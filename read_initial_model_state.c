@@ -32,6 +32,18 @@ void read_initial_model_state(FILE                *statefile,
            with simulations started with the state file.         KAC
   04-10-03 Modified to read storm parameters from the state file.  KAC
   06-03-03 Modified to read ASCII as well as BINARY state file.  KAC
+  03-Oct-03 Modified to loop over tmp_Nveg and tmp_Nband when searching
+            for desired cellnum in ASCII file, rather than over Nveg
+            and Nbands.  As we skip over other records in the state
+            file while searching for the desired record, the loop
+            must parse each undesired record differently, according
+            to how many veg classes and snow bands exist in the
+            record (tmp_Nveg and tmp_Nband, respectively), rather
+            than the number of veg classes and snow bands in the
+            desired record (Nveg and Nbands, respectively).       TJB
+  09-Oct-03 Modified to skip an extra line (for init_STILL_STORM
+	    and init_DRY_TIME) when searching for desired cellnum in
+	    ASCII file.                                           TJB
 
 *********************************************************************/
 {
@@ -102,11 +114,12 @@ void read_initial_model_state(FILE                *statefile,
     }
     else {
       // skip rest of current cells info
-      fgets(tmpstr, MAXSTRING, statefile); // skip rest of general cell info
-      for ( veg = 0; veg <= Nveg; veg++ ) {
+      fgets(tmpstr, MAXSTRING, statefile); // skip remainder of this line (soil thermal node depths)
+      fgets(tmpstr, MAXSTRING, statefile); // skip init_STILL_STORM, init_DRY_TIME
+      for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, statefile); // skip dist precip info
-	for ( band = 0; band < Nbands; band++ )
-	  fgets(tmpstr, MAXSTRING, statefile); // skip snowband info
+	for ( band = 0; band < tmp_Nband; band++ )
+	  fgets(tmpstr, MAXSTRING, statefile); // skip veg/snowband info
       }
       // read info for next cell
       fscanf( statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );

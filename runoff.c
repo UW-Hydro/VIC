@@ -58,6 +58,10 @@ void runoff(layer_data_struct *layer_wet,
     01-24-00    simplified handling of soil moisture for the
                 frozen soil algorithm.  all option selection
 		now use the same soil moisture transport method   KAC
+    06-Sep-03   Changed calculation of dt_baseflow to go to zero when
+                soil liquid moisture <= residual moisture.  Changed
+                block that handles case of total soil moisture < residual
+                moisture to not allow dt_baseflow to go negative.  TJB
 
 **********************************************************************/
 {  
@@ -402,7 +406,7 @@ void runoff(layer_data_struct *layer_wet,
       
 	frac = soil_con->Ds * Dsmax 
 	  / (soil_con->Ws * soil_con->max_moist[lindex]);
-	dt_baseflow = frac * moist[lindex];
+	dt_baseflow = frac * ( moist[lindex] - resid_moist[lindex] );
 	if (moist[lindex] > soil_con->Ws * soil_con->max_moist[lindex]) {
 	  frac = (moist[lindex] - soil_con->Ws * soil_con->max_moist[lindex]) 
 	    / (soil_con->max_moist[lindex] - soil_con->Ws 
@@ -422,8 +426,13 @@ void runoff(layer_data_struct *layer_wet,
 	
 	if((moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
 	  /* soil moisture is below minimum */
-	  dt_baseflow  += (moist[lindex] - resid_moist[lindex]);
-	  moist[lindex]  = resid_moist[lindex];
+	  fprintf(stderr,"Warning: total soil moisture in layer [%d] < residual moisture; adjusting baseflow to compensate\n",lindex);
+	  dt_baseflow  += (moist[lindex] + ice[lindex] - resid_moist[lindex]);
+	  if (dt_baseflow < 0.) {
+	    dt_baseflow = 0.;
+	    fprintf(stderr,"Warning: baseflow < 0; setting baseflow to 0.\n");
+	  }
+	  moist[lindex]  = resid_moist[lindex] - ice[lindex];
 	}
 
 	if((moist[lindex]+ice[lindex]) > max_moist[lindex]) {

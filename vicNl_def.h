@@ -1,3 +1,9 @@
+/* RCS Id String
+ * $Id$
+ */
+/***** Version Information *****/
+#define VERSION		"VIC Release 4.0.4"
+
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20
@@ -191,6 +197,7 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  char   ARNO_PARAMS;    /* FALSE: read Ds, Dm, Ws, c; TRUE: read d1, d2, d3, d4 */
 } option_struct;
 
 #if LINK_DEBUG

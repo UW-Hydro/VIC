@@ -37,6 +37,7 @@ global_param_struct get_global_param(filenames_struct *names,
              will cause the model to use bare soil.  Make sure that 
              positive index value refer to a non-canopied vegetation
              type in the vegetation library.                   KAC
+  10-Oct-03  Modified to understand the ARNO_PARAMS option.	TJB
 
 **********************************************************************/
 {
@@ -240,6 +241,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
         else options.MOISTFRACT = FALSE;
+      }
+      else if(strcasecmp("ARNO_PARAMS",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ARNO_PARAMS=TRUE;
+        else options.ARNO_PARAMS = FALSE;
       }
 #if SAVE_STATE
       else if(strcasecmp("INIT_STATE",optstr)==0) {

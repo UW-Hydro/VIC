@@ -46,6 +46,10 @@ double snow_density(int date,
 	   pack.                                               Bart
   06-30-03 Added check to keep compression from aging from exceeding
            the actual depth of the snowpack.                   KAC
+  08-Oct-03 Modified the checks on delta_depth (mentioned above)
+	    so that the condition is delta_depth > MAX_CHANGE*depth. TJB
+  08-Oct-03 Modified compression due to aging to only be calculated
+	    if depth > 0.					TJB
 
 **********************************************************************/
 
@@ -60,23 +64,20 @@ double snow_density(int date,
   /** Compaction of snow pack by new snow fall **/
   /** Bras pg. 257 **/
 
-  if ( new_snow > 0 ) {
+  if( new_snow > 0 ) {
 
     /* Estimate density of new snow based on air temperature */
 
     density_new = new_snow_density(air_temp);
 
-    if ( depth > 0. ) {
+    if( depth>0. ) {
 
       /* Compact current snowpack by weight of new snowfall */
 
       delta_depth = ( ((new_snow / 25.4) * (depth / 0.0254)) / (swq / 0.0254)
                     * pow( (depth / 0.0254) / 10., 0.35) ) * 0.0254;
   
-      /* Check put in by Bart Nijssen Sat Aug  7 17:00:52 1999  delta_depth
-	 CANNOT be greater than depth */
-      if ( delta_depth >= depth )
-	delta_depth = MAX_CHANGE * depth;
+      if (delta_depth > MAX_CHANGE * depth) delta_depth = MAX_CHANGE * depth;
       
       depth_new = new_snow / density_new;
   
@@ -105,17 +106,21 @@ double snow_density(int date,
   /** Densification of the snow pack due to aging **/
   /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
 
-  overburden  = 0.5 * G * RHO_W * swq;
+  if ( depth > 0. ) {
 
-  viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
+    overburden  = 0.5 * G * RHO_W * swq;
 
-  delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
+    viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
 
-  if (delta_depth >= depth) delta_depth = MAX_CHANGE * depth;
+    delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
+
+    if (delta_depth > MAX_CHANGE * depth) delta_depth = MAX_CHANGE * depth;
       
-  depth      -= delta_depth;
+    depth      -= delta_depth;
 
-  density     = 1000. * swq / depth;
+    density     = 1000. * swq / depth;
+
+  }
 
   return (density);
 

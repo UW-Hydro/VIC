@@ -134,8 +134,7 @@ double solve_snow(snow_data_struct    *snow,
       vicerror(ErrStr);
     }
     else if(mu!=1) {
-      fprintf(stderr,"WARNING: Snow is falling, but mu not equal to 1 (%f)\n",
-	      mu);
+      fprintf(stderr,"WARNING: Snow is falling, but mu not equal to 1 (%f)\n", mu);
       fprintf(stderr,"\trec = %i, veg = %i, hour = %i\n",rec,iveg,hour);
     }
   }
@@ -156,7 +155,6 @@ double solve_snow(snow_data_struct    *snow,
     snow_coverage = snow->coverage;
       
     /** Compute Snow Pack Albedo **/
-    if( iveg==0) fprintf(stdout, "SNOW %i %f %f %f %f %f %f %f %i %i\n", day_in_year, air_temp, snow->albedo, snow->swq, snow->depth, snow->density, snowfall[WET], snow->coldcontent, snow->last_snow, snow->MELTING );
     if(snow->swq > 0 || snowfall[WET] > 0.) {
       snow->albedo   = snow_albedo( snowfall[WET], snow->swq, 
 				    snow->coldcontent, dt, snow->last_snow,
@@ -463,7 +461,4 @@ double solve_snow(snow_data_struct    *snow,
   return(melt);
 
 }
-
-
-
 

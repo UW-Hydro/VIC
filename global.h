@@ -1,11 +1,14 @@
 /**********************************************************************
                         Global Variables
-**********************************************************************/
-/* RCS Id String
- * $Id$
- */
 
-char *optstring = "i:o:g:r:s:v:L:a:D:d:I:S:EFCHpmP:";
+  $Id$
+
+  29-Oct-03 Added version string and removed unused options from
+	    optstring.						TJB
+**********************************************************************/
+char *version = "VIC Release 4.0.4";
+
+char *optstring = "g:v";
 
 #if QUICK_FS
 double   temps[] = { -1.e-5, -0.075, -0.20, -0.50, -1.00, -2.50, -5, -10 };

@@ -39,6 +39,8 @@ void write_model_state(dist_prcp_struct    *prcp,
              file, this corrects a problem with state files created
              for models using the Cherkauer and Lettenmaier (1999) heat 
              flux formulation.                                   KAC
+  09-Oct-03 Added "\n" after mu in ASCII file, to jive with
+	    read_initial_model_state.                            TJB
 
 *********************************************************************/
 {
@@ -128,7 +130,7 @@ void write_model_state(dist_prcp_struct    *prcp,
     if ( options.BINARY_STATE_FILE )
       fwrite( &prcp->mu[veg], 1, sizeof(double), outfiles->statefile );
     else
-      fprintf( outfiles->statefile, "%f", prcp->mu[veg] );
+      fprintf( outfiles->statefile, "%f\n", prcp->mu[veg] );
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
@@ -139,7 +141,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	fwrite( &band, 1, sizeof(int), outfiles->statefile );
       }
       else {
-	fprintf( outfiles->statefile, " %i %i", veg, band );
+	fprintf( outfiles->statefile, "%i %i", veg, band );
       }
       
       for ( dist = 0; dist < Ndist; dist ++ ) {

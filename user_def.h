@@ -2,6 +2,9 @@
   This header file contains model parameters that can be modified by
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
+
+  $Id$
+
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -25,7 +28,7 @@
        to estimate the maximum unfrozen water content equation.  This 
        significantly reduces the run time with frozen soil, but may
        introduce new errors *****/
-#define QUICK_FS TRUE
+#define QUICK_FS FALSE
 #define QUICK_FS_TEMPS 7
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the

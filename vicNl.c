@@ -39,10 +39,13 @@ int main(int argc, char *argv[])
            water balance storage.  This accounts for changes in model
            state initialization, which now stores wet and dry fractions
            rather than just averagedvalues.                      KAC
+  29-Oct-03 Modified the version display banner to print the version
+	    string defined in global.h.				TJB
 
 **********************************************************************/
 {
 
+  extern char *version;
   extern veg_lib_struct *veg_lib;
   extern option_struct options;
 #if LINK_DEBUG
@@ -85,7 +88,7 @@ int main(int argc, char *argv[])
   outfiles_struct          outfiles;
   
 #if VERBOSE
-  fprintf(stderr,"Running Model Version: %s\n",vcid);
+  fprintf(stderr,"Running Model Version: %s\n",version);
 #endif
 
   /** Read Model Options **/

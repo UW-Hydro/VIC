@@ -61,6 +61,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 layer values                                    KAC
   6-6-2000      Modified to skip individual parameter reads
                 if model grid cell is not read.                 KAC
+  10-Oct-03     Modified to read ARNO baseflow parameters d1, d2,
+		d3, and d4 and convert to Ds, Dsmax, Ws, and c,
+		if options.ARNO_PARAMS is TRUE.		TJB
 
 **********************************************************************/
 {
@@ -250,6 +253,24 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	temp.init_moist[layer] = temp.Wpwp[layer];
       }
     }
+
+    /*************************************************
+      If ARNO_PARAMS = TRUE then convert ARNO baseflow
+      parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
+    *************************************************/
+    printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
+    if(options.ARNO_PARAMS) {
+      layer = options.Nlayer-1;
+      tmp = temp.Dsmax;
+      temp.Dsmax = temp.Dsmax *
+        pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
+        temp.Ds * temp.max_moist[layer];
+      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
+      temp.Ws = temp.Ws/temp.max_moist[layer];
+      printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
+    }
+
+
 
     /*************************************************
       Determine Central Longitude of Current Time Zone 

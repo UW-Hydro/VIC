@@ -31,6 +31,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
            fully covered by snow.                                KAC
   04-12-01 fixed error where sensible heat flux for partial bare
            ground was not multiplied by the snow cover fraction. KAC
+  04-29-02 moved calculation of sensible heat so that it is computed
+           even in water balance mode.  This assures that it is set
+           to 0 in water balance mode and does not yield the 
+           cumulative sum of sensible heat from the snowpack.    KAC
 
 **********************************************************************/
 {
@@ -532,7 +536,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /** Compute the latent heat flux from a thin snowpack if present **/
   if (INCLUDE_SNOW) {
-    latent_heat_from_snow(atmos_density, snow_density, vp, Le, atmos_pressure, 
+    latent_heat_from_snow(atmos_density, ice_density, vp, Le, atmos_pressure, 
 			  ra_under, TMean, vpd, &temp_latent_heat, 
 			  &temp_latent_heat_sub, VaporMassFlux);
     *latent_heat += temp_latent_heat * snow_coverage;
@@ -540,17 +544,17 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
   else *latent_heat *= (1. - snow_coverage);
 
+  /************************************************
+    Compute the Sensible Heat Flux from the Surface
+  ************************************************/
+  if ( snow_coverage < 1 || INCLUDE_SNOW ) {
+    *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / ra_under;
+    if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
+  }
+  else *sensible_heat = 0.;
+
   if(options.GRND_FLUX) {
   
-    /************************************************
-      Compute the Sensible Heat Flux from the Surface
-    ************************************************/
-    if ( snow_coverage < 1 || INCLUDE_SNOW ) {
-      *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / ra_under;
-      if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
-    }
-    else *sensible_heat = 0.;
-
     /*************************************
       Compute Surface Energy Balance Error
     *************************************/

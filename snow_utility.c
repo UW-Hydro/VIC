@@ -14,7 +14,7 @@ static char vcid[] = "$Id$";
 #define MAX_CHANGE 0.9      /* maximum fraction of snowpack depth change
 			       caused by new snow */
 
-double snow_density(int date,
+double snow_density(int    date,
                     double new_snow,
                     double air_temp,
                     double swq,
@@ -43,6 +43,8 @@ double snow_density(int date,
   08-19-99 Added check to make sure that the change in snowpack depth
            due to new snow does not exceed the actual depth of the 
 	   pack.                                               Bart
+  06-30-03 Added check to keep compression from aging from exceeding
+           the actual depth of the snowpack.                   KAC
 
 **********************************************************************/
 
@@ -52,7 +54,6 @@ double snow_density(int date,
   double depth_new;
   double overburden;
   double viscosity;
-  double deltadepth;
 
   /** Compaction of snow pack by new snow fall **/
   /** Bras pg. 257 **/
@@ -88,9 +89,11 @@ double snow_density(int date,
 
       /* no snowpack present, so snow density equals that of new snow */
 
-      density = density_new;
+      density  = density_new;
 
-      swq += new_snow / 1000.;
+      swq     += new_snow / 1000.;
+
+      depth    = 1000. * swq / density;
 
     }
 
@@ -100,15 +103,15 @@ double snow_density(int date,
   /** Densification of the snow pack due to aging **/
   /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
 
-  depth       = 1000. * swq / density;
-
   overburden  = 0.5 * G * RHO_W * swq;
 
   viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
 
-  deltadepth  = -overburden / viscosity * depth * dt * SECPHOUR;
+  delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
 
-  depth      += deltadepth;
+  if (delta_depth >= depth) delta_depth = MAX_CHANGE * depth;
+      
+  depth      -= delta_depth;
 
   density     = 1000. * swq / depth;
 

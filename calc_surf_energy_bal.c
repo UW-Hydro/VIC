@@ -107,6 +107,8 @@ double calc_surf_energy_bal(double             Le,
 	      which no longer needs them.		TJB
     24-Aug-04 Modified the re-scaling of surface_flux to reduce
 	      round-off errors.				TJB
+    21-Sep-04 Added ErrorString to store error messages from
+	      root_brent.				TJB
 
 ***************************************************************/
 {
@@ -169,6 +171,7 @@ double calc_surf_energy_bal(double             Le,
   double   TmpNetLongSnow;
   double   TmpNetShortSnow;
   double   old_swq, old_depth;
+  char ErrorString[MAXSTRING];
 
   /**************************************************
     Set All Variables For Use
@@ -289,7 +292,7 @@ double calc_surf_energy_bal(double             Le,
       NOFLUX = options.NOFLUX;
     }
 
-    Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
+    Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
 		       dmy->month, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2, 
 		       T1_old, T2, Ts_old, soil_con->b_infilt, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, soil_con->max_infil, 
@@ -373,7 +376,7 @@ double calc_surf_energy_bal(double             Le,
 					 &energy->latent, 
 					 &energy->latent_sub, 
 					 &energy->sensible, 
-					 &energy->snow_flux, &energy->error);
+					 &energy->snow_flux, &energy->error, ErrorString);
     }
 
     /**************************************************
@@ -384,7 +387,7 @@ double calc_surf_energy_bal(double             Le,
       tmpNnodes = Nnodes;
       FIRST_SOLN[0] = TRUE;
       
-         Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
+         Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
 		       dmy->month, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2, 
 		       T1_old, T2, Ts_old, soil_con->b_infilt, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, soil_con->max_infil, 
@@ -470,7 +473,7 @@ double calc_surf_energy_bal(double             Le,
 					   &energy->latent, 
 					   &energy->latent_sub, 
 					   &energy->sensible, 
-					   &energy->snow_flux, &energy->error);
+					   &energy->snow_flux, &energy->error, ErrorString);
       }
     }
   }
@@ -742,8 +745,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   /* Define imported variables */
 
   /* general model terms */
-  int iveg;
   int month;
+  int iveg;
   int VEG;
   int veg_class;
 
@@ -876,6 +879,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *snow_flux;
   double *store_error;
 
+  char *ErrorString;
+
   /* Define internal routine variables */
   int                i;
 
@@ -884,8 +889,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   ***************************/
 
   /* general model terms */
-  iveg                    = (int) va_arg(ap, int);
   month                   = (int) va_arg(ap, int);
+  iveg                    = (int) va_arg(ap, int);
   VEG                     = (int) va_arg(ap, int);
   veg_class               = (int) va_arg(ap, int);
 
@@ -1016,10 +1021,13 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
 
+  ErrorString             = (char *) va_arg(ap, char *);
+
   /***************
     Main Routine
   ***************/
 
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   /* Print Variables */

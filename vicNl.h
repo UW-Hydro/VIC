@@ -308,7 +308,7 @@ void   redistribute_moisture(layer_data_struct *, double *, double *,
 			     double *, double *, double *, int);
 unsigned char redistribute_moisture_for_storm(double *, double *, double, 
 					      double, double);
-double root_brent(double, double, double (*Function)(double, va_list), ...);
+double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
 void   runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *, 
 	      soil_con_struct *, double *, double *, double *, double *, 
 	      double *, 

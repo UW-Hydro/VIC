@@ -280,7 +280,7 @@ global_param_struct get_global_param(filenames_struct *names,
   *********************************/
   fprintf(stderr,"Time Step = %i hour(s)\n",temp.dt);
   fprintf(stderr,"Number of Records = %i\n\n",temp.nrecs);
-  fprintf(stderr,"Full Energgy..................(%i)\n",options.FULL_ENERGY);
+  fprintf(stderr,"Full Energy...................(%i)\n",options.FULL_ENERGY);
   fprintf(stderr,"Use Distributed Precipitation.(%i)\n",options.DIST_PRCP);
   if(options.DIST_PRCP)
     fprintf(stderr,"..Using Precipitation Exponent of %lf\n",options.PREC_EXPT);

@@ -88,7 +88,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	if(rec == 0) {
           /* Set model variables if first time step */
 	  prcp->mu[veg]=NEW_MU;
-	  if(atmos->prec > 0) 
+	  if(atmos->prec[NR] > 0) 
 	    STILL_STORM=TRUE;
 	  else 
 	    STILL_STORM=FALSE;

@@ -212,19 +212,26 @@ start date
 Incorrect sublimation values for BLOWING option
 
 	Files affected:
-	IceEnergyBalance.c, SnowPackEnergyBalance.c, calc_surf_energy_bal.c,
-	func_surf_energy_bal.c, ice_melt.c, latent_heat_from_snow.c,
-	snow_melt.c, solve_snow.c, surface_fluxes.c, vicNl.h
+	CalcBlowingSnow.c, IceEnergyBalance.c, SnowPackEnergyBalance.c,
+	calc_surf_energy_bal.c, func_surf_energy_bal.c, ice_melt.c, lakes.eb.c,
+	latent_heat_from_snow.c, put_data.c, snow_melt.c, solve_snow.c,
+	surface_fluxes.c, vicNl.h, vicNl_def.h
 
 	Description:
-	Fixed 2 bugs in the sublimation terms: 1) sub_surface was wrong when
-	snow step was not 1 hour, and 2) sub_blowing was wrong under certain
-	conditions.  The fix involved moving the calculation of blowing_flux
-	from surface_fluxes() to latent_heat_from_snow() and establishing the
-	convention that VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
-	always have units of kg/m2s; and that vapor_flux, blowing_flux, and
-	surface_flux always have units of m/timestep.  Parameter lists for
-	several functions had to be modified for this to work.
+	Fixed 3 bugs in the sublimation terms: 1) sub_surface was wrong when
+	snow step was not 1 hour, 2) sub_blowing was wrong under certain
+	conditions, and 3) sub_blowing and sub_surface did not contain the
+	contribution from lakes, even though sub_total did.  The fix
+	establishes the convention that the internal variables VaporMassFlux,
+	BlowingMassFlux, and SurfaceMassFlux always have units of kg/m2s; and
+	that internal variables vapor_flux, blowing_flux, and surface_flux
+	always have units of m/timestep.  Unnecessary terms were removed from
+	the parameter lists of several functions.
+
+	NOTE: The effects of this fix on major water balance terms such as
+	runoff, baseflow, evaporation, etc. should be very small.
+
+	NOTE 2: The lake contribution to sub_blowing is currently set to 0.
 
 
 Negative incoming shortwave radiation at high latitudes

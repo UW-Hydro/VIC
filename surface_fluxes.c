@@ -89,6 +89,9 @@ void surface_fluxes(char                 overstory,
 	    correctly over a model time step.			TJB
   16-Jul-04 Moved calculation of blowing_flux from this function
 	    into latent_heat_from_snow().			TJB
+  05-Aug-04 Moved calculation of blowing_flux back into this function
+	    from latent_heat_from_snow().  Updated arg lists to
+	    calc_surf_energy_bal() and solve_snow() accordingly.TJB
 
 **********************************************************************/
 {
@@ -357,6 +360,25 @@ void surface_fluxes(char                 overstory,
     A_tol_over   = 999;
     B_tol_over   = 999;
 
+    // Compute mass flux of blowing snow
+    if( !overstory && options.BLOWING && snow->swq > 0.) {
+      Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
+      snow->blowing_flux = CalcBlowingSnow((double) step_dt, Tair,
+                                           snow->last_snow, snow->surf_water,
+                                           wind[2], Ls, atmos->density[hidx],
+                                           atmos->pressure[hidx],
+                                           atmos->vp[hidx], roughness,
+                                           ref_height[2], snow->depth,
+                                           lag_one, sigma_slope,
+                                           snow->surf_temp, iveg, Nveg, fetch,
+                                           veg_lib[iveg].displacement[dmy[rec].month-1],
+                                           veg_lib[iveg].roughness[dmy[rec].month-1],
+                                           &step_snow.transport);
+      snow->blowing_flux*=step_dt*SECPHOUR/RHO_W; /* m/time step */
+    }
+    else
+      snow->blowing_flux = 0.0;
+
     do {
 
       /** Iterate for overstory solution **/
@@ -430,7 +452,10 @@ void surface_fluxes(char                 overstory,
 	step_snow.canopy_vapor_flux = 0;
 	step_snow.vapor_flux = 0;
 	step_snow.surface_flux = 0;
-	step_snow.blowing_flux = 0;
+// We've already calculated snow->blowing_flux for this step, and since we've set
+// step_snow = *snow, step_snow.blowing_flux has also been calculated.
+// step_snow.surface_flux and step_snow.vapor_flux will be calculated during the
+// iterations.
 
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
@@ -455,8 +480,7 @@ void surface_fluxes(char                 overstory,
 			       rec, veg_class, &UnderStory, &(snow_energy), 
 			       step_layer[DRY], step_layer[WET], &(step_snow), 
 			       soil_con, &(snow_veg_var[DRY]), 
-			       &(snow_veg_var[WET]),
-			       lag_one, sigma_slope, fetch);
+			       &(snow_veg_var[WET]));
       
 // snow_energy.sensible + snow_energy.latent + snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + snow_energy.advection - snow_energy.deltaCC + snow_energy.refreeze_energy + snow_energy.advected_sensible ) * snow->coverage
 
@@ -501,8 +525,7 @@ void surface_fluxes(char                 overstory,
 				     &(dmy[rec]), &bare_energy, 
 				     step_layer[DRY], step_layer[WET], 
 				     &(step_snow), soil_con, 
-				     &bare_veg_var[DRY], &bare_veg_var[WET], 
-				     lag_one, sigma_slope, fetch); 
+				     &bare_veg_var[DRY], &bare_veg_var[WET]); 
 	if ( INCLUDE_SNOW ) {
 	  /* store melt from thin snowpack */
 	  step_melt *= 1000.;

@@ -71,10 +71,7 @@ double solve_snow(char                 overstory,
 		  snow_data_struct    *snow,
 		  soil_con_struct     *soil_con,
 		  veg_var_struct      *veg_var_dry,
-		  veg_var_struct      *veg_var_wet,
-		  float lag_one,
-		  float sigma_slope,
-		  float fetch) {
+		  veg_var_struct      *veg_var_wet) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -111,8 +108,9 @@ double solve_snow(char                 overstory,
            occurs in the melt season - currently this is defined
            between March 1 and October 1.  Otherwise the MELTING
            flag can trigger rapid very early season melt	KAC
-  16-Jul-04 Added "month" to parameter list so that it can be passed
-	    to snow_melt() function.				TJB
+  05-Aug-04 Removed lag_one, sigma_slope, and fetch from argument
+	    list since they were only used in call to snow_melt(),
+	    which no longer needs them.				TJB
 
 *********************************************************************/
 
@@ -362,9 +360,8 @@ double solve_snow(char                 overstory,
 		&energy->advected_sensible, &energy->advection, 
 		&energy->deltaCC, &tmp_grnd_flux, &energy->latent, 
 		&energy->latent_sub, &energy->refreeze_energy, 
-		&energy->sensible, INCLUDE_SNOW, band, iveg, 
-		(int)overstory, rec, snow, soil_con,lag_one, sigma_slope, 
-		fetch, Nveg, month);
+		&energy->sensible, INCLUDE_SNOW, band, 
+		rec, snow, soil_con);
 
       // store melt water
       ppt[WET] += melt;

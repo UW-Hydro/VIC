@@ -50,8 +50,12 @@ static char vcid[] = "$Id$";
     double snow->pack_water      - Liquid water content of snow pack 
     double snow->surf_water	 - Liquid water content of surface layer 
     double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m/time step)
+    double snow->vapor_flux;     - Total mass flux of water vapor to or from
+                                   snow (m/time step)
+    double snow->blowing_flux;   - Mass flux of water vapor to or from
+                                   blowing snow (m/time step)
+    double snow->surface_flux;   - Mass flux of water vapor to or from
+                                   snow pack (m/time step)
     double snow->pack_temp       - Temperature of snow pack (C)
     double snow->surf_temp       - Temperature of snow pack surface layer (C)
     double snow->melt_energy     - Energy used for melting and heating of
@@ -62,8 +66,10 @@ static char vcid[] = "$Id$";
     double snow->pack_water      - Liquid water content of snow pack 
     double snow->surf_water	 - Liquid water content of surface layer 
     double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m/timestep)
+    double snow->vapor_flux;     - Total mass flux of water vapor to or from
+                                   snow (m/timestep)
+    double snow->surface_flux;   - Mass flux of water vapor to or from
+                                   snow pack (m/timestep)
     double snow->pack_temp       - Temperature of snow pack (C)
     double snow->surf_temp       - Temperature of snow pack surface layer (C)
     double snow->melt_energy     - Energy used for melting and heating of
@@ -80,6 +86,13 @@ static char vcid[] = "$Id$";
 	    IceEnergyBalance(), in which VaporMassFlux is in (kg/m2s) and
 	    vapor_flux is in (m/timestep).  Changed calculations involving
 	    vapor_flux to reflect these new units.			TJB
+  25-Aug-04 Added calculations for surface_flux and blowing_flux.  Note that
+	    blowing_flux is currently set to 0.  This can be replaced in the
+	    future with a call to CalcBlowingSnow().			TJB
+  27-Aug-04 Replaced *DeltaColdContent with DeltaColdContent in parameter
+	    list for ErrorIcePackEnergyBalance() and
+	    ErrorPrintIcePackEnergyBalance() so that types match in the caller
+	    and callee.							TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -139,6 +152,8 @@ void ice_melt(double            z2,
   double SnowFall;
   double RainFall;
   double vapor_flux;
+  double blowing_flux;
+  double surface_flux;
   double advection;
   double deltaCC;
   double SnowFlux;		/* thermal flux through snowpack from ground */
@@ -167,23 +182,32 @@ void ice_melt(double            z2,
   
   icerad (net_short, lake->hice, SnowIce*RHO_W/RHOSNOW, &avgcond, &SWconducted, &deltaCC);
 
+  /* Calculate blowing snow sublimation (m/timestep) */
+  /* This could be replaced with a call to CalcBlowingSnow(), as done in surface_fluxes() */
+  snow->blowing_flux = 0.0;
+
+  /* Store sublimation terms in temporary variables */
+  vapor_flux = snow->vapor_flux;
+  blowing_flux = snow->blowing_flux;
+  surface_flux = snow->surface_flux;
+
+
   /* Calculate the surface energy balance for snow_temp = 0.0 */
   
-  vapor_flux = snow->vapor_flux;
-
   Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
 				  z2, displacement, Z0, wind, net_short, 
 				  longwave, density, Le, air_temp,
 				  pressure * 1000., vpd * 1000., vp * 1000.,
 				  RainFall, snow->swq+LakeIce, 
-				  snow->surf_water, 
-				  OldTSurf, &RefreezeEnergy, &vapor_flux, 
+				  snow->surf_water, OldTSurf, &RefreezeEnergy,
+				  &vapor_flux, &blowing_flux, &surface_flux,
 				  &advection, deltaCC, Tcutoff, avgcond, 
 				  SWconducted, snow->swq*RHO_W/RHOSNOW, 
 				  RHOSNOW, surf_atten, &SnowFlux, 
 				  &latent_heat, &sensible_heat, &LWnet);
 
   snow->vapor_flux = vapor_flux;
+  snow->surface_flux = surface_flux;
   save_refreeze_energy[0] = RefreezeEnergy;
 
   /* If Qnet == 0.0, then set the surface temperature to 0.0 */
@@ -215,7 +239,12 @@ void ice_melt(double            z2,
   
     /* Adjust snow->surf_water for vapor_flux */
     if ((SnowIce + snow->surf_water + LakeIce) < -(snow->vapor_flux)) {
-      snow->vapor_flux = -SnowIce - LakeIce;
+      // if vapor_flux exceeds stored ice/water, we not only need to
+      // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+//      snow->surface_flux *= -(SnowIce + snow->surf_water + LakeIce) / snow->vapor_flux;
+      snow->blowing_flux *= -(SnowIce + snow->surf_water + LakeIce) / snow->vapor_flux;
+      snow->vapor_flux = -(SnowIce + snow->surf_water + LakeIce);
+      snow->surface_flux = -(SnowIce + snow->surf_water + LakeIce) - snow->blowing_flux;
       lake->volume -= LakeIce*fracprv*lake->surface[0];	    
       LakeIce=0.0;
       SnowIce=0.0; 
@@ -262,8 +291,6 @@ void ice_melt(double            z2,
   else  {
     /* Calculate surface layer temperature using "Brent method" */
 
-    vapor_flux = snow->vapor_flux;
-
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				 (double)0.0,
 				 IceEnergyBalance, (double)delta_t, 
@@ -273,7 +300,8 @@ void ice_melt(double            z2,
 				 vpd * 1000., vp * 1000., RainFall, 
 				 snow->swq+LakeIce,
 				 snow->surf_water, OldTSurf, &RefreezeEnergy, 
-				 &vapor_flux, &advection, deltaCC, Tcutoff, 
+				 &vapor_flux, &blowing_flux, &surface_flux,
+				 &advection, deltaCC, Tcutoff, 
 				 avgcond, SWconducted,
 				 snow->swq*RHO_W/RHOSNOW,
 				 RHOSNOW,surf_atten,&SnowFlux,
@@ -285,10 +313,9 @@ void ice_melt(double            z2,
 				 longwave, density, Le, air_temp,
 				 pressure * 1000., vpd * 1000., vp * 1000.,
 				 RainFall, snow->swq+LakeIce, 
-				snow->surf_water, 
-				 OldTSurf,
-				 &RefreezeEnergy, &vapor_flux, &advection, 
-				 deltaCC, Tcutoff, 
+				 snow->surf_water, OldTSurf, &RefreezeEnergy,
+				 &vapor_flux, &blowing_flux, &surface_flux,
+				 &advection, deltaCC, Tcutoff, 
 				 avgcond, SWconducted,		
 				 snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
 				 &SnowFlux,&latent_heat,
@@ -300,17 +327,18 @@ void ice_melt(double            z2,
 				     pressure * 1000., vpd * 1000., 
 				     vp * 1000.,RainFall, snow->swq+LakeIce, 
 				     snow->surf_water, OldTSurf, &RefreezeEnergy, 
-				     &vapor_flux, &advection, deltaCC, Tcutoff, 
+				     &vapor_flux, &blowing_flux, &surface_flux,
+				     &advection, deltaCC, Tcutoff, 
 				     avgcond, SWconducted, snow->swq*RHO_W/RHOSNOW, 
 				     RHOSNOW,surf_atten, &SnowFlux,&latent_heat,
 				     &sensible_heat, &LWnet);
     
 
     snow->vapor_flux = vapor_flux;
+    snow->surface_flux = surface_flux;
     save_refreeze_energy[0] = RefreezeEnergy;
 
-    /* since we iterated, the surface layer is below freezing and no snowmelt
-     */ 
+    /* since we iterated, the surface layer is below freezing and no snowmelt */ 
     
     SnowMelt = 0.0;
     
@@ -325,7 +353,12 @@ void ice_melt(double            z2,
     
     /* Adjust SurfaceSwq for vapor_flux */
     if ((SnowIce + LakeIce) < -(snow->vapor_flux)) {
-      snow->vapor_flux = -SnowIce - LakeIce;
+      // if vapor_flux exceeds stored ice/water, we not only need to
+      // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+//      snow->surface_flux *= -(SnowIce + LakeIce) / snow->vapor_flux;
+      snow->blowing_flux *= -(SnowIce + LakeIce) / snow->vapor_flux;
+      snow->vapor_flux = -(SnowIce + LakeIce);
+      snow->surface_flux = -(SnowIce + LakeIce) - snow->blowing_flux;
       lake->volume -= lake->surface[0]*fracprv*LakeIce;	    
       LakeIce=0.0;
       SnowIce=0.0; 
@@ -473,10 +506,14 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   double OldTSurf;               /* Surface temperature during previous time
                                    step */ 
   double *RefreezeEnergy;        /* Refreeze energy (W/m2) */
-  double *vapor_flux;            /* Mass flux of water vapor to or from the
-                                    intercepted snow (m/timestep) */
-  double *AdvectedEnergy;         /* Energy advected by precipitation (W/m2) */
-  double *DeltaColdContent;       /* Change in cold content (W/m2) */
+  double *vapor_flux;            /* Total mass flux of water vapor to or from
+                                    snow (m/timestep) */
+  double *blowing_flux;          /* Mass flux of water vapor to or from
+                                    blowing snow (m/timestep) */
+  double *surface_flux;          /* Mass flux of water vapor to or from
+                                    snow pack (m/timestep) */
+  double *AdvectedEnergy;        /* Energy advected by precipitation (W/m2) */
+  double DeltaColdContent;       /* Change in cold content (W/m2) */
   double Tfreeze;
   double AvgCond;
   double SWconducted;
@@ -511,8 +548,10 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   OldTSurf           = (double) va_arg(ap, double);
   RefreezeEnergy     = (double *) va_arg(ap, double *);
   vapor_flux         = (double *) va_arg(ap, double *);
+  blowing_flux       = (double *) va_arg(ap, double *);
+  surface_flux       = (double *) va_arg(ap, double *);
   AdvectedEnergy     = (double *) va_arg(ap, double *);
-  DeltaColdContent   = (double *) va_arg(ap, double *);
+  DeltaColdContent   = (double) va_arg(ap, double);
   Tfreeze            = (double) va_arg(ap, double);
   AvgCond            = (double) va_arg(ap, double);
   SWconducted        = (double) va_arg(ap, double);
@@ -546,9 +585,11 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"SurfaceLiquidWater = %f\n",SurfaceLiquidWater);
   fprintf(stderr,"OldTSurf = %f\n",OldTSurf);
   fprintf(stderr,"RefreezeEnergy = %f\n",RefreezeEnergy[0]);
-  fprintf(stderr,"vapor_flux = %f\n",vapor_flux);
+  fprintf(stderr,"vapor_flux = %f\n",*vapor_flux);
+  fprintf(stderr,"blowing_flux = %f\n",*blowing_flux);
+  fprintf(stderr,"surface_flux = %f\n",*surface_flux);
   fprintf(stderr,"AdvectedEnergy = %f\n",AdvectedEnergy[0]);
-  fprintf(stderr,"DeltaColdContent = %f\n",DeltaColdContent[0]);
+  fprintf(stderr,"DeltaColdContent = %f\n",DeltaColdContent);
   fprintf(stderr,"Tfreeze = %f\n",Tfreeze);
   fprintf(stderr,"AvgCond = %f\n",AvgCond);
   fprintf(stderr,"SWconducted = %f\n",SWconducted);

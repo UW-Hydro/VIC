@@ -48,6 +48,8 @@ void put_data(char              *AboveTreeLine,
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
   30-Oct-03 Snow_flux was incorrectly set to Tcanopy.  Fixed.	TJB
+  25-Aug-04 Sub_snow was incorrectly set to blowing_flux.  Now it is
+	    set to vapor_flux.				 	TJB
 
 **********************************************************************/
 {
@@ -194,7 +196,7 @@ void put_data(char              *AboveTreeLine,
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    out_data->sub_blowing += snow[veg][band].blowing_flux * 1000.
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-	    out_data->sub_snow[veg] += snow[veg][band].blowing_flux * 1000.; 
+	    out_data->sub_snow[veg] += snow[veg][band].vapor_flux * 1000.; 
 	    if ( veg <= veg_con[0].vegetat_type_num ) {
 	      tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
 	      out_data->sub_canop += snow[veg][band].canopy_vapor_flux 
@@ -582,7 +584,7 @@ void put_data(char              *AboveTreeLine,
       out_data->sub_total += snow[veg][band].vapor_flux * 1000. * Cv; 
       out_data->sub_surface += snow[veg][band].surface_flux * 1000. * Cv; 
       out_data->sub_blowing += snow[veg][band].blowing_flux * 1000. * Cv; 
-      out_data->sub_snow[veg] += snow[veg][band].blowing_flux * 1000.; 
+      out_data->sub_snow[veg] += snow[veg][band].vapor_flux * 1000.; 
       /*    out_data->evap_lake = lake_var.evapw * Clake * Cv; */  /* mm over gridcell */
       out_data->evap_lake = lake_var.evapw;
       out_data->melt[0] += snow[veg][band].melt * Cv;

@@ -71,6 +71,10 @@ static char vcid[] = "$Id$";
 	    have to do with the fact that they followed variables of type
 	    (double *) in va_list, which may have caused memory alignment
 	    problems.							TJB
+  05-Aug-04 Removed lag_one, sigma_slope, fetch, iveg, Nveg, month, overstory,
+	    LastSnow, and SnowDepth from argument list, since they were only
+	    needed to pass to latent_heat_from_snow(), which no longer needs
+	    them.							TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -87,8 +91,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   double Ra;                      /* Aerodynamic resistance (s/m) */
 
   /* Vegetation Parameters */
-  int overstory;                  /* if TRUE than overstory is present */
-
   double Displacement;            /* Displacement height (m) */
   double Z;                       /* Reference height (m) */
   double *Z0;                      /* surface roughness height (m) */
@@ -110,7 +112,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 				     step */ 
   double SnowCoverFract;          /* Fraction of area covered by snow */
   double SnowDensity;             /* Density of snowpack (kg/m^3) */
-  double SnowDepth;               /* Depth of snowpack (m) */
   double SurfaceLiquidWater;      /* Liquid water in the surface layer (m) */
   double SweSurfaceLayer;         /* Snow water equivalent in surface layer 
 				     (m) */ 
@@ -139,13 +140,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 				     intercepted snow (m/timestep) */
   double *blowing_flux;           /* Mass flux of water vapor from blowing snow. (m/timestep) */
   double *surface_flux;           /* Mass flux of water vapor from pack snow. (m/timestep) */
-  int LastSnow;
-  float lag_one;
-  float sigma_slope;
-  float fetch;
-  int iveg;
-  int Nveg;
-  int month;
 
   /* Internal Routine Variables */
 
@@ -181,8 +175,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   Ra = (double) va_arg(ap, double);
 
   /* Vegetation Parameters */
-  overstory = (int) va_arg(ap, int);
-
   Displacement = (double) va_arg(ap, double);
   Z            = (double) va_arg(ap, double);
   Z0           = (double *) va_arg(ap, double *);
@@ -202,7 +194,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   OldTSurf           = (double) va_arg(ap, double);
   SnowCoverFract     = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
-  SnowDepth          = (double) va_arg(ap, double);
   SurfaceLiquidWater = (double) va_arg(ap, double);
   SweSurfaceLayer    = (double) va_arg(ap, double);
 
@@ -223,13 +214,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   vapor_flux            = (double *) va_arg(ap, double *);
   blowing_flux          = (double *) va_arg(ap, double *); 
   surface_flux          = (double *) va_arg(ap, double *);   
-  LastSnow              = (int) va_arg(ap, double);
-  lag_one               = (float) va_arg(ap, double);
-  sigma_slope           = (float) va_arg(ap, double);
-  fetch                 = (float) va_arg(ap, double);
-  iveg                  = (int) va_arg(ap, double);
-  Nveg                  = (int) va_arg(ap, double);
-  month                 = (int) va_arg(ap, double);
 
   /* Calculate active temp for energy balance as average of old and new  */
   
@@ -284,11 +268,9 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate the saturated vapor pressure in the snow pack, 
      (Equation 3.32, Bras 1990) */
 
-  latent_heat_from_snow(AirDens, Density, EactAir, Lv, Press, Ra, TMean, Vpd,
+  latent_heat_from_snow(AirDens, EactAir, Lv, Press, Ra, TMean, Vpd,
 			LatentHeat, LatentHeatSub, &VaporMassFlux, &BlowingMassFlux, 
-			&SurfaceMassFlux, Dt, Tair, LastSnow, SurfaceLiquidWater,
-			Wind, Z0, Z, SnowDepth, overstory, lag_one, sigma_slope, fetch, 
-			iveg, Nveg, month);
+			&SurfaceMassFlux);
 
   /* Convert sublimation terms from kg/m2s to m/timestep */
   *vapor_flux = VaporMassFlux * Dt / Density;

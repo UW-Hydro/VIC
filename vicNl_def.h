@@ -114,6 +114,9 @@ typedef struct {
   float  OVERSTORY_ATTENUATION; /* attenutation coefficient for overstory */
   float  TRUNK_RATIO;    /* Fraction of Tree Height that is trunk */
   int    ROOT_ZONES;     /* Number of root zones used in simulation */
+  float  PREC_EXPT;      /* Exponential that controls the fraction of a
+			    grid cell that receives rain during a storm
+			    of given intensity */
 } option_struct;
 
 typedef struct {

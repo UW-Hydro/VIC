@@ -59,7 +59,7 @@ void dist_prec(atmos_data_struct   *atmos,
       *****************************************/
  
     
-    NEW_MU = 1.0 - exp(-0.6*atmos->prec);
+    NEW_MU = 1.0 - exp(-options.PREC_EXPT*atmos->prec);
     for(veg=0;veg<=veg_con[0].vegetat_type_num;veg++) {
       ANY_SNOW = FALSE;
       for(i=0;i<options.SNOW_BAND;i++)

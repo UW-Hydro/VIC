@@ -86,6 +86,7 @@ void initialize_global() {
   options.SNOW_STEP             = 1;
   options.OVERSTORY_ATTENUATION = 0.5;
   options.TRUNK_RATIO           = 0.2;
+  options.PREC_EXPT             = 0.6;
  
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;

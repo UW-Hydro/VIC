@@ -1,5 +1,5 @@
 # VIC Makefile
-# Last Changed: Tue Apr 18 12:03:25 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+# Last Changed: Wed Jul 19 14:41:18 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
 # Note: replaced read_vegparam by read_vegparam_LAI
 
 SHELL = /bin/csh
@@ -20,10 +20,10 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	calc_root_fraction.o calc_surf_energy_bal.o calc_veg_params.o \
 	canopy_evap.o check_files.o check_state_file.o close_files.o \
 	cmd_proc.o compress_files.o compute_dz.o correct_precip.o \
-	dist_prec.o estimate_T1.o \
-	free_dist_prcp.o free_vegcon.o frozen_soil.o full_energy.o \
-	func_surf_energy_bal.o get_force_type.o get_global_param.o \
-	initialize_atmos.o initialize_model_state.o initialize_global.o \
+	dist_prec.o estimate_T1.o free_dist_prcp.o free_vegcon.o \
+	frozen_soil.o full_energy.o func_surf_energy_bal.o \
+	get_force_type.o get_global_param.o initialize_atmos.o \
+	initialize_model_state.o initialize_global.o \
 	initialize_new_storm.o initialize_snow.o initialize_soil.o \
 	initialize_veg.o make_cell_data.o make_dist_prcp.o make_dmy.o \
 	make_energy_bal.o make_in_and_outfiles.o make_snow_data.o \
@@ -37,8 +37,8 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	snow_melt.o snow_utility.o soil_conduction.o soil_thermal_eqn.o \
 	solve_snow.o store_moisture_for_debug.o surface_fluxes.o svp.o \
 	vicNl.o vicerror.o write_atmosdata.o write_data.o write_debug.o \
-	write_layer.o write_model_state.o write_soilparam.o \
-	write_vegparam.o write_vegvar.o 
+	write_forcing_file.o write_layer.o write_model_state.o \
+	write_soilparam.o write_vegparam.o write_vegvar.o 
 
 SRCS = $(OBJS:%.o=%.c) 
 

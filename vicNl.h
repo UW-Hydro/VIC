@@ -148,7 +148,12 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
+#if OUTPUT_FORCE
+			double *, outfiles_struct *);
+#else
 			double *);
+#endif
+
 void   initialize_global();
 void   initialize_model_state(dist_prcp_struct *, dmy_struct, double,
 			      global_param_struct *, infiles_struct, int,
@@ -214,7 +219,7 @@ void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_sawd_binary(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_snowband(FILE *, int, double, double **, double **, double **);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
-soil_con_struct read_soilparam(FILE *);
+soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);
@@ -319,6 +324,9 @@ void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,
                  dmy_struct *, global_param_struct *,
                  double, double, int, int, int, int, int, char);
 void write_dist_prcp(dist_prcp_struct *);
+#if OUTPUT_FORCE
+void write_forcing_file(atmos_data_struct *, int nrecs, outfiles_struct *);
+#endif
 void write_layer(layer_data_struct *, int, int, double *);
 #if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 

@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 	MODEL_DONE = TRUE;
 	RUN_MODEL = FALSE;
       }
-      if(!MODEL_DONE) soil_con = read_soilparam(infiles.soilparam);
+      if(!MODEL_DONE) soil_con = read_soilparam(infiles.soilparam, RUN_MODEL);
     }
     else {
       soil_con = read_soilparam_arc(infiles.soilparam, 
@@ -143,6 +143,7 @@ int main(int argc, char *argv[])
       if(debug.PRT_SOIL) write_soilparam(&soil_con); 
 #endif
 
+#if !OUTPUT_FORCE
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
       if(options.FROZEN_SOIL) {
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
 	    soil_con.ufwc_table_node[i][j] = (double *)malloc(2*sizeof(double));
 	}
       }
-#endif
+#endif /* QUICK_FS */
 
       NEWCELL=TRUE;
       cellnum++;
@@ -169,12 +170,14 @@ int main(int argc, char *argv[])
       calc_root_fractions(veg_con, &soil_con);
 #if LINK_DEBUG
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
-#endif
+#endif /* LINK_DEBUG*/
+#endif /* !OUTPUT_FORCE */
 
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
                    &outfiles);
 
+#if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
 		    (double)soil_con.elevation,
@@ -191,13 +194,19 @@ int main(int argc, char *argv[])
 
 #if VERBOSE
       fprintf(stderr,"Initializing Forcing Data\n");
-#endif
+#endif /* VERBOSE */
+#endif /* !OUTPUT_FORCE */
 
-      initialize_atmos(atmos, dmy, infiles.forcing,
+      initialize_atmos(atmos, dmy, infiles.forcing, 
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
-		       soil_con.rough, soil_con.Tfactor); 
+		       soil_con.rough, 
+#if OUTPUT_FORCE
+		       soil_con.Tfactor, &outfiles); 
+#else /* OUTPUT_FORCE */
+                       soil_con.Tfactor); 
+#endif /* OUTPUT_FORCE */
       
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
@@ -207,9 +216,10 @@ int main(int argc, char *argv[])
         Initialize Energy Balance and Snow Variables 
       **************************************************/
 
+#if !OUTPUT_FORCE
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
-#endif
+#endif /* VERBOSE */
       initialize_model_state(&prcp, dmy[0], atmos[0].air_temp[NR], 
 			     &global_param, infiles, soil_con.gridcel, 
 			     veg_con[0].vegetat_type_num, 
@@ -218,7 +228,7 @@ int main(int argc, char *argv[])
 
 #if VERBOSE
       fprintf(stderr,"Running Model\n");
-#endif
+#endif /* VERBOSE */
 
       /** Update Error Handling Structure **/
       Error.outfp = outfiles;
@@ -282,12 +292,13 @@ int main(int argc, char *argv[])
 	  free((char *)soil_con.ufwc_table_node[i]);
 	}
       }
-#endif
+#endif /* QUICK_FS */
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
       free_vegcon(&veg_con);
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
+#endif /* !OUTPUT_FORCE */
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);
       free((char*)soil_con.layer_node_fract);

@@ -419,11 +419,11 @@ global_param_struct get_global_param(filenames_struct *names,
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
   if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%i) than are defined by MAX_LAYERS (%i).  Edit vicNl_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%i) than are defined by MAX_LAYERS (%i).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%i) than are defined by MAX_NODES (%i).  Edit vicNl_def.h and recompile.",options.Nnode,MAX_NODES);
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%i) than are defined by MAX_NODES (%i).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode<3) {
@@ -439,7 +439,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if(options.SNOW_BAND > MAX_BANDS) {
-    sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit vicNl_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+    sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
   }
 #if SAVE_STATE

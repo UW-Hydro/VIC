@@ -14,7 +14,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
+#if OUTPUT_FORCE
+		      double                   *Tfactor,
+		      outfiles_struct          *outfiles)
+#else /* OUTPUT_FORCE */
 		      double                   *Tfactor)
+#endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
 
@@ -110,8 +115,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[VP].SUPPLIED)
       || (!param_set.TYPE[SHORTWAVE].SUPPLIED && param_set.TYPE[VP].SUPPLIED)) 
     nrerror("Sub-daily shortwave and vapor pressure forcing data must be supplied together.");
+    /*
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[LONGWAVE].SUPPLIED)) 
     nrerror("Model cannot be run with shortwave supplied, if longwave is not provided.");
+    */
   
   /* mtclim routine memory allocations */
 
@@ -667,5 +674,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
     if (param_set.TYPE[i].SUPPLIED) 
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
+
+#if OUTPUT_FORCE
+  write_forcing_file(atmos, global_param.nrecs, outfiles);
+#endif /* OUTPUT_FORCE */
 
 }

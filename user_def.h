@@ -39,7 +39,21 @@
        compiled code.  If STATEYEAR, STATEMONTH and STATEDAY are
        defined in the global control file the model state will
        be written to a file. *****/
-#define SAVE_STATE FALSE
+#define SAVE_STATE TRUE
+
+/***** If TRUE VIC does not rewind the vegetation, state, and snow
+       band files before read data for each cell.  This saves time
+       but requires that all grid cells are listed in the same
+       order as the soil parameter file *****/
+#define NO_REWIND TRUE
+
+/***** If TRUE VIC reads the model forcing files, and creates the full
+       internal forcing dataset (longwave, shortwave, humidity, etc.)
+       which is then written to a series of gridded output files for
+       later use.  Gridded forcing files are written to the RESULTS
+       directory defined in the global control file, and are binary
+       or ASCII based on the BINARY_OUTPUT flag. *****/
+#define OUTPUT_FORCE TRUE
 
 /***** Define maximum array sizes for model source code *****/
 #define MAX_VEG      8          /* maximum number of vegetation types per 

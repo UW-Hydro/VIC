@@ -4,6 +4,21 @@
 
 Modifications:
 
+	arno_evap.c:
+	    Changed logic of evap limit check to avoid creating spurious
+	    condensation.  Previously, when liquid moisture < residual
+	    moisture, (liquid moisture - residual moisture) would be
+	    negative.  Any non-negative evap would be greater than this,
+	    resulting in evap getting set to (liquid moisture - residual
+	    moisture), which would be negative (i.e. condensation).
+	    This artificially created condensation in whatever amount
+	    necessary to bring liquid moisture up to residual, causing
+	    1) large latent heat flux, 2) incorrect surface temperatures,
+	    3) occasional inability for calc_surf_energy_bal to converge
+	    in root_brent, and 4) spuriously high runoff and baseflow.
+	    Now there is an added condition that liquid moisture > residual
+	    moisture for evap to be capped at (liquid moisture - residual
+	    moisture).						TJB
 	calc_surf_energy_bal.c, frozen_soil.c, root_brent.c,
 	snow_melt.c:
 	    Modified error messages.  Root_brent.c now simply

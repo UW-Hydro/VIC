@@ -4,19 +4,36 @@
 
 static char vcid[] = "$Id$";
 
-/*****************************************************************************/
-/*                                                                           */
-/*  ARNO/ARNO Model of Evaporation                                           */
-/*                                                                           */
-/*  Routine to compute evaporation based on the assumption that              */
-/*  evaporation is at the potential for the area which is saturated,         */
-/*  and at some percentage of the potential for the area which is partial    */
-/*  saturated.                                                               */
-/*                                                                           */
-/*  Evaporation from bare soil calculated only from uppermost layer.         */
-/*                                                                           */
-/*  Evaporation is in mm/(time step)  --> usually 1 day or 1 hour            */
-/*****************************************************************************/
+/****************************************************************************
+
+  ARNO/ARNO Model of Evaporation
+
+  Routine to compute evaporation based on the assumption that
+  evaporation is at the potential for the area which is saturated,
+  and at some percentage of the potential for the area which is partial
+  saturated.
+
+  Evaporation from bare soil calculated only from uppermost layer.
+
+  Evaporation is in mm/(time step)  --> usually 1 day or 1 hour
+
+  modifications:
+  04-Jun-04 Changed logic of evap limit check to avoid creating spurious
+	    condensation.  Previously, when liquid moisture < residual
+	    moisture, (liquid moisture - residual moisture) would be
+	    negative.  Any non-negative evap would be greater than this,
+	    resulting in evap getting set to (liquid moisture - residual
+	    moisture), which would be negative (i.e. condensation).
+	    This artificially created condensation in whatever amount
+	    necessary to bring liquid moisture up to residual, causing
+	    1) large latent heat flux, 2) incorrect surface temperatures,
+	    3) occasional inability for calc_surf_energy_bal to converge
+	    in root_brent, and 4) spuriously high runoff and baseflow.
+            Now there is an added condition that liquid moisture > residual
+	    moisture for evap to be capped at (liquid moisture - residual
+	    moisture).							TJB
+
+****************************************************************************/
 
 double arno_evap(layer_data_struct *layer_wet,
 		 layer_data_struct *layer_dry,
@@ -71,6 +88,7 @@ double arno_evap(layer_data_struct *layer_wet,
       layer = layer_wet;
     }
     
+    /* moist = liquid soil moisture */
     moist = layer[0].moist - layer[0].ice;
     if(moist>max_moist) moist=max_moist;
 
@@ -165,9 +183,19 @@ double arno_evap(layer_data_struct *layer_wet,
     /***********************************************************************/
 
 
-    moist = layer[0].moist - layer[0].ice;
-    if((evap) > moist - moist_resid * D1 * 1000.)
-      evap = moist -  moist_resid * D1 * 1000.;
+    /* only consider positive evaporation; we won't put limits on condensation */
+    if (evap > 0.0) {
+      if (moist > moist_resid * D1 * 1000.) {
+        /* there is liquid moisture available; cap evap at available liquid moisture */
+        if (evap > moist -  moist_resid * D1 * 1000.) {
+          evap = moist -  moist_resid * D1 * 1000.;
+        }
+      }
+      else {
+        /* no moisture available; cap evap at 0 */
+        evap = 0.0;
+      }
+    }
 
     layer[0].evap = evap;
     Evap += evap / 1000. / dt / 3600. * mu;

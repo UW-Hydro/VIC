@@ -151,7 +151,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate active temp for energy balance as average of old and new  */
   
   *TMean = 0.5 * (OldTSurf + TSurf);
-  Density = WaterDensity(*TMean);
+  Density = RHO_W;
   
   /* Correct aerodynamic conductance for stable conditions
      Note: If air temp >> snow temp then aero_cond -> 0 (i.e. very stable)

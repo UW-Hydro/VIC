@@ -159,21 +159,32 @@ void get_rise_and_set_hours(int    *rise_hour,
  
   double declination;
   double i_var;
+  double cos_tmp;
+  double sin_tmp;
   double tau;
   double sin_alpha;
   double radius;
+  double radius2;
   double I0;
   int    hour;
 
   rise_hour[0] = -1;
   set_hour[0]  = -1;
+
+  if(fabs(theta_l)==theta_l) 
+    i_var = 1.0;
+  else 
+    i_var = -1.0;
+
+  declination = 23.45 * PI / 180.0 * cos(2.0 * PI / 365.0 * (172.0 - jdate)); 
+  sin_tmp = sin(declination) * sin(phi*PI/180.0); 
+  cos_tmp = cos(declination) * cos(phi*PI/180.0);
+  radius = 1.0+0.017*cos((double)(2*PI/365*(186-jdate)));
+  radius2 = radius*radius;
+
   for(hour=0;hour<24;hour++) {
     hour = hour - SOLARTIMEOFFSET;   /* assume shortwave measurements made 
 					during previous hour */
-    declination = 23.45 * PI / 180.0 * cos(2.0 * PI / 365.0
-					   * (172.0 - jdate));
-    if(fabs(theta_l)==theta_l) i_var = 1.0;
-    else i_var = -1.0;
     
     /** Check if sun is east or west of cell longitude **/
     if(((float)hour > (12.+(theta_l-theta_s)*24./360.)
@@ -183,10 +194,8 @@ void get_rise_and_set_hours(int    *rise_hour,
 					  - fabs(theta_l)))) * 15.0;
     else tau = (hour + 12.0 - (i_var/15.0 * (fabs(theta_s)
 					     - fabs(theta_l)))) * 15.0;
-    sin_alpha = (sin(declination) * sin(phi*PI/180.0) + cos(declination)
-		 * cos(phi*PI/180.0) * cos(tau*PI/180.0));
-    radius = 1.0+0.017*cos((double)(2*PI/365*(186-jdate)));
-    I0 = 1353.0 * sin_alpha / radius / radius;
+    sin_alpha = sin_tmp + cos_tmp * cos(tau*PI/180.0);
+    I0 = 1353.0 * sin_alpha / radius2;
 
     if(rise_hour[0] < 0 && I0 > 0) rise_hour[0] = hour;
     if(set_hour[0] < 0 && rise_hour[0] > 0 && I0 < 0) set_hour[0] = hour;

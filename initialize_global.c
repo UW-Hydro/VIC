@@ -71,6 +71,10 @@ void initialize_global() {
                will cause the model to use bare soil.  Make sure that 
                positive index value refer to a non-canopied vegetation
                type in the vegetation library.                   KAC
+    07-May-04 Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
+	      Also changed limit on loop over forcing types from
+	      hard-coded 17 to variable N_FORCING_TYPES.	TJB
+	      
 
 *********************************************************************/
 
@@ -84,6 +88,9 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
+  options.ARC_SOIL              = FALSE;
+  options.COMPRESS              = FALSE;
+  options.ARNO_PARAMS           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.DIST_PRCP             = FALSE;
@@ -149,7 +156,7 @@ void initialize_global() {
     param_set.FORCE_DT[i] = MISSING;
     param_set.N_TYPES[i] = MISSING;
     param_set.FORCE_FORMAT[i] = MISSING;
-    for(j=0;j<17;j++) param_set.FORCE_INDEX[i][j] = MISSING;
+    for(j=0;j<N_FORCING_TYPES;j++) param_set.FORCE_INDEX[i][j] = MISSING;
   }
 
 }

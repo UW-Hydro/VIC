@@ -33,7 +33,7 @@ New Features:
 
 	gen.hydro.washington.edu 41: vicNl -o
 
-	***** VIC Version 4.0.5 Beta Release 1 - Current Model Settings *****
+	***** VIC Version 4.0.5 - Current Model Settings *****
 
 	COMPILE-TIME OPTIONS (set in user_def.h)
 	----------------------------------------

@@ -93,7 +93,7 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
     tmp_iptr[0] = dmy->day;
     fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
-    if(options.FULL_ENERGY) {
+    if(dt<24) {
       tmp_iptr[0] = dmy->hour;
       fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
     }
@@ -127,8 +127,11 @@ void write_data(out_data_struct *out_data,
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
     /***** Write ASCII water balance snow output file *****/
-    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
-	    dmy->year, dmy->month, dmy->day, dmy->hour,
+    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i",
+	    dmy->year, dmy->month, dmy->day);
+    if(dt<24) 
+      fprintf(outfiles.snow  ,"\t%02i",dmy->hour);
+    fprintf(outfiles.snow  ,"\t%.4lf\t%.4lf\t%.4lf\n",
 	    out_data->swq[0], out_data->snow_depth[0], 
 	    out_data->snow_canopy[0]);
   }
@@ -144,7 +147,7 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
     tmp_iptr[0] = dmy->day;
     fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
-    if(options.FULL_ENERGY) {
+    if(dt<24) {
       tmp_iptr[0] = dmy->hour;
       fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
     }
@@ -184,8 +187,10 @@ void write_data(out_data_struct *out_data,
   else if(!options.FULL_ENERGY && options.SNOW_MODEL 
 	  && options.PRT_SNOW_BAND) {
     /***** Write ASCII water balance snow band output file *****/
-    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i",
+	      dmy->year, dmy->month, dmy->day);
+    if(dt<24) 
+      fprintf(outfiles.snowband  ,"\t%02i", dmy->hour);
     for(band=0;band<options.SNOW_BAND;band++)
       fprintf(outfiles.snowband  ,"\t%.4lf\t%.4lf\t%.4lf",
 	      out_data->swq[band+1], out_data->snow_depth[band+1], 

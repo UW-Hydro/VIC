@@ -339,10 +339,10 @@ void runoff(layer_data_struct *layer_wet,
 	    }
 	    else {
 	      if(firstlayer)
-		debug.inflow[dist][band][lindex+2] = inflow - dt_runoff;
+		debug.inflow[dist][band][lindex+2]  += inflow - dt_runoff;
 	      else {
-		debug.inflow[dist][band][lindex+2] = inflow;
-		debug.outflow[dist][band][lindex+1] = inflow;
+		debug.inflow[dist][band][lindex+2]  += inflow;
+		debug.outflow[dist][band][lindex+1] += inflow;
 	      }
 	    }
 	  }

@@ -326,11 +326,9 @@ void full_energy(int rec,
 			   displacement,ref_height,surf_atten,gp.MAX_SNOW_TEMP,
 			   gp.MIN_RAIN_TEMP,gp.wind_h,moist,ice0,dp,
 			   bare_albedo,&Le,&Ls,cell[WET][iveg][0].aero_resist,
-			   tmp_wind,&step_net_short,
-			   &out_short,&step_rad,&Evap,&last_T1,
-			   &Tsurf,&Tgrnd,&Tend_surf,
-			   &Tend_grnd,
-			   &tmp_snow_energy,snow_inflow,&ppt[band*2]);
+			   tmp_wind,&step_net_short,&out_short,&step_rad,
+			   &Evap,&last_T1,&Tsurf,&Tgrnd,&Tend_surf,&Tend_grnd,
+			   &tmp_snow_energy,&snow_inflow[band],&ppt[band*2]);
 	    
 	    tmp_surf_temp = 0.;
  
@@ -558,8 +556,8 @@ void full_energy(int rec,
 			       cell[WET][iveg][0].aero_resist,tmp_wind,
 			       &step_net_short,&out_short,&step_rad,
 			       &Evap,&last_T1,&Tsurf,&Tgrnd,&Tend_surf,
-			       &Tend_grnd,&tmp_snow_energy,snow_inflow,
-			       &ppt[band*2]);
+			       &Tend_grnd,&tmp_snow_energy,
+			       &snow_inflow[band],&ppt[band*2]);
 		
 		if(!SNOW) {
 		  
@@ -584,8 +582,7 @@ void full_energy(int rec,
 					 step_air_temp
 					 + soil_con.Tfactor[band],
 					 (double)SNOW_STEP,step_rad,
-					 step_vpd,step_net_short,
-					 step_air_temp
+					 step_vpd,step_net_short,step_air_temp
 					 + soil_con.Tfactor[band],
 					 tmp_aero_resist,
 					 displacement,roughness,ref_height,
@@ -606,8 +603,7 @@ void full_energy(int rec,
 				       soil_con.b_infilt, step_air_temp 
 				       + soil_con.Tfactor[band],
 				       displacement, roughness, ref_height, 
-				       tmp_aero_resist, 
-				       (double)SNOW_STEP,
+				       tmp_aero_resist, (double)SNOW_STEP,
 				       prcp[0].mu[iveg]);
 		      for(j=0;j<Ndist;j++) {
 			ppt[band*2+j] = prec[iveg*2+j] 
@@ -627,8 +623,7 @@ void full_energy(int rec,
 				     soil_con.max_moist[0], soil_con.elevation,
 				     soil_con.b_infilt, 
 				     step_air_temp, displacement, roughness, 
-				     ref_height, 
-				     tmp_aero_resist, 
+				     ref_height, tmp_aero_resist, 
 				     (double)SNOW_STEP,prcp[0].mu[iveg]);
 		    for(j=0;j<Ndist;j++) {
 		      ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band]
@@ -638,12 +633,14 @@ void full_energy(int rec,
 		} /* End Computations for Bare Ground */
 		
 		/** Store Huorly Moisture Flux Terms **/
-		tmp_throughfall[WET][band]  
-		  += veg_var[WET][iveg][band].throughfall;
-		tmp_canopyevap[WET][band]   
-		  += veg_var[WET][iveg][band].canopyevap;
-		tmp_canopy_vapor_flux[band] 
-		  += snow[iveg][band].canopy_vapor_flux;
+		if(iveg<Nveg) {
+		  tmp_throughfall[WET][band]  
+		    += veg_var[WET][iveg][band].throughfall;
+		  tmp_canopyevap[WET][band]   
+		    += veg_var[WET][iveg][band].canopyevap;
+		  tmp_canopy_vapor_flux[band] 
+		    += snow[iveg][band].canopy_vapor_flux;
+		}
 		tmp_vapor_flux[band]        
 		  += snow[iveg][band].vapor_flux;
 		if(options.DIST_PRCP && hour==0) {
@@ -716,7 +713,7 @@ void full_energy(int rec,
 	  for(j=0;j<Ndist;j++) 
 	    for(band=0;band<Nbands;band++) ppt[band*2+j] = 0.;
 	  if (tmp_wind[0] > 0.0)
-	    cell[WET][iveg][0].aero_resist[0] 
+	    cell[j][iveg][0].aero_resist[0] 
 	      /= StabilityCorrection(ref_height, displacement, 
 				     atmos->air_temp, atmos->air_temp, 
 				     tmp_wind[0], roughness);

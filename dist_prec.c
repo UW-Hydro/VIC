@@ -61,6 +61,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	  if(atmos->prec>0) STILL_STORM=TRUE;
 	  else STILL_STORM=FALSE;
 	} 
+	ANY_SNOW = TRUE;
       }
       else {
 	if(atmos->prec==0 && rec==0) {
@@ -78,7 +79,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	}
       }
 
-      if(!STILL_STORM && atmos->prec>STORM_THRES) {
+      if(!STILL_STORM && (atmos->prec>STORM_THRES || ANY_SNOW)) {
 	initialize_new_storm(prcp[0].cell,prcp[0].veg_var,
 			     veg,veg_con[0].vegetat_type_num,rec,
 			     prcp[0].mu[veg],NEW_MU);

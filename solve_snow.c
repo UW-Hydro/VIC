@@ -108,10 +108,9 @@ double solve_snow(snow_data_struct    *snow,
   tmp_air_temp = air_temp + soil_con.Tfactor[band];
 
   /** Calculate Fraction of Precipitation that falls as Rain **/
-  rainonly        = calc_rainonly(tmp_air_temp,prec
-				  *soil_con.Pfactor[band],
+  rainonly        = calc_rainonly(tmp_air_temp,prec * soil_con.Pfactor[band],
 				  MAX_SNOW_TEMP,MIN_RAIN_TEMP);
-  snowfall[WET]  = prec - rainonly;
+  snowfall[WET]  = prec * soil_con.Pfactor[band] - rainonly;
   rainfall[WET]  = rainonly;
   snowfall[DRY]  = 0.;
   rainfall[DRY]  = 0.;
@@ -237,7 +236,7 @@ double solve_snow(snow_data_struct    *snow,
 	    is Under Snow (used only for accounting purposes)**/
 	veg_var_wet->throughfall = rainfall[WET] + snowfall[WET];
 	veg_var_dry->throughfall = rainfall[DRY] + snowfall[DRY];
-	energy->longwave          = longwave;
+	energy->longwave         = longwave;
       }
     }
     else energy->longwave = longwave;
@@ -257,7 +256,7 @@ double solve_snow(snow_data_struct    *snow,
 	snow->last_snow = 1;
 	out_short[0]    = energy->albedo * shortwave;
 	net_short[0]    = (1.0 - energy->albedo) * shortwave;
-	rad[0]          = net_short[0] + energy->longwave 
+	rad[0]          = net_short[0] + longwave 
 	  - STEFAN_B * pow(snow->surf_temp+KELVIN,4.0);
       }
     
@@ -379,8 +378,14 @@ double solve_snow(snow_data_struct    *snow,
     /** Compute Radiation Balance for Bare Surface **/ 
     out_short[0] = energy->albedo * shortwave;
     net_short[0] = (1.0 - energy->albedo) * shortwave;
-    rad[0]       = net_short[0] + longwave 
-      - STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
+    if(options.FULL_ENERGY) {
+      rad[0]       = net_short[0] + longwave 
+	- STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
+    }
+    else {
+      rad[0]       = net_short[0] + longwave 
+	- STEFAN_B * pow(air_temp+KELVIN,4.0);
+    }
 
   }
 

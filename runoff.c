@@ -73,6 +73,7 @@ void runoff(layer_data_struct *layer_wet,
   int                time_step;
   int                Ndist;
   int                dist;
+  int                storesub;
   int                tmpsub;
   int                tmplayer;
   double             ex, A, i_0, basis, frac;
@@ -273,7 +274,7 @@ void runoff(layer_data_struct *layer_wet,
       dt_inflow  =  inflow / (double) dt;
       dt_outflow =  0.0;
       for(sub=0;sub<3;sub++) 
-	if(sublayer[options.Nlayer-1][sub]>0) tmpsub = sub;
+	if(sublayer[options.Nlayer-1][sub]>0) storesub = sub;
       
       for (time_step = 0; time_step < dt; time_step++) {
 	inflow   = dt_inflow;
@@ -317,7 +318,7 @@ void runoff(layer_data_struct *layer_wet,
 	/*************************************************
 	  Stop drainage from bottom sublayer
         *************************************************/
-	Q12[options.Nlayer-1][tmpsub] = 0.;
+	Q12[options.Nlayer-1][storesub] = 0.;
 	
 	/**************************************************
           Solve for Current Soil Layer Moisture, and
@@ -381,6 +382,7 @@ void runoff(layer_data_struct *layer_wet,
 
 		/* Layer is thick, so excess soil moisture is trapped above **/
 		if(sublayer[lindex][sub]*soil_con.depth[lindex] > 0.10) {
+		  tmp_inflow *= sublayer[lindex][sub];
 		  tmpsub   = sub;
 		  tmplayer = lindex;
 		  while(tmp_inflow > 0) {
@@ -463,7 +465,7 @@ void runoff(layer_data_struct *layer_wet,
       /** ARNO model for the bottom soil layer **/
       
       lindex = options.Nlayer-1;
-      submoist[lindex][tmpsub] += inflow / sublayer[lindex][tmpsub];
+      submoist[lindex][storesub] += inflow / sublayer[lindex][storesub];
       Dsmax = soil_con.Dsmax * (double)dt / 24.0;
       if(debug.DEBUG || debug.PRT_BALANCE) last_moist = submoist[lindex][2];
       

@@ -22,6 +22,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
            parameter file.  Added specifically to work with the new
 	   global LAI files.
   11-18-02 Added code to read in blowing snow parameters.          LCB
+  03-27-03 Modified code to update Wdmax based on LAI values read in
+           for the current grid cell.  If LAI is not obtained from this
+           function, then the values cacluated in read_veglib.c are
+           left unchanged.                                   DP & KAC
 
 **********************************************************************/
 {
@@ -33,6 +37,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
   veg_con_struct *temp;
   int             vegcel, i, j, vegetat_type_num, skip, veg_class;
+  int             MaxVeg;
   float           depth_sum;
   float           sum;
   char            str[500];
@@ -60,10 +65,15 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     nrerror(ErrStr);
   }
 
+  // Make sure to allocate extra memory for wetlands vegetation
+  if ( options.LAKES )
+    MaxVeg = vegetat_type_num+1;
+  else
+    MaxVeg = vegetat_type_num;
+
   /** Allocate memory for vegetation grid cell parameters **/
-  if(vegetat_type_num>0)
-    temp = (veg_con_struct*) calloc(vegetat_type_num, 
-                                    sizeof(veg_con_struct));
+  if ( MaxVeg > 0 )
+    temp = (veg_con_struct*) calloc( MaxVeg, sizeof(veg_con_struct));
   else
     temp = (veg_con_struct*) calloc(1, sizeof(veg_con_struct));
   temp[0].Cv_sum = 0.0;
@@ -114,9 +124,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
-    if(options.GLOBAL_LAI)
-      for(j=0;j<12;j++) 
+    if ( options.GLOBAL_LAI )
+      for ( j = 0; j < 12; j++ ) {
 	fscanf(vegparam,"%lf",&veg_lib[temp[i].veg_class].LAI[j]);
+	veg_lib[temp[i].veg_class].Wdmax[j] = 
+	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
+      }
     
   }
   if(temp[0].Cv_sum>1.0){

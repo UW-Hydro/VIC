@@ -66,6 +66,7 @@ double canopy_evap(layer_data_struct *layer_wet,
   06-25-98 modified for new distributed precipitation data structure KAC
   01-19-00 modified to function with new simplified soil moisture 
            scheme                                                  KAC
+  5-8-2001 Modified to close the canopy energy balance.       KAC
 
 **********************************************************************/
 {
@@ -116,7 +117,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 	        modifications:
      6-8-2000 Modified to use spatially distributed soil frost if 
               present.                                           KAC
-
+     5-8-2001 Modified to close the canopy energy balance.       KAC
 
   **********************************************************************/ 
 

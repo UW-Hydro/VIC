@@ -35,7 +35,7 @@ void write_data(out_data_struct *out_data,
   int j;
 
   if(options.FROZEN_SOIL) {
-    fprintf(outfiles.fdepth  ,"%04i\t%02i\t%02i\t%02i\t%.5lf\t%.5lf",
+    fprintf(outfiles.fdepth  ,"%04i\t%02i\t%02i\t%02i\t%.4lg\t%.4lg",
 	    dmy->year, dmy->month, dmy->day, dmy->hour, out_data->fdepth[0], 
             out_data->fdepth[1]);
     for(j=0;j<options.Nlayer;j++) {
@@ -45,20 +45,21 @@ void write_data(out_data_struct *out_data,
   }
 
   if(options.FULL_ENERGY && options.SNOW_MODEL) {
-    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\n",
+    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->swq, out_data->snow_depth, out_data->snow_canopy,
-            out_data->advection, out_data->coldcontent, out_data->melt_energy);
+            out_data->advection, out_data->deltaCC, out_data->snow_flux,
+	    out_data->refreeze_energy);
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
-    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\n",
+    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lg\t%.4lg\t%.4lg\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->swq, out_data->snow_depth, out_data->snow_canopy);
   }
 
 
   if(options.FULL_ENERGY) {
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t\n",
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->prec, out_data->evap, out_data->runoff,
 	    out_data->baseflow, out_data->Wdew, out_data->moist[0],
@@ -71,7 +72,7 @@ void write_data(out_data_struct *out_data,
 	    out_data->albedo);
   }
   else {
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t\n",
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t\n",
 	    dmy->year, dmy->month, dmy->day,
 	    out_data->prec, out_data->evap, out_data->runoff, 
 	    out_data->baseflow, out_data->Wdew, out_data->moist[0], 
@@ -108,10 +109,10 @@ void calc_water_balance_error(int    rec,
     last_storage = storage;
     if(fabs(error)>1.e-5) {
       if(error_cnt<25) 
-	fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",
+	fprintf(stderr,"Moist Error:\t%i\t%.4lg\t%.4lg\n",
 		rec,error,cum_error);
       else if(error_cnt == 25) {
-	fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",
+	fprintf(stderr,"Moist Error:\t%i\t%.4lg\t%.4lg\n",
 		rec,error,cum_error);
 	fprintf(stderr,"Too many mass balance errors, will not print more.\n");
       }
@@ -125,7 +126,8 @@ void calc_energy_balance_error(int    rec,
 			       double net_rad,
 			       double latent,
 			       double sensible,
-			       double grnd_flux) {
+			       double grnd_flux,
+			       double snow_fluxes) {
 /***************************************************************
   This subroutine computes the overall model energy balance
 ***************************************************************/
@@ -140,14 +142,14 @@ void calc_energy_balance_error(int    rec,
     error_cnt = 0;
   }
   else {
-    error = net_rad + latent + sensible + grnd_flux;
+    error = net_rad + latent + sensible + grnd_flux + snow_fluxes;
     cum_error += error;
-    if(fabs(error)>1.e-5) {
+    if(fabs(error)>1.e-3) {
       if(error_cnt<25)
-        fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",
+        fprintf(stderr,"Energy Error:\t%i\t%.4lg\t%.4lg\n",
 		rec,error,cum_error);
       else if(error_cnt==25) {
-        fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",
+        fprintf(stderr,"Energy Error:\t%i\t%.4lg\t%.4lg\n",
 		rec,error,cum_error);
 	fprintf(stderr,"Too many energy balance errors, will not print more.\n");
       }

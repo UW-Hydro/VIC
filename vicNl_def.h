@@ -18,7 +18,7 @@
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
 					work (m) */
-#define SNOWTHRES    1.e-4	/* minimum depth of snow for snow flux
+#define SNOWTHRES    1.e-10	/* minimum depth of snow for snow flux
                                    calculation [m] */
 /***** Model Constants *****/
 #define MAXSTRING    512
@@ -333,26 +333,30 @@ typedef struct {
   solve the thermal fluxes through the soil column.
   ***********************************************************************/
 typedef struct {
-  double shortwave;		/* incoming shortwave heat (Wm-2) */
-  double longwave;		/* net longwave flux (Wm-2) */
-  double latent;		/* net latent heat flux (Wm-2) */
-  double sensible;		/* net sensible heat flux (Wm-2) */
-  double grnd_flux;		/* ground heat flux (Wm-2) */
-  double advection;		/* advective flux (Wm-2) */
-  double deltaH;		/* change in soil heat storage (Wm-2) */
-  double deltaCC;	        /* change in snow heat storage (Wm-2) */
-  double albedo;		/* surface albedo (fraction) */
-  double error;			/* energy balance error (W/m^2) */
-  char frozen;			/* TRUE = frozen soil present */
+  double  shortwave;	        /* incoming shortwave heat (Wm-2) */
+  double  longwave;	        /* net longwave flux (Wm-2) */
+  double  latent;	        /* net latent heat flux (Wm-2) */
+  double  sensible;	        /* net sensible heat flux (Wm-2) */
+  double  grnd_flux;	        /* ground heat flux (Wm-2) */
+  double  advection;	        /* advective flux (Wm-2) */
+  double  deltaH;	        /* change in soil heat storage (Wm-2) */
+  double  deltaCC;	        /* change in snow heat storage (Wm-2) */
+  double  snow_flux;            /* thermal flux through the snow pack (Wm-2) */
+  double  refreeze_energy;      /* energy used to refreeze the snow pack 
+				   (Wm-2) */
+  double  albedo;	        /* surface albedo (fraction) */
+  double  error;	        /* energy balance error (W/m^2) */
+  double  Trad[2];              /* surface temperature of energy balance (C) */
+  char    frozen;	       	/* TRUE = frozen soil present */
   double *T;			/* thermal node temperatures (C) */
   double *dz;			/* thermal node thickness (m) */
-  int T1_index;			/* soil node at the bottom of the top layer */
-  double kappa[2];		/* soil thermal conductivity for top two
+  int     T1_index;		/* soil node at the bottom of the top layer */
+  double  kappa[2];		/* soil thermal conductivity for top two
 				   layers (W/m/K) */
-  double Cs[2];			/* heat capacity for top two layers
+  double  Cs[2];		/* heat capacity for top two layers
 				   (J/m^3/K) */
-  double fdepth[2];		/* [0] freezing front depth, [1] thawing */
-  double unfrozen;		/* frozen layer water content that is 
+  double  fdepth[2];		/* [0] freezing front depth, [1] thawing */
+  double  unfrozen;		/* frozen layer water content that is 
                                    unfrozen */
   double *ice;			/* frozen layer ice content */
 } energy_bal_struct;
@@ -388,10 +392,6 @@ typedef struct {
                                condensation from intercepted snow (m) */
   double albedo;            /* snow surface albedo (fraction) */
   double coldcontent;       /* cold content of snow pack */
-  double melt_energy;	    /* energy used for melting and refreezing the snow
-                               pack */
-  double advection;	    /* advection flux into snow pack due to rain
-                               (W/m^2) */
   double mass_error;	    /* snow mass balance error */
   double density;	    /* snow density (kg/m^3) */
   double depth;		    /* snow depth (m) */
@@ -467,8 +467,9 @@ typedef struct {
   double prec;            /* incoming precipitation */
   double Wdew;            /* canopy interception of moisture */
   double snow_depth;      /* snow depth */
-  double coldcontent;     /* cold content of snow pack */
-  double melt_energy;	  /* energy used for melting and heating snow pack */
+  double deltaCC;         /* change of cold content in the snow pack [Wm-2] */
+  double snow_flux;       /* energy flux through the snow pack [Wm-2] */
+  double refreeze_energy; /* energy used to refreeze snowpack [Wm-2] */
 } out_data_struct;
 
 /********************************************************

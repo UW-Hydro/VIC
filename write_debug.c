@@ -47,8 +47,8 @@ void write_debug(atmos_data_struct atmos,
   static double *GRND_FLUX;
   static double *ADVECTION;
   static double *DELTA_CC;
-  static double *QNET;
-  static double *MELTENERGY;
+  static double *SNOW_FLUX;
+  static double *REFREEZEENERGY;
   static double *DELTA_H;
   static double *SWQ;
   static double *SURF_WATER;
@@ -77,7 +77,6 @@ void write_debug(atmos_data_struct atmos,
   double advection;
   double deltaH;
   double deltaCC;
-  double meltenergy;
   double Qnet;
 
   if(debug.PRT_FLUX) {
@@ -98,8 +97,8 @@ void write_debug(atmos_data_struct atmos,
         free((char *)ADVECTION);
         free((char *)DELTA_H);
         free((char *)DELTA_CC);
-        free((char *)QNET);
-        free((char *)MELTENERGY);
+        free((char *)SNOW_FLUX);
+        free((char *)REFREEZEENERGY);
       }
       ENERGY_ERROR = (double *)calloc(Nveg,sizeof(double));
       ENERGY_ERROR_CALC = (double *)calloc(Nveg,sizeof(double));
@@ -113,8 +112,8 @@ void write_debug(atmos_data_struct atmos,
       ADVECTION = (double *)calloc(Nveg,sizeof(double));
       DELTA_H = (double *)calloc(Nveg,sizeof(double));
       DELTA_CC = (double *)calloc(Nveg,sizeof(double));
-      QNET = (double *)calloc(Nveg,sizeof(double));
-      MELTENERGY = (double *)calloc(Nveg,sizeof(double));
+      SNOW_FLUX = (double *)calloc(Nveg,sizeof(double));
+      REFREEZEENERGY = (double *)calloc(Nveg,sizeof(double));
     }
     if(rec==0 && prcpdist==0) {
       ENERGY_ERROR[veg] = 0.;
@@ -131,59 +130,60 @@ void write_debug(atmos_data_struct atmos,
       ADVECTION[veg] = 0.;
       DELTA_H[veg] = 0.;
       DELTA_CC[veg] = 0.;
-      QNET[veg] = 0.;
-      MELTENERGY[veg] = 0.;
+      SNOW_FLUX[veg] = 0.;
+      REFREEZEENERGY[veg] = 0.;
     } 
 
-    if(snow->snow) {
-      longwave = STEFAN_B*pow(snow->surf_temp + KELVIN,4.0);
+    if(options.SNOW_MODEL) {
       deltaCC = energy->deltaCC;
-      meltenergy = snow->melt_energy;
       Qnet = snow->Qnet;
     }
     else {
-      longwave = STEFAN_B*pow(energy->T[0] + KELVIN,4.0);
       deltaCC = 0.;
-      meltenergy = 0.;
       Qnet = 0.;
     }
     advection = energy->advection;
     deltaH = energy->deltaH;
 
-    ENERGY_ERROR[veg] += energy->error;
-    ENERGY_ERROR_CALC[veg] += (1.-energy->albedo)*energy->shortwave
-                            + energy->longwave + energy->grnd_flux
-                            + energy->latent + energy->sensible 
-                            + energy->deltaH - deltaCC + meltenergy;
+    ENERGY_ERROR[veg] += energy->error * mu;
+    ENERGY_ERROR_CALC[veg] += ((1.-energy->albedo)*energy->shortwave
+		            + energy->longwave + energy->grnd_flux
+		            + energy->latent + energy->sensible 
+		            + energy->deltaH - energy->deltaCC 
+		            - energy->snow_flux + energy->refreeze_energy 
+                            + energy->advection) * mu;
 
     INSHORT[veg] += (1.-energy->albedo)*atmos.shortwave * mu;
     INLONG[veg] += atmos.longwave * mu;
     SENSIBLE[veg] += energy->sensible * mu;
     LATENT[veg] += energy->latent * mu;
     GRND_FLUX[veg] += energy->grnd_flux * mu;
-    ADVECTION[veg] += advection * mu;
-    DELTA_H[veg] += deltaH * mu;
-    DELTA_CC[veg] += deltaCC * mu;
-    QNET[veg] += Qnet * mu;
-    MELTENERGY[veg] += meltenergy * mu;
+    ADVECTION[veg] += energy->advection * mu;
+    DELTA_H[veg] += energy->deltaH * mu;
+    DELTA_CC[veg] += energy->deltaCC * mu;
+    SNOW_FLUX[veg] += energy->snow_flux * mu;
+    REFREEZEENERGY[veg] += energy->refreeze_energy * mu;
 
     if(rec==0 && veg==0 && prcpdist==0) {
       fprintf(debug.fg_energy,"DATE\tNET SHT\tNET LNG\t");
-      fprintf(debug.fg_energy,"GRND F\tLATENT\tSENSBL\tADVEC\tdel H\tdel CC\tMELT\t");
+      fprintf(debug.fg_energy,"GRND F\tLATENT\tSENSBL\tADVEC\tdel H\t");
+      fprintf(debug.fg_energy,"del CC\tSNWFLX\tMELT\t");
       fprintf(debug.fg_energy,"ERROR\tERR CAL\tGRND T\tT_1\tWIND\n");
     }
     if((options.DIST_PRCP && prcpdist==1) || !options.DIST_PRCP) {
-      fprintf(debug.fg_energy,"%7.4f\t%7.2lf\t%7.2lf",
-          (float)rec/24.0*(float)gp.dt, INSHORT[veg],
-          INLONG[veg]);
-      fprintf(debug.fg_energy,"\t%7.2lf\t%7.2lf\t%7.2lf",
-          -GRND_FLUX[veg], LATENT[veg], SENSIBLE[veg]);
-      fprintf(debug.fg_energy,"\t%7.2lf\t%7.2lf\t%7.2lf\t%7.2lf\t%7.2lf",
-          ADVECTION[veg], DELTA_H[veg], DELTA_CC[veg], MELTENERGY[veg], QNET[veg]);
-      fprintf(debug.fg_energy,"\t%7.2lf\t%7.2lf",
-          ENERGY_ERROR[veg],ENERGY_ERROR_CALC[veg]);
-      fprintf(debug.fg_energy,"\t%7.2lf\t%7.2lf\t%7.2lf\n",energy->T[0], energy->T[1],
-          atmos.wind);
+      fprintf(debug.fg_energy,"%7.4f\t%7.4lf\t%7.4lf",
+	      (float)rec/24.0*(float)gp.dt, INSHORT[veg],
+	      INLONG[veg]);
+      fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf\t%7.4lf",
+	      -GRND_FLUX[veg], LATENT[veg], SENSIBLE[veg]);
+      fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf\t%7.4lf\t%7.4lf\t%7.4lf",
+	      ADVECTION[veg], DELTA_H[veg], DELTA_CC[veg], SNOW_FLUX[veg], 
+	      REFREEZEENERGY[veg]);
+      fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf",
+	      ENERGY_ERROR[veg],ENERGY_ERROR_CALC[veg]);
+      fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf\t%7.4lf\n",
+	      energy->T[0], energy->T[1],
+	      atmos.wind);
     }
   }
  

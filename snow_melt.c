@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Mon Oct  6 13:16:38 1997 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Sat Apr 18 15:47:39 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -86,7 +86,9 @@ void snow_melt(atmos_data_struct *atmos,
                double *save_grnd_flux,
                double *save_latent,
                double *save_sensible,
-               double *save_Qnet)
+               double *save_Qnet,
+	       double *save_Trad,
+	       double *save_refreeze_energy)
 {
   double DeltaPackCC;            /* Change in cold content of the pack */
   double DeltaPackSwq;           /* Change in snow water equivalent of the
@@ -114,6 +116,7 @@ void snow_melt(atmos_data_struct *atmos,
   double grnd_flux;		/* thermal flux through snowpack from ground */
   double latent_heat;		/* thermal flux through snowpack from ground */
   double sensible_heat;		/* thermal flux through snowpack from ground */
+  double melt_energy = 0.;
 
   SnowFall = snowfall / 1000.; /* convet to m */
   RainFall = rainfall / 1000.; /* convet to m */
@@ -181,9 +184,10 @@ void snow_melt(atmos_data_struct *atmos,
          RainFall, SurfaceSwq, snow->surf_water, OldTSurf,
          &RefreezeEnergy, &vapor_flux, &advection, &deltaCC, grnd_surf_temp,
          snow->depth, snow->density,surf_atten,&grnd_flux,&latent_heat,
-         &sensible_heat);
+         &sensible_heat,save_Trad);
 
   snow->vapor_flux = vapor_flux;
+  save_refreeze_energy[0] = RefreezeEnergy;
 
   /* If Qnet == 0.0, then set the surface temperature to 0.0 */
   if (Qnet == 0.0) {
@@ -196,7 +200,7 @@ void snow_melt(atmos_data_struct *atmos,
         RefreezeEnergy = RefrozenWater * Lf * WaterDensity(snow->surf_temp)/
           (delta_t * SECPHOUR);
       } 
-      snow->melt_energy  += RefreezeEnergy;
+      melt_energy  += RefreezeEnergy;
       SurfaceSwq   += RefrozenWater;
       Ice          += RefrozenWater;
       snow->surf_water   -= RefrozenWater;
@@ -208,7 +212,7 @@ void snow_melt(atmos_data_struct *atmos,
       /* Calculate snow melt */      
       SnowMelt = fabs(RefreezeEnergy)/(Lf * WaterDensity(snow->surf_temp)) * 
         delta_t * SECPHOUR;
-      snow->melt_energy += RefreezeEnergy;
+      melt_energy += RefreezeEnergy;
     }
 
     /* Convert vapor mass flux to a depth per timestep and adjust snow->surf_water */
@@ -263,7 +267,8 @@ void snow_melt(atmos_data_struct *atmos,
         atmos->vpd * 1000., atmos->vp * 1000., RainFall, SurfaceSwq,
         snow->surf_water, OldTSurf, &RefreezeEnergy, 
         &vapor_flux, &advection, &deltaCC, grnd_surf_temp, snow->depth,
-        snow->density,surf_atten,&grnd_flux,&latent_heat,&sensible_heat);
+        snow->density,surf_atten,&grnd_flux,&latent_heat,&sensible_heat,
+				 save_Trad);
 
     Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
            z2, displacement, Z0, wind, atmos->net_short,
@@ -272,11 +277,10 @@ void snow_melt(atmos_data_struct *atmos,
            RainFall, SurfaceSwq, snow->surf_water, OldTSurf,
            &RefreezeEnergy, &vapor_flux, &advection, &deltaCC, grnd_surf_temp,
            snow->depth, snow->density,surf_atten,&grnd_flux,&latent_heat,
-           &sensible_heat);
-
-    snow->surf_temp = 0.5 * (snow->surf_temp + OldTSurf);
+           &sensible_heat,save_Trad);
 
     snow->vapor_flux = vapor_flux;
+    save_refreeze_energy[0] = RefreezeEnergy;
 
     /* since we iterated, the surface layer is below freezing and no snowmelt
      */ 
@@ -289,7 +293,7 @@ void snow_melt(atmos_data_struct *atmos,
     SurfaceSwq += snow->surf_water;
     Ice        += snow->surf_water;
     snow->surf_water  = 0.0;
-    snow->melt_energy += snow->surf_water * Lf 
+    melt_energy += snow->surf_water * Lf 
                        * WaterDensity(snow->surf_temp)/(delta_t * SECPHOUR);
     
     /* Convert mass flux to a depth per timestep and adjust SurfaceSwq */
@@ -413,7 +417,6 @@ void snow_melt(atmos_data_struct *atmos,
   atmos->melt *= 1000.; /* converts back to mm */
   snow->mass_error = MassBalanceError;
   snow->coldcontent = SurfaceCC;
-  snow->advection = advection;
   snow->vapor_flux *= -1.;
   *save_advection = advection;
   *save_deltaCC = deltaCC;

@@ -16,8 +16,6 @@ void initialize_snow (snow_data_struct *snow,
     snow[i].vapor_flux 		Mass flux of water vapor to or from the
 					intercepted snow (m) 
     snow[i].pack_temp 		Temperature of snow pack (C) 
-    snow[i].melt_energy 	Energy used for melting and heating of snow
-					pack 
     snow[i].snow 		1 = snow present, 0 = no snow 
     snow[i].last_snow 		days since last snowfall 
     snow[i].swq 		Snow water equivalent at current pixel (m) 
@@ -44,8 +42,6 @@ void initialize_snow (snow_data_struct *snow,
     snow[i].vapor_flux = 0.0;	/* Mass flux of water vapor to or from the
                                intercepted snow (m) */
     snow[i].pack_temp = 0.0;	/* Temperature of snow pack (C) */
-    snow[i].melt_energy = 0.0;	/* Energy used for melting and heating of snow
-                                   pack */
     snow[i].snow_canopy = 0.0;	/* Snow on canopy */
     snow[i].tmp_int_storage = 0.0;
     if(options.INIT_SNOW) {

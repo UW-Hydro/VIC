@@ -145,8 +145,6 @@ void put_data(dist_prcp_struct  *prcp,
         out_data->grnd_flux += (energy[veg].grnd_flux
                           + energy[veg].deltaH)
                           * veg_con[veg].Cv * mu;
-        out_data->advection += energy[veg].advection
-                          * veg_con[veg].Cv * mu;
         out_data->deltaH    += energy[veg].deltaH
                           * veg_con[veg].Cv * mu;
         out_data->energy_error += energy[veg].error
@@ -168,9 +166,11 @@ void put_data(dist_prcp_struct  *prcp,
         out_data->snow_canopy += (snow[veg].snow_canopy
                                + snow[veg].tmp_int_storage) * veg_con[veg].Cv
 	                       * mu * 1000.;
-        out_data->coldcontent += snow[veg].coldcontent * veg_con[veg].Cv * mu;
-        out_data->melt_energy += snow[veg].melt_energy * veg_con[veg].Cv * mu;
-        out_data->advection   += snow[veg].advection * veg_con[veg].Cv * mu;
+        out_data->deltaCC     += energy[veg].deltaCC * veg_con[veg].Cv * mu;
+        out_data->advection   += energy[veg].advection * veg_con[veg].Cv * mu;
+        out_data->snow_flux   += energy[veg].snow_flux * veg_con[veg].Cv * mu;
+        out_data->refreeze_energy   += energy[veg].refreeze_energy 
+	                             * veg_con[veg].Cv * mu;
       }
     }
   
@@ -247,8 +247,6 @@ void put_data(dist_prcp_struct  *prcp,
       out_data->grnd_flux += (energy[vegnum].grnd_flux 
                             + energy[vegnum].deltaH)
                             * (1.0 - veg_con[0].Cv_sum) * mu;
-      out_data->advection += energy[vegnum].advection 
-                            * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->deltaH    += energy[vegnum].deltaH 
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->energy_error += energy[vegnum].error 
@@ -261,12 +259,12 @@ void put_data(dist_prcp_struct  *prcp,
                               * mu * 1000.;
       out_data->snow_depth  += snow[vegnum].depth 
                               * (1.0 - veg_con[0].Cv_sum) * mu * 1000.;
-      out_data->coldcontent += snow[vegnum].coldcontent 
-                              * (1.0 - veg_con[0].Cv_sum) * mu / 10.;
-      out_data->melt_energy += snow[vegnum].melt_energy 
-                              * (1.0 - veg_con[0].Cv_sum) * mu / 10.;
-      out_data->advection   += snow[vegnum].advection   
-                              * (1.0 - veg_con[0].Cv_sum) * mu / 10.;
+      out_data->deltaCC += energy[vegnum].deltaCC 
+                              * (1.0 - veg_con[0].Cv_sum) * mu;
+      out_data->advection   += energy[vegnum].advection   
+                              * (1.0 - veg_con[0].Cv_sum) * mu;
+      out_data->snow_flux   += energy[vegnum].snow_flux   
+                              * (1.0 - veg_con[0].Cv_sum) * mu;
     }
   }
 
@@ -285,7 +283,9 @@ void put_data(dist_prcp_struct  *prcp,
   calc_water_balance_error(rec,inflow,outflow,storage);
   calc_energy_balance_error(rec,out_data->net_short+out_data->net_long,
 			    out_data->latent,out_data->sensible,
-			    out_data->grnd_flux);
+			    out_data->grnd_flux,
+			    out_data->advection-out_data->deltaCC
+			    -out_data->snow_flux+out_data->refreeze_energy);
 
   write_data(out_data, outfiles, dmy);
 

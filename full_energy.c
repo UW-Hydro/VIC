@@ -91,6 +91,8 @@ void full_energy(int rec,
   double tmp_canopy_vapor_flux;
   double tmp_canopyevap;
   double tmp_snowinflow;
+  double tmp_snow_surf_temp;
+  double tmp_snow_energy;
   double *tmp_layerevap;
   atmos_data_struct tmp_atmos;
   layer_data_struct *tmp_layer;
@@ -164,7 +166,6 @@ void full_energy(int rec,
       else surf_atten=1;
         
       if(options.SNOW_MODEL) {
-        snow[iveg].melt_energy = 0.;
         if(snow[iveg].snow) Ls = (677. - 0.07 * snow[iveg].surf_temp)
                                * 4.1868 * 1000;
         else Ls = 0.;
@@ -210,6 +211,12 @@ void full_energy(int rec,
         Initialize Energy Balance Terms
       **************************************************/
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+	/** Clear Energy Balance Terms for Snow Pack **/
+	energy[iveg].deltaCC         = 0.;
+	energy[iveg].snow_flux       = 0.;
+	energy[iveg].refreeze_energy = 0.;
+	energy[iveg].advection       = 0.;
+
         /** Set Damping Depth **/
         dp=soil_con.dp;
 
@@ -327,7 +334,7 @@ void full_energy(int rec,
             snow[iveg].last_snow++;
           else snow[iveg].last_snow=1;
           out_short = snow[iveg].albedo * atmos->shortwave;
-          atmos->net_short *= (1.0 - snow[iveg].albedo);
+          atmos->net_short = (1.0 - snow[iveg].albedo) * atmos->shortwave;
           atmos->rad = atmos->net_short + atmos->longwave 
                      - STEFAN_B * pow(snow[iveg].surf_temp+KELVIN,4.0);
 
@@ -349,7 +356,7 @@ void full_energy(int rec,
 			     &veg_var[iveg].Wdew,&snow[iveg].snow_canopy,
 			     &snow[iveg].tmp_int_storage,
                              &snow[iveg].canopy_vapor_flux,&canopy_temp,
-                             &snow[iveg].melt_energy);
+                             &energy[iveg].refreeze_energy);
               atmos->longwave = STEFAN_B * pow(canopy_temp+KELVIN,4.0);
               veg_var[iveg].throughfall = rainfall + snowfall;
             }
@@ -379,6 +386,8 @@ void full_energy(int rec,
           }
 
           tmp_swq = snow[iveg].swq;
+          if(tmp_swq>0.) tmp_snow_surf_temp = snow[iveg].surf_temp;
+          else tmp_snow_surf_temp = 0.;
     
           /** Snowpack on Ground **/
           if(snow[iveg].swq>0.0 || snowfall > 0) {
@@ -389,9 +398,12 @@ void full_energy(int rec,
 		      tmp_wind[2],energy[iveg].T[0],
                       &energy[iveg].advection,&energy[iveg].deltaCC,
                       &energy[iveg].grnd_flux,&energy[iveg].latent,
-                      &energy[iveg].sensible,&snow[iveg].Qnet);
+                      &energy[iveg].sensible,&snow[iveg].Qnet,
+		      &energy[iveg].Trad[0],&energy[iveg].refreeze_energy);
             ppt=atmos->melt;
             energy[iveg].albedo = snow[iveg].albedo;
+	    tmp_snow_energy = energy[iveg].advection - energy[iveg].deltaCC
+	                    + energy[iveg].refreeze_energy;
 
             /** Compute Snow Parameters **/
             if(snow[iveg].swq > 0.) {
@@ -416,6 +428,7 @@ void full_energy(int rec,
           }
           else {
             ppt = rainfall;
+            tmp_snow_energy = 0.;
           }
         }
         else {
@@ -431,6 +444,7 @@ void full_energy(int rec,
             rainfall += snowfall;
             snowfall=0.;
           }
+	  tmp_snow_energy = 0.;
         }
   
         /** Compute Surface Temperature, and Update Snowpack Variables **/
@@ -457,13 +471,19 @@ void full_energy(int rec,
   
             if(options.FROZEN_SOIL || options.CALC_SNOW_FLUX) {
               surf_temp = calc_snow_ground_flux(dp,moist,ice0,
-                          &last_T1,&energy[iveg],&snow[iveg],soil_con,gp);
+						energy[iveg].Trad[0],&last_T1,
+						&energy[iveg],&snow[iveg],
+						soil_con,gp);
 
               if(options.FROZEN_SOIL) {
 	        tmp_surf_temp=surf_temp;
 	        frozen_soil(soil_con,cell[iveg].layer,&energy[iveg],rec,
 	                    iveg,gp.dt,tmp_surf_temp,gp.Ulayer,gp.Llayer);
               }
+	      else {
+		energy[iveg].T[0] = surf_temp;
+		energy[iveg].T[1] = last_T1;
+	      }
             }
             else {
               surf_temp=energy[iveg].T[0];
@@ -578,43 +598,13 @@ void full_energy(int rec,
 				    cell[iveg].aero_resist,
 				    cell[iveg].Le,Ls,mu,&x,0.,roughness,
 				    ref_height+roughness,
-				    snow[iveg].melt_energy,
+				    tmp_snow_energy,
 				    tmp_wind,snow[iveg].canopy_vapor_flux
 				    +snow[iveg].vapor_flux,
 				    rainfall,atmos,&tmp_veg_var,
 				    &energy[iveg],gp,tmp_layer,soil_con,
 				    veg_class,dmy[rec]);  
-  
-          /** Iterate Energy Balance Solution MAXIT_FE Times for Improved
-              Solution **/
-/*****
-          DONE = FALSE;
-          iter = 0;
-          while(iter < MAXIT_FE && !DONE) {
-            if(iveg<Nveg) veg_var[iveg].canopyevap = 0.;
-            for(i=0;i<options.Nlayer;i++) tmp_layer[i] = cell[iveg].layer[i];
-            if(iveg<Nveg) tmp_veg_var = veg_var[iveg];
-            else tmp_veg_var = veg_var[0];
-            new_T0 = calc_surf_energy_bal(rec,iveg,options.Nlayer,Nveg,
-					  SNOW,ice0,moist,
-					  dp,surf_atten,T0,&last_T1,
-					  cell[iveg].aero_resist,
-					  cell[iveg].Le,Ls,mu,&x,0.,roughness,
-					  ref_height+roughness,
-					  snow[iveg].melt_energy,
-					  tmp_wind,snow[iveg].canopy_vapor_flux
-					  +snow[iveg].vapor_flux,
-					  rainfall,atmos,&tmp_veg_var,
-					  &energy[iveg],gp,tmp_layer,
-					  soil_con,veg_class,dmy[rec]);
-            dT = new_T0-T0;
-            if(fabs(dT) < threshold) DONE=TRUE;
-            else iter++;
-            T0 = new_T0;
-          }
-          if(!DONE && MAXIT_FE>1)
-            fprintf(stderr,"Surface Energy Balance Exceeded Max Iterations in Rec %i (dT = %lf)\n",rec,dT);
-*****/
+
           energy[iveg].T[0] = T0;
           for(i=0;i<options.Nlayer;i++) cell[iveg].layer[i]=tmp_layer[i];
           if(iveg<Nveg) veg_var[iveg] = tmp_veg_var;
@@ -666,7 +656,7 @@ void full_energy(int rec,
           tmp_canopy_vapor_flux = 0.;
           tmp_vapor_flux = 0.;
           tmp_canopyevap = 0.;
-          snow[iveg].melt_energy=0.;
+          energy[iveg].refreeze_energy=0.;
           tmp_layerevap = (double*)calloc(options.Nlayer,sizeof(double));
 
           if(snow[iveg].snow || (atmos->prec-atmos->rainonly) > 0.
@@ -732,12 +722,8 @@ void full_energy(int rec,
               out_short = energy[iveg].albedo * inshort;
               atmos->net_short = inshort * (1.0 - energy[iveg].albedo);
               atmos->longwave = inlong;
-              if(snow[iveg].snow)
-                atmos->rad = atmos->net_short + inlong
-                           - STEFAN_B * pow(snow[iveg].surf_temp+KELVIN,4.0);
-              else
-                atmos->rad = atmos->net_short + inlong
-                           - STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
+	      atmos->rad = atmos->net_short + inlong
+                         - STEFAN_B * pow(energy[iveg].Trad[0]+KELVIN,4.0);
 
               if(iveg!=Nveg) {
                 /***** Check if Vegetation Covered by Snow *****/
@@ -760,7 +746,7 @@ void full_energy(int rec,
 				 &veg_var[iveg].Wdew,&snow[iveg].snow_canopy,
 				 &snow[iveg].tmp_int_storage,
 				 &snow[iveg].canopy_vapor_flux,&canopy_temp,
-				 &snow[iveg].melt_energy);
+				 &energy[iveg].refreeze_energy);
                   atmos->longwave = STEFAN_B * pow(canopy_temp+KELVIN,4.0);
                   tmp_throughfall = rainfall + snowfall;
                 }
@@ -798,8 +784,8 @@ void full_energy(int rec,
                           cell[iveg].aero_resist[2],
                           cell[iveg].Le,&snow[iveg],(double)gp.dt/4,0.00,
                           soil_con.snow_rough,surf_atten,rainfall,
-			  snowfall,tmp_wind[2],0.,&dummy,
-                          &dummy,&dummy,&dummy,&dummy,&dummy);
+			  snowfall,tmp_wind[2],0.,&dummy,&dummy,
+                          &dummy,&dummy,&dummy,&dummy,&dummy,&dummy);
                 tmp_melt+=atmos->melt;
 
                 if(snow[iveg].swq>0.) {
@@ -937,14 +923,8 @@ void full_energy(int rec,
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
         energy[iveg].shortwave = atmos->shortwave;
         energy[iveg].longwave = atmos->longwave;
-        if(snow[iveg].snow) {
-          energy[iveg].longwave -= STEFAN_B 
-                                 * pow(snow[iveg].surf_temp+KELVIN,4.0);
-        }
-        else {
-          energy[iveg].longwave -= STEFAN_B 
-                                * pow(energy[iveg].T[0]+KELVIN,4.0);
-        }
+	energy[iveg].longwave -= STEFAN_B 
+	                       * pow(energy[iveg].Trad[0]+KELVIN,4.0);
       }
 
       /***** Reset modified Paramters *****/

@@ -21,7 +21,7 @@ double calc_surf_energy_bal(int rec,
 			    double displacement,
 			    double roughness,
 			    double ref_height,
-			    double melt_energy,
+			    double snow_energy,
 			    double *wind,
 			    double vapor_flux,
 			    double rainfall,
@@ -71,7 +71,7 @@ double calc_surf_energy_bal(int rec,
 	displacement	m	Displacement height of vegetation type
 	roughness	m	Roughness length of surface or vegetation
 	ref_height	m	Reference height at which wind measured
-	melt_energy	W/m^2	Internal energy used to melt snow pack
+	snow_energy	W/m^2	Internal energy used to melt snow pack
 	*wind		m/s	Wind speed
 	vapor_flux	mm/TS	Vapor flux from snow pack
 	rainfall	mm/TS	Rain
@@ -107,7 +107,6 @@ double calc_surf_energy_bal(int rec,
   double D1;
   double D2;
   double delta_t;
-  double Evap;
   double Vapor;
   double max_moist;
   double bubble;
@@ -193,11 +192,11 @@ double calc_surf_energy_bal(int rec,
 			 ref_height,soil_con.elevation,
 			 soil_con.b_infilt,soil_con.max_infil,
 			 (double)gp.dt,atmos->vpd,rainfall,Wdew,
-			 melt_energy,
+			 snow_energy,
 			 &energy->grnd_flux,T1,
 			 &energy->latent,
 			 &energy->sensible,&energy->deltaH,
-			 &energy->error,&atmos->rad,
+			 &energy->error,&energy->Trad[0],&atmos->rad,
 			 soil_con.depth,
 			 soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
 			 VEG,CALC_EVAP,
@@ -206,64 +205,31 @@ double calc_surf_energy_bal(int rec,
   /**************************************************
     Recalculate Energy Balance Terms for Final Surface Temperature
   **************************************************/
-/*****
-  surf_temp = 0.5 * (surf_temp + Ts_old);
+  error = solve_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,
+				atmos_density,shortwave,longwave,albedo,
+				emissivity,kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
+				delta_t,Le,Ls,Vapor,moist,ice0,
+				max_moist,bubble,expt,surf_atten,U,
+				displacement,roughness,
+				ref_height,soil_con.elevation,
+				soil_con.b_infilt,soil_con.max_infil,
+				(double)gp.dt,atmos->vpd,rainfall,Wdew,
+				snow_energy,
+				&energy->grnd_flux,T1,&energy->latent,
+				&energy->sensible,&energy->deltaH,
+				&energy->error,&energy->Trad[0],&atmos->rad,
+				soil_con.depth,
+				soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
+				VEG,CALC_EVAP,
+				veg_class,dmy.month);
 
-  C1 = Cs2 * dp / D2 * ( 1. - exp(-D2/dp));
-  C2 = - ( 1. - exp(D1/dp) ) * exp(-D2/dp);
-  C3 = kappa1/D1 - kappa2/D1 + kappa2/D1*exp(-D1/dp);
-
-  *T1 = (kappa1/2./D1/D2*surf_temp + C1/delta_t*T1_old
-     + (2.*C2-1.+exp(-D1/dp))*kappa2/2./D1/D2*T2)
-     / (C1/delta_t + kappa2/D1/D2*C2 + C3/2./D2);
-
-  if((surf_temp+ *T1)/2.<0. && options.FROZEN_SOIL) {
-    ice = moist - maximum_unfrozen_water((surf_temp+ *T1)/2.,max_moist,bubble,expt);
-    if(ice<0.) ice=0.;
-    if(ice>max_moist) ice=max_moist;
-  }
-  else ice=0.;
-
-  energy->grnd_flux = surf_atten * ((kappa1/D1*(*T1-surf_temp)));
-
-  energy->latent = -RHO_W*Le*Evap;
-  energy->latent += -atmos_density*Ls*Vapor;
-
-  energy->sensible = atmos_density*Cp*(Tair-surf_temp)/ra;
-
-  energy->deltaH = Cs1 * (Ts_old - surf_temp) * D1 / delta_t;
-  energy->deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
-
-  energy->error = (1.-albedo)*shortwave
-                + emissivity*(longwave-STEFAN_B*pow(surf_temp + KELVIN,4.))
-                + energy->sensible + energy->latent + energy->grnd_flux 
-                + energy->deltaH + melt_energy;
-*****/
-
-  solve_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,atmos_density,
-			shortwave,longwave,albedo,emissivity,
-			kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
-			delta_t,Le,Ls,Vapor,moist,ice0,
-			max_moist,bubble,expt,surf_atten,U,displacement,
-			roughness,
-			ref_height,soil_con.elevation,soil_con.b_infilt,
-			soil_con.max_infil,
-			(double)gp.dt,atmos->vpd,rainfall,Wdew,
-			melt_energy,
-			&energy->grnd_flux,T1,&energy->latent,
-			&energy->sensible,&energy->deltaH,
-			&energy->error,&atmos->rad,
-			soil_con.depth,
-			soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
-			VEG,CALC_EVAP,
-			veg_class,dmy.month);
+  energy->error = error;
 
   return (surf_temp);
     
 }
 
-double solve_surf_energy_bal(double Tsurf, ...)
-{
+double solve_surf_energy_bal(double Tsurf, ...) {
 
   va_list ap;
 

@@ -136,17 +136,18 @@ snow_data_struct *make_snow_data(int);
 void initialize_snow(snow_data_struct *,int,FILE *);
 double snow_albedo(double, double, double, double, int);
 double snow_density(int, double, double, double, double, double, double);
-double calc_snow_ground_flux(double, double, double, double *,
+double calc_snow_ground_flux(double, double, double, double, double *,
                              energy_bal_struct *, snow_data_struct *,
                              soil_con_struct, global_param_struct);
 double func_snow_ground_flux(double, va_list);
+double solve_snow_ground_flux(double Tsurf, ...);
 double f(double, double, double, double, double, double, double, double,
          double, double, int, double *, double, double, double, double *,
          double *, double *, double *, double *, double *);
 void snow_melt(atmos_data_struct *, soil_con_struct, double, double, double,
                snow_data_struct *, double, double, double,
-               double, double, double, double, double, double *,
-	       double *, double *, double *, double *, double *);
+               double, double, double, double, double, double *, double *,
+	       double *, double *, double *, double *, double *, double *);
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double root_brent(double, double, double (*Function)(double, va_list), ...);
 double SnowPackEnergyBalance(double, va_list);
@@ -192,4 +193,4 @@ double calc_rainonly(double,double,double,double);
 void store_max_min_temp(atmos_data_struct *, double *, double *,
                         int, int, char);
 void calc_water_balance_error(int, double, double, double);
-void calc_energy_balance_error(int, double, double, double, double);
+void calc_energy_balance_error(int, double, double, double, double, double);

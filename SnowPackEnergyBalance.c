@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Tue Dec 10 17:05:15 1996 by Bart Nijssen <nijssen@meter.ce.washington.edu>
+ * LAST-MOD: Wed Apr 15 18:29:55 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -101,7 +101,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   double RestTerm;		/* Rest term in surface energy balance
 				   (W/m2) */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
-  double TMean;			/* Mean temperature during interval (C) */
+  double *TMean;                /* Average temperature for time step (C) */
 
   /* Assign the elements of the array to the appropriate variables.  The list
      is traversed as if the elements are doubles, because:
@@ -144,11 +144,12 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   GroundFlux         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
+  TMean              = (double *) va_arg(ap, double *);
   
   /* Calculate active temp for energy balance as average of old and new  */
   
-  TMean = 0.5 * (OldTSurf + TSurf);
-  Density = WaterDensity(TMean);
+  *TMean = 0.5 * (OldTSurf + TSurf);
+  Density = WaterDensity(*TMean);
   
   /* Correct aerodynamic conductance for stable conditions
      Note: If air temp >> snow temp then aero_cond -> 0 (i.e. very stable)
@@ -161,29 +162,29 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
 
   if (Wind > 0.0)
-    Ra /= StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0);
-    /*Ra /= StabilityCorrection(2.f, 0.f, TMean, Tair, Wind, Z0);*/
+    Ra /= StabilityCorrection(Z, 0.f, *TMean, Tair, Wind, Z0);
+    /*Ra /= StabilityCorrection(2.f, 0.f, *TMean, Tair, Wind, Z0);*/
   else
     Ra = HUGE_RESIST;
 
   /* Calculate longwave exchange and net radiation */
  
-  LongRadOut = STEFAN * pow((double) (TMean+273.15), (double) 4.0);
+  LongRadOut = STEFAN * pow((double) (*TMean+273.15), (double) 4.0);
   NetRad = SurfAttenuation * ShortRad + LongRadIn - LongRadOut;
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * CP * (Tair - TMean)/Ra;
+  *SensibleHeat = AirDens * CP * (Tair - *TMean)/Ra;
 
   /* Calculate the mass flux of ice to or from the surface layer */
  
   /* Calculate the saturated vapor pressure in the snow pack, 
      (Equation 3.32, Bras 1990) */
 
-  EsSnow = 610.78 * exp((double)((17.269 * TMean) / (237.3 + TMean)));
+  EsSnow = 610.78 * exp((double)((17.269 * *TMean) / (237.3 + *TMean)));
 
-  if (TMean < 0.0)
-    EsSnow *= 1.0 + .00972 * TMean + .000042 * pow((double)TMean,(double)2.0);
+  if (*TMean < 0.0)
+    EsSnow *= 1.0 + .00972 * *TMean + .000042 * pow((double)*TMean,(double)2.0);
   
   *VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow)/Ra;
   *VaporMassFlux /= Density;
@@ -192,13 +193,13 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate latent heat flux */
  
-  if (TMean >= 0.0) {
+  if (*TMean >= 0.0) {
     /* Melt conditions: use latent heat of vaporization */
     *LatentHeat = Lv * *VaporMassFlux * Density;
   }
   else {
     /* Accumulation: use latent heat of sublimation (Eq. 3.19, Bras 1990 */
-    Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
+    Ls = (677. - 0.07 * *TMean) * JOULESPCAL * GRAMSPKG;
     *LatentHeat = Ls * *VaporMassFlux * Density;
   }
   
@@ -215,15 +216,15 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate Ground Heat Flux */
   if(SnowDepth>SNOWTHRES && options.CALC_SNOW_FLUX) {
     *GroundFlux = 2.9302 * pow(SnowDensity*0.001, 2.0) 
-        * (TGrnd - TSurf) / SnowDepth;
+        * (TGrnd - *TMean) / SnowDepth;
   }
   else *GroundFlux=0;
-
+  *DeltaColdContent -= *GroundFlux;
   
   /* Calculate net energy exchange at the snow surface */
   
   RestTerm = NetRad + *SensibleHeat + *LatentHeat + *AdvectedEnergy 
-           + *GroundFlux - *DeltaColdContent ;
+           - *DeltaColdContent ;
 
   *RefreezeEnergy = (SurfaceLiquidWater * Lf * Density)/(Dt * SECPHOUR);
 

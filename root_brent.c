@@ -90,6 +90,10 @@ static char vcid[] = "$Id$";
   Modifies     : none
 
   Comments     :
+    04-Jun-04 Removed message announcing the dumping of variables,
+	      since that doesn't always happen when root_brent fails.
+	      Changed remaining message from ERROR to WARNING for
+	      the same reason.				TJB
 *****************************************************************************/
 double root_brent(double LowerBound, 
 		  double UpperBound, 
@@ -147,9 +151,8 @@ double root_brent(double LowerBound,
   }
   if ((fa * fb) >= 0) {
 #if VERBOSE
-    fprintf(stderr,"ERROR: first error in root_brent -> %f * %f >= 0\n",
+    fprintf(stderr,"WARNING: first error in root_brent -> %f * %f >= 0\n",
         fa, fb);
-    fprintf(stderr,"Dumping Input Variables - Check for Valid Values\n");
 #endif // VERBOSE
     return(-9999.);
   }
@@ -230,8 +233,7 @@ double root_brent(double LowerBound,
     }
   }
 #if VERBOSE
-  fprintf(stderr,"ERROR: second error in root_brent -> Too many iterations\n");
-  fprintf(stderr,"Dumping Input Variables - Check for Valid Values\n");
+  fprintf(stderr,"WARNING: second error in root_brent -> Too many iterations\n");
 #endif // VERBOSE
   return(-9998.);
 }

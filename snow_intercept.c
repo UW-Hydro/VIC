@@ -54,6 +54,10 @@ static char vcid[] = "$Id$";
         precipitation is active this could cause the model to crash
         in redistribute_during_storm as it will be unable to conserve
         water when too much water is in the canopy.                 KAC
+  04-Jun-04 Fixed typo in line 730.  Changed SPATIAL_FRoST to
+	    SPATIAL_FROST.					TJB
+  04-Jun-04 Added descriptive error message to beginning of screen dump
+	    in error_print_canopy_energy_bal.			TJB
 
 *****************************************************************************/
 void snow_intercept(double  AirDens,
@@ -713,8 +717,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   VaporMassFlux      = (double *) va_arg(ap, double *);
 
   /** Print variable info */
-
-  fprintf(stderr, "snow_intercept failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+  fprintf(stderr, "ERROR: snow_intercept failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   /* General Model Parameters */
   printf("band = %i\n", band);
@@ -727,7 +730,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("*Wcr = %f\n", *Wcr);
   printf("*Wpwp = %f\n", *Wpwp);
   printf("*depth = %f\n", *depth);
-#if SPATIAL_FROST
+#if SPATIAL_FRoST
   printf(" = %f\n", *frost_fract);
 #endif
   
@@ -793,7 +796,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
   /* call error handling routine */
-  vicerror("Problem encountered with canopy energy flux solution.");
+  vicerror("Finished dumping snow_intercept variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0);
 

@@ -93,6 +93,8 @@ double calc_surf_energy_bal(double             Le,
               on the surface energy balance.                 LCB
     07-30-03  Made sure that local NOFLUX variable is always set
               to the options flag value.                      KAC
+    04-Jun-04 Placed "ERROR" at beginning of screen dump in
+	      error_print_surf_energy_bal.		TJB
 
 ***************************************************************/
 {
@@ -1015,7 +1017,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
     Main Routine
   ***************/
 
-  fprintf(stderr, "calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+  fprintf(stderr, "ERROR: calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   /* Print Variables */
   /* general model terms */
@@ -1151,7 +1153,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
 	      max_moist_node[i], ice_node[i]);
   }
 
-  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0.0);
     

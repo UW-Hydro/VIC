@@ -37,6 +37,10 @@ void setup_frozen_soil(soil_con_struct   *soil_con,
   double            *kappa      soil layer thermal conductivity (W/m/K)
   double            *Cs         soil layer heat capacity (J/m^3/K)
   double            *moist      soil layer moisture (mm)
+
+  Modifications
+  04-Jun-04 Added descriptive error message to beginning of screen dump
+	    in error_print_solve_T_profile.			TJB
   
 **********************************************************************/
   extern option_struct options;
@@ -439,6 +443,8 @@ double error_print_solve_T_profile(double T, va_list ap) {
   D         = (double) va_arg(ap, double);
   E         = (double) va_arg(ap, double);
   
+  fprintf(stderr, "ERROR: solve_T_profile failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+
   fprintf(stderr,"TL\t%f\n",TL);
   fprintf(stderr,"TU\t%f\n",TU);
   fprintf(stderr,"T0\t%f\n",T0);
@@ -455,7 +461,7 @@ double error_print_solve_T_profile(double T, va_list ap) {
   fprintf(stderr,"D\t%f\n",D);
   fprintf(stderr,"E\t%f\n",E);
 
-  vicerror("Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.\n");
   
   return(0.0);
 

@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#define SnowThres 1.00
-
 static char vcid[] = "$Id$";
 
 double solve_snow(char                 overstory,
@@ -73,7 +71,10 @@ double solve_snow(char                 overstory,
 		  snow_data_struct    *snow,
 		  soil_con_struct     *soil_con,
 		  veg_var_struct      *veg_var_dry,
-		  veg_var_struct      *veg_var_wet) {
+		  veg_var_struct      *veg_var_wet,
+		  float lag_one,
+		  float sigma_slope,
+		  float fetch) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -104,6 +105,7 @@ double solve_snow(char                 overstory,
   06-15-02 Set MELTING flag to maintain melting albedo curve
            even during brief periods of refreezing, until a 
            snowfall exceeds SnowThres.           .           KAC
+  11-18-02 Modified to handle the effects of blowing snow.    LCB
 
 *********************************************************************/
 
@@ -202,8 +204,6 @@ double solve_snow(char                 overstory,
 				  snow->last_snow, snow->MELTING); 
     TmpAlbedoUnder[1]   = (*coverage * snow->albedo
 			   + (1. - *coverage) * BareAlbedo); 
-
-    fprintf(stdout, "%i/%i/%i %02i,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", month, day, year, hour, snow->swq, snow->depth, snow->density, snow->albedo, snow->surf_temp, snow->coverage, snowfall[WET], snow->coldcontent, (float)snow->last_snow*(float)dt/24.);
 
     /** Compute Radiation Balance over Snow **/ 
     
@@ -355,7 +355,7 @@ double solve_snow(char                 overstory,
 #endif
 
       snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
-		roughness[*UnderStory], aero_resist[*UnderStory], 
+		roughness, aero_resist[*UnderStory], 
 		air_temp, *coverage, (double)dt * SECPHOUR, density, 
 		displacement[*UnderStory], snow_grnd_flux, 
 		*LongUnderIn, pressure, rainfall[WET], snowfall[WET], 
@@ -365,7 +365,8 @@ double solve_snow(char                 overstory,
 		&energy->deltaCC, &tmp_grnd_flux, &energy->latent, 
 		&energy->latent_sub, &energy->refreeze_energy, 
 		&energy->sensible, INCLUDE_SNOW, band, iveg, 
-		(int)overstory, rec, snow, soil_con);
+		(int)overstory, rec, snow, soil_con,lag_one, sigma_slope, 
+		fetch, Nveg);
 
       // store melt water
       ppt[WET] += melt;
@@ -395,7 +396,7 @@ double solve_snow(char                 overstory,
 
 	/** Record if snowpack is melting this time step **/
 	if ( snow->coldcontent >= 0 ) snow->MELTING = TRUE;
-	else if ( snow->MELTING && snowfall[WET] > SnowThres ) 
+	else if ( snow->MELTING && snowfall[WET] > TraceSnow ) 
 	  snow->MELTING = FALSE;
 
 	
@@ -538,7 +539,7 @@ double solve_snow(char                 overstory,
 
     }
 
-    if ( store_snowfall > SnowThres || store_snowfall == 0 ) {
+    if ( store_snowfall > TraceSnow || store_snowfall == 0 ) {
       // reset snow albedo ago if new snow is sufficiently deep
       //fprintf(stdout,"YES: last_snow -> %i, curr_snow -> %i, snowfall -> %f\n", snow->last_snow, curr_snow, store_snowfall);
       snow->last_snow = curr_snow;
@@ -585,8 +586,6 @@ double solve_snow(char                 overstory,
   return(melt);
 
 }
-
-#undef SnowThres
 
 
 

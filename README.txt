@@ -4,6 +4,9 @@
 
 Modifications:
 
+	Makefile:
+	    Now automatically re-compiles all dependent files when
+	    any .h files are updated.				TJB
 	arno_evap.c:
 	    Changed logic of evap limit check to avoid creating spurious
 	    condensation.  Previously, when liquid moisture < residual
@@ -29,9 +32,8 @@ Modifications:
 	global.h, vicNl.c, vicNl.h, vicNl_def.h:
 	    Added -o option, to display current run-time and
 	    compile-time options.  Updated version string.	TJB
-	Makefile:
-	    Now automatically re-compiles all dependent files when
-	    any .h files are updated.				TJB
+	mtclim42_vic.c:
+	    If data->s_srad becomes negative, we set it to 0.0.	TJB
 	open_file.c:
 	    Now announces when it opens a binary file for reading.
 	write_data.c:

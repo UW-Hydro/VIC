@@ -17,6 +17,7 @@
 	    radiation that occurs during each radiation time step is also
 	    returned through the variable tiny_radfract
 	    - SRADDT has been changed to be 300 sec
+            - 04-Jun-04 If data->s_srad becomes negative, we set it to 0.0.     TJB
 	    Changes are preceded by the comment * start vic_change *  and
 	    followed by the comment * end vic_change *
   Author: Most of the code was written by Peter E. Thornton at the Univeristy of 
@@ -24,8 +25,6 @@
 	  Adapted by: Bart Nijssen
           Adaptation started on Sat Aug 21 using the mtclim4.2 code from
 	  5/7/1999 
-  Last Changed: Tue Mar 14 11:31:04 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
-  $Id$
 */
 
 /*
@@ -281,6 +280,8 @@ MTCLIM version 3.1 testing
 #include <vicNl.h>
 
 #include <mtclim42_vic.h>   /* physical constants */
+
+static char vcid[] = "$Id$";
 
 /****************************
  **                         **
@@ -1327,6 +1328,13 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
     
     /* save daily radiation */
     data->s_srad[i] = srad1 + srad2;
+
+    /* start vic_change */
+    /* under some conditions near the arctic circle in winter, s_srad < 0 */
+    if (data->s_srad[i] < 0.0)
+      data->s_srad[i] = 0.0;
+    /* end vic_change */
+
   }
   
   /* Revise estimate of Tdew using new radiation */

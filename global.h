@@ -4,9 +4,9 @@
   29-Oct-03 Added version string and removed unused options from
 	    optstring.						TJB
 **********************************************************************/
-char *version = "VIC Release 4.1.0";
+char *version = "4.1.0";
 
-char *optstring = "g:v";
+char *optstring = "g:vo";
 
 #if QUICK_FS
 double   temps[] = { -1.e-5, -0.075, -0.20, -0.50, -1.00, -2.50, -5, -10 };

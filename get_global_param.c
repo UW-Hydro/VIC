@@ -21,6 +21,9 @@ global_param_struct get_global_param(filenames_struct *names,
   This routine reads the VIC model global control file, getting
   values for global parameters, model options, and debugging controls.
 
+  NOTE: any additions or removals of parameters in this file must also
+  be made in display_current_settings.c.
+
   Modifications:
   7-19-96 Modified to read time step		        KAC
   4-5-98  Modified to read model options and debugging
@@ -533,6 +536,11 @@ global_param_struct get_global_param(filenames_struct *names,
   /*********************************
     Output major options to stderr
   *********************************/
+#if VERBOSE
+  display_current_settings(DISP_ALL,names,&global);
+#else
+  display_current_settings(DISP_VERSION,names,&global);
+#endif
 
 #if VERBOSE
   fprintf(stderr,"Time Step = %i hour(s)\n",global.dt);

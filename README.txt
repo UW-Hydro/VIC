@@ -1,7 +1,20 @@
-# README.txt - Release Notes
-#
+# README.txt - Release notes
 # $Id$
-#------------------------------------------------------------------------
+#-----------------------------------------------------------------------
+
+Modifications:
+
+	cmd_proc.c, display_current_settings.c, global.h, vicNl.c, vicNl.h,
+	vicNl_def.h:
+	    Added -o option, to display current run-time and compile-time
+	    options.  Updated version string.
+	Makefile:
+	    Now automatically re-compiles all dependent files when any .h
+	    files are updated.
+	open_file.c:
+	    Now announces when it opens a binary file for reading.
+	write_data.c:
+	    Corrected typo in output format for fluxes file.
 
 December 1, 2003: VIC release 4.0.4
 
@@ -27,7 +40,7 @@ New Features:
 	{Ds, Dsmax, Ws, and c} and your global parameter file should
 	contain:
 		ARNO_PARAMS FALSE
-	or you may omit the ARNO_PARAMS line entirely. 
+	or you may omit the ARNO_PARAMS line entirely.
 
 Modifications:
 
@@ -47,7 +60,7 @@ Modifications:
 	    <= residual moisture.  Changed block that handles case
 	    of total soil moisture < residual moisture to not allow
 	    dt_baseflow to go negative.				TJB
-        write_model_state.c, read_initial_model_state.c:
+	write_model_state.c, read_initial_model_state.c:
 	    (bugs found by Lifeng Luo at Princeton)
 	    Read_initial_model_state was not parsing ASCII state
 	    files according to the format written by
@@ -64,7 +77,7 @@ Modifications:
 	snow_utility.c:
 	    In the snow_density function, modified the checks on
 	    delta_depth so that the condition is
-	        delta_depth > MAX_CHANGE*depth
+	    delta_depth > MAX_CHANGE*depth
 	    Modified compression due to aging to only be calculated
 	    if depth > 0.					TJB
 	global.h, vicNl.c, cmd_proc.c:
@@ -74,53 +87,53 @@ Modifications:
 
 September 5, 2003: VIC release 4.0.4beta r3
 
-        snow_utility.c: modification by KAC
-            Added check to keep compression from aging from exceeding
+	snow_utility.c: modification by KAC
+	    Added check to keep compression from aging from exceeding
 	    the actual depth of the snowpack.
-	get_global_param.c, initialize_atmos.c, read_vegparam.c, 
-            vicNl_def.h: modification by KAC
+	get_global_param.c, initialize_atmos.c, read_vegparam.c,
+	vicNl_def.h: modification by KAC
 	    Moved COMPUTE_TREELINE flag from user_def.h to the
 	    options structure.  Now when not set to FALSE, the
 	    value indicates the default above treeline vegetation
 	    if no usable vegetation types are in the grid cell
 	    (i.e. everything has a canopy).  A negative value
-            will cause the model to use bare soil.  Make sure that
-            positive index value refer to a non-canopied vegetation
-            type in the vegetation library.
+	    will cause the model to use bare soil.  Make sure that
+	    positive index value refer to a non-canopied vegetation
+	    type in the vegetation library.
 
-            To activate treeline calculation, add the following to 
+	    To activate treeline calculation, add the following to
 	    your global control file:
-	    COMPUTE_TREELINE n 
-            If n < 0, the default above treeline vegetation is 
+		COMPUTE_TREELINE n
+	    If n < 0, the default above treeline vegetation is
 	    set to bare soil.  If n >= 0, the default vegetation type
-            is set to type n in the vegetation library.
-	    To deactivate treeline calculation, add the following or remove 
+	    is set to type n in the vegetation library.
+	    To deactivate treeline calculation, add the following or remove
 	    the line from the global control file:
-	    COMPUTE_TREELINE FALSE
+		COMPUTE_TREELINE FALSE
 
 	    WARNING #1: Since the model does not store default root zone
-	    distributions, the default vegetation type will use the 
+	    distributions, the default vegetation type will use the
 	    values from the last defined vegetation type for the current
-	    grid cell (i.e. veg type N-1, prior to the addition of the 
+	    grid cell (i.e. veg type N-1, prior to the addition of the
 	    new vegetation type).
 
 	    WARNING #2: If you are using GLOBAL_LAI, than the LAI and
-	    dew storage terms for the default vegetation type will be set 
-	    to the values used by the last occurrence of the default 
+	    dew storage terms for the default vegetation type will be set
+	    to the values used by the last occurrence of the default
 	    vegetation type.
-	    
-        write_model_state.c: bug found by AWW and KAC
+
+	write_model_state.c: bug found by AWW and KAC
 	    Modified to print space before dz_node for ASCII state
 	    file, this corrects a problem with state files created
-            for models using the Cherkauer and Lettenmaier (1999) heat 
-            flux formulation.
+	    for models using the Cherkauer and Lettenmaier (1999) heat
+	    flux formulation.
 
 June 4, 2003: VIC release 4.0.4beta r2
 
 This covers bugs found during tests with the snow algorithm.
 
-        solve_snow.c: Bug found by KAC
-	    Counter for number of days since last snowfall was 
+	solve_snow.c: Bug found by KAC
+	    Counter for number of days since last snowfall was
 	    incremented twice in the MELTING update.  This has been
 	    fixed.
 	solve_snow.c: modification by KAC
@@ -131,27 +144,27 @@ This covers bugs found during tests with the snow algorithm.
 	write_model_state.c, read_initial_model_state.c, open_state_file.c,
 	check_state_file.c: Modification by KAC
 	    Modified to handle both ASCII and BINARY state files.
-	    NOTE: ASCII mode is designed to make it easier to create 
-	    a state file for initializing a point model.  It includes 
-	    all features of the Binary state file, but values are 
+	    NOTE: ASCII mode is designed to make it easier to create
+	    a state file for initializing a point model.  It includes
+	    all features of the Binary state file, but values are
 	    truncated so the resulting restart will not be identical.
 	    If you need an exact restart, use the Binary files.  Also
 	    removed ice content from the state file as it is computed
-	    at the beginning of each time step, so storing its value
+	    at the begining of each time step, so storing its value
 	    is unnecessary.
 
 April 23, 2003: VIC release 4.0.4beta r1
 
-This covers bug fixes found by beta testers and fixed in the version of 
+This covers bug fixes found by beta testers and fixed in the version of
 the code bundled with this file.
 
 	surface_fluxes.c: (found by Ingjerd Haddeland)
 	    Indexing fix sent SNOW_STEP to calc_surf_energy_bal rather
-	    than the model time step, meaning that without snow the 
+	    than the model time step, meaning that without snow the
 	    evaporation was computed for SNOW_STEP hours rather than a
-	    full day.  This was fixed by introducing step_inc to 
+	    full day.  This was fixed by introducing step_inc to
 	    index the arrays, while step_dt keeps track of the correct
-	    time step. 
+	    time step.
 
 March 27, 2003: VIC release 4.0.4beta
 
@@ -230,7 +243,7 @@ Modifications:
 	     a grid cell specific value did not change the values of Wdmax.  
 	     Wdmax values were computed in read_veglib.c based on the 
 	     default LAI values, so they did not necessarily reflect the 
-	     actually LAI values used for the grid cell.  Values for Wdmax 
+	     actual LAI values used for the grid cell.  Values for Wdmax 
 	     are now computed in read_vegparam.c whenever GLOBAL_LAI are 
 	     provided.  The effects of this change will change in magnitude
 	     based on how different the cell LAI values are from those in
@@ -254,8 +267,8 @@ Modifications:
 	     file should now have the same year, month, day and hour as the 
 	     original global file - the VIC model will compute the number of
 	     records to skip at the beginning to reach the point where the 
-	     model state was saved.  This means that calculations to yield
-	     sub-daily metrological forcings from daily forcings will produce 
+	     model state was saved.  This means that caluclations to yield
+	     sub-daily meteological forcings from daily forcings will produce 
 	     the exact same forcing values -> this also means that restarted
 	     simulations will be exactly the same as the original run.  Slight
 	     variations in the model results were also introduced because the

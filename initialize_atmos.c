@@ -14,11 +14,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
-#if OUTPUT_FORCE
 		      double                   *Tfactor,
+#if OUTPUT_FORCE
+                      char                     *AboveTreeLine,
 		      outfiles_struct          *outfiles)
 #else /* OUTPUT_FORCE */
-		      double                   *Tfactor)
+                      char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
@@ -64,6 +65,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
             format of the forcing files (where pressure was supposed 
             to be in kPa, but allows VIC to use Pa internally, eliminating
             the need to convert to Pa every time it is used.     KAC
+  03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
+           the model can make use of the computed treeline.     KAC
 
 **********************************************************************/
 {
@@ -92,7 +95,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double *tmin;
   double *tair;
   double *tskc;
-
   double *vp;
   double  min, max;
   double  rainonly;
@@ -663,6 +665,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 #endif // OUTPUT_FORCE
  
+  // Free temporary parameters
   free(hourlyrad);
   free(prec);
   free(tair);
@@ -677,6 +680,13 @@ void initialize_atmos(atmos_data_struct        *atmos,
     if (param_set.TYPE[i].SUPPLIED) 
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
+
+#if COMPUTE_TREELINE
+  // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
+  // is processed to identify the treeline.
+  if ( options.SNOW_BAND )
+    compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
+#endif // COMPUTE_TREELINE
 
 #if OUTPUT_FORCE_STATS
   calc_forcing_stats(global_param.nrecs, atmos);

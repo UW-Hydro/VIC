@@ -4,7 +4,8 @@
 
 static char vcid[] = "$Id$";
 
-void put_data(double            *AreaFract,
+void put_data(char              *AboveTreeLine,
+	      double            *AreaFract,
               double            *depth,
 	      double            *dz,
 #if SPATIAL_FROST
@@ -42,6 +43,10 @@ void put_data(double            *AreaFract,
   11-18-02 updated output of lake variables to reflect algorithm 
            changes.  Also added output variables for blowing snow
            algorithm.                                              LCB
+  03-12-03 modified to add additional energy balance variable storage 
+           when output of snow bands is selected.                  KAC
+  03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
+           the model can make use of the computed treeline.     KAC
 
 **********************************************************************/
 {
@@ -83,6 +88,7 @@ void put_data(double            *AreaFract,
   double                  inflow;
   double                  outflow;
   double                  storage;
+  double                  TreeAdjustFactor[MAX_BANDS];
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -97,6 +103,21 @@ void put_data(double            *AreaFract,
   else 
     Ndist = 1;
   Nbands = options.SNOW_BAND;
+
+  // Compute treeline adjustment factors
+  for ( band = 0; band < Nbands; band++ ) {
+    if ( AboveTreeLine[band] ) {
+      Cv = 0;
+      for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++ ) {
+	if ( veg_lib[veg_con[veg].veg_class].overstory )
+	  Cv += veg_con[veg].Cv;
+      }
+      TreeAdjustFactor[band] = 1. / ( 1. - Cv );
+    }
+    else TreeAdjustFactor[band] = 1.;
+    if ( TreeAdjustFactor[band] != 1 && rec == 0 )
+      fprintf( stderr, "WARNING: Tree adjust factor for band %i is equal to %f.\n", band, TreeAdjustFactor[band] );
+  }
 
   /** Initialize Output Data Array **/
   out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct)); 
@@ -152,8 +173,8 @@ void put_data(double            *AreaFract,
 	*********************************/
 
 	/** record total evaporation **/
-	for ( band = 0; band < Nbands; band++ ) {
-	  if ( AreaFract[band] > 0. ) {
+	for(band=0;band<Nbands;band++) {
+	  if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
 	    
 #if !OPTIMIZE
 	    
@@ -161,39 +182,39 @@ void put_data(double            *AreaFract,
 	    for ( index = 0; index < options.Nlayer; index++ )
 	      tmp_evap += cell[dist][veg][band].layer[index].evap;
 	    if ( veg < veg_con[0].vegetat_type_num )
-	      out_data->evap_veg += tmp_evap * Cv * mu * AreaFract[band];
+	      out_data->evap_veg += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    else 
-	      out_data->evap_bare += tmp_evap * Cv * mu * AreaFract[band];
+	      out_data->evap_bare += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 
 	    tmp_evap += snow[veg][band].vapor_flux * 1000.;
 	    out_data->sub_total += snow[veg][band].vapor_flux * 1000.
-	      * Cv * mu * AreaFract[band]; 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    out_data->sub_surface += snow[veg][band].surface_flux * 1000.
-	      * Cv * mu * AreaFract[band]; 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    out_data->sub_blowing += snow[veg][band].blowing_flux * 1000.
-	      * Cv * mu * AreaFract[band];
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    out_data->sub_snow[veg] += snow[veg][band].blowing_flux * 1000.; 
 	    if ( veg <= veg_con[0].vegetat_type_num ) {
 	      tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
 	      out_data->sub_canop += snow[veg][band].canopy_vapor_flux 
-		* 1000. * Cv * mu * AreaFract[band]; 
+		* 1000. * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    }
 	    if ( veg < veg_con[0].vegetat_type_num ) {
 	      tmp_evap += veg_var[dist][veg][band].canopyevap;
 	      out_data->evap_canop += veg_var[dist][veg][band].canopyevap 
-		* Cv * mu * AreaFract[band]; 
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    }
-	    out_data->evap += tmp_evap * Cv * mu * AreaFract[band]; 
+	    out_data->evap += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 
 #endif
 	  
 	    /** record runoff **/
 	    out_data->runoff   += cell[dist][veg][band].runoff 
-	      * Cv * mu * AreaFract[band];
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** record baseflow **/
 	    out_data->baseflow += cell[dist][veg][band].baseflow 
-	      * Cv * mu * AreaFract[band]; 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    
 #if ! OPTIMIZE
 	    
@@ -201,19 +222,19 @@ void put_data(double            *AreaFract,
 	    if ( veg < veg_con[0].vegetat_type_num ) 
 	      out_data->inflow += (cell[dist][veg][band].inflow 
 				   + veg_var[dist][veg][band].canopyevap) 
-		* Cv * mu * AreaFract[band];
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    else 
 	      out_data->inflow += (cell[dist][veg][band].inflow) 
-		* Cv * mu * AreaFract[band];
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** record canopy interception **/
 	    if ( veg < veg_con[0].vegetat_type_num ) 
 	      out_data->Wdew += veg_var[dist][veg][band].Wdew 
-		* Cv * mu * AreaFract[band];
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	    /** record aerodynamic resistance **/
 	    out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
-	      * Cv * mu * AreaFract[band];
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** record layer moistures **/
 	    for ( index = 0; index < options.Nlayer; index++ ) {
@@ -231,8 +252,8 @@ void put_data(double            *AreaFract,
 		tmp_moist /= depth[index] * 1000.;
 		tmp_ice /= depth[index] * 1000.;
 	      }
-	      tmp_moist *= Cv * mu * AreaFract[band];
-	      tmp_ice *= Cv * mu * AreaFract[band];
+	      tmp_moist *= Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	      tmp_ice *= Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	      out_data->moist[index] += tmp_moist;
 	      out_data->ice[index]   += tmp_ice;
 	    }
@@ -242,7 +263,7 @@ void put_data(double            *AreaFract,
       }
 
       for(band=0;band<Nbands;band++) {
-	if(AreaFract[band] > 0.) {
+	if(AreaFract[band] > 0.&& ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
 
 #if !OPTIMIZE
 
@@ -255,10 +276,10 @@ void put_data(double            *AreaFract,
 	    for(index = 0; index < MAX_FRONTS; index++) {
 	      if(energy[veg][band].fdepth[index] != MISSING)
 		out_data->fdepth[index] += energy[veg][band].fdepth[index] 
-		  * Cv * 100. * AreaFract[band];
+		  * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
 	      if(energy[veg][band].tdepth[index] != MISSING)
 		out_data->tdepth[index] += energy[veg][band].tdepth[index] 
-		  * Cv * 100. * AreaFract[band];
+		  * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
 	    }
 	  }
 	  
@@ -271,7 +292,7 @@ void put_data(double            *AreaFract,
   	  if ( cell[0][veg][band].layer[0].ice > 0 )
 	    tmp_fract   = 1.;
 #endif
-	  out_data->surf_frost_fract += tmp_fract * Cv * AreaFract[band];
+	  out_data->surf_frost_fract += tmp_fract * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
 	  tmp_fract = 0;
 #if SPATIAL_FROST
@@ -282,13 +303,13 @@ void put_data(double            *AreaFract,
 				      + frost_slope / 2.), 
 				  (energy[veg][band].T[0] 
 				   - frost_slope / 2.), 1, 0) 
-		* Cv * AreaFract[band];
+		* Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  }
 	  else
-	    tmp_fract += 1 * Cv * AreaFract[band];
+	    tmp_fract += 1 * Cv * AreaFract[band] * TreeAdjustFactor[band];
 #else
 	  if ( energy[veg][band].T[0] <= 0 ) 
-	    tmp_fract = 1 * Cv * AreaFract[band];
+	    tmp_fract = 1 * Cv * AreaFract[band] * TreeAdjustFactor[band];
 #endif
 
 	  /**********************************
@@ -306,67 +327,67 @@ void put_data(double            *AreaFract,
 	  
 	  /** record net shortwave radiation **/
 	  out_data->net_short += energy[veg][band].NetShortAtmos
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record net longwave radiation **/
 	  out_data->net_long  += energy[veg][band].NetLongAtmos
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record incoming longwave radiation **/
 	  if ( snow[veg][band].snow && overstory )
 	    out_data->in_long  += (energy[veg][band].LongOverIn 
-				   * Cv * AreaFract[band]);
+				   * Cv * AreaFract[band] * TreeAdjustFactor[band]);
 	  else
 	    out_data->in_long  += (energy[veg][band].LongUnderIn 
-				   * Cv * AreaFract[band]);
+				   * Cv * AreaFract[band] * TreeAdjustFactor[band]);
 	  
 	  /** record albedo **/
 	  if ( snow[veg][band].snow && overstory )
 	    out_data->albedo    += energy[veg][band].AlbedoOver
-	      * Cv * AreaFract[band];
+	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  else
 	    out_data->albedo    += energy[veg][band].AlbedoUnder
-	      * Cv * AreaFract[band];
+	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record latent heat flux **/
 	  out_data->latent    -= energy[veg][band].AtmosLatent
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record latent heat flux from sublimation **/
 	  out_data->latent_sub[0] 
-	    -= energy[veg][band].AtmosLatentSub * Cv * AreaFract[band];
+	    -= energy[veg][band].AtmosLatentSub * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	  /** record sensible heat flux **/
 	  out_data->sensible  -= energy[veg][band].AtmosSensible
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record ground heat flux (+ heat storage) **/
 	  out_data->grnd_flux -= (energy[veg][band].grnd_flux)
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record heat storage **/
 	  out_data->deltaH    -= energy[veg][band].deltaH
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record heat of fusion **/
 	  out_data->fusion    -= energy[veg][band].fusion
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record energy balance error **/
 	  out_data->energy_error += energy[veg][band].error
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record radiative effective temperature [K], 
 	      emissivities set = 1.0  **/
 	  out_data->rad_temp += ((rad_temp) * (rad_temp) 
 				 * (rad_temp) * (rad_temp)) 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record mean surface temperature [C]  **/
 	  /*out_data->surf_temp += surf_temp * Cv * AreaFract[band];*/
 	  out_data->surf_temp += (energy[veg][band].T[0] 
 				  + energy[veg][band].T[1]) / 2 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /*****************************
 	    Record Snow Pack Variables 
@@ -374,13 +395,13 @@ void put_data(double            *AreaFract,
 	  
 	  /** record snow water equivalence **/
 	  out_data->swq[0]         
-	    += snow[veg][band].swq * Cv * 1000. * AreaFract[band];
-
+	    += snow[veg][band].swq * Cv * 1000. * AreaFract[band] * TreeAdjustFactor[band];
+	  
 #endif // !OPTIMIZE
 	  
 	  /** record snowpack depth **/
 	  out_data->snow_depth[0]  
-	    += snow[veg][band].depth * Cv * 100. * AreaFract[band];
+	    += snow[veg][band].depth * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
 	  
 #if !OPTIMIZE
 
@@ -392,78 +413,78 @@ void put_data(double            *AreaFract,
 	      out_data->snow_canopy[0] 
 #endif
 	      += (snow[veg][band].snow_canopy) 
-	      * Cv * 1000. * AreaFract[band];
+	      * Cv * 1000. * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snowpack melt **/
 	  out_data->melt[0]  
-	    += snow[veg][band].melt * Cv * AreaFract[band];
+	    += snow[veg][band].melt * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snow cover fraction **/
 	  if ( snow[veg][band].snow && overstory ) {
 	    if ( snow[veg][band].snow_canopy > 0 )
-	      out_data->coverage[0] += 1. * Cv * AreaFract[band];
+	      out_data->coverage[0] += 1. * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  }
 	  else
 	    out_data->coverage[0]    
-	      += snow[veg][band].coverage * Cv * AreaFract[band];
+	      += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snowpack cold content **/
 	  out_data->deltaCC[0]           
-	    += energy[veg][band].deltaCC * Cv * AreaFract[band];
+	    += energy[veg][band].deltaCC * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snowpack advection **/
 	  if ( snow[veg][band].snow && overstory )
 	    out_data->advection[0]         
-	      += energy[veg][band].canopy_advection * Cv * AreaFract[band];
+	      += energy[veg][band].canopy_advection * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  out_data->advection[0]         
-	    += energy[veg][band].advection * Cv * AreaFract[band];
+	    += energy[veg][band].advection * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snow energy flux **/
 	  out_data->snow_flux[0]         
 /* 	    += energy[veg][band].snow_flux * Cv * AreaFract[band]; */
-	    += energy[veg][band].Tcanopy * Cv * AreaFract[band];
+	    += energy[veg][band].Tcanopy * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record refreeze energy **/
 	  if ( snow[veg][band].snow && overstory ) {
 	    out_data->refreeze_energy[0]   
 	      += energy[veg][band].canopy_refreeze 
-	      * Cv * AreaFract[band];
+	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  }
 	  out_data->refreeze_energy[0]   
 	    += energy[veg][band].refreeze_energy 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record melt energy **/
 	  out_data->melt_energy[0]   
 	    += energy[veg][band].melt_energy 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record advected sensible heat energy **/
 	  if ( !overstory )
 	    out_data->advected_sensible[0]   
 	      -= energy[veg][band].advected_sensible 
-	      * Cv * AreaFract[band];
+	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record surface layer temperature **/
 	  out_data->snow_surf_temp[0]   
 	    += snow[veg][band].surf_temp 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record pack layer temperature **/
 	  out_data->snow_pack_temp[0]   
 	    += snow[veg][band].pack_temp 
-	    * Cv * AreaFract[band];
+	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** if snow elevation bands are to be printed separately **/
 	  if(options.PRT_SNOW_BAND) {
 	    
 	    /** record band snow water equivalent **/
 	    out_data->swq[band+1]         
-	      += snow[veg][band].swq * Cv  * 1000.;
+	      += snow[veg][band].swq * Cv  * 1000. * TreeAdjustFactor[band];
 	    
 	    /** record band snowpack depth **/
 	    out_data->snow_depth[band+1]  
-	      += snow[veg][band].depth * Cv * 100.;
+	      += snow[veg][band].depth * Cv * 100. * TreeAdjustFactor[band];
 	    
 	    /** record band canopy intercepted snow **/
 	    if ( veg < veg_con[0].vegetat_type_num )
@@ -472,51 +493,51 @@ void put_data(double            *AreaFract,
 #else
 		out_data->snow_canopy[band+1]  
 #endif
-		+= (snow[veg][band].snow_canopy) * Cv * 1000.;
+		+= (snow[veg][band].snow_canopy) * Cv * 1000. * TreeAdjustFactor[band];
 	    
 	    /** record band snowpack melt **/
 	    out_data->melt[band+1]  
-	      += snow[veg][band].melt * Cv;
+	      += snow[veg][band].melt * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band snow coverage **/
 	    out_data->coverage[band+1]    
-	      += snow[veg][band].coverage * Cv;
+	      += snow[veg][band].coverage * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band cold content **/
 	    out_data->deltaCC[band+1]           
-	      += energy[veg][band].deltaCC * Cv;
+	      += energy[veg][band].deltaCC * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band advection **/
 	    out_data->advection[band+1]         
-	      += energy[veg][band].advection * Cv;
+	      += energy[veg][band].advection * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band snow flux **/
 	    out_data->snow_flux[band+1]         
-	      += energy[veg][band].snow_flux * Cv;
+	      += energy[veg][band].snow_flux * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band refreeze energy **/
 	    out_data->refreeze_energy[band+1]   
-	      += energy[veg][band].refreeze_energy * Cv;
+	      += energy[veg][band].refreeze_energy * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band melt energy **/
 	    out_data->melt_energy[band+1]   
-	      += energy[veg][band].melt_energy * Cv;
+	      += energy[veg][band].melt_energy * Cv * TreeAdjustFactor[band];
 	    
 	    /** record band advected sensble heat **/
 	    out_data->advected_sensible[band+1]   
-	      -= energy[veg][band].advected_sensible * Cv;
+	      -= energy[veg][band].advected_sensible * Cv * TreeAdjustFactor[band];
 	    
 	    /** record surface layer temperature **/
 	    out_data->snow_surf_temp[band+1]   
-	      += snow[veg][band].surf_temp * Cv;
+	      += snow[veg][band].surf_temp * Cv * TreeAdjustFactor[band];
 	    
 	    /** record pack layer temperature **/
 	    out_data->snow_pack_temp[band+1]   
-	      += snow[veg][band].pack_temp * Cv;
+	      += snow[veg][band].pack_temp * Cv * TreeAdjustFactor[band];
 	    
 	    /** record latent heat of sublimation **/
 	    out_data->latent_sub[band+1]   
-	      += energy[veg][band].latent_sub * Cv;
+	      += energy[veg][band].latent_sub * Cv * TreeAdjustFactor[band];
 	    
 	  }
 

@@ -281,6 +281,8 @@ MTCLIM version 3.1 testing
 
 #include <mtclim42_vic.h>   /* physical constants */
 
+static char vcid[] = "$Id$";
+
 /****************************
  **                         **
  **    START OF FUNCTION    **

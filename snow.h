@@ -13,6 +13,8 @@
  * COMMENTS:     
  */
 
+static char vcid[] = "$Id$";
+
 #ifndef SNOW_H
 #define SNOW_H
 

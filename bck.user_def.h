@@ -2,6 +2,9 @@
   This header file contains model parameters that can be modified by
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
+
+  $Id$
+
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/

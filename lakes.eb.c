@@ -3,6 +3,8 @@
 #include <math.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 #if LAKE_MODEL
 
 #define QUICK_ICE TRUE

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 #if OUTPUT_FORCE_STATS
 
 double get_mean(double *, int, double);

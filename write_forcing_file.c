@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$";
+static char vcid[] = "$Id$";
 
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *atmos,

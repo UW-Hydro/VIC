@@ -3,6 +3,49 @@
 # $Id$
 #------------------------------------------------------------------------
 
+September 5, 2003: VIC release 4.0.4beta r3
+
+        snow_utility.c: modification by KAC
+            Added check to keep compression from aging from exceeding
+	    the actual depth of the snowpack.
+	get_global_param.c, initialize_atmos.c, read_vegparam.c, 
+            vicNl_def.h: modification by KAC
+	    Moved COMPUTE_TREELINE flag from user_def.h to the
+	    options structure.  Now when not set to FALSE, the
+	    value indicates the default above treeline vegetation
+	    if no usable vegetation types are in the grid cell
+	    (i.e. everything has a canopy).  A negative value
+            will cause the model to use bare soil.  Make sure that
+            positive index value refer to a non-canopied vegetation
+            type in the vegetation library.
+
+            To activate treeline calculation, add the following to 
+	    your global control file:
+	    COMPUTE_TREELINE n 
+            If n < 0, the default above treeline vegetation is 
+	    set to bare soil.  If n >= 0, the default vegetation type
+            is set to type n in the vegetation library.
+	    To deactivate treeline calculation, add the following or remove 
+	    the line from the global control file:
+	    COMPUTE_TREELINE FALSE
+
+	    WARNING #1: Since the model does not store default root zone
+	    distributions, the default vegetation type will use the 
+	    values from the last defined vegetation type for the current
+	    grid cell (i.e. veg type N-1, prior to the addition of the 
+	    new vegetation type).
+
+	    WARNING #2: If you are using GLOBAL_LAI, than the LAI and
+	    dew storage terms for the default vegetation type will be set 
+	    to the values used by the last occurrence of the default 
+	    vegetation type.
+	    
+        write_model_state.c: bug found by AWW and KAC
+	    Modified to print space before dz_node for ASCII state
+	    file, this corrects a problem with state files created
+            for models using the Cherkauer and Lettenmaier (1999) heat 
+            flux formulation.
+
 June 4, 2003: VIC release 4.0.4beta r2
 
 This covers bugs found during tests with the snow algorithm.
@@ -25,8 +68,8 @@ This covers bugs found during tests with the snow algorithm.
 	    truncated so the resulting restart will not be identical.
 	    If you need an exact restart, use the Binary files.  Also
 	    removed ice content from the state file as it is computed
-	    at the begining of each time step, so storing its value
-	    is unecessary.
+	    at the beginning of each time step, so storing its value
+	    is unnecessary.
 
 April 23, 2003: VIC release 4.0.4beta r1
 
@@ -81,9 +124,9 @@ Modifications:
 	     spin-up time, so it is unlikely that this bug impacts any 
 	     simulations not employing frozen soil.
 	Snow time step: (found by Andy, et al.)
-	     The snow algorithm needs to run subdaily for the energy balance
+	     The snow algorithm needs to run sub-daily for the energy balance
 	     components to function properly.  This means that for daily 
-	     simulations, the snow model must be solved at a finer (subdaily)
+	     simulations, the snow model must be solved at a finer (sub-daily)
 	     time step.  In the previous release, initialize_atmos.c stored
 	     sub-daily met data in each days variable using positions (e.g. 
              0,1,..8 for 3 hour data).  In surface_fluxes.c the model indexed 
@@ -98,7 +141,7 @@ Modifications:
 	FROZEN_SOIL active flag: (found by Ed and Justin)
 	     The cause of the problem is a bug in the code that occurs when 
 	     the global frozen soils flag (FROZEN_SOILS) is set to true but 
-	     the inidividual cell frozen soil flag (FS_ACTIVE) is set to 
+	     the individual cell frozen soil flag (FS_ACTIVE) is set to 
 	     false. This causes the change in soil heat storage to be 
 	     calculated incorrectly.  This was fixed by adding additional
 	     conditions within frozen_soil.c and initialize_model_state.c,
@@ -118,7 +161,7 @@ Modifications:
 	     a grid cell specific value did not change the values of Wdmax.  
 	     Wdmax values were computed in read_veglib.c based on the 
 	     default LAI values, so they did not necessarily reflect the 
-	     actualy LAI values used for the grid cell.  Values for Wdmax 
+	     actually LAI values used for the grid cell.  Values for Wdmax 
 	     are now computed in read_vegparam.c whenever GLOBAL_LAI are 
 	     provided.  The effects of this change will change in magnitude
 	     based on how different the cell LAI values are from those in
@@ -132,7 +175,7 @@ Modifications:
 	     removed, so now DRY_TIME is checked versus the hours since the 
 	     last storm.
 	State file: (KAC)
-	     *** WARNING: This may require modifcations to your global file ***
+	     *** WARNING: This may require modifications to your global file ***
 	     The state file has been modified to account for model updates.
 	     It has also been converted to write binary files - this makes 
 	     them less convenient to edit, but means that model starts using
@@ -141,9 +184,9 @@ Modifications:
 	     the global file is set up to restart the model.  The global
 	     file should now have the same year, month, day and hour as the 
 	     original global file - the VIC model will compute the number of
-	     records to skip at the begining to reach the point where the 
-	     model state was saved.  This means that caluclations to yield
-	     sub-daily meteological forcings from daily forcings will produce 
+	     records to skip at the beginning to reach the point where the 
+	     model state was saved.  This means that calculations to yield
+	     sub-daily metrological forcings from daily forcings will produce 
 	     the exact same forcing values -> this also means that restarted
 	     simulations will be exactly the same as the original run.  Slight
 	     variations in the model results were also introduced because the
@@ -159,7 +202,7 @@ Modifications:
 	     noted above the new version of the state file should allow the
 	     model to be restarted and to produce exactly the same results as
 	     the original complete result.  If there are cases where this is
-	     not true, plese report.  If you edit the read/write model state
+	     not true, please report.  If you edit the read/write model state
 	     functions - BE VERY CAREFUL to edit Nbytes to reflect any changes.
 	COMPUTE_TREELINE: (KAC and LCB)
 	     This is an added feature which computes the treeline elevation
@@ -234,7 +277,7 @@ the model source code.
 
 In read_soilparam.c, the soil parameters are defined only if the current
 grid cell is run, otherwise the line in the file is skipped and soil_con
-is retruned without new data values.
+is returned without new data values.
 
 May 30, 2000: VIC release 4.0.1
 

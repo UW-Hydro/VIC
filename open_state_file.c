@@ -34,7 +34,7 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s_%02i%02i%04i", global->statename, 
+  sprintf(filename,"%s_%04i%02i%02i", global->statename, 
 	  global->stateyear, global->statemonth, global->stateday);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");

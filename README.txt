@@ -74,15 +74,9 @@ Modifications:
 	    isn't supported on all platforms.			TJB
 	    Added print statement for current cell number.	TJB
 	func_surf_energy_bal.c:
-	    (found by Justin Sheffield at Princeton)
 	    Added check that both FS_ACTIVE and FROZEN_SOIL are true
-	    before adjusting *deltaH.  This fixes a bug caused when
-	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
-	    non-zero ice content was calculated at the beginning of
-	    the time step but always assumed zero at the point of
-	    *deltaH adjustment, leading to *deltaH always being
-	    calculated as if ice had melted, leading to lower soil
-	    temperatures and snow packs that never melted.	TJB
+	    before adjusting *deltaH.  This is just a safety measure;
+	    ice and ice0 should both be 0 when FS_ACTIVE is FALSE.TJB
 	initialize_global.c:
 	    (found by Justin Sheffield at Princeton)
 	    Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.

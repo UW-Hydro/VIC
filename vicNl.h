@@ -57,16 +57,19 @@ void tridag(double *,double *,double *,double *,double *,int);
 
 /** Evaporation Routines **/
 double priestley(double, double);
-double canopy_evap(atmos_data_struct, layer_data_struct *, veg_var_struct *,
-                   soil_con_struct, char, int, double, int, 
-                   global_param_struct, double,double,double,double,double,double);
-void unfroz_evap(atmos_data_struct, layer_data_struct *,
-                 soil_con_struct, int, double, int, double, double, double,
-                 double, double, double *, double *, double *);
+double canopy_evap(layer_data_struct *, veg_var_struct *,
+                   char, int, int, double, double, double, double, double, 
+		   double, double, double,  double, double, double, double, 
+		   double, double *, double *, double *);
+void transpiration(layer_data_struct *, int, int, double, double, double, 
+		   double, double, double, double, double, double, double, 
+		   double, double *, double *, double *, double *, double *, 
+		   double *);
 double penman(double, double, double, double, double, double, double, double,
               double, double, float);
-void arno_evap(atmos_data_struct *, layer_data_struct *, soil_con_struct,
-               double, double, double, double, double, global_param_struct);
+double arno_evap(layer_data_struct *, double, double, double, double, double, 
+		 double, double, double, double, double, double, double, 
+		 double, double, double);
 
 /** Radiation Routines **/
 void rad_and_vpd(atmos_data_struct *, soil_con_struct, int, dmy_struct *);
@@ -170,6 +173,7 @@ double calc_surf_energy_bal(int,int,int,int,int,double,double,double,double,
 			    veg_var_struct *, energy_bal_struct *,
 			    global_param_struct,layer_data_struct *,
 			    soil_con_struct,int,dmy_struct);
+double solve_surf_energy_bal(double Tsurf, ...);
 void write_debug(atmos_data_struct, soil_con_struct, cell_data_struct,
                  energy_bal_struct *, snow_data_struct *, veg_var_struct *,
                  dmy_struct, global_param_struct,

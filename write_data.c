@@ -93,19 +93,30 @@ void calc_water_balance_error(int    rec,
 
   static double last_storage;
   static double cum_error;
+  static int    error_cnt;
 
   double error;
 
   if(rec<0) {
     last_storage = storage;
     cum_error = 0.;
+    error_cnt = 0;
   }
   else {
     error = inflow - outflow - (storage - last_storage);
     cum_error += error;
     last_storage = storage;
-    if(fabs(error)>1.e-5)
-      fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",rec,error,cum_error);
+    if(fabs(error)>1.e-5) {
+      if(error_cnt<25) 
+	fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",
+		rec,error,cum_error);
+      else if(error_cnt == 25) {
+	fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",
+		rec,error,cum_error);
+	fprintf(stderr,"Too many mass balance errors, will not print more.\n");
+      }
+      error_cnt++;
+    }
   }
 
 }
@@ -120,14 +131,27 @@ void calc_energy_balance_error(int    rec,
 ***************************************************************/
 
   static double cum_error;
+  static int    error_cnt;
 
   double error;
 
-  if(rec<0) cum_error=0;
+  if(rec<0) {
+    cum_error=0;
+    error_cnt = 0;
+  }
   else {
     error = net_rad + latent + sensible + grnd_flux;
     cum_error += error;
-    if(fabs(error)>1.e-5)
-      fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",rec,error,cum_error);
+    if(fabs(error)>1.e-5) {
+      if(error_cnt<25)
+        fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",
+		rec,error,cum_error);
+      else if(error_cnt==25) {
+        fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",
+		rec,error,cum_error);
+	fprintf(stderr,"Too many energy balance errors, will not print more.\n");
+      }
+      error_cnt++;
+    }
   }
 }

@@ -16,15 +16,22 @@
 /*  Evaporation is in mm/(time step)  --> usually 1 day or 1 hour            */
 /*****************************************************************************/
 
-void arno_evap(atmos_data_struct *atmos, 
-               layer_data_struct *layer,
-               soil_con_struct    soil_con,
-               double  Tsurf,
-               double displacement,
-               double roughness,
-               double ref_height,
-               double ra,
-               global_param_struct global)
+double arno_evap(layer_data_struct *layer,
+		 double             rad,
+		 double             air_temp,
+		 double             vpd,
+		 double             net_short,
+		 double             D1,
+		 double             max_moist,
+		 double             elevation,
+		 double             b_infilt,
+		 double             max_infil,
+		 double             Tsurf,
+		 double             displacement,
+		 double             roughness,
+		 double             ref_height,
+		 double             ra,
+		 double             dt)
 {
   extern option_struct options;
   extern debug_struct debug;
@@ -36,30 +43,28 @@ void arno_evap(atmos_data_struct *atmos,
   double Epot;		/* potential bare soil evaporation */
   double evap_temp;
   double moist;
-  double max_moist;
   double evap;
   double moist_resid;
 
   evap_temp = Tsurf;
 
-  moist = layer[0].moist_thaw*(layer[0].tdepth)/soil_con.depth[0]
-      + layer[0].moist_froz*(layer[0].fdepth-layer[0].tdepth)/soil_con.depth[0]
-      + layer[0].moist*(soil_con.depth[0]-layer[0].fdepth)/soil_con.depth[0];
-  max_moist = soil_con.max_moist[0];
+  moist = layer[0].moist_thaw*(layer[0].tdepth)/D1
+      + layer[0].moist_froz*(layer[0].fdepth-layer[0].tdepth)/D1
+      + layer[0].moist*(D1-layer[0].fdepth)/D1;
   if(moist>max_moist) moist=max_moist;	/** correct for machine errors **/
 
   /* Calculate the potential bare soil evaporation (mm/time step) */
   
-  Epot = penman(atmos->rad, atmos->vpd * 1000., ra, 0.0, 0.0, 1.0, 1.0, 
-		atmos->air_temp, evap_temp, atmos->net_short,
-		soil_con.elevation) * (double)global.dt / 24.0;
+  Epot = penman(rad, vpd * 1000., ra, 0.0, 0.0, 1.0, 1.0, 
+		air_temp, evap_temp, net_short,
+		elevation) * dt / 24.0;
 
 /**************************************************************************/
 /*  Compute temporary infiltration rate based on given soil_moist.        */
 /**************************************************************************/
 
-  if(soil_con.b_infilt == -1.0)
-    tmp = soil_con.max_infil;
+  if(b_infilt == -1.0)
+    tmp = max_infil;
   else {
     ratio = 1.0 - (moist) / (max_moist);
     /*****if(ratio < SMALL && ratio > -SMALL) ratio = 0.;*****/
@@ -77,16 +82,16 @@ void arno_evap(atmos_data_struct *atmos,
 	exit(0);
       }
       else
-	ratio = pow(ratio,(1.0 / (soil_con.b_infilt + 1.0)));
+	ratio = pow(ratio,(1.0 / (b_infilt + 1.0)));
     }
-    tmp = soil_con.max_infil*(1.0 - ratio);
+    tmp = max_infil*(1.0 - ratio);
   }
 
 /****************************************************************************/
 /* Evaporate at potential rate, i.e., Eq.(10) in Liang's derivation.        */
 /****************************************************************************/
 
-  if(tmp >= soil_con.max_infil)
+  if(tmp >= max_infil)
     evap = Epot;     
   else {                 
     
@@ -95,7 +100,7 @@ void arno_evap(atmos_data_struct *atmos,
 /*  that is unsaturated.                                                    */
 /****************************************************************************/
     
-    ratio = tmp/soil_con.max_infil; 
+    ratio = tmp/max_infil; 
     ratio = 1.0 - ratio;
     
     if(ratio > 1.0) {
@@ -109,7 +114,7 @@ void arno_evap(atmos_data_struct *atmos,
       }
       else {
 	if(ratio != 0.0)
-	  ratio = pow(ratio,soil_con.b_infilt);
+	  ratio = pow(ratio,b_infilt);
       }
     }
     
@@ -120,12 +125,12 @@ void arno_evap(atmos_data_struct *atmos,
 /*  30 terms in the power expansion expression.                             */
 /****************************************************************************/ 
 	
-    ratio = pow(ratio,(1.0/soil_con.b_infilt));
+    ratio = pow(ratio,(1.0/b_infilt));
     
     dummy = 1.0;
     for(num_term=1;num_term<=30;num_term++)
-      dummy += soil_con.b_infilt * pow(ratio,(double)num_term)/
-	      (soil_con.b_infilt + num_term);
+      dummy += b_infilt * pow(ratio,(double)num_term)/
+	      (b_infilt + num_term);
     
     beta_asp = as+(1.0-as)*(1.0-ratio)*dummy;
     evap = Epot*beta_asp;
@@ -140,10 +145,12 @@ void arno_evap(atmos_data_struct *atmos,
   if(options.FULL_ENERGY) moist_resid = MOIST_RESID;
   else moist_resid = 0.;
 
-  moist = layer[0].moist_thaw*(layer[0].tdepth)/soil_con.depth[0]
-      + layer[0].moist_froz*(layer[0].fdepth-layer[0].tdepth)/soil_con.depth[0]
-      + layer[0].moist*(soil_con.depth[0]-layer[0].fdepth)/soil_con.depth[0];
-  if((layer[0].evap) > moist /*- soil_con.Wpwp[0] moist_resid * soil_con.depth[0] * 1000.*/ )
-    layer[0].evap = moist - /*soil_con.Wpwp[0]*/ moist_resid * soil_con.depth[0] * 1000.;
+  moist = layer[0].moist_thaw*(layer[0].tdepth)/D1
+      + layer[0].moist_froz*(layer[0].fdepth-layer[0].tdepth)/D1
+      + layer[0].moist*(D1-layer[0].fdepth)/D1;
+  if((layer[0].evap) > moist)
+    layer[0].evap = moist -  moist_resid * D1 * 1000.;
+
+  return(layer[0].evap / 1000. / dt / 3600.);
 
 }

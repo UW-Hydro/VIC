@@ -77,6 +77,7 @@ void full_energy(int rec,
   double kappa_snow;
   double snow_flux;
   double throughfall;
+  double Evap;
   double tmp_throughfall;
   double tmp_shortwave;
   double tmp_longwave;
@@ -353,11 +354,16 @@ void full_energy(int rec,
               veg_var[iveg].throughfall = rainfall + snowfall;
             }
             else if(overstory) {
-              x = canopy_evap(atmos[0],cell[iveg].layer,&veg_var[iveg],
-                              soil_con,FALSE,veg_class,atmos->air_temp,
-                              dmy[rec].month,gp,mu,
-                              cell[iveg].aero_resist[0],rainfall,
-                              displacement,roughness,ref_height);
+              Evap = canopy_evap(cell[iveg].layer,&veg_var[iveg],
+				 FALSE,veg_class,
+				 dmy[rec].month,veg_var[iveg].Wdew,
+				 atmos->air_temp,(double)gp.dt,
+				 atmos->rad,atmos->vpd,atmos->net_short,
+				 atmos->air_temp,
+				 cell[iveg].aero_resist[0],rainfall,
+				 displacement,roughness,ref_height,
+				 soil_con.elevation,soil_con.depth,
+				 soil_con.Wcr,soil_con.Wpwp);
               rainfall = veg_var[iveg].throughfall;
               atmos->longwave = STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
             }
@@ -581,6 +587,7 @@ void full_energy(int rec,
   
           /** Iterate Energy Balance Solution MAXIT_FE Times for Improved
               Solution **/
+/*****
           DONE = FALSE;
           iter = 0;
           while(iter < MAXIT_FE && !DONE) {
@@ -607,10 +614,11 @@ void full_energy(int rec,
           }
           if(!DONE && MAXIT_FE>1)
             fprintf(stderr,"Surface Energy Balance Exceeded Max Iterations in Rec %i (dT = %lf)\n",rec,dT);
+*****/
           energy[iveg].T[0] = T0;
           for(i=0;i<options.Nlayer;i++) cell[iveg].layer[i]=tmp_layer[i];
           if(iveg<Nveg) veg_var[iveg] = tmp_veg_var;
-	  
+
           if(!SNOW && iveg!=Nveg && veg_lib[veg_class].LAI[dmy[rec].month-1])
             ppt=veg_var[iveg].throughfall;
           else if(!SNOW) ppt=rainfall;
@@ -758,11 +766,16 @@ void full_energy(int rec,
                 }
                 else if(overstory) {
 		  /** Canopy intercept rain only, and has no snow storage **/
-                  x = canopy_evap(atmos[0],cell[iveg].layer,&veg_var[iveg],
-                                  soil_con,TRUE,veg_class,atmos->air_temp,
-                                  dmy[rec].month,gp,mu,
-                                  cell[iveg].aero_resist[0],rainfall,
-                                  displacement,roughness,ref_height);
+                  Evap = canopy_evap(cell[iveg].layer,&veg_var[iveg],
+				     TRUE,veg_class,dmy[rec].month,
+				     veg_var[iveg].Wdew,atmos->air_temp,
+				     (double)gp.dt,
+				     atmos->rad,atmos->vpd,atmos->net_short,
+				     atmos->air_temp,
+				     cell[iveg].aero_resist[0],rainfall,
+				     displacement,roughness,ref_height,
+				     soil_con.elevation,soil_con.depth,
+				     soil_con.Wcr,soil_con.Wpwp);
                   atmos->longwave = (1. - surf_atten) * STEFAN_B
                                   * pow(atmos->air_temp+KELVIN,4.0)
                                   + surf_atten * atmos->longwave;
@@ -874,25 +887,39 @@ void full_energy(int rec,
           if(iveg!=Nveg) {
             /** Compute Evaporation from Vegetation **/
             if(veg_lib[veg_class].LAI[dmy[rec].month-1] > 0.0) {
-              x = canopy_evap(atmos[0],cell[iveg].layer,&veg_var[iveg],
-                              soil_con,TRUE,veg_class,atmos->air_temp,
-                              dmy[rec].month,gp,mu,
-                              cell[iveg].aero_resist[0],rainfall,
-                              displacement,roughness,ref_height);
+              Evap = canopy_evap(cell[iveg].layer,&veg_var[iveg],
+				 TRUE,veg_class,dmy[rec].month,
+				 veg_var[iveg].Wdew,atmos->air_temp,
+				 (double)gp.dt,
+				 atmos->rad,atmos->vpd,atmos->net_short,
+				 atmos->air_temp,
+				 cell[iveg].aero_resist[0],rainfall,
+				 displacement,roughness,ref_height,
+				 soil_con.elevation,soil_con.depth,
+				 soil_con.Wcr,soil_con.Wpwp);
               ppt = veg_var[iveg].throughfall;
             }
             else {
-              arno_evap(atmos, cell[iveg].layer, soil_con,
-			atmos->air_temp, displacement, roughness,
-			ref_height,cell[iveg].aero_resist[0], gp);
+              Evap = arno_evap(cell[iveg].layer, atmos->rad,
+			       atmos->air_temp, atmos->vpd, atmos->net_short,
+			       soil_con.depth[0], soil_con.max_moist[0],
+			       soil_con.elevation, soil_con.b_infilt, 
+			       soil_con.max_infil, atmos->air_temp,
+			       displacement, roughness, ref_height, 
+			       cell[iveg].aero_resist[0], (double)gp.dt);
               ppt = rainfall;
             }
           }
 
           /** Compute Evaporation from Bare Soil **/
-          else arno_evap(atmos, cell[iveg].layer, soil_con,
-                         atmos->air_temp, displacement, roughness, ref_height,
-                         cell[iveg].aero_resist[0], gp);
+          else Evap = arno_evap(cell[iveg].layer, atmos->rad,
+				atmos->air_temp, atmos->vpd, 
+				atmos->net_short, soil_con.depth[0],
+				soil_con.max_moist[0], soil_con.elevation,
+				soil_con.b_infilt, soil_con.max_infil, 
+				atmos->air_temp, displacement, roughness, 
+				ref_height, cell[iveg].aero_resist[0], 
+				(double)gp.dt);
 
         }
         if(!options.SNOW_MODEL) ppt += atmos->melt;

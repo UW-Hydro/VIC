@@ -114,20 +114,21 @@ double calc_surf_energy_bal(int rec,
   double expt;
   double dH_height;
 
-  char veg_present;
-  int i;
+  char   CALC_EVAP;
+  char   VEG;
+  int    i;
   double surf_temp;
   double U;
   double error;
   double C1, C2, C3;
   double ice;
+  double Wdew;
 
   /**************************************************
     Correct Aerodynamic Resistance for Stability
   **************************************************/
   ra = aero_resist[0];
   U = wind[0];
-  dH_height = soil_con.depth[0];
   if (U > 0.0)
     ra /= StabilityCorrection(ref_height, displacement, T0,
           atmos->air_temp, U, roughness);
@@ -141,41 +142,18 @@ double calc_surf_energy_bal(int rec,
   if(iveg!=Nveg) albedo = veg_lib[veg_class].albedo[dmy.month-1];
   else albedo = atmos->albedo;
   energy->albedo = albedo;
-  if(iveg!=Nveg) atmos->rad = ((1.0 - albedo) * atmos->shortwave 
-                            + atmos->longwave - STEFAN_B * pow(T0+KELVIN,4.0))
-                            * 1.00 + energy->grnd_flux;
-  else atmos->rad = (1.0 - albedo) * atmos->shortwave 
-                  + atmos->longwave - STEFAN_B * pow(T0+KELVIN,4.0)
-                  + energy->grnd_flux;
 
   /**************************************************
     Compute Evaporation and Transpiration 
   **************************************************/
   if(iveg!=Nveg) {
-    if(veg_lib[veg_class].LAI[dmy.month-1] > 0.0)
-        *x = canopy_evap(atmos[0],layer,veg_var,soil_con,TRUE,
-                         veg_class,T0,dmy.month,gp,mu,ra,
-                         rainfall,displacement,roughness,ref_height);
-    else arno_evap(atmos, layer, soil_con, T0, displacement,
-                             roughness, ref_height, ra, gp);
+    if(veg_lib[veg_class].LAI[dmy.month-1] > 0.0) VEG = TRUE;
+    else VEG = FALSE;
   }
-  else arno_evap(atmos, layer, soil_con, T0, displacement,
-                           roughness, ref_height, ra, gp);
-
-  /**************************************************
-    Sum Evaporation for Latent Heat Calculations
-  **************************************************/
-  if(iveg!=Nveg && !snow)
-    Evap = veg_var->canopyevap / 1000. / (double)gp.dt / 3600.;
-  else Evap = 0.;
-  for(i=0;i<options.Nlayer;i++) {
-    Evap += layer[i].evap / 1000. / (double)gp.dt / 3600.;
-  }
+  else VEG = FALSE;
+  if(!snow) CALC_EVAP=TRUE;
+  else CALC_EVAP=FALSE;
   Vapor = vapor_flux / (double)gp.dt / 3600.;
-
-  if(iveg!=Nveg && veg_lib[veg_class].displacement[dmy.month-1])
-    veg_present = TRUE;
-  else veg_present = FALSE;
 
   /**************************************************
     Set All Variables For Use
@@ -198,24 +176,37 @@ double calc_surf_energy_bal(int rec,
   max_moist = soil_con.max_moist[0]/(soil_con.depth[0]*1000.);
   bubble = soil_con.bubble;
   expt = soil_con.expt[0];
+  Wdew = veg_var[0].Wdew;
 
   /**************************************************
     Find Surface Temperature Using Root Brent Method
   **************************************************/
   surf_temp = root_brent(0.5*(energy->T[0]+atmos->air_temp)+25.,
-      0.5*(energy->T[0]+atmos->air_temp)-25.,
-      func_surf_energy_bal,T2,Ts_old,T1_old,Tair,ra,atmos_density,
-      shortwave,longwave,albedo,emissivity,
-      kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
-      delta_t,Le,Ls,Evap,Vapor,moist,ice0,
-      max_moist,bubble,expt,surf_atten,U,displacement,roughness,
-      ref_height,dH_height,melt_energy,&energy->grnd_flux,T1,&energy->latent,
-      &energy->sensible,&energy->deltaH,&energy->error,
-      veg_present);
+			 0.5*(energy->T[0]+atmos->air_temp)-25.,
+			 func_surf_energy_bal,T2,Ts_old,T1_old,Tair,ra,
+			 atmos_density,
+			 shortwave,longwave,albedo,emissivity,
+			 kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
+			 delta_t,Le,Ls,Vapor,moist,ice0,
+			 max_moist,bubble,expt,surf_atten,U,displacement,
+			 roughness,
+			 ref_height,soil_con.elevation,
+			 soil_con.b_infilt,soil_con.max_infil,
+			 (double)gp.dt,atmos->vpd,rainfall,Wdew,
+			 melt_energy,
+			 &energy->grnd_flux,T1,
+			 &energy->latent,
+			 &energy->sensible,&energy->deltaH,
+			 &energy->error,&atmos->rad,
+			 soil_con.depth,
+			 soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
+			 VEG,CALC_EVAP,
+			 veg_class,dmy.month);
 
   /**************************************************
     Recalculate Energy Balance Terms for Final Surface Temperature
   **************************************************/
+/*****
   surf_temp = 0.5 * (surf_temp + Ts_old);
 
   C1 = Cs2 * dp / D2 * ( 1. - exp(-D2/dp));
@@ -247,7 +238,41 @@ double calc_surf_energy_bal(int rec,
                 + emissivity*(longwave-STEFAN_B*pow(surf_temp + KELVIN,4.))
                 + energy->sensible + energy->latent + energy->grnd_flux 
                 + energy->deltaH + melt_energy;
+*****/
+
+  solve_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,atmos_density,
+			shortwave,longwave,albedo,emissivity,
+			kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
+			delta_t,Le,Ls,Vapor,moist,ice0,
+			max_moist,bubble,expt,surf_atten,U,displacement,
+			roughness,
+			ref_height,soil_con.elevation,soil_con.b_infilt,
+			soil_con.max_infil,
+			(double)gp.dt,atmos->vpd,rainfall,Wdew,
+			melt_energy,
+			&energy->grnd_flux,T1,&energy->latent,
+			&energy->sensible,&energy->deltaH,
+			&energy->error,&atmos->rad,
+			soil_con.depth,
+			soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
+			VEG,CALC_EVAP,
+			veg_class,dmy.month);
 
   return (surf_temp);
     
+}
+
+double solve_surf_energy_bal(double Tsurf, ...)
+{
+
+  va_list ap;
+
+  double error;
+
+  va_start(ap,Tsurf);
+  error = func_surf_energy_bal(Tsurf, ap);
+  va_end(ap);
+
+  return error;
+
 }

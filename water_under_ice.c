@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Thu Mar  8 21:35:54 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Tue Apr 22 10:18:43 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  
  * DESCRIP-END.
  * FUNCTIONS:   
@@ -38,6 +38,10 @@
 
 
   Comments     :
+
+  Modifications:
+  11-18-02 Updated to reflect changes in algorithm structure.          LCB
+
 *****************************************************************************/
 void water_under_ice(int freezeflag, 
 		     double sw_ice,
@@ -55,7 +59,9 @@ void water_under_ice(int freezeflag,
 		     int mixdepth,
 		     double hice,
 		     double sdepth,
-		     double dt)
+		     double dt,
+		     double LakeFlow,
+		     double *energy_out_bottom)
 	      
 {
   double Tnew[MAX_LAKE_NODES];
@@ -64,7 +70,6 @@ void water_under_ice(int freezeflag,
   double jouleold;
   double joulenew;
   double error;
-  double energy_out_bottom;
   double de[MAX_LAKE_NODES]; 
   double epsilon = 0.0001;
   double qw_init, qw_mean, qw_final;
@@ -76,9 +81,11 @@ void water_under_ice(int freezeflag,
   for(k=0; k<numnod; k++)
     Tnew[k] = Ti[k];
 
+  // compute the eddy diffusivity 
   eddy(freezeflag, wind, Ti, water_density, de, lat, numnod, dz);
   
-  qw_init =  0.57*(Ti[0]-Tcutoff)/(SURF/2.);
+  // estimate the flux out of the water
+  qw_init =  0.57*(Ti[0]-Tcutoff)/(SURF/2.) /*+ 4218. * RHO_W * 1.4e-3 * LakeFlow * (Tnew[0]-Tcutoff)*/;
   *qw = qw_init;
   qw_mean = -999.;
 
@@ -90,7 +97,8 @@ void water_under_ice(int freezeflag,
       *qw = qw_init;
     else
       *qw = qw_mean;
-	
+
+    // compute shortwave that transmitted through the lake ice 
     sw_underice_visible = a1*sw_ice*exp(-1.*(lamisw*hice+lamssw*sdepth));
     sw_underice_nir = a2*sw_ice*exp(-1.*(lamilw*hice+lamslw*sdepth));
 	
@@ -99,30 +107,31 @@ void water_under_ice(int freezeflag,
      * new timestep.
      * -------------------------------------------------------------------- */
 	
-    temp_area (sw_underice_visible, sw_underice_nir, -1*(*qw) , Ti, Tnew,
+    temp_area (sw_underice_visible, sw_underice_nir, -1.*(*qw) , Ti, Tnew,
 	       water_density, de, dt, surface, numnod, 
-	       dz, &joulenew, water_cp, &energy_out_bottom);
-    *deltaH = (jouleold - joulenew)/(surface[0]*dt*SECPHOUR);
+	       dz, &joulenew, water_cp, energy_out_bottom);
+
+    // recompute storage of heat in the lake
+    *deltaH = (joulenew - jouleold)/(surface[0]*dt*SECPHOUR);
       
     /* --------------------------------------------------------------------
      * Do the convective mixing of the lake water.
      * -------------------------------------------------------------------- */
 
     tracer_mixer (Tnew, &mixdepth, freezeflag,
-		  surface,numnod, dz, water_cp);
+    		  surface,numnod, dz, water_cp);
     
-    if(mixdepth > mixmax) 
-      mixmax=mixdepth;
+    if(mixdepth > mixmax) mixmax=mixdepth;
 
-    qw_final = 0.57*(Tnew[0]-Tcutoff)/(SURF/2.);     
-
-    qw_mean = (qw_final + qw_init)/2.;  
+    qw_final = 0.57*(Tnew[0]-Tcutoff)/(SURF/2.);
+    
+    qw_mean = (qw_final + *qw)/2.;  
     
     iterations += 1;
   }
     
   *qw = qw_mean;
-  for(k=0; k<numnod; k++)
+  for ( k = 0; k < numnod; k++ )
     Ti[k] = Tnew[k];
 }
 

@@ -84,6 +84,21 @@ in the global parameter file.
 	the beginning of the new forcing file.
 
 
+EQUAL_AREA global parameter option
+
+	Files affected:
+	display_current_settings.c, get_global_param.c, initialize_global.c,
+	read_lakeparam.c, vicNl_def.h
+
+	Description:
+	New global parameter option.  When EQUAL_AREA is TRUE, all grid cells are
+	assumed to have the same area, and the global parameter RESOLUTION is
+	interpreted to store the grid cell area in km^2.  When EQUAL_AREA is FALSE,
+	grid cells are assumed to have the same side length in degrees, and
+	RESOLUTION is interpreted to store the grid cell side length in degrees,
+	as before.
+
+
 Improved validation of global options
 
 	Files affected:

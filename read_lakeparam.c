@@ -45,6 +45,9 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   02-Nov-04 Modified the adjustment of Cv_sum so that veg fractions
 	    share in area reduction along with the lake fraction.	TJB
   22-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
+  2005-03-08 Added EQUAL_AREA option.  When TRUE, res variable is interpreted
+	     to be the grid cell area in km^2.  When FALSE, res is interpreted
+	     to be the length of a grid cell side, in degrees (as before).	TJB
   
 **********************************************************************/
 
@@ -74,22 +77,32 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   /* Calculate grid cell area. */
   /******************************************************************/
 
-  lat = fabs(soil_con.lat);
-  lng = fabs(soil_con.lng);
+  if (options.EQUAL_AREA) {
 
-  start_lat = lat - res / 2.;
-  right_lng = lng + res / 2;
-  left_lng  = lng - res / 2;
+    temp.cell_area = res * 1000. * 1000.; /* Grid cell area in m^2. */
 
-  delta = get_dist(lat,lng,lat+res/10.,lng);
-
-  dist = 0.;
-
-  for ( i = 0; i < 10; i++ ) {
-    dist += get_dist(start_lat,left_lng,start_lat,right_lng) * delta;
-    start_lat += res/10;
   }
-  temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
+  else {
+
+    lat = fabs(soil_con.lat);
+    lng = fabs(soil_con.lng);
+
+    start_lat = lat - res / 2.;
+    right_lng = lng + res / 2;
+    left_lng  = lng - res / 2;
+
+    delta = get_dist(lat,lng,lat+res/10.,lng);
+
+    dist = 0.;
+
+    for ( i = 0; i < 10; i++ ) {
+      dist += get_dist(start_lat,left_lng,start_lat,right_lng) * delta;
+      start_lat += res/10;
+    }
+
+    temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
+
+  }
 
   /*******************************************************************/
   /* Read in general lake parameters.                           */

@@ -227,6 +227,9 @@ void initialize_new_storm(dist_prcp_struct *prcp,
       }
     }
 
+    /****************************************
+      Redistribute Stored Water in Vegetation
+      ****************************************/
     if(veg<Nveg) {
       temp_wet = prcp[0].dist[0].veg_var[veg].Wdew;
       temp_dry = prcp[0].dist[1].veg_var[veg].Wdew;
@@ -242,8 +245,14 @@ void initialize_new_storm(dist_prcp_struct *prcp,
       prcp[0].dist[1].veg_var[veg].Wdew = temp_dry;
     }
 
+    /******************
+      Redistribute Snow
+      ******************/
     if(options.FULL_ENERGY || options.SNOW_MODEL) {
   
+      /*************************
+	Redistribute Ground Snow
+	*************************/
       if(prcp[0].dist[0].snow[veg].snow || prcp[0].dist[1].snow[veg].snow) {
         temp_wet = (double)prcp[0].dist[0].snow[veg].last_snow;
         temp_dry = (double)prcp[0].dist[1].snow[veg].last_snow;
@@ -316,6 +325,60 @@ void initialize_new_storm(dist_prcp_struct *prcp,
         prcp[0].dist[0].snow[veg].depth = temp_wet;
         prcp[0].dist[1].snow[veg].depth = temp_dry;
 
+	if(prcp[0].dist[0].snow[veg].snow && prcp[0].dist[1].snow[veg].snow) {
+	  temp_wet = prcp[0].dist[0].snow[veg].surf_temp;
+	  temp_dry = prcp[0].dist[1].snow[veg].surf_temp;
+	  error = redistribute_new_storm(&temp_wet, &temp_dry, old_mu, new_mu);
+	  if(error) {
+	    sprintf(ErrorString,"surf_temp does not balance after new storm: %lf -> %lf record %i\n",
+		    prcp[0].dist[0].snow[veg].surf_temp*new_mu
+		    + prcp[0].dist[1].snow[veg].surf_temp*(1.-new_mu),
+		    temp_wet+temp_dry,rec);
+	    vicerror(ErrorString);
+	  }
+	  prcp[0].dist[0].snow[veg].surf_temp = temp_wet;
+	  prcp[0].dist[1].snow[veg].surf_temp = temp_dry;
+	  
+	  temp_wet = prcp[0].dist[0].snow[veg].pack_temp;
+	  temp_dry = prcp[0].dist[1].snow[veg].pack_temp;
+	  error = redistribute_new_storm(&temp_wet, &temp_dry, old_mu, new_mu);
+	  if(error) {
+	    sprintf(ErrorString,"pack_temp does not balance after new storm: %lf -> %lf record %i\n",
+		    prcp[0].dist[0].snow[veg].pack_temp*new_mu
+		    + prcp[0].dist[1].snow[veg].pack_temp*(1.-new_mu),
+		    temp_wet+temp_dry,rec);
+	    vicerror(ErrorString);
+	  }
+	  prcp[0].dist[0].snow[veg].pack_temp = temp_wet;
+	  prcp[0].dist[1].snow[veg].pack_temp = temp_dry;
+	}
+	else if(prcp[0].dist[0].snow[veg].snow) {
+	  prcp[0].dist[1].snow[veg].surf_temp =
+	    prcp[0].dist[0].snow[veg].surf_temp;
+	  prcp[0].dist[1].snow[veg].pack_temp =
+	    prcp[0].dist[0].snow[veg].pack_temp;
+        }
+	else if(prcp[0].dist[1].snow[veg].snow) {
+	  prcp[0].dist[0].snow[veg].surf_temp =
+	    prcp[0].dist[1].snow[veg].surf_temp;
+	  prcp[0].dist[0].snow[veg].pack_temp =
+	    prcp[0].dist[1].snow[veg].pack_temp;
+        }
+
+        if(prcp[0].dist[0].snow[veg].swq > 0)
+	  prcp[0].dist[0].snow[veg].snow = TRUE;
+        else prcp[0].dist[0].snow[veg].snow = FALSE;
+        if(prcp[0].dist[1].snow[veg].swq > 0)
+	  prcp[0].dist[1].snow[veg].snow = TRUE;
+        else prcp[0].dist[1].snow[veg].snow = FALSE;
+
+      }
+
+      /******************************
+	Redistribute Intercepted Snow
+	******************************/
+      if(prcp[0].dist[0].snow[veg].snow_canopy > 0.
+	 || prcp[0].dist[1].snow[veg].snow_canopy > 0.) {
         temp_wet = prcp[0].dist[0].snow[veg].snow_canopy;
         temp_dry = prcp[0].dist[1].snow[veg].snow_canopy;
         error = redistribute_new_storm(&temp_wet, &temp_dry, old_mu, new_mu);
@@ -341,11 +404,6 @@ void initialize_new_storm(dist_prcp_struct *prcp,
         }
         prcp[0].dist[0].snow[veg].tmp_int_storage = temp_wet;
         prcp[0].dist[1].snow[veg].tmp_int_storage = temp_dry;
-
-        if(prcp[0].dist[0].snow[veg].swq > 0) prcp[0].dist[0].snow[veg].snow = TRUE;
-        else prcp[0].dist[0].snow[veg].snow = FALSE;
-        if(prcp[0].dist[1].snow[veg].swq > 0) prcp[0].dist[1].snow[veg].snow = TRUE;
-        else prcp[0].dist[1].snow[veg].snow = FALSE;
 
       }
     }

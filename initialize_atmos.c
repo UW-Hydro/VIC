@@ -67,7 +67,7 @@ void initialize_atmos(atmos_data_struct *temp,
     if(param_set.TMAX && param_set.TMIN && !param_set.AIR_TEMP)
       temp[rec].air_temp = (temp[rec].tmax + temp[rec].tmin) / 2.;
 
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || options.SNOW_MODEL) {
       /** Set snow/rain division **/
       temp[rec].rainonly = calc_rainonly(temp[rec].air_temp, temp[rec].prec,
 					 MAX_SNOW_TEMP,MIN_RAIN_TEMP);

@@ -377,10 +377,10 @@ void snow_intercept(double Dt, double F,  double LAI,
   
   /* Calculate intercepted H2O balance. */  
   
-  MassBalanceError = (InitialWaterInt - (*IntSnow + *IntRain)) +
-    (*SnowFall + *RainFall) - 
-    (SnowThroughFall + RainThroughFall + Drip + ReleasedMass) + 
-    *VaporMassFlux;
+  MassBalanceError = (InitialWaterInt - (*IntSnow + *IntRain))
+                   + (*SnowFall + *RainFall) - (SnowThroughFall
+                   + RainThroughFall + Drip + ReleasedMass)
+                   + *VaporMassFlux;
 
   *RainFall = RainThroughFall + Drip;
   *SnowFall = SnowThroughFall + ReleasedMass;

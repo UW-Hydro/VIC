@@ -17,7 +17,6 @@ double canopy_evap(atmos_data_struct atmos,
                    double displacement,
                    double roughness,
                    double ref_height)
-
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 
@@ -32,8 +31,26 @@ double canopy_evap(atmos_data_struct atmos,
 		prec (mm)
 		melt (mm)
 
+  VARIABLE TYPE        NAME          UNITS DESCRIPTION
+  atmos_data_struct    atmos         N/A   atmospheric forcing data structure
+  layer_data_struct   *layer         N/A   soil layer variable structure
+  veg_var_struct      *veg_var       N/A   vegetation variable structure
+  soil_con_struct      soil_con      N/A   soil parameter structure
+  char                 CALC_EVAP     N/A   TRUE = calculate evapotranspiration
+  int                  veg_class     N/A   vegetation class index number
+  double               evap_temp     C     evaporation temperature
+  int                  month         N/A   current month
+  global_param_struct  global        N/A   global parameter structure
+  double               mu            fract wet (or dry) fraction of grid cell
+  double               ra            s/m   aerodynamic resistance
+  double               prec          mm    precipitation
+  double               displacement  m     displacement height of surface cover
+  double               roughness     m     roughness height of surface cover
+  double               ref_height    m     measurement reference height
+
   Modifications:
   9/1/97	Greg O'Donnell
+  4-12-98  Code cleaned and final version prepared, KAC
 
 **********************************************************************/
 {
@@ -76,6 +93,10 @@ double canopy_evap(atmos_data_struct atmos,
   ppt = prec;
   x = 1.;
 
+  /**************************************************
+    Compute Evaporation from Canopy Intercepted Water
+    **************************************************/
+
   /** Due to month changes ..... Wdmax based on LAI **/
   throughfall = 0.0;
   Wdew = veg_var->Wdew;
@@ -107,6 +128,9 @@ double canopy_evap(atmos_data_struct atmos,
     Wdew = veg_lib[veg_class].Wdmax[month-1];
   }
 
+  /*******************************************
+    Compute Evapotranspiration from Vegetation
+    *******************************************/
   if(CALC_EVAP)
     unfroz_evap(atmos, layer, soil_con, veg_class, evap_temp, month, ra,
                 ppt, f, (double)global.dt, veg_var->Wdew, &Wdew,
@@ -169,7 +193,9 @@ void unfroz_evap(atmos_data_struct atmos,
      Re-written to allow for multi-layers.
   **********************************************************************/
  
-  /* find moisture content in combined upper layers - excluding layer 1 */
+  /**************************************************
+    Compute moisture content in combined upper layers
+    **************************************************/
   moist1 = 0.0;
   Wcr1 = 0.0;                    /* may include this in struct latter */
   for(i=0;i<options.Nlayer-1;i++){
@@ -189,7 +215,9 @@ void unfroz_evap(atmos_data_struct atmos,
     else avail_moist[i]=0.;
   }
 
-  /* moisture in lowest layer */
+  /*****************************************
+    Compute moisture content in lowest layer
+    *****************************************/
   i=options.Nlayer-1;
   if(options.FROZEN_SOIL)
     moist2 = layer[i].moist_thaw*(layer[i].tdepth)
@@ -251,7 +279,9 @@ void unfroz_evap(atmos_data_struct atmos,
     }
   }
 
-  /**  CASE 2: Independent evapotranspirations **/
+  /****************************************
+    CASE 2: Independent evapotranspirations
+    ****************************************/
 
   else {
 

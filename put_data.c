@@ -7,7 +7,8 @@ void put_data(dist_prcp_struct  *prcp,
 	      veg_con_struct    *veg_con,
               outfiles_struct   outfiles,
               double            *depth,
-	      dmy_struct        *dmy)
+	      dmy_struct        *dmy,
+              int               rec)
 
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996
@@ -19,6 +20,7 @@ void put_data(dist_prcp_struct  *prcp,
 {
   extern veg_lib_struct *veg_lib;
   extern option_struct  options;
+  extern debug_struct   debug;
 
   static out_data_struct *out_data;
 
@@ -32,6 +34,7 @@ void put_data(dist_prcp_struct  *prcp,
   double tmp_moist;
   double tmp_ice;
   double rad_temp = 0.0;
+  double inflow, outflow, storage;
 
   cell_data_struct *cell;
   snow_data_struct *snow;
@@ -45,6 +48,10 @@ void put_data(dist_prcp_struct  *prcp,
 
   out_data->prec = atmos->prec;
  
+  /*************************************************
+    Store Output for Precipitation Distribution Type
+    *************************************************/
+
   for ( dist = 0; dist < Ndist; dist++ ) {
     if(dist==0) 
       mu = prcp[0].mu;
@@ -56,6 +63,9 @@ void put_data(dist_prcp_struct  *prcp,
     energy = prcp[0].dist[dist].energy;
     veg_var = prcp[0].dist[dist].veg_var;
 
+    /**************************************
+      Store Output for all Vegetation Types
+      **************************************/
     for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++) {
 
       /** record total evaporation **/
@@ -155,7 +165,8 @@ void put_data(dist_prcp_struct  *prcp,
         out_data->swq         += snow[veg].swq * veg_con[veg].Cv * mu * 1000.;
         out_data->snow_depth  += snow[veg].depth * veg_con[veg].Cv
 	                       * mu * 1000.;
-        out_data->snow_canopy += snow[veg].snow_canopy * veg_con[veg].Cv
+        out_data->snow_canopy += (snow[veg].snow_canopy
+                               + snow[veg].tmp_int_storage) * veg_con[veg].Cv
 	                       * mu * 1000.;
         out_data->coldcontent += snow[veg].coldcontent * veg_con[veg].Cv * mu;
         out_data->melt_energy += snow[veg].melt_energy * veg_con[veg].Cv * mu;
@@ -163,6 +174,10 @@ void put_data(dist_prcp_struct  *prcp,
       }
     }
   
+    /***********************
+      Store Bare Soil Output
+      ***********************/
+
     /** record evaporation for bare soil **/
     vegnum = veg_con[0].vegetat_type_num;
     tmp_evap=0.;
@@ -198,7 +213,7 @@ void put_data(dist_prcp_struct  *prcp,
       tmp_ice    = (cell[vegnum].layer[index].ice 
                     * (cell[vegnum].layer[index].fdepth
                     - cell[vegnum].layer[index].tdepth)
-                    / depth[index]) + out_data->moist[index];
+                    / depth[index]);
       if(options.MOISTFRACT) {
         tmp_moist /= depth[index] * 1000.;
         tmp_ice /= depth[index] * 1000.;
@@ -257,6 +272,20 @@ void put_data(dist_prcp_struct  *prcp,
 
   out_data->rad_temp = pow(rad_temp,0.25);
   out_data->r_net    = out_data->net_short + out_data->net_long;
+
+  /********************
+    Check Water Balance 
+    ********************/
+  inflow  = out_data->prec;
+  outflow = out_data->evap+out_data->runoff+out_data->baseflow;
+  storage = 0.;
+  for(index=0;index<options.Nlayer;index++)
+    storage += out_data->moist[index] + out_data->ice[index];
+  storage += out_data->swq + out_data->snow_canopy + out_data->Wdew;
+  calc_water_balance_error(rec,inflow,outflow,storage);
+  calc_energy_balance_error(rec,out_data->net_short+out_data->net_long,
+			    out_data->latent,out_data->sensible,
+			    out_data->grnd_flux);
 
   write_data(out_data, outfiles, dmy);
 

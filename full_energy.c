@@ -89,6 +89,7 @@ void full_energy(int rec,
   double tmp_vapor_flux;
   double tmp_canopy_vapor_flux;
   double tmp_canopyevap;
+  double tmp_snowinflow;
   double *tmp_layerevap;
   atmos_data_struct tmp_atmos;
   layer_data_struct *tmp_layer;
@@ -157,7 +158,7 @@ void full_energy(int rec,
       else veg_class = 0;
 
       if(iveg!=Nveg && (!options.SNOW_MODEL
-			|| (!snow[iveg].snow || overstory)))
+			|| (!snow[iveg].snow || veg_lib[veg_class].overstory)))
 	  surf_atten=exp(-0.50*veg_lib[veg_class].LAI[dmy[rec].month-1]);
       else surf_atten=1;
         
@@ -168,6 +169,8 @@ void full_energy(int rec,
         else Ls = 0.;
       }
       else Ls = 0.;
+
+      tmp_snowinflow = 0.;
 
       /**************************************************
         Store Water Balance Terms for Debugging
@@ -356,9 +359,7 @@ void full_energy(int rec,
                               cell[iveg].aero_resist[0],rainfall,
                               displacement,roughness,ref_height);
               rainfall = veg_var[iveg].throughfall;
-              atmos->longwave = (1. - surf_atten) * STEFAN_B
-                              * pow(atmos->air_temp+KELVIN,4.0)
-                              + surf_atten * atmos->longwave;
+              atmos->longwave = STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
             }
             else if(snowfall > 0.) {
               tmp_rain = calc_rainonly(atmos->air_temp,veg_var[iveg].Wdew,
@@ -653,7 +654,6 @@ void full_energy(int rec,
           tmp_melt = 0.;
           throughfall = 0.;
           tmp_throughfall = 0.;
-          tmp_longwave = atmos->longwave;
           tmp_rad = atmos->rad;
           tmp_canopy_vapor_flux = 0.;
           tmp_vapor_flux = 0.;
@@ -780,6 +780,7 @@ void full_energy(int rec,
               throughfall += tmp_throughfall;
 
               if(snow[iveg].swq>0.0 || snowfall > 0) {
+		tmp_snowinflow += rainfall + snowfall;
                 snow_melt(atmos,soil_con,gp.wind_h+soil_con.snow_rough,
                           cell[iveg].aero_resist[2],
                           cell[iveg].Le,&snow[iveg],(double)gp.dt/4,0.00,
@@ -919,6 +920,7 @@ void full_energy(int rec,
         }
       }
 
+      /***** Reset modified Paramters *****/
       atmos->longwave = tmp_longwave;
 
       /***** Debug Option Output *****/
@@ -942,7 +944,8 @@ void full_energy(int rec,
           debug.outflow[0] = 0.;
         }
         if((options.FULL_ENERGY || options.SNOW_MODEL) 
-            && (snow[iveg].snow || debug.store_moist[1]>0)) {
+            && (snow[iveg].snow || debug.store_moist[1]>0 || atmos->melt>0.)) {
+	  if(!options.FULL_ENERGY) debug.inflow[1] = tmp_snowinflow;
           debug.outflow[1] = atmos->melt;
         }
         else if(iveg<Nveg) {

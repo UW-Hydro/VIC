@@ -154,9 +154,9 @@ void CalcAerodynamic(char   OverStory,
     
 
     /***** Old VIC *****/
-    U[0]  = log((2. + Z0_Lower)/Z0_Lower)/log((Zref[0] - d_Lower)/Z0_Lower);
-    Ra[0] = log((2. + (1.0/0.63 - 1.0) * d_Lower) / Z0_Lower)
-          * log((2. + (1.0/0.63 - 1.0) * d_Lower) / (0.1*Z0_Lower)) / K2;
+    U[0]  = log((2. + Z0_Upper)/Z0_Upper)/log((Zref[0] - d_Upper)/Z0_Upper);
+    Ra[0] = log((2. + (1.0/0.63 - 1.0) * d_Upper) / Z0_Upper)
+          * log((2. + (1.0/0.63 - 1.0) * d_Upper) / (0.1*Z0_Upper)) / K2;
     /******************/
 
 

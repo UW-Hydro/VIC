@@ -34,7 +34,7 @@ void write_vegvar(veg_var_struct, int);
 
 /** IO and Data Storage Routines **/
 void put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *, 
-              outfiles_struct, double *, dmy_struct *);
+              outfiles_struct, double *, dmy_struct *, int);
 out_data_struct *make_out_data(int);
 void write_data(out_data_struct *, outfiles_struct, dmy_struct *);
 void close_files(infiles_struct, outfiles_struct, filenames_struct);
@@ -187,3 +187,5 @@ double calc_air_temperature(double *, double *, int);
 double calc_rainonly(double,double,double,double);
 void store_max_min_temp(atmos_data_struct *, double *, double *,
                         int, int, char);
+void calc_water_balance_error(int, double, double, double);
+void calc_energy_balance_error(int, double, double, double, double);

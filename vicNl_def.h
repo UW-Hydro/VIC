@@ -176,18 +176,26 @@ typedef struct {
   int    gridcel;	         /* grid cell number */
   float  lat;		         /* grid cell central latitude */
   float  lng;		         /* grid cell central longitude */
-  float  time_zone_lng;	         /* central meridian of the time zone */
   double b_infilt;  	         /* infiltration parameter */
   double Ds;		         /* fraction of maximum subsurface flow rate */
   double Dsmax;  	         /* maximum subsurface flow rate (mm/day) */
   double Ws;		         /* fraction of maximum soil moisture */
   double c;                      /* exponent */
   double expt[MAXlayer];         /* pore-size distribution, HBH 5.15 */
-  double bubble;	         /* bubbling pressure, HBH 5.15 (cm) */
   double Ksat[MAXlayer];         /* saturated hydraulic  conductivity
 				    (mm/day) */
+  double phi_s[MAXlayer];        /* saturated matrix potential */
   double init_moist[MAXlayer];   /* initial layer moisture level (mm) */
   float  elevation;	         /* grid cell elevation (m) */
+  double depth[MAXlayer];        /* dthickness of each layer (m) */
+  double avg_temp;	         /* average soil temperature (C) */
+  double dp;			 /* soil thermal damping depth (m) */
+  double bubble;	         /* bubbling pressure, HBH 5.15 (cm) */
+  double quartz;		 /* quartz content of soil (fraction) */
+  double bulk_density[MAXlayer]; /* soil bulk density (kg/m^3) */
+  double soil_density;		 /* soil partical density (kg/m^3) */
+  double rough;		         /* soil surface roughness (m) */
+  double snow_rough;             /* snow surface roughness (m) */
   double max_moist[MAXlayer];    /* maximum moisture content (mm) per layer */
   double max_infil;	         /* maximum infiltration rate */
   double Wcr[MAXlayer];	         /* critical moisture level for soil layer,
@@ -195,15 +203,7 @@ typedef struct {
 			            stress in the soil (mm) */
   double Wpwp[MAXlayer];         /* soil moisture content at permanent wilting
 			            point (mm) */
-  double rough;		         /* soil surface roughness (m) */
-  double snow_rough;             /* snow surface roughness (m) */
-  double depth[MAXlayer];        /* dthickness of each layer (m) */
-  double avg_temp;	         /* average soil temperature (C) */
-  double dp;			 /* soil thermal damping depth (m) */
-  double bulk_density[MAXlayer]; /* soil bulk density (kg/m^3) */
-  double soil_density;		 /* soil partical density (kg/m^3) */
-  double quartz;		 /* quartz content of soil (fraction) */
-  double phi_s[MAXlayer];        /* saturated matrix potential */
+  float  time_zone_lng;	         /* central meridian of the time zone */
 } soil_con_struct;
 
 /*******************************************************************

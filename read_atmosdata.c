@@ -30,8 +30,8 @@ void read_atmosdata(atmos_data_struct *temp,
   while (fgets(str,maxline,snowf) != '\0') n++;
   printf("nrecs = %d\n",n*24/dt);
   if(*nrecs>n*24/dt) {
-    fprintf(stderr,"WARNING: daily precipitation file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n);
-    *nrecs=n;
+    fprintf(stderr,"WARNING: daily precipitation file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n*24/dt);
+    *nrecs=n*24/dt;
   }
   if(*nrecs<n) {
     fprintf(stderr,"WARNING: daily precipitation file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs);
@@ -40,6 +40,7 @@ void read_atmosdata(atmos_data_struct *temp,
 
   rewind(snowf);
 
+  rec=0;
   for(i=0;i<n;i++) {
     fgets(str, maxline, snowf);
     for(j=0;j<24/dt;j++) {

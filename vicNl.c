@@ -36,14 +36,16 @@ void main(int argc, char *argv[])
 
   /** Variable Declarations **/
 
-  char NEWCELL;
-  char LASTREC;
-  int STILL_STORM;
-  int rec, i;
-  int Ndist;
-  int Nveg_type;
-  int cellnum;
+  char    NEWCELL;
+  char    LASTREC;
+  int     STILL_STORM;
+  int     rec, i;
+  int     Ndist;
+  int     Nveg_type;
+  int     cellnum;
+  int     index;
   double *mu;
+  double  storage;
   dmy_struct *dmy;
   atmos_data_struct *atmos;
   veg_con_struct *veg_con;
@@ -72,15 +74,25 @@ void main(int argc, char *argv[])
   fprintf(stderr,"Frozen Soils (%i)\n",options.FROZEN_SOIL);
 
 
-  /** MAIN Model Control Code **/
+  /** Read Global Control File **/
   infiles.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames,infiles.globalparam);
+
+  /** Check and Open Files **/
   check_files(&infiles, filenames);
   open_debug();
+
+  /** Read Vegetation Library File **/
   veg_lib = read_veglib(infiles.veglib,&Nveg_type);
+
+  /** Initialize Parameters **/
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;
   cellnum = -1;
+
+  /************************************
+    Run Model for all Active Grid Cells
+    ************************************/
   while((fscanf(infiles.soilparam, "%d", &flag))!=EOF) {
     soil_con = read_soilparam(infiles.soilparam);
     if(debug.PRT_SOIL) write_soilparam(soil_con); 
@@ -88,19 +100,25 @@ void main(int argc, char *argv[])
 
       NEWCELL=TRUE;
       cellnum++;
+
+      /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
 
+      /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, filenames, soil_con,
                    &outfiles);
 
+      /** Read Forcing Data **/
       atmos = read_forcing_data(infiles, &global_param.nrecs,
 				global_param.dt);
-
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
+      /** Make Date Data Structure **/
       dmy      = make_dmy(global_param);
+
+      /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
       for(i=0;i<Ndist;i++) {
         prcp.dist[i].veg_var  = make_veg_var(veg_con[0].vegetat_type_num);
@@ -113,8 +131,7 @@ void main(int argc, char *argv[])
         }
       }
 
-
-      /** Initialize Variables **/
+      /** Initialize Soil and Vegetation Variables **/
       fprintf(stderr,"Initializing Variables\n");
       for(i=0;i<Ndist;i++) {
         initialize_soil(prcp.dist[i].cell,soil_con,
@@ -151,22 +168,38 @@ void main(int argc, char *argv[])
       fprintf(stderr,"Running Model\n");
 
       /** Update Error Handling Structure **/
-/*****
-      Error.dt = global_param.dt;
-*****/
       Error.outfp = outfiles;
       Error.infp = infiles;
-/*****
-      Error.soil_con = soil_con;
-      Error.veg_con = veg_con;
-      Error.atmos = atmos;
-*****/
+
+      /***************************************************
+	Intialize Moisture and Energy Balance Error Checks
+	***************************************************/
+      storage = 0.;
+      for(index=0;index<options.Nlayer;index++) {
+	storage += (prcp.dist[0].cell[0].layer[index].moist_thaw 
+	         * prcp.dist[0].cell[0].layer[index].tdepth
+	         / soil_con.depth[index]);
+	storage += (prcp.dist[0].cell[0].layer[index].moist_froz 
+	         * (prcp.dist[0].cell[0].layer[index].fdepth 
+	         - prcp.dist[0].cell[0].layer[index].tdepth)
+	         / soil_con.depth[index]);
+	storage += (prcp.dist[0].cell[0].layer[index].moist
+      	         * (soil_con.depth[index]
+                 - prcp.dist[0].cell[0].layer[index].fdepth)
+                 / soil_con.depth[index]);
+	storage += (prcp.dist[0].cell[0].layer[index].ice 
+	         * (prcp.dist[0].cell[0].layer[index].fdepth
+	         - prcp.dist[0].cell[0].layer[index].tdepth)
+	         / soil_con.depth[index]);
+      }
+      calc_water_balance_error(-1,0.,0.,storage);
+      calc_energy_balance_error(-1,0.,0.,0.,0.);
+
+      /******************************************
+	Run Model in Grid Cell for all Time Steps
+	******************************************/
 
       for ( rec = 0 ; rec < global_param.nrecs; rec++ ) {
-
-/*****
-        Error.rec = rec;
-*****/
 
         if(rec==global_param.nrecs-1) LASTREC = TRUE;
         else LASTREC = FALSE;

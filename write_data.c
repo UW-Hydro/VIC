@@ -60,22 +60,74 @@ void write_data(out_data_struct *out_data,
   if(options.FULL_ENERGY) {
     fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
-	    out_data->prec, out_data->evap, out_data->runoff, out_data->baseflow, 
-	    out_data->Wdew, out_data->moist[0], out_data->moist[1], out_data->moist[2],
-	    out_data->rad_temp, out_data->net_short, out_data->r_net, out_data->latent,
-	    out_data->latent_canop, out_data->latent_trans, out_data->latent_bare, 
-	    out_data->latent_pet, out_data->latent_pet_mm, out_data->sensible,
+	    out_data->prec, out_data->evap, out_data->runoff,
+	    out_data->baseflow, out_data->Wdew, out_data->moist[0],
+	    out_data->moist[1], out_data->moist[2], out_data->rad_temp,
+	    out_data->net_short, out_data->r_net, out_data->latent,
+	    out_data->latent_canop, out_data->latent_trans,
+	    out_data->latent_bare, out_data->latent_pet, 
+	    out_data->latent_pet_mm, out_data->sensible,
 	    out_data->grnd_flux, out_data->aero_resist, out_data->surf_cond, 
 	    out_data->albedo);
   }
   else {
     fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t\n",
 	    dmy->year, dmy->month, dmy->day,
-	    out_data->prec, out_data->evap, out_data->runoff, out_data->baseflow, 
-	    out_data->Wdew, out_data->moist[0], out_data->moist[1], out_data->moist[2],
-	    out_data->net_short, out_data->r_net, out_data->latent_canop, out_data->latent_trans, 
-	    out_data->latent_bare, out_data->latent_pet, out_data->latent_pet_mm, 
+	    out_data->prec, out_data->evap, out_data->runoff, 
+	    out_data->baseflow, out_data->Wdew, out_data->moist[0], 
+	    out_data->moist[1], out_data->moist[2],
+	    out_data->net_short, out_data->r_net, out_data->latent_canop, 
+	    out_data->latent_trans, out_data->latent_bare, 
+	    out_data->latent_pet, out_data->latent_pet_mm, 
 	    out_data->aero_resist, out_data->surf_cond, out_data->albedo);
   }
 }
 
+void calc_water_balance_error(int    rec,
+			      double inflow,
+			      double outflow,
+			      double storage) {
+/***************************************************************
+  This subroutine computes the overall model water balance
+***************************************************************/
+
+  static double last_storage;
+  static double cum_error;
+
+  double error;
+
+  if(rec<0) {
+    last_storage = storage;
+    cum_error = 0.;
+  }
+  else {
+    error = inflow - outflow - (storage - last_storage);
+    cum_error += error;
+    last_storage = storage;
+    if(fabs(error)>1.e-5)
+      fprintf(stderr,"Moist Error:\t%i\t%.5lf\t%.5lf\n",rec,error,cum_error);
+  }
+
+}
+
+void calc_energy_balance_error(int    rec,
+			       double net_rad,
+			       double latent,
+			       double sensible,
+			       double grnd_flux) {
+/***************************************************************
+  This subroutine computes the overall model energy balance
+***************************************************************/
+
+  static double cum_error;
+
+  double error;
+
+  if(rec<0) cum_error=0;
+  else {
+    error = net_rad + latent + sensible + grnd_flux;
+    cum_error += error;
+    if(fabs(error)>1.e-5)
+      fprintf(stderr,"Energy Error:\t%i\t%.5lf\t%.5lf\n",rec,error,cum_error);
+  }
+}

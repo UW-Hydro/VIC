@@ -214,7 +214,7 @@ void write_debug(atmos_data_struct atmos,
 
     if(NEWCELL && prcpdist==0) {
       if(gridcell>0) {
-        for(i=0;i<Nveg;i++) free((char *)MOIST_ERROR[i]);
+        for(i=0;i<=Nveg;i++) free((char *)MOIST_ERROR[i]);
         free((char *)INIT_MOIST);
         free((char *)MOIST_ERROR);
         free((char *)INFLOW);
@@ -222,13 +222,13 @@ void write_debug(atmos_data_struct atmos,
         free((char *)BASEFLOW);
         free((char *)EVAP);
       }
-      INIT_MOIST = (double *)calloc(Nveg,sizeof(double));
-      MOIST_ERROR = (double **)calloc(Nveg,sizeof(double*));
-      INFLOW = (double *)calloc(Nveg,sizeof(double));
-      RUNOFF = (double *)calloc(Nveg,sizeof(double));
-      BASEFLOW = (double *)calloc(Nveg,sizeof(double));
-      EVAP = (double *)calloc(Nveg,sizeof(double));
-      for(i=0;i<Nveg;i++)
+      INIT_MOIST = (double *)calloc(Nveg+1,sizeof(double));
+      MOIST_ERROR = (double **)calloc(Nveg+1,sizeof(double*));
+      INFLOW = (double *)calloc(Nveg+1,sizeof(double));
+      RUNOFF = (double *)calloc(Nveg+1,sizeof(double));
+      BASEFLOW = (double *)calloc(Nveg+1,sizeof(double));
+      EVAP = (double *)calloc(Nveg+1,sizeof(double));
+      for(i=0;i<=Nveg;i++)
         MOIST_ERROR[i] = (double *)calloc(options.Nlayer+3,sizeof(double));
     }
     if(rec==0 && prcpdist==0) {

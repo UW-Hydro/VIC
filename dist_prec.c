@@ -95,6 +95,6 @@ void dist_prec(atmos_data_struct *atmos,
 
   }
 
-  put_data(prcp, atmos, veg_con, outfiles, soil_con.depth, &dmy[rec]);
+  put_data(prcp, atmos, veg_con, outfiles, soil_con.depth, &dmy[rec], rec);
 
 }

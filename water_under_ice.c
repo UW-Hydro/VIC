@@ -41,6 +41,7 @@
 
   Modifications:
   11-18-02 Updated to reflect changes in algorithm structure.          LCB
+  15-Jun-04 Initialize mixmax to 0.					TJB
 
 *****************************************************************************/
 void water_under_ice(int freezeflag, 
@@ -74,7 +75,7 @@ void water_under_ice(int freezeflag,
   double epsilon = 0.0001;
   double qw_init, qw_mean, qw_final;
   double sw_underice_visible, sw_underice_nir;
-  int mixmax;
+  int mixmax = 0;
   
   iterations = 0;
 

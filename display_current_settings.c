@@ -15,6 +15,9 @@ void display_current_settings(int                 mode,
 
   NOTE: This file must be kept in sync with any additions, removals,
   or modifications to names of parameters in user_def.h or get_global_param.c.
+
+  07-May-04 Replaced "Release" with "Version".  Moved COMPUTE_TREELINE
+	    lower down in output display.			TJB
 **********************************************************************/
 {
 
@@ -25,11 +28,11 @@ void display_current_settings(int                 mode,
   int file_num;
 
   if (mode == DISP_VERSION) {
-    fprintf(stdout,"***** VIC Release %s *****\n",version);
+    fprintf(stdout,"***** VIC Version %s *****\n",version);
     return;
   }
   else {
-    fprintf(stdout,"\n***** VIC Release %s - Current Model Settings *****\n",version);
+    fprintf(stdout,"\n***** VIC Version %s - Current Model Settings *****\n",version);
   }
 
   fprintf(stdout,"\n");
@@ -259,10 +262,6 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
   else
     fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
-  if (options.COMPUTE_TREELINE)
-    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
-  else
-    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
   if (options.CORRPREC)
     fprintf(stdout,"CORRPREC\t\tTRUE\n");
   else
@@ -275,6 +274,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"MOISTFRACT\t\tTRUE\n");
   else
     fprintf(stdout,"MOISTFRACT\t\tFALSE\n");
+  if (options.COMPUTE_TREELINE)
+    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
+  else
+    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
   fprintf(stdout,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
   fprintf(stdout,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stdout,"MEASURE_H\t\t%f\n",global->measure_h);

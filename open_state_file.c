@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id";
 
 #if SAVE_STATE
 
@@ -13,7 +13,7 @@ FILE *open_state_file(global_param_struct *global,
 /*********************************************************************
   open_state_file      Keith Cherkauer           April 15, 2000
 
-  This subroutine opens the model state file if used.
+  This subroutine opens the model state file for output.
 
 *********************************************************************/
 {

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$";
 
 void read_atmos_data(FILE                 *infile,
 		     global_param_struct   global_param,
@@ -46,6 +46,9 @@ void read_atmos_data(FILE                 *infile,
   01/10/00 Modified to read a generic Binary, or ASCII column 
            data file and read the contents into the provided  
            data arrays.                                    KAC
+  ??-???-?? Replaced NF with global_param.dt in condition checking
+	    whether forcing file contains enough records to cover
+	    the time range of the simulation.	(documented by TJB)
 
   **********************************************************************/
 {

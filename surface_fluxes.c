@@ -72,6 +72,16 @@ void surface_fluxes(char                 overstory,
   10-31-00 modified to iterate a solution for the exchange of
            energy between the snowpack and the ground surface.  KAC
   11-18-02 modified to add the effects of blowing snow.         LCB
+  02-07-03 fixed indexing problem for sub-daily snow model within
+           daily water balance VIC: hour (now hidx) is incremented
+           by 1 rather than the sub-daily time step, so the atmospheric
+           forcing data is now properly indexed.                KAC
+  04-23-03 Indexing fix sent SNOW_STEP to calc_surf_energy_bal rather
+           than the model time step, meaning that without snow the 
+           evaporation was computed for SNOW_STEP hours rather than a
+           full day.  This was fixed by introducing step_inc to 
+           index the arrays, while step_dt keeps track of the correct
+           time step.                                            KAC
 
 **********************************************************************/
 {
@@ -92,11 +102,12 @@ void surface_fluxes(char                 overstory,
   int                    N_steps;
   int                    UnderStory;
   int                    dist;
-  int                    endhour;
-  int                    hour;
+  int                    endhidx;
+  int                    hidx;
   int                    lidx;
   int                    over_iter;
   int                    step_dt;
+  int                    step_inc;
   int                    under_iter;
   double                 Evap;
   double Ls;
@@ -234,16 +245,15 @@ void surface_fluxes(char                 overstory,
   ********************************/
 
   if(snow->swq > 0 || snow->snow_canopy > 0 || atmos->snowflag[NR]) {
-    hour      = 0;
-    endhour   = hour + NF;
-    step_dt   = 1;
-    //endhour   = hour + NF * options.SNOW_STEP;
-    //step_dt   = options.SNOW_STEP;
+    hidx      = 0;
+    endhidx   = hidx + NF;
+    step_inc  = 1;
+    step_dt   = options.SNOW_STEP;
   }
   else {
-    hour      = NR;
-    endhour   = hour + gp->dt;
-    step_dt   = gp->dt;
+    hidx      = NR;
+    endhidx   = hidx + gp->dt;
+    step_inc  = step_dt = gp->dt;
   }
 
   /*******************************************
@@ -312,8 +322,8 @@ void surface_fluxes(char                 overstory,
 
 
     /* set air temperature and precipitation for this snow band */
-    Tair = atmos->air_temp[hour] + soil_con->Tfactor[band];
-    step_prec[WET] = atmos->prec[hour] / mu * soil_con->Pfactor[band];
+    Tair = atmos->air_temp[hidx] + soil_con->Tfactor[band];
+    step_prec[WET] = atmos->prec[hidx] / mu * soil_con->Pfactor[band];
     
     // initialize ground surface temperaure
     if ( options.GRND_FLUX ) Tgrnd = energy->T[0];
@@ -321,8 +331,8 @@ void surface_fluxes(char                 overstory,
 
     // initialize canopy terms
     Tcanopy = Tair;
-    VPcanopy = atmos->vp[hour];
-    VPDcanopy = atmos->vpd[hour];
+    VPcanopy = atmos->vp[hidx];
+    VPDcanopy = atmos->vpd[hidx];
 
     over_iter  = 0;
     tol_over   = 999;
@@ -336,9 +346,9 @@ void surface_fluxes(char                 overstory,
       Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
       snow->blowing_flux = CalcBlowingSnow((double) step_dt, Tair, 
 					   snow->last_snow, snow->surf_water, 
-					   wind[2], Ls, atmos->density[hour], 
-					   atmos->pressure[hour], 
-					   atmos->vp[hour], roughness, 
+					   wind[2], Ls, atmos->density[hidx], 
+					   atmos->pressure[hidx], 
+					   atmos->vp[hidx], roughness, 
 					   ref_height[2], snow->depth, 
 					   lag_one, sigma_slope, 
 					   snow->surf_temp, iveg, Nveg, fetch, 
@@ -430,10 +440,10 @@ void surface_fluxes(char                 overstory,
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
-			       Tcanopy, Tgrnd, Tair, atmos->density[hour], 
-			       dp, ice0, atmos->longwave[hour], moist, mu, 
-			       step_prec[WET], atmos->pressure[hour], 
-			       atmos->shortwave[hour], snow_grnd_flux, 
+			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 
+			       dp, ice0, atmos->longwave[hidx], moist, mu, 
+			       step_prec[WET], atmos->pressure[hidx], 
+			       atmos->shortwave[hidx], snow_grnd_flux, 
 			       VPcanopy, VPDcanopy, gp->wind_h, 
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
@@ -491,7 +501,7 @@ void surface_fluxes(char                 overstory,
 				     rainfall, ref_height, roughness, 
 				     snowfall, wind, root, INCLUDE_SNOW, 
 				     UnderStory, options.Nnode, Nveg, band, 
-				     step_dt, hour, iveg, options.Nlayer, 
+				     step_dt, hidx, iveg, options.Nlayer, 
 				     (int)overstory, rec, veg_class, atmos, 
 				     &(dmy[rec]), &bare_energy, 
 				     step_layer[DRY], step_layer[WET], 
@@ -521,8 +531,8 @@ void surface_fluxes(char                 overstory,
 					  snow_energy.NetShortOver, 
 					  bare_energy.NetShortUnder, 
 					  aero_resist[1], Tair, 
-					  atmos->density[hour], 
-					  atmos->vp[hour], atmos->vpd[hour], 
+					  atmos->density[hidx], 
+					  atmos->vp[hidx], atmos->vpd[hidx], 
 					  &bare_energy.AtmosError, 
 					  &bare_energy.AtmosLatent,
 					  &bare_energy.AtmosLatentSub,
@@ -670,9 +680,9 @@ void surface_fluxes(char                 overstory,
 
     /* increment time step */
     N_steps ++;
-    hour += step_dt;
+    hidx += step_inc;
 
-  } while (hour < endhour);
+  } while (hidx < endhidx);
 
   /************************************************
     Store snow variables for sub-model time steps 

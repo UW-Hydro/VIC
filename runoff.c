@@ -311,6 +311,7 @@ void runoff(layer_data_struct *layer_wet,
 	  if(lindex==0) dt_runoff = *runoff / (double) dt;
 
 	  /* Store moistures for water balance debugging */
+#if LINK_DEBUG
 	  if(debug.PRT_BALANCE) {
 	    if(time_step==0) {
 	      if(firstlayer)
@@ -329,14 +330,17 @@ void runoff(layer_data_struct *layer_wet,
 	      }
 	    }
 	  }
+#endif
 
 	  /* transport moisture for all sublayers **/
 	  for(sub=0;sub<3;sub++) {
 	    
 	    if(sublayer[lindex][sub] > 0.) {
 	      
+#if LINK_DEBUG
 	      if(debug.DEBUG || debug.PRT_BALANCE) 
 		last_moist = submoist[lindex][sub];
+#endif
 	      
 	      tmp_inflow = 0.;
 
@@ -371,11 +375,13 @@ void runoff(layer_data_struct *layer_wet,
 		    if(tmpsub<0) {
 		      tmplayer--;
 		      tmpsub=2;
+#if LINK_DEBUG
 		      if(debug.PRT_BALANCE) {
 			/** Update debugging storage terms **/
 			debug.inflow[dist][band][lindex+2]  -= tmp_inflow;
 			debug.outflow[dist][band][lindex+1] -= tmp_inflow;
 		      }
+#endif
 		    }
 		    if(tmplayer<0) {
 		      /** If top layer saturated, add to top layer **/
@@ -448,7 +454,9 @@ void runoff(layer_data_struct *layer_wet,
       lindex = options.Nlayer-1;
       submoist[lindex][storesub] += inflow / sublayer[lindex][storesub];
       Dsmax = soil_con.Dsmax * (double)dt / 24.0;
+#if LINK_DEBUG
       if(debug.DEBUG || debug.PRT_BALANCE) last_moist = submoist[lindex][2];
+#endif
       
       frac = soil_con.Ds * Dsmax / (soil_con.Ws * soil_con.max_moist[lindex]);
       *baseflow = frac * bot_moist;
@@ -502,11 +510,13 @@ void runoff(layer_data_struct *layer_wet,
 	      if(tmpsub<0) {
 		tmplayer--;
 		tmpsub=2;
+#if LINK_DEBUG
 		if(debug.PRT_BALANCE) {
 		  /** Update debugging storage terms **/
 		  debug.inflow[dist][band][lindex+2]  -= tmp_moist;
 		  debug.outflow[dist][band][lindex+1] -= tmp_moist;
 		}
+#endif
 	      }
 	      if(tmplayer<0) {
 		/** If top layer saturated, add to top layer **/
@@ -542,10 +552,12 @@ void runoff(layer_data_struct *layer_wet,
 
       }
       
+#if LINK_DEBUG
       if(debug.PRT_BALANCE) {
 	debug.outflow[dist][band][options.Nlayer+2] = (*runoff + *baseflow);
 	debug.outflow[dist][band][options.Nlayer+1] = *baseflow;
       }
+#endif
     }
   } /** Loop over wet and dry fractions **/
 

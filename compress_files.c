@@ -17,7 +17,10 @@ void compress_files(char string[])
   char command[MAXSTRING];
 
   /** uncompress and open zipped file **/
+#if VERBOSE
   fprintf(stderr,"zipping \"%s\".\n",string);
+#endif
+
   sprintf(command,"gzip -f %s &",string);
   system(command);
 

@@ -189,6 +189,7 @@ void full_energy(int rec,
       /**************************************************
         Store Water Balance Terms for Debugging
       **************************************************/
+#if LINK_DEBUG
       if(debug.DEBUG || debug.PRT_MOIST || debug.PRT_BALANCE) {
         /** Compute current total moisture for water balance check **/
 	store_moisture_for_debug(iveg,Nveg,prcp[0].mu,cell,
@@ -206,6 +207,7 @@ void full_energy(int rec,
 	  }
 	}
       }
+#endif
 
       /**************************************************
         Initialize Energy Balance Terms
@@ -473,12 +475,14 @@ void full_energy(int rec,
 	  else
 	    tmp_aero_resist = HUGE_RESIST;
 	  
+#if LINK_DEBUG
 	  if(debug.PRT_FLUX && rec==0) {
 	    fprintf(debug.fg_energy,"DATE\tVEG TYPE\tPRCPDIST\tNET SHT\t");
 	    fprintf(debug.fg_energy,"NET LNG\tLATENT\tSENSBL\tADVEC\t");
 	    fprintf(debug.fg_energy,"del CC\tMELT\t");
 	    fprintf(debug.fg_energy,"T_AIR\tT_SNOW\tWIND\n");
 	  }
+#endif
 	  
 	  /***********************************************
 	    New Snow, or Old Snow on Ground or in Canopy
@@ -830,6 +834,7 @@ void full_energy(int rec,
 	Controls Debugging Output
       ****************************/
 
+#if LINK_DEBUG
       for(j=0;j<Ndist;j++) {
 	if(iveg<Nveg) tmp_veg[j] = veg_var[j][iveg];
 	else tmp_veg[j] = NULL;
@@ -881,6 +886,8 @@ void full_energy(int rec,
 		      j,NEWCELL); 
 	}
       }
+#endif
+
     } /** end if RUN_TYPE **/
 
     atmos[0] = tmp_atmos;
@@ -903,6 +910,7 @@ void full_energy(int rec,
 
 }
 
+#if LINK_DEBUG
 void store_moisture_for_debug(int                 iveg,
 		              int                 Nveg,
 			      double             *mu,
@@ -962,6 +970,7 @@ void store_moisture_for_debug(int                 iveg,
     }
   }
 }
+#endif
 
 void prepare_full_energy(int               iveg,
 			 int               Nveg,

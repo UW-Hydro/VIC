@@ -63,6 +63,7 @@ void close_files(infiles_struct   inf,
     Close All Used Debugging Files
     *******************************/ 
 
+#if LINK_DEBUG
   if(debug.DEBUG || debug.PRT_TEMP) {
     fclose(debug.fg_temp);
   }
@@ -84,5 +85,6 @@ void close_files(infiles_struct   inf,
   if(debug.DEBUG || debug.PRT_GRID) {
     fclose(debug.fg_grid);
   }
+#endif
 
 }

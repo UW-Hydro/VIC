@@ -65,7 +65,9 @@ void main(int argc, char *argv[])
   infiles_struct infiles;
   outfiles_struct outfiles;
 
+#if VERBOSE
   fprintf(stderr,"Running Model Version: %s\n",vcid);
+#endif
 
   /** Read Model Options **/
   initialize_global();
@@ -78,7 +80,11 @@ void main(int argc, char *argv[])
 
   /** Check and Open Files **/
   check_files(&infiles, filenames);
+
+  /** Check and Open Debugging Files **/
+#if LINK_DEBUG
   open_debug();
+#endif
 
   /** Read Vegetation Library File **/
   veg_lib = read_veglib(infiles.veglib,&Nveg_type);
@@ -116,7 +122,9 @@ void main(int argc, char *argv[])
       if(cell_cnt==Ncells) MODEL_DONE = TRUE;
     }
     if(RUN_MODEL) {
+#if LINK_DEBUG
       if(debug.PRT_SOIL) write_soilparam(soil_con); 
+#endif
 
       NEWCELL=TRUE;
       cellnum++;
@@ -134,7 +142,9 @@ void main(int argc, char *argv[])
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
       calc_root_fractions(veg_con,soil_con);
+#if LINK_DEBUG
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
+#endif
 
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, filenames, soil_con,
@@ -156,7 +166,11 @@ void main(int argc, char *argv[])
 				&global_param.Nnodes);
 
       /** Initialize Soil and Vegetation Variables **/
+
+#if VERBOSE
       fprintf(stderr,"Initializing Variables\n");
+#endif
+
       for(i=0;i<Ndist;i++) {
         initialize_soil(prcp.cell[i],soil_con,
 			veg_con[0].vegetat_type_num);
@@ -173,18 +187,24 @@ void main(int argc, char *argv[])
 		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
 		       soil_con.annual_prec,soil_con.Tfactor,
 		       global_param.nrecs,global_param.dt);
+#if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
+#endif
 
       /**************************************************
         Initialize Energy Balance and Snow Variables 
       **************************************************/
       if(options.SNOW_MODEL) {
+#if VERBOSE
         fprintf(stderr,"Snow Model Initialization\n");
+#endif
 	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
 			infiles.init_snow,soil_con.gridcel);
       }
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+#if VERBOSE
 	fprintf(stderr,"Energy Balance Initialization\n");
+#endif
 	initialize_energy_bal(prcp.energy,prcp.cell,&soil_con,
 			      atmos[0].air_temp,prcp.mu,soil_con.gridcel,
 			      veg_con[0].vegetat_type_num,
@@ -192,7 +212,9 @@ void main(int argc, char *argv[])
 			      Ndist,infiles.init_soil);
       }
 
+#if VERBOSE
       fprintf(stderr,"Running Model\n");
+#endif
 
       /** Update Error Handling Structure **/
       Error.outfp = outfiles;

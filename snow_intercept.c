@@ -79,6 +79,9 @@ static char vcid[] = "$Id$";
   06-98 included maximum structural loading to prevent the model
         from loading the canopy with more snow than it can handle
         structurally.                                             PXS
+  09-98 aerodynamic resistances in the canopy when snow has been  
+        intercepted is increased by a factor of 10:  include REF
+        Journal of Hydrology, 1998                            KAC, GO'D
 
 *****************************************************************************/
 void snow_intercept(double Dt, double F,  double LAI, 

@@ -137,11 +137,11 @@ Spurious condensation at low temperatures
 	spuriously high runoff and baseflow.  Now there is an added condition
 	that liquid moisture > residual moisture for evap to be capped at
 	(liquid moisture - residual moisture).
-	NOTE: This fix results in lower runoff and baseflow in areas with
-	frozen soils, and may require recalibration of soil paramters.
+	NOTE: This fix results in lower runoff and baseflow in unvegetated areas
+	with frozen soils, and may require recalibration of soil parameters.
 
 
-Incorrect baseflow bounds
+Baseflow validation
 
 	Files affected:
 	read_soilparam.c, read_soilparam_arc.c, runoff.c
@@ -150,7 +150,7 @@ Incorrect baseflow bounds
 	In 4.0.4, runoff.c checked for the wrong bounds on baseflow, allowing
 	baseflow to become negative when liquid soil moisture < residual
 	moisture.  These bounds have been fixed in 4.0.5, as follows: baseflow
-	is not allowed to exceed (liquid soil moisture - field capacity); when
+	is not allowed to exceed (liquid soil moisture - residual moisture); when
 	baseflow < 0, baseflow is set to 0; when baseflow > 0 and the resulting
 	soil moisture < residual moisture, water is taken out of baseflow and
 	given to the soil as follows:

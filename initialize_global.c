@@ -22,6 +22,7 @@ void initialize_global() {
   options.MOISTFRACT     = TRUE - output moisture as fractional moisture
                            content instead of total water in mm
   options.BINARY_OUTPUT  = TRUE - create binary output fles
+  options.BLOWING        = TRUE - calculate sublimation from blowing snow
   options.Nlayer         = Number of soil layers to use in model (at least
                            3 must be used for the energy balance model
   options.GRID_DECIMAL   = Number of decimal places used in the gridded
@@ -61,6 +62,14 @@ void initialize_global() {
   param_set.WIND         = FALSE;
   param_set.DENSITY      = FALSE;
 
+  Modifications:
+  11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file 
+           initialization.                                        KAC
+  04-22-03 Removed LAKS and LAKE_PROFILE from pre-processor
+           statements that removed them is LAKE_MODEL was FALSE.
+           This causes problems with various checks and saves no
+           appreciable time of memory.                            KAC
+
 *********************************************************************/
 
   extern option_struct options;
@@ -80,6 +89,7 @@ void initialize_global() {
   options.MOISTFRACT            = FALSE;
   options.BINARY_OUTPUT         = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
+  options.BLOWING               = FALSE;
   options.Nlayer                = 2;
   options.Nnode                 = 3;
   options.GRID_DECIMAL          = 2;
@@ -94,10 +104,8 @@ void initialize_global() {
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;
   options.GRND_FLUX             = FALSE;
-#if LAKE_MODEL
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
-#endif // LAKE_MODEL
 
 #if LINK_DEBUG 
 
@@ -113,6 +121,7 @@ void initialize_global() {
   debug.PRT_VAR     = FALSE;
   debug.PRT_TEMP    = FALSE;
   debug.PRT_MOIST   = FALSE;
+  debug.PRT_LAKE    = FALSE;
   debug.PRT_KAPPA   = FALSE;
   debug.PRT_BALANCE = FALSE;
   debug.PRT_GRID    = FALSE;

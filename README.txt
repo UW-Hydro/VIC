@@ -87,10 +87,6 @@ Modifications:
 	  soil liquid moisture <= residual moisture.  Changed
 	  block that handles case of total soil moisture < residual
 	  moisture to not allow dt_baseflow to go negative.	TJB
-	  (fix by Chunmei Zhu and Alan Hamlet)
-	  Added check to make sure baseflow doesn't exceed
-	  difference between liquid moisture and field
-	  capacity.						TJB
 	  Changed block that handles baseflow when soil moisture
 	  drops below residual moisture.  Now, the block is only
 	  entered if baseflow > 0 and soil moisture < residual,

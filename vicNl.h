@@ -23,6 +23,9 @@ void write_soilparam(soil_con_struct);
 cell_data_struct *make_cell_data(int, int);
 void initialize_soil(cell_data_struct *, soil_con_struct, int);
 void write_layer(layer_data_struct *, int, int, double *);
+soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
+double read_arcinfo_value(char *, double, double);
+int read_arcinfo_info(char *, double **, double **, int **);
 
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);

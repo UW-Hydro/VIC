@@ -128,6 +128,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
         else options.BINARY_OUTPUT = FALSE;
       }
+      else if(strcasecmp("ARC_SOIL",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
+        else options.ARC_SOIL = FALSE;
+      }
 
       /************************************
         Get Frocing Data File Information
@@ -143,6 +148,10 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->soil);
+      }
+      else if(strcasecmp("SOIL_DIR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->soil_dir);
+	options.ARC_SOIL = TRUE;
       }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
@@ -197,6 +206,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) debug.PRT_MOIST=TRUE;
         else debug.PRT_MOIST = FALSE;
+      }
+      else if(strcasecmp("PRT_TEMP",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_TEMP=TRUE;
+        else debug.PRT_TEMP = FALSE;
       }
       else if(strcasecmp("DEBUG_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",debug.debug_dir);

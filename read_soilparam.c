@@ -127,9 +127,10 @@ soil_con_struct read_soilparam(FILE *soilparam)
     Compute Maximum Soil Layer Moiture Content
     *******************************************/
   for(layer=0;layer<options.Nlayer;layer++) {
+    temp.resid_moist[layer] = RESID_MOIST;
     porosity = 1.0 - temp.bulk_density[layer]/temp.soil_density;
-    if(porosity < MOIST_RESID) {
-      sprintf(errstr,"Layer %i porosity (%lf mm/mm) must be greater then the defined moisture residue of %lf mm/mm",layer,porosity,(double)MOIST_RESID);
+    if(porosity < RESID_MOIST) {
+      sprintf(errstr,"Layer %i porosity (%lf mm/mm) must be greater then the defined moisture residue of %lf mm/mm",layer,porosity,(double)RESID_MOIST);
       nrerror(errstr);
     }
     temp.max_moist[layer] = temp.depth[layer] * porosity * 1000.;

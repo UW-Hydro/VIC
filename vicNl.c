@@ -35,12 +35,16 @@ void main(int argc, char *argv[])
 
   char    NEWCELL;
   char    LASTREC;
+  char    MODEL_DONE;
   int     STILL_STORM;
   int     rec, i;
   int     Ndist;
   int     Nveg_type;
   int     cellnum;
   int     index;
+  int     RUN_MODEL;
+  int     Ncells;
+  int     cell_cnt;
   double *mu;
   double  storage;
   dmy_struct *dmy;
@@ -90,10 +94,26 @@ void main(int argc, char *argv[])
   /************************************
     Run Model for all Active Grid Cells
     ************************************/
-  while((fscanf(infiles.soilparam, "%d", &flag))!=EOF) {
-    soil_con = read_soilparam(infiles.soilparam);
-    if(debug.PRT_SOIL) write_soilparam(soil_con); 
-    if (flag == 1) {
+  MODEL_DONE = FALSE;
+  cell_cnt=0;
+  while(!MODEL_DONE) {
+    if(!options.ARC_SOIL) {
+      if((fscanf(infiles.soilparam, "%d", &flag))!=EOF) RUN_MODEL=TRUE;
+      else {
+	MODEL_DONE = TRUE;
+	RUN_MODEL = FALSE;
+      }
+      if(!MODEL_DONE) soil_con = read_soilparam(infiles.soilparam);
+    }
+    else {
+      soil_con = read_soilparam_arc(infiles.soilparam, 
+				    filenames.soil_dir, &Ncells, 
+				    &RUN_MODEL, cell_cnt);
+      cell_cnt++;
+      if(cell_cnt==Ncells) MODEL_DONE = TRUE;
+    }
+    if(RUN_MODEL) {
+      if(debug.PRT_SOIL) write_soilparam(soil_con); 
 
       NEWCELL=TRUE;
       cellnum++;
@@ -151,15 +171,21 @@ void main(int argc, char *argv[])
       /**************************************************
         Initialize Energy Balance and Snow Variables 
       **************************************************/
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-        fprintf(stderr,"Energy Balance Initialization\n");
+      if(options.FULL_ENERGY || options.SNOW_MODEL) {
+        fprintf(stderr,"Snow Model Initialization\n");
         for(i=0;i<Ndist;i++)
           initialize_snow(prcp.dist[i].snow,veg_con[0].vegetat_type_num,
-              infiles.init_snow);
-        for(i=0;i<Ndist;i++)
-          initialize_energy_bal(prcp.dist[i].energy,prcp.dist[i].cell,soil_con,
-              atmos[0].air_temp,veg_con[0].vegetat_type_num,global_param.Ulayer,
-              global_param.Llayer,infiles.init_soil);
+			  infiles.init_snow);
+      }
+      if(options.FULL_ENERGY) {
+	for(i=0;i<Ndist;i++)
+	  fprintf(stderr,"Full Energy Model Initialization\n");
+          initialize_energy_bal(prcp.dist[i].energy,
+				prcp.dist[i].cell,soil_con,
+				atmos[0].air_temp,
+				veg_con[0].vegetat_type_num,
+				global_param.Ulayer,
+				global_param.Llayer,infiles.init_soil);
       }
 
       fprintf(stderr,"Running Model\n");
@@ -216,6 +242,6 @@ void main(int argc, char *argv[])
       free((char *)dmy);
       if(options.RADAR) free((char *)mu);
 
-    }	/* End Run Flag Condition */
+    }	/* End Run Model Loop */
   } 	/* End Grid Loop */
 }	/* End Main Program */

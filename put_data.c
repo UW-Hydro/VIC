@@ -22,7 +22,7 @@ void put_data(dist_prcp_struct  *prcp,
   extern option_struct    options;
   extern debug_struct     debug;
 
-  static out_data_struct *out_data;
+  out_data_struct *out_data;
 
   int                     veg, vegnum;
   int                     index;

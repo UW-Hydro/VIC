@@ -53,11 +53,11 @@ void write_soilparam(soil_con_struct soil)
   printf("\tsoil_density         = %lf kg/m^3 [Soil partical density]\n",soil.soil_density);
   printf("\ttime_zone_lng     = %f degrees [Central longitude of time zone]\n",soil.time_zone_lng);
   for(i=0;i<options.Nlayer;i++)
-    printf("\tmax_moist%02d     = %lf mm [Maximum moisture content]\n",soil.max_moist[i]);
+    printf("\tmax_moist%02d     = %lf mm [Maximum moisture content]\n",i+1,soil.max_moist[i]);
   for(i=0;i<options.Nlayer;i++)
-    printf("\tWcr%02d           = %lf mm [Critical moisture content]\n",soil.Wcr[i]);
+    printf("\tWcr%02d           = %lf mm [Critical moisture content]\n",i+1,soil.Wcr[i]);
   for(i=0;i<options.Nlayer;i++)
-    printf("\tWpwp%02d          = %lf mm [Wilting point moisture content]\n",soil.Wpwp[i]);
+    printf("\tWpwp%02d          = %lf mm [Wilting point moisture content]\n",i+1,soil.Wpwp[i]);
   printf("\trough             = %lf m [Roughness of bare soil]\n",soil.rough);
   printf("\tsnow_rough     = %lf m [Roughness of snow surface]\n",soil.snow_rough);
 }

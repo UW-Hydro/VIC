@@ -1,5 +1,5 @@
 /***** Physical Parameters *****/
-#define MOIST_RESID 0.055 /* define residual moisture content of soil column */
+#define RESID_MOIST 0.055 /* define residual moisture content of soil column */
 
 /***** Physical Constants *****/
 #define von_K        0.40	/* Von Karmin constant for evapotranspiration */
@@ -64,6 +64,7 @@ typedef struct {
   char  forcing[2][MAXSTRING];	/* atmospheric forcing data file names */
   char  global[MAXSTRING];
   char  soil[MAXSTRING];
+  char  soil_dir[MAXSTRING];
   char  veglib[MAXSTRING];	/* vegetation parameter library file */
   char  veg[MAXSTRING];		/* vegetation grid coverage file */
   char  result_dir[MAXSTRING];
@@ -94,6 +95,8 @@ typedef struct {
   char   MOISTFRACT;	 /* TRUE = output soil moisture as moisture content */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
+  char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
+			  parameters*/
 } option_struct;
 
 typedef struct {
@@ -195,6 +198,7 @@ typedef struct {
   double dp;			 /* soil thermal damping depth (m) */
   double bubble;	         /* bubbling pressure, HBH 5.15 (cm) */
   double quartz;		 /* quartz content of soil (fraction) */
+  double resid_moist[MAXlayer];  /* residual moisture content of soil layer */
   double bulk_density[MAXlayer]; /* soil bulk density (kg/m^3) */
   double soil_density;		 /* soil partical density (kg/m^3) */
   double rough;		         /* soil surface roughness (m) */

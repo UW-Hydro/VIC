@@ -922,11 +922,10 @@ void full_energy(int rec,
  
         if(!SNOW) {
 	  if (tmp_wind[0] > 0.0)
-	    cell[iveg].aero_resist[0] /= StabilityCorrection(ref_height, 
-							 displacement, T0,
-							 atmos->air_temp, 
-							 tmp_wind[0], 
-							 roughness);
+	    cell[iveg].aero_resist[0] 
+	      /= StabilityCorrection(ref_height, displacement, 
+				     atmos->air_temp, atmos->air_temp, 
+				     tmp_wind[0], roughness);
 	  else
 	    cell[iveg].aero_resist[0] = HUGE_RESIST;
           if(iveg!=Nveg) {

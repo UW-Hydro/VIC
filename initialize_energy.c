@@ -55,7 +55,7 @@ void initialize_energy_bal (energy_bal_struct *energy,
   char errorstr[MAXSTRING];
   int i, j, veg, index, Tlayer;
   int tmpint;
-  double sum, Lsum, Zsum, dp, Ltotal;
+  double sum, Lsum, Zsum, dp, Ltotal, tmpdepth;
   double *kappa, *Cs, *M;
   double moist[MAXlayer], ice[MAXlayer];
   double unfrozen, frozen;
@@ -304,6 +304,11 @@ void initialize_energy_bal (energy_bal_struct *energy,
       energy[veg].T[3] = soil_con.avg_temp;
     }
   }
+
+  /*****************************************************************
+    Initialize Energy Balance Variables if Frozen Soils Activated,
+    and no Initial Condition File Given 
+  *****************************************************************/
   else if(options.FROZEN_SOIL) {
     for ( veg = 0 ; veg <= veg_num ; veg++) {
 
@@ -314,18 +319,28 @@ void initialize_energy_bal (energy_bal_struct *energy,
                          dp,surf_temp,soil_con.avg_temp);
 
       Zsum = 0.;
+      if(dp<Ltotal) tmpdepth = dp;
+      else tmpdepth = Ltotal;
       dp -= soil_con.depth[0] * 1.5;
+      tmpdepth -= soil_con.depth[0] * 1.5;
       for(index=2;index<=Ulayer+1;index++) {
-        energy[veg].dz[index] = dp/(((double)Ulayer-0.5));
+        energy[veg].dz[index] = tmpdepth/(((double)Ulayer-0.5));
         Zsum += (energy[veg].dz[index]+energy[veg].dz[index-1])/2.;
-        energy[veg].T[index] = linear_interp(Zsum+soil_con.depth[0],0.,
-            soil_con.dp,surf_temp,soil_con.avg_temp);
+        energy[veg].T[index] = soil_con.avg_temp;
       }
       dp += soil_con.depth[0] * 1.5;
-      for(index=Ulayer+2;index<Tlayer;index++) {
-        energy[veg].dz[index] = (Ltotal - dp - energy[veg].dz[Ulayer+1]/2.)
-                              / ((double)Llayer-0.5);
-        energy[veg].T[index] = soil_con.avg_temp;
+      if(dp < Ltotal) {
+	for(index=Ulayer+2;index<Tlayer;index++) {
+	  energy[veg].dz[index] = (Ltotal - dp - energy[veg].dz[Ulayer+1]/2.)
+	    / ((double)Llayer-0.5);
+	  energy[veg].T[index] = soil_con.avg_temp;
+	}
+      }
+      else {
+	for(index=Ulayer+2;index<Tlayer;index++) {
+	  energy[veg].dz[index] = 0;
+	  energy[veg].T[index] = soil_con.avg_temp;
+	}
       }
 
       find_0_degree_fronts(&energy[veg],cell[veg].layer,Ltotal,

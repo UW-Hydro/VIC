@@ -43,6 +43,9 @@ void write_data(out_data_struct *out_data,
   int   *tmp_iptr;
   float *tmp_fptr;
 
+  tmp_iptr = (int *)calloc(1,sizeof(int));
+  tmp_fptr = (float *)calloc(1,sizeof(float));
+
   /************************************
     Output Frozen Soil Variables
   ************************************/
@@ -201,6 +204,10 @@ void write_data(out_data_struct *out_data,
 	    out_data->latent_pet, out_data->latent_pet_mm, 
 	    out_data->aero_resist, out_data->surf_temp, out_data->albedo);
   }
+
+  free((char *)tmp_iptr);
+  free((char *)tmp_fptr);
+
 }
 
 void calc_water_balance_error(int    rec,
@@ -216,6 +223,7 @@ void calc_water_balance_error(int    rec,
 
   static double last_storage;
   static double cum_error;
+  static double max_error;
   static int    error_cnt;
   static int    Nrecs;
 
@@ -224,6 +232,7 @@ void calc_water_balance_error(int    rec,
   if(rec<0) {
     last_storage = storage;
     cum_error    = 0.;
+    max_error    = 0.;
     error_cnt    = 0;
     Nrecs        = -rec;
   }
@@ -231,16 +240,10 @@ void calc_water_balance_error(int    rec,
     error = inflow - outflow - (storage - last_storage);
     cum_error += error;
     last_storage = storage;
-    if(fabs(error)>1.e-5) {
-      if(error_cnt<25) 
-	fprintf(stderr,"Moist Error:\t%i\t%.4lf\t%.4lf\n",
-		rec,error,cum_error);
-      else if(error_cnt == 25) {
-	fprintf(stderr,"Moist Error:\t%i\t%.4lf\t%.4lf\n",
-		rec,error,cum_error);
-	fprintf(stderr,"Too many mass balance errors, will not print more.\n");
-      }
-      error_cnt++;
+    if(fabs(error)>fabs(error) && fabs(error)>1e-5) {
+      max_error = error;
+      fprintf(stderr,"Maximum Moist Error:\t%i\t%.4lf\t%.4lf\n",
+	      rec,error,cum_error);
     }
     if(rec==Nrecs-1) {
       fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4lf\n",

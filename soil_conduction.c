@@ -156,6 +156,7 @@ void distribute_soil_property(double *dz,
   double Ltmp, Ftmp, Ttmp, Ztmp;
 
   dz[0] /= 2.;
+  while(dz[Tlayer-1]<=0) Tlayer--;
   dz[Tlayer-1] /= 2.;
 
   Zsum=0.;
@@ -442,6 +443,7 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   /** Calculate New Layer Depths **/
   index=Tlayer-1;
   Zsum = dp;
+  fdepth=tdepth=0;
   if(T[index]>0.0) {
     /***** Find Freezing Front Depth *****/
     while(index>0 && T[index]>0.0) {
@@ -836,7 +838,7 @@ void find_sublayer_temperatures(layer_data_struct *layer,
       layer[i].T_froz = -999.;
     else if(layer[i].T_froz > 0.) { 
       layer[i].T_froz = 0.;
-      fprintf(stderr,"WARNING: Frozen layer temperature for layer %i was set to 0. fdepth = %.4lf\n",i,layer[i].fdepth);
+      fprintf(stderr,"WARNING: Frozen layer temperature for layer %i was set to 0. thickness = %.4lf\n",i,layer[i].fdepth-layer[i].tdepth);
     }
     if(layer[i].fdepth == depth[i]) layer[i].T = -999.;
   }

@@ -54,11 +54,6 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
       infp->forcing[1] = open_file(fnames.forcing[1], "r");
   }
 
-  /** Initial Model State Variables Read from File **/
-  if(options.INIT_STATE) {
-    infp->statefile = open_file(fnames.init_state, "r");
-  }
-
   /** If running frozen soils model **/
 #if !LDAS_OUTPUT && !OPTIMIZE
    if(options.FROZEN_SOIL) {

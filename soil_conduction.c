@@ -405,8 +405,7 @@ void distribute_node_moisture_properties(double *moist_node,
 
     // Check that node moisture does not exceed maximum node moisture
     if (abs(moist_node[nidx]-max_moist_node[nidx]) > SMALL) {
-      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisuttre, %f.", moist_node[nidx], max_moist_node[n
-idx] );
+      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisuttre, %f.", moist_node[nidx], max_moist_node[nidx] );
       vicerror(ErrStr);
     }
 

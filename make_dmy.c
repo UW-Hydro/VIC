@@ -103,7 +103,7 @@ dmy_struct *make_dmy(global_param_struct *global)
     }
   }
 
-
+  // allocate dmy struct
   temp = (dmy_struct*) calloc(global->nrecs, sizeof(dmy_struct));
 
   /** Create Date Structure for each Modeled Time Step **/
@@ -121,7 +121,7 @@ dmy_struct *make_dmy(global_param_struct *global)
     temp[ii].day   = day;
     temp[ii].month = month;
     temp[ii].year  = year;
-    temp[ii].day_in_year = jday;
+    temp[ii].day_in_year = jday;      
 
     get_next_time_step(&year,&month,&day,&hr,&jday,global->dt);
 
@@ -131,7 +131,7 @@ dmy_struct *make_dmy(global_param_struct *global)
   }
 
   /** Determine number of forcing records to skip before model start time **/
-  for(i=0;i<2;i++) {
+  for ( i = 0; i < 2; i++ ) {
     if(param_set.FORCE_DT[i] != MISSING) {
       if(global->forceyear[i] > 0) {
 	tmpyear  = global->forceyear[i];
@@ -160,7 +160,7 @@ dmy_struct *make_dmy(global_param_struct *global)
 
   /** Determine the number of records to skip before starting output files **/
   skiprec = 0;
-  for(i=0;i<global->skipyear;i++) {
+  for ( i = 0; i < global->skipyear; i++ ) {
     if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
     else skiprec += 365 * 24 / global->dt;
   }

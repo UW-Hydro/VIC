@@ -20,7 +20,8 @@ void close_files(infiles_struct   *inf,
   02-27-01 Now closes files opened for lake model applications  KAC
   11-18-02 Now closes lake debugging file.                      LCB
   29-Oct-03 Distinguishing between input lakeparam file and output
-	   lake file.						TJB
+	    lake file.						TJB
+  2005-Mar-24 Added support for ALMA output files.		TJB
 
 **********************************************************************/
 {
@@ -44,38 +45,75 @@ void close_files(infiles_struct   *inf,
     Close Output Files
     *******************/
 
+#if LDAS_OUTPUT || OPTIMIZE
+
   /** Energy and Moisture Fluxes Output File **/
   fclose(outf->fluxes);
   if(options.COMPRESS) compress_files(fnames->fluxes);
 
-#if !LDAS_OUTPUT && !OPTIMIZE
+#else /* LDAS_OUTPUT || OPTIMIZE */
 
-  /** These output files are not used when using LDAS binary format **/
+  if ( options.ALMA_OUTPUT ) {
 
-  /** Frozen Soils Output File **/
-  if(options.FROZEN_SOIL) {
-    fclose(outf->fdepth);
-    if(options.COMPRESS) compress_files(fnames->fdepth);
+    /** Energy Balance Output File **/
+    fclose(outf->eb);
+    if(options.COMPRESS) compress_files(fnames->eb);
+
+    /** Water Balance Output File **/
+    fclose(outf->wb);
+    if(options.COMPRESS) compress_files(fnames->wb);
+
+    /** Surface Output File **/
+    fclose(outf->sur);
+    if(options.COMPRESS) compress_files(fnames->sur);
+
+    /** Subsurace Output File **/
+    fclose(outf->sub);
+    if(options.COMPRESS) compress_files(fnames->sub);
+
+    /** Evaporation Output File **/
+    fclose(outf->eva);
+    if(options.COMPRESS) compress_files(fnames->eva);
+
+    /** Cold-season Processes Output File **/
+    fclose(outf->csp);
+    if(options.COMPRESS) compress_files(fnames->csp);
+
   }
+  else {
 
-  /** Snow Data Output File **/
-  fclose(outf->snow);
-  if(options.COMPRESS) compress_files(fnames->snow);
+    /** Energy and Moisture Fluxes Output File **/
+    fclose(outf->fluxes);
+    if(options.COMPRESS) compress_files(fnames->fluxes);
 
-  if(options.PRT_SNOW_BAND) {
-    fclose(outf->snowband);
-    if(options.COMPRESS) compress_files(fnames->snowband);
-  }
+    /** These output files are not used when using LDAS binary format **/
+
+    /** Frozen Soils Output File **/
+    if(options.FROZEN_SOIL) {
+      fclose(outf->fdepth);
+      if(options.COMPRESS) compress_files(fnames->fdepth);
+    }
+
+    /** Snow Data Output File **/
+    fclose(outf->snow);
+    if(options.COMPRESS) compress_files(fnames->snow);
+
+    if(options.PRT_SNOW_BAND) {
+      fclose(outf->snowband);
+      if(options.COMPRESS) compress_files(fnames->snowband);
+    }
 
 #if LAKE_MODEL
-  if ( options.LAKES ) {
-    /** Lake Data Output File **/
-    fclose(outf->lake);
-    if(options.COMPRESS) compress_files(fnames->lake);
-  }
-#endif
+    if ( options.LAKES ) {
+      /** Lake Data Output File **/
+      fclose(outf->lake);
+      if(options.COMPRESS) compress_files(fnames->lake);
+    }
+#endif /* LAKE_MODEL */
 
-#endif
+  }
+
+#endif /* LDAS_OUTPUT || OPTIMIZE */
 
   /*******************************
     Close All Used Debugging Files

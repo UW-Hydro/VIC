@@ -5,6 +5,18 @@
 
 Modifications:
 
+	IceEnergyBalance.c, SnowPackEnergyBalance.c, calc_surf_energy_bal.c,
+	func_surf_energy_bal.c, ice_melt.c, latent_heat_from_snow.c,
+	snow_melt.c, solve_snow.c, surface_fluxes.c, vicNl.h:
+	  Fixed 2 bugs in the sublimation terms: 1) sub_surface
+	  was wrong when snow step was not 1 hour, and 2) sub_blowing
+	  was wrong under certain conditions.  The fix involved
+	  moving the calculation of blowing_flux from surface_fluxes()
+	  to latent_heat_from_snow() and establishing the convention
+	  that VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
+	  always have units of kg/m2s; and that vapor_flux, blowing_flux,
+	  and surface_flux always have units of m/timestep.  Parameter
+	  lists for several functions had to be modified for this to work.	TJB
 	Makefile:
 	  Added "make depend" to the "all" and "default" options.
 	  This way, if a user always types "make", the user is

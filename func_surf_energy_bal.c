@@ -40,6 +40,23 @@ double func_surf_energy_bal(double Ts, va_list ap)
   10-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
 	    before computing *fusion.  This is just a safety measure;
 	    ice and ice0 should both be 0 if FS_ACTIVE is FALSE.TJB
+  16-Jul-04 Renamed VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
+	    to vapor_flux, blowing_flux, and surface_flux, respectively,
+	    to denote fact that their units are m/timestep rather than
+	    kg/m2s.  Created new variables VaporMassFlux, BlowingMassFlux,
+	    and SurfaceMassFlux with units of kg/m2s.  The addresses of
+	    the *MassFlux variables are passed to latent_heat_from_snow()
+	    where values for the variables are computed.  After these
+	    values are computed, vapor_flux, blowing_flux and surface_flux
+	    are derived from them by unit conversion.  vapor_flux,
+	    blowing_flux, and surface_flux are the variables that are
+	    passed in/out of this function.			TJB
+  16-Jul-04 Changed the type of the last few variables (lag_one, Nveg,
+	    etc) in the va_list to be double.  For some reason, passing
+	    them as float or int caused them to become garbage.  This may
+	    have to do with the fact that they followed variables of type
+	    (double *) in va_list, which may have caused memory alignment
+	    problems.						TJB
 
 **********************************************************************/
 {
@@ -130,9 +147,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   double *deltaCC;
   double *refreeze_energy;
-  double *VaporMassFlux;
-  double *BlowingMassFlux;
-  double *SurfaceMassFlux;
+  double *vapor_flux;
+  double *blowing_flux;
+  double *surface_flux;
 
   /* soil node terms */
   int     Nnodes;
@@ -208,6 +225,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double ra_under;
   double temp_latent_heat;
   double temp_latent_heat_sub;
+  double VaporMassFlux;
+  double BlowingMassFlux;
+  double SurfaceMassFlux;
 
   /************************************
     Read variables from variable list 
@@ -292,9 +312,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
     
   deltaCC                 = (double *) va_arg(ap, double *);
   refreeze_energy         = (double *) va_arg(ap, double *);
-  VaporMassFlux           = (double *) va_arg(ap, double *);
-  BlowingMassFlux         = (double *) va_arg(ap, double *);
-  SurfaceMassFlux         = (double *) va_arg(ap, double *);
+  vapor_flux              = (double *) va_arg(ap, double *);
+  blowing_flux            = (double *) va_arg(ap, double *);
+  surface_flux            = (double *) va_arg(ap, double *);
 
   /* soil node terms */
   Nnodes                  = (int) va_arg(ap, int);
@@ -348,12 +368,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   sensible_heat           = (double *) va_arg(ap, double *);
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
-  dt   = (double) va_arg(ap, double);
-  SnowDepth  = (double) va_arg(ap, double);
-  lag_one = (float) va_arg(ap, float);
-  sigma_slope = (float) va_arg(ap, float);
-  fetch = (float) va_arg(ap, float);
-  Nveg = (int) va_arg(ap, int);
+  dt                      = (double) va_arg(ap, double);
+  SnowDepth               = (double) va_arg(ap, double);
+  lag_one                 = (float) va_arg(ap, double);
+  sigma_slope             = (float) va_arg(ap, double);
+  fetch                   = (float) va_arg(ap, double);
+  Nveg                    = (int) va_arg(ap, double);
 
   /***************
     MAIN ROUTINE
@@ -559,13 +579,25 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /** Compute the latent heat flux from a thin snowpack if present **/
   if (INCLUDE_SNOW) {
+
+    /* Convert sublimation terms from m/timestep to kg/m2s */
+    VaporMassFlux = *vapor_flux * ice_density / delta_t;
+    BlowingMassFlux = *blowing_flux * ice_density / delta_t;
+    SurfaceMassFlux = *surface_flux * ice_density / delta_t;
+
     latent_heat_from_snow(atmos_density, ice_density, vp, Le, atmos_pressure, 
 			  ra_under, TMean, vpd, &temp_latent_heat, 
-			  &temp_latent_heat_sub, VaporMassFlux, BlowingMassFlux, SurfaceMassFlux,
-			  dt,Tair, LastSnow, snow_water, wind[2],roughness, ref_height[2],
-			  SnowDepth, overstory, lag_one, sigma_slope, fetch, Nveg, iveg);
+			  &temp_latent_heat_sub, &VaporMassFlux, &BlowingMassFlux, &SurfaceMassFlux,
+			  delta_t,Tair, LastSnow, snow_water, wind[2],roughness, ref_height[2],
+			  SnowDepth, overstory, lag_one, sigma_slope, fetch, iveg, Nveg, month);
     *latent_heat += temp_latent_heat * snow_coverage;
     *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
+
+    /* Convert sublimation terms from kg/m2s to m/timestep */
+    *vapor_flux = VaporMassFlux * delta_t / ice_density;
+    *blowing_flux = BlowingMassFlux * delta_t / ice_density;
+    *surface_flux = SurfaceMassFlux * delta_t / ice_density;
+
   }
   else *latent_heat *= (1. - snow_coverage);
 

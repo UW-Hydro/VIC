@@ -18,7 +18,7 @@ void latent_heat_from_snow(double  AirDens,
 			   double *VaporMassFlux,
 			   double *BlowingMassFlux,
 			   double *SurfaceMassFlux,
-			   double Dt,
+			   double delta_t,
 			   double Tair,
 			   int LastSnow,
 			   double SurfaceLiquidWater,
@@ -30,8 +30,9 @@ void latent_heat_from_snow(double  AirDens,
 			   float lag_one,
 			   float sigma_slope,
 			   float fetch,
+			   int iveg,
 			   int Nveg,
-			   int iveg) {
+			   int month) {
 /**********************************************************************
   latent_heat_from_snow.c       Laura Bowling           
 
@@ -40,47 +41,55 @@ void latent_heat_from_snow(double  AirDens,
 
   Modifications:
   11-18-02 Modified to handle the effects of blowing snow.       LCB
+  16-Jul-04 Moved the calculation of BlowingMassFlux back into this
+	    function.  Added "month" to the parameter list and added
+	    declaration of *veg_lib, to enable this calculation to
+	    occur.  Modified calculations of all sublimation terms
+	    to ensure that VaporMassFlux, BlowingMassFlux, and
+	    SurfaceMassFlux consistently have units of kg/m2s.	TJB
 
 ***********************************************************************/
 
+  extern veg_lib_struct *veg_lib;
   extern option_struct options;
   double EsSnow;
   double Ls;
 
   EsSnow = svp(TMean);
 
-  // SurfaceMassFlux and BlowingMassFlux in kg*m-2*s
+  // SurfaceMassFlux and BlowingMassFlux in kg/m2s
 
   *SurfaceMassFlux = AirDens * ( EPS / Press ) * ( EactAir - EsSnow ) / Ra;
   
   if ( Vpd == 0.0 && *SurfaceMassFlux < 0.0 ) 
     *SurfaceMassFlux = 0.0;
 
-  //      if( !overstory && options.BLOWING) {
-  //     Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
-  //	*BlowingMassFlux = CalcBlowingSnow(Dt, Tair, LastSnow, SurfaceLiquidWater, Wind, Ls, AirDens, Press, EactAir, Z0, Z, SnowDepth, lag_one, sigma_slope, TMean, iveg, Nveg, fetch);
-  //	*BlowingMassFlux *= 3600./RHO_W;
-  // }
-  //    else
-  //     *BlowingMassFlux = 0.0;
+  if( options.BLOWING && !overstory ) {
+    Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
+    *BlowingMassFlux = CalcBlowingSnow(delta_t/SECPHOUR, Tair, LastSnow,
+				       SurfaceLiquidWater, Wind, Ls,
+				       AirDens, Press, EactAir, Z0, Z,
+				       SnowDepth, lag_one, sigma_slope,
+				       TMean, iveg, Nveg, fetch,
+				       veg_lib[iveg].displacement[month],
+				       veg_lib[iveg].roughness[month]);
+  }
+  else
+    *BlowingMassFlux = 0.0;
   
   /* Calculate latent heat flux */
-   *VaporMassFlux = *SurfaceMassFlux + *BlowingMassFlux*Density/3600.;
-   *SurfaceMassFlux *= 3600./Density;
-   //  fprintf(stderr, "SurfaceMAssFlux = %f\n",*SurfaceMassFlux);
+  *VaporMassFlux = *SurfaceMassFlux + *BlowingMassFlux;
 
-   if ( TMean >= 0.0 ) {
-     /* Melt conditions: use latent heat of vaporization */
-     *LatentHeat = Lv * (*VaporMassFlux);
-     *LatentHeatSublimation = 0;
-   }
+  if ( TMean >= 0.0 ) {
+    /* Melt conditions: use latent heat of vaporization */
+    *LatentHeat = Lv * (*VaporMassFlux);
+    *LatentHeatSublimation = 0;
+  }
   else {
     /* Accumulation: use latent heat of sublimation (Eq. 3.19, Bras 1990 */
     Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
     *LatentHeatSublimation = Ls * (*VaporMassFlux);
     *LatentHeat = 0;
   }
-
-  *VaporMassFlux /= Density;
 
 }  

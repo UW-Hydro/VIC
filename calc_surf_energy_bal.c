@@ -95,6 +95,15 @@ double calc_surf_energy_bal(double             Le,
               to the options flag value.                      KAC
     04-Jun-04 Placed "ERROR" at beginning of screen dump in
 	      error_print_surf_energy_bal.		TJB
+    16-Jul-04 Cast the last 6 variables in the parameter list
+	      passed to root_brent, error_calc_surf_energy_bal
+	      and solve_surf_energy_bal as double, since for
+	      some reason letting them remain ints or floats
+	      caused them to become garbage in the child
+	      functions.				TJB
+    16-Jul-04 Modified the cap on vapor_flux to re-scale
+	      blowing_flux and surface_flux proportionally
+	      so that vapor_flux still = their sum.	TJB
 
 ***************************************************************/
 {
@@ -311,7 +320,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       dt, snow->depth, lag_one, sigma_slope, fetch, Nveg);
+		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
  
     if(Tsurf <= -9998) {  
       error = error_calc_surf_energy_bal(Tsurf, iveg, dmy->month, VEG, 
@@ -362,7 +371,7 @@ double calc_surf_energy_bal(double             Le,
 					 &energy->latent_sub, 
 					 &energy->sensible, 
 					 &energy->snow_flux, &energy->error,
-		       dt, snow->depth, lag_one, sigma_slope, fetch, Nveg);
+		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
     }
 
     /**************************************************
@@ -407,7 +416,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       dt, snow->depth, lag_one, sigma_slope, fetch, Nveg);
+		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
  
       if(Tsurf <= -9998) {  
 	error = error_calc_surf_energy_bal(Tsurf, iveg, dmy->month, VEG, 
@@ -460,7 +469,7 @@ double calc_surf_energy_bal(double             Le,
 					   &energy->latent_sub, 
 					   &energy->sensible, 
 					   &energy->snow_flux, &energy->error,
-		       dt, snow->depth, lag_one, sigma_slope, fetch, Nveg);
+		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
       }
     }
   }
@@ -511,7 +520,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       dt, snow->depth, lag_one, sigma_slope, fetch, Nveg);
+		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
   
   energy->error = error;
 
@@ -605,9 +614,14 @@ double calc_surf_energy_bal(double             Le,
 
   if ( INCLUDE_SNOW ) {
 
-    snow->vapor_flux *= delta_t;
-    snow->vapor_flux = 
-      ( snow->swq < -(snow->vapor_flux) ) ? -(snow->swq) : snow->vapor_flux;
+    // don't allow vapor_flux to exceed snow pack
+    if (-(snow->vapor_flux) > snow->swq) {
+      // if vapor_flux exceeds snow pack, we not only need to
+      // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+      snow->surface_flux *= -( snow->swq / snow->vapor_flux );
+      snow->blowing_flux *= -( snow->swq / snow->vapor_flux );
+      snow->vapor_flux = -(snow->swq);
+    }
 
     /* adjust snowpack for vapor flux */
     old_swq           = snow->swq;
@@ -1008,10 +1022,10 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   store_error             = (double *) va_arg(ap, double *);
   dt                      = (double)   va_arg(ap, double);
   SnowDepth               = (double)   va_arg(ap, double);
-  lag_one                 = (float)    va_arg(ap, float);
-  sigma_slope             = (float)    va_arg(ap, float);
-  fetch                   = (float)    va_arg(ap, float);
-  Nveg                    = (int)      va_arg(ap, int);
+  lag_one                 = (float)    va_arg(ap, double);
+  sigma_slope             = (float)    va_arg(ap, double);
+  fetch                   = (float)    va_arg(ap, double);
+  Nveg                    = (int)      va_arg(ap, double);
 
   /***************
     Main Routine

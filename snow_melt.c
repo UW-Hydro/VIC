@@ -61,7 +61,7 @@ static char vcid[] = "$Id$";
     double snow->surf_water	 - Liquid water content of surface layer 
     double snow->swq             - Snow water equivalent at current pixel (m)
     double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m)
+                                   intercepted snow (m/time step)
     double snow->pack_temp       - Temperature of snow pack (C)
     double snow->surf_temp       - Temperature of snow pack surface layer (C)
     double snow->melt_energy     - Energy used for melting and heating of
@@ -80,6 +80,20 @@ static char vcid[] = "$Id$";
 	    separately, added message explaining that root_brent's
 	    error is not fatal and that snow pack will be solved in
 	    conjunction with surface energy balance.		TJB
+  16-Jul-04 Added "month" to parameter list to allow this function to
+	    pass month to latent_heat_from_snow().  Changed calculations
+	    involving vapor_flux to make it consistent with convention
+	    that vapor_flux has units of m/timestep.		TJB
+  16-Jul-04 Changed the type of the last few variables (lag_one, iveg,
+	    etc) to be double in the parameter lists of root_brent
+	    and CalcSnowPackEnergyBalance.  For some reason, passing
+	    them as float or int caused them to become garbage.  This may
+	    have to do with the fact that they followed variables of type
+	    (double *) in va_list, which may have caused memory alignment
+	    problems.						TJB
+  16-Jul-04 Modified cap on vapor_flux to re-scale values of blowing_flux
+	    and surface_flux so that blowing_flux and surface_flux still
+	    add up to the new value of vapor_flux.		TJB
 
 *****************************************************************************/
 void snow_melt(double            Le, 
@@ -124,7 +138,8 @@ void snow_melt(double            Le,
 	       float lag_one,
 	       float sigma_slope,
 	       float fetch,
-	       int Nveg)
+	       int Nveg,
+	       int month)
 {
   int    Twidth;
 
@@ -229,7 +244,7 @@ void snow_melt(double            Le,
 				   &latent_heat_sub, NetLongSnow, 
 				   &RefreezeEnergy, &sensible_heat, 
 				   &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
-				   snow->last_snow, lag_one, sigma_slope, fetch, Nveg, iveg);
+				   (double)snow->last_snow, (double)lag_one, (double)sigma_slope, (double)fetch, (double)iveg, (double)Nveg, (double)month);
 
   /* Check that snow swq exceeds minimum value for model stability */
 //  if ( SurfaceSwq > MIN_SWQ_EB_THRES && !UNSTABLE_SNOW ) {
@@ -261,12 +276,14 @@ void snow_melt(double            Le,
 	melt_energy += RefreezeEnergy;
       }
       
-      /* Convert vapor mass flux to a depth per timestep and adjust snow->surf_water */
-      snow->vapor_flux *= delta_t;
-      
+      /* Adjust snow->surf_water for vapor_flux */
       if (snow->surf_water < -(snow->vapor_flux)) {
+        // if vapor_flux exceeds surf_water, we not only need to
+        // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+        snow->surface_flux *= -( snow->surf_water / snow->vapor_flux );
+        snow->blowing_flux *= -( snow->surf_water / snow->vapor_flux );
 	snow->vapor_flux = -(snow->surf_water);
-	snow->surf_water    = 0.0;
+	snow->surf_water = 0.0;
       }
       else
 	snow->surf_water += snow->vapor_flux;
@@ -326,7 +343,7 @@ void snow_melt(double            Le,
 				     &latent_heat_sub, NetLongSnow, 
 				     &RefreezeEnergy, &sensible_heat, 
 				     &snow->vapor_flux, &snow->blowing_flux,  &snow->surface_flux, 
-				   snow->last_snow, lag_one, sigma_slope, fetch, Nveg, iveg);
+				   (double)snow->last_snow, (double)lag_one, (double)sigma_slope, (double)fetch, (double)iveg, (double)Nveg, (double)month);
       
       if ( snow->surf_temp <= -9998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
 	/* Thin snowpack must be solved in conjunction with ground surface
@@ -355,7 +372,7 @@ void snow_melt(double            Le,
 					 &latent_heat_sub, 
 					 NetLongSnow, &RefreezeEnergy, 
 					 &sensible_heat, &snow->vapor_flux, &snow->blowing_flux, 
-					 &snow->surface_flux, snow->last_snow, lag_one, sigma_slope, fetch, Nveg, iveg);
+					 &snow->surface_flux, (double)snow->last_snow, (double)lag_one, (double)sigma_slope, (double)fetch, (double)iveg, (double)Nveg, (double)month);
 	
 	/* since we iterated, the surface layer is below freezing and no snowmelt
 	 */ 
@@ -371,11 +388,12 @@ void snow_melt(double            Le,
 	melt_energy += snow->surf_water * Lf 
 	  * RHO_W/(delta_t);
 	
-	/* Convert mass flux to a depth per timestep and adjust SurfaceSwq */
-	
-	snow->vapor_flux *= delta_t;
-	
+	/* Adjust SurfaceSwq for vapor flux */
 	if (SurfaceSwq < -(snow->vapor_flux)) {
+          // if vapor_flux exceeds SurfaceSwq, we not only need to
+          // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+          snow->surface_flux *= -( SurfaceSwq / snow->vapor_flux );
+          snow->blowing_flux *= -( SurfaceSwq / snow->vapor_flux );
 	  snow->vapor_flux = -SurfaceSwq;
 	  SurfaceSwq    = 0.0;
 	  Ice           = PackSwq;
@@ -691,14 +709,14 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   RefreezeEnergy        = (double *) va_arg(ap, double *);
   SensibleHeat          = (double *) va_arg(ap, double *);
   VaporMassFlux         = (double *) va_arg(ap, double *);
-  BlowingMassFlux         = (double *) va_arg(ap, double *);
-  SurfaceMassFlux         = (double *) va_arg(ap, double *);
-  LastSnow    = (int) va_arg(ap, int);
-  lag_one    = (float) va_arg(ap, float);
-  sigma_slope    = (float) va_arg(ap, float);
-  fetch    = (float) va_arg(ap, float);
-  Nveg    = (int) va_arg(ap, int);
-  iveg    = (int) va_arg(ap, int);
+  BlowingMassFlux       = (double *) va_arg(ap, double *);
+  SurfaceMassFlux       = (double *) va_arg(ap, double *);
+  LastSnow              = (int) va_arg(ap, double);
+  lag_one               = (float) va_arg(ap, double);
+  sigma_slope           = (float) va_arg(ap, double);
+  fetch                 = (float) va_arg(ap, double);
+  Nveg                  = (int) va_arg(ap, double);
+  iveg                  = (int) va_arg(ap, double);
 
   /* print variables */
   fprintf(stderr, "ERROR: snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");

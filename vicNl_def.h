@@ -141,6 +141,7 @@ typedef struct {
   FILE   *fg_energy;
   FILE   *fg_snow;
   FILE   *fg_grid;
+  FILE   *fg_atmos;
   double **inflow[2];
   double **outflow[2];
   double **store_moist[2];

@@ -15,18 +15,19 @@ double soil_thermal_eqn(double T, va_list ap) {
   double max_moist;
 #if QUICK_FS
   double **ufwc_table;
-#endif
+#else
   double bubble;
   double expt;
+#endif
   double ice0;
   double gamma;
   double fprime;
-  double ice;
   double A;
   double B;
   double C;
   double D;
   double E;
+  double ice;
 
   TL         = (double) va_arg(ap, double);
   TU         = (double) va_arg(ap, double);
@@ -35,6 +36,9 @@ double soil_thermal_eqn(double T, va_list ap) {
   max_moist  = (double) va_arg(ap, double);
 #if QUICK_FS
   ufwc_table = (double **) va_arg(ap, double **);
+#else
+  bubble     = (double) va_arg(ap, double);
+  expt       = (double) va_arg(ap, double);
 #endif
   ice0       = (double) va_arg(ap, double);
   gamma      = (double) va_arg(ap, double);

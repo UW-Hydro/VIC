@@ -89,6 +89,7 @@ void initialize_global() {
   options.PREC_EXPT             = 0.6;
   options.INIT_SNOW             = FALSE;
   options.ROOT_ZONES            = -999;
+  options.MIN_WIND_SPEED        = 0.0;
  
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;

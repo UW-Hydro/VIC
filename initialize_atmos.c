@@ -171,7 +171,7 @@ void initialize_atmos(atmos_data_struct *temp,
     if(options.SNOW_MODEL) {
       /** Set snow/rain division for highest elevation band **/
 	
-      if(!options.FULL_ENERGY)
+      if(dt<24)
 	temp[rec].rainonly 
 	  = calc_rainonly(temp[rec].tmin+min_Tfactor, temp[rec].prec,
 			  MAX_SNOW_TEMP,MIN_RAIN_TEMP,1.);
@@ -189,6 +189,8 @@ void initialize_atmos(atmos_data_struct *temp,
     *****************/
 
     if(!param_set.WIND) temp[rec].wind = 1.5;
+    else if(temp[rec].wind < options.MIN_WIND_SPEED) 
+      temp[rec].wind = options.MIN_WIND_SPEED;
 
     /***********************
       Set bare soil albedo 
@@ -255,6 +257,9 @@ void initialize_atmos(atmos_data_struct *temp,
 	temp[rec+hour].tskc = temp[rec].tskc;
     }
   }
+
+  if(!param_set.SHORTWAVE && !param_set.LONGWAVE && !param_set.TSKC && dt<24)
+    param_set.TSKC=1;
 
   trans_clear = A1_TRANS + A2_TRANS * elevation;
 

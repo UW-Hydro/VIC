@@ -122,6 +122,11 @@ typedef struct {
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */
+  float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model
+			    Can be set by the user if energy balance problems 
+			    arise using hourly wind speeds which are recorded at
+			    0 m/s, even though most wind speed measurement devices
+			    cannot read below about 1 m/s **/
 } option_struct;
 
 typedef struct {

@@ -5,7 +5,7 @@
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE FALSE
+#define VERBOSE TRUE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE

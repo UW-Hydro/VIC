@@ -38,6 +38,8 @@ global_param_struct get_global_param(filenames_struct *names,
   11-May-04 Modified to display compile-time and run-time options
 	    if VERBOSE is set to TRUE.			TJB
   13-Oct-04 Added validation for GRND_FLUX option.              TJB
+  01-Nov-04 Added validation for Nnodes with QUICK_FLUX option, as
+	    part of fix for QUICK_FLUX state file compatibility.TJB
 
 **********************************************************************/
 {
@@ -302,6 +304,7 @@ global_param_struct get_global_param(filenames_struct *names,
       }
 #endif /* LAKE_MODEL */
 
+
       /************************************
         Get Forcing Data File Information
 	**********************************/
@@ -492,16 +495,24 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
 #endif // LAKE_MODEL 
-  if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode<3) {
-    sprintf(ErrStr,"You must define at least 3 soil thermal nodes to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nnodes is set to  %i.",options.Nnode);
-    nrerror(ErrStr);
+  if(options.QUICK_FLUX) {
+    if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode != 3) {
+      sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %i.",options.Nnode);
+      nrerror(ErrStr);
+    }
+    else if (!options.FULL_ENERGY && !options.FROZEN_SOIL && options.Nnode != 1) {
+      sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %i.",options.Nnode);
+      nrerror(ErrStr);
+    }
   }
-  if(!options.QUICK_FLUX && options.Nnode<4) {
-    sprintf(ErrStr,"You must define at least 4 soil thermal nodes to run the model with the finite difference ground heat flux solution.  Currently Nnodes is set to  %i.",options.Nnode);
-    nrerror(ErrStr);
+  else {
+    if(options.Nnode < 4) {
+      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to  %i.",options.Nnode);
+      nrerror(ErrStr);
+    }
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
-    sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlaeyrs is set to  %i.",options.Nlayer);
+    sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %i.",options.Nlayer);
     nrerror(ErrStr);
   }
   if(!options.FULL_ENERGY && !options.FROZEN_SOIL && options.GRND_FLUX) {

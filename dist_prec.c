@@ -86,18 +86,20 @@ void dist_prec(atmos_data_struct   *atmos,
 	ANY_SNOW = TRUE;
       }
       else {
-	if(atmos->prec==0 && rec==0) {
-          /* If first time step has no rain, than set mu to 1. */
-	  prcp[0].mu[veg] = 1.;
-	  NEW_MU=1.;
-	  STILL_STORM = TRUE;
-          DRY_TIME = 0;
-	}
-	else if(rec==0) {
-          /* If first time step has rain, then set mu based on intensity */
-	  prcp[0].mu[veg]=NEW_MU;
-	  STILL_STORM=TRUE;
-          DRY_TIME = 0;
+	if(rec==0) {
+	  if(atmos->prec==0) {
+	    /* If first time step has no rain, than set mu to 1. */
+	    prcp[0].mu[veg] = 1.;
+	    NEW_MU=1.;
+	    STILL_STORM = TRUE;
+	    DRY_TIME = 24;
+	  }
+	  else {
+	    /* If first time step has rain, then set mu based on intensity */
+	    prcp[0].mu[veg]=NEW_MU;
+	    STILL_STORM=TRUE;
+	    DRY_TIME = 0;
+	  }
 	}
 	else if(atmos->prec==0 && DRY_TIME >= 24./(float)global_param.dt) {
           /* Check if storm has ended */
@@ -105,7 +107,11 @@ void dist_prec(atmos_data_struct   *atmos,
 	  STILL_STORM=FALSE;
           DRY_TIME = 0;
 	}
-        else if(atmos->prec==0) DRY_TIME++;
+        else if(atmos->prec==0) {
+	  /* May be pause in storm, keep track of pause length */
+	  NEW_MU=prcp[0].mu[veg];
+	  DRY_TIME += global_param.dt;
+	}
       }
 
       if(!STILL_STORM && (atmos->prec>STORM_THRES || ANY_SNOW)) {

@@ -15,13 +15,13 @@
        no iteration is used and the model estimates the new fluxes
        based on those from the previous time step, results should
        be similar, however, the model will report energy balance errors *****/
-#define CLOSE_ENERGY FALSE
+#define CLOSE_ENERGY TRUE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE
        all debugging if-then statements are removed from the compiled 
        code *****/
-#define LINK_DEBUG TRUE
+#define LINK_DEBUG FALSE
 
 /***** If TRUE output will be in LDAS binary format, which is a single
        file with limited variables, most of which are truncated to
@@ -89,14 +89,12 @@
        that the entire grid cell is frozen uniformly *****/
 #define SPATIAL_FROST FALSE
 #define FROST_SUBAREAS 10
-#define SPATIAL_FROST_SLOPE 1.5
 
 /***** If TRUE VIC uses a uniform distribution to simulate the partial
        coverage of the surface by a thin snowpack.  Coverage is 
        assumed to be uniform after snowfall until the pack begins to 
        melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
 #define SPATIAL_SNOW FALSE
-#define MAX_FULL_COVERAGE_DEPTH   0.155 /* Minimum snow depth required for uniform coverage (m) */
 
 
 /***** Define maximum array sizes for model source code *****/

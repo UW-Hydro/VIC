@@ -48,10 +48,19 @@ void write_data(out_data_struct *out_data,
                 variables introduced by the spatial frost and snow
                 algorithms, the lake algorithm and the PILPS 2e 
                 study.                                          KAC
+  3-12-03       added energy fluxes to snow band output files   KAC
   04-22-03      Updated output of model for lakes and wetlands algorithm.
                 Added output of blowing snow sublimation to LDAS and
                 standard snow output files.  ** No Lake Variables are
                 included in the LDAS output format. **         KAC
+  04-23-2003    modified LDAS SWQ output, so that it is multiplied by
+                10 instead of 100 before being converted to a short
+                integer.  This reduces stored value precision to 0.1,
+                but increases the maximum storable SWQ, which was
+                exceeded in previous LDAS simulations.          KAC
+  07-30-2003    Corrected output of sub_snow variable to item [0]
+                rather than a point - will need to decide what
+                parts of this array are important to output.    KAC
 
 **********************************************************************/
 {
@@ -104,7 +113,7 @@ void write_data(out_data_struct *out_data,
   float                          runoff
   float                          baseflow
   unsigned short int * Nlayers   moist * 10
-  unsigned short int             swq * 100
+  unsigned short int             swq * 10
   short int                      net_short * 10
   short int                      in_long * 10
   short int                      r_net * 10
@@ -169,7 +178,7 @@ void write_data(out_data_struct *out_data,
   }
   
   /* snow water equivalence */
-  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*100.);
+  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*10.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   
   /** energy balance components **/
@@ -610,7 +619,7 @@ void write_data(out_data_struct *out_data,
     fprintf(outfiles->snowband, "%04i\t%02i\t%02i\t", dmy->year, 
 	    dmy->month, dmy->day);
     fprintf(outfiles->snowband, "%02i\t", dmy->hour);
-    for ( band = 0; band < options.SNOW_BAND; band++) 
+    for ( band = 0; band < options.SNOW_BAND; band++) {
       fprintf(outfiles->snowband  ,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
 	      out_data->swq[band+1], out_data->snow_depth[band+1], 
 	      out_data->snow_canopy[band+1], out_data->coverage[band+1], 
@@ -620,6 +629,11 @@ void write_data(out_data_struct *out_data,
 	      out_data->advected_sensible[band+1], 
 	      out_data->latent_sub[band+1], out_data->snow_surf_temp[band+1], 
 	      out_data->snow_pack_temp[band+1], out_data->melt[band+1] );
+      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
+	      out_data->swband[band], out_data->lwband[band], 
+	      out_data->albedoband[band], out_data->latentband[band], 
+	      out_data->sensibleband[band], out_data->grndband[band]);
+    }
     fprintf(outfiles->snowband,"\n");
   }
 
@@ -768,7 +782,7 @@ void write_data(out_data_struct *out_data,
 	    out_data->rad_temp, out_data->net_short, out_data->r_net, 
 	    out_data->latent, out_data->evap_canop, out_data->evap_veg );
     fprintf(outfiles->fluxes, "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
-	    out_data->evap_bare, out_data->sub_canop, out_data->sub_snow, 
+	    out_data->evap_bare, out_data->sub_canop, out_data->sub_snow[0], 
 	    out_data->sensible, out_data->grnd_flux, out_data->deltaH );
     fprintf(outfiles->fluxes, "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
 	    out_data->fusion, out_data->aero_resist, out_data->surf_temp, 

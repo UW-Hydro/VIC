@@ -36,11 +36,10 @@ void read_snowband(FILE    *snowband,
   Pfactor[0]   = (double *)calloc(Nbands,sizeof(double));
   AreaFract[0] = (double *)calloc(Nbands,sizeof(double));
 
-  rewind(snowband);
-
   if(Nbands>1) {
 
     /** Find Current Grid Cell in SnowBand File **/
+    rewind(snowband);
     fscanf(snowband, "%i", &cell);
     while(cell != gridcell && !feof(snowband)) {
       fgets(ErrStr,MAXSTRING,snowband);

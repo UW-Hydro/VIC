@@ -78,7 +78,7 @@ void put_data(dist_prcp_struct  *prcp,
   out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct)); 
   
   out_data->snow_canopy[0] = 0.0;
-  out_data->prec           = atmos->prec[NR];
+  out_data->prec           = atmos->out_prec;
   out_data->wind           = atmos->wind[NR];
   out_data->air_temp       = atmos->air_temp[NR];
   out_data->rel_humid      = 100.*atmos->vp[NR]/(atmos->vp[NR]+atmos->vpd[NR]);

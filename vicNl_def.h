@@ -71,6 +71,11 @@
 #define DRY 1
 #endif
 
+#ifndef SNOW
+#define RAIN 0
+#define SNOW 1
+#endif
+
 #define min(a,b) (a < b) ? a : b
 #define max(a,b) (a > b) ? a : b
 
@@ -401,6 +406,8 @@ typedef struct {
   double density[25];   /* atmospheric density (kg/m^3) */
   double longwave[25];  /* incoming longwave radiation (W/m^2) (net incoming 
 			   longwave for water balance model) */
+  double out_prec;      /* Total precipitation for time step - accounts
+			   for corrected precipitation totals */
   double prec[25];      /* average precipitation in grid cell (mm) */
   double pressure[25];  /* atmospheric pressure (kPa) */
   double shortwave[25]; /* incoming shortwave radiation (W/m^2) */

@@ -222,6 +222,7 @@ typedef struct {
   double  soil_density;		 /* soil partical density (kg/m^3) */
   double  rough;		 /* soil surface roughness (m) */
   double  snow_rough;            /* snow surface roughness (m) */
+  double  annual_prec;           /* annual average precipitation (mm) */
   double  max_moist[MAXlayer];   /* maximum moisture content (mm) per layer */
   double  max_infil;	         /* maximum infiltration rate */
   double  Wcr[MAXlayer];	 /* critical moisture level for soil layer,

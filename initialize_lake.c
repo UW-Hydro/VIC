@@ -174,39 +174,44 @@ double get_depth(lake_con_struct lake_con, double volume)
   double tempvolume;	
   depth = 0.0;
 
-  if(volume >= lake_con.maxvolume)
-    {
-      depth = lake_con.maxdepth;
-      depth += (volume - lake_con.maxvolume)/lake_con.basin[0];	
-    }
-  else
-    { 	
+  if (volume < 0.0) {
+#if VERBOSE
+    fprintf(stderr, "Warning: lake volume %e is negative; setting to 0.\n", volume);
+#endif // VERBOSE
+    volume = 0.0;
+  }
+
+  if(volume >= lake_con.maxvolume) {
+    depth = lake_con.maxdepth;
+    depth += (volume - lake_con.maxvolume)/lake_con.basin[0];	
+  }
+  else { 	
   // Update lake depth
     tempvolume = volume;	
-    for ( k = lake_con.numnod - 1; k >= 0; k-- ) {
+    for ( k = lake_con.numnod - 1 ; k >= 0; k-- ) {
       if ( tempvolume > ((lake_con.z[k]-lake_con.z[k+1])
 			 *(lake_con.basin[k]+lake_con.basin[k+1])/2.)) {
 	// current layer completely filled
 	tempvolume -= (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.;
 	depth += lake_con.z[k] - lake_con.z[k+1];
-	}
+      }
       else if(tempvolume > 0.0 ) {
-          if(lake_con.basin[k]==lake_con.basin[k+1]) {
+        if(lake_con.basin[k]==lake_con.basin[k+1]) {
            depth += tempvolume/lake_con.basin[k+1];
-	tempvolume = 0.0;
+           tempvolume = 0.0;
 	}
 	else {
 	  m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
 	  depth += ((-1*lake_con.basin[k+1]) + sqrt(lake_con.basin[k+1]*lake_con.basin[k+1] + 2.*m*tempvolume))/m;
 	  tempvolume = 0.0;
 	}
-	}
       }
-	  
-  if(tempvolume/lake_con.basin[0] > SMALL )   {                  
-    fprintf(stderr, "Error in get depth tempvolume = %e, depth=%f\n", tempvolume,depth);
+    } 
+
+    if(tempvolume/lake_con.basin[0] > SMALL )   {                  
+      fprintf(stderr, "Error in get depth tempvolume = %e, depth=%f\n", tempvolume,depth);
+    }
   }
- }
 
   if(depth <= 0.0  && volume != 0.0) {
     fprintf(stderr, "Somthing went wrong in get_depth\n");

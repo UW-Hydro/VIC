@@ -434,7 +434,7 @@ void write_layer(layer_data_struct *, int, int,
                  double *);
 #if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
-		       int, outfiles_struct *, soil_con_struct *, char, int);
+		       int, outfiles_struct *, soil_con_struct *, char *, int *);
 #endif
 void write_snow_data(snow_data_struct, int, int);
 void write_soilparam(soil_con_struct *);

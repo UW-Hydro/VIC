@@ -14,6 +14,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
+		      double                    avgJulyAirTemp,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
@@ -76,6 +77,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		(float)(int)(something + 0.5)
 	    to handle rounding errors without resorting to rint()
 	    function.						TJB
+  16-Jun-04 Modified to pass avgJulyAirTemp argument to
+	    compute_treeline().					TJB
 
 **********************************************************************/
 {
@@ -695,11 +698,17 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
-  if ( options.COMPUTE_TREELINE )
-  // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
-  // is processed to identify the treeline.
-    if ( options.SNOW_BAND )
-      compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
+  // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
+  // specifically been turned off for this cell (by supplying avgJulyAirTemp
+  // and setting it to -999), calculate which snowbands are above the
+  // treeline, based on average July air temperature.
+  if (options.COMPUTE_TREELINE) {
+    if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
+      if ( options.SNOW_BAND ) {
+        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+      }
+    }
+  }
 
 #if OUTPUT_FORCE
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full

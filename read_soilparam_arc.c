@@ -95,6 +95,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		(porosity*Wpwp_FRACT) is greater than residual
 		moisture.					TJB
   04-Jun-04	Added print statement for current cell number.	TJB
+  16-Jun-04	Added logic to look for average July air temperature
+		if COMPUTE_TREELINE is TRUE.  If July air temperature
+		is not supplied, then it's calculated from forcing data
+		as before.					TJB
 
 **********************************************************************/
 {
@@ -338,6 +342,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcpy(namestr,soilparamdir);
     strcat(namestr,tmpstr);
     temp.FS_ACTIVE = (char)read_arcinfo_value(namestr,temp.lat,temp.lng);
+
+    if (options.COMPUTE_TREELINE && (fscanf(soilparam,"%s",tmpstr)) != EOF) {
+      /** Get Avg July Air Temperature **/
+      strcpy(namestr,soilparamdir);
+      strcat(namestr,tmpstr);
+      temp.avgJulyAirTemp = read_arcinfo_value(namestr,temp.lat,temp.lng);
+      options.JULY_TAVG_SUPPLIED = TRUE;
+    }
 
     /*************************************************
     if ARNO_PARAMS == TRUE then convert the baseflow

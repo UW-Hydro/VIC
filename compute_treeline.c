@@ -6,6 +6,7 @@ static char vcid[] = "$";
 
 void compute_treeline(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
+		      double                   avgJulyAirTemp,
 		      double                   *Tfactor,
 		      char                     *AboveTreeLine)
 /**********************************************************************
@@ -23,6 +24,9 @@ void compute_treeline(atmos_data_struct        *atmos,
   high elevation "glaciers", a more permanent version would actually 
   allow for vegetation types to be excluded from various snow bands.
 
+  Modifications:
+  16-Jun-04 Added extra input parameter (avgJulyAirTemp) and logic to
+	    handle it in the event JULY_TAVG_SUPPLIED is TRUE.	TJB
 ************************************************************************/
 {
 
@@ -38,32 +42,43 @@ void compute_treeline(atmos_data_struct        *atmos,
   int    band;
   int    i;
 
-  AnnualSum = 0;
-  AnnualCnt = 0;
-  rec = 0;
-  while ( rec < global_param.nrecs ) {
-    if ( dmy[rec].month == 7 ) {
-      MonthSum = 0;
-      MonthCnt = 0;
-      while ( dmy[rec].month == 7 ) {
-	for (i = 0; i < NF; i++) {
-	  MonthSum += atmos[rec].air_temp[i];
-	  MonthCnt++;
-	}
-	rec++;
-      }
-      if ( MonthCnt > 0 ) {
-	// Sum monthly average July temperature
-	AnnualSum += MonthSum / (double)MonthCnt;
-	AnnualCnt++;
-      }
-    }
-    rec++;
-  }
+  if (options.JULY_TAVG_SUPPLIED) {
 
-  // Compute average annual July air temperature
-  if ( AnnualCnt > 0 )
-    AnnualSum /= (double)AnnualCnt;
+    // use supplied average annual July air temperature
+    AnnualSum = avgJulyAirTemp;
+
+  }
+  else {
+
+    // compute average annual July air temperature from forcing
+    AnnualSum = 0;
+    AnnualCnt = 0;
+    rec = 0;
+    while ( rec < global_param.nrecs ) {
+      if ( dmy[rec].month == 7 ) {
+        MonthSum = 0;
+        MonthCnt = 0;
+        while ( dmy[rec].month == 7 ) {
+	  for (i = 0; i < NF; i++) {
+	    MonthSum += atmos[rec].air_temp[i];
+	    MonthCnt++;
+	  }
+	  rec++;
+        }
+        if ( MonthCnt > 0 ) {
+	  // Sum monthly average July temperature
+	  AnnualSum += MonthSum / (double)MonthCnt;
+	  AnnualCnt++;
+        }
+      }
+      rec++;
+    }
+
+    // Compute average annual July air temperature
+    if ( AnnualCnt > 0 )
+      AnnualSum /= (double)AnnualCnt;
+
+  }
 
   // Lapse average annual July air temperature to 10C and determine elevation
   for ( band = 0; band < options.SNOW_BAND; band++ ) {

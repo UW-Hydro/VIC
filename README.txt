@@ -28,6 +28,20 @@ Modifications:
 	    prints a warning, leaving it to the functions that
 	    called it to describe the specific error and its
 	    consequences.					TJB
+	check_files.c, compute_treeline.c, initialize_atmos.c,
+	initialize_global.c, read_soilparam.c, read_soilparam_arc.c,
+	vicNl.c, vicNl.h, vicNl_def.h:
+	    Added optional field to the soil file, containing
+	    average July air temperature, for use with the COMPUTE_
+	    TREELINE option.  If the soil file contains 54 fields
+	    (or if the arc/info soil file list has 1 more line),
+	    this final entry is assumed to be the average July air
+	    temperature.  If COMPUTE_TREELINE is TRUE, this temperature
+	    is used in computing the treeline rather than calculating
+	    the average July temperature from the forcing data.  If
+	    COMPUTE_TREELINE is FALSE, this field is ignored.  If
+	    this field is not present in the soil file, vic behaves
+	    as in 4.0.4.					TJB
 	cmd_proc.c, display_current_settings.c, get_global_param.c,
 	global.h, vicNl.c, vicNl.h, vicNl_def.h:
 	    Added -o option, to display current run-time and

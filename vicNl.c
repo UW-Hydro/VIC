@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
            rather than just averagedvalues.                      KAC
   29-Oct-03 Modified the version display banner to print the version
 	    string defined in global.h.				TJB
+  16-Jun-04 Modified to pass soil_con.avgJulyAirTemp to
+	    initialize_atmos().					TJB
 
 **********************************************************************/
 {
@@ -223,7 +225,8 @@ int main(int argc, char *argv[])
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
-		       soil_con.rough, soil_con.Tfactor, 
+		       soil_con.rough, soil_con.avgJulyAirTemp, 
+		       soil_con.Tfactor,
 #if OUTPUT_FORCE
 		       soil_con.AboveTreeLine, &outfiles); 
 #else /* OUTPUT_FORCE */

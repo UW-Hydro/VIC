@@ -71,6 +71,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		Added check to make sure that wilting point
 		(porosity*Wpwp_FRACT) is greater than residual
 		moisture.					TJB
+  16-Jun-04	Added logic to read optional extra field containing
+		average July air temperature, if JULY_TAVG_SUPPLIED
+		= TRUE.						TJB
 
 **********************************************************************/
 {
@@ -219,6 +222,11 @@ soil_con_struct read_soilparam(FILE *soilparam,
     fscanf(soilparam, "%i", &tempint);
     temp.FS_ACTIVE = (char)tempint;
     
+    if (options.JULY_TAVG_SUPPLIED) {
+      /* read cell average July air temperature */
+      fscanf(soilparam, "%lf", &temp.avgJulyAirTemp);
+    }
+
     /*******************************************
       Compute Maximum Soil Layer Moisture Content
     *******************************************/

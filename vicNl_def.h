@@ -206,6 +206,9 @@ typedef struct {
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
   char   ARNO_PARAMS;    /* FALSE: read Ds, Dm, Ws, c; TRUE: read d1, d2, d3, d4 */
+  char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
+			        then average July air temperature will be read
+				from soil file and used in calculating treeline */
 } option_struct;
 
 #if LINK_DEBUG
@@ -322,6 +325,7 @@ typedef struct {
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
   double   avg_temp;                  /* average soil temperature (C) */
+  double   avgJulyAirTemp;            /* Average July air temperature (C) */
   double   b_infilt;                  /* infiltration parameter */
   double   beta[MAX_NODES];           /* thermal solution constant */
   double   bubble[MAX_LAYERS];        /* bubbling pressure, HBH 5.15 (cm) */

@@ -74,6 +74,7 @@ void initialize_global() {
     07-May-04 Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
 	      Also changed limit on loop over forcing types from
 	      hard-coded 17 to variable N_FORCING_TYPES.	TJB
+    16-Jun-04 Added JULY_TAVG_SUPPLIED.				TJB
 	      
 
 *********************************************************************/
@@ -88,6 +89,7 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
+  options.JULY_TAVG_SUPPLIED    = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
   options.ARNO_PARAMS           = FALSE;

@@ -3,6 +3,59 @@
 # $Id$
 #------------------------------------------------------------------------
 
+Modifications:
+
+	Makefile:
+	  Added "make depend" to the "all" and "default" options.
+	  This way, if a user always types "make", the user is
+	  guaranteed to have a .depend file and therefore *.o will
+	  always be recompiled whenever a .h file is updated.  The
+	  user can override this behavior by typing "make model",
+	  which doesn't invoke "make depend".			TJB
+	cmd_proc.c, display_current_settings.c, global.h, vicNl.c, vicNl.h,
+        vicNl_def.hi, Makefile:
+          Added -v and -o options, to display vic release version
+	  and current run-time and compile-time options.	TJB
+	alloc_atmos.c:
+	  Added check for LINK_DEBUG global option.  If LINK_DEBUG is
+	  TRUE atmospheric data is not dynamically allocated, so it
+	  should not be freed.					KAC
+	close_files.c, make_in_and_outfiles.c:
+	  Distinguishing between input lakeparam file and output
+	  lake file.						TJB
+	get_global_param.c, read_soilparam.c, vicNl_def.h:
+	  Changed NEW_ARNO_TYPE to ARNO_PARAMS.			TJB
+ 	open_file.c:
+	  Added message announcing the opening of files when type
+	  is "rb".						TJB
+	put_data.c:
+	  Snow_flux was incorrectly set to Tcanopy.  Fixed.	TJB
+	read_initial_model_state.c:
+	  Modified to loop over tmp_Nveg and tmp_Nband when searching
+	  for desired cellnum in ASCII file, rather than over Nveg
+	  and Nbands.  As we skip over other records in the state
+	  file while searching for the desired record, the loop
+	  must parse each undesired record differently, according
+	  to how many veg classes and snow bands exist in the
+	  record (tmp_Nveg and tmp_Nband, respectively), rather
+	  than the number of veg classes and snow bands in the
+	  desired record (Nveg and Nbands, respectively).	TJB
+	runoff.c:
+	  Changed calculation of dt_baseflow to go to zero when
+	  soil liquid moisture <= residual moisture.  Changed
+	  block that handles case of total soil moisture < residual
+	  moisture to not allow dt_baseflow to go negative.	TJB
+	snow_utility.c:
+	  Modified the checks on delta_depth so that the condition
+	  is delta_depth > MAX_CHANGE*depth.  Modified compression
+	  due to aging to only be calculated if depth > 0.	TJB
+	write_data.c:
+	  Replaced output of sub_snow[0] in fluxes file with
+	  sub_total.						TJB
+	write_model_state.c:
+	  Removed initial space on veg/band info line in ASCII
+	  file.							TJB
+
 Updates 7-30-2003: VIC 4.1.0 r1
 
     (1) Added support for ASCII as well as Binary state files (NOTE: ASCII

@@ -480,13 +480,22 @@ void full_energy(int rec,
 	    /** Snow melt model is solved using a time step of SNOW_STEP **/
 	    
 	    /** Initialize parameters for the shorter time step **/
-	    step_air_temp = air_temp[hour];
-
-	    step_vp  = atmos->rel_humid * svp(step_air_temp) / 100.;
-	    step_vpd = svp(step_air_temp) - step_vp;
-	    
-	    step_density = 3.486*atmos->pressure/(275.0
+	    if(gp.dt==24) {
+	      /** Daily Time Step - Use Average Values **/
+	      step_air_temp = air_temp[hour];
+	      step_vp  = atmos->rel_humid * svp(step_air_temp) / 100.;
+	      step_vpd = svp(step_air_temp) - step_vp;	    
+	      step_density = 3.486*atmos->pressure/(275.0
 						    + step_air_temp);
+	    }
+	    else {
+	      /** Sub-Daily Time Step - Use Hourly Values **/
+	      step_air_temp = atmos->air_temp;
+	      step_vp       = atmos->vp;
+	      step_vpd      = atmos->vpd;
+	      step_density  = atmos->density;
+	    }
+
 	    for(band=0;band<Nbands;band++) {
 	      if(soil_con.AreaFract[band]>0) {
 		snow[iveg][band].vapor_flux         = 0.;
@@ -500,13 +509,22 @@ void full_energy(int rec,
 		    cell[i][iveg][band].layer[j].evap = 0.;
 	      }
 	    }
-	    calc_long_shortwave(&inshort,&inlong,&atmos->tskc,
-				step_air_temp,step_vp,
-				(double)soil_con.time_zone_lng,
-				(double)soil_con.lng,(double)soil_con.lat,
-				(double)dmy[rec].day_in_year,
-				(double)hour*(double)options.SNOW_STEP,
-				FALSE,FALSE,TRUE);
+
+	    if(gp.dt==24) {
+	      /** Estimate Radiation for Snow Model Time Steps, if Model is Daily **/
+	      calc_long_shortwave(&inshort,&inlong,&atmos->tskc,
+				  step_air_temp,step_vp,
+				  (double)soil_con.time_zone_lng,
+				  (double)soil_con.lng,(double)soil_con.lat,
+				  (double)dmy[rec].day_in_year,
+				  (double)hour*(double)options.SNOW_STEP,
+				  FALSE,FALSE,TRUE);
+	    }
+	    else {
+	      /** Use Time Step Estimated Radiation for Sub-Daily Time Steps **/
+	      inshort = atmos->shortwave;
+	      inlong  = atmos->longwave;
+	    }
 
 	    for(band=0;band<Nbands;band++) {	      
 	      if(soil_con.AreaFract[band]>0) {
@@ -622,7 +640,7 @@ void full_energy(int rec,
 		}
 		tmp_vapor_flux[band]        
 		  += snow[iveg][band].vapor_flux;
-		if(options.DIST_PRCP && hour==0) {
+		if(options.DIST_PRCP && hour==0 && iveg<Nveg) {
 		  tmp_throughfall[DRY][band] 
 		    += veg_var[DRY][iveg][band].throughfall;
 		  tmp_canopyevap[DRY][band] 
@@ -637,11 +655,6 @@ void full_energy(int rec,
 	      }
 	    } /* End Loop Through Elevation Bands */
 
-/* 	    if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) { */
-/* 	      atmos->vp  = tmp_vp; */
-/* 	      atmos->vpd = tmp_vpd; */
-/* 	    } */
-	    
 	  } /* End Hourly Snow Solution */
 	  cell[WET][iveg][0].aero_resist[0] = tmp_aero_resist;
 	  for(band=0;band<Nbands;band++) {
@@ -692,12 +705,12 @@ void full_energy(int rec,
 	  for(j=0;j<Ndist;j++) 
 	    for(band=0;band<Nbands;band++) ppt[band*2+j] = 0.;
 	  if (tmp_wind[0] > 0.0)
-	    cell[j][iveg][0].aero_resist[0] 
+	    cell[WET][iveg][0].aero_resist[0] 
 	      /= StabilityCorrection(ref_height, displacement, 
 				     atmos->air_temp, atmos->air_temp, 
 				     tmp_wind[0], roughness);
 	  else
-	    cell[j][iveg][0].aero_resist[0] = HUGE_RESIST;
+	    cell[WET][iveg][0].aero_resist[0] = HUGE_RESIST;
 
 	  for(band=0;band<Nbands;band++) {
 	    if(soil_con.AreaFract[band]>0) {
@@ -705,6 +718,8 @@ void full_energy(int rec,
 	      /** Compute Net Radiation at Surface **/
 	      step_net_short = (1. - bare_albedo) * atmos->shortwave; 
 	      step_rad = step_net_short + atmos->longwave;
+	      if(gp.dt<24) 
+		step_rad -= STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
 
 	      if(iveg!=Nveg) {
 		/** Compute Evaporation from Vegetation **/

@@ -62,6 +62,11 @@ void runoff(layer_data_struct *layer_wet,
                 frozen soil algorithm.  all option selection
 		now use the same soil moisture transport method   KAC
     6-8-2000 modified to handle spatially distributed soil frost  KAC
+    06-07-03 modified so that infiltration is computed using only the
+             top two soil moisture layers, rather than all but the
+             bottom most layer.  This preserves the functionality
+             of the original model design, but is more realistic for
+             handling multiple soil moisture layers
 
 **********************************************************************/
 {  
@@ -223,7 +228,7 @@ void runoff(layer_data_struct *layer_wet,
 
 	top_moist = 0.;
 	top_max_moist=0.;
-	for(lindex=0;lindex<options.Nlayer-1;lindex++) {
+	for(lindex=0;lindex<2;lindex++) {
 	  top_moist += (moist[lindex] + ice[lindex]);
 	  top_max_moist += max_moist[lindex];
 	}

@@ -34,6 +34,11 @@ Modifications:
 	    compile-time options.  Updated version string.	TJB
 	mtclim42_vic.c:
 	    If data->s_srad becomes negative, we set it to 0.0.	TJB
+	    If p->base_isoh and p->site_isoh are both small or 0, set
+	    ratio = 1.  This handles the case in which annual precip
+	    for the grid cell is 0, resulting in both p->base_isoh
+	    and p->site_isoh being 0, and their ratio being
+	    undefined. (found by Liz Clark)			TJB
 	open_file.c:
 	    Now announces when it opens a binary file for reading.
 	write_data.c:

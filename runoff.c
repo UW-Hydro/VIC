@@ -418,12 +418,14 @@ void runoff(layer_data_struct *layer_wet,
 	  dt_baseflow += (Dsmax - soil_con->Ds * Dsmax / soil_con->Ws) 
 	    * pow(frac,soil_con->c);
 	}
-	if(dt_baseflow < 0) dt_baseflow = 0;
 
         /** make sure baseflow doesn't cause soil moisture to drop below field capacity **/
         if(dt_baseflow > (moist[lindex] - soil_con->Wcr[lindex] /0.8))
           dt_baseflow = moist[lindex] - soil_con->Wcr[lindex] /0.8;
       
+        /** Make sure baseflow isn't negative **/
+	if(dt_baseflow < 0) dt_baseflow = 0;
+
 	/** Extract baseflow from the bottom soil layer **/ 
 	
 	moist[lindex] += Q12[lindex-1] - (layer[lindex].evap/(double)dt 

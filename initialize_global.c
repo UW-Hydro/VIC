@@ -97,6 +97,7 @@ void initialize_global() {
   options.SNOW_STEP             = 1;
   options.PREC_EXPT             = 0.6;
   options.INIT_STATE            = FALSE;
+  options.BINARY_STATE_FILE     = TRUE;
   options.ROOT_ZONES            = MISSING;
   options.MIN_WIND_SPEED        = 0.0;
   options.NOFLUX                = FALSE;

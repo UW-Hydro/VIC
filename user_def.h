@@ -2,16 +2,13 @@
   This header file contains model parameters that can be modified by
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
-
-  $Id$
-
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE FALSE
+#define VERBOSE TRUE
 
 /***** If TRUE limit output data to runoff and baseflow for optimization *****/
-#define OPTIMIZE TRUE
+#define OPTIMIZE FALSE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE
@@ -27,7 +24,7 @@
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 
        significantly reduces the run time with frozen soil, but may
-       introduce new errors (STILL UNDER TESTING) *****/
+       introduce new errors *****/
 #define QUICK_FS TRUE
 #define QUICK_FS_TEMPS 7
 
@@ -35,7 +32,8 @@
        matric potential from the two surrounding layers to estimate the 
        soil moisture drainage from each layer (Boone and Wetzel, 1996).
        This should improve the soil moisture drainage predicted by the
-       low resolution solution computed by VIC. *****/
+       low resolution solution computed by VIC. (This requires further 
+       testing to validate the results) *****/
 #define LOW_RES_MOIST FALSE
 
 /***** If TRUE VIC code to save the model state is included in the 
@@ -63,13 +61,14 @@
        based on elevation at which the average annual July air temperature
        is at or below 10C.  All snowbands above this evelation are then 
        assumed to be above the treeline, and vegetation types with 
-       overstory are removed from the snow band average variables. *****/
-#define COMPUTE_TREELINE FALSE
+       overstory are removed from the snow band average variables. 
+       MOVED TO GLOBAL CONTROL FILE! *****/
+//#define COMPUTE_TREELINE TRUE
 
 /***** Define maximum array sizes for model source code *****/
 #define MAX_VEG      12         /* maximum number of vegetation types per 
 				   cell */
-#define MAX_LAYERS   11         /* maximum number of soil moisture layers */
+#define MAX_LAYERS   3          /* maximum number of soil moisture layers */
 #define MAX_NODES    18         /* maximum number of soil thermal nodes */
 #define MAX_BANDS    10         /* maximum number of snow bands */
 #define MAX_FRONTS   3          /* maximum number of freezing and thawing 

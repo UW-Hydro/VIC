@@ -35,6 +35,10 @@ void write_model_state(dist_prcp_struct    *prcp,
   04-10-03 Model is now restarted with the correct values for mu
            and LAST_STORM
   06-03-03 Modified to create ASCII as well as BINARY state file.  KAC
+  09-05-2003 Modified to print space before dz_node for ASCII state
+             file, this corrects a problem with state files created
+             for models using the Cherkauer and Lettenmaier (1999) heat 
+             flux formulation.                                   KAC
 
 *********************************************************************/
 {
@@ -103,7 +107,7 @@ void write_model_state(dist_prcp_struct    *prcp,
       fwrite( &soil_con->dz_node[nidx], 1, sizeof(double), 
 	      outfiles->statefile );
     else
-      fprintf( outfiles->statefile, "%f ", soil_con->dz_node[nidx] );
+      fprintf( outfiles->statefile, " %f", soil_con->dz_node[nidx] );
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( outfiles->statefile, "\n" );

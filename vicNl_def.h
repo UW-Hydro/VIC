@@ -1,6 +1,3 @@
-/* RCS Id String
- * $Id$
- */
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20
@@ -159,7 +156,10 @@ typedef struct {
   char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
 			    parameters*/
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
+  char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
   char   COMPRESS;       /* TRUE = Compress all output files */
+  char   COMPUTE_TREELINE; // TRUE = Determine treeline and exclude overstory
+                           // vegetation from higher elevations
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
@@ -169,7 +169,6 @@ typedef struct {
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
-  char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
@@ -182,6 +181,8 @@ typedef struct {
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */
+  int    AboveTreelineVeg; // Default veg type to use above treeline
+                           // Negative number indicates bare soil.
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */

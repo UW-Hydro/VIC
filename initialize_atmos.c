@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$";
 
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
@@ -62,6 +62,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    previous versions of the model.              Bart and Greg
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
+  09-02-2003 Moved COMPUTE_TREELINE flag from user_def.h to the 
+             options structure.  Now when not set to FALSE, the 
+             value indicates the default above treeline vegetation
+             if no usable vegetation types are in the grid cell 
+             (i.e. everything has a canopy).  A negative value  
+             will cause the model to use bare soil.  Make sure that 
+             positive index value refer to a non-canopied vegetation
+             type in the vegetation library.                   KAC
 
 **********************************************************************/
 {
@@ -681,12 +689,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
-#if COMPUTE_TREELINE
+  if ( options.COMPUTE_TREELINE )
   // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
   // is processed to identify the treeline.
-  if ( options.SNOW_BAND )
-    compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
-#endif // COMPUTE_TREELINE
+    if ( options.SNOW_BAND )
+      compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
 
 #if OUTPUT_FORCE
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full

@@ -61,6 +61,17 @@ void initialize_global() {
   param_set.WIND         = FALSE;
   param_set.DENSITY      = FALSE;
 
+  Modifications:
+    06-03-2003 modified to handle both ASCII and BINARY state files.  KAC
+    09-02-2003 Moved COMPUTE_TREELINE flag from user_def.h to the 
+               options structure.  Now when not set to FALSE, the 
+               value indicates the default above treeline vegetation
+               if no usable vegetation types are in the grid cell 
+               (i.e. everything has a canopy).  A negative value  
+               will cause the model to use bare soil.  Make sure that 
+               positive index value refer to a non-canopied vegetation
+               type in the vegetation library.                   KAC
+
 *********************************************************************/
 
   extern option_struct options;
@@ -76,10 +87,12 @@ void initialize_global() {
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.DIST_PRCP             = FALSE;
+  options.COMPUTE_TREELINE      = FALSE;
   options.CORRPREC              = FALSE;
   options.MOISTFRACT            = FALSE;
   options.BINARY_OUTPUT         = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
+  options.AboveTreelineVeg      = -1;
   options.Nlayer                = 2;
   options.Nnode                 = 3;
   options.GRID_DECIMAL          = 2;

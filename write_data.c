@@ -43,6 +43,11 @@ void write_data(out_data_struct *out_data,
   1/4/2000      modified to allow both standard and LDAS formatted
                 output using a compiler flag                    KAC
   3-12-03   added energy fluxes to snow band output files   KAC
+  04-23-2003    modified LDAS SWQ output, so that it is multiplied by
+                10 instead of 100 before being converted to a short
+                integer.  This reduces stored value precision to 0.1,
+                but increases the maximum storable SWQ, which was
+                exceeded in previous LDAS simulations.          KAC
 
 **********************************************************************/
 {
@@ -61,7 +66,21 @@ void write_data(out_data_struct *out_data,
 
 #if OPTIMIZE
 
-  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\n",
+  /*****************************************************************
+    Create optimization output files
+      type: ASCII
+      columns: 5
+               year
+	       month
+	       day
+	       runoff
+	       baseflow
+               snow_depth
+      comment: runoff and baseflow are output as daily sums for all
+               defined model time steps.
+  ******************************************************************/
+
+  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\n",
 	  dmy->year, dmy->month, dmy->day, out_data->runoff,
 	  out_data->baseflow);
   
@@ -81,7 +100,7 @@ void write_data(out_data_struct *out_data,
   float                          runoff
   float                          baseflow
   unsigned short int * Nlayers   moist * 10
-  unsigned short int             swq * 100
+  unsigned short int             swq * 10
   short int                      net_short * 10
   short int                      in_long * 10
   short int                      r_net * 10
@@ -136,7 +155,7 @@ void write_data(out_data_struct *out_data,
     tmp_usiptr[0] = (unsigned short int)(out_data->moist[j]*10.);
     fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   }
-  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*100.);
+  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*10.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   
   /** energy balance components **/

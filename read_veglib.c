@@ -4,9 +4,17 @@
 
 veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 /**********************************************************************
+  read_veglib.c               Keith Cherkauer                 1997
+
   This routine reads in a library of vegetation parameters for all
   vegetation classes used in the model.  The veg class number is used
   to reference the information in this library.
+
+  Modifications:
+  09-24-98 Modified to remove root fractions from the library file.
+           See read_vegparam.c and calc_root_fraction.c for new
+           root fraction distribution information.               KAC
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -40,19 +48,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       else temp[i].overstory = TRUE;
       fscanf(veglib, "%lf", &temp[i].rarc);
       fscanf(veglib, "%lf", &temp[i].rmin);
-      dum=0.;
-      for (j=0;j<options.Nlayer;j++) {
-        fscanf(veglib, "%lf", &temp[i].root[j]);
-        dum+=temp[i].root[j];
-      }
-      for (j=0;j<options.Nlayer;j++) {
-        temp[i].root[j] /= dum;
-      }
-      if(dum == 0.0){
-        sprintf(str,"Root fractions sum equals zero: %f , Vege Class: %d\n",
-	        dum, temp[i].veg_class);
-        nrerror(str);
-      }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].LAI[j]);
         temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];

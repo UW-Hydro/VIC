@@ -272,10 +272,11 @@ void put_data(dist_prcp_struct  *prcp,
     for(band=0;band<Nbands;band++) {
       if(AreaFract[band]>0.) {
 	tmp_evap=0.;
-	for(index=0;index<options.Nlayer;index++)
+	for(index=0;index<options.Nlayer;index++) {
 	  tmp_evap += cell[dist][vegnum][band].layer[index].evap;
-	out_data->evap_bare += cell[dist][vegnum][band].layer[index].evap 
-	  * (1.0 - veg_con[0].Cv_sum) * mu * AreaFract[band];
+	  out_data->evap_bare += cell[dist][vegnum][band].layer[index].evap 
+	    * (1.0 - veg_con[0].Cv_sum) * mu * AreaFract[band];
+	}
 	if(options.FULL_ENERGY || options.SNOW_MODEL) {
 	  tmp_evap += snow[vegnum][band].vapor_flux * 1000.;
 	  out_data->sub_snow += snow[vegnum][band].vapor_flux * 1000. 

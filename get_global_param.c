@@ -152,6 +152,9 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("FORCE_DT",optstr)==0) {
 	sscanf(cmdstr,"%*s %i %i",&force_dt[0],&force_dt[1]);
       }
+      else if(strcasecmp("ROOT_ZONES",optstr)==0) {
+	sscanf(cmdstr,"%*s %i",&options.ROOT_ZONES);
+      }
 
       /************************************
         Get Frocing Data File Information

@@ -113,6 +113,7 @@ typedef struct {
 			    snow model */
   float  OVERSTORY_ATTENUATION; /* attenutation coefficient for overstory */
   float  TRUNK_RATIO;    /* Fraction of Tree Height that is trunk */
+  int    ROOT_ZONES;     /* Number of root zones used in simulation */
 } option_struct;
 
 typedef struct {
@@ -244,10 +245,14 @@ typedef struct {
   the current grid cell.
   *******************************************************************/
 typedef struct {
-  int    vegetat_type_num;
-  int    veg_class;		/* vegetation class reference number */
-  double Cv;			/* fraction of vegetation coverage */ 
-  double Cv_sum;		/* total fraction of vegetation coverage */
+  int     vegetat_type_num;
+  int     veg_class;		/* vegetation class reference number */
+  double  Cv;			/* fraction of vegetation coverage */ 
+  double  Cv_sum;		/* total fraction of vegetation coverage */
+  float  *zone_depth;          /* depth of root zone */
+  float  *zone_fract;           /* fraction of roots within root zone */
+  float   root[MAXlayer];	/* percent of roots in each soil layer
+                                   (fraction) */
 } veg_con_struct;
 
 /******************************************************************
@@ -261,8 +266,6 @@ typedef struct {
   double rarc;			/* architectural resistance (s/m) */
   double rmin;			/* minimum stomatal resistance (s/m) */
   double wind_h;		/* height at which wind is measured (m) */
-  double root[MAXlayer];	/* percent of roots in each soil layer
-                                   (fraction) */
   double LAI[12];		/* monthly leaf area index */
   double displacement[12];	/* vegetation displacement height (m) */
   double roughness[12];		/* vegetation roughness length (m) */

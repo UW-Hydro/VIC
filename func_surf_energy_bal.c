@@ -92,6 +92,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double            *alpha;
   double            *beta;
   double            *gamma;
+  float             *root;
   layer_data_struct *layer_wet;
   layer_data_struct *layer_dry;
   veg_var_struct    *veg_var_wet;
@@ -170,6 +171,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   alpha         = (double *) va_arg(ap, double *);
   beta          = (double *) va_arg(ap, double *);
   gamma         = (double *) va_arg(ap, double *);
+  root          = (float  *) va_arg(ap, float  *);
   layer_wet     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   layer_dry     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   veg_var_wet   = (veg_var_struct *) va_arg(ap, veg_var_struct *);
@@ -237,7 +239,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 		       veg_class,month,mu,Wdew,Tair,dt,rad[0],
 		       vpd,(1.0 - albedo) * shortwave,Tair,ra,
 		       displacement,roughness,ref_height,elevation,
-		       tmp_rainfall,depth,Wcr,Wpwp);
+		       tmp_rainfall,depth,Wcr,Wpwp,root);
   }
   else if(CALC_EVAP)
     Evap = arno_evap(layer_wet, layer_dry, rad[0], Tair, vpd, 

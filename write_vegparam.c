@@ -36,7 +36,7 @@ void write_vegparam(veg_con_struct *veg_con)
     printf("\trarc             = %lf s/m\n", veg_lib[vegclass].rarc);
     printf("\trmin             = %lf s/m\n", veg_lib[vegclass].rmin);
     for(l=0;l<options.Nlayer;l++)
-      printf("\troot_percent%d   = %lf\n",l+1,veg_lib[vegclass].root[l]);
+      printf("\troot_percent%d   = %lf\n",l+1,veg_con[i].root[l]);
     for (j = 0; j < 12; j++) 
       printf("\tLAI[%d]          = %lf\n",j,veg_lib[vegclass].LAI[j]);
     for (j = 0; j < 12; j++) 

@@ -128,6 +128,7 @@ void main(int argc, char *argv[])
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
+      calc_root_fractions(veg_con,soil_con);
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
 
       /** Build Gridded Filenames, and Open **/
@@ -223,7 +224,7 @@ void main(int argc, char *argv[])
       close_files(infiles,outfiles,builtnames); 
 
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
-      free((char *)veg_con);
+      free_vegcon(&veg_con);
       free((char *)atmos);  
       free((char *)dmy);
       free((char *)soil_con.AreaFract);

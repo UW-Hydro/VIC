@@ -56,7 +56,8 @@ double solve_snow(snow_data_struct    *snow,
 		  double              *Tend_grnd, /** end of time step **/
 		  double              *tmp_snow_energy,
 		  double              *snow_inflow,
-		  double              *ppt) {
+		  double              *ppt,
+		  float               *root) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -227,7 +228,7 @@ double solve_snow(snow_data_struct    *snow,
 				roughness,ref_height,
 				(double)soil_con.elevation,
 				rainfall,soil_con.depth,soil_con.Wcr,
-				soil_con.Wpwp);
+				soil_con.Wpwp,root);
 	  rainfall[WET] = veg_var_wet->throughfall;
 	  energy->longwave = STEFAN_B * pow(tmp_air_temp+KELVIN,4.0);
 	  if(Ndist>1) rainfall[DRY] = veg_var_dry->throughfall;

@@ -330,7 +330,8 @@ void full_energy(int rec,
 			   bare_albedo,&Le,&Ls,cell[WET][iveg][0].aero_resist,
 			   tmp_wind,&step_net_short,&out_short,&step_rad,
 			   &Evap,&last_T1,&Tsurf,&Tgrnd,&Tend_surf,&Tend_grnd,
-			   &tmp_snow_energy,&snow_inflow[band],&ppt[band*2]);
+			   &tmp_snow_energy,&snow_inflow[band],&ppt[band*2],
+			   veg_con[iveg].root);
 	    
 	    tmp_surf_temp = 0.;
  
@@ -359,19 +360,18 @@ void full_energy(int rec,
 	      rainfall[DRY]  = prec[iveg*2+1] * soil_con.Pfactor[band];
 	      Tend_grnd 
 		= calc_surf_energy_bal(!SNOW,rec,iveg,options.Nlayer,
-				       Nveg,
-				       gp.dt,gp.Nnodes,veg_class,
+				       Nveg,gp.dt,gp.Nnodes,veg_class,
 				       band,ice0,moist,dp,surf_atten,
 				       energy[iveg][band].T[0],
 				       atmos->shortwave,tmp_energy->longwave,
 				       Le,Ls,prcp[0].mu[iveg],
 				       displacement,roughness,
-				       ref_height,
-				       tmp_snow_energy,
+				       ref_height,tmp_snow_energy,
 				       snow[iveg][band].vapor_flux,
 				       &last_T1,cell[WET][iveg][0].aero_resist,
-				       tmp_wind,rainfall,atmos,
-				       &tmp_veg_var[WET],&tmp_veg_var[DRY],
+				       tmp_wind,rainfall,veg_con[iveg].root,
+				       atmos,&tmp_veg_var[WET],
+				       &tmp_veg_var[DRY],
 				       tmp_energy,tmp_layer[WET],
 				       tmp_layer[DRY],soil_con,dmy[rec]);  
 	      
@@ -530,13 +530,12 @@ void full_energy(int rec,
 			       cell[DRY][iveg][band].layer,
 			       &veg_var[WET][sveg][band],
 			       &veg_var[DRY][sveg][band],dmy,
-			       &energy[iveg][band],
-			       soil_con,overstory,&SNOW,&SOLVE_SURF_ENERGY,
+			       &energy[iveg][band],soil_con,overstory,
+			       &SNOW,&SOLVE_SURF_ENERGY,
 			       options.SNOW_STEP,rec,veg_class,iveg,Nveg,
-			       band,hour,
-			       gp.Nnodes,inshort,inlong,
-			       step_air_temp,
-			       prec[iveg*2]*(double)options.SNOW_STEP
+			       band,hour,gp.Nnodes,inshort,inlong,
+			       step_air_temp,prec[iveg*2]
+			       *(double)options.SNOW_STEP
 			       /(double)gp.dt,step_density,step_vp,
 			       step_vpd,atmos->pressure,prcp[0].mu[iveg],
 			       roughness,displacement,ref_height,surf_atten,
@@ -546,7 +545,8 @@ void full_energy(int rec,
 			       &step_net_short,&out_short,&step_rad,
 			       &Evap,&last_T1,&Tsurf,&Tgrnd,&Tend_surf,
 			       &Tend_grnd,&tmp_snow_energy,
-			       &snow_inflow[band],&ppt[band*2]);
+			       &snow_inflow[band],&ppt[band*2],
+			       veg_con[iveg].root);
 		
 		if(!SNOW) {
 		  
@@ -577,7 +577,8 @@ void full_energy(int rec,
 					 displacement,roughness,ref_height,
 					 soil_con.elevation,rainfall,
 					 soil_con.depth,
-					 soil_con.Wcr,soil_con.Wpwp);
+					 soil_con.Wcr,soil_con.Wpwp,
+					 veg_con[iveg].root);
 		      for(j=0;j<Ndist;j++) 
 			ppt[band*2+j] += veg_var[j][iveg][band].throughfall; 
 		    }
@@ -738,7 +739,8 @@ void full_energy(int rec,
 				     displacement,roughness,ref_height,
 				     soil_con.elevation,rainfall,
 				     soil_con.depth,
-				     soil_con.Wcr,soil_con.Wpwp);
+				     soil_con.Wcr,soil_con.Wpwp,
+				     veg_con[iveg].root);
 		  for(j=0;j<Ndist;j++) 
 		    ppt[band*2+j] += veg_var[j][iveg][band].throughfall; 
 		}

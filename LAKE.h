@@ -95,7 +95,7 @@ double get_depth(lake_con_struct, double);
 void wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		    global_param_struct *, soil_con_struct  *, int,
 		    int, double, lake_con_struct);
-void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, int, int, double, soil_con_struct); 
-void initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, int, int, double, soil_con_struct, lake_var_struct *, int, lake_con_struct); 
+void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, double, lake_var_struct *, lake_con_struct, int, int, double, soil_con_struct);
+void initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, double, soil_con_struct, lake_var_struct *, int, lake_con_struct);
 
 #endif // LAKE_MODEL

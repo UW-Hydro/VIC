@@ -55,6 +55,8 @@ void initialize_model_state(double               surf_temp,
            parameters.                                              KAC
   07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
 	    accessed in set_node_parameters().			TJB
+  01-Nov-04 Added support for state files containing SPATIAL_FROST
+	    and LAKE_MODEL state variables.			TJB
 
 **********************************************************************/
 {
@@ -230,7 +232,11 @@ void initialize_model_state(double               surf_temp,
 
     read_initial_model_state(infiles.statefile, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
+#if LAKE_MODEL
+			     Ndist, *init_STILL_STORM, *init_DRY_TIME, lake_con);
+#else
 			     Ndist, *init_STILL_STORM, *init_DRY_TIME);
+#endif // LAKE_MODEL
 
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types

@@ -14,7 +14,12 @@ void write_model_state(dist_prcp_struct    *prcp,
 		       outfiles_struct     *outfiles,
 		       soil_con_struct     *soil_con,
 		       char                *STILL_STORM,
-		       int                 *DRY_TIME) 
+#if LAKE_MODEL
+		       int                 *DRY_TIME,
+		       lake_con_struct      lake_con)
+#else
+		       int                 *DRY_TIME)
+#endif // LAKE_MODEL
 /*********************************************************************
   write_model_state      Keith Cherkauer           April 14, 2000
 
@@ -43,6 +48,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 	    account for bare soil values (extra veg class per grid
 	    cell).  Without this fix, attempts to skip grid cells
 	    fail.						TJB
+  01-Nov-04 Added storage of state variables for SPATIAL_FROST and
+	    LAKE_MODEL.						TJB
 
 *********************************************************************/
 {
@@ -58,6 +65,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   int    Ndist;
   int    Nbands;
   int    byte, Nbytes;
+  int    extra_veg;
 #if SPATIAL_FROST
   int    frost_area;
 #endif // SPATIAL_FROST
@@ -66,6 +74,10 @@ void write_model_state(dist_prcp_struct    *prcp,
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
+#if LAKE_MODEL
+  lake_var_struct         lake_var;
+  int    node;
+#endif // LAKE_MODEL
 
   if(options.DIST_PRCP) 
     Ndist = 2;
@@ -77,6 +89,9 @@ void write_model_state(dist_prcp_struct    *prcp,
   veg_var = prcp->veg_var;
   snow    = prcp->snow;
   energy  = prcp->energy;
+#if LAKE_MODEL
+  lake_var = prcp->lake_var;
+#endif // LAKE_MODEL
   
   /* write cell information */
   if ( options.BINARY_STATE_FILE ) {
@@ -98,11 +113,45 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * sizeof(int) // DRY_TIME
 	       + (Nveg+1) * Nbands * 2 * sizeof(int) // veg & band
 	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
+#if SPATIAL_FROST
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // soil ice
+#else
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil ice
+#endif // SPATIAL_FROST
 	       + Nveg * Nbands * Ndist * sizeof(double) // dew
 	       + (Nveg+1) * Nbands * sizeof(int) // last_snow
 	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
+#if LAKE_MODEL
+    if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+      Nbytes += sizeof(double) // wetland mu
+		+ sizeof(char) // wetland STILL_STORM
+		+ sizeof(int) // wetland DRY_TIME
+		+ 2 * sizeof(int) // wetland veg and band (band = 0 for wetland)
+		+ Ndist * options.Nlayer * sizeof(double) // wetland soil moisture
+#if SPATIAL_FROST
+	        + Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // wetland soil ice
+#else
+	        + Ndist * options.Nlayer * sizeof(double) // wetland soil ice
+#endif // SPATIAL_FROST
+		+ sizeof(double) // wetland dew
+		+ sizeof(int) // wetland last_snow
+		+ sizeof(char) // wetland MELTING
+		+ 9 * sizeof(double) // wetland snow parameters
+		+ options.Nnode * sizeof(double) // wetland soil temperatures
+		+ sizeof(int) // numnod
+		+ sizeof(double) // tp_in
+		+ lake_con.numnod * sizeof(double) // temp
+		+ sizeof(double) // tempi
+		+ sizeof(double) // hice
+		+ sizeof(double) // fraci
+		+ sizeof(int) // mixmax
+		+ sizeof(double) // volume
+		+ sizeof(double) // sarea
+      ;
+    }
+#endif // LAKE_MODEL
     fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
   }
 
@@ -118,8 +167,15 @@ void write_model_state(dist_prcp_struct    *prcp,
   if ( !options.BINARY_STATE_FILE )
     fprintf( outfiles->statefile, "\n" );
 
+  extra_veg = 0;
+#if LAKE_MODEL
+  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+    extra_veg = 1; // add a veg type for the wetland
+  }
+#endif // LAKE_MODEL
+
   /* Output for all vegetation types */
-  for ( veg = 0; veg <= Nveg; veg++ ) {
+  for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
 
     // Store distributed precipitation fraction
     if ( options.BINARY_STATE_FILE )
@@ -137,9 +193,15 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       DRY_TIME[veg] );
     }
 
+#if LAKE_MODEL
+  if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
+    Nbands = 1; // wetland veg type only occurs in band 0
+  }
+#endif // LAKE_MODEL
+
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      
+
       /* Write cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	fwrite( &veg, 1, sizeof(int), outfiles->statefile );
@@ -160,9 +222,32 @@ void write_model_state(dist_prcp_struct    *prcp,
 	  else
 	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
-      
+
+        /* Write average ice content */
+        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	    tmpval = cell[dist][veg][band].layer[lidx].ice[frost_area];
+	    if ( options.BINARY_STATE_FILE ) {
+	      fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	    }
+	    else {
+	      fprintf( outfiles->statefile, " %f", tmpval );
+	    }
+	  }
+#else
+	  tmpval = cell[dist][veg][band].layer[lidx].ice;
+	  if ( options.BINARY_STATE_FILE ) {
+	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  }
+	  else {
+	    fprintf( outfiles->statefile, " %f", tmpval );
+	  }
+#endif // SPATIAL_FROST
+        }
+
 	/* Write dew storage */
-	if ( veg < Nveg ) {
+	if ( veg < Nveg || ( veg == Nveg+extra_veg && extra_veg > 0 ) ) {
 	  tmpval = veg_var[dist][veg][band].Wdew;
 	  if ( options.BINARY_STATE_FILE )
 	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
@@ -208,6 +293,34 @@ void write_model_state(dist_prcp_struct    *prcp,
     }
   }
 
+#if LAKE_MODEL
+  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+    if ( options.BINARY_STATE_FILE ) {
+      fwrite( &lake_con.numnod, 1, sizeof(int), outfiles->statefile );
+      fwrite( &lake_var.tp_in, 1, sizeof(double), outfiles->statefile );
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        fwrite( &lake_var.temp[node], 1, sizeof(double), outfiles->statefile );
+      }
+      fwrite( &lake_var.tempi, 1, sizeof(double), outfiles->statefile );
+      fwrite( &lake_var.hice, 1, sizeof(double), outfiles->statefile );
+      fwrite( &lake_var.fraci, 1, sizeof(double), outfiles->statefile );
+      fwrite( &lake_var.mixmax, 1, sizeof(int), outfiles->statefile );
+      fwrite( &lake_var.volume, 1, sizeof(double), outfiles->statefile );
+      fwrite( &lake_var.sarea, 1, sizeof(double), outfiles->statefile );
+    }
+    else {
+      fprintf( outfiles->statefile, "%i %f", lake_con.numnod, lake_var.tp_in );
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        fprintf( outfiles->statefile, " %f", lake_var.temp[node] );
+      }
+      fprintf( outfiles->statefile, " %f %f %f %d %f %f",
+        lake_var.tempi, lake_var.hice, lake_var.fraci, lake_var.mixmax,
+	lake_var.volume, lake_var.sarea );
+      if ( !options.BINARY_STATE_FILE )
+        fprintf( outfiles->statefile, "\n" );
+    }
+  }
+#endif // LAKE_MODEL
   /* Force file to be written */
   fflush(outfiles->statefile);
 

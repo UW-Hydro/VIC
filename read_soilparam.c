@@ -72,6 +72,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   07-Jul-04	Changed lower limit on initial soil moisture to be
 		residual moisture instead of wilting point.  Also
 		cleaned up validation statements.		TJB
+		Removed extraneous tmp variable.		TJB
 
 **********************************************************************/
 {
@@ -86,7 +87,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          Wcr_FRACT[MAX_LAYERS];
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
-  double          tmp;
   double          tempdbl;
   soil_con_struct temp; 
 
@@ -293,7 +293,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
     *************************************************/
     if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
-      tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax * 
 	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
 	temp.Ds * temp.max_moist[layer];

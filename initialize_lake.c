@@ -28,6 +28,7 @@ void initialize_lake (lake_var_struct  *lake,
   modifications:
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
+ 2005-03-24 Added check for negative lake volumes.			TJB
 
 **********************************************************************/
 {

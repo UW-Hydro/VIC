@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Mon Apr 21 15:14:05 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Fri Apr 25 14:58:10 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -44,6 +44,8 @@ static char vcid[] = "$Id$";
   11-00 energy balance components are now returned to the VIC model
         so that they can be reported as energy balance components
         in model output.                                           KAC
+  xx-xx-02 Modified to handle new variables required to close the
+        canopy energy balance.                                     KAC
   2-20-03 Added check of intercepted before mass balance error 
         calculation.  Since interception quantity can be greater
         than Wd_max when snow is present, the routine could return

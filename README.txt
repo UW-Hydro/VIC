@@ -44,19 +44,40 @@ Modifications:
 	    Also changed limit on loop over forcing types from
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
 	initialize_model_state.c (found by Justin Sheffield at Princeton):
-	    Initialize soil_con->dz_node[Nnodes] to 0.0 (on some
-	    platforms, if we don't initialize it, it gets set to
-	    garbage).						TJB
+	    Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
+	    accessed in set_node_parameters().			TJB
 	open_debug.c (found by Justin Sheffield at Princeton):
 	    Initialize debug_store_moist array when debug.PRT_MOIST
 	    is true (as well as under the other previously-defined
 	    conditions).					TJB
+	open_state_file.c (Port from 4.1.0):
+	    Modified the statefile name to contain year, month, day
+	    rather than day, month, year.  This makes it consistent
+	    with the planned release of 4.1.0.			TJB
 	penman.c (found by Justin Sheffield at Princeton):
 	    Changed
 		if (vpd > 0.0 && evap < 0.0)
 	    to
 		if (vpd >= 0.0 && evap < 0.0)
 	    to correctly handle evap when vpd == 0.0.		TJB
+	read_atmos_data.c (Port from 4.1.0):
+	    Replaced NF with global_param.dt in condition checking
+	    whether forcing file contains enough records to cover
+	    the time range of the simulation.			TJB
+	read_initial_model_state.c (Port from 4.1.0):
+	    Added check to verify that the sum of the defined nodes
+	    equals the damping depth.				TJB
+	read_soilparam_arc.c:
+	    Modified to handle ARNO parameters.			TJB
+	soil_conduction.c (Port from 4.1.0):
+	    set_node_parameters(): Modified to correct differences
+	    between calculations to determine maximum node moisture
+	    and node moisture, so that nodes on the boundary between
+	    soil layers are computed the same way for both.	TJB
+	    distribute_node_moisture_properties(): Modified to check
+	    that node soil moisture is less than or equal to maximum
+	    node soil moisture, otherwise an error is printed to the
+	    screen and the model exits.				TJB
 	surface_fluxes.c (found by Justin Sheffield at Princeton):
 	    Fixed initialization of canopyevap to initialize for every
 	    value of dist, rather than just dist 0.		TJB

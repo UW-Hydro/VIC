@@ -28,13 +28,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
            routines, as well as the simplified frozen soil moisture
            storage                                              KAC
   07-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
-	    before adjusting *deltaH.  This fixes a bug caused when
-	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
-	    non-zero ice content was calculated at the beginning of
-	    the time step but always assumed zero at the point of
-	    *deltaH adjustment, leading to *deltaH always being
-	    calculated as if ice had melted, leading to lower soil
-	    temperatures and snow packs that never melted.	TJB
+	    before adjusting *deltaH for ice.  This is just a safety
+	    measure; ice and ice0 should both be 0 if FS_ACTIVE is
+	    FALSE.						TJB
 
 **********************************************************************/
 {

@@ -100,6 +100,12 @@ static char vcid[] = "$Id$";
 	    which no longer needs them.				TJB
   25-Aug-04 Modified re-scaling of surface_flux to reduce round-off
 	    error.						TJB
+  21-Sep-04 Added ErrorString to store error messages from
+	    root_brent.						TJB
+	    Removed message explaining non-fatal root_brent warning.
+	    These warnings were not a sign of any failures, and served
+	    only to confuse users and take up valuable space in the
+	    output display.					TJB
 
 *****************************************************************************/
 void snow_melt(double            Le, 
@@ -170,6 +176,8 @@ void snow_melt(double            Le,
   double sensible_heat;		
   double advected_sensible_heat;		
   double melt_energy = 0.;
+
+  char ErrorString[MAXSTRING];
 
   SnowFall = snowfall / 1000.; /* convet to m */
   RainFall = rainfall / 1000.; /* convet to m */
@@ -329,7 +337,7 @@ void snow_melt(double            Le,
       if ( SurfaceSwq > MIN_SWQ_EB_THRES ) 
 	snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				     (double)(snow->surf_temp+SNOW_DT),
-				     SnowPackEnergyBalance, 
+				     ErrorString, SnowPackEnergyBalance, 
 				     delta_t, aero_resist,
 				     displacement, z2, Z0, 
 				     density, vp, LongSnowIn, Le, pressure,
@@ -349,12 +357,6 @@ void snow_melt(double            Le,
       if ( snow->surf_temp <= -9998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
 	/* Thin snowpack must be solved in conjunction with ground surface
 	   energy balance */
-#if VERBOSE
-        if ( snow->surf_temp <= -9998 ) {
-          /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
-	  fprintf(stderr,"Snowpack is too thin to solve separately; it will be solved in conjunction with ground surface energy balance\n");
-        }
-#endif // VERBOSE
 	snow->surf_temp = 999;
       }
       else {
@@ -655,6 +657,8 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   double *SurfaceMassFlux;          /* Mass flux of water vapor to or from the
 					 intercepted snow */
 
+  char *ErrorString;
+
   /* Read Variable Argument List */
 
   /* General Model Parameters */
@@ -701,8 +705,10 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   VaporMassFlux         = (double *) va_arg(ap, double *);
   BlowingMassFlux       = (double *) va_arg(ap, double *);
   SurfaceMassFlux       = (double *) va_arg(ap, double *);
+  ErrorString           = (char *) va_arg(ap, char *);
 
   /* print variables */
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"Dt = %f\n",Dt);
@@ -719,7 +725,6 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"Press = %f\n",Press);
   fprintf(stderr,"Rain = %f\n",Rain);
   fprintf(stderr,"ShortRad = %f\n",ShortRad);
-  fprintf(stderr,"Tair = %f\n",Tair);
   fprintf(stderr,"Vpd = %f\n",Vpd);
   fprintf(stderr,"Wind = %f\n",Wind);
 

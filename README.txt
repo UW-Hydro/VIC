@@ -444,13 +444,14 @@ Calculation of deltaH when FS_ACTIVE is FALSE
 Root_brent error message clarification
 
         Files affected:
-        calc_surf_energy_bal.c, frozen_soil.c, root_brent.c, snow_melt.c
+        calc_atmos_energy_bal.c, calc_surf_energy_bal.c, frozen_soil.c,
+	ice_melt.c, root_brent.c, snow_intercept.c, snow_melt.c, vicNl.h
 
         Description:
-        Modified error messages.  Root_brent.c now simply prints a warning,
-        leaving it to the functions that called it to describe the specific
-        error and its consequences.  In 4.0.4, root_brent's messages sometimes
-        were wrong.
+        Instead of printing warning or error messages, root_brent.c now
+	passes descriptions of the errors to the functions that called it,
+        leaving it to them to describe the specific error and its consequences.
+	In 4.0.4, root_brent's messages sometimes were wrong.
 
 
 Display current grid cell number for arc/info soil files

@@ -58,6 +58,8 @@ static char vcid[] = "$Id$";
 	    SPATIAL_FROST.					TJB
   04-Jun-04 Added descriptive error message to beginning of screen dump
 	    in error_print_canopy_energy_bal.			TJB
+  21-Sep-04 Added ErrorString to store error messages from
+	    root_brent.						TJB
 
 *****************************************************************************/
 void snow_intercept(double  AirDens,
@@ -155,6 +157,8 @@ void snow_intercept(double  AirDens,
   double Tupper;
   double Tlower;
   double Evap;
+
+  char ErrorString[MAXSTRING];
 
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
@@ -325,7 +329,7 @@ void snow_intercept(double  AirDens,
 
   if ( Tupper != MISSING && Tlower != MISSING ) {
 
-    *Tfoliage = root_brent(Tlower, Tupper, func_canopy_energy_bal,  band, 
+    *Tfoliage = root_brent(Tlower, Tupper, ErrorString, func_canopy_energy_bal,  band, 
 			  month, rec, Dt, soil_con->elevation, 
 			  soil_con->Wcr, soil_con->Wpwp, soil_con->depth, 
 #if SPATIAL_FROST
@@ -366,7 +370,7 @@ void snow_intercept(double  AirDens,
 					  LatentHeat, LatentHeatSub, 
 					  LongOverOut, NetLongOver, &NetRadiation, 
 					  &RefreezeEnergy, SensibleHeat, 
-					  VaporMassFlux);
+					  VaporMassFlux, ErrorString);
       
     }
     
@@ -648,6 +652,8 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   double *SensibleHeat;
   double *VaporMassFlux;
 
+  char *ErrorString;
+
   /** Read variables from variable length argument list **/
 
   /* General Model Parameters */
@@ -715,8 +721,10 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   RefreezeEnergy     = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
   VaporMassFlux      = (double *) va_arg(ap, double *);
+  ErrorString        = (char *) va_arg(ap, char *);
 
   /** Print variable info */
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: snow_intercept failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   /* General Model Parameters */

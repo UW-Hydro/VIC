@@ -93,6 +93,8 @@ static char vcid[] = "$Id$";
 	    list for ErrorIcePackEnergyBalance() and
 	    ErrorPrintIcePackEnergyBalance() so that types match in the caller
 	    and callee.							TJB
+  21-Sep-04 Added ErrorString to store error messages from
+	    root_brent.							TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -160,6 +162,8 @@ void ice_melt(double            z2,
   double latent_heat;		
   double sensible_heat;		
   double melt_energy = 0.;
+
+  char ErrorString[MAXSTRING];
 
   SnowFall = snowfall / 1000.; /* convet to m */
   RainFall = rainfall / 1000.; /* convet to m */
@@ -292,7 +296,7 @@ void ice_melt(double            z2,
     /* Calculate surface layer temperature using "Brent method" */
 
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
-				 (double)0.0,
+				 (double)0.0, ErrorString,
 				 IceEnergyBalance, (double)delta_t, 
 				 aero_resist, z2, 
 				 displacement, Z0, wind, net_short, longwave,
@@ -319,7 +323,7 @@ void ice_melt(double            z2,
 				 avgcond, SWconducted,		
 				 snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
 				 &SnowFlux,&latent_heat,
-				 &sensible_heat, &LWnet);
+				 &sensible_heat, &LWnet, ErrorString);
 
     Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				     z2, displacement, Z0, wind, net_short,
@@ -526,6 +530,9 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   double *GroundFlux;
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
+  double *LWnet;
+
+  char *ErrorString;
 
   /* initialize variables */
   Dt                 = (double) va_arg(ap, double);
@@ -555,15 +562,17 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   Tfreeze            = (double) va_arg(ap, double);
   AvgCond            = (double) va_arg(ap, double);
   SWconducted        = (double) va_arg(ap, double);
-  SWabsorbed         = (double) va_arg(ap, double);
   SnowDepth          = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
   SurfAttenuation    = (double) va_arg(ap, double);
   GroundFlux         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
+  LWnet              = (double *) va_arg(ap, double *);
+  ErrorString        = (char *) va_arg(ap, double *);
   
   /* print variables */
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: ice_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"Dt = %f\n",Dt);
@@ -593,13 +602,13 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"Tfreeze = %f\n",Tfreeze);
   fprintf(stderr,"AvgCond = %f\n",AvgCond);
   fprintf(stderr,"SWconducted = %f\n",SWconducted);
-  fprintf(stderr,"SWabsorbed = %f\n",SWabsorbed);
   fprintf(stderr,"SnowDepth = %f\n",SnowDepth);
   fprintf(stderr,"SnowDensity = %f\n",SnowDensity);
   fprintf(stderr,"SurfAttenuation = %f\n",SurfAttenuation);
   fprintf(stderr,"GroundFlux = %f\n",GroundFlux[0]);
   fprintf(stderr,"LatentHeat = %f\n",LatentHeat[0]);
   fprintf(stderr,"SensibleHeat = %f\n",SensibleHeat[0]);
+  fprintf(stderr,"LWnet = %f\n",*LWnet);
   
   fprintf(stderr,"Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
   exit(0);

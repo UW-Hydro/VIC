@@ -27,6 +27,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   int    tmpflag;
   int    Nveg_type;
   char   str[MAXSTRING];
+  double maxd;
 
   rewind(veglib);
   fgets(str,MAXSTRING,veglib);
@@ -60,9 +61,10 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         fscanf(veglib, "%lf", &temp[i].roughness[j]);
       }
       temp[i].wind_h = 0.;
+      maxd = 0;
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].displacement[j]);
-
+        if(temp[i].displacement[j] > maxd) maxd = temp[i].displacement[j];
         if(temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
           sprintf(str,"Vegetation has leaves (LAI = %lf), but no displacement (%lf)",
 	          temp[i].LAI[j], temp[i].displacement[j]);
@@ -75,6 +77,11 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         }
       }
       fscanf(veglib, "%lf", &temp[i].wind_h);
+      if(temp[i].wind_h < maxd && temp[i].overstory) {
+        sprintf(str,"Vegetation reference height (%lf) for vegetation class %i, must be greater than the maximum displacement height (%lf) when OVERSTORY has been set TRUE.",
+                temp[i].wind_h,temp[i].veg_class,maxd);
+        nrerror(str);
+      }
       fgets(str, MAXSTRING, veglib);	/* skip over end of line comments */
       i++;
     }

@@ -3,6 +3,28 @@
 # $Id$
 #------------------------------------------------------------------------
 
+April 25, 2003: Beta bug patches (Revision 2)
+
+        write_data.c: (suggested by EDM)
+	    **** WARNING: CHANGE TO OUTPUT FILE ****
+	    modified LDAS SWQ output, so that it is multiplied by 10 
+	    instead of 100 before being converted to a short integer.  
+	    This reduces stored value precision to 0.1, but increases 
+	    the maximum storable SWQ, which was exceeded in previous 
+	    LDAS simulations.
+
+April 23, 2003: Beta bug patches (Revision 1)
+
+This covers bug fixes found by beta testers and fixed in the version of the code bundled with this file.
+
+	surface_fluxes.c: (found by Ingjerd Haddeland)
+	    Indexing fix sent SNOW_STEP to calc_surf_energy_bal rather
+	    than the model time step, meaning that without snow the 
+	    evaporation was computed for SNOW_STEP hours rather than a
+	    full day.  This was fixed by introducing step_inc to 
+	    index the arrays, while step_dt keeps track of the correct
+	    time step. 
+
 March 27, 2003: VIC release 4.0.4beta
 
 This release covers patches for several bugs found in 4.0.3, which were 

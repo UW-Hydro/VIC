@@ -62,14 +62,15 @@ double hermint(double xbar, int n, double *x, double *yc1, double *yc2,
 /****************************************************************************/
 /*				    HourlyT                                 */
 /****************************************************************************/
-void HourlyT(int Dt, int *TmaxHour, double *Tmax, 
-	     int *TminHour, double *Tmin, double *Tair)
+double HourlyT(int Dt, int *TmaxHour, double *Tmax, 
+	       int *TminHour, double *Tmin, double *Tair)
 {
   double *x;
   double *Tyc1;
   double *yc2;
   double *yc3;
   double *yc4;
+  double new_Tmin;
   int i;
   int j;
   int n;
@@ -100,9 +101,6 @@ void HourlyT(int Dt, int *TmaxHour, double *Tmax,
       Tyc1[j++]  = Tmin[i];
     }
 
-
-
-
   }
 
   /* we want to preserve maxima and minima, so we require that the first 
@@ -114,8 +112,10 @@ void HourlyT(int Dt, int *TmaxHour, double *Tmax,
   hermite(n, x, Tyc1, yc2, yc3, yc4);
 
   /* interpolate the temperatures */
+  new_Tmin=100;
   for (i = 0, hour = 0.5*Dt+HOURSPERDAY; i < nHours; i++, hour += Dt) {
     Tair[i] = hermint(hour, n, x, Tyc1, yc2, yc3, yc4);
+    if(Tair[i]<new_Tmin) new_Tmin=Tair[i];
   }
 
   free((char*)x);
@@ -123,5 +123,8 @@ void HourlyT(int Dt, int *TmaxHour, double *Tmax,
   free((char*)yc2);
   free((char*)yc3);
   free((char*)yc4);
+
+  return(new_Tmin);
+
 }
 

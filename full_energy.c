@@ -19,7 +19,9 @@ void full_energy(int rec,
                  char                 NEWCELL,
 		 double              *prec,
 		 double              *rainonly,
-		 double              *melt)
+		 double              *melt,
+		 double              *yearly_prec,
+		 double              *yearly_epot)
 /**********************************************************************
 	full_energy	Keith Cherkauer		January 8, 1997
 
@@ -105,6 +107,7 @@ void full_energy(int rec,
   double                 tmp_Wdew[2];
   double                 tmp_mu;
   double                *tmp_layerevap[2];
+  double                 tmp_Tmin;
   atmos_data_struct      tmp_atmos;
   layer_data_struct     *tmp_layer[2];
   veg_var_struct         tmp_veg_var[2];
@@ -482,7 +485,7 @@ void full_energy(int rec,
 	    New Snow, or Old Snow on Ground or in Canopy
 	  ***********************************************/
 
-	  HourlyT(1,tmax_hour,tmax,tmin_hour,tmin,air_temp);
+	  tmp_Tmin = HourlyT(1,tmax_hour,tmax,tmin_hour,tmin,air_temp);
 	  
 	  for(hour=0;hour<gp.dt/SNOW_STEP;hour++) {
 	    
@@ -490,6 +493,7 @@ void full_energy(int rec,
 	    
 	    /** Initialize parameters for the shorter time step **/
 	    step_air_temp = air_temp[hour];
+
 /* 	    if(step_air_temp<tmin[1] && hour>tmax_hour[1]) { */
 /* 	      tmp_vp     = atmos->vp; */
 /* 	      tmp_vpd    = atmos->vpd; */
@@ -509,8 +513,21 @@ void full_energy(int rec,
 /* 	      step_vp  = atmos->vp; */
 /* 	      step_vpd = atmos->vpd; */
 /* 	    } */
-	    step_vp  = svp(step_air_temp) - atmos->vpd; 
-	    step_vpd = atmos->vpd; 
+
+
+/*  	    step_vp  = estimate_vapor_pressure(dmy,  */
+/*  					       yearly_epot,  */
+/*  					       yearly_prec,  */
+/*  					       atmos->tmin,  */
+/*  					       step_air_temp,  */
+/*  					       atmos->priest,  */
+/*  					       rec);   */
+/*  	    step_vpd = svp(step_air_temp) - step_vp;   */
+/* 	    step_vp  = svp(step_air_temp) - atmos->vpd;  */
+/* 	    step_vpd = atmos->vpd;  */
+
+	    step_vp  = atmos->rel_humid * svp(step_air_temp) / 100.;
+	    step_vpd = svp(step_air_temp) - step_vp;
 	    
 	    step_density = 3.486*atmos->pressure/(275.0
 						    + step_air_temp);

@@ -197,7 +197,7 @@ double solve_snow(snow_data_struct    *snow,
 			 &snow->snow_canopy,
 			 &snow->tmp_int_storage,
 			 &snow->canopy_vapor_flux,&canopy_temp,
-			 &tmp_energy_val,dmy[rec].month,rec);
+			 &tmp_energy_val,dmy[rec].month,rec,hour);
 	  energy->longwave = STEFAN_B * pow(canopy_temp+KELVIN,4.0);
 	  veg_var_wet->throughfall = rainfall[0] + snowfall[0];
 	}

@@ -265,7 +265,7 @@ void write_data(out_data_struct *out_data,
 	    out_data->baseflow, out_data->Wdew);
     for(j=0;j<options.Nlayer;j++) 
       fprintf(outfiles.fluxes,"\t%.4lf", out_data->moist[j]);
-    fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
+    fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lg\t%.4lg\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
 	    out_data->net_short, out_data->r_net, out_data->latent_canop, 
 	    out_data->latent_trans, out_data->latent_bare, 
 	    out_data->latent_pet, out_data->latent_pet_mm, 

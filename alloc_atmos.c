@@ -4,7 +4,7 @@
  * Author : Bart Nijssen
  * E-mail : nijssen@u.washington.edu
  * Created: Fri Aug 27 18:22:42 1999
- * Last Changed: Mon Apr 21 15:02:28 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * Last Changed: Tue Sep  2 15:11:02 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * Notes  :
  */
 
@@ -76,13 +76,20 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
 /*	      		  free_atmos()                                      */
 /****************************************************************************/
 void free_atmos(int nrecs, atmos_data_struct **atmos)
+/***************************************************************************
+  Modifications:
+  09-02-2003 Added check for LINK_DEBUG global option.  If LINK_DEBUG is
+             TRUE atmospheric data is not dynamically allocated, so it
+             should not be freed.                                   KAC
+
+***************************************************************************/
 {
   int i;
 
   if (*atmos == NULL)
     return;
 
-#if !OPTIMIZE
+#if !OPTIMIZE && !LINK_DEBUG
   for (i = 0; i < nrecs; i++) {
     free((*atmos)[i].prec);
     free((*atmos)[i].air_temp);

@@ -233,17 +233,6 @@ void main(int argc, char *argv[])
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
-/*    if(options.FROZEN_SOIL) {  */
-/* 	free((char*)soil_con.dz_node);  */
-/* 	free((char*)soil_con.expt_node);  */
-/* 	free((char*)soil_con.max_moist_node); */
-/* 	free((char*)soil_con.alpha); */
-/* 	free((char*)soil_con.beta); */
-/* 	free((char*)soil_con.gamma); */
-/*       } */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
-
-/*   free((char *)prcp); */
-  
 }	/* End Main Program */

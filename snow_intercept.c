@@ -60,6 +60,8 @@ static char vcid[] = "$Id$";
 	    in error_print_canopy_energy_bal.			TJB
   21-Sep-04 Added ErrorString to store error messages from
 	    root_brent.						TJB
+  28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
+	    flux calculations.					TJB
 
 *****************************************************************************/
 void snow_intercept(double  AirDens,
@@ -90,6 +92,7 @@ void snow_intercept(double  AirDens,
 		    double *NetLongOver,
 		    double *NetShortOver,
 		    double *Ra,
+		    double *Ra_used,
 		    double *RainFall,
 		    double *SensibleHeat,
 		    double *SnowFall, 
@@ -294,7 +297,7 @@ void snow_intercept(double  AirDens,
 				   soil_con->frost_fract, 
 #endif
 				   AirDens, EactAir, Press, Le, 
-				   Tcanopy, Vpd, mu, &Evap, Ra, 
+				   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
 				   RainFall, Wind, UnderStory, iveg, 
 				   veg_class, displacement, ref_height, 
 				   roughness, root, IntRainOrg, *IntSnow, 
@@ -336,7 +339,7 @@ void snow_intercept(double  AirDens,
 			  soil_con->frost_fract, 
 #endif
 			   AirDens, EactAir, Press, Le, 
-			   Tcanopy, Vpd, mu, &Evap, Ra, 
+			   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
 			   RainFall, Wind, UnderStory, iveg, 
 			   veg_class, displacement, ref_height, 
 			   roughness, root, IntRainOrg, *IntSnow, 
@@ -359,7 +362,7 @@ void snow_intercept(double  AirDens,
 					  soil_con->frost_fract, 
 #endif
 					  AirDens, EactAir, Press, Le, 
-					  Tcanopy, Vpd, mu, &Evap, Ra, 
+					  Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
 					  RainFall, Wind, UnderStory, iveg, 
 					  veg_class, displacement, ref_height, 
 					  roughness, root, IntRainOrg, *IntSnow, 
@@ -381,7 +384,7 @@ void snow_intercept(double  AirDens,
 				   soil_con->frost_fract, 
 #endif
 				   AirDens, EactAir, Press, Le, 
-				   Tcanopy, Vpd, mu, &Evap, Ra, 
+				   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
 				   RainFall, Wind, UnderStory, iveg, 
 				   veg_class, displacement, ref_height, 
 				   roughness, root, IntRainOrg, *IntSnow, 
@@ -612,6 +615,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
 
   double *Evap;
   double *Ra;
+  double *Ra_used;
   double *Rainfall;
   double *Wind;
 
@@ -682,6 +686,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
 
   Evap     = (double *) va_arg(ap, double *);
   Ra       = (double *) va_arg(ap, double *);
+  Ra_used  = (double *) va_arg(ap, double *);
   Rainfall = (double *) va_arg(ap, double *);
   Wind     = (double *) va_arg(ap, double *);
 
@@ -748,6 +753,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("Press = %f\n",  Press);
   printf("Le = %f\n",  Le);
   printf("Ra = [%f, %f]\n",  Ra[1], Ra[UnderStory]);
+  printf("Ra_used = %f\n",  *Ra_used);
   printf("Tcanopy = %f\n",  Tcanopy);
   printf("Vpd = %f\n",  Vpd);
   printf("mu = %f\n",  mu);

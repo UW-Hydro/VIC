@@ -78,7 +78,7 @@ void tridia(int, double *, double *, double *, double *, double *);
 void water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, double, soil_con_struct, double, double, double, double);
 double func_lake_energy_balance(double, va_list);
 double solve_surf_energy_bal(double Tsurf, ...);
-void ice_melt(double, double, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
+void ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
 double func_lake_energy_bal(double , va_list);
 double IceEnergyBalance(double, va_list);

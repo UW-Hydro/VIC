@@ -23,6 +23,7 @@ void surface_fluxes(char                 overstory,
 		    double              *Melt,
 		    double              *Le,
 		    double              *aero_resist,
+		    double              *aero_resist_used,
 		    double              *baseflow_dry,
 		    double              *baseflow_wet,
 		    double              *displacement,
@@ -92,7 +93,8 @@ void surface_fluxes(char                 overstory,
   05-Aug-04 Moved calculation of blowing_flux back into this function
 	    from latent_heat_from_snow().  Updated arg lists to
 	    calc_surf_energy_bal() and solve_snow() accordingly.TJB
-
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -468,7 +470,7 @@ void surface_fluxes(char                 overstory,
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
-			       aero_resist, &coverage, &delta_coverage, 
+			       aero_resist, aero_resist_used, &coverage, &delta_coverage, 
 			       &delta_snow_heat, displacement, 
 			       gauge_correction, &step_melt_energy, 
 			       &step_out_prec, step_ppt, rainfall, ref_height, 
@@ -515,7 +517,7 @@ void surface_fluxes(char                 overstory,
 				     step_snow.coverage, 
 				     (snow->depth + step_snow.depth) / 2., 
 				     BareAlbedo, surf_atten, 
-				     step_snow.vapor_flux, aero_resist, 
+				     step_snow.vapor_flux, aero_resist, aero_resist_used,
 				     displacement, &step_melt, step_ppt, 
 				     rainfall, ref_height, roughness, 
 				     snowfall, wind, root, INCLUDE_SNOW, 

@@ -38,6 +38,8 @@ void full_energy(char                 NEWCELL,
            to surface_fluxes.  Original did not account for the fact
            that veg_con is not allocated for veg = Nveg (bare soil)
            case.  This eliminates a memory error.                  KAC
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.				TJB
 
 **********************************************************************/
 {
@@ -308,7 +310,7 @@ void full_energy(char                 NEWCELL,
 
 	  surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
 			 prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-			 cell[WET][iveg][0].aero_resist, 
+			 cell[WET][iveg][0].aero_resist, &(cell[WET][iveg][0].aero_resist_used),
 			 &(cell[DRY][iveg][band].baseflow), 
 			 &(cell[WET][iveg][band].baseflow), displacement, 
 			 gauge_correction, &(cell[DRY][iveg][band].inflow), 

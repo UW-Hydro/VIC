@@ -165,6 +165,19 @@ State files not written/read correctly when QUICK_FLUX set to TRUE.
 	able to read the state file.  This has been fixed.
 
 
+Automatic re-adjustment of lake fraction when sum of veg and lake fractions
+exceeds 1 can set lake fraction to 0.
+
+	Files affected:
+	LAKE.h, read_lakeparam.c, vicNl.c
+
+	Description:
+	In earlier releases, the automatic re-adjustment of the lake fraction
+	when the sum of the veg and lake fractions exceeds 1 can reset the lake
+	fraction to 0.  This has been changed so that the veg and lake
+	fractions all share proportionally in the re-adjustment.
+	
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

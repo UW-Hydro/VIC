@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
 	    string defined in global.h.				TJB
   01-Nov-04 Updated arglist for make_dist_prcp(), as part of fix for
 	    QUICK_FLUX state file compatibility.		TJB
+  02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
+	    lake fraction readjustment.				TJB
 
 **********************************************************************/
 {
@@ -205,8 +207,7 @@ int main(int argc, char *argv[])
 #if LAKE_MODEL
       if ( options.LAKES ) 
 	lake_con = read_lakeparam(infiles.lakeparam, soil_con, 
-				  global_param.resolution, 
-				  &veg_con[0].Cv_sum);
+				  veg_con, global_param.resolution);
 #endif // LAKE_MODEL
 
       /** Build Gridded Filenames, and Open **/

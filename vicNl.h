@@ -67,6 +67,7 @@ double error_solve_T_profile(double Tsurf, ...);
 double estimate_dew_point(double, double, double, double, double, int);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
+double exp_interp(double,double,double,double,double);
 
 double f(double, double, double, double, double, double, double, double,
          double, double, int, double *, double, double, double, double *,
@@ -96,6 +97,7 @@ double func_aero_resist(double,double,double,double,double);
 double func_snow_ground_flux(double, va_list);
 double func_surf_energy_bal(double, va_list);
 
+double get_avg_temp(double, double, double *, double *, int);
 global_param_struct get_global_param(filenames_struct *, FILE *, int *);
 void   get_rise_and_set_hours(int *, int *, double, double,
 			   double, double); 

@@ -490,25 +490,27 @@ void full_energy(int rec,
 	    
 	    /** Initialize parameters for the shorter time step **/
 	    step_air_temp = air_temp[hour];
-	    if(step_air_temp<tmin[1] && hour>tmax_hour[1]) {
+/* 	    if(step_air_temp<tmin[1] && hour>tmax_hour[1]) { */
 /* 	      tmp_vp     = atmos->vp; */
 /* 	      tmp_vpd    = atmos->vpd; */
-	      step_vp  = atmos[1].vp;
-	      step_vpd = atmos[1].vpd;
-	    }
-	    else if(step_air_temp<tmin[1] && hour<tmin_hour[1]) {
+/* 	      step_vp  = atmos[1].vp; */
+/* 	      step_vpd = atmos[1].vpd; */
+/* 	    } */
+/* 	    else if(step_air_temp<tmin[1] && hour<tmin_hour[1]) { */
 /* 	      tmp_vp     = atmos->vp; */
 /* 	      tmp_vpd    = atmos->vpd; */
-	      step_vp  = atmos[-1].vp;
-	      step_vpd = atmos[-1].vpd;
-	    }
-	    else if(step_air_temp<tmin[1]) {
-	      vicerror("Air temperature falls below daily minimum temperature.  Please report error.");
-	    }
-	    else {
-	      step_vp  = atmos->vp;
-	      step_vpd = atmos->vpd;
-	    }
+/* 	      step_vp  = atmos[-1].vp; */
+/* 	      step_vpd = atmos[-1].vpd; */
+/* 	    } */
+/* 	    else if(step_air_temp<tmin[1]) { */
+/* 	      vicerror("Air temperature falls below daily minimum temperature.  Please report error."); */
+/* 	    } */
+/* 	    else { */
+/* 	      step_vp  = atmos->vp; */
+/* 	      step_vpd = atmos->vpd; */
+/* 	    } */
+	    step_vp  = svp(step_air_temp) - atmos->vpd; 
+	    step_vpd = atmos->vpd; 
 	    
 	    step_density = 3.486*atmos->pressure/(275.0
 						    + step_air_temp);

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Fri Apr  9 14:20:20 1999 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Aug 12 16:21:36 1999 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -286,29 +286,7 @@ void snow_melt(soil_con_struct   soil_con,
 				 snow->density,surf_atten,&grnd_flux,
 				 &latent_heat, &sensible_heat);
 
-    while(snow->surf_temp <= -9998) {
-      
-      Twidth *= 2;
-      
-      fprintf(stderr,"WARNING: SNOW_DT too narrow now using %i times value.\nIf this message appears often increase SNOW_DT in vicNl_def.h.\n",Twidth);
-      
-      snow->surf_temp = root_brent((snow->surf_temp
-					    -(SNOW_DT*(double)Twidth)),0.0,
-				   SnowPackEnergyBalance, delta_t, 
-				   aero_resist, z2, 
-				   displacement, Z0, wind, net_short, longwave,
-				   density, Le, air_temp, pressure * 1000.,
-				   vpd * 1000., vp * 1000., RainFall, 
-				   SurfaceSwq,
-				   snow->surf_water, OldTSurf, &RefreezeEnergy, 
-				   &vapor_flux, &advection, &deltaCC, 
-				   grnd_surf_temp, snow->depth,
-				   snow->density,surf_atten,&grnd_flux,
-				   &latent_heat, &sensible_heat);
-      
-    }
-    
-    if(snow->surf_temp <= -8887)
+    if(snow->surf_temp <= -9998)
       ErrorSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
 				 z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,

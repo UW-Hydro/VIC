@@ -52,6 +52,8 @@ Modifications:
 	  lake file.						TJB
 	get_global_param.c, read_soilparam.c, vicNl_def.h:
 	  Changed NEW_ARNO_TYPE to ARNO_PARAMS.			TJB
+	mtclim42_vic.c:
+	  If data->s_srad becomes negative, we set it to 0.0.	TJB
  	open_file.c:
 	  Added message announcing the opening of files when type
 	  is "rb".						TJB

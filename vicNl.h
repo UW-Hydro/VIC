@@ -289,7 +289,12 @@ void   read_atmos_data(FILE *, global_param_struct, int, int, double **);
 double **read_forcing_data(FILE **, global_param_struct);
 void   read_initial_model_state(FILE *, dist_prcp_struct *, 
 				global_param_struct *, int, int, int, 
-				soil_con_struct *, int, char *, int *);
+				soil_con_struct *, int, char *,
+#if LAKE_MODEL
+				int *, lake_con_struct);
+#else
+				int *);
+#endif // LAKE_MODEL
 void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int, int);
 void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
@@ -434,8 +439,13 @@ void write_layer(layer_data_struct *, int, int,
                  double *);
 #if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
-		       int, outfiles_struct *, soil_con_struct *, char *, int *);
-#endif
+		       int, outfiles_struct *, soil_con_struct *, char *,
+#if LAKE_MODEL
+		       int *, lake_con_struct);
+#else
+		       int *);
+#endif // LAKE_MODEL
+#endif // SAVE_STATE
 void write_snow_data(snow_data_struct, int, int);
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);

@@ -134,6 +134,22 @@ file.
 	crash.
 
 
+State variables for SPATIAL_FROST and LAKE_MODEL options not stored in state
+file.
+
+	Files affected:
+	dist_prec.c, initialize_model_state.c, read_initial_model_state.c,
+	vicNl.h, write_model_state.c
+
+	Description:
+	State variables for SPATIAL_FROST and LAKE_MODEL options were not stored
+	in state files, causing these variables to be reset to default values
+	when reading from an initial state file.  This has been fixed.
+
+	NOTE: this fix involves a change in the format of state files which
+	makes state files used with 4.1.0 beta 3 incompatible with earlier
+	releases (and vice versa).
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

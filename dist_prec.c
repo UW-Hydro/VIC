@@ -55,6 +55,8 @@ void dist_prec(atmos_data_struct   *atmos,
            the cell has been drying for a full 24 hours.     RS & KAC
   04-10-03 Modified to store STILL_STORM and DRY_TIME in the model
            statefile, so that full conditions will be preserved.  KAC
+  01-Nov-04 Added support for state files containing SPATIAL_FROST and
+	    LAKE_MODEL state variables.				TJB
 
 **********************************************************************/
 
@@ -86,7 +88,11 @@ void dist_prec(atmos_data_struct   *atmos,
 	     && dmy[rec].day == global_param->stateday ) )
     write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
 		      soil_con->gridcel, outfiles, soil_con,
+#if LAKE_MODEL
+		      STILL_STORM, DRY_TIME, *lake_con);
+#else
 		      STILL_STORM, DRY_TIME);
+#endif // LAKE_MODEL
 
 #endif
 
@@ -210,7 +216,7 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(soil_con->AboveTreeLine, soil_con->AreaFract, soil_con->depth, 
+  put_data(soil_con->AboveTreeLine, soil_con->AreaFract, soil_con->depth,
 	   soil_con->dz_node, 
 #if SPATIAL_FROST
 	   soil_con->frost_fract, soil_con->frost_slope, 

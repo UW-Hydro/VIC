@@ -62,7 +62,7 @@ void runoff(layer_data_struct *layer_wet,
                 soil liquid moisture <= residual moisture.  Changed
                 block that handles case of total soil moisture < residual
                 moisture to not allow dt_baseflow to go negative.  TJB
-    11-May-04	(fix Chumei Zhu and Alan Hamleaf)
+    11-May-04	(fix Chumei Zhu and Alan Hamlet)
 		Added check to make sure baseflow doesn't exceed
 		difference between liquid moisture and field
 		capacity.					TJB

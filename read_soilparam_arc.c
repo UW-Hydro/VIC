@@ -90,6 +90,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		to handle rounding without resorting to rint().	TJB
   10-May-04	Modified to handle Arno parameters.		TJB
   11-May-04	Removed extraneous tmp variable.		TJB
+  11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
+		Added check to make sure that wilting point
+		(porosity*Wpwp_FRACT) is greater than residual
+		moisture.					TJB
 
 **********************************************************************/
 {
@@ -417,8 +421,13 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	temp.resid_moist[layer] = -0.038;
       }
       if(temp.resid_moist[layer] > 0.205) {
-	fprintf(stderr,"WARNING: estimated residual soil mositure too high (%f), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
+	fprintf(stderr,"WARNING: estimated residual soil moisture too high (%f), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
 	temp.resid_moist[layer] = 0.205;
+      }
+      if (temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
+        sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the estimated moisture residue of %f mm/mm;\nTry increasing either the porosity (%f mm/mm) or fractional wilting point (%f)",
+          layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
+          temp.porosity[layer], Wpwp_FRACT[layer]);
       }
       tmp_bubble += temp.bubble[layer];
     }

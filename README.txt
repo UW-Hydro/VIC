@@ -54,6 +54,13 @@ Modifications:
 	  Added check to make sure baseflow doesn't exceed
 	  difference between liquid moisture and field
 	  capacity.						TJB
+	  Changed block that handles baseflow when soil moisture
+	  drops below residual moisture.  Now, the block is only
+	  entered if baseflow > 0 and soil moisture < residual,
+	  and the amount of water taken out of baseflow and given
+	  to the soil cannot exceed baseflow.  In addition, error
+	  messages are no longer printed, since it isn't an error
+	  to be in that block.					TJB
 	snow_utility.c:
 	  Modified the checks on delta_depth so that the condition
 	  is delta_depth > MAX_CHANGE*depth.  Modified compression

@@ -79,7 +79,7 @@ void runoff(layer_data_struct *layer_wet,
   double             ex, A, i_0, basis, frac;
   double             inflow;
   double             last_moist;
-  double            *resid_moist;
+  double             resid_moist[MAX_LAYERS];
   double             submoist[MAX_LAYERS][3];
   double             subice[MAX_LAYERS][3];
   double             sublayer[MAX_LAYERS][3];
@@ -104,7 +104,6 @@ void runoff(layer_data_struct *layer_wet,
   layer_data_struct *layer;
 
   /** Set Residual Moisture **/
-  resid_moist = (double *)calloc(options.Nlayer,sizeof(double));
   if(options.FULL_ENERGY) 
     for(i=0;i<options.Nlayer;i++) resid_moist[i] = soil_con.resid_moist[i] 
 				    * soil_con.depth[i] * 1000.;
@@ -587,7 +586,5 @@ void runoff(layer_data_struct *layer_wet,
     energy->Cs[1] = layer[1].Cs;
     free((char*)layer);
   }
-
-  free((char *)resid_moist);
 
 }

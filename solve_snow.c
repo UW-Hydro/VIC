@@ -212,9 +212,9 @@ double solve_snow(snow_data_struct    *snow,
 		* (energy->T[0] + KELVIN) * (energy->T[0] + KELVIN) 
 		* (energy->T[0] + KELVIN);
 	    else
-	      surf_long = STEFAN_B * (energy->T[0] + KELVIN) 
-		* (energy->T[0] + KELVIN) * (energy->T[0] + KELVIN) 
-		* (energy->T[0] + KELVIN);
+	      surf_long = STEFAN_B * (air_temp + KELVIN) 
+		* (air_temp + KELVIN) * (air_temp + KELVIN) 
+		* (air_temp + KELVIN);
 	      /* surf_long = longwave; */
 	  }
 	  snow_intercept((double)dt,1.,
@@ -422,8 +422,8 @@ double solve_snow(snow_data_struct    *snow,
     }
     else {
       rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
-	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
+	- STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
+	* (air_temp+KELVIN) * (air_temp+KELVIN);
     }
 
   }

@@ -276,6 +276,8 @@ void solve_T_profile(double *T,
   static double D[MAX_NODES];
   static double E[MAX_NODES];
 
+  double *aa, *bb, *cc, *dd, *ee;
+
   char   Error;
   int    try;
   double maxdiff, diff;
@@ -307,17 +309,23 @@ void solve_T_profile(double *T,
     }
   }
     
+  aa = &A[0];
+  bb = &B[0];
+  cc = &C[0];
+  dd = &D[0];
+  ee = &E[0];
+
   for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
 #if QUICK_FS
   Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
 				   ice,bubble,expt,alpha,
-				   gamma,A,B,C,D,E,ufwc_table,
+				   gamma,aa,bb,cc,dd,ee,ufwc_table,
 				   Twidth);
 #else
   Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
 				   ice,bubble,expt,alpha,
-				   gamma,A,B,C,D,E,Twidth);
+				   gamma,aa,bb,cc,dd,ee,Twidth);
 #endif
   
 }
@@ -391,17 +399,10 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #endif
 	
 	if(T[j] <= -9998) 
-#if QUICK_FS
 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
 				max_moist[j], bubble, expt[j], ice[j], 
 				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
 				E[j]);
-#else
-	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
-				max_moist[j], bubble, expt[j], ice[j], 
-				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
-				E[j]);
-#endif
       }
       
       diff=fabs(oldT-T[j]);

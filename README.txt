@@ -40,11 +40,20 @@ Modifications:
 	  record (tmp_Nveg and tmp_Nband, respectively), rather
 	  than the number of veg classes and snow bands in the
 	  desired record (Nveg and Nbands, respectively).	TJB
+	read_soilparam.c, read_soilparam_arc.c:
+	  (fix by Chunmei Zhu and Alan Hamlet)
+	  Added check to make sure that wilting point
+	  (porosity*Wpwp_FRACT) is greater than residual
+	  moisture.						TJB
 	runoff.c:
 	  Changed calculation of dt_baseflow to go to zero when
 	  soil liquid moisture <= residual moisture.  Changed
 	  block that handles case of total soil moisture < residual
 	  moisture to not allow dt_baseflow to go negative.	TJB
+	  (fix by Chunmei Zhu and Alan Hamlet)
+	  Added check to make sure baseflow doesn't exceed
+	  difference between liquid moisture and field
+	  capacity.						TJB
 	snow_utility.c:
 	  Modified the checks on delta_depth so that the condition
 	  is delta_depth > MAX_CHANGE*depth.  Modified compression
@@ -55,7 +64,8 @@ Modifications:
 	write_model_state.c:
 	  Removed initial space on veg/band info line in ASCII
 	  file.							TJB
-	calc_rainonly.c (found by Justin Sheffield at Princeton):
+	calc_rainonly.c:
+	  (found by Justin Sheffield at Princeton)
 	  Changed test
 		if ( MAX_SNOW_TEMP < MIN_RAIN_TEMP )
 	  to
@@ -69,11 +79,13 @@ Modifications:
 	  rainfall (rainonly) was set to 0 and snowfall was set
 	  to 100% of precip, causing function to fail.		TJB
 	compute_dz.c, initialize_atmos_pilps.c, read_soilparam.c,
-	read_soilparam_arc.c (found by Justin Sheffield at Princeton):
+	read_soilparam_arc.c:
+	  (found by Justin Sheffield at Princeton)
 	  Replaced rint(something) with (float)(int)(something + 0.5)
 	  to handle rounding without resorting to rint(), which
 	  isn't supported on all platforms.			TJB
-	func_surf_energy_bal.c (found by Justin Sheffield at Princeton):
+	func_surf_energy_bal.c:
+	  (found by Justin Sheffield at Princeton)
 	  Added check that both FS_ACTIVE and FROZEN_SOIL are true
 	  before computing *fusion.  This fixes a bug caused when
 	  FS_ACTIVE was false and FROZEN_SOIL was true, in which
@@ -82,27 +94,33 @@ Modifications:
 	  *fusion computation, leading to *fusion always being
 	  calculated as if ice had melted, leading to lower soil
 	  temperatures and snow packs that never melted.	TJB
-	initialize_atmos_global.c (found by Justin Sheffield at Princeton):
+	initialize_atmos_global.c:
+	  (found by Justin Sheffield at Princeton)
 	  Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
 	  Also changed limit on loop over forcing types from
 	  hard-coded 17 to variable N_FORCING_TYPES.		TJB
-	initialize_model_state.c (found by Justin Sheffield at Princeton):
+	initialize_model_state.c:
+	  (found by Justin Sheffield at Princeton)
 	  Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
 	  accessed in set_node_parameters().			TJB
-	open_debug.c (found by Justin Sheffield at Princeton):
+	open_debug.c:
+	  (found by Justin Sheffield at Princeton)
 	  Initialize debug_store_moist array when debug.PRT_MOIST
 	  is true (as well as under the other previously-defined
 	  conditions).						TJB
-	penman.c (found by Justin Sheffield at Princeton):
+	penman.c:
+	  (found by Justin Sheffield at Princeton)
 	  Changed
 		if (vpd > 0.0 && evap < 0.0)
 	  to
 		if (vpd >= 0.0 && evap < 0.0)
 	  to correctly handle evap when vpd == 0.0.		TJB
-	surface_fluxes.c (found by Justin Sheffield at Princeton):
+	surface_fluxes.c:
+	  (found by Justin Sheffield at Princeton)
 	  Fixed initialization of canopyevap to initialize for every
 	  value of dist, rather than just dist 0.		TJB
-	write_atmosdata.c (found by Justin Sheffield at Princeton):
+	write_atmosdata.c:
+	  (found by Justin Sheffield at Princeton)
 	  No longer close the debug file, since the next cell
 	  must write to it.					TJB
 

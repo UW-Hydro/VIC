@@ -92,6 +92,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
                 as well as the original.                        KAC
   10-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
+  11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
+		Added check to make sure that wilting point
+		porosity*Wpwp_FRACT) is greater than residual
+		moisture.					TJB
 
 **********************************************************************/
 {
@@ -439,6 +443,11 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       if(temp.resid_moist[layer] > 0.205) {
 	fprintf(stderr,"WARNING: estimated residual soil mositure too high (%f), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
 	temp.resid_moist[layer] = 0.205;
+      }
+      if (temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
+        sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the estimated moisture residue of %f mm/mm;\nTry increasing either the porosity (%f mm/mm) or fractional wilting point (%f)",
+          layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
+          temp.porosity[layer], Wpwp_FRACT[layer]);
       }
       tmp_bubble += temp.bubble[layer];
     }

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Thu Mar  8 20:38:25 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Tue Apr 22 10:16:32 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  
  * DESCRIP-END.
  * FUNCTIONS:   
@@ -25,7 +25,7 @@
 #define MAX_ITER 50
 #else
 #define MAX_ITER 1
-#endif
+#endif // CLOSE_ENERGY
 
 //static char vcid[] = "$Id$";
 
@@ -38,6 +38,10 @@
 
 
   Comments     :
+
+  Modifications:
+  11-18-02 Updated to reflect changes in algorithm structure.        LCB
+
 *****************************************************************************/
 void water_energy_balance(int numnod, double * surface, double *evapw,
 	      int               dt,
@@ -64,7 +68,8 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 	      double            fracprv,
 	      double           *new_ice_fraction,
 	      double           *cp,
-	      double           *new_ice_height)
+	      double           *new_ice_height,
+	      double           *energy_out_bottom)
 	      
 {
   double Ts;
@@ -82,7 +87,7 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
   double error;
   double Told;
   double Tupper, Tlower;
-  double energy_out_bottom;
+  
   double de[MAX_LAKE_NODES]; 
   double epsilon = 0.0001;
 
@@ -152,7 +157,7 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 
     temp_area(shortwave*a1, shortwave*a2, *Qle+*Qh+*LWnet, T, Tnew,
 	      water_density, de, dt, surface, numnod, 
-	      dz, &joulenew, cp, &energy_out_bottom);
+	      dz, &joulenew, cp, energy_out_bottom);
     
     /* Surface temperature < 0.0, then ice will form. */
     if(Tnew[0] <  Tcutoff) {
@@ -162,17 +167,16 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 	       numnod, dt, dz, cp, surface, new_ice_height, water_density);
 
       energycalc(Tnew, &sumjouli, numnod, dz, surface, cp, water_density);    
-      *deltaH = (jouleold - sumjouli)/(surface[0]*dt*SECPHOUR);
+      *deltaH = (sumjouli-jouleold)/(surface[0]*dt*SECPHOUR);
     }
     else {
-      *deltaH = (jouleold- joulenew)/(surface[0]*dt*SECPHOUR);
+      *deltaH = (joulenew-jouleold)/(surface[0]*dt*SECPHOUR);
       *energy_ice_formation = 0.0;
     }
 
     Tmean = (Tnew[0] + T[0])/2.;  
 
-    error = *LWnet + shortwave + *Qh + *Qle  + *deltaH + *energy_ice_formation;
-    
+    error = *LWnet + shortwave - *energy_out_bottom + *Qh + *Qle  - *deltaH + *energy_ice_formation;
     iterations += 1;
     }
   

@@ -396,10 +396,13 @@ double solve_snow(char                 overstory,
 	if ( snow->coldcontent >= 0 && day_in_year > 60 // ~ March 1
 	     && day_in_year < 273 // ~ October 1
 	     ) snow->MELTING = TRUE;
-	else if ( snow->MELTING && snowfall[WET] > TraceSnow ) 
+	else
 	  snow->MELTING = FALSE;
 
-	
+	if ( snow->MELTING && snowfall[WET] > TraceSnow )
+	  snow->MELTING = FALSE;
+
+
 	/** Check for Thin Snowpack which only Partially Covers Grid Cell
 	 exists only if not snowing and snowpack has started to melt **/
 #if SPATIAL_SNOW

@@ -5,7 +5,6 @@
 static char vcid[] = "$Id$";
 
 #if LAKE_MODEL
-#define MINLAYERTHICKNESS .25
 
 void initialize_lake (lake_var_struct  *lake, 
 		      lake_con_struct   lake_con,
@@ -21,15 +20,15 @@ void initialize_lake (lake_var_struct  *lake,
   VARIABLES INITIALIZED:
   lake.tp_in               Lake skin temperature (C). 
   lake.temp[MAXNOD]        Water temperature at each node.
-  lake.tempi[MAXNOD]               Lake ice temp.
+  lake.tempi[MAXNOD]       Water temperature under ice at each node.
   lake.hice                Depth of lake ice.
   lake.fraci               Fractional coverage of lake ice. 
   lake.mixmax              Depth of local instability (node #).
   lake.volume
   lake.sarea
-
+  
   modifications:
-  11-18-02 Improvments made to the initialization of lake variables.  LCB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
 
 **********************************************************************/
 {
@@ -45,14 +44,14 @@ void initialize_lake (lake_var_struct  *lake,
 
   /*  Assume no ice present, lake completely equilibrated with atmosphere. */
 
-  for ( i = 0 ; i < lake_con.numnod ; i++ )
+  for ( i = 0 ; i < MAX_LAKE_NODES; i++ )
     {      
-      lake->temp[i] = 15.0;
+      lake->temp[i] = airtemp;
     }
 
   lake->tempi = 0.0;
   lake->hice = 0.0;
-  lake->fraci = 0.0;
+  lake->fraci = .0;
   lake->mixmax = 0;
   lake_snow->swq = 0.0;
   lake_snow->depth = 0.0;
@@ -63,43 +62,49 @@ void initialize_lake (lake_var_struct  *lake,
   /********************************************************************/
 
   lake->ldepth = lake_con.depth_in;
-  lake->dz = (lake->ldepth-SURF)/((float)(lake_con.numnod-1.));
 
-  if(lake->dz < MINLAYERTHICKNESS) {
-    lake->dz = MINLAYERTHICKNESS;
-    lake->activenod = 1 + (int)(lake->ldepth-SURF)/lake->dz;
-  }
-  else
-    lake->activenod = lake_con.numnod;
+  if(lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2*MAX_SURFACE_LAKE) 		{
+  /* Not quite enough for two full layers. */
+	lake->surfdz = lake->ldepth/2.;
+	lake->dz = lake->ldepth/2.;
+	lake->activenod = 2;
+	}
+   else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
+	/* More than two layers. */	
+     	lake->surfdz = MAX_SURFACE_LAKE;
+	lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
+	if(lake->activenod > MAX_LAKE_NODES)
+		lake->activenod = MAX_LAKE_NODES;
+	lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
+  	}	
+   else if(lake->ldepth > 0.0){
+  	lake->surfdz = lake->ldepth;
+	lake->dz = 0.0;
+	lake->activenod = 1;
+	}
+  else {
+	lake->surfdz = 0.0;
+	lake->dz = 0.0;
+	lake->activenod = 0;
+	} 	
 
-  // lake_con.basin equals the surface area at specific depths, lake->surface equals the
-  // area at the top of each dynamic solution layer 
+  // lake_con.basin equals the surface area at specific depths as input by
+  // the user in the lake parameter file or calculated in read_lakeparam(), 
+  // lake->surface equals the area at the top of each dynamic solution layer 
  
-  for(k=0; k<lake->activenod;k++) {
+  for(k=0; k< lake->activenod; k++) {
     if(k==0)
-      depth = SURF+lake->dz*(lake->activenod - 1);
+      depth = lake->ldepth;
     else
       depth = lake->dz*(lake->activenod - k);
 
     lake->surface[k] = get_sarea(lake_con, depth);
   }
 
-  
-  lake->volume=0.0;
-   for(k=0; k<lake->activenod;k++) {
-     if(k==0)
-       lake->volume += (lake->surface[0] + lake->surface[1]) * SURF/2.;
-     else if(k < lake->activenod-1)
-       lake->volume += (lake->surface[k] + lake->surface[k+1]) * lake->dz/2.;
-     else 
-       lake->volume += (lake->surface[k]) * lake->dz;
-    //  printf("area layer %d = %f, cum volume = %f\n",k,lake->surface[k],lake->volume);
-   }
-   
+  lake->sarea = lake->surface[0];
+  lake->volume = get_volume(lake_con, lake->ldepth);	  
  
-   lake->sarea = lake->surface[0];
- 
-  //  printf("initial volume = %f, initial depth = %f\n",lake->volume, lake->ldepth);
+  printf("initial volume = %e km3, initial depth = %f initial area = %e km2\n",lake->volume/(1000.*1000.*1000.), lake->ldepth, lake->sarea/(1000.*1000.));
   lake->runoff_out=0.0;
   lake->baseflow_out=0.0;
 }
@@ -119,24 +124,98 @@ double get_sarea(lake_con_struct lake_con, double depth)
     }
   for(i=0; i< lake_con.numnod; i++)
     {
-      if(i < lake_con.numnod -1 ) {
-	if (depth <= lake_con.z[i] && depth > lake_con.z[i+1]) 
-	  sarea = lake_con.basin[i+1] + (depth-lake_con.z[i+1])*(lake_con.basin[i] - lake_con.basin[i+1])/(lake_con.z[i] - lake_con.z[i+1]);
-      }
-      else {
-	if(depth <= lake_con.z[i])
-	  sarea = lake_con.basin[i];
-      }
+     if (depth <= lake_con.z[i] && depth > lake_con.z[i+1]) 
+	sarea = lake_con.basin[i+1] + (depth-lake_con.z[i+1])*(lake_con.basin[i] - lake_con.basin[i+1])/(lake_con.z[i] - lake_con.z[i+1]);
     }
-  if(sarea == 0.0) {
+  if(sarea == 0.0 && depth != 0.0) {
     fprintf(stderr, "Somthing went wrong in get_sarea\n");
+    fprintf(stderr, "depth = %f, sarea = %e\n",depth,sarea);	
     exit(0);
   }
 
   return sarea;
 }
 
+double get_volume(lake_con_struct lake_con, double depth)
+{
+  int i;
+  double volume;	
+  double m, b;
 
+  volume = 0.0;
 
+  if(depth > lake_con.z[0])
+    {
+      fprintf(stderr, "Depth exceeds maximum depth.\n");
+      volume = lake_con.maxvolume;
+    }
+  for(i=lake_con.numnod-1; i>= 0; i--)
+    {
+      if (depth >= lake_con.z[i]) 
+	  volume += (lake_con.basin[i] + lake_con.basin[i+1]) * (lake_con.z[i] - lake_con.z[i+1])/2.;
+      else if (depth < lake_con.z[i] && depth >= lake_con.z[i+1]){
+	m = (lake_con.basin[i]-lake_con.basin[i+1])/(lake_con.z[i]-lake_con.z[i+1]);
+	volume += (depth - lake_con.z[i+1])*(m*(depth - lake_con.z[i+1])/2. + lake_con.basin[i+1]);
+      }
+    }
+  if(volume == 0.0  && depth != 0.0) {
+    fprintf(stderr, "Somthing went wrong in get_volume\n");
+    exit(0);
+  }
 
+  return volume;
+}
+
+double get_depth(lake_con_struct lake_con, double volume)
+{
+  int k;
+  double depth;
+  double m;
+  double tempvolume;	
+  depth = 0.0;
+
+  if(volume > lake_con.maxvolume)
+    {
+      fprintf(stderr, "Volume exceeds maximum volume.\n");
+      tempvolume = lake_con.maxvolume;	
+    }
+else
+	tempvolume=volume;
+   	
+  // Update lake depth
+
+    for ( k = lake_con.numnod - 1; k >= 0; k-- ) {
+      if ( tempvolume > ((lake_con.z[k]-lake_con.z[k+1])
+			 *(lake_con.basin[k]+lake_con.basin[k+1])/2.)) {
+	// current layer completely filled
+	tempvolume -= (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.;
+	depth += lake_con.z[k] - lake_con.z[k+1];
+	}
+      else if(tempvolume > 0.0 ) {
+          if(lake_con.basin[k]==lake_con.basin[k+1]) {
+           depth += tempvolume/lake_con.basin[k+1];
+	tempvolume = 0.0;
+	}
+	else {
+	  m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
+	  depth += ((-1*lake_con.basin[k+1]) + sqrt(lake_con.basin[k+1]*lake_con.basin[k+1] + 2.*m*tempvolume))/m;
+	  tempvolume = 0.0;
+	}
+	}
+      }
+	  
+  if(tempvolume/lake_con.basin[0] > SMALL || depth > lake_con.maxdepth)   {                  
+    fprintf(stderr, "Error in get depth tempvolume = %e, depth=%f\n", tempvolume,depth);
+  }
+
+  if(depth <= 0.0  && volume != 0.0) {
+    fprintf(stderr, "Somthing went wrong in get_depth\n");
+    fprintf(stderr, "depth = %f, volume = %e\n",depth,volume);	
+    exit(0);
+  }
+  	
+  if(depth < 0.0) depth = 0.0;
+
+  return depth;
+}
 #endif // LAKE_MODEL

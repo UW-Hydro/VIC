@@ -337,6 +337,8 @@ typedef struct {
   double eta_a;                   /* Decline of solar rad w/ depth. */
   double maxdepth;                /* Maximum lake depth. */
   double maxrate;                 
+  double ratefrac;
+  double depthfrac;
   double mindepth;                /* Minimum lake depth. */
   double maxvolume;
   float  bpercent;
@@ -374,6 +376,7 @@ typedef struct {
   double tp_in;                   /* Lake skin temperature (C). */
   double volume;
   double dz;                      /* Distance between each water layer. */
+  double surfdz;                  /* Thickness of the surface water layer. */
   int    activenod;
   int    mixmax;                  /* top depth (node #) of local 
                                      instability. */

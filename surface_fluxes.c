@@ -95,6 +95,8 @@ void surface_fluxes(char                 overstory,
 	    calc_surf_energy_bal() and solve_snow() accordingly.TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.TJB
+
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -369,7 +371,7 @@ void surface_fluxes(char                 overstory,
                                            snow->last_snow, snow->surf_water,
                                            wind[2], Ls, atmos->density[hidx],
                                            atmos->pressure[hidx],
-                                           atmos->vp[hidx], roughness,
+                                           atmos->vp[hidx], roughness[2],
                                            ref_height[2], snow->depth,
                                            lag_one, sigma_slope,
                                            snow->surf_temp, iveg, Nveg, fetch,

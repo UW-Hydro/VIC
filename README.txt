@@ -28,6 +28,36 @@ Usage:
 New Features:
 -------------
 
+Improved lake model
+
+	Files Affected:
+	CalcBlowingSnow.c, LAKE.h, IceEnergyBalance.c, ice_melt.c,
+	initialize_atmos.c, initialize_lake.c, lakes.eb.c, read_lakeparam.c,
+	solve_snow.c, surface_fluxes.c, vicNl.h, vicNl_def.h,
+	water_energy_balance.c, water_under_ice.c
+
+	Description:
+	This fixes the following bugs:
+
+		Lake model crashes when lakes fill up
+		Lake model crashes when lakes dry out
+
+	And introduces the following new features:
+
+		Blowing snow sublimation computed over lakes
+		Tuning of default lake profile (parabolic to square)
+
+	The new parameter BETA in LAKE.h can be used to control the shape
+	of the automatic lake profile (when the global option LAKE_PROFILE
+	is FALSE).  BETA=0.5 is strongly parabolic, while BETA=0.001 is
+	almost square (vertical walls).
+
+	If LAKE_PROFILE=FALSE, the lake parameter file from VIC 4.1.0 beta 2 can
+	be used without any changes.  However, if LAKE_PROFILE=TRUE, the lake
+	parameter file must now contain a (depth,area) pair for each lake node.
+	See read_lakeparam.c for details.
+	
+
 Improved validation of global options
 
 	Files affected:
@@ -75,9 +105,9 @@ Aerodynamic resistance incorrect in output fluxes file
         In 4.1.0 beta r3 and later, the value written to the fluxes file is the
         actual value used in flux computations, including any corrections that
         were applied.  In the case mentioned above in which two different
-        aerodynamic resistances are in use at the same time, the one used for the
-        snow pack is written.  In addition, the aerodynamic resistance of the
-        canopy air/surrounding atmosphere interface is not tracked.
+        aerodynamic resistances are in use at the same time, the one used for
+        the snow pack is written.  In addition, the aerodynamic resistance of
+        the canopy air/surrounding atmosphere interface is not tracked.
 
 
 --------------------------------------------------------------------------------

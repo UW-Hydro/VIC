@@ -19,6 +19,7 @@
  *	       - Fixed RH profile.
  *	       - Fixed vertical integration functions.
  *										TJB
+ *   04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
  */
 
 #include <stdarg.h>
@@ -104,7 +105,7 @@ double CalcBlowingSnow( double Dt,
 			double AirDens,
 			double Press,
 			double EactAir,
-			double *ZO,
+			double ZO,
 			double Zrh,
 			double snowdepth,
 			float lag_one,
@@ -147,6 +148,7 @@ double CalcBlowingSnow( double Dt,
   /*******************************************************************/
   /* Calculate some general variables, that don't depend on wind speed. */
 
+  /* Age in hours */
   Age = LastSnow*(Dt);
       
   /* Saturation density of water vapor, Liston A-8 */
@@ -166,7 +168,7 @@ double CalcBlowingSnow( double Dt,
   /* grid cell 10 m wind speed = 50th percentile wind */
   /* Wind speed at 2 m above snow was passed to this function. */
 
-  wind10 = Wind*log(10./ZO[2])/log((2+ZO[2])/ZO[2]);
+  wind10 = Wind*log(10./ZO)/log((2+ZO)/ZO);
   //  fprintf(stderr,"wind=%f, Uo=%f\n",Wind, Uo);
 
   /* Check for bare soil case. */
@@ -259,11 +261,11 @@ double CalcBlowingSnow( double Dt,
       /* Calculate threshold shear stress. Send 0 for constant or  */
       /* 1 for variable threshold after Li and Pomeroy (1997)      */
 
-      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO[2], VAR_THRESHOLD);
+      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO, VAR_THRESHOLD);
    
       /* Iterate to find actual shear stress during saltation. */
 
-      shear_stress(U10, ZO[2], &ushear, &Zo_salt, utshear);
+      shear_stress(U10, ZO, &ushear, &Zo_salt, utshear);
       
       if(ushear > utshear) {
 	
@@ -298,11 +300,11 @@ double CalcBlowingSnow( double Dt,
       /* Calculate threshold shear stress. Send 0 for constant or  */
       /* 1 for variable threshold after Li and Pomeroy (1997)      */
 
-      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO[2], VAR_THRESHOLD);
+      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO, VAR_THRESHOLD);
 
       /* Iterate to find actual shear stress during saltation. */
       
-      shear_stress(Uo, ZO[2], &ushear, &Zo_salt, utshear);
+      shear_stress(Uo, ZO, &ushear, &Zo_salt, utshear);
 
       if(ushear > utshear) {
 	SubFlux = CalcSubFlux(EactAir, es, Zrh, AirDens, utshear,ushear, fe, Tsnow, 

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD: Thu Aug 13 18:27:38 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Tue Mar 25 16:54:52 1997 by Bart Nijssen <nijssen@meter.ce.washington.edu>
  * DESCRIPTION:  Calculate the stability correction for exchange of sensible
  *               heat between the surface and the atmosphere 
  * DESCRIP-END.
@@ -48,7 +48,7 @@
   Comments     :
 *****************************************************************************/
 double StabilityCorrection(double Z, double d, double TSurf, double Tair, 
-			   double Wind, double Z0)
+			  double Wind, double Z0)
 {
   const char *Routine = "StabilityCorrection";
   double Correction;		/* Correction to aerodynamic resistance */

@@ -67,8 +67,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double             vpd;
   double             snow_energy;
   double             mu;
-  double             Tfactor;
-  double             Pfactor;
   double            *rainfall;
   double            *Wdew;
   double            *grnd_flux;
@@ -107,7 +105,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double             error;
   double             ice;
   double             Evap;		/** Total evap in m/s **/
-  double             tmp_Tair;
   double             tmp_rainfall[2];
 
   T2            = (double) va_arg(ap, double);
@@ -148,8 +145,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   vpd           = (double) va_arg(ap, double);
   snow_energy   = (double) va_arg(ap, double);
   mu            = (double) va_arg(ap, double);
-  Tfactor       = (double) va_arg(ap, double);
-  Pfactor       = (double) va_arg(ap, double);
   rainfall      = (double *) va_arg(ap, double *);
   Wdew          = (double *) va_arg(ap, double *);
   grnd_flux     = (double *) va_arg(ap, double *);
@@ -235,7 +230,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   *rad = (1.0 - albedo) * shortwave + longwave 
        - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux;
   if(VEG && CALC_EVAP) {
-    tmp_Tair          = Tair + Tfactor;
     tmp_rainfall[WET] = rainfall[WET];
     tmp_rainfall[DRY] = rainfall[DRY];
     Evap = canopy_evap(layer_wet,layer_dry,veg_var_wet,

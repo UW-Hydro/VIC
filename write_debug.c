@@ -297,7 +297,7 @@ void write_debug(atmos_data_struct     atmos,
 	/** Snow present **/
 	Evap[1]                       = snow[band].vapor_flux * 1000.;
 	Evap[options.Nlayer+2]       += Evap[1];
-	curr_moist[1]                += snow[band].swq * 1000.;
+	curr_moist[1]                 = snow[band].swq * 1000.;
 	curr_moist[options.Nlayer+2] += curr_moist[1];
       }
       else {
@@ -322,7 +322,7 @@ void write_debug(atmos_data_struct     atmos,
 	  += (debug.inflow[prcpdist][band][i] 
 	      - (debug.outflow[prcpdist][band][i] + Evap[i]) 
 	      - (curr_moist[i] - debug.store_moist[prcpdist][band][i])) 
-	  * mu / soil_con.AreaFract[band];
+	  * mu * soil_con.AreaFract[band];
 	if(fabs(MOIST_ERROR[veg][i]) > 1.e-4) {
 	  fprintf(stderr,"WARNING: Debug Layer %i has a Moisture Balance Error of %lf in rec %i, veg %i\n",i,MOIST_ERROR[veg][i],rec,veg);
 	}

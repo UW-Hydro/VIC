@@ -98,7 +98,7 @@ void read_snowband(FILE    *snowband,
     }
     if(total!=1.) {
       fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %i (%lf), dividing each fraction by the sum\n",
-	      1., total);
+	      1, total);
       for(band=0;band<options.SNOW_BAND;band++) 
 	Pfactor[0][band] /= total;
     }

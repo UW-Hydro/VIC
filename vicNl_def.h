@@ -12,7 +12,7 @@
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 
 #define SECPHOUR     3600	/* seconds per hour */
-#define DELTAT       50.	/* Used in snow_melt to bracket the 
+#define DELTAT       75.	/* Used in SensibleHeatFlux to bracket the 
                                    effective surface temperature (C) */
 #define HOURSPERDAY  24         /* number of hours per day */
 

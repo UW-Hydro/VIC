@@ -160,7 +160,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
   T2            = energy->T[Nnodes-1];
   Ts_old        = energy->T[0];
   T1_old        = energy->T[1];
-  Tair          = atmos->air_temp;
+  Tair          = atmos->air_temp + soil_con.Tfactor[band];
   atmos_density = atmos->density;
   albedo        = energy->albedo;
   emissivity    = 1.;
@@ -216,8 +216,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 			 displacement,roughness,ref_height,
 			 (double)soil_con.elevation,soil_con.b_infilt,
 			 soil_con.max_infil,(double)dt,atmos->vpd,
-			 snow_energy,mu,soil_con.Tfactor[band],
-			 soil_con.Pfactor[band],rainfall,Wdew,
+			 snow_energy,mu,rainfall,Wdew,
 			 &energy->grnd_flux,T1,&energy->latent,
 			 &energy->sensible,&energy->deltaH,
 			 &energy->error,&energy->Trad[0],&atmos->rad,
@@ -238,8 +237,6 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				       ref_height,(double)soil_con.elevation,
 				       soil_con.b_infilt,soil_con.max_infil,
 				       (double)dt,atmos->vpd,snow_energy,mu,
-				       soil_con.Tfactor[band],
-				       soil_con.Pfactor[band],
 				       rainfall,Wdew,&energy->grnd_flux,
 				       T1,&energy->latent,&energy->sensible,
 				       &energy->deltaH,&energy->error,
@@ -267,7 +264,6 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				ref_height,(double)soil_con.elevation,
 				soil_con.b_infilt,soil_con.max_infil,
 				(double)dt,atmos->vpd,snow_energy,mu,
-				soil_con.Tfactor[band],soil_con.Pfactor[band],
 				rainfall,Wdew,&energy->grnd_flux,
 				T1,&energy->latent,&energy->sensible,
 				&energy->deltaH,&energy->error,
@@ -380,8 +376,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double             vpd;
   double             snow_energy;
   double             mu;
-  double             Tfactor;
-  double             Pfactor;
   double            *rainfall;
   double            *Wdew;
   double            *grnd_flux;
@@ -459,8 +453,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   vpd           = (double) va_arg(ap, double);
   snow_energy   = (double) va_arg(ap, double);
   mu            = (double) va_arg(ap, double);
-  Tfactor       = (double) va_arg(ap, double);
-  Pfactor       = (double) va_arg(ap, double);
   rainfall      = (double *) va_arg(ap, double *);
   Wdew          = (double *) va_arg(ap, double *);
   grnd_flux     = (double *) va_arg(ap, double *);
@@ -536,8 +528,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr,"vpd = %lf\n",vpd);
   fprintf(stderr,"snow_energy = %lf\n",snow_energy);
   fprintf(stderr,"mu = %lf\n",mu);
-  fprintf(stderr,"Tfactor = %lf\n",Tfactor);
-  fprintf(stderr,"Pfactor = %lf\n",Pfactor);
   fprintf(stderr,"rainfall = %lf\n",rainfall[0]);
   fprintf(stderr,"Wdew = %lf\n",Wdew[0]);
   fprintf(stderr,"grnd_flux = %lf\n",grnd_flux[0]);

@@ -1,16 +1,44 @@
 # VIC Makefile
-# Last Changed: Tue Apr 15 10:04:12 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
-# $Id$
-# Note: replaced read_vegparam by read_vegparam_LAI
+# Modifications:
+# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI       KAC
+# 12-Nov-2003 Added "make depend" to the "all" and "default" options.
+#             This way, if a user always types "make", the user is
+#             guaranteed to have a .depend file and therefore *.o will
+#             always be recompiled whenever a .h file is updated.  The
+#             user can override this behavior by typing "make model",
+#             which doesn't invoke "make depend".		TJB
+# -----------------------------------------------------------------------
 
+# -----------------------------------------------------------------------
+# SET ENVIRONMENT-SPECIFIC OPTIONS HERE
+# -----------------------------------------------------------------------
+
+# Set SHELL = your shell here
 SHELL = /bin/csh
 
+# Set CC = your compiler here
 CC = gcc
-#CFLAGS = -I. -g -Wall -Wno-unused
-CFLAGS = -I. -O3 -Wall -Wno-unused
-#CFLAGS = -I. -O3 -pg -Wall -Wno-unused
+
+# Uncomment for normal optimized code flags (fastest run option)
+#CFLAGS  = -I. -O3 -Wall -Wno-unused
+#LIBRARY = -lm
+
+# Uncomment to include debugging information
+CFLAGS  = -I. -g -Wall -Wno-unused
 LIBRARY = -lm
-#LIBRARY = -lm -lefence
+
+# Uncomment to include execution profiling information
+#CFLAGS  = -I. -O3 -pg -Wall -Wno-unused
+#LIBRARY = -lm
+
+# Uncomment to debug memory problems using electric fence (man efence)
+#CFLAGS  = -I. -g -Wall -Wno-unused
+#LIBRARY = -lm -lefence -L/usr/local/lib
+
+
+# -----------------------------------------------------------------------
+# MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
+# -----------------------------------------------------------------------
 
 HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h
 
@@ -20,8 +48,9 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	calc_root_fraction.o calc_surf_energy_bal.o calc_veg_params.o \
 	canopy_evap.o check_files.o check_state_file.o close_files.o \
 	cmd_proc.o compress_files.o compute_dz.o compute_treeline.o \
-	correct_precip.o dist_prec.o estimate_T1.o free_dist_prcp.o \
-	free_vegcon.o frozen_soil.o full_energy.o func_surf_energy_bal.o \
+	correct_precip.o display_current_settings.o dist_prec.o \
+	estimate_T1.o free_dist_prcp.o free_vegcon.o frozen_soil.o \
+	full_energy.o func_surf_energy_bal.o \
 	get_force_type.o get_global_param.o initialize_atmos.o \
 	initialize_model_state.o initialize_global.o \
 	initialize_new_storm.o initialize_snow.o initialize_soil.o \
@@ -43,9 +72,11 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 SRCS = $(OBJS:%.o=%.c) 
 
 all:
+	make depend
 	make model
 
 default:
+	make depend
 	make model
 
 full:
@@ -76,7 +107,7 @@ clean::
 # -------------------------------------------------------------
 depend: .depend
 .depend:	$(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -MM $(SRCS) > $@
+	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
 	\rm -f .depend	     

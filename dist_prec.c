@@ -217,7 +217,7 @@ void dist_prec(atmos_data_struct   *atmos,
   ************************************/
 
   if ( outfiles->statefile != NULL
-       &&  ( && dmy[rec].year == global_param->stateyear
+       &&  ( dmy[rec].year == global_param->stateyear
 	     && dmy[rec].month == global_param->statemonth 
 	     && dmy[rec].day == global_param->stateday
 	     && ( rec+1 == global_param->nrecs

@@ -19,6 +19,8 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
   5/20/96	The routine was modified to accept a variable
 		number of layers, as well as to work with 
 		frozen soils					KAC
+  11-18-02 Modified to print notification that the output fluxes file
+           will be in a binary format.                          LCB
 
 **********************************************************************/
 {
@@ -62,8 +64,10 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
   strcat(fnames.fluxes, latchar);
   strcat(fnames.fluxes, "_");
   strcat(fnames.fluxes, lngchar);
-  if(options.BINARY_OUTPUT) 
+  if(options.BINARY_OUTPUT) {
     outfp->fluxes = open_file(fnames.fluxes, "wb");
+    fprintf(stderr,"flux file opened as binary!\n");
+  }
   else outfp->fluxes = open_file(fnames.fluxes, "w");
 
 #else /* OUTPUT_FORCE */

@@ -12,6 +12,9 @@ void open_debug() {
 
   This subroutine opens all requested debugging output files.
 
+  Modifications:
+  11-18-02 Modified to open lake model debugging file.          LCB
+
 **********************************************************************/
 
   extern debug_struct debug;
@@ -25,6 +28,18 @@ void open_debug() {
     strcat(tempname,"/VIC_temp.out");
     if((debug.fg_temp=fopen(tempname,"w"))==NULL)
       nrerror("ERROR: Unable to open VIC_temp.out");
+  }
+  if(debug.DEBUG || debug.PRT_KAPPA) {
+    strcpy(tempname,debug.debug_dir);
+    strcat(tempname,"/VIC_kappa.out");
+    if((debug.fg_kappa=fopen(tempname,"w"))==NULL)
+      nrerror("ERROR: Unable to open VIC_kappa.out");
+  }
+  if(debug.DEBUG || debug.PRT_LAKE) {
+    strcpy(tempname,debug.debug_dir);
+    strcat(tempname,"/VIC_lake.out");
+    if((debug.fg_lake=fopen(tempname,"w"))==NULL)
+      nrerror("ERROR: Unable to open VIC_lake.out");
   }
   if(debug.DEBUG || debug.PRT_MOIST) {
     strcpy(tempname,debug.debug_dir);

@@ -340,12 +340,9 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	energy[veg][band].dz[0] = soil_con[0].depth[0];
 	energy[veg][band].dz[1] = soil_con[0].depth[0];
 	energy[veg][band].dz[2] = 2. * (dp - 1.5 * soil_con[0].depth[0]);
-	energy[veg][band].dz[3] = 2. * (Ltotal - energy[veg][band].dz[2] 
-					- 1.5 * soil_con[0].depth[0]);
 	energy[veg][band].T[0] = surf_temp;
 	energy[veg][band].T[1] = surf_temp;
 	energy[veg][band].T[2] = soil_con[0].avg_temp;
-	energy[veg][band].T[3] = soil_con[0].avg_temp;
       }
     }
   }

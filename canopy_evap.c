@@ -328,9 +328,9 @@ void transpiration(layer_data_struct *layer,
         else 
           gsm_inv=0.0;
 	    
-        layerevap[i]=evap*gsm_inv*veg_lib[veg_class].root[i];
-        root -= veg_lib[veg_class].root[i];
-        spare_evap=evap*veg_lib[veg_class].root[i]*(1.0-gsm_inv);
+        layerevap[i]  = evap*gsm_inv*veg_lib[veg_class].root[i];
+        root         -= veg_lib[veg_class].root[i];
+        spare_evap    = evap*veg_lib[veg_class].root[i]*(1.0-gsm_inv);
       }
     }
 
@@ -338,7 +338,7 @@ void transpiration(layer_data_struct *layer,
     if(spare_evap>0.0){
       for(i=0;i<options.Nlayer;i++){
         if(avail_moist[i] >= Wcr[i]){
-          layerevap[i]+=veg_lib[veg_class].root[i]*spare_evap;
+          layerevap[i] += veg_lib[veg_class].root[i]*spare_evap/root;
         }
       }
     }

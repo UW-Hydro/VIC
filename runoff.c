@@ -7,13 +7,14 @@ void runoff(layer_data_struct *layer,
             energy_bal_struct *energy,
             soil_con_struct soil_con,
             double *runoff, double *baseflow,
-            double mu, double x,
 	    double ppt, int dt,
             int Tlayer)
 /**********************************************************************
 	runoff.c	Keith Cherkauer		May 18, 1996
 
-  This subroutine calculates infiltration and runoff from all layers.
+  This subroutine calculates infiltration and runoff from the surface,
+  gravity driven drainage between all soil layers, and generates 
+  baseflow from the bottom layer..
   
   Modifications:
   5/22/96	Routine modified to account for spatially varying
@@ -32,7 +33,6 @@ void runoff(layer_data_struct *layer,
   Variables:
 	ppt	incoming precipitation and snow melt
 	mu	fraction of area that receives precipitation
-	x	fraction of precipitation that exceeds mean precipitation
 	inflow	incoming water corrected for fractional area of precip (mu)
 
   NOTE: If not using distributed precipitation, x, and mu should be 
@@ -192,7 +192,7 @@ void runoff(layer_data_struct *layer,
   if(*runoff<0.) *runoff=0.;
 
   /**************************************************
-    Compute Flow Between Soil Layers
+    Compute Flow Between Soil Layers (using an hourly time step)
   **************************************************/
 
   dt_inflow  = inflow / (double) dt;
@@ -257,9 +257,11 @@ void runoff(layer_data_struct *layer,
     for(lindex=0;lindex<options.Nlayer;lindex++) {
       for(sub=0;sub<3;sub++) {
   
-        if(sublayer[lindex][sub] > 0. && !(lindex==options.Nlayer-1 && sub==2)) {
+        if(sublayer[lindex][sub] > 0. 
+	   && !(lindex==options.Nlayer-1 && sub==2)) {
   
-          if(debug.DEBUG || debug.PRT_BALANCE) last_moist = submoist[lindex][sub];
+          if(debug.DEBUG || debug.PRT_BALANCE) 
+	    last_moist = submoist[lindex][sub];
   
           tmp_inflow = 0.;
           if(firstlayer) {
@@ -342,30 +344,6 @@ void runoff(layer_data_struct *layer,
               submoist[lindex][sub] = 0.;
             }
           }
-/******
-          if (submoist[lindex][sub] > submax_moist[lindex][sub]) {
-            i = last_index;
-            while(i>0 && submoist[last_layer[i]][last_sub[i]]
-                > submax_moist[last_layer[i]][last_sub[i]]) {
-              submoist[last_layer[i-1]][last_sub[i-1]]
-                  += (submoist[last_layer[i]][last_sub[i]]
-                   - submax_moist[last_layer[i]][last_sub[i]])
-                   * sublayer[last_layer[i]][last_sub[i]]
-                   / sublayer[last_layer[i-1]][last_sub[i-1]];
-              submoist[last_layer[i]][last_sub[i]]
-                   = submax_moist[last_layer[i]][last_sub[i]];
-              i--;
-            }
-            if(i==0 && submoist[last_layer[i]][last_sub[i]]
-                > submax_moist[last_layer[i]][last_sub[i]]) {
-              *runoff += (submoist[last_layer[i]][last_sub[i]]
-                       - submax_moist[last_layer[i]][last_sub[i]])
-                       * sublayer[last_layer[i]][last_sub[i]];
-              submoist[last_layer[i]][last_sub[i]]
-                   = submax_moist[last_layer[i]][last_sub[i]];
-            }
-          }
-******/
 
           inflow = (Q12[lindex][sub]+tmp_inflow) * sublayer[lindex][sub];
   
@@ -437,17 +415,6 @@ void runoff(layer_data_struct *layer,
                       - *baseflow;
 
   /** Check Lower Layer Moisture **/
-#ifdef EMULATE_XU
-  if (submoist[lindex][2] < soil_con.Wpwp[2]*sublayer[lindex][2] ) {
-    *baseflow  += submoist[lindex][2]
-                - soil_con.Wpwp[2]*sublayer[lindex][2];
-    submoist[lindex][2]  = soil_con.Wpwp[2]*sublayer[lindex][2];
-    if(*baseflow<0.) {
-      submoist[lindex][2] += *baseflow;
-      *baseflow=0.;
-    }
-  }
-#else
   if (submoist[lindex][2] < moist_resid * soil_con.depth[lindex] * 1000. ) {
     *baseflow  += submoist[lindex][2]
                 - moist_resid * soil_con.depth[lindex] * 1000.;
@@ -457,7 +424,6 @@ void runoff(layer_data_struct *layer,
       *baseflow=0.;
     }
   }
-#endif
 
   if(submoist[lindex][2] > submax_moist[lindex][2]) {
     *baseflow += submoist[lindex][2] - submax_moist[lindex][2];

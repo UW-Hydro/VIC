@@ -12,7 +12,7 @@ void initialize_global() {
   options.FULL_ENERGY = FALSE;
   options.FROZEN_SOIL = FALSE;
   options.SNOW_MODEL = FALSE;
-  options.CALC_SNOW_FLUX = FALSE;
+  options.CALC_SNOW_FLUX = TRUE;
   options.DIST_PRCP = FALSE;
   options.RADAR = FALSE;
   options.INIT_SOIL = FALSE;

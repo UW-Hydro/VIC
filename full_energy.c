@@ -78,6 +78,7 @@ void full_energy(int rec,
   double snow_flux;
   double throughfall;
   double Evap;
+  double tmp_energy_val;
   double tmp_throughfall;
   double tmp_shortwave;
   double tmp_longwave;
@@ -138,14 +139,6 @@ void full_energy(int rec,
     else RUN_TYPE = 0;
     
     if(RUN_TYPE) {
-
-#ifdef ROSEMOUNT
-      if(dmy[rec].day == 26 && dmy[rec].month == 10 && dmy[rec].year == 1995
-         && dmy[rec].hour == 0) {
-        cell[iveg].layer[0].moist = 0.3071 * soil_con.depth[0] * 1000.;
-        cell[iveg].layer[1].moist = 0.4249 * soil_con.depth[1] * 1000.;
-      }
-#endif
 
       /**************************************************
         Initialize Model Parameters
@@ -356,7 +349,7 @@ void full_energy(int rec,
 			     &veg_var[iveg].Wdew,&snow[iveg].snow_canopy,
 			     &snow[iveg].tmp_int_storage,
                              &snow[iveg].canopy_vapor_flux,&canopy_temp,
-                             &energy[iveg].refreeze_energy);
+                             &tmp_energy_val);
               atmos->longwave = STEFAN_B * pow(canopy_temp+KELVIN,4.0);
               veg_var[iveg].throughfall = rainfall + snowfall;
             }
@@ -633,7 +626,7 @@ void full_energy(int rec,
 
         cell[iveg].inflow = ppt;
         runoff(cell[iveg].layer,&energy[iveg],soil_con,&cell[iveg].runoff,
-               &cell[iveg].baseflow,mu,x,ppt,gp.dt,gp.Ulayer+gp.Llayer+2);
+               &cell[iveg].baseflow,ppt,gp.dt,gp.Ulayer+gp.Llayer+2);
   
         out_short = atmos->albedo * atmos->shortwave;
         atmos->net_short = (1.0 - atmos->albedo) * atmos->shortwave;
@@ -659,7 +652,7 @@ void full_energy(int rec,
           energy[iveg].refreeze_energy=0.;
           tmp_layerevap = (double*)calloc(options.Nlayer,sizeof(double));
 
-          if(snow[iveg].snow || (atmos->prec-atmos->rainonly) > 0.
+          if(snow[iveg].swq>0 || (atmos->prec-atmos->rainonly) > 0.
             || (snow[iveg].snow_canopy>0. && overstory)) {
 
 	    /*********************************************
@@ -868,6 +861,14 @@ void full_energy(int rec,
         }
  
         if(!SNOW) {
+	  if (tmp_wind[0] > 0.0)
+	    cell[iveg].aero_resist[0] /= StabilityCorrection(ref_height, 
+							 displacement, T0,
+							 atmos->air_temp, 
+							 tmp_wind[0], 
+							 roughness);
+	  else
+	    cell[iveg].aero_resist[0] = HUGE_RESIST;
           if(iveg!=Nveg) {
             /** Compute Evaporation from Vegetation **/
             if(veg_lib[veg_class].LAI[dmy[rec].month-1] > 0.0) {
@@ -912,7 +913,7 @@ void full_energy(int rec,
         cell[iveg].inflow = ppt;
 
         runoff(cell[iveg].layer, &energy[iveg],soil_con, &cell[iveg].runoff,
-               &cell[iveg].baseflow,mu,x,ppt,gp.dt,gp.Ulayer+gp.Llayer+2);
+               &cell[iveg].baseflow,ppt,gp.dt,gp.Ulayer+gp.Llayer+2);
  
 
       } /** End Water Balance Model **/

@@ -5,19 +5,21 @@
 void write_data(out_data_struct *out_data,
 		outfiles_struct outfiles,
 		dmy_struct      *dmy)
-
 /**********************************************************************
 	write_data	Dag Lohmann		Janurary 1996
 
-  This subroutine writes out the final results for soil moisture, 
-  evaporation, runoff and baseflow.
+  This subroutine writes all energy and moisture balance parameters to
+  output files.
 
   OUTPUT:
-	evaporation in mm/time step
+	evaporation and vapor fluxes in mm/time step
 	layer moisture in mm/time step
 	runoff in mm/time step
 	baseflow in mm/time step
-	freezing and thawing depths in mm
+	freezing and thawing depths in cm
+	snow depth in cm
+	snow water equivlence in mm
+	all energy fluxes are in W/m^2
 
   Modifications:
   5/20/96	Program was modified to account for a variable
@@ -41,6 +43,9 @@ void write_data(out_data_struct *out_data,
   int   *tmp_iptr;
   float *tmp_fptr;
 
+  /************************************
+    Output Frozen Soil Variables
+  ************************************/
   if(options.FROZEN_SOIL && options.BINARY_OUTPUT) {
     /***** Write Binary Frozen Soil Output File *****/
     tmp_iptr[0] = dmy->year;
@@ -70,7 +75,10 @@ void write_data(out_data_struct *out_data,
     }
     fprintf(outfiles.fdepth,"\n"); 
   }
-  
+
+  /**************************************
+    Ouput Snow Variables
+  **************************************/
   if(options.SNOW_MODEL && options.BINARY_OUTPUT) {
     /***** Write Binary Snow Output File *****/
     tmp_iptr[0] = dmy->year;
@@ -115,6 +123,9 @@ void write_data(out_data_struct *out_data,
 	    out_data->swq, out_data->snow_depth, out_data->snow_canopy);
   }
 
+  /************************************
+    Output Standard Energy and Moisture Flux Variables
+  ************************************/
   if(options.BINARY_OUTPUT) {
     /***** Write Binary Fluxes File *****/
     tmp_iptr[0] = dmy->year;
@@ -197,19 +208,24 @@ void calc_water_balance_error(int    rec,
 			      double outflow,
 			      double storage) {
 /***************************************************************
-  This subroutine computes the overall model water balance
+  calc_water_balance_error  Keith Cherkauer        April 1998
+
+  This subroutine computes the overall model water balance, and 
+  warns the model user if large errors are found.
 ***************************************************************/
 
   static double last_storage;
   static double cum_error;
   static int    error_cnt;
+  static int    Nrecs;
 
   double error;
 
   if(rec<0) {
     last_storage = storage;
-    cum_error = 0.;
-    error_cnt = 0;
+    cum_error    = 0.;
+    error_cnt    = 0;
+    Nrecs        = -rec;
   }
   else {
     error = inflow - outflow - (storage - last_storage);
@@ -226,6 +242,10 @@ void calc_water_balance_error(int    rec,
       }
       error_cnt++;
     }
+    if(rec==Nrecs-1) {
+      fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4lf\n",
+	      cum_error);
+    }
   }
 
 }
@@ -237,7 +257,12 @@ void calc_energy_balance_error(int    rec,
 			       double grnd_flux,
 			       double snow_fluxes) {
 /***************************************************************
-  This subroutine computes the overall model energy balance
+  calc_energy_balance_error   Keith Cherkauer     April 1998
+
+  This subroutine computes the overall model energy balance, and
+  reports the maximum time step error above a thresehold to the
+  user.  The total cumulative error for the grid cell is also 
+  computed and reported at the end of the model run.
 ***************************************************************/
 
   static double cum_error;

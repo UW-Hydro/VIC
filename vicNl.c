@@ -10,21 +10,18 @@ void main(int argc, char *argv[])
 /**********************************************************************
 	vic2l.c		Dag Lohmann		January 1996
 
-  This program controls file I/O and model steps for the water 
-  balance version of the VIC-2L.
+  This program controls file I/O and variable initialization as well as
+  being the primary driver for the model.
 
   For details about variables, input files and subroutines check:
-	http://ce.washington.edu/~hydro/Lettenmaier/Models/VIC/VIC%20Water%20Balance%20Model.html
+	http://ce.washington.edu/~hydro/Lettenmaier/Models/VIC/VIC_home.html
 
-  UNITS: (cm, s, g, C) unless otherwise marked {at least in my subroutines}
+  UNITS: unless otherwise marked:
+         all water balance components are in mm
+	 all energy balance components are in mks
+	 depths, and lengths are in m
 
   modifications:
-  7-30-96  ifdef statements added to allow non working code to
-           be cut out of the compilation step when a less complete
-           version of the code is desired			KAC
-  1-8-97   Began adding code to solve energy balance over bare soil.
-           will be followed with 2-layer snow code, which is
-           eventually to be made aware of the soil.		KAC
 
 **********************************************************************/
 {
@@ -192,7 +189,7 @@ void main(int argc, char *argv[])
 	         - prcp.dist[0].cell[0].layer[index].tdepth)
 	         / soil_con.depth[index]);
       }
-      calc_water_balance_error(-1,0.,0.,storage);
+      calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
       /******************************************
@@ -212,11 +209,6 @@ void main(int argc, char *argv[])
       }	/* End Rec Loop */
 
       close_files(infiles,outfiles,builtnames); 
-
-/*****
-      free((char *)Error.veg_con);
-      free((char *)Error.atmos);
-*****/
 
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
       free((char *)veg_con);

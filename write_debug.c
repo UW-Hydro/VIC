@@ -23,6 +23,14 @@ void write_debug(atmos_data_struct atmos,
   write_debug		Keith Cherkauer		October 8, 1997
 
   This subroutine controls the output of selected debug data files.
+  Which debugging files are output is controlled by flags set in the
+  model control file.
+
+  This subroutine is not essential to the operation of the model, and 
+  can be excluded from the compiled code as long as references to it 
+  from full_energy.c are removed.  Due to the number of static variables
+  in this routine, it may contribut significantly to the size of the
+  compiled code.
 
 **********************************************************************/
 

@@ -30,61 +30,68 @@ void read_sawd(atmos_data_struct *temp,
   extern param_set_struct param_set;
  
   int    i, j, n, rec, maxline = 210;
-  int    fixcnt;
+  int    fixcnt, headcnt;
   char   str[210],jnkstr[MAXSTRING];
 
   /** Count Records **/
   n = 0;
   while (fgets(str,maxline,sawdf) != '\0') n++;
   printf("nrecs = %d\n",n);
-  if(*nrecs>n) {
+  if(*nrecs*dt>n) {
     fprintf(stderr,"WARNING: SAWD file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n);
-    *nrecs=n;
+    *nrecs=n/dt;
   }
-  if(*nrecs<n) {
+  if(*nrecs*dt<n) {
     fprintf(stderr,"WARNING: SAWD file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs);
-    n = *nrecs;
+    n = *nrecs*dt;
   }
 
   rewind(sawdf);
 
   /** Check for Header, and Skip **/
   fgets(jnkstr,MAXSTRING,sawdf);
+  headcnt=0;
   if((jnkstr[0]<48 || jnkstr[0]>57) && jnkstr[0]!=46) {
     fgets(jnkstr,MAXSTRING,sawdf);
     fprintf(stderr,"SAWD ... skipping header\n");
     n--;
+    headcnt++;
     if(prec) *nrecs = n;
   }
-  else rewind(sawdf);
+  rewind(sawdf);
+  for(i=0;i<headcnt;i++) fgets(jnkstr,MAXSTRING,sawdf);
 
   fixcnt = 0;
   rec = 0;
   for (i = 0; i < n; i++) {
-    fscanf(sawdf,"%*s");
-    fscanf(sawdf,"%s",str);
-    temp[rec].air_temp = atof(str);
-    fscanf(sawdf,"%s",str);
-    temp[rec].pressure = atof(str) / 1000.;
-    if(temp[rec].pressure <= 0. && rec>0) {
-      temp[rec].pressure = temp[rec-1].pressure;
-      fixcnt++;
-    }
-    fscanf(sawdf,"%s",str);
-    temp[rec].wind = atof(str);
-    fscanf(sawdf,"%s",str);
-    temp[rec].rel_humid = atof(str);
-    if(temp[rec].rel_humid == 0. && rec>0) {
-      temp[rec].rel_humid = temp[rec-1].rel_humid;
-      fixcnt++;
-    }
-    fscanf(sawdf,"%s",str);
-    temp[rec].tskc = atof(str) / 100.;
-    if(prec) {
+    if(i == rec*dt) {
+      fscanf(sawdf,"%*s");
       fscanf(sawdf,"%s",str);
-      temp[rec].prec = atof(str);
+      temp[rec].air_temp = atof(str);
+      fscanf(sawdf,"%s",str);
+      temp[rec].pressure = atof(str) / 1000.;
+      if(temp[rec].pressure <= 0. && rec>0) {
+	temp[rec].pressure = temp[rec-1].pressure;
+	fixcnt++;
+      }
+      fscanf(sawdf,"%s",str);
+      temp[rec].wind = atof(str);
+      fscanf(sawdf,"%s",str);
+      temp[rec].rel_humid = atof(str);
+      if(temp[rec].rel_humid == 0. && rec>0) {
+	temp[rec].rel_humid = temp[rec-1].rel_humid;
+      fixcnt++;
+      }
+      fscanf(sawdf,"%s",str);
+      temp[rec].tskc = atof(str) / 100.;
+      if(prec) {
+	fscanf(sawdf,"%s",str);
+	temp[rec].prec = atof(str);
+      }
+      rec++;
     }
-    rec++;
+    else fgets(jnkstr,MAXSTRING,sawdf);
+
   }
 
   if(fixcnt>0) {

@@ -110,11 +110,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
         else options.DIST_PRCP = FALSE;
       }
-      else if(strcasecmp("CALC_SNOW_FLUX",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.CALC_SNOW_FLUX=TRUE;
-        else options.CALC_SNOW_FLUX = FALSE;
-      }
       else if(strcasecmp("COMPRESS",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.COMPRESS=TRUE;

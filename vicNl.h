@@ -51,7 +51,7 @@ filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct,
 
 /** Runoff Routines **/
 void runoff(layer_data_struct *, energy_bal_struct *, soil_con_struct, 
-            double *, double *, double, double, double, int, int);
+            double *, double *, double, int, int);
 void vertical(layer_data_struct *, soil_con_struct, double, int);
 void tridag(double *,double *,double *,double *,double *,int);
 

@@ -6,7 +6,9 @@ void write_vegparam(veg_con_struct *veg_con)
 /**********************************************************************
 	write_vegparam		Dag Lohmann	January 1996
 
-  This routine writes vegetation parameters to the screen.
+  This routine writes vegetation parameters to stdout, used primarily 
+  for debugging, and making sure the model is reading the proper 
+  parameters..
 
   Modifications:
   5/21/96	Routine was modified to allow for variable

@@ -9,8 +9,8 @@ void vicerror(char error_text[])
 	vicerror.c	Keith Cherkauer		April 23, 1997
 
   This subroutine was written to handle numerical errors within the
-  VIC model.  This will dump all records currently stored, as well
-  current values of all data structures.
+  VIC model.  This will flush all file buffers so that all records 
+  that have been run will be written to disk before the model is exited.
 
 **********************************************************************/
 {
@@ -27,15 +27,7 @@ void vicerror(char error_text[])
 	fprintf(stderr,"VIC model run-time error...\n");
 	fprintf(stderr,"%s\n",error_text);
 	fprintf(stderr,"...now writing output files...\n");
-/*****
-        write_data(Error.out_data,Error.outfp,Error.rec,Error.dt);
-*****/
         close_files(Error.infp,Error.outfp,fnames);
-/*****
-        for(i=0;i<Error.veg_con[0].vegetat_type_num;i++) {
-	  write_vegvar(Error.veg_var[i],i);
-        }
-*****/
 	fprintf(stderr,"...now exiting to system...\n");
         fflush(stdout);
         fflush(stderr);

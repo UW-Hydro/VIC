@@ -10,7 +10,10 @@ void write_layer(layer_data_struct *layer,
 /**********************************************************************
 	write_soilvar		Keith Cherkauer		July 17, 1997
 
-  This routine writes soil variables to the screen.
+  This routine writes soil variables to stdout.  It creates a table 
+  of soil moisture values which shows how much liquid water and ice 
+  are contained in the thawed, frozen and unfrozen sublayers of each 
+  soil layer.  It also gives the total soil moisture for each layer.
 
 **********************************************************************/
 {

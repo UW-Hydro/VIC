@@ -41,13 +41,13 @@ void read_sawd_binary(atmos_data_struct *temp,
     fread(tmpmem,sizeof(char),10,sawdf);
   }
   printf("nrecs = %d\n",n);
-  if(*nrecs>n) {
+  if(*nrecs*dt>n) {
     fprintf(stderr,"WARNING: SAWD file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n);
-    *nrecs=n;
+    *nrecs=n/dt;
   }
-  if(*nrecs<n) {
-    fprintf(stderr,"WARNING: SAWD file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs);
-    n = *nrecs;
+  if(*nrecs*dt<n) {
+    fprintf(stderr,"WARNING: SAWD file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs*dt);
+    n = *nrecs*dt;
   }
 
   rewind(sawdf);
@@ -56,25 +56,29 @@ void read_sawd_binary(atmos_data_struct *temp,
   fixcnt = 0;
   rec = 0;
   for (i = 0; i < n; i++) {
-    fread(values,sizeof(short int),5,sawdf);
-    temp[rec].air_temp = (double)values[0]/100.;
-    temp[rec].pressure = (double)values[1]/100.;
-    if(temp[rec].pressure == 0. && rec>0) {
-      temp[rec].pressure = temp[rec-1].pressure;
-      fixcnt++;
+    if(i == rec*dt) {
+      fread(values,sizeof(short int),5,sawdf);
+      temp[rec].air_temp = (double)values[0]/100.;
+      temp[rec].pressure = (double)values[1]/100.;
+      if(temp[rec].pressure == 0. && rec>0) {
+	temp[rec].pressure = temp[rec-1].pressure;
+	fixcnt++;
+      }
+      temp[rec].wind = (double)values[2]/1000.;
+      temp[rec].spec_humid = (double)values[3]/1000000.;
+      if(temp[rec].spec_humid == 0. && rec>0) {
+	temp[rec].spec_humid = temp[rec-1].spec_humid;
+	fixcnt++;
+      }
+      temp[rec].tskc = (double)values[4] / 1000.;
+      if(prec) {
+	fscanf(sawdf,"%s",str);
+	temp[rec].prec = atof(str);
+      }
+      rec++;
     }
-    temp[rec].wind = (double)values[2]/1000.;
-    temp[rec].spec_humid = (double)values[3]/1000000.;
-    if(temp[rec].spec_humid == 0. && rec>0) {
-      temp[rec].spec_humid = temp[rec-1].spec_humid;
-      fixcnt++;
-    }
-    temp[rec].tskc = (double)values[4] / 1000.;
-    if(prec) {
-      fscanf(sawdf,"%s",str);
-      temp[rec].prec = atof(str);
-    }
-    rec++;
+    else fread(values,sizeof(short int),5,sawdf);
+
   }
 
   if(fixcnt>0) {

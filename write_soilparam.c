@@ -6,7 +6,8 @@ void write_soilparam(soil_con_struct soil)
 /**********************************************************************
 	write_soilparam		Dag Lohmann	January 1996
 
-  This routine writes soil parameters to the screen.
+  This routine writes soil parameters to stdout.  Used to check that
+  the correct parameters are in fact being read into the model.
 
   Modifications:
   5/21/96	Routine rewritten to account for variable number

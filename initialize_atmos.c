@@ -52,8 +52,6 @@ void initialize_atmos(atmos_data_struct *temp,
   extern debug_struct debug;
   extern param_set_struct param_set;
  
-  /*FILE *ftmp;*/
-
   int     rec;
   int     band;
   int     tmax_hour[3];
@@ -78,11 +76,6 @@ void initialize_atmos(atmos_data_struct *temp,
   double  qdp;
   double *yearly_prec;
   double *day_len_hr;
-
-  double *storerad;
-  double  sumrad;
-
-  /*ftmp=open_file("humid_compare","w");*/
 
   if(!param_set.PREC)
     nrerror("ERROR: Precipitation must be given to the model, check input files\n");
@@ -221,8 +214,6 @@ void initialize_atmos(atmos_data_struct *temp,
     Calculate Daily and Annual Precipitation and Evaporation
   *****************************************************************/
 
-  storerad = (double *)calloc(Ndays,sizeof(double));
-
   for(day=0;day<Ndays;day++) {
     rec = day * Nhours;
     if ( day == (Ndays-1) )
@@ -238,8 +229,6 @@ void initialize_atmos(atmos_data_struct *temp,
     shortwave = calc_netshort(temp[rec].trans, dmy[rec].day_in_year, 
 			      phi,&day_len_hr[day]);
 
-    storerad[day] = shortwave;
-    
     tair = (temp[rec].tmax + temp[rec].tmin) / 2.0;
     priest = priestley(tair, shortwave);
     for(hour=0;hour<Nhours;hour++) {
@@ -298,18 +287,10 @@ void initialize_atmos(atmos_data_struct *temp,
       for(hour=0;hour<Nhours;hour++) {
 	rec = day*Nhours+hour;
 
-
-	/*fprintf(ftmp,"%lf\t%lf\t",temp[rec].rel_humid,temp[rec].vp);*/
-
-
 	temp[rec].rel_humid = qdp / svp(tair) * 100.;
 	temp[rec].vp        = (temp[rec].rel_humid 
 				* svp(temp[rec].air_temp)) / 100.;
 	temp[rec].vpd       = (svp(temp[rec].air_temp) - temp[rec].vp);
-
-
-	/*fprintf(ftmp,"%lf\t%lf\n",temp[rec].rel_humid,temp[rec].vp);*/
-
 
       }
     }
@@ -344,24 +325,9 @@ void initialize_atmos(atmos_data_struct *temp,
       }
     }
   }
-  
-  for(day=0;day<Ndays;day++) {
-    sumrad = 0.;
-    for(hour=0;hour<Nhours;hour++) {
-      sumrad += temp[day*Nhours+hour].shortwave * 3600.;
-    }
-
-    if(storerad[day]>sumrad/3600./24.) {
-      fprintf(stderr,"ERROR: Estimated net shortwave radiation exceeds total incoming shortwave radiation.\n");
-      fprintf(stdout,"%i\t%lf\t%lf\t%lf\t%lf\n",day,storerad[day],sumrad/3600./24.,sumrad/1000.,sumrad);
-      exit(0);
-    }
-  }
 
   free((char *)yearly_prec);
   free((char *)day_len_hr);
   
-  /*fclose(ftmp);*/
-
-  }
+}
 #undef MAXSTR

@@ -29,6 +29,9 @@ global_param_struct get_global_param(filenames_struct *names,
            new simplified frozen soil moisture, and new new open
            format forcing file rad routines.              KAC
   02-27-01 added reads for lake model parameters          KAC
+  04-21-03 added parameters for blowing snow algorithm, printing
+           lake variables during debugging and reading Bart's 
+           new Arno parameters.                           KAC
 
 **********************************************************************/
 {
@@ -179,6 +182,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
         else options.DIST_PRCP = FALSE;
       }
+      else if(strcasecmp("BLOWING",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
+        else options.BLOWING = FALSE;
+      }
       else if(strcasecmp("COMPRESS",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.COMPRESS=TRUE;
@@ -244,6 +252,11 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.INIT_STATE = TRUE;
 	  strcpy(names->init_state,flgstr);
 	}
+      }
+      else if (strcasecmp("NEW_ARNO_TYPE", optstr)==0) {
+	sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.NEW_ARNO_TYPE=TRUE;
+        else options.NEW_ARNO_TYPE = FALSE;
       }
 #if SAVE_STATE
       else if(strcasecmp("STATENAME",optstr)==0) {
@@ -389,6 +402,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) debug.PRT_MOIST=TRUE;
         else debug.PRT_MOIST = FALSE;
+      }
+      else if(strcasecmp("PRT_LAKE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_LAKE=TRUE;
+        else debug.PRT_LAKE = FALSE;
       }
       else if(strcasecmp("PRT_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

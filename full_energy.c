@@ -31,6 +31,9 @@ void full_energy(char                 NEWCELL,
            implemented when the radiation forcing routines were 
 	   updated.  Also modified to use the new simplified 
 	   soil moisture storage for the frozen soil algorithm.    KAC
+  12-01-00 modified to include the lakes and wetlands algorithm.   KAC
+  11-18-02 Modified to handle blowing snow.  Also added debugging
+           output for lake model.                                  LCB
 
 **********************************************************************/
 {
@@ -305,7 +308,8 @@ void full_energy(char                 NEWCELL,
 			 atmos, dmy, &(energy[iveg][band]), gp, 
 			 cell[DRY][iveg][band].layer, 
 			 cell[WET][iveg][band].layer, &(snow[iveg][band]), 
-			 soil_con, dry_veg_var, wet_veg_var);
+			 soil_con, dry_veg_var, wet_veg_var, veg_con[iveg].lag_one,
+			 veg_con[iveg].sigma_slope,veg_con[iveg].fetch);
 	  
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 
@@ -423,12 +427,120 @@ void full_energy(char                 NEWCELL,
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
     lake_prec = ( gauge_correction[SNOW] * (atmos->prec[NR] - rainonly) 
 		  + gauge_correction[RAIN] * rainonly );
-    atmos->out_prec += lake_prec * lake_con->Cl[0];
-    lakemain(*atmos, lake_var, *lake_con, lake_prec, *soil_con,
-	     (float)gp->dt, &energy[Nveg+1][0], &snow[Nveg+1][0], NR, rec, 
-	     gp->wind_h);
+    // atmos->out_prec += lake_prec * lake_con->Cl[0];
+
+    lakemain(atmos, *lake_con, gauge_correction[SNOW] * (atmos->prec[NR] - rainonly),gauge_correction[RAIN] * rainonly, 
+	     soil_con,(float)gp->dt, prcp, NR, rec, 
+    	     gp->wind_h, gp, dmy, Nveg+1, 0);
+
+#if LINK_DEBUG
+    if ( debug.PRT_LAKE ) { 
+      if ( rec == 0 ) {
+	// print file header
+	fprintf(debug.fg_lake,"Date,Rec,AeroResist,BasinflowIn,BaseflowOut");
+	for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	  fprintf(debug.fg_lake, ",Density%i", i);
+	fprintf(debug.fg_lake,",Evap,IceFract,IceHeight,LakeDepth,RunoffIn,RunoffOut,SurfaceArea,SnowDepth,SnowMelt");
+	for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	  fprintf(debug.fg_lake, ",Area%i", i);
+	fprintf(debug.fg_lake,",SWE");
+	for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	  fprintf(debug.fg_lake, ",Temp%i", i);
+	fprintf(debug.fg_lake,",IceTemp,TpIn,Volume,Nodes,MinMax");
+	fprintf(debug.fg_lake,",AlbedoLake,AlbedoOver,AlbedoUnder,AtmosError,AtmosLatent,AtmosLatentSub,AtmosSensible,LongOverIn,LongUnderIn,LongUnderOut,NetLongAtmos,NetLongOver,NetLongUnder,NetShortAtmos,NetShortGrnd,NetShortOver,NetShortUnder");
+	fprintf(debug.fg_lake,",ShortOverIn,ShortUnderIn,advection,deltaCC,deltaH,error,fusion,grnd_flux,latent,latent_sub,longwave,melt_energy,out_long_surface,refreeze_energy,sensible,shortwave");
+	fprintf(debug.fg_lake,",Qnet,albedo,coldcontent,coverage,density,depth,mass_error,max_swq,melt,pack_temp,pack_water,store_coverage,store_swq,surf_temp,surf_water,swq,swq_slope,vapor_flux,last_snow,store_snow\n");
+      }
+
+      // print lake variables
+      fprintf(debug.fg_lake, "%i/%i/%i %i:00:00,%i", dmy[rec].month, dmy[rec].day, dmy[rec].year, dmy[rec].hour, rec);
+      fprintf(debug.fg_lake, ",%f", lake_var->aero_resist);
+      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_out);
+      for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	fprintf(debug.fg_lake, ",%f", lake_var->density[i]);
+      fprintf(debug.fg_lake, ",%f", lake_var->evapw);
+      fprintf(debug.fg_lake, ",%f", lake_var->fraci);
+      fprintf(debug.fg_lake, ",%f", lake_var->hice);
+      fprintf(debug.fg_lake, ",%f", lake_var->ldepth);
+      fprintf(debug.fg_lake, ",%f", lake_var->runoff_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->runoff_out);
+      fprintf(debug.fg_lake, ",%f", lake_var->sarea);
+      fprintf(debug.fg_lake, ",%f", lake_var->sdepth);
+      fprintf(debug.fg_lake, ",%f", lake_var->snowmlt);
+      for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	fprintf(debug.fg_lake, ",%f", lake_var->surface[i]);
+      fprintf(debug.fg_lake, ",%f", lake_var->swe);
+      for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	fprintf(debug.fg_lake, ",%f", lake_var->temp[i]);
+      fprintf(debug.fg_lake, ",%f", lake_var->tempi);
+      fprintf(debug.fg_lake, ",%f", lake_var->tp_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->volume);
+      fprintf(debug.fg_lake, ",%i", lake_var->activenod);
+      fprintf(debug.fg_lake, ",%i", lake_var->mixmax);
+      
+      // print lake energy variables
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AlbedoLake);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AlbedoOver);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AlbedoUnder);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AtmosError);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AtmosLatent);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AtmosLatentSub);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AtmosSensible);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].LongOverIn);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].LongUnderIn);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].LongUnderOut);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetLongAtmos);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetLongOver);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetLongUnder);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetShortAtmos);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetShortGrnd);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetShortOver);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].NetShortUnder);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].ShortOverIn);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].ShortUnderIn);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].advection);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].deltaCC);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].deltaH);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].error);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].fusion);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].grnd_flux);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].latent);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].latent_sub);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].longwave);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].melt_energy);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].out_long_surface);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].refreeze_energy);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].sensible);
+      fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].shortwave);
+      
+      // print lake snow variables
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].Qnet);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].albedo);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].coldcontent);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].coverage);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].density);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].depth);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].mass_error);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].max_swq);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].melt);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].pack_temp);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].pack_water);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].store_coverage);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].store_swq);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].surf_temp);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].surf_water);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].swq);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].swq_slope);
+      fprintf(debug.fg_lake, ",%f", snow[Nveg+1][0].vapor_flux);
+      fprintf(debug.fg_lake, ",%i", snow[Nveg+1][0].last_snow);
+      fprintf(debug.fg_lake, ",%i\n", snow[Nveg+1][0].store_snow);
+
+    }
+#endif // LINK_DEBUG
 
   }
+
 #endif /* LAKE_MODEL */
 
 }

@@ -38,8 +38,6 @@ void full_energy(int                  rec,
 #endif
 
   char                   overstory;
-  char                   ANY_SNOW;
-  char                   SNOW;
   char                   SOLVE_SURF_ENERGY;
   int                    i, j, k;
   int                    Ndist;
@@ -50,8 +48,7 @@ void full_energy(int                  rec,
   int                    band;
   int                    Nbands;
   int                    hour;
-  double                 prec[2];
-  double                 ppt[2*MAX_BANDS];
+  double                 out_prec[2*MAX_BANDS];
   double                 tmp_surf_temp;
   double                 last_T1;
   double                 out_short=0;
@@ -71,6 +68,7 @@ void full_energy(int                  rec,
   double                 displacement;
   double                 roughness;
   double                 ref_height;
+  double                 Cv;
   double                 Le;
   double                 Ls;
   double                 Evap;
@@ -83,7 +81,6 @@ void full_energy(int                  rec,
   double                 tmp_throughfall[2][MAX_BANDS];
   double                 tmp_wind[3];
   double                 tmp_melt[MAX_BANDS*2];
-  double                 tmp_ppt[MAX_BANDS*2];
   double                 tmp_vapor_flux[MAX_BANDS];
   double                 tmp_canopy_vapor_flux[MAX_BANDS];
   double                 tmp_canopyevap[2][MAX_BANDS];
@@ -92,6 +89,7 @@ void full_energy(int                  rec,
   double                 tmp_mu;
   double                 tmp_layerevap[2][MAX_BANDS][MAX_LAYERS];
   double                 tmp_Tmin;
+  double                 gauge_correction[2];
   layer_data_struct     *tmp_layer[2];
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
@@ -132,6 +130,18 @@ void full_energy(int                  rec,
     }
   }
       
+  /* Compute gauge undercatch correction factors 
+     - this assumes that the gauge is free of vegetation effects, so gauge
+     correction is constant for the entire grid cell */
+  if( options.CORRPREC && atmos->prec[NR] > 0 ) 
+    correct_precip(gauge_correction, atmos->wind[NR], gp->wind_h, 
+		   soil_con->rough, soil_con->snow_rough);
+  else {
+    gauge_correction[0] = 1;
+    gauge_correction[1] = 1;
+  }
+  atmos->out_prec = 0;
+
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
@@ -141,6 +151,9 @@ void full_energy(int                  rec,
     /** Solve Veg Type only if Coverage Greater than 0% **/
     if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
 	(iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
+
+      if ( iveg < Nveg ) Cv = veg_con[iveg].Cv;
+      else Cv = 1. - veg_con[0].Cv_sum;
 
       /**************************************************
         Initialize Model Parameters
@@ -164,10 +177,9 @@ void full_energy(int                  rec,
 	}
       }
 
-     /** Define precipitation for WET and DRY fractions of the grid cell **/
-      prec[WET] = atmos->prec[NR]/prcp->mu[iveg];
-      prec[DRY] = 0.;
-
+      /* Initialize precipitation storage */
+      for ( j = 0; j < 2*MAX_BANDS; j++ ) out_prec[j] = 0;
+    
       /** Define vegetation class number **/
       if (iveg < Nveg) 
 	veg_class = veg_con[iveg].veg_class;
@@ -281,16 +293,18 @@ void full_energy(int                  rec,
 			 &(cell[WET][iveg][band].baseflow), 
 			 &(cell[DRY][iveg][band].baseflow), 
 			 &(cell[WET][iveg][band].runoff), 
-			 &(cell[DRY][iveg][band].runoff), ppt, 
+			 &(cell[DRY][iveg][band].runoff), &out_prec[band*2], 
 			 tmp_wind, &Le, &Ls, &(Melt[band*2]), 
 			 &(cell[WET][iveg][band].inflow), 
 			 &(cell[DRY][iveg][band].inflow), 
-			 &snow_inflow[band], veg_con[iveg].root, 
-			 atmos, soil_con, dmy, gp, 
+			 &snow_inflow[band], gauge_correction,
+			 veg_con[iveg].root, atmos, soil_con, dmy, gp, 
 			 &(energy[iveg][band]), &(snow[iveg][band]),
 			 cell[WET][iveg][band].layer, 
 			 cell[DRY][iveg][band].layer, 
 			 wet_veg_var, dry_veg_var);
+	  
+	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 
 	} /** End Loop Through Elevation Bands **/
       } /** End Full Energy Balance Model **/
@@ -319,14 +333,14 @@ void full_energy(int                  rec,
 	  for(band = 0; band < Nbands; band++) {
 	    if(soil_con->AreaFract[band] > 0) {
 	      debug.inflow[j][band][options.Nlayer+2] 
-		+= prec[j] * soil_con->Pfactor[band];
+		+= out_prec[j+band*2] * soil_con->Pfactor[band];
 	      debug.inflow[j][band][0]  = 0.;
 	      debug.inflow[j][band][1]  = 0.;
 	      debug.outflow[j][band][0] = 0.;
 	      debug.outflow[j][band][1] = 0.;
 	      if(iveg < Nveg) {
 		/** Vegetation Present **/
-		debug.inflow[j][band][0] += prec[j] * soil_con->Pfactor[band]; 
+		debug.inflow[j][band][0] += out_prec[j+band*2] * soil_con->Pfactor[band]; 
 		debug.outflow[j][band][0] 
 		  += veg_var[j][iveg][band].throughfall;
 	      }

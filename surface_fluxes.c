@@ -29,7 +29,7 @@ void surface_fluxes(char                 overstory,
 		    double              *baseflow_dry,
 		    double              *runoff_wet,
 		    double              *runoff_dry,
-		    double              *ppt,
+		    double              *out_prec,
 		    double              *wind,
 		    double              *Le,
 		    double              *Ls,
@@ -37,6 +37,7 @@ void surface_fluxes(char                 overstory,
 		    double              *inflow_wet,
 		    double              *inflow_dry,
 		    double              *snow_inflow,
+		    double              *gauge_correction,
 		    float               *root,
 		    atmos_data_struct   *atmos,
 		    soil_con_struct     *soil_con,
@@ -66,8 +67,8 @@ void surface_fluxes(char                 overstory,
   extern debug_struct    debug;
 #endif
 
-  double          total_store_moist[3];
-  double          step_store_moist[3];
+  double                 total_store_moist[3];
+  double                 step_store_moist[3];
 
   int                    dist;
   int                    lidx;
@@ -81,8 +82,11 @@ void surface_fluxes(char                 overstory,
   double                 T0;
   double                 step_rad;
   double                 step_net_short;
+  double                 ppt[2];
+  double                 rainfall[2];
   double                 step_ppt[2];
   double                 step_snow_energy;
+  double                 step_out_prec;
   double                 step_out_short;
   double                 step_Evap;
   double                 step_melt;
@@ -217,11 +221,11 @@ void surface_fluxes(char                 overstory,
 			    atmos->pressure[hour], mu, roughness, 
 			    displacement, ref_height, surf_atten, 
 			    gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 
-			    gp->wind_h, moist, ice0, dp, bare_albedo, Le, 
-			    Ls, aero_resist, wind, &step_net_short, 
-			    &step_out_short, &step_rad, &step_Evap, 
-			    &step_snow_energy, snow_inflow, 
-			    step_ppt, root);
+			    gp->wind_h, moist, ice0, dp, bare_albedo, 
+			    rainfall, &step_out_prec, Le, Ls, aero_resist, 
+			    wind, &step_net_short, &step_out_short, &step_rad, 
+			    &step_Evap, &step_snow_energy, snow_inflow, 
+			    step_ppt, gauge_correction, root);
       
     /**********************************************************
       Solve Energy Balance Components for Ground Free of Snow
@@ -236,7 +240,7 @@ void surface_fluxes(char                 overstory,
 				 ref_height, step_snow_energy, 
 				 step_snow.vapor_flux,  bare_albedo, 
 				 aero_resist, wind, 
-				 step_prec, step_ppt, root, 
+				 rainfall, step_ppt, root, 
 				 atmos, &bare_veg_var[WET], 
 				 &bare_veg_var[DRY], &bare_energy, 
 				 &(step_snow), step_layer[WET], 
@@ -272,7 +276,8 @@ void surface_fluxes(char                 overstory,
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
     store_vapor_flux += step_snow.vapor_flux;
       
-    store_melt += step_melt;
+    store_melt  += step_melt;
+    out_prec[0] += step_out_prec * mu;
    
     if(overstory)
       store_shortwave += step_snow.coverage * snow_energy.shortwave 

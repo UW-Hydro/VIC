@@ -4,17 +4,16 @@
 
 static char vcid[] = "$Id$";
 
-#define ETA0           (3.6e6)  /* viscosity of snow at T = 0C and density = 0
-                                   used in calculation of true viscosity 
-                                   (Ns/m2) */
+#define ETA0       (3.6e6)  /* viscosity of snow at T = 0C and density = 0
+			       used in calculation of true viscosity (Ns/m2) */
 
-#define G              9.81     /* gravitational accelleration (m/(s^2)) */
-#define C5         .08          /* constant used in snow viscosity calculation,
-                                   taken from SNTHRM.89 (/C)*/
-#define C6         .021         /* constant used in snow viscosity calculation,
-                                   taken from SNTHRM.89 (kg/m3) */
-#define MAX_CHANGE 0.9          /* maximum fraction of snowpack depth change
-				   caused by new snow */
+#define G          9.81     /* gravitational accelleration (m/(s^2)) */
+#define C5         0.08     /* constant used in snow viscosity calculation,
+			       taken from SNTHRM.89 (/C)*/
+#define C6         0.021    /* constant used in snow viscosity calculation,
+			       taken from SNTHRM.89 (kg/m3) */
+#define MAX_CHANGE 0.9      /* maximum fraction of snowpack depth change
+			       caused by new snow */
 
 double snow_density(int date,
                     double new_snow,
@@ -100,13 +99,6 @@ double snow_density(int date,
     }
 
   }
-/*   else if(coldcontent < 0) { */
-
-/*     density = 1000. * swq / depth; */
-
-/*     density += 1.2 * dt / 24.; */
-
-/*   } */
   else density = 1000. * swq / depth;
 
   /** Densification of the snow pack due to aging **/
@@ -118,7 +110,7 @@ double snow_density(int date,
 
   viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
 
-  deltadepth  = -overburden/viscosity*depth*dt*SECPHOUR;
+  deltadepth  = -overburden / viscosity * depth * dt * SECPHOUR;
 
   depth      += deltadepth;
 
@@ -150,13 +142,15 @@ double snow_albedo(double new_snow,
 
     /* Accumulation season */
     if(cold_content < 0.0)
-      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, pow((double)last_snow*dt/24.,
-                   SNOW_ALB_ACCUM_B));
+      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
+				pow((double)last_snow * dt / 24.,
+				    SNOW_ALB_ACCUM_B));
 
     /* Melt Season */
     else
-      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A, pow((double)last_snow*dt/24.,
-                   SNOW_ALB_THAW_B));
+      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A, 
+				pow((double)last_snow * dt / 24.,
+				    SNOW_ALB_THAW_B));
 
   }
 

@@ -4,11 +4,13 @@
 
 static char vcid[] = "$Id$";
 
-void correct_precip(double *rain, 
-		    double *rainonly, 
+#define GAUGE_HEIGHT 1.0  /* precipitation gauge height (m) */
+
+void correct_precip(double *gauge_correction, 
 		    double  wind,
 		    double  wind_h,
-		    double  roughness) {
+		    double  roughness,
+		    double  snow_roughness) {
 /**********************************************************************
 	correct_precip	Keith Cherkauer		May 21, 1997
 
@@ -21,27 +23,31 @@ void correct_precip(double *rain,
   Modifications:
   05-12-2000 Modified to use a logorithmic wind profile to bring
              observed wind speeds to a height of 2m             KAC
+  05-20-2000 Modified to use the WMO correction equations for
+             standard NWS shielded 8 inch gauges.  Equations
+             presented in: Yang, D., B. E. Goodison, J. R. Metcalfe,
+	     V. S. Golubev, R. Bates, T. Pangburn, and C. L. Hanson,
+	     "Accuracy of NWS 8" Standard Nonrecording Precipitation
+	     Gauge: Results and Application of WMO Intercomparison,"
+	     J. Atmos. Oceanic Tech, 15(1), 54-68, 1998.       KAC
 
 **********************************************************************/
 
-  double snow;
-  double Frain,Fsnow;
+  double gauge_wind;
 
-  wind = log( ( 2. + roughness ) / roughness ) / log( wind_h / roughness );
+  gauge_wind = wind * (log( ( GAUGE_HEIGHT + roughness ) / roughness ) 
+		       / log( wind_h / roughness ));
 
-  if(wind<=8.) {
-    Frain = 0.9959 + 0.03296 * wind - 7.748e-6 * exp(wind);
-    Fsnow = 0.9987 + 0.09080 * wind - 5.803e-6 * exp(wind);
-  }
-  else {
-    Frain = 0.9959 + 0.03296 * 9. - 7.748e-6 * exp(8.);
-    Fsnow = 0.9987 + 0.09080 * 9. - 5.803e-6 * exp(8.);
-  }
+  gauge_correction[RAIN] = 100. / exp(4.606 - 0.041 
+				      * pow ( gauge_wind, 0.69 ) );
 
-  snow = *rain - *rainonly;
+  gauge_wind = wind * (log( ( GAUGE_HEIGHT + snow_roughness ) 
+			    / snow_roughness ) / 
+		       log( wind_h / snow_roughness ));
 
-  snow *= Fsnow;
-  *rainonly *= Frain;
-  *rain = snow + *rainonly;
+  gauge_correction[SNOW] = 100. / exp(4.606 - 0.036 
+				      * pow ( gauge_wind, 1.75 ) );
 
 }
+
+#undef GAUGE_HEIGHT

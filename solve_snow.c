@@ -42,6 +42,8 @@ double solve_snow(snow_data_struct    *snow,
 		  double               ice0,
 		  double               dp,
 		  double               bare_albedo,
+		  double              *rainfall,
+		  double              *out_prec,
 		  double              *Le,
 		  double              *Ls,
 		  double              *aero_resist,
@@ -53,6 +55,7 @@ double solve_snow(snow_data_struct    *snow,
 		  double              *tmp_snow_energy,
 		  double              *snow_inflow,
 		  double              *ppt,
+		  double              *gauge_correction,
 		  float               *root) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
@@ -88,7 +91,6 @@ double solve_snow(snow_data_struct    *snow,
   double              old_swq;
   double              tmp_Wdew[2];
   double              melt;
-  double              rainfall[2];
   double              snowfall[2];
   double              snow_coverage;
   double              grnd_temp;
@@ -102,11 +104,12 @@ double solve_snow(snow_data_struct    *snow,
   /** Calculate Fraction of Precipitation that falls as Rain **/
   rainonly      = calc_rainonly(air_temp, prec, 
 				MAX_SNOW_TEMP, MIN_RAIN_TEMP, mu);
-  snowfall[WET] = prec - rainonly;
-  rainfall[WET] = rainonly;
+  snowfall[WET] = gauge_correction[SNOW] * (prec - rainonly);
+  rainfall[WET] = gauge_correction[RAIN] * rainonly;
   snowfall[DRY] = 0.;
   rainfall[DRY] = 0.;
   if(snowfall[WET] < 1e-5) snowfall[WET] = 0.;
+  (*out_prec) = snowfall[WET] + rainfall[WET];
 
   /** Compute latent heats **/
   (*Le) = (2.501 - 0.002361 * air_temp) * 1.0e6;

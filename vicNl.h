@@ -66,7 +66,7 @@ void   compute_dz(double *, double *, int, double);
 void   compute_penman_constants(double, double, double, double, double, 
 				double, double, float, float, double *, 
 				double *, double *, double *, double *);
-void   correct_precip(double *, double *, double, double, double);
+void   correct_precip(double *, double, double, double, double);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, double *, 
 					     int);
@@ -264,13 +264,13 @@ double soil_thermal_eqn(double, va_list);
 double solve_snow(snow_data_struct *, layer_data_struct *, 
 		  layer_data_struct *, veg_var_struct *, veg_var_struct *, 
 		  int, int, energy_bal_struct *, soil_con_struct *, 
-		  char, int, int, int, int, int, int, int, 
-		  int, double, double , 
-		  double, double, double, double, double, double, double,
-		  double, double, double, double, double, double, double,
-		  double, double, double, double, double *, double *,
-		  double *, double *, double *, double *, double *,
-		  double *, double *, double *, double *, float *);
+		  char, int, int, int, int, int, int, int, int, double, 
+		  double, double, double, double, double, double, double, 
+		  double, double, double, double, double, double, double, 
+		  double, double, double, double, double, double *, double *,
+		  double *, double *, double *, double *, double *, double *,
+		  double *, double *, double *, double *, double *, double *, 
+		  float *);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
@@ -293,8 +293,8 @@ void   surface_fluxes(char, int, int, int, int, int, int, int, int, int,
 		      double, double, double, double *, double *, double *, 
 		      double *, double *, double *, double *, double *, 
 		      double *, double *, double *, double *, double *, 
-		      float *, atmos_data_struct *, soil_con_struct *, 
-		      dmy_struct *, global_param_struct *,
+		      double *, float *, atmos_data_struct *, 
+		      soil_con_struct *, dmy_struct *, global_param_struct *,
 		      energy_bal_struct *, snow_data_struct *, 
 		      layer_data_struct *, layer_data_struct *, 
 		      veg_var_struct *, veg_var_struct *);

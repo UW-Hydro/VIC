@@ -68,6 +68,7 @@ global_param_struct get_global_param(filenames_struct *names,
   global.nrecs         = MISSING;
 #if SAVE_STATE
   global.stateyear = MISSING;
+  strcpy(global.statename, "NONE");
 #endif
 
   /** Read through global control file to find parameters **/
@@ -252,6 +253,11 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.INIT_STATE = TRUE;
 	  strcpy(names->init_state,flgstr);
 	}
+      }
+      else if(strcasecmp("BINARY_STATE_FILE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.BINARY_STATE_FILE=FALSE;
+	else options.BINARY_STATE_FILE=TRUE;
       }
       else if (strcasecmp("NEW_ARNO_TYPE", optstr)==0) {
 	sscanf(cmdstr, "%*s %s", flgstr);

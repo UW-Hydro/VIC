@@ -18,7 +18,9 @@ void initialize_model_state(double               surf_temp,
 			    lake_con_struct      lake_con,
 #endif //LAKE_MODEL
                             soil_con_struct     *soil_con,
-			    veg_con_struct      *veg_con)
+			    veg_con_struct      *veg_con,
+			    char               **init_STILL_STORM,
+			    int                **init_DRY_TIME)
 /**********************************************************************
   initialize_model_state       Keith Cherkauer	    April 17, 2000
 
@@ -44,6 +46,13 @@ void initialize_model_state(double               surf_temp,
           is activated.                                           KAC
   11-18-02 Modified to initialize lake and wetland algorithms 
           variables.                                              LCB
+  2-10-03 Fixed looping problem with initialization of soil moisture. KAC
+  3-12-03 Modified so that soil layer ice content is only calculated 
+          when frozen soil is implemented and active in the current 
+          grid cell.                                                KAC
+  04-10-03 Modified to read storm parameters from model state file.  KAC
+  04-25-03 Modified to work with vegetation type specific storm 
+           parameters.                                              KAC
 
 **********************************************************************/
 {
@@ -74,6 +83,11 @@ void initialize_model_state(double               surf_temp,
   double   Tair;
   double  *kappa, *Cs, *M;
   double   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
+#if SPATIAL_FROST
+  double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][FROST_SUBAREAS];
+#else
+  double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS];
+#endif // SPATIAL_FROST
   double   unfrozen, frozen;
   double **layer_ice;
   double **layer_tmp;
@@ -99,12 +113,6 @@ void initialize_model_state(double               surf_temp,
   snow    = prcp->snow;
   veg_var = prcp->veg_var;
   
-  // Initialize distributed precipiation
-  if(options.DIST_PRCP) 
-    Ndist = 2;
-  else 
-    Ndist = 1;
-
   // Initialize soil depths
   dp = soil_con->dp;
   Ltotal = 0;
@@ -121,6 +129,12 @@ void initialize_model_state(double               surf_temp,
   // increase initial soil surface temperature if air is very cold
   Tair = surf_temp;
   if ( surf_temp < -1. ) surf_temp = -1.;
+  
+  // initialize storm parameters to start a new simulation
+  (*init_STILL_STORM) = (char *)malloc((MaxVeg+1)*sizeof(char));
+  (*init_DRY_TIME)    = (int *)malloc((MaxVeg+1)*sizeof(int));
+  for ( veg = 0 ; veg <= MaxVeg ; veg++ )
+    (*init_DRY_TIME)[veg] = -999;
   
   /********************************************
     Initialize all snow pack variables 
@@ -213,7 +227,8 @@ void initialize_model_state(double               surf_temp,
   if(options.INIT_STATE) {
 
     read_initial_model_state(infiles.statefile, prcp, global_param,  
-			     Nveg, options.SNOW_BAND, cellnum, soil_con);
+			     Nveg, options.SNOW_BAND, cellnum, soil_con,
+			     Ndist, *init_STILL_STORM, *init_DRY_TIME);
 
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
@@ -224,6 +239,13 @@ void initialize_model_state(double               surf_temp,
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
+#if SPATIAL_FROST
+	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      ice[veg][band][lidx][frost_area] 
+		= cell[0][veg][band].layer[lidx].ice[frost_area];
+#else
+	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
+#endif
 	  }
 	}
       }
@@ -254,9 +276,15 @@ void initialize_model_state(double               surf_temp,
 	  energy[veg][band].T[1] = surf_temp;
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 	  
-	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-	  
+#if SPATIAL_FROST
+	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      ice[veg][band][lidx][frost_area] = 0.;
+#else
+	    ice[veg][band][lidx] = 0.;
+#endif
+	  }
 	}
       }
     }
@@ -318,8 +346,15 @@ void initialize_model_state(double               surf_temp,
 	    }
 	  }
 
-	  for ( lidx = 0; lidx < options.Nlayer; lidx++ )
+	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
+#if SPATIAL_FROST
+	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      ice[veg][band][lidx][frost_area] = 0.;
+#else
+	    ice[veg][band][lidx] = 0.;
+#endif
+	  }
 	}
       }
     }
@@ -412,6 +447,13 @@ void initialize_model_state(double               surf_temp,
 	      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 		cell[dry][veg][band].layer[lidx].moist 
 		  = moist[veg][band][lidx];
+#if SPATIAL_FROST
+		for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+
+		  cell[dry][veg][band].layer[lidx].ice[frost_area] = ice[veg][band][lidx][frost_area];
+#else
+		cell[dry][veg][band].layer[lidx].ice = ice[veg][band][lidx];
+#endif
 	      }
 	      if ( !( options.LAKES && veg == MaxVeg ) ) {
 		estimate_layer_ice_content(cell[dry][veg][band].layer,

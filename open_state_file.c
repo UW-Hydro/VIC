@@ -15,6 +15,10 @@ FILE *open_state_file(global_param_struct *global,
 
   This subroutine opens the model state file for output.
 
+  Modifications:
+  04-10-03 Modified to open and write to a binary state file.    KAC
+  06-03-03 modified to handle both ASCII and BINARY state files.  KAC
+
 *********************************************************************/
 {
   extern option_struct options;
@@ -24,16 +28,32 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s_%02i%02i%04i", global->statename, 
-	  global->stateday, global->statemonth, global->stateyear);
-  statefile = open_file(filename,"w");
+  sprintf(filename,"%s_%04i%02i%02i", global->statename, 
+	  global->stateyear, global->statemonth, global->stateday );
+  if ( options.BINARY_STATE_FILE )
+    statefile = open_file(filename,"wb");
+  else
+    statefile = open_file(filename,"w");
 
   /* Write save state date information */
-  fprintf(statefile,"%i %i %i\n", global->stateday, 
-	  global->statemonth, global->stateyear);
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &global->stateyear, 1, sizeof(int), statefile );
+    fwrite( &global->statemonth, 1, sizeof(int), statefile );
+    fwrite( &global->stateday, 1, sizeof(int), statefile );
+  }
+  else {
+    fprintf(statefile,"%i %i %i\n", global->stateyear, 
+	    global->statemonth, global->stateday);
+  }
 
   /* Write simulation flags */
-  fprintf(statefile,"%i %i\n", Nlayer, Nnodes);
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &Nlayer, 1, sizeof(int), statefile );
+    fwrite( &Nnodes, 1, sizeof(int), statefile );
+  }
+  else {
+    fprintf(statefile,"%i %i\n", Nlayer, Nnodes);
+  }
 
   return(statefile);
 

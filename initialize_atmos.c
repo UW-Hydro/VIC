@@ -41,6 +41,11 @@ void initialize_atmos(atmos_data_struct *temp,
 	longwave radiation	(W/m^2)
 	shortwave radiation	(W/m^2)
 
+  Modifications:
+  11-18-98  Removed variable array yearly_epot, since yearly potential
+            evaporation is no longer used for estimating the dew
+            point temperature from daily minimum temperature.   KAC
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -72,8 +77,10 @@ void initialize_atmos(atmos_data_struct *temp,
   double  trans_clear;
   double  qdp;
   double *yearly_prec;
-  double *yearly_epot;
   double *day_len_hr;
+
+  double *storerad;
+  double  sumrad;
 
   /*ftmp=open_file("humid_compare","w");*/
 
@@ -93,7 +100,6 @@ void initialize_atmos(atmos_data_struct *temp,
   Nhours = 24 / dt;
   
   yearly_prec = (double*) calloc(Nyears, sizeof(double));
-  yearly_epot = (double*) calloc(Nyears, sizeof(double));
   day_len_hr  = (double*) calloc(Ndays, sizeof(double));
 
   /************************************************************
@@ -215,6 +221,8 @@ void initialize_atmos(atmos_data_struct *temp,
     Calculate Daily and Annual Precipitation and Evaporation
   *****************************************************************/
 
+  storerad = (double *)calloc(Ndays,sizeof(double));
+
   for(day=0;day<Ndays;day++) {
     rec = day * Nhours;
     if ( day == (Ndays-1) )
@@ -229,12 +237,14 @@ void initialize_atmos(atmos_data_struct *temp,
     for(hour=1;hour<Nhours;hour++) temp[rec+hour].trans = temp[rec].trans;
     shortwave = calc_netshort(temp[rec].trans, dmy[rec].day_in_year, 
 			      phi,&day_len_hr[day]);
+
+    storerad[day] = shortwave;
+    
     tair = (temp[rec].tmax + temp[rec].tmin) / 2.0;
     priest = priestley(tair, shortwave);
     for(hour=0;hour<Nhours;hour++) {
       temp[rec+hour].priest = priest;
       yearly_prec[dmy[rec].year-dmy[0].year] += temp[rec+hour].prec;
-      yearly_epot[dmy[rec].year-dmy[0].year] += priest / Nhours;
     }
   }
 
@@ -280,7 +290,7 @@ void initialize_atmos(atmos_data_struct *temp,
     /** Estimate vapor pressure from daily tmax and tmin **/
     for(day=0;day<Ndays;day++) {
       tair = (temp[day*Nhours].tmax + temp[day*Nhours].tmin) / 2.0;
-      qdp = svp(estimate_dew_point(dmy,yearly_epot,yearly_prec,
+      qdp = svp(estimate_dew_point(dmy,yearly_prec,
 				   temp[day*Nhours].tmin,
 				   temp[day*Nhours].tmax,
 				   temp[day*Nhours].priest,
@@ -335,8 +345,20 @@ void initialize_atmos(atmos_data_struct *temp,
     }
   }
   
+  for(day=0;day<Ndays;day++) {
+    sumrad = 0.;
+    for(hour=0;hour<Nhours;hour++) {
+      sumrad += temp[day*Nhours+hour].shortwave * 3600.;
+    }
+
+    if(storerad[day]>sumrad/3600./24.) {
+      fprintf(stderr,"ERROR: Estimated net shortwave radiation exceeds total incoming shortwave radiation.\n");
+      fprintf(stdout,"%i\t%lf\t%lf\t%lf\t%lf\n",day,storerad[day],sumrad/3600./24.,sumrad/1000.,sumrad);
+      exit(0);
+    }
+  }
+
   free((char *)yearly_prec);
-  free((char *)yearly_epot);
   free((char *)day_len_hr);
   
   /*fclose(ftmp);*/

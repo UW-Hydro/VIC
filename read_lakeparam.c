@@ -39,6 +39,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   Modifications:
   03-11-01 Modified Cv_sum so that it includes the lake fraction,
 	   thus 1 - Cv_sum is once again the bare soil fraction.  KAC
+  11-18-02 Modified to reflect updates to the lake and wetland 
+           algorithms.                                            LCB
   
 **********************************************************************/
 
@@ -54,6 +56,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   double lat, lng;
   double start_lat, right_lng, left_lng, delta;
   double dist;
+  double tempdz;
   double radius, A, x, y;
   char   instr[251];
   char   tmpstr[MAXSTRING];
@@ -127,8 +130,9 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   fscanf(lakeparam, "%lf %lf", &temp.mindepth, &temp.maxrate);
   fscanf(lakeparam, "%lf", &temp.depth_in);
   fscanf(lakeparam, "%f", &temp.rpercent);
+  temp.wetland_veg_class = 0;
   temp.bpercent=0.0;
-  
+
   if(temp.numnod > MAX_LAKE_NODES) {
     nrerror("Number of lake nodes exceeds the maximum allowable.");
   }
@@ -140,7 +144,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   /**********************************************
       Compute water layer thickness
   **********************************************/
-   temp.dz = temp.maxdepth / ((float) temp.numnod ); 
+  tempdz = (temp.maxdepth - SURF) / ((float) temp.numnod -1. ); 
 
   /*******************************************************************/
   /* Find lake basin area with depth.                           */
@@ -148,7 +152,9 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   /* Read in parameters to calculate lake profile. */
   /*if(!options.LAKE_PROFILE) { */ 
-    if(!LAKE_PROFILE) {
+  if(!LAKE_PROFILE) {
+
+    fprintf(stderr, "WARNING: LAKE PROFILE being computed and I'm not sure it works. \n");
     fscanf(lakeparam, "%lf", &temp.Cl[0]);
     fscanf(lakeparam, "%lf", &temp.b);
 
@@ -160,29 +166,41 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   
     radius = sqrt(temp.basin[0] / PI);
     A = temp.maxdepth/pow(radius,temp.b);
-
-    for(i=1; i<temp.numnod; i++)
-      {
-	y = temp.maxdepth - SURF - temp.dz *(float)i/2.;
-	x = pow(y/A,1/temp.b);
-	temp.basin[i] = PI * x * x;	
-      }
+    
+    for(i=1; i<temp.numnod; i++) {
+      y = temp.maxdepth - SURF - tempdz *(float)i/2.;
+      x = pow(y/A,1/temp.b);
+      temp.basin[i] = PI * x * x;	
+    }
   }
   
-  /* Read in basin area for each node depth. */
-  else{       
-    for ( i = 0; i < temp.numnod; i++ )
-      {
-/*	fscanf(lakeparam, "%lf", &temp.basin[i]);
-	temp.Cl[i] = temp.basin[i]/temp.cell_area; */
-	fscanf(lakeparam, "%lf", &temp.Cl[i]);
-	temp.basin[i] = temp.Cl[i] * temp.cell_area;
+  /* Read in basin area for the top of each layer depth. */
+  /* Assumes that the lake bottom area is the same as */
+  /* the area of the top of the bottom layer. */
 
-	if(temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0)
-	  nrerror("Lake area must be a fraction between 0 and 1, please check the lake parameter file.");
-	    
-	
-      }
+  else{       
+    temp.maxvolume=0.0;
+    for ( i = 0; i < temp.numnod; i++ ) {
+      fscanf(lakeparam, "%lf", &temp.Cl[i]);
+      temp.basin[i] = temp.Cl[i] * temp.cell_area;
+      
+      if(i==0)
+	temp.z[i] = (temp.numnod - 1.) * tempdz + SURF;
+      else
+	temp.z[i] = (temp.numnod - i) * tempdz;
+
+      if(temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0)
+	nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
+    }
+
+    for ( i = 0; i < temp.numnod; i++ ) {
+       if(i==0)
+	 temp.maxvolume += (temp.basin[0] + temp.basin[1]) * SURF/2.;
+       else if(i < temp.numnod-1)
+	 temp.maxvolume += (temp.basin[i] + temp.basin[i+1]) * tempdz/2.;
+       else 
+	 temp.maxvolume += (temp.basin[i]) * tempdz;
+    }
   }
 
   // Add lake fraction to Cv_sum

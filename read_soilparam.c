@@ -60,7 +60,7 @@ soil_con_struct read_soilparam(FILE *soilparam)
   extern option_struct options;
   extern debug_struct debug;
 
-  char            errstr[MAXSTRING];
+  char            ErrStr[MAXSTRING];
   int             layer;
   double          porosity;
   double          Wcr_FRACT;
@@ -128,8 +128,8 @@ soil_con_struct read_soilparam(FILE *soilparam)
     temp.resid_moist[layer] = RESID_MOIST;
     porosity = 1.0 - temp.bulk_density[layer]/temp.soil_density;
     if(porosity < RESID_MOIST) {
-      sprintf(errstr,"Layer %i porosity (%lf mm/mm) must be greater then the defined moisture residue of %lf mm/mm",layer,porosity,(double)RESID_MOIST);
-      nrerror(errstr);
+      sprintf(ErrStr,"Layer %i porosity (%lf mm/mm) must be greater then the defined moisture residue of %lf mm/mm",layer,porosity,(double)RESID_MOIST);
+      nrerror(ErrStr);
     }
     temp.max_moist[layer] = temp.depth[layer] * porosity * 1000.;
     if(temp.init_moist[layer] > temp.max_moist[layer]) 
@@ -148,10 +148,14 @@ soil_con_struct read_soilparam(FILE *soilparam)
     Compute Soil Layer Critical and Wilting Point Moisture Contents
     ****************************************************************/
   for(layer=0;layer<options.Nlayer;layer++) {
-      temp.Wcr[layer]  = Wcr_FRACT * temp.max_moist[layer];
-      temp.Wpwp[layer] = Wpwp_FRACT * temp.max_moist[layer];
-      if(temp.Wpwp[layer] > temp.Wcr[layer])
-        nrerror("Wpwp is greater then Wcr");
+    temp.Wcr[layer]  = Wcr_FRACT * temp.max_moist[layer];
+    temp.Wpwp[layer] = Wpwp_FRACT * temp.max_moist[layer];
+    if(temp.Wpwp[layer] > temp.Wcr[layer])
+      nrerror("Wpwp is greater then Wcr");
+    if(temp.init_moist[layer] < temp.Wpwp[layer]) { 
+      sprintf(ErrStr,"Initial soil moisture (%lf) is less than the wilting point (%lf) for layer %i",temp.init_moist[layer],temp.Wpwp[layer],layer);
+      nrerror(ErrStr);
+    }
   }
 
   /*************************************************

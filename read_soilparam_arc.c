@@ -104,7 +104,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double         *sand;
   double         *porosity;
   double          sum_depth;
-  char            errstr[MAXSTRING];
+  char            ErrStr[MAXSTRING];
   char            namestr[MAXSTRING];
   char            tmpstr[MAXSTRING];
 
@@ -116,8 +116,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       cnt++;
     }
     if(cnt!=16+8*options.Nlayer) {
-      sprintf(errstr,"Not the right number of soil parameter files in the ARC/INFO file list.");
-      vicerror(errstr);
+      sprintf(ErrStr,"Not the right number of soil parameter files in the ARC/INFO file list.");
+      vicerror(ErrStr);
     }
     
     rewind(soilparam);
@@ -379,6 +379,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       temp.Wpwp[layer] = Wpwp_FRACT * temp.max_moist[layer];
       if(temp.Wpwp[layer] > temp.Wcr[layer])
         nrerror("Wpwp is greater then Wcr");
+      if(temp.init_moist[layer] < temp.Wpwp[layer]) { 
+	sprintf(ErrStr,"Initial soil moisture (%lf) is less than the wilting point (%lf) for layer %i",temp.init_moist[layer],temp.Wpwp[layer],layer);
+	nrerror(ErrStr);
+      }
     }
 
     /*************************************************

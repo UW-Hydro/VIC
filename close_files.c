@@ -52,6 +52,11 @@ void close_files(infiles_struct   inf,
     if(options.COMPRESS) compress_files(fnames.snow);
   }
 
+  if(options.PRT_SNOW_BAND) {
+    fclose(outf.snowband);
+    if(options.COMPRESS) compress_files(fnames.snowband);
+  }
+
   /*******************************
     Close All Used Debugging Files
     *******************************/ 

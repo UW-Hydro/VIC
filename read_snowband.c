@@ -71,31 +71,41 @@ void read_snowband(FILE    *snowband,
     /** Read Band Elevation **/
     for(band=0;band<Nbands;band++) {
       fscanf(snowband, "%lf", &band_elev);
-      if(band_elev<=0) {
+      if(band_elev<0) {
 	sprintf(ErrStr,"Negative snow band elevation (%lf) read from file", 
 		band_elev);
 	vicerror(ErrStr);
       }
-      Tfactor[0][band] = (elev - band_elev) * T_lapse;
+      Tfactor[0][band] = (elev - band_elev) / 1000. * T_lapse;
     }
     total = 0.;
 
     /** Read Precipitation Fraction **/
     for(band=0;band<options.SNOW_BAND;band++) {
       fscanf(snowband, "%lf", &prec_frac);
-      if(prec_frac<=0) {
+      if(prec_frac<0) {
 	sprintf(ErrStr,"Snow band precipitation fraction (%lf) must be between 0 and 1", 
 		prec_frac);
 	vicerror(ErrStr);
       }
-      Pfactor[0][band]  = prec_frac * (double)Nbands;
-      total            += Pfactor[0][band];
+      if(prec_frac>0 && AreaFract[0][band]==0) {
+	sprintf(ErrStr,"Snow band precipitation fraction (%lf) should be 0 when the area fraction is 0. (band = %i)", 
+		prec_frac, band);
+	vicerror(ErrStr);
+      }
+      Pfactor[0][band] = prec_frac;
+      total += prec_frac;
     }
-    if(total!=1.*(double)Nbands) {
+    if(total!=1.) {
       fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %i (%lf), dividing each fraction by the sum\n",
-	      Nbands, total);
+	      1., total);
       for(band=0;band<options.SNOW_BAND;band++) 
-	Pfactor[0][band] /= (total / (double)Nbands);
+	Pfactor[0][band] /= total;
+    }
+    for(band=0;band<options.SNOW_BAND;band++) {
+      if(AreaFract[0][band] > 0)
+	Pfactor[0][band] /= AreaFract[0][band];
+      else Pfactor[0][band]  = 0.;
     }
   }
 

@@ -93,6 +93,18 @@ filenames_struct make_in_and_outfiles(infiles_struct *infp,
     else outfp->snow = open_file(filenames.snow, "w");
   }
 
+  if(options.PRT_SNOW_BAND) {
+    strcpy(filenames.snowband, filenames.result_dir);
+    strcat(filenames.snowband, "snowband");
+    strcat(filenames.snowband, "_");
+    strcat(filenames.snowband, latchar);
+    strcat(filenames.snowband, "_");
+    strcat(filenames.snowband, lngchar);
+    if(options.BINARY_OUTPUT) 
+      outfp->snowband = open_file(filenames.snowband, "wb");
+    else outfp->snowband = open_file(filenames.snowband, "w");
+  }
+
   fnames = filenames;
   return (fnames);
 

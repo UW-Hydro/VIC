@@ -118,6 +118,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.CORRPREC=TRUE;
         else options.CORRPREC = FALSE;
       }
+      else if(strcasecmp("PRT_SNOW_BAND",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.PRT_SNOW_BAND=TRUE;
+        else options.PRT_SNOW_BAND = FALSE;
+      }
       else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&options.GRID_DECIMAL);
       }
@@ -152,7 +157,6 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("SOIL_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->soil_dir);
-	options.ARC_SOIL = TRUE;
       }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);

@@ -39,7 +39,7 @@ void write_data(out_data_struct *out_data,
   extern option_struct options;
   extern debug_struct debug;
 
-  int   j;
+  int   band, j;
   int   *tmp_iptr;
   float *tmp_fptr;
 
@@ -94,22 +94,22 @@ void write_data(out_data_struct *out_data,
       tmp_iptr[0] = dmy->hour;
       fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
     }
-    tmp_fptr[0] = (float)out_data->swq;
+    tmp_fptr[0] = (float)out_data->swq[0];
     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-    tmp_fptr[0] = (float)out_data->snow_depth;
+    tmp_fptr[0] = (float)out_data->snow_depth[0];
     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-    tmp_fptr[0] = (float)out_data->snow_canopy;
+    tmp_fptr[0] = (float)out_data->snow_canopy[0];
     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-/*     tmp_fptr[0] = (float)out_data->coverage; */
+/*     tmp_fptr[0] = (float)out_data->coverage[0]; */
 /*     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow); */
     if(options.FULL_ENERGY) {
-      tmp_fptr[0] = (float)out_data->advection;
+      tmp_fptr[0] = (float)out_data->advection[0];
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-      tmp_fptr[0] = (float)out_data->deltaCC;
+      tmp_fptr[0] = (float)out_data->deltaCC[0];
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-      tmp_fptr[0] = (float)out_data->snow_flux;
+      tmp_fptr[0] = (float)out_data->snow_flux[0];
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
-      tmp_fptr[0] = (float)out_data->refreeze_energy;
+      tmp_fptr[0] = (float)out_data->refreeze_energy[0];
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
     }
   }
@@ -117,15 +117,77 @@ void write_data(out_data_struct *out_data,
     /***** Write ASCII full energy snow output file *****/
     fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
-	    out_data->swq, out_data->snow_depth, out_data->snow_canopy, 
-	    /* out_data->coverage, */ out_data->advection, out_data->deltaCC, 
-	    out_data->snow_flux, out_data->refreeze_energy);
+	    out_data->swq[0], out_data->snow_depth[0], 
+	    out_data->snow_canopy[0], /* out_data->coverage[0], */ 
+	    out_data->advection[0], out_data->deltaCC[0], 
+	    out_data->snow_flux[0], out_data->refreeze_energy[0]);
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
     /***** Write ASCII water balance snow output file *****/
     fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
 	    dmy->year, dmy->month, dmy->day,
-	    out_data->swq, out_data->snow_depth, out_data->snow_canopy);
+	    out_data->swq[0], out_data->snow_depth[0], 
+	    out_data->snow_canopy[0]);
+  }
+
+  /**************************************
+    Ouput Snow Band Variables
+  **************************************/
+  if(options.SNOW_MODEL && options.PRT_SNOW_BAND && options.BINARY_OUTPUT) {
+    /***** Write Binary Snow Band Output File *****/
+    tmp_iptr[0] = dmy->year;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
+    tmp_iptr[0] = dmy->month;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
+    tmp_iptr[0] = dmy->day;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
+    if(options.FULL_ENERGY) {
+      tmp_iptr[0] = dmy->hour;
+      fwrite(tmp_iptr,1,sizeof(int),outfiles.snowband);
+    }
+    for(band=0;band<options.SNOW_BAND;band++) {
+      tmp_fptr[0] = (float)out_data->swq[band+1];
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+      tmp_fptr[0] = (float)out_data->snow_depth[band+1];
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+      tmp_fptr[0] = (float)out_data->snow_canopy[band+1];
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+      /*     tmp_fptr[0] = (float)out_data->coverage; */
+      /*     fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband); */
+      if(options.FULL_ENERGY) {
+	tmp_fptr[0] = (float)out_data->advection[band+1];
+	fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+	tmp_fptr[0] = (float)out_data->deltaCC[band+1];
+	fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+	tmp_fptr[0] = (float)out_data->snow_flux[band+1];
+	fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+	tmp_fptr[0] = (float)out_data->refreeze_energy[band+1];
+	fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
+      }
+    }
+  }
+  else if(options.FULL_ENERGY && options.SNOW_MODEL && options.PRT_SNOW_BAND) {
+    /***** Write ASCII full energy snow band output file *****/
+    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i\t%02i",
+	    dmy->year, dmy->month, dmy->day, dmy->hour);
+    for(band=0;band<options.SNOW_BAND;band++) 
+      fprintf(outfiles.snowband  ,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
+	      out_data->swq[band+1], out_data->snow_depth[band+1], 
+	      out_data->snow_canopy[band+1], /* out_data->coverage[band+1], */ 
+	      out_data->advection[band+1], out_data->deltaCC[band+1], 
+	      out_data->snow_flux[band+1], out_data->refreeze_energy[band+1]);
+    fprintf(outfiles.snowband,"\n");
+  }
+  else if(!options.FULL_ENERGY && options.SNOW_MODEL 
+	  && options.PRT_SNOW_BAND) {
+    /***** Write ASCII water balance snow band output file *****/
+    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i",
+	    dmy->year, dmy->month, dmy->day);
+    for(band=0;band<options.SNOW_BAND;band++)
+      fprintf(outfiles.snowband  ,"\t%.4lf\t%.4lf\t%.4lf",
+	      out_data->swq[band+1], out_data->snow_depth[band+1], 
+	      out_data->snow_canopy[band+1]);
+    fprintf(outfiles.snowband,"\n");
   }
 
   /************************************

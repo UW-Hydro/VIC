@@ -44,11 +44,19 @@ void put_data(dist_prcp_struct  *prcp,
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
 
-  out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct));
-
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;
   Nbands = options.SNOW_BAND;
+
+  out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct));
+  out_data->swq             = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->snow_canopy     = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->snow_depth      = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->advection       = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->deltaCC         = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->snow_flux       = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->refreeze_energy = (double *)calloc(Nbands+1,sizeof(double));
+  out_data->coverage        = (double *)calloc(Nbands+1,sizeof(double));
 
   out_data->prec = atmos->prec;
  
@@ -173,23 +181,55 @@ void put_data(dist_prcp_struct  *prcp,
 	  
 	}
 	if(options.FULL_ENERGY || options.SNOW_MODEL) {
-	  out_data->swq         += snow[veg][band].swq * veg_con[veg].Cv 
+	  out_data->swq[0]         
+	    += snow[veg][band].swq * veg_con[veg].Cv 
 	    * 1000. * AreaFract[band];
-	  out_data->snow_depth  += snow[veg][band].depth * veg_con[veg].Cv
+	  out_data->snow_depth[0]  
+	    += snow[veg][band].depth * veg_con[veg].Cv
 	    * 100. * AreaFract[band];
-	  out_data->snow_canopy += (snow[veg][band].snow_canopy) 
+	  out_data->snow_canopy[0] 
+	    += (snow[veg][band].snow_canopy) 
 	    * veg_con[veg].Cv * 1000. * AreaFract[band];
-	  out_data->coverage    += snow[veg][band].coverage * veg_con[veg].Cv
-	    * AreaFract[band];
+	  out_data->coverage[0]    
+	    += snow[veg][band].coverage 
+	    * veg_con[veg].Cv * AreaFract[band];
+	  out_data->deltaCC[0]           
+	    += energy[veg][band].deltaCC 
+	    * veg_con[veg].Cv * AreaFract[band];
+	  out_data->advection[0]         
+	    += energy[veg][band].advection 
+	    * veg_con[veg].Cv * AreaFract[band];
+	  out_data->snow_flux[0]         
+	    += energy[veg][band].snow_flux 
+	    * veg_con[veg].Cv * AreaFract[band];
+	  out_data->refreeze_energy[0]   
+	    += energy[veg][band].refreeze_energy 
+	    * veg_con[veg].Cv * AreaFract[band];
+	  if(options.PRT_SNOW_BAND) {
+	    out_data->swq[band+1]         
+	      += snow[veg][band].swq * veg_con[veg].Cv  * 1000.;
+	    out_data->snow_depth[band+1]  
+	      += snow[veg][band].depth * veg_con[veg].Cv * 100.;
+	    out_data->snow_canopy[band+1] 
+	      += (snow[veg][band].snow_canopy) 
+	      * veg_con[veg].Cv * 1000.;
+	    out_data->coverage[band+1]    
+	      += snow[veg][band].coverage 
+	      * veg_con[veg].Cv;
+	    out_data->deltaCC[band+1]           
+	      += energy[veg][band].deltaCC 
+	      * veg_con[veg].Cv;
+	    out_data->advection[band+1]         
+	      += energy[veg][band].advection 
+	      * veg_con[veg].Cv;
+	    out_data->snow_flux[band+1]         
+	      += energy[veg][band].snow_flux 
+	      * veg_con[veg].Cv;
+	    out_data->refreeze_energy[band+1]   
+	      += energy[veg][band].refreeze_energy 
+	      * veg_con[veg].Cv;
+	  }
 	}
-	out_data->deltaCC     += energy[veg][band].deltaCC 
-	  * veg_con[veg].Cv * AreaFract[band];
-	out_data->advection   += energy[veg][band].advection 
-	  * veg_con[veg].Cv * AreaFract[band];
-	out_data->snow_flux   += energy[veg][band].snow_flux 
-	  * veg_con[veg].Cv * AreaFract[band];
-	out_data->refreeze_energy   += energy[veg][band].refreeze_energy 
-	  * veg_con[veg].Cv * AreaFract[band];
       }
     }
   }
@@ -297,20 +337,39 @@ void put_data(dist_prcp_struct  *prcp,
 	
       }
       if(options.FULL_ENERGY || options.SNOW_MODEL) {
-	out_data->swq         += snow[vegnum][band].swq 
+	out_data->swq[0]             += snow[vegnum][band].swq 
 	  * (1.0 - veg_con[0].Cv_sum) * 1000. * AreaFract[band];
-	out_data->snow_depth  += snow[vegnum][band].depth 
+	out_data->snow_depth[0]      += snow[vegnum][band].depth 
 	  * (1.0 - veg_con[0].Cv_sum) * 100. * AreaFract[band];
-	out_data->coverage    += snow[vegnum][band].coverage 
+	out_data->coverage[0]        += snow[vegnum][band].coverage 
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->deltaCC += energy[vegnum][band].deltaCC 
+	out_data->deltaCC[0] += energy[vegnum][band].deltaCC 
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->advection   += energy[vegnum][band].advection   
+	out_data->advection[0]       += energy[vegnum][band].advection   
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->snow_flux   += energy[vegnum][band].snow_flux   
+	out_data->snow_flux[0]       += energy[vegnum][band].snow_flux   
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->refreeze_energy   += energy[vegnum][band].refreeze_energy 
+	out_data->refreeze_energy[0] += energy[vegnum][band].refreeze_energy 
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
+	if(options.PRT_SNOW_BAND) {
+	  out_data->swq[band+1]             += snow[vegnum][band].swq 
+	    * (1.0 - veg_con[0].Cv_sum) * 1000.;
+	  out_data->snow_depth[band+1]      += snow[vegnum][band].depth 
+	    * (1.0 - veg_con[0].Cv_sum) * 100.;
+	  out_data->coverage[band+1]        += snow[vegnum][band].coverage 
+	    * (1.0 - veg_con[0].Cv_sum);
+	  out_data->deltaCC[band+1] += energy[vegnum][band].deltaCC 
+	    * (1.0 - veg_con[0].Cv_sum);
+	  out_data->advection[band+1]       
+	    += energy[vegnum][band].advection   
+	    * (1.0 - veg_con[0].Cv_sum);
+	  out_data->snow_flux[band+1]       
+	    += energy[vegnum][band].snow_flux   
+	    * (1.0 - veg_con[0].Cv_sum);
+	  out_data->refreeze_energy[band+1] 
+	    += energy[vegnum][band].refreeze_energy 
+	    * (1.0 - veg_con[0].Cv_sum);
+	}
       }
     }
   }
@@ -327,16 +386,25 @@ void put_data(dist_prcp_struct  *prcp,
   storage = 0.;
   for(index=0;index<options.Nlayer;index++)
     storage += out_data->moist[index] + out_data->ice[index];
-  storage += out_data->swq + out_data->snow_canopy + out_data->Wdew;
+  storage += out_data->swq[0] + out_data->snow_canopy[0] + out_data->Wdew;
   calc_water_balance_error(rec,inflow,outflow,storage);
   if(options.FULL_ENERGY)
     calc_energy_balance_error(rec,out_data->net_short+out_data->net_long,
 			      out_data->latent,out_data->sensible,
 			      out_data->grnd_flux,
-			      out_data->advection-out_data->deltaCC
-			      -out_data->snow_flux+out_data->refreeze_energy);
+			      out_data->advection[0]-out_data->deltaCC[0]
+			      -out_data->snow_flux[0]
+			      +out_data->refreeze_energy[0]);
 
   write_data(out_data, outfiles, dmy);
 
-  free((char *) out_data); 
+  free((char *)out_data->swq);
+  free((char *)out_data->snow_canopy);
+  free((char *)out_data->snow_depth);
+  free((char *)out_data->advection);
+  free((char *)out_data->deltaCC);
+  free((char *)out_data->snow_flux);
+  free((char *)out_data->refreeze_energy);
+  free((char *)out_data->coverage);
+  free((char *)out_data); 
 }

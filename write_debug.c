@@ -66,6 +66,7 @@ void write_debug(atmos_data_struct     atmos,
   int     Ntemp;
   int     band;
   int     Nbands;
+  double  sum;
   double *Evap;
   double *curr_moist;
   double  curr_ice;
@@ -356,15 +357,15 @@ void write_debug(atmos_data_struct     atmos,
     /***** Temperature Profile Debugging Output *****/
  
     if(rec==0 && veg==0 && prcpdist==0) {
-      fprintf(debug.fg_temp,"%i\n",Nnodes);
+      fprintf(debug.fg_temp,"%i\n",gp.Nnodes);
       fprintf(debug.fg_temp,"Date - hour(REC)\tveg\tband\tAir T\tFdpth\tTdpth");
       for(i=0;i<options.Nlayer;i++) 
 	fprintf(debug.fg_temp,"\t%i Th T\t%i Fr T\t%i T",i,i,i);
       sum=0.0;
       fprintf(debug.fg_temp,"\t%.2lfcm",soil_con.depth[1]/2.*100.);
-      for(i=0;i<Nnodes;i++) {
+      for(i=0;i<gp.Nnodes;i++) {
 	fprintf(debug.fg_temp,"\t%.0lf",sum*100.0);
-	sum+=(energy[veg_num][0].dz[i]+energy[veg_num][0].dz[i+1])/2.0;
+	sum+=(energy->dz[i]+energy->dz[i+1])/2.0;
       }
       fprintf(debug.fg_temp,"\n");
     }

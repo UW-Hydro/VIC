@@ -78,6 +78,7 @@ void initialize_global() {
   options.CORRPREC       = FALSE;
   options.MOISTFRACT     = FALSE;
   options.BINARY_OUTPUT  = FALSE;
+  options.PRT_SNOW_BAND  = FALSE;
   options.Nlayer         = 2;
   options.GRID_DECIMAL   = 2;
   options.SNOW_BAND      = 1;

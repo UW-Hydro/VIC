@@ -497,7 +497,7 @@ void full_energy(int rec,
 	    atmos->density = 3.486*atmos->pressure/(275.0
 						    + atmos->air_temp);
 	    for(band=0;band<Nbands;band++) {
-	      if(soil_con.AreaFract>0) {
+	      if(soil_con.AreaFract[band]>0) {
 		snow[iveg][band].vapor_flux         = 0.;
 		snow[iveg][band].canopy_vapor_flux  = 0.;
 		if(iveg<Nveg) {
@@ -518,7 +518,7 @@ void full_energy(int rec,
 				FALSE,FALSE,TRUE);
 
 	    for(band=0;band<Nbands;band++) {	      
-	      if(soil_con.AreaFract>0) {
+	      if(soil_con.AreaFract[band]>0) {
 		energy[iveg][band].refreeze_energy = 0.;
 		if(iveg==Nveg) sveg=0;
 		else sveg=iveg;
@@ -566,10 +566,10 @@ void full_energy(int rec,
 					 TRUE,veg_class,dmy[rec].month,
 					 prcp[0].mu[iveg],tmp_Wdew,
 					 atmos->air_temp
-					 *soil_con.Tfactor[band],
+					 + soil_con.Tfactor[band],
 					 (double)gp.dt,atmos->rad,atmos->vpd,
 					 atmos->net_short,atmos->air_temp
-					 *soil_con.Tfactor[band],
+					 + soil_con.Tfactor[band],
 					 cell[WET][iveg][0].aero_resist[0],
 					 displacement,roughness,ref_height,
 					 soil_con.elevation,rainfall,
@@ -587,7 +587,7 @@ void full_energy(int rec,
 				       soil_con.max_moist[0], 
 				       soil_con.elevation, 
 				       soil_con.b_infilt, atmos->air_temp 
-				       * soil_con.Tfactor[band],
+				       + soil_con.Tfactor[band],
 				       displacement, roughness, ref_height, 
 				       cell[WET][iveg][0].aero_resist[0], 
 				       (double)gp.dt,
@@ -648,14 +648,14 @@ void full_energy(int rec,
 	    
 	  } /* End Hourly Snow Solution */
 	  for(band=0;band<Nbands;band++) {
-	    if(soil_con.AreaFract>0) {
+	    if(soil_con.AreaFract[band]>0) {
 	      snow[iveg][band].canopy_vapor_flux = tmp_canopy_vapor_flux[band];
 	      snow[iveg][band].vapor_flux = tmp_vapor_flux[band];
 	    }
 	  }
 	  for(j=0;j<Ndist;j++) {
 	    for(band=0;band<Nbands;band++) {
-	      if(soil_con.AreaFract>0) {
+	      if(soil_con.AreaFract[band]>0) {
 		if(iveg < Nveg) {
 		  veg_var[j][iveg][band].canopyevap  
 		    = tmp_canopyevap[j][band];
@@ -703,7 +703,7 @@ void full_energy(int rec,
 	      cell[j][iveg][0].aero_resist[0] = HUGE_RESIST;
 	  }
 	  for(band=0;band<Nbands;band++) {
-	    if(soil_con.AreaFract>0) {
+	    if(soil_con.AreaFract[band]>0) {
 	      if(iveg!=Nveg) {
 		/** Compute Evaporation from Vegetation **/
 		if(veg_lib[veg_class].LAI[dmy[rec].month-1] > 0.0) {
@@ -717,10 +717,10 @@ void full_energy(int rec,
 				     &veg_var[DRY][iveg][band],
 				     TRUE,veg_class,dmy[rec].month,
 				     prcp[0].mu[iveg],tmp_Wdew,atmos->air_temp
-				     *soil_con.Tfactor[band],
+				     + soil_con.Tfactor[band],
 				     (double)gp.dt,atmos->rad,atmos->vpd,
 				     atmos->net_short,atmos->air_temp
-				     *soil_con.Tfactor[band],
+				     + soil_con.Tfactor[band],
 				     cell[WET][iveg][0].aero_resist[0],
 				     displacement,roughness,ref_height,
 				     soil_con.elevation,rainfall,
@@ -736,7 +736,7 @@ void full_energy(int rec,
 				   atmos->net_short, soil_con.depth[0], 
 				   soil_con.max_moist[0], soil_con.elevation, 
 				   soil_con.b_infilt, atmos->air_temp 
-				   * soil_con.Tfactor[band],
+				   + soil_con.Tfactor[band],
 				   displacement, roughness, ref_height, 
 				   cell[WET][iveg][0].aero_resist[0], 
 				   (double)gp.dt,

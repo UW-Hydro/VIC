@@ -5,6 +5,8 @@
 
 static char vcid[] = "$Id$";
 
+#if LAKE_MODEL
+
 void wetland_energy(int                  rec,
 		    atmos_data_struct   *atmos,
 		    dist_prcp_struct    *prcp,
@@ -13,7 +15,7 @@ void wetland_energy(int                  rec,
 		    soil_con_struct     *soil_con,
 		    int                  iveg,
 		    int                  band,
-		    double lake_frac,
+		    double               lake_frac,
 		    lake_con_struct      lake_con)
 
 /**********************************************************************
@@ -228,4 +230,6 @@ void wetland_energy(int                  rec,
   } /** end current vegetation type **/
   
 }
+
+#endif // LAKE_MODEL
 

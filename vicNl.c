@@ -1,10 +1,10 @@
+static char vcid[] = "$Id$";
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vicNl.h>
 #include <global.h>
-
-static char vcid[] = "$Id$";
 
 /** Main Program **/
 

@@ -13,6 +13,10 @@ void write_forcing_file(atmos_data_struct *atmos,
 
   This routine writes the complete forcing data files for use in 
   future simulations.
+
+  xx-xx-01 Modified to output pressures, which are handled internally
+           in kPa, as Pa for backward compatability.              KAC
+
 **********************************************************************/
 {
   extern option_struct options;

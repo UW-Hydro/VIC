@@ -47,6 +47,7 @@ void   check_files(infiles_struct *, filenames_struct);
 void   close_files(infiles_struct, outfiles_struct, filenames_struct);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
+void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double *, double);
 
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct,
@@ -109,11 +110,11 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, double, double,
 			int, int);
 void   initialize_energy_bal(energy_bal_struct **, cell_data_struct ***,
 			     soil_con_struct *, double, double *, int, int,
-			     int, FILE *);
+			     int, int, FILE *);
 void   initialize_global();
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
-void   initialize_snow(snow_data_struct **,int,FILE *);
+void   initialize_snow(snow_data_struct **,int,FILE *,int);
 void   initialize_soil(cell_data_struct **, soil_con_struct, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct);
@@ -151,6 +152,10 @@ double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
 void   read_atmosdata(atmos_data_struct *, FILE *, int *, int, int);
 atmos_data_struct *read_forcing_data(infiles_struct, int, int *, int, int *);
+snow_data_struct read_initial_snow(FILE *, int, int, int);
+void read_initial_soil_therm(FILE *, int, int, int, int, double,
+			     double *, double *, double *,
+			     double *, double *);
 void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int);
 void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_sawd(atmos_data_struct *, FILE *, int *, int, int);
@@ -188,7 +193,7 @@ void   setup_frozen_soil(soil_con_struct, layer_data_struct  *,
 			 double *, double *, double *);
 double shrad(double,double,double,double,double,int,double);
 double snow_albedo(double, double, double, double, int);
-double snow_density(int, double, double, double, double, double, double);
+double snow_density(int, double, double, double, double, double, double, double);
 void   snow_intercept(double, double, double, double, double, double, double,
 		      double, double, double, double, double, double, double,
 		      double *, double *, double *, double *,

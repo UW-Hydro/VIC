@@ -1,10 +1,7 @@
 SHELL = /bin/csh
 
-CC = gcc -I. -g
-#CC = cc -I.
-#LIBRARY = -lm
-LIBRARY = -lm /nfs/hydro4/usr5/cherkaue/source/electric_fence_meter/lib/libefence.a
-#LIBRARY = -lm -lc
+CC = gcc -I. -O
+LIBRARY = -lm
 UTILDIR = ./
 DISTDIR = ./
 FULLDIR = ./
@@ -35,7 +32,7 @@ OBJS = vicNl.o cmd_proc.o check_files.o read_soilparam.o open_file.o \
        calc_veg_params.o read_veglib.o calc_rainonly.o \
        calc_long_shortwave.o calc_air_temperature.o read_PILPS2c.o \
        calc_snow_ground_flux.o read_forcing_data.o read_soilparam_arc.o \
-       read_arcinfo_ascii.o solve_snow.o
+       read_arcinfo_ascii.o solve_snow.o calc_root_fraction.o free_vegcon.o
 
 
 all:
@@ -127,6 +124,10 @@ write_debug.o:	  write_debug.c  $(INCFILE)
 	$(CC) -c write_debug.c
 check_files.o:   	check_files.c $(INCFILE)
 	$(CC) -c check_files.c
+calc_root_fraction.o:   	calc_root_fraction.c $(INCFILE)
+	$(CC) -c calc_root_fraction.c
+free_vegcon.o:   	free_vegcon.c $(INCFILE)
+	$(CC) -c free_vegcon.c
 
 # RADIATION AND EVAPORATION CODE
 rad_and_vpd.o:   	  rad_and_vpd.c $(INCFILE)

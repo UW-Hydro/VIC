@@ -12,6 +12,27 @@ Modifications:
 	  always be recompiled whenever a .h file is updated.  The
 	  user can override this behavior by typing "make model",
 	  which doesn't invoke "make depend".			TJB
+	arno_evap.c:
+	  Moved unit conversion of moist_resid back inside distributed
+	  precipitation loop in such a way that it does not get multiplied
+	  by D1 * 1000 twice.					TJB
+	  Changed logic of evap limit check to avoid creating spurious
+	  condensation.  Previously, when liquid moisture < residual
+	  moisture, (liquid moisture - residual moisture) would be
+	  negative.  Any non-negative evap would be greater than this,
+	  resulting in evap getting set to (liquid moisture - residual
+	  moisture), which would be negative (i.e. condensation).
+	  This artificially created condensation in whatever amount
+	  necessary to bring liquid moisture up to residual, causing
+	  1) large latent heat flux, 2) incorrect surface temperatures,
+	  3) occasional inability for calc_surf_energy_bal to converge
+	  in root_brent, and 4) spuriously high runoff and baseflow.
+	  Now there is an added condition that liquid moisture > residual
+	  moisture for evap to be capped at (liquid moisture - residual
+	  moisture).  In addition, the previous logic for capping evap
+	  involved an incorrect calculation of the soil's ice content.
+	  Since the new logic doesn't require calculation of ice content,
+	  this calculation has been removed altogether.		TJB
 	calc_atmos_energy_bal.c, calc_surf_energy_bal.c,
 	frozen_soil.c, ice_melt.c, root_brent.c, snow_intercept.c,
 	snow_melt.c:

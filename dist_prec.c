@@ -60,6 +60,8 @@ void dist_prec(atmos_data_struct   *atmos,
   02-Feb-05 Modified to save state file at the end of the final timestep
 	    of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
 	    in the global parameter file.			TJB
+  2005-Mar-24 Modified parameter list of put_data() to accomodate support
+	      for ALMA variables.				TJB
 **********************************************************************/
 
   extern option_struct   options;
@@ -197,13 +199,7 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(soil_con->AboveTreeLine, soil_con->AreaFract, soil_con->depth,
-	   soil_con->dz_node, 
-#if SPATIAL_FROST
-	   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-	   soil_con->dp, options.Nnode, global_param->dt, rec, 
-	   global_param->skipyear, atmos, prcp, &dmy[rec], 
+  put_data(soil_con, global_param, options.Nnode, rec, atmos, prcp, &dmy[rec], 
 #if LAKE_MODEL
 	   lake_con,
 #endif // LAKE_MODEL 

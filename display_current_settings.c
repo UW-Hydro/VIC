@@ -18,6 +18,7 @@ void display_current_settings(int                 mode,
 
   Modifications:
   2005-03-08 Added EQUAL_AREA option.				TJB
+  2005-03-24 Added ALMA_OUTPUT option.				TJB
 **********************************************************************/
 {
 
@@ -277,6 +278,10 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Data:\n");
   fprintf(stdout,"Result dir:\t\t%s\n",names->result_dir);
+  if (options.ALMA_OUTPUT)
+    fprintf(stdout,"ALMA_OUTPUT\t\tTRUE\n");
+  else
+    fprintf(stdout,"ALMA_OUTPUT\t\tFALSE\n");
   if (options.BINARY_OUTPUT)
     fprintf(stdout,"BINARY_OUTPUT\t\tTRUE\n");
   else

@@ -88,6 +88,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
                 standard input file.                            KAC
   07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
+  10-May-04	Modified to handle Arno parameters.		TJB
 
 **********************************************************************/
 {
@@ -326,6 +327,20 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcpy(namestr,soilparamdir);
     strcat(namestr,tmpstr);
     temp.FS_ACTIVE = (char)read_arcinfo_value(namestr,temp.lat,temp.lng);
+
+    /*************************************************
+    if ARNO_PARAMS == TRUE then convert the baseflow
+    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
+    *************************************************/
+    if(options.ARNO_PARAMS) {
+      layer = options.Nlayer-1;
+      tmp = temp.Dsmax;
+      temp.Dsmax = temp.Dsmax *
+        pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
+        temp.Ds * temp.max_moist[layer];
+      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
+      temp.Ws = temp.Ws/temp.max_moist[layer];
+    }
 
     /*******************************************
       Compute Soil Layer Properties

@@ -46,7 +46,11 @@ void read_atmos_data(FILE                 *infile,
   01/10/00 Modified to read a generic Binary, or ASCII column 
            data file and read the contents into the provided  
            data arrays.                                    KAC
-
+  10-May-04 (Port from 4.1.0) Replaced NF with global_param.dt
+	    in condition checking whether forcing file contains
+	    enough records to cover the time range of the
+	    simulation.					TJB
+		
   **********************************************************************/
 {
   
@@ -166,7 +170,7 @@ void read_atmos_data(FILE                 *infile,
   }
   
   if(rec * param_set.FORCE_DT[file_num] 
-     < global_param.nrecs * NF ) {
+     < global_param.nrecs * global_param.dt ) {
     sprintf(ErrStr,"Not enough records in the forcing file (%i * %i = %i) to run the number of records defined in the global file (%i * %i = %i).  Check forcing file time step, and global file", rec, param_set.FORCE_DT[file_num], 
 	    rec*param_set.FORCE_DT[file_num], global_param.nrecs, 
 	    global_param.dt, global_param.nrecs*global_param.dt);

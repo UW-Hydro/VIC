@@ -21,9 +21,9 @@ Aerodynamic resistance incorrect in output fluxes file
         surface_fluxes.c, vicNl.h, vicNl_def.h
 
         Description:
-        In 4.0.4, the aerodynamic resistance written to the output fluxes file
-        rarely reflected the value actually used in flux computations.  This
-        has been fixed.
+        In 4.0.5 and earlier, the aerodynamic resistance written to the output
+        fluxes file rarely reflected the value actually used in flux computations.
+        This has been fixed.
 
         VIC actually computes an array of 3 different aerodynamic resistances,
         as follows:
@@ -39,10 +39,10 @@ Aerodynamic resistance incorrect in output fluxes file
         aero_resist[0] is used for canopy flux computations, meaning that two
         different aerodynamic resistances are in use in the same time step.
 
-        However, VIC 4.0.4 always wrote the uncorrected value of aero_resist[0]
+        However, VIC 4.0.5 always wrote the uncorrected value of aero_resist[0]
         to the fluxes file.
 
-        In 4.0.5, the value written to the fluxes file is the actual value used
+        In 4.0.6, the value written to the fluxes file is the actual value used
         in flux computations, including any corrections that were applied.  In
         the case mentioned above in which two different aerodynamic resistances
         are in use at the same time, the one used for the snow pack is written.

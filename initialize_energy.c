@@ -10,6 +10,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
                             soil_con_struct     *soil_con,
                             double               surf_temp,
 			    double              *mu,
+			    int                  cellnum,
 		            int                  veg_num,
                             int                  Nnodes,
 			    int                  Ndist,
@@ -79,10 +80,12 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 
   if(options.INIT_SOIL && options.FROZEN_SOIL) {
 
-    thermdepths = (double *)calloc(Nnodes,sizeof(double));
-
     for ( veg = 0 ; veg <= veg_num ; veg++) {
       for(band=0;band<options.SNOW_BAND;band++) {
+	read_initial_soil_thermal(fsoil,cellnum,veg,band,Nnodes,dp,
+				  energy[veg][band].fdepth,moist,ice,
+				  energy[veg][band].dz,energy[veg][band].T);
+/**
 	rewind(fsoil);
 	fgets(tmpstr,MAXSTRING,fsoil);
 	
@@ -102,6 +105,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  fscanf(fsoil,"%lf",&thermdepths[j]);
 	  fscanf(fsoil,"%lf",&energy[veg][band].T[j]);
 	}
+
 	if(thermdepths[Nnodes-1] != dp) {
 	  sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
 		  Nnodes-1,dp,thermdepths[Nnodes-1]);
@@ -131,6 +135,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	}
 	energy[veg][band].dz[0] = thermdepths[1];
 	energy[veg][band].dz[Nnodes-1] = thermdepths[Nnodes-1];
+**/
 
 	sum = energy[veg][band].dz[0]/2. + energy[veg][band].dz[Nnodes-1]/2.;
 	for(index=1;index<Nnodes-1;index++) sum += energy[veg][band].dz[index];
@@ -257,10 +262,13 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 
   else if(options.INIT_SOIL && options.FULL_ENERGY) {
 
-    thermdepths = (double *)calloc(Nnodes,sizeof(double));
-
     for ( veg = 0 ; veg <= veg_num ; veg++) {
       for(band=0;band<options.SNOW_BAND;band++) {
+	read_initial_soil_thermal(fsoil,cellnum,veg,band,Nnodes,dp,
+				  energy[veg][band].fdepth,moist,ice,
+				  energy[veg][band].dz,energy[veg][band].T);
+
+/**
 	rewind(fsoil);
 	fgets(tmpstr,MAXSTRING,fsoil);
 	
@@ -268,16 +276,23 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	if(tmpint!=Nnodes) nrerror("Nnodes in soil initialization file, does not match that of the current model version");
 	
 	energy[veg][band].fdepth[0]=energy[veg][band].fdepth[1]=0.;
-	
+**/	
+
 	for(dry=0;dry<Ndist;dry++) {
 	  for(i=0;i<options.Nlayer;i++) {
 	    cell[dry][veg][band].layer[i].fdepth = 0.;
 	    cell[dry][veg][band].layer[i].tdepth = 0.;
 	  }
 	}
+
+/**
 	fscanf(fsoil,"%*s");
+**/
 	for(i=0;i<options.Nlayer;i++) {
+/**
 	  fscanf(fsoil,"%lf",&cell[WET][veg][band].layer[i].moist);
+**/
+	  cell[WET][veg][band].layer[i].moist = moist[i];
 	  cell[WET][veg][band].layer[i].moist *= soil_con[0].depth[i]*1000.;
 	  cell[WET][veg][band].layer[i].moist_froz = 0.;
 	  cell[WET][veg][band].layer[i].moist_thaw = 0.;
@@ -288,6 +303,8 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	    cell[DRY][veg][band].layer[i].moist_thaw = 0.;
 	  }
 	}
+
+/**
 	fgets(tmpstr,MAXSTRING,fsoil);
 	fgets(tmpstr,MAXSTRING,fsoil);
 	for(j=0;j<Nnodes;j++) {
@@ -303,12 +320,15 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  thermdepths[j] = (double)((int)(thermdepths[j] * 10000. + 0.5))
 	    / 10000.;
 	}
+**/
 	
+/**
 	energy[veg][band].dz[0] = soil_con[0].depth[0];
 	energy[veg][band].dz[1] = soil_con[0].depth[0];
 	energy[veg][band].dz[2] = 2. * (dp - 1.5 * soil_con[0].depth[0]);
 	energy[veg][band].dz[2] = 2. * (Ltotal - 1.5 * soil_con[0].depth[0]
 					- energy[veg][band].dz[2]);
+**/
       }
     }
     

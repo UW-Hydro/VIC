@@ -18,6 +18,8 @@ void display_current_settings(int                 mode,
 
   07-May-04 Replaced "Release" with "Version".  Moved COMPUTE_TREELINE
 	    lower down in output display.			TJB
+  12-May-04 Changed formatting from %s to %d in STATE* print
+	    statements.						TJB
 **********************************************************************/
 {
 
@@ -214,9 +216,9 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Output State File:\n");
   fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
-  fprintf(stdout,"STATEYEAR\t\t%s\n",global->stateyear);
-  fprintf(stdout,"STATEMONTH\t\t%s\n",global->statemonth);
-  fprintf(stdout,"STATEDAY\t\t%s\n",global->stateday);
+  fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
+  fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
+  fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
   if (options.BINARY_STATE_FILE)
     fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
   else

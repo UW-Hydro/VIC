@@ -280,21 +280,24 @@ typedef struct {
 				   in canopy */
   double rarc;			/* architectural resistance (s/m) */
   double rmin;			/* minimum stomatal resistance (s/m) */
-  double wind_h;		/* height at which wind is measured (m) */
+  double wind_h;		        /* height at which wind is measured (m) */
   double LAI[12];		/* monthly leaf area index */
   double displacement[12];	/* vegetation displacement height (m) */
   double roughness[12];		/* vegetation roughness length (m) */
   double Wdmax[12];		/* maximum monthly dew holding capacity (mm) */
   double albedo[12];		/* vegetation albedo (added for full energy)
-                                   (fraction) */
-  double emissivity[12];	/* vegetation emissivity
-                                   (fraction) */
-  double rad_atten;             /* radiation attenuation due to canopy,
+                                        (fraction) */
+  double emissivity[12];	        /* vegetation emissivity
+                                        (fraction) */
+  float  RGL;                    /* Value of solar radiation below which there will
+				    be no transpiration (ranges from
+				   ~50 W/m^2 for trees to ~100 W/m^2 for crops) */
+  double rad_atten;              /* radiation attenuation due to canopy,
 				   default = 0.5 (N/A) */
-  double wind_atten;            /* wind attenuation through canopy
-                                   default = 0.5 (N/A) */
-  double trunk_ratio;           /* ratio of trunk height to tree height
-                                   default = 0.2 (fraction) */
+  double wind_atten;             /* wind attenuation through canopy
+                                        default = 0.5 (N/A) */
+  double trunk_ratio;            /* ratio of trunk height to tree height
+                                        default = 0.2 (fraction) */
 } veg_lib_struct;
 
 /**********************************************************************

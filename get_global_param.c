@@ -98,7 +98,10 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("FROZEN_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.FROZEN_SOIL=TRUE;
+        if(strcasecmp("TRUE",flgstr)==0) {
+	  options.FROZEN_SOIL=TRUE;
+	  options.FS_FLUXES=TRUE;
+	}
         else options.FROZEN_SOIL = FALSE;
       }
       else if(strcasecmp("SNOW_MODEL",optstr)==0) {

@@ -81,7 +81,7 @@ double arno_evap(layer_data_struct *layer_wet,
   
     Epot = penman(rad, vpd * 1000., ra, 0.0, 0.0, 1.0, 1.0, 
 		  air_temp, evap_temp, net_short,
-		  elevation) * dt / 24.0;
+		  elevation, 0) * dt / 24.0;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */

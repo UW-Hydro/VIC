@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$";
+static char vcid[] = "$Id$";
 
 void compute_treeline(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
@@ -61,7 +61,7 @@ void compute_treeline(atmos_data_struct        *atmos,
     rec++;
   }
 
-  // Compute average annual July sir temperature
+  // Compute average annual July air temperature
   if ( AnnualCnt > 0 )
     AnnualSum /= (double)AnnualCnt;
 

@@ -3,15 +3,42 @@
 # $Id$
 #------------------------------------------------------------------------
 
+August 15, 2000: VIC release 4.0.3
+
+This release fixes a problem with the implementation of va_arg that 
+causes run time errors on some systems.  Previous releases of the code 
+worked correctly on the LINUX and freeBSD systems where it was tested. 
+However on some systems (including Sun Ultra-2s) character variables 
+passed with va_arg are changed into integers so reading a character from 
+the argument list does not produce the value sent to the routine.  The
+character flags used by VIC to indicate if there is snow present and if
+the frozen soil algorithm has been activated have now been converted to 
+integers, which should make the va_arg call work on all systems.
+
+Also fixed in this release was a check in dist_prec.c to see if it is 
+still raining which actually used the memory address of the 
+precipitation variable rather than the daily value in the check.
+
+MODIFIED FILES:
+	read_atmos_data.c	-	Fixed input file time step check
+	write_forcing_files.c	-	Added free statements for pointers
+	calc_surf_energy_bal.c	-	Converted char flags to int
+	dist_prec.c		-	Fixed logical statement error
+	frozen_soil.c		-	Converted char flags to int
+	func_surf_energy_bal.c	-	Converted char flags to int
+	initialize_atmos.c	-	Added flag for output forcing
+	vicNl.h			-	Converted char flags to int
+	vicNl_def.h		-	Converted char flags to int
+
 July 19, 2000: VIC release 4.0.2
 
-Two new pre-processor options have been added to VIC as well as minor
-modifications to two subroutines.
+Two new pre-processor options have been added to VIC as well as minor 
+modifications to two subroutines.  
 
 If set to TRUE the NO_REWIND pre-processor option stops the VIC model from
 rewinding the soil and vegetation parameter input files for each new grid
 cell.  This reduces run times but requires that all input files are in the
-same order as the soil parameter file.
+same order as the soil parameter file.  
 
 If set TRUE the OUTPUT_FORCE pre-processor option blocks off the main
 model and only reads the provided forcing files. Once VIC has estimated

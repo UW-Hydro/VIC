@@ -48,6 +48,10 @@ void write_data(out_data_struct *out_data,
                 variables introduced by the spatial frost and snow
                 algorithms, the lake algorithm and the PILPS 2e 
                 study.                                          KAC
+  04-22-03      Updated output of model for lakes and wetlands algorithm.
+                Added output of blowing snow sublimation to LDAS and
+                standard snow output files.  ** No Lake Variables are
+                included in the LDAS output format. **         KAC
 
 **********************************************************************/
 {
@@ -75,7 +79,7 @@ void write_data(out_data_struct *out_data,
 	       day
 	       runoff
 	       baseflow
-               snow_dpeth
+               snow_depth
       comment: runoff and baseflow are output as daily sums for all
                defined model time steps.
   ******************************************************************/
@@ -127,7 +131,7 @@ void write_data(out_data_struct *out_data,
   tmp_usiptr = (unsigned short int *)calloc(1,sizeof(unsigned short int));
   tmp_iptr = (int *)calloc(1,sizeof(int));
   tmp_fptr = (float *)calloc(1,sizeof(float));
-
+  
   /***** Write Date and Time *****/
   tmp_usiptr[0] = (unsigned short int)dmy->year;
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
@@ -141,11 +145,11 @@ void write_data(out_data_struct *out_data,
   }
   
   /** water balance components **/
-
+  
   /* precipitation */
   tmp_usiptr[0] = (unsigned short int)(out_data->prec * 100.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
-
+  
   /* evaporation */
   tmp_siptr[0] = (short int)(out_data->evap * 100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
@@ -153,45 +157,45 @@ void write_data(out_data_struct *out_data,
   /* runoff */
   tmp_fptr[0] = (float)out_data->runoff;
   fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
-
+  
   /* baseflow */
   tmp_fptr[0] = (float)out_data->baseflow;
   fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
-
+  
   /* liquid soil moisture */
   for(j=0;j<options.Nlayer;j++) {    
     tmp_usiptr[0] = (unsigned short int)(out_data->moist[j]*10.);
     fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   }
-
+  
   /* snow water equivalence */
   tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*100.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   
   /** energy balance components **/
-
+  
   /* net shortwave radiation */
   tmp_siptr[0] = (short int)(out_data->net_short*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* incoming longwave radiation */
   tmp_siptr[0] = (short int)(out_data->in_long*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* net radiation */
   tmp_siptr[0] = (short int)(out_data->r_net*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* latent heat flux */
   tmp_siptr[0] = (short int)((out_data->latent 
 			      + out_data->latent_sub[0])*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* sensible heat flux */
   tmp_siptr[0] = (short int)((out_data->sensible 
 			      + out_data->advected_sensible[0])*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* ground heat flux */
   tmp_siptr[0] = (short int)((out_data->grnd_flux + out_data->deltaH + out_data->fusion)*10.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
@@ -199,30 +203,47 @@ void write_data(out_data_struct *out_data,
   /* albedo */
   tmp_usiptr[0] = (unsigned short int)(out_data->albedo*10000.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
-
+  
   /* raditaive temperature of surface */
   tmp_siptr[0] = (short int)((out_data->rad_temp-KELVIN)*100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* relative humidity */
   tmp_usiptr[0] = (unsigned short int)(out_data->rel_humid*100.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
-
+  
   /* air temperature */
   tmp_siptr[0] = (short int)(out_data->air_temp * 100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* wind speed */
   tmp_siptr[0] = (short int)(out_data->wind * 100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
-
+  
   /* snow cover fraction */
   tmp_siptr[0] = (short int)(out_data->coverage[0] * 100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
 
+  // blowing snow variables
+  if(options.BLOWING) {
+
+    /* sublimation due to blowing snow */
+    tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+    /* snow surface sublimation */
+    tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+    /* total snow sublimation */
+    tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+  }
+  
   /* frozen soil depths */
   if(options.FROZEN_SOIL) {
-
+    
     /* total soil moisture content */
     for ( j = 0; j < options.Nlayer; j++ ) {    
       tmp_usiptr[0] = (unsigned short int)(out_data->ice[j]*10.);
@@ -237,7 +258,7 @@ void write_data(out_data_struct *out_data,
       fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
     }
   }
-
+  
   /* free pointers */
   free((char *)tmp_cptr);
   free((char *)tmp_siptr);
@@ -353,7 +374,7 @@ void write_data(out_data_struct *out_data,
     tmp_fptr[0] = (float)out_data->lake_ice_fract;
     fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
 
-    // lake dpeth
+    // lake depth
     tmp_fptr[0] = (float)out_data->lake_depth;
     fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
 
@@ -369,16 +390,20 @@ void write_data(out_data_struct *out_data,
     tmp_fptr[0] = (float)out_data->lake_surf_temp;
     fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
 
+    // lake evaporation
+    tmp_fptr[0] = (float)out_data->evap_lake;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+
   }
   else if(options.LAKES) {
     /***** Write ASCII Lake Output File *****/
     fprintf(outfiles->lake  ,"%04i\t%02i\t%02i\t%02i\t",
 	    dmy->year,  dmy->month,  dmy->day,  dmy->hour);
-    fprintf(outfiles->lake  ,"%04f\t%04f\t%04f\t%04f\t%04f\t%04f\t%04f\n",
+    fprintf(outfiles->lake  ,"%04f\t%04f\t%04f\t%04f\t%04f\t%04f\t%04f\t%04f\n",
 	    out_data->lake_ice_temp, out_data->lake_ice_height, 
 	    out_data->lake_ice_fract, out_data->lake_depth, 
-	    out_data->lake_surf_area, out_data->lake_volume, 
-	    out_data->lake_surf_temp);
+	    out_data->lake_surf_area, out_data->lake_moist, 
+	    out_data->lake_surf_temp, out_data->evap_lake);
   }
 #endif // LAKE_MODEL
 
@@ -460,13 +485,30 @@ void write_data(out_data_struct *out_data,
     tmp_fptr[0] = (float)out_data->melt[0];
     fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
 
+    // blowing snow variables
+    if(options.BLOWING) {
+
+      /* sublimation due to blowing snow */
+      tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+      /* snow surface sublimation */
+      tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+      /* total snow sublimation */
+      tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+
+    }
+  
   }
   else {
     /***** Write ASCII full energy snow output file *****/
     fprintf(outfiles->snow, "%04i\t%02i\t%02i\t", dmy->year, dmy->month, 
 	    dmy->day);
     fprintf(outfiles->snow, "%02i\t", dmy->hour);
-    fprintf(outfiles->snow, "%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
+    fprintf(outfiles->snow, "%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
 	    out_data->swq[0], out_data->snow_depth[0], 
 	    out_data->snow_canopy[0], out_data->coverage[0], 
 	    out_data->advection[0], out_data->deltaCC[0], 
@@ -474,6 +516,11 @@ void write_data(out_data_struct *out_data,
 	    out_data->melt_energy[0], out_data->advected_sensible[0], 
 	    out_data->latent_sub[0], out_data->snow_surf_temp[0], 
 	    out_data->snow_pack_temp[0], out_data->melt[0] );
+    if(options.BLOWING) {
+      fprintf(outfiles->snow, "\t%.4f\t%.4f\t%.4f", out_data->sub_blowing, 
+	      out_data->sub_surface, out_data->sub_total);
+    }
+    fprintf(outfiles->snow, "\n");
   }
 
   /**************************************
@@ -659,7 +706,7 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
 
     // snowpack sublimation
-    tmp_fptr[0] = (float)out_data->sub_snow;
+    tmp_fptr[0] = (float)out_data->sub_snow[0];
     fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
 
     // sensible heat

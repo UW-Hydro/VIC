@@ -20,12 +20,12 @@ SHELL = /bin/csh
 CC = gcc
 
 # Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -I. -O3 -Wall -Wno-unused
-#LIBRARY = -lm
+CFLAGS  = -I. -O3 -Wall -Wno-unused
+LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  = -I. -g -Wall -Wno-unused
-LIBRARY = -lm
+#CFLAGS  = -I. -g -Wall -Wno-unused
+#LIBRARY = -lm
 
 # Uncomment to include execution profiling information
 #CFLAGS  = -I. -O3 -pg -Wall -Wno-unused

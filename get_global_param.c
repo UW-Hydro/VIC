@@ -40,6 +40,7 @@ global_param_struct get_global_param(filenames_struct *names,
   13-Oct-04 Added validation for GRND_FLUX option.              TJB
   01-Nov-04 Added validation for Nnodes with QUICK_FLUX option, as
 	    part of fix for QUICK_FLUX state file compatibility.TJB
+  2005-03-08 Added EQUAL_AREA option.				TJB
 
 **********************************************************************/
 {
@@ -221,6 +222,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
         else options.BINARY_OUTPUT = FALSE;
+      }
+      else if(strcasecmp("EQUAL_AREA",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
+        else options.EQUAL_AREA = FALSE;
       }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -543,6 +549,10 @@ global_param_struct get_global_param(filenames_struct *names,
 #if LAKE_MODEL
   if ( global.resolution == 0 && options.LAKES ) {
     sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
+    nrerror(ErrStr);
+  }
+  if ( options.LAKES && global.resolution > 360 && !options.EQUAL_AREA ) {
+    sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
     nrerror(ErrStr);
   }
 #endif  // LAKE_MODEL

@@ -189,6 +189,8 @@ typedef struct {
   char   COMPRESS;       /* TRUE = Compress all output files */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
+  char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
+			    FALSE = RESOLUTION stores grid cell side length in degrees */
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GLOBAL_LAI;     /* TRUE = read LAI values for each vegetation type

@@ -15,6 +15,9 @@ void display_current_settings(int                 mode,
 
   NOTE: This file must be kept in sync with any additions, removals,
   or modifications to names of parameters in user_def.h or get_global_param.c.
+
+  Modifications:
+  2005-03-08 Added EQUAL_AREA option.				TJB
 **********************************************************************/
 {
 
@@ -157,6 +160,12 @@ void display_current_settings(int                 mode,
 
   fprintf(stdout,"Simulation Dimensions:\n");
   fprintf(stdout,"NLAYER\t\t\t%d\n",options.Nlayer);
+  if ( options.EQUAL_AREA ) {
+    fprintf(stdout,"EQUAL_AREA\t\tTRUE\n");
+  }
+  else {
+    fprintf(stdout,"EQUAL_AREA\t\tFALSE\n");
+  }
   fprintf(stdout,"RESOLUTION\t\t%f\n",global->resolution);
   fprintf(stdout,"TIME_STEP\t\t%d\n",global->dt);
   fprintf(stdout,"SNOW_STEP\t\t%d\n",options.SNOW_STEP);

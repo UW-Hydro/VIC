@@ -72,6 +72,7 @@ void initialize_global() {
   10-May-04 Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
 	    Also changed limit on loop over forcing types from
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
+  2005-03-08 Added EQUAL_AREA option.				TJB
 
 *********************************************************************/
 
@@ -85,6 +86,7 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
+  options.EQUAL_AREA            = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
   options.ARNO_PARAMS           = FALSE;

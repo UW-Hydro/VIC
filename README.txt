@@ -3,6 +3,40 @@
 # $Id$
 #------------------------------------------------------------------------
 
+May 30, 2000: VIC release 4.0.1
+
+Increased use of the released VIC model code has lead to the
+discovery of a couple of minor bugs.  This release fixes those bugs as
+well as introducing a improved precipitation correction algorithm based on 
+Yang et al. 1998.  Unless you have encountered these problems or are
+trying to correct precipitation undercatch due to wind, in the VIC
+model, your results will not be impacted by these fixes.
+
+MODIFIED FILES:
+    correct_precip.c       - changed to WMO correction equation for
+                             NWS 8" standard gauge.
+    full_energy.c          - modified to handle WMO correction.
+    initialize_atmos.c     - modified to handle WMO correction.
+                             fixed error in estimating minimum daily 
+                             temperature from sub-daily temperatures.
+    make_in_and_outfiles.c - removed line that opened the state file
+                             again for each new grid cell.
+    open_state_file.c      - modified comments.
+    put_data.c             - modified to handle WMO correction.
+    snow_utility.c         - cleaned source code.
+    solve_snow.c           - modified to handle WMO correction.
+    surface_fluxes.c       - modified to handle WMO correction.
+    vicNl.h                - modified to handle WMO correction.
+    vicNl_def.h            - modified to handle WMO correction.
+
+REFERENCE:
+
+    Yang, D., B. E. Goodison, J. R. Metcalfe, V. S. Golubev, R.
+    Bates, T. Pangburn, and C. L. Hanson, Accuracy of NWS 8" Standard 
+    Nonrecording Precipitation Gauge: Results and Application of WMO 
+    Intercomparison, J. Atmos. Oceanic Tech., 15, 54-68, 1998.
+             
+
 Date: May 16, 2000
 
 From: Keith Cherkauer

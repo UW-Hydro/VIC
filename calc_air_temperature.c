@@ -69,32 +69,39 @@ double hermint(double xbar, int n, double *x, double *yc1, double *yc2,
 /****************************************************************************/
 /*				    HourlyT                                 */
 /****************************************************************************/
-double HourlyT(int Dt, int *TmaxHour, double *Tmax, 
-	       int *TminHour, double *Tmin, double *Tair)
+void HourlyT(int Dt, 
+	     int ndays, 
+	     int *TmaxHour, 
+	     double *Tmax, 
+	     int *TminHour,
+	     double *Tmin, 
+	     double *Tair) 
 {
-  double x[6];
-  double Tyc1[6];
-  double yc2[6];
-  double yc3[6];
-  double yc4[6];
-  double new_Tmin;
+  double *x;
+  double *Tyc1;
+  double *yc2;
+  double *yc3;
+  double *yc4;
   int i;
   int j;
   int n;
   int hour;
-  int nHours;
+  int nsteps;
 
-  nHours = HOURSPERDAY;
-  n     = 6;
-/*   x     = (double *) calloc(n, sizeof(double)); */
-/*   Tyc1  = (double *) calloc(n, sizeof(double)); */
-/*   yc2   = (double *) calloc(n, sizeof(double)); */
-/*   yc3   = (double *) calloc(n, sizeof(double)); */
-/*   yc4   = (double *) calloc(n, sizeof(double)); */
+  nsteps = HOURSPERDAY/Dt * ndays;
 
+  n     = ndays*2+2;
+  x     = (double *) calloc(n, sizeof(double));
+  Tyc1  = (double *) calloc(n, sizeof(double));
+  yc2   = (double *) calloc(n, sizeof(double));
+  yc3   = (double *) calloc(n, sizeof(double));
+  yc4   = (double *) calloc(n, sizeof(double));
+  if (x == NULL || Tyc1 == NULL || yc2 == NULL || yc3 == NULL || yc4 == NULL)
+    nrerror("Memory allocation failure in HourlyT()");
+  
   /* First fill the x vector with the times for Tmin and Tmax, and fill the 
      Tyc1 with the corresponding temperature and humidity values */
-  for (i = 0, j = 0, hour = 0; i < 3; i++, hour += HOURSPERDAY) {
+  for (i = 0, j = 1, hour = 0; i < ndays; i++, hour += HOURSPERDAY) {
     if (TminHour[i] < TmaxHour[i]) {
       x[j]       = TminHour[i] + hour;
       Tyc1[j++]  = Tmin[i];
@@ -106,134 +113,93 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
       Tyc1[j++]  = Tmax[i];
       x[j]       = TminHour[i] + hour;
       Tyc1[j++]  = Tmin[i];
-    }
-
+    } 
   }
+  
+  /* To "tie" down the first and last values, repeat those */
+  x[0] = x[2] - HOURSPERDAY;
+  Tyc1[0] = Tyc1[2];
+  x[n-1] = x[n-3] + HOURSPERDAY;
+  Tyc1[n-1] = Tyc1[n-3];
 
   /* we want to preserve maxima and minima, so we require that the first 
      derivative at these points is zero */
   for (i = 0; i < n; i++)
     yc2[i] = 0.;
-
+  
   /* calculate the coefficients for the splines for the temperature */
   hermite(n, x, Tyc1, yc2, yc3, yc4);
-
+  
   /* interpolate the temperatures */
-  new_Tmin=100;
-  for (i = 0, hour = HOURSPERDAY; i < nHours/Dt; i++, hour += Dt) {
+  for (i = 0, hour = 0; i < nsteps; i++, hour += Dt) {
     Tair[i] = hermint(hour, n, x, Tyc1, yc2, yc3, yc4);
-    if(Tair[i]<new_Tmin) new_Tmin=Tair[i];
   }
-
-/*   free((char*)x); */
-/*   free((char*)Tyc1); */
-/*   free((char*)yc2); */
-/*   free((char*)yc3); */
-/*   free((char*)yc4); */
-
-  return(new_Tmin);
-
+  
+  free(x);   
+  free(Tyc1);
+  free(yc2);
+  free(yc3);
+  free(yc4);
+  
+  return;
 }
 
-void store_max_min_temp(atmos_data_struct *atmos,
-                        double            *tmax,
-			int               *tmax_hour,
-                        double            *tmin,
-			int               *tmin_hour,
-                        int                rec,
-                        int                Nrecs,
-			int                skip_recs) {
-/**********************************************************************
-  This subroutine sets prepares arrays of maximum and minimum 
-  daily air temperature, and the hour of day at which the maximum
-  and minimum temperatures are achieved.  These arrays are used 
-  when estimating the daily temperature cycle from tmax and tmin.
-
-  atmos_data_struct *atmos,        atmospheric forcing data structure
-  double            *tmax,         maximum temperatures for three days
-  int               *tmax_hour,    hour of maximum temperature
-  double            *tmin,         minimum temperatures for three days
-  int               *tmin_hour,    hour of minimum temperature
-  int                rec,          current record number
-  int                Nrecs,        total number of records
-  int                skip_recs     number of subdaily records (24/dt)
-
-  If it is always dark (rise_hour < 0) or always light (rise_hour => 
-  set_hour < 0), then set the minimum and maximum temperature hours to 2 AM
-  and 2 PM (arbitrary) Bart Nijssen Tue Aug  3 11:46:51 1999
-
-**********************************************************************/
-
-  static int last_rec;
-
-  if(rec==0) {
-    tmax[0] = tmax[1] = atmos[0].tmax;
-    tmin[0] = tmin[1] = atmos[0].tmin;
-    tmax[2] = atmos[skip_recs].tmax;
-    tmin[2] = atmos[skip_recs].tmin;
-    if (atmos[0].rise_hour < 0 || 
-	(atmos[0].rise_hour >=  0 && atmos[0].set_hour < 0)) {
-      tmax_hour[0] = 14;
-      tmin_hour[0] = 2;
-    }
-    else {
-      tmax_hour[0] = (int)(2. / 3. * (atmos[0].set_hour - 
-				      atmos[0].rise_hour)) + 
-	atmos[0].rise_hour; 
-      tmin_hour[0] = atmos[0].rise_hour - 1;
-    }
-    tmax_hour[1] = tmax_hour[0];
-    tmin_hour[1] = tmin_hour[0];
-    if (atmos[skip_recs].rise_hour < 0 || 
-	(atmos[skip_recs].rise_hour >=  0 && atmos[skip_recs].set_hour < 0)) {
-      tmax_hour[2] = 14;
-      tmin_hour[2] = 2;
-    }
-    else {
-      tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour  -
-				      atmos[skip_recs].rise_hour)) +
-	atmos[0].rise_hour; 
-      tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
-    }
-    
-    last_rec = rec;
+void set_max_min_hour(double *hourlyrad, 
+		      int ndays, 
+		      int *tmaxhour,
+		      int *tminhour)
+{
+  int risehour;
+  int sethour;
+  int hour;
+  int i;
+  int j;
+ 
+  /* treat the first day separately */
+  risehour = -999;
+  sethour = -999;
+  if (hourlyrad[0] > 0 && hourlyrad[23] <= 0)
+    risehour = 0;
+  if (hourlyrad[0] <= 0 && hourlyrad[23] > 0)
+    sethour = 0;
+  for (hour = 1; hour < 24; hour++) {
+    if (hourlyrad[hour] > 0 && hourlyrad[hour-1] <= 0)
+      risehour = hour;
+    if (hourlyrad[hour] <= 0 && hourlyrad[hour-1] > 0)
+      sethour = hour;
   }
-  else if(rec>=last_rec+skip_recs) {
-    last_rec = rec;
-    if(rec>=Nrecs-skip_recs) {
-      tmax[0] = tmax[1];
-      tmax[1] = tmax[2];
-      tmin[0] = tmin[1];
-      tmin[1] = tmin[2];
-      tmax_hour[0] = tmax_hour[1];
-      tmax_hour[1] = tmax_hour[2];
-      tmin_hour[0] = tmin_hour[1];
-      tmin_hour[1] = tmin_hour[2];
+  if (risehour == -999 || sethour == -999) {
+    /* arbitrarily set the min and max time to 2am and 2pm */
+    tminhour[0] = 2;
+    tmaxhour[0] = 14;
+  }
+  else {
+    if (risehour > sethour)
+      risehour -= 24;
+    tmaxhour[0] = 0.67 * (sethour - risehour) + risehour;
+    tminhour[0] = risehour - 1;
+  }
+
+  /* treat remaining days */
+  for (i = 1, hour = 24; i < ndays; i++) {
+    risehour = -999;
+    sethour = -999;
+    for (j = 0; j < 24; j++, hour++) {
+      if (hourlyrad[hour] > 0 && hourlyrad[hour-1] <= 0)
+	risehour = j;
+      if (hourlyrad[hour] <= 0 && hourlyrad[hour-1] > 0)
+	sethour = j;
+    }
+    if (risehour == -999 || sethour == -999) {
+      /* arbitrarily set the min and max time to 2am and 2pm */
+      tminhour[i] = 2;
+      tmaxhour[i] = 14;
     }
     else {
-      tmax[0] = tmax[1];
-      tmax[1] = tmax[2];
-      tmax[2] = atmos[skip_recs].tmax;
-      tmin[0] = tmin[1];
-      tmin[1] = tmin[2];
-      tmin[2] = atmos[skip_recs].tmin;
-      tmax_hour[0] = tmax_hour[1];
-      tmax_hour[1] = tmax_hour[2];
-      tmin_hour[0] = tmin_hour[1];
-      tmin_hour[1] = tmin_hour[2];
-      if (atmos[skip_recs].rise_hour < 0 || 
-	  (atmos[skip_recs].rise_hour >=  0 
-	   && atmos[skip_recs].set_hour < 0)) {
-	tmax_hour[2] = 14;
-	tmin_hour[2] = 2;
-      }
-      else {
-	tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
-					- atmos[skip_recs].rise_hour)) 
-	  + atmos[skip_recs].rise_hour;
-	tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
-      }
+      if (risehour > sethour)
+	risehour -= 24;
+      tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
+      tminhour[i] = risehour - 1;
     }
   }
 }
-

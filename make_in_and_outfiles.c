@@ -5,10 +5,10 @@
 
 static char vcid[] = "$Id$";
 
-filenames_struct make_in_and_outfiles(infiles_struct *infp, 
-				      filenames_struct filenames,
-				      soil_con_struct soil,
-				      outfiles_struct *outfp)
+filenames_struct make_in_and_outfiles(infiles_struct   *infp, 
+				      filenames_struct *filenames,
+				      soil_con_struct  *soil,
+				      outfiles_struct  *outfp)
 /**********************************************************************
 	make_in_and_outfile	Dag Lohman	January 1996
 
@@ -22,92 +22,92 @@ filenames_struct make_in_and_outfiles(infiles_struct *infp,
 
 **********************************************************************/
 {
-  extern option_struct options;
-  extern debug_struct debug;
+  extern option_struct    options;
+  extern param_set_struct param_set;
   extern FILE *open_file(char string[], char type[]);
 
   char             latchar[10], lngchar[10], junk[5];
   filenames_struct fnames;
 
+  fnames = *filenames;
+
   sprintf(junk, "%%.%if", options.GRID_DECIMAL);
-  sprintf(latchar, junk, soil.lat);
-  sprintf(lngchar, junk, soil.lng);
+  sprintf(latchar, junk, soil->lat);
+  sprintf(lngchar, junk, soil->lng);
  
-  strcat(filenames.forcing[0], latchar);
-  strcat(filenames.forcing[0], "_");
-  strcat(filenames.forcing[0], lngchar);
-  infp->forcing[0] = open_file(filenames.forcing[0], "r");
+  strcat(fnames.forcing[0], latchar);
+  strcat(fnames.forcing[0], "_");
+  strcat(fnames.forcing[0], lngchar);
+  if(param_set.FORCE_FORMAT[0] == BINARY)
+    infp->forcing[0] = open_file(fnames.forcing[0], "rb");
+  else
+    infp->forcing[0] = open_file(fnames.forcing[0], "r");
 
   infp->forcing[1] = NULL;
-  if(strcasecmp(filenames.forcing[1],"FALSE")!=0) {
-    strcat(filenames.forcing[1], latchar);
-    strcat(filenames.forcing[1], "_");
-    strcat(filenames.forcing[1], lngchar);
-    if((strcasecmp(options.FORCE_TYPE,"SAWD_BIN"))==0) 
-      infp->forcing[1] = open_file(filenames.forcing[1], "rb");
-    else infp->forcing[1] = open_file(filenames.forcing[1], "r");
-    if((strcasecmp(options.FORCE_TYPE,"SAWD"))==0) options.HP = FALSE;
-  }
-  else if((strcasecmp(options.FORCE_TYPE,"SAWD"))==0) options.HP = TRUE;
-
-  /** Initial Soil Variables Read from File **/
-  if((options.FULL_ENERGY || options.FROZEN_SOIL)&& options.INIT_SOIL) {
-    infp->init_soil = open_file(filenames.init_soil, "r");
+  if(strcasecmp(fnames.forcing[1],"FALSE")!=0) {
+    strcat(fnames.forcing[1], latchar);
+    strcat(fnames.forcing[1], "_");
+    strcat(fnames.forcing[1], lngchar);
+    if(param_set.FORCE_FORMAT[0] == BINARY) 
+      infp->forcing[1] = open_file(fnames.forcing[1], "rb");
+    else 
+      infp->forcing[1] = open_file(fnames.forcing[1], "r");
   }
 
-  /** Initial Snow Variables Read from File **/
-  if((options.FULL_ENERGY || options.SNOW_MODEL)&& options.INIT_SNOW) {
-    infp->init_snow = open_file(filenames.init_snow, "r");
+  /** Initial Model State Variables Read from File **/
+  if(options.INIT_STATE) {
+    infp->statefile = open_file(fnames.init_state, "r");
   }
 
   /** If running frozen soils model **/
-  if(options.FROZEN_SOIL) {
-    strcpy(filenames.fdepth, filenames.result_dir);
-    strcat(filenames.fdepth, "fdepth");
-    strcat(filenames.fdepth, "_");
-    strcat(filenames.fdepth, latchar);
-    strcat(filenames.fdepth, "_");
-    strcat(filenames.fdepth, lngchar);
-    if(options.BINARY_OUTPUT) 
-      outfp->fdepth = open_file(filenames.fdepth, "wb");
-    else outfp->fdepth = open_file(filenames.fdepth, "w");
-  }
+#if !LDAS_OUTPUT && !OPTIMIZE
+   if(options.FROZEN_SOIL) {
+     strcpy(fnames.fdepth, fnames.result_dir);
+     strcat(fnames.fdepth, "fdepth");
+     strcat(fnames.fdepth, "_");
+     strcat(fnames.fdepth, latchar);
+     strcat(fnames.fdepth, "_");
+     strcat(fnames.fdepth, lngchar);
+     if(options.BINARY_OUTPUT) 
+       outfp->fdepth = open_file(fnames.fdepth, "wb");
+     else outfp->fdepth = open_file(fnames.fdepth, "w");
+   }
+#endif
 
-  strcpy(filenames.fluxes, filenames.result_dir);
-  strcat(filenames.fluxes, "fluxes");
-  strcat(filenames.fluxes, "_");
-  strcat(filenames.fluxes, latchar);
-  strcat(filenames.fluxes, "_");
-  strcat(filenames.fluxes, lngchar);
+  strcpy(fnames.fluxes, fnames.result_dir);
+  strcat(fnames.fluxes, "fluxes");
+  strcat(fnames.fluxes, "_");
+  strcat(fnames.fluxes, latchar);
+  strcat(fnames.fluxes, "_");
+  strcat(fnames.fluxes, lngchar);
   if(options.BINARY_OUTPUT) 
-    outfp->fluxes = open_file(filenames.fluxes, "wb");
-  else outfp->fluxes = open_file(filenames.fluxes, "w");
+    outfp->fluxes = open_file(fnames.fluxes, "wb");
+  else outfp->fluxes = open_file(fnames.fluxes, "w");
 
-  if(options.FULL_ENERGY || options.SNOW_MODEL) {
-    strcpy(filenames.snow, filenames.result_dir);
-    strcat(filenames.snow, "snow");
-    strcat(filenames.snow, "_");
-    strcat(filenames.snow, latchar);
-    strcat(filenames.snow, "_");
-    strcat(filenames.snow, lngchar);
-    if(options.BINARY_OUTPUT) 
-      outfp->snow = open_file(filenames.snow, "wb");
-    else outfp->snow = open_file(filenames.snow, "w");
-  }
+#if !LDAS_OUTPUT && !OPTIMIZE
+  strcpy(fnames.snow, fnames.result_dir);
+  strcat(fnames.snow, "snow");
+  strcat(fnames.snow, "_");
+  strcat(fnames.snow, latchar);
+  strcat(fnames.snow, "_");
+  strcat(fnames.snow, lngchar);
+  if(options.BINARY_OUTPUT) 
+    outfp->snow = open_file(fnames.snow, "wb");
+  else outfp->snow = open_file(fnames.snow, "w");
 
-  if(options.PRT_SNOW_BAND) {
-    strcpy(filenames.snowband, filenames.result_dir);
-    strcat(filenames.snowband, "snowband");
-    strcat(filenames.snowband, "_");
-    strcat(filenames.snowband, latchar);
-    strcat(filenames.snowband, "_");
-    strcat(filenames.snowband, lngchar);
-    if(options.BINARY_OUTPUT) 
-      outfp->snowband = open_file(filenames.snowband, "wb");
-    else outfp->snowband = open_file(filenames.snowband, "w");
-  }
+   if(options.PRT_SNOW_BAND) {
+     strcpy(fnames.snowband, fnames.result_dir);
+     strcat(fnames.snowband, "snowband");
+     strcat(fnames.snowband, "_");
+     strcat(fnames.snowband, latchar);
+     strcat(fnames.snowband, "_");
+     strcat(fnames.snowband, lngchar);
+     if(options.BINARY_OUTPUT) 
+       outfp->snowband = open_file(fnames.snowband, "wb");
+     else outfp->snowband = open_file(fnames.snowband, "w");
+   }
+#endif
 
-  fnames = filenames;
   return (fnames);
 
 } 

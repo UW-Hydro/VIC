@@ -26,30 +26,40 @@ dmy_struct *make_dmy(global_param_struct *global)
            that should be skipped before starting to write
 	   model output, based on the number of years defined
 	   with the SKIPYEAR global variable.               KAC
+  3-14-00  Fixed problem with accounting for number of days in
+           February.  If last simulation year was a leap year,
+           number of days in February was not reset to 28 after
+	   working out number of records and before working out
+	   the number of forcing file records to skip.      KAC
 
 **********************************************************************/
 {
+  extern param_set_struct param_set;
+
   dmy_struct *temp;
   int    hr, year, day, month, jday, ii, daymax;
   int    days[12]={31,28,31,30,31,30,31,31,30,31,30,31};
-  int    endmonth, endday, endyear, skiprec, i;
+  int    endmonth, endday, endyear, skiprec, i, offset;
   int    tmpmonth, tmpday, tmpyear, tmphr, tmpjday, step;
   char   DONE;
+  char   ErrStr[MAXSTRING];
 
-  hr = global->starthour;
-  year = global->startyear;
-  day = global->startday;
+  hr    = global->starthour;
+  year  = global->startyear;
+  day   = global->startday;
   month = global->startmonth;
   
   /** Check if user defined end date instead of number of records **/
-  if(global->nrecs<0) {
-    if(global->endyear<0 || global->endmonth<0 || global->endday<0) {
+  if(global->nrecs < 0) {
+    if((global->endyear < 0) || (global->endmonth < 0) 
+       || (global->endday < 0)) {
       nrerror("The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
     }
     endday   = global->endday;
     endmonth = global->endmonth;
     endyear  = global->endyear;
-    if(( (endyear%4 == 0) && ( (endyear%100 != 0) || (endyear%400 ==0) ))) days[1] = 29;
+    if(LEAPYR(endyear)) days[1] = 29;
+    else days[1] = 28;
     if(endday < days[global->endmonth-1]-1) endday++;
     else {
       endday = 1;
@@ -63,10 +73,10 @@ dmy_struct *make_dmy(global_param_struct *global)
     DONE = FALSE;
     ii   = 0;
 
-    tmpyear = year;
+    tmpyear  = year;
     tmpmonth = month;
-    tmpday = day;
-    tmphr = hr;
+    tmpday   = day;
+    tmphr    = hr;
     while(!DONE) {
       get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,
 			 &tmpjday,global->dt);
@@ -79,15 +89,29 @@ dmy_struct *make_dmy(global_param_struct *global)
     global->nrecs = ii;
 
   }
+  else {
+    offset = 0;
+    tmphr  = hr;
+    while (tmphr != 0) {
+      tmphr += global->dt;
+      offset++;
+      if(tmphr >= 24) tmphr = 0;
+    }
+    if( ((global->dt * (global->nrecs - offset)) % 24) != 0 ) {
+      sprintf(ErrStr,"Nrecs must be defined such that the model ends after completing a full day.  Currently Nrecs is set to %i, while %i and %i are allowable values.", global->nrecs, ((global->dt * (global->nrecs - offset)) / 24) * 24, ((global->dt * (global->nrecs - offset)) / 24) * 24 + 24);
+      nrerror(ErrStr);
+    }
+  }
+
 
   temp = (dmy_struct*) calloc(global->nrecs, sizeof(dmy_struct));
 
   /** Create Date Structure for each Modeled Time Step **/
   jday = day;
-  for (ii=0;ii<month-1;ii++) 
+  if( LEAPYR(year) ) days[1] = 29;
+  else days[1] = 28;
+  for ( ii = 0; ii < month-1; ii++ ) 
     jday += days[ii];
-  if ((month > 2 ) && LEAPYR(year))
-    jday += 1;
   
   DONE = FALSE;
   ii   = 0;
@@ -98,41 +122,39 @@ dmy_struct *make_dmy(global_param_struct *global)
     temp[ii].month = month;
     temp[ii].year  = year;
     temp[ii].day_in_year = jday;
-    temp[ii].day_count = ii;
 
     get_next_time_step(&year,&month,&day,&hr,&jday,global->dt);
 
     ii++;
-    if(global->nrecs>0 && ii==global->nrecs) DONE=TRUE;
-    else if(year == endyear)
-      if(month == endmonth)
-	if(day == endday)
-	  DONE = TRUE;
+    if(ii == global->nrecs) DONE=TRUE;
 
   }
 
-  if(global->nrecs < 0) global->nrecs = ii;
-
   /** Determine number of forcing records to skip before model start time **/
-  if(global->forceyear > 0) {
-    tmpyear  = global->forceyear;
-    tmpmonth = global->forcemonth;
-    tmpday   = global->forceday;
-    tmphr    = global->forcehour;
-    tmpjday = tmpday;
-    for (ii=0;ii<tmpmonth-1;ii++) 
-      tmpjday += days[ii];
-    if ((tmpmonth > 2 ) && LEAPYR(tmpyear))
-      tmpjday += 1;
+  for(i=0;i<2;i++) {
+    if(param_set.FORCE_DT[i] != MISSING) {
+      if(global->forceyear[i] > 0) {
+	tmpyear  = global->forceyear[i];
+	tmpmonth = global->forcemonth[i];
+	tmpday   = global->forceday[i];
+	tmphr    = global->forcehour[i];
+	tmpjday  = tmpday;
+	if ( LEAPYR(tmpyear) ) days[1] = 29;
+	else days[1] = 28;
+	for ( ii = 0; ii < tmpmonth-1; ii++) 
+	  tmpjday += days[ii];
+	
+	step     = (int)(1./((float)global->dt/24.));
+	while(tmpyear < temp[0].year || 
+	      (tmpyear == temp[0].year && tmpjday < temp[0].day_in_year)) {
+	  
+	  get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,
+			     &tmpjday,global->dt);
+	  
+	  global->forceskip[i] ++;
 
-    step     = (int)(1./((float)global->dt/24.));
-    while(tmpyear < temp[0].year || 
-	  (tmpyear == temp[0].year && tmpjday < temp[0].day_in_year)) {
-      
-      get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,
-			 &tmpjday,global->dt);
-      
-      global->forceskip ++;
+	}
+      }
     }
   }
 
@@ -142,7 +164,7 @@ dmy_struct *make_dmy(global_param_struct *global)
     if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
     else skiprec += 365 * 24 / global->dt;
   }
-  global->skipyear = skiprec - 1;
+  global->skipyear = skiprec;
 
   return temp;
 }

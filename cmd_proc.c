@@ -21,7 +21,9 @@ filenames_struct cmd_proc(int argc, char *argv[])
 **********************************************************************/
 {
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
   extern int getopt();
   extern char *optarg;
   extern char *optstring;
@@ -70,6 +72,6 @@ void usage(char *temp)
 
 **********************************************************************/
 {
-  fprintf(stderr,"Usage: %s -g<model_control_file> ",temp);
+  fprintf(stderr,"Usage: %s -g<model_control_file>\n",temp);
   fprintf(stderr,"\t<model_control_file> is a file that contains all needed model\n\t\tparameters as well as model option flags, and the names and\n\t\tlocations of all other files,\n");
 }

@@ -20,7 +20,6 @@ void read_snowband(FILE    *snowband,
 **********************************************************************/
 {
   extern option_struct options;
-  extern debug_struct debug;
 
   char    ErrStr[MAXSTRING];
   int     band;
@@ -32,9 +31,12 @@ void read_snowband(FILE    *snowband,
   double  prec_frac;
 
   Nbands       = options.SNOW_BAND;
-  Tfactor[0]   = (double *)calloc(Nbands,sizeof(double));
-  Pfactor[0]   = (double *)calloc(Nbands,sizeof(double));
-  AreaFract[0] = (double *)calloc(Nbands,sizeof(double));
+  *Tfactor   = (double *)calloc(Nbands,sizeof(double));
+  *Pfactor   = (double *)calloc(Nbands,sizeof(double));
+  *AreaFract = (double *)calloc(Nbands,sizeof(double));
+
+  if (*Tfactor == NULL || *Pfactor == NULL || *AreaFract == NULL) 
+    nrerror("Memory allocation failure in read_snowband");
 
   if(Nbands>1) {
 
@@ -53,68 +55,69 @@ void read_snowband(FILE    *snowband,
 
     /** Read Area Fraction **/
     total = 0.;
-    for(band=0;band<Nbands;band++) {
+    for(band = 0; band < Nbands; band++) {
       fscanf(snowband, "%lf", &area_fract);
       if(area_fract<0) {
-	sprintf(ErrStr,"Negative snow band area fraction (%lf) read from file", 
+	sprintf(ErrStr,"Negative snow band area fraction (%f) read from file", 
 		area_fract);
 	nrerror(ErrStr);
       }
-      AreaFract[0][band]  = area_fract;
+      (*AreaFract)[band]  = area_fract;
       total              += area_fract;
     }
     if(total!=1.) {
-      fprintf(stderr,"WARNING: Sum of the snow band area fractions does not equal 1 (%lf), dividing each fraction by the sum\n",
+      fprintf(stderr,"WARNING: Sum of the snow band area fractions does not equal 1 (%f), dividing each fraction by the sum\n",
 	      total);
-      for(band=0;band<options.SNOW_BAND;band++) 
-	AreaFract[0][band] /= total;
+      for(band = 0; band < options.SNOW_BAND; band++) 
+	(*AreaFract)[band] /= total;
     }
 
     /** Read Band Elevation **/
-    for(band=0;band<Nbands;band++) {
+    for(band = 0; band < Nbands; band++) {
       fscanf(snowband, "%lf", &band_elev);
       if(band_elev<0) {
-	sprintf(ErrStr,"WARNING: Negative snow band elevation (%lf) read from file", 
+	fprintf(stderr,"Negative snow band elevation (%f) read from file\n", 
 		band_elev);
       }
-      Tfactor[0][band] = (elev - band_elev) / 1000. * T_lapse;
+      (*Tfactor)[band] = (elev - band_elev) / 1000. * T_lapse;
     }
     total = 0.;
 
     /** Read Precipitation Fraction **/
-    for(band=0;band<options.SNOW_BAND;band++) {
+    for(band = 0; band < options.SNOW_BAND; band++) {
       fscanf(snowband, "%lf", &prec_frac);
       if(prec_frac<0) {
-	sprintf(ErrStr,"Snow band precipitation fraction (%lf) must be between 0 and 1", 
+	sprintf(ErrStr,"Snow band precipitation fraction (%f) must be between 0 and 1", 
 		prec_frac);
 	nrerror(ErrStr);
       }
-      if(prec_frac>0 && AreaFract[0][band]==0) {
-	sprintf(ErrStr,"Snow band precipitation fraction (%lf) should be 0 when the area fraction is 0. (band = %i)", 
+      if(prec_frac>0 && (*AreaFract)[band]==0) {
+	sprintf(ErrStr,"Snow band precipitation fraction (%f) should be 0 when the area fraction is 0. (band = %i)", 
 		prec_frac, band);
 	nrerror(ErrStr);
       }
-      Pfactor[0][band] = prec_frac;
+      (*Pfactor)[band] = prec_frac;
       total += prec_frac;
     }
     if(total!=1.) {
-      fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %i (%lf), dividing each fraction by the sum\n",
+      fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %i (%f), dividing each fraction by the sum\n",
 	      1, total);
-      for(band=0;band<options.SNOW_BAND;band++) 
-	Pfactor[0][band] /= total;
+      for(band = 0; band < options.SNOW_BAND; band++) 
+	(*Pfactor)[band] /= total;
     }
-    for(band=0;band<options.SNOW_BAND;band++) {
-      if(AreaFract[0][band] > 0)
-	Pfactor[0][band] /= AreaFract[0][band];
-      else Pfactor[0][band]  = 0.;
+    for (band = 0; band < options.SNOW_BAND; band++) {
+      if ((*AreaFract)[band] > 0)
+	(*Pfactor)[band] /= (*AreaFract)[band];
+      else 
+	(*Pfactor)[band]  = 0.;
     }
   }
 
   else if(Nbands==1) {
     /** If no snow bands, set factors to use unmodified forcing data **/
-    AreaFract[0][0] = 1.;
-    Tfactor[0][0]   = 0.;
-    Pfactor[0][0]   = 1.;
+    (*AreaFract)[0] = 1.;
+    (*Tfactor)[0]   = 0.;
+    (*Pfactor)[0]   = 1.;
   }
 
   else {
@@ -123,6 +126,3 @@ void read_snowband(FILE    *snowband,
   }
 
 } 
-
-
-

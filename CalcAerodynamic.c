@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Thu Mar 27 18:00:10 1997
- * LAST-MOD: Mon Aug 16 10:23:53 1999 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Mar 13 11:31:13 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate the aerodynamic resistances
  * DESCRIP-END.
  * FUNCTIONS:    CalcAerodynamic()
@@ -182,9 +182,10 @@ void CalcAerodynamic(char   OverStory,
         (exp(n*(1-Zt/Height)) - exp(n*(1-(Z0_SNOW+2.)/Height)));
     }
     
-    /* case 3: the top of the overstory is less than 2 m above the lower boundary.
-       The wind profile above the lower boundary is part logarithmic and part 
-       exponential, but only extends to the top of the overstory */
+    /* case 3: the top of the overstory is less than 2 m above the lower 
+       boundary.  The wind profile above the lower boundary is part 
+       logarithmic and part exponential, but only extends to the top of the 
+       overstory */
     else {
       U[2] = Uh;
       Ra[2] = log(Zt/Z0_SNOW) * log(Zt/Z0_SNOW)/

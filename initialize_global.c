@@ -15,8 +15,6 @@ void initialize_global() {
   option_strudt:           structure containing all global model options
   options.FULL_ENERGY    = TRUE - compute full energy balance
   options.FROZEN_SOIL    = TRUE - compute frozen soils
-  options.SNOW_MODEL     = TRUE - compute full energy balance snow model
-  options.CALC_SNOW_FLUX = TRUE - compute thermal fluxes through the snowpack
   options.DIST_PRCP      = TRUE - use distributed precipitation
   options.INIT_SOIL      = TRUE - use file to initialize soil column
   options.CORRPREC       = TRUE - correct precipitation measurements to
@@ -66,33 +64,43 @@ void initialize_global() {
 *********************************************************************/
 
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
   extern param_set_struct param_set;
+
+  int i, j;
+
+  /** Initialize model option flags **/
 
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
-  options.SNOW_MODEL            = FALSE;
-  options.CALC_SNOW_FLUX        = TRUE;
   options.DIST_PRCP             = FALSE;
-  options.RADAR                 = FALSE;
-  options.INIT_SOIL             = FALSE;
   options.CORRPREC              = FALSE;
   options.MOISTFRACT            = FALSE;
   options.BINARY_OUTPUT         = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
   options.Nlayer                = 2;
+  options.Nnode                 = 3;
   options.GRID_DECIMAL          = 2;
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
   options.PREC_EXPT             = 0.6;
-  options.INIT_SNOW             = FALSE;
-  options.ROOT_ZONES            = -999;
+#if SAVE_STATE
+  options.INIT_STATE            = FALSE;
+#endif
+/*   options.INIT_SNOW             = FALSE; */
+  options.ROOT_ZONES            = MISSING;
   options.MIN_WIND_SPEED        = 0.0;
   options.NOFLUX                = FALSE;
-  options.FS_FLUXES             = FALSE;
   options.GLOBAL_LAI            = FALSE;
+  options.QUICK_FLUX            = TRUE;
+  options.GRND_FLUX             = FALSE;
 
 #if LINK_DEBUG 
+
+  /** Initialize debugging control flags **/
+
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;
   debug.PRT_VEGE    = FALSE;
@@ -109,20 +117,25 @@ void initialize_global() {
   strcpy(debug.debug_dir,"./");
 #endif
 
-  param_set.SHORTWAVE  = FALSE;
-  param_set.LONGWAVE   = FALSE;
-  param_set.PRESSURE   = FALSE;
-  param_set.TSKC       = FALSE;
-  param_set.VP         = FALSE;
-  param_set.VPD        = FALSE;
-  param_set.REL_HUMID  = FALSE;
-  param_set.SPEC_HUMID = FALSE;
-  param_set.ALBEDO     = FALSE;
-  param_set.AIR_TEMP   = FALSE;
-  param_set.TMAX       = FALSE;
-  param_set.TMIN       = FALSE;
-  param_set.PREC       = FALSE;
-  param_set.WIND       = FALSE;
-  param_set.DENSITY    = FALSE;
+  /** Initialize forcing file input controls **/
+
+  param_set.TYPE[AIR_TEMP].SUPPLIED   = FALSE;
+  param_set.TYPE[ALBEDO].SUPPLIED     = FALSE;
+  param_set.TYPE[DENSITY].SUPPLIED    = FALSE;
+  param_set.TYPE[PREC].SUPPLIED       = FALSE;
+  param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
+  param_set.TYPE[SHORTWAVE].SUPPLIED  = FALSE;
+  param_set.TYPE[TMAX].SUPPLIED       = FALSE;
+  param_set.TYPE[TMIN].SUPPLIED       = FALSE;
+  param_set.TYPE[TSKC].SUPPLIED       = FALSE;
+  param_set.TYPE[VP].SUPPLIED         = FALSE;
+  param_set.TYPE[WIND].SUPPLIED       = FALSE;
+  param_set.TYPE[SKIP].SUPPLIED       = FALSE;
+  for(i=0;i<2;i++) {
+    param_set.FORCE_DT[i] = MISSING;
+    param_set.N_TYPES[i] = MISSING;
+    param_set.FORCE_FORMAT[i] = MISSING;
+    for(j=0;j<17;j++) param_set.FORCE_INDEX[i][j] = MISSING;
+  }
 
 }

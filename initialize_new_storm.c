@@ -35,44 +35,18 @@ void initialize_new_storm(cell_data_struct ***cell,
   double        temp_dry;
 
   /** Redistribute Soil Moisture **/
-  for(layer=0;layer<options.Nlayer;layer++) {
+  for(layer = 0; layer < options.Nlayer; layer++) {
 
-    for(band=0;band<options.SNOW_BAND;band++) {
+    for(band = 0; band < options.SNOW_BAND; band++) {
 
-      temp_wet = cell[WET][veg][band].layer[layer].moist_thaw;
-      temp_dry = cell[DRY][veg][band].layer[layer].moist_thaw;
-      error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
-      if(error) {
-	sprintf(ErrorString,"Moist_thaw does not balance before new storm: %lf -> %lf record %i\n",
-		cell[WET][veg][band].layer[layer].moist_thaw*new_mu
-		+ cell[DRY][veg][band].layer[layer].moist_thaw*(1.-new_mu),
-		temp_wet+temp_dry,rec);
-	vicerror(ErrorString);
-      }
-      cell[WET][veg][band].layer[layer].moist_thaw = temp_wet;
-      cell[DRY][veg][band].layer[layer].moist_thaw = temp_dry;
-      
-      temp_wet = cell[WET][veg][band].layer[layer].moist_froz;
-      temp_dry = cell[DRY][veg][band].layer[layer].moist_froz;
-      error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
-      if(error) {
-	sprintf(ErrorString,"moist_froz does not balance before new storm: %lf -> %lf record %i\n",
-		cell[WET][veg][band].layer[layer].moist_froz*new_mu
-		+ cell[DRY][veg][band].layer[layer].moist_froz*(1.-new_mu),
-		temp_wet+temp_dry,rec);
-	vicerror(ErrorString);
-      }
-      cell[WET][veg][band].layer[layer].moist_froz = temp_wet;
-      cell[DRY][veg][band].layer[layer].moist_froz = temp_dry;
-      
       temp_wet = cell[WET][veg][band].layer[layer].moist;
       temp_dry = cell[DRY][veg][band].layer[layer].moist;
       error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"moist does not balance before new storm: %lf -> %lf record %i\n",
-		cell[WET][veg][band].layer[layer].moist*new_mu
-		+ cell[DRY][veg][band].layer[layer].moist*(1.-new_mu),
-		temp_wet+temp_dry,rec);
+	sprintf(ErrorString,"moist does not balance before new storm: %f -> %f record %i\n",
+		cell[WET][veg][band].layer[layer].moist * new_mu
+		+ cell[DRY][veg][band].layer[layer].moist * (1. - new_mu),
+		temp_wet + temp_dry, rec);
 	vicerror(ErrorString);
       }
       cell[WET][veg][band].layer[layer].moist = temp_wet;
@@ -82,10 +56,10 @@ void initialize_new_storm(cell_data_struct ***cell,
       temp_dry = cell[DRY][veg][band].layer[layer].ice;
       error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"ice does not balance before new storm: %lf -> %lf record %i\n",
-		cell[WET][veg][band].layer[layer].ice*new_mu
-		+ cell[DRY][veg][band].layer[layer].ice*(1.-new_mu),
-		temp_wet+temp_dry,rec);
+	sprintf(ErrorString,"ice does not balance before new storm: %f -> %f record %i\n",
+		cell[WET][veg][band].layer[layer].ice * new_mu
+		+ cell[DRY][veg][band].layer[layer].ice * (1. - new_mu),
+		temp_wet + temp_dry, rec);
 	vicerror(ErrorString);
       }
       cell[WET][veg][band].layer[layer].ice = temp_wet;
@@ -103,10 +77,10 @@ void initialize_new_storm(cell_data_struct ***cell,
       temp_dry = veg_var[DRY][veg][band].Wdew;
       error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"Wdew does not balance before new storm: %lf -> %lf record %i\n",
-		veg_var[WET][veg][band].Wdew*new_mu
-		+ veg_var[DRY][veg][band].Wdew*(1.-new_mu),
-		temp_wet+temp_dry,rec);
+	sprintf(ErrorString,"Wdew does not balance before new storm: %f -> %f record %i\n",
+		veg_var[WET][veg][band].Wdew * new_mu
+		+ veg_var[DRY][veg][band].Wdew * (1. - new_mu),
+		temp_wet + temp_dry, rec);
 	vicerror(ErrorString);
       }
       veg_var[WET][veg][band].Wdew = temp_wet;
@@ -117,8 +91,8 @@ void initialize_new_storm(cell_data_struct ***cell,
 
 unsigned char average_moisture_for_storm(double *wet_value,
 					 double *dry_value,
-					 double old_mu,
-					 double new_mu) {
+					 double  old_mu,
+					 double  new_mu) {
 /**********************************************************************
   This subroutine averages total soil moisture between the wet and dry
   fractions of the soil column

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Tue Jul  6 16:15:57 1999 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Apr  6 12:43:30 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -17,8 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
-
-static char vcid[] = "$Id$";
 
 #define GRAMSPKG 1000.
 #define CH_WATER 4186.8e3
@@ -219,7 +217,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
     (Dt * SECPHOUR);
 
   /* Calculate Ground Heat Flux */
-  if(SnowDepth>0. && options.CALC_SNOW_FLUX) {
+  if(SnowDepth>0.) {
     *GroundFlux = 2.9302e-6 * SnowDensity * SnowDensity
         * (TGrnd - TMean) / SnowDepth;
   }

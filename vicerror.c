@@ -17,7 +17,9 @@ void vicerror(char error_text[])
 {
         extern option_struct options;
 	extern Error_struct Error;
+#if LINK_DEBUG
         extern debug_struct debug;
+#endif
 
         filenames_struct fnames;
 	void _exit();
@@ -27,7 +29,7 @@ void vicerror(char error_text[])
 	fprintf(stderr,"VIC model run-time error...\n");
 	fprintf(stderr,"%s\n",error_text);
 	fprintf(stderr,"...now writing output files...\n");
-        close_files(Error.infp,Error.outfp,fnames);
+        close_files(&(Error.infp), &(Error.outfp), &fnames);
 	fprintf(stderr,"...now exiting to system...\n");
         fflush(stdout);
         fflush(stderr);

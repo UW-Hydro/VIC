@@ -34,10 +34,13 @@ double arno_evap(layer_data_struct *layer_wet,
 		 double             ref_height,
 		 double             ra,
 		 double             dt,
-		 double             mu)
+		 double             mu,
+		 double             moist_resid)
 {
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
 
   int    num_term;
   int    i;
@@ -46,16 +49,12 @@ double arno_evap(layer_data_struct *layer_wet,
   double tmp,beta_asp,dummy;
   double ratio,as;
   double Epot;		/* potential bare soil evaporation */
-  double evap_temp;
   double moist;
   double evap;
-  double moist_resid;
   double max_infil;
   double Evap;
   double tmpsum;
   layer_data_struct *layer;
-
-  evap_temp = Tsurf;
 
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;
@@ -72,17 +71,13 @@ double arno_evap(layer_data_struct *layer_wet,
       layer = layer_wet;
     }
     
-    moist = layer[0].moist_thaw*(layer[0].tdepth)/D1
-          + layer[0].moist_froz 
-          * (layer[0].fdepth-layer[0].tdepth)/D1
-          + layer[0].moist*(D1-layer[0].fdepth)/D1;
+    moist = layer[0].moist - layer[0].ice;
     if(moist>max_moist) moist=max_moist;
 
     /* Calculate the potential bare soil evaporation (mm/time step) */
   
     Epot = penman(rad, vpd * 1000., ra, 0.0, 0.0, 1.0, 1.0, 
-		  air_temp, evap_temp, net_short,
-		  elevation, 0) * dt / 24.0;
+		  air_temp, net_short, elevation, 0) * dt / 24.0;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */
@@ -95,14 +90,14 @@ double arno_evap(layer_data_struct *layer_wet,
       /*****if(ratio < SMALL && ratio > -SMALL) ratio = 0.;*****/
       if(ratio > 1.0) {
 	printf("\n  ERROR: SOIL RATIO GREATER THAN 1.0\n");
-	printf("moisture %lf   max_moisture %lf -> ratio = %lf\n",
+	printf("moisture %f   max_moisture %f -> ratio = %f\n",
 	       moist,max_moist,ratio);
 	exit(0);
       }
       else {
 	if(ratio < 0.0) {
 	  printf("\n  ERROR: SOIL RATIO LESS THAN 0.0\n");
-	  printf("moisture %lf   max_moisture %lf -> ratio = %le\n",
+	  printf("moisture %f   max_moisture %f -> ratio = %e\n",
 		 moist,max_moist,ratio);
 	  exit(0);
 	}
@@ -169,14 +164,9 @@ double arno_evap(layer_data_struct *layer_wet,
     /*  Evaporation second soil layer = 0.0                                */
     /***********************************************************************/
 
-    if(options.FULL_ENERGY) moist_resid = MOIST_RESID;
-    else moist_resid = 0.;
 
-    moist = layer[0].moist_thaw*(layer[0].tdepth)/D1
-          + layer[0].moist_froz 
-          * (layer[0].fdepth-layer[0].tdepth)/D1
-          + layer[0].moist*(D1-layer[0].fdepth)/D1;
-    if((evap) > moist)
+    moist = layer[0].moist - layer[0].ice;
+    if((evap) > moist - moist_resid * D1 * 1000.)
       evap = moist -  moist_resid * D1 * 1000.;
 
     layer[0].evap = evap;

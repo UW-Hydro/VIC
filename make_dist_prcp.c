@@ -25,11 +25,9 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   int              i;
 
   temp.mu     = (double *)calloc(nveg+1,sizeof(double));
-  for(i=0;i<nveg+1;i++) temp.mu[i] = 1;
-  if(options.FULL_ENERGY || options.SNOW_MODEL) {
-    temp.snow   = make_snow_data(nveg+1);
-    temp.energy = make_energy_bal(nveg+1,Nnodes);
-  }
+  for ( i = 0; i < nveg + 1; i++ ) temp.mu[i] = 1;
+  temp.snow   = make_snow_data(nveg+1);
+  temp.energy = make_energy_bal(nveg+1,Nnodes);
   for(i=0;i<2;i++) {
     temp.veg_var[i]  = make_veg_var(nveg);
     temp.cell[i]     = make_cell_data(nveg+1,options.Nlayer);

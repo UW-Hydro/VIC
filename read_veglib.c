@@ -20,7 +20,9 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 **********************************************************************/
 {
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
 
   veg_lib_struct *temp;
   int    i, j;
@@ -67,19 +69,19 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         fscanf(veglib, "%lf", &temp[i].displacement[j]);
         if(temp[i].displacement[j] > maxd) maxd = temp[i].displacement[j];
         if(temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
-          sprintf(str,"Vegetation has leaves (LAI = %lf), but no displacement (%lf)",
+          sprintf(str,"Vegetation has leaves (LAI = %f), but no displacement (%f)",
 	          temp[i].LAI[j], temp[i].displacement[j]);
           nrerror(str);
         }
         if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
-          sprintf(str,"Albedo must be between 0 and 1 (%lf)",
+          sprintf(str,"Albedo must be between 0 and 1 (%f)",
 	          temp[i].albedo[j]);
           nrerror(str);
         }
       }
       fscanf(veglib, "%lf", &temp[i].wind_h);
       if(temp[i].wind_h < maxd && temp[i].overstory) {
-        sprintf(str,"Vegetation reference height (%lf) for vegetation class %i, must be greater than the maximum displacement height (%lf) when OVERSTORY has been set TRUE.",
+        sprintf(str,"Vegetation reference height (%f) for vegetation class %i, must be greater than the maximum displacement height (%f) when OVERSTORY has been set TRUE.",
                 temp[i].wind_h,temp[i].veg_class,maxd);
         nrerror(str);
       }

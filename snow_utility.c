@@ -133,12 +133,20 @@ double snow_albedo(double new_snow,
                    double swq,
                    double cold_content,
                    double dt,
-                   int last_snow) {
+                   int    last_snow,
+		   char   MELTING) {
 /**********************************************************************
   snow_albedo		Keith Cherkauer		June 10, 1997
 
   This subroutine computes the snow pack surface albedo based on snow
   age and season, using the tables generated in snow_table_albedo.
+
+  Modified:
+  06-15-02 Added MELTING flag which tells the algorithm whether or not
+           the pack was melting previously.  This locks the albedo
+           onto the lower ablation albedo curve until a sufficiently
+           large new snow event resets the surface albedo.       KAC
+
 **********************************************************************/
 
   double albedo;
@@ -150,7 +158,7 @@ double snow_albedo(double new_snow,
   else if(swq > 0.0) {
 
     /* Accumulation season */
-    if(cold_content < 0.0)
+    if ( cold_content < 0.0 && !MELTING )
       albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
 				pow((double)last_snow * dt / 24.,
 				    SNOW_ALB_ACCUM_B));

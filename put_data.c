@@ -39,6 +39,9 @@ void put_data(double            *AreaFract,
   6-8-2000 modified to handle spatially distribute frozen soil     KAC
   10-6-2000 modified to handle partial snow cover                  KAC
   02-27-01 modified to output lake model variables                 KAC
+  11-18-02 updated output of lake variables to reflect algorithm 
+           changes.  Also added output variables for blowing snow
+           algorithm.                                              LCB
 
 **********************************************************************/
 {
@@ -63,11 +66,13 @@ void put_data(double            *AreaFract,
   int                     dist;
   int                     band;
   int                     Nbands;
+  int n;
   int                     overstory;
 #if SPATIAL_FROST
   int                     frost_area;
 #endif
   double                  Cv;
+  double                  Clake;
   double                  mu;
   double                  tmp_evap;
   double                  tmp_moist;
@@ -117,7 +122,7 @@ void put_data(double            *AreaFract,
   veg_var = prcp->veg_var;
   
   /****************************************
-    Store Output for all Vegetation Types
+    Store Output for all Vegetation Types (except lakes)
   ****************************************/
   for ( veg = 0 ; veg <= veg_con[0].vegetat_type_num ; veg++) {
     
@@ -133,7 +138,6 @@ void put_data(double            *AreaFract,
     if ( Cv > 0 ) {
 
       
-
       /*******************************************************
         Compute Average Variables from Wet and Dry Fractions
       *******************************************************/
@@ -162,8 +166,13 @@ void put_data(double            *AreaFract,
 	      out_data->evap_bare += tmp_evap * Cv * mu * AreaFract[band];
 
 	    tmp_evap += snow[veg][band].vapor_flux * 1000.;
-	    out_data->sub_snow += snow[veg][band].vapor_flux * 1000. 
+	    out_data->sub_total += snow[veg][band].vapor_flux * 1000.
 	      * Cv * mu * AreaFract[band]; 
+	    out_data->sub_surface += snow[veg][band].surface_flux * 1000.
+	      * Cv * mu * AreaFract[band]; 
+	    out_data->sub_blowing += snow[veg][band].blowing_flux * 1000.
+	      * Cv * mu * AreaFract[band];
+	    out_data->sub_snow[veg] += snow[veg][band].blowing_flux * 1000.; 
 	    if ( veg <= veg_con[0].vegetat_type_num ) {
 	      tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
 	      out_data->sub_canop += snow[veg][band].canopy_vapor_flux 
@@ -529,19 +538,32 @@ void put_data(double            *AreaFract,
 
       /** If lake fraction exists store energy and water fluxes */
       
+      // Fraction of wetland with open water
+      Clake = lake_var.sarea/lake_con->basin[0];
+
+      // Fraction of grid cell that is lakes and wetlands.
       Cv = lake_con->Cl[0];
       mu = 1;
       band = 0;
       veg = veg_con[0].vegetat_type_num + 1;
+      
+      tmp_evap = lake_var.evapw * Clake * Cv;
 
-      tmp_evap = lake_var.evapw * Cv;
+      for ( index = 0; index < options.Nlayer; index++ )
+	tmp_evap += cell[0][veg][band].layer[index].evap*(1.-Clake)*Cv;
+      tmp_evap += veg_var[0][veg][band].canopyevap*(1.-Clake)*Cv;
 
       tmp_evap += snow[veg][band].vapor_flux * 1000. * Cv;
-
-      out_data->sub_snow += snow[veg][band].vapor_flux * 1000. * Cv; 
-      out_data->evap_lake = lake_var.evapw * Cv; 
-
+      
       out_data->evap += tmp_evap; 
+
+      out_data->sub_total += snow[veg][band].vapor_flux * 1000. * Cv; 
+      out_data->sub_surface += snow[veg][band].surface_flux * 1000. * Cv; 
+      out_data->sub_blowing += snow[veg][band].blowing_flux * 1000. * Cv; 
+      out_data->sub_snow[veg] += snow[veg][band].blowing_flux * 1000.; 
+      /*    out_data->evap_lake = lake_var.evapw * Clake * Cv; */  /* mm over gridcell */
+      out_data->evap_lake = lake_var.evapw;
+      out_data->melt[0] += snow[veg][band].melt * Cv;
 
       /** record runoff **/
       out_data->runoff   = lake_var.runoff_out;
@@ -549,25 +571,60 @@ void put_data(double            *AreaFract,
       /** record baseflow **/
       out_data->baseflow = lake_var.baseflow_out; 
 	    
+      /** record freezing and thawing front depths **/
+      if(options.FROZEN_SOIL) {
+	if(Clake != 1.) {
+	  for(index = 0; index < MAX_FRONTS; index++) {
+	    if(energy[veg][band].fdepth[index] != MISSING)
+	      out_data->fdepth[index] += energy[veg][band].fdepth[index] 
+		* Cv * 100. * AreaFract[band];
+	    if(energy[veg][band].tdepth[index] != MISSING)
+	      out_data->tdepth[index] += energy[veg][band].tdepth[index] 
+		* Cv * 100. * AreaFract[band];
+	  }
+	}
+      }
+
 #if ! OPTIMIZE
 	    
       /** record aerodynamic resistance **/
-      out_data->aero_resist += lake_var.aero_resist * Cv * mu;
-      
+      out_data->aero_resist += lake_var.aero_resist * Clake * Cv * mu;
+      out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
+	      * Cv * mu * (1.-Clake);
+
       /** record lake moistures **/
-      out_data->lake_moist = lake_var.volume / lake_var.sarea; // meters
+      out_data->lake_moist = lake_con->Cl[0] * 1000. * lake_var.volume / lake_con->basin[0]; // mm
       out_data->lake_ice   = ( ice_density * lake_var.fraci 
 			       * lake_var.hice / RHO_W );
+
+
+      for ( index = 0; index < options.Nlayer; index++ ) {
+	tmp_moist = cell[0][veg][band].layer[index].moist;
+#if SPATIAL_FROST
+	tmp_ice = 0;
+	for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	  tmp_ice  += (cell[0][veg][band].layer[index].ice[frost_area] 
+		       * frost_fract[frost_area]); 
+#else
+	tmp_ice   = cell[0][veg][band].layer[index].ice;
+#endif
+	tmp_moist -= tmp_ice;
+	if(options.MOISTFRACT) {
+	  tmp_moist /= depth[index] * 1000.;
+	  tmp_ice /= depth[index] * 1000.;
+	}
+	tmp_moist *= Cv;
+	tmp_ice *= Cv;
+	out_data->moist[index] += tmp_moist;
+	out_data->ice[index]   += tmp_ice;
+      }
 
       /***************************************
         Record Lake Energy Balance Variables
       ***************************************/
 
       /** record surface radiative temperature **/
-      if ( snow[veg][band].swq > 0 ) 
-	rad_temp = snow[veg][band].surf_temp + KELVIN;
-      else
-	rad_temp = lake_var.temp[0] + KELVIN;
+      rad_temp = energy[veg][band].Tsurf + KELVIN;
       
       /** record lake surface temperature **/
       surf_temp = lake_var.temp[0];
@@ -584,7 +641,8 @@ void put_data(double            *AreaFract,
 			      * (rad_temp) * (rad_temp)) * Cv);
       
       /** record albedo **/
-      out_data->albedo    += energy[veg][band].AlbedoLake * Cv;
+      out_data->albedo    += (energy[veg][band].AlbedoLake*Clake  +
+			      energy[veg][band].AlbedoUnder*(1.-Clake))* Cv;
       
       /** record latent heat flux **/
       out_data->latent        -= energy[veg][band].AtmosLatent * Cv;
@@ -641,9 +699,10 @@ void put_data(double            *AreaFract,
       // Store Lake Specific Variables 
       out_data->lake_ice_temp   = lake_var.tempi;
       out_data->lake_ice_height = lake_var.hice;
-      out_data->lake_ice_fract  = lake_var.fraci * Cv;
+      out_data->lake_ice_fract  = lake_var.fraci;
       out_data->lake_depth      = lake_var.ldepth;
-      out_data->lake_surf_area  = lake_var.surface[0];
+      //     out_data->lake_surf_area  = Clake;
+      out_data->lake_surf_area  = lake_var.sarea;
       out_data->lake_volume     = lake_var.volume;
       out_data->lake_surf_temp  = lake_var.temp[0];
       
@@ -677,8 +736,7 @@ void put_data(double            *AreaFract,
   storage += out_data->swq[0] + out_data->snow_canopy[0] + out_data->Wdew;
 #if LAKE_MODEL
   if ( options.LAKES ) 
-    storage += lake_con->Cl[0] * ( out_data->lake_moist 
-				   /* + out_data->lake_ice */ ) * 1000.;
+    storage += ( out_data->lake_moist );
 #endif // LAKE_MODEL
   calc_water_balance_error(rec,inflow,outflow,storage);
   if(options.FULL_ENERGY)

@@ -55,6 +55,7 @@ void runoff(layer_data_struct *layer_wet,
     4-1-98 Soil moisture transport is now done on an hourly time
            step, irregardless to the model time step, to prevent
            numerical stabilities in the solution	Dag and KAC
+    8-19-99 Removed last reference to unused 
 
 **********************************************************************/
 {  
@@ -66,7 +67,6 @@ void runoff(layer_data_struct *layer_wet,
   int                i;
   int                last_layer[MAX_LAYERS*3];
   int                last_sub[MAX_LAYERS*3];
-  int                froz_solid[MAX_LAYERS*3];
   int                last_index;
   int                last_cnt;
   int                tmp_index;
@@ -274,8 +274,6 @@ store_top_moist = submoist[0][2];
 	      /** If Saturated Moisture Content - Ice Content < 0.13, and
 		  frozen layer is thicker than 5cm, layer 
 		  is assumed impermiable **/
-	      froz_solid[last_cnt] = FALSE;
-
 	      if((tmp_moist=submoist[lindex][sub]-layer[lindex].evap) 
 		 < resid_moist[lindex])
 		tmp_moist = resid_moist[lindex];
@@ -358,8 +356,7 @@ store_top_moist = submoist[0][2];
 	      /** Verify that soil sublayer moisture content falls within 
 		  acceptable range **/
 	      if((submoist[lindex][sub]+subice[lindex][sub]) 
-		 > submax_moist[lindex][sub]
-		 && (!froz_solid[last_index+1])) {
+		 > submax_moist[lindex][sub]) {
 		tmp_inflow = (submoist[lindex][sub]+subice[lindex][sub])
 		  - submax_moist[lindex][sub];
 		submoist[lindex][sub] = submax_moist[lindex][sub] 

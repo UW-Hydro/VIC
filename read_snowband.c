@@ -58,7 +58,7 @@ void read_snowband(FILE    *snowband,
       if(area_fract<0) {
 	sprintf(ErrStr,"Negative snow band area fraction (%lf) read from file", 
 		area_fract);
-	vicerror(ErrStr);
+	nrerror(ErrStr);
       }
       AreaFract[0][band]  = area_fract;
       total              += area_fract;
@@ -74,9 +74,8 @@ void read_snowband(FILE    *snowband,
     for(band=0;band<Nbands;band++) {
       fscanf(snowband, "%lf", &band_elev);
       if(band_elev<0) {
-	sprintf(ErrStr,"Negative snow band elevation (%lf) read from file", 
+	sprintf(ErrStr,"WARNING: Negative snow band elevation (%lf) read from file", 
 		band_elev);
-	vicerror(ErrStr);
       }
       Tfactor[0][band] = (elev - band_elev) / 1000. * T_lapse;
     }
@@ -88,12 +87,12 @@ void read_snowband(FILE    *snowband,
       if(prec_frac<0) {
 	sprintf(ErrStr,"Snow band precipitation fraction (%lf) must be between 0 and 1", 
 		prec_frac);
-	vicerror(ErrStr);
+	nrerror(ErrStr);
       }
       if(prec_frac>0 && AreaFract[0][band]==0) {
 	sprintf(ErrStr,"Snow band precipitation fraction (%lf) should be 0 when the area fraction is 0. (band = %i)", 
 		prec_frac, band);
-	vicerror(ErrStr);
+	nrerror(ErrStr);
       }
       Pfactor[0][band] = prec_frac;
       total += prec_frac;
@@ -120,7 +119,7 @@ void read_snowband(FILE    *snowband,
 
   else {
     sprintf(ErrStr,"Number of snow elevation bands must be > 0 (%i)",Nbands);
-    vicerror(ErrStr);
+    nrerror(ErrStr);
   }
 
 } 

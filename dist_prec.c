@@ -31,12 +31,19 @@ void dist_prec(atmos_data_struct   *atmos,
 
   References:
 
+  Modifications:
+  11-30-98 Added counter to assure that a storm has been stopped
+           for at least one day, before allowing the model to 
+	   average soil moisture when a new precipitation event
+	   arrives.                                             KAC
+
 **********************************************************************/
 
   extern option_struct options;
   extern debug_struct debug;
 
   static char STILL_STORM;
+  static int  DRY_TIME;
 
   char    ANY_SNOW;
   int     veg, i;
@@ -63,31 +70,42 @@ void dist_prec(atmos_data_struct   *atmos,
     for(veg=0;veg<=veg_con[0].vegetat_type_num;veg++) {
       ANY_SNOW = FALSE;
       for(i=0;i<options.SNOW_BAND;i++)
+        /* Check for snow on ground or falling */
 	if(prcp[0].snow[veg][i].snow 
 	   || prcp[0].snow[veg][i].snow_canopy>0.) ANY_SNOW = TRUE;
       if(options.SNOW_MODEL && (ANY_SNOW || atmos->prec-atmos->rainonly>0)) {
+        /* If snow present, mu must be set to 1. */
 	NEW_MU = 1.;
 	if(rec==0) {
+          /* Set model variables if first time step */
 	  prcp[0].mu[veg]=NEW_MU;
 	  if(atmos->prec>0) STILL_STORM=TRUE;
 	  else STILL_STORM=FALSE;
+          DRY_TIME = 0;
 	} 
 	ANY_SNOW = TRUE;
       }
       else {
 	if(atmos->prec==0 && rec==0) {
+          /* If first time step has no rain, than set mu to 1. */
 	  prcp[0].mu[veg] = 1.;
 	  NEW_MU=1.;
 	  STILL_STORM = TRUE;
+          DRY_TIME = 0;
 	}
 	else if(rec==0) {
+          /* If first time step has rain, then set mu based on intensity */
 	  prcp[0].mu[veg]=NEW_MU;
 	  STILL_STORM=TRUE;
+          DRY_TIME = 0;
 	}
-	else if(atmos->prec==0) {
+	else if(atmos->prec==0 && DRY_TIME >= 24./(float)global_param.dt) {
+          /* Check if storm has ended */
 	  NEW_MU=prcp[0].mu[veg];
 	  STILL_STORM=FALSE;
+          DRY_TIME = 0;
 	}
+        else if(atmos->prec==0) DRY_TIME++;
       }
 
       if(!STILL_STORM && (atmos->prec>STORM_THRES || ANY_SNOW)) {

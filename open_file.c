@@ -102,6 +102,8 @@ FILE *open_file(char string[],char type[])
   }
 
 #if VERBOSE
+  if(strcmp(type,"rb") == 0) fprintf(stderr,"\n  opened for reading.");
+
   if(strcmp(type,"w") == 0) fprintf(stderr,"\n  truncated or created for writing.");
 
   if(strcmp(type,"wb") == 0) fprintf(stderr,"\n  truncated or created for writing.");

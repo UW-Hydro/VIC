@@ -55,11 +55,14 @@ void surface_fluxes(char                 overstory,
 		    snow_data_struct    *snow,
 		    soil_con_struct     *soil_con,
 		    veg_var_struct      *veg_var_dry,
-		    veg_var_struct      *veg_var_wet)
+		    veg_var_struct      *veg_var_wet,
+		    float              lag_one,
+		    float              sigma_slope,
+		    float              fetch)
 /**********************************************************************
 	surface_fluxes	Keith Cherkauer		February 29, 2000
 
-  Formerally a part of full_energy.c this routine computes all surface
+  Formerly a part of full_energy.c this routine computes all surface
   fluxes, and solves the snow accumulation and ablation algorithm.
   Solutions are for the current snow band and vegetation type (these
   are defined in full_energy before the routine is called).
@@ -68,6 +71,7 @@ void surface_fluxes(char                 overstory,
   10-06-00 modified to handle partial snow cover                KAC
   10-31-00 modified to iterate a solution for the exchange of
            energy between the snowpack and the ground surface.  KAC
+  11-18-02 modified to add the effects of blowing snow.         LCB
 
 **********************************************************************/
 {
@@ -95,6 +99,7 @@ void surface_fluxes(char                 overstory,
   int                    step_dt;
   int                    under_iter;
   double                 Evap;
+  double Ls;
   double                 LongUnderIn; // inmoing LW to ground surface
   double                 LongUnderOut; // outgoing LW from ground surface
   double                 NetLongSnow; // net LW over snowpack
@@ -230,8 +235,10 @@ void surface_fluxes(char                 overstory,
 
   if(snow->swq > 0 || snow->snow_canopy > 0 || atmos->snowflag[NR]) {
     hour      = 0;
-    endhour   = hour + NF * options.SNOW_STEP;
-    step_dt   = options.SNOW_STEP;
+    endhour   = hour + NF;
+    step_dt   = 1;
+    //endhour   = hour + NF * options.SNOW_STEP;
+    //step_dt   = options.SNOW_STEP;
   }
   else {
     hour      = NR;
@@ -323,6 +330,24 @@ void surface_fluxes(char                 overstory,
     last_Tcanopy      = 999;
     last_LongUnderOut = 999;
     last_snow_flux    = 999;
+
+    // Compute mass flux of blowing snow
+    if( !overstory && options.BLOWING && snow->swq > 0.) {
+      Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
+      snow->blowing_flux = CalcBlowingSnow((double) step_dt, Tair, 
+					   snow->last_snow, snow->surf_water, 
+					   wind[2], Ls, atmos->density[hour], 
+					   atmos->pressure[hour], 
+					   atmos->vp[hour], roughness, 
+					   ref_height[2], snow->depth, 
+					   lag_one, sigma_slope, 
+					   snow->surf_temp, iveg, Nveg, fetch, 
+					   veg_lib[iveg].displacement[dmy[rec].month], 
+					   veg_lib[iveg].roughness[dmy[rec].month]);
+      snow->blowing_flux *= 3600./RHO_W;
+    }
+    else
+      snow->blowing_flux = 0.0;
 
     // initialize bisection startup
     BISECT_OVER  = FALSE;
@@ -425,7 +450,8 @@ void surface_fluxes(char                 overstory,
 			       rec, veg_class, &UnderStory, &(snow_energy), 
 			       step_layer[DRY], step_layer[WET], &(step_snow), 
 			       soil_con, &(snow_veg_var[DRY]), 
-			       &(snow_veg_var[WET]));
+			       &(snow_veg_var[WET]),
+			       lag_one, sigma_slope, fetch);
       
 // snow_energy.sensible + snow_energy.latent + snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + snow_energy.advection - snow_energy.deltaCC + snow_energy.refreeze_energy + snow_energy.advected_sensible ) * snow->coverage
 
@@ -470,7 +496,8 @@ void surface_fluxes(char                 overstory,
 				     &(dmy[rec]), &bare_energy, 
 				     step_layer[DRY], step_layer[WET], 
 				     &(step_snow), soil_con, 
-				     &bare_veg_var[DRY], &bare_veg_var[WET]); 
+				     &bare_veg_var[DRY], &bare_veg_var[WET], 
+				     lag_one, sigma_slope, fetch); 
 	if ( INCLUDE_SNOW ) {
 	  /* store melt from thin snowpack */
 	  step_melt *= 1000.;
@@ -559,7 +586,7 @@ void surface_fluxes(char                 overstory,
 
     for(dist = 0; dist < Ndist; dist++) {
 
-      if(iveg < Nveg) {
+      if(iveg != Nveg) {
 	if(step_snow.snow) {
 	  store_throughfall[dist] += snow_veg_var[dist].throughfall;
 	  store_canopyevap[dist]  += snow_veg_var[dist].canopyevap;
@@ -578,7 +605,7 @@ void surface_fluxes(char                 overstory,
       store_ppt[dist] += step_ppt[dist];
     }
 
-    if(iveg < Nveg) 
+    if(iveg != Nveg) 
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
     store_vapor_flux += step_snow.vapor_flux;
       
@@ -705,7 +732,7 @@ void surface_fluxes(char                 overstory,
     Store vegetation variable sums for sub-model time steps 
   **********************************************************/
 
-  if(iveg < Nveg) {
+  if(iveg != Nveg) {
     veg_var_wet->throughfall = store_throughfall[WET];
     veg_var_dry->throughfall = store_throughfall[DRY];
     veg_var_wet->canopyevap  = store_canopyevap[WET];

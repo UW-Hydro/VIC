@@ -14,6 +14,7 @@
 #define DELTAT       25.	/* Used in SensibleHeatFlux to bracket the 
                                    effective surface temperature (C) */
 #define ice_density  917.	/* density of ice (kg/m^3) */
+#define HOURSPERDAY  24         /* number of hours per day */
 
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can

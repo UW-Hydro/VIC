@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-void rad_and_vpd (atmos_data_struct *atmos, soil_con_struct soil_con,
-   int nrecs, dmy_struct *dmy)
+void rad_and_vpd (atmos_data_struct *atmos, 
+		  soil_con_struct soil_con,
+		  int nrecs, 
+		  dmy_struct *dmy)
 /**********************************************************************
   	rad_and_vpd
 

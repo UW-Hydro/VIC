@@ -188,9 +188,12 @@ double func_aero_resist(double,double,double,double,double);
 double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
-double calc_air_temperature(double *, double *, int);
+/**double calc_air_temperature(double *, double *, int);**/
+void HourlyT(int,int *,double *,int *,double *,double *);
+double hermint(double, int, double *, double *, double *, double *, double *);
+void hermite(int, double *, double *, double *, double *, double *);
 double calc_rainonly(double,double,double,double);
-void store_max_min_temp(atmos_data_struct *, double *, double *,
-                        int, int, char);
+void store_max_min_temp(atmos_data_struct *, double *, int *,
+                        double *, int *, int, int, char);
 void calc_water_balance_error(int, double, double, double);
 void calc_energy_balance_error(int, double, double, double, double, double);

@@ -56,6 +56,10 @@ void read_atmosdata(atmos_data_struct *temp,
 	temp[rec].tmax = temp[rec].tmin;
 	temp[rec].tmin = junk;
       }
+      if(rec>0) {
+	if(temp[rec-1].tmax<temp[rec].tmin) temp[rec].tmin=temp[rec-1].tmax;
+	if(temp[rec-1].tmin>temp[rec].tmax) temp[rec].tmax=temp[rec-1].tmin;
+      }
       rec++;
     }
 

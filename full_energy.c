@@ -32,6 +32,8 @@ void full_energy(int rec,
 
   static double tmax[3];
   static double tmin[3];
+  static int    tmax_hour[3];
+  static int    tmin_hour[3];
 
   char   RUN_TYPE;
   char   DONE;
@@ -80,6 +82,7 @@ void full_energy(int rec,
   double snow_flux;
   double throughfall;
   double Evap;
+  double air_temp[24];
   double tmp_energy_val;
   double tmp_throughfall;
   double tmp_shortwave;
@@ -96,6 +99,8 @@ void full_energy(int rec,
   double tmp_snowinflow;
   double tmp_snow_surf_temp;
   double tmp_snow_energy;
+  double tmp_vp;
+  double tmp_vpd;
   double *tmp_layerevap;
   atmos_data_struct tmp_atmos;
   layer_data_struct *tmp_layer;
@@ -119,7 +124,8 @@ void full_energy(int rec,
   }
 
   if(gp.dt == 24 && options.SNOW_MODEL) {
-    store_max_min_temp(atmos,tmax,tmin,rec,gp.nrecs,prcpdist);
+    store_max_min_temp(atmos,tmax,tmax_hour,tmin,tmin_hour,rec,
+		       gp.nrecs,prcpdist);
   }
       
   Nveg = veg_con[0].vegetat_type_num;
@@ -684,12 +690,23 @@ void full_energy(int rec,
             }
             else tmp_rain = 0.;
 
+	    HourlyT(1,tmax_hour,tmax,tmin_hour,tmin,air_temp);
+
             for(hour=0;hour<24/SNOW_STEP;hour++) {
 
 	      /** Snow melt model is solved using a time step of SNOW_STEP,
 	        Initialize parameters for the shorter time step **/
 
-              atmos->air_temp = calc_air_temperature(tmax,tmin,hour*SNOW_STEP);
+              atmos->air_temp = air_temp[hour];
+	      if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) {
+		tmp_vp     = atmos->vp;
+		tmp_vpd    = atmos->vpd;
+		atmos->vp  = atmos[1].vp;
+		atmos->vpd = atmos[1].vpd;
+	      }
+	      else if(atmos->air_temp<tmin[1]) {
+		vicerror("Air temperature estimate falls below daily minimum early in the day - currently uncorrected");
+	      }
               atmos->rainonly = calc_rainonly(atmos->air_temp,atmos->prec,
 					      gp.MAX_SNOW_TEMP,
 					      gp.MIN_RAIN_TEMP);
@@ -745,7 +762,7 @@ void full_energy(int rec,
 		  /** Canopy intercepts or stores snow **/
                   if(snow[iveg].snow) surf_temp = snow[iveg].surf_temp;
                   else surf_temp = atmos->air_temp;
-                  snow_intercept((double)gp.dt,1.,
+                  snow_intercept((double)SNOW_STEP,1.,
 				 veg_lib[veg_class].LAI[dmy[rec].month-1],
 				 veg_lib[veg_class].Wdmax[dmy[rec].month-1],
 				 cell[iveg].aero_resist[1],atmos->density,
@@ -765,7 +782,7 @@ void full_energy(int rec,
                   Evap = canopy_evap(cell[iveg].layer,&veg_var[iveg],
 				     TRUE,veg_class,dmy[rec].month,
 				     veg_var[iveg].Wdew,atmos->air_temp,
-				     (double)gp.dt,
+				     (double)SNOW_STEP,
 				     atmos->rad,atmos->vpd,atmos->net_short,
 				     atmos->air_temp,
 				     cell[iveg].aero_resist[0],rainfall,
@@ -871,6 +888,11 @@ void full_energy(int rec,
 			atmos->air_temp, snow[iveg].surf_temp, atmos->wind);
 	      }
 
+	      if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) {
+		atmos->vp  = tmp_vp;
+		atmos->vpd = tmp_vpd;
+	      }
+
             }
             atmos->longwave = tmp_longwave;
             atmos->rad = tmp_rad;
@@ -955,6 +977,8 @@ void full_energy(int rec,
         runoff(cell[iveg].layer, &energy[iveg],soil_con, &cell[iveg].runoff,
                &cell[iveg].baseflow,ppt,gp.dt,gp.Ulayer+gp.Llayer+2);
  
+	free((char *)tmp_layerevap);
+	free((char *)tmp_energy);
 
       } /** End Water Balance Model **/
   
@@ -1043,7 +1067,9 @@ void full_energy(int rec,
 
 void store_max_min_temp(atmos_data_struct *atmos,
                         double *tmax,
+			int    *tmax_hour,
                         double *tmin,
+			int    *tmin_hour,
                         int rec,
                         int Nrecs,
                         char prcpdist) {
@@ -1078,4 +1104,6 @@ void store_max_min_temp(atmos_data_struct *atmos,
       tmin[2] = atmos[1].tmin;
     }
   }
+  tmax_hour[0] = tmax_hour[1] = tmax_hour[2] = 15;
+  tmin_hour[0] = tmin_hour[1] = tmin_hour[2] = 5;
 }

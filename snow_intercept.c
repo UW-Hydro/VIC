@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Mon Jun 22 14:58:14 1998 by Bernt Viggo Matheussen <tempbvm@ce.washington.edu>
+ * LAST-MOD: Wed Jun 24 09:51:59 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -259,11 +259,11 @@ void snow_intercept(double Dt, double F,  double LAI,
   EsSnow = svp(*Tcanopy);
   *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow)/Ra;
   *VaporMassFlux /= RHO_W;
-
+/*****
 printf("
   AirTemp = %f    EactAir %f   EsSnow %f   Ra %f   AirDens %f   Press %f VaporMassFlux %f \n",
   Tair,           EactAir,     EsSnow,     Ra,      AirDens,     Press); 
-
+*****/
 
 
 

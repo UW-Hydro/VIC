@@ -5,7 +5,9 @@
 void rad_and_vpd (atmos_data_struct *atmos, 
 		  soil_con_struct    soil_con,
 		  int                nrecs, 
-		  dmy_struct        *dmy)
+		  dmy_struct        *dmy,
+		  double           **yearly_prec,
+		  double           **yearly_epot)
 /**********************************************************************
   rad_and_vpd           Dag Lohmann and Bart Nijssen            1995
 
@@ -30,58 +32,82 @@ void rad_and_vpd (atmos_data_struct *atmos,
 
   int    i, no_of_years;
   double deltat, tair, trans_clear, qdp;
-  double *yearly_prec, *yearly_epot;
   double shortwave;
 
   no_of_years = dmy[nrecs-1].year - dmy[0].year + 1;
 
-  yearly_prec = (double*) calloc(no_of_years, sizeof(double));
-  yearly_epot = (double*) calloc(no_of_years, sizeof(double));
+  yearly_prec[0] = (double*) calloc(no_of_years, sizeof(double));
+  yearly_epot[0] = (double*) calloc(no_of_years, sizeof(double));
 
   /** Compute Priestly Evaporation **/
   if(!options.FULL_ENERGY) {
     for (i = 0; i < nrecs; i++) {
       if ( i == (nrecs-1) )
-        deltat = atmos[i].tmax - atmos[i].tmin;
+	deltat = atmos[i].tmax - atmos[i].tmin;
       else
-        deltat = atmos[i].tmax - (atmos[i].tmin + atmos[i+1].tmin)/2.0;
+	deltat = atmos[i].tmax - (atmos[i].tmin + atmos[i+1].tmin)/2.0;
       deltat = (deltat < 0) ? -deltat : deltat;
       deltat = (deltat==0) ?  (atmos[i].tmax - atmos[i+1].tmin) : deltat;
       atmos[i].trans = calc_trans(deltat, soil_con.elevation);
       shortwave = calc_netshort(atmos[i].trans, dmy[i].day_in_year, 
-          soil_con.lat);
+				soil_con.lat);
       tair = (atmos[i].tmax + atmos[i].tmin) / 2.0;
       atmos[i].priest = priestley(tair, shortwave);
     }
   }
-
+  
   for (i = 0 ; i < nrecs; i++) {
-    yearly_prec[dmy[i].year-dmy[0].year] += atmos[i].prec;
-    yearly_epot[dmy[i].year-dmy[0].year] += atmos[i].priest;
+    yearly_prec[0][dmy[i].year-dmy[0].year] += atmos[i].prec;
+    yearly_epot[0][dmy[i].year-dmy[0].year] += atmos[i].priest;
   }
   trans_clear = A1_TRANS + A2_TRANS * soil_con.elevation;
-
+  
   for ( i = 0 ; i < nrecs ; i++) {
     tair = (atmos[i].tmax + atmos[i].tmin) / 2.0;
-    if (yearly_epot[dmy[i].year-dmy[0].year]/
-      yearly_prec[dmy[i].year-dmy[0].year] < HUMID_RATIO) {
-      qdp = svp(atmos[i].tmin);
-    }
-    else { 
-      qdp = svp(atmos[i].tmin) * 0.2 *
-               (pow((atmos[i].priest/yearly_prec[dmy[i].year-dmy[0].year]),
-               -0.1) - 0.83) - 0.016 * tair + 0.867;
-    }
+    qdp = estimate_vapor_pressure(dmy,yearly_epot[0],yearly_prec[0],
+				  atmos[i].tmin,tair,atmos[i].priest,i);
+    /*     if (yearly_epot[dmy[i].year-dmy[0].year]/ */
+    /*       yearly_prec[dmy[i].year-dmy[0].year] < HUMID_RATIO) { */
+    /*       qdp = svp(atmos[i].tmin); */
+    /*     } */
+    /*     else {  */
+    /*       qdp = svp(atmos[i].tmin) * 0.2 * */
+    /*                (pow((atmos[i].priest/yearly_prec[dmy[i].year-dmy[0].year]), */
+    /*                -0.1) - 0.83) - 0.016 * tair + 0.867; */
+    /*     } */
     atmos[i].vpd = (svp(tair) - qdp);
     atmos[i].vp = qdp;
+    atmos[i].rel_humid = 100. * atmos[i].vp / svp(tair);
+    
     if(!options.FULL_ENERGY) {
       atmos[i].shortwave = /* (1.0 - atmos[i].albedo) *  */
-          in_shortwave(soil_con.lat,dmy[i].day_in_year,atmos[i].trans);
+	in_shortwave(soil_con.lat,dmy[i].day_in_year,atmos[i].trans);
       atmos[i].longwave = -net_out_longwave(atmos[i].trans, trans_clear, tair,
-          qdp*1000.0,&atmos[i].tskc);
+					    qdp*1000.0,&atmos[i].tskc);
       atmos[i].rad = atmos[i].shortwave + atmos[i].longwave;
     }
   }
-  free((char *)yearly_prec);
-  free((char *)yearly_epot);
+}
+
+double estimate_vapor_pressure(dmy_struct *dmy,
+			       double     *yearly_epot,
+			       double     *yearly_prec,
+			       double      tmin,
+			       double      tair,
+			       double      priest,
+			       int         day) {
+
+  double qdp;
+
+   if (yearly_epot[dmy[day].year-dmy[0].year]/ 
+       yearly_prec[dmy[day].year-dmy[0].year] < HUMID_RATIO) { 
+     qdp = svp(tmin); 
+   } 
+   else {  
+     qdp = svp(tmin) * 0.2 * 
+       (pow((priest/yearly_prec[dmy[day].year-dmy[0].year]), 
+ 	   -0.1) - 0.83) - 0.016 * tair + 0.867; 
+   } 
+
+  return(qdp);
 }

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Tue Jul 28 09:50:40 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Thu Sep  3 15:59:59 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -86,8 +86,12 @@ void snow_intercept(double Dt, double F,  double LAI,
 		    double Vpd, double Wind,  double *RainFall,
 		    double *SnowFall, double *IntRain, double *IntSnow,
 		    double *TempIntStorage, double *VaporMassFlux,
-		    double *Tcanopy, double *MeltEnergy, int month, int rec)
+		    double *Tcanopy, double *MeltEnergy, int month, int rec,
+		    int hour)
 {
+  extern option_struct options;
+  FILE *ftmp;
+
   const char *Routine = "SnowInterception";
   double AdvectedEnergy;         /* Energy advected by the rain (W/m2) */
   double BlownSnow;              /* Depth of snow blown of the canopy (m) */
@@ -263,9 +267,13 @@ void snow_intercept(double Dt, double F,  double LAI,
   /* Calculate the vapor mass flux between the canopy and the surrounding 
      air mass */
   
-  EsSnow = svp(*Tcanopy);
-  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / Ra;
-  *VaporMassFlux /= RHO_W;
+  EsSnow = svp(*Tcanopy); 
+  if (*Tcanopy < 0.0)
+    EsSnow *= 1.0 + .00972 * *Tcanopy + .000042 
+      * pow((double)*Tcanopy,(double)2.0);
+  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / Ra; 
+  *VaporMassFlux /= RHO_W; 
+
 /*****
 printf("
   AirTemp = %f    EactAir %f   EsSnow %f   Ra %f   AirDens %f   Press %f VaporMassFlux %f \n",
@@ -275,6 +283,18 @@ printf("
   if (Vpd == 0.0 && *VaporMassFlux < 0.0)
     *VaporMassFlux = 0.0;
   
+  ftmp = fopen("canopy_intercept.out","a");
+  if(!options.FULL_ENERGY)
+    fprintf(ftmp,"%f %f %f %f %f %f %f %f %f %f\n",
+	    (float)rec+(float)hour/24., Tair, EactAir, EsSnow, Ra, 
+	    AirDens, Press, Shortwave, Longwave, 
+	    *VaporMassFlux * Dt * SECPHOUR); 
+  else
+    fprintf(ftmp,"%f %f %f %f %f %f %f %f %f %f\n",
+	    (float)rec/24., Tair, EactAir, EsSnow, Ra, AirDens, 
+	    Press, Shortwave, Longwave, *VaporMassFlux * Dt * SECPHOUR); 
+  fclose(ftmp);
+
   /* Calculate the latent heat flux */
 
   Ls = (677. - 0.07 * *Tcanopy) * 4.1868 * 1000.;

@@ -48,6 +48,8 @@ void main(int argc, char *argv[])
   int     Ncells;
   int     cell_cnt;
   double *mu;
+  double *yearly_prec;
+  double *yearly_epot;
   double  storage;
   dmy_struct *dmy;
   atmos_data_struct *atmos;
@@ -163,7 +165,8 @@ void main(int argc, char *argv[])
 		       soil_con.Tfactor,global_param.nrecs,global_param.dt);
 
       if(!options.FULL_ENERGY)
-        rad_and_vpd(atmos,soil_con,global_param.nrecs,dmy);
+        rad_and_vpd(atmos,soil_con,global_param.nrecs,dmy,
+		    &yearly_prec,&yearly_epot);
 
       /**************************************************
          Initialize Energy Balance and Snow Variables 
@@ -210,7 +213,7 @@ void main(int argc, char *argv[])
 
         dist_prec(&atmos[rec],&prcp,soil_con,veg_con,
                   dmy,global_param,outfiles,rec,cellnum,
-                  NEWCELL,LASTREC);
+                  NEWCELL,LASTREC,yearly_prec,yearly_epot);
         NEWCELL=FALSE;
 
       }	/* End Rec Loop */
@@ -231,6 +234,10 @@ void main(int argc, char *argv[])
 	free((char*)soil_con.alpha);
 	free((char*)soil_con.beta);
 	free((char*)soil_con.gamma);
+      }
+      if(!options.FULL_ENERGY) {
+	free((char *)yearly_prec);
+        free((char *)yearly_epot);
       }
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */

@@ -79,7 +79,10 @@ double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 		 double, double, double, double, double, double);
 
 /** Radiation Routines **/
-void rad_and_vpd(atmos_data_struct *, soil_con_struct, int, dmy_struct *);
+void rad_and_vpd(atmos_data_struct *, soil_con_struct, int, dmy_struct *,
+		 double **, double **);
+double estimate_vapor_pressure(dmy_struct *,double *,double *,double,
+			       double,double,int);
 double calc_trans(double, double);
 double calc_netshort(double, int, double);
 void calc_long_shortwave(double *, double *, double *, double,
@@ -200,17 +203,17 @@ double StabilityCorrection(double, double, double, double, double, double);
 void snow_intercept(double, double, double, double, double, double, double,
 		    double, double, double, double, double, double, double,
                     double *, double *, double *, double *,
-                    double *, double *, double *, double *, int, int);
+                    double *, double *, double *, double *, int, int, int);
 void MassRelease(double *,double *,double *,double *);
 
 /** Full Energy Balance Routines **/
 void dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct,
                veg_con_struct *,dmy_struct *,global_param_struct,
-               outfiles_struct,int,int,char,char);
+               outfiles_struct,int,int,char,char,double *,double *);
 void full_energy(int,atmos_data_struct *,soil_con_struct,
                  veg_con_struct *, dist_prcp_struct *,
                  dmy_struct *,global_param_struct,int,char,
-		 double *,double *,double *);
+		 double *,double *,double *,double *,double *);
 void store_moisture_for_debug(int,int,double *,cell_data_struct ***,
 			      veg_var_struct ***,snow_data_struct **,
 			      soil_con_struct);
@@ -255,7 +258,7 @@ double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
 /**double calc_air_temperature(double *, double *, int);**/
-void HourlyT(int,int *,double *,int *,double *,double *);
+double HourlyT(int,int *,double *,int *,double *,double *);
 double hermint(double, int, double *, double *, double *, double *, double *);
 void hermite(int, double *, double *, double *, double *, double *);
 double calc_rainonly(double,double,double,double);

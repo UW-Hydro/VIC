@@ -63,7 +63,7 @@ double ErrorPrintSnowPackEnergyBalance(double, va_list);
 double error_print_solve_T_profile(double, va_list);
 double error_print_surf_energy_bal(double, va_list);
 double error_solve_T_profile(double Tsurf, ...);
-double estimate_dew_point(dmy_struct *,double *,double *,double,
+double estimate_dew_point(dmy_struct *,double *,double,
 			  double,double,double,int);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);

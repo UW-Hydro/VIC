@@ -4,6 +4,10 @@
 #include <vicNl.h>
 #include <global.h>
 
+#ifndef lint
+static char vcid[] = "$Id$";
+#endif /* lint */
+
 /** Main Program **/
 
 void main(int argc, char *argv[])
@@ -62,6 +66,8 @@ void main(int argc, char *argv[])
   filenames_struct builtnames;
   infiles_struct infiles;
   outfiles_struct outfiles;
+
+  fprintf(stderr,"Running Model Version: %s\n",vcid);
 
   /** Read Model Options **/
   initialize_global();

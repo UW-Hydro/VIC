@@ -10,6 +10,15 @@
 New Features:
 -------------
 
+Improved validation of global options
+
+	Files affected:
+	get_global_param.c
+
+	Description:
+	Now does not allow bad combinations of FULL_ENERGY, FROZEN_SOIL, and
+	GRND_FLUX values.
+
 
 Bug Fixes:
 ----------

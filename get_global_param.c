@@ -37,6 +37,7 @@ global_param_struct get_global_param(filenames_struct *names,
            new Arno parameters.                           KAC
   11-May-04 Modified to display compile-time and run-time options
 	    if VERBOSE is set to TRUE.			TJB
+  13-Oct-04 Added validation for GRND_FLUX option.              TJB
 
 **********************************************************************/
 {
@@ -501,6 +502,18 @@ global_param_struct get_global_param(filenames_struct *names,
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlaeyrs is set to  %i.",options.Nlayer);
+    nrerror(ErrStr);
+  }
+  if(!options.FULL_ENERGY && !options.FROZEN_SOIL && options.GRND_FLUX) {
+    sprintf(ErrStr,"Both FULL_ENERGY and FROZEN_SOIL are FALSE, but GRND_FLUX is TRUE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
+    nrerror(ErrStr);
+  }
+  if(options.FULL_ENERGY && !options.GRND_FLUX) {
+    sprintf(ErrStr,"FULL_ENERGY is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
+    nrerror(ErrStr);
+  }
+  if(options.FROZEN_SOIL && !options.GRND_FLUX) {
+    sprintf(ErrStr,"FROZEN_SOIL is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
     nrerror(ErrStr);
   }
   if(options.SNOW_BAND > MAX_BANDS) {

@@ -27,7 +27,7 @@ static char vcid[] = "$Id$";
 
 #define CLOSURE 4000		/** Pa **/
 #define RSMAX 5000
-#define RGL	50 		/** limit value for solar radiation -> 30W/m^3 forest,
+#define RGL	100  /* 50 */ 		/** limit value for solar radiation -> 30W/m^3 forest,
 					100 W/m^2 crop **/
 #define VPDMINFACTOR 0.1
 
@@ -46,20 +46,22 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
   double Tfactor;		/* factor for canopy resistance based on temperature */
   double vpdfactor;		/* factor for canopy resistance based on vpd */
   double DAYfactor;		/* factor for canopy resistance based on photosynthesis */
+  double f;
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
   slope = svp_slope(tair)*1000;
 
   /* calculate resistance factor (Wigmosta et al., 1994) */
 
-/***** Turns off too much transpiration
+/***** Turns off too much transpiration - TESTING FACTOR **/
   if(rs>0.) {
-    f = 0.55 * net_short / RGL * 2. / lai;
+/*     f = 0.55 * net_short / RGL * 2. / lai; */
+    f = net_short / RGL;
     DAYfactor = (1. + f)/(f + rs/RSMAX);
   }
   else DAYfactor = 1.;
-*****/
-  DAYfactor = 1.;
+/*****/
+/*   DAYfactor = 1.; */
 
   Tfactor = .08 * tair - 0.0016 * pow(tair,2.0);
   Tfactor = (Tfactor <= 0.0) ? 1e-10 : Tfactor;

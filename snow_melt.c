@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Thu Oct  1 18:17:59 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Fri Oct 16 13:41:13 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -204,11 +204,11 @@ void snow_melt(soil_con_struct   soil_con,
   if (Qnet == 0.0) {
     snow->surf_temp = 0.0;
     if (RefreezeEnergy >= 0.0) {
-      RefrozenWater = RefreezeEnergy/(Lf * WaterDensity(snow->surf_temp)) 
+      RefrozenWater = RefreezeEnergy/(Lf * RHO_W) 
           * delta_t * SECPHOUR; 
       if (RefrozenWater > snow->surf_water) {
         RefrozenWater = snow->surf_water;
-        RefreezeEnergy = RefrozenWater * Lf * WaterDensity(snow->surf_temp)/
+        RefreezeEnergy = RefrozenWater * Lf * RHO_W/
           (delta_t * SECPHOUR);
       } 
       melt_energy  += RefreezeEnergy;
@@ -221,7 +221,7 @@ void snow_melt(soil_con_struct   soil_con,
     else {
       
       /* Calculate snow melt */      
-      SnowMelt = fabs(RefreezeEnergy)/(Lf * WaterDensity(snow->surf_temp)) * 
+      SnowMelt = fabs(RefreezeEnergy)/(Lf * RHO_W) * 
         delta_t * SECPHOUR;
       melt_energy += RefreezeEnergy;
     }
@@ -327,7 +327,7 @@ void snow_melt(soil_con_struct   soil_con,
     Ice        += snow->surf_water;
     snow->surf_water  = 0.0;
     melt_energy += snow->surf_water * Lf 
-                       * WaterDensity(snow->surf_temp)/(delta_t * SECPHOUR);
+                       * RHO_W/(delta_t * SECPHOUR);
     
     /* Convert mass flux to a depth per timestep and adjust SurfaceSwq */
     
@@ -368,7 +368,7 @@ void snow_melt(soil_con_struct   soil_con,
   
   snow->pack_water += melt[0]; /* add surface layer outflow to pack 
                                       liquid water*/
-  RefreezeEnergy = snow->pack_water * Lf * WaterDensity(snow->pack_temp);
+  RefreezeEnergy = snow->pack_water * Lf * RHO_W;
 
   /* calculate energy released to freeze*/
   
@@ -376,8 +376,11 @@ void snow_melt(soil_con_struct   soil_con,
     PackSwq   += snow->pack_water;    /* refreeze all water and update*/
     Ice       += snow->pack_water;
     snow->pack_water = 0.0;
-    if (PackSwq > 0.0)
-      snow->pack_temp = (PackCC + RefreezeEnergy) / (CH_ICE * PackSwq);
+    if (PackSwq > 0.0) {
+      PackCC = PackSwq * CH_ICE * snow->pack_temp + RefreezeEnergy;
+      snow->pack_temp = PackCC / (CH_ICE * PackSwq);
+      if(snow->pack_temp > 0.) snow->pack_temp = 0.;
+    }
     else 
       snow->pack_temp = 0.0;
   }
@@ -389,7 +392,7 @@ void snow_melt(soil_con_struct   soil_con,
        The refrozen water is added to PackSwq and Ice */
 
     snow->pack_temp      = 0.0;    
-    DeltaPackSwq = -PackCC/(Lf * WaterDensity(snow->pack_temp)); 
+    DeltaPackSwq = -PackCC/(Lf * RHO_W); 
     snow->pack_water -= DeltaPackSwq;
     PackSwq += DeltaPackSwq;
     Ice += DeltaPackSwq;

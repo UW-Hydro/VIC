@@ -13,6 +13,8 @@ static char vcid[] = "$Id$";
                                    taken from SNTHRM.89 (/C)*/
 #define C6         .021         /* constant used in snow viscosity calculation,
                                    taken from SNTHRM.89 (kg/m3) */
+#define MAX_CHANGE 0.9          /* maximum fraction of snowpack depth change
+				   caused by new snow */
 
 double snow_density(int date,
                     double new_snow,
@@ -39,6 +41,11 @@ double snow_density(int date,
 	depth		m	snow pack depth
 	density            kg/m^3   snow density
 
+  Modified:
+  08-19-99 Added check to make sure that the change in snowpack depth
+           due to new snow does not exceed the actual depth of the 
+	   pack.                                               Bart
+
 **********************************************************************/
 
   double density;
@@ -63,6 +70,11 @@ double snow_density(int date,
       delta_depth = ( ((new_snow / 25.4) * (depth / 0.0254)) / (swq / 0.0254)
                     * pow( (depth / 0.0254) / 10., 0.35) ) * 0.0254;
   
+      /* Check put in by Bart Nijssen Sat Aug  7 17:00:52 1999  delta_depth
+	 CANNOT be greater than depth */
+      if (delta_depth >= depth)
+	delta_depth = MAX_CHANGE * depth;
+      
       depth_new = new_snow / density_new;
   
       depth = depth - delta_depth + depth_new;
@@ -143,3 +155,4 @@ double snow_albedo(double new_snow,
 #undef G
 #undef C5     
 #undef C6
+#undef MAX_CHANGE

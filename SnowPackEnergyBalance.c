@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Thu Apr  8 10:05:31 1999 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Tue Jul  6 16:15:57 1999 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -171,7 +171,8 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   /* Calculate longwave exchange and net radiation */
  
-  LongRadOut = STEFAN * pow((double) (TMean+273.15), (double) 4.0);
+  LongRadOut = STEFAN * (TMean+273.15) * (TMean+273.15) 
+    * (TMean+273.15) * (TMean+273.15);
   NetRad = SurfAttenuation * ShortRad + LongRadIn - LongRadOut;
   
   /* Calculate the sensible heat flux */
@@ -219,7 +220,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   /* Calculate Ground Heat Flux */
   if(SnowDepth>0. && options.CALC_SNOW_FLUX) {
-    *GroundFlux = 2.9302e-6 * pow(SnowDensity, 2.0) 
+    *GroundFlux = 2.9302e-6 * SnowDensity * SnowDensity
         * (TGrnd - TMean) / SnowDepth;
   }
   else *GroundFlux=0;

@@ -242,7 +242,6 @@ void write_data(out_data_struct *out_data,
     tmp_fptr[0] = (float)out_data->sub_snow;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     if(options.FULL_ENERGY) {
-      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
       tmp_fptr[0] = (float)out_data->sensible;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
       tmp_fptr[0] = (float)out_data->grnd_flux;

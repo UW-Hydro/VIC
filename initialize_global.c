@@ -1,4 +1,4 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vicNl.h>
@@ -90,6 +90,7 @@ void initialize_global() {
   options.MIN_WIND_SPEED        = 0.0;
   options.NOFLUX                = FALSE;
   options.FS_FLUXES             = FALSE;
+  options.GLOBAL_LAI            = FALSE;
 
 #if LINK_DEBUG 
   debug.DEBUG       = FALSE;

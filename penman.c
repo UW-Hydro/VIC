@@ -27,13 +27,11 @@ static char vcid[] = "$Id$";
 
 #define CLOSURE 4000		/** Pa **/
 #define RSMAX 5000
-#define RGL	100  /* 50 */ 		/** limit value for solar radiation -> 30W/m^3 forest,
-					100 W/m^2 crop **/
 #define VPDMINFACTOR 0.1
 
 double penman(double rad, double vpd, double ra, double rs, double rarc, 
 	      double lai, double gsm_inv, double tair, double tsurf, 
-              double net_short, float elevation)
+              double net_short, float elevation, float RGL)
 {
   double evap;			/* Penman-Monteith evapotranspiration */
   double slope;			/* slope of saturated vapor pressure curve */
@@ -51,7 +49,7 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
   slope = svp_slope(tair)*1000;
 
-  /* calculate resistance factor (Wigmosta et al., 1994) */
+  /* calculate resistance factors (Wigmosta et al., 1994) */
 
   if(rs>0.) {
     f = net_short / RGL;

@@ -152,7 +152,8 @@ double canopy_evap(layer_data_struct *layer_wet,
 					(double) 0.0, veg_lib[veg_class].rarc,
 					veg_lib[veg_class].LAI[month-1], 
 					(double) 1.0, air_temp, evap_temp, 
-					net_short, elevation) * dt / 24.0;
+					net_short, elevation, 
+					veg_lib[veg_class].RGL) * dt / 24.0;
 
     if (canopyevap > 0.0 && dt==24)
       /** If daily time step, evap can include current precipitation **/
@@ -312,7 +313,7 @@ void transpiration(layer_data_struct *layer,
            veg_lib[veg_class].rmin,
            veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
            gsm_inv, air_temp, evap_temp,
-           net_short, elevation) * dt / 24.0 *
+           net_short, elevation, veg_lib[veg_class].RGL) * dt / 24.0 *
            (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
            (2.0/3.0)));
 
@@ -373,7 +374,7 @@ void transpiration(layer_data_struct *layer,
                  veg_lib[veg_class].rmin,
                  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
                  gsm_inv, air_temp, evap_temp, 
-                 net_short, elevation) 
+                 net_short, elevation, veg_lib[veg_class].RGL) 
                  * dt / 24.0 * (double)root[i] 
                  * (1.0-f*pow((Wdew/
                  veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0)));

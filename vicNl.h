@@ -143,7 +143,7 @@ void   open_debug();
 FILE  *open_file(char string[], char type[]);
 
 double penman(double, double, double, double, double, double, double, double,
-              double, double, float);
+              double, double, float, float);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			 soil_con_struct, double *, double *);
 double priestley(double, double);

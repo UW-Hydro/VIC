@@ -67,7 +67,7 @@ void lakemain(atmos_data_struct *, lake_con_struct, double, double,
 void latsens(double,double, double, double, double, double, double, double,
 	     double *, double *, double);
 float lkdrag(float, double, double, double, double);
-lake_con_struct read_lakeparam(FILE *, soil_con_struct, float, double *);
+lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *, float);
 void rhoinit(double *, double);
 void solve_lake(double, double, double, double, double, double, double, double, 
 		double, double, double, lake_var_struct *, lake_con_struct, 

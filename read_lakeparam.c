@@ -9,8 +9,8 @@ static char vcid[] = "$Id$";
 
 lake_con_struct read_lakeparam(FILE            *lakeparam, 
 			       soil_con_struct  soil_con, 
-			       float            res,
-			       double          *Cv_sum)
+			       veg_con_struct  *veg_con, 
+			       float            res)
 /**********************************************************************
 	read_lakeparam		Laura Bowling		2000
 
@@ -42,6 +42,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   03-11-01 Modified Cv_sum so that it includes the lake fraction,
 	   thus 1 - Cv_sum is once again the bare soil fraction.  KAC
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+  02-Nov-04 Modified the adjustment of Cv_sum so that veg fractions
+	    share in area reduction along with the lake fraction.	TJB
   
 **********************************************************************/
 
@@ -195,12 +197,16 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 	 }
 
   // Add lake fraction to Cv_sum
-  (*Cv_sum) += temp.Cl[0];
-  if ( *Cv_sum > 0.999 ) {
-    // Adjust Cv_sum so that it is equal to 1 
-    temp.Cl[0] += 1. - *Cv_sum;
-    *Cv_sum = 1;
+  (veg_con[0].Cv_sum) += temp.Cl[0];
+  if ( veg_con[0].Cv_sum > 0.999 ) {
+    // Adjust Cv_sum so that it is equal to 1
+    fprintf(stderr,"WARNING: Total Cv of veg fractions and lake fraction exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", temp.gridcel);
+    for( i = 0; i < veg_con[0].vegetat_type_num; i++ )
+      veg_con[i].Cv = veg_con[i].Cv / veg_con[0].Cv_sum;
+    temp.Cl[0] = temp.Cl[0] / veg_con[0].Cv_sum;
+    veg_con[0].Cv_sum = 1;
   }
+
   fprintf(stderr, "Lake area = %e km2\n",temp.basin[0]/(1000.*1000.));
   return temp;
 }

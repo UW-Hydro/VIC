@@ -47,6 +47,7 @@ void put_data(char              *AboveTreeLine,
            when output of snow bands is selected.                  KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
+  30-Oct-03 Snow_flux was incorrectly set to Tcanopy.  Fixed.	TJB
 
 **********************************************************************/
 {
@@ -441,8 +442,8 @@ void put_data(char              *AboveTreeLine,
 	  
 	  /** record snow energy flux **/
 	  out_data->snow_flux[0]         
-/* 	    += energy[veg][band].snow_flux * Cv * AreaFract[band]; */
-	    += energy[veg][band].Tcanopy * Cv * AreaFract[band] * TreeAdjustFactor[band];
+ 	    += energy[veg][band].snow_flux * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	  /*  += energy[veg][band].Tcanopy * Cv * AreaFract[band] * TreeAdjustFactor[band]; */
 	  
 	  /** record refreeze energy **/
 	  if ( snow[veg][band].snow && overstory ) {

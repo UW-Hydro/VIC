@@ -47,8 +47,8 @@ FILE *check_state_file(char                *init_state,
   else 
     statefile = open_file(init_state,"r");
 
-  // Initialize startrec
-  (*startrec) = 0;
+  /* Initialize startrec */
+  *startrec = 0;
 
   /* Check state date information */
   if ( options.BINARY_STATE_FILE ) {
@@ -59,9 +59,6 @@ FILE *check_state_file(char                *init_state,
   else {
     fscanf(statefile,"%i %i %i\n", &startyear, &startmonth, &startday);
   }
-  while ( startday != dmy[*startrec].day || startmonth != dmy[*startrec].month 
-	  || startyear != dmy[*startrec].year || dmy[*startrec].hour != 0 ) 
-    (*startrec)++;
 
   /* Check simulation options */
   if ( options.BINARY_STATE_FILE ) {

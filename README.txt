@@ -47,6 +47,11 @@ Modifications:
 	  Added check for LINK_DEBUG global option.  If LINK_DEBUG is
 	  TRUE atmospheric data is not dynamically allocated, so it
 	  should not be freed.					KAC
+	check_state_file.c:
+	  No longer adjusts startrec to match the date stored in the
+	  state file.  Now the simulation will always start on the
+	  start date given in the global parameter file, regardless
+	  of the date when the state file was saved.		TJB
 	close_files.c, make_in_and_outfiles.c:
 	  Distinguishing between input lakeparam file and output
 	  lake file.						TJB

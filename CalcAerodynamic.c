@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Thu Mar 27 18:00:10 1997
- * LAST-MOD: Mon Sep 28 16:21:33 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Mon Aug 16 10:23:53 1999 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate the aerodynamic resistances
  * DESCRIP-END.
  * FUNCTIONS:    CalcAerodynamic()
@@ -198,17 +198,23 @@ void CalcAerodynamic(char   OverStory,
   if(tmp_wind>0.) {
     U[0] *= tmp_wind;
     Ra[0] /= tmp_wind;
-    U[1] *= tmp_wind;
-    Ra[1] /= tmp_wind;
-    U[2] *= tmp_wind;
-    Ra[2] /= tmp_wind;
+    if(U[1]!=-999) {
+      U[1] *= tmp_wind;
+      Ra[1] /= tmp_wind;
+    }
+    if(U[2]!=-999) {
+      U[2] *= tmp_wind;
+      Ra[2] /= tmp_wind;
+    }
   }
   else {
     U[0] *= tmp_wind;
     Ra[0] = HUGE_RESIST;
-    U[1] *= tmp_wind;
+    if(U[1]!=-999)
+      U[1] *= tmp_wind;
     Ra[1] = HUGE_RESIST;
-    U[2] *= tmp_wind;
+    if(U[2]!=-999)
+      U[2] *= tmp_wind;
     Ra[2] = HUGE_RESIST;
   }
 }

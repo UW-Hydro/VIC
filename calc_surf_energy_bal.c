@@ -208,8 +208,8 @@ double calc_surf_energy_bal(char               CALC_EVAP,
   /**************************************************
     Find Surface Temperature Using Root Brent Method
   **************************************************/
-  surf_temp = root_brent(0.5*(energy->T[0]+atmos->air_temp)+25.,
-			 0.5*(energy->T[0]+atmos->air_temp)-25.,
+  surf_temp = root_brent(0.5*(energy->T[0]+atmos->air_temp)+SURF_DT,
+			 0.5*(energy->T[0]+atmos->air_temp)-SURF_DT,
 			 func_surf_energy_bal,T2,Ts_old,T1_old,Tair,ra,
 			 atmos_density,shortwave,longwave,albedo,emissivity,
 			 kappa1,kappa2,Cs1,Cs2,D1,D2,dp,delta_t,Le,Ls,Vapor,
@@ -563,7 +563,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
 	      moist_node[i],expt_node[i],max_moist_node[i],ice_node[i]);
   }
 
-  vicerror("Finished writing calc_surf_energy_bal variables");
+  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.");
 
   return(0.0);
     

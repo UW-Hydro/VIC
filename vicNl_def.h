@@ -12,8 +12,13 @@
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 
 #define SECPHOUR     3600	/* seconds per hour */
-#define DELTAT       75.	/* Used in SensibleHeatFlux to bracket the 
-                                   effective surface temperature (C) */
+#define SNOW_DT       75.	/* Used to bracket snow surface temperatures
+				   while computing the snow surface energy 
+				   balance (C) */
+#define SURF_DT       50.	/* Used to bracket soil surface temperatures 
+                                   while computing energy balance (C) */
+#define SOIL_DT       5.        /* Used to bracket soil temperatures while
+                                   solving the soil thermal flux (C) */
 #define HOURSPERDAY  24         /* number of hours per day */
 
 /***** Physical Constraints *****/

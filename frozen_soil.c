@@ -293,7 +293,7 @@ void solve_T_profile(double *T,
 	     + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat);
       }
       else {
-        T[j] = root_brent(T0[j]-5.,T0[j]+5.,soil_thermal_eqn, T[j+1],
+        T[j] = root_brent(T0[j]-SOIL_DT,T0[j]+SOIL_DT,soil_thermal_eqn, T[j+1],
 			  T[j-1], T0[j], kappa[j], kappa[j+1], kappa[j-1], 
 			  Cs[j], deltat, moist[j], max_moist[j], bubble, 
 			  expt[j], ice[j], alpha[j-1]*alpha[j-1], 
@@ -394,7 +394,7 @@ double error_print_solve_T_profile(double T, va_list ap) {
   fprintf(stderr,"gamma\t%lf\n",gamma);
   fprintf(stderr,"fprime\t%lf\n",fprime);
 
-  vicerror("Finished dumping values for solve_T_profile");
+  vicerror("Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.");
 
 }
 

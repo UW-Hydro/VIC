@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Fri Oct 16 13:41:13 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Mon Jan  4 11:59:42 1999 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -271,7 +271,7 @@ void snow_melt(soil_con_struct   soil_con,
 
     vapor_flux = snow->vapor_flux;
 
-    snow->surf_temp = root_brent((double)(snow->surf_temp-DELTAT), 
+    snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				 (double)0.0,
 				 SnowPackEnergyBalance, delta_t, 
 				 aero_resist, z2, 
@@ -617,7 +617,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"SensibleHeat = %lf\n",SensibleHeat[0]);
   fprintf(stderr,"TMean = %lf\n",TMean[0]);
   
-  vicerror("Finished dumping snow_melt variables");
+  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
 
   return(0.0);
 

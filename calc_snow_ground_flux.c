@@ -115,7 +115,7 @@ double calc_snow_ground_flux(int                dt,
   /**************************************************
     Find Surface Temperature using Root Brent Method
   **************************************************/
-  surf_temp = root_brent(energy->T[0]-25., 0., func_snow_ground_flux,
+  surf_temp = root_brent(energy->T[0]-SURF_DT, 0., func_snow_ground_flux,
 			 T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
 			 delta_t, snow_density, snow_depth, Tsnow_surf,
 			 D1, D2, dp,moist, ice0, max_moist, bubble, expt,
@@ -313,7 +313,7 @@ double error_print_snow_ground_flux(double Ts, va_list ap) {
 	    i,T_node[i],Tnew_node[i],dz_node[i],kappa_node[i],Cs_node[i],
 	    moist_node[i],expt_node[i],max_moist_node[i],ice_node[i]);
 
-  vicerror("Finished Dumping calc_snow_ground_flux variables");
+  vicerror("Finished Dumping calc_snow_ground_flux variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.");
 
 }
 

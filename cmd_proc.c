@@ -28,7 +28,6 @@ filenames_struct cmd_proc(int argc, char *argv[])
   extern int getopt();
   extern char *optarg;
   extern char *optstring;
-  extern char *version;
 
   filenames_struct names;
   int              optchar;
@@ -45,7 +44,12 @@ filenames_struct cmd_proc(int argc, char *argv[])
     switch((char)optchar) {
     case 'v':
       /** Version information **/
-      fprintf(stdout,"%s\n",version);
+      display_current_settings(DISP_VERSION,(filenames_struct*)NULL,(global_param_struct*)NULL);
+      exit(0);
+      break;
+    case 'o':
+      /** Compile-time options information **/
+      display_current_settings(DISP_COMPILE_TIME,(filenames_struct*)NULL,(global_param_struct*)NULL);
       exit(0);
       break;
     case 'g':
@@ -79,7 +83,11 @@ void usage(char *temp)
 
 **********************************************************************/
 {
-  fprintf(stderr,"Usage: %s [-v | -g<global_parameter_file>]\n",temp);
+  fprintf(stderr,"Usage: %s [-v | -o | -g<global_parameter_file>]\n",temp);
   fprintf(stderr,"  v: display version information\n");
-  fprintf(stderr,"  g: read model parameters from <global_parameter_file>.\n     <global_parameter_file> is a file that contains all needed model\n     parameters as well as model option flags, and the names and\n     locations of all other files.\n");
+  fprintf(stderr,"  o: display compile-time options settings (set in user_def.h)\n");
+  fprintf(stderr,"  g: read model parameters from <global_parameter_file>.\n");
+  fprintf(stderr,"       <global_parameter_file> is a file that contains all needed model\n");
+  fprintf(stderr,"       parameters as well as model option flags, and the names and\n");
+  fprintf(stderr,"       locations of all other files.\n");
 }

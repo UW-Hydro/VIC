@@ -76,6 +76,7 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, double *, 
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
+void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
 		 outfiles_struct *,int,int,char,char, char, int);

@@ -146,7 +146,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 		+ sizeof(double) // ldepth
 		+ sizeof(double) // sarea
 		+ sizeof(double) // dz
-//		+ sizeof(double) // surfdz
+		+ sizeof(double) // surfdz
 		+ lake_con.numnod * sizeof(double) // surface
 		+ sizeof(double) // tp_in
 		+ sizeof(double) // tempavg

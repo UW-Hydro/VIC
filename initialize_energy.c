@@ -64,10 +64,10 @@ void initialize_energy_bal (energy_bal_struct  **energy,
   int    band;
   int    zindex;
   double sum, Lsum, Zsum, dp, Ltotal;
+  double tmpdp, tmpadj;
   double *kappa, *Cs, *M;
   double moist[MAXlayer], ice[MAXlayer];
   double unfrozen, frozen;
-  double *thermdepths;
   double **layer_ice;
 
   dp = soil_con[0].dp;
@@ -200,8 +200,6 @@ void initialize_energy_bal (energy_bal_struct  **energy,
       }
     }
 
-    free((char *)thermdepths);
-
   }
 
   /****************************************************************************
@@ -239,8 +237,6 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 
       }
     }
-    
-    free((char *)thermdepths);
     
   }
 
@@ -296,16 +292,27 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  Initialize Soil Layer Depths and Temperatures
 	************************************************/
 	Zsum = soil_con[0].depth[0];
-	dp -= soil_con[0].depth[0] * 1.5;
-	for(index=2;index<Nnodes;index++) {
-	  energy[veg][band].dz[index] = dp/(((double)Nnodes-2.5));
+	if(dp <= Ltotal) {
+	  tmpdp  = dp - soil_con[0].depth[0] * 1.5;
+	  tmpadj = 2.5;
+	}
+	else {
+	  tmpdp  = Ltotal - soil_con[0].depth[0] * 1.5;
+	  tmpadj = 3.5;
+	}
+	for(index=2;index<Nnodes-1;index++) {
+	  energy[veg][band].dz[index] = tmpdp/(((double)Nnodes-tmpadj));
 	  Zsum += (energy[veg][band].dz[index]
 		   +energy[veg][band].dz[index-1])/2.;
 	  energy[veg][band].T[index] = linear_interp(Zsum,0.,soil_con[0].dp,
 						     surf_temp,
 						     soil_con[0].avg_temp);
 	}
-	dp += soil_con[0].depth[0] * 1.5;
+	energy[veg][band].dz[Nnodes-1] = (dp - Zsum 
+					  - energy[veg][band].dz[Nnodes-2] 
+					  / 2. ) * 2.;
+	Zsum += (energy[veg][band].dz[Nnodes-2]
+		 +energy[veg][band].dz[Nnodes-1])/2.;
 	if((int)(Zsum*1000+0.5) != (int)(dp*1000+0.5)) {
 	  sprintf(ErrStr,"Sum of thermal node thicknesses (%lf) in initialize_energy_bal do not equal dp (%lf), check initialization procedure",Zsum,dp);
 	  nrerror(ErrStr);
@@ -313,7 +320,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	
 	for(dry=0;dry<Ndist;dry++) {
 	  find_0_degree_fronts(&energy[veg][band],
-			       cell[dry][veg][band].layer,Ltotal,
+			       cell[dry][veg][band].layer,dp,
 			       soil_con[0].depth,energy[veg][band].T,
 			       options.Nlayer,
 			       Nnodes);
@@ -321,7 +328,8 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  find_sublayer_temperatures(cell[dry][veg][band].layer,
 				     energy[veg][band].T,
 				     energy[veg][band].dz,
-				     soil_con[0].depth,energy[veg][band].fdepth[0],
+				     soil_con[0].depth,
+				     energy[veg][band].fdepth[0],
 				     energy[veg][band].fdepth[1],
 				     options.Nlayer,Nnodes);
 	  

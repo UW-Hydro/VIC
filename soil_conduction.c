@@ -316,7 +316,8 @@ void soil_thermal_calc(soil_con_struct    soil_con,
   
       if(zindex<Nnodes-1) {
         Zsum += (energy.dz[zindex] + energy.dz[zindex+1]) / 2.;
-        if((int)(((Zsum - Lsum)+0.0005)*1000.) > (int)(depth_mm[index])) {
+        if(((int)(((Zsum - Lsum)+0.0005)*1000.) > (int)(depth_mm[index]))
+           && index<options.Nlayer-1) {
           Lsum += soil_con.depth[index];
           index++;
         }

@@ -114,12 +114,19 @@
 #define PS_PM 101300		/* sea level air pressure in Pa */
 #define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
 
+/***** Codes for displaying version information *****/
+#define DISP_VERSION 1
+#define DISP_COMPILE_TIME 2
+#define DISP_ALL 3
+
+/***** VIC model version *****/
+extern char *version;
+
 /* global variables */
 extern int NR;			/* array index for atmos struct that indicates
 				   the model step avarage or sum */
 extern int NF;			/* array index loop counter limit for atmos
 				   struct that indicates the SNOW_STEP values */
-
 /***** Data Structures *****/
 
 /** file structures **/

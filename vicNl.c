@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
 **********************************************************************/
 {
 
-  extern char *version;
   extern veg_lib_struct *veg_lib;
   extern option_struct options;
 #if LINK_DEBUG
@@ -93,13 +92,13 @@ int main(int argc, char *argv[])
 #endif // LAKE_MODEL
   outfiles_struct          outfiles;
   
-#if VERBOSE
-  fprintf(stderr,"Running Model Version: %s\n",version);
-#endif // VERBOSE
-
   /** Read Model Options **/
   initialize_global();
   filenames = cmd_proc(argc, argv);
+
+#if VERBOSE
+  display_current_settings(DISP_VERSION,(filenames_struct*)NULL,(global_param_struct*)NULL);
+#endif
 
   /** Read Global Control File **/
   infiles.globalparam = open_file(filenames.global,"r");

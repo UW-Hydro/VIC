@@ -2,6 +2,10 @@
   This header file contains model parameters that can be modified by
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
+
+  NOTE (to those who add or remove parameters from VIC):
+  Any additions or removals of parameters in this file must also
+  be made in display_current_settings.c.
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -15,7 +19,7 @@
        no iteration is used and the model estimates the new fluxes
        based on those from the previous time step, results should
        be similar, however, the model will report energy balance errors *****/
-#define CLOSE_ENERGY TRUE
+#define CLOSE_ENERGY FALSE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE

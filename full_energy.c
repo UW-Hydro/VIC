@@ -653,7 +653,7 @@ void full_energy(int rec,
 		  += snow[iveg][band].vapor_flux;
 		for(i=0;i<options.Nlayer;i++)
 		  tmp_layerevap[WET][band][i] 
-		    += cell[WET][iveg][band].layer[j].evap;
+		    += cell[WET][iveg][band].layer[i].evap;
 		if(options.DIST_PRCP && hour==0 && iveg<Nveg) {
 		  tmp_throughfall[DRY][band] 
 		    += veg_var[DRY][iveg][band].throughfall;
@@ -661,7 +661,7 @@ void full_energy(int rec,
 		    += veg_var[DRY][iveg][band].canopyevap;
 		  for(i=0;i<options.Nlayer;i++)
 		    tmp_layerevap[DRY][band][i] 
-		      += cell[DRY][iveg][band].layer[j].evap;
+		      += cell[DRY][iveg][band].layer[i].evap;
 		}
 		
 		for(j=0;j<Ndist;j++) {

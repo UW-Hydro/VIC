@@ -224,9 +224,9 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 			 soil_con.depth,soil_con.Wcr,soil_con.Wpwp,
 			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 			 moist_node,expt_node,max_moist_node,ice_node,
-			 alpha,beta,gamma,root,layer_wet,layer_dry,veg_var_wet
-			 ,veg_var_dry,
-			 VEG,(int)CALC_EVAP,veg_class,dmy.month,Nnodes);
+			 alpha,beta,gamma,root,layer_wet,layer_dry,
+			 veg_var_wet,veg_var_dry,VEG,(int)CALC_EVAP,
+			 veg_class,dmy.month,Nnodes);
 
   if(surf_temp <= -9998) {  
     error = error_calc_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,

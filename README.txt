@@ -3,6 +3,148 @@
 # $Id$
 #------------------------------------------------------------------------
 
+March 27, 2003: VIC release 4.0.4beta
+
+This release covers patches for several bugs found in 4.0.3, which were 
+never formally released (i.e. the downloadable source code was modified, 
+but no major announcement was made).  It also includes other fixes and 
+modifications that have been identified as being needed prior to releasing 
+version 4.1.0, which will involve several significant changes (including 
+lakes & wetlands, spatial snow & frost, and a closed canopy energy balance).
+
+Modifications:
+
+	Snow albedo update: (found by Keith)
+	     In previous releases, the snow albedo function has been hyper 
+	     sensitive to trace amounts of snowfall during the melt period.  
+	     Whenever new snow falls or the cold content falls below 0, the 
+	     albedo is switched from the ablation curve to the accumulation 
+	     curve.  This curve is then followed until the cold content 
+	     exceeds 0, indicating it is in the spring melt season.  This is 
+	     fine when accounting for thin early season snowpacks or mid-
+	     season melt events, however, a cold snap or light dusting of 
+	     snow should not reset the snowpack albedo to much higher winter 
+	     values for days or weeks at a time.  This release of the model 
+	     monitors the state of pack with the variable MELTING.  This 
+	     flag keeps the snowpack on the ablation curve unless new snow-
+	     fall exceeds a threshold (TraceSnow in user_def.h) indicating 
+	     that the top of the snowpack should be represented by the albedo 
+	     of the new snow.
+	Model initialization: (found by Ulysses and Keith)
+	     In previous releases, the initialization of soil layer moist[] 
+	     and ice[] was within a second set of loops for band and 
+	     vegetation, using the same counters.  Because of the dual use
+	     of counters, initialization was not completed correctly.  The
+	     primary effect of this was that thermal node values beyond the
+	     first vegetation type were not correctly initialized, which 
+	     caused the model to crash during some simulations with full
+             energy or frozen soils active.  Without frozen soil, most 
+	     simulations would compensate for the problem within their
+	     spin-up time, so it is unlikely that this bug impacts any 
+	     simulations not employing frozen soil.
+	Snow time step: (found by Andy, et al.)
+	     The snow algorithm needs to run subdaily for the energy balance
+	     components to function properly.  This means that for daily 
+	     simulations, the snow model must be solved at a finer (subdaily)
+	     time step.  In the previous release, initialize_atmos.c stored
+	     sub-daily met data in each days variable using positions (e.g. 
+             0,1,..8 for 3 hour data).  In surface_fluxes.c the model indexed 
+	     the sub-daily time steps used by the snow algorithm with hours 
+	     (e.g. 0,3,6,...21 for three hour data).  This means the arrays
+	     were incorrectly indexed and the resulting model simulations 
+	     would be wrong.  The fix implemented here has been tested under 
+	     several model configurations and is deemed the official version.
+	     WARNING: There are several versions of this fix circulating,
+	     please update your code to this version - the previous fixes
+	     may not work in all circumstances!
+	FROZEN_SOIL active flag: (found by Ed and Justin)
+	     The cause of the problem is a bug in the code that occurs when 
+	     the global frozen soils flag (FROZEN_SOILS) is set to true but 
+	     the inidividual cell frozen soil flag (FS_ACTIVE) is set to 
+	     false. This causes the change in soil heat storage to be 
+	     calculated incorrectly.  This was fixed by adding additional
+	     conditions within frozen_soil.c and initialize_model_state.c,
+	     which verify the FS_ACTIVE is TRUE before running 
+	     estimate_layer_ice_content.  This avoids the problem of the 
+	     soil layer ice content being set to a positive value, ignored
+	     by the rest of the model.
+	Vapor pressure: (Keith)
+	     All internal vapor pressure calculations are now done in 
+	     Pascals.  Previous release versions, switched between Pa
+	     and kPa, so this simply removes the extra step.  The input
+	     file format is unchanged, so there should be no change to
+	     model output (model might run slightly faster, but it is
+	     also unlikely that this will be witnessed by a normal user).
+	Constant dew despite changing LAI: (Dave Peterson)
+	     The modification of read_vegparam.c to update LAI based on 
+	     a grid cell specific value did not change the values of Wdmax.  
+	     Wdmax values were computed in read_veglib.c based on the 
+	     default LAI values, so they did not necessarily reflect the 
+	     actualy LAI values used for the grid cell.  Values for Wdmax 
+	     are now computed in read_vegparam.c whenever GLOBAL_LAI are 
+	     provided.  The effects of this change will change in magnitude
+	     based on how different the cell LAI values are from those in
+	     the default library file.
+	DRY_TIME error: (Reinur Schnur)
+	     DRY_TIME in dist_prcp.c was incremented by the time step in 
+	     hours.  Then to see if the current rain was part of the same 
+	     storm or the start of a new one, DRY_TIME was checked to see 
+	     if it was greater than or equal to 24/dt.  This compares 
+	     DRY_TIME in hours to the model time step.  The "/dt" has been 
+	     removed, so now DRY_TIME is checked versus the hours since the 
+	     last storm.
+	State file: (KAC)
+	     *** WARNING: This may require modifcations to your global file ***
+	     The state file has been modified to account for model updates.
+	     It has also been converted to write binary files - this makes 
+	     them less convenient to edit, but means that model starts using
+	     the same forcing, soil and vegetation files will produce the
+	     exact same results.  There has also been a slight change in how
+	     the global file is set up to restart the model.  The global
+	     file should now have the same year, month, day and hour as the 
+	     original global file - the VIC model will compute the number of
+	     records to skip at the begining to reach the point where the 
+	     model state was saved.  This means that caluclations to yield
+	     sub-daily meteological forcings from daily forcings will produce 
+	     the exact same forcing values -> this also means that restarted
+	     simulations will be exactly the same as the original run.  Slight
+	     variations in the model results were also introduced because the
+	     method for storing soil node depths led to the possibility of 
+	     very small differences in dz_node for the restarted model.  
+	     Previous versions also did not store the snowpack cold content,
+	     this meant that for restarts during winter, the snowpack albedo
+	     might start on the ablation curve (as cold content was initialized
+	     to 0 and not to a value less than 0) rather than the accumulation
+	     curve.  This could lead to slight differences in the snowpack
+	     if no new snow fell and the snowpack was not melting - but
+	     after 10 years of simulations the differences were minor.  As 
+	     noted above the new version of the state file should allow the
+	     model to be restarted and to produce exactly the same results as
+	     the original complete result.  If there are cases where this is
+	     not true, plese report.  If you edit the read/write model state
+	     functions - BE VERY CAREFUL to edit Nbytes to reflect any changes.
+	COMPUTE_TREELINE: (KAC and LCB)
+	     This is an added feature which computes the treeline elevation
+	     in the current grid cell and does not include vegetation 
+	     fractions with overstory in the grid cell averages for snow bands
+	     that exceed the treeline elevation.  This feature was added
+	     to the model to reduce the appearance of "glaciers" in high
+	     elevation snow bands.  It computes average annual July air
+	     temperatures using the temperature data from the atmospheric
+	     forcing files (WARNING - elevation of treeline may change if
+	     the period of forcing data used changes).  It then lapses the
+	     average annual July air temperature to locate the elevation 
+	     at which it equals 10C.  This is assumed to be the treeline,
+	     so vegetation types with overstory in snow bands with average 
+	     elevations higher than this, are excluded from the grid cell
+	     average variables in put_data.c.  For the time being full 
+	     energy and water balances are still computed for these 
+	     vegetation fractions, and no attempt is made to verify that
+	     a snow band has a non-overstory vegetation type that can be 
+	     expanded to represent the coverage area lost due to the 
+	     exclusion of the overstory fraction.
+	     
+
 August 15, 2000: VIC release 4.0.3
 
 This release fixes a problem with the implementation of va_arg that 

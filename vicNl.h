@@ -63,8 +63,7 @@ double ErrorPrintSnowPackEnergyBalance(double, va_list);
 double error_print_solve_T_profile(double, va_list);
 double error_print_surf_energy_bal(double, va_list);
 double error_solve_T_profile(double Tsurf, ...);
-double estimate_dew_point(dmy_struct *,double *,double,
-			  double,double,double,int);
+double estimate_dew_point(double, double, double, double, double, int);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
 
@@ -106,7 +105,8 @@ double HourlyT(int,int *,double *,int *,double *,double *);
 
 double in_shortwave(float,int,double);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, double, double, 
-			double, double, double, double, double *, int, int);
+			double, double, double, double, double, double *, 
+			int, int);
 void   initialize_energy_bal(energy_bal_struct **, cell_data_struct ***,
 			     soil_con_struct *, double, double *, int, int,
 			     int, FILE *);

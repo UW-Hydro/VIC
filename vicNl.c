@@ -167,7 +167,8 @@ void main(int argc, char *argv[])
 		       (double)soil_con.lng,(double)soil_con.lat,
 		       (double)soil_con.elevation,
 		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
-		       soil_con.Tfactor,global_param.nrecs,global_param.dt);
+		       soil_con.annual_prec,soil_con.Tfactor,
+		       global_param.nrecs,global_param.dt);
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
       /**************************************************

@@ -52,13 +52,6 @@ void dist_prec(atmos_data_struct   *atmos,
   double  melt[(MAX_VEG+1)*2];
   double  NEW_MU;
 
-/*   prec     = (double *)calloc((veg_con[0].vegetat_type_num+1)*2, */
-/* 			      sizeof(double)); */
-/*   rainonly = (double *)calloc((veg_con[0].vegetat_type_num+1)*2, */
-/* 			      sizeof(double)); */
-/*   melt     = (double *)calloc((veg_con[0].vegetat_type_num+1)*2, */
-/* 			      sizeof(double)); */
-
   if(options.DIST_PRCP) {
 
     /*****************************************
@@ -126,7 +119,8 @@ void dist_prec(atmos_data_struct   *atmos,
 	/** Redistribute soil moisture during the storm if mu changes **/
 	redistribute_during_storm(prcp[0].cell,prcp[0].veg_var,veg,
 				  veg_con[0].vegetat_type_num,rec,
-				  prcp[0].mu[veg],NEW_MU);
+				  prcp[0].mu[veg],NEW_MU,
+				  soil_con.max_moist);
 	prcp[0].mu[veg] = NEW_MU;
       }
     }
@@ -177,11 +171,8 @@ void dist_prec(atmos_data_struct   *atmos,
 
   }
 
-/*   free((char *)prec); */
-/*   free((char *)rainonly); */
-/*   free((char *)melt); */
-
-  put_data(prcp, atmos, veg_con, outfiles, soil_con.depth, soil_con.AreaFract,
-	   &dmy[rec], rec, global_param.dt);
+  put_data(prcp, atmos, veg_con, outfiles, soil_con.depth, 
+	   soil_con.AreaFract, &dmy[rec], rec, global_param.dt,
+	   global_param.skipyear);
 
 }

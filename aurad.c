@@ -48,8 +48,8 @@ CVO   VOUTPUT :
 CR    RETURNS : 
 CD    DESCRIP : given below 
 CH    HISTORY : CREATED 5/2/1989 
-ch              modified 5/ /1990 r nemani jp patterson    */
-/* 
+ch              modified 5/ /1990 r nemani jp patterson   
+ch              modified 11/18/98 k cherkauer - fixed comments about UNITS
 cd     flat surface radiation computation. 
 cd     slope = 0    aspect = 0 
 cd     this subroutine computes incident shortwave radiation and 
@@ -85,8 +85,8 @@ cd     globf=global radiation, determining diffuse
 cd     diffl=diffuse on flat for interval 
 cd     dayl=daylength (hours) 
 cd     albdo=albedo 					never used
-cd     arad=absorbed radiation, w/m2 			removed
-cd     radn=incident radiation  w/m2 
+cd     arad=absorbed radiation, kJ/day/m2 		removed
+cd     radn=incident radiation  kJ/day/m2 
 cd    (* . . . . . . . . . . . . . . . . . . . . . . . . . . . */ 
    
 #include <stdio.h>
@@ -301,8 +301,8 @@ cd     globf=global radiation, determining diffuse
 cd     diffl=diffuse on flat for interval 
 cd     dayl=daylength (hours) 
 cd     albdo=albedo 					never used
-cd     arad=absorbed radiation, w/m2 			removed
-cd     radn=incident radiation  w/m2 
+cd     arad=absorbed radiation, kJ/day/m2 		removed
+cd     radn=incident radiation  kJ/day/m2 
 cd   */
 
 double shrad (double asp, double dslop, double slat, double sehorz, double swhorz, int jday, double tranday)

@@ -241,9 +241,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.porosity[layer] = 1.0 - temp.bulk_density[layer] 
 	/ temp.soil_density[layer];
       if(temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
-	sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the defined moisture residue of %f mm/mm;\nTry increasing either the porosity (%f mm/mm) or fractional wilting point (%f),\nor decreasing the residual moisture",
-		layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
-		temp.porosity[layer], Wpwp_FRACT[layer]);
+        sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the defined residual moisture of %f mm/mm.\nTry either decreasing the residual moisture to below %f mm/mm or increasing the wilting point.\nThe wilting point is calculated as: Wpwp_FRACT * (1.0 - bulk_density/soil_density).\n",
+                layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
+                temp.resid_moist[layer]);
 	nrerror(ErrStr);
       }
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;

@@ -49,6 +49,7 @@ void initialize_snow (snow_data_struct **snow,
   04-17-00 removed call for read_initial_snow properties file, the
            file read is now incorporated into a single model state
            file.                                                  KAC
+  11-18-02 modified to initalize blowing_snow variable.          LCB
 
 **********************************************************************/
 {
@@ -74,6 +75,7 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].pack_water      = 0.0;
       snow[i][j].surf_water      = 0.0;
       snow[i][j].vapor_flux      = 0.0;
+      snow[i][j].blowing_flux      = 0.0;
       snow[i][j].pack_temp       = 0.0;
       snow[i][j].snow_canopy     = 0.0;
       snow[i][j].store_swq       = 0.0;

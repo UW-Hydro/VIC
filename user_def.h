@@ -80,7 +80,7 @@
        is at or below 10C.  All snowbands above this evelation are then 
        assumed to be above the treeline, and vegetation types with 
        overstory are removed from the snow band average variables. *****/
-#define COMPUTE_TREELINE TRUE
+#define COMPUTE_TREELINE FALSE
 
 /***** If TRUE VIC computes the mean, standard deviation, and sum
        and finds the minimum and maximum values of the forcing 

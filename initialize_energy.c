@@ -85,57 +85,6 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	read_initial_soil_thermal(fsoil,cellnum,veg,band,Nnodes,dp,
 				  energy[veg][band].fdepth,moist,ice,
 				  energy[veg][band].dz,energy[veg][band].T);
-/**
-	rewind(fsoil);
-	fgets(tmpstr,MAXSTRING,fsoil);
-	
-	fscanf(fsoil,"%*s %i\n",&tmpint);
-	if(tmpint!=Nnodes) nrerror("Nnodes in soil initialization file, does not match that of the current model version");
-	
-	fscanf(fsoil,"%*s %lf %lf\n",&energy[veg][band].fdepth[0],
-	       &energy[veg][band].fdepth[1]);
-	fscanf(fsoil,"%*s");
-	for(i=0;i<options.Nlayer;i++) fscanf(fsoil,"%lf",&moist[i]);
-	fscanf(fsoil,"%*s");
-	for(i=0;i<options.Nlayer;i++) fscanf(fsoil,"%lf",&ice[i]);
-	
-	fgets(tmpstr,MAXSTRING,fsoil);
-	fgets(tmpstr,MAXSTRING,fsoil);
-	for(j=0;j<Nnodes;j++) {
-	  fscanf(fsoil,"%lf",&thermdepths[j]);
-	  fscanf(fsoil,"%lf",&energy[veg][band].T[j]);
-	}
-
-	if(thermdepths[Nnodes-1] != dp) {
-	  sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
-		  Nnodes-1,dp,thermdepths[Nnodes-1]);
-	  nrerror(ErrStr);
-	}
-	for(j=Nnodes-1;j>0;j--) {
-	  thermdepths[j] -= thermdepths[j-1];
-	  thermdepths[j] = (double)((int)(thermdepths[j] * 10000. + 0.5))
-	    / 10000.;
-	}
-	for(j=1;j<Nnodes-1;j++) {
-	  if((int)(thermdepths[j]*1000.+0.5) 
-	     == (int)(thermdepths[j+1]*1000.+0.5))
-	    energy[veg][band].dz[j] = (thermdepths[j] + thermdepths[j+1]) / 2.;
-	  else {
-	    energy[veg][band].dz[j] = thermdepths[j];
-	    j++;
-	    energy[veg][band].dz[j] = thermdepths[j+1];
-	    if((int)((energy[veg][band].dz[j-1]
-		      +energy[veg][band].dz[j])/2.*1000.+0.5)
-	       != (int)(thermdepths[j]*1000.+0.5)) {
-	      sprintf(ErrStr,"Check spacing between thermal layers %i and %i\n",
-		      j-1,j);
-	      nrerror(ErrStr);
-	    }
-	  }
-	}
-	energy[veg][band].dz[0] = thermdepths[1];
-	energy[veg][band].dz[Nnodes-1] = thermdepths[Nnodes-1];
-**/
 
 	sum = energy[veg][band].dz[0]/2. + energy[veg][band].dz[Nnodes-1]/2.;
 	for(index=1;index<Nnodes-1;index++) sum += energy[veg][band].dz[index];
@@ -268,16 +217,6 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 				  energy[veg][band].fdepth,moist,ice,
 				  energy[veg][band].dz,energy[veg][band].T);
 
-/**
-	rewind(fsoil);
-	fgets(tmpstr,MAXSTRING,fsoil);
-	
-	fscanf(fsoil,"%*s %i\n",&tmpint);
-	if(tmpint!=Nnodes) nrerror("Nnodes in soil initialization file, does not match that of the current model version");
-	
-	energy[veg][band].fdepth[0]=energy[veg][band].fdepth[1]=0.;
-**/	
-
 	for(dry=0;dry<Ndist;dry++) {
 	  for(i=0;i<options.Nlayer;i++) {
 	    cell[dry][veg][band].layer[i].fdepth = 0.;
@@ -285,13 +224,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  }
 	}
 
-/**
-	fscanf(fsoil,"%*s");
-**/
 	for(i=0;i<options.Nlayer;i++) {
-/**
-	  fscanf(fsoil,"%lf",&cell[WET][veg][band].layer[i].moist);
-**/
 	  cell[WET][veg][band].layer[i].moist = moist[i];
 	  cell[WET][veg][band].layer[i].moist *= soil_con[0].depth[i]*1000.;
 	  cell[WET][veg][band].layer[i].moist_froz = 0.;
@@ -304,31 +237,6 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  }
 	}
 
-/**
-	fgets(tmpstr,MAXSTRING,fsoil);
-	fgets(tmpstr,MAXSTRING,fsoil);
-	for(j=0;j<Nnodes;j++) {
-	  fscanf(fsoil,"%lf",&thermdepths[j]);
-	  fscanf(fsoil,"%lf",&energy[veg][band].T[j]);
-	}
-	if(thermdepths[Nnodes-1] != dp) {
-	  sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",Nnodes-1,dp,thermdepths[Nnodes-1]);
-	  nrerror(ErrStr);
-	}
-	for(j=Nnodes-1;j>0;j--) {
-	  thermdepths[j] -= thermdepths[j-1];
-	  thermdepths[j] = (double)((int)(thermdepths[j] * 10000. + 0.5))
-	    / 10000.;
-	}
-**/
-	
-/**
-	energy[veg][band].dz[0] = soil_con[0].depth[0];
-	energy[veg][band].dz[1] = soil_con[0].depth[0];
-	energy[veg][band].dz[2] = 2. * (dp - 1.5 * soil_con[0].depth[0]);
-	energy[veg][band].dz[2] = 2. * (Ltotal - 1.5 * soil_con[0].depth[0]
-					- energy[veg][band].dz[2]);
-**/
       }
     }
     

@@ -139,6 +139,15 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
         else options.ARC_SOIL = FALSE;
       }
+      else if(strcasecmp("SNOW_STEP",optstr)==0) {
+	sscanf(cmdstr,"%*s %i",&options.SNOW_STEP);
+      }
+      else if(strcasecmp("OVERSTORY_ATTENUATION",optstr)==0) {
+	sscanf(cmdstr,"%*s %f",&options.OVERSTORY_ATTENUATION);
+      }
+      else if(strcasecmp("SNOW_BAND",optstr)==0) {
+	sscanf(cmdstr,"%*s %f",&options.TRUNK_RATIO);
+      }
 
       /************************************
         Get Frocing Data File Information

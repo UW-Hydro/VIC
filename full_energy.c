@@ -3,9 +3,9 @@
 #include <vicNl.h>
 #include <math.h>
 
-#define OVERSTORY_ATTENUATION 0.5  /* attenutation coefficient for overstory */
-#define TRUNK_RATIO           0.2  /* Fraction of Tree Height that is trunk */
-#define SNOW_STEP             1    /* Time step in hours to use when solving
+/* #define OVERSTORY_ATTENUATION 0.5 */  /* attenutation coefficient for overstory */
+/* #define TRUNK_RATIO           0.2 */  /* Fraction of Tree Height that is trunk */
+/* #define SNOW_STEP             1 */    /* Time step in hours to use when solving
 				      snow model in water balance mode */
 
 void full_energy(int rec,
@@ -289,9 +289,11 @@ void full_energy(int rec,
 	if(ref_height<=0.) ref_height = calc_veg_height(displacement)
 		  	              + gp.wind_h;
       }
-      CalcAerodynamic(overstory,iveg,Nveg,OVERSTORY_ATTENUATION,
+      CalcAerodynamic(overstory,iveg,Nveg,
+		      (double)options.OVERSTORY_ATTENUATION,
                       height,soil_con.rough,soil_con.snow_rough,
-                      &displacement,&roughness,&ref_height,TRUNK_RATIO,
+                      &displacement,&roughness,&ref_height,
+		      (double)options.TRUNK_RATIO,
                       tmp_wind,cell[WET][iveg][0].aero_resist);
   
       /** Check for Presence of Snow Pack, or New Snow **/
@@ -487,7 +489,7 @@ void full_energy(int rec,
 
 	  tmp_Tmin = HourlyT(1,tmax_hour,tmax,tmin_hour,tmin,air_temp);
 	  
-	  for(hour=0;hour<gp.dt/SNOW_STEP;hour++) {
+	  for(hour=0;hour<gp.dt/options.SNOW_STEP;hour++) {
 	    
 	    /** Snow melt model is solved using a time step of SNOW_STEP **/
 	    
@@ -549,7 +551,7 @@ void full_energy(int rec,
 				(double)soil_con.time_zone_lng,
 				(double)soil_con.lng,(double)soil_con.lat,
 				(double)dmy[rec].day_in_year,
-				(double)hour*(double)SNOW_STEP,
+				(double)hour*(double)options.SNOW_STEP,
 				FALSE,FALSE,TRUE);
 
 	    for(band=0;band<Nbands;band++) {	      
@@ -564,9 +566,11 @@ void full_energy(int rec,
 			       &veg_var[DRY][sveg][band],dmy,
 			       &energy[iveg][band],
 			       soil_con,overstory,&SNOW,&SOLVE_SURF_ENERGY,
-			       SNOW_STEP,rec,veg_class,iveg,Nveg,band,hour,
+			       options.SNOW_STEP,rec,veg_class,iveg,Nveg,
+			       band,hour,
 			       gp.Nnodes,inshort,inlong,
-			       step_air_temp,prec[iveg*2]*(double)SNOW_STEP
+			       step_air_temp,
+			       prec[iveg*2]*(double)options.SNOW_STEP
 			       /(double)gp.dt,step_density,step_vp,
 			       step_vpd,atmos->pressure,prcp[0].mu[iveg],
 			       roughness,displacement,ref_height,surf_atten,
@@ -590,7 +594,7 @@ void full_energy(int rec,
 			tmp_Wdew[j] = veg_var[j][iveg][band].Wdew;
 			rainfall[j] 
 			  = prec[j+iveg*2] * soil_con.Pfactor[band] 
-			  * (double)SNOW_STEP / (double)gp.dt; 
+			  * (double)options.SNOW_STEP / (double)gp.dt; 
 		      }
 		      Evap = canopy_evap(cell[WET][iveg][band].layer,
 					 cell[DRY][iveg][band].layer,
@@ -600,7 +604,7 @@ void full_energy(int rec,
 					 prcp[0].mu[iveg],tmp_Wdew,
 					 step_air_temp
 					 + soil_con.Tfactor[band],
-					 (double)SNOW_STEP,step_rad,
+					 (double)options.SNOW_STEP,step_rad,
 					 step_vpd,step_net_short,step_air_temp
 					 + soil_con.Tfactor[band],
 					 tmp_aero_resist,
@@ -622,12 +626,13 @@ void full_energy(int rec,
 				       soil_con.b_infilt, step_air_temp 
 				       + soil_con.Tfactor[band],
 				       displacement, roughness, ref_height, 
-				       tmp_aero_resist, (double)SNOW_STEP,
+				       tmp_aero_resist, 
+				       (double)options.SNOW_STEP,
 				       prcp[0].mu[iveg]);
 		      for(j=0;j<Ndist;j++) {
 			ppt[band*2+j] = prec[iveg*2+j] 
 			  * soil_con.Pfactor[band] 
-			  * (double)SNOW_STEP / (double)gp.dt;
+			  * (double)options.SNOW_STEP / (double)gp.dt;
 			veg_var[j][iveg][band].throughfall = ppt[band*2+j]; 
 		      }
 		    }  /** end if vegetation not growing **/
@@ -643,10 +648,10 @@ void full_energy(int rec,
 				     soil_con.b_infilt, 
 				     step_air_temp, displacement, roughness, 
 				     ref_height, tmp_aero_resist, 
-				     (double)SNOW_STEP,prcp[0].mu[iveg]);
+				     (double)options.SNOW_STEP,prcp[0].mu[iveg]);
 		    for(j=0;j<Ndist;j++) {
 		      ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band]
-			* (double)SNOW_STEP / (double)gp.dt;
+			* (double)options.SNOW_STEP / (double)gp.dt;
 		    }
 		  }
 		} /* End Computations for Bare Ground */

@@ -109,6 +109,10 @@ typedef struct {
 			    soils code) */
   int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
 			    snow model */
+  int    SNOW_STEP;      /* Time step in hours to use when solving the 
+			    snow model */
+  float  OVERSTORY_ATTENUATION; /* attenutation coefficient for overstory */
+  float  TRUNK_RATIO;    /* Fraction of Tree Height that is trunk */
 } option_struct;
 
 typedef struct {

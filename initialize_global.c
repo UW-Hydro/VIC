@@ -68,20 +68,23 @@ void initialize_global() {
   extern debug_struct debug;
   extern param_set_struct param_set;
 
-  options.FULL_ENERGY    = FALSE;
-  options.FROZEN_SOIL    = FALSE;
-  options.SNOW_MODEL     = FALSE;
-  options.CALC_SNOW_FLUX = TRUE;
-  options.DIST_PRCP      = FALSE;
-  options.RADAR          = FALSE;
-  options.INIT_SOIL      = FALSE;
-  options.CORRPREC       = FALSE;
-  options.MOISTFRACT     = FALSE;
-  options.BINARY_OUTPUT  = FALSE;
-  options.PRT_SNOW_BAND  = FALSE;
-  options.Nlayer         = 2;
-  options.GRID_DECIMAL   = 2;
-  options.SNOW_BAND      = 1;
+  options.FULL_ENERGY           = FALSE;
+  options.FROZEN_SOIL           = FALSE;
+  options.SNOW_MODEL            = FALSE;
+  options.CALC_SNOW_FLUX        = TRUE;
+  options.DIST_PRCP             = FALSE;
+  options.RADAR                 = FALSE;
+  options.INIT_SOIL             = FALSE;
+  options.CORRPREC              = FALSE;
+  options.MOISTFRACT            = FALSE;
+  options.BINARY_OUTPUT         = FALSE;
+  options.PRT_SNOW_BAND         = FALSE;
+  options.Nlayer                = 2;
+  options.GRID_DECIMAL          = 2;
+  options.SNOW_BAND             = 1;
+  options.SNOW_STEP             = 1;
+  options.OVERSTORY_ATTENUATION = 0.5;
+  options.TRUNK_RATIO           = 0.2;
  
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;

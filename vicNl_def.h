@@ -284,7 +284,7 @@ typedef struct {
   This structure stores the soil parameters for a grid cell.
   ***********************************************************/
 typedef struct {
-  char     FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
+  int      FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
 					 active in current grid cell */
   double   Ds;                        /* fraction of maximum subsurface flow 
 					 rate */
@@ -518,7 +518,7 @@ typedef struct {
   This structure stores snow pack variables needed to run the snow model.
   ************************************************************************/
 typedef struct {
-  char   snow;              /* TRUE = snow, FALSE = no snow */
+  int    snow;              /* TRUE = snow, FALSE = no snow */
   double Qnet;              /* New energy at snowpack surface */
   double albedo;            /* snow surface albedo (fraction) */
   double canopy_vapor_flux; /* depth of water evaporation, sublimation, or 

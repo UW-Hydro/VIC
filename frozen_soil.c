@@ -163,7 +163,7 @@ void solve_T_profile(double *T,
 		     int     Nnodes,
 		     char   *FIRST_SOLN,
 		     char    FIRST_TIME, 
-		     char    FS_ACTIVE) {
+		     int     FS_ACTIVE) {
 /**********************************************************************
   This subroutine was written to iteratively solve the soil temperature
   profile using a numerical difference equation.  The solution equation

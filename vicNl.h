@@ -282,12 +282,12 @@ double solve_surf_energy_bal(double Tsurf, ...);
 void   solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double ***, 
-		       int, char *, char, char);
+		       int, char *, char, int);
 #else
 void   solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, int, char *, 
-		       char, char);
+		       char, int);
 #endif
 double StabilityCorrection(double, double, double, double, double, double);
 void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,

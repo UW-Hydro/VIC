@@ -445,9 +445,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	temp.resid_moist[layer] = 0.205;
       }
       if (temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
-        sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the estimated moisture residue of %f mm/mm;\nTry increasing either the porosity (%f mm/mm) or fractional wilting point (%f)",
-          layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
-          temp.porosity[layer], Wpwp_FRACT[layer]);
+        sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the estimated residual moisture of %f mm/mm.\nTry either decreasing the residual moisture to below %f mm/mm or increasing the wilting point.\nResidual moisture is calculated as a function of sand, clay, and porosity. The wilting point is calculated as: Wpwp_FRACT * porosity.\n",
+                layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
+                temp.resid_moist[layer]);
       }
       tmp_bubble += temp.bubble[layer];
     }

@@ -18,7 +18,9 @@ void dist_prec(atmos_data_struct   *atmos,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
-               char                 LASTREC) {
+               char                 LASTREC,
+	       char                *init_STILL_STORM,
+	       int                 *init_DRY_TIME) {
 /**********************************************************************
   dist_prec		Keith Cherkauer		October 9, 1997
 
@@ -43,6 +45,16 @@ void dist_prec(atmos_data_struct   *atmos,
            variables (DRY_TIME, STILL_STORM, ANY_SNOW) were used 
            within the vegetation loop, but did not store separate
            values for each vegetation type.                     KAC
+  03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
+           the model can make use of the computed treeline.     KAC
+  03-27-03 Modified calculation of DRY_TIME.  Originally the check
+           to see if a new storm was warranted checked if DRY_TIME
+           was greater than 24/dt.  However, DRY_TIME is incremented
+           by dt, so it was checking hours against time steps.  The
+           division by dt has been removed, so a new storm starts if
+           the cell has been drying for a full 24 hours.     RS & KAC
+  04-10-03 Modified to store STILL_STORM and DRY_TIME in the model
+           statefile, so that full conditions will be preserved.  KAC
 
 **********************************************************************/
 
@@ -67,13 +79,25 @@ void dist_prec(atmos_data_struct   *atmos,
     Save model state at assigned date
   ************************************/
 
-  if ( dmy[rec].hour == 0 && dmy[rec].year == global_param->stateyear
-       && dmy[rec].month == global_param->statemonth 
-       && dmy[rec].day == global_param->stateday )
+  if ( outfiles->statefile != NULL
+       &&  ( dmy[rec].hour == 0 
+	     && dmy[rec].year == global_param->stateyear
+	     && dmy[rec].month == global_param->statemonth 
+	     && dmy[rec].day == global_param->stateday ) )
     write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
-		      soil_con->gridcel, outfiles, soil_con);
+		      soil_con->gridcel, outfiles, soil_con,
+		      STILL_STORM, DRY_TIME);
 
 #endif
+
+  // check if state file has been used to initialize storm tracking
+  if ( init_DRY_TIME >= 0 ) {
+    // initialize storm tracking
+    for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
+      DRY_TIME[veg] = init_DRY_TIME[veg];
+      STILL_STORM[veg] = init_STILL_STORM[veg];
+    }
+  }
 
   if(options.DIST_PRCP) {
 
@@ -95,7 +119,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	if ( rec == 0 ) {
           /* Set model variables if first time step */
 	  prcp->mu[veg] = NEW_MU;
-	  if ( atmos->prec > 0 ) 
+	  if ( atmos->prec[NR] > 0 ) 
 	    STILL_STORM[veg] = TRUE;
 	  else 
 	    STILL_STORM[veg] = FALSE;
@@ -119,8 +143,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	    DRY_TIME[veg]    = 0;
 	  }
 	}
-	else if ( atmos->prec[NR] == 0 
-		  && DRY_TIME[veg] >= 24./(float)global_param->dt ) {
+	else if(atmos->prec[NR] == 0 && DRY_TIME[veg] >= 24.) {
           /* Check if storm has ended */
 	  NEW_MU           = prcp->mu[veg];
 	  STILL_STORM[veg] = FALSE;
@@ -187,7 +210,8 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(soil_con->AreaFract, soil_con->depth, soil_con->dz_node, 
+  put_data(soil_con->AboveTreeLine, soil_con->AreaFract, soil_con->depth, 
+	   soil_con->dz_node, 
 #if SPATIAL_FROST
 	   soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST

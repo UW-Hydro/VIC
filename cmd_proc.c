@@ -17,6 +17,7 @@ filenames_struct cmd_proc(int argc, char *argv[])
   11-18-98  Added comment block to cmd_proc() and fixed routine so
             that it will exit if global command file is not defined
             using the "-g" flag.                                KAC
+  30-Oct-03 Added -v option to display version information.	TJB
 
 **********************************************************************/
 {
@@ -27,6 +28,7 @@ filenames_struct cmd_proc(int argc, char *argv[])
   extern int getopt();
   extern char *optarg;
   extern char *optstring;
+  extern char *version;
 
   filenames_struct names;
   int              optchar;
@@ -41,6 +43,11 @@ filenames_struct cmd_proc(int argc, char *argv[])
 
   while((optchar = getopt(argc, argv, optstring)) != EOF) {
     switch((char)optchar) {
+    case 'v':
+      /** Version information **/
+      fprintf(stdout,"%s\n",version);
+      exit(0);
+      break;
     case 'g':
       /** Global Parameters File **/
       strcpy(names.global, optarg);
@@ -72,6 +79,7 @@ void usage(char *temp)
 
 **********************************************************************/
 {
-  fprintf(stderr,"Usage: %s -g<model_control_file>\n",temp);
-  fprintf(stderr,"\t<model_control_file> is a file that contains all needed model\n\t\tparameters as well as model option flags, and the names and\n\t\tlocations of all other files,\n");
+  fprintf(stderr,"Usage: %s [-v | -g<global_parameter_file>]\n",temp);
+  fprintf(stderr,"  v: display version information\n");
+  fprintf(stderr,"  g: read model parameters from <global_parameter_file>.\n     <global_parameter_file> is a file that contains all needed model\n     parameters as well as model option flags, and the names and\n     locations of all other files.\n");
 }

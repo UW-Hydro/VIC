@@ -197,9 +197,15 @@ typedef struct {
   int    startmonth; /* Starting month of the simulation */
   int    startday;   /* Starting day of the simulation */
   int    starthour;  /* Starting hour of the simulation */
-  int    endyear;
-  int    endmonth;
-  int    endday;
+  int    endyear;    /* Last year of model simulation */
+  int    endmonth;   /* Last month of model simulation */
+  int    endday;     /* Last day of model simulation */
+  int    forceyear;  /* year forcing files start */
+  int    forcemonth; /* month forcing files starts */
+  int    forceday;   /* day forcing files starts */
+  int    forcehour;  /* hour forcing files starts */
+  int    forceskip;  /* number of model time steps to skip at the start of
+			the forcing file */
   int    nrecs;      /* Number of time steps simulated */
   int    Nnodes;     /* Number of soil thermal nodes for soil column thermal
 		        fluxes calculations */

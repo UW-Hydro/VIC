@@ -8,7 +8,8 @@ void read_sawd_binary(atmos_data_struct *temp,
 		      FILE              *sawdf,
 		      int               *nrecs,
 		      int                dt,
-		      int                file_dt)
+		      int                file_dt,
+		      int                fileskip)
 /**********************************************************************
   read_sawd_binary	Keith Cherkauer		April 26, 1998
 
@@ -31,23 +32,19 @@ void read_sawd_binary(atmos_data_struct *temp,
   int       i, n, rec;
   int       fixcnt;
   int       store_rec;
+  int       skip_bytes;
   char      tmpmem[20];
   short int values[5];
 
-  /** Count Records **/
-  n = 0;
-  fread(tmpmem,sizeof(char),10,sawdf);
-  while (!feof(sawdf)) {
-    n++;
-    fread(tmpmem,sizeof(char),10,sawdf);
-  }
-  printf("nrecs = %d\n",n);
-  if(n==0)
-    nrerror("No data in SAWD Binary forcing file.  Model stopping...");
+  /** locate starting record **/
+  skip_bytes = (int)((float)(dt * fileskip)) / (float)file_dt - 1;
+  if((dt * fileskip) % (24 / file_dt) > 0) 
+    nrerror("Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+  fseek(sawdf,skip_bytes*12,SEEK_SET);
+  if(feof(sawdf))
+    nrerror("No data for the specified time period in the Daily Precipitation forcing file.  Model stopping...");
 
-  rewind(sawdf);
-
-  /** Check for Header, and Skip **/
+  /** Read forcing data **/
   fixcnt = 0;
   rec = 0;
   while ( !feof(sawdf) && (rec < *nrecs) ) {

@@ -9,7 +9,8 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
 				     int                 starthour,
                                      int                *nrecs,
                                      int                 dt,
-				     int                *force_dt)
+				     int                *force_dt,
+				     int                 forceskip)
 /**********************************************************************
   read_forcing_data    Keith Cherkauer      April 6, 1998
 
@@ -28,23 +29,24 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
 
   /***** Read Forcing Files in PILPS2c Format *****/
   if(strcasecmp(options.FORCE_TYPE,"PILPS")==0) {
-    read_PILPS2c(temp,inf.forcing[0],nrecs,dt,force_dt[0]);
+    read_PILPS2c(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
   }
   /***** Read Forcing Files in SAWD Format *****/
   else if(strcasecmp(options.FORCE_TYPE,"SAWD")==0) {
-    read_sawd(temp,inf.forcing[0],nrecs,dt,force_dt[0]);
-    if(!options.HP) read_atmosdata(temp,inf.forcing[1],nrecs,dt,force_dt[1]);
+    read_sawd(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
+    if(!options.HP) read_atmosdata(temp,inf.forcing[1],nrecs,dt,
+				   force_dt[1],forceskip);
   }
   /***** Read Forcing Files in SAWD Binary Format *****/
   else if(strcasecmp(options.FORCE_TYPE,"SAWD_BIN")==0) {
-    read_sawd_binary(temp,inf.forcing[0],nrecs,dt,force_dt[0]);
-    read_atmosdata(temp,inf.forcing[1],nrecs,dt,force_dt[1]);
+    read_sawd_binary(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
+    read_atmosdata(temp,inf.forcing[1],nrecs,dt,force_dt[1],forceskip);
   }
   /***** Read Daily Forcing Files *****/
   else if(strcasecmp(options.FORCE_TYPE,"DAILY")==0) {
-    read_atmosdata(temp,inf.forcing[0],nrecs,dt,force_dt[0]);
+    read_atmosdata(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
     if(!options.SNOW_MODEL && inf.forcing[1] != NULL)
-      read_snowmodel(temp,inf.forcing[1],nrecs[0],dt,force_dt[1]);
+      read_snowmodel(temp,inf.forcing[1],nrecs[0],dt,force_dt[1],forceskip);
     else if(!options.SNOW_MODEL) {
       options.SNOW_MODEL = TRUE;
       fprintf(stderr,"WARNING: Check global parameter file, SNOW_MODEL ");
@@ -54,7 +56,7 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
   }
   /***** Read SHAW Hourly Forcing Files *****/
   else if(strcasecmp(options.FORCE_TYPE,"SHAW")==0) {
-    read_rosemount(temp,inf.forcing[0],nrecs,starthour,dt,force_dt[0]);
+    read_rosemount(temp,inf.forcing[0],nrecs,starthour,dt,force_dt[0],forceskip);
   }
   /***** Unrecognized Forcing File Type *****/
   else {

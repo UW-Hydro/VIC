@@ -1,4 +1,3 @@
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
@@ -7,10 +6,11 @@
 static char vcid[] = "$Id$";
 
 void read_atmosdata(atmos_data_struct *temp,
-		    FILE              *snowf,
+		    FILE              *atmosf,
 		    int               *nrecs,
 		    int                dt,
-		    int                file_dt)
+		    int                file_dt,
+		    int                fileskip)
 /**********************************************************************
 	read_atmosdata	Dag Lohmann	
 
@@ -27,20 +27,22 @@ void read_atmosdata(atmos_data_struct *temp,
 
   int    i, n, rec, maxline = 210;
   int    store_rec;
+  int    skip_bytes;
   char   str[210];
   double junk;
 
-  n = 0;
-  while (fgets(str,maxline,snowf) != '\0') n++;
-  printf("nrecs = %d\n",n*24/dt);
-  if(n==0)
-    nrerror("No data in Daily Precipitation forcing file.  Model stopping...");
+  /** locate starting record **/
+  skip_bytes = (int)((float)(dt * fileskip)) / (float)file_dt - 1;
+  if((dt * fileskip) % (24 / file_dt) > 0) 
+    nrerror("Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+  for(i=0;i<skip_bytes;i++) {
+    fgets(str, maxline, atmosf);
+  }
 
-  rewind(snowf);
-
+  /** read forcing data **/
   rec=0;
-  while ( !feof(snowf) && (rec < *nrecs) ) {
-    fgets(str, maxline, snowf);
+  while ( !feof(atmosf) && (rec < *nrecs) ) {
+    fgets(str, maxline, atmosf);
     sscanf(str, "%lf %lf %lf", &junk, &temp[rec].tmax, &temp[rec].tmin);
     temp[rec].prec = (double)dt/(double)file_dt * junk;
     if(temp[rec].prec < 0.) {
@@ -62,7 +64,7 @@ void read_atmosdata(atmos_data_struct *temp,
     if(file_dt < dt) {
       /** Time Step in Forcing File Finer than Used by Model: 
 	  Skip Records **/
-      for(i=0;i<dt/file_dt-1;i++) fgets(str,maxline,snowf);
+      for(i=0;i<dt/file_dt-1;i++) fgets(str,maxline,atmosf);
     }
     else if(file_dt > dt) {
       /** Time step used by model finer than that used in forcing file:

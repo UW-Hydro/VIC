@@ -88,6 +88,9 @@ void main(int argc, char *argv[])
   else Ndist = 1;
   cellnum = -1;
 
+  /** Make Date Data Structure **/
+  dmy      = make_dmy(&global_param);
+
   /************************************
     Run Model for all Active Grid Cells
     ************************************/
@@ -140,15 +143,13 @@ void main(int argc, char *argv[])
       /** Read Forcing Data **/
       atmos = read_forcing_data(infiles, global_param.starthour,
 				&global_param.nrecs,
-				global_param.dt, force_dt);
+				global_param.dt, force_dt, 
+				global_param.forceskip);
 
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
 		    (double)soil_con.elevation,
 		    &soil_con.Tfactor,&soil_con.Pfactor,&soil_con.AreaFract);
-
-      /** Make Date Data Structure **/
-      dmy      = make_dmy(global_param);
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 

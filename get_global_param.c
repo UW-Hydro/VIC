@@ -31,6 +31,15 @@ global_param_struct get_global_param(filenames_struct *names,
 
   /** Initialize non-global parameters **/
   temp.Nnodes = 3;
+  temp.endmonth   = -99;
+  temp.endday     = -99;
+  temp.endyear    = -99;
+  temp.forcemonth = 1;
+  temp.forceday   = 1;
+  temp.forceyear  = -99;
+  temp.forcehour  = 0;
+  temp.forceskip  = 0;
+  temp.nrecs      = -99;
 
   /** Read through global control file to find parameters **/
 
@@ -74,6 +83,18 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("ENDDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&temp.endday);
+      }
+      else if(strcasecmp("FORCEYEAR",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.forceyear);
+      }
+      else if(strcasecmp("FORCEMONTH",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.forcemonth);
+      }
+      else if(strcasecmp("FORCEDAY",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.forceday);
+      }
+      else if(strcasecmp("FORCEHOUR",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.forceday);
       }
       else if(strcasecmp("NRECS",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&temp.nrecs);

@@ -5,10 +5,11 @@
 static char vcid[] = "$Id$";
 
 void read_snowmodel(atmos_data_struct *temp,
-                    FILE              *atmosf,
+                    FILE              *snowf,
                     int                nrecs,
                     int                dt,
-		    int                file_dt)
+		    int                file_dt,
+		    int                fileskip)
 /**********************************************************************
 	read_snowmodel	Keith Cherkauer		July 25, 1996
 
@@ -25,38 +26,38 @@ void read_snowmodel(atmos_data_struct *temp,
 
   int    i, n, rec, maxline = 210;
   int    store_rec;
+  int    skip_bytes;
   char   str[210];
 
-  n = 0;
-  while (fgets(str,maxline,atmosf) != '\0') n++;
-  printf("nrecs = %d\n",n);
-  if(n==0)
-    nrerror("No data in Daily Snow Melt forcing file.  Model stopping...");
+  /** locate starting record **/
+  skip_bytes = (int)((float)(dt * fileskip)) / (float)file_dt - 1;
+  if((dt * fileskip) % (24 / file_dt) > 0) 
+    nrerror("Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+  for(i=0;i<skip_bytes;i++) {
+    fgets(str, maxline, snowf);
+  }
 
-  rewind(atmosf);
-
+  /** read forcing data **/
   rec = 0;
-
-  /** Read NWS Snow Melt Output File **/
-  while ( !feof(atmosf) && (rec < nrecs) ) {
-    fscanf(atmosf,"%s",str);
+  while ( !feof(snowf) && (rec < nrecs) ) {
+    fscanf(snowf,"%s",str);
     temp[rec].melt = (double)dt/(double)file_dt * atof(str);
-    fscanf(atmosf,"%s",str);
+    fscanf(snowf,"%s",str);
     temp[rec].prec = (double)dt/(double)file_dt * atof(str);    
-    fscanf(atmosf,"%s",str);
+    fscanf(snowf,"%s",str);
     temp[rec].air_temp = atof(str);
-    fscanf(atmosf,"%*s");
-    fscanf(atmosf,"%*s");
-    fscanf(atmosf,"%*s");
-    fscanf(atmosf,"%s",str);
+    fscanf(snowf,"%*s");
+    fscanf(snowf,"%*s");
+    fscanf(snowf,"%*s");
+    fscanf(snowf,"%s",str);
     temp[rec].rainonly = (double)dt/(double)file_dt * atof(str);
-    fscanf(atmosf,"%*s");
-    fscanf(atmosf,"%*s"); 
-    fscanf(atmosf,"%*s");
+    fscanf(snowf,"%*s");
+    fscanf(snowf,"%*s"); 
+    fscanf(snowf,"%*s");
 
     fprintf(stderr,"WARNING: Reading Albedo from NWS Snow Model - Check VERSION.  This was not a feature of the original snow model, so make sure your files have albedo in the last column (total of 11 columns).\n");
 
-    fscanf(atmosf,"%s",str);
+    fscanf(snowf,"%s",str);
     temp[rec].albedo = atof(str);
     param_set.ALBEDO = TRUE;
     rec ++;
@@ -64,7 +65,7 @@ void read_snowmodel(atmos_data_struct *temp,
     if(file_dt < dt) {
       /** Time Step in Forcing File Finer than Used by Model: 
 	  Skip Records **/
-      for(i=0;i<dt/file_dt-1;i++) fgets(str,maxline,atmosf);
+      for(i=0;i<dt/file_dt-1;i++) fgets(str,maxline,snowf);
     }
     else if(file_dt > dt) {
       /** Time step used by model finer than that used in forcing file:

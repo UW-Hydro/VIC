@@ -37,6 +37,8 @@ void write_model_state(dist_prcp_struct    *prcp,
   06-03-03 Modified to create ASCII as well as BINARY state file.  KAC
   06-06-03 It is not necessary to store the current ice content as
            it is recomputed in initialize_model_state.         KAC
+  09-Oct-03 Removed initial space on veg/band info line in ASCII
+	    file.                                                 TJB
 
 *********************************************************************/
 {
@@ -140,7 +142,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	fwrite( &band, 1, sizeof(int), outfiles->statefile );
       }
       else {
-	fprintf( outfiles->statefile, " %i %i", veg, band );
+	fprintf( outfiles->statefile, "%i %i", veg, band );
       }
       
       for ( dist = 0; dist < Ndist; dist ++ ) {

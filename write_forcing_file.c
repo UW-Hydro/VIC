@@ -51,6 +51,9 @@ void write_forcing_file(atmos_data_struct *atmos,
 	/* wind * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].wind[j]*100.);
 	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);   
+
+	free((char *)tmp_siptr);
+	free((char *)tmp_usiptr);
       }
       else {
 	/* Write an ASCII forcing file */

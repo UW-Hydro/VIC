@@ -59,6 +59,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    (that might be needed for the snow model) within each
 	    record, eliminating the on the fly estimations used in
 	    previous versions of the model.              Bart and Greg
+  01-17-01  Pressure and vapor pressure read from a forcing file are
+            converted from kPa to Pa.  This preserves the original
+            format of the forcing files (where pressure was supposed 
+            to be in kPa, but allows VIC to use Pa internally, eliminating
+            the need to convert to Pa every time it is used.     KAC
 
 **********************************************************************/
 {
@@ -87,6 +92,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double *tmin;
   double *tair;
   double *tskc;
+
   double *vp;
   double  min, max;
   double  rainonly;
@@ -308,7 +314,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
       sum = 0;
       for (i = 0; i < NF; i++, step++) {
-	atmos[rec].shortwave[i] = forcing_data[SHORTWAVE][idx];
+	atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
 	sum += atmos[rec].shortwave[i];
 	idx++;
       }
@@ -376,7 +382,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	for (i = 0; i < stepspday; i++) {
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
-	    atmos[rec].vp[j] = forcing_data[VP][day];
+	    atmos[rec].vp[j] = forcing_data[VP][day] * kPa2Pa;
 	    atmos[rec].vpd[j] = (svp(atmos[rec].air_temp[j]) 
 				 - atmos[rec].vp[j]);
 	    sum += atmos[rec].vp[j];
@@ -396,12 +402,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for(rec = 0; rec < global_param.nrecs; rec++) {
 	sum = 0;
 	for(i = 0; i < NF; i++) {
-	  atmos[rec].vp[i] = forcing_data[VP][idx];
-
-
-	  atmos[rec].vp[i] = (rint(atmos[rec].vp[i]*1000)/1000);
-
-
+	  atmos[rec].vp[i] = forcing_data[VP][idx] * kPa2Pa;
 	  atmos[rec].vpd[i] = (svp(atmos[rec].air_temp[i]) 
 			       - atmos[rec].vp[i]);
 	  sum += atmos[rec].vp[i];
@@ -566,14 +567,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /**************************************
-    Estimate Atmospheric Pressure (kPa) 
+    Estimate Atmospheric Pressure (Pa) 
   **************************************/
 
   if(!param_set.TYPE[PRESSURE].SUPPLIED) {
     if(!param_set.TYPE[DENSITY].SUPPLIED) {
       /* set pressure to constant value */
       for (rec = 0; rec < global_param.nrecs; rec++) {
-	atmos[rec].pressure[NR] = 95.5;
+	atmos[rec].pressure[NR] = 95500.;
 	for (i = 0; i < NF; i++) {
 	  atmos[rec].pressure[i] = atmos[rec].pressure[NR];
 	}
@@ -583,10 +584,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* use observed densities to estimate pressure */
       for (rec = 0; rec < global_param.nrecs; rec++) {
 	atmos[rec].pressure[NR] = (275.0 + atmos[rec].air_temp[NR])
-	  *atmos[rec].density[NR]/3.486;
+	  *atmos[rec].density[NR]/0.003486;
 	for (i = 0; i < NF; i++) {
 	  atmos[rec].pressure[i] = (275.0 + atmos[rec].air_temp[i])
-	    *atmos[rec].density[i]/3.486;
+	    *atmos[rec].density[i]/0.003486;
 	}
       }
     }
@@ -600,7 +601,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	for (i = 0; i < stepspday; i++) {
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
-	    atmos[rec].pressure[j] = forcing_data[PRESSURE][day];
+	    atmos[rec].pressure[j] = forcing_data[PRESSURE][day] * kPa2Pa;
 	    sum += atmos[rec].pressure[j];
 	  }
 	  if(NF>1) atmos[rec].pressure[NR] = sum / (float)NF;
@@ -614,7 +615,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for(rec = 0; rec < global_param.nrecs; rec++) {
 	sum = 0;
 	for(i = 0; i < NF; i++) {
-	  atmos[rec].pressure[i] = forcing_data[PRESSURE][idx];
+	  atmos[rec].pressure[i] = forcing_data[PRESSURE][idx] * kPa2Pa;
 	  sum += atmos[rec].pressure[i];
 	  idx++;
 	}
@@ -629,10 +630,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   if(!param_set.TYPE[DENSITY].SUPPLIED) {
     for (rec = 0; rec < global_param.nrecs; rec++) {
-      atmos[rec].density[NR] = 3.486*atmos[rec].pressure[NR]/
+      atmos[rec].density[NR] = 0.003486*atmos[rec].pressure[NR]/
 	(275.0 + atmos[rec].air_temp[NR]);
       for (i = 0; i < NF; i++) {
-	atmos[rec].density[i] = 3.486*atmos[rec].pressure[i]/
+	atmos[rec].density[i] = 0.003486*atmos[rec].pressure[i]/
 	  (275.0 + atmos[rec].air_temp[i]);
       }
     }
@@ -660,7 +661,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	atmos[rec].snowflag[i] = FALSE;
     }
   }
-#endif
+#endif // OUTPUT_FORCE
  
   free(hourlyrad);
   free(prec);
@@ -677,8 +678,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
+#if OUTPUT_FORCE_STATS
+  calc_forcing_stats(global_param.nrecs, atmos);
+#endif // OUTPUT_FORCE_STATS
+
 #if OUTPUT_FORCE
   write_forcing_file(atmos, global_param.nrecs, outfiles);
-#endif /* OUTPUT_FORCE */
+#endif // OUTPUT_FORCE 
 
 }

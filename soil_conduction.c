@@ -459,7 +459,7 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 #else
 				double            *expt_node,
 				double            *bubble_node,
-#endif
+#endif // QUICK_FS
 				double            *depth,
 				double            *max_moist,
 #if QUICK_FS
@@ -467,7 +467,11 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 #else
 				double            *expt,
 				double            *bubble,
-#endif
+#endif // QUICK_FS
+#if SPATIAL_FROST
+				double            *frost_fract,
+				double             frost_slope,
+#endif // SPATIAL_FROST
 				double            *bulk_density,
 				double            *soil_density,
 				double            *quartz,
@@ -496,31 +500,80 @@ void estimate_layer_ice_content(layer_data_struct *layer,
   int           Nnodes          number of soil thermal nodes
   int           Nlayer          number of soil moisture layers
 
+  Modifications:
+  11-00 Modified to find ice content in spatial frost bands  KAC
+
 **************************************************************/
 
   extern option_struct options;
 
   int    nidx;
   int    lidx;
-  double Lsum; /* cumulative depth of moisture layer */
-  double Zsum; /* cumulative depth of thermal node */
+#if SPATIAL_FROST
+  int    frost_area;
+#endif
+  double Lsum;           /* cumulative depth of moisture layer */
+  double Zsum;           /* cumulative depth of thermal node */
   double deltaz;
-  double fract; /* fract of internodal region in layer */
-  double boundT; /* soil temperature between layers */
+  double fract;          /* fract of internodal region in layer */
+  double boundT;         /* soil temperature between layers */
+#if SPATIAL_FROST
+  double tmp_ice[FROST_SUBAREAS];
+  double tmpT;
+  double min_temp, max_temp, tmp_fract;
+#else
   double tmp_ice;
+#endif
   double ice_content[2]; /* stores estimated nodal ice content */
   double kappa_layer[2]; /* stores node thermal conductivity */
-  double Cs_layer[2]; /* stores node volumetric heat capacity */
-  double T_sum; /* summation of nodal temperatures within the layer */
-  double ice_sum; /* summation of nodal ice contents within the layer */
-  double dz_sum; /* summation of depth used in computing statistics */
+  double Cs_layer[2];    /* stores node volumetric heat capacity */
+  double T_sum;          /* summation of nodal temperatures within the layer */
+  double ice_sum;        /* summation of nodal ice contents within the layer */
+  double dz_sum;         /* summation of depth used in computing statistics */
 
   for(lidx=0;lidx<Nlayers;lidx++) {
     layer[lidx].T = 0.;
+#if SPATIAL_FROST
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+      layer[lidx].ice[frost_area] = 0.;
+#else
     layer[lidx].ice = 0.;
+#endif
     for(nidx=0;nidx<Nnodes;nidx++) {
       if(layer_node_fract[lidx][nidx] > 0) {
 	layer[lidx].T += T[nidx] * layer_node_fract[lidx][nidx] * dz[nidx];
+#if SPATIAL_FROST 
+	/* Spatial frost active */
+	min_temp = T[nidx] - frost_slope / 2.;
+	max_temp = min_temp + frost_slope;
+	for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	  if ( FROST_SUBAREAS > 1 ) {
+	    if ( frost_area == 0 ) tmp_fract = frost_fract[0] / 2.;
+	    else tmp_fract += (frost_fract[frost_area-1] / 2. 
+			       + frost_fract[frost_area] / 2.);
+	    tmpT = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
+/* 	    tmpT = T[nidx] - frost_slope / 2.  */
+/* 	      + (float)frost_area / (float)(FROST_SUBAREAS - 1); */
+	  }
+	  else tmpT = T[nidx];
+	  if(tmpT < 0 && options.FROZEN_SOIL && FS_ACTIVE) {
+	    tmp_ice[frost_area] = layer[lidx].moist 
+#if QUICK_FS
+	      - maximum_unfrozen_water_quick(tmpT, max_moist[lidx], 
+					     ufwc_table_layer[lidx]);
+#else
+ 	      - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], 
+				     expt[lidx]);
+#endif
+	    if(tmp_ice[frost_area] < 0) tmp_ice[frost_area] = 0;
+	  }
+	  else tmp_ice[frost_area] = 0;
+	  layer[lidx].ice[frost_area] += (tmp_ice[frost_area] 
+					  * layer_node_fract[lidx][nidx] 
+					  * dz[nidx]);
+	}
+#else
+	/* Spatial frost not active */
 	if(T[nidx] < 0 && options.FROZEN_SOIL && FS_ACTIVE) {
 	  tmp_ice = layer[lidx].moist 
 #if QUICK_FS
@@ -535,10 +588,16 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 	}
 	else tmp_ice = 0;
 	layer[lidx].ice += tmp_ice * layer_node_fract[lidx][nidx] * dz[nidx];
+#endif
       }
     }
     layer[lidx].T /= depth[lidx];
+#if SPATIAL_FROST
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+      layer[lidx].ice[frost_area] /= depth[lidx];
+#else
     layer[lidx].ice /= depth[lidx];
+#endif
   }
 
 }
@@ -548,6 +607,9 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 					   double            *bulk_density,
 					   double            *soil_density,
 					   double            *quartz,
+#if SPATIAL_FROST
+					   double            *frost_fract,
+#endif
 					   int                Nlayers) {
 /********************************************************************
   This subroutine computes the thermal conductivity and volumetric
@@ -564,13 +626,23 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 
 ********************************************************************/
 
-  int lidx;
+  int    lidx;
+#if SPATIAL_FROST
+  int    frost_area;
+#endif
   double moist, ice;
 
   /* compute layer thermal properties */
   for(lidx=0;lidx<Nlayers;lidx++) {
     moist = layer[lidx].moist / depth[lidx] / 1000;
+#if SPATIAL_FROST
+    ice = 0;
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 
+	* frost_fract[frost_area];
+#else
     ice = layer[lidx].ice / depth[lidx] / 1000;
+#endif
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, soil_density[lidx], 
 			  bulk_density[lidx], quartz[lidx]);
@@ -692,10 +764,19 @@ layer_data_struct find_average_layer(layer_data_struct *wet,
 **************************************************************/
 
   layer_data_struct layer;
+#if SPATIAL_FROST
+  int frost_area;
+#endif
 
   layer = *wet;
 
+#if SPATIAL_FROST
+  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+    layer.ice[frost_area] = ((wet->ice[frost_area] * mu) 
+			     + (dry->ice[frost_area] * (1. - mu)));
+#else
   layer.ice = ((wet->ice * mu) + (dry->ice * (1. - mu)));
+#endif
   layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
 
   return(layer);

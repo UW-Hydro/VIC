@@ -17,6 +17,7 @@ void close_files(infiles_struct   *inf,
   7-19-96  Files are now gzipped when they are closed.  This
 	   was added to save space when using large volumes
 	   of data.						KAC
+  02-27-01 Now closes files opened for lake model applications  KAC
 
 **********************************************************************/
 {
@@ -62,6 +63,14 @@ void close_files(infiles_struct   *inf,
     fclose(outf->snowband);
     if(options.COMPRESS) compress_files(fnames->snowband);
   }
+
+#if LAKE_MODEL
+  if ( options.LAKES ) {
+    /** Lake Data Output File **/
+    fclose(outf->lake);
+    if(options.COMPRESS) compress_files(fnames->lakeparam);
+  }
+#endif
 
 #endif
 

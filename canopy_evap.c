@@ -13,7 +13,7 @@ double canopy_evap(layer_data_struct *layer_wet,
                    int                month, 
                    double             mu,
 		   double            *Wdew,
-                   double             dt,
+                   double             delta_t,
                    double             rad,
 		   double             vpd,
 		   double             net_short,
@@ -27,6 +27,9 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   double            *depth,
 		   double            *Wcr,
 		   double            *Wpwp,
+#if SPATIAL_FROST
+		   double            *frost_fract,
+#endif
 		   float             *root)
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
@@ -46,7 +49,6 @@ double canopy_evap(layer_data_struct *layer_wet,
   atmos_data_struct    atmos         N/A   atmospheric forcing data structure
   layer_data_struct   *layer         N/A   soil layer variable structure
   veg_var_struct      *veg_var       N/A   vegetation variable structure
-  soil_con_struct      soil_con      N/A   soil parameter structure
   char                 CALC_EVAP     N/A   TRUE = calculate evapotranspiration
   int                  veg_class     N/A   vegetation class index number
   int                  month         N/A   current month
@@ -111,7 +113,10 @@ double canopy_evap(layer_data_struct *layer_wet,
 	      time step that it falls (OK for daily time step, 
 	      but causes oscilations in surface temperature
 	      for hourly time step)                      KAC, Dag
-	      
+	        modifications:
+     6-8-2000 Modified to use spatially distributed soil frost if 
+              present.                                           KAC
+
 
   **********************************************************************/ 
 
@@ -120,10 +125,10 @@ double canopy_evap(layer_data_struct *layer_wet,
 
   Evap = 0;
 
-  for(dist=0;dist<Ndist;dist++) {
+  for ( dist = 0; dist < Ndist; dist++ ) {
 
     /* Initialize variables */
-    for(i=0;i<options.Nlayer;i++) layerevap[i] = 0;
+    for ( i = 0; i < options.Nlayer; i++ ) layerevap[i] = 0;
     canopyevap = 0;
     throughfall = 0;
 
@@ -156,14 +161,15 @@ double canopy_evap(layer_data_struct *layer_wet,
       }
       
       canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),
-		       (2.0/3.0))* penman(rad, vpd * 1000., ra, (double) 0.0, 
+		       (2.0/3.0))* penman(rad, vpd, ra, (double) 0.0, 
 					  veg_lib[veg_class].rarc,
 					  veg_lib[veg_class].LAI[month-1], 
 					  (double) 1.0, air_temp, 
 					  net_short, elevation, 
-					  veg_lib[veg_class].RGL) * dt / 24.0;
+					  veg_lib[veg_class].RGL) * delta_t 
+	/ SEC_PER_DAY;
 
-      if (canopyevap > 0.0 && dt==24)
+      if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
 	/** If daily time step, evap can include current precipitation **/
 	f = min(1.0,((tmp_Wdew + ppt) / canopyevap));
       else if (canopyevap > 0.0)
@@ -187,11 +193,14 @@ double canopy_evap(layer_data_struct *layer_wet,
         Compute Evapotranspiration from Vegetation
       *******************************************/
       if(CALC_EVAP)
-	transpiration(tmp_layer, veg_class, month, rad,
-		      vpd, net_short, air_temp, ra,
-		      ppt, f, dt, tmp_veg_var->Wdew, elevation,
-		      depth, Wcr, Wpwp, &tmp_Wdew,
-		      &canopyevap, layerevap, root);
+	transpiration(tmp_layer, veg_class, month, rad, vpd, net_short, 
+		      air_temp, ra, ppt, f, delta_t, tmp_veg_var->Wdew, 
+		      elevation, depth, Wcr, Wpwp, &tmp_Wdew, &canopyevap, 
+		      layerevap, 
+#if SPATIAL_FROST
+		      frost_fract, 
+#endif
+		      root);
 
     }
 
@@ -204,7 +213,7 @@ double canopy_evap(layer_data_struct *layer_wet,
       tmp_Evap          += layerevap[i];
     }
     
-    Evap += tmp_Evap * mu / (1000. * dt * 3600.);
+    Evap += tmp_Evap * mu / (1000. * delta_t);
 
   }
 
@@ -226,7 +235,7 @@ void transpiration(layer_data_struct *layer,
 		   double ra,
 		   double ppt,
 		   double f,
-		   double dt,
+		   double delta_t,
 		   double Wdew,
 		   double elevation,
 		   double *depth,
@@ -235,16 +244,27 @@ void transpiration(layer_data_struct *layer,
 		   double *new_Wdew,
 		   double *canopyevap,
 		   double *layerevap,
+#if SPATIAL_FROST
+		   double *frost_fract,
+#endif
 		   float  *root)
 /**********************************************************************
   Computes evapotranspiration for unfrozen soils
   Allows for multiple layers.
+
+  modifications:
+  6-8-2000 Modified to use spatially distributed soil frost if 
+           present.                                               KAC
+
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
   extern option_struct options;
 
-  int i;
+  int    i;
+#if SPATIAL_FROST
+  int    frost_area;
+#endif
   double gsm_inv;               	/* soil moisture stress factor */
   double moist1, moist2;                /* tmp holding of moisture */
   double evap;                          /* tmp holding for evap total */
@@ -252,6 +272,7 @@ void transpiration(layer_data_struct *layer,
   double root_sum;                      /* proportion of roots in moist>Wcr zones */
   double spare_evap;                    /* evap for 2nd distribution */
   double avail_moist[MAX_LAYERS];         /* moisture available for trans */
+  double ice[MAX_LAYERS];
 
   /********************************************************************** 
      EVAPOTRANSPIRATION
@@ -272,7 +293,18 @@ void transpiration(layer_data_struct *layer,
   Wcr1 = 0.0;  
   for(i=0;i<options.Nlayer-1;i++){
     if(root[i] > 0.) {
+#if SPATIAL_FROST
+      avail_moist[i] = 0;
+      ice[i] = 0;
+      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	avail_moist[i] += ((layer[i].moist - layer[i].ice[frost_area]) 
+			   * frost_fract[frost_area]);
+        ice[i] += layer[i].ice[frost_area] * frost_fract[frost_area];
+      }
+#else
       avail_moist[i] = layer[i].moist - layer[i].ice;
+      ice[i]         = layer[i].ice;
+#endif
 
       moist1+=avail_moist[i];
       Wcr1 += Wcr[i];
@@ -283,8 +315,15 @@ void transpiration(layer_data_struct *layer,
   /*****************************************
     Compute moisture content in lowest layer
     *****************************************/
-  i=options.Nlayer-1;
+  i = options.Nlayer - 1;
+#if SPATIAL_FROST
+  moist2 = 0;
+  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+    moist2 += ((layer[i].moist - layer[i].ice[frost_area]) 
+	       * frost_fract[frost_area]);
+#else
   moist2 = layer[i].moist - layer[i].ice;
+#endif
 
   avail_moist[i]=moist2;
 
@@ -303,10 +342,10 @@ void transpiration(layer_data_struct *layer,
       (moist2>=Wcr[options.Nlayer-1] &&
       root[options.Nlayer-1]>=0.5) ){
     gsm_inv=1.0;
-    evap = penman(rad, vpd * 1000., ra, veg_lib[veg_class].rmin,
+    evap = penman(rad, vpd, ra, veg_lib[veg_class].rmin,
 		  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
 		  gsm_inv, air_temp, net_short, elevation, 
-		  veg_lib[veg_class].RGL) * dt / 24.0 *
+		  veg_lib[veg_class].RGL) * delta_t / SEC_PER_DAY *
       (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
 		 (2.0/3.0)));
 
@@ -363,11 +402,11 @@ void transpiration(layer_data_struct *layer,
 
       if(gsm_inv > 0.0){
 	/** Compute potential evapotranspiration **/
-        layerevap[i] = penman(rad, vpd * 1000., ra, veg_lib[veg_class].rmin,
+        layerevap[i] = penman(rad, vpd, ra, veg_lib[veg_class].rmin,
 			      veg_lib[veg_class].rarc, 
 			      veg_lib[veg_class].LAI[month-1], gsm_inv, 
 			      air_temp, net_short, elevation, 
-			      veg_lib[veg_class].RGL) * dt / 24.0 
+			      veg_lib[veg_class].RGL) * delta_t / SEC_PER_DAY 
 	  * (double)root[i] * (1.0-f*pow((Wdew/
 					  veg_lib[veg_class].Wdmax[month-1]),
 					 (2.0/3.0)));
@@ -381,13 +420,24 @@ void transpiration(layer_data_struct *layer,
     Check that evapotransipration does not cause soil moisture to 
     fall below wilting point.
   ****************************************************************/
-  for(i=0;i<options.Nlayer;i++){
-    if(layerevap[i] > layer[i].moist - Wpwp[i]) {
-      layerevap[i] = layer[i].moist - Wpwp[i];
+  for ( i = 0; i < options.Nlayer; i++ ) {
+    if ( ice[i] > 0 ) {
+      if ( ice[i] >= Wpwp[i] ) {
+	// ice content greater than wilting point can use all unfrozen moist
+	if ( layerevap[i] > avail_moist[i] ) layerevap[i] = avail_moist[i];
+      }
+      else {
+	// ice content less than wilting point restrict loss of unfrozen moist
+	if ( layerevap[i] > layer[i].moist - Wpwp[i] ) 
+	  layerevap[i] = layer[i].moist - Wpwp[i];
+      }
     }
-    if ( layerevap[i] < 0.0 ) {
-      layerevap[i] = 0.0;
+    else {
+      // No ice restrict loss of unfrozen moist
+      if ( layerevap[i] > layer[i].moist - Wpwp[i] ) 
+	layerevap[i] = layer[i].moist - Wpwp[i];
     }
+    if ( layerevap[i] < 0.0 ) layerevap[i] = 0.0;
   }
 
 }

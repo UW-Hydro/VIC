@@ -23,14 +23,22 @@ dist_prcp_struct make_dist_prcp(int  nveg,
 
   dist_prcp_struct temp;
   int              i;
+  int              Nitems;
 
-  temp.mu     = (double *)calloc(nveg+1,sizeof(double));
-  for ( i = 0; i < nveg + 1; i++ ) temp.mu[i] = 1;
-  temp.snow   = make_snow_data(nveg+1);
-  temp.energy = make_energy_bal(nveg+1,Nnodes);
-  for(i=0;i<2;i++) {
-    temp.veg_var[i]  = make_veg_var(nveg);
-    temp.cell[i]     = make_cell_data(nveg+1,options.Nlayer);
+#if LAKE_MODEL
+  if ( options.LAKES ) Nitems = nveg + 2;
+  else Nitems = nveg + 1;
+#else // LAKE_MODEL
+  Nitems = nveg + 1;
+#endif // LAKE_MODEL
+
+  temp.mu     = (double *)calloc(Nitems,sizeof(double));
+  for ( i = 0; i < Nitems; i++ ) temp.mu[i] = 1;
+  temp.snow   = make_snow_data(Nitems);
+  temp.energy = make_energy_bal(Nitems,Nnodes);
+  for ( i = 0; i < 2; i++ ) {
+    temp.veg_var[i]  = make_veg_var(Nitems-1);
+    temp.cell[i]     = make_cell_data(Nitems,options.Nlayer);
   }
 
   return (temp);

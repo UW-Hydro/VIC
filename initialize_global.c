@@ -86,16 +86,18 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
   options.PREC_EXPT             = 0.6;
-#if SAVE_STATE
   options.INIT_STATE            = FALSE;
-#endif
-/*   options.INIT_SNOW             = FALSE; */
   options.ROOT_ZONES            = MISSING;
   options.MIN_WIND_SPEED        = 0.0;
   options.NOFLUX                = FALSE;
   options.GLOBAL_LAI            = FALSE;
   options.QUICK_FLUX            = TRUE;
+  options.QUICK_SOLVE           = FALSE;
   options.GRND_FLUX             = FALSE;
+#if LAKE_MODEL
+  options.LAKES                 = FALSE;
+  options.LAKE_PROFILE          = FALSE;
+#endif // LAKE_MODEL
 
 #if LINK_DEBUG 
 
@@ -115,7 +117,8 @@ void initialize_global() {
   debug.PRT_BALANCE = FALSE;
   debug.PRT_GRID    = FALSE;
   strcpy(debug.debug_dir,"./");
-#endif
+
+#endif // LINK_DEBUG
 
   /** Initialize forcing file input controls **/
 

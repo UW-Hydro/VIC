@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
   1997-98 Model was updated from simple 2 layer water balance to 
           an extension of the full energy and water balance 3 layer
 	  model.                                                  KAC
+  02-27-01 added controls for lake model                          KAC
+
 
 **********************************************************************/
 {
@@ -35,7 +37,7 @@ int main(int argc, char *argv[])
   extern option_struct options;
 #if LINK_DEBUG
   extern debug_struct debug;
-#endif
+#endif // LINK_DEBUG
   extern Error_struct Error;
   extern global_param_struct global_param;
 
@@ -66,11 +68,14 @@ int main(int argc, char *argv[])
   filenames_struct         filenames;
   filenames_struct         builtnames;
   infiles_struct           infiles;
+#if LAKE_MODEL
+  lake_con_struct          lake_con;
+#endif // LAKE_MODEL
   outfiles_struct          outfiles;
   
 #if VERBOSE
   fprintf(stderr,"Running Model Version: %s\n",vcid);
-#endif
+#endif // VERBOSE
 
   /** Read Model Options **/
   initialize_global();
@@ -173,6 +178,13 @@ int main(int argc, char *argv[])
 #endif /* LINK_DEBUG*/
 #endif /* !OUTPUT_FORCE */
 
+#if LAKE_MODEL
+      if ( options.LAKES ) 
+	lake_con = read_lakeparam(infiles.lakeparam, soil_con, 
+				  global_param.resolution, 
+				  &veg_con[0].Cv_sum);
+#endif // LAKE_MODEL
+
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
                    &outfiles);
@@ -197,7 +209,7 @@ int main(int argc, char *argv[])
 #endif /* VERBOSE */
 #endif /* !OUTPUT_FORCE */
 
-      initialize_atmos(atmos, dmy, infiles.forcing, 
+      initialize_atmos(atmos, dmy, infiles.forcing,
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
@@ -207,7 +219,7 @@ int main(int argc, char *argv[])
 #else /* OUTPUT_FORCE */
                        soil_con.Tfactor); 
 #endif /* OUTPUT_FORCE */
-      
+
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 #endif
@@ -220,10 +232,13 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-      initialize_model_state(&prcp, dmy[0], atmos[0].air_temp[NR], 
-			     &global_param, infiles, soil_con.gridcel, 
-			     veg_con[0].vegetat_type_num, 
-			     options.Nnode, Ndist, &soil_con, veg_con);
+      initialize_model_state(atmos[0].air_temp[NR], Ndist, options.Nnode, 
+			     veg_con[0].vegetat_type_num, soil_con.gridcel, 
+			     &prcp, dmy[0], &global_param, infiles, 
+#if LAKE_MODEL
+			     lake_con,
+#endif // LAKE_MODEL
+			     &soil_con, veg_con);
 
 
 #if VERBOSE
@@ -258,6 +273,15 @@ int main(int argc, char *argv[])
 	  }
 	}
       }
+
+#if LAKE_MODEL
+      if ( options.LAKES ) {
+	/** COMPUTE MOSITURE STORAGE IN LAKE FRACTION **/
+	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
+				     / prcp.lake_var.sarea) * 1000.;
+      }
+#endif // LAKE_MODEL
+
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
@@ -271,7 +295,11 @@ int main(int argc, char *argv[])
         else LASTREC = FALSE;
 
         dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
-                  dmy, &global_param, &outfiles, rec, cellnum,
+                  dmy, &global_param, 
+#if LAKE_MODEL
+		  &lake_con, 
+#endif /* LAKE_MODEL */
+		  &outfiles, rec, cellnum,
                   NEWCELL, LASTREC);
         NEWCELL=FALSE;
 

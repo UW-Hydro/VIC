@@ -76,6 +76,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
   double          tmp;
+  double          tempdbl;
   soil_con_struct temp; 
 
   if ( RUN_MODEL ) {
@@ -137,7 +138,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	nrerror(ErrStr);
       }
     }
-    if(options.GRND_FLUX && (temp.depth[0] > temp.depth[1])) {
+    if(temp.depth[0] > temp.depth[1]) {
       sprintf(ErrStr,"ERROR: Model will not function with layer %i depth (%f m) < layer %i depth (%f m).\n",
 	      0,temp.depth[0],1,temp.depth[1]);
       nrerror(ErrStr);
@@ -209,6 +210,18 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* read frozen soil active flag */
     fscanf(soilparam, "%i", &tempint);
     temp.FS_ACTIVE = (char)tempint;
+    
+    /* read minimum snow depth for full coverage */
+    fscanf(soilparam, "%lf", &tempdbl);
+#if SPATIAL_SNOW
+    temp.depth_full_snow_cover = tempdbl;
+#endif // SPATIAL_SNOW
+    
+    /* read slope of frozen soil distribution */
+    fscanf(soilparam, "%lf", &tempdbl);
+#if SPATIAL_FROST
+    temp.frost_slope = tempdbl;
+#endif // SPATIAL_FROST
     
     /*******************************************
       Compute Maximum Soil Layer Moiture Content

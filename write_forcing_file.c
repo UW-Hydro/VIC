@@ -42,11 +42,11 @@ void write_forcing_file(atmos_data_struct *atmos,
 	/* density * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].density[j]*100.);
 	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
-	/* pressure * 100 */
-	tmp_usiptr[0] = (unsigned short int)(atmos[rec].pressure[j]*100.);
+	/* pressure * 0.1 */
+	tmp_usiptr[0] = (unsigned short int)(atmos[rec].pressure[j]*0.1);
 	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
-	/* vp * 100 */
-	tmp_siptr[0] = (short int)(atmos[rec].vp[j]*100.);
+	/* vp * 1 */
+	tmp_siptr[0] = (short int)(atmos[rec].vp[j]*1.);
 	fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
 	/* wind * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].wind[j]*100.);
@@ -60,8 +60,8 @@ void write_forcing_file(atmos_data_struct *atmos,
 	fprintf(outfiles->fluxes,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
 		atmos[rec].prec[j], atmos[rec].air_temp[j], 
 		atmos[rec].shortwave[j], atmos[rec].longwave[j], 
-		atmos[rec].density[j], atmos[rec].pressure[j], 
-		atmos[rec].vp[j], atmos[rec].wind[j]);
+		atmos[rec].density[j], atmos[rec].pressure[j]/1000., 
+		atmos[rec].vp[j]/1000., atmos[rec].wind[j]);
       }
     }
   }

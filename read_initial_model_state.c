@@ -116,11 +116,11 @@ void read_initial_model_state(FILE                *statefile,
       }
       
       /* Read average ice content */
-      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	if ( fscanf(statefile," %lf", 
-		    &cell[WET][veg][band].layer[lidx].ice) == EOF ) 
-	  nrerror("End of model state file found unexpectedly");
-      }
+/*       for ( lidx = 0; lidx < options.Nlayer; lidx++ ) { */
+/* 	if ( fscanf(statefile," %lf",  */
+/* 		    &cell[WET][veg][band].layer[lidx].ice) == EOF )  */
+/* 	  nrerror("End of model state file found unexpectedly"); */
+/*       } */
       
       /* Read average dew storage */
       if ( veg < Nveg ) {
@@ -129,12 +129,14 @@ void read_initial_model_state(FILE                *statefile,
       }
       
       /* Read snow data */
-      if ( fscanf(statefile," %i %lf %lf %lf %lf %lf", 
+      if ( fscanf(statefile," %i %lf %lf %lf %lf %lf %lf", 
 		  &snow[veg][band].last_snow, &snow[veg][band].swq, 
 		  &snow[veg][band].surf_temp, &snow[veg][band].pack_temp, 
-		  &snow[veg][band].density, &snow[veg][band].snow_canopy) 
+		  &snow[veg][band].density, &snow[veg][band].snow_canopy,
+		  &snow[veg][band].coverage) 
 	   == EOF ) 
 	nrerror("End of model state file found unexpectedly");
+      
       if(snow[veg][band].density > 0.) 
 	snow[veg][band].depth = 1000. * snow[veg][band].swq 
 	  / snow[veg][band].density;

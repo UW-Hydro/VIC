@@ -76,6 +76,9 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].vapor_flux      = 0.0;
       snow[i][j].pack_temp       = 0.0;
       snow[i][j].snow_canopy     = 0.0;
+      snow[i][j].store_swq       = 0.0;
+      snow[i][j].store_snow      = FALSE;
+      snow[i][j].swq_slope       = 0.0;
       snow[i][j].tmp_int_storage = 0.0;
       if(snow[i][j].density>0.) 
 	snow[i][j].depth = 1000. * snow[i][j].swq / snow[i][j].density;

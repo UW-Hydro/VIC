@@ -123,7 +123,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       fscanf(soilparam,"%s",tmpstr);
       cnt++;
     }
-    if(cnt!=16+10*options.Nlayer) {
+    if(cnt!=18+10*options.Nlayer) {
       sprintf(ErrStr,"Not the right number of soil parameter files in the ARC/INFO file list.");
       nrerror(ErrStr);
     }
@@ -324,6 +324,22 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcpy(namestr,soilparamdir);
     strcat(namestr,tmpstr);
     temp.FS_ACTIVE = (char)read_arcinfo_value(namestr,temp.lat,temp.lng);
+
+    /** Minimum Snow Depth of Full Coverage **/
+    fscanf(soilparam,"%s",tmpstr);
+#if SPATIAL_SNOW
+    strcpy(namestr,soilparamdir);
+    strcat(namestr,tmpstr);
+    temp.depth_full_snow_cover = read_arcinfo_value(namestr,temp.lat,temp.lng);
+#endif // SPATIAL_SNOW
+
+    /** Slope of Frozen Soil Distribution **/
+    fscanf(soilparam,"%s",tmpstr);
+#if SPATIAL_FROST
+    strcpy(namestr,soilparamdir);
+    strcat(namestr,tmpstr);
+    temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
+#endif // SPATIAL_FROST
 
     /*******************************************
       Compute Soil Layer Properties

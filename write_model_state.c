@@ -85,11 +85,11 @@ void write_model_state(dist_prcp_struct    *prcp,
       }
       
       /* Write average ice content */
-      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	tmpval = prcp->mu[veg] * (cell[WET][veg][band].layer[lidx].ice)
-	  + (1. - prcp->mu[veg]) * (cell[DRY][veg][band].layer[lidx].ice);
-	fprintf(outfiles->statefile," %f", tmpval);
-      }
+/*       for ( lidx = 0; lidx < options.Nlayer; lidx++ ) { */
+/* 	tmpval = prcp->mu[veg] * (cell[WET][veg][band].layer[lidx].ice) */
+/* 	  + (1. - prcp->mu[veg]) * (cell[DRY][veg][band].layer[lidx].ice); */
+/* 	fprintf(outfiles->statefile," %f", tmpval); */
+/*       } */
       
       /* Write average dew storage */
       if ( veg < Nveg ) {

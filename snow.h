@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 16:03:11
- * LAST-MOD: Tue Jul 14 10:38:32 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Thu Feb 22 14:28:53 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  header file for DHSVM snow routines
  * DESCRIP-END.
  * FUNCTIONS:    
@@ -34,8 +34,17 @@
 
 /* density of new fallen snow [50] */
 #define NEW_SNOW_DENSITY	50.
+
+/* Minimum SWQ for which the snowpack energy balance is computed 
+   independent of the soil surface temperature */
+/* #define MIN_SWQ_EB_THRES 0.0060 */
+#define MIN_SWQ_EB_THRES 0.0010
  
-/* Minimum SWQ at which the snow pack is assumed to fully cover the grid cell (m) */
-#define MAX_FULL_COVERAGE_SWQ   0.076
+/* Attenuation coefficients for shortwave in a snowpack.  Values and
+   equation taken from Patterson and Hamblin, 1988 */
+#define SNOW_A1 0.7
+#define SNOW_A2 0.3  
+#define SNOW_L1 6    // (1/m)
+#define SNOW_L2 20   // (1/m)
 
 #endif 

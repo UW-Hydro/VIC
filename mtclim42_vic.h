@@ -15,7 +15,7 @@ University of Montana
 Adapted for inclusion in VIC-code:
 Bart Nijssen
 Sat Aug 21 16:58:43 1999
-Last Changed: Sat Sep  4 15:35:35 1999 by Bart Nijssen <nijssen@u.washington.edu>
+Last Changed: Mon Jan 29 15:55:08 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
 */
 
 #define TDAYCOEF 0.45     /* daylight air temperature coefficient (dim) */
@@ -38,7 +38,7 @@ Last Changed: Sat Sep  4 15:35:35 1999 by Bart Nijssen <nijssen@u.washington.edu
 #define T_STD    288.15          /* (K) standard temp at 0.0 m elevation  */ 
 #define CP       1010.0          /* (J kg-1 K-1) specific heat of air */
 #define LR_STD   0.0065          /* (-K m-1) standard temperature lapse rate */
-#define EPS      0.62196351      /* (MW/MA) unitless ratio of molec weights */
+//#define EPS      0.62196351      /* (MW/MA) unitless ratio of molec weights */
 /* start vic_change */
 #ifndef PI
 #define PI       3.14159265

@@ -5,15 +5,18 @@
 
 static char vcid[] = "$Id$";
 
-void full_energy(int                  rec,
+void full_energy(char                 NEWCELL,
+		 int                  gridcell,
+                 int                  rec,
                  atmos_data_struct   *atmos,
-                 soil_con_struct     *soil_con,
-                 veg_con_struct      *veg_con,
                  dist_prcp_struct    *prcp,
                  dmy_struct          *dmy,
                  global_param_struct *gp,
-                 int                  gridcell,
-                 char                 NEWCELL)
+#if LAKE_MODEL
+		 lake_con_struct     *lake_con,
+#endif // LAKE_MODEL 
+                 soil_con_struct     *soil_con,
+                 veg_con_struct      *veg_con)
 /**********************************************************************
 	full_energy	Keith Cherkauer		January 8, 1997
 
@@ -65,16 +68,21 @@ void full_energy(int                  rec,
   double                 rainfall[2]; 
   double                 wind_h;
   double                 height;
-  double                 displacement;
-  double                 roughness;
-  double                 ref_height;
+  double                 displacement[3];
+  double                 roughness[3];
+  double                 ref_height[3];
   double                 Cv;
   double                 Le;
-  double                 Ls;
   double                 Evap;
   double                 Melt[2*MAX_BANDS];
   double                 bare_albedo;
   double                 snow_inflow[MAX_BANDS];
+#if LAKE_MODEL
+  double                 lake_prec;
+  double                 rainonly;
+  double                 sum_runoff;
+  double                 sum_baseflow;
+#endif // LAKE_MODEL
   double                 step_rad;
   double                 step_net_short;
   double                 tmp_aero_resist;
@@ -90,7 +98,9 @@ void full_energy(int                  rec,
   double                 tmp_layerevap[2][MAX_BANDS][MAX_LAYERS];
   double                 tmp_Tmin;
   double                 gauge_correction[2];
-  layer_data_struct     *tmp_layer[2];
+#if LAKE_MODEL
+  lake_var_struct       *lake_var;
+#endif /* LAKE_MODEL */
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -105,9 +115,12 @@ void full_energy(int                  rec,
 
   /* set local pointers */
   cell    = prcp->cell;
-  veg_var = prcp->veg_var;
-  snow    = prcp->snow;
   energy  = prcp->energy;
+#if LAKE_MODEL
+  lake_var = &prcp->lake_var;
+#endif /* LAKE_MODEL */
+  snow    = prcp->snow;
+  veg_var = prcp->veg_var;
 
   /* set variables for distributed precipitation */
   if(options.DIST_PRCP) 
@@ -122,14 +135,6 @@ void full_energy(int                  rec,
   /** Set Damping Depth **/
   dp        = soil_con->dp;
 
-  /* allocate memory for temporary storage structures */
-  if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-    for(i=0; i<2; i++) {
-      tmp_layer[i] = (layer_data_struct *)calloc((options.Nlayer),
-						 sizeof(layer_data_struct));
-    }
-  }
-      
   /* Compute gauge undercatch correction factors 
      - this assumes that the gauge is free of vegetation effects, so gauge
      correction is constant for the entire grid cell */
@@ -159,21 +164,19 @@ void full_energy(int                  rec,
         Initialize Model Parameters
       **************************************************/
 
-      /* Initialize energy balance variables */
       for(band = 0; band < Nbands; band++) {
 	if(soil_con->AreaFract[band] > 0) {
+
+	  /* Initialize energy balance variables */
 	  energy[iveg][band].shortwave = 0;
 	  energy[iveg][band].longwave  = 0.;
-	}
-      }
 
-      /* Initialize snow variables */
-      for(band=0; band<Nbands; band++) {
-	if(soil_con->AreaFract[band] > 0) {
+	  /* Initialize snow variables */
 	  snow[iveg][band].vapor_flux        = 0.;
 	  snow[iveg][band].canopy_vapor_flux = 0.;
 	  snow_inflow[band]                  = 0.;
 	  Melt[band*2]                       = 0.;
+
 	}
       }
 
@@ -189,7 +192,7 @@ void full_energy(int                  rec,
       else wind_h = gp->wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      if(iveg < Nveg)
+      if ( iveg < Nveg )
 	surf_atten = exp(-veg_lib[veg_class].rad_atten 
 			 * veg_lib[veg_class].LAI[dmy[rec].month-1]);
       else 
@@ -213,15 +216,16 @@ void full_energy(int                  rec,
 
       /* Set surface descriptive variables */
       overstory = FALSE;
-      if(iveg < Nveg) {
-        displacement = veg_lib[veg_class].displacement[dmy[rec].month-1];
-        roughness = veg_lib[veg_class].roughness[dmy[rec].month-1];
-        overstory = veg_lib[veg_class].overstory;
+      if ( iveg < Nveg ) {
+        displacement[0] = veg_lib[veg_class].displacement[dmy[rec].month-1];
+        roughness[0]    = veg_lib[veg_class].roughness[dmy[rec].month-1];
+        overstory       = veg_lib[veg_class].overstory;
+	if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
       }
       if(iveg == Nveg || roughness == 0) {
-        displacement = 0.;
-        roughness = soil_con->rough;
-        overstory = FALSE;
+        displacement[0] = 0.;
+        roughness[0]    = soil_con->rough;
+        overstory       = FALSE;
       }
 
       /* Initialize wind speeds */
@@ -230,20 +234,21 @@ void full_energy(int                  rec,
       tmp_wind[2] = -999.;
  
       /* Estimate vegetation height */
-      height = calc_veg_height(displacement);
+      height = calc_veg_height(displacement[0]);
 
       /* Estimate reference height */
-      if(displacement < wind_h) 
-	ref_height = wind_h;
+      if(displacement[0] < wind_h) 
+	ref_height[0] = wind_h;
       else 
-	ref_height = displacement + wind_h + roughness;
+	ref_height[0] = displacement[0] + wind_h + roughness[0];
 
       /* Compute aerodynamic resistance over various surface types */
-      CalcAerodynamic(overstory, iveg, Nveg, veg_lib[veg_class].wind_atten,
-                      height, soil_con->rough, soil_con->snow_rough,
-                      &displacement, &roughness, &ref_height,
-		      veg_lib[veg_class].trunk_ratio,
-                      tmp_wind, cell[WET][iveg][0].aero_resist);
+      CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio, 
+                      soil_con->snow_rough, soil_con->rough, 
+		      veg_lib[veg_class].wind_atten,
+		      gp->wind_h, cell[WET][iveg][0].aero_resist, tmp_wind, 
+                      displacement, ref_height, roughness, 
+                      Nveg, iveg);
   
       /**************************************************
         Store Water Balance Terms for Debugging
@@ -267,7 +272,7 @@ void full_energy(int                  rec,
 	  }
 	}
       }
-#endif
+#endif // LINK_DEBUG
 
       /******************************
         Solve ground surface fluxes 
@@ -285,24 +290,22 @@ void full_energy(int                  rec,
 	    dry_veg_var = &(empty_veg_var);
 	  }
 
-	  surface_fluxes(overstory, rec, band, veg_class, iveg, Nveg, Ndist, 
-			 Nbands, options.Nlayer, dp, prcp->mu[iveg], ice0, 
-			 moist, surf_atten, height, displacement, roughness, 
-			 ref_height, bare_albedo, 
+	  surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
+			 prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
 			 cell[WET][iveg][0].aero_resist, 
-			 &(cell[WET][iveg][band].baseflow), 
 			 &(cell[DRY][iveg][band].baseflow), 
-			 &(cell[WET][iveg][band].runoff), 
-			 &(cell[DRY][iveg][band].runoff), &out_prec[band*2], 
-			 tmp_wind, &Le, &Ls, &(Melt[band*2]), 
-			 &(cell[WET][iveg][band].inflow), 
-			 &(cell[DRY][iveg][band].inflow), 
-			 &snow_inflow[band], gauge_correction,
-			 veg_con[iveg].root, atmos, soil_con, dmy, gp, 
-			 &(energy[iveg][band]), &(snow[iveg][band]),
-			 cell[WET][iveg][band].layer, 
+			 &(cell[WET][iveg][band].baseflow), displacement, 
+			 gauge_correction, &(cell[DRY][iveg][band].inflow), 
+			 &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
+			 ref_height, roughness, 
+			 &(cell[DRY][iveg][band].runoff), 
+			 &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
+			 tmp_wind, veg_con[iveg].root, Nbands, Ndist, 
+			 options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
+			 atmos, dmy, &(energy[iveg][band]), gp, 
 			 cell[DRY][iveg][band].layer, 
-			 wet_veg_var, dry_veg_var);
+			 cell[WET][iveg][band].layer, &(snow[iveg][band]), 
+			 soil_con, dry_veg_var, wet_veg_var);
 	  
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 
@@ -362,17 +365,71 @@ void full_energy(int                  rec,
 		      iveg, rec, gridcell, j, NEWCELL); 
 	}
       }
-#endif
+#endif // LINK_DEBUG
 
     } /** end current vegetation type **/
   } /** end of vegetation loop **/
 
-  /** END Temperature and Moisture Profile Debugging Output **/
-  if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-    for(j = 0; j < 2; j++) {
-      free ((char *)tmp_layer[j]);
+#if LAKE_MODEL
+  /** Compute total runoff and baseflow for all vegetation types
+      within each snowband. **/
+  if ( options.LAKES && lake_con->Cl[0] > 0 ) {
+
+    sum_runoff = sum_baseflow = 0;
+	
+    // Loop through snow elevation bands
+    for ( band = 0; band < Nbands; band++ ) {
+      if ( soil_con->AreaFract[band] > 0 ) {
+	
+	// Loop through all vegetation types
+	for ( iveg = 0; iveg <= Nveg; iveg++ ) {
+	  
+	  /** Solve Veg Type only if Coverage Greater than 0% **/
+	  if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
+	      (iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
+
+	    // Loop through distributed precipitation fractions
+	    for ( dist = 0; dist < 2; dist++ ) {
+	      
+	      if ( dist == 0 ) 
+		tmp_mu = prcp->mu[iveg]; 
+	      else 
+		tmp_mu = 1. - prcp->mu[iveg]; 
+	      
+	      if ( iveg < Nveg ) {
+		Cv = veg_con[iveg].Cv;
+		sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu 
+				* Cv * soil_con->AreaFract[band] );
+		sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu 
+				  * Cv * soil_con->AreaFract[band] );
+	      }
+	      else {
+		Cv = 1. - veg_con[0].Cv_sum;
+		sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu 
+				* Cv * soil_con->AreaFract[band] );
+		sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu 
+				  * Cv * soil_con->AreaFract[band] ); 
+	      }
+	    }
+	  }
+	}
+      }
     }
+
+    /** Run lake model **/
+    lake_var->runoff_in   = sum_runoff;
+    lake_var->baseflow_in = sum_baseflow;
+    rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
+			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
+    lake_prec = ( gauge_correction[SNOW] * (atmos->prec[NR] - rainonly) 
+		  + gauge_correction[RAIN] * rainonly );
+    atmos->out_prec += lake_prec * lake_con->Cl[0];
+    lakemain(*atmos, lake_var, *lake_con, lake_prec, *soil_con,
+	     (float)gp->dt, &energy[Nveg+1][0], &snow[Nveg+1][0], NR, rec, 
+	     gp->wind_h);
+
   }
+#endif /* LAKE_MODEL */
 
 }
 

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD: Wed Jan 19 16:20:40 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Fri Mar  2 18:42:20 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate the stability correction for exchange of sensible
  *               heat between the surface and the atmosphere 
  * DESCRIP-END.
@@ -17,8 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
-
-#define G 9.81
 
 /*****************************************************************************
   Function name: StabilityCorrection()
@@ -120,4 +118,3 @@ double StabilityCorrection(double Z, double d, double TSurf, double Tair,
   /*   return Correction; */
 }
 
-#undef G

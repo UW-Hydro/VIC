@@ -56,6 +56,7 @@ void read_initial_model_state(FILE                *statefile,
             desired record (Nveg and Nbands, respectively).       TJB
   01-Nov-04 Modified to read state files containing SPATIAL_FROST
 	    and LAKE_MODEL state variables.			TJB
+  02-Nov-04 Added a few more lake state variables.		TJB
 
 *********************************************************************/
 {
@@ -363,23 +364,45 @@ void read_initial_model_state(FILE                *statefile,
     if ( options.BINARY_STATE_FILE ) {
       if ( fread( &lake_con.numnod, 1, sizeof(int), statefile ) != sizeof(int) )
 	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->volume, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->ldepth, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->sarea, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->dz, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->surfdz, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        if ( fread( &lake_var->surface[node], 1, sizeof(double), statefile ) != sizeof(double) )
+	  nrerror("End of model state file found unexpectedly");
+      }
       if ( fread( &lake_var->tp_in, 1, sizeof(double), statefile ) != sizeof(double) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->tempavg, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
       for ( node = 0; node < lake_con.numnod; node++ ) {
         if ( fread( &lake_var->temp[node], 1, sizeof(double), statefile ) != sizeof(double) )
 	  nrerror("End of model state file found unexpectedly");
       }
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        if ( fread( &lake_var->density[node], 1, sizeof(double), statefile ) != sizeof(double) )
+	  nrerror("End of model state file found unexpectedly");
+      }
+      if ( fread( &lake_var->mixmax, 1, sizeof(int), statefile ) != sizeof(int) )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->activenod, 1, sizeof(int), statefile ) != sizeof(int) )
+	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->tempi, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->hice, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->fraci, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->mixmax, 1, sizeof(int), statefile ) != sizeof(int) )
+      if ( fread( &lake_var->swe, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->volume, 1, sizeof(double), statefile ) != sizeof(double) )
-	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->sarea, 1, sizeof(double), statefile ) != sizeof(double) )
+      if ( fread( &lake_var->sdepth, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
     }
     else {
@@ -389,23 +412,45 @@ void read_initial_model_state(FILE                *statefile,
 	fprintf(stderr,"The number of lake nodes stored in the state file (%d) for this grid cell does not match the number of lake nodes indicated in your lake parameter file (%d).", tmp_int, lake_con.numnod);
 	nrerror(ErrStr);
       }
+      if ( fscanf(statefile," %lf", &lake_var->volume) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %lf", &lake_var->ldepth) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %lf", &lake_var->sarea) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %lf", &lake_var->dz) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %lf", &lake_var->surfdz) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        if ( fscanf(statefile," %lf", &lake_var->surface[node]) == EOF )
+	  nrerror("End of model state file found unexpectedly");
+      }
       if ( fscanf(statefile," %lf", &lake_var->tp_in) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %lf", &lake_var->tempavg) == EOF )
 	nrerror("End of model state file found unexpectedly");
       for ( node = 0; node < lake_con.numnod; node++ ) {
         if ( fscanf(statefile," %lf", &lake_var->temp[node]) == EOF )
 	  nrerror("End of model state file found unexpectedly");
       }
+      for ( node = 0; node < lake_con.numnod; node++ ) {
+        if ( fscanf(statefile," %lf", &lake_var->density[node]) == EOF )
+	  nrerror("End of model state file found unexpectedly");
+      }
+      if ( fscanf(statefile," %d", &lake_var->mixmax) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(statefile," %d", &lake_var->activenod) == EOF )
+	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->tempi) == EOF )
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->hice) == EOF )
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->fraci) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      if ( fscanf(statefile," %d", &lake_var->mixmax) == EOF )
+      if ( fscanf(statefile," %lf", &lake_var->swe) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      if ( fscanf(statefile," %lf", &lake_var->volume) == EOF )
-	nrerror("End of model state file found unexpectedly");
-      if ( fscanf(statefile," %lf", &lake_var->sarea) == EOF )
+      if ( fscanf(statefile," %lf", &lake_var->sdepth) == EOF )
 	nrerror("End of model state file found unexpectedly");
     }
   }

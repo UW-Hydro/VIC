@@ -91,7 +91,8 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
                    float *);
 #endif
 void   check_files(infiles_struct *, filenames_struct *);
-FILE  *check_state_file(char *, dmy_struct, global_param_struct *, int, int);
+FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
+                        int *);
 void   close_files(infiles_struct *, outfiles_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
@@ -106,13 +107,13 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
                                              double *,
 #endif
 					     int);
-
+void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
 #if LAKE_MODEL
 		 lake_con_struct *,
 #endif /* LAKE_MODEL */
-		 outfiles_struct *,int,int,char,char);
+		 outfiles_struct *, int, int, char, char, char *, int *);
 #if QUICK_FS
 void distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
@@ -207,10 +208,11 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
+                        double *, 
 #if OUTPUT_FORCE
-			double *, outfiles_struct *);
+			char *, outfiles_struct *);
 #else
-			double *);
+			char *);
 #endif
 void   initialize_global();
 void   initialize_model_state(double, int, int, int, int, dist_prcp_struct *, 
@@ -219,7 +221,8 @@ void   initialize_model_state(double, int, int, int, int, dist_prcp_struct *,
 #if LAKE_MODEL
                               lake_con_struct,
 #endif // LAKE_MODEL
-                              soil_con_struct *, veg_con_struct *);
+                              soil_con_struct *, veg_con_struct *, char **, 
+                              int **);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **,int,FILE *,int);
@@ -266,13 +269,12 @@ double penman(double, double, double, double, double, double, double,
 void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
 			   soil_con_struct *, double *, double *);
 double priestley(double, double);
-void   put_data(double *, double *, double *, 
+void   put_data(char *, double *, double *, double *, 
 #if SPATIAL_FROST
                 double *, double,
 #endif // SPATIAL_FROST
                 double, int, int, int, int, atmos_data_struct *, 
-                dist_prcp_struct *, 
-		dmy_struct *,
+                dist_prcp_struct *, dmy_struct *,
 #if LAKE_MODEL
                 lake_con_struct *, 
 #endif // LAKE_MODEL
@@ -286,12 +288,13 @@ void   read_atmos_data(FILE *, global_param_struct, int, int, double **);
 double **read_forcing_data(FILE **, global_param_struct);
 void   read_initial_model_state(FILE *, dist_prcp_struct *, 
 				global_param_struct *, int, int, int, 
-				soil_con_struct *);
+				soil_con_struct *, int, char *, int *);
 void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int, int);
 void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_sawd_binary(atmos_data_struct *, FILE *, int *, int, int, int);
-void   read_snowband(FILE *, int, double, double **, double **, double **);
+void   read_snowband(FILE *, int, double, double **, double **, double **, 
+                     char **);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
@@ -431,7 +434,7 @@ void write_layer(layer_data_struct *, int, int,
                  double *);
 #if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
-		       int, outfiles_struct *, soil_con_struct *);
+		       int, outfiles_struct *, soil_con_struct *, char, int);
 #endif
 void write_snow_data(snow_data_struct, int, int);
 void write_soilparam(soil_con_struct *);

@@ -114,8 +114,24 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
        outfp->snowband = open_file(fnames.snowband, "wb");
      else outfp->snowband = open_file(fnames.snowband, "w");
    }
+
+#if LAKE_MODEL
+  if ( options.LAKES ) {
+    strcpy(fnames.lakeparam, fnames.result_dir);
+    strcat(fnames.lakeparam, "lake");
+    strcat(fnames.lakeparam, "_");
+    strcat(fnames.lakeparam, latchar);
+    strcat(fnames.lakeparam, "_");
+    strcat(fnames.lakeparam, lngchar);
+    if(options.BINARY_OUTPUT) 
+      outfp->lake = open_file(fnames.lakeparam, "wb");
+    else outfp->lake = open_file(fnames.lakeparam, "w");
+  }
+#endif // LAKE_MODEL
+
 #endif /* !LDAS_OUTPUT && !OPTIMIZE */
 #endif /* OUTPUT_FORCE - else */
+
   return (fnames);
 
 } 

@@ -105,13 +105,16 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 			     soil_con->ufwc_table_node,
 #else
 			     soil_con->expt_node, soil_con->bubble_node, 
-#endif
+#endif // QUICK_FS
 			     soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
 			     soil_con->ufwc_table_layer,
 #else
 			     soil_con->expt, soil_con->bubble, 
-#endif
+#endif // QUICK_FS
+#if SPATIAL_FROST
+			     soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
 			     soil_con->bulk_density,
 			     soil_con->soil_density, soil_con->quartz,
 			     soil_con->layer_node_fract, Nnodes, 
@@ -123,13 +126,16 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 			       soil_con->ufwc_table_node,
 #else
 			       soil_con->expt_node, soil_con->bubble_node, 
-#endif
+#endif // QUICK_FS
 			       soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
 			       soil_con->ufwc_table_layer,
 #else
 			       soil_con->expt, soil_con->bubble, 
-#endif
+#endif // QUICK_FS
+#if SPATIAL_FROST
+			       soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
 			       soil_con->bulk_density, soil_con->soil_density, 
 			       soil_con->quartz, soil_con->layer_node_fract, 
 			       Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
@@ -137,7 +143,12 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 #if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Moisture Redistribution\n");
-    write_layer(layer,veg,options.Nlayer,soil_con->depth);
+#if SPATIAL_FROST
+    write_layer(layer, veg, options.Nlayer, soil_con->frost_fract,
+		soil_con->depth);
+#else
+    write_layer(layer, veg, options.Nlayer, soil_con->depth);
+#endif
   } 
 #endif
   
@@ -161,9 +172,10 @@ void solve_T_profile(double *T,
 		     double ***ufwc_table_node,
 #endif
 		     int     Nnodes,
-		     char   *FIRST_SOLN,
-		     char    FIRST_TIME, 
-		     int     FS_ACTIVE) {
+		     int    *FIRST_SOLN,
+		     int     FIRST_TIME, 
+		     int     FS_ACTIVE,
+		     int     NOFLUX) {
 /**********************************************************************
   This subroutine was written to iteratively solve the soil temperature
   profile using a numerical difference equation.  The solution equation
@@ -200,7 +212,7 @@ void solve_T_profile(double *T,
       E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
 	+ 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
     }
-    if(options.NOFLUX) {
+    if(NOFLUX) {
       j = Nnodes-1;
       A[j] = beta[j-1]*deltat*(kappa[j]-kappa[j-1]);
       B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
@@ -222,11 +234,12 @@ void solve_T_profile(double *T,
 #if QUICK_FS
   Error = calc_soil_thermal_fluxes(Nnodes, T, T0, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
-				   dd, ee, ufwc_table_node, FS_ACTIVE);
+				   dd, ee, ufwc_table_node, FS_ACTIVE, 
+				   NOFLUX);
 #else
   Error = calc_soil_thermal_fluxes(Nnodes, T, T0, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
-				   dd, ee, FS_ACTIVE);
+				   dd, ee, FS_ACTIVE, NOFLUX);
 #endif
   
 }
@@ -250,7 +263,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #if QUICK_FS
 			     double ***ufwc_table_node,
 #endif
-			     char    FS_ACTIVE) {
+			     int    FS_ACTIVE, 
+			     int    NOFLUX) {
   
   /** Eventually the nodal ice contents will also have to be updated **/
 
@@ -287,13 +301,13 @@ int calc_soil_thermal_fluxes(int     Nnodes,
       else {
 #if QUICK_FS
 	T[j] = root_brent(T0[j]-(SOIL_DT),
-			  T0[j]+(SOIL_DT),soil_thermal_eqn, 
+			  T0[j]+(SOIL_DT), soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  ufwc_table_node[j], ice[j], gamma[j-1], fprime, 
 			  A[j], B[j], C[j], D[j], E[j]);
 #else
 	T[j] = root_brent(T0[j]-(SOIL_DT),
-			  T0[j]+(SOIL_DT),soil_thermal_eqn, 
+			  T0[j]+(SOIL_DT), soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  bubble[j], expt[j], ice[j], gamma[j-1], fprime, 
 			  A[j], B[j], C[j], D[j], E[j]);
@@ -310,7 +324,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
       if(diff > maxdiff) maxdiff=diff;
     }
     
-    if(options.NOFLUX) { 
+    if(NOFLUX) { 
       /** Solve for bottom temperature if using no flux lower boundary **/
       oldT=T[Nnodes-1];
       
@@ -324,8 +338,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
       }
       else {
 #if QUICK_FS
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
-				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]
+				 +SOIL_DT, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
 				 ufwc_table_node[Nnodes-1], 
@@ -333,8 +347,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 gamma[Nnodes-2], fprime, 
 				 A[j], B[j], C[j], D[j], E[j]);
 #else
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
-				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]
+				 +SOIL_DT, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
 				 bubble[j], expt[Nnodes-1], ice[Nnodes-1], 

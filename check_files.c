@@ -11,6 +11,9 @@ void check_files(infiles_struct   *infp,
 
   This routine opens files for soil, vegitation, and global parameters.
 
+  Modifcations:
+  02-27-01 Added controls for lake model parameter file    KAC
+
 **********************************************************************/
 {
   extern option_struct  options;
@@ -21,6 +24,11 @@ void check_files(infiles_struct   *infp,
   infp->vegparam    = open_file(fnames->veg, "r");
   if(options.SNOW_BAND>1)
     infp->snowband    = open_file(fnames->snow_band, "r");
+#if LAKE_MODEL
+  if ( options.LAKES )
+    infp->lakeparam = open_file(fnames->lakeparam,"r");
+#endif /* LAKE_MODEL */
+
 }
 
 

@@ -7,7 +7,6 @@ static char vcid[] = "$Id$";
 #define ETA0       (3.6e6)  /* viscosity of snow at T = 0C and density = 0
 			       used in calculation of true viscosity (Ns/m2) */
 
-#define G          9.81     /* gravitational accelleration (m/(s^2)) */
 #define C5         0.08     /* constant used in snow viscosity calculation,
 			       taken from SNTHRM.89 (/C)*/
 #define C6         0.021    /* constant used in snow viscosity calculation,
@@ -58,16 +57,13 @@ double snow_density(int date,
   /** Compaction of snow pack by new snow fall **/
   /** Bras pg. 257 **/
 
-  if(new_snow > 0) {
+  if ( new_snow > 0 ) {
 
     /* Estimate density of new snow based on air temperature */
 
-    air_temp = air_temp * 9. / 5. + 32.;
-    if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
-                                 * (air_temp / 100.) * (air_temp / 100.);
-    else density_new = (double)NEW_SNOW_DENSITY;
+    density_new = new_snow_density(air_temp);
 
-    if(depth>0.) {
+    if ( depth > 0. ) {
 
       /* Compact current snowpack by weight of new snowfall */
 
@@ -120,6 +116,19 @@ double snow_density(int date,
 
 }
 
+double new_snow_density(double air_temp) {
+  /**************************************************
+    This routine estimates the density of new snow.
+  **************************************************/
+  double density_new;
+
+  air_temp = air_temp * 9. / 5. + 32.;
+  if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
+		     * (air_temp / 100.) * (air_temp / 100.);
+  else density_new = (double)NEW_SNOW_DENSITY;
+  return (density_new);
+}
+
 double snow_albedo(double new_snow,
                    double swq,
                    double cold_content,
@@ -162,6 +171,5 @@ double snow_albedo(double new_snow,
 }
 
 #undef ETA0
-#undef G
 #undef C5     
 #undef C6

@@ -8,7 +8,10 @@ static char vcid[] = "$Id$";
 void write_layer(layer_data_struct *layer,
                  int                veg,
                  int                Nlayer,
-                 double            *depth)
+#if SPATIAL_FROST
+                 double            *frost_fract,
+#endif
+		 double            *depth)
 /**********************************************************************
 	write_soilvar		Keith Cherkauer		July 17, 1997
 
@@ -24,6 +27,10 @@ void write_layer(layer_data_struct *layer,
   int index;
   double layer_moist;
   double sum_moist;
+#if SPATIAL_FROST
+  int    frost_area;
+  double avg_ice;
+#endif
 
   printf("Layer Data for Vegetation Type #%i\n",veg);
   printf("Layer:\t");
@@ -37,7 +44,16 @@ void write_layer(layer_data_struct *layer,
   printf("\n\nMoisture Table\n---------------------------------------------------------------------------\n Moist:\t");
   for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].moist);
   printf("\n        Ice:\t");
+#if SPATIAL_FROST
+  for(index=0;index<Nlayer;index++) {
+    avg_ice = 0;
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+      avg_ice += layer[index].ice[frost_area] * frost_fract[frost_area];
+    printf("\t%f",avg_ice);
+  }
+#else
   for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].ice);
+#endif
   printf("\n---------------------------------------------------------------------------\nLayer Moist:\t");
   sum_moist = 0.;
   for(index=0;index<Nlayer;index++) {
@@ -47,7 +63,3 @@ void write_layer(layer_data_struct *layer,
   }
   printf("\n\n-----> Total Moisture = %f\n\n",sum_moist);
 }
-
-
-
-

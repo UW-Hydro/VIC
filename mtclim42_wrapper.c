@@ -5,7 +5,7 @@
  * Author : Bart Nijssen
  * E-mail : nijssen@u.washington.edu
  * Created:
- * Last Changed: Mon May 15 15:24:53 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * Last Changed: Tue Nov  7 09:45:41 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * Notes  : Acts as interface between mtclim42 and vic
  * Disclaimer: Feel free to use or adapt any part of this program for your own
  *             convenience.  However, this only applies with the understanding
@@ -233,6 +233,6 @@ void mtclim42_to_vic(int have_dewpt, int have_shortwave, double hour_offset,
   
   for (i = 0; i < ctrl->ndays; i++) {
     tskc[i] = mtclim42_data->s_tskc[i];
-    vp[i] = mtclim42_data->s_hum[i]/1000.; /* convert to kPa */
+    vp[i] = mtclim42_data->s_hum[i]; /* convert to kPa */
   }
 }

@@ -166,7 +166,7 @@ void read_atmos_data(FILE                 *infile,
   }
   
   if(rec * param_set.FORCE_DT[file_num] 
-     < global_param.nrecs * NF ) {
+     < global_param.nrecs * global_param.dt ) {
     sprintf(ErrStr,"Not enough records in the forcing file (%i * %i = %i) to run the number of records defined in the global file (%i * %i = %i).  Check forcing file time step, and global file", rec, param_set.FORCE_DT[file_num], 
 	    rec*param_set.FORCE_DT[file_num], global_param.nrecs, 
 	    global_param.dt, global_param.nrecs*global_param.dt);

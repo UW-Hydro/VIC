@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Tue Feb 29 14:36:36 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Thu Feb 15 13:06:30 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -28,47 +28,6 @@ static char vcid[] = "$Id$";
 
   Purpose      : Calculate snow interception and release by the canopy
 
-  Required     :
-    int Dt                 - Model timestep (hours)
-    double F                - Fractional coverage
-    double LAI              - Leaf Area Index
-    double MaxInt           - Maximum rainfall interception storage (m)
-    double BaseRa           - Aerodynamic resistance (uncorrected for
-                             stability) (s/m)
-    double AirDens          - Density of air (kg/m3)
-    double EactAir          - Actual vapor pressure of air (Pa) 
-    double Lv               - Latent heat of vaporization (J/kg3)
-    PIXRAD *LocalRad       - Components of radiation balance for current pixel
-                             (W/m2) 
-    double Press            - Air pressure (Pa)
-    double Tair             - Air temperature (C) 
-    double Vpd	           - Vapor pressure deficit (Pa) 
-    double Wind             - Wind speed (m/s)
-    double *RainFall        - Amount of rain (m)
-    double *Snowfall        - Amount of snow (m)
-    double *IntRain         - Intercepted rain (m) 
-    double *IntSnow         - Snow water equivalent of intercepted snow (m)
-    double *TempIntStorage  - Temporary storage for snowmelt and rainfall
-                             involved in mass release calculations (m)
-    double *VaporMassFlux   - Vapor mass flux to/from intercepted snow
-                             (m/timestep)
-    double *Tcanopy         - Canopy temperature (C)
-    double *MeltEnergy      - Energy used in heating and melting of the snow 
-                             (W/m2)
-
-  Returns      : none
-
-  Modifies     :
-    double *RainFall        - Amount of rain (m)
-    double *Snowfall        - Amount of snow (m)
-    double *IntRain         - Intercepted rain (m) 
-    double *IntSnow         - Snow water equivalent of intercepted snow (m)
-    double *TempIntStorage  - Temporary storage for snowmelt and rainfall
-                             involved in mass release calculations (m)
-    double *VaporMassFlux   - Vapor mass flux to/from intercepted snow
-                             (m/timestep)  
-    double *Tcanopy         - Canopy temperature (C)
-
   Comments     : Only the top canopy layer is taken into account for snow
                  interception.  Snow interception by lower canopy is
                  disregarded.  Rain water CAN be intercepted by lower canopy
@@ -82,35 +41,64 @@ static char vcid[] = "$Id$";
   09-98 aerodynamic resistances in the canopy when snow has been  
         intercepted is increased by a factor of 10:  include REF
         Journal of Hydrology, 1998                            KAC, GO'D
+  11-00 energy balance components are now returned to the VIC model
+        so that they can be reported as energy balance components
+        in model output.                                           KAC
 
 *****************************************************************************/
-void snow_intercept(double Dt, 
-		    double F,  
-		    double LAI, 
-		    double MaxInt, 
-		    double Ra, 
-		    double AirDens,
-		    double EactAir, 
-		    double Lv, 
-		    double Shortwave,
-		    double Longwave, 
-		    double Press, 
-		    double Tair, 
-		    double Vpd, 
-		    double Wind,  
+void snow_intercept(double  AirDens,
+		    double  Dt, 
+		    double  EactAir, 		    
+		    double  F,  
+		    double  LAI, 
+		    double  Le, 
+		    double  LongOverIn, // incominf LW from sky
+		    double  LongUnderOut, // incoming LW from understroy
+		    double  MaxInt, // maximum interception capacity
+		    double  Press, // atmospheric pressure
+		    double  ShortOverIn,  // incoming SW to overstory
+		    double  ShortUnderIn,  // incoming SW to understory
+		    double  Tcanopy, // canopy air temperature
+		    double  Vpd, // vapor pressure defficit
+		    double  bare_albedo, // albedo of snow-free ground
+		    double  mu, // fraction of precipitation area
+		    double *AdvectedEnergy,
+		    double *AlbedoOver, // overstory albedo
+		    double *AlbedoUnder, // understory albedo
+		    double *IntRain, // intercepted rain
+		    double *IntSnow, // intercepted snow
+		    double *LatentHeat, // latent heat from overstory
+		    double *LatentHeatSub, // sublimation heat from overstory
+		    double *LongOverOut, // longwave emitted by canopy
+		    double *MeltEnergy, 
+		    double *NetLongOver,
+		    double *NetShortOver,
+		    double *Ra,
 		    double *RainFall,
+		    double *SensibleHeat,
 		    double *SnowFall, 
-		    double *IntRain, 
-		    double *IntSnow,
+		    double *Tfoliage, 
 		    double *TempIntStorage, 
 		    double *VaporMassFlux,
-		    double *Tcanopy, 
-		    double *MeltEnergy, 
-		    int month, 
-		    int rec,
-		    int hour)
+		    double *Wind,   
+		    double *displacement,
+		    double *ref_height,
+		    double *roughness,
+		    float  *root, 
+		    int     UnderStory,
+		    int     band, 
+		    int     hour, 
+		    int     iveg, 
+		    int     month, 
+		    int     rec,
+		    int     veg_class,
+		    layer_data_struct *layer_dry,
+		    layer_data_struct *layer_wet,
+		    soil_con_struct   *soil_con,
+		    veg_var_struct    *veg_var_dry,
+		    veg_var_struct    *veg_var_wet)
 {
-  double AdvectedEnergy;         /* Energy advected by the rain (W/m2) */
+  /* double AdvectedEnergy; */         /* Energy advected by the rain (W/m2) */
   double BlownSnow;              /* Depth of snow blown of the canopy (m) */
   double DeltaSnowInt;           /* Change in the physical swe of snow
 				    interceped on the branches. (m) */
@@ -123,9 +111,7 @@ void snow_intercept(double Dt,
   double InitialSnowInt;         /* Initial intercepted snow (m) */ 
   double InitialWaterInt;        /* Initial intercepted water (snow and rain)
                                     (m) */ 
-  double LatentHeat;             /* Latent heat flux (W/m2) */
-  double LongOut;                /* Longwave radiation emitted by canopy 
-                                   (W/m2) */
+  double IntRainOrg;
   double Ls;                     /* Latent heat of sublimation (J/(kg K) */
   double MassBalanceError;       /* Mass blalnce to make sure no water is
 				    being destroyed/created (m) */
@@ -138,7 +124,7 @@ void snow_intercept(double Dt,
   double RefreezeEnergy;         /* Energy available for refreezing or melt */
   double ReleasedMass;           /* Amount of mass release of intercepted snow
 				    (m) */ 
-  double SensibleHeat;           /* Sensible heat flux (W/m2) */
+  /* double SensibleHeat; */           /* Sensible heat flux (W/m2) */
   double SnowThroughFall;        /* Amount of snow reaching to the ground (m)
 				  */ 
   double Tmp;                    /* Temporary variable */
@@ -150,12 +136,18 @@ void snow_intercept(double Dt,
 				    solid */
   double Overload;               /* temp variable to calculated structural 
 				    overloading */
+  double Qnet;                   /* temporary storage of energy balance 
+				    error */
+  double Tupper;
+  double Tlower;
+  double Evap;
 
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
   *SnowFall /= 1000.;
   *IntRain  /= 1000.;
   MaxInt    /= 1000.;
+  IntRainOrg = *IntRain;
 
   /* Initialize Drip, H2O balance, and mass release variables. */
   
@@ -176,9 +168,9 @@ void snow_intercept(double Dt,
   
   Imax1 = 4.0* LAI_SNOW_MULTIPLIER * LAI;
 
-  if (Tair < -1.0 && Tair > -3.0)
-    MaxSnowInt = (Tair*3.0/2.0) + (11.0/2.0);
-  else if (Tair > -1.0) 
+  if ((*Tfoliage) < -1.0 && (*Tfoliage) > -3.0)
+    MaxSnowInt = ((*Tfoliage)*3.0/2.0) + (11.0/2.0);
+  else if ((*Tfoliage) > -1.0) 
     MaxSnowInt = 4.0;  
   else
     MaxSnowInt = 1.0;
@@ -206,8 +198,8 @@ void snow_intercept(double Dt,
      cold (< -3 to -5 C).                                             
      Schmidt and Troendle 1992 western snow conference paper. */  
   
-  if (Tair < -3.0 && DeltaSnowInt > 0.0 && Wind > 1.0) {
-    BlownSnow = (0.2 * Wind - 0.2) * DeltaSnowInt;
+  if ((*Tfoliage) < -3.0 && DeltaSnowInt > 0.0 && Wind[1] > 1.0) {
+    BlownSnow = (0.2 * Wind[1] - 0.2) * DeltaSnowInt;
     if (BlownSnow >= DeltaSnowInt) 
       BlownSnow = DeltaSnowInt;
     DeltaSnowInt -= BlownSnow;
@@ -259,59 +251,137 @@ void snow_intercept(double Dt,
     IntSnowFract = *IntSnow/(*IntRain + *IntSnow);
     *IntRain = *IntRain - Overload*IntRainFract;
     *IntSnow = *IntSnow - Overload*IntSnowFract;
-    RainThroughFall = RainThroughFall + (Overload*IntRainFract)*F;
-    SnowThroughFall = SnowThroughFall + (Overload*IntSnowFract)*F;
+    RainThroughFall = RainThroughFall + (Overload * IntRainFract) * F;
+    SnowThroughFall = SnowThroughFall + (Overload * IntSnowFract) * F;
   }
-  
-  /* The canopy temperature is assumed to be equal to the air temperature if 
-     the air temperature is below 0C, otherwise the canopy temperature is 
-     equal to 0C */
-  
-  if (Tair > 0.)
-    *Tcanopy = 0.;
-  else
-    *Tcanopy = Tair;
 
   /* Calculate the net radiation at the canopy surface, using the canopy 
      temperature.  The outgoing longwave is subtracted twice, because the 
      canopy radiates in two directions */
 
-  Tmp = *Tcanopy + 273.15;
-  LongOut = STEFAN_B * (Tmp * Tmp * Tmp * Tmp);
-  NetRadiation = (1.-NEW_SNOW_ALB)*Shortwave + Longwave - 2 * F * LongOut;
-  NetRadiation /= F;
+  Tupper = Tlower = MISSING;
 
-  /* Calculate the vapor mass flux between the canopy and the surrounding 
-     air mass */
-  
-  EsSnow = svp(*Tcanopy); 
+  if ( *IntSnow > 0 || *SnowFall > 0 ) {
+    /* Snow present or accumulating in the canopy */
 
-  /** Added division by 10 to incorporate change in canopy resistance due
-      to smoothing by intercepted snow **/
-  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / Ra / 10.; 
-  *VaporMassFlux /= RHO_W; 
+    *AlbedoOver = NEW_SNOW_ALB; // albedo of intercepted snow in canopy
+    *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
 
-  if (Vpd == 0.0 && *VaporMassFlux < 0.0)
-    *VaporMassFlux = 0.0;
-  
-  /* Calculate the latent heat flux */
 
-  Ls = (677. - 0.07 * *Tcanopy) * 4.1868 * 1000.;
-  LatentHeat = Ls * *VaporMassFlux * RHO_W;
+    Qnet = solve_canopy_energy_bal(0., band, month, rec, Dt, 
+				   soil_con->elevation, 
+				   soil_con->Wcr, soil_con->Wpwp, 
+				   soil_con->depth, 
+#if SPATIAL_FROST
+				   soil_con->frost_fract, 
+#endif
+				   AirDens, EactAir, Press, Le, 
+				   Tcanopy, Vpd, mu, &Evap, Ra, 
+				   RainFall, Wind, UnderStory, iveg, 
+				   veg_class, displacement, ref_height, 
+				   roughness, root, IntRainOrg, *IntSnow, 
+				   IntRain, layer_wet, layer_dry, veg_var_wet, 
+				   veg_var_dry, LongOverIn, LongUnderOut, 
+				   *NetShortOver, 
+				   AdvectedEnergy, 
+				   LatentHeat, LatentHeatSub, 
+				   LongOverOut, NetLongOver, &NetRadiation, 
+				   &RefreezeEnergy, SensibleHeat, 
+				   VaporMassFlux);
 
-  /* Calculate the sensible heat flux */
+    if ( Qnet != 0 ) {
+      /* Intercepted snow not melting - need to find temperature */
+      Tupper = 0;
+      if ( (*Tfoliage) <= 0.) Tlower = (*Tfoliage) - SNOW_DT;
+      else Tlower = -SNOW_DT;
+    }
+    else *Tfoliage = 0.;  // intercepted snow is melting
 
-  SensibleHeat = AirDens * Cp * (Tair - *Tcanopy)/Ra;
-  
-  /* Calculate the advected energy */
 
-  AdvectedEnergy = (4186.8 * Tair * *RainFall)/(Dt * SECPHOUR);
+  }
+  else {
+    /* No snow in canopy */
+    *AlbedoOver = bare_albedo;
+    *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
+    Qnet = -9999;
+    Tupper = (*Tfoliage) + SNOW_DT;
+    Tlower = (*Tfoliage) - SNOW_DT;
 
-  /* Calculate the amount of energy available for refreezing */
+  }
 
-  RefreezeEnergy = SensibleHeat + LatentHeat + NetRadiation + AdvectedEnergy;
+  if ( Tupper != MISSING && Tlower != MISSING ) {
 
-  RefreezeEnergy *= Dt * SECPHOUR;
+    *Tfoliage = root_brent(Tlower, Tupper, func_canopy_energy_bal,  band, 
+			  month, rec, Dt, soil_con->elevation, 
+			  soil_con->Wcr, soil_con->Wpwp, soil_con->depth, 
+#if SPATIAL_FROST
+			  soil_con->frost_fract, 
+#endif
+			   AirDens, EactAir, Press, Le, 
+			   Tcanopy, Vpd, mu, &Evap, Ra, 
+			   RainFall, Wind, UnderStory, iveg, 
+			   veg_class, displacement, ref_height, 
+			   roughness, root, IntRainOrg, *IntSnow, 
+			   IntRain, layer_wet, layer_dry, veg_var_wet, 
+			   veg_var_dry, LongOverIn, LongUnderOut, 
+			   *NetShortOver, 
+			   AdvectedEnergy, 
+			   LatentHeat, LatentHeatSub, 
+			   LongOverOut, NetLongOver, &NetRadiation, 
+			   &RefreezeEnergy, SensibleHeat, 
+			   VaporMassFlux);
+    
+    if ( *Tfoliage < -9998 ) {
+      
+      Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
+					  soil_con->elevation, 
+					  soil_con->Wcr, soil_con->Wpwp, 
+					  soil_con->depth, 
+#if SPATIAL_FROST
+					  soil_con->frost_fract, 
+#endif
+					  AirDens, EactAir, Press, Le, 
+					  Tcanopy, Vpd, mu, &Evap, Ra, 
+					  RainFall, Wind, UnderStory, iveg, 
+					  veg_class, displacement, ref_height, 
+					  roughness, root, IntRainOrg, *IntSnow, 
+					  IntRain, layer_wet, layer_dry, veg_var_wet, 
+					  veg_var_dry, 
+					  LongOverIn, LongUnderOut, *NetShortOver, 
+					  AdvectedEnergy, 
+					  LatentHeat, LatentHeatSub, 
+					  LongOverOut, NetLongOver, &NetRadiation, 
+					  &RefreezeEnergy, SensibleHeat, 
+					  VaporMassFlux);
+      
+    }
+    
+    Qnet = solve_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
+				   soil_con->elevation, soil_con->Wcr, 
+				   soil_con->Wpwp, soil_con->depth, 
+#if SPATIAL_FROST
+				   soil_con->frost_fract, 
+#endif
+				   AirDens, EactAir, Press, Le, 
+				   Tcanopy, Vpd, mu, &Evap, Ra, 
+				   RainFall, Wind, UnderStory, iveg, 
+				   veg_class, displacement, ref_height, 
+				   roughness, root, IntRainOrg, *IntSnow, 
+				   IntRain, layer_wet, layer_dry, veg_var_wet, 
+				   veg_var_dry, LongOverIn, LongUnderOut, 
+				   *NetShortOver, 
+				   AdvectedEnergy, 
+				   LatentHeat, LatentHeatSub, 
+				   LongOverOut, NetLongOver, &NetRadiation, 
+				   &RefreezeEnergy, SensibleHeat, 
+				   VaporMassFlux);
+
+  }
+
+  if ( *IntSnow <= 0 )
+    RainThroughFall = veg_var_wet->throughfall / 1000.;
+
+  RefreezeEnergy *= Dt;
 
   /* if RefreezeEnergy is positive it means energy is available to melt the
      intercepted snow in the canopy.  If it is negative, it means that 
@@ -322,9 +392,9 @@ void snow_intercept(double Dt,
   MaxWaterInt = LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
 
   /* Convert the vapor mass flux from a flux to a depth per interval */
-  *VaporMassFlux *= Dt * SECPHOUR;
+  *VaporMassFlux *= Dt;
   
-  if (RefreezeEnergy > 0.0) {
+  if ( *Tfoliage == 0 ) {
 
     if (-(*VaporMassFlux) > *IntRain) {
       *VaporMassFlux = -(*IntRain);
@@ -333,9 +403,16 @@ void snow_intercept(double Dt,
     else
       *IntRain += *VaporMassFlux;
 
-    PotSnowMelt = min((RefreezeEnergy/Lf/RHO_W), *IntSnow);
-
-    *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt *SECPHOUR);
+    if (RefreezeEnergy < 0 ) {
+      /* intercepted snow is ripe, melt can occur */
+      PotSnowMelt = min((-RefreezeEnergy/Lf/RHO_W), *IntSnow);
+      *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt);
+    }
+    else {
+      /* snow temperature is below freezing, no melt occurs */
+      PotSnowMelt = 0;
+      *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt);
+    }
     
     if ((*IntRain + PotSnowMelt) <= MaxWaterInt) {
 
@@ -392,11 +469,11 @@ void snow_intercept(double Dt,
     
     /* Refreeze as much surface water as you can */
     
-    if (RefreezeEnergy > - (*IntRain) * Lf) {
+    if (-RefreezeEnergy > - (*IntRain) * Lf) {
       *IntSnow += fabs(RefreezeEnergy) / Lf;
       *IntRain -= fabs(RefreezeEnergy) / Lf;
 
-      *MeltEnergy += (fabs(RefreezeEnergy) * RHO_W) / (Dt *SECPHOUR);
+      *MeltEnergy += (fabs(RefreezeEnergy) * RHO_W) / (Dt);
 
       RefreezeEnergy = 0.0;
     }
@@ -415,7 +492,7 @@ void snow_intercept(double Dt,
       /* Energy released by freezing of intercepted water is added to the 
          MeltEnergy */
 
-      *MeltEnergy += (Lf * *IntRain * RHO_W) / (Dt *SECPHOUR);
+      *MeltEnergy += (Lf * *IntRain * RHO_W) / (Dt);
       *IntRain = 0.0;
       
     } 
@@ -450,5 +527,258 @@ void snow_intercept(double Dt,
   *RainFall *= 1000.;
   *SnowFall *= 1000.;
   *IntRain  *= 1000.;
+
+  /*** FIX THIS ***/
+  *MeltEnergy = RefreezeEnergy / Dt;
+
+}
+
+double solve_canopy_energy_bal(double Tfoliage, ...)
+{
+  va_list  ap;
+  double   Qnet;
+
+  va_start(ap, Tfoliage);
+  Qnet = func_canopy_energy_bal(Tfoliage, ap);
+  va_end(ap);
+
+  return Qnet;
+}
+
+double error_calc_canopy_energy_bal(double Tfoliage, ...)
+{
+  va_list  ap;
+  double   Qnet;
+
+  va_start(ap, Tfoliage);
+  Qnet = error_print_canopy_energy_bal(Tfoliage, ap);
+  va_end(ap);
+
+  return Qnet;
+}
+
+double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
+{  
+
+  extern option_struct options;
+
+  /* General Model Parameters */
+  int     band;
+  int     month;
+  int     rec;
+
+  double  delta_t;
+  double  elevation;
+
+  double *Wcr;
+  double *Wpwp;
+  double *depth;
+#if SPATIAL_FROST
+  double *frost_fract;
+#endif
+
+  /* Atmopheric Condition and Forcings */
+  double  AirDens;
+  double  EactAir;
+  double  Press;
+  double  Le;
+  double  Tcanopy;
+  double  Vpd;
+  double  mu;
+
+  double *Evap;
+  double *Ra;
+  double *Rainfall;
+  double *Wind;
+
+  /* Vegetation Terms */
+  int     UnderStory;
+  int     iveg;
+  int     veg_class;
+
+  double *displacement;
+  double *ref_height;
+  double *roughness;
+
+  float  *root;
+
+  /* Water Flux Terms */
+  double  IntRain;
+  double  IntSnow;
+
+  double *Wdew;
+
+  layer_data_struct *layer_wet;
+  layer_data_struct *layer_dry;
+  veg_var_struct    *veg_var_wet;
+  veg_var_struct    *veg_var_dry;
+
+  /* Energy Flux Terms */
+  double  LongOverIn;
+  double  LongUnderOut;
+  double  NetShortOver;
+
+  double *AdvectedEnergy;
+  double *LatentHeat;
+  double *LatentHeatSub;
+  double *LongOverOut;
+  double *NetLongOver;
+  double *NetRadiation;
+  double *RefreezeEnergy;
+  double *SensibleHeat;
+  double *VaporMassFlux;
+
+  /** Read variables from variable length argument list **/
+
+  /* General Model Parameters */
+  band    = (int) va_arg(ap, int);
+  month   = (int) va_arg(ap, int);
+  rec     = (int) va_arg(ap, int);
+
+  delta_t   = (double) va_arg(ap, double);
+  elevation = (double) va_arg(ap, double);
+
+  Wcr   = (double *) va_arg(ap, double *);
+  Wpwp  = (double *) va_arg(ap, double *);
+  depth = (double *) va_arg(ap, double *);
+#if SPATIAL_FROST
+  frost_fract = (double *) va_arg(ap, double *);
+#endif
+
+  /* Atmopheric Condition and Forcings */
+  AirDens = (double) va_arg(ap, double);
+  EactAir = (double) va_arg(ap, double);
+  Press   = (double) va_arg(ap, double);
+  Le      = (double) va_arg(ap, double);
+  Tcanopy = (double) va_arg(ap, double);
+  Vpd     = (double) va_arg(ap, double);
+  mu      = (double) va_arg(ap, double);
+
+  Evap     = (double *) va_arg(ap, double *);
+  Ra       = (double *) va_arg(ap, double *);
+  Rainfall = (double *) va_arg(ap, double *);
+  Wind     = (double *) va_arg(ap, double *);
+
+  /* Vegetation Terms */
+  UnderStory = (int) va_arg(ap, int);
+  iveg       = (int) va_arg(ap, int);
+  veg_class  = (int) va_arg(ap, int);
+
+  displacement = (double *) va_arg(ap, double *);
+  ref_height   = (double *) va_arg(ap, double *);
+  roughness    = (double *) va_arg(ap, double *);
+
+  root = (float *) va_arg(ap, float *);
+
+  /* Water Flux Terms */
+  IntRain = (double) va_arg(ap, double);
+  IntSnow = (double) va_arg(ap, double);
+
+  Wdew    = (double *) va_arg(ap, double *);
+
+  layer_wet   = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  layer_dry   = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var_wet = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  veg_var_dry = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+
+  /* Energy Flux Terms */
+  LongOverIn       = (double) va_arg(ap, double);
+  LongUnderOut     = (double) va_arg(ap, double);
+  NetShortOver     = (double) va_arg(ap, double);
+
+  AdvectedEnergy     = (double *) va_arg(ap, double *);
+  LatentHeat         = (double *) va_arg(ap, double *);
+  LatentHeatSub      = (double *) va_arg(ap, double *);
+  LongOverOut        = (double *) va_arg(ap, double *);
+  NetLongOver        = (double *) va_arg(ap, double *);
+  NetRadiation       = (double *) va_arg(ap, double *);
+  RefreezeEnergy     = (double *) va_arg(ap, double *);
+  SensibleHeat       = (double *) va_arg(ap, double *);
+  VaporMassFlux      = (double *) va_arg(ap, double *);
+
+  /** Print variable info */
+
+  fprintf(stderr, "snow_intercept failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+
+  /* General Model Parameters */
+  printf("band = %i\n", band);
+  printf("month = %i\n",     month);
+  printf("rec = %i\n", rec);
+  
+  printf("delta_t = %f\n", delta_t);
+  printf("elevation = %f\n",  elevation);
+  
+  printf("*Wcr = %f\n", *Wcr);
+  printf("*Wpwp = %f\n", *Wpwp);
+  printf("*depth = %f\n", *depth);
+#if SPATIAL_FRoST
+  printf(" = %f\n", *frost_fract);
+#endif
+  
+  /* Atmopheric Condition and Forcings */
+  printf("AirDens = %f\n",  AirDens);
+  printf("EactAir = %f\n",  EactAir);
+  printf("Press = %f\n",  Press);
+  printf("Le = %f\n",  Le);
+  printf("Ra = [%f, %f]\n",  Ra[1], Ra[UnderStory]);
+  printf("Tcanopy = %f\n",  Tcanopy);
+  printf("Vpd = %f\n",  Vpd);
+  printf("mu = %f\n",  mu);
+
+  printf("Evap = %f\n", *Evap);
+  printf("Rainfall = %f\n", *Rainfall);
+  printf("Wind = [%f, %f]\n",  Wind[1], Wind[UnderStory]);
+
+  /* Vegetation Terms */
+  printf("UnderStory = %i\n",     UnderStory);
+  printf("iveg = %i\n",     iveg);
+  printf("veg_class = %i\n",     veg_class);
+
+  printf("displacement = [%f, %f]\n",  displacement[1], displacement[UnderStory]);
+  printf("ref_height = [%f, %f]\n",  ref_height[1], ref_height[UnderStory]);
+  printf("roughness = [%f, %f]\n",  roughness[1], roughness[UnderStory]);
+
+  printf("root = %f\n", *root);
+
+  /* Water Flux Terms */
+  printf("IntRain = %f\n",  IntRain);
+  printf("IntSnow = %f\n",  IntSnow);
+
+  printf("Wdew = %f\n", *Wdew);
+
+#if SPATIAL_FROST
+  write_layer(layer_wet, iveg, options.Nlayer, frost_fract, depth);
+#else
+  write_layer(layer_wet, iveg, options.Nlayer, depth);
+#endif
+  if(options.DIST_PRCP) 
+#if SPATIAL_FROST
+    write_layer(layer_dry, iveg, options.Nlayer, frost_fract, depth);
+#else
+    write_layer(layer_dry, iveg, options.Nlayer, depth);
+#endif
+  write_vegvar(&(veg_var_wet[0]),iveg);
+  if(options.DIST_PRCP) 
+    write_vegvar(&(veg_var_dry[0]),iveg);
+
+  /* Energy Flux Terms */
+  fprintf(stderr, "LongOverIn = %f\n",  LongOverIn);
+  fprintf(stderr, "LongUnderOut = %f\n",  LongUnderOut);
+  fprintf(stderr, "NetShortOver = %f\n",  NetShortOver);
+
+  fprintf(stderr, "*AdvectedEnergy = %f\n", *AdvectedEnergy);
+  fprintf(stderr, "*LatentHeat = %f\n", *LatentHeat);
+  fprintf(stderr, "*LatentHeatSub = %f\n", *LatentHeatSub);
+  fprintf(stderr, "*LongOverOut = %f\n", *LongOverOut);
+  fprintf(stderr, "*NetLongOver = %f\n", *NetLongOver);
+  fprintf(stderr, "*NetRadiation = %f\n", *NetRadiation);
+  fprintf(stderr, "*RefreezeEnergy = %f\n", *RefreezeEnergy);
+  fprintf(stderr, "*SensibleHeat = %f\n", *SensibleHeat);
+  fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
+
+  /* call error handling routine */
+  vicerror("Problem encountered with canopy energy flux solution.");
+
+  return(0);
 
 }

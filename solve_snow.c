@@ -4,59 +4,72 @@
 
 static char vcid[] = "$Id$";
 
-double solve_snow(snow_data_struct    *snow,
-		  layer_data_struct   *layer_wet,
-		  layer_data_struct   *layer_dry,
-		  veg_var_struct      *veg_var_wet,
-		  veg_var_struct      *veg_var_dry,
-		  int                  month,
-		  int                  day_in_year,
-		  energy_bal_struct   *energy,
-		  soil_con_struct     *soil_con,
-		  char                 overstory,
-		  int                  dt,
-		  int                  rec,
-		  int                  veg_class,
-		  int                  iveg,
+double solve_snow(char                 overstory,
+		  double               BareAlbedo,
+		  double               LongUnderOut, // LW from understory
+		  double               MIN_RAIN_TEMP,
+		  double               MAX_SNOW_TEMP,
+		  double               Tcanopy, // canopy air temperature
+		  double               Tgrnd, // soil surface temperature
+		  double               air_temp, // air temperature
+		  double               density,
+		  double               dp,
+		  double               ice0,
+		  double               longwave,
+		  double               moist,
+		  double               mu,
+		  double               prec,
+		  double               pressure,
+		  double               shortwave,
+		  double               snow_grnd_flux,
+		  double               vp,
+		  double               vpd,
+		  double               wind_h,
+		  double              *AlbedoUnder,
+		  double              *Evap,
+		  double              *Le,
+		  double              *LongUnderIn, // surface incomgin LW
+		  double              *NetLongSnow, // net LW at snow surface
+		  double              *NetShortGrnd, // net SW reaching ground
+		  double              *NetShortSnow, // net SW at snow surface
+		  double              *ShortUnderIn, // surfave incoming SW
+		  double              *Torg_snow,
+		  double              *aero_resist,
+		  double              *coverage, // best guess snow coverage
+		  double              *delta_coverage, // cover fract change
+		  double              *delta_snow_heat, // change in pack heat
+		  double              *displacement,
+		  double              *gauge_correction,
+		  double              *melt_energy,
+		  double              *out_prec,
+		  double              *ppt,
+		  double              *rainfall,
+		  double              *ref_height,
+		  double              *roughness,
+		  double              *snow_inflow,
+		  double              *snowfall,
+		  double              *surf_atten,
+		  double              *wind,
+		  float               *root,
+		  int                  INCLUDE_SNOW,
+		  int                  Nnodes,
 		  int                  Nveg,
 		  int                  band,
 		  int                  hour,
-		  int                  Nnodes,
-		  double               shortwave,
-		  double               longwave,
-		  double               air_temp,
-		  double               prec,
-		  double               density,
-		  double               vp,
-		  double               vpd,
-		  double               pressure,
-		  double               mu,
-		  double               roughness,
-		  double               displacement,
-		  double               ref_height,
-		  double               surf_atten,
-		  double               MAX_SNOW_TEMP,
-		  double               MIN_RAIN_TEMP,
-		  double               wind_h,
-		  double               moist,
-		  double               ice0,
-		  double               dp,
-		  double               bare_albedo,
-		  double              *rainfall,
-		  double              *out_prec,
-		  double              *Le,
-		  double              *Ls,
-		  double              *aero_resist,
-		  double              *tmp_wind,
-		  double              *net_short,
-		  double              *out_short,
-		  double              *rad,
-		  double              *Evap,
-		  double              *tmp_snow_energy,
-		  double              *snow_inflow,
-		  double              *ppt,
-		  double              *gauge_correction,
-		  float               *root) {
+		  int                  iveg,
+		  int                  day_in_year,
+		  int                  dt,
+		  int                  month,
+		  int                  rec,
+		  int                  veg_class,
+		  int                 *UnderStory,
+		  energy_bal_struct   *energy,
+		  layer_data_struct   *layer_dry,
+		  layer_data_struct   *layer_wet,
+		  snow_data_struct    *snow,
+		  soil_con_struct     *soil_con,
+		  veg_var_struct      *veg_var_dry,
+		  veg_var_struct      *veg_var_wet) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -77,6 +90,11 @@ double solve_snow(snow_data_struct    *snow,
            make those outside of this routine, in the same function
 	   that is used to compute the ground heat flux when
 	   there is no snow cover.                           KAC
+  10-06-00 added partial snow cover and advection of sensible
+           heat from local bare patches.                     KAC
+  03-06-01 Modified to pass the minimum depth of full snow cover
+           as a variable in soil_con rather than a globally defined
+           constant.                                         KAC
 
 *********************************************************************/
 
@@ -85,184 +103,164 @@ double solve_snow(snow_data_struct    *snow,
 
   char                ErrStr[MAXSTRING];
   char                FIRST_SOLN[1];
-  double              rainonly;
-  double              canopy_temp;
-  double              tmp_energy_val = 0.;
-  double              old_swq;
-  double              tmp_Wdew[2];
+  float               tempstep;
+  double              TmpAlbedoUnder[2];
+/*   double              LongUnderOut; */
+  double              ShortOverIn;
+/*   double              Tgrnd; */
+  double              Tmp;
   double              melt;
-  double              snowfall[2];
-  double              snow_coverage;
-  double              grnd_temp;
-  double              tmp_rain;
-  double              surf_long;
+  double              old_coverage;
+  double              old_depth;
+  double              old_swq;
+  double              rainonly;
+  double              tmp_Wdew[2];
+  double              tmp_grnd_flux;
+  int                 curr_snow;
 
+  /* initialize moisture variable s*/
   melt     = 0.;
   ppt[WET] = 0.; 
   ppt[DRY] = 0.; 
 
+  /* initialize storage for energy consumed in changing snowpack
+     cover fraction */
+  (*melt_energy)     = 0.;
+
+  /* initialize change in snow[pack heat storage */
+  (*delta_snow_heat) = 0.;
+
   /** Calculate Fraction of Precipitation that falls as Rain **/
-  rainonly      = calc_rainonly(air_temp, prec, 
-				MAX_SNOW_TEMP, MIN_RAIN_TEMP, mu);
+  rainonly      = calc_rainonly(air_temp, prec, MAX_SNOW_TEMP, 
+				MIN_RAIN_TEMP, mu); 
   snowfall[WET] = gauge_correction[SNOW] * (prec - rainonly);
   rainfall[WET] = gauge_correction[RAIN] * rainonly;
   snowfall[DRY] = 0.;
   rainfall[DRY] = 0.;
-  if(snowfall[WET] < 1e-5) snowfall[WET] = 0.;
+  if ( snowfall[WET] < 1e-5 ) snowfall[WET] = 0.;
   (*out_prec) = snowfall[WET] + rainfall[WET];
 
   /** Compute latent heats **/
-  (*Le) = (2.501 - 0.002361 * air_temp) * 1.0e6;
-  (*Ls) = 0.;
+  (*Le) = (2.501e6 - 0.002361e6 * air_temp);
 
-  /** Error checks **/
-  if((snow->swq > 0 || snowfall[WET] > 0.
-      || (snow->snow_canopy>0. && overstory))) {
-    if(mu!=1 && options.FULL_ENERGY) {
+  /** verify that distributed precipitation fraction equals 1 if
+      snow is present or falling **/
+  if ( ( snow->swq > 0 || snowfall[WET] > 0.
+	 || (snow->snow_canopy>0. && overstory) ) ) {
+    if ( mu != 1 && options.FULL_ENERGY ) {
       sprintf(ErrStr,"Snow model cannot be used if mu (%f) is not equal to 1.\n\tsolve_snow.c: record = %i,\t vegetation type = %i",
 	      mu, rec, iveg);
       vicerror(ErrStr);
     }
-    else if(mu!=1) {
+    else if ( mu != 1 ) {
       fprintf(stderr,"WARNING: Snow is falling, but mu not equal to 1 (%f)\n",
 	      mu);
       fprintf(stderr,"\trec = %i, veg = %i, hour = %i\n",rec,iveg,hour);
     }
   }
 
-  if((snow->swq > 0 || snowfall[WET] > 0.
-      || (snow->snow_canopy>0. && overstory)) && mu==1) {
+  /** If first iteration, set UnderStory index **/
+  if ( *UnderStory == 999 ) {
+    if ( snow->swq > 0 || snowfall > 0 ) *UnderStory = 2; // snow covered
+    else *UnderStory = 0; // understory bare
+  }
+
+  /* initialize understory radiation inputs */
+  (*ShortUnderIn) = shortwave;
+  (*LongUnderIn)  = longwave;
+
+  if ( (snow->swq > 0 || snowfall[WET] > 0.
+      || (snow->snow_canopy > 0. && overstory)) && mu==1 ) {
     
-    /************************************************
+    /*****************************
       Snow is Present or Falling 
-    ************************************************/
+    *****************************/
 
-    /** Snow is present or falling **/
-    snow->snow = TRUE;
+    snow->snow = TRUE; // snow is present during time step
 	
-    /** Initialize variables **/
-    (*tmp_snow_energy) = 0.;
-    if(!overstory) surf_atten = 1.;
-    snow_coverage = snow->coverage;
-      
-    /** Compute Snow Pack Albedo **/
-    if(snow->swq > 0 || snowfall[WET] > 0.) {
-      snow->albedo   = snow_albedo( snowfall[WET], snow->swq, 
-				    snow->coldcontent, dt, snow->last_snow);
-      energy->albedo = snow->albedo;
-    }
-    else {
-      snow->albedo   = NEW_SNOW_ALB;
-      energy->albedo = bare_albedo;
-    }
-    
-    /** Age Snow Pack **/
-    if( snowfall[WET] > 0 )
-      snow->last_snow = 1;
-    else snow->last_snow++;
-    
-    /** Compute Radiation Balance over Snow **/ 
-    (*out_short) = energy->albedo * shortwave;
-    (*net_short) = (1.0 - energy->albedo) * shortwave;
-    if(snow->swq > 0) {
-      (*rad) = (*net_short) + longwave - STEFAN_B 
-	* (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN) 
-	* (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN);
-    }
-    else {
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-	(*rad) = (*net_short) + longwave - STEFAN_B 
-	  * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
-	  * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
-      }
-      else {
-	(*rad) = (*net_short) + longwave - STEFAN_B 
-	  * (air_temp+KELVIN) * (air_temp+KELVIN) 
-	  * (air_temp+KELVIN) * (air_temp+KELVIN);
-      }
-    }
+    if ( !overstory ) (*surf_atten) = 1.;  // understory covered by snow
 
-    if(iveg!=Nveg) {
+    old_coverage = snow->coverage; // store previous coverage fraction
+      
+    /** compute understory albedo **/
+    TmpAlbedoUnder[0]   = NEW_SNOW_ALB; // albedo if new snow falls
+    if ( snow->swq > 0 ) 
+      snow->albedo = snow_albedo( snowfall[WET], snow->swq, 
+				  snow->coldcontent, dt, 
+				  snow->last_snow); // aged snow albedo
+      TmpAlbedoUnder[1]   = (*coverage * snow->albedo
+			     + (1. - *coverage) * BareAlbedo); 
+
+    /** Compute Radiation Balance over Snow **/ 
+    
+    if ( iveg != Nveg ) {
       
       /****************************************
 	Check Vegetation for Intercepted Snow
       ****************************************/
       
-      if(overstory) {
-	if( snowfall[WET] > 0. || snow->snow_canopy > 0. ) {
-	  
-	  /** Compute Canopy Interception, if Snow and Canopy **/
-	  if(snow->swq > 0) 
-	    surf_long = STEFAN_B * (snow->surf_temp + KELVIN) 
-	      * (snow->surf_temp + KELVIN) * (snow->surf_temp + KELVIN) 
-	      * (snow->surf_temp + KELVIN);
-	  else {
-	    if(options.FULL_ENERGY || options.FROZEN_SOIL)
-	      surf_long = STEFAN_B * (energy->T[0] + KELVIN) 
-		* (energy->T[0] + KELVIN) * (energy->T[0] + KELVIN) 
-		* (energy->T[0] + KELVIN);
-	    else
-	      surf_long = STEFAN_B * (air_temp + KELVIN) 
-		* (air_temp + KELVIN) * (air_temp + KELVIN) 
-		* (air_temp + KELVIN);
-	  }
-	  snow_intercept((double)dt, 1., veg_lib[veg_class].LAI[month-1], 
-			 veg_lib[veg_class].Wdmax[month-1], 
-			 aero_resist[1], density, vp, (*Le), shortwave, 
-			 longwave+surf_long, pressure, air_temp, vpd, 
-			 tmp_wind[1], rainfall, snowfall, &veg_var_wet->Wdew, 
-			 &snow->snow_canopy, &snow->tmp_int_storage, 
-			 &snow->canopy_vapor_flux, &canopy_temp, 
-			 &tmp_energy_val, month, rec, hour);
+      if ( overstory ) {
 
-	  /* Store throughfall from canopy */
-	  veg_var_wet->throughfall = rainfall[0] + snowfall[0];
+	/***********************************************
+          Compute canopy interception of precipitation
+        ***********************************************/
 
-	  /* Estimate longwave radiation from canopy */
-	  energy->longwave = STEFAN_B * (canopy_temp+KELVIN) 
-	    * (canopy_temp+KELVIN) * (canopy_temp+KELVIN) 
-	    * (canopy_temp+KELVIN);
+	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
+	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
+	snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
+		       veg_lib[veg_class].LAI[month-1], 
+		       (*Le), longwave, LongUnderOut, 
+		       veg_lib[veg_class].Wdmax[month-1], pressure, 
+		       ShortOverIn, *ShortUnderIn, 
+		       Tcanopy, vpd, 
+		       BareAlbedo, mu, &energy->canopy_advection, 
+		       &energy->AlbedoOver, TmpAlbedoUnder, 
+		       &veg_var_wet->Wdew, &snow->snow_canopy, 
+		       &energy->canopy_latent, 
+		       &energy->canopy_latent_sub, LongUnderIn, 
+		       &energy->canopy_refreeze, &energy->NetLongOver, 
+		       &energy->NetShortOver, 
+		       aero_resist, rainfall, 
+		       &energy->canopy_sensible, 
+		       snowfall, &energy->Tfoliage, &snow->tmp_int_storage, 
+		       &snow->canopy_vapor_flux, wind, displacement, 
+		       ref_height, roughness, root, *UnderStory, band, 
+		       hour, iveg, month, rec, veg_class, layer_dry, 
+		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
 
+	/* Store throughfall from canopy */
+	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
+
+	/* Determine under canopy net shortwave */
+	if ( veg_var_wet->throughfall > 0 ) {
+	  (*AlbedoUnder) = TmpAlbedoUnder[0];
+	  *NetShortSnow = ( 1. - *AlbedoUnder ) * *ShortUnderIn; 
 	}
 	else {
-	  /** Compute Canopy Evaporation, if Canopy and No Snow **/
-	  tmp_Wdew[WET] = veg_var_wet->Wdew;
-	  if(options.DIST_PRCP) tmp_Wdew[DRY] = 0.;
-	  Evap[0] = canopy_evap(layer_wet, layer_dry, veg_var_wet, 
-				veg_var_dry, FALSE, veg_class, month, mu, 
-				tmp_Wdew, (double)dt, rad[0], vpd, 
-				net_short[0], air_temp, aero_resist[0], 
-				displacement, roughness, ref_height, 
-				(double)soil_con->elevation, rainfall, 
-				soil_con->depth, soil_con->Wcr, 
-				soil_con->Wpwp, root);
-
-	  /* Store throughfall from canopy */
-	  rainfall[WET] = veg_var_wet->throughfall;
-	  if(options.DIST_PRCP) 
-	    rainfall[DRY] = veg_var_dry->throughfall;
-
-	  /* Estimate longwave radiation from canopy */
-	  energy->longwave = (STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
-			      * (air_temp+KELVIN) * (air_temp+KELVIN));
-
+	  (*AlbedoUnder) = TmpAlbedoUnder[1];
+	  *NetShortSnow = ( 1. - *AlbedoUnder ) * *ShortUnderIn; 
 	}
+  
 
-      }
+	energy->LongOverIn = longwave;
+
+      }  /* if overstory */
 
       else if(snowfall[0] > 0. && veg_var_wet->Wdew > 0.) {
 
 	/** If No Overstory, Empty Vegetation of Stored Water **/
 
-	tmp_rain = calc_rainonly(air_temp, veg_var_wet->Wdew,
-				 MAX_SNOW_TEMP, MIN_RAIN_TEMP, mu);
-	rainfall[WET]            += tmp_rain;
-	snowfall[WET]            += veg_var_wet->Wdew - tmp_rain;
+	rainfall[WET]            += veg_var_wet->Wdew;
 	veg_var_wet->throughfall  = rainfall[WET] + snowfall[WET];
 	veg_var_wet->Wdew         = 0.;
-	energy->longwave          = longwave;
+	energy->NetLongOver       = 0;
+	energy->LongOverIn        = 0;
+	energy->Tfoliage             = air_temp;
+	(*AlbedoUnder)            = TmpAlbedoUnder[0];
+	(*NetShortSnow)          = (1.0 - *AlbedoUnder) * shortwave; 
 
-      }
+      } /* snow falling on vegetation with dew */
+
       else {
 
 	/** Precipitation "Passes Through" Vegetation which 
@@ -270,96 +268,204 @@ double solve_snow(snow_data_struct    *snow,
 
 	veg_var_wet->throughfall = rainfall[WET] + snowfall[WET];
 	veg_var_dry->throughfall = rainfall[DRY] + snowfall[DRY];
-	energy->longwave         = longwave;
+	energy->NetLongOver      = 0;
+	energy->LongOverIn       = 0;
+	energy->Tfoliage    = air_temp;
+	if ( snowfall[WET] > 0 ) { // net SW at snow/ground surface
+	  (*AlbedoUnder)   = TmpAlbedoUnder[0];
+	  (*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
+	}
+	else {
+	  (*AlbedoUnder)   = TmpAlbedoUnder[1];
+	  (*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
+	}
 
-      }
+      } /* vegetation already covered by snow */
 
     }
-    else energy->longwave = longwave;
+    else { /* no vegetation present */
+      energy->NetLongOver = 0;
+      energy->LongOverIn  = 0;
+      if ( snowfall[WET] > 0 ) { // net SW at snow/ground surface
+	(*AlbedoUnder)   = TmpAlbedoUnder[0];
+	(*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
+      }
+      else {
+	(*AlbedoUnder)   = TmpAlbedoUnder[1];
+	(*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
+      }
+    }
     
-    old_swq = snow->swq;
-    
-    if(snow->swq>0.0 || snowfall[0] > 0) {
+    if ( snow->swq > 0.0 || snowfall[0] > 0 ) {
       
       /******************************
 	Snow Pack Present on Ground
       ******************************/
 
-      if(overstory && snowfall[0] > 0.) {
+      /** Age Snowpack **/
+      if( snowfall[WET] > 0 ) curr_snow = 1; // new snow - reset pack age
+      else curr_snow = snow->last_snow + 1; // age pack by one time step
+      
+      /** Determine amount of solar radiation that reaches the ground under
+	  the snowpack, see Patterson and Hamblin, 1988 **/
+/*       (*NetShortGrnd) =  */
+/* 	*NetShortSnow * ( SNOW_A1 * exp ( - SNOW_L1 * snow->depth )  */
+/* 			   + SNOW_A2 * exp ( -SNOW_L2 * snow->depth ) ); */
+/*       (*NetShortSnow) -= (*NetShortGrnd); */ // shortwave absorbed by snow
 
-	/** recompute surface properties if overstory drops snow **/
-
-	snow->albedo    = NEW_SNOW_ALB;
-	energy->albedo  = snow->albedo;
-	snow->last_snow = 1;
-	(*out_short)    = energy->albedo * shortwave;
-	(*net_short)    = (1.0 - energy->albedo) * shortwave;
-	(*rad)          = (*net_short) + longwave - STEFAN_B 
-	  * (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN) 
-	  * (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN);
-      }
-    
+      (*NetShortGrnd) = 0.;
+   
       (*snow_inflow) += rainfall[WET] + snowfall[WET];
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) grnd_temp = energy->T[0];
-      else grnd_temp = air_temp;
+/*       if(options.FULL_ENERGY || options.FROZEN_SOIL) Tgrnd = energy->T[0]; */
+/*       else Tgrnd = air_temp; */
 
       /** Call snow pack accumulation and ablation algorithm **/
 
-      snow_melt(soil_con, rec, iveg, wind_h+soil_con->snow_rough, 
-		aero_resist[2], Le[0], snow, (double)dt, 0.00, 
-		soil_con->snow_rough, surf_atten, rainfall[WET], 
-		snowfall[WET], tmp_wind[2], grnd_temp, air_temp, net_short[0], 
-		energy->longwave, density, pressure, vpd, vp, &melt, 
-		&energy->advection, &energy->deltaCC, &energy->grnd_flux, 
-		&energy->latent, &energy->sensible, &energy->error, 
-		&energy->refreeze_energy);
+      old_swq       = snow->swq; /* store swq for density calculations */
+      (*UnderStory) = 2;         /* ground snow is present of accumulating 
+				    during time step */
+      
+#if SPATIAL_SNOW
+      /* make snowpack uniform at mean depth */
+      if ( snowfall[WET] > 0 ) snow->coverage = 1;
+      if (snow->coverage > 0 && snowfall[WET] == 0) {
+	if ( snow->coverage < 1) {
+	  /* rain falls evenly over grid cell */
+	  ppt[WET] = rainfall[WET] * (1.0 - snow->coverage);
+	  rainfall[WET] *= snow->coverage;
+	}
+      }
+#endif
 
+      snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
+		roughness[*UnderStory], aero_resist[*UnderStory], 
+		air_temp, *coverage, (double)dt * SECPHOUR, density, 
+		displacement[*UnderStory], snow_grnd_flux, 
+		*LongUnderIn, pressure, rainfall[WET], snowfall[WET], 
+		vp, vpd, wind[*UnderStory], ref_height[*UnderStory], 
+		NetLongSnow, Torg_snow, &melt, &energy->error, 
+		&energy->advected_sensible, &energy->advection, 
+		&energy->deltaCC, &tmp_grnd_flux, &energy->latent, 
+		&energy->latent_sub, &energy->refreeze_energy, 
+		&energy->sensible, INCLUDE_SNOW, band, iveg, 
+		(int)overstory, rec, snow, soil_con);
+
+      // store melt water
       ppt[WET] += melt;
-      energy->albedo   = snow->albedo;
-      tmp_snow_energy[0] = energy->advection - energy->deltaCC 
-	+ energy->refreeze_energy;
-      (*Ls) = (677. - 0.07 * snow->surf_temp) * 4.1868 * 1000;
+
+      // store snow albedo
+      energy->AlbedoUnder   = TmpAlbedoUnder[1];
       
       /** Compute Snow Parameters **/
       if(snow->swq > 0.) {
 
 	/** Calculate Snow Density **/
-	snow->density = snow_density(day_in_year, snowfall[WET], air_temp, 
-				     old_swq, snow->depth, snow->coldcontent, 
-				     (double)dt, snow->surf_temp);
+	if ( snow->surf_temp <= 0 )
+	  snow->density = snow_density(day_in_year, 
+				       snowfall[WET], 
+				       air_temp, old_swq, snow->depth, 
+				       snow->coldcontent, 
+				       (double)dt, snow->surf_temp);
+	else 
+	  if ( curr_snow == 1 ) 
+	    snow->density = new_snow_density(air_temp);
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
+	old_depth   = snow->depth;
 	snow->depth = 1000. * snow->swq / snow->density; 
 	
-	/** Check for Thin Snowpack which only Partially Covers Grid Cell **/
-	if(snow->swq < MAX_FULL_COVERAGE_SWQ) {
-	  snow->coverage = 1.; 
-/* 	  snow->coverage = 1. / MAX_FULL_COVERAGE_SWQ   */
-/* 	    * snow->swq;  */
-/* 	  if(snow_coverage <= snow->coverage) { */
-/* 	    energy->albedo = bare_albedo; */
-/* 	  } */
-/* 	  else { */
-/* 	    energy->albedo = (snow_coverage - snow->coverage)  */
-/* 	      / (1. - snow->coverage) * snow->albedo; */
-/* 	    energy->albedo += (1. - snow_coverage)  */
-/* 	      / (1. - snow->coverage) * bare_albedo; */
-/* 	  } */
-	}
-	else {
-	  snow->coverage = 1.;
-	}
+	/** Check for Thin Snowpack which only Partially Covers Grid Cell
+	 exists only if not snowing and snowpack has started to melt **/
+#if SPATIAL_SNOW
+	snow->coverage = calc_snow_coverage(&snow->store_snow, 
+					    soil_con->depth_full_snow_cover, 
+					    old_coverage, snow->swq,
+					    old_swq, snow->depth, old_depth, 
+					    melt + snow->vapor_flux, 
+					    &snow->max_swq, snowfall, 
+					    &snow->store_swq, 
+					    &snow->swq_slope,
+					    &snow->store_coverage);
 
-	/** Estimate net longwave at the snow surface */
-	energy->longwave -= (STEFAN_B * (snow->surf_temp+KELVIN) 
-			     * (snow->surf_temp+KELVIN) 
-			     * (snow->surf_temp+KELVIN) 
-			     * (snow->surf_temp+KELVIN));
+#else
+
+	if ( snow->swq > 0 ) snow->coverage = 1.;
+	else snow->coverage = 0.;
+#endif
 
       }
       else {
+	snow->coverage = 0.;
+      }
+      
+      *delta_coverage = old_coverage - snow->coverage;
+
+      if ( *delta_coverage != 0 ) {
+	
+	/* returns mixed surface albedo if snow cover fraction has 
+	   decreased (old_coverage is cover fraction for previous
+	   time step, snow->coverage is cover fraction for current
+	   time step. */
+	if ( old_coverage > snow->coverage ) {
+	  /* melt has occured */
+	  *coverage = (old_coverage);
+	  (*AlbedoUnder) = (*coverage - snow->coverage) 
+	    / (1. - snow->coverage) * snow->albedo;
+	  (*AlbedoUnder) += (1. - *coverage) 
+	    / (1. - snow->coverage) * BareAlbedo;
+
+	  /* compute snowpack energy used in reducing coverage area */
+/* 	  if ( old_coverage < 1 )  */
+/* 	    (*melt_energy) = 0; */
+	    (*melt_energy) = ( *delta_coverage ) 
+	      * (energy->advection - energy->deltaCC 
+		 + energy->latent + energy->latent_sub 
+		 + energy->sensible + energy->refreeze_energy 
+		 + energy->advected_sensible);
+/* 	  else (*melt_energy) = 0; */
+	}
+	else if ( old_coverage < snow->coverage ) {
+#if VERBOSE
+	  if ( snow->coverage != 1. ) 
+	    fprintf(stderr, "WARNING: snow cover fraction has increased, but it is not equal to 1 (%f).\n", snow->coverage);
+#endif // VERBOSE
+	  *coverage       = snow->coverage;
+	  *delta_coverage = 0;
+	}
+	else {
+	  *coverage       = snow->coverage;
+	  *delta_coverage = 0.;
+	}
+      }
+      else if ( old_coverage == 0 && snow->coverage == 0 ) {
+	// snow falls and melts all in one time step
+	*delta_coverage = 1.;
+	*coverage       = 0.;
+/* 	(*melt_energy)  = 0; */
+	(*melt_energy) = (energy->advection - energy->deltaCC 
+			  + energy->latent + energy->latent_sub 
+			  + energy->sensible + energy->refreeze_energy
+			  + energy->advected_sensible);
+      }
+
+      /** Compute energy balance components for snowpack */
+      
+      (*NetLongSnow)     *= (snow->coverage);
+      (*NetShortSnow)    *= (snow->coverage);
+      (*NetShortGrnd)    *= (snow->coverage);
+      energy->latent     *= (snow->coverage + *delta_coverage);
+      energy->latent_sub *= (snow->coverage + *delta_coverage);
+      energy->sensible   *= (snow->coverage + *delta_coverage);
+
+      /* store change in heat capacity for soil thermal flux calculations */
+/*       *delta_snow_heat = snow->coverage * (energy->refreeze_energy - energy->deltaCC) / 2.; */
+
+      if ( snow->swq == 0 ) {
 
 	/** Reset Snow Pack Variables after Complete Melt **/
+
+	/*** NOTE *coverage should not be zero the time step the 
+	     snowpack melts - FIX THIS ***/
 
 	snow->density    = 0.;
 	snow->depth      = 0.;
@@ -368,13 +474,21 @@ double solve_snow(snow_data_struct    *snow,
 	snow->surf_temp  = 0;
 	snow->pack_temp  = 0;
 	snow->coverage   = 0;
-
- 	energy->albedo = (snow_coverage - snow->coverage)  
- 	  / (1. - snow->coverage) * snow->albedo; 
- 	energy->albedo += (1. - snow_coverage)  
- 	  / (1. - snow->coverage) * bare_albedo; 
+	snow->swq_slope  = 0;
+	snow->store_snow = TRUE;
+	
+/*  	energy->AlbedoUnder  = (old_coverage - snow->coverage)   */
+/*  	  / (1. - snow->coverage) * snow->albedo;  */
+/*  	energy->AlbedoUnder  += (1. - old_coverage)   */
+/*  	  / (1. - snow->coverage) * BareAlbedo;  */
+/* 	(*NetShortGrnd)  += (*NetShortSnow); */
+/* 	(*NetShortSnow) = 0; */
 	
       }
+
+      snowfall[WET] = 0; /* all falling snow has been added to the pack */
+      rainfall[WET] = 0; /* all rain has been added to the pack */
+      
     }
 
     else {
@@ -382,9 +496,26 @@ double solve_snow(snow_data_struct    *snow,
       /** Ground Snow not Present, and Falling Snow Does not Reach Ground **/
 
       ppt[WET] += rainfall[WET];
-      tmp_snow_energy[0] = 0.;
+      energy->AlbedoOver      = 0.;
+      (*AlbedoUnder)          = BareAlbedo;
+      //energy->NetLongOver  = 0.;
+      //energy->LongOverIn   = 0.;
+      //energy->NetShortOver = 0.;
+      //energy->ShortOverIn  = 0.;
+      (*NetLongSnow)       = 0.;
+      (*NetShortSnow)      = 0.;
+      (*NetShortGrnd)      = 0.;
+      (*delta_coverage)    = 0.;
+      energy->latent       = 0.;
+      energy->latent_sub   = 0.;
+      energy->sensible     = 0.;
+      curr_snow            = 0;
+      snow->store_swq      = 0;
+      snow->store_coverage = 1;
 
     }
+
+    snow->last_snow = curr_snow;
     
   }
   else {
@@ -394,28 +525,30 @@ double solve_snow(snow_data_struct    *snow,
     *****************************/
 
     /** Initialize variables **/
-    snow->snow         = FALSE;
-    tmp_snow_energy[0] = 0;
-    energy->albedo     = bare_albedo;
-    energy->longwave   = longwave;
+    *UnderStory             = 0;
+    snow->snow              = FALSE;
+    energy->Tfoliage        = air_temp;
 
     /** Compute Radiation Balance for Bare Surface **/ 
-    out_short[0] = energy->albedo * shortwave;
-    net_short[0] = (1.0 - energy->albedo) * shortwave;
-    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-      rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
-	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
-    }
-    else {
-      rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
-	* (air_temp+KELVIN) * (air_temp+KELVIN);
-    }
-
+    energy->AlbedoOver   = 0.;
+    (*AlbedoUnder)       = BareAlbedo;
+    energy->NetLongOver  = 0.;
+    energy->LongOverIn   = 0.;
+    energy->NetShortOver = 0.;
+    energy->ShortOverIn  = 0.;
+    energy->latent       = 0.;
+    energy->latent_sub   = 0.;
+    energy->sensible     = 0.;
+    (*NetLongSnow)       = 0.;
+    (*NetShortSnow)      = 0.;
+    (*NetShortGrnd)      = 0.;
+    (*delta_coverage)    = 0.;
+    energy->Tfoliage     = Tcanopy;
+    snow->store_swq      = 0;
+    snow->store_coverage = 1;
   }
 
-  energy->shortwave = (*net_short);
+  energy->melt_energy *= -1.;
 
   return(melt);
 

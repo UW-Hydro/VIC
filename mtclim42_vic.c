@@ -24,7 +24,7 @@
 	  Adapted by: Bart Nijssen
           Adaptation started on Sat Aug 21 using the mtclim4.2 code from
 	  5/7/1999 
-  Last Changed: Tue Mar 14 11:31:04 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+  Last Changed: Fri Oct 27 10:28:52 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
 */
 
 /*
@@ -474,7 +474,7 @@ int calc_srad_humidity(const control_struct *ctrl, const parameter_struct *p,
     /* convert dewpoint to vapor pressure */
     /* start vic_change */
     /* pva = 610.7 * exp(17.38 * data->tdew[i] / (239.0 + data->tdew[i])); */
-    pva = 1000. * svp(data->tdew[i]);
+    pva = svp(data->tdew[i]);
     /* end vic_change */
     if (ctrl->outhum) {
       /* output humidity as vapor pressure */
@@ -486,7 +486,7 @@ int calc_srad_humidity(const control_struct *ctrl, const parameter_struct *p,
       /* start vic_change */
       /* pvs = 610.7 * exp(17.38 * data->s_tday[i] / (239.0 + data->s_tday[i])); 
        */
-      pvs = 1000. * svp(data->s_tday[i]);
+      pvs = svp(data->s_tday[i]);
       /* end vic_change */
       /* calculate vpd */
       vpd = pvs-pva;
@@ -742,7 +742,7 @@ int calc_srad_humidity(const control_struct *ctrl, const parameter_struct *p,
     yday = data->yday[i]-1;
     /* start vic_change */
     /* pva = 610.7 * exp(17.38 * data->tdew[i] / (239.0 + data->tdew[i])); */
-    pva = 1000. * svp(data->tdew[i]);
+    pva = svp(data->tdew[i]);
     /* end vic_change */
     t_tmax = ttmax0[yday] + abase * pva;
     
@@ -1222,7 +1222,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
     yday = data->yday[i]-1;
     /* start vic_change */
     /* pva = 610.7 * exp(17.38 * data->tmin[i] / (239.0 + data->tmin[i])); */
-    pva = 1000. * svp(data->tmin[i]);
+    pva = svp(data->tmin[i]);
     /* end vic_change */
     t_tmax = ttmax0[yday] + abase * pva;
     
@@ -1284,7 +1284,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
     yday = data->yday[i]-1;
     /* start vic_change */
     /* pva = 610.7 * exp(17.38 * tdew[i] / (239.0 + tdew[i])); */
-    pva = 1000. * svp(tdew[i]);
+    pva = svp(tdew[i]);
     /* end vic_change */
     t_tmax = ttmax0[yday] + abase * pva;
     
@@ -1346,7 +1346,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
   for (i=0 ; i<ndays ; i++) {
     /* start vic_change */
     /* pva = 610.7 * exp(17.38 * tdew[i] / (239.0 + tdew[i])); */
-    pva = 1000. * svp(tdew[i]);
+    pva = svp(tdew[i]);
     /* end vic_change */
     if (ctrl->outhum) {
       /* output humidity as vapor pressure (Pa) */
@@ -1357,7 +1357,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
       /* calculate saturated VP at tday */
       /* start vic_change */
       /* pvs = 610.7 * exp(17.38 * data->s_tday[i]/(239.0+data->s_tday[i])); */
-      pvs = 1000. * svp(data->s_tday[i]);
+      pvs = svp(data->s_tday[i]);
       /* end vic_change */
       vpd = pvs - pva;
       if (vpd < 0.0) 
@@ -1445,9 +1445,9 @@ double calc_pet(double rad, double ta, double pa, double dayl)
   */
   /* start vic_change */
   /* pvs1 = 610.7 * exp(17.38 * t1 / (239.0 + t1)); */
-  pvs1 = 1000. * svp(t1);
+  pvs1 = svp(t1);
   /* pvs2 = 610.7 * exp(17.38 * t2 / (239.0 + t2)); */
-  pvs2 = 1000. * svp(t2);
+  pvs2 = svp(t2);
   /* end vic_change */
   
   /* calculate slope of pvs vs. T curve near ta */

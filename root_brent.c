@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-96
- * LAST-MOD: Mon Jan 24 12:06:38 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Mar  5 17:53:56 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Determine surface temperature iteratively using the Brent
  *               method.  
  * DESCRIP-END.
@@ -91,8 +91,9 @@ static char vcid[] = "$Id$";
 
   Comments     :
 *****************************************************************************/
-double root_brent(double LowerBound, double UpperBound, 
-                double (*Function)(double Estimate, va_list ap), ...)
+double root_brent(double LowerBound, 
+		  double UpperBound, 
+		  double (*Function)(double Estimate, va_list ap), ...)
 {
   const char *Routine = "RootBrent";
   char ErrorString[MAXSTRING+1];
@@ -145,9 +146,11 @@ double root_brent(double LowerBound, double UpperBound,
     j++;
   }
   if ((fa * fb) >= 0) {
+#if VERBOSE
     fprintf(stderr,"ERROR: first error in root_brent -> %f * %f >= 0\n",
         fa, fb);
     fprintf(stderr,"Dumping Input Variables - Check for Valid Values\n");
+#endif // VERBOSE
     return(-9999.);
   }
   
@@ -226,9 +229,11 @@ double root_brent(double LowerBound, double UpperBound,
       eval++;
     }
   }
+#if VERBOSE
   fprintf(stderr,"ERROR: second error in root_brent -> Too many iterations\n");
   fprintf(stderr,"Dumping Input Variables - Check for Valid Values\n");
-  return(-9999.);
+#endif // VERBOSE
+  return(-9998.);
 }
 
 #undef MAXTRIES

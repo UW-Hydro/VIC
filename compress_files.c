@@ -21,7 +21,7 @@ void compress_files(char string[])
   fprintf(stderr,"zipping \"%s\".\n",string);
 #endif
 
-  sprintf(command,"gzip -f %s &",string);
+  sprintf(command,"nice gzip -f %s &",string);
   system(command);
 
 }

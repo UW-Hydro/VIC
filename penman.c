@@ -56,7 +56,7 @@ nthesis */
   double f;
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
-  slope = svp_slope(tair)*1000;
+  slope = svp_slope(tair);
 
   /* calculate resistance factors (Wigmosta et al., 1994) */
 
@@ -163,7 +163,7 @@ void compute_penman_constants(double  vpd,
   double f;
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
-  slope = svp_slope(tair)*1000;
+  slope = svp_slope(tair);
 
   /* calculate resistance factors (Wigmosta et al., 1994) */
 

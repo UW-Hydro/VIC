@@ -70,7 +70,11 @@ void prepare_full_energy(int               iveg,
     compute_soil_layer_thermal_properties(layer,soil_con->depth,
 					  soil_con->bulk_density,
 					  soil_con->soil_density,
-					  soil_con->quartz,options.Nlayer);
+					  soil_con->quartz,
+#if SPATIAL_FROST
+					  soil_con->frost_fract,
+#endif
+					  options.Nlayer);
     
     /** Save Thermal Conductivities for Energy Balance **/
     prcp->energy[iveg][band].kappa[0] = layer[0].kappa; 

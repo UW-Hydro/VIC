@@ -145,14 +145,14 @@ void write_debug(atmos_data_struct    *atmos,
       
       ENERGY_ERROR[veg] += energy[band].error * mu;
       ENERGY_ERROR_CALC[veg] 
-	+= ((1.-energy[band].albedo)*energy[band].shortwave
+	+= ((1.-energy[band].AlbedoOver)*energy[band].shortwave
 	    + energy[band].longwave + energy[band].grnd_flux
 	    + energy[band].latent + energy[band].sensible 
 	    + energy[band].deltaH - energy[band].deltaCC 
 	    - energy[band].snow_flux + energy[band].refreeze_energy 
 	    + energy[band].advection) * mu / soil_con->AreaFract[band];
       
-      INSHORT[veg]        += (1.-energy[band].albedo)*atmos->shortwave[NR] 
+      INSHORT[veg]        += (1.-energy[band].AlbedoOver)*atmos->shortwave[NR] 
 	* mu / soil_con->AreaFract[band];
       INLONG[veg]         += atmos->longwave[NR] * mu 
 	/ soil_con->AreaFract[band];

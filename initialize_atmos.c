@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
- 
-#define MAXSTR 512
 
+#define MIN_TDEW -50  /* svp calculations fail at very low temperatures
+                         which sometimes are estimated by the Kimball
+			 dew point temperature estimation equation (C) */
+ 
 static char vcid[] = "$Id$";
 
 void initialize_atmos(atmos_data_struct *temp,
@@ -54,6 +56,9 @@ void initialize_atmos(atmos_data_struct *temp,
             daily temperature.  This allows relative humidity to
             change during the day, when the time step is less than
             daily.                                              KAC
+  8-19-99   MIN_TDEW was added to prevent the dew point temperature
+            estimated by Kimball's equations from becoming so low
+            that svp() fails.                                   Bart
 
 **********************************************************************/
 {
@@ -85,6 +90,7 @@ void initialize_atmos(atmos_data_struct *temp,
   double  trans_clear;
   double  qdp;
   double *day_len_hr;
+  double  Tdew;
 
   if(!param_set.PREC)
     nrerror("ERROR: Precipitation must be given to the model, check input files\n");
@@ -304,10 +310,13 @@ void initialize_atmos(atmos_data_struct *temp,
     for(day=0;day<Ndays;day++) {
       if(annual_prec>0) {
 	/** Estimate dew point using Kimball's regression **/
-	qdp = svp(estimate_dew_point(annual_prec,temp[day*Nhours].tmin,
-				     temp[day*Nhours].tmax,
-				     temp[day*Nhours].priest,
-				     day_len_hr[day]*3600.,day*Nhours));
+	Tdew = estimate_dew_point(annual_prec,temp[day*Nhours].tmin,
+				  temp[day*Nhours].tmax,
+				  temp[day*Nhours].priest,
+				  day_len_hr[day]*3600.,day*Nhours);
+	if (Tdew < MIN_TDEW)
+	  Tdew = MIN_TDEW;
+	qdp = svp(Tdew);
       }
       else {
 	/** Estimate daw point using minimum daily temperature **/
@@ -358,4 +367,4 @@ void initialize_atmos(atmos_data_struct *temp,
   free((char *)day_len_hr);
   
 }
-#undef MAXSTR
+#undef MIN_TDEW

@@ -51,6 +51,8 @@ void write_model_state(dist_prcp_struct    *prcp,
   01-Nov-04 Added storage of state variables for SPATIAL_FROST and
 	    LAKE_MODEL.						TJB
   02-Nov-04 Added a few more lake state variables.		TJB
+  03-Nov-04 Now outputs extra_veg to aid other programs in parsing
+	    state files.					TJB
 
 *********************************************************************/
 {
@@ -93,15 +95,23 @@ void write_model_state(dist_prcp_struct    *prcp,
 #if LAKE_MODEL
   lake_var = prcp->lake_var;
 #endif // LAKE_MODEL
-  
+ 
+  extra_veg = 0;
+#if LAKE_MODEL
+  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+    extra_veg = 1; // add a veg type for the wetland
+  }
+#endif // LAKE_MODEL
+
   /* write cell information */
   if ( options.BINARY_STATE_FILE ) {
     fwrite( &cellnum, 1, sizeof(int), outfiles->statefile );
     fwrite( &Nveg, 1, sizeof(int), outfiles->statefile );
+    fwrite( &extra_veg, 1, sizeof(int), outfiles->statefile );
     fwrite( &Nbands, 1, sizeof(int), outfiles->statefile );
   }
   else {
-    fprintf( outfiles->statefile, "%i %i %i", cellnum, Nveg, Nbands );
+    fprintf( outfiles->statefile, "%i %i %i %i", cellnum, Nveg, extra_veg, Nbands );
   }
   // This stores the number of bytes from after this value to the end 
   // of the line.  DO NOT CHANGE unless you have changed the values
@@ -176,13 +186,6 @@ void write_model_state(dist_prcp_struct    *prcp,
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( outfiles->statefile, "\n" );
-
-  extra_veg = 0;
-#if LAKE_MODEL
-  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
-    extra_veg = 1; // add a veg type for the wetland
-  }
-#endif // LAKE_MODEL
 
   /* Output for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {

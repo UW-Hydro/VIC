@@ -19,6 +19,9 @@ static char vcid[] = "$Id$";
 
   modifications:
   6-8-2000  modified to make use of spatially distributed frost   KAC
+  2-24-03   moved unit conversion of moist_resid outside of distributed
+            precipitation loop.  Moist_resid was being multiplied by
+            D! * 1000 twice for the dry fraction.                 KAC
        
 ****************************************************************************/
 
@@ -72,6 +75,8 @@ double arno_evap(layer_data_struct *layer_wet,
   else Ndist = 1;
 
   Evap = 0;
+
+  moist_resid *= D1 * 1000.;
 
   for(dist=0;dist<Ndist;dist++) {
 
@@ -188,7 +193,6 @@ double arno_evap(layer_data_struct *layer_wet,
       /*  Evaporation second soil layer = 0.0                                */
       /***********************************************************************/
 
-      moist_resid *= D1 * 1000.;
       if ( ice > 0 ) {
         if ( ice > moist_resid ) {
  	  // ice content greater than wilting point can use all unfrozen moist

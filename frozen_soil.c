@@ -133,13 +133,13 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 			    soil_con.depth, options.Nlayer);
     }
   }
-/*   free((char*)old_fdepth); */
-/*   free((char*)old_tdepth); */
 
+#if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Moisture Redistribution\n");
     write_layer(layer,veg,options.Nlayer,soil_con.depth);
   } 
+#endif
 
   /** Compute Amount of Unfrozen Moisture in Frozen Layer **/
   for(index=0;index<options.Nlayer;index++) {
@@ -204,10 +204,12 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
     layer[i] = find_average_layer(layer_wet[i],layer_dry[i],
 				  soil_con.depth[i],mu);
 
+#if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Refreezing Moisture\n");
     write_layer(layer,veg,options.Nlayer,soil_con.depth);
   } 
+#endif
 
   tmp_ptr = NULL;
 

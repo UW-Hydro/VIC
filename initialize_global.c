@@ -90,7 +90,8 @@ void initialize_global() {
   options.MIN_WIND_SPEED        = 0.0;
   options.NOFLUX                = FALSE;
   options.FS_FLUXES             = FALSE;
- 
+
+#if LINK_DEBUG 
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;
   debug.PRT_VEGE    = FALSE;
@@ -105,6 +106,7 @@ void initialize_global() {
   debug.PRT_BALANCE = FALSE;
   debug.PRT_GRID    = FALSE;
   strcpy(debug.debug_dir,"./");
+#endif
 
   param_set.SHORTWAVE  = FALSE;
   param_set.LONGWAVE   = FALSE;

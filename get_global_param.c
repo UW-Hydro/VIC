@@ -228,6 +228,8 @@ global_param_struct get_global_param(filenames_struct *names,
       /******************************
         Get Model Debugging Options
 	****************************/
+
+#if LINK_DEBUG
       else if(strcasecmp("PRT_FLUX",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) debug.PRT_FLUX=TRUE;
@@ -276,6 +278,7 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("DEBUG_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",debug.debug_dir);
       }
+#endif
 
       /***********************************
         Unrecognized Global Parameter Flag
@@ -290,8 +293,6 @@ global_param_struct get_global_param(filenames_struct *names,
   /******************************************
     Check for undefined required parameters
   ******************************************/
-/*   if(!options.FULL_ENERGY && options.FROZEN_SOIL)  */
-/*     options.FULL_ENERGY = TRUE; */
   if((!options.FULL_ENERGY && !options.FROZEN_SOIL) && options.CALC_SNOW_FLUX) 
     options.CALC_SNOW_FLUX = FALSE;
   if(force_dt[0]<0 || force_dt[1]<0)
@@ -314,6 +315,8 @@ global_param_struct get_global_param(filenames_struct *names,
   /*********************************
     Output major options to stderr
   *********************************/
+
+#if VERBOSE
   fprintf(stderr,"Time Step = %i hour(s)\n",temp.dt);
   fprintf(stderr,"Number of Records = %i\n\n",temp.nrecs);
   fprintf(stderr,"Full Energy...................(%i)\n",options.FULL_ENERGY);
@@ -330,6 +333,9 @@ global_param_struct get_global_param(filenames_struct *names,
   fprintf(stderr,"\n");
   fprintf(stderr,"Using %i Snow Bands\n",options.SNOW_BAND);
   fprintf(stderr,"Using %i Root Zones\n",options.ROOT_ZONES);
+  if(LINK_DEBUG) fprintf(stderr,"Debugging code has been included in the executable.\n");
+  else fprintf(stderr,"Debugging code has not been compiled.\n");
+#endif
 
   return temp;
 

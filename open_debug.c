@@ -5,6 +5,7 @@
 
 static char vcid[] = "$Id$";
 
+#if LINK_DEBUG
 void open_debug() {
 /**********************************************************************
   open_debug		Keith Cherkauer		October 10, 1997
@@ -85,3 +86,4 @@ void open_debug() {
   }
 
 }
+#endif

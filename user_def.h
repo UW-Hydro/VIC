@@ -4,8 +4,14 @@
   the model needs to be recompiled for the changes to take effect.
 **********************************************************************/
 
-/*#define EMULATE_XU*/	/* uses step function baseflow curve, remove
-				after ark-red tests */
+/***** If TRUE include all model messages to stdout, and stderr *****/
+#define VERBOSE TRUE
+
+/***** If TRUE include all debugging code - debugging options still
+       have to be activated to get extra output.  When set to FALSE
+       all debugging if-then statements are removed from the compiled 
+       code *****/
+#define LINK_DEBUG FALSE
 
 /***** Number of layers to use in energy balance and frozen soil models.
        Water balance model runs with only two layers, while the full

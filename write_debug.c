@@ -5,6 +5,7 @@
 
 static char vcid[] = "$Id$";
 
+#if LINK_DEBUG
 void write_debug(atmos_data_struct     atmos,
                  soil_con_struct       soil_con,
                  cell_data_struct     *cell,
@@ -467,3 +468,4 @@ void write_debug(atmos_data_struct     atmos,
   FIRST = -999;
  
 }
+#endif

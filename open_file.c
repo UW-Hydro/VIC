@@ -38,7 +38,10 @@ FILE *open_file(char string[],char type[])
 
   stream = fopen(string,type);
 
+#if VERBOSE
   fprintf(stderr,"\n");
+#endif
+
   if (stream == NULL) {
 
     /** Check if file is compressed **/
@@ -53,7 +56,10 @@ FILE *open_file(char string[],char type[])
     fclose(stream);
 
     /** uncompress and open zipped file **/
+#if VERBOSE
     fprintf(stderr,"unzipping \"%s\".",string);
+#endif
+
     sprintf(command,"gzip -d %s",zipname);
     system(command);
     stream = fopen(string,type);
@@ -64,14 +70,24 @@ FILE *open_file(char string[],char type[])
     }
   }
 
+#if VERBOSE
   fprintf(stderr,"\n \"%s\" has been",string);
+#endif
 
   if(strcmp(type,"r") == 0) {
+
+#if VERBOSE
     fprintf(stderr,"\n  opened for reading.");
+#endif
+
     temp=fgetc(stream);
     while(temp==32) temp=fgetc(stream);
     if(temp==35) {
+
+#if VERBOSE
       fprintf(stderr,"... skipping header");
+#endif
+
       headcnt = 0;
       while(temp==35) {
 	fgets(jnkstr,MAXSTRING,stream);
@@ -85,6 +101,7 @@ FILE *open_file(char string[],char type[])
     else rewind(stream);
   }
 
+#if VERBOSE
   if(strcmp(type,"w") == 0) fprintf(stderr,"\n  truncated or created for writing.");
 
   if(strcmp(type,"wb") == 0) fprintf(stderr,"\n  truncated or created for writing.");
@@ -106,6 +123,7 @@ FILE *open_file(char string[],char type[])
   }
 
   fprintf(stderr,"\n");
+#endif
 
   fflush(stderr);
 

@@ -12,20 +12,40 @@ void write_atmosdata(atmos_data_struct *atmos, int nrecs)
 
 **********************************************************************/
 {
+  extern debug_struct debug;
+
   int i;
 
-  printf("Atmospheric Data:\n");
-  for (i = 0; i < 10; i++) {
-    printf("\ti = %d\n", i);
-    printf("\tMelt            = %lf\n", atmos[i].melt); 
-    printf("\tPrec            = %lf\n", atmos[i].prec); 
-    printf("\tAir_temp        = %lf\n", atmos[i].air_temp); 
-    printf("\trainonly        = %lf\n", atmos[i].rainonly); 
-    printf("\tWind            = %lf\n", atmos[i].wind); 
-    printf("\talbedo          = %lf\n", atmos[i].albedo); 
-    printf("\ttmin            = %lf\n", atmos[i].tmin); 
-    printf("\ttmax            = %lf\n\n", atmos[i].tmax); 
+  for (i = 0; i < nrecs; i++) {
+    fprintf(debug.fg_atmos,"%d",  i);
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].melt); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].prec); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].air_temp); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].rainonly); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].wind); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].rad); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].vpd); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].vp); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].pressure); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].density); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].rel_humid); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].spec_humid); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].tmin); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].tmax); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].priest); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].penman_temp); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].tskc); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].trans); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].shortwave); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].longwave); 
+    fprintf(debug.fg_atmos,"\t%lf", atmos[i].albedo); 
+    fprintf(debug.fg_atmos,"\t%i",  atmos[i].rise_hour); 
+    fprintf(debug.fg_atmos,"\t%i",  atmos[i].set_hour); 
+    fprintf(debug.fg_atmos,"\n");
   }
+
+  fflush(debug.fg_atmos);
+
 }
 
 

@@ -188,6 +188,14 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("RESULT_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->result_dir);
       }
+      else if(strcasecmp("INIT_SNOW",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->init_snow);
+	options.INIT_SNOW = TRUE;
+      }
+      else if(strcasecmp("INIT_SOIL",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->init_soil);
+	options.INIT_SOIL = TRUE;
+      }
 
 
       /******************************
@@ -258,6 +266,8 @@ global_param_struct get_global_param(filenames_struct *names,
     options.CALC_SNOW_FLUX = FALSE;
   if(force_dt[0]<0 || force_dt[1]<0)
     nrerror("Must define forcing file time steps (FORCE_DT <dt 1> <dt 2>) in control file");
+  if(options.ROOT_ZONES<0)
+    nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
 
   return temp;
 }

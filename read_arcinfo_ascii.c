@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <math.h>
 
+static char vcid[] = "$Id$";
+
 double read_arcinfo_value(char *filename,
 			  double lat,
 			  double lng) {

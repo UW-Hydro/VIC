@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double solve_snow(snow_data_struct    *snow,
 		  layer_data_struct   *layer_wet,
 		  layer_data_struct   *layer_dry,

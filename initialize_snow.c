@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void initialize_snow (snow_data_struct **snow, 
 		      int                veg_num, 
 		      FILE              *fsnow)

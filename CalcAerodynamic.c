@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Thu Mar 27 18:00:10 1997
- * LAST-MOD: Thu Oct  2 14:38:18 1997 by Bart Nijssen <nijssen@u.washington.edu>
+ * LAST-MOD: Mon Sep 28 16:21:33 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate the aerodynamic resistances
  * DESCRIP-END.
  * FUNCTIONS:    CalcAerodynamic()
@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 #include <math.h>
+
+static char vcid[] = "$Id$";
 
   
 /*****************************************************************************

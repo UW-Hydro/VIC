@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 #define DAYLENGTH 0.0           /* daylength coefficient: selects a */
                                 /* definition for sunrise/sunset :  */
                                 /* 0.0 : center of sun even with horizon */

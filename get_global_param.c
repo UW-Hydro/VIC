@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <string.h>
  
+static char vcid[] = "$Id$";
+
 global_param_struct get_global_param(filenames_struct *names,
                                      FILE             *gp,
 				     int              *force_dt)
@@ -146,7 +148,7 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("OVERSTORY_ATTENUATION",optstr)==0) {
 	sscanf(cmdstr,"%*s %f",&options.OVERSTORY_ATTENUATION);
       }
-      else if(strcasecmp("SNOW_BAND",optstr)==0) {
+      else if(strcasecmp("TRUNK_RATIO",optstr)==0) {
 	sscanf(cmdstr,"%*s %f",&options.TRUNK_RATIO);
       }
       else if(strcasecmp("FORCE_DT",optstr)==0) {

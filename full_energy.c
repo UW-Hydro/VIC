@@ -8,6 +8,8 @@
 /* #define SNOW_STEP             1 */    /* Time step in hours to use when solving
 				      snow model in water balance mode */
 
+static char vcid[] = "$Id$";
+
 void full_energy(int rec,
                  atmos_data_struct   *atmos,
                  soil_con_struct      soil_con,

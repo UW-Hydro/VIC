@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void check_files(infiles_struct *infp, 
 		 filenames_struct fnames)
 /**********************************************************************

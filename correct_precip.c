@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void correct_precip(double *rain, double *rainonly, double wind) {
 /**********************************************************************
 	correct_precip	Keith Cherkauer		May 21, 1997

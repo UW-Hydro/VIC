@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 snow_data_struct **make_snow_data(int nveg)
 /**********************************************************************
 	make_snow_data	Keith Cherkauer		January 22, 1997

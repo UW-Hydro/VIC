@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <string.h>
 
+static char vcid[] = "$Id$";
+
 soil_con_struct read_soilparam_arc(FILE *soilparam, 
 				   char *soilparamdir, 
 				   int  *Ncells,

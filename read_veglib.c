@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 /**********************************************************************
   read_veglib.c               Keith Cherkauer                 1997
@@ -74,7 +76,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         }
       }
       fscanf(veglib, "%lf", &temp[i].wind_h);
-      fscanf(veglib, "%s", str);	/* skip over end of line comments */
+      fgets(str, MAXSTRING, veglib);	/* skip over end of line comments */
       i++;
     }
     else fgets(str, MAXSTRING, veglib);

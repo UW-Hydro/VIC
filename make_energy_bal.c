@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 energy_bal_struct **make_energy_bal(int nveg, int *Nnodes)
 /**********************************************************************
 	make_energy_bal	Keith Cherkauer		May 26, 1996

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void read_sawd_binary(atmos_data_struct *temp,
 		      FILE              *sawdf,
 		      int               *nrecs,
@@ -103,9 +105,5 @@ void read_sawd_binary(atmos_data_struct *temp,
   param_set.WIND = param_set.AIR_TEMP = param_set.PRESSURE = TRUE;
   param_set.TSKC = TRUE;
   param_set.REL_HUMID = TRUE;
-
-
-  param_set.AIR_TEMP = FALSE;
-
 
 }

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void nrerror(char error_text[])
 /* Numerical Recipes standard error handler */
 {

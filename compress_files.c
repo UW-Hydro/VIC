@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void compress_files(char string[])
 /**********************************************************************
   compress_files.c	Keith Cherkauer		September 10, 1997

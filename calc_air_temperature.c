@@ -3,6 +3,8 @@
 #include <math.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 /****************************************************************************
   Subroutines developed by Bart Nijssen to estimate the daily temperature
   cycle from maximum and minimum daily temperature measurements.  Modified

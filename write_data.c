@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void write_data(out_data_struct *out_data,
 		outfiles_struct  outfiles,
 		dmy_struct      *dmy)

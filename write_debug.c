@@ -3,6 +3,8 @@
 #include <string.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void write_debug(atmos_data_struct     atmos,
                  soil_con_struct       soil_con,
                  cell_data_struct     *cell,

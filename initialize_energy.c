@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <string.h>
 
+static char vcid[] = "$Id$";
+
 void initialize_energy_bal (energy_bal_struct  **energy, 
                             cell_data_struct  ***cell,
                             soil_con_struct     *soil_con,

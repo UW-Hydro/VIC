@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double calc_trans(double deltat, double elevation)
 /**********************************************************************
 	calc_trans	Dag Lohmann		January 1996

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 veg_var_struct **make_veg_var(int veg_type_num)
 /**********************************************************************
 	make_veg_var	Dag Lohman		January 1996

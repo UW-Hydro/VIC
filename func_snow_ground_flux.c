@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double func_snow_ground_flux(double Ts, va_list ap) {
 /**********************************************************************
 	snow_ground_flux	Keith Cherkauer		January 24, 1997

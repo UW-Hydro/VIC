@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void read_rosemount(atmos_data_struct *temp,
 		    FILE              *snowf,
 		    int               *nrecs,

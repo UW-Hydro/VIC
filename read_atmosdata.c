@@ -4,6 +4,8 @@
 #include <vicNl.h>
 #include <math.h>
  
+static char vcid[] = "$Id$";
+
 void read_atmosdata(atmos_data_struct *temp,
 		    FILE              *snowf,
 		    int               *nrecs,

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 filenames_struct cmd_proc(int argc, char *argv[]) 
 {
   extern option_struct options;

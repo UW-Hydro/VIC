@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 dmy_struct *make_dmy(global_param_struct global)
 /**********************************************************************
 	make_dmy	Dag Lohmann		January 1996

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double priestley(double tair, double rad)
 /**********************************************************************
 	priestley	Dag Lohmann		January 1996

@@ -4,6 +4,8 @@
  
 #define MAXSTR 512
 
+static char vcid[] = "$Id$";
+
 void initialize_atmos(atmos_data_struct *temp,
                       dmy_struct        *dmy,
                       double             theta_l,

@@ -94,6 +94,8 @@ cd    (* . . . . . . . . . . . . . . . . . . . . . . . . . . . */
 #include <vicNl.h>
 
 
+static char vcid[] = "$Id$";
+
 /* Since K&R C doesn't allow multiple assignments of arrays within functions
    this must be done as an external variable, but that's ok since this way
    both functions can use the data   */

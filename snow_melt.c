@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Wed Jul 29 15:06:28 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Sep 28 16:21:42 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
+
+static char vcid[] = "$Id$";
 
 /*****************************************************************************
   Function name: SnowMelt()

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Fri Sep  4 19:39:55 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Mon Sep 28 16:21:34 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
+
+static char vcid[] = "$Id$";
 
 #define GRAMSPKG 1000.
 #define CH_WATER 4186.8e3

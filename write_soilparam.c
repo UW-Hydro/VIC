@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void write_soilparam(soil_con_struct soil)
 /**********************************************************************
 	write_soilparam		Dag Lohmann	January 1996

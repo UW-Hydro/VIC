@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void read_sawd(atmos_data_struct *temp,
                FILE              *sawdf,
                int               *nrecs,

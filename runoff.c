@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <math.h>
 
+static char vcid[] = "$Id$";
+
 void runoff(layer_data_struct *layer_wet,
 	    layer_data_struct *layer_dry,
             energy_bal_struct *energy,

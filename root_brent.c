@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-96
- * LAST-MOD: Mon Aug  3 14:18:32 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Sep 28 16:21:41 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Determine surface temperature iteratively using the Brent
  *               method.  
  * DESCRIP-END.
@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vicNl.h>
+
+static char vcid[] = "$Id$";
 
 /*****
 #include <stdarg.h>

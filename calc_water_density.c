@@ -6,25 +6,18 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD:     23-Aug-1996 at 16:58:14 by DHSVM Project Account
+ * LAST-MOD: Mon Sep 28 16:21:35 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate the density of water as a function of temperature
  * DESCRIP-END.
  * FUNCTIONS:    WaterDensity()
  * COMMENTS:     
  */
 
-#ifndef lint
-static char vcid[] = "nil";
-#endif /* lint */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
 
-/*
-#include "settings.h"
-#include "density.h"
-*/
+static char vcid[] = "$Id$";
 
 /*****************************************************************************
   Function name: WaterDensity()

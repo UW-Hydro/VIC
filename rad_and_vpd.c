@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void rad_and_vpd (atmos_data_struct *atmos, 
 		  soil_con_struct    soil_con,
 		  int                nrecs, 

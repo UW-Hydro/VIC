@@ -3,6 +3,8 @@
 #include <math.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void calc_root_fractions(veg_con_struct  *veg_con,
 			 soil_con_struct  soil_con)
 /**********************************************************************
@@ -22,6 +24,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
   int    veg;
   int    layer;
   int    zone;
+  int    i;
   float  sum_depth;
   float  sum_fract;
   float  dum;
@@ -40,7 +43,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
     sum_fract  = 0;
     layer      = 0;
     Lstep      = soil_con.depth[layer];
-    Lsum      += Lstep;
+    Lsum       = Lstep;
     Zsum       = 0;
     zone       = 0;
     
@@ -83,30 +86,54 @@ void calc_root_fractions(veg_con_struct  *veg_con,
       else if(Zsum + Zstep == Lsum) {
 	Zsum += Zstep;
 	zone ++;
-	veg_con[veg].root[layer] = sum_fract;
-	sum_fract = 0.;
+	if(layer<options.Nlayer) {
+	  veg_con[veg].root[layer] = sum_fract;
+	  sum_fract = 0.;
+	}
 	layer++;
-	Lstep  = soil_con.depth[layer];
-	Lsum  += Lstep;
+	if(layer<options.Nlayer) {
+	  Lstep  = soil_con.depth[layer];
+	  Lsum  += Lstep;
+	}
+	else if(layer==options.Nlayer) {
+	  Lstep  = Zsum + Zstep - Lsum;
+	  if(zone<options.ROOT_ZONES-1) {
+	    for(i=zone+1;i<options.ROOT_ZONES;i++) {
+	      Lstep += veg_con[veg].zone_depth[i];
+	    }
+	  }
+	  Lsum  += Lstep;
+	}
       }
       else if(Zsum + Zstep > Lsum) {
-	veg_con[veg].root[layer] = sum_fract;
-	sum_fract = 0.;
+	if(layer<options.Nlayer) {
+	  veg_con[veg].root[layer] = sum_fract;
+	  sum_fract = 0.;
+	}
 	layer++;
-	Lstep  = soil_con.depth[layer];
-	Lsum  += Lstep;
+	if(layer<options.Nlayer) {
+	  Lstep  = soil_con.depth[layer];
+	  Lsum  += Lstep;
+	}
+	else if(layer==options.Nlayer) {
+	  Lstep  = Zsum + Zstep - Lsum;
+	  if(zone<options.ROOT_ZONES-1) {
+	    for(i=zone+1;i<options.ROOT_ZONES;i++) {
+	      Lstep += veg_con[veg].zone_depth[i];
+	    }
+	  }
+	  Lsum  += Lstep;
+	}
       }
 	
     }
 
-    if(Zsum < Lsum) {
-      veg_con[veg].root[layer] = sum_fract;
+    if(sum_fract > 0 && layer >= options.Nlayer) {
+      veg_con[veg].root[options.Nlayer-1] += sum_fract;
     }
-    else if(Zsum > Lsum) {
-      veg_con[veg].root[layer] 
-	+= (Zsum - Lsum) / veg_con[veg].zone_depth[options.ROOT_ZONES-1]
-	* veg_con[veg].zone_fract[options.ROOT_ZONES-1];
-    } 
+    else if(sum_fract > 0) {
+      veg_con[veg].root[layer] += sum_fract;
+    }
 
     dum=0.;
     for (layer=0;layer<options.Nlayer;layer++) {

@@ -23,6 +23,8 @@
 #include <string.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 #define CLOSURE 4000		/** Pa **/
 #define RSMAX 5000
 #define RGL	50 		/** limit value for solar radiation -> 30W/m^3 forest,

@@ -5,6 +5,8 @@
 
 #define MAXIT 1000
 
+static char vcid[] = "$Id$";
+
 void setup_frozen_soil(soil_con_struct    soil_con,
 		       layer_data_struct *layer_wet,
 		       layer_data_struct *layer_dry,

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double canopy_evap(layer_data_struct *layer_wet,
                    layer_data_struct *layer_dry,
                    veg_var_struct    *veg_var_wet, 

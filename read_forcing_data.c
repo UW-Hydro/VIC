@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <string.h>
  
+static char vcid[] = "$Id$";
+
 atmos_data_struct *read_forcing_data(infiles_struct      inf,
 				     int                 starthour,
                                      int                *nrecs,

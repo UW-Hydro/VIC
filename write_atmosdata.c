@@ -1,8 +1,9 @@
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void write_atmosdata(atmos_data_struct *atmos, int nrecs)
 /**********************************************************************
 	write_atmosdata		Dag Lohmann	Januray 1996

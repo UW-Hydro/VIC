@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void write_vegparam(veg_con_struct *veg_con)
 /**********************************************************************
 	write_vegparam		Dag Lohmann	January 1996

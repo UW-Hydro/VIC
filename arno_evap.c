@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 /*****************************************************************************/
 /*                                                                           */
 /*  ARNO/ARNO Model of Evaporation                                           */

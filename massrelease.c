@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     6-Oct-1996 at 15:42:13
- * LAST-MOD:     24-Nov-1996 at 12:29:52 by Bart Nijssen
+ * LAST-MOD: Mon Sep 28 16:21:39 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculates mass release of snow from canopy
  * DESCRIP-END.
  * FUNCTIONS:    MassRelease()
@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <vicNl.h>
   
+static char vcid[] = "$Id$";
+
 /*****************************************************************************
   Function name: MassRelease()
 

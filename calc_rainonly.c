@@ -7,6 +7,8 @@
 				   is allowed to fall as snow or rain in
 				   a mixed precipitation event */
 
+static char vcid[] = "$Id$";
+
 double calc_rainonly(double air_temp,
 		     double prec,
 		     double MAX_SNOW_TEMP,
@@ -40,8 +42,7 @@ double calc_rainonly(double air_temp,
     rainonly = prec;
   }
 
-  if(rainonly < MIN_PREC/mu) rainonly=0.;
-  else if((prec-rainonly) < MIN_PREC/mu) rainonly = prec;
+  if(mu < 1) rainonly = prec;
 
   return(rainonly);
 

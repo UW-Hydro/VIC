@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 FILE *open_file(char string[],char type[])
 
 /******************************************************************/

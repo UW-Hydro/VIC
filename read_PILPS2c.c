@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void read_PILPS2c(atmos_data_struct *temp,
                   FILE              *PILPS2c,
                   int               *nrecs,

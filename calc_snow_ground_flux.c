@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 double calc_snow_ground_flux(int                dt,
 			     int                Nnodes,
 			     int                rec,

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
+static char vcid[] = "$Id$";
+
 double calc_surf_energy_bal(char               CALC_EVAP,
 			    int                rec,
 			    int                iveg,

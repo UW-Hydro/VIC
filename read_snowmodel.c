@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
+static char vcid[] = "$Id$";
+
 void read_snowmodel(atmos_data_struct *temp,
                     FILE              *atmosf,
                     int                nrecs,

@@ -7,13 +7,13 @@ DISTDIR = ./
 FULLDIR = ./
 FROZDIR = ./
 
-INCFILE = vicNl.h vicNl_def.h global.h rad_and_vpd.h snow.h user_def.h
+INCFILE = vicNl.h vicNl_def.h global.h snow.h user_def.h rad_and_vpd.h
 
 OBJS = vicNl.o cmd_proc.o check_files.o read_soilparam.o open_file.o \
        make_in_and_outfiles.o read_atmosdata.o read_vegparam.o make_dmy.o \
-       get_global_param.o initialize_soil.o close_files.o rad_and_vpd.o \
+       get_global_param.o initialize_soil.o close_files.o \
        calc_trans.o calc_netshort.o aurad.o priestley.o svp.o \
-       long_shortwave.o nrerror.o vicerror.o \
+       long_shortwave.o nrerror.o vicerror.o rad_and_vpd.o \
        make_veg_var.o make_cell_data.o initialize_veg.o penman.o arno_evap.o \
        put_data.o polint.o initialize_global.o read_snowband.o \
        read_snowmodel.o read_sawd.o read_sawd_binary.o \

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void open_debug() {
 /**********************************************************************
   open_debug		Keith Cherkauer		October 10, 1997

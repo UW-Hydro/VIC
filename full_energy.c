@@ -946,7 +946,10 @@ void prepare_full_energy(int               iveg,
 
   int                i, band;
   double            *null_ptr;
-  layer_data_struct  layer[options.Nlayer];
+  layer_data_struct *layer;
+
+  layer = (layer_data_struct *)calloc(options.Nlayer,
+				      sizeof(layer_data_struct));
 
   for(band=0;band<options.SNOW_BAND;band++) {
     for(i=0;i<options.Nlayer;i++) 
@@ -957,11 +960,13 @@ void prepare_full_energy(int               iveg,
     moist[0] = find_total_layer_moisture(layer[0],soil_con.depth[0]);
     moist[0] /= soil_con.depth[0]*1000.;
     if(options.FROZEN_SOIL){
-      if((prcp[0].energy[iveg][band].T[0]+prcp[0].energy[iveg][band].T[1])/2.<0.) {
+      if((prcp[0].energy[iveg][band].T[0] 
+	  + prcp[0].energy[iveg][band].T[1])/2.<0.) {
 	ice0[0] = moist[0] 
 	  - maximum_unfrozen_water((prcp[0].energy[iveg][band].T[0]
 				    + prcp[0].energy[iveg][band].T[1])/2.,
-				   soil_con.max_moist[0]/(soil_con.depth[0]*1000.),
+				   soil_con.max_moist[0]
+				   /(soil_con.depth[0]*1000.),
 				   soil_con.bubble,soil_con.expt[0]);
 	if(ice0[0]<0.) ice0[0]=0.;
 	if(ice0[0]>soil_con.max_moist[0]/(soil_con.depth[0]*1000.)) 
@@ -992,4 +997,7 @@ void prepare_full_energy(int               iveg,
       prcp[0].energy[iveg][band].Cs[1] = layer[1].Cs;
     }
   }
+
+  free((char *)layer);
+
 }

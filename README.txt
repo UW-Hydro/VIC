@@ -3,6 +3,32 @@
 # $Id$
 #------------------------------------------------------------------------
 
+July 19, 2000: VIC release 4.0.2
+
+Two new pre-processor options have been added to VIC as well as minor
+modifications to two subroutines.
+
+If set to TRUE the NO_REWIND pre-processor option stops the VIC model from
+rewinding the soil and vegetation parameter input files for each new grid
+cell.  This reduces run times but requires that all input files are in the
+same order as the soil parameter file.
+
+If set TRUE the OUTPUT_FORCE pre-processor option blocks off the main
+model and only reads the provided forcing files. Once VIC has estimated
+the missing forcing parameters the full forcing data set for the defined
+simulation period is output to a series of gridded forcing files.  The
+gridded forcing files are written to the RESULTS directory defined in the
+global control file with the prefix "full_data_".  The new files are in
+Binary or ASCII depending on the setting of BINARY_OUTPUT.
+
+The error messages in get_global_param.c have been modified so that the
+correct file is referenced when telling the user to change values found in
+the model source code.
+
+In read_soilparam.c, the soil parameters are defined only if the current
+grid cell is run, otherwise the line in the file is skipped and soil_con
+is retruned without new data values.
+
 May 30, 2000: VIC release 4.0.1
 
 Increased use of the released VIC model code has lead to the

@@ -57,7 +57,9 @@ void dist_prec(atmos_data_struct   *atmos,
            statefile, so that full conditions will be preserved.  KAC
   01-Nov-04 Added support for state files containing SPATIAL_FROST and
 	    LAKE_MODEL state variables.				TJB
-
+  02-Feb-05 Modified to save state file at the end of the final timestep
+	    of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
+	    in the global parameter file.			TJB
 **********************************************************************/
 
   extern option_struct   options;
@@ -74,27 +76,6 @@ void dist_prec(atmos_data_struct   *atmos,
   int     month;
   double  Wdmax;
   double  NEW_MU;
-
-#if SAVE_STATE
-
-  /************************************
-    Save model state at assigned date
-  ************************************/
-
-  if ( outfiles->statefile != NULL
-       &&  ( dmy[rec].hour == 0 
-	     && dmy[rec].year == global_param->stateyear
-	     && dmy[rec].month == global_param->statemonth 
-	     && dmy[rec].day == global_param->stateday ) )
-    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
-		      soil_con->gridcel, outfiles, soil_con,
-#if LAKE_MODEL
-		      STILL_STORM, DRY_TIME, *lake_con);
-#else
-		      STILL_STORM, DRY_TIME);
-#endif // LAKE_MODEL
-
-#endif
 
   // check if state file has been used to initialize storm tracking
   if ( init_DRY_TIME >= 0 ) {
@@ -227,5 +208,28 @@ void dist_prec(atmos_data_struct   *atmos,
 	   lake_con,
 #endif // LAKE_MODEL 
 	   outfiles, veg_con);
+
+#if SAVE_STATE
+
+  /************************************
+    Save model state at assigned date
+    (after the final time step of the assigned date)
+  ************************************/
+
+  if ( outfiles->statefile != NULL
+       &&  ( && dmy[rec].year == global_param->stateyear
+	     && dmy[rec].month == global_param->statemonth 
+	     && dmy[rec].day == global_param->stateday
+	     && ( rec+1 == global_param->nrecs
+		  || dmy[rec+1].day != global_param->stateday ) ) )
+    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
+		      soil_con->gridcel, outfiles, soil_con,
+#if LAKE_MODEL
+		      STILL_STORM, DRY_TIME, *lake_con);
+#else
+		      STILL_STORM, DRY_TIME);
+#endif // LAKE_MODEL
+
+#endif
 
 }

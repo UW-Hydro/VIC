@@ -58,6 +58,32 @@ Improved lake model
 	See read_lakeparam.c for details.
 	
 
+State file is now written at the END of the final timestep of the date indicated
+in the global parameter file.
+
+	Files affected:
+	dist_prec.c
+
+	Description:
+	Previous versions of VIC wrote the state file at the beginnning of the
+	date indicated (via STATEYEAR, STATEMONTH, and STATEDAY) in the global
+	parameter file.  For sub-daily model time steps, this meant that the
+	simulation's end could not be aligned exactly with the writing of the
+	state file, since the model would continue simluating for the remainder
+	of the final day after writing the state file.  This created difficulties
+	when running VIC in real-time simulations, in which the forcings are
+	broken up into short time periods and the previous state file must be
+	used as the initial condition for the next time period.
+
+	Now that the state file is written at the end of the final timestep of the
+	date indicated in the global parameter file, it is possible for the end of
+	a forcing file, the end of the simulation, and the timing of the state file
+	all to align on the same time.  This simplifies re-starting the model for
+	a forcing file that begins immediately after the previous forcing file
+	ended, since the state file now is equivalent to the initial condition at
+	the beginning of the new forcing file.
+
+
 Improved validation of global options
 
 	Files affected:
@@ -66,6 +92,7 @@ Improved validation of global options
 	Description:
 	Now does not allow bad combinations of FULL_ENERGY, FROZEN_SOIL, and
 	GRND_FLUX values.
+
 
 Improved validation of soil param file
 

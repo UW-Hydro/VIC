@@ -199,27 +199,33 @@ void runoff(layer_data_struct *layer_wet,
 	Check if top soil layer is frozen solid
       ******************************************/
       *runoff = -99;
+/*****
       if(options.FROZEN_SOIL &&  
 	 (submax_moist[0][1])/(soil_con.depth[0]*1000.) < 0.13
 	 && sublayer[0][1]*soil_con.depth[0]>0.05 && sublayer[0][0]==0) {
 	*runoff = inflow;
       }
+*****/
 
       /**********************************************************
         Check if thawed layer exists above solidly frozen layer
       **********************************************************/
+/*****
       else if(options.FROZEN_SOIL &&  
 	      (submax_moist[0][1])/(soil_con.depth[0]*1000.) < 0.13
 	      && sublayer[0][1]*soil_con.depth[0]>0.05 && sublayer[0][0]>0) {
 	top_moist = submoist[0][0] * sublayer[0][0];
 	top_max_moist = submax_moist[0][0] * sublayer[0][0];
       }
+*****/
 
       /******************************************************
         Runoff Based on Soil Moisture Level of Upper Layers
       ******************************************************/
 
+/*****
       else {
+*****/
 	top_moist = 0.;
 	top_max_moist=0.;
 	for(lindex=0;lindex<options.Nlayer-1;lindex++) {
@@ -233,7 +239,9 @@ void runoff(layer_data_struct *layer_wet,
 	if(layer[0].tdepth>0) sub = 0;
 	else if(layer[0].fdepth>0) sub = 1;
 	else sub = 2;
+/*****
       }
+*****/
 
       /**************************************************
         Calculate Runoff from Surface
@@ -380,8 +388,9 @@ void runoff(layer_data_struct *layer_wet,
 		submoist[lindex][sub] = submax_moist[lindex][sub] 
 		  - subice[lindex][sub];
 
-		/* Layer is thick, so excess soil moisture is trapped above **/
-		if(sublayer[lindex][sub]*soil_con.depth[lindex] > 0.10) {
+		/* Layer is thick, so excess soil moisture is trapped above 
+                   (except for top thin layer, where excess is included in infiltration) **/
+		if(lindex>0 && sublayer[lindex][sub]*soil_con.depth[lindex] > 0.10) {
 		  tmp_inflow *= sublayer[lindex][sub];
 		  tmpsub   = sub;
 		  tmplayer = lindex;

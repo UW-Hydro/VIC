@@ -44,6 +44,8 @@ void read_initial_model_state(FILE                *statefile,
   09-Oct-03 Modified to skip an extra line (for init_STILL_STORM
 	    and init_DRY_TIME) when searching for desired cellnum in
 	    ASCII file.                                           TJB
+  11-May-04 (Port from 4.1.0) Added check to verify that the sum of
+	    the defined nodes equals the damping depth.		TJB
 
 *********************************************************************/
 {
@@ -55,6 +57,7 @@ void read_initial_model_state(FILE                *statefile,
   double tmpval;
   double Nsum;
   double depth_node[MAX_NODES];
+  double sum;
   int    veg, iveg;
   int    band, iband;
   int    lidx;
@@ -142,13 +145,22 @@ void read_initial_model_state(FILE                *statefile,
   }
 
   /* Read soil thermal node depths */
+  sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
-    if ( options.BINARY_STATE_FILE ) 
+    if ( options.BINARY_STATE_FILE )
       fread( &soil_con->dz_node[nidx], 1, sizeof(double), statefile );
-    else 
+    else
       fscanf( statefile, "%lf", &soil_con->dz_node[nidx] );
+    sum += soil_con->dz_node[nidx];
   }
   if ( options.Nnode == 1 ) soil_con->dz_node[0] = 0;
+  sum -= 0.5 * soil_con->dz_node[0];
+  sum -= 0.5 * soil_con->dz_node[options.Nnode-1];
+  if ( abs( sum - soil_con->dp ) > SMALL ) {
+    fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", sum,
+soil_con->dp );
+    soil_con->dp = sum;
+  }
     
   // read storm parameters
   if ( options.BINARY_STATE_FILE ) {

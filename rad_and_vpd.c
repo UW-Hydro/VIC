@@ -4,8 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-double estimate_dew_point(dmy_struct *dmy,
-			  double     *yearly_prec,
+double estimate_dew_point(double      annual_prec,
 			  double      tmin,
 			  double      tmax,
 			  double      priest,
@@ -34,12 +33,14 @@ double estimate_dew_point(dmy_struct *dmy,
   double      day_len      s        Length of the current day in seconds
   int         day          N/A      Day in simulation
 
+  Returns Dew Point Temperature in Degrees C.
+
 *******************************************************************/
 
   double Tdew;
   double EF;
 
-  EF = ((priest) * day_len) / (yearly_prec[dmy[day].year-dmy[0].year]);
+  EF = ((priest) * day_len) / (annual_prec);
   Tdew = (tmin + KELVIN) * ( -0.127 + 1.121 * (1.003 - 1.444 * EF
 					       + 12.312 * EF * EF
 					       -32.766 * EF * EF * EF) 

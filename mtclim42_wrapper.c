@@ -62,7 +62,7 @@ void mtclim42_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
   ntinys *= 366L;
   tiny_radfract = (double *) calloc(ntinys, sizeof(double));
   if (tiny_radfract == NULL) {
-    vicerror("Memory allocation error in mtclim42_init() ...\n");
+    nrerror("Memory allocation error in mtclim42_init() ...\n");
   }
 
   /* initialize the mtclim 4.2 data structures */ 
@@ -72,12 +72,12 @@ void mtclim42_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
 
   /* calculate daily air temperatures */
   if (calc_tair(&ctrl, &p, &mtclim42_data)) {
-    vicerror("Error in calc_tair()... exiting\n");
+    nrerror("Error in calc_tair()... exiting\n");
   }
   
   /* calculate daily precipitation */
   if (calc_prcp(&ctrl, &p, &mtclim42_data)) {
-    vicerror("Error in calc_prcp()... exiting\n");
+    nrerror("Error in calc_prcp()... exiting\n");
   }
   
   /* test for the presence of Tdew observations, and branch to the
@@ -85,14 +85,14 @@ void mtclim42_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
   if (ctrl.indewpt) {
     /* calculate srad and humidity using real Tdew data */
     if (calc_srad_humidity(&ctrl, &p, &mtclim42_data, tiny_radfract)) {
-      vicerror("Error in calc_srad_humidity()... exiting\n");
+      nrerror("Error in calc_srad_humidity()... exiting\n");
     }
   }
   else { /* no dewpoint temperature data */
     /* calculate srad and humidity with iterative algorithm */
     if (calc_srad_humidity_iterative(&ctrl, &p, &mtclim42_data,
 				     tiny_radfract)) { 
-      vicerror("Error in calc_srad_humidity_iterative()... exiting\n");
+      nrerror("Error in calc_srad_humidity_iterative()... exiting\n");
     }
   }
 
@@ -103,7 +103,7 @@ void mtclim42_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
 
   /* clean up */
   if (data_free(&ctrl, &mtclim42_data)) {
-    vicerror("Error in data_free()... exiting\n");
+    nrerror("Error in data_free()... exiting\n");
   }  
   free(tiny_radfract);
 }
@@ -123,7 +123,7 @@ void mtclim42_init(int have_dewpt, double elevation, double annual_prcp,
   ctrl->ndays = (vic_global->nrecs*vic_global->dt)/24;
   
   if (have_dewpt)
-    vicerror("have_dewpt not yet implemented...\n");
+    nrerror("have_dewpt not yet implemented...\n");
   else
     ctrl->indewpt = 0;
   ctrl->outhum = 1;		/* output vapor pressure */
@@ -148,7 +148,7 @@ void mtclim42_init(int have_dewpt, double elevation, double annual_prcp,
 
   /* allocate space in the data arrays for input and output data */
   if (data_alloc(ctrl, mtclim42_data)) {
-    vicerror("Error in data_alloc()... exiting\n");
+    nrerror("Error in data_alloc()... exiting\n");
   }
 
   /* First populate the solar day array with the tmin, tmax, prcp and possibly
@@ -170,7 +170,7 @@ void mtclim42_init(int have_dewpt, double elevation, double annual_prcp,
     /* MTCLIM prcp in cm */
     mtclim42_data->prcp[i] = prec[i]/10.; 
     if (have_dewpt)
-      vicerror("have_dewpt not yet implemented ...\n");
+      nrerror("have_dewpt not yet implemented ...\n");
   }
   tinystepspyear = 366L*(86400L/(long)SRADDT);
   for (i = 0; i < tinystepspyear; i++)

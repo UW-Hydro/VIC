@@ -53,6 +53,9 @@ int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *,
 				double *, double *, int, int);
 #endif // QUICK_FS
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
+double CalcBlowingSnow(double, double, int, double, double, double, double, 
+                       double, double, double *, double, double, float, 
+                       float, double, int, int, float, double, double); 
 double calc_atmos_energy_bal(double, double, double, double, double, double, 
                              double, double, double, double, double, double, 
                              double, double, double, double, 
@@ -71,7 +74,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             energy_bal_struct *, layer_data_struct *, 
                             layer_data_struct *, 
                             snow_data_struct *, soil_con_struct *, 
-                            veg_var_struct *, veg_var_struct *);
+                            veg_var_struct *, veg_var_struct *, float, float, float);
 double calc_trans(double, double);
 double calc_veg_displacement(double);
 double calc_veg_height(double);
@@ -222,11 +225,12 @@ void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 void   initialize_snow(snow_data_struct **,int,FILE *,int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
-		       global_param_struct *);
-
+		       global_param_struct *, int);
 void   latent_heat_from_snow(double, double, double, double, double, 
                              double, double, double, double *, double *, 
-                             double *);
+                             double *, double *, double *, double, double, 
+                             int, double, double, double *, double, double, 
+                             int, float, float, float, int, int);
 double linear_interp(double,double,double,double,double);
 
 cell_data_struct **make_cell_data(int, int);
@@ -336,13 +340,13 @@ void   snow_intercept(double, double, double, double, double, double, double,
                       int, int, int, int, layer_data_struct *, 
                       layer_data_struct *, soil_con_struct *, 
                       veg_var_struct *, veg_var_struct *);
-void   snow_melt(double, double, double, double, double, double, double, 
+void   snow_melt(double, double, double, double, double *, double, double, 
 		 double, double, double, double, double, double, double, 
                  double, double, double, double, double, double, 
                  double *, double *, double *, double *, double *, double *, 
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, int, 
-                 snow_data_struct *, soil_con_struct *);
+                 snow_data_struct *, soil_con_struct *, float, float, float, int);
 double SnowPackEnergyBalance(double, va_list);
 double soil_conductivity(double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
@@ -362,7 +366,7 @@ double solve_snow(char, double, double, double, double, double, double,
                   int, int, int, int, int *, energy_bal_struct *, 
                   layer_data_struct *, layer_data_struct *, 
                   snow_data_struct *, soil_con_struct *, 
-                  veg_var_struct *, veg_var_struct *);
+                  veg_var_struct *, veg_var_struct *, float, float, float);
 double solve_atmos_energy_bal(double Tcanopy, ...);
 double solve_atmos_moist_bal(double , ...);
 double solve_canopy_energy_bal(double Tfoliage, ...);
@@ -392,7 +396,7 @@ void   surface_fluxes(char, double, double, double, double, double, double,
                       energy_bal_struct *, global_param_struct *, 
                       layer_data_struct *, layer_data_struct *, 
                       snow_data_struct *, soil_con_struct *, 
-                      veg_var_struct *, veg_var_struct *);
+                      veg_var_struct *, veg_var_struct *, float, float, float);
 double svp(double);
 double svp_slope(double);
 

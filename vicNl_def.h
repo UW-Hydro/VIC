@@ -44,7 +44,7 @@
 #define Cp           1010.0	/* Specific heat at constant pressure of air 
 				   (J/deg/K) (H.B.H. p.4.7)*/
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
-#define CH_WATER     4186.8e3
+#define CH_WATER     4186.8e3   // volumetric heat capacity of water
 #define GRAMSPKG     1000.      // convert grams to kilograms
 #define K_SNOW       2.9302e-6  // conductivity of snow (W/mK)
 
@@ -187,10 +187,9 @@ typedef struct {
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
-#if LAKE_MODEL
+  char   NEW_ARNO_TYPE;  /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   LAKES;          /* TRUE = use lake energy code */
-#endif // LAKE_MODEL
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
@@ -201,6 +200,7 @@ typedef struct {
   char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for 
 			    iteration, but explicit finite difference
 			    method for final step. */
+  char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
@@ -226,6 +226,7 @@ typedef struct {
   FILE    *fg_energy;
   FILE    *fg_grid;
   FILE    *fg_kappa;
+  FILE    *fg_lake;
   FILE    *fg_modelstep_atmos;
   FILE    *fg_moist;
   FILE    *fg_snow;
@@ -238,6 +239,7 @@ typedef struct {
   char     PRT_GLOBAL;
   char     PRT_GRID;
   char     PRT_KAPPA;
+  char     PRT_LAKE;
   char     PRT_MOIST;
   char     PRT_SNOW;
   char     PRT_SOIL;
@@ -317,18 +319,19 @@ typedef struct {
   ******************************************************************/
 typedef struct {
   double Cl[MAX_LAKE_NODES];      /* fractional lake coverage area */
+  double z[MAX_LAKE_NODES];       /* Fixed elevation from bottom of each Cl. */  
   double b;                       /* Exponent controlling lake depth y=Ax^b. */
   double basin[MAX_LAKE_NODES];   /* Area of the basin at each node. */
   double cell_area;               /* area of grid cell */
   double depth_in;                /* initial lake depth */
-  double dz;                      /* Distance between each water layer. */
   double eta_a;                   /* Decline of solar rad w/ depth. */
   double maxdepth;                /* Maximum lake depth. */
   double maxrate;                 
   double mindepth;                /* Minimum lake depth. */
-  double surface[MAX_LAKE_NODES];
+  double maxvolume;
   float  bpercent;
   float  rpercent;
+  int wetland_veg_class;
   int    gridcel;
   int    numnod;                  /* Maximum number of solution nodes. */
 } lake_con_struct;
@@ -354,9 +357,11 @@ typedef struct {
   double surface[MAX_LAKE_NODES];
   double swe;
   double temp[MAX_LAKE_NODES];    /* Lake water temp. at each node (C). */
+  double tempavg;
   double tempi;                   /* Lake ice temp (C). */
   double tp_in;                   /* Lake skin temperature (C). */
   double volume;
+  double dz;                      /* Distance between each water layer. */
   int    activenod;
   int    mixmax;                  /* top depth (node #) of local 
                                      instability. */
@@ -453,6 +458,9 @@ typedef struct {
   float  *zone_fract;       /* fraction of roots within root zone */
   int     veg_class;        /* vegetation class reference number */
   int     vegetat_type_num; /* number of vegetation types in the grid cell */
+  float   sigma_slope;      /* Std. deviation of terrain slope for each vegetation class. */
+  float   lag_one;          /* Lag one gradient autocorrelation of terrain slope */
+  float   fetch;            /* Average fetch length for each vegetation class. */
 } veg_con_struct;
 
 /******************************************************************
@@ -491,7 +499,7 @@ typedef struct {
    is done by for (i = 0; i < NF; i++) 
 ***************************************************************************/
 typedef struct {
-#if OPTIMIZE
+#if OPTIMIZE || LINK_DEBUG
   char   snowflag[25];  /* TRUE if there is snowfall in any of the snow 
 			   bands during the timestep, FALSE otherwise*/
   double air_temp[25];  /* air temperature (C) */
@@ -521,7 +529,7 @@ typedef struct {
   double *vp;        /* atmospheric vapor pressure (kPa) */
   double *vpd;       /* atmospheric vapor pressure deficit (kPa) */
   double *wind;      /* wind speed (m/s) */
-#endif // OPTIMIZE
+#endif // OPTIMIZE or LINK_DEBUG
 } atmos_data_struct;
 
 /*************************************************************************
@@ -623,8 +631,8 @@ typedef struct {
 				    from the canopy (W/m^2) */
   double  canopy_refreeze;       /* energy used to refreeze/melt canopy 
 				    intercepted snow (W/m^2) */
-  double  canopy_sensible;       /* sensible heat flux from canopy interception
-			       (W/m^2) */
+  double  canopy_sensible;       /* sensible heat flux from canopy 
+                                    interception (W/m^2) */
   double  deltaCC;               /* change in snow heat storage (Wm-2) */
   double  deltaH;                /* change in soil heat storage (Wm-2) */
   double  error;                 /* energy balance error (W/m^2) */
@@ -706,6 +714,8 @@ typedef struct {
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
   double vapor_flux;        /* depth of water evaporation, sublimation, or 
 			       condensation from snow pack (m) */
+  double blowing_flux;      /* depth of sublimation from blowing snow (m) */
+  double surface_flux;      /* depth of sublimation from blowing snow (m) */
   int    last_snow;         /* time steps since last snowfall */
   int    store_snow;        /* flag indicating whether or not new accumulation
 			       is stored on top of an existing distribution */
@@ -782,7 +792,7 @@ typedef struct {
   double lake_volume;                  /* lake volume */
 #endif // LAKE_MODEL
   double latent;                       /* grid cell net latent heat flux */
-  double latent_sub[MAX_BANDS+1]; /* grid cell net latent heat flux */
+  double latent_sub[MAX_BANDS+1];      /* grid cell net latent heat flux */
   double melt[MAX_BANDS+1];            /* snowpack melt (mm) */
   double melt_energy[MAX_BANDS+1];     /* energy used to reduce snow 
 					  coverage (Wm-2) */
@@ -807,8 +817,11 @@ typedef struct {
   double snow_surf_temp[MAX_BANDS+1];  /* snow pack surface layer temp (C) */
   double sub_canop;                    /* grid cell net sublimation from 
 					  canopy interception */
-  double sub_snow;                     /* grid cell net sublimation from 
+  double sub_snow[MAX_VEG];            /* grid cell net sublimation from 
 					  bare ground from snow pack */
+  double sub_total;
+  double sub_surface;
+  double sub_blowing;
   double surf_cond;                    /* grid cell mean surface conductance 
 					  [m/s] */
   double surf_frost_fract;             /* fraction of surface frozen (fract) */

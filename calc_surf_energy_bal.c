@@ -803,6 +803,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *Wdew;
   double *displacement;
   double *ra;
+  double *ra_used;
   double *rainfall;
   double *ref_height;
   double *roughness;
@@ -947,6 +948,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
   ra                      = (double *) va_arg(ap, double *);
+  ra_used                 = (double *) va_arg(ap, double *);
   rainfall                = (double *) va_arg(ap, double *);
   ref_height              = (double *) va_arg(ap, double *);
   roughness               = (double *) va_arg(ap, double *);
@@ -1090,6 +1092,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "*Wdew = %f\n",  *Wdew);
   fprintf(stderr, "*displacement = %f\n",  *displacement);
   fprintf(stderr, "*ra = %f\n",  *ra);
+  fprintf(stderr, "*ra_used = %f\n",  *ra_used);
   fprintf(stderr, "*rainfall = %f\n",  *rainfall);
   fprintf(stderr, "*ref_height = %f\n",  *ref_height);
   fprintf(stderr, "*roughness = %f\n",  *roughness);

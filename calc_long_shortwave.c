@@ -153,18 +153,12 @@ void get_rise_and_set_hours(int    *rise_hour,
  
 **********************************************************************/
  
-  static double last_tskc;
-
   double declination;
   double i_var;
   double tau;
   double sin_alpha;
   double radius;
   double I0;
-  double m;
-  double Ic;
-  int    sum_exceed=0;
-  int    sum_zero=0;
   int    hour;
 
   rise_hour[0] = -1;

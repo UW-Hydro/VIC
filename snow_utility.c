@@ -90,7 +90,6 @@ double snow_albedo(double new_snow,
 
   /** New Snow **/
   if(new_snow > 0.0) albedo = NEW_SNOW_ALB;
-  /*if(new_snow > 0.0) albedo = 0.85;*/
 
   /** Aged Snow **/
   else if(swq>0.0) {

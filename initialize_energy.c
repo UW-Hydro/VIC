@@ -57,7 +57,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 
   char   tmpstr[MAXSTRING];
   char   ErrStr[MAXSTRING];
-  int    i, j, veg, index, tmpdepth;
+  int    i, j, veg, index;
   int    tmpint;
   int    dry;
   int    band;

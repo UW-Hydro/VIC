@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD: Mon Sep 28 16:21:35 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Oct  1 18:18:27 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate the density of water as a function of temperature
  * DESCRIP-END.
  * FUNCTIONS:    WaterDensity()
@@ -39,7 +39,6 @@ static char vcid[] = "$Id$";
 *****************************************************************************/
 double WaterDensity(double T)
 {
-  const char *Routine = "WaterDensity";
   double rho;
 
   rho = 1000 * (1 - (T + 288.9414)/(508929.2 * (T + 68.12963)) * 

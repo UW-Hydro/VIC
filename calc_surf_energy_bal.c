@@ -115,9 +115,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
   double   bubble;
   double   expt;
 
-  FILE    *ftemp;
   int      VEG;
-  int      i;
   double   surf_temp;
   double   U;
   double   error;
@@ -566,6 +564,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   }
 
   vicerror("Finished writing calc_surf_energy_bal variables");
+
+  return(0.0);
     
 }
 

@@ -3,11 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-/* #define OVERSTORY_ATTENUATION 0.5 */  /* attenutation coefficient for overstory */
-/* #define TRUNK_RATIO           0.2 */  /* Fraction of Tree Height that is trunk */
-/* #define SNOW_STEP             1 */    /* Time step in hours to use when solving
-				      snow model in water balance mode */
-
 static char vcid[] = "$Id$";
 
 void full_energy(int rec,
@@ -72,9 +67,7 @@ void full_energy(int rec,
   double                 Tgrnd;
   double                 Tend_surf;
   double                 Tend_grnd;
-  double                 Ttemp;
   double                 rainfall[2]; 
-/*   double                 snowfall[2]; */
   double                 height;
   double                 displacement;
   double                 roughness;
@@ -94,7 +87,6 @@ void full_energy(int rec,
   double                 step_net_short;
   double                 tmp_aero_resist;
   double                *tmp_throughfall[2];
-  double                 tmp_rad;
   double                 tmp_wind[3];
   double                *tmp_melt;
   double                *tmp_ppt;
@@ -102,8 +94,6 @@ void full_energy(int rec,
   double                *tmp_canopy_vapor_flux;
   double                *tmp_canopyevap[2];
   double                 tmp_snow_energy;
-  double                 tmp_vp;
-  double                 tmp_vpd;
   double                 tmp_Wdew[2];
   double                 tmp_mu;
   double                *tmp_layerevap[2];
@@ -250,10 +240,10 @@ void full_energy(int rec,
 	}
       }
 
-      if(options.FULL_ENERGY) {
-        /** Set Damping Depth **/
-        dp=soil_con.dp;
+      /** Set Damping Depth **/
+      dp=soil_con.dp;
 
+      if(options.FULL_ENERGY) {
         /** Compute Total Moisture of Surface Layer **/
 	prepare_full_energy(iveg, Nveg, gp.Nnodes, prcp, 
 			    soil_con, &moist, &ice0);
@@ -265,6 +255,7 @@ void full_energy(int rec,
       else bare_albedo = atmos->albedo;
       
       /** Compute the aerodynamic resistance **/
+      overstory = FALSE;
       if(iveg<Nveg) {
         displacement = veg_lib[veg_class].displacement[dmy[rec].month-1];
         roughness = veg_lib[veg_class].roughness[dmy[rec].month-1];
@@ -302,11 +293,6 @@ void full_energy(int rec,
            Full Energy Balance Model
          **************************************************/
   
-/* 	for(j=0;j<Ndist;j++) { */
-/* 	  rainfall[j] = rainonly[j+iveg*2]; */
-/* 	  snowfall[j] = prec[j+iveg*2] - rainonly[j+iveg*2]; */
-/* 	} */
-
 	/*******************************************************************
           Solve Snow Accumulation and Melt on the Ground and in the Canopy 
         *******************************************************************/
@@ -904,7 +890,6 @@ void store_moisture_for_debug(int                 iveg,
   int               band;
   int               dist;
   int               Nbands;
-  layer_data_struct tmp_layer;
 
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;

@@ -153,7 +153,7 @@ void distribute_soil_property(double  *dz,
   soil column.
 **********************************************************************/
 
-  int i, lindex, l2index, zindex;
+  int    lindex, l2index, zindex;
   double Zsum, Lsum;
   double Ltmp, Ftmp, Ttmp, Ztmp;
 
@@ -425,7 +425,7 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   them within the fixed soil layers.
 **********************************************************************/
 
-  int i, index;
+  int    index;
   double Zsum, Lsum;
   double tdepth, fdepth;
   double MINLAYER = 0.001;

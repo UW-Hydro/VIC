@@ -23,6 +23,14 @@ void dist_prec(atmos_data_struct   *atmos,
   for one time step.  It also controls the distribution of precipitation
   and reassembles grid cell data for output.
 
+  The fractional coverage of precipitation over an area or grid cell, 
+  mu, is estimated using the equation from Fan et. al. (1996).  The 
+  coefficient, 0.6, was selected for the Arkansas - Red River Basin and
+  was found using precipitation records on a 100km x 100km area.  It
+  may not be applicable to all regions, please check the reference
+
+  References:
+
 **********************************************************************/
 
   extern option_struct options;
@@ -50,6 +58,7 @@ void dist_prec(atmos_data_struct   *atmos,
       Controls Distributed Precipitation Model
       *****************************************/
  
+    
     NEW_MU = 1.0 - exp(-0.6*atmos->prec);
     for(veg=0;veg<=veg_con[0].vegetat_type_num;veg++) {
       ANY_SNOW = FALSE;
@@ -82,6 +91,7 @@ void dist_prec(atmos_data_struct   *atmos,
       }
 
       if(!STILL_STORM && (atmos->prec>STORM_THRES || ANY_SNOW)) {
+	/** Average soil moisture before a new storm **/
 	initialize_new_storm(prcp[0].cell,prcp[0].veg_var,
 			     veg,veg_con[0].vegetat_type_num,rec,
 			     prcp[0].mu[veg],NEW_MU);
@@ -89,6 +99,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	prcp[0].mu[veg] = NEW_MU;
       }
       else if(NEW_MU != prcp[0].mu[veg] && STILL_STORM) {
+	/** Redistribute soil moisture during the storm if mu changes **/
 	redistribute_during_storm(prcp[0].cell,prcp[0].veg_var,veg,
 				  veg_con[0].vegetat_type_num,rec,
 				  prcp[0].mu[veg],NEW_MU);
@@ -96,7 +107,8 @@ void dist_prec(atmos_data_struct   *atmos,
       }
     }
 
-    /** Solve Wet Fraction (mu) of Grid Cell **/
+    /** Prepare precipitation and melt forcing data for wet 
+	and dry fractions **/
     for(i=0; i<(veg_con[0].vegetat_type_num+1); i++) {
       prec[i*2] = atmos->prec;
       prec[(i*2)+1] = 0;
@@ -114,15 +126,12 @@ void dist_prec(atmos_data_struct   *atmos,
 	melt[i*2+1] = atmos->melt;
       }
     }
+
+    /** Solve model time step **/
     full_energy(rec,atmos,soil_con,veg_con,prcp,dmy,
 		global_param,cellnum,NEWCELL,prec,
 		rainonly,melt);
 
-/***
-    atmos->prec = prec;
-    atmos->rainonly = rainonly;
-    atmos->melt = melt;
-***/
   }
 
   else {
@@ -149,6 +158,6 @@ void dist_prec(atmos_data_struct   *atmos,
   free((char *)melt);
 
   put_data(prcp, atmos, veg_con, outfiles, soil_con.depth, soil_con.AreaFract,
-	   &dmy[rec], rec);
+	   &dmy[rec], rec, global_param.dt);
 
 }

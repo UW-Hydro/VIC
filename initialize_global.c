@@ -51,7 +51,6 @@ void initialize_global() {
   param_set.LONGWAVE     = FALSE;
   param_set.PRESSURE     = FALSE;
   param_set.TSKC         = FALSE;
-  param_set.SVP          = FALSE;
   param_set.VP           = FALSE;
   param_set.VPD          = FALSE;
   param_set.REL_HUMID    = FALSE;
@@ -107,7 +106,6 @@ void initialize_global() {
   param_set.LONGWAVE   = FALSE;
   param_set.PRESSURE   = FALSE;
   param_set.TSKC       = FALSE;
-  param_set.SVP        = FALSE;
   param_set.VP         = FALSE;
   param_set.VPD        = FALSE;
   param_set.REL_HUMID  = FALSE;

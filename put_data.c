@@ -11,7 +11,8 @@ void put_data(dist_prcp_struct  *prcp,
               double            *depth,
 	      double            *AreaFract,
 	      dmy_struct        *dmy,
-              int                rec)
+              int                rec,
+	      int                dt)
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996
 
@@ -442,7 +443,7 @@ void put_data(dist_prcp_struct  *prcp,
 			      -out_data->snow_flux[0]
 			      +out_data->refreeze_energy[0]);
 
-  write_data(out_data, outfiles, dmy);
+  write_data(out_data, outfiles, dmy, dt);
 
   free((char *)out_data->swq);
   free((char *)out_data->snow_canopy);

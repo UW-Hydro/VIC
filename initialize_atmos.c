@@ -49,14 +49,13 @@ void initialize_atmos(atmos_data_struct *temp,
  
   /*FILE *ftmp;*/
 
-  int     i, j, rec;
+  int     rec;
   int     band;
   int     tmax_hour[3];
   int     tmin_hour[3];
   int     Nyears;
   int     Ndays;
   int     Nhours;
-  int     day_step;
   int     day;
   int     hour;
   double  tmp_tmax, tmp_tmin;
@@ -248,7 +247,7 @@ void initialize_atmos(atmos_data_struct *temp,
   if(!param_set.VPD && !param_set.VP && param_set.REL_HUMID) {
     /** Estimate vapor pressure from relative humidity **/
     for(rec=0;rec<nrecs;rec++) {
-      if(!param_set.SVP) sat_vp = svp(temp[rec].air_temp);
+      sat_vp = svp(temp[rec].air_temp);
       temp[rec].vpd = sat_vp * (1. - temp[rec].rel_humid / 100.);
       temp[rec].vp = temp[rec].rel_humid / 100. * sat_vp;
       temp[rec].spec_humid = 0.622 * temp[rec].vp / (temp[rec].pressure
@@ -258,7 +257,7 @@ void initialize_atmos(atmos_data_struct *temp,
   else if(!param_set.VPD && !param_set.VP && param_set.SPEC_HUMID) {
     /** Estimate vapor pressure from specific humidity **/
     for(rec=0;rec<nrecs;rec++) {
-      if(!param_set.SVP) sat_vp = svp(temp[rec].air_temp);
+      sat_vp = svp(temp[rec].air_temp);
       temp[rec].vp = temp[rec].spec_humid * temp[rec].pressure / 0.622;
       temp[rec].rel_humid = 100. * temp[rec].vp / sat_vp;
       if(temp[rec].rel_humid>100.) temp[rec].rel_humid=100.;
@@ -268,7 +267,7 @@ void initialize_atmos(atmos_data_struct *temp,
   else if(!param_set.VPD && param_set.VP) {
     /** estimate vapor pressure deficit from vapor pressure **/
     for(rec=0;rec<nrecs;rec++) {
-      if(!param_set.SVP) sat_vp = svp(temp[rec].air_temp);
+      sat_vp = svp(temp[rec].air_temp);
       temp[rec].vpd = sat_vp - temp[rec].vp;
       if(!param_set.REL_HUMID)
 	temp[rec].rel_humid = 100. * temp[rec].vp / sat_vp;

@@ -1,4 +1,3 @@
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
@@ -24,11 +23,9 @@ void read_snowmodel(atmos_data_struct *temp,
 {
   extern param_set_struct param_set;
 
-  int    i, j, n, rec, maxline = 210;
+  int    i, n, rec, maxline = 210;
   int    store_rec;
   char   str[210];
-  double junk;
-  double pan_evap;
 
   n = 0;
   while (fgets(str,maxline,atmosf) != '\0') n++;
@@ -51,7 +48,7 @@ void read_snowmodel(atmos_data_struct *temp,
     fscanf(atmosf,"%*s");
     fscanf(atmosf,"%*s");
     fscanf(atmosf,"%*s");
-    fscanf(atmosf,"%s");
+    fscanf(atmosf,"%s",str);
     temp[rec].rainonly = (double)dt/(double)file_dt * atof(str);
     fscanf(atmosf,"%*s");
     fscanf(atmosf,"%*s"); 

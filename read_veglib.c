@@ -27,7 +27,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   int    tmpflag;
   int    Nveg_type;
   char   str[MAXSTRING];
-  double dum;
 
   rewind(veglib);
   fgets(str,MAXSTRING,veglib);

@@ -6,7 +6,6 @@
 static char vcid[] = "$Id$";
 
 void read_snowband(FILE    *snowband,
-		   int      rec,
 		   int      gridcell,
 		   double   elev,
 		   double **Tfactor,

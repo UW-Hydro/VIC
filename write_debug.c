@@ -73,7 +73,6 @@ void write_debug(atmos_data_struct     atmos,
   double *curr_moist;
   double  curr_ice;
   double  Zsum;
-  double  longwave;
   double  grnd_flux;
   double  advection;
   double  deltaH;

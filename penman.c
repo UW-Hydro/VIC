@@ -46,7 +46,6 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
   double Tfactor;		/* factor for canopy resistance based on temperature */
   double vpdfactor;		/* factor for canopy resistance based on vpd */
   double DAYfactor;		/* factor for canopy resistance based on photosynthesis */
-  double f;
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
   slope = svp_slope(tair)*1000;

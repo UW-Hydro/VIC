@@ -50,7 +50,6 @@ void main(int argc, char *argv[])
   int     Ncells;
   int     cell_cnt;
   int     force_dt[2];
-  double *mu;
   double  storage;
   dmy_struct *dmy;
   atmos_data_struct *atmos;
@@ -142,7 +141,7 @@ void main(int argc, char *argv[])
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
       /** Read Elevation Band Data if Used **/
-      read_snowband(infiles.snowband,rec,soil_con.gridcel,
+      read_snowband(infiles.snowband,soil_con.gridcel,
 		    (double)soil_con.elevation,
 		    &soil_con.Tfactor,&soil_con.Pfactor,&soil_con.AreaFract);
 

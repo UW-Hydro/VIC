@@ -22,7 +22,6 @@ void vicerror(char error_text[])
 
         filenames_struct fnames;
 	void _exit();
-        int i;
 
         options.COMPRESS=FALSE;	/* turn off compression of last set of files */
 

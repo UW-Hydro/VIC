@@ -63,7 +63,6 @@ double func_snow_ground_flux(double Ts, va_list ap) {
 
   double ice;
   double kappa_snow;	/* thermal conductivity of snow (W/s/K) */
-  double C1, C2, C3;
   double error;
 
   /** Initialize Variables **/

@@ -16,7 +16,6 @@ void correct_precip(double *rain, double *rainonly, double wind) {
 
 **********************************************************************/
 
-  int i;
   double snow;
   double Frain,Fsnow;
 

@@ -80,7 +80,6 @@ double solve_snow(snow_data_struct    *snow,
   extern veg_lib_struct *veg_lib;
 
   char                ErrStr[MAXSTRING];
-  int                 Ndist;
   double              rainonly;
   double              canopy_temp;
   double              tmp_energy_val;
@@ -94,7 +93,6 @@ double solve_snow(snow_data_struct    *snow,
   double              snow_coverage;
   double              grnd_temp;
   double              tmp_rain;
-  double              ice;
   double              surf_long;
   energy_bal_struct   tmp_energy;
 
@@ -233,7 +231,8 @@ double solve_snow(snow_data_struct    *snow,
 				soil_con.Wpwp,root);
 	  rainfall[WET] = veg_var_wet->throughfall;
 	  energy->longwave = STEFAN_B * pow(tmp_air_temp+KELVIN,4.0);
-	  if(Ndist>1) rainfall[DRY] = veg_var_dry->throughfall;
+	  if(options.DIST_PRCP) 
+	    rainfall[DRY] = veg_var_dry->throughfall;
 	}
       }
       else if(snowfall[0] > 0. && veg_var_wet->Wdew > 0.) {

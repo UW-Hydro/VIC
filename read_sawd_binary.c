@@ -31,7 +31,6 @@ void read_sawd_binary(atmos_data_struct *temp,
   int       i, n, rec;
   int       fixcnt;
   int       store_rec;
-  char      str[210];
   char      tmpmem[20];
   short int values[5];
 

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Mon Sep 28 16:21:42 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Oct  1 18:17:59 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -546,16 +546,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   
   /* end of list of arguments in variable argument list */
 
-  double Density;                /* Density of water/ice at TMean (kg/m3) */
-  double EsSnow;                 /* saturated vapor pressure in the snow pack
-                                   (Pa)  */
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
-  double LongRadOut;		/* long wave radiation emitted by surface
-				   (W/m2) */
-  double Ls;                     /* Latent heat of sublimation (J/kg) */
-  double NetRad;			/* Net radiation exchange at surface (W/m2) */
-  double RestTerm;		/* Rest term in surface energy balance
-				   (W/m2) */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
   double *TMean;                /* Average temperature for time step (C) */
 
@@ -624,6 +615,8 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"TMean = %lf\n",TMean[0]);
   
   vicerror("Finished dumping snow_melt variables");
+
+  return(0.0);
 
 }
 

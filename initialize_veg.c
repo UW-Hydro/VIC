@@ -19,7 +19,6 @@ void initialize_veg (veg_var_struct      **veg_var,
 **********************************************************************/
 {
   extern option_struct   options;
-  extern veg_lib_struct *veg_lib;
 
   int i, j;
 

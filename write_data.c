@@ -6,7 +6,8 @@ static char vcid[] = "$Id$";
 
 void write_data(out_data_struct *out_data,
 		outfiles_struct  outfiles,
-		dmy_struct      *dmy)
+		dmy_struct      *dmy,
+		int              dt)
 /**********************************************************************
 	write_data	Dag Lohmann		Janurary 1996
 
@@ -203,8 +204,10 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
     tmp_iptr[0] = dmy->day;
     fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
-    tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    if(dt<24) {
+      tmp_iptr[0] = dmy->hour;
+      fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    }
     tmp_fptr[0] = (float)out_data->prec;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->evap;
@@ -273,8 +276,11 @@ void write_data(out_data_struct *out_data,
   }
   else {
     /***** Write ASCII Water Balance Fluxes File *****/
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
-	    dmy->year, dmy->month, dmy->day, dmy->hour,
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i",
+	    dmy->year, dmy->month, dmy->day);
+    if(dt<24)
+      fprintf(outfiles.fluxes,"\t%02i", dmy->hour);
+    fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
 	    out_data->prec, out_data->evap, out_data->runoff, 
 	    out_data->baseflow, out_data->Wdew);
     for(j=0;j<options.Nlayer;j++) 

@@ -18,7 +18,7 @@ void initialize_soil (cell_data_struct **cell,
   extern option_struct options;
   extern debug_struct debug;
 
-  int i, j, band, index;
+  int j, band, index;
   
   for ( j = 0 ; j <= veg_num ; j++)
     for(band=0;band<options.SNOW_BAND;band++) 

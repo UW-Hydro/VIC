@@ -20,7 +20,7 @@ snow_data_struct **make_snow_data(int nveg)
 {
   extern option_struct options;
 
-  int                i, j;
+  int                i;
   snow_data_struct **temp;
 
   temp = (snow_data_struct **) calloc(nveg, 

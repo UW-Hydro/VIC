@@ -30,7 +30,7 @@ void read_sawd(atmos_data_struct *temp,
   extern debug_struct debug;
   extern param_set_struct param_set;
  
-  int    i, j, n, rec, maxline = 210;
+  int    i, n, rec, maxline = 210;
   int    fixcnt, headcnt;
   int    store_rec;
   char   str[210],jnkstr[MAXSTRING];

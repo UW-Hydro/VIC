@@ -25,7 +25,7 @@ void read_atmosdata(atmos_data_struct *temp,
 {
   extern param_set_struct param_set;
 
-  int    i, j, n, rec, maxline = 210;
+  int    i, n, rec, maxline = 210;
   int    store_rec;
   char   str[210];
   double junk;

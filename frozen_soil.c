@@ -340,8 +340,6 @@ double error_solve_T_profile (double Tj, ...) {
 
 double error_print_solve_T_profile(double T, va_list ap) {
 
-  double value;
-
   double TL;
   double TU;
   double T0;
@@ -359,7 +357,6 @@ double error_print_solve_T_profile(double T, va_list ap) {
   double beta;
   double gamma;
   double fprime;
-  double ice;
 
   TL        = (double) va_arg(ap, double);
   TU        = (double) va_arg(ap, double);

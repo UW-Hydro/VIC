@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Mon Sep 28 16:21:41 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Oct  1 18:25:21 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -95,7 +95,6 @@ void snow_intercept(double Dt, double F,  double LAI,
 		    int hour)
 {
   extern option_struct options;
-  FILE *ftmp;
 
   const char *Routine = "SnowInterception";
   double AdvectedEnergy;         /* Energy advected by the rain (W/m2) */

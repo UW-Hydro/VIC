@@ -17,8 +17,6 @@ void write_vegvar(veg_var_struct veg, int n)
 
 **********************************************************************/
 {
-  int i, j, l;
-
   printf("Vegetation Variables: vegtype %i\n",n);
   printf("\tcanopyevap  = %lf\n", veg.canopyevap);
   printf("\tWdew        = %lf\n", veg.Wdew);

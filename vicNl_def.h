@@ -153,7 +153,6 @@ typedef struct {
   char LONGWAVE;   /* incoming longwave (W/m^2) */
   char PRESSURE;   /* atmospheric pressure (kPa) */
   char TSKC;       /* cloud cover (fraction) */
-  char SVP;        /* saturated vapor pressure (kPa) */
   char VP;         /* vapor pressure (kPa) */
   char VPD;        /* vapor pressure deficit (kPa) */
   char REL_HUMID;  /* relative humidity (%) */

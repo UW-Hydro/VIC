@@ -104,6 +104,7 @@ double func_surf_energy_bal(double, va_list);
 
 double get_avg_temp(double, double, double *, double *, int);
 global_param_struct get_global_param(filenames_struct *, FILE *, int *);
+void   get_next_time_step(int *, int *, int *, int *, int *, int);
 void   get_rise_and_set_hours(int *, int *, double, double,
 			   double, double); 
 
@@ -130,7 +131,7 @@ double linear_interp(double,double,double,double,double);
 
 cell_data_struct **make_cell_data(int, int);
 dist_prcp_struct make_dist_prcp(int, int *);
-dmy_struct *make_dmy(global_param_struct);
+dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int, int *);
 filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct, 
                           soil_con_struct, outfiles_struct *);
@@ -157,18 +158,19 @@ void   put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *,
 
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
-void   read_atmosdata(atmos_data_struct *, FILE *, int *, int, int);
-atmos_data_struct *read_forcing_data(infiles_struct, int, int *, int, int *);
+void   read_atmosdata(atmos_data_struct *, FILE *, int *, int, int, int);
+atmos_data_struct *read_forcing_data(infiles_struct, int, int *, int, int *,
+				     int);
 snow_data_struct read_initial_snow(FILE *, int, int, int);
 void read_initial_soil_therm(FILE *, int, int, int, int, double,
 			     double *, double *, double *,
 			     double *, double *);
-void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int);
-void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int);
-void   read_sawd(atmos_data_struct *, FILE *, int *, int, int);
-void   read_sawd_binary(atmos_data_struct *, FILE *, int *, int, int);
+void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int, int);
+void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int, int);
+void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
+void   read_sawd_binary(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_snowband(FILE *, int, double, double **, double **, double **);
-void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int);
+void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
 veg_lib_struct *read_veglib(FILE *, int *);

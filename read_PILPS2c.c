@@ -8,7 +8,8 @@ void read_PILPS2c(atmos_data_struct *temp,
                   FILE              *PILPS2c,
                   int               *nrecs,
                   int                dt,
-		  int                file_dt)
+		  int                file_dt,
+		  int                fileskip)
 /**********************************************************************
 	read_PILPS2c	Dag Lohmann		Feb. 12, 1998
 
@@ -32,17 +33,18 @@ void read_PILPS2c(atmos_data_struct *temp,
   int    i, n, rec, maxline = 210;
   int    year, month, day, hour;
   int    store_rec;
+  int    skip_bytes;
   char   str[210];
   
-  /** Count Records **/
-  n = 0;
-  while (fgets(str,maxline,PILPS2c) != '\0') n++;
-  printf("nrecs = %d\n",n);
-  if(n==0)
-    nrerror("No data in PILPS forcing file.  Model stopping...");
+  /** locate starting record **/
+  skip_bytes = (int)((float)(dt * fileskip)) / (float)file_dt - 1;
+  if((dt * fileskip) % (24 / file_dt) > 0) 
+    nrerror("Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+  for(i=0;i<skip_bytes;i++) {
+    fgets(str, maxline, PILPS2c);
+  }
 
-  rewind(PILPS2c);
-  
+  /** read forcing data **/
   rec = 0;
   while ( !feof(PILPS2c) ) {
     fscanf(PILPS2c,"%d",&year);

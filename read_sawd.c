@@ -8,7 +8,8 @@ void read_sawd(atmos_data_struct *temp,
                FILE              *sawdf,
                int               *nrecs,
                int                dt,
-	       int                file_dt)
+	       int                file_dt,
+	       int                fileskip)
 /**********************************************************************
 	read_sawd	Keith Cherkauer		July 25, 1996
 
@@ -33,6 +34,7 @@ void read_sawd(atmos_data_struct *temp,
   int    i, n, rec, maxline = 210;
   int    fixcnt, headcnt;
   int    store_rec;
+  int    skip_bytes;
   char   str[210],jnkstr[MAXSTRING];
 
   /** Count Records **/
@@ -44,19 +46,20 @@ void read_sawd(atmos_data_struct *temp,
 
   /** Check for Header, and Skip **/
   fgets(jnkstr,MAXSTRING,sawdf);
-  headcnt=0;
   if((jnkstr[0]<48 || jnkstr[0]>57) && jnkstr[0]!=46) {
     fgets(jnkstr,MAXSTRING,sawdf);
     fprintf(stderr,"SAWD ... skipping header\n");
-    n--;
-    headcnt++;
   }
-  if(n==0)
-    nrerror("No data in SAWD ASCII forcing file.  Model stopping...");
 
-  rewind(sawdf);
-  for(i=0;i<headcnt;i++) fgets(jnkstr,MAXSTRING,sawdf);
+  /** find simulation start record **/
+  skip_bytes = (int)((float)(dt * fileskip)) / (float)file_dt - 1;
+  if((dt * fileskip) % (24 / file_dt) > 0) 
+    nrerror("Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+  for(i=0;i<skip_bytes;i++) {
+    fgets(str, maxline, sawdf);
+  }
 
+  /** read forcing data **/
   fixcnt = 0;
   rec = 0;
   while ( !feof(sawdf) && (rec < *nrecs) ) {

@@ -94,6 +94,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double            *alpha;
   double            *beta;
   double            *gamma;
+#if QUICK_FS
+  double           **ufwc_table;
+#endif
   float             *root;
   layer_data_struct *layer_wet;
   layer_data_struct *layer_dry;
@@ -173,6 +176,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   alpha         = (double *) va_arg(ap, double *);
   beta          = (double *) va_arg(ap, double *);
   gamma         = (double *) va_arg(ap, double *);
+#if QUICK_FS
+  ufwc_table    = (double **) va_arg(ap, double **);
+#endif
   root          = (float  *) va_arg(ap, float  *);
   layer_wet     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   layer_dry     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
@@ -203,10 +209,17 @@ double func_surf_energy_bal(double Ts, va_list ap)
       Explicitly Solve Thermal Fluxes For all Soil Thermal Nodes 
     *************************************************************/
     T_node[0] = TMean;
+#if QUICK_FS
+    solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
+		    moist_node,delta_t,max_moist_node,
+		    bubble,expt_node,ice_node,alpha,
+		    beta,gamma,ufwc_table,Nnodes,FIRST_SOLN,FALSE);
+#else
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
 		    bubble,expt_node,ice_node,alpha,
 		    beta,gamma,Nnodes,FIRST_SOLN,FALSE);
+#endif
     *T1 = Tnew_node[1];
   }
 
@@ -233,7 +246,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute Evapotranspiration
   ***************************/
   *rad = (1.0 - albedo) * shortwave + longwave 
-       - STEFAN_B * pow(TMean+KELVIN,4.0) + *grnd_flux + *deltaH;
+    - STEFAN_B * (TMean+KELVIN) * (TMean+KELVIN) * (TMean+KELVIN) 
+    * (TMean+KELVIN) + *grnd_flux + *deltaH;
   if(VEG && CALC_EVAP) {
     tmp_rainfall[WET] = rainfall[WET];
     tmp_rainfall[DRY] = rainfall[DRY];
@@ -266,7 +280,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute Surface Energy Balance Error
     *************************************/
   error = (1.-albedo)*shortwave 
-        + emissivity*(longwave-STEFAN_B*pow(TMean + KELVIN,4.))
+        + emissivity*(longwave-STEFAN_B*(TMean + KELVIN)*(TMean + KELVIN)
+		      *(TMean + KELVIN)*(TMean + KELVIN))
         + *sensible_heat + *latent_heat + *grnd_flux + *deltaH + snow_energy;
 
   *store_error = error;

@@ -264,6 +264,9 @@ typedef struct {
   double alpha[MAX_NODES];		/* thermal solution constant */
   double beta[MAX_NODES];			/* thermal solution constant */
   double gamma[MAX_NODES];		/* thermal solution constant */
+#if QUICK_FS
+  double **ufwc_table[MAX_NODES];
+#endif
 } soil_con_struct;
 
 /*******************************************************************

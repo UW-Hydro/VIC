@@ -56,7 +56,7 @@ double snow_density(int date,
 
     air_temp = air_temp * 9. / 5. + 32.;
     if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
-                                 * pow (air_temp / 100., 2.0);
+                                 * (air_temp / 100.) * (air_temp / 100.);
     else density_new = (double)NEW_SNOW_DENSITY;
 
     if(depth>0.) {

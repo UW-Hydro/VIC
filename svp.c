@@ -17,7 +17,7 @@ double svp(double temp)
   
   SVP = A_SVP * exp((B_SVP * temp)/(C_SVP+temp));
 
-  if(temp<0) SVP *= 1.0 + .00972 * temp + .000042 * pow(temp,(double)2.0);
+  if(temp<0) SVP *= 1.0 + .00972 * temp + .000042 * temp * temp;
 
   return (SVP);
 }
@@ -28,7 +28,7 @@ double svp_slope(double temp)
   of Hydrology eqn 4.2.3
 **********************************************************************/
 {
-  return (B_SVP * C_SVP) / pow((C_SVP + temp),2.0) * svp(temp);
+  return (B_SVP * C_SVP) / ((C_SVP + temp) * (C_SVP + temp)) * svp(temp);
 }
 
 

@@ -41,7 +41,7 @@ void main(int argc, char *argv[])
   char    NEWCELL;
   char    LASTREC;
   char    MODEL_DONE;
-  int     rec, i;
+  int     rec, i, j;
   int     Ndist;
   int     Nveg_type;
   int     cellnum;
@@ -126,17 +126,19 @@ void main(int argc, char *argv[])
       if(debug.PRT_SOIL) write_soilparam(soil_con); 
 #endif
 
+#if QUICK_FS
+      /** Allocate Unfrozen Water Content Table **/
+      if(options.FROZEN_SOIL) {
+	for(i=0;i<MAX_NODES;i++) {
+	  soil_con.ufwc_table[i] = (double **)malloc(6*sizeof(double *));
+	  for(j=0;j<6;j++) 
+	    soil_con.ufwc_table[i][j] = (double *)malloc(2*sizeof(double));
+	}
+      }
+#endif
+
       NEWCELL=TRUE;
       cellnum++;
-
-      /** Allocate arrays in solve_T_profile **/
-      if(cellnum==0 && (options.FROZEN_SOIL || options.FS_FLUXES)) {
-	EMPTY = NULL;
-	EMPTY_C = NULL;
-	solve_T_profile(EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,0,EMPTY,0,EMPTY,
-			EMPTY,EMPTY,EMPTY,EMPTY,global_param.Nnodes,EMPTY_C,
-			TRUE);
-      }
 
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
@@ -249,10 +251,18 @@ void main(int argc, char *argv[])
 
       close_files(infiles,outfiles,builtnames); 
 
+#if QUICK_FS
+      if(options.FROZEN_SOIL) {
+	for(i=0;i<MAX_NODES;i++) {
+	  for(j=0;j<6;j++) 
+	    free((char *)soil_con.ufwc_table[i][j]);
+	  free((char *)soil_con.ufwc_table[i]);
+	}
+      }
+#endif
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
       free_vegcon(&veg_con);
       free((char *)atmos);  
-      free((char *)dmy);
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);

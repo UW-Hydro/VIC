@@ -13,6 +13,12 @@
        code *****/
 #define LINK_DEBUG FALSE
 
+/***** If TRUE VIC uses a system of linear equations defined in global.h
+       to estimate the maximum unfrozen water content equation.  This 
+       significantly reduces the run time with frozen soil, but may
+       introduce new errors (STILL UNDER TESTING) *****/
+#define QUICK_FS FALSE
+
 /***** Number of layers to use in energy balance and frozen soil models.
        Water balance model runs with only two layers, while the full
        energy model requires at least 3 layers *****/

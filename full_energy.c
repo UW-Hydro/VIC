@@ -127,13 +127,8 @@ void full_energy(int rec,
     }
     tmp_energy = (energy_bal_struct *)calloc(1,sizeof(energy_bal_struct));
   }
-/*   if(options.SNOW_MODEL || options.FULL_ENERGY) { */
-/*     snow_inflow = (double *)calloc(Nbands,sizeof(double)); */
-/*   } */
   band_energy       = (energy_bal_struct *)calloc(1,
 						  sizeof(energy_bal_struct));
-/*   ppt               = (double *)calloc(2*Nbands,sizeof(double)); */
-/*   Melt              = (double *)calloc(2*Nbands,sizeof(double)); */
   if(gp.dt == 24 && options.SNOW_MODEL) {
     store_max_min_temp(atmos,tmax,tmax_hour,tmin,tmin_hour,rec,
 		       gp.nrecs,1);
@@ -219,12 +214,6 @@ void full_energy(int rec,
 	  if(soil_con.AreaFract[band]>0) {
 	    energy[iveg][band].shortwave       = atmos->shortwave;
 	    energy[iveg][band].longwave        = 0.;
-/* 	    energy[iveg][band].latent          = 0.; */
-/* 	    energy[iveg][band].sensible        = 0.; */
-/* 	    energy[iveg][band].grnd_flux       = 0.; */
-/* 	    energy[iveg][band].deltaH          = 0.; */
-/* 	    energy[iveg][band].albedo          = 0.; */
-/* 	    energy[iveg][band].error           = 0.; */
 	    energy[iveg][band].deltaCC         = 0.; 
 	    energy[iveg][band].snow_flux       = 0.; 
 	    energy[iveg][band].refreeze_energy = 0.; 
@@ -344,7 +333,6 @@ void full_energy(int rec,
 		  tmp_layer[j][i] = cell[j][iveg][band].layer[i];
 	      }
 	      tmp_energy[0]  = band_energy[0];
-	      /* roughness      = soil_con.rough; */
 	      rainfall[WET]  = prec[iveg*2] * soil_con.Pfactor[band];
 	      rainfall[DRY]  = prec[iveg*2+1] * soil_con.Pfactor[band];
 	      Tend_grnd 
@@ -365,7 +353,8 @@ void full_energy(int rec,
 				       tmp_layer[DRY],soil_con,dmy[rec]);  
 	      
 	      tmp_energy[0].longwave  
-		-= STEFAN_B * pow(Tend_grnd+KELVIN,4.0);  
+		-= STEFAN_B * (Tend_grnd+KELVIN) * (Tend_grnd+KELVIN) 
+		* (Tend_grnd+KELVIN) * (Tend_grnd+KELVIN);  
 	      
 	      for(j=0;j<Ndist;j++) {
 		for(i=0;i<options.Nlayer;i++) 
@@ -384,7 +373,10 @@ void full_energy(int rec,
 	    } /* finished computing energy balance for no snow cover */	
 	    else { 
 	      band_energy[0].longwave  
-		-= STEFAN_B * pow(snow[iveg][band].surf_temp+KELVIN,4.0); 
+		-= STEFAN_B * (snow[iveg][band].surf_temp+KELVIN)
+		* (snow[iveg][band].surf_temp+KELVIN) 
+		* (snow[iveg][band].surf_temp+KELVIN) 
+		* (snow[iveg][band].surf_temp+KELVIN); 
 	      band_energy[0].albedo = snow[iveg][band].albedo;
 	    } 
 
@@ -436,12 +428,6 @@ void full_energy(int rec,
         if(options.SNOW_MODEL && (ANY_SNOW || atmos->prec-atmos->rainonly>0)) {
 
           for(j=0;j<Ndist;j++) {
-/* 	    tmp_layerevap[j]           = (double*)calloc(options.Nlayer, */
-/* 							 sizeof(double)); */
-/* 	    tmp_throughfall[j]         = (double*)calloc(Nbands, */
-/* 							 sizeof(double)); */
-/* 	    tmp_canopyevap[j]          = (double*)calloc(Nbands, */
-/* 							 sizeof(double)); */
 	    for(i=0;i<Nbands;i++) {
 	      tmp_throughfall[j][i]  = 0.;
 	      tmp_canopyevap[j][i]   = 0.;
@@ -457,14 +443,6 @@ void full_energy(int rec,
 	  for(i=0;i<Nbands*2;i++) {
 	    tmp_ppt[i]               = 0;
 	  }
-/* 	  tmp_canopy_vapor_flux        = (double*)calloc(Nbands, */
-/* 							 sizeof(double)); */
-/* 	  tmp_vapor_flux               = (double*)calloc(Nbands, */
-/* 							 sizeof(double)); */
-/*           tmp_melt                     = (double*)calloc(Nbands*2, */
-/* 							 sizeof(double)); */
-/*           tmp_ppt                      = (double*)calloc(Nbands*2, */
-/* 							 sizeof(double)); */
 
 	  if (tmp_wind[0] > 0.0)
 	    tmp_aero_resist 
@@ -701,16 +679,6 @@ void full_energy(int rec,
 	    }  /** loop through elevation bands **/
 	  }  /** Loop through wet and dry fractions **/
 
-/* 	  for(j=0;j<Ndist;j++) { */
-/* 	    free((char*)tmp_layerevap[j]); */
-/* 	    free((char*)tmp_throughfall[j]); */
-/* 	    free((char*)tmp_canopyevap[j]); */
-/* 	  } */
-/* 	  free((char*)tmp_canopy_vapor_flux); */
-/* 	  free((char*)tmp_vapor_flux); */
-/* 	  free((char*)tmp_melt); */
-/* 	  free((char*)tmp_ppt); */
-	  
 	  ANY_SNOW = TRUE;
 	  
         }
@@ -741,7 +709,9 @@ void full_energy(int rec,
 	      step_net_short = (1. - bare_albedo) * atmos->shortwave; 
 	      step_rad = step_net_short + atmos->longwave;
 	      if(gp.dt<24) 
-		step_rad -= STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
+		step_rad -= STEFAN_B * (atmos->air_temp+KELVIN) 
+		  * (atmos->air_temp+KELVIN) * (atmos->air_temp+KELVIN) 
+		  * (atmos->air_temp+KELVIN);
 
 	      if(iveg!=Nveg) {
 		/** Compute Evaporation from Vegetation **/
@@ -901,12 +871,7 @@ void full_energy(int rec,
     }
     free ((char *)tmp_energy);
   }
-/*   if(options.SNOW_MODEL || options.FULL_ENERGY) { */
-/*     free((char*)snow_inflow); */
-/*   } */
   free((char*)band_energy);
-/*   free((char*)ppt); */
-/*   free((char*)Melt); */
 
 }
 

@@ -59,6 +59,9 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   double            *alpha;
   double            *beta;
   double            *gamma;
+#if QUICK_FS
+  double           **ufwc_table;
+#endif
   int                Nnodes;
   char              *FIRST_SOLN;
 
@@ -102,12 +105,15 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   alpha          = (double *) va_arg(ap, double *);
   beta           = (double *) va_arg(ap, double *);
   gamma          = (double *) va_arg(ap, double *);
+#if QUICK_FS
+  ufwc_table     = (double **) va_arg(ap, double **);
+#endif
   Nnodes         = (int)      va_arg(ap, int);
   FIRST_SOLN     = (char *)   va_arg(ap, char *);
 
   TMean = Ts;
 
-  kappa_snow = 2.9302e-6 * pow(snow_density, 2.0);
+  kappa_snow = 2.9302e-6 * (snow_density) * (snow_density);
  
   *snow_flux = kappa_snow * (TMean - surf_temp) / snow_depth;
 
@@ -124,10 +130,17 @@ double func_snow_ground_flux(double Ts, va_list ap) {
       Explicitly Solve Thermal Fluxes For all Soil Thermal Nodes 
     *************************************************************/
     T_node[0] = TMean;
+#if QUICK_FS
+     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
+		    moist_node,delta_t,max_moist_node,
+		    bubble,expt_node,ice_node,alpha,beta,gamma,ufwc_table,
+		    Nnodes,FIRST_SOLN,FALSE);
+#else
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
 		    bubble,expt_node,ice_node,alpha,beta,gamma,Nnodes,
 		    FIRST_SOLN,FALSE);
+#endif
     *T1 = Tnew_node[1];
   }
 

@@ -415,6 +415,34 @@ double maximum_unfrozen_water(double T,
   return (unfrozen);
 }
 
+#if QUICK_FS
+double maximum_unfrozen_water_quick(double   T,
+				    double   max_moist,
+				    double **table) {
+/**********************************************************************
+  This subroutine computes the maximum amount of unfrozen water that
+  can exist at the current temperature.
+**********************************************************************/
+
+  extern double temps[];
+
+  double unfrozen;
+
+  if(T > temps[1])
+    unfrozen = max_moist * (table[0][0] + table[0][1] * T);
+  else if(T > temps[2])
+    unfrozen = max_moist * (table[1][0] + table[1][1] * T);
+  else if(T > temps[3])
+    unfrozen = max_moist * (table[2][0] + table[2][1] * T);
+  else if(T > temps[4])
+    unfrozen = max_moist * (table[3][0] + table[3][1] * T);
+  else
+    unfrozen = max_moist * (table[4][0] + table[4][1] * T);
+
+  return (unfrozen);
+}
+#endif
+
 void find_0_degree_fronts(energy_bal_struct *energy,
                           layer_data_struct *layer,
                           double dp,

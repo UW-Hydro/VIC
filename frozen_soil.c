@@ -55,7 +55,12 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 			      double            *Cs,
 			      double            *moist,
 			      double            *expt,
+#if QUICK_FS
+			      double            *max_moist,
+			      double          ***ufwc_table) {
+#else
 			      double            *max_moist) {
+#endif
 /******************************************************************
   finish_frozen_soil_calcs      Keith Cherkauer      July 27, 1998
 
@@ -82,8 +87,6 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
   tdepth = energy->fdepth[1];
 
   /** Calculate New Layer Depths **/
-/*   old_fdepth = (double *)calloc(options.Nlayer,sizeof(double)); */
-/*   old_tdepth = (double *)calloc(options.Nlayer,sizeof(double)); */
   for(i=0;i<options.Nlayer;i++) {
     old_fdepth[i] = layer[i].fdepth;
     old_tdepth[i] = layer[i].tdepth;
@@ -192,8 +195,14 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 
   for(j=0;j<Nnodes;j++) {
     if(T[j]<0.) {
+#if QUICK_FS
+      energy->ice[j] = moist[j] 
+	- maximum_unfrozen_water_quick(T[j],max_moist[j],
+				       ufwc_table[j]);
+#else
       energy->ice[j] = moist[j] - maximum_unfrozen_water(T[j],max_moist[j],
                soil_con.bubble,expt[j]);
+#endif
       if(energy->ice[j]<0.) energy->ice[j]=0.;
       if(energy->ice[j]>max_moist[j]) energy->ice[j]=max_moist[j];
     }
@@ -246,6 +255,9 @@ void solve_T_profile(double *T,
 		     double *alpha,
 		     double *beta,
 		     double *gamma,
+#if QUICK_FS
+		     double **ufwc_table,
+#endif
 		     int     Nnodes,
 		     char   *FIRST_SOLN,
 		     char   FIRST_TIME) {
@@ -274,99 +286,40 @@ void solve_T_profile(double *T,
 
   Twidth = 1;
 
-  if(FIRST_TIME) {
-/*     A = (double *)calloc(Nnodes,sizeof(double)); */
-/*     B = (double *)calloc(Nnodes,sizeof(double)); */
-/*     C = (double *)calloc(Nnodes,sizeof(double)); */
-/*     D = (double *)calloc(Nnodes,sizeof(double)); */
-/*     E = (double *)calloc(Nnodes,sizeof(double)); */
+  if(FIRST_SOLN[0]) {
+    FIRST_SOLN[0] = FALSE;
+    for(j=1;j<Nnodes-1;j++) {
+      A[j] = beta[j-1]*deltat*(kappa[j+1]-kappa[j-1]);
+      B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
+      C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
+      D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
+      E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
+	+ 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
+    }
+    if(options.NOFLUX) {
+      j = Nnodes-1;
+      A[j] = beta[j-1]*deltat*(kappa[j]-kappa[j-1]);
+      B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
+      C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
+      D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
+      E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
+	+ 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
+    }
   }
-  else {
-
-    if(FIRST_SOLN[0]) {
-      FIRST_SOLN[0] = FALSE;
-      for(j=1;j<Nnodes-1;j++) {
-	A[j] = beta[j-1]*deltat*(kappa[j+1]-kappa[j-1]);
-	B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
-	C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
-	D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
-	E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
-	  + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
-      }
-      if(options.NOFLUX) {
-	j = Nnodes-1;
-	A[j] = beta[j-1]*deltat*(kappa[j]-kappa[j-1]);
-	B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
-	C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
-	D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
-	E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
-	  + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
-      }
-    }
     
-    for(j=0;j<Nnodes;j++) T[j]=T0[j];
-    
-    Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
-				     ice,bubble,expt,alpha,
-				     gamma,A,B,C,D,E,Twidth);
+  for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
-    while(Error == -9999) {
-
-      Twidth *= 2;
-
-      fprintf(stderr,"WARNING: SOIL_DT too narrow now using %i times value.\nIf this message appears often increase SOIL_DT in vicNl_def.h.\n",Twidth);
-
-      for(j=0;j<Nnodes;j++) T[j]=T0[j];
-      
-      Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
-				       ice,bubble,expt,alpha,
-				       gamma,A,B,C,D,E,Twidth);
-
-    }
-    if(Error == -8888) {
-
-      fprintf(stderr,"WARNING: Soil thermal flux solution unable to converge at current time step %lf sec, trying again at %lf sec.\n",deltat,deltat/10);
-
-      FIRST_SOLN[0] = TRUE;
-      deltat /= 10;
-      for(try=0;try<10;try++) {
-
-	for(j=1;j<Nnodes-1;j++) {
-	  A[j] = beta[j-1]*deltat*(kappa[j+1]-kappa[j-1]);
-	  B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
-	  C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
-	  D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
-	  E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
-	    + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
-	}
-	if(options.NOFLUX) {
-	  j = Nnodes-1;
-	  A[j] = beta[j-1]*deltat*(kappa[j]-kappa[j-1]);
-	  B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
-	  C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
-	  D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
-	  E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
-	    + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
-	}
-
-	for(j=0;j<Nnodes;j++) T[j]=T0[j];
-    
-	Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
-					 ice,bubble,expt,alpha,
-					 gamma,A,B,C,D,E,Twidth);
-	
-	if(Error) {
-	  vicerror("Unable to get soil thermal flux solution to converge.\n");
-	}
-	
-	for(j=0;j<Nnodes;j++) T0[j]=T[j];
-	
-      }
-
-    }
-    
-  }
-
+#if QUICK_FS
+  Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
+				   ice,bubble,expt,alpha,
+				   gamma,A,B,C,D,E,ufwc_table,
+				   Twidth);
+#else
+  Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
+				   ice,bubble,expt,alpha,
+				   gamma,A,B,C,D,E,Twidth);
+#endif
+  
 }
   
 
@@ -385,6 +338,9 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 			     double *C, 
 			     double *D, 
 			     double *E,
+#if QUICK_FS
+			     double **ufwc_table,
+#endif
 			     int     Twidth) {
   
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -420,18 +376,32 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 		+ C[j] + D[j]*(0.-ice[j])) / (E[j]);
       }
       else {
+#if QUICK_FS
+	T[j] = root_brent(T0[j]-(SOIL_DT*(double)Twidth),
+			  T0[j]+(SOIL_DT*(double)Twidth),soil_thermal_eqn, 
+			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
+			  ufwc_table[j], ice[j], gamma[j-1], fprime, 
+			  A[j], B[j], C[j], D[j], E[j]);
+#else
 	T[j] = root_brent(T0[j]-(SOIL_DT*(double)Twidth),
 			  T0[j]+(SOIL_DT*(double)Twidth),soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  bubble, expt[j], ice[j], gamma[j-1], fprime, 
 			  A[j], B[j], C[j], D[j], E[j]);
+#endif
 	
-	if(T[j] <= -9998) Error = -9999;
-	else if(T[j] <= -8887) Error = -8888;
-/* 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j],  */
-/* 				max_moist[j], bubble, expt[j], ice[j],  */
-/* 				gamma[j-1], fprime, A[j], B[j], C[j], D[j],  */
-/* 				E[j]); */
+	if(T[j] <= -9998) 
+#if QUICK_FS
+	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
+				max_moist[j], bubble, expt[j], ice[j], 
+				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
+				E[j]);
+#else
+	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
+				max_moist[j], bubble, expt[j], ice[j], 
+				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
+				E[j]);
+#endif
       }
       
       diff=fabs(oldT-T[j]);
@@ -451,6 +421,16 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 		+ C[j] + D[j]*(0.-ice[j])) / E[j];
       }
       else {
+#if QUICK_FS
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
+				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+				 T[Nnodes-2], T0[Nnodes-1], 
+				 moist[Nnodes-1], max_moist[Nnodes-1], 
+				 ufwc_table[Nnodes-1], 
+				 ice[Nnodes-1], 
+				 gamma[Nnodes-2], fprime, 
+				 A[j], B[j], C[j], D[j], E[j]);
+#else
 	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
 				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
@@ -458,15 +438,15 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 bubble, expt[Nnodes-1], ice[Nnodes-1], 
 				 gamma[Nnodes-2], fprime, 
 				 A[j], B[j], C[j], D[j], E[j]);
+#endif
 	
-	if(T[j] <= -9998) Error = -9999;
-	else if(T[j] <= -8887) Error = -8888;
-/* 	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1], */
-/* 				T[Nnodes-2], T0[Nnodes-1],  */
-/* 				moist[Nnodes-1], max_moist[Nnodes-1], bubble,  */
-/* 				expt[Nnodes-1], ice[Nnodes-1],  */
-/* 				gamma[Nnodes-2], fprime,  */
-/* 				A[j], B[j], C[j], D[j], E[j]); */
+	if(T[j] <= -9998) 
+	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
+				T[Nnodes-2], T0[Nnodes-1], 
+				moist[Nnodes-1], max_moist[Nnodes-1], bubble, 
+				expt[Nnodes-1], ice[Nnodes-1], 
+				gamma[Nnodes-2], fprime, 
+				A[j], B[j], C[j], D[j], E[j]);
       }
       
       diff=fabs(oldT-T[Nnodes-1]);

@@ -77,13 +77,10 @@ double net_out_longwave(double trans,
   *cloudiness = 1.0/0.65 * sqrt(1.0 - trans/trans_clear);
   *cloudiness = (*cloudiness > 1.0) ? 1.0 : *cloudiness;
   emissivity = 0.70 + 0.0000595 * v_mbar * exp(1500.0/t_kelvin);
-  cloudfactor = 1.0 + 0.17 * pow(*cloudiness,2.0);
+  cloudfactor = 1.0 + 0.17 * (*cloudiness) * (*cloudiness);
   
-  longwave = (1.0 - emissivity * cloudfactor) * STEFAN * pow(t_kelvin,4.0);
-  
-/* printf("%lf  %lf  %lf  %lf  %lf  %lf\n",cloudiness,emissivity,
-	 longwave,tair,trans/trans_clear,vapor);*/
-  /* return longwave in W/m^2 */
+  longwave = (1.0 - emissivity * cloudfactor) * STEFAN * (t_kelvin) 
+    * (t_kelvin) * (t_kelvin) * (t_kelvin);
   
   return longwave;
 }

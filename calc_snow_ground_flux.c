@@ -113,6 +113,18 @@ double calc_snow_ground_flux(int                dt,
   **************************************************/
   Twidth = 1;
 
+#if QUICK_FS
+  surf_temp = root_brent(energy->T[0]-SURF_DT, 0., func_snow_ground_flux,
+			 T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
+			 delta_t, snow_density, snow_depth, Tsnow_surf,
+			 D1, D2, dp,moist, ice0, max_moist, bubble, expt,
+			 grnd_flux, deltaH, 
+			 snow_flux, T1,
+			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+			 moist_node,expt_node,max_moist_node,ice_node,
+			 alpha,beta,gamma,soil_con.ufwc_table,
+			 Nnodes,FIRST_SOLN);
+#else
   surf_temp = root_brent(energy->T[0]-SURF_DT, 0., func_snow_ground_flux,
 			 T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
 			 delta_t, snow_density, snow_depth, Tsnow_surf,
@@ -122,8 +134,22 @@ double calc_snow_ground_flux(int                dt,
 			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 			 moist_node,expt_node,max_moist_node,ice_node,
 			 alpha,beta,gamma,Nnodes,FIRST_SOLN);
+#endif
  
   if(surf_temp <= -9998)
+#if QUICK_FS
+    error_calc_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
+				kappa1, kappa2, Cs1, Cs2,
+				delta_t, snow_density, snow_depth, 
+				Tsnow_surf, D1, D2, dp, moist, ice0, 
+				max_moist, bubble, expt,
+				grnd_flux, deltaH, 
+				snow_flux, T1,
+				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+				moist_node,expt_node,max_moist_node,ice_node,
+				alpha,beta,gamma,soil_con.ufwc_table,
+				Nnodes,FIRST_SOLN);
+#else
     error_calc_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
 				kappa1, kappa2, Cs1, Cs2,
 				delta_t, snow_density, snow_depth, 
@@ -134,10 +160,24 @@ double calc_snow_ground_flux(int                dt,
 				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				moist_node,expt_node,max_moist_node,ice_node,
 				alpha,beta,gamma,Nnodes,FIRST_SOLN);
+#endif
 
   /**************************************************
     Recalculate Energy Fluxes Based on Final Temperature
   **************************************************/
+#if QUICK_FS
+  error = solve_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
+				 kappa1, kappa2, Cs1, Cs2,
+				 delta_t, snow_density, snow_depth, 
+				 Tsnow_surf, D1, D2, dp, moist, ice0, 
+				 max_moist, bubble, expt,
+				 grnd_flux, deltaH, 
+				 snow_flux, T1,
+				 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+				 moist_node,expt_node,max_moist_node,ice_node,
+				 alpha,beta,gamma,soil_con.ufwc_table,
+				 Nnodes,FIRST_SOLN);
+#else
   error = solve_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
 				 kappa1, kappa2, Cs1, Cs2,
 				 delta_t, snow_density, snow_depth, 
@@ -148,6 +188,7 @@ double calc_snow_ground_flux(int                dt,
 				 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				 moist_node,expt_node,max_moist_node,ice_node,
 				 alpha,beta,gamma,Nnodes,FIRST_SOLN);
+#endif
  
   energy->error += error;
 
@@ -156,9 +197,16 @@ double calc_snow_ground_flux(int                dt,
   ***************************************************/
   if(options.FROZEN_SOIL) {
 
+#if QUICK_FS
+    finish_frozen_soil_calcs(energy,layer_wet,layer_dry,layer,soil_con,
+			     Nnodes,iveg,mu,Tnew_node,dz_node,kappa_node,
+			     Cs_node,moist_node,expt_node,max_moist_node,
+			     soil_con.ufwc_table);
+#else
     finish_frozen_soil_calcs(energy,layer_wet,layer_dry,layer,soil_con,
 			     Nnodes,iveg,mu,Tnew_node,dz_node,kappa_node,
 			     Cs_node,moist_node,expt_node,max_moist_node);
+#endif
 
   }
 
@@ -232,6 +280,9 @@ double error_print_snow_ground_flux(double Ts, va_list ap) {
   double            *alpha;
   double            *beta;
   double            *gamma;
+#if QUICK_FS
+  double          ***ufwc_table;
+#endif
   int                Nnodes;
   char              *FIRST_SOLN;
 
@@ -274,6 +325,9 @@ double error_print_snow_ground_flux(double Ts, va_list ap) {
   alpha         = (double *) va_arg(ap, double *);
   beta          = (double *) va_arg(ap, double *);
   gamma         = (double *) va_arg(ap, double *);
+#if QUICK_FS
+  ufwc_table    = (double ***) va_arg(ap, double ***);
+#endif
   Nnodes        = (int)      va_arg(ap, int);
   FIRST_SOLN    = (char *)   va_arg(ap, char *);
 

@@ -57,7 +57,7 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
   }
   else DAYfactor = 1.;
 
-  Tfactor = .08 * tair - 0.0016 * pow(tair,2.0);
+  Tfactor = .08 * tair - 0.0016 * tair * tair;
   Tfactor = (Tfactor <= 0.0) ? 1e-10 : Tfactor;
 
   vpdfactor = 1 - vpd/CLOSURE;

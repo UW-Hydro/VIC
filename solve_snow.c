@@ -175,16 +175,19 @@ double solve_snow(snow_data_struct    *snow,
     net_short[0] = (1.0 - energy->albedo) * shortwave;
     if(snow->snow) {
       rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * pow(snow->surf_temp+KELVIN,4.0);
+	- STEFAN_B * (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN) 
+	* (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN);
     }
     else {
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	rad[0]       = net_short[0] + longwave 
-	  - STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
+	  - STEFAN_B * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
+	  * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
       }
       else {
 	rad[0]       = net_short[0] + longwave 
-	  - STEFAN_B * pow(air_temp+KELVIN,4.0);
+	  - STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
+	  * (air_temp+KELVIN) * (air_temp+KELVIN);
       }
     }
 
@@ -200,12 +203,18 @@ double solve_snow(snow_data_struct    *snow,
 	  
 	  /** Compute Canopy Interception, if Snow and Canopy **/
 	  if(snow->snow) 
-	    surf_long = STEFAN_B * pow(snow->surf_temp + KELVIN, 4.);
+	    surf_long = STEFAN_B * (snow->surf_temp + KELVIN) 
+	      * (snow->surf_temp + KELVIN) * (snow->surf_temp + KELVIN) 
+	      * (snow->surf_temp + KELVIN);
 	  else {
 	    if(options.FULL_ENERGY || options.FROZEN_SOIL)
-	      surf_long = STEFAN_B * pow(energy->T[0] + KELVIN, 4.);
+	      surf_long = STEFAN_B * (energy->T[0] + KELVIN) 
+		* (energy->T[0] + KELVIN) * (energy->T[0] + KELVIN) 
+		* (energy->T[0] + KELVIN);
 	    else
-	      surf_long = STEFAN_B * pow(air_temp + KELVIN, 4.);
+	      surf_long = STEFAN_B * (energy->T[0] + KELVIN) 
+		* (energy->T[0] + KELVIN) * (energy->T[0] + KELVIN) 
+		* (energy->T[0] + KELVIN);
 	      /* surf_long = longwave; */
 	  }
 	  snow_intercept((double)dt,1.,
@@ -219,7 +228,9 @@ double solve_snow(snow_data_struct    *snow,
 			 &snow->tmp_int_storage,
 			 &snow->canopy_vapor_flux,&canopy_temp,
 			 &tmp_energy_val,dmy[rec].month,rec,hour);
-	  energy->longwave = STEFAN_B * pow(canopy_temp+KELVIN,4.0);
+	  energy->longwave = STEFAN_B * (canopy_temp+KELVIN) 
+	    * (canopy_temp+KELVIN) * (canopy_temp+KELVIN) 
+	    * (canopy_temp+KELVIN);
 	  veg_var_wet->throughfall = rainfall[0] + snowfall[0];
 	}
 	else {
@@ -237,7 +248,9 @@ double solve_snow(snow_data_struct    *snow,
 				rainfall,soil_con.depth,soil_con.Wcr,
 				soil_con.Wpwp,root);
 	  rainfall[WET] = veg_var_wet->throughfall;
-	  energy->longwave = STEFAN_B * pow(tmp_air_temp+KELVIN,4.0);
+	  energy->longwave = STEFAN_B * (tmp_air_temp+KELVIN) 
+	    * (tmp_air_temp+KELVIN) * (tmp_air_temp+KELVIN) 
+	    * (tmp_air_temp+KELVIN);
 	  if(options.DIST_PRCP) 
 	    rainfall[DRY] = veg_var_dry->throughfall;
 	}
@@ -279,7 +292,8 @@ double solve_snow(snow_data_struct    *snow,
 	out_short[0]    = energy->albedo * shortwave;
 	net_short[0]    = (1.0 - energy->albedo) * shortwave;
 	rad[0]          = net_short[0] + longwave 
-	  - STEFAN_B * pow(snow->surf_temp+KELVIN,4.0);
+	  - STEFAN_B * (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN) 
+	  * (snow->surf_temp+KELVIN) * (snow->surf_temp+KELVIN);
       }
     
       snow_inflow[0] += rainfall[WET] + snowfall[WET];
@@ -403,11 +417,13 @@ double solve_snow(snow_data_struct    *snow,
     net_short[0] = (1.0 - energy->albedo) * shortwave;
     if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
+	- STEFAN_B * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
+	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
     }
     else {
       rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * pow(air_temp+KELVIN,4.0);
+	- STEFAN_B * (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
+	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
     }
 
   }

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD: Thu Oct  1 18:18:27 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Tue Jul  6 16:22:32 1999 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate the density of water as a function of temperature
  * DESCRIP-END.
  * FUNCTIONS:    WaterDensity()
@@ -42,7 +42,7 @@ double WaterDensity(double T)
   double rho;
 
   rho = 1000 * (1 - (T + 288.9414)/(508929.2 * (T + 68.12963)) * 
-                pow((double) (T - 3.9863), (double) 2.0));
+                (T - 3.9863) * (T - 3.9863));
 
   return rho;
 }

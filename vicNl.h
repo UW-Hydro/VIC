@@ -23,10 +23,17 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
 			     double *, energy_bal_struct *, 
 			     snow_data_struct *, layer_data_struct *,
                              layer_data_struct *, soil_con_struct, char *);
+#if QUICK_FS
+int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
+				double *, double, double *, double *, 
+				double *, double *, double *, double *, 
+				double *, double *, double **, int);
+#else
 int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
 				double *, double, double *, double *, 
 				double *, double *, double *, double *, 
 				double *, double *, int);
+#endif
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double calc_surf_energy_bal(char, int, int, int, int, int, int, int, int, 
 			    double, double, double, double, double, 
@@ -85,11 +92,19 @@ void   find_sublayer_temperatures(layer_data_struct *, double *, double *,
 				  double *, double, double, int, int);
 double find_total_layer_moisture(layer_data_struct,double);
 double find_total_layer_ice(layer_data_struct,double);
+#if QUICK_FS
+void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
+				layer_data_struct *, layer_data_struct *,
+				soil_con_struct, int, int, double, 
+				double *, double *, double *, double *, 
+				double *, double *, double *, double ***);
+#else
 void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
 				layer_data_struct *, layer_data_struct *,
 				soil_con_struct, int, int, double, 
 				double *, double *, double *, double *, 
 				double *, double *, double *);
+#endif
 double fltrad(double, double, double, int, double, double *); 
 void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_vegcon(veg_con_struct **);
@@ -140,6 +155,9 @@ snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
 void   MassRelease(double *,double *,double *,double *);
 double maximum_unfrozen_water(double, double, double, double);
+#if QUICK_FS
+double maximum_unfrozen_water_quick(double, double, double **);
+#endif
 double modify_Ksat(double);
 
 double net_out_longwave(double,double,double,double,double *);
@@ -231,9 +249,17 @@ double solve_snow(snow_data_struct *, layer_data_struct *,
 		  double *, double *, double *, double *, float *);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
+#if QUICK_FS
 void   solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double, double *,
-		       double *, double *, double *, double *, int, char *, char);
+		       double *, double *, double *, double *, double **, 
+		       int, char *, char);
+#else
+void   solve_T_profile(double *, double *, double *, double *,double *,
+		       double *, double, double *, double, double *,
+		       double *, double *, double *, double *, int, char *, 
+		       char);
+#endif
 double StabilityCorrection(double, double, double, double, double, double);
 void   store_max_min_temp(atmos_data_struct *, double *, int *,
 			  double *, int *, int, int, int);

@@ -220,30 +220,28 @@ void runoff(layer_data_struct *layer_wet,
       /** Runoff Calculations for Top Layer Only **/
       /** A and i_0 as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
       
-      if(*runoff < 0) {
-	max_infil = (1.0+soil_con.b_infilt) * top_max_moist;
-	
-	ex        = soil_con.b_infilt / (1.0 + soil_con.b_infilt);
-	A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
-	i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 
-						      / soil_con.b_infilt))); 
-	/* Maximum Inflow */
-	
-	/** equation (3a) Wood et al. **/
-	
-	if (inflow == 0.0) *runoff = 0.0;
-	else if (max_infil == 0.0) *runoff = inflow;
-	else if ((i_0 + inflow) > max_infil) 
-	  *runoff = inflow - top_max_moist + top_moist;
-	
-	/** equation (3b) Wood et al. (wrong in paper) **/
-	else {
-	  basis = 1.0 - (i_0 + inflow) / max_infil;
-	  *runoff = (inflow - top_max_moist + top_moist + top_max_moist
-		     * pow(basis,1.0*(1.0+soil_con.b_infilt)));
-	}
-	if(*runoff<0.) *runoff=0.;
+      max_infil = (1.0+soil_con.b_infilt) * top_max_moist;
+      
+      ex        = soil_con.b_infilt / (1.0 + soil_con.b_infilt);
+      A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+      i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 
+						    / soil_con.b_infilt))); 
+      /* Maximum Inflow */
+      
+      /** equation (3a) Wood et al. **/
+      
+      if (inflow == 0.0) *runoff = 0.0;
+      else if (max_infil == 0.0) *runoff = inflow;
+      else if ((i_0 + inflow) > max_infil) 
+	*runoff = inflow - top_max_moist + top_moist;
+      
+      /** equation (3b) Wood et al. (wrong in paper) **/
+      else {
+	basis = 1.0 - (i_0 + inflow) / max_infil;
+	*runoff = (inflow - top_max_moist + top_moist + top_max_moist
+		   * pow(basis,1.0*(1.0+soil_con.b_infilt)));
       }
+      if(*runoff<0.) *runoff=0.;
       
       /**************************************************
         Compute Flow Between Soil Layers (using an hourly time step)

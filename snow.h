@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 16:03:11
- * LAST-MOD: Sun Dec  1 16:37:42 1996 by Bart Nijssen <nijssen@meter.ce.washington.edu>
+ * LAST-MOD: Tue Jul 14 10:38:32 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  header file for DHSVM snow routines
  * DESCRIP-END.
  * FUNCTIONS:    
@@ -35,4 +35,7 @@
 /* density of new fallen snow [50] */
 #define NEW_SNOW_DENSITY	50.
  
+/* Minimum SWQ at which the snow pack is assumed to fully cover the grid cell (m) */
+#define MAX_FULL_COVERAGE_SWQ   0.076
+
 #endif 

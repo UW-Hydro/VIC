@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Thu Apr 30 17:13:41 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Thu Jul 30 14:45:41 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -214,7 +214,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
     (Dt * SECPHOUR);
 
   /* Calculate Ground Heat Flux */
-  if(SnowDepth>SNOWTHRES && options.CALC_SNOW_FLUX) {
+  if(SnowDepth>0. && options.CALC_SNOW_FLUX) {
     *GroundFlux = 2.9302e-6 * pow(SnowDensity, 2.0) 
         * (TGrnd - *TMean) / SnowDepth;
   }

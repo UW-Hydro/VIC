@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Thu Jul 16 14:38:41 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Tue Jul 28 09:50:40 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -72,25 +72,31 @@
                  disregarded.  Rain water CAN be intercepted by lower canopy
                  layers (similar to InterceptionStorage()).
                  Of course:  NO vegetation -> NO interception
+
+  Modifications:
+  06-98 included maximum structural loading to prevent the model
+        from loading the canopy with more snow than it can handle
+        structurally.                                             PXS
+
 *****************************************************************************/
 void snow_intercept(double Dt, double F,  double LAI, 
 		    double MaxInt, double Ra, double AirDens,
 		    double EactAir, double Lv, double Shortwave,
 		    double Longwave, double Press, double Tair, 
-		    double Vpd, double Wind, double *RainFall,
+		    double Vpd, double Wind,  double *RainFall,
 		    double *SnowFall, double *IntRain, double *IntSnow,
 		    double *TempIntStorage, double *VaporMassFlux,
-		    double *Tcanopy, double *MeltEnergy)
+		    double *Tcanopy, double *MeltEnergy, int month, int rec)
 {
   const char *Routine = "SnowInterception";
   double AdvectedEnergy;         /* Energy advected by the rain (W/m2) */
   double BlownSnow;              /* Depth of snow blown of the canopy (m) */
   double DeltaSnowInt;           /* Change in the physical swe of snow
-                                   interceped on the branches. (m) */
+				    interceped on the branches. (m) */
   double Drip;                   /* Amount of drip from intercepted snow as a
-                                   result of snowmelt (m) */
+				    result of snowmelt (m) */
   double ExcessSnowMelt;         /* Snowmelt in excess of the water holding
-                                   capacity of the tree (m) */
+				    capacity of the tree (m) */
   double EsSnow;                 /* saturated vapor pressure in the snow pack
                                    (Pa)  */
   double InitialSnowInt;         /* Initial intercepted snow (m) */ 
@@ -101,26 +107,29 @@ void snow_intercept(double Dt, double F,  double LAI,
                                    (W/m2) */
   double Ls;                     /* Latent heat of sublimation (J/(kg K) */
   double MassBalanceError;       /* Mass blalnce to make sure no water is
-                                   being destroyed/created (m) */
+				    being destroyed/created (m) */
   double MaxWaterInt;            /* Water interception capacity (m) */  
   double MaxSnowInt;             /* Snow interception capacity (m) */
   double NetRadiation;
   double PotSnowMelt;            /* Potential snow melt (m) */
   double RainThroughFall;        /* Amount of rain reaching to the ground (m)
-                                 */ 
+				  */ 
   double RefreezeEnergy;         /* Energy available for refreezing or melt */
   double ReleasedMass;           /* Amount of mass release of intercepted snow
-                                   (m) */ 
+				    (m) */ 
   double SensibleHeat;           /* Sensible heat flux (W/m2) */
   double SnowThroughFall;        /* Amount of snow reaching to the ground (m)
-                                 */ 
+				  */ 
   double Tmp;                    /* Temporary variable */
 
-  double Imax1;               /*maxium water intecept regardless of temp*/
-  double IntRainFract;      /*Fraction of intercpeted water which is liquid*/
-  double IntSnowFract;      /*Fraction of intercepted water which is solid*/
-  double Overload;          /* temp variable to calcuated structural overloading */
-  char shit;
+  double Imax1;                  /* maxium water intecept regardless of temp */
+  double IntRainFract;           /* Fraction of intercpeted water which is 
+				    liquid */
+  double IntSnowFract;           /* Fraction of intercepted water which is 
+				    solid */
+  double Overload;               /* temp variable to calculated structural 
+				    overloading */
+
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
   *SnowFall /= 1000.;
@@ -255,15 +264,13 @@ void snow_intercept(double Dt, double F,  double LAI,
      air mass */
   
   EsSnow = svp(*Tcanopy);
-  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow)/Ra;
+  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / Ra;
   *VaporMassFlux /= RHO_W;
 /*****
 printf("
   AirTemp = %f    EactAir %f   EsSnow %f   Ra %f   AirDens %f   Press %f VaporMassFlux %f \n",
   Tair,           EactAir,     EsSnow,     Ra,      AirDens,     Press); 
 *****/
-
-
 
   if (Vpd == 0.0 && *VaporMassFlux < 0.0)
     *VaporMassFlux = 0.0;
@@ -284,6 +291,21 @@ printf("
   /* Calculate the amount of energy available for refreezing */
 
   RefreezeEnergy = SensibleHeat + LatentHeat + NetRadiation + AdvectedEnergy;
+
+
+
+
+/*****
+fprintf(stderr,"%i\t%i\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t",
+	rec,month,LAI,MaxInt,Ra,AirDens,EactAir,Lv,Shortwave,Longwave);
+fprintf(stderr,"%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t",
+	Press,Tair,Vpd,Wind,*RainFall,*SnowFall,*IntRain,*IntSnow);
+fprintf(stderr,"%.4lg\t%.4lg\t%.4lg\t%.4lg\t%.4lg\t",
+	*TempIntStorage,*VaporMassFlux,*Tcanopy,RefreezeEnergy,NetRadiation);
+fprintf(stderr,"%.4lg\t%.4lg\t%.4lg\n",
+	LatentHeat,SensibleHeat,AdvectedEnergy);
+*****/
+
 
   RefreezeEnergy *= Dt * SECPHOUR;
 
@@ -307,7 +329,7 @@ printf("
     else
       *IntRain += *VaporMassFlux;
 
-    PotSnowMelt = min((RefreezeEnergy/Lf), *IntSnow) / RHO_W;
+    PotSnowMelt = min((RefreezeEnergy/Lf/RHO_W), *IntSnow);
 
     *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt *SECPHOUR);
     

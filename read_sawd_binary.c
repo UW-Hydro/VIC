@@ -23,13 +23,12 @@ void read_sawd_binary(atmos_data_struct *temp,
 
 **********************************************************************/
 {
-  extern option_struct options;
   extern debug_struct debug;
   extern param_set_struct param_set;
  
-  int       i, j, n, rec, maxline = 210;
+  int       i, n, rec;
   int       fixcnt;
-  char      str[210],jnkstr[MAXSTRING];
+  char      str[210];
   char      tmpmem[20];
   short int values[5];
 

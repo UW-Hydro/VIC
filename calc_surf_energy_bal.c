@@ -2,38 +2,42 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
-double calc_surf_energy_bal(int rec,
-			    int iveg,
-			    int nlayer,
-			    int Nveg,
-			    int snow,
-			    double ice0,
-			    double moist,
-			    double dp,
-			    double surf_atten,
-			    double T0,
-			    double *T1,
-			    double *aero_resist,
-			    double Le,
-			    double Ls,
-			    double mu,
-			    double *x,
-			    double displacement,
-			    double roughness,
-			    double ref_height,
-			    double snow_energy,
-			    double *wind,
-			    double vapor_flux,
-			    double rainfall,
+double calc_surf_energy_bal(char               CALC_EVAP,
+			    int                rec,
+			    int                iveg,
+			    int                nlayer,
+			    int                Nveg,
+			    int                dt,
+			    int                Nnodes,
+			    int                veg_class,
+			    int                band,
+			    double             ice0,
+			    double             moist,
+			    double             dp,
+			    double             surf_atten,
+			    double             T0,
+			    double             shortwave,
+			    double             longwave,
+			    double             Le,
+			    double             Ls,
+			    double             mu,
+			    double             displacement,
+			    double             roughness,
+			    double             ref_height,
+			    double             snow_energy,
+			    double             vapor_flux,
+			    double            *T1,
+			    double            *aero_resist,
+			    double            *wind,
+			    double            *rainfall,
 			    atmos_data_struct *atmos,
-			    veg_var_struct *veg_var,
+			    veg_var_struct    *veg_var_wet,
+			    veg_var_struct    *veg_var_dry,
 			    energy_bal_struct *energy,
-			    global_param_struct gp,
-			    layer_data_struct *layer,
-			    soil_con_struct soil_con,
-			    int veg_class,
-			    dmy_struct dmy)
-
+			    layer_data_struct *layer_wet,
+			    layer_data_struct *layer_dry,
+			    soil_con_struct    soil_con,
+			    dmy_struct         dmy)
 /**************************************************************
   calc_surf_energy_bal.c  Greg O'Donnell and Keith Cherkauer  Sept 9 1997
   
@@ -56,7 +60,7 @@ double calc_surf_energy_bal(int rec,
 	iveg		N/A	Current Vegetation Index
 	nlayer		N/A	Number of soil layers
 	Nveg		N/A	Number of vegetation types in current cell
-	snow		N/A	TRUE = Snow was present this time step
+	CALC_EVAP	N/A	TRUE = Snow was present this time step
 	ice0		mm/mm	Ice content of top layer
 	moist		mm/mm	Water content of top soil layer
 	dp		m	Soil Thermal Damping Depth 
@@ -67,7 +71,6 @@ double calc_surf_energy_bal(int rec,
 	Le		J/kg	Latent heat of evaporation
 	Ls		J/kg	Latent heat of sublimation
 	mu		fract	Fraction of grid cell receiving precipitation
-	*x
 	displacement	m	Displacement height of vegetation type
 	roughness	m	Roughness length of surface or vegetation
 	ref_height	m	Reference height at which wind measured
@@ -78,7 +81,6 @@ double calc_surf_energy_bal(int rec,
 	*atmos		N/A
 	*veg_var	N/A
 	*energy		N/A
-	gp		N/A
 	*layer		N/A
 	soil_con	N/A
 	veg_class	N/A
@@ -88,40 +90,48 @@ double calc_surf_energy_bal(int rec,
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
-  extern option_struct options;
+  extern option_struct   options;
 
-  double T2;
-  double Ts_old;
-  double T1_old;
-  double Tair;
-  double ra;
-  double atmos_density;
-  double shortwave;
-  double longwave;
-  double albedo;
-  double emissivity;
-  double kappa1;
-  double kappa2;
-  double Cs1;
-  double Cs2;
-  double D1;
-  double D2;
-  double delta_t;
-  double Vapor;
-  double max_moist;
-  double bubble;
-  double expt;
-  double dH_height;
+  double   T2;
+  double   Ts_old;
+  double   T1_old;
+  double   Tair;
+  double   ra;
+  double   atmos_density;
+  double   albedo;
+  double   emissivity;
+  double   kappa1;
+  double   kappa2;
+  double   Cs1;
+  double   Cs2;
+  double   D1;
+  double   D2;
+  double   delta_t;
+  double   Vapor;
+  double   max_moist;
+  double   bubble;
+  double   expt;
 
-  char   CALC_EVAP;
-  char   VEG;
-  int    i;
-  double surf_temp;
-  double U;
-  double error;
-  double C1, C2, C3;
-  double ice;
-  double Wdew;
+  FILE    *ftemp;
+  int      VEG;
+  int      i;
+  double   surf_temp;
+  double   U;
+  double   error;
+  double   Wdew[2];
+  double  *T_node;
+  double  *Tnew_node;
+  double  *dz_node;
+  double  *kappa_node;
+  double  *Cs_node;
+  double  *moist_node;
+  double  *expt_node;
+  double  *max_moist_node;
+  double  *ice_node;
+  double  *alpha;
+  double  *beta;
+  double  *gamma;
+  layer_data_struct *layer;
 
   /**************************************************
     Correct Aerodynamic Resistance for Stability
@@ -133,15 +143,7 @@ double calc_surf_energy_bal(int rec,
           atmos->air_temp, U, roughness);
   else
     ra = HUGE_RESIST;
-
-
-  /**************************************************
-    Compute Net Surface Radiation
-  **************************************************/
-  if(iveg!=Nveg) albedo = veg_lib[veg_class].albedo[dmy.month-1];
-  else albedo = atmos->albedo;
-  energy->albedo = albedo;
-
+  
   /**************************************************
     Compute Evaporation and Transpiration 
   **************************************************/
@@ -150,32 +152,57 @@ double calc_surf_energy_bal(int rec,
     else VEG = FALSE;
   }
   else VEG = FALSE;
-  if(!snow) CALC_EVAP=TRUE;
-  else CALC_EVAP=FALSE;
-  Vapor = vapor_flux / (double)gp.dt / 3600.;
+  Vapor = vapor_flux / (double)dt / 3600.;
 
   /**************************************************
     Set All Variables For Use
   **************************************************/
-  T2 = energy->T[gp.Ulayer+gp.Llayer+1];
-  Ts_old = energy->T[0];
-  T1_old = energy->T[1];
-  Tair = atmos->air_temp;
+  T2            = energy->T[Nnodes-1];
+  Ts_old        = energy->T[0];
+  T1_old        = energy->T[1];
+  Tair          = atmos->air_temp;
   atmos_density = atmos->density;
-  shortwave = atmos->shortwave;
-  longwave = atmos->longwave;
-  emissivity = 1.;
-  kappa1 = energy->kappa[0];
-  kappa2 = energy->kappa[1];
-  Cs1 = energy->Cs[0];
-  Cs2 = energy->Cs[1];
-  D1 = soil_con.depth[0];
-  D2 = soil_con.depth[1];
-  delta_t = (double)gp.dt*3600.;
-  max_moist = soil_con.max_moist[0]/(soil_con.depth[0]*1000.);
-  bubble = soil_con.bubble;
-  expt = soil_con.expt[0];
-  Wdew = veg_var[0].Wdew;
+  albedo        = energy->albedo;
+  emissivity    = 1.;
+  kappa1        = energy->kappa[0];
+  kappa2        = energy->kappa[1];
+  Cs1           = energy->Cs[0];
+  Cs2           = energy->Cs[1];
+  D1            = soil_con.depth[0];
+  D2            = soil_con.depth[1];
+  delta_t       = (double)dt*3600.;
+  max_moist     = soil_con.max_moist[0]/(soil_con.depth[0]*1000.);
+  bubble        = soil_con.bubble;
+  expt          = soil_con.expt[0];
+  Wdew[WET]     = veg_var_wet->Wdew;
+  if(options.DIST_PRCP) Wdew[DRY] = veg_var_dry->Wdew;
+
+  /***********************************************************
+    Prepare Data Sets for Solving Frozen Soil Thermal Fluxes 
+  ***********************************************************/
+  if(options.FROZEN_SOIL) {
+
+    layer          = (layer_data_struct *)calloc(options.Nlayer,
+						 sizeof(layer_data_struct));
+    kappa_node     = (double *)calloc(Nnodes,sizeof(double));
+    Cs_node        = (double *)calloc(Nnodes,sizeof(double));
+    moist_node     = (double *)calloc(Nnodes,sizeof(double));
+    expt_node      = soil_con.expt_node; 
+    max_moist_node = soil_con.max_moist_node;  
+    alpha          = soil_con.alpha; 
+    beta           = soil_con.beta; 
+    gamma          = soil_con.gamma; 
+    
+    setup_frozen_soil(soil_con,layer_wet,layer_dry,layer,energy[0],
+		      rec,iveg,Nnodes,mu,kappa_node,Cs_node,
+		      moist_node);
+
+    T_node    = energy->T;
+    dz_node   = energy->dz;
+    ice_node  = energy->ice;
+    Tnew_node = (double *)calloc(Nnodes,sizeof(double));
+
+  }
 
   /**************************************************
     Find Surface Temperature Using Root Brent Method
@@ -183,43 +210,50 @@ double calc_surf_energy_bal(int rec,
   surf_temp = root_brent(0.5*(energy->T[0]+atmos->air_temp)+25.,
 			 0.5*(energy->T[0]+atmos->air_temp)-25.,
 			 func_surf_energy_bal,T2,Ts_old,T1_old,Tair,ra,
-			 atmos_density,
-			 shortwave,longwave,albedo,emissivity,
-			 kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
-			 delta_t,Le,Ls,Vapor,moist,ice0,
-			 max_moist,bubble,expt,surf_atten,U,displacement,
-			 roughness,
-			 ref_height,soil_con.elevation,
-			 soil_con.b_infilt,soil_con.max_infil,
-			 (double)gp.dt,atmos->vpd,rainfall,Wdew,
-			 snow_energy,
-			 &energy->grnd_flux,T1,
-			 &energy->latent,
+			 atmos_density,shortwave,longwave,albedo,emissivity,
+			 kappa1,kappa2,Cs1,Cs2,D1,D2,dp,delta_t,Le,Ls,Vapor,
+			 moist,ice0,max_moist,bubble,expt,surf_atten,U,
+			 displacement,roughness,ref_height,
+			 (double)soil_con.elevation,soil_con.b_infilt,
+			 soil_con.max_infil,(double)dt,atmos->vpd,
+			 snow_energy,mu,soil_con.Tfactor[band],
+			 soil_con.Pfactor[band],rainfall,Wdew,
+			 &energy->grnd_flux,T1,&energy->latent,
 			 &energy->sensible,&energy->deltaH,
 			 &energy->error,&energy->Trad[0],&atmos->rad,
-			 soil_con.depth,
-			 soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
-			 VEG,CALC_EVAP,
-			 veg_class,dmy.month);
+			 soil_con.depth,soil_con.Wcr,soil_con.Wpwp,
+			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+			 moist_node,expt_node,max_moist_node,ice_node,
+			 alpha,beta,gamma,layer_wet,layer_dry,veg_var_wet
+			 ,veg_var_dry,
+			 VEG,(int)CALC_EVAP,veg_class,dmy.month,Nnodes);
 
-  if(surf_temp<=-9998) 
-    error_calc_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,
-			       atmos_density,shortwave,longwave,albedo,
-			       emissivity,kappa1,kappa2,Cs1,Cs2,D1,D2,dp,
-			       delta_t,Le,Ls,Vapor,moist,ice0,
-			       max_moist,bubble,expt,surf_atten,U,
-			       displacement,roughness,
-			       ref_height,soil_con.elevation,
-			       soil_con.b_infilt,soil_con.max_infil,
-			       (double)gp.dt,atmos->vpd,rainfall,Wdew,
-			       snow_energy,
-			       &energy->grnd_flux,T1,&energy->latent,
-			       &energy->sensible,&energy->deltaH,
-			       &energy->error,&energy->Trad[0],&atmos->rad,
-			       soil_con.depth,
-			       soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
-			       VEG,CALC_EVAP,
-			       veg_class,dmy.month,iveg);
+  if(surf_temp <= -9998) {  
+    error = error_calc_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,
+				       atmos_density,shortwave,longwave,
+				       albedo,emissivity,kappa1,kappa2,
+				       Cs1,Cs2,D1,D2,dp,delta_t,Le,Ls,Vapor,
+				       moist,ice0,max_moist,bubble,expt,
+				       surf_atten,U,displacement,roughness,
+				       ref_height,(double)soil_con.elevation,
+				       soil_con.b_infilt,soil_con.max_infil,
+				       (double)dt,atmos->vpd,snow_energy,mu,
+				       soil_con.Tfactor[band],
+				       soil_con.Pfactor[band],
+				       rainfall,Wdew,&energy->grnd_flux,
+				       T1,&energy->latent,&energy->sensible,
+				       &energy->deltaH,&energy->error,
+				       &energy->Trad[0],&atmos->rad,
+				       soil_con.depth,soil_con.Wcr,
+				       soil_con.Wpwp,T_node,Tnew_node,
+				       dz_node,kappa_node,Cs_node,
+				       moist_node,expt_node,max_moist_node,
+				       ice_node,alpha,beta,gamma,
+				       layer_wet,layer_dry,
+				       veg_var_wet,veg_var_dry,VEG,
+				       (int)CALC_EVAP,
+				       veg_class,dmy.month,Nnodes);
+  }
 
   /**************************************************
     Recalculate Energy Balance Terms for Final Surface Temperature
@@ -230,19 +264,46 @@ double calc_surf_energy_bal(int rec,
 				delta_t,Le,Ls,Vapor,moist,ice0,
 				max_moist,bubble,expt,surf_atten,U,
 				displacement,roughness,
-				ref_height,soil_con.elevation,
+				ref_height,(double)soil_con.elevation,
 				soil_con.b_infilt,soil_con.max_infil,
-				(double)gp.dt,atmos->vpd,rainfall,Wdew,
-				snow_energy,
-				&energy->grnd_flux,T1,&energy->latent,
-				&energy->sensible,&energy->deltaH,
-				&energy->error,&energy->Trad[0],&atmos->rad,
-				soil_con.depth,
-				soil_con.Wcr,soil_con.Wpwp,layer,veg_var,
-				VEG,CALC_EVAP,
-				veg_class,dmy.month);
+				(double)dt,atmos->vpd,snow_energy,mu,
+				soil_con.Tfactor[band],soil_con.Pfactor[band],
+				rainfall,Wdew,&energy->grnd_flux,
+				T1,&energy->latent,&energy->sensible,
+				&energy->deltaH,&energy->error,
+				&energy->Trad[0],&atmos->rad,
+				soil_con.depth,soil_con.Wcr,soil_con.Wpwp,
+				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+				moist_node,expt_node,max_moist_node,ice_node,
+				alpha,beta,gamma,layer_wet,layer_dry,
+				veg_var_wet,
+				veg_var_dry,VEG,(int)CALC_EVAP,
+				veg_class,dmy.month,Nnodes);
 
   energy->error = error;
+
+  /***************************************************
+    Recalculate Soil Moisture and Thermal Properties
+  ***************************************************/
+  if(options.FROZEN_SOIL) {
+
+    finish_frozen_soil_calcs(energy,layer_wet,layer_dry,layer,soil_con,
+			     Nnodes,iveg,mu,Tnew_node,dz_node,kappa_node,
+			     Cs_node,moist_node,expt_node,max_moist_node);
+
+    free((char *)Tnew_node);
+    free((char *)moist_node);
+    free((char *)kappa_node);
+    free((char *)Cs_node);
+    free((char *)layer);
+
+  }
+  if(iveg!=Nveg) {
+    if(veg_lib[veg_class].LAI[dmy.month-1] <= 0.0) { 
+      veg_var_wet->throughfall = rainfall[WET];
+      if(options.DIST_PRCP) veg_var_dry->throughfall = rainfall[DRY];
+    }
+  }
 
   return (surf_temp);
     
@@ -317,9 +378,12 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double             max_infil;
   double             dt;
   double             vpd;
-  double             rainfall;
-  double             Wdew;
   double             snow_energy;
+  double             mu;
+  double             Tfactor;
+  double             Pfactor;
+  double            *rainfall;
+  double            *Wdew;
   double            *grnd_flux;
   double            *T1;
   double            *latent_heat;
@@ -331,13 +395,30 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double            *depth;
   double            *Wcr;
   double            *Wpwp;
-  layer_data_struct *layer;
-  veg_var_struct    *veg_var;
-  char               VEG;
-  char               CALC_EVAP;
+  double            *T_node;
+  double            *Tnew_node;
+  double            *dz_node;
+  double            *kappa_node;
+  double            *Cs_node;
+  double            *moist_node;
+  double            *expt_node;
+  double            *max_moist_node;
+  double            *ice_node;
+  double            *alpha;
+  double            *beta;
+  double            *gamma;
+  layer_data_struct *layer_wet;
+  layer_data_struct *layer_dry;
+  veg_var_struct    *veg_var_wet;
+  veg_var_struct    *veg_var_dry;
+  int                VEG;
+  int                CALC_EVAP;
   int                veg_class;
   int                month;
   int                iveg;
+  int                Nnodes;
+
+  int                i;
 
   /* Initialize Variables */
   T2            = (double) va_arg(ap, double);
@@ -376,9 +457,12 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   max_infil     = (double) va_arg(ap, double);
   dt            = (double) va_arg(ap, double);
   vpd           = (double) va_arg(ap, double);
-  rainfall      = (double) va_arg(ap, double);
-  Wdew          = (double) va_arg(ap, double);
   snow_energy   = (double) va_arg(ap, double);
+  mu            = (double) va_arg(ap, double);
+  Tfactor       = (double) va_arg(ap, double);
+  Pfactor       = (double) va_arg(ap, double);
+  rainfall      = (double *) va_arg(ap, double *);
+  Wdew          = (double *) va_arg(ap, double *);
   grnd_flux     = (double *) va_arg(ap, double *);
   T1            = (double *) va_arg(ap, double *);
   latent_heat   = (double *) va_arg(ap, double *);
@@ -390,13 +474,28 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   depth         = (double *) va_arg(ap, double *);
   Wcr           = (double *) va_arg(ap, double *);
   Wpwp          = (double *) va_arg(ap, double *);
-  layer         = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var       = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  VEG           = (char) va_arg(ap, char);
-  CALC_EVAP     = (char) va_arg(ap, char);
-  veg_class     = (int)  va_arg(ap, int);
-  month         = (int)  va_arg(ap, int);
-  iveg          = (int)  va_arg(ap, int);
+  T_node        = (double *) va_arg(ap, double *);
+  Tnew_node     = (double *) va_arg(ap, double *);
+  dz_node       = (double *) va_arg(ap, double *);
+  kappa_node    = (double *) va_arg(ap, double *);
+  Cs_node       = (double *) va_arg(ap, double *);
+  moist_node    = (double *) va_arg(ap, double *);
+  expt_node     = (double *) va_arg(ap, double *);
+  max_moist_node= (double *) va_arg(ap, double *);
+  ice_node      = (double *) va_arg(ap, double *);
+  alpha         = (double *) va_arg(ap, double *);
+  beta          = (double *) va_arg(ap, double *);
+  gamma         = (double *) va_arg(ap, double *);
+  layer_wet     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  layer_dry     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var_wet   = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  veg_var_dry   = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  VEG           = (int) va_arg(ap, int);
+  CALC_EVAP     = (int) va_arg(ap, int);
+  veg_class     = (int) va_arg(ap, int);
+  month         = (int) va_arg(ap, int);
+  iveg          = (int) va_arg(ap, int);
+  Nnodes        = (int) va_arg(ap, int);
 
   /* Print Variables */
   fprintf(stderr,"T2 = %lf\n",T2);
@@ -435,9 +534,12 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr,"max_infil = %lf\n",max_infil);
   fprintf(stderr,"dt = %lf\n",dt);
   fprintf(stderr,"vpd = %lf\n",vpd);
-  fprintf(stderr,"rainfall = %lf\n",rainfall);
-  fprintf(stderr,"Wdew = %lf\n",Wdew);
   fprintf(stderr,"snow_energy = %lf\n",snow_energy);
+  fprintf(stderr,"mu = %lf\n",mu);
+  fprintf(stderr,"Tfactor = %lf\n",Tfactor);
+  fprintf(stderr,"Pfactor = %lf\n",Pfactor);
+  fprintf(stderr,"rainfall = %lf\n",rainfall[0]);
+  fprintf(stderr,"Wdew = %lf\n",Wdew[0]);
   fprintf(stderr,"grnd_flux = %lf\n",grnd_flux[0]);
   fprintf(stderr,"T1 = %lf\n",T1[0]);
   fprintf(stderr,"latent_heat = %lf\n",latent_heat[0]);
@@ -449,13 +551,23 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr,"depth = %lf\n",depth[0]);
   fprintf(stderr,"Wcr = %lf\n",Wcr[0]);
   fprintf(stderr,"Wpwp = %lf\n",Wpwp[0]);
-  fprintf(stderr,"VEG = %c\n",VEG);
-  fprintf(stderr,"CALC_EVAP = %c\n",CALC_EVAP);
+  fprintf(stderr,"VEG = %i\n",VEG);
+  fprintf(stderr,"CALC_EVAP = %i\n",CALC_EVAP);
   fprintf(stderr,"veg_class = %i\n",veg_class);
   fprintf(stderr,"veg_class = %i\n",month);
-  write_layer(layer,iveg,options.Nlayer,depth);
-  write_vegvar(veg_var[0],iveg);
+  write_layer(layer_wet,iveg,options.Nlayer,depth);
+  if(options.DIST_PRCP) 
+    write_layer(layer_dry,iveg,options.Nlayer,depth);
+  write_vegvar(veg_var_wet[0],iveg);
+  if(options.DIST_PRCP) 
+    write_vegvar(veg_var_dry[0],iveg);
+  fprintf(stderr,"Node\tT\tTnew\tdz\tkappa\tCs\tmoist\texpt\tmax_moist\tice\n");
+  for(i=0;i<Nnodes;i++) 
+    fprintf(stderr,"%i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
+	    i,T_node[i],Tnew_node[i],dz_node[i],kappa_node[i],Cs_node[i],
+	    moist_node[i],expt_node[i],max_moist_node[i],ice_node[i]);
 
   vicerror("Finished writing calc_surf_energy_bal variables");
 
 }
+

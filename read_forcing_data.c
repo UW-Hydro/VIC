@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
+#include <string.h>
  
 atmos_data_struct *read_forcing_data(infiles_struct      inf,
                                      int                *nrecs,

@@ -28,7 +28,6 @@ double read_arcinfo_value(char *filename,
   double tmp_lng;
   double tmpvalue;
   char   errstr[MAXSTRING];
-  char   junk[50];
 
   if((farc=fopen(filename,"r"))==NULL) {
     sprintf(errstr,"Unable to open ARC/INFO soil file %s",filename);
@@ -97,8 +96,6 @@ int read_arcinfo_info(char    *filename,
   double value;
   double tmp_lat;
   double tmp_lng;
-  char   errstr[MAXSTRING];
-  char   junk[50];
   int    cell;
   int    Ncells;
   int    NODATA;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <vicNl.h>
 
@@ -14,7 +15,8 @@ void open_debug() {
   extern option_struct options;
 
   char tempname[MAXSTRING];
-
+  int  i, j;
+  
   if(debug.DEBUG || debug.PRT_TEMP) {
     strcpy(tempname,debug.debug_dir);
     strcat(tempname,"/VIC_temp.out");
@@ -38,9 +40,22 @@ void open_debug() {
     strcat(tempname,"/VIC_balance.out");
     if((debug.fg_balance=fopen(tempname,"w"))==NULL)
       nrerror("ERROR: Unable to open VIC_balance.out");
-    debug.inflow = (double *)calloc(options.Nlayer+3,sizeof(double));
-    debug.outflow = (double *)calloc(options.Nlayer+3,sizeof(double));
-    debug.store_moist = (double *)calloc(options.Nlayer+3,sizeof(double));
+    for(i=0;i<2;i++) {
+      debug.inflow[i]      = (double **)calloc(options.SNOW_BAND,
+					       sizeof(double*));
+      debug.outflow[i]     = (double **)calloc(options.SNOW_BAND,
+					       sizeof(double*));
+      debug.store_moist[i] = (double **)calloc(options.SNOW_BAND,
+					       sizeof(double*));
+      for(j=0;j<options.SNOW_BAND;j++) {
+	debug.inflow[i][j]      = (double *)calloc(options.Nlayer+3,
+						   sizeof(double));
+	debug.outflow[i][j]     = (double *)calloc(options.Nlayer+3,
+						   sizeof(double));
+	debug.store_moist[i][j] = (double *)calloc(options.Nlayer+3,
+						   sizeof(double));
+      }
+    }
   }
   if(debug.DEBUG || debug.PRT_FLUX) {
     strcpy(tempname,debug.debug_dir);

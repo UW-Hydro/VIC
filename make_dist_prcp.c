@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-dist_prcp_struct make_dist_prcp(int nveg)
+dist_prcp_struct make_dist_prcp(int  nveg,
+				int *Nnodes)
 /**********************************************************************
 	read_dist_prcp	Keith Cherkauer		May 21, 1996
 
@@ -19,12 +20,18 @@ dist_prcp_struct make_dist_prcp(int nveg)
   extern option_struct options;
 
   dist_prcp_struct temp;
+  int              i;
 
-  temp.mu = 1.;
-  if(options.DIST_PRCP)
-    temp.dist = (prcp_var_struct *) calloc(2,sizeof(prcp_var_struct));
-  else
-    temp.dist = (prcp_var_struct *) calloc(1,sizeof(prcp_var_struct));
+  temp.mu     = (double *)calloc(nveg+1,sizeof(double));
+  for(i=0;i<nveg+1;i++) temp.mu[i] = 1;
+  if(options.FULL_ENERGY || options.SNOW_MODEL) {
+    temp.snow   = make_snow_data(nveg+1);
+    temp.energy = make_energy_bal(nveg+1,Nnodes);
+  }
+  for(i=0;i<2;i++) {
+    temp.veg_var[i]  = make_veg_var(nveg);
+    temp.cell[i]     = make_cell_data(nveg+1,options.Nlayer);
+  }
 
   return (temp);
 

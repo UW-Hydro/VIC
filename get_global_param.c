@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
+#include <string.h>
  
 global_param_struct get_global_param(filenames_struct *names,
                                      FILE             *gp)
@@ -23,7 +24,7 @@ global_param_struct get_global_param(filenames_struct *names,
   char optstr[MAXSTRING];
   char flgstr[MAXSTRING];
   global_param_struct temp;
-  
+
   fgets(cmdstr,MAXSTRING,gp);
 
   while(!feof(gp)) {
@@ -74,11 +75,8 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("MEASURE_H",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&temp.measure_h);
       }
-      else if(strcasecmp("ULAYER",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&temp.Ulayer);
-      }
-      else if(strcasecmp("LLAYER",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&temp.Llayer);
+      else if(strcasecmp("NODES",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.Nnodes);
       }
       else if(strcasecmp("MIN_RAIN_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&temp.MIN_RAIN_TEMP);
@@ -122,6 +120,9 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&options.GRID_DECIMAL);
+      }
+      else if(strcasecmp("SNOW_BAND",optstr)==0) {
+	sscanf(cmdstr,"%*s %i %s",&options.SNOW_BAND,names->snow_band);
       }
       else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

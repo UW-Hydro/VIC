@@ -60,15 +60,13 @@ soil_con_struct read_soilparam(FILE *soilparam)
   extern option_struct options;
   extern debug_struct debug;
 
-  int layer;
+  char            errstr[MAXSTRING];
+  int             layer;
+  double          porosity;
+  double          Wcr_FRACT;
+  double          Wpwp_FRACT;
+  double          off_gmt;
   soil_con_struct temp; 
-  double porosity;
-  double max_moist_tot;
-  double maxsoilmoist2factor;
-  double Wcr_FRACT;
-  double Wpwp_FRACT;
-  double off_gmt;
-  char errstr[MAXSTRING];
 
   fscanf(soilparam, "%d", &temp.gridcel);
   fscanf(soilparam, "%f", &temp.lat);
@@ -134,6 +132,8 @@ soil_con_struct read_soilparam(FILE *soilparam)
       nrerror(errstr);
     }
     temp.max_moist[layer] = temp.depth[layer] * porosity * 1000.;
+    if(temp.init_moist[layer] > temp.max_moist[layer]) 
+      temp.init_moist[layer] = temp.max_moist[layer];
   }
 
   /**********************************************

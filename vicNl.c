@@ -8,13 +8,13 @@
 
 void main(int argc, char *argv[])
 /**********************************************************************
-	vicNl.c		Dag Lohmann and Keith Cherkauer		January 1996
+	vicNl.c		Dag Lohmann		January 1996
 
   This program controls file I/O and variable initialization as well as
   being the primary driver for the model.
 
   For details about variables, input files and subroutines check:
-	http://www.hydro.washington.edu/Lettenmaier/Models/VIC/VIChome.html
+	http://ce.washington.edu/~hydro/Lettenmaier/Models/VIC/VIC_home.html
 
   UNITS: unless otherwise marked:
          all water balance components are in mm
@@ -22,10 +22,9 @@ void main(int argc, char *argv[])
 	 depths, and lengths are in m
 
   modifications:
-    Model has been updated to incorporate all published features of the
-    model, including: full energy balance, and distributed precipitation.
-    Improved snow ablation and accumulation routines, and a frozen soil
-    algorithm have also been added.
+  1997-98 Model was updated from simple 2 layer water balance to 
+          an extension of the full energy and water balance 3 layer
+	  model.                                                  KAC
 
 **********************************************************************/
 {
@@ -40,7 +39,6 @@ void main(int argc, char *argv[])
   char    NEWCELL;
   char    LASTREC;
   char    MODEL_DONE;
-  int     STILL_STORM;
   int     rec, i;
   int     Ndist;
   int     Nveg_type;
@@ -62,10 +60,6 @@ void main(int argc, char *argv[])
   filenames_struct builtnames;
   infiles_struct infiles;
   outfiles_struct outfiles;
-
-  /** Initialize Variables **/
-
-  STILL_STORM = 0;	/* TRUE = currently precipitation */
 
   /** Read Model Options **/
   initialize_global();
@@ -102,7 +96,10 @@ void main(int argc, char *argv[])
   cell_cnt=0;
   while(!MODEL_DONE) {
     if(!options.ARC_SOIL) {
-      if((fscanf(infiles.soilparam, "%d", &flag))!=EOF) RUN_MODEL=TRUE;
+      if((fscanf(infiles.soilparam, "%d", &flag))!=EOF) {
+	if(flag) RUN_MODEL=TRUE;
+	else     RUN_MODEL=FALSE;
+      }
       else {
 	MODEL_DONE = TRUE;
 	RUN_MODEL = FALSE;
@@ -136,61 +133,53 @@ void main(int argc, char *argv[])
 				global_param.dt);
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
+      /** Read Elevation Band Data if Used **/
+      read_snowband(infiles.snowband,rec,soil_con.gridcel,
+		    (double)soil_con.elevation,
+		    &soil_con.Tfactor,&soil_con.Pfactor,&soil_con.AreaFract);
+
       /** Make Date Data Structure **/
       dmy      = make_dmy(global_param);
 
       /** Make Precipitation Distribution Control Structure **/
-      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
-      for(i=0;i<Ndist;i++) {
-        prcp.dist[i].veg_var  = make_veg_var(veg_con[0].vegetat_type_num);
-        prcp.dist[i].cell     = make_cell_data(veg_con[0].vegetat_type_num+1,
-                                options.Nlayer);
-        if(options.FULL_ENERGY || options.SNOW_MODEL) {
-          prcp.dist[i].snow = make_snow_data(veg_con[0].vegetat_type_num+1);
-          prcp.dist[i].energy = make_energy_bal(veg_con[0].vegetat_type_num+1,
-                                &global_param.Ulayer,&global_param.Llayer);
-        }
-      }
+      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
+				&global_param.Nnodes);
 
       /** Initialize Soil and Vegetation Variables **/
       fprintf(stderr,"Initializing Variables\n");
       for(i=0;i<Ndist;i++) {
-        initialize_soil(prcp.dist[i].cell,soil_con,
-            veg_con[0].vegetat_type_num);
-        initialize_veg(prcp.dist[i].veg_var,veg_con,global_param);
+        initialize_soil(prcp.cell[i],soil_con,
+			veg_con[0].vegetat_type_num);
+        initialize_veg(prcp.veg_var[i],veg_con,global_param);
       }
 
       /**************************************************
-        Initialize Meteological Forcing Values That
-        Have not Been Specifically Set
-      **************************************************/
+         Initialize Meteological Forcing Values That
+         Have not Been Specifically Set
+       **************************************************/
       initialize_atmos(atmos,dmy,(double)soil_con.time_zone_lng,
 		       (double)soil_con.lng,(double)soil_con.lat,
 		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
-		       global_param.nrecs,global_param.dt);
+		       soil_con.Tfactor,global_param.nrecs,global_param.dt);
 
       if(!options.FULL_ENERGY)
         rad_and_vpd(atmos,soil_con,global_param.nrecs,dmy);
 
       /**************************************************
-        Initialize Energy Balance and Snow Variables 
-      **************************************************/
-      if(options.FULL_ENERGY || options.SNOW_MODEL) {
+         Initialize Energy Balance and Snow Variables 
+       **************************************************/
+      if(options.SNOW_MODEL) {
         fprintf(stderr,"Snow Model Initialization\n");
-        for(i=0;i<Ndist;i++)
-          initialize_snow(prcp.dist[i].snow,veg_con[0].vegetat_type_num,
-			  infiles.init_snow);
+	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
+			infiles.init_snow);
       }
       if(options.FULL_ENERGY) {
-	for(i=0;i<Ndist;i++) {
-	  fprintf(stderr,"Full Energy Model Initialization\n");
-          initialize_energy_bal(prcp.dist[i].energy,
-				prcp.dist[i].cell,soil_con,
-				atmos[0].air_temp,
-				veg_con[0].vegetat_type_num,
-				global_param.Ulayer,
-				global_param.Llayer,infiles.init_soil);
-	}
+	fprintf(stderr,"Energy Balance Initialization\n");
+	initialize_energy_bal(prcp.energy,prcp.cell,&soil_con,
+			      atmos[0].air_temp,prcp.mu,
+			      veg_con[0].vegetat_type_num,
+			      global_param.Nnodes,
+			      Ndist,infiles.init_soil);
       }
 
       fprintf(stderr,"Running Model\n");
@@ -203,23 +192,10 @@ void main(int argc, char *argv[])
 	Intialize Moisture and Energy Balance Error Checks
 	***************************************************/
       storage = 0.;
-      for(index=0;index<options.Nlayer;index++) {
-	storage += (prcp.dist[0].cell[0].layer[index].moist_thaw 
-	         * prcp.dist[0].cell[0].layer[index].tdepth
-	         / soil_con.depth[index]);
-	storage += (prcp.dist[0].cell[0].layer[index].moist_froz 
-	         * (prcp.dist[0].cell[0].layer[index].fdepth 
-	         - prcp.dist[0].cell[0].layer[index].tdepth)
-	         / soil_con.depth[index]);
-	storage += (prcp.dist[0].cell[0].layer[index].moist
-      	         * (soil_con.depth[index]
-                 - prcp.dist[0].cell[0].layer[index].fdepth)
-                 / soil_con.depth[index]);
-	storage += (prcp.dist[0].cell[0].layer[index].ice 
-	         * (prcp.dist[0].cell[0].layer[index].fdepth
-	         - prcp.dist[0].cell[0].layer[index].tdepth)
-	         / soil_con.depth[index]);
-      }
+      for(index=0;index<options.Nlayer;index++)
+	storage += find_total_layer_moisture(prcp.cell[0][0][0].layer[index],
+					     soil_con.depth[index]);
+      if(options.SNOW_MODEL) storage += prcp.snow[0][0].swq * 1000.;
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
@@ -233,7 +209,7 @@ void main(int argc, char *argv[])
         else LASTREC = FALSE;
 
         dist_prec(&atmos[rec],&prcp,soil_con,veg_con,
-                  dmy,global_param,outfiles,rec,cellnum,&STILL_STORM,
+                  dmy,global_param,outfiles,rec,cellnum,
                   NEWCELL,LASTREC);
         NEWCELL=FALSE;
 
@@ -245,8 +221,17 @@ void main(int argc, char *argv[])
       free((char *)veg_con);
       free((char *)atmos);  
       free((char *)dmy);
-      if(options.RADAR) free((char *)mu);
-
-    }	/* End Run Model Loop */
+      free((char *)soil_con.AreaFract);
+      free((char *)soil_con.Tfactor);
+      free((char *)soil_con.Pfactor);
+      if(options.FROZEN_SOIL) {
+	free((char*)soil_con.dz_node);
+	free((char*)soil_con.expt_node);
+	free((char*)soil_con.max_moist_node);
+	free((char*)soil_con.alpha);
+	free((char*)soil_con.beta);
+	free((char*)soil_con.gamma);
+      }
+    }	/* End Run Model Condition */
   } 	/* End Grid Loop */
 }	/* End Main Program */

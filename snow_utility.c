@@ -29,7 +29,6 @@ double snow_density(int date,
 **********************************************************************/
 
   double density;
-  double new_snow_density = 185.0;
   double delta_depth;
   double density_new;
   double depth_new;

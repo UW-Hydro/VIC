@@ -4,7 +4,7 @@
 
 void write_vegvar(veg_var_struct veg, int n)
 /**********************************************************************
-	write_vegvar		Keith Cherkauer		May 29, 1996
+  write_vegvar		Keith Cherkauer		May 29, 1996
 
   This routine writes vegetation variables to stdout.  Used primarily
   for debugging purposes.

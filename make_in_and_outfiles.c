@@ -22,11 +22,10 @@ filenames_struct make_in_and_outfiles(infiles_struct *infp,
 {
   extern option_struct options;
   extern debug_struct debug;
-
-  char latchar[10], lngchar[10], junk[5];
-  int layer;
-  filenames_struct fnames;
   extern FILE *open_file(char string[], char type[]);
+
+  char             latchar[10], lngchar[10], junk[5];
+  filenames_struct fnames;
 
   sprintf(junk, "%%.%if", options.GRID_DECIMAL);
   sprintf(latchar, junk, soil.lat);
@@ -48,17 +47,6 @@ filenames_struct make_in_and_outfiles(infiles_struct *infp,
     if((strcasecmp(options.FORCE_TYPE,"SAWD"))==0) options.HP = FALSE;
   }
   else if((strcasecmp(options.FORCE_TYPE,"SAWD"))==0) options.HP = TRUE;
-
-  /** If using radar precipitation data **/
-  if(options.RADAR) {
-    strcpy(filenames.radar_prcp, "../radar_prec/");
-    strcat(filenames.radar_prcp, "radar_prec");
-    strcat(filenames.radar_prcp, "_");
-    strcat(filenames.radar_prcp, latchar);
-    strcat(filenames.radar_prcp, "_");
-    strcat(filenames.radar_prcp, lngchar);
-    infp->radar_prcp = open_file(filenames.radar_prcp, "r");
-  }
 
   /** Initial Soil Variables Read from File **/
   if((options.FULL_ENERGY || options.FROZEN_SOIL)&& options.INIT_SOIL) {

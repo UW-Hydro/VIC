@@ -23,14 +23,12 @@ void read_PILPS2c(atmos_data_struct *temp,
 
 **********************************************************************/
 {
-  extern option_struct options;
   extern debug_struct debug;
   extern param_set_struct param_set;
   
-  int    i, j, n, rec, maxline = 210;
+  int    i, n, rec, maxline = 210;
   int    year, month, day, hour;
-  char   str[210],jnkstr[MAXSTRING];
-  char   errstr[MAXSTRING];
+  char   str[210];
   
   /** Count Records **/
   n = 0;

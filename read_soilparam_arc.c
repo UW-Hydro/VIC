@@ -97,8 +97,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   int             layer;
   int             cnt;
   soil_con_struct temp; 
-  double          max_moist_tot;
-  double          maxsoilmoist2factor;
   double          Wcr_FRACT;
   double          Wpwp_FRACT;
   double          off_gmt;
@@ -315,6 +313,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	                 * temp.depth[layer];
       temp.quartz += sand[layer]/100. * temp.depth[layer];
       temp.max_moist[layer] = temp.depth[layer] * porosity[layer] * 1000.;
+      if(temp.init_moist[layer] > temp.max_moist[layer]) 
+	temp.init_moist[layer] = temp.max_moist[layer];
       temp.bubble += exp(5.3396738 + 0.1845038*clay[layer] 
 			 - 2.48394546*porosity[layer] 
 			 - 0.00213853*pow(clay[layer],2.)

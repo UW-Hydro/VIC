@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
@@ -19,7 +18,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   int    Nveg_type;
   char   str[MAXSTRING];
   double dum;
-  double height;
 
   rewind(veglib);
   fgets(str,MAXSTRING,veglib);

@@ -2,9 +2,19 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+#define DAYLENGTH 0.0           /* daylength coefficient: selects a */
+                                /* definition for sunrise/sunset :  */
+                                /* 0.0 : center of sun even with horizon */
+                                /* 0.26667 : top of sun even w/ horizon  */
+                                /* 0.8333 : top of sun apparently even   */
+
 /*******************************************************************************
-*
   Function to calculate the daily incoming shortwave in W/m2 (Shuttleworth 1993)
+
+  Modifications:
+  08-04-98 Code was modified to use Reiner's corrections so that it would
+           function correctly in high latitudes during global simulations KAC
+
 *******************************************************************************/
 double in_shortwave(float lat, int day, double trans)
 {
@@ -14,10 +24,23 @@ double in_shortwave(float lat, int day, double trans)
   double dist;                  /* relative distance bewteen earth and sun */
   double lat_rad;               /* latitude in radians */
 
-  declination = 0.4093 * sin(2.0 * PI/DAYS_PER_YEAR * day - 1.405);
   lat_rad = lat * DtoR;
  
-  omega_s = acos(-tan(lat_rad)*tan(declination));
+  /** Old calculations for net shortwave radiation **/
+/*   declination = 0.4093 * sin(2.0 * PI/DAYS_PER_YEAR * day - 1.405); */
+/*   omega_s = acos(-tan(lat_rad)*tan(declination)); */
+ 
+  /** Reiner's correction for global simulations **/
+  declination = asin(0.39795 * cos(0.2163108 + 2. *
+	        atan(0.9671396 * tan(0.00860*(day-186)))));
+
+  omega_s = (sin(DAYLENGTH*PI/180.)+sin(lat_rad)*sin(declination)) /
+    (cos(lat_rad)*cos(declination));
+  if(omega_s < -1.)
+    omega_s = -1.;
+  else if(omega_s > 1.) 
+    omega_s = 1.;
+  omega_s = PI - acos(omega_s);
  
   dist = 1.0 + 0.033 * cos(2.0 * PI/DAYS_PER_YEAR * day);
  
@@ -62,4 +85,4 @@ double net_out_longwave(double trans,
   return longwave;
 }
 
-
+#undef DAYLENGTH

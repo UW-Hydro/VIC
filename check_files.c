@@ -11,11 +11,14 @@ void check_files(infiles_struct *infp,
 
 **********************************************************************/
 {
-  extern FILE *open_file(char string[], char type[]);
+  extern option_struct  options;
+  extern FILE          *open_file(char string[], char type[]);
 
   infp->soilparam   = open_file(fnames.soil, "r");
   infp->veglib      = open_file(fnames.veglib, "r");
   infp->vegparam    = open_file(fnames.veg, "r");
+  if(options.SNOW_BAND>1)
+    infp->snowband    = open_file(fnames.snow_band, "r");
 }
 
 

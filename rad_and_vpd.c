@@ -3,11 +3,11 @@
 #include <vicNl.h>
 
 void rad_and_vpd (atmos_data_struct *atmos, 
-		  soil_con_struct soil_con,
-		  int nrecs, 
-		  dmy_struct *dmy)
+		  soil_con_struct    soil_con,
+		  int                nrecs, 
+		  dmy_struct        *dmy)
 /**********************************************************************
-  	rad_and_vpd
+  rad_and_vpd           Dag Lohmann and Bart Nijssen            1995
 
   This subroutine calculates net radation and the vapor pressure 
   deficit at the current time step for the current grid cell.  The

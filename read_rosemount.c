@@ -16,19 +16,14 @@ void read_rosemount(atmos_data_struct *temp,
 
 **********************************************************************/
 {
-  extern option_struct options;
   extern debug_struct debug;
   extern param_set_struct param_set;
 
-  int    i, j, n, rec, maxline = 210;
+  int    i, n, rec, maxline = 210;
   int    FIRST = TRUE;
   int    day, year, hour;
   char   str[210];
   double junk;
-  double jdate;
-  double declination, sin_alpha, tau;
-  double I0, Ic, m, f, radius;
-  double tmax, tmin;
 
   n = 0;
   while (fgets(str,maxline,snowf) != '\0') n++;

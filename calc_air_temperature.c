@@ -77,8 +77,8 @@ void HourlyT(int Dt, int *TmaxHour, double *Tmax,
   int nHours;
 
   nHours = HOURSPERDAY;
-  n = 6;
-  x = (double *) calloc(n, sizeof(double));
+  n     = 6;
+  x     = (double *) calloc(n, sizeof(double));
   Tyc1  = (double *) calloc(n, sizeof(double));
   yc2   = (double *) calloc(n, sizeof(double));
   yc3   = (double *) calloc(n, sizeof(double));
@@ -116,34 +116,12 @@ void HourlyT(int Dt, int *TmaxHour, double *Tmax,
   /* interpolate the temperatures */
   for (i = 0, hour = 0.5*Dt+HOURSPERDAY; i < nHours; i++, hour += Dt) {
     Tair[i] = hermint(hour, n, x, Tyc1, yc2, yc3, yc4);
-/*****
-    if(Tair[i]<Tmin[1]) 
-      fprintf(stderr,"WARNING: Estimated air temperature less than daily minimum in hour %i\n",hour-HOURSPERDAY);
-    if(Tair[i]>Tmax[1]) 
-      fprintf(stderr,"WARNING: Estimated air temperature greater than daily maximum in hour %i\n",hour-HOURSPERDAY);
-*****/
   }
 
-  free(x);
-  free(Tyc1);
-  free(yc2);
-  free(yc3);
-  free(yc4);
+  free((char*)x);
+  free((char*)Tyc1);
+  free((char*)yc2);
+  free((char*)yc3);
+  free((char*)yc4);
 }
-
-
-
-/*****double calc_air_temperature(double *tmax, double *tmin, int hour) {*****/
-/**********************************************************************
-  calc_air_temperature.c	Keith Cherkauer		March 7, 1998
-
-  This subroutine is based on equations from the NWS snow melt model,
-  which estimate air temperature based on minimum and maximum daily
-  air temperatures for the 6th, 12th, 18th, and 24th hours of the day.
-
-  Modified:
-  6/12/98  
-
-**********************************************************************/
-
 

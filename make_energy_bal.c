@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-energy_bal_struct *make_energy_bal(int nveg, int *Ulayer, int *Llayer)
+energy_bal_struct **make_energy_bal(int nveg, int *Nnodes)
 /**********************************************************************
 	make_energy_bal	Keith Cherkauer		May 26, 1996
 
@@ -13,31 +13,35 @@ energy_bal_struct *make_energy_bal(int nveg, int *Ulayer, int *Llayer)
 {
   extern option_struct options;
 
-  int i;
-  energy_bal_struct *temp;
+  int i, j;
+  energy_bal_struct **temp;
 
-  temp = (energy_bal_struct*) calloc(nveg, 
-                                  sizeof(energy_bal_struct));
+  temp = (energy_bal_struct**) calloc(nveg, 
+                                  sizeof(energy_bal_struct*));
 
   /** Initialize all records to unfrozen conditions */
   for(i=0;i<nveg;i++) {
-    temp[i].frozen = FALSE;
-    if(options.FROZEN_SOIL) {
-      temp[i].T = (double *)calloc( *Ulayer+ *Llayer+2, sizeof(double));
-      temp[i].dz = (double *)calloc( *Ulayer+ *Llayer+2, sizeof(double));
-      temp[i].ice = (double *)calloc( *Ulayer+ *Llayer+2, sizeof(double));
-    }
-    else if(options.FULL_ENERGY) {
-      *Ulayer = 1;
-      *Llayer = 1;
-      temp[i].T = (double *)calloc(4, sizeof(double));
-      temp[i].dz = (double *)calloc(4, sizeof(double));
-      temp[i].ice = NULL;
-    }
-    else {
-      temp[i].T = NULL;
-      temp[i].dz = (double *)calloc(options.Nlayer, sizeof(double));
-      temp[i].ice = NULL;
+    temp[i] = (energy_bal_struct*) calloc(options.SNOW_BAND, 
+					  sizeof(energy_bal_struct));
+    for(j=0;j<options.SNOW_BAND;j++) {
+      temp[i][j].frozen = FALSE;
+      if(options.FROZEN_SOIL) {
+	temp[i][j].T   = (double *)calloc( *Nnodes, sizeof(double));
+	temp[i][j].dz  = (double *)calloc( *Nnodes, sizeof(double));
+	temp[i][j].ice = (double *)calloc( *Nnodes, sizeof(double));
+      }
+      else if(options.FULL_ENERGY) {
+	*Nnodes        = 3;
+	temp[i][j].T   = (double *)calloc(3, sizeof(double));
+	temp[i][j].dz  = (double *)calloc(3, sizeof(double));
+	temp[i][j].ice = NULL;
+      }
+      else {
+	*Nnodes        = 0;
+	temp[i][j].T   = NULL;
+	temp[i][j].dz  = (double *)calloc(options.Nlayer, sizeof(double));
+	temp[i][j].ice = NULL;
+      }
     }
   }
 

@@ -16,14 +16,17 @@ double func_surf_energy_bal(double Ts, va_list ap)
   "Insights of the Ground Heat Flux in Land Surface Parameterization
   Schemes."
 
-  Modified 4-14-98 to compute evapotranspiration within this routine
-  in the hopes of reducing the number of iteration needed to find a
-  solution surface temperature.                                 KAC
+  Modifications:
+  04-14-98 modified to compute evapotranspiration within this routine
+           in the hopes of reducing the number of iteration 
+	  needed to find a solution surface temperature.       KAC
+  07-13-98 modified to include elevation bands for vegetation 
+           and snow                                             KAC
 
 **********************************************************************/
 {
   extern option_struct options;
-  extern debug_struct debug;
+  extern debug_struct  debug;
 
   /** Thermal Properties **/
   double T2;		/** average soil temperature (C) **/
@@ -62,9 +65,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double             max_infil;
   double             dt;
   double             vpd;
-  double             rainfall;
-  double             Wdew;
   double             snow_energy;
+  double             mu;
+  double             Tfactor;
+  double             Pfactor;
+  double            *rainfall;
+  double            *Wdew;
   double            *grnd_flux;
   double            *T1;
   double            *latent_heat;
@@ -76,18 +82,33 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double            *depth;
   double            *Wcr;
   double            *Wpwp;
-  layer_data_struct *layer;
-  veg_var_struct    *veg_var;
-  char               VEG;
-  char               CALC_EVAP;
+  double            *T_node;
+  double            *Tnew_node;
+  double            *dz_node;
+  double            *kappa_node;
+  double            *Cs_node;
+  double            *moist_node;
+  double            *expt_node;
+  double            *max_moist_node;
+  double            *ice_node;
+  double            *alpha;
+  double            *beta;
+  double            *gamma;
+  layer_data_struct *layer_wet;
+  layer_data_struct *layer_dry;
+  veg_var_struct    *veg_var_wet;
+  veg_var_struct    *veg_var_dry;
+  int                VEG;
+  int                CALC_EVAP;
   int                veg_class;
   int                month;
+  int                Nnodes;
 
-  double error;
-  double ice;
-  double C1, C2, C3;
-  double heat_capacity;
-  double Evap;		/** Total evap in m/s **/
+  double             error;
+  double             ice;
+  double             Evap;		/** Total evap in m/s **/
+  double             tmp_Tair;
+  double             tmp_rainfall[2];
 
   T2            = (double) va_arg(ap, double);
   Ts_old        = (double) va_arg(ap, double);
@@ -125,9 +146,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   max_infil     = (double) va_arg(ap, double);
   dt            = (double) va_arg(ap, double);
   vpd           = (double) va_arg(ap, double);
-  rainfall      = (double) va_arg(ap, double);
-  Wdew          = (double) va_arg(ap, double);
   snow_energy   = (double) va_arg(ap, double);
+  mu            = (double) va_arg(ap, double);
+  Tfactor       = (double) va_arg(ap, double);
+  Pfactor       = (double) va_arg(ap, double);
+  rainfall      = (double *) va_arg(ap, double *);
+  Wdew          = (double *) va_arg(ap, double *);
   grnd_flux     = (double *) va_arg(ap, double *);
   T1            = (double *) va_arg(ap, double *);
   latent_heat   = (double *) va_arg(ap, double *);
@@ -139,49 +163,93 @@ double func_surf_energy_bal(double Ts, va_list ap)
   depth         = (double *) va_arg(ap, double *);
   Wcr           = (double *) va_arg(ap, double *);
   Wpwp          = (double *) va_arg(ap, double *);
-  layer         = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var       = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  VEG           = (char) va_arg(ap, char);
-  CALC_EVAP     = (char) va_arg(ap, char);
-  veg_class     = (int)  va_arg(ap, int);
-  month         = (int)  va_arg(ap, int);
+  T_node        = (double *) va_arg(ap, double *);
+  Tnew_node     = (double *) va_arg(ap, double *);
+  dz_node       = (double *) va_arg(ap, double *);
+  kappa_node    = (double *) va_arg(ap, double *);
+  Cs_node       = (double *) va_arg(ap, double *);
+  moist_node    = (double *) va_arg(ap, double *);
+  expt_node     = (double *) va_arg(ap, double *);
+  max_moist_node= (double *) va_arg(ap, double *);
+  ice_node      = (double *) va_arg(ap, double *);
+  alpha         = (double *) va_arg(ap, double *);
+  beta          = (double *) va_arg(ap, double *);
+  gamma         = (double *) va_arg(ap, double *);
+  layer_wet     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  layer_dry     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var_wet   = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  veg_var_dry   = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  VEG           = (int) va_arg(ap, int);
+  CALC_EVAP     = (int) va_arg(ap, int);
+  veg_class     = (int) va_arg(ap, int);
+  month         = (int) va_arg(ap, int);
+  Nnodes        = (int) va_arg(ap, int);
 
   /**********************************************
     Compute Surface Temperature at Half Time Step
     **********************************************/
-  *TMean = 0.5 * (Ts + Ts_old);
+  *TMean = Ts;
 
-  /*********************************************************************
-    Estimate the Soil Temperature at the Interface of the Top Two Layers
-    *********************************************************************/
-  C1 = Cs2 * dp / D2 * ( 1. - exp(-D2/dp));
-  C2 = - ( 1. - exp(D1/dp) ) * exp(-D2/dp);
-  C3 = kappa1/D1 - kappa2/D1 + kappa2/D1*exp(-D1/dp);
-
-  *T1 = (kappa1/2./D1/D2*(*TMean) + C1/delta_t*T1_old
-     + (2.*C2-1.+exp(-D1/dp))*kappa2/2./D1/D2*T2)
-     / (C1/delta_t + kappa2/D1/D2*C2 + C3/2./D2);
+  if(!options.FROZEN_SOIL) {
+    /*************************************************
+      Use Xu's Equations to Calculate Thermal Fluxes
+    *************************************************/
+    *T1 = estimate_T1(TMean[0], T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
+		      Cs2, dp, delta_t);
+    
+  }
+  else {
+    /*************************************************************
+      Explicitly Solve Thermal Fluxes For all Soil Thermal Nodes 
+    *************************************************************/
+    T_node[0] = *TMean;
+    solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
+		    moist_node,delta_t,max_moist_node,
+		    bubble,expt_node,ice_node,alpha,
+		    beta,gamma,Nnodes);
+    *T1 = Tnew_node[1];
+  }
 
   /*****************************************************
     Compute the Ground Heat Flux from the Top Soil Layer
-    *****************************************************/
-  *grnd_flux = surf_atten * (kappa1/D1*(*T1 - (*TMean)));
+  *****************************************************/
+  *grnd_flux = surf_atten * (kappa1/D1*((*T1) - (*TMean)));
+
+  /******************************************************
+    Compute the Current Ice Content of the Top Soil Layer
+  ******************************************************/
+  if(options.FROZEN_SOIL && (*TMean+ *T1)/2.<0.) {
+    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,
+					 max_moist,bubble,expt);
+    if(ice<0.) ice=0.;
+    if(ice>max_moist) ice=max_moist;
+  }
+  else ice=0.;
+ 
+  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
+  *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
   /***************************
     Compute Evapotranspiration
-    ***************************/
+  ***************************/
   *rad = (1.0 - albedo) * shortwave + longwave 
        - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux;
-  if(VEG && CALC_EVAP)
-    Evap = canopy_evap(layer,veg_var,TRUE,
-		       veg_class,month,Wdew,Tair,dt,rad[0],vpd,
-		       (1.0 - albedo) * shortwave,Tair,ra,
-		       rainfall,displacement,roughness,ref_height,elevation,
-		       depth,Wcr,Wpwp);
+  if(VEG && CALC_EVAP) {
+    tmp_Tair          = Tair + Tfactor;
+    tmp_rainfall[WET] = rainfall[WET] * Pfactor;
+    tmp_rainfall[DRY] = rainfall[DRY] * Pfactor;
+    Evap = canopy_evap(layer_wet,layer_dry,veg_var_wet,
+		       veg_var_dry,TRUE,
+		       veg_class,month,mu,Wdew,Tair,dt,rad[0],
+		       vpd,(1.0 - albedo) * shortwave,Tair,ra,
+		       displacement,roughness,ref_height,elevation,
+		       tmp_rainfall,depth,Wcr,Wpwp);
+  }
   else if(CALC_EVAP)
-    Evap = arno_evap(layer, rad[0], Tair, vpd, (1.0 - albedo) * shortwave, 
+    Evap = arno_evap(layer_wet, layer_dry, rad[0], Tair, vpd, 
+		     (1.0 - albedo) * shortwave, 
 		     D1, max_moist*depth[0]*1000., elevation, b_infilt, 
-		     Tair, displacement, roughness, ref_height, ra, dt);
+		     Tair, displacement, roughness, ref_height, ra, dt, mu);
   else Evap = 0.;
   
   /**********************************************************************
@@ -195,23 +263,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
     ************************************************/
   *sensible_heat = atmos_density*Cp*(Tair - (*TMean))/ra;
 
-  /******************************************************
-    Compute the Current Ice Content of the Top Soil Layer
-    ******************************************************/
-  if((*TMean+ *T1)/2.<0. && options.FROZEN_SOIL) {
-    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,
-          max_moist,bubble,expt);
-    if(ice<0.) ice=0.;
-    if(ice>max_moist) ice=max_moist;
-  }
-  else ice=0.;
- 
-  /*******************************************
-    Compute Heat Storage in the Top Soil Layer
-    *******************************************/
-  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
-  *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
-
   /*************************************
     Compute Surface Energy Balance Error
     *************************************/
@@ -222,5 +273,42 @@ double func_surf_energy_bal(double Ts, va_list ap)
   *store_error = error;
 
   return error;
+
+}
+
+double estimate_T1(double Ts, 
+		   double T1_old,
+		   double T2,
+		   double D1, 
+		   double D2, 
+		   double kappa1, 
+		   double kappa2, 
+		   double Cs1, 
+		   double Cs2, 
+		   double dp,
+		   double delta_t) {
+/**********************************************************************
+  estimate_T1                Keith Cherkauer          July 15, 1998
+
+  uses Xu Liangs 3-layer energy balance formulation to estimate the 
+  temperature between the first and second layers.  Formerly calculated
+  independently in each of the surface energy balance equation routines.
+
+**********************************************************************/
+
+  double C1;
+  double C2;
+  double C3;
+  double T1;
+
+  C1 = Cs2 * dp / D2 * ( 1. - exp(-D2/dp));
+  C2 = - ( 1. - exp(D1/dp) ) * exp(-D2/dp);
+  C3 = kappa1/D1 - kappa2/D1 + kappa2/D1*exp(-D1/dp);
+
+  T1 = (kappa1/2./D1/D2*(Ts) + C1/delta_t*T1_old
+     + (2.*C2-1.+exp(-D1/dp))*kappa2/2./D1/D2*T2)
+     / (C1/delta_t + kappa2/D1/D2*C2 + C3/2./D2);
+
+  return(T1);
 
 }

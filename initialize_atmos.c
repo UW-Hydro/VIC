@@ -5,14 +5,15 @@
 #define MAXSTR 512
 
 void initialize_atmos(atmos_data_struct *temp,
-                      dmy_struct *dmy,
-                      double theta_l,
-                      double theta_s,
-                      double phi,
-                      double MAX_SNOW_TEMP,
-                      double MIN_RAIN_TEMP,
-                      int nrecs,
-                      int dt)
+                      dmy_struct        *dmy,
+                      double             theta_l,
+                      double             theta_s,
+                      double             phi,
+                      double             MAX_SNOW_TEMP,
+                      double             MIN_RAIN_TEMP,
+		      double            *Tfactor,
+                      int                nrecs,
+                      int                dt)
 /**********************************************************************
 	initialize_atmos	Keith Cherkauer		February 3, 1997
 
@@ -43,16 +44,12 @@ void initialize_atmos(atmos_data_struct *temp,
   extern debug_struct debug;
   extern param_set_struct param_set;
  
-  int    i, j, rec;
+  int    j, rec;
   int    date_cnt;
-  double jdate;
-  double declination, sin_alpha, tau;
-  double I0, Ic, m, f, radius;
+  int    band;
   double tmax, tmin;
-  double i_var;
-  double hour;
-  double last_tskc=0;
   double sat_vp;
+  double min_Tfactor;
 
   if(!param_set.PREC)
     nrerror("ERROR: Precipitation must be given to the model, check input files\n");
@@ -62,15 +59,28 @@ void initialize_atmos(atmos_data_struct *temp,
 
   /** Initialize Variables **/
   date_cnt=1;
+  min_Tfactor = Tfactor[0];
+  for(band=1;band<options.SNOW_BAND;band++)
+    if(Tfactor[band]<min_Tfactor) min_Tfactor = Tfactor[band];
+
+  /** Loop Through All Records **/
   for (rec = 0; rec < nrecs; rec++) {
 
-    if(param_set.TMAX && param_set.TMIN && !param_set.AIR_TEMP)
+    if(param_set.TMAX && param_set.TMIN 
+       && (!param_set.AIR_TEMP || ! options.FULL_ENERGY))
       temp[rec].air_temp = (temp[rec].tmax + temp[rec].tmin) / 2.;
 
     if(options.FULL_ENERGY || options.SNOW_MODEL) {
-      /** Set snow/rain division **/
-      temp[rec].rainonly = calc_rainonly(temp[rec].air_temp, temp[rec].prec,
-					 MAX_SNOW_TEMP,MIN_RAIN_TEMP);
+      /** Set snow/rain division for highest elevation band **/
+	
+      if(!options.FULL_ENERGY)
+	temp[rec].rainonly 
+	  = calc_rainonly(temp[rec].tmin+min_Tfactor, temp[rec].prec,
+			  MAX_SNOW_TEMP,MIN_RAIN_TEMP);
+      else
+	temp[rec].rainonly 
+	  = calc_rainonly(temp[rec].air_temp+min_Tfactor, temp[rec].prec,
+			  MAX_SNOW_TEMP,MIN_RAIN_TEMP);
 
       /** Initialize snow melt **/
       temp[rec].melt = 0.0;             /** melt will be calculated **/

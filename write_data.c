@@ -3,7 +3,7 @@
 #include <vicNl.h>
 
 void write_data(out_data_struct *out_data,
-		outfiles_struct outfiles,
+		outfiles_struct  outfiles,
 		dmy_struct      *dmy)
 /**********************************************************************
 	write_data	Dag Lohmann		Janurary 1996
@@ -100,6 +100,8 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
     tmp_fptr[0] = (float)out_data->snow_canopy;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+/*     tmp_fptr[0] = (float)out_data->coverage; */
+/*     fwrite(tmp_fptr,1,sizeof(float),outfiles.snow); */
     if(options.FULL_ENERGY) {
       tmp_fptr[0] = (float)out_data->advection;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
@@ -115,9 +117,9 @@ void write_data(out_data_struct *out_data,
     /***** Write ASCII full energy snow output file *****/
     fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
-	    out_data->swq, out_data->snow_depth, out_data->snow_canopy,
-            out_data->advection, out_data->deltaCC, out_data->snow_flux,
-	    out_data->refreeze_energy);
+	    out_data->swq, out_data->snow_depth, out_data->snow_canopy, 
+	    /* out_data->coverage, */ out_data->advection, out_data->deltaCC, 
+	    out_data->snow_flux, out_data->refreeze_energy);
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
     /***** Write ASCII water balance snow output file *****/
@@ -239,16 +241,16 @@ void calc_water_balance_error(int    rec,
   else {
     error = inflow - outflow - (storage - last_storage);
     cum_error += error;
-    last_storage = storage;
-    if(fabs(error)>fabs(error) && fabs(error)>1e-5) {
+    if(fabs(error)>fabs(max_error) && fabs(error)>1e-5) {
       max_error = error;
-      fprintf(stderr,"Maximum Moist Error:\t%i\t%.4lf\t%.4lf\n",
+      fprintf(stderr,"Maximum Moist Error:\t%i\t%.5lf\t%.5lf\n",
 	      rec,error,cum_error);
     }
     if(rec==Nrecs-1) {
       fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4lf\n",
 	      cum_error);
     }
+    last_storage = storage;
   }
 
 }

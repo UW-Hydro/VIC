@@ -3,13 +3,13 @@
 #include <string.h>
 #include <vicNl.h>
  
-void close_files(infiles_struct inf,
-                 outfiles_struct outf,
+void close_files(infiles_struct   inf,
+                 outfiles_struct  outf,
                  filenames_struct fnames)
 /**********************************************************************
 	close_files	Dag Lohmann		January 1996
 
-  This routine closes all data files.
+  This routine closes all forcing data files, and output files.
 
   Modifications:
   7-19-96  Files are now gzipped when they are closed.  This
@@ -21,9 +21,6 @@ void close_files(infiles_struct inf,
   extern option_struct options;
   extern debug_struct debug;
 
-  int layer;
-  char command[MAXSTRING];
-
   /**********************
     Close All Input Files
     **********************/
@@ -33,10 +30,6 @@ void close_files(infiles_struct inf,
   if(strcasecmp(fnames.forcing[1],"FALSE")!=0) {
     fclose(inf.forcing[1]);
     if(options.COMPRESS) compress_files(fnames.forcing[1]);
-  }
-  if(options.RADAR) {
-    fclose(inf.radar_prcp);
-    if(options.COMPRESS) compress_files(fnames.radar_prcp);
   }
 
   /*******************

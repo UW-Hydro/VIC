@@ -131,14 +131,14 @@ double volumetric_heat_capacity(double soil_fract,
 
 #undef organic_fract
 
-void distribute_soil_property(double *dz,
-                              double fdepth,
-                              double tdepth,
+void distribute_soil_property(double  *dz,
+                              double   fdepth,
+                              double   tdepth,
                               double **l_param,
-                              int Nlayer,
-                              int Tlayer,
-                              double *depth,
-                              double *param) {
+                              int      Nlayer,
+                              int      Nnodes,
+                              double  *depth,
+                              double  *param) {
 /**********************************************************************
   This subroutine distributes soil parameters calculated for freezing,
   thawing, upper, and lower soil layers, for all layers used by the
@@ -156,14 +156,14 @@ void distribute_soil_property(double *dz,
   double Ltmp, Ftmp, Ttmp, Ztmp;
 
   dz[0] /= 2.;
-  while(dz[Tlayer-1]<=0) Tlayer--;
-  dz[Tlayer-1] /= 2.;
+  while(dz[Nnodes-1]<=0) Nnodes--;
+  dz[Nnodes-1] /= 2.;
 
   Zsum=0.;
   Lsum = depth[0];
   lindex=l2index=0;
 
-  for(zindex=0;zindex<Tlayer;zindex++) {
+  for(zindex=0;zindex<Nnodes;zindex++) {
     Ltmp = (double)((int)(((Lsum - Zsum)+0.0005)*1000.))/1000.;
     Ftmp = (double)((int)(((fdepth - Zsum)+0.0005)*1000.))/1000.;
     Ttmp = (double)((int)(((tdepth - Zsum)+0.0005)*1000.))/1000.;
@@ -234,20 +234,18 @@ void distribute_soil_property(double *dz,
   }
 
   dz[0] *= 2.;
-  dz[Tlayer-1] *= 2.;
+  dz[Nnodes-1] *= 2.;
 
 }
 
-void soil_thermal_calc(soil_con_struct soil_con,
+void soil_thermal_calc(soil_con_struct    soil_con,
                        layer_data_struct *layer,
-                       energy_bal_struct energy,
-                       double *kappa,
-                       double *Cs, 
-                       double *moist,
-                       double *expt,
-                       double *max_moist,
-                       int Nlayer,
-                       int Tlayer) {
+                       energy_bal_struct  energy,
+                       double            *kappa,
+                       double            *Cs, 
+                       double            *moist,
+                       int                Nlayer,
+                       int                Nnodes) {
 /**********************************************************************
   This subroutine will calculate thermal conductivity and volumetric
   heat capacity for frozen, thawed, and unfrozen sublayers, of each
@@ -259,13 +257,13 @@ void soil_thermal_calc(soil_con_struct soil_con,
   extern option_struct options;
   extern debug_struct debug;
 
-  int zindex, index;
-  double Lsum, Zsum;
+  int      zindex, index;
+  double   Lsum, Zsum;
   double **K_layer;
   double **Cs_layer;
   double **moist_layer;
-  double *depth_mm;
-  double unfrozen;
+  double  *depth_mm;
+  double   unfrozen;
 
   depth_mm = (double *)calloc(options.Nlayer,sizeof(double));
   for(index=0;index<options.Nlayer;index++) 
@@ -275,44 +273,29 @@ void soil_thermal_calc(soil_con_struct soil_con,
 
     moist_layer = (double **)calloc(options.Nlayer,sizeof(double*));
     for(index=0;index<options.Nlayer;index++) {
-      moist_layer[index] = (double *)calloc(3,sizeof(double));
-      moist_layer[index][0] = layer[index].moist_thaw / depth_mm[index];
-      moist_layer[index][1] = layer[index].moist_froz / depth_mm[index];
+      moist_layer[index]     = (double *)calloc(3,sizeof(double));
+      moist_layer[index][0]  = layer[index].moist_thaw / depth_mm[index];
+      moist_layer[index][1]  = layer[index].moist_froz / depth_mm[index];
       moist_layer[index][1] += layer[index].ice / depth_mm[index];
-      moist_layer[index][2] = layer[index].moist / depth_mm[index];
+      moist_layer[index][2]  = layer[index].moist / depth_mm[index];
     }
     distribute_soil_property(energy.dz,energy.fdepth[0],energy.fdepth[1],
-        moist_layer,options.Nlayer,Tlayer,soil_con.depth,moist);
+        moist_layer,options.Nlayer,Nnodes,soil_con.depth,moist);
     for(index=0;index<options.Nlayer;index++) free((char*)moist_layer[index]);
     free((char*)moist_layer);
 
     Lsum = 0.;
     Zsum = 0.;
     index = 0;
-    for(zindex=0;zindex<Tlayer;zindex++) {
-
-      if(Zsum+energy.dz[zindex]/2.>=Lsum+soil_con.depth[index]) {
-        expt[zindex] = (soil_con.expt[index]*(Lsum+soil_con.depth[index]
-                     - (Zsum-energy.dz[zindex]/2.))
-                     + soil_con.expt[index+1]*(Zsum+energy.dz[zindex]/2.
-                     - soil_con.depth[index]))/energy.dz[zindex];
-        max_moist[zindex] = (soil_con.max_moist[index]/depth_mm[index]
-                          * (Lsum+soil_con.depth[index]
-                          - (Zsum-energy.dz[zindex]/2.))
-                          + soil_con.max_moist[index+1]/depth_mm[index+1]
-                          * (Zsum+energy.dz[zindex]/2. - soil_con.depth[index]))
-                          / energy.dz[zindex];
-      }
-      else {
-        expt[zindex] = soil_con.expt[index];
-        max_moist[zindex] = soil_con.max_moist[index] / depth_mm[index];
-      }
+    for(zindex=0;zindex<Nnodes;zindex++) {
 
       if(energy.T[zindex]<0.) {
         unfrozen = maximum_unfrozen_water(energy.T[zindex],
-            max_moist[zindex], soil_con.bubble, expt[zindex]);
-        if(unfrozen>max_moist[zindex] || unfrozen<0.)
-          unfrozen = max_moist[zindex];
+					  soil_con.max_moist_node[zindex], 
+					  soil_con.bubble, 
+					  soil_con.expt_node[zindex]);
+        if(unfrozen>soil_con.max_moist_node[zindex] || unfrozen<0.)
+          unfrozen = soil_con.max_moist_node[zindex];
         if(unfrozen > moist[zindex]) unfrozen = moist[zindex];
         kappa[zindex] = frozen_soil_conductivity(moist[zindex],unfrozen,
             soil_con.soil_density,soil_con.bulk_density[index],
@@ -322,12 +305,14 @@ void soil_thermal_calc(soil_con_struct soil_con,
       }
       else {
         kappa[zindex] = soil_conductivity(moist[zindex],
-            soil_con.soil_density,soil_con.bulk_density[index],soil_con.quartz);
+					  soil_con.soil_density,
+					  soil_con.bulk_density[index],
+					  soil_con.quartz);
         Cs[zindex] = volumetric_heat_capacity(soil_con.bulk_density[index]
             / soil_con.soil_density, moist[zindex], 0.);
       }
   
-      if(zindex<Tlayer-1) {
+      if(zindex<Nnodes-1) {
         Zsum += (energy.dz[zindex] + energy.dz[zindex+1]) / 2.;
         if((int)(((Zsum - Lsum)+0.0005)*1000.) > (int)(depth_mm[index])) {
           Lsum += soil_con.depth[index];
@@ -375,9 +360,11 @@ void soil_thermal_calc(soil_con_struct soil_con,
           / soil_con.soil_density,layer[index].moist_thaw/depth_mm[index],0.0);
     else Cs_layer[index][0] = Cs_layer[index][2];
     if(layer[index].fdepth > 0.0)
-      Cs_layer[index][1] = volumetric_heat_capacity(soil_con.bulk_density[index]
-          / soil_con.soil_density,layer[index].moist_froz/depth_mm[index],
-          layer[index].ice/depth_mm[index]);
+      Cs_layer[index][1] 
+	= volumetric_heat_capacity(soil_con.bulk_density[index]
+				   / soil_con.soil_density,
+				   layer[index].moist_froz/depth_mm[index],
+				   layer[index].ice/depth_mm[index]);
     else Cs_layer[index][1] = Cs_layer[index][2];
   
   } 
@@ -430,7 +417,7 @@ void find_0_degree_fronts(energy_bal_struct *energy,
                           double *depth,
                           double *T,
                           int Nlayer,
-                          int Tlayer) {
+                          int Nnodes) {
 /**********************************************************************
   This subroutine finds the freezing and thawing fronts, and locates
   them within the fixed soil layers.
@@ -439,9 +426,10 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   int i, index;
   double Zsum, Lsum;
   double tdepth, fdepth;
+  double MINLAYER = 0.001;
 
   /** Calculate New Layer Depths **/
-  index=Tlayer-1;
+  index=Nnodes-1;
   Zsum = dp;
   fdepth=tdepth=0;
   if(T[index]>0.0) {
@@ -478,6 +466,7 @@ void find_0_degree_fronts(energy_bal_struct *energy,
     fdepth=Zsum;
   }
 
+  if(fdepth-tdepth < MINLAYER) fdepth = tdepth = 0.;
   energy->fdepth[0] = fdepth;
   energy->fdepth[1] = tdepth;
 
@@ -618,24 +607,33 @@ void redistribute_moisture(layer_data_struct *layer,
 }
 
 void find_sublayer_temperatures(layer_data_struct *layer,
-                                double *T,
-                                double *dz,
-                                double *depth,
-                                double fdepth,
-                                double tdepth,
-                                int Nlayer,
-                                int Tlayer) {
+                                double            *T,
+                                double            *dz,
+                                double            *depth,
+                                double             fdepth,
+                                double             tdepth,
+                                int                Nlayer,
+                                int                Nnodes) {
 /**********************************************************************
   This subroutine computes the soil temperature for each layer and 
   it's subdivisions.
 **********************************************************************/
 
   int i, lindex, zindex;
-  double Zsum, Lsum;
-  double Ltmp, Ftmp, Ttmp, Ztmp;
-  double Tstr, Tavg;
-  double tmpsum;
-  double T1, T2;
+  double Zsum;   /** Total depth of soil thermal layers from surface **/
+  double Lsum;   /** Total depth of soil moisture layers from surface **/
+  double Ztmp;   /** Depth of current soil thermal layer **/
+  double Ltmp;   /** Thickness of soil moisture layer below last 
+		     thermal layer **/
+  double Ftmp;   /** Depth from current soil thermal layer to frost depth **/ 
+  double Ttmp;   /** Depth from current soil thermal layer to thaw depth **/
+  double Tstr;   /** Stored temperature for current soil thermal layer **/
+  double Tavg;   /** Averaged temperature for current soil moisture 
+		     sublayer **/
+  double tmpsum; /** Thickness of stored temperatures (Tstr) for current 
+		     layer **/
+  double T1;     /** Temperature of last thermal node **/
+  double T2;     /** Temperature of current soil thermal node **/
 
   Zsum=0.;
   Lsum = depth[0];
@@ -647,190 +645,196 @@ void find_sublayer_temperatures(layer_data_struct *layer,
   Tavg = 0.;
   tmpsum = 0.;
 
-  for(zindex=0;zindex<Tlayer-1;zindex++) {
-    Ltmp = Lsum - Zsum;
-    Ftmp = fdepth - Zsum;
-    Ttmp = tdepth - Zsum;
-    Ztmp = (dz[zindex]+dz[zindex+1])/2.;
+  for(zindex=0;zindex<Nnodes-1;zindex++) {
+    if(lindex<Nlayer) {
+      Ltmp = Lsum - Zsum;
+      Ftmp = fdepth - Zsum;
+      Ttmp = tdepth - Zsum;
+      Ztmp = (dz[zindex]+dz[zindex+1])/2.;
+      
+      T1 = T[zindex];
+      T2 = T[zindex+1];
+      
+      if(Ttmp>Ztmp && Ltmp>Ztmp) {
+	Tstr = 0.5*(T1+T2)*Ztmp;
+	tmpsum += Ztmp;
+      }
+      else if(Ttmp<=0 && Ftmp>Ztmp && Ltmp>Ztmp) {
+	Tstr = 0.5*(T1+T2)*Ztmp;
+	tmpsum += Ztmp;
+      }
+      else if(Ttmp<=0 && Ftmp<=0 && Ltmp>Ztmp) {
+	Tstr = 0.5*(T1+T2)*Ztmp;
+	tmpsum += Ztmp;
+      }
+      else if(Ttmp>0 && Ttmp<=Ztmp && Ftmp>Ztmp && Ltmp>Ztmp) {
+	Tavg += 0.5*(T1+0.)*Ttmp;
+	tmpsum += Ttmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	Tavg = 0.;
+	tmpsum = Ztmp - Ttmp;
+	Tstr = 0.5*(0.+T2)*tmpsum;
+      }
+      else if(Ttmp<=0 && Ftmp>0 && Ftmp<=Ztmp && Ltmp>Ztmp) {
+	Tavg += 0.5*(T1+0.)*Ftmp;
+	tmpsum += Ftmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_froz = Tavg;
+	Tavg = 0.;
+	tmpsum = Ztmp - Ftmp;
+	Tstr = 0.5*(0.+T2)*tmpsum;
+      }
+      else if(Ttmp<=0 && Ftmp<=0 && Ltmp>0 && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T = Tavg;
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp<=0 && Ftmp>Ztmp && Ltmp>0 && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_froz = Tavg;
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>Ztmp && Ftmp>Ztmp && Ltmp>0 && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>0 && Ftmp>Ztmp && Ltmp>Ttmp && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
+	tmpsum += Ttmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
+				    +linear_interp(Ltmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>Ltmp && Ttmp<=Ztmp && Ftmp>Ztmp && Ltmp>0) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex+1].T_thaw = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
+				      +linear_interp(Ttmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ttmp;
+	Tstr = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp<=0 && Ftmp>0 && Ltmp>Ftmp && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ftmp,0.,Ztmp,T1,T2))*Ftmp;
+	tmpsum += Ftmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_froz = Tavg;
+	layer[lindex].T = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)
+			       +linear_interp(Ltmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp<=0 && Ftmp>Ltmp && Ftmp<=Ztmp && Ltmp>0) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_froz = Tavg;
+	layer[lindex+1].T_froz = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
+				      +linear_interp(Ftmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ftmp;
+	Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>0 && Ftmp>Ttmp && Ftmp<=Ztmp && Ltmp>Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
+	tmpsum += Ttmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
+				    +linear_interp(Ftmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ftmp;
+	Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>0 && Ftmp>Ttmp && Ltmp>Ftmp && Ltmp<=Ztmp) {
+	Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
+	tmpsum += Ttmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
+				    +linear_interp(Ftmp,0.,Ztmp,T1,T2));
+	layer[lindex].T = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)
+			       +linear_interp(Ltmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ltmp;
+	Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>0 && Ftmp>Ltmp && Ftmp<=Ztmp && Ltmp>Ttmp) {
+	Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
+	tmpsum += Ttmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
+				    +linear_interp(Ltmp,0.,Ztmp,T1,T2));
+	layer[lindex+1].T_froz = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
+				      +linear_interp(Ftmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ftmp;
+	Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
+      else if(Ttmp>Ltmp && Ftmp>Ttmp && Ftmp<=Ztmp && Ltmp>0) {
+	Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
+	tmpsum += Ltmp;
+	if(tmpsum>0.) Tavg /= tmpsum;
+	else Tavg= -999.;
+	layer[lindex].T_thaw = Tavg;
+	layer[lindex].T_thaw = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
+				    +linear_interp(Ttmp,0.,Ztmp,T1,T2));
+	layer[lindex+1].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
+				      +linear_interp(Ftmp,0.,Ztmp,T1,T2));
+	Tavg = 0.;
+	tmpsum = Ztmp - Ftmp;
+	Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
+      }
 
-    T1 = T[zindex];
-    T2 = T[zindex+1];
+      Tavg += Tstr;
 
-    if(Ttmp>Ztmp && Ltmp>Ztmp) {
-      Tstr = 0.5*(T1+T2)*Ztmp;
-      tmpsum += Ztmp;
+      if(Ltmp>0 && Ltmp<=Ztmp) {
+	lindex++;
+	if(lindex<Nlayer) Lsum+=depth[lindex];
+      }
+      Zsum += Ztmp;
     }
-    else if(Ttmp<=0 && Ftmp>Ztmp && Ltmp>Ztmp) {
-      Tstr = 0.5*(T1+T2)*Ztmp;
-      tmpsum += Ztmp;
-    }
-    else if(Ttmp<=0 && Ftmp<=0 && Ltmp>Ztmp) {
-      Tstr = 0.5*(T1+T2)*Ztmp;
-      tmpsum += Ztmp;
-    }
-    else if(Ttmp>0 && Ttmp<=Ztmp && Ftmp>Ztmp && Ltmp>Ztmp) {
-      Tavg += 0.5*(T1+0.)*Ttmp;
-      tmpsum += Ttmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      Tavg = 0.;
-      tmpsum = Ztmp - Ttmp;
-      Tstr = 0.5*(0.+T2)*tmpsum;
-    }
-    else if(Ttmp<=0 && Ftmp>0 && Ftmp<=Ztmp && Ltmp>Ztmp) {
-      Tavg += 0.5*(T1+0.)*Ftmp;
-      tmpsum += Ftmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_froz = Tavg;
-      Tavg = 0.;
-      tmpsum = Ztmp - Ftmp;
-      Tstr = 0.5*(0.+T2)*tmpsum;
-    }
-    else if(Ttmp<=0 && Ftmp<=0 && Ltmp>0 && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T = Tavg;
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp<=0 && Ftmp>Ztmp && Ltmp>0 && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_froz = Tavg;
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>Ztmp && Ftmp>Ztmp && Ltmp>0 && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>0 && Ftmp>Ztmp && Ltmp>Ttmp && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
-      tmpsum += Ttmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ltmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>Ltmp && Ttmp<=Ztmp && Ftmp>Ztmp && Ltmp>0) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex+1].T_thaw = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ttmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ttmp;
-      Tstr = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp<=0 && Ftmp>0 && Ltmp>Ftmp && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ftmp,0.,Ztmp,T1,T2))*Ftmp;
-      tmpsum += Ftmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_froz = Tavg;
-      layer[lindex].T = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ltmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp<=0 && Ftmp>Ltmp && Ftmp<=Ztmp && Ltmp>0) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_froz = Tavg;
-      layer[lindex+1].T_froz = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ftmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ftmp;
-      Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>0 && Ftmp>Ttmp && Ftmp<=Ztmp && Ltmp>Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
-      tmpsum += Ttmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ftmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ftmp;
-      Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>0 && Ftmp>Ttmp && Ltmp>Ftmp && Ltmp<=Ztmp) {
-      Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
-      tmpsum += Ttmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ftmp,0.,Ztmp,T1,T2));
-      layer[lindex].T = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ltmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ltmp;
-      Tstr = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>0 && Ftmp>Ltmp && Ftmp<=Ztmp && Ltmp>Ttmp) {
-      Tavg += 0.5*(T1+linear_interp(Ttmp,0.,Ztmp,T1,T2))*Ttmp;
-      tmpsum += Ttmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ltmp,0.,Ztmp,T1,T2));
-      layer[lindex+1].T_froz = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ftmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ftmp;
-      Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-    else if(Ttmp>Ltmp && Ftmp>Ttmp && Ftmp<=Ztmp && Ltmp>0) {
-      Tavg += 0.5*(T1+linear_interp(Ltmp,0.,Ztmp,T1,T2))*Ltmp;
-      tmpsum += Ltmp;
-      if(tmpsum>0.) Tavg /= tmpsum;
-      else Tavg= -999.;
-      layer[lindex].T_thaw = Tavg;
-      layer[lindex].T_thaw = 0.5*(linear_interp(Ltmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ttmp,0.,Ztmp,T1,T2));
-      layer[lindex+1].T_froz = 0.5*(linear_interp(Ttmp,0.,Ztmp,T1,T2)
-          +linear_interp(Ftmp,0.,Ztmp,T1,T2));
-      Tavg = 0.;
-      tmpsum = Ztmp - Ftmp;
-      Tstr = 0.5*(linear_interp(Ftmp,0.,Ztmp,T1,T2)+T2)*tmpsum;
-    }
-
-    Tavg += Tstr;
-
-    if(Ltmp>0 && Ltmp<=Ztmp) {
-      lindex++;
-      Lsum+=depth[lindex];
-    }
-    Zsum += Ztmp;
   }
-  if(tmpsum > 0. && Tavg>=0.) layer[Nlayer-1].T = Tavg/tmpsum;
-  else if(tmpsum > 0.) layer[Nlayer-1].T_froz = Tavg/tmpsum;
+  if(Lsum>Zsum && lindex<Nlayer)
+    layer[lindex].T = ((Lsum-Zsum)*T[Nnodes-1] + Tavg) / depth[lindex];
+  if(lindex<Nlayer-1) {
+    for(i=lindex;i<Nlayer;i++)
+      layer[lindex].T = T[Nnodes-1];
+  }
 
   for(i=0;i<Nlayer;i++) {
     if(layer[i].tdepth == 0.) layer[i].T_thaw = -999.;
@@ -842,5 +846,67 @@ void find_sublayer_temperatures(layer_data_struct *layer,
     }
     if(layer[i].fdepth == depth[i]) layer[i].T = -999.;
   }
+
+}
+
+layer_data_struct find_average_layer(layer_data_struct wet,
+				     layer_data_struct dry,
+				     double            depth,
+				     double            mu) {
+/*************************************************************
+  This subroutine computes the average soil layer moistures
+  between the wet and dry fraction for use in computing 
+  energy balance parameters.  Other layer variables are copied 
+  from the wet fraction structure since they are they same for 
+  wet and dry fractions.
+**************************************************************/
+
+  layer_data_struct layer;
+
+  layer = wet;
+
+  layer.moist_thaw = ((wet.moist_thaw * mu) 
+		      + (dry.moist_thaw * (1. - mu)));
+  layer.moist_froz = ((wet.moist_froz * mu)
+		      + (dry.moist_froz * (1. - mu)));
+  layer.ice = ((wet.ice * mu) + (dry.ice * (1. - mu)));
+  layer.moist = ((wet.moist * mu)
+	      + (dry.moist * (1. - mu)));
+
+  return(layer);
+
+}
+
+double find_total_layer_moisture(layer_data_struct layer,
+				 double            depth) {
+/*****************************************************************
+  This subroutine returns the total soil moisture in a layer 
+  (including ice).
+*****************************************************************/
+
+  double moist;
+
+  moist  = layer.moist_thaw * layer.tdepth / depth;
+  moist += layer.moist_froz
+         * (layer.fdepth - layer.tdepth) / depth;
+  moist += layer.ice
+         * (layer.fdepth - layer.tdepth) / depth;
+  moist += layer.moist * (depth - layer.fdepth) 
+         / depth;
+
+  return (moist);
+}
+
+double find_total_layer_ice(layer_data_struct layer,
+			    double            depth) {
+/*****************************************************************
+  This subroutine computes the total moisture in a layer
+*****************************************************************/
+
+  double ice;
+
+  ice = layer.ice * (layer.fdepth - layer.tdepth) / depth;
+
+  return (ice);
 
 }

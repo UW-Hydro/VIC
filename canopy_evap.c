@@ -2,27 +2,30 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-double canopy_evap(layer_data_struct *layer,
-                   veg_var_struct *veg_var, 
-                   char CALC_EVAP,
-                   int veg_class, 
-                   int month, 
-		   double Wdew,
-                   double evap_temp,
-                   double dt,
-                   double rad,
-		   double vpd,
-		   double net_short,
-		   double air_temp,
-                   double ra,
-                   double prec,
-                   double displacement,
-                   double roughness,
-                   double ref_height,
-		   double elevation,
-		   double *depth,
-		   double *Wcr,
-		   double *Wpwp)
+double canopy_evap(layer_data_struct *layer_wet,
+                   layer_data_struct *layer_dry,
+                   veg_var_struct    *veg_var_wet, 
+                   veg_var_struct    *veg_var_dry, 
+		   char               CALC_EVAP,
+                   int                veg_class, 
+                   int                month, 
+                   double             mu,
+		   double            *Wdew,
+                   double             evap_temp,
+                   double             dt,
+                   double             rad,
+		   double             vpd,
+		   double             net_short,
+		   double             air_temp,
+                   double             ra,
+                   double             displacement,
+                   double             roughness,
+                   double             ref_height,
+		   double             elevation,
+                   double            *prec,
+		   double            *depth,
+		   double            *Wcr,
+		   double            *Wpwp)
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 
@@ -57,6 +60,7 @@ double canopy_evap(layer_data_struct *layer,
   Modifications:
   9/1/97	Greg O'Donnell
   4-12-98  Code cleaned and final version prepared, KAC
+  06-25-98 modified for new distributed precipitation data structure KAC
 
 **********************************************************************/
 {
@@ -67,16 +71,19 @@ double canopy_evap(layer_data_struct *layer,
   extern option_struct options;
 
   /** declare local variables **/
-  int    Ndist;
-  int    dist;
-  int    i;
-  double ppt;		/* effective precipitation */
-  double f;		/* fraction of time step used to fill canopy */
-  double throughfall;
-  double Evap;
-  double exponent;
-  double canopyevap;
-  double *layerevap;
+  int                Ndist;
+  int                dist;
+  int                i;
+  double             ppt;		/* effective precipitation */
+  double             f;		/* fraction of time step used to fill canopy */
+  double             throughfall;
+  double             Evap;
+  double             tmp_Evap;
+  double             canopyevap;
+  double             tmp_Wdew;
+  double            *layerevap;
+  layer_data_struct *tmp_layer;
+  veg_var_struct    *tmp_veg_var;
 
   /********************************************************************** 
      CANOPY EVAPORATION
@@ -92,70 +99,101 @@ double canopy_evap(layer_data_struct *layer,
      Wdmax - max monthly dew holding capacity
      Wdew - dew trapped on vegetation
 
-     Modified 4-14-98 to work within calc_surf_energy_balance.c  KAC
+     Modified 
+     04-14-98 to work within calc_surf_energy_balance.c  KAC
+     07-24-98 fixed problem that caused hourly precipitation
+              to evaporate from the canopy during the same
+	      time step that it falls (OK for daily time step, 
+	      but causes oscilations in surface temperature
+	      for hourly time step)                      KAC, Dag
+	      
 
   **********************************************************************/ 
 
-  layerevap = (double *)calloc(options.Nlayer,sizeof(double));
+  if(options.DIST_PRCP) Ndist = 2;
+  else Ndist = 1;
 
-  ppt = prec;
+  Evap = 0;
 
-  /**************************************************
-    Compute Evaporation from Canopy Intercepted Water
-    **************************************************/
+  for(dist=0;dist<Ndist;dist++) {
 
-  /** Due to month changes ..... Wdmax based on LAI **/
-  throughfall = 0.0;
-  veg_var->Wdew = Wdew;
-  if (Wdew > veg_lib[veg_class].Wdmax[month-1]) {
-    throughfall  =  Wdew - veg_lib[veg_class].Wdmax[month-1];
-    Wdew = veg_lib[veg_class].Wdmax[month-1];
-  }
+    layerevap = (double *)calloc(options.Nlayer,sizeof(double));
+    if(dist==0) {
+      tmp_layer   = layer_wet;
+      tmp_veg_var = veg_var_wet;
+      ppt         = prec[WET];
+      tmp_Wdew    = Wdew[WET];
+    }
+    else {
+      tmp_layer   = layer_dry;
+      tmp_veg_var = veg_var_dry;
+      ppt         = prec[DRY];
+      mu          = (1. - mu);
+      tmp_Wdew    = Wdew[DRY];
+    }      
 
-  canopyevap = pow((Wdew / veg_lib[veg_class].Wdmax[month-1]),
-               (2.0/3.0))* penman(rad, vpd * 1000., ra, 
-               (double) 0.0, veg_lib[veg_class].rarc,
-               veg_lib[veg_class].LAI[month-1], 
-               (double) 1.0, air_temp, evap_temp, net_short,
-               elevation) * dt / 24.0;
+    /****************************************************
+      Compute Evaporation from Canopy Intercepted Water
+    ****************************************************/
 
-  if (canopyevap > 0.0)
-    f = min(1.0,((Wdew+ppt) / canopyevap));
-  else
-    f = 1.0;
-  canopyevap *= f;
+    /** Due to month changes ..... Wdmax based on LAI **/
+    throughfall = 0.0;
+    tmp_veg_var->Wdew = tmp_Wdew;
+    if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
+      throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+      tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
+    }
 
-  Wdew += ppt - canopyevap;
-  if (Wdew < 0.0) 
-    Wdew = 0.0;
-  if (Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
-    throughfall += 0.0;
-  else {
-    throughfall += Wdew - veg_lib[veg_class].Wdmax[month-1];
-    Wdew = veg_lib[veg_class].Wdmax[month-1];
-  }
+    canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),
+		     (2.0/3.0))* penman(rad, vpd * 1000., ra, 
+					(double) 0.0, veg_lib[veg_class].rarc,
+					veg_lib[veg_class].LAI[month-1], 
+					(double) 1.0, air_temp, evap_temp, 
+					net_short, elevation) * dt / 24.0;
 
-  /*******************************************
-    Compute Evapotranspiration from Vegetation
+    if (canopyevap > 0.0 && dt==24)
+      /** If daily time step, evap can include current precipitation **/
+      f = min(1.0,((tmp_Wdew + ppt) / canopyevap));
+    else if (canopyevap > 0.0)
+      /** If sub-daily time step, evap can not exceed current storage **/
+      f = min(1.0,((tmp_Wdew) / canopyevap));
+    else
+      f = 1.0;
+    canopyevap *= f;
+    
+    tmp_Wdew += ppt - canopyevap;
+    if (tmp_Wdew < 0.0) 
+      tmp_Wdew = 0.0;
+    if (tmp_Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
+      throughfall += 0.0;
+    else {
+      throughfall += tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+      tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
+    }
+
+    /*******************************************
+      Compute Evapotranspiration from Vegetation
     *******************************************/
-  if(CALC_EVAP)
-    transpiration(layer, veg_class, month, evap_temp, rad,
-		  vpd, net_short, air_temp, ra,
-		  ppt, f, dt, veg_var->Wdew, elevation,
-		  depth, Wcr, Wpwp, &Wdew,
-		  &canopyevap, layerevap);
+    if(CALC_EVAP)
+      transpiration(tmp_layer, veg_class, month, evap_temp, rad,
+		    vpd, net_short, air_temp, ra,
+		    ppt, f, dt, tmp_veg_var->Wdew, elevation,
+		    depth, Wcr, Wpwp, &tmp_Wdew,
+		    &canopyevap, layerevap);
 
-  veg_var->canopyevap = canopyevap;
-  veg_var->throughfall = throughfall;
-  veg_var->Wdew = Wdew;
-  Evap = canopyevap;
-  for(i=0;i<options.Nlayer;i++) {
-    layer[i].evap = layerevap[i];
-    Evap += layerevap[i];
+    tmp_veg_var->canopyevap = canopyevap;
+    tmp_veg_var->throughfall = throughfall;
+    tmp_veg_var->Wdew = tmp_Wdew;
+    tmp_Evap = canopyevap;
+    for(i=0;i<options.Nlayer;i++) {
+      tmp_layer[i].evap  = layerevap[i];
+      tmp_Evap          += layerevap[i];
+    }
+    free((char *)layerevap);
+    
+    Evap += tmp_Evap * mu / (1000. * dt * 3600.);
+
   }
-  free((char *)layerevap);
-
-  Evap /= (1000. * dt * 3600.);
 
   return (Evap);
 
@@ -251,10 +289,15 @@ void transpiration(layer_data_struct *layer,
 
   avail_moist[i]=moist2;
 
-  /** Conditions" **/
-  /** CASE 1: both layers exceed their Wcr values **/
-  /**         OR, 1 layer exceeds Wcr and has 50% plus roots **/
-  /** First condition is not mutually exclusive - leave for now **/
+  /******************************************************************
+    CASE 1: Moisture in both layers exceeds Wcr, or Moisture in
+    layer with more than half of the roots exceeds Wcr.
+
+    Potential evapotranspiration not hindered by soil dryness.  If
+    layer with less than half the roots is dryer than Wcr, extra
+    evaporation is taken from the wetter layer.  Otherwise layers
+    contribute to evapotransipration based on root fraction.
+  ******************************************************************/
 
   if( (moist1>=Wcr1 && moist2>=Wcr[options.Nlayer-1] && Wcr1>0.) ||
       (moist1>=Wcr1 && (1-veg_lib[veg_class].root[options.Nlayer-1])>= 0.5) ||
@@ -291,6 +334,7 @@ void transpiration(layer_data_struct *layer,
       }
     }
 
+    /** Assign excess evaporation to wetter layer **/
     if(spare_evap>0.0){
       for(i=0;i<options.Nlayer;i++){
         if(avail_moist[i] >= Wcr[i]){
@@ -300,13 +344,17 @@ void transpiration(layer_data_struct *layer,
     }
   }
 
-  /****************************************
+  /*********************************************************************
     CASE 2: Independent evapotranspirations
-    ****************************************/
+
+    Evapotranspiration is restricted by low soil moisture. Evaporation
+    is computed independantly from each soil layer.
+  *********************************************************************/
 
   else {
 
     for(i=0;i<options.Nlayer;i++){
+      /** Set evaporation restriction factor **/
       if(avail_moist[i] >= Wcr[i])
 	gsm_inv=1.0;
       else if(avail_moist[i] >= Wpwp[i])
@@ -316,6 +364,7 @@ void transpiration(layer_data_struct *layer,
 	gsm_inv=0.0;
 
       if(gsm_inv > 0.0){
+	/** Compute potential evapotranspiration **/
         layerevap[i] = penman(rad, vpd * 1000., ra, 
                  veg_lib[veg_class].rmin,
                  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
@@ -330,16 +379,15 @@ void transpiration(layer_data_struct *layer,
     }
   }
     
-  /** check this -> should this be done relative to losses from upper layer **/
+  /****************************************************************
+    Check that evapotransipration does not cause soil moisture to 
+    fall below wilting point.
+  ****************************************************************/
   for(i=0;i<options.Nlayer;i++){
     if(layerevap[i] > layer[i].moist - Wpwp[i]) {
       layerevap[i] = layer[i].moist - Wpwp[i];
     }
     if ( layerevap[i] < 0.0 ) {
-/*****
-      *new_Wdew -= layerevap[i];
-      *canopyevap += layerevap[i];
-*****/
       layerevap[i] = 0.0;
     }
   }

@@ -35,8 +35,11 @@ veg_con_struct *read_vegparam(FILE *vegparam,
             gridcel);
     exit(99);
   }
-  temp = (veg_con_struct*) calloc(vegetat_type_num, 
-                                  sizeof(veg_con_struct));
+  if(vegetat_type_num>0)
+    temp = (veg_con_struct*) calloc(vegetat_type_num, 
+                                    sizeof(veg_con_struct));
+  else
+    temp = (veg_con_struct*) calloc(1, sizeof(veg_con_struct));
   temp[0].Cv_sum = 0.0;
   for (i = 0; i < vegetat_type_num; i++) {
     temp[i].vegetat_type_num = vegetat_type_num;

@@ -25,11 +25,11 @@ void display_current_settings(int                 mode,
   int file_num;
 
   if (mode == DISP_VERSION) {
-    fprintf(stdout,"***** VIC Release %s *****\n",version);
+    fprintf(stdout,"***** VIC Version %s *****\n",version);
     return;
   }
   else {
-    fprintf(stdout,"\n***** VIC Release %s - Current Model Settings *****\n",version);
+    fprintf(stdout,"\n***** VIC Version %s - Current Model Settings *****\n",version);
   }
 
   fprintf(stdout,"\n");
@@ -256,9 +256,9 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Output State File:\n");
   fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
-  fprintf(stdout,"STATEYEAR\t\t%s\n",global->stateyear);
-  fprintf(stdout,"STATEMONTH\t\t%s\n",global->statemonth);
-  fprintf(stdout,"STATEDAY\t\t%s\n",global->stateday);
+  fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
+  fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
+  fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
   if (options.BINARY_STATE_FILE)
     fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
   else

@@ -35,6 +35,8 @@ global_param_struct get_global_param(filenames_struct *names,
   04-21-03 added parameters for blowing snow algorithm, printing
            lake variables during debugging and reading Bart's 
            new Arno parameters.                           KAC
+  11-May-04 Modified to display compile-time and run-time options
+	    if VERBOSE is set to TRUE.			TJB
 
 **********************************************************************/
 {

@@ -12,8 +12,8 @@ Modifications:
 	  always be recompiled whenever a .h file is updated.  The
 	  user can override this behavior by typing "make model",
 	  which doesn't invoke "make depend".			TJB
-	cmd_proc.c, display_current_settings.c, global.h, vicNl.c, vicNl.h,
-        vicNl_def.hi, Makefile:
+	cmd_proc.c, display_current_settings.c, get_global_params.c,
+	global.h, vicNl.c, vicNl.h, vicNl_def.hi, Makefile:
           Added -v and -o options, to display vic release version
 	  and current run-time and compile-time options.	TJB
 	alloc_atmos.c:

@@ -4,13 +4,24 @@
 
 static char vcid[] = "$Id$";
 
+#define ETA0           (3.6e6)  /* viscosity of snow at T = 0C and density = 0
+                                   used in calculation of true viscosity 
+                                   (Ns/m2) */
+
+#define G              9.81     /* gravitational accelleration (m/(s^2)) */
+#define C5         .08          /* constant used in snow viscosity calculation,
+                                   taken from SNTHRM.89 (/C)*/
+#define C6         .021         /* constant used in snow viscosity calculation,
+                                   taken from SNTHRM.89 (kg/m3) */
+
 double snow_density(int date,
                     double new_snow,
                     double air_temp,
                     double swq,
                     double depth, 
                     double coldcontent,
-                    double dt) {
+                    double dt,
+		    double Tsurf) {
 /**********************************************************************
   snow_density		Keith Cherkauer		May 28, 1997
 
@@ -22,11 +33,11 @@ double snow_density(int date,
   plains of south central Canada, and the north central US.
 
   UNITS:
-	new_snow	mm	new snow
-	air_temp	C	current air temperature
+	new_snow	         mm	new snow
+	air_temp	         C	current air temperature
 	swq		m	snow water equivalent	
 	depth		m	snow pack depth
-	density         kg/m^3  snow density
+	density            kg/m^3   snow density
 
 **********************************************************************/
 
@@ -34,9 +45,12 @@ double snow_density(int date,
   double delta_depth;
   double density_new;
   double depth_new;
+  double overburden;
+  double viscosity;
+  double deltadepth;
 
-  /** Trying new approach which allows for compaction of snow by new snow **/
-  /** Breas pg. 257 **/
+  /** Compaction of snow pack by new snow fall **/
+  /** Bras pg. 257 **/
 
   if(new_snow > 0) {
 
@@ -58,7 +72,13 @@ double snow_density(int date,
       density = 1000. * swq / depth;
 
     }
-    else density = density_new;
+    else {
+
+      density = density_new;
+
+      swq += new_snow / 1000.;
+
+    }
 
   }
   else if(coldcontent < 0) {
@@ -69,6 +89,16 @@ double snow_density(int date,
 
   }
   else density = 1000. * swq / depth;
+
+  /** Densification of the snow pack due to aging **/
+  /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
+
+  depth = 1000. * swq / density;
+  overburden = 0.5 * G * RHO_W * swq;
+  viscosity = ETA0 * exp(-C5 * Tsurf + C6 * density);
+  deltadepth = -overburden/viscosity*depth*dt*SECPHOUR;
+  depth += deltadepth;
+  density = 1000. * swq / depth;
 
   return (density);
 
@@ -109,3 +139,7 @@ double snow_albedo(double new_snow,
   return(albedo);
 }
 
+#undef ETA0
+#undef G
+#undef C5     
+#undef C6

@@ -80,10 +80,15 @@ void open_debug() {
   }
   if(debug.DEBUG || debug.PRT_ATMOS) {
     strcpy(tempname,debug.debug_dir);
-    strcat(tempname,"/VIC_atmos.out");
-    if((debug.fg_atmos=fopen(tempname,"w"))==NULL)
-      nrerror("ERROR: Unable to open VIC_atmos.out");
+    strcat(tempname,"/VIC_snowstep_atmos.out");
+    if((debug.fg_snowstep_atmos=fopen(tempname,"w"))==NULL)
+      nrerror("ERROR: Unable to open VIC_snowstep_atmos.out");
   }
-
+  if(debug.DEBUG || debug.PRT_ATMOS) {
+    strcpy(tempname,debug.debug_dir);
+    strcat(tempname,"/VIC_modelstep_atmos.out");
+    if((debug.fg_modelstep_atmos=fopen(tempname,"w"))==NULL)
+      nrerror("ERROR: Unable to open VIC_modelstep_atmos.out");
+  }
 }
 #endif

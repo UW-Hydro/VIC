@@ -46,17 +46,18 @@ double read_arcinfo_value(char *filename,
 
   /***** Check for Valid Location *****/
   if(lat<ll_lat || lat>ll_lat+cellsize*(double)nrows) {
-    sprintf(errstr,"Given latitude %lf does not fall within ARC file %s",
+    sprintf(errstr,"Given latitude %f does not fall within ARC file %s",
 	    lat,filename);
     nrerror(errstr);
   }
 
   if(lng<ll_lng || lng>ll_lng+cellsize*(double)ncols) {
-    sprintf(errstr,"Given longitude %lf does not fall within ARC file %s",
+    sprintf(errstr,"Given longitude %f does not fall within ARC file %s",
 	    lng,filename);
     nrerror(errstr);
   }
 
+  value = NODATA;
   for(j=0;j<nrows;j++) {
     tmp_lat = ll_lat+(double)(nrows-j-0.5)*cellsize;
     for(i=0;i<ncols;i++) {
@@ -95,7 +96,6 @@ int read_arcinfo_info(char    *filename,
   double ll_lat;
   double ll_lng;
   double cellsize;
-  double value;
   double tmp_lat;
   double tmp_lng;
   int    cell;
@@ -125,10 +125,10 @@ int read_arcinfo_info(char    *filename,
     tmp_lat = ll_lat+(double)(nrows-j-0.5)*cellsize;
     for(i=0;i<ncols;i++) {
       tmp_lng = ll_lng + (double)(i+0.5)*cellsize;
-      fscanf(farc,"%i",&tmpvalue);
-      if(tmpvalue!=NODATA) {
-	lat[0][cell]  = tmp_lat;
-	lng[0][cell]  = tmp_lng;
+      fscanf(farc, "%i", &tmpvalue);
+      if(tmpvalue != NODATA) {
+	lat[0][cell]     = tmp_lat;
+	lng[0][cell]     = tmp_lng;
 	cellnum[0][cell] = tmpvalue;
 	cell++;
       }
@@ -137,7 +137,6 @@ int read_arcinfo_info(char    *filename,
   fclose(farc);
   Ncells = cell;
 
-  if(value==NODATA) value = -999.;
   return Ncells;
 
 }

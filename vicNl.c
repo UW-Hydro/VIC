@@ -8,7 +8,7 @@ static char vcid[] = "$Id$";
 
 /** Main Program **/
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 /**********************************************************************
 	vicNl.c		Dag Lohmann		January 1996
 
@@ -33,38 +33,41 @@ void main(int argc, char *argv[])
 
   extern veg_lib_struct *veg_lib;
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
   extern Error_struct Error;
+  extern global_param_struct global_param;
 
   /** Variable Declarations **/
 
-  char    NEWCELL;
-  char    LASTREC;
-  char    MODEL_DONE;
-  int     rec, i, j;
-  int     Ndist;
-  int     Nveg_type;
-  int     cellnum;
-  int     index;
-  int     RUN_MODEL;
-  int     Ncells;
-  int     cell_cnt;
-  int     force_dt[2];
-  double  storage;
-  double  *EMPTY;
-  char    *EMPTY_C;
-  dmy_struct         *dmy;
-  atmos_data_struct  *atmos;
-  veg_con_struct     *veg_con;
-  soil_con_struct     soil_con;
-  global_param_struct global_param;
-  dist_prcp_struct    prcp;	/* stores information about distributed 
-                                   precipitation */
-  filenames_struct filenames;
-  filenames_struct builtnames;
-  infiles_struct infiles;
-  outfiles_struct outfiles;
-
+  char                     NEWCELL;
+  char                     LASTREC;
+  char                     MODEL_DONE;
+  int                      rec, i, j;
+  int                      veg;
+  int                      band;
+  int                      Ndist;
+  int                      Nveg_type;
+  int                      cellnum;
+  int                      index;
+  int                      RUN_MODEL;
+  int                      Ncells;
+  int                      cell_cnt;
+  double                   storage;
+  double                   veg_fract;
+  double                   band_fract;
+  dmy_struct              *dmy;
+  atmos_data_struct       *atmos;
+  veg_con_struct          *veg_con;
+  soil_con_struct          soil_con;
+  dist_prcp_struct         prcp; /* stores information about distributed 
+				    precipitation */
+  filenames_struct         filenames;
+  filenames_struct         builtnames;
+  infiles_struct           infiles;
+  outfiles_struct          outfiles;
+  
 #if VERBOSE
   fprintf(stderr,"Running Model Version: %s\n",vcid);
 #endif
@@ -74,12 +77,11 @@ void main(int argc, char *argv[])
   filenames = cmd_proc(argc, argv);
 
   /** Read Global Control File **/
-  force_dt[0] = force_dt[1] = -99;
   infiles.globalparam = open_file(filenames.global,"r");
-  global_param = get_global_param(&filenames,infiles.globalparam,force_dt);
+  global_param = get_global_param(&filenames, infiles.globalparam);
 
   /** Check and Open Files **/
-  check_files(&infiles, filenames);
+  check_files(&infiles, &filenames);
 
   /** Check and Open Debugging Files **/
 #if LINK_DEBUG
@@ -96,6 +98,21 @@ void main(int argc, char *argv[])
 
   /** Make Date Data Structure **/
   dmy      = make_dmy(&global_param);
+
+  /** allocate memory for the atmos_data_struct **/
+  alloc_atmos(global_param.nrecs, &atmos);
+
+#if SAVE_STATE
+  /** open state file if model state is to be saved **/
+  if ( global_param.stateyear > 0 ) 
+    outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
+					 options.Nnode);
+#endif
+
+  if ( options.INIT_STATE ) 
+    infiles.statefile = check_state_file(filenames.init_state, dmy[0], 
+					 &global_param, options.Nlayer, 
+					 options.Nnode);
 
   /************************************
     Run Model for all Active Grid Cells
@@ -123,16 +140,22 @@ void main(int argc, char *argv[])
     }
     if(RUN_MODEL) {
 #if LINK_DEBUG
-      if(debug.PRT_SOIL) write_soilparam(soil_con); 
+      if(debug.PRT_SOIL) write_soilparam(&soil_con); 
 #endif
 
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
       if(options.FROZEN_SOIL) {
+	for(i=0;i<MAX_LAYERS;i++) {
+	  soil_con.ufwc_table_layer[i] = (double **)malloc((QUICK_FS_TEMPS+1)*sizeof(double *));
+	  for(j=0;j<QUICK_FS_TEMPS+1;j++) 
+	    soil_con.ufwc_table_layer[i][j] = (double *)malloc(2*sizeof(double));
+	}
 	for(i=0;i<MAX_NODES;i++) {
-	  soil_con.ufwc_table[i] = (double **)malloc(6*sizeof(double *));
-	  for(j=0;j<6;j++) 
-	    soil_con.ufwc_table[i][j] = (double *)malloc(2*sizeof(double));
+	  soil_con.ufwc_table_node[i] = (double **)malloc((QUICK_FS_TEMPS+1)*sizeof(double *));
+
+	  for(j=0;j<QUICK_FS_TEMPS+1;j++) 
+	    soil_con.ufwc_table_node[i][j] = (double *)malloc(2*sizeof(double));
 	}
       }
 #endif
@@ -143,20 +166,14 @@ void main(int argc, char *argv[])
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
-      calc_root_fractions(veg_con,soil_con);
+      calc_root_fractions(veg_con, &soil_con);
 #if LINK_DEBUG
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
 #endif
 
       /** Build Gridded Filenames, and Open **/
-      builtnames = make_in_and_outfiles(&infiles, filenames, soil_con,
+      builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
                    &outfiles);
-
-      /** Read Forcing Data **/
-      atmos = read_forcing_data(infiles, global_param.starthour,
-				&global_param.nrecs,
-				global_param.dt, force_dt, 
-				global_param.forceskip);
 
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
@@ -165,30 +182,23 @@ void main(int argc, char *argv[])
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
-				&global_param.Nnodes);
-
-      /** Initialize Soil and Vegetation Variables **/
-
-#if VERBOSE
-      fprintf(stderr,"Initializing Variables\n");
-#endif
-
-      for(i=0;i<Ndist;i++) {
-        initialize_soil(prcp.cell[i],soil_con,
-			veg_con[0].vegetat_type_num);
-        initialize_veg(prcp.veg_var[i],veg_con,global_param);
-      }
+				&options.Nnode);
 
       /**************************************************
          Initialize Meteological Forcing Values That
          Have not Been Specifically Set
        **************************************************/
-      initialize_atmos(atmos,dmy,(double)soil_con.time_zone_lng,
-		       (double)soil_con.lng,(double)soil_con.lat,
-		       (double)soil_con.elevation,
-		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
-		       soil_con.annual_prec,soil_con.Tfactor,
-		       global_param.nrecs,global_param.dt);
+
+#if VERBOSE
+      fprintf(stderr,"Initializing Forcing Data\n");
+#endif
+
+      initialize_atmos(atmos, dmy, infiles.forcing,
+		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
+		       (double)soil_con.lat, soil_con.elevation,
+		       soil_con.annual_prec, global_param.wind_h, 
+		       soil_con.rough, soil_con.Tfactor); 
+      
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 #endif
@@ -196,23 +206,15 @@ void main(int argc, char *argv[])
       /**************************************************
         Initialize Energy Balance and Snow Variables 
       **************************************************/
-      if(options.SNOW_MODEL) {
+
 #if VERBOSE
-        fprintf(stderr,"Snow Model Initialization\n");
+      fprintf(stderr,"Model State Initialization\n");
 #endif
-	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
-			infiles.init_snow,soil_con.gridcel);
-      }
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-#if VERBOSE
-	fprintf(stderr,"Energy Balance Initialization\n");
-#endif
-	initialize_energy_bal(prcp.energy,prcp.cell,&soil_con,
-			      atmos[0].air_temp,prcp.mu,soil_con.gridcel,
-			      veg_con[0].vegetat_type_num,
-			      global_param.Nnodes,
-			      Ndist,infiles.init_soil);
-      }
+      initialize_model_state(&prcp, dmy[0], atmos[0].air_temp[NR], 
+			     &global_param, infiles, soil_con.gridcel, 
+			     veg_con[0].vegetat_type_num, 
+			     options.Nnode, Ndist, &soil_con, veg_con);
+
 
 #if VERBOSE
       fprintf(stderr,"Running Model\n");
@@ -226,10 +228,26 @@ void main(int argc, char *argv[])
 	Intialize Moisture and Energy Balance Error Checks
 	***************************************************/
       storage = 0.;
-      for(index=0;index<options.Nlayer;index++)
-	storage += find_total_layer_moisture(prcp.cell[0][0][0].layer[index],
-					     soil_con.depth[index]);
-      if(options.SNOW_MODEL) storage += prcp.snow[0][0].swq * 1000.;
+      for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
+	if ( veg < veg_con[0].vegetat_type_num ) veg_fract = veg_con[veg].Cv;
+	else veg_fract = ( 1.0 - veg_con[0].Cv_sum );
+	for ( band = 0; band < options.SNOW_BAND; band++ ) {
+	  band_fract = soil_con.AreaFract[band];
+	  if ( veg_fract > SMALL && band_fract > SMALL ) {
+	    for(index=0;index<options.Nlayer;index++)
+	      storage += prcp.cell[WET][veg][band].layer[index].moist 
+		* veg_fract * band_fract;
+	    storage += prcp.snow[veg][band].swq * 1000. * veg_fract 
+	      * band_fract;
+	    if ( veg != veg_con[0].vegetat_type_num ) {
+	      storage += prcp.veg_var[WET][veg][band].Wdew 
+		* veg_fract * band_fract;
+	      storage += prcp.snow[veg][band].snow_canopy * 1000. 
+		* veg_fract * band_fract;
+	    }
+	  }
+	}
+      }
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
@@ -239,33 +257,45 @@ void main(int argc, char *argv[])
 
       for ( rec = 0 ; rec < global_param.nrecs; rec++ ) {
 
-        if(rec==global_param.nrecs-1) LASTREC = TRUE;
+        if ( rec == global_param.nrecs - 1 ) LASTREC = TRUE;
         else LASTREC = FALSE;
 
-        dist_prec(&atmos[rec],&prcp,soil_con,veg_con,
-                  dmy,global_param,outfiles,rec,cellnum,
-                  NEWCELL,LASTREC);
+        dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
+                  dmy, &global_param, &outfiles, rec, cellnum,
+                  NEWCELL, LASTREC);
         NEWCELL=FALSE;
 
       }	/* End Rec Loop */
 
-      close_files(infiles,outfiles,builtnames); 
+      close_files(&infiles,&outfiles,&builtnames); 
 
 #if QUICK_FS
       if(options.FROZEN_SOIL) {
+	for(i=0;i<MAX_LAYERS;i++) {
+	  for(j=0;j<6;j++) 
+	    free((char *)soil_con.ufwc_table_layer[i][j]);
+	  free((char *)soil_con.ufwc_table_layer[i]);
+	}
 	for(i=0;i<MAX_NODES;i++) {
 	  for(j=0;j<6;j++) 
-	    free((char *)soil_con.ufwc_table[i][j]);
-	  free((char *)soil_con.ufwc_table[i]);
+	    free((char *)soil_con.ufwc_table_node[i][j]);
+	  free((char *)soil_con.ufwc_table_node[i]);
 	}
       }
 #endif
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
       free_vegcon(&veg_con);
-      free((char *)atmos);  
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
+      for(index=0;index<=options.Nlayer;index++) 
+	free((char*)soil_con.layer_node_fract[index]);
+      free((char*)soil_con.layer_node_fract);
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
+
+  /** cleanup **/
+  free_atmos(global_param.nrecs, &atmos);
+
+  return EXIT_SUCCESS;
 }	/* End Main Program */

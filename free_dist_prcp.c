@@ -22,14 +22,12 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   extern option_struct options;
 
   int Ndist;
-  int i, j, k;
+  int i, j;
 
   Ndist = 2;
 
   for(i=0;i<Ndist;i++) {
     for(j=0;j<=Nveg;j++) {
-/*       for(k=0;k<options.SNOW_BAND;k++) */
-/* 	free((char *)prcp[0].cell[i][j][k].layer); */
       free((char *)prcp[0].cell[i][j]);
     }
     free((char *)prcp[0].cell[i]);
@@ -38,20 +36,11 @@ void free_dist_prcp(dist_prcp_struct *prcp,
     free((char *)prcp[0].veg_var[i]);
   }
   for(j=0;j<=Nveg;j++) {
-/*     for(k=0;k<options.SNOW_BAND;k++) { */
-/*       free((char *)prcp[0].energy[j][k].dz); */
-/*       if(options.FULL_ENERGY || options.SNOW_MODEL) { */
-/* 	free((char *)prcp[0].energy[j][k].T); */
-/* 	if(options.FROZEN_SOIL) free((char *)prcp[0].energy[j][k].ice); */
-/*       } */
-/*     } */
     free((char *)prcp[0].energy[j]);
   }
-  if(options.FULL_ENERGY || options.SNOW_MODEL) {
-    free((char *)prcp[0].energy);
-    for(i=0;i<=Nveg;i++)
-      free((char *)prcp[0].snow[i]);
-    free((char *)prcp[0].snow);
-  }
+  free((char *)prcp[0].energy);
+  for(i=0;i<=Nveg;i++)
+    free((char *)prcp[0].snow[i]);
+  free((char *)prcp[0].snow);
 
 }

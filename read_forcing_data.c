@@ -5,83 +5,49 @@
  
 static char vcid[] = "$Id$";
 
-atmos_data_struct *read_forcing_data(infiles_struct      inf,
-				     int                 starthour,
-                                     int                *nrecs,
-                                     int                 dt,
-				     int                *force_dt,
-				     int                 forceskip)
+double **read_forcing_data(FILE                **infile,
+			   global_param_struct   global_param)
 /**********************************************************************
-  read_forcing_data    Keith Cherkauer      April 6, 1998
+  read_forcing_data    Keith Cherkauer      January 10, 2000
 
-  This subroutine was added to give users a place to add the routines
-  to read the atmospheric forcing data used by the versions of their 
-  models.
+  This subroutine controls the order and number of forcing variables
+  read from the forcing data files.  Two forcing files are allowed, 
+  variables, time step and file format must be defined in the global
+  control file.
 
 **********************************************************************/
 {
-  extern option_struct options;
+  extern option_struct    options;
   extern param_set_struct param_set;
+  extern int              NR, NF;
 
-  atmos_data_struct *temp;
-  char              errorstr[MAXSTRING];
+  char                 errorstr[MAXSTRING];
+  int                  i;
+  double             **forcing_data;
 
-  temp = (atmos_data_struct*)calloc(*nrecs,sizeof(atmos_data_struct));
+  /** Allocate data arrays for input forcing data **/
+  forcing_data = (double **)calloc(N_FORCING_TYPES,sizeof(double*));
+  for(i=0;i<N_FORCING_TYPES;i++) 
+    if (param_set.TYPE[i].SUPPLIED) 
+      forcing_data[i] = (double *)calloc((global_param.nrecs * NF),
+			   sizeof(double));
 
-  param_set.SHORTWAVE  = FALSE; 
-  param_set.LONGWAVE   = FALSE; 
-  param_set.PRESSURE   = FALSE;
-  param_set.TSKC       = FALSE; 
-  param_set.VP         = FALSE; 
-  param_set.VPD        = FALSE; 
-  param_set.REL_HUMID  = FALSE; 
-  param_set.SPEC_HUMID = FALSE; 
-  param_set.ALBEDO     = FALSE; 
-  param_set.AIR_TEMP   = FALSE;
-  param_set.TMAX       = FALSE; 
-  param_set.TMIN       = FALSE; 
-  param_set.PREC       = FALSE; 
-  param_set.WIND       = FALSE; 
-  param_set.DENSITY    = FALSE; 
-
-  /***** Read Forcing Files in PILPS2c Format *****/
-  if(strcasecmp(options.FORCE_TYPE,"PILPS")==0) {
-    read_PILPS2c(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
+  /** Read First Forcing Data File **/
+  if(param_set.FORCE_DT[0] > 0) {
+    read_atmos_data(infile[0], global_param, 0, global_param.forceskip[0],
+		    forcing_data);
   }
-  /***** Read Forcing Files in SAWD Format *****/
-  else if(strcasecmp(options.FORCE_TYPE,"SAWD")==0) {
-    read_sawd(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
-    if(!options.HP) read_atmosdata(temp,inf.forcing[1],nrecs,dt,
-				   force_dt[1],forceskip);
-  }
-  /***** Read Forcing Files in SAWD Binary Format *****/
-  else if(strcasecmp(options.FORCE_TYPE,"SAWD_BIN")==0) {
-    read_sawd_binary(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
-    read_atmosdata(temp,inf.forcing[1],nrecs,dt,force_dt[1],forceskip);
-  }
-  /***** Read Daily Forcing Files *****/
-  else if(strcasecmp(options.FORCE_TYPE,"DAILY")==0) {
-    read_atmosdata(temp,inf.forcing[0],nrecs,dt,force_dt[0],forceskip);
-    if(!options.SNOW_MODEL && inf.forcing[1] != NULL)
-      read_snowmodel(temp,inf.forcing[1],nrecs[0],dt,force_dt[1],forceskip);
-    else if(!options.SNOW_MODEL) {
-      options.SNOW_MODEL = TRUE;
-      fprintf(stderr,"WARNING: Check global parameter file, SNOW_MODEL ");
-      fprintf(stderr,"not turned on, and no NWS snow model file defined\n");
-      fprintf(stderr,"\tSetting SNOW_MODEL to TRUE to continue model run.\n");
-    }
-  }
-  /***** Read SHAW Hourly Forcing Files *****/
-  else if(strcasecmp(options.FORCE_TYPE,"SHAW")==0) {
-    read_rosemount(temp,inf.forcing[0],nrecs,starthour,dt,force_dt[0],forceskip);
-  }
-  /***** Unrecognized Forcing File Type *****/
   else {
-    sprintf(errorstr,"ERROR: Unrecognized forcing file type %s\n",
-	    options.FORCE_TYPE);
+    sprintf(errorstr,"ERROR: File time step must be defined for at least the first forcing file (FILE_DT).\n");
     vicerror(errorstr);
   }
 
-  return(temp);
+  /** Read Second Forcing Data File **/
+  if(param_set.FORCE_DT[1] > 0) {
+    read_atmos_data(infile[1], global_param, 1, global_param.forceskip[1], 
+		    forcing_data);
+  }
+
+  return(forcing_data);
 
 }

@@ -6,7 +6,7 @@
 static char vcid[] = "$Id$";
 
 void calc_root_fractions(veg_con_struct  *veg_con,
-			 soil_con_struct  soil_con)
+			 soil_con_struct  *soil_con)
 /**********************************************************************
   calc_root_fraction.c    Keith Cherkauer      September 24, 1998
 
@@ -42,7 +42,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
     sum_depth  = 0;
     sum_fract  = 0;
     layer      = 0;
-    Lstep      = soil_con.depth[layer];
+    Lstep      = soil_con->depth[layer];
     Lsum       = Lstep;
     Zsum       = 0;
     zone       = 0;
@@ -92,7 +92,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 	}
 	layer++;
 	if(layer<options.Nlayer) {
-	  Lstep  = soil_con.depth[layer];
+	  Lstep  = soil_con->depth[layer];
 	  Lsum  += Lstep;
 	}
 	else if(layer==options.Nlayer) {
@@ -112,7 +112,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 	}
 	layer++;
 	if(layer<options.Nlayer) {
-	  Lstep  = soil_con.depth[layer];
+	  Lstep  = soil_con->depth[layer];
 	  Lsum  += Lstep;
 	}
 	else if(layer==options.Nlayer) {

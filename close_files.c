@@ -5,9 +5,9 @@
  
 static char vcid[] = "$Id$";
 
-void close_files(infiles_struct   inf,
-                 outfiles_struct  outf,
-                 filenames_struct fnames)
+void close_files(infiles_struct   *inf,
+                 outfiles_struct  *outf,
+                 filenames_struct *fnames)
 /**********************************************************************
 	close_files	Dag Lohmann		January 1996
 
@@ -21,17 +21,19 @@ void close_files(infiles_struct   inf,
 **********************************************************************/
 {
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
 
   /**********************
     Close All Input Files
     **********************/
 
-  fclose(inf.forcing[0]);
-  if(options.COMPRESS) compress_files(fnames.forcing[0]);
-  if(inf.forcing[1]!=NULL) {
-    fclose(inf.forcing[1]);
-    if(options.COMPRESS) compress_files(fnames.forcing[1]);
+  fclose(inf->forcing[0]);
+  if(options.COMPRESS) compress_files(fnames->forcing[0]);
+  if(inf->forcing[1]!=NULL) {
+    fclose(inf->forcing[1]);
+    if(options.COMPRESS) compress_files(fnames->forcing[1]);
   }
 
   /*******************
@@ -39,25 +41,29 @@ void close_files(infiles_struct   inf,
     *******************/
 
   /** Energy and Moisture Fluxes Output File **/
-  fclose(outf.fluxes);
-  if(options.COMPRESS) compress_files(fnames.fluxes);
+  fclose(outf->fluxes);
+  if(options.COMPRESS) compress_files(fnames->fluxes);
+
+#if !LDAS_OUTPUT && !OPTIMIZE
+
+  /** These output files are not used when using LDAS binary format **/
 
   /** Frozen Soils Output File **/
   if(options.FROZEN_SOIL) {
-    fclose(outf.fdepth);
-    if(options.COMPRESS) compress_files(fnames.fdepth);
+    fclose(outf->fdepth);
+    if(options.COMPRESS) compress_files(fnames->fdepth);
   }
 
   /** Snow Data Output File **/
-  if(options.FULL_ENERGY || options.SNOW_MODEL) {
-    fclose(outf.snow);
-    if(options.COMPRESS) compress_files(fnames.snow);
-  }
+  fclose(outf->snow);
+  if(options.COMPRESS) compress_files(fnames->snow);
 
   if(options.PRT_SNOW_BAND) {
-    fclose(outf.snowband);
-    if(options.COMPRESS) compress_files(fnames.snowband);
+    fclose(outf->snowband);
+    if(options.COMPRESS) compress_files(fnames->snowband);
   }
+
+#endif
 
   /*******************************
     Close All Used Debugging Files

@@ -6,9 +6,9 @@
 static char vcid[] = "$Id$";
 
 void write_layer(layer_data_struct *layer,
-                 int veg,
-                 int Nlayer,
-                 double *depth)
+                 int                veg,
+                 int                Nlayer,
+                 double            *depth)
 /**********************************************************************
 	write_soilvar		Keith Cherkauer		July 17, 1997
 
@@ -29,37 +29,23 @@ void write_layer(layer_data_struct *layer,
   printf("Layer:\t");
   for(index=0;index<Nlayer;index++) printf("\t\t%i",index+1);
   printf("\nEvaporation:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].evap);
+  for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].evap);
   printf("\n      Kappa:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].kappa);
+  for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].kappa);
   printf("\n         Cs:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].Cs);
-  printf("\n\nMoisture Table\n---------------------------------------------------------------------------\n Thaw Moist:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].moist_thaw);
-  printf("\n Froz Moist:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].moist_froz);
-  printf("\n      Moist:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].moist);
+  for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].Cs);
+  printf("\n\nMoisture Table\n---------------------------------------------------------------------------\n Moist:\t");
+  for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].moist);
   printf("\n        Ice:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].ice);
-  printf("\n Thaw Depth:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].tdepth);
-  printf("\n Froz Depth:\t");
-  for(index=0;index<Nlayer;index++) printf("\t%lf",layer[index].fdepth);
+  for(index=0;index<Nlayer;index++) printf("\t%f",layer[index].ice);
   printf("\n---------------------------------------------------------------------------\nLayer Moist:\t");
   sum_moist = 0.;
   for(index=0;index<Nlayer;index++) {
-    layer_moist = layer[index].moist_thaw * layer[index].tdepth / depth[index];
-    layer_moist += layer[index].moist_froz * (layer[index].fdepth 
-        - layer[index].tdepth) / depth[index];
-    layer_moist += layer[index].ice * (layer[index].fdepth 
-        - layer[index].tdepth) / depth[index];
-    layer_moist += layer[index].moist * (depth[index] - layer[index].fdepth)
-        / depth[index];
+    layer_moist = layer[index].moist;
     sum_moist += layer_moist;
-    printf("\t%lf",layer_moist);
+    printf("\t%f",layer_moist);
   }
-  printf("\n\n-----> Total Moisture = %lf\n\n",sum_moist);
+  printf("\n\n-----> Total Moisture = %f\n\n",sum_moist);
 }
 
 

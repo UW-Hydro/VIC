@@ -26,10 +26,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 {
   extern veg_lib_struct *veg_lib;
   extern option_struct   options;
+#if LINK_DEBUG
   extern debug_struct    debug;
+#endif
 
   veg_con_struct *temp;
-  int             vegcel, i, j, vegetat_type_num, skip;
+  int             vegcel, i, j, vegetat_type_num, skip, veg_class;
   float           depth_sum;
   float           sum;
   char            str[500];
@@ -82,15 +84,22 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       nrerror(str);
     }
     if(sum != 1.) {
-      fprintf(stderr,"WARNING: Root zone fractions sum to more than 1 ( = %lf), normalizing fractions.  If the sum is large, check that your vegetation parameter file is in the form - <zone 1 depth> <zone 1 fract> <zone 2 depth> <zone 2 fract> ...\n", sum);
+      fprintf(stderr,"WARNING: Root zone fractions sum to more than 1 ( = %f), normalizing fractions.  If the sum is large, check that your vegetation parameter file is in the form - <zone 1 depth> <zone 1 fract> <zone 2 depth> <zone 2 fract> ...\n", sum);
       for(j=0;j<options.ROOT_ZONES;j++) {
 	temp[i].zone_fract[j] /= sum;
       }
     }
 
+    veg_class = MISSING;
     for(j=0;j<Nveg_type;j++)
       if(temp[i].veg_class == veg_lib[j].veg_class)
-        temp[i].veg_class = j;
+	veg_class = j;
+    if(veg_class == MISSING) {
+      sprintf(ErrStr,"Vegetation class %i from cell %i is not defined in the vegetation library file.", temp[i].veg_class, gridcel);
+      nrerror(ErrStr);
+    }
+    else
+      temp[i].veg_class = veg_class;
 
     temp[0].Cv_sum += temp[i].Cv;
 

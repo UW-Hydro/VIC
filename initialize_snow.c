@@ -46,13 +46,17 @@ void initialize_snow (snow_data_struct **snow,
   07-09-98 modified to initialize snow variables for each defined
            snow elevation band.                                   KAC
   01-11-99 modified to read new initial snow conditions file format KAC
+  04-17-00 removed call for read_initial_snow properties file, the
+           file read is now incorporated into a single model state
+           file.                                                  KAC
 
 **********************************************************************/
 {
   extern option_struct options;
+#if LINK_DEBUG
   extern debug_struct debug;
+#endif
 
-  char tempstr[512];
   int i, j;
   int startlayer;
 
@@ -61,17 +65,12 @@ void initialize_snow (snow_data_struct **snow,
 
   for ( i = 0 ; i <= veg_num ; i++ ) {
     for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
-      if(options.INIT_SNOW) {
-	snow[i][j] = read_initial_snow(fsnow,cellnum,i,j);
-      }
-      else {	/* Assume no snow present */
-	snow[i][j].snow      = 0;
-	snow[i][j].last_snow = 0;
-	snow[i][j].swq       = 0.0;
-	snow[i][j].surf_temp = 0.0;
-	snow[i][j].density   = 0.0;
-	snow[i][j].coverage  = 0.0;
-      }
+      snow[i][j].snow            = 0;
+      snow[i][j].last_snow       = 0;
+      snow[i][j].swq             = 0.0;
+      snow[i][j].surf_temp       = 0.0;
+      snow[i][j].density         = 0.0;
+      snow[i][j].coverage        = 0.0;
       snow[i][j].pack_water      = 0.0;
       snow[i][j].surf_water      = 0.0;
       snow[i][j].vapor_flux      = 0.0;
@@ -83,5 +82,4 @@ void initialize_snow (snow_data_struct **snow,
       else snow[i][j].depth = 0.;
     }
   }
-
 }

@@ -4,7 +4,8 @@
 
 static char vcid[] = "$Id$";
 
-void write_vegvar(veg_var_struct veg, int n)
+void write_vegvar(veg_var_struct *veg, 
+		  int             n)
 /**********************************************************************
   write_vegvar		Keith Cherkauer		May 29, 1996
 
@@ -18,8 +19,8 @@ void write_vegvar(veg_var_struct veg, int n)
 **********************************************************************/
 {
   printf("Vegetation Variables: vegtype %i\n",n);
-  printf("\tcanopyevap  = %lf\n", veg.canopyevap);
-  printf("\tWdew        = %lf\n", veg.Wdew);
-  printf("\tthroughfall = %lf\n", veg.throughfall);
+  printf("\tcanopyevap  = %f\n", veg->canopyevap);
+  printf("\tWdew        = %f\n", veg->Wdew);
+  printf("\tthroughfall = %f\n", veg->throughfall);
 }
 

@@ -51,7 +51,7 @@ double soil_thermal_eqn(double T, va_list ap) {
 
   if(T<0.) {
 #if QUICK_FS
-    ice = moist - maximum_unfrozen_water_quick(T,max_moist,
+    ice = moist - maximum_unfrozen_water_quick(T, max_moist,
 					       ufwc_table);
 #else
     ice = moist - maximum_unfrozen_water(T,max_moist,bubble,expt);

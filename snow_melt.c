@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Thu Aug 12 16:21:36 1999 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Tue Mar  7 17:02:40 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -69,7 +69,7 @@ static char vcid[] = "$Id$";
 
   Comments     :
 *****************************************************************************/
-void snow_melt(soil_con_struct   soil_con, 
+void snow_melt(soil_con_struct  *soil_con, 
 	       int               rec,
 	       int               iveg,
                double            z2,
@@ -190,13 +190,14 @@ void snow_melt(soil_con_struct   soil_con,
   vapor_flux = snow->vapor_flux;
 
   Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist,
-         z2, displacement, Z0, wind, net_short,
-         longwave, density, Le, air_temp,
-         pressure * 1000., vpd * 1000., vp * 1000.,
-         RainFall, SurfaceSwq, snow->surf_water, OldTSurf,
-         &RefreezeEnergy, &vapor_flux, &advection, &deltaCC, grnd_surf_temp,
-         snow->depth, snow->density,surf_atten,&grnd_flux,&latent_heat,
-         &sensible_heat);
+				   z2, displacement, Z0, wind, net_short, 
+				   longwave, density, Le, air_temp,
+				   pressure * 1000., vpd * 1000., vp * 1000.,
+				   RainFall, SurfaceSwq, snow->surf_water, 
+				   OldTSurf, &RefreezeEnergy, &vapor_flux, 
+				   &advection, &deltaCC, grnd_surf_temp,
+				   snow->depth, snow->density, surf_atten, 
+				   &grnd_flux, &latent_heat, &sensible_heat);
 
   snow->vapor_flux = vapor_flux;
   save_refreeze_energy[0] = RefreezeEnergy;
@@ -482,7 +483,6 @@ void snow_melt(soil_con_struct   soil_con,
 *****************************************************************************/
 double CalcSnowPackEnergyBalance(double Tsurf, ...)
 {
-  char *Routine = "CalcSnowPackEnergyBalance";
 
   va_list ap;                   /* Used in traversing variable argument list
                                  */ 
@@ -498,7 +498,6 @@ double CalcSnowPackEnergyBalance(double Tsurf, ...)
 
 double ErrorSnowPackEnergyBalance(double Tsurf, ...)
 {
-  char *Routine = "CalcSnowPackEnergyBalance";
 
   va_list ap;                   /* Used in traversing variable argument list
                                  */ 
@@ -584,35 +583,35 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   SensibleHeat       = (double *) va_arg(ap, double *);
   
   /* print variables */
-  fprintf(stderr,"Dt = %lf\n",Dt);
-  fprintf(stderr,"Ra = %lf\n",Ra);
-  fprintf(stderr,"Z = %lf\n",Z);
-  fprintf(stderr,"Displacement = %lf\n",Displacement);
-  fprintf(stderr,"Z0 = %lf\n",Z0);
-  fprintf(stderr,"Wind = %lf\n",Wind);
-  fprintf(stderr,"ShortRad = %lf\n",ShortRad);
-  fprintf(stderr,"LongRadIn = %lf\n",LongRadIn);
-  fprintf(stderr,"AirDens = %lf\n",AirDens);
-  fprintf(stderr,"Lv = %lf\n",Lv);
-  fprintf(stderr,"Tair = %lf\n",Tair);
-  fprintf(stderr,"Press = %lf\n",Press);
-  fprintf(stderr,"Vpd = %lf\n",Vpd);
-  fprintf(stderr,"EactAir = %lf\n",EactAir);
-  fprintf(stderr,"Rain = %lf\n",Rain);
-  fprintf(stderr,"SweSurfaceLayer = %lf\n",SweSurfaceLayer);
-  fprintf(stderr,"SurfaceLiquidWater = %lf\n",SurfaceLiquidWater);
-  fprintf(stderr,"OldTSurf = %lf\n",OldTSurf);
-  fprintf(stderr,"RefreezeEnergy = %lf\n",RefreezeEnergy[0]);
-  fprintf(stderr,"VaporMassFlux = %lf\n",VaporMassFlux[0]);
-  fprintf(stderr,"AdvectedEnergy = %lf\n",AdvectedEnergy[0]);
-  fprintf(stderr,"DeltaColdContent = %lf\n",DeltaColdContent[0]);
-  fprintf(stderr,"TGrnd = %lf\n",TGrnd);
-  fprintf(stderr,"SnowDepth = %lf\n",SnowDepth);
-  fprintf(stderr,"SnowDensity = %lf\n",SnowDensity);
-  fprintf(stderr,"SurfAttenuation = %lf\n",SurfAttenuation);
-  fprintf(stderr,"GroundFlux = %lf\n",GroundFlux[0]);
-  fprintf(stderr,"LatentHeat = %lf\n",LatentHeat[0]);
-  fprintf(stderr,"SensibleHeat = %lf\n",SensibleHeat[0]);
+  fprintf(stderr,"Dt = %f\n",Dt);
+  fprintf(stderr,"Ra = %f\n",Ra);
+  fprintf(stderr,"Z = %f\n",Z);
+  fprintf(stderr,"Displacement = %f\n",Displacement);
+  fprintf(stderr,"Z0 = %f\n",Z0);
+  fprintf(stderr,"Wind = %f\n",Wind);
+  fprintf(stderr,"ShortRad = %f\n",ShortRad);
+  fprintf(stderr,"LongRadIn = %f\n",LongRadIn);
+  fprintf(stderr,"AirDens = %f\n",AirDens);
+  fprintf(stderr,"Lv = %f\n",Lv);
+  fprintf(stderr,"Tair = %f\n",Tair);
+  fprintf(stderr,"Press = %f\n",Press);
+  fprintf(stderr,"Vpd = %f\n",Vpd);
+  fprintf(stderr,"EactAir = %f\n",EactAir);
+  fprintf(stderr,"Rain = %f\n",Rain);
+  fprintf(stderr,"SweSurfaceLayer = %f\n",SweSurfaceLayer);
+  fprintf(stderr,"SurfaceLiquidWater = %f\n",SurfaceLiquidWater);
+  fprintf(stderr,"OldTSurf = %f\n",OldTSurf);
+  fprintf(stderr,"RefreezeEnergy = %f\n",RefreezeEnergy[0]);
+  fprintf(stderr,"VaporMassFlux = %f\n",VaporMassFlux[0]);
+  fprintf(stderr,"AdvectedEnergy = %f\n",AdvectedEnergy[0]);
+  fprintf(stderr,"DeltaColdContent = %f\n",DeltaColdContent[0]);
+  fprintf(stderr,"TGrnd = %f\n",TGrnd);
+  fprintf(stderr,"SnowDepth = %f\n",SnowDepth);
+  fprintf(stderr,"SnowDensity = %f\n",SnowDensity);
+  fprintf(stderr,"SurfAttenuation = %f\n",SurfAttenuation);
+  fprintf(stderr,"GroundFlux = %f\n",GroundFlux[0]);
+  fprintf(stderr,"LatentHeat = %f\n",LatentHeat[0]);
+  fprintf(stderr,"SensibleHeat = %f\n",SensibleHeat[0]);
   
   vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
 

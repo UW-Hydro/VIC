@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-96
- * LAST-MOD: Mon Apr 19 14:33:12 1999 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Jan 24 12:06:38 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Determine surface temperature iteratively using the Brent
  *               method.  
  * DESCRIP-END.
@@ -145,7 +145,7 @@ double root_brent(double LowerBound, double UpperBound,
     j++;
   }
   if ((fa * fb) >= 0) {
-    fprintf(stderr,"ERROR: first error in root_brent -> %lf * %lf >= 0\n",
+    fprintf(stderr,"ERROR: first error in root_brent -> %f * %f >= 0\n",
         fa, fb);
     fprintf(stderr,"Dumping Input Variables - Check for Valid Values\n");
     return(-9999.);

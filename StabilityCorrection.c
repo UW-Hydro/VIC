@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Apr-1996
- * LAST-MOD: Mon Sep 28 16:21:34 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Wed Jan 19 16:20:40 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate the stability correction for exchange of sensible
  *               heat between the surface and the atmosphere 
  * DESCRIP-END.
@@ -17,14 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
-
-static char vcid[] = "$Id$";
-
-/***
-#include "settings.h"
-#include "massenergy.h"
-#include "constants.h"
-***/
 
 #define G 9.81
 
@@ -52,7 +44,6 @@ static char vcid[] = "$Id$";
 double StabilityCorrection(double Z, double d, double TSurf, double Tair, 
 			  double Wind, double Z0)
 {
-  const char *Routine = "StabilityCorrection";
   double Correction;		/* Correction to aerodynamic resistance */
   double Ri;                     /* Richardson's Number */
   double RiCr = 0.2;             /* Critical Richardson's Number */

@@ -15,7 +15,7 @@ cell_data_struct **make_cell_data(int veg_type_num, int Nlayer)
 {
   extern option_struct options;
 
-  int i, j;
+  int i;
   cell_data_struct **temp;
 
   temp = (cell_data_struct**) calloc(veg_type_num, 

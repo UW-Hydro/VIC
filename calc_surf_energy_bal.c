@@ -577,8 +577,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   int                iveg;
   int                Nnodes;
   char              *FIRST_SOLN;
-  char               SNOWING;
-  char               FS_ACTIVE;
+  int                SNOWING;
+  int                FS_ACTIVE;
 
   int                i;
 
@@ -666,8 +666,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   iveg                = (int) va_arg(ap, int);
   Nnodes              = (int) va_arg(ap, int);
   FIRST_SOLN          = (char *) va_arg(ap, char *);
-  SNOWING             = (char) va_arg(ap, char);
-  FS_ACTIVE           = (char) va_arg(ap, char);
+  SNOWING             = (int) va_arg(ap, int);
+  FS_ACTIVE           = (int) va_arg(ap, int);
 
   /* Print Variables */
   fprintf(stderr,"T2 = %f\n",T2);

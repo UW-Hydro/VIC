@@ -120,8 +120,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   int                month;
   int                Nnodes;
   char              *FIRST_SOLN;
-  char               SNOWING;
-  char               FS_ACTIVE;
+  int                SNOWING;
+  int                FS_ACTIVE;
 
   double             error;
   double             ice;
@@ -210,8 +210,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   month               = (int) va_arg(ap, int);
   Nnodes              = (int) va_arg(ap, int);
   FIRST_SOLN          = (char *)va_arg(ap, char *);
-  SNOWING             = (char)va_arg(ap, char);
-  FS_ACTIVE           = (char)va_arg(ap, char);
+  SNOWING             = (int) va_arg(ap, int);
+  FS_ACTIVE           = (int) va_arg(ap, int);
 
   TMean = Ts;
 

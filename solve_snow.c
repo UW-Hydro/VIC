@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+#define SnowThres 1.00
+
 static char vcid[] = "$Id$";
 
 double solve_snow(char                 overstory,
@@ -60,6 +62,8 @@ double solve_snow(char                 overstory,
 		  int                  day_in_year,
 		  int                  dt,
 		  int                  month,
+		  int                  day, 
+		  int                  year, 
 		  int                  rec,
 		  int                  veg_class,
 		  int                 *UnderStory,
@@ -95,6 +99,11 @@ double solve_snow(char                 overstory,
   03-06-01 Modified to pass the minimum depth of full snow cover
            as a variable in soil_con rather than a globally defined
            constant.                                         KAC
+  06-15-02 Fixed check of new snow accumulation for setting 
+           understory flag to use snowfall[WET] not snowfall.  KAC
+  06-15-02 Set MELTING flag to maintain melting albedo curve
+           even during brief periods of refreezing, until a 
+           snowfall exceeds SnowThres.           .           KAC
 
 *********************************************************************/
 
@@ -116,6 +125,7 @@ double solve_snow(char                 overstory,
   double              rainonly;
   double              tmp_Wdew[2];
   double              tmp_grnd_flux;
+  double              store_snowfall;
   int                 curr_snow;
 
   /* initialize moisture variable s*/
@@ -139,6 +149,7 @@ double solve_snow(char                 overstory,
   rainfall[DRY] = 0.;
   if ( snowfall[WET] < 1e-5 ) snowfall[WET] = 0.;
   (*out_prec) = snowfall[WET] + rainfall[WET];
+  store_snowfall = snowfall[WET];
 
   /** Compute latent heats **/
   (*Le) = (2.501e6 - 0.002361e6 * air_temp);
@@ -161,7 +172,7 @@ double solve_snow(char                 overstory,
 
   /** If first iteration, set UnderStory index **/
   if ( *UnderStory == 999 ) {
-    if ( snow->swq > 0 || snowfall > 0 ) *UnderStory = 2; // snow covered
+    if ( snow->swq > 0 || snowfall[WET] > 0 ) *UnderStory = 2; // snow covered
     else *UnderStory = 0; // understory bare
   }
 
@@ -185,11 +196,14 @@ double solve_snow(char                 overstory,
     /** compute understory albedo **/
     TmpAlbedoUnder[0]   = NEW_SNOW_ALB; // albedo if new snow falls
     if ( snow->swq > 0 ) 
+      // age snow albedo if no new snow
       snow->albedo = snow_albedo( snowfall[WET], snow->swq, 
 				  snow->coldcontent, dt, 
-				  snow->last_snow); // aged snow albedo
-      TmpAlbedoUnder[1]   = (*coverage * snow->albedo
-			     + (1. - *coverage) * BareAlbedo); 
+				  snow->last_snow, snow->MELTING); 
+    TmpAlbedoUnder[1]   = (*coverage * snow->albedo
+			   + (1. - *coverage) * BareAlbedo); 
+
+    fprintf(stdout, "%i/%i/%i %02i,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", month, day, year, hour, snow->swq, snow->depth, snow->density, snow->albedo, snow->surf_temp, snow->coverage, snowfall[WET], snow->coldcontent, (float)snow->last_snow*(float)dt/24.);
 
     /** Compute Radiation Balance over Snow **/ 
     
@@ -302,6 +316,9 @@ double solve_snow(char                 overstory,
 	Snow Pack Present on Ground
       ******************************/
 
+      // store snowfall reaching the ground for determining the albedo
+      store_snowfall            = snowfall[WET];
+
       /** Age Snowpack **/
       if( snowfall[WET] > 0 ) curr_snow = 1; // new snow - reset pack age
       else curr_snow = snow->last_snow + 1; // age pack by one time step
@@ -361,18 +378,26 @@ double solve_snow(char                 overstory,
 
 	/** Calculate Snow Density **/
 	if ( snow->surf_temp <= 0 )
+	  // snowpack present, compress and age density
 	  snow->density = snow_density(day_in_year, 
 				       snowfall[WET], 
 				       air_temp, old_swq, snow->depth, 
 				       snow->coldcontent, 
 				       (double)dt, snow->surf_temp);
 	else 
+	  // no snowpack present, start with new snow density
 	  if ( curr_snow == 1 ) 
 	    snow->density = new_snow_density(air_temp);
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	old_depth   = snow->depth;
 	snow->depth = 1000. * snow->swq / snow->density; 
+
+	/** Record if snowpack is melting this time step **/
+	if ( snow->coldcontent >= 0 ) snow->MELTING = TRUE;
+	else if ( snow->MELTING && snowfall[WET] > SnowThres ) 
+	  snow->MELTING = FALSE;
+
 	
 	/** Check for Thin Snowpack which only Partially Covers Grid Cell
 	 exists only if not snowing and snowpack has started to melt **/
@@ -476,6 +501,7 @@ double solve_snow(char                 overstory,
 	snow->coverage   = 0;
 	snow->swq_slope  = 0;
 	snow->store_snow = TRUE;
+	snow->MELTING    = FALSE;
 	
 /*  	energy->AlbedoUnder  = (old_coverage - snow->coverage)   */
 /*  	  / (1. - snow->coverage) * snow->albedo;  */
@@ -498,24 +524,29 @@ double solve_snow(char                 overstory,
       ppt[WET] += rainfall[WET];
       energy->AlbedoOver      = 0.;
       (*AlbedoUnder)          = BareAlbedo;
-      //energy->NetLongOver  = 0.;
-      //energy->LongOverIn   = 0.;
-      //energy->NetShortOver = 0.;
-      //energy->ShortOverIn  = 0.;
-      (*NetLongSnow)       = 0.;
-      (*NetShortSnow)      = 0.;
-      (*NetShortGrnd)      = 0.;
-      (*delta_coverage)    = 0.;
-      energy->latent       = 0.;
-      energy->latent_sub   = 0.;
-      energy->sensible     = 0.;
-      curr_snow            = 0;
-      snow->store_swq      = 0;
-      snow->store_coverage = 1;
+      (*NetLongSnow)          = 0.;
+      (*NetShortSnow)         = 0.;
+      (*NetShortGrnd)         = 0.;
+      (*delta_coverage)       = 0.;
+      energy->latent          = 0.;
+      energy->latent_sub      = 0.;
+      energy->sensible        = 0.;
+      curr_snow               = 0;
+      snow->store_swq         = 0;
+      snow->store_coverage    = 1;
+      snow->MELTING           = FALSE;
 
     }
 
-    snow->last_snow = curr_snow;
+    if ( store_snowfall > SnowThres || store_snowfall == 0 ) {
+      // reset snow albedo ago if new snow is sufficiently deep
+      //fprintf(stdout,"YES: last_snow -> %i, curr_snow -> %i, snowfall -> %f\n", snow->last_snow, curr_snow, store_snowfall);
+      snow->last_snow = curr_snow;
+    }
+    else {
+      //fprintf(stdout,"NO:  last_snow -> %i, curr_snow -> %i, snowfall -> %f\n", snow->last_snow, curr_snow, store_snowfall);
+      snow->last_snow++;
+    }
     
   }
   else {
@@ -546,6 +577,7 @@ double solve_snow(char                 overstory,
     energy->Tfoliage     = Tcanopy;
     snow->store_swq      = 0;
     snow->store_coverage = 1;
+    snow->MELTING        = FALSE;
   }
 
   energy->melt_energy *= -1.;
@@ -553,6 +585,8 @@ double solve_snow(char                 overstory,
   return(melt);
 
 }
+
+#undef SnowThres
 
 
 

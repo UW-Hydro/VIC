@@ -26,7 +26,13 @@ global_param_struct get_global_param(filenames_struct *names,
   char cmdstr[MAXSTRING];
   char optstr[MAXSTRING];
   char flgstr[MAXSTRING];
+  char ErrStr[MAXSTRING];
   global_param_struct temp;
+
+  /** Initialize non-global parameters **/
+  temp.Nnodes = 3;
+
+  /** Read through global control file to find parameters **/
 
   fgets(cmdstr,MAXSTRING,gp);
 
@@ -263,14 +269,26 @@ global_param_struct get_global_param(filenames_struct *names,
   /******************************************
     Check for undefined required parameters
   ******************************************/
-  if(!options.FULL_ENERGY && options.FROZEN_SOIL) 
-    options.FULL_ENERGY = TRUE;
-  if(!options.FULL_ENERGY && options.CALC_SNOW_FLUX) 
+/*   if(!options.FULL_ENERGY && options.FROZEN_SOIL)  */
+/*     options.FULL_ENERGY = TRUE; */
+  if((!options.FULL_ENERGY && !options.FROZEN_SOIL) && options.CALC_SNOW_FLUX) 
     options.CALC_SNOW_FLUX = FALSE;
   if(force_dt[0]<0 || force_dt[1]<0)
     nrerror("Must define forcing file time steps (FORCE_DT <dt 1> <dt 2>) in control file");
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
+  if(options.Nlayer > MAX_LAYERS) {
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%i) than are defined by MAX_LAYERS (%i).  Edit vicNl_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    nrerror(ErrStr);
+  }
+  if(temp.Nnodes > MAX_NODES) {
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%i) than are defined by MAX_NODES (%i).  Edit vicNl_def.h and recompile.",temp.Nnodes,MAX_NODES);
+    nrerror(ErrStr);
+  }
+  if(options.SNOW_BAND > MAX_BANDS) {
+    sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit vicNl_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+    nrerror(ErrStr);
+  }
 
   /*********************************
     Output major options to stderr

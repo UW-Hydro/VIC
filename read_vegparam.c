@@ -30,6 +30,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   float           depth_sum;
   float           sum;
   char            str[500];
+  char            ErrStr[MAXSTRING];
 
   rewind(vegparam);
       
@@ -42,6 +43,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     fprintf(stderr, "Error in vegetation file.  Grid cell %d not found\n",
             gridcel);
     exit(99);
+  }
+  if(vegetat_type_num >= MAX_VEG) {
+    sprintf(ErrStr,"Vegetation parameter file wants more vegetation types in grid cell %i (%i) than are defined by MAX_VEG (%i) [NOTE: bare soil class is assumed].  Edit vicNl_def.h and recompile.",gridcel,vegetat_type_num+1,MAX_VEG);
+    nrerror(ErrStr);
   }
 
   /** Allocate memory for vegetation grid cell parameters **/
@@ -71,6 +76,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       nrerror(str);
     }
     if(sum != 1.) {
+      fprintf(stderr,"WARNING: Root zone fractions sum to more than 1 ( = %lf), normalizing fractions.  If the sum is large, check that your vegetation parameter file is in the form - <zone 1 depth> <zone 1 fract> <zone 2 depth> <zone 2 fract> ...\n", sum);
       for(j=0;j<options.ROOT_ZONES;j++) {
 	temp[i].zone_fract[j] /= sum;
       }

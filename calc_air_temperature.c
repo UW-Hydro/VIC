@@ -67,11 +67,11 @@ double hermint(double xbar, int n, double *x, double *yc1, double *yc2,
 double HourlyT(int Dt, int *TmaxHour, double *Tmax, 
 	       int *TminHour, double *Tmin, double *Tair)
 {
-  double *x;
-  double *Tyc1;
-  double *yc2;
-  double *yc3;
-  double *yc4;
+  double x[6];
+  double Tyc1[6];
+  double yc2[6];
+  double yc3[6];
+  double yc4[6];
   double new_Tmin;
   int i;
   int j;
@@ -81,11 +81,11 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
 
   nHours = HOURSPERDAY;
   n     = 6;
-  x     = (double *) calloc(n, sizeof(double));
-  Tyc1  = (double *) calloc(n, sizeof(double));
-  yc2   = (double *) calloc(n, sizeof(double));
-  yc3   = (double *) calloc(n, sizeof(double));
-  yc4   = (double *) calloc(n, sizeof(double));
+/*   x     = (double *) calloc(n, sizeof(double)); */
+/*   Tyc1  = (double *) calloc(n, sizeof(double)); */
+/*   yc2   = (double *) calloc(n, sizeof(double)); */
+/*   yc3   = (double *) calloc(n, sizeof(double)); */
+/*   yc4   = (double *) calloc(n, sizeof(double)); */
 
   /* First fill the x vector with the times for Tmin and Tmax, and fill the 
      Tyc1 with the corresponding temperature and humidity values */

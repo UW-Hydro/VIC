@@ -28,6 +28,7 @@ void put_data(dist_prcp_struct  *prcp,
   extern option_struct    options;
   extern debug_struct     debug;
 
+/*   out_data_struct         out_data[1]; */
   out_data_struct        *out_data;
 
   int                     veg, vegnum;
@@ -52,16 +53,60 @@ void put_data(dist_prcp_struct  *prcp,
   else Ndist = 1;
   Nbands = options.SNOW_BAND;
 
-  out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct));
-  out_data->swq             = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->snow_canopy     = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->snow_depth      = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->advection       = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->deltaCC         = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->snow_flux       = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->refreeze_energy = (double *)calloc(Nbands+1,sizeof(double));
-  out_data->coverage        = (double *)calloc(Nbands+1,sizeof(double));
-
+  /** Initialize Output Data Array **/
+/*   out_data->evap  = 0.; */
+/*   out_data->runoff  = 0.; */
+/*   out_data->baseflow  = 0.; */
+/*   out_data->inflow  = 0.; */
+/*   out_data->shortwave  = 0.; */
+/*   out_data->longwave  = 0.; */
+/*   out_data->latent  = 0.; */
+/*   out_data->sensible  = 0.; */
+/*   out_data->grnd_flux  = 0.; */
+/*   out_data->deltaH  = 0.; */
+/*   out_data->energy_error  = 0.; */
+/*   out_data->surf_temp  = 0.; */
+/*   out_data->r_net  = 0.; */
+/*   out_data->net_short  = 0.; */
+/*   out_data->net_long  = 0.; */
+/*   out_data->sub_canop  = 0.; */
+/*   out_data->evap_canop  = 0.; */
+/*   out_data->sub_snow  = 0.; */
+/*   out_data->evap_veg  = 0.; */
+/*   out_data->evap_bare  = 0.; */
+/*   out_data->rad_temp  = 0.; */
+/*   out_data->aero_resist  = 0.; */
+/*   out_data->surf_cond  = 0.; */
+/*   out_data->albedo  = 0.; */
+/*   out_data->prec  = 0.; */
+/*   out_data->Wdew  = 0.; */
+/*   for(index=0;index<2;index++) { */
+/*     out_data->fdepth[index]  = 0.; */
+/*   } */
+/*   for(index=0;index<options.Nlayer;index++) { */
+/*     out_data->moist[index]  = 0.; */
+/*     out_data->ice[index]  = 0.; */
+/*   } */
+/*   for(index=0;index<Nbands;index++) { */
+/*     out_data->swq[index]  = 0.; */
+/*     out_data->snow_canopy[index]  = 0.; */
+/*     out_data->snow_depth[index]  = 0.; */
+/*     out_data->advection[index]  = 0.; */
+/*     out_data->deltaCC[index]  = 0.; */
+/*     out_data->snow_flux[index]  = 0.; */
+/*     out_data->refreeze_energy[index]  = 0.; */
+/*     out_data->coverage[index]  = 0.; */
+/*   } */
+  out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct)); 
+/*   out_data->swq             = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->snow_canopy     = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->snow_depth      = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->advection       = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->deltaCC         = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->snow_flux       = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->refreeze_energy = (double *)calloc(Nbands+1,sizeof(double));  */
+/*   out_data->coverage        = (double *)calloc(Nbands+1,sizeof(double));  */
+  
   out_data->prec = atmos->prec;
  
   /*************************************************
@@ -445,13 +490,14 @@ void put_data(dist_prcp_struct  *prcp,
 
   write_data(out_data, outfiles, dmy, dt);
 
-  free((char *)out_data->swq);
-  free((char *)out_data->snow_canopy);
-  free((char *)out_data->snow_depth);
-  free((char *)out_data->advection);
-  free((char *)out_data->deltaCC);
-  free((char *)out_data->snow_flux);
-  free((char *)out_data->refreeze_energy);
-  free((char *)out_data->coverage);
+/*   free((char *)out_data->swq);  */
+/*   free((char *)out_data->snow_canopy);  */
+/*   free((char *)out_data->snow_depth);  */
+/*   free((char *)out_data->advection);  */
+/*   free((char *)out_data->deltaCC);  */
+/*   free((char *)out_data->snow_flux);  */
+/*   free((char *)out_data->refreeze_energy); */
+/*   free((char *)out_data->coverage);  */
   free((char *)out_data); 
+
 }

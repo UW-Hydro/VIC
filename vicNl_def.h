@@ -1,3 +1,14 @@
+/***** Model Constants *****/
+#define MAX_VEG      8
+#define MAX_LAYERS   3
+#define MAX_NODES    18
+#define MAX_BANDS    2
+
+#define MAXSTRING    512
+#define MINSTRING    20
+#define HUGE_RESIST  1.e20	/* largest allowable double number */
+#define SMALL        1.e-15	/* smallest allowable double number */
+
 /***** Physical Constants *****/
 #define RESID_MOIST  0.0        /* define residual moisture content of soil column */
 #define ice_density  917.	/* density of ice (kg/m^3) */
@@ -12,12 +23,12 @@
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 
 #define SECPHOUR     3600	/* seconds per hour */
-#define SNOW_DT       75.	/* Used to bracket snow surface temperatures
+#define SNOW_DT       1.0	/* Used to bracket snow surface temperatures
 				   while computing the snow surface energy 
 				   balance (C) */
-#define SURF_DT       50.	/* Used to bracket soil surface temperatures 
+#define SURF_DT       1.0	/* Used to bracket soil surface temperatures 
                                    while computing energy balance (C) */
-#define SOIL_DT       5.        /* Used to bracket soil temperatures while
+#define SOIL_DT       0.25        /* Used to bracket soil temperatures while
                                    solving the soil thermal flux (C) */
 #define HOURSPERDAY  24         /* number of hours per day */
 
@@ -26,12 +37,6 @@
 					work (m) */
 #define STORM_THRES  0.001      /* thresehold at which a new storm is 
 				   decalred */
-/***** Model Constants *****/
-#define MAXSTRING    512
-#define MINSTRING    20
-#define HUGE_RESIST  1.e20	/* largest allowable double number */
-#define SMALL        1.e-15	/* smallest allowable double number */
-
 /***** Define Boolean Values *****/
 #ifndef FALSE
 #define FALSE 0
@@ -247,12 +252,12 @@ typedef struct {
 				    (fract) */
   double *AreaFract;             /* Fraction of grid cell included in each
 				    elevation band */
-  double *dz_node;		/* thermal node thickness (m) */
-  double *expt_node;		/* soil infiltration parameter */
-  double *max_moist_node;	/* maximum soil moisture (mm/mm) */
-  double *alpha;		/* thermal solution constant */
-  double *beta;			/* thermal solution constant */
-  double *gamma;		/* thermal solution constant */
+  double dz_node[MAX_NODES];		/* thermal node thickness (m) */
+  double expt_node[MAX_NODES];		/* soil infiltration parameter */
+  double max_moist_node[MAX_NODES];	/* maximum soil moisture (mm/mm) */
+  double alpha[MAX_NODES];		/* thermal solution constant */
+  double beta[MAX_NODES];			/* thermal solution constant */
+  double gamma[MAX_NODES];		/* thermal solution constant */
 } soil_con_struct;
 
 /*******************************************************************
@@ -291,7 +296,7 @@ typedef struct {
                                         (fraction) */
   float  RGL;                    /* Value of solar radiation below which there will
 				    be no transpiration (ranges from
-				   ~50 W/m^2 for trees to ~100 W/m^2 for crops) */
+				   ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
   double rad_atten;              /* radiation attenuation due to canopy,
 				   default = 0.5 (N/A) */
   double wind_atten;             /* wind attenuation through canopy
@@ -386,7 +391,7 @@ typedef struct {
   double baseflow;          /* baseflow from current cell (mm/TS) */
   double inflow;            /* moisture that reaches the top of the soil
 			       column (mm) */
-  layer_data_struct *layer; /* structure containing soil variables for
+  layer_data_struct layer[MAX_LAYERS]; /* structure containing soil variables for
 			       each layer (see above) */
 } cell_data_struct;
 
@@ -410,8 +415,8 @@ typedef struct {
   double  error;	        /* energy balance error (W/m^2) */
   double  Trad[2];              /* surface temperature of energy balance (C) */
   char    frozen;	       	/* TRUE = frozen soil present */
-  double *T;			/* thermal node temperatures (C) */
-  double *dz;			/* thermal node thickness (m) */
+  double  T[MAX_NODES];		/* thermal node temperatures (C) */
+  double  dz[MAX_NODES];	/* thermal node thickness (m) */
   int     T1_index;		/* soil node at the bottom of the top layer */
   double  kappa[2];		/* soil thermal conductivity for top two
 				   layers (W/m/K) */
@@ -420,7 +425,7 @@ typedef struct {
   double  fdepth[2];		/* [0] freezing front depth, [1] thawing */
   double  unfrozen;		/* frozen layer water content that is 
                                    unfrozen */
-  double *ice;			/* frozen layer ice content */
+  double  ice[MAX_NODES];	/* frozen layer ice content */
 } energy_bal_struct;
 
 /***********************************************************************
@@ -470,7 +475,7 @@ typedef struct {
   cell (for use with the distributed precipitation model).
 *****************************************************************/
 typedef struct {
-  double *mu;		          /* fraction of grid cell that receives 
+  double            *mu;   /* fraction of grid cell that receives 
 				     precipitation */
   energy_bal_struct **energy;     /* Stores energy balance variables */
   snow_data_struct  **snow;       /* Stores snow variables */
@@ -484,45 +489,45 @@ typedef struct {
   This structure stores all variables needed for output.
   *******************************************************/
 typedef struct {
-  double  evap;		   /* grid cell evaporation */
-  double  runoff;	   /* runoff from the surface */
-  double  baseflow;	   /* baseflow out of the bottom layer */
-  double  moist[MAXlayer]; /* current moisture in each layer */
-  double  ice[MAXlayer];   /* frozen layer ice content */
-  double  inflow;          /* moisture that reaches the top of the soil
-			     column */
-  double  fdepth[2];	   /* depth of freezing [0], and thawing[1] fronts */
-  double  shortwave;	   /* grid cell incoming shortwave flux */
-  double  longwave;	   /* grid cell net longwave flux */
-  double  latent;	   /* grid cell net latent heat flux */
-  double  sensible;	   /* grid cell net sensible heat flux */
-  double  grnd_flux;	   /* grid cell ground flux */
-  double  deltaH;	   /* grid cell change in heat storage (snow only) */
-  double  energy_error;    /* energy balance error */
-  double  surf_temp;	   /* grid cell average daily surface temperature */
-  double  r_net;           /* grid cell net radiation W/m^2  */
-  double  net_short;       /* grid cell net shortwave flux */
-  double  net_long;        /* grid cell net longwave flux */
-  double  sub_canop;       /* grid cell net sublimation from canopy interception */
-  double  evap_canop;      /* grid cell net evaporation from canopy interception */
-  double  sub_snow;        /* grid cell net sublimation from bare ground from snow pack */
-  double  evap_veg;        /* grid cell net evapotraspiration from vegetation */
-  double  evap_bare;       /* grid cell net evaporation from bare ground */
-  double  rad_temp;        /* grid cell average radiative surface 
+  double evap;		   /* grid cell evaporation */
+  double runoff;	   /* runoff from the surface */
+  double baseflow;	   /* baseflow out of the bottom layer */
+  double moist[MAXlayer]; /* current moisture in each layer */
+  double ice[MAXlayer];   /* frozen layer ice content */
+  double inflow;          /* moisture that reaches the top of the soil
+		            column */
+  double fdepth[2];	   /* depth of freezing [0], and thawing[1] fronts */
+  double shortwave;	   /* grid cell incoming shortwave flux */
+  double longwave;	   /* grid cell net longwave flux */
+  double latent;	   /* grid cell net latent heat flux */
+  double sensible;	   /* grid cell net sensible heat flux */
+  double grnd_flux;	   /* grid cell ground flux */
+  double deltaH;	   /* grid cell change in heat storage (snow only) */
+  double energy_error;    /* energy balance error */
+  double surf_temp;	   /* grid cell average daily surface temperature */
+  double r_net;           /* grid cell net radiation W/m^2  */
+  double net_short;       /* grid cell net shortwave flux */
+  double net_long;        /* grid cell net longwave flux */
+  double sub_canop;       /* grid cell net sublimation from canopy interception */
+  double evap_canop;      /* grid cell net evaporation from canopy interception */
+  double sub_snow;        /* grid cell net sublimation from bare ground from snow pack */
+  double evap_veg;        /* grid cell net evapotraspiration from vegetation */
+  double evap_bare;       /* grid cell net evaporation from bare ground */
+  double rad_temp;        /* grid cell average radiative surface 
 			      temperature */
-  double  aero_resist;     /* grid cell mean aerodynamic resistence  [s/m] */
-  double  surf_cond;       /* grid cell mean surface conductance  [m/s] */
-  double  albedo;          /* grid cell mean albedo */ 
-  double  prec;            /* incoming precipitation */
-  double  Wdew;            /* canopy interception of moisture */
-  double *swq;		   /* snow water equivalent (mm) */
-  double *snow_canopy;	   /* snow captured by canopy (mm) */
-  double *snow_depth;      /* snow depth (cm) */
-  double *advection;	   /* grid cell advection (snow only) (Wm-2) */
-  double *deltaCC;         /* change of cold content in the snow pack [Wm-2] */
-  double *snow_flux;       /* energy flux through the snow pack [Wm-2] */
-  double *refreeze_energy; /* energy used to refreeze snowpack [Wm-2] */
-  double *coverage;        /* fractional coverage of grid cell with snow */
+  double aero_resist;     /* grid cell mean aerodynamic resistence  [s/m] */
+  double surf_cond;       /* grid cell mean surface conductance  [m/s] */
+  double albedo;          /* grid cell mean albedo */ 
+  double prec;            /* incoming precipitation */
+  double Wdew;            /* canopy interception of moisture */
+  double swq[MAX_BANDS+1];	       /* snow water equivalent (mm) */
+  double snow_canopy[MAX_BANDS+1];     /* snow captured by canopy (mm) */
+  double snow_depth[MAX_BANDS+1];      /* snow depth (cm) */
+  double advection[MAX_BANDS+1];       /* grid cell advection (snow only) (Wm-2) */
+  double deltaCC[MAX_BANDS+1];         /* change of cold content in the snow pack [Wm-2] */
+  double snow_flux[MAX_BANDS+1];       /* energy flux through the snow pack [Wm-2] */
+  double refreeze_energy[MAX_BANDS+1]; /* energy used to refreeze snowpack [Wm-2] */
+  double coverage[MAX_BANDS+1];        /* fractional coverage of grid cell with snow */
 } out_data_struct;
 
 /********************************************************

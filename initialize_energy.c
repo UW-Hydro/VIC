@@ -69,6 +69,7 @@ void initialize_energy_bal (energy_bal_struct  **energy,
   double moist[MAXlayer], ice[MAXlayer];
   double unfrozen, frozen;
   double **layer_ice;
+  double **layer_tmp;
   double *EMPTY;
   char   *EMPTY_C;
 
@@ -182,9 +183,9 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 		* moist[index] * 1000.;
 	    }
 	  }
-	  layer_ice = (double **)calloc(options.Nlayer,sizeof(double *));
+	  layer_ice = (double **)malloc(options.Nlayer*sizeof(double *));
 	  for(i=0;i<options.Nlayer;i++) {
-	    layer_ice[i] = (double *)calloc(3,sizeof(double));
+	    layer_ice[i] = (double *)malloc(3*sizeof(double));
 	    layer_ice[i][0] = 0.;
 	    layer_ice[i][1] = cell[dry][veg][band].layer[i].ice 
 	      / (soil_con[0].depth[i] * 1000.);
@@ -379,9 +380,9 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	    
 	  }
 	  
-	  layer_ice = (double **)calloc(options.Nlayer,sizeof(double *));
+	  layer_ice = (double **)malloc(options.Nlayer*sizeof(double *));
 	  for(i=0;i<options.Nlayer;i++) {
-	    layer_ice[i] = (double *)calloc(3,sizeof(double));
+	    layer_ice[i] = (double *)malloc(3*sizeof(double));
 	    layer_ice[i][0] = 0.;
 	    layer_ice[i][1] = cell[dry][veg][band].layer[i].ice 
 	      / (soil_con[0].depth[i] * 1000.);
@@ -465,48 +466,43 @@ void initialize_energy_bal (energy_bal_struct  **energy,
         Prepare soil constants for use in thermal flux solutions
       ***********************************************************/
 
-      soil_con[0].dz_node        = (double *)calloc(Nnodes,sizeof(double));
-      soil_con[0].expt_node      = (double *)calloc(Nnodes,sizeof(double));
-      soil_con[0].max_moist_node = (double *)calloc(Nnodes,sizeof(double));
-      soil_con[0].alpha          = (double *)calloc(Nnodes-1,sizeof(double));
-      soil_con[0].beta           = (double *)calloc(Nnodes-1,sizeof(double));
-      soil_con[0].gamma          = (double *)calloc(Nnodes-1,sizeof(double));
+/*       soil_con[0].dz_node        = (double *)calloc(Nnodes,sizeof(double)); */
+/*       soil_con[0].expt_node      = (double *)calloc(Nnodes,sizeof(double)); */
+/*       soil_con[0].max_moist_node = (double *)calloc(Nnodes,sizeof(double)); */
+/*       soil_con[0].alpha          = (double *)calloc(Nnodes-1,sizeof(double)); */
+/*       soil_con[0].beta           = (double *)calloc(Nnodes-1,sizeof(double)); */
+/*       soil_con[0].gamma          = (double *)calloc(Nnodes-1,sizeof(double)); */
 
-      Lsum = 0.;
-      Zsum = 0.;
-      index = 0;
-      for(zindex=0;zindex<Nnodes;zindex++) {
-	
+      for(zindex=0;zindex<Nnodes;zindex++)
 	soil_con[0].dz_node[zindex] = energy[0][0].dz[zindex];
-	if(Zsum+energy[0][0].dz[zindex]/2.>=Lsum+soil_con[0].depth[index]) {
-	  soil_con[0].expt_node[zindex] 
-	    = (soil_con[0].expt[index]*(Lsum+soil_con[0].depth[index]
-				     - (Zsum-energy[0][0].dz[zindex]/2.))
-	       + soil_con[0].expt[index+1]*(Zsum+energy[0][0].dz[zindex]/2.
-					 - soil_con[0].depth[index]))
-	    / energy[0][0].dz[zindex];
-	  soil_con[0].max_moist_node[zindex] 
-	    = (soil_con[0].max_moist[index]/soil_con[0].depth[index]/1000.
-	       * (Lsum+soil_con[0].depth[index] 
-		  - (Zsum-energy[0][0].dz[zindex]/2.))
-	       + soil_con[0].max_moist[index+1]/soil_con[0].depth[index+1]/1000.
-	       * (Zsum+energy[0][0].dz[zindex]/2. - soil_con[0].depth[index]))
-	    / energy[0][0].dz[zindex];
-	}
-	else {
-	  soil_con[0].expt_node[zindex] = soil_con[0].expt[index];
-	  soil_con[0].max_moist_node[zindex] 
-	    = soil_con[0].max_moist[index] / soil_con[0].depth[index] / 1000.;
-	}
-	if(zindex<Nnodes-1) {
-	  Zsum += (energy[0][0].dz[zindex] + energy[0][0].dz[zindex+1]) / 2.;
-	  if((int)(((Zsum - Lsum)+0.0005)*1000.) 
-	     > (int)(soil_con[0].depth[index]*1000.)) {
-	    Lsum += soil_con[0].depth[index];
-	    index++;
-	  }
-	}
+
+      layer_tmp = (double **)malloc(options.Nlayer*sizeof(double *));
+
+      /** Store expt for each soil thermal node **/
+      for(i=0;i<options.Nlayer;i++) {
+	layer_tmp[i] = (double *)malloc(3*sizeof(double));
+	layer_tmp[i][0] = 0.;
+	layer_tmp[i][1] = 0.;
+	layer_tmp[i][2] = soil_con[0].expt[i];
       }
+      distribute_soil_property(energy[0][0].dz,0,0,
+			       layer_tmp,options.Nlayer,Nnodes,
+			       soil_con[0].depth,soil_con[0].expt_node);
+
+      /** Store maximum soil mositure for each soil thermal node **/
+      for(i=0;i<options.Nlayer;i++) {
+	layer_tmp[i][0] = 0.;
+	layer_tmp[i][1] = 0.;
+	layer_tmp[i][2] = soil_con[0].max_moist[i] 
+          / (soil_con[0].depth[i] * 1000.);
+      }
+      distribute_soil_property(energy[0][0].dz,0,0,
+			       layer_tmp,options.Nlayer,Nnodes,
+			       soil_con[0].depth,soil_con[0].max_moist_node);
+
+      for(i=0;i<options.Nlayer;i++) free((char *)layer_tmp[i]);
+      free((char *)layer_tmp);
+
       for(zindex=0;zindex<Nnodes-2;zindex++) {
 	soil_con[0].alpha[zindex] = ((soil_con[0].dz_node[zindex+2] 
 				   + soil_con[0].dz_node[zindex+1]) / 2.0 

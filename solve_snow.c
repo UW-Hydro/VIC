@@ -178,7 +178,7 @@ double solve_snow(snow_data_struct    *snow,
 	- STEFAN_B * pow(snow->surf_temp+KELVIN,4.0);
     }
     else {
-      if(options.FULL_ENERGY) {
+      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	rad[0]       = net_short[0] + longwave 
 	  - STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
       }
@@ -202,7 +202,7 @@ double solve_snow(snow_data_struct    *snow,
 	  if(snow->snow) 
 	    surf_long = STEFAN_B * pow(snow->surf_temp + KELVIN, 4.);
 	  else {
-	    if(options.FULL_ENERGY)
+	    if(options.FULL_ENERGY || options.FROZEN_SOIL)
 	      surf_long = STEFAN_B * pow(energy->T[0] + KELVIN, 4.);
 	    else
 	      surf_long = STEFAN_B * pow(air_temp + KELVIN, 4.);
@@ -283,7 +283,7 @@ double solve_snow(snow_data_struct    *snow,
       }
     
       snow_inflow[0] += rainfall[WET] + snowfall[WET];
-      if(options.FULL_ENERGY) grnd_temp = energy->T[0];
+      if(options.FULL_ENERGY || options.FROZEN_SOIL) grnd_temp = energy->T[0];
       else grnd_temp = air_temp;
       snow_melt(soil_con,rec,iveg,wind_h+soil_con.snow_rough,aero_resist[2],
 		Le[0],snow,(double)dt,0.00,soil_con.snow_rough,
@@ -292,13 +292,13 @@ double solve_snow(snow_data_struct    *snow,
 		energy->longwave,density,pressure,vpd,vp,&melt,
 		&energy->advection,&energy->deltaCC,
 		&energy->grnd_flux,&energy->latent,
-		&energy->sensible,&energy->error,Tsurf,
+		&energy->sensible,&energy->error,
 		&energy->refreeze_energy);
       ppt[WET]             += melt;
       energy->albedo   = snow->albedo;
       tmp_snow_energy[0] = energy->advection 
 	- energy->deltaCC + energy->refreeze_energy;
-      Ls[0] = (677. - 0.07 * Tsurf[0]) * 4.1868 * 1000;
+      Ls[0] = (677. - 0.07 * snow->surf_temp) * 4.1868 * 1000;
       Tend_surf[0] = snow->surf_temp;
       
       /** Compute Snow Parameters **/
@@ -310,7 +310,7 @@ double solve_snow(snow_data_struct    *snow,
 				     snowfall[0],tmp_air_temp,
 				     tmp_swq,snow->depth,
 				     snow->coldcontent,(double)dt,
-				     Tsurf[0]);
+				     snow->surf_temp);
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	snow->depth = 1000. * snow->swq 
@@ -336,22 +336,21 @@ double solve_snow(snow_data_struct    *snow,
 	  snow->coverage = 1.;
 	}
 	
-	if(options.FULL_ENERGY) {
+	if(options.FULL_ENERGY  || options.FROZEN_SOIL) {
 	  /** Compute Surface Energy Balance with Snow Present **/
 	  if(options.CALC_SNOW_FLUX) {
 	    /** Compute Thermal Flux Through the Snow Pack **/
 	    FIRST_SOLN[0] = TRUE;
 	    Tend_grnd[0] 
 	      = calc_snow_ground_flux(dt,Nnodes,rec,iveg,mu,dp,moist,ice0,
-				      Tsurf[0],new_T1,&energy->grnd_flux,
+				      snow->surf_temp,new_T1,&energy->grnd_flux,
 				      &energy->deltaH,&energy->snow_flux,
-				      Tgrnd,energy,snow,layer_wet,layer_dry,
+				      energy,snow,layer_wet,layer_dry,
 				      soil_con,FIRST_SOLN);
 	  }
-	  else if(options.FULL_ENERGY) {
+	  else if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	    /** Ignore Thermal Flux Through the Snow Pack **/
-	    Tgrnd[0] = Tsurf[0];
-	    Tend_grnd[0] = Tend_surf[0];
+	    Tend_grnd[0] = snow->surf_temp;
 	    new_T1[0] = energy->T[1];
 	  }
 	}
@@ -402,7 +401,7 @@ double solve_snow(snow_data_struct    *snow,
     /** Compute Radiation Balance for Bare Surface **/ 
     out_short[0] = energy->albedo * shortwave;
     net_short[0] = (1.0 - energy->albedo) * shortwave;
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       rad[0]       = net_short[0] + longwave 
 	- STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
     }

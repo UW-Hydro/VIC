@@ -116,7 +116,7 @@ void write_data(out_data_struct *out_data,
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
     }
   }
-  else if(options.FULL_ENERGY && options.SNOW_MODEL) {
+  else if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.SNOW_MODEL) {
     /***** Write ASCII full energy snow output file *****/
     fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
@@ -160,7 +160,7 @@ void write_data(out_data_struct *out_data,
       fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
       /*     tmp_fptr[0] = (float)out_data->coverage; */
       /*     fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband); */
-      if(options.FULL_ENERGY) {
+      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	tmp_fptr[0] = (float)out_data->advection[band+1];
 	fwrite(tmp_fptr,1,sizeof(float),outfiles.snowband);
 	tmp_fptr[0] = (float)out_data->deltaCC[band+1];
@@ -172,7 +172,8 @@ void write_data(out_data_struct *out_data,
       }
     }
   }
-  else if(options.FULL_ENERGY && options.SNOW_MODEL && options.PRT_SNOW_BAND) {
+  else if((options.FULL_ENERGY || options.FROZEN_SOIL) 
+	  && options.SNOW_MODEL && options.PRT_SNOW_BAND) {
     /***** Write ASCII full energy snow band output file *****/
     fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i\t%02i",
 	    dmy->year, dmy->month, dmy->day, dmy->hour);
@@ -227,7 +228,7 @@ void write_data(out_data_struct *out_data,
       tmp_fptr[0] = (float)out_data->moist[j];
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     }
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       tmp_fptr[0] = (float)out_data->rad_temp;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     }
@@ -235,7 +236,7 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->r_net;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       tmp_fptr[0] = (float)out_data->latent;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     }
@@ -249,7 +250,7 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->sub_snow;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       tmp_fptr[0] = (float)out_data->sensible;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
       tmp_fptr[0] = (float)out_data->grnd_flux;
@@ -262,7 +263,7 @@ void write_data(out_data_struct *out_data,
     tmp_fptr[0] = (float)out_data->albedo;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
   }
-  else if(options.FULL_ENERGY) {
+  else if(options.FULL_ENERGY || options.FROZEN_SOIL) {
     /***** Write ASCII energy balance fluxes file *****/
     fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,

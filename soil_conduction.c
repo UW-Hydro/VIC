@@ -717,7 +717,7 @@ double get_avg_temp(double  Top,
 	zindex ++;
 	Zsum += dZ;
 	tmpdZ = dZ;
-	dZ = (dz[zindex] + dz[zindex+1]) / 2.;
+	if(zindex < Nnodes-1) dZ = (dz[zindex] + dz[zindex+1]) / 2.;
       }
       if(zindex < Nnodes-1) {
 	T1 = T[zindex];

@@ -45,14 +45,14 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   double *grnd_flux;
   double *deltaH;
   double *snow_flux;
-  double *TMean;
+  double  TMean;
   double *T1;
-  double            *T_node;
-  double            *Tnew_node;
-  double            *dz_node;
-  double            *kappa_node;
-  double            *Cs_node;
-  double            *moist_node;
+  double *T_node;
+  double *Tnew_node;
+  double *dz_node;
+  double *kappa_node;
+  double *Cs_node;
+  double *moist_node;
   double            *expt_node;
   double            *max_moist_node;
   double            *ice_node;
@@ -89,7 +89,6 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   grnd_flux      = (double *) va_arg(ap, double *);
   deltaH         = (double *) va_arg(ap, double *);
   snow_flux      = (double *) va_arg(ap, double *);
-  TMean          = (double *) va_arg(ap, double *);
   T1             = (double *) va_arg(ap, double *);
   T_node         = (double *) va_arg(ap, double *);
   Tnew_node      = (double *) va_arg(ap, double *);
@@ -106,17 +105,17 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   Nnodes         = (int)      va_arg(ap, int);
   FIRST_SOLN     = (char *)   va_arg(ap, char *);
 
-  *TMean = Ts;
+  TMean = Ts;
 
   kappa_snow = 2.9302e-6 * pow(snow_density, 2.0);
  
-  *snow_flux = kappa_snow * (*TMean - surf_temp) / snow_depth;
+  *snow_flux = kappa_snow * (TMean - surf_temp) / snow_depth;
 
   if(!options.FROZEN_SOIL) {
     /*************************************************
       Use Xu's Equations to Calculate Thermal Fluxes
     *************************************************/
-    *T1 = estimate_T1(TMean[0], T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
+    *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
 		      Cs2, dp, delta_t);
     
   }
@@ -124,7 +123,7 @@ double func_snow_ground_flux(double Ts, va_list ap) {
     /*************************************************************
       Explicitly Solve Thermal Fluxes For all Soil Thermal Nodes 
     *************************************************************/
-    T_node[0] = *TMean;
+    T_node[0] = TMean;
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
 		    bubble,expt_node,ice_node,alpha,beta,gamma,Nnodes,
@@ -135,20 +134,20 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   /************************************************************
     Compute the Ground Heat Flux Through the Upper Soil Layer
   ************************************************************/
-  *grnd_flux = kappa1/D1*((*T1) - (*TMean));
+  *grnd_flux = kappa1/D1*((*T1) - (TMean));
 
   /**************************************************************
     Compute the Change in Heat Storage in the Upper Soil Layer
   **************************************************************/
-  if(options.FROZEN_SOIL && (*TMean+ *T1)/2.<0.) {
-    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,max_moist,
+  if(options.FROZEN_SOIL && (TMean+ *T1)/2.<0.) {
+    ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,max_moist,
 					 bubble,expt);
     if(ice<0.) ice=0.;
     if(ice>max_moist) ice=max_moist;
   }
   else ice=0.;
 
-  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
+  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (TMean + *T1)/2.) * D1 / delta_t;
   *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
   /*******************************

@@ -137,6 +137,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 
     dum=0.;
     for (layer=0;layer<options.Nlayer;layer++) {
+      if(veg_con[veg].root[layer] < 1.e-4) veg_con[veg].root[layer] = 0.;
       dum += veg_con[veg].root[layer];
     }
     if(dum == 0.0){

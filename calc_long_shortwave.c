@@ -39,6 +39,11 @@ void calc_long_shortwave(double *shortwave,
       HAVE_LONGWAVE    if TRUE do not calculate longwave
       HAVE_TSKC        if TRUE do not calculate cloud coverage
  
+  Modifications:
+  11-30-98 TSKC is a fractional value from 0 to 1, but was being 
+           used as if it was a percent (0 to 100).  Based on Gregs
+           testing have fixed the problem.                     KAC
+
 **********************************************************************/
  
   static double last_tskc;
@@ -82,7 +87,7 @@ void calc_long_shortwave(double *shortwave,
                                         to over correct **/
     if(!HAVE_SHORTWAVE && HAVE_TSKC) {
       /** Need to Calculate Shortwave Radiation **/
-      *shortwave = (1.0 - 0.65 * ((*tskc) * (*tskc)) / 100.) * Ic;
+      *shortwave = (1.0 - 0.65 * ((*tskc) * (*tskc)) / 1.00) * Ic;
       if(*shortwave < 0.0) {
         sum_zero++;
         *shortwave = 0.0;

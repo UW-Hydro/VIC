@@ -653,6 +653,14 @@ void full_energy(int rec,
           tmp_canopyevap = 0.;
           energy[iveg].refreeze_energy=0.;
           tmp_layerevap = (double*)calloc(options.Nlayer,sizeof(double));
+	  tmp_energy 
+	    = (energy_bal_struct *)calloc(1,sizeof(energy_bal_struct));
+	  if(debug.PRT_FLUX && rec==0 && prcpdist==0) {
+	    fprintf(debug.fg_energy,"DATE\tVEG TYPE\tPRCPDIST\tNET SHT\tNET LNG\t");
+	    fprintf(debug.fg_energy,"LATENT\tSENSBL\tADVEC\t");
+	    fprintf(debug.fg_energy,"del CC\tMELT\t");
+	    fprintf(debug.fg_energy,"T_AIR\tT_SNOW\tWIND\n");
+	  }
 
           if(snow[iveg].swq>0 || (atmos->prec-atmos->rainonly) > 0.
             || (snow[iveg].snow_canopy>0. && overstory)) {
@@ -699,10 +707,14 @@ void full_energy(int rec,
                 snow[iveg].albedo = snow_albedo(snowfall,
                                     snow[iveg].swq,snow[iveg].coldcontent,
                                     SNOW_STEP,snow[iveg].last_snow);
-              else
+              else if(overstory && snow[iveg].snow_canopy>0.) {
                 snow[iveg].albedo = snow_albedo(snowfall,
                                     snow[iveg].snow_canopy,atmos->air_temp,
                                     SNOW_STEP,snow[iveg].last_snow);
+	      }
+	      else {
+		snow[iveg].albedo = 0.;
+	      }
               calc_long_shortwave(&inshort,
                    &inlong,&atmos->tskc,atmos->air_temp,
                    atmos->vp,(double)soil_con.time_zone_lng,
@@ -781,8 +793,11 @@ void full_energy(int rec,
                           cell[iveg].aero_resist[2],
                           cell[iveg].Le,&snow[iveg],(double)SNOW_STEP,
 			  0.00,soil_con.snow_rough,surf_atten,rainfall,
-			  snowfall,tmp_wind[2],0.,&dummy,&dummy,
-                          &dummy,&dummy,&dummy,&dummy,&dummy,&dummy);
+			  snowfall,tmp_wind[2],0.,
+			  &energy[iveg].advection,&energy[iveg].deltaCC,
+			  &energy[iveg].grnd_flux,&energy[iveg].latent,
+			  &energy[iveg].sensible,&energy[iveg].error,
+			  &energy[iveg].Trad[0],&energy[iveg].refreeze_energy);
                 tmp_melt+=atmos->melt;
 
                 if(snow[iveg].swq>0.) {
@@ -841,6 +856,21 @@ void full_energy(int rec,
               }
               tmp_canopy_vapor_flux += snow[iveg].canopy_vapor_flux;
               tmp_vapor_flux += snow[iveg].vapor_flux;
+
+	      if(debug.PRT_FLUX) {
+		fprintf(debug.fg_energy,"%7.4f\t%i\t%i\t%7.4lf\t%7.4lf",
+			(float)rec+(float)hour/24., iveg, prcpdist, 
+			atmos->net_short,
+			inlong-STEFAN_B*pow(energy[iveg].Trad[0]+KELVIN,4.0));
+		fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf",
+			energy[iveg].latent, energy[iveg].sensible);
+		fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf\t%7.4lf",
+			energy[iveg].advection, energy[iveg].deltaCC, 
+			energy[iveg].refreeze_energy);
+		fprintf(debug.fg_energy,"\t%7.4lf\t%7.4lf\t%7.4lf\n",
+			atmos->air_temp, snow[iveg].surf_temp, atmos->wind);
+	      }
+
             }
             atmos->longwave = tmp_longwave;
             atmos->rad = tmp_rad;
@@ -929,7 +959,7 @@ void full_energy(int rec,
       } /** End Water Balance Model **/
   
       /** Store Energy Balance Data **/
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+      if(options.FULL_ENERGY || options.SNOW_MODEL) {
         energy[iveg].shortwave = atmos->shortwave;
 	if(snow[iveg].swq>0) energy[iveg].shortwave *= surf_atten;
         energy[iveg].longwave = atmos->longwave;

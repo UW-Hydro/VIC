@@ -16,7 +16,10 @@ double calc_air_temperature(double *tmax, double *tmin, int hour) {
 
 **********************************************************************/
 
+  int    A, B;
   double air_temp;
+  double air_temp_A;
+  double air_temp_B;
   double a0[] = { 0.330, 0.260, 0.200, 0.140, 0.100, 0.070, 0.050, 0.000, 
                  0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
                  0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000 };
@@ -32,6 +35,26 @@ double calc_air_temperature(double *tmax, double *tmin, int hour) {
 
   air_temp = a0[hour] * tmax[0] + a1[hour] * tmax[1] 
            + b1[hour] * tmin[1] + b2[hour] * tmin[2];
+
+  /** Check for Air Temperature Less Than Tmin at end of Current Day **/
+  B = 23;
+  air_temp_B = a0[B] * tmax[0] + a1[B] * tmax[1] 
+             + b1[B] * tmin[1] + b2[B] * tmin[2];    
+  if(hour>19 && air_temp_B<tmin[1]) {
+    A = 19;
+    air_temp_A = a0[A] * tmax[0] + a1[A] * tmax[1] 
+               + b1[A] * tmin[1] + b2[A] * tmin[2];
+    air_temp = (hour - B)/(A-B) * (air_temp_A - tmin[1]) + tmin[1];
+  }
+   
+  if(air_temp>tmax[1]) {
+    air_temp = tmax[1];
+    fprintf(stderr,"WARNING: Daily temperature cyle exceeded maximum temperature\n");
+  }
+  if(air_temp<tmin[1]) {
+    air_temp = tmin[1];
+    fprintf(stderr,"WARNING: Daily temperature cyle fell below minimum temperature\n");
+  }
 
   return (air_temp);
 

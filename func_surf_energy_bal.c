@@ -181,21 +181,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   else if(CALC_EVAP)
     Evap = arno_evap(layer, rad[0], Tair, vpd, (1.0 - albedo) * shortwave, 
 		     D1, max_moist*depth[0]*1000., elevation, b_infilt, 
-		     max_infil, 
 		     Tair, displacement, roughness, ref_height, ra, dt);
   else Evap = 0.;
   
-  /******************************************************
-    Compute the Current Ice Content of the Top Soil Layer
-    ******************************************************/
-  if((*TMean+ *T1)/2.<0. && options.FROZEN_SOIL) {
-    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,
-          max_moist,bubble,expt);
-    if(ice<0.) ice=0.;
-    if(ice>max_moist) ice=max_moist;
-  }
-  else ice=0.;
- 
   /**********************************************************************
     Compute the Latent Heat Flux from the Surface and Covering Vegetation
     **********************************************************************/
@@ -207,6 +195,17 @@ double func_surf_energy_bal(double Ts, va_list ap)
     ************************************************/
   *sensible_heat = atmos_density*Cp*(Tair - (*TMean))/ra;
 
+  /******************************************************
+    Compute the Current Ice Content of the Top Soil Layer
+    ******************************************************/
+  if((*TMean+ *T1)/2.<0. && options.FROZEN_SOIL) {
+    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,
+          max_moist,bubble,expt);
+    if(ice<0.) ice=0.;
+    if(ice>max_moist) ice=max_moist;
+  }
+  else ice=0.;
+ 
   /*******************************************
     Compute Heat Storage in the Top Soil Layer
     *******************************************/

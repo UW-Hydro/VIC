@@ -59,6 +59,7 @@ void runoff(layer_data_struct *layer,
   int *froz_solid;
   int last_index;
   int last_cnt;
+  int tmp_index;
   int time_step;
   double ex, A, i_0, basis, frac;
   double inflow;
@@ -266,20 +267,60 @@ void runoff(layer_data_struct *layer,
                 / sublayer[lindex][sub] - dt_runoff
                 / sublayer[lindex][sub] 
                 - (Q12[lindex][sub] + layer[lindex].evap/(double)dt);
-            if(submoist[lindex][sub] > submax_moist[lindex][sub]) {
+            if(submoist[lindex][sub] > submax_moist[lindex][sub] 
+	       && !froz_solid[last_index+1]) {
               tmp_inflow = submoist[lindex][sub] - submax_moist[lindex][sub];
               submoist[lindex][sub] = submax_moist[lindex][sub];
-            } 
-           
+            }
+	    else if(submoist[lindex][sub] > submax_moist[lindex][sub] 
+	       && froz_solid[last_index+1]) {
+              tmp_inflow=0.;
+              *runoff += (submoist[lindex][sub] - submax_moist[lindex][sub]) 
+		* sublayer[lindex][sub];
+              submoist[lindex][sub] = submax_moist[lindex][sub];
+	    }
           }
           else {
             submoist[lindex][sub] = submoist[lindex][sub] + inflow
                                   / sublayer[lindex][sub] - (Q12[lindex][sub]
                                   + layer[lindex].evap/(double)dt);
-            if(submoist[lindex][sub] > submax_moist[lindex][sub]) {
+            if(submoist[lindex][sub] > submax_moist[lindex][sub]
+	       && !froz_solid[last_index+1]) {
               tmp_inflow = submoist[lindex][sub] - submax_moist[lindex][sub];
               submoist[lindex][sub] = submax_moist[lindex][sub];
             } 
+	    else if(submoist[lindex][sub] > submax_moist[lindex][sub] 
+	       && froz_solid[last_index+1]) {
+              tmp_inflow=0.;
+              tmp_index = last_index;
+              while(tmp_index>0 
+		    && submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		    > submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) {
+		Q12[last_layer[tmp_index-1]][last_sub[tmp_index]] 
+		  -= (submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) 
+		  * sublayer[last_layer[tmp_index]][last_sub[tmp_index]]
+		  / sublayer[last_layer[tmp_index-1]][last_sub[tmp_index]];
+		submoist[last_layer[tmp_index-1]][last_sub[tmp_index]] 
+		  += (submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) 
+		  * sublayer[last_layer[tmp_index]][last_sub[tmp_index]]
+		  / sublayer[last_layer[tmp_index-1]][last_sub[tmp_index]];
+		submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		  = submax_moist[last_layer[tmp_index]][last_sub[tmp_index]];
+                tmp_index--;
+              }
+	      if(tmp_index==0 
+		 && submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		 > submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) {
+		*runoff 
+		  += (submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]])
+		  * sublayer[last_layer[tmp_index]][last_sub[tmp_index]];
+		submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
+		  = submax_moist[last_layer[tmp_index]][last_sub[tmp_index]];
+	      }
+	    }
           }
 
           firstlayer=FALSE;
@@ -301,8 +342,8 @@ void runoff(layer_data_struct *layer,
               submoist[lindex][sub] = 0.;
             }
           }
+/******
           if (submoist[lindex][sub] > submax_moist[lindex][sub]) {
-            /** if layer below is frozen solid, moisture is trapped above **/
             i = last_index;
             while(i>0 && submoist[last_layer[i]][last_sub[i]]
                 > submax_moist[last_layer[i]][last_sub[i]]) {
@@ -317,7 +358,6 @@ void runoff(layer_data_struct *layer,
             }
             if(i==0 && submoist[last_layer[i]][last_sub[i]]
                 > submax_moist[last_layer[i]][last_sub[i]]) {
-              /** increase runoff if all thawed layers saturated **/
               *runoff += (submoist[last_layer[i]][last_sub[i]]
                        - submax_moist[last_layer[i]][last_sub[i]])
                        * sublayer[last_layer[i]][last_sub[i]];
@@ -325,7 +365,8 @@ void runoff(layer_data_struct *layer,
                    = submax_moist[last_layer[i]][last_sub[i]];
             }
           }
-  
+******/
+
           inflow = (Q12[lindex][sub]+tmp_inflow) * sublayer[lindex][sub];
   
           last_index++;

@@ -19,27 +19,27 @@ void put_data(dist_prcp_struct  *prcp,
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
-  extern option_struct  options;
-  extern debug_struct   debug;
+  extern option_struct    options;
+  extern debug_struct     debug;
 
   static out_data_struct *out_data;
 
-  int veg, vegnum;
-  int index;
-  int Ndist;
-  int dist;
-  int dt;
-  double mu;
-  double tmp_evap;
-  double tmp_moist;
-  double tmp_ice;
-  double rad_temp = 0.0;
-  double inflow, outflow, storage;
+  int                     veg, vegnum;
+  int                     index;
+  int                     Ndist;
+  int                     dist;
+  int                     dt;
+  double                  mu;
+  double                  tmp_evap;
+  double                  tmp_moist;
+  double                  tmp_ice;
+  double                  rad_temp = 0.0;
+  double                  inflow, outflow, storage;
 
-  cell_data_struct *cell;
-  snow_data_struct *snow;
-  energy_bal_struct *energy;
-  veg_var_struct *veg_var;
+  cell_data_struct       *cell;
+  snow_data_struct       *snow;
+  energy_bal_struct      *energy;
+  veg_var_struct         *veg_var;
 
   out_data = (out_data_struct *) calloc(1,sizeof(out_data_struct));
 
@@ -132,37 +132,36 @@ void put_data(dist_prcp_struct  *prcp,
       /** record surface fluxes **/
       if(options.FULL_ENERGY) {
         out_data->net_short += energy[veg].shortwave
-                          * (1.0 - energy[veg].albedo)
-                          * veg_con[veg].Cv * mu;
+	                     * (1.0 - energy[veg].albedo)
+                             * veg_con[veg].Cv * mu;
         out_data->net_long  += energy[veg].longwave
-                          * veg_con[veg].Cv * mu;
+                             * veg_con[veg].Cv * mu;
         out_data->albedo    += energy[veg].albedo
-                          * veg_con[veg].Cv * mu;
-        out_data->latent    += energy[veg].latent
-                          * veg_con[veg].Cv * mu;
-        out_data->sensible  += energy[veg].sensible
-                          * veg_con[veg].Cv * mu;
-        out_data->grnd_flux += (energy[veg].grnd_flux
-                          + energy[veg].deltaH)
-                          * veg_con[veg].Cv * mu;
-        out_data->deltaH    += energy[veg].deltaH
-                          * veg_con[veg].Cv * mu;
+                             * veg_con[veg].Cv * mu;
+        out_data->latent    -= energy[veg].latent
+                             * veg_con[veg].Cv * mu;
+        out_data->sensible  -= energy[veg].sensible
+                             * veg_con[veg].Cv * mu;
+        out_data->grnd_flux -= (energy[veg].grnd_flux
+                             + energy[veg].deltaH)
+                             * veg_con[veg].Cv * mu;
+        out_data->deltaH    -= energy[veg].deltaH
+                             * veg_con[veg].Cv * mu;
         out_data->energy_error += energy[veg].error
-                          * veg_con[veg].Cv * mu;
-        out_data->surf_temp += energy[veg].T[0]
                           * veg_con[veg].Cv * mu;
 
         /** record radiative effective temperature [K], emissivities set = 1.0  **/
-        rad_temp            += pow((273.15+energy->T[0]),4.0) * veg_con[veg].Cv * mu;
+        rad_temp            += pow((273.15+energy[veg].T[0]),4.0) 
+                             * veg_con[veg].Cv * mu;
 
         /** record mean surface temperature [C]  **/
-        out_data->surf_temp += energy->T[0] * veg_con[veg].Cv * mu;
+        out_data->surf_temp += energy[veg].T[0] * veg_con[veg].Cv * mu;
 
       }
       if(options.FULL_ENERGY || options.SNOW_MODEL) {
         out_data->swq         += snow[veg].swq * veg_con[veg].Cv * mu * 1000.;
         out_data->snow_depth  += snow[veg].depth * veg_con[veg].Cv
-	                       * mu * 1000.;
+	                       * mu * 100.;
         out_data->snow_canopy += (snow[veg].snow_canopy
                                + snow[veg].tmp_int_storage) * veg_con[veg].Cv
 	                       * mu * 1000.;
@@ -184,7 +183,7 @@ void put_data(dist_prcp_struct  *prcp,
     for(index=0;index<options.Nlayer;index++)
       tmp_evap += cell[vegnum].layer[index].evap;
     if(options.FULL_ENERGY || options.SNOW_MODEL)
-      tmp_evap += snow[veg].vapor_flux * 1000.;
+      tmp_evap += snow[vegnum].vapor_flux * 1000.;
     out_data->evap += tmp_evap * (1.0 - veg_con[0].Cv_sum) * mu;
   
 
@@ -199,7 +198,7 @@ void put_data(dist_prcp_struct  *prcp,
 
     /** record aerodynamic resistance **/
     out_data->aero_resist += cell[vegnum].aero_resist[0]
-                           * (1.0 - veg_con[veg].Cv_sum) * mu;
+                           * (1.0 - veg_con[0].Cv_sum) * mu;
 
     /** record layer moisture for bare soil **/
     for(index=0;index<options.Nlayer;index++) {
@@ -240,31 +239,36 @@ void put_data(dist_prcp_struct  *prcp,
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->albedo    += energy[vegnum].albedo
                             * (1.0 - veg_con[0].Cv_sum) * mu;
-      out_data->latent    += energy[vegnum].latent 
+      out_data->latent    -= energy[vegnum].latent 
                             * (1.0 - veg_con[0].Cv_sum) * mu;
-      out_data->sensible  += energy[vegnum].sensible 
+      out_data->sensible  -= energy[vegnum].sensible 
                             * (1.0 - veg_con[0].Cv_sum) * mu;
-      out_data->grnd_flux += (energy[vegnum].grnd_flux 
+      out_data->grnd_flux -= (energy[vegnum].grnd_flux 
                             + energy[vegnum].deltaH)
                             * (1.0 - veg_con[0].Cv_sum) * mu;
-      out_data->deltaH    += energy[vegnum].deltaH 
+      out_data->deltaH    -= energy[vegnum].deltaH 
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->energy_error += energy[vegnum].error 
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->surf_temp += energy[vegnum].T[0] 
-                            * (1.0 - veg_con[0].Cv_sum) * mu;
+                           * (1.0 - veg_con[0].Cv_sum) * mu;
+      rad_temp            += pow((273.15+energy[vegnum].T[0]),4.0) 
+	                   * (1.0 - veg_con[0].Cv_sum) * mu;
+
     }
     if(options.FULL_ENERGY || options.SNOW_MODEL) {
       out_data->swq         += snow[vegnum].swq * (1.0 - veg_con[0].Cv_sum) 
                               * mu * 1000.;
       out_data->snow_depth  += snow[vegnum].depth 
-                              * (1.0 - veg_con[0].Cv_sum) * mu * 1000.;
+                              * (1.0 - veg_con[0].Cv_sum) * mu * 100.;
       out_data->deltaCC += energy[vegnum].deltaCC 
                               * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->advection   += energy[vegnum].advection   
                               * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->snow_flux   += energy[vegnum].snow_flux   
                               * (1.0 - veg_con[0].Cv_sum) * mu;
+      out_data->refreeze_energy   += energy[vegnum].refreeze_energy 
+	                           * (1.0 - veg_con[0].Cv_sum) * mu;
     }
   }
 

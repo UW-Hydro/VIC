@@ -25,7 +25,6 @@ double arno_evap(layer_data_struct *layer,
 		 double             max_moist,
 		 double             elevation,
 		 double             b_infilt,
-		 double             max_infil,
 		 double             Tsurf,
 		 double             displacement,
 		 double             roughness,
@@ -45,6 +44,7 @@ double arno_evap(layer_data_struct *layer,
   double moist;
   double evap;
   double moist_resid;
+  double max_infil;
 
   evap_temp = Tsurf;
 
@@ -62,7 +62,7 @@ double arno_evap(layer_data_struct *layer,
 /**************************************************************************/
 /*  Compute temporary infiltration rate based on given soil_moist.        */
 /**************************************************************************/
-
+  max_infil = (1.0+b_infilt)*max_moist;
   if(b_infilt == -1.0)
     tmp = max_infil;
   else {

@@ -69,7 +69,7 @@ double penman(double, double, double, double, double, double, double, double,
               double, double, float);
 double arno_evap(layer_data_struct *, double, double, double, double, double, 
 		 double, double, double, double, double, double, double, 
-		 double, double, double);
+		 double, double);
 
 /** Radiation Routines **/
 void rad_and_vpd(atmos_data_struct *, soil_con_struct, int, dmy_struct *);

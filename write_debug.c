@@ -100,20 +100,20 @@ void write_debug(atmos_data_struct atmos,
         free((char *)SNOW_FLUX);
         free((char *)REFREEZEENERGY);
       }
-      ENERGY_ERROR = (double *)calloc(Nveg,sizeof(double));
-      ENERGY_ERROR_CALC = (double *)calloc(Nveg,sizeof(double));
-      INSHORT = (double *)calloc(Nveg,sizeof(double));
-      OUTSHORT = (double *)calloc(Nveg,sizeof(double));
-      INLONG = (double *)calloc(Nveg,sizeof(double));
-      OUTLONG = (double *)calloc(Nveg,sizeof(double));
-      SENSIBLE = (double *)calloc(Nveg,sizeof(double));
-      LATENT = (double *)calloc(Nveg,sizeof(double));
-      GRND_FLUX = (double *)calloc(Nveg,sizeof(double));
-      ADVECTION = (double *)calloc(Nveg,sizeof(double));
-      DELTA_H = (double *)calloc(Nveg,sizeof(double));
-      DELTA_CC = (double *)calloc(Nveg,sizeof(double));
-      SNOW_FLUX = (double *)calloc(Nveg,sizeof(double));
-      REFREEZEENERGY = (double *)calloc(Nveg,sizeof(double));
+      ENERGY_ERROR = (double *)calloc(Nveg+1,sizeof(double));
+      ENERGY_ERROR_CALC = (double *)calloc(Nveg+1,sizeof(double));
+      INSHORT = (double *)calloc(Nveg+1,sizeof(double));
+      OUTSHORT = (double *)calloc(Nveg+1,sizeof(double));
+      INLONG = (double *)calloc(Nveg+1,sizeof(double));
+      OUTLONG = (double *)calloc(Nveg+1,sizeof(double));
+      SENSIBLE = (double *)calloc(Nveg+1,sizeof(double));
+      LATENT = (double *)calloc(Nveg+1,sizeof(double));
+      GRND_FLUX = (double *)calloc(Nveg+1,sizeof(double));
+      ADVECTION = (double *)calloc(Nveg+1,sizeof(double));
+      DELTA_H = (double *)calloc(Nveg+1,sizeof(double));
+      DELTA_CC = (double *)calloc(Nveg+1,sizeof(double));
+      SNOW_FLUX = (double *)calloc(Nveg+1,sizeof(double));
+      REFREEZEENERGY = (double *)calloc(Nveg+1,sizeof(double));
     }
     if(rec==0 && prcpdist==0) {
       ENERGY_ERROR[veg] = 0.;

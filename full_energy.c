@@ -890,7 +890,7 @@ void full_energy(int rec,
 			       atmos->air_temp, atmos->vpd, atmos->net_short,
 			       soil_con.depth[0], soil_con.max_moist[0],
 			       soil_con.elevation, soil_con.b_infilt, 
-			       soil_con.max_infil, atmos->air_temp,
+			       atmos->air_temp,
 			       displacement, roughness, ref_height, 
 			       cell[iveg].aero_resist[0], (double)gp.dt);
               ppt = rainfall;
@@ -902,7 +902,7 @@ void full_energy(int rec,
 				atmos->air_temp, atmos->vpd, 
 				atmos->net_short, soil_con.depth[0],
 				soil_con.max_moist[0], soil_con.elevation,
-				soil_con.b_infilt, soil_con.max_infil, 
+				soil_con.b_infilt, 
 				atmos->air_temp, displacement, roughness, 
 				ref_height, cell[iveg].aero_resist[0], 
 				(double)gp.dt);

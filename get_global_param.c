@@ -75,10 +75,10 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %lf",&temp.measure_h);
       }
       else if(strcasecmp("ULAYER",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&temp.measure_h);
+        sscanf(cmdstr,"%*s %i",&temp.Ulayer);
       }
       else if(strcasecmp("LLAYER",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&temp.measure_h);
+        sscanf(cmdstr,"%*s %i",&temp.Llayer);
       }
       else if(strcasecmp("MIN_RAIN_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&temp.MIN_RAIN_TEMP);

@@ -5,26 +5,44 @@
 static char vcid[] = "$Id$";
 
 filenames_struct cmd_proc(int argc, char *argv[]) 
+/**********************************************************************
+  cmd_proc                  Keith Cherkauer                1997
+
+  This routine checks the command line for valid program options.  If
+  no options are found, or an invalid combination of them appear, the
+  routine calls usage() to print the model usage to the screen, before
+  exiting execution.
+
+  Modifications:
+  11-18-98  Added comment block to cmd_proc() and fixed routine so
+            that it will exit if global command file is not defined
+            using the "-g" flag.                                KAC
+
+**********************************************************************/
 {
   extern option_struct options;
   extern debug_struct debug;
-
-  filenames_struct names;
   extern int getopt();
   extern char *optarg;
   extern char *optstring;
-  int optchar;
+
+  filenames_struct names;
+  int              optchar;
+  char             GLOBAL_SET;
   
   if(argc==1) {
     usage(argv[0]);
     exit(1);
   }
   
+  GLOBAL_SET = FALSE;
+
   while((optchar = getopt(argc, argv, optstring)) != EOF) {
     switch((char)optchar) {
     case 'g':
       /** Global Parameters File **/
       strcpy(names.global, optarg);
+      GLOBAL_SET = TRUE;
       break;
     case 'I':
       /** Soil Initialization File **/
@@ -43,6 +61,13 @@ filenames_struct cmd_proc(int argc, char *argv[])
       break;
     }
   }
+
+  if(!GLOBAL_SET) {
+    fprintf(stderr,"ERROR: Must set global control file using the '-g' flag\n");
+    usage(argv[0]);
+    exit(1);
+  }
+
   return names;
 }
 

@@ -21,6 +21,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   07-15-99 Modified to read LAI values from a new line in the vegetation
            parameter file.  Added specifically to work with the new
 	   global LAI files.
+  11-18-02 Added code to read in blowing snow parameters.          LCB
 
 **********************************************************************/
 {
@@ -89,6 +90,14 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       fprintf(stderr,"WARNING: Root zone fractions sum to more than 1 ( = %f), normalizing fractions.  If the sum is large, check that your vegetation parameter file is in the form - <zone 1 depth> <zone 1 fract> <zone 2 depth> <zone 2 fract> ...\n", sum);
       for(j=0;j<options.ROOT_ZONES;j++) {
 	temp[i].zone_fract[j] /= sum;
+      }
+    }
+
+    if(options.BLOWING) {
+       fscanf(vegparam,"%f %f %f",&temp[i].sigma_slope, &temp[i].lag_one, &temp[i].fetch);
+      if( temp[i].sigma_slope <= 0. || temp[i].lag_one <= 0.) {
+      sprintf(str,"Deviation of terrain slope must be greater than 0.");
+       nrerror(str);
       }
     }
 

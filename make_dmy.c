@@ -22,13 +22,17 @@ dmy_struct *make_dmy(global_param_struct *global)
            simulation ending dates, and to skip over initial 
 	  forcing data records so that the model can be run on
 	  subsets of more complete data records.            KAC
+  8-19-99  Modified routine to estimate the number of records
+           that should be skipped before starting to write
+	   model output, based on the number of years defined
+	   with the SKIPYEAR global variable.               KAC
 
 **********************************************************************/
 {
   dmy_struct *temp;
   int    hr, year, day, month, jday, ii, daymax;
   int    days[12]={31,28,31,30,31,30,31,31,30,31,30,31};
-  int    endmonth, endday, endyear;
+  int    endmonth, endday, endyear, skiprec, i;
   int    tmpmonth, tmpday, tmpyear, tmphr, tmpjday, step;
   char   DONE;
 
@@ -64,7 +68,8 @@ dmy_struct *make_dmy(global_param_struct *global)
     tmpday = day;
     tmphr = hr;
     while(!DONE) {
-      get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,&tmpjday,global->dt);
+      get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,
+			 &tmpjday,global->dt);
       ii++;
       if(tmpyear == endyear)
 	if(tmpmonth == endmonth)
@@ -130,6 +135,14 @@ dmy_struct *make_dmy(global_param_struct *global)
       global->forceskip ++;
     }
   }
+
+  /** Determine the number of records to skip before starting output files **/
+  skiprec = 0;
+  for(i=0;i<global->skipyear;i++) {
+    if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
+    else skiprec += 365 * 24 / global->dt;
+  }
+  global->skipyear = skiprec - 1;
 
   return temp;
 }

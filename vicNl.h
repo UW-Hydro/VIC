@@ -238,9 +238,9 @@ void   latent_heat_from_snow(double, double, double, double, double,
 double linear_interp(double,double,double,double,double);
 
 cell_data_struct **make_cell_data(int, int);
-dist_prcp_struct make_dist_prcp(int, int *);
+dist_prcp_struct make_dist_prcp(int);
 dmy_struct *make_dmy(global_param_struct *);
-energy_bal_struct **make_energy_bal(int, int *);
+energy_bal_struct **make_energy_bal(int);
 filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct *, 
 				      soil_con_struct *, outfiles_struct *);
 out_data_struct *make_out_data(int);

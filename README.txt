@@ -165,6 +165,9 @@ Modifications:
 	  (found by Justin Sheffield at Princeton)
 	  Fixed initialization of canopyevap to initialize for every
 	  value of dist, rather than just dist 0.		TJB
+	user_def.h:
+	  Removed SPATIAL_FROST_SLOPE and MAX_FULL_COVERAGE_DEPTH
+	  since they were not used anywhere.			TJB
 	water_under_ice.c:
 	  Initialize mixmax to 0.				TJB
 	write_atmosdata.c:

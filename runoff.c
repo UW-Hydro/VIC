@@ -64,9 +64,9 @@ void runoff(layer_data_struct *layer_wet,
   char               ErrStr[MAXSTRING];
   int                firstlayer, lindex, sub;
   int                i;
-  int               *last_layer;
-  int               *last_sub;
-  int               *froz_solid;
+  int                last_layer[MAX_LAYERS*3];
+  int                last_sub[MAX_LAYERS*3];
+  int                froz_solid[MAX_LAYERS*3];
   int                last_index;
   int                last_cnt;
   int                tmp_index;
@@ -74,17 +74,18 @@ void runoff(layer_data_struct *layer_wet,
   int                Ndist;
   int                dist;
   int                tmpsub;
+  int                tmplayer;
   double             ex, A, i_0, basis, frac;
   double             inflow;
   double             last_moist;
   double            *resid_moist;
-  double           **submoist;
-  double           **subice;
-  double           **sublayer;
-  double           **submax_moist;
+  double             submoist[MAX_LAYERS][3];
+  double             subice[MAX_LAYERS][3];
+  double             sublayer[MAX_LAYERS][3];
+  double             submax_moist[MAX_LAYERS][3];
   double             max_infil;
-  double            *Ksat;
-  double           **Q12;
+  double             Ksat[MAX_LAYERS];
+  double             Q12[MAX_LAYERS][3];
   double            *kappa;
   double            *Cs;
   double            *M;
@@ -129,15 +130,6 @@ void runoff(layer_data_struct *layer_wet,
     }
 
     if(mu>0.) {
-      last_layer   = (int *)calloc(options.Nlayer*3,sizeof(int));
-      last_sub     = (int *)calloc(options.Nlayer*3,sizeof(int));
-      froz_solid   = (int *)calloc(options.Nlayer*3,sizeof(int));
-      Ksat         = (double *)calloc(options.Nlayer,sizeof(double));
-      Q12          = (double **)calloc(options.Nlayer,sizeof(double *));
-      submoist     = (double **)calloc(options.Nlayer,sizeof(double *));
-      subice       = (double **)calloc(options.Nlayer,sizeof(double *));
-      submax_moist = (double **)calloc(options.Nlayer,sizeof(double *));
-      sublayer     = (double **)calloc(options.Nlayer,sizeof(double *));
       
       /** ppt = amount of liquid water coming to the surface **/
       inflow = ppt[dist];
@@ -147,11 +139,6 @@ void runoff(layer_data_struct *layer_wet,
       **************************************************/
       for(lindex=0;lindex<options.Nlayer;lindex++) {
 	Ksat[lindex]         = soil_con.Ksat[lindex] / 24.;
-	Q12[lindex]          = (double *)calloc(3,sizeof(double));
-	submoist[lindex]     = (double *)calloc(3,sizeof(double));
-	subice[lindex]       = (double *)calloc(3,sizeof(double));
-	submax_moist[lindex] = (double *)calloc(3,sizeof(double));
-	sublayer[lindex]     = (double *)calloc(3,sizeof(double));
 
 	/** Set Sublayer Fraction **/
 	sublayer[lindex][0]     
@@ -162,14 +149,6 @@ void runoff(layer_data_struct *layer_wet,
 	sublayer[lindex][2]     
 	  = (soil_con.depth[lindex] - layer[lindex].fdepth) 
 	  / soil_con.depth[lindex];
-/* 	sublayer[lindex][0]      */
-/* 	  = rint((layer[lindex].tdepth) / soil_con.depth[lindex] * 1000) / 1000; */
-/* 	sublayer[lindex][1]      */
-/* 	  = rint((layer[lindex].fdepth - layer[lindex].tdepth)  */
-/* 	  / soil_con.depth[lindex] * 1000) / 1000; */
-/* 	sublayer[lindex][2]      */
-/* 	  = rint((soil_con.depth[lindex] - layer[lindex].fdepth)  */
-/* 	  / soil_con.depth[lindex] * 1000) / 1000; */
 
 	/** Set Sublayer Unfrozen Moisture Content **/
 	submoist[lindex][0] = layer[lindex].moist_thaw;
@@ -206,31 +185,55 @@ void runoff(layer_data_struct *layer_wet,
 	
       }
       
-      /******************************************************
-        Runoff Based on Soil Moisture Level of Upper Layers
-      ******************************************************/
-      top_moist = 0.;
-      top_max_moist=0.;
-      for(lindex=0;lindex<options.Nlayer-1;lindex++) {
-	for(sub=0;sub<3;sub++) {
-	  top_moist += (submoist[lindex][sub] + subice[lindex][sub]) 
-	    * sublayer[lindex][sub];
-	  top_max_moist += submax_moist[lindex][sub] * sublayer[lindex][sub];
-	}
-      }
-      if(top_moist>top_max_moist) top_moist = top_max_moist;
-      if(layer[0].tdepth>0) sub = 0;
-      else if(layer[0].fdepth>0) sub = 1;
-      else sub = 2;
-
       /********************************************************************
         Store original soil moisture for bottom layers for baseflow calcs
       ********************************************************************/
       bot_moist = 0;
+      lindex    = options.Nlayer-1;
       for(sub=0;sub<3;sub++) {
 	bot_moist += (submoist[lindex][sub]) * sublayer[lindex][sub];
       }
       
+      /******************************************
+	Check if top soil layer is frozen solid
+      ******************************************/
+      *runoff = -99;
+      if(options.FROZEN_SOIL &&  
+	 (submax_moist[0][1])/(soil_con.depth[0]*1000.) < 0.13
+	 && sublayer[0][1]*soil_con.depth[0]>0.05 && sublayer[0][0]==0) {
+	*runoff = inflow;
+      }
+
+      /**********************************************************
+        Check if thawed layer exists above solidly frozen layer
+      **********************************************************/
+      else if(options.FROZEN_SOIL &&  
+	      (submax_moist[0][1])/(soil_con.depth[0]*1000.) < 0.13
+	      && sublayer[0][1]*soil_con.depth[0]>0.05 && sublayer[0][0]>0) {
+	top_moist = submoist[0][0] * sublayer[0][0];
+	top_max_moist = submax_moist[0][0] * sublayer[0][0];
+      }
+
+      /******************************************************
+        Runoff Based on Soil Moisture Level of Upper Layers
+      ******************************************************/
+
+      else {
+	top_moist = 0.;
+	top_max_moist=0.;
+	for(lindex=0;lindex<options.Nlayer-1;lindex++) {
+	  for(sub=0;sub<3;sub++) {
+	    top_moist += (submoist[lindex][sub] + subice[lindex][sub]) 
+	      * sublayer[lindex][sub];
+	    top_max_moist += submax_moist[lindex][sub] * sublayer[lindex][sub];
+	  }
+	}
+	if(top_moist>top_max_moist) top_moist = top_max_moist;
+	if(layer[0].tdepth>0) sub = 0;
+	else if(layer[0].fdepth>0) sub = 1;
+	else sub = 2;
+      }
+
       /**************************************************
         Calculate Runoff from Surface
       **************************************************/
@@ -238,35 +241,36 @@ void runoff(layer_data_struct *layer_wet,
       /** Runoff Calculations for Top Layer Only **/
       /** A and i_0 as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
       
-      max_infil = (1.0+soil_con.b_infilt) * top_max_moist;
-      
-      ex        = soil_con.b_infilt / (1.0 + soil_con.b_infilt);
-      A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
-      i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 
-						    / soil_con.b_infilt))); 
-      /* Maximum Inflow */
-      
-      /** equation (3a) Wood et al. **/
-      
-      if (inflow == 0.0) *runoff = 0.0;
-      else if (max_infil == 0.0) *runoff = inflow;
-      else if ((i_0 + inflow) > max_infil) 
-	*runoff = inflow - top_max_moist + top_moist;
-      
-      /** equation (3b) Wood et al. (wrong in paper) **/
-      else {
-	basis = 1.0 - (i_0 + inflow) / max_infil;
-	*runoff = (inflow - top_max_moist + top_moist + top_max_moist
-		 * pow(basis,1.0*(1.0+soil_con.b_infilt)));
+      if(*runoff < 0) {
+	max_infil = (1.0+soil_con.b_infilt) * top_max_moist;
+	
+	ex        = soil_con.b_infilt / (1.0 + soil_con.b_infilt);
+	A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+	i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 
+						      / soil_con.b_infilt))); 
+	/* Maximum Inflow */
+	
+	/** equation (3a) Wood et al. **/
+	
+	if (inflow == 0.0) *runoff = 0.0;
+	else if (max_infil == 0.0) *runoff = inflow;
+	else if ((i_0 + inflow) > max_infil) 
+	  *runoff = inflow - top_max_moist + top_moist;
+	
+	/** equation (3b) Wood et al. (wrong in paper) **/
+	else {
+	  basis = 1.0 - (i_0 + inflow) / max_infil;
+	  *runoff = (inflow - top_max_moist + top_moist + top_max_moist
+		     * pow(basis,1.0*(1.0+soil_con.b_infilt)));
+	}
+	if(*runoff<0.) *runoff=0.;
       }
-      if(*runoff<0.) *runoff=0.;
       
       /**************************************************
         Compute Flow Between Soil Layers (using an hourly time step)
       **************************************************/
       
       dt_inflow  =  inflow / (double) dt;
-      dt_runoff  = *runoff / (double) dt;
       dt_outflow =  0.0;
       for(sub=0;sub<3;sub++) 
 	if(sublayer[options.Nlayer-1][sub]>0) tmpsub = sub;
@@ -274,6 +278,10 @@ void runoff(layer_data_struct *layer_wet,
       for (time_step = 0; time_step < dt; time_step++) {
 	inflow   = dt_inflow;
 	last_cnt = 0;
+
+	/*************************************
+          Compute Drainage between Sublayers 
+        *************************************/
 	
 	for(lindex=0;lindex<options.Nlayer;lindex++) {
 	  for(sub=0;sub<3;sub++) {
@@ -290,42 +298,15 @@ void runoff(layer_data_struct *layer_wet,
 		 < resid_moist[lindex])
 		tmp_moist = resid_moist[lindex];
 
-	      if(options.FROZEN_SOIL && sub==1 && 
-		 (submax_moist[lindex][sub])/(soil_con.depth[lindex]*1000.) 
-		 < 0.00
-		 && sublayer[lindex][1]*soil_con.depth[lindex]>0.05) {
-		Q12[lindex][sub] = 0.0;
-		froz_solid[last_cnt] = TRUE;
-		if(last_cnt>0)
-		  Q12[last_layer[last_cnt-1]][last_sub[last_cnt-1]] = 0.;
+	      if(submoist[lindex][sub] > resid_moist[lindex]) {
+		Q12[lindex][sub] 
+		  = Ksat[lindex] * pow(((tmp_moist
+					 - resid_moist[lindex]) 
+					/ (soil_con.max_moist[lindex] 
+					   - resid_moist[lindex])),
+				       soil_con.expt[lindex]); 
 	      }
-	      else if(options.FROZEN_SOIL) {
-		if(sub==1) 
-		  Q12[lindex][sub] = Ksat[lindex] 
-		    * pow(tmp_moist / (soil_con.max_moist[lindex]),
-			  soil_con.expt[lindex]); 
-		else {
-		  Q12[lindex][sub] = Ksat[lindex] 
-		    * pow((tmp_moist - resid_moist[lindex])
-			  / (soil_con.max_moist[lindex] 
-                             - resid_moist[lindex]),
-			  soil_con.expt[lindex]); 
-		  if(submoist[lindex][sub] <= resid_moist[lindex])
-		    Q12[lindex][sub] = 0.;
-		}
-	      }
-	      else {
-		if(submoist[lindex][sub]
-		   > resid_moist[lindex]) {
-		  Q12[lindex][sub] 
-		    = Ksat[lindex] * pow(((tmp_moist
-					   - resid_moist[lindex]) 
-					  / (soil_con.max_moist[lindex] 
-					     - resid_moist[lindex])),
-					 soil_con.expt[lindex]); 
-		}
-		else Q12[lindex][sub] = 0.;
-	      }
+	      else Q12[lindex][sub] = 0.;
 	      last_layer[last_cnt] = lindex;
 	      last_sub[last_cnt] = sub;
 	      last_cnt++;
@@ -347,6 +328,8 @@ void runoff(layer_data_struct *layer_wet,
 	firstlayer = TRUE;
 	last_index = 0;
 	for(lindex=0;lindex<options.Nlayer;lindex++) {
+
+	  if(lindex==0) dt_runoff = *runoff / (double) dt;
 
 	  /* Store moistures for water balance debugging */
 	  if(debug.PRT_BALANCE) {
@@ -377,83 +360,64 @@ void runoff(layer_data_struct *layer_wet,
 		last_moist = submoist[lindex][sub];
 	      
 	      tmp_inflow = 0.;
-	      if(firstlayer) {
-		submoist[lindex][sub] = submoist[lindex][sub] + inflow
-		  / sublayer[lindex][sub] - dt_runoff
-		  / sublayer[lindex][sub] 
-		  - (Q12[lindex][sub] + layer[lindex].evap/(double)dt);
-		if((submoist[lindex][sub]+subice[lindex][sub])
-		   > submax_moist[lindex][sub] 
-		   && !froz_solid[last_index+1]) {
-		  tmp_inflow = (submoist[lindex][sub]+subice[lindex][sub]) 
-		    - submax_moist[lindex][sub];
-		  submoist[lindex][sub] = submax_moist[lindex][sub] 
-		    - subice[lindex][sub];
-		}
-		else if((submoist[lindex][sub]+subice[lindex][sub])
-			> submax_moist[lindex][sub] 
-			&& froz_solid[last_index+1]) {
-		  tmp_inflow=0.;
-		  *runoff += ((submoist[lindex][sub]+subice[lindex][sub]) 
-			      - submax_moist[lindex][sub]) 
-		    * sublayer[lindex][sub];
-		  submoist[lindex][sub] = submax_moist[lindex][sub] 
-		    - subice[lindex][sub];
-		}
-	      }
-	      else {
-		submoist[lindex][sub] = submoist[lindex][sub] + inflow
-		  / sublayer[lindex][sub] - (Q12[lindex][sub]
-					     + layer[lindex].evap/(double)dt);
-		if((submoist[lindex][sub]+subice[lindex][sub]) 
-		   > submax_moist[lindex][sub]
-		   && (!froz_solid[last_index+1])) {
-		  tmp_inflow = (submoist[lindex][sub]+subice[lindex][sub])
-		    - submax_moist[lindex][sub];
-		  submoist[lindex][sub] = submax_moist[lindex][sub] 
-		    - subice[lindex][sub];
-		} 
-		else if((submoist[lindex][sub]+subice[lindex][sub]) 
-			> submax_moist[lindex][sub] 
-			&& (froz_solid[last_index+1])) {
-		  tmp_inflow=0.;
-		  tmp_index = last_index;
-		  while(tmp_index>0 
-			&& (submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-			    + subice[last_layer[tmp_index]][last_sub[tmp_index]])
-			> submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) {
-		    Q12[last_layer[tmp_index-1]][last_sub[tmp_index]] 
-		      -= ((submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-			   + subice[last_layer[tmp_index]][last_sub[tmp_index]])
-			  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) 
-		      * sublayer[last_layer[tmp_index]][last_sub[tmp_index]]
-		      / sublayer[last_layer[tmp_index-1]][last_sub[tmp_index]];
-		    submoist[last_layer[tmp_index-1]][last_sub[tmp_index]] 
-		      += ((submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-			   + subice[last_layer[tmp_index]][last_sub[tmp_index]])
-			  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) 
-		      * sublayer[last_layer[tmp_index]][last_sub[tmp_index]]
-		      / sublayer[last_layer[tmp_index-1]][last_sub[tmp_index]];
-		    submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-		      = submax_moist[last_layer[tmp_index]][last_sub[tmp_index]] 
-		      - subice[last_layer[tmp_index]][last_sub[tmp_index]];
-		    tmp_index--;
+
+	      /** Update soil layer moisture content **/
+	      submoist[lindex][sub] = submoist[lindex][sub] 
+		+ (inflow - dt_runoff)
+		/ sublayer[lindex][sub] - (Q12[lindex][sub]
+					   + layer[lindex].evap/(double)dt);
+
+	      dt_runoff = 0;
+
+	      /** Verify that soil sublayer moisture content falls within 
+		  acceptable range **/
+	      if((submoist[lindex][sub]+subice[lindex][sub]) 
+		 > submax_moist[lindex][sub]
+		 && (!froz_solid[last_index+1])) {
+		tmp_inflow = (submoist[lindex][sub]+subice[lindex][sub])
+		  - submax_moist[lindex][sub];
+		submoist[lindex][sub] = submax_moist[lindex][sub] 
+		  - subice[lindex][sub];
+
+		/* Layer is thick, so excess soil moisture is trapped above **/
+		if(sublayer[lindex][sub]*soil_con.depth[lindex] > 0.10) {
+		  tmpsub   = sub;
+		  tmplayer = lindex;
+		  while(tmp_inflow > 0) {
+		    tmpsub--;
+		    if(tmpsub<0) {
+		      tmplayer--;
+		      tmpsub=2;
+		      if(debug.PRT_BALANCE) {
+			/** Update debugging storage terms **/
+			debug.inflow[dist][band][lindex+2]  -= tmp_inflow;
+			debug.outflow[dist][band][lindex+1] -= tmp_inflow;
+		      }
+		    }
+		    if(tmplayer<0) {
+		      /** If top layer saturated, add to top layer **/
+		      *runoff += tmp_inflow;
+		      tmp_inflow = 0;
+		    }
+		    else if(sublayer[tmplayer][tmpsub] > 0) {
+		      /** else if sublayer exists, add excess soil moisture **/
+		      submoist[tmplayer][tmpsub] += tmp_inflow 
+			/ sublayer[tmplayer][tmpsub];
+		      if((submoist[tmplayer][tmpsub]+subice[tmplayer][tmpsub]) 
+			 > submax_moist[tmplayer][tmpsub]) {
+			tmp_inflow = ((submoist[tmplayer][tmpsub]
+				      +subice[tmplayer][tmpsub])
+				     - submax_moist[tmplayer][tmpsub]) 
+			  * sublayer[tmplayer][tmpsub];
+			submoist[tmplayer][tmpsub] 
+			  = submax_moist[tmplayer][tmpsub] 
+			  - subice[tmplayer][tmpsub];
+		      }
+		      else tmp_inflow=0;
+		    }
 		  }
-		  if(tmp_index==0 
-		     && (submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-			 + subice[last_layer[tmp_index]][last_sub[tmp_index]])
-		   > submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]) {
-		    *runoff 
-		      += ((submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-			   + subice[last_layer[tmp_index]][last_sub[tmp_index]])
-			  - submax_moist[last_layer[tmp_index]][last_sub[tmp_index]])
-		      * sublayer[last_layer[tmp_index]][last_sub[tmp_index]];
-		    submoist[last_layer[tmp_index]][last_sub[tmp_index]] 
-		      = submax_moist[last_layer[tmp_index]][last_sub[tmp_index]]
-		      - subice[last_layer[tmp_index]][last_sub[tmp_index]];
-		  }
-		}
-	      }
+		} /** end trapped excess moisture **/
+	      } 
 	      
 	      firstlayer=FALSE;
 	      
@@ -468,7 +432,7 @@ void runoff(layer_data_struct *layer_wet,
 	      
 	      inflow = (Q12[lindex][sub]+tmp_inflow) * sublayer[lindex][sub];
 	      Q12[lindex][sub] += tmp_inflow;
-
+	      
 	      last_index++;
 	      
 	    }
@@ -528,7 +492,9 @@ void runoff(layer_data_struct *layer_wet,
 				    / bot_moist) / sublayer[lindex][sub];
       
       /** Check Lower Sub-Layer Moistures **/
-      for(sub=0;sub<3;sub++) {
+      tmp_moist = 0;
+
+      for(sub=1;sub<3;sub++) {
 
 	if (sublayer[lindex][sub] > 0) {
 	  if((submoist[lindex][sub]+subice[lindex][sub]) 
@@ -542,35 +508,56 @@ void runoff(layer_data_struct *layer_wet,
 	  if((submoist[lindex][sub]+subice[lindex][sub]) 
 	     > submax_moist[lindex][sub]) {
 	    /* Too much soil moisture */
-	    *baseflow += ((submoist[lindex][sub]+subice[lindex][sub]) 
+	    tmp_moist = ((submoist[lindex][sub]+subice[lindex][sub]) 
 			  - submax_moist[lindex][sub]) * sublayer[lindex][sub];
 	    submoist[lindex][sub] = submax_moist[lindex][sub] 
 	      - subice[lindex][sub];
+	    tmpsub   = sub;
+	    tmplayer = lindex;
+	    while(tmp_moist > 0) {
+	      tmpsub--;
+	      if(tmpsub<0) {
+		tmplayer--;
+		tmpsub=2;
+		if(debug.PRT_BALANCE) {
+		  /** Update debugging storage terms **/
+		  debug.inflow[dist][band][lindex+2]  -= tmp_moist;
+		  debug.outflow[dist][band][lindex+1] -= tmp_moist;
+		}
+	      }
+	      if(tmplayer<0) {
+		/** If top layer saturated, add to top layer **/
+		*runoff += tmp_moist;
+		tmp_moist = 0;
+	      }
+	      else if(sublayer[tmplayer][tmpsub] > 0) {
+		/** else if sublayer exists, add excess soil moisture **/
+		submoist[tmplayer][tmpsub] += tmp_moist 
+		  / sublayer[tmplayer][tmpsub];
+		if((submoist[tmplayer][tmpsub]+subice[tmplayer][tmpsub]) 
+		   > submax_moist[tmplayer][tmpsub]) {
+		  tmp_moist = ((submoist[tmplayer][tmpsub]
+				+subice[tmplayer][tmpsub])
+		    - submax_moist[tmplayer][tmpsub]) 
+		    * sublayer[tmplayer][tmpsub];
+		  submoist[tmplayer][tmpsub] = submax_moist[tmplayer][tmpsub] 
+		    - subice[tmplayer][tmpsub];
+		}
+		else tmp_moist=0;
+	      }
+	    }
 	  }
 	}
-      
+
       }
-      
-      layer[lindex].moist_thaw = submoist[lindex][0];
-      layer[lindex].moist_froz = submoist[lindex][1];
-      layer[lindex].moist      = submoist[lindex][2];
       
       for(lindex=0;lindex<options.Nlayer;lindex++) {
-	free((char *)Q12[lindex]);
-	free((char *)submoist[lindex]);
-	free((char *)subice[lindex]);
-	free((char *)submax_moist[lindex]);
-	free((char *)sublayer[lindex]);
+
+	layer[lindex].moist_thaw = submoist[lindex][0];
+	layer[lindex].moist_froz = submoist[lindex][1];
+	layer[lindex].moist      = submoist[lindex][2];
+
       }
-      free((char *)Ksat);
-      free((char *)Q12);
-      free((char *)submoist);
-      free((char *)subice);
-      free((char *)submax_moist);
-      free((char *)sublayer);
-      free((char *)last_layer);
-      free((char *)last_sub);
-      free((char *)froz_solid);
       
       if(debug.PRT_BALANCE) {
 	debug.outflow[dist][band][options.Nlayer+2] = (*runoff + *baseflow);

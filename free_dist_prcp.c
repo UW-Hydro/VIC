@@ -23,18 +23,19 @@ void free_dist_prcp(dist_prcp_struct *prcp, int Nveg)
   for(i=0;i<Ndist;i++) {
     for(j=0;j<=Nveg;j++) {
       free((char *)prcp[0].dist[i].cell[j].layer);
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+      free((char *)prcp[0].dist[i].energy[j].dz);
+      if(options.FULL_ENERGY || options.SNOW_MODEL) {
         free((char *)prcp[0].dist[i].energy[j].T);
-        free((char *)prcp[0].dist[i].energy[j].dz);
         if(options.FROZEN_SOIL) free((char *)prcp[0].dist[i].energy[j].ice);
       }
     }
     free((char *)prcp[0].dist[i].cell);
     free((char *)prcp[0].dist[i].veg_var);
-    free((char *)prcp[0].dist[i].snow);
-    free((char *)prcp[0].dist[i].energy);
+    if(options.FULL_ENERGY || options.SNOW_MODEL) {
+      free((char *)prcp[0].dist[i].snow);
+      free((char *)prcp[0].dist[i].energy);
+    }
   }
   free((char *)prcp[0].dist);
-  free((char *)prcp);
 
 }

@@ -122,7 +122,7 @@ void main(int argc, char *argv[])
         prcp.dist[i].cell     = make_cell_data(veg_con[0].vegetat_type_num+1,
                                 options.Nlayer);
         if(options.FULL_ENERGY || options.SNOW_MODEL) {
-          prcp.dist[i].snow = make_snow_data(global_param.nrecs);
+          prcp.dist[i].snow = make_snow_data(veg_con[0].vegetat_type_num+1);
           prcp.dist[i].energy = make_energy_bal(veg_con[0].vegetat_type_num+1,
                                 &global_param.Ulayer,&global_param.Llayer);
         }

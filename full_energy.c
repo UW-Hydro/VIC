@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#define OVERSTORY_ATTENUATION 3.5
-#define TRUNK_RATIO 0.5
+#define OVERSTORY_ATTENUATION 3.5  /* attenutation coefficient for overstory */
+#define TRUNK_RATIO           0.5  /* Fraction of Tree Height that is trunk */
+#define SNOW_STEP             1    /* Time step in hours to use when solving
+				      snow model in water balance mode */
 
 void full_energy(int rec,
                  atmos_data_struct *atmos,
@@ -257,7 +259,7 @@ void full_energy(int rec,
 
       }
   
-      veg_var[iveg].throughfall = 0.;
+      if(iveg < Nveg) veg_var[iveg].throughfall = 0.;
 
       /** Compute latent heat of vaporization (J/kg) **/
       cell[iveg].Le = (2.501 - 0.002361*atmos->air_temp) * 1.0e6;
@@ -674,19 +676,21 @@ void full_energy(int rec,
             }
             else tmp_rain = 0.;
 
-            for(hour=0;hour<4;hour++) {
+            for(hour=0;hour<24/SNOW_STEP;hour++) {
 
-	      /** Snow melt model is solved using a 6 hour time step,
+	      /** Snow melt model is solved using a time step of SNOW_STEP,
 	        Initialize parameters for the shorter time step **/
 
-              atmos->air_temp = calc_air_temperature(tmax,tmin,hour*6);
+              atmos->air_temp = calc_air_temperature(tmax,tmin,hour*SNOW_STEP);
               atmos->rainonly = calc_rainonly(atmos->air_temp,atmos->prec,
 					      gp.MAX_SNOW_TEMP,
 					      gp.MIN_RAIN_TEMP);
               atmos->density = 3.486*atmos->pressure/(275.0
                              + atmos->air_temp);
-              rainfall = (atmos->rainonly + tmp_rain)/4.;
-              snowfall = (atmos->prec - atmos->rainonly)/4.;
+              rainfall = (atmos->rainonly + tmp_rain)*(double)SNOW_STEP
+                       / (double)gp.dt;
+              snowfall = (atmos->prec - atmos->rainonly)*(double)SNOW_STEP
+		       / (double)gp.dt;
               snow[iveg].vapor_flux = 0.;
               snow[iveg].canopy_vapor_flux = 0.;
 	      for(i=0;i<options.Nlayer;i++)
@@ -694,23 +698,24 @@ void full_energy(int rec,
               if(snow[iveg].snow || snowfall > 0.)
                 snow[iveg].albedo = snow_albedo(snowfall,
                                     snow[iveg].swq,snow[iveg].coldcontent,
-                                    gp.dt/4,snow[iveg].last_snow);
+                                    SNOW_STEP,snow[iveg].last_snow);
               else
                 snow[iveg].albedo = snow_albedo(snowfall,
                                     snow[iveg].snow_canopy,atmos->air_temp,
-                                    gp.dt/4,snow[iveg].last_snow);
+                                    SNOW_STEP,snow[iveg].last_snow);
               calc_long_shortwave(&inshort,
                    &inlong,&atmos->tskc,atmos->air_temp,
                    atmos->vp,(double)soil_con.time_zone_lng,
                    (double)soil_con.lng,(double)soil_con.lat,
-                   (double)dmy[rec].day_in_year,(double)hour*6.,
+                   (double)dmy[rec].day_in_year,(double)hour*(double)SNOW_STEP,
                    FALSE,FALSE,TRUE);
               if((overstory && snow[iveg].snow_canopy>0.)
                   || !overstory || snowfall>0.) {
                 energy[iveg].albedo = snow[iveg].albedo;
               }
               else {
-                energy[iveg].albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+                energy[iveg].albedo 
+		  = veg_lib[veg_class].albedo[dmy[rec].month-1];
               }
               out_short = energy[iveg].albedo * inshort;
               atmos->net_short = inshort * (1.0 - energy[iveg].albedo);
@@ -771,10 +776,11 @@ void full_energy(int rec,
 
               if(snow[iveg].swq>0.0 || snowfall > 0) {
 		tmp_snowinflow += rainfall + snowfall;
+		if(snow[iveg].swq<=0.) snow[iveg].surf_temp = atmos->air_temp;
                 snow_melt(atmos,soil_con,gp.wind_h+soil_con.snow_rough,
                           cell[iveg].aero_resist[2],
-                          cell[iveg].Le,&snow[iveg],(double)gp.dt/4,0.00,
-                          soil_con.snow_rough,surf_atten,rainfall,
+                          cell[iveg].Le,&snow[iveg],(double)SNOW_STEP,
+			  0.00,soil_con.snow_rough,surf_atten,rainfall,
 			  snowfall,tmp_wind[2],0.,&dummy,&dummy,
                           &dummy,&dummy,&dummy,&dummy,&dummy,&dummy);
                 tmp_melt+=atmos->melt;
@@ -787,7 +793,7 @@ void full_energy(int rec,
 						    snowfall,atmos->air_temp,
 						    tmp_swq,snow[iveg].depth,
 						    snow[iveg].coldcontent,
-						    (double)gp.dt/4.);
+						    (double)SNOW_STEP);
   
                   snow[iveg].depth = 1000. * snow[iveg].swq
                                    / snow[iveg].density;  /* HBH 7.2.1 */
@@ -841,8 +847,10 @@ void full_energy(int rec,
             atmos->melt = tmp_melt;
             snow[iveg].canopy_vapor_flux = tmp_canopy_vapor_flux;
             snow[iveg].vapor_flux = tmp_vapor_flux;
-            veg_var[iveg].canopyevap = tmp_canopyevap;
-            veg_var[iveg].throughfall = throughfall;
+	    if(iveg < Nveg) {
+	      veg_var[iveg].canopyevap = tmp_canopyevap;
+	      veg_var[iveg].throughfall = throughfall;
+	    }
             ppt += tmp_melt;
 	    for(i=0;i<options.Nlayer;i++)
 	      cell[iveg].layer[i].evap += tmp_layerevap[i];
@@ -897,15 +905,17 @@ void full_energy(int rec,
           }
 
           /** Compute Evaporation from Bare Soil **/
-          else Evap = arno_evap(cell[iveg].layer, atmos->rad,
-				atmos->air_temp, atmos->vpd, 
-				atmos->net_short, soil_con.depth[0],
-				soil_con.max_moist[0], soil_con.elevation,
-				soil_con.b_infilt, 
-				atmos->air_temp, displacement, roughness, 
-				ref_height, cell[iveg].aero_resist[0], 
-				(double)gp.dt);
-
+          else {
+	    Evap = arno_evap(cell[iveg].layer, atmos->rad,
+			     atmos->air_temp, atmos->vpd, 
+			     atmos->net_short, soil_con.depth[0],
+			     soil_con.max_moist[0], soil_con.elevation,
+			     soil_con.b_infilt, 
+			     atmos->air_temp, displacement, roughness, 
+			     ref_height, cell[iveg].aero_resist[0], 
+			     (double)gp.dt);
+	    ppt = rainfall;
+	  }
         }
         if(!options.SNOW_MODEL) ppt += atmos->melt;
 

@@ -84,6 +84,7 @@ double solve_snow(snow_data_struct    *snow,
   extern veg_lib_struct *veg_lib;
 
   char                ErrStr[MAXSTRING];
+  char                FIRST_SOLN[1];
   double              rainonly;
   double              canopy_temp;
   double              tmp_energy_val;
@@ -339,12 +340,13 @@ double solve_snow(snow_data_struct    *snow,
 	  /** Compute Surface Energy Balance with Snow Present **/
 	  if(options.CALC_SNOW_FLUX) {
 	    /** Compute Thermal Flux Through the Snow Pack **/
+	    FIRST_SOLN[0] = TRUE;
 	    Tend_grnd[0] 
 	      = calc_snow_ground_flux(dt,Nnodes,rec,iveg,mu,dp,moist,ice0,
 				      Tsurf[0],new_T1,&energy->grnd_flux,
 				      &energy->deltaH,&energy->snow_flux,
 				      Tgrnd,energy,snow,layer_wet,layer_dry,
-				      soil_con);
+				      soil_con,FIRST_SOLN);
 	  }
 	  else if(options.FULL_ENERGY) {
 	    /** Ignore Thermal Flux Through the Snow Pack **/

@@ -69,6 +69,8 @@ void initialize_energy_bal (energy_bal_struct  **energy,
   double moist[MAXlayer], ice[MAXlayer];
   double unfrozen, frozen;
   double **layer_ice;
+  double *EMPTY;
+  char   *EMPTY_C;
 
   dp = soil_con[0].dp;
   Ltotal = 0;
@@ -295,14 +297,8 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  Initialize Soil Layer Depths and Temperatures
 	************************************************/
 	Zsum = soil_con[0].depth[0];
-/* 	if(dp <= Ltotal) { */
-	  tmpdp  = dp - soil_con[0].depth[0] * 1.5;
-	  tmpadj = 2.5;
-/* 	} */
-/* 	else { */
-/* 	  tmpdp  = Ltotal - soil_con[0].depth[0] * 1.5; */
-/* 	  tmpadj = 3.5; */
-/* 	} */
+	tmpdp  = dp - soil_con[0].depth[0] * 1.5;
+	tmpadj = 2.5;
 	for(index=2;index<Nnodes-1;index++) {
 	  energy[veg][band].dz[index] = tmpdp/(((double)Nnodes-tmpadj));
 	  Zsum += (energy[veg][band].dz[index]
@@ -472,9 +468,9 @@ void initialize_energy_bal (energy_bal_struct  **energy,
       soil_con[0].dz_node        = (double *)calloc(Nnodes,sizeof(double));
       soil_con[0].expt_node      = (double *)calloc(Nnodes,sizeof(double));
       soil_con[0].max_moist_node = (double *)calloc(Nnodes,sizeof(double));
-      soil_con[0].alpha          = (double *)calloc(Nnodes-2,sizeof(double));
-      soil_con[0].beta           = (double *)calloc(Nnodes-2,sizeof(double));
-      soil_con[0].gamma          = (double *)calloc(Nnodes-2,sizeof(double));
+      soil_con[0].alpha          = (double *)calloc(Nnodes-1,sizeof(double));
+      soil_con[0].beta           = (double *)calloc(Nnodes-1,sizeof(double));
+      soil_con[0].gamma          = (double *)calloc(Nnodes-1,sizeof(double));
 
       Lsum = 0.;
       Zsum = 0.;
@@ -524,6 +520,20 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 				   + soil_con[0].dz_node[zindex+1]) / 2.0 
 				  - (soil_con[0].dz_node[zindex+1] 
 				     + soil_con[0].dz_node[zindex]) / 2.0);
+      }
+      if(options.NOFLUX) {
+	soil_con[0].alpha[Nnodes-2] = ((soil_con[0].dz_node[Nnodes-1] 
+				   + soil_con[0].dz_node[Nnodes-1]) / 2.0 
+				  + (soil_con[0].dz_node[Nnodes-1] 
+				     + soil_con[0].dz_node[Nnodes-2]) / 2.0);
+	soil_con[0].beta[Nnodes-2] = pow((soil_con[0].dz_node[Nnodes-1] 
+				     + soil_con[0].dz_node[Nnodes-1])/2.0, 2.0) 
+	  + pow((soil_con[0].dz_node[Nnodes-1]+soil_con[0].dz_node[Nnodes-2])/2.0, 
+		2.0);
+	soil_con[0].gamma[Nnodes-2] = ((soil_con[0].dz_node[Nnodes-1] 
+				   + soil_con[0].dz_node[Nnodes-1]) / 2.0 
+				  - (soil_con[0].dz_node[Nnodes-1] 
+				     + soil_con[0].dz_node[Nnodes-2]) / 2.0);
       }
     }
   }  

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     March 16, 2001
- * LAST-MOD: Fri Mar  2 18:18:19 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Apr 21 15:51:12 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate ice energy balance
  * DESCRIP-END.
  * FUNCTIONS:    IceEnergyBalance()
@@ -88,7 +88,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
   double SnowDepth;  
   double SnowDensity; 
   double SurfAttenuation; 
-  double *SnowFlux;		/* Ground Heat Flux (W/m2) */
+  double *qf;		/* Ground Heat Flux (W/m2) */
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
   double *LongRadOut;
@@ -146,7 +146,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
    SnowDepth          = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
   SurfAttenuation    = (double) va_arg(ap, double);
-  SnowFlux         = (double *) va_arg(ap, double *);
+  qf         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
   LongRadOut       = (double *) va_arg(ap, double *);
@@ -201,6 +201,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
     *VaporMassFlux = 0.0;
   
   /* Calculate latent heat flux */
+  /* Should use latent_heat_from_snow. */
  
   if (TMean >= 0.0) {
     /* Melt conditions: use latent heat of vaporization */
@@ -220,26 +221,19 @@ double IceEnergyBalance(double TSurf, va_list ap)
   //*AdvectedEnergy = 0.0;
   
   /* Calculate change in cold content */
-  
-  /* Changes for lake model start here. */
-  qnull = (1/AvgCond)*(Tfreeze - TMean + SWconducted);
-  *SnowFlux = qnull + ShortRad - DeltaColdContent;
+  /* No change in cold content in lake model */
 
-  //*DeltaColdContent = CH_ICE * SweSurfaceLayer * (TSurf - OldTSurf)/
-  //(Dt * SECPHOUR);
-  /* Calculate Ground Heat Flux */
-  //  if(SnowDepth>0.) {
-  //  *GroundFlux = 2.9302e-6 * SnowDensity * SnowDensity
-  //     * (TGrnd - TMean) / SnowDepth;
-  //}
-  //else *GroundFlux=0;
-  //*DeltaColdContent -= *GroundFlux;
+  /* Changes for lake model start here. Actually, equals qo-Io (P&H eq. 7)*/
+    /* because Io (SWnet) is included in NetRad below. */
+  qnull = (1/AvgCond)*(Tfreeze - TMean + SWconducted);
+  *qf   = qnull;
+
   /* Changes for lake model end here. */
   
   /* Calculate net energy exchange at the snow surface */
   
-  RestTerm = NetRad + *SensibleHeat + *LatentHeat + *AdvectedEnergy 
-            + qnull;
+  RestTerm = ( NetRad + *SensibleHeat + *LatentHeat + *AdvectedEnergy 
+	       + qnull );
 
   *RefreezeEnergy = (SurfaceLiquidWater * Lf * Density)/(Dt * SECPHOUR);
 

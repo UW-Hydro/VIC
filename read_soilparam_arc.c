@@ -364,6 +364,32 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
                                            * porosity[layer] 
                               - 0.00235840 * pow(porosity[layer],2.) 
                                            * clay[layer];
+
+      /** Check for valid values of generated parameters **/
+      if(temp.bubble<1.36) {
+	fprintf(stderr,"WARNING: estimated bubbling pressure too low (%lf), resetting to minimum value (%f).\n",temp.bubble,1.36);
+	temp.bubble = 1.36;
+      }
+      if(temp.bubble>187.2) {
+	fprintf(stderr,"WARNING: estimated bubbling pressure too high (%lf), resetting to maximum value (%f).\n",temp.bubble,187.2);
+	temp.bubble = 187.2;
+      }
+      if(temp.expt[layer] < 2. / 1.090 + 3.) {
+	fprintf(stderr,"WARNING: estimated exponential (expt) too low (%lf), resetting to minimum value (%f).\n", temp.expt[layer], 2. / 1.090 + 3.);
+	temp.expt[layer] = 2. / 1.090 + 3.;
+      }
+      if(temp.expt[layer] > 2. / 0.037 + 3.) {
+	fprintf(stderr,"WARNING: estimated exponential (expt) too high (%lf), resetting to maximum value (%f).\n",temp.expt[layer], 2. / 0.037 + 3.);
+	temp.expt[layer] = 2. / 0.037 + 3.;
+      }
+      if(temp.resid_moist[layer] < -0.038) {
+	fprintf(stderr,"WARNING: estimated residual soil moisture too low (%lf), resetting to minimum value (%f).\n",temp.resid_moist[layer],-0.038);
+	temp.resid_moist[layer] = -0.038;
+      }
+      if(temp.resid_moist[layer] > 0.205) {
+	fprintf(stderr,"WARNING: estimated residual soil mositure too high (%lf), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
+	temp.resid_moist[layer] = 0.205;
+      }
     }
     temp.bubble /= sum_depth;
     temp.soil_density /= sum_depth;

@@ -124,8 +124,8 @@ void write_data(out_data_struct *out_data,
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
     /***** Write ASCII water balance snow output file *****/
-    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
-	    dmy->year, dmy->month, dmy->day,
+    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
+	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->swq[0], out_data->snow_depth[0], 
 	    out_data->snow_canopy[0]);
   }
@@ -181,8 +181,8 @@ void write_data(out_data_struct *out_data,
   else if(!options.FULL_ENERGY && options.SNOW_MODEL 
 	  && options.PRT_SNOW_BAND) {
     /***** Write ASCII water balance snow band output file *****/
-    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day);
+    fprintf(outfiles.snowband  ,"%04i\t%02i\t%02i\t%02i",
+	    dmy->year, dmy->month, dmy->day, dmy->hour);
     for(band=0;band<options.SNOW_BAND;band++)
       fprintf(outfiles.snowband  ,"\t%.4lf\t%.4lf\t%.4lf",
 	      out_data->swq[band+1], out_data->snow_depth[band+1], 
@@ -201,10 +201,8 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
     tmp_iptr[0] = dmy->day;
     fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
-    if(options.FULL_ENERGY) {
-      tmp_iptr[0] = dmy->hour;
-      fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
-    }
+    tmp_iptr[0] = dmy->hour;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->prec;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->evap;
@@ -222,11 +220,26 @@ void write_data(out_data_struct *out_data,
     if(options.FULL_ENERGY) {
       tmp_fptr[0] = (float)out_data->rad_temp;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-      tmp_fptr[0] = (float)out_data->net_short;
-      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-      tmp_fptr[0] = (float)out_data->r_net;
-      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    }
+    tmp_fptr[0] = (float)out_data->net_short;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->r_net;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    if(options.FULL_ENERGY) {
       tmp_fptr[0] = (float)out_data->latent;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    }
+    tmp_fptr[0] = (float)out_data->evap_canop;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->evap_veg;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->evap_bare;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->sub_canop;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->sub_snow;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    if(options.FULL_ENERGY) {
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
       tmp_fptr[0] = (float)out_data->sensible;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
@@ -251,24 +264,24 @@ void write_data(out_data_struct *out_data,
     fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
 	    out_data->rad_temp,
 	    out_data->net_short, out_data->r_net, out_data->latent,
-	    out_data->latent_canop, out_data->latent_trans,
-	    out_data->latent_bare, out_data->latent_pet, 
-	    out_data->latent_pet_mm, out_data->sensible,
+	    out_data->evap_canop, out_data->evap_veg,
+	    out_data->evap_bare, out_data->sub_canop, 
+	    out_data->sub_snow, out_data->sensible,
 	    out_data->grnd_flux, out_data->aero_resist, out_data->surf_temp, 
 	    out_data->albedo);
   }
   else {
     /***** Write ASCII Water Balance Fluxes File *****/
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
-	    dmy->year, dmy->month, dmy->day,
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
+	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->prec, out_data->evap, out_data->runoff, 
 	    out_data->baseflow, out_data->Wdew);
     for(j=0;j<options.Nlayer;j++) 
       fprintf(outfiles.fluxes,"\t%.4lf", out_data->moist[j]);
     fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lg\t%.4lg\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
-	    out_data->net_short, out_data->r_net, out_data->latent_canop, 
-	    out_data->latent_trans, out_data->latent_bare, 
-	    out_data->latent_pet, out_data->latent_pet_mm, 
+	    out_data->net_short, out_data->r_net, out_data->evap_canop, 
+	    out_data->evap_veg, out_data->evap_bare, 
+	    out_data->sub_canop, out_data->sub_snow, 
 	    out_data->aero_resist, out_data->surf_temp, out_data->albedo);
   }
 

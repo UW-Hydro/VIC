@@ -19,9 +19,7 @@ void full_energy(int rec,
                  char                 NEWCELL,
 		 double              *prec,
 		 double              *rainonly,
-		 double              *melt,
-		 double              *yearly_prec,
-		 double              *yearly_epot)
+		 double              *melt)
 /**********************************************************************
 	full_energy	Keith Cherkauer		January 8, 1997
 
@@ -146,11 +144,10 @@ void full_energy(int rec,
   Melt              = (double *)calloc(2*Nbands,sizeof(double));
   if(gp.dt == 24 && options.SNOW_MODEL) {
     store_max_min_temp(atmos,tmax,tmax_hour,tmin,tmin_hour,rec,
-		       gp.nrecs);
+		       gp.nrecs,1);
   }
       
   Nveg         = veg_con[0].vegetat_type_num;
-/*****  tmp_longwave = atmos->longwave;*****/
   tmp_atmos    = atmos[0];
 
   /**************************************************
@@ -357,7 +354,7 @@ void full_energy(int rec,
 		  tmp_layer[j][i] = cell[j][iveg][band].layer[i];
 	      }
 	      tmp_energy[0]  = band_energy[0];
-	      roughness      = soil_con.rough;
+	      /* roughness      = soil_con.rough; */
 	      rainfall[WET]  = prec[iveg*2] * soil_con.Pfactor[band];
 	      rainfall[DRY]  = prec[iveg*2+1] * soil_con.Pfactor[band];
 	      Tend_grnd 
@@ -368,7 +365,8 @@ void full_energy(int rec,
 				       energy[iveg][band].T[0],
 				       atmos->shortwave,tmp_energy->longwave,
 				       Le,Ls,prcp[0].mu[iveg],
-				       0.,roughness,ref_height+roughness,
+				       displacement,roughness,
+				       ref_height,
 				       tmp_snow_energy,
 				       snow[iveg][band].vapor_flux,
 				       &last_T1,cell[WET][iveg][0].aero_resist,
@@ -495,38 +493,6 @@ void full_energy(int rec,
 	    
 	    /** Initialize parameters for the shorter time step **/
 	    step_air_temp = air_temp[hour];
-
-/* 	    if(step_air_temp<tmin[1] && hour>tmax_hour[1]) { */
-/* 	      tmp_vp     = atmos->vp; */
-/* 	      tmp_vpd    = atmos->vpd; */
-/* 	      step_vp  = atmos[1].vp; */
-/* 	      step_vpd = atmos[1].vpd; */
-/* 	    } */
-/* 	    else if(step_air_temp<tmin[1] && hour<tmin_hour[1]) { */
-/* 	      tmp_vp     = atmos->vp; */
-/* 	      tmp_vpd    = atmos->vpd; */
-/* 	      step_vp  = atmos[-1].vp; */
-/* 	      step_vpd = atmos[-1].vpd; */
-/* 	    } */
-/* 	    else if(step_air_temp<tmin[1]) { */
-/* 	      vicerror("Air temperature falls below daily minimum temperature.  Please report error."); */
-/* 	    } */
-/* 	    else { */
-/* 	      step_vp  = atmos->vp; */
-/* 	      step_vpd = atmos->vpd; */
-/* 	    } */
-
-
-/*  	    step_vp  = estimate_vapor_pressure(dmy,  */
-/*  					       yearly_epot,  */
-/*  					       yearly_prec,  */
-/*  					       atmos->tmin,  */
-/*  					       step_air_temp,  */
-/*  					       atmos->priest,  */
-/*  					       rec);   */
-/*  	    step_vpd = svp(step_air_temp) - step_vp;   */
-/* 	    step_vp  = svp(step_air_temp) - atmos->vpd;  */
-/* 	    step_vpd = atmos->vpd;  */
 
 	    step_vp  = atmos->rel_humid * svp(step_air_temp) / 100.;
 	    step_vpd = svp(step_air_temp) - step_vp;
@@ -912,48 +878,6 @@ void full_energy(int rec,
   free((char*)ppt);
   free((char*)Melt);
 
-}
-
-void store_max_min_temp(atmos_data_struct *atmos,
-                        double *tmax,
-			int    *tmax_hour,
-                        double *tmin,
-			int    *tmin_hour,
-                        int rec,
-                        int Nrecs) {
-/**********************************************************************
-  This subroutine sets prepares arrays of maximum and minimum 
-  daily air temperature.
-**********************************************************************/
-
-  static int last_rec;
-
-  if(rec==0) {
-    tmax[0] = tmax[1] = atmos[0].tmax;
-    tmin[0] = tmin[1] = atmos[0].tmin;
-    tmax[2] = atmos[1].tmax;
-    tmin[2] = atmos[1].tmin;
-    last_rec = rec;
-  }
-  else if(rec!=last_rec) {
-    last_rec = rec;
-    if(rec==Nrecs-1) {
-      tmax[0] = tmax[1];
-      tmax[1] = tmax[2];
-      tmin[0] = tmin[1];
-      tmin[1] = tmin[2];
-    }
-    else {
-      tmax[0] = tmax[1];
-      tmax[1] = tmax[2];
-      tmax[2] = atmos[1].tmax;
-      tmin[0] = tmin[1];
-      tmin[1] = tmin[2];
-      tmin[2] = atmos[1].tmin;
-    }
-  }
-  tmax_hour[0] = tmax_hour[1] = tmax_hour[2] = 15;
-  tmin_hour[0] = tmin_hour[1] = tmin_hour[2] = 5;
 }
 
 void store_moisture_for_debug(int                 iveg,

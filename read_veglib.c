@@ -77,9 +77,8 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 	          temp[i].albedo[j]);
           nrerror(str);
         }
-        temp[i].wind_h += calc_veg_height(temp[i].displacement[j]);
       }
-      temp[i].wind_h *= 3./12.;
+      fscanf(veglib, "%lf", &temp[i].wind_h);
       fscanf(veglib, "%s", str);	/* skip over end of line comments */
       i++;
     }

@@ -228,7 +228,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute Evapotranspiration
   ***************************/
   *rad = (1.0 - albedo) * shortwave + longwave 
-       - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux;
+       - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux + *deltaH;
   if(VEG && CALC_EVAP) {
     tmp_rainfall[WET] = rainfall[WET];
     tmp_rainfall[DRY] = rainfall[DRY];

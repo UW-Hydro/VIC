@@ -5,7 +5,8 @@
 void read_PILPS2c(atmos_data_struct *temp,
                   FILE              *PILPS2c,
                   int               *nrecs,
-                  int                dt)
+                  int                dt,
+		  int                file_dt)
 /**********************************************************************
 	read_PILPS2c	Dag Lohmann		Feb. 12, 1998
 
@@ -28,26 +29,20 @@ void read_PILPS2c(atmos_data_struct *temp,
   
   int    i, n, rec, maxline = 210;
   int    year, month, day, hour;
+  int    store_rec;
   char   str[210];
   
   /** Count Records **/
   n = 0;
-  while (fgets(str,maxline,PILPS2c) != '\0') 
-    n++;
+  while (fgets(str,maxline,PILPS2c) != '\0') n++;
   printf("nrecs = %d\n",n);
-  if(*nrecs>n) {
-    fprintf(stderr,"WARNING: SAWD file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n);
-    *nrecs=n;
-  }
-  if(*nrecs<n) {
-    fprintf(stderr,"WARNING: SAWD file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs);
-    n = *nrecs;
-  }
-  
+  if(n==0)
+    nrerror("No data in PILPS forcing file.  Model stopping...");
+
   rewind(PILPS2c);
   
   rec = 0;
-  for (i = 0; i < n; i++) {
+  while ( !feof(PILPS2c) ) {
     fscanf(PILPS2c,"%d",&year);
     fscanf(PILPS2c,"%d",&month);
     fscanf(PILPS2c,"%d",&day);
@@ -60,8 +55,34 @@ void read_PILPS2c(atmos_data_struct *temp,
     fscanf(PILPS2c,"%lf",&temp[rec].wind);
     fscanf(PILPS2c,"%lf",&temp[rec].pressure);
     fscanf(PILPS2c,"%lf",&temp[rec].spec_humid);
-    temp[rec].pressure =  temp[rec].pressure / 10.;    
+    temp[rec].pressure =  temp[rec].pressure / 10.; 
     rec++;
+
+    if(file_dt < dt) {
+      /** Time Step in Forcing File Finer than Used by Model: 
+	  Skip Records **/
+      for(i=0;i<dt/file_dt-1;i++) fgets(str,maxline,PILPS2c);
+    }
+    else if(file_dt > dt) {
+      /** Time step used by model finer than that used in forcing file:
+	  Repeat Data Into Extra Columns **/
+      store_rec = rec;
+      for(i=1;i<dt/file_dt;i++) {
+	temp[rec].shortwave  = temp[store_rec].shortwave;
+	temp[rec].longwave   = temp[store_rec].longwave;
+	temp[rec].prec       = temp[store_rec].prec;
+	temp[rec].air_temp   = temp[store_rec].air_temp;
+	temp[rec].wind       = temp[store_rec].wind;
+	temp[rec].pressure   = temp[store_rec].pressure;
+	temp[rec].spec_humid = temp[store_rec].spec_humid;
+	rec++;
+      }
+    }
+  }
+
+  if(rec < *nrecs) {
+    fprintf(stderr,"WARNING: Not enough records in the PILPS2c forcing file to run the number of records defined in the global file.  Check forcing file time step (%i), and global file.  Number of records being modified to stop model when available data has run out.\n",file_dt);
+    *nrecs = rec;
   }
 
   param_set.SHORTWAVE=TRUE;

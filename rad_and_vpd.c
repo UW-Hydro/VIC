@@ -109,7 +109,8 @@ double estimate_dew_point(dmy_struct *dmy,
   EF = ((priest / RHO_W) * day_len) / yearly_prec[dmy[day].year-dmy[0].year];
   Tdew = (tmin + KELVIN) * ( -0.127 + 1.121 * (1.003 - 1.444 * EF
 					       + 12.312 * EF * EF
-					       -32.766 * EF * EF * EF));
+					       -32.766 * EF * EF * EF) 
+			     + 0.0006 * (tmax - tmin) );
 
   return(Tdew-KELVIN);
 }

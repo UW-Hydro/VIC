@@ -6,7 +6,7 @@ void read_sawd_binary(atmos_data_struct *temp,
 		      FILE              *sawdf,
 		      int               *nrecs,
 		      int                dt,
-		      int                prec)
+		      int                file_dt)
 /**********************************************************************
   read_sawd_binary	Keith Cherkauer		April 26, 1998
 
@@ -28,6 +28,7 @@ void read_sawd_binary(atmos_data_struct *temp,
  
   int       i, n, rec;
   int       fixcnt;
+  int       store_rec;
   char      str[210];
   char      tmpmem[20];
   short int values[5];
@@ -40,47 +41,53 @@ void read_sawd_binary(atmos_data_struct *temp,
     fread(tmpmem,sizeof(char),10,sawdf);
   }
   printf("nrecs = %d\n",n);
-  if(*nrecs*dt>n) {
-    fprintf(stderr,"WARNING: SAWD file does not have as many records as defined in the global parameter file, truncating run to %i records.\n",n);
-    *nrecs=n/dt;
-  }
-  if(*nrecs*dt<n) {
-    fprintf(stderr,"WARNING: SAWD file has more records then were defined in the global parameter file, run will stop after %i records.\n",*nrecs*dt);
-    n = *nrecs*dt;
-  }
+  if(n==0)
+    nrerror("No data in SAWD Binary forcing file.  Model stopping...");
 
   rewind(sawdf);
 
   /** Check for Header, and Skip **/
   fixcnt = 0;
   rec = 0;
-  for (i = 0; i < n; i++) {
-    if(i == rec*dt) {
-      fread(values,sizeof(short int),5,sawdf);
-      temp[rec].air_temp = (double)values[0]/100.;
-      temp[rec].pressure = (double)values[1]/100.;
-      if(temp[rec].pressure == 0. && rec>0) {
-	temp[rec].pressure = temp[rec-1].pressure;
-	fixcnt++;
-      }
-      temp[rec].wind = (double)values[2]/1000.;
-      temp[rec].rel_humid = (double)values[3]/100.;
-      if(temp[rec].rel_humid == 0. && rec>0) {
-	temp[rec].rel_humid = temp[rec-1].rel_humid;
-	fixcnt++;
-      }
-      if(temp[rec].rel_humid > 100.) {
-	temp[rec].rel_humid = 100.;
-	fixcnt++;
-      }
-      temp[rec].tskc = (double)values[4] / 1000.;
-      if(prec) {
-	fscanf(sawdf,"%s",str);
-	temp[rec].prec = atof(str);
-      }
-      rec++;
+  while ( !feof(sawdf) && (rec < *nrecs) ) {
+    fread(values,sizeof(short int),5,sawdf);
+    temp[rec].air_temp = (double)values[0]/100.;
+    temp[rec].pressure = (double)values[1]/100.;
+    if(temp[rec].pressure == 0. && rec>0) {
+      temp[rec].pressure = temp[rec-1].pressure;
+      fixcnt++;
     }
-    else fread(values,sizeof(short int),5,sawdf);
+    temp[rec].wind = (double)values[2]/1000.;
+    temp[rec].rel_humid = (double)values[3]/100.;
+    if(temp[rec].rel_humid == 0. && rec>0) {
+      temp[rec].rel_humid = temp[rec-1].rel_humid;
+      fixcnt++;
+    }
+    if(temp[rec].rel_humid > 100.) {
+      temp[rec].rel_humid = 100.;
+      fixcnt++;
+    }
+    temp[rec].tskc = (double)values[4] / 1000.;
+    rec++;
+
+    if(file_dt < dt) {
+      /** Time Step in Forcing File Finer than Used by Model: 
+	  Skip Records **/
+      for(i=0;i<dt/file_dt-1;i++) fread(tmpmem,sizeof(char),10,sawdf);
+    }
+    else if(file_dt > dt) {
+      /** Time step used by model finer than that used in forcing file:
+	  Repeat Data Into Extra Columns **/
+      store_rec = rec - 1;
+      for(i=1;i<file_dt/dt;i++) {
+	temp[rec].air_temp   = temp[store_rec].air_temp;
+	temp[rec].wind       = temp[store_rec].wind;
+	temp[rec].pressure   = temp[store_rec].pressure;
+	temp[rec].rel_humid  = temp[store_rec].rel_humid;
+	temp[rec].tskc       = temp[store_rec].tskc;
+	rec++;
+      }
+    }
 
   }
 
@@ -88,8 +95,17 @@ void read_sawd_binary(atmos_data_struct *temp,
     fprintf(stderr,"WARNING: Had to fix %i values in sawd file.\n",fixcnt);
   }
 
+  if(rec < *nrecs) {
+    fprintf(stderr,"WARNING: Not enough records in the SAWD Binary forcing file to run the number of records defined in the global file.  Check forcing file time step (%i), and global file.  Number of records being modified to stop model when available data has run out.\n",file_dt);
+    *nrecs = rec;
+  }
+
   param_set.WIND = param_set.AIR_TEMP = param_set.PRESSURE = TRUE;
-  param_set.TSKC = param_set.REL_HUMID = TRUE;
-  if(prec) param_set.PREC = TRUE;
+  param_set.TSKC = TRUE;
+  param_set.REL_HUMID = TRUE;
+
+
+  param_set.AIR_TEMP = FALSE;
+
 
 }

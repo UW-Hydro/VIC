@@ -4,12 +4,13 @@
 #include <string.h>
  
 global_param_struct get_global_param(filenames_struct *names,
-                                     FILE             *gp)
+                                     FILE             *gp,
+				     int              *force_dt)
 /**********************************************************************
-	global_param_struct	Dag Lohmann	January 1996
+  get_global_param	Keith Cherkauer	            March 1998
 
-  This routine reads the global parameters, model options, and
-  debugging controls from an input file.
+  This routine reads the VIC model global control file, getting
+  values for global parameters, model options, and debugging controls.
 
   Modifications:
   7-19-96 Modified to read time step		        KAC
@@ -148,6 +149,9 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("SNOW_BAND",optstr)==0) {
 	sscanf(cmdstr,"%*s %f",&options.TRUNK_RATIO);
       }
+      else if(strcasecmp("FORCE_DT",optstr)==0) {
+	sscanf(cmdstr,"%*s %i %i",&force_dt[0],&force_dt[1]);
+      }
 
       /************************************
         Get Frocing Data File Information
@@ -229,6 +233,13 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("DEBUG_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",debug.debug_dir);
       }
+
+      /***********************************
+        Unrecognized Global Parameter Flag
+        ***********************************/
+      else {
+	fprintf(stderr,"WARNING: Unrecognized option in the global parameter file:\n\t%s is unknown - check your spelling\n", optstr);
+      }
     }
     fgets(cmdstr,MAXSTRING,gp);
   }
@@ -237,6 +248,8 @@ global_param_struct get_global_param(filenames_struct *names,
     options.FULL_ENERGY = TRUE;
   if(!options.FULL_ENERGY && options.CALC_SNOW_FLUX) 
     options.CALC_SNOW_FLUX = FALSE;
+  if(force_dt[0]<0 || force_dt[1]<0)
+    nrerror("Must define forcing file time steps (FORCE_DT <dt 1> <dt 2>) in control file");
 
   return temp;
 }

@@ -164,6 +164,7 @@ typedef struct {
   char PREC;       /* precipitation (mm) */
   char WIND;       /* wind speed (m/s) */
   char DENSITY;    /* atmospheric density (kg/m^3) */
+  char MELT;       /* snow melt from NWS or other external model (mm) */
 } param_set_struct;
 
 /*******************************************************
@@ -303,6 +304,8 @@ typedef struct {
   double albedo;		/* bare soil albedo (fraction) */
   double gamma;			/* pshychometric constant (used for snow
                                    met calcs) */
+  int    rise_hour;             /* hour the sun rises above the horizon */
+  int    set_hour;              /* hour the sun sets below the horizon */
 } atmos_data_struct;
 
 /*************************************************************************
@@ -473,12 +476,11 @@ typedef struct {
   double  r_net;           /* grid cell net radiation W/m^2  */
   double  net_short;       /* grid cell net shortwave flux */
   double  net_long;        /* grid cell net longwave flux */
-  double  latent_canop;    /* grid cell net latent heat flux from canopy */
-  double  latent_trans;    /* grid cell net latent heat flux from
-			      transpiration */
-  double  latent_bare;     /* grid cell net latent heat flux from bare soil*/
-  double  latent_pet;      /* grid cell potential latent heat flux*/
-  double  latent_pet_mm;   /* grid cell potential latent heat flux [mm]*/
+  double  sub_canop;       /* grid cell net sublimation from canopy interception */
+  double  evap_canop;      /* grid cell net evaporation from canopy interception */
+  double  sub_snow;        /* grid cell net sublimation from bare ground from snow pack */
+  double  evap_veg;        /* grid cell net evapotraspiration from vegetation */
+  double  evap_bare;       /* grid cell net evaporation from bare ground */
   double  rad_temp;        /* grid cell average radiative surface 
 			      temperature */
   double  aero_resist;     /* grid cell mean aerodynamic resistence  [s/m] */

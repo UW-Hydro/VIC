@@ -128,3 +128,79 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
 
 }
 
+void store_max_min_temp(atmos_data_struct *atmos,
+                        double            *tmax,
+			int               *tmax_hour,
+                        double            *tmin,
+			int               *tmin_hour,
+                        int                rec,
+                        int                Nrecs,
+			int                skip_recs) {
+/**********************************************************************
+  This subroutine sets prepares arrays of maximum and minimum 
+  daily air temperature, and the hour of day at which the maximum
+  and minimum temperatures are achieved.  These arrays are used 
+  when estimating the daily temperature cycle from tmax and tmin.
+
+  atmos_data_struct *atmos,        atmospheric forcing data structure
+  double            *tmax,         maximum temperatures for three days
+  int               *tmax_hour,    hour of maximum temperature
+  double            *tmin,         minimum temperatures for three days
+  int               *tmin_hour,    hour of minimum temperature
+  int                rec,          current record number
+  int                Nrecs,        total number of records
+  int                skip_recs     number of subdaily records (24/dt)
+
+**********************************************************************/
+
+  static int last_rec;
+
+  if(rec==0) {
+    tmax[0] = tmax[1] = atmos[0].tmax;
+    tmin[0] = tmin[1] = atmos[0].tmin;
+    tmax[2] = atmos[skip_recs].tmax;
+    tmin[2] = atmos[skip_recs].tmin;
+    tmax_hour[0] = (int)(2. / 3. * (atmos[0].set_hour 
+				    - atmos[0].rise_hour)) 
+      + atmos[0].rise_hour;
+    tmin_hour[0] = atmos[0].rise_hour - 1;
+    tmax_hour[1] = tmax_hour[0];
+    tmin_hour[1] = tmin_hour[0];
+    tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
+				    - atmos[skip_recs].rise_hour)) 
+      + atmos[0].rise_hour;
+    tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+    
+    last_rec = rec;
+  }
+  else if(rec>=last_rec+skip_recs) {
+    last_rec = rec;
+    if(rec>=Nrecs-skip_recs) {
+      tmax[0] = tmax[1];
+      tmax[1] = tmax[2];
+      tmin[0] = tmin[1];
+      tmin[1] = tmin[2];
+      tmax_hour[0] = tmax_hour[1];
+      tmax_hour[1] = tmax_hour[2];
+      tmin_hour[0] = tmin_hour[1];
+      tmin_hour[1] = tmin_hour[2];
+    }
+    else {
+      tmax[0] = tmax[1];
+      tmax[1] = tmax[2];
+      tmax[2] = atmos[skip_recs].tmax;
+      tmin[0] = tmin[1];
+      tmin[1] = tmin[2];
+      tmin[2] = atmos[skip_recs].tmin;
+      tmax_hour[0] = tmax_hour[1];
+      tmax_hour[1] = tmax_hour[2];
+      tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
+				      - atmos[skip_recs].rise_hour)) 
+	+ atmos[skip_recs].rise_hour;
+      tmin_hour[0] = tmin_hour[1];
+      tmin_hour[1] = tmin_hour[2];
+      tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+    }
+  }
+}
+

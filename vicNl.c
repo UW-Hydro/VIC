@@ -1,10 +1,10 @@
-static char vcid[] = "$Id$";
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vicNl.h>
 #include <global.h>
+
+static char vcid[] = "$Id$";
 
 /** Main Program **/
 
@@ -49,9 +49,8 @@ void main(int argc, char *argv[])
   int     RUN_MODEL;
   int     Ncells;
   int     cell_cnt;
+  int     force_dt[2];
   double *mu;
-  double *yearly_prec;
-  double *yearly_epot;
   double  storage;
   dmy_struct *dmy;
   atmos_data_struct *atmos;
@@ -80,8 +79,9 @@ void main(int argc, char *argv[])
 
 
   /** Read Global Control File **/
+  force_dt[0] = force_dt[1] = -99;
   infiles.globalparam = open_file(filenames.global,"r");
-  global_param = get_global_param(&filenames,infiles.globalparam);
+  global_param = get_global_param(&filenames,infiles.globalparam,force_dt);
 
   /** Check and Open Files **/
   check_files(&infiles, filenames);
@@ -135,8 +135,9 @@ void main(int argc, char *argv[])
                    &outfiles);
 
       /** Read Forcing Data **/
-      atmos = read_forcing_data(infiles, &global_param.nrecs,
-				global_param.dt);
+      atmos = read_forcing_data(infiles, global_param.starthour,
+				&global_param.nrecs,
+				global_param.dt, force_dt);
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
       /** Read Elevation Band Data if Used **/
@@ -165,16 +166,13 @@ void main(int argc, char *argv[])
        **************************************************/
       initialize_atmos(atmos,dmy,(double)soil_con.time_zone_lng,
 		       (double)soil_con.lng,(double)soil_con.lat,
+		       (double)soil_con.elevation,
 		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
 		       soil_con.Tfactor,global_param.nrecs,global_param.dt);
 
-      if(!options.FULL_ENERGY)
-        rad_and_vpd(atmos,soil_con,global_param.nrecs,dmy,
-		    &yearly_prec,&yearly_epot);
-
       /**************************************************
-         Initialize Energy Balance and Snow Variables 
-       **************************************************/
+        Initialize Energy Balance and Snow Variables 
+      **************************************************/
       if(options.SNOW_MODEL) {
         fprintf(stderr,"Snow Model Initialization\n");
 	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
@@ -217,7 +215,7 @@ void main(int argc, char *argv[])
 
         dist_prec(&atmos[rec],&prcp,soil_con,veg_con,
                   dmy,global_param,outfiles,rec,cellnum,
-                  NEWCELL,LASTREC,yearly_prec,yearly_epot);
+                  NEWCELL,LASTREC);
         NEWCELL=FALSE;
 
       }	/* End Rec Loop */
@@ -238,10 +236,6 @@ void main(int argc, char *argv[])
 	free((char*)soil_con.alpha);
 	free((char*)soil_con.beta);
 	free((char*)soil_con.gamma);
-      }
-      if(!options.FULL_ENERGY) {
-	free((char *)yearly_prec);
-        free((char *)yearly_epot);
       }
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */

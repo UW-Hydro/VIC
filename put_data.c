@@ -87,15 +87,18 @@ void put_data(dist_prcp_struct  *prcp,
 	  tmp_evap = 0.0;
 	  for(index=0;index<options.Nlayer;index++)
 	    tmp_evap += cell[dist][veg][band].layer[index].evap;
+	  out_data->evap_veg += tmp_evap * veg_con[veg].Cv * mu * AreaFract[band];
 	  if(options.FULL_ENERGY || options.SNOW_MODEL) {
 	    tmp_evap += snow[veg][band].vapor_flux * 1000.;
 	    tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
-	    out_data->latent_trans += snow[veg][band].vapor_flux * 1000. 
+	    out_data->sub_snow += snow[veg][band].vapor_flux * 1000. 
 	      * veg_con[veg].Cv * mu * AreaFract[band]; 
-	    out_data->latent_canop += snow[veg][band].canopy_vapor_flux 
+	    out_data->sub_canop += snow[veg][band].canopy_vapor_flux 
 	      * 1000. * veg_con[veg].Cv * mu * AreaFract[band]; 
 	  }
 	  tmp_evap += veg_var[dist][veg][band].canopyevap;
+	  out_data->evap_canop += veg_var[dist][veg][band].canopyevap 
+	    * veg_con[veg].Cv * mu * AreaFract[band]; 
 	  out_data->evap += tmp_evap * veg_con[veg].Cv * mu * AreaFract[band]; 
 	  
 	  /** record runoff **/
@@ -166,10 +169,6 @@ void put_data(dist_prcp_struct  *prcp,
 	    * veg_con[veg].Cv * AreaFract[band];
 	  out_data->grnd_flux -= (energy[veg][band].grnd_flux
 				  + energy[veg][band].deltaH)
-	    * veg_con[veg].Cv * AreaFract[band];
-	  out_data->latent_pet -= (energy[veg][band].grnd_flux)
-	    * veg_con[veg].Cv * AreaFract[band];
-	  out_data->latent_pet_mm -= (energy[veg][band].deltaH)
 	    * veg_con[veg].Cv * AreaFract[band];
 	  out_data->deltaH    -= energy[veg][band].deltaH
 	    * veg_con[veg].Cv * AreaFract[band];
@@ -275,9 +274,11 @@ void put_data(dist_prcp_struct  *prcp,
 	tmp_evap=0.;
 	for(index=0;index<options.Nlayer;index++)
 	  tmp_evap += cell[dist][vegnum][band].layer[index].evap;
+	out_data->evap_bare += cell[dist][vegnum][band].layer[index].evap 
+	  * (1.0 - veg_con[0].Cv_sum) * mu * AreaFract[band];
 	if(options.FULL_ENERGY || options.SNOW_MODEL) {
 	  tmp_evap += snow[vegnum][band].vapor_flux * 1000.;
-	  out_data->latent_trans += snow[vegnum][band].vapor_flux * 1000. 
+	  out_data->sub_snow += snow[vegnum][band].vapor_flux * 1000. 
 	    * (1.0 - veg_con[0].Cv_sum) * mu * AreaFract[band];
 	}	  
 	out_data->evap += tmp_evap * (1.0 - veg_con[0].Cv_sum) * mu 
@@ -348,10 +349,6 @@ void put_data(dist_prcp_struct  *prcp,
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
 	out_data->grnd_flux -= (energy[vegnum][band].grnd_flux 
 				+ energy[vegnum][band].deltaH)
-	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->latent_pet -= (energy[vegnum][band].grnd_flux)
-	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
-	out_data->latent_pet_mm -= (energy[vegnum][band].deltaH)
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
 	out_data->deltaH    -= energy[vegnum][band].deltaH 
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];

@@ -13,9 +13,7 @@ void dist_prec(atmos_data_struct   *atmos,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
-               char                 LASTREC,
-	       double              *yearly_prec,
-	       double              *yearly_epot) {
+               char                 LASTREC) {
 /**********************************************************************
   dist_prec		Keith Cherkauer		October 9, 1997
 
@@ -116,7 +114,7 @@ void dist_prec(atmos_data_struct   *atmos,
     }
     full_energy(rec,atmos,soil_con,veg_con,prcp,dmy,
 		global_param,cellnum,NEWCELL,prec,
-		rainonly,melt,yearly_prec,yearly_epot);
+		rainonly,melt);
 
 /***
     atmos->prec = prec;
@@ -140,8 +138,7 @@ void dist_prec(atmos_data_struct   *atmos,
       melt[i*2+1]     = 0;
     }
     full_energy(rec,atmos,soil_con,veg_con,prcp,dmy,
-		global_param,cellnum,NEWCELL,prec,rainonly,melt,
-		yearly_prec,yearly_epot);
+		global_param,cellnum,NEWCELL,prec,rainonly,melt);
 
   }
 

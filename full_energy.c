@@ -179,7 +179,8 @@ void full_energy(int rec,
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
       if(iveg<Nveg)
-	surf_atten=exp(-0.50*veg_lib[veg_class].LAI[dmy[rec].month-1]);
+	surf_atten=exp(-veg_lib[veg_class].rad_atten 
+		       * veg_lib[veg_class].LAI[dmy[rec].month-1]);
       else surf_atten = 1.;
         
       /**************************************************
@@ -280,10 +281,10 @@ void full_energy(int rec,
 		  	              + gp.wind_h;
       }
       CalcAerodynamic(overstory,iveg,Nveg,
-		      (double)options.OVERSTORY_ATTENUATION,
+		      veg_lib[veg_class].wind_atten,
                       height,soil_con.rough,soil_con.snow_rough,
                       &displacement,&roughness,&ref_height,
-		      (double)options.TRUNK_RATIO,
+		      veg_lib[veg_class].trunk_ratio,
                       tmp_wind,cell[WET][iveg][0].aero_resist);
   
       /** Check for Presence of Snow Pack, or New Snow **/

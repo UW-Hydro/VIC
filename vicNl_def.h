@@ -116,8 +116,6 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
-  float  OVERSTORY_ATTENUATION; /* attenutation coefficient for overstory */
-  float  TRUNK_RATIO;    /* Fraction of Tree Height that is trunk */
   int    ROOT_ZONES;     /* Number of root zones used in simulation */
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
@@ -288,6 +286,12 @@ typedef struct {
                                    (fraction) */
   double emissivity[12];	/* vegetation emissivity
                                    (fraction) */
+  double rad_atten;             /* radiation attenuation due to canopy,
+				   default = 0.5 (N/A) */
+  double wind_atten;            /* wind attenuation through canopy
+                                   default = 0.5 (N/A) */
+  double trunk_ratio;           /* ratio of trunk height to tree height
+                                   default = 0.2 (fraction) */
 } veg_lib_struct;
 
 /**********************************************************************

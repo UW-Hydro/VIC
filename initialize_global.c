@@ -84,8 +84,6 @@ void initialize_global() {
   options.GRID_DECIMAL          = 2;
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
-  options.OVERSTORY_ATTENUATION = 0.5;
-  options.TRUNK_RATIO           = 0.2;
   options.PREC_EXPT             = 0.6;
   options.INIT_SNOW             = FALSE;
   options.ROOT_ZONES            = -999;

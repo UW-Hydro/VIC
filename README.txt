@@ -25,8 +25,9 @@ Modifications:
 	    to 100% of precip, causing function to fail.	TJB
 	compute_dz.c, initialize_atmos.c, read_soilparam.c,
 	read_soilparam_arc.c (found by Justin Sheffield at Princeton):
-	    Replaced rint(something) with (int)(something + 0.5)
-	    to handle rounding without resorting to rint().	TJB
+	    Replaced rint(something) with (float)(int)(something + 0.5)
+	    to handle rounding without resorting to rint(), which
+	    isn't supported on all platforms.			TJB
 	full_energy.c (found by Justin Sheffield at Princeton):
 	    Initialize roughness to 0.0 for bare soil.		TJB
 	func_surf_energy_bal.c (found by Justin Sheffield at Princeton):

@@ -17,9 +17,9 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
 	    to
 		if((int)(thermdepths[Nnodes-1]*1000 + 0.5) != (int)(dp*1000 + 0.5)) {
 	    and changed
-		rint(whatever_quantity)
+		rint(something)
 	    to
-		(int)(whatever_quantity + 0.5)
+		(float)(int)(something + 0.5)
 	    to handle floating-point representation errors in the data
 	    read from the state file without resorting to rint function.
 								TJB
@@ -37,13 +37,13 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
 
   for(j=Nnodes-1;j>0;j--) {
     thermdepths[j] -= thermdepths[j-1];
-    thermdepths[j] = (int)(thermdepths[j] * 10000. + 0.5) / 10000.;
+    thermdepths[j] = (float)(int)(thermdepths[j] * 10000. + 0.5) / 10000.;
   }
 
   sum = 0;
-  dz[0] = (int)(thermdepths[1] * 10000. + 0.5) / 10000.;
+  dz[0] = (float)(int)(thermdepths[1] * 10000. + 0.5) / 10000.;
   for(j=1;j<Nnodes;j++) {
-    dz[j] = 2. * (int)((thermdepths[j] - dz[j-1] / 2.) * 10000. + 0.5) / 10000.;
+    dz[j] = 2. * (float)(int)((thermdepths[j] - dz[j-1] / 2.) * 10000. + 0.5) / 10000.;
     if(dz[j] < 0) {
       sprintf(ErrStr,"Check spacing between thermal layers %i and %i\n",
 	      j-1,j);

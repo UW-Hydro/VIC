@@ -86,7 +86,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		model.						KAC
   4-12-98       Modified to read all parameters from a single
                 standard input file.                            KAC
-  07-May-04	Replaced rint(something) with (int)(something + 0.5)
+  07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
 
 **********************************************************************/
@@ -292,7 +292,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       strcpy(namestr,soilparamdir);
       strcat(namestr,tmpstr);
       temp.depth[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
-      temp.depth[layer] = (int)(temp.depth[layer] * 1000 + 0.5) / 1000;
+      temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
 	fprintf(stderr,"Model will not function with layer depth %f < %f m.\n",
 		temp.depth[layer],MINSOILDEPTH);

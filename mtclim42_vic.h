@@ -1,6 +1,11 @@
 /*
   Changes for the VIC implementation are preceded by the comment * start
   vic_change * and followed by the comment * end vic_change * */
+
+/* RCS Id String
+ * $Id$
+ */
+
 /* 
 mtclim42.h
 constants typedefs, and function prototypes for MTCLIM 4.2
@@ -19,7 +24,6 @@ Last Changed: Fri Apr 25 11:37:15 2003 by Keith Cherkauer <cherkaue@u.washington
 */
 
 
-static char vcid[] = "$Id$";
 
 #define TDAYCOEF 0.45     /* daylight air temperature coefficient (dim) */
 

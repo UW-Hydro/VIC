@@ -5,7 +5,7 @@
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE FALSE
+#define VERBOSE TRUE
 
 /***** If TRUE limit output data to runoff and baseflow for optimization *****/
 #define OPTIMIZE FALSE
@@ -21,24 +21,24 @@
        have to be activated to get extra output.  When set to FALSE
        all debugging if-then statements are removed from the compiled 
        code *****/
-#define LINK_DEBUG FALSE
+#define LINK_DEBUG TRUE
 
 /***** If TRUE output will be in LDAS binary format, which is a single
        file with limited variables, most of which are truncated to
        conserve disk space *****/
-#define LDAS_OUTPUT TRUE
+#define LDAS_OUTPUT FALSE
 
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 
        significantly reduces the run time with frozen soil, but may
        introduce new errors (STILL UNDER TESTING) *****/
-#define QUICK_FS TRUE
+#define QUICK_FS FALSE
 #define QUICK_FS_TEMPS 7
 
 /***** If TRUE VIC binary includes the lake/wetland algorithm.  Lakes
        and wetlands do not need to be defined but code will be 
        accessed. *****/
-#define LAKE_MODEL TRUE
+#define LAKE_MODEL FALSE
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the
        matric potential from the two surrounding layers to estimate the 
@@ -67,6 +67,14 @@
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
 
+/***** Compute the treeline elevation.  If set to TRUE this flag will 
+       force the VIC model to compute the elevation of the tree line, 
+       based on elevation at which the average annual July air temperature
+       is at or below 10C.  All snowbands above this evelation are then 
+       assumed to be above the treeline, and vegetation types with 
+       overstory are removed from the snow band average variables. *****/
+#define COMPUTE_TREELINE TRUE
+
 /***** If TRUE VIC computes the mean, standard deviation, and sum
        and finds the minimum and maximum values of the forcing 
        variables for each grid cell and outputs the results to 
@@ -79,7 +87,7 @@
 /***** If TRUE VIC uses a uniform distribution function to simulate
        the spatial distribution of soil frost, if FALSE VIC assumes
        that the entire grid cell is frozen uniformly *****/
-#define SPATIAL_FROST TRUE
+#define SPATIAL_FROST FALSE
 #define FROST_SUBAREAS 10
 #define SPATIAL_FROST_SLOPE 1.5
 
@@ -92,13 +100,13 @@
 
 
 /***** Define maximum array sizes for model source code *****/
-#define MAX_VEG        8        /* maximum number of vegetation types per 
-				   cell */
-#define MAX_LAYERS     10       /* maximum number of soil moisture layers */
-#define MAX_NODES      18       /* maximum number of soil thermal nodes */
-#define MAX_BANDS      2        /* maximum number of snow bands */
-#define MAX_FRONTS     3        /* maximum number of freezing and thawing 
-				   front depths to store */
+#define MAX_VEG        12      /* maximum number of vegetation types per 
+				  cell */
+#define MAX_LAYERS     3       /* maximum number of soil moisture layers */
+#define MAX_NODES      18      /* maximum number of soil thermal nodes */
+#define MAX_BANDS      10      /* maximum number of snow bands */
+#define MAX_FRONTS     3       /* maximum number of freezing and thawing 
+				  front depths to store */
 #define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
 
 /***** Number of iterations to use in solving the surface energy balance.

@@ -82,7 +82,7 @@ double calc_surf_energy_bal(double             Le,
               balance will now be a mixture of snow covered
 	      and bare ground, controlled by the snow cover 
 	      fraction set in solve_snow.c                 KAC
-    6-8-2000  Modifeid to make use of spatially distribute 
+    6-8-2000  Modified to make use of spatially distributed 
               soil frost                                   KAC
     03-09-01  Added QUICK_SOLVE options for finite difference
               soil thermal solution.  By iterating on only a
@@ -91,6 +91,8 @@ double calc_surf_energy_bal(double             Le,
               with minimal additional energy balance errors.  KAC
     11-18-02  Modified to include the effects of blowing snow
               on the surface energy balance.                 LCB
+    07-30-03  Made sure that local NOFLUX variable is always set
+              to the options flag value.                      KAC
 
 ***************************************************************/
 {
@@ -464,6 +466,7 @@ double calc_surf_energy_bal(double             Le,
 
     /** Frozen soil model run with no surface energy balance **/
     Tsurf  = Tair;
+    NOFLUX = options.NOFLUX;
 
   }
 

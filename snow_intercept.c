@@ -33,8 +33,9 @@ static char vcid[] = "$Id$";
     double F                - Fractional coverage
     double LAI              - Leaf Area Index
     double MaxInt           - Maximum rainfall interception storage (m)
-    double BaseRa           - Aerodynamic resistance (uncorrected for
+    double Ra               - Aerodynamic resistance (uncorrected for
                              stability) (s/m)
+    double *Ra_used         - Aerodynamic resistance after adjustments (s/m)
     double AirDens          - Density of air (kg/m3)
     double EactAir          - Actual vapor pressure of air (Pa) 
     double Lv               - Latent heat of vaporization (J/kg3)
@@ -59,6 +60,7 @@ static char vcid[] = "$Id$";
   Returns      : none
 
   Modifies     :
+    double *Ra_used         - Aerodynamic resistance after adjustments (s/m)
     double *RainFall        - Amount of rain (m)
     double *Snowfall        - Amount of snow (m)
     double *IntRain         - Intercepted rain (m) 
@@ -82,6 +84,8 @@ static char vcid[] = "$Id$";
   09-98 aerodynamic resistances in the canopy when snow has been  
         intercepted is increased by a factor of 10:  include REF
         Journal of Hydrology, 1998                            KAC, GO'D
+  28-Sep-04 Added Ra_used to store the aerodynamic resistance actually
+	    used in flux calculations.				TJB
 
 *****************************************************************************/
 void snow_intercept(double Dt, 
@@ -89,6 +93,7 @@ void snow_intercept(double Dt,
 		    double LAI, 
 		    double MaxInt, 
 		    double Ra, 
+		    double *Ra_used, 
 		    double AirDens,
 		    double EactAir, 
 		    double Lv, 
@@ -286,9 +291,11 @@ void snow_intercept(double Dt,
   
   EsSnow = svp(*Tcanopy); 
 
+  *Ra_used = Ra;
+
   /** Added division by 10 to incorporate change in canopy resistance due
       to smoothing by intercepted snow **/
-  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / Ra / 10.; 
+  *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow) / *Ra_used / 10.0;
   *VaporMassFlux /= RHO_W; 
 
   if (Vpd == 0.0 && *VaporMassFlux < 0.0)
@@ -301,8 +308,11 @@ void snow_intercept(double Dt,
 
   /* Calculate the sensible heat flux */
 
-  SensibleHeat = AirDens * Cp * (Tair - *Tcanopy)/Ra;
+  SensibleHeat = AirDens * Cp * (Tair - *Tcanopy) / *Ra_used;
   
+  /** Multiply Ra by 10 to reflect the value used in calculating VaporMassFlux **/
+  *Ra_used *= 10.0;
+
   /* Calculate the advected energy */
 
   AdvectedEnergy = (4186.8 * Tair * *RainFall)/(Dt * SECPHOUR);

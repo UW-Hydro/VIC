@@ -28,6 +28,8 @@ void full_energy(int                  rec,
            implemented when the radiation forcing routines were 
 	   updated.  Also modified to use the new simplified 
 	   soil moisture storage for the frozen soil algorithm.    KAC
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    actually used in flux calculations.			TJB
 
 **********************************************************************/
 {
@@ -289,7 +291,7 @@ void full_energy(int                  rec,
 			 Nbands, options.Nlayer, dp, prcp->mu[iveg], ice0, 
 			 moist, surf_atten, height, displacement, roughness, 
 			 ref_height, bare_albedo, 
-			 cell[WET][iveg][0].aero_resist, 
+			 cell[WET][iveg][0].aero_resist, &(cell[WET][iveg][0].aero_resist_used),
 			 &(cell[WET][iveg][band].baseflow), 
 			 &(cell[DRY][iveg][band].baseflow), 
 			 &(cell[WET][iveg][band].runoff), 

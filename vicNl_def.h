@@ -476,9 +476,18 @@ typedef struct {
   for each grid cell.
   ******************************************************************/
 typedef struct {
-  double aero_resist[3];               /* aerodynamic resistane (s/m) 
-					  [0] = over bare vegetation or soil 
+  double aero_resist[3];               /* aerodynamic resistance (s/m) 
+					  [0] = over vegetation or bare soil 
+					  [1] = over snow-filled overstory
 					  [2] = over snow */
+  double aero_resist_used;             /* The (stability-corrected) aerodynamic
+                                          resistance (s/m) that was actually used
+                                          in flux calculations.  For cases in which
+                                          a cell uses 2 different resistances for
+                                          flux computations in the same time step
+                                          (i.e. cell contains overstory and snow
+                                          is present on the ground), aero_resist_used
+                                          will contain the snow pack's resistance. */
   double baseflow;                     /* baseflow from current cell (mm/TS) */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */

@@ -47,6 +47,7 @@ double solve_snow(snow_data_struct    *snow,
 		  double              *Le,
 		  double              *Ls,
 		  double              *aero_resist,
+		  double              *aero_resist_used,
 		  double              *tmp_wind,
 		  double              *net_short,
 		  double              *out_short,
@@ -83,7 +84,9 @@ double solve_snow(snow_data_struct    *snow,
   06-04-03 Added check so that MELTING flag is only TRUE if melt
            occurs in the melt season - currently this is defined
            between March 1 and October 1.  Otherwise the MELTING
-           flag can trigger rapid very early season melt
+           flag can trigger rapid very early season melt     KAC
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    actually used in flux calculations.			TJB
 
 *********************************************************************/
 
@@ -218,7 +221,8 @@ double solve_snow(snow_data_struct    *snow,
 	  }
 	  snow_intercept((double)dt, 1., veg_lib[veg_class].LAI[month-1], 
 			 veg_lib[veg_class].Wdmax[month-1], 
-			 aero_resist[1], density, vp, (*Le), shortwave, 
+			 aero_resist[1], aero_resist_used,
+			 density, vp, (*Le), shortwave, 
 			 longwave+surf_long, pressure, air_temp, vpd, 
 			 tmp_wind[1], rainfall, snowfall, &veg_var_wet->Wdew, 
 			 &snow->snow_canopy, &snow->tmp_int_storage, 
@@ -238,10 +242,11 @@ double solve_snow(snow_data_struct    *snow,
 	  /** Compute Canopy Evaporation, if Canopy and No Snow **/
 	  tmp_Wdew[WET] = veg_var_wet->Wdew;
 	  if(options.DIST_PRCP) tmp_Wdew[DRY] = 0.;
+          *aero_resist_used = aero_resist[0];
 	  Evap[0] = canopy_evap(layer_wet, layer_dry, veg_var_wet, 
 				veg_var_dry, FALSE, veg_class, month, mu, 
 				tmp_Wdew, (double)dt, rad[0], vpd, 
-				net_short[0], air_temp, aero_resist[0], 
+				net_short[0], air_temp, *aero_resist_used,
 				displacement, roughness, ref_height, 
 				(double)soil_con->elevation, rainfall, 
 				soil_con->depth, soil_con->Wcr, 
@@ -323,7 +328,7 @@ double solve_snow(snow_data_struct    *snow,
       /** Call snow pack accumulation and ablation algorithm **/
 
       snow_melt(soil_con, rec, iveg, wind_h+soil_con->snow_rough, 
-		aero_resist[2], Le[0], snow, (double)dt, 0.00, 
+		aero_resist[2], aero_resist_used, Le[0], snow, (double)dt, 0.00, 
 		soil_con->snow_rough, surf_atten, rainfall[WET], 
 		snowfall[WET], tmp_wind[2], grnd_temp, air_temp, net_short[0], 
 		energy->longwave, density, pressure, vpd, vp, &melt, 

@@ -25,6 +25,7 @@ void surface_fluxes(char                 overstory,
 		    double               ref_height,
 		    double               bare_albedo,
 		    double              *aero_resist,
+		    double              *aero_resist_used,
 		    double              *baseflow_wet,
 		    double              *baseflow_dry,
 		    double              *runoff_wet,
@@ -70,6 +71,8 @@ void surface_fluxes(char                 overstory,
            time step.                                            KAC
   07-May-04 Fixed initialization of canopyevap to initialize for every
 	    value of dist, rather than just dist 0.		TJB
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    actually used in flux calculations.			TJB
 
 **********************************************************************/
 {
@@ -238,7 +241,7 @@ void surface_fluxes(char                 overstory,
 			    displacement, ref_height, surf_atten, 
 			    gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 
 			    gp->wind_h, moist, ice0, dp, bare_albedo, 
-			    rainfall, &step_out_prec, Le, Ls, aero_resist, 
+			    rainfall, &step_out_prec, Le, Ls, aero_resist, aero_resist_used,
 			    wind, &step_net_short, &step_out_short, &step_rad, 
 			    &step_Evap, &step_snow_energy, snow_inflow, 
 			    step_ppt, gauge_correction, root);
@@ -256,7 +259,7 @@ void surface_fluxes(char                 overstory,
 				 (*Ls), mu, displacement, roughness, 
 				 ref_height, step_snow_energy, 
 				 step_snow.vapor_flux,  bare_albedo, 
-				 aero_resist, wind, 
+				 aero_resist, aero_resist_used, wind, 
 				 rainfall, step_ppt, root, 
 				 atmos, &bare_veg_var[WET], 
 				 &bare_veg_var[DRY], &bare_energy, 

@@ -34,6 +34,8 @@ void put_data(dist_prcp_struct  *prcp,
            when output of snow bands is selected.                  KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
+  28-Sep-04 Replaced aero_resist[0] with aero_resist_used, the aerodynamic
+	    resistance that was actually used in flux calculations.	TJB
 
 **********************************************************************/
 {
@@ -195,7 +197,7 @@ void put_data(dist_prcp_struct  *prcp,
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	    /** record aerodynamic resistance **/
-	    out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
+	    out_data->aero_resist += cell[WET][veg][0].aero_resist_used
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** recored layer moistures **/

@@ -31,6 +31,7 @@ double calc_surf_energy_bal(int                rec,
 			    double             vapor_flux,
 			    double             bare_albedo,
 			    double            *aero_resist,
+			    double            *aero_resist_used,
 			    double            *wind,
 			    double            *rainfall,
 			    double            *ppt,
@@ -64,6 +65,8 @@ double calc_surf_energy_bal(int                rec,
 	      error_print_surf_energy_bal.		TJB
     21-Sep-04 Added ErrorString to store error messages from
 	      root_brent.				TJB
+    28-Sep-04 Added aero_resist_used to store the aerodynamic
+	      resistance actually used in flux calculations.	TJB
 
 ***************************************************************/
 {
@@ -75,7 +78,6 @@ double calc_surf_energy_bal(int                rec,
   double   Ts_old;
   double   T1_old;
   double   Tair;
-  double   ra;
   double   atmos_density;
   double   albedo;
   double   emissivity;
@@ -123,13 +125,12 @@ double calc_surf_energy_bal(int                rec,
   /**************************************************
     Correct Aerodynamic Resistance for Stability
   **************************************************/
-  ra = aero_resist[0];
   U = wind[0];
   if (U > 0.0)
-    ra /= StabilityCorrection(ref_height, displacement, T0,
-          air_temp, U, roughness);
+    *aero_resist_used = aero_resist[0] / StabilityCorrection(ref_height, displacement, T0,
+                                                              air_temp, U, roughness);
   else
-    ra = HUGE_RESIST;
+    *aero_resist_used = HUGE_RESIST;
   
   /**************************************************
     Compute Evaporation and Transpiration 
@@ -226,7 +227,7 @@ double calc_surf_energy_bal(int                rec,
 #if QUICK_FS
     Tsurf = root_brent(T_upper, T_lower, ErrorString,
 		       func_surf_energy_bal, T2, Ts_old, T1_old, Tair, 
-		       ra, atmos_density, shortwave, longwave, albedo, 
+		       *aero_resist_used, atmos_density, shortwave, longwave, albedo, 
 		       emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, dp, 
 		       delta_t, Le, Ls, Vapor, moist, ice0, max_moist, 
 		       bubble, expt, snow_depth, snow_density, Tsnow_surf, 
@@ -250,7 +251,7 @@ double calc_surf_energy_bal(int                rec,
 #else
     Tsurf = root_brent(T_upper, T_lower, ErrorString,
 		       func_surf_energy_bal, T2, Ts_old, T1_old, Tair, 
-		       ra, atmos_density, shortwave, longwave, albedo, 
+		       *aero_resist_used, atmos_density, shortwave, longwave, albedo, 
 		       emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, dp, 
 		       delta_t, Le, Ls, Vapor, moist, ice0, max_moist, 
 		       bubble, expt, snow_depth, snow_density, Tsnow_surf, 
@@ -274,7 +275,7 @@ double calc_surf_energy_bal(int                rec,
     if(Tsurf <= -9998) {  
 #if QUICK_FS
       error = error_calc_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, 
-					 ra, atmos_density, shortwave, 
+					 *aero_resist_used, atmos_density, shortwave, 
 					 longwave, albedo, emissivity, kappa1, 
 					 kappa2, Cs1, Cs2, D1, D2, dp, 
 					 delta_t, Le, Ls, Vapor, moist, ice0, 
@@ -307,7 +308,7 @@ double calc_surf_energy_bal(int                rec,
 					 snow->snow, soil_con->FS_ACTIVE, ErrorString);
 #else
       error = error_calc_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, 
-					 ra, atmos_density, shortwave, 
+					 *aero_resist_used, atmos_density, shortwave, 
 					 longwave, albedo, emissivity, kappa1, 
 					 kappa2, Cs1, Cs2, D1, D2, dp, 
 					 delta_t, Le, Ls, Vapor, moist, ice0, 
@@ -349,7 +350,7 @@ double calc_surf_energy_bal(int                rec,
     Recalculate Energy Balance Terms for Final Surface Temperature
   **************************************************/
 #if QUICK_FS
-  error = solve_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, ra, 
+  error = solve_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, *aero_resist_used, 
 				atmos_density, shortwave, longwave, albedo, 
 				emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, 
 				dp, delta_t, Le, Ls, Vapor, moist, ice0, 
@@ -375,7 +376,7 @@ double calc_surf_energy_bal(int                rec,
 				veg_class, dmy->month, Nnodes, 
 				FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE);
 #else
-  error = solve_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, ra, 
+  error = solve_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, *aero_resist_used, 
 				atmos_density, shortwave, longwave, albedo, 
 				emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, 
 				dp, delta_t, Le, Ls, Vapor, moist, ice0, 

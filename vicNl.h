@@ -44,7 +44,7 @@ double calc_surf_energy_bal(int, int, int, int, int, int, int, int, int,
 			    double, double, double, double, double, double, 
 			    double, double, double, double, double, double, 
 			    double, double, double, double, double, double *,
-			    double *, double *, double *, float *,
+			    double *, double *, double *, double *, float *,
 			    atmos_data_struct *, veg_var_struct *, 
 			    veg_var_struct *, energy_bal_struct *, 
 			    snow_data_struct *,
@@ -260,11 +260,11 @@ double shrad(double,double,double,double,double,int,double);
 double snow_albedo(double, double, double, double, int, char);
 double snow_density(int, double, double, double, double, double, double, 
 		    double);
-void   snow_intercept(double, double, double, double, double, double, double,
+void   snow_intercept(double, double, double, double, double, double *, double, double,
 		      double, double, double, double, double, double, double,
 		      double *, double *, double *, double *, double *, 
 		      double *, double *, double *, int, int, int);
-void   snow_melt(soil_con_struct *, int, int, double, double, double,
+void   snow_melt(soil_con_struct *, int, int, double, double, double *, double,
 		 snow_data_struct *, double, double, double, double, double, 
 		 double, double, double, double, double, double, double, 
 		 double, double, double, double *, double *, double *,
@@ -284,7 +284,7 @@ double solve_snow(snow_data_struct *, layer_data_struct *,
 		  double, double, double, double, double, double *, double *,
 		  double *, double *, double *, double *, double *, double *,
 		  double *, double *, double *, double *, double *, double *, 
-		  float *);
+		  double *, float *);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
@@ -307,7 +307,7 @@ void   surface_fluxes(char, int, int, int, int, int, int, int, int, int,
 		      double, double, double, double *, double *, double *, 
 		      double *, double *, double *, double *, double *, 
 		      double *, double *, double *, double *, double *, 
-		      double *, float *, atmos_data_struct *, 
+		      double *, double *, float *, atmos_data_struct *, 
 		      soil_con_struct *, dmy_struct *, global_param_struct *,
 		      energy_bal_struct *, snow_data_struct *, 
 		      layer_data_struct *, layer_data_struct *, 

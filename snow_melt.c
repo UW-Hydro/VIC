@@ -34,6 +34,8 @@ static char vcid[] = "$Id$";
     double displacement          - Displacement height (m)
     double aero_resist  - Aerodynamic resistance (uncorrected for
                                    stability) (s/m)
+    double *aero_resist_used  - Aerodynamic resistance (corrected for
+                                   stability) (s/m)
     double atmos->density        - Density of air (kg/m3)
     double atmos->vp             - Actual vapor pressure of air (Pa) 
     double Le           - Latent heat of vaporization (J/kg3)
@@ -72,12 +74,16 @@ static char vcid[] = "$Id$";
 	      in ErrorPrintSnowPackEnergyBalance.			TJB
     21-Sep-04 Added ErrorString to store error messages from
 	      root_brent.						TJB
+    28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	      actually used in flux calculations.			TJB
+
 *****************************************************************************/
 void snow_melt(soil_con_struct  *soil_con, 
 	       int               rec,
 	       int               iveg,
                double            z2,
                double            aero_resist,
+               double            *aero_resist_used,
                double            Le,
                snow_data_struct *snow, 
                double            delta_t,
@@ -194,7 +200,7 @@ void snow_melt(soil_con_struct  *soil_con,
   
   vapor_flux = snow->vapor_flux;
 
-  Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist,
+  Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist, aero_resist_used,
 				   z2, displacement, Z0, wind, net_short, 
 				   longwave, density, Le, air_temp,
 				   pressure * 1000., vpd * 1000., vp * 1000.,
@@ -281,7 +287,7 @@ void snow_melt(soil_con_struct  *soil_con,
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				 (double)0.0, ErrorString,
 				 SnowPackEnergyBalance, delta_t, 
-				 aero_resist, z2, 
+				 aero_resist, aero_resist_used, z2, 
 				 displacement, Z0, wind, net_short, longwave,
 				 density, Le, air_temp, pressure * 1000.,
 				 vpd * 1000., vp * 1000., RainFall, 
@@ -293,7 +299,7 @@ void snow_melt(soil_con_struct  *soil_con,
 				 &latent_heat, &sensible_heat);
 
     if(snow->surf_temp <= -9998)
-      ErrorSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
+      ErrorSnowPackEnergyBalance(snow->surf_temp, delta_t, *aero_resist_used,
 				 z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
 				 pressure * 1000., vpd * 1000., vp * 1000.,
@@ -305,7 +311,7 @@ void snow_melt(soil_con_struct  *soil_con,
 				 &grnd_flux,&latent_heat,
 				 &sensible_heat, ErrorString);
 
-    Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
+    Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist, aero_resist_used,
 				     z2, displacement, Z0, wind, net_short,
 				     longwave, density, Le, air_temp,
 				     pressure * 1000., vpd * 1000., 

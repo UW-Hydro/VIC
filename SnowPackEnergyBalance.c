@@ -48,6 +48,11 @@
   Comments     :
     Reference:  Bras, R. A., Hydrology, an introduction to hydrologic
                 science, Addisson Wesley, Inc., Reading, etc., 1990.
+
+  Modifications:
+    28-Sep-04 Added Ra_used to store the aerodynamic resistance actually
+	      used in flux calculations.				TJB
+
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
 {
@@ -60,6 +65,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   double Dt;                     /* Model time step (hours) */
   double Ra;                     /* Aerodynamic resistance (s/m) */
+  double *Ra_used;               /* Aerodynamic resistance (s/m) after stability correction */
   double Z;                      /* Reference height (m) */
   double Displacement;           /* Displacement height (m) */
   double Z0;                     /* surface roughness height (m) */
@@ -118,6 +124,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
      */
   Dt                 = (double) va_arg(ap, double);
   Ra                 = (double) va_arg(ap, double);
+  Ra_used           = (double *) va_arg(ap, double *);
   Z                  = (double) va_arg(ap, double);
   Displacement       = (double) va_arg(ap, double);
   Z0                 = (double) va_arg(ap, double);
@@ -163,10 +170,10 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
 
   if (Wind > 0.0)
-    Ra /= StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0);
-    /*Ra /= StabilityCorrection(2.f, 0.f, TMean, Tair, Wind, Z0);*/
+    *Ra_used = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0);
+    /* *Ra_used = Ra / StabilityCorrection(2.f, 0.f, TMean, Tair, Wind, Z0);*/
   else
-    Ra = HUGE_RESIST;
+    *Ra_used = HUGE_RESIST;
 
   /* Calculate longwave exchange and net radiation */
  
@@ -176,7 +183,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * CP * (Tair - TMean)/Ra;
+  *SensibleHeat = AirDens * CP * (Tair - TMean) / *Ra_used;
 
   /* Calculate the mass flux of ice to or from the surface layer */
  
@@ -190,7 +197,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 /*   if (TMean < 0.0) */
 /*     EsSnow *= 1.0 + .00972 * TMean + .000042 * pow((double)TMean,(double)2.0); */
   
-  *VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow)/Ra;
+  *VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow) / *Ra_used;
   *VaporMassFlux /= Density;
   if (Vpd == 0.0 && *VaporMassFlux < 0.0)
     *VaporMassFlux = 0.0;

@@ -11,7 +11,13 @@ double svp(double temp)
 
 **********************************************************************/
 {
-  return (A_SVP * exp((B_SVP * temp)/(C_SVP+temp)));
+  double SVP;
+  
+  SVP = A_SVP * exp((B_SVP * temp)/(C_SVP+temp));
+
+  if(temp<0) SVP *= 1.0 + .00972 * temp + .000042 * pow(temp,(double)2.0);
+
+  return (SVP);
 }
 
 double svp_slope(double temp)

@@ -24,15 +24,23 @@ void rad_and_vpd (atmos_data_struct *atmos,
   Modifications:
   5/18/96	Removed first shortwave variable from global usage,
 	and added comments.					KAC
+  9/4/98  Modified to apply Kimball et. al.'s published regression
+          for estimating the daily dew point temperature:
+          Kimball, J. S., S. W. Running, R. Nemani, An Improved
+          method for estimating surface humidity from Daily 
+          Minimum Temperature, Agricultural and Forest Hydrology, 
+          Vol. 85, no. 1-2, June 1997, pg 87-98.               KAC
 
 **********************************************************************/
 {
   extern option_struct options;
   extern debug_struct debug;
+  extern param_set_struct param_set;
 
   int    i, no_of_years;
   double deltat, tair, trans_clear, qdp;
   double shortwave;
+  double day_len_hr;
 
   no_of_years = dmy[nrecs-1].year - dmy[0].year + 1;
 
@@ -50,7 +58,7 @@ void rad_and_vpd (atmos_data_struct *atmos,
       deltat = (deltat==0) ?  (atmos[i].tmax - atmos[i+1].tmin) : deltat;
       atmos[i].trans = calc_trans(deltat, soil_con.elevation);
       shortwave = calc_netshort(atmos[i].trans, dmy[i].day_in_year, 
-				soil_con.lat);
+				soil_con.lat,&day_len_hr);
       tair = (atmos[i].tmax + atmos[i].tmin) / 2.0;
       atmos[i].priest = priestley(tair, shortwave);
     }
@@ -64,21 +72,15 @@ void rad_and_vpd (atmos_data_struct *atmos,
   
   for ( i = 0 ; i < nrecs ; i++) {
     tair = (atmos[i].tmax + atmos[i].tmin) / 2.0;
-    qdp = estimate_vapor_pressure(dmy,yearly_epot[0],yearly_prec[0],
-				  atmos[i].tmin,tair,atmos[i].priest,i);
-    /*     if (yearly_epot[dmy[i].year-dmy[0].year]/ */
-    /*       yearly_prec[dmy[i].year-dmy[0].year] < HUMID_RATIO) { */
-    /*       qdp = svp(atmos[i].tmin); */
-    /*     } */
-    /*     else {  */
-    /*       qdp = svp(atmos[i].tmin) * 0.2 * */
-    /*                (pow((atmos[i].priest/yearly_prec[dmy[i].year-dmy[0].year]), */
-    /*                -0.1) - 0.83) - 0.016 * tair + 0.867; */
-    /*     } */
-    atmos[i].vpd = (svp(tair) - qdp);
-    atmos[i].vp = qdp;
-    atmos[i].rel_humid = 100. * atmos[i].vp / svp(tair);
-    
+    qdp = svp(estimate_dew_point(dmy,yearly_epot[0],yearly_prec[0],
+				 atmos[i].tmin,atmos[i].tmax,atmos[i].priest,
+				 day_len_hr*3600.,i));
+    if(!param_set.SPEC_HUMID) {
+      atmos[i].vpd = (svp(tair) - qdp);
+      atmos[i].vp = qdp;
+      atmos[i].rel_humid = qdp / svp(tair) * 100.;
+    }
+
     if(!options.FULL_ENERGY) {
       atmos[i].shortwave = /* (1.0 - atmos[i].albedo) *  */
 	in_shortwave(soil_con.lat,dmy[i].day_in_year,atmos[i].trans);
@@ -89,25 +91,25 @@ void rad_and_vpd (atmos_data_struct *atmos,
   }
 }
 
-double estimate_vapor_pressure(dmy_struct *dmy,
-			       double     *yearly_epot,
-			       double     *yearly_prec,
-			       double      tmin,
-			       double      tair,
-			       double      priest,
-			       int         day) {
+double estimate_dew_point(dmy_struct *dmy,
+			  double     *yearly_epot,
+			  double     *yearly_prec,
+			  double      tmin,
+			  double      tmax,
+			  double      priest,
+			  double      day_len,
+			  int         day) {
+/*******************************************************************
+  As described in Kimball et. al. 1997.  See reference above.  KAC  
+*******************************************************************/
 
-  double qdp;
+  double Tdew;
+  double EF;
 
-   if (yearly_epot[dmy[day].year-dmy[0].year]/ 
-       yearly_prec[dmy[day].year-dmy[0].year] < HUMID_RATIO) { 
-     qdp = svp(tmin); 
-   } 
-   else {  
-     qdp = svp(tmin) * 0.2 * 
-       (pow((priest/yearly_prec[dmy[day].year-dmy[0].year]), 
- 	   -0.1) - 0.83) - 0.016 * tair + 0.867; 
-   } 
+  EF = ((priest / RHO_W) * day_len) / yearly_prec[dmy[day].year-dmy[0].year];
+  Tdew = (tmin + KELVIN) * ( -0.127 + 1.121 * (1.003 - 1.444 * EF
+					       + 12.312 * EF * EF
+					       -32.766 * EF * EF * EF));
 
-  return(qdp);
+  return(Tdew-KELVIN);
 }

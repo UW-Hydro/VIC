@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Thu Jul 30 14:45:41 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Fri Sep  4 19:39:55 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -181,10 +181,12 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate the saturated vapor pressure in the snow pack, 
      (Equation 3.32, Bras 1990) */
 
-  EsSnow = 610.78 * exp((double)((17.269 * *TMean) / (237.3 + *TMean)));
+  EsSnow = svp(*TMean) * 1000.;
 
-  if (*TMean < 0.0)
-    EsSnow *= 1.0 + .00972 * *TMean + .000042 * pow((double)*TMean,(double)2.0);
+/*   EsSnow = 610.78 * exp((double)((17.269 * *TMean) / (237.3 + *TMean))); */
+
+/*   if (*TMean < 0.0) */
+/*     EsSnow *= 1.0 + .00972 * *TMean + .000042 * pow((double)*TMean,(double)2.0); */
   
   *VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow)/Ra;
   *VaporMassFlux /= Density;

@@ -103,7 +103,7 @@ void initialize_atmos(atmos_data_struct *temp,
     if(options.CORRPREC && temp[rec].prec>0 && param_set.WIND)
       correct_precip(&temp[rec].prec, &temp[rec].rainonly, temp[rec].wind);
 
-    if(options.FULL_ENERGY) {
+    if(options.FULL_ENERGY || param_set.SPEC_HUMID) {
   
       /** Compute humidity and vapor pressure parameters **/
       if(!param_set.SVP) sat_vp = svp(temp[rec].air_temp);

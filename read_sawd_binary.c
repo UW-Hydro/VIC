@@ -18,7 +18,7 @@ void read_sawd_binary(atmos_data_struct *temp,
 	air_temp	-	C*100	        C
 	pressure	-	Pa*100	        kPa
 	wind		-	m/s*1000        m/s
-	spec_humid	-	fract*1000000	fract
+	rel_humid	-	%*100		%
 	tskc		-	%*10	        fract
 
 **********************************************************************/
@@ -64,9 +64,13 @@ void read_sawd_binary(atmos_data_struct *temp,
 	fixcnt++;
       }
       temp[rec].wind = (double)values[2]/1000.;
-      temp[rec].spec_humid = (double)values[3]/1000000.;
-      if(temp[rec].spec_humid == 0. && rec>0) {
-	temp[rec].spec_humid = temp[rec-1].spec_humid;
+      temp[rec].rel_humid = (double)values[3]/100.;
+      if(temp[rec].rel_humid == 0. && rec>0) {
+	temp[rec].rel_humid = temp[rec-1].rel_humid;
+	fixcnt++;
+      }
+      if(temp[rec].rel_humid > 100.) {
+	temp[rec].rel_humid = 100.;
 	fixcnt++;
       }
       temp[rec].tskc = (double)values[4] / 1000.;
@@ -85,7 +89,7 @@ void read_sawd_binary(atmos_data_struct *temp,
   }
 
   param_set.WIND = param_set.AIR_TEMP = param_set.PRESSURE = TRUE;
-  param_set.TSKC = param_set.SPEC_HUMID = TRUE;
+  param_set.TSKC = param_set.REL_HUMID = TRUE;
   if(prec) param_set.PREC = TRUE;
 
 }

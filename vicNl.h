@@ -81,14 +81,14 @@ double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 /** Radiation Routines **/
 void rad_and_vpd(atmos_data_struct *, soil_con_struct, int, dmy_struct *,
 		 double **, double **);
-double estimate_vapor_pressure(dmy_struct *,double *,double *,double,
-			       double,double,int);
+double estimate_dew_point(dmy_struct *,double *,double *,double,
+			  double,double,double,int);
 double calc_trans(double, double);
-double calc_netshort(double, int, double);
+double calc_netshort(double, int, double, double *);
 void calc_long_shortwave(double *, double *, double *, double,
                          double, double, double, double, double,
                          double, char, char, char);
-double fltrad(double, double, double, int, double); 
+double fltrad(double, double, double, int, double, double *); 
 double shrad(double,double,double,double,double,int,double);
 double svp(double);
 double svp_slope(double);

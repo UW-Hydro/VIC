@@ -114,12 +114,17 @@ cd    (* . . . . . . . . . . . . . . . . . . . . . . . . . . . */
 	 1.354,1.375,1.403,1.424,1.438,1.445};
 
 
-double fltrad(double sehorz, double swhorz, double slat, int jday, double tranday) 
+double fltrad(double  sehorz, 
+	      double  swhorz, 
+	      double  slat, 
+	      int     jday, 
+	      double  tranday,
+	      double *dayl) 
 {
   int    i, nnh, nc, n, nh, ml, mo, idec;
   
   double  decl,h, grad, radn; 
-  double  xtran, dayl, sol, tdif, tdrad, dayl2;
+  double  xtran, sol, tdif, tdrad, dayl2;
   double  cosdec, cosdla, sindla, sindec, coshh;
   double  cza, am, tram, dt, etf, hrad, globf, diffl, cbsa, drad, se;
   double  difrad;
@@ -128,7 +133,7 @@ double fltrad(double sehorz, double swhorz, double slat, int jday, double tranda
   nnh=3600;
   nc=86400; 
   n = nc/nnh + 1;
-  dayl=0.0; 
+  dayl[0]=0.0; 
   
 
   mo = jday/30 + 1; 
@@ -222,7 +227,7 @@ double fltrad(double sehorz, double swhorz, double slat, int jday, double tranda
       
       /*             difrad=diffl*(cos(dslop*.5*DtoR))**2.)    */
    
-      dayl	=dayl+((double) (nnh)/3600.0); 
+      dayl[0]	=dayl[0]+((double) (nnh)/3600.0); 
       grad	=grad+drad+difrad; 
       tdif	=tdif+difrad; 
       tdrad	=tdrad+drad; 

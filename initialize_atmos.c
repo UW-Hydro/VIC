@@ -136,9 +136,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   forcing_data = read_forcing_data(infile, global_param);
   
-#if VERBOSE
   fprintf(stderr,"\nRead meteorological forcing file\n");
-#endif
   
   /*************************************************
     Create sub-daily precipitation if not provided
@@ -245,8 +243,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       min = max = atmos[rec].air_temp[0];
       for (j = 0; j < stepspday; j++) {
 	for (i = 0; i < NF; i++, step++) {
-	  if(atmos[rec].air_temp[i]>max) max = atmos[rec].air_temp[i];
-	  if(atmos[rec].air_temp[i]>min) min = atmos[rec].air_temp[i];
+	  if ( atmos[rec].air_temp[i] > max ) max = atmos[rec].air_temp[i];
+	  if ( atmos[rec].air_temp[i] < min ) min = atmos[rec].air_temp[i];
 	}
 	rec++;
       }
@@ -655,27 +653,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
  
-  /******************************************** 
-      Correct precipitation for gage undercatch 
-    ********************************************/
-
-  if(options.CORRPREC && param_set.TYPE[WIND].SUPPLIED) {
-    for (rec = 0, step = 0; rec < global_param.nrecs; rec++) {
-      sum = 0;
-      for (i = 0; i < NF; i++, step++) {
-	if ( atmos[rec].prec[i] > 0 ) {
-	  rainonly = calc_rainonly(atmos[rec].air_temp[i], atmos[rec].prec[i],
-				   global_param.MAX_SNOW_TEMP, 
-				   global_param.MIN_RAIN_TEMP, 1.);
-	  correct_precip(&atmos[rec].prec[i], &rainonly, atmos[rec].wind[i], 
-			 wind_h, roughness);
-	  sum += atmos[rec].prec[i];
-	}
-	if ( NF > 1 ) atmos[rec].prec[NR] = sum;
-      }
-    }
-  }
-
   free(hourlyrad);
   free(prec);
   free(tair);

@@ -35,6 +35,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
            even in water balance mode.  This assures that it is set
            to 0 in water balance mode and does not yield the 
            cumulative sum of sensible heat from the snowpack.    KAC
+  11-18-02 modified to compute the effects of blowing snow on the
+           surface energy balance.                               LCB
 
 **********************************************************************/
 {
@@ -121,10 +123,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
 /*   double snow_depth; */
   double snow_swq;
   double snow_water;
+  int LastSnow;
 
   double *deltaCC;
   double *refreeze_energy;
   double *VaporMassFlux;
+  double *BlowingMassFlux;
+  double *SurfaceMassFlux;
 
   /* soil node terms */
   int     Nnodes;
@@ -180,6 +185,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *sensible_heat;
   double *snow_flux;
   double *store_error;
+  double dt;
+  double SnowDepth;
+  float lag_one;
+  float sigma_slope;
+  float fetch;
+  int Nveg;
 
   /* Define internal routine variables */
   double Evap;		/** Total evap in m/s **/
@@ -272,13 +283,15 @@ double func_surf_energy_bal(double Ts, va_list ap)
   melt_energy             = (double) va_arg(ap, double);
   snow_coverage           = (double) va_arg(ap, double);
   snow_density            = (double) va_arg(ap, double);
-/*   snow_depth              = (double) va_arg(ap, double); */
   snow_swq                = (double) va_arg(ap, double);
   snow_water              = (double) va_arg(ap, double);
-
+  LastSnow                = (int) va_arg(ap, int);
+    
   deltaCC                 = (double *) va_arg(ap, double *);
   refreeze_energy         = (double *) va_arg(ap, double *);
   VaporMassFlux           = (double *) va_arg(ap, double *);
+  BlowingMassFlux         = (double *) va_arg(ap, double *);
+  SurfaceMassFlux         = (double *) va_arg(ap, double *);
 
   /* soil node terms */
   Nnodes                  = (int) va_arg(ap, int);
@@ -332,6 +345,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   sensible_heat           = (double *) va_arg(ap, double *);
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
+  dt   = (double) va_arg(ap, double);
+  SnowDepth  = (double) va_arg(ap, double);
+  lag_one = (float) va_arg(ap, float);
+  sigma_slope = (float) va_arg(ap, float);
+  fetch = (float) va_arg(ap, float);
+  Nveg = (int) va_arg(ap, int);
 
   /***************
     MAIN ROUTINE
@@ -538,7 +557,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   if (INCLUDE_SNOW) {
     latent_heat_from_snow(atmos_density, ice_density, vp, Le, atmos_pressure, 
 			  ra_under, TMean, vpd, &temp_latent_heat, 
-			  &temp_latent_heat_sub, VaporMassFlux);
+			  &temp_latent_heat_sub, VaporMassFlux, BlowingMassFlux, SurfaceMassFlux,
+			  dt,Tair, LastSnow, snow_water, wind[2],roughness, ref_height[2],
+			  SnowDepth, overstory, lag_one, sigma_slope, fetch, Nveg, iveg);
     *latent_heat += temp_latent_heat * snow_coverage;
     *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
   }

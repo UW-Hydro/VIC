@@ -475,7 +475,7 @@ void write_data(out_data_struct *out_data,
 	    out_data->baseflow, out_data->Wdew);
     for(j=0;j<options.Nlayer;j++) 
       fprintf(outfiles->fluxes,"\t%.4f", out_data->moist[j]);
-    fprintf(outfiles->fluxes,"\t%.4f\t%.4f\t%.4g\t%.4g\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t\n",
+    fprintf(outfiles->fluxes,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t\n",
 	    out_data->net_short, out_data->r_net, out_data->evap_canop, 
 	    out_data->evap_veg, out_data->evap_bare, 
 	    out_data->sub_canop, out_data->sub_snow, 

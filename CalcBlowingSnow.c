@@ -19,6 +19,8 @@
 #include <vicNl.h>
 #include <mtclim42_vic.h>
 
+static char vcid[] = "$Id$";
+
 #define GRAMSPKG 1000.
 #define CH_WATER 4186.8e3
 #define JOULESPCAL     4.1868   /* Joules per calorie */

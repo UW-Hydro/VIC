@@ -22,6 +22,9 @@ void prepare_full_energy(int               iveg,
   Modifications:
   01-20-00 split into separate file, formerly at the end of 
            full_energy.c                                      KAC
+  03-12-03 modified so that ice content is set to zero unless
+           the frozen soil algorithm is implemented and active
+           in the current grid cell.                          KAC
 
 *******************************************************************/
 
@@ -49,7 +52,7 @@ void prepare_full_energy(int               iveg,
 
     /* Compute top soil layer ice content (mm/mm) */
 
-    if(options.FROZEN_SOIL){
+    if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
       if((prcp->energy[iveg][band].T[0] 
 	  + prcp->energy[iveg][band].T[1])/2.<0.) {
 	(*ice0) = (*moist) 

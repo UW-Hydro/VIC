@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void calc_cloud_cover_fraction(atmos_data_struct *atmos,
 			       dmy_struct        *dmy,
 			       int                nrecs,

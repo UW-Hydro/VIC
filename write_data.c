@@ -42,6 +42,12 @@ void write_data(out_data_struct *out_data,
                 for the LDAS output files.  
   1/4/2000      modified to allow both standard and LDAS formatted
                 output using a compiler flag                    KAC
+  3-12-03   added energy fluxes to snow band output files   KAC
+  04-23-2003    modified LDAS SWQ output, so that it is multiplied by
+                10 instead of 100 before being converted to a short
+                integer.  This reduces stored value precision to 0.1,
+                but increases the maximum storable SWQ, which was
+                exceeded in previous LDAS simulations.          KAC
 
 **********************************************************************/
 {
@@ -60,7 +66,21 @@ void write_data(out_data_struct *out_data,
 
 #if OPTIMIZE
 
-  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\n",
+  /*****************************************************************
+    Create optimization output files
+      type: ASCII
+      columns: 5
+               year
+	       month
+	       day
+	       runoff
+	       baseflow
+               snow_depth
+      comment: runoff and baseflow are output as daily sums for all
+               defined model time steps.
+  ******************************************************************/
+
+  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\n",
 	  dmy->year, dmy->month, dmy->day, out_data->runoff,
 	  out_data->baseflow);
   
@@ -80,7 +100,7 @@ void write_data(out_data_struct *out_data,
   float                          runoff
   float                          baseflow
   unsigned short int * Nlayers   moist * 10
-  unsigned short int             swq * 100
+  unsigned short int             swq * 10
   short int                      net_short * 10
   short int                      in_long * 10
   short int                      r_net * 10
@@ -135,7 +155,7 @@ void write_data(out_data_struct *out_data,
     tmp_usiptr[0] = (unsigned short int)(out_data->moist[j]*10.);
     fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   }
-  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*100.);
+  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*10.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   
   /** energy balance components **/
@@ -332,12 +352,17 @@ void write_data(out_data_struct *out_data,
     /***** Write ASCII full energy snow band output file *****/
     fprintf(outfiles->snowband  ,"%04i\t%02i\t%02i\t%02i",
 	    dmy->year, dmy->month, dmy->day, dmy->hour);
-    for(band=0;band<options.SNOW_BAND;band++) 
+    for(band=0;band<options.SNOW_BAND;band++) {
       fprintf(outfiles->snowband  ,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
 	      out_data->swq[band+1], out_data->snow_depth[band+1], 
 	      out_data->snow_canopy[band+1], /* out_data->coverage[band+1], */ 
 	      out_data->advection[band+1], out_data->deltaCC[band+1], 
 	      out_data->snow_flux[band+1], out_data->refreeze_energy[band+1]);
+      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
+	      out_data->swband[band], out_data->lwband[band], 
+	      out_data->albedoband[band], out_data->latentband[band], 
+	      out_data->sensibleband[band], out_data->grndband[band]);
+    }
     fprintf(outfiles->snowband,"\n");
   }
   else if(!options.FULL_ENERGY && options.PRT_SNOW_BAND) {
@@ -346,10 +371,15 @@ void write_data(out_data_struct *out_data,
 	      dmy->year, dmy->month, dmy->day);
     if(dt<24) 
       fprintf(outfiles->snowband  ,"\t%02i", dmy->hour);
-    for(band=0;band<options.SNOW_BAND;band++)
+    for ( band = 0; band < options.SNOW_BAND; band++ ) {
       fprintf(outfiles->snowband  ,"\t%.4f\t%.4f\t%.4f",
 	      out_data->swq[band+1], out_data->snow_depth[band+1], 
-	      out_data->snow_canopy[band+1]);
+	      out_data->snow_canopy[band+1]); 
+      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
+	      out_data->swband[band], out_data->lwband[band], 
+	      out_data->albedoband[band], out_data->latentband[band], 
+	      out_data->sensibleband[band], out_data->grndband[band]);
+    }
     fprintf(outfiles->snowband,"\n");
   }
 

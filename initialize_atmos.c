@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$";
+static char vcid[] = "$Id$";
 
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
@@ -14,11 +14,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
-#if OUTPUT_FORCE
 		      double                   *Tfactor,
+#if OUTPUT_FORCE
+                      char                     *AboveTreeLine,
 		      outfiles_struct          *outfiles)
 #else /* OUTPUT_FORCE */
-		      double                   *Tfactor)
+                      char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
@@ -59,6 +60,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    (that might be needed for the snow model) within each
 	    record, eliminating the on the fly estimations used in
 	    previous versions of the model.              Bart and Greg
+  03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
+           the model can make use of the computed treeline.     KAC
 
 **********************************************************************/
 {
@@ -662,6 +665,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 #endif
  
+  // Free temporary parameters
   free(hourlyrad);
   free(prec);
   free(tair);
@@ -677,7 +681,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
+  if ( options.COMPUTE_TREELINE ) {
+    // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
+    // is processed to identify the treeline.
+    if ( options.SNOW_BAND )
+      compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
+  }
+
 #if OUTPUT_FORCE
+  // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
+  // forcing data array is dumped into a new set of files.
   write_forcing_file(atmos, global_param.nrecs, outfiles);
 #endif /* OUTPUT_FORCE */
 

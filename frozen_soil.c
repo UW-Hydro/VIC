@@ -72,6 +72,11 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
   This subroutine redistributes soil properties based on the 
   thermal solutions found for the current time step.
 
+  Modifications:
+  3-12-03 Modified so that soil layer ice content is only 
+          calculated if the frozen soil algorithm is implemented 
+          and active in the current grid cell.               KAC
+
 ******************************************************************/
 
   extern option_struct options;
@@ -99,24 +104,25 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
   else energy->frozen = FALSE;
 
   /** Redistribute Soil Properties for New Frozen Soil Layer Size **/
-  estimate_layer_ice_content(layer_wet, soil_con->dz_node, energy->T,
-			     soil_con->max_moist_node, 
+  if(soil_con->FS_ACTIVE && options.FROZEN_SOIL)
+    estimate_layer_ice_content(layer_wet, soil_con->dz_node, energy->T,
+			       soil_con->max_moist_node, 
 #if QUICK_FS
-			     soil_con->ufwc_table_node,
+			       soil_con->ufwc_table_node,
 #else
-			     soil_con->expt_node, soil_con->bubble_node, 
+			       soil_con->expt_node, soil_con->bubble_node, 
 #endif
-			     soil_con->depth, soil_con->max_moist, 
+			       soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
-			     soil_con->ufwc_table_layer,
+			       soil_con->ufwc_table_layer,
 #else
-			     soil_con->expt, soil_con->bubble, 
+			       soil_con->expt, soil_con->bubble, 
 #endif
-			     soil_con->bulk_density,
-			     soil_con->soil_density, soil_con->quartz,
-			     soil_con->layer_node_fract, Nnodes, 
-			     options.Nlayer, soil_con->FS_ACTIVE);
-  if(options.DIST_PRCP)
+			       soil_con->bulk_density,
+			       soil_con->soil_density, soil_con->quartz,
+			       soil_con->layer_node_fract, Nnodes, 
+			       options.Nlayer, soil_con->FS_ACTIVE);
+  if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL)
     estimate_layer_ice_content(layer_dry, soil_con->dz_node, energy->T,
 			       soil_con->max_moist_node, 
 #if QUICK_FS

@@ -10,7 +10,8 @@ void read_snowband(FILE    *snowband,
 		   double   elev,
 		   double **Tfactor,
 		   double **Pfactor,
-		   double **AreaFract)
+		   double **AreaFract,
+		   char   **AboveTreeLine)
 /**********************************************************************
   read_snowband		Keith Cherkauer		July 9, 1998
 
@@ -31,9 +32,10 @@ void read_snowband(FILE    *snowband,
   double  prec_frac;
 
   Nbands       = options.SNOW_BAND;
-  *Tfactor   = (double *)calloc(Nbands,sizeof(double));
-  *Pfactor   = (double *)calloc(Nbands,sizeof(double));
-  *AreaFract = (double *)calloc(Nbands,sizeof(double));
+  *Tfactor       = (double *)calloc(Nbands,sizeof(double));
+  *Pfactor       = (double *)calloc(Nbands,sizeof(double));
+  *AreaFract     = (double *)calloc(Nbands,sizeof(double));
+  *AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
 
   if (*Tfactor == NULL || *Pfactor == NULL || *AreaFract == NULL) 
     nrerror("Memory allocation failure in read_snowband");

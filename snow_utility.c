@@ -44,6 +44,8 @@ double snow_density(int date,
   08-19-99 Added check to make sure that the change in snowpack depth
            due to new snow does not exceed the actual depth of the 
 	   pack.                                               Bart
+  06-30-03 Added check to keep compression from aging from exceeding
+           the actual depth of the snowpack.                   KAC
 
 **********************************************************************/
 
@@ -62,10 +64,7 @@ double snow_density(int date,
 
     /* Estimate density of new snow based on air temperature */
 
-    air_temp = air_temp * 9. / 5. + 32.;
-    if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
-                                 * (air_temp / 100.) * (air_temp / 100.);
-    else density_new = (double)NEW_SNOW_DENSITY;
+    density_new = new_snow_density(air_temp);
 
     if(depth>0.) {
 
@@ -94,7 +93,9 @@ double snow_density(int date,
 
       density = density_new;
 
-      swq += new_snow / 1000.;
+      swq     += new_snow / 1000.;
+
+      depth    = 1000. * swq / density;
 
     }
 
@@ -104,15 +105,15 @@ double snow_density(int date,
   /** Densification of the snow pack due to aging **/
   /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
 
-  depth       = 1000. * swq / density;
-
   overburden  = 0.5 * G * RHO_W * swq;
 
   viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
 
-  deltadepth  = -overburden / viscosity * depth * dt * SECPHOUR;
+  delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
 
-  depth      += deltadepth;
+  if (delta_depth >= depth) delta_depth = MAX_CHANGE * depth;
+      
+  depth      -= delta_depth;
 
   density     = 1000. * swq / depth;
 
@@ -120,16 +121,36 @@ double snow_density(int date,
 
 }
 
+double new_snow_density(double air_temp) {
+  /**************************************************
+    This routine estimates the density of new snow.
+  **************************************************/
+  double density_new;
+
+  air_temp = air_temp * 9. / 5. + 32.;
+  if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
+		     * (air_temp / 100.) * (air_temp / 100.);
+  else density_new = (double)NEW_SNOW_DENSITY;
+  return (density_new);
+}
+
 double snow_albedo(double new_snow,
                    double swq,
                    double cold_content,
                    double dt,
-                   int last_snow) {
+                   int last_snow,
+		   char MELTING) {
 /**********************************************************************
   snow_albedo		Keith Cherkauer		June 10, 1997
 
   This subroutine computes the snow pack surface albedo based on snow
   age and season, using the tables generated in snow_table_albedo.
+
+  Modified:
+  06-15-02 Added MELTING flag which tells the algorithm whether or not
+           the pack was melting previously.  This locks the albedo
+           onto the lower ablation albedo curve until a sufficiently
+           large new snow event resets the surface albedo.       KAC
 **********************************************************************/
 
   double albedo;
@@ -141,7 +162,7 @@ double snow_albedo(double new_snow,
   else if(swq > 0.0) {
 
     /* Accumulation season */
-    if(cold_content < 0.0)
+    if(cold_content < 0.0 && !MELTING )
       albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
 				pow((double)last_snow * dt / 24.,
 				    SNOW_ALB_ACCUM_B));

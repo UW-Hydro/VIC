@@ -96,6 +96,8 @@ double solve_snow(snow_data_struct    *snow,
   double              grnd_temp;
   double              tmp_rain;
   double              surf_long;
+  double              store_snowfall;
+  int                 curr_snow;
 
   melt     = 0.;
   ppt[WET] = 0.; 
@@ -110,6 +112,7 @@ double solve_snow(snow_data_struct    *snow,
   rainfall[DRY] = 0.;
   if(snowfall[WET] < 1e-5) snowfall[WET] = 0.;
   (*out_prec) = snowfall[WET] + rainfall[WET];
+  store_snowfall = snowfall[WET];
 
   /** Compute latent heats **/
   (*Le) = (2.501 - 0.002361 * air_temp) * 1.0e6;
@@ -148,7 +151,8 @@ double solve_snow(snow_data_struct    *snow,
     /** Compute Snow Pack Albedo **/
     if(snow->swq > 0 || snowfall[WET] > 0.) {
       snow->albedo   = snow_albedo( snowfall[WET], snow->swq, 
-				    snow->coldcontent, dt, snow->last_snow);
+				    snow->coldcontent, dt, snow->last_snow,
+				    snow->MELTING);
       energy->albedo = snow->albedo;
     }
     else {
@@ -285,6 +289,13 @@ double solve_snow(snow_data_struct    *snow,
 	Snow Pack Present on Ground
       ******************************/
 
+      // store snowfall reaching the ground for determining the albedo
+      store_snowfall            = snowfall[WET];
+
+      /** Age Snowpack **/
+      if( snowfall[WET] > 0 ) curr_snow = 1; // new snow - reset pack age
+      else curr_snow = snow->last_snow + 1; // age pack by one time step
+
       if(overstory && snowfall[0] > 0.) {
 
 	/** recompute surface properties if overstory drops snow **/
@@ -324,12 +335,23 @@ double solve_snow(snow_data_struct    *snow,
       if(snow->swq > 0.) {
 
 	/** Calculate Snow Density **/
-	snow->density = snow_density(day_in_year, snowfall[WET], air_temp, 
-				     old_swq, snow->depth, snow->coldcontent, 
-				     (double)dt, snow->surf_temp);
-	
+	if ( snow->surf_temp <= 0 )
+	  // snowpack present, compress and age density
+	  snow->density = snow_density(day_in_year, snowfall[WET], air_temp, 
+				       old_swq, snow->depth, snow->coldcontent, 
+				       (double)dt, snow->surf_temp);
+	else 
+	  // no snowpack present, start with new snow density
+	  if ( curr_snow == 1 ) 
+	    snow->density = new_snow_density(air_temp);
+
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	snow->depth = 1000. * snow->swq / snow->density; 
+	
+	/** Record if snowpack is melting this time step **/
+	if ( snow->coldcontent >= 0 ) snow->MELTING = TRUE;
+	else if ( snow->MELTING && snowfall[WET] > TraceSnow ) 
+	  snow->MELTING = FALSE;
 	
 	/** Check for Thin Snowpack which only Partially Covers Grid Cell **/
 	if(snow->swq < MAX_FULL_COVERAGE_SWQ) {
@@ -368,6 +390,7 @@ double solve_snow(snow_data_struct    *snow,
 	snow->surf_temp  = 0;
 	snow->pack_temp  = 0;
 	snow->coverage   = 0;
+	snow->MELTING    = FALSE;
 
  	energy->albedo = (snow_coverage - snow->coverage)  
  	  / (1. - snow->coverage) * snow->albedo; 
@@ -383,9 +406,19 @@ double solve_snow(snow_data_struct    *snow,
 
       ppt[WET] += rainfall[WET];
       tmp_snow_energy[0] = 0.;
+      curr_snow               = 0;
+      snow->MELTING           = FALSE;
 
     }
     
+    if ( store_snowfall > TraceSnow || store_snowfall == 0 ) {
+      // reset snow albedo ago if new snow is sufficiently deep
+      snow->last_snow = curr_snow;
+    }
+    else {
+      snow->last_snow++;
+    }
+
   }
   else {
     
@@ -412,7 +445,7 @@ double solve_snow(snow_data_struct    *snow,
 	- STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
 	* (air_temp+KELVIN) * (air_temp+KELVIN);
     }
-
+    snow->MELTING        = FALSE;
   }
 
   energy->shortwave = (*net_short);

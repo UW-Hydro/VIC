@@ -2,6 +2,9 @@
   This header file contains model parameters that can be modified by
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
+
+  $Id$
+
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -39,13 +42,13 @@
        compiled code.  If STATEYEAR, STATEMONTH and STATEDAY are
        defined in the global control file the model state will
        be written to a file. *****/
-#define SAVE_STATE FALSE
+#define SAVE_STATE TRUE
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow
        band files before read data for each cell.  This saves time
        but requires that all grid cells are listed in the same
        order as the soil parameter file *****/
-#define NO_REWIND FALSE
+#define NO_REWIND TRUE
 
 /***** If TRUE VIC reads the model forcing files, and creates the full
        internal forcing dataset (longwave, shortwave, humidity, etc.)
@@ -55,12 +58,20 @@
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
 
+/***** Compute the treeline elevation.  If set to TRUE this flag will 
+       force the VIC model to compute the elevation of the tree line, 
+       based on elevation at which the average annual July air temperature
+       is at or below 10C.  All snowbands above this evelation are then 
+       assumed to be above the treeline, and vegetation types with 
+       overstory are removed from the snow band average variables. *****/
+//#define COMPUTE_TREELINE TRUE
+
 /***** Define maximum array sizes for model source code *****/
-#define MAX_VEG      8          /* maximum number of vegetation types per 
+#define MAX_VEG      12         /* maximum number of vegetation types per 
 				   cell */
 #define MAX_LAYERS   3          /* maximum number of soil moisture layers */
 #define MAX_NODES    18         /* maximum number of soil thermal nodes */
-#define MAX_BANDS    2          /* maximum number of snow bands */
+#define MAX_BANDS    10         /* maximum number of snow bands */
 #define MAX_FRONTS   3          /* maximum number of freezing and thawing 
 				   front depths to store */
 
@@ -86,3 +97,7 @@
 #define SNOW_ALB_ACCUM_B	0.58
 #define SNOW_ALB_THAW_A		0.82
 #define SNOW_ALB_THAW_B		0.46
+
+/***** Defines the minimum amount of new snow (mm) which will reset the
+       snowpack albedo to new snow *****/
+#define TraceSnow 0.03

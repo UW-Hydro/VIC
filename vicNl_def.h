@@ -1,3 +1,6 @@
+/* RCS Id String
+ * $Id$
+ */
 /***** Model Constants *****/
 #define MAXSTRING    512
 #define MINSTRING    20
@@ -157,6 +160,8 @@ typedef struct {
 			    parameters*/
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
+  char   COMPUTE_TREELINE; // TRUE = Determine treeline and exclude overstory
+                           // vegetation from higher elevations
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
@@ -178,6 +183,8 @@ typedef struct {
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */
+  int    AboveTreelineVeg; // Default veg type to use above treeline
+                           // Negative number indicates bare soil.
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
@@ -337,6 +344,8 @@ typedef struct {
 					 elevation (fract) */
   double  *Tfactor;                   /* Change in temperature due to 
 					 elevation (C) */
+  char    *AboveTreeLine;             // Flag to indicate if band is above 
+                                      // the treeline
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];
   double **ufwc_table_node[MAX_NODES]; 
@@ -518,6 +527,8 @@ typedef struct {
   This structure stores snow pack variables needed to run the snow model.
   ************************************************************************/
 typedef struct {
+  char   MELTING;           /* flag indicating that snowpack melted 
+			       previously */
   int    snow;              /* TRUE = snow, FALSE = no snow */
   double Qnet;              /* New energy at snowpack surface */
   double albedo;            /* snow surface albedo (fraction) */
@@ -623,6 +634,12 @@ typedef struct {
   double swq[MAX_BANDS+1];             /* snow water equivalent (mm) */
   double tdepth[MAX_FRONTS];           /* depth of all thawing fronts */
   double wind;                         /* grid cell wind speed */
+  double swband[MAX_BANDS+1];          // store shortwave by snow band
+  double lwband[MAX_BANDS+1];          // store longwave by snow band
+  double albedoband[MAX_BANDS+1];      // store snow albedo by snow band
+  double latentband[MAX_BANDS+1];      // store latent heat by snow band
+  double sensibleband[MAX_BANDS+1];    // store sensible heat by snow band
+  double grndband[MAX_BANDS+1];        // store ground heat
 } out_data_struct;
 
 /********************************************************

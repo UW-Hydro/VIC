@@ -1,5 +1,6 @@
 # VIC Makefile
-# Last Changed: Wed Jul 19 14:41:18 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+# Last Changed: Tue Apr 15 10:04:12 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+# $Id$
 # Note: replaced read_vegparam by read_vegparam_LAI
 
 SHELL = /bin/csh
@@ -11,17 +12,16 @@ CFLAGS = -I. -O3 -Wall -Wno-unused
 LIBRARY = -lm
 #LIBRARY = -lm -lefence
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h rad_and_vpd.h \
-       mtclim42_vic.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h
 
 OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	alloc_atmos.o arno_evap.o calc_air_temperature.o \
 	calc_cloud_cover_fraction.o calc_longwave.o calc_rainonly.o \
 	calc_root_fraction.o calc_surf_energy_bal.o calc_veg_params.o \
 	canopy_evap.o check_files.o check_state_file.o close_files.o \
-	cmd_proc.o compress_files.o compute_dz.o correct_precip.o \
-	dist_prec.o estimate_T1.o free_dist_prcp.o free_vegcon.o \
-	frozen_soil.o full_energy.o func_surf_energy_bal.o \
+	cmd_proc.o compress_files.o compute_dz.o compute_treeline.o \
+	correct_precip.o dist_prec.o estimate_T1.o free_dist_prcp.o \
+	free_vegcon.o frozen_soil.o full_energy.o func_surf_energy_bal.o \
 	get_force_type.o get_global_param.o initialize_atmos.o \
 	initialize_model_state.o initialize_global.o \
 	initialize_new_storm.o initialize_snow.o initialize_soil.o \
@@ -46,6 +46,12 @@ all:
 	make model
 
 default:
+	make model
+
+full:
+	make clean
+	make depend
+	make tags
 	make model
 
 clean::

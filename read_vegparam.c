@@ -21,6 +21,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   07-15-99 Modified to read LAI values from a new line in the vegetation
            parameter file.  Added specifically to work with the new
 	   global LAI files.
+  03-27-03 Modified code to update Wdmax based on LAI values read in
+           for the current grid cell.  If LAI is not obtained from this
+           function, then the values cacluated in read_veglib.c are
+           left unchanged.                                   DP & KAC
+  NEED TO MODIFY SO THAT IT CREATES A NEW VEG TYPE IF COMPUTE_TREELINE
+  IF ACTIVE AND NO VEGETATION IS PROVIDED WITHOUT CANOPY!
 
 **********************************************************************/
 {
@@ -105,10 +111,20 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
-    if(options.GLOBAL_LAI)
-      for(j=0;j<12;j++) 
+    if ( options.GLOBAL_LAI )
+      for ( j = 0; j < 12; j++ ) {
 	fscanf(vegparam,"%lf",&veg_lib[temp[i].veg_class].LAI[j]);
+	veg_lib[temp[i].veg_class].Wdmax[j] = 
+	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
+      }
+
+    if ( options.COMPUTE_TREELINE ) 
+      if ( ! veg_lib[temp[i].veg_class].overstory ) NoOverstory++;
     
+  }
+  if ( options.COMPUTE_TREELINE && !NoOverstory ) {
+    // Adjust vegetation fractions to incorporate non-canopy vegetation
+    // if treeline will be computed and cell vegetation all has a canopy.
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);

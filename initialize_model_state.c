@@ -15,7 +15,9 @@ void initialize_model_state(dist_prcp_struct    *prcp,
                             int                  Nnodes,
 			    int                  Ndist,
                             soil_con_struct     *soil_con,
-			    veg_con_struct      *veg_con)
+			    veg_con_struct      *veg_con,
+			    char                *init_STILL_STORM,
+			    int                 *init_DRY_TIME)
 /**********************************************************************
   initialize_model_state       Keith Cherkauer	    April 17, 2000
 
@@ -33,6 +35,12 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   4-17-00 Modified from initialize_energy_bal.c and initialize_snow.c
           to provide a single controlling routine for initializing the
           model state.
+  2-10-03 Fixed looping problem with initialization of soil moisture. KAC
+  3-12-03 Modified so that soil layer ice content is only calculated 
+          when frozen soil is implemented and active in the current 
+          grid cell.                                                KAC
+  04-10-03 Modified to read storm parameters from model state file.  KAC
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -76,15 +84,13 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   snow    = prcp->snow;
   energy  = prcp->energy;
   
-  if(options.DIST_PRCP) 
-    Ndist = 2;
-  else 
-    Ndist = 1;
-
   dp = soil_con->dp;
   Ltotal = 0;
   for(index=0;index<options.Nlayer;index++) Ltotal += soil_con->depth[index];
   FIRST_VEG = TRUE;
+
+  // initialize storm parameters to start a new simulation
+  (*init_DRY_TIME) = -999;
   
   /********************************************
     Initialize all snow pack variables 
@@ -142,7 +148,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   if(options.INIT_STATE) {
 
     read_initial_model_state(infiles.statefile, prcp, global_param,  
-			     Nveg, options.SNOW_BAND, cellnum, soil_con);
+			     Nveg, options.SNOW_BAND, cellnum, soil_con,
+			     Ndist, init_STILL_STORM, init_DRY_TIME);
 
     for( veg = 0; veg <= Nveg; veg++ ) 
       for( band = 0; band < options.SNOW_BAND; band++ )
@@ -172,12 +179,10 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 	energy[veg][band].T[1] = surf_temp;
 	energy[veg][band].T[2] = soil_con->avg_temp;
 
-	for( veg = 0; veg <= Nveg; veg++ ) 
-	  for( band = 0; band < options.SNOW_BAND; band++ )
-	    for(lidx=0;lidx<options.Nlayer;lidx++) {
-	      moist[veg][band][lidx] = soil_con->init_moist[lidx];
-	      ice[veg][band][lidx] = 0.;
-	    }
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	  moist[veg][band][lidx] = soil_con->init_moist[lidx];
+	  ice[veg][band][lidx] = 0.;
+	}
 
       }
     }
@@ -189,7 +194,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   *****************************************************************/
   else if(!options.QUICK_FLUX) {
     for ( veg = 0 ; veg <= Nveg ; veg++) {
-      for(band=0;band<options.SNOW_BAND;band++) {
+      for ( band = 0; band < options.SNOW_BAND; band++ ) {
 
 	/* Initialize soil node temperatures and thicknesses 
 	 Nodes set at surface, the depth of the first layer,
@@ -232,12 +237,10 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 	  }
         }
 
-	for( veg = 0; veg <= Nveg; veg++ ) 
-	  for( band = 0; band < options.SNOW_BAND; band++ )
-	    for(lidx=0;lidx<options.Nlayer;lidx++) {
-	      moist[veg][band][lidx] = soil_con->init_moist[lidx];
-	      ice[veg][band][lidx] = 0.;
-	    }
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	  moist[veg][band][lidx] = soil_con->init_moist[lidx];
+	  ice[veg][band][lidx] = 0.;
+	}
 
       }
     }
@@ -248,8 +251,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   *********************************/
   else {
     for ( veg = 0 ; veg <= Nveg ; veg++) {
-      for(band=0;band<options.SNOW_BAND;band++) {
-	for(index=0;index<options.Nlayer;index++) {
+      for ( band = 0; band < options.SNOW_BAND; band++ ) {
+	for ( index = 0; index < options.Nlayer; index++ ) {
 	  soil_con->dz_node[index] = 1.;
 	}
       }
@@ -311,31 +314,32 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 	    cell[dry][veg][band].layer[lidx].moist = moist[veg][band][lidx];
 	    cell[dry][veg][band].layer[lidx].ice = ice[veg][band][lidx];
 	  }
-	  estimate_layer_ice_content(cell[dry][veg][band].layer,
-				     soil_con->dz_node,
-				     energy[veg][band].T,
-				     soil_con->max_moist_node,
+	  if(soil_con->FS_ACTIVE && options.FROZEN_SOIL)
+	    estimate_layer_ice_content(cell[dry][veg][band].layer,
+				       soil_con->dz_node,
+				       energy[veg][band].T,
+				       soil_con->max_moist_node,
 #if QUICK_FS
-				     soil_con->ufwc_table_node,
+				       soil_con->ufwc_table_node,
 #else
-				     soil_con->expt_node,
-				     soil_con->bubble_node,
+				       soil_con->expt_node,
+				       soil_con->bubble_node,
 #endif
-				     soil_con->depth,
-				     soil_con->max_moist,
+				       soil_con->depth,
+				       soil_con->max_moist,
 #if QUICK_FS
-				     soil_con->ufwc_table_layer,
+				       soil_con->ufwc_table_layer,
 #else
-				     soil_con->expt,
-				     soil_con->bubble,
+				       soil_con->expt,
+				       soil_con->bubble,
 #endif
-				     soil_con->bulk_density,
-				     soil_con->soil_density,
-				     soil_con->quartz, 
-				     soil_con->layer_node_fract,
-				     Nnodes, options.Nlayer, 
-				     soil_con->FS_ACTIVE);
-	  
+				       soil_con->bulk_density,
+				       soil_con->soil_density,
+				       soil_con->quartz, 
+				       soil_con->layer_node_fract,
+				       Nnodes, options.Nlayer, 
+				       soil_con->FS_ACTIVE);
+	
 	}
 	
 	/* Find freezing and thawing front depths */

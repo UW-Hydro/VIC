@@ -25,6 +25,7 @@
           Adaptation started on Sat Aug 21 using the mtclim4.2 code from
 	  5/7/1999 
   Last Changed: Tue Mar 14 11:31:04 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+  $Id$
 */
 
 /*

@@ -27,6 +27,18 @@ int main(int argc, char *argv[])
   1997-98 Model was updated from simple 2 layer water balance to 
           an extension of the full energy and water balance 3 layer
 	  model.                                                  KAC
+  03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
+           the model can make use of the computed treeline.     KAC
+  04-10-03 Modified to initialize storm parameters using the state
+           file.                                                KAC
+  04-10-03 Modified to start the model by skipping records until the
+           state file date is found.  This replaces the previous method
+           of modifying the global file start date, which can change 
+           the interpolation of atmospheric forcing data.        KAC
+  04-15-03 Modified to store wet and dry fractions when intializing 
+           water balance storage.  This accounts for changes in model
+           state initialization, which now stores wet and dry fractions
+           rather than just averagedvalues.                      KAC
 
 **********************************************************************/
 {
@@ -44,16 +56,20 @@ int main(int argc, char *argv[])
   char                     NEWCELL;
   char                     LASTREC;
   char                     MODEL_DONE;
+  char                     init_STILL_STORM;
   int                      rec, i, j;
   int                      veg;
+  int                      dist;
   int                      band;
   int                      Ndist;
   int                      Nveg_type;
   int                      cellnum;
   int                      index;
+  int                      init_DRY_TIME;
   int                      RUN_MODEL;
   int                      Ncells;
   int                      cell_cnt;
+  int                      startrec;
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
@@ -104,15 +120,18 @@ int main(int argc, char *argv[])
 
 #if SAVE_STATE
   /** open state file if model state is to be saved **/
-  if ( global_param.stateyear > 0 ) 
+  if ( strcmp( global_param.statename, "NONE" ) != 0 ) 
     outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
 					 options.Nnode);
+  else outfiles.statefile = NULL;
 #endif
 
   if ( options.INIT_STATE ) 
-    infiles.statefile = check_state_file(filenames.init_state, dmy[0], 
+    infiles.statefile = check_state_file(filenames.init_state, dmy, 
 					 &global_param, options.Nlayer, 
-					 options.Nnode);
+					 options.Nnode, &startrec);
+  else
+    startrec = 0;
 
   /************************************
     Run Model for all Active Grid Cells
@@ -180,8 +199,9 @@ int main(int argc, char *argv[])
 #if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
-		    (double)soil_con.elevation,
-		    &soil_con.Tfactor,&soil_con.Pfactor,&soil_con.AreaFract);
+		    (double)soil_con.elevation, &soil_con.Tfactor, 
+		    &soil_con.Pfactor, &soil_con.AreaFract, 
+		    &soil_con.AboveTreeLine);
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
@@ -201,11 +221,11 @@ int main(int argc, char *argv[])
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
-		       soil_con.rough, 
+		       soil_con.rough, soil_con.Tfactor, 
 #if OUTPUT_FORCE
-		       soil_con.Tfactor, &outfiles); 
+		       soil_con.AboveTreeLine, &outfiles); 
 #else /* OUTPUT_FORCE */
-                       soil_con.Tfactor); 
+                       soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
       
 #if LINK_DEBUG
@@ -222,8 +242,9 @@ int main(int argc, char *argv[])
 #endif /* VERBOSE */
       initialize_model_state(&prcp, dmy[0], atmos[0].air_temp[NR], 
 			     &global_param, infiles, soil_con.gridcel, 
-			     veg_con[0].vegetat_type_num, 
-			     options.Nnode, Ndist, &soil_con, veg_con);
+			     veg_con[0].vegetat_type_num, options.Nnode, 
+			     Ndist, &soil_con, veg_con, &init_STILL_STORM,
+			     &init_DRY_TIME);
 
 
 #if VERBOSE
@@ -236,6 +257,12 @@ int main(int argc, char *argv[])
 
       /***************************************************
 	Intialize Moisture and Energy Balance Error Checks
+        --- As of 4/15/03 this does not properly initialize
+            storage from bands above treeline, when the model 
+            state is restored from a file.  This can lead to 
+            water balance errors in the initial time step but 
+            does not impact the actual simulation.  It will
+            be addressed in the next release version.  KAC
 	***************************************************/
       storage = 0.;
       for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
@@ -245,13 +272,15 @@ int main(int argc, char *argv[])
 	  band_fract = soil_con.AreaFract[band];
 	  if ( veg_fract > SMALL && band_fract > SMALL ) {
 	    for(index=0;index<options.Nlayer;index++)
-	      storage += prcp.cell[WET][veg][band].layer[index].moist 
-		* veg_fract * band_fract;
+	      for ( dist = 0; dist < Ndist; dist ++ )
+		storage += prcp.cell[dist][veg][band].layer[index].moist 
+		  * veg_fract * band_fract;
 	    storage += prcp.snow[veg][band].swq * 1000. * veg_fract 
 	      * band_fract;
 	    if ( veg != veg_con[0].vegetat_type_num ) {
-	      storage += prcp.veg_var[WET][veg][band].Wdew 
-		* veg_fract * band_fract;
+	      for ( dist = 0; dist < Ndist; dist ++ ) 
+		storage += prcp.veg_var[dist][veg][band].Wdew 
+		  * veg_fract * band_fract;
 	      storage += prcp.snow[veg][band].snow_canopy * 1000. 
 		* veg_fract * band_fract;
 	    }
@@ -265,15 +294,16 @@ int main(int argc, char *argv[])
 	Run Model in Grid Cell for all Time Steps
 	******************************************/
 
-      for ( rec = 0 ; rec < global_param.nrecs; rec++ ) {
+      for ( rec = startrec ; rec < global_param.nrecs; rec++ ) {
 
         if ( rec == global_param.nrecs - 1 ) LASTREC = TRUE;
         else LASTREC = FALSE;
 
-        dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
-                  dmy, &global_param, &outfiles, rec, cellnum,
-                  NEWCELL, LASTREC);
+        dist_prec( &atmos[rec], &prcp, &soil_con, veg_con,
+		   dmy, &global_param, &outfiles, rec, cellnum,
+		   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME );
         NEWCELL=FALSE;
+	init_DRY_TIME = -999;
 
       }	/* End Rec Loop */
 
@@ -298,6 +328,7 @@ int main(int argc, char *argv[])
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
+      free((char *)soil_con.AboveTreeLine);
 #endif /* !OUTPUT_FORCE */
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);

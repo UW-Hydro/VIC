@@ -7,6 +7,7 @@
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
  * LAST-MOD: Thu Apr  6 12:43:30 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * $Id$
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()

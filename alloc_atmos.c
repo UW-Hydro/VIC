@@ -4,7 +4,7 @@
  * Author : Bart Nijssen
  * E-mail : nijssen@u.washington.edu
  * Created: Fri Aug 27 18:22:42 1999
- * Last Changed: Wed Apr  4 12:02:18 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * Last Changed: Mon Apr 21 15:02:28 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * Notes  :
  */
 
@@ -35,7 +35,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
   if (*atmos == NULL)
     vicerror("Memory allocation error in alloc_atmos().");
 
-#if !OPTIMIZE
+#if !OPTIMIZE && !LINK_DEBUG
   for (i = 0; i < nrecs; i++) {
     (*atmos)[i].prec = (double *) calloc(NF+1, sizeof(double));
     if ((*atmos)[i].prec == NULL)
@@ -68,7 +68,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     if ((*atmos)[i].snowflag == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
   }    			
-#endif // not OPTIMIZE
+#endif // not OPTIMIZE and not LINK_DEBUG
 
 }
 

@@ -18,6 +18,9 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   09-24-98  Modified to read root zone distribution information so
            that soil layer root fractions can be computed for new 
 	   soil layer depths - see calc_root_fractions.c           KAC
+  07-15-99 Modified to read LAI values from a new line in the vegetation
+           parameter file.  Added specifically to work with the new
+	   global LAI files.
 
 **********************************************************************/
 {
@@ -26,17 +29,20 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   extern debug_struct    debug;
 
   veg_con_struct *temp;
-  int             vegcel, i, j, vegetat_type_num;
+  int             vegcel, i, j, vegetat_type_num, skip;
   float           depth_sum;
   float           sum;
   char            str[500];
   char            ErrStr[MAXSTRING];
 
+  if(options.GLOBAL_LAI) skip=2;
+  else skip=1;
+
   rewind(vegparam);
       
   while ((fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num)) == 2 &&
           vegcel != gridcel) {
-    for (i = 0; i <= vegetat_type_num; i++)
+    for (i = 0; i <= vegetat_type_num * skip; i++)
       fgets(str, 500, vegparam);
   }
   if (vegcel != gridcel) {
@@ -88,6 +94,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
+    if(options.GLOBAL_LAI)
+      for(j=0;j<12;j++) 
+	fscanf(vegparam,"%lf",&veg_lib[temp[i].veg_class].LAI[j]);
+    
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);

@@ -28,14 +28,6 @@ global_param_struct get_global_param(filenames_struct *names,
   01-20-00 modified to work with new radiation estimation routines,
            new simplified frozen soil moisture, and new new open
            format forcing file rad routines.              KAC
-  09-02-2003 Moved COMPUTE_TREELINE flag from user_def.h to the 
-             options structure.  Now when not set to FALSE, the 
-             value indicates the default above treeline vegetation
-             if no usable vegetation types are in the grid cell 
-             (i.e. everything has a canopy).  A negative value  
-             will cause the model to use bare soil.  Make sure that 
-             positive index value refer to a non-canopied vegetation
-             type in the vegetation library.                   KAC
 
 **********************************************************************/
 {
@@ -249,6 +241,11 @@ global_param_struct get_global_param(filenames_struct *names,
 	  strcpy(names->init_state,flgstr);
 	}
       }
+      else if(strcasecmp("BINARY_STATE_FILE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.BINARY_STATE_FILE=FALSE;
+	else options.BINARY_STATE_FILE=TRUE;
+      }
       else if(strcasecmp("STATENAME",optstr)==0) {
         sscanf(cmdstr,"%*s %s",global.statename);
       }
@@ -262,14 +259,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %i",&global.stateday);
       }
 #endif
-      else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("FALSE",flgstr)==0) options.COMPUTE_TREELINE=FALSE;
-        else {
-	  options.COMPUTE_TREELINE = TRUE;
-	  options.AboveTreelineVeg = atoi( flgstr );
-	}
-      }
 
       /************************************
         Get Forcing Data File Information

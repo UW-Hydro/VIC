@@ -27,6 +27,7 @@ FILE *check_state_file(char                *init_state,
            problems associated with restarting the model with an 
            incomplete record of forcing data, which can lead to 
            differences in the interpolated sub-daily forcings.    KAC
+  06-03-03 modified to handle both ASCII and BINARY state files.  KAC
 
 *********************************************************************/
 {
@@ -41,24 +42,35 @@ FILE *check_state_file(char                *init_state,
   int     startday, startmonth, startyear;
 
   /* open state file */
-  statefile = open_file(init_state,"rb");
+  if ( options.BINARY_STATE_FILE )
+    statefile = open_file(init_state,"rb");
+  else 
+    statefile = open_file(init_state,"r");
 
   // Initialize startrec
   (*startrec) = 0;
 
   /* Check state date information */
-  //fscanf(statefile,"%i %i %i\n", &startday, &startmonth, &startyear);
-  fread( &startyear, 1, sizeof(int), statefile );
-  fread( &startmonth, 1, sizeof(int), statefile );
-  fread( &startday, 1, sizeof(int), statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    fread( &startyear, 1, sizeof(int), statefile );
+    fread( &startmonth, 1, sizeof(int), statefile );
+    fread( &startday, 1, sizeof(int), statefile );
+  }
+  else {
+    fscanf(statefile,"%i %i %i\n", &startyear, &startmonth, &startday );
+  }
   while ( startday != dmy[*startrec].day || startmonth != dmy[*startrec].month 
 	  || startyear != dmy[*startrec].year || dmy[*startrec].hour != 0 ) 
     (*startrec)++;
 
   /* Check simulation options */
-  //fscanf(statefile,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);
-  fread( &tmp_Nlayer, 1, sizeof(int), statefile );
-  fread( &tmp_Nnodes, 1, sizeof(int), statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    fread( &tmp_Nlayer, 1, sizeof(int), statefile );
+    fread( &tmp_Nnodes, 1, sizeof(int), statefile );
+  }
+  else {
+    fscanf(statefile,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);
+  }
   if ( tmp_Nlayer != Nlayer ) {
     sprintf(ErrStr,"The number of soil moisture layers in the model state file (%i) does not equal that defined in the global control file (%i).  Check your input files.", tmp_Nlayer, Nlayer);
     nrerror(ErrStr);

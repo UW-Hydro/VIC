@@ -248,7 +248,8 @@ void put_data(dist_prcp_struct  *prcp,
 	    rad_temp = energy[veg][band].T[0] + KELVIN;
 	  
 	  /** record soil surface temperature **/
-	  surf_temp = energy[veg][band].T[0];
+	  // MODIFIED FOR USE WITH ROSEMOUNT SIMULATIONS
+	  surf_temp = (energy[veg][band].T[0] + energy[veg][band].T[1])/2.;
 	  
 	  /** record net shortwave radiation **/
 	  out_data->net_short += energy[veg][band].shortwave

@@ -44,8 +44,6 @@ double snow_density(int date,
   08-19-99 Added check to make sure that the change in snowpack depth
            due to new snow does not exceed the actual depth of the 
 	   pack.                                               Bart
-  06-30-03 Added check to keep compression from aging from exceeding
-           the actual depth of the snowpack.                   KAC
 
 **********************************************************************/
 
@@ -93,9 +91,7 @@ double snow_density(int date,
 
       density = density_new;
 
-      swq     += new_snow / 1000.;
-
-      depth    = 1000. * swq / density;
+      swq += new_snow / 1000.;
 
     }
 
@@ -105,15 +101,15 @@ double snow_density(int date,
   /** Densification of the snow pack due to aging **/
   /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
 
+  depth       = 1000. * swq / density;
+
   overburden  = 0.5 * G * RHO_W * swq;
 
   viscosity   = ETA0 * exp(-C5 * Tsurf + C6 * density);
 
-  delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
+  deltadepth  = -overburden / viscosity * depth * dt * SECPHOUR;
 
-  if (delta_depth >= depth) delta_depth = MAX_CHANGE * depth;
-      
-  depth      -= delta_depth;
+  depth      += deltadepth;
 
   density     = 1000. * swq / depth;
 

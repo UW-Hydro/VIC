@@ -17,6 +17,7 @@ FILE *open_state_file(global_param_struct *global,
 
   Modifications:
   04-10-03 Modified to open and write to a binary state file.    KAC
+  06-03-03 modified to handle both ASCII and BINARY state files.  KAC
 
 *********************************************************************/
 {
@@ -29,19 +30,30 @@ FILE *open_state_file(global_param_struct *global,
   /* open state file */
   sprintf(filename,"%s_%02i%02i%04i", global->statename, 
 	  global->stateday, global->statemonth, global->stateyear);
-  statefile = open_file(filename,"wb");
+  if ( options.BINARY_STATE_FILE )
+    statefile = open_file(filename,"wb");
+  else
+    statefile = open_file(filename,"w");
 
   /* Write save state date information */
-  /*fprintf(statefile,"%i %i %i\n", global->stateday, 
-	  global->statemonth, global->stateyear);*/
-  fwrite( &global->stateyear, 1, sizeof(int), statefile );
-  fwrite( &global->statemonth, 1, sizeof(int), statefile );
-  fwrite( &global->stateday, 1, sizeof(int), statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &global->stateyear, 1, sizeof(int), statefile );
+    fwrite( &global->statemonth, 1, sizeof(int), statefile );
+    fwrite( &global->stateday, 1, sizeof(int), statefile );
+  }
+  else {
+    fprintf(statefile,"%i %i %i\n", global->stateday, 
+	    global->statemonth, global->stateyear);
+  }
 
   /* Write simulation flags */
-  //fprintf(statefile,"%i %i\n", Nlayer, Nnodes);
-  fwrite( &Nlayer, 1, sizeof(int), statefile );
-  fwrite( &Nnodes, 1, sizeof(int), statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &Nlayer, 1, sizeof(int), statefile );
+    fwrite( &Nnodes, 1, sizeof(int), statefile );
+  }
+  else {
+    fprintf(statefile,"%i %i\n", Nlayer, Nnodes);
+  }
 
   return(statefile);
 

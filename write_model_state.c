@@ -34,6 +34,7 @@ void write_model_state(dist_prcp_struct    *prcp,
            with simulations started with the state file.         KAC
   04-10-03 Model is now restarted with the correct values for mu
            and LAST_STORM
+  06-03-03 Modified to create ASCII as well as BINARY state file.  KAC
 
 *********************************************************************/
 {
@@ -67,102 +68,142 @@ void write_model_state(dist_prcp_struct    *prcp,
   energy  = prcp->energy;
   
   /* write cell information */
-  //fprintf(outfiles->statefile,"%i %i %i", cellnum, Nveg, Nbands);
-  fwrite( &cellnum, 1, sizeof(int), outfiles->statefile );
-  fwrite( &Nveg, 1, sizeof(int), outfiles->statefile );
-  fwrite( &Nbands, 1, sizeof(int), outfiles->statefile );
-
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &cellnum, 1, sizeof(int), outfiles->statefile );
+    fwrite( &Nveg, 1, sizeof(int), outfiles->statefile );
+    fwrite( &Nbands, 1, sizeof(int), outfiles->statefile );
+  }
+  else {
+    fprintf( outfiles->statefile, "%i %i %i", cellnum, Nveg, Nbands );
+  }
   // This stores the number of bytes from after this value to the end 
   // of the line.  DO NOT CHANGE unless you have changed the values
   // written to the state file.
   // IF YOU EDIT THIS FILE: UPDATE THIS VALUE!
-  Nbytes = ( options.Nnode * sizeof(double) + Nveg * Nbands * 2 * sizeof(int)
-	     + sizeof(char) + sizeof(int) + Nveg * sizeof(double)
-	     + Nveg * Nbands * Ndist * options.Nlayer * 3 *sizeof(double)
-	     + Nveg * Nbands * sizeof(int) + Nveg * Nbands * sizeof(char) 
-	     + Nveg * Nbands * 9 * sizeof(double) 
-	     + Nveg * Nbands * options.Nnode * sizeof(double) );
-  fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    Nbytes = ( options.Nnode * sizeof(double) // dz_node
+	       + sizeof(char) // STILL_STORM
+	       + sizeof(int) // DRY_TIME
+	       + Nveg * sizeof(double) // mu
+	       + Nveg * Nbands * 2 * sizeof(int) // veg & band
+	       + Nveg * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
+	       + Nveg * Nbands * Ndist * options.Nlayer * sizeof(double) // soil ice
+	       + (Nveg-1) * Nbands * sizeof(double) // dew
+	       + Nveg * Nbands * sizeof(int) // last_snow
+	       + Nveg * Nbands * sizeof(char) // MELTING
+	       + Nveg * Nbands * sizeof(double) * 9 // other snow parameters
+	       + Nveg * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
+    fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
+  }
 
   /* Write soil thermal node depths */
   Nsum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
-    //fprintf(outfiles->statefile," %f", Nsum);
-    //fwrite( &Nsum, 1, sizeof(double), outfiles->statefile );
-    //if ( nidx < options.Nnode - 1 )
-      //Nsum += (soil_con->dz_node[nidx] + soil_con->dz_node[nidx+1]) / 2.;
-    fwrite( &soil_con->dz_node[nidx], 1, sizeof(double), outfiles->statefile );
+    if ( options.BINARY_STATE_FILE )
+      fwrite( &soil_con->dz_node[nidx], 1, sizeof(double), 
+	      outfiles->statefile );
+    else
+      fprintf( outfiles->statefile, "%f ", soil_con->dz_node[nidx] );
   }    
-  //fprintf(outfiles->statefile,"\n");
+  if ( !options.BINARY_STATE_FILE )
+    fprintf( outfiles->statefile, "\n" );
 
   // Store distributed precipitation variables
-  fwrite( &STILL_STORM, 1, sizeof(char), outfiles->statefile );
-  fwrite( &DRY_TIME, 1, sizeof(int), outfiles->statefile );
+  if ( options.BINARY_STATE_FILE ) {
+    fwrite( &STILL_STORM, 1, sizeof(char), outfiles->statefile );
+    fwrite( &DRY_TIME, 1, sizeof(int), outfiles->statefile );
+  }
+  else {
+    fprintf( outfiles->statefile, "%i %i\n", STILL_STORM, DRY_TIME );
+  }
 
   /* Output for all vegetation types */
   for ( veg = 0; veg <= Nveg; veg++ ) {
 
     // Store distributed precipitation fraction
-    fwrite( &prcp->mu[veg], 1, sizeof(double), outfiles->statefile );
+    if ( options.BINARY_STATE_FILE )
+      fwrite( &prcp->mu[veg], 1, sizeof(double), outfiles->statefile );
+    else
+      fprintf( outfiles->statefile, "%f", prcp->mu[veg] );
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       
       /* Write cell identification information */
-      //fprintf(outfiles->statefile,"%i %i", veg, band);
-      fwrite( &veg, 1, sizeof(int), outfiles->statefile );
-      fwrite( &band, 1, sizeof(int), outfiles->statefile );
+      if ( options.BINARY_STATE_FILE ) {
+	fwrite( &veg, 1, sizeof(int), outfiles->statefile );
+	fwrite( &band, 1, sizeof(int), outfiles->statefile );
+      }
+      else {
+	fprintf( outfiles->statefile, " %i %i", veg, band );
+      }
       
       for ( dist = 0; dist < Ndist; dist ++ ) {
 	// Store both wet and dry fractions if using distributed precipitation
 
-	/* Write average total soil moisture */
+	/* Write total soil moisture */
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  tmpval = cell[dist][veg][band].layer[lidx].moist;
-	  //fprintf(outfiles->statefile," %f", tmpval);
-	  fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  if ( options.BINARY_STATE_FILE )
+	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  else
+	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
 
-	/* Write average ice content */
+	/* Write ice content */
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  tmpval = cell[dist][veg][band].layer[lidx].ice;
-	  //fprintf(outfiles->statefile," %f", tmpval);
-	  fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  if ( options.BINARY_STATE_FILE )
+	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  else
+	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
       
-	/* Write average dew storage */
+	/* Write dew storage */
 	if ( veg < Nveg ) {
 	  tmpval = veg_var[dist][veg][band].Wdew;
-	  //fprintf(outfiles->statefile," %f", tmpval);
-	  fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  if ( options.BINARY_STATE_FILE )
+	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	  else
+	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
       }
       
       /* Write snow data */
-      /*fprintf(outfiles->statefile," %i %f %f %f %f %f", 
-	      snow[veg][band].last_snow, snow[veg][band].swq, 
-	      snow[veg][band].surf_temp, snow[veg][band].pack_temp, 
-	      snow[veg][band].density, snow[veg][band].snow_canopy);*/
-      fwrite( &snow[veg][band].last_snow, 1, sizeof(int), outfiles->statefile );
-      fwrite( &snow[veg][band].MELTING, 1, sizeof(char), outfiles->statefile );
-      fwrite( &snow[veg][band].coverage, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].swq, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].surf_temp, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].surf_water, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].pack_temp, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].pack_water, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].density, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].coldcontent, 1, sizeof(double), outfiles->statefile );
-      fwrite( &snow[veg][band].snow_canopy, 1, sizeof(double), outfiles->statefile );
+      if ( options.BINARY_STATE_FILE ) {
+	fwrite( &snow[veg][band].last_snow, 1, sizeof(int), outfiles->statefile );
+	fwrite( &snow[veg][band].MELTING, 1, sizeof(char), outfiles->statefile );
+	fwrite( &snow[veg][band].coverage, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].swq, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].surf_temp, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].surf_water, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].pack_temp, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].pack_water, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].density, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].coldcontent, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].snow_canopy, 1, sizeof(double), outfiles->statefile );
+      }
+      else {
+	fprintf( outfiles->statefile, " %i %i %f %f %f %f %f %f %f %f %f", 
+		 snow[veg][band].last_snow, (int)snow[veg][band].MELTING, 
+		 snow[veg][band].coverage, snow[veg][band].swq, 
+		 snow[veg][band].surf_temp, snow[veg][band].surf_water, 
+		 snow[veg][band].pack_temp, snow[veg][band].pack_water, 
+		 snow[veg][band].density, snow[veg][band].coldcontent, 
+		 snow[veg][band].snow_canopy );
+      }
       
       /* Write soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) 
-	//fprintf(outfiles->statefile," %f", energy[veg][band].T[nidx]);
-	fwrite( &energy[veg][band].T[nidx], 1, sizeof(double), outfiles->statefile );
+	if ( options.BINARY_STATE_FILE )
+	  fwrite( &energy[veg][band].T[nidx], 1, sizeof(double), 
+		  outfiles->statefile );
+	else
+	  fprintf( outfiles->statefile, " %f", energy[veg][band].T[nidx] );
+
+      if ( !options.BINARY_STATE_FILE ) fprintf( outfiles->statefile, "\n" );
       
-      //fprintf(outfiles->statefile,"\n");
-      
-    }
+    } 
   }
 
   /* Force file to be written */

@@ -77,6 +77,13 @@ double solve_snow(snow_data_struct    *snow,
            make those outside of this routine, in the same function
 	   that is used to compute the ground heat flux when
 	   there is no snow cover.                           KAC
+  06-04-03 Counter for number of days since last snowfall was 
+           incremented twice in the MELTING update.  This has been
+           fixed.                                            KAC
+  06-04-03 Added check so that MELTING flag is only TRUE if melt
+           occurs in the melt season - currently this is defined
+           between March 1 and October 1.  Otherwise the MELTING
+           flag can trigger rapid very early season melt
 
 *********************************************************************/
 
@@ -149,10 +156,11 @@ double solve_snow(snow_data_struct    *snow,
     snow_coverage = snow->coverage;
       
     /** Compute Snow Pack Albedo **/
+    if( iveg==0) fprintf(stdout, "SNOW %i %f %f %f %f %f %f %f %i %i\n", day_in_year, air_temp, snow->albedo, snow->swq, snow->depth, snow->density, snowfall[WET], snow->coldcontent, snow->last_snow, snow->MELTING );
     if(snow->swq > 0 || snowfall[WET] > 0.) {
       snow->albedo   = snow_albedo( snowfall[WET], snow->swq, 
 				    snow->coldcontent, dt, snow->last_snow,
-				    snow->MELTING);
+				    snow->MELTING );
       energy->albedo = snow->albedo;
     }
     else {
@@ -161,9 +169,9 @@ double solve_snow(snow_data_struct    *snow,
     }
     
     /** Age Snow Pack **/
-    if( snowfall[WET] > 0 )
-      snow->last_snow = 1;
-    else snow->last_snow++;
+    //if( snowfall[WET] > 0 )
+      //snow->last_snow = 1;
+    //else snow->last_snow++;
     
     /** Compute Radiation Balance over Snow **/ 
     (*out_short) = energy->albedo * shortwave;
@@ -349,7 +357,9 @@ double solve_snow(snow_data_struct    *snow,
 	snow->depth = 1000. * snow->swq / snow->density; 
 	
 	/** Record if snowpack is melting this time step **/
-	if ( snow->coldcontent >= 0 ) snow->MELTING = TRUE;
+	if ( snow->coldcontent >= 0 && day_in_year > 60 // ~ March 1
+	     && day_in_year < 273 // ~ October 1
+	     ) snow->MELTING = TRUE;
 	else if ( snow->MELTING && snowfall[WET] > TraceSnow ) 
 	  snow->MELTING = FALSE;
 	

@@ -8,10 +8,10 @@
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE TRUE
+#define VERBOSE FALSE
 
 /***** If TRUE limit output data to runoff and baseflow for optimization *****/
-#define OPTIMIZE FALSE
+#define OPTIMIZE TRUE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE
@@ -28,7 +28,7 @@
        to estimate the maximum unfrozen water content equation.  This 
        significantly reduces the run time with frozen soil, but may
        introduce new errors (STILL UNDER TESTING) *****/
-#define QUICK_FS FALSE
+#define QUICK_FS TRUE
 #define QUICK_FS_TEMPS 7
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the
@@ -42,7 +42,7 @@
        compiled code.  If STATEYEAR, STATEMONTH and STATEDAY are
        defined in the global control file the model state will
        be written to a file. *****/
-#define SAVE_STATE TRUE
+#define SAVE_STATE FALSE
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow
        band files before read data for each cell.  This saves time
@@ -64,12 +64,12 @@
        is at or below 10C.  All snowbands above this evelation are then 
        assumed to be above the treeline, and vegetation types with 
        overstory are removed from the snow band average variables. *****/
-//#define COMPUTE_TREELINE TRUE
+#define COMPUTE_TREELINE FALSE
 
 /***** Define maximum array sizes for model source code *****/
 #define MAX_VEG      12         /* maximum number of vegetation types per 
 				   cell */
-#define MAX_LAYERS   3          /* maximum number of soil moisture layers */
+#define MAX_LAYERS   11         /* maximum number of soil moisture layers */
 #define MAX_NODES    18         /* maximum number of soil thermal nodes */
 #define MAX_BANDS    10         /* maximum number of snow bands */
 #define MAX_FRONTS   3          /* maximum number of freezing and thawing 

@@ -681,12 +681,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
-  if ( options.COMPUTE_TREELINE ) {
-    // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
-    // is processed to identify the treeline.
-    if ( options.SNOW_BAND )
-      compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
-  }
+#if COMPUTE_TREELINE
+  // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
+  // is processed to identify the treeline.
+  if ( options.SNOW_BAND )
+    compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
+#endif // COMPUTE_TREELINE
 
 #if OUTPUT_FORCE
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full

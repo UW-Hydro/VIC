@@ -87,7 +87,7 @@ void write_debug(atmos_data_struct atmos,
   double deltaCC;
   double Qnet;
 
-  if(debug.PRT_FLUX) {
+  if(debug.PRT_FLUX && options.FULL_ENERGY) {
 
     /***** Record Hourly Energy Balance Terms *****/
 

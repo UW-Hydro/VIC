@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Mon Apr 14 17:41:40 1997 by Bart Nijssen <nijssen@meter.ce.washington.edu>
+ * LAST-MOD: Mon Jun 22 14:58:14 1998 by Bernt Viggo Matheussen <tempbvm@ce.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -116,6 +116,11 @@ void snow_intercept(double Dt, double F,  double LAI,
                                  */ 
   double Tmp;                    /* Temporary variable */
 
+  double Imax1;               /*maxium water intecept regardless of temp*/
+  double IntRainFract;      /*Fraction of intercpeted water which is liquid*/
+  double IntSnowFract;      /*Fraction of intercepted water which is solid*/
+  double Overload;          /* temp variable to calcuated structural overloading */
+  char shit;
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
   *SnowFall /= 1000.;
@@ -139,6 +144,8 @@ void snow_intercept(double Dt, double F,  double LAI,
      Cold Regions Science and Technology, (13), pp. 239-245.           
      Figure 4. */  
   
+  Imax1 = 4.0* LAI_SNOW_MULTIPLIER * LAI;
+
   if (Tair < -1.0 && Tair > -3.0)
     MaxSnowInt = (Tair*3.0/2.0) + (11.0/2.0);
   else if (Tair > -1.0) 
@@ -177,12 +184,14 @@ void snow_intercept(double Dt, double F,  double LAI,
   }
   
   /* now update snowfall and total accumulated intercepted snow amounts */
+
+  if (*IntSnow +  DeltaSnowInt > Imax1) DeltaSnowInt =0.0; 
   
   /* pixel depth    */ 
   SnowThroughFall = (*SnowFall - DeltaSnowInt) * F + (*SnowFall) * (1 - F);
   
   /* physical depth */
-  *IntSnow += DeltaSnowInt;                               
+  *IntSnow += DeltaSnowInt;
   
   /* Calculate amount of rain intercepted on branches and stored in
      intercepted snow. */  
@@ -203,7 +212,29 @@ void snow_intercept(double Dt, double F,  double LAI,
     /* physical depth */
     *IntRain = MaxWaterInt;
   }
+
+  /* at this point we have calculated the amount of snowfall intercepted and
+     the amount of rainfall intercepted.  These values have been 
+     appropriately subtracted from SnowFall and RainFall to determine 
+     SnowThroughfall and RainThroughfall.  However, we can end up with the 
+     condition that the total intercepted rain plus intercepted snow is 
+     greater than the maximum bearing capacity of the tree regardless of air 
+     temp (Imax1).  The following routine will adjust *IntRain and *IntSnow 
+     by triggering mass release due to overloading.  Of course since *IntRain
+     and *IntSnow are mixed, we need to slough them of as fixed fractions  */
+
+  if (*IntRain + *IntSnow > Imax1) { /*then trigger structural unloading*/
+    Overload = (*IntSnow + *IntRain) - Imax1;
+    IntRainFract= *IntRain/(*IntRain + *IntSnow);
+    IntSnowFract = *IntSnow/(*IntRain + *IntSnow);
+    *IntRain = *IntRain - Overload*IntRainFract;
+    *IntSnow = *IntSnow - Overload*IntSnowFract;
+    RainThroughFall = RainThroughFall + (Overload*IntRainFract)*F;
+    SnowThroughFall = SnowThroughFall + (Overload*IntSnowFract)*F;
+  }
   
+  if (*IntSnow > Imax1) printf("Exceeded Imax\n");
+
   /* The canopy temperature is assumed to be equal to the air temperature if 
      the air temperature is below 0C, otherwise the canopy temperature is 
      equal to 0C */
@@ -228,6 +259,14 @@ void snow_intercept(double Dt, double F,  double LAI,
   EsSnow = svp(*Tcanopy);
   *VaporMassFlux = AirDens * (0.622/Press) * (EactAir - EsSnow)/Ra;
   *VaporMassFlux /= RHO_W;
+
+printf("
+  AirTemp = %f    EactAir %f   EsSnow %f   Ra %f   AirDens %f   Press %f VaporMassFlux %f \n",
+  Tair,           EactAir,     EsSnow,     Ra,      AirDens,     Press); 
+
+
+
+
   if (Vpd == 0.0 && *VaporMassFlux < 0.0)
     *VaporMassFlux = 0.0;
   
@@ -291,11 +330,12 @@ void snow_intercept(double Dt, double F,  double LAI,
       if (*IntSnow < 0.0) 
         *IntSnow = 0.0;
       
-      if (SnowThroughFall > 0.0 && InitialSnowInt <= MIN_INTERCEPTION_STORAGE) {
+      if (SnowThroughFall > 0.0 && 
+	  InitialSnowInt <= MIN_INTERCEPTION_STORAGE) {
         /* Water in excess of MaxWaterInt has been generated.  If it is 
-           snowing and there was little intercepted snow at the beginning of the 
-           time step ( <= MIN_INTERCEPTION_STORAGE), then allow the snow to melt
-           as it is intercepted */
+           snowing and there was little intercepted snow at the beginning 
+	   of the time step ( <= MIN_INTERCEPTION_STORAGE), then allow the 
+	   snow to melt as it is intercepted */
         Drip += ExcessSnowMelt; 
         *IntSnow -= ExcessSnowMelt;
         if (*IntSnow < 0.0) 
@@ -364,9 +404,10 @@ void snow_intercept(double Dt, double F,  double LAI,
       *IntSnow += *VaporMassFlux;
   } 
   
-  /* Convert drip, mass, *IntSnow, *IntRain, *MeltEnergy and
-   *int_vapor_flux from physical depths to pixel depths.  Update p0 and
-   snow_fract. */
+   if (*IntSnow > Imax1) printf("Exceeded Imax after vapor flux %5.2f \n",
+                           *VaporMassFlux*1000);
+
+   if (*IntSnow > Imax1) printf("IntSnow = %5.2f \n",*IntSnow*1000); 
   
   *IntSnow *= F;
   *IntRain *= F;

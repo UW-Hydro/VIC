@@ -28,6 +28,7 @@ void full_energy(int                  rec,
            implemented when the radiation forcing routines were 
 	   updated.  Also modified to use the new simplified 
 	   soil moisture storage for the frozen soil algorithm.    KAC
+  07-May-04 Initialize roughness to 0.0 for bare soil.		TJB
 
 **********************************************************************/
 {
@@ -213,6 +214,8 @@ void full_energy(int                  rec,
 
       /* Set surface descriptive variables */
       overstory = FALSE;
+      /* if there is no vegetation (bare soil) then roughness is not initialised */
+      roughness = 0.0;
       if(iveg < Nveg) {
         displacement = veg_lib[veg_class].displacement[dmy[rec].month-1];
         roughness = veg_lib[veg_class].roughness[dmy[rec].month-1];

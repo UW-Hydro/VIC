@@ -51,11 +51,13 @@ void read_initial_model_state(FILE                *statefile,
   snow    = prcp->snow;
   energy  = prcp->energy;
   
+#if !NO_REWIND 
   rewind(statefile);
-
+  
   /* skip header */
   fgets(tmpstr, MAXSTRING, statefile);
   fgets(tmpstr, MAXSTRING, statefile);
+#endif
 
   /* read cell information */
   fscanf(statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband);

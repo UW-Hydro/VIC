@@ -54,6 +54,19 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
       infp->forcing[1] = open_file(fnames.forcing[1], "r");
   }
 
+#if OUTPUT_FORCE
+
+  strcpy(fnames.fluxes, fnames.result_dir);
+  strcat(fnames.fluxes, "full_data");
+  strcat(fnames.fluxes, "_");
+  strcat(fnames.fluxes, latchar);
+  strcat(fnames.fluxes, "_");
+  strcat(fnames.fluxes, lngchar);
+  if(options.BINARY_OUTPUT) 
+    outfp->fluxes = open_file(fnames.fluxes, "wb");
+  else outfp->fluxes = open_file(fnames.fluxes, "w");
+
+#else /* OUTPUT_FORCE */
   /** If running frozen soils model **/
 #if !LDAS_OUTPUT && !OPTIMIZE
    if(options.FROZEN_SOIL) {
@@ -67,7 +80,7 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
        outfp->fdepth = open_file(fnames.fdepth, "wb");
      else outfp->fdepth = open_file(fnames.fdepth, "w");
    }
-#endif
+#endif /* !LDAS_OUTPUT && !OPTIMIZE */
 
   strcpy(fnames.fluxes, fnames.result_dir);
   strcat(fnames.fluxes, "fluxes");
@@ -101,8 +114,8 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
        outfp->snowband = open_file(fnames.snowband, "wb");
      else outfp->snowband = open_file(fnames.snowband, "w");
    }
-#endif
-
+#endif /* !LDAS_OUTPUT && !OPTIMIZE */
+#endif /* OUTPUT_FORCE - else */
   return (fnames);
 
 } 

@@ -40,8 +40,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   if(options.GLOBAL_LAI) skip=2;
   else skip=1;
 
+#if !NO_REWIND
   rewind(vegparam);
-      
+#endif  
+    
   while ((fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num)) == 2 &&
           vegcel != gridcel) {
     for (i = 0; i <= vegetat_type_num * skip; i++)

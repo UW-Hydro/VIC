@@ -41,7 +41,10 @@ void read_snowband(FILE    *snowband,
   if(Nbands>1) {
 
     /** Find Current Grid Cell in SnowBand File **/
+#if !NO_REWIND
     rewind(snowband);
+#endif
+
     fscanf(snowband, "%i", &cell);
     while(cell != gridcell && !feof(snowband)) {
       fgets(ErrStr,MAXSTRING,snowband);

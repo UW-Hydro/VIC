@@ -12,7 +12,8 @@ void put_data(dist_prcp_struct  *prcp,
 	      double            *AreaFract,
 	      dmy_struct        *dmy,
               int                rec,
-	      int                dt)
+	      int                dt,
+	      int                skipyear)
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996
 
@@ -443,7 +444,8 @@ void put_data(dist_prcp_struct  *prcp,
 			      -out_data->snow_flux[0]
 			      +out_data->refreeze_energy[0]);
 
-  write_data(out_data, outfiles, dmy, dt);
+  if(rec > skipyear)
+    write_data(out_data, outfiles, dmy, dt);
 
   free((char *)out_data); 
 

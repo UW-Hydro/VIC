@@ -127,6 +127,7 @@ soil_con_struct read_soilparam(FILE *soilparam)
   fscanf(soilparam, "%lf", &Wpwp_FRACT);
   fscanf(soilparam, "%lf", &temp.rough);
   fscanf(soilparam, "%lf", &temp.snow_rough);
+  fscanf(soilparam, "%lf", &temp.annual_prec);
 
   /*******************************************
     Compute Maximum Soil Layer Moiture Content

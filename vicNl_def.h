@@ -12,7 +12,7 @@
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 
 #define SECPHOUR     3600	/* seconds per hour */
-#define DELTAT       25.	/* Used in SensibleHeatFlux to bracket the 
+#define DELTAT       50.	/* Used in snow_melt to bracket the 
                                    effective surface temperature (C) */
 #define HOURSPERDAY  24         /* number of hours per day */
 
@@ -293,8 +293,9 @@ typedef struct {
   double tskc;			/* total sky cover (fraction) */
   double trans;			/* atmospheric transmissivity */
   double shortwave;		/* incoming shortwave radiation (W/m^2) */
-  double net_short;		/* net shortwave at surface (W/m^2) */
-  double longwave;		/* incoming longwave radiation (W/m^2) */
+  double longwave;		/* incoming longwave radiation (W/m^2) 
+				   (net incoming longwave for water balance 
+				   model) */
   double albedo;		/* bare soil albedo (fraction) */
   double gamma;			/* pshychometric constant (used for snow
                                    met calcs) */

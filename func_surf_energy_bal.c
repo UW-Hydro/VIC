@@ -236,8 +236,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
        - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux;
   if(VEG && CALC_EVAP) {
     tmp_Tair          = Tair + Tfactor;
-    tmp_rainfall[WET] = rainfall[WET] * Pfactor;
-    tmp_rainfall[DRY] = rainfall[DRY] * Pfactor;
+    tmp_rainfall[WET] = rainfall[WET];
+    tmp_rainfall[DRY] = rainfall[DRY];
     Evap = canopy_evap(layer_wet,layer_dry,veg_var_wet,
 		       veg_var_dry,TRUE,
 		       veg_class,month,mu,Wdew,Tair,dt,rad[0],

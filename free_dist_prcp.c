@@ -42,8 +42,8 @@ void free_dist_prcp(dist_prcp_struct *prcp,
 	free((char *)prcp[0].energy[j][k].T);
 	if(options.FROZEN_SOIL) free((char *)prcp[0].energy[j][k].ice);
       }
-      free((char *)prcp[0].energy[j]);
     }
+    free((char *)prcp[0].energy[j]);
   }
   if(options.FULL_ENERGY || options.SNOW_MODEL) {
     free((char *)prcp[0].energy);

@@ -52,8 +52,14 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);
-    for(j=0;j<Nveg_type;j++)
-      temp[i].Cv = temp[i].Cv / temp[0].Cv_sum;
+    for(j=0;j<vegetat_type_num;j++)
+      temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
+    temp[0].Cv_sum = 1.;
+  }
+  if(temp[0].Cv_sum>0.99 && temp[0].Cv_sum<1.0){
+    fprintf(stderr,"WARNING: Cv > 0.99 and Cv < 1.0 at grid cell %d, model assuming that bare soil is not to be run - fractions being adjusted to equal 1\n", gridcel);
+    for(j=0;j<vegetat_type_num;j++)
+      temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
     temp[0].Cv_sum = 1.;
   }
   return temp;

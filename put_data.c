@@ -197,8 +197,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      * (1.0 - veg_lib[veg_con[veg].veg_class].albedo[dmy->month-1])
 	      * veg_con[veg].Cv * AreaFract[band];
 	  }
-	  out_data->net_long  += (atmos->longwave - STEFAN_B 
-				  * pow(atmos->air_temp+KELVIN,4.0))
+	  out_data->net_long  += (atmos->longwave)
 	    * veg_con[veg].Cv * AreaFract[band];
 	}
 	if(options.FULL_ENERGY || options.SNOW_MODEL) {
@@ -373,8 +372,7 @@ void put_data(dist_prcp_struct  *prcp,
 	    * (1.0 - atmos->albedo)
 	    * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
 	}
-	out_data->net_long  += (atmos->longwave - STEFAN_B 
-				* pow(atmos->air_temp+KELVIN,4.0))
+	out_data->net_long  += (atmos->longwave)
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
       }
       if(options.FULL_ENERGY || options.SNOW_MODEL) {

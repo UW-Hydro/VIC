@@ -75,11 +75,11 @@ void rad_and_vpd (atmos_data_struct *atmos,
     atmos[i].vpd = (svp(tair) - qdp);
     atmos[i].vp = qdp;
     if(!options.FULL_ENERGY) {
-      atmos[i].shortwave = (1.0 - atmos[i].albedo) * 
+      atmos[i].shortwave = /* (1.0 - atmos[i].albedo) *  */
           in_shortwave(soil_con.lat,dmy[i].day_in_year,atmos[i].trans);
-      atmos[i].longwave = net_out_longwave(atmos[i].trans, trans_clear, tair,
+      atmos[i].longwave = -net_out_longwave(atmos[i].trans, trans_clear, tair,
           qdp*1000.0,&atmos[i].tskc);
-      atmos[i].rad = atmos[i].shortwave - atmos[i].longwave;
+      atmos[i].rad = atmos[i].shortwave + atmos[i].longwave;
     }
   }
   free((char *)yearly_prec);

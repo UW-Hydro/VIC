@@ -84,6 +84,13 @@ void full_energy(int rec,
   double                 air_temp[24];
   double                 bare_albedo;
   double                *snow_inflow;
+  double                 step_air_temp;
+  double                 step_vp;
+  double                 step_vpd;
+  double                 step_rad;
+  double                 step_density;
+  double                 step_net_short;
+  double                 tmp_aero_resist;
   double                *tmp_throughfall[2];
   double                 tmp_rad;
   double                 tmp_wind[3];
@@ -319,8 +326,8 @@ void full_energy(int rec,
 			   displacement,ref_height,surf_atten,gp.MAX_SNOW_TEMP,
 			   gp.MIN_RAIN_TEMP,gp.wind_h,moist,ice0,dp,
 			   bare_albedo,&Le,&Ls,cell[WET][iveg][0].aero_resist,
-			   tmp_wind,&atmos->net_short,
-			   &out_short,&atmos->rad,&Evap,&last_T1,
+			   tmp_wind,&step_net_short,
+			   &out_short,&step_rad,&Evap,&last_T1,
 			   &Tsurf,&Tgrnd,&Tend_surf,
 			   &Tend_grnd,
 			   &tmp_snow_energy,snow_inflow,&ppt[band*2]);
@@ -423,7 +430,7 @@ void full_energy(int rec,
 		   gp.dt,gp.Nnodes,band,rec,iveg);
 	    
 	    out_short = atmos->albedo * atmos->shortwave;
-	    atmos->net_short = (1.0 - atmos->albedo) * atmos->shortwave;
+	    step_net_short = (1.0 - atmos->albedo) * atmos->shortwave;
 	  }
 	} /** End Loop Through Elevation Bands **/
       } /** End Full Energy Balance Model **/
@@ -457,8 +464,15 @@ void full_energy(int rec,
           tmp_ppt                      = (double*)calloc(Nbands*2,
 							 sizeof(double));
 
-          tmp_rad                      = atmos->rad;
-
+	  if (tmp_wind[0] > 0.0)
+	    tmp_aero_resist 
+	      = cell[WET][iveg][0].aero_resist[0] 
+	      / StabilityCorrection(ref_height, displacement, 
+				    atmos->air_temp, atmos->air_temp, 
+				    tmp_wind[0], roughness);
+	  else
+	    tmp_aero_resist = HUGE_RESIST;
+	  
 	  if(debug.PRT_FLUX && rec==0) {
 	    fprintf(debug.fg_energy,"DATE\tVEG TYPE\tPRCPDIST\tNET SHT\t");
 	    fprintf(debug.fg_energy,"NET LNG\tLATENT\tSENSBL\tADVEC\t");
@@ -477,24 +491,29 @@ void full_energy(int rec,
 	    /** Snow melt model is solved using a time step of SNOW_STEP **/
 	    
 	    /** Initialize parameters for the shorter time step **/
-	    atmos->air_temp = air_temp[hour];
-	    if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) {
-	      tmp_vp     = atmos->vp;
-	      tmp_vpd    = atmos->vpd;
-	      atmos->vp  = atmos[1].vp;
-	      atmos->vpd = atmos[1].vpd;
+	    step_air_temp = air_temp[hour];
+	    if(step_air_temp<tmin[1] && hour>tmax_hour[1]) {
+/* 	      tmp_vp     = atmos->vp; */
+/* 	      tmp_vpd    = atmos->vpd; */
+	      step_vp  = atmos[1].vp;
+	      step_vpd = atmos[1].vpd;
 	    }
-	    else if(atmos->air_temp<tmin[1] && hour<tmin_hour[1]) {
-	      tmp_vp     = atmos->vp;
-	      tmp_vpd    = atmos->vpd;
-	      atmos->vp  = atmos[-1].vp;
-	      atmos->vpd = atmos[-1].vpd;
+	    else if(step_air_temp<tmin[1] && hour<tmin_hour[1]) {
+/* 	      tmp_vp     = atmos->vp; */
+/* 	      tmp_vpd    = atmos->vpd; */
+	      step_vp  = atmos[-1].vp;
+	      step_vpd = atmos[-1].vpd;
 	    }
-	    else if(atmos->air_temp<tmin[1]) {
+	    else if(step_air_temp<tmin[1]) {
 	      vicerror("Air temperature falls below daily minimum temperature.  Please report error.");
 	    }
-	    atmos->density = 3.486*atmos->pressure/(275.0
-						    + atmos->air_temp);
+	    else {
+	      step_vp  = atmos->vp;
+	      step_vpd = atmos->vpd;
+	    }
+	    
+	    step_density = 3.486*atmos->pressure/(275.0
+						    + step_air_temp);
 	    for(band=0;band<Nbands;band++) {
 	      if(soil_con.AreaFract[band]>0) {
 		snow[iveg][band].vapor_flux         = 0.;
@@ -509,7 +528,7 @@ void full_energy(int rec,
 	      }
 	    }
 	    calc_long_shortwave(&inshort,&inlong,&atmos->tskc,
-				atmos->air_temp,atmos->vp,
+				step_air_temp,step_vp,
 				(double)soil_con.time_zone_lng,
 				(double)soil_con.lng,(double)soil_con.lat,
 				(double)dmy[rec].day_in_year,
@@ -530,19 +549,17 @@ void full_energy(int rec,
 			       soil_con,overstory,&SNOW,&SOLVE_SURF_ENERGY,
 			       SNOW_STEP,rec,veg_class,iveg,Nveg,band,hour,
 			       gp.Nnodes,inshort,inlong,
-			       atmos->air_temp,prec[iveg*2]*(double)SNOW_STEP
-			       /(double)gp.dt,atmos->density,atmos->vp,
-			       atmos->vpd,atmos->pressure,prcp[0].mu[iveg],
+			       step_air_temp,prec[iveg*2]*(double)SNOW_STEP
+			       /(double)gp.dt,step_density,step_vp,
+			       step_vpd,atmos->pressure,prcp[0].mu[iveg],
 			       roughness,displacement,ref_height,surf_atten,
 			       gp.MAX_SNOW_TEMP,gp.MIN_RAIN_TEMP,gp.wind_h,
-			       moist,ice0,dp,
-			       bare_albedo,&Le,&Ls,
-			       cell[WET][iveg][0].aero_resist,
-			       tmp_wind,
-			       &atmos->net_short,&out_short,&atmos->rad,
-			       &Evap,&last_T1,
-			       &Tsurf,&Tgrnd,&Tend_surf,&Tend_grnd,
-			       &tmp_snow_energy,snow_inflow,&ppt[band*2]);
+			       moist,ice0,dp,bare_albedo,&Le,&Ls,
+			       cell[WET][iveg][0].aero_resist,tmp_wind,
+			       &step_net_short,&out_short,&step_rad,
+			       &Evap,&last_T1,&Tsurf,&Tgrnd,&Tend_surf,
+			       &Tend_grnd,&tmp_snow_energy,snow_inflow,
+			       &ppt[band*2]);
 		
 		if(!SNOW) {
 		  
@@ -564,13 +581,13 @@ void full_energy(int rec,
 					 &veg_var[DRY][iveg][band],
 					 TRUE,veg_class,dmy[rec].month,
 					 prcp[0].mu[iveg],tmp_Wdew,
-					 atmos->air_temp
+					 step_air_temp
 					 + soil_con.Tfactor[band],
-					 (double)SNOW_STEP,atmos->rad,
-					 atmos->vpd,
-					 atmos->net_short,atmos->air_temp
+					 (double)SNOW_STEP,step_rad,
+					 step_vpd,step_net_short,
+					 step_air_temp
 					 + soil_con.Tfactor[band],
-					 cell[WET][iveg][0].aero_resist[0],
+					 tmp_aero_resist,
 					 displacement,roughness,ref_height,
 					 soil_con.elevation,rainfall,
 					 soil_con.depth,
@@ -581,15 +598,15 @@ void full_energy(int rec,
 		    else {
 		      Evap = arno_evap(cell[WET][iveg][band].layer, 
 				       cell[DRY][iveg][band].layer, 
-				       atmos->rad, atmos->air_temp, 
-				       atmos->vpd, 
-				       atmos->net_short, soil_con.depth[0], 
+				       step_rad, step_air_temp, 
+				       step_vpd, 
+				       step_net_short, soil_con.depth[0], 
 				       soil_con.max_moist[0], 
 				       soil_con.elevation, 
-				       soil_con.b_infilt, atmos->air_temp 
+				       soil_con.b_infilt, step_air_temp 
 				       + soil_con.Tfactor[band],
 				       displacement, roughness, ref_height, 
-				       cell[WET][iveg][0].aero_resist[0], 
+				       tmp_aero_resist, 
 				       (double)SNOW_STEP,
 				       prcp[0].mu[iveg]);
 		      for(j=0;j<Ndist;j++) {
@@ -605,13 +622,13 @@ void full_energy(int rec,
 		  else {
 		    Evap = arno_evap(cell[WET][iveg][band].layer, 
 				     cell[DRY][iveg][band].layer, 
-				     atmos->rad, atmos->air_temp, atmos->vpd, 
-				     atmos->net_short, soil_con.depth[0],
+				     step_rad, step_air_temp, step_vpd, 
+				     step_net_short, soil_con.depth[0],
 				     soil_con.max_moist[0], soil_con.elevation,
 				     soil_con.b_infilt, 
-				     atmos->air_temp, displacement, roughness, 
+				     step_air_temp, displacement, roughness, 
 				     ref_height, 
-				     cell[WET][iveg][0].aero_resist[0], 
+				     tmp_aero_resist, 
 				     (double)SNOW_STEP,prcp[0].mu[iveg]);
 		    for(j=0;j<Ndist;j++) {
 		      ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band]
@@ -644,12 +661,13 @@ void full_energy(int rec,
 	      }
 	    } /* End Loop Through Elevation Bands */
 
-	    if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) {
-	      atmos->vp  = tmp_vp;
-	      atmos->vpd = tmp_vpd;
-	    }
+/* 	    if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) { */
+/* 	      atmos->vp  = tmp_vp; */
+/* 	      atmos->vpd = tmp_vpd; */
+/* 	    } */
 	    
 	  } /* End Hourly Snow Solution */
+	  cell[WET][iveg][0].aero_resist[0] = tmp_aero_resist;
 	  for(band=0;band<Nbands;band++) {
 	    if(soil_con.AreaFract[band]>0) {
 	      snow[iveg][band].canopy_vapor_flux = tmp_canopy_vapor_flux[band];
@@ -695,18 +713,23 @@ void full_energy(int rec,
 	    No Snow on Ground Or Snow Model not Run
 	  ******************************************/
 	  
-	  for(j=0;j<Ndist;j++) {
+	  for(j=0;j<Ndist;j++) 
 	    for(band=0;band<Nbands;band++) ppt[band*2+j] = 0.;
-	    if (tmp_wind[0] > 0.0)
-	      cell[j][iveg][0].aero_resist[0] 
-		/= StabilityCorrection(ref_height, displacement, 
-				       atmos->air_temp, atmos->air_temp, 
-				       tmp_wind[0], roughness);
-	    else
-	      cell[j][iveg][0].aero_resist[0] = HUGE_RESIST;
-	  }
+	  if (tmp_wind[0] > 0.0)
+	    cell[WET][iveg][0].aero_resist[0] 
+	      /= StabilityCorrection(ref_height, displacement, 
+				     atmos->air_temp, atmos->air_temp, 
+				     tmp_wind[0], roughness);
+	  else
+	    cell[j][iveg][0].aero_resist[0] = HUGE_RESIST;
+
 	  for(band=0;band<Nbands;band++) {
 	    if(soil_con.AreaFract[band]>0) {
+
+	      /** Compute Net Radiation at Surface **/
+	      step_net_short = (1. - bare_albedo) * atmos->shortwave; 
+	      step_rad = step_net_short + atmos->longwave;
+
 	      if(iveg!=Nveg) {
 		/** Compute Evaporation from Vegetation **/
 		if(veg_lib[veg_class].LAI[dmy[rec].month-1] > 0.0) {
@@ -721,8 +744,8 @@ void full_energy(int rec,
 				     TRUE,veg_class,dmy[rec].month,
 				     prcp[0].mu[iveg],tmp_Wdew,atmos->air_temp
 				     + soil_con.Tfactor[band],
-				     (double)gp.dt,atmos->rad,atmos->vpd,
-				     atmos->net_short,atmos->air_temp
+				     (double)gp.dt,step_rad,atmos->vpd,
+				     step_net_short,atmos->air_temp
 				     + soil_con.Tfactor[band],
 				     cell[WET][iveg][0].aero_resist[0],
 				     displacement,roughness,ref_height,
@@ -735,8 +758,8 @@ void full_energy(int rec,
 		else {
 		  Evap = arno_evap(cell[WET][iveg][band].layer, 
 				   cell[DRY][iveg][band].layer, 
-				   atmos->rad, atmos->air_temp, atmos->vpd, 
-				   atmos->net_short, soil_con.depth[0], 
+				   step_rad, atmos->air_temp, atmos->vpd, 
+				   step_net_short, soil_con.depth[0], 
 				   soil_con.max_moist[0], soil_con.elevation, 
 				   soil_con.b_infilt, atmos->air_temp 
 				   + soil_con.Tfactor[band],
@@ -755,8 +778,8 @@ void full_energy(int rec,
 	      else {
 		Evap = arno_evap(cell[WET][iveg][band].layer, 
 				 cell[DRY][iveg][band].layer, 
-				 atmos->rad, atmos->air_temp, atmos->vpd, 
-				 atmos->net_short, soil_con.depth[0],
+				 step_rad, atmos->air_temp, atmos->vpd, 
+				 step_net_short, soil_con.depth[0],
 				 soil_con.max_moist[0], soil_con.elevation,
 				 soil_con.b_infilt, 
 				 atmos->air_temp, displacement, roughness, 

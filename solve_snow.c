@@ -185,7 +185,8 @@ double solve_snow(snow_data_struct    *snow,
 	    if(options.FULL_ENERGY)
 	      surf_long = STEFAN_B * pow(energy->T[0] + KELVIN, 4.);
 	    else
-	      surf_long = longwave;
+	      surf_long = STEFAN_B * pow(air_temp + KELVIN, 4.);
+	      /* surf_long = longwave; */
 	  }
 	  snow_intercept((double)dt,1.,
 			 veg_lib[veg_class].LAI[dmy[rec].month-1],
@@ -251,12 +252,12 @@ double solve_snow(snow_data_struct    *snow,
 
       if(overstory && snowfall[0] > 0.) {
 	/** recompute surface properties if overstory drops snow **/
-	snow->albedo   = NEW_SNOW_ALB;
-	energy->albedo = snow->albedo;
-	snow->last_snow=1;
-	out_short[0] = energy->albedo * shortwave;
-	net_short[0] = (1.0 - energy->albedo) * shortwave;
-	rad[0]       = net_short[0] + longwave 
+	snow->albedo    = NEW_SNOW_ALB;
+	energy->albedo  = snow->albedo;
+	snow->last_snow = 1;
+	out_short[0]    = energy->albedo * shortwave;
+	net_short[0]    = (1.0 - energy->albedo) * shortwave;
+	rad[0]          = net_short[0] + energy->longwave 
 	  - STEFAN_B * pow(snow->surf_temp+KELVIN,4.0);
       }
     
@@ -372,9 +373,15 @@ double solve_snow(snow_data_struct    *snow,
     
     BARE[0]            = TRUE;
     tmp_snow_energy[0] = 0;
-    energy->albedo   = bare_albedo;
-    energy->longwave = longwave;
-    
+    energy->albedo     = bare_albedo;
+    energy->longwave   = longwave;
+
+    /** Compute Radiation Balance for Bare Surface **/ 
+    out_short[0] = energy->albedo * shortwave;
+    net_short[0] = (1.0 - energy->albedo) * shortwave;
+    rad[0]       = net_short[0] + longwave 
+      - STEFAN_B * pow(energy->T[0]+KELVIN,4.0);
+
   }
 
   return(Melt);

@@ -119,6 +119,22 @@ Aerodynamic resistance incorrect in output fluxes file
         the canopy air/surrounding atmosphere interface is not tracked.
 
 
+Attempts to skip deactivated grid cells fail when using a binary initial state
+file.
+
+	Files affected:
+	write_model_state.c
+
+	Description:
+	write_model_state() now computes the correct number of bytes per record
+	for a binary state file.  Before this fix, if a user de-activated some
+	grid cells (by setting the first field in the soil parameter file to 0)
+	and attempted to read from a binary state file that was written when the
+	cells were active, VIC would not read the state file correctly and would
+	crash.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

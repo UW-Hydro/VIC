@@ -75,13 +75,14 @@ void write_data(out_data_struct *out_data,
 	       day
 	       runoff
 	       baseflow
+               snow_dpeth
       comment: runoff and baseflow are output as daily sums for all
                defined model time steps.
   ******************************************************************/
 
-  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\n",
+  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\n",
 	  dmy->year, dmy->month, dmy->day, out_data->runoff,
-	  out_data->baseflow);
+	  out_data->baseflow, out_data->snow_depth[0]);
   
 #elif LDAS_OUTPUT 
 

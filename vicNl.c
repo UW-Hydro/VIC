@@ -138,7 +138,6 @@ void main(int argc, char *argv[])
       atmos = read_forcing_data(infiles, global_param.starthour,
 				&global_param.nrecs,
 				global_param.dt, force_dt);
-      if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
@@ -169,6 +168,7 @@ void main(int argc, char *argv[])
 		       (double)soil_con.elevation,
 		       global_param.MAX_SNOW_TEMP,global_param.MIN_RAIN_TEMP,
 		       soil_con.Tfactor,global_param.nrecs,global_param.dt);
+      if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 
       /**************************************************
         Initialize Energy Balance and Snow Variables 

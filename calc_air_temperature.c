@@ -7,8 +7,13 @@ static char vcid[] = "$Id$";
 
 /****************************************************************************
   Subroutines developed by Bart Nijssen to estimate the daily temperature
-  cycle from maximum and minimum daily temperature measurements.  Modified
+  cycle from maximum and minimum daily temperature measurements.  
+
+  Modifications:
   June 23, 1998 by Keith Cherkauer to be run within the VIC-NL model.
+  August 19, 1999 by Bart Nijssen to function in polar regions where
+    daylight or darkness may last for 24 hours.
+
   ***************************************************************************/
 
 /****************************************************************************/
@@ -153,6 +158,10 @@ void store_max_min_temp(atmos_data_struct *atmos,
   int                Nrecs,        total number of records
   int                skip_recs     number of subdaily records (24/dt)
 
+  If it is always dark (rise_hour < 0) or always light (rise_hour => 
+  set_hour < 0), then set the minimum and maximum temperature hours to 2 AM
+  and 2 PM (arbitrary) Bart Nijssen Tue Aug  3 11:46:51 1999
+
 **********************************************************************/
 
   static int last_rec;
@@ -162,16 +171,30 @@ void store_max_min_temp(atmos_data_struct *atmos,
     tmin[0] = tmin[1] = atmos[0].tmin;
     tmax[2] = atmos[skip_recs].tmax;
     tmin[2] = atmos[skip_recs].tmin;
-    tmax_hour[0] = (int)(2. / 3. * (atmos[0].set_hour 
-				    - atmos[0].rise_hour)) 
-      + atmos[0].rise_hour;
-    tmin_hour[0] = atmos[0].rise_hour - 1;
+    if (atmos[0].rise_hour < 0 || 
+	(atmos[0].rise_hour >=  0 && atmos[0].set_hour < 0)) {
+      tmax_hour[0] = 14;
+      tmin_hour[0] = 2;
+    }
+    else {
+      tmax_hour[0] = (int)(2. / 3. * (atmos[0].set_hour - 
+				      atmos[0].rise_hour)) + 
+	atmos[0].rise_hour; 
+      tmin_hour[0] = atmos[0].rise_hour - 1;
+    }
     tmax_hour[1] = tmax_hour[0];
     tmin_hour[1] = tmin_hour[0];
-    tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
-				    - atmos[skip_recs].rise_hour)) 
-      + atmos[0].rise_hour;
-    tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+    if (atmos[skip_recs].rise_hour < 0 || 
+	(atmos[skip_recs].rise_hour >=  0 && atmos[skip_recs].set_hour < 0)) {
+      tmax_hour[2] = 14;
+      tmin_hour[2] = 2;
+    }
+    else {
+      tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour  -
+				      atmos[skip_recs].rise_hour)) +
+	atmos[0].rise_hour; 
+      tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+    }
     
     last_rec = rec;
   }
@@ -196,12 +219,20 @@ void store_max_min_temp(atmos_data_struct *atmos,
       tmin[2] = atmos[skip_recs].tmin;
       tmax_hour[0] = tmax_hour[1];
       tmax_hour[1] = tmax_hour[2];
-      tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
-				      - atmos[skip_recs].rise_hour)) 
-	+ atmos[skip_recs].rise_hour;
       tmin_hour[0] = tmin_hour[1];
       tmin_hour[1] = tmin_hour[2];
-      tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+      if (atmos[skip_recs].rise_hour < 0 || 
+	  (atmos[skip_recs].rise_hour >=  0 
+	   && atmos[skip_recs].set_hour < 0)) {
+	tmax_hour[2] = 14;
+	tmin_hour[2] = 2;
+      }
+      else {
+	tmax_hour[2] = (int)(2. / 3. * (atmos[skip_recs].set_hour 
+					- atmos[skip_recs].rise_hour)) 
+	  + atmos[skip_recs].rise_hour;
+	tmin_hour[2] = atmos[skip_recs].rise_hour - 1;
+      }
     }
   }
 }

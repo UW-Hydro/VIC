@@ -372,7 +372,7 @@ Canopy evaporation and distributed precipitation
 Output debug file error
 
 	Files affected:
-	write_debug.c
+	write_atmosdata.c
 
 	Description:
 	No longer close the debug file, since the next cell must write to it.

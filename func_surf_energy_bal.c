@@ -27,6 +27,14 @@ double func_surf_energy_bal(double Ts, va_list ap)
   01-20-00 modified to work with the updated radiation estimation
            routines, as well as the simplified frozen soil moisture
            storage                                              KAC
+  07-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
+	    before adjusting *deltaH.  This fixes a bug caused when
+	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
+	    non-zero ice content was calculated at the beginning of
+	    the time step but always assumed zero at the point of
+	    *deltaH adjustment, leading to *deltaH always being
+	    calculated as if ice had melted, leading to lower soil
+	    temperatures and snow packs that never melted.	TJB
 
 **********************************************************************/
 {
@@ -280,7 +288,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
     else ice=0.;
  
     *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (TMean + *T1)/2.) * D1 / delta_t;
-    *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
+    /* Only adjust for ice if both FS_ACTIVE and FROZEN_SOIL are true */
+    if(FS_ACTIVE && options.FROZEN_SOIL)
+      *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
     /** Compute net surface radiation for evaporation estimates **/
     rad = (1.0 - albedo) * shortwave + longwave 

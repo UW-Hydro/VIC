@@ -8,6 +8,10 @@ double linear_interp(double x,double lx,double ux,double ly,double uy) {
   return((x-lx)/(ux-lx)*(uy-ly)+ly);
 }
 
+double exp_interp(double x,double lx,double ux,double ly,double uy) {
+  return(uy+(ly-uy)*exp(-(x-lx)));
+}
+
 double modify_Ksat(double Temp) {
 /**********************************************************************
 	modify_Ksat	Keith Cherkauer		February 12, 1997

@@ -30,6 +30,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 			    double            *aero_resist,
 			    double            *wind,
 			    double            *rainfall,
+			    float             *root,
 			    atmos_data_struct *atmos,
 			    veg_var_struct    *veg_var_wet,
 			    veg_var_struct    *veg_var_dry,
@@ -223,7 +224,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 			 soil_con.depth,soil_con.Wcr,soil_con.Wpwp,
 			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 			 moist_node,expt_node,max_moist_node,ice_node,
-			 alpha,beta,gamma,layer_wet,layer_dry,veg_var_wet
+			 alpha,beta,gamma,root,layer_wet,layer_dry,veg_var_wet
 			 ,veg_var_dry,
 			 VEG,(int)CALC_EVAP,veg_class,dmy.month,Nnodes);
 
@@ -245,7 +246,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				       soil_con.Wpwp,T_node,Tnew_node,
 				       dz_node,kappa_node,Cs_node,
 				       moist_node,expt_node,max_moist_node,
-				       ice_node,alpha,beta,gamma,
+				       ice_node,alpha,beta,gamma,root,
 				       layer_wet,layer_dry,
 				       veg_var_wet,veg_var_dry,VEG,
 				       (int)CALC_EVAP,
@@ -271,7 +272,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				soil_con.depth,soil_con.Wcr,soil_con.Wpwp,
 				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				moist_node,expt_node,max_moist_node,ice_node,
-				alpha,beta,gamma,layer_wet,layer_dry,
+				alpha,beta,gamma,root,layer_wet,layer_dry,
 				veg_var_wet,
 				veg_var_dry,VEG,(int)CALC_EVAP,
 				veg_class,dmy.month,Nnodes);
@@ -401,6 +402,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double            *alpha;
   double            *beta;
   double            *gamma;
+  float             *root;
   layer_data_struct *layer_wet;
   layer_data_struct *layer_dry;
   veg_var_struct    *veg_var_wet;
@@ -478,6 +480,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   alpha         = (double *) va_arg(ap, double *);
   beta          = (double *) va_arg(ap, double *);
   gamma         = (double *) va_arg(ap, double *);
+  root          = (float  *) va_arg(ap, float  *);
   layer_wet     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   layer_dry     = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   veg_var_wet   = (veg_var_struct *) va_arg(ap, veg_var_struct *);

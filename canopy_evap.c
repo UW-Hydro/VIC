@@ -25,7 +25,8 @@ double canopy_evap(layer_data_struct *layer_wet,
                    double            *prec,
 		   double            *depth,
 		   double            *Wcr,
-		   double            *Wpwp)
+		   double            *Wpwp,
+		   float             *root)
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 
@@ -179,7 +180,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		    vpd, net_short, air_temp, ra,
 		    ppt, f, dt, tmp_veg_var->Wdew, elevation,
 		    depth, Wcr, Wpwp, &tmp_Wdew,
-		    &canopyevap, layerevap);
+		    &canopyevap, layerevap, root);
 
     tmp_veg_var->canopyevap = canopyevap;
     tmp_veg_var->throughfall = throughfall;
@@ -222,7 +223,8 @@ void transpiration(layer_data_struct *layer,
 		   double *Wpwp,
 		   double *new_Wdew,
 		   double *canopyevap,
-		   double *layerevap)
+		   double *layerevap,
+		   float  *root)
 /**********************************************************************
   Computes evapotranspiration for unfrozen soils
   Allows for multiple layers.
@@ -236,7 +238,7 @@ void transpiration(layer_data_struct *layer,
   double moist1, moist2;                /* tmp holding of moisture */
   double evap;                          /* tmp holding for evap total */
   double Wcr1;                          /* tmp holding of critical water for upper layers */
-  double root;                          /* proportion of roots in moist>Wcr zones */
+  double root_sum;                      /* proportion of roots in moist>Wcr zones */
   double spare_evap;                    /* evap for 2nd distribution */
   double avail_moist[MAXlayer];         /* moisture available for trans */
 
@@ -258,7 +260,7 @@ void transpiration(layer_data_struct *layer,
   moist1 = 0.0;
   Wcr1 = 0.0;                    /* may include this in struct latter */
   for(i=0;i<options.Nlayer-1;i++){
-    if(veg_lib[veg_class].root[i] > 0.) {
+    if(root[i] > 0.) {
       if(options.FROZEN_SOIL) 
         avail_moist[i] = layer[i].moist_thaw*(layer[i].tdepth)
 	  /depth[i] + layer[i].moist_froz*
@@ -300,9 +302,9 @@ void transpiration(layer_data_struct *layer,
   ******************************************************************/
 
   if( (moist1>=Wcr1 && moist2>=Wcr[options.Nlayer-1] && Wcr1>0.) ||
-      (moist1>=Wcr1 && (1-veg_lib[veg_class].root[options.Nlayer-1])>= 0.5) ||
+      (moist1>=Wcr1 && (1-root[options.Nlayer-1])>= 0.5) ||
       (moist2>=Wcr[options.Nlayer-1] &&
-      veg_lib[veg_class].root[options.Nlayer-1]>=0.5) ){
+      root[options.Nlayer-1]>=0.5) ){
     gsm_inv=1.0;
     evap = penman(rad, vpd * 1000., ra,
            veg_lib[veg_class].rmin,
@@ -314,11 +316,11 @@ void transpiration(layer_data_struct *layer,
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
-    root=1.0;
+    root_sum=1.0;
     spare_evap=0.0;
     for(i=0;i<options.Nlayer;i++){
       if(avail_moist[i]>=Wcr[i]){
-        layerevap[i]=evap*veg_lib[veg_class].root[i];
+        layerevap[i]=evap*(double)root[i];
       }
       else {
           
@@ -328,9 +330,9 @@ void transpiration(layer_data_struct *layer,
         else 
           gsm_inv=0.0;
 	    
-        layerevap[i]  = evap*gsm_inv*veg_lib[veg_class].root[i];
-        root         -= veg_lib[veg_class].root[i];
-        spare_evap    = evap*veg_lib[veg_class].root[i]*(1.0-gsm_inv);
+        layerevap[i]  = evap*gsm_inv*(double)root[i];
+        root_sum     -= root[i];
+        spare_evap    = evap*(double)root[i]*(1.0-gsm_inv);
       }
     }
 
@@ -338,7 +340,7 @@ void transpiration(layer_data_struct *layer,
     if(spare_evap>0.0){
       for(i=0;i<options.Nlayer;i++){
         if(avail_moist[i] >= Wcr[i]){
-          layerevap[i] += veg_lib[veg_class].root[i]*spare_evap/root;
+          layerevap[i] += (double)root[i]*spare_evap/root_sum;
         }
       }
     }
@@ -370,7 +372,7 @@ void transpiration(layer_data_struct *layer,
                  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
                  gsm_inv, air_temp, evap_temp, 
                  net_short, elevation) 
-                 * dt / 24.0 * veg_lib[veg_class].root[i] 
+                 * dt / 24.0 * (double)root[i] 
                  * (1.0-f*pow((Wdew/
                  veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0)));
       }

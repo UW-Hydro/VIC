@@ -7,7 +7,7 @@
 #define MAXSTRING    512
 #define MINSTRING    20
 #define HUGE_RESIST  1.e20	/* largest allowable double number */
-#define SMALL        1.e-15	/* smallest allowable double number */
+#define SMALL        1.e-12	/* smallest allowable double number */
 
 /***** Physical Constants *****/
 #define RESID_MOIST  0.0        /* define residual moisture content of soil column */
@@ -133,6 +133,8 @@ typedef struct {
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing soil 
  			    thermal fluxes */
   char   FS_FLUXES;      /* TRUE = Use new soil thermal flux algorithm */
+  char   GLOBAL_LAI;     /* TRUE = read LAI values for each vegetation type
+			    from the veg param file */
 } option_struct;
 
 typedef struct {
@@ -200,6 +202,7 @@ typedef struct {
   int    endyear;    /* Last year of model simulation */
   int    endmonth;   /* Last month of model simulation */
   int    endday;     /* Last day of model simulation */
+  int    skipyear;   /* Number of years to skip before writing output data */
   int    forceyear;  /* year forcing files start */
   int    forcemonth; /* month forcing files starts */
   int    forceday;   /* day forcing files starts */
@@ -498,6 +501,7 @@ typedef struct {
   This structure stores all variables needed for output.
   *******************************************************/
 typedef struct {
+  double air_temp;	   /* grid cell air temperature */
   double evap;		   /* grid cell evaporation */
   double runoff;	   /* runoff from the surface */
   double baseflow;	   /* baseflow out of the bottom layer */
@@ -517,9 +521,13 @@ typedef struct {
   double r_net;           /* grid cell net radiation W/m^2  */
   double net_short;       /* grid cell net shortwave flux */
   double net_long;        /* grid cell net longwave flux */
-  double sub_canop;       /* grid cell net sublimation from canopy interception */
-  double evap_canop;      /* grid cell net evaporation from canopy interception */
-  double sub_snow;        /* grid cell net sublimation from bare ground from snow pack */
+  double in_long;         /* grid cell net incoming longwave flux */
+  double sub_canop;       /* grid cell net sublimation from canopy 
+			     interception */
+  double evap_canop;      /* grid cell net evaporation from canopy 
+			     interception */
+  double sub_snow;        /* grid cell net sublimation from bare ground 
+			     from snow pack */
   double evap_veg;        /* grid cell net evapotraspiration from vegetation */
   double evap_bare;       /* grid cell net evaporation from bare ground */
   double rad_temp;        /* grid cell average radiative surface 
@@ -532,11 +540,17 @@ typedef struct {
   double swq[MAX_BANDS+1];	       /* snow water equivalent (mm) */
   double snow_canopy[MAX_BANDS+1];     /* snow captured by canopy (mm) */
   double snow_depth[MAX_BANDS+1];      /* snow depth (cm) */
-  double advection[MAX_BANDS+1];       /* grid cell advection (snow only) (Wm-2) */
-  double deltaCC[MAX_BANDS+1];         /* change of cold content in the snow pack [Wm-2] */
-  double snow_flux[MAX_BANDS+1];       /* energy flux through the snow pack [Wm-2] */
-  double refreeze_energy[MAX_BANDS+1]; /* energy used to refreeze snowpack [Wm-2] */
-  double coverage[MAX_BANDS+1];        /* fractional coverage of grid cell with snow */
+  double advection[MAX_BANDS+1];       /* grid cell advection (snow only) 
+					  (Wm-2) */
+  double deltaCC[MAX_BANDS+1];         /* change of cold content in the 
+					  snowpack [Wm-2] */
+  double snow_flux[MAX_BANDS+1];       /* energy flux through the snowpack 
+					  [Wm-2] */
+  double refreeze_energy[MAX_BANDS+1]; /* energy used to refreeze snowpack 
+					  [Wm-2] */
+  double coverage[MAX_BANDS+1];        /* fractional coverage of grid cell 
+					  with snow */
+  double rel_humid;
 } out_data_struct;
 
 /********************************************************

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Thu Apr 12 18:18:00 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Apr 21 16:39:04 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow pack energy balance
  * DESCRIP-END.
  * FUNCTIONS:    SnowPackEnergyBalance()
@@ -45,6 +45,12 @@
   10-6-2000 modified to handle partial snow cover including the
     advection of sensible heat from bare patches to the edges
     of the remaining snow cover.                               KAC
+  11-18-02 Modified to include the effects of blowing snow on the
+           accumulation and ablation of the snowpack.          LCB
+  04-21-03 Removed constant variable declarations.  Those still
+           required by the VIC model are now defined in 
+           vicNl_def.h.                                        KAC
+
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
 {
@@ -64,7 +70,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   double Displacement;            /* Displacement height (m) */
   double Z;                       /* Reference height (m) */
-  double Z0;                      /* surface roughness height (m) */
+  double *Z0;                      /* surface roughness height (m) */
 
   /* Atmospheric Forcing Variables */
   double AirDens;                 /* Density of air (kg/m3) */
@@ -110,7 +116,15 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 				     (W/m2) */
   double *VaporMassFlux;          /* Mass flux of water vapor to or from the
 				     intercepted snow */
-  
+  double *BlowingMassFlux;         /* Mass flux of water vapor from blowing snow. */
+  double *SurfaceMassFlux;         /* Mass flux of water vapor from pack snow. */
+  int LastSnow;
+  float lag_one;
+  float sigma_slope;
+  float fetch;
+  int Nveg;
+  int iveg;
+
   /* Internal Routine Variables */
 
   double Density;                 /* Density of water/ice at TMean (kg/m3) */
@@ -145,7 +159,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   Displacement = (double) va_arg(ap, double);
   Z            = (double) va_arg(ap, double);
-  Z0           = (double) va_arg(ap, double);
+  Z0           = (double *) va_arg(ap, double *);
 
   /* Atmospheric Forcing Variables */
   AirDens       = (double) va_arg(ap, double);
@@ -181,7 +195,15 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   RefreezeEnergy        = (double *) va_arg(ap, double *);
   SensibleHeat          = (double *) va_arg(ap, double *);
   VaporMassFlux         = (double *) va_arg(ap, double *);
-  
+  BlowingMassFlux       = (double *) va_arg(ap, double *); 
+  SurfaceMassFlux       = (double *) va_arg(ap, double *);   
+  LastSnow              = (int) va_arg(ap, int);
+  lag_one               = (float) va_arg(ap, float);
+  sigma_slope              = (float) va_arg(ap, float);
+  fetch               = (float) va_arg(ap, float);
+  Nveg              = (int) va_arg(ap, int);
+  iveg              = (int) va_arg(ap, int);
+
   /* Calculate active temp for energy balance as average of old and new  */
   
   TMean = TSurf;
@@ -198,7 +220,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
 
   if (Wind > 0.0) 
-    Ra /= StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0); 
+    Ra /= StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]); 
   else
     Ra = HUGE_RESIST;
 
@@ -232,7 +254,10 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
      (Equation 3.32, Bras 1990) */
 
   latent_heat_from_snow(AirDens, Density, EactAir, Lv, Press, Ra, TMean, Vpd,
-			LatentHeat, LatentHeatSub, VaporMassFlux);
+			LatentHeat, LatentHeatSub, VaporMassFlux, BlowingMassFlux, 
+			SurfaceMassFlux, Dt, Tair, LastSnow, SurfaceLiquidWater,
+			Wind, Z0, Z, SnowDepth, overstory, lag_one, sigma_slope, fetch, 
+			Nveg, iveg);
 
   
   /* Calculate advected heat flux from rain 

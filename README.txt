@@ -243,41 +243,6 @@ Undefined daily precipitation for deserts
 	are 0 (or very small). (found by Liz Clark)
 
 
-Aerodynamic resistance incorrect in output fluxes file
-
-	Files affected:
-	SnowPackEnergyBalance.c, calc_surf_energy_bal.c, full_energy.c,
-	put_data.c, snow_intercept.c, snow_melt.c, solve_snow.c,
-	surface_fluxes.c, vicNl.h, vicNl_def.h
-
-	Description:
-	In 4.0.4, the aerodynamic resistance written to the output fluxes file
-	rarely reflected the value actually used in flux computations.  This
-	has been fixed.
-
-	VIC actually computes an array of 3 different aerodynamic resistances,
-	as follows:
-	  aero_resist[0] : over vegetation or bare soil
-	  aero_resist[1] : over snow-filled overstory
-	  aero_resist[2] : over snow pack
-	VIC determines which element of the array to use depending on the current
-	vegetation type and whether snow is present.  In addition, in most cases,
-	VIC applies a stability correction to this aerodynamic resistance before
-	using it in flux computations.  Furthermore, when the current vegetation
-	tile contains overstory and snow is present on the ground, aero_resist[2]
-	is used for snow pack flux computations and either aero_resist[1] or
-	aero_resist[0] is used for canopy flux computations, meaning that two
-	different aerodynamic resistances are in use in the same time step.
-
-	However, VIC 4.0.4 always wrote the uncorrected value of aero_resist[0]
-	to the fluxes file.
-
-	In 4.0.5, the value written to the fluxes file is the actual value used
-	in flux computations, including any corrections that were applied.  In
-	the case mentioned above in which two different aerodynamic resistances
-	are in use at the same time, the one used for the snow pack is written.
-
-
 100% snow when air_temp = MAX_SNOW_TEMP
 
 	Files affected:

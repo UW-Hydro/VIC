@@ -20,6 +20,8 @@ void write_layer(layer_data_struct *layer,
   are contained in the thawed, frozen and unfrozen sublayers of each 
   soil layer.  It also gives the total soil moisture for each layer.
 
+  xx-xx-01 Modified to handle spatial soil frost.                 KAC
+
 **********************************************************************/
 {
   extern option_struct options;

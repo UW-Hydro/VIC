@@ -37,6 +37,7 @@ void write_debug(atmos_data_struct    *atmos,
 
   Modifications:
   07-15-98 modified to work with elevation bands                 KAC
+  xx-xx-01 Modified to work with closed canopy energy balance.   KAC
 
 **********************************************************************/
 

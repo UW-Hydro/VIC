@@ -21,11 +21,28 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
 **********************************************************************/
 {
   extern option_struct options;
+  extern param_set_struct param_set;
 
   atmos_data_struct *temp;
   char              errorstr[MAXSTRING];
 
   temp = (atmos_data_struct*)calloc(*nrecs,sizeof(atmos_data_struct));
+
+  param_set.SHORTWAVE  = FALSE; 
+  param_set.LONGWAVE   = FALSE; 
+  param_set.PRESSURE   = FALSE;
+  param_set.TSKC       = FALSE; 
+  param_set.VP         = FALSE; 
+  param_set.VPD        = FALSE; 
+  param_set.REL_HUMID  = FALSE; 
+  param_set.SPEC_HUMID = FALSE; 
+  param_set.ALBEDO     = FALSE; 
+  param_set.AIR_TEMP   = FALSE;
+  param_set.TMAX       = FALSE; 
+  param_set.TMIN       = FALSE; 
+  param_set.PREC       = FALSE; 
+  param_set.WIND       = FALSE; 
+  param_set.DENSITY    = FALSE; 
 
   /***** Read Forcing Files in PILPS2c Format *****/
   if(strcasecmp(options.FORCE_TYPE,"PILPS")==0) {

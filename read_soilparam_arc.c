@@ -86,6 +86,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		model.						KAC
   4-12-98       Modified to read all parameters from a single
                 standard input file.                            KAC
+  xx-xx-01      modified to read in spatial snow and soil frost 
+                parameters.                                     KAC
+  04-25-03      modified to handle Bart's new Arno parameterization,
+                as well as the original.                        KAC
 
 **********************************************************************/
 {
@@ -107,6 +111,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double          clay[MAX_LAYERS];
   double          sand[MAX_LAYERS];
   double          sum_depth;
+  double          tmp;
   char            ErrStr[MAXSTRING];
   char            namestr[MAXSTRING];
   char            tmpstr[MAXSTRING];
@@ -340,6 +345,20 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcat(namestr,tmpstr);
     temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // SPATIAL_FROST
+
+    /*************************************************
+    if NEW_ARNO_TYPE == TRUE then convert the baseflow 
+    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
+    *************************************************/
+    if(options.NEW_ARNO_TYPE) {
+      layer = options.Nlayer-1;
+      tmp = temp.Dsmax;
+      temp.Dsmax = temp.Dsmax * 
+	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
+	temp.Ds * temp.max_moist[layer];
+      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
+      temp.Ws = temp.Ws/temp.max_moist[layer];
+    }
 
     /*******************************************
       Compute Soil Layer Properties

@@ -39,6 +39,10 @@ void write_model_state(dist_prcp_struct    *prcp,
            it is recomputed in initialize_model_state.         KAC
   09-Oct-03 Removed initial space on veg/band info line in ASCII
 	    file.                                                 TJB
+  26-Oct-04 Changed calculation of Nbytes in binary state file to
+	    account for bare soil values (extra veg class per grid
+	    cell).  Without this fix, attempts to skip grid cells
+	    fail.						TJB
 
 *********************************************************************/
 {
@@ -89,16 +93,16 @@ void write_model_state(dist_prcp_struct    *prcp,
   // IF YOU EDIT THIS FILE: UPDATE THIS VALUE!
   if ( options.BINARY_STATE_FILE ) {
     Nbytes = ( options.Nnode * sizeof(double) // dz_node
-	       + Nveg * sizeof(double) // mu
-	       + Nveg * sizeof(char) // STILL_STORM
-	       + Nveg * sizeof(int) // DRY_TIME
-	       + Nveg * Nbands * 2 * sizeof(int) // veg & band
-	       + Nveg * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
-	       + (Nveg-1) * Nbands * sizeof(double) // dew
-	       + Nveg * Nbands * sizeof(int) // last_snow
-	       + Nveg * Nbands * sizeof(char) // MELTING
-	       + Nveg * Nbands * sizeof(double) * 9 // other snow parameters
-	       + Nveg * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
+	       + (Nveg+1) * sizeof(double) // mu
+	       + (Nveg+1) * sizeof(char) // STILL_STORM
+	       + (Nveg+1) * sizeof(int) // DRY_TIME
+	       + (Nveg+1) * Nbands * 2 * sizeof(int) // veg & band
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
+	       + Nveg * Nbands * Ndist * sizeof(double) // dew
+	       + (Nveg+1) * Nbands * sizeof(int) // last_snow
+	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
+	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
+	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
     fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
   }
 

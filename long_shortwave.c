@@ -17,6 +17,11 @@ static char vcid[] = "$Id$";
   08-04-98 Code was modified to use Reiner's corrections so that it would
            function correctly in high latitudes during global simulations KAC
 
+  References:
+  Forsythe, W.C., et al., A Model Comparison for Daylength as a Function of
+  Latitude and Day of Year, Ecological Modelling 80(1995), pp. 87-95.
+
+
 *******************************************************************************/
 double in_shortwave(float lat, int day, double trans)
 {
@@ -27,12 +32,8 @@ double in_shortwave(float lat, int day, double trans)
   double lat_rad;               /* latitude in radians */
 
   lat_rad = lat * DtoR;
- 
-  /** Old calculations for net shortwave radiation **/
-/*   declination = 0.4093 * sin(2.0 * PI/DAYS_PER_YEAR * day - 1.405); */
-/*   omega_s = acos(-tan(lat_rad)*tan(declination)); */
- 
-  /** Reiner's correction for global simulations **/
+  
+  /** equations established for global simulations (see Forsythe, 1995) **/
   declination = asin(0.39795 * cos(0.2163108 + 2. *
 	        atan(0.9671396 * tan(0.00860*(day-186)))));
 

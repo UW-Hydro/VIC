@@ -28,21 +28,21 @@ energy_bal_struct **make_energy_bal(int nveg, int *Nnodes)
     for(j=0;j<options.SNOW_BAND;j++) {
       temp[i][j].frozen = FALSE;
       if(options.FROZEN_SOIL) {
-	temp[i][j].T   = (double *)calloc( *Nnodes, sizeof(double));
-	temp[i][j].dz  = (double *)calloc( *Nnodes, sizeof(double));
-	temp[i][j].ice = (double *)calloc( *Nnodes, sizeof(double));
+/* 	temp[i][j].T   = (double *)calloc( *Nnodes, sizeof(double)); */
+/* 	temp[i][j].dz  = (double *)calloc( *Nnodes, sizeof(double)); */
+/* 	temp[i][j].ice = (double *)calloc( *Nnodes, sizeof(double)); */
       }
       else if(options.FULL_ENERGY) {
 	*Nnodes        = 3;
-	temp[i][j].T   = (double *)calloc(3, sizeof(double));
-	temp[i][j].dz  = (double *)calloc(3, sizeof(double));
-	temp[i][j].ice = NULL;
+/* 	temp[i][j].T   = (double *)calloc(3, sizeof(double)); */
+/* 	temp[i][j].dz  = (double *)calloc(3, sizeof(double)); */
+/* 	temp[i][j].ice = NULL; */
       }
       else {
 	*Nnodes        = 0;
-	temp[i][j].T   = NULL;
-	temp[i][j].dz  = (double *)calloc(options.Nlayer, sizeof(double));
-	temp[i][j].ice = NULL;
+/* 	temp[i][j].T   = NULL; */
+/* 	temp[i][j].dz  = (double *)calloc(options.Nlayer, sizeof(double)); */
+/* 	temp[i][j].ice = NULL; */
       }
     }
   }

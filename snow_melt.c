@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Mon Jan  4 11:59:42 1999 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Fri Apr  9 14:20:20 1999 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -98,9 +98,10 @@ void snow_melt(soil_con_struct   soil_con,
                double           *save_latent,
                double           *save_sensible,
                double           *save_Qnet,
-	       double           *save_Trad,
 	       double           *save_refreeze_energy)
 {
+  int    Twidth;
+
   double DeltaPackCC;            /* Change in cold content of the pack */
   double DeltaPackSwq;           /* Change in snow water equivalent of the
                                    pack (m) */
@@ -195,7 +196,7 @@ void snow_melt(soil_con_struct   soil_con,
          RainFall, SurfaceSwq, snow->surf_water, OldTSurf,
          &RefreezeEnergy, &vapor_flux, &advection, &deltaCC, grnd_surf_temp,
          snow->depth, snow->density,surf_atten,&grnd_flux,&latent_heat,
-         &sensible_heat,save_Trad);
+         &sensible_heat);
 
   snow->vapor_flux = vapor_flux;
   save_refreeze_energy[0] = RefreezeEnergy;
@@ -283,10 +284,31 @@ void snow_melt(soil_con_struct   soil_con,
 				 &vapor_flux, &advection, &deltaCC, 
 				 grnd_surf_temp, snow->depth,
 				 snow->density,surf_atten,&grnd_flux,
-				 &latent_heat, &sensible_heat,
-				 save_Trad);
+				 &latent_heat, &sensible_heat);
 
-    if(snow->surf_temp <= -9998)
+    while(snow->surf_temp <= -9998) {
+      
+      Twidth *= 2;
+      
+      fprintf(stderr,"WARNING: SNOW_DT too narrow now using %i times value.\nIf this message appears often increase SNOW_DT in vicNl_def.h.\n",Twidth);
+      
+      snow->surf_temp = root_brent((snow->surf_temp
+					    -(SNOW_DT*(double)Twidth)),0.0,
+				   SnowPackEnergyBalance, delta_t, 
+				   aero_resist, z2, 
+				   displacement, Z0, wind, net_short, longwave,
+				   density, Le, air_temp, pressure * 1000.,
+				   vpd * 1000., vp * 1000., RainFall, 
+				   SurfaceSwq,
+				   snow->surf_water, OldTSurf, &RefreezeEnergy, 
+				   &vapor_flux, &advection, &deltaCC, 
+				   grnd_surf_temp, snow->depth,
+				   snow->density,surf_atten,&grnd_flux,
+				   &latent_heat, &sensible_heat);
+      
+    }
+    
+    if(snow->surf_temp <= -8887)
       ErrorSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
 				 z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
@@ -297,7 +319,7 @@ void snow_melt(soil_con_struct   soil_con,
 				 &deltaCC, grnd_surf_temp,
 				 snow->depth, snow->density,surf_atten,
 				 &grnd_flux,&latent_heat,
-				 &sensible_heat,save_Trad);
+				 &sensible_heat);
 
     Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
 				     z2, displacement, Z0, wind, net_short,
@@ -310,7 +332,7 @@ void snow_melt(soil_con_struct   soil_con,
 				     &advection, &deltaCC, grnd_surf_temp,
 				     snow->depth, snow->density,surf_atten,
 				     &grnd_flux,&latent_heat,
-				     &sensible_heat,save_Trad);
+				     &sensible_heat);
 
     snow->vapor_flux = vapor_flux;
     save_refreeze_energy[0] = RefreezeEnergy;
@@ -551,7 +573,6 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
 
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
-  double *TMean;                /* Average temperature for time step (C) */
 
   /* initialize variables */
   Dt                 = (double) va_arg(ap, double);
@@ -583,7 +604,6 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   GroundFlux         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
-  TMean              = (double *) va_arg(ap, double *);
   
   /* print variables */
   fprintf(stderr,"Dt = %lf\n",Dt);
@@ -615,7 +635,6 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"GroundFlux = %lf\n",GroundFlux[0]);
   fprintf(stderr,"LatentHeat = %lf\n",LatentHeat[0]);
   fprintf(stderr,"SensibleHeat = %lf\n",SensibleHeat[0]);
-  fprintf(stderr,"TMean = %lf\n",TMean[0]);
   
   vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
 

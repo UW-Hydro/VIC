@@ -23,12 +23,12 @@ cell_data_struct **make_cell_data(int veg_type_num, int Nlayer)
   for(i=0;i<veg_type_num;i++) {
     temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND, 
 					 sizeof(cell_data_struct));
-    for(j=0;j<options.SNOW_BAND;j++) {
-      temp[i][j].layer 
-	= (layer_data_struct*)calloc(Nlayer,
-				     sizeof(layer_data_struct));
+/*     for(j=0;j<options.SNOW_BAND;j++) { */
+/*       temp[i][j].layer  */
+/* 	= (layer_data_struct*)calloc(Nlayer, */
+/* 				     sizeof(layer_data_struct)); */
       
-    }
+/*     } */
   }
   return temp;
 }

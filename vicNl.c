@@ -53,12 +53,12 @@ void main(int argc, char *argv[])
   double  storage;
   double  *EMPTY;
   char    *EMPTY_C;
-  dmy_struct *dmy;
-  atmos_data_struct *atmos;
-  veg_con_struct *veg_con;
-  soil_con_struct soil_con;
+  dmy_struct         *dmy;
+  atmos_data_struct  *atmos;
+  veg_con_struct     *veg_con;
+  soil_con_struct     soil_con;
   global_param_struct global_param;
-  dist_prcp_struct prcp;	/* stores information about distributed 
+  dist_prcp_struct    prcp;	/* stores information about distributed 
                                    precipitation */
   filenames_struct filenames;
   filenames_struct builtnames;
@@ -182,7 +182,7 @@ void main(int argc, char *argv[])
 	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
 			infiles.init_snow,soil_con.gridcel);
       }
-      if(options.FULL_ENERGY) {
+      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	fprintf(stderr,"Energy Balance Initialization\n");
 	initialize_energy_bal(prcp.energy,prcp.cell,&soil_con,
 			      atmos[0].air_temp,prcp.mu,soil_con.gridcel,
@@ -233,14 +233,17 @@ void main(int argc, char *argv[])
       free((char *)soil_con.AreaFract);
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
-      if(options.FROZEN_SOIL) {
-	free((char*)soil_con.dz_node);
-	free((char*)soil_con.expt_node);
-	free((char*)soil_con.max_moist_node);
-	free((char*)soil_con.alpha);
-	free((char*)soil_con.beta);
-	free((char*)soil_con.gamma);
-      }
+/*    if(options.FROZEN_SOIL) {  */
+/* 	free((char*)soil_con.dz_node);  */
+/* 	free((char*)soil_con.expt_node);  */
+/* 	free((char*)soil_con.max_moist_node); */
+/* 	free((char*)soil_con.alpha); */
+/* 	free((char*)soil_con.beta); */
+/* 	free((char*)soil_con.gamma); */
+/*       } */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
+
+/*   free((char *)prcp); */
+  
 }	/* End Main Program */

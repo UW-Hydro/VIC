@@ -20,9 +20,13 @@ double calc_rainonly(double,double,double,double,double);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct);
 double calc_snow_ground_flux(int, int, int, int, double, double, double, 
 			     double, double, double *, double *, double *, 
-			     double *, double *, energy_bal_struct *, 
+			     double *, energy_bal_struct *, 
 			     snow_data_struct *, layer_data_struct *,
                              layer_data_struct *, soil_con_struct, char *);
+int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
+				double *, double, double *, double *, 
+				double *, double *, double *, double *, 
+				double *, double *, int);
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double calc_surf_energy_bal(char, int, int, int, int, int, int, int, int, 
 			    double, double, double, double, double, 
@@ -53,7 +57,8 @@ void   correct_precip(double *, double *, double);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct,
 		 veg_con_struct *,dmy_struct *,global_param_struct,
 		 outfiles_struct,int,int,char,char);
-void   distribute_soil_property(double *,double,double,double**,
+void   distribute_soil_property(double *,double,double,
+				double **l_param,
 				int, int, double *, double *);
 
 double error_calc_snow_ground_flux(double Tsurf, ...);
@@ -204,7 +209,7 @@ void   snow_melt(soil_con_struct, int, int, double, double, double,
 		 snow_data_struct *, double, double, double, double, double, 
 		 double, double, double, double, double, double, double, 
 		 double, double, double, double *, double *, double *,
-		 double *, double *, double *, double *, double *, double *);
+		 double *, double *, double *, double *, double *);
 double SnowPackEnergyBalance(double, va_list);
 double soil_conductivity(double,double,double,double);
 void   soil_thermal_calc(soil_con_struct, layer_data_struct *,

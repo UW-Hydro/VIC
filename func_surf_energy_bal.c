@@ -77,7 +77,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double            *sensible_heat;
   double            *deltaH;
   double            *store_error;
-  double            *TMean;
+  double             TMean;
   double            *rad;
   double            *depth;
   double            *Wcr;
@@ -157,7 +157,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   sensible_heat = (double *) va_arg(ap, double *);
   deltaH        = (double *) va_arg(ap, double *);
   store_error   = (double *) va_arg(ap, double *);
-  TMean         = (double *) va_arg(ap, double *);
   rad           = (double *) va_arg(ap, double *);
   depth         = (double *) va_arg(ap, double *);
   Wcr           = (double *) va_arg(ap, double *);
@@ -189,13 +188,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /**********************************************
     Compute Surface Temperature at Half Time Step
     **********************************************/
-  *TMean = Ts;
+  TMean = Ts;
 
   if(!options.FROZEN_SOIL) {
     /*************************************************
       Use Xu's Equations to Calculate Thermal Fluxes
     *************************************************/
-    *T1 = estimate_T1(TMean[0], T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
+    *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
 		      Cs2, dp, delta_t);
     
   }
@@ -203,7 +202,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     /*************************************************************
       Explicitly Solve Thermal Fluxes For all Soil Thermal Nodes 
     *************************************************************/
-    T_node[0] = *TMean;
+    T_node[0] = TMean;
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
 		    bubble,expt_node,ice_node,alpha,
@@ -214,27 +213,27 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /*****************************************************
     Compute the Ground Heat Flux from the Top Soil Layer
   *****************************************************/
-  *grnd_flux = surf_atten * (kappa1/D1*((*T1) - (*TMean)));
+  *grnd_flux = surf_atten * (kappa1/D1*((*T1) - (TMean)));
 
   /******************************************************
     Compute the Current Ice Content of the Top Soil Layer
   ******************************************************/
-  if(options.FROZEN_SOIL && (*TMean+ *T1)/2.<0.) {
-    ice = moist - maximum_unfrozen_water((*TMean+ *T1)/2.,
+  if(options.FROZEN_SOIL && (TMean+ *T1)/2.<0.) {
+    ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
 					 max_moist,bubble,expt);
     if(ice<0.) ice=0.;
     if(ice>max_moist) ice=max_moist;
   }
   else ice=0.;
  
-  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
+  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (TMean + *T1)/2.) * D1 / delta_t;
   *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
   /***************************
     Compute Evapotranspiration
   ***************************/
   *rad = (1.0 - albedo) * shortwave + longwave 
-       - STEFAN_B * pow(*TMean+KELVIN,4.0) + *grnd_flux + *deltaH;
+       - STEFAN_B * pow(TMean+KELVIN,4.0) + *grnd_flux + *deltaH;
   if(VEG && CALC_EVAP) {
     tmp_rainfall[WET] = rainfall[WET];
     tmp_rainfall[DRY] = rainfall[DRY];
@@ -261,13 +260,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /************************************************
     Compute the Sensible Heat Flux from the Surface
     ************************************************/
-  *sensible_heat = atmos_density*Cp*(Tair - (*TMean))/ra;
+  *sensible_heat = atmos_density*Cp*(Tair - (TMean))/ra;
 
   /*************************************
     Compute Surface Energy Balance Error
     *************************************/
   error = (1.-albedo)*shortwave 
-        + emissivity*(longwave-STEFAN_B*pow(*TMean + KELVIN,4.))
+        + emissivity*(longwave-STEFAN_B*pow(TMean + KELVIN,4.))
         + *sensible_heat + *latent_heat + *grnd_flux + *deltaH + snow_energy;
 
   *store_error = error;

@@ -84,7 +84,7 @@ double canopy_evap(layer_data_struct *layer_wet,
   double             tmp_Evap;
   double             canopyevap;
   double             tmp_Wdew;
-  double            *layerevap;
+  double             layerevap[MAX_LAYERS];
   layer_data_struct *tmp_layer;
   veg_var_struct    *tmp_veg_var;
 
@@ -120,7 +120,9 @@ double canopy_evap(layer_data_struct *layer_wet,
 
   for(dist=0;dist<Ndist;dist++) {
 
-    layerevap = (double *)calloc(options.Nlayer,sizeof(double));
+    for(i=0;i<options.Nlayer;i++)
+      layerevap[i] = 0;
+/*     layerevap = (double *)calloc(options.Nlayer,sizeof(double)); */
     if(dist==0) {
       tmp_layer   = layer_wet;
       tmp_veg_var = veg_var_wet;
@@ -193,7 +195,7 @@ double canopy_evap(layer_data_struct *layer_wet,
       tmp_layer[i].evap  = layerevap[i];
       tmp_Evap          += layerevap[i];
     }
-    free((char *)layerevap);
+/*     free((char *)layerevap); */
     
     Evap += tmp_Evap * mu / (1000. * dt * 3600.);
 

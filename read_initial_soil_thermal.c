@@ -97,9 +97,17 @@ void read_initial_soil_thermal(FILE   *initsoil,
     if(Nnodes!=tmpnodes) {
       sprintf(ErrStr,"Number of nodes defined in soil thermal initialization file (%i), not equal to number of nodes defined in model (%i).",tmpnodes,Nnodes);
     }
-    for(i=0;i<2;i++)       fdepth[i] = 0.;
-    for(i=0;i<options.Nlayer;i++) fscanf(initsoil, "%lf",     &moist[i]);
-    for(i=0;i<options.Nlayer;i++) ice[i] = 0.;
+    for(i=0;i<2;i++) {
+      fscanf(initsoil, "%lf", &fdepth[i]);
+      fdepth[i] = 0.;
+    }
+    for(i=0;i<options.Nlayer;i++) fscanf(initsoil, "%lf", &moist[i]);
+
+    for(i=0;i<options.Nlayer;i++) {
+      fscanf(initsoil, "%lf", &ice[i]);
+      moist[i] += ice[i];
+      ice[i] = 0.;
+    }
     for(i=0;i<Nnodes;i++)  fscanf(initsoil, "%lf %lf", &thermdepths[i], &T[i]);
 
     compute_dz(dz, thermdepths, Nnodes, dp);
@@ -120,35 +128,35 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
  
   char ErrStr[MAXSTRING];
   int  i, j;
+  double sum;
 
   if(thermdepths[Nnodes-1] != dp) {
     sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
 	    Nnodes-1,dp,thermdepths[Nnodes-1]);
     nrerror(ErrStr);
   }
+
   for(j=Nnodes-1;j>0;j--) {
     thermdepths[j] -= thermdepths[j-1];
-    thermdepths[j] = (double)((int)(thermdepths[j] * 10000. + 0.5))
-      / 10000.;
+    thermdepths[j] = rint(thermdepths[j] * 10000.) / 10000.;
   }
-  for(j=1;j<Nnodes-1;j++) {
-    if((int)(thermdepths[j]*1000.+0.5) 
-       == (int)(thermdepths[j+1]*1000.+0.5))
-      dz[j] = (thermdepths[j] + thermdepths[j+1]) / 2.;
-    else {
-      dz[j] = thermdepths[j];
-      j++;
-      dz[j] = thermdepths[j+1];
-      if((int)((dz[j-1]
-		+dz[j])/2.*1000.+0.5)
-	 != (int)(thermdepths[j]*1000.+0.5)) {
-	sprintf(ErrStr,"Check spacing between thermal layers %i and %i\n",
-		j-1,j);
-	nrerror(ErrStr);
-      }
+
+  sum = 0;
+  dz[0] = rint(thermdepths[1] * 10000.) / 10000.;
+  for(j=1;j<Nnodes;j++) {
+    dz[j] = 2. * rint((thermdepths[j] - dz[j-1] / 2.) * 10000.) / 10000.;
+    if(dz[j] < 0) {
+      sprintf(ErrStr,"Check spacing between thermal layers %i and %i\n",
+	      j-1,j);
+      nrerror(ErrStr);
     }
+    sum += (dz[j-1] + dz[j]) / 2.;
   }
-  dz[0] = thermdepths[1];
-  dz[Nnodes-1] = thermdepths[Nnodes-1];
+
+  if(rint(sum*1000) != rint(dp*1000)) {
+    sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
+	    Nnodes-1,dp,sum);
+    nrerror(ErrStr);
+  }
 
 }

@@ -17,7 +17,6 @@ double calc_snow_ground_flux(int                dt,
 			     double            *grnd_flux,
 			     double            *deltaH,
 			     double            *snow_flux,
-			     double            *Trad,
                              energy_bal_struct *energy,
                              snow_data_struct  *snow,
 			     layer_data_struct *layer_wet,
@@ -33,6 +32,8 @@ double calc_snow_ground_flux(int                dt,
 **********************************************************************/
 
   extern option_struct options;
+
+  int    Twidth;
 
   double T2;
   double Ts_old;
@@ -53,18 +54,18 @@ double calc_snow_ground_flux(int                dt,
 
   double error;
   double  *T_node;
-  double  *Tnew_node;
+  double  Tnew_node[MAX_NODES];
   double  *dz_node;
-  double  *kappa_node;
-  double  *Cs_node;
-  double  *moist_node;
+  double  kappa_node[MAX_NODES];
+  double  Cs_node[MAX_NODES];
+  double  moist_node[MAX_NODES];
   double  *expt_node;
   double  *max_moist_node;
   double  *ice_node;
   double  *alpha;
   double  *beta;
   double  *gamma;
-  layer_data_struct *layer;
+  layer_data_struct layer[MAX_LAYERS];
 
   /**************************************************
     Initialize Snow Flux Variables
@@ -91,11 +92,11 @@ double calc_snow_ground_flux(int                dt,
   ***********************************************************/
   if(options.FROZEN_SOIL) {
 
-    layer          = (layer_data_struct *)calloc(options.Nlayer,
-						 sizeof(layer_data_struct));
-    kappa_node     = (double *)calloc(Nnodes,sizeof(double));
-    Cs_node        = (double *)calloc(Nnodes,sizeof(double));
-    moist_node     = (double *)calloc(Nnodes,sizeof(double));
+/*     layer          = (layer_data_struct *)calloc(options.Nlayer, */
+/* 						 sizeof(layer_data_struct)); */
+/*     kappa_node     = (double *)calloc(Nnodes,sizeof(double)); */
+/*     Cs_node        = (double *)calloc(Nnodes,sizeof(double)); */
+/*     moist_node     = (double *)calloc(Nnodes,sizeof(double)); */
     expt_node      = soil_con.expt_node; 
     max_moist_node = soil_con.max_moist_node;  
     alpha          = soil_con.alpha; 
@@ -109,31 +110,52 @@ double calc_snow_ground_flux(int                dt,
     T_node    = energy->T;
     dz_node   = energy->dz;
     ice_node  = energy->ice;
-    Tnew_node = (double *)calloc(Nnodes,sizeof(double));
+/*     Tnew_node = (double *)calloc(Nnodes,sizeof(double)); */
 
   }
 
   /**************************************************
     Find Surface Temperature using Root Brent Method
   **************************************************/
+  Twidth = 1;
+
   surf_temp = root_brent(energy->T[0]-SURF_DT, 0., func_snow_ground_flux,
 			 T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
 			 delta_t, snow_density, snow_depth, Tsnow_surf,
 			 D1, D2, dp,moist, ice0, max_moist, bubble, expt,
 			 grnd_flux, deltaH, 
-			 snow_flux, Trad, T1,
+			 snow_flux, T1,
 			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 			 moist_node,expt_node,max_moist_node,ice_node,
 			 alpha,beta,gamma,Nnodes,FIRST_SOLN);
  
-  if(surf_temp <= -9998)
+  while(surf_temp <= -9998) {
+
+    Twidth *= 2;
+    
+    fprintf(stderr,"WARNING: SURF_DT too narrow now using %i times value.\nIf this message appears often increase SURF_DT in vicNl_def.h.\n",Twidth);
+    
+    surf_temp = root_brent(energy->T[0]-(SURF_DT*(double)Twidth), 
+			   0., func_snow_ground_flux,
+			   T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
+			   delta_t, snow_density, snow_depth, Tsnow_surf,
+			   D1, D2, dp,moist, ice0, max_moist, bubble, expt,
+			   grnd_flux, deltaH, 
+			   snow_flux, T1,
+			   T_node,Tnew_node,dz_node,kappa_node,Cs_node,
+			   moist_node,expt_node,max_moist_node,ice_node,
+			   alpha,beta,gamma,Nnodes,FIRST_SOLN);
+    
+  }
+  
+  if(surf_temp <= -8887)
     error_calc_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
 				kappa1, kappa2, Cs1, Cs2,
 				delta_t, snow_density, snow_depth, 
 				Tsnow_surf, D1, D2, dp, moist, ice0, 
 				max_moist, bubble, expt,
 				grnd_flux, deltaH, 
-				snow_flux, Trad, T1,
+				snow_flux, T1,
 				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				moist_node,expt_node,max_moist_node,ice_node,
 				alpha,beta,gamma,Nnodes,FIRST_SOLN);
@@ -147,7 +169,7 @@ double calc_snow_ground_flux(int                dt,
 				 Tsnow_surf, D1, D2, dp, moist, ice0, 
 				 max_moist, bubble, expt,
 				 grnd_flux, deltaH, 
-				 snow_flux, Trad,T1,
+				 snow_flux, T1,
 				 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				 moist_node,expt_node,max_moist_node,ice_node,
 				 alpha,beta,gamma,Nnodes,FIRST_SOLN);
@@ -163,11 +185,11 @@ double calc_snow_ground_flux(int                dt,
 			     Nnodes,iveg,mu,Tnew_node,dz_node,kappa_node,
 			     Cs_node,moist_node,expt_node,max_moist_node);
 
-    free((char *)Tnew_node);
-    free((char *)moist_node);
-    free((char *)kappa_node);
-    free((char *)Cs_node);
-    free((char *)layer);
+/*     free((char *)Tnew_node); */
+/*     free((char *)moist_node); */
+/*     free((char *)kappa_node); */
+/*     free((char *)Cs_node); */
+/*     free((char *)layer); */
 
   }
 

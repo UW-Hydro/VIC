@@ -27,6 +27,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   int    tmpflag;
   int    Nveg_type;
   char   str[MAXSTRING];
+  char   ErrStr[MAXSTRING];
   double maxd;
 
   rewind(veglib);
@@ -107,7 +108,10 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
     else fgets(str, MAXSTRING, veglib);
     fscanf(veglib, "%s", str);
   }
-  if(i!=Nveg_type) nrerror("Error reading vegetation library file.\n");
+  if(i!=Nveg_type) {
+    sprintf(ErrStr,"ERROR: Problem reading vegetation library file - make sure the file has the right number of columns.\n");
+    nrerror(ErrStr);
+  }
   *Ntype = Nveg_type;
 
   return temp;

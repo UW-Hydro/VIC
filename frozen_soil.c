@@ -74,16 +74,16 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
   double  tdepth;
   double  unfrozen;
   double  frozen;
-  double *old_fdepth;
-  double *old_tdepth;
+  double  old_fdepth[MAX_LAYERS];
+  double  old_tdepth[MAX_LAYERS];
   double *tmp_ptr;
 
   fdepth = energy->fdepth[0];
   tdepth = energy->fdepth[1];
 
   /** Calculate New Layer Depths **/
-  old_fdepth = (double *)calloc(options.Nlayer,sizeof(double));
-  old_tdepth = (double *)calloc(options.Nlayer,sizeof(double));
+/*   old_fdepth = (double *)calloc(options.Nlayer,sizeof(double)); */
+/*   old_tdepth = (double *)calloc(options.Nlayer,sizeof(double)); */
   for(i=0;i<options.Nlayer;i++) {
     old_fdepth[i] = layer[i].fdepth;
     old_tdepth[i] = layer[i].tdepth;
@@ -133,8 +133,8 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
 			    soil_con.depth, options.Nlayer);
     }
   }
-  free((char*)old_fdepth);
-  free((char*)old_tdepth);
+/*   free((char*)old_fdepth); */
+/*   free((char*)old_tdepth); */
 
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Moisture Redistribution\n");
@@ -255,21 +255,29 @@ void solve_T_profile(double *T,
 
   extern option_struct options;
   extern debug_struct  debug;
+  
+  static double A[MAX_NODES];
+  static double B[MAX_NODES];
+  static double C[MAX_NODES];
+  static double D[MAX_NODES];
+  static double E[MAX_NODES];
 
-  static double *A, *B, *C, *D, *E;
-
+  char   Error;
+  int    try;
   double maxdiff, diff;
-  double threshold = 1.e-3;	/* temperature profile iteration threshold */
   double oldT;
   double fprime;
-  int j, Done, ItCount;
+  int    j, Done, ItCount;
+  int    Twidth;
+
+  Twidth = 1;
 
   if(FIRST_TIME) {
-    A = (double *)calloc(Nnodes,sizeof(double));
-    B = (double *)calloc(Nnodes,sizeof(double));
-    C = (double *)calloc(Nnodes,sizeof(double));
-    D = (double *)calloc(Nnodes,sizeof(double));
-    E = (double *)calloc(Nnodes,sizeof(double));
+/*     A = (double *)calloc(Nnodes,sizeof(double)); */
+/*     B = (double *)calloc(Nnodes,sizeof(double)); */
+/*     C = (double *)calloc(Nnodes,sizeof(double)); */
+/*     D = (double *)calloc(Nnodes,sizeof(double)); */
+/*     E = (double *)calloc(Nnodes,sizeof(double)); */
   }
   else {
 
@@ -296,89 +304,186 @@ void solve_T_profile(double *T,
     
     for(j=0;j<Nnodes;j++) T[j]=T0[j];
     
-    Done = FALSE;
-    ItCount = 0;
+    Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
+				     ice,bubble,expt,alpha,
+				     gamma,A,B,C,D,E,Twidth);
+
+    while(Error == -9999) {
+
+      Twidth *= 2;
+
+      fprintf(stderr,"WARNING: SOIL_DT too narrow now using %i times value.\nIf this message appears often increase SOIL_DT in vicNl_def.h.\n",Twidth);
+
+      for(j=0;j<Nnodes;j++) T[j]=T0[j];
+      
+      Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
+				       ice,bubble,expt,alpha,
+				       gamma,A,B,C,D,E,Twidth);
+
+    }
+    if(Error == -8888) {
+
+      fprintf(stderr,"WARNING: Soil thermal flux solution unable to converge at current time step %lf sec, trying again at %lf sec.\n",deltat,deltat/10);
+
+      FIRST_SOLN[0] = TRUE;
+      deltat /= 10;
+      for(try=0;try<10;try++) {
+
+	for(j=1;j<Nnodes-1;j++) {
+	  A[j] = beta[j-1]*deltat*(kappa[j+1]-kappa[j-1]);
+	  B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
+	  C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
+	  D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
+	  E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
+	    + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
+	}
+	if(options.NOFLUX) {
+	  j = Nnodes-1;
+	  A[j] = beta[j-1]*deltat*(kappa[j]-kappa[j-1]);
+	  B[j] = 2.*alpha[j-1]*alpha[j-1]*deltat*kappa[j];
+	  C[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j]*T0[j];
+	  D[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*ice_density*Lf;
+	  E[j] = alpha[j-1]*alpha[j-1]*beta[j-1]*Cs[j] 
+	    + 4.*kappa[j]*alpha[j-1]*alpha[j-1]*deltat;
+	}
+
+	for(j=0;j<Nnodes;j++) T[j]=T0[j];
     
-    while(!Done && ItCount<MAXIT) {
-      ItCount++;
-      maxdiff=threshold;
-      for(j=1;j<Nnodes-1;j++) {
-	oldT=T[j];
+	Error = calc_soil_thermal_fluxes(Nnodes,T,T0,moist,max_moist,
+					 ice,bubble,expt,alpha,
+					 gamma,A,B,C,D,E,Twidth);
+	
+	if(Error) {
+	  vicerror("Unable to get soil thermal flux solution to converge.\n");
+	}
+	
+	for(j=0;j<Nnodes;j++) T0[j]=T[j];
+	
+      }
+
+    }
+    
+  }
+
+}
   
-	/**	2nd order variable kappa equation **/
-	fprime = (T[j+1]-T[j-1])/alpha[j-1];
+
+int calc_soil_thermal_fluxes(int     Nnodes,
+			     double *T,
+			     double *T0,
+			     double *moist,
+			     double *max_moist,
+			     double *ice,
+			     double  bubble,
+			     double *expt,
+			     double *alpha,
+			     double *gamma,
+			     double *A, 
+			     double *B, 
+			     double *C, 
+			     double *D, 
+			     double *E,
+			     int     Twidth) {
+  
+  /** Eventually the nodal ice contents will also have to be updated **/
+
+  extern option_struct options;
+
+  int    Error;
+  char   Done;
+  int    j;
+  int    ItCount;
+  double threshold = 1.e-2;	/* temperature profile iteration threshold */
+  double maxdiff;
+  double diff;
+  double oldT;
+  double fprime;
+
+  Error = 0;
+  Done = FALSE;
+  ItCount = 0;
+  
+  while(!Done && Error==0 && ItCount<MAXIT) {
+    ItCount++;
+    maxdiff=threshold;
+    for(j=1;j<Nnodes-1;j++) {
+      oldT=T[j];
+      
+      /**	2nd order variable kappa equation **/
+      fprime = (T[j+1]-T[j-1])/alpha[j-1];
+      
+      if(T[j]>=0) {
+	T[j] = (A[j]*(T[j+1]-T[j-1])
+		+ B[j]*(T[j+1]+T[j-1]-gamma[j-1]*fprime)
+		+ C[j] + D[j]*(0.-ice[j])) / (E[j]);
+      }
+      else {
+	T[j] = root_brent(T0[j]-(SOIL_DT*(double)Twidth),
+			  T0[j]+(SOIL_DT*(double)Twidth),soil_thermal_eqn, 
+			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
+			  bubble, expt[j], ice[j], gamma[j-1], fprime, 
+			  A[j], B[j], C[j], D[j], E[j]);
 	
-	if(T[j]>=0) {
-	  T[j] = (A[j]*(T[j+1]-T[j-1])
-		  + B[j]*(T[j+1]+T[j-1]-gamma[j-1]*fprime)
-		  + C[j] + D[j]*(0.-ice[j])) / (E[j]);
-	}
-	else {
-	  T[j] = root_brent(T0[j]-SOIL_DT,T0[j]+SOIL_DT,soil_thermal_eqn, 
-			    T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
-			    bubble, expt[j], ice[j], gamma[j-1], fprime, 
-			    A[j], B[j], C[j], D[j], E[j]);
-	  
-	  if(T[j] <= -9998) {
-	    error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
-				  max_moist[j], bubble, expt[j], ice[j], 
-				  gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
-				  E[j]);
-	  }
-	}
-	
-	diff=fabs(oldT-T[j]);
-	if(diff>maxdiff) maxdiff=diff;
+	if(T[j] <= -9998) Error = -9999;
+	else if(T[j] <= -8887) Error = -8888;
+/* 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j],  */
+/* 				max_moist[j], bubble, expt[j], ice[j],  */
+/* 				gamma[j-1], fprime, A[j], B[j], C[j], D[j],  */
+/* 				E[j]); */
       }
       
-      if(options.NOFLUX) { 
-	/** Solve for bottom temperature if using no flux lower boundary **/
-	oldT=T[Nnodes-1];
-	
-	fprime = (T[Nnodes-1]-T[Nnodes-2])/alpha[Nnodes-2];
-	
-	j = Nnodes-1;
-	
-	if(T[j]>=0) {
-	  T[j] = (A[j]*(T[j]-T[j-1]) + B[j]*(T[j] + T[j-1] - gamma[j-1]*fprime)
-		  + C[j] + D[j]*(0.-ice[j])) / E[j];
-	}
-	else {
-	  T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
-				   +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
-				   T[Nnodes-2], T0[Nnodes-1], 
-				   moist[Nnodes-1], max_moist[Nnodes-1], 
-				   bubble, expt[Nnodes-1], ice[Nnodes-1], 
-				   gamma[Nnodes-2], fprime, 
-				   A[j], B[j], C[j], D[j], E[j]);
-	  
-	  if(T[Nnodes-1] <= -9998) {
-	    error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
-				  T[Nnodes-2], T0[Nnodes-1], 
-				  moist[Nnodes-1], max_moist[Nnodes-1], bubble, 
-				  expt[Nnodes-1], ice[Nnodes-1], 
-				  gamma[Nnodes-2], fprime, 
-				  A[j], B[j], C[j], D[j], E[j]);
-	  }
-	}
-	
-	diff=fabs(oldT-T[Nnodes-1]);
-	if(diff>maxdiff) maxdiff=diff;
-      }
+      diff=fabs(oldT-T[j]);
+      if(diff>maxdiff) maxdiff=diff;
+    }
     
-      if(maxdiff<=threshold) Done=TRUE;
-  
+    if(options.NOFLUX) { 
+      /** Solve for bottom temperature if using no flux lower boundary **/
+      oldT=T[Nnodes-1];
+      
+      fprime = (T[Nnodes-1]-T[Nnodes-2])/alpha[Nnodes-2];
+      
+      j = Nnodes-1;
+      
+      if(T[j]>=0) {
+	T[j] = (A[j]*(T[j]-T[j-1]) + B[j]*(T[j] + T[j-1] - gamma[j-1]*fprime)
+		+ C[j] + D[j]*(0.-ice[j])) / E[j];
+      }
+      else {
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
+				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+				 T[Nnodes-2], T0[Nnodes-1], 
+				 moist[Nnodes-1], max_moist[Nnodes-1], 
+				 bubble, expt[Nnodes-1], ice[Nnodes-1], 
+				 gamma[Nnodes-2], fprime, 
+				 A[j], B[j], C[j], D[j], E[j]);
+	
+	if(T[j] <= -9998) Error = -9999;
+	else if(T[j] <= -8887) Error = -8888;
+/* 	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1], */
+/* 				T[Nnodes-2], T0[Nnodes-1],  */
+/* 				moist[Nnodes-1], max_moist[Nnodes-1], bubble,  */
+/* 				expt[Nnodes-1], ice[Nnodes-1],  */
+/* 				gamma[Nnodes-2], fprime,  */
+/* 				A[j], B[j], C[j], D[j], E[j]); */
+      }
+      
+      diff=fabs(oldT-T[Nnodes-1]);
+      if(diff>maxdiff) maxdiff=diff;
     }
-  
-    if(!Done) {
-      fprintf(stderr,"ERROR: Temperature Profile Unable to Converge!!!\n");
-      fprintf(stderr,"Dumping Profile Temperatures (last, new).\n");
-      for(j=0;j<Nnodes;j++) fprintf(stderr,"%lf\t%lf\n",T0[j],T[j]);
-      vicerror("ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile");
-    }
-
+    
+    if(maxdiff<=threshold) Done=TRUE;
+    
   }
   
+  if(!Done && !Error) {
+    fprintf(stderr,"ERROR: Temperature Profile Unable to Converge!!!\n");
+    fprintf(stderr,"Dumping Profile Temperatures (last, new).\n");
+    for(j=0;j<Nnodes;j++) fprintf(stderr,"%lf\t%lf\n",T0[j],T[j]);
+    vicerror("ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile");
+  }
+
+  return (Error);
+
 }
 
 double error_solve_T_profile (double Tj, ...) {

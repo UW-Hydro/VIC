@@ -160,6 +160,9 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("PREC_EXPT",optstr)==0) {
 	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
       }
+      else if(strcasecmp("MIN_WIND_SPEED",optstr)==0) {
+	sscanf(cmdstr,"%*s %f",&options.MIN_WIND_SPEED);
+      }
 
       /************************************
         Get Frocing Data File Information
@@ -260,6 +263,9 @@ global_param_struct get_global_param(filenames_struct *names,
     fgets(cmdstr,MAXSTRING,gp);
   }
 
+  /******************************************
+    Check for undefined required parameters
+  ******************************************/
   if(!options.FULL_ENERGY && options.FROZEN_SOIL) 
     options.FULL_ENERGY = TRUE;
   if(!options.FULL_ENERGY && options.CALC_SNOW_FLUX) 
@@ -269,5 +275,26 @@ global_param_struct get_global_param(filenames_struct *names,
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
 
+  /*********************************
+    Output major options to stderr
+  *********************************/
+  fprintf(stderr,"Time Step = %i hour(s)\n",temp.dt);
+  fprintf(stderr,"Number of Records = %i\n\n",temp.nrecs);
+  fprintf(stderr,"Full Energgy..................(%i)\n",options.FULL_ENERGY);
+  fprintf(stderr,"Use Distributed Precipitation.(%i)\n",options.DIST_PRCP);
+  if(options.DIST_PRCP)
+    fprintf(stderr,"..Using Precipitation Exponent of %lf\n",options.PREC_EXPT);
+  fprintf(stderr,"Use Frozen Soil Model.........(%i)\n",options.FROZEN_SOIL);
+  fprintf(stderr,"Run Snow Model................(%i)\n",options.SNOW_MODEL);
+  if(options.SNOW_MODEL && !options.FULL_ENERGY)
+    fprintf(stderr,"..Using Time Step of %i hours\n",options.SNOW_STEP);
+  fprintf(stderr,"Compress Output Files.........(%i)\n",options.COMPRESS);
+  fprintf(stderr,"Correct Precipitation.........(%i)\n",options.CORRPREC);
+
+  fprintf(stderr,"\n");
+  fprintf(stderr,"Using %i Snow Bands\n",options.SNOW_BAND);
+  fprintf(stderr,"Using %i Root Zones\n",options.ROOT_ZONES);
+
   return temp;
+
 }

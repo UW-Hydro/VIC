@@ -275,12 +275,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.Wcr[layer]  = Wcr_FRACT[layer] * temp.max_moist[layer];
       temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
       if(temp.Wpwp[layer] > temp.Wcr[layer]) {
-        sprintf(ErrStr,"Calculated wilting point (%f mm) is greater than calculated critical point (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be < Wcr_FRACT.\n",
+        sprintf(ErrStr,"Calculated wilting point (%f mm) is greater than calculated critical point (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
                 temp.Wpwp[layer], temp.Wcr[layer], layer);
 	nrerror(ErrStr);
       }
       if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-        sprintf(ErrStr,"Calculated wilting point (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be > resid_moist / (1.0 - bulk_density/soil_density).\n",
+        sprintf(ErrStr,"Calculated wilting point (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
                 temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
 	nrerror(ErrStr);
       }

@@ -36,7 +36,7 @@
 /* constants for Priestley-Taylor potential evaporation, values from Kimball 
    et al., 1995 */
 #define ALPHA_PT 1.26		/* Priestley-Taylor parameter */
-#define GAMMA_PT 6.6		/* psychrometric constant (kPa/K) */
+#define GAMMA_PT 0.066		/* psychrometric constant (kPa/K) */
 #define LV_PT    2.5E6		/* latent heat of vaporization (J/kg) */
 
 /* define constants for saturated vapor pressure curve (kPa) */

@@ -94,6 +94,7 @@ soil_con_struct read_soilparam(FILE *soilparam)
   fscanf(soilparam, "%f", &temp.elevation);
   for(layer=0;layer<options.Nlayer;layer++) {
     fscanf(soilparam, "%lf", &temp.depth[layer]);
+    temp.depth[layer] = rint(temp.depth[layer] * 1000) / 1000;
     if(temp.depth[layer] < MINSOILDEPTH) {
       sprintf(ErrStr,"ERROR: Model will not function with layer %i depth %f < %f m.\n",
 	      layer,temp.depth[layer],MINSOILDEPTH);

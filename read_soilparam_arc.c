@@ -284,6 +284,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       strcpy(namestr,soilparamdir);
       strcat(namestr,tmpstr);
       temp.depth[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
+      temp.depth[layer] = rint(temp.depth[layer] * 1000) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
 	fprintf(stderr,"Model will not function with layer depth %f < %f m.\n",
 		temp.depth[layer],MINSOILDEPTH);

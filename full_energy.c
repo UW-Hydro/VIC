@@ -34,6 +34,10 @@ void full_energy(char                 NEWCELL,
   12-01-00 modified to include the lakes and wetlands algorithm.   KAC
   11-18-02 Modified to handle blowing snow.  Also added debugging
            output for lake model.                                  LCB
+  05-27-03 Updated passing of veg_con parameters for blowing snow
+           to surface_fluxes.  Original did not account for the fact
+           that veg_con is not allocated for veg = Nveg (bare soil)
+           case.  This eliminates a memory error.                  KAC
 
 **********************************************************************/
 {
@@ -101,6 +105,9 @@ void full_energy(char                 NEWCELL,
   double                 tmp_layerevap[2][MAX_BANDS][MAX_LAYERS];
   double                 tmp_Tmin;
   double                 gauge_correction[2];
+  float 	         lag_one;
+  float 	         sigma_slope;
+  float  	         fetch;
 #if LAKE_MODEL
   lake_var_struct       *lake_var;
 #endif /* LAKE_MODEL */
@@ -287,10 +294,16 @@ void full_energy(char                 NEWCELL,
 	  if ( iveg < Nveg ) {
 	    wet_veg_var = &(veg_var[WET][iveg][band]);
 	    dry_veg_var = &(veg_var[DRY][iveg][band]);
+	    lag_one     = veg_con[iveg].lag_one;
+	    sigma_slope = veg_con[iveg].sigma_slope;
+	    fetch       = veg_con[iveg].fetch;
 	  }
 	  else {
 	    wet_veg_var = &(empty_veg_var);
 	    dry_veg_var = &(empty_veg_var);
+	    lag_one     = veg_con[0].lag_one;
+	    sigma_slope = veg_con[0].sigma_slope;
+	    fetch       = veg_con[0].fetch;
 	  }
 
 	  surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
@@ -308,8 +321,8 @@ void full_energy(char                 NEWCELL,
 			 atmos, dmy, &(energy[iveg][band]), gp, 
 			 cell[DRY][iveg][band].layer, 
 			 cell[WET][iveg][band].layer, &(snow[iveg][band]), 
-			 soil_con, dry_veg_var, wet_veg_var, veg_con[iveg].lag_one,
-			 veg_con[iveg].sigma_slope,veg_con[iveg].fetch);
+			 soil_con, dry_veg_var, wet_veg_var, 
+			 lag_one, sigma_slope, fetch);
 	  
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 

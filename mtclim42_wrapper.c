@@ -5,7 +5,7 @@
  * Author : Bart Nijssen
  * E-mail : nijssen@u.washington.edu
  * Created:
- * Last Changed: Tue Nov  7 09:45:41 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * Last Changed: Fri Apr 25 11:51:24 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * Notes  : Acts as interface between mtclim42 and vic
  * Disclaimer: Feel free to use or adapt any part of this program for your own
  *             convenience.  However, this only applies with the understanding
@@ -15,6 +15,11 @@
  *             the use of this code.  At any time, please feel free to discard
  *             this code and WRITE YOUR OWN, it's what I would do.
  */
+
+  // Modified 04-25-03 to checnge calls to vicerror into calls to nrerror.  
+  //          Vicerror may cause errors as all variables are not yet 
+  //          defined.                                                KAC
+  // Modified 04-25-03 to compute pressures in Pa, rather than kPa.   KAC
 
 /******************************************************************************/
 /*			    PREPROCESSOR DIRECTIVES                           */

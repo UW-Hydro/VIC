@@ -121,7 +121,7 @@ dmy_struct *make_dmy(global_param_struct *global)
     temp[ii].day   = day;
     temp[ii].month = month;
     temp[ii].year  = year;
-    temp[ii].day_in_year = jday;      
+    temp[ii].day_in_year = jday;
 
     get_next_time_step(&year,&month,&day,&hr,&jday,global->dt);
 

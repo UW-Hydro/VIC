@@ -183,6 +183,30 @@ Incorrect baseflow limits
 	NOTE: This fix may result in small changes in baseflow and evaporation.
 
 
+Runs using initial state files starting at state file date rather than global
+start date
+
+	Files affected:
+	check_state_file.c
+
+	Description:
+	In 4.0.4, check_state_file.c would increment the index of the forcing
+	data array until it reached the record corresponding to the date
+	stored in the state file.  This caused the simulation to start at the
+	date at which the state file was saved rather than the start date
+	specified in the global parameter file.  If the state file's date was
+	earlier than the start date in the global parameter file, the index
+	would be incremented until a segmentation fault occurred.  This has
+	been fixed in 4.0.5 so that the start date in the global parameter
+	file is always the start date of the simulation.  The date stored in
+	the initial state file is ignored.
+
+	NOTE: If you have been relying on the state file to dictate when your
+	simulations start, this fix may require you to change your global
+	parameter file so that STARTYEAR, STARTMONTH, etc. reflect the start
+	date/time you want.
+
+
 Negative incoming shortwave radiation at high latitudes
 
 	Files affected:

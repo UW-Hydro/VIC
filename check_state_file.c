@@ -28,6 +28,11 @@ FILE *check_state_file(char                *init_state,
            incomplete record of forcing data, which can lead to 
            differences in the interpolated sub-daily forcings.    KAC
   06-03-03 modified to handle both ASCII and BINARY state files.  KAC
+  14-Jul-04 Removed adjustment of startrec.  The starting record will
+	    always be the beginning of the interval specified in the
+	    global file, rather than the date of the state file. This
+	    means that now you can start your simulation at a date
+	    other than the date when the state file was saved.	TJB
 
 *********************************************************************/
 {
@@ -47,8 +52,8 @@ FILE *check_state_file(char                *init_state,
   else 
     statefile = open_file(init_state,"r");
 
-  // Initialize startrec
-  (*startrec) = 0;
+  /* Initialize startrec */
+  *startrec = 0;
 
   /* Check state date information */
   if ( options.BINARY_STATE_FILE ) {
@@ -59,9 +64,6 @@ FILE *check_state_file(char                *init_state,
   else {
     fscanf(statefile,"%i %i %i\n", &startyear, &startmonth, &startday );
   }
-  while ( startday != dmy[*startrec].day || startmonth != dmy[*startrec].month 
-	  || startyear != dmy[*startrec].year || dmy[*startrec].hour != 0 ) 
-    (*startrec)++;
 
   /* Check simulation options */
   if ( options.BINARY_STATE_FILE ) {

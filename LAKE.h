@@ -24,11 +24,14 @@
 #define CONDS 0.31       /* thermal conductivity of snow */ 
 #define MAX_LAKE_NODES 20
 #define lamisw 1.5 
-#define lamilw 20
-#define lamwsw 2.3 
-#define lamwlw .005
-#define lamssw 6.0
-#define lamslw 20.
+#define lamilw 1.5
+#define lamssw 1.6
+#define lamslw 1.5
+//#define lamilw 20
+//#define lamwsw 2.3 
+//#define lamwlw .005
+//#define lamssw 6.0
+//#define lamslw 20.
 #define  a1 0.7        /* Percent of radiation in visible band. */
 #define  a2 0.3        /* Percent of radiation in infrared band. */
 #define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */

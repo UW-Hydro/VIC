@@ -52,6 +52,7 @@ void put_data(double            *AreaFract,
   static int              prtdt;
   static double           runoff;
   static double           baseflow;
+  static double           snow_depth;
 #endif
 
   out_data_struct        *out_data;
@@ -205,7 +206,7 @@ void put_data(double            *AreaFract,
 	    out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
 	      * Cv * mu * AreaFract[band];
 	    
-	    /** recored layer moistures **/
+	    /** record layer moistures **/
 	    for ( index = 0; index < options.Nlayer; index++ ) {
 	      tmp_moist = cell[dist][veg][band].layer[index].moist;
 #if SPATIAL_FROST
@@ -231,9 +232,10 @@ void put_data(double            *AreaFract,
 	}
       }
 
-#if !OPTIMIZE
       for(band=0;band<Nbands;band++) {
 	if(AreaFract[band] > 0.) {
+
+#if !OPTIMIZE
 
 	  /**********************************
 	    Record Frozen Soil Variables
@@ -364,11 +366,15 @@ void put_data(double            *AreaFract,
 	  /** record snow water equivalence **/
 	  out_data->swq[0]         
 	    += snow[veg][band].swq * Cv * 1000. * AreaFract[band];
+
+#endif // !OPTIMIZE
 	  
 	  /** record snowpack depth **/
 	  out_data->snow_depth[0]  
 	    += snow[veg][band].depth * Cv * 100. * AreaFract[band];
 	  
+#if !OPTIMIZE
+
 	  /** record canopy intercepted snow **/
 	  if ( veg < veg_con[0].vegetat_type_num )
 #if LDAS_OUTPUT
@@ -504,11 +510,11 @@ void put_data(double            *AreaFract,
 	      += energy[veg][band].latent_sub * Cv;
 	    
 	  }
-	}
-      }
 
 #endif /* not OPTIMIZE */
 
+	}
+      }
     }
   }
   
@@ -699,18 +705,22 @@ void put_data(double            *AreaFract,
   if ( prtdt == 0 ) {
     runoff = out_data->runoff;
     baseflow = out_data->baseflow;
+    snow_depth = out_data->snow_depth[0];
     prtdt ++;
   }
   else {
     runoff += out_data->runoff;
     baseflow += out_data->baseflow;
+    snow_depth += out_data->snow_depth[0];
     prtdt ++;
   }
   if ( prtdt == 24 / dt ) {
     out_data->runoff = runoff;
     out_data->baseflow = baseflow;
-    write_data(out_data, outfiles, dmy, dt);
+    out_data->snow_depth[0] = snow_depth / (double)(prtdt);
     prtdt = 0;
+    if(rec >= skipyear)
+      write_data(out_data, outfiles, dmy, dt);
   } 
 
 #endif /* not OPTIMIZE */

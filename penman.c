@@ -53,15 +53,11 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
 
   /* calculate resistance factor (Wigmosta et al., 1994) */
 
-/***** Turns off too much transpiration - TESTING FACTOR **/
   if(rs>0.) {
-/*     f = 0.55 * net_short / RGL * 2. / lai; */
     f = net_short / RGL;
     DAYfactor = (1. + f)/(f + rs/RSMAX);
   }
   else DAYfactor = 1.;
-/*****/
-/*   DAYfactor = 1.; */
 
   Tfactor = .08 * tair - 0.0016 * pow(tair,2.0);
   Tfactor = (Tfactor <= 0.0) ? 1e-10 : Tfactor;

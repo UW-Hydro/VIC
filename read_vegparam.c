@@ -25,8 +25,6 @@ veg_con_struct *read_vegparam(FILE *vegparam,
            for the current grid cell.  If LAI is not obtained from this
            function, then the values cacluated in read_veglib.c are
            left unchanged.                                   DP & KAC
-  NEED TO MODIFY SO THAT IT CREATES A NEW VEG TYPE IF COMPUTE_TREELINE
-  IF ACTIVE AND NO VEGETATION IS PROVIDED WITHOUT CANOPY!
 
 **********************************************************************/
 {
@@ -117,14 +115,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	veg_lib[temp[i].veg_class].Wdmax[j] = 
 	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
-
-    if ( options.COMPUTE_TREELINE ) 
-      if ( ! veg_lib[temp[i].veg_class].overstory ) NoOverstory++;
     
-  }
-  if ( options.COMPUTE_TREELINE && !NoOverstory ) {
-    // Adjust vegetation fractions to incorporate non-canopy vegetation
-    // if treeline will be computed and cell vegetation all has a canopy.
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);

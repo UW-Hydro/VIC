@@ -177,12 +177,12 @@ void main(int argc, char *argv[])
       if(options.SNOW_MODEL) {
         fprintf(stderr,"Snow Model Initialization\n");
 	initialize_snow(prcp.snow,veg_con[0].vegetat_type_num,
-			infiles.init_snow);
+			infiles.init_snow,soil_con.gridcel);
       }
       if(options.FULL_ENERGY) {
 	fprintf(stderr,"Energy Balance Initialization\n");
 	initialize_energy_bal(prcp.energy,prcp.cell,&soil_con,
-			      atmos[0].air_temp,prcp.mu,
+			      atmos[0].air_temp,prcp.mu,soil_con.gridcel,
 			      veg_con[0].vegetat_type_num,
 			      global_param.Nnodes,
 			      Ndist,infiles.init_soil);

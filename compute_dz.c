@@ -3,9 +3,16 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id";
+static char vcid[] = "$Id$";
 
 void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
+/***********************************************************************
+  compute_dz              Keith Cherkauer	 	May 16, 2000
+
+  This routines computes the soil thermal node thicknesses using an
+  array of node depths.
+
+***********************************************************************/
  
   char ErrStr[MAXSTRING];
   int  j;

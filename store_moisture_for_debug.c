@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id";
+static char vcid[] = "$Id$";
 
 #if LINK_DEBUG
 void store_moisture_for_debug(int                 iveg,

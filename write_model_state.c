@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id";
+static char vcid[] = "$Id$";
 
 #if SAVE_STATE
 

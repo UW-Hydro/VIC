@@ -258,9 +258,6 @@ void set_node_parameters(double   *dz_node,
       if( Zsum < Lsum && Zsum + dz_node[nidx] >= Lsum ) {
 	layer_node_fract[lidx][nidx] = 1. 
 	  - (float)linear_interp(Lsum, Zsum, Zsum + dz_node[nidx], 0, 1);
-
-	/** !! CHECK THIS BEFORE RELEASE !! **/
-
 	if(Lsum + deltaL[lidx] < Zsum + dz_node[nidx])
 	  layer_node_fract[lidx][nidx] -= 
 	    (float)linear_interp(Lsum + deltaL[lidx], Zsum, Zsum + dz_node[nidx], 1, 0);

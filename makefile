@@ -36,7 +36,6 @@ OBJS = vicNl.o cmd_proc.o check_files.o read_soilparam.o open_file.o \
 
 
 all:
-	make clean
 	make model
 
 default:

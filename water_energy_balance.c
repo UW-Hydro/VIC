@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Tue Apr 22 10:16:32 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Wed Nov  7 15:45:45 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  
  * DESCRIP-END.
  * FUNCTIONS:   
@@ -40,13 +40,13 @@
   Comments     :
 
   Modifications:
-  11-18-02 Updated to reflect changes in algorithm structure.        LCB
-
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
 *****************************************************************************/
 void water_energy_balance(int numnod, double * surface, double *evapw,
 	      int               dt,
 	      int               freezeflag,
 	      double            dz,
+	      double            surfdz,	
 	      double            lat,
 	      double            Tcutoff,
 	      double            Tair,
@@ -68,8 +68,8 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 	      double            fracprv,
 	      double           *new_ice_fraction,
 	      double           *cp,
-	      double           *new_ice_height,
-	      double           *energy_out_bottom)
+			  double           *new_ice_height,
+			  double *energy_out_bottom)
 	      
 {
   double Ts;
@@ -99,8 +99,8 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
   iterations = 0;
   for(k=0; k<numnod; k++)
     Tnew[k] = T[k];
-
-  energycalc(T, &jouleold, numnod,dz, surface, cp, water_density);
+ 
+  energycalc(T, &jouleold, numnod,dz, surfdz, surface, cp, water_density);
  
   while((fabs(Tmean - Ts) > epsilon) && iterations < MAX_ITER) {
    
@@ -148,7 +148,7 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
      * Calculate the eddy diffusivity.
      * -------------------------------------------------------------------- */
    
-    eddy(1, wind, T, water_density, de, lat, numnod, dz);
+    eddy(1, wind, T, water_density, de, lat, numnod, dz, surfdz);
  
     /* --------------------------------------------------------------------
      * Calculate the lake temperatures at different levels for the
@@ -157,16 +157,16 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 
     temp_area(shortwave*a1, shortwave*a2, *Qle+*Qh+*LWnet, T, Tnew,
 	      water_density, de, dt, surface, numnod, 
-	      dz, &joulenew, cp, energy_out_bottom);
+	      dz, surfdz, &joulenew, cp, energy_out_bottom);
     
     /* Surface temperature < 0.0, then ice will form. */
     if(Tnew[0] <  Tcutoff) {
       
     
       iceform (energy_ice_formation, Tnew, Tcutoff, fracprv, new_ice_fraction, 
-	       numnod, dt, dz, cp, surface, new_ice_height, water_density);
+	       numnod, dt, dz, surfdz, cp, surface, new_ice_height, water_density);
 
-      energycalc(Tnew, &sumjouli, numnod, dz, surface, cp, water_density);    
+      energycalc(Tnew, &sumjouli, numnod, dz, surfdz, surface, cp, water_density);    
       *deltaH = (sumjouli-jouleold)/(surface[0]*dt*SECPHOUR);
     }
     else {
@@ -179,7 +179,11 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
     error = *LWnet + shortwave - *energy_out_bottom + *Qh + *Qle  - *deltaH + *energy_ice_formation;
     iterations += 1;
     }
-  
+ 
+ 
+  //  if(Tnew[0] < T[0]-1) 
+  //  printf("%f %f %f %f %f\n",*LWnet, shortwave, *Qh, *Qle, Tnew[0]);
+
  for(k=0; k<numnod; k++)
    T[k] = Tnew[k];
 }

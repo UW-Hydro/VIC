@@ -9,7 +9,6 @@ static char vcid[] = "$Id$";
 
 #define QUICK_ICE TRUE
 #define NOICE 0
-#define MINLAYERTHICKNESS .09
 
 void lakemain(atmos_data_struct  *atmos, 
 	      lake_con_struct    lake_con,
@@ -42,7 +41,8 @@ void lakemain(atmos_data_struct  *atmos,
   27-Aug-04 Added logic to handle blowing_flux and surface_flux.	TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.					TJB
-  
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+
   Parameters :
 
   soil_con.lat  	Latitude of the lake (degrees).
@@ -89,6 +89,9 @@ void lakemain(atmos_data_struct  *atmos,
   initialize_prcp(prcp, &lake_energy, &lake_snow, lake->sarea/lake_con.basin[0],
 	      iveg, band, lake->fraci, *soil_con, lake, rec, lake_con);
 
+ /**********************************************************************
+   * Solve the energy budget for the exposed land.
+   **********************************************************************/	 
   oldmoist = 0.0;
   for(i=0; i<options.Nlayer; i++) {
     oldmoist += cell[WET][iveg][band].layer[i].moist;
@@ -124,6 +127,7 @@ void lakemain(atmos_data_struct  *atmos,
   oldvolume = lake->volume;
   oldsnow = lake_snow.swq;
   atmos->out_prec += (snowprec + rainprec) * lake_con.Cl[0] * (lake->sarea/lake_con.basin[0]);
+  
   solve_lake(snowprec, rainprec, atmos->air_temp[hour], atmos->wind[hour],
 	     atmos->vp[hour] / 1000., atmos->shortwave[hour], 
 	     atmos->longwave[hour], atmos->vpd[hour] / 1000., 
@@ -266,6 +270,7 @@ void solve_lake(double             snow,
       lake_snow->vapor_flux=0.0;
       //  lake->sarea = lake->surface[0];
 
+	 if(lake->activenod > 0) {	
 
       /* --------------------------------------------------------------------
        * Calculate the water freezing point.
@@ -286,7 +291,7 @@ void solve_lake(double             snow,
 	}
 
       energycalc( lake->temp, &sumjoulb, lake->activenod, lake->dz, 
-		  lake->surface, water_cp, water_density);
+	lake->surfdz,lake->surface, water_cp, water_density);
 
       /**********************************************************************
        * 2. Calculate added precipitation and total snow height.
@@ -372,7 +377,7 @@ void solve_lake(double             snow,
 	windw = wind*log((2. + ZWATER)/ZWATER)/log(wind_h/ZWATER);  
 	
 	water_energy_balance( lake->activenod, lake->surface, &lake->evapw, 
-			      dt, freezeflag, lake->dz, 
+			      dt, freezeflag, lake->dz, lake->surfdz,
 			      (double)soil_con.lat, Tcutoff, tair, windw, 
 			      pressure, vp, air_density, longin, sw_water, 
 			      sumjoulb, wind_h, &Qhw, &Qew, &LWnetw, T, 
@@ -388,7 +393,7 @@ void solve_lake(double             snow,
 	 
 	mixdepth=0;        /* Set to zero for this time step. */
 		tracer_mixer( T, &mixdepth, freezeflag, lake->surface, 
-			      lake->activenod, lake->dz, water_cp );
+			      lake->activenod, lake->dz, lake->surfdz, water_cp );
 	//	printf("%d\n",mixdepth);
 		if ( mixdepth > mixmax ) mixmax = mixdepth;
 
@@ -419,7 +424,7 @@ void solve_lake(double             snow,
 
 	/* Calculate snow/ice temperature and change in ice thickness from 
 	   surface melting. */
-	ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used), 
+	ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used),
 		  Le, lake_snow, lake, dt,  0.0, soil_con.snow_rough, 1.0, 
 		  rainfall, snowfall,  windi, Tcutoff, tair, sw_ice, 
 		  longin, air_density, pressure,  vpd,  vp, &lake->snowmlt, 
@@ -438,7 +443,7 @@ void solve_lake(double             snow,
 	 * -------------------------------------------------------------------- */
 
 	water_under_ice( freezeflag, sw_ice, wind, Ti, water_density, 
-			 (double)soil_con.lat, lake->activenod, lake->dz, 
+			 (double)soil_con.lat, lake->activenod, lake->dz, lake->surfdz,
 			 Tcutoff, &qw, lake->surface, &temphi, water_cp, 
 			 mixdepth, lake->hice, lake_snow->swq*RHO_W/RHOSNOW,
 			(double)dt, LakeFlow, &energy_out_bottom_ice);     
@@ -471,7 +476,7 @@ void solve_lake(double             snow,
        **********************************************************************/
 
       colavg( lake->temp, T, Ti, fracprv,lake->density, lake->activenod, 
-	      lake->dz);
+	      lake->dz, lake->surfdz);
 
       /**********************************************************************
        * 10. Calculate the final water heat content and energy balance.
@@ -538,7 +543,7 @@ void solve_lake(double             snow,
       lake->evapw           *= ( (1. - fracprv ) * dt * SECPHOUR ); // in mm
       lake_snow->vapor_flux *= fracprv; // in meters 
       lake_snow->blowing_flux *= fracprv; // in meters 
-      lake_snow->surface_flux *= fracprv; // in meters 
+      lake_snow->surface_flux *= fracprv; // in meters 	
       lake->snowmlt         *= fracprv; // in mm 
 
       // update ice cover 
@@ -550,7 +555,7 @@ void solve_lake(double             snow,
 
       if(!NOICE)
           lake->fraci += new_ice_fraction;
-      
+
       if(lake->fraci > .999) lake->fraci = 1.0;
       if(lake->fraci < FRACLIM) {
 	lake->fraci = 0.0;
@@ -579,7 +584,7 @@ void solve_lake(double             snow,
       lake_snow->swq        *= lake->fraci;
       lake_snow->surf_water *= lake->fraci;
       lake_snow->depth = lake_snow->swq * RHO_W / RHOSNOW;
-      
+      }
 }   /* End of lake function. */
 
 void latsens (double Tsurf, double Tcutk, double hice, 
@@ -743,7 +748,7 @@ void alblake (double  Tcutoff,
 }
 
 
-void colavg (double *finaltemp, double *T,double *Ti,float lakeprv,double *density, int numnod, double dz)
+void colavg (double *finaltemp, double *T,double *Ti,float lakeprv,double *density, int numnod, double dz, double surfdz)
   {
 
 /**********************************************************************
@@ -759,6 +764,7 @@ void colavg (double *finaltemp, double *T,double *Ti,float lakeprv,double *densi
  * density  	Water density at each node (kg/m3).
  * numnod	Number of nodes in the lake (-).
  * dz           Thickness of each water layer (m). 
+ * surfdz       Thickness of the surface water layer.
  **********************************************************************/
     int j;
     double water_densityw, water_densityi;
@@ -783,7 +789,7 @@ void colavg (double *finaltemp, double *T,double *Ti,float lakeprv,double *densi
 
          z=dz;
          if (j == 0)
-	   z=SURF;
+	   z=surfdz;
 
 /* --------------------------------------------------------------------
  * Calculate the lake (water) temperature as a weight of ice and water
@@ -846,7 +852,7 @@ double calc_density(double ts)
   }
 
 void eddy (int freezeflag, double wind, double *T, double *water_density, 
-	   double *de, double lat, int numnod, double dz)
+	   double *de, double lat, int numnod, double dz, double surfdz)
    {
 
 /**********************************************************************
@@ -865,7 +871,7 @@ void eddy (int freezeflag, double wind, double *T, double *water_density,
 
       double ks, N2, ws, radmax, Po;
       double dpdz, rad;
-      double zhalf[MAX_LAKE_NODES];  /* Originally set to 1000 - why? */
+      double zhalf[MAX_LAKE_NODES];  
       int k;
       double z;
       double Ri; /* Richardson's number. */      
@@ -880,10 +886,10 @@ void eddy (int freezeflag, double wind, double *T, double *water_density,
 	}
 
 /**********************************************************************
- * Calculate the distance between the first node and the surface.
+ * Calculate the distance between the first node and the surface node.
  **********************************************************************/
 
-      zhalf[0] = (SURF + dz) * 0.5;
+      zhalf[0] = (surfdz + dz) * 0.5;
 
 /**********************************************************************
  * If there is ice only molecular diffusivity is taken in account,
@@ -936,7 +942,7 @@ void eddy (int freezeflag, double wind, double *T, double *water_density,
 	
 	  dpdz=(water_density[k+1]-water_density[k])/zhalf[k];
 	  N2=(dpdz/(1.e3+water_density[k]))*9.8;   
-	  z=SURF+((float)k)*dz;	 
+	  z=surfdz+((float)k)*dz;	 
 	
 	/* --------------------------------------------------------------------
 	 * Calculate the second term in the calculation of the Richardson
@@ -987,6 +993,7 @@ void iceform (double *qfusion,
 	      int     numnod, 
 	      int     dt,  
 	      double  dz, 
+	      double  surfdz,	
 	      double *cp, 
 	      double *surface, 
 	      double *new_ice_height, 
@@ -1035,7 +1042,7 @@ void iceform (double *qfusion,
  * -------------------------------------------------------------------- */
 	    
             if (j == 0) 
-	      extra = ( (Tcutoff-T[j]) * SURF * (water_density[j]+1000.) 
+	      extra = ( (Tcutoff-T[j]) * surfdz * (water_density[j]+1000.) 
 			* cp[j]  * (1.0-fracprv) * (surface[j]+surface[j+1])/2.);
 	    else if (j == numnod-1)
 	      extra = ( (Tcutoff-T[j]) * dz * (water_density[j]+1000.) 
@@ -1161,14 +1168,12 @@ void lakeice (double *tempi, double Tcutoff, double sw_ice, double *hice,
    * twater       Temperature of the top water layer (K).
    * *qbot	Incoming short wave radiation at bottom of the ice (W/m2).
    * *qw		Heat storage in the lake ice (J/m3).
-   * evapi	Evaporation from the ice (m/s)..
    * *fracice	Revised fraction of the lake covered by ice due to growth/decrease of exisitng cover (-).
    * dt		Time step (s).
    * ds           Amount of snowmelt (m)
    * qnetice;	Heat flux absorbed into the ice (W/m2). 
    **********************************************************************/
   
-  double evaps, evapi;     /* Evaporation from the snow, ice (m). */
   double condqw, evapl; 
   double qmelts;           /* Energy available to melt ice. ? */
   double dibot;            /* change in ice surface at the bottom of the pack. */
@@ -1367,7 +1372,7 @@ double specheat (double t)
 
 void temp_area(double sw_visible, double sw_nir, double surface_force, 
 	       double *T, double *Tnew, double *water_density, double *de,
-	       int dt, double *surface, int numnod, double dz, double *temph, 
+	       int dt, double *surface, int numnod, double dz, double surfdz, double *temph, 
 	       double *cp, double *energy_out_bottom)
     {
 /********************************************************************** 				       
@@ -1418,7 +1423,7 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
 
       for(k=0; k<numnod; k++) {
 	 if(k==0)
-	   z[k] = SURF;
+	   z[k] = surfdz;
 	 else
 	   z[k]=dz;
          zhalf[k]=dz;
@@ -1441,8 +1446,8 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
       surface_2 = surface[1];
       surface_avg = (surface_1 + surface_2)/2.;
 
-       T1 = (sw_visible*(1*surface_1-surface_2*exp(-lamwsw*SURF)) + 
-      	    sw_nir*(1*surface_1-surface_2*exp(-lamwlw*SURF)))/surface_avg 
+       T1 = (sw_visible*(1*surface_1-surface_2*exp(-lamwsw*surfdz)) + 
+      	    sw_nir*(1*surface_1-surface_2*exp(-lamwlw*surfdz)))/surface_avg 
       	+ (surface_force*surface_1)/surface_avg;          /* W/m2 */
 
        totalenergy = sw_visible  + sw_nir + surface_force;
@@ -1451,10 +1456,16 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
       
        energymixed += cnextra;
 
+       if(numnod==1)
+          Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
+       else {	
+
       d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
 
-            *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*SURF) + 
-      						    sw_nir*exp(-lamwlw*SURF));
+            *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
+      						    sw_nir*exp(-lamwlw*surfdz));
+
+
 
 /* --------------------------------------------------------------------
  * Calculate d for the remainder of the column.
@@ -1465,8 +1476,8 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
  * ....................................................................*/
 
       for(k=1; k<numnod-1; k++) {
-	top = (SURF+(k-1)*dz);
-        bot = (SURF+(k)*dz);
+	top = (surfdz+(k-1)*dz);
+        bot = (surfdz+(k)*dz);
 
          surface_1 = surface[k]; 
 	 surface_2 = surface[k+1];
@@ -1497,8 +1508,8 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
       surface_2 = surface[k];
       surface_avg = surface[k];
      
-      top = (SURF+(k-1)*dz);
-      bot = (SURF+(k)*dz);
+      top = (surfdz+(k-1)*dz);
+      bot = (surfdz+(k)*dz);
 
       //       T1 = (sw_visible*(exp(-lamwsw*top)) + 
       //	    sw_nir*(exp(-lamwlw*top)))*surface_1/surface_avg; 
@@ -1574,7 +1585,7 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
  * moving to lagrangian scheme
  **********************************************************************/
     
-      energycalc(Tnew, &joulenew, numnod,dz, surface, cp, water_density);
+      energycalc(Tnew, &joulenew, numnod,dz, surfdz, surface, cp, water_density);
      
       *temph=0.0;
       //for(k=0; k<numnod;k++) {        
@@ -1585,6 +1596,7 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
       *temph = joulenew;
 
     }
+}
 
 void tracer_mixer (double *T, 
                    int    *mixdepth,
@@ -1592,6 +1604,7 @@ void tracer_mixer (double *T,
                    double *surface,
                    int     numnod, 
                    double  dz, 
+		   double surfdz, 
                    double *cp) {
 /**********************************************************************
  * Simulate the convective mixing in the lake.
@@ -1660,8 +1673,8 @@ void tracer_mixer (double *T,
 
 	if (m == 0) {
 	  /* Calculate the heat content and volume of the surface layer. */
-	  heatcon = SURF*(1.e3+water_density[m])*cp[m]*surface[m];
-	  vol = SURF * surface[m];
+	  heatcon = surfdz*(1.e3+water_density[m])*cp[m]*surface[m];
+	  vol = surfdz * surface[m];
 	}
 	else {
 	  /* Calculate the heat content and volume of all layers but 
@@ -1816,7 +1829,7 @@ void tridia (int ne,
 }  
 
     
- void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, double *surface, double *cp, double *density)
+ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, double surfdz, double *surface, double *cp, double *density)
    {
 
 /**********************************************************************
@@ -1836,9 +1849,9 @@ void tridia (int ne,
 	 // density = calc_density(finaltemp[k]);
 
 	 if(k==0)
-	   energy=(finaltemp[k]+KELVIN)*SURF*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
+	   energy=(finaltemp[k]+KELVIN)*surfdz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
 	 else if (k==numnod-1)
-	   energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*surface[k];
+	   energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*surface[k]/2.;
 	 else
 	   energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
 
@@ -1881,7 +1894,7 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
    * 1. convert runoff input/output volume to rate
    **********************************************************************/
 
-  isave_n = lake->activenod;   /* save initial depth for later */
+  isave_n = lake->activenod;   /* save initial no. of nodes for later */
 
   /* convert from mm over grid cell to m3. */
   //  if(lake->baseflow_in != 0.)
@@ -1912,122 +1925,86 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   lake->volume += ( runoff_volume + ((lake->snowmlt-lake->evapw) 
   				     * lake->sarea / 1000. ) );
   
-  // store updated lake volume
-  tempvolume = lake->volume;
+  if (lake->volume > lake_con.maxvolume) { 
+     lake->runoff_out = lake->volume - lake_con.maxvolume;
+     lake->volume = lake_con.maxvolume;
+     }
+  else if(lake->volume < SMALL) {
+     lake->volume=0.0;	
+     lake->runoff_out = 0.0;
+}
+  else	
+     lake->runoff_out = 0.0;
 
-    // if (tempvolume > lake_con.maxvolume) { 
-    //  lake->runoff_out = lake->volume - lake_con.maxvolume;
-    //  tempvolume = lake_con.maxvolume;
-    //  }
-    // else
-    // lake->runoff_out = 0.0;
+  // find new lake depth
+  if(lake->volume == lake_con.maxvolume)
+     ldepth = lake_con.maxdepth;
+  else	
+     ldepth = get_depth(lake_con, lake->volume);
 
-  // initialize new lake depth
-  ldepth = 0.0;
-
-  // Update lake depth
-  k = lake_con.numnod - 1;
-  if ( tempvolume >= lake_con.basin[k]*lake_con.z[k] ) {
-
-    // current lake layer is completely full
-    tempvolume -= lake_con.basin[k]*lake_con.z[k];
-    ldepth += lake_con.z[k];
-
-    // fill other layers with remaining volume
-    for ( k = lake_con.numnod - 2; k >= 0; k-- ) {
-      if ( tempvolume > ((lake_con.z[k]-lake_con.z[k+1])
-			 *(lake_con.basin[k]+lake_con.basin[k+1])/2.)) {
-	// current layer completely filled
-	tempvolume -= (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.;
-	ldepth += lake_con.z[k] - lake_con.z[k+1];
-      }
-      else if(tempvolume > 0.0 ) {
-	// partially fill current layer
-	if(lake_con.basin[k] == lake_con.basin[k+1]) {
-	  ldepth += tempvolume/lake_con.basin[k];
-	  tempvolume = 0.0;
-	}
-	else {
-	  m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
-	  ldepth += ((-1*lake_con.basin[k+1]) + sqrt(lake_con.basin[k+1]*lake_con.basin[k+1] + 2.*m*tempvolume))/m;
-	  tempvolume = 0.0;
-	}
-      }
-    }
-  }
-  else {
-    // lake volume is not great enough to completly fill any layers
-    ldepth = tempvolume/lake_con.basin[lake_con.numnod -1];
-    tempvolume = 0.0;
-  }
-	  
-  if(tempvolume > 0.0)   {                  // Lake over topping. 
-    ldepth += tempvolume / lake_con.basin[0];
-  }
-
-  if(ldepth > lake_con.maxdepth)
-    surfacearea = lake_con.basin[0];
-  else {   
     surfacearea = get_sarea(lake_con, ldepth);
-    // fprintf(stderr, "depth = %f, maxarea = %f, maxdepth =%f, sarea=%f\n",ldepth, lake_con.basin[0], lake_con.z[0],surfacearea);
-    
-  }
-
+ 
     
 /**********************************************************************
- * 3. calculate runoff from lake.  Runoff out is in meters over lake surface.
+ * 3. Calculate runoff from lake.  Runoff out is in meters over lake surface.
  * Therefore, maxrate is currently in meters.
  **********************************************************************/
 
   // DEBUG output
-  //fprintf(stdout,",%f,%f,%f,%f,%f,%f", wetland_runoff * lake_con.cell_area / 1000., ldepth, lake_con.mindepth, lake_con.maxdepth, lake_con.maxrate, surfacearea ); 
+  // fprintf(stdout,"depth %f,mindepth %f,maxdepth %f,maxrate %f,sarea %e\n",ldepth, lake_con.mindepth, lake_con.maxdepth, lake_con.maxrate, surfacearea ); 
 
-  /***************************************************************************
-	NOTE: Maximum rate is not modified by model time step in this
-	subroutine, so if that is not handled somewhere else, the predicted
-	outflow will change with selected time step making calibration more
-	difficult.
-  ***************************************************************************/
+  /**********************************************************************/
+  /* Use this section if depthfrac and ratefrac specified. */
+  /**********************************************************************/
 
   // compute inflection point for curve
-  inflec  = 3./4.*(lake_con.maxdepth-lake_con.mindepth)+lake_con.mindepth;
-  midrate = 1./10.*lake_con.maxrate;
+/*   inflec  = lake_con.depthfrac*(lake_con.maxdepth-lake_con.mindepth)+lake_con.mindepth;
+   midrate = lake_con.ratefrac*lake_con.maxrate;
 
-  // Calculate lake runoff rate based on lake level
-  if(ldepth < lake_con.mindepth) {
-    // Below minimum release level, no outflow
+  if(ldepth < lake_con.mindepth)
     lake->runoff_out = 0.0;
-    //fprintf(stdout,",0");
-  }
-  else if(ldepth > lake_con.maxdepth) {
-    // Above maximum depth, unable to store excess water, outflow unrestricted
-    lake->runoff_out = lake_con.maxrate*surfacearea;
-    //fprintf(stdout,",%f", lake_con.maxrate);
-  }
-  else if(ldepth > inflec) {
-    // fast response for full lakes
-    lake->runoff_out = surfacearea * ( ( ldepth - inflec ) / ( lake_con.maxdepth - inflec ) * (lake_con.maxrate - midrate) + midrate );
-    //fprintf(stdout,",%f", lake_con.maxrate * pow( ( ldepth - lake_con.mindepth ) / ( lake_con.maxdepth - lake_con.mindepth ), 3.0 ) );
-  }
+  else if(ldepth < inflec)
+    lake->runoff_out += midrate  * surfacearea * (( ldepth - lake_con.mindepth ) / ( inflec - lake_con.mindepth ));
+  else if(ldepth < lake_con.maxdepth)
+    lake->runoff_out += surfacearea * ( ( ldepth - inflec ) / ( lake_con.maxdepth - inflec ) * (lake_con.maxrate - midrate) + midrate );
   else {
-    // Between maximum and minimum release depths, outflow is restricted
-    lake->runoff_out = midrate  * surfacearea * (( ldepth - lake_con.mindepth ) / ( inflec - lake_con.mindepth ));
-    //fprintf(stdout,",%f", lake_con.maxrate * pow( ( ldepth - lake_con.mindepth ) / ( lake_con.maxdepth - lake_con.mindepth ), 3.0 ) );
-  }
+    lake->runoff_out += lake_con.maxrate * surfacearea;	 
+    if(ldepth - lake_con.maxrate > lake_con.maxdepth)
+   	lake->runoff_out += lake_con.maxdepth - (ldepth - lake_con.maxrate);
+	}
+*/
+  /**********************************************************************/
+  /* Use this section if depthfrac and ratefrac NOT specified. */
+  /**********************************************************************/
 
+  if(ldepth < lake_con.mindepth)
+    lake->runoff_out += 0.0;
+  else if(ldepth < lake_con.maxdepth)
+    lake->runoff_out += surfacearea * lake_con.maxrate * (exp(ldepth)/exp(lake_con.maxdepth));
+  else {
+    lake->runoff_out += (lake_con.maxrate * surfacearea);	 
+    if(ldepth - lake_con.maxrate > lake_con.maxdepth)
+   	lake->runoff_out += lake_con.maxdepth - (ldepth - lake_con.maxrate);
+    }
+ 
+  /**********************************************************************/
+  /* End of runoff calculation */
+  /**********************************************************************/
   // extract runoff volume from the lake m^3
   lake->volume -= ( lake->runoff_out );
 
   // check that lake volume does not exceed its maximum
-  if (lake->volume > lake_con.maxvolume) { 
-    lake->runoff_out += lake->volume - lake_con.maxvolume;
+  if (lake->volume - lake_con.maxvolume > SMALL) { 
+	fprintf(stderr, "Lake volume exceeds max volume: current volume = %e, max volume = %e\n", lake->volume, lake_con.maxvolume);
     lake->volume = lake_con.maxvolume;
   }
+  else if (lake->volume < SMALL)
+     lake->volume = 0.0;
   
   // adjust from m3 to mm over entire gridcell
   lake->runoff_out = ( lake->runoff_out ) * 1000. / lake_con.cell_area;
 
-  /*   if(lake->baseflow_in != 0 && lake->runoff_in != 0) {
+  if(lake->baseflow_in != 0 && lake->runoff_in != 0) {
     lake->baseflow_out = lake->runoff_out*(lake->baseflow_in/(lake->runoff_in+lake->baseflow_in));
     lake->runoff_out *= (lake->runoff_in/(lake->runoff_in+lake->baseflow_in));
    }
@@ -2037,53 +2014,14 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
    }
    else
     lake->baseflow_out = 0.0;
-  */
+  
 
   /* Add in runoff and baseflow that did not pass through the lake. */
   lake->runoff_out   += (1. - lake_con.rpercent) * lake->runoff_in;
-  lake->baseflow_out  = (1. - lake_con.rpercent) * lake->baseflow_in;
+  lake->baseflow_out  += (1. - lake_con.rpercent) * lake->baseflow_in;
 
   // Recalculate lake depth
-  tempvolume = lake->volume;
-  lake->ldepth = 0.0;
-
-  // update lake depth
-  k=lake_con.numnod -1;
-  if(tempvolume >= lake_con.basin[k]*lake_con.z[k]) {
-    tempvolume -= lake_con.basin[k]*lake_con.z[k];
-    lake->ldepth += lake_con.z[k];
-	  
-    for(k=lake_con.numnod -2; k>= 0; k--) {
-      if(tempvolume > (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.) {
-	tempvolume -= (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.;
-	lake->ldepth += lake_con.z[k] - lake_con.z[k+1];
-      }
-      else if(tempvolume > 0.0 ) {
-	if(lake_con.basin[k] == lake_con.basin[k+1]) {
-	  lake->ldepth += tempvolume/lake_con.basin[k];
-	  tempvolume = 0.0;
-	}
-	else {
-	  m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
-	  lake->ldepth += ((-1*lake_con.basin[k+1]) + sqrt(lake_con.basin[k+1]*lake_con.basin[k+1] + 2.*m*tempvolume))/m;
-	  tempvolume = 0.0;
-	}
-      }
-    }
-  }
-  else {
-    lake->ldepth = tempvolume/lake_con.basin[lake_con.numnod -1];
-    tempvolume = 0.0;
-  }
-
-
-  if ( lake->ldepth < 0.0 ) lake->ldepth = 0.0;
-  
-  if (tempvolume > 0.00001) {
-    printf("volume = %f, depth = %f,  surfacea = %f\n",lake->volume, lake->ldepth, lake->sarea);
-    printf("runoff_in = %f, runoff_out = %f\n",lake->runoff_in, lake->runoff_out);
-    nrerror("Lake is overflowing the basin.");
-  }
+  lake->ldepth = get_depth(lake_con, lake->volume);
 
   // DEBUG output
   //fprintf(stdout,",%f,%f,%f", lake->runoff_out, lake->baseflow_out, lake->ldepth ); 
@@ -2092,27 +2030,49 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
  *  4. Adjust the activenodes and lake area array. 
  **********************************************************************/
 
-  lake->dz = (lake->ldepth-SURF)/((float)(lake_con.numnod-1.));
+  if(lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2*MAX_SURFACE_LAKE) 		{
+  /* Not quite enough for two full layers. */
+	lake->surfdz = lake->ldepth/2.;
+	lake->dz = lake->ldepth/2.;
+	lake->activenod = 2;
+	}
+   else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
+	/* More than two layers. */	
+     	lake->surfdz = MAX_SURFACE_LAKE;
+	lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
+	if(lake->activenod > MAX_LAKE_NODES)
+		lake->activenod = MAX_LAKE_NODES;
+	lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
+  	}	
+  else if(lake->ldepth > 0.0){
+  	lake->surfdz = lake->ldepth;
+	lake->dz = 0.0;
+	lake->activenod = 1;
+	}
+  else {
+	lake->surfdz = 0.0;
+	lake->dz = 0.0;
+	lake->activenod = 0;
+	lake->ldepth = 0.0;
+	} 	
 
-  if(lake->dz < MINLAYERTHICKNESS) {
-    lake->activenod = 1 + (int)((lake->ldepth-SURF)/MINLAYERTHICKNESS);
-    lake->dz = (lake->ldepth-SURF)/((float)(lake->activenod-1.));
-  }
-  else
-    lake->activenod = lake_con.numnod;
-
-  if(lake->activenod < 2)
-    printf("active nodes = %d\n",lake->activenod);
-
-  /* Re-calcualte lake surface area  */
-  for(k=0; k<lake->activenod;k++) {
+  // lake_con.basin equals the surface area at specific depths as input by
+  // the user in the lake parameter file or calculated in read_lakeparam(), 
+  // lake->surface equals the area at the top of each dynamic solution layer 
+ 
+  /* Re-calculate lake surface area  */
+  for(k=0; k< lake->activenod; k++) {
     if(k==0)
-      ldepth = SURF+lake->dz*(lake->activenod - 1);
+      ldepth = lake->ldepth;
     else
       ldepth = lake->dz*(lake->activenod - k);
+
     lake->surface[k] = get_sarea(lake_con, ldepth);
   }
-  
+
+  lake->sarea = lake->surface[0];
+
+  /*******************************************************************/  
   /* Adjust temperature distribution if number of nodes has changed. */
   index = 0;
   if ( lake->activenod != isave_n ) {
@@ -2123,9 +2083,19 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
 	Tnew[k] += lake->temp[index];
       }
     }
-    for(k=0; k< lake->activenod; k++) 
-      lake->temp[k] = Tnew[k]/isave_n;
-  }
+    for(k=0; k< lake->activenod; k++) {
+	if(isave_n > 0)
+          lake->temp[k] = Tnew[k]/isave_n;
+	else
+	  lake->temp[k]	= prcp->energy[iveg][band].Tsurf;
+  	}	
+	}
+   else if(isave_n == 0)
+	lake->temp[k]	= prcp->energy[iveg][band].Tsurf;
+ 
+
+  if(lake->activenod == isave_n && isave_n == 0)
+	lake->temp[k] = 	
 
   // Compute water balance
   inflow =  // (prec/1000.)* lake->sarea 
@@ -2165,7 +2135,7 @@ void update_prcp(dist_prcp_struct *prcp,
 #if SPATIAL_FROST
   int frost_area;
 #endif // SPATIAL_FROST
-  
+
   wland_energy  = prcp->energy;
   wland_snow    = prcp->snow;
   cell    = prcp->cell;
@@ -2215,7 +2185,7 @@ void update_prcp(dist_prcp_struct *prcp,
    wland_snow[iveg][band].vapor_flux *= (1.-lakefraction);
    wland_snow[iveg][band].vapor_flux += lakefraction * lake_snow->vapor_flux;
 
-   wland_snow[iveg][band].blowing_flux *= (1.-lakefraction);
+   wland_snow[iveg][band].blowing_flux *= (1.-lakefraction);	
    wland_snow[iveg][band].blowing_flux += lakefraction * lake_snow->blowing_flux;
 
    wland_snow[iveg][band].surface_flux *= (1.-lakefraction);
@@ -2410,7 +2380,7 @@ void initialize_prcp(dist_prcp_struct *prcp,
 	  cell[DRY][iveg][band].layer[i].ice[frost_area] /= (1.-oldfrac);
 	  cell[WET][iveg][band].layer[i].ice[frost_area] /= (1.-oldfrac);
 	}
-#else
+#else	
 	cell[DRY][iveg][band].layer[i].ice /= (1.-oldfrac);
 	cell[WET][iveg][band].layer[i].ice /= (1.-oldfrac);
 #endif // SPATIAL_FROST
@@ -2438,7 +2408,7 @@ void initialize_prcp(dist_prcp_struct *prcp,
       cell[DRY][iveg][band].layer[index].ice   *= (1.-oldfrac);
       cell[WET][iveg][band].layer[index].ice   *= (1.-oldfrac);
 #endif // SPATIAL_FROST
-      
+
       cell[DRY][iveg][band].layer[index].moist += soil_con.porosity[index]*soil_con.depth[index]*1000.*
 	deltafrac;
       cell[WET][iveg][band].layer[index].moist += soil_con.porosity[index]*soil_con.depth[index]*1000.*

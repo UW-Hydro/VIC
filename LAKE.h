@@ -6,13 +6,14 @@
 #define LAKE_SET
 #define TMELT 0.0
 #define EMICE 0.97      /* Ice emissivity */
-#define EMH2O 0.98
+#define EMH2O .98
 #define RHOSNOW   250.  /* densities of water and snow */
 #define RHOICE   917.   /* ice density*/
 #define rhosurf 1.275   /* surface air density */
 #define JOULESPCAL 4.1868
 #define GRAMSPKG 1000.
-#define SURF   0.09     /* surface thickness for E-B computation (m) */
+#define MAX_SURFACE_LAKE   .6  /* max. surface layer thickness for E-B (m) */
+#define BETA 0.001       /* Curve shape parameter for lake profile. */
 #define FRACMIN  0.10   /* min ice thickness in meters */
 #define FRACLIM   0.02  /* lower limit on fractional ice cover */
 #define CPW_ICE   4200. /* specific heat of ice */
@@ -48,12 +49,12 @@ void alblake(double, double, float *, float *, float *, double, double,
 	     int, int *, double, char *);
 void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
-void colavg (double *, double *, double *, float, double *, int, double);
+void colavg (double *, double *, double *, float, double *, int, double, double);
 float dragcoeff(float, double, double);
-void eddy (int, double, double * , double *, double *, double, int, double);
-void energycalc(double *, double *, int, double, double *, double *, double *);
+void eddy (int, double, double * , double *, double *, double, int, double, double);
+void energycalc(double *, double *, int, double, double,double *, double *, double *);
 double get_dist(double, double, double, double);
-void iceform (double *,double *,double ,double,double *,int, int, double, double *, double *, double *, double *);
+void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *);
 void icerad(double,double ,double,double *, double *,double *);
 void initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, 
 		     double);
@@ -61,7 +62,8 @@ void lakeice(double *, double, double, double *, double, double *,int,
 	     double, double, double *, double, double, int, dmy_struct, double *);
 void lakemain(atmos_data_struct *, lake_con_struct, double, double,
 	      soil_con_struct *, int, dist_prcp_struct *, 
-	      int, int, double, global_param_struct *, dmy_struct *, int, int);
+	      int, int, double, global_param_struct *, dmy_struct *, 
+	      int, int);
 void latsens(double,double, double, double, double, double, double, double,
 	     double *, double *, double);
 float lkdrag(float, double, double, double, double);
@@ -72,8 +74,8 @@ void solve_lake(double, double, double, double, double, double, double, double,
 		soil_con_struct, int, int, energy_bal_struct *, 
 		snow_data_struct *, double, dmy_struct);
 double specheat (double);
-void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double*, double *, double *);
-void tracer_mixer(double *, int *, int, double*, int, double, double *);
+void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
+void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
 void water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, double, soil_con_struct, double, double, double, double);
 double func_lake_energy_balance(double, va_list);
@@ -84,10 +86,12 @@ double func_lake_energy_bal(double , va_list);
 double IceEnergyBalance(double, va_list);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
-void water_energy_balance(int, double*, double*, int,int,double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
-void water_under_ice(int, double,  double, double *, double *, double, int, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
+void water_energy_balance(int, double*, double*, int,int,double, double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
+void water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
 void write_lake_var(lake_var_struct, int);
 double get_sarea(lake_con_struct, double);
+double get_volume(lake_con_struct, double);
+double get_depth(lake_con_struct, double);
 void wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		    global_param_struct *, soil_con_struct  *, int,
 		    int, double, lake_con_struct);

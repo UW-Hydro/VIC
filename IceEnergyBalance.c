@@ -60,6 +60,8 @@ static char vcid[] = "$Id$";
   24-Aug-04 Added logic to handle blowing_flux and vapor_flux.		TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
 	    calculations.						TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
+	    blowing snow sublimation is calculated for lakes.		TJB
 *****************************************************************************/
 double IceEnergyBalance(double TSurf, va_list ap)
 {
@@ -108,6 +110,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
   double SurfAttenuation; 
   double *qf;		/* Ground Heat Flux (W/m2) */
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
+  double *LatentHeatSub;	/* Latent heat exchange at surface (W/m2) due to sublimation */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
   double *LongRadOut;
 
@@ -175,6 +178,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
   SurfAttenuation    = (double) va_arg(ap, double);
   qf                 = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
+  LatentHeatSub      = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
   LongRadOut         = (double *) va_arg(ap, double *);
   
@@ -223,37 +227,14 @@ double IceEnergyBalance(double TSurf, va_list ap)
 /*     EsSnow *= 1.0 + .00972 * TMean + .000042 * pow((double)TMean,(double)2.0); */
   
   /* Calculate sublimation terms and latent heat flux */
-  /********************************************************
-   * To use latent_heat_from_snow, replace the lines from
-   *      SurfaceMassFlux = AirDens ...
-   * through 
-   *        *LatentHeat = Ls * ...
-   *      }
-   * with a call to latent_heat_from_snow().
-   * The sublimation terms in this call should be
-   *      &VaporMassFlux, &BlowingMassFlux, &SurfaceMassFlux
-   *********************************************************/
- 
 
   /* blowing_flux was calculated outside of the root_brent iteration */
   BlowingMassFlux = *blowing_flux * Density / (Dt * SECPHOUR);
 
-  SurfaceMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow) / *Ra_used;
-  if (Vpd == 0.0 && VaporMassFlux < 0.0)
-    SurfaceMassFlux = 0.0;
+  latent_heat_from_snow(AirDens, EactAir, Lv, Press, Ra, TMean, Vpd,
+                        LatentHeat, LatentHeatSub, &VaporMassFlux, &BlowingMassFlux,
+                        &SurfaceMassFlux);
 
-  VaporMassFlux = SurfaceMassFlux + BlowingMassFlux;
-  
-  if (TMean >= 0.0) {
-    /* Melt conditions: use latent heat of vaporization */
-    *LatentHeat = Lv * VaporMassFlux;
-  }
-  else {
-    /* Accumulation: use latent heat of sublimation (Eq. 3.19, Bras 1990 */
-    Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
-    *LatentHeat = Ls * VaporMassFlux;
-  }
-  
   /* Convert sublimation terms from kg/m2s to m/timestep */
   *vapor_flux = VaporMassFlux * Dt * SECPHOUR / Density;
   *surface_flux = SurfaceMassFlux * Dt * SECPHOUR / Density;
@@ -277,7 +258,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate net energy exchange at the snow surface */
   
-  RestTerm = ( NetRad + *SensibleHeat + *LatentHeat + *AdvectedEnergy 
+  RestTerm = ( NetRad + *SensibleHeat + *LatentHeat + *LatentHeatSub + *AdvectedEnergy 
 	       + qnull );
 
   *RefreezeEnergy = (SurfaceLiquidWater * Lf * Density)/(Dt * SECPHOUR);

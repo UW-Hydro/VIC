@@ -99,6 +99,9 @@ static char vcid[] = "$Id$";
 	    root_brent.							TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance used
 	    in flux calculations.					TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
+	    sublimation from blowing snow is calculated for lakes.	TJB
+
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -133,6 +136,8 @@ void ice_melt(double            z2,
 	      double           *save_LWnet,
 	      double            fracprv)
 {
+  extern option_struct   options;
+
   int    Twidth;
 
   double DeltaPackCC;            /* Change in cold content of the pack */
@@ -165,7 +170,9 @@ void ice_melt(double            z2,
   double deltaCC;
   double SnowFlux;		/* thermal flux through snowpack from ground */
   double latent_heat;		
+  double latent_heat_sub;		
   double sensible_heat;		
+  double Ls;
   double melt_energy = 0.;
 
   char ErrorString[MAXSTRING];
@@ -192,8 +199,19 @@ void ice_melt(double            z2,
   icerad (net_short, lake->hice, SnowIce*RHO_W/RHOSNOW, &avgcond, &SWconducted, &deltaCC);
 
   /* Calculate blowing snow sublimation (m/timestep) */
-  /* This could be replaced with a call to CalcBlowingSnow(), as done in surface_fluxes() */
-  snow->blowing_flux = 0.0;
+  if(options.BLOWING && snow->swq > 0.) {
+    Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
+    snow->blowing_flux = CalcBlowingSnow((double) delta_t, air_temp,
+					 snow->last_snow, snow->surf_water,
+					 wind, Ls, density,
+					 pressure, vp, Z0,
+					 z2, snow->depth, 1.0, 0.0,
+					 snow->surf_temp, 0, 1, 1500.,
+					 0.01, 0.0, &snow->transport);
+    snow->blowing_flux *= delta_t*SECPHOUR/RHO_W;
+  }
+  else
+    snow->blowing_flux = 0.0;
 
   /* Store sublimation terms in temporary variables */
   vapor_flux = snow->vapor_flux;
@@ -213,7 +231,7 @@ void ice_melt(double            z2,
 				  &advection, deltaCC, Tcutoff, avgcond, 
 				  SWconducted, snow->swq*RHO_W/RHOSNOW, 
 				  RHOSNOW, surf_atten, &SnowFlux, 
-				  &latent_heat, &sensible_heat, &LWnet);
+				  &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
   snow->vapor_flux = vapor_flux;
   snow->surface_flux = surface_flux;
@@ -314,7 +332,7 @@ void ice_melt(double            z2,
 				 avgcond, SWconducted,
 				 snow->swq*RHO_W/RHOSNOW,
 				 RHOSNOW,surf_atten,&SnowFlux,
-				 &latent_heat, &sensible_heat, &LWnet);
+				 &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
     if(snow->surf_temp <= -9998)
       ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
@@ -327,7 +345,7 @@ void ice_melt(double            z2,
 				 &advection, deltaCC, Tcutoff, 
 				 avgcond, SWconducted,		
 				 snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
-				 &SnowFlux,&latent_heat,
+				 &SnowFlux, &latent_heat, &latent_heat_sub,
 				 &sensible_heat, &LWnet, ErrorString);
 
     Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
@@ -339,8 +357,8 @@ void ice_melt(double            z2,
 				     &vapor_flux, &blowing_flux, &surface_flux,
 				     &advection, deltaCC, Tcutoff, 
 				     avgcond, SWconducted, snow->swq*RHO_W/RHOSNOW, 
-				     RHOSNOW,surf_atten, &SnowFlux,&latent_heat,
-				     &sensible_heat, &LWnet);
+				     RHOSNOW,surf_atten, &SnowFlux, &latent_heat,
+				     &latent_heat_sub, &sensible_heat, &LWnet);
     
 
     snow->vapor_flux = vapor_flux;
@@ -437,7 +455,7 @@ void ice_melt(double            z2,
   *save_advection = advection;
   *save_deltaCC = deltaCC;
   *save_SnowFlux = SnowFlux;
-  *save_latent = latent_heat;
+  *save_latent = latent_heat + latent_heat_sub;
   *save_sensible = sensible_heat;
   *save_Qnet = Qnet;
 
@@ -535,6 +553,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   /* end of list of arguments in variable argument list */
   double *GroundFlux;
   double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
+  double *LatentHeatSub;	/* Latent heat exchange at surface (W/m2) due to sublimation */
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
   double *LWnet;
 
@@ -574,6 +593,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   SurfAttenuation    = (double) va_arg(ap, double);
   GroundFlux         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
+  LatentHeatSub      = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
   LWnet              = (double *) va_arg(ap, double *);
   ErrorString        = (char *) va_arg(ap, double *);
@@ -615,6 +635,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"SurfAttenuation = %f\n",SurfAttenuation);
   fprintf(stderr,"GroundFlux = %f\n",GroundFlux[0]);
   fprintf(stderr,"LatentHeat = %f\n",LatentHeat[0]);
+  fprintf(stderr,"LatentHeatSub = %f\n",LatentHeatSub[0]);
   fprintf(stderr,"SensibleHeat = %f\n",SensibleHeat[0]);
   fprintf(stderr,"LWnet = %f\n",*LWnet);
   

@@ -56,7 +56,7 @@ int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *,
 #endif // QUICK_FS
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double CalcBlowingSnow(double, double, int, double, double, double, double, 
-                       double, double, double *, double, double, float, 
+                       double, double, double, double, double, float, 
                        float, double, int, int, float, double, double, double *); 
 double calc_atmos_energy_bal(double, double, double, double, double, double, 
                              double, double, double, double, double, double, 

@@ -67,6 +67,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
             the need to convert to Pa every time it is used.     KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
+  04-Oct-04 Changed logic to allow VP to be supplied without
+	    SHORTWAVE.						TJB
 
 **********************************************************************/
 {
@@ -120,9 +122,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24)
     nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
   
-  if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[VP].SUPPLIED)
-      || (!param_set.TYPE[SHORTWAVE].SUPPLIED && param_set.TYPE[VP].SUPPLIED)) 
-    nrerror("Sub-daily shortwave and vapor pressure forcing data must be supplied together.");
+  if (param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[VP].SUPPLIED)
+    nrerror("Model cannot be run with shortwave supplied, if vapor pressure is not provided.");
     /*
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[LONGWAVE].SUPPLIED)) 
     nrerror("Model cannot be run with shortwave supplied, if longwave is not provided.");

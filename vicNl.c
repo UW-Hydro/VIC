@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
            rather than just averagedvalues.                      KAC
   29-Oct-03 Modified the version display banner to print the version
 	    string defined in global.h.				TJB
+  01-Nov-04 Updated arglist for make_dist_prcp(), as part of fix for
+	    QUICK_FLUX state file compatibility.		TJB
 
 **********************************************************************/
 {
@@ -219,8 +221,7 @@ int main(int argc, char *argv[])
 		    &soil_con.AboveTreeLine);
 
       /** Make Precipitation Distribution Control Structure **/
-      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
-				&options.Nnode);
+      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
 
       /**************************************************
          Initialize Meteological Forcing Values That

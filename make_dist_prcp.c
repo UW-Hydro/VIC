@@ -4,8 +4,7 @@
  
 static char vcid[] = "$Id$";
 
-dist_prcp_struct make_dist_prcp(int  nveg,
-				int *Nnodes)
+dist_prcp_struct make_dist_prcp(int  nveg)
 /**********************************************************************
 	read_dist_prcp	Keith Cherkauer		May 21, 1996
 
@@ -20,6 +19,8 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   modifications:
   11-18-02 Modified to allocate vegetation variables for the 
            wetland vegetation class.                             LCB
+  01-Nov-04 Updated arglist to make_energy_bal() as part of fix for
+	    QUICK_FLUX state file compatibility.		TJB
 
 **********************************************************************/
 {
@@ -39,7 +40,7 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   temp.mu     = (double *)calloc(Nitems,sizeof(double));
   for ( i = 0; i < Nitems; i++ ) temp.mu[i] = 1;
   temp.snow   = make_snow_data(Nitems);
-  temp.energy = make_energy_bal(Nitems,Nnodes);
+  temp.energy = make_energy_bal(Nitems);
   for ( i = 0; i < 2; i++ ) {
     temp.veg_var[i]  = make_veg_var(Nitems);
     temp.cell[i]     = make_cell_data(Nitems,options.Nlayer);

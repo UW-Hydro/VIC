@@ -30,6 +30,7 @@ Modifications:
 	    Replaced rint(something) with (float)(int)(something + 0.5)
 	    to handle rounding without resorting to rint(), which
 	    isn't supported on all platforms.			TJB
+	    Added print statement for current cell number.	TJB
 	func_surf_energy_bal.c:
 	    (found by Justin Sheffield at Princeton)
 	    Added check that both FS_ACTIVE and FROZEN_SOIL are true

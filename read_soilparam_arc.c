@@ -94,6 +94,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		Added check to make sure that wilting point
 		(porosity*Wpwp_FRACT) is greater than residual
 		moisture.					TJB
+  04-Jun-04	Added print statement for current cell number.	TJB
 
 **********************************************************************/
 {
@@ -158,6 +159,11 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   *RUN = (int)read_arcinfo_value(namestr,temp.lat,temp.lng);
   
   if(RUN[0] > 0) {
+#if VERBOSE
+    /* add print statements for grid cell number */
+    fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
+#endif
+
     /** Get Average Grid Cell Elevation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);

@@ -1,31 +1,37 @@
 # VIC Makefile
-# Last Changed: Wed Jul 19 14:41:18 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
+# Last Changed: Mon Jun 11 12:30:44 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
 # Note: replaced read_vegparam by read_vegparam_LAI
 
 SHELL = /bin/csh
 
 CC = gcc
-#CFLAGS = -I. -g -Wall -Wno-unused
-CFLAGS = -I. -O3 -Wall -Wno-unused
+CFLAGS = -I. -g -Wall -Wno-unused
+EXT    = .debug
+#CFLAGS = -I. -O3 -Wall -Wno-unused
 #CFLAGS = -I. -O3 -pg -Wall -Wno-unused
 LIBRARY = -lm
-#LIBRARY = -lm -lefence
+#LIBRARY = -lm -lefence -L/usr/local/lib
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h rad_and_vpd.h \
-       mtclim42_vic.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
-	alloc_atmos.o arno_evap.o calc_air_temperature.o \
-	calc_cloud_cover_fraction.o calc_longwave.o calc_rainonly.o \
-	calc_root_fraction.o calc_surf_energy_bal.o calc_veg_params.o \
+	advected_sensible_heat.o alloc_atmos.o arno_evap.o \
+	calc_air_temperature.o calc_atmos_energy_bal.o \
+	calc_cloud_cover_fraction.o \
+	calc_forcing_stats.o calc_longwave.o calc_rainonly.o \
+	calc_root_fraction.o calc_snow_coverage.o calc_surf_energy_bal.o \
+	calc_veg_params.o \
 	canopy_evap.o check_files.o check_state_file.o close_files.o \
 	cmd_proc.o compress_files.o compute_dz.o correct_precip.o \
-	dist_prec.o estimate_T1.o free_dist_prcp.o free_vegcon.o \
-	frozen_soil.o full_energy.o func_surf_energy_bal.o \
-	get_force_type.o get_global_param.o initialize_atmos.o \
-	initialize_model_state.o initialize_global.o \
+	dist_prec.o estimate_T1.o \
+	free_dist_prcp.o free_vegcon.o frozen_soil.o full_energy.o \
+	func_atmos_energy_bal.o func_atmos_moist_bal.o \
+	func_canopy_energy_bal.o func_surf_energy_bal.o get_force_type.o \
+	get_global_param.o \
+	initialize_atmos.o initialize_model_state.o initialize_global.o \
 	initialize_new_storm.o initialize_snow.o initialize_soil.o \
-	initialize_veg.o make_cell_data.o make_dist_prcp.o make_dmy.o \
+	initialize_veg.o latent_heat_from_snow.o make_cell_data.o \
+	make_dist_prcp.o make_dmy.o \
 	make_energy_bal.o make_in_and_outfiles.o make_snow_data.o \
 	make_veg_var.o massrelease.o modify_Ksat.o mtclim42_vic.o \
 	mtclim42_wrapper.o nrerror.o open_debug.o open_file.o \
@@ -38,7 +44,9 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	solve_snow.o store_moisture_for_debug.o surface_fluxes.o svp.o \
 	vicNl.o vicerror.o write_atmosdata.o write_data.o write_debug.o \
 	write_forcing_file.o write_layer.o write_model_state.o \
-	write_soilparam.o write_vegparam.o write_vegvar.o 
+	write_snow_data.o write_soilparam.o write_vegparam.o write_vegvar.o \
+	lakes.eb.o initialize_lake.o read_lakeparam.o ice_melt.o \
+	IceEnergyBalance.o water_energy_balance.o water_under_ice.o
 
 SRCS = $(OBJS:%.o=%.c) 
 
@@ -48,11 +56,17 @@ all:
 default:
 	make model
 
+full:
+	make clean
+	make depend
+	make tags
+	make model
+
 clean::
 	/bin/rm -f *.o core log *~
 
 model: $(OBJS)
-	$(CC) -o vicNl $(OBJS) $(CFLAGS) $(LIBRARY)
+	$(CC) -o vicNl$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags
@@ -70,7 +84,7 @@ clean::
 # -------------------------------------------------------------
 depend: .depend
 .depend:	$(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -MM $(SRCS) > $@
+	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
 	\rm -f .depend	     

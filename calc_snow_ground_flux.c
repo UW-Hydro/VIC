@@ -84,7 +84,7 @@ double calc_snow_ground_flux(double dp,
 				 &energy->snow_flux, &energy->Trad[1],
 				 T1);
  
-
+  energy->error += error;
 
   return (surf_temp);
 

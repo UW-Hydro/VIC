@@ -128,6 +128,11 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&options.GRID_DECIMAL);
       }
+      else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
+        else options.BINARY_OUTPUT = FALSE;
+      }
 
       /************************************
         Get Frocing Data File Information

@@ -46,6 +46,16 @@ void read_atmosdata(atmos_data_struct *temp,
     for(j=0;j<24/dt;j++) {
       sscanf(str, "%lf %lf %lf", &junk, &temp[rec].tmax, &temp[rec].tmin);
       temp[rec].prec = (double)dt/24. * junk;
+      if(temp[rec].prec < 0.) {
+	fprintf(stderr,"ERROR: Negative precipitation for record #%i.\n",rec);
+	exit(0);
+      }
+      if(temp[rec].tmax < temp[rec].tmin) {
+	fprintf(stderr,"WARNING: Maximum temperature (%.3lf) less than minimum (%.3lf) for record #%i.\n\tSwitching values.\n",temp[rec].tmax,temp[rec].tmin,rec);
+	junk           = temp[rec].tmax;
+	temp[rec].tmax = temp[rec].tmin;
+	temp[rec].tmin = junk;
+      }
       rec++;
     }
 

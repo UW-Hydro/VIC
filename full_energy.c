@@ -210,13 +210,17 @@ void full_energy(int rec,
       /**************************************************
         Initialize Energy Balance Terms
       **************************************************/
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+      if(options.SNOW_MODEL) {
 	/** Clear Energy Balance Terms for Snow Pack **/
 	energy[iveg].deltaCC         = 0.;
 	energy[iveg].snow_flux       = 0.;
 	energy[iveg].refreeze_energy = 0.;
 	energy[iveg].advection       = 0.;
+        snow[iveg].vapor_flux        = 0.;
+        snow[iveg].canopy_vapor_flux = 0.;
+      }
 
+      if(options.FULL_ENERGY) {
         /** Set Damping Depth **/
         dp=soil_con.dp;
 
@@ -260,10 +264,6 @@ void full_energy(int rec,
 
       }
   
-      if(options.FULL_ENERGY || options.SNOW_MODEL) {
-        snow[iveg].vapor_flux = 0.;
-        snow[iveg].canopy_vapor_flux = 0.;
-      }
       veg_var[iveg].throughfall = 0.;
 
       /** Compute latent heat of vaporization (J/kg) **/
@@ -398,7 +398,7 @@ void full_energy(int rec,
 		      tmp_wind[2],energy[iveg].T[0],
                       &energy[iveg].advection,&energy[iveg].deltaCC,
                       &energy[iveg].grnd_flux,&energy[iveg].latent,
-                      &energy[iveg].sensible,&snow[iveg].Qnet,
+                      &energy[iveg].sensible,&energy[iveg].error,
 		      &energy[iveg].Trad[0],&energy[iveg].refreeze_energy);
             ppt=atmos->melt;
             energy[iveg].albedo = snow[iveg].albedo;
@@ -762,9 +762,7 @@ void full_energy(int rec,
 				     displacement,roughness,ref_height,
 				     soil_con.elevation,soil_con.depth,
 				     soil_con.Wcr,soil_con.Wpwp);
-                  atmos->longwave = (1. - surf_atten) * STEFAN_B
-                                  * pow(atmos->air_temp+KELVIN,4.0)
-                                  + surf_atten * atmos->longwave;
+                  atmos->longwave = STEFAN_B * pow(atmos->air_temp+KELVIN,4.0);
                   out_short = snow[iveg].albedo * inshort;
                   atmos->net_short = inshort * (1.0 - snow[iveg].albedo);
                   rainfall = veg_var[iveg].throughfall;
@@ -922,6 +920,7 @@ void full_energy(int rec,
       /** Store Energy Balance Data **/
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
         energy[iveg].shortwave = atmos->shortwave;
+	if(snow[iveg].swq>0) energy[iveg].shortwave *= surf_atten;
         energy[iveg].longwave = atmos->longwave;
 	energy[iveg].longwave -= STEFAN_B 
 	                       * pow(energy[iveg].Trad[0]+KELVIN,4.0);

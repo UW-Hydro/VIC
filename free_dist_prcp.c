@@ -4,13 +4,11 @@
  
 void free_dist_prcp(dist_prcp_struct *prcp, int Nveg)
 /**********************************************************************
-	read_dist_prcp	Keith Cherkauer		May 21, 1996
+	free_dist_prcp	Keith Cherkauer		March 1998
 
-  This routine creates an array of structures which will store 
-  necessary information about the distribution of precipitation, moisture,
-  evaporation, and dew.  Mu represents the fractional area of the grid 
-  that receives precipitation (wet), while 1-mu is the corresponding 
-  area that receives no precipitation.
+  This routine frees all memory allocated down the distributed 
+  precipitation data structure.  This include all grid cell specific
+  variables (soil, vegetation, energy, snow).
 
 **********************************************************************/
 {
@@ -26,9 +24,9 @@ void free_dist_prcp(dist_prcp_struct *prcp, int Nveg)
     for(j=0;j<=Nveg;j++) {
       free((char *)prcp[0].dist[i].cell[j].layer);
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-        free((char *)prcp[0].dist[i].energy[i].T);
-        free((char *)prcp[0].dist[i].energy[i].dz);
-        if(options.FROZEN_SOIL) free((char *)prcp[0].dist[i].energy[i].ice);
+        free((char *)prcp[0].dist[i].energy[j].T);
+        free((char *)prcp[0].dist[i].energy[j].dz);
+        if(options.FROZEN_SOIL) free((char *)prcp[0].dist[i].energy[j].ice);
       }
     }
     free((char *)prcp[0].dist[i].cell);

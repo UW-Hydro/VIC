@@ -79,7 +79,7 @@ double func_snow_ground_flux(double Ts, va_list ap) {
 
   *TMean = 0.5 * (Ts + Ts_old);
 
-  kappa_snow = 2.9302 * pow(snow_density*0.001, 2.0);
+  kappa_snow = 2.9302e-6 * pow(snow_density, 2.0);
  
   *snow_flux = kappa_snow * (*TMean - surf_temp) / snow_depth;
 

@@ -39,7 +39,7 @@
 #define GAMMA_PT 6.6		/* psychrometric constant (kPa/K) */
 #define LV_PT    2.5E6		/* latent heat of vaporization (J/kg) */
 
-/* define constants for saturated vapor pressure curve (mb) */
+/* define constants for saturated vapor pressure curve (kPa) */
 #define A_SVP 0.61078
 #define B_SVP 17.269
 #define C_SVP 237.3

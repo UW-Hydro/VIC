@@ -85,6 +85,8 @@ FILE *open_file(char string[],char type[])
 
   if(strcmp(type,"w") == 0) fprintf(stderr,"\n  truncated or created for writing.");
 
+  if(strcmp(type,"wb") == 0) fprintf(stderr,"\n  truncated or created for writing.");
+
   if(strcmp(type,"a") == 0) {
     fprintf(stderr,"\n  opened or created for writing at");
     fprintf(stderr,"\n  the end-of-file.");

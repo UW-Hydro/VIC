@@ -285,11 +285,12 @@ void put_data(dist_prcp_struct  *prcp,
     storage += out_data->moist[index] + out_data->ice[index];
   storage += out_data->swq + out_data->snow_canopy + out_data->Wdew;
   calc_water_balance_error(rec,inflow,outflow,storage);
-  calc_energy_balance_error(rec,out_data->net_short+out_data->net_long,
-			    out_data->latent,out_data->sensible,
-			    out_data->grnd_flux,
-			    out_data->advection-out_data->deltaCC
-			    -out_data->snow_flux+out_data->refreeze_energy);
+  if(options.FULL_ENERGY)
+    calc_energy_balance_error(rec,out_data->net_short+out_data->net_long,
+			      out_data->latent,out_data->sensible,
+			      out_data->grnd_flux,
+			      out_data->advection-out_data->deltaCC
+			      -out_data->snow_flux+out_data->refreeze_energy);
 
   write_data(out_data, outfiles, dmy);
 

@@ -17,10 +17,10 @@ void read_sawd(atmos_data_struct *temp,
 				Input	Output
 				Units	Units
 	air_temp	-	C	C
-	rel_humid	-	%	fraction
+	rel_humid	-	%	%
 	tskc		-	%	fraction
 	wind		-	m/s	m/s
-	pressure	-	kPa	kPa
+	pressure	-	Pa	kPa
 	prec		-	mm	mm
 
 **********************************************************************/
@@ -65,8 +65,8 @@ void read_sawd(atmos_data_struct *temp,
     fscanf(sawdf,"%s",str);
     temp[rec].air_temp = atof(str);
     fscanf(sawdf,"%s",str);
-    temp[rec].pressure = atof(str);
-    if(temp[rec].pressure == 0. && rec>0) {
+    temp[rec].pressure = atof(str) / 1000.;
+    if(temp[rec].pressure <= 0. && rec>0) {
       temp[rec].pressure = temp[rec-1].pressure;
       fixcnt++;
     }

@@ -17,6 +17,7 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
   extern option_struct options;
 
   atmos_data_struct *temp;
+  char              errorstr[MAXSTRING];
 
   temp = (atmos_data_struct*)calloc(*nrecs,sizeof(atmos_data_struct));
 
@@ -28,6 +29,11 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
   else if(strcasecmp(options.FORCE_TYPE,"SAWD")==0) {
     read_sawd(temp,inf.forcing[0],nrecs,dt,options.HP);
     if(!options.HP) read_atmosdata(temp,inf.forcing[1],nrecs,dt);
+  }
+  /***** Read Forcing Files in SAWD Binary Format *****/
+  else if(strcasecmp(options.FORCE_TYPE,"SAWD_BIN")==0) {
+    read_sawd_binary(temp,inf.forcing[0],nrecs,dt,options.HP);
+    read_atmosdata(temp,inf.forcing[1],nrecs,dt);
   }
   /***** Read Daily Forcing Files *****/
   else if(strcasecmp(options.FORCE_TYPE,"DAILY")==0) {
@@ -44,6 +50,12 @@ atmos_data_struct *read_forcing_data(infiles_struct      inf,
   /***** Read SHAW Hourly Forcing Files *****/
   else if(strcasecmp(options.FORCE_TYPE,"SHAW")==0) {
     read_rosemount(temp,inf.forcing[0],nrecs,dt);
+  }
+  /***** Unrecognized Forcing File Type *****/
+  else {
+    sprintf(errorstr,"ERROR: Unrecognized forcing file type %s\n",
+	    options.FORCE_TYPE);
+    vicerror(errorstr);
   }
 
   return(temp);

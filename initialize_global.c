@@ -20,6 +20,7 @@ void initialize_global() {
   options.CORRPREC = FALSE;
   options.MOISTFRACT = FALSE;
   options.GRID_DECIMAL = 2;
+  options.BINARY_OUTPUT = FALSE;
  
   debug.DEBUG = FALSE;
   debug.PRT_SOIL = FALSE;

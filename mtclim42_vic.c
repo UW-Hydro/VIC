@@ -18,6 +18,10 @@
 	    returned through the variable tiny_radfract
 	    - SRADDT has been changed to be 300 sec
 	    - 04-Jun-04 If data->s_srad becomes negative, we set it to 0.0.	TJB
+	    - 15-Jun-04 If p->base_isoh and p->site_isoh are equal (within some
+	      minimum tolerance), set ratio = 1.  This handles case in which annual
+	      precip for the grid cell is 0, resulting in both p->base_isoh and
+	      p->site_isoh being 0, and their ratio being undefined.		TJB
 	    Changes are preceded by the comment * start vic_change *  and
 	    followed by the comment * end vic_change *
   Author: Most of the code was written by Peter E. Thornton at the Univeristy of 
@@ -402,7 +406,23 @@ int calc_prcp(const control_struct *ctrl, const parameter_struct *p,
   
   ndays = ctrl->ndays;
   
-  ratio = p->site_isoh / p->base_isoh;
+  /* start vic_change */
+  if ( p->site_isoh - p->base_isoh < 1e-10
+    && p->base_isoh - p->site_isoh < 1e-10
+    ) {
+    /* If base_isoh and site_isoh are equal (within some minimum tolerance),
+       set the ratio to 1. This handles case in which annual precip is 0,
+       resulting in base_isoh and site_isoh being 0 and their ratio being
+       undefined. */
+    ratio = 1.;
+  }
+  else if (p->base_isoh == 0) {
+    vicerror("Error in calc_prcp(): base_isoh == 0 and site_isoh/base_isoh == NaN.");
+  }
+  else {
+    ratio = p->site_isoh / p->base_isoh;
+  }
+  /* end vic_change */
   
   if (ok) {
     for (i=0 ; i<ndays ; i++) {

@@ -29,7 +29,7 @@ void close_files(infiles_struct   inf,
 
   fclose(inf.forcing[0]);
   if(options.COMPRESS) compress_files(fnames.forcing[0]);
-  if(strcasecmp(fnames.forcing[1],"FALSE")!=0) {
+  if(inf.forcing[1]!=NULL) {
     fclose(inf.forcing[1]);
     if(options.COMPRESS) compress_files(fnames.forcing[1]);
   }

@@ -4,17 +4,64 @@
 
 Modifications:
 
-	cmd_proc.c, display_current_settings.c, global.h, vicNl.c, vicNl.h,
-	vicNl_def.h:
-	    Added -o option, to display current run-time and compile-time
-	    options.  Updated version string.
+	cmd_proc.c, display_current_settings.c, global.h, vicNl.c,
+	vicNl.h, vicNl_def.h:
+	    Added -o option, to display current run-time and
+	    compile-time options.  Updated version string.	TJB
 	Makefile:
-	    Now automatically re-compiles all dependent files when any .h
-	    files are updated.
+	    Now automatically re-compiles all dependent files when
+	    any .h files are updated.				TJB
 	open_file.c:
 	    Now announces when it opens a binary file for reading.
 	write_data.c:
-	    Corrected typo in output format for fluxes file.
+	    Corrected typo in output format for fluxes file.	TJB
+	calc_rainonly.c (found by Justin Sheffield at Princeton):
+	    Changed test
+		else if(air_temp > MAX_SNOW_TEMP)
+	    to
+		else if(air_temp >= MAX_SNOW_TEMP)
+	    to fix situation in which, if air_temp = MAX_SNOW_TEMP,
+	    rainfall (rainonly) was set to 0 and snowfall was set
+	    to 100% of precip, causing function to fail.	TJB
+	compute_dz.c, initialize_atmos.c, read_soilparam.c,
+	read_soilparam_arc.c (found by Justin Sheffield at Princeton):
+	    Replaced rint(something) with (int)(something + 0.5)
+	    to handle rounding without resorting to rint().	TJB
+	full_energy.c (found by Justin Sheffield at Princeton):
+	    Initialize roughness to 0.0 for bare soil.		TJB
+	func_surf_energy_bal.c (found by Justin Sheffield at Princeton):
+	    Added check that both FS_ACTIVE and FROZEN_SOIL are true
+	    before adjusting *deltaH.  This fixes a bug caused when
+	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
+	    non-zero ice content was calculated at the beginning of
+	    the time step but always assumed zero at the point of
+	    *deltaH adjustment, leading to *deltaH always being
+	    calculated as if ice had melted, leading to lower soil
+	    temperatures and snow packs that never melted.	TJB
+	initialize_global.c (found by Justin Sheffield at Princeton):
+	    Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
+	    Also changed limit on loop over forcing types from
+	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
+	initialize_model_state.c (found by Justin Sheffield at Princeton):
+	    Initialize soil_con->dz_node[Nnodes] to 0.0 (on some
+	    platforms, if we don't initialize it, it gets set to
+	    garbage).						TJB
+	open_debug.c (found by Justin Sheffield at Princeton):
+	    Initialize debug_store_moist array when debug.PRT_MOIST
+	    is true (as well as under the other previously-defined
+	    conditions).					TJB
+	penman.c (found by Justin Sheffield at Princeton):
+	    Changed
+		if (vpd > 0.0 && evap < 0.0)
+	    to
+		if (vpd >= 0.0 && evap < 0.0)
+	    to correctly handle evap when vpd == 0.0.		TJB
+	surface_fluxes.c (found by Justin Sheffield at Princeton):
+	    Fixed initialization of canopyevap to initialize for every
+	    value of dist, rather than just dist 0.		TJB
+	write_atmosdata.c (found by Justin Sheffield at Princeton):
+	    No longer close the debug file, since the next cell
+	    must write to it.					TJB
 
 December 1, 2003: VIC release 4.0.4
 

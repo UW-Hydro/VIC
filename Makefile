@@ -1,6 +1,6 @@
 SHELL = /bin/csh
 
-CC = gcc -I. -O
+CC = gcc -I. -O3
 LIBRARY = -lm
 UTILDIR = ./
 DISTDIR = ./
@@ -20,7 +20,7 @@ OBJS = vicNl.o cmd_proc.o check_files.o read_soilparam.o open_file.o \
        initialize_atmos.o correct_precip.o compress_files.o \
        write_soilparam.o write_vegparam.o write_atmosdata.o write_data.o \
        write_vegvar.o write_layer.o make_dist_prcp.o free_dist_prcp.o \
-       initialize_energy.o frozen_soil.o \
+       initialize_energy.o frozen_soil.o read_initial_snow.o \
        soil_conduction.o make_energy_bal.o canopy_evap.o runoff.o \
        modify_Ksat.o full_energy.o func_surf_energy_bal.o read_rosemount.o \
        initialize_snow.o snow_melt.o root_brent.o calc_water_density.o \
@@ -32,7 +32,8 @@ OBJS = vicNl.o cmd_proc.o check_files.o read_soilparam.o open_file.o \
        calc_veg_params.o read_veglib.o calc_rainonly.o \
        calc_long_shortwave.o calc_air_temperature.o read_PILPS2c.o \
        calc_snow_ground_flux.o read_forcing_data.o read_soilparam_arc.o \
-       read_arcinfo_ascii.o solve_snow.o calc_root_fraction.o free_vegcon.o
+       read_arcinfo_ascii.o solve_snow.o calc_root_fraction.o free_vegcon.o \
+       read_initial_soil_thermal.o
 
 
 all:
@@ -83,6 +84,10 @@ read_soilparam_arc.o:   	read_soilparam_arc.c $(INCFILE)
 	$(CC) -c read_soilparam_arc.c
 read_arcinfo_ascii.o:   	read_arcinfo_ascii.c $(INCFILE)
 	$(CC) -c read_arcinfo_ascii.c
+read_initial_snow.o:   	read_initial_snow.c $(INCFILE)
+	$(CC) -c read_initial_snow.c
+read_initial_soil_thermal.o:   	read_initial_soil_thermal.c $(INCFILE)
+	$(CC) -c read_initial_soil_thermal.c
 write_soilparam.o:   	write_soilparam.c $(INCFILE)
 	$(CC) -c write_soilparam.c
 open_file.o:		open_file.c $(INCFILE)

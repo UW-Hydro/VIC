@@ -5,8 +5,9 @@
 static char vcid[] = "$Id$";
 
 void initialize_snow (snow_data_struct **snow, 
-		      int                veg_num, 
-		      FILE              *fsnow)
+		      int                veg_num,
+		      FILE              *fsnow,
+		      int                cellnum)
 /**********************************************************************
 	initialize_snow		Keith Cherkauer		January 22, 1997
 
@@ -44,6 +45,7 @@ void initialize_snow (snow_data_struct **snow,
   modifications:
   07-09-98 modified to initialize snow variables for each defined
            snow elevation band.                                   KAC
+  01-11-99 modified to read new initial snow conditions file format KAC
 
 **********************************************************************/
 {
@@ -59,24 +61,8 @@ void initialize_snow (snow_data_struct **snow,
 
   for ( i = 0 ; i <= veg_num ; i++ ) {
     for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
-      snow[i][j].pack_water      = 0.0;
-      snow[i][j].surf_water      = 0.0;
-      snow[i][j].vapor_flux      = 0.0;
-      snow[i][j].pack_temp       = 0.0;
-      snow[i][j].snow_canopy     = 0.0;
-      snow[i][j].tmp_int_storage = 0.0;
       if(options.INIT_SNOW) {
-	rewind(fsnow);
-	fgets(tempstr,512,fsnow);
-	fscanf(fsnow,"%*s %c\n", &snow[i][j].snow);
-	fscanf(fsnow,"%*s %i\n", &snow[i][j].last_snow);
-	fscanf(fsnow,"%*s %lf\n",&snow[i][j].swq);
-	fscanf(fsnow,"%*s %lf\n",&snow[i][j].surf_temp);
-	fscanf(fsnow,"%*s %lf\n",&snow[i][j].density);
-	if(snow[i][j].swq < MAX_FULL_COVERAGE_SWQ)
-	  snow[i][j].coverage = 1. / MAX_FULL_COVERAGE_SWQ * snow[i][j].swq;
-	else if(snow[i][j].swq > 0.) snow[i][j].coverage = 1.0;
-	else snow[i][j].coverage = 0.0;
+	snow[i][j] = read_initial_snow(fsnow,cellnum,i,j);
       }
       else {	/* Assume no snow present */
 	snow[i][j].snow      = 0;
@@ -86,6 +72,12 @@ void initialize_snow (snow_data_struct **snow,
 	snow[i][j].density   = 0.0;
 	snow[i][j].coverage  = 0.0;
       }
+      snow[i][j].pack_water      = 0.0;
+      snow[i][j].surf_water      = 0.0;
+      snow[i][j].vapor_flux      = 0.0;
+      snow[i][j].pack_temp       = 0.0;
+      snow[i][j].snow_canopy     = 0.0;
+      snow[i][j].tmp_int_storage = 0.0;
       if(snow[i][j].density>0.) 
 	snow[i][j].depth = 1000. * snow[i][j].swq / snow[i][j].density;
       else snow[i][j].depth = 0.;

@@ -63,7 +63,7 @@ static char vcid[] = "$Id$";
     double snow->surf_water	 - Liquid water content of surface layer 
     double snow->swq             - Snow water equivalent at current pixel (m)
     double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m)
+                                   intercepted snow (m/timestep)
     double snow->pack_temp       - Temperature of snow pack (C)
     double snow->surf_temp       - Temperature of snow pack surface layer (C)
     double snow->melt_energy     - Energy used for melting and heating of
@@ -76,6 +76,10 @@ static char vcid[] = "$Id$";
            are updated.                                                LCB
   04-Jun-04 Added descriptive error message to beginning of screen dump in
 	    ErrorPrintIcePackEnergyBalance.				TJB
+  16-Jul-04 Changed VaporMassFlux to vapor_flux, to make it consistent with
+	    IceEnergyBalance(), in which VaporMassFlux is in (kg/m2s) and
+	    vapor_flux is in (m/timestep).  Changed calculations involving
+	    vapor_flux to reflect these new units.			TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -209,8 +213,7 @@ void ice_melt(double            z2,
     }
 
   
-    /* Convert vapor mass flux to a depth per timestep and adjust snow->surf_water */
-     snow->vapor_flux *= delta_t * SECPHOUR;
+    /* Adjust snow->surf_water for vapor_flux */
     if ((SnowIce + snow->surf_water + LakeIce) < -(snow->vapor_flux)) {
       snow->vapor_flux = -SnowIce - LakeIce;
       lake->volume -= LakeIce*fracprv*lake->surface[0];	    
@@ -320,9 +323,7 @@ void ice_melt(double            z2,
     RefrozenWater = snow->surf_water;
     snow->surf_water  = 0.0;
     
-    /* Convert mass flux to a depth per timestep and adjust SurfaceSwq */
-    
-    snow->vapor_flux *= delta_t * SECPHOUR;
+    /* Adjust SurfaceSwq for vapor_flux */
     if ((SnowIce + LakeIce) < -(snow->vapor_flux)) {
       snow->vapor_flux = -SnowIce - LakeIce;
       lake->volume -= lake->surface[0]*fracprv*LakeIce;	    
@@ -472,8 +473,8 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   double OldTSurf;               /* Surface temperature during previous time
                                    step */ 
   double *RefreezeEnergy;        /* Refreeze energy (W/m2) */
-  double *VaporMassFlux;          /* Mass flux of water vapor to or from the
-                                   intercepted snow */
+  double *vapor_flux;            /* Mass flux of water vapor to or from the
+                                    intercepted snow (m/timestep) */
   double *AdvectedEnergy;         /* Energy advected by precipitation (W/m2) */
   double *DeltaColdContent;       /* Change in cold content (W/m2) */
   double Tfreeze;
@@ -490,7 +491,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
 
   /* initialize variables */
-    Dt                 = (double) va_arg(ap, double);
+  Dt                 = (double) va_arg(ap, double);
   Ra                 = (double) va_arg(ap, double);
   Z                  = (double) va_arg(ap, double);
   Displacement       = (double) va_arg(ap, double);
@@ -509,13 +510,13 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   SurfaceLiquidWater = (double) va_arg(ap, double);
   OldTSurf           = (double) va_arg(ap, double);
   RefreezeEnergy     = (double *) va_arg(ap, double *);
-  VaporMassFlux      = (double *) va_arg(ap, double *);
+  vapor_flux         = (double *) va_arg(ap, double *);
   AdvectedEnergy     = (double *) va_arg(ap, double *);
   DeltaColdContent   = (double *) va_arg(ap, double *);
-  Tfreeze              = (double) va_arg(ap, double);
-  AvgCond              = (double) va_arg(ap, double);
-  SWconducted              = (double) va_arg(ap, double);
-  SWabsorbed              = (double) va_arg(ap, double);
+  Tfreeze            = (double) va_arg(ap, double);
+  AvgCond            = (double) va_arg(ap, double);
+  SWconducted        = (double) va_arg(ap, double);
+  SWabsorbed         = (double) va_arg(ap, double);
   SnowDepth          = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
   SurfAttenuation    = (double) va_arg(ap, double);
@@ -545,7 +546,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"SurfaceLiquidWater = %f\n",SurfaceLiquidWater);
   fprintf(stderr,"OldTSurf = %f\n",OldTSurf);
   fprintf(stderr,"RefreezeEnergy = %f\n",RefreezeEnergy[0]);
-  fprintf(stderr,"VaporMassFlux = %f\n",VaporMassFlux[0]);
+  fprintf(stderr,"vapor_flux = %f\n",vapor_flux);
   fprintf(stderr,"AdvectedEnergy = %f\n",AdvectedEnergy[0]);
   fprintf(stderr,"DeltaColdContent = %f\n",DeltaColdContent[0]);
   fprintf(stderr,"Tfreeze = %f\n",Tfreeze);

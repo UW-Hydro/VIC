@@ -110,7 +110,9 @@ double solve_snow(char                 overstory,
   06-04-03 Added check so that MELTING flag is only TRUE if melt
            occurs in the melt season - currently this is defined
            between March 1 and October 1.  Otherwise the MELTING
-           flag can trigger rapid very early season melt
+           flag can trigger rapid very early season melt	KAC
+  16-Jul-04 Added "month" to parameter list so that it can be passed
+	    to snow_melt() function.				TJB
 
 *********************************************************************/
 
@@ -362,7 +364,7 @@ double solve_snow(char                 overstory,
 		&energy->latent_sub, &energy->refreeze_energy, 
 		&energy->sensible, INCLUDE_SNOW, band, iveg, 
 		(int)overstory, rec, snow, soil_con,lag_one, sigma_slope, 
-		fetch, Nveg);
+		fetch, Nveg, month);
 
       // store melt water
       ppt[WET] += melt;

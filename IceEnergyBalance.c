@@ -49,6 +49,14 @@ static char vcid[] = "$Id$";
   Comments     :
     Reference:  Bras, R. A., Hydrology, an introduction to hydrologic
                 science, Addisson Wesley, Inc., Reading, etc., 1990.
+
+  Modifications:
+  16-Jul-04 Renamed VaporMassFlux to vapor_flux to denote fact that its
+	    units are m/timestep rather than kg/m2s.  Created new variable
+	    VaporMassFlux with units of kg/m2s.  After VaporMassFlux is
+	    computed, vapor_flux is derived from it by unit conversion.
+	    vapor_flux is the variable that is passed in/out of this
+	    function.							TJB
 *****************************************************************************/
 double IceEnergyBalance(double TSurf, va_list ap)
 {
@@ -80,8 +88,8 @@ double IceEnergyBalance(double TSurf, va_list ap)
   double OldTSurf;               /* Surface temperature during previous time
                                    step */
   double *RefreezeEnergy;        /* Refreeze energy (W/m2) */
-  double *VaporMassFlux;          /* Mass flux of water vapor to or from the
-                                   intercepted snow */
+  double *vapor_flux;            /* Mass flux of water vapor to or from the
+                                    intercepted snow (m/timestep) */
   double *AdvectedEnergy;         /* Energy advected by precipitation (W/m2) */
   double DeltaColdContent;       /* Change in cold content (W/m2) */
   double Tfreeze;     
@@ -107,6 +115,8 @@ double IceEnergyBalance(double TSurf, va_list ap)
 				   (W/m2) */
   double  TMean;                /* Average temperature for time step (C) */
   double qnull;
+  double VaporMassFlux;          /* Mass flux of water vapor to or from the
+                                    intercepted snow (m/timestep) */
 
   /* Assign the elements of the array to the appropriate variables.  The list
      is traversed as if the elements are doubles, because:
@@ -139,19 +149,19 @@ double IceEnergyBalance(double TSurf, va_list ap)
   SurfaceLiquidWater = (double) va_arg(ap, double);
   OldTSurf           = (double) va_arg(ap, double);
   RefreezeEnergy     = (double *) va_arg(ap, double *);
-  VaporMassFlux      = (double *) va_arg(ap, double *);
+  vapor_flux         = (double *) va_arg(ap, double *);
   AdvectedEnergy     = (double *) va_arg(ap, double *);
   DeltaColdContent   = (double) va_arg(ap, double );
-  Tfreeze              = (double) va_arg(ap, double);
-  AvgCond              = (double) va_arg(ap, double);
-  SWconducted              = (double) va_arg(ap, double);
-   SnowDepth          = (double) va_arg(ap, double);
+  Tfreeze            = (double) va_arg(ap, double);
+  AvgCond            = (double) va_arg(ap, double);
+  SWconducted        = (double) va_arg(ap, double);
+  SnowDepth          = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
   SurfAttenuation    = (double) va_arg(ap, double);
-  qf         = (double *) va_arg(ap, double *);
+  qf                 = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
-  LongRadOut       = (double *) va_arg(ap, double *);
+  LongRadOut         = (double *) va_arg(ap, double *);
   
   /* Calculate active temp for energy balance as average of old and new  */
   
@@ -197,24 +207,40 @@ double IceEnergyBalance(double TSurf, va_list ap)
 /*   if (TMean < 0.0) */
 /*     EsSnow *= 1.0 + .00972 * TMean + .000042 * pow((double)TMean,(double)2.0); */
   
-  *VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow)/Ra;
-  *VaporMassFlux /= Density;
-  if (Vpd == 0.0 && *VaporMassFlux < 0.0)
-    *VaporMassFlux = 0.0;
-  
   /* Calculate latent heat flux */
   /* Should use latent_heat_from_snow. */
+  /* To use latent_heat_from_snow:
+   * 1. un-comment the line below that starts with VaporMassFlux = *vapor_flux ...
+   * 2. replace the lines from
+   *      VaporMassFlux = AirDens ...
+   *    through 
+   *        *LatentHeat = Ls * ...
+   *      }
+   *    with a call to latent_heat_from_snow().
+   *    The sublimation terms in this call should be
+   *      &VaporMassFlux, &BlowingMassFlux, &SurfaceMassFlux
+   */
  
+  /* Convert sublimation terms from m/timestep to kg/m2s */
+/*  VaporMassFlux = *vapor_flux * Density / (Dt * SECPHOUR); */
+
+  VaporMassFlux = AirDens * (EPS/Press) * (EactAir - EsSnow)/Ra;
+  if (Vpd == 0.0 && VaporMassFlux < 0.0)
+    VaporMassFlux = 0.0;
+  
   if (TMean >= 0.0) {
     /* Melt conditions: use latent heat of vaporization */
-    *LatentHeat = Lv * *VaporMassFlux * Density;
+    *LatentHeat = Lv * VaporMassFlux;
   }
   else {
     /* Accumulation: use latent heat of sublimation (Eq. 3.19, Bras 1990 */
     Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
-    *LatentHeat = Ls * *VaporMassFlux * Density;
+    *LatentHeat = Ls * VaporMassFlux;
   }
   
+  /* Convert sublimation terms from kg/m2s to m/timestep */
+  *vapor_flux = VaporMassFlux * Dt * SECPHOUR / Density;
+
   /* Calculate advected heat flux from rain 
      WORK IN PROGRESS:  Should the following read (Tair - Tsurf) ?? */
   

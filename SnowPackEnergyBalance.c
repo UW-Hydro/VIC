@@ -36,8 +36,10 @@ static char vcid[] = "$Id$";
 
   Modifies     : 
     double *RefreezeEnergy - Refreeze energy (W/m2) 
-    double *VaporMassFlux  - Mass flux of water vapor to or from the
-                            intercepted snow (m/s)
+    double *vapor_flux     - Mass flux of water vapor to or from the
+                             intercepted snow (m/timestep)
+    double *blowing_flux   - Mass flux of water vapor from blowing snow (m/timestep)
+    double *surface_flux   - Mass flux of water vapor from pack snow (m/timestep)
 
   Comments     :
     Reference:  Bras, R. A., Hydrology, an introduction to hydrologic
@@ -52,6 +54,23 @@ static char vcid[] = "$Id$";
   04-21-03 Removed constant variable declarations.  Those still
            required by the VIC model are now defined in 
            vicNl_def.h.                                        KAC
+  16-Jul-04 Renamed VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
+	    to vapor_flux, blowing_flux, and surface_flux, respectively,
+	    to denote fact that their units are m/timestep rather than
+	    kg/m2s.  Created new variables VaporMassFlux, BlowingMassFlux,
+	    and SurfaceMassFlux with units of kg/m2s.  The addresses of
+	    the *MassFlux variables are passed to latent_heat_from_snow()
+	    where values for the variables are computed.  After these
+	    values are computed, vapor_flux, blowing_flux and surface_flux
+	    are derived from them by unit conversion.  vapor_flux,
+	    blowing_flux, and surface_flux are the variables that are
+	    passed in/out of this function.				TJB
+  16-Jul-04 Changed the type of the last few variables (lag_one, iveg,
+	    etc) in the va_list to be double.  For some reason, passing
+	    them as float or int caused them to become garbage.  This may
+	    have to do with the fact that they followed variables of type
+	    (double *) in va_list, which may have caused memory alignment
+	    problems.							TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -111,21 +130,22 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   double *LatentHeat;		  /* Latent heat exchange at surface (W/m2) */
   double *LatentHeatSub;  /* Latent heat of sublimation exchange at 
 				     surface (W/m2) */
-  double *NetLongUnder;            /* Net longwave radiation at snowpack 
+  double *NetLongUnder;           /* Net longwave radiation at snowpack 
 				     surface (W/m^2) */
   double *RefreezeEnergy;         /* Refreeze energy (W/m2) */
   double *SensibleHeat;		  /* Sensible heat exchange at surface 
 				     (W/m2) */
-  double *VaporMassFlux;          /* Mass flux of water vapor to or from the
-				     intercepted snow */
-  double *BlowingMassFlux;         /* Mass flux of water vapor from blowing snow. */
-  double *SurfaceMassFlux;         /* Mass flux of water vapor from pack snow. */
+  double *vapor_flux;             /* Mass flux of water vapor to or from the
+				     intercepted snow (m/timestep) */
+  double *blowing_flux;           /* Mass flux of water vapor from blowing snow. (m/timestep) */
+  double *surface_flux;           /* Mass flux of water vapor from pack snow. (m/timestep) */
   int LastSnow;
   float lag_one;
   float sigma_slope;
   float fetch;
-  int Nveg;
   int iveg;
+  int Nveg;
+  int month;
 
   /* Internal Routine Variables */
 
@@ -138,6 +158,10 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 				     (W/m2) */
   double TMean;                   /* Average temperature for time step (C) */
   double Tmp;
+  double VaporMassFlux;           /* Mass flux of water vapor to or from the
+				     intercepted snow (kg/m2s) */
+  double BlowingMassFlux;         /* Mass flux of water vapor from blowing snow. (kg/m2s) */
+  double SurfaceMassFlux;         /* Mass flux of water vapor from pack snow. (kg/m2s) */
 
   /* Assign the elements of the array to the appropriate variables.  The list
      is traversed as if the elements are doubles, because:
@@ -196,15 +220,16 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   NetLongUnder          = (double *) va_arg(ap, double *);
   RefreezeEnergy        = (double *) va_arg(ap, double *);
   SensibleHeat          = (double *) va_arg(ap, double *);
-  VaporMassFlux         = (double *) va_arg(ap, double *);
-  BlowingMassFlux       = (double *) va_arg(ap, double *); 
-  SurfaceMassFlux       = (double *) va_arg(ap, double *);   
-  LastSnow              = (int) va_arg(ap, int);
-  lag_one               = (float) va_arg(ap, float);
-  sigma_slope              = (float) va_arg(ap, float);
-  fetch               = (float) va_arg(ap, float);
-  Nveg              = (int) va_arg(ap, int);
-  iveg              = (int) va_arg(ap, int);
+  vapor_flux            = (double *) va_arg(ap, double *);
+  blowing_flux          = (double *) va_arg(ap, double *); 
+  surface_flux          = (double *) va_arg(ap, double *);   
+  LastSnow              = (int) va_arg(ap, double);
+  lag_one               = (float) va_arg(ap, double);
+  sigma_slope           = (float) va_arg(ap, double);
+  fetch                 = (float) va_arg(ap, double);
+  iveg                  = (int) va_arg(ap, double);
+  Nveg                  = (int) va_arg(ap, double);
+  month                 = (int) va_arg(ap, double);
 
   /* Calculate active temp for energy balance as average of old and new  */
   
@@ -249,6 +274,10 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   (*AdvectedSensibleHeat) = 0;
 #endif // SPATIAL_SNOW
 
+  /* Convert sublimation terms from m/timestep to kg/m2s */
+  VaporMassFlux = *vapor_flux * Density / Dt;
+  BlowingMassFlux = *blowing_flux * Density / Dt;
+  SurfaceMassFlux = *surface_flux * Density / Dt;
 
   /* Calculate the mass flux of ice to or from the surface layer */
  
@@ -256,11 +285,15 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
      (Equation 3.32, Bras 1990) */
 
   latent_heat_from_snow(AirDens, Density, EactAir, Lv, Press, Ra, TMean, Vpd,
-			LatentHeat, LatentHeatSub, VaporMassFlux, BlowingMassFlux, 
-			SurfaceMassFlux, Dt, Tair, LastSnow, SurfaceLiquidWater,
+			LatentHeat, LatentHeatSub, &VaporMassFlux, &BlowingMassFlux, 
+			&SurfaceMassFlux, Dt, Tair, LastSnow, SurfaceLiquidWater,
 			Wind, Z0, Z, SnowDepth, overstory, lag_one, sigma_slope, fetch, 
-			Nveg, iveg);
+			iveg, Nveg, month);
 
+  /* Convert sublimation terms from kg/m2s to m/timestep */
+  *vapor_flux = VaporMassFlux * Dt / Density;
+  *blowing_flux = BlowingMassFlux * Dt / Density;
+  *surface_flux = SurfaceMassFlux * Dt / Density;
   
   /* Calculate advected heat flux from rain 
      Equation 7.3.12 from H.B.H. for rain falling on melting snowpack */

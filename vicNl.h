@@ -236,7 +236,7 @@ void   latent_heat_from_snow(double, double, double, double, double,
                              double, double, double, double *, double *, 
                              double *, double *, double *, double, double, 
                              int, double, double, double *, double, double, 
-                             int, float, float, float, int, int);
+                             int, float, float, float, int, int, int);
 double linear_interp(double,double,double,double,double);
 
 cell_data_struct **make_cell_data(int, int);
@@ -352,7 +352,7 @@ void   snow_melt(double, double, double, double, double *, double, double,
                  double *, double *, double *, double *, double *, double *, 
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, int, 
-                 snow_data_struct *, soil_con_struct *, float, float, float, int);
+                 snow_data_struct *, soil_con_struct *, float, float, float, int, int);
 double SnowPackEnergyBalance(double, va_list);
 double soil_conductivity(double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,

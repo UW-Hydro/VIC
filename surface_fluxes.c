@@ -84,6 +84,11 @@ void surface_fluxes(char                 overstory,
            time step.                                            KAC
   10-May-04 Fixed initialization of canopyevap to initialize for every
 	    value of dist, rather than just dist 0.		TJB
+  16-Jul-04 Added variables store_blowing_flux and store_surface_flux
+	    so that surface_flux and blowing_flux are calculated
+	    correctly over a model time step.			TJB
+  16-Jul-04 Moved calculation of blowing_flux from this function
+	    into latent_heat_from_snow().			TJB
 
 **********************************************************************/
 {
@@ -183,6 +188,8 @@ void surface_fluxes(char                 overstory,
   double                 store_latent_sub;
   double                 store_throughfall[2];
   double                 store_vapor_flux;
+  double                 store_surface_flux;
+  double                 store_blowing_flux;
   double                 store_grnd_flux;
   double                 store_deltaH;
   double                 store_fusion;
@@ -271,6 +278,8 @@ void surface_fluxes(char                 overstory,
   }
   store_canopy_vapor_flux = 0;
   store_vapor_flux        = 0;
+  store_surface_flux      = 0;
+  store_blowing_flux      = 0;
   store_ppt[WET]          = 0;
   store_ppt[DRY]          = 0;
   store_melt              = 0;
@@ -342,24 +351,6 @@ void surface_fluxes(char                 overstory,
     last_Tcanopy      = 999;
     last_LongUnderOut = 999;
     last_snow_flux    = 999;
-
-    // Compute mass flux of blowing snow
-    if( !overstory && options.BLOWING && snow->swq > 0.) {
-      Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
-      snow->blowing_flux = CalcBlowingSnow((double) step_dt, Tair, 
-					   snow->last_snow, snow->surf_water, 
-					   wind[2], Ls, atmos->density[hidx], 
-					   atmos->pressure[hidx], 
-					   atmos->vp[hidx], roughness, 
-					   ref_height[2], snow->depth, 
-					   lag_one, sigma_slope, 
-					   snow->surf_temp, iveg, Nveg, fetch, 
-					   veg_lib[iveg].displacement[dmy[rec].month], 
-					   veg_lib[iveg].roughness[dmy[rec].month]);
-      snow->blowing_flux *= 3600./RHO_W;
-    }
-    else
-      snow->blowing_flux = 0.0;
 
     // initialize bisection startup
     BISECT_OVER  = FALSE;
@@ -438,7 +429,8 @@ void surface_fluxes(char                 overstory,
         }
 	step_snow.canopy_vapor_flux = 0;
 	step_snow.vapor_flux = 0;
-
+	step_snow.surface_flux = 0;
+	step_snow.blowing_flux = 0;
 
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
@@ -620,7 +612,10 @@ void surface_fluxes(char                 overstory,
 
     if(iveg != Nveg) 
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
+
     store_vapor_flux += step_snow.vapor_flux;
+    store_surface_flux += step_snow.surface_flux;
+    store_blowing_flux += step_snow.blowing_flux;
       
     store_melt  += step_melt;
     out_prec[0] += step_out_prec * mu;
@@ -693,6 +688,8 @@ void surface_fluxes(char                 overstory,
 
   (*snow) = step_snow;
   snow->vapor_flux = store_vapor_flux;
+  snow->blowing_flux = store_blowing_flux;
+  snow->surface_flux = store_surface_flux;
   snow->canopy_vapor_flux = store_canopy_vapor_flux;
   (*Melt) = store_melt;
   snow->melt = store_melt;

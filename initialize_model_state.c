@@ -15,7 +15,7 @@ void initialize_model_state(double               surf_temp,
                             global_param_struct *global_param,
                             infiles_struct       infiles,
 #if LAKE_MODEL
-			    lake_con_struct lake_con,
+			    lake_con_struct      lake_con,
 #endif //LAKE_MODEL
                             soil_con_struct     *soil_con,
 			    veg_con_struct      *veg_con)
@@ -39,6 +39,12 @@ void initialize_model_state(double               surf_temp,
   9-00    Fixed bug where initialization of soil node temperatures 
           and moitures was within two vegetation loops, thus only
           the first vegetation type was properly initialized.     KAC
+  2-19-03 Modified to initialize soil and vegetation parameters for
+          the dry grid cell fraction, if distributed precipitation
+          is activated.                                           KAC
+  11-18-02 Modified to initialize lake and wetland algorithms 
+          variables.                                              LCB
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -58,6 +64,7 @@ void initialize_model_state(double               surf_temp,
   int      dry;
   int      band;
   int      zindex;
+  int      MaxVeg;
 #if SPATIAL_FROST
   int      frost_area;
 #endif
@@ -67,7 +74,6 @@ void initialize_model_state(double               surf_temp,
   double   Tair;
   double  *kappa, *Cs, *M;
   double   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-/*   double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS]; */
   double   unfrozen, frozen;
   double **layer_ice;
   double **layer_tmp;
@@ -107,6 +113,11 @@ void initialize_model_state(double               surf_temp,
 
   FIRST_VEG = TRUE;
 
+  if(options.LAKES) 
+    MaxVeg = Nveg+1;
+  else
+    MaxVeg = Nveg;
+
   // increase initial soil surface temperature if air is very cold
   Tair = surf_temp;
   if ( surf_temp < -1. ) surf_temp = -1.;
@@ -116,28 +127,32 @@ void initialize_model_state(double               surf_temp,
     - some may be reset if state file present
   ********************************************/
 
-  initialize_snow(snow, Nveg, infiles.init_snow, cellnum);
+  initialize_snow(snow, MaxVeg, infiles.init_snow, cellnum);
 
   /********************************************
     Initialize all soil layer variables 
     - some may be reset if state file present
   ********************************************/
 
-  initialize_soil(cell[WET], soil_con, Nveg);
+  initialize_soil(cell[WET], soil_con, MaxVeg);
+  if ( options.DIST_PRCP )
+    initialize_soil(cell[DRY], soil_con, MaxVeg);
 
   /********************************************
     Initialize all vegetation variables 
     - some may be reset if state file present
   ********************************************/
 
-  initialize_veg(veg_var[WET], veg_con, global_param);
+  initialize_veg(veg_var[WET], veg_con, global_param, MaxVeg);
+  if ( options.DIST_PRCP )
+    initialize_veg(veg_var[DRY], veg_con, global_param, MaxVeg);
 
   /********************************************
     Initialize all lake variables 
   ********************************************/
 
 #if LAKE_MODEL
-  if ( options.LAKES ) {
+  if ( options.LAKES && lake_con.Cl[0] > 0) {
     initialize_lake(lake_var, lake_con, &snow[Nveg+1][0], surf_temp);
   }
 #endif // LAKE_MODEL
@@ -200,12 +215,12 @@ void initialize_model_state(double               surf_temp,
     read_initial_model_state(infiles.statefile, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con);
 
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
       if ( veg < Nveg ) Cv = veg_con[veg].Cv;
       else Cv = (1.0 - veg_con[0].Cv_sum);
 
-      if ( Cv > 0 ) {
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
@@ -222,12 +237,12 @@ void initialize_model_state(double               surf_temp,
     
   else if(options.QUICK_FLUX) {
 
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
       if ( veg < Nveg ) Cv = veg_con[veg].Cv;
       else Cv = (1.0 - veg_con[0].Cv_sum);
       
-      if ( Cv > 0 ) {
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 
 	  /* Initialize soil node temperatures and thicknesses */
@@ -240,7 +255,7 @@ void initialize_model_state(double               surf_temp,
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 	  
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
-	    moist[veg][band][lidx] = soil_con->init_moist[lidx];
+	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 	  
 	}
       }
@@ -252,12 +267,12 @@ void initialize_model_state(double               surf_temp,
     ground heat flux, and no Initial Condition File Given 
   *****************************************************************/
   else if(!options.QUICK_FLUX) {
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
       if ( veg < Nveg ) Cv = veg_con[veg].Cv;
       else Cv = (1.0 - veg_con[0].Cv_sum);
       
-      if ( Cv > 0 ) {
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 	  
 	  /* Initialize soil node temperatures and thicknesses 
@@ -281,15 +296,17 @@ void initialize_model_state(double               surf_temp,
 	  tmpdp  = dp - soil_con[0].depth[0] * 2.5;
 	  tmpadj = 3.5;
 	  for ( index = 3; index < Nnodes-1; index++ ) {
-	    if ( veg == 0 && band == 0 )
+	    if ( FIRST_VEG ) {
 	      soil_con->dz_node[index] = tmpdp/(((double)Nnodes-tmpadj));
+	    }
 	    Zsum += (soil_con->dz_node[index]
 		     +soil_con->dz_node[index-1])/2.;
 	    energy[veg][band].T[index] = exp_interp(Zsum,0.,soil_con[0].dp,
 						    surf_temp,
 						    soil_con[0].avg_temp);
 	  }
-	  if ( veg == 0 && band == 0) {
+	  if ( FIRST_VEG ) {
+	    FIRST_VEG = FALSE;
 	    soil_con->dz_node[Nnodes-1] = (dp - Zsum 
 					   - soil_con->dz_node[Nnodes-2] 
 					   / 2. ) * 2.;
@@ -302,7 +319,7 @@ void initialize_model_state(double               surf_temp,
 	  }
 
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ )
-	    moist[veg][band][lidx] = soil_con->init_moist[lidx];
+	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 	}
       }
     }
@@ -312,12 +329,12 @@ void initialize_model_state(double               surf_temp,
     CASE 4: Unknown option
   *********************************/
   else {
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
       if ( veg < Nveg ) Cv = veg_con[veg].Cv;
       else Cv = (1.0 - veg_con[0].Cv_sum);
 
-      if ( Cv > 0 ) {
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 	  // Initialize soil for existing snow elevation bands
 	  if ( soil_con->AreaFract[band] > 0. ) {
@@ -337,16 +354,17 @@ void initialize_model_state(double               surf_temp,
 
   if ( options.GRND_FLUX ) {
 
-    for ( veg = 0 ; veg <= Nveg ; veg++) {
+    FIRST_VEG = TRUE;
+    for ( veg = 0 ; veg <= MaxVeg ; veg++) {
       // Initialize soil for existing vegetation types
       if ( veg < Nveg ) Cv = veg_con[veg].Cv;
       else Cv = (1.0 - veg_con[0].Cv_sum);
 
-      if ( Cv > 0 ) {
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 	  // Initialize soil for existing snow elevation bands
 	  if ( soil_con->AreaFract[band] > 0. ) {
-	  
+	    
 	    /** Set soil properties for all soil nodes **/
 	    if(FIRST_VEG) {
 	      FIRST_VEG = FALSE;
@@ -395,10 +413,11 @@ void initialize_model_state(double               surf_temp,
 		cell[dry][veg][band].layer[lidx].moist 
 		  = moist[veg][band][lidx];
 	      }
-	      estimate_layer_ice_content(cell[dry][veg][band].layer,
-					 soil_con->dz_node,
-					 energy[veg][band].T,
-					 soil_con->max_moist_node,
+	      if ( !( options.LAKES && veg == MaxVeg ) ) {
+		estimate_layer_ice_content(cell[dry][veg][band].layer,
+					   soil_con->dz_node,
+					   energy[veg][band].T,
+					   soil_con->max_moist_node,
 #if QUICK_FS
 					 soil_con->ufwc_table_node,
 #else
@@ -424,6 +443,7 @@ void initialize_model_state(double               surf_temp,
 					 Nnodes, options.Nlayer, 
 					 soil_con->FS_ACTIVE);
 	  
+	      }
 	    }
 	
 	    /* Find freezing and thawing front depths */
@@ -437,12 +457,10 @@ void initialize_model_state(double               surf_temp,
   }
 
   // initialize energy balance terms before iterations begin
-  for ( veg = 0 ; veg <= Nveg ; veg++) {
+  for ( veg = 0 ; veg <= MaxVeg ; veg++) {
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
 	energy[veg][band].LongUnderOut = 0.;
 	energy[veg][band].Tfoliage     = Tair;
     }
   }
-
-
 }

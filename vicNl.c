@@ -69,14 +69,6 @@ void main(int argc, char *argv[])
   initialize_global();
   filenames = cmd_proc(argc, argv);
 
-  /** Print Options **/
-  fprintf(stderr,"Distributed Precipitation (%i)\n",options.DIST_PRCP);
-  if(options.DIST_PRCP) {
-    fprintf(stderr,"Use Radar Precipitation (%i)\n",options.RADAR);
-  }
-  fprintf(stderr,"Frozen Soils (%i)\n",options.FROZEN_SOIL);
-
-
   /** Read Global Control File **/
   force_dt[0] = force_dt[1] = -99;
   infiles.globalparam = open_file(filenames.global,"r");

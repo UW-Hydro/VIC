@@ -13,6 +13,9 @@ void initialize_soil (cell_data_struct **cell,
   This routine initializes the soil variable arrays for each new
   grid cell.
 
+  modifications:
+  11-18-02 Modified to initialize wetland soil moisture.          LCB
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -23,4 +26,13 @@ void initialize_soil (cell_data_struct **cell,
     for(band=0;band<options.SNOW_BAND;band++) 
       for(index=0;index<options.Nlayer;index++)
 	cell[j][band].layer[index].moist = soil_con->init_moist[index];
+
+
+#if LAKE_MODEL
+  if ( options.LAKES ) {
+    for(index=0;index<options.Nlayer;index++)
+      cell[veg_num][0].layer[index].moist = soil_con->porosity[index]*soil_con->depth[index]*1000.;
+  }
+#endif // LAKE_MODEL
+
 }

@@ -120,11 +120,11 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
     if(Tair[i]<new_Tmin) new_Tmin=Tair[i];
   }
 
-  free((char*)x);
-  free((char*)Tyc1);
-  free((char*)yc2);
-  free((char*)yc3);
-  free((char*)yc4);
+/*   free((char*)x); */
+/*   free((char*)Tyc1); */
+/*   free((char*)yc2); */
+/*   free((char*)yc3); */
+/*   free((char*)yc4); */
 
   return(new_Tmin);
 

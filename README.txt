@@ -3,6 +3,75 @@
 # $Id$
 #------------------------------------------------------------------------
 
+December 1, 2003: VIC release 4.0.4
+
+This release covers fixes for a small number of additional bugs discovered
+since the release of 4.0.4 beta r3, plus 2 new features.
+
+New Features:
+
+      - Typing 'vicNl -v' on the command line now displays the version
+	of VIC you are running.  This provides a fast, simple way of
+	determining the version of VIC without running a simulation.
+
+      - The parameters {Ds, Dsmax, Ws and c} in the soil parameter file
+	may now be replaced by the set of ARNO baseflow parameters
+	{d1, d2, d3, d4}.  To enable VIC to read the ARNO baseflow
+	parameters, you must add the following line to the global
+	parameter file:
+		ARNO_PARAMS TRUE
+	and replace {Ds, Dsmax, Ws, and c} with {d1, d2, d3, and d4}
+	in the soil parameter file.
+
+	To disable this behavior, your soil file should contain
+	{Ds, Dsmax, Ws, and c} and your global parameter file should
+	contain:
+		ARNO_PARAMS FALSE
+	or you may omit the ARNO_PARAMS line entirely. 
+
+Modifications:
+
+	read_vegparam.c:
+	    Applied Alan Hamlet's fix for COMPUTE_TREELINE option,
+	    which fixed a segmentation fault when COMPUTE_TREELINE=TRUE.
+	    This consisted of removing the call to realloc and
+	    instead allocating an extra veg class to begin with,
+	    as well as assigning this extra veg class a very small
+	    fraction of the grid cell's area to avoid changing the
+	    results for areas below the treeline.		TJB
+	runoff.c:
+	    This fixed strange behavior (spikes) in bottom-layer
+	    soil moisture and baseflow for low liquid moisture
+	    conditions (e.g.  frozen soils).  Changed calculation
+	    of dt_baseflow to go to zero when soil liquid moisture
+	    <= residual moisture.  Changed block that handles case
+	    of total soil moisture < residual moisture to not allow
+	    dt_baseflow to go negative.				TJB
+        write_model_state.c, read_initial_model_state.c:
+	    (bugs found by Lifeng Luo at Princeton)
+	    Read_initial_model_state was not parsing ASCII state
+	    files according to the format written by
+	    write_model_state.  Modified write_model_state.c to
+	    add a "\n" after writing mu.  Modified
+	    read_initial_model_state to loop over tmp_Nveg and
+	    tmp_Nband when searching for the desired cellnum, and
+	    to read the correct number of lines per veg class
+	    once the desired cellnum has been found.		TJB
+	vicNl_def.h, get_global_param.c, read_soilparam.c:
+	    Added the ARNO_PARAMS option.  If TRUE, read_soilparam
+	    reads the ARNO baseflow parameters d1, d2, d3, and d4
+	    and converts them to Ds, Dsmax, Ws, and c.		TJB
+	snow_utility.c:
+	    In the snow_density function, modified the checks on
+	    delta_depth so that the condition is
+	        delta_depth > MAX_CHANGE*depth
+	    Modified compression due to aging to only be calculated
+	    if depth > 0.					TJB
+	global.h, vicNl.c, cmd_proc.c:
+	    Modified the version information banner to display the
+	    version string defined in global.h.  Added -v option
+	    to display version information as well.		TJB
+
 September 5, 2003: VIC release 4.0.4beta r3
 
         snow_utility.c: modification by KAC

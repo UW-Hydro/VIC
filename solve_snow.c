@@ -106,6 +106,11 @@ double solve_snow(char                 overstory,
            even during brief periods of refreezing, until a 
            snowfall exceeds SnowThres.           .           KAC
   11-18-02 Modified to handle the effects of blowing snow.    LCB
+  xx-xx-01 Modified to handle closed canopy energy balance.   KAC
+  06-04-03 Added check so that MELTING flag is only TRUE if melt
+           occurs in the melt season - currently this is defined
+           between March 1 and October 1.  Otherwise the MELTING
+           flag can trigger rapid very early season melt
 
 *********************************************************************/
 
@@ -323,18 +328,9 @@ double solve_snow(char                 overstory,
       if( snowfall[WET] > 0 ) curr_snow = 1; // new snow - reset pack age
       else curr_snow = snow->last_snow + 1; // age pack by one time step
       
-      /** Determine amount of solar radiation that reaches the ground under
-	  the snowpack, see Patterson and Hamblin, 1988 **/
-/*       (*NetShortGrnd) =  */
-/* 	*NetShortSnow * ( SNOW_A1 * exp ( - SNOW_L1 * snow->depth )  */
-/* 			   + SNOW_A2 * exp ( -SNOW_L2 * snow->depth ) ); */
-/*       (*NetShortSnow) -= (*NetShortGrnd); */ // shortwave absorbed by snow
-
       (*NetShortGrnd) = 0.;
    
       (*snow_inflow) += rainfall[WET] + snowfall[WET];
-/*       if(options.FULL_ENERGY || options.FROZEN_SOIL) Tgrnd = energy->T[0]; */
-/*       else Tgrnd = air_temp; */
 
       /** Call snow pack accumulation and ablation algorithm **/
 
@@ -395,7 +391,9 @@ double solve_snow(char                 overstory,
 	snow->depth = 1000. * snow->swq / snow->density; 
 
 	/** Record if snowpack is melting this time step **/
-	if ( snow->coldcontent >= 0 ) snow->MELTING = TRUE;
+	if ( snow->coldcontent >= 0 && day_in_year > 60 // ~ March 1
+	     && day_in_year < 273 // ~ October 1
+	     ) snow->MELTING = TRUE;
 	else if ( snow->MELTING && snowfall[WET] > TraceSnow ) 
 	  snow->MELTING = FALSE;
 
@@ -441,14 +439,11 @@ double solve_snow(char                 overstory,
 	    / (1. - snow->coverage) * BareAlbedo;
 
 	  /* compute snowpack energy used in reducing coverage area */
-/* 	  if ( old_coverage < 1 )  */
-/* 	    (*melt_energy) = 0; */
-	    (*melt_energy) = ( *delta_coverage ) 
-	      * (energy->advection - energy->deltaCC 
-		 + energy->latent + energy->latent_sub 
-		 + energy->sensible + energy->refreeze_energy 
-		 + energy->advected_sensible);
-/* 	  else (*melt_energy) = 0; */
+	  (*melt_energy) = ( *delta_coverage ) 
+	    * (energy->advection - energy->deltaCC 
+	       + energy->latent + energy->latent_sub 
+	       + energy->sensible + energy->refreeze_energy 
+	       + energy->advected_sensible);
 	}
 	else if ( old_coverage < snow->coverage ) {
 #if VERBOSE
@@ -467,7 +462,6 @@ double solve_snow(char                 overstory,
 	// snow falls and melts all in one time step
 	*delta_coverage = 1.;
 	*coverage       = 0.;
-/* 	(*melt_energy)  = 0; */
 	(*melt_energy) = (energy->advection - energy->deltaCC 
 			  + energy->latent + energy->latent_sub 
 			  + energy->sensible + energy->refreeze_energy
@@ -482,9 +476,6 @@ double solve_snow(char                 overstory,
       energy->latent     *= (snow->coverage + *delta_coverage);
       energy->latent_sub *= (snow->coverage + *delta_coverage);
       energy->sensible   *= (snow->coverage + *delta_coverage);
-
-      /* store change in heat capacity for soil thermal flux calculations */
-/*       *delta_snow_heat = snow->coverage * (energy->refreeze_energy - energy->deltaCC) / 2.; */
 
       if ( snow->swq == 0 ) {
 
@@ -503,13 +494,6 @@ double solve_snow(char                 overstory,
 	snow->swq_slope  = 0;
 	snow->store_snow = TRUE;
 	snow->MELTING    = FALSE;
-	
-/*  	energy->AlbedoUnder  = (old_coverage - snow->coverage)   */
-/*  	  / (1. - snow->coverage) * snow->albedo;  */
-/*  	energy->AlbedoUnder  += (1. - old_coverage)   */
-/*  	  / (1. - snow->coverage) * BareAlbedo;  */
-/* 	(*NetShortGrnd)  += (*NetShortSnow); */
-/* 	(*NetShortSnow) = 0; */
 	
       }
 

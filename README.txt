@@ -15,7 +15,8 @@ Modifications:
 	    Now announces when it opens a binary file for reading.
 	write_data.c:
 	    Corrected typo in output format for fluxes file.	TJB
-	calc_rainonly.c (found by Justin Sheffield at Princeton):
+	calc_rainonly.c:
+	    (found by Justin Sheffield at Princeton)
 	    Changed test
 		else if(air_temp > MAX_SNOW_TEMP)
 	    to
@@ -24,11 +25,13 @@ Modifications:
 	    rainfall (rainonly) was set to 0 and snowfall was set
 	    to 100% of precip, causing function to fail.	TJB
 	compute_dz.c, initialize_atmos.c, read_soilparam.c,
-	read_soilparam_arc.c (found by Justin Sheffield at Princeton):
+	read_soilparam_arc.c:
+	    (found by Justin Sheffield at Princeton)
 	    Replaced rint(something) with (float)(int)(something + 0.5)
 	    to handle rounding without resorting to rint(), which
 	    isn't supported on all platforms.			TJB
-	func_surf_energy_bal.c (found by Justin Sheffield at Princeton):
+	func_surf_energy_bal.c:
+	    (found by Justin Sheffield at Princeton)
 	    Added check that both FS_ACTIVE and FROZEN_SOIL are true
 	    before adjusting *deltaH.  This fixes a bug caused when
 	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
@@ -37,37 +40,55 @@ Modifications:
 	    *deltaH adjustment, leading to *deltaH always being
 	    calculated as if ice had melted, leading to lower soil
 	    temperatures and snow packs that never melted.	TJB
-	initialize_global.c (found by Justin Sheffield at Princeton):
+	initialize_global.c:
+	    (found by Justin Sheffield at Princeton)
 	    Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
 	    Also changed limit on loop over forcing types from
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
-	initialize_model_state.c (found by Justin Sheffield at Princeton):
+	initialize_model_state.c:
+	    (found by Justin Sheffield at Princeton)
 	    Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
 	    accessed in set_node_parameters().			TJB
-	open_debug.c (found by Justin Sheffield at Princeton):
+	open_debug.c:
+	    (found by Justin Sheffield at Princeton)
 	    Initialize debug_store_moist array when debug.PRT_MOIST
 	    is true (as well as under the other previously-defined
 	    conditions).					TJB
-	open_state_file.c (Port from 4.1.0):
+	open_state_file.c:
+	    (Port from 4.1.0)
 	    Modified the statefile name to contain year, month, day
 	    rather than day, month, year.  This makes it consistent
 	    with the planned release of 4.1.0.			TJB
-	penman.c (found by Justin Sheffield at Princeton):
+	penman.c:
+	    (found by Justin Sheffield at Princeton)
 	    Changed
 		if (vpd > 0.0 && evap < 0.0)
 	    to
 		if (vpd >= 0.0 && evap < 0.0)
 	    to correctly handle evap when vpd == 0.0.		TJB
-	read_atmos_data.c (Port from 4.1.0):
+	read_atmos_data.c:
+	    (Port from 4.1.0)
 	    Replaced NF with global_param.dt in condition checking
 	    whether forcing file contains enough records to cover
 	    the time range of the simulation.			TJB
-	read_initial_model_state.c (Port from 4.1.0):
+	read_initial_model_state.c:
+	    (Port from 4.1.0)
 	    Added check to verify that the sum of the defined nodes
 	    equals the damping depth.				TJB
+	read_soilparam.c, read_soilparam_arc.c:
+	    (fix by Chunmei Zhu and Alan Hamlet)
+	    Added check to make sure that wilting point
+	    (porosity*Wpwp_FRACT) is greater than residual
+	    moisture.						TJB
 	read_soilparam_arc.c:
 	    Modified to handle ARNO parameters.			TJB
-	soil_conduction.c (Port from 4.1.0):
+	runoff.c:
+	    (fix by Chunmei Zhu and Alan Hamlet)
+	    Added check to make sure baseflow doesn't exceed
+	    difference between liquid moisture and field
+	    capacity.						TJB
+	soil_conduction.c:
+	    (Port from 4.1.0)
 	    set_node_parameters(): Modified to correct differences
 	    between calculations to determine maximum node moisture
 	    and node moisture, so that nodes on the boundary between
@@ -76,10 +97,12 @@ Modifications:
 	    that node soil moisture is less than or equal to maximum
 	    node soil moisture, otherwise an error is printed to the
 	    screen and the model exits.				TJB
-	surface_fluxes.c (found by Justin Sheffield at Princeton):
+	surface_fluxes.c:
+	    (found by Justin Sheffield at Princeton)
 	    Fixed initialization of canopyevap to initialize for every
 	    value of dist, rather than just dist 0.		TJB
-	write_atmosdata.c (found by Justin Sheffield at Princeton):
+	write_atmosdata.c:
+	    (found by Justin Sheffield at Princeton)
 	    No longer close the debug file, since the next cell
 	    must write to it.					TJB
 

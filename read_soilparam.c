@@ -67,6 +67,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
   07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
   11-May-04	Removed extraneous tmp variable.		TJB
+  11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
+		Added check to make sure that wilting point
+		(porosity*Wpwp_FRACT) is greater than residual
+		moisture.					TJB
 
 **********************************************************************/
 {
@@ -216,16 +220,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
     temp.FS_ACTIVE = (char)tempint;
     
     /*******************************************
-      Compute Maximum Soil Layer Moiture Content
+      Compute Maximum Soil Layer Moisture Content
     *******************************************/
     for(layer = 0; layer < options.Nlayer; layer++) {
       if (temp.resid_moist[layer] == MISSING)
 	temp.resid_moist[layer] = RESID_MOIST;
       temp.porosity[layer] = 1.0 - temp.bulk_density[layer] 
 	/ temp.soil_density[layer];
-      if(temp.porosity[layer] < temp.resid_moist[layer]) {
-	sprintf(ErrStr,"Layer %i porosity (%f mm/mm) must be greater then the defined moisture residue of %f mm/mm", 
-		layer, temp.porosity[layer], temp.resid_moist[layer]);
+      if(temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
+	sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the defined moisture residue of %f mm/mm;\nTry increasing either the porosity (%f mm/mm) or fractional wilting point (%f),\nor decreasing the residual moisture\n", 
+		layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
+		temp.porosity[layer], Wpwp_FRACT[layer]);
 	nrerror(ErrStr);
       }
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;

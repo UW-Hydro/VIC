@@ -205,5 +205,10 @@ global_param_struct get_global_param(filenames_struct *names,
     fgets(cmdstr,MAXSTRING,gp);
   }
 
+  if(!options.FULL_ENERGY && options.FROZEN_SOIL) 
+    options.FULL_ENERGY = TRUE;
+  if(!options.FULL_ENERGY && options.CALC_SNOW_FLUX) 
+    options.CALC_SNOW_FLUX = FALSE;
+
   return temp;
 }

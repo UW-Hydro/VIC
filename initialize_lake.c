@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 #if LAKE_MODEL
 
 void initialize_lake (lake_var_struct  *lake, 
@@ -29,6 +27,7 @@ void initialize_lake (lake_var_struct  *lake,
   
   modifications:
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+  23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
 
 **********************************************************************/
 {
@@ -46,7 +45,7 @@ void initialize_lake (lake_var_struct  *lake,
 
   for ( i = 0 ; i < MAX_LAKE_NODES; i++ )
     {      
-      lake->temp[i] = airtemp;
+      lake->temp[i] = max(airtemp,0.0);
     }
 
   lake->tempi = 0.0;
@@ -119,9 +118,9 @@ double get_sarea(lake_con_struct lake_con, double depth)
 
   if(depth > lake_con.z[0])
     {
-      fprintf(stderr, "Depth exceeds maximum depth.\n");
       sarea = lake_con.basin[0];
     }
+  else {	
   for(i=0; i< lake_con.numnod; i++)
     {
      if (depth <= lake_con.z[i] && depth > lake_con.z[i+1]) 
@@ -132,6 +131,7 @@ double get_sarea(lake_con_struct lake_con, double depth)
     fprintf(stderr, "depth = %f, sarea = %e\n",depth,sarea);	
     exit(0);
   }
+ }
 
   return sarea;
 }
@@ -174,16 +174,15 @@ double get_depth(lake_con_struct lake_con, double volume)
   double tempvolume;	
   depth = 0.0;
 
-  if(volume > lake_con.maxvolume)
+  if(volume >= lake_con.maxvolume)
     {
-      fprintf(stderr, "Volume exceeds maximum volume.\n");
-      tempvolume = lake_con.maxvolume;	
+      depth = lake_con.maxdepth;
+      depth += (volume - lake_con.maxvolume)/lake_con.basin[0];	
     }
-else
-	tempvolume=volume;
-   	
+  else
+    { 	
   // Update lake depth
-
+    tempvolume = volume;	
     for ( k = lake_con.numnod - 1; k >= 0; k-- ) {
       if ( tempvolume > ((lake_con.z[k]-lake_con.z[k+1])
 			 *(lake_con.basin[k]+lake_con.basin[k+1])/2.)) {
@@ -204,9 +203,10 @@ else
 	}
       }
 	  
-  if(tempvolume/lake_con.basin[0] > SMALL || depth > lake_con.maxdepth)   {                  
+  if(tempvolume/lake_con.basin[0] > SMALL )   {                  
     fprintf(stderr, "Error in get depth tempvolume = %e, depth=%f\n", tempvolume,depth);
   }
+ }
 
   if(depth <= 0.0  && volume != 0.0) {
     fprintf(stderr, "Somthing went wrong in get_depth\n");

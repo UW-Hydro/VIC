@@ -44,6 +44,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   02-Nov-04 Modified the adjustment of Cv_sum so that veg fractions
 	    share in area reduction along with the lake fraction.	TJB
+  22-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
   
 **********************************************************************/
 
@@ -116,7 +117,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   fscanf(lakeparam, "%lf %lf", &temp.mindepth, &temp.maxrate);
 
   // Comment out the following if depthfrac and ratefrac aren't used. 
- // fscanf(lakeparam, "%lf %lf", &temp.ratefrac, &temp.depthfrac);
+  fscanf(lakeparam, "%lf %lf", &temp.ratefrac, &temp.depthfrac);
 
   fscanf(lakeparam, "%lf", &temp.depth_in);
   fscanf(lakeparam, "%f", &temp.rpercent);

@@ -38,7 +38,7 @@
 /***** If TRUE VIC binary includes the lake/wetland algorithm.  Lakes
        and wetlands do not need to be defined but code will be 
        accessed. *****/
-#define LAKE_MODEL FALSE
+#define LAKE_MODEL TRUE
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the
        matric potential from the two surrounding layers to estimate the 
@@ -123,3 +123,7 @@
 #define SNOW_ALB_ACCUM_B	0.58
 #define SNOW_ALB_THAW_A		0.82
 #define SNOW_ALB_THAW_B		0.46
+
+/***** Defines the minimum amount of new snow (mm) which will reset the
+       snowpack albedo to new snow *****/
+#define TraceSnow 0.03

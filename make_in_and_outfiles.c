@@ -21,6 +21,8 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
 		frozen soils					KAC
   11-18-02 Modified to print notification that the output fluxes file
            will be in a binary format.                          LCB
+  29-Oct-03 Distinguishing between input lakeparam file and output
+	   lake file.						TJB
 
 **********************************************************************/
 {
@@ -121,15 +123,15 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
 
 #if LAKE_MODEL
   if ( options.LAKES ) {
-    strcpy(fnames.lakeparam, fnames.result_dir);
-    strcat(fnames.lakeparam, "lake");
-    strcat(fnames.lakeparam, "_");
-    strcat(fnames.lakeparam, latchar);
-    strcat(fnames.lakeparam, "_");
-    strcat(fnames.lakeparam, lngchar);
+    strcpy(fnames.lake, fnames.result_dir);
+    strcat(fnames.lake, "lake");
+    strcat(fnames.lake, "_");
+    strcat(fnames.lake, latchar);
+    strcat(fnames.lake, "_");
+    strcat(fnames.lake, lngchar);
     if(options.BINARY_OUTPUT) 
-      outfp->lake = open_file(fnames.lakeparam, "wb");
-    else outfp->lake = open_file(fnames.lakeparam, "w");
+      outfp->lake = open_file(fnames.lake, "wb");
+    else outfp->lake = open_file(fnames.lake, "w");
   }
 #endif // LAKE_MODEL
 

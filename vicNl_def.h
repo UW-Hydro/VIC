@@ -159,6 +159,7 @@ typedef struct {
   char  init_state[MAXSTRING];  /* initial model state file name */
 #if LAKE_MODEL
   char  lakeparam[MAXSTRING];   /* lake model constants file */
+  char  lake[MAXSTRING];        /* lake model results file (output) */
 #endif // LAKE_MODEL
   char  result_dir[MAXSTRING];  /* directory where results will be written */
   char  snow[MAXSTRING];        /* snow pack depth and swq (output) */

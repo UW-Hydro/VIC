@@ -19,6 +19,8 @@ void close_files(infiles_struct   *inf,
 	   of data.						KAC
   02-27-01 Now closes files opened for lake model applications  KAC
   11-18-02 Now closes lake debugging file.                      LCB
+  29-Oct-03 Distinguishing between input lakeparam file and output
+	   lake file.						TJB
 
 **********************************************************************/
 {
@@ -69,7 +71,7 @@ void close_files(infiles_struct   *inf,
   if ( options.LAKES ) {
     /** Lake Data Output File **/
     fclose(outf->lake);
-    if(options.COMPRESS) compress_files(fnames->lakeparam);
+    if(options.COMPRESS) compress_files(fnames->lake);
   }
 #endif
 

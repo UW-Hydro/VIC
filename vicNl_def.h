@@ -1,5 +1,5 @@
 /***** Model Constants *****/
-#define MAXSTRING    512
+#define MAXSTRING    2048
 #define MINSTRING    20
 #define HUGE_RESIST  1.e20	/* largest allowable double number */
 #define SMALL        1.e-12	/* smallest allowable double number */
@@ -187,6 +187,7 @@ typedef struct {
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
+  char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
   char   NEW_ARNO_TYPE;  /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   LAKES;          /* TRUE = use lake energy code */
@@ -372,7 +373,7 @@ typedef struct {
   This structure stores the soil parameters for a grid cell.
   ***********************************************************/
 typedef struct {
-  char     FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
+  int      FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
 					 active in current grid cell */
   double   Ds;                        /* fraction of maximum subsurface flow 
 					 rate */
@@ -433,6 +434,8 @@ typedef struct {
 					 elevation (fract) */
   double  *Tfactor;                   /* Change in temperature due to 
 					 elevation (C) */
+  char    *AboveTreeLine;             // Flag to indicate if band is above 
+                                      // the treeline
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];
   double **ufwc_table_node[MAX_NODES]; 
@@ -683,7 +686,7 @@ typedef struct {
 typedef struct {
   char   MELTING;           /* flag indicating that snowpack melted 
 			       previously */
-  char   snow;              /* TRUE = snow, FALSE = no snow */
+  int    snow;              /* TRUE = snow, FALSE = no snow */
   double Qnet;              /* New energy at snowpack surface */
   double albedo;            /* snow surface albedo (fraction) */
   double canopy_albedo;     /* albedo of the canopy (fract) */
@@ -830,6 +833,12 @@ typedef struct {
   double swq[MAX_BANDS+1];             /* snow water equivalent (mm) */
   double tdepth[MAX_FRONTS];           /* depth of all thawing fronts */
   double wind;                         /* grid cell wind speed */
+  double swband[MAX_BANDS+1];          // store shortwave by snow band
+  double lwband[MAX_BANDS+1];          // store longwave by snow band
+  double albedoband[MAX_BANDS+1];      // store snow albedo by snow band
+  double latentband[MAX_BANDS+1];      // store latent heat by snow band
+  double sensibleband[MAX_BANDS+1];    // store sensible heat by snow band
+  double grndband[MAX_BANDS+1];        // store ground heat
 } out_data_struct;
 
 /********************************************************

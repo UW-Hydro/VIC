@@ -38,13 +38,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   11-18-02 modified to compute the effects of blowing snow on the
            surface energy balance.                               LCB
   10-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
-	    before computing *fusion.  This fixes a bug caused when
-	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
-	    non-zero ice content was calculated at the beginning of
-	    the time step but always assumed zero at the point of
-	    *fusion computation, leading to *fusion always being
-	    calculated as if ice had melted, leading to lower soil
-	    temperatures and snow packs that never melted.	TJB
+	    before computing *fusion.  This is just a safety measure;
+	    ice and ice0 should both be 0 if FS_ACTIVE is FALSE.TJB
 
 **********************************************************************/
 {

@@ -257,6 +257,8 @@ void full_energy(int rec,
         overstory = FALSE;
       }
       tmp_wind[0] = atmos->wind;
+      tmp_wind[1] = -999.;
+      tmp_wind[2] = -999.;
  
       /** for PILPS comparison only **/
       height = calc_veg_height(displacement);

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Thu Feb 15 13:06:30 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Apr 21 15:14:05 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -44,6 +44,14 @@ static char vcid[] = "$Id$";
   11-00 energy balance components are now returned to the VIC model
         so that they can be reported as energy balance components
         in model output.                                           KAC
+  2-20-03 Added check of intercepted before mass balance error 
+        calculation.  Since interception quantity can be greater
+        than Wd_max when snow is present, the routine could return
+        dew values higher than maximum in a time step when intercepted
+        snow melted.  If there is no other snow, and distributed 
+        precipitation is active this could cause the model to crash
+        in redistribute_during_storm as it will be unable to conserve
+        water when too much water is in the canopy.                 KAC
 
 *****************************************************************************/
 void snow_intercept(double  AirDens,
@@ -512,6 +520,12 @@ void snow_intercept(double  AirDens,
   Drip           *= F;
   ReleasedMass   *= F;
   
+  if ( *IntSnow == 0 && *IntRain > MaxInt ) {
+    // if snow has melted, make sure canopy is not retaining extra water
+    RainThroughFall += *IntRain - MaxInt;
+    *IntRain = MaxInt;
+  }
+
   /* Calculate intercepted H2O balance. */  
   
   MassBalanceError = (InitialWaterInt - (*IntSnow + *IntRain))

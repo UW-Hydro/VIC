@@ -87,6 +87,8 @@ void initialize_global() {
   options.OVERSTORY_ATTENUATION = 0.5;
   options.TRUNK_RATIO           = 0.2;
   options.PREC_EXPT             = 0.6;
+  options.INIT_SNOW             = FALSE;
+  options.ROOT_ZONES            = -999;
  
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;

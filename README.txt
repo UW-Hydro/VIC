@@ -137,14 +137,32 @@ Spurious condensation at low temperatures
 	spuriously high runoff and baseflow.  Now there is an added condition
 	that liquid moisture > residual moisture for evap to be capped at
 	(liquid moisture - residual moisture).
+
 	NOTE: This fix results in lower runoff and baseflow in unvegetated areas
 	with frozen soils, and may require recalibration of soil parameters.
 
 
-Baseflow validation
+Validation of initial soil moisture
 
 	Files affected:
-	read_soilparam.c, read_soilparam_arc.c, runoff.c
+	read_soilparam.c, read_soilparam_arc.c
+
+	Description:
+	Added check to read_soilparam.c and read_soilparam_arc.c to make sure
+	that wilting point is greater than residual moisture.  Changed lower
+	limit on initial soil moisture to be residual moisture rather than
+	wilting point.  Made validation statements clearer.
+	(found and fixed by Chunmei Zhu, Alan Hamlet, and Ted Bohn)
+
+	NOTE: Soil parameter files containing Wpwp_FRACT and resid_moist
+	such that Wpwp_FRACT < resid_moist / (1.0 - bulk_density/soil_density)
+	will now cause VIC to exit with an error message.
+
+
+Incorrect baseflow limits
+
+	Files affected:
+	runoff.c
 
 	Description:
 	In 4.0.4, runoff.c checked for the wrong bounds on baseflow, allowing
@@ -160,9 +178,8 @@ Baseflow validation
 	  else
 	    soil moisture += baseflow;
 	    baseflow = 0;
-	Also added check to read_soilparam.c and read_soilparam_arc.c to make
-	sure that wilting point (porosity*Wpwp_FRACT) is greater than residual
-	moisture. (found and fixed by Chunmei Zhu, Alan Hamlet, and Ted Bohn)
+
+	NOTE: This fix may result in small changes in baseflow and evaporation.
 
 
 Negative incoming shortwave radiation at high latitudes

@@ -68,12 +68,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		to handle rounding without resorting to rint().	TJB
   11-May-04	Removed extraneous tmp variable.		TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
-		Added check to make sure that wilting point
-		(porosity*Wpwp_FRACT) is greater than residual
-		moisture.					TJB
+		Added check to make sure that wilting point is
+		greater than residual moisture.			TJB
   16-Jun-04	Added logic to read optional extra field containing
 		average July air temperature, if JULY_TAVG_SUPPLIED
 		= TRUE.						TJB
+  07-Jul-04	Changed lower limit on initial soil moisture to be
+		residual moisture rather than wilting point.  Also
+		cleaned up validation statements.		TJB
 
 **********************************************************************/
 {
@@ -228,24 +230,31 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
 
     /*******************************************
-      Compute Maximum Soil Layer Moisture Content
+      Compute Soil Layer Properties
     *******************************************/
     for(layer = 0; layer < options.Nlayer; layer++) {
       if (temp.resid_moist[layer] == MISSING)
-	temp.resid_moist[layer] = RESID_MOIST;
-      temp.porosity[layer] = 1.0 - temp.bulk_density[layer] 
-	/ temp.soil_density[layer];
-      if(temp.porosity[layer]*Wpwp_FRACT[layer] <= temp.resid_moist[layer]) {
-	sprintf(ErrStr,"Layer %i wilting point (%f mm/mm) must be greater than the defined residual moisture of %f mm/mm.\nTry either decreasing the residual moisture to below %f mm/mm or increasing the wilting point.\nThe wilting point is calculated as: Wpwp_FRACT * (1.0 - bulk_density/soil_density).\n", 
-		layer, temp.porosity[layer]*Wpwp_FRACT[layer], temp.resid_moist[layer],
-		temp.resid_moist[layer]);
-	nrerror(ErrStr);
-      }
+        temp.resid_moist[layer] = RESID_MOIST;
+      temp.porosity[layer] = 1.0 - temp.bulk_density[layer]
+        / temp.soil_density[layer];
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
-      if(temp.init_moist[layer] > temp.max_moist[layer]) 
-	temp.init_moist[layer] = temp.max_moist[layer];
     }
-    
+
+    /*******************************************
+      Validate Initial Soil Layer Moisture Content
+    *******************************************/
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if(temp.init_moist[layer] > temp.max_moist[layer])
+        fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %i.\n\tResetting soil moisture to maximum.\n",
+                temp.init_moist[layer], temp.max_moist[layer], layer);
+        temp.init_moist[layer] = temp.max_moist[layer];
+      if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
+        fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tResetting soil moisture to residual moisture.\n",
+                temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+        temp.init_moist[layer] = temp.resid_moist[layer];
+      }
+    }
+
     /**********************************************
       Compute Maximum Infiltration for Upper Layers
     **********************************************/
@@ -260,14 +269,18 @@ soil_con_struct read_soilparam(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       temp.Wcr[layer]  = Wcr_FRACT[layer] * temp.max_moist[layer];
       temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
-      if(temp.Wpwp[layer] > temp.Wcr[layer])
-	nrerror("Wpwp is greater then Wcr");
-      if(temp.init_moist[layer] < temp.Wpwp[layer]) { 
-	fprintf(stderr,"Initial soil moisture (%f) is less than the wilting point (%f) for layer %i\n\tResetting soil moisture to wilting point\n",
-		temp.init_moist[layer], temp.Wpwp[layer], layer);
-	temp.init_moist[layer] = temp.Wpwp[layer];
+      if(temp.Wpwp[layer] > temp.Wcr[layer]) {
+        sprintf(ErrStr,"Calculated wilting point (%f mm) is greater than calculated critical point (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
+                temp.Wpwp[layer], temp.Wcr[layer], layer);
+        nrerror(ErrStr);
+      }
+      if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
+        sprintf(ErrStr,"Calculated wilting point (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
+                temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+        nrerror(ErrStr);
       }
     }
+
 
     /*************************************************
       If ARNO_PARAMS = TRUE then convert ARNO baseflow

@@ -94,8 +94,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		to handle rounding without resorting to rint().	TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
 		Added check to make sure that wilting point
-		porosity*Wpwp_FRACT) is greater than residual
+		(porosity*Wpwp_FRACT) is greater than residual
 		moisture.					TJB
+  03-Jun-04	Removed extraneous tmp variable.		TJB
+  04-Jun-04	Added print statement for current cell number.	TJB
 
 **********************************************************************/
 {
@@ -117,7 +119,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double          clay[MAX_LAYERS];
   double          sand[MAX_LAYERS];
   double          sum_depth;
-  double          tmp;
   char            ErrStr[MAXSTRING];
   char            namestr[MAXSTRING];
   char            tmpstr[MAXSTRING];
@@ -161,6 +162,11 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   *RUN = (int)read_arcinfo_value(namestr,temp.lat,temp.lng);
   
   if(RUN[0] > 0) {
+#if VERBOSE
+    /* add print statements for grid cell number */
+    fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
+#endif
+
     /** Get Average Grid Cell Elevation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
@@ -358,7 +364,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     *************************************************/
     if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
-      tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax * 
 	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
 	temp.Ds * temp.max_moist[layer];

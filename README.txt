@@ -45,6 +45,9 @@ Modifications:
 	  Added check to make sure that wilting point
 	  (porosity*Wpwp_FRACT) is greater than residual
 	  moisture.						TJB
+	read_soilparam_arc.c:
+	  Removed extraneous tmp variable.			TJB
+	  Added print statement for current cell number.	TJB
 	runoff.c:
 	  Changed calculation of dt_baseflow to go to zero when
 	  soil liquid moisture <= residual moisture.  Changed

@@ -5,7 +5,7 @@
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE TRUE
+#define VERBOSE FALSE
 
 /***** If TRUE limit output data to runoff and baseflow for optimization *****/
 #define OPTIMIZE FALSE
@@ -21,7 +21,7 @@
        have to be activated to get extra output.  When set to FALSE
        all debugging if-then statements are removed from the compiled 
        code *****/
-#define LINK_DEBUG TRUE
+#define LINK_DEBUG FALSE
 
 /***** If TRUE output will be in LDAS binary format, which is a single
        file with limited variables, most of which are truncated to
@@ -87,7 +87,7 @@
        coverage of the surface by a thin snowpack.  Coverage is 
        assumed to be uniform after snowfall until the pack begins to 
        melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
-#define SPATIAL_SNOW TRUE
+#define SPATIAL_SNOW FALSE
 #define MAX_FULL_COVERAGE_DEPTH   0.155 /* Minimum snow depth required for uniform coverage (m) */
 
 

@@ -322,7 +322,7 @@ void   setup_frozen_soil(soil_con_struct *, layer_data_struct  *,
 			 energy_bal_struct, int, int, int, double,
 			 double *, double *, double *);
 double shrad(double,double,double,double,double,int,double);
-double snow_albedo(double, double, double, double, int);
+double snow_albedo(double, double, double, double, int, char);
 double snow_density(int, double, double, double, double, double, double, 
 		    double);
 void   snow_intercept(double, double, double, double, double, double, double,
@@ -358,7 +358,7 @@ double solve_snow(char, double, double, double, double, double, double,
                   double *, double *, double *, double *, double *, double *, 
                   double *, double *, double *, double *, double *, double *,
                   float *, 
-                  int, int, int, int, int, int, int, 
+                  int, int, int, int, int, int, int, int, int, 
                   int, int, int, int, int *, energy_bal_struct *, 
                   layer_data_struct *, layer_data_struct *, 
                   snow_data_struct *, soil_con_struct *, 

@@ -673,6 +673,8 @@ typedef struct {
   This structure stores snow pack variables needed to run the snow model.
   ************************************************************************/
 typedef struct {
+  char   MELTING;           /* flag indicating that snowpack melted 
+			       previously */
   char   snow;              /* TRUE = snow, FALSE = no snow */
   double Qnet;              /* New energy at snowpack surface */
   double albedo;            /* snow surface albedo (fraction) */

@@ -3,6 +3,24 @@
 # $Id$
 #------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+                     ***** VIC MODEL RELEASE NOTES *****
+--------------------------------------------------------------------------------
+
+Usage:
+------
+
+	vicNl [-v | -o | -g<global_parameter_file>]
+
+	  v: display version information
+	  o: display compile-time options settings (set in user_def.h)
+	  g: read model parameters from <global_parameter_file>.
+	     <global_parameter_file> is a file that contains all needed model
+	     parameters as well as model option flags, and the names and
+	     locations of all other files.
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------
 

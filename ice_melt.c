@@ -74,6 +74,8 @@ static char vcid[] = "$Id$";
   Modifications:
   11-18-02 Modified method by which lake coverage fraction and ice height 
            are updated.                                                LCB
+  04-Jun-04 Added descriptive error message to beginning of screen dump in
+	    ErrorPrintIcePackEnergyBalance.				TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -522,6 +524,8 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   SensibleHeat       = (double *) va_arg(ap, double *);
   
   /* print variables */
+  fprintf(stderr, "ERROR: ice_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+
   fprintf(stderr,"Dt = %f\n",Dt);
   fprintf(stderr,"Ra = %f\n",Ra);
   fprintf(stderr,"Z = %f\n",Z);
@@ -555,7 +559,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"LatentHeat = %f\n",LatentHeat[0]);
   fprintf(stderr,"SensibleHeat = %f\n",SensibleHeat[0]);
   
-  fprintf(stderr,"Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
+  fprintf(stderr,"Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
   exit(0);
 
   return(0.0);

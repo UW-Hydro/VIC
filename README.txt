@@ -12,6 +12,12 @@ Modifications:
 	  always be recompiled whenever a .h file is updated.  The
 	  user can override this behavior by typing "make model",
 	  which doesn't invoke "make depend".			TJB
+	calc_atmos_energy_bal.c, calc_surf_energy_bal.c,
+	frozen_soil.c, ice_melt.c, root_brent.c, snow_intercept.c,
+	snow_melt.c:
+	  Modified error messages.  Root_brent.c now simply prints
+	  a warning, leaving it to the functions that called it to
+	  describe the specific error and its consequences.	TJB
 	cmd_proc.c, display_current_settings.c, get_global_params.c,
 	global.h, vicNl.c, vicNl.h, vicNl_def.hi, Makefile:
           Added -v and -o options, to display vic release version
@@ -64,6 +70,8 @@ Modifications:
 	  to the soil cannot exceed baseflow.  In addition, error
 	  messages are no longer printed, since it isn't an error
 	  to be in that block.					TJB
+	snow_intercept.c:
+	  Fixed typo.  Changed SPATIAL_FRoST to SPATIAL_FROST.	TJB
 	snow_utility.c:
 	  Modified the checks on delta_depth so that the condition
 	  is delta_depth > MAX_CHANGE*depth.  Modified compression

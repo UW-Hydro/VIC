@@ -39,6 +39,9 @@ double calc_atmos_energy_bal(double  InOverSensible,
   Sellers et al., J. Clim., v.9, April 1996, pp. 676-705.
   Dickinsen, BATS manual, NCAR Tech. Note (NCAR/TN-387+STR), August 1993.
 
+  Modifications:
+  04-Jun-04 Added more descriptive error message to beginning of screen
+	    dump in error_print_atmos_moist_bal.		TJB
 ************************************************************************/
 
   double AtmosLatent;
@@ -187,6 +190,7 @@ double error_print_atmos_energy_bal(double Tcanopy, va_list ap) {
   SensibleHeat  = (double *)va_arg(ap, double *);
 
   // print variable values
+  fprintf(stderr, "ERROR: calc_atmos_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
   fprintf(stderr, "LatentHeat = %f\n",  LatentHeat);
   fprintf(stderr, "NetRadiation = %f\n",  NetRadiation);
   fprintf(stderr, "Ra = %f\n",  Ra);
@@ -196,7 +200,7 @@ double error_print_atmos_energy_bal(double Tcanopy, va_list ap) {
 
   fprintf(stderr, "*SensibleHeat = %f\n", *SensibleHeat);
  
-  vicerror("Finished writing calc_atmos_energy_bal variables.\nTry increasing CANOPY_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished writing calc_atmos_energy_bal variables.\nTry increasing CANOPY_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0.0);
     

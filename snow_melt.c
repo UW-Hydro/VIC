@@ -76,6 +76,10 @@ static char vcid[] = "$Id$";
            as imporving the handling of energy fluxes for 
            partial snow cover.                                  KAC
   11-18-02 modified to handle blowing snow.                     LCB
+  04-Jun-04 For the case in which snowpack is too thin to solve
+	    separately, added message explaining that root_brent's
+	    error is not fatal and that snow pack will be solved in
+	    conjunction with surface energy balance.		TJB
 
 *****************************************************************************/
 void snow_melt(double            Le, 
@@ -327,6 +331,12 @@ void snow_melt(double            Le,
       if ( snow->surf_temp <= -9998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
 	/* Thin snowpack must be solved in conjunction with ground surface
 	   energy balance */
+#if VERBOSE
+        if ( snow->surf_temp <= -9998 ) {
+          /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
+	  fprintf(stderr,"Snowpack is too thin to solve separately; it will be solved in conjunction with ground surface energy balance\n");
+        }
+#endif // VERBOSE
 	snow->surf_temp = 999;
       }
       else {
@@ -691,7 +701,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   iveg    = (int) va_arg(ap, int);
 
   /* print variables */
-  fprintf(stderr, "snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+  fprintf(stderr, "ERROR: snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"Dt = %f\n",Dt);
   fprintf(stderr,"Ra = %f\n",Ra);
@@ -738,7 +748,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"SurfaceMassFlux = %f\n",SurfaceMassFlux[0]);
   fprintf(stderr,"LastSnow = %i\n",LastSnow);
 
-  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0.0);
 

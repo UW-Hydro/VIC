@@ -3,6 +3,57 @@
 # $Id$
 #------------------------------------------------------------------------
 
+***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
+--------------------------------------------------------------------------------
+
+
+New Features:
+-------------
+
+
+Bug Fixes:
+----------
+
+Aerodynamic resistance incorrect in output fluxes file
+
+        Files affected:
+        IceEnergyBalance.c, LAKE.h, SnowPackEnergyBalance.c,
+        calc_surf_energy_bal.c, full_energy.c, func_canopy_energy_bal.c,
+        func_surf_energy_bal.c, ice_melt.c, lakes.eb.c, put_data.c,
+        snow_intercept.c, snow_melt.c, solve_snow.c, surface_fluxes.c,
+        vicNl.h, vicNl_def.h, wetland_energy.c
+
+        Description:
+        In 4.1.0 beta r2 and earlier, the aerodynamic resistance written to the
+        output fluxes file rarely reflected the value actually used in flux
+        computations.  This has been fixed.
+
+        VIC actually computes an array of 3 different aerodynamic resistances,
+        as follows:
+          aero_resist[0] : over vegetation or bare soil
+          aero_resist[1] : over snow-filled overstory
+          aero_resist[2] : over snow pack
+        VIC determines which element of the array to use depending on the current
+        vegetation type and whether snow is present.  In addition, in most cases,
+        VIC applies a stability correction to this aerodynamic resistance before
+        using it in flux computations.  Furthermore, when the current vegetation
+        tile contains overstory and snow is present on the ground, aero_resist[2]
+        is used for snow pack flux computations and either aero_resist[1] or
+        aero_resist[0] is used for canopy flux computations, meaning that two
+        different aerodynamic resistances are in use in the same time step.
+
+        However, VIC 4.1.0 beta r2 always wrote the uncorrected value of
+        aero_resist[0] to the fluxes file.
+
+        In 4.1.0 beta r3 and later, the value written to the fluxes file is the
+        actual value used in flux computations, including any corrections that
+        were applied.  In the case mentioned above in which two different
+        aerodynamic resistances are in use at the same time, the one used for the
+        snow pack is written.  In addition, the aerodynamic resistance of the
+        canopy air/surrounding atmosphere interface is not tracked.
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------
 

@@ -64,6 +64,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
   xx-xx-01      Modified to read in spatial snow and frost 
                 parameters.                                     KAC
   11-18-02      Modified to read Bart's new Arno parameters.    JA
+  10-May-04     Replaced rint(something) with (float)(int)(something + 0.5)
+		to handle rounding without resorting to rint().	TJB
+
 
 **********************************************************************/
 {
@@ -134,7 +137,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* soil layer thicknesses */
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam, "%lf", &temp.depth[layer]);
-      temp.depth[layer] = rint(temp.depth[layer] * 1000) / 1000;
+      temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
 	sprintf(ErrStr,"ERROR: Model will not function with layer %i depth %f < %f m.\n",
 		layer,temp.depth[layer],MINSOILDEPTH);

@@ -53,6 +53,8 @@ void initialize_model_state(double               surf_temp,
   04-10-03 Modified to read storm parameters from model state file.  KAC
   04-25-03 Modified to work with vegetation type specific storm 
            parameters.                                              KAC
+  07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
+	    accessed in set_node_parameters().			TJB
 
 **********************************************************************/
 {
@@ -386,6 +388,10 @@ void initialize_model_state(double               surf_temp,
   /******************************************
     Initialize soil thermal node properties 
   ******************************************/
+
+/* dz_node[Nnodes] is accessed later despite not being set. This can
+  cause run-time errors on some platforms. Therefore, set it to zero */
+  soil_con->dz_node[Nnodes]=0.0;
 
   if ( options.GRND_FLUX ) {
 

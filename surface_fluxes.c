@@ -82,6 +82,8 @@ void surface_fluxes(char                 overstory,
            full day.  This was fixed by introducing step_inc to 
            index the arrays, while step_dt keeps track of the correct
            time step.                                            KAC
+  10-May-04 Fixed initialization of canopyevap to initialize for every
+	    value of dist, rather than just dist 0.		TJB
 
 **********************************************************************/
 {
@@ -428,11 +430,12 @@ void surface_fluxes(char                 overstory,
 	bare_energy    = (*energy);
 	snow_veg_var[WET].Wdew = step_Wdew;
 	bare_veg_var[WET].Wdew = step_Wdew;
-	snow_veg_var->canopyevap = 0;
-	bare_veg_var->canopyevap = 0;
-	for ( dist = 0; dist < Ndist; dist ++ ) 
+	for ( dist = 0; dist < Ndist; dist ++ ) {
+	  snow_veg_var[dist].canopyevap = 0;
+	  bare_veg_var[dist].canopyevap = 0;
 	  for ( lidx = 0; lidx < Nlayers; lidx ++ ) 
 	    step_layer[dist][lidx].evap = 0;
+        }
 	step_snow.canopy_vapor_flux = 0;
 	step_snow.vapor_flux = 0;
 

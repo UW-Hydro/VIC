@@ -14,6 +14,9 @@ void open_debug() {
 
   Modifications:
   11-18-02 Modified to open lake model debugging file.          LCB
+  07-May-04 Initialize debug_store_moist array when debug.PRT_MOIST
+	    is true (as well as under the other previously-defined
+	    conditions).					TJB
 
 **********************************************************************/
 
@@ -53,7 +56,7 @@ void open_debug() {
     if((debug.fg_kappa=fopen(tempname,"w"))==NULL)
       nrerror("ERROR: Unable to open VIC_kappa.out");
   }
-  if(debug.DEBUG || debug.PRT_BALANCE) {
+  if(debug.DEBUG || debug.PRT_BALANCE || debug.PRT_MOIST) {
     strcpy(tempname,debug.debug_dir);
     strcat(tempname,"/VIC_balance.out");
     if((debug.fg_balance=fopen(tempname,"w"))==NULL)

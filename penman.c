@@ -17,6 +17,12 @@
   changes   :
               04-25-03 modified to use pressure in Pa directly, rather than
                        converting it within the routine.              KAC
+	      07-May-04 Changed
+				if (vpd > 0.0 && evap < 0.0)
+			to
+				if (vpd >= 0.0 && evap < 0.0)
+			to correctly handle evap when vpd == 0.0.	TJB
+
   references: 
 ********************************************************************************/
 
@@ -103,7 +109,7 @@ nthesis */
   evap = (slope * rad + r_air * CP_PM * vpd/ra)/
          (lv * (slope + gamma * (1 + (rc + rarc)/ra))) * SEC_PER_DAY;
 
-  if (vpd > 0.0 && evap < 0.0) 
+  if (vpd >= 0.0 && evap < 0.0) 
     evap = 0.0;
 
   return evap;

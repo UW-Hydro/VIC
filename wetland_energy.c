@@ -21,6 +21,9 @@ void wetland_energy(int                  rec,
 /**********************************************************************
 	wetland_energy	Laura Bowling		May 12, 2002
 
+  Modifications:
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.				TJB
 
 **********************************************************************/
 {
@@ -68,7 +71,6 @@ void wetland_energy(int                  rec,
   double                 snow_inflow[MAX_BANDS];
   double                 step_rad;
   double                 step_net_short;
-  double                 tmp_aero_resist;
   double                 tmp_throughfall[2][MAX_BANDS];
   double                 tmp_wind[3];
   double                 tmp_melt[MAX_BANDS*2];
@@ -210,7 +212,7 @@ void wetland_energy(int                  rec,
 
     surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
 		   prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-		   cell[WET][iveg][0].aero_resist, 
+		   cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used), 
 		   &(cell[DRY][iveg][band].baseflow), 
 		   &(cell[WET][iveg][band].baseflow), displacement, 
 		   gauge_correction, &(cell[DRY][iveg][band].inflow), 

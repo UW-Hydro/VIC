@@ -2,153 +2,409 @@
 # $Id$
 #-----------------------------------------------------------------------
 
-Modifications:
+***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
+--------------------------------------------------------------------------------
 
-	Makefile:
-	    Now automatically re-compiles all dependent files when
-	    any .h files are updated.				TJB
-	arno_evap.c:
-	    Changed logic of evap limit check to avoid creating spurious
-	    condensation.  Previously, when liquid moisture < residual
-	    moisture, (liquid moisture - residual moisture) would be
-	    negative.  Any non-negative evap would be greater than this,
-	    resulting in evap getting set to (liquid moisture - residual
-	    moisture), which would be negative (i.e. condensation).
-	    This artificially created condensation in whatever amount
-	    necessary to bring liquid moisture up to residual, causing
-	    1) large latent heat flux, 2) incorrect surface temperatures,
-	    3) occasional inability for calc_surf_energy_bal to converge
-	    in root_brent, and 4) spuriously high runoff and baseflow.
-	    Now there is an added condition that liquid moisture > residual
-	    moisture for evap to be capped at (liquid moisture - residual
-	    moisture).						TJB
-	calc_surf_energy_bal.c, frozen_soil.c, root_brent.c,
-	snow_melt.c:
-	    Modified error messages.  Root_brent.c now simply
-	    prints a warning, leaving it to the functions that
-	    called it to describe the specific error and its
-	    consequences.					TJB
+
+New Features:
+-------------
+
+"-o" command-line option and display of run/compile-time options
+
+	Files affected:
+	cmd_proc.c, display_current_settings.c, get_global_param.c, global.h,
+	vicNl.c, vicNl.h, vicNl_def.h
+
+	Description:
+	In VIC 4.0.5, if VERBOSE is TRUE, all compile-time options (from
+	user_def.h) and run-time options (from your global parameter file) are
+	displayed for you at the beginning of a model run.  If you are saving
+	your model output to a log file, this information will be stored with
+	your log, so you will have a record of the option settings that produced
+	the results of that particular model run.
+	In addition, added the "-o" option, to display current compile-time
+	options.  One benefit of this option is that you can see what the
+	options in user_def.h were set to when vicNl was compiled, without
+	having to start a model run.  Since your version of user_def.h may have
+	changed since you compiled vicNl, this is the most reliable way to see
+	what these options are set to.
+
+	Example:
+
+	gen.hydro.washington.edu 41: vicNl -o
+
+	***** VIC Version 4.0.5 Beta Release 1 - Current Model Settings *****
+
+	COMPILE-TIME OPTIONS (set in user_def.h)
+	----------------------------------------
+
+	Output to Screen:
+	VERBOSE                 TRUE
+
+	Input Files:
+	NO_REWIND               TRUE
+
+	Output Files:
+	LDAS_OUTPUT             FALSE
+	LINK_DEBUG              FALSE
+	OPTIMIZE                FALSE
+	OUTPUT_FORCE            FALSE
+	SAVE_STATE              FALSE
+
+	Simulation Parameters:
+	LOW_RES_MOIST           FALSE
+	QUICK_FS                FALSE
+
+	Maximum Array Sizes:
+	MAX_BANDS               10
+	MAX_FRONTS               3
+	MAX_LAYERS               3
+	MAX_NODES               18
+	MAX_VEG                 12
+
+	Snow Constants:
+	NEW_SNOW_ALB            0.850000
+	SNOW_ALB_ACCUM_A        0.940000
+	SNOW_ALB_ACCUM_B        0.580000
+	SNOW_ALB_THAW_A         0.820000
+	SNOW_ALB_THAW_B         0.460000
+	TraceSnow               0.030000
+
+	Other Constants:
+	LAI_WATER_FACTOR        0.200000
+	LWAVE_COR               1.000000
+	MAXIT_FE                25
+
+
+Automatic recompilation on updates to *.h
+
+	Files affected:
+	Makefile
+
+	Description:
+	In VIC 4.0.4 and earlier, updating a .h file and recompiling VIC would
+	not result in recompilation of files that depend on the .h file, unless
+	a "make clean" command was issued first.  Now, if any .h files are
+	updated, all dependent .c files are recompiled on the next "make".
+
+
+Optional July average temperature field in soil parameter file
+
+	Files affected:
 	check_files.c, compute_treeline.c, initialize_atmos.c,
-	initialize_global.c, read_soilparam.c, read_soilparam_arc.c,
-	vicNl.c, vicNl.h, vicNl_def.h:
-	    Added optional field to the soil file, containing
-	    average July air temperature, for use with the COMPUTE_
-	    TREELINE option.  If the soil file contains 54 fields
-	    (or if the arc/info soil file list has 1 more line),
-	    this final entry is assumed to be the average July air
-	    temperature.  If COMPUTE_TREELINE is TRUE, this temperature
-	    is used in computing the treeline rather than calculating
-	    the average July temperature from the forcing data.  If
-	    COMPUTE_TREELINE is FALSE, this field is ignored.  If
-	    this field is not present in the soil file, vic behaves
-	    as in 4.0.4.					TJB
-	cmd_proc.c, display_current_settings.c, get_global_param.c,
-	global.h, vicNl.c, vicNl.h, vicNl_def.h:
-	    Added -o option, to display current run-time and
-	    compile-time options.  Updated version string.	TJB
-	mtclim42_vic.c:
-	    If data->s_srad becomes negative, we set it to 0.0.	TJB
-	    If p->base_isoh and p->site_isoh are both small or 0, set
-	    ratio = 1.  This handles the case in which annual precip
-	    for the grid cell is 0, resulting in both p->base_isoh
-	    and p->site_isoh being 0, and their ratio being
-	    undefined. (found by Liz Clark)			TJB
-	open_file.c:
-	    Now announces when it opens a binary file for reading.
-	write_data.c:
-	    Corrected typo in output format for fluxes file.	TJB
-	calc_rainonly.c:
-	    (found by Justin Sheffield at Princeton)
-	    Changed test
-		else if(air_temp > MAX_SNOW_TEMP)
-	    to
-		else if(air_temp >= MAX_SNOW_TEMP)
-	    to fix situation in which, if air_temp = MAX_SNOW_TEMP,
-	    rainfall (rainonly) was set to 0 and snowfall was set
-	    to 100% of precip, causing function to fail.	TJB
-	compute_dz.c, initialize_atmos.c, read_soilparam.c,
-	read_soilparam_arc.c:
-	    (found by Justin Sheffield at Princeton)
-	    Replaced rint(something) with (float)(int)(something + 0.5)
-	    to handle rounding without resorting to rint(), which
-	    isn't supported on all platforms.			TJB
-	    Added print statement for current cell number.	TJB
-	func_surf_energy_bal.c:
-	    Added check that both FS_ACTIVE and FROZEN_SOIL are true
-	    before adjusting *deltaH.  This is just a safety measure;
-	    ice and ice0 should both be 0 when FS_ACTIVE is FALSE.TJB
-	initialize_global.c:
-	    (found by Justin Sheffield at Princeton)
-	    Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
-	    Also changed limit on loop over forcing types from
-	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
-	initialize_model_state.c:
-	    (found by Justin Sheffield at Princeton)
-	    Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
-	    accessed in set_node_parameters().			TJB
-	open_debug.c:
-	    (found by Justin Sheffield at Princeton)
-	    Initialize debug_store_moist array when debug.PRT_MOIST
-	    is true (as well as under the other previously-defined
-	    conditions).					TJB
-	open_state_file.c:
-	    (Port from 4.1.0)
-	    Modified the statefile name to contain year, month, day
-	    rather than day, month, year.  This makes it consistent
-	    with the planned release of 4.1.0.			TJB
-	penman.c:
-	    (found by Justin Sheffield at Princeton)
-	    Changed
+	initialize_global.c, read_soilparam.c, read_soilparam_arc.c, vicNl.c,
+	vicNl.h, vicNl_def.h
+
+	Description:
+	In 4.0.4, when using the COMPUTE_TREELINE option, if the forcing files
+	did not contain data for at least one July, the computed July average
+	temperature would be undefined, resulting in incorrect location of the
+	treeline.  In addition, runs covering different periods of the same
+	forcing data would have different July average temperatures, causing the
+	location of the treeline to change from run to run.  To allow more user
+	control over the location of the treeline, added an optional field to
+	the soil file, containing average July air temperature.  If the soil
+	file contains 54 fields (or if the arc/info soil file list has 1 more
+	line), this final entry is assumed to be the average July air
+	temperature.  If COMPUTE_TREELINE is TRUE, this temperature is used in
+	computing the treeline rather than calculating the average July
+	temperature from the forcing data.  If COMPUTE_TREELINE is FALSE, this
+	field is ignored.  If this field is not present in the soil file, vic
+	behaves as in 4.0.4.
+
+
+Bug Fixes:
+----------
+
+Spurious condensation at low temperatures
+
+	Files affected:
+	arno_evap.c
+
+	Description:
+	Changed logic of evap limit check to avoid creating spurious
+	condensation.  In VIC 4.0.4 and earlier, whenever evaporation > (liquid
+	moisture - residual moisture), evaporation would be set to (liquid
+	moisture - residual moisture).  However, at low temperatures, when most
+	or all soil moisture is frozen, liquid moisture < residual moisture,
+	causing (liquid moisture - residual moisture) to be negative.  Any non-
+	negative evap would be greater than this, resulting in evap getting set
+	to (liquid moisture - residual moisture), which would be negative (i.e.
+	condensation).  This artificially created condensation in whatever
+	amount necessary to bring liquid moisture up to residual, causing 1)
+	large latent heat flux, 2) incorrect surface temperatures, 3) occasional
+	inability for calc_surf_energy_bal to converge in root_brent, and 4)
+	spuriously high runoff and baseflow.  Now there is an added condition
+	that liquid moisture > residual moisture for evap to be capped at
+	(liquid moisture - residual moisture).
+	NOTE: This fix results in lower runoff and baseflow in areas with
+	frozen soils, and may require recalibration of soil paramters.
+
+
+Incorrect baseflow bounds
+
+	Files affected:
+	read_soilparam.c, read_soilparam_arc.c, runoff.c
+
+	Description:
+	In 4.0.4, runoff.c checked for the wrong bounds on baseflow, allowing
+	baseflow to become negative when liquid soil moisture < residual
+	moisture.  These bounds have been fixed in 4.0.5, as follows: baseflow
+	is not allowed to exceed (liquid soil moisture - field capacity); when
+	baseflow < 0, baseflow is set to 0; when baseflow > 0 and the resulting
+	soil moisture < residual moisture, water is taken out of baseflow and
+	given to the soil as follows:
+	  if baseflow > (residual moisture - soil moisture), then
+	    baseflow -= (residual moisture - soil moisture);
+	    soil moisture += (residual moisture - soil moisture);
+	  else
+	    soil moisture += baseflow;
+	    baseflow = 0;
+	Also added check to read_soilparam.c and read_soilparam_arc.c to make
+	sure that wilting point (porosity*Wpwp_FRACT) is greater than residual
+	moisture. (found and fixed by Chunmei Zhu, Alan Hamlet, and Ted Bohn)
+
+
+Negative incoming shortwave radiation at high latitudes
+
+	Files affected:
+	mtclim42_vic.c
+
+	Description:
+	In 4.0.4, when sub-daily shortwave radiation is estimated from daily
+	min/max temperatures, negative values occasionally are calculated in
+	coastal areas above the Arctic Circle in winter.  Now, if estimated sub-
+	daily incident shortwave is negative, it is set to 0.0.
+
+
+Undefined daily precipitation for deserts
+
+	Files affected:
+	mtclim42_vic.c
+
+	Description:
+	In 4.0.4, if a grid cell's annual precipitation (specified in the soil
+	parameter file) is 0, then the adjusted daily precipitation calculated
+	in mtclim42_vic.c ends up being undefined.  In 4.0.5 this has been
+	fixed.
+
+	More specifically, the MTCLIM 4.2 algorithm (which VIC uses for
+	estimating sub-daily forcing values) was originally set up to expect a
+	base precipitation as an input, and to translate this base precip into
+	a site-specific precip via an adjustment function.  The adjustment
+	function multiplies the base precip by the ratio of site_isohyet to
+	base_isohyet to get site precipitation.  In calling the MTCLIM 4.2
+	functions, VIC sets site_isohyet and base_isohyet to the grid cell's
+	annual precipitation.  So this ratio should always = 1.  However,
+	when annual precipitation is 0.0, this ratio is undefined.  So, the
+	fix is to set the ratio to 1 when both site_isohyet and base_isohyet
+	are 0 (or very small). (found by Liz Clark)
+
+
+100% snow when air_temp = MAX_SNOW_TEMP
+
+	Files affected:
+	calc_rainonly.c
+
+	Description:
+	In 4.0.4, when air_temp = MAX_SNOW_TEMP, the portion of precipitation
+	that is snow was set to 100%.  This has been fixed.  (found by Justin
+	Sheffield at Princeton)
+
+
+Special case in Penman equation
+
+	Files affected:
+	penman.c
+
+	Description:
+	Changed
 		if (vpd > 0.0 && evap < 0.0)
-	    to
+	to
 		if (vpd >= 0.0 && evap < 0.0)
-	    to correctly handle evap when vpd == 0.0.		TJB
-	read_atmos_data.c:
-	    (Port from 4.1.0)
-	    Replaced NF with global_param.dt in condition checking
-	    whether forcing file contains enough records to cover
-	    the time range of the simulation.			TJB
-	read_initial_model_state.c:
-	    (Port from 4.1.0)
-	    Added check to verify that the sum of the defined nodes
-	    equals the damping depth.				TJB
-	read_soilparam.c, read_soilparam_arc.c:
-	    (fix by Chunmei Zhu and Alan Hamlet)
-	    Added check to make sure that wilting point
-	    (porosity*Wpwp_FRACT) is greater than residual
-	    moisture.						TJB
-	read_soilparam_arc.c:
-	    Modified to handle ARNO parameters.			TJB
-	runoff.c:
-	    (fix by Chunmei Zhu and Alan Hamlet)
-	    Added check to make sure baseflow doesn't exceed
-	    difference between liquid moisture and field
-	    capacity.						TJB
-	    Changed block that handles baseflow when soil moisture
-	    drops below residual moisture.  Now, the block is only
-	    entered if baseflow > 0 and soil moisture < residual,
-	    and the amount of water taken out of baseflow and given
-	    to the soil cannot exceed baseflow.  In addition, error
-	    messages are no longer printed, since it isn't an error
-	    to be in that block.				TJB
-	soil_conduction.c:
-	    (Port from 4.1.0)
-	    set_node_parameters(): Modified to correct differences
-	    between calculations to determine maximum node moisture
-	    and node moisture, so that nodes on the boundary between
-	    soil layers are computed the same way for both.	TJB
-	    distribute_node_moisture_properties(): Modified to check
-	    that node soil moisture is less than or equal to maximum
-	    node soil moisture, otherwise an error is printed to the
-	    screen and the model exits.				TJB
-	surface_fluxes.c:
-	    (found by Justin Sheffield at Princeton)
-	    Fixed initialization of canopyevap to initialize for every
-	    value of dist, rather than just dist 0.		TJB
-	write_atmosdata.c:
-	    (found by Justin Sheffield at Princeton)
-	    No longer close the debug file, since the next cell
-	    must write to it.					TJB
+	to correctly handle evap when vpd == 0.0. (found by Justin Sheffield
+	at Princeton)
+
+
+Rint() function not supported on all platforms
+
+	Files affected:
+	compute_dz.c, initialize_atmos.c, read_soilparam.c,
+	read_soilparam_arc.c
+
+	Description:
+	Replaced rint(something) with (float)(int)(something + 0.5) to
+	handle rounding without resorting to rint(), which isn't supported
+	on all platforms.  (found by Justin Sheffield at Princeton)
+
+
+Global parameter initialization
+
+	Files affected:
+	initialize_global.c
+
+	Description:
+	Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.  Also changed
+	limit on loop over forcing types from hard-coded 17 to variable
+	N_FORCING_TYPES.  (found by Justin Sheffield at Princeton)
+
+
+Bottom soil node thickness initialization
+
+	Files affected:
+	initialize_model_state.c
+
+	Description:
+	Initialize soil_con->dz_node[Nnodes] to 0.0, since it is accessed in
+	set_node_parameters().  (found by Justin Sheffield at Princeton)
+
+
+Initialization of debug parameters
+
+	Files affected:
+	open_debug.c
+
+	Description:
+	Initialize debug_store_moist array when debug.PRT_MOIST is true (as
+	well as under the other previously-defined conditions). (found by
+	Justin Sheffield at Princeton)
+
+
+Forcing data validation
+
+	Files affected:
+	read_atmos_data.c
+
+        Description:
+	Replaced NF with global_param.dt in condition checking whether forcing
+	file contains enough records to cover the time range of the simulation.
+	(port from 4.1.0 beta)
+
+
+Model state validation
+
+	Files affected:
+	read_initial_model_state.c
+
+	Description:
+	Added check to verify that the sum of the defined nodes equals the damping depth. (port from 4.1.0 beta)
+
+
+Arc/info soil parameter files and ARNO soil parameters
+
+	Files affected:
+	read_soilparam_arc.c
+
+	Description:
+	VIC 4.0.4 does not handle ARNO soil parameters in arc/info soil files.
+	VIC 4.0.5 now handles them in all soil files (assuming ARC_SOIL is
+	TRUE).
+
+
+Soil thermal node calculations
+
+	Files affected:
+	soil_conduction.c
+
+	Description:
+	set_node_parameters(): Modified to correct differences between
+	calculations to determine maximum node moisture and node moisture, so
+	that nodes on the boundary between soil layers are computed the same
+	way for both. (port from 4.1.0 beta)
+	distribute_node_moisture_properties(): Modified to check that node soil
+	moisture is less than or equal to maximum node soil moisture, otherwise
+	an error is printed to the screen and the model exits. (port from 4.1.0
+	beta)
+
+
+Canopy evaporation and distributed precipitation
+
+	Files affected:
+	surface_fluxes.c
+
+	Description:
+	Fixed initialization of canopyevap to initialize for every value of
+	dist, rather than just dist 0. (found by Justin Sheffield at Princeton)
+
+
+Output debug file error
+
+	Files affected:
+	write_debug.c
+
+	Description:
+	No longer close the debug file, since the next cell must write to it.
+	(found by Justin Sheffield at Princeton)
+
+
+Calculation of deltaH when FS_ACTIVE is FALSE
+
+	Files affected:
+	func_surf_energy_bal.c
+
+	Description:
+	Added check that both FS_ACTIVE and FROZEN_SOIL are true before
+	adjusting *deltaH.  This is just a safety measure; ice and ice0 should
+	both be 0 when FS_ACTIVE is FALSE.  (found by Justin Sheffield at
+	Princeton)
+
+
+Root_brent error message clarification
+
+	Files affected:
+	calc_surf_energy_bal.c, frozen_soil.c, root_brent.c, snow_melt.c
+
+	Description:
+	Modified error messages.  Root_brent.c now simply prints a warning,
+	leaving it to the functions that called it to describe the specific
+	error and its consequences.  In 4.0.4, root_brent's messages sometimes
+	were wrong.
+
+
+Statefile name change
+
+	Files affected:
+	open_state_file.c
+
+	Description:
+	Modified the statefile name to contain year, month, day rather than
+	day, month, year.  This makes it consistent with the planned release
+	of 4.1.0. (port from 4.1.0 beta)
+
+
+Display current grid cell number for arc/info soil files
+
+	Files affected:
+	read_soilparam_arc.c
+
+	Description:
+	In 4.0.4, for arc/info-format soil files, the current grid cell is
+	not displayed (for regular-format soil files, it is displayed).  Now
+	the current grid cell number is always displayed.
+
+
+Fluxes file output format (ascii)
+
+	Files affected:
+	write_data.c
+
+	Description:
+	In 4.0.4, some fields in the ascii-format fluxes output file were not
+	separated by white space when values became large.  This has been
+	fixed.
+
+
+Binary file opening message
+
+	Files affected:
+	open_file.c
+
+	Description:
+	In 4.0.4, the message announcing the opening of a binary input file
+	for reading was truncated.  This has been fixed.
+
+
+--------------------------------------------------------------------------------
 
 December 1, 2003: VIC release 4.0.4
 
@@ -219,6 +475,8 @@ Modifications:
 	    version string defined in global.h.  Added -v option
 	    to display version information as well.		TJB
 
+--------------------------------------------------------------------------------
+
 September 5, 2003: VIC release 4.0.4beta r3
 
 	snow_utility.c: modification by KAC
@@ -262,6 +520,8 @@ September 5, 2003: VIC release 4.0.4beta r3
 	    for models using the Cherkauer and Lettenmaier (1999) heat
 	    flux formulation.
 
+--------------------------------------------------------------------------------
+
 June 4, 2003: VIC release 4.0.4beta r2
 
 This covers bugs found during tests with the snow algorithm.
@@ -287,6 +547,8 @@ This covers bugs found during tests with the snow algorithm.
 	    at the begining of each time step, so storing its value
 	    is unnecessary.
 
+--------------------------------------------------------------------------------
+
 April 23, 2003: VIC release 4.0.4beta r1
 
 This covers bug fixes found by beta testers and fixed in the version of
@@ -299,6 +561,8 @@ the code bundled with this file.
 	    full day.  This was fixed by introducing step_inc to
 	    index the arrays, while step_dt keeps track of the correct
 	    time step.
+
+--------------------------------------------------------------------------------
 
 March 27, 2003: VIC release 4.0.4beta
 
@@ -442,6 +706,8 @@ Modifications:
 	     exclusion of the overstory fraction.
 	     
 
+--------------------------------------------------------------------------------
+
 August 15, 2000: VIC release 4.0.3
 
 This release fixes a problem with the implementation of va_arg that 
@@ -577,6 +843,8 @@ version 3.2.1.  It is strongly recommended that if you were using version
 3.2.1 or earlier versions that you update with a complete copy of the new
 code.
 
+--------------------------------------------------------------------------------
+
 Major changes from release version 3.2.1 to 4.0.0:
 
 - Radiation Estimation Update: The routines to estimate shortwave and
@@ -621,6 +889,8 @@ period, not from the full dataset included in the forcing file.  It also
 does not store wet and dry fraction information, when running with
 distributed precipitation the model is restarted using average soil
 conditions.
+
+--------------------------------------------------------------------------------
 
 References:
 

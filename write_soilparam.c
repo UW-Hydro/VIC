@@ -37,7 +37,7 @@ void write_soilparam(soil_con_struct soil)
   for(i=0;i<options.Nlayer;i++)
     printf("\tKsat%02d             = %lf mm/day [Saturated hydraulic conductivity]\n",i+1,soil.Ksat[i]);
   for(i=0;i<options.Nlayer;i++)
-    printf("\tPhi_s%02d            = %lf mm/mm [diffusion coefficient]\n",i+1,soil.phi_s[i]);
+    printf("\tPhi_s%02d            = %lf mm/mm [soil moisture diffusion coefficient]\n",i+1,soil.phi_s[i]);
   for(i=0;i<options.Nlayer;i++)
     printf("\tinit_moist%02d       = %lf mm [Initial soil layer moisture]\n",i+1,soil.init_moist[i]);
   printf("\televation            = %lf m [Average elevation]\n",soil.elevation);

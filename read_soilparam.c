@@ -96,9 +96,21 @@ soil_con_struct read_soilparam(FILE *soilparam)
     }
   }
   fscanf(soilparam, "%lf", &temp.avg_temp);
+  if(options.FULL_ENERGY && (temp.avg_temp>100. || temp.avg_temp<-50)) {
+    fprintf(stderr,"Need valid average soil temperature in degrees C to run");
+    fprintf(stderr," Full Energy model, %f is not acceptable.\n",
+	    temp.avg_temp);
+    exit(0);
+  }
   fscanf(soilparam, "%lf", &temp.dp);
   fscanf(soilparam, "%lf", &temp.bubble);
   fscanf(soilparam, "%lf", &temp.quartz);
+  if(options.FULL_ENERGY && (temp.quartz>1. || temp.quartz<0)) {
+    fprintf(stderr,"Need valid quartz content as a fraction to run");
+    fprintf(stderr," Full Energy model, %f is not acceptable.\n",
+	    temp.quartz);
+    exit(0);
+  }
   for(layer=0;layer<options.Nlayer;layer++)
     fscanf(soilparam, "%lf", &temp.bulk_density[layer]);
   fscanf(soilparam, "%lf", &temp.soil_density);

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:    Apr-96
- * LAST-MOD:      2-Oct-1996 at 16:25:36 by Bart Nijssen
+ * LAST-MOD: Sat May  2 11:30:46 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Determine surface temperature iteratively using the Brent
  *               method.  
  * DESCRIP-END.
@@ -31,7 +31,7 @@
 #define MAXITER 1000
 #define MACHEPS 3e-8
 #define TSTEP   10
-#define T       1e-5   
+#define T       1e-7   
 
 /*****************************************************************************
   GENERAL DOCUMENTATION FOR THIS MODULE

@@ -18,7 +18,7 @@
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
 					work (m) */
-#define SNOWTHRES    1.e-10	/* minimum depth of snow for snow flux
+#define SNOWTHRES    0.0	/* minimum depth of snow for snow flux
                                    calculation [m] */
 /***** Model Constants *****/
 #define MAXSTRING    512
@@ -92,6 +92,7 @@ typedef struct {
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   MOISTFRACT;	 /* TRUE = output soil moisture as moisture content */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
+  char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
 } option_struct;
 
 typedef struct {
@@ -184,7 +185,8 @@ typedef struct {
   double expt[MAXlayer];         /* pore-size distribution, HBH 5.15 */
   double Ksat[MAXlayer];         /* saturated hydraulic  conductivity
 				    (mm/day) */
-  double phi_s[MAXlayer];        /* saturated matrix potential */
+  double phi_s[MAXlayer];        /* soil moisture diffusion parameter (mm/mm) 
+				  */
   double init_moist[MAXlayer];   /* initial layer moisture level (mm) */
   float  elevation;	         /* grid cell elevation (m) */
   double depth[MAXlayer];        /* dthickness of each layer (m) */

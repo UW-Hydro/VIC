@@ -26,15 +26,42 @@ void write_data(out_data_struct *out_data,
   1/15/97	Program modified to output daily sums, or values
 		independant of selected time step.  This aids in
 		comparisons between model versions.		KAC
+  3/98          Routine modified to output fluxes in PILPS2c 
+                ASCII column format                             Dag
+  4/30/98       Routine modified to add binary output options for
+                improved file speed, and less disk usage for large
+		model basins                                    KAC
 
 **********************************************************************/
 {
   extern option_struct options;
   extern debug_struct debug;
 
-  int j;
+  int   j;
+  int   *tmp_iptr;
+  float *tmp_fptr;
 
-  if(options.FROZEN_SOIL) {
+  if(options.FROZEN_SOIL && options.BINARY_OUTPUT) {
+    /***** Write Binary Frozen Soil Output File *****/
+    tmp_iptr[0] = dmy->year;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fdepth);
+    tmp_iptr[0] = dmy->month;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fdepth);
+    tmp_iptr[0] = dmy->day;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fdepth);
+    tmp_iptr[0] = dmy->hour;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fdepth);
+    tmp_fptr[0] = (float)out_data->fdepth[0];
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fdepth);
+    tmp_fptr[0] = (float)out_data->fdepth[1];
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fdepth);
+    for(j=0;j<options.Nlayer;j++) {
+      tmp_fptr[0] = (float)(out_data->ice[j] + out_data->moist[j]);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fdepth);
+    }
+  }
+  else if(options.FROZEN_SOIL) {
+    /***** Write ASCII Frozen Soil Output File *****/
     fprintf(outfiles.fdepth  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf",
 	    dmy->year, dmy->month, dmy->day, dmy->hour, out_data->fdepth[0], 
             out_data->fdepth[1]);
@@ -43,8 +70,38 @@ void write_data(out_data_struct *out_data,
     }
     fprintf(outfiles.fdepth,"\n"); 
   }
-
-  if(options.FULL_ENERGY && options.SNOW_MODEL) {
+  
+  if(options.SNOW_MODEL && options.BINARY_OUTPUT) {
+    /***** Write Binary Snow Output File *****/
+    tmp_iptr[0] = dmy->year;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
+    tmp_iptr[0] = dmy->month;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
+    tmp_iptr[0] = dmy->day;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
+    if(options.FULL_ENERGY) {
+      tmp_iptr[0] = dmy->hour;
+      fwrite(tmp_iptr,1,sizeof(int),outfiles.snow);
+    }
+    tmp_fptr[0] = (float)out_data->swq;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+    tmp_fptr[0] = (float)out_data->snow_depth;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+    tmp_fptr[0] = (float)out_data->snow_canopy;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+    if(options.FULL_ENERGY) {
+      tmp_fptr[0] = (float)out_data->advection;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+      tmp_fptr[0] = (float)out_data->deltaCC;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+      tmp_fptr[0] = (float)out_data->snow_flux;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+      tmp_fptr[0] = (float)out_data->refreeze_energy;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.snow);
+    }
+  }
+  else if(options.FULL_ENERGY && options.SNOW_MODEL) {
+    /***** Write ASCII full energy snow output file *****/
     fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->swq, out_data->snow_depth, out_data->snow_canopy,
@@ -52,13 +109,63 @@ void write_data(out_data_struct *out_data,
 	    out_data->refreeze_energy);
   }
   else if(!options.FULL_ENERGY && options.SNOW_MODEL) {
-    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
-	    dmy->year, dmy->month, dmy->day, dmy->hour,
+    /***** Write ASCII water balance snow output file *****/
+    fprintf(outfiles.snow  ,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\n",
+	    dmy->year, dmy->month, dmy->day,
 	    out_data->swq, out_data->snow_depth, out_data->snow_canopy);
   }
 
-
-  if(options.FULL_ENERGY) {
+  if(options.BINARY_OUTPUT) {
+    /***** Write Binary Fluxes File *****/
+    tmp_iptr[0] = dmy->year;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    tmp_iptr[0] = dmy->month;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    tmp_iptr[0] = dmy->day;
+    fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    if(options.FULL_ENERGY) {
+      tmp_iptr[0] = dmy->hour;
+      fwrite(tmp_iptr,1,sizeof(int),outfiles.fluxes);
+    }
+    tmp_fptr[0] = (float)out_data->prec;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->evap;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->runoff;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->baseflow;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->Wdew;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->moist[0];
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->moist[1];
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->moist[2];
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    if(options.FULL_ENERGY) {
+      tmp_fptr[0] = (float)out_data->rad_temp;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+      tmp_fptr[0] = (float)out_data->net_short;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+      tmp_fptr[0] = (float)out_data->r_net;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+      tmp_fptr[0] = (float)out_data->latent;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+      tmp_fptr[0] = (float)out_data->sensible;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+      tmp_fptr[0] = (float)out_data->grnd_flux;
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    }
+    tmp_fptr[0] = (float)out_data->aero_resist;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->surf_temp;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    tmp_fptr[0] = (float)out_data->albedo;
+    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+  }
+  else if(options.FULL_ENERGY) {
+    /***** Write ASCII energy balance fluxes file *****/
     fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->prec, out_data->evap, out_data->runoff,
@@ -72,6 +179,7 @@ void write_data(out_data_struct *out_data,
 	    out_data->albedo);
   }
   else {
+    /***** Write ASCII Water Balance Fluxes File *****/
     fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
 	    dmy->year, dmy->month, dmy->day,
 	    out_data->prec, out_data->evap, out_data->runoff, 
@@ -133,27 +241,27 @@ void calc_energy_balance_error(int    rec,
 ***************************************************************/
 
   static double cum_error;
-  static int    error_cnt;
+  static double max_error;
+  static int    Nrecs;
 
   double error;
 
   if(rec<0) {
-    cum_error=0;
-    error_cnt = 0;
+    cum_error = 0;
+    Nrecs     = -rec;
+    max_error = 0;
   }
   else {
     error = net_rad - latent - sensible - grnd_flux + snow_fluxes;
     cum_error += error;
-    if(fabs(error)>1.e-3) {
-      if(error_cnt<25)
-        fprintf(stderr,"Energy Error:\t%i\t%.4lf\t%.4lf\n",
+    if(fabs(error)>fabs(max_error) && fabs(error)>0.0001) {
+      max_error = error;
+      fprintf(stderr,"Maximum Energy Error:\t%i\t%.4lf\t%.4lf\n",
 		rec,error,cum_error);
-      else if(error_cnt==25) {
-        fprintf(stderr,"Energy Error:\t%i\t%.4lf\t%.4lf\n",
-		rec,error,cum_error);
-	fprintf(stderr,"Too many energy balance errors, will not print more.\n");
-      }
-      error_cnt++;
+    }
+    if(rec==Nrecs-1) {
+      fprintf(stderr,"Total Cumulative Energy Error for Grid Cell = %.4lf\n",
+	      cum_error);
     }
   }
 }

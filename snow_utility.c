@@ -24,6 +24,7 @@ double snow_density(int date,
 	air_temp	C	current air temperature
 	swq		m	snow water equivalent	
 	depth		m	snow pack depth
+	density         kg/m^3  snow density
 
 **********************************************************************/
 
@@ -39,7 +40,6 @@ double snow_density(int date,
   if(new_snow > 0) {
 
     air_temp = air_temp * 9. / 5. + 32.;
-    /**if(air_temp > 0) density_new = 50. + 1000. * pow (air_temp / 100., 2);**/
     if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
                                  * pow (air_temp / 100., 2.0);
     else density_new = (double)NEW_SNOW_DENSITY;
@@ -68,24 +68,6 @@ double snow_density(int date,
 
   }
   else density = 1000. * swq / depth;
-  
-  
-/*****
-  if(date>0 && date<110) {
-*****/
-    /*density = 192.1951 + 0.3733 * (double)date + 1.0919e-8 *
-        pow((double)date,5.0);*/
-/*****
-    density = new_snow_density + 0.3733 * (double)date + 0.0 *
-        pow((double)date,5.0);
-  }
-  else {
-*****/
-    /*density = 192.1951;*/
-/*****
-    density = new_snow_density;
-  }
-*****/
 
   return (density);
 

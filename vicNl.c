@@ -193,7 +193,7 @@ void main(int argc, char *argv[])
 	         / soil_con.depth[index]);
       }
       calc_water_balance_error(-1,0.,0.,storage);
-      calc_energy_balance_error(-1,0.,0.,0.,0.,0.);
+      calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
       /******************************************
 	Run Model in Grid Cell for all Time Steps

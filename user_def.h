@@ -59,15 +59,6 @@
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
 
-/***** Compute the treeline elevation.  If set to TRUE this flag will 
-       force the VIC model to compute the elevation of the tree line, 
-       based on elevation at which the average annual July air temperature
-       is at or below 10C.  All snowbands above this evelation are then 
-       assumed to be above the treeline, and vegetation types with 
-       overstory are removed from the snow band average variables. 
-       MOVED TO GLOBAL CONTROL FILE! *****/
-//#define COMPUTE_TREELINE TRUE
-
 /***** Define maximum array sizes for model source code *****/
 #define MAX_VEG      12         /* maximum number of vegetation types per 
 				   cell */

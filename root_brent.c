@@ -68,13 +68,12 @@ static char vcid[] = "$Id$";
 /*****************************************************************************
   Function name: RootBrent()
 
-  Purpose      : Calculate the surface temperature in the absence of snow
+  Purpose      : Calculate the surface temperature
 
   Required     :
-    int y                 - Row number of current pixel
-    int x                 - Column number of current pixel 
-    double LowerBound      - Lower bound for root
-    double UpperBound      - Upper bound for root
+    double LowerBound     - Lower bound for root
+    double UpperBound     - Upper bound for root
+    char *ErrorString     - For storing description of errors (if any)
     double (*Function)(double Estimate, va_list ap)
     ...                   - Variable arguments 
                             The number and order of arguments has to be
@@ -85,21 +84,23 @@ static char vcid[] = "$Id$";
                             arguments. 
 
   Returns      :
-    double b               - Effective surface temperature (C)
+    double b              - Effective surface temperature (C)
 
-  Modifies     : none
+  Modifies     : 
+    char *ErrorString     - Stores description of errors
 
   Comments     :
     04-Jun-04 Removed message announcing the dumping of variables,
 	      since that doesn't always happen when root_brent fails.
 	      Changed remaining message from ERROR to WARNING for
-	      the same reason.				TJB
+	      the same reason.						TJB
+    21-Sep-04 No longer print warning to stderr from this routine;
+	      instead store warning messages in parameter ErrorString.	TJB
 *****************************************************************************/
-double root_brent(double LowerBound, double UpperBound, 
+double root_brent(double LowerBound, double UpperBound, char *ErrorString,
                 double (*Function)(double Estimate, va_list ap), ...)
 {
   const char *Routine = "RootBrent";
-  char ErrorString[MAXSTRING+1];
   va_list ap;                   /* Used in traversing variable argument list
                                  */ 
   double a;
@@ -119,8 +120,6 @@ double root_brent(double LowerBound, double UpperBound,
   int i;
   int j;
   int eval = 0;
-
-  sprintf(ErrorString, "%s", Routine);
 
   /* initialize variable argujment list */
 
@@ -149,10 +148,8 @@ double root_brent(double LowerBound, double UpperBound,
     j++;
   }
   if ((fa * fb) >= 0) {
-#if VERBOSE
-    fprintf(stderr,"WARNING: first error in root_brent -> %f * %f >= 0\n",
-        fa, fb);
-#endif // VERBOSE
+    /* if we get here, the lower and upper bounds did not bracket the root */
+    sprintf(ErrorString,"WARNING: %s: lower and upper bounds %f and %f failed to bracket the root.\n",Routine,a,b);
     return(-9999.);
   }
   
@@ -231,10 +228,9 @@ double root_brent(double LowerBound, double UpperBound,
       eval++;
     }
   }
-#if VERBOSE
-  fprintf(stderr,"WARNING: second error in root_brent -> Too many iterations\n");
-#endif // VERBOSE
-  return(-9999.);
+  /* If we get here, there were too many iterations */
+  sprintf(ErrorString,"WARNING: %s: too many iterations.\n",Routine);
+  return(-9998.);
 }
 
 #undef MAXTRIES

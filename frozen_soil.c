@@ -41,6 +41,8 @@ void setup_frozen_soil(soil_con_struct   *soil_con,
   Modifications
   04-Jun-04 Added descriptive error message to beginning of screen dump
 	    in error_print_solve_T_profile.			TJB
+  21-Sep-04 Added ErrorString to store error messages from
+	    root_brent.						TJB
 
 **********************************************************************/
   extern option_struct options;
@@ -275,6 +277,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   double diff;
   double oldT;
   double fprime;
+  char ErrorString[MAXSTRING];
 
   Error = 0;
   Done = FALSE;
@@ -296,14 +299,14 @@ int calc_soil_thermal_fluxes(int     Nnodes,
       }
       else {
 #if QUICK_FS
-	T[j] = root_brent(T0[j]-(SOIL_DT),
-			  T0[j]+(SOIL_DT),soil_thermal_eqn, 
+	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
+			  ErrorString, soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  ufwc_table_node[j], ice[j], gamma[j-1], fprime, 
 			  A[j], B[j], C[j], D[j], E[j]);
 #else
-	T[j] = root_brent(T0[j]-(SOIL_DT),
-			  T0[j]+(SOIL_DT),soil_thermal_eqn, 
+	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
+			  ErrorString, soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  bubble[j], expt[j], ice[j], gamma[j-1], fprime, 
 			  A[j], B[j], C[j], D[j], E[j]);
@@ -313,7 +316,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
 				max_moist[j], bubble[j], expt[j], ice[j], 
 				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
-				E[j]);
+				E[j], ErrorString);
       }
       
       diff=fabs(oldT-T[j]);
@@ -334,8 +337,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
       }
       else {
 #if QUICK_FS
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
-				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]+SOIL_DT,
+				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
 				 ufwc_table_node[Nnodes-1], 
@@ -343,8 +346,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 gamma[Nnodes-2], fprime, 
 				 A[j], B[j], C[j], D[j], E[j]);
 #else
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]
-				 +SOIL_DT,soil_thermal_eqn, T[Nnodes-1],
+	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT,T0[Nnodes-1]+SOIL_DT,
+				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
 				 bubble[j], expt[Nnodes-1], ice[Nnodes-1], 
@@ -359,7 +362,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				bubble[Nnodes-1], 
 				expt[Nnodes-1], ice[Nnodes-1], 
 				gamma[Nnodes-2], fprime, 
-				A[j], B[j], C[j], D[j], E[j]);
+				A[j], B[j], C[j], D[j], E[j], ErrorString);
       }
       
       diff=fabs(oldT-T[Nnodes-1]);
@@ -412,6 +415,7 @@ double error_print_solve_T_profile(double T, va_list ap) {
   double C;
   double D;
   double E;
+  char *ErrorString;
 
   TL        = (double) va_arg(ap, double);
   TU        = (double) va_arg(ap, double);
@@ -428,7 +432,9 @@ double error_print_solve_T_profile(double T, va_list ap) {
   C         = (double) va_arg(ap, double);
   D         = (double) va_arg(ap, double);
   E         = (double) va_arg(ap, double);
+  ErrorString = (char*) va_arg(ap, char *);
   
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: solve_T_profile failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"TL\t%f\n",TL);

@@ -70,6 +70,8 @@ static char vcid[] = "$Id$";
   Comments     :
     04-Jun-04 Added descriptive error message to beginning of screen dump
 	      in ErrorPrintSnowPackEnergyBalance.			TJB
+    21-Sep-04 Added ErrorString to store error messages from
+	      root_brent.						TJB
 *****************************************************************************/
 void snow_melt(soil_con_struct  *soil_con, 
 	       int               rec,
@@ -131,6 +133,7 @@ void snow_melt(soil_con_struct  *soil_con,
   double latent_heat;		/* thermal flux through snowpack from ground */
   double sensible_heat;		/* thermal flux through snowpack from ground */
   double melt_energy = 0.;
+  char ErrorString[MAXSTRING];
 
   SnowFall = snowfall / 1000.; /* convet to m */
   RainFall = rainfall / 1000.; /* convet to m */
@@ -276,7 +279,7 @@ void snow_melt(soil_con_struct  *soil_con,
     vapor_flux = snow->vapor_flux;
 
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
-				 (double)0.0,
+				 (double)0.0, ErrorString,
 				 SnowPackEnergyBalance, delta_t, 
 				 aero_resist, z2, 
 				 displacement, Z0, wind, net_short, longwave,
@@ -300,7 +303,7 @@ void snow_melt(soil_con_struct  *soil_con,
 				 &deltaCC, grnd_surf_temp,
 				 snow->depth, snow->density,surf_atten,
 				 &grnd_flux,&latent_heat,
-				 &sensible_heat);
+				 &sensible_heat, ErrorString);
 
     Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
 				     z2, displacement, Z0, wind, net_short,
@@ -547,6 +550,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   double SnowDepth;  
   double SnowDensity; 
   double SurfAttenuation; 
+  char *ErrorString;
   
   /* end of list of arguments in variable argument list */
 
@@ -583,8 +587,10 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   GroundFlux         = (double *) va_arg(ap, double *);
   LatentHeat         = (double *) va_arg(ap, double *);
   SensibleHeat       = (double *) va_arg(ap, double *);
+  ErrorString        = (char *) va_arg(ap, char *);
   
   /* print variables */
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"Dt = %f\n",Dt);

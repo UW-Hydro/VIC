@@ -62,6 +62,8 @@ double calc_surf_energy_bal(int                rec,
 	      fraction set in solve_snow.c                 KAC
     04-Jun-04 Placed "ERROR" at beginning of screen dump in
 	      error_print_surf_energy_bal.		TJB
+    21-Sep-04 Added ErrorString to store error messages from
+	      root_brent.				TJB
 
 ***************************************************************/
 {
@@ -116,6 +118,7 @@ double calc_surf_energy_bal(int                rec,
   layer_data_struct layer[MAX_LAYERS];
 
   double   T_lower, T_upper;
+  char    ErrorString[MAXSTRING];
 
   /**************************************************
     Correct Aerodynamic Resistance for Stability
@@ -221,7 +224,7 @@ double calc_surf_energy_bal(int                rec,
     }
 
 #if QUICK_FS
-    Tsurf = root_brent(T_upper, T_lower, 
+    Tsurf = root_brent(T_upper, T_lower, ErrorString,
 		       func_surf_energy_bal, T2, Ts_old, T1_old, Tair, 
 		       ra, atmos_density, shortwave, longwave, albedo, 
 		       emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, dp, 
@@ -245,7 +248,7 @@ double calc_surf_energy_bal(int                rec,
 		       veg_class, dmy->month, Nnodes, 
 		       FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE);
 #else
-    Tsurf = root_brent(T_upper, T_lower, 
+    Tsurf = root_brent(T_upper, T_lower, ErrorString,
 		       func_surf_energy_bal, T2, Ts_old, T1_old, Tair, 
 		       ra, atmos_density, shortwave, longwave, albedo, 
 		       emissivity, kappa1, kappa2, Cs1, Cs2, D1, D2, dp, 
@@ -301,7 +304,7 @@ double calc_surf_energy_bal(int                rec,
 					 veg_var_wet, veg_var_dry, VEG, 
 					 veg_class, 
 					 dmy->month, iveg, Nnodes, FIRST_SOLN,
-					 snow->snow, soil_con->FS_ACTIVE);
+					 snow->snow, soil_con->FS_ACTIVE, ErrorString);
 #else
       error = error_calc_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, 
 					 ra, atmos_density, shortwave, 
@@ -331,7 +334,7 @@ double calc_surf_energy_bal(int                rec,
 					 layer_dry, veg_var_wet, veg_var_dry, 
 					 VEG, veg_class, 
 					 dmy->month, iveg, Nnodes, FIRST_SOLN, 
-					 snow->snow, soil_con->FS_ACTIVE);
+					 snow->snow, soil_con->FS_ACTIVE, ErrorString);
 #endif
     }
   }
@@ -581,6 +584,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   char              *FIRST_SOLN;
   int                SNOWING;
   int                FS_ACTIVE;
+  char              *ErrorString;
 
   int                i;
 
@@ -670,8 +674,10 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   FIRST_SOLN          = (char *) va_arg(ap, char *);
   SNOWING             = (int) va_arg(ap, int);
   FS_ACTIVE           = (int) va_arg(ap, int);
+  ErrorString         = (char *) va_arg(ap, char *);
 
   /* Print Variables */
+  fprintf(stderr, "%s", ErrorString);
   fprintf(stderr, "ERROR: calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
   fprintf(stderr,"T2 = %f\n",T2);

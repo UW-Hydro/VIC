@@ -37,7 +37,9 @@ global_param_struct get_global_param(filenames_struct *names,
              will cause the model to use bare soil.  Make sure that 
              positive index value refer to a non-canopied vegetation
              type in the vegetation library.                   KAC
-  10-Oct-03  Modified to understand the ARNO_PARAMS option.	TJB
+  10-Oct-03 Modified to understand the ARNO_PARAMS option.	TJB
+  10-May-04 Modified to display compile-time and run-time options
+	    if VERBOSE is set to TRUE.				TJB
 
 **********************************************************************/
 {
@@ -493,6 +495,11 @@ global_param_struct get_global_param(filenames_struct *names,
   /*********************************
     Output major options to stderr
   *********************************/
+#if VERBOSE
+  display_current_settings(DISP_ALL,names,&global);
+#else
+  display_current_settings(DISP_VERSION,names,&global);
+#endif
 
 #if VERBOSE
   fprintf(stderr,"Time Step = %i hour(s)\n",global.dt);

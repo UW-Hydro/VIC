@@ -4,8 +4,8 @@
 
 Modifications:
 
-	cmd_proc.c, display_current_settings.c, global.h, vicNl.c,
-	vicNl.h, vicNl_def.h:
+	cmd_proc.c, display_current_settings.c, get_global_param.c,
+	global.h, vicNl.c, vicNl.h, vicNl_def.h:
 	    Added -o option, to display current run-time and
 	    compile-time options.  Updated version string.	TJB
 	Makefile:

@@ -367,8 +367,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     temp.bubble /= sum_depth;
     temp.soil_density /= sum_depth;
     temp.quartz /= sum_depth;
-    /** Need to fix this in the future so that dp can be set to any depth **/
-    if(temp.dp > sum_depth) temp.dp = sum_depth;
 
     /**********************************************
       Compute Maximum Infiltration for Upper Layers

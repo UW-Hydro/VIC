@@ -170,6 +170,7 @@ void distribute_soil_property(double  *dz,
     Ftmp = (double)((int)(((fdepth - Zsum)+0.0005)*1000.))/1000.;
     Ttmp = (double)((int)(((tdepth - Zsum)+0.0005)*1000.))/1000.;
     Ztmp = (double)((int)(((dz[zindex])+0.0005)*1000.))/1000.;
+    if(lindex == Nlayer-1 && Ztmp>Ltmp) Ztmp = Ltmp;
 
     if(Ttmp>=Ztmp && Ltmp>=Ztmp)
       param[zindex] = l_param[lindex][0];
@@ -185,48 +186,48 @@ void distribute_soil_property(double  *dz,
           + l_param[lindex][2]*(dz[zindex]-Ftmp)) / dz[zindex];
     else if(Ttmp<0 && Ftmp<0 && Ltmp>=0 && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][2]*Ltmp 
-          + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp<0 && Ftmp>=Ztmp && Ltmp>=0 && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][1]*Ltmp 
-          + l_param[lindex+1][1]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex+1][1]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp>=Ztmp && Ftmp>=Ztmp && Ltmp>=0 && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][0]*Ltmp 
-          + l_param[lindex+1][0]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex+1][0]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp>=0 && Ftmp>=Ztmp && Ltmp>=Ttmp && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][0]*Ttmp 
-          + l_param[lindex][1]*(Ltmp-Ttmp) 
-          + l_param[lindex+1][1]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex][1]*(Ltmp-Ttmp) 
+		       + l_param[lindex+1][1]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp>=Ltmp && Ttmp<Ztmp && Ftmp>=Ztmp && Ltmp>=0)
       param[zindex] = (l_param[lindex][0]*Ltmp 
-          + l_param[lindex+1][0]*(Ttmp-Ltmp) 
-          + l_param[lindex+1][1]*(dz[zindex]-Ttmp)) / dz[zindex];
+		       + l_param[lindex+1][0]*(Ttmp-Ltmp) 
+		       + l_param[lindex+1][1]*(dz[zindex]-Ttmp)) / dz[zindex];
     else if(Ttmp<0 && Ftmp>=0 && Ltmp>=Ftmp && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][1]*Ftmp 
-          + l_param[lindex][2]*(Ltmp-Ftmp) 
-          + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex][2]*(Ltmp-Ftmp) 
+		       + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp<0 && Ftmp>=Ltmp && Ftmp<Ztmp && Ltmp>=0)
       param[zindex] = (l_param[lindex][1]*Ltmp 
-          + l_param[lindex+1][1]*(Ftmp-Ltmp) 
-          + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
+		       + l_param[lindex+1][1]*(Ftmp-Ltmp) 
+		       + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
     else if(Ttmp>=0 && Ftmp>=Ttmp && Ftmp<Ztmp && Ltmp>=Ztmp)
       param[zindex] = (l_param[lindex][0]*Ttmp 
-          + l_param[lindex][1]*(Ftmp-Ttmp) 
-          + l_param[lindex][2]*(dz[zindex]-Ftmp)) / dz[zindex];
+		       + l_param[lindex][1]*(Ftmp-Ttmp) 
+		       + l_param[lindex][2]*(dz[zindex]-Ftmp)) / dz[zindex];
     else if(Ttmp>=0 && Ftmp>=Ttmp && Ltmp>=Ftmp && Ltmp<Ztmp)
       param[zindex] = (l_param[lindex][0]*Ttmp 
-          + l_param[lindex][1]*(Ftmp-Ttmp) 
-          + l_param[lindex][2]*(Ltmp-Ftmp) 
-          + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
+		       + l_param[lindex][1]*(Ftmp-Ttmp) 
+		       + l_param[lindex][2]*(Ltmp-Ftmp) 
+		       + l_param[lindex+1][2]*(dz[zindex]-Ltmp)) / dz[zindex];
     else if(Ttmp>=0 && Ftmp>=Ltmp && Ftmp<Ztmp && Ltmp>=Ttmp)
       param[zindex] = (l_param[lindex][0]*Ttmp 
-          + l_param[lindex][1]*(Ltmp-Ttmp) 
-          + l_param[lindex+1][1]*(Ftmp-Ltmp) 
-          + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
+		       + l_param[lindex][1]*(Ltmp-Ttmp) 
+		       + l_param[lindex+1][1]*(Ftmp-Ltmp) 
+		       + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
     else if(Ttmp>=Ltmp && Ftmp>=Ttmp && Ftmp<Ztmp && Ltmp>=0)
       param[zindex] = (l_param[lindex][0]*Ltmp 
-          + l_param[lindex+1][0]*(Ttmp-Ltmp) 
-          + l_param[lindex+1][1]*(Ftmp-Ttmp) 
-          + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
+		       + l_param[lindex+1][0]*(Ttmp-Ltmp) 
+		       + l_param[lindex+1][1]*(Ftmp-Ttmp) 
+		       + l_param[lindex+1][2]*(dz[zindex]-Ftmp)) / dz[zindex];
 
     if(Ltmp>=0 && Ltmp<Ztmp) {
       lindex++;
@@ -432,8 +433,14 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   double MINLAYER = 0.001;
 
   /** Calculate New Layer Depths **/
+  Lsum = 0.;
+  for(index=0;index<Nlayer;index++) Lsum += depth[index];
+  if(dp > Lsum) {
+    Nnodes--;
+    Zsum = Lsum;
+  }
+  else Zsum=dp;
   index=Nnodes-1;
-  Zsum = dp;
   fdepth=tdepth=0;
   if(T[index]>0.0) {
     /***** Find Freezing Front Depth *****/

@@ -14,7 +14,11 @@
               - output: - daily evapotranspiration (mm/day)
   programmer: Bart Nijssen
   date      : August 7, 1995
-  changes   :
+  changes   : 07-May-04 Changed
+				if (vpd > 0.0 && evap < 0.0)
+			to
+				if (vpd >= 0.0 && evap < 0.0)
+			to correctly handle evap when vpd == 0.0.	TJB
   references: 
 ********************************************************************************/
 
@@ -101,7 +105,7 @@ nthesis */
   evap = (slope * rad + r_air * CP_PM * vpd/ra)/
          (lv * (slope + gamma * (1 + (rc + rarc)/ra))) * SEC_PER_DAY;
 
-  if (vpd > 0.0 && evap < 0.0) 
+  if (vpd >= 0.0 && evap < 0.0) 
     evap = 0.0;
 
   return evap;

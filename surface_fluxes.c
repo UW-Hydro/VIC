@@ -421,10 +421,11 @@ void surface_fluxes(char                 overstory,
 			       wind, root, UNSTABLE_SNOW, options.Nnode, 
 			       Nveg, band, dmy[rec].hour, iveg, 
 			       dmy[rec].day_in_year, step_dt, 
-			       dmy[rec].month, rec, veg_class, 
-			       &UnderStory, &(snow_energy), step_layer[DRY], 
-			       step_layer[WET], &(step_snow), soil_con, 
-			       &(snow_veg_var[DRY]), &(snow_veg_var[WET]));
+			       dmy[rec].month, dmy[rec].day, dmy[rec].year, 
+			       rec, veg_class, &UnderStory, &(snow_energy), 
+			       step_layer[DRY], step_layer[WET], &(step_snow), 
+			       soil_con, &(snow_veg_var[DRY]), 
+			       &(snow_veg_var[WET]));
       
 // snow_energy.sensible + snow_energy.latent + snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + snow_energy.advection - snow_energy.deltaCC + snow_energy.refreeze_energy + snow_energy.advected_sensible ) * snow->coverage
 

@@ -38,11 +38,6 @@ void display_current_settings(int                 mode,
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Output to Screen:\n");
-#if OUTPUT_FORCE_STATS
-  fprintf(stdout,"OUTPUT_FORCE_STATS\tTRUE\n");
-#else
-  fprintf(stdout,"OUTPUT_FORCE_STATS\tFALSE\n");
-#endif
 #if VERBOSE
   fprintf(stdout,"VERBOSE\t\t\tTRUE\n");
 #else
@@ -87,21 +82,6 @@ void display_current_settings(int                 mode,
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Simulation Parameters:\n");
-#if CLOSE_ENERGY
-  fprintf(stdout,"CLOSE_ENERGY\t\tTRUE\n");
-#else
-  fprintf(stdout,"CLOSE_ENERGY\t\tFALSE\n");
-#endif
-#if COMPUTE_TREELINE
-  fprintf(stdout,"COMPUTE_TREELINE\tTRUE\n");
-#else
-  fprintf(stdout,"COMPUTE_TREELINE\tFALSE\n");
-#endif
-#if LAKE_MODEL
-  fprintf(stdout,"LAKE_MODEL\t\tTRUE\n");
-#else
-  fprintf(stdout,"LAKE_MODEL\t\tFALSE\n");
-#endif
 #if LOW_RES_MOIST
   fprintf(stdout,"LOW_RES_MOIST\t\tTRUE\n");
 #else
@@ -113,23 +93,11 @@ void display_current_settings(int                 mode,
 #else
   fprintf(stdout,"QUICK_FS\t\tFALSE\n");
 #endif
-#if SPATIAL_FROST
-  fprintf(stdout,"SPATIAL_FROST\t\tTRUE\n");
-  fprintf(stdout,"FROST_SUBAREAS\t\t%d\n",FROST_SUBAREAS);
-#else
-  fprintf(stdout,"SPATIAL_FROST\t\tFALSE\n");
-#endif
-#if SPATIAL_SNOW
-  fprintf(stdout,"SPATIAL_SNOW\t\tTRUE\n");
-#else
-  fprintf(stdout,"SPATIAL_SNOW\t\tFALSE\n");
-#endif
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Maximum Array Sizes:\n");
   fprintf(stdout,"MAX_BANDS\t\t%2d\n",MAX_BANDS);
   fprintf(stdout,"MAX_FRONTS\t\t%2d\n",MAX_FRONTS);
-  fprintf(stdout,"MAX_LAKE_NODES\t\t%2d\n",MAX_LAKE_NODES);
   fprintf(stdout,"MAX_LAYERS\t\t%2d\n",MAX_LAYERS);
   fprintf(stdout,"MAX_NODES\t\t%2d\n",MAX_NODES);
   fprintf(stdout,"MAX_VEG\t\t\t%2d\n",MAX_VEG);
@@ -227,19 +195,6 @@ void display_current_settings(int                 mode,
   else
     fprintf(stdout,"SNOW_BAND\t\t%d\n",options.SNOW_BAND);
 
-#if LAKE_MODEL
-  fprintf(stdout,"\n");
-  fprintf(stdout,"Input Lake Data:\n");
-  if (options.LAKES)
-    fprintf(stdout,"LAKES\t\tTRUE\t%s\n",names->lakeparam);
-  else
-    fprintf(stdout,"LAKES\t\tFALSE\n");
-  if (options.LAKE_PROFILE)
-    fprintf(stdout,"LAKE_PROFILE\t\tTRUE\n");
-  else
-    fprintf(stdout,"LAKE_PROFILE\t\tFALSE\n");
-#endif
-
   fprintf(stdout,"\n");
   fprintf(stdout,"Input State File:\n");
   if (options.INIT_STATE) {
@@ -300,18 +255,14 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"GRND_FLUX\t\tTRUE\n");
   else
     fprintf(stdout,"GRND_FLUX\t\tFALSE\n");
-  if (options.QUICK_SOLVE)
-    fprintf(stdout,"QUICK_SOLVE\t\tTRUE\n");
-  else
-    fprintf(stdout,"QUICK_SOLVE\t\tFALSE\n");
   if (options.NOFLUX)
     fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
   else
     fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
-  if (options.BLOWING)
-    fprintf(stdout,"BLOWING\t\t\tTRUE\n");
+  if (options.COMPUTE_TREELINE)
+    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
   else
-    fprintf(stdout,"BLOWING\t\t\tFALSE\n");
+    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
   if (options.CORRPREC)
     fprintf(stdout,"CORRPREC\t\tTRUE\n");
   else

@@ -3,19 +3,35 @@
 # $Id$
 #------------------------------------------------------------------------
 
-April 25, 2003: Beta bug patches (Revision 2)
+June 4, 2003: VIC release 4.0.4beta r2
 
-        write_data.c: (suggested by EDM)
-	    **** WARNING: CHANGE TO OUTPUT FILE ****
-	    modified LDAS SWQ output, so that it is multiplied by 10 
-	    instead of 100 before being converted to a short integer.  
-	    This reduces stored value precision to 0.1, but increases 
-	    the maximum storable SWQ, which was exceeded in previous 
-	    LDAS simulations.
+This covers bugs found during tests with the snow algorithm.
 
-April 23, 2003: Beta bug patches (Revision 1)
+        solve_snow.c: Bug found by KAC
+	    Counter for number of days since last snowfall was 
+	    incremented twice in the MELTING update.  This has been
+	    fixed.
+	solve_snow.c: modification by KAC
+	    Added check so that MELTING flag is only TRUE if melt
+	    occurs in the melt season - currently this is defined
+	    between March 1 and October 1.  Otherwise the MELTING
+	    flag can trigger rapid very early season melt
+	write_model_state.c, read_initial_model_state.c, open_state_file.c,
+	check_state_file.c: Modification by KAC
+	    Modified to handle both ASCII and BINARY state files.
+	    NOTE: ASCII mode is designed to make it easier to create 
+	    a state file for initializing a point model.  It includes 
+	    all features of the Binary state file, but values are 
+	    truncated so the resulting restart will not be identical.
+	    If you need an exact restart, use the Binary files.  Also
+	    removed ice content from the state file as it is computed
+	    at the begining of each time step, so storing its value
+	    is unecessary.
 
-This covers bug fixes found by beta testers and fixed in the version of the code bundled with this file.
+April 23, 2003: VIC release 4.0.4beta r1
+
+This covers bug fixes found by beta testers and fixed in the version of 
+the code bundled with this file.
 
 	surface_fluxes.c: (found by Ingjerd Haddeland)
 	    Indexing fix sent SNOW_STEP to calc_surf_energy_bal rather

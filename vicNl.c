@@ -4,9 +4,7 @@
 #include <vicNl.h>
 #include <global.h>
 
-#ifndef lint
 static char vcid[] = "$Id$";
-#endif /* lint */
 
 /** Main Program **/
 

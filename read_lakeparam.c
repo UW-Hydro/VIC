@@ -48,6 +48,9 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2005-03-08 Added EQUAL_AREA option.  When TRUE, res variable is interpreted
 	     to be the grid cell area in km^2.  When FALSE, res is interpreted
 	     to be the length of a grid cell side, in degrees (as before).	TJB
+  2005-03-17 Laura Bowling's update had included what appeared to be temporary
+	     code that expected to read the lake node depths from the lake param
+	     file.  This has code has been removed.				TJB
   
 **********************************************************************/
 
@@ -160,8 +163,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     fprintf(stderr, "LAKE PROFILE being computed. \n");
 
     fscanf(lakeparam, "%lf", &temp.Cl[0]);
- if(temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0)
-	nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
+    if(temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0)
+      nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
     
     fgets(tmpstr, MAXSTRING, lakeparam);
     	
@@ -174,29 +177,31 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     radius = sqrt(temp.basin[0] / PI);
     temp.z[0] = temp.maxdepth;
     temp.maxvolume = 0.0;
-   for(i=1; i<= temp.numnod; i++) {
+    for(i=1; i<= temp.numnod; i++) {
       temp.z[i] = (temp.numnod - i) * tempdz;             
       if(temp.z[i] < 0.0) temp.z[i] = 0.0;
       x = pow(temp.z[i]/temp.maxdepth,BETA)*radius;
       temp.basin[i] = PI * x * x;	
       temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * tempdz/2.;
     }
+
   }
   
   /* Read in basin area for each layer depth. */
   /* Assumes that the lake bottom area is zero. */
 
-    else{       
+  else{       
+
     fprintf(stderr, "Reading in the specified lake profile.\n");
     temp.maxvolume=0.0;
     for ( i = 0; i < temp.numnod; i++ ) {
-      fscanf(lakeparam, "%lf %lf", &temp.z[i], &temp.Cl[i]);
+      fscanf(lakeparam, "%lf", &temp.Cl[i]);
       temp.basin[i] = temp.Cl[i] * temp.cell_area;
       
-//      if(i==0)
-//	temp.z[i] = temp.maxdepth;
-//      else
-//	temp.z[i] = (temp.numnod - i) * tempdz;
+      if(i==0)
+	temp.z[i] = temp.maxdepth;
+      else
+	temp.z[i] = (temp.numnod - i) * tempdz;
 
       if(temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0)
 	nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
@@ -205,10 +210,11 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     temp.basin[temp.numnod] = 0.0;
 
     for ( i = 1; i <= temp.numnod; i++ ) {
-         temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * tempdz/2.;
-	    }
-   fprintf(stderr, "maxvolume = %e km3\n",temp.maxvolume/(1000.*1000.*1000.));
-	 }
+      temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * tempdz/2.;
+    }
+    fprintf(stderr, "maxvolume = %e km3\n",temp.maxvolume/(1000.*1000.*1000.));
+
+  }
 
   // Add lake fraction to Cv_sum
   (veg_con[0].Cv_sum) += temp.Cl[0];

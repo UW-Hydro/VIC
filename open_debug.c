@@ -12,6 +12,11 @@ void open_debug() {
 
   This subroutine opens all requested debugging output files.
 
+  Modifications:
+    07-May-04 Initialize debug_store_moist array when debug.PRT_MOIST
+	      is true (as well as under the other previously-defined
+	      conditions).					TJB
+
 **********************************************************************/
 
   extern debug_struct debug;
@@ -38,7 +43,7 @@ void open_debug() {
     if((debug.fg_kappa=fopen(tempname,"w"))==NULL)
       nrerror("ERROR: Unable to open VIC_kappa.out");
   }
-  if(debug.DEBUG || debug.PRT_BALANCE) {
+  if(debug.DEBUG || debug.PRT_BALANCE || debug.PRT_MOIST) {
     strcpy(tempname,debug.debug_dir);
     strcat(tempname,"/VIC_balance.out");
     if((debug.fg_balance=fopen(tempname,"w"))==NULL)

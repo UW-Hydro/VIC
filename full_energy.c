@@ -38,6 +38,7 @@ void full_energy(char                 NEWCELL,
            to surface_fluxes.  Original did not account for the fact
            that veg_con is not allocated for veg = Nveg (bare soil)
            case.  This eliminates a memory error.                  KAC
+  10-May-04 Initialize roughness to 0.0 for all veg classes.	TJB
 
 **********************************************************************/
 {
@@ -226,6 +227,7 @@ void full_energy(char                 NEWCELL,
 
       /* Set surface descriptive variables */
       overstory = FALSE;
+      roughness = 0.0;
       if ( iveg < Nveg ) {
         displacement[0] = veg_lib[veg_class].displacement[dmy[rec].month-1];
         roughness[0]    = veg_lib[veg_class].roughness[dmy[rec].month-1];

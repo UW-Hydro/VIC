@@ -59,6 +59,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    (that might be needed for the snow model) within each
 	    record, eliminating the on the fly estimations used in
 	    previous versions of the model.              Bart and Greg
+  10-May-04 Replaced rint(something) with (float)(int)(something + 0.5)
+	    to handle rounding without resorting to rint().	TJB
 
 **********************************************************************/
 {
@@ -400,7 +402,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  atmos[rec].vp[i] = forcing_data[VP][idx]*forcing_data[PRESSURE][idx]/(0.622);
 
 
-	  atmos[rec].vp[i] = (rint(atmos[rec].vp[i]*1000)/1000);
+	  atmos[rec].vp[i] = ((float)(int)(atmos[rec].vp[i]*1000 + 0.5)/1000);
 
 
 	  atmos[rec].vpd[i] = (svp(atmos[rec].air_temp[i]) 

@@ -37,6 +37,14 @@ double func_surf_energy_bal(double Ts, va_list ap)
            cumulative sum of sensible heat from the snowpack.    KAC
   11-18-02 modified to compute the effects of blowing snow on the
            surface energy balance.                               LCB
+  10-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
+	    before computing *fusion.  This fixes a bug caused when
+	    FS_ACTIVE was false and FROZEN_SOIL was true, in which
+	    non-zero ice content was calculated at the beginning of
+	    the time step but always assumed zero at the point of
+	    *fusion computation, leading to *fusion always being
+	    calculated as if ice had melted, leading to lower soil
+	    temperatures and snow packs that never melted.	TJB
 
 **********************************************************************/
 {
@@ -446,7 +454,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 				       - (TMean + *T1)) * D1 / delta_t / 2.);
     
     /* compute the change in heat due to solid - liquid phase changes */
-    *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+    if (FS_ACTIVE && options.FROZEN_SOIL)
+      *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
     
     /* if thin snowpack, compute the change in energy stored in the pack */
     if ( INCLUDE_SNOW ) {

@@ -26,19 +26,31 @@ double calc_rainonly(double air_temp,
 	   is adjusted to account for the size of mu (minimum
 	   is based of fractional precipitation with mu=1, since
 	   snow cannot be solved for when mu<1).                  KAC
+  10-May-04 Changed test
+		if ( MAX_SNOW_TEMP < MIN_RAIN_TEMP )
+	    to
+		if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP )
+            to avoid possibility of dividing by zero.		TJB
+  10-May-04 Changed test
+		else if(air_temp > MAX_SNOW_TEMP)
+	    to
+		else if(air_temp >= MAX_SNOW_TEMP)
+	    to fix situation in which, if air_temp = MAX_SNOW_TEMP,
+	    rainfall (rainonly) was set to 0 and snowfall was set
+	    to 100% of precip, causing function to fail.	TJB
 
 **********************************************************************/
 
   double rainonly;
 
   rainonly = 0.;
-  if ( MAX_SNOW_TEMP < MIN_RAIN_TEMP )
+  if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP )
     vicerror("ERROR: MAX_SNOW_TEMP must be greater then MIN_RAIN_TEMP");
   if(air_temp < MAX_SNOW_TEMP && air_temp > MIN_RAIN_TEMP) {
     rainonly = (air_temp - MIN_RAIN_TEMP)
         / (MAX_SNOW_TEMP - MIN_RAIN_TEMP) * prec;
   }
-  else if(air_temp > MAX_SNOW_TEMP) {
+  else if(air_temp >= MAX_SNOW_TEMP) {
     rainonly = prec;
   }
 

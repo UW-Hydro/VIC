@@ -10,8 +10,10 @@ void write_atmosdata(atmos_data_struct *atmos, int nrecs)
 
   This routine writes atmospheric data to the screen.
 
-  Changed to reflect the new atmos_data_struct
-  Sat Aug 28 13:28:38 1999 Bart Nijssen
+  Modifications:
+    28-Aug-99 Changed to reflect the new atmos_data_struct.     Bart Nijssen
+    07-May-04 No longer close the debug file, since the next cell
+	      must write to it.					TJB
 **********************************************************************/
 {
 #if LINK_DEBUG
@@ -38,7 +40,8 @@ void write_atmosdata(atmos_data_struct *atmos, int nrecs)
 	fprintf(debug.fg_snowstep_atmos,"\n");
       }
     }
-    fclose(debug.fg_snowstep_atmos);
+  /* don't close the debug output file, as we need to write to it for the next cell as well */
+/*  fclose(debug.fg_snowstep_atmos);*/
   }
   
   /* then write all the dt data */

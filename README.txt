@@ -47,10 +47,10 @@ Improved lake model
 		Blowing snow sublimation computed over lakes
 		Tuning of default lake profile (parabolic to square)
 
-	The new parameter BETA in LAKE.h can be used to control the shape
-	of the automatic lake profile (when the global option LAKE_PROFILE
-	is FALSE).  BETA=0.5 is strongly parabolic, while BETA=0.001 is
-	almost square (vertical walls).
+	The new parameter BETA in LAKE.h can be used to control the shape of the
+	automatic lake profile (when the global option LAKE_PROFILE is FALSE).
+	BETA=0.5 is strongly parabolic, while BETA=0.001 is almost square
+	(vertical walls).
 
 	If LAKE_PROFILE=FALSE, the lake parameter file from VIC 4.1.0 beta 2 can
 	be used without any changes.  However, if LAKE_PROFILE=TRUE, the lake
@@ -90,14 +90,15 @@ Aerodynamic resistance incorrect in output fluxes file
           aero_resist[0] : over vegetation or bare soil
           aero_resist[1] : over snow-filled overstory
           aero_resist[2] : over snow pack
-        VIC determines which element of the array to use depending on the current
-        vegetation type and whether snow is present.  In addition, in most cases,
-        VIC applies a stability correction to this aerodynamic resistance before
-        using it in flux computations.  Furthermore, when the current vegetation
-        tile contains overstory and snow is present on the ground, aero_resist[2]
-        is used for snow pack flux computations and either aero_resist[1] or
-        aero_resist[0] is used for canopy flux computations, meaning that two
-        different aerodynamic resistances are in use in the same time step.
+        VIC determines which element of the array to use depending on the
+	current vegetation type and whether snow is present.  In addition, in
+	most cases, VIC applies a stability correction to this aerodynamic
+	resistance before using it in flux computations.  Furthermore, when the
+	current vegetation tile contains overstory and snow is present on the
+	ground, aero_resist[2] is used for snow pack flux computations and
+	either aero_resist[1] or aero_resist[0] is used for canopy flux
+	computations, meaning that two different aerodynamic resistances are in
+	use in the same time step.
 
         However, VIC 4.1.0 beta r2 always wrote the uncorrected value of
         aero_resist[0] to the fluxes file.

@@ -1,6 +1,8 @@
 /**********************************************************************
                         Global Variables
 
+  $Id$
+
   29-Oct-03 Added version string and removed unused options from
 	    optstring.						TJB
 **********************************************************************/

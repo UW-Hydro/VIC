@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 /*****************************************************************************
   Function name: StabilityCorrection()
 

@@ -3,6 +3,8 @@
 #include <vicNl.h>
 #include <string.h>
 
+static char vcid[] = "$Id$";
+
 #if LAKE_MODEL
 
 lake_con_struct read_lakeparam(FILE            *lakeparam, 

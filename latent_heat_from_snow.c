@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 void latent_heat_from_snow(double  AirDens,
 			   double  Density,
 			   double  EactAir,

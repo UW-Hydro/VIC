@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
+static char vcid[] = "$Id$";
+
 double advected_sensible_heat(double SnowCoverFract, 
 			      double AirDens, 
 			      double Tair, 

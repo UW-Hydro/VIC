@@ -61,7 +61,7 @@ void compute_treeline(atmos_data_struct        *atmos,
     rec++;
   }
 
-  // Compute average annual July air temperature
+  // Compute average annual July sir temperature
   if ( AnnualCnt > 0 )
     AnnualSum /= (double)AnnualCnt;
 

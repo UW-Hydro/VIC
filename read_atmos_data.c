@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$";
+static char vcid[] = "$Id$";
 
 void read_atmos_data(FILE                 *infile,
 		     global_param_struct   global_param,

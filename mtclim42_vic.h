@@ -18,6 +18,9 @@ Sat Aug 21 16:58:43 1999
 Last Changed: Fri Apr 25 11:37:15 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
 */
 
+
+static char vcid[] = "$Id$";
+
 #define TDAYCOEF 0.45     /* daylight air temperature coefficient (dim) */
 
 #define SECPERRAD 13750.9871     /* seconds per radian of hour angle */

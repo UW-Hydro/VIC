@@ -21,6 +21,9 @@ FILE *open_state_file(global_param_struct *global,
   10-02-03 Modified to write statefile as year, month, day rather than
            day, month, year.  This makes it consistent with how the
            file is read by the model.                            KAC
+  11-May-04 Modified the statefile name to contain year, month, day
+	    rather than day, month, year.  This makes it consistent
+	    with the planned release of 4.1.0.			TJB
 
 *********************************************************************/
 {
@@ -32,7 +35,7 @@ FILE *open_state_file(global_param_struct *global,
 
   /* open state file */
   sprintf(filename,"%s_%02i%02i%04i", global->statename, 
-	  global->stateday, global->statemonth, global->stateyear);
+	  global->stateyear, global->statemonth, global->stateday);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");
   else

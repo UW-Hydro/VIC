@@ -14,6 +14,7 @@ void initialize_atmos(atmos_data_struct *temp,
 		      double             elevation,
                       double             MAX_SNOW_TEMP,
                       double             MIN_RAIN_TEMP,
+		      double             annual_prec,
 		      double            *Tfactor,
                       int                nrecs,
                       int                dt)
@@ -45,6 +46,14 @@ void initialize_atmos(atmos_data_struct *temp,
   11-18-98  Removed variable array yearly_epot, since yearly potential
             evaporation is no longer used for estimating the dew
             point temperature from daily minimum temperature.   KAC
+  11-25-98  Added second check to make sure that the difference 
+            between tmax and tmin is positive, after being reset
+            when it was equal to 0.                        DAG, EFW
+  12-1-98   Changed relative humidity computations so that they 
+            use air temperature for the time step, instead of average
+            daily temperature.  This allows relative humidity to
+            change during the day, when the time step is less than
+            daily.                                              KAC
 
 **********************************************************************/
 {
@@ -59,6 +68,7 @@ void initialize_atmos(atmos_data_struct *temp,
   int     Nyears;
   int     Ndays;
   int     Nhours;
+  int     year;
   int     day;
   int     hour;
   double  tmp_tmax, tmp_tmin;
@@ -74,7 +84,6 @@ void initialize_atmos(atmos_data_struct *temp,
   double  tair;
   double  trans_clear;
   double  qdp;
-  double *yearly_prec;
   double *day_len_hr;
 
   if(!param_set.PREC)
@@ -92,8 +101,7 @@ void initialize_atmos(atmos_data_struct *temp,
   Ndays  = (nrecs * dt) / 24;
   Nhours = 24 / dt;
   
-  yearly_prec = (double*) calloc(Nyears, sizeof(double));
-  day_len_hr  = (double*) calloc(Ndays, sizeof(double));
+  day_len_hr    = (double *) calloc(Ndays,  sizeof(double));
 
   /************************************************************
     Determine the hours of sunrise and sunset for all records 
@@ -224,6 +232,7 @@ void initialize_atmos(atmos_data_struct *temp,
     deltat = (deltat < 0) ? -deltat : deltat;
     deltat = (deltat==0) ?  (temp[rec].tmax 
 			     - temp[rec+Nhours].tmin) : deltat;
+    deltat = (deltat < 0) ? -deltat : deltat;
     temp[rec].trans = calc_trans(deltat, elevation);
     for(hour=1;hour<Nhours;hour++) temp[rec+hour].trans = temp[rec].trans;
     shortwave = calc_netshort(temp[rec].trans, dmy[rec].day_in_year, 
@@ -233,7 +242,6 @@ void initialize_atmos(atmos_data_struct *temp,
     priest = priestley(tair, shortwave);
     for(hour=0;hour<Nhours;hour++) {
       temp[rec+hour].priest = priest;
-      yearly_prec[dmy[rec].year-dmy[0].year] += temp[rec+hour].prec;
     }
   }
 
@@ -278,16 +286,21 @@ void initialize_atmos(atmos_data_struct *temp,
   else { 
     /** Estimate vapor pressure from daily tmax and tmin **/
     for(day=0;day<Ndays;day++) {
-      tair = (temp[day*Nhours].tmax + temp[day*Nhours].tmin) / 2.0;
-      qdp = svp(estimate_dew_point(dmy,yearly_prec,
-				   temp[day*Nhours].tmin,
-				   temp[day*Nhours].tmax,
-				   temp[day*Nhours].priest,
-				   day_len_hr[day]*3600.,day*Nhours));
+      if(annual_prec>0) {
+	/** Estimate dew point using Kimball's regression **/
+	qdp = svp(estimate_dew_point(annual_prec,temp[day*Nhours].tmin,
+				     temp[day*Nhours].tmax,
+				     temp[day*Nhours].priest,
+				     day_len_hr[day]*3600.,day*Nhours));
+      }
+      else {
+	/** Estimate daw point using minimum daily temperature **/
+	qdp = svp(temp[day*Nhours].tmin);
+      }
       for(hour=0;hour<Nhours;hour++) {
 	rec = day*Nhours+hour;
 
-	temp[rec].rel_humid = qdp / svp(tair) * 100.;
+	temp[rec].rel_humid = qdp / svp(temp[rec].air_temp) * 100.;
 	temp[rec].vp        = (temp[rec].rel_humid 
 				* svp(temp[rec].air_temp)) / 100.;
 	temp[rec].vpd       = (svp(temp[rec].air_temp) - temp[rec].vp);
@@ -326,7 +339,6 @@ void initialize_atmos(atmos_data_struct *temp,
     }
   }
 
-  free((char *)yearly_prec);
   free((char *)day_len_hr);
   
 }

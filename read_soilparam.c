@@ -61,6 +61,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 layer values                                    KAC
   6-6-2000      Modified to skip individual parameter reads
                 if model grid cell is not read.                 KAC
+  11-18-02      Modified to read Bart's new Arno parameters.    JA
 
 **********************************************************************/
 {
@@ -212,14 +213,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
     temp.FS_ACTIVE = (char)tempint;
     
     /* read minimum snow depth for full coverage */
-    fscanf(soilparam, "%lf", &tempdbl);
 #if SPATIAL_SNOW
+    fscanf(soilparam, "%lf", &tempdbl);
     temp.depth_full_snow_cover = tempdbl;
 #endif // SPATIAL_SNOW
     
     /* read slope of frozen soil distribution */
-    fscanf(soilparam, "%lf", &tempdbl);
 #if SPATIAL_FROST
+    fscanf(soilparam, "%lf", &tempdbl);
     temp.frost_slope = tempdbl;
 #endif // SPATIAL_FROST
     
@@ -264,6 +265,26 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
     }
 
+
+    
+    /*************************************************
+    if NEW_ARNO_TYPE == TRUE then convert the baseflow 
+    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
+    *************************************************/
+    printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
+    if(options.NEW_ARNO_TYPE) {
+      layer = options.Nlayer-1;
+      tmp = temp.Dsmax;
+      temp.Dsmax = temp.Dsmax * 
+	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
+	temp.Ds * temp.max_moist[layer];
+      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
+      temp.Ws = temp.Ws/temp.max_moist[layer];
+      printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
+    }
+    
+    
+    
     /*************************************************
       Determine Central Longitude of Current Time Zone 
     *************************************************/

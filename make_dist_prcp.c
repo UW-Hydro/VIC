@@ -17,6 +17,10 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   the intensity of incoming precipitation, and is set in the routine
   dist_prec.
 
+  modifications:
+  11-18-02 Modified to allocate vegetation variables for the 
+           wetland vegetation class.                             LCB
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -37,7 +41,7 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   temp.snow   = make_snow_data(Nitems);
   temp.energy = make_energy_bal(Nitems,Nnodes);
   for ( i = 0; i < 2; i++ ) {
-    temp.veg_var[i]  = make_veg_var(Nitems-1);
+    temp.veg_var[i]  = make_veg_var(Nitems);
     temp.cell[i]     = make_cell_data(Nitems,options.Nlayer);
   }
 

@@ -88,6 +88,7 @@ void initialize_global() {
   options.PREC_EXPT             = 0.6;
 #if SAVE_STATE
   options.INIT_STATE            = FALSE;
+  options.BINARY_STATE_FILE     = TRUE;
 #endif
 /*   options.INIT_SNOW             = FALSE; */
   options.ROOT_ZONES            = MISSING;

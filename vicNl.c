@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
           an extension of the full energy and water balance 3 layer
 	  model.                                                  KAC
   02-27-01 added controls for lake model                          KAC
-
+  11-18-02 Updated storage of lake water for water balance 
+           calculations.                                          LCB
 
 **********************************************************************/
 {
@@ -275,10 +276,14 @@ int main(int argc, char *argv[])
       }
 
 #if LAKE_MODEL
-      if ( options.LAKES ) {
-	/** COMPUTE MOSITURE STORAGE IN LAKE FRACTION **/
+      if ( options.LAKES && lake_con.Cl[0] > 0) {
+	/** COMPUTE MOISTURE STORAGE IN LAKE FRACTION **/
 	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
-				     / prcp.lake_var.sarea) * 1000.;
+				     / lake_con.basin[0]) * 1000.;
+	band = 0;
+	veg = veg_con[0].vegetat_type_num + 1;
+	for(index=0;index<options.Nlayer;index++)
+	  storage += lake_con.Cl[0] * prcp.cell[WET][veg][band].layer[index].moist; 
       }
 #endif // LAKE_MODEL
 

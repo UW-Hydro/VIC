@@ -84,15 +84,20 @@ soil_con_struct read_soilparam(FILE *soilparam)
     fscanf(soilparam, "%lf", &temp.Ksat[layer]);
   for(layer=0;layer<options.Nlayer;layer++)
     fscanf(soilparam, "%lf", &temp.phi_s[layer]);
-  for(layer=0;layer<options.Nlayer;layer++)
+  for(layer=0;layer<options.Nlayer;layer++) {
     fscanf(soilparam, "%lf", &temp.init_moist[layer]);
+    if(temp.init_moist[layer] < 0.) {
+      sprintf(ErrStr,"ERROR: Initial moisture for layer %i cannot be negative (%lf)",layer,temp.init_moist[layer]);
+      nrerror(ErrStr);
+    }
+  }
   fscanf(soilparam, "%f", &temp.elevation);
   for(layer=0;layer<options.Nlayer;layer++) {
     fscanf(soilparam, "%lf", &temp.depth[layer]);
     if(temp.depth[layer] < MINSOILDEPTH) {
-      fprintf(stderr,"Model will not function with layer depth %f < %f m.\n",
-	      temp.depth[layer],MINSOILDEPTH);
-      exit(0);
+      sprintf(ErrStr,"ERROR: Model will not function with layer %i depth %f < %f m.\n",
+	      layer,temp.depth[layer],MINSOILDEPTH);
+      nrerror(ErrStr);
     }
   }
   fscanf(soilparam, "%lf", &temp.avg_temp);
@@ -166,4 +171,5 @@ soil_con_struct read_soilparam(FILE *soilparam)
   temp.time_zone_lng = off_gmt * 360./24.;
 
   return temp;
+
 } 

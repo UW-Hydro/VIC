@@ -106,6 +106,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double         *sand;
   double         *porosity;
   double          sum_depth;
+  double          annual_prec;
   char            ErrStr[MAXSTRING];
   char            namestr[MAXSTRING];
   char            tmpstr[MAXSTRING];
@@ -117,9 +118,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       fscanf(soilparam,"%s",tmpstr);
       cnt++;
     }
-    if(cnt!=16+8*options.Nlayer) {
+    if(cnt!=17+8*options.Nlayer) {
       sprintf(ErrStr,"Not the right number of soil parameter files in the ARC/INFO file list.");
-      vicerror(ErrStr);
+      nrerror(ErrStr);
     }
     
     rewind(soilparam);
@@ -227,6 +228,12 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcpy(namestr,soilparamdir);
     strcat(namestr,tmpstr);
     temp.snow_rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
+
+    /** Read average annual precipitation **/
+    fscanf(soilparam,"%s",tmpstr);
+    strcpy(namestr,soilparamdir);
+    strcat(namestr,tmpstr);
+    annual_prec = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     sand     = (double *)calloc(options.Nlayer,sizeof(double));
     clay     = (double *)calloc(options.Nlayer,sizeof(double));

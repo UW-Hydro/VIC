@@ -63,9 +63,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 if model grid cell is not read.                 KAC
   10-Oct-03     Modified to read ARNO baseflow parameters d1, d2,
 		d3, and d4 and convert to Ds, Dsmax, Ws, and c,
-		if options.ARNO_PARAMS is TRUE.		TJB
+		if options.ARNO_PARAMS is TRUE.			TJB
   07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
+  11-May-04	Removed extraneous tmp variable.		TJB
 
 **********************************************************************/
 {
@@ -80,7 +81,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          Wcr_FRACT[MAX_LAYERS];
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
-  double          tmp;
   soil_con_struct temp; 
 
   if ( RUN_MODEL ) {
@@ -263,7 +263,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
     printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
     if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
-      tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
         temp.Ds * temp.max_moist[layer];

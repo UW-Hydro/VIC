@@ -89,6 +89,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
   10-May-04	Modified to handle Arno parameters.		TJB
+  11-May-04	Removed extraneous tmp variable.		TJB
 
 **********************************************************************/
 {
@@ -334,7 +335,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     *************************************************/
     if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
-      tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
         temp.Ds * temp.max_moist[layer];

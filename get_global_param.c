@@ -41,6 +41,7 @@ global_param_struct get_global_param(filenames_struct *names,
   01-Nov-04 Added validation for Nnodes with QUICK_FLUX option, as
 	    part of fix for QUICK_FLUX state file compatibility.TJB
   2005-03-08 Added EQUAL_AREA option.				TJB
+  2005-03-24 Added ALMA_OUTPUT option.				TJB
 
 **********************************************************************/
 {
@@ -227,6 +228,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
         else options.EQUAL_AREA = FALSE;
+      }
+      else if(strcasecmp("ALMA_OUTPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
+        else options.ALMA_OUTPUT = FALSE;
       }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

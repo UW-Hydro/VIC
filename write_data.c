@@ -62,7 +62,8 @@ void write_data(out_data_struct *out_data,
                 rather than a point - will need to decide what
                 parts of this array are important to output.    KAC
   30-Oct-03	Replaced output of sub_snow[0] in fluxes file with
-	 	sub_total.					TJB
+		sub_total.					TJB
+  2005-Mar-24 Added support for ALMA variables.			TJB
 
 **********************************************************************/
 {
@@ -215,7 +216,7 @@ void write_data(out_data_struct *out_data,
   tmp_usiptr[0] = (unsigned short int)(out_data->albedo*10000.);
   fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
   
-  /* raditaive temperature of surface */
+  /* radiative temperature of surface */
   tmp_siptr[0] = (short int)((out_data->rad_temp-KELVIN)*100.);
   fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
   
@@ -801,6 +802,319 @@ void write_data(out_data_struct *out_data,
 #endif
 
 }
+
+
+void write_data_alma(out_data_alma_struct *out_data_alma,
+		     outfiles_struct *outfiles,
+		     dmy_struct           *dmy)
+/**********************************************************************
+	write_data_alma		Ted Bohn	September 2003
+
+  This subroutine writes all ALMA-standard energy and moisture
+  balance parameters to output files.
+
+  OUTPUT:
+
+    Ascii files with the following contents:
+
+      Energy Balance (eb):
+        SWnet
+        LWnet
+        Qle
+        Qh
+        Qg
+        Qf
+        Qv
+        Qa
+        DelSurfHeat
+        DelColdCont
+
+      Water Balance (wb):
+        Snowf
+        Rainf
+        Evap
+        Qs
+        Qsb
+        Qsm
+        DelSoilMoist
+        DelSWE
+        DelSurfStor
+        DelIntercept
+
+      Surface State (sur):
+        SnowT
+        VegT
+        BaresoilT
+        AvgSurfT
+        RadT
+        Albedo
+        SWE
+        SWEVeg
+        SurfStor
+
+      Subsurface State (sub):
+        LayerDepth
+        SoilMoist
+        LSoilMoist
+        SoilTemp
+        SMLiqFrac
+        SMFrozFrac
+        SoilWet
+
+      Evaporation (eva):
+        ECanop
+        TVeg
+        ESoil
+        EWater
+        RootMoist
+        Canopint
+        SubSnow
+        SubSurf
+        ACond
+
+      Cold-Season Process (csp):
+        SnowFrac
+        IceFrac
+        IceT
+        Fdepth
+        Tdepth
+        SAlbedo
+        SnowTProf
+        SnowDepth
+
+  Modifications:
+
+**********************************************************************/
+{
+  extern option_struct options;
+
+  int index, pindex;
+  int                *tmp_iptr;
+  float              *tmp_fptr;
+
+
+  if(options.BINARY_OUTPUT) {
+
+    /* initialize pointers */
+    tmp_iptr = (int *)calloc(4,sizeof(int));
+    tmp_fptr = (float *)calloc(5*options.Nlayer+10,sizeof(float));
+
+    // Time
+    tmp_iptr[0] = dmy->year;
+    tmp_iptr[1] = dmy->month;
+    tmp_iptr[2] = dmy->day;
+    tmp_iptr[3] = dmy->hour;
+
+    /* Energy Balance Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->eb);
+    // Data
+    tmp_fptr[0] = out_data_alma->SWnet;
+    tmp_fptr[1] = out_data_alma->LWnet;
+    tmp_fptr[2] = out_data_alma->Qle;
+    tmp_fptr[3] = out_data_alma->Qh;
+    tmp_fptr[4] = out_data_alma->Qg;
+    tmp_fptr[5] = out_data_alma->Qf;
+    tmp_fptr[6] = out_data_alma->Qv;
+    tmp_fptr[7] = out_data_alma->Qa;
+    tmp_fptr[8] = out_data_alma->DelSurfHeat;
+    tmp_fptr[9] = out_data_alma->DelColdCont;
+    fwrite(tmp_fptr,10,sizeof(float),outfiles->eb);
+
+    /* Water Balance Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->wb);
+    // Data
+    tmp_fptr[0] = out_data_alma->Snowf;
+    tmp_fptr[1] = out_data_alma->Rainf;
+    tmp_fptr[2] = out_data_alma->Evap;
+    tmp_fptr[3] = out_data_alma->Qs;
+    tmp_fptr[4] = out_data_alma->Qsb;
+    tmp_fptr[5] = out_data_alma->Qsm;
+    tmp_fptr[6] = out_data_alma->DelSoilMoist;
+    tmp_fptr[7] = out_data_alma->DelSWE;
+    tmp_fptr[8] = out_data_alma->DelSurfStor;
+    tmp_fptr[9] = out_data_alma->DelIntercept;
+    fwrite(tmp_fptr,10,sizeof(float),outfiles->wb);
+
+    /* Surface State Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->sur);
+    // Data
+    tmp_fptr[0] = out_data_alma->SnowT;
+    tmp_fptr[1] = out_data_alma->VegT;
+    tmp_fptr[2] = out_data_alma->BaresoilT;
+    tmp_fptr[3] = out_data_alma->AvgSurfT;
+    tmp_fptr[4] = out_data_alma->RadT;
+    tmp_fptr[5] = out_data_alma->Albedo;
+    tmp_fptr[6] = out_data_alma->SWE;
+    tmp_fptr[7] = out_data_alma->SWEVeg;
+    tmp_fptr[8] = out_data_alma->SurfStor;
+    fwrite(tmp_fptr,9,sizeof(float),outfiles->sur);
+
+    /* Subsurface State Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->sub);
+    // Data
+    pindex = 0;
+    for (index=0; index<options.Nlayer; index++) {
+      tmp_fptr[pindex++] = out_data_alma->HLayerDepth[index];
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      tmp_fptr[pindex++] = out_data_alma->SoilMoist[index];
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      tmp_fptr[pindex++] = out_data_alma->SoilTemp[index];
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      tmp_fptr[pindex++] = out_data_alma->SMLiqFrac[index];
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      tmp_fptr[pindex++] = out_data_alma->SMFrozFrac[index];
+    }
+    tmp_fptr[pindex] = out_data_alma->SoilWet;
+    fwrite(tmp_fptr,pindex+1,sizeof(float),outfiles->sub);
+
+    /* Evaporation Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->eva);
+    // Data
+    tmp_fptr[0] = out_data_alma->ECanop;
+    tmp_fptr[1] = out_data_alma->TVeg;
+    tmp_fptr[2] = out_data_alma->ESoil;
+    tmp_fptr[3] = out_data_alma->EWater;
+    tmp_fptr[4] = out_data_alma->RootMoist;
+    tmp_fptr[5] = out_data_alma->Canopint;
+    tmp_fptr[6] = out_data_alma->SubSnow;
+    tmp_fptr[7] = out_data_alma->SubSurf;
+    tmp_fptr[8] = out_data_alma->ACond;
+    fwrite(tmp_fptr,9,sizeof(float),outfiles->eva);
+
+    /* Cold-Season Process Variables */
+    // Time
+    fwrite(tmp_iptr,4,sizeof(int),outfiles->csp);
+    // Data
+    pindex = 0;
+    tmp_fptr[pindex++] = out_data_alma->SnowFrac;
+    tmp_fptr[pindex++] = out_data_alma->IceFrac;
+    tmp_fptr[pindex++] = out_data_alma->IceT;
+    for (index=0; index<MAX_FRONTS; index++) {
+      tmp_fptr[pindex++] = out_data_alma->Fdepth[index];
+    }
+    for (index=0; index<MAX_FRONTS; index++) {
+      tmp_fptr[pindex++] = out_data_alma->Tdepth[index];
+    }
+    tmp_fptr[pindex++] = out_data_alma->SAlbedo;
+    tmp_fptr[pindex++] = out_data_alma->SnowTProf;
+    tmp_fptr[pindex] = out_data_alma->SnowDepth;
+    fwrite(tmp_fptr,pindex+1,sizeof(float),outfiles->csp);
+
+    free((char *)tmp_iptr);
+    free((char *)tmp_fptr);
+
+  }
+  else {
+
+    /* Energy Balance Variables */
+    fprintf(outfiles->eb  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles->eb, " \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e\n",
+      out_data_alma->SWnet,
+      out_data_alma->LWnet,
+      out_data_alma->Qle,
+      out_data_alma->Qh,
+      out_data_alma->Qg,
+      out_data_alma->Qf,
+      out_data_alma->Qv,
+      out_data_alma->Qa,
+      out_data_alma->DelSurfHeat,
+      out_data_alma->DelColdCont);
+
+    /* Water Balance Variables */
+    fprintf(outfiles->wb  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles->wb, " \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e\n",
+      out_data_alma->Snowf,
+      out_data_alma->Rainf,
+      out_data_alma->Evap,
+      out_data_alma->Qs,
+      out_data_alma->Qsb,
+      out_data_alma->Qsm,
+      out_data_alma->DelSoilMoist,
+      out_data_alma->DelSWE,
+      out_data_alma->DelSurfStor,
+      out_data_alma->DelIntercept);
+
+    /* Surface State Variables */
+    fprintf(outfiles->sur  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles->sur, " \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e\n",
+      out_data_alma->SnowT,
+      out_data_alma->VegT,
+      out_data_alma->BaresoilT,
+      out_data_alma->AvgSurfT,
+      out_data_alma->RadT,
+      out_data_alma->Albedo,
+      out_data_alma->SWE,
+      out_data_alma->SWEVeg,
+      out_data_alma->SurfStor);
+
+    /* Subsurface State Variables */
+    fprintf(outfiles->sub  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    for (index=0; index<options.Nlayer; index++) {
+      fprintf(outfiles->sub, " \t%.7e", out_data_alma->HLayerDepth[index]);
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      fprintf(outfiles->sub, " \t%.7e", out_data_alma->SoilMoist[index]);
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      fprintf(outfiles->sub, " \t%.7e", out_data_alma->SoilTemp[index]);
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      fprintf(outfiles->sub, " \t%.7e", out_data_alma->SMLiqFrac[index]);
+    }
+    for (index=0; index<options.Nlayer; index++) {
+      fprintf(outfiles->sub, " \t%.7e" , out_data_alma->SMFrozFrac[index]);
+    }
+    fprintf(outfiles->sub, " \t%.7e\n", out_data_alma->SoilWet);
+
+    /* Evaporation Variables */
+    fprintf(outfiles->eva  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles->eva, " \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e\n",
+      out_data_alma->ECanop,
+      out_data_alma->TVeg,
+      out_data_alma->ESoil,
+      out_data_alma->EWater,
+      out_data_alma->RootMoist,
+      out_data_alma->Canopint,
+      out_data_alma->SubSnow,
+      out_data_alma->SubSurf,
+      out_data_alma->ACond);
+
+    /* Cold-Season Process Variables */
+    fprintf(outfiles->csp  ,"%04i\t%02i\t%02i\t%02i",
+            dmy->year, dmy->month, dmy->day, dmy->hour);
+    fprintf(outfiles->csp, " \t%.7e \t%.7e \t%.7e",
+      out_data_alma->SnowFrac,
+      out_data_alma->IceFrac,
+      out_data_alma->IceT);
+    for (index=0; index<MAX_FRONTS; index++) {
+      fprintf(outfiles->csp, " \t%.7e", out_data_alma->Fdepth[index]);
+    }
+    for (index=0; index<MAX_FRONTS; index++) {
+      fprintf(outfiles->csp, " \t%.7e", out_data_alma->Tdepth[index]);
+    }
+    fprintf(outfiles->csp, " \t%.7e \t%.7e \t%.7e\n",
+      out_data_alma->SAlbedo,
+      out_data_alma->SnowTProf,
+      out_data_alma->SnowDepth);
+
+  }
+
+}
+
 
 void calc_water_balance_error(int    rec,
 			      double inflow,

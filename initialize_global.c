@@ -61,6 +61,11 @@ void initialize_global() {
   param_set.PREC         = FALSE;
   param_set.WIND         = FALSE;
   param_set.DENSITY      = FALSE;
+  param_set.RAINF        = FALSE;
+  param_set.SNOWF        = FALSE;
+  param_set.TAIR         = FALSE;
+  param_set.PSURF        = FALSE;
+  param_set.QAIR         = FALSE;
 
   Modifications:
   11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file 
@@ -72,7 +77,7 @@ void initialize_global() {
   10-May-04 Initialize ARC_SOIL, COMPRESS, and ARNO_PARAMS to FALSE.
 	    Also changed limit on loop over forcing types from
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
-  2005-03-08 Added EQUAL_AREA option.				TJB
+  2005-Mar-24 Modified to handle ALMA-specific global options.	TJB
 
 *********************************************************************/
 
@@ -86,6 +91,7 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
+  options.ALMA_OUTPUT           = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
@@ -145,7 +151,12 @@ void initialize_global() {
   param_set.TYPE[DENSITY].SUPPLIED    = FALSE;
   param_set.TYPE[PREC].SUPPLIED       = FALSE;
   param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
+  param_set.TYPE[PSURF].SUPPLIED      = FALSE;
+  param_set.TYPE[QAIR].SUPPLIED       = FALSE;
+  param_set.TYPE[RAINF].SUPPLIED      = FALSE;
   param_set.TYPE[SHORTWAVE].SUPPLIED  = FALSE;
+  param_set.TYPE[SNOWF].SUPPLIED      = FALSE;
+  param_set.TYPE[TAIR].SUPPLIED       = FALSE;
   param_set.TYPE[TMAX].SUPPLIED       = FALSE;
   param_set.TYPE[TMIN].SUPPLIED       = FALSE;
   param_set.TYPE[TSKC].SUPPLIED       = FALSE;

@@ -18,6 +18,7 @@ void close_files(infiles_struct   *inf,
 	   was added to save space when using large volumes
 	   of data.						KAC
   02-27-01 Now closes files opened for lake model applications  KAC
+  11-18-02 Now closes lake debugging file.                      LCB
 
 **********************************************************************/
 {
@@ -87,6 +88,9 @@ void close_files(infiles_struct   *inf,
   }
   if(debug.DEBUG || debug.PRT_KAPPA) {
     fclose(debug.fg_kappa);
+  }
+  if(debug.DEBUG || debug.PRT_LAKE) {
+    fclose(debug.fg_lake);
   }
   if(debug.DEBUG || debug.PRT_BALANCE) {
     fclose(debug.fg_balance);

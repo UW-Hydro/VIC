@@ -151,7 +151,8 @@ Validation of initial soil moisture
 	Added check to read_soilparam.c and read_soilparam_arc.c to make sure
 	that wilting point is greater than residual moisture.  Changed lower
 	limit on initial soil moisture to be residual moisture rather than
-	wilting point.  Made validation statements clearer.
+	wilting point.  Made validation statements clearer.  Validation does
+	not occur if soil moisture will be read from a model state file.
 	(found and fixed by Chunmei Zhu, Alan Hamlet, and Ted Bohn)
 
 	NOTE: Soil parameter files containing Wpwp_FRACT and resid_moist

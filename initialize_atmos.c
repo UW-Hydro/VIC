@@ -256,9 +256,6 @@ void initialize_atmos(atmos_data_struct *temp,
     }
   }
 
-  if(!param_set.SHORTWAVE && !param_set.LONGWAVE && !param_set.TSKC && dt<24)
-    param_set.TSKC=1;
-
   trans_clear = A1_TRANS + A2_TRANS * elevation;
 
   /*************************************************

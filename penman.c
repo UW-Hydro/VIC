@@ -91,6 +91,6 @@ double penman(double rad, double vpd, double ra, double rs, double rarc,
     
   evap = (slope * rad + r_air * CP_PM * vpd/ra)/
          (lv * (slope + gamma * (1 + (rc + rarc)/ra))) * SEC_PER_DAY;
-
+  if(vpd>0.0 && evap<0.0)evap=0.0;
   return evap;
 }

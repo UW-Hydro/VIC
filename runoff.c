@@ -66,6 +66,13 @@ void runoff(layer_data_struct *layer_wet,
 		Added check to make sure baseflow doesn't exceed
 		difference between liquid moisture and field
 		capacity.					TJB
+    17-May-04	Changed block that handles baseflow when soil moisture
+		drops below residual moisture.  Now, the block is only
+		entered if baseflow > 0 and soil moisture < residual,
+		and the amount of water taken out of baseflow and given
+		to the soil cannot exceed baseflow.  In addition, error
+		messages are no longer printed, since it isn't an error
+		to be in that block.				TJB
 
 **********************************************************************/
 {  
@@ -434,15 +441,18 @@ void runoff(layer_data_struct *layer_wet,
 	/** Check Lower Sub-Layer Moistures **/
 	tmp_moist = 0;
 	
-	if((moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
-	  /* soil moisture is below minimum */
-	  fprintf(stderr,"Warning: total soil moisture in layer [%d] < residual moisture; adjusting baseflow to compensate\n",lindex);
-	  dt_baseflow  += (moist[lindex] + ice[lindex] - resid_moist[lindex]);
-	  if (dt_baseflow < 0.) {
-	    dt_baseflow = 0.;
-	    fprintf(stderr,"Warning: baseflow < 0; setting baseflow to 0.\n");
+        /* If baseflow > 0 and soil moisture has gone below residual,
+         * take water out of baseflow and add back to soil to make up the difference
+         * Note: if baseflow is small, soil moisture may still be < residual after this */
+	if(dt_baseflow > 0 && (moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
+          if ( dt_baseflow > resid_moist[lindex] - (moist[lindex]+ice[lindex]) ) {
+            dt_baseflow -= resid_moist[lindex] - (moist[lindex]+ice[lindex]);
+            moist[lindex] += resid_moist[lindex] - (moist[lindex]+ice[lindex]);
 	  }
-	  moist[lindex]  = resid_moist[lindex] - ice[lindex];
+          else {
+            moist[lindex] += dt_baseflow;
+            dt_baseflow = 0.0;
+          }
 	}
 
 	if((moist[lindex]+ice[lindex]) > max_moist[lindex]) {

@@ -87,6 +87,13 @@ Modifications:
 	    Added check to make sure baseflow doesn't exceed
 	    difference between liquid moisture and field
 	    capacity.						TJB
+	    Changed block that handles baseflow when soil moisture
+	    drops below residual moisture.  Now, the block is only
+	    entered if baseflow > 0 and soil moisture < residual,
+	    and the amount of water taken out of baseflow and given
+	    to the soil cannot exceed baseflow.  In addition, error
+	    messages are no longer printed, since it isn't an error
+	    to be in that block.				TJB
 	soil_conduction.c:
 	    (Port from 4.1.0)
 	    set_node_parameters(): Modified to correct differences

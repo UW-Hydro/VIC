@@ -6,7 +6,8 @@ static char vcid[] = "$Id$";
 
 void initialize_veg(veg_var_struct      **veg_var,
 		    veg_con_struct       *veg_con,
-		    global_param_struct   *gp)
+		    global_param_struct   *gp,
+		    int                    Nveg)
 /**********************************************************************
   initialize_veg		Dag Lohmann	 January 1996
 
@@ -15,6 +16,10 @@ void initialize_veg(veg_var_struct      **veg_var,
   Modifications:
   07-13-98 modified to initialize vegetation structure for all 
            defined elevation bands                                 KAC
+  11-18-02 modified to get the maximum number of vegetation types
+           passed to it.  This allows the maximum number of vegetation
+           types to include the wetland vegetation fraction when the 
+           lake model is active.                                  LCB
 
 **********************************************************************/
 {
@@ -22,7 +27,7 @@ void initialize_veg(veg_var_struct      **veg_var,
 
   int i, j;
 
-  for ( i = 0 ; i < veg_con[0].vegetat_type_num ; i++) {
+  for ( i = 0 ; i < Nveg ; i++) {
     for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
       veg_var[i][j].Wdew = 0.0;
       veg_var[i][j].throughfall = 0.0;

@@ -21,6 +21,7 @@ void put_data(dist_prcp_struct  *prcp,
 
 **********************************************************************/
 {
+  extern veg_lib_struct  *veg_lib;
   extern option_struct    options;
   extern debug_struct     debug;
 
@@ -180,6 +181,26 @@ void put_data(dist_prcp_struct  *prcp,
 	    * AreaFract[band];
 	  
 	}
+	else {
+	  if(options.SNOW_MODEL && snow[veg][band].snow) { 
+	    out_data->albedo    += snow[veg][band].albedo
+	      * veg_con[veg].Cv * AreaFract[band];
+	    out_data->net_short += atmos->shortwave
+	      * (1.0 - snow[veg][band].albedo)
+	      * veg_con[veg].Cv * AreaFract[band];
+	  }
+	  else {
+	    out_data->albedo    
+	      += veg_lib[veg_con[veg].veg_class].albedo[dmy->month-1]
+	      * veg_con[veg].Cv * AreaFract[band];
+	    out_data->net_short += atmos->shortwave
+	      * (1.0 - veg_lib[veg_con[veg].veg_class].albedo[dmy->month-1])
+	      * veg_con[veg].Cv * AreaFract[band];
+	  }
+	  out_data->net_long  += (atmos->longwave - STEFAN_B 
+				  * pow(atmos->air_temp+KELVIN,4.0))
+	    * veg_con[veg].Cv * AreaFract[band];
+	}
 	if(options.FULL_ENERGY || options.SNOW_MODEL) {
 	  out_data->swq[0]         
 	    += snow[veg][band].swq * veg_con[veg].Cv 
@@ -335,6 +356,26 @@ void put_data(dist_prcp_struct  *prcp,
 	rad_temp            += pow((273.15+energy[vegnum][band].T[0]),4.0) 
 	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
 	
+      }
+      else {
+	if(options.SNOW_MODEL && snow[vegnum][band].snow) { 
+	  out_data->albedo    += snow[vegnum][band].albedo
+	    * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
+	  out_data->net_short += atmos->shortwave
+	    * (1.0 - snow[vegnum][band].albedo)
+	    * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
+	}
+	else {
+	  out_data->albedo    
+	    += atmos->albedo
+	    * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
+	  out_data->net_short += atmos->shortwave
+	    * (1.0 - atmos->albedo)
+	    * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
+	}
+	out_data->net_long  += (atmos->longwave - STEFAN_B 
+				* pow(atmos->air_temp+KELVIN,4.0))
+	  * (1.0 - veg_con[0].Cv_sum) * AreaFract[band];
       }
       if(options.FULL_ENERGY || options.SNOW_MODEL) {
 	out_data->swq[0]             += snow[vegnum][band].swq 

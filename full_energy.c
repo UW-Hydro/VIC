@@ -250,8 +250,6 @@ void full_energy(int rec,
 			    soil_con, &moist, &ice0);
       }
 
-/*       energy[iveg].longwave = atmos->longwave; */
-  
       /** Compute Bare Soil (free of snow) Albedo **/
       if(iveg!=Nveg) bare_albedo 
 		       = veg_lib[veg_class].albedo[dmy[rec].month-1];
@@ -309,7 +307,8 @@ void full_energy(int rec,
 	    else sveg=iveg;
 	    Melt[band*2] 
 	      = solve_snow(&snow[iveg][band],cell[WET][iveg][band].layer,
-			   cell[DRY][iveg][band].layer,&veg_var[WET][sveg][band],
+			   cell[DRY][iveg][band].layer,
+			   &veg_var[WET][sveg][band],
 			   &veg_var[DRY][sveg][band],dmy,band_energy,soil_con,
 			   overstory,&SNOW,&SOLVE_SURF_ENERGY,gp.dt,rec,
 			   veg_class,iveg,Nveg,band,dmy[rec].hour,
@@ -557,7 +556,7 @@ void full_energy(int rec,
 			tmp_Wdew[j] = veg_var[j][iveg][band].Wdew;
 			rainfall[j] 
 			  = prec[j+iveg*2] * soil_con.Pfactor[band] 
-			  * (double)SNOW_STEP /(double)gp.dt; 
+			  * (double)SNOW_STEP / (double)gp.dt; 
 		      }
 		      Evap = canopy_evap(cell[WET][iveg][band].layer,
 					 cell[DRY][iveg][band].layer,
@@ -567,7 +566,8 @@ void full_energy(int rec,
 					 prcp[0].mu[iveg],tmp_Wdew,
 					 atmos->air_temp
 					 + soil_con.Tfactor[band],
-					 (double)gp.dt,atmos->rad,atmos->vpd,
+					 (double)SNOW_STEP,atmos->rad,
+					 atmos->vpd,
 					 atmos->net_short,atmos->air_temp
 					 + soil_con.Tfactor[band],
 					 cell[WET][iveg][0].aero_resist[0],
@@ -590,10 +590,12 @@ void full_energy(int rec,
 				       + soil_con.Tfactor[band],
 				       displacement, roughness, ref_height, 
 				       cell[WET][iveg][0].aero_resist[0], 
-				       (double)gp.dt,
+				       (double)SNOW_STEP,
 				       prcp[0].mu[iveg]);
 		      for(j=0;j<Ndist;j++) {
-			ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band];
+			ppt[band*2+j] = prec[iveg*2+j] 
+			  * soil_con.Pfactor[band] 
+			  * (double)SNOW_STEP / (double)gp.dt;
 			veg_var[j][iveg][band].throughfall = ppt[band*2+j]; 
 		      }
 		    }  /** end if vegetation not growing **/
@@ -610,9 +612,10 @@ void full_energy(int rec,
 				     atmos->air_temp, displacement, roughness, 
 				     ref_height, 
 				     cell[WET][iveg][0].aero_resist[0], 
-				     (double)gp.dt,prcp[0].mu[iveg]);
+				     (double)SNOW_STEP,prcp[0].mu[iveg]);
 		    for(j=0;j<Ndist;j++) {
-		      ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band];
+		      ppt[band*2+j] = prec[iveg*2+j] * soil_con.Pfactor[band]
+			* (double)SNOW_STEP / (double)gp.dt;
 		    }
 		  }
 		} /* End Computations for Bare Ground */

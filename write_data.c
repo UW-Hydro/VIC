@@ -215,12 +215,10 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
     tmp_fptr[0] = (float)out_data->Wdew;
     fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-    tmp_fptr[0] = (float)out_data->moist[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-    tmp_fptr[0] = (float)out_data->moist[1];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
-    tmp_fptr[0] = (float)out_data->moist[2];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    for(j=0;j<options.Nlayer;j++) {    
+      tmp_fptr[0] = (float)out_data->moist[j];
+      fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
+    }
     if(options.FULL_ENERGY) {
       tmp_fptr[0] = (float)out_data->rad_temp;
       fwrite(tmp_fptr,1,sizeof(float),outfiles.fluxes);
@@ -244,11 +242,14 @@ void write_data(out_data_struct *out_data,
   }
   else if(options.FULL_ENERGY) {
     /***** Write ASCII energy balance fluxes file *****/
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
 	    dmy->year, dmy->month, dmy->day, dmy->hour,
 	    out_data->prec, out_data->evap, out_data->runoff,
-	    out_data->baseflow, out_data->Wdew, out_data->moist[0],
-	    out_data->moist[1], out_data->moist[2], out_data->rad_temp,
+	    out_data->baseflow, out_data->Wdew);
+    for(j=0;j<options.Nlayer;j++) 
+      fprintf(outfiles.fluxes,"\t%.4lf", out_data->moist[j]);
+    fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
+	    out_data->rad_temp,
 	    out_data->net_short, out_data->r_net, out_data->latent,
 	    out_data->latent_canop, out_data->latent_trans,
 	    out_data->latent_bare, out_data->latent_pet, 
@@ -258,11 +259,13 @@ void write_data(out_data_struct *out_data,
   }
   else {
     /***** Write ASCII Water Balance Fluxes File *****/
-    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
+    fprintf(outfiles.fluxes,"%04i\t%02i\t%02i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf",
 	    dmy->year, dmy->month, dmy->day,
 	    out_data->prec, out_data->evap, out_data->runoff, 
-	    out_data->baseflow, out_data->Wdew, out_data->moist[0], 
-	    out_data->moist[1], out_data->moist[2],
+	    out_data->baseflow, out_data->Wdew);
+    for(j=0;j<options.Nlayer;j++) 
+      fprintf(outfiles.fluxes,"\t%.4lf", out_data->moist[j]);
+    fprintf(outfiles.fluxes,"\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t\n",
 	    out_data->net_short, out_data->r_net, out_data->latent_canop, 
 	    out_data->latent_trans, out_data->latent_bare, 
 	    out_data->latent_pet, out_data->latent_pet_mm, 

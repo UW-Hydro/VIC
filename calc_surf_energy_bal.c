@@ -252,7 +252,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				       layer_wet,layer_dry,
 				       veg_var_wet,veg_var_dry,VEG,
 				       (int)CALC_EVAP,
-				       veg_class,dmy.month,Nnodes);
+				       veg_class,dmy.month,iveg,Nnodes);
   }
 
   /**************************************************
@@ -561,13 +561,16 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   write_vegvar(veg_var_wet[0],iveg);
   if(options.DIST_PRCP) 
     write_vegvar(veg_var_dry[0],iveg);
-  fprintf(stderr,"Node\tT\tTnew\tdz\tkappa\tCs\tmoist\texpt\tmax_moist\tice\n");
-  for(i=0;i<Nnodes;i++) 
-    fprintf(stderr,"%i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
-	    i,T_node[i],Tnew_node[i],dz_node[i],kappa_node[i],Cs_node[i],
-	    moist_node[i],expt_node[i],max_moist_node[i],ice_node[i]);
+
+  if(options.FROZEN_SOIL) {
+    fprintf(stderr,"Node\tT\tTnew\tdz\tkappa\tCs\tmoist\texpt\tmax_moist\tice\n");
+    for(i=0;i<Nnodes;i++) 
+      fprintf(stderr,"%i\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\t%.4lf\n",
+	      i,T_node[i],Tnew_node[i],dz_node[i],kappa_node[i],Cs_node[i],
+	      moist_node[i],expt_node[i],max_moist_node[i],ice_node[i]);
+  }
 
   vicerror("Finished writing calc_surf_energy_bal variables");
-
+    
 }
 

@@ -259,10 +259,10 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("FALSE",flgstr)==0) options.BINARY_STATE_FILE=FALSE;
 	else options.BINARY_STATE_FILE=TRUE;
       }
-      else if (strcasecmp("NEW_ARNO_TYPE", optstr)==0) {
+      else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
 	sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.NEW_ARNO_TYPE=TRUE;
-        else options.NEW_ARNO_TYPE = FALSE;
+        if(strcasecmp("TRUE",flgstr)==0) options.ARNO_PARAMS=TRUE;
+        else options.ARNO_PARAMS = FALSE;
       }
 #if SAVE_STATE
       else if(strcasecmp("STATENAME",optstr)==0) {

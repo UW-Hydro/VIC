@@ -189,7 +189,7 @@ typedef struct {
 			    balance */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
   char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
-  char   NEW_ARNO_TYPE;  /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
+  char   ARNO_PARAMS;    /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   LAKES;          /* TRUE = use lake energy code */
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */

@@ -61,6 +61,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 layer values                                    KAC
   6-6-2000      Modified to skip individual parameter reads
                 if model grid cell is not read.                 KAC
+  xx-xx-01      Modified to read in spatial snow and frost 
+                parameters.                                     KAC
   11-18-02      Modified to read Bart's new Arno parameters.    JA
 
 **********************************************************************/

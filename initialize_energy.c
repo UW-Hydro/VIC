@@ -287,19 +287,22 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	energy[veg][band].T[1] = linear_interp(soil_con[0].depth[0],0.,
 					       dp,surf_temp,
 					       soil_con[0].avg_temp);
+	energy[veg][band].T[1] = exp_interp(soil_con[0].depth[0],0.,
+					       dp,surf_temp,
+					       soil_con[0].avg_temp);
 	
 	/************************************************
 	  Initialize Soil Layer Depths and Temperatures
 	************************************************/
 	Zsum = soil_con[0].depth[0];
-	if(dp <= Ltotal) {
+/* 	if(dp <= Ltotal) { */
 	  tmpdp  = dp - soil_con[0].depth[0] * 1.5;
 	  tmpadj = 2.5;
-	}
-	else {
-	  tmpdp  = Ltotal - soil_con[0].depth[0] * 1.5;
-	  tmpadj = 3.5;
-	}
+/* 	} */
+/* 	else { */
+/* 	  tmpdp  = Ltotal - soil_con[0].depth[0] * 1.5; */
+/* 	  tmpadj = 3.5; */
+/* 	} */
 	for(index=2;index<Nnodes-1;index++) {
 	  energy[veg][band].dz[index] = tmpdp/(((double)Nnodes-tmpadj));
 	  Zsum += (energy[veg][band].dz[index]
@@ -307,6 +310,9 @@ void initialize_energy_bal (energy_bal_struct  **energy,
 	  energy[veg][band].T[index] = linear_interp(Zsum,0.,soil_con[0].dp,
 						     surf_temp,
 						     soil_con[0].avg_temp);
+	  energy[veg][band].T[index] = exp_interp(Zsum,0.,soil_con[0].dp,
+						  surf_temp,
+						  soil_con[0].avg_temp);
 	}
 	energy[veg][band].dz[Nnodes-1] = (dp - Zsum 
 					  - energy[veg][band].dz[Nnodes-2] 

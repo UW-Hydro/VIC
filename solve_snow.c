@@ -35,6 +35,7 @@ double solve_snow(char                 overstory,
 		  double              *ShortUnderIn, // surfave incoming SW
 		  double              *Torg_snow,
 		  double              *aero_resist,
+		  double              *aero_resist_used,
 		  double              *coverage, // best guess snow coverage
 		  double              *delta_coverage, // cover fract change
 		  double              *delta_snow_heat, // change in pack heat
@@ -111,6 +112,8 @@ double solve_snow(char                 overstory,
   05-Aug-04 Removed lag_one, sigma_slope, and fetch from argument
 	    list since they were only used in call to snow_melt(),
 	    which no longer needs them.				TJB
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.				TJB
 
 *********************************************************************/
 
@@ -239,7 +242,7 @@ double solve_snow(char                 overstory,
 		       &energy->canopy_latent_sub, LongUnderIn, 
 		       &energy->canopy_refreeze, &energy->NetLongOver, 
 		       &energy->NetShortOver, 
-		       aero_resist, rainfall, 
+		       aero_resist, aero_resist_used, rainfall, 
 		       &energy->canopy_sensible, 
 		       snowfall, &energy->Tfoliage, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
@@ -351,7 +354,7 @@ double solve_snow(char                 overstory,
 #endif
 
       snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
-		roughness, aero_resist[*UnderStory], 
+		roughness, aero_resist[*UnderStory], aero_resist_used,
 		air_temp, *coverage, (double)dt * SECPHOUR, density, 
 		displacement[*UnderStory], snow_grnd_flux, 
 		*LongUnderIn, pressure, rainfall[WET], snowfall[WET], 

@@ -32,7 +32,9 @@ static char vcid[] = "$Id$";
     double delta_t               - Model timestep (secs)
     double z2           - Reference height (m) 
     double displacement          - Displacement height (m)
-    double aero_resist  - Aerodynamic resistance (uncorrected for
+    double aero_resist           - Aerodynamic resistance (uncorrected for
+                                   stability) (s/m)
+    double *aero_resist_used     - Aerodynamic resistance (corrected for
                                    stability) (s/m)
     double atmos->density        - Density of air (kg/m3)
     double atmos->vp             - Actual vapor pressure of air (Pa) 
@@ -106,6 +108,8 @@ static char vcid[] = "$Id$";
 	    These warnings were not a sign of any failures, and served
 	    only to confuse users and take up valuable space in the
 	    output display.					TJB
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.				TJB
 
 *****************************************************************************/
 void snow_melt(double            Le, 
@@ -114,6 +118,7 @@ void snow_melt(double            Le,
 	       double            Tgrnd,
 	       double            *Z0,  // roughness
                double            aero_resist,  // aerodynamic resistance
+               double            *aero_resist_used,  // stability-corrected aerodynamic resistance
                double            air_temp,  // air temperature
 	       double            coverage, // snowpack cover fraction
 	       double            delta_t,  // time step in secs
@@ -237,7 +242,7 @@ void snow_melt(double            Le,
   
   /* Calculate the surface energy balance for snow_temp = 0.0 */
   
-  Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist,
+  Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist, aero_resist_used,
 				   displacement, z2, Z0, 
 				   density, vp, LongSnowIn, Le, pressure,
 				   RainFall, NetShortSnow, vpd, 
@@ -338,7 +343,7 @@ void snow_melt(double            Le,
 	snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				     (double)(snow->surf_temp+SNOW_DT),
 				     ErrorString, SnowPackEnergyBalance, 
-				     delta_t, aero_resist,
+				     delta_t, aero_resist, aero_resist_used,
 				     displacement, z2, Z0, 
 				     density, vp, LongSnowIn, Le, pressure,
 				     RainFall, NetShortSnow, vpd, 
@@ -361,7 +366,7 @@ void snow_melt(double            Le,
       }
       else {
 	Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, 
-					 delta_t, aero_resist,
+					 delta_t, aero_resist, aero_resist_used,
 					 displacement, z2, Z0, 
 					 density, vp, LongSnowIn, Le, pressure,
 					 RainFall, NetShortSnow, vpd, 

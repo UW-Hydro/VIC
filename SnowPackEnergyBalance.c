@@ -75,7 +75,8 @@ static char vcid[] = "$Id$";
 	    LastSnow, and SnowDepth from argument list, since they were only
 	    needed to pass to latent_heat_from_snow(), which no longer needs
 	    them.							TJB
-
+  28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
+	    calculations.						TJB
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
 {
@@ -89,6 +90,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* General Model Parameters */
   double Dt;                      /* Model time step (sec) */
   double Ra;                      /* Aerodynamic resistance (s/m) */
+  double *Ra_used;                /* Aerodynamic resistance (s/m) after stability correction */
 
   /* Vegetation Parameters */
   double Displacement;            /* Displacement height (m) */
@@ -171,8 +173,9 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
      */
 
   /* General Model Parameters */
-  Dt = (double) va_arg(ap, double);
-  Ra = (double) va_arg(ap, double);
+  Dt           = (double) va_arg(ap, double);
+  Ra           = (double) va_arg(ap, double);
+  Ra_used      = (double *) va_arg(ap, double *);
 
   /* Vegetation Parameters */
   Displacement = (double) va_arg(ap, double);
@@ -231,9 +234,9 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
 
   if (Wind > 0.0) 
-    Ra /= StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]); 
+    *Ra_used = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]); 
   else
-    Ra = HUGE_RESIST;
+    *Ra_used = HUGE_RESIST;
 
   /* Calculate longwave exchange and net radiation */
 
@@ -243,7 +246,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tair - TMean) / Ra;
+  *SensibleHeat = AirDens * Cp * (Tair - TMean) / *Ra_used;
 
 #if SPATIAL_SNOW  
   /* Add in Sensible heat flux turbulent exchange from surrounding 
@@ -251,7 +254,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   if ( SnowCoverFract > 0 ) {
     *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract, 
 						     AirDens, Tair, TGrnd, 
-						     Ra);
+						     *Ra_used);
   }
   else (*AdvectedSensibleHeat) = 0;
 #else
@@ -268,7 +271,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate the saturated vapor pressure in the snow pack, 
      (Equation 3.32, Bras 1990) */
 
-  latent_heat_from_snow(AirDens, EactAir, Lv, Press, Ra, TMean, Vpd,
+  latent_heat_from_snow(AirDens, EactAir, Lv, Press, *Ra_used, TMean, Vpd,
 			LatentHeat, LatentHeatSub, &VaporMassFlux, &BlowingMassFlux, 
 			&SurfaceMassFlux);
 

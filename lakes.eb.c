@@ -40,6 +40,8 @@ void lakemain(atmos_data_struct  *atmos,
            and to make the lake algorithm interact with the wetland 
            algorithm.                                          LCB
   27-Aug-04 Added logic to handle blowing_flux and surface_flux.	TJB
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
+	    used in flux calculations.					TJB
   
   Parameters :
 
@@ -417,8 +419,8 @@ void solve_lake(double             snow,
 
 	/* Calculate snow/ice temperature and change in ice thickness from 
 	   surface melting. */
-	ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, Le, 
-		  lake_snow, lake, dt,  0.0, soil_con.snow_rough, 1.0, 
+	ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used), 
+		  Le, lake_snow, lake, dt,  0.0, soil_con.snow_rough, 1.0, 
 		  rainfall, snowfall,  windi, Tcutoff, tair, sw_ice, 
 		  longin, air_density, pressure,  vpd,  vp, &lake->snowmlt, 
 		  &lake_energy->advection, &lake_energy->deltaCC, 

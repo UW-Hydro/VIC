@@ -50,6 +50,8 @@ void put_data(char              *AboveTreeLine,
   30-Oct-03 Snow_flux was incorrectly set to Tcanopy.  Fixed.	TJB
   25-Aug-04 Sub_snow was incorrectly set to blowing_flux.  Now it is
 	    set to vapor_flux.				 	TJB
+  28-Sep-04 Now out_data->aero_resist stores the aerodynamic resistance
+	    used in flux calculations.				TJB
 
 **********************************************************************/
 {
@@ -236,7 +238,7 @@ void put_data(char              *AboveTreeLine,
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	    /** record aerodynamic resistance **/
-	    out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
+	    out_data->aero_resist += cell[WET][veg][0].aero_resist_used 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** record layer moistures **/
@@ -612,8 +614,8 @@ void put_data(char              *AboveTreeLine,
 #if ! OPTIMIZE
 	    
       /** record aerodynamic resistance **/
-      out_data->aero_resist += lake_var.aero_resist * Clake * Cv * mu;
-      out_data->aero_resist += cell[WET][veg][0].aero_resist[0] 
+      out_data->aero_resist += lake_var.aero_resist_used * Clake * Cv * mu;
+      out_data->aero_resist += cell[WET][veg][0].aero_resist_used
 	      * Cv * mu * (1.-Clake);
 
       /** record lake moistures **/

@@ -61,6 +61,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	    fetch, and Nveg from the this function's argument list,
 	    since these variables were only used in the call to
 	    latent_heat_from_snow() which no longer needs them.	TJB
+  28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
+	    flux calculations.					TJB
 
 **********************************************************************/
 {
@@ -126,6 +128,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *Wdew;
   double *displacement;
   double *ra;
+  double *Ra_used;
   double *rainfall;
   double *ref_height;
   double *roughness;
@@ -284,6 +287,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
   ra                      = (double *) va_arg(ap, double *);
+  Ra_used                 = (double *) va_arg(ap, double *);
   rainfall                = (double *) va_arg(ap, double *);
   ref_height              = (double *) va_arg(ap, double *);
   roughness               = (double *) va_arg(ap, double *);
@@ -530,27 +534,31 @@ double func_surf_energy_bal(double Ts, va_list ap)
   else
     ra_under = HUGE_RESIST;
 
+  *Ra_used = ra_under;
+
   /*************************************************
     Compute Evapotranspiration if not snow covered
 
     Should evapotranspiration be active when the 
     ground is only paritially covered with snow????
   *************************************************/
-  if ( VEG && !SNOWING ) 
+  if ( VEG && !SNOWING ) {
+    *Ra_used = ra[1];
     Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
 		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
-		       NetShortBare, Tair, ra[1], 
+		       NetShortBare, Tair, *Ra_used, 
 		       displacement[1], roughness[1], ref_height[1], 
 		       elevation, rainfall, depth, Wcr, Wpwp, 
 #if SPATIAL_FROST
 		       frost_fract,
 #endif // SPATIAL_FROST
 		       root);
+  }
   else if(!SNOWING) {
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
 		     NetShortBare, D1, max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, displacement[0], 
-		     roughness[0], ref_height[0], ra_under, delta_t, mu, 
+		     roughness[0], ref_height[0], *Ra_used, delta_t, mu, 
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else

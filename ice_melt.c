@@ -34,7 +34,9 @@ static char vcid[] = "$Id$";
     double delta_t               - Model timestep (hours)
     double z2           - Reference height (m) 
     double displacement          - Displacement height (m)
-    double aero_resist  - Aerodynamic resistance (uncorrected for
+    double aero_resist           - Aerodynamic resistance (uncorrected for
+                                   stability) (s/m)
+    double *aero_resist_used     - Aerodynamic resistance (corrected for
                                    stability) (s/m)
     double atmos->density        - Density of air (kg/m3)
     double atmos->vp             - Actual vapor pressure of air (Pa) 
@@ -95,10 +97,13 @@ static char vcid[] = "$Id$";
 	    and callee.							TJB
   21-Sep-04 Added ErrorString to store error messages from
 	    root_brent.							TJB
+  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance used
+	    in flux calculations.					TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
 	      double            aero_resist,
+	      double            *aero_resist_used,
 	      double            Le,
 	      snow_data_struct *snow,
 	      lake_var_struct  *lake,
@@ -199,7 +204,7 @@ void ice_melt(double            z2,
   /* Calculate the surface energy balance for snow_temp = 0.0 */
   
   Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
-				  z2, displacement, Z0, wind, net_short, 
+				  aero_resist_used, z2, displacement, Z0, wind, net_short, 
 				  longwave, density, Le, air_temp,
 				  pressure * 1000., vpd * 1000., vp * 1000.,
 				  RainFall, snow->swq+LakeIce, 
@@ -298,7 +303,7 @@ void ice_melt(double            z2,
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
 				 (double)0.0, ErrorString,
 				 IceEnergyBalance, (double)delta_t, 
-				 aero_resist, z2, 
+				 aero_resist, aero_resist_used, z2, 
 				 displacement, Z0, wind, net_short, longwave,
 				 density, Le, air_temp, pressure * 1000.,
 				 vpd * 1000., vp * 1000., RainFall, 
@@ -313,7 +318,7 @@ void ice_melt(double            z2,
 
     if(snow->surf_temp <= -9998)
       ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
-				 z2, displacement, Z0, wind, net_short,
+				 aero_resist_used, z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
 				 pressure * 1000., vpd * 1000., vp * 1000.,
 				 RainFall, snow->swq+LakeIce, 
@@ -326,7 +331,7 @@ void ice_melt(double            z2,
 				 &sensible_heat, &LWnet, ErrorString);
 
     Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
-				     z2, displacement, Z0, wind, net_short,
+				     aero_resist_used, z2, displacement, Z0, wind, net_short,
 				     longwave, density, Le, air_temp,
 				     pressure * 1000., vpd * 1000., 
 				     vp * 1000.,RainFall, snow->swq+LakeIce, 
@@ -491,6 +496,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
 
   double Dt;                     /* Model time step (hours) */
   double Ra;                     /* Aerodynamic resistance (s/m) */
+  double *Ra_used;               /* Aerodynamic resistance (s/m) after stability correction */
   double Z;                      /* Reference height (m) */
   double Displacement;           /* Displacement height (m) */
   double Z0;                     /* surface roughness height (m) */
@@ -537,6 +543,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   /* initialize variables */
   Dt                 = (double) va_arg(ap, double);
   Ra                 = (double) va_arg(ap, double);
+  Ra_used            = (double *) va_arg(ap, double *);
   Z                  = (double) va_arg(ap, double);
   Displacement       = (double) va_arg(ap, double);
   Z0                 = (double) va_arg(ap, double);
@@ -577,6 +584,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
 
   fprintf(stderr,"Dt = %f\n",Dt);
   fprintf(stderr,"Ra = %f\n",Ra);
+  fprintf(stderr,"Ra_used = %f\n",*Ra_used);
   fprintf(stderr,"Z = %f\n",Z);
   fprintf(stderr,"Displacement = %f\n",Displacement);
   fprintf(stderr,"Z0 = %f\n",Z0);

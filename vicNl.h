@@ -110,7 +110,9 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 #endif
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
-void display_current_settings(int, filenames_struct *, global_param_struct *);
+void   conv_force_vic2alma(atmos_data_struct *, int, int, int, atmos_data_alma_struct *);
+void   conv_results_vic2alma(out_data_struct *, int, double *, out_data_alma_struct *, int);
+void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
 #if LAKE_MODEL
@@ -270,11 +272,8 @@ double penman(double, double, double, double, double, double, double,
 void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
 			   soil_con_struct *, double *, double *);
 double priestley(double, double);
-void   put_data(char *, double *, double *, double *, 
-#if SPATIAL_FROST
-                double *, double,
-#endif // SPATIAL_FROST
-                double, int, int, int, int, atmos_data_struct *, 
+void   put_data(soil_con_struct *, global_param_struct *,
+                int, int, atmos_data_struct *, 
                 dist_prcp_struct *, dmy_struct *,
 #if LAKE_MODEL
                 lake_con_struct *, 
@@ -424,13 +423,14 @@ double volumetric_heat_capacity(double,double,double);
 
 void write_atmosdata(atmos_data_struct *, int);
 void write_data(out_data_struct *, outfiles_struct *, dmy_struct *, int);
+void write_data_alma(out_data_alma_struct *, outfiles_struct *, dmy_struct *);
 void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,
                  energy_bal_struct *, snow_data_struct *, veg_var_struct *,
                  dmy_struct *, global_param_struct *,
                  double, double, int, int, int, int, int, char);
 void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
-void write_forcing_file(atmos_data_struct *, int, outfiles_struct *);
+void write_forcing_file(atmos_data_struct *, int, int, outfiles_struct *);
 #endif
 void write_layer(layer_data_struct *, int, int, 
 #if SPATIAL_FROST

@@ -4,19 +4,10 @@
 
 static char vcid[] = "$Id$";
 
-void put_data(char              *AboveTreeLine,
-	      double            *AreaFract,
-              double            *depth,
-	      double            *dz,
-#if SPATIAL_FROST
-	      double            *frost_fract,
-	      double             frost_slope,
-#endif // SPATIAL_FROST
-	      double             dp,
+void put_data(soil_con_struct	*soil_con,
+	      global_param_struct *global_param,
 	      int                Nnodes,
-	      int                dt,
               int                rec,
-	      int                skipyear,
 	      atmos_data_struct *atmos,
 	      dist_prcp_struct  *prcp,
 	      dmy_struct        *dmy,
@@ -49,9 +40,10 @@ void put_data(char              *AboveTreeLine,
            the model can make use of the computed treeline.     KAC
   30-Oct-03 Snow_flux was incorrectly set to Tcanopy.  Fixed.	TJB
   25-Aug-04 Sub_snow was incorrectly set to blowing_flux.  Now it is
-	    set to vapor_flux.				 	TJB
+	    set to vapor_flux.					TJB
   28-Sep-04 Now out_data->aero_resist stores the aerodynamic resistance
 	    used in flux calculations.				TJB
+  2005-Mar-24 Modified to compute ALMA output variables.	TJB
 
 **********************************************************************/
 {
@@ -69,6 +61,7 @@ void put_data(char              *AboveTreeLine,
 #endif
 
   out_data_struct        *out_data;
+  out_data_alma_struct   *out_data_alma;
 
   int                     veg;
   int                     index;
@@ -81,11 +74,33 @@ void put_data(char              *AboveTreeLine,
 #if SPATIAL_FROST
   int                     frost_area;
 #endif
+  char              *AboveTreeLine;
+  double            *porosity;
+  double            *Wpwp;
+  double            *AreaFract;
+  double            *depth;
+  double            *dz;
+#if SPATIAL_FROST
+  double            *frost_fract;
+  double             frost_slope;
+#endif // SPATIAL_FROST
+  double             dp;
+  int                dt;
+  int                skipyear;
+  double             MIN_RAIN_TEMP;
+  double             MAX_SNOW_TEMP;
   double                  Cv;
   double                  Clake;
   double                  mu;
   double                  tmp_evap;
   double                  tmp_moist;
+  double tmp_total_moist;
+  double tmp_root_moist;
+  double tmp_total_soil;
+  double tmp_temp;
+  double cv_baresoil;
+  double cv_foliage;
+  double cv_snow;
   double                  tmp_ice;
   double                  tmp_fract;
   double                  rad_temp;
@@ -102,6 +117,22 @@ void put_data(char              *AboveTreeLine,
 #endif // LAKE_MODEL
   snow_data_struct      **snow;
   veg_var_struct       ***veg_var;
+
+  AboveTreeLine = soil_con->AboveTreeLine;
+  porosity = soil_con->porosity;
+  Wpwp = soil_con->Wpwp;
+  AreaFract = soil_con->AreaFract;
+  depth = soil_con->depth;
+  dz = soil_con->dz_node;
+#if SPATIAL_FROST
+  frost_fract = soil_con->frost_fract;
+  frost_slope = soil_con->frost_slope;
+#endif // SPATIAL_FROST
+  dp = soil_con->dp;
+  dt = global_param->dt;
+  skipyear = global_param->skipyear;
+  MIN_RAIN_TEMP = global_param->MIN_RAIN_TEMP;
+  MAX_SNOW_TEMP = global_param->MAX_SNOW_TEMP;
 
   if(options.DIST_PRCP) 
     Ndist = 2;
@@ -133,7 +164,22 @@ void put_data(char              *AboveTreeLine,
   out_data->air_temp       = atmos->air_temp[NR];
   out_data->rel_humid      = ( 100. * atmos->vp[NR] 
 			       / (atmos->vp[NR] + atmos->vpd[NR]) );
+  if(out_data->air_temp > (MAX_SNOW_TEMP+MIN_RAIN_TEMP)/2) {
+    out_data->rain = out_data->prec / (dt*3600);
+    out_data->snow = 0.;
+  }
+  else {
+    out_data->rain = 0.;
+    out_data->snow = out_data->prec / (dt*3600);
+  }
   out_data->surf_temp      = 0.;
+  out_data->snow_albedo = SPVAL;
+  for(band=0;band<Nbands;band++) {
+    out_data->snow_surf_temp[band] = SPVAL;
+    out_data->snow_pack_temp[band] = SPVAL;
+  }
+  out_data->baresoilt = SPVAL;
+  out_data->tfoliage = SPVAL;
  
   /*************************************************
     Store Output for Precipitation Distribution Type
@@ -242,6 +288,7 @@ void put_data(char              *AboveTreeLine,
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
 	    /** record layer moistures **/
+	    tmp_total_moist = tmp_total_soil = tmp_root_moist = 0.0;
 	    for ( index = 0; index < options.Nlayer; index++ ) {
 	      tmp_moist = cell[dist][veg][band].layer[index].moist;
 #if SPATIAL_FROST
@@ -259,10 +306,25 @@ void put_data(char              *AboveTreeLine,
 	      }
 	      tmp_moist *= Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	      tmp_ice *= Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	      tmp_total_moist += tmp_moist + tmp_ice - Wpwp[index];
+	      tmp_total_soil += depth[index] * porosity[index] * 1000. - Wpwp[index];
+              if (tmp_total_moist - tmp_ice > 0.0)
+	        tmp_root_moist += tmp_total_moist - tmp_ice;
 	      out_data->moist[index] += tmp_moist;
 	      out_data->ice[index]   += tmp_ice;
 	    }
+	    out_data->soil_wetness += tmp_total_moist/tmp_total_soil;
+	    out_data->rootmoist += tmp_root_moist;
 #endif
+
+	    /** record layer temperatureses **/
+	    for ( index = 0; index < options.Nlayer; index++ ) {
+	      tmp_temp = cell[dist][veg][band].layer[index].T;
+
+	      tmp_temp *= Cv * AreaFract[band];
+	      out_data->layer_temp[index] += tmp_temp;
+	    }
+
 	  }
 	}
       }
@@ -327,6 +389,48 @@ void put_data(char              *AboveTreeLine,
 	  else
 	    rad_temp = energy[veg][band].Tsurf + KELVIN;
 	  
+	  /** record landcover temperature **/
+          /** note: these are undefined if the landcover class is not present **/
+	  if(veg == veg_con[0].vegetat_type_num) {
+            // landcover is bare soil
+            if (out_data->baresoilt > SPVAL/2) {
+              // first assignment of baresoilt
+	      out_data->baresoilt = rad_temp * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            else {
+              // not first assignment of baresoilt
+	      out_data->baresoilt += rad_temp * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            cv_baresoil += AreaFract[band] * TreeAdjustFactor[band];
+          }
+          else {
+            // landcover is vegetation
+            if (overstory && !snow[veg][band].snow) {
+              // here, rad_temp will be wrong since it will pick the understory temperature
+              // so we'll use Tfoliage instead
+              if (out_data->tfoliage > SPVAL/2) {
+                // first assignment of tfoliage
+	        out_data->tfoliage = (energy[veg][band].Tfoliage + KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
+              }
+              else {
+                // not first assignment of tfoliage
+	        out_data->tfoliage += (energy[veg][band].Tfoliage + KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
+              }
+            }
+            else {
+              // use rad_temp in all other cases
+              if (out_data->tfoliage > SPVAL/2) {
+                // first assignment of tfoliage
+	        out_data->tfoliage = rad_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+              }
+              else {
+                // not first assignment of tfoliage
+	        out_data->tfoliage += rad_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+              }
+            }
+            cv_foliage += Cv * AreaFract[band] * TreeAdjustFactor[band];
+          }
+
 	  /** record soil surface temperature **/
 	  surf_temp = energy[veg][band].T[0];
 	  
@@ -387,7 +491,8 @@ void put_data(char              *AboveTreeLine,
 	  out_data->rad_temp += ((rad_temp) * (rad_temp) 
 				 * (rad_temp) * (rad_temp)) 
 	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  
+	  out_data->AvgSurfT += rad_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+  
 	  /** record mean surface temperature [C]  **/
 	  /*out_data->surf_temp += surf_temp * Cv * AreaFract[band];*/
 	  out_data->surf_temp += (energy[veg][band].T[0] 
@@ -407,7 +512,29 @@ void put_data(char              *AboveTreeLine,
 	  /** record snowpack depth **/
 	  out_data->snow_depth[0]  
 	    += snow[veg][band].depth * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-	  
+
+          /** record snowpack albedo, temperature **/
+          /** Note: these quantities are undefined if swq is 0 **/
+          if (out_data->swq[0] > 0.0) {
+            if (out_data->snow_albedo >= SPVAL/2) {
+	      out_data->snow_albedo
+	        = snow[veg][band].albedo * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	      out_data->snow_surf_temp[0]   
+	        = snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	      out_data->snow_pack_temp[0]   
+	        = snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            else {
+	      out_data->snow_albedo
+  	        += snow[veg][band].albedo * Cv * AreaFract[band] * TreeAdjustFactor[band];
+  	      out_data->snow_surf_temp[0]   
+  	        += snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+  	      out_data->snow_pack_temp[0]   
+	        += snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            cv_snow += Cv;
+          }
+
 #if !OPTIMIZE
 
 	  /** record canopy intercepted snow **/
@@ -469,16 +596,6 @@ void put_data(char              *AboveTreeLine,
 	    out_data->advected_sensible[0]   
 	      -= energy[veg][band].advected_sensible 
 	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  
-	  /** record surface layer temperature **/
-	  out_data->snow_surf_temp[0]   
-	    += snow[veg][band].surf_temp 
-	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  
-	  /** record pack layer temperature **/
-	  out_data->snow_pack_temp[0]   
-	    += snow[veg][band].pack_temp 
-	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** if snow elevation bands are to be printed separately **/
 	  if(options.PRT_SNOW_BAND) {
@@ -552,6 +669,18 @@ void put_data(char              *AboveTreeLine,
       }
     }
   }
+  // normalize quantities that may not be present over all of grid cell
+  if (out_data->baresoilt < SPVAL/2) {
+    out_data->baresoilt /= cv_baresoil;
+  }
+  if (out_data->tfoliage < SPVAL/2) {
+    out_data->tfoliage /= cv_foliage;
+  }
+  if (out_data->snow_albedo < SPVAL/2) {
+    out_data->snow_albedo /= cv_snow;
+    out_data->snow_surf_temp[0] /= cv_snow;
+    out_data->snow_pack_temp[0] /= cv_snow;
+  }
   
 #if LAKE_MODEL
 
@@ -623,7 +752,7 @@ void put_data(char              *AboveTreeLine,
       out_data->lake_ice   = ( ice_density * lake_var.fraci 
 			       * lake_var.hice / RHO_W );
 
-
+      tmp_total_moist = tmp_total_soil = tmp_root_moist = 0.0;
       for ( index = 0; index < options.Nlayer; index++ ) {
 	tmp_moist = cell[0][veg][band].layer[index].moist;
 #if SPATIAL_FROST
@@ -641,8 +770,21 @@ void put_data(char              *AboveTreeLine,
 	}
 	tmp_moist *= Cv;
 	tmp_ice *= Cv;
+	tmp_total_moist += tmp_moist + tmp_ice - Wpwp[index];
+	tmp_total_soil += depth[index] * porosity[index] * 1000. - Wpwp[index];
+        if (tmp_total_moist - tmp_ice > 0.0)
+	  tmp_root_moist += tmp_total_moist - tmp_ice;
 	out_data->moist[index] += tmp_moist;
 	out_data->ice[index]   += tmp_ice;
+      }
+      out_data->soil_wetness += tmp_total_moist/tmp_total_soil;
+      out_data->rootmoist += tmp_root_moist;
+
+      /** record layer temperatures **/
+      for ( index = 0; index < options.Nlayer; index++ ) {
+        tmp_temp = cell[0][veg][band].layer[index].T;
+        tmp_temp *= Cv;
+        out_data->layer_temp[index] += tmp_temp;
       }
 
       /***************************************
@@ -694,6 +836,8 @@ void put_data(char              *AboveTreeLine,
       out_data->rad_temp += ((rad_temp) * (rad_temp) 
 			     * (rad_temp) * (rad_temp)) * Cv;
       
+      out_data->AvgSurfT += rad_temp*Cv;
+
       /** record mean surface temperature [C]  **/
       out_data->surf_temp += surf_temp * Cv;
       
@@ -725,12 +869,13 @@ void put_data(char              *AboveTreeLine,
       // Store Lake Specific Variables 
       out_data->lake_ice_temp   = lake_var.tempi;
       out_data->lake_ice_height = lake_var.hice;
-      out_data->lake_ice_fract  = lake_var.fraci;
+      out_data->lake_ice_fract  = lake_var.fraci*Cv;
       out_data->lake_depth      = lake_var.ldepth;
       //     out_data->lake_surf_area  = Clake;
       out_data->lake_surf_area  = lake_var.sarea;
       out_data->lake_volume     = lake_var.volume;
       out_data->lake_surf_temp  = lake_var.temp[0];
+      out_data->surfstor        = (lake_var.volume/lake_var.surface[0])*Cv*1000.;
       
 
 #endif /* not OPTIMIZE */
@@ -780,8 +925,20 @@ void put_data(char              *AboveTreeLine,
     Write Data
   *************/
 
-  if(rec >= skipyear)
-    write_data(out_data, outfiles, dmy, dt);
+  if(rec >= skipyear) {
+    if (options.ALMA_OUTPUT) {
+      /* Convert to ALMA standard */
+      out_data_alma = (out_data_alma_struct *) calloc(1,sizeof(out_data_alma_struct)); 
+      conv_results_vic2alma(out_data, dt, depth, out_data_alma, rec);
+      /* write ALMA variables */
+      write_data_alma(out_data_alma, outfiles, dmy);
+      // Free memory
+      free((char *)out_data_alma); 
+    }
+    else {
+      write_data(out_data, outfiles, dmy, dt);
+    }
+  }
 
 #else /* not OPTIMIZE */
 

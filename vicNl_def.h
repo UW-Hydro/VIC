@@ -1,8 +1,13 @@
 // $Id$
+/**********************************************************************
+  Modifications:
+  2005-Mar-24 Added data structures to accomodate ALMA variables.	TJB
+*********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20
 #define HUGE_RESIST  1.e20	/* largest allowable double number */
+#define SPVAL        1.e20	/* largest allowable double number - used to signify missing data */
 #define SMALL        1.e-12	/* smallest allowable double number */
 #define MISSING      -99999.	/* missing value for multipliers in
 				   BINARY format */
@@ -14,21 +19,25 @@
 #define BINARY 2		/* met file format flag */
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 14
+#define N_FORCING_TYPES 18
 #define AIR_TEMP  0  /* air temperature per time step (C) */
 #define ALBEDO    1  /* surface albedo (fraction) */
 #define DENSITY   2  /* atmospheric density (kg/m^3) */
 #define LONGWAVE  3  /* incoming longwave radiation (W/m^2) */
 #define PREC      4  /* precipitation (mm) */
 #define PRESSURE  5  /* atmospheric pressure (kPa) */
-#define SHORTWAVE 6  /* incoming shortwave (W/m^2) */
-#define TMAX      7  /* maximum daily temperature (C) */
-#define TMIN      8  /* minimum daily temperature (C) */
-#define TSKC      9  /* cloud cover (fraction) */
-#define VP        10 /* vapor pressure (kPa) */
-#define WIND      11 /* wind speed (m/s) */
-#define WINDE     12
-#define SKIP      13 /* place holder for unused data columns */
+#define PSURF     6  /* atmospheric pressure (Pa) */
+#define QAIR      7  /* specific humidity (unitless) */
+#define RAINF     8  /* rainfall rate (kg/m^2s) */
+#define SHORTWAVE 9  /* incoming shortwave (W/m^2) */
+#define SNOWF     10 /* snowfall rate (kg/m^2s) */
+#define TAIR      11 /* air temperature per time step (K) */
+#define TMAX      12 /* maximum daily temperature (C) */
+#define TMIN      13 /* minimum daily temperature (C) */
+#define TSKC      14 /* cloud cover (fraction) */
+#define VP        15 /* vapor pressure (kPa) */
+#define WIND      16 /* wind speed (m/s) */
+#define SKIP      17 /* place holder for unused data columns */
 		 
 /***** Physical Constants *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
@@ -157,6 +166,12 @@ typedef struct {
 #if SAVE_STATE
   FILE *statefile;
 #endif // SAVE_STATE
+  FILE *eb;
+  FILE *wb;
+  FILE *sur;
+  FILE *sub;
+  FILE *eva;
+  FILE *csp;
 } outfiles_struct;
 
 typedef struct {
@@ -180,9 +195,16 @@ typedef struct {
 				   soil files */
   char  veg[MAXSTRING];         /* vegetation grid coverage file */
   char  veglib[MAXSTRING];      /* vegetation parameter library file */
+  char  eb[MAXSTRING];          /* energy balance (output) */
+  char  wb[MAXSTRING];          /* water balance (output) */
+  char  sur[MAXSTRING];         /* surface processes (output) */
+  char  sub[MAXSTRING];         /* subsurface processes (output) */
+  char  eva[MAXSTRING];         /* evaporation (output) */
+  char  csp[MAXSTRING];         /* cold-season processes (output) */
 } filenames_struct;
 
 typedef struct {
+  char   ALMA_OUTPUT;    /* TRUE = output files contain ALMA standard variables */
   char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
 			    parameters*/
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
@@ -355,8 +377,8 @@ typedef struct {
   *****************************************************************/
 typedef struct {
   /** Use MAX_LAKE_NODES **/
-  double aero_resist;             /* aerodynamic resistance (s/m) */
-  double aero_resist_used;        /* aerodynamic resistance (s/m)
+  double aero_resist;		  /* aerodynamic resistance (s/m) */
+  double aero_resist_used;	  /* aerodynamic resistance (s/m) 
 				     after stability correction */
   double baseflow_in;
   double baseflow_out;
@@ -378,7 +400,7 @@ typedef struct {
   double tp_in;                   /* Lake skin temperature (C). */
   double volume;
   double dz;                      /* Distance between each water layer. */
-  double surfdz;                  /* Thickness of the surface water layer. */
+  double surfdz;
   int    activenod;
   int    mixmax;                  /* top depth (node #) of local 
                                      instability. */
@@ -551,6 +573,22 @@ typedef struct {
 #endif // OPTIMIZE or LINK_DEBUG
 } atmos_data_struct;
 
+/***************************************************************************
+   This structure stores the ALMA-standard atmospheric forcing data
+   for just one time step for a single grid cell.  This is just a temporary
+   structure used when converting to/from ALMA.
+***************************************************************************/
+typedef struct {
+  double Tair;    /* air temperature (K) */
+  double Qair;    /* specific humidity near surface */
+  double Psurf;   /* atmospheric pressure near surface (kPa) */
+  double SWdown;  /* incoming shortwave radiation (W/m^2) */
+  double LWdown;  /* incoming longwave radiation (W/m^2) */
+  double Rainf;   /* average rainfall rate in grid cell (kg/m^2s) */
+  double Snowf;   /* average snowfall rate in grid cell (kg/m^2s) */
+  double Wind;    /* wind speed (m/s) */
+} atmos_data_alma_struct;
+
 /*************************************************************************
   This structure stores information about the time and date of the current
   time step.
@@ -593,14 +631,14 @@ typedef struct {
 					  [0] = over bare vegetation or soil 
 					  [1] = over canopy (if present)
 					  [2] = over snow */
-  double aero_resist_used;             /* The (stability-corrected) aerodynamic
-                                          resistance (s/m) that was actually used
-                                          in computing fluxes.  For cases in which
-                                          a cell uses 2 different resistances for
-                                          flux computations in the same time step
-                                          (i.e. cell contains overstory and snow
-                                          is present on the ground), aero_resist_used
-                                          will contain the snow pack's resistance. */
+  double aero_resist_used;	       /* The (stability-corrected) aerodynamic
+					  resistance (s/m) that was actually used
+					  in computing fluxes.  For cases in which
+					  a cell uses 2 different resistances for
+					  flux computations in the same time step
+					  (i.e. cell contains overstory and snow
+					  is present on the ground), aero_resist_used
+					  will contain the snow pack's resistance. */
   double baseflow;                     /* baseflow from current cell (mm/TS) */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */
@@ -744,10 +782,10 @@ typedef struct {
 			       condensation from snow pack (m) */
   double blowing_flux;      /* depth of sublimation from blowing snow (m) */
   double surface_flux;      /* depth of sublimation from blowing snow (m) */
-  double transport;         /* flux of snow (potentially) transported from veg type */
   int    last_snow;         /* time steps since last snowfall */
   int    store_snow;        /* flag indicating whether or not new accumulation
 			       is stored on top of an existing distribution */
+  double transport;	    /* flux of snow (potentially) transported from veg type */
 } snow_data_struct;	    /* an array of size Nrec */
 
 /*****************************************************************
@@ -783,6 +821,8 @@ typedef struct {
 					  resistence  [s/m] */
   double air_temp;                     /* grid cell air temperature */
   double albedo;                       /* grid cell mean albedo */ 
+  double AvgSurfT;                     /* grid cell mean surface temerature */
+  double baresoilt;                    /* grid cell mean soil surface temperature */
   double baseflow;                     /* baseflow out of the bottom layer */
   double bot_energy_error[2];
   double coverage[MAX_BANDS+1];        /* fractional coverage of grid cell 
@@ -822,6 +862,7 @@ typedef struct {
 #endif // LAKE_MODEL
   double latent;                       /* grid cell net latent heat flux */
   double latent_sub[MAX_BANDS+1];      /* grid cell net latent heat flux */
+  double layer_temp[MAX_LAYERS];       /* soil layer temperature */
   double melt[MAX_BANDS+1];            /* snowpack melt (mm) */
   double melt_energy[MAX_BANDS+1];     /* energy used to reduce snow 
 					  coverage (Wm-2) */
@@ -832,18 +873,27 @@ typedef struct {
   double r_net;                        /* grid cell net radiation W/m^2 */
   double rad_temp;                     /* grid cell average radiative surface 
 					  temperature */
+  double rain;                         /* = prec for air_temp > 0
+					  = 0 for air_temp <= 0 */
   double refreeze_energy[MAX_BANDS+1]; /* energy used to refreeze snowpack 
 					  [Wm-2] */
   double rel_humid;
+  double rootmoist;                    /* total simulated soil moisture available
+					  for transpiration */
   double runoff;                       /* runoff from the surface */
   double sensible;                     /* grid cell net sensible heat flux */
   double shortwave;                    /* grid cell incoming shortwave flux */
+  double snow;                         /* = 0 for air_temp > 0
+					  = prec for air_temp <= 0 */
+  double snow_albedo;                  /* albedo of snow pack */
   double snow_canopy[MAX_BANDS+1];     /* snow captured by canopy (mm) */
   double snow_depth[MAX_BANDS+1];      /* snow depth (cm) */
   double snow_flux[MAX_BANDS+1];       /* energy flux through the snowpack 
 					  [Wm-2] */
   double snow_pack_temp[MAX_BANDS+1];  /* snow pack surface layer temp (C) */
   double snow_surf_temp[MAX_BANDS+1];  /* snow pack surface layer temp (C) */
+  double soil_wetness;                 /* vertically integrated soil moisture
+					  divided by max moisture above wilting point */
   double sub_canop;                    /* grid cell net sublimation from 
 					  canopy interception */
   double sub_snow[MAX_VEG];            /* grid cell net sublimation from 
@@ -851,6 +901,7 @@ typedef struct {
   double sub_total;
   double sub_surface;
   double sub_blowing;
+  double surfstor;                     /* grid cell mean surface water storage */
   double surf_cond;                    /* grid cell mean surface conductance 
 					  [m/s] */
   double surf_frost_fract;             /* fraction of surface frozen (fract) */
@@ -858,6 +909,8 @@ typedef struct {
 					  temperature */
   double swq[MAX_BANDS+1];             /* snow water equivalent (mm) */
   double tdepth[MAX_FRONTS];           /* depth of all thawing fronts */
+  double tfoliage;                     /* grid cell mean surface temperature
+					  of vegetation */
   double wind;                         /* grid cell wind speed */
   double swband[MAX_BANDS+1];          // store shortwave by snow band
   double lwband[MAX_BANDS+1];          // store longwave by snow band
@@ -866,6 +919,82 @@ typedef struct {
   double sensibleband[MAX_BANDS+1];    // store sensible heat by snow band
   double grndband[MAX_BANDS+1];        // store ground heat
 } out_data_struct;
+
+/*******************************************************
+  This structure stores all variables needed for ALMA output.
+  *******************************************************/
+typedef struct {
+
+  // Energy Balance Variables
+  double SWnet;                        // Net SW rad (W/m^2)
+  double LWnet;                        // Net LW rad (W/m^2)
+  double Qle;                          // Latent heat flux (W/m^2)
+  double Qh;                           // Sensible heat flux (W/m^2)
+  double Qg;                           // Ground heat flux (W/m^2)
+  double Qf;                           // Energy of fusion (W/m^2)
+  double Qv;                           // Energy of Sublimation (W/m^2)
+  double Qa;                           // Advective energy (W/m^2)
+  double DelSurfHeat;                  // Change in surface heat storage (W/m^2)
+  double DelColdCont;                  // Change in snow cold content (W/m^2)
+
+  // Water Balance Variables
+  double Snowf;                        // Snowfall rate (kg/m^2s)
+  double Rainf;                        // Rainfall rate (kg/m^2s)
+  double Evap;                         // Total evapotranspiration (kg/m^2s)
+  double Qs;                           // Surface runoff (kg/m^2s)
+  double Qsb;                          // Subsurface runoff (kg/m^2s)
+  double Qsm;                          // Snowmelt (kg/m^2s)
+  double DelSoilMoist;                 // Change in soil moisture (kg/m^2)
+  double DelSWE;                       // Change in snow water equivalent in snow pack (kg/m^2)
+  double DelSurfStor;                  // Change in surface storage (liquid water) (kg/m^2)
+  double DelIntercept;                 // Change in interception storage (kg/m^2)
+
+  // Surface Process Variables
+  double SnowT;                        // Snow surface temperature (K)
+  double VegT;                         // Vegetation canopy temperature (K)
+  double BaresoilT;                    // Temperature of bare soil (K)
+  double AvgSurfT;                     // Average surface temperature (K)
+  double RadT;                         // Surface radiative temperature (K)
+  double Albedo;                       // Surface albedo (unitless)
+  double SWE;                          // Snow water equivalent (kg/m^2)
+  double SWEVeg;                       // SWE intercepted by the vegetation (kg/m^2)
+  double SurfStor;                     // Surface water storage (kg/m^2)
+
+  // Subsurface Process Variables
+  double HLayerDepth[MAX_LAYERS];      // Hydrological Soil layer depth (m)
+  double SoilMoist[MAX_LAYERS];        // Average total soil moisture (kg/m^2)
+  double LSoilMoist[MAX_LAYERS];       // Average liquid soil moisture (kg/m^2)
+  double SoilTemp[MAX_LAYERS];         // Average soil temperature (K)
+  double SMLiqFrac[MAX_LAYERS];        // Fraction of soil moisture that is liquid (unitless)
+  double SMFrozFrac[MAX_LAYERS];       // Fraction of soil moisture that is frozen (unitless)
+  double SoilWet;                      // Vertically integrated soil moisture
+                                       // divided by maximum allowable soil moisture
+                                       // above wilting point (unitless)
+
+  // Evaporation Variables
+  double ECanop;                       // Interception evaporation (kg/m^2s)
+  double TVeg;                         // Vegetation transpiration (kg/m^2s)
+  double ESoil;                        // Bare soil evaporation (kg/m^2s)
+  double EWater;                       // Open water evaporation (kg/m^2s)
+  double RootMoist;                    // Total simulated soil moisture available (kg/m^2)
+                                       // for transpiration
+  double Canopint;                     // Total canopy water interception (kg/m^2)
+  double SubSnow;                      // Snow sublimation (kg/m^2s)
+  double SubSurf;                      // Sublimation from the snow-free area (kg/m^2s)
+  double ACond;                        // Aerodynamic conductance (m/s)
+
+  // Cold-season Process Variables
+  double SnowFrac;                     // Fraction of grid cell covered by snow (unitless)
+  double IceFrac;                      // Fraction of grid cell covered by sea or lake ice (unitless)
+  double IceT;                         // Thickness of sea/lake ice (m)
+  double Fdepth[MAX_FRONTS];           // Frozen soil depth (m)
+  double Tdepth[MAX_FRONTS];           // Depth to soil thaw (m)
+  double SAlbedo;                      // Snow albedo (unitless)
+  double SnowTProf;                    // Temperature profile of snow pack (K)
+  double SnowDepth;                    // Depth of snow layer (m)
+
+} out_data_alma_struct;
+
 
 /********************************************************
   This structure holds all variables needed for the error

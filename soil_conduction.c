@@ -357,6 +357,7 @@ void distribute_node_moisture_properties(double *moist_node,
   11-20-02 Modified to check that node soil moisture is less than
            or equal to maximum node soil moisture, otherwise an 
            error is printed to the screen and the model exits.  KAC
+  2005-Mar-24 Removed abs() from check on soil moisture.	TJB
 
 *********************************************************************/
 
@@ -403,8 +404,8 @@ void distribute_node_moisture_properties(double *moist_node,
     }      
 
     // Check that node moisture does not exceed maximum node moisture
-    if (abs(moist_node[nidx]-max_moist_node[nidx]) > SMALL) {
-      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisuttre, %f.", moist_node[nidx], max_moist_node[nidx] );
+    if (moist_node[nidx]-max_moist_node[nidx] > SMALL) {
+      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.", moist_node[nidx], max_moist_node[nidx] );
       vicerror(ErrStr);
     }
 

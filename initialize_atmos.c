@@ -69,6 +69,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
            the model can make use of the computed treeline.     KAC
   04-Oct-04 Changed logic to allow VP to be supplied without
 	    SHORTWAVE.						TJB
+  2005-Mar-24 Modified to handle ALMA forcing variables.	TJB
 
 **********************************************************************/
 {
@@ -111,18 +112,23 @@ void initialize_atmos(atmos_data_struct        *atmos,
   /* compute number of full model time steps per day */
   stepspday = 24/global_param.dt;
   
-  if (!param_set.TYPE[PREC].SUPPLIED)
-    nrerror("Precipitation must be given to the model, check input files\n");
+  if (!param_set.TYPE[PREC].SUPPLIED
+    && !param_set.TYPE[RAINF].SUPPLIED
+    && !param_set.TYPE[SNOWF].SUPPLIED)
+    nrerror("Precipitation (PREC, or both RAINF and SNOWF) must be given to the model, check input files\n");
   
   if ((!param_set.TYPE[TMAX].SUPPLIED || !param_set.TYPE[TMIN].SUPPLIED) 
-      && !param_set.TYPE[AIR_TEMP].SUPPLIED)
+      && !(param_set.TYPE[AIR_TEMP].SUPPLIED || param_set.TYPE[TAIR].SUPPLIED) )
     nrerror("Daily maximum and minimum air temperature or sub-daily air temperature must be given to the model, check input files\n");
   
-  if (param_set.TYPE[AIR_TEMP].SUPPLIED 
+  if ( (param_set.TYPE[AIR_TEMP].SUPPLIED
       && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24)
+      || (param_set.TYPE[TAIR].SUPPLIED
+      && param_set.FORCE_DT[param_set.TYPE[TAIR].SUPPLIED-1] == 24) )
     nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
   
-  if (param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[VP].SUPPLIED)
+  if ( param_set.TYPE[SHORTWAVE].SUPPLIED
+        && !(param_set.TYPE[VP].SUPPLIED || param_set.TYPE[QAIR].SUPPLIED) )
     nrerror("Model cannot be run with shortwave supplied, if vapor pressure is not provided.");
     /*
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[LONGWAVE].SUPPLIED)) 
@@ -153,7 +159,84 @@ void initialize_atmos(atmos_data_struct        *atmos,
   forcing_data = read_forcing_data(infile, global_param);
   
   fprintf(stderr,"\nRead meteorological forcing file\n");
-  
+ 
+  /*************************************************
+    Handle any ALMA-specific variables first
+  *************************************************/
+ 
+  /*************************************************
+    If provided, translate rainfall and snowfall
+    rates into steply precipitation
+    NOTE: this overwrites any PREC data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[RAINF].SUPPLIED && param_set.TYPE[SNOWF].SUPPLIED) {
+    /* rainfall and snowfall rates supplied */
+    if (forcing_data[PREC] == NULL) {
+      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[PREC][idx] = (forcing_data[RAINF][idx] + forcing_data[SNOWF][idx])
+                                * (global_param.dt * 3600);
+    }
+    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[RAINF].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate air temperature in K
+    into air temperature in C
+    NOTE: this overwrites any AIR_TEMP data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[TAIR].SUPPLIED) {
+    /* air temperature in K supplied */
+    if (forcing_data[AIR_TEMP] == NULL) {
+      forcing_data[AIR_TEMP] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[AIR_TEMP][idx] = forcing_data[TAIR][idx] - KELVIN;
+    }
+    param_set.TYPE[AIR_TEMP].SUPPLIED = param_set.TYPE[TAIR].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate surface pressure in Pa
+    into surface pressure in kPa
+    NOTE: this overwrites any PRESSURE data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[PSURF].SUPPLIED) {
+    /* surface pressure in Pa supplied */
+    if (forcing_data[PRESSURE] == NULL) {
+      forcing_data[PRESSURE] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[PRESSURE][idx] = forcing_data[PSURF][idx] / 1000.0;
+    }
+    param_set.TYPE[PRESSURE].SUPPLIED = param_set.TYPE[PSURF].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate specific humidity and atm. pressure
+    into vapor pressure
+    NOTE: this overwrites any VP data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[QAIR].SUPPLIED && param_set.TYPE[PRESSURE].SUPPLIED) {
+    /* specific humidity and atm. pressure supplied */
+    if (forcing_data[VP] == NULL) {
+      forcing_data[VP] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[VP][idx] = forcing_data[QAIR][idx] * forcing_data[PRESSURE][idx];
+    }
+    param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
+  }
+
+  /*************************************************
+    Handle all other variables
+  *************************************************/
+ 
   /*************************************************
     Create sub-daily precipitation if not provided
   *************************************************/
@@ -694,7 +777,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 #endif // OUTPUT_FORCE_STATS
 
 #if OUTPUT_FORCE
-  write_forcing_file(atmos, global_param.nrecs, outfiles);
+  write_forcing_file(atmos, global_param.nrecs, global_param.dt, outfiles);
 #endif // OUTPUT_FORCE 
 
 }

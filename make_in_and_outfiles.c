@@ -56,7 +56,7 @@ filenames_struct make_in_and_outfiles(infiles_struct *infp,
   }
 
   /** Initial Snow Variables Read from File **/
-  if((options.FULL_ENERGY || options.FROZEN_SOIL)&& options.INIT_SNOW) {
+  if((options.FULL_ENERGY || options.SNOW_MODEL)&& options.INIT_SNOW) {
     infp->init_snow = open_file(filenames.init_snow, "r");
   }
 

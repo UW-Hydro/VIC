@@ -727,7 +727,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("*Wcr = %f\n", *Wcr);
   printf("*Wpwp = %f\n", *Wpwp);
   printf("*depth = %f\n", *depth);
-#if SPATIAL_FRoST
+#if SPATIAL_FROST
   printf(" = %f\n", *frost_fract);
 #endif
   

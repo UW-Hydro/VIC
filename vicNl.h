@@ -172,7 +172,8 @@ void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			 soil_con_struct, double *, double *);
 double priestley(double, double);
 void   put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *, 
-		outfiles_struct, double *, double *, dmy_struct *, int, int);
+		outfiles_struct, double *, double *, dmy_struct *, int, int, 
+		int);
 
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
@@ -194,11 +195,11 @@ soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);
 void   redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
-				 int, int, int, double, double);
+				 int, int, int, double, double, double *);
 void   redistribute_moisture(layer_data_struct *, double *, double *,
 			     double *, double *, double *, int);
 unsigned char redistribute_moisture_for_storm(double *, double *, double, 
-					      double);
+					      double, double);
 double resolve_surf_energy_bal(double, char, int, int, int, int, int, int, int,
 			       int, double, double, double, double, 
 			       double, double, double, double, double, 

@@ -40,9 +40,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
           when frozen soil is implemented and active in the current 
           grid cell.                                                KAC
   04-10-03 Modified to read storm parameters from model state file.  KAC
-  07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0 (on some
-	    platforms, if we don't initialize it, it gets set to
-	    garbage).						TJB
+  07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
+	    accessed in set_node_parameters().			TJB
 
 **********************************************************************/
 {

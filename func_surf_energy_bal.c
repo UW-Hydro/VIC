@@ -57,6 +57,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	    have to do with the fact that they followed variables of type
 	    (double *) in va_list, which may have caused memory alignment
 	    problems.						TJB
+  05-Aug-04 Removed iveg, LastSnow, dt, SnowDepth, lag_one, sigma_slope,
+	    fetch, and Nveg from the this function's argument list,
+	    since these variables were only used in the call to
+	    latent_heat_from_snow() which no longer needs them.	TJB
 
 **********************************************************************/
 {
@@ -68,7 +72,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /* define routine input variables */
 
   /* general model terms */
-  int iveg;
   int month;
   int VEG;
   int veg_class;
@@ -143,7 +146,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
 /*   double snow_depth; */
   double snow_swq;
   double snow_water;
-  int LastSnow;
 
   double *deltaCC;
   double *refreeze_energy;
@@ -205,12 +207,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *sensible_heat;
   double *snow_flux;
   double *store_error;
-  double dt;
-  double SnowDepth;
-  float lag_one;
-  float sigma_slope;
-  float fetch;
-  int Nveg;
 
   /* Define internal routine variables */
   double Evap;		/** Total evap in m/s **/
@@ -234,7 +230,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   ************************************/
 
   /* general model terms */
-  iveg                    = (int) va_arg(ap, int);
   month                   = (int) va_arg(ap, int);
   VEG                     = (int) va_arg(ap, int);
   veg_class               = (int) va_arg(ap, int);
@@ -308,7 +303,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   snow_density            = (double) va_arg(ap, double);
   snow_swq                = (double) va_arg(ap, double);
   snow_water              = (double) va_arg(ap, double);
-  LastSnow                = (int) va_arg(ap, int);
     
   deltaCC                 = (double *) va_arg(ap, double *);
   refreeze_energy         = (double *) va_arg(ap, double *);
@@ -368,12 +362,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   sensible_heat           = (double *) va_arg(ap, double *);
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
-  dt                      = (double) va_arg(ap, double);
-  SnowDepth               = (double) va_arg(ap, double);
-  lag_one                 = (float) va_arg(ap, double);
-  sigma_slope             = (float) va_arg(ap, double);
-  fetch                   = (float) va_arg(ap, double);
-  Nveg                    = (int) va_arg(ap, double);
 
   /***************
     MAIN ROUTINE
@@ -585,11 +573,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
     BlowingMassFlux = *blowing_flux * ice_density / delta_t;
     SurfaceMassFlux = *surface_flux * ice_density / delta_t;
 
-    latent_heat_from_snow(atmos_density, ice_density, vp, Le, atmos_pressure, 
+    latent_heat_from_snow(atmos_density, vp, Le, atmos_pressure, 
 			  ra_under, TMean, vpd, &temp_latent_heat, 
-			  &temp_latent_heat_sub, &VaporMassFlux, &BlowingMassFlux, &SurfaceMassFlux,
-			  delta_t,Tair, LastSnow, snow_water, wind[2],roughness, ref_height[2],
-			  SnowDepth, overstory, lag_one, sigma_slope, fetch, iveg, Nveg, month);
+			  &temp_latent_heat_sub, &VaporMassFlux,
+                          &BlowingMassFlux, &SurfaceMassFlux);
     *latent_heat += temp_latent_heat * snow_coverage;
     *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
 

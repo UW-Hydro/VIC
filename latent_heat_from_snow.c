@@ -6,7 +6,6 @@
 static char vcid[] = "$Id$";
 
 void latent_heat_from_snow(double  AirDens,
-			   double  Density,
 			   double  EactAir,
 			   double  Lv,
 			   double  Press,
@@ -17,22 +16,7 @@ void latent_heat_from_snow(double  AirDens,
 			   double *LatentHeatSublimation,
 			   double *VaporMassFlux,
 			   double *BlowingMassFlux,
-			   double *SurfaceMassFlux,
-			   double delta_t,
-			   double Tair,
-			   int LastSnow,
-			   double SurfaceLiquidWater,
-			   double Wind,
-			   double *Z0,
-			   double Z,
-			   double SnowDepth,
-			   int overstory,
-			   float lag_one,
-			   float sigma_slope,
-			   float fetch,
-			   int iveg,
-			   int Nveg,
-			   int month) {
+			   double *SurfaceMassFlux) {
 /**********************************************************************
   latent_heat_from_snow.c       Laura Bowling           
 
@@ -47,11 +31,12 @@ void latent_heat_from_snow(double  AirDens,
 	    occur.  Modified calculations of all sublimation terms
 	    to ensure that VaporMassFlux, BlowingMassFlux, and
 	    SurfaceMassFlux consistently have units of kg/m2s.	TJB
+  05-Aug-04 Moved the calculation of BlowingMassFlux back out of this
+	    function into surface_fluxes(), as part of merge with
+	    Laura Bowling's latest code.			TJB
 
 ***********************************************************************/
 
-  extern veg_lib_struct *veg_lib;
-  extern option_struct options;
   double EsSnow;
   double Ls;
 
@@ -64,20 +49,8 @@ void latent_heat_from_snow(double  AirDens,
   if ( Vpd == 0.0 && *SurfaceMassFlux < 0.0 ) 
     *SurfaceMassFlux = 0.0;
 
-  if( options.BLOWING && !overstory ) {
-    Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
-    *BlowingMassFlux = CalcBlowingSnow(delta_t/SECPHOUR, Tair, LastSnow,
-				       SurfaceLiquidWater, Wind, Ls,
-				       AirDens, Press, EactAir, Z0, Z,
-				       SnowDepth, lag_one, sigma_slope,
-				       TMean, iveg, Nveg, fetch,
-				       veg_lib[iveg].displacement[month],
-				       veg_lib[iveg].roughness[month]);
-  }
-  else
-    *BlowingMassFlux = 0.0;
-  
-  /* Calculate latent heat flux */
+  /* Calculate total latent heat flux */
+
   *VaporMassFlux = *SurfaceMassFlux + *BlowingMassFlux;
 
   if ( TMean >= 0.0 ) {

@@ -728,6 +728,7 @@ typedef struct {
 			       condensation from snow pack (m) */
   double blowing_flux;      /* depth of sublimation from blowing snow (m) */
   double surface_flux;      /* depth of sublimation from blowing snow (m) */
+  double transport;         /* flux of snow (potentially) transported from veg type */
   int    last_snow;         /* time steps since last snowfall */
   int    store_snow;        /* flag indicating whether or not new accumulation
 			       is stored on top of an existing distribution */

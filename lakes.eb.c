@@ -39,6 +39,7 @@ void lakemain(atmos_data_struct  *atmos,
   11-18-02 Modifications were made to improve handling of snow and ice
            and to make the lake algorithm interact with the wetland 
            algorithm.                                          LCB
+  27-Aug-04 Added logic to handle blowing_flux and surface_flux.	TJB
   
   Parameters :
 
@@ -534,6 +535,8 @@ void solve_lake(double             snow,
 	 entire lake. */
       lake->evapw           *= ( (1. - fracprv ) * dt * SECPHOUR ); // in mm
       lake_snow->vapor_flux *= fracprv; // in meters 
+      lake_snow->blowing_flux *= fracprv; // in meters 
+      lake_snow->surface_flux *= fracprv; // in meters 
       lake->snowmlt         *= fracprv; // in mm 
 
       // update ice cover 
@@ -2210,6 +2213,12 @@ void update_prcp(dist_prcp_struct *prcp,
    wland_snow[iveg][band].vapor_flux *= (1.-lakefraction);
    wland_snow[iveg][band].vapor_flux += lakefraction * lake_snow->vapor_flux;
 
+   wland_snow[iveg][band].blowing_flux *= (1.-lakefraction);
+   wland_snow[iveg][band].blowing_flux += lakefraction * lake_snow->blowing_flux;
+
+   wland_snow[iveg][band].surface_flux *= (1.-lakefraction);
+   wland_snow[iveg][band].surface_flux += lakefraction * lake_snow->surface_flux;
+
    wland_snow[iveg][band].swq *= (1.-lakefraction);
    wland_snow[iveg][band].swq += lakefraction * lake_snow->swq;
    
@@ -2315,10 +2324,14 @@ void initialize_prcp(dist_prcp_struct *prcp,
   
   if(fraci > 0.0) {   
     lake_snow->vapor_flux = wland_snow[iveg][band].vapor_flux;
+    lake_snow->blowing_flux = wland_snow[iveg][band].blowing_flux;
+    lake_snow->surface_flux = wland_snow[iveg][band].surface_flux;
     lake_snow->surf_temp = wland_snow[iveg][band].surf_temp;
   }
   else {
     lake_snow->vapor_flux = 0.;  
+    lake_snow->blowing_flux = 0.;  
+    lake_snow->surface_flux = 0.;  
     lake_snow->surf_temp = 0.;
   }
 

@@ -62,10 +62,7 @@ double calc_surf_energy_bal(double             Le,
 			    snow_data_struct  *snow,
 			    soil_con_struct   *soil_con,
 			    veg_var_struct    *veg_var_dry,
-			    veg_var_struct    *veg_var_wet,
-			    float lag_one,
-			    float sigma_slope,
-			    float fetch)
+			    veg_var_struct    *veg_var_wet)
 /**************************************************************
   calc_surf_energy_bal.c  Greg O'Donnell and Keith Cherkauer  Sept 9 1997
   
@@ -104,6 +101,12 @@ double calc_surf_energy_bal(double             Le,
     16-Jul-04 Modified the cap on vapor_flux to re-scale
 	      blowing_flux and surface_flux proportionally
 	      so that vapor_flux still = their sum.	TJB
+    05-Aug-04 Removed lag_one, sigma_slope, and fetch from
+	      parameter list, since these were only used in
+	      the call to root_brent/func_surf_energy_bal(),
+	      which no longer needs them.		TJB
+    24-Aug-04 Modified the re-scaling of surface_flux to reduce
+	      round-off errors.				TJB
 
 ***************************************************************/
 {
@@ -286,7 +289,7 @@ double calc_surf_energy_bal(double             Le,
       NOFLUX = options.NOFLUX;
     }
 
-    Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal, iveg, 
+    Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
 		       dmy->month, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2, 
 		       T1_old, T2, Ts_old, soil_con->b_infilt, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, soil_con->max_infil, 
@@ -302,9 +305,10 @@ double calc_surf_energy_bal(double             Le,
 		       energy->advection, OldTSurf, snow->pack_temp, 
 		       Tsnow_surf, kappa_snow, melt_energy, 
 		       snow_coverage, 
-		       snow->density, snow->swq, snow->surf_water,snow->last_snow, 
+		       snow->density, snow->swq, snow->surf_water,
 		       &energy->deltaCC, &energy->refreeze_energy, 
-		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux, tmpNnodes, Cs_node, T_node, Tnew_node, 
+		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
+		       tmpNnodes, Cs_node, T_node, Tnew_node, 
 		       alpha, beta, bubble_node, dz_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
 #if SPATIAL_FROST
@@ -319,11 +323,10 @@ double calc_surf_energy_bal(double             Le,
 		       FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
-		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
+		       &energy->sensible, &energy->snow_flux, &energy->error);
  
     if(Tsurf <= -9998) {  
-      error = error_calc_surf_energy_bal(Tsurf, iveg, dmy->month, VEG, 
+      error = error_calc_surf_energy_bal(Tsurf, dmy->month, VEG, iveg,
 					 veg_class, delta_t, Cs1, Cs2, D1, D2, 
 					 T1_old, T2, Ts_old, 
 					 soil_con->b_infilt, bubble, dp, 
@@ -370,8 +373,7 @@ double calc_surf_energy_bal(double             Le,
 					 &energy->latent, 
 					 &energy->latent_sub, 
 					 &energy->sensible, 
-					 &energy->snow_flux, &energy->error,
-		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
+					 &energy->snow_flux, &energy->error);
     }
 
     /**************************************************
@@ -382,7 +384,7 @@ double calc_surf_energy_bal(double             Le,
       tmpNnodes = Nnodes;
       FIRST_SOLN[0] = TRUE;
       
-         Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal, iveg, 
+         Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
 		       dmy->month, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2, 
 		       T1_old, T2, Ts_old, soil_con->b_infilt, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, soil_con->max_infil, 
@@ -398,9 +400,10 @@ double calc_surf_energy_bal(double             Le,
 		       energy->advection, OldTSurf, snow->pack_temp, 
 		       Tsnow_surf, kappa_snow, melt_energy, 
 		       snow_coverage, 
-		       snow->density, snow->swq, snow->surf_water,snow->last_snow, 
+		       snow->density, snow->swq, snow->surf_water,
 		       &energy->deltaCC, &energy->refreeze_energy, 
-		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,tmpNnodes, Cs_node, T_node, Tnew_node, 
+		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
+		       tmpNnodes, Cs_node, T_node, Tnew_node, 
 		       alpha, beta, bubble_node, dz_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
 #if SPATIAL_FROST
@@ -415,11 +418,10 @@ double calc_surf_energy_bal(double             Le,
 		       FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
-		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
+		       &energy->sensible, &energy->snow_flux, &energy->error);
  
       if(Tsurf <= -9998) {  
-	error = error_calc_surf_energy_bal(Tsurf, iveg, dmy->month, VEG, 
+	error = error_calc_surf_energy_bal(Tsurf, dmy->month, VEG, iveg,
 					   veg_class, delta_t, Cs1, Cs2, D1, 
 					   D2, T1_old, T2, Ts_old, 
 					   soil_con->b_infilt, bubble, dp, 
@@ -468,8 +470,7 @@ double calc_surf_energy_bal(double             Le,
 					   &energy->latent, 
 					   &energy->latent_sub, 
 					   &energy->sensible, 
-					   &energy->snow_flux, &energy->error,
-		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
+					   &energy->snow_flux, &energy->error);
       }
     }
   }
@@ -485,7 +486,7 @@ double calc_surf_energy_bal(double             Le,
     // Reset model so that it solves thermal fluxes for full soil column
     FIRST_SOLN[0] = TRUE;
 
-  error = solve_surf_energy_bal(Tsurf, iveg, 
+  error = solve_surf_energy_bal(Tsurf,
 		       dmy->month, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2, 
 		       T1_old, T2, Ts_old, soil_con->b_infilt, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, soil_con->max_infil, 
@@ -501,7 +502,7 @@ double calc_surf_energy_bal(double             Le,
 		       energy->advection, OldTSurf, snow->pack_temp, 
 		       Tsnow_surf, kappa_snow, melt_energy, 
 		       snow_coverage, 
-		       snow->density, snow->swq, snow->surf_water,snow->last_snow, 
+		       snow->density, snow->swq, snow->surf_water,
 		       &energy->deltaCC, &energy->refreeze_energy, 
 		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
 		       Nnodes, Cs_node, T_node, Tnew_node, 
@@ -519,8 +520,7 @@ double calc_surf_energy_bal(double             Le,
 		       FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
-		       &energy->sensible, &energy->snow_flux, &energy->error,
-		       (double)dt, snow->depth, (double)lag_one, (double)sigma_slope, (double)fetch, (double)Nveg);
+		       &energy->sensible, &energy->snow_flux, &energy->error);
   
   energy->error = error;
 
@@ -618,9 +618,10 @@ double calc_surf_energy_bal(double             Le,
     if (-(snow->vapor_flux) > snow->swq) {
       // if vapor_flux exceeds snow pack, we not only need to
       // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-      snow->surface_flux *= -( snow->swq / snow->vapor_flux );
       snow->blowing_flux *= -( snow->swq / snow->vapor_flux );
+//      snow->surface_flux *= -( snow->swq / snow->vapor_flux );
       snow->vapor_flux = -(snow->swq);
+      snow->surface_flux = snow->vapor_flux - snow->blowing_flux;
     }
 
     /* adjust snowpack for vapor flux */
@@ -874,12 +875,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *sensible_heat;
   double *snow_flux;
   double *store_error;
-  double dt;
-  double SnowDepth;
-  float lag_one;
-  float sigma_slope;
-  float fetch;
-  int Nveg;
 
   /* Define internal routine variables */
   int                i;
@@ -1020,12 +1015,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   sensible_heat           = (double *) va_arg(ap, double *);
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
-  dt                      = (double)   va_arg(ap, double);
-  SnowDepth               = (double)   va_arg(ap, double);
-  lag_one                 = (float)    va_arg(ap, double);
-  sigma_slope             = (float)    va_arg(ap, double);
-  fetch                   = (float)    va_arg(ap, double);
-  Nveg                    = (int)      va_arg(ap, double);
 
   /***************
     Main Routine

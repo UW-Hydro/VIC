@@ -11,6 +11,14 @@
  * DESCRIP-END.
  * FUNCTIONS:    CalcBlowingSnow()
  * COMMENTS:     
+ * Modifications:
+ *   05-Aug-04 Merged with Laura Bowling's updated code to fix the following problems:
+ *	       - Error in array declaration line 373 and 375
+ *	       - Added calculation of blowing snow transport.  This is not really used
+ *	         currently, but it is something Laura is experimenting with.
+ *	       - Fixed RH profile.
+ *	       - Fixed vertical integration functions.
+ *										TJB
  */
 
 #include <stdarg.h>
@@ -42,21 +50,26 @@ static char vcid[] = "$Id$";
 #define FETCH 1               /* Include fetch dependence (1). */
 #define CALC_PROB 1             /* Variable (1) or constant (0) probability of occurence. */
 
-void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-double trapzd(double a, double b, int n, double es, double Wind, double AirDens, double ZO, double EactAir, 
-	      double F, double hsalt, double phi_r, double ushear, double Zrh);
-double qromb(double a, double b, double es, double Wind, double AirDens, double ZO, double EactAir, 
-	     double F, double hsalt, double phi_r, double ushear, double Zrh);
+double qromb(double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, 
+	     double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, 
+	     double a, double b);
+double (*funcd)(double z,double es,  double Wind, double AirDens, double ZO,          
+			  double EactAir,double F, double hsalt, double phi_r,         
+			  double ushear, double Zrh);
 double sub_with_height(double z,double es,  double Wind, double AirDens, double ZO,          
-		       double EactAir,double F, double hsalt, double phi_r,         
-		       double ushear, double Zrh, int flag);
+			  double EactAir,double F, double hsalt, double phi_r,         
+			  double ushear, double Zrh);
+double transport_with_height(double z,double es,  double Wind, double AirDens, double ZO,
+				double EactAir,double F, double hsalt, double phi_r,         
+				double ushear, double Zrh);
 double rtnewt(double x1, double x2, double xacc, double Ur, double Zr);
 void get_shear(double x, double *f, double *df, double Ur, double Zr);
 double get_prob(double Tair, double Age, double SurfaceLiquidWater, double U10);
-double get_thresh(double Tair, double SurfaceLiquidWater, double U10, double Zo_salt, double prob_occurence, int flag, double ushear);
-void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt);
+double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt, int flag);
+void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt, double utshear);
 double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double utshear, 
-		   double ushear, double fe, double Tsnow, double Tair, double U10, double Zo_salt, double F);
+		   double ushear, double fe, double Tsnow, double Tair, double U10, 
+		   double Zo_salt, double F, double *Transport);
 
 /*****************************************************************************
   Function name: CalcBlowingSnow()
@@ -101,7 +114,8 @@ double CalcBlowingSnow( double Dt,
 			int Nveg, 
 			float fe,
 			double displacement,
-			double roughness)
+			double roughness,
+			double *TotalTransport)
 
 {
   /* Local variables: */
@@ -126,6 +140,8 @@ double CalcBlowingSnow( double Dt,
   double Zo_salt;
   double ratio, wind10;
   double Uveg, hv, Nd;
+  double Transport;
+  int count=0;
 
   Lv = (2.501e6 - 0.002361e6 * Tsnow);
   /*******************************************************************/
@@ -135,6 +151,7 @@ double CalcBlowingSnow( double Dt,
       
   /* Saturation density of water vapor, Liston A-8 */
   es = svp(Tair);
+
   Tk = Tair  + KELVIN;
     
   Ros = 0.622*es/(287*Tk);
@@ -158,44 +175,32 @@ double CalcBlowingSnow( double Dt,
     sigma_slope = .0002;
   }
   // sigma_w/uo:
-  ratio = (2.4 - (0.4/0.9)*lag_one)*sigma_slope;
+  ratio = (2.44 - (0.43)*lag_one)*sigma_slope;
   //  sigma_w = wind10/(.69+(1/ratio));
   //  Uo = sigma_w/ratio;
   
   sigma_w = wind10*ratio;
-
-  /* Hack to keep model running until I find bug.*/
-  if(sigma_w > 10. || sigma_w < -10.) {
-    sigma_w = 0.22;
-    fprintf(stderr, "sigma problem:\n");
-    fprintf(stderr, "sigma_W =%f, wind10 = %f, Wind=%f\n",sigma_w, wind10, Wind);
-    fprintf(stderr, "lagone=%f, sigma_slope=%f\n",lag_one, sigma_slope);
-  }
-	
   Uo = wind10;
   
-  /*************/
-  /* Parameters for roughness above snow. */
-  hv = (3./2.)*displacement;
-  Nd = (4./3.)*(roughness/displacement);
+  /*********** Parameters for roughness above snow. *****************/
+    hv = (3./2.)*displacement;
+    Nd = (4./3.)*(roughness/displacement);
 
   /*******************************************************************/
   /** Begin loop through wind probability function.                  */
 
   Total = 0.0;
+  *TotalTransport = 0.0;
   area = 1./NUMINCS;
   
-  /* Assume snow holding capacity is twice the roughness length. */
-  /* No snow is transported until holding capacity is satisfied. */
-
   if(snowdepth > 0.0) {
     if(SPATIAL_WIND && sigma_w != 0.) {
       for(p= 0; p< NUMINCS; p++) {
       
-      SubFlux = lower = upper = 0.0;
+	SubFlux = lower = upper = 0.0;
       /* Find the limits of integration. */
       if(p==0) {
-	lower = 0;
+	lower = -9999;
 	upper = Uo + sigma_w*log(2.*(p+1)*area);
       }
       else if(p > 0 && p < NUMINCS/2) {
@@ -208,15 +213,13 @@ double CalcBlowingSnow( double Dt,
       }
       else if(p == NUMINCS-1) {
 	lower =  Uo - sigma_w*log(2.-2.*(p*area));
-	upper = Uo*2.;
+	upper = 9999;
       }
 
-      if(lower < 0.)
-	lower = 0.;
-      if(upper < 0)
-	upper = 0.;
-      if(lower > upper)  /* Could happen if lower > Uo*2 */
+      if(lower > upper)  {/* Could happen if lower > Uo*2 */
 	lower = upper;
+	fprintf(stderr,"Warning: Error with probability boundaries in CalcBlowingSnow()\n");
+      }
 
       /* Find expected value of wind speed for the interval. */
       U10 = Uo;
@@ -229,9 +232,7 @@ double CalcBlowingSnow( double Dt,
       else {
 	fprintf(stderr,"Problem with probability ranges in CalcBlowingSnow.c\n");
 	fprintf(stderr,"Increment = %d, integration limits = %f - %f\n",p,upper, lower);
-	fprintf(stderr, "sigma_W =%f, Uo = %f, area = %f\n",sigma_w, Uo, area);
-	fprintf(stderr, "lagone=%f, sigma_slope=%f\n",lag_one, sigma_slope);
-	U10 = 0.4;
+	exit(0);
       }
    
       if(U10 < 0.4)
@@ -242,70 +243,77 @@ double CalcBlowingSnow( double Dt,
       /* Calculate parameters for probability of blowing snow occurence. */
       /* ( Li and Pomeroy 1997) */
 
-      if(snowdepth < hv)
-	Uveg = U10/sqrt(1.+ 680*Nd*(hv - snowdepth));
+      if(snowdepth < hv) {
+		Uveg = U10/sqrt(1.+ 170*Nd*(hv - snowdepth));
+      }
       else
 	Uveg = U10;
   
-      //   printf("Uveg = %f, U10 = %f\n",Uveg, U10);
+      //  fprintf(stderr, "Uveg = %f, U10 = %f\n",Uveg, U10);
 
       prob_occurence = get_prob(Tair, Age, SurfaceLiquidWater, Uveg);
 
-      /* Iterate to find actual shear stress during saltation. */
-
-      shear_stress(U10, ZO[2], &ushear, &Zo_salt);
+      //   printf("prob=%f\n",prob_occurence);
      
-
       /*******************************************************************/
       /* Calculate threshold shear stress. Send 0 for constant or  */
       /* 1 for variable threshold after Li and Pomeroy (1997)      */
 
-      utshear = get_thresh(Tair, SurfaceLiquidWater, U10, ZO[2], prob_occurence, VAR_THRESHOLD, ushear);
+      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO[2], VAR_THRESHOLD);
+   
+      /* Iterate to find actual shear stress during saltation. */
+
+      shear_stress(U10, ZO[2], &ushear, &Zo_salt, utshear);
       
-      
-      if(ushear > utshear && EactAir < es) {
+      if(ushear > utshear) {
 	
-	SubFlux = CalcSubFlux(EactAir, es, Zrh, AirDens, utshear,ushear, fe, Tsnow, Tair, U10, Zo_salt, F);}
-      else
+	SubFlux = CalcSubFlux(EactAir, es, Zrh, AirDens, utshear,ushear, fe, Tsnow, 
+			      Tair, U10, Zo_salt, F, &Transport);
+      }
+      else {
 	SubFlux=0.0;
-  
+	Transport = 0.0;
+      }
+ 
       Total += (1./NUMINCS)*SubFlux*prob_occurence;
-    
-      //   fprintf(stderr, "iveg=%d,U10=%f, prob_occurence=%f, Total=%f\n",iveg,U10, prob_occurence,Total);
+      *TotalTransport += (1./NUMINCS)*Transport*prob_occurence;
+
       }
    
     }
     else {
-      Uo=wind10;
+      U10=Uo;
        /*******************************************************************/
       /* Calculate parameters for probability of blowing snow occurence. */
       /* ( Li and Pomeroy 1997) */
   
       if(snowdepth < hv)
-	Uveg = U10/sqrt(1.+ 680*Nd*(hv - snowdepth));
+	Uveg = U10/sqrt(1.+ 170*Nd*(hv - snowdepth));
       else
 	Uveg = U10;
 
       prob_occurence = get_prob(Tair, Age, SurfaceLiquidWater, Uveg);
     
-      /* Iterate to find actual shear stress during saltation. */
-
-      shear_stress(Uo, ZO[2], &ushear, &Zo_salt);
-      
-
       /*******************************************************************/
       /* Calculate threshold shear stress. Send 0 for constant or  */
       /* 1 for variable threshold after Li and Pomeroy (1997)      */
 
-      utshear = get_thresh(Tair, SurfaceLiquidWater, Uo, ZO[2], prob_occurence, VAR_THRESHOLD, ushear);
+      utshear = get_thresh(Tair, SurfaceLiquidWater, ZO[2], VAR_THRESHOLD);
 
-      if(ushear > utshear && EactAir < es) {
-	SubFlux = CalcSubFlux(EactAir, es, Zrh, AirDens, utshear,ushear, fe, Tsnow, Tair, Uo, Zo_salt, F);
+      /* Iterate to find actual shear stress during saltation. */
+      
+      shear_stress(Uo, ZO[2], &ushear, &Zo_salt, utshear);
+
+      if(ushear > utshear) {
+	SubFlux = CalcSubFlux(EactAir, es, Zrh, AirDens, utshear,ushear, fe, Tsnow, 
+			      Tair, Uo, Zo_salt, F, &Transport);
       }
-      else
+      else {
 	SubFlux=0.0;
-
+	Transport = 0.0;
+      }
       Total = SubFlux*prob_occurence;
+      *TotalTransport = Transport*prob_occurence;
     }
   }
 
@@ -316,18 +324,25 @@ double CalcBlowingSnow( double Dt,
   
 }
 
-double qromb(double a, double b, double es, double Wind, double AirDens, double ZO, double EactAir, 
-	     double F, double hsalt, double phi_r, double ushear, double Zrh)
-     // Returns the integral of the function func from a to b.  Integration is performed by Romberg's method:
-     // Numerical Recipes in C Section 4.3
+double qromb(double (*funcd)(), double es, double Wind, double AirDens, double ZO, 
+	     double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, 
+	     double a, double b)
+     // Returns the integral of the function func from a to b.  Integration is performed 
+     // by Romberg's method:  Numerical Recipes in C Section 4.3
 {
+  void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
+  double trapzd(double (*funcd)(), double es, double Wind, double AirDens, 
+		double ZO, double EactAir, double F, double hsalt, double phi_r, 
+		double ushear, double Zrh, double a, double b, int n);
+
   double ss, dss;
   double s[MAX_ITER+1], h[MAX_ITER+2];
   int j;
 
   h[1] = 1.0;
   for(j=1; j<=MAX_ITER; j++) {
-    s[j]=trapzd(a,b,j,es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r, ushear, Zrh);
+    s[j]=trapzd(funcd,es, Wind, AirDens, ZO, EactAir, F, hsalt, phi_r, 
+		ushear, Zrh, a,b,j);
     if(j >= K) {
       polint(&h[j-K],&s[j-K],K,0.0,&ss,&dss);
       if (fabs(dss) <= MACHEPS*fabs(ss)) return ss;
@@ -346,9 +361,9 @@ void polint(double xa[], double ya[], int n, double x, double *y, double *dy)
 
   ns=1;
   dif=fabs(x-xa[1]);
-  c=(double *)malloc((size_t) (n*sizeof(double)));
+  c=(double *)malloc((size_t) ((n+1)*sizeof(double)));
   if(!c) nrerror("allocation failure in vector()");
-  d=(double *)malloc((size_t) (n*sizeof(double)));
+  d=(double *)malloc((size_t) ((n+1)*sizeof(double)));
   if(!d) nrerror("allocation failure in vector()");
 
   for (i=1; i<=n; i++) {
@@ -376,27 +391,29 @@ void polint(double xa[], double ya[], int n, double x, double *y, double *dy)
   free(c);
 }
 
-double trapzd(double a, double b, int n, double es, double Wind, double AirDens, double ZO, double EactAir, 
-	     double F, double hsalt, double phi_r, double ushear, double Zrh)
+
+
+double trapzd(double (*funcd)(), double es, double Wind, double AirDens, double ZO, 
+	      double EactAir, double F, double hsalt, double phi_r, double ushear, 
+	      double Zrh, double a, double b, int n)
 {
-  va_list ap;
   double x, tnm, sum, del;
   static double s;
   int it, j;
 
   if (n==1) {
-    return (s=0.5*(b-a)*(sub_with_height(a, es, Wind, AirDens, ZO, EactAir, F, hsalt, 
-					 phi_r, ushear, Zrh, 0) + 
-			 sub_with_height(b,es, Wind, AirDens, ZO, EactAir, F, hsalt, 
-					 phi_r, ushear, Zrh, 0)));
+    return (s=0.5*(b-a)*((*funcd)(a, es, Wind, AirDens, ZO, EactAir, F, hsalt, 
+					 phi_r, ushear, Zrh) + 
+			 (*funcd)(b,es, Wind, AirDens, ZO, EactAir, F, hsalt, 
+					 phi_r, ushear, Zrh)));
   }
   else {
     for (it=1, j=1; j<n-1; j++) it <<= 1;
     tnm=it;
     del=(b-a)/tnm;
     x=a+0.5*del;
-    for(sum=0.0, j=1; j<=it; j++, x+=del ) sum += sub_with_height(x,es, Wind, AirDens, ZO, EactAir, F, hsalt, 
-					 phi_r, ushear, Zrh, 0);
+    for(sum=0.0, j=1; j<=it; j++, x+=del ) sum += (*funcd)(x,es, Wind, AirDens, ZO, EactAir, 
+							   F, hsalt, phi_r, ushear, Zrh);
     s=0.5*(s+(b-a)*sum/tnm);
     return s;
   }
@@ -445,21 +462,20 @@ double rtnewt(double x1, double x2, double acc, double Ur, double Zr)
       }
       if(fabs(dx) < acc) return rts;
       // if(rts < .025) rts=.025;
-  get_shear(rts,&f,&df, Ur, Zr);
+      get_shear(rts,&f,&df, Ur, Zr);
        if(f<0.0)
 	 xl=rts;
        else 
 	 xh = rts;
     }
     fprintf(stderr, "Maximum number of iterations exceeded in rtnewt.\n");
-    rts = .025;
-      return rts;
+    return 0.0;
 }
 
 void get_shear(double x, double *f, double *df, double Ur, double Zr) {
 
-  *f = exp(von_K*Ur/x) - (2.*G_STD*Zr)/(.12*x*x);
-  *df = -1.*exp(von_K*Ur/x)/(x*x) + 2.*(2.*G_STD*Zr)/(.12*x*x*x);
+  *f = log(2.*G_STD*Zr/.12)+log(1/(x*x)) - von_K*Ur/x;
+  *df = von_K*Ur/(x*x) - 2./x;
 }
 
 /*****************************************************************************
@@ -497,8 +513,7 @@ double sub_with_height(double z,
 		       double hsalt,         
 		       double phi_r,         
 		       double ushear,        
-		       double Zrh,
-		       int flag)
+		       double Zrh)
 {
 
   /* Local variables */
@@ -529,7 +544,10 @@ double sub_with_height(double z,
   Re = 2. * Rmean * Vtz / KIN_VIS;
   Nu = 1.79 + 0.606 * pow(Re, 0.5);
 
-  sigz = ((EactAir/es) - 1.) * (1 - .027*log( z / Zrh));
+  // LCB: found error in rh calc, 1/20/04, check impact
+  // sigz = ((EactAir/es) - 1.) * (1 + .027*log(z) - .027*log(Zrh));
+  sigz = ((EactAir/es) - 1.) * (1.019 + .027*log(z));
+
   dMdt = 2 * PI * Rmean * sigz * Nu / F;
   // sublimation loss rate coefficient (1/s)
 
@@ -539,12 +557,8 @@ double sub_with_height(double z,
   
   temp = (0.5*ushear*ushear)/(Wind*SETTLING);
   phi_t = phi_r* ( (temp + 1.) * pow((z/hsalt),(-1.*SETTLING)/(von_K*ushear)) - temp );
-
   
-  if(flag==1) 
-    return psi_t;
-  else
-    return psi_t * phi_t;
+  return psi_t * phi_t;
 }
 
 /*******************************************************************/
@@ -562,21 +576,20 @@ double get_prob(double Tair, double Age, double SurfaceLiquidWater, double U10)
     if(SurfaceLiquidWater < 0.001) {
       mean_u_occurence = 11.2 + 0.365*Tair + 0.00706*Tair*Tair+0.9*log(Age);
       sigma_occurence = 4.3 + 0.145*Tair + 0.00196*Tair*Tair;
-      if(U10 > 3.)
-	prob_occurence = 1./(1.+exp(sqrt(PI)*(mean_u_occurence-U10)/sigma_occurence));
-      else
-	prob_occurence = 0.0;
       
+      prob_occurence = 1./(1.+exp(sqrt(PI)*(mean_u_occurence-U10)/sigma_occurence));
     }
     else {
       mean_u_occurence = 21.;
       sigma_occurence = 7.;
 	
-      if(U10 > 7.)
-	prob_occurence = 1./(1.+exp(sqrt(PI)*(mean_u_occurence-U10)/sigma_occurence));
-      else
-	prob_occurence = 0.0;
+      prob_occurence = 1./(1.+exp(sqrt(PI)*(mean_u_occurence-U10)/sigma_occurence));
     }
+
+    if(prob_occurence < 0.0)
+      prob_occurence = 0.0;
+    if(prob_occurence > 1.0)
+      prob_occurence = 1.0;
   }
   else
     prob_occurence = 1.;
@@ -584,8 +597,7 @@ double get_prob(double Tair, double Age, double SurfaceLiquidWater, double U10)
   return prob_occurence;
 }
 
-double get_thresh(double Tair, double SurfaceLiquidWater, double U10, double Zo_salt, 
-		  double prob_occurence, int flag, double ushear) 
+double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt, int flag) 
 {
   double ut10;
   double utshear;
@@ -603,10 +615,8 @@ double get_thresh(double Tair, double SurfaceLiquidWater, double U10, double Zo_
   if(flag) {
     // Variable threshold, Li and Pomeroy 1997
     utshear = von_K * ut10 / log(10./Zo_salt);
-    if(ushear < utshear && prob_occurence > 0.001)
-      utshear = von_K * (U10 - .5) / log(10./Zo_salt);
   }
-      // Constant threshold, i.e. Liston and Sturm
+  // Constant threshold, i.e. Liston and Sturm
   else
     utshear = UTHRESH;
   
@@ -614,25 +624,44 @@ double get_thresh(double Tair, double SurfaceLiquidWater, double U10, double Zo_
 }
 
 
-void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt)
+void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt, double utshear)
 {
-  double temp;
-  
-  /* Iterate to find actual shear stress. */
-  temp = von_K * U10 / log(10./ZO);
-  // fprintf(stderr,"x1=.0000001, x2=%f, U10=%f\n",temp+5, U10);
-  *ushear = rtnewt (.0000001, temp+5, .000001, U10, 10.);
-  *Zo_salt = 0.12 *(*ushear) * (*ushear) / (2.* G_STD);
+  double umin, umax, xacc;
+  double fl, fh, df;
 
-  if(*Zo_salt < ZO) {
-    *Zo_salt = ZO;
-    *ushear = temp;
-  }
+  /* Find min & max shear stress to bracket value. */
+  umin = utshear;
+  umax = von_K*U10;
+  xacc = 0.10*umin;
 
+  /* Check to see if value is bracketed. */
+   get_shear(umin,&fl,&df, U10, 10.);
+   get_shear(umax,&fh,&df, U10, 10.);
+
+    if(fl < 0.0 && fh < 0.0) { 
+      fprintf(stderr, "Solution in rtnewt surpasses upper boundary.\n");
+      fprintf(stderr, "fl(%f)=%f, fh(%f)=%f\n",umin, fl, umax, fh);
+      exit(0);
+    }
+    
+    if(fl > 0.0 && fh > 0.0) {
+      //      fprintf(stderr, "No solution possible that exceeds utshear.\n");
+      //   fprintf(stderr, "utshear=%f, u10=%f\n",utshear, U10);
+     
+      *Zo_salt = ZO;
+      *ushear = von_K * U10 / log(10./ZO);  
+    }
+    else {
+      /* Iterate to find actual shear stress. */
+      *ushear = rtnewt (umin, umax, xacc, U10, 10.);
+      *Zo_salt = 0.12 *(*ushear) * (*ushear) / (2.* G_STD);
+    }
+    
 }
 
 double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double utshear, 
-		   double ushear, double fe, double Tsnow, double Tair, double U10, double Zo_salt, double F)
+		   double ushear, double fe, double Tsnow, double Tair, double U10, 
+		   double Zo_salt, double F, double *Transport)
 
 {
   float b, undersat_2;
@@ -641,13 +670,18 @@ double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double
   double phi_s, psi_s;
   double T, ztop;
   double particle;
+  double saltation_transport;
+  double suspension_transport;
 
   SubFlux=0.0;
   particle = utshear*2.8;
   // SBSM:
   if(SIMPLE) {   
     b=.25;
-    undersat_2 = ((EactAir/es)-1.)*(1.-.027*log(Zrh)+0.027*log(2)); 
+    if(EactAir >= es)
+      undersat_2 = 0.0;
+    else
+      undersat_2 = ((EactAir/es)-1.)*(1.-.027*log(Zrh)+0.027*log(2)); 
     //  fprintf(stderr,"RH=%f\n",EactAir/es);
     SubFlux =  b*undersat_2* pow(U10, 5.) / F;
   }
@@ -662,23 +696,102 @@ double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double
     Qsalt = ( CSALT * AirDens /  G_STD ) * (utshear / ushear) * (ushear*ushear - utshear*utshear); 
     if(FETCH)
       Qsalt *= (1.+(500./(3.*fe))*(exp(-3.*fe/500.)-1.));
-    hsalt = 1.6 * ushear * ushear / ( 2. * G_STD );
-	  
+    
+    // Liston and Sturm (1998)
+    // hsalt = 1.6 * ushear * ushear / ( 2. * G_STD );
+	
+    // Pomeroy and Male (1992)
+    hsalt = 0.08436*pow(ushear,1.27);
+
     // Saltation layer mass concentration (kg/m3)
     phi_s = Qsalt / (hsalt * particle);
-	  
-    // Sublimation loss-rate for the saltation layer (s-1)
-    psi_s =  sub_with_height(hsalt/2.,es, U10, AirDens, Zo_salt, EactAir, F, hsalt, 
-				 phi_s, ushear, Zrh, 1);
-    
-    // Sublimation from the saltation layer in kg/m2*s
-    SubFlux = phi_s*psi_s*hsalt;
-   
+
     T = 0.5*(ushear*ushear)/(U10*SETTLING);
     ztop = hsalt*pow(T/(T+1.), (von_K*ushear)/(-1.*SETTLING));
-    //  Suspension layer must be integrated
-    SubFlux += qromb(hsalt, ztop, es, U10, AirDens, Zo_salt, EactAir, F, hsalt, phi_s, ushear, Zrh);
+
+    if(EactAir >= es) {
+      SubFlux = 0.0;
+    }
+    else 
+      { 
+	// Sublimation loss-rate for the saltation layer (s-1)
+	psi_s =  sub_with_height(hsalt/2.,es, U10, AirDens, Zo_salt, EactAir, F, hsalt, 
+				 phi_s, ushear, Zrh);
+    
+	// Sublimation from the saltation layer in kg/m2*s
+	SubFlux = phi_s*psi_s*hsalt;
+    
+	//  Suspension layer must be integrated
+	SubFlux += qromb(sub_with_height, es, U10, AirDens, Zo_salt, EactAir, F, hsalt,
+			 phi_s, ushear, Zrh, hsalt, ztop);
+      }
+
+    // Transport out of the domain by saltation Qs(fe) (kg/m*s), eq 10 Liston and Sturm
+    saltation_transport = Qsalt*(1-exp(-3.*fe/500.));
+
+    // Transport in the suspension layer
+    suspension_transport = qromb(transport_with_height, es, U10, AirDens, Zo_salt, 
+    				 EactAir, F, hsalt, phi_s, ushear, Zrh, hsalt, ztop);
+
+    // Transport at the downstream edge of the fetch in kg/m*s
+    *Transport = (suspension_transport + saltation_transport);
+    if(FETCH) 
+      *Transport /= fe;
   }
 
   return SubFlux;
+}
+
+/*****************************************************************************
+  Function name: transport_with_height()
+
+  Purpose      : Calculate the transport rate for a given height above the boundary layer.
+
+  Required     :
+    double z               - Height of solution (m) 
+    double Tair;           - Air temperature (C) 
+    double Wind;           - Wind speed (m/s), 2 m above snow 
+    double AirDens;        - Density of air (kg/m3) 
+    double ZO;             - Snow roughness height (m)
+    double EactAir;        - Actual vapor pressure of air (Pa) 
+    double F;              - Denominator of dm/dt          
+    double hsalt;          - Height of the saltation layer (m)
+    double phi_r;          - Saltation layer mass concentration (kg/m3)
+    double ushear;         - shear velocity (m/s) 
+    double Zrh;            - Reference height of humidity measurements
+
+  Returns      :
+   double f(z)             - Transport rate in kg/m^2*s
+
+  Modifies     : none
+
+*****************************************************************************/
+double transport_with_height(double z,
+		       double es,          
+		       double Wind,          
+		       double AirDens,     
+		       double ZO,          
+		       double EactAir,        
+		       double F,          
+		       double hsalt,         
+		       double phi_r,         
+		       double ushear,        
+		       double Zrh)
+{
+
+  /* Local variables */
+  double u_z;
+  double temp;
+  double phi_t;
+  
+  // Find wind speed at current height
+
+  u_z = ushear*log(z/ZO)/von_K;
+
+  // Concentration of turbulent suspended snow Kind (1992)
+  
+  temp = (0.5*ushear*ushear)/(Wind*SETTLING);
+  phi_t = phi_r* ( (temp + 1.) * pow((z/hsalt),(-1.*SETTLING)/(von_K*ushear)) - temp );
+  
+  return u_z * phi_t;
 }

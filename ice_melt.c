@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Fri Mar  2 18:14:55 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Mon Apr 21 17:07:05 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -70,13 +70,18 @@ static char vcid[] = "$Id$";
                                    snow pack (W/m2)
 
   Comments     :
+
+  Modifications:
+  11-18-02 Modified method by which lake coverage fraction and ice height 
+           are updated.                                                LCB
+
 *****************************************************************************/
 void ice_melt(double            z2,
 	      double            aero_resist,
 	      double            Le,
 	      snow_data_struct *snow,
 	      lake_var_struct  *lake,
-	      int            delta_t,
+	      int               delta_t,
 	      double            displacement,
 	      double            Z0,
 	      double            surf_atten,
@@ -131,8 +136,8 @@ void ice_melt(double            z2,
   double advection;
   double deltaCC;
   double SnowFlux;		/* thermal flux through snowpack from ground */
-  double latent_heat;		/* thermal flux through snowpack from ground */
-  double sensible_heat;		/* thermal flux through snowpack from ground */
+  double latent_heat;		
+  double sensible_heat;		
   double melt_energy = 0.;
 
   SnowFall = snowfall / 1000.; /* convet to m */
@@ -161,14 +166,16 @@ void ice_melt(double            z2,
   vapor_flux = snow->vapor_flux;
 
   Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
-				   z2, displacement, Z0, wind, net_short, 
-				   longwave, density, Le, air_temp,
-				   pressure * 1000., vpd * 1000., vp * 1000.,
-				   RainFall, snow->swq, snow->surf_water, 
-				   OldTSurf, &RefreezeEnergy, &vapor_flux, 
-				  &advection, deltaCC, Tcutoff, avgcond, SWconducted,
-				  snow->swq*RHO_W/RHOSNOW, RHOSNOW, surf_atten, 
-				   &SnowFlux, &latent_heat, &sensible_heat, &LWnet);
+				  z2, displacement, Z0, wind, net_short, 
+				  longwave, density, Le, air_temp,
+				  pressure * 1000., vpd * 1000., vp * 1000.,
+				  RainFall, snow->swq+LakeIce, 
+				  snow->surf_water, 
+				  OldTSurf, &RefreezeEnergy, &vapor_flux, 
+				  &advection, deltaCC, Tcutoff, avgcond, 
+				  SWconducted, snow->swq*RHO_W/RHOSNOW, 
+				  RHOSNOW, surf_atten, &SnowFlux, 
+				  &latent_heat, &sensible_heat, &LWnet);
 
   snow->vapor_flux = vapor_flux;
   save_refreeze_energy[0] = RefreezeEnergy;
@@ -259,7 +266,7 @@ void ice_melt(double            z2,
 				 displacement, Z0, wind, net_short, longwave,
 				 density, Le, air_temp, pressure * 1000.,
 				 vpd * 1000., vp * 1000., RainFall, 
-				 snow->swq,
+				 snow->swq+LakeIce,
 				 snow->surf_water, OldTSurf, &RefreezeEnergy, 
 				 &vapor_flux, &advection, deltaCC, Tcutoff, 
 				 avgcond, SWconducted,
@@ -272,7 +279,8 @@ void ice_melt(double            z2,
 				 z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
 				 pressure * 1000., vpd * 1000., vp * 1000.,
-				 RainFall, snow->swq, snow->surf_water, 
+				 RainFall, snow->swq+LakeIce, 
+				snow->surf_water, 
 				 OldTSurf,
 				 &RefreezeEnergy, &vapor_flux, &advection, 
 				 deltaCC, Tcutoff, 
@@ -285,7 +293,7 @@ void ice_melt(double            z2,
 				     z2, displacement, Z0, wind, net_short,
 				     longwave, density, Le, air_temp,
 				     pressure * 1000., vpd * 1000., 
-				     vp * 1000.,RainFall, snow->swq, 
+				     vp * 1000.,RainFall, snow->swq+LakeIce, 
 				     snow->surf_water, OldTSurf, &RefreezeEnergy, 
 				     &vapor_flux, &advection, deltaCC, Tcutoff, 
 				     avgcond, SWconducted, snow->swq*RHO_W/RHOSNOW, 
@@ -348,22 +356,27 @@ void ice_melt(double            z2,
   
   snow->swq = SnowIce + snow->surf_water;
   lake->hice = LakeIce * RHO_W/RHOICE;
-  if (lake->hice < FRACMIN) {
+  if(lake->hice <= 0.0)
+    {
+      lake->hice = 0.0;
+      lake->fraci = 0.0;
+    }
+  //  if (lake->hice < FRACMIN) {
       /* ....................................................................
        * If the ice height is lower than the minimum ice height increase the
        * height and decrease the fractional cover in order to conserve
        * numerical stability.  Ice covered fraction changes linearly up to FRACMIN.
        * ....................................................................*/
 
-    lake->fraci=(lake->hice*lake->fraci)/FRACMIN;
+  //    lake->fraci=(lake->hice*lake->fraci)/FRACMIN;
 
-      if(lake->fraci > 0.0)
-	lake->hice=FRACMIN;
-      else {
-	lake->hice=0.0;
-	lake->fraci = 0.0;
-      }
-    }
+  //  if(lake->fraci > 0.0)
+  //lake->hice=FRACMIN;
+  //  else {
+  //lake->hice=0.0;
+  //lake->fraci = 0.0;
+  //  }
+  //}
 
   /* Mass balance test */
 

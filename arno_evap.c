@@ -52,6 +52,7 @@ double arno_evap(layer_data_struct *layer_wet,
   double moist_resid;
   double max_infil;
   double Evap;
+  double tmpsum;
   layer_data_struct *layer;
 
   evap_temp = Tsurf;
@@ -152,9 +153,12 @@ double arno_evap(layer_data_struct *layer_wet,
       ratio = pow(ratio,(1.0/b_infilt));
     
       dummy = 1.0;
-      for(num_term=1;num_term<=30;num_term++)
-	dummy += b_infilt * pow(ratio,(double)num_term)/
+      for(num_term=1;num_term<=30;num_term++) {
+	tmpsum = ratio;
+	for(i=1;i<num_term;i++) tmpsum *= ratio;
+	dummy += b_infilt * tmpsum /
 	  (b_infilt + num_term);
+      }
     
       beta_asp = as+(1.0-as)*(1.0-ratio)*dummy;
       evap = Epot*beta_asp;

@@ -94,8 +94,9 @@ void calc_long_shortwave(double *shortwave,
       }
       if(!HAVE_LONGWAVE)
         *longwave = (1.0 + 0.17 * (*tskc)
-                  * (*tskc)) * (0.740+0.0049* (vp)*10.0)
-                  * STEFAN_B * pow(air_temp+KELVIN,4.0)  / LWAVE_COR;
+		     * (*tskc)) * (0.740+0.0049* (vp)*10.0)
+	  * STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
+	  * (air_temp+KELVIN) * (air_temp+KELVIN) / LWAVE_COR;
     }
 
     else if(HAVE_SHORTWAVE && !HAVE_LONGWAVE) {
@@ -105,16 +106,18 @@ void calc_long_shortwave(double *shortwave,
         *tskc = sqrt((1.0 - *shortwave / Ic) / 0.65);
         last_tskc = *tskc;
         *longwave = (1.0 + 0.17 * (*tskc) * (*tskc))
-                  * (0.740+0.0049*vp*10.0) * STEFAN_B
-                  * pow(air_temp+KELVIN,4.0)  / LWAVE_COR;
+	  * (0.740+0.0049*vp*10.0) * STEFAN_B
+	  * (air_temp+KELVIN) * (air_temp+KELVIN) 
+	  * (air_temp+KELVIN) * (air_temp+KELVIN)  / LWAVE_COR;
       }
       else {
         /** Measured shortwave exceeds estimated **/
         sum_exceed++;
         *tskc = last_tskc;
         *longwave = (1.0 + 0.17*(*tskc)*(*tskc))
-                  * (0.740+0.0049*vp*10.0) * STEFAN_B
-                  * pow(air_temp+KELVIN,4.0)  / LWAVE_COR;
+	  * (0.740+0.0049*vp*10.0) * STEFAN_B
+	  * (air_temp+KELVIN) * (air_temp+KELVIN) 
+	  * (air_temp+KELVIN) * (air_temp+KELVIN)  / LWAVE_COR;
       }
     }
     else {
@@ -126,14 +129,10 @@ void calc_long_shortwave(double *shortwave,
     else if(HAVE_SHORTWAVE && !HAVE_TSKC) *tskc = last_tskc;
     if(!HAVE_LONGWAVE)
       *longwave = (1.0 + 0.17*(*tskc)*(*tskc))
-                * (0.740+0.0049*vp*10.0) * STEFAN_B
-                * pow(air_temp+KELVIN,4.0)  / LWAVE_COR;
+	* (0.740+0.0049*vp*10.0) * STEFAN_B
+	* (air_temp+KELVIN) * (air_temp+KELVIN) 
+	* (air_temp+KELVIN) * (air_temp+KELVIN)  / LWAVE_COR;
   }
-
-/*****
-  if(sum_exceed>0) fprintf(stderr,"WARNING: measured shortwave exceed calaculated maximum %i out of %i times.\n",sum_exceed,nrecs);
-  if(sum_zero>0) fprintf(stderr,"WARNING: measured shortwave equaled zero %i out of %i times.\n",sum_zero,nrecs);
-*****/
 
 }
 

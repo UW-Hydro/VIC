@@ -7,6 +7,8 @@
 #             always be recompiled whenever a .h file is updated.  The
 #             user can override this behavior by typing "make model",
 #             which doesn't invoke "make depend".
+# 24-Mar-2005 Added 2 new files: conv_force_vic2alma.c and
+#	      conv_results_vic2alma.c.	TJB
 #
 # $Id$
 #
@@ -55,7 +57,8 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
-	compress_files.o compute_dz.o compute_treeline.o correct_precip.o \
+	compress_files.o compute_dz.o compute_treeline.o \
+	conv_force_vic2alma.o conv_results_vic2alma.o correct_precip.o \
 	display_current_settings.o dist_prec.o estimate_T1.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \

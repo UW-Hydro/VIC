@@ -58,6 +58,25 @@ Improved lake model
 	See read_lakeparam.c for details.
 	
 
+VIC now supports ALMA input and output variables.
+
+	Files affected:
+	Makefile, conv_force_vic2alma.c, conv_results_vic2alma.c, close_files.c,
+	display_current_settings.c, dist_prec.c, get_force_type.c,
+	get_global_param.c, initialize_atmos.c, initialize_global.c,
+	make_in_and_outfiles.c, put_data.c, read_atmos_data.c, vicNl.h,
+	vicNl_def.h, write_data.c, write_forcing_file.c
+
+	Description:
+	VIC now supports ALMA input and output variables.  To have VIC read ALMA
+	input (forcing) variables, all that is required is to identify them by
+	the appropriate names in the forcing section of the global parameter file.
+	The appropriate names are listed in vicNl_def.h.  To have VIC write ALMA
+	output variables, it is necessary to include the option ALMA_OUTPUT in the
+	global parameter file and set it to TRUE.  This option does not affect
+	model physics.
+
+
 State file is now written at the END of the final timestep of the date indicated
 in the global parameter file.
 
@@ -218,7 +237,19 @@ exceeds 1 can set lake fraction to 0.
 	when the sum of the veg and lake fractions exceeds 1 can reset the lake
 	fraction to 0.  This has been changed so that the veg and lake
 	fractions all share proportionally in the re-adjustment.
-	
+
+
+Fixed incorrect check on soil moisture in distribute_node_moisture_properties().
+
+	Files affected:
+	soil_conduction.c
+
+	Description:
+	distribute_node_moisture_properties() contained the following check:
+		if(abs(moist_node[nidx]-max_moist_node[nidx]) > SMALL)
+	Checking the absolute value here was incorrect.  The abs() has been
+	removed.
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

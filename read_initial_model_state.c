@@ -57,6 +57,7 @@ void read_initial_model_state(FILE                *statefile,
   01-Nov-04 Modified to read state files containing SPATIAL_FROST
 	    and LAKE_MODEL state variables.			TJB
   02-Nov-04 Added a few more lake state variables.		TJB
+  03-Nov-04 Now reads extra_veg from state file.		TJB
 
 *********************************************************************/
 {
@@ -117,11 +118,12 @@ void read_initial_model_state(FILE                *statefile,
   if ( options.BINARY_STATE_FILE ) {
     fread( &tmp_cellnum, 1, sizeof(int), statefile );
     fread( &tmp_Nveg, 1, sizeof(int), statefile );
+    fread( &extra_veg, 1, sizeof(int), statefile );
     fread( &tmp_Nband, 1, sizeof(int), statefile );
     fread( &Nbytes, 1, sizeof(int), statefile );
   }
   else {
-    fscanf( statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
+    fscanf( statefile, "%i %i %i %i", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
   }
   
   // Skip over unused cell information
@@ -133,6 +135,7 @@ void read_initial_model_state(FILE                *statefile,
       // read info for next cell
       fread( &tmp_cellnum, 1, sizeof(int), statefile );
       fread( &tmp_Nveg, 1, sizeof(int), statefile );
+      fread( &extra_veg, 1, sizeof(int), statefile );
       fread( &tmp_Nband, 1, sizeof(int), statefile );
       fread( &Nbytes, 1, sizeof(int), statefile );
     }
@@ -145,7 +148,7 @@ void read_initial_model_state(FILE                *statefile,
 	  fgets(tmpstr, MAXSTRING, statefile); // skip snowband info
       }
       // read info for next cell
-      fscanf( statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
+      fscanf( statefile, "%i %i %i %i", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
     }
   }
 
@@ -164,6 +167,19 @@ void read_initial_model_state(FILE                *statefile,
     nrerror(ErrStr);
   }
 
+#if LAKE_MODEL
+  if ( options.LAKES ) {
+    if ( lake_con.Cl[0] > 0 && extra_veg == 0 ) {
+      sprintf(ErrStr,"The model state file does not list a lake for this cell, but the lake coverage given by the lake parameter file is > 0.  Check your input files.");
+      nrerror(ErrStr);
+    }
+    else if ( lake_con.Cl[0] == 0 && extra_veg == 1 ) {
+      sprintf(ErrStr,"The model state file lists a lake for this cell, but the lake coverage given by the lake parameter file is 0.  Check your input files.");
+      nrerror(ErrStr);
+    }
+  }
+#endif // LAKE_MODEL
+
   /* Read soil thermal node depths */
   sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
@@ -180,13 +196,6 @@ void read_initial_model_state(FILE                *statefile,
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", sum, soil_con->dp );
     soil_con->dp = sum;
   }
-
-  extra_veg = 0;
-#if LAKE_MODEL
-  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
-    extra_veg = 1; // add a veg type for the wetland
-  }
-#endif // LAKE_MODEL
 
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {

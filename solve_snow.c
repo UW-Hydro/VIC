@@ -308,7 +308,8 @@ double solve_snow(snow_data_struct    *snow,
 	snow->density = snow_density(dmy[rec].day_in_year,
 				     snowfall[0],tmp_air_temp,
 				     tmp_swq,snow->depth,
-				     snow->coldcontent,(double)dt);
+				     snow->coldcontent,(double)dt,
+				     Tsurf[0]);
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	snow->depth = 1000. * snow->swq 

@@ -82,6 +82,12 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
                 temp[i].wind_h,temp[i].veg_class,maxd);
         nrerror(str);
       }
+      fscanf(veglib, "%lf", &temp[i].rad_atten);   /* vegetation radiation 
+						      attenuation factor */
+      fscanf(veglib, "%lf", &temp[i].wind_atten);  /* canopy wind speed
+						      attenuation factor */
+      fscanf(veglib, "%lf", &temp[i].trunk_ratio); /* ratio of tree height that
+						      is trunk */
       fgets(str, MAXSTRING, veglib);	/* skip over end of line comments */
       i++;
     }

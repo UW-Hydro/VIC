@@ -145,12 +145,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("SNOW_STEP",optstr)==0) {
 	sscanf(cmdstr,"%*s %i",&options.SNOW_STEP);
       }
-      else if(strcasecmp("OVERSTORY_ATTENUATION",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.OVERSTORY_ATTENUATION);
-      }
-      else if(strcasecmp("TRUNK_RATIO",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.TRUNK_RATIO);
-      }
       else if(strcasecmp("FORCE_DT",optstr)==0) {
 	sscanf(cmdstr,"%*s %i %i",&force_dt[0],&force_dt[1]);
       }

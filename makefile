@@ -1,24 +1,11 @@
 # VIC Makefile
-# Modifications:
-# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI	KAC
-# 12-Nov-2003 Added "make depend" to the "all" and "default" options.
-#             This way, if a user always types "make", the user is
-#             guaranteed to have a .depend file and therefore *.o will
-#             always be recompiled whenever a .h file is updated.  The
-#             user can override this behavior by typing "make model",
-#             which doesn't invoke "make depend".
-# -----------------------------------------------------------------------
+# Last Changed: Tue May 27 14:24:45 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+# Note: replaced read_vegparam by read_vegparam_LAI
+# $Id$
 
-# -----------------------------------------------------------------------
-# SET ENVIRONMENT-SPECIFIC OPTIONS HERE
-# -----------------------------------------------------------------------
-
-# Set SHELL = your shell here
 SHELL = /bin/csh
 
-# Set CC = your compiler here
 CC = gcc
-
 # Uncomment for normal optimized code flags (fastest run option)
 CFLAGS  = -I. -O3 -Wall -Wno-unused
 EXT     = 
@@ -39,10 +26,6 @@ LIBRARY = -lm
 #EXT     = .debug
 #LIBRARY = -lm -lefence -L/usr/local/lib
 
-# -----------------------------------------------------------------------
-# MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
-# -----------------------------------------------------------------------
-
 HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
@@ -53,8 +36,8 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	calc_surf_energy_bal.o calc_veg_params.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
 	compress_files.o compute_dz.o compute_treeline.o correct_precip.o \
-	display_current_settings.o dist_prec.o estimate_T1.o free_dist_prcp.o \
-	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
+	dist_prec.o estimate_T1.o free_dist_prcp.o free_vegcon.o \
+	frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
 	func_surf_energy_bal.o get_force_type.o get_global_param.o \
 	initialize_atmos.o initialize_model_state.o \
@@ -83,11 +66,9 @@ SRCS = $(OBJS:%.o=%.c)
 #	co $@
 
 all:
-	make depend
 	make model
 
 default:
-	make depend
 	make model
 
 full:

@@ -49,6 +49,7 @@ void initialize_snow (snow_data_struct **snow,
   04-17-00 removed call for read_initial_snow properties file, the
            file read is now incorporated into a single model state
            file.                                                  KAC
+  xx-xx-01 modified to initialize spatially distributed snow variables. KAC
   11-18-02 modified to initalize blowing_snow variable.          LCB
 
 **********************************************************************/

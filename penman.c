@@ -15,6 +15,8 @@
   programmer: Bart Nijssen
   date      : August 7, 1995
   changes   :
+              04-25-03 modified to use pressure in Pa directly, rather than
+                       converting it within the routine.              KAC
   references: 
 ********************************************************************************/
 

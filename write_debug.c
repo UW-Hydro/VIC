@@ -325,7 +325,7 @@ void write_debug(atmos_data_struct     atmos,
 	      - (curr_moist[i] - debug.store_moist[prcpdist][band][i])) 
 	  * mu * soil_con.AreaFract[band];
 	if(fabs(MOIST_ERROR[veg][i]) > 1.e-4) {
-	  fprintf(stderr,"WARNING: Debug Layer %i has a Moisture Balance Error of %lf in rec %i, veg %i\n",i,MOIST_ERROR[veg][i],rec,veg);
+	  fprintf(stderr,"WARNING: Debug Layer %i has a Moisture Balance Error of %lf in rec %i, veg %i, band %i\n",i,MOIST_ERROR[veg][i],rec,veg,band);
 	}
       }
 

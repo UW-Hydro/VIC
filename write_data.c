@@ -61,6 +61,7 @@ void write_data(out_data_struct *out_data,
   07-30-2003    Corrected output of sub_snow variable to item [0]
                 rather than a point - will need to decide what
                 parts of this array are important to output.    KAC
+  30-Oct-03 Replaced output of sub_snow[0] with sub_total.	TJB
 
 **********************************************************************/
 {
@@ -720,7 +721,8 @@ void write_data(out_data_struct *out_data,
     fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
 
     // snowpack sublimation
-    tmp_fptr[0] = (float)out_data->sub_snow[0];
+//    tmp_fptr[0] = (float)out_data->sub_snow[0];
+    tmp_fptr[0] = (float)out_data->sub_total;
     fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
 
     // sensible heat
@@ -782,7 +784,8 @@ void write_data(out_data_struct *out_data,
 	    out_data->rad_temp, out_data->net_short, out_data->r_net, 
 	    out_data->latent, out_data->evap_canop, out_data->evap_veg );
     fprintf(outfiles->fluxes, "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
-	    out_data->evap_bare, out_data->sub_canop, out_data->sub_snow[0], 
+//	    out_data->evap_bare, out_data->sub_canop, out_data->sub_snow[0], 
+	    out_data->evap_bare, out_data->sub_canop, out_data->sub_total, 
 	    out_data->sensible, out_data->grnd_flux, out_data->deltaH );
     fprintf(outfiles->fluxes, "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
 	    out_data->fusion, out_data->aero_resist, out_data->surf_temp, 

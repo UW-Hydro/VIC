@@ -54,11 +54,11 @@ Modifications:
 	  Changed NEW_ARNO_TYPE to ARNO_PARAMS.			TJB
 	mtclim42_vic.c:
 	  If data->s_srad becomes negative, we set it to 0.0.	TJB
-	  If p->base_isoh and p->site_isoh are equal (within some
-	  minimum tolerance), set ratio = 1.  This handles case in
-	  which annual precip for the grid cell is 0, resulting in
-	  both p->base_isoh and p->site_isoh being 0, and their
-	  ratio being undefined.				TJB
+	  If p->base_isoh and p->site_isoh are both small, set
+	  ratio = 1.  This handles case in which annual precip for
+	  the grid cell is 0, resulting in both p->base_isoh and
+	  p->site_isoh being 0, and their ratio being undefined.
+	  (found by Liz Clark)					TJB
  	open_file.c:
 	  Added message announcing the opening of files when type
 	  is "rb".						TJB

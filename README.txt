@@ -76,9 +76,11 @@ Modifications:
 	  desired record (Nveg and Nbands, respectively).	TJB
 	read_soilparam.c, read_soilparam_arc.c:
 	  (fix by Chunmei Zhu and Alan Hamlet)
-	  Added check to make sure that wilting point
-	  (porosity*Wpwp_FRACT) is greater than residual
-	  moisture.						TJB
+	  Added check to make sure that wilting point is greater
+	  than residual moisture.				TJB
+	  Changed lower limit on inital soil moisture to be residual
+	  moisture instead of wilting point.  Also cleaned up
+	  validation statements.				TJB
 	read_soilparam_arc.c:
 	  Removed extraneous tmp variable.			TJB
 	  Added print statement for current cell number.	TJB

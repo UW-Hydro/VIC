@@ -89,7 +89,7 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
 
   /* First fill the x vector with the times for Tmin and Tmax, and fill the 
      Tyc1 with the corresponding temperature and humidity values */
-  for (i = 0, j = 0, hour = 0.5 * Dt; i < 3; i++, hour += HOURSPERDAY) {
+  for (i = 0, j = 0, hour = 0; i < 3; i++, hour += HOURSPERDAY) {
     if (TminHour[i] < TmaxHour[i]) {
       x[j]       = TminHour[i] + hour;
       Tyc1[j++]  = Tmin[i];
@@ -115,7 +115,7 @@ double HourlyT(int Dt, int *TmaxHour, double *Tmax,
 
   /* interpolate the temperatures */
   new_Tmin=100;
-  for (i = 0, hour = 0.5*Dt+HOURSPERDAY; i < nHours; i++, hour += Dt) {
+  for (i = 0, hour = HOURSPERDAY; i < nHours/Dt; i++, hour += Dt) {
     Tair[i] = hermint(hour, n, x, Tyc1, yc2, yc3, yc4);
     if(Tair[i]<new_Tmin) new_Tmin=Tair[i];
   }

@@ -135,7 +135,7 @@ void initialize_atmos(atmos_data_struct *temp,
     for (day = 0; day < Ndays; day++) {
       store_max_min_temp(&temp[day*Nhours],tmax,tmax_hour,tmin,
 			 tmin_hour,day*Nhours,nrecs,Nhours);
-      Tmin = HourlyT(1,tmax_hour,tmax,tmin_hour,tmin,Tair);
+      Tmin = HourlyT(dt,tmax_hour,tmax,tmin_hour,tmin,Tair);
       for(hour=0;hour<Nhours;hour++) 
 	temp[day*Nhours+hour].air_temp = Tair[hour];
     }
@@ -234,6 +234,13 @@ void initialize_atmos(atmos_data_struct *temp,
 			     - temp[rec+Nhours].tmin) : deltat;
     deltat = (deltat < 0) ? -deltat : deltat;
     temp[rec].trans = calc_trans(deltat, elevation);
+
+    if(!param_set.SHORTWAVE && !param_set.LONGWAVE 
+       && !param_set.TSKC && dt<24){
+      trans_clear = A1_TRANS + A2_TRANS * elevation;
+      temp[rec].tskc = 1-temp[rec].trans/trans_clear;
+    }
+
     for(hour=1;hour<Nhours;hour++) temp[rec+hour].trans = temp[rec].trans;
     shortwave = calc_netshort(temp[rec].trans, dmy[rec].day_in_year, 
 			      phi,&day_len_hr[day]);
@@ -242,8 +249,15 @@ void initialize_atmos(atmos_data_struct *temp,
     priest = priestley(tair, shortwave);
     for(hour=0;hour<Nhours;hour++) {
       temp[rec+hour].priest = priest;
+
+      if(!param_set.SHORTWAVE && !param_set.LONGWAVE 
+	 && !param_set.TSKC && dt<24)
+	temp[rec+hour].tskc = temp[rec].tskc;
     }
   }
+
+  if(!param_set.SHORTWAVE && !param_set.LONGWAVE && !param_set.TSKC && dt<24)
+    param_set.TSKC=1;
 
   trans_clear = A1_TRANS + A2_TRANS * elevation;
 

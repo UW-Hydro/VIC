@@ -34,6 +34,7 @@ global_param_struct get_global_param(filenames_struct *names,
   temp.endmonth   = -99;
   temp.endday     = -99;
   temp.endyear    = -99;
+  temp.skipyear   = 0;
   temp.forcemonth = 1;
   temp.forceday   = 1;
   temp.forceyear  = -99;
@@ -83,6 +84,9 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("ENDDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&temp.endday);
+      }
+      else if(strcasecmp("SKIPYEAR",optstr)==0) {
+        sscanf(cmdstr,"%*s %i",&temp.skipyear);
       }
       else if(strcasecmp("FORCEYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&temp.forceyear);
@@ -211,6 +215,11 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("VEGLIB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veglib);
+      }
+      else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.GLOBAL_LAI=TRUE;
+        else options.GLOBAL_LAI = FALSE;
       }
       else if(strcasecmp("RESULT_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->result_dir);

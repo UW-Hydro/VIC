@@ -60,6 +60,8 @@ double calc_surf_energy_bal(int                rec,
               balance will now be a mixture of snow covered
 	      and bare ground, controlled by the snow cover 
 	      fraction set in solve_snow.c                 KAC
+    04-Jun-04 Placed "ERROR" at beginning of screen dump in
+	      error_print_surf_energy_bal.		TJB
 
 ***************************************************************/
 {
@@ -670,6 +672,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   FS_ACTIVE           = (int) va_arg(ap, int);
 
   /* Print Variables */
+  fprintf(stderr, "ERROR: calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+
   fprintf(stderr,"T2 = %f\n",T2);
   fprintf(stderr,"Ts_old = %f\n",Ts_old);
   fprintf(stderr,"T1_old = %f\n",T1_old);
@@ -739,7 +743,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
 	      max_moist_node[i], ice_node[i]);
   }
 
-  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0.0);
     

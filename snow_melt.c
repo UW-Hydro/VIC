@@ -68,6 +68,8 @@ static char vcid[] = "$Id$";
                                    snow pack (W/m2)
 
   Comments     :
+    04-Jun-04 Added descriptive error message to beginning of screen dump
+	      in ErrorPrintSnowPackEnergyBalance.			TJB
 *****************************************************************************/
 void snow_melt(soil_con_struct  *soil_con, 
 	       int               rec,
@@ -583,6 +585,8 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   SensibleHeat       = (double *) va_arg(ap, double *);
   
   /* print variables */
+  fprintf(stderr, "ERROR: snow_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+
   fprintf(stderr,"Dt = %f\n",Dt);
   fprintf(stderr,"Ra = %f\n",Ra);
   fprintf(stderr,"Z = %f\n",Z);
@@ -613,7 +617,7 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"LatentHeat = %f\n",LatentHeat[0]);
   fprintf(stderr,"SensibleHeat = %f\n",SensibleHeat[0]);
   
-  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.");
+  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
   return(0.0);
 

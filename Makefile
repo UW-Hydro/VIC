@@ -1,5 +1,5 @@
 # VIC Makefile
-# Last Changed: Mon Jun 11 12:30:44 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
+# Last Changed: Tue Apr 22 11:41:58 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
 # Note: replaced read_vegparam by read_vegparam_LAI
 
 SHELL = /bin/csh
@@ -14,9 +14,9 @@ LIBRARY = -lm
 
 HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h LAKE.h
 
-OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
-	advected_sensible_heat.o alloc_atmos.o arno_evap.o \
-	calc_air_temperature.o calc_atmos_energy_bal.o \
+OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
+        StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
+        arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
 	calc_cloud_cover_fraction.o \
 	calc_forcing_stats.o calc_longwave.o calc_rainonly.o \
 	calc_root_fraction.o calc_snow_coverage.o calc_surf_energy_bal.o \
@@ -46,7 +46,8 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	write_forcing_file.o write_layer.o write_model_state.o \
 	write_snow_data.o write_soilparam.o write_vegparam.o write_vegvar.o \
 	lakes.eb.o initialize_lake.o read_lakeparam.o ice_melt.o \
-	IceEnergyBalance.o water_energy_balance.o water_under_ice.o
+	IceEnergyBalance.o water_energy_balance.o water_under_ice.o \
+	wetland_energy.o
 
 SRCS = $(OBJS:%.o=%.c) 
 

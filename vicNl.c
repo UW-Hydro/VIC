@@ -51,6 +51,8 @@ void main(int argc, char *argv[])
   int     cell_cnt;
   int     force_dt[2];
   double  storage;
+  double  *EMPTY;
+  char    *EMPTY_C;
   dmy_struct *dmy;
   atmos_data_struct *atmos;
   veg_con_struct *veg_con;
@@ -115,6 +117,15 @@ void main(int argc, char *argv[])
 
       NEWCELL=TRUE;
       cellnum++;
+
+      /** Allocate arrays in solve_T_profile **/
+      if(cellnum==0 && (options.FROZEN_SOIL || options.FS_FLUXES)) {
+	EMPTY = NULL;
+	EMPTY_C = NULL;
+	solve_T_profile(EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,0,EMPTY,0,EMPTY,
+			EMPTY,EMPTY,EMPTY,EMPTY,global_param.Nnodes,EMPTY_C,
+			TRUE);
+      }
 
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,

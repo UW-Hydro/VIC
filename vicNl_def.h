@@ -125,6 +125,9 @@ typedef struct {
 			    arise using hourly wind speeds which are recorded at
 			    0 m/s, even though most wind speed measurement devices
 			    cannot read below about 1 m/s **/
+  char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing soil 
+ 			    thermal fluxes */
+  char   FS_FLUXES;      /* TRUE = Use new soil thermal flux algorithm */
 } option_struct;
 
 typedef struct {

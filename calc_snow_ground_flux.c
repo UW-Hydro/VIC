@@ -22,7 +22,8 @@ double calc_snow_ground_flux(int                dt,
                              snow_data_struct  *snow,
 			     layer_data_struct *layer_wet,
 			     layer_data_struct *layer_dry,
-                             soil_con_struct    soil_con) {
+                             soil_con_struct    soil_con,
+			     char               *FIRST_SOLN) {
 /**********************************************************************
   calc_snow_ground_flux.c	Keith Cherkauer		March 31, 1997
 
@@ -123,7 +124,7 @@ double calc_snow_ground_flux(int                dt,
 			 snow_flux, Trad, T1,
 			 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 			 moist_node,expt_node,max_moist_node,ice_node,
-			 alpha,beta,gamma,Nnodes);
+			 alpha,beta,gamma,Nnodes,FIRST_SOLN);
  
   if(surf_temp <= -9998)
     error_calc_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
@@ -135,7 +136,7 @@ double calc_snow_ground_flux(int                dt,
 				snow_flux, Trad, T1,
 				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				moist_node,expt_node,max_moist_node,ice_node,
-				alpha,beta,gamma,Nnodes);
+				alpha,beta,gamma,Nnodes,FIRST_SOLN);
 
   /**************************************************
     Recalculate Energy Fluxes Based on Final Temperature
@@ -149,7 +150,7 @@ double calc_snow_ground_flux(int                dt,
 				 snow_flux, Trad,T1,
 				 T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				 moist_node,expt_node,max_moist_node,ice_node,
-				 alpha,beta,gamma,Nnodes);
+				 alpha,beta,gamma,Nnodes,FIRST_SOLN);
  
   energy->error += error;
 
@@ -241,6 +242,7 @@ double error_print_snow_ground_flux(double Ts, va_list ap) {
   double            *beta;
   double            *gamma;
   int                Nnodes;
+  char              *FIRST_SOLN;
 
   int                i;
 
@@ -282,6 +284,7 @@ double error_print_snow_ground_flux(double Ts, va_list ap) {
   beta          = (double *) va_arg(ap, double *);
   gamma         = (double *) va_arg(ap, double *);
   Nnodes        = (int)      va_arg(ap, int);
+  FIRST_SOLN    = (char *)   va_arg(ap, char *);
 
   /* Print Variables */
   fprintf(stderr,"T2 = %lf\n",T2);

@@ -95,6 +95,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
   extern veg_lib_struct *veg_lib;
   extern option_struct   options;
 
+  char     FIRST_SOLN[1];
   double   T2;
   double   Ts_old;
   double   T1_old;
@@ -177,6 +178,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
   expt          = soil_con.expt[0];
   Wdew[WET]     = veg_var_wet->Wdew;
   if(options.DIST_PRCP) Wdew[DRY] = veg_var_dry->Wdew;
+  FIRST_SOLN[0] = TRUE;
 
   /***********************************************************
     Prepare Data Sets for Solving Frozen Soil Thermal Fluxes 
@@ -226,7 +228,7 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 			 moist_node,expt_node,max_moist_node,ice_node,
 			 alpha,beta,gamma,root,layer_wet,layer_dry,
 			 veg_var_wet,veg_var_dry,VEG,(int)CALC_EVAP,
-			 veg_class,dmy.month,Nnodes);
+			 veg_class,dmy.month,Nnodes,FIRST_SOLN);
 
   if(surf_temp <= -9998) {  
     error = error_calc_surf_energy_bal(surf_temp,T2,Ts_old,T1_old,Tair,ra,
@@ -249,8 +251,8 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				       ice_node,alpha,beta,gamma,root,
 				       layer_wet,layer_dry,
 				       veg_var_wet,veg_var_dry,VEG,
-				       (int)CALC_EVAP,
-				       veg_class,dmy.month,iveg,Nnodes);
+				       (int)CALC_EVAP,veg_class,dmy.month,
+				       iveg,Nnodes,FIRST_SOLN);
   }
 
   /**************************************************
@@ -273,9 +275,8 @@ double calc_surf_energy_bal(char               CALC_EVAP,
 				T_node,Tnew_node,dz_node,kappa_node,Cs_node,
 				moist_node,expt_node,max_moist_node,ice_node,
 				alpha,beta,gamma,root,layer_wet,layer_dry,
-				veg_var_wet,
-				veg_var_dry,VEG,(int)CALC_EVAP,
-				veg_class,dmy.month,Nnodes);
+				veg_var_wet,veg_var_dry,VEG,(int)CALC_EVAP,
+				veg_class,dmy.month,Nnodes,FIRST_SOLN);
 
   energy->error = error;
 
@@ -413,6 +414,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   int                month;
   int                iveg;
   int                Nnodes;
+  char              *FIRST_SOLN;
 
   int                i;
 
@@ -491,6 +493,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   month         = (int) va_arg(ap, int);
   iveg          = (int) va_arg(ap, int);
   Nnodes        = (int) va_arg(ap, int);
+  FIRST_SOLN    = (char *) va_arg(ap, char *);
 
   /* Print Variables */
   fprintf(stderr,"T2 = %lf\n",T2);

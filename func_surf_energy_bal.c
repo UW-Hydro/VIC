@@ -104,6 +104,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   int                veg_class;
   int                month;
   int                Nnodes;
+  char              *FIRST_SOLN;
 
   double             error;
   double             ice;
@@ -183,6 +184,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   veg_class     = (int) va_arg(ap, int);
   month         = (int) va_arg(ap, int);
   Nnodes        = (int) va_arg(ap, int);
+  FIRST_SOLN    = (char *)va_arg(ap, char *);
 
   /**********************************************
     Compute Surface Temperature at Half Time Step
@@ -205,7 +207,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
 		    bubble,expt_node,ice_node,alpha,
-		    beta,gamma,Nnodes);
+		    beta,gamma,Nnodes,FIRST_SOLN,FALSE);
     *T1 = Tnew_node[1];
   }
 

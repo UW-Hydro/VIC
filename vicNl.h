@@ -22,7 +22,7 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
 			     double, double, double *, double *, double *, 
 			     double *, double *, energy_bal_struct *, 
 			     snow_data_struct *, layer_data_struct *,
-                             layer_data_struct *, soil_con_struct);
+                             layer_data_struct *, soil_con_struct, char *);
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double calc_surf_energy_bal(char, int, int, int, int, int, int, int, int, 
 			    double, double, double, double, double, 
@@ -226,7 +226,7 @@ double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 void   solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double, double *,
-		       double *, double *, double *, double *, int);
+		       double *, double *, double *, double *, int, char *, char);
 double StabilityCorrection(double, double, double, double, double, double);
 void   store_max_min_temp(atmos_data_struct *, double *, int *,
 			  double *, int *, int, int, int);

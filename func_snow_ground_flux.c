@@ -60,6 +60,7 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   double            *beta;
   double            *gamma;
   int                Nnodes;
+  char              *FIRST_SOLN;
 
   double ice;
   double kappa_snow;	/* thermal conductivity of snow (W/s/K) */
@@ -103,6 +104,7 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   beta           = (double *) va_arg(ap, double *);
   gamma          = (double *) va_arg(ap, double *);
   Nnodes         = (int)      va_arg(ap, int);
+  FIRST_SOLN     = (char *)   va_arg(ap, char *);
 
   *TMean = Ts;
 
@@ -125,7 +127,8 @@ double func_snow_ground_flux(double Ts, va_list ap) {
     T_node[0] = *TMean;
     solve_T_profile(Tnew_node,T_node,dz_node,kappa_node,Cs_node,
 		    moist_node,delta_t,max_moist_node,
-		    bubble,expt_node,ice_node,alpha,beta,gamma,Nnodes);
+		    bubble,expt_node,ice_node,alpha,beta,gamma,Nnodes,
+		    FIRST_SOLN,FALSE);
     *T1 = Tnew_node[1];
   }
 

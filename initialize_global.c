@@ -88,6 +88,8 @@ void initialize_global() {
   options.INIT_SNOW             = FALSE;
   options.ROOT_ZONES            = -999;
   options.MIN_WIND_SPEED        = 0.0;
+  options.NOFLUX                = FALSE;
+  options.FS_FLUXES             = FALSE;
  
   debug.DEBUG       = FALSE;
   debug.PRT_SOIL    = FALSE;

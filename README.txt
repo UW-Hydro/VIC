@@ -81,6 +81,8 @@ Modifications:
 	  Changed lower limit on inital soil moisture to be residual
 	  moisture instead of wilting point.  Also cleaned up
 	  validation statements.				TJB
+	  Only validate initial soil moisture if we're not getting
+	  initial soil moisture from model state file.		TJB
 	read_soilparam_arc.c:
 	  Removed extraneous tmp variable.			TJB
 	  Added print statement for current cell number.	TJB

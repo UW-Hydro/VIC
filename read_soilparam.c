@@ -270,11 +270,11 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     
     /*************************************************
-    if NEW_ARNO_TYPE == TRUE then convert the baseflow 
+    if ARNO_PARAMS == TRUE then convert the baseflow 
     parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
     *************************************************/
     printf("dsmax=%f ds=%f ws=%f c=%f\n",temp.Dsmax,temp.Ds,temp.Ws,temp.c);
-    if(options.NEW_ARNO_TYPE) {
+    if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
       tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax * 

@@ -347,10 +347,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 #endif // SPATIAL_FROST
 
     /*************************************************
-    if NEW_ARNO_TYPE == TRUE then convert the baseflow 
+    if ARNO_PARAMS == TRUE then convert the baseflow 
     parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
     *************************************************/
-    if(options.NEW_ARNO_TYPE) {
+    if(options.ARNO_PARAMS) {
       layer = options.Nlayer-1;
       tmp = temp.Dsmax;
       temp.Dsmax = temp.Dsmax * 

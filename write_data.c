@@ -61,7 +61,8 @@ void write_data(out_data_struct *out_data,
   07-30-2003    Corrected output of sub_snow variable to item [0]
                 rather than a point - will need to decide what
                 parts of this array are important to output.    KAC
-  30-Oct-03 Replaced output of sub_snow[0] with sub_total.	TJB
+  30-Oct-03	Replaced output of sub_snow[0] in fluxes file with
+	 	sub_total.					TJB
 
 **********************************************************************/
 {

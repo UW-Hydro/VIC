@@ -151,6 +151,20 @@ file.
 	releases (and vice versa).
 
 
+State files not written/read correctly when QUICK_FLUX set to TRUE.
+
+	Files affected:
+	get_global_param.c, make_dist_prcp.c, make_energy_bal.c, vicNl.c,
+	vicNl.h
+
+	Description:
+	In previous releases, if QUICK_FLUX=TRUE, the number of soil thermal
+	nodes is changed after being recorded in the state file.  The resulting
+	mismatch between Nnodes in the state file header and the actual number
+	of node temperatures recorded in the state file prevents VIC from being
+	able to read the state file.  This has been fixed.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

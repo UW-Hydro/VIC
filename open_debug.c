@@ -75,7 +75,13 @@ void open_debug() {
     strcpy(tempname,debug.debug_dir);
     strcat(tempname,"/VIC_grid.out");
     if((debug.fg_grid=fopen(tempname,"w"))==NULL)
-      nrerror("ERROR: Unable to open VIC_grid.xyz");
+      nrerror("ERROR: Unable to open VIC_grid.out");
+  }
+  if(debug.DEBUG || debug.PRT_ATMOS) {
+    strcpy(tempname,debug.debug_dir);
+    strcat(tempname,"/VIC_atmos.out");
+    if((debug.fg_atmos=fopen(tempname,"w"))==NULL)
+      nrerror("ERROR: Unable to open VIC_atmos.out");
   }
 
 }

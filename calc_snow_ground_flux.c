@@ -92,11 +92,6 @@ double calc_snow_ground_flux(int                dt,
   ***********************************************************/
   if(options.FROZEN_SOIL) {
 
-/*     layer          = (layer_data_struct *)calloc(options.Nlayer, */
-/* 						 sizeof(layer_data_struct)); */
-/*     kappa_node     = (double *)calloc(Nnodes,sizeof(double)); */
-/*     Cs_node        = (double *)calloc(Nnodes,sizeof(double)); */
-/*     moist_node     = (double *)calloc(Nnodes,sizeof(double)); */
     expt_node      = soil_con.expt_node; 
     max_moist_node = soil_con.max_moist_node;  
     alpha          = soil_con.alpha; 
@@ -110,7 +105,6 @@ double calc_snow_ground_flux(int                dt,
     T_node    = energy->T;
     dz_node   = energy->dz;
     ice_node  = energy->ice;
-/*     Tnew_node = (double *)calloc(Nnodes,sizeof(double)); */
 
   }
 
@@ -129,26 +123,7 @@ double calc_snow_ground_flux(int                dt,
 			 moist_node,expt_node,max_moist_node,ice_node,
 			 alpha,beta,gamma,Nnodes,FIRST_SOLN);
  
-  while(surf_temp <= -9998) {
-
-    Twidth *= 2;
-    
-    fprintf(stderr,"WARNING: SURF_DT too narrow now using %i times value.\nIf this message appears often increase SURF_DT in vicNl_def.h.\n",Twidth);
-    
-    surf_temp = root_brent(energy->T[0]-(SURF_DT*(double)Twidth), 
-			   0., func_snow_ground_flux,
-			   T2, Ts_old, T1_old, kappa1, kappa2, Cs1, Cs2,
-			   delta_t, snow_density, snow_depth, Tsnow_surf,
-			   D1, D2, dp,moist, ice0, max_moist, bubble, expt,
-			   grnd_flux, deltaH, 
-			   snow_flux, T1,
-			   T_node,Tnew_node,dz_node,kappa_node,Cs_node,
-			   moist_node,expt_node,max_moist_node,ice_node,
-			   alpha,beta,gamma,Nnodes,FIRST_SOLN);
-    
-  }
-  
-  if(surf_temp <= -8887)
+  if(surf_temp <= -9998)
     error_calc_snow_ground_flux(surf_temp, T2, Ts_old, T1_old, 
 				kappa1, kappa2, Cs1, Cs2,
 				delta_t, snow_density, snow_depth, 
@@ -184,12 +159,6 @@ double calc_snow_ground_flux(int                dt,
     finish_frozen_soil_calcs(energy,layer_wet,layer_dry,layer,soil_con,
 			     Nnodes,iveg,mu,Tnew_node,dz_node,kappa_node,
 			     Cs_node,moist_node,expt_node,max_moist_node);
-
-/*     free((char *)Tnew_node); */
-/*     free((char *)moist_node); */
-/*     free((char *)kappa_node); */
-/*     free((char *)Cs_node); */
-/*     free((char *)layer); */
 
   }
 

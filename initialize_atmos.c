@@ -70,6 +70,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
              will cause the model to use bare soil.  Make sure that 
              positive index value refer to a non-canopied vegetation
              type in the vegetation library.                   KAC
+  07-May-04 Replaced
+		rint(something)
+	    with
+		(int)(something + 0.5)
+	    to handle rounding errors without resorting to rint()
+	    function.						TJB
 
 **********************************************************************/
 {
@@ -410,7 +416,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  atmos[rec].vp[i] = forcing_data[VP][idx];
 
 
-	  atmos[rec].vp[i] = (rint(atmos[rec].vp[i]*1000)/1000);
+	  atmos[rec].vp[i] = ((int)(atmos[rec].vp[i]*1000 + 0.5)/1000);
 
 
 	  atmos[rec].vpd[i] = (svp(atmos[rec].air_temp[i]) 

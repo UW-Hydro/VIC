@@ -67,6 +67,14 @@ Improved validation of global options
 	Now does not allow bad combinations of FULL_ENERGY, FROZEN_SOIL, and
 	GRND_FLUX values.
 
+Improved validation of soil param file
+
+	Files affected:
+	read_soilparam.c
+
+	Description:
+	Now validates depth_full_snow_cover and frost_slope.
+
 
 Bug Fixes:
 ----------

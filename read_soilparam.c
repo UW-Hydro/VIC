@@ -75,6 +75,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
   07-Jul-04	Removed extraneous tmp variable.		TJB
   07-Jul-04	Only validate initial soil moisture if INIT_STATE
 		is FALSE.					TJB
+  26-Oct-04	Added validation of depth_full_snow_cover and
+		frost_slope.					TJB
 
 **********************************************************************/
 {
@@ -290,6 +292,24 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	nrerror(ErrStr);
       }
     }
+
+
+    /**********************************************
+      Validate Spatial Snow/Frost Params
+    **********************************************/
+#if SPATIAL_SNOW
+    if (temp.depth_full_snow_cover < 0.0) {
+      sprintf(ErrStr,"depth_full_snow_cover (%f) must be positive.\n", temp.depth_full_snow_cover);
+      nrerror(ErrStr);
+    }
+#endif // SPATIAL_SNOW
+    
+#if SPATIAL_FROST
+    if (temp.frost_slope < 0.0) {
+      sprintf(ErrStr,"frost_slope (%f) must be positive.\n", temp.frost_slope);
+      nrerror(ErrStr);
+    }
+#endif // SPATIAL_FROST
 
     
     /*************************************************

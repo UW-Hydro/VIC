@@ -161,6 +161,10 @@ void set_node_parameters(double   *dz_node,
            in which they fall.  Averaging of layer properties 
 	   only occurs if the node falls directly on a layer
 	   boundary.                                        KAC
+  11-May-04 (Port from 4.1.0) Modified to correct differences between
+	    calculations to determine maximum node moisture and node
+	    moisture, so that nodes on the boundary between soil
+	    layers are computed the same way for both.		TJB
 
 **********************************************************************/
 
@@ -191,10 +195,10 @@ void set_node_parameters(double   *dz_node,
   /* set node parameters */
   for(nidx=0;nidx<Nnodes;nidx++) {
 
-    if(Zsum == Lsum && nidx != 0 && lidx != Nlayers-1) {
+    if(Zsum == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
       /* node on layer boundary */
-      max_moist_node[nidx] = (max_moist[lidx] / depth[lidx] 
-			      + max_moist[lidx+1] / depth[lidx+1])/ 1000;
+      max_moist_node[nidx] = (max_moist[lidx] / depth[lidx]
+                              + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
       expt_node[nidx]      = (expt[lidx] + expt[lidx+1]) / 2.;
       bubble_node[nidx]    = (bubble[lidx] + bubble[lidx+1]) / 2.;
     }
@@ -350,11 +354,16 @@ void distribute_node_moisture_properties(double *moist_node,
            in which they fall.  Averaging of layer properties 
 	   only occurs if the node falls directly on a layer
 	   boundary.                                        KAC
+  11-May-04 (Port from 4.1.0) Modified to check that node soil
+	    moisture is less than or equal to maximum node soil
+	    moisture, otherwise an error is printed to the screen
+	    and the model exits.				TJB
 
 *********************************************************************/
 
   extern option_struct options;
 
+  char ErrStr[MAXSTRING];
   char PAST_BOTTOM;
   int nidx, lidx, i;
   int tmplidx;
@@ -393,6 +402,13 @@ void distribute_node_moisture_properties(double *moist_node,
       moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
       soil_fract = (bulk_density[lidx] / soil_density[lidx]);
     }      
+
+    // Check that node moisture does not exceed maximum node moisture
+    if (abs(moist_node[nidx]-max_moist_node[nidx]) > SMALL) {
+      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisuttre, %f.", moist_node[nidx], max_moist_node[n
+idx] );
+      vicerror(ErrStr);
+    }
 
     if(T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
       /* compute moisture and ice contents */

@@ -8,13 +8,13 @@
 
 void main(int argc, char *argv[])
 /**********************************************************************
-	vic2l.c		Dag Lohmann		January 1996
+	vicNl.c		Dag Lohmann and Keith Cherkauer		January 1996
 
   This program controls file I/O and variable initialization as well as
   being the primary driver for the model.
 
   For details about variables, input files and subroutines check:
-	http://ce.washington.edu/~hydro/Lettenmaier/Models/VIC/VIC_home.html
+	http://www.hydro.washington.edu/Lettenmaier/Models/VIC/VIChome.html
 
   UNITS: unless otherwise marked:
          all water balance components are in mm
@@ -22,6 +22,10 @@ void main(int argc, char *argv[])
 	 depths, and lengths are in m
 
   modifications:
+    Model has been updated to incorporate all published features of the
+    model, including: full energy balance, and distributed precipitation.
+    Improved snow ablation and accumulation routines, and a frozen soil
+    algorithm have also been added.
 
 **********************************************************************/
 {
@@ -178,7 +182,7 @@ void main(int argc, char *argv[])
 			  infiles.init_snow);
       }
       if(options.FULL_ENERGY) {
-	for(i=0;i<Ndist;i++)
+	for(i=0;i<Ndist;i++) {
 	  fprintf(stderr,"Full Energy Model Initialization\n");
           initialize_energy_bal(prcp.dist[i].energy,
 				prcp.dist[i].cell,soil_con,
@@ -186,6 +190,7 @@ void main(int argc, char *argv[])
 				veg_con[0].vegetat_type_num,
 				global_param.Ulayer,
 				global_param.Llayer,infiles.init_soil);
+	}
       }
 
       fprintf(stderr,"Running Model\n");

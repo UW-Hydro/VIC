@@ -109,6 +109,7 @@ void runoff(layer_data_struct *layer,
     Ksat[lindex]         = soil_con.Ksat[lindex] / 24.;
     Q12[lindex]          = (double *)calloc(3,sizeof(double));
     submoist[lindex]     = (double *)calloc(3,sizeof(double));
+    subice[lindex]       = (double *)calloc(3,sizeof(double));
     submax_moist[lindex] = (double *)calloc(3,sizeof(double));
     sublayer[lindex]     = (double *)calloc(3,sizeof(double));
     subT[lindex]         = (double *)calloc(3,sizeof(double));

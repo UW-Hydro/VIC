@@ -98,7 +98,7 @@ double func_snow_ground_flux(double Ts, va_list ap) {
   }
   else ice=0.;
 
-  *deltaH = Cs1 * (Ts_old - *TMean) * D1 / delta_t;
+  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
   *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
   *grnd_flux = kappa1/D1*(*T1 - *TMean);

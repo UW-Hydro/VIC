@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       nijssen@u.washington.edu
  * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Sat Apr 18 15:47:39 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
+ * LAST-MOD: Tue Jul 14 15:23:00 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
  *               approach for a two layer snow model
  * DESCRIP-END.
@@ -270,6 +270,21 @@ void snow_melt(atmos_data_struct *atmos,
         snow->density,surf_atten,&grnd_flux,&latent_heat,&sensible_heat,
 				 save_Trad);
 
+    if(snow->surf_temp <= -9998) 
+      ErrorSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
+				 z2, displacement, Z0, wind, atmos->net_short,
+				 atmos->longwave, atmos->density, Le, 
+				 atmos->air_temp,
+				 atmos->pressure * 1000., atmos->vpd * 1000., 
+				 atmos->vp * 1000.,
+				 RainFall, SurfaceSwq, snow->surf_water, 
+				 OldTSurf,
+				 &RefreezeEnergy, &vapor_flux, &advection, 
+				 &deltaCC, grnd_surf_temp,
+				 snow->depth, snow->density,surf_atten,
+				 &grnd_flux,&latent_heat,
+				 &sensible_heat,save_Trad);
+
     Qnet = CalcSnowPackEnergyBalance(snow->surf_temp, delta_t, aero_resist,
            z2, displacement, Z0, wind, atmos->net_short,
            atmos->longwave, atmos->density, Le, atmos->air_temp,
@@ -458,4 +473,138 @@ double CalcSnowPackEnergyBalance(double Tsurf, ...)
   va_end(ap);
   
   return Qnet;
+}
+
+double ErrorSnowPackEnergyBalance(double Tsurf, ...)
+{
+  char *Routine = "CalcSnowPackEnergyBalance";
+
+  va_list ap;                   /* Used in traversing variable argument list
+                                 */ 
+  double Qnet;                   /* Net energy exchange at the SnowPack snow
+                                   surface (W/m^2) */
+
+  va_start(ap, Tsurf);
+  Qnet = ErrorPrintSnowPackEnergyBalance(Tsurf, ap);
+  va_end(ap);
+  
+  return Qnet;
+}
+
+double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
+{
+
+
+  double Dt;                     /* Model time step (hours) */
+  double Ra;                     /* Aerodynamic resistance (s/m) */
+  double Z;                      /* Reference height (m) */
+  double Displacement;           /* Displacement height (m) */
+  double Z0;                     /* surface roughness height (m) */
+  double Wind;                   /* Wind speed (m/s) */
+  double ShortRad;               /* Net incident shortwave radiation (W/m2) */
+  double LongRadIn;              /* Incoming longwave radiation (W/m2) */
+  double AirDens;                /* Density of air (kg/m3) */
+  double Lv;                     /* Latent heat of vaporization (J/kg3) */
+  double Tair;                   /* Air temperature (C) */
+  double Press;                  /* Air pressure (Pa) */
+  double Vpd;			/* Vapor pressure deficit (Pa) */
+  double EactAir;                /* Actual vapor pressure of air (Pa) */
+  double Rain;                   /* Rain fall (m/timestep) */
+  double SweSurfaceLayer;        /* Snow water equivalent in surface layer (m)
+                                 */ 
+  double SurfaceLiquidWater;     /* Liquid water in the surface layer (m) */
+  double OldTSurf;               /* Surface temperature during previous time
+                                   step */ 
+  double *GroundFlux;		/* Ground Heat Flux (W/m2) */
+  double *RefreezeEnergy;        /* Refreeze energy (W/m2) */
+  double *VaporMassFlux;          /* Mass flux of water vapor to or from the
+                                   intercepted snow */
+  double *AdvectedEnergy;         /* Energy advected by precipitation (W/m2) */
+  double *DeltaColdContent;       /* Change in cold content (W/m2) */
+  double TGrnd;     
+  double SnowDepth;  
+  double SnowDensity; 
+  double SurfAttenuation; 
+  
+  /* end of list of arguments in variable argument list */
+
+  double Density;                /* Density of water/ice at TMean (kg/m3) */
+  double EsSnow;                 /* saturated vapor pressure in the snow pack
+                                   (Pa)  */
+  double *LatentHeat;		/* Latent heat exchange at surface (W/m2) */
+  double LongRadOut;		/* long wave radiation emitted by surface
+				   (W/m2) */
+  double Ls;                     /* Latent heat of sublimation (J/kg) */
+  double NetRad;			/* Net radiation exchange at surface (W/m2) */
+  double RestTerm;		/* Rest term in surface energy balance
+				   (W/m2) */
+  double *SensibleHeat;		/* Sensible heat exchange at surface (W/m2) */
+  double *TMean;                /* Average temperature for time step (C) */
+
+  /* initialize variables */
+  Dt                 = (double) va_arg(ap, double);
+  Ra                 = (double) va_arg(ap, double);
+  Z                  = (double) va_arg(ap, double);
+  Displacement       = (double) va_arg(ap, double);
+  Z0                 = (double) va_arg(ap, double);
+  Wind               = (double) va_arg(ap, double);
+  ShortRad           = (double) va_arg(ap, double);
+  LongRadIn          = (double) va_arg(ap, double);
+  AirDens            = (double) va_arg(ap, double);
+  Lv                 = (double) va_arg(ap, double);
+  Tair               = (double) va_arg(ap, double);
+  Press              = (double) va_arg(ap, double);
+  Vpd                = (double) va_arg(ap, double);
+  EactAir            = (double) va_arg(ap, double);
+  Rain               = (double) va_arg(ap, double);
+  SweSurfaceLayer    = (double) va_arg(ap, double);
+  SurfaceLiquidWater = (double) va_arg(ap, double);
+  OldTSurf           = (double) va_arg(ap, double);
+  RefreezeEnergy     = (double *) va_arg(ap, double *);
+  VaporMassFlux      = (double *) va_arg(ap, double *);
+  AdvectedEnergy     = (double *) va_arg(ap, double *);
+  DeltaColdContent   = (double *) va_arg(ap, double *);
+  TGrnd              = (double) va_arg(ap, double);
+  SnowDepth          = (double) va_arg(ap, double);
+  SnowDensity        = (double) va_arg(ap, double);
+  SurfAttenuation    = (double) va_arg(ap, double);
+  GroundFlux         = (double *) va_arg(ap, double *);
+  LatentHeat         = (double *) va_arg(ap, double *);
+  SensibleHeat       = (double *) va_arg(ap, double *);
+  TMean              = (double *) va_arg(ap, double *);
+  
+  /* print variables */
+  fprintf(stderr,"Dt = %lf\n",Dt);
+  fprintf(stderr,"Ra = %lf\n",Ra);
+  fprintf(stderr,"Z = %lf\n",Z);
+  fprintf(stderr,"Displacement = %lf\n",Displacement);
+  fprintf(stderr,"Z0 = %lf\n",Z0);
+  fprintf(stderr,"Wind = %lf\n",Wind);
+  fprintf(stderr,"ShortRad = %lf\n",ShortRad);
+  fprintf(stderr,"LongRadIn = %lf\n",LongRadIn);
+  fprintf(stderr,"AirDens = %lf\n",AirDens);
+  fprintf(stderr,"Lv = %lf\n",Lv);
+  fprintf(stderr,"Tair = %lf\n",Tair);
+  fprintf(stderr,"Press = %lf\n",Press);
+  fprintf(stderr,"Vpd = %lf\n",Vpd);
+  fprintf(stderr,"EactAir = %lf\n",EactAir);
+  fprintf(stderr,"Rain = %lf\n",Rain);
+  fprintf(stderr,"SweSurfaceLayer = %lf\n",SweSurfaceLayer);
+  fprintf(stderr,"SurfaceLiquidWater = %lf\n",SurfaceLiquidWater);
+  fprintf(stderr,"OldTSurf = %lf\n",OldTSurf);
+  fprintf(stderr,"RefreezeEnergy = %lf\n",RefreezeEnergy[0]);
+  fprintf(stderr,"VaporMassFlux = %lf\n",VaporMassFlux[0]);
+  fprintf(stderr,"AdvectedEnergy = %lf\n",AdvectedEnergy[0]);
+  fprintf(stderr,"DeltaColdContent = %lf\n",DeltaColdContent[0]);
+  fprintf(stderr,"TGrnd = %lf\n",TGrnd);
+  fprintf(stderr,"SnowDepth = %lf\n",SnowDepth);
+  fprintf(stderr,"SnowDensity = %lf\n",SnowDensity);
+  fprintf(stderr,"SurfAttenuation = %lf\n",SurfAttenuation);
+  fprintf(stderr,"GroundFlux = %lf\n",GroundFlux[0]);
+  fprintf(stderr,"LatentHeat = %lf\n",LatentHeat[0]);
+  fprintf(stderr,"SensibleHeat = %lf\n",SensibleHeat[0]);
+  fprintf(stderr,"TMean = %lf\n",TMean[0]);
+  
+  vicerror("Finished dumping snow_melt variables");
+
 }

@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#define OVERSTORY_ATTENUATION 3.5  /* attenutation coefficient for overstory */
-#define TRUNK_RATIO           0.5  /* Fraction of Tree Height that is trunk */
+#define OVERSTORY_ATTENUATION 0.5  /* attenutation coefficient for overstory */
+#define TRUNK_RATIO           0.2  /* Fraction of Tree Height that is trunk */
 #define SNOW_STEP             1    /* Time step in hours to use when solving
 				      snow model in water balance mode */
 
@@ -704,8 +704,14 @@ void full_energy(int rec,
 		atmos->vp  = atmos[1].vp;
 		atmos->vpd = atmos[1].vpd;
 	      }
+	      else if(atmos->air_temp<tmin[1] && hour<tmin_hour[1]) {
+		tmp_vp     = atmos->vp;
+		tmp_vpd    = atmos->vpd;
+		atmos->vp  = atmos[-1].vp;
+		atmos->vpd = atmos[-1].vpd;
+	      }
 	      else if(atmos->air_temp<tmin[1]) {
-		vicerror("Air temperature estimate falls below daily minimum early in the day - currently uncorrected");
+		vicerror("Air temperature falls below daily minimum temperature.  Please report error.");
 	      }
               atmos->rainonly = calc_rainonly(atmos->air_temp,atmos->prec,
 					      gp.MAX_SNOW_TEMP,
@@ -769,7 +775,7 @@ void full_energy(int rec,
 				 atmos->vp,cell[iveg].Le,inshort,
 				 atmos->longwave,atmos->pressure,
 				 atmos->air_temp,
-				 atmos->vpd,tmp_wind[0],&rainfall,&snowfall,
+				 atmos->vpd,tmp_wind[1],&rainfall,&snowfall,
 				 &veg_var[iveg].Wdew,&snow[iveg].snow_canopy,
 				 &snow[iveg].tmp_int_storage,
 				 &snow[iveg].canopy_vapor_flux,&canopy_temp,
@@ -888,7 +894,7 @@ void full_energy(int rec,
 			atmos->air_temp, snow[iveg].surf_temp, atmos->wind);
 	      }
 
-	      if(atmos->air_temp<tmin[1] && hour>tmax_hour[1]) {
+	      if(atmos->air_temp<tmin[1]) {
 		atmos->vp  = tmp_vp;
 		atmos->vpd = tmp_vpd;
 	      }

@@ -209,7 +209,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /*******************************************
     Compute Heat Storage in the Top Soil Layer
     *******************************************/
-  *deltaH = Cs1 * (Ts_old - *TMean) * D1 / delta_t;
+  *deltaH = Cs1 * ((Ts_old + T1_old)/2. - (*TMean + *T1)/2.) * D1 / delta_t;
   *deltaH -= ice_density*Lf*(ice0-ice)*D1/delta_t;
 
   /*************************************

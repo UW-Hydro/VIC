@@ -145,6 +145,10 @@ void put_data(dist_prcp_struct  *prcp,
         out_data->grnd_flux -= (energy[veg].grnd_flux
                              + energy[veg].deltaH)
                              * veg_con[veg].Cv * mu;
+        out_data->latent_pet -= (energy[veg].grnd_flux)
+                             * veg_con[veg].Cv * mu;
+        out_data->latent_pet_mm -= (energy[veg].deltaH)
+                             * veg_con[veg].Cv * mu;
         out_data->deltaH    -= energy[veg].deltaH
                              * veg_con[veg].Cv * mu;
         out_data->energy_error += energy[veg].error
@@ -245,6 +249,10 @@ void put_data(dist_prcp_struct  *prcp,
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->grnd_flux -= (energy[vegnum].grnd_flux 
                             + energy[vegnum].deltaH)
+                            * (1.0 - veg_con[0].Cv_sum) * mu;
+      out_data->latent_pet -= (energy[vegnum].grnd_flux)
+                            * (1.0 - veg_con[0].Cv_sum) * mu;
+      out_data->latent_pet_mm -= (energy[vegnum].deltaH)
                             * (1.0 - veg_con[0].Cv_sum) * mu;
       out_data->deltaH    -= energy[vegnum].deltaH 
                             * (1.0 - veg_con[0].Cv_sum) * mu;

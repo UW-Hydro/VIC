@@ -338,7 +338,7 @@ void write_debug(atmos_data_struct atmos,
  
     fprintf(debug.fg_temp,"%6.2lf",(energy->T[0]+energy->T[1])/2.);
  
-    for(i=0;i<Ntemp;i++) fprintf(debug.fg_temp,"\t%6.2lf", energy->T[i]);
+    for(i=0;i<gp.Ulayer+2;i++) fprintf(debug.fg_temp,"\t%6.2lf", energy->T[i]);
     fprintf(debug.fg_temp,"\n");
  
   }

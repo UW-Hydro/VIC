@@ -144,6 +144,8 @@ double calc_snow_ground_flux(double, double, double, double, double *,
                              soil_con_struct, global_param_struct);
 double func_snow_ground_flux(double, va_list);
 double solve_snow_ground_flux(double Tsurf, ...);
+double error_print_snow_ground_flux(double, va_list);
+double error_calc_snow_ground_flux(double Tsurf, ...);
 double f(double, double, double, double, double, double, double, double,
          double, double, int, double *, double, double, double, double *,
          double *, double *, double *, double *, double *);
@@ -152,8 +154,10 @@ void snow_melt(atmos_data_struct *, soil_con_struct, double, double, double,
                double, double, double, double, double, double *, double *,
 	       double *, double *, double *, double *, double *, double *);
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
-double root_brent(double, double, double (*Function)(double, va_list), ...);
 double SnowPackEnergyBalance(double, va_list);
+double ErrorSnowPackEnergyBalance(double Tsurf, ...);
+double ErrorPrintSnowPackEnergyBalance(double, va_list);
+double root_brent(double, double, double (*Function)(double, va_list), ...);
 double WaterDensity(double);
 double StabilityCorrection(double, double, double, double, double, double);
 void snow_intercept(double, double, double, double, double, double, double,
@@ -169,7 +173,6 @@ void dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct,
 void full_energy(int,atmos_data_struct *,soil_con_struct,
                  veg_con_struct *, prcp_var_struct *,
                  dmy_struct *,global_param_struct,double,int,int,char);
-double func_surf_energy_bal(double, va_list);
 double calc_surf_energy_bal(int,int,int,int,int,double,double,double,double,
 			    double,double *,double *,double,double,double,
 			    double *,double,double,double,double,double *,
@@ -177,7 +180,10 @@ double calc_surf_energy_bal(int,int,int,int,int,double,double,double,double,
 			    veg_var_struct *, energy_bal_struct *,
 			    global_param_struct,layer_data_struct *,
 			    soil_con_struct,int,dmy_struct);
+double func_surf_energy_bal(double, va_list);
 double solve_surf_energy_bal(double Tsurf, ...);
+double error_print_surf_energy_bal(double, va_list);
+double error_calc_surf_energy_bal(double Tsurf, ...);
 void write_debug(atmos_data_struct, soil_con_struct, cell_data_struct,
                  energy_bal_struct *, snow_data_struct *, veg_var_struct *,
                  dmy_struct, global_param_struct,

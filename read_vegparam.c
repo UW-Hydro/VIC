@@ -51,8 +51,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
   }
   if(temp[0].Cv_sum>1.0){
-    fprintf(stderr,"ERROR: Cv exceeds 1.0 at grid cell %d\n", gridcel);
-    exit(99);
+    fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);
+    for(j=0;j<Nveg_type;j++)
+      temp[i].Cv = temp[i].Cv / temp[0].Cv_sum;
+    temp[0].Cv_sum = 1.;
   }
   return temp;
 } 

@@ -6,7 +6,7 @@
  * ORG:          University of Washington, Department of Civil Engineering
  * E-MAIL:       pstorck@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Wed Jun 24 09:51:59 1998 by VIC Administrator <vicadmin@u.washington.edu>
+ * LAST-MOD: Thu Jul 16 14:38:41 1998 by VIC Administrator <vicadmin@u.washington.edu>
  * DESCRIPTION:  Calculates the interception and subsequent release of
  *               by the forest canopy using an energy balance approach
  * DESCRIP-END.
@@ -233,8 +233,6 @@ void snow_intercept(double Dt, double F,  double LAI,
     SnowThroughFall = SnowThroughFall + (Overload*IntSnowFract)*F;
   }
   
-  if (*IntSnow > Imax1) printf("Exceeded Imax\n");
-
   /* The canopy temperature is assumed to be equal to the air temperature if 
      the air temperature is below 0C, otherwise the canopy temperature is 
      equal to 0C */
@@ -309,7 +307,7 @@ printf("
     else
       *IntRain += *VaporMassFlux;
 
-    PotSnowMelt = min((RefreezeEnergy/Lf), *IntSnow);
+    PotSnowMelt = min((RefreezeEnergy/Lf), *IntSnow) / RHO_W;
 
     *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt *SECPHOUR);
     
@@ -403,11 +401,6 @@ printf("
     else
       *IntSnow += *VaporMassFlux;
   } 
-  
-   if (*IntSnow > Imax1) printf("Exceeded Imax after vapor flux %5.2f \n",
-                           *VaporMassFlux*1000);
-
-   if (*IntSnow > Imax1) printf("IntSnow = %5.2f \n",*IntSnow*1000); 
   
   *IntSnow *= F;
   *IntRain *= F;

@@ -46,6 +46,7 @@ void rad_and_vpd (atmos_data_struct *atmos,
       else
         deltat = atmos[i].tmax - (atmos[i].tmin + atmos[i+1].tmin)/2.0;
       deltat = (deltat < 0) ? -deltat : deltat;
+      deltat = (deltat==0) ?  (atmos[i].tmax - atmos[i+1].tmin) : deltat;
       atmos[i].trans = calc_trans(deltat, soil_con.elevation);
       shortwave = calc_netshort(atmos[i].trans, dmy[i].day_in_year, 
           soil_con.lat);

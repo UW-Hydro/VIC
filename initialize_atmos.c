@@ -642,6 +642,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Determine if Snow will Fall During Each Time Step
   ****************************************************/
 
+#if !OUTPUT_FORCE
   min_Tfactor = Tfactor[0];
   for (band = 1; band < options.SNOW_BAND; band++) {
     if (Tfactor[band] < min_Tfactor)
@@ -659,6 +660,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	atmos[rec].snowflag[i] = FALSE;
     }
   }
+#endif
  
   free(hourlyrad);
   free(prec);

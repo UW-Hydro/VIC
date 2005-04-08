@@ -42,6 +42,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	    part of fix for QUICK_FLUX state file compatibility.TJB
   2005-03-08 Added EQUAL_AREA option.				TJB
   2005-03-24 Added ALMA_OUTPUT option.				TJB
+  2005-04-07 Fixed state file warning check.			TJB
 
 **********************************************************************/
 {
@@ -548,7 +549,7 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
     nrerror(ErrStr);
   }
-  if ( strcmp( names->init_state, "" ) != 0 ) {
+  if ( strcmp( global.statename, "" ) == 0 ) {
     fprintf(stderr,"WARNING: Model compiled with SAVE_STATE activated, but no state files were defined.\n");
   }
 #endif // SAVE_STATE

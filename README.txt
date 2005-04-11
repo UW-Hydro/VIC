@@ -251,6 +251,18 @@ Fixed incorrect check on soil moisture in distribute_node_moisture_properties().
 	removed.
 
 
+Fixed incorrect check on soil node depths in read_initial_model_state().
+
+	Files affected:
+	read_initial_model_state.c
+
+	Description:
+	read_initial_model_state() contained the following check:
+		if( abs( sum - soil_con->dp ) > SMALL )
+	Checking the absolute value here was incorrect.  The abs() has been
+	removed.
+
+
 Fixed incomplete file closure in OUTPUT_FORCE option.
 
 	Files affected:

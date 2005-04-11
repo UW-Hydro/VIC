@@ -58,6 +58,7 @@ void read_initial_model_state(FILE                *statefile,
 	    and LAKE_MODEL state variables.			TJB
   02-Nov-04 Added a few more lake state variables.		TJB
   03-Nov-04 Now reads extra_veg from state file.		TJB
+  2005-Apr-10 Fixed incorrect check on soil node depths.	TJB
 
 *********************************************************************/
 {
@@ -192,7 +193,7 @@ void read_initial_model_state(FILE                *statefile,
   if ( options.Nnode == 1 ) soil_con->dz_node[0] = 0;
   sum -= 0.5 * soil_con->dz_node[0];
   sum -= 0.5 * soil_con->dz_node[options.Nnode-1];
-  if ( abs( sum - soil_con->dp ) > SMALL ) {
+  if (sum - soil_con->dp > SMALL) {
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", sum, soil_con->dp );
     soil_con->dp = sum;
   }

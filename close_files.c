@@ -22,6 +22,7 @@ void close_files(infiles_struct   *inf,
   29-Oct-03 Distinguishing between input lakeparam file and output
 	    lake file.						TJB
   2005-Mar-24 Added support for ALMA output files.		TJB
+  2005-Apr-10 Added logic for OUTPUT_FORCE option.		TJB
 
 **********************************************************************/
 {
@@ -44,6 +45,16 @@ void close_files(infiles_struct   *inf,
   /*******************
     Close Output Files
     *******************/
+
+#if OUTPUT_FORCE
+
+  /** Output Forcing File **/
+  fclose(outf->fluxes);
+  if(options.COMPRESS) compress_files(fnames->fluxes);
+
+#endif /* !OUTPUT_FORCE */
+
+#if !OUTPUT_FORCE
 
 #if LDAS_OUTPUT || OPTIMIZE
 
@@ -144,6 +155,7 @@ void close_files(infiles_struct   *inf,
   if(debug.DEBUG || debug.PRT_GRID) {
     fclose(debug.fg_grid);
   }
-#endif
+#endif /* LINK_DEBUG */
+#endif /* !OUTPUT_FORCE */
 
 }

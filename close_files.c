@@ -52,7 +52,7 @@ void close_files(infiles_struct   *inf,
   fclose(outf->fluxes);
   if(options.COMPRESS) compress_files(fnames->fluxes);
 
-#endif /* !OUTPUT_FORCE */
+#endif /* OUTPUT_FORCE */
 
 #if !OUTPUT_FORCE
 

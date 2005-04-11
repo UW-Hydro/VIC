@@ -251,6 +251,16 @@ Fixed incorrect check on soil moisture in distribute_node_moisture_properties().
 	removed.
 
 
+Fixed incomplete file closure in OUTPUT_FORCE option.
+
+	Files affected:
+	close_files.c, vicNl.c
+
+	Description:
+	VIC's OUTPUT_FORCE option was not closing output files properly,
+	resulting in incomplete output files.  This has been fixed.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

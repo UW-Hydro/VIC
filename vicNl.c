@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 	    QUICK_FLUX state file compatibility.		TJB
   02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
 	    lake fraction readjustment.				TJB
+  2005-Apr-10 OUTPUT_FORCE option now calls close_files().	TJB
 
 **********************************************************************/
 {
@@ -174,7 +175,6 @@ int main(int argc, char *argv[])
       if(debug.PRT_SOIL) write_soilparam(&soil_con); 
 #endif
 
-#if !OUTPUT_FORCE
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
       if(options.FROZEN_SOIL) {
@@ -202,7 +202,6 @@ int main(int argc, char *argv[])
 #if LINK_DEBUG
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
 #endif /* LINK_DEBUG*/
-#endif /* !OUTPUT_FORCE */
 
 #if LAKE_MODEL
       if ( options.LAKES ) 
@@ -210,11 +209,11 @@ int main(int argc, char *argv[])
 				  veg_con, global_param.resolution);
 #endif // LAKE_MODEL
 
+
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
                    &outfiles);
 
-#if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
 		    (double)soil_con.elevation, &soil_con.Tfactor, 
@@ -232,7 +231,6 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
-#endif /* !OUTPUT_FORCE */
 
       initialize_atmos(atmos, dmy, infiles.forcing,
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
@@ -245,6 +243,7 @@ int main(int argc, char *argv[])
                        soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
 
+#if !OUTPUT_FORCE
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 #endif
@@ -253,7 +252,6 @@ int main(int argc, char *argv[])
         Initialize Energy Balance and Snow Variables 
       **************************************************/
 
-#if !OUTPUT_FORCE
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
@@ -347,7 +345,11 @@ int main(int argc, char *argv[])
 
       }	/* End Rec Loop */
 
+#endif /* !OUTPUT_FORCE */
+
       close_files(&infiles,&outfiles,&builtnames); 
+
+#if !OUTPUT_FORCE
 
 #if QUICK_FS
       if(options.FROZEN_SOIL) {

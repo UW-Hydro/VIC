@@ -43,6 +43,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-03-08 Added EQUAL_AREA option.				TJB
   2005-03-24 Added ALMA_OUTPUT option.				TJB
   2005-04-07 Fixed state file warning check.			TJB
+  2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
 
 **********************************************************************/
 {
@@ -492,6 +493,8 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceskip[1] = 0;
   }
 
+#if !OUTPUT_FORCE
+
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
   if(options.Nlayer > MAX_LAYERS) {
@@ -564,6 +567,12 @@ global_param_struct get_global_param(filenames_struct *names,
   }
 #endif  // LAKE_MODEL
 
+#endif  // !OUTPUT_FORCE
+
+#if OUTPUT_FORCE
+  options.SNOW_STEP = global.dt;
+#endif  // OUTPUT_FORCE
+
   /* set NR and NF */
   if (global.dt < 24 && global.dt != options.SNOW_STEP)
     nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
@@ -575,6 +584,8 @@ global_param_struct get_global_param(filenames_struct *names,
     NR = 0;
   else
     NR = NF;
+
+#if !OUTPUT_FORCE
 
   /*********************************
     Output major options to stderr
@@ -636,6 +647,8 @@ global_param_struct get_global_param(filenames_struct *names,
   else 
     fprintf(stderr,"Debugging code has not been compiled.\n");
 #endif
+
+#endif // !OUTPUT_FORCE
 
   return global;
 

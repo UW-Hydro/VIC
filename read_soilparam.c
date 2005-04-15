@@ -77,6 +77,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		is FALSE.					TJB
   26-Oct-04	Added validation of depth_full_snow_cover and
 		frost_slope.					TJB
+  2005-Apr-13   Added logic for OUTPUT_FORCE option.		TJB
 
 **********************************************************************/
 {
@@ -104,6 +105,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
 #endif
     
+#if OUTPUT_FORCE
+    fscanf(soilparam, "%*s");
+#else // OUTPUT_FORCE
     /* read infiltration parameter */
     fscanf(soilparam, "%lf", &temp.b_infilt);
     
@@ -336,6 +340,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
     temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
     for(layer=0;layer<=options.Nlayer;layer++) 
       temp.layer_node_fract[layer] = (float *)malloc(options.Nnode*sizeof(float));
+
+#endif // OUTPUT_FORCE
 
   }
   else {

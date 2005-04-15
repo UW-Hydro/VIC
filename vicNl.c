@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	    QUICK_FLUX state file compatibility.		TJB
   02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
 	    lake fraction readjustment.				TJB
-  2005-Apr-10 OUTPUT_FORCE option now calls close_files().	TJB
+  2005-Apr-13 OUTPUT_FORCE option now calls close_files().	TJB
 
 **********************************************************************/
 {
@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
   /** Check and Open Files **/
   check_files(&infiles, &filenames);
 
+#if !OUTPUT_FORCE
+
   /** Check and Open Debugging Files **/
 #if LINK_DEBUG
   open_debug();
@@ -119,6 +121,8 @@ int main(int argc, char *argv[])
 
   /** Read Vegetation Library File **/
   veg_lib = read_veglib(infiles.veglib,&Nveg_type);
+
+#endif // !OUTPUT_FORCE
 
   /** Initialize Parameters **/
   if(options.DIST_PRCP) Ndist = 2;
@@ -131,20 +135,22 @@ int main(int argc, char *argv[])
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
 
+  /** Initial state **/
+  startrec = 0;
+#if !OUTPUT_FORCE
+  if ( options.INIT_STATE ) 
+    infiles.statefile = check_state_file(filenames.init_state, dmy, 
+					 &global_param, options.Nlayer, 
+					 options.Nnode, &startrec);
+
 #if SAVE_STATE
   /** open state file if model state is to be saved **/
   if ( strcmp( global_param.statename, "NONE" ) != 0 ) 
     outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
 					 options.Nnode);
   else outfiles.statefile = NULL;
-#endif
-
-  if ( options.INIT_STATE ) 
-    infiles.statefile = check_state_file(filenames.init_state, dmy, 
-					 &global_param, options.Nlayer, 
-					 options.Nnode, &startrec);
-  else
-    startrec = 0;
+#endif // SAVE_STATE
+#endif // !OUTPUT_FORCE
 
   /************************************
     Run Model for all Active Grid Cells
@@ -195,6 +201,8 @@ int main(int argc, char *argv[])
       NEWCELL=TRUE;
       cellnum++;
 
+#if !OUTPUT_FORCE
+
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
@@ -209,10 +217,13 @@ int main(int argc, char *argv[])
 				  veg_con, global_param.resolution);
 #endif // LAKE_MODEL
 
+#endif // !OUTPUT_FORCE
 
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
                    &outfiles);
+
+#if !OUTPUT_FORCE
 
       /** Read Elevation Band Data if Used **/
       read_snowband(infiles.snowband,soil_con.gridcel,
@@ -222,6 +233,8 @@ int main(int argc, char *argv[])
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
+
+#endif // !OUTPUT_FORCE
 
       /**************************************************
          Initialize Meteological Forcing Values That
@@ -371,10 +384,10 @@ int main(int argc, char *argv[])
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
       free((char *)soil_con.AboveTreeLine);
-#endif /* !OUTPUT_FORCE */
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);
       free((char*)soil_con.layer_node_fract);
+#endif /* !OUTPUT_FORCE */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
 

@@ -137,6 +137,63 @@ Improved validation of soil param file
 	Now validates depth_full_snow_cover and frost_slope.
 
 
+New vicInterp executable
+
+	Files affected:
+	Makefile, check_files.c, close_files.c, get_global_param.c,
+	read_soilparam.c, vicNl.c
+
+	Description:
+	Now users can create a stand-alone executable called "vicInterp" by
+	typing "make interp".  This executable is a stripped-down version 
+	of VIC that reads a set of forcing files and outputs diurnally-varying
+	sub-daily forcings.  The interpolation scheme, based on the Thornton and
+	Running (mtclim) algorithm, can convert from from daily Prec, Tmin, Tmax,
+	and Wind to sub-daily Prec, AirTemp, Shortwave and Longwave radiation,
+	Wind, Pressure, and air Density.  The interpolated forms of Prec, Wind,
+	Pressure, and Density do not vary diurnally but are assumed constant
+	during each day.
+
+	vicInterp is vicNl, compiled with the OUTPUT_FORCE option set to TRUE.
+	As such, vicInterp can read a standard VIC global parameter file.  While
+	it will ignore many of the options, it understands (and requires) the
+	following:
+		TIMESTEP
+		STARTYEAR
+		STARTMONTH
+		STARTDAY
+		STARTHOUR
+		ENDYEAR
+		ENDMONTH
+		ENDDAY
+		GRID_DECIMAL
+		FORCING1
+		N_TYPES
+		FORCE_TYPE
+		FORCE_FORMAT
+		FORCE_ENDIAN
+		FORCE_DT
+		FORCEYEAR
+		FORCEMONTH
+		FORCEDAY
+		FORCEHOUR
+		SOIL
+		RESULT_DIR
+	In addition, the following options are optional:
+		BINARY_OUTPUT
+		ALMA_OUTPUT
+
+	For example, if FORCE_DT is 24 and TIMESTEP is 3, vicInterp will
+	interpolate the input daily forcings to a 3-hour time step.  If
+	ALMA_OUTPUT is TRUE, these output forcings will be standard ALMA
+	variables.
+
+	This new feature also involves an update to the OUTPUT_FORCE option
+	that fixes a bug in which output files were not properly closed
+	before exiting.  This prevented all of the output data from being
+	completely written.
+
+
 Bug Fixes:
 ----------
 
@@ -261,16 +318,6 @@ Fixed incorrect check on soil node depths in read_initial_model_state().
 		if( abs( sum - soil_con->dp ) > SMALL )
 	Checking the absolute value here was incorrect.  The abs() has been
 	removed.
-
-
-Fixed incomplete file closure in OUTPUT_FORCE option.
-
-	Files affected:
-	close_files.c, vicNl.c
-
-	Description:
-	VIC's OUTPUT_FORCE option was not closing output files properly,
-	resulting in incomplete output files.  This has been fixed.
 
 
 --------------------------------------------------------------------------------

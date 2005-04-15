@@ -8,7 +8,8 @@
 #             user can override this behavior by typing "make model",
 #             which doesn't invoke "make depend".
 # 24-Mar-2005 Added 2 new files: conv_force_vic2alma.c and
-#	      conv_results_vic2alma.c.	TJB
+#	      conv_results_vic2alma.c.				TJB
+# 13-Apr-2005 Added vicTR target.				TJB
 #
 # $Id$
 #
@@ -92,6 +93,12 @@ all:
 	make depend
 	make model
 
+interp:
+	sed -i bak 's/OUTPUT_FORCE FALSE/OUTPUT_FORCE TRUE/' user_def.h
+	make depend
+	make vicInterp
+	sed -i bak 's/OUTPUT_FORCE TRUE/OUTPUT_FORCE FALSE/' user_def.h
+
 default:
 	make depend
 	make model
@@ -101,12 +108,16 @@ full:
 	make depend
 	make tags
 	make model
+	make vicInterp
 
 clean::
 	/bin/rm -f *.o core log *~
 
 model: $(OBJS)
 	$(CC) -o vicNl$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
+
+vicInterp: $(OBJS)
+	$(CC) -o vicInterp $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags

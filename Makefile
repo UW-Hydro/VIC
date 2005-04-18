@@ -94,11 +94,11 @@ all:
 	make model
 
 interp:
-	sed -i 's/OUTPUT_FORCE FALSE/OUTPUT_FORCE TRUE/' user_def.h
+	sed -i.bak 's/OUTPUT_FORCE FALSE/OUTPUT_FORCE TRUE/' user_def.h
 	make clean
 	make depend
 	make vicInterp
-	sed -i 's/OUTPUT_FORCE TRUE/OUTPUT_FORCE FALSE/' user_def.h
+	sed -i.bak 's/OUTPUT_FORCE TRUE/OUTPUT_FORCE FALSE/' user_def.h
 	make clean
 	make depend
 

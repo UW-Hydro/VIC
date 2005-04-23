@@ -44,6 +44,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-03-24 Added ALMA_OUTPUT option.				TJB
   2005-04-07 Fixed state file warning check.			TJB
   2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW	TJB
 
 **********************************************************************/
 {
@@ -282,9 +283,15 @@ global_param_struct get_global_param(filenames_struct *names,
 	else options.BINARY_STATE_FILE=TRUE;
       }
       else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
+	fprintf(stderr,"WARNING: Please change \"ARNO_PARAMS\" to \"NIJSSEN2001_BASEFLOW\" in your global parameter file\n");
 	sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ARNO_PARAMS=TRUE;
-        else options.ARNO_PARAMS = FALSE;
+        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
+        else options.NIJSSEN2001_BASEFLOW = FALSE;
+      }
+      else if (strcasecmp("NIJSSEN2001_BASEFLOW", optstr)==0) {
+	sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
+        else options.NIJSSEN2001_BASEFLOW = FALSE;
       }
 #if SAVE_STATE
       else if(strcasecmp("STATENAME",optstr)==0) {

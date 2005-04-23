@@ -19,6 +19,7 @@ void display_current_settings(int                 mode,
   Modifications:
   2005-03-08 Added EQUAL_AREA option.				TJB
   2005-03-24 Added ALMA_OUTPUT option.				TJB
+  2005-04-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
 **********************************************************************/
 {
 
@@ -213,10 +214,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"ARC_SOIL\t\tTRUE\n");
   else
     fprintf(stdout,"ARC_SOIL\t\tFALSE\n");
-  if (options.ARNO_PARAMS)
-    fprintf(stdout,"ARNO_PARAMS\t\tTRUE\n");
+  if (options.NIJSSEN2001_BASEFLOW)
+    fprintf(stdout,"NIJSSEN2001_BASEFLOW\tTRUE\n");
   else
-    fprintf(stdout,"ARNO_PARAMS\t\tFALSE\n");
+    fprintf(stdout,"NIJSSEN2001_BASEFLOW\tFALSE\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Veg Data:\n");

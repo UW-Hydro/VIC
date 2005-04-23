@@ -2,6 +2,7 @@
 /**********************************************************************
   Modifications:
   2005-Mar-24 Added data structures to accomodate ALMA variables.	TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
 *********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -221,10 +222,10 @@ typedef struct {
 			    balance */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
   char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
-  char   ARNO_PARAMS;    /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   LAKES;          /* TRUE = use lake energy code */
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
+  char   NIJSSEN2001_BASEFLOW;   /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band */

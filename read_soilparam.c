@@ -78,6 +78,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   26-Oct-04	Added validation of depth_full_snow_cover and
 		frost_slope.					TJB
   2005-Apr-13   Added logic for OUTPUT_FORCE option.		TJB
+  2005-Apr-23   Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
 
 **********************************************************************/
 {
@@ -327,10 +328,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     
     /*************************************************
-    if ARNO_PARAMS == TRUE then convert the baseflow 
+    if NIJSSEN2001_BASEFLOW == TRUE then convert the baseflow 
     parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.
     *************************************************/
-    if(options.ARNO_PARAMS) {
+    if(options.NIJSSEN2001_BASEFLOW) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax * 
 	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

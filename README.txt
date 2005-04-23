@@ -118,6 +118,31 @@ EQUAL_AREA global parameter option
 	as before.
 
 
+ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
+
+	Files affected:
+	display_current_settings.c, get_global_param.c, initialize_global.c,
+	read_soilparam.c, read_soilparam_arc.c, vicNl_def.h
+
+	Description:
+	Changed the name of the ARNO_PARAMS global parameter option to
+	NIJSSEN2001_BASEFLOW.  The meaning of the ARNO_PARAMS option was
+	actually opposite to its name: when ARNO_PARAMS was FALSE, VIC would
+	interpret the first four parameters in the soil parameter file to be the
+	standard ARNO soil parameters Ds, Dsmax, Ws, and c, while when ARNO_PARAMS
+	was TRUE, VIC would interpret the first four parameters to be d1, d2, d3,
+	and d4, the soil parameters used in Nijssen et al. (2001).  The new name
+	for this option more accurately reflects its meaning: when
+	NIJSSEN2001_BASEFLOW is TRUE, VIC assumes the soil parameter file contains
+	d1, d2, d3, and d4.  When NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the
+	soil parameter file contains Ds, Dsmax, Ws, and c.
+
+	As of the current release of VIC 4.1.0, VIC accepts both ARNO_PARAMS and
+	NIJSSEN2001_BASEFLOW in the global parameter file.  But eventually
+	ARNO_PARAMS will be phased out, and users are encouraged to replace
+	ARNO_PARAMS with NIJSSEN2001_BASEFLOW in their global parameter files.
+
+
 Improved validation of global options
 
 	Files affected:

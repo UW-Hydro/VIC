@@ -78,6 +78,7 @@ void initialize_global() {
 	    Also changed limit on loop over forcing types from
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
   2005-Mar-24 Modified to handle ALMA-specific global options.	TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
 
 *********************************************************************/
 
@@ -95,7 +96,7 @@ void initialize_global() {
   options.EQUAL_AREA            = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
-  options.ARNO_PARAMS           = FALSE;
+  options.NIJSSEN2001_BASEFLOW  = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.DIST_PRCP             = FALSE;

@@ -44,6 +44,7 @@ void put_data(soil_con_struct	*soil_con,
   28-Sep-04 Now out_data->aero_resist stores the aerodynamic resistance
 	    used in flux calculations.				TJB
   2005-Mar-24 Modified to compute ALMA output variables.	TJB
+  2005-Apr-23 Now aero_cond is aggregated instead of aero_resist.	TJB
 
 **********************************************************************/
 {
@@ -283,9 +284,15 @@ void put_data(soil_con_struct	*soil_con,
 	      out_data->Wdew += veg_var[dist][veg][band].Wdew 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
-	    /** record aerodynamic resistance **/
-	    out_data->aero_resist += cell[WET][veg][0].aero_resist_used 
-	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    /** record aerodynamic conductance **/
+            if (cell[WET][veg][0].aero_resist_used > SMALL) {
+	      out_data->aero_cond += (1/cell[WET][veg][0].aero_resist_used)
+	        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            else {
+              out_data->aero_cond = HUGE_RESIST;
+              out_data->aero_resist = cell[WET][veg][0].aero_resist_used;
+            }
 	    
 	    /** record layer moistures **/
 	    tmp_total_moist = tmp_total_soil = tmp_root_moist = 0.0;
@@ -669,6 +676,7 @@ void put_data(soil_con_struct	*soil_con,
       }
     }
   }
+
   // normalize quantities that may not be present over all of grid cell
   if (out_data->baresoilt < SPVAL/2) {
     out_data->baresoilt /= cv_baresoil;
@@ -742,10 +750,22 @@ void put_data(soil_con_struct	*soil_con,
 
 #if ! OPTIMIZE
 	    
-      /** record aerodynamic resistance **/
-      out_data->aero_resist += lake_var.aero_resist_used * Clake * Cv * mu;
-      out_data->aero_resist += cell[WET][veg][0].aero_resist_used
+      /** record aerodynamic conductivity **/
+      if (lake_var.aero_resist_used > SMALL) {
+        out_data->aero_cond += (1/lake_var.aero_resist_used) * Clake * Cv * mu;
+      }
+      else {
+        out_data->aero_cond = HUGE_RESIST;
+        out_data->aero_resist = lake_var.aero_resist_used;
+      }
+      if (cell[WET][veg][0].aero_resist_used > SMALL) {
+        out_data->aero_cond += (1/cell[WET][veg][0].aero_resist_used)
 	      * Cv * mu * (1.-Clake);
+      }
+      else {
+        out_data->aero_cond = HUGE_RESIST;
+        out_data->aero_resist = cell[WET][veg][0].aero_resist_used;
+      }
 
       /** record lake moistures **/
       out_data->lake_moist = lake_con->Cl[0] * 1000. * lake_var.volume / lake_con->basin[0]; // mm
@@ -885,6 +905,11 @@ void put_data(soil_con_struct	*soil_con,
 #endif /* LAKE_MODEL */
   
 #if !OPTIMIZE
+
+  /** record aerodynamic resistance **/
+  if (out_data->aero_cond < HUGE_RESIST) {
+    out_data->aero_resist = 1 / out_data->aero_cond;
+  }
 
   /** record radiative temperature **/
   out_data->rad_temp = pow(out_data->rad_temp,0.25);

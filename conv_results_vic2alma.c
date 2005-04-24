@@ -12,6 +12,7 @@ void conv_results_vic2alma(out_data_struct *out_data, int dt, double *depth, out
   compliant output variables and stores them in the structure out_data_alma.
   
   modifications:
+  2005-Apr-23 Set ACond = new aero_cond variable.		TJB
 
 **********************************************************************/
 {
@@ -85,12 +86,7 @@ void conv_results_vic2alma(out_data_struct *out_data, int dt, double *depth, out
   out_data_alma->Canopint = out_data->Wdew;
   out_data_alma->SubSnow = out_data->sub_total;
   out_data_alma->SubSurf = 0.0;
-  if (out_data->aero_resist > SMALL) {
-    out_data_alma->ACond = 1 / out_data->aero_resist;
-  }
-  else {
-    out_data_alma->ACond = HUGE_RESIST;
-  }
+  out_data_alma->ACond = out_data->aero_cond;
 
   /* Cold-Season Processes */
   out_data_alma->SnowFrac = out_data->coverage[0];

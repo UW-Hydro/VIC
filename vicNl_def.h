@@ -3,6 +3,7 @@
   Modifications:
   2005-Mar-24 Added data structures to accomodate ALMA variables.	TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
+  2005-Apr-23 Added out_data.aero_cond.					TJB
 *********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -818,6 +819,8 @@ typedef struct {
 					  advected to snowpack (Wm-2) */
   double advection[MAX_BANDS+1];       /* grid cell advection (snow only) 
 					  (Wm-2) */
+  double aero_cond;                    /* grid cell mean aerodynamic 
+					  conductivity  [m/s] */
   double aero_resist;                  /* grid cell mean aerodynamic 
 					  resistence  [s/m] */
   double air_temp;                     /* grid cell air temperature */

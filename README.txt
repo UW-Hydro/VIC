@@ -118,31 +118,6 @@ EQUAL_AREA global parameter option
 	as before.
 
 
-ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
-
-	Files affected:
-	display_current_settings.c, get_global_param.c, initialize_global.c,
-	read_soilparam.c, read_soilparam_arc.c, vicNl_def.h
-
-	Description:
-	Changed the name of the ARNO_PARAMS global parameter option to
-	NIJSSEN2001_BASEFLOW.  The meaning of the ARNO_PARAMS option was
-	actually opposite to its name: when ARNO_PARAMS was FALSE, VIC would
-	interpret the first four parameters in the soil parameter file to be the
-	standard ARNO soil parameters Ds, Dsmax, Ws, and c, while when ARNO_PARAMS
-	was TRUE, VIC would interpret the first four parameters to be d1, d2, d3,
-	and d4, the soil parameters used in Nijssen et al. (2001).  The new name
-	for this option more accurately reflects its meaning: when
-	NIJSSEN2001_BASEFLOW is TRUE, VIC assumes the soil parameter file contains
-	d1, d2, d3, and d4.  When NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the
-	soil parameter file contains Ds, Dsmax, Ws, and c.
-
-	As of the current release of VIC 4.1.0, VIC accepts both ARNO_PARAMS and
-	NIJSSEN2001_BASEFLOW in the global parameter file.  But eventually
-	ARNO_PARAMS will be phased out, and users are encouraged to replace
-	ARNO_PARAMS with NIJSSEN2001_BASEFLOW in their global parameter files.
-
-
 Improved validation of global options
 
 	Files affected:
@@ -262,6 +237,29 @@ Aerodynamic resistance incorrect in output fluxes file
         the canopy air/surrounding atmosphere interface is not tracked.
 
 
+Aerodynamic resistance not correctly aggregated for output
+
+	Files affected:
+	conv_results_vic2alma.c, put_data.c, vicNl_def.h
+
+	Description:
+	In previous releases, aerodynamic resistance (out_data->aero_resist)
+	was aggregated by a simple area-weighted average over veg tiles.  This
+	led to an aggregate value that was not the true effective resistance
+	of the entire grid cell.  Since evaporation is proportional to
+	1/aero_resist, it is (1/aero_resist), or the aerodynamic conductivity,
+	that should be averaged over the grid cell.  Therefore, a new variable,
+	out_data.aero_cond, was created for the purposes of aggregation.  After
+	aggregation, out_data.aero_resist is computed as 1/out_data.aero_cond.
+
+	The effect of the change is most pronounced when there is a large range
+	of values of aerodynamic resistance among the veg tiles in a grid cell.
+	The effective aerodynamic resistance, computed the new way, will tend
+	to be smaller than the old way when the values cover a wide range.
+	However, the effective aerodynamic resistance will never be smaller than
+	the smallest value among the various veg tiles in the cell.
+	
+
 Attempts to skip deactivated grid cells fail when using a binary initial state
 file.
 
@@ -343,6 +341,31 @@ Fixed incorrect check on soil node depths in read_initial_model_state().
 		if( abs( sum - soil_con->dp ) > SMALL )
 	Checking the absolute value here was incorrect.  The abs() has been
 	removed.
+
+
+ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
+
+	Files affected:
+	display_current_settings.c, get_global_param.c, initialize_global.c,
+	read_soilparam.c, read_soilparam_arc.c, vicNl_def.h
+
+	Description:
+	Changed the name of the ARNO_PARAMS global parameter option to
+	NIJSSEN2001_BASEFLOW.  The meaning of the ARNO_PARAMS option was
+	actually opposite to its name: when ARNO_PARAMS was FALSE, VIC would
+	interpret the first four parameters in the soil parameter file to be the
+	standard ARNO soil parameters Ds, Dsmax, Ws, and c, while when ARNO_PARAMS
+	was TRUE, VIC would interpret the first four parameters to be d1, d2, d3,
+	and d4, the soil parameters used in Nijssen et al. (2001).  The new name
+	for this option more accurately reflects its meaning: when
+	NIJSSEN2001_BASEFLOW is TRUE, VIC assumes the soil parameter file contains
+	d1, d2, d3, and d4.  When NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the
+	soil parameter file contains Ds, Dsmax, Ws, and c.
+
+	As of the current release of VIC 4.1.0, VIC accepts both ARNO_PARAMS and
+	NIJSSEN2001_BASEFLOW in the global parameter file.  But eventually
+	ARNO_PARAMS will be phased out, and users are encouraged to replace
+	ARNO_PARAMS with NIJSSEN2001_BASEFLOW in their global parameter files.
 
 
 --------------------------------------------------------------------------------

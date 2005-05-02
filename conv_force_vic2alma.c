@@ -14,6 +14,7 @@ void conv_force_vic2alma(atmos_data_struct *atmos, int rec, int j, int dt, atmos
   modifications:
   2005-04-17 Rain and Snow fractions now vary linearly between MIN_RAIN_TEMP
 	     and MAX_SNOW_TEMP.						TJB
+  2005-04-29 Fixed typo in calculation of Qair.				TJB
 
 **********************************************************************/
 {
@@ -28,7 +29,7 @@ void conv_force_vic2alma(atmos_data_struct *atmos, int rec, int j, int dt, atmos
   atmos_alma->SWdown = atmos[rec].shortwave[j];
   atmos_alma->LWdown = atmos[rec].longwave[j];
   atmos_alma->Tair = atmos[rec].air_temp[j] + KELVIN;
-  atmos_alma->Qair = atmos[rec].vp[j] / atmos[rec].pressure[j];
+  atmos_alma->Qair = 0.622 * atmos[rec].vp[j] / atmos[rec].pressure[j];
   atmos_alma->Psurf = atmos[rec].pressure[j];
   if (atmos[rec].air_temp[j] >= MAX_SNOW_TEMP) {
     atmos_alma->Rainf = atmos[rec].prec[j] / (dt * 3600);

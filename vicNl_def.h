@@ -4,6 +4,7 @@
   2005-Mar-24 Added data structures to accomodate ALMA variables.	TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
   2005-Apr-23 Added out_data.aero_cond.					TJB
+  2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
 *********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -21,26 +22,30 @@
 #define BINARY 2		/* met file format flag */
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 18
+#define N_FORCING_TYPES 22
 #define AIR_TEMP  0  /* air temperature per time step (C) */
 #define ALBEDO    1  /* surface albedo (fraction) */
-#define DENSITY   2  /* atmospheric density (kg/m^3) */
-#define LONGWAVE  3  /* incoming longwave radiation (W/m^2) */
-#define PREC      4  /* precipitation (mm) */
-#define PRESSURE  5  /* atmospheric pressure (kPa) */
-#define PSURF     6  /* atmospheric pressure (Pa) */
-#define QAIR      7  /* specific humidity (unitless) */
-#define RAINF     8  /* rainfall rate (kg/m^2s) */
-#define SHORTWAVE 9  /* incoming shortwave (W/m^2) */
-#define SNOWF     10 /* snowfall rate (kg/m^2s) */
-#define TAIR      11 /* air temperature per time step (K) */
-#define TMAX      12 /* maximum daily temperature (C) */
-#define TMIN      13 /* minimum daily temperature (C) */
-#define TSKC      14 /* cloud cover (fraction) */
-#define VP        15 /* vapor pressure (kPa) */
-#define WIND      16 /* wind speed (m/s) */
-#define SKIP      17 /* place holder for unused data columns */
-		 
+#define CRAINF    2  /* convective rainfall rate (kg/m^2s) */
+#define CSNOWF    3  /* convective snowfall rate (kg/m^2s) */
+#define DENSITY   4  /* atmospheric density (kg/m^3) */
+#define LONGWAVE  5  /* incoming longwave radiation (W/m^2) */
+#define LSRAINF   6  /* large-scale rainfall rate (kg/m^2s) */
+#define LSSNOWF   7  /* large-scale snowfall rate (kg/m^2s) */
+#define PREC      8  /* precipitation (mm) */
+#define PRESSURE  9  /* atmospheric pressure (kPa) */
+#define PSURF     10 /* atmospheric pressure (Pa) */
+#define QAIR      11 /* specific humidity (unitless) */
+#define RAINF     12 /* rainfall rate (kg/m^2s) */
+#define SHORTWAVE 13 /* incoming shortwave (W/m^2) */
+#define SNOWF     14 /* snowfall rate (kg/m^2s) */
+#define TAIR      15 /* air temperature per time step (K) */
+#define TMAX      16 /* maximum daily temperature (C) */
+#define TMIN      17 /* minimum daily temperature (C) */
+#define TSKC      18 /* cloud cover (fraction) */
+#define VP        19 /* vapor pressure (kPa) */
+#define WIND      20 /* wind speed (m/s) */
+#define SKIP      21 /* place holder for unused data columns */
+
 /***** Physical Constants *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
 #define RESID_MOIST      0.0        /* define residual moisture content 

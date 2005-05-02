@@ -17,6 +17,7 @@ void get_force_type(char   *cmdstr,
 
   Modifications:
   2005-Mar-24 Modified to accept ALMA forcing variables.	TJB
+  2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
 
 *************************************************************/
 
@@ -64,7 +65,33 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 2: air density */
+  /* type 2: convective rainfall rate */
+  else if(strcasecmp("CRAINF",optstr)==0){
+    type = CRAINF;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+             &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 3: convective snowfall rate */
+  else if(strcasecmp("CSNOWF",optstr)==0){
+    type = CSNOWF;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+             &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 4: air density */
   else if(strcasecmp("DENSITY",optstr)==0){
     type = DENSITY;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -77,7 +104,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 3: incomgin longwave radiation */
+  /* type 5: incoming longwave radiation */
   else if(strcasecmp("LONGWAVE",optstr)==0 || strcasecmp("LWDOWN",optstr)==0){
     type = LONGWAVE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -90,7 +117,33 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 4: precipitation */
+  /* type 6: large-scale rainfall rate */
+  else if(strcasecmp("LSRAINF",optstr)==0){
+    type = LSRAINF;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+             &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 7: large-scale snowfall rate */
+  else if(strcasecmp("LSSNOWF",optstr)==0){
+    type = LSSNOWF;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+             &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 8: precipitation */
   else if(strcasecmp("PREC",optstr)==0){
     type = PREC;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -103,7 +156,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 5: air pressure (kPa) */
+  /* type 9: air pressure (kPa) */
   else if(strcasecmp("PRESSURE",optstr)==0){
     type = PRESSURE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -116,7 +169,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 6: air pressure (Pa) */
+  /* type 10: air pressure (Pa) */
   else if(strcasecmp("PSURF",optstr)==0){
     type = PSURF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -129,7 +182,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 7: specific humidity */
+  /* type 11: specific humidity */
   else if(strcasecmp("QAIR",optstr)==0){
     type = QAIR;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -142,7 +195,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 8: rainfall rate */
+  /* type 12: rainfall rate */
   else if(strcasecmp("RAINF",optstr)==0){
     type = RAINF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -155,7 +208,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 9: shortwave radiation */
+  /* type 13: shortwave radiation */
   else if(strcasecmp("SHORTWAVE",optstr)==0 || strcasecmp("SWDOWN",optstr)==0){
     type = SHORTWAVE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -168,7 +221,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 10: snowfall rate */
+  /* type 14: snowfall rate */
   else if(strcasecmp("SNOWF",optstr)==0){
     type = SNOWF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -181,7 +234,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 11: air temperature (K) */
+  /* type 15: air temperature (K) */
   else if(strcasecmp("TAIR",optstr)==0){
     type = TAIR;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -194,7 +247,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 12: maximum daily temperature */
+  /* type 16: maximum daily temperature */
   else if(strcasecmp("TMAX",optstr)==0){
     type = TMAX;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -207,7 +260,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 13: minimum daily temperature */
+  /* type 17: minimum daily temperature */
   else if(strcasecmp("TMIN",optstr)==0){
     type = TMIN;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -220,7 +273,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 14: sky cover */
+  /* type 18: sky cover */
   else if(strcasecmp("TSKC",optstr)==0){
     type = TSKC;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -233,7 +286,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 15: vapor pressure */
+  /* type 19: vapor pressure */
   else if(strcasecmp("VP",optstr)==0){
     type = VP;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -246,7 +299,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 16: wind speed */
+  /* type 20: wind speed */
   else if(strcasecmp("WIND",optstr)==0){
     type = WIND;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -259,7 +312,7 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 17: unused (blank) data */
+  /* type 21: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
     param_set.TYPE[type].SUPPLIED=file_num+1;

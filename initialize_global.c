@@ -46,26 +46,27 @@ void initialize_global() {
   debug.PRT_GRID         = TRUE - 
   debug.debug_dir        = 
 
-  param_set.SHORTWAVE    = FALSE;
-  param_set.LONGWAVE     = FALSE;
-  param_set.PRESSURE     = FALSE;
-  param_set.TSKC         = FALSE;
-  param_set.VP           = FALSE;
-  param_set.VPD          = FALSE;
-  param_set.REL_HUMID    = FALSE;
-  param_set.SPEC_HUMID   = FALSE;
   param_set.ALBEDO       = FALSE;
   param_set.AIR_TEMP     = FALSE;
-  param_set.TMAX         = FALSE;
-  param_set.TMIN         = FALSE;
-  param_set.PREC         = FALSE;
-  param_set.WIND         = FALSE;
+  param_set.CRAINF       = FALSE;
+  param_set.CSNOWF       = FALSE;
   param_set.DENSITY      = FALSE;
-  param_set.RAINF        = FALSE;
-  param_set.SNOWF        = FALSE;
-  param_set.TAIR         = FALSE;
+  param_set.LONGWAVE     = FALSE;
+  param_set.LSRAINF      = FALSE;
+  param_set.LSSNOWF      = FALSE;
+  param_set.PREC         = FALSE;
+  param_set.PRESSURE     = FALSE;
   param_set.PSURF        = FALSE;
   param_set.QAIR         = FALSE;
+  param_set.RAINF        = FALSE;
+  param_set.SHORTWAVE    = FALSE;
+  param_set.SNOWF        = FALSE;
+  param_set.TAIR         = FALSE;
+  param_set.TMAX         = FALSE;
+  param_set.TMIN         = FALSE;
+  param_set.TSKC         = FALSE;
+  param_set.VP           = FALSE;
+  param_set.WIND         = FALSE;
 
   Modifications:
   11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file 
@@ -79,6 +80,7 @@ void initialize_global() {
 	    hard-coded 17 to variable N_FORCING_TYPES.		TJB
   2005-Mar-24 Modified to handle ALMA-specific global options.	TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
+  2005-May-01 Added the ALMA vars CRainf, CSSnowf, LSRainf, and LSSnowf.TJB
 
 *********************************************************************/
 
@@ -149,7 +151,12 @@ void initialize_global() {
 
   param_set.TYPE[AIR_TEMP].SUPPLIED   = FALSE;
   param_set.TYPE[ALBEDO].SUPPLIED     = FALSE;
+  param_set.TYPE[CRAINF].SUPPLIED     = FALSE;
+  param_set.TYPE[CSNOWF].SUPPLIED     = FALSE;
   param_set.TYPE[DENSITY].SUPPLIED    = FALSE;
+  param_set.TYPE[LONGWAVE].SUPPLIED   = FALSE;
+  param_set.TYPE[LSRAINF].SUPPLIED    = FALSE;
+  param_set.TYPE[LSSNOWF].SUPPLIED    = FALSE;
   param_set.TYPE[PREC].SUPPLIED       = FALSE;
   param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
   param_set.TYPE[PSURF].SUPPLIED      = FALSE;

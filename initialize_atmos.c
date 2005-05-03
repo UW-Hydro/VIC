@@ -194,13 +194,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
     param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[LSRAINF].SUPPLIED;
   }
-  if(param_set.TYPE[SNOWF].SUPPLIED) {
+  if(param_set.TYPE[RAINF].SUPPLIED && param_set.TYPE[SNOWF].SUPPLIED) {
     /* snowfall rate supplied */
     for (idx=0; idx<(global_param.nrecs*NF); idx++) {
       forcing_data[PREC][idx] += forcing_data[SNOWF][idx] * (global_param.dt * 3600);
     }
   }
-  else if(param_set.TYPE[CSNOWF].SUPPLIED && param_set.TYPE[LSSNOWF].SUPPLIED) {
+  else if(param_set.TYPE[CRAINF].SUPPLIED && param_set.TYPE[LSRAINF].SUPPLIED
+    && param_set.TYPE[CSNOWF].SUPPLIED && param_set.TYPE[LSSNOWF].SUPPLIED) {
     /* convective and large-scale snowfall rates supplied */
     for (idx=0; idx<(global_param.nrecs*NF); idx++) {
       forcing_data[PREC][idx] = (forcing_data[CSNOWF][idx] + forcing_data[LSSNOWF][idx])

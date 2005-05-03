@@ -5,6 +5,7 @@
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
   2005-Apr-23 Added out_data.aero_cond.					TJB
   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
+  2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
 *********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -22,7 +23,7 @@
 #define BINARY 2		/* met file format flag */
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 22
+#define N_FORCING_TYPES 24
 #define AIR_TEMP  0  /* air temperature per time step (C) */
 #define ALBEDO    1  /* surface albedo (fraction) */
 #define CRAINF    2  /* convective rainfall rate (kg/m^2s) */
@@ -44,7 +45,9 @@
 #define TSKC      18 /* cloud cover (fraction) */
 #define VP        19 /* vapor pressure (kPa) */
 #define WIND      20 /* wind speed (m/s) */
-#define SKIP      21 /* place holder for unused data columns */
+#define WIND_E    21 /* zonal component of wind speed (m/s) */
+#define WIND_N    22 /* meridional component of wind speed (m/s) */
+#define SKIP      23 /* place holder for unused data columns */
 
 /***** Physical Constants *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */

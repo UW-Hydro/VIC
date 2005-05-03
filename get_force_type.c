@@ -18,6 +18,7 @@ void get_force_type(char   *cmdstr,
   Modifications:
   2005-Mar-24 Modified to accept ALMA forcing variables.	TJB
   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
+  2005-May-02 Added the ALMA vars Wind_E and Wind_N.			TJB
 
 *************************************************************/
 
@@ -312,7 +313,33 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 21: unused (blank) data */
+  /* type 21: zonal component of wind speed */
+  else if(strcasecmp("WIND_E",optstr)==0){
+    type = WIND_E;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+	     &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 22: meridional component of wind speed */
+  else if(strcasecmp("WIND_N",optstr)==0){
+    type = WIND_N;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+	     &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 23: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
     param_set.TYPE[type].SUPPLIED=file_num+1;

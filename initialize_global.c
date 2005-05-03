@@ -67,6 +67,8 @@ void initialize_global() {
   param_set.TSKC         = FALSE;
   param_set.VP           = FALSE;
   param_set.WIND         = FALSE;
+  param_set.WIND_E       = FALSE;
+  param_set.WIND_N       = FALSE;
 
   Modifications:
   11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file 
@@ -81,6 +83,7 @@ void initialize_global() {
   2005-Mar-24 Modified to handle ALMA-specific global options.	TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
   2005-May-01 Added the ALMA vars CRainf, CSSnowf, LSRainf, and LSSnowf.TJB
+  2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
 
 *********************************************************************/
 
@@ -170,6 +173,8 @@ void initialize_global() {
   param_set.TYPE[TSKC].SUPPLIED       = FALSE;
   param_set.TYPE[VP].SUPPLIED         = FALSE;
   param_set.TYPE[WIND].SUPPLIED       = FALSE;
+  param_set.TYPE[WIND_E].SUPPLIED     = FALSE;
+  param_set.TYPE[WIND_N].SUPPLIED     = FALSE;
   param_set.TYPE[SKIP].SUPPLIED       = FALSE;
   for(i=0;i<2;i++) {
     param_set.FORCE_DT[i] = MISSING;

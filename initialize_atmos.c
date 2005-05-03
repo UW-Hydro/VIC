@@ -72,6 +72,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2005-Mar-24 Modified to handle ALMA forcing variables.	TJB
   2005-Apr-30 Fixed typo in QAIR calculation.			TJB
   2005-May-01 Added logic for CSNOWF and LSSNOWF.		TJB
+  2005-May-02 Added logic for WIND_E and WIND_N.		TJB
 
 **********************************************************************/
 {
@@ -136,7 +137,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[LONGWAVE].SUPPLIED)) 
     nrerror("Model cannot be run with shortwave supplied, if longwave is not provided.");
     */
-  
+
   /* mtclim routine memory allocations */
 
   hourlyrad  = (double *) calloc(Ndays*24, sizeof(double));
@@ -256,6 +257,23 @@ void initialize_atmos(atmos_data_struct        *atmos,
       forcing_data[VP][idx] = forcing_data[QAIR][idx] * forcing_data[PRESSURE][idx] / 0.622;
     }
     param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate WIND_E and WIND_N
+    into WIND
+    NOTE: this overwrites any WIND data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[WIND_E].SUPPLIED && param_set.TYPE[WIND_N].SUPPLIED) {
+    /* specific humidity and atm. pressure supplied */
+    if (forcing_data[WIND] == NULL) {
+      forcing_data[WIND] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[WIND][idx] = sqrt((pow(forcing_data[WIND_E][idx],2)+pow(forcing_data[WIND_N][idx],2)));
+    }
+    param_set.TYPE[WIND].SUPPLIED = param_set.TYPE[WIND_E].SUPPLIED;
   }
 
   /*************************************************
@@ -590,7 +608,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
     set the windspeed 
   ********************/
 
-  if (!param_set.TYPE[WIND].SUPPLIED) {
+  if (!param_set.TYPE[WIND].SUPPLIED
+      && !(param_set.TYPE[WIND_E].SUPPLIED && param_set.TYPE[WIND_N].SUPPLIED)) {
     /* no wind data provided, use default constant */
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for (i = 0; i < NF; i++) {

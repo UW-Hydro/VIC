@@ -44,10 +44,10 @@ void read_rosemount(atmos_data_struct *temp,
   rec=0;
   while ( !feof(snowf) && (rec < *nrecs) ) {
     fgets(str, maxline, snowf);
-    sscanf(str, "%*i %i",&hour);
+    sscanf(str, "%*d %d",&hour);
     if(!(FIRST && hour!=starthour) || !FIRST) {
       if(FIRST) FIRST=FALSE;
-      sscanf(str, "%i %*i %i %lf %lf %lf %lf %lf %lf", &day, &year, 
+      sscanf(str, "%d %*d %d %lf %lf %lf %lf %lf %lf", &day, &year, 
 	     &temp[rec].air_temp, &temp[rec].wind, &temp[rec].rel_humid, 
 	     &temp[rec].prec, &junk, &temp[rec].shortwave);
       

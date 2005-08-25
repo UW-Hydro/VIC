@@ -138,7 +138,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       fscanf(soilparam, "%lf", &temp.init_moist[layer]);
 #if !OUTPUT_FORCE
       if(temp.init_moist[layer] < 0.) {
-	sprintf(ErrStr,"ERROR: Initial moisture for layer %i cannot be negative (%f)",layer,temp.init_moist[layer]);
+	sprintf(ErrStr,"ERROR: Initial moisture for layer %d cannot be negative (%f)",layer,temp.init_moist[layer]);
 	nrerror(ErrStr);
       }
 #endif /* !OUTPUT_FORCE */
@@ -153,7 +153,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #if !OUTPUT_FORCE
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
-	sprintf(ErrStr,"ERROR: Model will not function with layer %i depth %f < %f m.\n",
+	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
 		layer,temp.depth[layer],MINSOILDEPTH);
 	nrerror(ErrStr);
       }
@@ -161,7 +161,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
 #if !OUTPUT_FORCE
     if(temp.depth[0] > temp.depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %i depth (%f m) < layer %i depth (%f m).\n",
+      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
 	      0,temp.depth[0],1,temp.depth[1]);
       nrerror(ErrStr);
     }
@@ -237,7 +237,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       fscanf(soilparam, "%lf", &temp.resid_moist[layer]);
     
     /* read frozen soil active flag */
-    fscanf(soilparam, "%i", &tempint);
+    fscanf(soilparam, "%d", &tempint);
     temp.FS_ACTIVE = (char)tempint;
     
     /* read minimum snow depth for full coverage */
@@ -270,12 +270,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
     if (!options.INIT_STATE) { // only do this if we're not getting initial moisture from model state file
       for(layer = 0; layer < options.Nlayer; layer++) {
 	if(temp.init_moist[layer] > temp.max_moist[layer]) {
-	  fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %i.\n\tResetting soil moisture to maximum.\n",
+	  fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %d.\n\tResetting soil moisture to maximum.\n",
 		temp.init_moist[layer], temp.max_moist[layer], layer);
 	  temp.init_moist[layer] = temp.max_moist[layer];
 	}
 	if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) { 
-	  fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tResetting soil moisture to residual moisture.\n",
+	  fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tResetting soil moisture to residual moisture.\n",
 		temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
 	  temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
         }
@@ -297,12 +297,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.Wcr[layer]  = Wcr_FRACT[layer] * temp.max_moist[layer];
       temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
       if(temp.Wpwp[layer] > temp.Wcr[layer]) {
-        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is greater than calculated critical point moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
+        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is greater than calculated critical point moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
                 temp.Wpwp[layer], temp.Wcr[layer], layer);
 	nrerror(ErrStr);
       }
       if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
+        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
                 temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
 	nrerror(ErrStr);
       }

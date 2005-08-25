@@ -57,7 +57,7 @@ FILE *check_state_file(char                *init_state,
     fread( &startday, 1, sizeof(int), statefile );
   }
   else {
-    fscanf(statefile,"%i %i %i\n", &startyear, &startmonth, &startday);
+    fscanf(statefile,"%d %d %d\n", &startyear, &startmonth, &startday);
   }
 
   /* Check simulation options */
@@ -66,14 +66,14 @@ FILE *check_state_file(char                *init_state,
     fread( &tmp_Nnodes, 1, sizeof(int), statefile );
   }
   else {
-    fscanf(statefile,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);
+    fscanf(statefile,"%d %d\n", &tmp_Nlayer, &tmp_Nnodes);
   }
   if ( tmp_Nlayer != Nlayer ) {
-    sprintf(ErrStr,"The number of soil moisture layers in the model state file (%i) does not equal that defined in the global control file (%i).  Check your input files.", tmp_Nlayer, Nlayer);
+    sprintf(ErrStr,"The number of soil moisture layers in the model state file (%d) does not equal that defined in the global control file (%d).  Check your input files.", tmp_Nlayer, Nlayer);
     nrerror(ErrStr);
   }
   if ( tmp_Nnodes != Nnodes ) {
-    sprintf(ErrStr,"The number of soil thermal nodes in the model state file (%i) does not equal that defined in the global control file (%i).  Check your input files.", tmp_Nnodes, Nnodes);
+    sprintf(ErrStr,"The number of soil thermal nodes in the model state file (%d) does not equal that defined in the global control file (%d).  Check your input files.", tmp_Nnodes, Nnodes);
     nrerror(ErrStr);
   }
 

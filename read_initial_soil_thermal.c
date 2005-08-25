@@ -53,7 +53,7 @@ void read_initial_soil_thermal(FILE   *initsoil,
   fscanf(initsoil, "%s", tmpstr);
   if(tmpstr[0] != '#') {
     index = atoi(tmpstr);
-    fscanf(initsoil, "%i %i", &tmpveg, &tmpband);
+    fscanf(initsoil, "%d %d", &tmpveg, &tmpband);
   }
   else index = tmpveg = tmpband = -999;
   while(index != cellnum && veg != tmpveg && band != tmpband) {
@@ -61,7 +61,7 @@ void read_initial_soil_thermal(FILE   *initsoil,
     fscanf(initsoil, "%s", tmpstr);
     if(tmpstr[0] != '#') {
       index = atoi(tmpstr);
-      fscanf(initsoil, "%i %i", &tmpveg, &tmpband);
+      fscanf(initsoil, "%d %d", &tmpveg, &tmpband);
     }
     else index = tmpveg = tmpband = -999;
   }
@@ -72,9 +72,9 @@ void read_initial_soil_thermal(FILE   *initsoil,
 
     thermdepths = (double*)calloc(Nnodes,sizeof(double));
   
-    fscanf(initsoil, "%i",  &tmpnodes);
+    fscanf(initsoil, "%d",  &tmpnodes);
     if(Nnodes!=tmpnodes) {
-      sprintf(ErrStr,"Number of nodes defined in soil thermal initialization file (%i), not equal to number of nodes defined in model (%i).",tmpnodes,Nnodes);
+      sprintf(ErrStr,"Number of nodes defined in soil thermal initialization file (%d), not equal to number of nodes defined in model (%d).",tmpnodes,Nnodes);
     }
     for(i=0;i<2;i++)       fscanf(initsoil, "%lf",     &fdepth[i]);
     for(i=0;i<options.Nlayer;i++) fscanf(initsoil, "%lf",     &moist[i]);
@@ -93,9 +93,9 @@ void read_initial_soil_thermal(FILE   *initsoil,
 
     thermdepths = (double*)calloc(Nnodes,sizeof(double));
   
-    fscanf(initsoil, "%i",  &tmpnodes);
+    fscanf(initsoil, "%d",  &tmpnodes);
     if(Nnodes!=tmpnodes) {
-      sprintf(ErrStr,"Number of nodes defined in soil thermal initialization file (%i), not equal to number of nodes defined in model (%i).",tmpnodes,Nnodes);
+      sprintf(ErrStr,"Number of nodes defined in soil thermal initialization file (%d), not equal to number of nodes defined in model (%d).",tmpnodes,Nnodes);
     }
     for(i=0;i<2;i++) {
       fscanf(initsoil, "%lf", &fdepth[i]);
@@ -118,7 +118,7 @@ void read_initial_soil_thermal(FILE   *initsoil,
   else {
 
     /** No Initial Conditions Provided in File **/
-    sprintf(ErrStr,"No initial soil energy balance conditions provided for cell %i, vegetation %i, and snow band %i.  Currently unable to handle this options, check input file.",cellnum,veg,band);
+    sprintf(ErrStr,"No initial soil energy balance conditions provided for cell %d, vegetation %d, and snow band %d.  Currently unable to handle this options, check input file.",cellnum,veg,band);
     nrerror(ErrStr);
   }
 
@@ -131,7 +131,7 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
   double sum;
 
   if(thermdepths[Nnodes-1] != dp) {
-    sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
+    sprintf(ErrStr,"Thermal solution depth %d (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
 	    Nnodes-1,dp,thermdepths[Nnodes-1]);
     nrerror(ErrStr);
   }
@@ -146,7 +146,7 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
   for(j=1;j<Nnodes;j++) {
     dz[j] = 2. * rint((thermdepths[j] - dz[j-1] / 2.) * 10000.) / 10000.;
     if(dz[j] < 0) {
-      sprintf(ErrStr,"Check spacing between thermal layers %i and %i\n",
+      sprintf(ErrStr,"Check spacing between thermal layers %d and %d\n",
 	      j-1,j);
       nrerror(ErrStr);
     }
@@ -154,7 +154,7 @@ void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
   }
 
   if(rint(sum*1000) != rint(dp*1000)) {
-    sprintf(ErrStr,"Thermal solution depth %i (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
+    sprintf(ErrStr,"Thermal solution depth %d (Nnodes-1) must equal thermal damping depth %lf, but is equal to %lf",
 	    Nnodes-1,dp,sum);
     nrerror(ErrStr);
   }

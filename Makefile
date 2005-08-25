@@ -1,7 +1,11 @@
 SHELL = /bin/csh
 
 CC = gcc -I. -O3
-LIBRARY = -lm 
+LIBRARY = -lm
+UTILDIR = ./
+DISTDIR = ./
+FULLDIR = ./
+FROZDIR = ./
 
 INCFILE = vicNl.h vicNl_def.h global.h snow.h user_def.h rad_and_vpd.h
 

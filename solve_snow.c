@@ -101,10 +101,11 @@ double solve_snow(snow_data_struct    *snow,
   double              surf_long;
   energy_bal_struct   tmp_energy;
 
-  melt                  = 0.;
-  Melt                  = 0.;
-  ppt[WET]              = 0.; 
-  ppt[DRY]              = 0.; 
+  melt           = 0.;
+  Melt           = 0.;
+  ppt[WET]       = 0.; 
+  ppt[DRY]       = 0.; 
+  tmp_energy_val = 0.;
 
   /** Check if Snow Model is Needed, if so Then Solve **/
   SNOW[0]   = FALSE;

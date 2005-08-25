@@ -44,7 +44,7 @@ snow_data_struct read_initial_snow(FILE *initsnow,
   fscanf(initsnow, "%s", tmpstr);
   if(tmpstr[0] != '#') {
     index = atoi(tmpstr);
-    fscanf(initsnow, "%i %i", &tmpveg, &tmpband);
+    fscanf(initsnow, "%d %d", &tmpveg, &tmpband);
   }
   else index = tmpveg = tmpband = -999;
   while(index != cellnum && veg != tmpveg && band != tmpband) {
@@ -52,7 +52,7 @@ snow_data_struct read_initial_snow(FILE *initsnow,
     fscanf(initsnow, "%s", tmpstr);
     if(tmpstr[0] != '#') {
       index = atoi(tmpstr);
-      fscanf(initsnow, "%i %i", &tmpveg, &tmpband);
+      fscanf(initsnow, "%d %d", &tmpveg, &tmpband);
     }
     else index = tmpveg = tmpband = -999;
   }
@@ -61,7 +61,7 @@ snow_data_struct read_initial_snow(FILE *initsnow,
     fscanf(initsnow, "%s",  &tmpstr);
     if(tmpstr[0]=='1') temp.snow = TRUE;
     else temp.snow = FALSE;
-    fscanf(initsnow, "%i",  &temp.last_snow);
+    fscanf(initsnow, "%d",  &temp.last_snow);
     fscanf(initsnow, "%lf", &temp.swq);
     fscanf(initsnow, "%lf", &temp.surf_temp);
     fscanf(initsnow, "%lf", &temp.density);
@@ -73,7 +73,7 @@ snow_data_struct read_initial_snow(FILE *initsnow,
   }
   else {
     /** Assume no snow cover **/
-    fprintf(stderr,"No snow cover defined for cell number %i.\nModel assuming no snow cover.\n",cellnum);
+    fprintf(stderr,"No snow cover defined for cell number %d.\nModel assuming no snow cover.\n",cellnum);
     temp.snow      = 0;
     temp.last_snow = 0;
     temp.swq       = 0.0;

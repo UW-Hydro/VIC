@@ -124,7 +124,7 @@ void read_initial_model_state(FILE                *statefile,
     fread( &Nbytes, 1, sizeof(int), statefile );
   }
   else {
-    fscanf( statefile, "%i %i %i %i", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
+    fscanf( statefile, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
   }
   
   // Skip over unused cell information
@@ -149,22 +149,22 @@ void read_initial_model_state(FILE                *statefile,
 	  fgets(tmpstr, MAXSTRING, statefile); // skip snowband info
       }
       // read info for next cell
-      fscanf( statefile, "%i %i %i %i", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
+      fscanf( statefile, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
     }
   }
 
   if ( feof(statefile) ) {
-    sprintf(ErrStr, "Requested grid cell (%i) is not in the model state file.", 
+    sprintf(ErrStr, "Requested grid cell (%d) is not in the model state file.", 
 	    cellnum);
     nrerror(ErrStr);
   }
 
   if ( tmp_Nveg != Nveg ) {
-    sprintf(ErrStr,"The number of vegetation types in cell %i (%i) does not equal that defined in vegetation parameter file (%i).  Check your input files.", cellnum, tmp_Nveg, Nveg);
+    sprintf(ErrStr,"The number of vegetation types in cell %d (%d) does not equal that defined in vegetation parameter file (%d).  Check your input files.", cellnum, tmp_Nveg, Nveg);
     nrerror(ErrStr);
   }
   if ( tmp_Nband != Nbands ) {
-    sprintf(ErrStr,"The number of snow bands in cell %i (%i) does not equal that defined in the snow band file (%i).  Check your input files.", cellnum, tmp_Nband, Nbands);
+    sprintf(ErrStr,"The number of snow bands in cell %d (%d) does not equal that defined in the snow band file (%d).  Check your input files.", cellnum, tmp_Nband, Nbands);
     nrerror(ErrStr);
   }
 
@@ -208,7 +208,7 @@ void read_initial_model_state(FILE                *statefile,
       fread( &init_DRY_TIME[veg], 1, sizeof(int), statefile );
     }
     else {
-      fscanf( statefile, "%lf %i %i", &prcp->mu[veg], &tmp_char, 
+      fscanf( statefile, "%lf %d %d", &prcp->mu[veg], &tmp_char, 
 	      &init_DRY_TIME[veg] );
       init_STILL_STORM[veg] = (char)tmp_char;
     }
@@ -230,11 +230,11 @@ void read_initial_model_state(FILE                *statefile,
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(statefile,"%i %i", &iveg, &iband) == EOF ) 
+	if ( fscanf(statefile,"%d %d", &iveg, &iband) == EOF ) 
 	  nrerror("End of model state file found unexpectedly");
       }
       if ( iveg != veg || iband != band ) {
-	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %i, band = %i) do not match those currently requested (veg = %i , band = %i).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.", iveg, iband, veg, band);
+	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %d, band = %d) do not match those currently requested (veg = %d , band = %d).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.", iveg, iband, veg, band);
 	nrerror(ErrStr);
       }
       
@@ -255,7 +255,7 @@ void read_initial_model_state(FILE                *statefile,
 	  }
 	  if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
 	    // Check that soil moisture does not exceed maximum allowed
-	    fprintf( stderr, "WARNING: Maximum soil moisture exceeded in layer %i for veg type %i and snow band %i.  Value reset to maximum (%f mm).\n", lidx, veg, band, soil_con->max_moist[lidx] );
+	    fprintf( stderr, "WARNING: Maximum soil moisture exceeded in layer %d for veg type %d and snow band %d.  Value reset to maximum (%f mm).\n", lidx, veg, band, soil_con->max_moist[lidx] );
 	    cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
 	  }
 	}
@@ -340,7 +340,7 @@ void read_initial_model_state(FILE                *statefile,
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(statefile," %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+	if ( fscanf(statefile," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
 		    &snow[veg][band].last_snow, &tmp_char,
 		    &snow[veg][band].coverage, &snow[veg][band].swq, 
 		    &snow[veg][band].surf_temp, &snow[veg][band].surf_water, 

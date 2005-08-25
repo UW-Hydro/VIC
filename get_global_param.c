@@ -97,52 +97,52 @@ global_param_struct get_global_param(filenames_struct *names,
         Get Model Global Parameters
 	*****************************/
       if(strcasecmp("NLAYER",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&options.Nlayer);
+        sscanf(cmdstr,"%*s %d",&options.Nlayer);
       }
       else if(strcasecmp("TIME_STEP",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.dt);
+        sscanf(cmdstr,"%*s %d",&global.dt);
       }
       else if(strcasecmp("RESOLUTION",optstr)==0) {
         sscanf(cmdstr,"%*s %f",&global.resolution);
       }
       else if(strcasecmp("STARTYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.startyear);
+        sscanf(cmdstr,"%*s %d",&global.startyear);
       }
       else if(strcasecmp("STARTMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.startmonth);
+        sscanf(cmdstr,"%*s %d",&global.startmonth);
       }
       else if(strcasecmp("STARTDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.startday);
+        sscanf(cmdstr,"%*s %d",&global.startday);
       }
       else if(strcasecmp("STARTHOUR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.starthour);
+        sscanf(cmdstr,"%*s %d",&global.starthour);
       }
       else if(strcasecmp("ENDYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.endyear);
+        sscanf(cmdstr,"%*s %d",&global.endyear);
       }
       else if(strcasecmp("ENDMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.endmonth);
+        sscanf(cmdstr,"%*s %d",&global.endmonth);
       }
       else if(strcasecmp("ENDDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.endday);
+        sscanf(cmdstr,"%*s %d",&global.endday);
       }
       else if(strcasecmp("SKIPYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.skipyear);
+        sscanf(cmdstr,"%*s %d",&global.skipyear);
       }
       else if(strcasecmp("FORCEYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.forceyear[file_num]);
+        sscanf(cmdstr,"%*s %d",&global.forceyear[file_num]);
       }
       else if(strcasecmp("FORCEMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.forcemonth[file_num]);
+        sscanf(cmdstr,"%*s %d",&global.forcemonth[file_num]);
       }
       else if(strcasecmp("FORCEDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.forceday[file_num]);
+        sscanf(cmdstr,"%*s %d",&global.forceday[file_num]);
       }
       else if(strcasecmp("FORCEHOUR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.forcehour[file_num]);
+        sscanf(cmdstr,"%*s %d",&global.forcehour[file_num]);
       }
       else if(strcasecmp("NRECS",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.nrecs);
+        sscanf(cmdstr,"%*s %d",&global.nrecs);
       }
       else if(strcasecmp("WIND_H",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&global.wind_h);
@@ -151,7 +151,7 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %lf",&global.measure_h);
       }
       else if(strcasecmp("NODES",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&options.Nnode);
+        sscanf(cmdstr,"%*s %d",&options.Nnode);
       }
       else if(strcasecmp("MIN_RAIN_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&global.MIN_RAIN_TEMP);
@@ -217,10 +217,10 @@ global_param_struct get_global_param(filenames_struct *names,
         else options.PRT_SNOW_BAND = FALSE;
       }
       else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&options.GRID_DECIMAL);
+        sscanf(cmdstr,"%*s %d",&options.GRID_DECIMAL);
       }
       else if(strcasecmp("SNOW_BAND",optstr)==0) {
-	sscanf(cmdstr,"%*s %i %s",&options.SNOW_BAND,names->snow_band);
+	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snow_band);
       }
       else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -243,10 +243,10 @@ global_param_struct get_global_param(filenames_struct *names,
         else options.ARC_SOIL = FALSE;
       }
       else if(strcasecmp("SNOW_STEP",optstr)==0) {
-	sscanf(cmdstr,"%*s %i",&options.SNOW_STEP);
+	sscanf(cmdstr,"%*s %d",&options.SNOW_STEP);
       }
       else if(strcasecmp("ROOT_ZONES",optstr)==0) {
-	sscanf(cmdstr,"%*s %i",&options.ROOT_ZONES);
+	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
       }
       else if(strcasecmp("PREC_EXPT",optstr)==0) {
 	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
@@ -298,13 +298,13 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",global.statename);
       }
       else if(strcasecmp("STATEYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.stateyear);
+        sscanf(cmdstr,"%*s %d",&global.stateyear);
       }
       else if(strcasecmp("STATEMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.statemonth);
+        sscanf(cmdstr,"%*s %d",&global.statemonth);
       }
       else if(strcasecmp("STATEDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&global.stateday);
+        sscanf(cmdstr,"%*s %d",&global.stateday);
       }
 #endif // SAVE_STATE
 #if LAKE_MODEL
@@ -342,13 +342,13 @@ global_param_struct get_global_param(filenames_struct *names,
 	field=0;
       }
       else if(strcasecmp("N_TYPES",optstr)==0) {
-        sscanf(cmdstr,"%*s %i",&param_set.N_TYPES[file_num]);
+        sscanf(cmdstr,"%*s %d",&param_set.N_TYPES[file_num]);
       }
       else if(strcasecmp("FORCE_TYPE",optstr)==0) {
 	get_force_type(cmdstr,file_num,&field);
       }
       else if(strcasecmp("FORCE_DT",optstr)==0) {
-	sscanf(cmdstr,"%*s %i ", &param_set.FORCE_DT[file_num]);
+	sscanf(cmdstr,"%*s %d ", &param_set.FORCE_DT[file_num]);
       }
       else if (strcasecmp("FORCE_ENDIAN",optstr)==0) {
 	sscanf(cmdstr, "%*s %s", flgstr);
@@ -474,19 +474,19 @@ global_param_struct get_global_param(filenames_struct *names,
   for ( i = 0; i < 2; i++ ) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
       if (param_set.N_TYPES[i] == MISSING) {
-	sprintf(ErrStr,"Need to specify the number forcing variables types in forcing file %i.", i);
+	sprintf(ErrStr,"Need to specify the number forcing variables types in forcing file %d.", i);
 	nrerror(ErrStr);
       }
       if (param_set.FORCE_FORMAT[i] == MISSING) {
-	sprintf(ErrStr,"Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %i.",i);
+	sprintf(ErrStr,"Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",i);
 	nrerror(ErrStr);
       }
       if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i]-1] == MISSING) {
-	sprintf(ErrStr,"Did not define enough forcing variables in forcing file %i.",i);
+	sprintf(ErrStr,"Did not define enough forcing variables in forcing file %d.",i);
 	nrerror(ErrStr);
       }
       if(param_set.FORCE_DT[i] == MISSING ) {
-	sprintf(ErrStr,"Must define time steps (FORCE_DT <dt>) in control file for focing file %i.",file_num);
+	sprintf(ErrStr,"Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",file_num);
 	nrerror(ErrStr);
       }
     }
@@ -505,37 +505,37 @@ global_param_struct get_global_param(filenames_struct *names,
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
   if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%i) than are defined by MAX_LAYERS (%i).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%i) than are defined by MAX_NODES (%i).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
 #if LAKE_MODEL
   if ( options.Nlakenode > MAX_LAKE_NODES) {
-    sprintf(ErrStr,"Global file wants more lake thermal nodes (%i) than are defined by MAX_LAKE_NODES (%i).  Edit user_def.h and recompile.", options.Nlakenode, MAX_LAKE_NODES);
+    sprintf(ErrStr,"Global file wants more lake thermal nodes (%d) than are defined by MAX_LAKE_NODES (%d).  Edit user_def.h and recompile.", options.Nlakenode, MAX_LAKE_NODES);
     nrerror(ErrStr);
   }
 #endif // LAKE_MODEL 
   if(options.QUICK_FLUX) {
     if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode != 3) {
-      sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %i.",options.Nnode);
+      sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
       nrerror(ErrStr);
     }
     else if (!options.FULL_ENERGY && !options.FROZEN_SOIL && options.Nnode != 1) {
-      sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %i.",options.Nnode);
+      sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %d.",options.Nnode);
       nrerror(ErrStr);
     }
   }
   else {
     if(options.Nnode < 4) {
-      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to  %i.",options.Nnode);
+      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
       nrerror(ErrStr);
     }
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
-    sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %i.",options.Nlayer);
+    sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
   if(!options.FULL_ENERGY && !options.FROZEN_SOIL && options.GRND_FLUX) {
@@ -551,7 +551,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if(options.SNOW_BAND > MAX_BANDS) {
-    sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+    sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
   }
 #if SAVE_STATE
@@ -604,16 +604,16 @@ global_param_struct get_global_param(filenames_struct *names,
 #endif
 
 #if VERBOSE
-  fprintf(stderr,"Time Step = %i hour(s)\n",global.dt);
+  fprintf(stderr,"Time Step = %d hour(s)\n",global.dt);
   fprintf(stderr,"Simulation start date = %02i/%02i/%04i\n",
 	  global.startday, global.startmonth, global.startyear);
   if ( global.nrecs > 0 )
-    fprintf(stderr,"Number of Records = %i\n\n",global.nrecs);
+    fprintf(stderr,"Number of Records = %d\n\n",global.nrecs);
   else 
     fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
 	    global.endday, global.endmonth, global.endyear);
-  fprintf(stderr,"Full Energy...................(%i)\n",options.FULL_ENERGY);
-  fprintf(stderr,"Use Distributed Precipitation.(%i)\n",options.DIST_PRCP);
+  fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
+  fprintf(stderr,"Use Distributed Precipitation.(%d)\n",options.DIST_PRCP);
   if(options.DIST_PRCP)
     fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
   if ( options.GRND_FLUX ) {
@@ -625,17 +625,17 @@ global_param_struct get_global_param(filenames_struct *names,
   }
   else
     fprintf(stderr,"Ground heat flux not computed (no energy balance).\n");
-  fprintf(stderr,"Use Frozen Soil Model.........(%i)\n",options.FROZEN_SOIL);
+  fprintf(stderr,"Use Frozen Soil Model.........(%d)\n",options.FROZEN_SOIL);
   if ( QUICK_FS )
-    fprintf(stderr,".... Using linearized UFWC curve with %i temperatures.\n",
+    fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n",
 	    QUICK_FS_TEMPS);
-  fprintf(stderr,"Run Snow Model Using a Time Step of %i hours\n", 
+  fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);
-  fprintf(stderr,"Compress Output Files.........(%i)\n",options.COMPRESS);
-  fprintf(stderr,"Correct Precipitation.........(%i)\n",options.CORRPREC);
+  fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);
+  fprintf(stderr,"Correct Precipitation.........(%d)\n",options.CORRPREC);
   fprintf(stderr,"\n");
-  fprintf(stderr,"Using %i Snow Bands\n",options.SNOW_BAND);
-  fprintf(stderr,"Using %i Root Zones\n",options.ROOT_ZONES);
+  fprintf(stderr,"Using %d Snow Bands\n",options.SNOW_BAND);
+  fprintf(stderr,"Using %d Root Zones\n",options.ROOT_ZONES);
 #if SAVE_STATE
   if ( global.stateyear != MISSING )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",

@@ -368,6 +368,19 @@ ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
 	ARNO_PARAMS with NIJSSEN2001_BASEFLOW in their global parameter files.
 
 
+Replaced %i with %d in fscanf statements
+
+	Files affected:
+	check_state_file.c, get_global_param.c, read_arcinfo_ascii.c,
+	read_initial_model_state.c, read_snowband.c, read_soilparam.c,
+	read_veglib.c
+
+	Description:
+	Having %i in fscanf statements was causing input values of "08" to be
+	interpreted as octal rather than decimal.  These instances of %i have
+	been replaced with %d.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

@@ -37,8 +37,8 @@ double read_arcinfo_value(char *filename,
   }
 
   /***** Read ARC/INFO Header *****/
-  fscanf(farc,"%*s %i",&ncols);
-  fscanf(farc,"%*s %i",&nrows);
+  fscanf(farc,"%*s %d",&ncols);
+  fscanf(farc,"%*s %d",&nrows);
   fscanf(farc,"%*s %lf",&ll_lng);
   fscanf(farc,"%*s %lf",&ll_lat);
   fscanf(farc,"%*s %lf",&cellsize);
@@ -106,12 +106,12 @@ int read_arcinfo_info(char    *filename,
   farc=open_file(filename,"r");
 
   /***** Read ARC/INFO Header *****/
-  fscanf(farc,"%*s %i",&ncols);
-  fscanf(farc,"%*s %i",&nrows);
+  fscanf(farc,"%*s %d",&ncols);
+  fscanf(farc,"%*s %d",&nrows);
   fscanf(farc,"%*s %lf",&ll_lng);
   fscanf(farc,"%*s %lf",&ll_lat);
   fscanf(farc,"%*s %lf",&cellsize);
-  fscanf(farc,"%*s %i",&NODATA);
+  fscanf(farc,"%*s %d",&NODATA);
 
   /***** Allocate Latitude and Longitude Arrays for maximum size *****/
   Ncells  = ncols*nrows;
@@ -125,7 +125,7 @@ int read_arcinfo_info(char    *filename,
     tmp_lat = ll_lat+(double)(nrows-j-0.5)*cellsize;
     for(i=0;i<ncols;i++) {
       tmp_lng = ll_lng + (double)(i+0.5)*cellsize;
-      fscanf(farc, "%i", &tmpvalue);
+      fscanf(farc, "%d", &tmpvalue);
       if(tmpvalue != NODATA) {
 	lat[0][cell]     = tmp_lat;
 	lng[0][cell]     = tmp_lng;

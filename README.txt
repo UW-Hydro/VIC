@@ -197,6 +197,20 @@ New vicInterp executable
 Bug Fixes:
 ----------
 
+Large water balance errors in daily water balance mode when snow is present
+
+	Files affected:
+	surface_fluxes.c
+
+	Description:
+	Fixed broken snow step in surface_fluxes.c.  Per-snow-step snow
+	quantities were being reset at the beginning of each canopy-surface
+	energy balance iteration, preventing snow characteristics from being
+	accumulated over all snow steps, and resulting in large water balance
+	errors.  Now per-iteration snow quantities are stored separately
+	from per-snow-step quantities.
+
+
 Aerodynamic resistance incorrect in output fluxes file
 
         Files affected:

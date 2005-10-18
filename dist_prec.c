@@ -48,6 +48,9 @@ void dist_prec(atmos_data_struct   *atmos,
            the cell has been drying for a full 24 hours.     RS & KAC
   04-10-03 Modified to store STILL_STORM and DRY_TIME in the model
            statefile, so that full conditions will be preserved.  KAC
+  02-Feb-05 Modified to save state file at the end of the final timestep
+            of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
+            in the global parameter file.                       GCT
 
 **********************************************************************/
 
@@ -66,22 +69,6 @@ void dist_prec(atmos_data_struct   *atmos,
   double  Wdmax;
   double  NEW_MU;
 
-#if SAVE_STATE
-
-  /************************************
-    Save model state at assigned date
-  ************************************/
-
-  if ( outfiles->statefile != NULL
-       &&  ( dmy[rec].hour == 0 
-	     && dmy[rec].year == global_param->stateyear
-	     && dmy[rec].month == global_param->statemonth 
-	     && dmy[rec].day == global_param->stateday ) )
-    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
-		      soil_con->gridcel, outfiles, soil_con,
-		      STILL_STORM, DRY_TIME);
-
-#endif
 
   // check if state file has been used to initialize storm tracking
   if ( init_DRY_TIME >= 0 ) {
@@ -198,5 +185,23 @@ void dist_prec(atmos_data_struct   *atmos,
 	   soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
 	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
 	   options.Nnode, global_param->skipyear);
+
+#if SAVE_STATE
+
+  /************************************
+    Save model state at assigned date
+  ************************************/
+
+  if ( outfiles->statefile != NULL
+       &&  ( dmy[rec].year == global_param->stateyear
+	     && dmy[rec].month == global_param->statemonth 
+	     && dmy[rec].day == global_param->stateday
+             && ( rec == global_param->nrecs-1
+                  || dmy[rec+1].day != global_param->stateday ) ) )
+    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
+		      soil_con->gridcel, outfiles, soil_con,
+		      STILL_STORM, DRY_TIME);
+
+#endif
 
 }

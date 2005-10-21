@@ -1,0 +1,93 @@
+#######################################################################
+# VIC Model Parameters - 4.0.x
+#######################################################################
+
+#######################################################################
+# Simulation Parameters
+#######################################################################
+TIME_STEP 	3	# model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
+SNOW_STEP	3	# time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
+STARTYEAR	2000	# year model simulation starts
+STARTMONTH	01	# month model simulation starts
+STARTDAY	01 	# day model simulation starts
+STARTHOUR	00	# hour model simulation starts
+ENDYEAR 	2000	# year model simulation ends
+ENDMONTH	12	# month model simulation ends
+ENDDAY		31	# day model simulation ends
+FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water balance only
+FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
+QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
+NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
+DIST_PRCP	FALSE	# TRUE = use distributed precipitation
+CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
+MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
+PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
+MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
+MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
+
+#######################################################################
+# State Files and  Parameters
+# If SAVE_STATE is TRUE in user_def.h, then remove the leading "#"
+# from the following lines.  If SAVE_STATE is FALSE, these lines
+# must either have a leading "#" or be deleted from this file.
+#######################################################################
+#INIT_STATE	(put the initial state path/filename here)	# Initial state path/file
+#STATENAME	(put the path/prefix of output state file here)	# Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY) will be appended to the prefix automatically in the format yyyymmdd.
+#STATEYEAR	2000	# year to save model state
+#STATEMONTH	12	# month to save model state
+#STATEDAY	31	# day to save model state
+#BINARY_STATE_FILE       FALSE	# TRUE if state file should be binary format; FALSE if ascii
+
+#######################################################################
+# Forcing Files and Parameters
+#
+#       All FORCING filenames are actually the pathname, and prefix
+#               for gridded data types: ex. DATA/forcing_
+#               Latitude and longitude index suffix is added by VIC
+#
+#	There must be 1 FORCE_TYPE entry for each variable (column) in the forcing file
+#
+#	If FORCE_TYPE is BINARY, each FORCE_TYPE must be followed by:
+#			SIGNED/UNSIGNED	SCALE_FACTOR
+#		For example (BINARY):
+#			FORCE_TYPE	PREC	UNSIGNED	40
+#		or (ASCII):
+#			FORCE_TYPE	PREC
+#######################################################################
+FORCING1	(put the forcing path/prefix here)	# Forcing file path and prefix, ending in "_"
+GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
+FORCE_FORMAT	BINARY	# BINARY or ASCII
+FORCE_ENDIAN	LITTLE	# LITTLE (PC/Linux) or BIG (SUN)
+N_TYPES		4	# Number of variables (columns)
+FORCE_TYPE	PREC	UNSIGNED	40
+FORCE_TYPE	TMAX	SIGNED	100
+FORCE_TYPE	TMIN	SIGNED	100
+FORCE_TYPE	WIND	SIGNED	100
+FORCE_DT	24	# Forcing time step length (hours)
+FORCEYEAR	1915	# Year of first forcing record
+FORCEMONTH	01	# Month of first forcing record
+FORCEDAY	01	# Day of first forcing record
+FORCEHOUR	00	# Hour of first forcing record
+
+#######################################################################
+# Land Surface Files and Parameters
+#######################################################################
+NLAYER		3	# number of soil layers
+NODES		10	# number of soil thermal nodes 
+SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
+NIJSSEN2001_BASEFLOW	FALSE	# TRUE = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001); FALSE = columns 5-8 are the standard VIC baseflow parameters
+ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
+VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
+GLOBAL_LAI 	TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
+ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
+VEGLIB	        (put the veg library path/file here)	# Veg library path/file
+SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
+COMPUTE_TREELINE	FALSE	# TRUE = replace any overstory veg types with the default understory veg type in all snow bands for which the average July Temperature <= 10 C; if TRUE, you must specify the default understory veg type after it (e.g. COMPUTE_TREELINE TRUE 11)
+
+#######################################################################
+# Output Files and Parameters
+#######################################################################
+RESULT_DIR      (put the result directory path here)	# Results directory path (with trailing "/")
+SKIPYEAR 	0	# Number of years of output to omit from the output files
+COMPRESS	FALSE	# TRUE = compress input and output files when done
+BINARY_OUTPUT	FALSE	# TRUE = binary output files

@@ -9,6 +9,10 @@
 New Features:
 -------------
 
+Added sample global param file to distribution
+
+        Files affected:
+        global.param.sample
 
 Bug Fixes:
 ----------

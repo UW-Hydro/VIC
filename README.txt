@@ -193,6 +193,10 @@ New vicInterp executable
 	before exiting.  This prevented all of the output data from being
 	completely written.
 
+Added sample global param file to distribution
+
+        Files affected:
+        global.param.sample
 
 Bug Fixes:
 ----------

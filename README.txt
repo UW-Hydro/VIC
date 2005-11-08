@@ -398,6 +398,17 @@ Replaced %i with %d in fscanf statements
 	interpreted as octal rather than decimal.  These instances of %i have
 	been replaced with %d.
 
+Removed some snowband output
+
+	Files affected:
+	write_data.c
+
+	Description:
+        Removed  net sw radiation, net lw, albedo, latent heat flux, 
+	sensible heat flux, ground heat flux
+
+
+        
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

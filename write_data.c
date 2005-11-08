@@ -70,7 +70,6 @@ void write_data(out_data_struct *out_data,
                 snowband output: net sw radiation, net lw, albedo,
                 latent heat flux, sensible heat flux, ground heat flux.  GCT
 
-
 **********************************************************************/
 {
   extern option_struct options;

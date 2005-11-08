@@ -64,6 +64,12 @@ void write_data(out_data_struct *out_data,
   30-Oct-03	Replaced output of sub_snow[0] in fluxes file with
 		sub_total.					TJB
   2005-Mar-24 Added support for ALMA variables.			TJB
+  2005-11-08    Corrected outfiles from fluxes to snow for blowing snow
+                sublimation. Corrected outfiles from snow to snowband
+                for options.PRT_SNOW_BAND. Removed the following from
+                snowband output: net sw radiation, net lw, albedo,
+                latent heat flux, sensible heat flux, ground heat flux.  GCT
+
 
 **********************************************************************/
 {
@@ -241,15 +247,15 @@ void write_data(out_data_struct *out_data,
 
     /* sublimation due to blowing snow */
     tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
     /* snow surface sublimation */
     tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
     /* total snow sublimation */
     tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
   }
   
@@ -502,15 +508,15 @@ void write_data(out_data_struct *out_data,
 
       /* sublimation due to blowing snow */
       tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
       /* snow surface sublimation */
       tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
       /* total snow sublimation */
       tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
 
     }
   
@@ -593,27 +599,27 @@ void write_data(out_data_struct *out_data,
 
       // snowpack melt energy
       tmp_fptr[0] = (float)out_data->melt_energy[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
       // advected sensible heat
       tmp_fptr[0] = (float)out_data->advected_sensible[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
       // latent heat of sublimation
       tmp_fptr[0] = (float)out_data->latent_sub[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
       // snowpack surface layer temperature
       tmp_fptr[0] = (float)out_data->snow_surf_temp[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
       // snowpack pack layer temperature
       tmp_fptr[0] = (float)out_data->snow_pack_temp[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
       // snowpack melt
       tmp_fptr[0] = (float)out_data->melt[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
 
     }
   }
@@ -632,10 +638,6 @@ void write_data(out_data_struct *out_data,
 	      out_data->advected_sensible[band+1], 
 	      out_data->latent_sub[band+1], out_data->snow_surf_temp[band+1], 
 	      out_data->snow_pack_temp[band+1], out_data->melt[band+1] );
-      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
-	      out_data->swband[band], out_data->lwband[band], 
-	      out_data->albedoband[band], out_data->latentband[band], 
-	      out_data->sensibleband[band], out_data->grndband[band]);
     }
     fprintf(outfiles->snowband,"\n");
   }

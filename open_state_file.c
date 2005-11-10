@@ -23,6 +23,7 @@ FILE *open_state_file(global_param_struct *global,
 	    rather than day, month, year.  This makes it consistent
 	    with the planned release of 4.1.0.			TJB
   2005-11-09 Removed '#if SAVE_STATE'                           GCT
+  2005-11-10 Moved setting of statename to get_global_param     GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -32,8 +33,7 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s_%04i%02i%02i", global->statename, 
-	  global->stateyear, global->statemonth, global->stateday);
+  sprintf(filename,"%s", global->statename);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");
   else

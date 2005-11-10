@@ -4,8 +4,8 @@
  
 static char vcid[] = "$Id$";
 
-dist_prcp_struct make_dist_prcp(int  nveg,
-				int *Nnodes)
+dist_prcp_struct make_dist_prcp(int  nveg)
+
 /**********************************************************************
 	read_dist_prcp	Keith Cherkauer		May 21, 1996
 
@@ -17,6 +17,10 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   the intensity of incoming precipitation, and is set in the routine
   dist_prec.
 
+Modifications
+
+  2005-11-09 (Port from 4.1.0) Updated arglist to make_energy_bal() as 
+             part of fix for QUICK_FLUX state file compatibility. GCT
 **********************************************************************/
 {
   extern option_struct options;
@@ -27,7 +31,7 @@ dist_prcp_struct make_dist_prcp(int  nveg,
   temp.mu     = (double *)calloc(nveg+1,sizeof(double));
   for ( i = 0; i < nveg + 1; i++ ) temp.mu[i] = 1;
   temp.snow   = make_snow_data(nveg+1);
-  temp.energy = make_energy_bal(nveg+1,Nnodes);
+  temp.energy = make_energy_bal(nveg+1);
   for(i=0;i<2;i++) {
     temp.veg_var[i]  = make_veg_var(nveg);
     temp.cell[i]     = make_cell_data(nveg+1,options.Nlayer);

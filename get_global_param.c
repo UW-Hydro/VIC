@@ -40,9 +40,10 @@ global_param_struct get_global_param(filenames_struct *names,
   10-Oct-03 Modified to understand the ARNO_PARAMS option.	TJB
   10-May-04 Modified to display compile-time and run-time options
 	    if VERBOSE is set to TRUE.				TJB
-  2005-11-09 Added checks for MISSING STATEMONTH & STATEDAY.
-             Added checks for 0<STATEMONTH<12 & 0<STATEDAY<31.  GCT
-
+  2005-11-09 Checked for missing STATEMONTH and STATEDAY        GCT
+  2005-11-09 (Port from 4.1.0) Added validation for Nnodes with QUICK_FLUX 
+            option, as part of fix for QUICK_FLUX state file compatibility.GCT
+  2005-11-10 Moved setting of statename from open_state_file to here. GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -458,12 +459,24 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"Global file wants more soil thermal nodes (%i) than are defined by MAX_NODES (%i).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
-  if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode<3) {
-    sprintf(ErrStr,"You must define at least 3 soil thermal nodes to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nnodes is set to  %i.",options.Nnode);
-    nrerror(ErrStr);
+  if(options.QUICK_FLUX) {
+    if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode != 3) {
+      sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
+      nrerror(ErrStr);
+    }
+    else if (!options.FULL_ENERGY && !options.FROZEN_SOIL && options.Nnode != 1) {
+      sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %d.",options.Nnode);
+      nrerror(ErrStr);
+    }
   }
-  if(!options.QUICK_FLUX && options.Nnode<4) {
-    sprintf(ErrStr,"You must define at least 4 soil thermal nodes to run the model with the finite difference ground heat flux solution.  Currently Nnodes is set to  %i.",options.Nnode);
+  else {
+    if(options.Nnode < 4) {
+      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to%d.",options.Nnode);
+      nrerror(ErrStr);
+    }
+  }
+  if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
+    sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
@@ -474,20 +487,26 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
   }
-  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0) ) {
+  /*    if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0) ) {
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
     nrerror(ErrStr);
   }
-  if( options.SAVE_STATE ) {
-    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING ) {
+  */
+
+
+  if( options.SAVE_STATE && ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING ) ) {
       sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
       nrerror(ErrStr);
-    } else if ( global.statemonth < 0 || global.statemonth > 12 || global.stateday < 0 || global.stateday > 31 ){
-      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
-      nrerror(ErrStr);
-    }
+  } 
+  // Set the statename here to be able to compare with INIT_STATE name
+  if( options.SAVE_STATE ) {
+    sprintf(global.statename,"%s_%04i%02i%02i", global.statename, 
+	  global.stateyear, global.statemonth, global.stateday);
   }
-
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0))  {
+      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
+      nrerror(ErrStr);
+  }
 
   /* set NR and NF */
   if (global.dt < 24 && global.dt != options.SNOW_STEP)

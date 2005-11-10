@@ -141,6 +141,32 @@ Skipping deactivated cells in binary state file
         per grid cell). Without this fix, attempts to skip grid cells
         fail.  GCT
 
+Fix reading/writing of state files when QUICK_FLUX is TRUE
+
+        Files affected:
+
+        get_global_param.c
+        make_dist_prcp.c
+        make_energy_bal.c
+        vicNl.c
+        vicNl.h
+
+        In previous releases, if QUICK_FLUX=TRUE, the number of soil
+        thermal nodes is changed after being recorded in the state
+        file.  The resulting mismatch between Nnodes in the state
+        file header and the actual number of node temperatures
+        recorded in the state file prevents VIC from being able to
+        read the state file.  This has been fixed.  GCT
+
+Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
+
+        Files affected:
+        get_global_param.c, open_state_file.c
+
+        Previously, the checks for matches would occur in get_global_param even
+        though the SAVE_STATE filename wasn't created until open_state_file.
+        The output name setting was moved from open_state_file to get_global_param. GCT
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

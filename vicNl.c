@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
 	    string defined in global.h.				TJB
   16-Jun-04 Modified to pass soil_con.avgJulyAirTemp to
 	    initialize_atmos().					TJB
+  2005-11-09 (Port from 4.1.0) Updated arglist for make_dist_prcp(), 
+            as part of fix for QUICK_FLUX state file compatibility. GCT
 
 **********************************************************************/
 {
@@ -206,8 +208,7 @@ int main(int argc, char *argv[])
 		    &soil_con.AboveTreeLine);
 
       /** Make Precipitation Distribution Control Structure **/
-      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
-				&options.Nnode);
+      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
 
       /**************************************************
          Initialize Meteological Forcing Values That

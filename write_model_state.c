@@ -5,8 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if SAVE_STATE
-
 void write_model_state(dist_prcp_struct    *prcp,
 		       global_param_struct *gp,
 		       int                  Nveg,
@@ -41,6 +39,7 @@ void write_model_state(dist_prcp_struct    *prcp,
              flux formulation.                                   KAC
   09-Oct-03 Added "\n" after mu in ASCII file, to jive with
 	    read_initial_model_state.                            TJB
+  2005-11-09 Removed '#if SAVE_STATE                             GCT
 
 *********************************************************************/
 {
@@ -217,4 +216,3 @@ void write_model_state(dist_prcp_struct    *prcp,
 
 }
 
-#endif

@@ -40,6 +40,8 @@ global_param_struct get_global_param(filenames_struct *names,
   10-Oct-03 Modified to understand the ARNO_PARAMS option.	TJB
   10-May-04 Modified to display compile-time and run-time options
 	    if VERBOSE is set to TRUE.				TJB
+  2005-11-09 Added checks for MISSING STATEMONTH & STATEDAY.
+             Added checks for 0<STATEMONTH<12 & 0<STATEDAY<31.  GCT
 
 **********************************************************************/
 {
@@ -74,10 +76,10 @@ global_param_struct get_global_param(filenames_struct *names,
   file_num             = 0;
   global.nrecs         = MISSING;
   strcpy(names->forcing[1],"FALSE");
-#if SAVE_STATE
-  global.stateyear = MISSING;
+  global.stateyear  = MISSING;
+  global.statemonth = MISSING;
+  global.stateday   = MISSING;
   strcpy(global.statename, "NONE");
-#endif
 
   /** Read through global control file to find parameters **/
 
@@ -249,7 +251,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.ARNO_PARAMS=TRUE;
         else options.ARNO_PARAMS = FALSE;
       }
-#if SAVE_STATE
       else if(strcasecmp("INIT_STATE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.INIT_STATE=FALSE;
@@ -265,6 +266,7 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("STATENAME",optstr)==0) {
         sscanf(cmdstr,"%*s %s",global.statename);
+        options.SAVE_STATE = TRUE;
       }
       else if(strcasecmp("STATEYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&global.stateyear);
@@ -275,7 +277,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("STATEDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %i",&global.stateday);
       }
-#endif
       else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.COMPUTE_TREELINE=FALSE;
@@ -473,12 +474,20 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"Global file wants more snow bands (%i) than are defined by MAX_BANDS (%i).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
   }
-#if SAVE_STATE
-  if ( strcmp( names->init_state, global.statename ) == 0 ) {
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0) ) {
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
     nrerror(ErrStr);
   }
-#endif
+  if( options.SAVE_STATE ) {
+    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING ) {
+      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    } else if ( global.statemonth < 0 || global.statemonth > 12 || global.stateday < 0 || global.stateday > 31 ){
+      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
+  }
+
 
   /* set NR and NF */
   if (global.dt < 24 && global.dt != options.SNOW_STEP)
@@ -534,11 +543,9 @@ global_param_struct get_global_param(filenames_struct *names,
   fprintf(stderr,"\n");
   fprintf(stderr,"Using %i Snow Bands\n",options.SNOW_BAND);
   fprintf(stderr,"Using %i Root Zones\n",options.ROOT_ZONES);
-#if SAVE_STATE
-  if ( global.stateyear != MISSING )
+  if ( options.SAVE_STATE )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
 	    global.stateday, global.statemonth, global.stateyear);
-#endif
   if ( OPTIMIZE )
     fprintf(stderr,"Model is using optimized output (runoff and baseflow only).\n");
   else if ( LDAS_OUTPUT )
@@ -554,5 +561,5 @@ global_param_struct get_global_param(filenames_struct *names,
 #endif
 
   return global;
-
+  
 }

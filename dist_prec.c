@@ -186,7 +186,6 @@ void dist_prec(atmos_data_struct   *atmos,
 	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
 	   options.Nnode, global_param->skipyear);
 
-#if SAVE_STATE
 
   /************************************
     Save model state at assigned date
@@ -202,6 +201,5 @@ void dist_prec(atmos_data_struct   *atmos,
 		      soil_con->gridcel, outfiles, soil_con,
 		      STILL_STORM, DRY_TIME);
 
-#endif
 
 }

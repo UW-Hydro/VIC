@@ -142,9 +142,7 @@ typedef struct {
   FILE *fluxes;
   FILE *snow;
   FILE *snowband;
-#if SAVE_STATE
   FILE *statefile;
-#endif
 } outfiles_struct;
 
 typedef struct {
@@ -190,6 +188,7 @@ typedef struct {
   char   QUICK_FLUX;     /* TRUE = Use Liang et al., 1999 formulation for
 			    ground heat flux, if FALSE use explicit finite
 			    difference method */
+  char   SAVE_STATE;      /* TRUE = save state file */       
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
@@ -272,9 +271,7 @@ typedef struct {
   This structure stores all model run global parameters.
   *******************************************************/
 typedef struct {
-#if SAVE_STATE
   char   statename[MAXSTRING];  /* name of file in which to store model state */
-#endif
   double MAX_SNOW_TEMP; /* maximum temperature at which snow can fall (C) */
   double MIN_RAIN_TEMP; /* minimum temperature at which rain can fall (C) */
   double measure_h;  /* height of measurements (m) */
@@ -296,11 +293,9 @@ typedef struct {
   int    starthour;  /* Starting hour of the simulation */
   int    startmonth; /* Starting month of the simulation */
   int    startyear;  /* Starting year of the simulation */
-#if SAVE_STATE
   int    stateday;   /* Day of the simulation at which to save model state */
   int    statemonth; /* Month of the simulation at which to save model state */
   int    stateyear;  /* Year of the simulation at which to save model state */
-#endif
 } global_param_struct;
 
 /***********************************************************

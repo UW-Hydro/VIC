@@ -5,8 +5,6 @@
 
 static char vcid[] = "$Id $";
 
-#if SAVE_STATE
-
 FILE *open_state_file(global_param_struct *global,
 		      int                  Nlayer,
 		      int                  Nnodes) 
@@ -24,7 +22,7 @@ FILE *open_state_file(global_param_struct *global,
   11-May-04 Modified the statefile name to contain year, month, day
 	    rather than day, month, year.  This makes it consistent
 	    with the planned release of 4.1.0.			TJB
-
+  2005-11-09 Removed '#if SAVE_STATE'                           GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -65,4 +63,3 @@ FILE *open_state_file(global_param_struct *global,
 
 }
 
-#endif

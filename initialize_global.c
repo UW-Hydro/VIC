@@ -108,10 +108,9 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
   options.PREC_EXPT             = 0.6;
-#if SAVE_STATE
   options.INIT_STATE            = FALSE;
+  options.SAVE_STATE            = FALSE;
   options.BINARY_STATE_FILE     = TRUE;
-#endif
 /*   options.INIT_SNOW             = FALSE; */
   options.ROOT_ZONES            = MISSING;
   options.MIN_WIND_SPEED        = 0.0;

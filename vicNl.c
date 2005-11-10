@@ -122,13 +122,11 @@ int main(int argc, char *argv[])
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
 
-#if SAVE_STATE
   /** open state file if model state is to be saved **/
-  if ( strcmp( global_param.statename, "NONE" ) != 0 ) 
+  if ( options.SAVE_STATE  && strcmp( global_param.statename, "NONE" ) != 0 ) 
     outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
 					 options.Nnode);
   else outfiles.statefile = NULL;
-#endif
 
   if ( options.INIT_STATE ) 
     infiles.statefile = check_state_file(filenames.init_state, dmy, 

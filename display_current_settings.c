@@ -79,12 +79,6 @@ void display_current_settings(int                 mode,
 #else
   fprintf(stdout,"OUTPUT_FORCE\t\tFALSE\n");
 #endif
-#if SAVE_STATE
-  fprintf(stdout,"SAVE_STATE\t\tTRUE\n");
-#else
-  fprintf(stdout,"SAVE_STATE\t\tFALSE\n");
-#endif
-
   fprintf(stdout,"\n");
   fprintf(stdout,"Simulation Parameters:\n");
 #if LOW_RES_MOIST
@@ -212,19 +206,22 @@ void display_current_settings(int                 mode,
   else
     fprintf(stdout,"INIT_STATE\t\tFALSE\n");
 
-#if SAVE_STATE
   fprintf(stdout,"\n");
   fprintf(stdout,"Output State File:\n");
-  fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
-  fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
-  fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
-  fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
-  if (options.BINARY_STATE_FILE)
-    fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
-  else
-    fprintf(stdout,"BINARY_STATE_FILE\tFALSE\n");
-#endif
-
+  if (options.SAVE_STATE ) {
+    fprintf(stdout, "SAVE_STATE\t\tTRUE\n");
+    fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
+    fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
+    fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
+    fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
+    if (options.BINARY_STATE_FILE)
+      fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
+    else
+      fprintf(stdout,"BINARY_STATE_FILE\tFALSE\n");
+  }
+  else {
+    fprintf(stdout, "SAVE_STATE\t\tFALSE\n");
+  }
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Data:\n");
   fprintf(stdout,"Result dir:\t\t%s\n",names->result_dir);

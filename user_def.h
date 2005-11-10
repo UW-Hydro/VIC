@@ -39,11 +39,6 @@
        testing to validate the results) *****/
 #define LOW_RES_MOIST FALSE
 
-/***** If TRUE VIC code to save the model state is included in the 
-       compiled code.  If STATEYEAR, STATEMONTH and STATEDAY are
-       defined in the global control file the model state will
-       be written to a file. *****/
-#define SAVE_STATE FALSE
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow
        band files before read data for each cell.  This saves time

@@ -199,9 +199,7 @@ void   nrerror(char *);
 
 void   open_debug();
 FILE  *open_file(char string[], char type[]);
-#if SAVE_STATE
 FILE  *open_state_file(global_param_struct *, int, int);
-#endif
 
 double penman(double, double, double, double, double, double, double, 
 	      double, double, float, float);
@@ -337,10 +335,8 @@ void write_dist_prcp(dist_prcp_struct *);
 void write_forcing_file(atmos_data_struct *, int nrecs, outfiles_struct *);
 #endif
 void write_layer(layer_data_struct *, int, int, double *);
-#if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, outfiles_struct *, soil_con_struct *, char, int);
-#endif
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);
 void write_vegvar(veg_var_struct *, int);

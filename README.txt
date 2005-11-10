@@ -131,6 +131,16 @@ STATE file option is now specified in global file, not in user_def.h at compile 
         will not save a state file.  If some (but not all) of these
         lines are present, VIC will give an error.
 
+Skipping deactivated cells in binary state file
+
+        Files affected:
+        write_model_state.c
+        
+        (Port from 4.1.0) Changed calculation of Nbytes in binary
+        state file to account for bare soil values (extra veg class
+        per grid cell). Without this fix, attempts to skip grid cells
+        fail.  GCT
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

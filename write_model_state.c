@@ -40,7 +40,10 @@ void write_model_state(dist_prcp_struct    *prcp,
   09-Oct-03 Added "\n" after mu in ASCII file, to jive with
 	    read_initial_model_state.                            TJB
   2005-11-09 Removed '#if SAVE_STATE                             GCT
-
+  2005-11-09 (Port from 4.1.0) Changed calculation of Nbytes in binary 
+            state file to account for bare soil values (extra veg class 
+            per grid cell). Without this fix, attempts to skip grid 
+            cells fail.                                          GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -89,15 +92,15 @@ void write_model_state(dist_prcp_struct    *prcp,
     Nbytes = ( options.Nnode * sizeof(double) // dz_node
 	       + sizeof(char) // STILL_STORM
 	       + sizeof(int) // DRY_TIME
-	       + Nveg * sizeof(double) // mu
-	       + Nveg * Nbands * 2 * sizeof(int) // veg & band
-	       + Nveg * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
-	       + Nveg * Nbands * Ndist * options.Nlayer * sizeof(double) // soil ice
-	       + (Nveg-1) * Nbands * sizeof(double) // dew
-	       + Nveg * Nbands * sizeof(int) // last_snow
-	       + Nveg * Nbands * sizeof(char) // MELTING
-	       + Nveg * Nbands * sizeof(double) * 9 // other snow parameters
-	       + Nveg * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
+	       + (Nveg+1) * sizeof(double) // mu
+	       + (Nveg+1) * Nbands * 2 * sizeof(int) // veg & band
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil ice
+	       + Nveg * Nbands * sizeof(double) // dew
+	       + (Nveg+1) * Nbands * sizeof(int) // last_snow
+	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
+	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
+	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
     fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
   }
 

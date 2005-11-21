@@ -167,6 +167,14 @@ Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
         though the SAVE_STATE filename wasn't created until open_state_file.
         The output name setting was moved from open_state_file to get_global_param. GCT
 
+Added checks for range/valid month days
+
+        Files affected:
+        get_global_param.c
+
+        In previous versions the user could set a non-valid date for STATE files
+        and the model would run without writing to STATE file. Code now checks
+        for valid date.
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

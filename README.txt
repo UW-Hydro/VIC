@@ -176,6 +176,21 @@ Added checks for range/valid month days
         and the model would run without writing to STATE file. Code now checks
         for valid date.
 
+Replace %i with %d in scanf statements.
+
+        Files affected:
+        check_state_file.c
+        get_global_param.c
+        read_arcinfo_ascii.c
+        read_initial_model_state.c
+        read_snowband.c
+        read_soilparam.c,
+        read_veglib.c
+
+        Having %i in fscanf statements was causing input values of
+        "08" to be interpreted as octal rather than decimal.  These
+        instances of %i have been replaced with %d.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

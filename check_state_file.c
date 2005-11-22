@@ -33,6 +33,7 @@ FILE *check_state_file(char                *init_state,
 	    global file, rather than the date of the state file. This
 	    means that now you can start your simulation at a date
 	    other than the date when the state file was saved.	TJB
+  2005-11-21 Replaced %i w/ %d in sscanf statement. (Port from 4.1.0) GCT
 
 *********************************************************************/
 {
@@ -62,7 +63,7 @@ FILE *check_state_file(char                *init_state,
     fread( &startday, 1, sizeof(int), statefile );
   }
   else {
-    fscanf(statefile,"%i %i %i\n", &startyear, &startmonth, &startday );
+    fscanf(statefile,"%d %d %d\n", &startyear, &startmonth, &startday );
   }
 
   /* Check simulation options */

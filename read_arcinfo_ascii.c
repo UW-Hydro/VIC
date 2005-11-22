@@ -14,6 +14,7 @@ double read_arcinfo_value(char *filename,
   This subroutine reads a single data value from an ARC/INFO ASCII 
   output grid file.  The latitude and longitude of the center of the
   grid cell of interest is provided to this routine.
+  2005-11-21 Replaced %i w/ %d in scanf statements (Port from 4.1.0) GCT
 
 **********************************************************************/
 
@@ -37,8 +38,8 @@ double read_arcinfo_value(char *filename,
   }
 
   /***** Read ARC/INFO Header *****/
-  fscanf(farc,"%*s %i",&ncols);
-  fscanf(farc,"%*s %i",&nrows);
+  fscanf(farc,"%*s %d",&ncols);
+  fscanf(farc,"%*s %d",&nrows);
   fscanf(farc,"%*s %lf",&ll_lng);
   fscanf(farc,"%*s %lf",&ll_lat);
   fscanf(farc,"%*s %lf",&cellsize);
@@ -86,7 +87,8 @@ int read_arcinfo_info(char    *filename,
   the central latitude and longitude of all grid cells that are not 
   assigned the value of NODATA.  Routine returns the number of defined 
   grid cell.
-
+  2005-11-21 Replaced %i w/ %d in scanf statements (Port from 4.1.0) GCT
+  
 **********************************************************************/
 
   FILE   *farc;
@@ -106,12 +108,12 @@ int read_arcinfo_info(char    *filename,
   farc=open_file(filename,"r");
 
   /***** Read ARC/INFO Header *****/
-  fscanf(farc,"%*s %i",&ncols);
-  fscanf(farc,"%*s %i",&nrows);
+  fscanf(farc,"%*s %d",&ncols);
+  fscanf(farc,"%*s %d",&nrows);
   fscanf(farc,"%*s %lf",&ll_lng);
   fscanf(farc,"%*s %lf",&ll_lat);
   fscanf(farc,"%*s %lf",&cellsize);
-  fscanf(farc,"%*s %i",&NODATA);
+  fscanf(farc,"%*s %d",&NODATA);
 
   /***** Allocate Latitude and Longitude Arrays for maximum size *****/
   Ncells  = ncols*nrows;
@@ -125,7 +127,7 @@ int read_arcinfo_info(char    *filename,
     tmp_lat = ll_lat+(double)(nrows-j-0.5)*cellsize;
     for(i=0;i<ncols;i++) {
       tmp_lng = ll_lng + (double)(i+0.5)*cellsize;
-      fscanf(farc, "%i", &tmpvalue);
+      fscanf(farc, "%d", &tmpvalue);
       if(tmpvalue != NODATA) {
 	lat[0][cell]     = tmp_lat;
 	lng[0][cell]     = tmp_lng;

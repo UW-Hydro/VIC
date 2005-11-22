@@ -46,6 +46,7 @@ void read_initial_model_state(FILE                *statefile,
 	    ASCII file.                                           TJB
   11-May-04 (Port from 4.1.0) Added check to verify that the sum of
 	    the defined nodes equals the damping depth.		TJB
+  2005-11-21 (Port from 4.1.0) Replaced %i w/ %d in scanf statements. GCT
 
 *********************************************************************/
 {
@@ -92,7 +93,7 @@ void read_initial_model_state(FILE                *statefile,
 #endif
 
   /* read cell information */
-  //fscanf(statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband);
+  //fscanf(statefile, "%d %d %d", &tmp_cellnum, &tmp_Nveg, &tmp_Nband);
   if ( options.BINARY_STATE_FILE ) {
     fread( &tmp_cellnum, 1, sizeof(int), statefile );
     fread( &tmp_Nveg, 1, sizeof(int), statefile );
@@ -100,7 +101,7 @@ void read_initial_model_state(FILE                *statefile,
     fread( &Nbytes, 1, sizeof(int), statefile );
   }
   else {
-    fscanf( statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
+    fscanf( statefile, "%d %d %d", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
   }
   
   // Skip over unused cell information
@@ -125,22 +126,22 @@ void read_initial_model_state(FILE                *statefile,
 	  fgets(tmpstr, MAXSTRING, statefile); // skip veg/snowband info
       }
       // read info for next cell
-      fscanf( statefile, "%i %i %i", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
+      fscanf( statefile, "%d %d %d", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
     }
   }
 
   if ( feof(statefile) ) {
-    sprintf(ErrStr, "Requested grid cell (%i) is not in the model state file.", 
+    sprintf(ErrStr, "Requested grid cell (%d) is not in the model state file.", 
 	    cellnum);
     nrerror(ErrStr);
   }
 
   if ( tmp_Nveg != Nveg ) {
-    sprintf(ErrStr,"The number of vegetation types in cell %i (%i) does not equal that defined in vegetation parameter file (%i).  Check your input files.", cellnum, tmp_Nveg, Nveg);
+    sprintf(ErrStr,"The number of vegetation types in cell %d (%d) does not equal that defined in vegetation parameter file (%d).  Check your input files.", cellnum, tmp_Nveg, Nveg);
     nrerror(ErrStr);
   }
   if ( tmp_Nband != Nbands ) {
-    sprintf(ErrStr,"The number of snow bands in cell %i (%i) does not equal that defined in the snow band file (%i).  Check your input files.", cellnum, tmp_Nband, Nbands);
+    sprintf(ErrStr,"The number of snow bands in cell %d (%d) does not equal that defined in the snow band file (%d).  Check your input files.", cellnum, tmp_Nband, Nbands);
     nrerror(ErrStr);
   }
 
@@ -168,7 +169,7 @@ soil_con->dp );
     fread( init_DRY_TIME, 1, sizeof(int), statefile );
   }
   else {
-    fscanf( statefile, "%i %i", &tmp_char, init_DRY_TIME );
+    fscanf( statefile, "%d %d", &tmp_char, init_DRY_TIME );
     (*init_STILL_STORM) = (char)tmp_char;
   }
 
@@ -192,11 +193,11 @@ soil_con->dp );
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(statefile,"%i %i", &iveg, &iband) == EOF ) 
+	if ( fscanf(statefile,"%d %d", &iveg, &iband) == EOF ) 
 	  nrerror("End of model state file found unexpectedly");
       }
       if ( iveg != veg || iband != band ) {
-	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %i, band = %i) do not match those currently requested (veg = %i , band = %i).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.", iveg, iband, veg, band);
+	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %d, band = %d) do not match those currently requested (veg = %d , band = %d).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.", iveg, iband, veg, band);
 	nrerror(ErrStr);
       }
       
@@ -282,7 +283,7 @@ soil_con->dp );
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(statefile," %i %i %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+	if ( fscanf(statefile," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
 		    &snow[veg][band].last_snow, &tmp_char,
 		    &snow[veg][band].coverage, &snow[veg][band].swq, 
 		    &snow[veg][band].surf_temp, &snow[veg][band].surf_water, 

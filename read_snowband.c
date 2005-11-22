@@ -17,6 +17,7 @@ void read_snowband(FILE    *snowband,
 
   This routine reads snow elevation band median elevaton, and 
   precipitation fraction for use with the snow model.
+ 2005-11-21 (Port from 4.1.0) Replaced %i w/ %d in scanf statements. GCT
 
 **********************************************************************/
 {
@@ -47,13 +48,13 @@ void read_snowband(FILE    *snowband,
     rewind(snowband);
 #endif
 
-    fscanf(snowband, "%i", &cell);
+    fscanf(snowband, "%d", &cell);
     while(cell != gridcell && !feof(snowband)) {
       fgets(ErrStr,MAXSTRING,snowband);
-      fscanf(snowband, "%i", &cell);
+      fscanf(snowband, "%d", &cell);
     }
     if(feof(snowband)) {
-      sprintf(ErrStr,"Cannot find current gridcell (%i) in snow band file",
+      sprintf(ErrStr,"Cannot find current gridcell (%d) in snow band file",
 	      gridcell);
       nrerror(ErrStr);
     }
@@ -97,7 +98,7 @@ void read_snowband(FILE    *snowband,
 	nrerror(ErrStr);
       }
       if(prec_frac>0 && (*AreaFract)[band]==0) {
-	sprintf(ErrStr,"Snow band precipitation fraction (%f) should be 0 when the area fraction is 0. (band = %i)", 
+	sprintf(ErrStr,"Snow band precipitation fraction (%f) should be 0 when the area fraction is 0. (band = %d)", 
 		prec_frac, band);
 	nrerror(ErrStr);
       }
@@ -105,7 +106,7 @@ void read_snowband(FILE    *snowband,
       total += prec_frac;
     }
     if(total!=1.) {
-      fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %i (%f), dividing each fraction by the sum\n",
+      fprintf(stderr,"WARNING: Sum of the snow band precipitation fractions does not equal %d (%f), dividing each fraction by the sum\n",
 	      1, total);
       for(band = 0; band < options.SNOW_BAND; band++) 
 	(*Pfactor)[band] /= total;
@@ -126,7 +127,7 @@ void read_snowband(FILE    *snowband,
   }
 
   else {
-    sprintf(ErrStr,"Number of snow elevation bands must be > 0 (%i)",Nbands);
+    sprintf(ErrStr,"Number of snow elevation bands must be > 0 (%d)",Nbands);
     nrerror(ErrStr);
   }
 

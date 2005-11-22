@@ -16,6 +16,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   09-24-98 Modified to remove root fractions from the library file.
            See read_vegparam.c and calc_root_fraction.c for new
            root fraction distribution information.               KAC
+  2005-11-21 (Port from 4.1.0) Replaced %i w/ %d in scanf statements. GCT
 
 **********************************************************************/
 {
@@ -48,7 +49,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   while (!feof(veglib)) {
     if(str[0]<=57 && str[0]>=48) {
       temp[i].veg_class = atoi(str);
-      fscanf(veglib, "%i",  &tmpflag);
+      fscanf(veglib, "%d",  &tmpflag);
       if(tmpflag==0) temp[i].overstory = FALSE;
       else temp[i].overstory = TRUE;
       fscanf(veglib, "%lf", &temp[i].rarc);
@@ -81,7 +82,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       }
       fscanf(veglib, "%lf", &temp[i].wind_h);
       if(temp[i].wind_h < maxd && temp[i].overstory) {
-        sprintf(str,"Vegetation reference height (%f) for vegetation class %i, must be greater than the maximum displacement height (%f) when OVERSTORY has been set TRUE.",
+        sprintf(str,"Vegetation reference height (%f) for vegetation class %d, must be greater than the maximum displacement height (%f) when OVERSTORY has been set TRUE.",
                 temp[i].wind_h,temp[i].veg_class,maxd);
         nrerror(str);
       }
@@ -89,14 +90,14 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 						    solar radiation at which there
 						   will still be transpiration */
       if(temp[i].RGL < 0) {
-        sprintf(str,"Minimum value of incoming solar radiation at which there is transpiration (RGL) must be greater than 0 for vegetation class %i.  Check that the vegetation library has the correct number of columns.",
+        sprintf(str,"Minimum value of incoming solar radiation at which there is transpiration (RGL) must be greater than 0 for vegetation class %d.  Check that the vegetation library has the correct number of columns.",
                 temp[i].veg_class);
         nrerror(str);
       }
       fscanf(veglib, "%lf", &temp[i].rad_atten);   /* vegetation radiation 
 						      attenuation factor */
       if(temp[i].rad_atten < 0 || temp[i].rad_atten > 1) {
-        sprintf(str,"The vegetation radiation attenuation factor must be greater than 0, and less than 1 for vegetation class %i.  Check that the vegetation library has the correct number of columns.",
+        sprintf(str,"The vegetation radiation attenuation factor must be greater than 0, and less than 1 for vegetation class %d.  Check that the vegetation library has the correct number of columns.",
                 temp[i].veg_class);
         nrerror(str);
       }

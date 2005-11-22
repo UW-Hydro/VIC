@@ -601,6 +601,8 @@ typedef struct {
 					  (Wm-2) */
   double aero_resist;                  /* grid cell mean aerodynamic 
 					  resistence  [s/m] */
+  double aero_cond;                    /* grid cell mean aerodynamic
+                                          conductivity [m/s] */
   double air_temp;                     /* grid cell air temperature */
   double albedo;                       /* grid cell mean albedo */ 
   double baseflow;                     /* baseflow out of the bottom layer */

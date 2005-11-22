@@ -215,6 +215,31 @@ ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
         NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the soil parameter
         file contains Ds, Dsmax, Ws, and c.
 
+Aerodynamic resistance not correctly aggregated for output
+
+        Files affected:
+        put_data.c
+        vicNl_def.h
+
+        In previous releases, aerodynamic resistance
+        (out_data->aero_resist) was aggregated by a simple
+        area-weighted average over veg tiles.  This led to an
+        aggregate value that was not the true effective resistance of
+        the entire grid cell.  Since evaporation is proportional to
+        1/aero_resist, it is (1/aero_resist), or the aerodynamic
+        conductivity, that should be averaged over the grid cell.
+        Therefore, a new variable, out_data.aero_cond, was created for
+        the purposes of aggregation.  After aggregation,
+        out_data.aero_resist is computed as 1/out_data.aero_cond.
+
+        The effect of the change is most pronounced when there is a
+        large range of values of aerodynamic resistance among the veg
+        tiles in a grid cell.  The effective aerodynamic resistance,
+        computed the new way, will tend to be smaller than the old way
+        when the values cover a wide range.  However, the effective
+        aerodynamic resistance will never be smaller than the smallest
+        value among the various veg tiles in the cell.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

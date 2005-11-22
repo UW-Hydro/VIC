@@ -36,6 +36,8 @@ void put_data(dist_prcp_struct  *prcp,
            the model can make use of the computed treeline.     KAC
   28-Sep-04 Replaced aero_resist[0] with aero_resist_used, the aerodynamic
 	    resistance that was actually used in flux calculations.	TJB
+  2005-11-21 (Port from 4.1.0) New aero-cond is aggregated instead of 
+            aero-resist. GCT
 
 **********************************************************************/
 {
@@ -196,9 +198,15 @@ void put_data(dist_prcp_struct  *prcp,
 	      out_data->Wdew += veg_var[dist][veg][band].Wdew 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
-	    /** record aerodynamic resistance **/
-	    out_data->aero_resist += cell[WET][veg][0].aero_resist_used
-	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            /** record aerodynamic conductance **/
+            if (cell[WET][veg][0].aero_resist_used > SMALL) {
+              out_data->aero_cond += (1/cell[WET][veg][0].aero_resist_used)
+                * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            else {
+              out_data->aero_cond = HUGE_RESIST;
+              out_data->aero_resist = cell[WET][veg][0].aero_resist_used;
+            }
 	    
 	    /** recored layer moistures **/
 	    for(index=0;index<options.Nlayer;index++) {
@@ -414,6 +422,11 @@ void put_data(dist_prcp_struct  *prcp,
   }
   
 #if !OPTIMIZE
+
+  /** record aerodynamic resistance **/
+  if (out_data->aero_cond < HUGE_RESIST) {
+    out_data->aero_resist = 1 / out_data->aero_cond;
+  }
 
   /** record radiative temperature **/
   out_data->rad_temp = pow(out_data->rad_temp,0.25);

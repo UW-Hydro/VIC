@@ -204,7 +204,7 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
-  char   ARNO_PARAMS;    /* FALSE: read Ds, Dm, Ws, c; TRUE: read d1, d2, d3, d4 */
+  char   NIJSSEN2001_BASEFLOW;    /* FALSE: read Ds, Dm, Ws, c; TRUE: read d1, d2, d3, d4 */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
 				from soil file and used in calculating treeline */

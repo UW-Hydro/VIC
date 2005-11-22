@@ -75,7 +75,7 @@ void initialize_global() {
 	      Also changed limit on loop over forcing types from
 	      hard-coded 17 to variable N_FORCING_TYPES.	TJB
     16-Jun-04 Added JULY_TAVG_SUPPLIED.				TJB
-	      
+   2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT 	      
 
 *********************************************************************/
 
@@ -92,7 +92,7 @@ void initialize_global() {
   options.JULY_TAVG_SUPPLIED    = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
-  options.ARNO_PARAMS           = FALSE;
+  options.NIJSSEN2001_BASEFLOW  = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.DIST_PRCP             = FALSE;

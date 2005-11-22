@@ -45,6 +45,8 @@ global_param_struct get_global_param(filenames_struct *names,
             option, as part of fix for QUICK_FLUX state file compatibility.GCT
   2005-11-10 Moved setting of statename from open_state_file to here. GCT
   2005-11-21 Added checks for range of STATEMONTH and STATEDAY  GCT
+  2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
+
 **********************************************************************/
 {
   extern option_struct    options;
@@ -263,10 +265,16 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
         else options.MOISTFRACT = FALSE;
       }
-      else if(strcasecmp("ARNO_PARAMS",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ARNO_PARAMS=TRUE;
-        else options.ARNO_PARAMS = FALSE;
+      else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
+        fprintf(stderr,"WARNING: Please change \"ARNO_PARAMS\" to \"NIJSSEN2001_BASEFLOW\" in your global parameter file\n");
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
+        else options.NIJSSEN2001_BASEFLOW = FALSE;
+      }
+      else if (strcasecmp("NIJSSEN2001_BASEFLOW", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
+        else options.NIJSSEN2001_BASEFLOW = FALSE;
       }
       else if(strcasecmp("INIT_STATE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

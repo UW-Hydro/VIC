@@ -191,6 +191,30 @@ Replace %i with %d in scanf statements.
         "08" to be interpreted as octal rather than decimal.  These
         instances of %i have been replaced with %d.
 
+ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
+
+        Files affected:
+        display_current_settings.c
+        get_global_param.c
+        initialize_global.c
+        read_soilparam.c
+        read_soilparam_arc.c
+        vicNl_def.h
+
+        Changed the name of the ARNO_PARAMS global parameter option to
+        NIJSSEN2001_BASEFLOW.  The meaning of the ARNO_PARAMS option
+        was actually opposite to its name: when ARNO_PARAMS was FALSE,
+        VIC would interpret the first four parameters in the soil
+        parameter file to be the standard ARNO soil parameters Ds,
+        Dsmax, Ws, and c, while when ARNO_PARAMS was TRUE, VIC would
+        interpret the first four parameters to be d1, d2, d3, and d4,
+        the soil parameters used in Nijssen et al. (2001).  The new
+        name for this option more accurately reflects its meaning:
+        when NIJSSEN2001_BASEFLOW is TRUE, VIC assumes the soil
+        parameter file contains d1, d2, d3, and d4.  When
+        NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the soil parameter
+        file contains Ds, Dsmax, Ws, and c.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

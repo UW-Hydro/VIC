@@ -20,6 +20,7 @@ void display_current_settings(int                 mode,
 	    lower down in output display.			TJB
   12-May-04 Changed formatting from %s to %d in STATE* print
 	    statements.						TJB
+  2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
 **********************************************************************/
 {
 
@@ -170,10 +171,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"ARC_SOIL\t\tTRUE\n");
   else
     fprintf(stdout,"ARC_SOIL\t\tFALSE\n");
-  if (options.ARNO_PARAMS)
-    fprintf(stdout,"ARNO_PARAMS\t\tTRUE\n");
+  if (options.NIJSSEN2001_BASEFLOW)
+    fprintf(stdout,"NIJSSEN2001_BASEFLOW\t\tTRUE\n");
   else
-    fprintf(stdout,"ARNO_PARAMS\t\tFALSE\n");
+    fprintf(stdout,"NIJSSEN2001_BASEFLOW\t\tFALSE\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Veg Data:\n");

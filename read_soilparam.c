@@ -79,7 +79,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   07-Jul-04	Validation of initial soil moisture is only performed
 		if INIT_STATE = FALSE.				TJB
   2005-11-21    (Port from 4.1.0) Replace %i w/ %d in scanf statements. GCT
-
+  2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
 **********************************************************************/
 {
   extern option_struct options;
@@ -289,10 +289,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
 
     /*************************************************
-      If ARNO_PARAMS = TRUE then convert ARNO baseflow
+      If NIJSSEN2001_BASEFLOW = TRUE then convert ARNO baseflow
       parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
     *************************************************/
-    if(options.ARNO_PARAMS) {
+    if(options.NIJSSEN2001_BASEFLOW) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

@@ -240,6 +240,15 @@ Aerodynamic resistance not correctly aggregated for output
         aerodynamic resistance will never be smaller than the smallest
         value among the various veg tiles in the cell.
 
+Allow NO_FLUX in addition to NOFLUX in global.param.file
+
+        Files affected:
+        get_global_param.c
+
+        The option NOFLUX has a syntax (ie, the missing underscore) that is
+        inconsistent with other FLUX options. The change will allow users to
+        enter either string.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

@@ -143,13 +143,12 @@ int main(int argc, char *argv[])
 					 &global_param, options.Nlayer, 
 					 options.Nnode, &startrec);
 
-#if SAVE_STATE
   /** open state file if model state is to be saved **/
-  if ( strcmp( global_param.statename, "NONE" ) != 0 ) 
-    outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
-					 options.Nnode);
+  if ( options.SAVE_STATE && strcmp( global_param.statename, "NONE" ) != 0 )
+    outfiles.statefile = open_state_file(&global_param, options.Nlayer,
+                                         options.Nnode);
   else outfiles.statefile = NULL;
-#endif // SAVE_STATE
+
 #endif // !OUTPUT_FORCE
 
   /************************************

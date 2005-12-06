@@ -407,6 +407,59 @@ Removed some snowband output
         Removed  net sw radiation, net lw, albedo, latent heat flux, 
 	sensible heat flux, ground heat flux
 
+STATE file option is now specified in global file, not in user_def.h at compile time
+
+        Files affected:
+
+        display_current_settings.c
+        dist_prec.c
+        get_global_param.c
+        initialize_global.c
+        open_state_file.c
+        user_def.h
+        vicNl.c
+        vicNl.h
+        vicNl_def.h
+        write_model_state.c
+
+        Previously, to be able to read/write state files, VIC required
+        users to define SAVE_STATE to be TRUE in user_def.h and
+        recompile VIC, in addition to having the correct settings of
+        INIT_STATE, STATENAME, STATEYEAR, STATEMONTH, and STATEDAY in
+        the global parameter file.
+
+        This was both unnecessary and confusing.  Setting SAVE_STATE
+        to FALSE did not improve VIC performance noticeably, and
+        having both a SAVE_STATE compile option and state file
+        information in the global parameter file only led to mistakes
+        in which the user made a change in one place without realizing
+        a change needed to be made elsewhere.
+
+        Now VIC behaves as follows:
+        1. To read an initial state file, the following line
+        must be in the global parameter file:
+          INIT_STATE init_state_filename
+
+        where init_state_filename is the name of the initial state
+        file.  If this line is absent or commented out (preceded by a
+        "#"), VIC will start from default initial conditions.
+
+        2. To write a state file during the simulation, the
+        following lines must be in the global parameter file:
+          STATENAME  state_file_name
+          STATEYEAR  state_year
+          STATEMONTH state_month
+          STATEDAY   state_day
+
+        where state_file_name is the path and prefix of the file to
+        save the state information in (the simulation date on which
+        the state file is saved will be appended to the state file
+        name), and state_year, state_month, and state_day are the
+        year, month, and day of the simulation on which to save state.
+        The state will be saved AFTER the FINAL time step of that
+        date.  If all of these lines are absent or commented out, VIC
+        will not save a state file.  If some (but not all) of these
+        lines are present, VIC will give an error.
 
         
 

@@ -84,7 +84,7 @@ void initialize_global() {
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
   2005-May-01 Added the ALMA vars CRainf, CSSnowf, LSRainf, and LSSnowf.TJB
   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
-
+  2005-11-29  Added SAVE_STATE (option is now set in global param file) GCT
 *********************************************************************/
 
   extern option_struct options;
@@ -117,6 +117,7 @@ void initialize_global() {
   options.SNOW_STEP             = 1;
   options.PREC_EXPT             = 0.6;
   options.INIT_STATE            = FALSE;
+  options.SAVE_STATE            = FALSE;
   options.BINARY_STATE_FILE     = TRUE;
   options.ROOT_ZONES            = MISSING;
   options.MIN_WIND_SPEED        = 0.0;

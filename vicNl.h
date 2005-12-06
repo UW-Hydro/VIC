@@ -263,9 +263,7 @@ void   nrerror(char *);
 
 void   open_debug();
 FILE  *open_file(char string[], char type[]);
-#if SAVE_STATE
 FILE  *open_state_file(global_param_struct *, int, int);
-#endif
 
 double penman(double, double, double, double, double, double, double, 
 	      double, double, float, float);
@@ -437,7 +435,6 @@ void write_layer(layer_data_struct *, int, int,
                  double *,
 #endif
                  double *);
-#if SAVE_STATE
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, outfiles_struct *, soil_con_struct *, char *,
 #if LAKE_MODEL
@@ -445,7 +442,6 @@ void write_model_state(dist_prcp_struct *, global_param_struct *, int,
 #else
 		       int *);
 #endif // LAKE_MODEL
-#endif // SAVE_STATE
 void write_snow_data(snow_data_struct, int, int);
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);

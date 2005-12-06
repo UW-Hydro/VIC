@@ -20,6 +20,7 @@ void display_current_settings(int                 mode,
   2005-03-08 Added EQUAL_AREA option.				TJB
   2005-03-24 Added ALMA_OUTPUT option.				TJB
   2005-04-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
+  2005-11-29 SAVE_STATE is now set in global param file         GCT
 **********************************************************************/
 {
 
@@ -83,11 +84,6 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"OUTPUT_FORCE\t\tTRUE\n");
 #else
   fprintf(stdout,"OUTPUT_FORCE\t\tFALSE\n");
-#endif
-#if SAVE_STATE
-  fprintf(stdout,"SAVE_STATE\t\tTRUE\n");
-#else
-  fprintf(stdout,"SAVE_STATE\t\tFALSE\n");
 #endif
 
   fprintf(stdout,"\n");
@@ -263,18 +259,22 @@ void display_current_settings(int                 mode,
   else
     fprintf(stdout,"INIT_STATE\t\tFALSE\n");
 
-#if SAVE_STATE
   fprintf(stdout,"\n");
   fprintf(stdout,"Output State File:\n");
-  fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
-  fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
-  fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
-  fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
-  if (options.BINARY_STATE_FILE)
-    fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
-  else
-    fprintf(stdout,"BINARY_STATE_FILE\tFALSE\n");
-#endif
+  if (options.SAVE_STATE) {
+    fprintf(stdout,"SAVE_STATE\t\tTRUE\n");
+    fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
+    fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
+    fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
+    fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);
+    if (options.BINARY_STATE_FILE)
+      fprintf(stdout,"BINARY_STATE_FILE\tTRUE\n");
+    else
+      fprintf(stdout,"BINARY_STATE_FILE\tFALSE\n");
+  }
+  else {
+    fprintf(stdout,"SAVE_STATE\t\tFALSE\n");
+  }
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Data:\n");

@@ -45,7 +45,7 @@
 /***** If TRUE VIC binary includes the lake/wetland algorithm.  Lakes
        and wetlands do not need to be defined but code will be 
        accessed. *****/
-#define LAKE_MODEL FALSE
+#define LAKE_MODEL TRUE
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the
        matric potential from the two surrounding layers to estimate the 
@@ -54,11 +54,6 @@
        low resolution solution computed by VIC. *****/
 #define LOW_RES_MOIST FALSE
 
-/***** If TRUE VIC code to save the model state is included in the 
-       compiled code.  If STATEYEAR, STATEMONTH and STATEDAY are
-       defined in the global control file the model state will
-       be written to a file. *****/
-#define SAVE_STATE FALSE
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow
        band files before read data for each cell.  This saves time

@@ -5,7 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if SAVE_STATE
 
 FILE *open_state_file(global_param_struct *global,
 		      int                  Nlayer,
@@ -18,7 +17,7 @@ FILE *open_state_file(global_param_struct *global,
   Modifications:
   04-10-03 Modified to open and write to a binary state file.    KAC
   06-03-03 modified to handle both ASCII and BINARY state files.  KAC
-
+  2005-11-29 SAVE_STATE is set in global param file, not in user_def.h GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -59,4 +58,3 @@ FILE *open_state_file(global_param_struct *global,
 
 }
 
-#endif

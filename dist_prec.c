@@ -205,7 +205,6 @@ void dist_prec(atmos_data_struct   *atmos,
 #endif // LAKE_MODEL 
 	   outfiles, veg_con);
 
-#if SAVE_STATE
 
   /************************************
     Save model state at assigned date
@@ -226,6 +225,5 @@ void dist_prec(atmos_data_struct   *atmos,
 		      STILL_STORM, DRY_TIME);
 #endif // LAKE_MODEL
 
-#endif
 
 }

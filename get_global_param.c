@@ -45,7 +45,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-04-07 Fixed state file warning check.			TJB
   2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW	TJB
-
+  2005-11-29 SAVE_STATE is set in global_param (not at compile time) GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -79,10 +79,8 @@ global_param_struct get_global_param(filenames_struct *names,
   }
   file_num             = 0;
   global.nrecs         = MISSING;
-#if SAVE_STATE
   global.stateyear = MISSING;
   strcpy(global.statename, "NONE");
-#endif
 
   /** Read through global control file to find parameters **/
 
@@ -293,9 +291,9 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
         else options.NIJSSEN2001_BASEFLOW = FALSE;
       }
-#if SAVE_STATE
       else if(strcasecmp("STATENAME",optstr)==0) {
         sscanf(cmdstr,"%*s %s",global.statename);
+        options.SAVE_STATE = TRUE;
       }
       else if(strcasecmp("STATEYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.stateyear);
@@ -306,7 +304,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("STATEDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.stateday);
       }
-#endif // SAVE_STATE
 #if LAKE_MODEL
       else if(strcasecmp("LAKES",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
@@ -554,15 +551,17 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
   }
-#if SAVE_STATE
-  if ( strcmp( names->init_state, global.statename ) == 0 && strcmp( names->init_state, "" ) != 0 ) {
+  if( options.SAVE_STATE ) {
+    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
+      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    } // Add the day range checking below here
+  }
+  // Set the statename here to be able to compare with INIT_STATE name
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0))  {
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
     nrerror(ErrStr);
   }
-  if ( strcmp( global.statename, "" ) == 0 ) {
-    fprintf(stderr,"WARNING: Model compiled with SAVE_STATE activated, but no state files were defined.\n");
-  }
-#endif // SAVE_STATE
 #if LAKE_MODEL
   if ( global.resolution == 0 && options.LAKES ) {
     sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
@@ -636,11 +635,9 @@ global_param_struct get_global_param(filenames_struct *names,
   fprintf(stderr,"\n");
   fprintf(stderr,"Using %d Snow Bands\n",options.SNOW_BAND);
   fprintf(stderr,"Using %d Root Zones\n",options.ROOT_ZONES);
-#if SAVE_STATE
-  if ( global.stateyear != MISSING )
+  if ( options.SAVE_STATE )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
 	    global.stateday, global.statemonth, global.stateyear);
-#endif
   if ( OPTIMIZE )
     fprintf(stderr,"Model is using optimized output (runoff and baseflow only).\n");
   else if ( LDAS_OUTPUT )

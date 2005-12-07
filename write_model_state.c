@@ -52,7 +52,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   02-Nov-04 Added a few more lake state variables.		TJB
   03-Nov-04 Now outputs extra_veg to aid other programs in parsing
 	    state files.					TJB
-  2005-11-29 SAVE_STATE is set in global param file not in user_def.h GCT
+  2005-12-07 STATE_FILE option is set in global file            GCT
 *********************************************************************/
 {
   extern option_struct options;

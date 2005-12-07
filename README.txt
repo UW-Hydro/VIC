@@ -461,6 +461,15 @@ STATE file option is now specified in global file, not in user_def.h at compile 
         will not save a state file.  If some (but not all) of these
         lines are present, VIC will give an error.
 
+Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
+
+        Files affected:
+        get_global_param.c, open_state_file.c
+
+        Previously, the checks for matches would occur in get_global_param even
+        though the SAVE_STATE filename wasn't created until open_state_file.
+        The output name setting was moved from open_state_file to get_global_param. GCT
+
         
 
 --------------------------------------------------------------------------------

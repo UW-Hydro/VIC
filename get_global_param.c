@@ -46,6 +46,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW	TJB
   2005-11-29 SAVE_STATE is set in global_param (not at compile time) GCT
+  2005-12-06 Moved setting of statename from open_state_file to here. GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -558,6 +559,10 @@ global_param_struct get_global_param(filenames_struct *names,
     } // Add the day range checking below here
   }
   // Set the statename here to be able to compare with INIT_STATE name
+  if( options.SAVE_STATE ) {
+    sprintf(global.statename,"%s_%04i%02i%02i", global.statename, 
+	  global.stateyear, global.statemonth, global.stateday);
+  }
   if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0))  {
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
     nrerror(ErrStr);

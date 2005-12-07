@@ -18,6 +18,7 @@ FILE *open_state_file(global_param_struct *global,
   04-10-03 Modified to open and write to a binary state file.    KAC
   06-03-03 modified to handle both ASCII and BINARY state files.  KAC
   2005-11-29 SAVE_STATE is set in global param file, not in user_def.h GCT
+  2005-12-06 Moved setting of statename to get_global_param     GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -27,8 +28,7 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s_%04i%02i%02i", global->statename, 
-	  global->stateyear, global->statemonth, global->stateday );
+  sprintf(filename,"%s", global->statename);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");
   else

@@ -478,7 +478,12 @@ Added checks for range/valid month days
         In previous versions the user could set a non-valid date for STATE files
         and the model would run without writing to STATE file. Code now checks
         for valid date.
-        
+
+Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX option in global param file
+
+        Files affected:
+        get_global_param.c
+               
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

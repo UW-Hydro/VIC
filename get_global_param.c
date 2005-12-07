@@ -48,6 +48,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-11-29 SAVE_STATE is set in global_param (not at compile time) GCT
   2005-12-06 Moved setting of statename from open_state_file to here. GCT
   2005-12-07 Added checks for range of STATEMONTH and STATEDAY  GCT
+  2005-12-07 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in
+             global.param.file  GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -201,7 +203,7 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.QUICK_SOLVE=TRUE;
         else options.QUICK_SOLVE = FALSE;
       }
-      else if(strcasecmp("NOFLUX",optstr)==0) {
+      else if( (strcasecmp("NOFLUX",optstr)==0) || (strcasecmp("NO_FLUX",optstr)==0) ) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.NOFLUX=TRUE;
         else options.NOFLUX = FALSE;

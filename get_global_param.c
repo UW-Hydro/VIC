@@ -47,6 +47,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW	TJB
   2005-11-29 SAVE_STATE is set in global_param (not at compile time) GCT
   2005-12-06 Moved setting of statename from open_state_file to here. GCT
+  2005-12-07 Added checks for range of STATEMONTH and STATEDAY  GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -63,6 +64,21 @@ global_param_struct get_global_param(filenames_struct *names,
   int  file_num;
   int  field;
   int  i;
+  int  lastvalidday;
+  int  lastday[] = {
+            31, /* JANUARY */
+            28, /* FEBRUARY */
+            31, /* MARCH */
+            30, /* APRIL */
+            31, /* MAY */
+            30, /* JUNE */
+            31, /* JULY */
+            31, /* AUGUST */
+            30, /* SEPTEMBER */
+            31, /* OCTOBER */
+            30, /* NOVEMBER */
+            31, /* DECEMBER */
+        } ;
   global_param_struct global;
 
   /** Initialize non-global parameters **/
@@ -557,6 +573,17 @@ global_param_struct get_global_param(filenames_struct *names,
       sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
       nrerror(ErrStr);
     } // Add the day range checking below here
+   // Check for month, day in range
+    lastvalidday = lastday[global.statemonth - 1];
+    if ( global.statemonth == 2 ) {
+      if ( (global.stateyear % 4) == 0 && ( (global.stateyear % 100) != 0 || (global.stateyear % 400) == 0 ) ){
+        lastvalidday = 29;
+      }
+    }
+    if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
+      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
   }
   // Set the statename here to be able to compare with INIT_STATE name
   if( options.SAVE_STATE ) {

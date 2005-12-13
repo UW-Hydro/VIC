@@ -59,6 +59,7 @@ void read_initial_model_state(FILE                *statefile,
   02-Nov-04 Added a few more lake state variables.		TJB
   03-Nov-04 Now reads extra_veg from state file.		TJB
   2005-Apr-10 Fixed incorrect check on soil node depths.	TJB
+  2005-12-13 Fixed bug in reading extra_veg from state file
 
 *********************************************************************/
 {
@@ -143,15 +144,25 @@ void read_initial_model_state(FILE                *statefile,
     else {
       // skip rest of current cells info
       fgets(tmpstr, MAXSTRING, statefile); // skip rest of general cell info
-      for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
+      for ( veg = 0; veg <= tmp_Nveg+extra_veg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, statefile); // skip dist precip info
+#if LAKE_MODEL
+	if ( options.LAKES && extra_veg == 1 && veg == tmp_Nveg + extra_veg ) {
+	  tmp_Nband = 1; // wetland veg type only occurs in band 0
+	}
+#endif // LAKE_MODEL
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, statefile); // skip snowband info
       }
+#if LAKE_MODEL
+  if ( options.LAKES && extra_veg == 1 ) {
+        fgets(tmpstr, MAXSTRING, statefile); // skip lake info
+  }
+#endif // LAKE_MODEL
       // read info for next cell
       fscanf( statefile, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
-    }
-  }
+    }//end if
+  }//end while
 
   if ( feof(statefile) ) {
     sprintf(ErrStr, "Requested grid cell (%d) is not in the model state file.", 

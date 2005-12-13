@@ -483,6 +483,11 @@ Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX option in global para
 
         Files affected:
         get_global_param.c
+
+Now reads extra_veg from state file
+
+        Files affected:
+        read_initial_model_state.c
                
 
 --------------------------------------------------------------------------------

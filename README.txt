@@ -489,6 +489,10 @@ Now reads extra_veg from state file
         Files affected:
         read_initial_model_state.c
                
+Removed Trad from vicNl_def.h
+
+        Files affected:
+        vicNl_def.h
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

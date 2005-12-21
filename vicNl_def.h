@@ -6,6 +6,7 @@
   2005-Apr-23 Added out_data.aero_cond.					TJB
   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
+  2005-Dec-21 Removed Trad.                                             GCT
 *********************************************************************/
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -690,8 +691,6 @@ typedef struct {
   double  Tcanopy;               /* temperature of the canopy air */
   double  Tfoliage;              /* temperature of the overstory vegetation */
   double  Tsurf;                 /* temperature of the understory */
-  double  Trad[2];               /* surface temperature of energy balance 
-				    (C) */
   double  advected_sensible;     /* net sensible heat flux advected to 
 				    snowpack (Wm-2) */
   double  advection;             /* advective flux (Wm-2) */

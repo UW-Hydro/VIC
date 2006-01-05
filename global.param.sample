@@ -25,6 +25,7 @@ PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if 
 MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 
+
 #######################################################################
 # Simulation Parameters for 4.1.0
 #######################################################################
@@ -75,6 +76,8 @@ FORCEYEAR	1915	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
 FORCEHOUR	00	# Hour of first forcing record
+WIND_H          10.0    # height of wind speed measurement (m)
+MEASURE_H       2.0     # height of humidity measurement (m)
 
 #######################################################################
 # Land Surface Files and Parameters

@@ -68,6 +68,8 @@ FORCEYEAR	1915	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
 FORCEHOUR	00	# Hour of first forcing record
+WIND_H          10.0    # height of wind speed measurement (m)
+MEASURE_H       2.0     # height of humidity measurement (m)
 
 #######################################################################
 # Land Surface Files and Parameters

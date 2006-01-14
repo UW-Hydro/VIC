@@ -59,8 +59,7 @@ void read_initial_model_state(FILE                *statefile,
   02-Nov-04 Added a few more lake state variables.		TJB
   03-Nov-04 Now reads extra_veg from state file.		TJB
   2005-Apr-10 Fixed incorrect check on soil node depths.	TJB
-  2005-12-13 Fixed bug in reading extra_veg from state file
-
+  2005-01-10 modified to read lake nodal variables for each of the active nodes JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -383,7 +382,7 @@ void read_initial_model_state(FILE                *statefile,
 #if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
-      if ( fread( &lake_con.numnod, 1, sizeof(int), statefile ) != sizeof(int) )
+      if ( fread( &lake_var->activenod, 1, sizeof(int), statefile ) != sizeof(int) )
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->volume, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
@@ -395,7 +394,7 @@ void read_initial_model_state(FILE                *statefile,
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->surfdz, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fread( &lake_var->surface[node], 1, sizeof(double), statefile ) != sizeof(double) )
 	  nrerror("End of model state file found unexpectedly");
       }
@@ -403,17 +402,17 @@ void read_initial_model_state(FILE                *statefile,
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->tempavg, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fread( &lake_var->temp[node], 1, sizeof(double), statefile ) != sizeof(double) )
 	  nrerror("End of model state file found unexpectedly");
       }
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fread( &lake_var->density[node], 1, sizeof(double), statefile ) != sizeof(double) )
 	  nrerror("End of model state file found unexpectedly");
       }
       if ( fread( &lake_var->mixmax, 1, sizeof(int), statefile ) != sizeof(int) )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->activenod, 1, sizeof(int), statefile ) != sizeof(int) )
+      if ( fread( &lake_con.numnod, 1, sizeof(int), statefile ) != sizeof(int) )
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->tempi, 1, sizeof(double), statefile ) != sizeof(double) )
 	nrerror("End of model state file found unexpectedly");
@@ -427,12 +426,8 @@ void read_initial_model_state(FILE                *statefile,
 	nrerror("End of model state file found unexpectedly");
     }
     else {
-      if ( fscanf(statefile," %d", &tmp_int) == EOF )
+      if ( fscanf(statefile," %d", &lake_var->activenod) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      if (tmp_int != lake_con.numnod) {
-	fprintf(stderr,"The number of lake nodes stored in the state file (%d) for this grid cell does not match the number of lake nodes indicated in your lake parameter file (%d).", tmp_int, lake_con.numnod);
-	nrerror(ErrStr);
-      }
       if ( fscanf(statefile," %lf", &lake_var->volume) == EOF )
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->ldepth) == EOF )
@@ -443,7 +438,7 @@ void read_initial_model_state(FILE                *statefile,
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->surfdz) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fscanf(statefile," %lf", &lake_var->surface[node]) == EOF )
 	  nrerror("End of model state file found unexpectedly");
       }
@@ -451,18 +446,22 @@ void read_initial_model_state(FILE                *statefile,
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->tempavg) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fscanf(statefile," %lf", &lake_var->temp[node]) == EOF )
 	  nrerror("End of model state file found unexpectedly");
       }
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var->activenod; node++ ) {
         if ( fscanf(statefile," %lf", &lake_var->density[node]) == EOF )
 	  nrerror("End of model state file found unexpectedly");
       }
       if ( fscanf(statefile," %d", &lake_var->mixmax) == EOF )
 	nrerror("End of model state file found unexpectedly");
-      if ( fscanf(statefile," %d", &lake_var->activenod) == EOF )
+      if ( fscanf(statefile," %d", &tmp_int) == EOF )
 	nrerror("End of model state file found unexpectedly");
+      if (tmp_int != lake_con.numnod) {
+	fprintf(stderr,"The number of lake nodes stored in the state file (%d) for this grid cell does not match the number of lake nodes indicated in your lake parameter file (%d).", tmp_int, lake_con.numnod);
+	nrerror(ErrStr);
+      }
       if ( fscanf(statefile," %lf", &lake_var->tempi) == EOF )
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(statefile," %lf", &lake_var->hice) == EOF )

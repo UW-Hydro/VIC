@@ -53,6 +53,8 @@ void write_model_state(dist_prcp_struct    *prcp,
   03-Nov-04 Now outputs extra_veg to aid other programs in parsing
 	    state files.					TJB
   2005-12-07 STATE_FILE option is set in global file            GCT
+  2005-01-10 writes temp[0] instead of tp_in for lake skin surface temperature JCA
+  2005-01-10 modified to write lake nodal variables for each of the active nodes JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -150,19 +152,19 @@ void write_model_state(dist_prcp_struct    *prcp,
 		+ sizeof(char) // wetland MELTING
 		+ 9 * sizeof(double) // wetland snow parameters
 		+ options.Nnode * sizeof(double) // wetland soil temperatures
-		+ sizeof(int) // numnod
+		+ sizeof(int) // activenod
 		+ sizeof(double) // volume
 		+ sizeof(double) // ldepth
 		+ sizeof(double) // sarea
 		+ sizeof(double) // dz
 		+ sizeof(double) // surfdz
-		+ lake_con.numnod * sizeof(double) // surface
-		+ sizeof(double) // tp_in
+		+ lake_var.activenod * sizeof(double) // surface
+		+ sizeof(double) // temp[0]
 		+ sizeof(double) // tempavg
-		+ lake_con.numnod * sizeof(double) // temp
-		+ lake_con.numnod * sizeof(double) // density
+		+ lake_var.activenod * sizeof(double) // temp
+		+ lake_var.activenod * sizeof(double) // density
 		+ sizeof(int) // mixmax
-		+ sizeof(int) // activenod
+		+ sizeof(int) // numnod
 		+ sizeof(double) // tempi
 		+ sizeof(double) // hice
 		+ sizeof(double) // fraci
@@ -308,25 +310,25 @@ void write_model_state(dist_prcp_struct    *prcp,
 #if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
-      fwrite( &lake_con.numnod, 1, sizeof(int), outfiles->statefile );
+      fwrite( &lake_var.activenod, 1, sizeof(int), outfiles->statefile );
       fwrite( &lake_var.volume, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.ldepth, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.sarea, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.dz, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.surfdz, 1, sizeof(double), outfiles->statefile );
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fwrite( &lake_var.surface[node], 1, sizeof(double), outfiles->statefile );
       }
-      fwrite( &lake_var.tp_in, 1, sizeof(double), outfiles->statefile );
+      fwrite( &lake_var.temp[0], 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.tempavg, 1, sizeof(double), outfiles->statefile );
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fwrite( &lake_var.temp[node], 1, sizeof(double), outfiles->statefile );
       }
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fwrite( &lake_var.density[node], 1, sizeof(double), outfiles->statefile );
       }
       fwrite( &lake_var.mixmax, 1, sizeof(int), outfiles->statefile );
-      fwrite( &lake_var.activenod, 1, sizeof(int), outfiles->statefile );
+      fwrite( &lake_con.numnod, 1, sizeof(int), outfiles->statefile );
       fwrite( &lake_var.tempi, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.hice, 1, sizeof(double), outfiles->statefile );
       fwrite( &lake_var.fraci, 1, sizeof(double), outfiles->statefile );
@@ -334,25 +336,25 @@ void write_model_state(dist_prcp_struct    *prcp,
       fwrite( &lake_var.sdepth, 1, sizeof(double), outfiles->statefile );
     }
     else {
-      fprintf( outfiles->statefile, "%d", lake_con.numnod );
+      fprintf( outfiles->statefile, "%d", lake_var.activenod );
       fprintf( outfiles->statefile, " %f", lake_var.volume );
       fprintf( outfiles->statefile, " %f", lake_var.ldepth );
       fprintf( outfiles->statefile, " %f", lake_var.sarea );
       fprintf( outfiles->statefile, " %f", lake_var.dz );
       fprintf( outfiles->statefile, " %f", lake_var.surfdz );
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fprintf( outfiles->statefile, " %f", lake_var.surface[node] );
       }
-      fprintf( outfiles->statefile, " %f", lake_var.tp_in );
+      fprintf( outfiles->statefile, " %f", lake_var.temp[0]);
       fprintf( outfiles->statefile, " %f", lake_var.tempavg );
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fprintf( outfiles->statefile, " %f", lake_var.temp[node] );
       }
-      for ( node = 0; node < lake_con.numnod; node++ ) {
+      for ( node = 0; node < lake_var.activenod; node++ ) {
         fprintf( outfiles->statefile, " %f", lake_var.density[node] );
       }
       fprintf( outfiles->statefile, " %d", lake_var.mixmax );
-      fprintf( outfiles->statefile, " %d", lake_var.activenod );
+      fprintf( outfiles->statefile, " %d", lake_con.numnod );
       fprintf( outfiles->statefile, " %f", lake_var.tempi );
       fprintf( outfiles->statefile, " %f", lake_var.hice );
       fprintf( outfiles->statefile, " %f", lake_var.fraci );

@@ -498,6 +498,8 @@ Modified to read lake nodal variables for each of the active nodes. (JCA)
 
         Files affected:
         read_initial_model_state.c
+        write_model_state.c
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

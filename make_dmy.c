@@ -31,7 +31,7 @@ dmy_struct *make_dmy(global_param_struct *global)
            number of days in February was not reset to 28 after
 	   working out number of records and before working out
 	   the number of forcing file records to skip.      KAC
-
+  2006-02-07 Changed indexing of line 63 (if(endday...) by 1 GCT 
 **********************************************************************/
 {
   extern param_set_struct param_set;
@@ -60,7 +60,7 @@ dmy_struct *make_dmy(global_param_struct *global)
     endyear  = global->endyear;
     if(LEAPYR(endyear)) days[1] = 29;
     else days[1] = 28;
-    if(endday < days[global->endmonth-1]-1) endday++;
+    if(endday < days[global->endmonth-1]) endday++;
     else {
       endday = 1;
       endmonth++;

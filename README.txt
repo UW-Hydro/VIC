@@ -500,6 +500,16 @@ Modified to read lake nodal variables for each of the active nodes. (JCA)
         read_initial_model_state.c
         write_model_state.c
 
+Reverting from version 5.10 to 5.9 in surface_fluxes.c 
+
+        Files affected:
+        surface_fluxes.c
+
+        Energy balance errors had been introduced in the changes from 5.9 to 5.10.
+        This is an intermittent problem that appears to depend on versions of FreeBSD
+        when compiling with the optimization flag. This temporary reversion should
+        be okay as long as the time steps are sub-daily.  GCT
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

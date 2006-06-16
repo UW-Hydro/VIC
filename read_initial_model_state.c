@@ -185,7 +185,7 @@ soil_con->dp );
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Skip if areafrac < 0 */
-      if ( (*AreaFract)[band] < 0 ){
+      if ( soil_con->AreaFract[band] < 0 ){
         continue;
       }
       /* Read cell identification information */

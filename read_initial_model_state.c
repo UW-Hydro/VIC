@@ -47,7 +47,7 @@ void read_initial_model_state(FILE                *statefile,
   11-May-04 (Port from 4.1.0) Added check to verify that the sum of
 	    the defined nodes equals the damping depth.		TJB
   2005-11-21 (Port from 4.1.0) Replaced %i w/ %d in scanf statements. GCT
-
+  2006-06-16 Skip reading snowband if AreaFract[band] <0         GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -184,7 +184,10 @@ soil_con->dp );
 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      
+      /* Skip if areafrac < 0 */
+      if ( (*AreaFract)[band] < 0 ){
+        continue;
+      }
       /* Read cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	if ( fread( &iveg, 1, sizeof(int), statefile) != sizeof(int) ) 

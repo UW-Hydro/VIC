@@ -138,7 +138,7 @@ void write_model_state(dist_prcp_struct    *prcp,
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Skip if areafract < 0 */
-      if ( ( *AreaFract)[band] < 0 ) {
+      if ( soil_con->AreaFract[band] < 0 ) {
         continue;
       }
       /* Write cell identification information */

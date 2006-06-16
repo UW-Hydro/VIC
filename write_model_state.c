@@ -44,6 +44,7 @@ void write_model_state(dist_prcp_struct    *prcp,
             state file to account for bare soil values (extra veg class 
             per grid cell). Without this fix, attempts to skip grid 
             cells fail.                                          GCT
+  2006-06-16 Skip writing snowband if AreaFract[band] <0         GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -136,7 +137,10 @@ void write_model_state(dist_prcp_struct    *prcp,
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      
+      /* Skip if areafract < 0 */
+      if ( ( *AreaFract)[band] < 0 ) {
+        continue;
+      }
       /* Write cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	fwrite( &veg, 1, sizeof(int), outfiles->statefile );

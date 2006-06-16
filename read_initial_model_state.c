@@ -60,6 +60,7 @@ void read_initial_model_state(FILE                *statefile,
   03-Nov-04 Now reads extra_veg from state file.		TJB
   2005-Apr-10 Fixed incorrect check on soil node depths.	TJB
   2005-01-10 modified to read lake nodal variables for each of the active nodes JCA
+  2006-06-16 Skip reading if areafract < 0 GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -231,7 +232,10 @@ void read_initial_model_state(FILE                *statefile,
 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      
+      /* Skip reading if areafract < 0 */
+      if ( soil_con->AreaFract[band] < 0 ) {
+        continue;
+      }
       /* Read cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	if ( fread( &iveg, 1, sizeof(int), statefile) != sizeof(int) ) 

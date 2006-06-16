@@ -249,6 +249,14 @@ Allow NO_FLUX in addition to NOFLUX in global.param.file
         inconsistent with other FLUX options. The change will allow users to
         enter either string.
 
+Skip reading/writing of snow band for areafract < 0 
+
+        Files affected:
+        read_initial_model_state.c
+        write_model_state.c
+
+        This will reduce the size of the statefile.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

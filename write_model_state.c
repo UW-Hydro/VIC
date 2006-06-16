@@ -55,6 +55,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   2005-12-07 STATE_FILE option is set in global file            GCT
   2005-01-10 writes temp[0] instead of tp_in for lake skin surface temperature JCA
   2005-01-10 modified to write lake nodal variables for each of the active nodes JCA
+  2006-06-16 Skip writing snow band if areafract < 0            GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -215,7 +216,10 @@ void write_model_state(dist_prcp_struct    *prcp,
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-
+      /* Skip writing if areafract < 0 */
+      if ( soil_con->AreaFract < 0 ) {
+        continue;
+      }
       /* Write cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	fwrite( &veg, 1, sizeof(int), outfiles->statefile );

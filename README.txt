@@ -510,6 +510,15 @@ Reverting from version 5.10 to 5.9 in surface_fluxes.c
         when compiling with the optimization flag. This temporary reversion should
         be okay as long as the time steps are sub-daily.  GCT
 
+Skip reading/writing of snow band for areafract < 0
+
+        Files affected:
+        read_initial_model_state.c
+        write_model_state.c
+
+        This will reduce the size of the statefile. GCT
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
 --------------------------------------------------------------------------------

@@ -510,6 +510,7 @@ Reverting from version 5.10 to 5.9 in surface_fluxes.c
         when compiling with the optimization flag. This temporary reversion should
         be okay as long as the time steps are sub-daily.  GCT
 
+
 Skip reading/writing of snow band for areafract < 0
 
         Files affected:
@@ -517,6 +518,20 @@ Skip reading/writing of snow band for areafract < 0
         write_model_state.c
 
         This will reduce the size of the statefile. GCT
+
+
+Lake model energy terms NaN for southern hemisphere lakes
+
+        Files affected:
+        lakes.eb.c
+
+        The computation of ks in the eddy() function was attempting to compute
+	  ks=6.6*pow(sin((double)lat*PI/180.),0.5)*pow(wind,-1.84);
+	however, in the southern hemisphere, lat is negative and ks evaluates
+	to NaN, causing lake temperatures to all become NaN.  This line has
+	been replaced by
+	  ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
+	This appears to fix the problem.	TJB
 
 
 --------------------------------------------------------------------------------

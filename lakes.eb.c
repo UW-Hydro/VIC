@@ -43,6 +43,8 @@ void lakemain(atmos_data_struct  *atmos,
 	    used in flux calculations.					TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
+  2006-Jul-18 Changed sin(lat) to sin(fabs(lat)) in ks computation so that
+	      southern hemisphere locations can be handled correctly.	TJB
 
   Parameters :
 
@@ -932,7 +934,7 @@ void eddy (int freezeflag, double wind, double *T, double *water_density,
        * value of the Prandtl number (Hostetler and Bartlein eq. 6 and 7).
        **********************************************************************/
       
-	ks=6.6*pow(sin((double)lat*PI/180.),0.5)*pow(wind,-1.84);
+	ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
 	ws=0.0012*wind;
 	Po=1.0;
 

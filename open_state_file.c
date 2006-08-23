@@ -19,6 +19,8 @@ FILE *open_state_file(global_param_struct *global,
   06-03-03 modified to handle both ASCII and BINARY state files.  KAC
   2005-11-29 SAVE_STATE is set in global param file, not in user_def.h GCT
   2005-12-06 Moved setting of statename to get_global_param     GCT
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -36,9 +38,9 @@ FILE *open_state_file(global_param_struct *global,
 
   /* Write save state date information */
   if ( options.BINARY_STATE_FILE ) {
-    fwrite( &global->stateyear, 1, sizeof(int), statefile );
-    fwrite( &global->statemonth, 1, sizeof(int), statefile );
-    fwrite( &global->stateday, 1, sizeof(int), statefile );
+    fwrite( &global->stateyear, sizeof(int), 1, statefile );
+    fwrite( &global->statemonth, sizeof(int), 1, statefile );
+    fwrite( &global->stateday, sizeof(int), 1, statefile );
   }
   else {
     fprintf(statefile,"%i %i %i\n", global->stateyear, 
@@ -47,8 +49,8 @@ FILE *open_state_file(global_param_struct *global,
 
   /* Write simulation flags */
   if ( options.BINARY_STATE_FILE ) {
-    fwrite( &Nlayer, 1, sizeof(int), statefile );
-    fwrite( &Nnodes, 1, sizeof(int), statefile );
+    fwrite( &Nlayer, sizeof(int), 1, statefile );
+    fwrite( &Nnodes, sizeof(int), 1, statefile );
   }
   else {
     fprintf(statefile,"%i %i\n", Nlayer, Nnodes);

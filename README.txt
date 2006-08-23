@@ -533,6 +533,19 @@ Lake model energy terms NaN for southern hemisphere lakes
 	  ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
 	This appears to fix the problem.	TJB
 
+Changed argument order in fread, fwrite statements.
+
+        Files affected:
+        check_state_file.c
+        open_state_file.c
+        read_atmos_data.c
+        read_initial_model_state.c
+        write_data.c
+        write_forcing_file.c
+        write_model_state.c
+
+        Statements had arguments with ...1, sizeof()....Those were changed to
+        ...sizeof(), 1, ...GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

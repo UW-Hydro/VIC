@@ -69,6 +69,8 @@ void write_data(out_data_struct *out_data,
                 for options.PRT_SNOW_BAND. Removed the following from
                 snowband output: net sw radiation, net lw, albedo,
                 latent heat flux, sensible heat flux, ground heat flux.  GCT
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 
 **********************************************************************/
 {
@@ -151,110 +153,110 @@ void write_data(out_data_struct *out_data,
   
   /***** Write Date and Time *****/
   tmp_usiptr[0] = (unsigned short int)dmy->year;
-  fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   tmp_cptr[0] = (char)dmy->month;
-  fwrite(tmp_cptr,1,sizeof(char),outfiles->fluxes);
+  fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
   tmp_cptr[0] = (char)dmy->day;
-  fwrite(tmp_cptr,1,sizeof(char),outfiles->fluxes);
+  fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
   if(dt<24) {
     tmp_cptr[0] = (char)dmy->hour;
-    fwrite(tmp_cptr,1,sizeof(char),outfiles->fluxes);
+    fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
   }
   
   /** water balance components **/
   
   /* precipitation */
   tmp_usiptr[0] = (unsigned short int)(out_data->prec * 100.);
-  fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   
   /* evaporation */
   tmp_siptr[0] = (short int)(out_data->evap * 100.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* runoff */
   tmp_fptr[0] = (float)out_data->runoff;
-  fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+  fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
   
   /* baseflow */
   tmp_fptr[0] = (float)out_data->baseflow;
-  fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+  fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
   
   /* liquid soil moisture */
   for(j=0;j<options.Nlayer;j++) {    
     tmp_usiptr[0] = (unsigned short int)(out_data->moist[j]*10.);
-    fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+    fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   }
   
   /* snow water equivalence */
   tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*10.);
-  fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   
   /** energy balance components **/
   
   /* net shortwave radiation */
   tmp_siptr[0] = (short int)(out_data->net_short*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* incoming longwave radiation */
   tmp_siptr[0] = (short int)(out_data->in_long*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* net radiation */
   tmp_siptr[0] = (short int)(out_data->r_net*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* latent heat flux */
   tmp_siptr[0] = (short int)((out_data->latent 
 			      + out_data->latent_sub[0])*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* sensible heat flux */
   tmp_siptr[0] = (short int)((out_data->sensible 
 			      + out_data->advected_sensible[0])*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* ground heat flux */
   tmp_siptr[0] = (short int)((out_data->grnd_flux + out_data->deltaH + out_data->fusion)*10.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* albedo */
   tmp_usiptr[0] = (unsigned short int)(out_data->albedo*10000.);
-  fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   
   /* radiative temperature of surface */
   tmp_siptr[0] = (short int)((out_data->rad_temp-KELVIN)*100.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* relative humidity */
   tmp_usiptr[0] = (unsigned short int)(out_data->rel_humid*100.);
-  fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
   
   /* air temperature */
   tmp_siptr[0] = (short int)(out_data->air_temp * 100.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* wind speed */
   tmp_siptr[0] = (short int)(out_data->wind * 100.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
   
   /* snow cover fraction */
   tmp_siptr[0] = (short int)(out_data->coverage[0] * 100.);
-  fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
 
   // blowing snow variables
   if(options.BLOWING) {
 
     /* sublimation due to blowing snow */
     tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+    fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
     /* snow surface sublimation */
     tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+    fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
     /* total snow sublimation */
     tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
-    fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+    fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
   }
   
@@ -264,15 +266,15 @@ void write_data(out_data_struct *out_data,
     /* total soil moisture content */
     for ( j = 0; j < options.Nlayer; j++ ) {    
       tmp_usiptr[0] = (unsigned short int)(out_data->ice[j]*10.);
-      fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
     }
     for ( fidx = 0; fidx < MAX_FRONTS; fidx++ ) {
       /* frost front depths */
       tmp_usiptr[0] = (unsigned short int)(out_data->fdepth[fidx]*100.);
-      fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
       /* thaw front depths */
       tmp_usiptr[0] = (unsigned short int)(out_data->tdepth[fidx]*100.);
-      fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
     }
   }
   
@@ -305,42 +307,42 @@ void write_data(out_data_struct *out_data,
 
     // year
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fdepth);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
 
     // month
     tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fdepth);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
 
     // day
     tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fdepth);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
 
     // hour
     tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fdepth);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
 
     for ( fidx = 0; fidx < MAX_FRONTS; fidx++ ) {
 
       // frost depth [fidx]
       tmp_fptr[0] = (float)out_data->fdepth[fidx];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->fdepth);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
 
       // thaw depth [fidx]
       tmp_fptr[0] = (float)out_data->tdepth[fidx];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->fdepth);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
     }
 
     for ( j = 0; j < options.Nlayer; j++ ) {
 
       // total soil moisture
       tmp_fptr[0] = (float)(out_data->ice[j] + out_data->moist[j]);
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->fdepth);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
 
     }
 
     // frozen fraction of ground surface
     tmp_fptr[0] = (float)(out_data->surf_frost_fract);
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fdepth);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
   }
   else if(options.FROZEN_SOIL) {
     /***** Write ASCII Frozen Soil Output File *****/
@@ -365,51 +367,51 @@ void write_data(out_data_struct *out_data,
 
     // year
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->lake);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->lake);
 
     // month
     tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->lake);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->lake);
 
     // day
     tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->lake);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->lake);
 
     // hour
     tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->lake);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->lake);
 
     // lake ice temperature
     tmp_fptr[0] = (float)out_data->lake_ice_temp;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake ice height
     tmp_fptr[0] = (float)out_data->lake_ice_height;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // fractional lake ice coverage
     tmp_fptr[0] = (float)out_data->lake_ice_fract;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake depth
     tmp_fptr[0] = (float)out_data->lake_depth;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake surface area
     tmp_fptr[0] = (float)out_data->lake_surf_area;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake volume
     tmp_fptr[0] = (float)out_data->lake_volume;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake surface temperature
     tmp_fptr[0] = (float)out_data->lake_surf_temp;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
     // lake evaporation
     tmp_fptr[0] = (float)out_data->evap_lake;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->lake);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->lake);
 
   }
   else if(options.LAKES) {
@@ -432,90 +434,90 @@ void write_data(out_data_struct *out_data,
 
     // year
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snow);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
 
     // month
     tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snow);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
 
     // day
     tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snow);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
 
     // hour
     tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snow);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
 
     // snow water equivalence
     tmp_fptr[0] = (float)out_data->swq[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snow depth
     tmp_fptr[0] = (float)out_data->snow_depth[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // intercepted snow
     tmp_fptr[0] = (float)out_data->snow_canopy[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // fractional snow coverage
     tmp_fptr[0] = (float)out_data->coverage[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // advection
     tmp_fptr[0] = (float)out_data->advection[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // change in snowpack cold content
     tmp_fptr[0] = (float)out_data->deltaCC[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snow heat flux
     tmp_fptr[0] = (float)out_data->snow_flux[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snowpack refreeze energy
     tmp_fptr[0] = (float)out_data->refreeze_energy[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snowpack melt energy
     tmp_fptr[0] = (float)out_data->melt_energy[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // advected sensible heat
     tmp_fptr[0] = (float)out_data->advected_sensible[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // latent heat of sublimation
     tmp_fptr[0] = (float)out_data->latent_sub[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snow surface temperature
     tmp_fptr[0] = (float)out_data->snow_surf_temp[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snow pack layer temperature
     tmp_fptr[0] = (float)out_data->snow_pack_temp[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // snow melt
     tmp_fptr[0] = (float)out_data->melt[0];
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->snow);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
 
     // blowing snow variables
     if(options.BLOWING) {
 
       /* sublimation due to blowing snow */
       tmp_siptr[0] = (short int)(out_data->sub_blowing * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+      fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
       /* snow surface sublimation */
       tmp_siptr[0] = (short int)(out_data->sub_surface * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+      fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
       /* total snow sublimation */
       tmp_siptr[0] = (short int)(out_data->sub_total * 100.);
-      fwrite(tmp_siptr,1,sizeof(short int),outfiles->snow);
+      fwrite(tmp_siptr,sizeof(short int), 1,outfiles->snow);
 
     }
   
@@ -548,77 +550,77 @@ void write_data(out_data_struct *out_data,
 
     // year
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snowband);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
 
     // month
     tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snowband);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
 
     // day
     tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snowband);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
 
     // hour
     tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->snowband);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
 
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
 
       // snow water equivalence
       tmp_fptr[0] = (float)out_data->swq[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snow depth
       tmp_fptr[0] = (float)out_data->snow_depth[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // intercepted snow
       tmp_fptr[0] = (float)out_data->snow_canopy[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // fractional snow coverage
       tmp_fptr[0] = (float)out_data->coverage[0];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
       
       // advection
       tmp_fptr[0] = (float)out_data->advection[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // change in snowpack cold content
       tmp_fptr[0] = (float)out_data->deltaCC[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snow heat flux
       tmp_fptr[0] = (float)out_data->snow_flux[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snowpack refreeze energy
       tmp_fptr[0] = (float)out_data->refreeze_energy[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snowpack melt energy
       tmp_fptr[0] = (float)out_data->melt_energy[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // advected sensible heat
       tmp_fptr[0] = (float)out_data->advected_sensible[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // latent heat of sublimation
       tmp_fptr[0] = (float)out_data->latent_sub[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snowpack surface layer temperature
       tmp_fptr[0] = (float)out_data->snow_surf_temp[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snowpack pack layer temperature
       tmp_fptr[0] = (float)out_data->snow_pack_temp[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
       // snowpack melt
       tmp_fptr[0] = (float)out_data->melt[band+1];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->snowband);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
 
     }
   }
@@ -649,128 +651,128 @@ void write_data(out_data_struct *out_data,
 
     // year
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fluxes);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
 
     // month
     tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fluxes);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
 
     // day
     tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fluxes);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
 
     // hour
     tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,1,sizeof(int),outfiles->fluxes);
+    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
     
     // precipitation
     tmp_fptr[0] = (float)out_data->prec;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
     
     // evaporation
     tmp_fptr[0] = (float)out_data->evap;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // runoff
     tmp_fptr[0] = (float)out_data->runoff;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
     
     // baseflow
     tmp_fptr[0] = (float)out_data->baseflow;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // Wdew
     tmp_fptr[0] = (float)out_data->Wdew;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     for ( j = 0; j < options.Nlayer; j++ ) {    
 
       // unfrozen soil moisture
       tmp_fptr[0] = (float)out_data->moist[j];
-      fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     }
 
     // radiative temperature
     tmp_fptr[0] = (float)out_data->rad_temp;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // net shortwave radiation
     tmp_fptr[0] = (float)out_data->net_short;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // net radiation
     tmp_fptr[0] = (float)out_data->r_net;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // latent heat
     tmp_fptr[0] = (float)out_data->latent;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // canopy evaporation
     tmp_fptr[0] = (float)out_data->evap_canop;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // vegetation transpiration
     tmp_fptr[0] = (float)out_data->evap_veg;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // bare soil evaporation
     tmp_fptr[0] = (float)out_data->evap_bare;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // canopy sublimation
     tmp_fptr[0] = (float)out_data->sub_canop;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // snowpack sublimation
 //    tmp_fptr[0] = (float)out_data->sub_snow[0];
     tmp_fptr[0] = (float)out_data->sub_total;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // sensible heat
     tmp_fptr[0] = (float)out_data->sensible;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // ground heat flux
     tmp_fptr[0] = (float)out_data->grnd_flux;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // heat storage
     tmp_fptr[0] = (float)out_data->deltaH;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // fusion
     tmp_fptr[0] = (float)out_data->fusion;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // aerodynamic resistance
     tmp_fptr[0] = (float)out_data->aero_resist;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // surface temperature
     tmp_fptr[0] = (float)out_data->surf_temp;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // albedo
     tmp_fptr[0] = (float)out_data->albedo;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // relative humidity
     tmp_fptr[0] = (float)out_data->rel_humid;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // incoming longwave
     tmp_fptr[0] = (float)out_data->in_long;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // air temperature
     tmp_fptr[0] = (float)out_data->air_temp;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
     // wind speed
     tmp_fptr[0] = (float)out_data->wind;
-    fwrite(tmp_fptr,1,sizeof(float),outfiles->fluxes);
+    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
 
   }
   else {
@@ -908,7 +910,7 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
 
     /* Energy Balance Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->eb);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->eb);
     // Data
     tmp_fptr[0] = out_data_alma->SWnet;
     tmp_fptr[1] = out_data_alma->LWnet;
@@ -920,11 +922,11 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
     tmp_fptr[7] = out_data_alma->Qa;
     tmp_fptr[8] = out_data_alma->DelSurfHeat;
     tmp_fptr[9] = out_data_alma->DelColdCont;
-    fwrite(tmp_fptr,10,sizeof(float),outfiles->eb);
+    fwrite(tmp_fptr,sizeof(float),10,outfiles->eb);
 
     /* Water Balance Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->wb);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->wb);
     // Data
     tmp_fptr[0] = out_data_alma->Snowf;
     tmp_fptr[1] = out_data_alma->Rainf;
@@ -936,11 +938,11 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
     tmp_fptr[7] = out_data_alma->DelSWE;
     tmp_fptr[8] = out_data_alma->DelSurfStor;
     tmp_fptr[9] = out_data_alma->DelIntercept;
-    fwrite(tmp_fptr,10,sizeof(float),outfiles->wb);
+    fwrite(tmp_fptr,sizeof(float),10,outfiles->wb);
 
     /* Surface State Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->sur);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->sur);
     // Data
     tmp_fptr[0] = out_data_alma->SnowT;
     tmp_fptr[1] = out_data_alma->VegT;
@@ -951,11 +953,11 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
     tmp_fptr[6] = out_data_alma->SWE;
     tmp_fptr[7] = out_data_alma->SWEVeg;
     tmp_fptr[8] = out_data_alma->SurfStor;
-    fwrite(tmp_fptr,9,sizeof(float),outfiles->sur);
+    fwrite(tmp_fptr,sizeof(float),9,outfiles->sur);
 
     /* Subsurface State Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->sub);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->sub);
     // Data
     pindex = 0;
     for (index=0; index<options.Nlayer; index++) {
@@ -974,11 +976,11 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
       tmp_fptr[pindex++] = out_data_alma->SMFrozFrac[index];
     }
     tmp_fptr[pindex] = out_data_alma->SoilWet;
-    fwrite(tmp_fptr,pindex+1,sizeof(float),outfiles->sub);
+    fwrite(tmp_fptr,pindex+sizeof(float), 1,outfiles->sub);
 
     /* Evaporation Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->eva);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->eva);
     // Data
     tmp_fptr[0] = out_data_alma->ECanop;
     tmp_fptr[1] = out_data_alma->TVeg;
@@ -989,11 +991,11 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
     tmp_fptr[6] = out_data_alma->SubSnow;
     tmp_fptr[7] = out_data_alma->SubSurf;
     tmp_fptr[8] = out_data_alma->ACond;
-    fwrite(tmp_fptr,9,sizeof(float),outfiles->eva);
+    fwrite(tmp_fptr,sizeof(float),9,outfiles->eva);
 
     /* Cold-Season Process Variables */
     // Time
-    fwrite(tmp_iptr,4,sizeof(int),outfiles->csp);
+    fwrite(tmp_iptr,sizeof(int),4,outfiles->csp);
     // Data
     pindex = 0;
     tmp_fptr[pindex++] = out_data_alma->SnowFrac;
@@ -1008,7 +1010,7 @@ void write_data_alma(out_data_alma_struct *out_data_alma,
     tmp_fptr[pindex++] = out_data_alma->SAlbedo;
     tmp_fptr[pindex++] = out_data_alma->SnowTProf;
     tmp_fptr[pindex] = out_data_alma->SnowDepth;
-    fwrite(tmp_fptr,pindex+1,sizeof(float),outfiles->csp);
+    fwrite(tmp_fptr,pindex+sizeof(float), 1,outfiles->csp);
 
     free((char *)tmp_iptr);
     free((char *)tmp_fptr);

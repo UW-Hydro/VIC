@@ -50,6 +50,8 @@ void read_atmos_data(FILE                 *infile,
 	    in condition checking whether forcing file contains
 	    enough records to cover the time range of the
 	    simulation.					TJB
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 		
   **********************************************************************/
 {

@@ -13,6 +13,8 @@ void write_forcing_file(atmos_data_struct *atmos,
 
   This routine writes the complete forcing data files for use in 
   future simulations.
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 **********************************************************************/
 {
   extern option_struct options;
@@ -29,28 +31,28 @@ void write_forcing_file(atmos_data_struct *atmos,
 	tmp_usiptr = (unsigned short int *)calloc(1,sizeof(unsigned short int));
 	/* precipitation * 40 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].prec[j]*40.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
 	/* air temperature * 100 */
 	tmp_siptr[0] = (short int)(atmos[rec].air_temp[j]*100.);
-	fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+	fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
 	/* shortwave * 50 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].shortwave[j]*50.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
 	/* longwave * 80 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].longwave[j]*80.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
 	/* density * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].density[j]*100.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
 	/* pressure * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].pressure[j]*100.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
 	/* vp * 100 */
 	tmp_siptr[0] = (short int)(atmos[rec].vp[j]*100.);
-	fwrite(tmp_siptr,1,sizeof(short int),outfiles->fluxes);
+	fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
 	/* wind * 100 */
 	tmp_usiptr[0] = (unsigned short int)(atmos[rec].wind[j]*100.);
-	fwrite(tmp_usiptr,1,sizeof(unsigned short int),outfiles->fluxes);   
+	fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);   
 
 	free((char *)tmp_siptr);
 	free((char *)tmp_usiptr);

@@ -45,6 +45,8 @@ void write_model_state(dist_prcp_struct    *prcp,
             per grid cell). Without this fix, attempts to skip grid 
             cells fail.                                          GCT
   2006-06-16 Skip writing snowband if AreaFract[band] <0         GCT
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -78,9 +80,9 @@ void write_model_state(dist_prcp_struct    *prcp,
   
   /* write cell information */
   if ( options.BINARY_STATE_FILE ) {
-    fwrite( &cellnum, 1, sizeof(int), outfiles->statefile );
-    fwrite( &Nveg, 1, sizeof(int), outfiles->statefile );
-    fwrite( &Nbands, 1, sizeof(int), outfiles->statefile );
+    fwrite( &cellnum, sizeof(int), 1, outfiles->statefile );
+    fwrite( &Nveg, sizeof(int), 1, outfiles->statefile );
+    fwrite( &Nbands, sizeof(int), 1, outfiles->statefile );
   }
   else {
     fprintf( outfiles->statefile, "%i %i %i", cellnum, Nveg, Nbands );
@@ -102,14 +104,14 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
-    fwrite( &Nbytes, 1, sizeof(int), outfiles->statefile );
+    fwrite( &Nbytes, sizeof(int), 1, outfiles->statefile );
   }
 
   /* Write soil thermal node depths */
   Nsum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->dz_node[nidx], 1, sizeof(double), 
+      fwrite( &soil_con->dz_node[nidx], sizeof(double), 1, 
 	      outfiles->statefile );
     else
       fprintf( outfiles->statefile, " %f", soil_con->dz_node[nidx] );
@@ -119,8 +121,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 
   // Store distributed precipitation variables
   if ( options.BINARY_STATE_FILE ) {
-    fwrite( &STILL_STORM, 1, sizeof(char), outfiles->statefile );
-    fwrite( &DRY_TIME, 1, sizeof(int), outfiles->statefile );
+    fwrite( &STILL_STORM, sizeof(char), 1, outfiles->statefile );
+    fwrite( &DRY_TIME, sizeof(int), 1, outfiles->statefile );
   }
   else {
     fprintf( outfiles->statefile, "%i %i\n", STILL_STORM, DRY_TIME );
@@ -131,7 +133,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 
     // Store distributed precipitation fraction
     if ( options.BINARY_STATE_FILE )
-      fwrite( &prcp->mu[veg], 1, sizeof(double), outfiles->statefile );
+      fwrite( &prcp->mu[veg], sizeof(double), 1, outfiles->statefile );
     else
       fprintf( outfiles->statefile, "%f\n", prcp->mu[veg] );
 
@@ -143,8 +145,8 @@ void write_model_state(dist_prcp_struct    *prcp,
       }
       /* Write cell identification information */
       if ( options.BINARY_STATE_FILE ) {
-	fwrite( &veg, 1, sizeof(int), outfiles->statefile );
-	fwrite( &band, 1, sizeof(int), outfiles->statefile );
+	fwrite( &veg, sizeof(int), 1, outfiles->statefile );
+	fwrite( &band, sizeof(int), 1, outfiles->statefile );
       }
       else {
 	fprintf( outfiles->statefile, "%i %i", veg, band );
@@ -157,7 +159,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  tmpval = cell[dist][veg][band].layer[lidx].moist;
 	  if ( options.BINARY_STATE_FILE )
-	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	    fwrite( &tmpval, sizeof(double), 1, outfiles->statefile );
 	  else
 	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
@@ -166,7 +168,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  tmpval = cell[dist][veg][band].layer[lidx].ice;
 	  if ( options.BINARY_STATE_FILE )
-	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	    fwrite( &tmpval, sizeof(double), 1, outfiles->statefile );
 	  else
 	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
@@ -175,7 +177,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	if ( veg < Nveg ) {
 	  tmpval = veg_var[dist][veg][band].Wdew;
 	  if ( options.BINARY_STATE_FILE )
-	    fwrite( &tmpval, 1, sizeof(double), outfiles->statefile );
+	    fwrite( &tmpval, sizeof(double), 1, outfiles->statefile );
 	  else
 	    fprintf( outfiles->statefile, " %f", tmpval );
 	}
@@ -183,17 +185,17 @@ void write_model_state(dist_prcp_struct    *prcp,
       
       /* Write snow data */
       if ( options.BINARY_STATE_FILE ) {
-	fwrite( &snow[veg][band].last_snow, 1, sizeof(int), outfiles->statefile );
-	fwrite( &snow[veg][band].MELTING, 1, sizeof(char), outfiles->statefile );
-	fwrite( &snow[veg][band].coverage, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].swq, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].surf_temp, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].surf_water, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].pack_temp, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].pack_water, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].density, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].coldcontent, 1, sizeof(double), outfiles->statefile );
-	fwrite( &snow[veg][band].snow_canopy, 1, sizeof(double), outfiles->statefile );
+	fwrite( &snow[veg][band].last_snow, sizeof(int), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].MELTING, sizeof(char), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].coverage, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].swq, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].surf_temp, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].surf_water, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].pack_temp, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].pack_water, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].density, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].coldcontent, sizeof(double), 1, outfiles->statefile );
+	fwrite( &snow[veg][band].snow_canopy, sizeof(double), 1, outfiles->statefile );
       }
       else {
 	fprintf( outfiles->statefile, " %i %i %f %f %f %f %f %f %f %f %f", 
@@ -208,7 +210,7 @@ void write_model_state(dist_prcp_struct    *prcp,
       /* Write soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) 
 	if ( options.BINARY_STATE_FILE )
-	  fwrite( &energy[veg][band].T[nidx], 1, sizeof(double), 
+	  fwrite( &energy[veg][band].T[nidx], sizeof(double), 1, 
 		  outfiles->statefile );
 	else
 	  fprintf( outfiles->statefile, " %f", energy[veg][band].T[nidx] );

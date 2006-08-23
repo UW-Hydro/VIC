@@ -34,6 +34,8 @@ FILE *check_state_file(char                *init_state,
 	    means that now you can start your simulation at a date
 	    other than the date when the state file was saved.	TJB
   2005-11-21 Replaced %i w/ %d in sscanf statement. (Port from 4.1.0) GCT
+  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
+             to ...sizeof, 1,... GCT
 
 *********************************************************************/
 {
@@ -58,9 +60,9 @@ FILE *check_state_file(char                *init_state,
 
   /* Check state date information */
   if ( options.BINARY_STATE_FILE ) {
-    fread( &startyear, 1, sizeof(int), statefile );
-    fread( &startmonth, 1, sizeof(int), statefile );
-    fread( &startday, 1, sizeof(int), statefile );
+    fread( &startyear, sizeof(int), 1, statefile );
+    fread( &startmonth, sizeof(int), 1, statefile );
+    fread( &startday, sizeof(int), 1, statefile );
   }
   else {
     fscanf(statefile,"%d %d %d\n", &startyear, &startmonth, &startday );
@@ -68,8 +70,8 @@ FILE *check_state_file(char                *init_state,
 
   /* Check simulation options */
   if ( options.BINARY_STATE_FILE ) {
-    fread( &tmp_Nlayer, 1, sizeof(int), statefile );
-    fread( &tmp_Nnodes, 1, sizeof(int), statefile );
+    fread( &tmp_Nlayer, sizeof(int), 1, statefile );
+    fread( &tmp_Nnodes, sizeof(int), 1, statefile );
   }
   else {
     fscanf(statefile,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);

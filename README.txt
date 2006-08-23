@@ -257,6 +257,20 @@ Skip reading/writing of snow band for areafract < 0
 
         This will reduce the size of the statefile.
 
+Changed argument order in fread, fwrite statements.
+
+        Files affected:
+        check_state_file.c
+        open_state_file.c
+        read_atmos_data.c
+        read_initial_model_state.c
+        write_data.c
+        write_forcing_file.c
+        write_model_state.c
+
+        Statements had arguments with ...1, sizeof()....Those were changed to
+        ...sizeof(), 1, ...GCT
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

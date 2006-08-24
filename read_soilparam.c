@@ -63,7 +63,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 if model grid cell is not read.                 KAC
   xx-xx-01      Modified to read in spatial snow and frost 
                 parameters.                                     KAC
-  11-18-02      Modified to read Bart's new Arno parameters.    JA
+  11-18-02      Modified to read Bart's new Arno parameters.    IHA
   10-May-04     Replaced rint(something) with (float)(int)(something + 0.5)
 		to handle rounding without resorting to rint().	TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)

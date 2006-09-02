@@ -2,7 +2,7 @@
  * $Id$
  */
 /***** Version Information *****/
-#define VERSION		"VIC Release 4.0.4"
+#define VERSION		"VIC Release 4.0.6"
 
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -81,6 +81,10 @@
 #define RAIN 0
 #define SNOW 1
 #endif
+
+/***** Baseflow parametrizations *****/
+#define ARNO        0
+#define NIJSSEN2001 1
 
 #define min(a,b) (a < b) ? a : b
 #define max(a,b) (a > b) ? a : b
@@ -204,7 +208,7 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
-  char   NIJSSEN2001_BASEFLOW;    /* FALSE: read Ds, Dm, Ws, c; TRUE: read d1, d2, d3, d4 */
+  char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
 				from soil file and used in calculating treeline */

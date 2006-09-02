@@ -48,6 +48,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
   2005-11-23 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in 
              global.param.file  GCT
+  2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+
 **********************************************************************/
 {
   extern option_struct    options;
@@ -267,15 +269,27 @@ global_param_struct get_global_param(filenames_struct *names,
         else options.MOISTFRACT = FALSE;
       }
       else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
-        fprintf(stderr,"WARNING: Please change \"ARNO_PARAMS\" to \"NIJSSEN2001_BASEFLOW\" in your global parameter file\n");
-        sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
-        else options.NIJSSEN2001_BASEFLOW = FALSE;
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          nrerror("Please change \"ARNO_PARAMS  TRUE\" to \"BASEFLOW  NIJSSEN2001\" in your global parameter file.");
+        }
+        else {
+          nrerror("Please change \"ARNO_PARAMS  FALSE\" to \"BASEFLOW  ARNO\" in your global parameter file.");
+        }
       }
       else if (strcasecmp("NIJSSEN2001_BASEFLOW", optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          nrerror("Please change \"NIJSSEN2001_BASEFLOW  TRUE\" to \"BASEFLOW  NIJSSEN2001\" in your global parameter file.");
+        }
+        else {
+          nrerror("Please change \"NIJSSEN2001_BASEFLOW  FALSE\" to \"BASEFLOW  ARNO\" in your global parameter file.");
+        }
+      }
+      else if (strcasecmp("BASEFLOW", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.NIJSSEN2001_BASEFLOW=TRUE;
-        else options.NIJSSEN2001_BASEFLOW = FALSE;
+        if(strcasecmp("NIJSSEN2001",flgstr)==0) options.BASEFLOW=NIJSSEN2001;
+        else options.BASEFLOW = ARNO;
       }
       else if(strcasecmp("INIT_STATE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

@@ -191,29 +191,29 @@ Replace %i with %d in scanf statements.
         "08" to be interpreted as octal rather than decimal.  These
         instances of %i have been replaced with %d.
 
-ARNO_PARAMS global parameter option changed to NIJSSEN2001_BASEFLOW
+ARNO_PARAMS global parameter option changed to BASEFLOW
 
         Files affected:
         display_current_settings.c
         get_global_param.c
+        global.param.sample
         initialize_global.c
         read_soilparam.c
         read_soilparam_arc.c
         vicNl_def.h
 
         Changed the name of the ARNO_PARAMS global parameter option to
-        NIJSSEN2001_BASEFLOW.  The meaning of the ARNO_PARAMS option
-        was actually opposite to its name: when ARNO_PARAMS was FALSE,
-        VIC would interpret the first four parameters in the soil
-        parameter file to be the standard ARNO soil parameters Ds,
-        Dsmax, Ws, and c, while when ARNO_PARAMS was TRUE, VIC would
-        interpret the first four parameters to be d1, d2, d3, and d4,
-        the soil parameters used in Nijssen et al. (2001).  The new
-        name for this option more accurately reflects its meaning:
-        when NIJSSEN2001_BASEFLOW is TRUE, VIC assumes the soil
-        parameter file contains d1, d2, d3, and d4.  When
-        NIJSSEN2001_BASEFLOW is FALSE, VIC assumes the soil parameter
-        file contains Ds, Dsmax, Ws, and c.
+        BASEFLOW.  The meaning of the ARNO_PARAMS option was actually
+        opposite to its name: when ARNO_PARAMS was FALSE, VIC would
+        interpret the first four parameters in the soil parameter file
+        to be the standard ARNO soil parameters Ds, Dsmax, Ws, and c,
+        while when ARNO_PARAMS was TRUE, VIC would interpret the first
+        four parameters to be d1, d2, d3, and d4, the soil parameters
+        used in Nijssen et al. (2001).  The new option now can take
+        values of "ARNO" and "NIJSSEN2001".  When BASEFLOW == NIJSSEN2001,
+        VIC assumes the soil parameter file contains d1, d2, d3, and d4.
+        When BASEFLOW == ARNO, VIC assumes the soil parameter file
+        contains Ds, Dsmax, Ws, and c.
 
 Aerodynamic resistance not correctly aggregated for output
 
@@ -248,28 +248,6 @@ Allow NO_FLUX in addition to NOFLUX in global.param.file
         The option NOFLUX has a syntax (ie, the missing underscore) that is
         inconsistent with other FLUX options. The change will allow users to
         enter either string.
-
-Skip reading/writing of snow band for areafract < 0 
-
-        Files affected:
-        read_initial_model_state.c
-        write_model_state.c
-
-        This will reduce the size of the statefile.
-
-Changed argument order in fread, fwrite statements.
-
-        Files affected:
-        check_state_file.c
-        open_state_file.c
-        read_atmos_data.c
-        read_initial_model_state.c
-        write_data.c
-        write_forcing_file.c
-        write_model_state.c
-
-        Statements had arguments with ...1, sizeof()....Those were changed to
-        ...sizeof(), 1, ...GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

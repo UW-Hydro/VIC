@@ -80,6 +80,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		if INIT_STATE = FALSE.				TJB
   2005-11-21    (Port from 4.1.0) Replace %i w/ %d in scanf statements. GCT
   2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
+  2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -289,10 +291,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
 
     /*************************************************
-      If NIJSSEN2001_BASEFLOW = TRUE then convert ARNO baseflow
+      If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
       parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
     *************************************************/
-    if(options.NIJSSEN2001_BASEFLOW) {
+    if(options.BASEFLOW == NIJSSEN2001) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

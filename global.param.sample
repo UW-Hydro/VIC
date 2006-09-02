@@ -1,5 +1,6 @@
 #######################################################################
 # VIC Model Parameters - 4.0.x
+# RCS ID $Id$
 #######################################################################
 
 #######################################################################
@@ -77,7 +78,7 @@ MEASURE_H       2.0     # height of humidity measurement (m)
 NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes 
 SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
-NIJSSEN2001_BASEFLOW	FALSE	# TRUE = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001); FALSE = columns 5-8 are the standard VIC baseflow parameters
+BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 GLOBAL_LAI 	TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file

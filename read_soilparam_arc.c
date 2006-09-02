@@ -104,6 +104,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   07-Jul-04	Validation of initial soil moisture is only performed
 		if INIT_STATE = FALSE.				TJB
   2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
+  2006-Jan-22   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
 
 **********************************************************************/
 {
@@ -357,10 +358,10 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     }
 
     /*************************************************
-    if NIJSSEN2001_BASEFLOW == TRUE then convert the baseflow
+    if BASEFLOW == ARNO then convert the baseflow
     parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
     *************************************************/
-    if(options.NIJSSEN2001_BASEFLOW) {
+    if(options.BASEFLOW == ARNO) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

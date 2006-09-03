@@ -215,6 +215,7 @@ ARNO_PARAMS global parameter option changed to BASEFLOW
         When BASEFLOW == ARNO, VIC assumes the soil parameter file
         contains Ds, Dsmax, Ws, and c.
 
+
 Aerodynamic resistance not correctly aggregated for output
 
         Files affected:
@@ -248,6 +249,28 @@ Allow NO_FLUX in addition to NOFLUX in global.param.file
         The option NOFLUX has a syntax (ie, the missing underscore) that is
         inconsistent with other FLUX options. The change will allow users to
         enter either string.
+
+Skip reading/writing of snow band for areafract < 0 
+
+        Files affected:
+        read_initial_model_state.c
+        write_model_state.c
+
+        This will reduce the size of the statefile.
+
+Changed argument order in fread, fwrite statements.
+
+        Files affected:
+        check_state_file.c
+        open_state_file.c
+        read_atmos_data.c
+        read_initial_model_state.c
+        write_data.c
+        write_forcing_file.c
+        write_model_state.c
+
+        Statements had arguments with ...1, sizeof()....Those were changed to
+        ...sizeof(), 1, ...GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

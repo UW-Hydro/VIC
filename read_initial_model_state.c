@@ -63,6 +63,7 @@ void read_initial_model_state(FILE                *statefile,
   2006-06-16 Skip reading if areafract < 0 GCT
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-09-07 Changed "Skip reading if areafract < 0" to "<=0". GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -234,8 +235,8 @@ void read_initial_model_state(FILE                *statefile,
 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      /* Skip reading if areafract < 0 */
-      if ( soil_con->AreaFract[band] < 0 ) {
+      /* Skip reading if areafract <= 0 */
+      if ( soil_con->AreaFract[band] <= 0 ) {
         continue;
       }
       /* Read cell identification information */

@@ -272,6 +272,28 @@ Changed argument order in fread, fwrite statements.
         Statements had arguments with ...1, sizeof()....Those were changed to
         ...sizeof(), 1, ...GCT
 
+OUTPUT_FORCE option does not close output files properly
+
+        Files affected:
+        check_files.c
+        close_files.c
+        get_global_param.c
+        initialize_atmos.c
+        read_soilparam.c
+        read_soilparam_arc.c
+        vicNl.c
+
+        The OUTPUT_FORCE compile-time option excluded the code that closed the
+        output files, causing the output disaggregated forcing files to end
+        abruptly before the end of the simulation period (due to the final
+        chunk of the buffer not being flushed).  In addition, the OUTPUT_FORCE
+        option included the validation code for the entire soil parameter
+        file, whose validation is not necessary for this option (and can prevent
+        this option from working.  This fix remedies these problems, by
+        including the necessary file-closing code and excluding the unnecessary
+        soil-parameter-file-checking code.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

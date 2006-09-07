@@ -79,6 +79,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    function.						TJB
   16-Jun-04 Modified to pass avgJulyAirTemp argument to
 	    compute_treeline().					TJB
+  2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option. TJB
 
 **********************************************************************/
 {
@@ -698,6 +699,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
+#if !OUTPUT_FORCE
+
   // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
   // specifically been turned off for this cell (by supplying avgJulyAirTemp
   // and setting it to -999), calculate which snowbands are above the
@@ -710,10 +713,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
-#if OUTPUT_FORCE
+#else
+
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
   // forcing data array is dumped into a new set of files.
   write_forcing_file(atmos, global_param.nrecs, outfiles);
-#endif /* OUTPUT_FORCE */
+
+#endif /* !OUTPUT_FORCE */
 
 }

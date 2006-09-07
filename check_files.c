@@ -16,6 +16,7 @@ void check_files(infiles_struct   *infp,
 	    soil file.  If there are 54 fields, assume that the
 	    final field is avgJulyAirTemp, and set JULY_TAVG_SUPPLIED
 	    to TRUE.						TJB
+  2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
 **********************************************************************/
 {
   extern option_struct  options;
@@ -26,6 +27,7 @@ void check_files(infiles_struct   *infp,
   int nextchar;
 
   infp->soilparam   = open_file(fnames->soil, "r");
+#if !OUTPUT_FORCE
   if (!options.ARC_SOIL) {
     /* count number of fields in first line of file */
     while ( (nextchar = fgetc(infp->soilparam)) != EOF
@@ -54,6 +56,7 @@ void check_files(infiles_struct   *infp,
   infp->vegparam    = open_file(fnames->veg, "r");
   if(options.SNOW_BAND>1)
     infp->snowband    = open_file(fnames->snow_band, "r");
+#endif /* !OUTPUT_FORCE */
 }
 
 

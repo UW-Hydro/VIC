@@ -17,6 +17,7 @@ void close_files(infiles_struct   *inf,
   7-19-96  Files are now gzipped when they are closed.  This
 	   was added to save space when using large volumes
 	   of data.						KAC
+  2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
 
 **********************************************************************/
 {
@@ -40,13 +41,27 @@ void close_files(infiles_struct   *inf,
     Close Output Files
     *******************/
 
+#if OUTPUT_FORCE
+
+  /** Output Forcing File **/
+  fclose(outf->fluxes);
+  if(options.COMPRESS) compress_files(fnames->fluxes);
+
+#endif /* OUTPUT_FORCE */
+
+#if !OUTPUT_FORCE
+
+#if LDAS_OUTPUT || OPTIMIZE
+
   /** Energy and Moisture Fluxes Output File **/
   fclose(outf->fluxes);
   if(options.COMPRESS) compress_files(fnames->fluxes);
 
-#if !LDAS_OUTPUT && !OPTIMIZE
+#else /* LDAS_OUTPUT || OPTIMIZE */
 
-  /** These output files are not used when using LDAS binary format **/
+  /** Energy and Moisture Fluxes Output File **/
+  fclose(outf->fluxes);
+  if(options.COMPRESS) compress_files(fnames->fluxes);
 
   /** Frozen Soils Output File **/
   if(options.FROZEN_SOIL) {
@@ -63,7 +78,7 @@ void close_files(infiles_struct   *inf,
     if(options.COMPRESS) compress_files(fnames->snowband);
   }
 
-#endif
+#endif /* LDAS_OUTPUT || OPTIMIZE */
 
   /*******************************
     Close All Used Debugging Files
@@ -91,6 +106,7 @@ void close_files(infiles_struct   *inf,
   if(debug.DEBUG || debug.PRT_GRID) {
     fclose(debug.fg_grid);
   }
-#endif
+#endif /* LINK_DEBUG */
+#endif /* !OUTPUT_FORCE */
 
 }

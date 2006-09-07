@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 	    initialize_atmos().					TJB
   2005-11-09 (Port from 4.1.0) Updated arglist for make_dist_prcp(), 
             as part of fix for QUICK_FLUX state file compatibility. GCT
+  2006-Sep-01 (Port from 4.1.0) OUTPUT_FORCE option now calls close_files(). TJB
 
 **********************************************************************/
 {
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
   /** Check and Open Files **/
   check_files(&infiles, &filenames);
 
+#if !OUTPUT_FORCE
+
   /** Check and Open Debugging Files **/
 #if LINK_DEBUG
   open_debug();
@@ -112,6 +115,8 @@ int main(int argc, char *argv[])
 
   /** Read Vegetation Library File **/
   veg_lib = read_veglib(infiles.veglib,&Nveg_type);
+
+#endif // !OUTPUT_FORCE
 
   /** Initialize Parameters **/
   if(options.DIST_PRCP) Ndist = 2;
@@ -124,18 +129,19 @@ int main(int argc, char *argv[])
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
 
+  startrec = 0;
+#if !OUTPUT_FORCE
+  if ( options.INIT_STATE ) 
+    infiles.statefile = check_state_file(filenames.init_state, dmy, 
+					 &global_param, options.Nlayer, 
+					 options.Nnode, &startrec);
+
   /** open state file if model state is to be saved **/
   if ( options.SAVE_STATE  && strcmp( global_param.statename, "NONE" ) != 0 ) 
     outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
 					 options.Nnode);
   else outfiles.statefile = NULL;
-
-  if ( options.INIT_STATE ) 
-    infiles.statefile = check_state_file(filenames.init_state, dmy, 
-					 &global_param, options.Nlayer, 
-					 options.Nnode, &startrec);
-  else
-    startrec = 0;
+#endif // !OUTPUT_FORCE
 
   /************************************
     Run Model for all Active Grid Cells
@@ -166,7 +172,6 @@ int main(int argc, char *argv[])
       if(debug.PRT_SOIL) write_soilparam(&soil_con); 
 #endif
 
-#if !OUTPUT_FORCE
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
       if(options.FROZEN_SOIL) {
@@ -186,6 +191,8 @@ int main(int argc, char *argv[])
 
       NEWCELL=TRUE;
       cellnum++;
+
+#if !OUTPUT_FORCE
 
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
@@ -210,6 +217,9 @@ int main(int argc, char *argv[])
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
 
+#endif /* !OUTPUT_FORCE */
+
+
       /**************************************************
          Initialize Meteological Forcing Values That
          Have not Been Specifically Set
@@ -218,7 +228,6 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
-#endif /* !OUTPUT_FORCE */
 
       initialize_atmos(atmos, dmy, infiles.forcing, 
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
@@ -232,6 +241,7 @@ int main(int argc, char *argv[])
                        soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
       
+#if !OUTPUT_FORCE
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 #endif
@@ -240,7 +250,6 @@ int main(int argc, char *argv[])
         Initialize Energy Balance and Snow Variables 
       **************************************************/
 
-#if !OUTPUT_FORCE
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
@@ -311,7 +320,11 @@ int main(int argc, char *argv[])
 
       }	/* End Rec Loop */
 
+#endif /* !OUTPUT_FORCE */
+
       close_files(&infiles,&outfiles,&builtnames); 
+
+#if !OUTPUT_FORCE
 
 #if QUICK_FS
       if(options.FROZEN_SOIL) {
@@ -333,10 +346,10 @@ int main(int argc, char *argv[])
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
       free((char *)soil_con.AboveTreeLine);
-#endif /* !OUTPUT_FORCE */
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);
       free((char*)soil_con.layer_node_fract);
+#endif /* !OUTPUT_FORCE */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
 

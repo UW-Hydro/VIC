@@ -80,8 +80,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		if INIT_STATE = FALSE.				TJB
   2005-11-21    (Port from 4.1.0) Replace %i w/ %d in scanf statements. GCT
   2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
-  2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
-
+  2006-Jan-22   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Sep-01   (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -137,10 +137,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* read layer initial moisture */
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam, "%lf", &temp.init_moist[layer]);
+#if !OUTPUT_FORCE
       if(temp.init_moist[layer] < 0.) {
 	sprintf(ErrStr,"ERROR: Initial moisture for layer %d cannot be negative (%f)",layer,temp.init_moist[layer]);
 	nrerror(ErrStr);
       }
+#endif /* !OUTPUT_FORCE */
     }
     
     /* read cell mean elevation */
@@ -149,27 +151,33 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* soil layer thicknesses */
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam, "%lf", &temp.depth[layer]);
+#if !OUTPUT_FORCE
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
 	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
 		layer,temp.depth[layer],MINSOILDEPTH);
 	nrerror(ErrStr);
       }
+#endif /* !OUTPUT_FORCE */
     }
+#if !OUTPUT_FORCE
     if(options.GRND_FLUX && (temp.depth[0] > temp.depth[1])) {
       sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
 	      0,temp.depth[0],1,temp.depth[1]);
       nrerror(ErrStr);
     }
+#endif /* !OUTPUT_FORCE */
     
     /* read average soil temperature */
     fscanf(soilparam, "%lf", &temp.avg_temp);
+#if !OUTPUT_FORCE
     if(options.FULL_ENERGY && (temp.avg_temp>100. || temp.avg_temp<-50)) {
       fprintf(stderr,"Need valid average soil temperature in degrees C to run");
       fprintf(stderr," Full Energy model, %f is not acceptable.\n",
 	      temp.avg_temp);
       exit(0);
     }
+#endif /* !OUTPUT_FORCE */
     
     /* read soil damping depth */
     fscanf(soilparam, "%lf", &temp.dp);
@@ -181,6 +189,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* read layer quartz content */
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam, "%lf", &temp.quartz[layer]);
+#if !OUTPUT_FORCE
       if(options.FULL_ENERGY 
 	 && (temp.quartz[layer] > 1. || temp.quartz[layer] < 0)) {
 	fprintf(stderr,"Need valid quartz content as a fraction to run");
@@ -188,6 +197,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		temp.quartz[layer]);
 	exit(0);
       }
+#endif /* !OUTPUT_FORCE */
     }
     
     /* read layer bulk density */
@@ -197,8 +207,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* read layer soil density */
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam, "%lf", &temp.soil_density[layer]);
+#if !OUTPUT_FORCE
       if(temp.bulk_density[layer]>=temp.soil_density[layer])
 	nrerror("Layer bulk density must be less then soil density");
+#endif /* !OUTPUT_FORCE */
     }
     
     /* read cell gmt offset */
@@ -234,6 +246,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       fscanf(soilparam, "%lf", &temp.avgJulyAirTemp);
     }
 
+#if !OUTPUT_FORCE
     /*******************************************
       Compute Soil Layer Properties
     *******************************************/
@@ -303,6 +316,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.Ws = temp.Ws/temp.max_moist[layer];
     }
 
+#endif /* !OUTPUT_FORCE */
 
 
     /*************************************************
@@ -310,10 +324,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
     *************************************************/
     temp.time_zone_lng = off_gmt * 360./24.;
 
+#if !OUTPUT_FORCE
+
     /* Allocate Layer - Node fraction array */
     temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
     for(layer=0;layer<=options.Nlayer;layer++) 
       temp.layer_node_fract[layer] = (float *)malloc(options.Nnode*sizeof(float));
+
+#endif /* !OUTPUT_FORCE */
 
   }
   else {

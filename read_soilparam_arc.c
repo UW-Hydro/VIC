@@ -105,6 +105,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		if INIT_STATE = FALSE.				TJB
   2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
   2006-Jan-22   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Sep-01   (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
 
 **********************************************************************/
 {
@@ -174,6 +175,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
 #endif
 
+#if !OUTPUT_FORCE
     /** Get Average Grid Cell Elevation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
@@ -495,6 +497,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       }
     }
 
+#endif /* !OUTPUT_FORCE */
+
+
     /*************************************************
       Determine Central Longitude of Current Time Zone 
       *************************************************/
@@ -503,11 +508,15 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   }
   else RUN[0] = 0;
 
+#if !OUTPUT_FORCE
+
   /* Allocate Layer - Node fraction array */
   temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
   for(layer=0;layer<=options.Nlayer;layer++) 
     temp.layer_node_fract[layer] 
       = (float *)malloc(options.Nnode*sizeof(float));
+
+#endif /* !OUTPUT_FORCE */
 
   return temp;
 } 

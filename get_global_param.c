@@ -48,7 +48,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
   2005-11-23 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in 
              global.param.file  GCT
-  2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
 
 **********************************************************************/
 {
@@ -488,6 +489,8 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceskip[1] = 0;
   }
 
+#if !OUTPUT_FORCE
+
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
   if(options.Nlayer > MAX_LAYERS) {
@@ -553,6 +556,12 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
   }
 
+#endif  // !OUTPUT_FORCE
+
+#if OUTPUT_FORCE
+  options.SNOW_STEP = global.dt;
+#endif  // OUTPUT_FORCE
+
   /* set NR and NF */
   if (global.dt < 24 && global.dt != options.SNOW_STEP)
     nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
@@ -564,6 +573,8 @@ global_param_struct get_global_param(filenames_struct *names,
     NR = 0;
   else
     NR = NF;
+
+#if !OUTPUT_FORCE
 
   /*********************************
     Output major options to stderr
@@ -623,6 +634,8 @@ global_param_struct get_global_param(filenames_struct *names,
   else 
     fprintf(stderr,"Debugging code has not been compiled.\n");
 #endif
+
+#endif // !OUTPUT_FORCE
 
   return global;
   

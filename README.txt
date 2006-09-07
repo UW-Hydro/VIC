@@ -511,7 +511,7 @@ Reverting from version 5.10 to 5.9 in surface_fluxes.c
         be okay as long as the time steps are sub-daily.  GCT
 
 
-Skip reading/writing of snow band for areafract < 0
+Skip reading/writing of snow band for areafract <= 0
 
         Files affected:
         read_initial_model_state.c

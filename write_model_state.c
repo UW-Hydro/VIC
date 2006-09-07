@@ -47,6 +47,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   2006-06-16 Skip writing snowband if AreaFract[band] <0         GCT
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-09-07 Changed "Skip writing snowband if AreaFract[band] <0" to "<=0". GCT
 *********************************************************************/
 {
   extern option_struct options;
@@ -140,7 +141,7 @@ void write_model_state(dist_prcp_struct    *prcp,
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Skip if areafract < 0 */
-      if ( soil_con->AreaFract[band] < 0 ) {
+      if ( soil_con->AreaFract[band] <= 0 ) {
         continue;
       }
       /* Write cell identification information */

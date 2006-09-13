@@ -108,6 +108,10 @@
 #define SNOW 1
 #endif
 
+/***** Baseflow parametrizations *****/
+#define ARNO        0
+#define NIJSSEN2001 1
+
 #define min(a,b) (a < b) ? a : b
 #define max(a,b) (a > b) ? a : b
 
@@ -216,6 +220,7 @@ typedef struct {
   char   ALMA_OUTPUT;    /* TRUE = output files contain ALMA standard variables */
   char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
 			    parameters*/
+  char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
@@ -233,7 +238,6 @@ typedef struct {
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   LAKES;          /* TRUE = use lake energy code */
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
-  char   NIJSSEN2001_BASEFLOW;   /* FALSE = Ds, Dm, Ws, c  TRUE = d1, d2, d3, d4 */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band */

@@ -79,6 +79,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 		frost_slope.					TJB
   2005-Apr-13   Added logic for OUTPUT_FORCE option.		TJB
   2005-Apr-23   Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
+  2006-09-13   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
 
 **********************************************************************/
 {
@@ -328,10 +329,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     
     /*************************************************
-    if NIJSSEN2001_BASEFLOW == TRUE then convert the baseflow 
-    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.
+      If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
+      parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
     *************************************************/
-    if(options.NIJSSEN2001_BASEFLOW) {
+    if(options.BASEFLOW == NIJSSEN2001) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax * 
 	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

@@ -85,7 +85,7 @@ MEASURE_H       2.0     # height of humidity measurement (m)
 NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes 
 SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
-NIJSSEN2001_BASEFLOW	FALSE	# TRUE = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001); FALSE = columns 5-8 are the standard VIC baseflow parameters
+BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED	FALSE	# TRUE = column 54 of the soil param file contains the average July temperature (C); if FALSE and COMPUTE_TREELINE = TRUE, VIC will compute the average July temperature from the date in the forcing file
 ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file

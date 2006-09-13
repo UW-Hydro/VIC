@@ -21,6 +21,7 @@ void display_current_settings(int                 mode,
   2005-03-24 Added ALMA_OUTPUT option.				TJB
   2005-04-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
   2005-11-29 SAVE_STATE is now set in global param file         GCT
+  2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
 **********************************************************************/
 {
 
@@ -210,10 +211,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"ARC_SOIL\t\tTRUE\n");
   else
     fprintf(stdout,"ARC_SOIL\t\tFALSE\n");
-  if (options.NIJSSEN2001_BASEFLOW)
-    fprintf(stdout,"NIJSSEN2001_BASEFLOW\tTRUE\n");
-  else
-    fprintf(stdout,"NIJSSEN2001_BASEFLOW\tFALSE\n");
+  if (options.BASEFLOW == ARNO)
+    fprintf(stdout,"BASEFLOW\t\tARNO\n");
+  else if (options.BASEFLOW == NIJSSEN2001)
+    fprintf(stdout,"BASEFLOW\t\tNIJSSEN2001\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Veg Data:\n");

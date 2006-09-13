@@ -85,6 +85,7 @@ void initialize_global() {
   2005-May-01 Added the ALMA vars CRainf, CSSnowf, LSRainf, and LSSnowf.TJB
   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
   2005-11-29  Added SAVE_STATE (option is now set in global param file) GCT
+  2006-0913  Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
 *********************************************************************/
 
   extern option_struct options;
@@ -101,7 +102,7 @@ void initialize_global() {
   options.EQUAL_AREA            = FALSE;
   options.ARC_SOIL              = FALSE;
   options.COMPRESS              = FALSE;
-  options.NIJSSEN2001_BASEFLOW  = FALSE;
+  options.BASEFLOW              = ARNO;
   options.FULL_ENERGY           = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.DIST_PRCP             = FALSE;

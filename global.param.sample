@@ -94,6 +94,7 @@ RESULT_DIR      (put the result directory path here)	# Results directory path (w
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files
+ALMA_OUTPUT  	FALSE	# TRUE = ALMA-compliant output variable units
 PRT_SNOW_BAND	FALSE	# TRUE = write a "snowband" output file, containing band-specific values of snow variables
 
 #######################################################################

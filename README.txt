@@ -205,6 +205,93 @@ Flexible output configuration
 
 
 
+ALMA-compliant input and output
+
+	Files affected:
+
+	SnowPackEnergyBalance.c
+	display_current_settings.c
+	dist_prec.c
+	full_energy.c
+	get_force_type.c
+	get_global_param.c
+	global.param.sample
+	initialize_atmos.c
+	initialize_global.c
+	initialize_model_state.c
+	output.OUTPUT_FORCE.ALMA.template (new)
+	output.PILPS-2E.ALMA.template (new)
+	output.TRADITIONAL.template
+	output_list_utils.c
+	put_data.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl.h
+	vicNl_def.h
+	write_forcing_file.c
+
+	Description:
+
+	This change allows VIC to handle input and output in a manner
+	compliant the the ALMA convention used in the PILPS-2e experiment
+	(http://www.lmd.jussieu.fr/~polcher/ALMA/).
+
+	ALMA INPUT:
+
+	VIC now accepts the following new ALMA-compliant input forcings
+	in addition to the forcings that it already accepts:
+		SNOWF     snowfall rate (kg/m^2s)
+		RAINF     rainfall rate (kg/m^2s)
+		CRAINF    convective rainfall rate (kg/m^2s)
+		LSRAINF   large scale rainfall rate (kg/m^2s)
+		QAIR      specific humidity (kg/kg)
+		WIND_E    zonal wind speed (m/s)
+		WIND_N    meridional wind speed (m/s)
+		TAIR      air temperature per time step (K)
+		PSURF     atmospheric pressure (Pa)
+
+	When giving VIC ALMA-compliant input files, you must be sure to use
+	the names given above in the forcing section of your global parameter
+	file.
+
+	Instead of the existing PREC (precipitation per timestep in mm), you
+	can now specify SNOWF and RAINF (snowfall and rainfall rates, both in
+	mm/s).  VIC will simply add these two quantities together, multiply
+	by the forcing interval, and treat their sum the same way it treats
+	PREC.
+
+	An alternative to supplying RAINF is to supply CRAINF (convective
+	rainfall rate, mm/s) and LSRAINF (large-scale rainfall rate, mm/s).
+	VIC will add these two quantities together to get RAINF.
+
+	Instead of the existing WIND, alternatively you can specify WIND_E
+	and WIND_N (zonal and meridional wind speed, m/s).  VIC will simply
+	compute WIND = sqrt(WIND_E**2+WIND_N**2).
+
+	TAIR has units of K, while the existing AIR_TEMP is in C.  Similarly,
+	PSURF is in Pa, while PRESSURE is in kPa.  VIC will convert these
+	to AIR_TEMP and PRESSURE after reading them in.
+
+	More information is available on ALMA forcing variables at:
+	  http://www.lmd.jussieu.fr/~polcher/ALMA/convention_input_3.html
+
+	ALMA OUTPUT:
+
+	If the user sets ALMA_OUTPUT=TRUE in the global parameter file, then
+	VIC will convert its output variables to ALMA-compliant forms.  The
+	majority of the changes are changes of units.  Moisture fluxes are
+	changed from VIC's standard (mm accumulated over the time step) to
+	the average flux rate (mm/s).  Temperatures are converted from C
+	to K.  More information on ALMA output variables is available at:
+	  http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html
+
+	In addition, several more variables have been added to the list of
+	available output variables.  See vicNl_def.h for the complete list
+	of available output variables.
+
+
+
+
 Bug Fixes:
 ----------
 

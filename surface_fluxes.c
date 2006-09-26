@@ -31,6 +31,8 @@ void surface_fluxes(char                 overstory,
 		    double              *runoff_wet,
 		    double              *runoff_dry,
 		    double              *out_prec,
+		    double              *out_rain,
+		    double              *out_snow,
 		    double              *wind,
 		    double              *Le,
 		    double              *Ls,
@@ -298,6 +300,7 @@ void surface_fluxes(char                 overstory,
       
     store_melt  += step_melt;
     out_prec[0] += step_out_prec * mu;
+    out_rain[0] += calc_rainonly(air_temp, step_out_prec, gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, mu);
    
     if(overstory)
       store_shortwave += step_snow.coverage * snow_energy.shortwave 
@@ -337,6 +340,7 @@ void surface_fluxes(char                 overstory,
   snow->canopy_vapor_flux = store_canopy_vapor_flux;
   (*Melt) = store_melt;
   for(dist = 0; dist < 2; dist++) ppt[dist] = store_ppt[dist];
+  out_snow[0] = out_prec[0] - out_rain[0];
 
   /******************************************************
     Store energy flux averages for sub-model time steps 

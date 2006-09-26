@@ -12,7 +12,7 @@ void initialize_global() {
   This subroutine initalizes all global parameters before they are 
   called by the model.
 
-  option_strudt:           structure containing all global model options
+  option_struct:           structure containing all global model options
   options.FULL_ENERGY    = TRUE - compute full energy balance
   options.FROZEN_SOIL    = TRUE - compute frozen soils
   options.DIST_PRCP      = TRUE - use distributed precipitation
@@ -77,6 +77,10 @@ void initialize_global() {
     16-Jun-04 Added JULY_TAVG_SUPPLIED.				TJB
    2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT 	      
   2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Sep-11 Implemented flexible output configuration; added new
+              options.Noutfiles and organized the options according
+              to function. TJB
+  2006-Sep-14 (Port from 4.1.0) Added support for ALMA-compliant input and output. TJB
 
 *********************************************************************/
 
@@ -90,35 +94,40 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
-  options.JULY_TAVG_SUPPLIED    = FALSE;
-  options.ARC_SOIL              = FALSE;
-  options.COMPRESS              = FALSE;
-  options.BASEFLOW              = ARNO;
-  options.FULL_ENERGY           = FALSE;
-  options.FROZEN_SOIL           = FALSE;
-  options.DIST_PRCP             = FALSE;
+  // simulation modes
+  options.AboveTreelineVeg      = -1;
   options.COMPUTE_TREELINE      = FALSE;
   options.CORRPREC              = FALSE;
+  options.DIST_PRCP             = FALSE;
+  options.FROZEN_SOIL           = FALSE;
+  options.FULL_ENERGY           = FALSE;
+  options.GRND_FLUX             = FALSE;
+  options.MIN_WIND_SPEED        = 0.0;
   options.MOISTFRACT            = FALSE;
-  options.BINARY_OUTPUT         = FALSE;
-  options.PRT_SNOW_BAND         = FALSE;
-  options.AboveTreelineVeg      = -1;
   options.Nlayer                = 2;
   options.Nnode                 = 3;
-  options.GRID_DECIMAL          = 2;
+  options.NOFLUX                = FALSE;
+  options.PREC_EXPT             = 0.6;
+  options.QUICK_FLUX            = TRUE;
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
-  options.PREC_EXPT             = 0.6;
+  // input options
+  options.ARC_SOIL              = FALSE;
+  options.BASEFLOW              = ARNO;
+  options.GRID_DECIMAL          = 2;
+  options.GLOBAL_LAI            = FALSE;
+  options.JULY_TAVG_SUPPLIED    = FALSE;
+  options.ROOT_ZONES            = MISSING;
+  // state options
   options.INIT_STATE            = FALSE;
   options.SAVE_STATE            = FALSE;
   options.BINARY_STATE_FILE     = TRUE;
-/*   options.INIT_SNOW             = FALSE; */
-  options.ROOT_ZONES            = MISSING;
-  options.MIN_WIND_SPEED        = 0.0;
-  options.NOFLUX                = FALSE;
-  options.GLOBAL_LAI            = FALSE;
-  options.QUICK_FLUX            = TRUE;
-  options.GRND_FLUX             = FALSE;
+  // output options
+  options.ALMA_OUTPUT           = FALSE;
+  options.BINARY_OUTPUT         = FALSE;
+  options.COMPRESS              = FALSE;
+  options.Noutfiles             = 2;
+  options.PRT_SNOW_BAND         = FALSE;
 
 #if LINK_DEBUG 
 

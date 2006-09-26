@@ -52,6 +52,7 @@
   Modifications:
     28-Sep-04 Added Ra_used to store the aerodynamic resistance actually
 	      used in flux calculations.				TJB
+  2006-Sep-14 Got rid of redundant STEFAN constant; replaced with STEFAN_B.  TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -177,7 +178,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   /* Calculate longwave exchange and net radiation */
  
-  LongRadOut = STEFAN * (TMean+273.15) * (TMean+273.15) 
+  LongRadOut = STEFAN_B * (TMean+273.15) * (TMean+273.15) 
     * (TMean+273.15) * (TMean+273.15);
   NetRad = SurfAttenuation * ShortRad + LongRadIn - LongRadOut;
   

@@ -48,6 +48,8 @@ int main(int argc, char *argv[])
   2006-Sep-01 (Port from 4.1.0) OUTPUT_FORCE option now calls close_files(). TJB
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output; uses the
+	      new save_data structure.  TJB
 
 **********************************************************************/
 {
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
   outfiles_struct          outfiles;
   out_data_file_struct     *out_data_files;
   out_data_struct          *out_data;
+  save_data_struct         save_data;
   
   /** Read Model Options **/
   initialize_global();
@@ -267,7 +270,7 @@ int main(int argc, char *argv[])
 			     &global_param, infiles, soil_con.gridcel, 
 			     veg_con[0].vegetat_type_num, options.Nnode, 
 			     Ndist, &soil_con, veg_con, &init_STILL_STORM,
-			     &init_DRY_TIME);
+			     &init_DRY_TIME, &save_data);
 
 
 #if VERBOSE
@@ -324,7 +327,7 @@ int main(int argc, char *argv[])
         else LASTREC = FALSE;
 
         dist_prec( &atmos[rec], &prcp, &soil_con, veg_con, dmy, &global_param,
-                   &outfiles, out_data_files, out_data, rec, cellnum,
+                   &outfiles, out_data_files, out_data, &save_data, rec, cellnum,
 		   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME );
         NEWCELL=FALSE;
 	init_DRY_TIME = -999;

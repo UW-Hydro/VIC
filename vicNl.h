@@ -13,6 +13,8 @@
                 set_output_defaults
                 set_output_var
                 zero_output_list
+  2006-Sep-14 Implemented ALMA-compliant input and output; several functions
+	      now take the save_data structure as an argument.  TJB
 ************************************************************************/
 
 #include <math.h>
@@ -96,7 +98,7 @@ void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
 		 outfiles_struct *, out_data_file_struct *, out_data_struct *,
-		 int,int,char,char, char, int);
+		 save_data_struct *, int,int,char,char, char, int);
 #if QUICK_FS
 void distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
@@ -182,9 +184,9 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double,
 
 void   initialize_global();
 void   initialize_model_state(dist_prcp_struct *, dmy_struct, double,
-			      global_param_struct *, infiles_struct, int,
-			      int, int, int, soil_con_struct *, 
-			      veg_con_struct *, char *, int *);
+			      global_param_struct *, infiles_struct, int, int,
+			      int, int, soil_con_struct *, veg_con_struct *,
+			      char *, int *, save_data_struct *);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **,int,FILE *,int);
@@ -226,8 +228,9 @@ void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			   soil_con_struct *, double *, double *);
 double priestley(double, double);
 void   put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *, 
-		out_data_file_struct *, out_data_struct *, double *, double *,
-		double, double *, char *, dmy_struct *, int, int, int, int); 
+		out_data_file_struct *, out_data_struct *, save_data_struct *,
+		double *, double *, double, double *, char *, dmy_struct *,
+		int, int, int, int); 
 
 double quick_penman(double, double, double, double, double, double, 
 		    double, double);
@@ -325,8 +328,8 @@ void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,
 void   surface_fluxes(char, int, int, int, int, int, int, int, int, int, 
 		      double, double, double, double, double, double, 
 		      double, double, double, double *, double *, double *, 
-		      double *, double *, double *, double *, double *, 
-		      double *, double *, double *, double *, double *, 
+		      double *, double *, double *, double *, double *, double *,
+		      double *, double *, double *, double *, double *, double *,
 		      double *, double *, float *, atmos_data_struct *, 
 		      soil_con_struct *, dmy_struct *, global_param_struct *,
 		      energy_bal_struct *, snow_data_struct *, 

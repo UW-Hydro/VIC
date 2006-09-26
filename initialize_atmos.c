@@ -18,8 +18,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
-		      out_data_file_struct     *out_data_files,
-		      out_data_struct          *out_data)
+                      out_data_file_struct     *out_data_files,
+                      out_data_struct          *out_data)
 #else /* OUTPUT_FORCE */
                       char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
@@ -83,6 +83,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option. TJB
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
+  2006-Sep-14 (Port from 4.1.0) Added support for ALMA input variables. TJB
 
 **********************************************************************/
 {
@@ -125,19 +126,22 @@ void initialize_atmos(atmos_data_struct        *atmos,
   /* compute number of full model time steps per day */
   stepspday = 24/global_param.dt;
   
-  if (!param_set.TYPE[PREC].SUPPLIED)
-    nrerror("Precipitation must be given to the model, check input files\n");
+  if ( !param_set.TYPE[PREC].SUPPLIED
+    && ( !param_set.TYPE[SNOWF].SUPPLIED
+      || ( !param_set.TYPE[RAINF].SUPPLIED
+        && ( !param_set.TYPE[LSRAINF].SUPPLIED || !param_set.TYPE[CRAINF].SUPPLIED ) ) ) )
+    nrerror("Precipitation (PREC, or {SNOWF and {RAINF or {LSRAINF and CRAINF}}}) must be given to the model, check input files\n");
   
   if ((!param_set.TYPE[TMAX].SUPPLIED || !param_set.TYPE[TMIN].SUPPLIED) 
-      && !param_set.TYPE[AIR_TEMP].SUPPLIED)
+      && !(param_set.TYPE[AIR_TEMP].SUPPLIED || param_set.TYPE[TAIR].SUPPLIED) )
     nrerror("Daily maximum and minimum air temperature or sub-daily air temperature must be given to the model, check input files\n");
   
-  if (param_set.TYPE[AIR_TEMP].SUPPLIED 
-      && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24)
+  if ( (param_set.TYPE[AIR_TEMP].SUPPLIED
+      || (param_set.TYPE[TAIR].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[TAIR].SUPPLIED-1] == 24) ) )
     nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
   
-  if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[VP].SUPPLIED)
-      || (!param_set.TYPE[SHORTWAVE].SUPPLIED && param_set.TYPE[VP].SUPPLIED)) 
+  if ( param_set.TYPE[SHORTWAVE].SUPPLIED
+        && !(param_set.TYPE[VP].SUPPLIED || param_set.TYPE[QAIR].SUPPLIED) )
     nrerror("Sub-daily shortwave and vapor pressure forcing data must be supplied together.");
     /*
   if ((param_set.TYPE[SHORTWAVE].SUPPLIED && !param_set.TYPE[LONGWAVE].SUPPLIED)) 
@@ -166,9 +170,99 @@ void initialize_atmos(atmos_data_struct        *atmos,
   *******************************/
 
   forcing_data = read_forcing_data(infile, global_param);
+//for (i=0; i<3; i++) {
+//  fprintf(stdout,"i %d Tmin %f Tmax %f\n", i, forcing_data[TMIN][i], forcing_data[TMAX][i]);
+//}
   
   fprintf(stderr,"\nRead meteorological forcing file\n");
   
+  /*************************************************
+    Handle any ALMA-specific variables first
+  *************************************************/
+
+  /*************************************************
+    If provided, translate rainfall and snowfall
+    rates into steply precipitation
+    NOTE: this overwrites any PREC data that was supplied
+  *************************************************/
+
+  if ( param_set.TYPE[LSRAINF].SUPPLIED && param_set.TYPE[CRAINF].SUPPLIED ) {
+    /* large-scale and convective rainfall rates supplied */
+    if (forcing_data[RAINF] == NULL) {
+      forcing_data[RAINF] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[RAINF][idx] = (forcing_data[LSRAINF][idx] + forcing_data[CRAINF][idx]);
+    }
+    param_set.TYPE[RAINF].SUPPLIED = param_set.TYPE[LSRAINF].SUPPLIED;
+  }
+  if( param_set.TYPE[SNOWF].SUPPLIED && param_set.TYPE[RAINF].SUPPLIED ) {
+    /* rainfall and snowfall rates supplied */
+    if (forcing_data[PREC] == NULL) {
+      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[PREC][idx] = (forcing_data[RAINF][idx] + forcing_data[SNOWF][idx])
+                                * (global_param.dt * 3600);
+    }
+    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[RAINF].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate air temperature in K
+    into air temperature in C
+    NOTE: this overwrites any AIR_TEMP data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[TAIR].SUPPLIED) {
+    /* air temperature in K supplied */
+    if (forcing_data[AIR_TEMP] == NULL) {
+      forcing_data[AIR_TEMP] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[AIR_TEMP][idx] = forcing_data[TAIR][idx] - KELVIN;
+    }
+    param_set.TYPE[AIR_TEMP].SUPPLIED = param_set.TYPE[TAIR].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate surface pressure in Pa
+    into surface pressure in kPa
+    NOTE: this overwrites any PRESSURE data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[PSURF].SUPPLIED) {
+    /* surface pressure in Pa supplied */
+    if (forcing_data[PRESSURE] == NULL) {
+      forcing_data[PRESSURE] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[PRESSURE][idx] = forcing_data[PSURF][idx] / 1000.0;
+    }
+    param_set.TYPE[PRESSURE].SUPPLIED = param_set.TYPE[PSURF].SUPPLIED;
+  }
+
+  /*************************************************
+    If provided, translate specific humidity and atm. pressure
+    into vapor pressure
+    NOTE: this overwrites any VP data that was supplied
+  *************************************************/
+
+  if(param_set.TYPE[QAIR].SUPPLIED && param_set.TYPE[PRESSURE].SUPPLIED) {
+    /* specific humidity and atm. pressure supplied */
+    if (forcing_data[VP] == NULL) {
+      forcing_data[VP] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[VP][idx] = forcing_data[QAIR][idx] * forcing_data[PRESSURE][idx] / 0.622;
+    }
+    param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
+  }
+
+  /*************************************************
+    Handle all other variables
+  *************************************************/
+
   /*************************************************
     Create sub-daily precipitation if not provided
   *************************************************/
@@ -191,7 +285,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
   else {
-    /* sub-daily prec speed provided */
+    /* sub-daily prec provided */
     idx = 0;
     for(rec = 0; rec < global_param.nrecs; rec++) {
       sum = 0;
@@ -502,7 +596,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
     set the windspeed 
   ********************/
 
-  if (!param_set.TYPE[WIND].SUPPLIED) {
+  if ( !param_set.TYPE[WIND].SUPPLIED
+    && ( !param_set.TYPE[WIND_N].SUPPLIED || !param_set.TYPE[WIND_E].SUPPLIED ) ) {
     /* no wind data provided, use default constant */
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for (i = 0; i < NF; i++) {
@@ -512,6 +607,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
   else {
+    if ( param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED ) {
+      if (forcing_data[WIND] == NULL) {
+        forcing_data[WIND] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+      }
+      for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+        forcing_data[WIND][idx] = sqrt( forcing_data[WIND_E][idx]*forcing_data[WIND_E][idx]
+                                      + forcing_data[WIND_N][idx]*forcing_data[WIND_N][idx] );
+      }
+      param_set.TYPE[WIND].SUPPLIED = param_set.TYPE[WIND_E].SUPPLIED;
+    }
     if(param_set.FORCE_DT[param_set.TYPE[WIND].SUPPLIED-1] == 24) {
       /* daily wind provided */
       rec = 0;

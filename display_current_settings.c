@@ -24,6 +24,7 @@ void display_current_settings(int                 mode,
   2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
   2006-Sep-11 Implemented flexible output configuration; removed
               OPTIMIZE and LDAS_OUTPUT options. TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output.  TJB
 
 **********************************************************************/
 {
@@ -280,6 +281,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"PRT_SNOW_BAND\t\tTRUE\n");
   else
     fprintf(stdout,"PRT_SNOW_BAND\t\tFALSE\n");
+  if (options.ALMA_OUTPUT)
+    fprintf(stdout,"ALMA_OUTPUT\t\tTRUE\n");
+  else
+    fprintf(stdout,"ALMA_OUTPUT\t\tFALSE\n");
   fprintf(stdout,"\n");
 
 }

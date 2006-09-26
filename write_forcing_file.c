@@ -18,9 +18,11 @@ void write_forcing_file(atmos_data_struct *atmos,
              to ...sizeof, 1,... GCT
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output.  TJB
 
 **********************************************************************/
 {
+  extern global_param_struct global_param;
   extern option_struct options;
 
   int                 rec, j, v;
@@ -28,17 +30,45 @@ void write_forcing_file(atmos_data_struct *atmos,
   unsigned short int *tmp_usiptr;
   dmy_struct         *dummy_dmy;
   int                 dummy_dt;
+  int                 dt_sec;
+
+  dt_sec = global_param.dt*SECPHOUR;
 
   for ( rec = 0; rec < nrecs; rec++ ) {
     for ( j = 0; j < NF; j++ ) {
-      out_data[OUT_PREC].data[0] = atmos[rec].prec[j];
-      out_data[OUT_AIR_TEMP].data[0] = atmos[rec].air_temp[j];
+
+      out_data[OUT_AIR_TEMP].data[0]  = atmos[rec].air_temp[j];
+      out_data[OUT_DENSITY].data[0]   = atmos[rec].density[j];
+      out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
+      out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
+      out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j];
+      out_data[OUT_QAIR].data[0]      = MOL_WT_RATIO * atmos->vp[j]/atmos->pressure[j];
+      out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[j]/(atmos->vp[j]+atmos->vpd[j]);
       out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
-      out_data[OUT_LONGWAVE].data[0] = atmos[rec].longwave[j];
-      out_data[OUT_DENSITY].data[0] = atmos[rec].density[j];
-      out_data[OUT_PRESSURE].data[0] = atmos[rec].pressure[j];
-      out_data[OUT_VP].data[0] = atmos[rec].vp[j];
-      out_data[OUT_WIND].data[0] = atmos[rec].wind[j];
+      out_data[OUT_VP].data[0]        = atmos[rec].vp[j];
+      out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];
+      if (out_data[OUT_AIR_TEMP].data[0] >= global_param.MAX_SNOW_TEMP) {
+        out_data[OUT_RAINF].data[0] = out_data[OUT_PREC].data[0];
+        out_data[OUT_SNOWF].data[0] = 0;
+      }
+      else if (out_data[OUT_AIR_TEMP].data[0] <= global_param.MIN_RAIN_TEMP) {
+        out_data[OUT_RAINF].data[0] = 0;
+        out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0];
+      }
+      else {
+        out_data[OUT_RAINF].data[0] = ((out_data[OUT_AIR_TEMP].data[0]-global_param.MIN_RAIN_TEMP)/(global_param.MAX_SNOW_TEMP-global_param.MIN_RAIN_TEMP))*out_data[OUT_PREC].data[0];
+        out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0]-out_data[OUT_RAINF].data[0];
+      }
+
+      if (options.ALMA_OUTPUT) {
+        out_data[OUT_PREC].data[0] /= dt_sec;
+        out_data[OUT_RAINF].data[0] /= dt_sec;
+        out_data[OUT_SNOWF].data[0] /= dt_sec;
+        out_data[OUT_AIR_TEMP].data[0] += KELVIN;
+        out_data[OUT_PRESSURE].data[0] *= 1000;
+        out_data[OUT_VP].data[0] *= 1000;
+      }
+
       if (options.BINARY_OUTPUT) {
         for (v=0; v<N_OUTVAR_TYPES; v++) {
           out_data[v].data[0] *= out_data[v].mult;

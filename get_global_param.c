@@ -249,6 +249,11 @@ global_param_struct get_global_param(filenames_struct      *names,
         if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
         else options.BINARY_OUTPUT = FALSE;
       }
+      else if(strcasecmp("ALMA_OUTPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
+        else options.ALMA_OUTPUT = FALSE;
+      }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;

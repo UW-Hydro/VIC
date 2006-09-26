@@ -9,6 +9,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      veg_con_struct    *veg_con,
               out_data_file_struct   *out_data_files,
               out_data_struct   *out_data,
+              save_data_struct  *save_data,
               double            *depth,
 	      double            *dz,
 	      double             dp,
@@ -42,6 +43,8 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; removed the
               OPTIMIZE and LDAS_OUTPUT options. TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output; uses the
+	      new save_data structure; tracks more variables.  TJB
 
 **********************************************************************/
 {
@@ -63,6 +66,9 @@ void put_data(dist_prcp_struct  *prcp,
   double                  tmp_evap;
   double                  tmp_moist;
   double                  tmp_ice;
+  double                  cv_baresoil;
+  double                  cv_veg;
+  double                  cv_snow;
   double                  rad_temp;
   double                  surf_temp;
   double                  inflow;
@@ -71,12 +77,15 @@ void put_data(dist_prcp_struct  *prcp,
   double                  TreeAdjustFactor[MAX_BANDS];
   int                     v;
   int                     i;
+  int                     dt_sec;
   int                     varid;
 
   cell_data_struct     ***cell;
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
+
+  dt_sec = dt*SECPHOUR;
 
   if(options.DIST_PRCP) 
     Ndist = 2;
@@ -99,6 +108,10 @@ void put_data(dist_prcp_struct  *prcp,
       fprintf( stderr, "WARNING: Tree adjust factor for band %i is equal to %f.\n", band, TreeAdjustFactor[band] );
   }
 
+  cv_baresoil = 0;
+  cv_veg = 0;
+  cv_snow = 0;
+
   // Initialize output data to zero
   zero_output_list(out_data);
 
@@ -108,8 +121,11 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec;
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR];
+  out_data[OUT_QAIR].data[0]      = MOL_WT_RATIO * atmos->vp[NR]/atmos->pressure[NR];
+  out_data[OUT_RAINF].data[0]     = atmos->out_rain;
   out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[NR]/(atmos->vp[NR]+atmos->vpd[NR]);
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
+  out_data[OUT_SNOWF].data[0]     = atmos->out_snow;
   out_data[OUT_VP].data[0]        = atmos->vp[NR];
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
  
@@ -206,7 +222,7 @@ void put_data(dist_prcp_struct  *prcp,
               out_data[OUT_AERO_RESIST].data[0] = cell[WET][veg][0].aero_resist_used;
             }
 	    
-	    /** recored layer moistures **/
+	    /** record layer moistures **/
 	    for(index=0;index<options.Nlayer;index++) {
 	      tmp_moist = cell[dist][veg][band].layer[index].moist;
 	      tmp_ice   = cell[dist][veg][band].layer[index].ice;
@@ -218,6 +234,16 @@ void put_data(dist_prcp_struct  *prcp,
 	      out_data[OUT_SOIL_LIQ].data[index] += tmp_moist
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	      out_data[OUT_SOIL_ICE].data[index] += tmp_ice
+                * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            }
+	    out_data[OUT_SOIL_WET].data[0] += cell[dist][veg][band].wetness
+              * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_ROOTMOIST].data[0] += cell[dist][veg][band].rootmoist
+              * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+
+	    /** record layer temperatures **/
+	    for(index=0;index<options.Nlayer;index++) {
+	      out_data[OUT_SOIL_TEMP].data[index] += cell[dist][veg][band].layer[index].T
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
 
@@ -254,6 +280,18 @@ void put_data(dist_prcp_struct  *prcp,
 	  else
 	    rad_temp = energy[veg][band].T[0] + KELVIN;
 	  
+          /** record landcover temperature **/
+          if(veg == veg_con[0].vegetat_type_num) {
+            // landcover is bare soil
+            out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            cv_baresoil += AreaFract[band] * TreeAdjustFactor[band];
+          }
+          else {
+            // landcover is vegetation
+            out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
+          }
+
 	  /** record soil surface temperature **/
 	  surf_temp = energy[veg][band].T[0];
 	  // MODIFIED FOR USE WITH ROSEMOUNT SIMULATIONS
@@ -319,6 +357,17 @@ void put_data(dist_prcp_struct  *prcp,
 	  out_data[OUT_SNOW_DEPTH].data[0]
 	    += snow[veg][band].depth * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
 	  
+          /** record snowpack albedo, temperature **/
+          if (snow[veg][band].swq> 0.0) {
+            out_data[OUT_SALBEDO].data[0]
+              += snow[veg][band].albedo * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            out_data[OUT_SNOW_SURF_TEMP].data[0]
+              += snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            out_data[OUT_SNOW_PACK_TEMP].data[0]
+              += snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
+          }
+
 	  /** record canopy intercepted snow **/
 	  if ( veg < veg_con[0].vegetat_type_num )
 	      out_data[OUT_SNOW_CANOPY].data[0]
@@ -417,6 +466,19 @@ void put_data(dist_prcp_struct  *prcp,
   /*****************************************
     Finish aggregation of special-case variables
    *****************************************/
+  // Normalize quantities that aren't present over entire grid cell
+  if (cv_baresoil > 0) {
+    out_data[OUT_BARESOILT].data[0] /= cv_baresoil;
+  }
+  if (cv_veg > 0) {
+    out_data[OUT_VEGT].data[0] /= cv_veg;
+  }
+  if (cv_snow > 0) {
+    out_data[OUT_SALBEDO].data[0] /= cv_snow;
+    out_data[OUT_SNOW_SURF_TEMP].data[0] /= cv_snow;
+    out_data[OUT_SNOW_PACK_TEMP].data[0] /= cv_snow;
+  }
+
   // Radiative temperature
   out_data[OUT_RAD_TEMP].data[0] = pow(out_data[OUT_RAD_TEMP].data[0],0.25);
 
@@ -428,10 +490,32 @@ void put_data(dist_prcp_struct  *prcp,
   /*****************************************
     Compute derived variables
    *****************************************/
+  // Water balance terms
+  out_data[OUT_DELSOILMOIST].data[0] = 0;
   for (index=0; index<options.Nlayer; index++) {
-    out_data[OUT_SOIL_MOIST].data[index] = out_data[OUT_SOIL_LIQ].data[index]+out_data[OUT_SOIL_MOIST].data[index];
+    out_data[OUT_SOIL_MOIST].data[index] = out_data[OUT_SOIL_LIQ].data[index]+out_data[OUT_SOIL_ICE].data[index];
+    out_data[OUT_DELSOILMOIST].data[0] += out_data[OUT_SOIL_MOIST].data[index];
+    out_data[OUT_SMLIQFRAC].data[index] = out_data[OUT_SOIL_LIQ].data[index]/out_data[OUT_SOIL_MOIST].data[index];
+    out_data[OUT_SMFROZFRAC].data[index] = 1 - out_data[OUT_SMLIQFRAC].data[index];
   }
+  out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
+  out_data[OUT_DELSWE].data[0] = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] - save_data->swe;
+  out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
+  out_data[OUT_SNOW_MELT].data[0] = out_data[OUT_SNOWF].data[0]-out_data[OUT_DELSWE].data[0]-out_data[OUT_SUB_SNOW].data[0]-out_data[OUT_SUB_CANOP].data[0];
+  if (out_data[OUT_SNOW_MELT].data[0] < 0) out_data[OUT_SNOW_MELT].data[0] = 0;
+
+  // Energy terms
+  out_data[OUT_REFREEZE].data[0] = (out_data[OUT_REFREEZE_ENERGY].data[0]/Lf)*dt_sec;
+  out_data[OUT_MELT_ENERGY].data[0] = out_data[OUT_SNOW_MELT].data[0]*Lf/dt_sec;
   out_data[OUT_R_NET].data[0] = out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0];
+
+  // Save current moisture state for use in next time step
+  save_data->total_soil_moist = 0;
+  for (index=0; index<options.Nlayer; index++) {
+    save_data->total_soil_moist += out_data[OUT_SOIL_MOIST].data[index];
+  }
+  save_data->swe = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0];
+  save_data->wdew = out_data[OUT_WDEW].data[0];
 
   /********************
     Check Water Balance 
@@ -457,6 +541,42 @@ void put_data(dist_prcp_struct  *prcp,
 			      out_data[OUT_GRND_FLUX].data[0], out_data[OUT_ADVECTION].data[0]
 			      - out_data[OUT_DELTACC].data[0] - out_data[OUT_SNOW_FLUX].data[0]
 			      + out_data[OUT_REFREEZE_ENERGY].data[0]);
+
+  /***********************************************
+    Change of units for ALMA-compliant output
+  ***********************************************/
+  if (options.ALMA_OUTPUT) {
+    out_data[OUT_BASEFLOW].data[0] /= dt_sec;
+    out_data[OUT_EVAP].data[0] /= dt_sec;
+    out_data[OUT_EVAP_BARE].data[0] /= dt_sec;
+    out_data[OUT_EVAP_CANOP].data[0] /= dt_sec;
+    out_data[OUT_TRANSP_VEG].data[0] /= dt_sec;
+    out_data[OUT_INFLOW].data[0] /= dt_sec;
+    out_data[OUT_PREC].data[0] /= dt_sec;
+    out_data[OUT_RAINF].data[0] /= dt_sec;
+    out_data[OUT_REFREEZE].data[0] /= dt_sec;
+    out_data[OUT_RUNOFF].data[0] /= dt_sec;
+    out_data[OUT_SNOW_MELT].data[0] /= dt_sec;
+    out_data[OUT_SNOWF].data[0] /= dt_sec;
+    out_data[OUT_SUB_CANOP].data[0] /= dt_sec;
+    out_data[OUT_SUB_SNOW].data[0] /= dt_sec;
+    out_data[OUT_SUB_SNOW].data[0] += out_data[OUT_SUB_CANOP].data[0];
+    out_data[OUT_BARESOILT].data[0] += KELVIN;
+    out_data[OUT_SNOW_PACK_TEMP].data[0] += KELVIN;
+    out_data[OUT_SNOW_SURF_TEMP].data[0] += KELVIN;
+    for (index=0; index<options.Nlayer; index++) {
+      out_data[OUT_SOIL_TEMP].data[index] += KELVIN;
+    }
+    out_data[OUT_SURF_TEMP].data[0] += KELVIN;
+    out_data[OUT_VEGT].data[0] += KELVIN;
+    out_data[OUT_FDEPTH].data[0] /= 100;
+    out_data[OUT_TDEPTH].data[0] /= 100;
+    out_data[OUT_DELTACC].data[0] *= dt_sec;
+    out_data[OUT_DELTAH].data[0] *= dt_sec;
+    out_data[OUT_AIR_TEMP].data[0] += KELVIN;
+    out_data[OUT_PRESSURE].data[0] *= 1000;
+    out_data[OUT_VP].data[0] *= 1000;
+  }
 
   /*************
     Write Data

@@ -14,6 +14,7 @@ void dist_prec(atmos_data_struct   *atmos,
                outfiles_struct     *outfiles,
                out_data_file_struct  *out_data_files,
                out_data_struct     *out_data,
+               save_data_struct    *save_data,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
@@ -55,6 +56,8 @@ void dist_prec(atmos_data_struct   *atmos,
             in the global parameter file.                       GCT
   2006-Sep-11 Implemented flexible output configuration; uses new
               out_data and out_data_files structures. TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output; uses new
+	      save_data structure.  TJB
 
 **********************************************************************/
 
@@ -185,8 +188,8 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(prcp, atmos, veg_con, out_data_files, out_data, soil_con->depth, 
-	   soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
+  put_data(prcp, atmos, veg_con, out_data_files, out_data, save_data,
+	   soil_con->depth, soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
 	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
 	   options.Nnode, global_param->skipyear);
 

@@ -94,3 +94,73 @@ RESULT_DIR      (put the result directory path here)	# Results directory path (w
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files
+PRT_SNOW_BAND	FALSE	# TRUE = write a "snowband" output file, containing band-specific values of snow variables
+
+#######################################################################
+#
+# Output File Contents
+#
+# As of VIC 4.0.6, you can specify your output file names and contents
+# in the global param file (see the README.txt file for more information).
+#
+# If you do not specify file names and contents in the global param
+# file, VIC will produce the same set of output files that it has
+# produced in earlier versions, namely "fluxes" and "snow" files, plus
+# "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if
+# PRT_SNOW_BAND is TRUE.  These files will have the same contents and
+# format as in earlier versions.
+#
+# The OPTIMIZE and LDAS_OUTPUT options have been removed.  These
+# output configurations can be selected with the proper set of
+# instructions in the global param file.  (see the output.*.template
+# files included in this distribution for more information.)
+#
+# If you do specify the file names and contents in the global param file,
+# PRT_SNOW_BAND will have no effect.
+#
+# Format:
+#
+#   N_OUTFILES    <n_outfiles>
+#
+#   OUTFILE       <prefix>        <nvars>
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#
+#   OUTFILE       <prefix>        <nvars>
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#
+#
+# where
+#   <n_outfiles> = number of output files
+#   <prefix>     = name of the output file, NOT including latitude
+#                  and longitude
+#   <nvars>      = number of variables in the output file
+#   <varname>    = name of the variable (this must be one of the
+#                  output variable names listed in vicNl_def.h.)
+#   <format>     = (for ascii output files) fprintf format string,
+#                  e.g.
+#                    %.4f = floating point with 4 decimal places
+#                    %.7e = scientific notation w/ 7 decimal places
+#                    *    = use the default format for this variable
+#
+#   <format>, <type>, and <multiplier> are optional.  For a given
+#   variable, you can specify either NONE of these, or ALL of
+#   these.  If these are omitted, the default values will be used.
+#
+#   <type>       = (for binary output files) data type code.
+#                  Must be one of:
+#                    OUT_TYPE_DOUBLE = double-precision floating point
+#                    OUT_TYPE_FLOAT  = single-precision floating point
+#                    OUT_TYPE_INT    = integer
+#                    OUT_TYPE_USINT  = unsigned short integer
+#                    OUT_TYPE_SINT   = short integer
+#                    OUT_TYPE_CHAR   = char
+#                    *               = use the default type
+#   <multiplier> = (for binary output files) factor to multiply
+#                  the data by before writing, to increase precision.
+#                    *    = use the default multiplier for this variable
+#
+#######################################################################

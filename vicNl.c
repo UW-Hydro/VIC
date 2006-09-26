@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
   2005-11-09 (Port from 4.1.0) Updated arglist for make_dist_prcp(), 
             as part of fix for QUICK_FLUX state file compatibility. GCT
   2006-Sep-01 (Port from 4.1.0) OUTPUT_FORCE option now calls close_files(). TJB
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
@@ -90,6 +92,8 @@ int main(int argc, char *argv[])
   filenames_struct         builtnames;
   infiles_struct           infiles;
   outfiles_struct          outfiles;
+  out_data_file_struct     *out_data_files;
+  out_data_struct          *out_data;
   
   /** Read Model Options **/
   initialize_global();
@@ -102,6 +106,12 @@ int main(int argc, char *argv[])
   /** Read Global Control File **/
   infiles.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, infiles.globalparam);
+
+  /** Set up output data structures **/
+  out_data = create_output_list();
+  out_data_files = set_output_defaults(out_data);
+  infiles.globalparam = open_file(filenames.global,"r");
+  parse_output_info(&filenames, infiles.globalparam, &out_data_files, out_data);
 
   /** Check and Open Files **/
   check_files(&infiles, &filenames);
@@ -205,7 +215,7 @@ int main(int argc, char *argv[])
 
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
-                   &outfiles);
+                   out_data_files);
 
 #if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/
@@ -236,7 +246,7 @@ int main(int argc, char *argv[])
 		       soil_con.rough, soil_con.avgJulyAirTemp, 
 		       soil_con.Tfactor,
 #if OUTPUT_FORCE
-		       soil_con.AboveTreeLine, &outfiles); 
+		       soil_con.AboveTreeLine, out_data_files, out_data); 
 #else /* OUTPUT_FORCE */
                        soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
@@ -267,6 +277,7 @@ int main(int argc, char *argv[])
       /** Update Error Handling Structure **/
       Error.outfp = outfiles;
       Error.infp = infiles;
+      Error.out_data_files = out_data_files;
 
       /***************************************************
 	Intialize Moisture and Energy Balance Error Checks
@@ -312,8 +323,8 @@ int main(int argc, char *argv[])
         if ( rec == global_param.nrecs - 1 ) LASTREC = TRUE;
         else LASTREC = FALSE;
 
-        dist_prec( &atmos[rec], &prcp, &soil_con, veg_con,
-		   dmy, &global_param, &outfiles, rec, cellnum,
+        dist_prec( &atmos[rec], &prcp, &soil_con, veg_con, dmy, &global_param,
+                   &outfiles, out_data_files, out_data, rec, cellnum,
 		   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME );
         NEWCELL=FALSE;
 	init_DRY_TIME = -999;
@@ -322,7 +333,7 @@ int main(int argc, char *argv[])
 
 #endif /* !OUTPUT_FORCE */
 
-      close_files(&infiles,&outfiles,&builtnames); 
+      close_files(&infiles,out_data_files,&builtnames); 
 
 #if !OUTPUT_FORCE
 

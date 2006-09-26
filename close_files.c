@@ -5,9 +5,9 @@
  
 static char vcid[] = "$Id$";
 
-void close_files(infiles_struct   *inf,
-                 outfiles_struct  *outf,
-                 filenames_struct *fnames)
+void close_files(infiles_struct       *inf,
+                 out_data_file_struct *out_data_files,
+                 filenames_struct     *fnames)
 /**********************************************************************
 	close_files	Dag Lohmann		January 1996
 
@@ -18,6 +18,8 @@ void close_files(infiles_struct   *inf,
 	   was added to save space when using large volumes
 	   of data.						KAC
   2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
+  2006-Sep-11 Implemented flexible output configuration, using
+              new out_data_files structure. TJB
 
 **********************************************************************/
 {
@@ -25,6 +27,8 @@ void close_files(infiles_struct   *inf,
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
+
+  int filenum;
 
   /**********************
     Close All Input Files
@@ -41,44 +45,12 @@ void close_files(infiles_struct   *inf,
     Close Output Files
     *******************/
 
-#if OUTPUT_FORCE
-
-  /** Output Forcing File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-#endif /* OUTPUT_FORCE */
+  for (filenum=0; filenum<options.Noutfiles; filenum++) {
+    fclose(out_data_files[filenum].fh);
+    if(options.COMPRESS) compress_files(out_data_files[filenum].filename);
+  }
 
 #if !OUTPUT_FORCE
-
-#if LDAS_OUTPUT || OPTIMIZE
-
-  /** Energy and Moisture Fluxes Output File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-#else /* LDAS_OUTPUT || OPTIMIZE */
-
-  /** Energy and Moisture Fluxes Output File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-  /** Frozen Soils Output File **/
-  if(options.FROZEN_SOIL) {
-    fclose(outf->fdepth);
-    if(options.COMPRESS) compress_files(fnames->fdepth);
-  }
-
-  /** Snow Data Output File **/
-  fclose(outf->snow);
-  if(options.COMPRESS) compress_files(fnames->snow);
-
-  if(options.PRT_SNOW_BAND) {
-    fclose(outf->snowband);
-    if(options.COMPRESS) compress_files(fnames->snowband);
-  }
-
-#endif /* LDAS_OUTPUT || OPTIMIZE */
 
   /*******************************
     Close All Used Debugging Files

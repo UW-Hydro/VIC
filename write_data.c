@@ -4,8 +4,8 @@
 
 static char vcid[] = "$Id$";
 
-void write_data(out_data_struct *out_data,
-		outfiles_struct *outfiles,
+void write_data(out_data_file_struct *out_data_files,
+		out_data_struct *out_data,
 		dmy_struct      *dmy,
 		int              dt)
 /**********************************************************************
@@ -50,6 +50,10 @@ void write_data(out_data_struct *out_data,
                 exceeded in previous LDAS simulations.          KAC
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures; moved the functions
+              calc_energy_balance_error and calc_water_balance_error to
+              the file calc_water_energy_balance_errors.c. TJB
 
 **********************************************************************/
 {
@@ -58,157 +62,16 @@ void write_data(out_data_struct *out_data,
   extern debug_struct debug;
 #endif
 
+  int                 file_idx;
+  int                 var_idx;
+  int                 elem_idx;
+  int                 ptr_idx;
   char               *tmp_cptr;
   short int          *tmp_siptr;
   unsigned short int *tmp_usiptr;
-  int                 band, j;
-  int                 fidx;
   int                *tmp_iptr;
   float              *tmp_fptr;
-
-#if OPTIMIZE
-
-  /*****************************************************************
-    Create optimization output files
-      type: ASCII
-      columns: 5
-               year
-	       month
-	       day
-	       runoff
-	       baseflow
-               snow_depth
-      comment: runoff and baseflow are output as daily sums for all
-               defined model time steps.
-  ******************************************************************/
-
-  fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\n",
-	  dmy->year, dmy->month, dmy->day, out_data->runoff,
-	  out_data->baseflow);
-  
-#elif LDAS_OUTPUT 
-
-  /*************************************************************
-    Write output files using LDAS binary format
-    - single file, limited output variables, output compressed
-
-  LDAS output file format:
-  unsigned short int             year
-  char                           month
-  char                           day
- (char)                         (hour)
-  unsigned short int             prec * 100
-  short int                      evap * 100
-  float                          runoff
-  float                          baseflow
-  unsigned short int * Nlayers   moist * 10
-  unsigned short int             swq * 10
-  short int                      net_short * 10
-  short int                      in_long * 10
-  short int                      r_net * 10
-  short int                      latent * 10
-  short int                      sensible * 10
-  short int                      grnd_flux * 10
-  unsigned short int             albedo * 10000
-  short int                      surf_temp * 100
-  unsigned short int             rel_humid * 100
-  short int                      air_temp*100
-  unsigned short int             wind*100
-  if FROZEN_SOIL activated
-    unsigned short int         ice[Nlayers] * 10     mean
-    for each NUM_FRONTS:
-      unsigned short int         fdepth[] * 100     mean
-      unsigned short int         tdepth[] * 100     mean
-
-  *************************************************************/
-
-  tmp_cptr = (char *)calloc(1,sizeof(char));
-  tmp_siptr = (short int *)calloc(1,sizeof(short int));
-  tmp_usiptr = (unsigned short int *)calloc(1,sizeof(unsigned short int));
-  tmp_iptr = (int *)calloc(1,sizeof(int));
-  tmp_fptr = (float *)calloc(1,sizeof(float));
-
-  /************************************
-    Output Standard Energy and Moisture Flux Variables
-  ************************************/
-
-  /***** Write Binary Fluxes File *****/
-  tmp_usiptr[0] = (unsigned short int)dmy->year;
-  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-  tmp_cptr[0] = (char)dmy->month;
-  fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
-  tmp_cptr[0] = (char)dmy->day;
-  fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
-  if(dt<24) {
-    tmp_cptr[0] = (char)dmy->hour;
-    fwrite(tmp_cptr,sizeof(char), 1,outfiles->fluxes);
-  }
-  
-  /** water balance components **/
-  tmp_usiptr[0] = (unsigned short int)(out_data->prec * 100.);
-  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->evap * 100.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_fptr[0] = (float)out_data->runoff;
-  fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-  tmp_fptr[0] = (float)out_data->baseflow;
-  fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-  for(j=0;j<options.Nlayer;j++) {    
-    tmp_usiptr[0] = (unsigned short int)(out_data->moist[j]*10.);
-    fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-  }
-  tmp_usiptr[0] = (unsigned short int)(out_data->swq[0]*10.);
-  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-  
-  /** energy balance components **/
-  tmp_siptr[0] = (short int)(out_data->net_short*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->in_long*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->r_net*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->latent*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->sensible*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)(out_data->grnd_flux*10.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_usiptr[0] = (unsigned short int)(out_data->albedo*10000.);
-  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-  tmp_siptr[0] = (short int)((out_data->rad_temp-KELVIN)*100.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-  tmp_usiptr[0] = (unsigned short int)(out_data->rel_humid*100.);
-  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-
-  /* write air temperature */
-  tmp_siptr[0] = (short int)(out_data->air_temp * 100.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-
-  /* write wind speed */
-  tmp_siptr[0] = (short int)(out_data->wind * 100.);
-  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-
-  /* frozen soil depths */
-  if(options.FROZEN_SOIL) {
-    for(j=0;j<options.Nlayer;j++) {    
-      tmp_usiptr[0] = (unsigned short int)(out_data->ice[j]*10.);
-      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-    }
-    for(fidx=0;fidx<MAX_FRONTS;fidx++) {
-      tmp_usiptr[0] = (unsigned short int)(out_data->fdepth[fidx]*100.);
-      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-      tmp_usiptr[0] = (unsigned short int)(out_data->tdepth[fidx]*100.);
-      fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-    }
-  }
-
-  free((char *)tmp_cptr);
-  free((char *)tmp_siptr);
-  free((char *)tmp_usiptr);
-  free((char *)tmp_iptr);
-  free((char *)tmp_fptr);
-
-#else
+  double             *tmp_dptr;
 
   /***************************************************************
     Write output files using default VIC ASCII or BINARY formats
@@ -218,364 +81,125 @@ void write_data(out_data_struct *out_data,
       www.hydro.washington.edu/Lettenmaier/Models/VIC/VIChome.html
   ***************************************************************/
 
-  tmp_iptr = (int *)calloc(1,sizeof(int));
-  tmp_fptr = (float *)calloc(1,sizeof(float));
+  if(options.BINARY_OUTPUT) {  // BINARY
 
-  /************************************
-    Output Frozen Soil Variables
-  ************************************/
-  if(options.FROZEN_SOIL && options.BINARY_OUTPUT) {
-    /***** Write Binary Frozen Soil Output File *****/
-    tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
-    tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
-    tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
-    tmp_iptr[0] = dmy->hour;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fdepth);
-    for(fidx=0;fidx<MAX_FRONTS;fidx++) {
-      tmp_fptr[0] = (float)out_data->fdepth[fidx];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
-      tmp_fptr[0] = (float)out_data->tdepth[fidx];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
-    }
-    for(j=0;j<options.Nlayer;j++) {
-      tmp_fptr[0] = (float)(out_data->ice[j] + out_data->moist[j]);
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fdepth);
-    }
-  }
-  else if(options.FROZEN_SOIL) {
-    /***** Write ASCII Frozen Soil Output File *****/
-    fprintf(outfiles->fdepth  ,"%04i\t%02i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day, dmy->hour);
-    for(fidx=0;fidx<MAX_FRONTS;fidx++) {
-      fprintf(outfiles->fdepth  ,"\t%.4f\t%.4f",out_data->fdepth[fidx], 
-            out_data->tdepth[fidx]);
-    }
-    for(j=0;j<options.Nlayer;j++) {
-      fprintf(outfiles->fdepth,"\t%f", out_data->ice[j] + out_data->moist[j]);
-    }
-    fprintf(outfiles->fdepth,"\n"); 
-  }
+    // Initialize pointers
+    tmp_cptr = (char *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(char));
+    tmp_siptr = (short int *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(short int));
+    tmp_usiptr = (unsigned short int *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(unsigned short int));
+    tmp_iptr = (int *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(int));
+    tmp_fptr = (float *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(float));
+    tmp_dptr = (double *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(double));
 
-  /**************************************
-    Ouput Snow Variables
-  **************************************/
-  if(options.BINARY_OUTPUT) {
-    /***** Write Binary Snow Output File *****/
+    // Time
     tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
-    tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
-    tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
-    if(dt<24) {
-      tmp_iptr[0] = dmy->hour;
-      fwrite(tmp_iptr,sizeof(int), 1,outfiles->snow);
-    }
-    tmp_fptr[0] = (float)out_data->swq[0];
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-    tmp_fptr[0] = (float)out_data->snow_depth[0];
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-    tmp_fptr[0] = (float)out_data->snow_canopy[0];
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-/*     tmp_fptr[0] = (float)out_data->coverage[0]; */
-/*     fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow); */
-    if(options.FULL_ENERGY) {
-      tmp_fptr[0] = (float)out_data->advection[0];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-      tmp_fptr[0] = (float)out_data->deltaCC[0];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-      tmp_fptr[0] = (float)out_data->snow_flux[0];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-      tmp_fptr[0] = (float)out_data->refreeze_energy[0];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snow);
-    }
-  }
-  else if((options.FULL_ENERGY || options.FROZEN_SOIL)) {
-    /***** Write ASCII full energy snow output file *****/
-    fprintf(outfiles->snow  ,"%04i\t%02i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
-	    dmy->year, dmy->month, dmy->day, dmy->hour,
-	    out_data->swq[0], out_data->snow_depth[0], 
-	    out_data->snow_canopy[0], /* out_data->coverage[0], */ 
-	    out_data->advection[0], out_data->deltaCC[0], 
-	    out_data->snow_flux[0], out_data->refreeze_energy[0]);
-  }
-  else {
-    /***** Write ASCII water balance snow output file *****/
-    fprintf(outfiles->snow  ,"%04i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day);
-    if(dt<24) 
-      fprintf(outfiles->snow  ,"\t%02i",dmy->hour);
-    fprintf(outfiles->snow  ,"\t%.4f\t%.4f\t%.4f\n",
-	    out_data->swq[0], out_data->snow_depth[0], 
-	    out_data->snow_canopy[0]);
-  }
+    tmp_iptr[1] = dmy->month;
+    tmp_iptr[2] = dmy->day;
+    tmp_iptr[3] = dmy->hour;
 
-  /**************************************
-    Ouput Snow Band Variables
-  **************************************/
-  if(options.PRT_SNOW_BAND && options.BINARY_OUTPUT) {
-    /***** Write Binary Snow Band Output File *****/
-    tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
-    tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
-    tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
-    if(dt<24) {
-      tmp_iptr[0] = dmy->hour;
-      fwrite(tmp_iptr,sizeof(int), 1,outfiles->snowband);
-    }
-    for(band=0;band<options.SNOW_BAND;band++) {
-      tmp_fptr[0] = (float)out_data->swq[band+1];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-      tmp_fptr[0] = (float)out_data->snow_depth[band+1];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-      tmp_fptr[0] = (float)out_data->snow_canopy[band+1];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-      /*     tmp_fptr[0] = (float)out_data->coverage; */
-      /*     fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband); */
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-	tmp_fptr[0] = (float)out_data->advection[band+1];
-	fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-	tmp_fptr[0] = (float)out_data->deltaCC[band+1];
-	fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-	tmp_fptr[0] = (float)out_data->snow_flux[band+1];
-	fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
-	tmp_fptr[0] = (float)out_data->refreeze_energy[band+1];
-	fwrite(tmp_fptr,sizeof(float), 1,outfiles->snowband);
+    // Loop over output files
+    for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
+
+#if !OUTPUT_FORCE
+      // Write the date
+      if (dt < 24) {
+        // Write year, month, day, and hour
+        fwrite(tmp_iptr, sizeof(int), 4, out_data_files[file_idx].fh);
       }
-    }
-  }
-  else if((options.FULL_ENERGY || options.FROZEN_SOIL) 
-	  && options.PRT_SNOW_BAND) {
-    /***** Write ASCII full energy snow band output file *****/
-    fprintf(outfiles->snowband  ,"%04i\t%02i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day, dmy->hour);
-    for(band=0;band<options.SNOW_BAND;band++) {
-      fprintf(outfiles->snowband  ,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
-	      out_data->swq[band+1], out_data->snow_depth[band+1], 
-	      out_data->snow_canopy[band+1], /* out_data->coverage[band+1], */ 
-	      out_data->advection[band+1], out_data->deltaCC[band+1], 
-	      out_data->snow_flux[band+1], out_data->refreeze_energy[band+1]);
-      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
-	      out_data->swband[band], out_data->lwband[band], 
-	      out_data->albedoband[band], out_data->latentband[band], 
-	      out_data->sensibleband[band], out_data->grndband[band]);
-    }
-    fprintf(outfiles->snowband,"\n");
-  }
-  else if(!options.FULL_ENERGY && options.PRT_SNOW_BAND) {
-    /***** Write ASCII water balance snow band output file *****/
-    fprintf(outfiles->snowband  ,"%04i\t%02i\t%02i",
-	      dmy->year, dmy->month, dmy->day);
-    if(dt<24) 
-      fprintf(outfiles->snowband  ,"\t%02i", dmy->hour);
-    for ( band = 0; band < options.SNOW_BAND; band++ ) {
-      fprintf(outfiles->snowband  ,"\t%.4f\t%.4f\t%.4f",
-	      out_data->swq[band+1], out_data->snow_depth[band+1], 
-	      out_data->snow_canopy[band+1]); 
-      fprintf(outfiles->snowband,"\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f", 
-	      out_data->swband[band], out_data->lwband[band], 
-	      out_data->albedoband[band], out_data->latentband[band], 
-	      out_data->sensibleband[band], out_data->grndband[band]);
-    }
-    fprintf(outfiles->snowband,"\n");
-  }
-
-  /************************************
-    Output Standard Energy and Moisture Flux Variables
-  ************************************/
-  if(options.BINARY_OUTPUT) {
-    /***** Write Binary Fluxes File *****/
-    tmp_iptr[0] = dmy->year;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
-    tmp_iptr[0] = dmy->month;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
-    tmp_iptr[0] = dmy->day;
-    fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
-    if(dt<24) {
-      tmp_iptr[0] = dmy->hour;
-      fwrite(tmp_iptr,sizeof(int), 1,outfiles->fluxes);
-    }
-    tmp_fptr[0] = (float)out_data->prec;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->evap;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->runoff;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->baseflow;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->Wdew;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    for(j=0;j<options.Nlayer;j++) {    
-      tmp_fptr[0] = (float)out_data->moist[j];
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    }
-    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-      tmp_fptr[0] = (float)out_data->rad_temp;
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    }
-    tmp_fptr[0] = (float)out_data->net_short;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->r_net;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-      tmp_fptr[0] = (float)out_data->latent;
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    }
-    tmp_fptr[0] = (float)out_data->evap_canop;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->evap_veg;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->evap_bare;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->sub_canop;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->sub_snow;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-      tmp_fptr[0] = (float)out_data->sensible;
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-      tmp_fptr[0] = (float)out_data->grnd_flux;
-      fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    }
-    tmp_fptr[0] = (float)out_data->aero_resist;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->surf_temp;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-    tmp_fptr[0] = (float)out_data->albedo;
-    fwrite(tmp_fptr,sizeof(float), 1,outfiles->fluxes);
-  }
-  else if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-    /***** Write ASCII energy balance fluxes file *****/
-    fprintf(outfiles->fluxes,"%04i\t%02i\t%02i\t%02i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
-	    dmy->year, dmy->month, dmy->day, dmy->hour,
-	    out_data->prec, out_data->evap, out_data->runoff,
-	    out_data->baseflow, out_data->Wdew);
-    for(j=0;j<options.Nlayer;j++) 
-      fprintf(outfiles->fluxes,"\t%.4f", out_data->moist[j]);
-    fprintf(outfiles->fluxes,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t\n",
-	    out_data->rad_temp,
-	    out_data->net_short, out_data->r_net, out_data->latent,
-	    out_data->evap_canop, out_data->evap_veg,
-	    out_data->evap_bare, out_data->sub_canop, 
-	    out_data->sub_snow, out_data->sensible,
-	    out_data->grnd_flux, out_data->aero_resist, out_data->surf_temp, 
-	    out_data->albedo);
-  }
-  else {
-    /***** Write ASCII Water Balance Fluxes File *****/
-    fprintf(outfiles->fluxes,"%04i\t%02i\t%02i",
-	    dmy->year, dmy->month, dmy->day);
-    if(dt<24)
-      fprintf(outfiles->fluxes,"\t%02i", dmy->hour);
-    fprintf(outfiles->fluxes,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f",
-	    out_data->prec, out_data->evap, out_data->runoff, 
-	    out_data->baseflow, out_data->Wdew);
-    for(j=0;j<options.Nlayer;j++) 
-      fprintf(outfiles->fluxes,"\t%.4f", out_data->moist[j]);
-    fprintf(outfiles->fluxes,"\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t\n",
-	    out_data->net_short, out_data->r_net, out_data->evap_canop, 
-	    out_data->evap_veg, out_data->evap_bare, 
-	    out_data->sub_canop, out_data->sub_snow, 
-	    out_data->aero_resist, out_data->surf_temp, out_data->albedo);
-  }
-
-  free((char *)tmp_iptr);
-  free((char *)tmp_fptr);
-
+      else {
+        // Only write year, month, and day
+        fwrite(tmp_iptr, sizeof(int), 3, out_data_files[file_idx].fh);
+      }
 #endif
 
-}
+      // Loop over this output file's data variables
+      for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
+        // Loop over this variable's elements
+        ptr_idx = 0;
+        if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_CHAR) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_cptr[ptr_idx++] = (char)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_cptr, sizeof(char), ptr_idx, out_data_files[file_idx].fh);
+        }
+        else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_SINT) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_siptr[ptr_idx++] = (short int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_siptr, sizeof(short int), ptr_idx, out_data_files[file_idx].fh);
+        }
+        else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_USINT) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_usiptr[ptr_idx++] = (unsigned short int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx, out_data_files[file_idx].fh);
+        }
+        else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_INT) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_iptr[ptr_idx++] = (int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_iptr, sizeof(int), ptr_idx, out_data_files[file_idx].fh);
+        }
+        else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_FLOAT) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_fptr[ptr_idx++] = (float)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_fptr, sizeof(float), ptr_idx, out_data_files[file_idx].fh);
+        }
+        else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_DOUBLE) {
+          for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+            tmp_dptr[ptr_idx++] = (double)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+          }
+          fwrite(tmp_dptr, sizeof(double), ptr_idx, out_data_files[file_idx].fh);
+        }
+      }
 
-void calc_water_balance_error(int    rec,
-			      double inflow,
-			      double outflow,
-			      double storage) {
-/***************************************************************
-  calc_water_balance_error  Keith Cherkauer        April 1998
-
-  This subroutine computes the overall model water balance, and 
-  warns the model user if large errors are found.
-***************************************************************/
-
-  static double last_storage;
-  static double cum_error;
-  static double max_error;
-  static int    error_cnt;
-  static int    Nrecs;
-
-  double error;
-
-  if(rec<0) {
-    last_storage = storage;
-    cum_error    = 0.;
-    max_error    = 0.;
-    error_cnt    = 0;
-    Nrecs        = -rec;
-  }
-  else {
-    error = inflow - outflow - (storage - last_storage);
-    cum_error += error;
-    if(fabs(error)>fabs(max_error) && fabs(error)>1e-5) {
-      max_error = error;
-      fprintf(stderr,"Maximum Moist Error:\t%i\t%.5f\t%.5f\n",
-	      rec,error,cum_error);
     }
-    if(rec==Nrecs-1) {
-      fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4f\n",
-	      cum_error);
-    }
-    last_storage = storage;
+
+    // Free the arrays
+    free((char *)tmp_cptr);
+    free((char *)tmp_siptr);
+    free((char *)tmp_usiptr);
+    free((char *)tmp_iptr);
+    free((char *)tmp_fptr);
+    free((char *)tmp_dptr);
+
   }
 
-}
+  else {  // ASCII
 
-void calc_energy_balance_error(int    rec,
-			       double net_rad,
-			       double latent,
-			       double sensible,
-			       double grnd_flux,
-			       double snow_fluxes) {
-/***************************************************************
-  calc_energy_balance_error   Keith Cherkauer     April 1998
+    // Loop over output files
+    for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
 
-  This subroutine computes the overall model energy balance, and
-  reports the maximum time step error above a thresehold to the
-  user.  The total cumulative error for the grid cell is also 
-  computed and reported at the end of the model run.
-***************************************************************/
+#if !OUTPUT_FORCE
+      // Write the date
+      if (dt < 24) {
+        // Write year, month, day, and hour
+        fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t%02i\t",
+                dmy->year, dmy->month, dmy->day, dmy->hour);
+      }
+      else {
+        // Only write year, month, and day
+        fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t",
+                dmy->year, dmy->month, dmy->day);
+      }
+#endif
 
-  static double cum_error;
-  static double max_error;
-  static int    Nrecs;
+      // Loop over this output file's data variables
+      for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
+        // Loop over this variable's elements
+        for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+          if (!(var_idx == 0 && elem_idx == 0)) {
+            fprintf(out_data_files[file_idx].fh, "\t");
+          }
+          fprintf(out_data_files[file_idx].fh, out_data[out_data_files[file_idx].varid[var_idx]].format, out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx]);
+        }
+      }
+      fprintf(out_data_files[file_idx].fh, "\n");
 
-  double error;
-
-  if(rec<0) {
-    cum_error = 0;
-    Nrecs     = -rec;
-    max_error = 0;
-  }
-  else {
-    error = net_rad - latent - sensible - grnd_flux + snow_fluxes;
-    cum_error += error;
-    if(fabs(error)>fabs(max_error) && fabs(error)>0.001) {
-      max_error = error;
-      if ( rec > 0 ) 
-	fprintf(stderr,"Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
-		rec,error,cum_error/(double)rec);
-      else 
-	fprintf(stderr,"Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
-		rec,error,cum_error);
     }
-    if(rec==Nrecs-1) {
-      fprintf(stderr,"Total Cumulative Energy Error for Grid Cell = %.4f\n",
-	      cum_error/(double)rec);
-    }
+
   }
+
 }
 

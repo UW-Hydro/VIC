@@ -5,24 +5,20 @@
 
   $Id$
 
+  Modifications:
+  2006-Sep-11 Implemented flexible output configuration; removed the
+              OPTIMIZE and LDAS_OUTPUT options. TJB
+
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
-
-/***** If TRUE limit output data to runoff and baseflow for optimization *****/
-#define OPTIMIZE FALSE
 
 /***** If TRUE include all debugging code - debugging options still
        have to be activated to get extra output.  When set to FALSE
        all debugging if-then statements are removed from the compiled 
        code *****/
 #define LINK_DEBUG FALSE
-
-/***** If TRUE output will be in LDAS binary format, which is a single
-       file with limited variables, most of which are truncated to
-       conserve disk space *****/
-#define LDAS_OUTPUT FALSE
 
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 

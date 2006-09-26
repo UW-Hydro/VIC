@@ -13,8 +13,8 @@ int NR;		      /* array index for atmos struct that indicates
 int NF;		      /* array index loop counter limit for atmos
 			 struct that indicates the SNOW_STEP values */
  
-global_param_struct get_global_param(filenames_struct *names,
-                                     FILE             *gp)
+global_param_struct get_global_param(filenames_struct      *names,
+                                     FILE                  *gp)
 /**********************************************************************
   get_global_param	Keith Cherkauer	            March 1998
 
@@ -50,6 +50,9 @@ global_param_struct get_global_param(filenames_struct *names,
              global.param.file  GCT
   2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
   2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
+  2006-Sep-11 Implemented flexible output configuration; uses new
+              N_OUTFILES, OUTFILE, and OUTVAR flags; removed the
+              OPTIMIZE and LDAS_OUTPUT options. TJB
 
 **********************************************************************/
 {
@@ -83,6 +86,15 @@ global_param_struct get_global_param(filenames_struct *names,
 	    31,	/* DECEMBER */
         } ;
   global_param_struct global;
+  int outfilenum;
+  int  fn;
+  char varname[20];
+  int outvarnum;
+  int format;
+  char formatstr[10];
+  int type;
+  char typestr[10];
+  float multiplier;
 
   /** Initialize non-global parameters **/
   global.endmonth      = MISSING;
@@ -393,6 +405,19 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",names->result_dir);
       }
 
+      /************************************
+        Get Output File Information
+	**********************************/
+      else if(strcasecmp("N_OUTFILES",optstr)==0) {
+        ; // do nothing
+      }
+      else if(strcasecmp("OUTFILE",optstr)==0) {
+        ; // do nothing
+      }
+      else if(strcasecmp("OUTVAR",optstr)==0) {
+        ; // do nothing
+      }
+
       /******************************
         Get Model Debugging Options
 	****************************/
@@ -457,6 +482,7 @@ global_param_struct get_global_param(filenames_struct *names,
     }
     fgets(cmdstr,MAXSTRING,gp);
   }
+  fclose(gp);
 
   /******************************************
     Check for undefined required parameters
@@ -621,11 +647,7 @@ global_param_struct get_global_param(filenames_struct *names,
   if ( options.SAVE_STATE )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
 	    global.stateday, global.statemonth, global.stateyear);
-  if ( OPTIMIZE )
-    fprintf(stderr,"Model is using optimized output (runoff and baseflow only).\n");
-  else if ( LDAS_OUTPUT )
-    fprintf(stderr,"Model output is in LDAS binary short int format.\n");
-  else if ( options.BINARY_OUTPUT ) 
+  if ( options.BINARY_OUTPUT ) 
     fprintf(stderr,"Model output is in standard BINARY format.\n");
   else 
     fprintf(stderr,"Model output is in standard ASCII format.\n");

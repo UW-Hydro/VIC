@@ -12,6 +12,8 @@ void dist_prec(atmos_data_struct   *atmos,
                dmy_struct          *dmy,
                global_param_struct *global_param,
                outfiles_struct     *outfiles,
+               out_data_file_struct  *out_data_files,
+               out_data_struct     *out_data,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
@@ -51,6 +53,8 @@ void dist_prec(atmos_data_struct   *atmos,
   02-Feb-05 Modified to save state file at the end of the final timestep
             of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
             in the global parameter file.                       GCT
+  2006-Sep-11 Implemented flexible output configuration; uses new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 
@@ -181,7 +185,7 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(prcp, atmos, veg_con, outfiles, soil_con->depth, 
+  put_data(prcp, atmos, veg_con, out_data_files, out_data, soil_con->depth, 
 	   soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
 	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
 	   options.Nnode, global_param->skipyear);

@@ -1,6 +1,20 @@
 /* RCS Id String
  * $Id$
  */
+/************************************************************************
+  Modifications:
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
+              Added the following new functions:
+                create_output_list
+                free_out_data_files
+                init_output_list
+                parse_output_info
+                set_output_defaults
+                set_output_var
+                zero_output_list
+************************************************************************/
+
 #include <math.h>
 #include <vicNl_def.h>
 
@@ -63,7 +77,7 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 void   check_files(infiles_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
-void   close_files(infiles_struct *, outfiles_struct *, filenames_struct *);
+void   close_files(infiles_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
@@ -76,10 +90,13 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, double *, 
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
+out_data_struct *create_output_list();
+
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
-		 outfiles_struct *,int,int,char,char, char, int);
+		 outfiles_struct *, out_data_file_struct *, out_data_struct *,
+		 int,int,char,char, char, int);
 #if QUICK_FS
 void distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
@@ -136,6 +153,7 @@ void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
 void   free_atmos(int nrecs, atmos_data_struct **atmos);
 void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_vegcon(veg_con_struct **);
+void   free_out_data_files(out_data_file_struct **);
 void   full_energy(int, atmos_data_struct *, soil_con_struct *,
 		   veg_con_struct *, dist_prcp_struct *,
 		   dmy_struct *,global_param_struct *,int,char);
@@ -152,11 +170,12 @@ double hermint(double, int, double *, double *, double *, double *, double *);
 void   hermite(int, double *, double *, double *, double *, double *);
 void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
+void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
 			double, double *, 
 #if OUTPUT_FORCE
-			char *, outfiles_struct *);
+			char *, out_data_file_struct *, out_data_struct *);
 #else
 			char *);
 #endif
@@ -180,8 +199,7 @@ dist_prcp_struct make_dist_prcp(int);
 dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int);
 filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct *, 
-				      soil_con_struct *, outfiles_struct *);
-out_data_struct *make_out_data(int);
+				      soil_con_struct *, out_data_file_struct *);
 snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
 void   MassRelease(double *,double *,double *,double *);
@@ -201,17 +219,19 @@ void   open_debug();
 FILE  *open_file(char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, int, int);
 
+void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
 double penman(double, double, double, double, double, double, double, 
 	      double, double, float, float);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			   soil_con_struct *, double *, double *);
 double priestley(double, double);
 void   put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *, 
-		outfiles_struct *, double *, double *, double, double *, 
-		char *, dmy_struct *, int, int, int, int); 
+		out_data_file_struct *, out_data_struct *, double *, double *,
+		double, double *, char *, dmy_struct *, int, int, int, int); 
 
 double quick_penman(double, double, double, double, double, double, 
 		    double, double);
+
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
 void   read_atmos_data(FILE *, global_param_struct, int, int, double **);
@@ -250,6 +270,8 @@ void set_node_parameters(double *, double *, double *, double *, double *,
 			 double ***,
 #endif
 			 int, int, char);
+out_data_file_struct *set_output_defaults(out_data_struct *);
+int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 void   setup_frozen_soil(soil_con_struct *, layer_data_struct  *,
 			 layer_data_struct *, layer_data_struct *,
 			 energy_bal_struct, int, int, int, double,
@@ -325,14 +347,14 @@ void   vicerror(char *);
 double volumetric_heat_capacity(double,double,double);
 
 void write_atmosdata(atmos_data_struct *, int);
-void write_data(out_data_struct *, outfiles_struct *, dmy_struct *, int);
+void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
 void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,
                  energy_bal_struct *, snow_data_struct *, veg_var_struct *,
                  dmy_struct *, global_param_struct *,
                  double, double, int, int, int, int, int, char);
 void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
-void write_forcing_file(atmos_data_struct *, int nrecs, outfiles_struct *);
+void write_forcing_file(atmos_data_struct *, int nrecs, out_data_file_struct *, out_data_struct *);
 #endif
 void write_layer(layer_data_struct *, int, int, double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
@@ -340,4 +362,6 @@ void write_model_state(dist_prcp_struct *, global_param_struct *, int,
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);
 void write_vegvar(veg_var_struct *, int);
+
+void zero_output_list(out_data_struct *);
 

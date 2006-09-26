@@ -22,6 +22,8 @@ void display_current_settings(int                 mode,
 	    statements.						TJB
   2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
   2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Sep-11 Implemented flexible output configuration; removed
+              OPTIMIZE and LDAS_OUTPUT options. TJB
 
 **********************************************************************/
 {
@@ -31,6 +33,7 @@ void display_current_settings(int                 mode,
   extern param_set_struct param_set;
 
   int file_num;
+  char typestr[20];
 
   if (mode == DISP_VERSION) {
     fprintf(stdout,"***** VIC Version %s *****\n",version);
@@ -62,20 +65,10 @@ void display_current_settings(int                 mode,
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Files:\n");
-#if LDAS_OUTPUT
-  fprintf(stdout,"LDAS_OUTPUT\t\tTRUE\n");
-#else
-  fprintf(stdout,"LDAS_OUTPUT\t\tFALSE\n");
-#endif
 #if LINK_DEBUG
   fprintf(stdout,"LINK_DEBUG\t\tTRUE\n");
 #else
   fprintf(stdout,"LINK_DEBUG\t\tFALSE\n");
-#endif
-#if OPTIMIZE
-  fprintf(stdout,"OPTIMIZE\t\tTRUE\n");
-#else
-  fprintf(stdout,"OPTIMIZE\t\tFALSE\n");
 #endif
 #if OUTPUT_FORCE
   fprintf(stdout,"OUTPUT_FORCE\t\tTRUE\n");
@@ -141,6 +134,52 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"ENDMONTH\t\t%d\n",global->endmonth);
     fprintf(stdout,"ENDDAY\t\t\t%d\n",global->endday);
   }
+
+  fprintf(stdout,"\n");
+  fprintf(stdout,"Simulation Parameters:\n");
+  if (options.FULL_ENERGY)
+    fprintf(stdout,"FULL_ENERGY\t\tTRUE\n");
+  else
+    fprintf(stdout,"FULL_ENERGY\t\tFALSE\n");
+  if (options.FROZEN_SOIL)
+    fprintf(stdout,"FROZEN_SOIL\t\tTRUE\n");
+  else
+    fprintf(stdout,"FROZEN_SOIL\t\tFALSE\n");
+  if (options.QUICK_FLUX)
+    fprintf(stdout,"QUICK_FLUX\t\tTRUE\n");
+  else
+    fprintf(stdout,"QUICK_FLUX\t\tFALSE\n");
+  if (options.GRND_FLUX)
+    fprintf(stdout,"GRND_FLUX\t\tTRUE\n");
+  else
+    fprintf(stdout,"GRND_FLUX\t\tFALSE\n");
+  if (options.NOFLUX)
+    fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
+  else
+    fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
+  if (options.CORRPREC)
+    fprintf(stdout,"CORRPREC\t\tTRUE\n");
+  else
+    fprintf(stdout,"CORRPREC\t\tFALSE\n");
+  if (options.DIST_PRCP)
+    fprintf(stdout,"DIST_PRCP\t\tTRUE\n");
+  else
+    fprintf(stdout,"DIST_PRCP\t\tFALSE\n");
+  if (options.MOISTFRACT)
+    fprintf(stdout,"MOISTFRACT\t\tTRUE\n");
+  else
+    fprintf(stdout,"MOISTFRACT\t\tFALSE\n");
+  if (options.COMPUTE_TREELINE)
+    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
+  else
+    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
+  fprintf(stdout,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
+  fprintf(stdout,"WIND_H\t\t\t%f\n",global->wind_h);
+  fprintf(stdout,"MEASURE_H\t\t%f\n",global->measure_h);
+  fprintf(stdout,"NODES\t\t\t%d\n",options.Nnode);
+  fprintf(stdout,"MIN_RAIN_TEMP\t\t%f\n",global->MIN_RAIN_TEMP);
+  fprintf(stdout,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
+  fprintf(stdout,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Forcing Data:\n");
@@ -241,52 +280,6 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"PRT_SNOW_BAND\t\tTRUE\n");
   else
     fprintf(stdout,"PRT_SNOW_BAND\t\tFALSE\n");
-
-  fprintf(stdout,"\n");
-  fprintf(stdout,"Simulation Parameters:\n");
-  if (options.FULL_ENERGY)
-    fprintf(stdout,"FULL_ENERGY\t\tTRUE\n");
-  else
-    fprintf(stdout,"FULL_ENERGY\t\tFALSE\n");
-  if (options.FROZEN_SOIL)
-    fprintf(stdout,"FROZEN_SOIL\t\tTRUE\n");
-  else
-    fprintf(stdout,"FROZEN_SOIL\t\tFALSE\n");
-  if (options.QUICK_FLUX)
-    fprintf(stdout,"QUICK_FLUX\t\tTRUE\n");
-  else
-    fprintf(stdout,"QUICK_FLUX\t\tFALSE\n");
-  if (options.GRND_FLUX)
-    fprintf(stdout,"GRND_FLUX\t\tTRUE\n");
-  else
-    fprintf(stdout,"GRND_FLUX\t\tFALSE\n");
-  if (options.NOFLUX)
-    fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
-  else
-    fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
-  if (options.CORRPREC)
-    fprintf(stdout,"CORRPREC\t\tTRUE\n");
-  else
-    fprintf(stdout,"CORRPREC\t\tFALSE\n");
-  if (options.DIST_PRCP)
-    fprintf(stdout,"DIST_PRCP\t\tTRUE\n");
-  else
-    fprintf(stdout,"DIST_PRCP\t\tFALSE\n");
-  if (options.MOISTFRACT)
-    fprintf(stdout,"MOISTFRACT\t\tTRUE\n");
-  else
-    fprintf(stdout,"MOISTFRACT\t\tFALSE\n");
-  if (options.COMPUTE_TREELINE)
-    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
-  else
-    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
-  fprintf(stdout,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
-  fprintf(stdout,"WIND_H\t\t\t%f\n",global->wind_h);
-  fprintf(stdout,"MEASURE_H\t\t%f\n",global->measure_h);
-  fprintf(stdout,"NODES\t\t\t%d\n",options.Nnode);
-  fprintf(stdout,"MIN_RAIN_TEMP\t\t%f\n",global->MIN_RAIN_TEMP);
-  fprintf(stdout,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
-  fprintf(stdout,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
   fprintf(stdout,"\n");
 
 }

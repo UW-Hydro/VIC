@@ -5,10 +5,10 @@
 
 static char vcid[] = "$Id$";
 
-filenames_struct make_in_and_outfiles(infiles_struct   *infp, 
-				      filenames_struct *filenames,
-				      soil_con_struct  *soil,
-				      outfiles_struct  *outfp)
+filenames_struct make_in_and_outfiles(infiles_struct       *infp, 
+				      filenames_struct     *filenames,
+				      soil_con_struct      *soil,
+				      out_data_file_struct *out_data_files)
 /**********************************************************************
 	make_in_and_outfile	Dag Lohman	January 1996
 
@@ -19,6 +19,9 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
   5/20/96	The routine was modified to accept a variable
 		number of layers, as well as to work with 
 		frozen soils					KAC
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures; removed the
+              OPTIMIZE and LDAS_OUTPUT options. TJB
 
 **********************************************************************/
 {
@@ -28,6 +31,7 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
 
   char             latchar[10], lngchar[10], junk[5];
   filenames_struct fnames;
+  int filenum;
 
   fnames = *filenames;
 
@@ -54,68 +58,18 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
       infp->forcing[1] = open_file(fnames.forcing[1], "r");
   }
 
-#if OUTPUT_FORCE
+  for (filenum=0; filenum<options.Noutfiles; filenum++) {
+    strcpy(out_data_files[filenum].filename, fnames.result_dir);
+    strcat(out_data_files[filenum].filename, out_data_files[filenum].prefix);
+    strcat(out_data_files[filenum].filename, "_");
+    strcat(out_data_files[filenum].filename, latchar);
+    strcat(out_data_files[filenum].filename, "_");
+    strcat(out_data_files[filenum].filename, lngchar);
+    if(options.BINARY_OUTPUT) 
+      out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "wb");
+    else out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "w");
+  }
 
-  strcpy(fnames.fluxes, fnames.result_dir);
-  strcat(fnames.fluxes, "full_data");
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, latchar);
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, lngchar);
-  if(options.BINARY_OUTPUT) 
-    outfp->fluxes = open_file(fnames.fluxes, "wb");
-  else outfp->fluxes = open_file(fnames.fluxes, "w");
-
-#else /* OUTPUT_FORCE */
-  /** If running frozen soils model **/
-#if !LDAS_OUTPUT && !OPTIMIZE
-   if(options.FROZEN_SOIL) {
-     strcpy(fnames.fdepth, fnames.result_dir);
-     strcat(fnames.fdepth, "fdepth");
-     strcat(fnames.fdepth, "_");
-     strcat(fnames.fdepth, latchar);
-     strcat(fnames.fdepth, "_");
-     strcat(fnames.fdepth, lngchar);
-     if(options.BINARY_OUTPUT) 
-       outfp->fdepth = open_file(fnames.fdepth, "wb");
-     else outfp->fdepth = open_file(fnames.fdepth, "w");
-   }
-#endif /* !LDAS_OUTPUT && !OPTIMIZE */
-
-  strcpy(fnames.fluxes, fnames.result_dir);
-  strcat(fnames.fluxes, "fluxes");
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, latchar);
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, lngchar);
-  if(options.BINARY_OUTPUT) 
-    outfp->fluxes = open_file(fnames.fluxes, "wb");
-  else outfp->fluxes = open_file(fnames.fluxes, "w");
-
-#if !LDAS_OUTPUT && !OPTIMIZE
-  strcpy(fnames.snow, fnames.result_dir);
-  strcat(fnames.snow, "snow");
-  strcat(fnames.snow, "_");
-  strcat(fnames.snow, latchar);
-  strcat(fnames.snow, "_");
-  strcat(fnames.snow, lngchar);
-  if(options.BINARY_OUTPUT) 
-    outfp->snow = open_file(fnames.snow, "wb");
-  else outfp->snow = open_file(fnames.snow, "w");
-
-   if(options.PRT_SNOW_BAND) {
-     strcpy(fnames.snowband, fnames.result_dir);
-     strcat(fnames.snowband, "snowband");
-     strcat(fnames.snowband, "_");
-     strcat(fnames.snowband, latchar);
-     strcat(fnames.snowband, "_");
-     strcat(fnames.snowband, lngchar);
-     if(options.BINARY_OUTPUT) 
-       outfp->snowband = open_file(fnames.snowband, "wb");
-     else outfp->snowband = open_file(fnames.snowband, "w");
-   }
-#endif /* !LDAS_OUTPUT && !OPTIMIZE */
-#endif /* OUTPUT_FORCE - else */
   return (fnames);
 
 } 

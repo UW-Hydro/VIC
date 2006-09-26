@@ -18,7 +18,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
-		      outfiles_struct          *outfiles)
+		      out_data_file_struct     *out_data_files,
+		      out_data_struct          *out_data)
 #else /* OUTPUT_FORCE */
                       char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
@@ -80,6 +81,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   16-Jun-04 Modified to pass avgJulyAirTemp argument to
 	    compute_treeline().					TJB
   2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option. TJB
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
@@ -717,7 +720,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
   // forcing data array is dumped into a new set of files.
-  write_forcing_file(atmos, global_param.nrecs, outfiles);
+  write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
 
 #endif /* !OUTPUT_FORCE */
 

@@ -45,6 +45,7 @@ void put_data(dist_prcp_struct  *prcp,
               OPTIMIZE and LDAS_OUTPUT options. TJB
   2006-Sep-14 Implemented ALMA-compliant input and output; uses the
 	      new save_data structure; tracks more variables.  TJB
+  2006-Sep-18 Implemented aggregation of output variables.  TJB
 
 **********************************************************************/
 {
@@ -78,14 +79,19 @@ void put_data(dist_prcp_struct  *prcp,
   int                     v;
   int                     i;
   int                     dt_sec;
-  int                     varid;
+  int                     out_dt_sec;
+  int                     out_step_ratio;
+  static int              step_count;
 
   cell_data_struct     ***cell;
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
 
-  dt_sec = dt*SECPHOUR;
+  dt_sec = global_param.dt*SECPHOUR;
+  out_dt_sec = global_param.out_dt*SECPHOUR;
+  out_step_ratio = (int)(out_dt_sec/dt_sec);
+  step_count++;
 
   if(options.DIST_PRCP) 
     Ndist = 2;
@@ -542,55 +548,93 @@ void put_data(dist_prcp_struct  *prcp,
 			      - out_data[OUT_DELTACC].data[0] - out_data[OUT_SNOW_FLUX].data[0]
 			      + out_data[OUT_REFREEZE_ENERGY].data[0]);
 
-  /***********************************************
-    Change of units for ALMA-compliant output
-  ***********************************************/
-  if (options.ALMA_OUTPUT) {
-    out_data[OUT_BASEFLOW].data[0] /= dt_sec;
-    out_data[OUT_EVAP].data[0] /= dt_sec;
-    out_data[OUT_EVAP_BARE].data[0] /= dt_sec;
-    out_data[OUT_EVAP_CANOP].data[0] /= dt_sec;
-    out_data[OUT_TRANSP_VEG].data[0] /= dt_sec;
-    out_data[OUT_INFLOW].data[0] /= dt_sec;
-    out_data[OUT_PREC].data[0] /= dt_sec;
-    out_data[OUT_RAINF].data[0] /= dt_sec;
-    out_data[OUT_REFREEZE].data[0] /= dt_sec;
-    out_data[OUT_RUNOFF].data[0] /= dt_sec;
-    out_data[OUT_SNOW_MELT].data[0] /= dt_sec;
-    out_data[OUT_SNOWF].data[0] /= dt_sec;
-    out_data[OUT_SUB_CANOP].data[0] /= dt_sec;
-    out_data[OUT_SUB_SNOW].data[0] /= dt_sec;
-    out_data[OUT_SUB_SNOW].data[0] += out_data[OUT_SUB_CANOP].data[0];
-    out_data[OUT_BARESOILT].data[0] += KELVIN;
-    out_data[OUT_SNOW_PACK_TEMP].data[0] += KELVIN;
-    out_data[OUT_SNOW_SURF_TEMP].data[0] += KELVIN;
-    for (index=0; index<options.Nlayer; index++) {
-      out_data[OUT_SOIL_TEMP].data[index] += KELVIN;
-    }
-    out_data[OUT_SURF_TEMP].data[0] += KELVIN;
-    out_data[OUT_VEGT].data[0] += KELVIN;
-    out_data[OUT_FDEPTH].data[0] /= 100;
-    out_data[OUT_TDEPTH].data[0] /= 100;
-    out_data[OUT_DELTACC].data[0] *= dt_sec;
-    out_data[OUT_DELTAH].data[0] *= dt_sec;
-    out_data[OUT_AIR_TEMP].data[0] += KELVIN;
-    out_data[OUT_PRESSURE].data[0] *= 1000;
-    out_data[OUT_VP].data[0] *= 1000;
-  }
-
-  /*************
-    Write Data
-  *************/
-
-  if(rec >= skipyear) {
-    if (options.BINARY_OUTPUT) {
-      for (v=0; v<N_OUTVAR_TYPES; v++) {
-        for (i=0; i<out_data[v].nelem; i++) {
-          out_data[v].data[i] *= out_data[v].mult;
-        }
+  /********************
+    Temporal Aggregation 
+    ********************/
+  for (v=0; v<N_OUTVAR_TYPES; v++) {
+    if (out_data[v].aggtype == AGG_TYPE_END) {
+      for (i=0; i<out_data[v].nelem; i++) {
+        out_data[v].aggdata[i] = out_data[v].data[i];
       }
     }
-    write_data(out_data_files, out_data, dmy, dt);
+    else if (out_data[v].aggtype == AGG_TYPE_SUM) {
+      for (i=0; i<out_data[v].nelem; i++) {
+        out_data[v].aggdata[i] += out_data[v].data[i];
+      }
+    }
+    else if (out_data[v].aggtype == AGG_TYPE_AVG) {
+      for (i=0; i<out_data[v].nelem; i++) {
+        out_data[v].aggdata[i] += out_data[v].data[i]/out_step_ratio;
+      }
+    }
   }
+
+  /********************
+    Output procedure
+    (only execute when we've completed an output interval)
+    ********************/
+  if (step_count == out_step_ratio) {
+
+    /***********************************************
+      Change of units for ALMA-compliant output
+    ***********************************************/
+    if (options.ALMA_OUTPUT) {
+      out_data[OUT_BASEFLOW].aggdata[0] /= out_dt_sec;
+      out_data[OUT_EVAP].aggdata[0] /= out_dt_sec;
+      out_data[OUT_EVAP_BARE].aggdata[0] /= out_dt_sec;
+      out_data[OUT_EVAP_CANOP].aggdata[0] /= out_dt_sec;
+      out_data[OUT_TRANSP_VEG].aggdata[0] /= out_dt_sec;
+      out_data[OUT_INFLOW].aggdata[0] /= out_dt_sec;
+      out_data[OUT_PREC].aggdata[0] /= out_dt_sec;
+      out_data[OUT_RAINF].aggdata[0] /= out_dt_sec;
+      out_data[OUT_REFREEZE].aggdata[0] /= out_dt_sec;
+      out_data[OUT_RUNOFF].aggdata[0] /= out_dt_sec;
+      out_data[OUT_SNOW_MELT].aggdata[0] /= out_dt_sec;
+      out_data[OUT_SNOWF].aggdata[0] /= out_dt_sec;
+      out_data[OUT_SUB_CANOP].aggdata[0] /= out_dt_sec;
+      out_data[OUT_SUB_SNOW].aggdata[0] /= out_dt_sec;
+      out_data[OUT_SUB_SNOW].aggdata[0] += out_data[OUT_SUB_CANOP].aggdata[0];
+      out_data[OUT_BARESOILT].aggdata[0] += KELVIN;
+      out_data[OUT_SNOW_PACK_TEMP].aggdata[0] += KELVIN;
+      out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += KELVIN;
+      for (index=0; index<options.Nlayer; index++) {
+        out_data[OUT_SOIL_TEMP].aggdata[index] += KELVIN;
+      }
+      out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;
+      out_data[OUT_VEGT].aggdata[0] += KELVIN;
+      out_data[OUT_FDEPTH].aggdata[0] /= 100;
+      out_data[OUT_TDEPTH].aggdata[0] /= 100;
+      out_data[OUT_DELTACC].aggdata[0] *= out_dt_sec;
+      out_data[OUT_DELTAH].aggdata[0] *= out_dt_sec;
+      out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
+      out_data[OUT_PRESSURE].aggdata[0] *= 1000;
+      out_data[OUT_VP].aggdata[0] *= 1000;
+    }
+
+    /*************
+      Write Data
+    *************/
+    if(rec >= skipyear) {
+      if (options.BINARY_OUTPUT) {
+        for (v=0; v<N_OUTVAR_TYPES; v++) {
+          for (i=0; i<out_data[v].nelem; i++) {
+            out_data[v].aggdata[i] *= out_data[v].mult;
+          }
+        }
+      }
+      write_data(out_data_files, out_data, dmy, global_param.out_dt);
+    }
+
+    // Reset the step count
+    step_count = 0;
+
+    // Reset the agg data
+    for (v=0; v<N_OUTVAR_TYPES; v++) {
+      for (i=0; i<out_data[v].nelem; i++) {
+        out_data[v].aggdata[i] = 0;
+      }
+    }
+
+  } // End of output procedure
 
 }

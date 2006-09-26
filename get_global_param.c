@@ -53,6 +53,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   2006-Sep-11 Implemented flexible output configuration; uses new
               N_OUTFILES, OUTFILE, and OUTVAR flags; removed the
               OPTIMIZE and LDAS_OUTPUT options. TJB
+  2006-Sep-18 Implemented aggregation of output variables.  TJB
 
 **********************************************************************/
 {
@@ -133,6 +134,9 @@ global_param_struct get_global_param(filenames_struct      *names,
       }
       else if(strcasecmp("TIME_STEP",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.dt);
+      }
+      else if(strcasecmp("OUT_STEP",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.out_dt);
       }
       else if(strcasecmp("RESOLUTION",optstr)==0) {
         sscanf(cmdstr,"%*s %f",&global.resolution);
@@ -588,6 +592,14 @@ global_param_struct get_global_param(filenames_struct      *names,
   }
 
 #endif  // !OUTPUT_FORCE
+
+  /* check the output step */
+  if (global.out_dt == 0) {
+    global.out_dt = global.dt;
+  }
+  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {
+    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
+  }
 
 #if OUTPUT_FORCE
   options.SNOW_STEP = global.dt;

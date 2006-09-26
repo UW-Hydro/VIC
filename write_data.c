@@ -54,6 +54,7 @@ void write_data(out_data_file_struct *out_data_files,
               out_data and out_data_files structures; moved the functions
               calc_energy_balance_error and calc_water_balance_error to
               the file calc_water_energy_balance_errors.c. TJB
+  2006-Sep-18 Implemented aggregation of output variables.  TJB
 
 **********************************************************************/
 {
@@ -118,37 +119,37 @@ void write_data(out_data_file_struct *out_data_files,
         ptr_idx = 0;
         if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_CHAR) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_cptr[ptr_idx++] = (char)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_cptr[ptr_idx++] = (char)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_cptr, sizeof(char), ptr_idx, out_data_files[file_idx].fh);
         }
         else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_SINT) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_siptr[ptr_idx++] = (short int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_siptr[ptr_idx++] = (short int)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_siptr, sizeof(short int), ptr_idx, out_data_files[file_idx].fh);
         }
         else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_USINT) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_usiptr[ptr_idx++] = (unsigned short int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_usiptr[ptr_idx++] = (unsigned short int)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx, out_data_files[file_idx].fh);
         }
         else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_INT) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_iptr[ptr_idx++] = (int)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_iptr[ptr_idx++] = (int)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_iptr, sizeof(int), ptr_idx, out_data_files[file_idx].fh);
         }
         else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_FLOAT) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_fptr[ptr_idx++] = (float)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_fptr[ptr_idx++] = (float)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_fptr, sizeof(float), ptr_idx, out_data_files[file_idx].fh);
         }
         else if (out_data[out_data_files[file_idx].varid[var_idx]].type == OUT_TYPE_DOUBLE) {
           for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-            tmp_dptr[ptr_idx++] = (double)out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx];
+            tmp_dptr[ptr_idx++] = (double)out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx];
           }
           fwrite(tmp_dptr, sizeof(double), ptr_idx, out_data_files[file_idx].fh);
         }
@@ -190,9 +191,9 @@ void write_data(out_data_file_struct *out_data_files,
         // Loop over this variable's elements
         for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
           if (!(var_idx == 0 && elem_idx == 0)) {
-            fprintf(out_data_files[file_idx].fh, "\t");
+            fprintf(out_data_files[file_idx].fh, "\t ");
           }
-          fprintf(out_data_files[file_idx].fh, out_data[out_data_files[file_idx].varid[var_idx]].format, out_data[out_data_files[file_idx].varid[var_idx]].data[elem_idx]);
+          fprintf(out_data_files[file_idx].fh, out_data[out_data_files[file_idx].varid[var_idx]].format, out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx]);
         }
       }
       fprintf(out_data_files[file_idx].fh, "\n");

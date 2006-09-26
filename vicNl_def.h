@@ -13,6 +13,8 @@
 	      new save_data structure; tracks more variables.
 	      Organized the physical constants into one section; got
 	      rid of redundant Stefan-Boltzmann constant.  TJB
+  2006-Sep-18 Implemented aggregation of output variables; added
+              AGG_TYPE definitions.  TJB
 
 ********************************************************************/
 /***** Version Information *****/
@@ -228,6 +230,14 @@
 #define OUT_TYPE_FLOAT   5 /* single-precision floating point */
 #define OUT_TYPE_DOUBLE  6 /* double-precision floating point */
 
+/***** Output aggregation method types *****/
+#define AGG_TYPE_AVG     0 /* average over agg interval */
+#define AGG_TYPE_BEG     1 /* value at beginning of agg interval */
+#define AGG_TYPE_END     2 /* value at end of agg interval */
+#define AGG_TYPE_MAX     3 /* maximum value over agg interval */
+#define AGG_TYPE_MIN     4 /* minimum value over agg interval */
+#define AGG_TYPE_SUM     5 /* sum over agg interval */
+
 #define min(a,b) (a < b) ? a : b
 #define max(a,b) (a > b) ? a : b
 
@@ -407,6 +417,7 @@ typedef struct {
   double wind_h;     /* height of wind measurements (m) */ 
   float  resolution; /* Model resolution (degrees) */
   int    dt;         /* Time step in hours (24/dt must be an integer) */
+  int    out_dt;     /* Output time step in hours (24/out_dt must be an integer) */
   int    endday;     /* Last day of model simulation */
   int    endmonth;   /* Last month of model simulation */
   int    endyear;    /* Last year of model simulation */
@@ -751,8 +762,16 @@ typedef struct {
 		                OUT_TYPE_FLOAT  = single precision floating point
 		                OUT_TYPE_DOUBLE = double precision floating point */
   float		mult;        /* multiplier, when written to a binary file */
+  int		aggtype;     /* type of aggregation to use;
+				AGG_TYPE_AVG    = take average value over agg interval
+				AGG_TYPE_BEG    = take value at beginning of agg interval
+				AGG_TYPE_END    = take value at end of agg interval
+				AGG_TYPE_MAX    = take maximum value over agg interval
+				AGG_TYPE_MIN    = take minimum value over agg interval
+				AGG_TYPE_SUM    = take sum over agg interval */
   int		nelem;       /* number of data values */
   double	*data;       /* array of data values */
+  double	*aggdata;    /* array of aggregated data values */
 } out_data_struct;
 
 /*******************************************************

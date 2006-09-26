@@ -91,6 +91,7 @@ COMPUTE_TREELINE	FALSE	# TRUE = replace any overstory veg types with the default
 # Output Files and Parameters
 #######################################################################
 RESULT_DIR      (put the result directory path here)	# Results directory path (with trailing "/")
+OUT_STEP	0	# Output interval (hours); if 0, OUT_STEP = TIME_STEP
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files

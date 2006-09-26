@@ -25,6 +25,7 @@ void display_current_settings(int                 mode,
   2006-Sep-11 Implemented flexible output configuration; removed
               OPTIMIZE and LDAS_OUTPUT options. TJB
   2006-Sep-14 Implemented ALMA-compliant input and output.  TJB
+  2006-Sep-18 Implemented aggregation of output variables.  TJB
 
 **********************************************************************/
 {
@@ -268,6 +269,7 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Data:\n");
   fprintf(stdout,"Result dir:\t\t%s\n",names->result_dir);
+  fprintf(stdout,"OUT_STEP\t\t%d\n",global->out_dt);
   if (options.BINARY_OUTPUT)
     fprintf(stdout,"BINARY_OUTPUT\t\tTRUE\n");
   else

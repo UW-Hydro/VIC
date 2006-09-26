@@ -290,6 +290,26 @@ ALMA-compliant input and output
 	of available output variables.
 
 
+Aggregation of output variables
+
+	Files affected:
+
+	display_current_settings.c
+	get_global_param.c
+	global.param.sample
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+	write_data.c
+
+	Description:
+
+	VIC can now aggregate the output variables to a user-defined
+	output interval, via the OUT_STEP setting in the global parameter
+	file.  Currently, the largest output interval allowed is 24 hours,
+	so this option is only useful for simulations running at sub-daily
+	time steps.
+
 
 
 Bug Fixes:

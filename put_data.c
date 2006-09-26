@@ -46,6 +46,7 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Sep-14 Implemented ALMA-compliant input and output; uses the
 	      new save_data structure; tracks more variables.  TJB
   2006-Sep-18 Implemented aggregation of output variables.  TJB
+  2006-Sep-23 Changed MOL_WT_RATIO to EPS.  TJB
 
 **********************************************************************/
 {
@@ -127,7 +128,7 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec;
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR];
-  out_data[OUT_QAIR].data[0]      = MOL_WT_RATIO * atmos->vp[NR]/atmos->pressure[NR];
+  out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];
   out_data[OUT_RAINF].data[0]     = atmos->out_rain;
   out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[NR]/(atmos->vp[NR]+atmos->vpd[NR]);
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];

@@ -15,11 +15,11 @@
 	      rid of redundant Stefan-Boltzmann constant.  TJB
   2006-Sep-18 Implemented aggregation of output variables; added
               AGG_TYPE definitions.  TJB
+  2006-Sep-23 Removed VERSION string (redundant with version in global.h).
+	      Changed OUT_EVAP_VEG to OUT_TRANSP_VEG.  Changed MOL_WT_RATIO
+	      to EPS.  TJB
 
 ********************************************************************/
-/***** Version Information *****/
-#define VERSION		"VIC Release 4.0.6"
-
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20
@@ -83,16 +83,16 @@
 #define OUT_EVAP            16  /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_EVAP_BARE       17  /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_EVAP_CANOP      18  /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_TRANSP_VEG      19  /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_INFLOW          20  /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PREC            21  /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_RAINF           22  /* rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_REFREEZE        23  /* refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_RUNOFF          24  /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_MELT       25  /* snow melt  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOWF           26  /* snowfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_CANOP       27  /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_SNOW        28  /* net sublimation from snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_INFLOW          19  /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PREC            20  /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_RAINF           21  /* rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_REFREEZE        22  /* refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_RUNOFF          23  /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_MELT       24  /* snow melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOWF           25  /* snowfall  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_CANOP       26  /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_SNOW        27  /* net sublimation from snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_TRANSP_VEG      28  /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
 // Energy Balance Terms - state variables
 #define OUT_ALBEDO          29  /* albedo [fraction] */
 #define OUT_BARESOILT       30  /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
@@ -171,7 +171,7 @@
 				   (J/deg/K) */
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
-#define MOL_WT_RATIO 0.622      /* Ratio of molecular weights: M_water_vapor/M_dry_air */
+#define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define DtoR 0.017453293	/* degrees to radians */
 #ifndef PI
 #define PI 3.1415927
@@ -569,11 +569,11 @@ typedef struct {
 			   longwave for water balance model) */
   double out_prec;      /* Total precipitation for time step - accounts
 			   for corrected precipitation totals */
+  double out_rain;      /* Rainfall for time step (mm) */
+  double out_snow;      /* Snowfall for time step (mm) */
   double prec[25];      /* average precipitation in grid cell (mm) */
   double pressure[25];  /* atmospheric pressure (kPa) */
-  double out_rain;      /* average rainfall in grid cell (mm) */
   double shortwave[25]; /* incoming shortwave radiation (W/m^2) */
-  double out_snow;      /* average snowfall in grid cell (mm) */
   double vp[25];        /* atmospheric vapor pressure (kPa) */
   double vpd[25];       /* atmospheric vapor pressure deficit (kPa) */
   double wind[25];      /* wind speed (m/s) */

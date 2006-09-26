@@ -12,6 +12,9 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   This routine sets the out_data_files and out_data structures to default values.
   These can be overridden by the user in the global control file.
 
+  Modifications:
+  2006-Sep-23 Simplified logic for fdepth and snowbands files.  TJB
+
 *************************************************************/
 
   extern option_struct options;
@@ -52,35 +55,35 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     options.Noutfiles++;
   }
   out_data_files = (out_data_file_struct *)calloc(options.Noutfiles,sizeof(out_data_file_struct));
-  strcpy(out_data_files[0].prefix,"fluxes");
+  filenum = 0;
+  strcpy(out_data_files[filenum].prefix,"fluxes");
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-    out_data_files[0].nvars = 20;
+    out_data_files[filenum].nvars = 20;
   }
   else {
-    out_data_files[0].nvars = 16;
+    out_data_files[filenum].nvars = 16;
   }
-  strcpy(out_data_files[1].prefix,"snow");
+  filenum++;
+  strcpy(out_data_files[filenum].prefix,"snow");
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-    out_data_files[1].nvars = 7;
+    out_data_files[filenum].nvars = 7;
   }
   else {
-    out_data_files[1].nvars = 3;
+    out_data_files[filenum].nvars = 3;
   }
   if (options.FROZEN_SOIL) {
-    strcpy(out_data_files[2].prefix,"fdepth");
-    out_data_files[2].nvars = 3;
-    if (options.PRT_SNOW_BAND) {
-      strcpy(out_data_files[3].prefix,"snowband");
-      out_data_files[3].nvars = 13;
-    }
+    filenum++;
+    strcpy(out_data_files[filenum].prefix,"fdepth");
+    out_data_files[filenum].nvars = 3;
   }
-  else if (options.PRT_SNOW_BAND) {
-    strcpy(out_data_files[2].prefix,"snowband");
+  if (options.PRT_SNOW_BAND) {
+    filenum++;
+    strcpy(out_data_files[filenum].prefix,"snowband");
     if (options.FULL_ENERGY) {
-      out_data_files[2].nvars = 13;
+      out_data_files[filenum].nvars = 13;
     }
     else {
-      out_data_files[2].nvars = 9;
+      out_data_files[filenum].nvars = 9;
     }
   }
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
@@ -118,7 +121,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ALBEDO", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     
   // Variables in second file
-  filenum = 1;
+  filenum++;
   varnum = 0;
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
@@ -132,31 +135,14 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 
   // Variables in other files
   if (options.FROZEN_SOIL) { 
-    filenum = 2;
+    filenum++;
     varnum = 0;
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_FDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_TDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SOIL_MOIST", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-    if (options.PRT_SNOW_BAND) {
-      filenum = 3;
-      varnum = 0;
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_CANOPY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_REFREEZE_ENERGY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NET_SHORT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NET_LONG_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ALBEDO_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LATENT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SENSIBLE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GRND_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-    }
   }
-  else if (options.PRT_SNOW_BAND) {
-    filenum = 2;
+  if (options.PRT_SNOW_BAND) {
+    filenum++;
     varnum = 0;
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);

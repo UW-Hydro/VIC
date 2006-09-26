@@ -19,6 +19,9 @@ void write_forcing_file(atmos_data_struct *atmos,
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
   2006-Sep-14 Implemented ALMA-compliant input and output.  TJB
+  2006-Sep-23 Fixed bugs in computation of QAIR and REL_HUMID;
+	      updated aggdata[] arrays to make it compatible with
+	      aggregation.  TJB
 
 **********************************************************************/
 {
@@ -42,8 +45,8 @@ void write_forcing_file(atmos_data_struct *atmos,
       out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
       out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
       out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j];
-      out_data[OUT_QAIR].data[0]      = MOL_WT_RATIO * atmos->vp[j]/atmos->pressure[j];
-      out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[j]/(atmos->vp[j]+atmos->vpd[j]);
+      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos->pressure[j];
+      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos->vp[j]+atmos->vpd[j]);
       out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
       out_data[OUT_VP].data[0]        = atmos[rec].vp[j];
       out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];
@@ -60,18 +63,26 @@ void write_forcing_file(atmos_data_struct *atmos,
         out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0]-out_data[OUT_RAINF].data[0];
       }
 
+      for (v=0; v<N_OUTVAR_TYPES; v++) {
+        for (i=0; i<out_data[v].nelem; i++) {
+          out_data[v].aggdata[i] = out_data[v].data[i];
+        }
+      }
+
       if (options.ALMA_OUTPUT) {
-        out_data[OUT_PREC].data[0] /= dt_sec;
-        out_data[OUT_RAINF].data[0] /= dt_sec;
-        out_data[OUT_SNOWF].data[0] /= dt_sec;
-        out_data[OUT_AIR_TEMP].data[0] += KELVIN;
-        out_data[OUT_PRESSURE].data[0] *= 1000;
-        out_data[OUT_VP].data[0] *= 1000;
+        out_data[OUT_PREC].aggdata[0] /= dt_sec;
+        out_data[OUT_RAINF].aggdata[0] /= dt_sec;
+        out_data[OUT_SNOWF].aggdata[0] /= dt_sec;
+        out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
+        out_data[OUT_PRESSURE].aggdata[0] *= 1000;
+        out_data[OUT_VP].aggdata[0] *= 1000;
       }
 
       if (options.BINARY_OUTPUT) {
         for (v=0; v<N_OUTVAR_TYPES; v++) {
-          out_data[v].data[0] *= out_data[v].mult;
+          for (i=0; i<out_data[v].nelem; i++) {
+            out_data[v].aggdata[i] *= out_data[v].mult;
+          }
         }
       }
       write_data(out_data_files, out_data, dummy_dmy, dummy_dt);

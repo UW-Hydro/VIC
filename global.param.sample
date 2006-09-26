@@ -28,9 +28,6 @@ MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 
 #######################################################################
 # State Files and  Parameters
-# If SAVE_STATE is TRUE in user_def.h, then remove the leading "#"
-# from the following lines.  If SAVE_STATE is FALSE, these lines
-# must either have a leading "#" or be deleted from this file.
 #######################################################################
 #INIT_STATE	(put the initial state path/filename here)	# Initial state path/file
 #STATENAME	(put the path/prefix of output state file here)	# Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY) will be appended to the prefix automatically in the format yyyymmdd.

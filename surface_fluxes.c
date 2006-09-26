@@ -75,6 +75,8 @@ void surface_fluxes(char                 overstory,
 	    value of dist, rather than just dist 0.		TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    actually used in flux calculations.			TJB
+  2006-Sep-11 Implemented flexible output configuration; moved tracking
+              of rain and snow for output to this function.  TJB
 
 **********************************************************************/
 {

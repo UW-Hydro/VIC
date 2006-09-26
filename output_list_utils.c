@@ -15,6 +15,7 @@ out_data_struct *create_output_list() {
   2006-Sep-14 Implemented ALMA-compliant input and output;
               now more variables are tracked.  TJB
   2006-Sep-18 Implemented aggregation of output variables.  TJB
+  2006-Sep-23 Renamed OUT_EVAP_VEG to OUT_TRANSP_VEG.  TJB
 
 *************************************************************/
 
@@ -67,8 +68,6 @@ out_data_struct *create_output_list() {
   out_data[OUT_EVAP_BARE].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP_CANOP].varname,"OUT_EVAP_CANOP");           /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
   out_data[OUT_EVAP_CANOP].aggtype = AGG_TYPE_SUM;
-  strcpy(out_data[OUT_TRANSP_VEG].varname,"OUT_TRANSP_VEG");           /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_INFLOW].varname,"OUT_INFLOW");                   /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
   out_data[OUT_INFLOW].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_PREC].varname,"OUT_PREC");                       /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -87,6 +86,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_SUB_CANOP].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_SUB_SNOW].varname,"OUT_SUB_SNOW");               /* net sublimation from snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
   out_data[OUT_SUB_SNOW].aggtype = AGG_TYPE_SUM;
+  strcpy(out_data[OUT_TRANSP_VEG].varname,"OUT_TRANSP_VEG");           /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
+  out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
 
   // Energy Balance Terms - state variables
   strcpy(out_data[OUT_ALBEDO].varname,"OUT_ALBEDO");                   /* albedo [fraction] */

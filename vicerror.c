@@ -13,6 +13,10 @@ void vicerror(char error_text[])
   VIC model.  This will flush all file buffers so that all records 
   that have been run will be written to disk before the model is exited.
 
+  Modifications:
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
+
 **********************************************************************/
 {
         extern option_struct options;
@@ -29,7 +33,7 @@ void vicerror(char error_text[])
 	fprintf(stderr,"VIC model run-time error...\n");
 	fprintf(stderr,"%s\n",error_text);
 	fprintf(stderr,"...now writing output files...\n");
-        close_files(&(Error.infp), &(Error.outfp), &fnames);
+        close_files(&(Error.infp), Error.out_data_files, &fnames);
 	fprintf(stderr,"...now exiting to system...\n");
         fflush(stdout);
         fflush(stderr);

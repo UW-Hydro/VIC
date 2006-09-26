@@ -27,9 +27,6 @@ int main(int argc, char *argv[])
   1997-98 Model was updated from simple 2 layer water balance to 
           an extension of the full energy and water balance 3 layer
 	  model.                                                  KAC
-  02-27-01 added controls for lake model                          KAC
-  11-18-02 Updated storage of lake water for water balance 
-           calculations.                                          LCB
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
   04-10-03 Modified to initialize storm parameters using the state
@@ -42,6 +39,15 @@ int main(int argc, char *argv[])
            water balance storage.  This accounts for changes in model
            state initialization, which now stores wet and dry fractions
            rather than just averagedvalues.                      KAC
+  29-Oct-03 Modified the version display banner to print the version
+	    string defined in global.h.				TJB
+  16-Jun-04 Modified to pass soil_con.avgJulyAirTemp to
+	    initialize_atmos().					TJB
+  2005-11-09 (Port from 4.1.0) Updated arglist for make_dist_prcp(), 
+            as part of fix for QUICK_FLUX state file compatibility. GCT
+  2006-Sep-01 (Port from 4.1.0) OUTPUT_FORCE option now calls close_files(). TJB
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
@@ -50,7 +56,7 @@ int main(int argc, char *argv[])
   extern option_struct options;
 #if LINK_DEBUG
   extern debug_struct debug;
-#endif // LINK_DEBUG
+#endif
   extern Error_struct Error;
   extern global_param_struct global_param;
 
@@ -59,7 +65,7 @@ int main(int argc, char *argv[])
   char                     NEWCELL;
   char                     LASTREC;
   char                     MODEL_DONE;
-  char                    *init_STILL_STORM;
+  char                     init_STILL_STORM;
   int                      rec, i, j;
   int                      veg;
   int                      dist;
@@ -68,7 +74,7 @@ int main(int argc, char *argv[])
   int                      Nveg_type;
   int                      cellnum;
   int                      index;
-  int                     *init_DRY_TIME;
+  int                      init_DRY_TIME;
   int                      RUN_MODEL;
   int                      Ncells;
   int                      cell_cnt;
@@ -85,25 +91,32 @@ int main(int argc, char *argv[])
   filenames_struct         filenames;
   filenames_struct         builtnames;
   infiles_struct           infiles;
-#if LAKE_MODEL
-  lake_con_struct          lake_con;
-#endif // LAKE_MODEL
   outfiles_struct          outfiles;
+  out_data_file_struct     *out_data_files;
+  out_data_struct          *out_data;
   
-#if VERBOSE
-  fprintf(stderr,"Running Model Version: %s\n",vcid);
-#endif // VERBOSE
-
   /** Read Model Options **/
   initialize_global();
   filenames = cmd_proc(argc, argv);
+
+#if VERBOSE
+  display_current_settings(DISP_VERSION,(filenames_struct*)NULL,(global_param_struct*)NULL);
+#endif
 
   /** Read Global Control File **/
   infiles.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, infiles.globalparam);
 
+  /** Set up output data structures **/
+  out_data = create_output_list();
+  out_data_files = set_output_defaults(out_data);
+  infiles.globalparam = open_file(filenames.global,"r");
+  parse_output_info(&filenames, infiles.globalparam, &out_data_files, out_data);
+
   /** Check and Open Files **/
   check_files(&infiles, &filenames);
+
+#if !OUTPUT_FORCE
 
   /** Check and Open Debugging Files **/
 #if LINK_DEBUG
@@ -112,6 +125,8 @@ int main(int argc, char *argv[])
 
   /** Read Vegetation Library File **/
   veg_lib = read_veglib(infiles.veglib,&Nveg_type);
+
+#endif // !OUTPUT_FORCE
 
   /** Initialize Parameters **/
   if(options.DIST_PRCP) Ndist = 2;
@@ -124,20 +139,19 @@ int main(int argc, char *argv[])
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
 
-#if SAVE_STATE
-  /** open state file if model state is to be saved **/
-  if ( strcmp( global_param.statename, "NONE" ) != 0 ) 
-    outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
-					 options.Nnode);
-  else outfiles.statefile = NULL;
-#endif
-
+  startrec = 0;
+#if !OUTPUT_FORCE
   if ( options.INIT_STATE ) 
     infiles.statefile = check_state_file(filenames.init_state, dmy, 
 					 &global_param, options.Nlayer, 
 					 options.Nnode, &startrec);
-  else
-    startrec = 0;
+
+  /** open state file if model state is to be saved **/
+  if ( options.SAVE_STATE  && strcmp( global_param.statename, "NONE" ) != 0 ) 
+    outfiles.statefile = open_state_file(&global_param, options.Nlayer, 
+					 options.Nnode);
+  else outfiles.statefile = NULL;
+#endif // !OUTPUT_FORCE
 
   /************************************
     Run Model for all Active Grid Cells
@@ -168,7 +182,6 @@ int main(int argc, char *argv[])
       if(debug.PRT_SOIL) write_soilparam(&soil_con); 
 #endif
 
-#if !OUTPUT_FORCE
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
       if(options.FROZEN_SOIL) {
@@ -189,6 +202,8 @@ int main(int argc, char *argv[])
       NEWCELL=TRUE;
       cellnum++;
 
+#if !OUTPUT_FORCE
+
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
                               Nveg_type);
@@ -198,16 +213,9 @@ int main(int argc, char *argv[])
 #endif /* LINK_DEBUG*/
 #endif /* !OUTPUT_FORCE */
 
-#if LAKE_MODEL
-      if ( options.LAKES ) 
-	lake_con = read_lakeparam(infiles.lakeparam, soil_con, 
-				  global_param.resolution, 
-				  &veg_con[0].Cv_sum);
-#endif // LAKE_MODEL
-
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
-                   &outfiles);
+                   out_data_files);
 
 #if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/
@@ -217,8 +225,10 @@ int main(int argc, char *argv[])
 		    &soil_con.AboveTreeLine);
 
       /** Make Precipitation Distribution Control Structure **/
-      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num, 
-				&options.Nnode);
+      prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
+
+#endif /* !OUTPUT_FORCE */
+
 
       /**************************************************
          Initialize Meteological Forcing Values That
@@ -228,19 +238,20 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
-#endif /* !OUTPUT_FORCE */
 
-      initialize_atmos(atmos, dmy, infiles.forcing,
+      initialize_atmos(atmos, dmy, infiles.forcing, 
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
-		       soil_con.rough, soil_con.Tfactor, 
+		       soil_con.rough, soil_con.avgJulyAirTemp, 
+		       soil_con.Tfactor,
 #if OUTPUT_FORCE
-		       soil_con.AboveTreeLine, &outfiles); 
+		       soil_con.AboveTreeLine, out_data_files, out_data); 
 #else /* OUTPUT_FORCE */
                        soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
-
+      
+#if !OUTPUT_FORCE
 #if LINK_DEBUG
       if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
 #endif
@@ -249,17 +260,13 @@ int main(int argc, char *argv[])
         Initialize Energy Balance and Snow Variables 
       **************************************************/
 
-#if !OUTPUT_FORCE
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-      initialize_model_state(atmos[0].air_temp[NR], Ndist, options.Nnode, 
-			     veg_con[0].vegetat_type_num, soil_con.gridcel, 
-			     &prcp, dmy[0], &global_param, infiles, 
-#if LAKE_MODEL
-			     lake_con,
-#endif // LAKE_MODEL
-			     &soil_con, veg_con, &init_STILL_STORM,
+      initialize_model_state(&prcp, dmy[0], atmos[0].air_temp[NR], 
+			     &global_param, infiles, soil_con.gridcel, 
+			     veg_con[0].vegetat_type_num, options.Nnode, 
+			     Ndist, &soil_con, veg_con, &init_STILL_STORM,
 			     &init_DRY_TIME);
 
 
@@ -270,6 +277,7 @@ int main(int argc, char *argv[])
       /** Update Error Handling Structure **/
       Error.outfp = outfiles;
       Error.infp = infiles;
+      Error.out_data_files = out_data_files;
 
       /***************************************************
 	Intialize Moisture and Energy Balance Error Checks
@@ -303,19 +311,6 @@ int main(int argc, char *argv[])
 	  }
 	}
       }
-
-#if LAKE_MODEL
-      if ( options.LAKES && lake_con.Cl[0] > 0) {
-	/** COMPUTE MOISTURE STORAGE IN LAKE FRACTION **/
-	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
-				     / lake_con.basin[0]) * 1000.;
-	band = 0;
-	veg = veg_con[0].vegetat_type_num + 1;
-	for(index=0;index<options.Nlayer;index++)
-	  storage += lake_con.Cl[0] * prcp.cell[WET][veg][band].layer[index].moist; 
-      }
-#endif // LAKE_MODEL
-
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
 
@@ -328,22 +323,19 @@ int main(int argc, char *argv[])
         if ( rec == global_param.nrecs - 1 ) LASTREC = TRUE;
         else LASTREC = FALSE;
 
-        dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
-                  dmy, &global_param, 
-#if LAKE_MODEL
-		  &lake_con, 
-#endif /* LAKE_MODEL */
-		  &outfiles, rec, cellnum,
-                  NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
+        dist_prec( &atmos[rec], &prcp, &soil_con, veg_con, dmy, &global_param,
+                   &outfiles, out_data_files, out_data, rec, cellnum,
+		   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME );
         NEWCELL=FALSE;
-	for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ )
-	  init_DRY_TIME[veg] = -999;
-	if ( options.LAKES )
-	  init_DRY_TIME[veg_con[0].vegetat_type_num+1] = -999;
+	init_DRY_TIME = -999;
 
       }	/* End Rec Loop */
 
-      close_files(&infiles,&outfiles,&builtnames); 
+#endif /* !OUTPUT_FORCE */
+
+      close_files(&infiles,out_data_files,&builtnames); 
+
+#if !OUTPUT_FORCE
 
 #if QUICK_FS
       if(options.FROZEN_SOIL) {
@@ -365,10 +357,10 @@ int main(int argc, char *argv[])
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
       free((char *)soil_con.AboveTreeLine);
-#endif /* !OUTPUT_FORCE */
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);
       free((char*)soil_con.layer_node_fract);
+#endif /* !OUTPUT_FORCE */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
 

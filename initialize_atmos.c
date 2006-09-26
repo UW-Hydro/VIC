@@ -14,10 +14,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
+		      double                    avgJulyAirTemp,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
-		      outfiles_struct          *outfiles)
+		      out_data_file_struct     *out_data_files,
+		      out_data_struct          *out_data)
 #else /* OUTPUT_FORCE */
                       char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
@@ -60,13 +62,27 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    (that might be needed for the snow model) within each
 	    record, eliminating the on the fly estimations used in
 	    previous versions of the model.              Bart and Greg
-  01-17-01  Pressure and vapor pressure read from a forcing file are
-            converted from kPa to Pa.  This preserves the original
-            format of the forcing files (where pressure was supposed 
-            to be in kPa, but allows VIC to use Pa internally, eliminating
-            the need to convert to Pa every time it is used.     KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
+  09-02-2003 Moved COMPUTE_TREELINE flag from user_def.h to the 
+             options structure.  Now when not set to FALSE, the 
+             value indicates the default above treeline vegetation
+             if no usable vegetation types are in the grid cell 
+             (i.e. everything has a canopy).  A negative value  
+             will cause the model to use bare soil.  Make sure that 
+             positive index value refer to a non-canopied vegetation
+             type in the vegetation library.                   KAC
+  07-May-04 Replaced
+		rint(something)
+	    with
+		(float)(int)(something + 0.5)
+	    to handle rounding errors without resorting to rint()
+	    function.						TJB
+  16-Jun-04 Modified to pass avgJulyAirTemp argument to
+	    compute_treeline().					TJB
+  2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option. TJB
+  2006-Sep-11 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
@@ -316,7 +332,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
       sum = 0;
       for (i = 0; i < NF; i++, step++) {
-	atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
+	atmos[rec].shortwave[i] = forcing_data[SHORTWAVE][idx];
 	sum += atmos[rec].shortwave[i];
 	idx++;
       }
@@ -384,7 +400,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	for (i = 0; i < stepspday; i++) {
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
-	    atmos[rec].vp[j] = forcing_data[VP][day] * kPa2Pa;
+	    atmos[rec].vp[j] = forcing_data[VP][day];
 	    atmos[rec].vpd[j] = (svp(atmos[rec].air_temp[j]) 
 				 - atmos[rec].vp[j]);
 	    sum += atmos[rec].vp[j];
@@ -404,7 +420,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for(rec = 0; rec < global_param.nrecs; rec++) {
 	sum = 0;
 	for(i = 0; i < NF; i++) {
-	  atmos[rec].vp[i] = forcing_data[VP][idx] * kPa2Pa;
+	  atmos[rec].vp[i] = forcing_data[VP][idx];
+
+
+	  atmos[rec].vp[i] = ((float)(int)(atmos[rec].vp[i]*1000 + 0.5)/1000);
+
+
 	  atmos[rec].vpd[i] = (svp(atmos[rec].air_temp[i]) 
 			       - atmos[rec].vp[i]);
 	  sum += atmos[rec].vp[i];
@@ -569,14 +590,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /**************************************
-    Estimate Atmospheric Pressure (Pa) 
+    Estimate Atmospheric Pressure (kPa) 
   **************************************/
 
   if(!param_set.TYPE[PRESSURE].SUPPLIED) {
     if(!param_set.TYPE[DENSITY].SUPPLIED) {
       /* set pressure to constant value */
       for (rec = 0; rec < global_param.nrecs; rec++) {
-	atmos[rec].pressure[NR] = 95500.;
+	atmos[rec].pressure[NR] = 95.5;
 	for (i = 0; i < NF; i++) {
 	  atmos[rec].pressure[i] = atmos[rec].pressure[NR];
 	}
@@ -586,10 +607,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* use observed densities to estimate pressure */
       for (rec = 0; rec < global_param.nrecs; rec++) {
 	atmos[rec].pressure[NR] = (275.0 + atmos[rec].air_temp[NR])
-	  *atmos[rec].density[NR]/0.003486;
+	  *atmos[rec].density[NR]/3.486;
 	for (i = 0; i < NF; i++) {
 	  atmos[rec].pressure[i] = (275.0 + atmos[rec].air_temp[i])
-	    *atmos[rec].density[i]/0.003486;
+	    *atmos[rec].density[i]/3.486;
 	}
       }
     }
@@ -603,7 +624,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	for (i = 0; i < stepspday; i++) {
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
-	    atmos[rec].pressure[j] = forcing_data[PRESSURE][day] * kPa2Pa;
+	    atmos[rec].pressure[j] = forcing_data[PRESSURE][day];
 	    sum += atmos[rec].pressure[j];
 	  }
 	  if(NF>1) atmos[rec].pressure[NR] = sum / (float)NF;
@@ -617,7 +638,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for(rec = 0; rec < global_param.nrecs; rec++) {
 	sum = 0;
 	for(i = 0; i < NF; i++) {
-	  atmos[rec].pressure[i] = forcing_data[PRESSURE][idx] * kPa2Pa;
+	  atmos[rec].pressure[i] = forcing_data[PRESSURE][idx];
 	  sum += atmos[rec].pressure[i];
 	  idx++;
 	}
@@ -632,10 +653,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   if(!param_set.TYPE[DENSITY].SUPPLIED) {
     for (rec = 0; rec < global_param.nrecs; rec++) {
-      atmos[rec].density[NR] = 0.003486*atmos[rec].pressure[NR]/
+      atmos[rec].density[NR] = 3.486*atmos[rec].pressure[NR]/
 	(275.0 + atmos[rec].air_temp[NR]);
       for (i = 0; i < NF; i++) {
-	atmos[rec].density[i] = 0.003486*atmos[rec].pressure[i]/
+	atmos[rec].density[i] = 3.486*atmos[rec].pressure[i]/
 	  (275.0 + atmos[rec].air_temp[i]);
       }
     }
@@ -663,7 +684,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	atmos[rec].snowflag[i] = FALSE;
     }
   }
-#endif // OUTPUT_FORCE
+#endif
  
   // Free temporary parameters
   free(hourlyrad);
@@ -681,19 +702,26 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
-#if COMPUTE_TREELINE
-  // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
-  // is processed to identify the treeline.
-  if ( options.SNOW_BAND )
-    compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
-#endif // COMPUTE_TREELINE
+#if !OUTPUT_FORCE
 
-#if OUTPUT_FORCE_STATS
-  calc_forcing_stats(global_param.nrecs, atmos);
-#endif // OUTPUT_FORCE_STATS
+  // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
+  // specifically been turned off for this cell (by supplying avgJulyAirTemp
+  // and setting it to -999), calculate which snowbands are above the
+  // treeline, based on average July air temperature.
+  if (options.COMPUTE_TREELINE) {
+    if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
+      if ( options.SNOW_BAND ) {
+        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+      }
+    }
+  }
 
-#if OUTPUT_FORCE
-  write_forcing_file(atmos, global_param.nrecs, outfiles);
-#endif // OUTPUT_FORCE 
+#else
+
+  // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
+  // forcing data array is dumped into a new set of files.
+  write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+
+#endif /* !OUTPUT_FORCE */
 
 }

@@ -5,9 +5,9 @@
  
 static char vcid[] = "$Id$";
 
-void close_files(infiles_struct   *inf,
-                 outfiles_struct  *outf,
-                 filenames_struct *fnames)
+void close_files(infiles_struct       *inf,
+                 out_data_file_struct *out_data_files,
+                 filenames_struct     *fnames)
 /**********************************************************************
 	close_files	Dag Lohmann		January 1996
 
@@ -17,8 +17,9 @@ void close_files(infiles_struct   *inf,
   7-19-96  Files are now gzipped when they are closed.  This
 	   was added to save space when using large volumes
 	   of data.						KAC
-  02-27-01 Now closes files opened for lake model applications  KAC
-  11-18-02 Now closes lake debugging file.                      LCB
+  2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
+  2006-Sep-11 Implemented flexible output configuration, using
+              new out_data_files structure. TJB
 
 **********************************************************************/
 {
@@ -26,6 +27,8 @@ void close_files(infiles_struct   *inf,
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
+
+  int filenum;
 
   /**********************
     Close All Input Files
@@ -42,38 +45,12 @@ void close_files(infiles_struct   *inf,
     Close Output Files
     *******************/
 
-  /** Energy and Moisture Fluxes Output File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-#if !LDAS_OUTPUT && !OPTIMIZE
-
-  /** These output files are not used when using LDAS binary format **/
-
-  /** Frozen Soils Output File **/
-  if(options.FROZEN_SOIL) {
-    fclose(outf->fdepth);
-    if(options.COMPRESS) compress_files(fnames->fdepth);
+  for (filenum=0; filenum<options.Noutfiles; filenum++) {
+    fclose(out_data_files[filenum].fh);
+    if(options.COMPRESS) compress_files(out_data_files[filenum].filename);
   }
 
-  /** Snow Data Output File **/
-  fclose(outf->snow);
-  if(options.COMPRESS) compress_files(fnames->snow);
-
-  if(options.PRT_SNOW_BAND) {
-    fclose(outf->snowband);
-    if(options.COMPRESS) compress_files(fnames->snowband);
-  }
-
-#if LAKE_MODEL
-  if ( options.LAKES ) {
-    /** Lake Data Output File **/
-    fclose(outf->lake);
-    if(options.COMPRESS) compress_files(fnames->lakeparam);
-  }
-#endif
-
-#endif
+#if !OUTPUT_FORCE
 
   /*******************************
     Close All Used Debugging Files
@@ -89,9 +66,6 @@ void close_files(infiles_struct   *inf,
   if(debug.DEBUG || debug.PRT_KAPPA) {
     fclose(debug.fg_kappa);
   }
-  if(debug.DEBUG || debug.PRT_LAKE) {
-    fclose(debug.fg_lake);
-  }
   if(debug.DEBUG || debug.PRT_BALANCE) {
     fclose(debug.fg_balance);
   }
@@ -104,6 +78,7 @@ void close_files(infiles_struct   *inf,
   if(debug.DEBUG || debug.PRT_GRID) {
     fclose(debug.fg_grid);
   }
-#endif
+#endif /* LINK_DEBUG */
+#endif /* !OUTPUT_FORCE */
 
 }

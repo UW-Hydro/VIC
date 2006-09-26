@@ -11,16 +11,15 @@ void dist_prec(atmos_data_struct   *atmos,
                veg_con_struct      *veg_con,
                dmy_struct          *dmy,
                global_param_struct *global_param,
-#if LAKE_MODEL
-	       lake_con_struct     *lake_con,
-#endif /* LAKE_MODEL */
                outfiles_struct     *outfiles,
+               out_data_file_struct  *out_data_files,
+               out_data_struct     *out_data,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
                char                 LASTREC,
-	       char                *init_STILL_STORM,
-	       int                 *init_DRY_TIME) {
+	       char                 init_STILL_STORM,
+	       int                  init_DRY_TIME) {
 /**********************************************************************
   dist_prec		Keith Cherkauer		October 9, 1997
 
@@ -41,10 +40,6 @@ void dist_prec(atmos_data_struct   *atmos,
            for at least one day, before allowing the model to 
 	   average soil moisture when a new precipitation event
 	   arrives.                                             KAC
-  03-05-01 Fixed error in which distributed precipitation accounting
-           variables (DRY_TIME, STILL_STORM, ANY_SNOW) were used 
-           within the vegetation loop, but did not store separate
-           values for each vegetation type.                     KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
            the model can make use of the computed treeline.     KAC
   03-27-03 Modified calculation of DRY_TIME.  Originally the check
@@ -55,6 +50,11 @@ void dist_prec(atmos_data_struct   *atmos,
            the cell has been drying for a full 24 hours.     RS & KAC
   04-10-03 Modified to store STILL_STORM and DRY_TIME in the model
            statefile, so that full conditions will be preserved.  KAC
+  02-Feb-05 Modified to save state file at the end of the final timestep
+            of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
+            in the global parameter file.                       GCT
+  2006-Sep-11 Implemented flexible output configuration; uses new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 
@@ -64,39 +64,21 @@ void dist_prec(atmos_data_struct   *atmos,
   extern debug_struct debug;
 #endif
 
-  static char STILL_STORM[MAX_VEG];
-  static int  DRY_TIME[MAX_VEG];
+  static char STILL_STORM;
+  static int  DRY_TIME;
 
-  char    ANY_SNOW[MAX_VEG];
+  char    ANY_SNOW;
   int     veg, i;
   int     month;
   double  Wdmax;
   double  NEW_MU;
 
-#if SAVE_STATE
-
-  /************************************
-    Save model state at assigned date
-  ************************************/
-
-  if ( outfiles->statefile != NULL
-       &&  ( dmy[rec].hour == 0 
-	     && dmy[rec].year == global_param->stateyear
-	     && dmy[rec].month == global_param->statemonth 
-	     && dmy[rec].day == global_param->stateday ) )
-    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
-		      soil_con->gridcel, outfiles, soil_con,
-		      STILL_STORM, DRY_TIME);
-
-#endif
 
   // check if state file has been used to initialize storm tracking
   if ( init_DRY_TIME >= 0 ) {
     // initialize storm tracking
-    for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
-      DRY_TIME[veg] = init_DRY_TIME[veg];
-      STILL_STORM[veg] = init_STILL_STORM[veg];
-    }
+    DRY_TIME = init_DRY_TIME;
+    STILL_STORM = init_STILL_STORM;
   }
 
   if(options.DIST_PRCP) {
@@ -106,66 +88,65 @@ void dist_prec(atmos_data_struct   *atmos,
     *******************************************/
      
     NEW_MU = 1.0 - exp(-options.PREC_EXPT*atmos->prec[NR]);
-    for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
-      ANY_SNOW[veg] = FALSE;
-      for ( i = 0; i < options.SNOW_BAND; i++ )
+    for(veg=0; veg<=veg_con[0].vegetat_type_num; veg++) {
+      ANY_SNOW = FALSE;
+      for(i=0; i<options.SNOW_BAND; i++)
         /* Check for snow on ground or falling */
-	if ( prcp->snow[veg][i].swq > 0 
-	     || prcp->snow[veg][i].snow_canopy > 0. ) 
-	  ANY_SNOW[veg] = TRUE;
-      if ( ANY_SNOW[veg] || atmos->snowflag[NR] ) {
+	if(prcp->snow[veg][i].swq > 0 
+	   || prcp->snow[veg][i].snow_canopy > 0.) 
+	  ANY_SNOW = TRUE;
+      if(ANY_SNOW || atmos->snowflag[NR]) {
         /* If snow present, mu must be set to 1. */
 	NEW_MU = 1.;
-	if ( rec == 0 ) {
+	if(rec == 0) {
           /* Set model variables if first time step */
-	  prcp->mu[veg] = NEW_MU;
-	  if ( atmos->prec[NR] > 0 ) 
-	    STILL_STORM[veg] = TRUE;
+	  prcp->mu[veg]=NEW_MU;
+	  if(atmos->prec[NR] > 0) 
+	    STILL_STORM=TRUE;
 	  else 
-	    STILL_STORM[veg] = FALSE;
-          DRY_TIME[veg] = 0;
+	    STILL_STORM=FALSE;
+          DRY_TIME = 0;
 	} 
-	ANY_SNOW[veg] = TRUE;
+	ANY_SNOW = TRUE;
       }
       else {
-	if ( rec == 0 ) {
-	  if ( atmos->prec[NR] == 0 ) {
+	if(rec==0) {
+	  if(atmos->prec[NR] == 0) {
 	    /* If first time step has no rain, than set mu to 1. */
-	    prcp->mu[veg]    = 1.;
-	    NEW_MU           = 1.;
-	    STILL_STORM[veg] = TRUE;
-	    DRY_TIME[veg]    = 24;
+	    prcp->mu[veg] = 1.;
+	    NEW_MU=1.;
+	    STILL_STORM = TRUE;
+	    DRY_TIME = 24;
 	  }
 	  else {
 	    /* If first time step has rain, then set mu based on intensity */
-	    prcp->mu[veg]    = NEW_MU;
-	    STILL_STORM[veg] = TRUE;
-	    DRY_TIME[veg]    = 0;
+	    prcp->mu[veg]=NEW_MU;
+	    STILL_STORM=TRUE;
+	    DRY_TIME = 0;
 	  }
 	}
-	else if(atmos->prec[NR] == 0 && DRY_TIME[veg] >= 24.) {
+	else if(atmos->prec[NR] == 0 && DRY_TIME >= 24.) {
           /* Check if storm has ended */
-	  NEW_MU           = prcp->mu[veg];
-	  STILL_STORM[veg] = FALSE;
-          DRY_TIME[veg]    = 0;
+	  NEW_MU=prcp->mu[veg];
+	  STILL_STORM=FALSE;
+          DRY_TIME = 0;
 	}
-        else if ( atmos->prec[NR] == 0 ) {
+        else if(atmos->prec[NR] == 0) {
 	  /* May be pause in storm, keep track of pause length */
-	  NEW_MU         = prcp->mu[veg];
-	  DRY_TIME[veg] += global_param->dt;
+	  NEW_MU=prcp->mu[veg];
+	  DRY_TIME += global_param->dt;
 	}
       }
 
-      if ( !STILL_STORM[veg] && (atmos->prec[NR] > STORM_THRES 
-				 || ANY_SNOW[veg] ) ) {
+      if(!STILL_STORM && (atmos->prec[NR] > STORM_THRES || ANY_SNOW)) {
 	/** Average soil moisture before a new storm **/
 	initialize_new_storm(prcp->cell,prcp->veg_var,
 			     veg,veg_con[0].vegetat_type_num,rec,
 			     prcp->mu[veg],NEW_MU);
-	STILL_STORM[veg] = TRUE;
-	prcp->mu[veg]    = NEW_MU;
+	STILL_STORM=TRUE;
+	prcp->mu[veg] = NEW_MU;
       }
-      else if ( NEW_MU != prcp->mu[veg] && STILL_STORM[veg] ) {
+      else if(NEW_MU != prcp->mu[veg] && STILL_STORM) {
 	/** Redistribute soil moisture during the storm if mu changes **/
 	if ( dmy[rec].day == 1 && dmy[rec].hour == 0 ) {
 	  month = dmy[rec].month - 2;
@@ -184,11 +165,8 @@ void dist_prec(atmos_data_struct   *atmos,
     }
 
     /** Solve model time step **/
-    full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
-#if LAKE_MODEL
-		lake_con, 
-#endif /* LAKE_MODEL */
-		soil_con, veg_con);
+    full_energy(rec, atmos, soil_con, veg_con, prcp, dmy, global_param, 
+		cellnum, NEWCELL);
 
   }
 
@@ -198,11 +176,8 @@ void dist_prec(atmos_data_struct   *atmos,
       Controls Grid Cell Averaged Precipitation Model
     **************************************************/
 
-    full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
-#if LAKE_MODEL
-		lake_con, 
-#endif /* LAKE_MODEL */
-		soil_con, veg_con);
+    full_energy(rec, atmos, soil_con, veg_con, prcp, dmy, global_param, 
+		cellnum, NEWCELL);
 
   }
 
@@ -210,16 +185,25 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(soil_con->AboveTreeLine, soil_con->AreaFract, soil_con->depth, 
-	   soil_con->dz_node, 
-#if SPATIAL_FROST
-	   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-	   soil_con->dp, options.Nnode, global_param->dt, rec, 
-	   global_param->skipyear, atmos, prcp, &dmy[rec], 
-#if LAKE_MODEL
-	   lake_con,
-#endif // LAKE_MODEL 
-	   outfiles, veg_con);
+  put_data(prcp, atmos, veg_con, out_data_files, out_data, soil_con->depth, 
+	   soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
+	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
+	   options.Nnode, global_param->skipyear);
+
+
+  /************************************
+    Save model state at assigned date
+  ************************************/
+
+  if ( outfiles->statefile != NULL
+       &&  ( dmy[rec].year == global_param->stateyear
+	     && dmy[rec].month == global_param->statemonth 
+	     && dmy[rec].day == global_param->stateday
+             && ( rec == global_param->nrecs-1
+                  || dmy[rec+1].day != global_param->stateday ) ) )
+    write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
+		      soil_con->gridcel, outfiles, soil_con,
+		      STILL_STORM, DRY_TIME);
+
 
 }

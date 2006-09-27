@@ -77,6 +77,7 @@ void surface_fluxes(char                 overstory,
 	    actually used in flux calculations.			TJB
   2006-Sep-11 Implemented flexible output configuration; moved tracking
               of rain and snow for output to this function.  TJB
+  2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.  TJB
 
 **********************************************************************/
 {
@@ -107,6 +108,8 @@ void surface_fluxes(char                 overstory,
   double                 step_ppt[2];
   double                 step_snow_energy;
   double                 step_out_prec;
+  double                 step_out_rain;
+  double                 step_out_snow;
   double                 step_out_short;
   double                 step_Evap;
   double                 step_melt;
@@ -245,7 +248,8 @@ void surface_fluxes(char                 overstory,
 			    displacement, ref_height, surf_atten, 
 			    gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 
 			    gp->wind_h, moist, ice0, dp, bare_albedo, 
-			    rainfall, &step_out_prec, Le, Ls, aero_resist, aero_resist_used,
+			    rainfall, &step_out_prec, &step_out_rain, &step_out_snow,
+			    Le, Ls, aero_resist, aero_resist_used,
 			    wind, &step_net_short, &step_out_short, &step_rad, 
 			    &step_Evap, &step_snow_energy, snow_inflow, 
 			    step_ppt, gauge_correction, root);
@@ -302,7 +306,8 @@ void surface_fluxes(char                 overstory,
       
     store_melt  += step_melt;
     out_prec[0] += step_out_prec * mu;
-    out_rain[0] += calc_rainonly(air_temp, step_out_prec, gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, mu);
+    out_rain[0] += step_out_rain * mu;
+    out_snow[0] += step_out_snow * mu;
    
     if(overstory)
       store_shortwave += step_snow.coverage * snow_energy.shortwave 
@@ -342,7 +347,6 @@ void surface_fluxes(char                 overstory,
   snow->canopy_vapor_flux = store_canopy_vapor_flux;
   (*Melt) = store_melt;
   for(dist = 0; dist < 2; dist++) ppt[dist] = store_ppt[dist];
-  out_snow[0] = out_prec[0] - out_rain[0];
 
   /******************************************************
     Store energy flux averages for sub-model time steps 

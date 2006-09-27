@@ -15,6 +15,8 @@
                 zero_output_list
   2006-Sep-14 Implemented ALMA-compliant input and output; several functions
 	      now take the save_data structure as an argument.  TJB
+  2006-Sep-26 Added 2 arguments to solve_snow(), to track out_rain and
+	      out_snow.  TJB
 ************************************************************************/
 
 #include <math.h>
@@ -307,7 +309,7 @@ double solve_snow(snow_data_struct *, layer_data_struct *,
 		  double, double, double, double, double, double *, double *,
 		  double *, double *, double *, double *, double *, double *,
 		  double *, double *, double *, double *, double *, double *, 
-		  double *, float *);
+		  double *, double *, double *, float *);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS

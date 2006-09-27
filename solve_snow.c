@@ -44,6 +44,8 @@ double solve_snow(snow_data_struct    *snow,
 		  double               bare_albedo,
 		  double              *rainfall,
 		  double              *out_prec,
+		  double              *out_rain,
+		  double              *out_snow,
 		  double              *Le,
 		  double              *Ls,
 		  double              *aero_resist,
@@ -87,6 +89,7 @@ double solve_snow(snow_data_struct    *snow,
            flag can trigger rapid very early season melt     KAC
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    actually used in flux calculations.			TJB
+  2006-Sep-26 Added tracking of out_rain and out_snow.  TJB
 
 *********************************************************************/
 
@@ -122,6 +125,8 @@ double solve_snow(snow_data_struct    *snow,
   rainfall[DRY] = 0.;
   if(snowfall[WET] < 1e-5) snowfall[WET] = 0.;
   (*out_prec) = snowfall[WET] + rainfall[WET];
+  (*out_rain) = rainfall[WET];
+  (*out_snow) = snowfall[WET];
   store_snowfall = snowfall[WET];
 
   /** Compute latent heats **/

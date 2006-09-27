@@ -19,11 +19,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#define GRAMSPKG 1000.
-#define CH_WATER 4186.8e3
-#define JOULESPCAL     4.1868   /* Joules per calorie */
-#define EPS            0.622    /* ratio of molecular weight of water vapor to
-                                   that for dry air */
 #define CP          1013.0      /* Specific heat of moist air at constant 
                                    pressure (J/(kg*C)) */
 /*****************************************************************************
@@ -53,6 +48,8 @@
     28-Sep-04 Added Ra_used to store the aerodynamic resistance actually
 	      used in flux calculations.				TJB
   2006-Sep-14 Got rid of redundant STEFAN constant; replaced with STEFAN_B.  TJB
+  2006-Sep-26 Got rid of redundant definition of EPS; moved definitions of GRAMSPKG, 
+	      CH_WATER, and JOULESPCAL to vicNl_def.h.  TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -253,8 +250,4 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   return RestTerm;
 }
 
-#undef GRAMSPKG
-#undef CH_WATER
-#undef JOULESPCAL
-#undef EPS
 #undef CP

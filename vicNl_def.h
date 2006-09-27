@@ -18,6 +18,8 @@
   2006-Sep-23 Removed VERSION string (redundant with version in global.h).
 	      Changed OUT_EVAP_VEG to OUT_TRANSP_VEG.  Changed MOL_WT_RATIO
 	      to EPS.  TJB
+  2006-Sep-26 Moved definitions of GRAMSPKG, CH_WATER, and JOULESPCAL from
+	      SnowPackEnergyBalance() to here.  TJB
 
 ********************************************************************/
 /***** Model Constants *****/
@@ -170,8 +172,11 @@
 #define Cp           1004.0	/* Specific heat at constant pressure of air 
 				   (J/deg/K) */
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
+#define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
+#define JOULESPCAL   4.1868     /* Joules per calorie */
+#define GRAMSPKG     1000.      /* convert grams to kilograms */
 #define DtoR 0.017453293	/* degrees to radians */
 #ifndef PI
 #define PI 3.1415927

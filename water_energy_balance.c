@@ -41,6 +41,8 @@
 
   Modifications:
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+  2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.  TJB
+
 *****************************************************************************/
 void water_energy_balance(int numnod, double * surface, double *evapw,
 	      int               dt,
@@ -137,7 +139,7 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
      * Calculate the outgoing long wave fluxes, positive downwards.
      * -------------------------------------------------------------------- */
 
-    *LWnet = longwave -EMH2O*STEFAN*Tskin*Tskin*Tskin*Tskin;
+    *LWnet = longwave -EMH2O*STEFAN_B*Tskin*Tskin*Tskin*Tskin;
   
     /*************************************************************
       Use a Triadiagonal Matric to Explicitly Solve for 

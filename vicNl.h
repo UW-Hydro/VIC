@@ -1,8 +1,25 @@
+/* RCS Id String
+ * $Id$
+ */
+/************************************************************************
+  Modifications:
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              out_data, out_data_files, and save_data structures. TJB
+	      Removed the following functions:
+		conv_force_vic2alma
+		conv_results_vic2alma
+	      Added the following new functions:
+		create_output_list
+		free_out_data_files
+		init_output_list
+		parse_output_info
+		set_output_defaults
+		set_output_var
+		zero_output_list
+************************************************************************/
+
 #include <math.h>
 #include <vicNl_def.h>
-
-// $Id$
-
 #if LAKE_MODEL
 #include <LAKE.h>
 #endif // LAKE_MODEL
@@ -95,7 +112,7 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 void   check_files(infiles_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
-void   close_files(infiles_struct *, outfiles_struct *, filenames_struct *);
+void   close_files(infiles_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
@@ -110,15 +127,18 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 #endif
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
-void   conv_force_vic2alma(atmos_data_struct *, int, int, int, atmos_data_alma_struct *);
-void   conv_results_vic2alma(out_data_struct *, int, double *, out_data_alma_struct *, int);
+out_data_struct *create_output_list();
+
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
-		 veg_con_struct *,dmy_struct *,global_param_struct *,
+		 veg_con_struct *,
 #if LAKE_MODEL
 		 lake_con_struct *,
 #endif /* LAKE_MODEL */
-		 outfiles_struct *, int, int, char, char, char *, int *);
+		 dmy_struct *,global_param_struct *,
+		 outfiles_struct *, out_data_file_struct *,
+		 out_data_struct *, save_data_struct *,
+		 int, int, char, char, char *, int *);
 #if QUICK_FS
 void distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
@@ -189,6 +209,7 @@ void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
 void   free_atmos(int nrecs, atmos_data_struct **atmos);
 void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_vegcon(veg_con_struct **);
+void   free_out_data_files(out_data_file_struct **);
 void   full_energy(char, int, int, atmos_data_struct *, dist_prcp_struct *,
 		   dmy_struct *, global_param_struct *, 
 #if LAKE_MODEL
@@ -211,29 +232,31 @@ double hermint(double, int, double *, double *, double *, double *, double *);
 void   hermite(int, double *, double *, double *, double *, double *);
 void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
+void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
                         double *, 
 #if OUTPUT_FORCE
-			char *, outfiles_struct *);
+			char *, out_data_file_struct *, out_data_struct *);
 #else
 			char *);
 #endif
 void   initialize_global();
-void   initialize_model_state(double, int, int, int, int, dist_prcp_struct *, 
-                              dmy_struct, global_param_struct *, 
-                              infiles_struct, 
+void   initialize_model_state(dist_prcp_struct *, dmy_struct,
+			      global_param_struct *, infiles_struct, 
+			      int, int, int, int, double,
+                              soil_con_struct *, veg_con_struct *,
 #if LAKE_MODEL
                               lake_con_struct,
 #endif // LAKE_MODEL
-                              soil_con_struct *, veg_con_struct *, char **, 
-                              int **);
+			      char **, int **, save_data_struct *);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **,int,FILE *,int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *, int);
+
 void   latent_heat_from_snow(double, double, double, double, double, 
                              double, double, double *, double *, 
                              double *, double *, double *);
@@ -244,7 +267,7 @@ dist_prcp_struct make_dist_prcp(int);
 dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int);
 filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct *, 
-				      soil_con_struct *, outfiles_struct *);
+				      soil_con_struct *, out_data_file_struct *);
 out_data_struct *make_out_data(int);
 snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
@@ -265,21 +288,24 @@ void   open_debug();
 FILE  *open_file(char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, int, int);
 
+void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
 double penman(double, double, double, double, double, double, double, 
 	      double, double, float, float);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
 			   soil_con_struct *, double *, double *);
 double priestley(double, double);
-void   put_data(soil_con_struct *, global_param_struct *,
-                int, int, atmos_data_struct *, 
-                dist_prcp_struct *, dmy_struct *,
+void   put_data(dist_prcp_struct *, atmos_data_struct *,
+		soil_con_struct *, veg_con_struct *,
 #if LAKE_MODEL
                 lake_con_struct *, 
 #endif // LAKE_MODEL
- 	        outfiles_struct *, veg_con_struct *); 
+		out_data_file_struct *,
+		out_data_struct *, save_data_struct *,
+ 	        dmy_struct *, int, int); 
 
 double quick_penman(double, double, double, double, double, double, 
 		    double, double);
+
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
 void   read_atmos_data(FILE *, global_param_struct, int, int, double **);
@@ -327,6 +353,8 @@ void set_node_parameters(double *, double *, double *, double *, double *,
 			 double ***,
 #endif
 			 int, int, char);
+out_data_file_struct *set_output_defaults(out_data_struct *);
+int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 void   setup_frozen_soil(soil_con_struct *, layer_data_struct  *,
 			 layer_data_struct *, layer_data_struct *,
 			 energy_bal_struct, int, int, int, double,
@@ -361,7 +389,7 @@ double soil_thermal_eqn(double, va_list);
 double solve_snow(char, double, double, double, double, double, double, 
                   double, double, double, double, double, double, double, 
                   double, double, double, double, double, double, double, 
-                  double *, double *,
+                  double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *, 
                   double *, double *, double *, double *, double *, double *, 
                   double *, double *, double *, double *, double *, double *, 
@@ -396,7 +424,8 @@ void   surface_fluxes(char, double, double, double, double, double, double,
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
-                      double *, double *, float *, int, int, int, int, int, 
+                      double *, double *, double *, double *, float *,
+		      int, int, int, int, int, 
                       int, int, int, int, atmos_data_struct *, dmy_struct *, 
                       energy_bal_struct *, global_param_struct *, 
                       layer_data_struct *, layer_data_struct *, 
@@ -420,15 +449,14 @@ void   vicerror(char *);
 double volumetric_heat_capacity(double,double,double);
 
 void write_atmosdata(atmos_data_struct *, int);
-void write_data(out_data_struct *, outfiles_struct *, dmy_struct *, int);
-void write_data_alma(out_data_alma_struct *, outfiles_struct *, dmy_struct *);
+void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
 void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,
                  energy_bal_struct *, snow_data_struct *, veg_var_struct *,
                  dmy_struct *, global_param_struct *,
                  double, double, int, int, int, int, int, char);
 void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
-void write_forcing_file(atmos_data_struct *, int, int, outfiles_struct *);
+void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);
 #endif
 void write_layer(layer_data_struct *, int, int, 
 #if SPATIAL_FROST
@@ -447,3 +475,4 @@ void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);
 void write_vegvar(veg_var_struct *, int);
 
+void zero_output_list(out_data_struct *);

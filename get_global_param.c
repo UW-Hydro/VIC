@@ -51,6 +51,10 @@ global_param_struct get_global_param(filenames_struct *names,
   2005-12-07 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in
              global.param.file  GCT
   2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
+  2006-Sep-23 Implemented flexible output configuration; removed the
+              OPTIMIZE and LDAS_OUTPUT options; implemented aggregation of
+	      output variables.  TJB
+
 **********************************************************************/
 {
   extern option_struct    options;
@@ -119,6 +123,9 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("TIME_STEP",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.dt);
+      }
+      else if(strcasecmp("OUT_STEP",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.out_dt);
       }
       else if(strcasecmp("RESOLUTION",optstr)==0) {
         sscanf(cmdstr,"%*s %f",&global.resolution);
@@ -245,15 +252,15 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
         else options.BINARY_OUTPUT = FALSE;
       }
-      else if(strcasecmp("EQUAL_AREA",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
-        else options.EQUAL_AREA = FALSE;
-      }
       else if(strcasecmp("ALMA_OUTPUT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
         else options.ALMA_OUTPUT = FALSE;
+      }
+      else if(strcasecmp("EQUAL_AREA",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
+        else options.EQUAL_AREA = FALSE;
       }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -421,6 +428,19 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("RESULT_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->result_dir);
+      }
+
+      /************************************
+        Get Output File Information
+        **********************************/
+      else if(strcasecmp("N_OUTFILES",optstr)==0) {
+        ; // do nothing
+      }
+      else if(strcasecmp("OUTFILE",optstr)==0) {
+        ; // do nothing
+      }
+      else if(strcasecmp("OUTVAR",optstr)==0) {
+        ; // do nothing
       }
 
       /******************************
@@ -622,6 +642,14 @@ global_param_struct get_global_param(filenames_struct *names,
 
 #endif  // !OUTPUT_FORCE
 
+  /* check the output step */
+  if (global.out_dt == 0) {
+    global.out_dt = global.dt;
+  }
+  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {
+    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
+  }
+
 #if OUTPUT_FORCE
   options.SNOW_STEP = global.dt;
 #endif  // OUTPUT_FORCE
@@ -685,11 +713,7 @@ global_param_struct get_global_param(filenames_struct *names,
   if ( options.SAVE_STATE )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
 	    global.stateday, global.statemonth, global.stateyear);
-  if ( OPTIMIZE )
-    fprintf(stderr,"Model is using optimized output (runoff and baseflow only).\n");
-  else if ( LDAS_OUTPUT )
-    fprintf(stderr,"Model output is in LDAS binary short int format.\n");
-  else if ( options.BINARY_OUTPUT ) 
+  if ( options.BINARY_OUTPUT ) 
     fprintf(stderr,"Model output is in standard BINARY format.\n");
   else 
     fprintf(stderr,"Model output is in standard ASCII format.\n");

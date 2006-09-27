@@ -62,6 +62,7 @@ static char vcid[] = "$Id$";
 	    calculations.						TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
 	    blowing snow sublimation is calculated for lakes.		TJB
+  2006-Sep-23 Replaced redundant STEFAN constant with STEFAN_B.  TJB
 *****************************************************************************/
 double IceEnergyBalance(double TSurf, va_list ap)
 {
@@ -206,7 +207,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
 
   /* Calculate longwave exchange and net radiation */
  
-  *LongRadOut = LongRadIn - STEFAN * (TMean+273.15) * (TMean+273.15) 
+  *LongRadOut = LongRadIn - STEFAN_B * (TMean+273.15) * (TMean+273.15) 
     * (TMean+273.15) * (TMean+273.15);
   NetRad = ShortRad + *LongRadOut;
   

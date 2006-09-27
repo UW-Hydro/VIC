@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
   02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
 	    lake fraction readjustment.				TJB
   2005-Apr-13 OUTPUT_FORCE option now calls close_files().	TJB
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              out_data, out_data_files, and save_data structures. TJB
 
 **********************************************************************/
 {
@@ -96,6 +98,9 @@ int main(int argc, char *argv[])
   lake_con_struct          lake_con;
 #endif // LAKE_MODEL
   outfiles_struct          outfiles;
+  out_data_file_struct     *out_data_files;
+  out_data_struct          *out_data;
+  save_data_struct         save_data;
   
   /** Read Model Options **/
   initialize_global();
@@ -108,6 +113,12 @@ int main(int argc, char *argv[])
   /** Read Global Control File **/
   infiles.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, infiles.globalparam);
+
+  /** Set up output data structures **/
+  out_data = create_output_list();
+  out_data_files = set_output_defaults(out_data);
+  infiles.globalparam = open_file(filenames.global,"r");
+  parse_output_info(&filenames, infiles.globalparam, &out_data_files, out_data);
 
   /** Check and Open Files **/
   check_files(&infiles, &filenames);
@@ -220,7 +231,7 @@ int main(int argc, char *argv[])
 
       /** Build Gridded Filenames, and Open **/
       builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
-                   &outfiles);
+                   out_data_files);
 
 #if !OUTPUT_FORCE
 
@@ -250,7 +261,7 @@ int main(int argc, char *argv[])
 		       soil_con.annual_prec, global_param.wind_h, 
 		       soil_con.rough, soil_con.Tfactor, 
 #if OUTPUT_FORCE
-		       soil_con.AboveTreeLine, &outfiles); 
+		       soil_con.AboveTreeLine, out_data_files, out_data); 
 #else /* OUTPUT_FORCE */
                        soil_con.AboveTreeLine); 
 #endif /* OUTPUT_FORCE */
@@ -267,14 +278,14 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-      initialize_model_state(atmos[0].air_temp[NR], Ndist, options.Nnode, 
-			     veg_con[0].vegetat_type_num, soil_con.gridcel, 
-			     &prcp, dmy[0], &global_param, infiles, 
+      initialize_model_state(&prcp, dmy[0], &global_param, infiles, 
+			     soil_con.gridcel, veg_con[0].vegetat_type_num,
+			     options.Nnode, Ndist, atmos[0].air_temp[NR],
+			     &soil_con, veg_con,
 #if LAKE_MODEL
 			     lake_con,
 #endif // LAKE_MODEL
-			     &soil_con, veg_con, &init_STILL_STORM,
-			     &init_DRY_TIME);
+			     &init_STILL_STORM, &init_DRY_TIME, &save_data);
 
 
 #if VERBOSE
@@ -284,6 +295,7 @@ int main(int argc, char *argv[])
       /** Update Error Handling Structure **/
       Error.outfp = outfiles;
       Error.infp = infiles;
+      Error.out_data_files = out_data_files;
 
       /***************************************************
 	Intialize Moisture and Energy Balance Error Checks
@@ -343,11 +355,11 @@ int main(int argc, char *argv[])
         else LASTREC = FALSE;
 
         dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
-                  dmy, &global_param, 
 #if LAKE_MODEL
 		  &lake_con, 
 #endif /* LAKE_MODEL */
-		  &outfiles, rec, cellnum,
+                  dmy, &global_param, &outfiles,
+		  out_data_files, out_data, &save_data, rec, cellnum,
                   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
         NEWCELL=FALSE;
 	for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ )
@@ -359,7 +371,7 @@ int main(int argc, char *argv[])
 
 #endif /* !OUTPUT_FORCE */
 
-      close_files(&infiles,&outfiles,&builtnames); 
+      close_files(&infiles,out_data_files,&builtnames); 
 
 #if !OUTPUT_FORCE
 

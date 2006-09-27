@@ -5,10 +5,10 @@
 
 static char vcid[] = "$Id$";
 
-filenames_struct make_in_and_outfiles(infiles_struct   *infp, 
-				      filenames_struct *filenames,
-				      soil_con_struct  *soil,
-				      outfiles_struct  *outfp)
+filenames_struct make_in_and_outfiles(infiles_struct       *infp, 
+				      filenames_struct     *filenames,
+				      soil_con_struct      *soil,
+				      out_data_file_struct *out_data_files)
 /**********************************************************************
 	make_in_and_outfile	Dag Lohman	January 1996
 
@@ -24,6 +24,9 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
   29-Oct-03 Distinguishing between input lakeparam file and output
 	    lake file.						TJB
   2005-Mar-24 Modified to handle ALMA output files.		TJB
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures; removed the
+              OPTIMIZE and LDAS_OUTPUT options. TJB
 
 **********************************************************************/
 {
@@ -33,6 +36,7 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
 
   char             latchar[10], lngchar[10], junk[5];
   filenames_struct fnames;
+  int filenum;
 
   fnames = *filenames;
 
@@ -67,152 +71,17 @@ filenames_struct make_in_and_outfiles(infiles_struct   *infp,
   Output Files
   ********************************/
 
-#if OUTPUT_FORCE
-
-  strcpy(fnames.fluxes, fnames.result_dir);
-  strcat(fnames.fluxes, "full_data");
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, latchar);
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, lngchar);
-  if(options.BINARY_OUTPUT) {
-    outfp->fluxes = open_file(fnames.fluxes, "wb");
-    fprintf(stderr,"flux file opened as binary!\n");
+  for (filenum=0; filenum<options.Noutfiles; filenum++) {
+    strcpy(out_data_files[filenum].filename, fnames.result_dir);
+    strcat(out_data_files[filenum].filename, out_data_files[filenum].prefix);
+    strcat(out_data_files[filenum].filename, "_");
+    strcat(out_data_files[filenum].filename, latchar);
+    strcat(out_data_files[filenum].filename, "_");
+    strcat(out_data_files[filenum].filename, lngchar);
+    if(options.BINARY_OUTPUT)
+      out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "wb");
+    else out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "w");
   }
-  else outfp->fluxes = open_file(fnames.fluxes, "w");
-
-#else /* OUTPUT_FORCE */
-
-#if LDAS_OUTPUT || OPTIMIZE
-
-  strcpy(fnames.fluxes, fnames.result_dir);
-  strcat(fnames.fluxes, "fluxes");
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, latchar);
-  strcat(fnames.fluxes, "_");
-  strcat(fnames.fluxes, lngchar);
-  if(options.BINARY_OUTPUT) 
-    outfp->fluxes = open_file(fnames.fluxes, "wb");
-  else outfp->fluxes = open_file(fnames.fluxes, "w");
-
-#else /* LDAS_OUTPUT || OPTIMIZE */
-
-  if ( options.ALMA_OUTPUT ) {
-
-    strcpy(fnames.eb, fnames.result_dir);
-    strcat(fnames.eb, "eb");
-    strcat(fnames.eb, "_");
-    strcat(fnames.eb, latchar);
-    strcat(fnames.eb, "_");
-    strcat(fnames.eb, lngchar);
-    outfp->eb = open_file(fnames.eb, "w");
-
-    strcpy(fnames.wb, fnames.result_dir);
-    strcat(fnames.wb, "wb");
-    strcat(fnames.wb, "_");
-    strcat(fnames.wb, latchar);
-    strcat(fnames.wb, "_");
-    strcat(fnames.wb, lngchar);
-    outfp->wb = open_file(fnames.wb, "w");
-
-    strcpy(fnames.sur, fnames.result_dir);
-    strcat(fnames.sur, "sur");
-    strcat(fnames.sur, "_");
-    strcat(fnames.sur, latchar);
-    strcat(fnames.sur, "_");
-    strcat(fnames.sur, lngchar);
-    outfp->sur = open_file(fnames.sur, "w");
-
-    strcpy(fnames.sub, fnames.result_dir);
-    strcat(fnames.sub, "sub");
-    strcat(fnames.sub, "_");
-    strcat(fnames.sub, latchar);
-    strcat(fnames.sub, "_");
-    strcat(fnames.sub, lngchar);
-    outfp->sub = open_file(fnames.sub, "w");
-
-    strcpy(fnames.eva, fnames.result_dir);
-    strcat(fnames.eva, "eva");
-    strcat(fnames.eva, "_");
-    strcat(fnames.eva, latchar);
-    strcat(fnames.eva, "_");
-    strcat(fnames.eva, lngchar);
-    outfp->eva = open_file(fnames.eva, "w");
-
-    strcpy(fnames.csp, fnames.result_dir);
-    strcat(fnames.csp, "csp");
-    strcat(fnames.csp, "_");
-    strcat(fnames.csp, latchar);
-    strcat(fnames.csp, "_");
-    strcat(fnames.csp, lngchar);
-    outfp->csp = open_file(fnames.csp, "w");
-
-  }
-  else {
-
-    strcpy(fnames.fluxes, fnames.result_dir);
-    strcat(fnames.fluxes, "fluxes");
-    strcat(fnames.fluxes, "_");
-    strcat(fnames.fluxes, latchar);
-    strcat(fnames.fluxes, "_");
-    strcat(fnames.fluxes, lngchar);
-    if(options.BINARY_OUTPUT) 
-      outfp->fluxes = open_file(fnames.fluxes, "wb");
-    else outfp->fluxes = open_file(fnames.fluxes, "w");
-
-    strcpy(fnames.snow, fnames.result_dir);
-    strcat(fnames.snow, "snow");
-    strcat(fnames.snow, "_");
-    strcat(fnames.snow, latchar);
-    strcat(fnames.snow, "_");
-    strcat(fnames.snow, lngchar);
-    if(options.BINARY_OUTPUT) 
-      outfp->snow = open_file(fnames.snow, "wb");
-    else outfp->snow = open_file(fnames.snow, "w");
-
-    if(options.FROZEN_SOIL) {
-      strcpy(fnames.fdepth, fnames.result_dir);
-      strcat(fnames.fdepth, "fdepth");
-      strcat(fnames.fdepth, "_");
-      strcat(fnames.fdepth, latchar);
-      strcat(fnames.fdepth, "_");
-      strcat(fnames.fdepth, lngchar);
-      if(options.BINARY_OUTPUT) 
-        outfp->fdepth = open_file(fnames.fdepth, "wb");
-      else outfp->fdepth = open_file(fnames.fdepth, "w");
-    }
-
-    if(options.PRT_SNOW_BAND) {
-      strcpy(fnames.snowband, fnames.result_dir);
-      strcat(fnames.snowband, "snowband");
-      strcat(fnames.snowband, "_");
-      strcat(fnames.snowband, latchar);
-      strcat(fnames.snowband, "_");
-      strcat(fnames.snowband, lngchar);
-      if(options.BINARY_OUTPUT) 
-        outfp->snowband = open_file(fnames.snowband, "wb");
-      else outfp->snowband = open_file(fnames.snowband, "w");
-    }
-
-#if LAKE_MODEL
-    if ( options.LAKES ) {
-      strcpy(fnames.lake, fnames.result_dir);
-      strcat(fnames.lake, "lake");
-      strcat(fnames.lake, "_");
-      strcat(fnames.lake, latchar);
-      strcat(fnames.lake, "_");
-      strcat(fnames.lake, lngchar);
-      if(options.BINARY_OUTPUT) 
-        outfp->lake = open_file(fnames.lake, "wb");
-      else outfp->lake = open_file(fnames.lake, "w");
-    }
-#endif // LAKE_MODEL
-
-  }
-
-#endif /* LDAS_OUTPUT || OPTIMIZE */
-
-#endif /* OUTPUT_FORCE - else */
 
   return (fnames);
 

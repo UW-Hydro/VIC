@@ -21,6 +21,239 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
+--------------------------------------------------------------------------------
+
+
+New Features:
+-------------
+
+Flexible output configuration & aggregation of output variables
+
+        Files affected:
+
+        Makefile
+	alloc_atmos.c
+	calc_water_energy_balance_errors.c (new)
+	close_files.c
+	conv_force_vic2alma.c (removed)
+	conv_results_vic2alma.c (removed)
+	display_current_settings.c
+	dist_prec.c
+	full_energy.c
+	get_global_param.c
+	global.h
+	global.param.sample
+	IceEnergyBalance.c
+	initialize_atmos.c
+	initialize_global.c
+	initialize_model_state.c
+	make_in_and_outfiles.c
+	output.LDAS_OUTPUT.template (new)
+	output.OPTIMIZE.template (new)
+	output.OUTPUT_FORCE.ALMA.template (new)
+	output.OUTPUT_FORCE.template (new)
+	output.PILPS-2E.ALMA.template (new)
+	output.TRADITIONAL.410.template (new)
+	output.TRADITIONAL.template (new)
+	output_list_utils.c (new)
+	parse_output_info.c (new)
+	put_data.c
+	read_atmos_data.c
+	set_output_defaults.c (new)
+	SnowPackEnergyBalance.c
+        solve_snow.c
+	surface_fluxes.c
+	user_def.h
+	vicNl.c
+	vicNl.h
+	vicNl_def.h
+	vicerror.c
+	water_energy_balance.c
+	wetland_energy.c
+	write_data.c
+	write_forcing_file.c
+
+        Description:
+
+        In earlier versions of VIC, the set of output files and their contents
+        were hard-coded.  A few settings in user_def.h (OPTIMIZE and
+	LDAS_OUTPUT) allowed the user to change the contents of the output
+	files, but this has not been enough to accomodate the various needs of
+	users.  Users inevitably have had to modify write_data.c to produce the
+	type of output they want, and when VIC is updated, they must merge their
+	changes into the new version of the code.
+
+        VIC 4.1.0 now allows the user to specify exactly which output files to
+        create and which variables to store in each file.  This way, users can
+        save space by only writing those variables that are useful, and will
+	be less likely to need to maintain a private version of the code to do
+	this.
+
+	In addition, VIC 4.1.0 can now aggregate the output variables to a
+	user-defined output interval, via the OUT_STEP setting in the global
+	parameter file.  Currently, the largest output interval allowed is 24
+	hours, so this option is only useful for simulations running at sub-
+	daily time steps.
+
+
+        Main points:
+
+        1. Output file names and contents can be specified in the global param
+           file (see below).
+
+        2. If you do not specify file names and contents in the global param
+           file, VIC will produce the same set of output files that it has
+           produced in earlier versions, namely "fluxes" and "snow" files,
+	   plus "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if
+           PRT_SNOW_BAND is TRUE.  These files will have the same contents and
+           format as in earlier versions.
+
+        3. The OPTIMIZE and LDAS_OUTPUT options have been removed.  These
+           output configurations can be selected with the proper set of
+           instructions in the global param file.  (see the output.*.template
+           files included in this distribution for more information.)
+
+        4. If you do specify the file names and contents in the global param
+	   file, PRT_SNOW_BAND will have no effect.
+
+        To specify file names and contents in the global param file, one
+        should use the following format:
+
+          (typical global param file contents here...)
+
+          # Output File Contents
+          N_OUTFILES    <n_outfiles>
+
+          OUTFILE       <prefix>        <nvars>
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+
+          OUTFILE       <prefix>        <nvars>
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+          OUTVAR        <varname>       [<format>       <type>  <multiplier>]
+
+        where
+                <n_outfiles> = number of output files
+                <prefix>     = name of the output file, NOT including latitude
+                               and longitude
+                <nvars>      = number of variables in the output file
+                <varname>    = name of the variable (this must be one of the
+                               output variable names listed in vicNl_def.h.)
+
+                <format>, <type>, and <multiplier> are optional.  For a given
+                variable, you can specify either NONE of these, or ALL of
+                these.  If these are omitted, the default values will be used.
+
+                <format>     = (for ascii output files) fprintf format string,
+                               e.g.
+                                 %.4f = floating point with 4 decimal places
+                                 %.7e = scientific notation w/ 7 decimal
+                                 %places
+                                 *    = use the default format for this
+                                 *    variable
+                <type>       = (for binary output files) data type code.
+                               Must be one of:
+                                 OUT_TYPE_DOUBLE = double-precision floating
+						   point
+                                 OUT_TYPE_FLOAT  = single-precision floating
+						   point
+                                 OUT_TYPE_INT    = integer
+                                 OUT_TYPE_USINT  = unsigned short integer
+                                 OUT_TYPE_SINT   = short integer
+                                 OUT_TYPE_CHAR   = char
+                                 *               = use the default type
+                <multiplier> = (for binary output files) factor to multiply
+                               the data by before writing, to increase
+                               precision.
+                                 *    = use the default multiplier for this
+                                 *    variable
+
+        Here's an example.  To specify 2 output files, named "wbal" and
+        "ebal", and containing water balance and energy balance terms,
+        respectively, you could do something like this:
+
+          N_OUTFILES    2
+
+          OUTFILE       wbal    6
+          OUTVAR        OUT_PREC
+          OUTVAR        OUT_EVAP
+          OUTVAR        OUT_RUNOFF
+          OUTVAR        OUT_BASEFLOW
+          OUTVAR        OUT_SWE
+          OUTVAR        OUT_SOIL_MOIST
+
+          OUTFILE       ebal    7
+          OUTVAR        OUT_NET_SHORT
+          OUTVAR        OUT_NET_LONG
+          OUTVAR        OUT_LATENT
+          OUTVAR        OUT_SENSIBLE
+          OUTVAR        OUT_GRND_FLUX
+          OUTVAR        OUT_SNOW_FLUX
+          OUTVAR        OUT_ALBEDO
+
+        Since no format, type, or multiplier were specified for any variables,
+	VIC will use the default format, type, and multiplier for the variables.
+
+        If you wanted scientific notation with 10 significant digits for
+	ALBEDO, you could do the following:
+
+          OUTVAR        OUT_ALBEDO              %.9e    *       *
+
+        Note that even if you only want to specify the format, you must supply
+	a value in the type and multiplier columns as well.  This can be "*" to
+	indicate the default value.  Similarly, if you only want to specify the
+	type (e.g.  as a double), you would need to do something like:
+
+          OUTVAR        OUT_ALBEDO              *       OUT_TYPE_DOUBLE	*
+
+
+        Date variables:
+
+        For typical output files, the date is always written at the beginning
+	of each record.  This will consist of the following columns:
+          year month day hour
+        For daily output timestep, "hour" is not written.
+
+        If BINARY_OUTPUT is TRUE, these will all be written as type int
+	(OUT_TYPE_INT).
+
+        If OUTPUT_FORCE is TRUE, the date will NOT be written.
+
+
+        Multiple-valued variables:
+
+        Since variables like SOIL_MOIST have 1 value per soil layer, these
+	variables will be written to multiple columns in the output file, one
+	column per soil layer.  Other multiple-valued variables are treated
+	similarly.
+
+
+        Snow band output:
+
+        To specify writing the values of variables in each snow band,  append
+        "_BAND" to the variable name (this only works for some variables - see
+        the list in vicNl_def.h).  If you specify these variables, the value
+	of the variable in each band will be written, one band per column.  For
+        example, for a cell having 2 snow bands:
+
+          OUTVAR        OUT_SWE_BAND
+          OUTVAR        OUT_ALBEDO_BAND
+
+        will result in an output file containing:
+
+          year month day (hour) swe[0] swe[1] albedo[0] albedo[1]
+
+
+
+Bug Fixes:
+----------
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------
 

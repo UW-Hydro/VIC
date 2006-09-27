@@ -9,12 +9,15 @@ void dist_prec(atmos_data_struct   *atmos,
                dist_prcp_struct    *prcp,
                soil_con_struct     *soil_con,
                veg_con_struct      *veg_con,
-               dmy_struct          *dmy,
-               global_param_struct *global_param,
 #if LAKE_MODEL
 	       lake_con_struct     *lake_con,
 #endif /* LAKE_MODEL */
+               dmy_struct          *dmy,
+               global_param_struct *global_param,
                outfiles_struct     *outfiles,
+               out_data_file_struct *out_data_files,
+               out_data_struct     *out_data,
+               save_data_struct    *save_data,
                int                  rec,
                int                  cellnum,
                char                 NEWCELL,
@@ -62,6 +65,9 @@ void dist_prec(atmos_data_struct   *atmos,
 	    in the global parameter file.			TJB
   2005-Mar-24 Modified parameter list of put_data() to accomodate support
 	      for ALMA variables.				TJB
+  2006-Sep-23 Implemented flexible output configuration; uses new out_data,
+	      out_data_files, and save_data structures. TJB
+
 **********************************************************************/
 
   extern option_struct   options;
@@ -199,11 +205,12 @@ void dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(soil_con, global_param, options.Nnode, rec, atmos, prcp, &dmy[rec], 
+  put_data(prcp, atmos, soil_con, veg_con,
 #if LAKE_MODEL
 	   lake_con,
 #endif // LAKE_MODEL 
-	   outfiles, veg_con);
+	   out_data_files, out_data, save_data,
+	   &dmy[rec], rec, options.Nnode);
 
 
   /************************************

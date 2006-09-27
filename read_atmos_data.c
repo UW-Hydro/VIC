@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$";
+static char vcid[] = "$Id$";
 
 void read_atmos_data(FILE                 *infile,
 		     global_param_struct   global_param,
@@ -51,6 +51,7 @@ void read_atmos_data(FILE                 *infile,
 	    the time range of the simulation.	(documented by TJB)
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-Sep-23 Fixed RCS ID string. TJB
 
   **********************************************************************/
 {

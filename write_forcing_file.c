@@ -7,116 +7,88 @@ static char vcid[] = "$Id$";
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *atmos,
 			int                nrecs,
-			int                dt,
-			outfiles_struct   *outfiles) 
+			out_data_file_struct *out_data_files, 
+			out_data_struct   *out_data)
 /**********************************************************************
   write_forcing_file          Keith Cherkauer           July 19, 2000
 
   This routine writes the complete forcing data files for use in 
   future simulations.
 
+  Modifications:
   xx-xx-01 Modified to output pressures, which are handled internally
            in kPa, as Pa for backward compatability.              KAC
-  2005-Mar-24 Added support for ALMA variables.			TJB
+  2005-Mar-24 Added support for ALMA variables.                 TJB
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
+  extern global_param_struct global_param;
   extern option_struct options;
 
-  int                 rec, j;
+  int                 rec, i, j, v;
   short int          *tmp_siptr;
   unsigned short int *tmp_usiptr;
-  float              *tmp_fptr;
-  atmos_data_alma_struct *atmos_alma;
+  dmy_struct         *dummy_dmy;
+  int                 dummy_dt;
+  int                 dt_sec;
 
-  atmos_alma = (atmos_data_alma_struct*)calloc(1,sizeof(atmos_data_alma_struct));
+  dt_sec = global_param.dt*SECPHOUR;
 
-  // Create forcing files
   for ( rec = 0; rec < nrecs; rec++ ) {
     for ( j = 0; j < NF; j++ ) {
-      if (options.ALMA_OUTPUT) {
-        // ALMA Standard
-        conv_force_vic2alma(atmos, rec, j, dt, atmos_alma); 
-        if (options.BINARY_OUTPUT) {
-          /* Write a binary forcing file */
-	  tmp_usiptr = (unsigned short int *)calloc(1,sizeof(unsigned short int));
-	  /* SWdown * 50 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos_alma->SWdown*50.);
-	  /* LWdown * 80 */
-	  tmp_usiptr[1] = (unsigned short int)(atmos_alma->LWdown*80.);
-	  /* Tair * 80 */
-	  tmp_usiptr[2] = (unsigned short int)(atmos_alma->Tair*80.);
-	  /* Qair * 10000000 */
-	  tmp_usiptr[3] = (unsigned short int)(atmos_alma->Qair*10000000.);
-	  /* Psurf * 0.01 */
-	  tmp_usiptr[4] = (unsigned short int)(atmos_alma->Psurf*0.01);
-	  /* Rainf * 400000000 */
-	  tmp_usiptr[5] = (unsigned short int)(atmos_alma->Rainf*400000000.);
-	  /* Snowf * 400000000 */
-	  tmp_usiptr[6] = (unsigned short int)(atmos_alma->Snowf*400000000.);
-	  /* Wind * 100 */
-	  tmp_usiptr[7] = (unsigned short int)(atmos_alma->Wind*100.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int),8,outfiles->fluxes);   
 
-	  free((char *)tmp_usiptr);
-        }
-        else {
-          /* Write an ASCII forcing file */
-          fprintf(outfiles->fluxes,"%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e \t%.7e\n", 
-            atmos_alma->SWdown, atmos_alma->LWdown, atmos_alma->Tair,
-            atmos_alma->Qair, atmos_alma->Psurf, atmos_alma->Rainf,
-            atmos_alma->Snowf, atmos_alma->Wind);
-        }
+      out_data[OUT_AIR_TEMP].data[0]  = atmos[rec].air_temp[j];
+      out_data[OUT_DENSITY].data[0]   = atmos[rec].density[j];
+      out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
+      out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
+      out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j];
+      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos->pressure[j];
+      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos->vp[j]+atmos->vpd[j]);
+      out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
+      out_data[OUT_VP].data[0]        = atmos[rec].vp[j];
+      out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];
+      if (out_data[OUT_AIR_TEMP].data[0] >= global_param.MAX_SNOW_TEMP) {
+        out_data[OUT_RAINF].data[0] = out_data[OUT_PREC].data[0];
+        out_data[OUT_SNOWF].data[0] = 0;
+      }
+      else if (out_data[OUT_AIR_TEMP].data[0] <= global_param.MIN_RAIN_TEMP) {
+        out_data[OUT_RAINF].data[0] = 0;
+        out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0];
       }
       else {
-        // VIC Standard
-        if (options.BINARY_OUTPUT) {
-  	  /* Write a binary forcing file */
-  	  tmp_siptr = (short int *)calloc(1,sizeof(short int));
-	  tmp_usiptr = (unsigned short int *)calloc(1,sizeof(unsigned short int));
-	  /* precipitation * 40 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].prec[j]*40.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-	  /* air temperature * 100 */
-	  tmp_siptr[0] = (short int)(atmos[rec].air_temp[j]*100.);
-	  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-	  /* shortwave * 50 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].shortwave[j]*50.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-	  /* longwave * 80 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].longwave[j]*80.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-	  /* density * 100 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].density[j]*100.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-	  /* pressure * 0.1 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].pressure[j]*0.1);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);
-	  /* vp * 1 */
-	  tmp_siptr[0] = (short int)(atmos[rec].vp[j]*1.);
-	  fwrite(tmp_siptr,sizeof(short int), 1,outfiles->fluxes);
-	  /* wind * 100 */
-	  tmp_usiptr[0] = (unsigned short int)(atmos[rec].wind[j]*100.);
-	  fwrite(tmp_usiptr,sizeof(unsigned short int), 1,outfiles->fluxes);   
-
-	  free((char *)tmp_siptr);
-	  free((char *)tmp_usiptr);
-        }
-        else {
-	  /* Write an ASCII forcing file */
-	  fprintf(outfiles->fluxes,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
-		atmos[rec].prec[j], atmos[rec].air_temp[j], 
-		atmos[rec].shortwave[j], atmos[rec].longwave[j], 
-		atmos[rec].density[j], atmos[rec].pressure[j]/1000., 
-		atmos[rec].vp[j]/1000., atmos[rec].wind[j]);
-	}
+        out_data[OUT_RAINF].data[0] = ((out_data[OUT_AIR_TEMP].data[0]-global_param.MIN_RAIN_TEMP)/(global_param.MAX_SNOW_TEMP-global_param.MIN_RAIN_TEMP))*out_data[OUT_PREC].data[0];
+        out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0]-out_data[OUT_RAINF].data[0];
       }
+
+      for (v=0; v<N_OUTVAR_TYPES; v++) {
+        for (i=0; i<out_data[v].nelem; i++) {
+          out_data[v].aggdata[i] = out_data[v].data[i];
+        }
+      }
+
+      if (options.ALMA_OUTPUT) {
+        out_data[OUT_PREC].aggdata[0] /= dt_sec;
+        out_data[OUT_RAINF].aggdata[0] /= dt_sec;
+        out_data[OUT_SNOWF].aggdata[0] /= dt_sec;
+        out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
+        out_data[OUT_PRESSURE].aggdata[0] *= 1000;
+        out_data[OUT_VP].aggdata[0] *= 1000;
+      }
+
+      if (options.BINARY_OUTPUT) {
+        for (v=0; v<N_OUTVAR_TYPES; v++) {
+          for (i=0; i<out_data[v].nelem; i++) {
+            out_data[v].aggdata[i] *= out_data[v].mult;
+          }
+        }
+      }
+      write_data(out_data_files, out_data, dummy_dmy, dummy_dt);
     }
   }
-
-  free ((char *)atmos_alma);
 
 }
 #endif /* OUTPUT_FORCE */

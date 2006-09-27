@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <vicNl.h>
 
 static char vcid[] = "$Id$";
@@ -28,6 +27,8 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
 
   Modification:
   01-11-00 Fixed allocation bug                             KAC
+  2006-Sep-23 Implemented flexible output configuration; removed
+	      LDAS_OUTPUT and OPTIMIZE compile-time options.  TJB
 *******************************************************************/
 {
   extern param_set_struct param_set;
@@ -38,7 +39,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
   if (*atmos == NULL)
     vicerror("Memory allocation error in alloc_atmos().");
 
-#if !OPTIMIZE && !LINK_DEBUG
+#if !LINK_DEBUG
   for (i = 0; i < nrecs; i++) {
     (*atmos)[i].prec = (double *) calloc(NF+1, sizeof(double));
     if ((*atmos)[i].prec == NULL)
@@ -71,7 +72,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     if ((*atmos)[i].snowflag == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
   }    			
-#endif // not OPTIMIZE and not LINK_DEBUG
+#endif // !LINK_DEBUG
 
 }
 
@@ -84,7 +85,8 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
   09-02-2003 Added check for LINK_DEBUG global option.  If LINK_DEBUG is
              TRUE atmospheric data is not dynamically allocated, so it
              should not be freed.                                   KAC
-
+  2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
+	      removed LDAS_OUTPUT and OPTIMIZE compile-time options.  TJB
 ***************************************************************************/
 {
   int i;
@@ -92,7 +94,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
   if (*atmos == NULL)
     return;
 
-#if !OPTIMIZE && !LINK_DEBUG
+#if !LINK_DEBUG
   for (i = 0; i < nrecs; i++) {
     free((*atmos)[i].prec);
     free((*atmos)[i].air_temp);
@@ -105,7 +107,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
     free((*atmos)[i].longwave);
     free((*atmos)[i].snowflag);
   }
-#endif // not OPTIMIZE
+#endif // !LINK_DEBUG
 
   free(*atmos);
 }

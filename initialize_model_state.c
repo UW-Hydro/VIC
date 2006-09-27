@@ -5,22 +5,23 @@
 
 static char vcid[] = "$Id$";
 
-void initialize_model_state(double               surf_temp, 
-			    int                  Ndist,
-                            int                  Nnodes,
-		            int                  Nveg,
-			    int                  cellnum,
-			    dist_prcp_struct    *prcp,
+void initialize_model_state(dist_prcp_struct    *prcp,
 			    dmy_struct           dmy,
                             global_param_struct *global_param,
                             infiles_struct       infiles,
+			    int                  cellnum,
+		            int                  Nveg,
+                            int                  Nnodes,
+			    int                  Ndist,
+			    double               surf_temp, 
+                            soil_con_struct     *soil_con,
+			    veg_con_struct      *veg_con,
 #if LAKE_MODEL
 			    lake_con_struct      lake_con,
 #endif //LAKE_MODEL
-                            soil_con_struct     *soil_con,
-			    veg_con_struct      *veg_con,
 			    char               **init_STILL_STORM,
-			    int                **init_DRY_TIME)
+			    int                **init_DRY_TIME,
+			    save_data_struct    *save_data)
 /**********************************************************************
   initialize_model_state       Keith Cherkauer	    April 17, 2000
 
@@ -57,10 +58,14 @@ void initialize_model_state(double               surf_temp,
 	    accessed in set_node_parameters().			TJB
   01-Nov-04 Added support for state files containing SPATIAL_FROST
 	    and LAKE_MODEL state variables.			TJB
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              save_data structure to track changes in moisture storage
+              over each time step; this needs initialization here.  TJB
 
 **********************************************************************/
 {
   extern option_struct options;
+  extern veg_lib_struct *veg_lib;
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
@@ -71,7 +76,7 @@ void initialize_model_state(double               surf_temp,
   char     tmpstr[MAXSTRING];
   char     ErrStr[MAXSTRING];
   char     FIRST_VEG;
-  int      i, j, ii, veg, index;
+  int      i, j, ii, veg, index, dist;
   int      nidx, lidx;
   int      tmpint;
   int      dry;
@@ -100,6 +105,9 @@ void initialize_model_state(double               surf_temp,
   double   Aufwc, Bufwc;
 #endif
   char    *EMPTY_C;
+  double   Clake;
+  double   mu;
+  double   TreeAdjustFactor[MAX_BANDS];
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -517,4 +525,71 @@ void initialize_model_state(double               surf_temp,
 	energy[veg][band].Tfoliage     = Tair;
     }
   }
+
+  // Compute treeline adjustment factors
+  for ( band = 0; band < options.SNOW_BAND; band++ ) {
+    if ( soil_con->AboveTreeLine[band] ) {
+      Cv = 0;
+      for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++ ) {
+        if ( veg_lib[veg_con[veg].veg_class].overstory )
+          Cv += veg_con[veg].Cv;
+      }
+      TreeAdjustFactor[band] = 1. / ( 1. - Cv );
+    }
+    else TreeAdjustFactor[band] = 1.;
+  }
+
+  // Save initial moisture storages for differencing at end of time step
+  save_data->total_soil_moist = 0;
+  save_data->swe = 0;
+  save_data->wdew = 0;
+  save_data->surfstor = 0;
+  for( veg = 0; veg <= Nveg; veg++ ) {
+
+    if ( veg < veg_con[0].vegetat_type_num )
+      Cv = veg_con[veg].Cv;
+    else
+      Cv = (1.0 - veg_con[0].Cv_sum);
+
+    if ( Cv > 0 ) {
+
+      for ( dist = 0; dist < Ndist; dist++ ) {
+
+        if(dist==0)
+          mu = prcp[0].mu[veg];
+        else
+          mu = 1. - prcp[0].mu[veg];
+
+        for( band = 0; band < options.SNOW_BAND; band++ ) {
+
+          if (soil_con->AreaFract[band] > 0.
+              && ( veg == veg_con[0].vegetat_type_num
+                  || ( !soil_con->AboveTreeLine[band]
+                      || (soil_con->AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
+
+            for(lidx=0;lidx<options.Nlayer;lidx++) {
+              save_data->total_soil_moist +=
+                (cell[dist][veg][band].layer[lidx].moist) // layer[].moist appears to contain both liquid and ice
+                * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+            }
+            save_data->wdew += veg_var[dist][veg][band].Wdew * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+
+          }
+
+        }
+
+      }
+
+      for( band = 0; band < options.SNOW_BAND; band++ ) {
+        save_data->swe += snow[veg][band].swq * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+      }
+
+    }
+
+  }
+#if LAKE_MODEL
+  Clake = lake_var->sarea/lake_con.basin[0];
+  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+#endif // LAKE_MODEL
+
 }

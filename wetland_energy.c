@@ -24,6 +24,8 @@ void wetland_energy(int                  rec,
   Modifications:
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
+  2006-Sep-23 Implemented flexible output configuration; atmos->out_rain
+	      and atmos->out_snow must be tracked now.  TJB
 
 **********************************************************************/
 {
@@ -44,6 +46,8 @@ void wetland_energy(int                  rec,
   double                 rad_atten;
   double                 LAI;
   double                 out_prec[2*MAX_BANDS];
+  double                 out_rain[2*MAX_BANDS];
+  double                 out_snow[2*MAX_BANDS];
   double                 tmp_surf_temp;
   double                 last_T1;
   double                 out_short=0;
@@ -149,7 +153,11 @@ void wetland_energy(int                  rec,
     Melt[band*2]                       = 0.;
   
     /* Initialize precipitation storage */
-    for ( j = 0; j < 2; j++ ) out_prec[j] = 0;
+    for ( j = 0; j < 2; j++ ) {
+      out_prec[j] = 0;
+      out_rain[j] = 0;
+      out_snow[j] = 0;
+    }
 
     wind_h = gp->wind_h;
 
@@ -217,7 +225,7 @@ void wetland_energy(int                  rec,
 		   &(cell[WET][iveg][band].baseflow), displacement, 
 		   gauge_correction, &(cell[DRY][iveg][band].inflow), 
 		   &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
-		   ref_height, roughness, 
+		   &out_rain[band*2], &out_snow[band*2], ref_height, roughness, 
 		   &(cell[DRY][iveg][band].runoff), 
 		   &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
 		   tmp_wind, root, Nbands, Ndist, 
@@ -229,6 +237,8 @@ void wetland_energy(int                  rec,
 		   .0001, 500.);
 
     atmos->out_prec += out_prec[band*2] * Cv * lake_con.Cl[0];
+    atmos->out_rain += out_rain[band*2] * Cv * lake_con.Cl[0];
+    atmos->out_snow += out_snow[band*2] * Cv * lake_con.Cl[0];
   } /** end current vegetation type **/
   
 }

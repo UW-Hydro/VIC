@@ -86,6 +86,10 @@ void initialize_global() {
   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
   2005-11-29  Added SAVE_STATE (option is now set in global param file) GCT
   2006-0913  Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
+  2006-Sep-23 Implemented flexible output configuration; added new
+              options.Noutfiles and organized the options according
+              to function. TJB
+
 *********************************************************************/
 
   extern option_struct options;
@@ -98,37 +102,42 @@ void initialize_global() {
 
   /** Initialize model option flags **/
 
-  options.ALMA_OUTPUT           = FALSE;
-  options.EQUAL_AREA            = FALSE;
-  options.ARC_SOIL              = FALSE;
-  options.COMPRESS              = FALSE;
-  options.BASEFLOW              = ARNO;
-  options.FULL_ENERGY           = FALSE;
-  options.FROZEN_SOIL           = FALSE;
-  options.DIST_PRCP             = FALSE;
-  options.CORRPREC              = FALSE;
-  options.MOISTFRACT            = FALSE;
-  options.BINARY_OUTPUT         = FALSE;
-  options.PRT_SNOW_BAND         = FALSE;
+  // simulation modes
   options.BLOWING               = FALSE;
-  options.Nlayer                = 2;
-  options.Nnode                 = 3;
-  options.GRID_DECIMAL          = 2;
-  options.SNOW_BAND             = 1;
-  options.SNOW_STEP             = 1;
-  options.PREC_EXPT             = 0.6;
-  options.INIT_STATE            = FALSE;
-  options.SAVE_STATE            = FALSE;
-  options.BINARY_STATE_FILE     = TRUE;
-  options.ROOT_ZONES            = MISSING;
-  options.MIN_WIND_SPEED        = 0.0;
-  options.NOFLUX                = FALSE;
-  options.GLOBAL_LAI            = FALSE;
-  options.QUICK_FLUX            = TRUE;
-  options.QUICK_SOLVE           = FALSE;
+  options.CORRPREC              = FALSE;
+  options.DIST_PRCP             = FALSE;
+  options.EQUAL_AREA            = FALSE;
+  options.FROZEN_SOIL           = FALSE;
+  options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX             = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
+  options.MIN_WIND_SPEED        = 0.0;
+  options.Nlayer                = 2;
+  options.Nnode                 = 3;
+  options.NOFLUX                = FALSE;
+  options.PREC_EXPT             = 0.6;
+  options.QUICK_FLUX            = TRUE;
+  options.QUICK_SOLVE           = FALSE;
+  options.ROOT_ZONES            = MISSING;
+  options.SNOW_BAND             = 1;
+  options.SNOW_STEP             = 1;
+  // input options
+  options.ARC_SOIL              = FALSE;
+  options.BASEFLOW              = ARNO;
+  options.GLOBAL_LAI            = FALSE;
+  options.GRID_DECIMAL          = 2;
+  // state options
+  options.BINARY_STATE_FILE     = TRUE;
+  options.INIT_STATE            = FALSE;
+  options.SAVE_STATE            = FALSE;
+  // output options
+  options.ALMA_OUTPUT           = FALSE;
+  options.BINARY_OUTPUT         = FALSE;
+  options.COMPRESS              = FALSE;
+  options.MOISTFRACT            = FALSE;
+  options.Noutfiles             = 2;
+  options.PRT_SNOW_BAND         = FALSE;
 
 #if LINK_DEBUG 
 

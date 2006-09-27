@@ -1,0 +1,34 @@
+# Output List for VIC LDAS_OUTPUT Configuration
+# RCS ID: $Id$
+# NOTE: the year, month, and day (and hour, if sub-daily) will all be written
+# as ints as of VIC 4.0.6.  In previous versions, for LDAS_OUTPUT, year was
+# written as unsigned short int, and month, day and hour were written as char.
+# To emulate this behavior in newer versions of VIC, please edit write_data.c.
+################################################################################
+BINARY_OUTPUT	TRUE
+COMPRESS	TRUE
+N_OUTFILES	1
+# If FROZEN_SOIL is FALSE, the number of variables should be 17
+# If FROZEN_SOIL is TRUE, the number of variables should be 20
+OUTFILE		fluxes	17
+OUTVAR		OUT_PREC	*	OUT_TYPE_USINT	100
+OUTVAR		OUT_EVAP	*	OUT_TYPE_SINT	100
+OUTVAR		OUT_RUNOFF	*	OUT_TYPE_FLOAT	1
+OUTVAR		OUT_BASEFLOW	*	OUT_TYPE_FLOAT	1
+OUTVAR		OUT_SOIL_LIQ	*	OUT_TYPE_USINT	10
+OUTVAR		OUT_SWE		*	OUT_TYPE_USINT	10
+OUTVAR		OUT_NET_SHORT	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_NET_LONG	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_R_NET	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_LATENT	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_SENSIBLE	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_GRND_FLUX	*	OUT_TYPE_SINT	10
+OUTVAR		OUT_ALBEDO	*	OUT_TYPE_USINT	10000
+OUTVAR		OUT_SURF_TEMP	*	OUT_TYPE_SINT	100
+OUTVAR		OUT_REL_HUMID	*	OUT_TYPE_USINT	100
+OUTVAR		OUT_AIR_TEMP	*	OUT_TYPE_SINT	100
+OUTVAR		OUT_WIND	*	OUT_TYPE_USINT	100
+# Uncomment these lines if FROZEN_SOIL is TRUE
+#OUTVAR		OUT_SOIL_MOIST	*	OUT_TYPE_USINT	10
+#OUTVAR		OUT_FDEPTH	*	OUT_TYPE_USINT	100
+#OUTVAR		OUT_TDEPTH	*	OUT_TYPE_USINT	100

@@ -77,6 +77,8 @@ static char vcid[] = "$Id$";
 	    them.							TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
 	    calculations.						TJB
+  2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.  TJB
+
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
 {
@@ -241,7 +243,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate longwave exchange and net radiation */
 
   Tmp = TMean + KELVIN;
-  (*NetLongUnder) = LongSnowIn - STEFAN * Tmp * Tmp * Tmp * Tmp;
+  (*NetLongUnder) = LongSnowIn - STEFAN_B * Tmp * Tmp * Tmp * Tmp;
   NetRad = NetShortUnder + (*NetLongUnder);
   
   /* Calculate the sensible heat flux */

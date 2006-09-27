@@ -31,6 +31,8 @@ void surface_fluxes(char                 overstory,
 		    double              *inflow_dry,
 		    double              *inflow_wet,
 		    double              *out_prec,
+		    double              *out_rain,
+		    double              *out_snow,
 		    double              *ref_height,
 		    double              *roughness,
 		    double              *runoff_dry,
@@ -96,6 +98,9 @@ void surface_fluxes(char                 overstory,
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.TJB
+  2006-Sep-23 Implemented flexible output configuration; moved tracking
+	      of rain and snow for output to this function.  TJB
+  2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.  TJB
 
 **********************************************************************/
 {
@@ -164,6 +169,8 @@ void surface_fluxes(char                 overstory,
   double                 step_melt;
   double                 step_melt_energy;  /* energy used to reduce snow coverage */
   double                 step_out_prec;
+  double                 step_out_rain;
+  double                 step_out_snow;
   double                 step_ppt[2];
   double                 step_prec[2];
   double                 store_AlbedoOver;
@@ -475,7 +482,8 @@ void surface_fluxes(char                 overstory,
 			       aero_resist, aero_resist_used, &coverage, &delta_coverage, 
 			       &delta_snow_heat, displacement, 
 			       gauge_correction, &step_melt_energy, 
-			       &step_out_prec, step_ppt, rainfall, ref_height, 
+			       &step_out_prec, &step_out_rain, &step_out_snow,
+			       step_ppt, rainfall, ref_height, 
 			       roughness, snow_inflow, snowfall, &surf_atten, 
 			       wind, root, UNSTABLE_SNOW, options.Nnode, 
 			       Nveg, band, dmy[rec].hour, iveg, 
@@ -646,6 +654,8 @@ void surface_fluxes(char                 overstory,
       
     store_melt  += step_melt;
     out_prec[0] += step_out_prec * mu;
+    out_rain[0] += step_out_rain * mu;
+    out_snow[0] += step_out_snow * mu;
 
     if ( INCLUDE_SNOW ) {
       /* copy needed flux terms to the snowpack */

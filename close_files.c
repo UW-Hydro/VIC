@@ -5,9 +5,9 @@
  
 static char vcid[] = "$Id$";
 
-void close_files(infiles_struct   *inf,
-                 outfiles_struct  *outf,
-                 filenames_struct *fnames)
+void close_files(infiles_struct       *inf,
+                 out_data_file_struct *out_data_files,
+                 filenames_struct     *fnames)
 /**********************************************************************
 	close_files	Dag Lohmann		January 1996
 
@@ -23,6 +23,8 @@ void close_files(infiles_struct   *inf,
 	    lake file.						TJB
   2005-Mar-24 Added support for ALMA output files.		TJB
   2005-Apr-10 Added logic for OUTPUT_FORCE option.		TJB
+  2006-Sep-23 Implemented flexible output configuration; uses new
+	      out_data_files structure. TJB
 
 **********************************************************************/
 {
@@ -30,6 +32,7 @@ void close_files(infiles_struct   *inf,
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
+  int filenum;
 
   /**********************
     Close All Input Files
@@ -46,85 +49,12 @@ void close_files(infiles_struct   *inf,
     Close Output Files
     *******************/
 
-#if OUTPUT_FORCE
-
-  /** Output Forcing File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-#endif /* OUTPUT_FORCE */
+  for (filenum=0; filenum<options.Noutfiles; filenum++) {
+    fclose(out_data_files[filenum].fh);
+    if(options.COMPRESS) compress_files(out_data_files[filenum].filename);
+  }
 
 #if !OUTPUT_FORCE
-
-#if LDAS_OUTPUT || OPTIMIZE
-
-  /** Energy and Moisture Fluxes Output File **/
-  fclose(outf->fluxes);
-  if(options.COMPRESS) compress_files(fnames->fluxes);
-
-#else /* LDAS_OUTPUT || OPTIMIZE */
-
-  if ( options.ALMA_OUTPUT ) {
-
-    /** Energy Balance Output File **/
-    fclose(outf->eb);
-    if(options.COMPRESS) compress_files(fnames->eb);
-
-    /** Water Balance Output File **/
-    fclose(outf->wb);
-    if(options.COMPRESS) compress_files(fnames->wb);
-
-    /** Surface Output File **/
-    fclose(outf->sur);
-    if(options.COMPRESS) compress_files(fnames->sur);
-
-    /** Subsurace Output File **/
-    fclose(outf->sub);
-    if(options.COMPRESS) compress_files(fnames->sub);
-
-    /** Evaporation Output File **/
-    fclose(outf->eva);
-    if(options.COMPRESS) compress_files(fnames->eva);
-
-    /** Cold-season Processes Output File **/
-    fclose(outf->csp);
-    if(options.COMPRESS) compress_files(fnames->csp);
-
-  }
-  else {
-
-    /** Energy and Moisture Fluxes Output File **/
-    fclose(outf->fluxes);
-    if(options.COMPRESS) compress_files(fnames->fluxes);
-
-    /** These output files are not used when using LDAS binary format **/
-
-    /** Frozen Soils Output File **/
-    if(options.FROZEN_SOIL) {
-      fclose(outf->fdepth);
-      if(options.COMPRESS) compress_files(fnames->fdepth);
-    }
-
-    /** Snow Data Output File **/
-    fclose(outf->snow);
-    if(options.COMPRESS) compress_files(fnames->snow);
-
-    if(options.PRT_SNOW_BAND) {
-      fclose(outf->snowband);
-      if(options.COMPRESS) compress_files(fnames->snowband);
-    }
-
-#if LAKE_MODEL
-    if ( options.LAKES ) {
-      /** Lake Data Output File **/
-      fclose(outf->lake);
-      if(options.COMPRESS) compress_files(fnames->lake);
-    }
-#endif /* LAKE_MODEL */
-
-  }
-
-#endif /* LDAS_OUTPUT || OPTIMIZE */
 
   /*******************************
     Close All Used Debugging Files

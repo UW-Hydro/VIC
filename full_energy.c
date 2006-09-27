@@ -40,6 +40,8 @@ void full_energy(char                 NEWCELL,
            case.  This eliminates a memory error.                  KAC
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
+  2006-Sep-23 Implemented flexible output configuration; now computation
+	      of soil wetness and root zone soil moisture happens here. TJB
 
 **********************************************************************/
 {
@@ -52,6 +54,7 @@ void full_energy(char                 NEWCELL,
   char                   overstory;
   char                   SOLVE_SURF_ENERGY;
   int                    i, j, k;
+  int                    lidx;
   int                    Ndist;
   int                    dist;
   int                    iveg;
@@ -61,6 +64,8 @@ void full_energy(char                 NEWCELL,
   int                    Nbands;
   int                    hour;
   double                 out_prec[2*MAX_BANDS];
+  double                 out_rain[2*MAX_BANDS];
+  double                 out_snow[2*MAX_BANDS];
   double                 tmp_surf_temp;
   double                 last_T1;
   double                 out_short=0;
@@ -106,6 +111,7 @@ void full_energy(char                 NEWCELL,
   double                 tmp_mu;
   double                 tmp_layerevap[2][MAX_BANDS][MAX_LAYERS];
   double                 tmp_Tmin;
+  double                 tmp_total_moist;
   double                 gauge_correction[2];
   float 	         lag_one;
   float 	         sigma_slope;
@@ -158,6 +164,8 @@ void full_energy(char                 NEWCELL,
     gauge_correction[1] = 1;
   }
   atmos->out_prec = 0;
+  atmos->out_rain = 0;
+  atmos->out_snow = 0;
 
   /**************************************************
     Solve Energy and/or Water Balance for Each
@@ -193,7 +201,11 @@ void full_energy(char                 NEWCELL,
       }
 
       /* Initialize precipitation storage */
-      for ( j = 0; j < 2*MAX_BANDS; j++ ) out_prec[j] = 0;
+      for ( j = 0; j < 2*MAX_BANDS; j++ ) {
+        out_prec[j] = 0;
+        out_rain[j] = 0;
+        out_snow[j] = 0;
+      }
     
       /** Define vegetation class number **/
       if (iveg < Nveg) 
@@ -315,6 +327,7 @@ void full_energy(char                 NEWCELL,
 			 &(cell[WET][iveg][band].baseflow), displacement, 
 			 gauge_correction, &(cell[DRY][iveg][band].inflow), 
 			 &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
+			 &out_rain[band*2], &out_snow[band*2],
 			 ref_height, roughness, 
 			 &(cell[DRY][iveg][band].runoff), 
 			 &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
@@ -327,6 +340,25 @@ void full_energy(char                 NEWCELL,
 			 lag_one, sigma_slope, fetch);
 	  
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
+	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
+	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
+
+          /********************************************************
+            Compute soil wetness and root zone soil moisture
+          ********************************************************/
+          // Loop through distributed precipitation fractions
+          for ( dist = 0; dist < 2; dist++ ) {
+            cell[dist][iveg][band].rootmoist = 0;
+            cell[dist][iveg][band].wetness = 0;
+            for(lidx=0;lidx<options.Nlayer;lidx++) {
+              tmp_total_moist = cell[dist][iveg][band].layer[lidx].moist + cell[dist][iveg][band].layer[lidx].ice;
+              if (veg_con->root[lidx] > 0) {
+                cell[dist][iveg][band].rootmoist += tmp_total_moist;
+              }
+              cell[dist][iveg][band].wetness += (tmp_total_moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+            }
+            cell[dist][iveg][band].wetness /= options.Nlayer;
+          }
 
 	} /** End Loop Through Elevation Bands **/
       } /** End Full Energy Balance Model **/

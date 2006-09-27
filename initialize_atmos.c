@@ -17,7 +17,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
-		      outfiles_struct          *outfiles)
+                      out_data_file_struct     *out_data_files,
+                      out_data_struct          *out_data)
 #else /* OUTPUT_FORCE */
                       char                     *AboveTreeLine)
 #endif /* OUTPUT_FORCE */
@@ -73,6 +74,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2005-Apr-30 Fixed typo in QAIR calculation.			TJB
   2005-May-01 Added logic for CSNOWF and LSSNOWF.		TJB
   2005-May-02 Added logic for WIND_E and WIND_N.		TJB
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+	      out_data and out_data_files structures. TJB
 
 **********************************************************************/
 {
@@ -822,7 +825,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
 #endif // OUTPUT_FORCE_STATS
 
 #if OUTPUT_FORCE
-  write_forcing_file(atmos, global_param.nrecs, global_param.dt, outfiles);
+
+  // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
+  // forcing data array is dumped into a new set of files.
+  write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+
 #endif // OUTPUT_FORCE 
 
 }

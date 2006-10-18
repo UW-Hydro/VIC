@@ -14,7 +14,7 @@ void dist_prec(atmos_data_struct   *atmos,
 #endif /* LAKE_MODEL */
                dmy_struct          *dmy,
                global_param_struct *global_param,
-               outfiles_struct     *outfiles,
+               filep_struct        *filep,
                out_data_file_struct *out_data_files,
                out_data_struct     *out_data,
                save_data_struct    *save_data,
@@ -67,6 +67,7 @@ void dist_prec(atmos_data_struct   *atmos,
 	      for ALMA variables.				TJB
   2006-Sep-23 Implemented flexible output configuration; uses new out_data,
 	      out_data_files, and save_data structures. TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
 
 **********************************************************************/
 
@@ -218,14 +219,14 @@ void dist_prec(atmos_data_struct   *atmos,
     (after the final time step of the assigned date)
   ************************************/
 
-  if ( outfiles->statefile != NULL
+  if ( filep->statefile != NULL
        &&  ( dmy[rec].year == global_param->stateyear
 	     && dmy[rec].month == global_param->statemonth 
 	     && dmy[rec].day == global_param->stateday
 	     && ( rec+1 == global_param->nrecs
 		  || dmy[rec+1].day != global_param->stateday ) ) )
     write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
-		      soil_con->gridcel, outfiles, soil_con,
+		      soil_con->gridcel, filep, soil_con,
 #if LAKE_MODEL
 		      STILL_STORM, DRY_TIME, *lake_con);
 #else

@@ -15,6 +15,9 @@ out_data_struct *create_output_list() {
   2006-Sep-14 Implemented ALMA-compliant input and output;
               now more variables are tracked.  TJB
   2006-Sep-18 Implemented aggregation of output variables.  TJB
+  2006-Oct-10 Shortened the names of variables whose names were
+	      too long; fixed typos in other names; added
+	      OUT_IN_LONG.  TJB
 
 *************************************************************/
 
@@ -141,8 +144,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_VEGT].aggtype = AGG_TYPE_AVG;
 
   // Energy Balance Terms - fluxes
-  strcpy(out_data[OUT_ADVECTED_SENSIBLE].varname,"OUT_ADVECTED_SENSIBLE"); /* net sensible heat advected to snow pack [W/m2] */
-  out_data[OUT_ADVECTED_SENSIBLE].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_ADV_SENS].varname,"OUT_ADV_SENS");               /* net sensible heat advected to snow pack [W/m2] */
+  out_data[OUT_ADV_SENS].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_ADVECTION].varname,"OUT_ADVECTION");             /* advected energy [W/m2] */
   out_data[OUT_ADVECTION].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_DELTACC].varname,"OUT_DELTACC");                 /* rate of change in cold content in snow pack [W/m2] */
@@ -155,6 +158,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_FUSION].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_GRND_FLUX].varname,"OUT_GRND_FLUX");             /* net heat flux into ground [W/m2] */
   out_data[OUT_GRND_FLUX].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_IN_LONG].varname,"OUT_IN_LONG");                 /* incoming longwave flux at surface (under veg) [W/m2] */
+  out_data[OUT_IN_LONG].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT].varname,"OUT_LATENT");                   /* net upward latent heat flux [W/m2] */
   out_data[OUT_LATENT].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT_SUB].varname,"OUT_LATENT_SUB");           /* net upward latent heat flux from sublimation [W/m2] */
@@ -167,8 +172,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_NET_SHORT].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_R_NET].varname,"OUT_R_NET");                     /* net downward radiation flux [W/m2] */
   out_data[OUT_R_NET].aggtype = AGG_TYPE_AVG;
-  strcpy(out_data[OUT_REFREEZE_ENERGY].varname,"OUT_REFREEZE_ENERGY"); /* net energy used to refreeze liquid water in snowpack [W/m2] */
-  out_data[OUT_REFREEZE_ENERGY].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_RFRZ_ENERGY].varname,"OUT_RFRZ_ENERGY");         /* net energy used to refreeze liquid water in snowpack [W/m2] */
+  out_data[OUT_RFRZ_ENERGY].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SENSIBLE].varname,"OUT_SENSIBLE");               /* net upward sensible heat flux [W/m2] */
   out_data[OUT_SENSIBLE].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_FLUX].varname,"OUT_SNOW_FLUX");             /* energy flux through snow pack [W/m2] */
@@ -201,8 +206,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
 
   // Band-specific quantities
-  strcpy(out_data[OUT_ADVECTED_SENSIBLE_BAND].varname,"OUT_ADVECTED_SENSIBLE_BAND"); /* net sensible heat flux advected to snow pack [W/m2] */
-  out_data[OUT_ADVECTED_SENSIBLE_BAND].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
+  out_data[OUT_ADV_SENS_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_ADVECTION_BAND].varname,"OUT_ADVECTION_BAND");             /* advected energy [W/m2] */
   out_data[OUT_ADVECTION_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_ALBEDO_BAND].varname,"OUT_ALBEDO_BAND");                   /* albedo [fraction] */
@@ -211,18 +216,20 @@ out_data_struct *create_output_list() {
   out_data[OUT_DELTACC_BAND].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_GRND_FLUX_BAND].varname,"OUT_GRND_FLUX_BAND");             /* net heat flux into ground [W/m2] */
   out_data[OUT_GRND_FLUX_BAND].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_IN_LONG_BAND].varname,"OUT_IN_LONG_BAND");                 /* incoming longwave flux at surface (under veg) [W/m2] */
+  out_data[OUT_IN_LONG_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT_BAND].varname,"OUT_LATENT_BAND");                   /* net upward latent heat flux [W/m2] */
   out_data[OUT_LATENT_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT_SUB_BAND].varname,"OUT_LATENT_SUB_BAND");           /* net upward latent heat flux from sublimation [W/m2] */
-  out_data[OUT_LATENT_BAND].aggtype = AGG_TYPE_AVG;
+  out_data[OUT_LATENT_SUB_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_MELT_ENERGY_BAND].varname,"OUT_MELT_ENERGY_BAND");         /* energy of fusion (melting) [W/m2] */
   out_data[OUT_MELT_ENERGY_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_LONG_BAND].varname,"OUT_NET_LONG_BAND");               /* net downward longwave flux [W/m2] */
   out_data[OUT_NET_LONG_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_SHORT_BAND].varname,"OUT_NET_SHORT_BAND");             /* net downward shortwave flux [W/m2] */
   out_data[OUT_NET_SHORT_BAND].aggtype = AGG_TYPE_AVG;
-  strcpy(out_data[OUT_REFREEZE_ENERGY_BAND].varname,"OUT_REFREEZE_ENERGY_BAND"); /* net energy used to refreeze liquid water in snowpack [W/m2] */
-  out_data[OUT_REFREEZE_ENERGY_BAND].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_RFRZ_ENERGY_BAND].varname,"OUT_RFRZ_ENERGY_BAND");         /* net energy used to refreeze liquid water in snowpack [W/m2] */
+  out_data[OUT_RFRZ_ENERGY_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SENSIBLE_BAND].varname,"OUT_SENSIBLE_BAND");               /* net upward sensible heat flux [W/m2] */
   out_data[OUT_SENSIBLE_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_CANOPY_BAND].varname,"OUT_SNOW_CANOPY_BAND");         /* snow interception storage in canopy [mm] */
@@ -235,10 +242,10 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_FLUX_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_MELT_BAND].varname,"OUT_SNOW_MELT_BAND");             /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
   out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
-  strcpy(out_data[OUT_SNOW_PACK_TEMP_BAND].varname,"OUT_SNOW_PACK_TEMP_BAND");   /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_SNOW_PACK_TEMP_BAND].aggtype = AGG_TYPE_AVG;
-  strcpy(out_data[OUT_SNOW_SURF_TEMP_BAND].varname,"OUT_SNOW_SURF_TEMP_BAND");   /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_SNOW_SURF_TEMP_BAND].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_SNOW_PACKT_BAND].varname,"OUT_SNOW_PACKT_BAND");           /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+  out_data[OUT_SNOW_PACKT_BAND].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_SNOW_SURFT_BAND].varname,"OUT_SNOW_SURFT_BAND");           /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+  out_data[OUT_SNOW_SURFT_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SWE_BAND].varname,"OUT_SWE_BAND");                         /* snow water equivalent in snow pack [mm] */
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
 
@@ -260,10 +267,11 @@ out_data_struct *create_output_list() {
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_DELTACC_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_GRND_FLUX_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_IN_LONG_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_LATENT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_NET_LONG_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_NET_SHORT_BAND].nelem = options.SNOW_BAND;
-  out_data[OUT_REFREEZE_ENERGY_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_RFRZ_ENERGY_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SENSIBLE_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_CANOPY_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_COVER_BAND].nelem = options.SNOW_BAND;

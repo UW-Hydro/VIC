@@ -6,7 +6,6 @@ static char vcid[] = "$Id$";
 
 void initialize_snow (snow_data_struct **snow, 
 		      int                veg_num,
-		      FILE              *fsnow,
 		      int                cellnum)
 /**********************************************************************
 	initialize_snow		Keith Cherkauer		January 22, 1997
@@ -51,6 +50,7 @@ void initialize_snow (snow_data_struct **snow,
            file.                                                  KAC
   xx-xx-01 modified to initialize spatially distributed snow variables. KAC
   11-18-02 modified to initalize blowing_snow variable.          LCB
+  2006-Oct-16 Removed unused init_snow file.  TJB
 
 **********************************************************************/
 {

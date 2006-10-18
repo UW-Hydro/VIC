@@ -109,10 +109,10 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 #else
                    float *);
 #endif
-void   check_files(infiles_struct *, filenames_struct *);
+void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
-void   close_files(infiles_struct *, out_data_file_struct *, filenames_struct *);
+void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
@@ -136,7 +136,7 @@ void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 lake_con_struct *,
 #endif /* LAKE_MODEL */
 		 dmy_struct *,global_param_struct *,
-		 outfiles_struct *, out_data_file_struct *,
+		 filep_struct *, out_data_file_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
 #if QUICK_FS
@@ -243,7 +243,7 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double,
 #endif
 void   initialize_global();
 void   initialize_model_state(dist_prcp_struct *, dmy_struct,
-			      global_param_struct *, infiles_struct, 
+			      global_param_struct *, filep_struct, 
 			      int, int, int, int, double,
                               soil_con_struct *, veg_con_struct *,
 #if LAKE_MODEL
@@ -252,7 +252,7 @@ void   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      char **, int **, save_data_struct *);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
-void   initialize_snow(snow_data_struct **,int,FILE *,int);
+void   initialize_snow(snow_data_struct **, int, int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *, int);
@@ -266,8 +266,8 @@ cell_data_struct **make_cell_data(int, int);
 dist_prcp_struct make_dist_prcp(int);
 dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int);
-filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct *, 
-				      soil_con_struct *, out_data_file_struct *);
+void make_in_and_outfiles(filep_struct *, filenames_struct *, 
+			  soil_con_struct *, out_data_file_struct *);
 out_data_struct *make_out_data(int);
 snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
@@ -286,7 +286,7 @@ void   nrerror(char *);
 
 void   open_debug();
 FILE  *open_file(char string[], char type[]);
-FILE  *open_state_file(global_param_struct *, int, int);
+FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
 double penman(double, double, double, double, double, double, double, 
@@ -464,7 +464,7 @@ void write_layer(layer_data_struct *, int, int,
 #endif
                  double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
-		       int, outfiles_struct *, soil_con_struct *, char *,
+		       int, filep_struct *, soil_con_struct *, char *,
 #if LAKE_MODEL
 		       int *, lake_con_struct);
 #else

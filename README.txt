@@ -248,8 +248,110 @@ Flexible output configuration & aggregation of output variables
 
 
 
+Cleanup of structures holding filenames and file pointers
+
+	Files affected:
+
+	check_files.c
+	check_state_file.c
+	close_files.c
+	display_current_settings.c
+	dist_prec.c
+	get_global_param.c
+	initialize_model_state.c
+	make_in_and_outfiles.c
+	open_state_file.c
+	read_initial_model_state.c
+	vicerror.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	1. Merged infiles and outfiles structs into filep_struct.
+	2. Merged builtnames into filenames struct.
+	3. Renamed infiles.statefile to filep.init_state
+	4. Moved global.statename to filenames.statefile.
+	5. Added f_path_pfx[] to the filenames_struct, to store
+	   the path and prefix of forcing files.  Now, forcing[]
+	   only stores the full forcing file names.
+
+
+
 Bug Fixes:
 ----------
+
+Various bugs in output variables
+
+	Files affected:
+
+	global.param.sample
+	output_list_utils.c
+	output.PILPS-2E.ALMA.template
+	output.TRADITIONAL.410.template
+	output.TRADITIONAL.template
+	put_data.c
+	set_output_defaults.c
+	vicNl_def.h
+
+	Description:
+
+	1. Shortened the names of variables whose names were too long
+	2. Fixed typos in other names
+	3. Added OUT_IN_LONG
+
+
+
+Uninitialized value of ice[] in transpiration()
+
+	Files affected:
+
+	canopy_evap.c
+
+	Description:
+
+	Modified to initialize ice[] for all soil layers before computing
+	available moisture (to avoid using uninitialized values later on).
+
+
+
+Uninitialized value of mixdepth in solve_lake()
+
+	Files affected:
+
+	lakes.eb.c
+
+	Description:
+
+	Now set mixdepth=0 for case of complete ice cover; this guarantees that
+	it is initialized for all cases.
+
+
+
+Missing ID String
+
+	Files affected:
+
+	initialize_lake.c
+
+	Description:
+
+	Added RCS ID string.
+
+
+
+Unused file "init_snow"
+
+	Files affected:
+
+	initialize_snow.c
+	vicNl.h
+
+	Description:
+
+	Removed reference to unused file "init_snow" from argument list.
 
 
 

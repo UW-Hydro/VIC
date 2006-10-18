@@ -256,6 +256,9 @@ void transpiration(layer_data_struct *layer,
   modifications:
   6-8-2000 Modified to use spatially distributed soil frost if 
            present.                                               KAC
+  2006-Oct-16 Modified to initialize ice[] for all soil layers
+	      before computing available moisture (to avoid using
+	      uninitialized values later on).			TJB
 
 **********************************************************************/
 {
@@ -288,6 +291,20 @@ void transpiration(layer_data_struct *layer,
   **********************************************************************/
  
   /**************************************************
+    Set ice content in all individual layers
+    **************************************************/
+  for(i=0;i<options.Nlayer;i++){
+#if SPATIAL_FROST
+    ice[i] = 0;
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+      ice[i] += layer[i].ice[frost_area] * frost_fract[frost_area];
+    }
+#else
+    ice[i]         = layer[i].ice;
+#endif
+  }
+
+  /**************************************************
     Compute moisture content in combined upper layers
     **************************************************/
   moist1 = 0.0;
@@ -296,17 +313,13 @@ void transpiration(layer_data_struct *layer,
     if(root[i] > 0.) {
 #if SPATIAL_FROST
       avail_moist[i] = 0;
-      ice[i] = 0;
       for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
 	avail_moist[i] += ((layer[i].moist - layer[i].ice[frost_area]) 
 			   * frost_fract[frost_area]);
-        ice[i] += layer[i].ice[frost_area] * frost_fract[frost_area];
       }
 #else
       avail_moist[i] = layer[i].moist - layer[i].ice;
-      ice[i]         = layer[i].ice;
 #endif
-
       moist1+=avail_moist[i];
       Wcr1 += Wcr[i];
     }

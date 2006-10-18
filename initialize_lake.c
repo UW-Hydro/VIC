@@ -4,6 +4,8 @@
 
 #if LAKE_MODEL
 
+static char vcid[] = "$Id$";
+
 void initialize_lake (lake_var_struct  *lake, 
 		      lake_con_struct   lake_con,
 		      snow_data_struct *lake_snow,
@@ -28,7 +30,8 @@ void initialize_lake (lake_var_struct  *lake,
   modifications:
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
- 2005-03-24 Added check for negative lake volumes.			TJB
+  2005-03-24 Added check for negative lake volumes.			TJB
+  2006-Oct-16 Added RCS ID string.					TJB
 
 **********************************************************************/
 {

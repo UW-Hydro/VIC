@@ -12,6 +12,10 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   This routine sets the out_data_files and out_data structures to default values.
   These can be overridden by the user in the global control file.
 
+  Modifications:
+  2006-Oct-10 Shortened the names of output variables whose names were
+              too long.  TJB
+
 *************************************************************/
 
   extern option_struct options;
@@ -135,7 +139,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_FLUX", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_REFREEZE_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_RFRZ_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
 
   // Variables in other files
@@ -156,7 +160,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_REFREEZE_ENERGY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_RFRZ_ENERGY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     }
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NET_SHORT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NET_LONG_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);

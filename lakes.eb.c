@@ -213,6 +213,10 @@ void solve_lake(double             snow,
   lake_snow.depth	         Height of the snow on top of the lake (m).
   lake.numnod        	Number of nodes in the lake (-).
   dt		         Time step size (hrs).
+
+  Modifications:
+  2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
+	      guarantees that it is initialized for all cases.  TJB
 **********************************************************************/
 
       double LWnetw,LWneti;
@@ -416,6 +420,7 @@ void solve_lake(double             snow,
       }          /* End of water fraction calculations. */
       else {
 	// ice covers 100% of lake, reset open water fluxes
+	mixdepth = 0;
 	LWnetw = 0;
 	Qew    = 0.;
 	Qhw    = 0;

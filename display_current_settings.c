@@ -23,7 +23,10 @@ void display_current_settings(int                 mode,
   2005-11-29 SAVE_STATE is now set in global param file         GCT
   2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
   2006-Sep-23 Implemented flexible output configuration
-              and aggregation of output variables. TJB
+              and aggregation of output variables.		TJB
+  2006-Oct-10 Moved printing of soil_dir inside if{} block.	TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
+	      This included moving global->statename to names->statefile. TJB
 
 **********************************************************************/
 {
@@ -227,7 +230,7 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"Input Forcing Data:\n");
   for (file_num=0; file_num<2; file_num++) {
     if (global->forceyear[file_num] > 0) {
-      fprintf(stdout,"Forcing File %d:\t\t%s\n",file_num+1,names->forcing[file_num]);
+      fprintf(stdout,"Forcing File %d:\t\t%s*\n",file_num+1,names->f_path_pfx[file_num]);
       fprintf(stdout,"FORCEYEAR\t\t%d\n",global->forceyear[file_num]);
       fprintf(stdout,"FORCEMONTH\t\t%d\n",global->forcemonth[file_num]);
       fprintf(stdout,"FORCEDAY\t\t%d\n",global->forceday[file_num]);
@@ -249,9 +252,10 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Soil Data:\n");
   fprintf(stdout,"Soil file\t\t%s\n",names->soil);
-  fprintf(stdout,"Soil dir\t\t%s\n",names->soil_dir);
-  if (options.ARC_SOIL)
+  if (options.ARC_SOIL) {
     fprintf(stdout,"ARC_SOIL\t\tTRUE\n");
+    fprintf(stdout,"Soil dir\t\t%s\n",names->soil_dir);
+  }
   else
     fprintf(stdout,"ARC_SOIL\t\tFALSE\n");
   if (options.BASEFLOW == ARNO)
@@ -272,7 +276,7 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Elevation Data:\n");
   if (options.SNOW_BAND > 1)
-    fprintf(stdout,"SNOW_BAND\t\t%d\t%s\n",options.SNOW_BAND,names->snow_band);
+    fprintf(stdout,"SNOW_BAND\t\t%d\t%s\n",options.SNOW_BAND,names->snowband);
   else if (options.SNOW_BAND == 1)
     fprintf(stdout,"SNOW_BAND\t\t%d\t(no input file needed for SNOW_BAND=1)\n",options.SNOW_BAND);
   else
@@ -307,7 +311,7 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"Output State File:\n");
   if (options.SAVE_STATE) {
     fprintf(stdout,"SAVE_STATE\t\tTRUE\n");
-    fprintf(stdout,"STATENAME\t\t%s\n",global->statename);
+    fprintf(stdout,"STATENAME\t\t%s\n",names->statefile);
     fprintf(stdout,"STATEYEAR\t\t%d\n",global->stateyear);
     fprintf(stdout,"STATEMONTH\t\t%d\n",global->statemonth);
     fprintf(stdout,"STATEDAY\t\t%d\n",global->stateday);

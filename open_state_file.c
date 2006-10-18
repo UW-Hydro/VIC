@@ -7,6 +7,7 @@ static char vcid[] = "$Id$";
 
 
 FILE *open_state_file(global_param_struct *global,
+		      filenames_struct     filenames,
 		      int                  Nlayer,
 		      int                  Nnodes) 
 /*********************************************************************
@@ -21,6 +22,9 @@ FILE *open_state_file(global_param_struct *global,
   2005-12-06 Moved setting of statename to get_global_param     GCT
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
+	      This included moving global->statename to filenames->statefile. TJB
+
 *********************************************************************/
 {
   extern option_struct options;
@@ -30,7 +34,7 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s", global->statename);
+  sprintf(filename,"%s", filenames.statefile);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");
   else

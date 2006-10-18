@@ -8,7 +8,7 @@ static char vcid[] = "$Id$";
 void initialize_model_state(dist_prcp_struct    *prcp,
 			    dmy_struct           dmy,
                             global_param_struct *global_param,
-                            infiles_struct       infiles,
+                            filep_struct         filep,
 			    int                  cellnum,
 		            int                  Nveg,
                             int                  Nnodes,
@@ -61,6 +61,9 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   2006-Sep-23 Implemented flexible output configuration; uses the new
               save_data structure to track changes in moisture storage
               over each time step; this needs initialization here.  TJB
+  2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe. TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
+	      This included removing the unused init_snow file. TJB
 
 **********************************************************************/
 {
@@ -153,7 +156,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
     - some may be reset if state file present
   ********************************************/
 
-  initialize_snow(snow, MaxVeg, infiles.init_snow, cellnum);
+  initialize_snow(snow, MaxVeg, cellnum);
 
   /********************************************
     Initialize all soil layer variables 
@@ -238,7 +241,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
   if(options.INIT_STATE) {
 
-    read_initial_model_state(infiles.statefile, prcp, global_param,  
+    read_initial_model_state(filep.init_state, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
 #if LAKE_MODEL
 			     Ndist, *init_STILL_STORM, *init_DRY_TIME, lake_con);
@@ -581,7 +584,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
       }
 
       for( band = 0; band < options.SNOW_BAND; band++ ) {
-        save_data->swe += snow[veg][band].swq * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+        save_data->swe += (snow[veg][band].swq + snow[veg][band].snow_canopy)
+                         * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
       }
 
     }
@@ -589,7 +593,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   }
 #if LAKE_MODEL
   Clake = lake_var->sarea/lake_con.basin[0];
-  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * Cv * soil_con->AreaFract[0] * TreeAdjustFactor[0];
 #endif // LAKE_MODEL
 
 }

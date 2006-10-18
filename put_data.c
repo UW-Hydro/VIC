@@ -50,6 +50,9 @@ void put_data(dist_prcp_struct  *prcp,
               out_data and out_data_files structures; removed the
               OPTIMIZE and LDAS_OUTPUT options; uses the
 	      new save_data structure; implemented aggregation.  TJB
+  2006-Oct-10 Shortened the names of output variables whose names were
+	      too long; fixed typos in others; created new OUT_IN_LONG
+	      variable.  TJB
 
 **********************************************************************/
 {
@@ -390,6 +393,14 @@ void put_data(dist_prcp_struct  *prcp,
 	  out_data[OUT_NET_LONG].data[0]  += energy[veg][band].NetLongAtmos
 	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
+          /** record incoming longwave radiation at ground surface (under veg) **/
+          if ( snow[veg][band].snow && overstory )
+            out_data[OUT_IN_LONG].data[0] += energy[veg][band].LongOverIn
+              * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          else
+            out_data[OUT_IN_LONG].data[0] += energy[veg][band].LongUnderIn
+              * Cv * AreaFract[band] * TreeAdjustFactor[band];
+
 	  /** record albedo **/
           if ( snow[veg][band].snow && overstory )
             out_data[OUT_ALBEDO].data[0]    += energy[veg][band].AlbedoOver
@@ -491,11 +502,11 @@ void put_data(dist_prcp_struct  *prcp,
 	  
 	  /** record refreeze energy **/
           if ( snow[veg][band].snow && overstory ) {
-	    out_data[OUT_REFREEZE_ENERGY].data[0]
+	    out_data[OUT_RFRZ_ENERGY].data[0]
 	      += energy[veg][band].canopy_refreeze 
 	      * Cv * AreaFract[band] * TreeAdjustFactor[band];
           }
-	  out_data[OUT_REFREEZE_ENERGY].data[0]
+	  out_data[OUT_RFRZ_ENERGY].data[0]
 	    += energy[veg][band].refreeze_energy 
 	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
@@ -506,7 +517,7 @@ void put_data(dist_prcp_struct  *prcp,
 
           /** record advected sensible heat energy **/
           if ( !overstory )
-            out_data[OUT_ADVECTED_SENSIBLE].data[0]
+            out_data[OUT_ADV_SENS].data[0]
               -= energy[veg][band].advected_sensible
               * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
@@ -547,7 +558,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      += energy[veg][band].snow_flux * Cv;
 	    
 	    /** record band refreeze energy **/
-	    out_data[OUT_REFREEZE_ENERGY_BAND].data[band]
+	    out_data[OUT_RFRZ_ENERGY_BAND].data[band]
 	      += energy[veg][band].refreeze_energy * Cv;
 	    
             /** record band melt energy **/
@@ -555,15 +566,15 @@ void put_data(dist_prcp_struct  *prcp,
               += energy[veg][band].melt_energy * Cv;
 
             /** record band advected sensble heat **/
-            out_data[OUT_ADVECTED_SENSIBLE_BAND].data[band]
+            out_data[OUT_ADV_SENS_BAND].data[band]
               -= energy[veg][band].advected_sensible * Cv;
 
             /** record surface layer temperature **/
-            out_data[OUT_SNOW_SURF_TEMP_BAND].data[band]
+            out_data[OUT_SNOW_SURFT_BAND].data[band]
               += snow[veg][band].surf_temp * Cv;
 
             /** record pack layer temperature **/
-            out_data[OUT_SNOW_PACK_TEMP_BAND].data[band]
+            out_data[OUT_SNOW_PACKT_BAND].data[band]
               += snow[veg][band].pack_temp * Cv;
 
             /** record latent heat of sublimation **/
@@ -638,7 +649,7 @@ void put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SUB_SNOW].data[0] += snow[veg][band].vapor_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_SUB_SURFACE].data[0] += snow[veg][band].surface_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_SUB_BLOWING].data[0] += snow[veg][band].blowing_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_EVAP_LAKE].data[0] = lake_var.evapw * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band]; /* mm over gridcell */
+      out_data[OUT_EVAP_LAKE].data[0] = lake_var.evapw * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band]; // mm over gridcell
       out_data[OUT_SNOW_MELT].data[0] += snow[veg][band].melt * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       /** record runoff **/
@@ -698,8 +709,6 @@ void put_data(dist_prcp_struct  *prcp,
           tmp_moist /= depth[index] * 1000.;
           tmp_ice /= depth[index] * 1000.;
         }
-        tmp_moist *= Cv;
-        tmp_ice *= Cv;
         out_data[OUT_SOIL_LIQ].data[index] += tmp_moist * Cv * AreaFract[band] * TreeAdjustFactor[band];
         out_data[OUT_SOIL_ICE].data[index] += tmp_ice * Cv * AreaFract[band] * TreeAdjustFactor[band];
       }
@@ -739,10 +748,10 @@ void put_data(dist_prcp_struct  *prcp,
       /** record net longwave radiation **/
       out_data[OUT_NET_LONG].data[0] += energy[veg][band].NetLongAtmos * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
-      /** record incoming longwave radiation **/
-      out_data[OUT_LONGWAVE].data[0] += ((energy[veg][band].NetLongAtmos + STEFAN_B
-                              * (rad_temp) * (rad_temp)
-                              * (rad_temp) * (rad_temp)) * Cv) * AreaFract[band] * TreeAdjustFactor[band];
+      /** record incoming longwave radiation at ground surface (under veg) **/
+      out_data[OUT_IN_LONG].data[0] += (energy[veg][band].NetLongAtmos + STEFAN_B
+                              * (rad_temp) * (rad_temp) * (rad_temp) * (rad_temp))
+                              * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       /** record albedo **/
       out_data[OUT_ALBEDO].data[0] += (energy[veg][band].AlbedoLake*Clake
@@ -809,7 +818,7 @@ void put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SNOW_FLUX].data[0] += energy[veg][band].snow_flux * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       /** record refreeze energy **/
-      out_data[OUT_REFREEZE_ENERGY].data[0] += energy[veg][band].refreeze_energy * Cv * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_RFRZ_ENERGY].data[0] += energy[veg][band].refreeze_energy * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       // Store Lake Specific Variables
       out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
@@ -866,7 +875,7 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
 
   // Energy terms
-  out_data[OUT_REFREEZE].data[0] = (out_data[OUT_REFREEZE_ENERGY].data[0]/Lf)*dt_sec;
+  out_data[OUT_REFREEZE].data[0] = (out_data[OUT_RFRZ_ENERGY].data[0]/Lf)*dt_sec;
   out_data[OUT_R_NET].data[0] = out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0];
 
   // Save current moisture state for use in next time step
@@ -899,10 +908,10 @@ void put_data(dist_prcp_struct  *prcp,
   if(options.FULL_ENERGY)
     calc_energy_balance_error(rec, out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0],
 			      out_data[OUT_LATENT].data[0]+out_data[OUT_LATENT_SUB].data[0],
-			      out_data[OUT_SENSIBLE].data[0]+out_data[OUT_ADVECTED_SENSIBLE].data[0],
+			      out_data[OUT_SENSIBLE].data[0]+out_data[OUT_ADV_SENS].data[0],
 			      out_data[OUT_GRND_FLUX].data[0]+out_data[OUT_DELTAH].data[0]+out_data[OUT_FUSION].data[0],
 			      out_data[OUT_ADVECTION].data[0] - out_data[OUT_DELTACC].data[0]
-			      - out_data[OUT_SNOW_FLUX].data[0] + out_data[OUT_REFREEZE_ENERGY].data[0]);
+			      - out_data[OUT_SNOW_FLUX].data[0] + out_data[OUT_RFRZ_ENERGY].data[0]);
 
   /********************
     Temporal Aggregation 

@@ -51,6 +51,8 @@ int main(int argc, char *argv[])
   2005-Apr-13 OUTPUT_FORCE option now calls close_files().	TJB
   2006-Sep-23 Implemented flexible output configuration; uses the new
               out_data, out_data_files, and save_data structures. TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
+	      This included merging builtnames into filenames. TJB
 
 **********************************************************************/
 {
@@ -92,12 +94,10 @@ int main(int argc, char *argv[])
   dist_prcp_struct         prcp; /* stores information about distributed 
 				    precipitation */
   filenames_struct         filenames;
-  filenames_struct         builtnames;
-  infiles_struct           infiles;
+  filep_struct             filep;
 #if LAKE_MODEL
   lake_con_struct          lake_con;
 #endif // LAKE_MODEL
-  outfiles_struct          outfiles;
   out_data_file_struct     *out_data_files;
   out_data_struct          *out_data;
   save_data_struct         save_data;
@@ -111,17 +111,17 @@ int main(int argc, char *argv[])
 #endif
 
   /** Read Global Control File **/
-  infiles.globalparam = open_file(filenames.global,"r");
-  global_param = get_global_param(&filenames, infiles.globalparam);
+  filep.globalparam = open_file(filenames.global,"r");
+  global_param = get_global_param(&filenames, filep.globalparam);
 
   /** Set up output data structures **/
   out_data = create_output_list();
   out_data_files = set_output_defaults(out_data);
-  infiles.globalparam = open_file(filenames.global,"r");
-  parse_output_info(&filenames, infiles.globalparam, &out_data_files, out_data);
+  filep.globalparam = open_file(filenames.global,"r");
+  parse_output_info(&filenames, filep.globalparam, &out_data_files, out_data);
 
   /** Check and Open Files **/
-  check_files(&infiles, &filenames);
+  check_files(&filep, &filenames);
 
 #if !OUTPUT_FORCE
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 #endif
 
   /** Read Vegetation Library File **/
-  veg_lib = read_veglib(infiles.veglib,&Nveg_type);
+  veg_lib = read_veglib(filep.veglib,&Nveg_type);
 
 #endif // !OUTPUT_FORCE
 
@@ -150,15 +150,15 @@ int main(int argc, char *argv[])
   startrec = 0;
 #if !OUTPUT_FORCE
   if ( options.INIT_STATE ) 
-    infiles.statefile = check_state_file(filenames.init_state, dmy, 
+    filep.statefile = check_state_file(filenames.init_state, dmy, 
 					 &global_param, options.Nlayer, 
 					 options.Nnode, &startrec);
 
   /** open state file if model state is to be saved **/
-  if ( options.SAVE_STATE && strcmp( global_param.statename, "NONE" ) != 0 )
-    outfiles.statefile = open_state_file(&global_param, options.Nlayer,
+  if ( options.SAVE_STATE && strcmp( filenames.statefile, "NONE" ) != 0 )
+    filep.statefile = open_state_file(&global_param, filenames, options.Nlayer,
                                          options.Nnode);
-  else outfiles.statefile = NULL;
+  else filep.statefile = NULL;
 
 #endif // !OUTPUT_FORCE
 
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
   cell_cnt=0;
   while(!MODEL_DONE) {
     if(!options.ARC_SOIL) {
-      if((fscanf(infiles.soilparam, "%d", &flag))!=EOF) {
+      if((fscanf(filep.soilparam, "%d", &flag))!=EOF) {
 	if(flag) RUN_MODEL=TRUE;
 	else     RUN_MODEL=FALSE;
       }
@@ -177,10 +177,10 @@ int main(int argc, char *argv[])
 	MODEL_DONE = TRUE;
 	RUN_MODEL = FALSE;
       }
-      if(!MODEL_DONE) soil_con = read_soilparam(infiles.soilparam, RUN_MODEL);
+      if(!MODEL_DONE) soil_con = read_soilparam(filep.soilparam, RUN_MODEL);
     }
     else {
-      soil_con = read_soilparam_arc(infiles.soilparam, 
+      soil_con = read_soilparam_arc(filep.soilparam, 
 				    filenames.soil_dir, &Ncells, 
 				    &RUN_MODEL, cell_cnt);
       cell_cnt++;
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 #if !OUTPUT_FORCE
 
       /** Read Grid Cell Vegetation Parameters **/
-      veg_con = read_vegparam(infiles.vegparam, soil_con.gridcel,
+      veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
                               Nveg_type);
       calc_root_fractions(veg_con, &soil_con);
 #if LINK_DEBUG
@@ -223,20 +223,19 @@ int main(int argc, char *argv[])
 
 #if LAKE_MODEL
       if ( options.LAKES ) 
-	lake_con = read_lakeparam(infiles.lakeparam, soil_con, 
+	lake_con = read_lakeparam(filep.lakeparam, soil_con, 
 				  veg_con, global_param.resolution);
 #endif // LAKE_MODEL
 
 #endif // !OUTPUT_FORCE
 
       /** Build Gridded Filenames, and Open **/
-      builtnames = make_in_and_outfiles(&infiles, &filenames, &soil_con,
-                   out_data_files);
+      make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
 
 #if !OUTPUT_FORCE
 
       /** Read Elevation Band Data if Used **/
-      read_snowband(infiles.snowband,soil_con.gridcel,
+      read_snowband(filep.snowband,soil_con.gridcel,
 		    (double)soil_con.elevation, &soil_con.Tfactor, 
 		    &soil_con.Pfactor, &soil_con.AreaFract, 
 		    &soil_con.AboveTreeLine);
@@ -255,7 +254,7 @@ int main(int argc, char *argv[])
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
 
-      initialize_atmos(atmos, dmy, infiles.forcing,
+      initialize_atmos(atmos, dmy, filep.forcing,
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
@@ -278,7 +277,7 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-      initialize_model_state(&prcp, dmy[0], &global_param, infiles, 
+      initialize_model_state(&prcp, dmy[0], &global_param, filep, 
 			     soil_con.gridcel, veg_con[0].vegetat_type_num,
 			     options.Nnode, Ndist, atmos[0].air_temp[NR],
 			     &soil_con, veg_con,
@@ -293,8 +292,7 @@ int main(int argc, char *argv[])
 #endif /* VERBOSE */
 
       /** Update Error Handling Structure **/
-      Error.outfp = outfiles;
-      Error.infp = infiles;
+      Error.filep = filep;
       Error.out_data_files = out_data_files;
 
       /***************************************************
@@ -358,7 +356,7 @@ int main(int argc, char *argv[])
 #if LAKE_MODEL
 		  &lake_con, 
 #endif /* LAKE_MODEL */
-                  dmy, &global_param, &outfiles,
+                  dmy, &global_param, &filep,
 		  out_data_files, out_data, &save_data, rec, cellnum,
                   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
         NEWCELL=FALSE;
@@ -371,7 +369,7 @@ int main(int argc, char *argv[])
 
 #endif /* !OUTPUT_FORCE */
 
-      close_files(&infiles,out_data_files,&builtnames); 
+      close_files(&filep,out_data_files,&filenames); 
 
 #if !OUTPUT_FORCE
 

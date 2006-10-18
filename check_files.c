@@ -4,7 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-void check_files(infiles_struct   *infp, 
+void check_files(filep_struct     *filep, 
 		 filenames_struct *fnames)
 /**********************************************************************
 	check_files		Dag Lohmann		January 1996
@@ -14,21 +14,22 @@ void check_files(infiles_struct   *infp,
   Modifcations:
   02-27-01 Added controls for lake model parameter file    KAC
   2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
 
 **********************************************************************/
 {
   extern option_struct  options;
   extern FILE          *open_file(char string[], char type[]);
 
-  infp->soilparam   = open_file(fnames->soil, "r");
+  filep->soilparam   = open_file(fnames->soil, "r");
 #if !OUTPUT_FORCE
-  infp->veglib      = open_file(fnames->veglib, "r");
-  infp->vegparam    = open_file(fnames->veg, "r");
+  filep->veglib      = open_file(fnames->veglib, "r");
+  filep->vegparam    = open_file(fnames->veg, "r");
   if(options.SNOW_BAND>1)
-    infp->snowband    = open_file(fnames->snow_band, "r");
+    filep->snowband    = open_file(fnames->snowband, "r");
 #if LAKE_MODEL
   if ( options.LAKES )
-    infp->lakeparam = open_file(fnames->lakeparam,"r");
+    filep->lakeparam = open_file(fnames->lakeparam,"r");
 #endif /* LAKE_MODEL */
 #endif /* !OUTPUT_FORCE */
 

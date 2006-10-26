@@ -29,9 +29,9 @@ MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 #######################################################################
 # Simulation Parameters for 4.1.0
 #######################################################################
-BLOWING	FALSE	# TRUE = compute evaporative fluxes due to blowing snow
-EQUAL_AREA	TRUE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
-RESOLUTION	10054.1	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE)
+BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
+EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
+RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE)
 
 #######################################################################
 # State Files and  Parameters
@@ -69,7 +69,7 @@ FORCE_TYPE	TMAX	SIGNED	100
 FORCE_TYPE	TMIN	SIGNED	100
 FORCE_TYPE	WIND	SIGNED	100
 FORCE_DT	24	# Forcing time step length (hours)
-FORCEYEAR	1915	# Year of first forcing record
+FORCEYEAR	2000	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
 FORCEHOUR	00	# Hour of first forcing record
@@ -85,7 +85,7 @@ SOIL            (put the soil parameter path/file here)	# Soil parameter path/fi
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
-GLOBAL_LAI 	TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
+GLOBAL_LAI 	FALSE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)

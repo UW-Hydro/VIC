@@ -46,6 +46,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   2006-Sep-14 Implemented ALMA-compliant input and output; uses the new
 	      save_data structure to track changes in moisture storage
 	      over each time step; this needs initialization here.  TJB
+  2006-Oct-25 Inserted "if (veg < Nveg)" before the line updating
+	      save_data->wdew, since Wdew is undefined for veg == Nveg. TJB
 
 **********************************************************************/
 {
@@ -410,7 +412,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
                 (cell[dist][veg][band].layer[lidx].moist) // layer[].moist appears to contain both liquid and ice
                 * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
             }
-            save_data->wdew += veg_var[dist][veg][band].Wdew * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
+            if (veg < Nveg)
+              save_data->wdew += veg_var[dist][veg][band].Wdew * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
 
           }
 

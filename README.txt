@@ -610,6 +610,16 @@ OUTPUT_FORCE option does not close output files properly
         soil-parameter-file-checking code.
 
 
+Bus error in cells that have bare soil
+
+	Files affected:
+	initialize_model_state.c
+        
+	An error in the flexible output configuration feature resulted in a bus
+	error in cells that have non-zero bare soil fractions.  This has been
+	fixed. TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

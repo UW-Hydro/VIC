@@ -652,6 +652,18 @@ Bus error in cells that have bare soil
 	fixed. TJB
 
 
+Incorrect sub-daily temperature interpolation when referencing GMT instead of
+local time
+
+	Files affected:
+	calc_air_temperature.c
+        
+	Temperature interpolation didn't account for case in which min or max
+	temperature could cross the boundary of the current day.  This can
+	happen when referencing GMT instead of local time, for cells far away
+	from 0 E longitude.  This has been fixed. TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

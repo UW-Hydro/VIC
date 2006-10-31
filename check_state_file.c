@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-FILE *check_state_file(char                *init_state,
+FILE *check_state_file(char                *init_state_name,
 		       dmy_struct          *dmy,
 		       global_param_struct *global,
 		       int                  Nlayer,
@@ -36,12 +36,13 @@ FILE *check_state_file(char                *init_state,
   2005-11-21 Replaced %i w/ %d in sscanf statement. (Port from 4.1.0) GCT
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
              to ...sizeof, 1,... GCT
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
 
 *********************************************************************/
 {
   extern option_struct options;
 
-  FILE   *statefile;
+  FILE   *init_state;
   char    filename[MAXSTRING];
   char    ErrStr[MAXSTRING];
   double  Nsum;
@@ -51,30 +52,30 @@ FILE *check_state_file(char                *init_state,
 
   /* open state file */
   if ( options.BINARY_STATE_FILE )
-    statefile = open_file(init_state,"rb");
+    init_state = open_file(init_state_name,"rb");
   else 
-    statefile = open_file(init_state,"r");
+    init_state = open_file(init_state_name,"r");
 
   /* Initialize startrec */
   *startrec = 0;
 
   /* Check state date information */
   if ( options.BINARY_STATE_FILE ) {
-    fread( &startyear, sizeof(int), 1, statefile );
-    fread( &startmonth, sizeof(int), 1, statefile );
-    fread( &startday, sizeof(int), 1, statefile );
+    fread( &startyear, sizeof(int), 1, init_state );
+    fread( &startmonth, sizeof(int), 1, init_state );
+    fread( &startday, sizeof(int), 1, init_state );
   }
   else {
-    fscanf(statefile,"%d %d %d\n", &startyear, &startmonth, &startday );
+    fscanf(init_state,"%d %d %d\n", &startyear, &startmonth, &startday );
   }
 
   /* Check simulation options */
   if ( options.BINARY_STATE_FILE ) {
-    fread( &tmp_Nlayer, sizeof(int), 1, statefile );
-    fread( &tmp_Nnodes, sizeof(int), 1, statefile );
+    fread( &tmp_Nlayer, sizeof(int), 1, init_state );
+    fread( &tmp_Nnodes, sizeof(int), 1, init_state );
   }
   else {
-    fscanf(statefile,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);
+    fscanf(init_state,"%i %i\n", &tmp_Nlayer, &tmp_Nnodes);
   }
   if ( tmp_Nlayer != Nlayer ) {
     sprintf(ErrStr,"The number of soil moisture layers in the model state file (%i) does not equal that defined in the global control file (%i).  Check your input files.", tmp_Nlayer, Nlayer);
@@ -85,6 +86,6 @@ FILE *check_state_file(char                *init_state,
     nrerror(ErrStr);
   }
 
-  return(statefile);
+  return(init_state);
 
 }

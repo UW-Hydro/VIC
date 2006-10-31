@@ -5,10 +5,10 @@
 
 static char vcid[] = "$Id$";
 
-filenames_struct make_in_and_outfiles(infiles_struct       *infp, 
-				      filenames_struct     *filenames,
-				      soil_con_struct      *soil,
-				      out_data_file_struct *out_data_files)
+void make_in_and_outfiles(filep_struct         *filep, 
+			  filenames_struct     *filenames,
+			  soil_con_struct      *soil,
+			  out_data_file_struct *out_data_files)
 /**********************************************************************
 	make_in_and_outfile	Dag Lohman	January 1996
 
@@ -21,7 +21,9 @@ filenames_struct make_in_and_outfiles(infiles_struct       *infp,
 		frozen soils					KAC
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; removed the
-              OPTIMIZE and LDAS_OUTPUT options. TJB
+              OPTIMIZE and LDAS_OUTPUT options. 		TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
+	      Merged builtnames into filenames. 		TJB
 
 **********************************************************************/
 {
@@ -30,36 +32,35 @@ filenames_struct make_in_and_outfiles(infiles_struct       *infp,
   extern FILE *open_file(char string[], char type[]);
 
   char             latchar[10], lngchar[10], junk[5];
-  filenames_struct fnames;
   int filenum;
-
-  fnames = *filenames;
 
   sprintf(junk, "%%.%if", options.GRID_DECIMAL);
   sprintf(latchar, junk, soil->lat);
   sprintf(lngchar, junk, soil->lng);
  
-  strcat(fnames.forcing[0], latchar);
-  strcat(fnames.forcing[0], "_");
-  strcat(fnames.forcing[0], lngchar);
+  strcpy(filenames->forcing[0], filenames->f_path_pfx[0]);
+  strcat(filenames->forcing[0], latchar);
+  strcat(filenames->forcing[0], "_");
+  strcat(filenames->forcing[0], lngchar);
   if(param_set.FORCE_FORMAT[0] == BINARY)
-    infp->forcing[0] = open_file(fnames.forcing[0], "rb");
+    filep->forcing[0] = open_file(filenames->forcing[0], "rb");
   else
-    infp->forcing[0] = open_file(fnames.forcing[0], "r");
+    filep->forcing[0] = open_file(filenames->forcing[0], "r");
 
-  infp->forcing[1] = NULL;
-  if(strcasecmp(fnames.forcing[1],"FALSE")!=0) {
-    strcat(fnames.forcing[1], latchar);
-    strcat(fnames.forcing[1], "_");
-    strcat(fnames.forcing[1], lngchar);
+  filep->forcing[1] = NULL;
+  if(strcasecmp(filenames->f_path_pfx[1],"FALSE")!=0) {
+    strcpy(filenames->forcing[1], filenames->f_path_pfx[1]);
+    strcat(filenames->forcing[1], latchar);
+    strcat(filenames->forcing[1], "_");
+    strcat(filenames->forcing[1], lngchar);
     if(param_set.FORCE_FORMAT[0] == BINARY) 
-      infp->forcing[1] = open_file(fnames.forcing[1], "rb");
+      filep->forcing[1] = open_file(filenames->forcing[1], "rb");
     else 
-      infp->forcing[1] = open_file(fnames.forcing[1], "r");
+      filep->forcing[1] = open_file(filenames->forcing[1], "r");
   }
 
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
-    strcpy(out_data_files[filenum].filename, fnames.result_dir);
+    strcpy(out_data_files[filenum].filename, filenames->result_dir);
     strcat(out_data_files[filenum].filename, out_data_files[filenum].prefix);
     strcat(out_data_files[filenum].filename, "_");
     strcat(out_data_files[filenum].filename, latchar);
@@ -69,7 +70,5 @@ filenames_struct make_in_and_outfiles(infiles_struct       *infp,
       out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "wb");
     else out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "w");
   }
-
-  return (fnames);
 
 } 

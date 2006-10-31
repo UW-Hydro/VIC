@@ -6,6 +6,7 @@
 static char vcid[] = "$Id $";
 
 FILE *open_state_file(global_param_struct *global,
+		      filenames_struct     filenames,
 		      int                  Nlayer,
 		      int                  Nnodes) 
 /*********************************************************************
@@ -35,7 +36,7 @@ FILE *open_state_file(global_param_struct *global,
   double  Nsum;
 
   /* open state file */
-  sprintf(filename,"%s", global->statename);
+  sprintf(filename,"%s", filenames.statefile);
   if ( options.BINARY_STATE_FILE )
     statefile = open_file(filename,"wb");
   else

@@ -20,6 +20,8 @@
 	      to EPS.  TJB
   2006-Sep-26 Moved definitions of GRAMSPKG, CH_WATER, and JOULESPCAL from
 	      SnowPackEnergyBalance() to here.  TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
+	      This included merging global->statename to filenames->statefile. TJB
 
 ********************************************************************/
 /***** Model Constants *****/
@@ -270,29 +272,27 @@ extern int NF;			/* array index loop counter limit for atmos
 typedef struct {
   FILE *forcing[2];     /* atmospheric forcing data files */
   FILE *globalparam;    /* global parameters file */
-  FILE *init_snow;      /* snowpack initialization file */
+  FILE *init_state;     /* initial model state file */
   FILE *snowband;       /* snow elevation band data file */
   FILE *soilparam;      /* soil parameters for all grid cells */
+  FILE *statefile;      /* output model state file */
   FILE *veglib;         /* vegetation parameters for all vege types */
   FILE *vegparam;       /* fractional coverage info for grid cell */
-  FILE *statefile;      /* initial model state file */
-} infiles_struct;
-
-typedef struct {
-  FILE *statefile;      /* output model state file */
-} outfiles_struct;
+} filep_struct;
 
 typedef struct {
   char  forcing[2][MAXSTRING];  /* atmospheric forcing data file names */
+  char  f_path_pfx[2][MAXSTRING];  /* path and prefix for atmospheric forcing data file names */
   char  global[MAXSTRING];      /* global control file name */
   char  init_state[MAXSTRING];  /* initial model state file name */
   char  result_dir[MAXSTRING];  /* directory where results will be written */
-  char  snow_band[MAXSTRING];   /* snow band parameter file name */
-  char  soil[MAXSTRING];        /* soil parameter file name, or name of 
-				   file that has a list of all soil 
-				   ARC/INFO files */
-  char  soil_dir[MAXSTRING];    /* directory from which to read ARC/INFO 
-				   soil files */
+  char  snowband[MAXSTRING];    /* snow band parameter file name */
+  char  soil[MAXSTRING];        /* soil parameter file name, or name of
+                                   file that has a list of all aoil
+                                   ARC/INFO files */
+  char  soil_dir[MAXSTRING];    /* directory from which to read ARC/INFO
+                                   soil files */
+  char  statefile[MAXSTRING];   /* name of file in which to store model state */
   char  veg[MAXSTRING];         /* vegetation grid coverage file */
   char  veglib[MAXSTRING];      /* vegetation parameter library file */
 } filenames_struct;
@@ -801,10 +801,9 @@ typedef struct {
   atmos_data_struct *atmos;
   double             dt;
   energy_bal_struct *energy;
-  infiles_struct     infp;
+  filep_struct       filep;
   int                rec;
   out_data_struct   *out_data;
-  outfiles_struct    outfp;
   out_data_file_struct    *out_data_files;
   snow_data_struct  *snow;
   soil_con_struct    soil_con;

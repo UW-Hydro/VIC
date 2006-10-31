@@ -6,7 +6,6 @@ static char vcid[] = "$Id$";
 
 void initialize_snow (snow_data_struct **snow, 
 		      int                veg_num,
-		      FILE              *fsnow,
 		      int                cellnum)
 /**********************************************************************
 	initialize_snow		Keith Cherkauer		January 22, 1997
@@ -49,6 +48,7 @@ void initialize_snow (snow_data_struct **snow,
   04-17-00 removed call for read_initial_snow properties file, the
            file read is now incorporated into a single model state
            file.                                                  KAC
+  2006-Oct-16 Removed unused init_snow file.  TJB
 
 **********************************************************************/
 {

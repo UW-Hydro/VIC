@@ -17,6 +17,8 @@
 	      now take the save_data structure as an argument.  TJB
   2006-Sep-26 Added 2 arguments to solve_snow(), to track out_rain and
 	      out_snow.  TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
+
 ************************************************************************/
 
 #include <math.h>
@@ -78,10 +80,10 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 		   double, double *, double, double, double, double, 
 		   double, double,  double, double, double, double, 
 		   double *, double *, double *, double *, float *);
-void   check_files(infiles_struct *, filenames_struct *);
+void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
-void   close_files(infiles_struct *, out_data_file_struct *, filenames_struct *);
+void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
@@ -99,7 +101,7 @@ out_data_struct *create_output_list();
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *,dmy_struct *,global_param_struct *,
-		 outfiles_struct *, out_data_file_struct *, out_data_struct *,
+		 filep_struct *, out_data_file_struct *, out_data_struct *,
 		 save_data_struct *, int,int,char,char, char, int);
 #if QUICK_FS
 void distribute_node_moisture_properties(double *, double *, double *,
@@ -185,13 +187,14 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double,
 #endif
 
 void   initialize_global();
-void   initialize_model_state(dist_prcp_struct *, dmy_struct, double,
-			      global_param_struct *, infiles_struct, int, int,
-			      int, int, soil_con_struct *, veg_con_struct *,
+void   initialize_model_state(dist_prcp_struct *, dmy_struct,
+			      global_param_struct *, filep_struct,
+			      int, int, int, int, double,
+			      soil_con_struct *, veg_con_struct *,
 			      char *, int *, save_data_struct *);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
-void   initialize_snow(snow_data_struct **,int,FILE *,int);
+void   initialize_snow(snow_data_struct **,int,int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *);
@@ -202,8 +205,8 @@ cell_data_struct **make_cell_data(int, int);
 dist_prcp_struct make_dist_prcp(int);
 dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int);
-filenames_struct make_in_and_outfiles(infiles_struct *, filenames_struct *, 
-				      soil_con_struct *, out_data_file_struct *);
+void make_in_and_outfiles(filep_struct *, filenames_struct *, 
+			  soil_con_struct *, out_data_file_struct *);
 snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
 void   MassRelease(double *,double *,double *,double *);
@@ -221,7 +224,7 @@ void   nrerror(char *);
 
 void   open_debug();
 FILE  *open_file(char string[], char type[]);
-FILE  *open_state_file(global_param_struct *, int, int);
+FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
 double penman(double, double, double, double, double, double, double, 
@@ -363,7 +366,7 @@ void write_forcing_file(atmos_data_struct *, int nrecs, out_data_file_struct *, 
 #endif
 void write_layer(layer_data_struct *, int, int, double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
-		       int, outfiles_struct *, soil_con_struct *, char, int);
+		       int, filep_struct *, soil_con_struct *, char, int);
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);
 void write_vegvar(veg_var_struct *, int);

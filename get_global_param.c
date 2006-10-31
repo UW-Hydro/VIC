@@ -54,6 +54,9 @@ global_param_struct get_global_param(filenames_struct      *names,
               N_OUTFILES, OUTFILE, and OUTVAR flags; removed the
               OPTIMIZE and LDAS_OUTPUT options. TJB
   2006-Sep-18 Implemented aggregation of output variables.  TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
+	      This included moving global->statename to filenames->statefile;
+	      also added f_path_pfx to store forcing file path and prefix. TJB
 
 **********************************************************************/
 {
@@ -111,11 +114,11 @@ global_param_struct get_global_param(filenames_struct      *names,
   }
   file_num             = 0;
   global.nrecs         = MISSING;
-  strcpy(names->forcing[1],"FALSE");
+  strcpy(names->f_path_pfx[1],"FALSE");
   global.stateyear  = MISSING;
   global.statemonth = MISSING;
   global.stateday   = MISSING;
-  strcpy(global.statename, "NONE");
+  strcpy(names->statefile, "NONE");
 
   /** Read through global control file to find parameters **/
 
@@ -246,7 +249,7 @@ global_param_struct get_global_param(filenames_struct      *names,
         sscanf(cmdstr,"%*s %d",&options.GRID_DECIMAL);
       }
       else if(strcasecmp("SNOW_BAND",optstr)==0) {
-	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snow_band);
+	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snowband);
       }
       else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -327,7 +330,7 @@ global_param_struct get_global_param(filenames_struct      *names,
 	else options.BINARY_STATE_FILE=TRUE;
       }
       else if(strcasecmp("STATENAME",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",global.statename);
+        sscanf(cmdstr,"%*s %s",names->statefile);
         options.SAVE_STATE = TRUE;
       }
       else if(strcasecmp("STATEYEAR",optstr)==0) {
@@ -352,12 +355,12 @@ global_param_struct get_global_param(filenames_struct      *names,
         Get Forcing Data File Information
 	**********************************/
       else if(strcasecmp("FORCING1",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->forcing[0]);
+        sscanf(cmdstr,"%*s %s",names->f_path_pfx[0]);
 	file_num = 0;
 	field=0;
       }
       else if(strcasecmp("FORCING2",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->forcing[1]);
+        sscanf(cmdstr,"%*s %s",names->f_path_pfx[1]);
 	file_num = 1;
 	field=0;
       }
@@ -496,6 +499,9 @@ global_param_struct get_global_param(filenames_struct      *names,
   /******************************************
     Check for undefined required parameters
   ******************************************/
+  if ( strcmp ( names->f_path_pfx[0], "FALSE" ) == 0 )
+    nrerror("No forcing file has been defined, make sure that the global files defines FORCING1.");
+
   for(i=0;i<2;i++) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
       if (param_set.N_TYPES[i] == MISSING) {
@@ -566,7 +572,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   }
   if( options.SAVE_STATE ) {
     if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
-      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
       nrerror(ErrStr);
     }
     // Check for month, day in range
@@ -577,17 +583,17 @@ global_param_struct get_global_param(filenames_struct      *names,
       } 
     }
     if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
-      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", global.statename, global.stateyear, global.statemonth, global.stateday);
+      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
       nrerror(ErrStr);
     }
   }
   // Set the statename here to be able to compare with INIT_STATE name
   if( options.SAVE_STATE ) {
-    sprintf(global.statename,"%s_%04i%02i%02i", global.statename, 
+    sprintf(names->statefile,"%s_%04i%02i%02i", names->statefile, 
 	  global.stateyear, global.statemonth, global.stateday);
   }
-  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, global.statename ) == 0))  {
-      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", global.statename, names->init_state);
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, names->statefile ) == 0))  {
+      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
       nrerror(ErrStr);
   }
 

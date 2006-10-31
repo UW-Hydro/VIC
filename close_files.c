@@ -5,7 +5,7 @@
  
 static char vcid[] = "$Id$";
 
-void close_files(infiles_struct       *inf,
+void close_files(filep_struct         *filep,
                  out_data_file_struct *out_data_files,
                  filenames_struct     *fnames)
 /**********************************************************************
@@ -20,6 +20,7 @@ void close_files(infiles_struct       *inf,
   2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
   2006-Sep-11 Implemented flexible output configuration, using
               new out_data_files structure. TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
 
 **********************************************************************/
 {
@@ -34,10 +35,10 @@ void close_files(infiles_struct       *inf,
     Close All Input Files
     **********************/
 
-  fclose(inf->forcing[0]);
+  fclose(filep->forcing[0]);
   if(options.COMPRESS) compress_files(fnames->forcing[0]);
-  if(inf->forcing[1]!=NULL) {
-    fclose(inf->forcing[1]);
+  if(filep->forcing[1]!=NULL) {
+    fclose(filep->forcing[1]);
     if(options.COMPRESS) compress_files(fnames->forcing[1]);
   }
 

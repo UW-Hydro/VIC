@@ -7,13 +7,13 @@ static char vcid[] = "$Id$";
 
 void initialize_model_state(dist_prcp_struct    *prcp,
 			    dmy_struct           dmy,
-                            double               surf_temp,
 			    global_param_struct *global_param,
-                            infiles_struct       infiles, 
+                            filep_struct         filep, 
 			    int                  cellnum,
 		            int                  Nveg,
                             int                  Nnodes,
 			    int                  Ndist,
+                            double               surf_temp,
                             soil_con_struct     *soil_con,
 			    veg_con_struct      *veg_con,
 			    char                *init_STILL_STORM,
@@ -48,6 +48,8 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 	      over each time step; this needs initialization here.  TJB
   2006-Oct-25 Inserted "if (veg < Nveg)" before the line updating
 	      save_data->wdew, since Wdew is undefined for veg == Nveg. TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
+	      This included removing the unused init_snow file. TJB
 
 **********************************************************************/
 {
@@ -109,7 +111,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
     - some may be reset if state file present
   ********************************************/
 
-  initialize_snow(snow, Nveg, infiles.init_snow, cellnum);
+  initialize_snow(snow, Nveg, cellnum);
 
   /********************************************
     Initialize all soil layer variables 
@@ -159,7 +161,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
   if(options.INIT_STATE) {
 
-    read_initial_model_state(infiles.statefile, prcp, global_param,  
+    read_initial_model_state(filep.statefile, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
 			     Ndist, init_STILL_STORM, init_DRY_TIME);
 

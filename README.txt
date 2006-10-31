@@ -330,6 +330,38 @@ Aggregation of output variables
 
 
 
+Cleanup of structures holding filenames and file pointers
+
+	Files affected:
+
+	check_files.c
+	check_state_file.c
+	close_files.c
+	display_current_settings.c
+	dist_prec.c
+	get_global_param.c
+	initialize_model_state.c
+	make_in_and_outfiles.c
+	open_state_file.c
+	read_initial_model_state.c
+	vicerror.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	1. Merged infiles and outfiles structs into filep_struct.
+	2. Merged builtnames into filenames struct.
+	3. Renamed infiles.statefile to filep.init_state
+	4. Moved global.statename to filenames.statefile.
+	5. Added f_path_pfx[] to the filenames_struct, to store
+	   the path and prefix of forcing files.  Now, forcing[]
+	   only stores the full forcing file names.
+
+
+
 Bug Fixes:
 ----------
 

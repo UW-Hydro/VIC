@@ -16,6 +16,7 @@ void vicerror(char error_text[])
   Modifications:
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
 
 **********************************************************************/
 {
@@ -33,7 +34,7 @@ void vicerror(char error_text[])
 	fprintf(stderr,"VIC model run-time error...\n");
 	fprintf(stderr,"%s\n",error_text);
 	fprintf(stderr,"...now writing output files...\n");
-        close_files(&(Error.infp), Error.out_data_files, &fnames);
+        close_files(&(Error.filep), Error.out_data_files, &fnames);
 	fprintf(stderr,"...now exiting to system...\n");
         fflush(stdout);
         fflush(stderr);

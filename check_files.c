@@ -4,7 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-void check_files(infiles_struct   *infp, 
+void check_files(filep_struct     *filep, 
 		 filenames_struct *fnames)
 /**********************************************************************
 	check_files		Dag Lohmann		January 1996
@@ -17,6 +17,8 @@ void check_files(infiles_struct   *infp,
 	    final field is avgJulyAirTemp, and set JULY_TAVG_SUPPLIED
 	    to TRUE.						TJB
   2006-Sep-01 (Port from 4.1.0) Added logic for OUTPUT_FORCE option. TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
+
 **********************************************************************/
 {
   extern option_struct  options;
@@ -26,11 +28,11 @@ void check_files(infiles_struct   *infp,
   int num_words = 0;
   int nextchar;
 
-  infp->soilparam   = open_file(fnames->soil, "r");
+  filep->soilparam   = open_file(fnames->soil, "r");
 #if !OUTPUT_FORCE
   if (!options.ARC_SOIL) {
     /* count number of fields in first line of file */
-    while ( (nextchar = fgetc(infp->soilparam)) != EOF
+    while ( (nextchar = fgetc(filep->soilparam)) != EOF
       && (char)nextchar != '\n' ) {
       if ((char)nextchar != ' ' && (char)nextchar != '\t') {
         if (!in_word) {
@@ -50,12 +52,12 @@ void check_files(infiles_struct   *infp,
       options.JULY_TAVG_SUPPLIED = TRUE;
     }
     /* rewind file back to beginning */
-    fseek(infp->soilparam, 0, 0);
+    fseek(filep->soilparam, 0, 0);
   }
-  infp->veglib      = open_file(fnames->veglib, "r");
-  infp->vegparam    = open_file(fnames->veg, "r");
+  filep->veglib      = open_file(fnames->veglib, "r");
+  filep->vegparam    = open_file(fnames->veg, "r");
   if(options.SNOW_BAND>1)
-    infp->snowband    = open_file(fnames->snow_band, "r");
+    filep->snowband    = open_file(fnames->snowband, "r");
 #endif /* !OUTPUT_FORCE */
 }
 

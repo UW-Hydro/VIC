@@ -13,6 +13,8 @@ static char vcid[] = "$Id$";
   June 23, 1998 by Keith Cherkauer to be run within the VIC-NL model.
   August 19, 1999 by Bart Nijssen to function in polar regions where
     daylight or darkness may last for 24 hours.
+  2006-Oct-26 Shift tminhour and tmaxhour if necessary to remain within
+	      the current day. TJB
 
   ***************************************************************************/
 
@@ -178,6 +180,9 @@ void set_max_min_hour(double *hourlyrad,
       risehour -= 24;
     tmaxhour[0] = 0.67 * (sethour - risehour) + risehour;
     tminhour[0] = risehour - 1;
+    // shift tminhour and tmaxhour if necessary to remain within the current day
+    if (tminhour[0] < 0) tminhour[0] += 24;
+    if (tmaxhour[0] < 0) tmaxhour[0] += 24;
   }
 
   /* treat remaining days */
@@ -200,6 +205,9 @@ void set_max_min_hour(double *hourlyrad,
 	risehour -= 24;
       tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
       tminhour[i] = risehour - 1;
+      // shift tminhour and tmaxhour if necessary to remain within the current day
+      if (tminhour[i] < 0) tminhour[i] += 24;
+      if (tmaxhour[i] < 0) tmaxhour[i] += 24;
     }
   }
 }

@@ -16,6 +16,7 @@
 		set_output_defaults
 		set_output_var
 		zero_output_list
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
 ************************************************************************/
 
 #include <math.h>

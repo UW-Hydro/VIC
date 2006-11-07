@@ -84,6 +84,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures. TJB
   2006-Sep-14 (Port from 4.1.0) Added support for ALMA input variables. TJB
+  2006-Nov-06 Fixed typo in the "if" statement at line 104 that was
+	      preventing AIR_TEMP from being accepted at any time step. TJB
 
 **********************************************************************/
 {
@@ -136,8 +138,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       && !(param_set.TYPE[AIR_TEMP].SUPPLIED || param_set.TYPE[TAIR].SUPPLIED) )
     nrerror("Daily maximum and minimum air temperature or sub-daily air temperature must be given to the model, check input files\n");
   
-  if ( (param_set.TYPE[AIR_TEMP].SUPPLIED
-      || (param_set.TYPE[TAIR].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[TAIR].SUPPLIED-1] == 24) ) )
+  if ( (param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24)
+      || (param_set.TYPE[TAIR].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[TAIR].SUPPLIED-1] == 24) )
     nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
   
   if ( param_set.TYPE[SHORTWAVE].SUPPLIED

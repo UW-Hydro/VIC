@@ -664,6 +664,18 @@ local time
 	from 0 E longitude.  This has been fixed. TJB
 
 
+AIR_TEMP was not being allowed as an input forcing variable
+
+	Files affected:
+	initialize_atmos.c
+
+	Description:
+	A typo in an "if" statement prevented AIR_TEMP from being allowed as
+	a valid input forcing variable at any time step.  This has been
+	fixed.	TJB
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

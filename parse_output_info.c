@@ -15,6 +15,9 @@ void parse_output_info(filenames_struct      *names,
   This routine reads the VIC model global control file, getting
   information for output variables list (if any).
 
+  Modifications:
+  2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
+
 **********************************************************************/
 {
   extern option_struct    options;
@@ -48,7 +51,7 @@ void parse_output_info(filenames_struct      *names,
         options.Noutfiles = tmp_noutfiles;
         *out_data_files = (out_data_file_struct *)calloc(options.Noutfiles, sizeof(out_data_file_struct));
         outfilenum = -1;
-        init_output_list(out_data, FALSE, "%.1f", OUT_TYPE_FLOAT, 1);
+        init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
       }
       else if(strcasecmp("OUTFILE",optstr)==0) {
         outfilenum++;

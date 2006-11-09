@@ -18,6 +18,7 @@ out_data_struct *create_output_list() {
   2006-Oct-10 Shortened the names of variables whose names were
 	      too long; fixed typos in other names; added
 	      OUT_IN_LONG.  TJB
+  2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
 
 *************************************************************/
 
@@ -286,7 +287,7 @@ out_data_struct *create_output_list() {
   }
 
   // Initialize data values
-  init_output_list(out_data, FALSE, "%.1f", OUT_TYPE_FLOAT, 1);
+  init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
 
   return out_data;
 

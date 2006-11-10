@@ -22,22 +22,114 @@
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included merging global->statename to filenames->statefile. TJB
   2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Nov-07 Organized model constants a bit more. TJB
 
 *********************************************************************/
+
+#include <user_def.h>
+#include <snow.h>
+
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20
 #define HUGE_RESIST  1.e20	/* largest allowable double number */
 #define SPVAL        1.e20	/* largest allowable double number - used to signify missing data */
 #define SMALL        1.e-12	/* smallest allowable double number */
-#define MISSING      -99999.	/* missing value for multipliers in
-				   BINARY format */
+#define MISSING      -99999.	/* missing value for multipliers in BINARY format */
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
-#define BROOKS 1		/* Brooks-Corey parameters for unsaturated flow
-				 */ 
-#define ASCII 1			/* met file format flag */
-#define BINARY 2		/* met file format flag */
+
+/***** Met file formats *****/
+#define ASCII 1
+#define BINARY 2
+
+/***** Baseflow parametrizations *****/
+#define ARNO        0
+#define NIJSSEN2001 1
+
+/***** Time Constants *****/
+#define DAYS_PER_YEAR 365.
+#define HOURSPERDAY   24        /* number of hours per day */
+#define HOURSPERYEAR  24*365    /* number of hours per year */
+#define SECPHOUR     3600	/* seconds per hour */
+#define SEC_PER_DAY 86400.	/* seconds per day */
+
+/***** Physical Constants *****/
+#define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
+#define RESID_MOIST      0.0        /* define residual moisture content 
+				       of soil column */
+#define ice_density      917.	    /* density of ice (kg/m^3) */
+#define T_lapse          6.5        /* temperature lapse rate of US Std 
+				       Atmos in C/km */
+#define von_K        0.40	/* Von Karman constant for evapotranspiration */
+#define KELVIN       273.15	/* conversion factor C to K */
+#define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
+#define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
+#define RHO_W        1000.0	/* Density of water (kg/m^3) at 0C */
+#define Cp           1010.0	/* Specific heat at constant pressure of air 
+				   (J/deg/K) (H.B.H. p.4.7)*/
+#define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
+#define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
+#define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
+#define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
+#define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
+#define G            9.81       /* gravity */
+#define JOULESPCAL   4.1868     /* Joules per calorie */
+#define GRAMSPKG     1000.      /* convert grams to kilograms */
+#define kPa2Pa 1000.            /* converts kPa to Pa */
+#define DtoR 0.017453293	/* degrees to radians */
+#ifndef PI
+#define PI 3.1415927
+#endif
+
+/* define constants for saturated vapor pressure curve (kPa) */
+#define A_SVP 0.61078
+#define B_SVP 17.269
+#define C_SVP 237.3
+
+/* define constants for penman evaporation */
+#define CP_PM 1013		/* specific heat of moist air at constant pressure (J/kg/C)
+				   (Handbook of Hydrology) */
+#define PS_PM 101300		/* sea level air pressure in Pa */
+#define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
+
+/***** Physical Constraints *****/
+#define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
+					work (m) */
+#define STORM_THRES  0.001      /* thresehold at which a new storm is 
+				   decalred */
+#define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
+				   while computing the snow surface energy 
+				   balance (C) */
+#define SURF_DT       1.0	/* Used to bracket soil surface temperatures 
+                                   while computing energy balance (C) */
+#define SOIL_DT       0.25      /* Used to bracket soil temperatures while
+                                   solving the soil thermal flux (C) */
+#define CANOPY_DT    1.0	/* Used to bracket canopy air temperatures 
+                                   while computing energy balance (C) */
+#define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
+                                   while computing moisture balance (Pa) */
+
+/***** Define Boolean Values *****/
+#ifndef FALSE
+#define FALSE 0
+#define TRUE !FALSE
+#endif
+
+#ifndef WET
+#define WET 0
+#define DRY 1
+#endif
+
+#ifndef SNOW
+#define RAIN 0
+#define SNOW 1
+#endif
+
+#define min(a,b) (a < b) ? a : b
+#define max(a,b) (a > b) ? a : b
+
 
 /***** Forcing Variable Types *****/
 #define N_FORCING_TYPES 24
@@ -181,89 +273,6 @@
 #define OUT_SNOW_SURFT_BAND     104  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SWE_BAND            105  /* snow water equivalent in snow pack [mm] */
 
-/***** Time Constants *****/
-#define DAYS_PER_YEAR 365.
-#define HOURSPERDAY   24        /* number of hours per day */
-#define HOURSPERYEAR  24*365    /* number of hours per year */
-#define SECPHOUR     3600	/* seconds per hour */
-#define SEC_PER_DAY 86400.	/* seconds per day */
-
-/***** Physical Constants *****/
-#define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
-#define RESID_MOIST      0.0        /* define residual moisture content 
-				       of soil column */
-#define ice_density      917.	    /* density of ice (kg/m^3) */
-#define T_lapse          6.5        /* temperature lapse rate of US Std 
-				       Atmos in C/km */
-#define von_K        0.40	/* Von Karman constant for evapotranspiration */
-#define KELVIN       273.15	/* conversion factor C to K */
-#define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
-#define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
-#define RHO_W        1000.0	/* Density of water (kg/m^3) at 0C */
-#define Cp           1010.0	/* Specific heat at constant pressure of air 
-				   (J/deg/K) (H.B.H. p.4.7)*/
-#define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
-#define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
-#define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
-#define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
-#define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
-#define G            9.81       /* gravity */
-#define JOULESPCAL   4.1868     /* Joules per calorie */
-#define GRAMSPKG     1000.      /* convert grams to kilograms */
-#define kPa2Pa 1000.            /* converts kPa to Pa */
-#define DtoR 0.017453293	/* degrees to radians */
-#ifndef PI
-#define PI 3.1415927
-#endif
-
-/* define constants for saturated vapor pressure curve (kPa) */
-#define A_SVP 0.61078
-#define B_SVP 17.269
-#define C_SVP 237.3
-
-/* define constants for penman evaporation */
-#define CP_PM 1013		/* specific heat of moist air J/kg/C 
-				   (Handbook of Hydrology) */
-#define PS_PM 101300		/* sea level air pressure in Pa */
-#define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
-
-/***** Physical Constraints *****/
-#define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
-					work (m) */
-#define STORM_THRES  0.001      /* thresehold at which a new storm is 
-				   decalred */
-#define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
-				   while computing the snow surface energy 
-				   balance (C) */
-#define SURF_DT       1.0	/* Used to bracket soil surface temperatures 
-                                   while computing energy balance (C) */
-#define SOIL_DT       0.25      /* Used to bracket soil temperatures while
-                                   solving the soil thermal flux (C) */
-#define CANOPY_DT    1.0	/* Used to bracket canopy air temperatures 
-                                   while computing energy balance (C) */
-#define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
-                                   while computing moisture balance (Pa) */
-
-/***** Define Boolean Values *****/
-#ifndef FALSE
-#define FALSE 0
-#define TRUE !FALSE
-#endif
-
-#ifndef WET
-#define WET 0
-#define DRY 1
-#endif
-
-#ifndef SNOW
-#define RAIN 0
-#define SNOW 1
-#endif
-
-/***** Baseflow parametrizations *****/
-#define ARNO        0
-#define NIJSSEN2001 1
-
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
 #define OUT_TYPE_CHAR    1 /* char */
@@ -281,17 +290,11 @@
 #define AGG_TYPE_MIN     4 /* minimum value over agg interval */
 #define AGG_TYPE_SUM     5 /* sum over agg interval */
 
-#define min(a,b) (a < b) ? a : b
-#define max(a,b) (a > b) ? a : b
-
-#include <user_def.h>
-#include <snow.h>
-
-
 /***** Codes for displaying version information *****/
 #define DISP_VERSION 1
 #define DISP_COMPILE_TIME 2
 #define DISP_ALL 3
+
 
 /***** VIC model version *****/
 extern char *version;
@@ -309,9 +312,7 @@ typedef struct {
   FILE *forcing[2];     /* atmospheric forcing data files */
   FILE *globalparam;    /* global parameters file */
   FILE *init_state;     /* initial model state file */
-#if LAKE_MODEL
   FILE *lakeparam;      /* lake parameter file */
-#endif // LAKE_MODEL
   FILE *snowband;       /* snow elevation band data file */
   FILE *soilparam;      /* soil parameters for all grid cells */
   FILE *statefile;      /* output model state file */
@@ -324,9 +325,7 @@ typedef struct {
   char  f_path_pfx[2][MAXSTRING];  /* path and prefix for atmospheric forcing data file names */
   char  global[MAXSTRING];      /* global control file name */
   char  init_state[MAXSTRING];  /* initial model state file name */
-#if LAKE_MODEL
   char  lakeparam[MAXSTRING];   /* lake model constants file */
-#endif // LAKE_MODEL
   char  result_dir[MAXSTRING];  /* directory where results will be written */
   char  snowband[MAXSTRING];    /* snow band parameter file name */
   char  soil[MAXSTRING];        /* soil parameter file name, or name of 
@@ -355,9 +354,7 @@ typedef struct {
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
-#if LAKE_MODEL
   int    Nlakenode;      /* Number of lake thermal nodes in the model. */
-#endif // LAKE_MODEL
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
@@ -490,7 +487,6 @@ typedef struct {
   int    stateyear;  /* Year of the simulation at which to save model state */
 } global_param_struct;
 
-#if LAKE_MODEL
 /******************************************************************
   This structure stores the lake/wetland parameters for a grid cell
   ******************************************************************/
@@ -548,7 +544,6 @@ typedef struct {
   int    mixmax;                  /* top depth (node #) of local 
                                      instability. */
 } lake_var_struct;
-#endif // LAKE_MODEL 
 
 /***********************************************************
   This structure stores the soil parameters for a grid cell.
@@ -934,9 +929,7 @@ typedef struct {
   double             *mu;         /* fraction of grid cell that receives 
 				     precipitation */
   energy_bal_struct **energy;     /* Stores energy balance variables */
-#if LAKE_MODEL
   lake_var_struct     lake_var;   /* Stores lake/wetland variables */
-#endif // LAKE_MODEL
   snow_data_struct  **snow;       /* Stores snow variables */
   veg_var_struct    **veg_var[2]; /* Stores vegetation variables (wet and 
 				     dry) */

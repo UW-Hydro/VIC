@@ -19,8 +19,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#if LAKE_MODEL
-
 #if CLOSE_ENERGY
 #define MAX_ITER 50
 #else
@@ -42,6 +40,7 @@
   Modifications:
   15-Jun-04 Initialize mixmax to 0.					TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 *****************************************************************************/
 void water_under_ice(int freezeflag, 
@@ -138,5 +137,3 @@ void water_under_ice(int freezeflag,
   for ( k = 0; k < numnod; k++ )
     Ti[k] = Tnew[k];
 }
-
-#endif // LAKE_MODEL

@@ -16,9 +16,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 			    double               surf_temp, 
                             soil_con_struct     *soil_con,
 			    veg_con_struct      *veg_con,
-#if LAKE_MODEL
 			    lake_con_struct      lake_con,
-#endif //LAKE_MODEL
 			    char               **init_STILL_STORM,
 			    int                **init_DRY_TIME,
 			    save_data_struct    *save_data)
@@ -64,6 +62,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included removing the unused init_snow file. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -114,17 +113,13 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
-#if LAKE_MODEL
   lake_var_struct   *lake_var;
-#endif // LAKE_MODEL
   snow_data_struct      **snow;
   veg_var_struct       ***veg_var;
 
   cell    = prcp->cell;
   energy  = prcp->energy;
-#if LAKE_MODEL
   lake_var = &prcp->lake_var;
-#endif // LAKE_MODEL
   snow    = prcp->snow;
   veg_var = prcp->veg_var;
   
@@ -180,11 +175,9 @@ void initialize_model_state(dist_prcp_struct    *prcp,
     Initialize all lake variables 
   ********************************************/
 
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0) {
     initialize_lake(lake_var, lake_con, &snow[Nveg+1][0], surf_temp);
   }
-#endif // LAKE_MODEL
 
   /********************************************
     Initialize all spatial frost variables 
@@ -243,11 +236,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
     read_initial_model_state(filep.init_state, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
-#if LAKE_MODEL
 			     Ndist, *init_STILL_STORM, *init_DRY_TIME, lake_con);
-#else
-			     Ndist, *init_STILL_STORM, *init_DRY_TIME);
-#endif // LAKE_MODEL
 
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
@@ -591,9 +580,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
     }
 
   }
-#if LAKE_MODEL
   Clake = lake_var->sarea/lake_con.basin[0];
   save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * Cv * soil_con->AreaFract[0] * TreeAdjustFactor[0];
-#endif // LAKE_MODEL
 
 }

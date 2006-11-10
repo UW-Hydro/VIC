@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
               out_data, out_data_files, and save_data structures. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included merging builtnames into filenames. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
   2006-Nov-07 Changed statefile to init_state in call to check_state_file().  TJB
 
 **********************************************************************/
@@ -96,9 +97,7 @@ int main(int argc, char *argv[])
 				    precipitation */
   filenames_struct         filenames;
   filep_struct             filep;
-#if LAKE_MODEL
   lake_con_struct          lake_con;
-#endif // LAKE_MODEL
   out_data_file_struct     *out_data_files;
   out_data_struct          *out_data;
   save_data_struct         save_data;
@@ -222,11 +221,9 @@ int main(int argc, char *argv[])
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
 #endif /* LINK_DEBUG*/
 
-#if LAKE_MODEL
       if ( options.LAKES ) 
 	lake_con = read_lakeparam(filep.lakeparam, soil_con, 
 				  veg_con, global_param.resolution);
-#endif // LAKE_MODEL
 
 #endif // !OUTPUT_FORCE
 
@@ -281,10 +278,7 @@ int main(int argc, char *argv[])
       initialize_model_state(&prcp, dmy[0], &global_param, filep, 
 			     soil_con.gridcel, veg_con[0].vegetat_type_num,
 			     options.Nnode, Ndist, atmos[0].air_temp[NR],
-			     &soil_con, veg_con,
-#if LAKE_MODEL
-			     lake_con,
-#endif // LAKE_MODEL
+			     &soil_con, veg_con, lake_con,
 			     &init_STILL_STORM, &init_DRY_TIME, &save_data);
 
 
@@ -329,7 +323,6 @@ int main(int argc, char *argv[])
 	}
       }
 
-#if LAKE_MODEL
       if ( options.LAKES && lake_con.Cl[0] > 0) {
 	/** COMPUTE MOISTURE STORAGE IN LAKE FRACTION **/
 	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
@@ -339,7 +332,6 @@ int main(int argc, char *argv[])
 	for(index=0;index<options.Nlayer;index++)
 	  storage += lake_con.Cl[0] * prcp.cell[WET][veg][band].layer[index].moist; 
       }
-#endif // LAKE_MODEL
 
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
       calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
@@ -354,10 +346,7 @@ int main(int argc, char *argv[])
         else LASTREC = FALSE;
 
         dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
-#if LAKE_MODEL
-		  &lake_con, 
-#endif /* LAKE_MODEL */
-                  dmy, &global_param, &filep,
+		  &lake_con, dmy, &global_param, &filep,
 		  out_data_files, out_data, &save_data, rec, cellnum,
                   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
         NEWCELL=FALSE;

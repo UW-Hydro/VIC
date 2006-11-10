@@ -12,9 +12,7 @@ void full_energy(char                 NEWCELL,
                  dist_prcp_struct    *prcp,
                  dmy_struct          *dmy,
                  global_param_struct *gp,
-#if LAKE_MODEL
 		 lake_con_struct     *lake_con,
-#endif // LAKE_MODEL 
                  soil_con_struct     *soil_con,
                  veg_con_struct      *veg_con)
 /**********************************************************************
@@ -42,6 +40,7 @@ void full_energy(char                 NEWCELL,
 	    used in flux calculations.				TJB
   2006-Sep-23 Implemented flexible output configuration; now computation
 	      of soil wetness and root zone soil moisture happens here. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -91,12 +90,10 @@ void full_energy(char                 NEWCELL,
   double                 Melt[2*MAX_BANDS];
   double                 bare_albedo;
   double                 snow_inflow[MAX_BANDS];
-#if LAKE_MODEL
   double                 lake_prec;
   double                 rainonly;
   double                 sum_runoff;
   double                 sum_baseflow;
-#endif // LAKE_MODEL
   double                 step_rad;
   double                 step_net_short;
   double                 tmp_aero_resist;
@@ -116,9 +113,7 @@ void full_energy(char                 NEWCELL,
   float 	         lag_one;
   float 	         sigma_slope;
   float  	         fetch;
-#if LAKE_MODEL
   lake_var_struct       *lake_var;
-#endif /* LAKE_MODEL */
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -134,9 +129,7 @@ void full_energy(char                 NEWCELL,
   /* set local pointers */
   cell    = prcp->cell;
   energy  = prcp->energy;
-#if LAKE_MODEL
   lake_var = &prcp->lake_var;
-#endif /* LAKE_MODEL */
   snow    = prcp->snow;
   veg_var = prcp->veg_var;
 
@@ -421,7 +414,6 @@ void full_energy(char                 NEWCELL,
     } /** end current vegetation type **/
   } /** end of vegetation loop **/
 
-#if LAKE_MODEL
   /** Compute total runoff and baseflow for all vegetation types
       within each snowband. **/
   if ( options.LAKES && lake_con->Cl[0] > 0 ) {
@@ -587,8 +579,6 @@ void full_energy(char                 NEWCELL,
 #endif // LINK_DEBUG
 
   }
-
-#endif /* LAKE_MODEL */
 
 }
 

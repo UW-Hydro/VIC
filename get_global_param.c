@@ -57,6 +57,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to filenames->statefile;
 	      also added f_path_pfx to store forcing file path and prefix. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -346,7 +347,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("STATEDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.stateday);
       }
-#if LAKE_MODEL
       else if(strcasecmp("LAKES",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
         if(strcasecmp("FALSE", flgstr) == 0) options.LAKES = FALSE;
@@ -362,7 +362,6 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.LAKE_PROFILE = TRUE;
 	}
       }
-#endif /* LAKE_MODEL */
 
 
       /************************************
@@ -564,12 +563,10 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
-#if LAKE_MODEL
   if ( options.Nlakenode > MAX_LAKE_NODES) {
     sprintf(ErrStr,"Global file wants more lake thermal nodes (%d) than are defined by MAX_LAKE_NODES (%d).  Edit user_def.h and recompile.", options.Nlakenode, MAX_LAKE_NODES);
     nrerror(ErrStr);
   }
-#endif // LAKE_MODEL 
   if(options.QUICK_FLUX) {
     if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode != 3) {
       sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
@@ -632,7 +629,6 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
     nrerror(ErrStr);
   }
-#if LAKE_MODEL
   if ( global.resolution == 0 && options.LAKES ) {
     sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
     nrerror(ErrStr);
@@ -641,7 +637,6 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
     nrerror(ErrStr);
   }
-#endif  // LAKE_MODEL
 
 #endif  // !OUTPUT_FORCE
 

@@ -295,6 +295,48 @@ Soil thermal node temperature is now an output variable
 	thermal nodes will be output.
 
 
+Removed LAKE_MODEL compile-time option
+
+	Files affected:
+
+	check_files.c
+	display_current_settings.c
+	dist_prec.c
+	full_energy.c
+	get_global_param.c
+	IceEnergyBalance.c
+	ice_melt.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	LAKE.h
+	lakes.eb.c
+	make_dist_prcp.c
+	put_data.c
+	read_initial_model_state.c
+	read_lakeparam.c
+	user_def.h
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	water_energy_balance.c
+	water_under_ice.c
+	wetland_energy.c
+	write_model_state.c
+
+	Description:
+
+	From a functional standpoint, the LAKE_MODEL compile-time option was
+	redundant with the options.LAKE switch.  Meanwhile, the difference in
+	the size of the executable between when the LAKE_MODEL switch was on
+	or off was deemed insignificant.  Therefore, this switch was removed
+	in the interest of making the code easier to maintain and reducing
+	user confusion.  Now, to turn off lake functionality, simply set LAKE
+	to FALSE in the global parameter file (or omit the "LAKE" line
+	completely).
+
+
+
 
 Bug Fixes:
 ----------

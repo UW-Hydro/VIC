@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#if LAKE_MODEL
-
 static char vcid[] = "$Id$";
 
 void initialize_lake (lake_var_struct  *lake, 
@@ -33,6 +31,7 @@ void initialize_lake (lake_var_struct  *lake,
   2005-03-24 Added check for negative lake volumes.			TJB
   2006-Oct-16 Added RCS ID string.					TJB
   2006-Nov-07 Initialized aero_resist, aero_resist_used, and MELTING.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -231,4 +230,3 @@ double get_depth(lake_con_struct lake_con, double volume)
 
   return depth;
 }
-#endif // LAKE_MODEL

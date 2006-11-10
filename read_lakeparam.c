@@ -5,8 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if LAKE_MODEL
-
 lake_con_struct read_lakeparam(FILE            *lakeparam, 
 			       soil_con_struct  soil_con, 
 			       veg_con_struct  *veg_con, 
@@ -51,6 +49,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2005-03-17 Laura Bowling's update had included what appeared to be temporary
 	     code that expected to read the lake node depths from the lake param
 	     file.  This has code has been removed.				TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
   
 **********************************************************************/
 
@@ -264,4 +263,3 @@ double get_dist(double lat1, double long1, double lat2, double long2)
   return distance;
 }  
 
-#endif // LAKE_MODEL

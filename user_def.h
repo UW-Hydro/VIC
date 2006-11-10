@@ -12,6 +12,7 @@
   Modifications:
   2006-Sep-23 Implemented flexible output configuration; removed the
               OPTIMIZE and LDAS_OUTPUT options. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 
@@ -37,11 +38,6 @@
        introduce new errors (STILL UNDER TESTING) *****/
 #define QUICK_FS FALSE
 #define QUICK_FS_TEMPS 7
-
-/***** If TRUE VIC binary includes the lake/wetland algorithm.  Lakes
-       and wetlands do not need to be defined but code will be 
-       accessed. *****/
-#define LAKE_MODEL TRUE
 
 /***** If TRUE VIC uses the linear interpolation of the logarithm of the
        matric potential from the two surrounding layers to estimate the 

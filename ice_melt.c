@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#if LAKE_MODEL
-
 static char vcid[] = "$Id$";
 
 /*****************************************************************************
@@ -101,7 +99,7 @@ static char vcid[] = "$Id$";
 	    in flux calculations.					TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
 	    sublimation from blowing snow is calculated for lakes.	TJB
-
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 *****************************************************************************/
 void ice_melt(double            z2,
@@ -645,5 +643,3 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   return(0.0);
 
 }
-
-#endif // LAKE_MODEL

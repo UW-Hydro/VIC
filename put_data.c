@@ -54,6 +54,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      too long; fixed typos in others; created new OUT_IN_LONG
 	      variable.  TJB
   2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
+  2006-Nov-07 Assigned value to overstory.  TJB
 
 **********************************************************************/
 {
@@ -196,6 +197,8 @@ void put_data(dist_prcp_struct  *prcp,
       Cv = (1.0 - veg_con[0].Cv_sum);
 
     if ( Cv > 0 ) {
+
+      overstory = veg_lib[veg_con[veg].veg_class].overstory;
 
       /*******************************************************
         Compute Average Variables from Wet and Dry Fractions

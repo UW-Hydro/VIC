@@ -2278,9 +2278,13 @@ void update_prcp(dist_prcp_struct *prcp,
 } 
 
 
-/* This function assigns values to the local lake variables from the */
-/* structure of weighted averages from the previous time step.  */
+/**************************************************************************
+ This function assigns values to the local lake variables from the
+ structure of weighted averages from the previous time step.
 
+  Modifications:
+  2006-Nov-07 Assigned value to MELTING.  TJB
+**************************************************************************/
 void initialize_prcp(dist_prcp_struct *prcp, 
 		     energy_bal_struct *lake_energy, 
 		     snow_data_struct *lake_snow, 
@@ -2341,6 +2345,7 @@ void initialize_prcp(dist_prcp_struct *prcp,
   /* Update snow variables. */
   lake_snow->albedo = wland_snow[iveg][band].albedo;
   lake_snow->last_snow = wland_snow[iveg][band].last_snow;
+  lake_snow->MELTING = wland_snow[iveg][band].MELTING;
   
   if(fraci > 0.0) {   
     lake_snow->vapor_flux = wland_snow[iveg][band].vapor_flux;

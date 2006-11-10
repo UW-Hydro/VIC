@@ -375,12 +375,40 @@ Incorrect sub-daily temperature interpolation when referencing GMT instead of
 local time
 
 	Files affected:
+
 	calc_air_temperature.c
+
+	Description:
 
 	Temperature interpolation didn't account for case in which min or max
 	temperature could cross the boundary of the current day.  This can
 	happen when referencing GMT instead of local time, for cells far away
 	from 0 E longitude.  This has been fixed. TJB
+
+
+Access of uninitialized variables
+
+	Files affected:
+
+	initialize_lake.c
+	lakes.eb.c
+	put_data.c
+	read_vegparam.c
+
+	Description:
+
+	Uninitialized variables were accessed in several parts of the code:
+	  put_data.c:
+	    overstory              (never assigned a value)
+	    lake->aero_resist      (only initialized when ice present)
+	    lake->aero_resist_used (only initialized when ice present)
+	  lakes.eb.c:
+	    lake_snow->MELTING     (only sometimes assigned a value)
+
+	In addition, read_vegparam.c was not allocating the correct number of
+	veg tiles in the case that options.LAKES was FALSE.
+
+	These have been fixed.
 
 
 

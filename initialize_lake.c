@@ -32,6 +32,7 @@ void initialize_lake (lake_var_struct  *lake,
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
   2005-03-24 Added check for negative lake volumes.			TJB
   2006-Oct-16 Added RCS ID string.					TJB
+  2006-Nov-07 Initialized aero_resist, aero_resist_used, and MELTING.	TJB
 
 **********************************************************************/
 {
@@ -56,9 +57,12 @@ void initialize_lake (lake_var_struct  *lake,
   lake->hice = 0.0;
   lake->fraci = .0;
   lake->mixmax = 0;
+  lake->aero_resist = 0;
+  lake->aero_resist_used = 0;
   lake_snow->swq = 0.0;
   lake_snow->depth = 0.0;
   lake_snow->surf_temp = 0.0;
+  lake_snow->MELTING = FALSE;
 
   /********************************************************************/
   /* Initialize lake physical parameters.                             */

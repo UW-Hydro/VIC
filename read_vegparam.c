@@ -26,7 +26,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
            for the current grid cell.  If LAI is not obtained from this
            function, then the values cacluated in read_veglib.c are
            left unchanged.                                   DP & KAC
-
+  2006-Nov-07 Allocates MaxVeg+1 veg tiles.  TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -73,7 +73,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
   /** Allocate memory for vegetation grid cell parameters **/
   if ( MaxVeg > 0 )
-    temp = (veg_con_struct*) calloc( MaxVeg, sizeof(veg_con_struct));
+    temp = (veg_con_struct*) calloc( MaxVeg+1, sizeof(veg_con_struct));
   else
     temp = (veg_con_struct*) calloc(1, sizeof(veg_con_struct));
   temp[0].Cv_sum = 0.0;

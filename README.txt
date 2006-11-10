@@ -280,6 +280,22 @@ Cleanup of structures holding filenames and file pointers
 
 
 
+Soil thermal node temperature is now an output variable
+
+	Files affected:
+
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+
+	Description:
+
+	Soil thermal node temperature can now be selected for output, via the
+	key "OUT_SOIL_TNODE".  If selected, the temperatures at all valid soil
+	thermal nodes will be output.
+
+
+
 Bug Fixes:
 ----------
 

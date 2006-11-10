@@ -19,6 +19,7 @@ out_data_struct *create_output_list() {
 	      too long; fixed typos in other names; added
 	      OUT_IN_LONG.  TJB
   2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
+  2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
 
 *************************************************************/
 
@@ -137,6 +138,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_SURF_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
   out_data[OUT_SOIL_TEMP].aggtype = AGG_TYPE_AVG;
+  strcpy(out_data[OUT_SOIL_TNODE].varname,"OUT_SOIL_TNODE");           /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+  out_data[OUT_SOIL_TNODE].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SURF_TEMP].varname,"OUT_SURF_TEMP");             /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
   out_data[OUT_SURF_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_TDEPTH].varname,"OUT_TDEPTH");                   /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
@@ -264,6 +267,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_LIQ].nelem = options.Nlayer;
   out_data[OUT_SOIL_MOIST].nelem = options.Nlayer;
   out_data[OUT_SOIL_TEMP].nelem = options.Nlayer;
+  out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
   out_data[OUT_ADVECTION_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_DELTACC_BAND].nelem = options.SNOW_BAND;

@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
               out_data, out_data_files, and save_data structures. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included merging builtnames into filenames. TJB
+  2006-Nov-07 Changed statefile to init_state in call to check_state_file().  TJB
 
 **********************************************************************/
 {
@@ -150,7 +151,7 @@ int main(int argc, char *argv[])
   startrec = 0;
 #if !OUTPUT_FORCE
   if ( options.INIT_STATE ) 
-    filep.statefile = check_state_file(filenames.init_state, dmy, 
+    filep.init_state = check_state_file(filenames.init_state, dmy, 
 					 &global_param, options.Nlayer, 
 					 options.Nnode, &startrec);
 

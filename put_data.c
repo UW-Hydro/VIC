@@ -53,6 +53,7 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Oct-10 Shortened the names of output variables whose names were
 	      too long; fixed typos in others; created new OUT_IN_LONG
 	      variable.  TJB
+  2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
 
 **********************************************************************/
 {
@@ -188,7 +189,7 @@ void put_data(dist_prcp_struct  *prcp,
     Store Output for all Vegetation Types (except lakes)
   ****************************************/
   for ( veg = 0 ; veg <= veg_con[0].vegetat_type_num ; veg++) {
-    
+
     if ( veg < veg_con[0].vegetat_type_num ) 
       Cv = veg_con[veg].Cv;
     else
@@ -211,7 +212,7 @@ void put_data(dist_prcp_struct  *prcp,
 
 	/** record total evaporation **/
 	for(band=0;band<Nbands;band++) {
-	  if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
+	  if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
 
 	    tmp_evap = 0.0;
 	    for(index=0;index<options.Nlayer;index++)
@@ -304,12 +305,18 @@ void put_data(dist_prcp_struct  *prcp,
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
 
+	    /** record thermal node temperatures **/
+	    for(index=0;index<options.Nnode;index++) {
+	      out_data[OUT_SOIL_TNODE].data[index] += energy[veg][band].T[index]
+                * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            }
+
 	  }
 	}
       }
 
       for(band=0;band<Nbands;band++) {
-	if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
+	if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
 
 	  /**********************************
 	    Record Frozen Soil Variables
@@ -374,7 +381,7 @@ void put_data(dist_prcp_struct  *prcp,
           }
           else {
             // landcover is vegetation
-            if (overstory && !snow[veg][band].snow)
+            if ( overstory && !snow[veg][band].snow )
               // here, rad_temp will be wrong since it will pick the understory temperature
               out_data[OUT_VEGT].data[0] += energy[veg][band].Tfoliage * Cv * AreaFract[band] * TreeAdjustFactor[band];
             else
@@ -720,6 +727,11 @@ void put_data(dist_prcp_struct  *prcp,
         out_data[OUT_SOIL_TEMP].data[index] += cell[0][veg][band].layer[index].T * Cv * AreaFract[band] * TreeAdjustFactor[band];
       }
 
+      /** record thermal node temperatures **/
+      for(index=0;index<options.Nnode;index++) {
+        out_data[OUT_SOIL_TNODE].data[index] += energy[veg][band].T[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
+      }
+
       /***************************************
         Record Lake Energy Balance Variables
       ***************************************/
@@ -967,6 +979,9 @@ void put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += KELVIN;
       for (index=0; index<options.Nlayer; index++) {
         out_data[OUT_SOIL_TEMP].aggdata[index] += KELVIN;
+      }
+      for (index=0; index<options.Nnode; index++) {
+        out_data[OUT_SOIL_TNODE].aggdata[index] += KELVIN;
       }
       out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;
       out_data[OUT_VEGT].aggdata[0] += KELVIN;

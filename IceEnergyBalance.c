@@ -20,13 +20,6 @@
 
 static char vcid[] = "$Id$";
 
-#if LAKE_MODEL
-
-#define CH_WATER 4186.8e3
-//#define EPS            0.622    /* ratio of molecular weight of water vapor to
-//                                   that for dry air */
-#define CP          1013.0      /* Specific heat of moist air at constant 
-                                   pressure (J/(kg*C)) */
 /*****************************************************************************
   Function name: IceEnergyBalance()
 
@@ -63,6 +56,8 @@ static char vcid[] = "$Id$";
   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
 	    blowing snow sublimation is calculated for lakes.		TJB
   2006-Sep-23 Replaced redundant STEFAN constant with STEFAN_B.  TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
+
 *****************************************************************************/
 double IceEnergyBalance(double TSurf, va_list ap)
 {
@@ -213,7 +208,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * CP * (Tair - TMean) / *Ra_used;
+  *SensibleHeat = AirDens * CP_PM * (Tair - TMean) / *Ra_used;
 
   /* Calculate the mass flux of ice to or from the surface layer */
  
@@ -277,9 +272,3 @@ double IceEnergyBalance(double TSurf, va_list ap)
   
   return RestTerm;
 }
-
-#undef CH_WATER
-#undef EPS
-#undef CP
-
-#endif // LAKE_MODEL

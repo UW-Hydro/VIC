@@ -8,9 +8,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      atmos_data_struct *atmos,
               soil_con_struct   *soil_con,
 	      veg_con_struct    *veg_con,
-#if LAKE_MODEL
               lake_con_struct   *lake_con,
-#endif // LAKE_MODEL
               out_data_file_struct   *out_data_files,
               out_data_struct   *out_data,
               save_data_struct  *save_data,
@@ -55,6 +53,7 @@ void put_data(dist_prcp_struct  *prcp,
 	      variable.  TJB
   2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
   2006-Nov-07 Assigned value to overstory.  TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -111,9 +110,7 @@ void put_data(dist_prcp_struct  *prcp,
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
-#if LAKE_MODEL
   lake_var_struct         lake_var;
-#endif // LAKE_MODEL
   snow_data_struct      **snow;
   veg_var_struct       ***veg_var;
 
@@ -180,9 +177,7 @@ void put_data(dist_prcp_struct  *prcp,
 
   cell    = prcp->cell;
   energy  = prcp->energy;
-#if LAKE_MODEL
   lake_var = prcp->lake_var;
-#endif // LAKE_MODEL
   snow    = prcp->snow;
   veg_var = prcp->veg_var;
  
@@ -626,8 +621,6 @@ void put_data(dist_prcp_struct  *prcp,
     }
   }
  
-#if LAKE_MODEL
-
   /********************
     Lake Model Output
   ********************/
@@ -848,7 +841,6 @@ void put_data(dist_prcp_struct  *prcp,
 
     }
   }
-#endif /* LAKE_MODEL */
 
   /*****************************************
     Finish aggregation of special-case variables

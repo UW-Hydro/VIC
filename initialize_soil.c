@@ -15,6 +15,7 @@ void initialize_soil (cell_data_struct **cell,
 
   modifications:
   11-18-02 Modified to initialize wetland soil moisture.          LCB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -28,11 +29,9 @@ void initialize_soil (cell_data_struct **cell,
 	cell[j][band].layer[index].moist = soil_con->init_moist[index];
 
 
-#if LAKE_MODEL
   if ( options.LAKES ) {
     for(index=0;index<options.Nlayer;index++)
       cell[veg_num][0].layer[index].moist = soil_con->porosity[index]*soil_con->depth[index]*1000.;
   }
-#endif // LAKE_MODEL
 
 }

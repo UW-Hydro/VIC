@@ -1,5 +1,9 @@
+/******************************************************************************
 // $Id$
-#if LAKE_MODEL
+  Modifications:
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
+
+******************************************************************************/
 
 //#ifndef LAKE_SET
 
@@ -10,8 +14,6 @@
 #define RHOSNOW   250.  /* densities of water and snow */
 #define RHOICE   917.   /* ice density*/
 #define rhosurf 1.275   /* surface air density */
-#define JOULESPCAL 4.1868
-#define GRAMSPKG 1000.
 #define MAX_SURFACE_LAKE   .6  /* max. surface layer thickness for E-B (m) */
 #define BETA 0.001       /* Curve shape parameter for lake profile. */
 #define FRACMIN  0.10   /* min ice thickness in meters */
@@ -97,5 +99,3 @@ void wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		    int, double, lake_con_struct);
 void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, double, lake_var_struct *, lake_con_struct, int, int, double, soil_con_struct);
 void initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, double, soil_con_struct, lake_var_struct *, int, lake_con_struct);
-
-#endif // LAKE_MODEL

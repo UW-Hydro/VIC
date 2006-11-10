@@ -5,8 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if LAKE_MODEL
-
 void wetland_energy(int                  rec,
 		    atmos_data_struct   *atmos,
 		    dist_prcp_struct    *prcp,
@@ -26,7 +24,7 @@ void wetland_energy(int                  rec,
 	    used in flux calculations.				TJB
   2006-Sep-23 Implemented flexible output configuration; atmos->out_rain
 	      and atmos->out_snow must be tracked now.  TJB
-
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -242,6 +240,3 @@ void wetland_energy(int                  rec,
   } /** end current vegetation type **/
   
 }
-
-#endif // LAKE_MODEL
-

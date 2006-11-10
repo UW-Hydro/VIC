@@ -14,12 +14,8 @@ void read_initial_model_state(FILE                *init_state,
 			      soil_con_struct     *soil_con,
 			      int                  Ndist,
 			      char                *init_STILL_STORM,
-#if LAKE_MODEL
 			      int                 *init_DRY_TIME,
 			      lake_con_struct      lake_con)
-#else
-			      int                 *init_DRY_TIME)
-#endif // LAKE_MODEL
 /*********************************************************************
   read_initial_model_state   Keith Cherkauer         April 14, 2000
 
@@ -66,6 +62,7 @@ void read_initial_model_state(FILE                *init_state,
   2006-09-07 Changed "Skip reading if areafract < 0" to "<=0". GCT
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving infiles.statefile to filep.init_state. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 *********************************************************************/
 {
@@ -98,17 +95,13 @@ void read_initial_model_state(FILE                *init_state,
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
-#if LAKE_MODEL
   lake_var_struct        *lake_var;
-#endif // LAKE_MODEL
 
   cell    = prcp->cell;
   veg_var = prcp->veg_var;
   snow    = prcp->snow;
   energy  = prcp->energy;
-#if LAKE_MODEL
   lake_var = &prcp->lake_var;
-#endif // LAKE_MODEL
   
 #if !NO_REWIND 
   rewind(init_state);
@@ -152,19 +145,15 @@ void read_initial_model_state(FILE                *init_state,
       fgets(tmpstr, MAXSTRING, init_state); // skip rest of general cell info
       for ( veg = 0; veg <= tmp_Nveg+extra_veg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
-#if LAKE_MODEL
 	if ( options.LAKES && extra_veg == 1 && veg == tmp_Nveg + extra_veg ) {
 	  tmp_Nband = 1; // wetland veg type only occurs in band 0
 	}
-#endif // LAKE_MODEL
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, init_state); // skip snowband info
       }
-#if LAKE_MODEL
   if ( options.LAKES && extra_veg == 1 ) {
         fgets(tmpstr, MAXSTRING, init_state); // skip lake info
   }
-#endif // LAKE_MODEL
       // read info for next cell
       fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
     }//end if
@@ -185,7 +174,6 @@ void read_initial_model_state(FILE                *init_state,
     nrerror(ErrStr);
   }
 
-#if LAKE_MODEL
   if ( options.LAKES ) {
     if ( lake_con.Cl[0] > 0 && extra_veg == 0 ) {
       sprintf(ErrStr,"The model state file does not list a lake for this cell, but the lake coverage given by the lake parameter file is > 0.  Check your input files.");
@@ -196,7 +184,6 @@ void read_initial_model_state(FILE                *init_state,
       nrerror(ErrStr);
     }
   }
-#endif // LAKE_MODEL
 
   /* Read soil thermal node depths */
   sum = 0;
@@ -230,11 +217,9 @@ void read_initial_model_state(FILE                *init_state,
       init_STILL_STORM[veg] = (char)tmp_char;
     }
 
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
     Nbands = 1; // wetland veg type only occurs in band 0
   }
-#endif // LAKE_MODEL
 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
@@ -389,7 +374,6 @@ void read_initial_model_state(FILE                *init_state,
       }
     }
   }
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
       if ( fread( &lake_var->activenod, sizeof(int), 1, init_state ) != sizeof(int) )
@@ -484,6 +468,5 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror("End of model state file found unexpectedly");
     }
   }
-#endif // LAKE_MODEL
 
 }

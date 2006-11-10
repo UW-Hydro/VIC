@@ -9,9 +9,7 @@ void dist_prec(atmos_data_struct   *atmos,
                dist_prcp_struct    *prcp,
                soil_con_struct     *soil_con,
                veg_con_struct      *veg_con,
-#if LAKE_MODEL
 	       lake_con_struct     *lake_con,
-#endif /* LAKE_MODEL */
                dmy_struct          *dmy,
                global_param_struct *global_param,
                filep_struct        *filep,
@@ -68,6 +66,7 @@ void dist_prec(atmos_data_struct   *atmos,
   2006-Sep-23 Implemented flexible output configuration; uses new out_data,
 	      out_data_files, and save_data structures. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 
@@ -181,10 +180,7 @@ void dist_prec(atmos_data_struct   *atmos,
 
     /** Solve model time step **/
     full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
-#if LAKE_MODEL
-		lake_con, 
-#endif /* LAKE_MODEL */
-		soil_con, veg_con);
+		lake_con, soil_con, veg_con);
 
   }
 
@@ -195,10 +191,7 @@ void dist_prec(atmos_data_struct   *atmos,
     **************************************************/
 
     full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
-#if LAKE_MODEL
-		lake_con, 
-#endif /* LAKE_MODEL */
-		soil_con, veg_con);
+		lake_con, soil_con, veg_con);
 
   }
 
@@ -207,10 +200,7 @@ void dist_prec(atmos_data_struct   *atmos,
   **************************************************/
 
   put_data(prcp, atmos, soil_con, veg_con,
-#if LAKE_MODEL
-	   lake_con,
-#endif // LAKE_MODEL 
-	   out_data_files, out_data, save_data,
+	   lake_con, out_data_files, out_data, save_data,
 	   &dmy[rec], rec, options.Nnode);
 
 
@@ -227,11 +217,6 @@ void dist_prec(atmos_data_struct   *atmos,
 		  || dmy[rec+1].day != global_param->stateday ) ) )
     write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
 		      soil_con->gridcel, filep, soil_con,
-#if LAKE_MODEL
 		      STILL_STORM, DRY_TIME, *lake_con);
-#else
-		      STILL_STORM, DRY_TIME);
-#endif // LAKE_MODEL
-
 
 }

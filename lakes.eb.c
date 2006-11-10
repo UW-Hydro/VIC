@@ -5,8 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if LAKE_MODEL
-
 #define QUICK_ICE TRUE
 #define NOICE 0
 
@@ -45,6 +43,7 @@ void lakemain(atmos_data_struct  *atmos,
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
   2006-Jul-18 Changed sin(lat) to sin(fabs(lat)) in ks computation so that
 	      southern hemisphere locations can be handled correctly.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
   Parameters :
 
@@ -2440,4 +2439,3 @@ void initialize_prcp(dist_prcp_struct *prcp,
 				      options.Nlayer, soil_con.FS_ACTIVE);
     //   printf("%f\n",error);
 }
-#endif // LAKE_MODEL

@@ -27,6 +27,7 @@ void display_current_settings(int                 mode,
   2006-Oct-10 Moved printing of soil_dir inside if{} block.	TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to names->statefile. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 **********************************************************************/
 {
@@ -94,11 +95,6 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"COMPUTE_TREELINE\tTRUE\n");
 #else
   fprintf(stdout,"COMPUTE_TREELINE\tFALSE\n");
-#endif
-#if LAKE_MODEL
-  fprintf(stdout,"LAKE_MODEL\t\tTRUE\n");
-#else
-  fprintf(stdout,"LAKE_MODEL\t\tFALSE\n");
 #endif
 #if LOW_RES_MOIST
   fprintf(stdout,"LOW_RES_MOIST\t\tTRUE\n");
@@ -282,7 +278,6 @@ void display_current_settings(int                 mode,
   else
     fprintf(stdout,"SNOW_BAND\t\t%d\n",options.SNOW_BAND);
 
-#if LAKE_MODEL
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Lake Data:\n");
   if (options.LAKES)
@@ -293,7 +288,6 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"LAKE_PROFILE\t\tTRUE\n");
   else
     fprintf(stdout,"LAKE_PROFILE\t\tFALSE\n");
-#endif
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input State File:\n");

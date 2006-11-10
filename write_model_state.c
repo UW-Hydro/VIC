@@ -13,12 +13,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 		       filep_struct        *filep,
 		       soil_con_struct     *soil_con,
 		       char                *STILL_STORM,
-#if LAKE_MODEL
 		       int                 *DRY_TIME,
 		       lake_con_struct      lake_con)
-#else
-		       int                 *DRY_TIME)
-#endif // LAKE_MODEL
 /*********************************************************************
   write_model_state      Keith Cherkauer           April 14, 2000
 
@@ -60,6 +56,7 @@ void write_model_state(dist_prcp_struct    *prcp,
              to ...sizeof, 1,... GCT
   2006-09-07 Changed "Skip writing snow band if areafract < 0" to "<=0". GCT
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
 
 *********************************************************************/
 {
@@ -84,10 +81,8 @@ void write_model_state(dist_prcp_struct    *prcp,
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
-#if LAKE_MODEL
   lake_var_struct         lake_var;
   int    node;
-#endif // LAKE_MODEL
 
   if(options.DIST_PRCP) 
     Ndist = 2;
@@ -99,16 +94,12 @@ void write_model_state(dist_prcp_struct    *prcp,
   veg_var = prcp->veg_var;
   snow    = prcp->snow;
   energy  = prcp->energy;
-#if LAKE_MODEL
   lake_var = prcp->lake_var;
-#endif // LAKE_MODEL
  
   extra_veg = 0;
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     extra_veg = 1; // add a veg type for the wetland
   }
-#endif // LAKE_MODEL
 
   /* write cell information */
   if ( options.BINARY_STATE_FILE ) {
@@ -141,7 +132,6 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
-#if LAKE_MODEL
     if ( options.LAKES && lake_con.Cl[0] > 0 ) {
       Nbytes += sizeof(double) // wetland mu
 		+ sizeof(char) // wetland STILL_STORM
@@ -178,7 +168,6 @@ void write_model_state(dist_prcp_struct    *prcp,
 		+ sizeof(double) // sdepth
       ;
     }
-#endif // LAKE_MODEL
     fwrite( &Nbytes, sizeof(int), 1, filep->statefile );
   }
 
@@ -213,11 +202,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       DRY_TIME[veg] );
     }
 
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
     Nbands = 1; // wetland veg type only occurs in band 0
   }
-#endif // LAKE_MODEL
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
@@ -316,7 +303,6 @@ void write_model_state(dist_prcp_struct    *prcp,
     }
   }
 
-#if LAKE_MODEL
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
       fwrite( &lake_var.activenod, sizeof(int), 1, filep->statefile );
@@ -372,7 +358,6 @@ void write_model_state(dist_prcp_struct    *prcp,
       fprintf( filep->statefile, "\n" );
     }
   }
-#endif // LAKE_MODEL
   /* Force file to be written */
   fflush(filep->statefile);
 

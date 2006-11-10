@@ -17,13 +17,13 @@
 		set_output_var
 		zero_output_list
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
+  2006-Nov-07 Removed LAKE_MODEL option. TJB
+
 ************************************************************************/
 
 #include <math.h>
 #include <vicNl_def.h>
-#if LAKE_MODEL
 #include <LAKE.h>
-#endif // LAKE_MODEL
 
 /*** SubRoutine Prototypes ***/
 
@@ -132,10 +132,7 @@ out_data_struct *create_output_list();
 
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
-		 veg_con_struct *,
-#if LAKE_MODEL
-		 lake_con_struct *,
-#endif /* LAKE_MODEL */
+		 veg_con_struct *, lake_con_struct *,
 		 dmy_struct *,global_param_struct *,
 		 filep_struct *, out_data_file_struct *,
 		 out_data_struct *, save_data_struct *,
@@ -212,10 +209,7 @@ void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_vegcon(veg_con_struct **);
 void   free_out_data_files(out_data_file_struct **);
 void   full_energy(char, int, int, atmos_data_struct *, dist_prcp_struct *,
-		   dmy_struct *, global_param_struct *, 
-#if LAKE_MODEL
-		   lake_con_struct *,
-#endif // LAKE_MODEL 
+		   dmy_struct *, global_param_struct *, lake_con_struct *,
                    soil_con_struct *, veg_con_struct *);
 double func_aero_resist(double,double,double,double,double);
 double func_atmos_energy_bal(double, va_list);
@@ -245,11 +239,8 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double,
 void   initialize_global();
 void   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      global_param_struct *, filep_struct, 
-			      int, int, int, int, double,
-                              soil_con_struct *, veg_con_struct *,
-#if LAKE_MODEL
-                              lake_con_struct,
-#endif // LAKE_MODEL
+			      int, int, int, int, double, soil_con_struct *,
+                              veg_con_struct *, lake_con_struct,
 			      char **, int **, save_data_struct *);
 void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
@@ -297,10 +288,7 @@ void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 double priestley(double, double);
 void   put_data(dist_prcp_struct *, atmos_data_struct *,
 		soil_con_struct *, veg_con_struct *,
-#if LAKE_MODEL
-                lake_con_struct *, 
-#endif // LAKE_MODEL
-		out_data_file_struct *,
+                lake_con_struct *, out_data_file_struct *,
 		out_data_struct *, save_data_struct *,
  	        dmy_struct *, int, int); 
 
@@ -314,11 +302,7 @@ double **read_forcing_data(FILE **, global_param_struct);
 void   read_initial_model_state(FILE *, dist_prcp_struct *, 
 				global_param_struct *, int, int, int, 
 				soil_con_struct *, int, char *,
-#if LAKE_MODEL
 				int *, lake_con_struct);
-#else
-				int *);
-#endif // LAKE_MODEL
 void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int, int);
 void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
@@ -466,11 +450,7 @@ void write_layer(layer_data_struct *, int, int,
                  double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, filep_struct *, soil_con_struct *, char *,
-#if LAKE_MODEL
 		       int *, lake_con_struct);
-#else
-		       int *);
-#endif // LAKE_MODEL
 void write_snow_data(snow_data_struct, int, int);
 void write_soilparam(soil_con_struct *);
 void write_vegparam(veg_con_struct *);

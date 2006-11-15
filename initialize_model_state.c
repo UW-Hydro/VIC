@@ -50,7 +50,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 	      save_data->wdew, since Wdew is undefined for veg == Nveg. TJB
   2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
 	      This included removing the unused init_snow file. TJB
-
+  2006-Nov-15 Changed initial state reading from statefile to init_state GCT
 **********************************************************************/
 {
   extern option_struct options;
@@ -161,7 +161,7 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
   if(options.INIT_STATE) {
 
-    read_initial_model_state(filep.statefile, prcp, global_param,  
+    read_initial_model_state(filep.init_state, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
 			     Ndist, init_STILL_STORM, init_DRY_TIME);
 

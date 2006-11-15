@@ -1121,6 +1121,14 @@ Binary file opening message
 	In 4.0.4, the message announcing the opening of a binary input file
 	for reading was truncated.  This has been fixed.
 
+Initial state reading changed to read initial state not final state
+
+	Files affected:
+	initialize_model_state.c
+
+	Description:
+	Changed read statement to read init_state not statefile.
+
 
 --------------------------------------------------------------------------------
 

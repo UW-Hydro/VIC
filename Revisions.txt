@@ -6,21 +6,26 @@
 --------------------------------------------------------------------------------
                      ***** VIC MODEL RELEASE NOTES *****
 --------------------------------------------------------------------------------
-README.txt - general notes on VIC model source code. For details on differences
-between versions see Revisions.txt
+Revisions.txt - Describes differences between versions of VIC source code. README.txt
+has more general descriptions.
 --------------------------------------------------------------------------------
 
-Usage:
-------
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r4b *****
+--------------------------------------------------------------------------------
 
-	vicNl [-v | -o | -g<global_parameter_file>]
+Water budget errors in snow pack on top of lake ice
 
-	  v: display version information
-	  o: display compile-time options settings (set in user_def.h)
-	  g: read model parameters from <global_parameter_file>.
-	     <global_parameter_file> is a file that contains all needed model
-	     parameters as well as model option flags, and the names and
-	     locations of all other files.
+        Files affected:
+
+        lakes.eb.c
+
+        Description:
+
+        Convert swq and surf_water from mm over lake to mm over ice fraction at
+        beginning of solve_lake().  This was needed to avoid a water budget
+        error since swq and surf_water were being converted to mm over lake at
+        end of solve_lake().
 
 
 --------------------------------------------------------------------------------
@@ -391,6 +396,31 @@ Uninitialized value of mixdepth in solve_lake()
 
 
 
+Missing ID String
+
+	Files affected:
+
+	initialize_lake.c
+
+	Description:
+
+	Added RCS ID string.
+
+
+
+Unused file "init_snow"
+
+	Files affected:
+
+	initialize_snow.c
+	vicNl.h
+
+	Description:
+
+	Removed reference to unused file "init_snow" from argument list.
+
+
+
 Incorrect sub-daily temperature interpolation when referencing GMT instead of
 local time
 
@@ -405,6 +435,30 @@ local time
 	happen when referencing GMT instead of local time, for cells far away
 	from 0 E longitude.  This has been fixed. TJB
 
+
+Access of uninitialized variables
+
+	Files affected:
+
+	initialize_lake.c
+	lakes.eb.c
+	put_data.c
+	read_vegparam.c
+
+	Description:
+
+	Uninitialized variables were accessed in several parts of the code:
+	  put_data.c:
+	    overstory              (never assigned a value)
+	    lake->aero_resist      (only initialized when ice present)
+	    lake->aero_resist_used (only initialized when ice present)
+	  lakes.eb.c:
+	    lake_snow->MELTING     (only sometimes assigned a value)
+
+	In addition, read_vegparam.c was not allocating the correct number of
+	veg tiles in the case that options.LAKES was FALSE.
+
+	These have been fixed.
 
 
 Water budget errors in snow pack on top of lake ice
@@ -520,6 +574,24 @@ EQUAL_AREA global parameter option
 	as before.
 
 
+Improved validation of global options
+
+	Files affected:
+	get_global_param.c
+
+	Description:
+	Now does not allow bad combinations of FULL_ENERGY, FROZEN_SOIL, and
+	GRND_FLUX values.
+
+
+Improved validation of soil param file
+
+	Files affected:
+	read_soilparam.c
+
+	Description:
+	Now validates depth_full_snow_cover and frost_slope.
+
 
 New vicInterp executable
 
@@ -577,6 +649,10 @@ New vicInterp executable
 	before exiting.  This prevented all of the output data from being
 	completely written.
 
+Added sample global param file to distribution
+
+        Files affected:
+        global.param.sample
 
 Bug Fixes:
 ----------
@@ -658,6 +734,20 @@ Aerodynamic resistance not correctly aggregated for output
 	the smallest value among the various veg tiles in the cell.
 	
 
+Attempts to skip deactivated grid cells fail when using a binary initial state
+file.
+
+	Files affected:
+	write_model_state.c
+
+	Description:
+	write_model_state() now computes the correct number of bytes per record
+	for a binary state file.  Before this fix, if a user de-activated some
+	grid cells (by setting the first field in the soil parameter file to 0)
+	and attempted to read from a binary state file that was written when the
+	cells were active, VIC would not read the state file correctly and would
+	crash.
+
 
 State variables for SPATIAL_FROST and LAKE_MODEL options not stored in state
 file.
@@ -675,6 +765,56 @@ file.
 	makes state files used with 4.1.0 beta 3 incompatible with earlier
 	releases (and vice versa).
 
+
+State files not written/read correctly when QUICK_FLUX set to TRUE.
+
+	Files affected:
+	get_global_param.c, make_dist_prcp.c, make_energy_bal.c, vicNl.c,
+	vicNl.h
+
+	Description:
+	In previous releases, if QUICK_FLUX=TRUE, the number of soil thermal
+	nodes is changed after being recorded in the state file.  The resulting
+	mismatch between Nnodes in the state file header and the actual number
+	of node temperatures recorded in the state file prevents VIC from being
+	able to read the state file.  This has been fixed.
+
+
+Automatic re-adjustment of lake fraction when sum of veg and lake fractions
+exceeds 1 can set lake fraction to 0.
+
+	Files affected:
+	LAKE.h, read_lakeparam.c, vicNl.c
+
+	Description:
+	In earlier releases, the automatic re-adjustment of the lake fraction
+	when the sum of the veg and lake fractions exceeds 1 can reset the lake
+	fraction to 0.  This has been changed so that the veg and lake
+	fractions all share proportionally in the re-adjustment.
+
+
+Fixed incorrect check on soil moisture in distribute_node_moisture_properties().
+
+	Files affected:
+	soil_conduction.c
+
+	Description:
+	distribute_node_moisture_properties() contained the following check:
+		if(abs(moist_node[nidx]-max_moist_node[nidx]) > SMALL)
+	Checking the absolute value here was incorrect.  The abs() has been
+	removed.
+
+
+Fixed incorrect check on soil node depths in read_initial_model_state().
+
+	Files affected:
+	read_initial_model_state.c
+
+	Description:
+	read_initial_model_state() contained the following check:
+		if( abs( sum - soil_con->dp ) > SMALL )
+	Checking the absolute value here was incorrect.  The abs() has been
+	removed.
 
 
 ARNO_PARAMS global parameter option changed to BASEFLOW
@@ -701,6 +841,18 @@ ARNO_PARAMS global parameter option changed to BASEFLOW
         When BASEFLOW == ARNO, VIC assumes the soil parameter file
         contains Ds, Dsmax, Ws, and c.
 
+
+Replaced %i with %d in fscanf statements
+
+	Files affected:
+	check_state_file.c, get_global_param.c, read_arcinfo_ascii.c,
+	read_initial_model_state.c, read_snowband.c, read_soilparam.c,
+	read_veglib.c
+
+	Description:
+	Having %i in fscanf statements was causing input values of "08" to be
+	interpreted as octal rather than decimal.  These instances of %i have
+	been replaced with %d.
 
 Removed some snowband output
 
@@ -765,12 +917,44 @@ STATE file option is now specified in global file, not in user_def.h at compile 
         will not save a state file.  If some (but not all) of these
         lines are present, VIC will give an error.
 
+Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
+
+        Files affected:
+        get_global_param.c, open_state_file.c
+
+        Previously, the checks for matches would occur in get_global_param even
+        though the SAVE_STATE filename wasn't created until open_state_file.
+        The output name setting was moved from open_state_file to get_global_param. GCT
+
+Added checks for range/valid month days
+
+        Files affected:
+        get_global_param.c
+
+        In previous versions the user could set a non-valid date for STATE files
+        and the model would run without writing to STATE file. Code now checks
+        for valid date.
+
+Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX option in global param file
+
+        Files affected:
+        get_global_param.c
 
 Now reads extra_veg from state file
 
         Files affected:
         read_initial_model_state.c
                
+Removed Trad from vicNl_def.h
+
+        Files affected:
+        vicNl_def.h
+
+Modified to read lake nodal variables for each of the active nodes. (JCA)
+
+        Files affected:
+        read_initial_model_state.c
+        write_model_state.c
 
 Reverting from version 5.10 to 5.9 in surface_fluxes.c 
 
@@ -805,6 +989,19 @@ Lake model energy terms NaN for southern hemisphere lakes
 	  ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
 	This appears to fix the problem.	TJB
 
+Changed argument order in fread, fwrite statements.
+
+        Files affected:
+        check_state_file.c
+        open_state_file.c
+        read_atmos_data.c
+        read_initial_model_state.c
+        write_data.c
+        write_forcing_file.c
+        write_model_state.c
+
+        Statements had arguments with ...1, sizeof()....Those were changed to
+        ...sizeof(), 1, ...GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****
@@ -948,6 +1145,24 @@ Spurious condensation at low temperatures
         with frozen soils, and may require recalibration of soil parameters.
 
 
+Validation of initial soil moisture
+
+        Files affected:
+        read_soilparam.c, read_soilparam_arc.c
+
+        Description:
+        Added check to read_soilparam.c and read_soilparam_arc.c to make sure
+        that wilting point is greater than residual moisture.  Changed lower
+        limit on initial soil moisture to be residual moisture rather than
+        wilting point.  Made validation statements clearer.  Validation does
+        not occur if soil moisture will be read from a model state file.
+        (found and fixed by Chunmei Zhu, Alan Hamlet, and Ted Bohn)
+
+        NOTE: Soil parameter files containing Wpwp_FRACT and resid_moist
+        such that Wpwp_FRACT < resid_moist / (1.0 - bulk_density/soil_density)
+        will now cause VIC to exit with an error message.
+
+
 Incorrect baseflow limits
 
         Files affected:
@@ -1075,6 +1290,68 @@ Incorrect value for sub_snow in fluxes output file
 	Replaced output of sub_snow[0] in fluxes file with sub_total.
 
 
+Mixmax uninitialized
+
+	Files affected:
+	water_under_ice.c
+
+	Description:
+	The variable mixmax was used in a max-finding loop without first being
+	initialized.  It is now initialized to 0 before being used.
+
+
+Typo in SPATIAL_FROST code in snow_intercept.c
+
+	Files affected:
+	snow_intercept.c
+
+	Description:
+	Fixed typo.  Changed SPATIAL_FRoST to SPATIAL_FROST.
+
+
+Incorrect skipping over masked-out cells when reading initial state file
+
+	Files affected:
+	read_initial_model_state.c
+
+	Description:
+	In 4.1.0 beta r1, the algorithm parsing the initial state file was
+	incorrect when attempting to skip over records for cells that were
+	excluded from the mask (by setting the "active" flag in the first field
+	of the soil file to 0).  This has been fixed.
+
+	More specifically, the algorithm has been modified to loop over
+	tmp_Nveg and tmp_Nband when searching for desired cellnum in ASCII file,
+	rather than over Nveg and Nbands.  As we skip over other records in the
+	state file while searching for the desired record, the loop must parse
+	each undesired record differently, according to how many veg classes and
+	snow bands exist in the record (tmp_Nveg and tmp_Nband, respectively),
+	rather than the number of veg classes and snow bands in the desired
+	record (Nveg and Nbands, respectively).
+
+
+Incorrect bounds for snow depth
+
+	Files affected:
+	snow_utility.c
+
+	Description:
+	Modified the checks on delta_depth so that the condition is
+		delta_depth > MAX_CHANGE*depth
+	Modified compression due to aging to only be calculated if depth > 0.
+
+
+100% snow when air_temp = MAX_SNOW_TEMP
+
+        Files affected:
+        calc_rainonly.c
+
+        Description:
+        In 4.1.0 beta r1, when air_temp = MAX_SNOW_TEMP, the portion of
+	precipitation that is snow was set to 100%.  This has been fixed.
+	(found by Justin Sheffield at Princeton)
+
+
 Special case in Penman equation
 
         Files affected:
@@ -1120,6 +1397,17 @@ Bottom soil node thickness initialization
         Description:
         Initialize soil_con->dz_node[Nnodes] to 0.0, since it is accessed in
         set_node_parameters().  (found by Justin Sheffield at Princeton)
+
+
+Initialization of debug parameters
+
+        Files affected:
+        open_debug.c
+
+        Description:
+        Initialize debug_store_moist array when debug.PRT_MOIST is true (as
+        well as under the other previously-defined conditions). (found by
+        Justin Sheffield at Princeton)
 
 
 Canopy evaporation and distributed precipitation
@@ -1176,6 +1464,50 @@ Display current grid cell number for arc/info soil files
         In 4.1.0 beta r1, for arc/info-format soil files, the current grid
         cell is not displayed (for regular-format soil files, it is displayed).
         Now the current grid cell number is always displayed.
+
+
+Binary file opening message
+
+        Files affected:
+        open_file.c
+
+        Description:
+        In 4.1.0 beta r1, the message announcing the opening of a binary input
+        file for reading was truncated.  This has been fixed.
+
+
+Extra options in user_def.h
+
+	Files affected:
+	user_def.h
+
+	Description:
+	Removed SPATIAL_FROST_SLOPE and MAX_FULL_COVERAGE_DEPTH since they were
+	not used anywhere.
+
+
+Unnecessary freeing of LINK_DEBUG
+
+	Files affected:
+	alloc_atmos.c
+
+	Description:
+	Added check for LINK_DEBUG global option.  If LINK_DEBUG is TRUE
+	atmospheric data is not dynamically allocated, so it should not be
+	freed.
+
+
+Lakeparam element of filenames structure overloaded
+
+	Files affected:
+	close_files.c, make_in_and_outfiles.c, vicNl_def.h
+
+	Description:
+	The lakeparam element of the filenames structure was used to contain
+	both the name of the input lakeparam file and the output lake file.
+	An extra element has been added to the filenames structure so that the
+	input lakeparam file and the output lake file can be referred to
+	separately.
 
 
 Inconsistent format in state file
@@ -2045,3 +2377,51 @@ Thornton, P.E. and S.W. Running, An improved algorithm for estimating
 incident daily solar radiation from measurements of temperature, humidity,
 and precipitation, Ag. For. Met., 93, 211-228, 1999.
 
+File List:
+
+CalcAerodynamic.c               modify_Ksat.c
+Makefile                        mtclim42_vic.c
+SnowPackEnergyBalance.c         mtclim42_vic.h
+StabilityCorrection.c           mtclim42_wrapper.c
+alloc_atmos.c                   nrerror.c
+arno_evap.c                     open_debug.c
+calc_air_temperature.c          open_file.c
+calc_cloud_cover_fraction.c     open_state_file.c
+calc_longwave.c                 penman.c
+calc_rainonly.c                 prepare_full_energy.c
+calc_root_fraction.c            put_data.c
+calc_surf_energy_bal.c          read_arcinfo_ascii.c
+calc_veg_params.c               read_atmos_data.c
+canopy_evap.c                   read_forcing_data.c
+check_files.c                   read_initial_model_state.c
+check_state_file.c              read_snowband.c
+close_files.c                   read_soilparam.c
+cmd_proc.c                      read_soilparam_arc.c
+compress_files.c                read_veglib.c
+compute_dz.c                    read_vegparam.c
+correct_precip.c                redistribute_during_storm.c
+dist_prec.c                     root_brent.c
+estimate_T1.c                   runoff.c
+free_dist_prcp.c                snow.h
+free_vegcon.c                   snow_intercept.c
+frozen_soil.c                   snow_melt.c
+full_energy.c                   snow_utility.c
+func_surf_energy_bal.c          soil_conduction.c
+get_force_type.c                soil_thermal_eqn.c
+get_global_param.c              solve_snow.c
+global.h                        store_moisture_for_debug.c
+initialize_atmos.c              surface_fluxes.c
+initialize_global.c             svp.c
+initialize_model_state.c        user_def.h
+initialize_new_storm.c          vicNl.c
+initialize_snow.c               vicNl.h
+initialize_soil.c               vicNl_def.h
+initialize_veg.c                vicerror.c
+make_cell_data.c                write_atmosdata.c
+make_dist_prcp.c                write_data.c
+make_dmy.c                      write_debug.c
+make_energy_bal.c               write_layer.c
+make_in_and_outfiles.c          write_model_state.c
+make_snow_data.c                write_soilparam.c
+make_veg_var.c                  write_vegparam.c
+massrelease.c                   write_vegvar.c

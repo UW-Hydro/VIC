@@ -216,80 +216,90 @@ void solve_lake(double             snow,
   Modifications:
   2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
 	      guarantees that it is initialized for all cases.  TJB
+  2006-Nov-15 Convert swq and surf_water from mm over lake to mm over ice
+	      fraction at beginning of function; this was needed to avoid
+	      a water budget error since swq and surf_water were being
+	      converted to mm over lake at end of the function.  TJB
 **********************************************************************/
 
-      double LWnetw,LWneti;
-      double sw_water, sw_ice;
-      double T[MAX_LAKE_NODES];   /* temp of the water column, open fraction. */
-      double Tnew[MAX_LAKE_NODES];  
-      double Ti[MAX_LAKE_NODES];   /* temp of the water column, ice fraction. */
-      double water_density[MAX_LAKE_NODES], water_cp[MAX_LAKE_NODES];
-      float albs, albi, albw;
-      double Ts;
-      double Tcutoff, Tcutk;  /* Lake freezing temperature (K). */
-      double Qhw, Qhi;
-      double Qgw, Qgi;
-      double Qew, Qei;
-      double eflux, eadd;
-      double Tki, Tkw;     /* Surface temp. of ice and water in Kelvin. */
-      double qbot, qw;
-      int freezeflag;
-      double mixmax;
-      int mixdepth;
-      double fracprv; /* Ice coverage at beginning of the timestep. */
-      double fracice;
-      double new_ice_fraction; /* Ice fraction formed by freezing. */
-      int k, i;
-      double tw1, tw2, r1, r2, rtu, rnet;
-      double Ls, Le;
-      double sumjoula, sumjoulb, sumjouli;
-      double temp;
-      double water_energy;
-      double temphw, temphi;
-      double SW_under_ice;
-      double newsnow;
-      int last_snow;
-      double cc;
-      double ice_energy;
-      double error_over_water;
-      double sw_underice_visible;
-      double sw_underice_nir;
-      double T_lower, T_upper;
-      double Tsurf;
-      double new_ice_height;
-      double rainfall, snowfall;
-      double windw, windi;
-      double energy_ice_formation;
-      double energy_ice_melt_bot;
-      double melt, deltaCC_ice, Qnet_ice;
-      double joule_intermediate;
-      double energy_out_bottom;
-      double energy_out_bottom_ice;    
-      double sw_out;
-      int index;
-      double tempdepth, in;
-      double qf;
-      double inputs, outputs, internal, phasechange;
-      
-      /**********************************************************************
-       * 1. Initialize and read in info from previous dt.
-       **********************************************************************/
-    
-      lake_energy->advection=0.0;
-      lake_energy->deltaCC = 0.0;
-      lake_energy->grnd_flux = 0.0;
-      lake_energy->snow_flux = 0.0;
-      lake->snowmlt = 0.0;
-      qbot=qw=0.0;
-      fracprv=lake->fraci;
-      new_ice_height = new_ice_fraction = 0.0;
-      lake->evapw=0.0;
-      energy_ice_formation = 0.0;
-      energy_out_bottom = energy_out_bottom_ice = 0.0;
-      lake_snow->vapor_flux=0.0;
-      //  lake->sarea = lake->surface[0];
+  double LWnetw,LWneti;
+  double sw_water, sw_ice;
+  double T[MAX_LAKE_NODES];   /* temp of the water column, open fraction. */
+  double Tnew[MAX_LAKE_NODES];  
+  double Ti[MAX_LAKE_NODES];   /* temp of the water column, ice fraction. */
+  double water_density[MAX_LAKE_NODES], water_cp[MAX_LAKE_NODES];
+  float albs, albi, albw;
+  double Ts;
+  double Tcutoff, Tcutk;  /* Lake freezing temperature (K). */
+  double Qhw, Qhi;
+  double Qgw, Qgi;
+  double Qew, Qei;
+  double eflux, eadd;
+  double Tki, Tkw;     /* Surface temp. of ice and water in Kelvin. */
+  double qbot, qw;
+  int freezeflag;
+  double mixmax;
+  int mixdepth;
+  double fracprv; /* Ice coverage at beginning of the timestep. */
+  double fracice;
+  double new_ice_fraction; /* Ice fraction formed by freezing. */
+  int k, i;
+  double tw1, tw2, r1, r2, rtu, rnet;
+  double Ls, Le;
+  double sumjoula, sumjoulb, sumjouli;
+  double temp;
+  double water_energy;
+  double temphw, temphi;
+  double SW_under_ice;
+  double newsnow;
+  int last_snow;
+  double cc;
+  double ice_energy;
+  double error_over_water;
+  double sw_underice_visible;
+  double sw_underice_nir;
+  double T_lower, T_upper;
+  double Tsurf;
+  double new_ice_height;
+  double rainfall, snowfall;
+  double windw, windi;
+  double energy_ice_formation;
+  double energy_ice_melt_bot;
+  double melt, deltaCC_ice, Qnet_ice;
+  double joule_intermediate;
+  double energy_out_bottom;
+  double energy_out_bottom_ice;    
+  double sw_out;
+  int index;
+  double tempdepth, in;
+  double qf;
+  double inputs, outputs, internal, phasechange;
+  
+  /**********************************************************************
+   * 1. Initialize and read in info from previous dt.
+   **********************************************************************/
+  
+  lake_energy->advection=0.0;
+  lake_energy->deltaCC = 0.0;
+  lake_energy->grnd_flux = 0.0;
+  lake_energy->snow_flux = 0.0;
+  lake->snowmlt = 0.0;
+  qbot=qw=0.0;
+  fracprv=lake->fraci;
+  new_ice_height = new_ice_fraction = 0.0;
+  lake->evapw=0.0;
+  energy_ice_formation = 0.0;
+  energy_out_bottom = energy_out_bottom_ice = 0.0;
+  lake_snow->vapor_flux=0.0;
 
-	 if(lake->activenod > 0) {	
+  if(lake->activenod > 0) {	
+
+      if (fracprv > 0) {
+        /* Convert snow from average over entire lake
+           to average amount per unit area of ice cover */
+        lake_snow->swq         /= fracprv;
+        lake_snow->surf_water  /= fracprv;
+      }
 
       /* --------------------------------------------------------------------
        * Calculate the water freezing point.
@@ -583,7 +593,7 @@ void solve_lake(double             snow,
 	lake->hice = 0.0;
       }
  
-     // adjust snowpack for changes in ice cover
+      // adjust snowpack for changes in ice cover
       if(lake->fraci < fracprv) {
 	lake->snowmlt += ( lake_snow->swq * 1000. 
 			   * ( fracprv - lake->fraci ) * lake_con.Cl[0] );
@@ -601,10 +611,13 @@ void solve_lake(double             snow,
 	lake->tempavg += lake->temp[i]/lake->activenod;
       }
 
+      // Adjust snow to be representative of entire lake
       lake_snow->swq        *= lake->fraci;
       lake_snow->surf_water *= lake->fraci;
-      lake_snow->depth = lake_snow->swq * RHO_W / RHOSNOW;
-      }
+      lake_snow->depth       = lake_snow->swq * RHO_W / RHOSNOW;
+
+  }
+
 }   /* End of lake function. */
 
 void latsens (double Tsurf, double Tcutk, double hice, 

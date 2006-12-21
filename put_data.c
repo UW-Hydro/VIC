@@ -54,6 +54,8 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
   2006-Nov-07 Assigned value to overstory.  TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Nov-30 Added OUT_DELSURFSTOR.  TJB
+  2006-Nov-30 Convert pressure and vapor pressure to kPa for output.  TJB
 
 **********************************************************************/
 {
@@ -162,13 +164,13 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_DENSITY].data[0]   = atmos->density[NR];
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec;
-  out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR];
+  out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR]/kPa2Pa;
   out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];
   out_data[OUT_RAINF].data[0]     = atmos->out_rain;
   out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[NR]/(atmos->vp[NR]+atmos->vpd[NR]);
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
   out_data[OUT_SNOWF].data[0]     = atmos->out_snow;
-  out_data[OUT_VP].data[0]        = atmos->vp[NR];
+  out_data[OUT_VP].data[0]        = atmos->vp[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
  
   /*************************************************
@@ -880,6 +882,7 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
   out_data[OUT_DELSWE].data[0] = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] - save_data->swe;
   out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
+  out_data[OUT_DELSURFSTOR].data[0] = out_data[OUT_SURFSTOR].data[0] - save_data->surfstor;
 
   // Energy terms
   out_data[OUT_REFREEZE].data[0] = (out_data[OUT_RFRZ_ENERGY].data[0]/Lf)*dt_sec;

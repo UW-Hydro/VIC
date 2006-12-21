@@ -344,6 +344,7 @@ Removed LAKE_MODEL compile-time option
 Bug Fixes:
 ----------
 
+
 Various bugs in output variables
 
 	Files affected:
@@ -419,6 +420,47 @@ Water budget errors in snow pack on top of lake ice
 	beginning of solve_lake().  This was needed to avoid a water budget
 	error since swq and surf_water were being converted to mm over lake at
 	end of solve_lake().
+
+
+Incorrect filenames in Makefile for variable output list functions
+
+	Files affected:
+
+	Makefile
+
+	Description:
+
+	Changed ".c" to ".o" for output_list_utils.o, parse_output_info.o,
+	set_output_defaults.o
+
+
+
+Output variable OUT_DELSURFSTOR not functioning
+
+	Files affected:
+
+	output_list_utils.c
+	put_data.c
+
+	Description:
+
+	Default properties for OUT_DELSURFSTOR were not set in
+	output_list_utils.c, and OUT_DELSURFSTOR was not assigned a
+	value in put_data.c.  These problems have been fixed.
+
+
+
+Pressure and vapor pressure output in wrong units
+
+	Files affected:
+
+	put_data.c
+	write_forcing_file.c
+
+	Description:
+
+	The output variables pressure and vapor pressure were output in Pa
+	instead of kPa.  This has been fixed.
 
 
 

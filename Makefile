@@ -19,6 +19,10 @@
 #		output_list_utils.c
 #		parse_output_info.c
 #		set_output_defaults.c
+# 2006-Nov-30 Changed ".c" to ".o" for:
+#               output_list_utils.o
+#               parse_output_info.o
+#               set_output_defaults.o
 #
 # $Id$
 #
@@ -77,12 +81,12 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
 	modify_Ksat.o mtclim42_vic.o mtclim42_wrapper.o nrerror.o \
 	open_debug.o open_file.o open_state_file.o \
-	output_list_utils.c parse_output_info.c penman.o \
+	output_list_utils.o parse_output_info.o penman.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
 	read_snowband.o read_soilparam.o read_soilparam_arc.o read_veglib.o \
 	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
-	set_output_defaults.c snow_intercept.o snow_melt.o \
+	set_output_defaults.o snow_intercept.o snow_melt.o \
 	snow_utility.o soil_conduction.o \
 	soil_thermal_eqn.o solve_snow.o store_moisture_for_debug.o \
 	surface_fluxes.o svp.o vicNl.o vicerror.o write_atmosdata.o \

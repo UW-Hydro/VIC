@@ -20,6 +20,7 @@ out_data_struct *create_output_list() {
 	      OUT_IN_LONG.  TJB
   2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
   2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
+  2006-Nov-30 Added OUT_DELSURFSTOR.  TJB
 
 *************************************************************/
 
@@ -84,6 +85,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_DELSWE].varname,"OUT_DELSWE");                   /* change in snow water equivalent [mm] */
   out_data[OUT_DELSWE].aggtype = AGG_TYPE_SUM;
+  strcpy(out_data[OUT_DELSURFSTOR].varname,"OUT_DELSURFSTOR");         /* change in surface liquid water storage  [mm] */
+  out_data[OUT_DELSURFSTOR].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP].varname,"OUT_EVAP");                       /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
   out_data[OUT_EVAP].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP_BARE].varname,"OUT_EVAP_BARE");             /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */

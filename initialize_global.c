@@ -56,12 +56,11 @@ void initialize_global() {
   param_set.LSSNOWF      = FALSE;
   param_set.PREC         = FALSE;
   param_set.PRESSURE     = FALSE;
-  param_set.PSURF        = FALSE;
   param_set.QAIR         = FALSE;
   param_set.RAINF        = FALSE;
+  param_set.REL_HUMID    = FALSE;
   param_set.SHORTWAVE    = FALSE;
   param_set.SNOWF        = FALSE;
-  param_set.TAIR         = FALSE;
   param_set.TMAX         = FALSE;
   param_set.TMIN         = FALSE;
   param_set.TSKC         = FALSE;
@@ -89,6 +88,8 @@ void initialize_global() {
   2006-Sep-23 Implemented flexible output configuration; added new
               options.Noutfiles and organized the options according
               to function. TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
 
 *********************************************************************/
 
@@ -173,12 +174,11 @@ void initialize_global() {
   param_set.TYPE[LSSNOWF].SUPPLIED    = FALSE;
   param_set.TYPE[PREC].SUPPLIED       = FALSE;
   param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
-  param_set.TYPE[PSURF].SUPPLIED      = FALSE;
   param_set.TYPE[QAIR].SUPPLIED       = FALSE;
   param_set.TYPE[RAINF].SUPPLIED      = FALSE;
+  param_set.TYPE[REL_HUMID].SUPPLIED  = FALSE;
   param_set.TYPE[SHORTWAVE].SUPPLIED  = FALSE;
   param_set.TYPE[SNOWF].SUPPLIED      = FALSE;
-  param_set.TYPE[TAIR].SUPPLIED       = FALSE;
   param_set.TYPE[TMAX].SUPPLIED       = FALSE;
   param_set.TYPE[TMIN].SUPPLIED       = FALSE;
   param_set.TYPE[TSKC].SUPPLIED       = FALSE;

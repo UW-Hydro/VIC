@@ -99,8 +99,9 @@ void surface_fluxes(char                 overstory,
 	    used in flux calculations.				TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.TJB
   2006-Sep-23 Implemented flexible output configuration; moved tracking
-	      of rain and snow for output to this function.  TJB
+	      of rain and snow for output to this function.		TJB
   2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.  TJB
+  2006-Dec-20 Modified iteration loop variables to be more intuitive.	TJB
 
 **********************************************************************/
 {
@@ -121,12 +122,12 @@ void surface_fluxes(char                 overstory,
   int                    N_steps;
   int                    UnderStory;
   int                    dist;
-  int                    endhidx;
-  int                    hidx;
+  int                    hidx;     // index of initial element of atmos array
+  int                    step_inc; // number of atmos array elements to skip per surface fluxes step
+  int                    endhidx;  // index of final element of atmos array
+  int                    step_dt;  // time length of surface fluxes step
   int                    lidx;
   int                    over_iter;
-  int                    step_dt;
-  int                    step_inc;
   int                    under_iter;
   double                 Evap;
   double Ls;
@@ -269,14 +270,15 @@ void surface_fluxes(char                 overstory,
 
   if(snow->swq > 0 || snow->snow_canopy > 0 || atmos->snowflag[NR]) {
     hidx      = 0;
-    endhidx   = hidx + NF;
     step_inc  = 1;
+    endhidx   = hidx + NF;
     step_dt   = options.SNOW_STEP;
   }
   else {
     hidx      = NR;
-    endhidx   = hidx + gp->dt;
-    step_inc  = step_dt = gp->dt;
+    step_inc  = 1;
+    endhidx   = hidx + step_inc;
+    step_dt   = gp->dt;
   }
 
   /*******************************************

@@ -47,15 +47,17 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Sep-23 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; removed the
               OPTIMIZE and LDAS_OUTPUT options; uses the
-	      new save_data structure; implemented aggregation.  TJB
+	      new save_data structure; implemented aggregation.		TJB
   2006-Oct-10 Shortened the names of output variables whose names were
 	      too long; fixed typos in others; created new OUT_IN_LONG
-	      variable.  TJB
-  2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
-  2006-Nov-07 Assigned value to overstory.  TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2006-Nov-30 Added OUT_DELSURFSTOR.  TJB
-  2006-Nov-30 Convert pressure and vapor pressure to kPa for output.  TJB
+	      variable.							TJB
+  2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
+  2006-Nov-07 Assigned value to overstory.				TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2006-Nov-30 Added OUT_DELSURFSTOR.					TJB
+  2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
+  2006-Dec-20 Changed OUT_SURF_TEMP from average of T[0] and T[1] to
+	      direct assignment of T[0].				TJB
 
 **********************************************************************/
 {
@@ -373,6 +375,9 @@ void put_data(dist_prcp_struct  *prcp,
           else
             rad_temp = energy[veg][band].Tsurf + KELVIN;
 
+          /** record surface skin temperature **/
+          surf_temp = energy[veg][band].T[0];
+
           /** record landcover temperature **/
           if(veg == veg_con[0].vegetat_type_num) {
             // landcover is bare soil
@@ -390,7 +395,7 @@ void put_data(dist_prcp_struct  *prcp,
           }
 
 	  /** record mean surface temperature [C]  **/
-	  out_data[OUT_SURF_TEMP].data[0] += (energy[veg][band].T[0] + energy[veg][band].T[1])/2. * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	  out_data[OUT_SURF_TEMP].data[0] += surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record net shortwave radiation **/
 	  out_data[OUT_NET_SHORT].data[0] += energy[veg][band].NetShortAtmos

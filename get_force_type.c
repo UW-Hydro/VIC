@@ -19,6 +19,11 @@ void get_force_type(char   *cmdstr,
   2005-Mar-24 Modified to accept ALMA forcing variables.	TJB
   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
   2005-May-02 Added the ALMA vars Wind_E and Wind_N.			TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
+	      of supported met input variables.				TJB
+  2007-Jan-05 Bugfix: replaced if(BINARY) with
+	      if(param_set.FORCE_FORMAT[file_num]==BINARY).		TJB
 
 *************************************************************/
 
@@ -40,12 +45,12 @@ void get_force_type(char   *cmdstr,
     Get meteorological data forcing info
   ***************************************/
 
-  /* type 0: air temperature (C) */
+  /* type 0: air temperature [C] (ALMA_INPUT: [K]) */
   if(strcasecmp("AIR_TEMP",optstr)==0){
     type = AIR_TEMP;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -53,12 +58,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 1: albedo */
+  /* type 1: albedo [fraction] */
   else if(strcasecmp("ALBEDO",optstr)==0){
     type = ALBEDO;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -66,12 +71,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 2: convective rainfall rate */
+  /* type 2: convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("CRAINF",optstr)==0){
     type = CRAINF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
              &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -79,12 +84,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 3: convective snowfall rate */
+  /* type 3: convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("CSNOWF",optstr)==0){
     type = CSNOWF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
              &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -92,12 +97,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 4: air density */
+  /* type 4: air density [kg/m3] */
   else if(strcasecmp("DENSITY",optstr)==0){
     type = DENSITY;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -105,12 +110,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 5: incoming longwave radiation */
+  /* type 5: incoming longwave radiation [W/m2] */
   else if(strcasecmp("LONGWAVE",optstr)==0 || strcasecmp("LWDOWN",optstr)==0){
     type = LONGWAVE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -118,12 +123,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 6: large-scale rainfall rate */
+  /* type 6: large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("LSRAINF",optstr)==0){
     type = LSRAINF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
              &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -131,12 +136,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 7: large-scale snowfall rate */
+  /* type 7: large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("LSSNOWF",optstr)==0){
     type = LSSNOWF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
              &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -144,12 +149,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 8: precipitation */
+  /* type 8: precipitation [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("PREC",optstr)==0){
     type = PREC;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -157,12 +162,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 9: air pressure (kPa) */
+  /* type 9: air pressure [kPa] (ALMA_INPUT: [Pa]) */
   else if(strcasecmp("PRESSURE",optstr)==0){
     type = PRESSURE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -170,25 +175,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 10: air pressure (Pa) */
-  else if(strcasecmp("PSURF",optstr)==0){
-    type = PSURF;
-    param_set.TYPE[type].SUPPLIED=file_num+1;
-    param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
-      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
-	     &param_set.TYPE[type].multiplier);
-      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
-      else param_set.TYPE[type].SIGNED=FALSE;
-    }
-  }
-
-  /* type 11: specific humidity */
+  /* type 10: specific humidity [kg/kg] */
   else if(strcasecmp("QAIR",optstr)==0){
     type = QAIR;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -196,12 +188,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 12: rainfall rate */
+  /* type 11: rainfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("RAINF",optstr)==0){
     type = RAINF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -209,12 +201,25 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 13: shortwave radiation */
+  /* type 12: relative humidity [fraction] */
+  else if(strcasecmp("REL_HUMID",optstr)==0){
+    type = REL_HUMID;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
+      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+	     &param_set.TYPE[type].multiplier);
+      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+      else param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 13: shortwave radiation [W/m2] */
   else if(strcasecmp("SHORTWAVE",optstr)==0 || strcasecmp("SWDOWN",optstr)==0){
     type = SHORTWAVE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -222,12 +227,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 14: snowfall rate */
+  /* type 14: snowfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("SNOWF",optstr)==0){
     type = SNOWF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -235,25 +240,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 15: air temperature (K) */
-  else if(strcasecmp("TAIR",optstr)==0){
-    type = TAIR;
-    param_set.TYPE[type].SUPPLIED=file_num+1;
-    param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
-      sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
-	     &param_set.TYPE[type].multiplier);
-      if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
-      else param_set.TYPE[type].SIGNED=FALSE;
-    }
-  }
-
-  /* type 16: maximum daily temperature */
+  /* type 15: maximum daily temperature [C] (ALMA_INPUT: [K]) */
   else if(strcasecmp("TMAX",optstr)==0){
     type = TMAX;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -261,12 +253,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 17: minimum daily temperature */
+  /* type 16: minimum daily temperature [C] (ALMA_INPUT: [K]) */
   else if(strcasecmp("TMIN",optstr)==0){
     type = TMIN;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -274,12 +266,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 18: sky cover */
+  /* type 17: sky cover */
   else if(strcasecmp("TSKC",optstr)==0){
     type = TSKC;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -287,12 +279,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 19: vapor pressure */
+  /* type 18: vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
   else if(strcasecmp("VP",optstr)==0){
     type = VP;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -300,12 +292,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 20: wind speed */
+  /* type 19: wind speed [m/s] */
   else if(strcasecmp("WIND",optstr)==0){
     type = WIND;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -313,12 +305,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 21: zonal component of wind speed */
+  /* type 20: zonal component of wind speed [m/s] */
   else if(strcasecmp("WIND_E",optstr)==0){
     type = WIND_E;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -326,12 +318,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 22: meridional component of wind speed */
+  /* type 21: meridional component of wind speed [m/s] */
   else if(strcasecmp("WIND_N",optstr)==0){
     type = WIND_N;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
 	     &param_set.TYPE[type].multiplier);
       if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
@@ -339,12 +331,12 @@ void get_force_type(char   *cmdstr,
     }
   }
 
-  /* type 23: unused (blank) data */
+  /* type 22: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
     param_set.TYPE[type].SUPPLIED=file_num+1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if(BINARY) {
+    if(param_set.FORCE_FORMAT[file_num]==BINARY) {
       param_set.TYPE[type].multiplier = 1;
       param_set.TYPE[type].SIGNED=FALSE;
     }

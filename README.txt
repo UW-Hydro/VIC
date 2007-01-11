@@ -338,6 +338,35 @@ Removed LAKE_MODEL compile-time option
 	to FALSE in the global parameter file (or omit the "LAKE" line
 	completely).
 
+More complete set of supported input variables
+
+        Files affected:
+
+        display_current_settings.c
+        get_force_type.c
+        get_force_type_pilps.c (removed)
+        get_global_param.c
+        initialize_atmos.c
+        initialize_atmos_pilps.c (removed)
+        initialize_global.c
+        vicNl_def.h
+
+        Description:
+
+        Added REL_HUMID (relative humidity, as a fraction) to the list of
+        supported met input variables.  Added the ALMA_INPUT option, which
+        causes temperatures to be interpreted as Kelvin, pressures as kPa,
+        and moisture fluxes as rates (mm/s) instead of accumulated fluxes
+        (mm/timestep).  This allowed us to remove TAIR and PSURF from the
+        list of supported met input variables, since AIR_TEMP and PRESSURE
+        provide this ability when ALMA_INPUT is TRUE.  This also makes
+        input variable specification more consistent with output variable
+        specification.
+        Since now the forcing files from PILPS can be read via the
+        appropriate specification of input variables and ALMA_INPUT option
+        in the global parameter file, the file initialize_atmos_pilps.c
+        has been removed.
+
 
 
 
@@ -462,6 +491,18 @@ Pressure and vapor pressure output in wrong units
 	The output variables pressure and vapor pressure were output in Pa
 	instead of kPa.  This has been fixed.
 
+Changed OUT_SURF_TEMP from the average of T[0] and T[1] to exactly
+equal to T[0].
+
+        Files affected:
+
+        put_data.c
+
+        Description:
+
+        Previously, OUT_SURF_TEMP had been set to the average of node
+        temperatures T[0] and T[1].  This has been changed to just T[0],
+        since OUT_SURF_TEMP represents the surface skin temperature.
 
 
 --------------------------------------------------------------------------------

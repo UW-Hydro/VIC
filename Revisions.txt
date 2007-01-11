@@ -10,6 +10,90 @@ Revisions.txt - Describes differences between versions of VIC source code. READM
 has more general descriptions.
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4c to VIC 4.1.0 beta r4d *****
+--------------------------------------------------------------------------------
+
+More complete set of supported input variables
+
+        Files affected:
+
+        display_current_settings.c
+        get_force_type.c
+        get_force_type_pilps.c (removed)
+        get_global_param.c
+        initialize_atmos.c
+        initialize_atmos_pilps.c (removed)
+        initialize_global.c
+        vicNl_def.h
+
+        Description:
+
+        Added REL_HUMID (relative humidity, as a fraction) to the list of
+        supported met input variables.  Added the ALMA_INPUT option, which
+        causes temperatures to be interpreted as Kelvin, pressures as kPa,
+        and moisture fluxes as rates (mm/s) instead of accumulated fluxes
+        (mm/timestep).  This allowed us to remove TAIR and PSURF from the
+        list of supported met input variables, since AIR_TEMP and PRESSURE
+        provide this ability when ALMA_INPUT is TRUE.  This also makes
+        input variable specification more consistent with output variable
+        specification.
+        Since now the forcing files from PILPS can be read via the
+        appropriate specification of input variables and ALMA_INPUT option
+        in the global parameter file, the file initialize_atmos_pilps.c
+        has been removed.
+
+
+Atmos_data arrays are always allocated dynamically now.
+
+        Files affected:
+
+        alloc_atmos.c
+        vicNl_def.h
+
+        Description:
+
+        Under some circumstances (OPTIMIZE and LINK_DEBUG options),
+        the arrays in the atmos_data structure were hard-wired to have
+        25 elements (large enough to store 24 hourly values and 1 daily
+        value).  This wasted memory and has been abandoned.  Now, the
+        arrays in atmos_data are always allocated dynamically to be only
+        big enough to store exactly the number of necessary elements.
+
+Changed OUT_SURF_TEMP from the average of T[0] and T[1] to exactly
+equal to T[0].
+
+        Files affected:
+
+        put_data.c
+
+        Description:
+
+        Previously, OUT_SURF_TEMP had been set to the average of node
+        temperatures T[0] and T[1].  This has been changed to just T[0],
+        since OUT_SURF_TEMP represents the surface skin temperature.
+
+
+More intuitive iteration loop variables in surface_fluxes().
+
+        Files affected:
+
+        surface_fluxes.c
+
+        Description:
+
+        Previously, for the non-SNOWSTEP case, step_inc and endhidx
+        were set to gp->dt and hidx+gp->dt, respectively.  This was
+        both unnecessary and confusing, since these assignments mixed
+        dimensions.  Now, for the non-SNOWSTEP case, step_inc and endhidx
+        have been changed to 1 and hidx+step_inc, respectively.
+
+Removal of files from repository:
+
+        get_force_type_pilps.c
+        initialize_atmos_pilps.c
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4b to VIC 4.1.0 beta r4c *****

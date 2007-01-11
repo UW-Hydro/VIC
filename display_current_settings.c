@@ -27,7 +27,8 @@ void display_current_settings(int                 mode,
   2006-Oct-10 Moved printing of soil_dir inside if{} block.	TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to names->statefile. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Nov-07 Removed LAKE_MODEL option.			TJB
+  2007-Jan-03 Added ALMA_INPUT option.				TJB
 
 **********************************************************************/
 {
@@ -244,6 +245,10 @@ void display_current_settings(int                 mode,
     }
   }
   fprintf(stdout,"GRID_DECIMAL\t\t%d\n",options.GRID_DECIMAL);
+  if (options.ALMA_INPUT)
+    fprintf(stdout,"ALMA_INPUT\t\tTRUE\n");
+  else
+    fprintf(stdout,"ALMA_INPUT\t\tFALSE\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Soil Data:\n");

@@ -361,6 +361,46 @@ Cleanup of structures holding filenames and file pointers
 	   only stores the full forcing file names.
 
 
+More complete set of supported input variables
+
+        Files affected:
+
+        display_current_settings.c
+        get_force_type.c
+        get_global_param.c
+        global.param.sample
+        initialize_atmos.c
+        initialize_global.c
+        vicNl_def.h
+
+        Description:
+
+        Added REL_HUMID (relative humidity, as a fraction), CSNOWF
+        (convective snowfall) and LSSNOWF (large-scale snowfall) to the
+        list of supported met input variables.  Added the ALMA_INPUT
+        option, which causes temperatures to be interpreted as Kelvin,
+        pressures as kPa, and moisture fluxes as rates (mm/s) instead of
+        accumulated fluxes (mm/timestep).  This allowed us to remove TAIR
+        and PSURF from the list of supported met input variables, since
+        AIR_TEMP and PRESSURE provide this ability when ALMA_INPUT is
+        TRUE.  This also makes input variable specification more
+        consistent with output variable specification.
+
+
+Atmos_data arrays are always allocated dynamically now.
+
+        alloc_atmos.c
+        vicNl_def.h
+
+        Description:
+
+        Under some circumstances (OPTIMIZE and LINK_DEBUG options),
+        the arrays in the atmos_data structure were hard-wired to have
+        25 elements (large enough to store 24 hourly values and 1 daily
+        value).  This wasted memory and has been abandoned.  Now, the
+        arrays in atmos_data are always allocated dynamically to be only
+        big enough to store exactly the number of necessary elements.
+
 
 Bug Fixes:
 ----------
@@ -673,6 +713,18 @@ AIR_TEMP was not being allowed as an input forcing variable
 	A typo in an "if" statement prevented AIR_TEMP from being allowed as
 	a valid input forcing variable at any time step.  This has been
 	fixed.	TJB
+
+
+Bug: undeclared variable i in write_forcing_file.c
+
+        Files affected:
+
+        write_forcing_file.c
+
+        Description:
+
+        Index i was not declared.  This has been fixed.
+
 
 
 

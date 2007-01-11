@@ -15,20 +15,21 @@ void write_forcing_file(atmos_data_struct *atmos,
   This routine writes the complete forcing data files for use in 
   future simulations.
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
+             to ...sizeof, 1,...				GCT
   2006-Sep-11 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures. TJB
-  2006-Sep-14 Implemented ALMA-compliant input and output.  TJB
+              out_data and out_data_files structures.		TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output.	TJB
   2006-Sep-23 Fixed bugs in computation of QAIR and REL_HUMID;
 	      updated aggdata[] arrays to make it compatible with
-	      aggregation.  TJB
+	      aggregation.					TJB
+  2007-Jan-03 Bugfix: Declared index i.				TJB
 
 **********************************************************************/
 {
   extern global_param_struct global_param;
   extern option_struct options;
 
-  int                 rec, j, v;
+  int                 rec, i, j, v;
   short int          *tmp_siptr;
   unsigned short int *tmp_usiptr;
   dmy_struct         *dummy_dmy;

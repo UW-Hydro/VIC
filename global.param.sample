@@ -68,6 +68,7 @@ FORCEDAY	01	# Day of first forcing record
 FORCEHOUR	00	# Hour of first forcing record
 WIND_H          10.0    # height of wind speed measurement (m)
 MEASURE_H       2.0     # height of humidity measurement (m)
+ALMA_INPUT	FALSE	# TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
 
 #######################################################################
 # Land Surface Files and Parameters
@@ -92,7 +93,7 @@ OUT_STEP	0	# Output interval (hours); if 0, OUT_STEP = TIME_STEP
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files
-ALMA_OUTPUT  	FALSE	# TRUE = ALMA-compliant output variable units
+ALMA_OUTPUT  	FALSE	# TRUE = ALMA-compliant output variable units; FALSE = standard VIC units
 PRT_SNOW_BAND	FALSE	# TRUE = write a "snowband" output file, containing band-specific values of snow variables
 
 #######################################################################

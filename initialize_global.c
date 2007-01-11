@@ -45,21 +45,28 @@ void initialize_global() {
   debug.PRT_GRID         = TRUE - 
   debug.debug_dir        = 
 
-  param_set.SHORTWAVE    = FALSE;
-  param_set.LONGWAVE     = FALSE;
-  param_set.PRESSURE     = FALSE;
-  param_set.TSKC         = FALSE;
-  param_set.VP           = FALSE;
-  param_set.VPD          = FALSE;
-  param_set.REL_HUMID    = FALSE;
-  param_set.SPEC_HUMID   = FALSE;
   param_set.ALBEDO       = FALSE;
   param_set.AIR_TEMP     = FALSE;
+  param_set.CRAINF       = FALSE;
+  param_set.CSNOWF       = FALSE;
+  param_set.DENSITY      = FALSE;
+  param_set.LONGWAVE     = FALSE;
+  param_set.LSRAINF      = FALSE;
+  param_set.LSSNOWF      = FALSE;
+  param_set.PREC         = FALSE;
+  param_set.PRESSURE     = FALSE;
+  param_set.QAIR         = FALSE;
+  param_set.RAINF        = FALSE;
+  param_set.REL_HUMID    = FALSE;
+  param_set.SHORTWAVE    = FALSE;
+  param_set.SNOWF        = FALSE;
   param_set.TMAX         = FALSE;
   param_set.TMIN         = FALSE;
-  param_set.PREC         = FALSE;
+  param_set.TSKC         = FALSE;
+  param_set.VP           = FALSE;
   param_set.WIND         = FALSE;
-  param_set.DENSITY      = FALSE;
+  param_set.WIND_E       = FALSE;
+  param_set.WIND_N       = FALSE;
 
   Modifications:
     06-03-2003 modified to handle both ASCII and BINARY state files.  KAC
@@ -81,6 +88,10 @@ void initialize_global() {
               options.Noutfiles and organized the options according
               to function. TJB
   2006-Sep-14 (Port from 4.1.0) Added support for ALMA-compliant input and output. TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
+  2006-Dec-29 Added initialization of some uninitialized met input variables. TJB
+  2007-Jan-02 Added CSNOWF and LSSNOWF to list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
 
 *********************************************************************/
 
@@ -112,6 +123,7 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_STEP             = 1;
   // input options
+  options.ALMA_INPUT            = FALSE;
   options.ARC_SOIL              = FALSE;
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
@@ -153,15 +165,26 @@ void initialize_global() {
 
   param_set.TYPE[AIR_TEMP].SUPPLIED   = FALSE;
   param_set.TYPE[ALBEDO].SUPPLIED     = FALSE;
+  param_set.TYPE[CRAINF].SUPPLIED     = FALSE;
+  param_set.TYPE[CSNOWF].SUPPLIED     = FALSE;
   param_set.TYPE[DENSITY].SUPPLIED    = FALSE;
+  param_set.TYPE[LONGWAVE].SUPPLIED   = FALSE;
+  param_set.TYPE[LSRAINF].SUPPLIED    = FALSE;
+  param_set.TYPE[LSSNOWF].SUPPLIED    = FALSE;
   param_set.TYPE[PREC].SUPPLIED       = FALSE;
   param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
+  param_set.TYPE[QAIR].SUPPLIED       = FALSE;
+  param_set.TYPE[RAINF].SUPPLIED      = FALSE;
+  param_set.TYPE[REL_HUMID].SUPPLIED  = FALSE;
   param_set.TYPE[SHORTWAVE].SUPPLIED  = FALSE;
+  param_set.TYPE[SNOWF].SUPPLIED      = FALSE;
   param_set.TYPE[TMAX].SUPPLIED       = FALSE;
   param_set.TYPE[TMIN].SUPPLIED       = FALSE;
   param_set.TYPE[TSKC].SUPPLIED       = FALSE;
   param_set.TYPE[VP].SUPPLIED         = FALSE;
   param_set.TYPE[WIND].SUPPLIED       = FALSE;
+  param_set.TYPE[WIND_E].SUPPLIED     = FALSE;
+  param_set.TYPE[WIND_N].SUPPLIED     = FALSE;
   param_set.TYPE[SKIP].SUPPLIED       = FALSE;
   for(i=0;i<2;i++) {
     param_set.FORCE_DT[i] = MISSING;

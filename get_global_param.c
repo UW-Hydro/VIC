@@ -48,15 +48,16 @@ global_param_struct get_global_param(filenames_struct      *names,
   2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
   2005-11-23 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in 
              global.param.file  GCT
-  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
-  2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
+  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.	TJB
+  2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option.	TJB
   2006-Sep-11 Implemented flexible output configuration; uses new
               N_OUTFILES, OUTFILE, and OUTVAR flags; removed the
-              OPTIMIZE and LDAS_OUTPUT options. TJB
-  2006-Sep-18 Implemented aggregation of output variables.  TJB
+              OPTIMIZE and LDAS_OUTPUT options.				TJB
+  2006-Sep-18 Implemented aggregation of output variables.		TJB
   2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to filenames->statefile;
 	      also added f_path_pfx to store forcing file path and prefix. TJB
+  2007-Jan-03 Added ALMA_INPUT option.					TJB
 
 **********************************************************************/
 {
@@ -390,6 +391,11 @@ global_param_struct get_global_param(filenames_struct      *names,
 	  param_set.FORCE_FORMAT[file_num] = ASCII;
 	else
 	  nrerror("FORCE_FORMAT must be either ASCII or BINARY.");
+      }
+      else if(strcasecmp("ALMA_INPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_INPUT=TRUE;
+        else options.ALMA_INPUT = FALSE;
       }
 
       /************************************

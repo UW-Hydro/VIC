@@ -53,11 +53,12 @@ global_param_struct get_global_param(filenames_struct *names,
   2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
   2006-Sep-23 Implemented flexible output configuration; removed the
               OPTIMIZE and LDAS_OUTPUT options; implemented aggregation of
-	      output variables.  TJB
+	      output variables.						TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to filenames->statefile;
 	      also added f_path_pfx to store forcing file path and prefix. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Jan-03 Added ALMA_INPUT option.					TJB
 
 **********************************************************************/
 {
@@ -405,6 +406,11 @@ global_param_struct get_global_param(filenames_struct *names,
 	  param_set.FORCE_FORMAT[file_num] = ASCII;
 	else
 	  nrerror("FORCE_FORMAT must be either ASCII or BINARY.");
+      }
+      else if(strcasecmp("ALMA_INPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_INPUT=TRUE;
+        else options.ALMA_INPUT = FALSE;
       }
 
       /************************************

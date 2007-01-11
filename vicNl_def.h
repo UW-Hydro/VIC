@@ -18,12 +18,15 @@
               aggregation of output variables; added AGG_TYPE definitions.  TJB
   2006-Oct-10 Shortened the names of output variables whose names were
 	      too long; fixed typos in others; created new OUT_IN_LONG
-	      variable.  TJB
+	      variable.							TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included merging global->statename to filenames->statefile. TJB
-  2006-Nov-07 Added OUT_SOIL_TNODE.  TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2006-Nov-07 Organized model constants a bit more. TJB
+  2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2006-Nov-07 Organized model constants a bit more.			TJB
+  2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
+  2006-Dec-29 Added REL_HUMID to list of supported met input variables.	TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
 
 *********************************************************************/
 
@@ -132,31 +135,30 @@
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 24
-#define AIR_TEMP  0  /* air temperature per time step [C] */
-#define ALBEDO    1  /* surface albedo [fraction] */
-#define CRAINF    2  /* convective rainfall rate [mm/s] */
-#define CSNOWF    3  /* convective snowfall rate [mm/s] */
-#define DENSITY   4  /* atmospheric density [kg/m3] */
-#define LONGWAVE  5  /* incoming longwave radiation [W/m2] */
-#define LSRAINF   6  /* large-scale rainfall rate [mm/s] */
-#define LSSNOWF   7  /* large-scale snowfall rate [mm/s] */
-#define PREC      8  /* precipitation [mm] */
-#define PRESSURE  9  /* atmospheric pressure [kPa] */
-#define PSURF     10 /* atmospheric pressure [Pa] */
-#define QAIR      11 /* specific humidity [kg/kg] */
-#define RAINF     12 /* rainfall rate [mm/s] */
+#define N_FORCING_TYPES 23
+#define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
+#define ALBEDO     1 /* surface albedo [fraction] */
+#define CRAINF     2 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define CSNOWF     3 /* convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define DENSITY    4 /* atmospheric density [kg/m3] */
+#define LONGWAVE   5 /* incoming longwave radiation [W/m2] */
+#define LSRAINF    6 /* large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define LSSNOWF    7 /* large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define PREC       8 /* total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
+#define PRESSURE   9 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define QAIR      10 /* specific humidity [kg/kg] */
+#define RAINF     11 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define REL_HUMID 12 /* relative humidity [fraction] */
 #define SHORTWAVE 13 /* incoming shortwave [W/m2] */
-#define SNOWF     14 /* snowfall rate [mm/s] */
-#define TAIR      15 /* air temperature per time step [K] */
-#define TMAX      16 /* maximum daily temperature [C] */
-#define TMIN      17 /* minimum daily temperature [C] */
-#define TSKC      18 /* cloud cover [fraction] */
-#define VP        19 /* vapor pressure [kPa] */
-#define WIND      20 /* wind speed [m/s] */
-#define WIND_E    21 /* zonal component of wind speed [m/s] */
-#define WIND_N    22 /* meridional component of wind speed [m/s] */
-#define SKIP      23 /* place holder for unused data columns */
+#define SNOWF     14 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define TMAX      15 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TMIN      16 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TSKC      17 /* cloud cover [fraction] */
+#define VP        18 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define WIND      19 /* wind speed [m/s] */
+#define WIND_E    20 /* zonal component of wind speed [m/s] */
+#define WIND_N    21 /* meridional component of wind speed [m/s] */
+#define SKIP      22 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 110
@@ -375,6 +377,7 @@ typedef struct {
 			    snow model */
 
   // input options
+  char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
 			    parameters*/
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
@@ -389,7 +392,7 @@ typedef struct {
   char   SAVE_STATE;     /* TRUE = save state file */       
 
   // output options
-  char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units */
+  char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
   int    Noutfiles;      /* Number of output files (not including state files) */
@@ -678,32 +681,14 @@ typedef struct {
    is done by for (i = 0; i < NF; i++) 
 ***************************************************************************/
 typedef struct {
-#if LINK_DEBUG
-  char   snowflag[25];  /* TRUE if there is snowfall in any of the snow 
-			   bands during the timestep, FALSE otherwise*/
-  double air_temp[25];  /* air temperature (C) */
-  double density[25];   /* atmospheric density (kg/m^3) */
-  double longwave[25];  /* incoming longwave radiation (W/m^2) (net incoming 
-			   longwave for water balance model) */
-  double out_prec;      /* Total precipitation for time step - accounts
-			   for corrected precipitation totals */
-  double out_rain;      /* Rainfall for time step (mm) */
-  double out_snow;      /* Snowfall for time step (mm) */
-  double prec[25];      /* average precipitation in grid cell (mm) */
-  double pressure[25];  /* atmospheric pressure (kPa) */
-  double shortwave[25]; /* incoming shortwave radiation (W/m^2) */
-  double vp[25];        /* atmospheric vapor pressure (kPa) */
-  double vpd[25];       /* atmospheric vapor pressure deficit (kPa) */
-  double wind[25];      /* wind speed (m/s) */
-#else
-  char   *snowflag;  /* TRUE if there is snowfall in any of the snow 
-			bands during the timestep, FALSE otherwise*/
+  char   *snowflag;  /* TRUE if there is snowfall in any of the snow
+                        bands during the timestep, FALSE otherwise*/
   double *air_temp;  /* air temperature (C) */
   double *density;   /* atmospheric density (kg/m^3) */
-  double *longwave;  /* incoming longwave radiation (W/m^2) (net incoming 
-			longwave for water balance model) */
+  double *longwave;  /* incoming longwave radiation (W/m^2) (net incoming
+                        longwave for water balance model) */
   double out_prec;   /* Total precipitation for time step - accounts
-		        for corrected precipitation totals */
+                        for corrected precipitation totals */
   double out_rain;   /* Rainfall for time step (mm) */
   double out_snow;   /* Snowfall for time step (mm) */
   double *prec;      /* average precipitation in grid cell (mm) */
@@ -712,7 +697,6 @@ typedef struct {
   double *vp;        /* atmospheric vapor pressure (kPa) */
   double *vpd;       /* atmospheric vapor pressure deficit (kPa) */
   double *wind;      /* wind speed (m/s) */
-#endif // LINK_DEBUG
 } atmos_data_struct;
 
 /*************************************************************************

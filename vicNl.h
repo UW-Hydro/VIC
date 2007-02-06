@@ -4,7 +4,7 @@
 /************************************************************************
   Modifications:
   2006-Sep-11 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures. TJB
+              out_data and out_data_files structures.			TJB
               Added the following new functions:
                 create_output_list
                 free_out_data_files
@@ -14,10 +14,11 @@
                 set_output_var
                 zero_output_list
   2006-Sep-14 Implemented ALMA-compliant input and output; several functions
-	      now take the save_data structure as an argument.  TJB
+	      now take the save_data structure as an argument.		TJB
   2006-Sep-26 Added 2 arguments to solve_snow(), to track out_rain and
-	      out_snow.  TJB
-  2006-Oct-26 Merged infiles and outfiles structs into filep_struct. TJB
+	      out_snow.							TJB
+  2006-Oct-26 Merged infiles and outfiles structs into filep_struct.	TJB
+  2007-Jan-15 Added PRT_HEADER option; added function write_header.	TJB
 
 ************************************************************************/
 
@@ -364,6 +365,7 @@ void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *, int nrecs, out_data_file_struct *, out_data_struct *);
 #endif
+void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, global_param_struct);
 void write_layer(layer_data_struct *, int, int, double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, filep_struct *, soil_con_struct *, char, int);

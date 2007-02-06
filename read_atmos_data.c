@@ -49,9 +49,11 @@ void read_atmos_data(FILE                 *infile,
   10-May-04 (Port from 4.1.0) Replaced NF with global_param.dt
 	    in condition checking whether forcing file contains
 	    enough records to cover the time range of the
-	    simulation.					TJB
+	    simulation.						TJB
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
+             to ...sizeof, 1,... 				GCT
+  2007-Jan-15 Added PRT_HEADER option; now binary forcing files
+	      might have headers, and these need to be skipped.	TJB
 		
   **********************************************************************/
 {
@@ -71,6 +73,8 @@ void read_atmos_data(FILE                 *infile,
   signed short    stmp;
   char            str[MAXSTRING+1];
   char            ErrStr[MAXSTRING+1];
+  unsigned short  Identifier[4];
+  int             Nbytes;
 
   Nfields     = param_set.N_TYPES[file_num];
   field_index = param_set.FORCE_INDEX[file_num];
@@ -111,9 +115,36 @@ void read_atmos_data(FILE                 *infile,
     else    
       endian = BIG;
 	  
+    // Check for presence of a header, & skip over it if appropriate.
+    // A VIC header will start with 4 instances of the identifier,
+    // followed by number of bytes in the header (Nbytes).
+    // Nbytes is assumed to be the byte offset at which the data records start.
+    fseek(infile,0,SEEK_SET);
+    if (feof(infile))
+      nrerror("No data in the forcing file.  Model stopping...");
+    for (i=0; i<4; i++) {
+      fread(&ustmp,sizeof(unsigned short),1,infile);
+      if (endian != param_set.FORCE_ENDIAN[file_num]) {
+        ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
+      }
+      Identifier[i] = ustmp;
+    }
+    if (Identifier[0] != 0xFFFF || Identifier[1] != 0xFFFF || Identifier[2] != 0xFFFF || Identifier[3] != 0xFFFF) {
+      Nbytes = 0;
+    }
+    else {
+      fread(&ustmp,sizeof(unsigned short),1,infile);
+      if (endian != param_set.FORCE_ENDIAN[file_num]) {
+        ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
+      }
+      Nbytes = (int)ustmp;
+    }
+    fseek(infile,Nbytes,SEEK_SET);
+
+
     /** if forcing file starts before the model simulation, 
 	skip over its starting records **/
-    fseek(infile,skip_recs*Nfields*sizeof(short),SEEK_SET);
+    fseek(infile,skip_recs*Nfields*sizeof(short),SEEK_CUR);
     if (feof(infile))
       nrerror("No data for the specified time period in the forcing file.  Model stopping...");
 	  
@@ -153,6 +184,13 @@ void read_atmos_data(FILE                 *infile,
 
   else{
 	  
+    // No need to skip over a header here, since ascii file headers are skipped
+    // in open_file().  However, if we wanted to read information from the header,
+    // we'd want to do it here, after rewinding to the beginning of the file (or
+    // moving the code that deals with headers from open_file() to this function
+    // and to any other functions that read the files, so that those functions could
+    // also read the headers if necessary).
+
     /* skip to the beginning of the required met data */
     for(i=0;i<skip_recs;i++){
       if( fgets(str, MAXSTRING, infile) == NULL )

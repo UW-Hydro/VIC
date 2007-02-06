@@ -83,15 +83,17 @@ void initialize_global() {
 	      hard-coded 17 to variable N_FORCING_TYPES.	TJB
     16-Jun-04 Added JULY_TAVG_SUPPLIED.				TJB
    2005-11-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT 	      
-  2006-Jan-22    Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
+  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.		TJB
   2006-Sep-11 Implemented flexible output configuration; added new
               options.Noutfiles and organized the options according
-              to function. TJB
+              to function.							TJB
   2006-Sep-14 (Port from 4.1.0) Added support for ALMA-compliant input and output. TJB
-  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
-  2006-Dec-29 Added initialization of some uninitialized met input variables. TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables.	TJB
+  2006-Dec-29 Added initialization of some uninitialized met input variables.	TJB
   2007-Jan-02 Added CSNOWF and LSSNOWF to list of supported met input variables. TJB
-  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
+	      of supported met input variables.					TJB
+  2007-Jan-15 Added PRT_HEADER option.						TJB
 
 *********************************************************************/
 
@@ -139,6 +141,7 @@ void initialize_global() {
   options.BINARY_OUTPUT         = FALSE;
   options.COMPRESS              = FALSE;
   options.Noutfiles             = 2;
+  options.PRT_HEADER            = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
 
 #if LINK_DEBUG 

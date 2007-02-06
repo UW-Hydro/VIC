@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
 	      new save_data structure.  TJB
   2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
 	      This included merging builtnames into filenames.	TJB
+  2007-Jan-15 Added PRT_HEADER option; added call to
+	      write_header().					TJB
 
 **********************************************************************/
 {
@@ -218,6 +220,11 @@ int main(int argc, char *argv[])
 
       /** Build Gridded Filenames, and Open **/
       make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
+
+      if (options.PRT_HEADER) {
+        /** Write output file headers **/
+        write_header(out_data_files, out_data, dmy, global_param);
+      }
 
 #if !OUTPUT_FORCE
       /** Read Elevation Band Data if Used **/

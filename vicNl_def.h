@@ -8,24 +8,26 @@
               Removed all output files except the state file from
               the outfiles_struct and the filenames_struct.  Added
               Noutfiles to the option_struct.  Created new
-              out_data_struct and out_data_files_struct.  TJB
+              out_data_struct and out_data_files_struct.			TJB
   2006-Sep-14 Implemented ALMA-compliant input and output; uses the
 	      new save_data structure; tracks more variables.
 	      Organized the physical constants into one section; got
-	      rid of redundant Stefan-Boltzmann constant.  TJB
+	      rid of redundant Stefan-Boltzmann constant.			TJB
   2006-Sep-18 Implemented aggregation of output variables; added
-              AGG_TYPE definitions.  TJB
+              AGG_TYPE definitions.						TJB
   2006-Sep-23 Removed VERSION string (redundant with version in global.h).
 	      Changed OUT_EVAP_VEG to OUT_TRANSP_VEG.  Changed MOL_WT_RATIO
-	      to EPS.  TJB
+	      to EPS.								TJB
   2006-Sep-26 Moved definitions of GRAMSPKG, CH_WATER, and JOULESPCAL from
-	      SnowPackEnergyBalance() to here.  TJB
+	      SnowPackEnergyBalance() to here.					TJB
   2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
 	      This included merging global->statename to filenames->statefile.	TJB
   2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
   2006-Dec-29 Added REL_HUMID to list of supported met input variables.		TJB
   2007-Jan-02 Added CSNOWF and LSSNOWF to list of supported met input variables. TJB
-  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
+	      of supported met input variables.					TJB
+  2007-Jan-15 Added PRT_HEADER option.						TJB
 
 ********************************************************************/
 /***** Model Constants *****/
@@ -321,6 +323,9 @@ typedef struct {
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
+  float  PREC_EXPT;      /* Exponential that controls the fraction of a
+			    grid cell that receives rain during a storm
+			    of given intensity */
   char   QUICK_FLUX;     /* TRUE = Use Liang et al., 1999 formulation for
 			    ground heat flux, if FALSE use explicit finite
 			    difference method */
@@ -352,9 +357,7 @@ typedef struct {
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
   int    Noutfiles;      /* Number of output files (not including state files) */
-  float  PREC_EXPT;      /* Exponential that controls the fraction of a
-			    grid cell that receives rain during a storm
-			    of given intensity */
+  char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band */
 
 } option_struct;

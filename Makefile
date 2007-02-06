@@ -7,12 +7,13 @@
 #             always be recompiled whenever a .h file is updated.  The
 #             user can override this behavior by typing "make model",
 #             which doesn't invoke "make depend".		TJB
-# 2006-Sep-11 Changes for flexible output configuration. TJB
+# 2006-Sep-11 Changes for flexible output configuration.	TJB
 #             Added the following files:
 #               calc_water_energy_balance_errors.c
 #               output_list_utils.c
 #               parse_output_info.c
 #               set_output_defaults.c
+# 2007-Jan-15 Added PRT_HEADER option;  Added write_header.c	TJB
 #             
 # -----------------------------------------------------------------------
 
@@ -76,7 +77,7 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	snow_utility.o soil_conduction.o soil_thermal_eqn.o \
 	solve_snow.o store_moisture_for_debug.o surface_fluxes.o svp.o \
 	vicNl.o vicerror.o write_atmosdata.o write_data.o write_debug.o \
-	write_forcing_file.o write_layer.o write_model_state.o \
+	write_forcing_file.o write_header.o write_layer.o write_model_state.o \
 	write_soilparam.o write_vegparam.o write_vegvar.o 
 
 SRCS = $(OBJS:%.o=%.c) 

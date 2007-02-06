@@ -59,6 +59,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      also added f_path_pfx to store forcing file path and prefix. TJB
   2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2007-Jan-03 Added ALMA_INPUT option.					TJB
+  2007-Jan-15 Added PRT_HEADER option.					TJB
 
 **********************************************************************/
 {
@@ -261,6 +262,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
         else options.ALMA_OUTPUT = FALSE;
+      }
+      else if(strcasecmp("PRT_HEADER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.PRT_HEADER=TRUE;
+        else options.PRT_HEADER = FALSE;
       }
       else if(strcasecmp("EQUAL_AREA",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

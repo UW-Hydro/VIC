@@ -11,6 +11,101 @@ has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4d to VIC 4.1.0 beta r4e *****
+--------------------------------------------------------------------------------
+
+
+Optional headers for output and input files
+
+        Files affected:
+
+        display_current_settings.c
+        get_global_param.c
+        global.param.sample
+        initialize_global.c
+        Makefile
+        read_atmos_data.c
+        vicNl.c
+        vicNl_def.h
+        vicNl.h
+        write_header.c (new)
+
+        Description:
+
+        Added the PRT_HEADER option to the global parameter file.  If
+        this is set to TRUE, VIC will insert a short header into its
+        output files, describing the time step, start date/time,
+        variables and units included in the file.
+
+        For ascii files, the output header has the following format:
+
+                # NRECS: (nrecs)
+                # DT: (dt)
+                # STARTDATE: yyyy-mm-dd hh:00:00
+                # ALMA_OUTPUT: (0 or 1)
+                # NVARS: (Nvars)
+                # VARNAME    VARNAME   VARNAME   ...
+
+        where
+           nrecs       = Number of records in the file
+           dt          = Time step length in hours
+           start date  = Date and time of first record of file
+           ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC
+                         units; 1 = ALMA units
+           Nvars       = Number of variables in the file, including date
+                         fields
+
+        For binary files, the output header has the following format:
+
+            // Data        Stored As           Comment
+            //
+            // Identifier  (unsigned short)*4  0xFFFF, repeated 4 times
+            // Nbytes      (unsigned short)*1  Number of bytes in the header,
+            //                                 INCLUDING THE IDENTIFIER
+            //
+            // Part 1: Global Attributes
+            // Nbytes1     (unsigned short)*1  Number of bytes in part 1
+            // nrecs       (int)*1             Number of records in the file
+            // dt          (int)*1             Time step length in hours
+            // startyear   (int)*1             Year of first record
+            // startmonth  (int)*1             Month of first record
+            // startday    (int)*1             Day of first record
+            // starthour   (int)*1             Hour of first record
+            // ALMA_OUTPUT (char)*1            0 = standard VIC units; 1 = ALMA units
+            // Nvars       (char)*1            Number of variables in the file,
+            // including date fields
+            //
+            // Part 2: Variables
+            // Nbytes2     (unsigned short)*1  Number of bytes in part 2
+            // For each variable, the following fields: { len varname type mult }
+            //   len       (char)*1            Number of characters in varname
+            //   varname   (char)*len          Variable name
+            //   type      (char)*1            Code identifying variable type
+            //   mult      (float)*1           Multiplier for variable
+
+
+        To accomodate input forcing files that might have been produced via
+        VIC's OUTPUT_FORCE option, and therefore could contain a header,
+        read_atmos_data.c has been modified to detect and skip headers that
+        follow the formats outlined above.
+
+
+
+Variable TYPE specifications for binary-format output files in the global parameter
+file must match the strings listed in vicNl_def.h.
+
+        Files affected:
+
+        parse_output_info.c
+
+        Description:
+
+        When listing output variables in the global parameter file, if the
+        output file format is binary, the variable data TYPE must match the string
+        from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4c to VIC 4.1.0 beta r4d *****
 --------------------------------------------------------------------------------
 

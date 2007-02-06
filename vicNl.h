@@ -4,7 +4,7 @@
 /************************************************************************
   Modifications:
   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data, out_data_files, and save_data structures. TJB
+              out_data, out_data_files, and save_data structures.	TJB
 	      Removed the following functions:
 		conv_force_vic2alma
 		conv_results_vic2alma
@@ -16,8 +16,9 @@
 		set_output_defaults
 		set_output_var
 		zero_output_list
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Jan-15 Added PRT_HEADER option.					TJB
 
 ************************************************************************/
 
@@ -443,6 +444,7 @@ void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);
 #endif
+void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, global_param_struct);
 void write_layer(layer_data_struct *, int, int, 
 #if SPATIAL_FROST
                  double *,

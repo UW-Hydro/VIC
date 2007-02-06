@@ -16,7 +16,9 @@ void parse_output_info(filenames_struct      *names,
   information for output variables list (if any).
 
   Modifications:
-  2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
+  2006-Nov-07 Changed default precision from %.1f to %.4f.	TJB
+  2007-Jan-15 Modified to expect "OUT_TYPE_" at beginning of
+	      output data type strings.				TJB
 
 **********************************************************************/
 {
@@ -30,9 +32,9 @@ void parse_output_info(filenames_struct      *names,
   char varname[20];
   int  outvarnum;
   char format[10];
-  char typestr[10];
+  char typestr[20];
   int  type;
-  char multstr[10];
+  char multstr[20];
   float mult;
   int  tmp_noutfiles;
 
@@ -73,13 +75,13 @@ void parse_output_info(filenames_struct      *names,
           mult = 0; // 0 means default multiplier
         }
         else {
-          if (strcasecmp("USINT", typestr)==0)
+          if (strcasecmp("OUT_TYPE_USINT", typestr)==0)
             type = OUT_TYPE_USINT;
-          else if (strcasecmp("SINT", typestr)==0)
+          else if (strcasecmp("OUT_TYPE_SINT", typestr)==0)
             type = OUT_TYPE_SINT;
-          else if (strcasecmp("FLOAT", typestr)==0)
+          else if (strcasecmp("OUT_TYPE_FLOAT", typestr)==0)
             type = OUT_TYPE_FLOAT;
-          else if (strcasecmp("DOUBLE", typestr)==0)
+          else if (strcasecmp("OUT_TYPE_DOUBLE", typestr)==0)
             type = OUT_TYPE_DOUBLE;
           else
             type = OUT_TYPE_DEFAULT;

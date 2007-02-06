@@ -29,7 +29,7 @@ void display_current_settings(int                 mode,
 	      This included moving global->statename to names->statefile. TJB
   2006-Nov-07 Removed LAKE_MODEL option.			TJB
   2007-Jan-03 Added ALMA_INPUT option.				TJB
-
+  2007-Jan-15 Added PRT_HEADER option.				TJB
 **********************************************************************/
 {
 
@@ -326,6 +326,11 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"\n");
   fprintf(stdout,"Output Data:\n");
   fprintf(stdout,"Result dir:\t\t%s\n",names->result_dir);
+  fprintf(stdout,"OUT_STEP\t\t%d\n",global->out_dt);
+  if (options.ALMA_OUTPUT)
+    fprintf(stdout,"ALMA_OUTPUT\t\tTRUE\n");
+  else
+    fprintf(stdout,"ALMA_OUTPUT\t\tFALSE\n");
   if (options.BINARY_OUTPUT)
     fprintf(stdout,"BINARY_OUTPUT\t\tTRUE\n");
   else
@@ -334,15 +339,15 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"COMPRESS\t\tTRUE\n");
   else
     fprintf(stdout,"COMPRESS\t\tFALSE\n");
-  fprintf(stdout,"SKIPYEAR\t\t%d\n",global->skipyear);
+  if (options.PRT_HEADER)
+    fprintf(stdout,"PRT_HEADER\t\tTRUE\n");
+  else
+    fprintf(stdout,"PRT_HEADER\t\tFALSE\n");
   if (options.PRT_SNOW_BAND)
     fprintf(stdout,"PRT_SNOW_BAND\t\tTRUE\n");
   else
     fprintf(stdout,"PRT_SNOW_BAND\t\tFALSE\n");
-  if (options.ALMA_OUTPUT)
-    fprintf(stdout,"ALMA_OUTPUT\t\tTRUE\n");
-  else
-    fprintf(stdout,"ALMA_OUTPUT\t\tFALSE\n");
+  fprintf(stdout,"SKIPYEAR\t\t%d\n",global->skipyear);
   fprintf(stdout,"\n");
 
 }

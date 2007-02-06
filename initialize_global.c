@@ -84,12 +84,14 @@ void initialize_global() {
   2005-May-01 Added the ALMA vars CRainf, CSSnowf, LSRainf, and LSSnowf.TJB
   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
   2005-11-29  Added SAVE_STATE (option is now set in global param file) GCT
-  2006-0913  Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
+  2006-0913  Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.	TJB/GCT
   2006-Sep-23 Implemented flexible output configuration; added new
               options.Noutfiles and organized the options according
-              to function. TJB
+              to function.						TJB
   2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
-  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
+	      of supported met input variables.				TJB
+  2007-Jan-15 Added PRT_HEADER option.					TJB
 
 *********************************************************************/
 
@@ -138,6 +140,7 @@ void initialize_global() {
   options.COMPRESS              = FALSE;
   options.MOISTFRACT            = FALSE;
   options.Noutfiles             = 2;
+  options.PRT_HEADER            = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
 
 #if LINK_DEBUG 

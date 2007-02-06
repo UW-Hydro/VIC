@@ -52,9 +52,12 @@ int main(int argc, char *argv[])
   2006-Sep-23 Implemented flexible output configuration; uses the new
               out_data, out_data_files, and save_data structures. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-	      This included merging builtnames into filenames. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2006-Nov-07 Changed statefile to init_state in call to check_state_file().  TJB
+	      This included merging builtnames into filenames.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.			TJB
+  2006-Nov-07 Changed statefile to init_state in call to
+	      check_state_file().				TJB
+  2007-Jan-15 Added PRT_HEADER option; added call to
+	      write_header().					TJB
 
 **********************************************************************/
 {
@@ -229,6 +232,11 @@ int main(int argc, char *argv[])
 
       /** Build Gridded Filenames, and Open **/
       make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
+
+      if (options.PRT_HEADER) {
+        /** Write output file headers **/
+        write_header(out_data_files, out_data, dmy, global_param);
+      }
 
 #if !OUTPUT_FORCE
 

@@ -106,6 +106,7 @@ SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
+PRT_HEADER	FALSE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
 PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables
 
 #######################################################################

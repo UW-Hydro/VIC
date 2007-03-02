@@ -832,6 +832,18 @@ If() statements in get_force_type() fail for some global parameter files
         have SIGNED or MULTIPLIER fields) vs. BINARY, we have removed
         the if() statements altogether.
 
+Aggregation methods of some variables not set properly.
+
+        Files affected:
+
+        output_list_utils.c
+
+        Description:
+
+        Corrected AGG_TYPE definitions for miscellaneous
+        output variables; re-organized the code to make
+        it easier to debug.
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

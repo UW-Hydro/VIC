@@ -815,34 +815,6 @@ Bug: undeclared variable i in write_forcing_file.c
         Index i was not declared.  This has been fixed.
 
 
-If() statements in get_force_type() fail for some global parameter files
-
-        Files Affected:
-
-        get_force_type.c
-
-        Description:
-
-        Removed all of the if statements
-          if(param_set.FORCE_FORMAT[file_num]==BINARY)
-        since this ended up requiring that the "FORCE_FORMAT BINARY"
-        line appear in the global parameter file before the list of
-        forcing variables in order to work.  Since the sscanf()
-        performs proper parsing regardless of ASCII (which doesn't
-        have SIGNED or MULTIPLIER fields) vs. BINARY, we have removed
-        the if() statements altogether.
-
-Aggregation methods of some variables not set properly.
-
-        Files affected:
-
-        output_list_utils.c
-
-        Description:
-
-        Corrected AGG_TYPE definitions for miscellaneous
-        output variables; re-organized the code to make
-        it easier to debug.
 
 
 --------------------------------------------------------------------------------

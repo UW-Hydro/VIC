@@ -11,6 +11,22 @@ has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4f to VIC 4.1.0 beta r4g *****
+--------------------------------------------------------------------------------
+
+Aggregation methods of some variables not set properly.
+
+        Files affected:
+
+        output_list_utils.c
+
+        Description:
+
+        Corrected AGG_TYPE definitions for miscellaneous
+        output variables; re-organized the code to make
+        it easier to debug.
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4e to VIC 4.1.0 beta r4f *****
 --------------------------------------------------------------------------------
 

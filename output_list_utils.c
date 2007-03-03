@@ -13,10 +13,13 @@ out_data_struct *create_output_list() {
 
   Modifications:
   2006-Sep-14 Implemented ALMA-compliant input and output;
-              now more variables are tracked.  TJB
-  2006-Sep-18 Implemented aggregation of output variables.  TJB
-  2006-Sep-23 Renamed OUT_EVAP_VEG to OUT_TRANSP_VEG.  TJB
-  2006-Nov-07 Changed default precision from %.1f to %.4f.  TJB
+              now more variables are tracked.			TJB
+  2006-Sep-18 Implemented aggregation of output variables.	TJB
+  2006-Sep-23 Renamed OUT_EVAP_VEG to OUT_TRANSP_VEG.		TJB
+  2006-Nov-07 Changed default precision from %.1f to %.4f.	TJB
+  2007-Feb-28 Corrected AGG_TYPE definitions for miscellaneous
+	      output variables; re-organized the code to make
+	      it easier to debug.				TJB
 
 *************************************************************/
 
@@ -30,175 +33,96 @@ out_data_struct *create_output_list() {
 
   // Water Balance Terms - state variables
   strcpy(out_data[OUT_ROOTMOIST].varname,"OUT_ROOTMOIST");             /* root zone soil moisture [mm] */
-  out_data[OUT_ROOTMOIST].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SMFROZFRAC].varname,"OUT_SMFROZFRAC");           /* fraction of soil moisture (by mass) that is ice, for each soil layer */
-  out_data[OUT_SMFROZFRAC].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SMLIQFRAC].varname,"OUT_SMLIQFRAC");             /* fraction of soil moisture (by mass) that is liquid, for each soil layer */
-  out_data[OUT_SMLIQFRAC].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_CANOPY].varname,"OUT_SNOW_CANOPY");         /* snow interception storage in canopy [mm] */
-  out_data[OUT_SNOW_CANOPY].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_COVER].varname,"OUT_SNOW_COVER");           /* fractional area of snow cover [fraction] */
-  out_data[OUT_SNOW_COVER].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_DEPTH].varname,"OUT_SNOW_DEPTH");           /* depth of snow pack [cm] */
-  out_data[OUT_SNOW_DEPTH].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SOIL_ICE].varname,"OUT_SOIL_ICE");               /* soil ice content [mm] for each soil layer */
-  out_data[OUT_SOIL_ICE].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SOIL_LIQ].varname,"OUT_SOIL_LIQ");               /* soil liquid moisture content [mm] for each soil layer */
-  out_data[OUT_SOIL_LIQ].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SOIL_MOIST].varname,"OUT_SOIL_MOIST");           /* soil total moisture content [mm] for each soil layer */
-  out_data[OUT_SOIL_MOIST].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SOIL_WET].varname,"OUT_SOIL_WET");               /* vertical average of (soil moisture - wilting point)/(maximum soil moisture - wilting point) [mm/mm] */
-  out_data[OUT_SOIL_WET].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SWE].varname,"OUT_SWE");                         /* snow water equivalent in snow pack [mm] */
-  out_data[OUT_SWE].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_WDEW].varname,"OUT_WDEW");                       /* total moisture interception storage in canopy [mm] */
-  out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
 
   // Water Balance Terms - fluxes
   strcpy(out_data[OUT_BASEFLOW].varname,"OUT_BASEFLOW");               /* baseflow out of the bottom layer [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_DELINTERCEPT].varname,"OUT_DELINTERCEPT");       /* change in canopy interception storage [mm] */
-  out_data[OUT_DELINTERCEPT].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_DELSOILMOIST].varname,"OUT_DELSOILMOIST");       /* change in soil water content [mm] */
-  out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_DELSWE].varname,"OUT_DELSWE");                   /* change in snow water equivalent [mm] */
-  out_data[OUT_DELSWE].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP].varname,"OUT_EVAP");                       /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_EVAP].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP_BARE].varname,"OUT_EVAP_BARE");             /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_EVAP_BARE].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_EVAP_CANOP].varname,"OUT_EVAP_CANOP");           /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_EVAP_CANOP].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_INFLOW].varname,"OUT_INFLOW");                   /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_INFLOW].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_PREC].varname,"OUT_PREC");                       /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_PREC].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_RAINF].varname,"OUT_RAINF");                     /* rainfall [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_RAINF].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_REFREEZE].varname,"OUT_REFREEZE");               /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_REFREEZE].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_RUNOFF].varname,"OUT_RUNOFF");                   /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_RUNOFF].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_SNOW_MELT].varname,"OUT_SNOW_MELT");             /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_SNOWF].varname,"OUT_SNOWF");                     /* snowfall [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_SNOWF].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_SUB_CANOP].varname,"OUT_SUB_CANOP");             /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_SUB_CANOP].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_SUB_SNOW].varname,"OUT_SUB_SNOW");               /* net sublimation from snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_SUB_SNOW].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_TRANSP_VEG].varname,"OUT_TRANSP_VEG");           /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
-  out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
 
   // Energy Balance Terms - state variables
   strcpy(out_data[OUT_ALBEDO].varname,"OUT_ALBEDO");                   /* albedo [fraction] */
-  out_data[OUT_ALBEDO].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_BARESOILT].varname,"OUT_BARESOILT");             /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_BARESOILT].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_FDEPTH].varname,"OUT_FDEPTH");                   /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
-  out_data[OUT_FDEPTH].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_RAD_TEMP].varname,"OUT_RAD_TEMP");               /* average radiative surface temperature [K] */
-  out_data[OUT_RAD_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SALBEDO].varname,"OUT_SALBEDO");                 /* snow albedo [fraction] */
-  out_data[OUT_SALBEDO].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_PACK_TEMP].varname,"OUT_SNOW_PACK_TEMP");   /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_SNOW_PACK_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_SURF_TEMP].varname,"OUT_SNOW_SURF_TEMP");   /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_SNOW_SURF_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
-  out_data[OUT_SOIL_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SURF_TEMP].varname,"OUT_SURF_TEMP");             /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_SURF_TEMP].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_TDEPTH].varname,"OUT_TDEPTH");                   /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
-  out_data[OUT_TDEPTH].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_VEGT].varname,"OUT_VEGT");                       /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
-  out_data[OUT_VEGT].aggtype = AGG_TYPE_AVG;
 
   // Energy Balance Terms - fluxes
   strcpy(out_data[OUT_ADVECTION].varname,"OUT_ADVECTION");             /* advected energy [W/m2] */
-  out_data[OUT_ADVECTION].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_DELTACC].varname,"OUT_DELTACC");                 /* rate of change in cold content in snow pack [W/m2] */
-  out_data[OUT_DELTACC].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_DELTAH].varname,"OUT_DELTAH");                   /* rate of change in heat storage [W/m2] */
-  out_data[OUT_DELTAH].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_ENERGY_ERROR].varname,"OUT_ENERGY_ERROR");       /* energy budget error [W/m2] */
-  out_data[OUT_ENERGY_ERROR].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_GRND_FLUX].varname,"OUT_GRND_FLUX");             /* net heat flux into ground [W/m2] */
-  out_data[OUT_GRND_FLUX].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT].varname,"OUT_LATENT");                   /* net upward latent heat flux [W/m2] */
-  out_data[OUT_LATENT].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_MELT_ENERGY].varname,"OUT_MELT_ENERGY");         /* energy of fusion (melting) [W/m2] */
-  out_data[OUT_MELT_ENERGY].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_LONG].varname,"OUT_NET_LONG");               /* net downward longwave flux [W/m2] */
-  out_data[OUT_NET_LONG].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_SHORT].varname,"OUT_NET_SHORT");             /* net downward shortwave flux [W/m2] */
-  out_data[OUT_NET_SHORT].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_R_NET].varname,"OUT_R_NET");                     /* net downward radiation flux [W/m2] */
-  out_data[OUT_R_NET].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_REFREEZE_ENERGY].varname,"OUT_REFREEZE_ENERGY"); /* net energy used to refreeze liquid water in snowpack [W/m2] */
-  out_data[OUT_REFREEZE_ENERGY].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SENSIBLE].varname,"OUT_SENSIBLE");               /* net upward sensible heat flux [W/m2] */
-  out_data[OUT_SENSIBLE].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_FLUX].varname,"OUT_SNOW_FLUX");             /* energy flux through snow pack [W/m2] */
-  out_data[OUT_SNOW_FLUX].aggtype = AGG_TYPE_AVG;
 
   // Miscellaneous Terms
   strcpy(out_data[OUT_AERO_RESIST].varname,"OUT_AERO_RESIST");         /* canopy aerodynamic resistance [s/m] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_AERO_COND].varname,"OUT_AERO_COND");             /* canopy aerodynamic conductance [m/s] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_AIR_TEMP].varname,"OUT_AIR_TEMP");               /* air temperature [C] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_PRESSURE].varname,"OUT_PRESSURE");               /* near surface atmospheric pressure [kPa] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_QAIR].varname,"OUT_QAIR");                       /* specific humidity [kg/kg] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_REL_HUMID].varname,"OUT_REL_HUMID");             /* relative humidity [fraction]*/
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SHORTWAVE].varname,"OUT_SHORTWAVE");             /* incoming shortwave [W/m2] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SURF_COND].varname,"OUT_SURF_COND");             /* surface conductance [m/s] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_VP].varname,"OUT_VP");                           /* near surface vapor pressure [kPa] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */
-  out_data[OUT_AERO_RESIST].aggtype = AGG_TYPE_AVG;
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADVECTION_BAND].varname,"OUT_ADVECTION_BAND");             /* advected energy [W/m2] */
-  out_data[OUT_ADVECTION_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_ALBEDO_BAND].varname,"OUT_ALBEDO_BAND");                   /* albedo [fraction] */
-  out_data[OUT_ALBEDO_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_DELTACC_BAND].varname,"OUT_DELTACC_BAND");                 /* change in cold content in snow pack [W/m2] */
-  out_data[OUT_DELTACC_BAND].aggtype = AGG_TYPE_SUM;
   strcpy(out_data[OUT_GRND_FLUX_BAND].varname,"OUT_GRND_FLUX_BAND");             /* net heat flux into ground [W/m2] */
-  out_data[OUT_GRND_FLUX_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_LATENT_BAND].varname,"OUT_LATENT_BAND");                   /* net upward latent heat flux [W/m2] */
-  out_data[OUT_LATENT_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_LONG_BAND].varname,"OUT_NET_LONG_BAND");               /* net downward longwave flux [W/m2] */
-  out_data[OUT_NET_LONG_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_NET_SHORT_BAND].varname,"OUT_NET_SHORT_BAND");             /* net downward shortwave flux [W/m2] */
-  out_data[OUT_NET_SHORT_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_REFREEZE_ENERGY_BAND].varname,"OUT_REFREEZE_ENERGY_BAND"); /* net energy used to refreeze liquid water in snowpack [W/m2] */
-  out_data[OUT_REFREEZE_ENERGY_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SENSIBLE_BAND].varname,"OUT_SENSIBLE_BAND");               /* net upward sensible heat flux [W/m2] */
-  out_data[OUT_SENSIBLE_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SNOW_CANOPY_BAND].varname,"OUT_SNOW_CANOPY_BAND");         /* snow interception storage in canopy [mm] */
-  out_data[OUT_SNOW_CANOPY_BAND].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_COVER_BAND].varname,"OUT_SNOW_COVER_BAND");           /* fractional area of snow cover [fraction] */
-  out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_DEPTH_BAND].varname,"OUT_SNOW_DEPTH_BAND");           /* depth of snow pack [cm] */
-  out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   strcpy(out_data[OUT_SNOW_FLUX_BAND].varname,"OUT_SNOW_FLUX_BAND");             /* energy flux through snow pack [W/m2] */
-  out_data[OUT_SNOW_FLUX_BAND].aggtype = AGG_TYPE_AVG;
   strcpy(out_data[OUT_SWE_BAND].varname,"OUT_SWE_BAND");                         /* snow water equivalent in snow pack [mm] */
-  out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
 
-  // Set number of elements
+  // Set number of elements - default is 1
   for (v=0; v<N_OUTVAR_TYPES; v++) {
     out_data[v].nelem = 1;
   }
@@ -226,6 +150,46 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_DEPTH_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_FLUX_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SWE_BAND].nelem = options.SNOW_BAND;
+
+  // Set aggregation method - default is to average over the interval
+  for (v=0; v<N_OUTVAR_TYPES; v++) {
+    out_data[v].aggtype = AGG_TYPE_AVG;
+  }
+  out_data[OUT_ROOTMOIST].aggtype = AGG_TYPE_END;
+  out_data[OUT_SMFROZFRAC].aggtype = AGG_TYPE_END;
+  out_data[OUT_SMLIQFRAC].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_CANOPY].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_COVER].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DEPTH].aggtype = AGG_TYPE_END;
+  out_data[OUT_SOIL_ICE].aggtype = AGG_TYPE_END;
+  out_data[OUT_SOIL_LIQ].aggtype = AGG_TYPE_END;
+  out_data[OUT_SOIL_MOIST].aggtype = AGG_TYPE_END;
+  out_data[OUT_SOIL_WET].aggtype = AGG_TYPE_END;
+  out_data[OUT_SWE].aggtype = AGG_TYPE_END;
+  out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
+  out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_DELINTERCEPT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_DELSWE].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_EVAP].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_EVAP_BARE].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_EVAP_CANOP].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_INFLOW].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_PREC].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_RAINF].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_REFREEZE].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_RUNOFF].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SNOWF].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SNOWF].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SUB_CANOP].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SUB_SNOW].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_DELTACC_BAND].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SNOW_CANOPY_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

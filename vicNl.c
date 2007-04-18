@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 	      check_state_file().				TJB
   2007-Jan-15 Added PRT_HEADER option; added call to
 	      write_header().					TJB
+  2007-Apr-04 Added option to continue run after a cell fails GCT/KAC.
 
 **********************************************************************/
 {
@@ -76,6 +77,7 @@ int main(int argc, char *argv[])
   char                     LASTREC;
   char                     MODEL_DONE;
   char                    *init_STILL_STORM;
+  char                     ErrStr[MAXSTRING];
   int                      rec, i, j;
   int                      veg;
   int                      dist;
@@ -89,6 +91,7 @@ int main(int argc, char *argv[])
   int                      Ncells;
   int                      cell_cnt;
   int                      startrec;
+  int                      ErrorFlag;
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
@@ -353,10 +356,23 @@ int main(int argc, char *argv[])
         if ( rec == global_param.nrecs - 1 ) LASTREC = TRUE;
         else LASTREC = FALSE;
 
-        dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
+        ErrorFlag = dist_prec(&atmos[rec], &prcp, &soil_con, veg_con,
 		  &lake_con, dmy, &global_param, &filep,
 		  out_data_files, out_data, &save_data, rec, cellnum,
                   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
+
+        if ( ErrorFlag == ERROR ) {
+          if ( options.CONTINUEONERROR == TRUE ) {
+            // Handle grid cell solution error
+            fprintf(stderr, "ERROR: Grid cell %i failed in record %i so the simulation has not finished.  An incomplete output file has been generated, check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
+            break;
+          } else {
+	    // Else exit program on cell solution error as in previous versions
+            sprintf(ErrStr, "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
+            vicerror(ErrStr);
+	  }
+        }
+
         NEWCELL=FALSE;
 	for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ )
 	  init_DRY_TIME[veg] = -999;

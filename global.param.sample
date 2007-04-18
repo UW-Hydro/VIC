@@ -24,7 +24,7 @@ MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
 PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
 MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
-
+CONTINUEONERROR FALSE   # TRUE = continue simulation on cell error
 
 #######################################################################
 # Simulation Parameters for 4.1.0

@@ -62,9 +62,11 @@ static char vcid[] = "$Id$";
 	    root_brent.						TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
 	    flux calculations.					TJB
+2007-Apr-11 Modified to handle grid cell errors by returning to the
+            main subroutine, rather than ending the simulation.    KAC
 
 *****************************************************************************/
-void snow_intercept(double  AirDens,
+int snow_intercept(double  AirDens,
 		    double  Dt, 
 		    double  EactAir, 		    
 		    double  F,  
@@ -352,7 +354,7 @@ void snow_intercept(double  AirDens,
 			   &RefreezeEnergy, SensibleHeat, 
 			   VaporMassFlux);
     
-    if ( *Tfoliage < -9998 ) {
+    if ( *Tfoliage <= -9998 ) {
       
       Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
 					  soil_con->elevation, 
@@ -374,7 +376,7 @@ void snow_intercept(double  AirDens,
 					  LongOverOut, NetLongOver, &NetRadiation, 
 					  &RefreezeEnergy, SensibleHeat, 
 					  VaporMassFlux, ErrorString);
-      
+      return( ERROR );
     }
     
     Qnet = solve_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
@@ -557,6 +559,8 @@ void snow_intercept(double  AirDens,
 
   /*** FIX THIS ***/
   *MeltEnergy = RefreezeEnergy / Dt;
+
+  return( 0 );
 
 }
 
@@ -810,8 +814,8 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
   /* call error handling routine */
-  vicerror("Finished dumping snow_intercept variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
+  fprintf(stderr,"**********\n**********\nFinished dumping snow_intercept variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n**********\n**********\n");
 
-  return(0);
+  return( ERROR );
 
 }

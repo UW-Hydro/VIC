@@ -100,9 +100,10 @@ static char vcid[] = "$Id$";
   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
 	    sublimation from blowing snow is calculated for lakes.	TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
+  2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.
+              GCT/KAC. 
 *****************************************************************************/
-void ice_melt(double            z2,
+int ice_melt(double            z2,
 	      double            aero_resist,
 	      double            *aero_resist_used,
 	      double            Le,
@@ -206,6 +207,14 @@ void ice_melt(double            z2,
 					 z2, snow->depth, 1.0, 0.0,
 					 snow->surf_temp, 0, 1, 1500.,
 					 0.01, 0.0, &snow->transport);
+
+    if ( (int)snow->blowing_flux == ERROR ) {
+      fprintf( stderr, "ERROR: ice_melt.c has an error from the call to CalcBlowingSnow\n");
+      fprintf( stderr, "Exiting module\n" );
+      return ( ERROR );
+    }
+
+
     snow->blowing_flux *= delta_t*SECPHOUR/RHO_W;
   }
   else
@@ -332,7 +341,7 @@ void ice_melt(double            z2,
 				 RHOSNOW,surf_atten,&SnowFlux,
 				 &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
-    if(snow->surf_temp <= -9998)
+    if( snow->surf_temp <= -9998 ){
       ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				 aero_resist_used, z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
@@ -345,7 +354,8 @@ void ice_melt(double            z2,
 				 snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
 				 &SnowFlux, &latent_heat, &latent_heat_sub,
 				 &sensible_heat, &LWnet, ErrorString);
-
+      return( ERROR );
+    }
     Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				     aero_resist_used, z2, displacement, Z0, wind, net_short,
 				     longwave, density, Le, air_temp,
@@ -457,6 +467,7 @@ void ice_melt(double            z2,
   *save_sensible = sensible_heat;
   *save_Qnet = Qnet;
 
+  return (0);
 }
 
 /*****************************************************************************

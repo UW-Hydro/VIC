@@ -38,14 +38,17 @@ double calc_rainonly(double air_temp,
 	    to fix situation in which, if air_temp = MAX_SNOW_TEMP,
 	    rainfall (rainonly) was set to 0 and snowfall was set
 	    to 100% of precip, causing function to fail.	TJB
-
+  2007-Apr-04 Modified to handle grid cell errors by returning to the
+           main subroutine, rather than ending the simulation.   GCT/KAC
 **********************************************************************/
 
   double rainonly;
 
   rainonly = 0.;
-  if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP )
-    vicerror("ERROR: MAX_SNOW_TEMP must be greater then MIN_RAIN_TEMP");
+  if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP ){
+    fprintf( stderr, "ERROR: MAX_SNOW_TEMP must be greater then MIN_RAIN_TEMP");
+    return (ERROR);
+  }
   if(air_temp < MAX_SNOW_TEMP && air_temp > MIN_RAIN_TEMP) {
     rainonly = (air_temp - MIN_RAIN_TEMP)
         / (MAX_SNOW_TEMP - MIN_RAIN_TEMP) * prec;

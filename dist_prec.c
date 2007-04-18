@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void dist_prec(atmos_data_struct   *atmos,
+int  dist_prec(atmos_data_struct   *atmos,
                dist_prcp_struct    *prcp,
                soil_con_struct     *soil_con,
                veg_con_struct      *veg_con,
@@ -67,6 +67,8 @@ void dist_prec(atmos_data_struct   *atmos,
 	      out_data_files, and save_data structures. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-Apr-04 Modified to handle grid cell errors by returning to the
+              main subroutine, rather than ending the simulation. GCT/KAC
 
 **********************************************************************/
 
@@ -82,6 +84,7 @@ void dist_prec(atmos_data_struct   *atmos,
   char    ANY_SNOW[MAX_VEG];
   int     veg, i;
   int     month;
+  int     ErrorFlag;
   double  Wdmax;
   double  NEW_MU;
 
@@ -154,9 +157,11 @@ void dist_prec(atmos_data_struct   *atmos,
       if ( !STILL_STORM[veg] && (atmos->prec[NR] > STORM_THRES 
 				 || ANY_SNOW[veg] ) ) {
 	/** Average soil moisture before a new storm **/
-	initialize_new_storm(prcp->cell,prcp->veg_var,
+	ErrorFlag = initialize_new_storm(prcp->cell,prcp->veg_var,
 			     veg,veg_con[0].vegetat_type_num,rec,
 			     prcp->mu[veg],NEW_MU);
+        if ( ErrorFlag == ERROR ) return ( ERROR );
+
 	STILL_STORM[veg] = TRUE;
 	prcp->mu[veg]    = NEW_MU;
       }
@@ -179,7 +184,7 @@ void dist_prec(atmos_data_struct   *atmos,
     }
 
     /** Solve model time step **/
-    full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
+    ErrorFlag = full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
 		lake_con, soil_con, veg_con);
 
   }
@@ -190,7 +195,7 @@ void dist_prec(atmos_data_struct   *atmos,
       Controls Grid Cell Averaged Precipitation Model
     **************************************************/
 
-    full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
+    ErrorFlag = full_energy(NEWCELL, cellnum, rec, atmos, prcp, dmy, global_param, 
 		lake_con, soil_con, veg_con);
 
   }
@@ -218,5 +223,7 @@ void dist_prec(atmos_data_struct   *atmos,
     write_model_state(prcp, global_param, veg_con[0].vegetat_type_num, 
 		      soil_con->gridcel, filep, soil_con,
 		      STILL_STORM, DRY_TIME, *lake_con);
+
+  return ( ErrorFlag );
 
 }

@@ -302,7 +302,7 @@ void set_node_parameters(double   *dz_node,
 
 #define N_INTS 5
 
-void distribute_node_moisture_properties(double *moist_node,
+int distribute_node_moisture_properties(double *moist_node,
 					 double *ice_node,
 					 double *kappa_node,
 					 double *Cs_node,
@@ -358,6 +358,8 @@ void distribute_node_moisture_properties(double *moist_node,
            or equal to maximum node soil moisture, otherwise an 
            error is printed to the screen and the model exits.  KAC
   2005-Mar-24 Removed abs() from check on soil moisture.	TJB
+  2007-Apr-04 Modified to handle grid cell errors by returning to
+              the main subroutine, rather than ending the simulation. GCT/KAC
 
 *********************************************************************/
 
@@ -403,10 +405,12 @@ void distribute_node_moisture_properties(double *moist_node,
       soil_fract = (bulk_density[lidx] / soil_density[lidx]);
     }      
 
+
     // Check that node moisture does not exceed maximum node moisture
     if (moist_node[nidx]-max_moist_node[nidx] > SMALL) {
-      sprintf( ErrStr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.", moist_node[nidx], max_moist_node[nidx] );
-      vicerror(ErrStr);
+      fprintf( stderr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.", 
+        moist_node[nidx], max_moist_node[nidx] );
+      return( ERROR );
     }
 
     if(T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
@@ -457,6 +461,7 @@ void distribute_node_moisture_properties(double *moist_node,
       }
     }
   }
+  return (0);
 
 }
 

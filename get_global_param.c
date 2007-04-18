@@ -60,7 +60,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
-
+  2007-Apr-03 Added CONTINUEONERROR option.				GCT
 **********************************************************************/
 {
   extern option_struct    options;
@@ -311,6 +311,13 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.INIT_STATE = TRUE;
 	  strcpy(names->init_state,flgstr);
+	}
+      }
+      else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CONTINUEONERROR=TRUE;
+        else {
+	  options.CONTINUEONERROR = FALSE;
 	}
       }
       else if(strcasecmp("BINARY_STATE_FILE",optstr)==0) {

@@ -62,7 +62,7 @@ void initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *,
 		     double);
 void lakeice(double *, double, double, double *, double, double *,int, 
 	     double, double, double *, double, double, int, dmy_struct, double *);
-void lakemain(atmos_data_struct *, lake_con_struct, double, double,
+int lakemain(atmos_data_struct *, lake_con_struct, double, double,
 	      soil_con_struct *, int, dist_prcp_struct *, 
 	      int, int, double, global_param_struct *, dmy_struct *, 
 	      int, int);
@@ -71,7 +71,7 @@ void latsens(double,double, double, double, double, double, double, double,
 float lkdrag(float, double, double, double, double);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *, float);
 void rhoinit(double *, double);
-void solve_lake(double, double, double, double, double, double, double, double, 
+int solve_lake(double, double, double, double, double, double, double, double, 
 		double, double, double, lake_var_struct *, lake_con_struct, 
 		soil_con_struct, int, int, energy_bal_struct *, 
 		snow_data_struct *, double, dmy_struct);
@@ -82,19 +82,19 @@ void tridia(int, double *, double *, double *, double *, double *);
 void water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, double, soil_con_struct, double, double, double, double);
 double func_lake_energy_balance(double, va_list);
 double solve_surf_energy_bal(double Tsurf, ...);
-void ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
+int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
 double func_lake_energy_bal(double , va_list);
 double IceEnergyBalance(double, va_list);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
-void water_energy_balance(int, double*, double*, int,int,double, double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
-void water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
+int  water_energy_balance(int, double*, double*, int,int,double, double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
+int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
 void write_lake_var(lake_var_struct, int);
 double get_sarea(lake_con_struct, double);
 double get_volume(lake_con_struct, double);
 double get_depth(lake_con_struct, double);
-void wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
+int wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		    global_param_struct *, soil_con_struct  *, int,
 		    int, double, lake_con_struct);
 void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, double, lake_var_struct *, lake_con_struct, int, int, double, soil_con_struct);

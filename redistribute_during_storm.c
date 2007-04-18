@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void redistribute_during_storm(cell_data_struct ***cell,
+int  redistribute_during_storm(cell_data_struct ***cell,
 			       veg_var_struct   ***veg_var,
 			       int                 veg,
 			       int                 Nveg,
@@ -27,6 +27,8 @@ void redistribute_during_storm(cell_data_struct ***cell,
   08-19-99 simplified logic, and added check to make sure soil
            moisture does not exceed maximum soil moisture content  Bart
   6-8-2000 modified to work with spatially distribute frozen soils KAC
+  4-6-2007 modified to return errors to calling routine rather than
+           ending program.                                         KAC
 
 **********************************************************************/
  
@@ -53,11 +55,11 @@ void redistribute_during_storm(cell_data_struct ***cell,
 					      max_moist[layer], old_mu, 
 					      new_mu);
       if(error) {
-	sprintf(ErrorString,"%s: Error in moist accounting %f -> %f record %i\n",
+	fprintf(stderr,"%s: Error in moist accounting %f -> %f record %i\n",
 		__FILE__,cell[WET][veg][band].layer[layer].moist*old_mu
 		+ cell[DRY][veg][band].layer[layer].moist*(1.-old_mu),
 		temp_wet*new_mu+temp_dry*(1.-new_mu),rec);
-	vicerror(ErrorString);
+	return( ERROR );
       }
       cell[WET][veg][band].layer[layer].moist = temp_wet;
       cell[DRY][veg][band].layer[layer].moist = temp_dry;
@@ -75,17 +77,17 @@ void redistribute_during_storm(cell_data_struct ***cell,
 						new_mu);
 	if(error) {
 #if SPATIAL_FROST
-	  sprintf(ErrorString,"%s: Error in ice accounting %f -> %f record %i\n",
+	  fprintf(stderr,"%s: Error in ice accounting %f -> %f record %i\n",
 		  __FILE__,cell[WET][veg][band].layer[layer].ice[frost_area]
 		  *old_mu + cell[DRY][veg][band].layer[layer].ice[frost_area]
 		  *(1.-old_mu), temp_wet*new_mu+temp_dry*(1.-new_mu),rec);
 #else
-	  sprintf(ErrorString,"%s: Error in ice accounting %f -> %f record %i\n",
+	  fprintf(stderr,"%s: Error in ice accounting %f -> %f record %i\n",
 		  __FILE__,cell[WET][veg][band].layer[layer].ice*old_mu
 		  + cell[DRY][veg][band].layer[layer].ice*(1.-old_mu),
 		  temp_wet*new_mu+temp_dry*(1.-new_mu),rec);
 #endif
-	  vicerror(ErrorString);
+	  return( ERROR );
 	}
 #if SPATIAL_FROST
 	cell[WET][veg][band].layer[layer].ice[frost_area] = temp_wet;
@@ -108,16 +110,17 @@ void redistribute_during_storm(cell_data_struct ***cell,
       error = redistribute_moisture_for_storm(&temp_wet, &temp_dry, Wdmax, 
 					      old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"%s: Error in Wdew accounting %f -> %f record %i\n",
+	fprintf(stderr,"%s: Error in Wdew accounting %f -> %f record %i\n",
 		__FILE__, veg_var[WET][veg][band].Wdew * old_mu
 		+ veg_var[DRY][veg][band].Wdew * (1. - old_mu),
 		temp_wet * new_mu + temp_dry * (1. - new_mu), rec);
-	vicerror(ErrorString);
+	return( ERROR );
       }
       veg_var[WET][veg][band].Wdew = temp_wet;
       veg_var[DRY][veg][band].Wdew = temp_dry;
     }
   }
+  return(0);
 }
 
 unsigned char redistribute_moisture_for_storm(double *wet_value,

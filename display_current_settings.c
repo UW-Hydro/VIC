@@ -215,6 +215,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"MOISTFRACT\t\tTRUE\n");
   else
     fprintf(stdout,"MOISTFRACT\t\tFALSE\n");
+  if (options.CONTINUEONERROR)
+    fprintf(stdout,"CONTINUEONERROR\t\tTRUE\n");
+  else
+    fprintf(stdout,"CONTINUEONERROR\t\tFALSE\n");
   fprintf(stdout,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
   fprintf(stdout,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stdout,"MEASURE_H\t\t%f\n",global->measure_h);

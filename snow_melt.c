@@ -110,9 +110,11 @@ static char vcid[] = "$Id$";
 	    output display.					TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
+2007-Apr-11 Modified to handle grid cell errors by returning to the
+            main subroutine, rather than ending the simulation.    KAC
 
 *****************************************************************************/
-void snow_melt(double            Le, 
+int  snow_melt(double            Le, 
                double            NetShortSnow,  // net SW at absorbed by snow
 	       double            Tcanopy,
 	       double            Tgrnd,
@@ -362,6 +364,10 @@ void snow_melt(double            Le,
       if ( snow->surf_temp <= -9998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
 	/* Thin snowpack must be solved in conjunction with ground surface
 	   energy balance */
+        if ( snow->surf_temp <= -9998 ) {
+          /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
+          fprintf(stderr,"Snowpack is too thin to solve separately; it will be solved in conjunction with ground surface energy balance\n");
+        }
 	snow->surf_temp = 999;
       }
       else {
@@ -551,6 +557,7 @@ void snow_melt(double            Le,
   *save_refreeze_energy    = RefreezeEnergy;
   *save_Qnet               = Qnet;
 
+  return ( 0 );
 }
 
 /*****************************************************************************
@@ -756,9 +763,9 @@ double ErrorPrintSnowPackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"BlowingMassFlux = %f\n",BlowingMassFlux[0]);
   fprintf(stderr,"SurfaceMassFlux = %f\n",SurfaceMassFlux[0]);
 
-  vicerror("Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
+  fprintf(stderr,"Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThencheck output for instabilities.\n");
 
-  return(0.0);
+  return(ERROR);
 
 }
 

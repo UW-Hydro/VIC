@@ -13,7 +13,7 @@ static char vcid[] = "$Id$";
 #define GRND_TOL 0.001
 #define OVER_TOL 0.001
 
-void surface_fluxes(char                 overstory,
+int  surface_fluxes(char                 overstory,
 		    double               BareAlbedo,
 		    double               height,
 		    double               ice0,
@@ -102,6 +102,8 @@ void surface_fluxes(char                 overstory,
 	      of rain and snow for output to this function.		TJB
   2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.  TJB
   2006-Dec-20 Modified iteration loop variables to be more intuitive.	TJB
+  2007-Apr-04 Modified to handle grid cell errors by returning to the
+              main subroutine, rather than ending the simulation.   GCT/KAC
 
 **********************************************************************/
 {
@@ -116,6 +118,7 @@ void surface_fluxes(char                 overstory,
 
   int                    BISECT_OVER;
   int                    BISECT_UNDER;
+  int                    ErrorFlag;
   int                    INCLUDE_SNOW = FALSE;
   int                    UNSTABLE_CNT;
   int                    UNSTABLE_SNOW = FALSE;
@@ -387,6 +390,11 @@ void surface_fluxes(char                 overstory,
                                            veg_lib[iveg].displacement[dmy[rec].month-1],
                                            veg_lib[iveg].roughness[dmy[rec].month-1],
                                            &step_snow.transport);
+      if ( (int)snow->blowing_flux == ERROR ) {
+        return ( ERROR );
+      }
+
+
       snow->blowing_flux*=step_dt*SECPHOUR/RHO_W; /* m/time step */
     }
     else
@@ -497,6 +505,7 @@ void surface_fluxes(char                 overstory,
 			       &(snow_veg_var[WET]));
       
 // snow_energy.sensible + snow_energy.latent + snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + snow_energy.advection - snow_energy.deltaCC + snow_energy.refreeze_energy + snow_energy.advected_sensible ) * snow->coverage
+        if ( step_melt == ERROR ) return (ERROR);
 
 	/* Check that the snow surface temperature was estimated, if not
 	   prepare to include thin snowpack in the estimation of the
@@ -540,6 +549,10 @@ void surface_fluxes(char                 overstory,
 				     step_layer[DRY], step_layer[WET], 
 				     &(step_snow), soil_con, 
 				     &bare_veg_var[DRY], &bare_veg_var[WET]); 
+        if ( (int)Tsurf == ERROR ) {
+          // Return error flag to skip rest of grid cell
+          return ( ERROR );
+        }
 	if ( INCLUDE_SNOW ) {
 	  /* store melt from thin snowpack */
 	  step_melt *= 1000.;
@@ -577,6 +590,10 @@ void surface_fluxes(char                 overstory,
 	     sum of latent heats from the ground and foliage, and iterate
 	     on the temperature used for the sensible heat flux from the
 	     canopy air to the mixing level */
+          if ( (int)Tcanopy == ERROR ) {
+            // Return error flag to skip rest of grid cell
+            return ( ERROR );
+          }
 	}
 	else {
 	  // else put surface fluxes into atmospheric flux storage so that 
@@ -814,13 +831,13 @@ void surface_fluxes(char                 overstory,
   (*inflow_wet) = ppt[WET];
   (*inflow_dry) = ppt[DRY];
 
-  runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
+  ErrorFlag = runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
 	 baseflow_wet, baseflow_dry, ppt, 
 #if SPATIAL_FROST
 	 soil_con->frost_fract,
 #endif // SPATIAL_FROST
 	 mu, gp->dt, options.Nnode, band, rec, iveg);
-
+  return( ErrorFlag );
 }
 
 #undef MAX_ITER

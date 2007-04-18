@@ -42,6 +42,8 @@ static char vcid[] = "$Id$";
 	    involved an incorrect calculation of the soil's ice content.
 	    Since the new logic doesn't require calculation of ice content,
 	    this calculation has been removed altogether.		TJB
+2007-Apr-06 Modified to handle grid cell errors by returning ERROR
+            status that can be trapped by calling routines.     GCT/KAC
 
 ****************************************************************************/
 
@@ -135,14 +137,14 @@ double arno_evap(layer_data_struct *layer_wet,
 	printf("\n  ERROR: SOIL RATIO GREATER THAN 1.0\n");
 	printf("moisture %f   max_moisture %f -> ratio = %f\n",
 	       moist,max_moist,ratio);
-	exit(0);
+	return( ERROR );
       }
       else {
 	if(ratio < 0.0) {
 	  printf("\n  ERROR: SOIL RATIO LESS THAN 0.0\n");
 	  printf("moisture %f   max_moisture %f -> ratio = %e\n",
 	         moist,max_moist,ratio);
-	  exit(0);
+	  return( ERROR );
 	}
 	else
 	  ratio = pow(ratio,(1.0 / (b_infilt + 1.0)));
@@ -168,12 +170,12 @@ double arno_evap(layer_data_struct *layer_wet,
     
       if(ratio > 1.0) {
 	printf("\n ARNO ERROR: EVAP RATIO GREATER THAN 1.0");
-	exit(0);
+	return ( ERROR );
       }
       else {
 	if(ratio < 0.0) {
 	  printf("\n ARNO ERROR: EVAP RATIO LESS THAN 0.0");
-	  exit(0);
+	  return( ERROR );
 	}
 	else {
 	  if(ratio != 0.0)

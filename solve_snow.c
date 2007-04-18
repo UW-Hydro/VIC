@@ -117,6 +117,8 @@ double solve_snow(char                 overstory,
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
   2006-Sep-26 Added tracking of out_rain and out_snow.  TJB
+  2007-Apr-06 Modified to handle grid cell errors by returning to the
+           main subroutine, rather than ending the simulation. GCT/KAC
 
 *********************************************************************/
 
@@ -125,6 +127,7 @@ double solve_snow(char                 overstory,
 
   char                ErrStr[MAXSTRING];
   char                FIRST_SOLN[1];
+  int                 ErrorFlag;
   float               tempstep;
   double              TmpAlbedoUnder[2];
 /*   double              LongUnderOut; */
@@ -174,9 +177,9 @@ double solve_snow(char                 overstory,
   if ( ( snow->swq > 0 || snowfall[WET] > 0.
 	 || (snow->snow_canopy>0. && overstory) ) ) {
     if ( mu != 1 && options.FULL_ENERGY ) {
-      sprintf(ErrStr,"Snow model cannot be used if mu (%f) is not equal to 1.\n\tsolve_snow.c: record = %i,\t vegetation type = %i",
+      fprintf(stderr,"ERROR: Snow model cannot be used if mu (%f) is not equal to 1.\n\tsolve_snow.c: record = %i,\t vegetation type = %i",
 	      mu, rec, iveg);
-      vicerror(ErrStr);
+      return( ERROR );
     }
     else if ( mu != 1 ) {
       fprintf(stderr,"WARNING: Snow is falling, but mu not equal to 1 (%f)\n",
@@ -234,7 +237,7 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-	snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
+	ErrorFlag = snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
 		       veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
 		       veg_lib[veg_class].Wdmax[month-1], pressure, 
@@ -254,6 +257,7 @@ double solve_snow(char                 overstory,
 		       ref_height, roughness, root, *UnderStory, band, 
 		       hour, iveg, month, rec, veg_class, layer_dry, 
 		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
 
 	/* Store throughfall from canopy */
 	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
@@ -358,7 +362,7 @@ double solve_snow(char                 overstory,
       }
 #endif
 
-      snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
+      ErrorFlag = snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
 		roughness, aero_resist[*UnderStory], aero_resist_used,
 		air_temp, *coverage, (double)dt * SECPHOUR, density, 
 		displacement[*UnderStory], snow_grnd_flux, 
@@ -370,6 +374,7 @@ double solve_snow(char                 overstory,
 		&energy->latent_sub, &energy->refreeze_energy, 
 		&energy->sensible, INCLUDE_SNOW, band, 
 		rec, snow, soil_con);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
 
       // store melt water
       ppt[WET] += melt;

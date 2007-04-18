@@ -41,9 +41,10 @@
   15-Jun-04 Initialize mixmax to 0.					TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
+  2007-Apr_03 Modified to handle grid cell errors by returning to the
+              main subroutine, rather than ending the simulation.  from  KAC
 *****************************************************************************/
-void water_under_ice(int freezeflag, 
+int water_under_ice(int freezeflag, 
 		     double sw_ice,
 		     double wind,
 		     double *Ti,
@@ -136,4 +137,6 @@ void water_under_ice(int freezeflag,
   *qw = qw_mean;
   for ( k = 0; k < numnod; k++ )
     Ti[k] = Tnew[k];
+
+  return (0);
 }

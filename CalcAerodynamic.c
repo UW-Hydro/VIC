@@ -58,7 +58,7 @@ static char vcid[] = "$Id$";
     double *d      - Vector of length 3, contains displacement height 
                      values for the conditions outlined for *U.  
 
-  Returns      : void
+  Returns      : int
 
   Modifies     :
     double *U
@@ -69,7 +69,7 @@ static char vcid[] = "$Id$";
    
   Comments     :
 *****************************************************************************/
-void CalcAerodynamic(char    OverStory,     /* overstory flag */
+int  CalcAerodynamic(char    OverStory,     /* overstory flag */
                      double  Height,        /* vegetation height */
                      double  Trunk,         /* trunk ratio parameter */
 		     double  Z0_SNOW,       /* snow roughness */
@@ -84,6 +84,13 @@ void CalcAerodynamic(char    OverStory,     /* overstory flag */
                      int     Nveg,          /* total number of veg types */
                      int     iveg)          /* current veg type */
 {
+  /******************************************************************
+  Modifications:
+  2007-Apr-04 Modified to catch and return error flags from surface_fluxes
+              subroutine.                                      GCT/KAC
+  *******************************************************************/
+
+
   double d_Lower;
   double d_Upper;
   double K2;
@@ -155,8 +162,11 @@ void CalcAerodynamic(char    OverStory,     /* overstory flag */
     
     Zw = 1.5 * Height - 0.5 * d_Upper;
     Zt = Trunk * Height;
-    if (Zt < (Z0_Lower+d_Lower)) 
-      vicerror("ERROR: Trunk space height below \"center\" of lower boundary");
+
+    if (Zt < (Z0_Lower+d_Lower)) {
+      fprintf(stderr,"ERROR: CalcAerodynamic - Trunk space height below \"center\" of lower boundary");
+      return( ERROR );
+    }
 
     /* Resistance for overstory */
     Ra[1] = log((ref_height[0]-d_Upper)/Z0_Upper)/K2
@@ -253,5 +263,6 @@ void CalcAerodynamic(char    OverStory,     /* overstory flag */
       U[2] *= tmp_wind;
     Ra[2] = HUGE_RESIST;
   }
+  return (0);
 
 }

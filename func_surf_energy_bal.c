@@ -63,6 +63,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	    latent_heat_from_snow() which no longer needs them.	TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
 	    flux calculations.					TJB
+  2007-Apr-11 Modified to handle grid cell errors by returning to the
+           main subroutine, rather than ending the simulation. GCT
 
 **********************************************************************/
 {
@@ -77,6 +79,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   int month;
   int VEG;
   int veg_class;
+  int Error;
 
   double delta_t;
 
@@ -423,17 +426,22 @@ double func_surf_energy_bal(double Ts, va_list ap)
     *************************************************************/
       T_node[0] = TMean;
 #if QUICK_FS
-      solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
+      Error = solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
 		      moist_node, delta_t, max_moist_node, bubble_node, 
 		      expt_node, ice_node, alpha, beta, gamma, 
 		      ufwc_table_node, Nnodes, FIRST_SOLN, FALSE, FS_ACTIVE, 
 		      NOFLUX);
 #else
-      solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
+      Error = solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
 		      moist_node, delta_t, max_moist_node, bubble_node, 
 		      expt_node, ice_node, alpha, beta, gamma, Nnodes, 
 		      FIRST_SOLN, FALSE, FS_ACTIVE, NOFLUX);
 #endif
+
+      if ( (int)Error == ERROR ) {
+        fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
+        return( ERROR ); 
+      }
       *T1 = Tnew_node[1];
 
       /*****************************************************

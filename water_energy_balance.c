@@ -41,9 +41,10 @@
   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.  TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
+  2007-Apr-03 Modified to handle grid cell errors by returning to the
+              main subroutine, rather than ending the simulation. from KAC
 *****************************************************************************/
-void water_energy_balance(int numnod, double * surface, double *evapw,
+int water_energy_balance(int numnod, double * surface, double *evapw,
 	      int               dt,
 	      int               freezeflag,
 	      double            dz,
@@ -187,4 +188,7 @@ void water_energy_balance(int numnod, double * surface, double *evapw,
 
  for(k=0; k<numnod; k++)
    T[k] = Tnew[k];
+
+ return(0);
+
 }

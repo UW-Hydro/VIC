@@ -20,6 +20,7 @@
  *	       - Fixed vertical integration functions.
  *										TJB
  *   04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
+ *   2007-Apr-03 Module returns an ERROR value that can be trapped in main      GCT
  */
 
 #include <stdarg.h>
@@ -223,6 +224,7 @@ double CalcBlowingSnow( double Dt,
 	fprintf(stderr,"Warning: Error with probability boundaries in CalcBlowingSnow()\n");
       }
 
+
       /* Find expected value of wind speed for the interval. */
       U10 = Uo;
       if(lower >= Uo ) 
@@ -232,9 +234,9 @@ double CalcBlowingSnow( double Dt,
 	U10 = 0.5*((upper-sigma_w)*exp((1./sigma_w)*(upper - Uo))
 		   - (lower-sigma_w)*exp((1./sigma_w)*(lower - Uo)))/area;
       else {
-	fprintf(stderr,"Problem with probability ranges in CalcBlowingSnow.c\n");
-	fprintf(stderr,"Increment = %d, integration limits = %f - %f\n",p,upper, lower);
-	exit(0);
+	fprintf(stderr,"ERROR in CalcBlowingSnow.c: Problem with probability ranges\n");
+	fprintf(stderr,"  Increment = %d, integration limits = %f - %f\n",p,upper, lower);
+        return ( ERROR );
       }
    
       if(U10 < 0.4)

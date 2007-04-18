@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void runoff(layer_data_struct *layer_wet,
+int  runoff(layer_data_struct *layer_wet,
 	    layer_data_struct *layer_dry,
             energy_bal_struct *energy,
             soil_con_struct   *soil_con,
@@ -78,7 +78,8 @@ void runoff(layer_data_struct *layer_wet,
 		to the soil cannot exceed baseflow.  In addition, error
 		messages are no longer printed, since it isn't an error
 		to be in that block.				TJB
-
+    2007-Apr-04 Modified to return Error status from 
+                distribute_node_moisture_properties  GCT/KAC
 **********************************************************************/
 {  
   extern option_struct options;
@@ -102,6 +103,7 @@ void runoff(layer_data_struct *layer_wet,
   int                tmpsub;
   int                tmplayer;
   int                frost_area;
+  int                ErrorFlag;
   double             ex, A, i_0, basis, frac;
   double             inflow;
   double             last_moist;
@@ -587,7 +589,7 @@ void runoff(layer_data_struct *layer_wet,
       moist[lindex] = tmp_layer.moist;
     }
     
-    distribute_node_moisture_properties(energy->moist, energy->ice,
+    ErrorFlag = distribute_node_moisture_properties(energy->moist, energy->ice,
 					energy->kappa_node, energy->Cs_node,
 					soil_con->dz_node, energy->T,
 					soil_con->max_moist_node,
@@ -602,7 +604,9 @@ void runoff(layer_data_struct *layer_wet,
 					soil_con->bulk_density,
 					soil_con->quartz, Nnodes, 
 					options.Nlayer, soil_con->FS_ACTIVE);
+    if ( ErrorFlag == ERROR ) return (ERROR);
     
   }
+  return (0);
 
 }

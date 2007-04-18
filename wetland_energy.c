@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void wetland_energy(int                  rec,
+int wetland_energy(int                  rec,
 		    atmos_data_struct   *atmos,
 		    dist_prcp_struct    *prcp,
 		    dmy_struct          *dmy,
@@ -25,6 +25,8 @@ void wetland_energy(int                  rec,
   2006-Sep-23 Implemented flexible output configuration; atmos->out_rain
 	      and atmos->out_snow must be tracked now.  TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-Apr-03 Changed routine type to int so that it can return numeric ERROR
+              values.    GCT from KAC. 
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -41,6 +43,7 @@ void wetland_energy(int                  rec,
   int                    veg_class;
   int                    Nbands;
   int                    hour;
+  int                    ErrorFlag;
   double                 rad_atten;
   double                 LAI;
   double                 out_prec[2*MAX_BANDS];
@@ -216,7 +219,7 @@ void wetland_energy(int                  rec,
 
     veg_class=0;
 
-    surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
+    ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
 		   prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
 		   cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used), 
 		   &(cell[DRY][iveg][band].baseflow), 
@@ -234,9 +237,16 @@ void wetland_energy(int                  rec,
 		   soil_con, dry_veg_var, wet_veg_var, .8,
 		   .0001, 500.);
 
+   if ( ErrorFlag == ERROR )
+      // Failed in surface_fluxes, return error flag
+      return( ErrorFlag );
+
+    
+
     atmos->out_prec += out_prec[band*2] * Cv * lake_con.Cl[0];
     atmos->out_rain += out_rain[band*2] * Cv * lake_con.Cl[0];
     atmos->out_snow += out_snow[band*2] * Cv * lake_con.Cl[0];
   } /** end current vegetation type **/
-  
+
+  return (0);  
 }

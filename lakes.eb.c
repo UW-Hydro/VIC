@@ -8,7 +8,7 @@ static char vcid[] = "$Id$";
 #define QUICK_ICE TRUE
 #define NOICE 0
 
-void lakemain(atmos_data_struct  *atmos, 
+int lakemain(atmos_data_struct  *atmos, 
 	      lake_con_struct    lake_con,
 	      double             snowprec,
 	      double             rainprec,
@@ -44,6 +44,8 @@ void lakemain(atmos_data_struct  *atmos,
   2006-Jul-18 Changed sin(lat) to sin(fabs(lat)) in ks computation so that
 	      southern hemisphere locations can be handled correctly.	TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-Apr-03 Modified to catch and return error flags from surface_fluxes
+              subroutine.                                         KAC
 
   Parameters :
 
@@ -83,7 +85,7 @@ the grid cell average fluxes.
   double oldsnow, newsnow;
   double oldmoist, newmoist, tmp_evap, error;
   double olddew, newdew;
-  int i;
+  int i, ErrorFlag;
 
   veg_var = prcp->veg_var;
   cell    = prcp->cell;
@@ -109,8 +111,13 @@ the grid cell average fluxes.
   }
   olddew = veg_var[WET][iveg][band].Wdew;
   oldsnow = snow[iveg][band].swq;
-  wetland_energy(rec,atmos, prcp, dmy, gp, soil_con, iveg, band,lake->sarea/lake_con.basin[0],
-		 lake_con);
+  ErrorFlag = wetland_energy(rec, atmos, prcp, dmy, gp, soil_con, iveg, 
+                 band, lake->sarea/lake_con.basin[0], lake_con);
+
+  if ( ErrorFlag == ERROR )
+    // Return failure flag to main routine
+    return ( ErrorFlag );
+
 
   tmp_evap = 0.0;
   for ( i = 0; i < options.Nlayer; i++ )
@@ -140,12 +147,14 @@ the grid cell average fluxes.
   
   atmos->out_prec += (snowprec + rainprec) * lake_con.Cl[0] * (lake->sarea/lake_con.basin[0]);
   
-  solve_lake(snowprec, rainprec, atmos->air_temp[hour], atmos->wind[hour],
+  ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[hour], atmos->wind[hour],
 	     atmos->vp[hour] / 1000., atmos->shortwave[hour], 
 	     atmos->longwave[hour], atmos->vpd[hour] / 1000., 
 	     atmos->pressure[hour] / 1000., atmos->density[hour], LakeFlow, 
 	     lake, lake_con, *soil_con, dt, rec, &lake_energy, &lake_snow, 
 	     wind_h, dmy[rec]);
+
+  if ( ErrorFlag == ERROR ) return (ERROR);
 
   /**********************************************************************
    * Solve the water budget for the lake.
@@ -161,11 +170,11 @@ the grid cell average fluxes.
 	      lake_con, iveg, band, lake->fraci, *soil_con);
 
   // LakeFlow = lake->runoff_out * 3600. * dt / 1000.; // returns m/s
-
+  return (0);
 }  /*End of  lake main. */
 
 
-void solve_lake(double             snow,
+int solve_lake(double             snow,
 		double             rain,
 		double             tair, 
 		double             wind, 
@@ -244,6 +253,7 @@ void solve_lake(double             snow,
   double fracice;
   double new_ice_fraction; /* Ice fraction formed by freezing. */
   int k, i;
+  int ErrorFlag;
   double tw1, tw2, r1, r2, rtu, rnet;
   double Ls, Le;
   double sumjoula, sumjoulb, sumjouli;
@@ -405,7 +415,7 @@ void solve_lake(double             snow,
 	freezeflag=1;         /* Calculation for water, not ice. */
 	windw = wind*log((2. + ZWATER)/ZWATER)/log(wind_h/ZWATER);  
 	
-	water_energy_balance( lake->activenod, lake->surface, &lake->evapw, 
+	ErrorFlag = water_energy_balance( lake->activenod, lake->surface, &lake->evapw, 
 			      dt, freezeflag, lake->dz, lake->surfdz,
 			      (double)soil_con.lat, Tcutoff, tair, windw, 
 			      pressure, vp, air_density, longin, sw_water, 
@@ -414,7 +424,8 @@ void solve_lake(double             snow,
 			      &energy_ice_formation, fracprv, 
 			      &new_ice_fraction, water_cp,  &new_ice_height,
 			      &energy_out_bottom);
-
+        if ( ErrorFlag == ERROR ) return (ERROR);
+ 
 	mixmax = 0.0;	 
 	/* --------------------------------------------------------------------
 	 * Do the convective mixing of the lake water.
@@ -454,13 +465,14 @@ void solve_lake(double             snow,
 
 	/* Calculate snow/ice temperature and change in ice thickness from 
 	   surface melting. */
-	ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used),
+	ErrorFlag = ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used),
 		  Le, lake_snow, lake, dt,  0.0, soil_con.snow_rough, 1.0, 
 		  rainfall, snowfall,  windi, Tcutoff, tair, sw_ice, 
 		  longin, air_density, pressure,  vpd,  vp, &lake->snowmlt, 
 		  &lake_energy->advection, &lake_energy->deltaCC, 
 		  &lake_energy->snow_flux, &Qei, &Qhi, &Qnet_ice, 
 		  &lake_energy->refreeze_energy, &LWneti, fracprv);
+        if ( ErrorFlag == ERROR ) return (ERROR);
 
 	lake->tempi = lake_snow->surf_temp;  
 	
@@ -472,11 +484,12 @@ void solve_lake(double             snow,
 	 * Calculate inputs to temp_area..
 	 * -------------------------------------------------------------------- */
 
-	water_under_ice( freezeflag, sw_ice, wind, Ti, water_density, 
+	ErrorFlag = water_under_ice( freezeflag, sw_ice, wind, Ti, water_density, 
 			 (double)soil_con.lat, lake->activenod, lake->dz, lake->surfdz,
 			 Tcutoff, &qw, lake->surface, &temphi, water_cp, 
 			 mixdepth, lake->hice, lake_snow->swq*RHO_W/RHOSNOW,
 			(double)dt, LakeFlow, &energy_out_bottom_ice);     
+        if ( ErrorFlag == ERROR ) return (ERROR);
 	
 	/**********************************************************************
 	 *   8.  Calculate change in ice thickness and fraction
@@ -617,6 +630,7 @@ void solve_lake(double             snow,
       lake_snow->depth       = lake_snow->swq * RHO_W / RHOSNOW;
 
   }
+  return (0);
 
 }   /* End of lake function. */
 

@@ -29,7 +29,8 @@
   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
 	      of supported met input variables.				TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
-
+  2007-Apr-03 Added CONTINUEONERROR option.				GCT
+  2007-Apr-03 Added ERROR value                                         KAC
 *********************************************************************/
 
 #include <user_def.h>
@@ -44,6 +45,7 @@
 #define MISSING      -99999.	/* missing value for multipliers in BINARY format */
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
+#define ERROR -999              /* Error Flag returned by subroutines */
 
 /***** Met file formats *****/
 #define ASCII 1
@@ -397,6 +399,7 @@ typedef struct {
   char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
+  int    CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   int    Noutfiles;      /* Number of output files (not including state files) */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band */

@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void initialize_new_storm(cell_data_struct ***cell,
+int  initialize_new_storm(cell_data_struct ***cell,
 			  veg_var_struct   ***veg_var,
 			  int                 veg,
 			  int                 Nveg,
@@ -23,7 +23,7 @@ void initialize_new_storm(cell_data_struct ***cell,
   07-13-98 modified to redistribute Wdew within all defined
            elevation bands                                         KAC
   6-8-2000 modified to work with spatially distributed frost       KAC
-
+  2007-Apr-04 Modified to return to main subroutine on cell error GCT/KAC
 **********************************************************************/
  
   extern option_struct options;
@@ -47,11 +47,11 @@ void initialize_new_storm(cell_data_struct ***cell,
       temp_dry = cell[DRY][veg][band].layer[layer].moist;
       error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"moist does not balance before new storm: %f -> %f record %i\n",
+	fprintf(stderr,"moist does not balance before new storm: %f -> %f record %i\n",
 		cell[WET][veg][band].layer[layer].moist * new_mu
 		+ cell[DRY][veg][band].layer[layer].moist * (1. - new_mu),
 		temp_wet + temp_dry, rec);
-	vicerror(ErrorString);
+	return( ERROR );
       }
       cell[WET][veg][band].layer[layer].moist = temp_wet;
       cell[DRY][veg][band].layer[layer].moist = temp_dry;
@@ -68,17 +68,17 @@ void initialize_new_storm(cell_data_struct ***cell,
 					   new_mu);
 	if(error) {
 #if SPATIAL_FROST
-	  sprintf(ErrorString,"ice does not balance before new storm: %f -> %f record %i\n",
+	  fprintf(stderr,"ice does not balance before new storm: %f -> %f record %i\n",
 		  cell[WET][veg][band].layer[layer].ice[frost_area] * new_mu
 		  + cell[DRY][veg][band].layer[layer].ice[frost_area] 
 	    * (1. - new_mu), temp_wet + temp_dry, rec);
 #else
-	  sprintf(ErrorString,"ice does not balance before new storm: %f -> %f record %i\n",
+	  fprintf(stderr,"ice does not balance before new storm: %f -> %f record %i\n",
 		  cell[WET][veg][band].layer[layer].ice * new_mu
 		  + cell[DRY][veg][band].layer[layer].ice * (1. - new_mu),
 		  temp_wet + temp_dry, rec);
 #endif
-	  vicerror(ErrorString);
+	  return( ERROR );
 	}
 #if SPATIAL_FROST
 	cell[WET][veg][band].layer[layer].ice[frost_area] = temp_wet;
@@ -100,16 +100,17 @@ void initialize_new_storm(cell_data_struct ***cell,
       temp_dry = veg_var[DRY][veg][band].Wdew;
       error = average_moisture_for_storm(&temp_wet, &temp_dry, old_mu, new_mu);
       if(error) {
-	sprintf(ErrorString,"Wdew does not balance before new storm: %f -> %f record %i\n",
+	fprintf(stderr,"Wdew does not balance before new storm: %f -> %f record %i\n",
 		veg_var[WET][veg][band].Wdew * new_mu
 		+ veg_var[DRY][veg][band].Wdew * (1. - new_mu),
 		temp_wet + temp_dry, rec);
-	vicerror(ErrorString);
+	return( ERROR );
       }
       veg_var[WET][veg][band].Wdew = temp_wet;
       veg_var[DRY][veg][band].Wdew = temp_dry;
     }
   }
+  return (0);
 }
 
 unsigned char average_moisture_for_storm(double *wet_value,

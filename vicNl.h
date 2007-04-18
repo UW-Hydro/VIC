@@ -40,7 +40,7 @@ double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 #endif // SPATIAL_FROST
 unsigned char average_moisture_for_storm(double *, double *, double, double);
 
-void   CalcAerodynamic(char, double, double, double, double, double, double, 
+int   CalcAerodynamic(char, double, double, double, double, double, double, 
 	  	       double *, double *, double *, double *, double *, 
                        int, int);
 void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
@@ -132,20 +132,20 @@ void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
 out_data_struct *create_output_list();
 
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
-void   dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
+int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 veg_con_struct *, lake_con_struct *,
 		 dmy_struct *,global_param_struct *,
 		 filep_struct *, out_data_file_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
 #if QUICK_FS
-void distribute_node_moisture_properties(double *, double *, double *,
+int  distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double ***, 
 					 double *, double *, double *,
 					 double *, double *, int, int, char);
 #else
-void distribute_node_moisture_properties(double *, double *, double *,
+int  distribute_node_moisture_properties(double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *,
@@ -209,7 +209,7 @@ void   free_atmos(int nrecs, atmos_data_struct **atmos);
 void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_vegcon(veg_con_struct **);
 void   free_out_data_files(out_data_file_struct **);
-void   full_energy(char, int, int, atmos_data_struct *, dist_prcp_struct *,
+int    full_energy(char, int, int, atmos_data_struct *, dist_prcp_struct *,
 		   dmy_struct *, global_param_struct *, lake_con_struct *,
                    soil_con_struct *, veg_con_struct *);
 double func_aero_resist(double,double,double,double,double);
@@ -243,7 +243,7 @@ void   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      int, int, int, int, double, soil_con_struct *,
                               veg_con_struct *, lake_con_struct,
 			      char **, int **, save_data_struct *);
-void   initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
+int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **, int, int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
@@ -315,7 +315,7 @@ soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);
-void   redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
+int    redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
 				 int, int, int, double, double, double, 
 				 double *);
 void   redistribute_moisture(layer_data_struct *, double *, double *,
@@ -323,7 +323,7 @@ void   redistribute_moisture(layer_data_struct *, double *, double *,
 unsigned char redistribute_moisture_for_storm(double *, double *, double, 
 					      double, double);
 double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
-void   runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *, 
+int    runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *, 
 	      soil_con_struct *, double *, double *, double *, double *, 
 	      double *, 
 #if SPATIAL_FROST
@@ -349,7 +349,7 @@ double shrad(double,double,double,double,double,int,double);
 double snow_albedo(double, double, double, double, int, char);
 double snow_density(int, double, double, double, double, double, double, 
 		    double);
-void   snow_intercept(double, double, double, double, double, double, double,
+int    snow_intercept(double, double, double, double, double, double, double,
                       double, double, double, double, double, double, double, 
                       double, double, 
                       double *, double *, double *, double *, double *, 
@@ -360,7 +360,7 @@ void   snow_intercept(double, double, double, double, double, double, double,
                       int, int, int, int, layer_data_struct *, 
                       layer_data_struct *, soil_con_struct *, 
                       veg_var_struct *, veg_var_struct *);
-void   snow_melt(double, double, double, double, double *, double, double *, double, 
+int    snow_melt(double, double, double, double, double *, double, double *, double, 
 		 double, double, double, double, double, double, double, 
                  double, double, double, double, double, double, 
                  double *, double *, double *, double *, double *, double *, 
@@ -392,12 +392,12 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
-void   solve_T_profile(double *, double *, double *, double *,double *,
+int    solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double ***, 
 		       int, int *, int, int, int);
 #else
-void   solve_T_profile(double *, double *, double *, double *,double *,
+int    solve_T_profile(double *, double *, double *, double *,double *,
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, int, int *, 
 		       int, int, int);
@@ -406,7 +406,7 @@ double StabilityCorrection(double, double, double, double, double, double);
 void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,
 				veg_var_struct ***,snow_data_struct **,
 				soil_con_struct *);
-void   surface_fluxes(char, double, double, double, double, double, double, 
+int    surface_fluxes(char, double, double, double, double, double, double, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 

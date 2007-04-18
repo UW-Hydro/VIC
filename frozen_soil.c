@@ -60,7 +60,7 @@ void setup_frozen_soil(soil_con_struct   *soil_con,
 
 }
 
-void finish_frozen_soil_calcs(energy_bal_struct *energy,
+void   finish_frozen_soil_calcs(energy_bal_struct *energy,
 			      layer_data_struct *layer_wet,
 			      layer_data_struct *layer_dry,
 			      layer_data_struct *layer,
@@ -166,7 +166,7 @@ void finish_frozen_soil_calcs(energy_bal_struct *energy,
   
 }
 
-void solve_T_profile(double *T,
+int  solve_T_profile(double *T,
 		     double *T0,
 		     double *dz,
 		     double *kappa,
@@ -192,6 +192,8 @@ void solve_T_profile(double *T,
   This subroutine was written to iteratively solve the soil temperature
   profile using a numerical difference equation.  The solution equation
   is second order in space, and first order in time.
+
+2007-Apr-11 Changed type of Error from char to int GCT
 **********************************************************************/
 
   extern option_struct options;
@@ -207,7 +209,7 @@ void solve_T_profile(double *T,
 
   double *aa, *bb, *cc, *dd, *ee;
 
-  char   Error;
+  int    Error;
   int    try;
   double maxdiff, diff;
   double oldT;
@@ -253,6 +255,8 @@ void solve_T_profile(double *T,
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, FS_ACTIVE, NOFLUX);
 #endif
+
+  return ( Error );
   
 }
   
@@ -326,11 +330,13 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 			  A[j], B[j], C[j], D[j], E[j]);
 #endif
 	
-	if(T[j] <= -9998) 
+	if(T[j] <= -9998 ) {
 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
 				max_moist[j], bubble[j], expt[j], ice[j], 
 				gamma[j-1], fprime, A[j], B[j], C[j], D[j], 
 				E[j], ErrorString);
+          return ( ERROR );
+	}
       }
       
       diff=fabs(oldT-T[j]);
@@ -369,7 +375,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 A[j], B[j], C[j], D[j], E[j]);
 #endif
 	
-	if(T[j] <= -9998) 
+	if(T[j] <= -9998 ) {
 	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
 				T[Nnodes-2], T0[Nnodes-1], 
 				moist[Nnodes-1], max_moist[Nnodes-1], 
@@ -377,6 +383,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				expt[Nnodes-1], ice[Nnodes-1], 
 				gamma[Nnodes-2], fprime, 
 				A[j], B[j], C[j], D[j], E[j], ErrorString);
+          return ( ERROR );
+        }
       }
       
       diff=fabs(oldT-T[Nnodes-1]);
@@ -391,7 +399,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
     fprintf(stderr,"ERROR: Temperature Profile Unable to Converge!!!\n");
     fprintf(stderr,"Dumping Profile Temperatures (last, new).\n");
     for(j=0;j<Nnodes;j++) fprintf(stderr,"%f\t%f\n",T0[j],T[j]);
-    vicerror("ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile");
+    fprintf(stderr,"ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile\n");
+    return ( ERROR );
   }
 
   return (Error);
@@ -467,9 +476,9 @@ double error_print_solve_T_profile(double T, va_list ap) {
   fprintf(stderr,"D\t%f\n",D);
   fprintf(stderr,"E\t%f\n",E);
 
-  vicerror("Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.\n");
-  
-  return(0.0);
+  fprintf(stderr,"Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.\n");
+
+  return(ERROR);
 
 }
 

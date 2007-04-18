@@ -44,6 +44,8 @@ double calc_atmos_energy_bal(double  InOverSensible,
 	    dump in error_print_atmos_moist_bal.		TJB
   21-Sep-04 Added ErrorString to store error messages from
 	    root_brent.						TJB
+2007-Apr-06 Modified to handle grid cell errors by returning to the
+            main subroutine, rather than ending the simulation. GCT/KAC
 
 ************************************************************************/
 
@@ -93,14 +95,15 @@ double calc_atmos_energy_bal(double  InOverSensible,
 		       NetRadiation, Ra, Tair, atmos_density, InSensible, 
 		       SensibleHeat);
 
-  if ( Tcanopy <= -9998 ) 
+  if ( Tcanopy <= -9998 ) {
     // handle error flag from root brent
     (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
 					   + (*LatentHeatSub), 
 					   NetRadiation, Ra, Tair, 
 					   atmos_density, InSensible, 
 					   SensibleHeat, ErrorString);
-  
+    return ( ERROR );
+  }
   // compute varaibles based on final temperature
   (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub), 
 				    NetRadiation, Ra, Tair, atmos_density, 
@@ -207,9 +210,9 @@ double error_print_atmos_energy_bal(double Tcanopy, va_list ap) {
 
   fprintf(stderr, "*SensibleHeat = %f\n", *SensibleHeat);
  
-  vicerror("Finished writing calc_atmos_energy_bal variables.\nTry increasing CANOPY_DT to get model to complete cell.\nThen check output for instabilities.\n");
+  fprintf(stderr, "Finished writing calc_atmos_energy_bal variables.\nTry increasing CANOPY_DT to get model to complete cell.\nThen check output for instabilities.\n");
 
-  return(0.0);
+  return( ERROR );
     
 }
 

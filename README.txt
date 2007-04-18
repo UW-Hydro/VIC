@@ -456,6 +456,49 @@ file must match the strings listed in vicNl_def.h.
         output file format is binary, the variable data TYPE must match the string
         from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
 
+Added global option CONTINUEONERROR allowing simulation to continue on cell error.
+
+        Files affected:
+
+        arno_evap.c
+        CalcAerodynamic.c
+        calc_atmos_energy_bal.c
+        CalcBlowingSnow.c
+        calc_rainonly.c
+        calc_surf_energy_bal.c
+        display_current_settings.c
+        dist_prec.c
+        frozen_soil.c
+        full_energy.c
+        func_surf_energy_bal.c
+        get_global_param.c
+        ice_melt.c
+        initialize_new_storm.c
+        lakes.eb.c
+        redistribute_during_storm.c
+        root_brent.c
+        runoff.c
+        snow_intercept.c
+        snow_melt.c
+        soil_conduction.c
+        solve_snow.c
+        surface_fluxes.c
+        vicNl.c
+        water_energy_balance.c
+        water_under_ice.c
+        wetland_energy.c
+        global.param.sample
+        LAKE.h
+        vicNl_def.h
+        vicNl.h
+
+        If the global option CONTINUEONERROR is set to TRUE then the
+        simulation continues to run even if a cell fails and produces
+        partial output. Default is is for CONTINUEONERROR to be FALSE,
+        as in previous versions of model. The return value of some modules
+        was changed from void to an int numeric return value. The ERROR value is
+        defined in vicNl_def.h.  
+
 
 
 Bug Fixes:

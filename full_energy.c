@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-void full_energy(char                 NEWCELL,
+int  full_energy(char                 NEWCELL,
 		 int                  gridcell,
                  int                  rec,
                  atmos_data_struct   *atmos,
@@ -41,7 +41,8 @@ void full_energy(char                 NEWCELL,
   2006-Sep-23 Implemented flexible output configuration; now computation
 	      of soil wetness and root zone soil moisture happens here. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
+  2007-Apr-04 Modified to handle grid cell errors by returning to the
+           main subroutine, rather than ending the simulation.   GCT/KAC
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -62,6 +63,7 @@ void full_energy(char                 NEWCELL,
   int                    band;
   int                    Nbands;
   int                    hour;
+  int                    ErrorFlag;
   double                 out_prec[2*MAX_BANDS];
   double                 out_rain[2*MAX_BANDS];
   double                 out_snow[2*MAX_BANDS];
@@ -260,13 +262,14 @@ void full_energy(char                 NEWCELL,
 	ref_height[0] = displacement[0] + wind_h + roughness[0];
 
       /* Compute aerodynamic resistance over various surface types */
-      CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio, 
+      ErrorFlag = CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio, 
                       soil_con->snow_rough, soil_con->rough, 
 		      veg_lib[veg_class].wind_atten,
 		      gp->wind_h, cell[WET][iveg][0].aero_resist, tmp_wind, 
                       displacement, ref_height, roughness, 
                       Nveg, iveg);
-  
+      if ( ErrorFlag == ERROR ) return ( ERROR );  
+
       /**************************************************
         Store Water Balance Terms for Debugging
       **************************************************/
@@ -313,7 +316,7 @@ void full_energy(char                 NEWCELL,
 	    fetch       = veg_con[0].fetch;
 	  }
 
-	  surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
+	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
 			 prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
 			 cell[WET][iveg][0].aero_resist, &(cell[WET][iveg][0].aero_resist_used),
 			 &(cell[DRY][iveg][band].baseflow), 
@@ -331,7 +334,8 @@ void full_energy(char                 NEWCELL,
 			 cell[WET][iveg][band].layer, &(snow[iveg][band]), 
 			 soil_con, dry_veg_var, wet_veg_var, 
 			 lag_one, sigma_slope, fetch);
-	  
+	  if ( ErrorFlag == ERROR ) return ( ERROR );
+
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
@@ -464,13 +468,18 @@ void full_energy(char                 NEWCELL,
     lake_var->baseflow_in = sum_baseflow;
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
+    if ( (int)rainonly == ERROR ) {
+      return( ERROR );
+    }
     lake_prec = ( gauge_correction[SNOW] * (atmos->prec[NR] - rainonly) 
 		  + gauge_correction[RAIN] * rainonly );
     // atmos->out_prec += lake_prec * lake_con->Cl[0];
 
-    lakemain(atmos, *lake_con, gauge_correction[SNOW] * (atmos->prec[NR] - rainonly),gauge_correction[RAIN] * rainonly, 
+    ErrorFlag = lakemain(atmos, *lake_con, gauge_correction[SNOW] * (atmos->prec[NR] - rainonly),
+             gauge_correction[RAIN] * rainonly, 
 	     soil_con,(float)gp->dt, prcp, NR, rec, 
     	     gp->wind_h, gp, dmy, Nveg+1, 0);
+    if ( ErrorFlag == ERROR ) return ( ERROR );
 
 #if LINK_DEBUG
     if ( debug.PRT_LAKE ) { 
@@ -579,6 +588,6 @@ void full_energy(char                 NEWCELL,
 #endif // LINK_DEBUG
 
   }
-
+  return (0);
 }
 

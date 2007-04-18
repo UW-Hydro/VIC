@@ -121,7 +121,7 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
   int j;
   int eval = 0;
 
-  /* initialize variable argujment list */
+  /* initialize variable argument list */
 
     
   a = LowerBound;
@@ -150,7 +150,8 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
   if ((fa * fb) >= 0) {
     /* if we get here, the lower and upper bounds did not bracket the root */
     sprintf(ErrorString,"WARNING: %s: lower and upper bounds %f and %f failed to bracket the root.\n",Routine,a,b);
-    return(-9999.);
+    va_end(ap);
+    return( -9999. );
   }
   
   fc = fb;
@@ -230,7 +231,8 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
   }
   /* If we get here, there were too many iterations */
   sprintf(ErrorString,"WARNING: %s: too many iterations.\n",Routine);
-  return(-9998.);
+  va_end(ap);
+  return( -9998. );
 }
 
 #undef MAXTRIES

@@ -112,6 +112,8 @@ double calc_surf_energy_bal(double             Le,
 	      root_brent.				TJB
     28-Sep-04 Added aero_resist_used to store the aerodynamic
 	      resistance used in flux calculations.	TJB
+  2007-Apr-06 Modified to handle grid cell errors by returning to the
+              main subroutine, rather than ending the simulation. GCT/KAC
 
 ***************************************************************/
 {
@@ -331,7 +333,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error);
  
-    if(Tsurf <= -9998) {  
+    if(Tsurf <= -9998 ) {  
       error = error_calc_surf_energy_bal(Tsurf, dmy->month, VEG, iveg,
 					 veg_class, delta_t, Cs1, Cs2, D1, D2, 
 					 T1_old, T2, Ts_old, 
@@ -380,6 +382,7 @@ double calc_surf_energy_bal(double             Le,
 					 &energy->latent_sub, 
 					 &energy->sensible, 
 					 &energy->snow_flux, &energy->error, ErrorString);
+      return ( ERROR );
     }
 
     /**************************************************
@@ -426,7 +429,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error);
  
-      if(Tsurf <= -9998) {  
+      if(Tsurf <=  -9998 ) {  
 	error = error_calc_surf_energy_bal(Tsurf, dmy->month, VEG, iveg,
 					   veg_class, delta_t, Cs1, Cs2, D1, 
 					   D2, T1_old, T2, Ts_old, 
@@ -477,6 +480,7 @@ double calc_surf_energy_bal(double             Le,
 					   &energy->latent_sub, 
 					   &energy->sensible, 
 					   &energy->snow_flux, &energy->error, ErrorString);
+        return ( ERROR );
       }
     }
   }
@@ -1170,9 +1174,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
 	      max_moist_node[i], ice_node[i]);
   }
 
-  vicerror("Finished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.\n");
+  fprintf(stderr,"**********\n**********\nFinished writing calc_surf_energy_bal variables.\nTry increasing SURF_DT to get model to complete cell.\nThen check output for instabilities.\n**********\n**********\n");
 
-  return(0.0);
+  return (ERROR);
     
 }
 

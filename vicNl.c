@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
 	      This included merging builtnames into filenames.	TJB
   2007-Jan-15 Added PRT_HEADER option; added call to
 	      write_header().					TJB
+  2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
+	      free_out_data(), and free_veglib().  Added closing of
+	      all parameter files.				TJB
 
 **********************************************************************/
 {
@@ -374,6 +377,15 @@ int main(int argc, char *argv[])
 
   /** cleanup **/
   free_atmos(global_param.nrecs, &atmos);
+  free_dmy(&dmy);
+  free_out_data_files(&out_data_files);
+  free_out_data(&out_data);
+  free_veglib(&veg_lib);
+  fclose(filep.soilparam);
+  fclose(filep.vegparam);
+  fclose(filep.veglib);
+  if (options.SNOW_BAND>1)
+    fclose(filep.snowband);
 
   return EXIT_SUCCESS;
 }	/* End Main Program */

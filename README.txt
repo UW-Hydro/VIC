@@ -844,6 +844,21 @@ Aggregation methods of some variables not set properly.
         output variables; re-organized the code to make
         it easier to debug.
 
+Fixes for memory leaks and variable initialization.
+
+        Files affected:
+
+        make_dmy.c
+        mtclim42_vic.c
+        output_list_utils.c
+        parse_output_info.c
+        read_veglib.c
+        vicNl.c
+        vicNl.h
+
+        Description:
+
+        Miscellaneous fixes for memory leaks and variable initialization.
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

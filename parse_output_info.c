@@ -19,6 +19,8 @@ void parse_output_info(filenames_struct      *names,
   2006-Nov-07 Changed default precision from %.1f to %.4f.	TJB
   2007-Jan-15 Modified to expect "OUT_TYPE_" at beginning of
 	      output data type strings.				TJB
+  2007-Apr-21 Added initialization for format, outfilenum, and
+	      outvarnum.					TJB
 
 **********************************************************************/
 {
@@ -38,10 +40,14 @@ void parse_output_info(filenames_struct      *names,
   float mult;
   int  tmp_noutfiles;
 
+  strcpy(format,"*");
+
   /** Read through global control file to find output info **/
 
   fgets(cmdstr,MAXSTRING,gp);
 
+  outfilenum = -1;
+  outvarnum = 0;
   while(!feof(gp)) {
     if(cmdstr[0]!='#' && cmdstr[0]!='\n' && cmdstr[0]!='\0') {
 

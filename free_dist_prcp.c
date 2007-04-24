@@ -16,6 +16,7 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   modifications:
   06-24-98 modified to account for redesign of distributed precipitation
            data structures                                          KAC
+  2007-Apr-23 Added freeing of mu.					TJB
 
 **********************************************************************/
 {
@@ -42,5 +43,6 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   for(i=0;i<=Nveg;i++)
     free((char *)prcp[0].snow[i]);
   free((char *)prcp[0].snow);
+  free((char *)prcp[0].mu);
 
 }

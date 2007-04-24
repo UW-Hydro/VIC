@@ -848,6 +848,8 @@ Fixes for memory leaks and variable initialization.
 
         Files affected:
 
+        free_dist_prcp.c
+        get_global_param.c
         make_dmy.c
         mtclim42_vic.c
         output_list_utils.c

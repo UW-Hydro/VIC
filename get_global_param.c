@@ -59,6 +59,7 @@ global_param_struct get_global_param(filenames_struct      *names,
 	      also added f_path_pfx to store forcing file path and prefix. TJB
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
+  2007-Apr-23 Added initialization of some global parameters.		TJB
 
 **********************************************************************/
 {
@@ -102,25 +103,36 @@ global_param_struct get_global_param(filenames_struct      *names,
   char typestr[10];
   float multiplier;
 
-  /** Initialize non-global parameters **/
+  /** Initialize global parameters (that aren't part of the options struct) **/
+  global.dt            = MISSING;
+  global.nrecs         = MISSING;
+  global.startyear     = MISSING;
+  global.startmonth    = MISSING;
+  global.startday      = MISSING;
+  global.starthour     = MISSING;
+  global.endyear       = MISSING;
   global.endmonth      = MISSING;
   global.endday        = MISSING;
-  global.endyear       = MISSING;
-  global.skipyear      = 0;
+  global.resolution    = MISSING;
+  global.MAX_SNOW_TEMP = 0;
+  global.MIN_RAIN_TEMP = 0;
+  global.measure_h     = 2.0;
+  global.wind_h        = 10.0;
   for(i = 0; i < 2; i++) {
+    global.forceyear[i]  = MISSING;
     global.forcemonth[i] = 1;
     global.forceday[i]   = 1;
-    global.forceyear[i]  = MISSING;
     global.forcehour[i]  = 0;
     global.forceskip[i]  = 0;
   }
   file_num             = 0;
-  global.nrecs         = MISSING;
   strcpy(names->f_path_pfx[1],"FALSE");
-  global.stateyear  = MISSING;
-  global.statemonth = MISSING;
-  global.stateday   = MISSING;
+  global.stateyear     = MISSING;
+  global.statemonth    = MISSING;
+  global.stateday      = MISSING;
   strcpy(names->statefile, "NONE");
+  global.skipyear      = 0;
+  global.out_dt        = MISSING;
 
   /** Read through global control file to find parameters **/
 
@@ -612,7 +624,7 @@ global_param_struct get_global_param(filenames_struct      *names,
 #endif  // !OUTPUT_FORCE
 
   /* check the output step */
-  if (global.out_dt == 0) {
+  if (global.out_dt == 0 || global.out_dt == MISSING) {
     global.out_dt = global.dt;
   }
   else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {

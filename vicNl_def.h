@@ -581,7 +581,7 @@ typedef struct {
   double   bubble[MAX_LAYERS];        /* bubbling pressure, HBH 5.15 (cm) */
   double   bubble_node[MAX_NODES];    /* bubbling pressure (cm) */
   double   bulk_density[MAX_LAYERS];  /* soil bulk density (kg/m^3) */
-  double   c;                         /* exponent */
+  double   c;                         /* exponent in ARNO baseflow scheme */
   double   depth[MAX_LAYERS];         /* thickness of each soil moisture 
 					 layer (m) */
 #if SPATIAL_SNOW

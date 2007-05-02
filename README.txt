@@ -1019,6 +1019,15 @@ Lake model energy terms NaN for southern hemisphere lakes
 	  ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
 	This appears to fix the problem.	TJB
 
+Added case of SPATIAL_FROST = TRUE in full_energy.c
+
+        Files affected:
+
+        full_energy.c
+
+        The modifications of 2006-Sep-23 contained a bug in the computation
+        of soil wetness and root zone soil moisture.
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r1 to VIC 4.1.0 beta r2 *****

@@ -10,6 +10,17 @@ Revisions.txt - Describes differences between versions of VIC source code.
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4i to VIC 4.1.0 beta r4j ***
+--------------------------------------------------------------------------------
+
+Changed comment in description of c in vicNl_def.h  
+
+        Files affected:
+
+        vicNl_def.h
+
+        Changed comment from "exponent" to "exponent in ARNO baseflow scheme"
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4h to VIC 4.1.0 beta r4i ***

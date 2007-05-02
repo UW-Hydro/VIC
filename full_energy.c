@@ -43,6 +43,8 @@ int  full_energy(char                 NEWCELL,
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
            main subroutine, rather than ending the simulation.   GCT/KAC
+  2007-May-01 Added case of SPATIAL_FROST = TRUE in modifications
+              from 2006-Sep-23. GCT
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -64,6 +66,9 @@ int  full_energy(char                 NEWCELL,
   int                    Nbands;
   int                    hour;
   int                    ErrorFlag;
+#if SPATIAL_FROST
+  int    frost_area;
+#endif // SPATIAL_FROST
   double                 out_prec[2*MAX_BANDS];
   double                 out_rain[2*MAX_BANDS];
   double                 out_snow[2*MAX_BANDS];
@@ -348,7 +353,14 @@ int  full_energy(char                 NEWCELL,
             cell[dist][iveg][band].rootmoist = 0;
             cell[dist][iveg][band].wetness = 0;
             for(lidx=0;lidx<options.Nlayer;lidx++) {
+#if SPATIAL_FROST
+              tmp_total_moist = cell[dist][iveg][band].layer[lidx].moist;
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+                tmp_total_moist += cell[dist][iveg][band].layer[lidx].ice[frost_area];
+	      }
+#else
               tmp_total_moist = cell[dist][iveg][band].layer[lidx].moist + cell[dist][iveg][band].layer[lidx].ice;
+#endif // SPATIAL_FROST 
               if (veg_con->root[lidx] > 0) {
                 cell[dist][iveg][band].rootmoist += tmp_total_moist;
               }

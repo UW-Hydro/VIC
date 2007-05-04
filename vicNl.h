@@ -19,6 +19,23 @@
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
   2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
+  2007-Apr-03 Modified the data types of the following functions for
+	      CONTINUE_ON_ERROR:					KAC/GTC
+	      CalcAerodynamic
+	      dist_prec
+	      distribute_node_moisture_properties
+	      full_energy
+	      initialize_new_storm
+	      redistribute_during_storm
+	      runoff
+	      snow_intercept
+	      snow_melt
+	      solve_T_profile
+	      surface_fluxes
+  2007-Apr-21 Added functions:						TJB
+	      free_dmy
+	      free_out_data
+	      free_veglib
 
 ************************************************************************/
 
@@ -207,8 +224,11 @@ void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
 				double *, double *, double *, double *);
 void   free_atmos(int nrecs, atmos_data_struct **atmos);
 void   free_dist_prcp(dist_prcp_struct *, int);
+void   free_dmy(dmy_struct **dmy);
 void   free_vegcon(veg_con_struct **);
+void   free_veglib(veg_lib_struct **);
 void   free_out_data_files(out_data_file_struct **);
+void   free_out_data(out_data_struct **);
 int    full_energy(char, int, int, atmos_data_struct *, dist_prcp_struct *,
 		   dmy_struct *, global_param_struct *, lake_con_struct *,
                    soil_con_struct *, veg_con_struct *);

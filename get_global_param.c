@@ -61,6 +61,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-03 Added CONTINUEONERROR option.				GCT
+  2007-Apr-23 Added initialization of global parameters.		TJB
+  2007-Apr-23 Added check for FULL_ENERGY if lake model is run.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -94,23 +96,36 @@ global_param_struct get_global_param(filenames_struct *names,
         } ;
   global_param_struct global;
 
-  /** Initialize non-global parameters **/
+  /** Initialize global parameters (that aren't part of the options struct) **/
+  global.dt            = MISSING;
+  global.nrecs         = MISSING;
+  global.startyear     = MISSING;
+  global.startmonth    = MISSING;
+  global.startday      = MISSING;
+  global.starthour     = MISSING;
+  global.endyear       = MISSING;
   global.endmonth      = MISSING;
   global.endday        = MISSING;
-  global.endyear       = MISSING;
-  global.skipyear      = 0;
+  global.resolution    = MISSING;
+  global.MAX_SNOW_TEMP = 0;
+  global.MIN_RAIN_TEMP = 0;
+  global.measure_h     = 2.0;
+  global.wind_h        = 10.0;
   for(i = 0; i < 2; i++) {
+    global.forceyear[i]  = MISSING;
     global.forcemonth[i] = 1;
     global.forceday[i]   = 1;
-    global.forceyear[i]  = MISSING;
     global.forcehour[i]  = 0;
     global.forceskip[i]  = 0;
     strcpy(names->f_path_pfx[i],"FALSE");
   }
   file_num             = 0;
-  global.nrecs         = MISSING;
-  global.stateyear = MISSING;
+  global.stateyear     = MISSING;
+  global.statemonth    = MISSING;
+  global.stateday      = MISSING;
   strcpy(names->statefile, "NONE");
+  global.skipyear      = 0;
+  global.out_dt        = MISSING;
 
   /** Read through global control file to find parameters **/
 
@@ -648,6 +663,11 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
     nrerror(ErrStr);
   }
+  // Validate lakes
+  if ( options.LAKES && !options.FULL_ENERGY ) {
+    sprintf(ErrStr, "FULL_ENERGY must be TRUE if the lake model is to be run.");
+    nrerror(ErrStr);
+  }
   if ( global.resolution == 0 && options.LAKES ) {
     sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
     nrerror(ErrStr);
@@ -660,7 +680,7 @@ global_param_struct get_global_param(filenames_struct *names,
 #endif  // !OUTPUT_FORCE
 
   /* check the output step */
-  if (global.out_dt == 0) {
+  if (global.out_dt == 0 || global.out_dt == MISSING) {
     global.out_dt = global.dt;
   }
   else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {

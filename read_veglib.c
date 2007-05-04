@@ -119,4 +119,15 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   return temp;
 } 
 
+/**********************************************************************
+  free_veglib              Ted Bohn		April 2007 
 
+  This routine frees the veglib structure.
+
+  Modifications:
+
+**********************************************************************/
+void free_veglib(veg_lib_struct **veg_lib) {
+
+  free((char*)(*veg_lib));
+}

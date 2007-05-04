@@ -31,7 +31,9 @@ void initialize_lake (lake_var_struct  *lake,
   2005-03-24 Added check for negative lake volumes.			TJB
   2006-Oct-16 Added RCS ID string.					TJB
   2006-Nov-07 Initialized aero_resist, aero_resist_used, and MELTING.	TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Apr-23 Added initialization of lake->surface, lake->swe, and
+	      lake->sdepth.						TJB
 
 **********************************************************************/
 {
@@ -50,6 +52,7 @@ void initialize_lake (lake_var_struct  *lake,
   for ( i = 0 ; i < MAX_LAKE_NODES; i++ )
     {      
       lake->temp[i] = max(airtemp,0.0);
+      lake->surface[i] = 0.0;
     }
 
   lake->tempi = 0.0;
@@ -62,6 +65,8 @@ void initialize_lake (lake_var_struct  *lake,
   lake_snow->depth = 0.0;
   lake_snow->surf_temp = 0.0;
   lake_snow->MELTING = FALSE;
+  lake->swe = lake_snow->swq;
+  lake->sdepth = lake_snow->depth;
 
   /********************************************************************/
   /* Initialize lake physical parameters.                             */

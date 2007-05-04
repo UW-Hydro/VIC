@@ -119,6 +119,8 @@ double solve_snow(char                 overstory,
   2006-Sep-26 Added tracking of out_rain and out_snow.  TJB
   2007-Apr-06 Modified to handle grid cell errors by returning to the
            main subroutine, rather than ending the simulation. GCT/KAC
+  2007-Apr-21 Added initialization of TmpAlbedoUnder[0] for the case
+	      in which snow->swq == 0.				TJB
 
 *********************************************************************/
 
@@ -218,6 +220,8 @@ double solve_snow(char                 overstory,
       snow->albedo = snow_albedo( snowfall[WET], snow->swq, 
 				  snow->coldcontent, dt, 
 				  snow->last_snow, snow->MELTING); 
+    else
+      snow->albedo = TmpAlbedoUnder[0];
     TmpAlbedoUnder[1]   = (*coverage * snow->albedo
 			   + (1. - *coverage) * BareAlbedo); 
 

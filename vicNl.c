@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
   2007-Jan-15 Added PRT_HEADER option; added call to
 	      write_header().					TJB
   2007-Apr-04 Added option to continue run after a cell fails GCT/KAC.
+  2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
+	      free_out_data(), and free_veglib().  Added closing of
+	      all parameter files.				TJB
 
 **********************************************************************/
 {
@@ -123,6 +126,7 @@ int main(int argc, char *argv[])
   /** Set up output data structures **/
   out_data = create_output_list();
   out_data_files = set_output_defaults(out_data);
+  fclose(filep.globalparam);
   filep.globalparam = open_file(filenames.global,"r");
   parse_output_info(&filenames, filep.globalparam, &out_data_files, out_data);
 
@@ -410,12 +414,25 @@ int main(int argc, char *argv[])
       for(index=0;index<=options.Nlayer;index++) 
 	free((char*)soil_con.layer_node_fract[index]);
       free((char*)soil_con.layer_node_fract);
+      free((char*)init_STILL_STORM);
+      free((char*)init_DRY_TIME);
 #endif /* !OUTPUT_FORCE */
     }	/* End Run Model Condition */
   } 	/* End Grid Loop */
 
   /** cleanup **/
   free_atmos(global_param.nrecs, &atmos);
+  free_dmy(&dmy);
+  free_out_data_files(&out_data_files);
+  free_out_data(&out_data);
+  free_veglib(&veg_lib);
+  fclose(filep.soilparam);
+  fclose(filep.vegparam);
+  fclose(filep.veglib);
+  if (options.SNOW_BAND>1)
+    fclose(filep.snowband);
+  if (options.LAKES)
+    fclose(filep.lakeparam);
 
   return EXIT_SUCCESS;
 }	/* End Main Program */

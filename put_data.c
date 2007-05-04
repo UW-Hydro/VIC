@@ -58,6 +58,9 @@ void put_data(dist_prcp_struct  *prcp,
   2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
   2006-Dec-20 Changed OUT_SURF_TEMP from average of T[0] and T[1] to
 	      direct assignment of T[0].				TJB
+  2007-Apr-21 Moved initialization of tmp_fract to immediately before the
+	        #if SPATIAL_FROST
+	      block, so that it would be initialized in all cases.	TJB
 
 **********************************************************************/
 {
@@ -336,8 +339,8 @@ void put_data(dist_prcp_struct  *prcp,
 	    }
 	  }
 
-#if SPATIAL_FROST
           tmp_fract = 0;
+#if SPATIAL_FROST
           for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
             if ( cell[0][veg][band].layer[0].ice[frost_area] )
               tmp_fract  += frost_fract[frost_area];

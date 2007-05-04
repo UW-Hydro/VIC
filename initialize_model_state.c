@@ -53,16 +53,18 @@ void initialize_model_state(dist_prcp_struct    *prcp,
   04-25-03 Modified to work with vegetation type specific storm 
            parameters.                                              KAC
   07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
-	    accessed in set_node_parameters().			TJB
+	    accessed in set_node_parameters().				TJB
   01-Nov-04 Added support for state files containing SPATIAL_FROST
-	    and LAKE_MODEL state variables.			TJB
+	    and LAKE_MODEL state variables.				TJB
   2006-Sep-23 Implemented flexible output configuration; uses the new
               save_data structure to track changes in moisture storage
-              over each time step; this needs initialization here.  TJB
-  2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe. TJB
+              over each time step; this needs initialization here.  	TJB
+  2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe. 	TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-	      This included removing the unused init_snow file. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+	      This included removing the unused init_snow file. 	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2006-Apr-21 Replaced Cv (uninitialized) with lake_con.Cl[0] in
+	      surfstor calculation.					TJB
 
 **********************************************************************/
 {
@@ -581,6 +583,6 @@ void initialize_model_state(dist_prcp_struct    *prcp,
 
   }
   Clake = lake_var->sarea/lake_con.basin[0];
-  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * Cv * soil_con->AreaFract[0] * TreeAdjustFactor[0];
+  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * lake_con.Cl[0] * soil_con->AreaFract[0] * TreeAdjustFactor[0];
 
 }

@@ -200,3 +200,20 @@ void get_next_time_step(int *year,
   }
   
 }
+
+
+/**********************************************************************
+	free_dmy	Ted Bohn		April 2007
+
+  This subroutine frees the dmy array.
+
+  modifications:
+**********************************************************************/
+void free_dmy(dmy_struct **dmy) {
+
+  if (*dmy == NULL)
+    return;
+
+  free(*dmy);
+
+}

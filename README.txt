@@ -1026,7 +1026,32 @@ Added case of SPATIAL_FROST = TRUE in full_energy.c
         full_energy.c
 
         The modifications of 2006-Sep-23 contained a bug in the computation
-        of soil wetness and root zone soil moisture.
+        of soil wetness and root zone soil moisture.  GCT
+
+Miscellaneous fixes for memory leaks and uninitialized variables.
+
+        Files affected:
+
+        free_dist_prcp.c
+        get_global_param.c
+        initialize_lake.c
+        initialize_model_state.c
+        lakes.eb.c
+        make_dmy.c
+        mtclim42_vic.c
+        output_list_utils.c
+        parse_output_info.c
+        put_data.c
+        read_veglib.c
+        solve_snow.c
+        vicNl.c
+        vicNl.h
+
+        Description:
+
+        Miscellaneous fixes for memory leaks and uninitialized variables.
+        Also changed comments in vicNl.h to reflect type changes introduced
+        in 4.1.0._r4h   TJB
 
 
 --------------------------------------------------------------------------------

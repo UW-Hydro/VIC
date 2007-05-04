@@ -16,31 +16,36 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   modifications:
   06-24-98 modified to account for redesign of distributed precipitation
            data structures                                          KAC
+  2007-Apr-21 Replaced loop over Nveg to loop over Nitems, so that lake-
+	      specific veg tiles could be freed.			TJB
 
 **********************************************************************/
 {
   extern option_struct options;
 
   int Ndist;
-  int i, j;
+  int i, j, Nitems;
 
   Ndist = 2;
+  if (options.LAKES) Nitems = Nveg + 2;
+  else Nitems = Nveg + 1;
 
   for(i=0;i<Ndist;i++) {
-    for(j=0;j<=Nveg;j++) {
+    for(j=0;j<Nitems;j++) {
       free((char *)prcp[0].cell[i][j]);
     }
     free((char *)prcp[0].cell[i]);
-    for(j=0;j<Nveg;j++) 
-      free((char *)prcp[0].veg_var[i][j]);
-    free((char *)prcp[0].veg_var[i]);
+    for(j=0;j<Nitems;j++) 
+      free((char *)(*prcp).veg_var[i][j]);
+    free((char *)(*prcp).veg_var[i]);
   }
-  for(j=0;j<=Nveg;j++) {
+  for(j=0;j<Nitems;j++) {
     free((char *)prcp[0].energy[j]);
   }
   free((char *)prcp[0].energy);
-  for(i=0;i<=Nveg;i++)
+  for(i=0;i<Nitems;i++)
     free((char *)prcp[0].snow[i]);
   free((char *)prcp[0].snow);
+  free((char *)prcp[0].mu);
 
 }

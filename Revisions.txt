@@ -11,6 +11,37 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4j to VIC 4.1.0 beta r4k ***
+--------------------------------------------------------------------------------
+
+Miscellaneous fixes for memory leaks and uninitialized variables.
+
+        Files affected:
+
+        free_dist_prcp.c
+        get_global_param.c
+        initialize_lake.c
+        initialize_model_state.c
+        lakes.eb.c
+        make_dmy.c
+        mtclim42_vic.c
+        output_list_utils.c
+        parse_output_info.c
+        put_data.c
+        read_veglib.c
+        solve_snow.c
+        vicNl.c
+        vicNl.h
+
+        Description:
+
+        Miscellaneous fixes for memory leaks and uninitialized variables.
+        Also changed comments in vicNl.h to reflect type changes introduced
+        in 4.1.0._r4h
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4i to VIC 4.1.0 beta r4j ***
 --------------------------------------------------------------------------------
 

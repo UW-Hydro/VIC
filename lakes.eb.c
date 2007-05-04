@@ -224,11 +224,14 @@ int solve_lake(double             snow,
 
   Modifications:
   2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
-	      guarantees that it is initialized for all cases.  TJB
+	      guarantees that it is initialized for all cases.		TJB
   2006-Nov-15 Convert swq and surf_water from mm over lake to mm over ice
 	      fraction at beginning of function; this was needed to avoid
 	      a water budget error since swq and surf_water were being
-	      converted to mm over lake at end of the function.  TJB
+	      converted to mm over lake at end of the function.		TJB
+  2007-Apr-21 Added initialization of energy_ice_melt_bot and qf for case
+	      in which fracprv >= FRACLIM but hice == 0.0.		TJB
+  2007-Apr-23 Added initialization of lake_energy->Tsurf.		TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -301,6 +304,7 @@ int solve_lake(double             snow,
   energy_ice_formation = 0.0;
   energy_out_bottom = energy_out_bottom_ice = 0.0;
   lake_snow->vapor_flux=0.0;
+  lake_energy->Tsurf = lake->temp[0];
 
   if(lake->activenod > 0) {	
 
@@ -501,7 +505,11 @@ int solve_lake(double             snow,
 		   &energy_ice_melt_bot, lake_snow->swq*RHO_W/RHOSNOW, 
 		   lake_energy->deltaCC, rec, dmy, &qf);
 	   // fprintf(stdout, ",%f,%f,%f,%f\n", lake->surface[0], lake->tempi, T[0], Ti[0]); // -> KAC
-	  }
+        }
+        else {
+          energy_ice_melt_bot = 0.;
+          qf = 0.;
+        }
       }
       else {
 	/* No Lake Ice */
@@ -1074,8 +1082,8 @@ void iceform (double *qfusion,
      *qfusion = 0.0;
       sum=0.;
 
-      for(j=0; j<numnod;j++) 
-	{
+      for(j=0; j<numnod;j++) {
+
 	  if (T[j]  < Tcutoff) {
 
 /* --------------------------------------------------------------------
@@ -1104,8 +1112,8 @@ void iceform (double *qfusion,
             T[j]=Tcutoff;
 	 
             sum+=extra;
-	    }
-	}
+	  }
+      }
 
 /**********************************************************************
  * Calculate the heat flux absorbed into the ice (in W/m2) and the 
@@ -1423,21 +1431,23 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
 	       double *cp, double *energy_out_bottom)
     {
 /********************************************************************** 				       
- * Calculate the water temperature for different levels in the lake.
- *
- * Parameters :
- *
- * sw_visible   Shortwave rad in visible band entering top of water column
- * sw_nir       Shortwave rad in near infrared band entering top of water column
- * surface_force The remaining rerms i nthe top layer energy balance 
- * T		Lake water temperature at different levels (K).
+  Calculate the water temperature for different levels in the lake.
  
- * water_density		Water density at different levels (kg/m3).
- * de		Diffusivity of water (or ice) (m2/d).
- * dt		Time step size (s).
- * surface	Area of the lake at different levels (m2).
- * numnod	Number of nodes in the lake (-).
- * dz        Thickness of the lake layers. 
+  Parameters :
+ 
+  sw_visible   Shortwave rad in visible band entering top of water column
+  sw_nir       Shortwave rad in near infrared band entering top of water column
+  surface_force The remaining rerms i nthe top layer energy balance 
+  T		Lake water temperature at different levels (K).
+  water_density		Water density at different levels (kg/m3).
+  de		Diffusivity of water (or ice) (m2/d).
+  dt		Time step size (s).
+  surface	Area of the lake at different levels (m2).
+  numnod	Number of nodes in the lake (-).
+  dz        Thickness of the lake layers. 
+
+  Modifications:
+  2007-Apr-23 Added initialization of temph.				TJB
  **********************************************************************/
 
       double z[MAX_LAKE_NODES], zhalf[MAX_LAKE_NODES];
@@ -1484,10 +1494,6 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
  * of equations.
  **********************************************************************/
 
-/* --------------------------------------------------------------------
- * First calculate d for the surface layer of the lake.
- * -------------------------------------------------------------------- */
-      
 	
       surface_1 = surface[0];
       surface_2 = surface[1];
@@ -1503,13 +1509,21 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
       
        energymixed += cnextra;
 
+       *temph=0.0;
+
        if(numnod==1)
+
           Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
+
        else {	
 
-      d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
+/* --------------------------------------------------------------------
+ * First calculate d for the surface layer of the lake.
+ * -------------------------------------------------------------------- */
+      
+         d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
 
-            *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
+         *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
       						    sw_nir*exp(-lamwlw*surfdz));
 
 

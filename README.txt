@@ -792,6 +792,21 @@ New vicInterp executable
 	completely written.
 
 
+Changed method of calculating T gradient at thermal nodes.
+
+        Files affected:
+
+        Makefile
+        free_dist_prcp.c
+        full_energy.c
+        get_global_param.c
+        initialize_model_state.c
+        lakes.eb.c
+        soil_conduction.c
+        vicNl_def.h
+        vicNl.h
+
+
 Bug Fixes:
 ----------
 

@@ -11,6 +11,27 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4k to VIC 4.1.0 beta r4l ***
+--------------------------------------------------------------------------------
+
+Changed method of calculating T gradient at thermal nodes. 
+
+        Files affected:
+
+        Makefile
+        free_dist_prcp.c
+        full_energy.c
+        get_global_param.c
+        initialize_model_state.c
+        lakes.eb.c
+        soil_conduction.c
+        vicNl_def.h
+        vicNl.h
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4j to VIC 4.1.0 beta r4k ***
 --------------------------------------------------------------------------------
 

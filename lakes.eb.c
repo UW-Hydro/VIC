@@ -21,8 +21,7 @@ int lakemain(atmos_data_struct  *atmos,
 	      global_param_struct *gp,
 	      dmy_struct          *dmy,
 	      int                iveg,
-	      int                band
-	      )
+	      int                band )
 {
   /**********************************************************************
       lakes           Valentijn Pauwels             September 1998
@@ -46,6 +45,7 @@ int lakemain(atmos_data_struct  *atmos,
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-03 Modified to catch and return error flags from surface_fluxes
               subroutine.                                         KAC
+  24-Apr-07  Passes soil_con.Zsum_node to distribute_node_moisture_properties.  JCA
 
   Parameters :
 
@@ -224,11 +224,11 @@ int solve_lake(double             snow,
 
   Modifications:
   2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
-	      guarantees that it is initialized for all cases.		TJB
+	      guarantees that it is initialized for all cases.  TJB
   2006-Nov-15 Convert swq and surf_water from mm over lake to mm over ice
 	      fraction at beginning of function; this was needed to avoid
 	      a water budget error since swq and surf_water were being
-	      converted to mm over lake at end of the function.		TJB
+	      converted to mm over lake at end of the function.  TJB
   2007-Apr-21 Added initialization of energy_ice_melt_bot and qf for case
 	      in which fracprv >= FRACLIM but hice == 0.0.		TJB
   2007-Apr-23 Added initialization of lake_energy->Tsurf.		TJB
@@ -504,12 +504,13 @@ int solve_lake(double             snow,
 		   &lake->fraci, dt, lake_energy->snow_flux, qw, 
 		   &energy_ice_melt_bot, lake_snow->swq*RHO_W/RHOSNOW, 
 		   lake_energy->deltaCC, rec, dmy, &qf);
-	   // fprintf(stdout, ",%f,%f,%f,%f\n", lake->surface[0], lake->tempi, T[0], Ti[0]); // -> KAC
-        }
+	   // fprintf(stdout, ",%f,%f,%f,%f\n", lake->surface[0], lake->tempi,
+	   // T[0], Ti[0]); // -> KAC
+	}
         else {
           energy_ice_melt_bot = 0.;
           qf = 0.;
-        }
+	}
       }
       else {
 	/* No Lake Ice */
@@ -1083,7 +1084,6 @@ void iceform (double *qfusion,
       sum=0.;
 
       for(j=0; j<numnod;j++) {
-
 	  if (T[j]  < Tcutoff) {
 
 /* --------------------------------------------------------------------
@@ -1112,8 +1112,8 @@ void iceform (double *qfusion,
             T[j]=Tcutoff;
 	 
             sum+=extra;
-	  }
-      }
+	    }
+	}
 
 /**********************************************************************
  * Calculate the heat flux absorbed into the ice (in W/m2) and the 
@@ -1510,24 +1510,22 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
        energymixed += cnextra;
 
        *temph=0.0;
-
+       
        if(numnod==1)
-
-          Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
-
+	 Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
        else {	
-
-/* --------------------------------------------------------------------
- * First calculate d for the surface layer of the lake.
- * -------------------------------------------------------------------- */
-      
-         d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
-
-         *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
-      						    sw_nir*exp(-lamwlw*surfdz));
-
-
-
+	 
+	 /* --------------------------------------------------------------------
+	  * First calculate d for the surface layer of the lake.
+	  * -------------------------------------------------------------------- */
+	 
+	 d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
+	 
+	 *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
+						       sw_nir*exp(-lamwlw*surfdz));
+	 
+	 
+	 
 /* --------------------------------------------------------------------
  * Calculate d for the remainder of the column.
  * --------------------------------------------------------------------*/
@@ -2465,7 +2463,7 @@ void initialize_prcp(dist_prcp_struct *prcp,
     moist[index] = cell[WET][iveg][band].layer[index].moist;
   distribute_node_moisture_properties(wland_energy[iveg][band].moist, wland_energy[iveg][band].ice,
 				      wland_energy[iveg][band].kappa_node, wland_energy[iveg][band].Cs_node,
-				      soil_con.dz_node, wland_energy[iveg][band].T,
+				      soil_con.dz_node, soil_con.Zsum_node, wland_energy[iveg][band].T,
 				      soil_con.max_moist_node,
 #if QUICK_FS
 				      soil_con.ufwc_table_node,

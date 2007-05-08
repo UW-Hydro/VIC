@@ -104,6 +104,8 @@ int  surface_fluxes(char                 overstory,
   2006-Dec-20 Modified iteration loop variables to be more intuitive.	TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
               main subroutine, rather than ending the simulation.   GCT/KAC
+  24-Apr-07 Features included for IMPLICIT frozen soils option. JCA
+              (passing nrecs to  calc_surf_energy_bal)
 
 **********************************************************************/
 {
@@ -548,7 +550,7 @@ int  surface_fluxes(char                 overstory,
 				     &(dmy[rec]), &bare_energy, 
 				     step_layer[DRY], step_layer[WET], 
 				     &(step_snow), soil_con, 
-				     &bare_veg_var[DRY], &bare_veg_var[WET]); 
+				     &bare_veg_var[DRY], &bare_veg_var[WET], gp->nrecs); 
         if ( (int)Tsurf == ERROR ) {
           // Return error flag to skip rest of grid cell
           return ( ERROR );

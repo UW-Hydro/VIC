@@ -38,6 +38,8 @@ void write_debug(atmos_data_struct    *atmos,
   Modifications:
   07-15-98 modified to work with elevation bands                 KAC
   xx-xx-01 Modified to work with closed canopy energy balance.   KAC
+  04-24-07 Brings in Zsum_node from soil_con rather than 
+           recalculating.  JCA
 
 **********************************************************************/
 
@@ -70,11 +72,9 @@ void write_debug(atmos_data_struct    *atmos,
   int     Ntemp;
   int     band;
   int     Nbands;
-  double  sum;
   double *Evap;
   double *curr_moist;
   double  curr_ice;
-  double  Zsum;
   double  grnd_flux;
   double  advection;
   double  deltaH;
@@ -349,30 +349,20 @@ void write_debug(atmos_data_struct    *atmos,
       fprintf(debug.fg_temp,"Date - hour(REC)\tveg\tband\tAir T\tFdpth\tTdpth");
       for(i=0;i<options.Nlayer;i++) 
 	fprintf(debug.fg_temp,"\tLayer %i",i);
-      sum=0.0;
       for(i=0;i<options.Nnode;i++) {
-	fprintf(debug.fg_temp,"\tT%.0f",sum*100.0);
-	sum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.0;
+	fprintf(debug.fg_temp,"\tT%.0f",soil_con->Zsum_node[i]*100.0);
       }
-      sum=0.0;
       for(i=0;i<options.Nnode;i++) {
-	fprintf(debug.fg_temp,"\tM%.0f",sum*100.0);
-	sum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.0;
+	fprintf(debug.fg_temp,"\tM%.0f",soil_con->Zsum_node[i]*100.0);
       }
-      sum=0.0;
       for(i=0;i<options.Nnode;i++) {
-	fprintf(debug.fg_temp,"\tI%.0f",sum*100.0);
-	sum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.0;
+	fprintf(debug.fg_temp,"\tI%.0f",soil_con->Zsum_node[i]*100.0);
       }
-      sum=0.0;
       for(i=0;i<options.Nnode;i++) {
-	fprintf(debug.fg_temp,"\tK%.0f",sum*100.0);
-	sum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.0;
+	fprintf(debug.fg_temp,"\tK%.0f",soil_con->Zsum_node[i]*100.0);
       }
-      sum=0.0;
       for(i=0;i<options.Nnode;i++) {
-	fprintf(debug.fg_temp,"\tCs%.0f",sum*100.0);
-	sum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.0;
+	fprintf(debug.fg_temp,"\tCs%.0f",soil_con->Zsum_node[i]*100.0);
       }
       fprintf(debug.fg_temp,"\n");
     }
@@ -468,13 +458,10 @@ void write_debug(atmos_data_struct    *atmos,
 
     /***** Soil Themperature GMT Grided Profile Output *****/
  
-    Zsum=0.;
     for(i=0;i<options.Nnode;i++) {
       fprintf(debug.fg_grid,"%7f\t%f\t%f\n",
-          (float)rec/24.0*(float)gp->dt,
-          Zsum,energy->T[i]);
-      if(i<options.Nnode)
-        Zsum+=(soil_con->dz_node[i]+soil_con->dz_node[i+1])/2.;
+	      (float)rec/24.0*(float)gp->dt,
+	      soil_con->Zsum_node[i],energy->T[i]);
     }
  
   }

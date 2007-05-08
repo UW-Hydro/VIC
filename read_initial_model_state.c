@@ -63,6 +63,7 @@ void read_initial_model_state(FILE                *init_state,
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving infiles.statefile to filep.init_state. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-04-25 modified to read Zsum_node from state file.  JCA
 
 *********************************************************************/
 {
@@ -185,23 +186,30 @@ void read_initial_model_state(FILE                *init_state,
     }
   }
 
-  /* Read soil thermal node depths */
+  /* Read soil thermal node deltas */
   sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
       fread( &soil_con->dz_node[nidx], sizeof(double), 1, init_state );
     else 
       fscanf( init_state, "%lf", &soil_con->dz_node[nidx] );
-    sum += soil_con->dz_node[nidx];
   }
   if ( options.Nnode == 1 ) soil_con->dz_node[0] = 0;
-  sum -= 0.5 * soil_con->dz_node[0];
-  sum -= 0.5 * soil_con->dz_node[options.Nnode-1];
-  if (sum - soil_con->dp > SMALL) {
-    fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", sum, soil_con->dp );
-    soil_con->dp = sum;
+  
+  /* Read soil thermal node depths */
+  sum = 0;
+  for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
+    if ( options.BINARY_STATE_FILE ) 
+      fread( &soil_con->Zsum_node[nidx], sizeof(double), 1, init_state );
+    else 
+      fscanf( init_state, "%lf", &soil_con->Zsum_node[nidx] );
   }
-
+  if ( options.Nnode == 1 ) soil_con->Zsum_node[0] = 0;
+  if ( soil_con->Zsum_node[options.Nnode-1] - soil_con->dp > SMALL) {
+    fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
+    soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
+  }
+  
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
 

@@ -57,13 +57,14 @@ void write_model_state(dist_prcp_struct    *prcp,
   2006-09-07 Changed "Skip writing snow band if areafract < 0" to "<=0". GCT
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-Apr-24  Modified to write Zsum_node.  JCA
+  2007-Apr-25  Removed variable Nsum.  JCA
 
 *********************************************************************/
 {
   extern option_struct options;
 
   double tmpval;
-  double Nsum;
   int    veg;
   int    band;
   int    lidx;
@@ -117,6 +118,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   // IF YOU EDIT THIS FILE: UPDATE THIS VALUE!
   if ( options.BINARY_STATE_FILE ) {
     Nbytes = ( options.Nnode * sizeof(double) // dz_node
+	       + options.Nnode * sizeof(double) // Zsum_node
 	       + (Nveg+1) * sizeof(double) // mu
 	       + (Nveg+1) * sizeof(char) // STILL_STORM
 	       + (Nveg+1) * sizeof(int) // DRY_TIME
@@ -171,14 +173,21 @@ void write_model_state(dist_prcp_struct    *prcp,
     fwrite( &Nbytes, sizeof(int), 1, filep->statefile );
   }
 
-  /* Write soil thermal node depths */
-  Nsum = 0;
+  /* Write soil thermal node deltas */
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->dz_node[nidx], sizeof(double), 1, 
+      fwrite( &soil_con->dz_node[nidx], sizeof(double), 1,
 	      filep->statefile );
     else
       fprintf( filep->statefile, " %f ", soil_con->dz_node[nidx] );
+  } 
+  /* Write soil thermal node depths */
+  for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
+    if ( options.BINARY_STATE_FILE )
+      fwrite( &soil_con->Zsum_node[nidx], sizeof(double), 1, 
+	      filep->statefile );
+    else
+      fprintf( filep->statefile, " %f ", soil_con->Zsum_node[nidx] );
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( filep->statefile, "\n" );

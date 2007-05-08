@@ -63,10 +63,9 @@ void read_initial_model_state(FILE                *init_state,
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving infiles.statefile to filep.init_state. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-04-28 modified to read Zsum_node  JCA
   2007-05-07 Fixed fread checks to make sure correct number of items were read
              in rather than the size of the item read in.  JCA
-  2007-05-07 Nsum and sum removed from declaration.  JCA
+
 *********************************************************************/
 {
   extern option_struct options;
@@ -75,7 +74,9 @@ void read_initial_model_state(FILE                *init_state,
   char   ErrStr[MAXSTRING];
   char   tmpchar;
   double tmpval;
+  double Nsum;
   double depth_node[MAX_NODES];
+  double sum;
   int    veg, iveg;
   int    band, iband;
   int    lidx;
@@ -185,27 +186,22 @@ void read_initial_model_state(FILE                *init_state,
       nrerror(ErrStr);
     }
   }
-  
-  /* Read soil thermal node deltas */
+
+  /* Read soil thermal node depths */
+  sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
       fread( &soil_con->dz_node[nidx], sizeof(double), 1, init_state );
     else 
       fscanf( init_state, "%lf", &soil_con->dz_node[nidx] );
+    sum += soil_con->dz_node[nidx];
   }
   if ( options.Nnode == 1 ) soil_con->dz_node[0] = 0;
-  
-  /* Read soil thermal node depths */
-  for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
-    if ( options.BINARY_STATE_FILE ) 
-      fread( &soil_con->Zsum_node[nidx], sizeof(double), 1, init_state );
-    else 
-      fscanf( init_state, "%lf", &soil_con->Zsum_node[nidx] );
-  }
-  if ( options.Nnode == 1 ) soil_con->Zsum_node[0] = 0;
-  if ( soil_con->Zsum_node[options.Nnode-1] - soil_con->dp > SMALL) {
-    fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
-    soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
+  sum -= 0.5 * soil_con->dz_node[0];
+  sum -= 0.5 * soil_con->dz_node[options.Nnode-1];
+  if (sum - soil_con->dp > SMALL) {
+    fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", sum, soil_con->dp );
+    soil_con->dp = sum;
   }
 
   /* Input for all vegetation types */
@@ -255,7 +251,7 @@ void read_initial_model_state(FILE                *init_state,
 	/* Read total soil moisture */
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &cell[dist][veg][band].layer[lidx].moist,
+	    if ( fread( &cell[dist][veg][band].layer[lidx].moist, 
 			sizeof(double), 1, init_state ) != 1 )
 	      nrerror("End of model state file found unexpectedly");
 	  }
@@ -288,7 +284,7 @@ void read_initial_model_state(FILE                *init_state,
 	  }
 #else
 	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &cell[dist][veg][band].layer[lidx].ice, 
+	    if ( fread( &cell[dist][veg][band].layer[lidx].ice,
 			sizeof(double), 1, init_state ) != 1 )
 		nrerror("End of model state file found unexpectedly");
 	  }
@@ -335,7 +331,7 @@ void read_initial_model_state(FILE                *init_state,
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].pack_temp, sizeof(double), 1, 
-		    init_state ) != 1 ) 
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].pack_water, sizeof(double), 1, 
 		    init_state ) != 1 )

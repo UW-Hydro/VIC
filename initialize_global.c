@@ -92,8 +92,7 @@ void initialize_global() {
   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
 	      of supported met input variables.				TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
-  2007-Apr-25 Added IMPLICIT option.                                     JCA
-  2007-Apr-25 Added EXP_TRANS option.                                     JCA
+
 *********************************************************************/
 
   extern option_struct options;
@@ -120,8 +119,6 @@ void initialize_global() {
   options.Nlayer                = 2;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
-  options.IMPLICIT              = FALSE;
-  options.EXP_TRANS             = FALSE;
   options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;

@@ -30,8 +30,6 @@ void display_current_settings(int                 mode,
   2006-Nov-07 Removed LAKE_MODEL option.			TJB
   2007-Jan-03 Added ALMA_INPUT option.				TJB
   2007-Jan-15 Added PRT_HEADER option.				TJB
-  2007-04-24 Added IMPLICIT option.                             JCA
-  2007-04-24 Added EXP_TRANS option.                            JCA
 **********************************************************************/
 {
 
@@ -201,14 +199,6 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
   else
     fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
-  if (options.IMPLICIT)
-    fprintf(stdout,"IMPLICIT\t\tTRUE\n");
-  else
-    fprintf(stdout,"IMPLICIT\t\tFALSE\n");
-  if (options.EXP_TRANS)
-    fprintf(stdout,"EXP_TRANS\t\tTRUE\n");
-  else
-    fprintf(stdout,"EXP_TRANS\t\tFALSE\n");
   if (options.BLOWING)
     fprintf(stdout,"BLOWING\t\t\tTRUE\n");
   else

@@ -11,167 +11,17 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.0 beta r4k to VIC 4.1.0 beta r4_jaTnode ***
+***** Description of changes from VIC 4.1.0 beta r4k to VIC 4.1.0 beta r4l ***
 --------------------------------------------------------------------------------
 
-TOTAL FILES AFFECTED:
-
-CHANGED:
-calc_surf_energy_bal.c
-display_current_settings.c
-frozen_soil.c
-func_surf_energy_bal.c
-get_global_param.c
-initialize_global.c
-initialize_model_state.c
-lakes.eb.c
-Makefile
-read_initial_model_state.c
-runoff.c
-soil_conduction.c
-soil_thermal_eqn.c
-surface_fluxes.c
-vicNl_def.h
-vicNl.h
-write_debug.c
-write_model_state.c
-
-NEW:
-newt_raph_func_fast.c
-
-
-DESCRIPTION OF CHANGES:
-
-MAJOR CHANGES:
-
-Exponential grid transformation option for soil thermal nodes in finite
-different heat equation
-
-            Files affected:
-            calc_surf_energy_bal.c
-            display_current_settings.c
-            frozen_soil.c
-            func_surf_energy_bal.c
-            get_global_param.c
-            initialize_global.c
-            initialize_model_state.c
-            soil_conduction.c
-            soil_thermal_eqn.c
-            vicNl_def.h
-
-            Description: New option is now EXP_TRANS to have an exponential
-            distribution of the thermal node depths in the vertical dimension.  
-            This allows for closer thermal nodes near the surface of soil 
-            where the variance is greatest.  The
-            transformation allows for the solution to be solved in
-            linear-space, wherein the nodes are distributed linearly with depth, 
-            but the physical system exists in exponential space.  This change also involves a
-            rearranging of the terms in the finite-difference equaton (equation 8
-            of Cherkauer et al. 1999).  Therefore the constants (A-E) are
-            calculated in a new way.  These constants are equal to the 
-            constants in each of the terms in equation 8 multiplied by alpha^2*deltat.
-
-
-Implicit solution option for finite difference frozen soils algorithm
-
-            Files affected:
-            calc_surf_energy_bal.c
-            display_current_settings.c
-            frozen_soil.c
-            func_surf_energy_bal.c
-            get_global_param.c
-            initialize_global.c
-            Makefile
-            surface_fluxes.c
-            vicNl_def.h
-            vicNl.h
-
-            Description: The implicit solution uses Newton Raphson 
-            to solvethe system of non-linear equations.  
-            Therefore there is a new option, IMPLICIT.If the
-            implicit solution fails (which can sometimes occur at the initial
-            formation of ice in the soil column), the model will use the original
-            explicit solver to solve for the thermal temperatures for that time-step only.
-            The implicit option is unconditionally stable and therefore the
-            Courant-Friedrichs-Lewy condition does not need to be checked 
-            (as it should be for the explicit solver).
-
-
-Zsum_node calculated once and passed in soil_con to other subroutines
-
-          Files affected:
-          calc_surf_energy_bal.c
-          func_surf_energy_bal.c
-          initialize_model_state.c
-          lakes.eb.c
-          read_initial_model_state.c
-          runoff.c
-          soil_conduction.c
-          vicNl_def.h
-          write_debug.c
-          write_model_state.c
-
-          Description:  Zsum_node is the depth of each of the thermal nodes
-          needed for the finite difference frozen soils algorithm.  Rather than
-          re-calculating this value in various places, this vector is now passed in the
-          soil_con structure to the various subroutines where it is needed.  The one
-          exception is set_node_parameters, because this is a slightly different
-          definition of Zsum.
-
-
-Patch for "cold nose" problem
-
-      Files affected:
-      frozen_soil.c
-      soil_thermal_eqn.c
-
-      Description:
-      This is an inelegant fix for "cold nose" problem that may occur in
-      the finite different frozen soil algorithm in each mode of operation.
-      This involves a thermal node that is of a lower temperature than the
-      upper and lower thermal nodes.  Due to the first term of the heat
-      conduction term (the term that accounts for a change in the thermal
-      conductivity in space), the first term can become more negative
-      than the second term. This causes this cold node to become
-      much colder and thus breaks the second law of thermodynamics (because
-      flux_term1 exceeds flux_term2 in absolute magnitude).  i
-      Therefore, a check
-      is now made to set the first term to zero when this begins to happen.
-      This only seems to happen in the first and second near-surface nodes.
-
-
-BUG FIXES:
-
-Read in order incorrect in error_print_surf_energy_bal
-
-     Files affected:
-     calc_surf_energy_bal.c
-
-
-Removed (1.-snow_coverage) from three equations where it did not belong
-
-        Files affected:
-        func_surf_energy_bal.c
-
-Fixed fread checks 
+Fixed fread statements
 
         Files affected:
 
         read_initial_model_state.c
 
         Fixed fread checks to make sure correct number of items were read
-        in rather than the size of the item read in     JCA
-
-OTHER MODIFICATIONS:
-
-setup_frozen_soil subroutine removed as it is never called
-
-                   Files affected:
-                   frozen_soil.c
-
-
-
-
+        in rather than the size of the item read in.  JCA
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4j to VIC 4.1.0 beta r4k ***
@@ -226,8 +76,7 @@ Added case of SPATIAL_FROST = TRUE in full_energy.c
 
         full_energy.c
 
-        The modifications of 2006-Sep-23 contained a bug in the computation
-        of soil wetness and root zone soil moisture. 
+        This module needed to handle the case of SPATIAL_FROST = TRUE. GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4g to VIC 4.1.0 beta r4h *****

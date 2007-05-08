@@ -80,8 +80,6 @@ int  runoff(layer_data_struct *layer_wet,
 		to be in that block.				TJB
     2007-Apr-04 Modified to return Error status from 
                 distribute_node_moisture_properties  GCT/KAC
-    24-Apr-07  Passes soil_con->Zsum_node to distribute_node_moisture_properties.  JCA
-
 **********************************************************************/
 {  
   extern option_struct options;
@@ -592,20 +590,20 @@ int  runoff(layer_data_struct *layer_wet,
     }
     
     ErrorFlag = distribute_node_moisture_properties(energy->moist, energy->ice,
-						    energy->kappa_node, energy->Cs_node,
-						    soil_con->dz_node, soil_con->Zsum_node,  energy->T,
-						    soil_con->max_moist_node,
+					energy->kappa_node, energy->Cs_node,
+					soil_con->dz_node, energy->T,
+					soil_con->max_moist_node,
 #if QUICK_FS
-						    soil_con->ufwc_table_node,
+					soil_con->ufwc_table_node,
 #else
-						    soil_con->expt_node,
-						    soil_con->bubble_node, 
+					soil_con->expt_node,
+					soil_con->bubble_node, 
 #endif // QUICK_FS
-						    moist, soil_con->depth, 
-						    soil_con->soil_density,
-						    soil_con->bulk_density,
-						    soil_con->quartz, Nnodes, 
-						    options.Nlayer, soil_con->FS_ACTIVE);
+					moist, soil_con->depth, 
+					soil_con->soil_density,
+					soil_con->bulk_density,
+					soil_con->quartz, Nnodes, 
+					options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     
   }

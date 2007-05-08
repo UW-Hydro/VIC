@@ -65,15 +65,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	    flux calculations.					TJB
   2007-Apr-11 Modified to handle grid cell errors by returning to the
            main subroutine, rather than ending the simulation. GCT
-  24-Apr-07 Removed (1.-snow_coverage) from three equations where it did not
-            belong: for calculating LongBareOut in the second two cases and for
-            calculating NetBareRad in the third case.  JCA
-  24-Apr-07 Features included for IMPLICIT frozen soils option. JCA
-              (including passing in nrec, nrecs, and iveg)
-              (including passing in bulk_density, soil_density, and quartz)
-              (including counting cases when IMPLICIT fails and involes EXPLICIT)
-  24-Apr-07 Features included for EXP_TRANS frozen soils option. JCA
-  24-Apr-07 Passing in Zsum_node.  JCA
 
 **********************************************************************/
 {
@@ -85,17 +76,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /* define routine input variables */
 
   /* general model terms */
-  int i;
-  int rec;
-  int nrecs;
   int month;
   int VEG;
   int veg_class;
-  int iveg;
   int Error;
-  
-  //error counting variables for IMPLICIT option
-  static int error_cnt0, error_cnt1;  
 
   double delta_t;
 
@@ -122,9 +106,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *Wpwp;
   double *depth;
   double *resid_moist;
-  double *bulk_density;
-  double *soil_density;
-  double *quartz;
 
   float *root;
 
@@ -188,7 +169,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *beta;
   double *bubble_node;
   double *dz_node;
-  double *Zsum_node;
   double *expt_node;
   double *gamma;
   double *ice_node;
@@ -217,7 +197,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   int INCLUDE_SNOW;
   int FS_ACTIVE;
   int NOFLUX;
-  int EXP_TRANS;
   int SNOWING;
 
   int *FIRST_SOLN;
@@ -257,12 +236,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
   ************************************/
 
   /* general model terms */
-  rec                     = (int) va_arg(ap, int);
-  nrecs                    = (int) va_arg(ap, int);
   month                   = (int) va_arg(ap, int);
   VEG                     = (int) va_arg(ap, int);
   veg_class               = (int) va_arg(ap, int);
-  iveg                    = (int) va_arg(ap, int);
+
   delta_t                 = (double) va_arg(ap, double);
 
   /* soil layer terms */
@@ -350,7 +327,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   beta                    = (double *) va_arg(ap, double *);
   bubble_node             = (double *) va_arg(ap, double *);
   dz_node                 = (double *) va_arg(ap, double *);
-  Zsum_node               = (double *) va_arg(ap, double *);
   expt_node               = (double *) va_arg(ap, double *);
   gamma                   = (double *) va_arg(ap, double *);
   ice_node                = (double *) va_arg(ap, double *);
@@ -377,7 +353,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   INCLUDE_SNOW            = (int) va_arg(ap, int);
   FS_ACTIVE               = (int) va_arg(ap, int);
   NOFLUX                  = (int) va_arg(ap, int);
-  EXP_TRANS               = (int) va_arg(ap, int);
   SNOWING                 = (int) va_arg(ap, int);
 
   FIRST_SOLN              = (int *) va_arg(ap, int *);
@@ -395,21 +370,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
 
-  /* more soil layer terms for IMPLICIT option*/
-  bulk_density = (double *) va_arg(ap, double *);
-  soil_density = (double *) va_arg(ap, double *);
-  quartz     = (double *) va_arg(ap, double *);
-
-
   /***************
     MAIN ROUTINE
   ***************/
-
-  Error = 0;
-  if(rec==0){
-    error_cnt0=0;
-    error_cnt1=0;
-  }
 
   TMean = Ts;
   Tmp = TMean + KELVIN;
@@ -458,57 +421,28 @@ double func_surf_energy_bal(double Ts, va_list ap)
     }
     else {
     /*************************************************************
-      Use Finite Difference Method to Solve Ground Heat
+      Use Finite Difference Method to Explicitly Solve Ground Heat
       Flux at Soil Thermal Nodes (Cherkauer and Lettenmaier, 1999)
     *************************************************************/
       T_node[0] = TMean;
-      
-      /* IMPLICIT Solution */
-      if(options.IMPLICIT) {
-	Error = solve_T_profile_implicit(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-					 moist_node, delta_t, max_moist_node, bubble_node, 
-					 expt_node, ice_node, alpha, beta, gamma, dp, Nnodes, 
-					 FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
-      }
-      
-      /* EXPLICIT Solution, or if IMPLICIT Solution Failed */
-      if(!options.IMPLICIT || Error == 1) {
-	if(options.IMPLICIT)
-	  FIRST_SOLN[0] = TRUE;
 #if QUICK_FS
-	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-			moist_node, delta_t, max_moist_node, bubble_node, 
-			expt_node, ice_node, alpha, beta, gamma, dp,
-			depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
-			NOFLUX, EXP_TRANS, veg_class);
+      Error = solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
+		      moist_node, delta_t, max_moist_node, bubble_node, 
+		      expt_node, ice_node, alpha, beta, gamma, 
+		      ufwc_table_node, Nnodes, FIRST_SOLN, FALSE, FS_ACTIVE, 
+		      NOFLUX);
 #else
-	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-			moist_node, delta_t, max_moist_node, bubble_node, 
-			expt_node, ice_node, alpha, beta, gamma, dp,
-			depth, Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+      Error = solve_T_profile(Tnew_node, T_node, dz_node, kappa_node, Cs_node, 
+		      moist_node, delta_t, max_moist_node, bubble_node, 
+		      expt_node, ice_node, alpha, beta, gamma, Nnodes, 
+		      FIRST_SOLN, FALSE, FS_ACTIVE, NOFLUX);
 #endif
-      }
-      
+
       if ( (int)Error == ERROR ) {
-	fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
-	return( ERROR ); 
+        fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
+        return( ERROR ); 
       }
       *T1 = Tnew_node[1];
-      
-      /* print out error information for IMPLICIT solution */
-      if(options.IMPLICIT){
-	if(Error==0)
-	  error_cnt0++;
-	else
-	  error_cnt1++;
-	if(FIRST_SOLN[1]){
-	  FIRST_SOLN[1] = FALSE;
-#if VERBOSE
-	  if ( iveg == 0 && rec == nrecs - 1) 
-	    fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
-#endif
-	}
-      }
 
       /*****************************************************
         Compute the Ground Heat Flux from the Top Soil Layer
@@ -561,18 +495,15 @@ double func_surf_energy_bal(double Ts, va_list ap)
 			* LongBareOut); // net LW snow-free area
     NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH 
 		  + *fusion);
-    
+
   } /* End computation for ground heat flux */
   else { /* ground heat flux not estimated */
-    
+
     if ( delta_t < SEC_PER_DAY ) {
       
       /** Compute net surface radiation of snow-free area for evaporation 
 	  estimates **/
-
-      //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
-      LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-
+      LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;
       if ( INCLUDE_SNOW ) { // compute net LW at snow surface
 	(*NetLongSnow) = (LongSnowIn - snow_coverage 
 			  * LongBareOut);
@@ -580,23 +511,19 @@ double func_surf_energy_bal(double Ts, va_list ap)
       (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) 
 			  * LongBareOut); // net LW snow-free area
       NetBareRad = NetShortBare + (*NetLongBare);
-      
+
     }
     else {
-      
+
       /** Daily water balance model provides average net shortwave and 
 	  longwave radiation **/
-
-      //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
-      LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-
+      LongBareOut = 
+	(1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;
       if ( INCLUDE_SNOW ) {
 	(*NetLongSnow) = snow_coverage * LongBareIn / (1. - snow_coverage);
       }
       (*NetLongBare) = LongBareIn;
-
-      //NetBareRad = (1. - snow_coverage) * (NetShortBare + (*NetLongBare));
-      NetBareRad = NetShortBare + (*NetLongBare);
+      NetBareRad = (1. - snow_coverage) * (NetShortBare + (*NetLongBare));
 
     }
   }
@@ -614,9 +541,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
 			    roughness[UnderStory]);
   else
     ra_under = HUGE_RESIST;
-  
+
   *Ra_used = ra_under;
-  
+
   /*************************************************
     Compute Evapotranspiration if not snow covered
 
@@ -643,7 +570,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else
-    resid_moist[0]);
+                     resid_moist[0]);
 #endif // SPATIAL_FROST
   }
   else Evap = 0.;

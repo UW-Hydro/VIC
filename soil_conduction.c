@@ -113,7 +113,6 @@ double volumetric_heat_capacity(double soil_fract,
 #undef organic_fract
 
 void set_node_parameters(double   *dz_node,
-			 double   *Zsum_node,
 			 double   *max_moist_node,
 			 double   *expt_node,
 			 double   *bubble_node,
@@ -140,7 +139,6 @@ void set_node_parameters(double   *dz_node,
   within each iteration).
 
   double   *dz_node          thermal node thicknes (m)
-  double   *Zsum_node        thermal node depth (m)
   double   *max_moist_node   maximum moisture content at thermal node (mm/mm)
   double   *expt_node        exponential at thermal node ()
   double   *bubble_node      bubbling pressure at thermal node (cm)
@@ -167,10 +165,7 @@ void set_node_parameters(double   *dz_node,
            to determine maximum node moisture and node moisture,
            so that nodes on the boundary between soil layers are
            computed the same way for both.                  KAC
-  04-24-07 Passing in Zsum_node rather than recalculating.  JCA
-  04-24-07 Rearranged terms in finite-difference heat equation (equation 8
-                of Cherkauer et al. (1999)).  See note in solve_T_profile.
-                This affects the equations for beta and gamma.
+
 **********************************************************************/
 
   extern option_struct options;
@@ -182,7 +177,7 @@ void set_node_parameters(double   *dz_node,
   int    nidx, lidx;
   int    tmplidx;
   double Lsum; /* cumulative depth of moisture layer */
-  double Zsum; /* upper boundary of node thermal layer */
+  double Zsum; /* cumulative depth of thermal node */
   double deltaL[MAX_LAYERS+1];
   double fract;
   double tmpfract;
@@ -195,11 +190,12 @@ void set_node_parameters(double   *dz_node,
   PAST_BOTTOM = FALSE;
   lidx = 0;
   Lsum = 0.;
+  Zsum = 0.;
 
   /* set node parameters */
   for(nidx=0;nidx<Nnodes;nidx++) {
-    
-    if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
+
+    if(Zsum == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
       /* node on layer boundary */
       max_moist_node[nidx] = (max_moist[lidx] / depth[lidx] 
 			      + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
@@ -212,7 +208,8 @@ void set_node_parameters(double   *dz_node,
       expt_node[nidx]      = expt[lidx];
       bubble_node[nidx]    = bubble[lidx];
     }      
-    if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
+    Zsum += (dz_node[nidx] + dz_node[nidx+1]) / 2.;
+    if(Zsum > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
       lidx++;
       if( lidx == Nlayers ) {
@@ -227,15 +224,23 @@ void set_node_parameters(double   *dz_node,
   for(nidx=0;nidx<Nnodes-2;nidx++) {
     alpha[nidx] = ((dz_node[nidx+2] + dz_node[nidx+1]) / 2.0 
 		   + (dz_node[nidx+1] + dz_node[nidx]) / 2.0);
-    beta[nidx] = (dz_node[nidx] + dz_node[nidx+1]) / 2.0;
-    gamma[nidx] = (dz_node[nidx+2] + dz_node[nidx+1]) / 2.0;
+    beta[nidx] = ((dz_node[nidx+2] + dz_node[nidx+1]) 
+		  * (dz_node[nidx+2] + dz_node[nidx+1])) / 4.0 
+      + ((dz_node[nidx+1]+dz_node[nidx]) 
+	 * (dz_node[nidx+1]+dz_node[nidx])) / 4.0;
+    gamma[nidx] = ((dz_node[nidx+2] + dz_node[nidx+1]) / 2.0 
+		   - (dz_node[nidx+1] + dz_node[nidx]) / 2.0);
   }
   if(options.NOFLUX) {
     /* no flux bottom boundary activated */
     alpha[Nnodes-2] = ((dz_node[Nnodes-1] + dz_node[Nnodes-1]) / 2.0 
 		       + (dz_node[Nnodes-1] + dz_node[Nnodes-2]) / 2.0);
-    beta[nidx] = (dz_node[Nnodes-1] + dz_node[Nnodes-2]) / 2.0;
-    gamma[nidx] = (dz_node[Nnodes-1] + dz_node[Nnodes-1]) / 2.0;
+    beta[Nnodes-2] = ((dz_node[Nnodes-1] + dz_node[Nnodes-1]) 
+		      * (dz_node[Nnodes-1] + dz_node[Nnodes-1]))/4.0 
+      + ((dz_node[Nnodes-1]+dz_node[Nnodes-2])
+	 * (dz_node[Nnodes-1]+dz_node[Nnodes-2])) / 4.0;
+    gamma[Nnodes-2] = ((dz_node[Nnodes-1] + dz_node[Nnodes-1]) / 2.0 
+		       - (dz_node[Nnodes-1] + dz_node[Nnodes-2]) / 2.0);
   }
 
   /* set fraction of soil thermal node in each soil layer */
@@ -246,9 +251,9 @@ void set_node_parameters(double   *dz_node,
     deltaL[Nlayers] -= depth[lidx];
   }
   for(nidx=0;nidx<Nnodes-1;nidx++) 
-    deltaL[Nlayers] += (dz_node[nidx] + dz_node[nidx+1]) / 2.;    
+    deltaL[Nlayers] += (dz_node[nidx] + dz_node[nidx+1]) / 2.;
   for(lidx=0;lidx<=Nlayers;lidx++) {
-    Zsum = -dz_node[0] / 2.; 
+    Zsum = -dz_node[0] / 2.;
     for(nidx=0;nidx<Nnodes;nidx++) {
       if( Zsum < Lsum && Zsum + dz_node[nidx] >= Lsum ) {
 	layer_node_fract[lidx][nidx] = 1. 
@@ -298,28 +303,27 @@ void set_node_parameters(double   *dz_node,
 #define N_INTS 5
 
 int distribute_node_moisture_properties(double *moist_node,
-					double *ice_node,
-					double *kappa_node,
-					double *Cs_node,
-					double *dz_node,
-					double *Zsum_node,
-					double *T_node,
-					double *max_moist_node,
+					 double *ice_node,
+					 double *kappa_node,
+					 double *Cs_node,
+					 double *dz_node,
+					 double *T_node,
+					 double *max_moist_node,
 #if QUICK_FS
-					double ***ufwc_table_node,
+					 double ***ufwc_table_node,
 #else
-					double *expt_node,
-					double *bubble_node,
+					 double *expt_node,
+					 double *bubble_node,
 #endif
-					double *moist,
-					double *depth,
-					double *soil_density,
-					double *bulk_density,
-					double *quartz,
-					int     Nnodes,
-					int     Nlayers,
-					char    FS_ACTIVE) {
-  /*********************************************************************
+					 double *moist,
+					 double *depth,
+					 double *soil_density,
+					 double *bulk_density,
+					 double *quartz,
+					 int     Nnodes,
+					 int     Nlayers,
+					 char    FS_ACTIVE) {
+/*********************************************************************
   This subroutine determines the moisture and ice contents of each 
   soil thermal node based on the current node temperature and layer
   moisture content.  Thermal conductivity and volumetric heat capacity
@@ -331,7 +335,6 @@ int distribute_node_moisture_properties(double *moist_node,
   double *kappa_node      thermal node thermal conductivity (W m-1 K-1)
   double *Cs_node         thermal node heat capacity (J m-3 K-1)
   double *dz_node         thermal node thickness (m)
-  double *Zsum_node       thermal node depth (m)
   double *T_node          thermal node temperature (C)
   double *max_moist_node  thermal node maximum moisture content (mm/mm)
   double *expt_node       thermal node exponential
@@ -357,7 +360,6 @@ int distribute_node_moisture_properties(double *moist_node,
   2005-Mar-24 Removed abs() from check on soil moisture.	TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to
               the main subroutine, rather than ending the simulation. GCT/KAC
-  2007-Apr-24 Passing in Zsum_node rather than recalculating.  JCA
 
 *********************************************************************/
 
@@ -368,6 +370,7 @@ int distribute_node_moisture_properties(double *moist_node,
   int nidx, lidx, i;
   int tmplidx;
   double Lsum; /* cumulative depth of moisture layer */
+  double Zsum; /* cumulative depth of thermal node */
   double tmp_moist;
   double tmp_T;
   double fract;
@@ -383,12 +386,13 @@ int distribute_node_moisture_properties(double *moist_node,
 
   lidx = 0;
   Lsum = 0.;
+  Zsum = 0.;
   PAST_BOTTOM = FALSE;
 
   /* node estimates */
   for(nidx=0;nidx<Nnodes;nidx++) {
  
-    if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
+    if(Zsum == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
       /* node on layer boundary */
       moist_node[nidx] = (moist[lidx] / depth[lidx] 
 			      + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
@@ -447,7 +451,8 @@ int distribute_node_moisture_properties(double *moist_node,
 					     moist_node[nidx] - ice_node[nidx],
 					     ice_node[nidx]);
 
-    if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
+    Zsum += (dz_node[nidx] + dz_node[nidx+1]) / 2.;
+    if(Zsum > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
       lidx++;
       if( lidx == Nlayers ) {
@@ -514,7 +519,6 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 
   Modifications:
   11-00 Modified to find ice content in spatial frost bands  KAC
-  Apr 24,2007: Zsum removed from declaration.  JCA
 
 **************************************************************/
 
@@ -526,6 +530,7 @@ void estimate_layer_ice_content(layer_data_struct *layer,
   int    frost_area;
 #endif
   double Lsum;           /* cumulative depth of moisture layer */
+  double Zsum;           /* cumulative depth of thermal node */
   double deltaz;
   double fract;          /* fract of internodal region in layer */
   double boundT;         /* soil temperature between layers */
@@ -666,7 +671,6 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 
 void find_0_degree_fronts(energy_bal_struct *energy,
 			  double            *dz,
-			  double            *Zsum_node,
 			  double            *T,
 			  int                Nnodes) {
 /***********************************************************************
@@ -675,12 +679,8 @@ void find_0_degree_fronts(energy_bal_struct *energy,
 
   energy_bal_struct *energy  energy balance variable structure
   double            *dz      thermal node thicknesses (m)
-  double            *Zsum_node      thermal node depth (m)
   double            *T       thermal node temperatures (C)
   int                Nnodes  number of defined thermal nodes
-
-  Modifications:
-  2007-Apr-24 Passing in Zsum_node rather than recalculating.  JCA
 
 ***********************************************************************/
 
@@ -689,9 +689,13 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   int    Nfrost; /* number of frost fronts found */
   double tdepth[MAX_FRONTS]; /* thawing frost depths */
   double fdepth[MAX_FRONTS]; /* freezing front depths */
+  double Zsum;
   double deltaz;
   
   /* Initialize parameters */
+  Zsum = 0;
+  for(nidx=0;nidx<Nnodes-1;nidx++)
+    Zsum += (dz[nidx] + dz[nidx+1]) / 2.;
   Nthaw = Nfrost = 0;
   for(fidx=0;fidx<MAX_FRONTS;fidx++) {
     fdepth[fidx] = MISSING;
@@ -702,13 +706,14 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   for(nidx=Nnodes-2;nidx>=0;nidx--) {
     deltaz = (dz[nidx] + dz[nidx+1]) / 2.;
     if(T[nidx] > 0 && T[nidx+1] <= 0 && Nthaw<MAX_FRONTS) {
-      tdepth[Nthaw] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx]-deltaz,Zsum_node[nidx]);
+      tdepth[Nthaw] = linear_interp(0,T[nidx],T[nidx+1],Zsum-deltaz,Zsum);
       Nthaw++;
     }
     else if(T[nidx] < 0 && T[nidx+1] >= 0 && Nfrost<MAX_FRONTS) {
-      fdepth[Nfrost] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx]-deltaz,Zsum_node[nidx]);
+      fdepth[Nfrost] = linear_interp(0,T[nidx],T[nidx+1],Zsum-deltaz,Zsum);
       Nfrost++;
     }
+    Zsum -= deltaz;
   }
 
   /* store thaw depths */
@@ -727,18 +732,12 @@ double maximum_unfrozen_water(double T,
 /**********************************************************************
   This subroutine computes the maximum amount of unfrozen water that
   can exist at the current temperature.
-
-  Modifications:
-
-  04-24-07 Removed T from denominator in equation - according to the proof in Zhang et
-          al. (2006), "Development and Testing of a Frozen Soil Model for the Cold
-          Region Climate Study".  JCA
 **********************************************************************/
 
   double unfrozen;
 
-  unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
-  //INCORRECT: unfrozen = max_moist * pow((-Lf * T) / (T + 273.16) / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
+  unfrozen = max_moist * pow((-Lf * T) / (T
+      + 273.16) / (9.18 * bubble / 100.), -(2.0 / (expt - 3.0)));
   if(unfrozen > max_moist) unfrozen = max_moist;
   if(unfrozen < 0) unfrozen = 0;
 

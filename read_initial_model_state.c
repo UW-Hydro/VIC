@@ -63,8 +63,10 @@ void read_initial_model_state(FILE                *init_state,
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving infiles.statefile to filep.init_state. TJB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-04-25 modified to read Zsum_node from state file.  JCA
-
+  2007-04-28 modified to read Zsum_node  JCA
+  2007-05-07 Fixed fread checks to make sure correct number of items were read
+             in rather than the size of the item read in.  JCA
+  2007-05-07 Nsum and sum removed from declaration.  JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -73,9 +75,7 @@ void read_initial_model_state(FILE                *init_state,
   char   ErrStr[MAXSTRING];
   char   tmpchar;
   double tmpval;
-  double Nsum;
   double depth_node[MAX_NODES];
-  double sum;
   int    veg, iveg;
   int    band, iband;
   int    lidx;
@@ -185,9 +185,8 @@ void read_initial_model_state(FILE                *init_state,
       nrerror(ErrStr);
     }
   }
-
+  
   /* Read soil thermal node deltas */
-  sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
       fread( &soil_con->dz_node[nidx], sizeof(double), 1, init_state );
@@ -197,7 +196,6 @@ void read_initial_model_state(FILE                *init_state,
   if ( options.Nnode == 1 ) soil_con->dz_node[0] = 0;
   
   /* Read soil thermal node depths */
-  sum = 0;
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
       fread( &soil_con->Zsum_node[nidx], sizeof(double), 1, init_state );
@@ -209,7 +207,7 @@ void read_initial_model_state(FILE                *init_state,
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
     soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
   }
-  
+
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
 
@@ -237,9 +235,9 @@ void read_initial_model_state(FILE                *init_state,
       }
       /* Read cell identification information */
       if ( options.BINARY_STATE_FILE ) {
-	if ( fread( &iveg, sizeof(int), 1, init_state) != sizeof(int) ) 
+	if ( fread( &iveg, sizeof(int), 1, init_state) != 1 ) 
 	  nrerror("End of model state file found unexpectedly");
-	if ( fread( &iband, sizeof(int), 1, init_state) != sizeof(int) ) 
+	if ( fread( &iband, sizeof(int), 1, init_state) != 1 ) 
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
@@ -257,8 +255,8 @@ void read_initial_model_state(FILE                *init_state,
 	/* Read total soil moisture */
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &cell[dist][veg][band].layer[lidx].moist, 1, 
-			sizeof(double), init_state ) != sizeof(double) )
+	    if ( fread( &cell[dist][veg][band].layer[lidx].moist,
+			sizeof(double), 1, init_state ) != 1 )
 	      nrerror("End of model state file found unexpectedly");
 	  }
 	  else {
@@ -278,8 +276,8 @@ void read_initial_model_state(FILE                *init_state,
 #if SPATIAL_FROST
 	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
 	    if ( options.BINARY_STATE_FILE ) {
-	      if ( fread( &cell[dist][veg][band].layer[lidx].ice[frost_area], 1,
-	        sizeof(double), init_state ) != sizeof(double) )
+	      if ( fread( &cell[dist][veg][band].layer[lidx].ice[frost_area],
+			  sizeof(double), 1, init_state ) != 1 )
 		  nrerror("End of model state file found unexpectedly");
 	    }
 	    else {
@@ -290,8 +288,8 @@ void read_initial_model_state(FILE                *init_state,
 	  }
 #else
 	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &cell[dist][veg][band].layer[lidx].ice, 1,
-	      sizeof(double), init_state ) != sizeof(double) )
+	    if ( fread( &cell[dist][veg][band].layer[lidx].ice, 
+			sizeof(double), 1, init_state ) != 1 )
 		nrerror("End of model state file found unexpectedly");
 	  }
 	  else {
@@ -306,7 +304,7 @@ void read_initial_model_state(FILE                *init_state,
 	if ( veg < Nveg || ( veg == Nveg+extra_veg && extra_veg > 0 ) ) {
 	  if ( options.BINARY_STATE_FILE ) {
 	    if ( fread( &veg_var[dist][veg][band].Wdew, sizeof(double), 1, 
-			init_state ) != sizeof(double) ) 
+			init_state ) != 1 ) 
 	      nrerror("End of model state file found unexpectedly");
 	  }
 	  else {
@@ -319,37 +317,37 @@ void read_initial_model_state(FILE                *init_state,
       /* Read snow data */
       if ( options.BINARY_STATE_FILE ) {
 	if ( fread( &snow[veg][band].last_snow, sizeof(int), 1, 
-		    init_state ) != sizeof(int) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].MELTING, sizeof(char), 1, 
-		    init_state ) != sizeof(char) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].coverage, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].swq, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].surf_temp, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].surf_water, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].pack_temp, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 ) 
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].pack_water, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].density, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].coldcontent, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].snow_canopy, sizeof(double), 1, 
-		    init_state ) != sizeof(double) )
+		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
@@ -372,7 +370,7 @@ void read_initial_model_state(FILE                *init_state,
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
 	if ( options.BINARY_STATE_FILE ) {
 	  if ( fread( &energy[veg][band].T[nidx], sizeof(double), 1, 
-		      init_state ) != sizeof(double) )
+		      init_state ) != 1 )
 	    nrerror("End of model state file found unexpectedly");
 	}
 	else {
@@ -384,47 +382,47 @@ void read_initial_model_state(FILE                *init_state,
   }
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
-      if ( fread( &lake_var->activenod, sizeof(int), 1, init_state ) != sizeof(int) )
+      if ( fread( &lake_var->activenod, sizeof(int), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->volume, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->volume, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->ldepth, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->ldepth, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->sarea, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->sarea, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->dz, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->dz, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->surfdz, sizeof(double), 1, init_state ) != sizeof(double) )
-	nrerror("End of model state file found unexpectedly");
-      for ( node = 0; node < lake_var->activenod; node++ ) {
-        if ( fread( &lake_var->surface[node], sizeof(double), 1, init_state ) != sizeof(double) )
-	  nrerror("End of model state file found unexpectedly");
-      }
-      if ( fread( &lake_var->tp_in, sizeof(double), 1, init_state ) != sizeof(double) )
-	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->tempavg, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->surfdz, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
       for ( node = 0; node < lake_var->activenod; node++ ) {
-        if ( fread( &lake_var->temp[node], sizeof(double), 1, init_state ) != sizeof(double) )
+        if ( fread( &lake_var->surface[node], sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+      }
+      if ( fread( &lake_var->tp_in, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->tempavg, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
+      for ( node = 0; node < lake_var->activenod; node++ ) {
+        if ( fread( &lake_var->temp[node], sizeof(double), 1, init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
       }
       for ( node = 0; node < lake_var->activenod; node++ ) {
-        if ( fread( &lake_var->density[node], sizeof(double), 1, init_state ) != sizeof(double) )
+        if ( fread( &lake_var->density[node], sizeof(double), 1, init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
       }
-      if ( fread( &lake_var->mixmax, sizeof(int), 1, init_state ) != sizeof(int) )
+      if ( fread( &lake_var->mixmax, sizeof(int), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_con.numnod, sizeof(int), 1, init_state ) != sizeof(int) )
+      if ( fread( &lake_con.numnod, sizeof(int), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->tempi, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->tempi, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->hice, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->hice, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->fraci, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->fraci, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->swe, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->swe, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->sdepth, sizeof(double), 1, init_state ) != sizeof(double) )
+      if ( fread( &lake_var->sdepth, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
     }
     else {

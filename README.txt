@@ -741,6 +741,23 @@ Removed (1.-snow_coverage) from three equations where it did not belong
         Files affected:
         func_surf_energy_bal.c
 
+Added case of SPATIAL_FROST = TRUE in full_energy.c
+
+        Files affected:
+
+        full_energy.c
+
+        The modifications of 2006-Sep-23 contained a bug in the computation
+        of soil wetness and root zone soil moisture.  GCT
+
+Fixed fread checks 
+
+        Files affected:
+
+        read_initial_model_state.c
+
+        Fixed fread checks to make sure correct number of items were read
+        in rather than the size of the item read in     JCA
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
@@ -1140,14 +1157,6 @@ Lake model energy terms NaN for southern hemisphere lakes
 	  ks=6.6*pow(sin((double)fabs(lat)*PI/180.),0.5)*pow(wind,-1.84);
 	This appears to fix the problem.	TJB
 
-Added case of SPATIAL_FROST = TRUE in full_energy.c
-
-        Files affected:
-
-        full_energy.c
-
-        The modifications of 2006-Sep-23 contained a bug in the computation
-        of soil wetness and root zone soil moisture.  GCT
 
 Miscellaneous fixes for memory leaks and uninitialized variables.
 

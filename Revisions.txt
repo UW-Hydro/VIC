@@ -11,7 +11,7 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.0 beta r4k to VIC 4.1.0 beta r4l ***
+***** Description of changes from VIC 4.1.0 beta r4k to VIC 4.1.0 beta r4_jaTnode ***
 --------------------------------------------------------------------------------
 
 TOTAL FILES AFFECTED:
@@ -152,6 +152,15 @@ Removed (1.-snow_coverage) from three equations where it did not belong
 
         Files affected:
         func_surf_energy_bal.c
+
+Fixed fread checks 
+
+        Files affected:
+
+        read_initial_model_state.c
+
+        Fixed fread checks to make sure correct number of items were read
+        in rather than the size of the item read in     JCA
 
 OTHER MODIFICATIONS:
 

@@ -31,6 +31,9 @@
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-03 Added CONTINUEONERROR option.				GCT
   2007-Apr-03 Added ERROR value                                         KAC
+  2007-Apr-24 Added IMPLICIT option.                                    JCA
+  2007-Apr-24 Added EXP_TRANS option.                                   JCA
+  2007-Apr-24 Added Zsum_node to soil_con structure.                    JCA
 *********************************************************************/
 
 #include <user_def.h>
@@ -365,6 +368,10 @@ typedef struct {
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
+  char   IMPLICIT;         /* TRUE = Use implicit solution when computing 
+			    soil thermal fluxes */
+  char   EXP_TRANS;         /* TRUE = Uses grid transform for exponential node 
+			       distribution for soil heat flux calculations*/
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */
@@ -589,6 +596,7 @@ typedef struct {
 #endif // SPATIAL_SNOW
   double   dp;                        /* soil thermal damping depth (m) */
   double   dz_node[MAX_NODES];        /* thermal node thickness (m) */
+  double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
   double   expt[MAX_LAYERS];          /* pore-size distribution per layer, 
 					 HBH 5.15 */
   double   expt_node[MAX_NODES];      /* pore-size distribution per node */

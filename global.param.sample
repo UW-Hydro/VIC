@@ -18,6 +18,8 @@ FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water 
 FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
 NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
+IMPLICIT	FALSE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
+EXP_TRANS	FALSE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution
 DIST_PRCP	FALSE	# TRUE = use distributed precipitation
 CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)

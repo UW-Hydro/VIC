@@ -32,11 +32,16 @@
 	      snow_melt
 	      solve_T_profile
 	      surface_fluxes
+  2007-Apr-24 Added Ming Pan's new functions for IMPLICIT option.       JCA
+              fda_heat_eqn
+              newt_raph
+              tridiag
+              fdjac3
+              solve_T_profile_implicit
   2007-Apr-21 Added functions:						TJB
 	      free_dmy
 	      free_out_data
 	      free_veglib
-
 ************************************************************************/
 
 #include <math.h>
@@ -81,14 +86,14 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
                              layer_data_struct *, soil_con_struct *, char *);
 #if QUICK_FS
 int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
-				double *, double *, double *, double *, 
-				double *, double *, double *, double *, 
-				double *, double *, double ***, int, int);
+				double *, double *, double *,double *, 
+				double *, double *, double *, 
+				double *, double *, double *, double ***, int, int, int, int);
 #else
 int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
-				double *, double *, double *, double *, 
-				double *, double *, double *, double *, 
-				double *, double *, int, int);
+				double *, double *, double *,double *, 
+				double *, double *, double *, 
+				double *, double *, double *, int, int, int, int);
 #endif // QUICK_FS
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double CalcBlowingSnow(double, double, int, double, double, double, double, 
@@ -112,7 +117,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             energy_bal_struct *, layer_data_struct *, 
                             layer_data_struct *, 
                             snow_data_struct *, soil_con_struct *, 
-                            veg_var_struct *, veg_var_struct *);
+                            veg_var_struct *, veg_var_struct *, int);
 double calc_trans(double, double);
 double calc_veg_displacement(double);
 double calc_veg_height(double);
@@ -156,13 +161,13 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
 #if QUICK_FS
-int  distribute_node_moisture_properties(double *, double *, double *,
+int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double ***, 
 					 double *, double *, double *,
 					 double *, double *, int, int, char);
 #else
-int  distribute_node_moisture_properties(double *, double *, double *,
+int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *,
@@ -213,7 +218,11 @@ double exp_interp(double,double,double,double,double);
 double f(double, double, double, double, double, double, double, double,
          double, double, int, double *, double, double, double, double *,
          double *, double *, double *, double *, double *);
-void   find_0_degree_fronts(energy_bal_struct *,double *, double *, int);
+void   fda_heat_eqn(double *, double *, int, int, ...);
+void   fdjac3(double *, double *, double *, double *, double *,
+            void (*vecfunc)(double *, double *, int, int, ...), 
+            int);
+void   find_0_degree_fronts(energy_bal_struct *,double *, double *, double *, int);
 layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
 				     double, double);
 void   find_sublayer_temperatures(layer_data_struct *, double *, double *,
@@ -295,6 +304,8 @@ void mtclim42_wrapper(int, int, double, double, double, double,
 		      double *, double *, double *, double *, double *);
 
 double new_snow_density(double);
+int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...), 
+               double *, int);
 void   nrerror(char *);
 
 void   open_debug();
@@ -352,7 +363,7 @@ int    runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *,
               double, int, int, int, int, int);
 
 void set_max_min_hour(double *, int, int *, int *);
-void set_node_parameters(double *, double *, double *, double *, double *,
+void set_node_parameters(double *, double *, double *, double *, double *, double *,
 			 double *, double *, double *, double *, double *,
 			 double *, double *, float **,
 #if QUICK_FS
@@ -361,10 +372,6 @@ void set_node_parameters(double *, double *, double *, double *, double *,
 			 int, int, char);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
-void   setup_frozen_soil(soil_con_struct *, layer_data_struct  *,
-			 layer_data_struct *, layer_data_struct *,
-			 energy_bal_struct, int, int, int, double,
-			 double *, double *, double *);
 double shrad(double,double,double,double,double,int,double);
 double snow_albedo(double, double, double, double, int, char);
 double snow_density(int, double, double, double, double, double, double, 
@@ -412,16 +419,22 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
-int    solve_T_profile(double *, double *, double *, double *,double *,
+int    solve_T_profile(double *, double *, double *, double *,double *, double *,
 		       double *, double, double *, double *, double *,
-		       double *, double *, double *, double *, double ***, 
-		       int, int *, int, int, int);
+		       double *, double *, double *, double *, double, double *, double ***,
+		       int, int *, int, int, int, int);
 #else
-int    solve_T_profile(double *, double *, double *, double *,double *,
+int    solve_T_profile(double *, double *, double *, double *,double *, double *,
 		       double *, double, double *, double *, double *,
-		       double *, double *, double *, double *, int, int *, 
-		       int, int, int);
+		       double *, double *, double *, double *, double, double *,
+		       int, int *, int, int, int, int);
+
 #endif
+int   solve_T_profile_implicit(double *, double *, double *, double *, double *,double *,
+				double *, double, double *, double *, double *,
+				double *, double *, double *, double *, double, int, int *,
+				int, int, int, int,
+				double *, double *, double *, double *);
 double StabilityCorrection(double, double, double, double, double, double);
 void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,
 				veg_var_struct ***,snow_data_struct **,
@@ -448,6 +461,7 @@ void transpiration(layer_data_struct *, int, int, double, double, double,
 #endif
                    float *);
 void tridag(double *,double *,double *,double *,double *,int);
+void tridiag(double *, double *, double *, double *, unsigned);
 
 void usage(char *);
 

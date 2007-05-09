@@ -24,6 +24,7 @@
 #               parse_output_info.o
 #               set_output_defaults.o
 # 2007-Jan-15 Added PRT_HEADER option; added write_header.c.	TJB
+# 24-Apr-2007 Added newt_raph_func_fast.c for IMPLICIT option.	JCA
 #
 # $Id$
 #
@@ -40,11 +41,11 @@ SHELL = /bin/csh
 CC = gcc
 
 # Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -I. -O3 -Wall -Wno-unused
+CFLAGS  = -I. -g  -Wall -Wno-unused
 LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  = -I. -g -Wall -Wno-unused
+#CFLAGS  = -I. -g -Wall -Wno-unused
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information
@@ -80,7 +81,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \
 	make_cell_data.o make_dist_prcp.o make_dmy.o make_energy_bal.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
-	modify_Ksat.o mtclim42_vic.o mtclim42_wrapper.o nrerror.o \
+	modify_Ksat.o mtclim42_vic.o mtclim42_wrapper.o newt_raph_func_fast.o nrerror.o \
 	open_debug.o open_file.o open_state_file.o \
 	output_list_utils.o parse_output_info.o penman.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \

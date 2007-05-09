@@ -61,6 +61,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-03 Added CONTINUEONERROR option.				GCT
+  2007-04-24 Added EXP_TRANS option. JCA
+  2007-04-24 Added IMPLICIT option. JCA
   2007-Apr-23 Added initialization of global parameters.		TJB
   2007-Apr-23 Added check for FULL_ENERGY if lake model is run.		TJB
 **********************************************************************/
@@ -236,6 +238,16 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.NOFLUX=TRUE;
         else options.NOFLUX = FALSE;
+      }
+      else if(strcasecmp("IMPLICIT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.IMPLICIT=TRUE;
+        else options.IMPLICIT = FALSE;
+      }
+      else if(strcasecmp("EXP_TRANS",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.EXP_TRANS=TRUE;
+        else options.EXP_TRANS = FALSE;
       }
       else if(strcasecmp("DIST_PRCP",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -629,10 +641,6 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"FULL_ENERGY is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
     nrerror(ErrStr);
   }
-  if(options.FROZEN_SOIL && !options.GRND_FLUX) {
-    sprintf(ErrStr,"FROZEN_SOIL is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
-    nrerror(ErrStr);
-  }
   if(options.SNOW_BAND > MAX_BANDS) {
     sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
     nrerror(ErrStr);
@@ -737,9 +745,20 @@ global_param_struct get_global_param(filenames_struct *names,
   else
     fprintf(stderr,"Ground heat flux not computed (no energy balance).\n");
   fprintf(stderr,"Use Frozen Soil Model.........(%d)\n",options.FROZEN_SOIL);
-  if ( QUICK_FS )
+  if( options.IMPLICIT ) 
+    fprintf(stderr,".... Using the implicit solution for the soil heat equation.\n");
+  else
+    fprintf(stderr,".... Using the explicit solution for the soil heat equation.\n");
+  if( options.EXP_TRANS )
+    fprintf(stderr,".... Thermal nodes are exponentially distributed.\n");
+  else
+    fprintf(stderr,".... Thermal nodes are linearly distributed.\n");
+  if ( QUICK_FS ){
     fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n",
 	    QUICK_FS_TEMPS);
+    if(options.IMPLICIT) 
+      fprintf(stderr,"IMPLICIT is TRUE and QUICK_FS is true.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
+  }
   fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);
   fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);

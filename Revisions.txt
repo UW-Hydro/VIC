@@ -9,6 +9,20 @@
 Revisions.txt - Describes differences between versions of VIC source code. 
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4m to VIC 4.1.0 beta r4n ***
+--------------------------------------------------------------------------------
+
+Checks for correct number of fields in vegparam file
+
+           Files affected:
+
+           read_vegparam.c
+
+           Description: Mismatches between the global file and the veg param
+           file were leading to bogus error messages. read_vegparam now checks
+           for correct number of root zones, blowing parameters, and 
+           LAI values and provides (hopefully) more useful error statements. GCT
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4l to VIC 4.1.0 beta r4m ***

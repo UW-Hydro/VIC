@@ -80,16 +80,21 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2005-Apr-13   Added logic for OUTPUT_FORCE option.		TJB
   2005-Apr-23   Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
   2006-09-13   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
-
+  2007-05-23   Replaced 'fscanf' statements with 'sscanf' statements
+               to trap missing fields. GCT
 **********************************************************************/
 {
+  void ttrim( char *string );
   extern option_struct options;
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
 
   char            ErrStr[MAXSTRING];
-  char            NotRunStr[2048];
+  char            line[MAXSTRING];
+  char            tmpline[MAXSTRING];
+  const char      delimiters[] = " ";
+  char            *token;
   int             layer, i, tempint;
   double          Wcr_FRACT[MAX_LAYERS];
   double          Wpwp_FRACT[MAX_LAYERS];
@@ -97,46 +102,104 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          tempdbl;
   soil_con_struct temp; 
 
+  if( fgets( line, MAXSTRING, soilparam ) == NULL ){
+    sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
+    nrerror(ErrStr);
+  }
+
   if ( RUN_MODEL ) {
 
-    fscanf(soilparam, "%d", &temp.gridcel);
-    fscanf(soilparam, "%f", &temp.lat);
-    fscanf(soilparam, "%f", &temp.lng);
+    strcpy(tmpline, line);
+    ttrim( tmpline );
+    if( ( token = strtok (tmpline, delimiters)) == NULL ) {
+      sprintf(ErrStr,"ERROR: Can't find values for CELL NUMBER in soil file\n");
+      nrerror(ErrStr);
+    }
+    sscanf(token, "%d", &temp.gridcel);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for CELL LATITUDE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%f", &temp.lat);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for CELL LONGITUDE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%f", &temp.lng);
 #if VERBOSE
     /* add print statements for grid cell number -- EDM */
     fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
 #endif
     
     /* read infiltration parameter */
-    fscanf(soilparam, "%lf", &temp.b_infilt);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for INFILTRATION in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.b_infilt);
     
     /* read fraction of baseflow rate */
-    fscanf(soilparam, "%lf", &temp.Ds);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for FRACTION OF BASEFLOW RATE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.Ds);
     
     /* read maximum baseflow rate */
-    fscanf(soilparam, "%lf", &temp.Dsmax);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for MAXIMUM BASEFLOW RATE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.Dsmax);
     
     /* read fraction of bottom soil layer moisture */
-    fscanf(soilparam, "%lf", &temp.Ws);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for FRACTION OF BOTTOM SOIL LAYER MOISTURE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.Ws);
     
     /* read exponential */
-    fscanf(soilparam, "%lf", &temp.c);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for EXPONENTIAL in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.c);
     
     /* read expt for each layer */
-    for(layer = 0; layer < options.Nlayer; layer++) 
-      fscanf(soilparam, "%lf", &temp.expt[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for EXPT for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.expt[layer]);
+    }
+
     /* read layer saturated hydraulic conductivity */
-    for(layer = 0; layer < options.Nlayer; layer++)
-      fscanf(soilparam, "%lf", &temp.Ksat[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++){
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for SATURATED HYDRAULIC CONDUCTIVITY for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.Ksat[layer]);
+    }
+
     /* read layer phi_s */
-    for(layer = 0; layer < options.Nlayer; layer++)
-      fscanf(soilparam, "%lf", &temp.phi_s[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++){
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for PHI_S for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.phi_s[layer]);
+    }
+
     /* read layer initial moisture */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      fscanf(soilparam, "%lf", &temp.init_moist[layer]);
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for INITIAL MOISTURE for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.init_moist[layer]);
 #if !OUTPUT_FORCE
       if(temp.init_moist[layer] < 0.) {
 	sprintf(ErrStr,"ERROR: Initial moisture for layer %d cannot be negative (%f)",layer,temp.init_moist[layer]);
@@ -146,11 +209,19 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read cell mean elevation */
-    fscanf(soilparam, "%f", &temp.elevation);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for CELL MEAN ELEVATION in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%f", &temp.elevation);
     
     /* soil layer thicknesses */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      fscanf(soilparam, "%lf", &temp.depth[layer]);
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for LAYER THICKNESS for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.depth[layer]);
 #if !OUTPUT_FORCE
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
       if(temp.depth[layer] < MINSOILDEPTH) {
@@ -169,7 +240,11 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif /* !OUTPUT_FORCE */
     
     /* read average soil temperature */
-    fscanf(soilparam, "%lf", &temp.avg_temp);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for AVERAGE SOIL TEMPERATURE in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.avg_temp);
 #if !OUTPUT_FORCE
     if(options.FULL_ENERGY && (temp.avg_temp>100. || temp.avg_temp<-50)) {
       fprintf(stderr,"Need valid average soil temperature in degrees C to run");
@@ -180,15 +255,25 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif /* !OUTPUT_FORCE */
     
     /* read soil damping depth */
-    fscanf(soilparam, "%lf", &temp.dp);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for SOIL DAMPING DEPTH in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.dp);
     
     /* read layer bubbling pressure */
-    for(layer = 0; layer < options.Nlayer; layer++) 
-      fscanf(soilparam, "%lf", &temp.bubble[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for BUBBLING PRESSURE for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.bubble[layer]);
+    }
+
     /* read layer quartz content */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      fscanf(soilparam, "%lf", &temp.quartz[layer]);
+      token = strtok (NULL, delimiters);  
+      sscanf(token, "%lf", &temp.quartz[layer]);
 #if !OUTPUT_FORCE
       if(options.FULL_ENERGY 
 	 && (temp.quartz[layer] > 1. || temp.quartz[layer] < 0)) {
@@ -201,12 +286,21 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read layer bulk density */
-    for(layer = 0; layer < options.Nlayer; layer++)
-      fscanf(soilparam, "%lf", &temp.bulk_density[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++){
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for BULK DENSITY for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.bulk_density[layer]);
+    }
+
     /* read layer soil density */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      fscanf(soilparam, "%lf", &temp.soil_density[layer]);
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for SOIL DENSITY for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.soil_density[layer]);
 #if !OUTPUT_FORCE
       if(temp.bulk_density[layer]>=temp.soil_density[layer])
 	nrerror("Layer bulk density must be less then soil density");
@@ -214,42 +308,85 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read cell gmt offset */
-    fscanf(soilparam, "%lf", &off_gmt);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for GMT OFFSET in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &off_gmt);
     
     /* read layer critical point */
-    for(layer=0;layer<options.Nlayer;layer++)
-      fscanf(soilparam, "%lf", &(Wcr_FRACT[layer]));
-    
+    for(layer=0;layer<options.Nlayer;layer++){
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for CRITICAL POINT for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &(Wcr_FRACT[layer]));
+    }
+
     /* read layer wilting point */
-    for(layer=0;layer<options.Nlayer;layer++)
-      fscanf(soilparam, "%lf", &(Wpwp_FRACT[layer]));
-    
+    for(layer=0;layer<options.Nlayer;layer++){
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for WILTING POINT for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &(Wpwp_FRACT[layer]));
+    }
+
     /* read soil roughness */
-    fscanf(soilparam, "%lf", &temp.rough);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for SOIL ROUGHNESS in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.rough);
     
     /* read snow roughness */
-    fscanf(soilparam, "%lf", &temp.snow_rough);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for SNOW ROUGHNESS in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.snow_rough);
     
     /* read cell annual precipitation */
-    fscanf(soilparam, "%lf", &temp.annual_prec);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for ANNUAL PRECIPITATION in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &temp.annual_prec);
     
     /* read layer residual moisture content */
-    for(layer = 0; layer < options.Nlayer; layer++) 
-      fscanf(soilparam, "%lf", &temp.resid_moist[layer]);
-    
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for RESIDUAL MOISTURE CONTENT for layer %d in soil file\n", layer);
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &temp.resid_moist[layer]);
+    }
+
     /* read frozen soil active flag */
-    fscanf(soilparam, "%d", &tempint);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for FROZEN SOIL ACTIVE FLAG in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%d", &tempint);
     temp.FS_ACTIVE = (char)tempint;
     
     /* read minimum snow depth for full coverage */
 #if SPATIAL_SNOW
-    fscanf(soilparam, "%lf", &tempdbl);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for SPATIAL SNOW in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &tempdbl);
     temp.depth_full_snow_cover = tempdbl;
 #endif // SPATIAL_SNOW
     
     /* read slope of frozen soil distribution */
 #if SPATIAL_FROST
-    fscanf(soilparam, "%lf", &tempdbl);
+    if( ( token = strtok (NULL, delimiters)) == NULL ){
+      sprintf(ErrStr,"ERROR: Can't find values for SPATIAL FROST in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%lf", &tempdbl);
     temp.frost_slope = tempdbl;
 #endif // SPATIAL_FROST
     
@@ -355,14 +492,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.layer_node_fract[layer] = (float *)malloc(options.Nnode*sizeof(float));
 
 
-  }
-  else {
-   
-    /* Grid cell is not active, skip soil parameter data */
-    fgets(NotRunStr, 2048, soilparam);
+    }
 
-  }
-    
+    /* ELSE Grid cell is not active (RUN_MODEL=0), skip soil parameter data */
+
   return temp;
 
 } 
+
+

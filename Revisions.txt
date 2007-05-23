@@ -10,6 +10,24 @@ Revisions.txt - Describes differences between versions of VIC source code.
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4n to VIC 4.1.0 beta r4o ***
+--------------------------------------------------------------------------------
+
+Checks for missing fields in soil param file
+
+           Files affected:
+
+           read_soilparam.c
+
+           Description: Mismatches between the global file and the soil param
+           file were leading to bogus error messages. read_soilparam now
+           checks to see if fields are available. Changed 'fscanf' to 'sscanf'
+           statements to prevent incorrectly reading beyond the end-of-line.
+           GCT
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4m to VIC 4.1.0 beta r4n ***
 --------------------------------------------------------------------------------
 

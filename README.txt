@@ -761,6 +761,23 @@ setup_frozen_soil subroutine removed as it is never called
                    frozen_soil.c
 
 
+Bug fix for previous bug fix to dt_baseflow calculation.
+
+           Files Affected:
+
+           runoff.c
+
+           Description:
+
+           Fixed bug arising from earlier fix to dt_baseflow
+           calculation.  Earlier fix took residual moisture
+           into account in the linear part of the baseflow eqn,
+           but not in the non-linear part.  Now we take residual
+           moisture into account correctly throughout the whole
+           equation.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

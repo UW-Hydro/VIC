@@ -81,6 +81,12 @@ int  runoff(layer_data_struct *layer_wet,
     2007-Apr-04 Modified to return Error status from 
                 distribute_node_moisture_properties  GCT/KAC
     24-Apr-07  Passes soil_con->Zsum_node to distribute_node_moisture_properties.  JCA
+    2007-Jun-13 Fixed bug arising from earlier fix to dt_baseflow
+		calculation.  Earlier fix took residual moisture
+		into account in the linear part of the baseflow eqn,
+		but not in the non-linear part.  Now we take residual
+		moisture into account correctly throughout the whole
+		equation.  Also re-wrote equation in simpler form.	TJB
 
 **********************************************************************/
 {  
@@ -134,6 +140,7 @@ int  runoff(layer_data_struct *layer_wet,
   double             actual_frost_fract[FROST_SUBAREAS];
   double             tmp_mu;
   double             dt_baseflow;
+  double             rel_moist;
 #if LOW_RES_MOIST
   double             b[MAX_LAYERS];
   double             matric[MAX_LAYERS];
@@ -472,18 +479,20 @@ int  runoff(layer_data_struct *layer_wet,
 	    debug.inflow[dist][band][lindex+2]  += Q12[lindex-1];
 	  }
 #endif // LINK_DEBUG
-	  
-	  frac = soil_con->Ds * Dsmax 
-	    / (soil_con->Ws * soil_con->max_moist[lindex]);
-	  dt_baseflow = frac * ( moist[lindex] - resid_moist[lindex] );
-	  if (moist[lindex] > soil_con->Ws * soil_con->max_moist[lindex]) {
-	    frac = (moist[lindex] - soil_con->Ws * soil_con->max_moist[lindex]) 
-	      / (soil_con->max_moist[lindex] - soil_con->Ws 
-		 * soil_con->max_moist[lindex]);
-	    dt_baseflow += (Dsmax - soil_con->Ds * Dsmax / soil_con->Ws) 
-	      * pow(frac,soil_con->c);
-	  }
-	  
+
+          /** Compute relative moisture **/
+          rel_moist = (moist[lindex]-resid_moist[lindex])
+                      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
+
+          /** Compute baseflow as function of relative moisture **/
+          frac = Dsmax * soil_con->Ds / soil_con->Ws;
+          dt_baseflow = frac * rel_moist;
+          if (rel_moist > soil_con->Ws) {
+            frac = (rel_moist - soil_con->Ws) / (1 - soil_con->Ws);
+            dt_baseflow += Dsmax * (1 - soil_con->Ds / soil_con->Ws)
+              * pow(frac,soil_con->c);
+          }
+
           /** Make sure baseflow isn't negative **/
 	  if(dt_baseflow < 0) dt_baseflow = 0;
 

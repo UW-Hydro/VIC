@@ -10,8 +10,33 @@ Revisions.txt - Describes differences between versions of VIC source code.
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
+
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.0 beta r4n to VIC 4.1.0 beta r4p ***
+***** Description of changes from VIC 4.1.0 beta r4p to VIC 4.1.0 beta r4q ***
+--------------------------------------------------------------------------------
+
+Sub-daily snow step for 24h wb mode not aggregating correctly
+
+           Files affected:
+
+           snow_melt.c (melt units corrected to mm)
+           solve_snow.c (melt units corrected to mm)
+           surface_fluxes.c (iter_* and step_* structures)
+
+           Description:
+
+           The implementation of the canopy iteration in surface_fluxes()
+           caused the data structures containing the results
+           for the sub-daily snow steps to be reset at the beginning
+           of every sub-daily step, resulting in large water
+           balance errors and incorrect daily results.  This has been fixed by
+           creating distinct data structures to store results for
+           iterations (iter_*) and steps (step_*).  In addition,
+           the units of snow melt were corrected to
+           be consistent (mm) across functions.
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4o to VIC 4.1.0 beta r4p ***
 --------------------------------------------------------------------------------
 
 Bug fix for previous bug fix to dt_baseflow calculation.

@@ -58,7 +58,7 @@ static char vcid[] = "$Id$";
                                    snow pack (W/m2)
 
   Modifies     :
-    double atmos->melt           - Amount of snowpack outflow (m)
+    double *melt                 - Amount of snowpack outflow (initially is m, but converted to mm for output)
     double snow->pack_water      - Liquid water content of snow pack 
     double snow->surf_water	 - Liquid water content of surface layer 
     double snow->swq             - Snow water equivalent at current pixel (m)
@@ -112,6 +112,7 @@ static char vcid[] = "$Id$";
 	    used in flux calculations.				TJB
 2007-Apr-11 Modified to handle grid cell errors by returning to the
             main subroutine, rather than ending the simulation.    KAC
+2007-Jul-03 Corrected the units of melt in the comment section.	TJB
 
 *****************************************************************************/
 int  snow_melt(double            Le, 

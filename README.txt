@@ -776,6 +776,25 @@ Bug fix for previous bug fix to dt_baseflow calculation.
            moisture into account correctly throughout the whole
            equation.
 
+Sub-daily snow step for 24h wb mode not aggregating correctly
+
+           Files affected:
+
+           snow_melt.c (melt units corrected to mm)
+           solve_snow.c (melt units corrected to mm)
+           surface_fluxes.c (iter_* and step_* structures)
+
+           Description:
+
+           The implementation of the canopy iteration in surface_fluxes() 
+           caused the data structures containing the results
+           for the sub-daily snow steps to be reset at the beginning
+           of every sub-daily step, resulting in large water
+           balance errors and incorrect daily results.  This has been fixed by
+           creating distinct data structures to store results for 
+           iterations (iter_*) and steps (step_*).  In addition,
+           the units of snow melt were corrected to
+           be consistent (mm) across functions.
 
 
 --------------------------------------------------------------------------------

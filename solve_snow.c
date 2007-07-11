@@ -121,6 +121,8 @@ double solve_snow(char                 overstory,
            main subroutine, rather than ending the simulation. GCT/KAC
   2007-Apr-21 Added initialization of TmpAlbedoUnder[0] for the case
 	      in which snow->swq == 0.				TJB
+  2007-Jul-03 Units of melt are in mm, not m, so inserted *0.001 into
+	      call to calc_snow_coverage().			TJB
 
 *********************************************************************/
 
@@ -424,7 +426,7 @@ double solve_snow(char                 overstory,
 					    soil_con->depth_full_snow_cover, 
 					    old_coverage, snow->swq,
 					    old_swq, snow->depth, old_depth, 
-					    melt + snow->vapor_flux, 
+					    melt*0.001 + snow->vapor_flux, 
 					    &snow->max_swq, snowfall, 
 					    &snow->store_swq, 
 					    &snow->swq_slope,

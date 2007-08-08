@@ -796,6 +796,12 @@ Sub-daily snow step for 24h wb mode not aggregating correctly
            the units of snow melt were corrected to
            be consistent (mm) across functions.
 
+Moved Implicit error counting above call for solve_T_profile.
+
+          Files affected:
+
+          func_surf_energy_bal
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

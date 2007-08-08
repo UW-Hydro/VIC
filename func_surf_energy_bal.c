@@ -74,6 +74,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
               (including counting cases when IMPLICIT fails and involes EXPLICIT)
   24-Apr-07 Features included for EXP_TRANS frozen soils option. JCA
   24-Apr-07 Passing in Zsum_node.  JCA
+  7-Aug-07  Moved Implicit error counting above call for solve_T_profile.  JCA
 
 **********************************************************************/
 {
@@ -469,8 +470,21 @@ double func_surf_energy_bal(double Ts, va_list ap)
 					 moist_node, delta_t, max_moist_node, bubble_node, 
 					 expt_node, ice_node, alpha, beta, gamma, dp, Nnodes, 
 					 FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
-      }
       
+	/* print out error information for IMPLICIT solution */
+	if(Error==0)
+	  error_cnt0++;
+	else
+	  error_cnt1++;
+	if(FIRST_SOLN[1]){
+	  FIRST_SOLN[1] = FALSE;
+#if VERBOSE
+	  if ( iveg == 0 && rec == nrecs - 1) 
+	    fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
+#endif
+	}
+      }
+
       /* EXPLICIT Solution, or if IMPLICIT Solution Failed */
       if(!options.IMPLICIT || Error == 1) {
 	if(options.IMPLICIT)
@@ -495,20 +509,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
       }
       *T1 = Tnew_node[1];
       
-      /* print out error information for IMPLICIT solution */
-      if(options.IMPLICIT){
-	if(Error==0)
-	  error_cnt0++;
-	else
-	  error_cnt1++;
-	if(FIRST_SOLN[1]){
-	  FIRST_SOLN[1] = FALSE;
-#if VERBOSE
-	  if ( iveg == 0 && rec == nrecs - 1) 
-	    fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
-#endif
-	}
-      }
 
       /*****************************************************
         Compute the Ground Heat Flux from the Top Soil Layer

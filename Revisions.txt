@@ -10,6 +10,15 @@ Revisions.txt - Describes differences between versions of VIC source code.
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4q to VIC 4.1.0 beta r4r ***
+--------------------------------------------------------------------------------
+
+Moved Implicit error counting above call for solve_T_profile.
+
+          Files affected:
+
+          func_surf_energy_bal
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4p to VIC 4.1.0 beta r4q ***

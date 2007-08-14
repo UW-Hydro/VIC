@@ -11,6 +11,17 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4r to VIC 4.1.0 beta r4s ***
+--------------------------------------------------------------------------------
+
+Moved ARNO/NIJSSEN conversion after calculation of max_moist.
+
+          Files affected:
+
+          read_soilparam_arc.c
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4q to VIC 4.1.0 beta r4r ***
 --------------------------------------------------------------------------------
 

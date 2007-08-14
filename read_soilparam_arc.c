@@ -104,6 +104,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		is FALSE.					TJB
   2005-Apr-23	Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
   2006-0913     Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
+  2007-Aug-09   Baseflow conversion if NIJSSEN2001=TRUE instead of ARNO=TRUE.  JCA
+  2007-Aug-09   Moved ARNO/NIJSSEN conversion after calculation of max_moist.  JCA
 **********************************************************************/
 {
   extern option_struct options;
@@ -363,19 +365,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // SPATIAL_FROST
 
-    /*************************************************
-    if BASEFLOW == ARNO then convert the baseflow
-    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
-    *************************************************/
-    if(options.BASEFLOW == ARNO) {
-      layer = options.Nlayer-1;
-      temp.Dsmax = temp.Dsmax * 
-	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
-	temp.Ds * temp.max_moist[layer];
-      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
-      temp.Ws = temp.Ws/temp.max_moist[layer];
-    }
-
     /*******************************************
       Compute Soil Layer Properties
       *******************************************/
@@ -499,6 +488,19 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
 	nrerror(ErrStr);
       }
+    }
+
+    /*************************************************
+    if BASEFLOW == NIJSSEN2001 then convert the baseflow
+    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
+    *************************************************/
+    if(options.BASEFLOW == NIJSSEN2001) {
+      layer = options.Nlayer-1;
+      temp.Dsmax = temp.Dsmax * 
+	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
+	temp.Ds * temp.max_moist[layer];
+      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
+      temp.Ws = temp.Ws/temp.max_moist[layer];
     }
 
     /*************************************************

@@ -802,6 +802,12 @@ Moved Implicit error counting above call for solve_T_profile.
 
           func_surf_energy_bal
 
+Moved ARNO/NIJSSEN conversion after calculation of max_moist.
+
+          Files affected:
+
+          read_soilparam_arc.c
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

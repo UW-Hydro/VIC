@@ -46,6 +46,7 @@ int lakemain(atmos_data_struct  *atmos,
   2007-Apr-03 Modified to catch and return error flags from surface_fluxes
               subroutine.                                         KAC
   24-Apr-07  Passes soil_con.Zsum_node to distribute_node_moisture_properties.  JCA
+  2007-Aug-16 Added ErrorFlag return value from initialize_prcp.  JCA
 
   Parameters :
 
@@ -99,8 +100,12 @@ the grid cell average fluxes.
   if ( rec == 0 ) LakeFlow = 0;
 
   // Initialize lake data structures 
-  initialize_prcp(prcp, &lake_energy, &lake_snow, iveg, band, lake->fraci, 
-		*soil_con, lake, rec, lake_con);
+  ErrorFlag = initialize_prcp(prcp, &lake_energy, &lake_snow, iveg, band, lake->fraci, 
+			      *soil_con, lake, rec, lake_con);
+
+  if ( ErrorFlag == ERROR )
+    // Return failure flag to main routine
+    return ( ErrorFlag );
 
  /**********************************************************************
    * Solve the energy budget for the exposed land.
@@ -2322,8 +2327,10 @@ void update_prcp(dist_prcp_struct *prcp,
 
   Modifications:
   2006-Nov-07 Assigned value to MELTING.  TJB
+  2007-Aug-16 Added ErrorFlag to return value of
+               distribute_node_moisture_properties.  JCA
 **************************************************************************/
-void initialize_prcp(dist_prcp_struct *prcp, 
+int initialize_prcp(dist_prcp_struct *prcp, 
 		     energy_bal_struct *lake_energy, 
 		     snow_data_struct *lake_snow, 
 		     int iveg,
@@ -2351,6 +2358,7 @@ void initialize_prcp(dist_prcp_struct *prcp,
   double error;
   double lakefrac;
   double sum_ice;
+  int ErrorFlag;
 
   wland_energy  = prcp->energy;
   wland_snow    = prcp->snow;
@@ -2461,20 +2469,23 @@ void initialize_prcp(dist_prcp_struct *prcp,
 
   for(index=0; index<options.Nlayer; index++) 
     moist[index] = cell[WET][iveg][band].layer[index].moist;
-  distribute_node_moisture_properties(wland_energy[iveg][band].moist, wland_energy[iveg][band].ice,
-				      wland_energy[iveg][band].kappa_node, wland_energy[iveg][band].Cs_node,
-				      soil_con.dz_node, soil_con.Zsum_node, wland_energy[iveg][band].T,
-				      soil_con.max_moist_node,
+  ErrorFlag = distribute_node_moisture_properties(wland_energy[iveg][band].moist, wland_energy[iveg][band].ice,
+						  wland_energy[iveg][band].kappa_node, wland_energy[iveg][band].Cs_node,
+						  soil_con.dz_node, soil_con.Zsum_node, wland_energy[iveg][band].T,
+						  soil_con.max_moist_node,
 #if QUICK_FS
-				      soil_con.ufwc_table_node,
+						  soil_con.ufwc_table_node,
 #else
-				      soil_con.expt_node,
-				      soil_con.bubble_node, 
+						  soil_con.expt_node,
+						  soil_con.bubble_node, 
 #endif // QUICK_FS
-				      moist, soil_con.depth, 
-				      soil_con.soil_density,
-				      soil_con.bulk_density,
-				      soil_con.quartz, options.Nnode, 
-				      options.Nlayer, soil_con.FS_ACTIVE);
-    //   printf("%f\n",error);
+						  moist, soil_con.depth, 
+						  soil_con.soil_density,
+						  soil_con.bulk_density,
+						  soil_con.quartz, options.Nnode, 
+						  options.Nlayer, soil_con.FS_ACTIVE);
+  if ( ErrorFlag == ERROR )
+    return ( ErrorFlag );
+  
+  return(0);
 }

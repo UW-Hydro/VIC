@@ -808,6 +808,13 @@ Moved ARNO/NIJSSEN conversion after calculation of max_moist.
 
           read_soilparam_arc.c
 
+Added ErrorFlag return value from initialize_prcp.
+
+          Files affected:
+
+          lakes.eb.c
+          LAKE.h
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

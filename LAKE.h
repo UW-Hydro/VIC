@@ -2,6 +2,7 @@
 // $Id$
   Modifications:
   2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2007-Aug-16 Made return value of initialize_prcp an int.  JCA
 
 ******************************************************************************/
 
@@ -98,4 +99,4 @@ int wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		    global_param_struct *, soil_con_struct  *, int,
 		    int, double, lake_con_struct);
 void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, double, lake_var_struct *, lake_con_struct, int, int, double, soil_con_struct);
-void initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, double, soil_con_struct, lake_var_struct *, int, lake_con_struct);
+int initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, double, soil_con_struct, lake_var_struct *, int, lake_con_struct);

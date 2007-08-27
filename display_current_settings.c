@@ -32,6 +32,7 @@ void display_current_settings(int                 mode,
   2007-Jan-15 Added PRT_HEADER option.				TJB
   2007-04-24 Added IMPLICIT option.                             JCA
   2007-04-24 Added EXP_TRANS option.                            JCA
+  2007-08-08 Added EXCESS_ICE option.                            JCA
 **********************************************************************/
 {
 
@@ -120,6 +121,11 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"SPATIAL_SNOW\t\tTRUE\n");
 #else
   fprintf(stdout,"SPATIAL_SNOW\t\tFALSE\n");
+#endif
+#if EXCESS_ICE
+  fprintf(stdout,"EXCESS_ICE\t\tTRUE\n");
+#else
+  fprintf(stdout,"EXCESS_ICE\t\tFALSE\n");
 #endif
 
   fprintf(stdout,"\n");

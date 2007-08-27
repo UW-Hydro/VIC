@@ -61,6 +61,8 @@ void put_data(dist_prcp_struct  *prcp,
   2007-Apr-21 Moved initialization of tmp_fract to immediately before the
 	        #if SPATIAL_FROST
 	      block, so that it would be initialized in all cases.	TJB
+  2007-Aug-17 Added EXCESS_ICE output variables.                        JCA
+  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.              JCA
 
 **********************************************************************/
 {
@@ -187,7 +189,7 @@ void put_data(dist_prcp_struct  *prcp,
   lake_var = prcp->lake_var;
   snow    = prcp->snow;
   veg_var = prcp->veg_var;
- 
+
   /****************************************
     Store Output for all Vegetation Types (except lakes)
   ****************************************/
@@ -853,6 +855,19 @@ void put_data(dist_prcp_struct  *prcp,
   }
 
   /*****************************************
+    Aggregation of Dynamic Soil Properties      
+   *****************************************/
+#if EXCESS_ICE
+  for(index=0;index<options.Nlayer;index++) {
+    out_data[OUT_SOIL_DEPTH].data[index]  = soil_con->depth[index];
+    out_data[OUT_SUBSIDENCE].data[index]  = soil_con->subsidence[index];
+    out_data[OUT_POROSITY].data[index]    = soil_con->effective_porosity[index];
+  }  
+  for(index=0;index<options.Nnode;index++) 
+    out_data[OUT_ZSUM_NODE].data[index]   = soil_con->Zsum_node[index];
+#endif // EXCESS_ICE
+
+  /*****************************************
     Finish aggregation of special-case variables
    *****************************************/
   // Normalize quantities that aren't present over entire grid cell
@@ -918,11 +933,11 @@ void put_data(dist_prcp_struct  *prcp,
     else
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
-  calc_water_balance_error(rec,inflow,outflow,storage);
-
+  out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
+  
   /********************
     Check Energy Balance 
-    ********************/
+  ********************/
   if(options.FULL_ENERGY)
     calc_energy_balance_error(rec, out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0],
 			      out_data[OUT_LATENT].data[0]+out_data[OUT_LATENT_SUB].data[0],

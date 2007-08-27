@@ -82,6 +82,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2006-09-13   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
   2007-05-23   Replaced 'fscanf' statements with 'sscanf' statements
                to trap missing fields. GCT
+  2007-08-08   Added EXCESS_ICE option.                         JCA
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -100,6 +101,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
   double          tempdbl;
+  double          extra_depth;
+#if EXCESS_ICE
+  double          init_ice_fract[MAX_LAYERS];
+#endif
   soil_con_struct temp; 
 
   if( fgets( line, MAXSTRING, soilparam ) == NULL ){
@@ -222,22 +227,15 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }  
       sscanf(token, "%lf", &temp.depth[layer]);
+    }
+
+    /* final soil layer thicknesses for !EXCESS_ICE option */
+#if !EXCESS_ICE
 #if !OUTPUT_FORCE
+    for(layer = 0; layer < options.Nlayer; layer++) 
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
-      if(temp.depth[layer] < MINSOILDEPTH) {
-	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
-		layer,temp.depth[layer],MINSOILDEPTH);
-	nrerror(ErrStr);
-      }
-#endif /* !OUTPUT_FORCE */
-    }
-#if !OUTPUT_FORCE
-    if(temp.depth[0] > temp.depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
-	      0,temp.depth[0],1,temp.depth[1]);
-      nrerror(ErrStr);
-    }
-#endif /* !OUTPUT_FORCE */
+#endif
+#endif /* !EXCESS_ICE */    
     
     /* read average soil temperature */
     if( ( token = strtok (NULL, delimiters)) == NULL ){
@@ -375,7 +373,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
     if( ( token = strtok (NULL, delimiters)) == NULL ){
       sprintf(ErrStr,"ERROR: Can't find values for SPATIAL SNOW in soil file\n");
       nrerror(ErrStr);
-    }  
+    }
     sscanf(token, "%lf", &tempdbl);
     temp.depth_full_snow_cover = tempdbl;
 #endif // SPATIAL_SNOW
@@ -390,6 +388,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
     temp.frost_slope = tempdbl;
 #endif // SPATIAL_FROST
     
+    /*read volumetric ice fraction for each soil layer */
+#if EXCESS_ICE
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+	sprintf(ErrStr,"ERROR: Can't find values for VOLUMETRIC ICE FRACTION (EXCESS_ICE = TRUE) for layer %d in soil file\n", layer);
+	nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &init_ice_fract[layer]);
+    }
+#endif // EXCESS_ICE
+    
 #if !OUTPUT_FORCE
     /*******************************************
       Compute Soil Layer Properties
@@ -399,11 +408,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	temp.resid_moist[layer] = RESID_MOIST;
       temp.porosity[layer] = 1.0 - temp.bulk_density[layer] 
 	/ temp.soil_density[layer];
+#if !EXCESS_ICE      
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
+#endif      
     }
 
+#if !EXCESS_ICE
     /*******************************************
-      Validate Initial Soil Layer Moisture Content
+      Validate Initial Soil Layer Moisture Content for !EXCESS_ICE option.
     *******************************************/
     if (!options.INIT_STATE) { // only do this if we're not getting initial moisture from model state file
       for(layer = 0; layer < options.Nlayer; layer++) {
@@ -419,7 +431,98 @@ soil_con_struct read_soilparam(FILE *soilparam,
         }
       }
     }
+#endif
     
+#if EXCESS_ICE
+    /*******************************************
+      Compute Soil Layer Properties for EXCESS_ICE option
+    *******************************************/
+    extra_depth=0;
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      temp.min_depth[layer]=temp.depth[layer];
+      if(init_ice_fract[layer]>MAX_ICE_INIT){ // validate amount based on physical constraints
+	fprintf(stderr,"Initial ice fraction (%f) is greater than maximum ice content for layer %d.\n\tResetting to maximum of %f\n",init_ice_fract[layer],layer,MAX_ICE_INIT);
+	init_ice_fract[layer]=MAX_ICE_INIT;
+      }
+      if(init_ice_fract[layer]>=temp.porosity[layer]){//excess ground ice present
+	fprintf(stderr,"Excess ground ice present in layer %d:\n",layer+1);
+	fprintf(stderr,"\t\tSubsidence will occur when the average soil layer\n\t\t  temperature exceeds %.2f degrees Celsius.\n",powf((1.-ICE_AT_SUBSIDENCE),(3.-temp.expt[layer])/2.)*273.16*9.81*temp.bubble[layer]/(-Lf*100.));	
+	temp.effective_porosity[layer]=init_ice_fract[layer];
+	fprintf(stderr,"\t\tEffective porosity increased from %.2f to %.2f.\n",temp.porosity[layer],temp.effective_porosity[layer]);
+	temp.depth[layer] = temp.min_depth[layer]*(1.0 - temp.porosity[layer])/(1.0 - temp.effective_porosity[layer]); //adjust soil layer depth
+	extra_depth += temp.depth[layer]-temp.min_depth[layer]; //net increase in depth due to excess ice
+	fprintf(stderr,"\t\tDepth of soil layer adjusted for excess ground ice: from %.2f m to %.2f m.\n",temp.min_depth[layer],temp.depth[layer]);
+	fprintf(stderr,"\t\tBulk density adjusted for excess ground ice: from %.2f kg/m^3 to %.2f kg/m^3.\n",temp.bulk_density[layer],(1.0-temp.effective_porosity[layer])*temp.soil_density[layer]);
+	temp.bulk_density[layer] = (1.0-temp.effective_porosity[layer])*temp.soil_density[layer]; //adjust bulk density
+      }
+      else //excess ground ice not present
+	temp.effective_porosity[layer]=temp.porosity[layer];
+    }
+    if(extra_depth>0) {
+      fprintf(stderr,"Damping depth adjusted for excess ground ice: from %.2f m to %.2f m.\n",temp.dp,temp.dp+extra_depth);
+      temp.dp += extra_depth;  //adjust damping depth
+    }
+    
+    /* final soil layer thicknesses for EXCESS_ICE option */
+    for(layer = 0; layer < options.Nlayer; layer++) 
+      temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
+    
+    /* Calculate and Validate Maximum Initial Soil Layer Moisture Content for EXCESS_ICE option */
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      temp.max_moist[layer] = temp.depth[layer] * temp.effective_porosity[layer] * 1000.;
+      if(temp.effective_porosity[layer]>temp.porosity[layer])//excess ground ice present
+	temp.init_moist[layer] = temp.max_moist[layer]; 
+      else {//excess ground ice not present
+	if(temp.depth[layer] * init_ice_fract[layer] * 1000. > temp.init_moist[layer])
+	  temp.init_moist[layer] = temp.depth[layer] * init_ice_fract[layer] * 1000.;
+      }
+    }
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if(temp.init_moist[layer] > temp.max_moist[layer]) {
+	fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %d.\n\tResetting soil moisture to maximum.\n",
+		temp.init_moist[layer], temp.max_moist[layer], layer);
+	temp.init_moist[layer] = temp.max_moist[layer];
+      }
+      if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) { 
+	fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tResetting soil moisture to residual moisture.\n",
+		temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+	temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
+      }
+    }
+#endif // EXCESS_ICE   
+    
+    /**********************************************
+      Validate soil layer depths for top two layers
+    **********************************************/
+#if !OUTPUT_FORCE
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if(temp.depth[layer] < MINSOILDEPTH) {
+	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
+		layer,temp.depth[layer],MINSOILDEPTH);
+	nrerror(ErrStr);
+      }
+    }
+    if(temp.depth[0] > temp.depth[1]) {
+      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
+	      0,temp.depth[0],1,temp.depth[1]);
+      nrerror(ErrStr);
+    }
+#if EXCESS_ICE
+    for(layer = 0; layer < options.Nlayer; layer++) {
+      if(temp.min_depth[layer] < MINSOILDEPTH) {
+	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
+		layer,temp.min_depth[layer],MINSOILDEPTH);
+	nrerror(ErrStr);
+      }
+    }
+    if(temp.min_depth[0] > temp.min_depth[1]) {
+      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
+	      0,temp.min_depth[0],1,temp.min_depth[1]);
+      nrerror(ErrStr);
+    }
+#endif /* EXCESS_ICE */
+#endif /* !OUTPUT_FORCE */
+
     /**********************************************
       Compute Maximum Infiltration for Upper Layers
     **********************************************/
@@ -434,19 +537,22 @@ soil_con_struct read_soilparam(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       temp.Wcr[layer]  = Wcr_FRACT[layer] * temp.max_moist[layer];
       temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
+#if EXCESS_ICE
+      temp.Wcr_FRACT[layer]  = Wcr_FRACT[layer];
+      temp.Wpwp_FRACT[layer] = Wpwp_FRACT[layer]; 
+#endif
       if(temp.Wpwp[layer] > temp.Wcr[layer]) {
-        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is greater than calculated critical point moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
-                temp.Wpwp[layer], temp.Wcr[layer], layer);
+	sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is greater than calculated critical point moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
+		temp.Wpwp[layer], temp.Wcr[layer], layer);
 	nrerror(ErrStr);
       }
       if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-                temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+	sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
+		temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
 	nrerror(ErrStr);
       }
-    }
-
-
+    }    
+    
     /**********************************************
       Validate Spatial Snow/Frost Params
     **********************************************/
@@ -463,12 +569,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
       nrerror(ErrStr);
     }
 #endif // SPATIAL_FROST
-
+    
     
     /*************************************************
       If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
       parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
     *************************************************/
+#if EXCESS_ICE
+    temp.Dsmax_orig = temp.Dsmax;
+    temp.Ds_orig = temp.Ds;
+    temp.Ws_orig = temp.Ws;
+#endif
     if(options.BASEFLOW == NIJSSEN2001) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax * 
@@ -477,7 +588,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
       temp.Ws = temp.Ws/temp.max_moist[layer];
     }
-    
+
 #endif /* !OUTPUT_FORCE */
     
     
@@ -485,19 +596,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
       Determine Central Longitude of Current Time Zone 
     *************************************************/
     temp.time_zone_lng = off_gmt * 360./24.;
-
+    
     /* Allocate Layer - Node fraction array */
     temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
     for(layer=0;layer<=options.Nlayer;layer++) 
       temp.layer_node_fract[layer] = (float *)malloc(options.Nnode*sizeof(float));
 
-
-    }
-
-    /* ELSE Grid cell is not active (RUN_MODEL=0), skip soil parameter data */
-
+}
+  /* ELSE Grid cell is not active (RUN_MODEL=0), skip soil parameter data */
+  
   return temp;
-
+  
 } 
 
 

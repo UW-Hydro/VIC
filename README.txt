@@ -589,6 +589,57 @@ Patch for "cold nose" problem
       is now made to set the first term to zero when this begins to happen.
       This only seems to happen in the first and second near-surface nodes.
 
+Added EXCESS_ICE option (set in user_def.h)
+
+        Files affected:
+        calc_surf_energy_bal.c
+        calc_water_energy_balance_errors.c
+        display_current_settings.c
+        frozen_soil.c
+        full_energy.c
+        func_surf_energy_bal.c
+        get_global_param.c
+        initialize_model_state.c
+        initialize_soil.c
+        LAKE.h
+        lakes.eb.c
+        output_list_utils.c
+        prepare_full_energy.c
+        put_data.c
+        read_initial_model_state.c
+        read_soilparam_arc.c
+        read_soilparam.c
+        runoff.c
+        soil_conduction.c
+        soil_thermal_eqn.c
+        surface_fluxes.c
+        user_def.h
+        vicNl.c
+        vicNl_def.h
+        vicNl.h
+        wetland_energy.c
+        write_model_state.c
+
+        Description:
+        If TRUE, VIC allows for excess ground ice, i.e. an expanded porosity
+        to account for an initial volumetric ice fraction larger than
+        soil porosity.  The ground subsides (therefore soil depth is no
+        longer static) and the porosity decreases as the excess ice melts.
+        Once porosity reaches the soil porosity (1-bulk density/soil density),
+        it does not change.  The initial volumetric ice fraction for
+        each soil layer must be defined in the soil file. The maximum value
+        for this initial ice fraction is set by MAX_ICE_INIT in
+        vicNl_def.h.  Another new parameter is ICE_AT_SUBSIDENCE, also set
+        in vicNl_def.h.  This parameter controls the rate of subsidence as
+        the ground warms.  Setting a larger value will cause the ground to
+        subside sooner and faster.  The physical bounds of this parameter
+        are 0.0 and 1.0, although setting this to a value of 1.0 will result
+        in the ground continually subsiding despite very cold soil
+        temperatures because there is always a small amount of unfrozen water
+        in each soil layer due to the function used in maximum_unfrozen_water.
+        The recommended value is 0.8.
+
+
 
 
 

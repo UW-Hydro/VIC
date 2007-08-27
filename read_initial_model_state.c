@@ -67,6 +67,7 @@ void read_initial_model_state(FILE                *init_state,
   2007-05-07 Fixed fread checks to make sure correct number of items were read
              in rather than the size of the item read in.  JCA
   2007-05-07 Nsum and sum removed from declaration.  JCA
+  2007-Aug-24  Added features for EXCESS_ICE option.  JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -207,6 +208,31 @@ void read_initial_model_state(FILE                *init_state,
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
     soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
   }
+
+  /* Read dynamic soil properties */
+#if EXCESS_ICE
+  /* Read soil depth */
+  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+    if ( options.BINARY_STATE_FILE ) 
+      fread( &soil_con->depth[lidx], sizeof(double), 1, init_state );
+    else 
+      fscanf( init_state, "%lf", &soil_con->depth[lidx] );
+  }
+
+  /* Read effective porosity */
+  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+    if ( options.BINARY_STATE_FILE ) 
+      fread( &soil_con->effective_porosity[lidx], sizeof(double), 1, init_state );
+    else 
+      fscanf( init_state, "%lf", &soil_con->effective_porosity[lidx] );
+  }
+
+  /* Reading damping depth */
+  if ( options.BINARY_STATE_FILE ) 
+    fread( &soil_con->dp, sizeof(double), 1, init_state );
+  else 
+    fscanf( init_state, "%lf", &soil_con->dp );
+#endif
 
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {

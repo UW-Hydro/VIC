@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
   2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
 	      free_out_data(), and free_veglib().  Added closing of
 	      all parameter files.				TJB
+  2007-Aug-21 Return ErrorFlag from initialize_model_state.  JCA
 
 **********************************************************************/
 {
@@ -188,6 +189,7 @@ int main(int argc, char *argv[])
 	RUN_MODEL = FALSE;
       }
       if(!MODEL_DONE) soil_con = read_soilparam(filep.soilparam, RUN_MODEL);
+
     }
     else {
       soil_con = read_soilparam_arc(filep.soilparam, 
@@ -290,13 +292,24 @@ int main(int argc, char *argv[])
 #if VERBOSE
       fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-      initialize_model_state(&prcp, dmy[0], &global_param, filep, 
+      ErrorFlag = initialize_model_state(&prcp, dmy[0], &global_param, filep, 
 			     soil_con.gridcel, veg_con[0].vegetat_type_num,
-			     options.Nnode, Ndist, atmos[0].air_temp[NR],
+			     options.Nnode, Ndist, 
+			     atmos[0].air_temp[NR],
 			     &soil_con, veg_con, lake_con,
 			     &init_STILL_STORM, &init_DRY_TIME, &save_data);
-
-
+      if ( ErrorFlag == ERROR ) {
+	if ( options.CONTINUEONERROR == TRUE ) {
+	  // Handle grid cell solution error
+	  fprintf(stderr, "ERROR: Grid cell %i failed in record %i so the simulation has not finished.  An incomplete output file has been generated, check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
+	  break;
+	} else {
+	  // Else exit program on cell solution error as in previous versions
+	  sprintf(ErrStr, "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
+	  vicerror(ErrStr);
+	}
+      }
+      
 #if VERBOSE
       fprintf(stderr,"Running Model\n");
 #endif /* VERBOSE */

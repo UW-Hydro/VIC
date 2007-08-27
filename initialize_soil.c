@@ -16,7 +16,7 @@ void initialize_soil (cell_data_struct **cell,
   modifications:
   11-18-02 Modified to initialize wetland soil moisture.          LCB
   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
+  2007-Aug-10 Added features for EXCESS_ICE option.  JCA
 **********************************************************************/
 {
   extern option_struct options;
@@ -28,10 +28,14 @@ void initialize_soil (cell_data_struct **cell,
       for(index=0;index<options.Nlayer;index++)
 	cell[j][band].layer[index].moist = soil_con->init_moist[index];
 
-
   if ( options.LAKES ) {
-    for(index=0;index<options.Nlayer;index++)
+    for(index=0;index<options.Nlayer;index++){
+#if EXCESS_ICE
+      cell[veg_num][0].layer[index].moist = soil_con->effective_porosity[index]*soil_con->depth[index]*1000.; 
+#else
       cell[veg_num][0].layer[index].moist = soil_con->porosity[index]*soil_con->depth[index]*1000.;
+#endif
+    }
   }
 
 }

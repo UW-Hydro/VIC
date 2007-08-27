@@ -35,7 +35,7 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
           (including passing Zsum_node to find_0_degree_fronts)
   4-24-07 For IMPLICIT option, added Ming Pan's new functions (solve_T_profile_implicit
           and fda_heat_eqn) JCA
-
+  8-09-07 Added features for EXCESS_ICE option.  JCA
 ******************************************************************/
 
   extern option_struct options;
@@ -43,16 +43,7 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
   extern debug_struct  debug;
 #endif
 
-  char    ErrorString[MAXSTRING];
-  int     i, j;
-  int     index;
-  double  fdepth;
-  double  tdepth;
-  double  unfrozen;
-  double  frozen;
-  double  old_fdepth[MAX_LAYERS];
-  double  old_tdepth[MAX_LAYERS];
-  double *tmp_ptr;
+  int     i;
 
   find_0_degree_fronts(energy, soil_con->dz_node, soil_con->Zsum_node, T, Nnodes);
 
@@ -67,23 +58,27 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
     estimate_layer_ice_content(layer_wet, soil_con->dz_node, energy->T,
 			       soil_con->max_moist_node, 
 #if QUICK_FS
-			     soil_con->ufwc_table_node,
+			       soil_con->ufwc_table_node,
 #else
-			     soil_con->expt_node, soil_con->bubble_node, 
+			       soil_con->expt_node, soil_con->bubble_node, 
 #endif // QUICK_FS
-			     soil_con->depth, soil_con->max_moist, 
+			       soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
-			     soil_con->ufwc_table_layer,
+			       soil_con->ufwc_table_layer,
 #else
-			     soil_con->expt, soil_con->bubble, 
+			       soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
 #if SPATIAL_FROST
-			     soil_con->frost_fract, soil_con->frost_slope, 
+			       soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
-			     soil_con->bulk_density,
-			     soil_con->soil_density, soil_con->quartz,
-			     soil_con->layer_node_fract, Nnodes, 
-			     options.Nlayer, soil_con->FS_ACTIVE);
+#if EXCESS_ICE
+			       soil_con->porosity,
+			       soil_con->effective_porosity,
+#endif // EXCESS_ICE
+			       soil_con->bulk_density,
+			       soil_con->soil_density, soil_con->quartz,
+			       soil_con->layer_node_fract, Nnodes, 
+			       options.Nlayer, soil_con->FS_ACTIVE);
   if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL)
     estimate_layer_ice_content(layer_dry, soil_con->dz_node, energy->T,
 			       soil_con->max_moist_node, 
@@ -101,10 +96,13 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
 #if SPATIAL_FROST
 			       soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
+#if EXCESS_ICE
+			       soil_con->porosity, soil_con->effective_porosity,
+#endif // EXCESS_ICE
 			       soil_con->bulk_density, soil_con->soil_density, 
 			       soil_con->quartz, soil_con->layer_node_fract, 
 			       Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
-
+  
 #if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Moisture Redistribution\n");
@@ -139,6 +137,10 @@ int  solve_T_profile(double *T,
 #if QUICK_FS
 		     double ***ufwc_table_node,
 #endif
+#if EXCESS_ICE
+		     double *porosity,
+		     double *effective_porosity,
+#endif		     
 		     int     Nnodes,
 		     int    *FIRST_SOLN,
 		     int     FS_ACTIVE,
@@ -153,7 +155,7 @@ int  solve_T_profile(double *T,
   Modifications:
   2007-Apr-11 Changed type of Error from char to int GCT
   Apr 24, 2007: Added option for EXP_TRANS.  JCA
-               (including passing in dz_node, Zsum, Dp, depth, EXPTRANS,
+               (including passing in dz_node, Zsum, Dp, depth, EXP_TRANS,
                veg_class; and removing FIRST_TIME and fprime)
   Apr 24, 2007: Rearranged terms in finite-difference heat equation (equation 8
                 of Cherkauer et al. (1999)); Therefore the constants (A-E)
@@ -163,6 +165,7 @@ int  solve_T_profile(double *T,
                 easier to code.        
   Apr 24, 2007: Replaced second term of heat flux with alternate derivative
                 approximation (a form found in most text books).  JCA
+  Aug 08, 2007: Added option for EXCESS_ICE.  JCA
 **********************************************************************/
 
   extern option_struct options;
@@ -179,10 +182,7 @@ int  solve_T_profile(double *T,
   double *aa, *bb, *cc, *dd, *ee, Bexp;
 
   int    Error;
-  int    try;
-  double maxdiff, diff;
-  double oldT;
-  int    j, Done, ItCount;
+  int    j;
 
   if(FIRST_SOLN[0]) {
     //fprintf(stderr,"*************EXPLICIT SOLUTION***********\n");
@@ -254,7 +254,11 @@ int  solve_T_profile(double *T,
 #else
   Error = calc_soil_thermal_fluxes(Nnodes, T, T0, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
-				   dd, ee, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+				   dd, ee, 
+#if EXCESS_ICE
+				   porosity, effective_porosity,
+#endif				   
+				   FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
 #endif 
 
   return ( Error );
@@ -264,31 +268,35 @@ int  solve_T_profile(double *T,
 
 
 int solve_T_profile_implicit(double *T,                           // update
-			      double *T0,                    // keep
-			      double *dz,                    // soil parameter
-			      double *Zsum,                  // soil parameter
-			      double *kappa,                 // update if necessary
-			      double *Cs,                    // update if necessary
-			      double *moist,                 // keep
-			      double  deltat,                // model parameter
-			      double *max_moist,             // soil parameter
-			      double *bubble,                // soil parameter
-			      double *expt,                  // soil parameter
-			      double *ice,                   // update if necessary
-			      double *alpha,                 // soil parameter
-			      double *beta,                  // soil parameter
-			      double *gamma,                 // soil parameter
-			      double Dp,                     // soil parameter
-			      int     Nnodes,               // model parameter
-			      int   *FIRST_SOLN,            // update
-			      int     FS_ACTIVE,
-			      int  NOFLUX,
-			      int EXP_TRANS,
-			      int veg_class,                // model parameter
-			      double *bulk_density,          // soil parameter
-			      double *soil_density,          // soil parameter
-			      double *quartz,                // soil parameter
-			      double *depth)                 // soil parameter
+			     double *T0,                    // keep
+			     double *dz,                    // soil parameter
+			     double *Zsum,                  // soil parameter
+			     double *kappa,                 // update if necessary
+			     double *Cs,                    // update if necessary
+			     double *moist,                 // keep
+			     double  deltat,                // model parameter
+			     double *max_moist,             // soil parameter
+			     double *bubble,                // soil parameter
+			     double *expt,                  // soil parameter
+#if EXCESS_ICE
+			     double *porosity,              // soil parameter
+			     double *effective_porosity,     // soil parameter
+#endif			     
+			     double *ice,                   // update if necessary
+			     double *alpha,                 // soil parameter
+			     double *beta,                  // soil parameter
+			     double *gamma,                 // soil parameter
+			     double Dp,                     // soil parameter
+			     int     Nnodes,               // model parameter
+			     int   *FIRST_SOLN,            // update
+			     int     FS_ACTIVE,
+			     int  NOFLUX,
+			     int EXP_TRANS,
+			     int veg_class,                // model parameter
+			     double *bulk_density,          // soil parameter
+			     double *soil_density,          // soil parameter
+			     double *quartz,                // soil parameter
+			     double *depth)                 // soil parameter
 {    
   /**********************************************************************
   This subroutine was written to iteratively solve the soil temperature
@@ -303,6 +311,7 @@ int solve_T_profile_implicit(double *T,                           // update
       to be solved on a transformed grid using an exponential distribution.  JCA
    Aug 9, 2006: Included terms needed for Cs and kappa nodal updating for new
       ice.  JCA
+   Aug 8, 2007: Added EXCESS_ICE OPTION.  JCA
 
   **********************************************************************/
   
@@ -311,17 +320,9 @@ int solve_T_profile_implicit(double *T,                           // update
   extern debug_struct  debug;
 #endif
   
-  int i, j, n, Error;
+  int  n, Error;
   double res[MAX_NODES];
   void (*vecfunc)(double *, double *, int, int, ...);
-
-  
-  //debugging variables
-  double Ts,Tb,T_2[MAX_NODES],ice_new[MAX_NODES],DT[MAX_NODES],DT_down[MAX_NODES],DT_up[MAX_NODES],ST[MAX_NODES],Dkappa[MAX_NODES],storage_term,flux_term,flux_term1,flux_term2,flux_term2_old,phase_term,T_up[MAX_NODES];
-  int lidx, Nlayers;
-  char PAST_BOTTOM;
-  double Lsum, Bexp, Cs_new[MAX_NODES], kappa_new[MAX_NODES];
-  
 
   if(FIRST_SOLN[0]) 
     FIRST_SOLN[0] = FALSE;
@@ -334,8 +335,12 @@ int solve_T_profile_implicit(double *T,                           // update
   else
     n = Nnodes-1;
   
-  fda_heat_eqn(&T[1], res, n, 1, deltat, FS_ACTIVE, NOFLUX, EXP_TRANS, T0, moist, ice, kappa, Cs, max_moist, bubble, expt, alpha, beta, gamma, Zsum, Dp, bulk_density, soil_density, quartz, depth, options.Nlayer);
-
+  fda_heat_eqn(&T[1], res, n, 1, deltat, FS_ACTIVE, NOFLUX, EXP_TRANS, T0, moist, ice, kappa, Cs, max_moist, bubble, expt, 
+#if EXCESS_ICE
+	       porosity, effective_porosity,
+#endif
+	       alpha, beta, gamma, Zsum, Dp, bulk_density, soil_density, quartz, depth, options.Nlayer);
+  
   // modified Newton-Raphson to solve for new T
   vecfunc = &(fda_heat_eqn);
   Error = newt_raph(vecfunc, &T[1], n);
@@ -371,6 +376,10 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #if QUICK_FS
 			     double ***ufwc_table_node,
 #endif
+#if EXCESS_ICE
+			     double *porosity,
+			     double *effective_porosity,
+#endif
 			     int    FS_ACTIVE, 
 			     int    NOFLUX,
 			     int EXP_TRANS,
@@ -385,6 +394,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
                 This affects the equation for T[j].
    Apr 24, 2007: Passed j to soil_thermal_eqn for "cold nose" problem in
                 explicit solution.   JCA
+   Aug 8, 2007: Added EXCESS_ICE option.  JCA
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -430,7 +440,12 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
 			  ErrorString, soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
-			  bubble[j], expt[j], ice[j], gamma[j-1], 
+			  bubble[j], expt[j], 
+#if EXCESS_ICE
+			  porosity[j], effective_porosity[j],
+#endif
+
+			  ice[j], gamma[j-1], 
 			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
 #endif
 	
@@ -473,7 +488,11 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
-				 bubble[j], expt[Nnodes-1], ice[Nnodes-1], 
+				 bubble[j], expt[Nnodes-1], 
+#if EXCESS_ICE
+				 porosity[Nnodes-1], effective_porosity[Nnodes-1],
+#endif
+				 ice[Nnodes-1], 
 				 gamma[Nnodes-2], 
 				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
 #endif
@@ -604,6 +623,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
       ice.  JCA
    Aug 11, 2006: Included additional term in the storage term to account for
       time-varying changes in Cs.  JCA
+   Aug 8, 2007: Added EXCESS_ICE option.  JCA
  
   **********************************************************************/
     
@@ -619,6 +639,10 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   static double *max_moist;
   static double *bubble;
   static double *expt;
+#if EXCESS_ICE
+  static double *porosity;
+  static double *effective_porosity;
+#endif
   static double *alpha;
   static double *beta;
   static double *gamma;
@@ -643,7 +667,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   char PAST_BOTTOM;
   double storage_term, flux_term, phase_term, flux_term1, flux_term2;
   double Lsum;
-  int i, j, lidx;
+  int i, lidx;
   int focus, left, right;
   
   // argument list handling
@@ -664,6 +688,10 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
     max_moist  = va_arg(arg_addr, double *);
     bubble     = va_arg(arg_addr, double *);
     expt       = va_arg(arg_addr, double *);
+#if EXCESS_ICE
+    porosity   = va_arg(arg_addr, double *);
+    effective_porosity = va_arg(arg_addr, double *);
+#endif
     alpha      = va_arg(arg_addr, double *);
     beta       = va_arg(arg_addr, double *);
     gamma      = va_arg(arg_addr, double *);
@@ -709,7 +737,11 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	if(i>=1) {  //all but surface node
 	  // update ice contents
 	  if (T_2[i-1]<0) {
-	    ice_new[i] = moist[i] - maximum_unfrozen_water(T_2[i-1], max_moist[i], bubble[i], expt[i]);
+	    ice_new[i] = moist[i] - maximum_unfrozen_water(T_2[i-1], 
+#if EXCESS_ICE
+							   porosity[i], effective_porosity[i],
+#endif							   
+							   max_moist[i], bubble[i], expt[i]);
 	    if (ice_new[i]<0) ice_new[i]=0;
 	  }
 	  else ice_new[i] = 0;
@@ -803,8 +835,11 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
       // update ice content for node focus and its adjacents
       for (i=left; i<=right; i++) {
 	if (T_2[i]<0) {
-	  ice_new[i+1] = moist[i+1] - maximum_unfrozen_water(T_2[i], max_moist[i+1], 
-								     bubble[i+1], expt[i+1]);
+	  ice_new[i+1] = moist[i+1] - maximum_unfrozen_water(T_2[i], 
+#if EXCESS_ICE
+							     porosity[i+1], effective_porosity[i+1],
+#endif							     
+							     max_moist[i+1], bubble[i+1], expt[i+1]);
 	  if (ice_new[i+1]<0) ice_new[i+1]=0;
 	}
 	else ice_new[i+1]=0;
@@ -899,4 +934,3 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   } // end of non-init
   
 }
-

@@ -24,7 +24,8 @@ out_data_struct *create_output_list() {
   2007-Feb-28 Corrected AGG_TYPE definitions for miscellaneous
 	      output variables; re-organized the code to make
 	      it easier to debug.				TJB
-
+  2007-Aug-17 Added EXCESS_ICE variables to output list.        JCA
+  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.      JCA
 *************************************************************/
 
   extern option_struct options;
@@ -103,6 +104,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_DELTACC].varname,"OUT_DELTACC");                 /* rate of change in cold content in snow pack [W/m2] */
   strcpy(out_data[OUT_DELTAH].varname,"OUT_DELTAH");                   /* rate of change in heat storage [W/m2] */
   strcpy(out_data[OUT_ENERGY_ERROR].varname,"OUT_ENERGY_ERROR");       /* energy budget error [W/m2] */
+  strcpy(out_data[OUT_WATER_ERROR].varname,"OUT_WATER_ERROR");         /* water budget error [mm] */
   strcpy(out_data[OUT_FUSION].varname,"OUT_FUSION");                   /* net energy used to melt/freeze soil moisture [W/m2] */
   strcpy(out_data[OUT_GRND_FLUX].varname,"OUT_GRND_FLUX");             /* net heat flux into ground [W/m2] */
   strcpy(out_data[OUT_IN_LONG].varname,"OUT_IN_LONG");                 /* incoming longwave flux at surface (under veg) [W/m2] */
@@ -129,6 +131,14 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SURF_COND].varname,"OUT_SURF_COND");             /* surface conductance [m/s] */
   strcpy(out_data[OUT_VP].varname,"OUT_VP");                           /* near surface vapor pressure [kPa] */
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */
+
+  // Dynamic Soil Layer Terms - EXCESS_ICE option
+#if EXCESS_ICE
+  strcpy(out_data[OUT_SOIL_DEPTH].varname,"OUT_SOIL_DEPTH");             /* soil moisture layer depths [m] */
+  strcpy(out_data[OUT_SUBSIDENCE].varname,"OUT_SUBSIDENCE");             /* subsidence of soil layer [mm] */
+  strcpy(out_data[OUT_POROSITY].varname,"OUT_POROSITY");                 /* porosity [mm/mm] */
+  strcpy(out_data[OUT_ZSUM_NODE].varname,"OUT_ZSUM_NODE");               /* depths of thermal nodes [m] */
+#endif
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
@@ -167,6 +177,12 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_LIQ].nelem = options.Nlayer;
   out_data[OUT_SOIL_MOIST].nelem = options.Nlayer;
   out_data[OUT_SOIL_TEMP].nelem = options.Nlayer;
+#if EXCESS_ICE
+  out_data[OUT_SOIL_DEPTH].nelem = options.Nlayer;
+  out_data[OUT_SUBSIDENCE].nelem = options.Nlayer;
+  out_data[OUT_POROSITY].nelem = options.Nlayer;
+  out_data[OUT_ZSUM_NODE].nelem = options.Nnode;
+#endif
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
   out_data[OUT_ADVECTION_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
@@ -215,6 +231,12 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
+#if EXCESS_ICE
+  out_data[OUT_SOIL_DEPTH].aggtype = AGG_TYPE_END;
+  out_data[OUT_POROSITY].aggtype = AGG_TYPE_END;
+  out_data[OUT_ZSUM_NODE].aggtype = AGG_TYPE_END;
+  out_data[OUT_SUBSIDENCE].aggtype = AGG_TYPE_SUM;
+#endif
   out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELINTERCEPT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;

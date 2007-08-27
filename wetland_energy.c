@@ -6,15 +6,18 @@
 static char vcid[] = "$Id$";
 
 int wetland_energy(int                  rec,
-		    atmos_data_struct   *atmos,
-		    dist_prcp_struct    *prcp,
-		    dmy_struct          *dmy,
-		    global_param_struct *gp,
-		    soil_con_struct     *soil_con,
-		    int                  iveg,
-		    int                  band,
-		    double               lake_frac,
-		    lake_con_struct      lake_con)
+		   atmos_data_struct   *atmos,
+		   dist_prcp_struct    *prcp,
+		   dmy_struct          *dmy,
+		   global_param_struct *gp,
+		   soil_con_struct     *soil_con,
+#if EXCESS_ICE
+		   int                  SubsidenceUpdate,
+#endif
+		   int                  iveg,
+		   int                  band,
+		   double               lake_frac,
+		   lake_con_struct      lake_con)
 
 /**********************************************************************
 	wetland_energy	Laura Bowling		May 12, 2002
@@ -27,6 +30,7 @@ int wetland_energy(int                  rec,
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-03 Changed routine type to int so that it can return numeric ERROR
               values.    GCT from KAC. 
+  2007-Aug-21 Added features for EXCESS_ICE option.   JCA
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -44,6 +48,12 @@ int wetland_energy(int                  rec,
   int                    Nbands;
   int                    hour;
   int                    ErrorFlag;
+  int                    lidx;
+  double                 tmp_moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
+#if EXCESS_ICE
+  double                 ppt[2]; 
+  double                 dummy[MAX_LAYERS]; //dummy array, not needed here
+#endif
   double                 rad_atten;
   double                 LAI;
   double                 out_prec[2*MAX_BANDS];
@@ -87,7 +97,7 @@ int wetland_energy(int                  rec,
   double                 tmp_mu;
   double                 tmp_layerevap[2][MAX_BANDS][MAX_LAYERS];
   double                 tmp_Tmin;
-  float root[MAX_LAYERS];
+  float                  root[MAX_LAYERS];
   double                 gauge_correction[2];
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
@@ -219,34 +229,132 @@ int wetland_energy(int                  rec,
 
     veg_class=0;
 
-    ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
-		   prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-		   cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used), 
-		   &(cell[DRY][iveg][band].baseflow), 
-		   &(cell[WET][iveg][band].baseflow), displacement, 
-		   gauge_correction, &(cell[DRY][iveg][band].inflow), 
-		   &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
-		   &out_rain[band*2], &out_snow[band*2], ref_height, roughness, 
-		   &(cell[DRY][iveg][band].runoff), 
-		   &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
-		   tmp_wind, root, Nbands, Ndist, 
-		   options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
-		   atmos, dmy, &(energy[iveg][band]), gp, 
-		   cell[DRY][iveg][band].layer, 
-		   cell[WET][iveg][band].layer, &(snow[iveg][band]), 
-		   soil_con, dry_veg_var, wet_veg_var, .8,
-		   .0001, 500.);
+#if EXCESS_ICE
+    if(SubsidenceUpdate == 1 ){ //if subsidence has occurred in this time-step,
+                                //call runoff before surface_fluxes, then don't
+                                //call runoff again in surface_fluxes.
+      //set inflow for runoff call       
+      ppt[WET]=cell[WET][iveg][band].inflow;
+      ppt[DRY]=cell[DRY][iveg][band].inflow;
+      ErrorFlag = runoff(cell[WET][iveg][band].layer, cell[DRY][iveg][band].layer, &(energy[iveg][band]), 
+			 soil_con, &(cell[WET][iveg][band].runoff), &(cell[DRY][iveg][band].runoff), 
+			 &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow), ppt, 
+			 SubsidenceUpdate,
+#if SPATIAL_FROST
+			 soil_con->frost_fract,
+#endif // SPATIAL_FROST
+			 prcp->mu[iveg], gp->dt, options.Nnode, band, rec, iveg);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
 
-   if ( ErrorFlag == ERROR )
-      // Failed in surface_fluxes, return error flag
-      return( ErrorFlag );
+      SubsidenceUpdate = 2;
+    }
+#endif //EXCESS_ICE
+    
+    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+      tmp_moist[iveg][band][lidx] = cell[0][iveg][band].layer[lidx].moist;
+    ErrorFlag = distribute_node_moisture_properties(energy[iveg][band].moist,
+						    energy[iveg][band].ice,
+						    energy[iveg][band].kappa_node,
+						    energy[iveg][band].Cs_node,
+						    soil_con->dz_node,
+						    soil_con->Zsum_node,
+						    energy[iveg][band].T,
+						    soil_con->max_moist_node,
+						    soil_con->expt_node,
+						    soil_con->bubble_node,
+#if EXCESS_ICE
+						    soil_con->porosity_node,
+						    soil_con->effective_porosity_node,
+#endif // EXCESS_ICE
+						    tmp_moist[iveg][band],
+						    soil_con->depth,
+						    soil_con->soil_density,
+						    soil_con->bulk_density,
+						    soil_con->quartz,
+						    options.Nnode, options.Nlayer,
+						    soil_con->FS_ACTIVE);
+#if EXCESS_ICE
+    if ( ErrorFlag == ERROR ) {//this means there has been a new wetland area
+			       //since subsidence, so first redistribute soil moisture
+      
+      SubsidenceUpdate = 1;
+      //set inflow for runoff call       
+      ppt[WET]=cell[WET][iveg][band].inflow;
+      ppt[DRY]=cell[DRY][iveg][band].inflow;
+      ErrorFlag = runoff(cell[WET][iveg][band].layer, cell[DRY][iveg][band].layer, &(energy[iveg][band]), 
+			 soil_con, &(cell[WET][iveg][band].runoff), &(cell[DRY][iveg][band].runoff), 
+			 &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow), ppt, 
+			 SubsidenceUpdate,
+#if SPATIAL_FROST
+			 soil_con->frost_fract,
+#endif // SPATIAL_FROST
+			 prcp->mu[iveg], gp->dt, options.Nnode, band, rec, iveg);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
+    
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+	tmp_moist[iveg][band][lidx] = cell[0][iveg][band].layer[lidx].moist;
+      ErrorFlag = distribute_node_moisture_properties(energy[iveg][band].moist,
+						      energy[iveg][band].ice,
+						      energy[iveg][band].kappa_node,
+						      energy[iveg][band].Cs_node,
+						      soil_con->dz_node,
+						      soil_con->Zsum_node,
+						      energy[iveg][band].T,
+						      soil_con->max_moist_node,
+						      soil_con->expt_node,
+						      soil_con->bubble_node,
+						      soil_con->porosity_node,
+						      soil_con->effective_porosity_node,
+						      tmp_moist[iveg][band],
+						      soil_con->depth,
+						      soil_con->soil_density,
+						      soil_con->bulk_density,
+						      soil_con->quartz,
+						      options.Nnode, options.Nlayer,
+						      soil_con->FS_ACTIVE);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
+      
+      SubsidenceUpdate = 2;
+    }
+#else //!EXCESS_ICE
+    if ( ErrorFlag == ERROR ) return ( ERROR );
+#endif //EXCESS_ICE
 
     
+#if EXCESS_ICE
+    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+      dummy[lidx]=0;
+#endif    
 
+    ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
+#if EXCESS_ICE
+			       SubsidenceUpdate, dummy, dummy,
+#endif
+			       prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
+			       cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used), 
+			       &(cell[DRY][iveg][band].baseflow), 
+			       &(cell[WET][iveg][band].baseflow), displacement, 
+			       gauge_correction, &(cell[DRY][iveg][band].inflow), 
+			       &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
+			       &out_rain[band*2], &out_snow[band*2], ref_height, roughness, 
+			       &(cell[DRY][iveg][band].runoff), 
+			       &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
+			       tmp_wind, root, Nbands, Ndist, 
+			       options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
+			       atmos, dmy, &(energy[iveg][band]), gp, 
+			       cell[DRY][iveg][band].layer, 
+			       cell[WET][iveg][band].layer, &(snow[iveg][band]), 
+			       soil_con, dry_veg_var, wet_veg_var, .8,
+			       .0001, 500.);
+    
+    if ( ErrorFlag == ERROR )
+      // Failed in surface_fluxes, return error flag
+      return( ErrorFlag );
+    
     atmos->out_prec += out_prec[band*2] * Cv * lake_con.Cl[0];
     atmos->out_rain += out_rain[band*2] * Cv * lake_con.Cl[0];
     atmos->out_snow += out_snow[band*2] * Cv * lake_con.Cl[0];
-  } /** end current vegetation type **/
+  } /** end if lake_frac < 0.999 **/
 
   return (0);  
 }

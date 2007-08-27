@@ -61,10 +61,11 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-03 Added CONTINUEONERROR option.				GCT
-  2007-04-24 Added EXP_TRANS option. JCA
-  2007-04-24 Added IMPLICIT option. JCA
+  2007-04-24 Added EXP_TRANS option.                                    JCA
+  2007-04-24 Added IMPLICIT option.                                     JCA
   2007-Apr-23 Added initialization of global parameters.		TJB
   2007-Apr-23 Added check for FULL_ENERGY if lake model is run.		TJB
+  2007-Aug-08 Added EXCESS_ICE option.                                  JCA
 **********************************************************************/
 {
   extern option_struct    options;
@@ -750,14 +751,31 @@ global_param_struct get_global_param(filenames_struct *names,
   else
     fprintf(stderr,".... Using the explicit solution for the soil heat equation.\n");
   if( options.EXP_TRANS )
-    fprintf(stderr,".... Thermal nodes are exponentially distributed.\n");
+    fprintf(stderr,".... Thermal nodes are exponentially distributed with depth.\n");
   else
-    fprintf(stderr,".... Thermal nodes are linearly distributed.\n");
+    fprintf(stderr,".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
+  if( EXCESS_ICE )
+    fprintf(stderr,".... Excess ground ice is being considered.\n\t\tTherefore, ground ice (as a volumetric fraction) must be initialized for each\n\t\t   soil layer in the soil file.\n\t\tCAUTION: When excess ice melts, subsidence occurs.\n\t\t  Therefore, soil layer depths, damping depth, thermal node depths,\n\t\t     bulk densities, porosities, and other properties are now dynamic!\n\t\t  EXERCISE EXTREME CAUTION IN INTERPRETING MODEL OUTPUT.\n\t\t  It is recommended to add OUT_SOIL_DEPTH to your list of output variables.\n");
   if ( QUICK_FS ){
-    fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n",
-	    QUICK_FS_TEMPS);
     if(options.IMPLICIT) 
-      fprintf(stderr,"IMPLICIT is TRUE and QUICK_FS is true.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
+      fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
+    else
+      fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n",
+	      QUICK_FS_TEMPS);
+  }
+  if( EXCESS_ICE ) {
+    if ( !options.FULL_ENERGY )
+      nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
+    if ( !options.FROZEN_SOIL )
+      nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
+    if ( !options.GRND_FLUX )
+      nrerror("set GRND_FLUX = TRUE to run EXCESS_ICE option.");
+    if ( options.QUICK_SOLVE){
+      fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
+      options.QUICK_SOLVE=FALSE;  
+    }    
+    if ( QUICK_FS ) 
+      nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
   }
   fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);

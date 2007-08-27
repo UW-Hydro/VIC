@@ -18,6 +18,7 @@ double soil_thermal_eqn(double T, va_list ap) {
   Apr 24, 2007: Added patch for the "cold nose" problem using the EXPLICIT  
                 option. (see comments on this in fda_heat_eqn in frozen_soil.c)
                 JCA
+  Aug 8, 2007: Added EXCESS_ICE option.  JCA
 
   ******************************************************************/
 
@@ -34,6 +35,10 @@ double soil_thermal_eqn(double T, va_list ap) {
 #else
   double bubble;
   double expt;
+#endif
+#if EXCESS_ICE
+  double porosity;
+  double effective_porosity;
 #endif
   double ice0;
   double gamma;
@@ -59,6 +64,10 @@ double soil_thermal_eqn(double T, va_list ap) {
   bubble     = (double) va_arg(ap, double);
   expt       = (double) va_arg(ap, double);
 #endif
+#if EXCESS_ICE
+  porosity   = (double) va_arg(ap, double);
+  effective_porosity   = (double) va_arg(ap, double);
+#endif
   ice0       = (double) va_arg(ap, double);
   gamma      = (double) va_arg(ap, double);
   A          = (double) va_arg(ap, double);
@@ -74,7 +83,11 @@ double soil_thermal_eqn(double T, va_list ap) {
     ice = moist - maximum_unfrozen_water_quick(T, max_moist,
 					       ufwc_table);
 #else
+#if EXCESS_ICE
+    ice = moist - maximum_unfrozen_water(T,porosity,effective_porosity,max_moist,bubble,expt);
+#else
     ice = moist - maximum_unfrozen_water(T,max_moist,bubble,expt);
+#endif
 #endif
     if(ice<0.) ice=0.;
     if(ice>max_moist) ice=max_moist;

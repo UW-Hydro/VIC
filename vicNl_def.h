@@ -34,6 +34,8 @@
   2007-Apr-24 Added IMPLICIT option.                                    JCA
   2007-Apr-24 Added EXP_TRANS option.                                   JCA
   2007-Apr-24 Added Zsum_node to soil_con structure.                    JCA
+  2007-Aug-08 Added features for EXCESS_ICE option.                     JCA
+  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.              JCA
 *********************************************************************/
 
 #include <user_def.h>
@@ -69,6 +71,10 @@
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
 #define RESID_MOIST      0.0        /* define residual moisture content 
 				       of soil column */
+#define MAX_ICE_INIT      0.95        /* define maximum volumetric ice fraction
+				       of soil column, for EXCESS_ICE option */
+#define ICE_AT_SUBSIDENCE 0.8        /* minimum ice/porosity fraction before
+					subsidence occurs, for EXCESS_ICE option */
 #define ice_density      917.	    /* density of ice (kg/m^3) */
 #define T_lapse          6.5        /* temperature lapse rate of US Std 
 				       Atmos in C/km */
@@ -168,7 +174,7 @@
 #define SKIP      22 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 110
+#define N_OUTVAR_TYPES 120
 // Water Balance Terms - state variables
 #define OUT_LAKE_DEPTH       0  /* lake depth [m] */
 #define OUT_LAKE_ICE         1  /* moisture stored as lake ice [mm] */
@@ -281,6 +287,14 @@
 #define OUT_SNOW_PACKT_BAND     103  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SNOW_SURFT_BAND     104  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SWE_BAND            105  /* snow water equivalent in snow pack [mm] */
+// Dynamic Soil Property Terms - EXCESS_ICE option
+#if EXCESS_ICE
+#define OUT_SOIL_DEPTH          106  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          107  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            108  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           109  /* depths of thermal nodes [m] */
+#endif // EXCESS_ICE
+#define OUT_WATER_ERROR         110  /* energy budget error [W/m2] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -522,7 +536,7 @@ typedef struct {
   double maxvolume;
   float  bpercent;
   float  rpercent;
-  int wetland_veg_class;
+  int    wetland_veg_class;
   int    gridcel;
   int    numnod;                  /* Maximum number of solution nodes. */
 } lake_con_struct;
@@ -580,6 +594,13 @@ typedef struct {
   double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
 					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
+#if EXCESS_ICE
+  double   Ds_orig;                   /* fraction of maximum subsurface flow 
+					 rate */
+  double   Dsmax_orig;                /* maximum subsurface flow rate 
+					 (mm/day) */
+  double   Ws_orig;                   /* fraction of maximum soil moisture */
+#endif  
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
   double   avg_temp;                  /* average soil temperature (C) */
@@ -590,7 +611,8 @@ typedef struct {
   double   bulk_density[MAX_LAYERS];  /* soil bulk density (kg/m^3) */
   double   c;                         /* exponent in ARNO baseflow scheme */
   double   depth[MAX_LAYERS];         /* thickness of each soil moisture 
-					 layer (m) */
+					 layer (m).  In the case of EXCESS_ICE,
+				         this is the effective (dynamic) depth. */
 #if SPATIAL_SNOW
   double   depth_full_snow_cover;     // minimum depth for full snow cover
 #endif // SPATIAL_SNOW
@@ -640,7 +662,33 @@ typedef struct {
   float  **layer_node_fract;          /* fraction of all nodes within each 
 					 layer */
   int      gridcel;                   /* grid cell number */
+#if EXCESS_ICE
+  double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m). 
+					 The effective depth will always be >= this value. */
+  double   porosity_node[MAX_NODES];  /* porosity for each thermal node */
+  double   effective_porosity[MAX_LAYERS]; /* effective soil porosity (fraction)
+					   when soil pores are expanded due to
+					   excess ground ice */
+  double   effective_porosity_node[MAX_NODES]; /* effective soil porosity (fraction)
+					   when soil pores are expanded due to
+					   excess ground ice */
+  double   Wcr_FRACT[MAX_LAYERS];
+  double   Wpwp_FRACT[MAX_LAYERS];
+  double   subsidence[MAX_LAYERS];      /* subsidence of soil layer, mm*/
+#endif // EXCESS_ICE
 } soil_con_struct;
+
+/*****************************************************************
+  This structure stores the dynamic soil properties for a grid cell
+  *****************************************************************/
+#if EXCESS_ICE
+typedef struct {
+  double soil_depth[MAX_LAYERS];             /* soil moisture layer depths [m] */
+  double subsidence[MAX_LAYERS];             /* subsidence of soil layer [mm] */
+  double porosity[MAX_LAYERS];               /* porosity [mm/mm] */
+  double zsum_node[MAX_NODES];               /* depths of thermal nodes [m] */
+} dynamic_soil_struct;
+#endif // EXCESS_ICE
 
 /*******************************************************************
   This structure stores information about the vegetation coverage of

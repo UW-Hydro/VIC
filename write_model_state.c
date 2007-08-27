@@ -59,7 +59,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-24  Modified to write Zsum_node.  JCA
   2007-Apr-25  Removed variable Nsum.  JCA
-
+  2007-Aug-24  Added features for EXCESS_ICE option.  JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -119,6 +119,11 @@ void write_model_state(dist_prcp_struct    *prcp,
   if ( options.BINARY_STATE_FILE ) {
     Nbytes = ( options.Nnode * sizeof(double) // dz_node
 	       + options.Nnode * sizeof(double) // Zsum_node
+#if EXCESS_ICE
+	       + options.Nlayer * sizeof(double) //soil depth
+	       + options.Nlayer * sizeof(double) //effective porosity
+	       + sizeof(double) //damping depth
+#endif
 	       + (Nveg+1) * sizeof(double) // mu
 	       + (Nveg+1) * sizeof(char) // STILL_STORM
 	       + (Nveg+1) * sizeof(int) // DRY_TIME
@@ -136,43 +141,43 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
     if ( options.LAKES && lake_con.Cl[0] > 0 ) {
       Nbytes += sizeof(double) // wetland mu
-		+ sizeof(char) // wetland STILL_STORM
-		+ sizeof(int) // wetland DRY_TIME
-		+ 2 * sizeof(int) // wetland veg and band (band = 0 for wetland)
-		+ Ndist * options.Nlayer * sizeof(double) // wetland soil moisture
+	+ sizeof(char) // wetland STILL_STORM
+	+ sizeof(int) // wetland DRY_TIME
+	+ 2 * sizeof(int) // wetland veg and band (band = 0 for wetland)
+	+ Ndist * options.Nlayer * sizeof(double) // wetland soil moisture
 #if SPATIAL_FROST
-	        + Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // wetland soil ice
+	+ Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // wetland soil ice
 #else
-	        + Ndist * options.Nlayer * sizeof(double) // wetland soil ice
+	+ Ndist * options.Nlayer * sizeof(double) // wetland soil ice
 #endif // SPATIAL_FROST
-		+ sizeof(double) // wetland dew
-		+ sizeof(int) // wetland last_snow
-		+ sizeof(char) // wetland MELTING
-		+ 9 * sizeof(double) // wetland snow parameters
-		+ options.Nnode * sizeof(double) // wetland soil temperatures
-		+ sizeof(int) // activenod
-		+ sizeof(double) // volume
-		+ sizeof(double) // ldepth
-		+ sizeof(double) // sarea
-		+ sizeof(double) // dz
-		+ sizeof(double) // surfdz
-		+ lake_var.activenod * sizeof(double) // surface
-		+ sizeof(double) // temp[0]
-		+ sizeof(double) // tempavg
-		+ lake_var.activenod * sizeof(double) // temp
-		+ lake_var.activenod * sizeof(double) // density
-		+ sizeof(int) // mixmax
-		+ sizeof(int) // numnod
-		+ sizeof(double) // tempi
-		+ sizeof(double) // hice
-		+ sizeof(double) // fraci
-		+ sizeof(double) // swe
-		+ sizeof(double) // sdepth
-      ;
+	+ sizeof(double) // wetland dew
+	+ sizeof(int) // wetland last_snow
+	+ sizeof(char) // wetland MELTING
+	+ 9 * sizeof(double) // wetland snow parameters
+	+ options.Nnode * sizeof(double) // wetland soil temperatures
+	+ sizeof(int) // activenod
+	+ sizeof(double) // volume
+	+ sizeof(double) // ldepth
+	+ sizeof(double) // sarea
+	+ sizeof(double) // dz
+	+ sizeof(double) // surfdz
+	+ lake_var.activenod * sizeof(double) // surface
+	+ sizeof(double) // temp[0]
+	+ sizeof(double) // tempavg
+	+ lake_var.activenod * sizeof(double) // temp
+	+ lake_var.activenod * sizeof(double) // density
+	+ sizeof(int) // mixmax
+	+ sizeof(int) // numnod
+	+ sizeof(double) // tempi
+	+ sizeof(double) // hice
+	+ sizeof(double) // fraci
+	+ sizeof(double) // swe
+	+ sizeof(double) // sdepth
+	;
     }
     fwrite( &Nbytes, sizeof(int), 1, filep->statefile );
   }
-
+  
   /* Write soil thermal node deltas */
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE )
@@ -191,16 +196,44 @@ void write_model_state(dist_prcp_struct    *prcp,
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( filep->statefile, "\n" );
-
+  
+  /* Write dynamic soil properties */
+#if EXCESS_ICE
+  /* Write soil depth */
+  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+    if ( options.BINARY_STATE_FILE )
+      fwrite( &soil_con->depth[lidx], sizeof(double), 1,
+	      filep->statefile );
+    else
+      fprintf( filep->statefile, "%f ", soil_con->depth[lidx] );
+  }
+  
+  /* Write effective porosity */
+  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+    if ( options.BINARY_STATE_FILE )
+      fwrite( &soil_con->effective_porosity[lidx], sizeof(double), 1,
+	      filep->statefile );
+    else
+      fprintf( filep->statefile, "%f ", soil_con->effective_porosity[lidx] );
+  }
+  
+  /* Write damping depth */
+  if ( options.BINARY_STATE_FILE )
+    fwrite( &soil_con->dp, sizeof(double), 1,
+	    filep->statefile );
+  else
+    fprintf( filep->statefile, "%f\n", soil_con->dp );
+#endif
+  
   /* Output for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
-
+    
     // Store distributed precipitation fraction
     if ( options.BINARY_STATE_FILE )
       fwrite( &prcp->mu[veg], sizeof(double), 1, filep->statefile );
     else
       fprintf( filep->statefile, "%f", prcp->mu[veg] );
-
+    
     // Store distributed precipitation variables
     if ( options.BINARY_STATE_FILE ) {
       fwrite( &STILL_STORM[veg], sizeof(char), 1, filep->statefile );
@@ -210,9 +243,9 @@ void write_model_state(dist_prcp_struct    *prcp,
       fprintf( filep->statefile, " %i %i\n", (int)STILL_STORM[veg], 
 	       DRY_TIME[veg] );
     }
-
-  if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
-    Nbands = 1; // wetland veg type only occurs in band 0
+    
+    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
+      Nbands = 1; // wetland veg type only occurs in band 0
   }
 
     /* Output for all snow bands */

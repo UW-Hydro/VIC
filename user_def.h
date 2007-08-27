@@ -35,7 +35,7 @@
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 
        significantly reduces the run time with frozen soil, but may
-       introduce new errors (STILL UNDER TESTING) *****/
+       introduce new errors (STILL UNDER TESTING, ALSO NEEDS DEBUGGING) *****/
 #define QUICK_FS FALSE
 #define QUICK_FS_TEMPS 7
 
@@ -51,7 +51,7 @@
        band files before read data for each cell.  This saves time
        but requires that all grid cells are listed in the same
        order as the soil parameter file *****/
-#define NO_REWIND TRUE
+#define NO_REWIND FALSE
 
 /***** If TRUE VIC reads the model forcing files, and creates the full
        internal forcing dataset (longwave, shortwave, humidity, etc.)
@@ -81,15 +81,22 @@
 /***** If TRUE VIC uses a uniform distribution function to simulate
        the spatial distribution of soil frost, if FALSE VIC assumes
        that the entire grid cell is frozen uniformly *****/
-#define SPATIAL_FROST FALSE
+#define SPATIAL_FROST TRUE
 #define FROST_SUBAREAS 10
 
 /***** If TRUE VIC uses a uniform distribution to simulate the partial
        coverage of the surface by a thin snowpack.  Coverage is 
        assumed to be uniform after snowfall until the pack begins to 
        melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
-#define SPATIAL_SNOW FALSE
+#define SPATIAL_SNOW TRUE
 
+/***** If TRUE VIC allows for excess ground ice, i.e. an expanded porosity
+       to account for an initial volumetric ice fraction larger than
+       soil porosity.  The porosity decreases as the excess ice melts.  
+       Once porosity reaches the soil porosity (1-bulk density/soil density), 
+       it does not change.  Initial volumetric ice fraction must be 
+       defined in the soil file for each soil layer. *****/
+#define EXCESS_ICE FALSE
 
 /***** Define maximum array sizes for model source code *****/
 #define MAX_VEG        12      /* maximum number of vegetation types per 
@@ -109,7 +116,7 @@
  
 /***** Coefficient multiplied by the LAI to determine the amount of
        water that can be storde in the canopy *****/
-#define LAI_WATER_FACTOR 0.2
+#define LAI_WATER_FACTOR 0.1
 
 /***** Longwave correction factor, used to correct estimated incoming
        longwave radiation (use 1, unless measured longwave available for

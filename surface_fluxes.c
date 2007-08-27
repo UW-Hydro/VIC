@@ -14,54 +14,59 @@ static char vcid[] = "$Id$";
 #define OVER_TOL 0.001
 
 int surface_fluxes(char                 overstory,
-		    double               BareAlbedo,
-		    double               height,
-		    double               ice0,
-		    double               moist,
-		    double               mu,
-		    double               surf_atten,
-		    double              *Melt,
-		    double              *Le,
-		    double              *aero_resist,
-		    double              *aero_resist_used,
-		    double              *baseflow_dry,
-		    double              *baseflow_wet,
-		    double              *displacement,
-		    double              *gauge_correction,
-		    double              *inflow_dry,
-		    double              *inflow_wet,
-		    double              *out_prec,
-		    double              *out_rain,
-		    double              *out_snow,
-		    double              *ref_height,
-		    double              *roughness,
-		    double              *runoff_dry,
-		    double              *runoff_wet,
-		    double              *snow_inflow,
-		    double              *wind,
-		    float               *root,
-		    int                  Nbands,
-		    int                  Ndist,
-		    int                  Nlayers,
-		    int                  Nveg,
-		    int                  band,
-		    int                  dp,
-		    int                  iveg,
-		    int                  rec,
-		    int                  veg_class,
-		    atmos_data_struct   *atmos,
-		    dmy_struct          *dmy,
-		    energy_bal_struct   *energy,
-		    global_param_struct *gp,
-		    layer_data_struct   *layer_dry,
-		    layer_data_struct   *layer_wet,
-		    snow_data_struct    *snow,
-		    soil_con_struct     *soil_con,
-		    veg_var_struct      *veg_var_dry,
-		    veg_var_struct      *veg_var_wet,
-		    float              lag_one,
-		    float              sigma_slope,
-		    float              fetch)
+		   double               BareAlbedo,
+		   double               height,
+		   double               ice0,
+		   double               moist,
+#if EXCESS_ICE
+		   int                  SubsidenceUpdate,
+		   double              *evap_prior_dry,
+		   double              *evap_prior_wet,
+#endif
+		   double               mu,
+		   double               surf_atten,
+		   double              *Melt,
+		   double              *Le,
+		   double              *aero_resist,
+		   double              *aero_resist_used,
+		   double              *baseflow_dry,
+		   double              *baseflow_wet,
+		   double              *displacement,
+		   double              *gauge_correction,
+		   double              *inflow_dry,
+		   double              *inflow_wet,
+		   double              *out_prec,
+		   double              *out_rain,
+		   double              *out_snow,
+		   double              *ref_height,
+		   double              *roughness,
+		   double              *runoff_dry,
+		   double              *runoff_wet,
+		   double              *snow_inflow,
+		   double              *wind,
+		   float               *root,
+		   int                  Nbands,
+		   int                  Ndist,
+		   int                  Nlayers,
+		   int                  Nveg,
+		   int                  band,
+		   int                  dp,
+		   int                  iveg,
+		   int                  rec,
+		   int                  veg_class,
+		   atmos_data_struct   *atmos,
+		   dmy_struct          *dmy,
+		   energy_bal_struct   *energy,
+		   global_param_struct *gp,
+		   layer_data_struct   *layer_dry,
+		   layer_data_struct   *layer_wet,
+		   snow_data_struct    *snow,
+		   soil_con_struct     *soil_con,
+		   veg_var_struct      *veg_var_dry,
+		   veg_var_struct      *veg_var_wet,
+		   float              lag_one,
+		   float              sigma_slope,
+		   float              fetch)
 /**********************************************************************
 	surface_fluxes	Keith Cherkauer		February 29, 2000
 
@@ -111,6 +116,7 @@ int surface_fluxes(char                 overstory,
 	      reset step_snow, etc.  This fixes a bug involving large
 	      water balance errors when model step = daily and snow
 	      step = sub-daily.						TJB
+  2007-Aug-17 Added features for EXCESS_ICE option.                     JCA
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -881,24 +887,38 @@ int surface_fluxes(char                 overstory,
     layer_dry[lidx]      = step_layer[DRY][lidx];
     layer_wet[lidx].evap = store_layerevap[WET][lidx];
     layer_dry[lidx].evap = store_layerevap[DRY][lidx];
+#if EXCESS_ICE
+    evap_prior_wet[lidx] = store_layerevap[WET][lidx];
+    evap_prior_dry[lidx] = store_layerevap[DRY][lidx];
+#endif
   }
 
   /********************************************************
     Compute Runoff, Baseflow, and Soil Moisture Transport
   ********************************************************/
 
-  (*inflow_wet) = ppt[WET];
-  (*inflow_dry) = ppt[DRY];
+#if EXCESS_ICE
+  if(SubsidenceUpdate != 2){
+#endif
+    (*inflow_wet) = ppt[WET];
+    (*inflow_dry) = ppt[DRY];
 
-  ErrorFlag = runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
-	 baseflow_wet, baseflow_dry, ppt, 
+    ErrorFlag = runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
+		       baseflow_wet, baseflow_dry, ppt, 
+#if EXCESS_ICE
+		       SubsidenceUpdate,
+#endif
 #if SPATIAL_FROST
-	 soil_con->frost_fract,
+		       soil_con->frost_fract,
 #endif // SPATIAL_FROST
-	 mu, gp->dt, options.Nnode, band, rec, iveg);
+		       mu, gp->dt, options.Nnode, band, rec, iveg);
+    
+    return( ErrorFlag );
+#if EXCESS_ICE
+  }
+#endif
 
-  return( ErrorFlag );
-
+  return(0);
 }
 
 #undef MAX_ITER

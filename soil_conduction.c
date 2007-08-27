@@ -49,7 +49,8 @@ double soil_conductivity(double moist,
 
   if(moist>0.) {
 
-    porosity = 1.0 - bulk_density / soil_density;
+    porosity = 1.0 - bulk_density / soil_density; //NOTE: if excess_ice present,
+						  //this is actually effective_porosity
 
     Sr = moist/porosity;
 
@@ -129,6 +130,12 @@ void set_node_parameters(double   *dz_node,
 #if QUICK_FS
 			 double ***ufwc_table_node,
 #endif
+#if EXCESS_ICE
+			 double    *porosity,
+			 double    *effective_porosity,
+			 double    *porosity_node,
+			 double    *effective_porosity_node,
+#endif
 			 int       Nnodes,
 			 int       Nlayers,
 			 char      FS_ACTIVE) {
@@ -152,6 +159,10 @@ void set_node_parameters(double   *dz_node,
   double   *bubble           soil moisture layer bubbling pressure (cm)
   double    quartz           soil quartz content (fract)
   double ***ufwc_table_node  table of unfrozen water contents ()
+  double   *porosity         soil layer porosity 
+  double   *effective_porosity   effective soil layer porosity
+  double   *porosity_node       thermal node porosity
+  double   *effective_porosity_node  effective thermal node porosity
   int       Nnodes           number of soil thermal nodes
   int       Nlayers          number of soil moisture layers
   char      FS_ACTIVE        TRUE if frozen soils are active in grid cell
@@ -170,7 +181,8 @@ void set_node_parameters(double   *dz_node,
   04-24-07 Passing in Zsum_node rather than recalculating.  JCA
   04-24-07 Rearranged terms in finite-difference heat equation (equation 8
                 of Cherkauer et al. (1999)).  See note in solve_T_profile.
-                This affects the equations for beta and gamma.
+                This affects the equations for beta and gamma.   JCA
+  08-09-07 Added features for EXCESS_ICE option.            JCA
 **********************************************************************/
 
   extern option_struct options;
@@ -180,12 +192,9 @@ void set_node_parameters(double   *dz_node,
 
   char   PAST_BOTTOM;
   int    nidx, lidx;
-  int    tmplidx;
   double Lsum; /* cumulative depth of moisture layer */
   double Zsum; /* upper boundary of node thermal layer */
   double deltaL[MAX_LAYERS+1];
-  double fract;
-  double tmpfract;
 #if QUICK_FS
   int    ii;
   double Aufwc;
@@ -205,13 +214,21 @@ void set_node_parameters(double   *dz_node,
 			      + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
       expt_node[nidx]      = (expt[lidx] + expt[lidx+1]) / 2.;
       bubble_node[nidx]    = (bubble[lidx] + bubble[lidx+1]) / 2.;
+#if EXCESS_ICE
+      porosity_node[nidx]    = (porosity[lidx] + porosity[lidx+1]) / 2.;
+      effective_porosity_node[nidx]    = (effective_porosity[lidx] + effective_porosity[lidx+1]) / 2.;
+#endif
     }
     else { 
       /* node completely in layer */
       max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / 1000;
       expt_node[nidx]      = expt[lidx];
       bubble_node[nidx]    = bubble[lidx];
-    }      
+#if EXCESS_ICE
+      porosity_node[nidx]  = porosity[lidx];
+      effective_porosity_node[nidx] = effective_porosity[lidx];
+#endif
+    }
     if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
       lidx++;
@@ -311,6 +328,10 @@ int distribute_node_moisture_properties(double *moist_node,
 					double *expt_node,
 					double *bubble_node,
 #endif
+#if EXCESS_ICE
+					double *porosity_node,
+					double *effective_porosity_node,
+#endif
 					double *moist,
 					double *depth,
 					double *soil_density,
@@ -358,27 +379,15 @@ int distribute_node_moisture_properties(double *moist_node,
   2007-Apr-04 Modified to handle grid cell errors by returning to
               the main subroutine, rather than ending the simulation. GCT/KAC
   2007-Apr-24 Passing in Zsum_node rather than recalculating.  JCA
+  2007-Aug-09 Added features for EXCESS_ICE.                   JCA
 
 *********************************************************************/
 
   extern option_struct options;
 
-  char ErrStr[MAXSTRING];
   char PAST_BOTTOM;
-  int nidx, lidx, i;
-  int tmplidx;
+  int nidx, lidx;
   double Lsum; /* cumulative depth of moisture layer */
-  double tmp_moist;
-  double tmp_T;
-  double fract;
-  double tmpfract;
-  double ice_sum;
-  double dz, dz_int;
-  double T_upper;
-  double T_mid;
-  double T_lower;
-  double T_int;
-  double factor;
   double soil_fract;
 
   lidx = 0;
@@ -403,9 +412,9 @@ int distribute_node_moisture_properties(double *moist_node,
 
 
     // Check that node moisture does not exceed maximum node moisture
-    if (moist_node[nidx]-max_moist_node[nidx] > SMALL) {
-      fprintf( stderr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.", 
-        moist_node[nidx], max_moist_node[nidx] );
+    if (moist_node[nidx]-max_moist_node[nidx] > 0.0001) {
+      fprintf( stderr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.\n", 
+	       moist_node[nidx], max_moist_node[nidx] );
       return( ERROR );
     }
 
@@ -419,17 +428,21 @@ int distribute_node_moisture_properties(double *moist_node,
 #else
       ice_node[nidx] 
 	= moist_node[nidx] - maximum_unfrozen_water(T_node[nidx],
-					     max_moist_node[nidx], 
-					     bubble_node[nidx],
-					     expt_node[nidx]);
+#if EXCESS_ICE
+						    porosity_node[nidx],
+						    effective_porosity_node[nidx],
+#endif
+						    max_moist_node[nidx], 
+						    bubble_node[nidx],
+						    expt_node[nidx]);
 #endif
       if(ice_node[nidx]<0) ice_node[nidx]=0;
 
       /* compute thermal conductivity */
       kappa_node[nidx] 
 	= soil_conductivity(moist_node[nidx], moist_node[nidx] 
-			    - ice_node[nidx], soil_density[lidx],
-			    bulk_density[lidx], quartz[lidx]);
+			    - ice_node[nidx], 
+			    soil_density[lidx], bulk_density[lidx], quartz[lidx]);
 
     }
     else {
@@ -484,6 +497,10 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 				double            *frost_fract,
 				double             frost_slope,
 #endif // SPATIAL_FROST
+#if EXCESS_ICE
+				double            *porosity,
+				double            *effective_porosity,
+#endif // EXCESS_ICE
 				double            *bulk_density,
 				double            *soil_density,
 				double            *quartz,
@@ -515,6 +532,7 @@ void estimate_layer_ice_content(layer_data_struct *layer,
   Modifications:
   11-00 Modified to find ice content in spatial frost bands  KAC
   Apr 24,2007: Zsum removed from declaration.  JCA
+  Aug 09,2007: Added features for EXCESS_ICE.  JCA
 
 **************************************************************/
 
@@ -525,10 +543,6 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 #if SPATIAL_FROST
   int    frost_area;
 #endif
-  double Lsum;           /* cumulative depth of moisture layer */
-  double deltaz;
-  double fract;          /* fract of internodal region in layer */
-  double boundT;         /* soil temperature between layers */
 #if SPATIAL_FROST
   double tmp_ice[FROST_SUBAREAS];
   double tmpT;
@@ -536,12 +550,6 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 #else
   double tmp_ice;
 #endif
-  double ice_content[2]; /* stores estimated nodal ice content */
-  double kappa_layer[2]; /* stores node thermal conductivity */
-  double Cs_layer[2];    /* stores node volumetric heat capacity */
-  double T_sum;          /* summation of nodal temperatures within the layer */
-  double ice_sum;        /* summation of nodal ice contents within the layer */
-  double dz_sum;         /* summation of depth used in computing statistics */
 
   for(lidx=0;lidx<Nlayers;lidx++) {
     layer[lidx].T = 0.;
@@ -574,8 +582,13 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 	      - maximum_unfrozen_water_quick(tmpT, max_moist[lidx], 
 					     ufwc_table_layer[lidx]);
 #else
- 	      - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], 
+#if EXCESS_ICE
+	    - maximum_unfrozen_water(tmpT, porosity[lidx], effective_porosity[lidx],
+				     max_moist[lidx], bubble[lidx], expt[lidx]);
+#else
+	    - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], 
 				     expt[lidx]);
+#endif
 #endif
 	    if(tmp_ice[frost_area] < 0) tmp_ice[frost_area] = 0;
 	  }
@@ -589,12 +602,17 @@ void estimate_layer_ice_content(layer_data_struct *layer,
 	if(T[nidx] < 0 && options.FROZEN_SOIL && FS_ACTIVE) {
 	  tmp_ice = layer[lidx].moist 
 #if QUICK_FS
-		     - maximum_unfrozen_water_quick(T[nidx], 
-						    max_moist[lidx], 
-						    ufwc_table_layer[lidx]);
+	    - maximum_unfrozen_water_quick(T[nidx], 
+					   max_moist[lidx], 
+					   ufwc_table_layer[lidx]);
 #else
-	- maximum_unfrozen_water(T[nidx], max_moist[lidx], bubble[lidx], 
-				 expt[lidx]);
+#if EXCESS_ICE
+	  - maximum_unfrozen_water(T[nidx], porosity[lidx],effective_porosity[lidx],
+				   max_moist[lidx], bubble[lidx], expt[lidx]);
+#else
+	  - maximum_unfrozen_water(T[nidx], max_moist[lidx], bubble[lidx], 
+				   expt[lidx]);
+#endif
 #endif
 	  if(tmp_ice < 0) tmp_ice = 0;
 	}
@@ -636,6 +654,9 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
   double             quartz         soil layer quartz content (fract)
   int                Nlayers        number of soil layers
 
+  MODIFICATIONS:
+  08-10-2007 Added features for EXCESS_ICE option.  JCA
+
 ********************************************************************/
 
   int    lidx;
@@ -656,8 +677,8 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
     ice = layer[lidx].ice / depth[lidx] / 1000;
 #endif
     layer[lidx].kappa 
-      = soil_conductivity(moist, moist - ice, soil_density[lidx], 
-			  bulk_density[lidx], quartz[lidx]);
+      = soil_conductivity(moist, moist - ice, 
+			  soil_density[lidx], bulk_density[lidx], quartz[lidx]);
     layer[lidx].Cs 
       = volumetric_heat_capacity(bulk_density[lidx] / soil_density[lidx], 
 				 moist - ice, ice);
@@ -721,6 +742,10 @@ void find_0_degree_fronts(energy_bal_struct *energy,
 }
 
 double maximum_unfrozen_water(double T,
+#if EXCESS_ICE
+			      double porosity,
+			      double effective_porosity,
+#endif //EXCESS_ICE
                               double max_moist,
                               double bubble,
                               double expt) {
@@ -731,16 +756,27 @@ double maximum_unfrozen_water(double T,
   Modifications:
 
   04-24-07 Removed T from denominator in equation - according to the proof in Zhang et
-          al. (2006), "Development and Testing of a Frozen Soil Model for the Cold
+          al. (2007), "Development and Testing of a Frozen Soil Model for the Cold
           Region Climate Study".  JCA
+  08-09-07 Added features for EXCESS_ICE option.  JCA
 **********************************************************************/
 
   double unfrozen;
 
   unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
-  //INCORRECT: unfrozen = max_moist * pow((-Lf * T) / (T + 273.16) / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
+  //INCORRECT: unfrozen = max_moist * pow((-Lf * T) / (T + 273.16) / (9.81 *
+  //bubble / 100.), -(2.0 / (expt - 3.0)));
+
   if(unfrozen > max_moist) unfrozen = max_moist;
   if(unfrozen < 0) unfrozen = 0;
+
+  //THIS CRASHES THE MODEL - DON'T USE THIS CHANGE
+  //#if EXCESS_ICE
+  //  if(effective_porosity>porosity){   //do not allow unfrozen water
+					  //when excess ice is present
+    //unfrozen = 0;  
+  //  }
+  //#endif //EXCESS_ICE
 
   return (unfrozen);
 }

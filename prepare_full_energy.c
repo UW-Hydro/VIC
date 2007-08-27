@@ -25,6 +25,7 @@ void prepare_full_energy(int               iveg,
   03-12-03 modified so that ice content is set to zero unless
            the frozen soil algorithm is implemented and active
            in the current grid cell.                          KAC
+  2007-Aug-9 Added features for EXCESS_ICE option.   JCA
 
 *******************************************************************/
 
@@ -58,6 +59,9 @@ void prepare_full_energy(int               iveg,
 	(*ice0) = (*moist) 
 	  - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
 				    + prcp->energy[iveg][band].T[1]) / 2.,
+#if EXCESS_ICE
+				   soil_con->porosity[0], soil_con->effective_porosity[0],
+#endif 
 				   soil_con->max_moist[0]
 				   / (soil_con->depth[0] * 1000.),
 				   soil_con->bubble[0], soil_con->expt[0]);

@@ -75,7 +75,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   24-Apr-07 Features included for EXP_TRANS frozen soils option. JCA
   24-Apr-07 Passing in Zsum_node.  JCA
   7-Aug-07  Moved Implicit error counting above call for solve_T_profile.  JCA
-
+  8-Aug-07  Added option for EXCESS_ICE.  JCA
+             including: passing entire soil_con structure to calc_surf_energy_bal
 **********************************************************************/
 {
   extern option_struct options;
@@ -208,7 +209,16 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double ***ufwc_table_node;
 #endif
 
+  /* excess ice terms */
+#if EXCESS_ICE
+  double porosity; //top layer
+  double effective_porosity; //top layer
+  double *porosity_node;
+  double *effective_porosity_node;
+#endif
+
   /* model structures */
+  soil_con_struct *soil_con;
   layer_data_struct *layer_wet;
   layer_data_struct *layer_dry;
   veg_var_struct *veg_var_wet;
@@ -274,21 +284,14 @@ double func_surf_energy_bal(double Ts, va_list ap)
   T1_old                  = (double) va_arg(ap, double);
   T2                      = (double) va_arg(ap, double);
   Ts_old                  = (double) va_arg(ap, double);
-  b_infilt                = (double) va_arg(ap, double);
   bubble                  = (double) va_arg(ap, double);
   dp                      = (double) va_arg(ap, double);
   expt                    = (double) va_arg(ap, double);
   ice0                    = (double) va_arg(ap, double);
   kappa1                  = (double) va_arg(ap, double);
   kappa2                  = (double) va_arg(ap, double);
-  max_infil               = (double) va_arg(ap, double);
   max_moist               = (double) va_arg(ap, double);
   moist                   = (double) va_arg(ap, double);
-
-  Wcr                     = (double *) va_arg(ap, double *);
-  Wpwp                    = (double *) va_arg(ap, double *);
-  depth                   = (double *) va_arg(ap, double *);
-  resid_moist             = (double *) va_arg(ap, double *);
 
   root                    = (float  *) va_arg(ap, float  *);
 
@@ -302,7 +305,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   Tair                    = (double) va_arg(ap, double);
   atmos_density           = (double) va_arg(ap, double);
   atmos_pressure          = (double) va_arg(ap, double);
-  elevation               = (double) va_arg(ap, double);
   emissivity              = (double) va_arg(ap, double);
   LongBareIn              = (double) va_arg(ap, double);
   LongSnowIn              = (double) va_arg(ap, double);
@@ -359,16 +361,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   max_moist_node          = (double *) va_arg(ap, double *);
   moist_node              = (double *) va_arg(ap, double *);
 
-#if SPATIAL_FROST    
-  frost_fract             = (double *) va_arg(ap, double *);
-#endif // SPATIAL_FROST
-
-#if QUICK_FS
-  ufwc_table_layer        = (double **) va_arg(ap, double **);
-  ufwc_table_node         = (double ***) va_arg(ap, double ***);
-#endif // QUICK_FS
-
   /* model structures */
+  soil_con                = (soil_con_struct *) va_arg(ap, soil_con_struct *);
   layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   layer_dry               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
   veg_var_wet             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
@@ -376,7 +370,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* control flags */
   INCLUDE_SNOW            = (int) va_arg(ap, int);
-  FS_ACTIVE               = (int) va_arg(ap, int);
   NOFLUX                  = (int) va_arg(ap, int);
   EXP_TRANS               = (int) va_arg(ap, int);
   SNOWING                 = (int) va_arg(ap, int);
@@ -396,10 +389,32 @@ double func_surf_energy_bal(double Ts, va_list ap)
   snow_flux               = (double *) va_arg(ap, double *);
   store_error             = (double *) va_arg(ap, double *);
 
+  /* take additional variables from soil_con structure */
+  b_infilt = soil_con->b_infilt;
+  max_infil = soil_con->max_infil;
+  Wcr = soil_con->Wcr;
+  Wpwp = soil_con->Wpwp;
+  depth = soil_con->depth;
+  resid_moist = soil_con->resid_moist;
+  elevation = (double)soil_con->elevation;
+#if SPATIAL_FROST    
+  frost_fract = soil_con->frost_fract;
+#endif // SPATIAL_FROST
+#if QUICK_FS
+  ufwc_table_layer = soil_con->ufwc_table_layer;
+  ufwc_table_node = soil_con->ufwc_table_node;
+#endif // QUICK_FS
+#if EXCESS_ICE
+  porosity = soil_con->porosity[0];
+  effective_porosity = soil_con->effective_porosity[0];
+  porosity_node = soil_con->porosity_node;
+  effective_porosity_node = soil_con->effective_porosity_node;
+#endif
+  FS_ACTIVE = soil_con->FS_ACTIVE;
   /* more soil layer terms for IMPLICIT option*/
-  bulk_density = (double *) va_arg(ap, double *);
-  soil_density = (double *) va_arg(ap, double *);
-  quartz     = (double *) va_arg(ap, double *);
+  bulk_density = soil_con->bulk_density;
+  soil_density = soil_con->soil_density;
+  quartz = soil_con->quartz;
 
 
   /***************
@@ -467,8 +482,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
       /* IMPLICIT Solution */
       if(options.IMPLICIT) {
 	Error = solve_T_profile_implicit(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-					 moist_node, delta_t, max_moist_node, bubble_node, 
-					 expt_node, ice_node, alpha, beta, gamma, dp, Nnodes, 
+					 moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
+#if EXCESS_ICE
+					 porosity_node, effective_porosity_node,
+#endif
+					 ice_node, alpha, beta, gamma, dp, Nnodes, 
 					 FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
       
 	/* print out error information for IMPLICIT solution */
@@ -491,15 +509,18 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	  FIRST_SOLN[0] = TRUE;
 #if QUICK_FS
 	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-			moist_node, delta_t, max_moist_node, bubble_node, 
-			expt_node, ice_node, alpha, beta, gamma, dp,
-			depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
-			NOFLUX, EXP_TRANS, veg_class);
+				moist_node, delta_t, max_moist_node, bubble_node, 
+				expt_node, ice_node, alpha, beta, gamma, dp,
+				depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
+				NOFLUX, EXP_TRANS, veg_class);
 #else
 	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
-			moist_node, delta_t, max_moist_node, bubble_node, 
-			expt_node, ice_node, alpha, beta, gamma, dp,
-			depth, Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+				moist_node, delta_t, max_moist_node, bubble_node, 
+				expt_node, ice_node, alpha, beta, gamma, dp, depth, 
+#if EXCESS_ICE
+				porosity_node, effective_porosity_node,
+#endif
+				Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
 #endif
       }
       
@@ -525,6 +546,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
     ******************************************************/
     if((FS_ACTIVE && options.FROZEN_SOIL) && (TMean+ *T1)/2.<0.) {
       ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
+#if EXCESS_ICE
+					   porosity,effective_porosity,
+#endif
 					   max_moist,bubble,expt);
       if(ice<0.) ice=0.;
     }

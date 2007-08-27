@@ -9,19 +9,23 @@ static char vcid[] = "$Id$";
 #define NOICE 0
 
 int lakemain(atmos_data_struct  *atmos, 
-	      lake_con_struct    lake_con,
-	      double             snowprec,
-	      double             rainprec,
-	      soil_con_struct    *soil_con, 
-	      int                dt, 
-	      dist_prcp_struct    *prcp,
-	      int                hour, 
-	      int                rec, 
-	      double             wind_h,
-	      global_param_struct *gp,
-	      dmy_struct          *dmy,
-	      int                iveg,
-	      int                band )
+	     lake_con_struct    lake_con,
+	     double             snowprec,
+	     double             rainprec,
+	     soil_con_struct    *soil_con, 
+#if EXCESS_ICE
+	     int                SubsidenceUpdate,
+	     double             total_meltwater,
+#endif
+	     int                dt, 
+	     dist_prcp_struct    *prcp,
+	     int                hour, 
+	     int                rec, 
+	     double             wind_h,
+	     global_param_struct *gp,
+	     dmy_struct          *dmy,
+	     int                iveg,
+	     int                band )
 {
   /**********************************************************************
       lakes           Valentijn Pauwels             September 1998
@@ -46,6 +50,7 @@ int lakemain(atmos_data_struct  *atmos,
   2007-Apr-03 Modified to catch and return error flags from surface_fluxes
               subroutine.                                         KAC
   24-Apr-07  Passes soil_con.Zsum_node to distribute_node_moisture_properties.  JCA
+  09-Aug-07  Added features for EXCESS_ICE option.  JCA
   2007-Aug-16 Added ErrorFlag return value from initialize_prcp.  JCA
 
   Parameters :
@@ -78,7 +83,7 @@ the grid cell average fluxes.
   energy_bal_struct lake_energy;
   snow_data_struct  lake_snow;
   snow_data_struct      **snow;
-  lake_var_struct *lake;
+  lake_var_struct        *lake;
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
 
@@ -91,18 +96,17 @@ the grid cell average fluxes.
   veg_var = prcp->veg_var;
   cell    = prcp->cell;
   snow    = prcp->snow;
-  lake = &prcp->lake_var;
+  lake    = &prcp->lake_var;
 
   /* Update sarea to equal new surface area from previous time step. */
   lake->sarea = lake->surface[0];	
  
   // initialize flow rate through lake
   if ( rec == 0 ) LakeFlow = 0;
-
+  
   // Initialize lake data structures 
-  ErrorFlag = initialize_prcp(prcp, &lake_energy, &lake_snow, iveg, band, lake->fraci, 
-			      *soil_con, lake, rec, lake_con);
-
+  ErrorFlag = initialize_prcp(prcp, &lake_energy, &lake_snow, iveg, band, 
+			      lake->fraci, *soil_con, lake, rec, lake_con);
   if ( ErrorFlag == ERROR )
     // Return failure flag to main routine
     return ( ErrorFlag );
@@ -116,8 +120,12 @@ the grid cell average fluxes.
   }
   olddew = veg_var[WET][iveg][band].Wdew;
   oldsnow = snow[iveg][band].swq;
-  ErrorFlag = wetland_energy(rec, atmos, prcp, dmy, gp, soil_con, iveg, 
-                 band, lake->sarea/lake_con.basin[0], lake_con);
+
+  ErrorFlag = wetland_energy(rec, atmos, prcp, dmy, gp, soil_con, 
+#if EXCESS_ICE
+			     SubsidenceUpdate,
+#endif
+			     iveg, band, lake->sarea/lake_con.basin[0], lake_con);
 
   if ( ErrorFlag == ERROR )
     // Return failure flag to main routine
@@ -165,7 +173,11 @@ the grid cell average fluxes.
    * Solve the water budget for the lake.
    **********************************************************************/
 
-  water_balance( lake, lake_con, dt, prcp, iveg, band, lake->sarea/lake_con.basin[0], *soil_con, snowprec+rainprec, oldvolume, oldsnow-lake_snow.swq, lake_snow.vapor_flux);
+  water_balance( lake, lake_con, dt, prcp, iveg, band, lake->sarea/lake_con.basin[0], *soil_con, 
+#if EXCESS_ICE
+		 SubsidenceUpdate, total_meltwater,
+#endif		 
+		 snowprec+rainprec, oldvolume, oldsnow-lake_snow.swq, lake_snow.vapor_flux);
 
   /**********************************************************************
    * Reallocate fluxes between lake and wetland fractions.
@@ -1892,44 +1904,50 @@ void tridia (int ne,
 
 }  
 
-    
- void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, double surfdz, double *surface, double *cp, double *density)
-   {
 
-/**********************************************************************
- * Calculate the thermal energy in the column.
- * finaltemp[numnodes]   Average temp for each node of the water column.
- * sumjoule              Thermal energy of water column, in joules 
- * numnod   
- **********************************************************************/
-
-     double energy;
-     int k;
-
-     *sumjoule=0.0;
-
-     for(k=0; k<numnod;k++)
-       {
-	 // density = calc_density(finaltemp[k]);
-
-	 if(k==0)
-	   energy=(finaltemp[k]+KELVIN)*surfdz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
-	 else if (k==numnod-1)
-	   energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*surface[k]/2.;
-	 else
-	   energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
-
-	 *sumjoule+=energy;
-       }
-   }
+void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, double surfdz, double *surface, double *cp, double *density)
+{
+  
+  /**********************************************************************
+   * Calculate the thermal energy in the column.
+   * finaltemp[numnodes]   Average temp for each node of the water column.
+   * sumjoule              Thermal energy of water column, in joules 
+   * numnod   
+   **********************************************************************/
+  
+  double energy;
+  int k;
+  
+  *sumjoule=0.0;
+  
+  for(k=0; k<numnod;k++)
+    {
+      // density = calc_density(finaltemp[k]);
+      
+      if(k==0)
+	energy=(finaltemp[k]+KELVIN)*surfdz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
+      else if (k==numnod-1)
+	energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*surface[k]/2.;
+      else
+	energy=(finaltemp[k]+KELVIN)*dz*(1000.+density[k])*cp[k]*(surface[k]+surface[k+1])/2.;
+      
+      *sumjoule+=energy;
+    }
+}
 
 /**********************************************************************
  * This routine calculates the water balance of the lake
+ 
+  Modifications:
+  Added features for EXCESS_ICE option.  JCA
  **********************************************************************/
 
 void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int iveg,int band, double lake_frac, soil_con_struct soil_con, double prec, 
-		    double oldvolume, double deltasnow, double vapor_flux)
+		    int iveg,int band, double lake_frac, soil_con_struct soil_con, 
+#if EXCESS_ICE
+		    int SubsidenceUpdate, double total_meltwater,
+#endif
+		    double prec,  double oldvolume, double deltasnow, double vapor_flux)
 {
   extern option_struct   options;
   int isave_n;
@@ -1951,70 +1969,75 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   double inflec, midrate;
 
   cell_data_struct    ***cell;
-
+  
   cell    = prcp->cell;
-
+  
   /**********************************************************************
    * 1. convert runoff input/output volume to rate
    **********************************************************************/
-
+  
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
-
+  
   /* convert from mm over grid cell tomm over lake. */
-
+  
   wetland_runoff = 0.0;
-
+  
   if(lake_frac < 0.999) {
     wetland_runoff += cell[WET][iveg][band].runoff + cell[WET][iveg][band].baseflow;
     wetland_runoff *= lake_con.Cl[0]*(1.-lake_frac);
   }
-
+  
   /* Assume baseflow enters lake in same proportion as runoff. */ 
   bpercent = lake_con.rpercent;
-
+  
   /* Convert from mm to m3. */
-  runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*lake_con.rpercent + wetland_runoff) / 1000. ) * lake_con.cell_area );  
-
-
-/**********************************************************************
- * 2. calculate change in lake level
- *     grid cell runoff (m3/TS for non-lake area)
- *     snow meltwater (mm)
- *     open water evaporation (mm)
- *     precip (added in solvelake)  
- **********************************************************************/
-
+#if EXCESS_ICE
+  if(SubsidenceUpdate > 0 ) 
+    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*lake_con.rpercent + wetland_runoff + total_meltwater*lake_con.Cl[0]*lake_frac) / 1000. ) * lake_con.cell_area );  
+  else
+#endif
+    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*lake_con.rpercent + wetland_runoff) / 1000. ) * lake_con.cell_area );  
+  
+  
+  /**********************************************************************
+   * 2. calculate change in lake level
+   *     grid cell runoff (m3/TS for non-lake area)
+   *     snow meltwater (mm)
+   *     open water evaporation (mm)
+   *     precip (added in solvelake)  
+   **********************************************************************/
+  
   oldvolume = lake->volume;
   
   // Add runoff from rest of grid cell and wetland to lake, remove evaporation
   lake->volume += ( runoff_volume + ((lake->snowmlt-lake->evapw) 
   				     * lake->sarea / 1000. ) );
   inflow = ( runoff_volume + ((lake->snowmlt-lake->evapw) 
-  				     * lake->sarea / 1000. ) );
-
+			      * lake->sarea / 1000. ) );
   
-	
+  
+  
   // Find new lake depth and surface area
-    ldepth = get_depth(lake_con, lake->volume);
-    surfacearea = get_sarea(lake_con, ldepth);
- 
-    
-/**********************************************************************
- * 3. Calculate runoff from lake.  Runoff out is in meters over lake surface.
- * Therefore, maxrate is currently in meters per timestep.
- **********************************************************************/
-
+  ldepth = get_depth(lake_con, lake->volume);
+  surfacearea = get_sarea(lake_con, ldepth);
+  
+  
+  /**********************************************************************
+   * 3. Calculate runoff from lake.  Runoff out is in meters over lake surface.
+   * Therefore, maxrate is currently in meters per timestep.
+   **********************************************************************/
+  
   // DEBUG output
   // fprintf(stdout,"depth %f,mindepth %f,maxdepth %f,maxrate %f,sarea %e\n",ldepth, lake_con.mindepth, lake_con.maxdepth, lake_con.maxrate, surfacearea ); 
-
+  
   /**********************************************************************/
   /* Use this section if depthfrac and ratefrac specified. */
   /**********************************************************************/
-
+  
   // compute inflection point for curve
-   inflec  = lake_con.depthfrac*(lake_con.maxdepth-lake_con.mindepth)+lake_con.mindepth;
-   midrate = lake_con.ratefrac*lake_con.maxrate;
-
+  inflec  = lake_con.depthfrac*(lake_con.maxdepth-lake_con.mindepth)+lake_con.mindepth;
+  midrate = lake_con.ratefrac*lake_con.maxrate;
+  
   if(ldepth < lake_con.mindepth)
     lake->runoff_out = 0.0;
   else if(ldepth < inflec)
@@ -2023,110 +2046,110 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
     lake->runoff_out = surfacearea * ( ( ldepth - inflec ) / ( lake_con.maxdepth - inflec ) * (lake_con.maxrate - midrate) + midrate );
   else {
     lake->runoff_out = (lake->volume - lake_con.maxvolume) + (lake_con.maxrate * surfacearea);
-	}
-
+  }
+  
   /**********************************************************************/
   /* Use this section if depthfrac and ratefrac NOT specified. */
   /**********************************************************************/
-/*
-  if(ldepth < lake_con.mindepth)
+  /*
+    if(ldepth < lake_con.mindepth)
     lake->runoff_out = 0.0;
-  else if(ldepth < lake_con.maxdepth)
+    else if(ldepth < lake_con.maxdepth)
     lake->runoff_out = surfacearea * lake_con.maxrate * (exp(ldepth)/exp(lake_con.maxdepth));
-  else {
+    else {
     lake->runoff_out = (lake->volume - lake_con.maxvolume) + (lake_con.maxrate * surfacearea);	 
     }
-*/
+  */
   /**********************************************************************/
   /* End of runoff calculation */
   /**********************************************************************/
   // extract runoff volume from the lake m^3
   lake->volume -= ( lake->runoff_out );
-
+  
   outflow = lake->runoff_out;	
-
+  
   // check that lake volume does not exceed its maximum
   if (lake->volume - lake_con.maxvolume > SMALL) { 
-	fprintf(stderr, "Lake volume exceeds max volume: current volume = %e, max volume = %e\n", lake->volume, lake_con.maxvolume);
+    fprintf(stderr, "Lake volume exceeds max volume: current volume = %e, max volume = %e\n", lake->volume, lake_con.maxvolume);
     lake->volume = lake_con.maxvolume;
   }
   else if (lake->volume < SMALL)
-     lake->volume = 0.0;
+    lake->volume = 0.0;
   
   // adjust from m3 to mm over entire gridcell
   lake->runoff_out = ( lake->runoff_out ) * 1000. / lake_con.cell_area;
-
-   if(lake->baseflow_in != 0 && lake->runoff_in != 0) {
+  
+  if(lake->baseflow_in != 0 && lake->runoff_in != 0) {
     lake->baseflow_out = lake->runoff_out*(lake->baseflow_in/(lake->runoff_in+lake->baseflow_in));
     lake->runoff_out *= (lake->runoff_in/(lake->runoff_in+lake->baseflow_in));
-   }
-    else if(lake->runoff_in == 0) {
-     lake->baseflow_out = lake->runoff_out;
-     lake->runoff_out = 0.0;
-   }
-   else
+  }
+  else if(lake->runoff_in == 0) {
+    lake->baseflow_out = lake->runoff_out;
+    lake->runoff_out = 0.0;
+  }
+  else
     lake->baseflow_out = 0.0;
-  	
+  
   /* Add in runoff and baseflow that did not pass through the lake. */
   lake->runoff_out   += (1. - lake_con.rpercent) * lake->runoff_in;
   lake->baseflow_out  += (1. - lake_con.rpercent) * lake->baseflow_in;
-
+  
   // Recalculate lake depth
   lake->ldepth = get_depth(lake_con, lake->volume);
-
+  
   // DEBUG output
   //fprintf(stdout,",%f,%f,%f", lake->runoff_out, lake->baseflow_out, lake->ldepth ); 
-
-/**********************************************************************
- *  4. Adjust the activenodes and lake area array. 
- **********************************************************************/
-
+  
+  /**********************************************************************
+   *  4. Adjust the activenodes and lake area array. 
+   **********************************************************************/
+  
   if(lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2*MAX_SURFACE_LAKE) 		{
-  /* Not quite enough for two full layers. */
-	lake->surfdz = lake->ldepth/2.;
-	lake->dz = lake->ldepth/2.;
-	lake->activenod = 2;
-	}
-   else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
-	/* More than two layers. */	
-     	lake->surfdz = MAX_SURFACE_LAKE;
-	lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
-	if(lake->activenod > MAX_LAKE_NODES)
-		lake->activenod = MAX_LAKE_NODES;
-	lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
-  	}	
+    /* Not quite enough for two full layers. */
+    lake->surfdz = lake->ldepth/2.;
+    lake->dz = lake->ldepth/2.;
+    lake->activenod = 2;
+  }
+  else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
+    /* More than two layers. */	
+    lake->surfdz = MAX_SURFACE_LAKE;
+    lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
+    if(lake->activenod > MAX_LAKE_NODES)
+      lake->activenod = MAX_LAKE_NODES;
+    lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
+  }	
   else if(lake->ldepth > 0.0){
-  	lake->surfdz = lake->ldepth;
-	lake->dz = 0.0;
-	lake->activenod = 1;
-	}
+    lake->surfdz = lake->ldepth;
+    lake->dz = 0.0;
+    lake->activenod = 1;
+  }
   else {
-	lake->surfdz = 0.0;
-	lake->dz = 0.0;
-	lake->activenod = 0;
-	lake->ldepth = 0.0;
-	} 	
-
+    lake->surfdz = 0.0;
+    lake->dz = 0.0;
+    lake->activenod = 0;
+    lake->ldepth = 0.0;
+  } 	
+  
   // lake_con.basin equals the surface area at specific depths as input by
   // the user in the lake parameter file or calculated in read_lakeparam(), 
   // lake->surface equals the area at the top of each dynamic solution layer 
- 
+  
   /* Re-calculate lake surface area  */
   for(k=0; k< lake->activenod; k++) {
     if(k==0)
       ldepth = lake->ldepth;
     else
       ldepth = lake->dz*(lake->activenod - k);
-
+    
     lake->surface[k] = get_sarea(lake_con, ldepth);
   }
-
-
+  
+  
   /*******************************************************************/  
   /* Adjust temperature distribution if number of nodes has changed. 
      Note:  This approach (and the lake model in general) does not preserve 
      the thermal energy of the water column. */
-
+  
   index = 0.;
   if ( lake->activenod != isave_n ) {
     for(k=0; k< lake->activenod; k++) {
@@ -2137,21 +2160,21 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
       }
     }
     for(k=0; k< lake->activenod; k++) {
-	if(isave_n > 0)
-          lake->temp[k] = Tnew[k]/isave_n;
-	else
-	  lake->temp[k]	= prcp->energy[iveg][band].Tsurf;
-  	}	
-	}
-
+      if(isave_n > 0)
+	lake->temp[k] = Tnew[k]/isave_n;
+      else
+	lake->temp[k]	= prcp->energy[iveg][band].Tsurf;
+    }	
+  }
+  
   if(lake->activenod == isave_n && isave_n == 0)
-	lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
-	
+    lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
+  
   // Compute water balance
   storage = oldvolume - lake->volume;
-
+  
   // DEBUG lake model
-//fprintf(stdout, "%f %f %f %f %f\n", lake->ldepth/lake_con.maxdepth, inflow, outflow, storage, storage + inflow - outflow);
+  //fprintf(stdout, "%f %f %f %f %f\n", lake->ldepth/lake_con.maxdepth, inflow, outflow, storage, storage + inflow - outflow);
 }
 
 
@@ -2183,141 +2206,156 @@ void update_prcp(dist_prcp_struct *prcp,
 #if SPATIAL_FROST
   int frost_area;
 #endif // SPATIAL_FROST
-
+  
   wland_energy  = prcp->energy;
   wland_snow    = prcp->snow;
   cell    = prcp->cell;
   veg_var = prcp->veg_var;
-
- /* Update energy balance variables. */
- wland_energy[iveg][band].NetLongAtmos *= (1.-lakefraction);
- wland_energy[iveg][band].NetLongAtmos += lakefraction * lake_energy->NetLongAtmos;
-
- wland_energy[iveg][band].NetShortAtmos *= (1.-lakefraction);
- wland_energy[iveg][band].NetShortAtmos += lakefraction * lake_energy->NetShortAtmos;
-
- wland_energy[iveg][band].snow_flux *= (1.-lakefraction);
- wland_energy[iveg][band].snow_flux += lakefraction * lake_energy->snow_flux;
-
- wland_energy[iveg][band].deltaH *= (1.-lakefraction);
- wland_energy[iveg][band].deltaH += lakefraction * lake_energy->deltaH;
-
- wland_energy[iveg][band].deltaCC *= (1.-lakefraction);
- wland_energy[iveg][band].deltaCC += lakefraction * lake_energy->deltaCC;
-
- wland_energy[iveg][band].grnd_flux *= (1.-lakefraction);
- wland_energy[iveg][band].grnd_flux += lakefraction * lake_energy->grnd_flux;
-
- wland_energy[iveg][band].refreeze_energy *= (1.-lakefraction);
- wland_energy[iveg][band].refreeze_energy += lakefraction * lake_energy->refreeze_energy;
-
- wland_energy[iveg][band].advection *= (1.-lakefraction);
- wland_energy[iveg][band].advection += lakefraction * lake_energy->advection;
-
- wland_energy[iveg][band].AtmosLatent *= (1.-lakefraction);
- wland_energy[iveg][band].AtmosLatent += lakefraction * lake_energy->AtmosLatent;
-
- wland_energy[iveg][band].AtmosSensible *= (1.-lakefraction);
- wland_energy[iveg][band].AtmosSensible += lakefraction * lake_energy->AtmosSensible;
-
- wland_energy[iveg][band].Tsurf *= (1.-lakefraction);
- wland_energy[iveg][band].Tsurf += lakefraction * lake_energy->Tsurf;
-
- wland_energy[iveg][band].error *= (1.-lakefraction);
- wland_energy[iveg][band].error += lakefraction * lake_energy->error;
-
- /* Update snow variables. */
-   wland_snow[iveg][band].albedo *= (1.-lakefraction);
-   wland_snow[iveg][band].albedo += lakefraction * lake_snow->albedo;
-
-   wland_snow[iveg][band].vapor_flux *= (1.-lakefraction);
-   wland_snow[iveg][band].vapor_flux += lakefraction * lake_snow->vapor_flux;
-
-   wland_snow[iveg][band].blowing_flux *= (1.-lakefraction);	
-   wland_snow[iveg][band].blowing_flux += lakefraction * lake_snow->blowing_flux;
-
-   wland_snow[iveg][band].surface_flux *= (1.-lakefraction);
-   wland_snow[iveg][band].surface_flux += lakefraction * lake_snow->surface_flux;
-
-   wland_snow[iveg][band].swq *= (1.-lakefraction);
-   wland_snow[iveg][band].swq += lakefraction * lake_snow->swq;
-   lake->swe = lake_snow->swq;
-
-   wland_snow[iveg][band].last_snow = lake_snow->last_snow;
-   
-   wland_snow[iveg][band].surf_temp *= (1.-lakefraction);
-   wland_snow[iveg][band].surf_temp += lakefraction * lake_snow->surf_temp;
-
-   wland_snow[iveg][band].surf_water *= (1.-lakefraction);
-   wland_snow[iveg][band].surf_water += lakefraction * lake_snow->surf_water;
-
-   wland_snow[iveg][band].depth *= (1.-lakefraction);
-   wland_snow[iveg][band].depth += lakefraction * lake_snow->depth; 
-   lake->sdepth = lake_snow->depth;
-	
- /* Update canopy storage terms. */
- veg_var[DRY][iveg][band].Wdew *= (1.-lakefraction);
- veg_var[WET][iveg][band].Wdew *= (1.-lakefraction);
-
-
+  
+  /* Update energy balance variables. */
+  wland_energy[iveg][band].NetLongAtmos *= (1.-lakefraction);
+  wland_energy[iveg][band].NetLongAtmos += lakefraction * lake_energy->NetLongAtmos;
+  
+  wland_energy[iveg][band].NetShortAtmos *= (1.-lakefraction);
+  wland_energy[iveg][band].NetShortAtmos += lakefraction * lake_energy->NetShortAtmos;
+  
+  wland_energy[iveg][band].snow_flux *= (1.-lakefraction);
+  wland_energy[iveg][band].snow_flux += lakefraction * lake_energy->snow_flux;
+  
+  wland_energy[iveg][band].deltaH *= (1.-lakefraction);
+  wland_energy[iveg][band].deltaH += lakefraction * lake_energy->deltaH;
+  
+  wland_energy[iveg][band].deltaCC *= (1.-lakefraction);
+  wland_energy[iveg][band].deltaCC += lakefraction * lake_energy->deltaCC;
+  
+  wland_energy[iveg][band].grnd_flux *= (1.-lakefraction);
+  wland_energy[iveg][band].grnd_flux += lakefraction * lake_energy->grnd_flux;
+  
+  wland_energy[iveg][band].refreeze_energy *= (1.-lakefraction);
+  wland_energy[iveg][band].refreeze_energy += lakefraction * lake_energy->refreeze_energy;
+  
+  wland_energy[iveg][band].advection *= (1.-lakefraction);
+  wland_energy[iveg][band].advection += lakefraction * lake_energy->advection;
+  
+  wland_energy[iveg][band].AtmosLatent *= (1.-lakefraction);
+  wland_energy[iveg][band].AtmosLatent += lakefraction * lake_energy->AtmosLatent;
+  
+  wland_energy[iveg][band].AtmosSensible *= (1.-lakefraction);
+  wland_energy[iveg][band].AtmosSensible += lakefraction * lake_energy->AtmosSensible;
+  
+  wland_energy[iveg][band].Tsurf *= (1.-lakefraction);
+  wland_energy[iveg][band].Tsurf += lakefraction * lake_energy->Tsurf;
+  
+  wland_energy[iveg][band].error *= (1.-lakefraction);
+  wland_energy[iveg][band].error += lakefraction * lake_energy->error;
+  
+  /* Update snow variables. */
+  wland_snow[iveg][band].albedo *= (1.-lakefraction);
+  wland_snow[iveg][band].albedo += lakefraction * lake_snow->albedo;
+  
+  wland_snow[iveg][band].vapor_flux *= (1.-lakefraction);
+  wland_snow[iveg][band].vapor_flux += lakefraction * lake_snow->vapor_flux;
+  
+  wland_snow[iveg][band].blowing_flux *= (1.-lakefraction);	
+  wland_snow[iveg][band].blowing_flux += lakefraction * lake_snow->blowing_flux;
+  
+  wland_snow[iveg][band].surface_flux *= (1.-lakefraction);
+  wland_snow[iveg][band].surface_flux += lakefraction * lake_snow->surface_flux;
+  
+  wland_snow[iveg][band].swq *= (1.-lakefraction);
+  wland_snow[iveg][band].swq += lakefraction * lake_snow->swq;
+  lake->swe = lake_snow->swq;
+  
+  wland_snow[iveg][band].last_snow = lake_snow->last_snow;
+  
+  wland_snow[iveg][band].surf_temp *= (1.-lakefraction);
+  wland_snow[iveg][band].surf_temp += lakefraction * lake_snow->surf_temp;
+  
+  wland_snow[iveg][band].surf_water *= (1.-lakefraction);
+  wland_snow[iveg][band].surf_water += lakefraction * lake_snow->surf_water;
+  
+  wland_snow[iveg][band].depth *= (1.-lakefraction);
+  wland_snow[iveg][band].depth += lakefraction * lake_snow->depth; 
+  lake->sdepth = lake_snow->depth;
+  
+  /* Update canopy storage terms. */
+  veg_var[DRY][iveg][band].Wdew *= (1.-lakefraction);
+  veg_var[WET][iveg][band].Wdew *= (1.-lakefraction);
+  
+  
   /* Update wetland soil moisture and lake volume to reflect change in lake area over 
      current time step. There is no ice in the soil under the lake. */
   deltafrac = lakefraction - newfraction;
-
+  
   /* Lake increases in area and some of the lake volume must be used to 
      bring the underlying soil to saturation. */
-
+  
   if(deltafrac < 0.0) {	
     tmp_volume = 0;
     for(index=0; index<options.Nlayer; index++) {
+#if EXCESS_ICE
+      tmp_volume += ((soil_con.effective_porosity[index]*soil_con.depth[index]*1000 -cell[WET][iveg][band].layer[index].moist ) / 1000. ) * deltafrac * lake_con.basin[0];
+#else      
       tmp_volume += ((soil_con.porosity[index]*soil_con.depth[index]*1000 -cell[WET][iveg][band].layer[index].moist ) / 1000. ) * deltafrac * lake_con.basin[0];
+#endif
     }
     lake->volume += tmp_volume;  
-
- /* Update soil moisture storage terms. */
- for(i=0; i<options.Nlayer; i++) {
- cell[DRY][iveg][band].layer[i].moist *= (1.-newfraction);
- cell[WET][iveg][band].layer[i].moist *= (1.-newfraction);
- cell[DRY][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*newfraction;
- cell[WET][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*newfraction;
-#if SPATIAL_FROST
- for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-   cell[DRY][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
-   cell[WET][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
- }
+    
+    /* Update soil moisture storage terms under the lake. */
+    for(i=0; i<options.Nlayer; i++) {
+      cell[DRY][iveg][band].layer[i].moist *= (1.-newfraction);
+      cell[WET][iveg][band].layer[i].moist *= (1.-newfraction);
+#if EXCESS_ICE
+      cell[DRY][iveg][band].layer[i].moist += soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*newfraction;
+      cell[WET][iveg][band].layer[i].moist += soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*newfraction;
 #else
- cell[DRY][iveg][band].layer[i].ice *= (1.-lakefraction);
- cell[WET][iveg][band].layer[i].ice *= (1.-lakefraction);
-#endif // SPATIAL_FROST
- }
- }
-		
- else {	
- /* Update soil moisture storage terms. */
- for(i=0; i<options.Nlayer; i++) {
- cell[DRY][iveg][band].layer[i].moist *= (1.-lakefraction);
- cell[WET][iveg][band].layer[i].moist *= (1.-lakefraction);
- cell[DRY][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefraction;
- cell[WET][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefraction;
+      cell[DRY][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*newfraction;
+      cell[WET][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*newfraction;
+#endif
 #if SPATIAL_FROST
- for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-   cell[DRY][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
-   cell[WET][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
- }
+      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	cell[DRY][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
+	cell[WET][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
+      }
 #else
- cell[DRY][iveg][band].layer[i].ice *= (1.-lakefraction);
- cell[WET][iveg][band].layer[i].ice *= (1.-lakefraction);
+      cell[DRY][iveg][band].layer[i].ice *= (1.-lakefraction);
+      cell[WET][iveg][band].layer[i].ice *= (1.-lakefraction);
 #endif // SPATIAL_FROST
- }
-}
-
+    }
+  }
+  
+  /* lake decreases in area or doesn't change */
+  else {	
+    /* Update soil moisture storage terms under the lake. */
+    for(i=0; i<options.Nlayer; i++) {
+      cell[DRY][iveg][band].layer[i].moist *= (1.-lakefraction);
+      cell[WET][iveg][band].layer[i].moist *= (1.-lakefraction);
+#if EXCESS_ICE
+      cell[DRY][iveg][band].layer[i].moist += soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*lakefraction;
+      cell[WET][iveg][band].layer[i].moist += soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*lakefraction;
+#else
+      cell[DRY][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefraction;
+      cell[WET][iveg][band].layer[i].moist += soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefraction;
+#endif
+#if SPATIAL_FROST
+      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	cell[DRY][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
+	cell[WET][iveg][band].layer[i].ice[frost_area] *= (1.-lakefraction);
+      }
+#else
+      cell[DRY][iveg][band].layer[i].ice *= (1.-lakefraction);
+      cell[WET][iveg][band].layer[i].ice *= (1.-lakefraction);
+#endif // SPATIAL_FROST
+    }
+  }
+  
   /* Update lake ice fraction for change in surface area. */
-   lake->fraci = lake->fraci * lakefraction/newfraction;
+  lake->fraci = lake->fraci * lakefraction/newfraction;
   if(lake->fraci > 1.) {
     lake->hice *= lake->fraci;
     lake->fraci = 1.;
   }
-
+  
 } 
 
 
@@ -2329,17 +2367,20 @@ void update_prcp(dist_prcp_struct *prcp,
   2006-Nov-07 Assigned value to MELTING.  TJB
   2007-Aug-16 Added ErrorFlag to return value of
                distribute_node_moisture_properties.  JCA
+  2007-Aug-21 Added features for EXCESS_ICE option.  JCA
+              Including moving distribute_node_moisture_properties call to
+              before surface_fluxes call in wetland_energy.
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
-		     energy_bal_struct *lake_energy, 
-		     snow_data_struct *lake_snow, 
-		     int iveg,
-		     int band,
-		     double fraci,
-		     soil_con_struct soil_con, 
-		     lake_var_struct *lake,
-		     int rec,
-		     lake_con_struct lake_con) 
+		    energy_bal_struct *lake_energy, 
+		    snow_data_struct *lake_snow, 
+		    int iveg,
+		    int band,
+		    double fraci,
+		    soil_con_struct soil_con, 
+		    lake_var_struct *lake,
+		    int rec,
+		    lake_con_struct lake_con) 
 {
   extern option_struct   options;
   energy_bal_struct    **wland_energy;
@@ -2350,11 +2391,10 @@ int initialize_prcp(dist_prcp_struct *prcp,
 #if SPATIAL_FROST
   int    frost_area;
 #endif // SPATIAL_FROST
-  double deltafrac;
   double tmp_volume;
   double totalmoist;
   double newmoist;
-  double             moist[MAX_LAYERS];
+  double moist[MAX_LAYERS];
   double error;
   double lakefrac;
   double sum_ice;
@@ -2451,8 +2491,13 @@ int initialize_prcp(dist_prcp_struct *prcp,
 /* Update Soil Moisture and Ice Content. */
  if ( lakefrac < 0.999 ) {
       for(i=0; i<options.Nlayer; i++) {
+#if EXCESS_ICE
+	cell[DRY][iveg][band].layer[i].moist -= soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*lakefrac;
+	cell[WET][iveg][band].layer[i].moist -= soil_con.effective_porosity[i]*soil_con.depth[i]*1000.*lakefrac;
+#else
 	cell[DRY][iveg][band].layer[i].moist -= soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefrac;
 	cell[WET][iveg][band].layer[i].moist -= soil_con.porosity[i]*soil_con.depth[i]*1000.*lakefrac;
+#endif
 	cell[DRY][iveg][band].layer[i].moist /= (1.-lakefrac);
 	cell[WET][iveg][band].layer[i].moist /= (1.-lakefrac);
 #if SPATIAL_FROST	
@@ -2466,26 +2511,6 @@ int initialize_prcp(dist_prcp_struct *prcp,
 #endif // SPATIAL_FROST
       }
     }  
-
-  for(index=0; index<options.Nlayer; index++) 
-    moist[index] = cell[WET][iveg][band].layer[index].moist;
-  ErrorFlag = distribute_node_moisture_properties(wland_energy[iveg][band].moist, wland_energy[iveg][band].ice,
-						  wland_energy[iveg][band].kappa_node, wland_energy[iveg][band].Cs_node,
-						  soil_con.dz_node, soil_con.Zsum_node, wland_energy[iveg][band].T,
-						  soil_con.max_moist_node,
-#if QUICK_FS
-						  soil_con.ufwc_table_node,
-#else
-						  soil_con.expt_node,
-						  soil_con.bubble_node, 
-#endif // QUICK_FS
-						  moist, soil_con.depth, 
-						  soil_con.soil_density,
-						  soil_con.bulk_density,
-						  soil_con.quartz, options.Nnode, 
-						  options.Nlayer, soil_con.FS_ACTIVE);
-  if ( ErrorFlag == ERROR )
-    return ( ErrorFlag );
-  
-  return(0);
+ 
+ return(0);
 }

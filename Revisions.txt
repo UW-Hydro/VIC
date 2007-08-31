@@ -9,6 +9,24 @@
 Revisions.txt - Describes differences between versions of VIC source code. 
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4v to VIC 4.1.0 beta r4w ***
+--------------------------------------------------------------------------------
+
+Drop canopy snow if thin
+
+     Files Affected:
+
+     snow_intercept.c
+
+     Description:
+
+     Modified to drop canopy snow if it is especially thin
+     (< MIN_SWQ_EB_THRES), which should improve the numeric
+     stability of the canopy energy balance solution.  KAC via TJB
+
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4u to VIC 4.1.0 beta r4v ***

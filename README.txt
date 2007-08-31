@@ -652,6 +652,19 @@ Bare soil evap for LAI=0
         is 0, e.g. winter cropland.  KAC via TJB
 
 
+Drop canopy snow if thin
+
+        Files Affected:
+
+        snow_intercept.c
+
+        Description:
+
+        Modified to drop canopy snow if it is especially thin
+        (< MIN_SWQ_EB_THRES), which should improve the numeric
+        stability of the canopy energy balance solution.  KAC via TJB
+
+
 
 Bug Fixes:
 ----------

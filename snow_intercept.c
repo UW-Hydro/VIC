@@ -63,7 +63,10 @@ static char vcid[] = "$Id$";
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
 	    flux calculations.					TJB
 2007-Apr-11 Modified to handle grid cell errors by returning to the
-            main subroutine, rather than ending the simulation.    KAC
+            main subroutine, rather than ending the simulation.	KAC
+2007-Aug-27 Modified to drop canopy snow if it is especially thin, which
+            should improve the numeric stability of the canopy energy
+            balance solution.					KAC via TJB
 
 *****************************************************************************/
 int snow_intercept(double  AirDens,
@@ -235,6 +238,12 @@ int snow_intercept(double  AirDens,
   /* pixel depth    */ 
   SnowThroughFall = (*SnowFall - DeltaSnowInt) * F + (*SnowFall) * (1 - F);
   
+  // Snow in canopy too thin for EB calculations; let it fall through
+  if ( *SnowFall == 0 && *IntSnow < MIN_SWQ_EB_THRES ) {
+    SnowThroughFall += *IntSnow;
+    DeltaSnowInt -= *IntSnow;
+  }
+
   /* physical depth */
   *IntSnow += DeltaSnowInt;
   

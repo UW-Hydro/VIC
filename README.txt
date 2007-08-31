@@ -640,6 +640,16 @@ Added EXCESS_ICE option (set in user_def.h)
         The recommended value is 0.8.
 
 
+Bare soil evap for LAI=0
+
+        Files affected:
+
+        func_surf_energy_bal.c
+
+        Description:
+
+        Modified to use arno_evap rather than canopy_evap if LAI
+        is 0, e.g. winter cropland.  KAC via TJB
 
 
 

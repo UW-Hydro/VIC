@@ -9,6 +9,25 @@
 Revisions.txt - Describes differences between versions of VIC source code. 
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4u to VIC 4.1.0 beta r4v ***
+--------------------------------------------------------------------------------
+
+
+Bare soil evap for LAI=0
+
+      Files affected:
+
+      func_surf_energy_bal.c
+
+      Description:
+
+      Modified to use arno_evap rather than canopy_evap if LAI
+      is 0, e.g. winter cropland.  KAC via TJB
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4t to VIC 4.1.0 beta r4u ***
 --------------------------------------------------------------------------------

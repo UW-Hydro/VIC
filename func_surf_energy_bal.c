@@ -64,22 +64,28 @@ double func_surf_energy_bal(double Ts, va_list ap)
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
 	    flux calculations.					TJB
   2007-Apr-11 Modified to handle grid cell errors by returning to the
-           main subroutine, rather than ending the simulation. GCT
-  24-Apr-07 Removed (1.-snow_coverage) from three equations where it did not
-            belong: for calculating LongBareOut in the second two cases and for
-            calculating NetBareRad in the third case.  JCA
-  24-Apr-07 Features included for IMPLICIT frozen soils option. JCA
+              main subroutine, rather than ending the simulation.	GCT
+  2007-Apr-24 Removed (1.-snow_coverage) from three equations where it did not
+              belong: for calculating LongBareOut in the second two cases and for
+              calculating NetBareRad in the third case.			JCA
+  2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA
               (including passing in nrec, nrecs, and iveg)
               (including passing in bulk_density, soil_density, and quartz)
               (including counting cases when IMPLICIT fails and involes EXPLICIT)
-  24-Apr-07 Features included for EXP_TRANS frozen soils option. JCA
-  24-Apr-07 Passing in Zsum_node.  JCA
-  7-Aug-07  Moved Implicit error counting above call for solve_T_profile.  JCA
-  8-Aug-07  Added option for EXCESS_ICE.  JCA
-             including: passing entire soil_con structure to calc_surf_energy_bal
+  2007-Apr-24 Features included for EXP_TRANS frozen soils option.	JCA
+  2007-Apr-24 Passing in Zsum_node.					JCA
+  2007-Aug-07 Moved Implicit error counting above call for
+              solve_T_profile.						JCA
+  2008-Aug-08 Added option for EXCESS_ICE.				JCA
+              including: passing entire soil_con structure to
+              calc_surf_energy_bal
+  2007-Aug-24 Modified to use arno_evap rather than canopy_evap if LAI
+              is 0, e.g. winter cropland.				KAC via TJB
+
 **********************************************************************/
 {
   extern option_struct options;
+  extern veg_lib_struct *veg_lib;
 #if LINK_DEBUG
   extern debug_struct  debug;
 #endif
@@ -646,8 +652,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
     Should evapotranspiration be active when the 
     ground is only paritially covered with snow????
+
+    Use Arno Evap if LAI is set to zero (e.g. no
+    winter crop planted).
   *************************************************/
-  if ( VEG && !SNOWING ) {
+  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
     *Ra_used = ra[1];
     Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
 		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 

@@ -102,6 +102,7 @@ static char vcid[] = "$Id$";
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.
               GCT/KAC. 
+  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -341,7 +342,7 @@ int ice_melt(double            z2,
 				 RHOSNOW,surf_atten,&SnowFlux,
 				 &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
-    if( snow->surf_temp <= -9998 ){
+    if( snow->surf_temp <= -998 ){
       ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				 aero_resist_used, z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,

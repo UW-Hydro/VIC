@@ -395,6 +395,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
    Apr 24, 2007: Passed j to soil_thermal_eqn for "cold nose" problem in
                 explicit solution.   JCA
    Aug 8, 2007: Added EXCESS_ICE option.  JCA
+   2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -449,7 +450,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
 #endif
 	
-	if(T[j] <= -9998 ) {
+	if(T[j] <= -998 ) {
 	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
 				max_moist[j], bubble[j], expt[j], ice[j], 
 				gamma[j-1], A[j], B[j], C[j], D[j], 
@@ -497,7 +498,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
 #endif
 	
-	if(T[j] <= -9998 ) {
+	if(T[j] <= -998 ) {
 	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
 				T[Nnodes-2], T0[Nnodes-1], 
 				moist[Nnodes-1], max_moist[Nnodes-1], 

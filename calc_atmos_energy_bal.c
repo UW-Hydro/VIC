@@ -46,7 +46,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
 	    root_brent.						TJB
 2007-Apr-06 Modified to handle grid cell errors by returning to the
             main subroutine, rather than ending the simulation. GCT/KAC
-
+ 2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
 ************************************************************************/
 
   double AtmosLatent;
@@ -95,7 +95,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
 		       NetRadiation, Ra, Tair, atmos_density, InSensible, 
 		       SensibleHeat);
 
-  if ( Tcanopy <= -9998 ) {
+  if ( Tcanopy <= -998 ) {
     // handle error flag from root brent
     (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
 					   + (*LatentHeatSub), 
@@ -124,7 +124,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
 /* 			   InLatent, Lv, Ra, atmos_density, gamma, vp,  */
 /* 			   &AtmosLatent); */
 
-/*   if ( (*VPcanopy) <= -9998 )  */
+/*   if ( (*VPcanopy) <= -998 )  */
     // handle error flag from root brent
 /*     (*Error) = error_calc_atmos_moist_bal((*VPcanopy), InLatent,  */
 /* 					  Lv, Ra, atmos_density, gamma, vp,  */

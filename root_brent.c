@@ -96,6 +96,9 @@ static char vcid[] = "$Id$";
 	      the same reason.						TJB
     21-Sep-04 No longer print warning to stderr from this routine;
 	      instead store warning messages in parameter ErrorString.	TJB
+    2007-Aug-31 Corrected handling of Function return value if Function returns ERROR.  
+               This can happen if Function is func_surf_energy_bal.  JCA
+    2007-Sep-1 Removed the integer "eval" since it is never used for anything.  JCA
 *****************************************************************************/
 double root_brent(double LowerBound, double UpperBound, char *ErrorString,
                 double (*Function)(double Estimate, va_list ap), ...)
@@ -119,39 +122,50 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
   double tol;
   int i;
   int j;
-  int eval = 0;
 
   /* initialize variable argument list */
-
-    
   a = LowerBound;
   b = UpperBound;;
   va_start(ap, Function);
   fa = Function(a, ap);
-  eval++;
   va_start(ap, Function);
   fb = Function(b, ap);
-  eval++;
   
-  /*  if root not bracketed attempt to bracket the root */
+  // if Function returns value of ERROR, then make sure root isn't mistakenly bracketed by
+  // making fa = fb
+  if(fa == ERROR || fb == ERROR)
+    fprintf(stderr,"WARNING: ERROR returned to root_brent on root-bracketing attempt 0: lower = %.4f->error=%.2f, upper = %.4f->error=%.2f\n",a,fa,b,fb);
+  if(fa == ERROR)
+    fb = ERROR;
+  else if (fb == ERROR)
+    fa = ERROR;
 
+  /*  if root not bracketed attempt to bracket the root */
   j = 0;
   while ((fa * fb) >= 0  && j < MAXTRIES) {
     a -= TSTEP;
     b += TSTEP;
     va_start(ap, Function);
     fa = Function(a, ap);
-    eval++;
     va_start(ap, Function);
     fb = Function(b, ap);
-    eval++;
+    
+    // if Function returns value of ERROR, then make sure root isn't mistakenly bracketed
+    // by making fa = fb
+    if(fa == ERROR || fb == ERROR)
+      fprintf(stderr,"WARNING: ERROR returned to root_brent on root-bracketing attempt %d: lower = %.4f->error=%.2f, upper = %.4f->error=%.2f\n",j+1,a,fa,b,fb);
+    if(fa == ERROR)
+      fb = ERROR;
+    else if (fb == ERROR)
+      fa = ERROR;
+
     j++;
   }
   if ((fa * fb) >= 0) {
     /* if we get here, the lower and upper bounds did not bracket the root */
     sprintf(ErrorString,"WARNING: %s: lower and upper bounds %f and %f failed to bracket the root.\n",Routine,a,b);
     va_end(ap);
-    return( -9999. );
+    return(ERROR);
   }
   
   fc = fb;
@@ -225,14 +239,23 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
       fa = fb;
       b += (fabs(d) > tol) ? d : ((m > 0) ? tol : -tol);
       va_start(ap, Function);
-      fb = Function(b, ap);      
-      eval++;
+      fb = Function(b, ap);
+
+      //don't allow ERROR from Function during iteration, because root_brent
+      //won't be able to find a solution
+      if(fb == ERROR){
+	sprintf(ErrorString,"ERROR returned to root_brent on iteration %d: temperature = %.4f\n",i+1,b);
+	va_end(ap);
+	return( ERROR );
+      }      
+
     }
   }
   /* If we get here, there were too many iterations */
   sprintf(ErrorString,"WARNING: %s: too many iterations.\n",Routine);
   va_end(ap);
-  return( -9998. );
+  return(ERROR);
+
 }
 
 #undef MAXTRIES

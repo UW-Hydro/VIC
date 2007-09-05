@@ -113,6 +113,7 @@ static char vcid[] = "$Id$";
 2007-Apr-11 Modified to handle grid cell errors by returning to the
             main subroutine, rather than ending the simulation.    KAC
 2007-Jul-03 Corrected the units of melt in the comment section.	TJB
+2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
 
 *****************************************************************************/
 int  snow_melt(double            Le, 
@@ -362,10 +363,10 @@ int  snow_melt(double            Le,
 				     &snow->vapor_flux, &snow->blowing_flux,
 				     &snow->surface_flux);
       
-      if ( snow->surf_temp <= -9998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
+      if ( snow->surf_temp <= -998 || SurfaceSwq <= MIN_SWQ_EB_THRES ) {
 	/* Thin snowpack must be solved in conjunction with ground surface
 	   energy balance */
-        if ( snow->surf_temp <= -9998 ) {
+        if ( snow->surf_temp <= -998 ) {
           /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
           fprintf(stderr,"Snowpack is too thin to solve separately; it will be solved in conjunction with ground surface energy balance\n");
         }

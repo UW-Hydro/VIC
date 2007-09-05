@@ -9,6 +9,39 @@
 Revisions.txt - Describes differences between versions of VIC source code. 
 README.txt has more general descriptions.
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+ **** Description of changes from VIC 4.1.0 beta r4rw to VIC 4.1.0 beta r4x ***
+--------------------------------------------------------------------------------
+
+
+
+Trap cases of T-errors matching variable ERROR for root_brent.
+
+
+            calc_atmos_energy_bal.c
+            calc_surf_energy_bal.c
+            frozen_soil.c
+            ice_melt.c
+            root_brent.c
+            snow_intercept.c
+            snow_melt.c
+
+
+            Basically, what was happening was that when root_brent was called
+            from calc_surf_energy_bal with func_surf_energy_bal as Function,
+            then func_surf_energy_bal was ocasionally returning a value of
+            ERROR to
+            root_brent, and root_brent was then (in some cases) interpreting
+            this as an actual surface temperature and continuing merrily on
+            its way. So, there was an error in the model that was never
+            caught. So, now root_brent checks for this and returns a value of
+            ERROR if there is a problem. Because of this change, all of the
+            routines that call root_brent had to be changed since they checked
+            against an error of -9998 - now they check for
+            values less than -998, since ERROR = -999.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4v to VIC 4.1.0 beta r4w ***
 --------------------------------------------------------------------------------

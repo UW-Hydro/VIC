@@ -67,7 +67,7 @@ static char vcid[] = "$Id$";
 2007-Aug-27 Modified to drop canopy snow if it is especially thin, which
             should improve the numeric stability of the canopy energy
             balance solution.					KAC via TJB
-
+2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
 *****************************************************************************/
 int snow_intercept(double  AirDens,
 		    double  Dt, 
@@ -363,7 +363,7 @@ int snow_intercept(double  AirDens,
 			   &RefreezeEnergy, SensibleHeat, 
 			   VaporMassFlux);
     
-    if ( *Tfoliage <= -9998 ) {
+    if ( *Tfoliage <= -998 ) {
       
       Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
 					  soil_con->elevation, 

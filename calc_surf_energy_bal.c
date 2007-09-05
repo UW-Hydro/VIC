@@ -128,6 +128,8 @@ double calc_surf_energy_bal(double             Le,
     08-Aug-07 Features included for EXCESS_ICE option for frozen soils
                 algorithm. JCA
              including: passing in entire soil_con structure.
+    2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+    2007-Sep-1 Checked for return value of ERROR from solve_surf_energy_bal.  JCA
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -345,7 +347,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->latent, &energy->latent_sub, 
 		       &energy->sensible, &energy->snow_flux, &energy->error);
  
-    if(Tsurf <= -9998 ) {  
+    if(Tsurf <= -998 ) {  
       fprintf(stderr, "SURF_DT = %.2f\n", SURF_DT);
       error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month, dmy->day, dmy->hour, VEG, iveg,
 					 veg_class, delta_t, Cs1, Cs2, D1, D2, 
@@ -433,7 +435,7 @@ double calc_surf_energy_bal(double             Le,
 			 &energy->latent, &energy->latent_sub, 
 			 &energy->sensible, &energy->snow_flux, &energy->error);
       
-      if(Tsurf <=  -9998 ) {  
+      if(Tsurf <=  -998 ) {  
 	error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month, dmy->day, dmy->hour, VEG, iveg,
 					   veg_class, delta_t, Cs1, Cs2, D1, 
 					   D2, T1_old, T2, Ts_old, 
@@ -527,8 +529,10 @@ double calc_surf_energy_bal(double             Le,
 				&energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 				&energy->latent, &energy->latent_sub, 
 				&energy->sensible, &energy->snow_flux, &energy->error);
-  
-  energy->error = error;
+  if(error == ERROR)
+    return(ERROR);
+  else
+    energy->error = error;
   
   /***************************************************
     Recalculate Soil Moisture and Thermal Properties

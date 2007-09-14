@@ -11,13 +11,27 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
- **** Description of changes from VIC 4.1.0 beta r4rw to VIC 4.1.0 beta r4x ***
+ *** Description of changes from VIC 4.1.0 beta r4x to VIC 4.1.0 beta r4y ***
+--------------------------------------------------------------------------------
+
+Trap cases of negative soil moisture. 
+
+            Files affected:
+
+            full_energy.c
+
+            No longer resets ice content to previous time-step ice content if
+            subsidence has occurred.
+
+--------------------------------------------------------------------------------
+ **** Description of changes from VIC 4.1.0 beta r4w to VIC 4.1.0 beta r4x ***
 --------------------------------------------------------------------------------
 
 
 
 Trap cases of T-errors matching variable ERROR for root_brent.
 
+            Files affected:
 
             calc_atmos_energy_bal.c
             calc_surf_energy_bal.c

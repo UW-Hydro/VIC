@@ -923,6 +923,14 @@ Trap cases of negative soil moisture.
             No longer resets ice content to previous time-step ice content if
             subsidence has occurred.
 
+Fixed bug for read-in during EXCESS_ICE option.
+
+            Files affected:
+
+            read_initial_model_state.c
+
+            Fixed bug for read-in during EXCESS_ICE option.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

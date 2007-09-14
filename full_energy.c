@@ -50,6 +50,8 @@ int  full_energy(char                 NEWCELL,
                updating soil depth, effective porosity,
                bulk density, and soil moisture and fluxes by calling
                runoff function if subsidence occurs.
+  2007-Sep-7 No longer resets ice content to previous time-step ice content if
+               subsidence has occurred.  JCA
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -128,11 +130,6 @@ int  full_energy(char                 NEWCELL,
   double                 total_meltwater; //mm
   double                 tmp_depth, tmp_depth_prior; //m
   double                 ppt[2]; 
-#if SPATIAL_FROST
-  double                 ice_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS][FROST_SUBAREAS]; //mm
-#else
-  double                 ice_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
-#endif
   double                 moist_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
   double                 evap_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
 #endif //EXCESS_ICE
@@ -331,12 +328,6 @@ int  full_energy(char                 NEWCELL,
             for(lidx=0;lidx<options.Nlayer;lidx++) {
 	      moist_prior[dist][iveg][band][lidx] = cell[dist][iveg][band].layer[lidx].moist;
 	      evap_prior[dist][iveg][band][lidx] = 0; //initialize
-#if SPATIAL_FROST
-              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) 
-		ice_prior[dist][iveg][band][lidx][frost_area] = cell[dist][iveg][band].layer[lidx].ice[frost_area];
-#else
-	      ice_prior[dist][iveg][band][lidx] = cell[dist][iveg][band].layer[lidx].ice;
-#endif
 	    }
 	  }
 #endif //EXCESS_ICE
@@ -624,12 +615,6 @@ int  full_energy(char                 NEWCELL,
 	      for(lidx=0;lidx<options.Nlayer;lidx++) {			
 		cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
 		cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
-#if SPATIAL_FROST
-		for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) 
-		  cell[dist][iveg][band].layer[lidx].ice[frost_area] = ice_prior[dist][iveg][band][lidx][frost_area];
-#else
-		cell[dist][iveg][band].layer[lidx].ice = ice_prior[dist][iveg][band][lidx];
-#endif
 	      }
 	    }
 

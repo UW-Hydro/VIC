@@ -914,6 +914,15 @@ Trap cases of T-errors matching variable ERROR for root_brent.
             against an error of -9998 - now they check for
             values less than -998, since ERROR = -999.
 
+Trap cases of negative soil moisture.
+
+            Files affected:
+
+            full_energy.c
+
+            No longer resets ice content to previous time-step ice content if
+            subsidence has occurred.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

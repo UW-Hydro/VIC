@@ -68,6 +68,7 @@ void read_initial_model_state(FILE                *init_state,
              in rather than the size of the item read in.  JCA
   2007-05-07 Nsum and sum removed from declaration.  JCA
   2007-Aug-24  Added features for EXCESS_ICE option.  JCA
+  2007-Sep-14  Fixed bug for read-in during EXCESS_ICE option.  JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -125,9 +126,8 @@ void read_initial_model_state(FILE                *init_state,
     fread( &tmp_Nband, sizeof(int), 1, init_state );
     fread( &Nbytes, sizeof(int), 1, init_state );
   }
-  else {
+  else 
     fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
-  }
   
   // Skip over unused cell information
   while ( tmp_cellnum != cellnum && !feof(init_state) ) {
@@ -145,6 +145,9 @@ void read_initial_model_state(FILE                *init_state,
     else {
       // skip rest of current cells info
       fgets(tmpstr, MAXSTRING, init_state); // skip rest of general cell info
+#if EXCESS_ICE      
+      fgets(tmpstr, MAXSTRING, init_state); //excess ice info
+#endif
       for ( veg = 0; veg <= tmp_Nveg+extra_veg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
 	if ( options.LAKES && extra_veg == 1 && veg == tmp_Nveg + extra_veg ) {
@@ -153,14 +156,14 @@ void read_initial_model_state(FILE                *init_state,
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, init_state); // skip snowband info
       }
-  if ( options.LAKES && extra_veg == 1 ) {
+      if ( options.LAKES && extra_veg == 1 ) {
         fgets(tmpstr, MAXSTRING, init_state); // skip lake info
-  }
+      }
       // read info for next cell
       fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
     }//end if
   }//end while
-
+  
   if ( feof(init_state) ) {
     sprintf(ErrStr, "Requested grid cell (%d) is not in the model state file.", 
 	    cellnum);

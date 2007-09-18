@@ -62,7 +62,10 @@ int main(int argc, char *argv[])
   2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
 	      free_out_data(), and free_veglib().  Added closing of
 	      all parameter files.				TJB
-  2007-Aug-21 Return ErrorFlag from initialize_model_state.  JCA
+  2007-Aug-21 Return ErrorFlag from initialize_model_state.	JCA
+  2007-Sep-14 Excluded calls to free_veglib() and closing of parameter
+	      files other than the soil param file for the case
+	      when OUTPUT_FORCE=TRUE.				TJB
 
 **********************************************************************/
 {
@@ -438,14 +441,18 @@ int main(int argc, char *argv[])
   free_dmy(&dmy);
   free_out_data_files(&out_data_files);
   free_out_data(&out_data);
+#if !OUTPUT_FORCE
   free_veglib(&veg_lib);
+#endif /* !OUTPUT_FORCE */
   fclose(filep.soilparam);
+#if !OUTPUT_FORCE
   fclose(filep.vegparam);
   fclose(filep.veglib);
   if (options.SNOW_BAND>1)
     fclose(filep.snowband);
   if (options.LAKES)
     fclose(filep.lakeparam);
+#endif /* !OUTPUT_FORCE */
 
   return EXIT_SUCCESS;
 }	/* End Main Program */

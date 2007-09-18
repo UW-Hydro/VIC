@@ -65,24 +65,25 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 parameters.                                     KAC
   11-18-02      Modified to read Bart's new Arno parameters.    IHA
   10-May-04     Replaced rint(something) with (float)(int)(something + 0.5)
-		to handle rounding without resorting to rint().	TJB
+		to handle rounding without resorting to rint().		TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
 		Added check to make sure that wilting point is
-		greater than residual moisture.			TJB
+		greater than residual moisture.				TJB
   07-Jul-04	Changed lower limit on initial soil moisture to be
 		residual moisture instead of wilting point.  Also
-		cleaned up validation statements.		TJB
-  07-Jul-04	Removed extraneous tmp variable.		TJB
+		cleaned up validation statements.			TJB
+  07-Jul-04	Removed extraneous tmp variable.			TJB
   07-Jul-04	Only validate initial soil moisture if INIT_STATE
-		is FALSE.					TJB
+		is FALSE.						TJB
   26-Oct-04	Added validation of depth_full_snow_cover and
-		frost_slope.					TJB
-  2005-Apr-13   Added logic for OUTPUT_FORCE option.		TJB
-  2005-Apr-23   Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
-  2006-09-13   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
-  2007-05-23   Replaced 'fscanf' statements with 'sscanf' statements
-               to trap missing fields. GCT
-  2007-08-08   Added EXCESS_ICE option.                         JCA
+		frost_slope.						TJB
+  2005-Apr-13 Added logic for OUTPUT_FORCE option.			TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
+  2006-Sep-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.	TJB/GCT
+  2007-May-23 Replaced 'fscanf' statements with 'sscanf' statements
+	      to trap missing fields.					GCT
+  2007-Aug-08 Added EXCESS_ICE option.					JCA
+  2007-Sep-14 Clarified description in comment before BASEFLOW check.	TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -572,8 +573,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     
     /*************************************************
-      If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
-      parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
+      If BASEFLOW = NIJSSEN2001 then convert NIJSSEN2001
+      parameters d1, d2, d3, and d4 to ARNO baseflow
+      parameters Ds, Dsmax, Ws, and c
     *************************************************/
 #if EXCESS_ICE
     temp.Dsmax_orig = temp.Dsmax;

@@ -94,6 +94,9 @@ void initialize_global() {
   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
 	      of supported met input variables.					TJB
   2007-Jan-15 Added PRT_HEADER option.						TJB
+  2007-Sep-14 Replaced initialization of param_set.TYPE[i].SUPPLIED with a loop,
+	      and added initialization of param_set.TYPE[i].SIGNED and
+	      param_set.TYPE[i].multiplier.					TJB
 
 *********************************************************************/
 
@@ -166,29 +169,11 @@ void initialize_global() {
 
   /** Initialize forcing file input controls **/
 
-  param_set.TYPE[AIR_TEMP].SUPPLIED   = FALSE;
-  param_set.TYPE[ALBEDO].SUPPLIED     = FALSE;
-  param_set.TYPE[CRAINF].SUPPLIED     = FALSE;
-  param_set.TYPE[CSNOWF].SUPPLIED     = FALSE;
-  param_set.TYPE[DENSITY].SUPPLIED    = FALSE;
-  param_set.TYPE[LONGWAVE].SUPPLIED   = FALSE;
-  param_set.TYPE[LSRAINF].SUPPLIED    = FALSE;
-  param_set.TYPE[LSSNOWF].SUPPLIED    = FALSE;
-  param_set.TYPE[PREC].SUPPLIED       = FALSE;
-  param_set.TYPE[PRESSURE].SUPPLIED   = FALSE;
-  param_set.TYPE[QAIR].SUPPLIED       = FALSE;
-  param_set.TYPE[RAINF].SUPPLIED      = FALSE;
-  param_set.TYPE[REL_HUMID].SUPPLIED  = FALSE;
-  param_set.TYPE[SHORTWAVE].SUPPLIED  = FALSE;
-  param_set.TYPE[SNOWF].SUPPLIED      = FALSE;
-  param_set.TYPE[TMAX].SUPPLIED       = FALSE;
-  param_set.TYPE[TMIN].SUPPLIED       = FALSE;
-  param_set.TYPE[TSKC].SUPPLIED       = FALSE;
-  param_set.TYPE[VP].SUPPLIED         = FALSE;
-  param_set.TYPE[WIND].SUPPLIED       = FALSE;
-  param_set.TYPE[WIND_E].SUPPLIED     = FALSE;
-  param_set.TYPE[WIND_N].SUPPLIED     = FALSE;
-  param_set.TYPE[SKIP].SUPPLIED       = FALSE;
+  for(j=0;j<N_FORCING_TYPES;j++) {
+    param_set.TYPE[j].SUPPLIED = FALSE;
+    param_set.TYPE[j].SIGNED   = 1;
+    param_set.TYPE[j].multiplier = 1;
+  }
   for(i=0;i<2;i++) {
     param_set.FORCE_DT[i] = MISSING;
     param_set.N_TYPES[i] = MISSING;

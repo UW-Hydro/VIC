@@ -30,6 +30,7 @@ void get_force_type(char   *cmdstr,
 	      proper parsing regardless of ASCII (which doesn't have SIGNED
 	      or MULTIPLIER fields) vs. BINARY, I removed the if() statements
 	      altogether.						TJB
+  2007-Sep-14 Initialize flgstr to "NULL".				TJB
 
 *************************************************************/
 
@@ -39,6 +40,9 @@ void get_force_type(char   *cmdstr,
   char flgstr[10];
   char ErrStr[MAXSTRING];
   int  type;
+
+  /** Initialize flgstr **/
+  strcpy(flgstr,"NULL");
 
   if((*field) >= param_set.N_TYPES[file_num]) {
     sprintf(ErrStr,"Too many variables defined for forcing file %i.",file_num);

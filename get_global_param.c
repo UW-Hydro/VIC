@@ -60,6 +60,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   2007-Jan-03 Added ALMA_INPUT option.					TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-23 Added initialization of some global parameters.		TJB
+  2007-Sep-14 Added initialization of names->soil_dir.			TJB
 
 **********************************************************************/
 {
@@ -133,6 +134,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   strcpy(names->statefile, "NONE");
   global.skipyear      = 0;
   global.out_dt        = MISSING;
+  strcpy(names->soil_dir, ".");
 
   /** Read through global control file to find parameters **/
 

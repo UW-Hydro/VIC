@@ -63,25 +63,26 @@ soil_con_struct read_soilparam(FILE *soilparam,
                 if model grid cell is not read.                 KAC
   10-Oct-03     Modified to read ARNO baseflow parameters d1, d2,
 		d3, and d4 and convert to Ds, Dsmax, Ws, and c,
-		if options.ARNO_PARAMS is TRUE.			TJB
+		if options.ARNO_PARAMS is TRUE.					TJB
   07-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
-		to handle rounding without resorting to rint().	TJB
-  11-May-04	Removed extraneous tmp variable.		TJB
+		to handle rounding without resorting to rint().			TJB
+  11-May-04	Removed extraneous tmp variable.				TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
 		Added check to make sure that wilting point is
-		greater than residual moisture.			TJB
+		greater than residual moisture.					TJB
   16-Jun-04	Added logic to read optional extra field containing
 		average July air temperature, if JULY_TAVG_SUPPLIED
-		= TRUE.						TJB
+		= TRUE.								TJB
   07-Jul-04	Changed lower limit on initial soil moisture to be
 		residual moisture rather than wilting point.  Also
-		cleaned up validation statements.		TJB
+		cleaned up validation statements.				TJB
   07-Jul-04	Validation of initial soil moisture is only performed
-		if INIT_STATE = FALSE.				TJB
-  2005-11-21    (Port from 4.1.0) Replace %i w/ %d in scanf statements. GCT
-  2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
-  2006-Jan-22   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
-  2006-Sep-01   (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
+		if INIT_STATE = FALSE.						TJB
+  2005-Nov-21 (Port from 4.1.0) Replace %i w/ %d in scanf statements.		GCT
+  2005-Nov-21 (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	GCT
+  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.		TJB
+  2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option.		TJB
+  2007-Sep-14 Clarified description in comment before BASEFLOW check.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -304,8 +305,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
 
     /*************************************************
-      If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
-      parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c
+      If BASEFLOW = NIJSSEN2001 then convert NIJSSEN2001
+      parameters d1, d2, d3, and d4 to ARNO baseflow
+      parameters Ds, Dsmax, Ws, and c
     *************************************************/
     if(options.BASEFLOW == NIJSSEN2001) {
       layer = options.Nlayer-1;

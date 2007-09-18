@@ -103,9 +103,13 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 		cleaned up validation statements.		TJB
   07-Jul-04	Validation of initial soil moisture is only performed
 		if INIT_STATE = FALSE.				TJB
-  2005-11-21    (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW. GCT
-  2006-Jan-22   Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB
-  2006-Sep-01   (Port from 4.1.0) Added support for OUTPUT_FORCE option. TJB
+  2005-11-21  (Port from 4.1.0) Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	GCT
+  2006-Jan-22 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.		TJB
+  2006-Sep-01 (Port from 4.1.0) Added support for OUTPUT_FORCE option.		TJB
+  2007-Sep-14 Fixed typo in BASEFLOW option check.				TJB
+  2007-Sep-14 Moved check on !OUTPUT_FORCE to after all files have been read
+	      because the forcing disaggregation requires annual precip.	TJB
+	       
 
 **********************************************************************/
 {
@@ -175,7 +179,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     fprintf(stderr,"\ncell: %d,  lat: %.4f, long: %.4f\n",temp.gridcel,temp.lat,temp.lng);
 #endif
 
-#if !OUTPUT_FORCE
     /** Get Average Grid Cell Elevation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
@@ -359,11 +362,13 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       options.JULY_TAVG_SUPPLIED = TRUE;
     }
 
+#if !OUTPUT_FORCE
     /*************************************************
-    if BASEFLOW == ARNO then convert the baseflow
-    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
+      If BASEFLOW = NIJSSEN2001 then convert NIJSSEN2001
+      parameters d1, d2, d3, and d4 to ARNO baseflow
+      parameters Ds, Dsmax, Ws, and c
     *************************************************/
-    if(options.BASEFLOW == ARNO) {
+    if(options.BASEFLOW == NIJSSEN2001) {
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +

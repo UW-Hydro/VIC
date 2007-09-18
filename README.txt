@@ -862,6 +862,26 @@ Fixes for memory leaks and variable initialization.
 
         Miscellaneous fixes for memory leaks and variable initialization.
 
+
+Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
+
+            Files Affected:
+
+            get_force_type.c
+            get_global_param.c
+            initialize_global.c
+            read_soilparam.c
+            read_soilparam_arc.c
+            vicNl.c
+
+            Description:
+
+            Memory errors would occur when ARC_SOIL=TRUE and
+            OUTPUT_FORCE=TRUE.
+            In addition, the output files would not contain sufficient
+            contents due to not closing properly.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

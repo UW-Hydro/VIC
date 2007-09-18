@@ -83,30 +83,32 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   7-19-96	Modified to read through variable layers, and
 		read soil depth and average temperature for
 		full energy and frozen soil versions of the
-		model.						KAC
+		model.							KAC
   4-12-98       Modified to read all parameters from a single
-                standard input file.                            KAC
+                standard input file.					KAC
   xx-xx-01      modified to read in spatial snow and soil frost 
-                parameters.                                     KAC
+                parameters.						KAC
   04-25-03      modified to handle Bart's new Arno parameterization,
-                as well as the original.                        KAC
+                as well as the original.				KAC
   10-May-04	Replaced rint(something) with (float)(int)(something + 0.5)
-		to handle rounding without resorting to rint().	TJB
+		to handle rounding without resorting to rint().			TJB
   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
 		Added check to make sure that wilting point is
-		greater than residual moisture.			TJB
-  03-Jun-04	Removed extraneous tmp variable.		TJB
-  04-Jun-04	Added print statement for current cell number.	TJB
+		greater than residual moisture.					TJB
+  03-Jun-04	Removed extraneous tmp variable.				TJB
+  04-Jun-04	Added print statement for current cell number.			TJB
   07-Jul-04	Changed lower limit on initial soil moisture to be
 		residual moisture instead of wilting point.  Also
-		cleaned up validation statements.		TJB
+		cleaned up validation statements.				TJB
   07-Jul-04	Only validate initial soil moisture if INIT_STATE
-		is FALSE.					TJB
-  2005-Apr-23	Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
-  2006-0913     Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
-  2007-Aug-09   Baseflow conversion if NIJSSEN2001=TRUE instead of ARNO=TRUE.  JCA
-  2007-Aug-09   Moved ARNO/NIJSSEN conversion after calculation of max_moist.  JCA
-  2007-Aug-09   Added EXCESS_ICE option.                        JCA
+		is FALSE.							TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.			TJB
+  2006-Sep-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. 		TJB/GCT
+  2007-Aug-09 Baseflow conversion if NIJSSEN2001=TRUE instead of ARNO=TRUE.	JCA
+  2007-Aug-09 Moved ARNO/NIJSSEN conversion after calculation of max_moist.	JCA
+  2007-Aug-09 Added EXCESS_ICE option.						JCA
+  2007-Sep-14 Added check on !OUTPUT_FORCE to avoid unnecessary computation.	TJB
+
 **********************************************************************/
 {
   extern option_struct options;
@@ -362,7 +364,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // SPATIAL_FROST
 
-
     /** Layer Initial Volumetric Ice Fraction **/
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
@@ -372,7 +373,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       init_ice_fract[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // EXCESS_ICE
     }
-    
+
+#if !OUTPUT_FORCE
     /*******************************************
       Compute Soil Layer Properties
       *******************************************/
@@ -614,6 +616,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
       temp.Ws = temp.Ws/temp.max_moist[layer];
     }
+#endif /* !OUTPUT_FORCE */
     
     /*************************************************
       Determine Central Longitude of Current Time Zone 
@@ -622,12 +625,16 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     
   }
   else RUN[0] = 0;
-  
+ 
+#if !OUTPUT_FORCE
+
   /* Allocate Layer - Node fraction array */
   temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
   for(layer=0;layer<=options.Nlayer;layer++) 
     temp.layer_node_fract[layer] 
       = (float *)malloc(options.Nnode*sizeof(float));
+
+#endif /* !OUTPUT_FORCE */
 
   return temp;
 } 

@@ -65,7 +65,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-04-24 Added IMPLICIT option.                                     JCA
   2007-Apr-23 Added initialization of global parameters.		TJB
   2007-Apr-23 Added check for FULL_ENERGY if lake model is run.		TJB
-  2007-Aug-08 Added EXCESS_ICE option.                                  JCA
+  2007-Aug-08 Added EXCESS_ICE option.					JCA
+  2007-Sep-14 Added initialization of names->soil_dir.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -129,6 +130,7 @@ global_param_struct get_global_param(filenames_struct *names,
   strcpy(names->statefile, "NONE");
   global.skipyear      = 0;
   global.out_dt        = MISSING;
+  strcpy(names->soil_dir, ".");
 
   /** Read through global control file to find parameters **/
 

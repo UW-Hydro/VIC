@@ -931,6 +931,23 @@ Fixed bug for read-in during EXCESS_ICE option.
 
             Fixed bug for read-in during EXCESS_ICE option.
 
+Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
+
+            Files Affected:
+
+            get_force_type.c
+            get_global_param.c
+            initialize_global.c
+            read_soilparam.c
+            read_soilparam_arc.c
+            vicNl.c
+
+            Description:
+
+            Memory errors would occur when ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE.
+            In addition, the output files would not contain sufficient contents due
+            to not closing properly.  These have been fixed.
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

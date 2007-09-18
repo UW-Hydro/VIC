@@ -881,6 +881,15 @@ Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
             In addition, the output files would not contain sufficient
             contents due to not closing properly.
 
+Fixed fread checks
+
+            Files affected:
+
+            read_initial_model_state.c
+
+            Fixed fread checks to make sure correct number of items were read
+            in rather than the size of the item read in.  JCA
+            (port from 4.1.0_r4 GCT)
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

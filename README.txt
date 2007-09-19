@@ -948,6 +948,21 @@ Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
             In addition, the output files would not contain sufficient contents due
             to not closing properly.  These have been fixed.
 
+
+Handling of cells missing from snowband file
+
+            Files affected:
+
+            read_snowband.c
+
+            Description:
+
+            Previously, if SNOW_BAND = TRUE and a particular cell was not listed
+            in the snowband file, VIC would abort.  Now, when VIC encounters
+            cells with no information in the snowband file, VIC issues a warning
+            and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

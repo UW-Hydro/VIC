@@ -11,6 +11,23 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+ *** Description of changes from VIC 4.1.0 beta r4aa to VIC 4.1.0 beta r4bb ***
+--------------------------------------------------------------------------------
+
+Handling of cells missing from snowband file
+
+         Files affected:
+
+         read_snowband.c
+
+         Description:
+
+         Previously, if SNOW_BAND = TRUE and a particular cell was not listed
+         in the snowband file, VIC would abort.  Now, when VIC encounters
+         cells with no information in the snowband file, VIC issues a warning
+         and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.
+
+--------------------------------------------------------------------------------
  *** Description of changes from VIC 4.1.0 beta r4z to VIC 4.1.0 beta r4aa ***
 --------------------------------------------------------------------------------
 

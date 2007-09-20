@@ -995,6 +995,19 @@ Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
          in each frost subsection.
 
 
+Bug fixes in EXCESS_ICE calculations
+
+         Files affected:
+
+         full_energy.c
+         vicNl_def.h
+
+         Description:
+
+         Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.
+         Fixed bug in subsidence calculation.
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

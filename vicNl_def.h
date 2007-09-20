@@ -36,6 +36,7 @@
   2007-Apr-24 Added Zsum_node to soil_con structure.                    JCA
   2007-Aug-08 Added features for EXCESS_ICE option.                     JCA
   2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.              JCA
+  2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.      JCA
 *********************************************************************/
 
 #include <user_def.h>
@@ -75,6 +76,8 @@
 				       of soil column, for EXCESS_ICE option */
 #define ICE_AT_SUBSIDENCE 0.8        /* minimum ice/porosity fraction before
 					subsidence occurs, for EXCESS_ICE option */
+#define MAX_SUBSIDENCE    1.0        /* maximum depth of subsidence per layer per
+					time-step (mm) */
 #define ice_density      917.	    /* density of ice (kg/m^3) */
 #define T_lapse          6.5        /* temperature lapse rate of US Std 
 				       Atmos in C/km */

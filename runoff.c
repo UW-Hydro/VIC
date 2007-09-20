@@ -51,50 +51,56 @@ int  runoff(layer_data_struct *layer_wet,
 	inflow	incoming water corrected for fractional area of precip (mu)
 
   MODIFICATIONS:
-    5/22/96	Routine modified to account for spatially varying
-		precipitation, and it's effects on runoff.	KAC
-    11/96		Code modified to account for extra model layers
-  		needed for frozen soils modeling.		KAC
-    1/9/97	Infiltration and other rate parameters modified
-		for time scales of less than 1 day.		KAC
-    4-1-98 Soil moisture transport is now done on an hourly time
-           step, irregardless to the model time step, to prevent
-           numerical stabilities in the solution	Dag and KAC
-    01-24-00    simplified handling of soil moisture for the
-                frozen soil algorithm.  all option selection
-		now use the same soil moisture transport method   KAC
-    6-8-2000 modified to handle spatially distributed soil frost  KAC
-    06-07-03 modified so that infiltration is computed using only the
-             top two soil moisture layers, rather than all but the
-             bottom most layer.  This preserves the functionality
-             of the original model design, but is more realistic for
-             handling multiple soil moisture layers
-    06-Sep-03   Changed calculation of dt_baseflow to go to zero when
-                soil liquid moisture <= residual moisture.  Changed
-                block that handles case of total soil moisture < residual
-                moisture to not allow dt_baseflow to go negative.  TJB
-    17-May-04	Changed block that handles baseflow when soil moisture
-		drops below residual moisture.  Now, the block is only
-		entered if baseflow > 0 and soil moisture < residual,
-		and the amount of water taken out of baseflow and given
-		to the soil cannot exceed baseflow.  In addition, error
-		messages are no longer printed, since it isn't an error
-		to be in that block.				TJB
-    2007-Apr-04 Modified to return Error status from 
-                distribute_node_moisture_properties  GCT/KAC
-    24-Apr-07  Passes soil_con->Zsum_node to distribute_node_moisture_properties.  JCA
-    2007-Jun-13 Fixed bug arising from earlier fix to dt_baseflow
-		calculation.  Earlier fix took residual moisture
-		into account in the linear part of the baseflow eqn,
-		but not in the non-linear part.  Now we take residual
-		moisture into account correctly throughout the whole
-		equation.  Also re-wrote equation in simpler form.	TJB
-    2007-Aug-15 Changed SPATIAL_FROST if statement to enclose the correct
-                end-bracket for the frost_area loop.                 JCA
-    2007-Aug-09 Added features for EXCESS_ICE option.   JCA
-                 Including adding SubsidenceUpdate flag for parts
-                 of the routine that will be used if redistributing
-                 soil moisture after subsidence.
+  5/22/96 Routine modified to account for spatially varying
+	  precipitation, and it's effects on runoff.	KAC
+  11/96	  Code modified to account for extra model layers
+  	  needed for frozen soils modeling.		KAC
+  1/9/97  Infiltration and other rate parameters modified
+	  for time scales of less than 1 day.		KAC
+  4-1-98  Soil moisture transport is now done on an hourly time
+          step, irregardless to the model time step, to prevent
+          numerical stabilities in the solution	Dag and KAC
+  01-24-00 simplified handling of soil moisture for the
+           frozen soil algorithm.  all option selection
+	   now use the same soil moisture transport method   KAC
+  6-8-2000 modified to handle spatially distributed soil frost  KAC
+  06-07-03 modified so that infiltration is computed using only the
+           top two soil moisture layers, rather than all but the
+           bottom most layer.  This preserves the functionality
+           of the original model design, but is more realistic for
+           handling multiple soil moisture layers
+  06-Sep-03   Changed calculation of dt_baseflow to go to zero when
+              soil liquid moisture <= residual moisture.  Changed
+              block that handles case of total soil moisture < residual
+              moisture to not allow dt_baseflow to go negative.		TJB
+  17-May-04   Changed block that handles baseflow when soil moisture
+	      drops below residual moisture.  Now, the block is only
+	      entered if baseflow > 0 and soil moisture < residual,
+	      and the amount of water taken out of baseflow and given
+	      to the soil cannot exceed baseflow.  In addition, error
+	      messages are no longer printed, since it isn't an error
+	      to be in that block.					TJB
+  2007-Apr-04 Modified to return Error status from 
+              distribute_node_moisture_properties			GCT/KAC
+  2007-Apr-24 Passes soil_con->Zsum_node to distribute_node_moisture_properties.  JCA
+  2007-Jun-13 Fixed bug arising from earlier fix to dt_baseflow
+	      calculation.  Earlier fix took residual moisture
+	      into account in the linear part of the baseflow eqn,
+	      but not in the non-linear part.  Now we take residual
+	      moisture into account correctly throughout the whole
+	      equation.  Also re-wrote equation in simpler form.	TJB
+  2007-Aug-15 Changed SPATIAL_FROST if statement to enclose the correct
+              end-bracket for the frost_area loop.			JCA
+  2007-Aug-09 Added features for EXCESS_ICE option.			JCA
+              Including adding SubsidenceUpdate flag for parts
+              of the routine that will be used if redistributing
+              soil moisture after subsidence.
+  2007-Sep-18 Modified to correctly handle evaporation from spatially
+	      distributed soil frost.  Original version could produce
+	      negative soil moisture in fractions with high ice content
+	      since only total evaporation was checked versus total
+	      liquid water content, not versus available liquid water
+	      in each frost subsection.					KAC via TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -148,6 +154,10 @@ int  runoff(layer_data_struct *layer_wet,
   double             tmp_mu;
   double             dt_baseflow;
   double             rel_moist;
+  double             evap[MAX_LAYERS][FROST_SUBAREAS];
+  double             sum_moist;
+  double             evap_percent;
+  double             evap_sum;
 #if LOW_RES_MOIST
   double             b[MAX_LAYERS];
   double             matric[MAX_LAYERS];
@@ -200,14 +210,44 @@ int  runoff(layer_data_struct *layer_wet,
 	
 #if SPATIAL_FROST
       for ( lindex = 0; lindex < options.Nlayer; lindex++ ) {
+	evap[lindex][0] = layer[lindex].evap/(double)dt;
 	org_moist[lindex] = layer[lindex].moist;
 	layer[lindex].moist = 0;
+        if ( evap[lindex][0] != 0 ) {
+          // if there is evaporation
+          sum_moist = 0;
+          for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+            // compute total available soil moisture between frost sub areas.
+            sum_moist += (org_moist[lindex] - layer[lindex].ice[frost_area]) * frost_fract[frost_area];
+          // compute fraction of avaiable soil moisture that is evaporated
+          evap_percent = evap[lindex][0] / sum_moist;
+          // distribute evaporation between frost sub areas by percentage
+          evap_sum = evap[lindex][0];
+          for ( frost_area = FROST_SUBAREAS - 1; frost_area >= 0; frost_area-- ) {
+            evap[lindex][frost_area] = ( org_moist[lindex]
+                                         - layer[lindex].ice[frost_area] )
+              * evap_percent;
+            evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
+          }
+          if ( evap_sum > SMALL || evap_sum < -SMALL ) {
+            fprintf(stderr,"Evap_sum = %f\n", evap_sum);
+          }
+        }
+        else {
+          for ( frost_area = FROST_SUBAREAS - 1; frost_area > 0; frost_area-- )
+            evap[lindex][frost_area] = evap[lindex][0];
+        }
       }
       
       for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
 	
 #else
-	frost_area = 0;
+      // store current evaporation
+      for ( lindex = 0; lindex < options.Nlayer; lindex++ )
+        evap[lindex][0] = layer[lindex].evap/(double)dt;
+
+      frost_area = 0;
+
 #endif // SPATIAL_FROST
       
 	/** ppt = amount of liquid water coming to the surface **/
@@ -238,10 +278,9 @@ int  runoff(layer_data_struct *layer_wet,
 #endif // SPATIAL_FROST
 	      moist[lindex] = 0;
 	    else {
-	      sprintf(ErrStr,
-		      "Layer %i has negative soil moisture, %f", 
+	      sprintf(stderr, "ERROR in runoff(): Layer %d has negative soil moisture, %f\n", 
 		      lindex, moist[lindex]);
-	      vicerror(ErrStr);
+	      return(ERROR);
 	    }
 	  }
 	  
@@ -278,7 +317,8 @@ int  runoff(layer_data_struct *layer_wet,
 	  for ( lindex = 0; lindex < options.Nlayer; lindex++ ){
 	    moist[lindex] = max_moist[lindex] - ice[lindex];
 	    if(moist[lindex]<0){
-	      fprintf(stderr, "Layer %d soil moisture is negative.\n",lindex);
+	      fprintf(stderr, "ERROR in runoff(): Layer %d has negative soil moisture, %f\n",
+                      lindex, moist[lindex]);
 	      return(ERROR);
 	    }
 	  }
@@ -306,7 +346,7 @@ int  runoff(layer_data_struct *layer_wet,
 	  /*calculate total evap*/
 	  total_evap = 0;
 	  for ( lindex = 0; lindex < options.Nlayer; lindex++ ) 
-	    total_evap += layer[lindex].evap;
+	    total_evap += evap[lindex][frost_area]*(double)dt;
 
 	  /* estimate runoff as sum of excess water */
 	  runoff[frost_area] = net_excess_water + inflow - baseflow[frost_area] - total_evap;
@@ -375,8 +415,7 @@ int  runoff(layer_data_struct *layer_wet,
 	  
 	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
 	  A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
-	  i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 
-							/ soil_con->b_infilt))); 
+	  i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 / soil_con->b_infilt))); 
 	  /* Maximum Inflow */
 	  
 	  /** equation (3a) Wood et al. **/
@@ -408,7 +447,7 @@ int  runoff(layer_data_struct *layer_wet,
 	    
 #if LOW_RES_MOIST
 	    for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
-	      if( (tmp_moist = moist[lindex] - layer[lindex].evap / (double)dt) 
+	      if( (tmp_moist = moist[lindex] - evap[lindex][frost_area]) 
 		  < resid_moist[lindex] )
 		tmp_moist = resid_moist[lindex];
 	      if(tmp_moist > resid_moist[lindex])
@@ -429,7 +468,7 @@ int  runoff(layer_data_struct *layer_wet,
 	      
 	      /** Brooks & Corey relation for hydraulic conductivity **/
 	      
-	      if((tmp_moist = moist[lindex] - layer[lindex].evap / (double)dt) 
+	      if((tmp_moist = moist[lindex] - evap[lindex][frost_area]) 
 		 < resid_moist[lindex])
 		tmp_moist = resid_moist[lindex];
 	      
@@ -512,7 +551,7 @@ int  runoff(layer_data_struct *layer_wet,
 	      
 	      /** Update soil layer moisture content **/
 	      moist[lindex] = moist[lindex] + (inflow - dt_runoff) 
-		- (Q12[lindex] + layer[lindex].evap/(double)dt);
+		- (Q12[lindex] + evap[lindex][frost_area]);
 	      
 	      /** Verify that soil layer moisture is less than maximum **/
 	      if((moist[lindex]+ice[lindex]) > max_moist[lindex]) {
@@ -606,8 +645,7 @@ int  runoff(layer_data_struct *layer_wet,
 	    
 	    /** Extract baseflow from the bottom soil layer **/ 
 	    
-	    moist[lindex] += Q12[lindex-1] - (layer[lindex].evap/(double)dt 
-					      + dt_baseflow);
+	    moist[lindex] += Q12[lindex-1] - (evap[lindex][frost_area] + dt_baseflow);
 	    
 	    /** Check Lower Sub-Layer Moistures **/
 	    tmp_moist = 0;

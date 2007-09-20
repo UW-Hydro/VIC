@@ -979,6 +979,21 @@ Moved check for soil moisture > max to initialize_model_state.c
          moisture values that exceeded max moist to each thermal node
          in the wetland area when Cl = 0.
 
+Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
+
+         Files affected:
+
+         runoff.c
+
+         Description:
+
+         Modified to correctly handle evaporation from spatially
+         distributed soil frost.  Original version could produce
+         negative soil moisture in fractions with high ice content
+         since only total evaporation was checked versus total
+         liquid water content, not versus available liquid water
+         in each frost subsection.
+
 
 
 --------------------------------------------------------------------------------

@@ -962,6 +962,24 @@ Handling of cells missing from snowband file
             cells with no information in the snowband file, VIC issues a warning
             and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.
 
+Moved check for soil moisture > max to initialize_model_state.c
+
+         Files affected:
+
+         read_initial_model_state.c
+         initialize_model_state.c
+
+         Description:
+
+         For initializing the model state the check for soil
+         moist > max moist was moved from read_initial_model_state.c
+         to initialize_model_state.c. The check is performed on all veg types
+         even if the area fraction = 0. There was a situation with
+         EXCESS_ICE = TRUE when the model was trying to distribute
+         moisture values that exceeded max moist to each thermal node
+         in the wetland area when Cl = 0.
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

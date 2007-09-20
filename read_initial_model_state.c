@@ -69,6 +69,8 @@ void read_initial_model_state(FILE                *init_state,
   2007-05-07 Nsum and sum removed from declaration.  JCA
   2007-Aug-24  Added features for EXCESS_ICE option.  JCA
   2007-Sep-14  Fixed bug for read-in during EXCESS_ICE option.  JCA
+  2007-Sep-18 Check for soil moist exceeding max moist moved from
+                 here to initialize_model_state.  JCA
 *********************************************************************/
 {
   extern option_struct options;
@@ -99,7 +101,7 @@ void read_initial_model_state(FILE                *init_state,
   energy_bal_struct     **energy;
   veg_var_struct       ***veg_var;
   lake_var_struct        *lake_var;
-
+  
   cell    = prcp->cell;
   veg_var = prcp->veg_var;
   snow    = prcp->snow;
@@ -117,7 +119,7 @@ void read_initial_model_state(FILE                *init_state,
     fgets(tmpstr, MAXSTRING, init_state);
   }
 #endif
-
+  
   /* read cell information */
   if ( options.BINARY_STATE_FILE ) {
     fread( &tmp_cellnum, sizeof(int), 1, init_state );
@@ -128,7 +130,6 @@ void read_initial_model_state(FILE                *init_state,
   }
   else 
     fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
-  
   // Skip over unused cell information
   while ( tmp_cellnum != cellnum && !feof(init_state) ) {
     if ( options.BINARY_STATE_FILE ) {
@@ -169,7 +170,7 @@ void read_initial_model_state(FILE                *init_state,
 	    cellnum);
     nrerror(ErrStr);
   }
-
+  
   if ( tmp_Nveg != Nveg ) {
     sprintf(ErrStr,"The number of vegetation types in cell %d (%d) does not equal that defined in vegetation parameter file (%d).  Check your input files.", cellnum, tmp_Nveg, Nveg);
     nrerror(ErrStr);
@@ -178,7 +179,7 @@ void read_initial_model_state(FILE                *init_state,
     sprintf(ErrStr,"The number of snow bands in cell %d (%d) does not equal that defined in the snow band file (%d).  Check your input files.", cellnum, tmp_Nband, Nbands);
     nrerror(ErrStr);
   }
-
+  
   if ( options.LAKES ) {
     if ( lake_con.Cl[0] > 0 && extra_veg == 0 ) {
       sprintf(ErrStr,"The model state file does not list a lake for this cell, but the lake coverage given by the lake parameter file is > 0.  Check your input files.");
@@ -211,7 +212,7 @@ void read_initial_model_state(FILE                *init_state,
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
     soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
   }
-
+  
   /* Read dynamic soil properties */
 #if EXCESS_ICE
   /* Read soil depth */
@@ -221,7 +222,7 @@ void read_initial_model_state(FILE                *init_state,
     else 
       fscanf( init_state, "%lf", &soil_con->depth[lidx] );
   }
-
+  
   /* Read effective porosity */
   for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
@@ -229,17 +230,17 @@ void read_initial_model_state(FILE                *init_state,
     else 
       fscanf( init_state, "%lf", &soil_con->effective_porosity[lidx] );
   }
-
+  
   /* Reading damping depth */
   if ( options.BINARY_STATE_FILE ) 
     fread( &soil_con->dp, sizeof(double), 1, init_state );
   else 
     fscanf( init_state, "%lf", &soil_con->dp );
-#endif
-
+#endif //EXCESS_ICE
+  
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
-
+    
     // read distributed precipitation variables
     if ( options.BINARY_STATE_FILE ) {
       fread( &prcp->mu[veg], sizeof(double), 1, init_state );
@@ -251,11 +252,11 @@ void read_initial_model_state(FILE                *init_state,
 	      &init_DRY_TIME[veg] );
       init_STILL_STORM[veg] = (char)tmp_char;
     }
-
-  if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
-    Nbands = 1; // wetland veg type only occurs in band 0
-  }
-
+    
+    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
+      Nbands = 1; // wetland veg type only occurs in band 0
+    }
+    
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Skip reading if areafract <= 0 */
@@ -280,7 +281,7 @@ void read_initial_model_state(FILE                *init_state,
       
       // Read both wet and dry fractions if using distributed precipitation
       for ( dist = 0; dist < Ndist; dist ++ ) {
-
+	
 	/* Read total soil moisture */
 	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	  if ( options.BINARY_STATE_FILE ) {
@@ -293,13 +294,8 @@ void read_initial_model_state(FILE                *init_state,
 			&cell[dist][veg][band].layer[lidx].moist) == EOF ) 
 	      nrerror("End of model state file found unexpectedly");
 	  }
-	  if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
-	    // Check that soil moisture does not exceed maximum allowed
-	    fprintf( stderr, "WARNING: Maximum soil moisture exceeded in layer %d for veg type %d and snow band %d.  Value reset to maximum (%f mm).\n", lidx, veg, band, soil_con->max_moist[lidx] );
-	    cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
-	  }
 	}
-
+	
         /* Read average ice content */
         for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 #if SPATIAL_FROST
@@ -307,11 +303,11 @@ void read_initial_model_state(FILE                *init_state,
 	    if ( options.BINARY_STATE_FILE ) {
 	      if ( fread( &cell[dist][veg][band].layer[lidx].ice[frost_area],
 			  sizeof(double), 1, init_state ) != 1 )
-		  nrerror("End of model state file found unexpectedly");
+		nrerror("End of model state file found unexpectedly");
 	    }
 	    else {
 	      if ( fscanf(init_state," %lf", 
-			&cell[dist][veg][band].layer[lidx].ice[frost_area]) == EOF ) 
+			  &cell[dist][veg][band].layer[lidx].ice[frost_area]) == EOF ) 
 	        nrerror("End of model state file found unexpectedly");
 	    }
 	  }
@@ -319,7 +315,7 @@ void read_initial_model_state(FILE                *init_state,
 	  if ( options.BINARY_STATE_FILE ) {
 	    if ( fread( &cell[dist][veg][band].layer[lidx].ice, 
 			sizeof(double), 1, init_state ) != 1 )
-		nrerror("End of model state file found unexpectedly");
+	      nrerror("End of model state file found unexpectedly");
 	  }
 	  else {
 	    if ( fscanf(init_state," %lf", 
@@ -328,7 +324,7 @@ void read_initial_model_state(FILE                *init_state,
 	  }
 #endif // SPATIAL_FROST
 	}
-
+	
 	/* Read dew storage */
 	if ( veg < Nveg || ( veg == Nveg+extra_veg && extra_veg > 0 ) ) {
 	  if ( options.BINARY_STATE_FILE ) {

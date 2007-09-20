@@ -69,7 +69,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2006-Apr-21 Replaced Cv (uninitialized) with lake_con.Cl[0] in
 	      surfstor calculation.					TJB
   2007-Aug-09 Added features for EXCESS_ICE option.  JCA
-  2007-Aug-21 Return value of ErrorFlag if error in distribute_node_moisture_properties.  JCA
+  2007-Aug-21 Return value of ErrorFlag if error in
+                distribute_node_moisture_properties.  JCA
+  2007-Sep-18 Check for soil moist exceeding max moist moved from
+                 read_initial_model_state to here.  JCA
 **********************************************************************/
 {
   extern option_struct options;
@@ -247,26 +250,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
 			     Ndist, *init_STILL_STORM, *init_DRY_TIME, lake_con);
 
-    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
-      // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
 
-      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
-	for( band = 0; band < options.SNOW_BAND; band++ ) {
-	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-	      ice[veg][band][lidx][frost_area] 
-		= cell[0][veg][band].layer[lidx].ice[frost_area];
-#else
-	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
-#endif
-	  }
-	}
-      }
-    }
 
 #if EXCESS_ICE
     // calculate dynamic soil and veg properties if excess_ice is present
@@ -333,7 +317,44 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 
     }//updated initial conditions due to state file
 #endif //EXCESS_ICE
-    
+
+    /******Check that soil moisture does not exceed maximum allowed************/
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
+      for( band = 0; band < options.SNOW_BAND; band++ ) {
+	for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
+	  for ( dist = 0; dist < Ndist; dist ++ ) {
+	    if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
+	      fprintf( stderr, "WARNING: Maximum soil moisture exceeded in layer %d for veg type %d and snow band %d.  Value of %f reset to maximum (%f mm).\n", lidx, veg, band, cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx] );
+	      cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
+	    }	    
+	  }
+	}
+      }      
+    }
+
+    /****** initialize moist and ice ************/
+    for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
+      // Initialize soil for existing vegetation types
+      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
+      else Cv = (1.0 - veg_con[0].Cv_sum);
+      
+      if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
+	for( band = 0; band < options.SNOW_BAND; band++ ) {
+	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
+
+#if SPATIAL_FROST
+	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      ice[veg][band][lidx][frost_area] 
+		= cell[0][veg][band].layer[lidx].ice[frost_area];
+#else
+	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
+#endif
+	  }
+	}
+      }
+    }
+
   }
   
   /************************************************************************

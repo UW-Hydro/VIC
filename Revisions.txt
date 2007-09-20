@@ -11,6 +11,28 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+ *** Description of changes from VIC 4.1.0 beta r4bb to VIC 4.1.0 beta r4cc ** 
+--------------------------------------------------------------------------------
+
+Moved check for soil moisture > max to initialize_model_state.c
+
+         Files affected:
+
+         read_initial_model_state.c
+         initialize_model_state.c
+
+         Description:
+
+         For initializing the model state the check for soil
+         moist > max moist was moved from read_initial_model_state.c
+         to initialize_model_state.c. The check is performed on all veg types
+         even if the area fraction = 0. There was a situation with
+         EXCESS_ICE = TRUE when the model was trying to distribute
+         moisture values that exceeded max moist to each thermal node
+         in the wetland area when Cl = 0.
+
+
+--------------------------------------------------------------------------------
  *** Description of changes from VIC 4.1.0 beta r4aa to VIC 4.1.0 beta r4bb ***
 --------------------------------------------------------------------------------
 

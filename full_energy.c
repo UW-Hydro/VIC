@@ -52,6 +52,8 @@ int  full_energy(char                 NEWCELL,
                runoff function if subsidence occurs.
   2007-Sep-7 No longer resets ice content to previous time-step ice content if
                subsidence has occurred.  JCA
+  2007-09-19   Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.  JCA
+  2007-09-19   Fixed bug in subsidence calculation.  JCA
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -127,6 +129,7 @@ int  full_energy(char                 NEWCELL,
   double                 ice_layer; //mm
   double                 subsidence[MAX_LAYERS]; //mm
   double                 total_subsidence; //m
+  double                 tmp_subsidence; //mm
   double                 total_meltwater; //mm
   double                 tmp_depth, tmp_depth_prior; //m
   double                 ppt[2]; 
@@ -167,6 +170,26 @@ int  full_energy(char                 NEWCELL,
   atmos->out_prec = 0;
   atmos->out_rain = 0;
   atmos->out_snow = 0;
+
+
+  /* initialize prior moist and ice for subsidence calculations */
+#if EXCESS_ICE
+  if(options.LAKES) 
+    MaxVeg = Nveg+1;
+  else
+    MaxVeg = Nveg;
+  for(iveg = 0; iveg <= MaxVeg; iveg++){
+    for ( band = 0; band < Nbands; band++ ) {
+      for ( dist = 0; dist < Ndist; dist++ ) {
+	for(lidx=0;lidx<options.Nlayer;lidx++) {
+	  moist_prior[dist][iveg][band][lidx] = cell[dist][iveg][band].layer[lidx].moist;
+	  evap_prior[dist][iveg][band][lidx] = 0; //initialize
+	}
+      }
+    }
+  }
+#endif //EXCESS_ICE
+
 
   /**************************************************
     Solve Energy and/or Water Balance for Each
@@ -322,16 +345,6 @@ int  full_energy(char                 NEWCELL,
 	    fetch       = veg_con[0].fetch;
 	  }
 
-	  // set prior moist and ice for subsidence calculations
-#if EXCESS_ICE
-          for ( dist = 0; dist < Ndist; dist++ ) {
-            for(lidx=0;lidx<options.Nlayer;lidx++) {
-	      moist_prior[dist][iveg][band][lidx] = cell[dist][iveg][band].layer[lidx].moist;
-	      evap_prior[dist][iveg][band][lidx] = 0; //initialize
-	    }
-	  }
-#endif //EXCESS_ICE
-
 	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
 #if EXCESS_ICE
 				     SubsidenceUpdate, evap_prior[DRY][iveg][band], evap_prior[WET][iveg][band],
@@ -454,11 +467,6 @@ int  full_energy(char                 NEWCELL,
      Calculate Subsidence
   ****************************/
 #if EXCESS_ICE
-  if(options.LAKES) 
-    MaxVeg = Nveg+1;
-  else
-    MaxVeg = Nveg;
-  
   total_subsidence = 0;
   total_meltwater = 0; //for lake model only
   for(lidx=0;lidx<options.Nlayer;lidx++) {//soil layer
@@ -510,16 +518,19 @@ int  full_energy(char                 NEWCELL,
       if(ave_ice_fract <= ICE_AT_SUBSIDENCE) {
 	SubsidenceUpdate = 1;
 
-	/*calculate subsidence based on maximum ice volume*/
-	/*make slightly larger than what can contain max ice volume*/
-	tmp_depth_prior = soil_con->depth[lidx];
-	tmp_depth = 1.01*max_ice_layer/1000. + soil_con->depth[lidx]*(1.0 - soil_con->effective_porosity[lidx]);
+	/*calculate subsidence based on maximum ice content in layer*/
+	/*constrain subsidence by MAX_SUBSIDENCE*/
+	tmp_depth_prior = soil_con->depth[lidx];//m
+	tmp_subsidence = (1000.*tmp_depth_prior - max_ice_layer);//mm
+	if(tmp_subsidence > MAX_SUBSIDENCE) 
+	  tmp_subsidence = MAX_SUBSIDENCE;
+	tmp_depth = tmp_depth_prior - tmp_subsidence/1000.;//m
 	if(tmp_depth <= soil_con->min_depth[lidx])
 	  tmp_depth = soil_con->min_depth[lidx];
+	soil_con->depth[lidx] = (float)(int)(tmp_depth * 1000 + 0.5) / 1000;//m
+	subsidence[lidx] = (tmp_depth_prior - soil_con->depth[lidx])*1000.;//mm
+	total_subsidence += (tmp_depth_prior - soil_con->depth[lidx]);//m
 
-	soil_con->depth[lidx] = (float)(int)(tmp_depth * 1000 + 0.5) / 1000;	
-	subsidence[lidx] = 1000.0*(tmp_depth_prior - soil_con->depth[lidx]); //in mm
-	total_subsidence += (tmp_depth_prior - soil_con->depth[lidx]);
 	if(subsidence[lidx] > 0 ){
 #if VERBOSE
 	  fprintf(stderr,"Subsidence of %.3f m in layer %d:\n",subsidence[lidx]/1000.,lidx+1);
@@ -529,7 +540,7 @@ int  full_energy(char                 NEWCELL,
 
 	  /*update soil_con properties*/
 #if VERBOSE
-	  fprintf(stderr,"\t\tEffective porosity decreased from %.2f to %.2f.\n",soil_con->effective_porosity[lidx],1.0-(1.0-soil_con->effective_porosity[lidx])*tmp_depth_prior/soil_con->depth[lidx]);
+	  fprintf(stderr,"\t\tEffective porosity decreased from %.3f to %.3f.\n",soil_con->effective_porosity[lidx],1.0-(1.0-soil_con->effective_porosity[lidx])*tmp_depth_prior/soil_con->depth[lidx]);
 #endif
 	  soil_con->effective_porosity[lidx]=1.0-(1.0-soil_con->effective_porosity[lidx])*tmp_depth_prior/soil_con->depth[lidx];
 	  if(tmp_depth <= soil_con->min_depth[lidx])
@@ -538,7 +549,8 @@ int  full_energy(char                 NEWCELL,
 	  fprintf(stderr,"\t\tBulk density increased from %.2f kg/m^3 to %.2f kg/m^3.\n",soil_con->bulk_density[lidx],(1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]);
 #endif
 	  soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; //adjust bulk density
-	  total_meltwater += soil_con->max_moist[lidx] - soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.; //for lake model
+	  total_meltwater += soil_con->max_moist[lidx] - soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.; //for lake model (uses prior max_moist, 
+	                                                                                                                     //so must come before new max_moist calculation
 	  soil_con->max_moist[lidx] = soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.;
 	  
 	}//subsidence occurs
@@ -550,7 +562,7 @@ int  full_energy(char                 NEWCELL,
 
     /********update remaining soil_con properties**********/
 #if VERBOSE
-    fprintf(stderr,"Damping depth decreased from %.2f m to %.2f m.\n",soil_con->dp,soil_con->dp-total_subsidence);
+    fprintf(stderr,"Damping depth decreased from %.3f m to %.3f m.\n",soil_con->dp,soil_con->dp-total_subsidence);
 #endif
     soil_con->dp -= total_subsidence;  //adjust damping depth
 
@@ -598,6 +610,19 @@ int  full_energy(char                 NEWCELL,
     calc_root_fractions(veg_con, soil_con);
 
     /**********redistribute soil moisture (call runoff function)*************/
+    /* If subsidence occurs, recalculate runoff, baseflow, and soil moisture
+       using soil moisture values from previous time-step; i.e.
+       as if prior runoff call did not occur.*/
+    for(iveg = 0; iveg <= MaxVeg; iveg++){
+      for ( band = 0; band < Nbands; band++ ) {
+	for ( dist = 0; dist < Ndist; dist++ ) {
+	  for(lidx=0;lidx<options.Nlayer;lidx++) {
+	    cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
+	    cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
+	  }
+	}
+      }
+    }
     for(iveg = 0; iveg <= Nveg; iveg++){
       if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
 	  (iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
@@ -608,16 +633,6 @@ int  full_energy(char                 NEWCELL,
 	    ppt[WET]=cell[WET][iveg][band].inflow;
 	    ppt[DRY]=cell[DRY][iveg][band].inflow;
 	    
-	    /* If subsidence occurs, recalculate runoff, baseflow, and soil moisture
-	       using soil moisture values from previous time-step; i.e.
-	       as if prior runoff call did not occur.*/
-	    for ( dist = 0; dist < Ndist; dist++ ) {
-	      for(lidx=0;lidx<options.Nlayer;lidx++) {			
-		cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
-		cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
-	      }
-	    }
-
 	    ErrorFlag = runoff(cell[WET][iveg][band].layer, cell[DRY][iveg][band].layer, &(energy[iveg][band]), 
 			       soil_con, &(cell[WET][iveg][band].runoff), &(cell[DRY][iveg][band].runoff), 
 			       &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow), ppt, 

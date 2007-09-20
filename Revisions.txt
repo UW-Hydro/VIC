@@ -11,6 +11,24 @@ README.txt has more general descriptions.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+ *** Description of changes from VIC 4.1.0 beta r4Rdd to VIC 4.1.0 beta r4ee **
+--------------------------------------------------------------------------------
+
+Bug fixes in EXCESS_ICE calculations
+
+         Files affected:
+
+         full_energy.c 
+         vicNl_def.h
+
+         Description:
+
+         Added MAX_SUBSIDENCE parameter to EXCESS_ICE option. 
+         Fixed bug in subsidence calculation. 
+
+
+
+--------------------------------------------------------------------------------
  *** Description of changes from VIC 4.1.0 beta r4cc to VIC 4.1.0 beta r4dd **
 --------------------------------------------------------------------------------
 

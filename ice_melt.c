@@ -102,7 +102,10 @@ static char vcid[] = "$Id$";
   2006-Nov-07 Removed LAKE_MODEL option. TJB
   2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.
               GCT/KAC. 
-  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.
+            JCA
+  2007-Sep-25 Return ERROR instead of exiting, if ice_melt could not converge to
+            a solution in root_brent.  JCA
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -650,8 +653,7 @@ double ErrorPrintIcePackEnergyBalance(double TSurf, va_list ap)
   fprintf(stderr,"LWnet = %f\n",*LWnet);
   
   fprintf(stderr,"Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
-  exit(0);
 
-  return(0.0);
+  return(ERROR);
 
 }

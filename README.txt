@@ -1007,6 +1007,16 @@ Bug fixes in EXCESS_ICE calculations
          Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.
          Fixed bug in subsidence calculation.
 
+Return ERROR instead of exiting in ice_melt.c module
+
+         Files affected:
+
+         ice_melt.c
+
+         Description:
+
+         Return ERROR instead of exiting, if ice_melt could not converge to
+         a solution in root_brent.
 
 
 --------------------------------------------------------------------------------

@@ -848,7 +848,7 @@ Bug fix for previous bug fix to dt_baseflow calculation.
            into account in the linear part of the baseflow eqn,
            but not in the non-linear part.  Now we take residual
            moisture into account correctly throughout the whole
-           equation.
+           equation.  TJB
 
 Sub-daily snow step for 24h wb mode not aggregating correctly
 
@@ -868,7 +868,7 @@ Sub-daily snow step for 24h wb mode not aggregating correctly
            creating distinct data structures to store results for 
            iterations (iter_*) and steps (step_*).  In addition,
            the units of snow melt were corrected to
-           be consistent (mm) across functions.
+           be consistent (mm) across functions.  TJB
 
 Moved Implicit error counting above call for solve_T_profile.
 
@@ -912,7 +912,7 @@ Trap cases of T-errors matching variable ERROR for root_brent.
             ERROR if there is a problem. Because of this change, all of the
             routines that call root_brent had to be changed since they checked
             against an error of -9998 - now they check for
-            values less than -998, since ERROR = -999.
+            values less than -998, since ERROR = -999.  JCA
 
 Trap cases of negative soil moisture.
 
@@ -921,7 +921,7 @@ Trap cases of negative soil moisture.
             full_energy.c
 
             No longer resets ice content to previous time-step ice content if
-            subsidence has occurred.
+            subsidence has occurred.  JCA
 
 Fixed bug for read-in during EXCESS_ICE option.
 
@@ -929,7 +929,7 @@ Fixed bug for read-in during EXCESS_ICE option.
 
             read_initial_model_state.c
 
-            Fixed bug for read-in during EXCESS_ICE option.
+            Fixed bug for read-in during EXCESS_ICE option.  JCA
 
 Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
@@ -946,7 +946,7 @@ Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
             Memory errors would occur when ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE.
             In addition, the output files would not contain sufficient contents due
-            to not closing properly.  These have been fixed.
+            to not closing properly.  These have been fixed.  TJB
 
 
 Handling of cells missing from snowband file
@@ -960,7 +960,7 @@ Handling of cells missing from snowband file
             Previously, if SNOW_BAND = TRUE and a particular cell was not listed
             in the snowband file, VIC would abort.  Now, when VIC encounters
             cells with no information in the snowband file, VIC issues a warning
-            and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.
+            and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.  KAC via TJB
 
 Moved check for soil moisture > max to initialize_model_state.c
 
@@ -977,7 +977,7 @@ Moved check for soil moisture > max to initialize_model_state.c
          even if the area fraction = 0. There was a situation with
          EXCESS_ICE = TRUE when the model was trying to distribute
          moisture values that exceeded max moist to each thermal node
-         in the wetland area when Cl = 0.
+         in the wetland area when Cl = 0.  JCA
 
 Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
 
@@ -992,7 +992,7 @@ Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
          negative soil moisture in fractions with high ice content
          since only total evaporation was checked versus total
          liquid water content, not versus available liquid water
-         in each frost subsection.
+         in each frost subsection.  KAC via TJB
 
 
 Bug fixes in EXCESS_ICE calculations
@@ -1005,7 +1005,7 @@ Bug fixes in EXCESS_ICE calculations
          Description:
 
          Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.
-         Fixed bug in subsidence calculation.
+         Fixed bug in subsidence calculation.  JCA
 
 Return ERROR instead of exiting in ice_melt.c module
 
@@ -1016,7 +1016,26 @@ Return ERROR instead of exiting in ice_melt.c module
          Description:
 
          Return ERROR instead of exiting, if ice_melt could not converge to
-         a solution in root_brent.
+         a solution in root_brent.  JCA
+
+
+Force runoff() to use user-specified resid_moist
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Removed logic that reset resid_moist[i].  Previously,
+	resid_moist[i] was reset to 0 for i > 0 when
+	resid_moist[0] == 0.  Such resetting of soil properties
+	was deemed unnecessary and confusing, since VIC would end
+	up using different residual moisture values than those
+	specified by the user.  If a user truly wants to specify
+	residual moisture in all layers to be 0, the user should
+	set these explicitly in the soil parameter file.  Also
+	fixed typo in fprintf() on line 289.  TJB
 
 
 --------------------------------------------------------------------------------

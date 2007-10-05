@@ -75,6 +75,15 @@ void runoff(layer_data_struct *layer_wet,
 	      but not in the non-linear part.  Now we take residual
 	      moisture into account correctly throughout the whole
 	      equation.  Also re-wrote equation in simpler form.	TJB
+  2007-Sep-20 Removed logic that reset resid_moist[i].  Previously,
+	      resid_moist[i] was reset to 0 for i > 0 when
+	      resid_moist[0] == 0.  Such resetting of soil properties
+	      was deemed unnecessary and confusing, since VIC would end
+	      up using different residual moisture values than those
+	      specified by the user.  If a user truly wants to specify
+	      residual moisture in all layers to be 0, the user should
+	      set these explicitly in the soil parameter file.		TJB
+
 **********************************************************************/
 {  
   extern option_struct options;
@@ -131,10 +140,8 @@ void runoff(layer_data_struct *layer_wet,
   layer_data_struct  tmp_layer;
 
   /** Set Residual Moisture **/
-  if(soil_con->resid_moist[0] > SMALL)
-    for(i=0;i<options.Nlayer;i++) resid_moist[i] = soil_con->resid_moist[i]
-                                    * soil_con->depth[i] * 1000.;
-  else for(i=0;i<options.Nlayer;i++) resid_moist[i] = 0.;
+  for(i=0;i<options.Nlayer;i++)
+    resid_moist[i] = soil_con->resid_moist[i] * soil_con->depth[i] * 1000.;
 
   /** Initialize Other Parameters **/
   if(options.DIST_PRCP) Ndist = 2;

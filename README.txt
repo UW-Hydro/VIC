@@ -222,7 +222,6 @@ Flexible output configuration
 	  year month day (hour) swe[0] swe[1] albedo[0] albedo[1]
 
 
-
 ALMA-compliant input and output
 
 	Files affected:
@@ -329,7 +328,6 @@ Aggregation of output variables
 	time steps.
 
 
-
 Cleanup of structures holding filenames and file pointers
 
 	Files affected:
@@ -400,6 +398,7 @@ Atmos_data arrays are always allocated dynamically now.
         value).  This wasted memory and has been abandoned.  Now, the
         arrays in atmos_data are always allocated dynamically to be only
         big enough to store exactly the number of necessary elements.
+
 
 Optional headers for output and input files
 
@@ -476,7 +475,6 @@ Optional headers for output and input files
         follow the formats outlined above.
 
 
-
 Variable TYPE specifications for binary-format output files in the global parameter
 file must match the strings listed in vicNl_def.h.
 
@@ -489,44 +487,6 @@ file must match the strings listed in vicNl_def.h.
         When listing output variables in the global parameter file, if the
         output file format is binary, the variable data TYPE must match the string
         from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
-
-
-Bug Fixes:
-----------
-
-Aerodynamic resistance incorrect in output fluxes file
-
-        Files affected:
-        SnowPackEnergyBalance.c, calc_surf_energy_bal.c, full_energy.c,
-        put_data.c, snow_intercept.c, snow_melt.c, solve_snow.c,
-        surface_fluxes.c, vicNl.h, vicNl_def.h
-
-        Description:
-        In 4.0.5 and earlier, the aerodynamic resistance written to the output
-        fluxes file rarely reflected the value actually used in flux computations.
-        This has been fixed.
-
-        VIC actually computes an array of 3 different aerodynamic resistances,
-        as follows:
-          aero_resist[0] : over vegetation or bare soil
-          aero_resist[1] : over snow-filled overstory
-          aero_resist[2] : over snow pack
-        VIC determines which element of the array to use depending on the current
-        vegetation type and whether snow is present.  In addition, in most cases,
-        VIC applies a stability correction to this aerodynamic resistance before
-        using it in flux computations.  Furthermore, when the current vegetation
-        tile contains overstory and snow is present on the ground, aero_resist[2]
-        is used for snow pack flux computations and either aero_resist[1] or
-        aero_resist[0] is used for canopy flux computations, meaning that two
-        different aerodynamic resistances are in use in the same time step.
-
-        However, VIC 4.0.5 always wrote the uncorrected value of aero_resist[0]
-        to the fluxes file.
-
-        In 4.0.6, the value written to the fluxes file is the actual value used
-        in flux computations, including any corrections that were applied.  In
-        the case mentioned above in which two different aerodynamic resistances
-        are in use at the same time, the one used for the snow pack is written.
 
 
 State file is now written at the END of the final timestep of the date indicated
@@ -553,6 +513,7 @@ in the global parameter file.
         a forcing file that begins immediately after the previous forcing file
         ended, since the state file now is equivalent to the initial condition at
         the beginning of the new forcing file.
+
 
 STATE file option is now specified in global file, not in user_def.h at compile time
 
@@ -608,89 +569,43 @@ STATE file option is now specified in global file, not in user_def.h at compile 
         will not save a state file.  If some (but not all) of these
         lines are present, VIC will give an error.
 
-Skipping deactivated cells in binary state file
+
+Bug Fixes:
+----------
+
+Aerodynamic resistance incorrect in output fluxes file
 
         Files affected:
-        write_model_state.c
-        
-        (Port from 4.1.0) Changed calculation of Nbytes in binary
-        state file to account for bare soil values (extra veg class
-        per grid cell). Without this fix, attempts to skip grid cells
-        fail.  GCT
+        SnowPackEnergyBalance.c, calc_surf_energy_bal.c, full_energy.c,
+        put_data.c, snow_intercept.c, snow_melt.c, solve_snow.c,
+        surface_fluxes.c, vicNl.h, vicNl_def.h
 
-Fix reading/writing of state files when QUICK_FLUX is TRUE
+        Description:
+        In 4.0.5 and earlier, the aerodynamic resistance written to the output
+        fluxes file rarely reflected the value actually used in flux computations.
+        This has been fixed.
 
-        Files affected:
+        VIC actually computes an array of 3 different aerodynamic resistances,
+        as follows:
+          aero_resist[0] : over vegetation or bare soil
+          aero_resist[1] : over snow-filled overstory
+          aero_resist[2] : over snow pack
+        VIC determines which element of the array to use depending on the current
+        vegetation type and whether snow is present.  In addition, in most cases,
+        VIC applies a stability correction to this aerodynamic resistance before
+        using it in flux computations.  Furthermore, when the current vegetation
+        tile contains overstory and snow is present on the ground, aero_resist[2]
+        is used for snow pack flux computations and either aero_resist[1] or
+        aero_resist[0] is used for canopy flux computations, meaning that two
+        different aerodynamic resistances are in use in the same time step.
 
-        get_global_param.c
-        make_dist_prcp.c
-        make_energy_bal.c
-        vicNl.c
-        vicNl.h
+        However, VIC 4.0.5 always wrote the uncorrected value of aero_resist[0]
+        to the fluxes file.
 
-        In previous releases, if QUICK_FLUX=TRUE, the number of soil
-        thermal nodes is changed after being recorded in the state
-        file.  The resulting mismatch between Nnodes in the state
-        file header and the actual number of node temperatures
-        recorded in the state file prevents VIC from being able to
-        read the state file.  This has been fixed.  GCT
-
-Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
-
-        Files affected:
-        get_global_param.c, open_state_file.c
-
-        Previously, the checks for matches would occur in get_global_param even
-        though the SAVE_STATE filename wasn't created until open_state_file.
-        The output name setting was moved from open_state_file to get_global_param. GCT
-
-Added checks for range/valid month days
-
-        Files affected:
-        get_global_param.c
-
-        In previous versions the user could set a non-valid date for STATE files
-        and the model would run without writing to STATE file. Code now checks
-        for valid date.
-
-Replace %i with %d in scanf statements.
-
-        Files affected:
-        check_state_file.c
-        get_global_param.c
-        read_arcinfo_ascii.c
-        read_initial_model_state.c
-        read_snowband.c
-        read_soilparam.c,
-        read_veglib.c
-
-        Having %i in fscanf statements was causing input values of
-        "08" to be interpreted as octal rather than decimal.  These
-        instances of %i have been replaced with %d.
-
-ARNO_PARAMS global parameter option changed to BASEFLOW
-
-        Files affected:
-        display_current_settings.c
-        get_global_param.c
-        global.param.sample
-        initialize_global.c
-        read_soilparam.c
-        read_soilparam_arc.c
-        vicNl_def.h
-
-        Changed the name of the ARNO_PARAMS global parameter option to
-        BASEFLOW.  The meaning of the ARNO_PARAMS option was actually
-        opposite to its name: when ARNO_PARAMS was FALSE, VIC would
-        interpret the first four parameters in the soil parameter file
-        to be the standard ARNO soil parameters Ds, Dsmax, Ws, and c,
-        while when ARNO_PARAMS was TRUE, VIC would interpret the first
-        four parameters to be d1, d2, d3, and d4, the soil parameters
-        used in Nijssen et al. (2001).  The new option now can take
-        values of "ARNO" and "NIJSSEN2001".  When BASEFLOW == NIJSSEN2001,
-        VIC assumes the soil parameter file contains d1, d2, d3, and d4.
-        When BASEFLOW == ARNO, VIC assumes the soil parameter file
-        contains Ds, Dsmax, Ws, and c.
+        In 4.0.6, the value written to the fluxes file is the actual value used
+        in flux computations, including any corrections that were applied.  In
+        the case mentioned above in which two different aerodynamic resistances
+        are in use at the same time, the one used for the snow pack is written.
 
 
 Aerodynamic resistance not correctly aggregated for output
@@ -718,6 +633,97 @@ Aerodynamic resistance not correctly aggregated for output
         aerodynamic resistance will never be smaller than the smallest
         value among the various veg tiles in the cell.
 
+
+Skipping deactivated cells in binary state file
+
+        Files affected:
+        write_model_state.c
+        
+        (Port from 4.1.0) Changed calculation of Nbytes in binary
+        state file to account for bare soil values (extra veg class
+        per grid cell). Without this fix, attempts to skip grid cells
+        fail.  GCT
+
+
+Fix reading/writing of state files when QUICK_FLUX is TRUE
+
+        Files affected:
+
+        get_global_param.c
+        make_dist_prcp.c
+        make_energy_bal.c
+        vicNl.c
+        vicNl.h
+
+        In previous releases, if QUICK_FLUX=TRUE, the number of soil
+        thermal nodes is changed after being recorded in the state
+        file.  The resulting mismatch between Nnodes in the state
+        file header and the actual number of node temperatures
+        recorded in the state file prevents VIC from being able to
+        read the state file.  This has been fixed.  GCT
+
+
+Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
+
+        Files affected:
+        get_global_param.c, open_state_file.c
+
+        Previously, the checks for matches would occur in get_global_param even
+        though the SAVE_STATE filename wasn't created until open_state_file.
+        The output name setting was moved from open_state_file to get_global_param. GCT
+
+
+Added checks for range/valid month days
+
+        Files affected:
+        get_global_param.c
+
+        In previous versions the user could set a non-valid date for STATE files
+        and the model would run without writing to STATE file. Code now checks
+        for valid date.
+
+
+Replace %i with %d in scanf statements.
+
+        Files affected:
+        check_state_file.c
+        get_global_param.c
+        read_arcinfo_ascii.c
+        read_initial_model_state.c
+        read_snowband.c
+        read_soilparam.c,
+        read_veglib.c
+
+        Having %i in fscanf statements was causing input values of
+        "08" to be interpreted as octal rather than decimal.  These
+        instances of %i have been replaced with %d.
+
+
+ARNO_PARAMS global parameter option changed to BASEFLOW
+
+        Files affected:
+        display_current_settings.c
+        get_global_param.c
+        global.param.sample
+        initialize_global.c
+        read_soilparam.c
+        read_soilparam_arc.c
+        vicNl_def.h
+
+        Changed the name of the ARNO_PARAMS global parameter option to
+        BASEFLOW.  The meaning of the ARNO_PARAMS option was actually
+        opposite to its name: when ARNO_PARAMS was FALSE, VIC would
+        interpret the first four parameters in the soil parameter file
+        to be the standard ARNO soil parameters Ds, Dsmax, Ws, and c,
+        while when ARNO_PARAMS was TRUE, VIC would interpret the first
+        four parameters to be d1, d2, d3, and d4, the soil parameters
+        used in Nijssen et al. (2001).  The new option now can take
+        values of "ARNO" and "NIJSSEN2001".  When BASEFLOW == NIJSSEN2001,
+        VIC assumes the soil parameter file contains d1, d2, d3, and d4.
+        When BASEFLOW == ARNO, VIC assumes the soil parameter file
+        contains Ds, Dsmax, Ws, and c.
+
+
 Allow NO_FLUX in addition to NOFLUX in global.param.file
 
         Files affected:
@@ -727,6 +733,7 @@ Allow NO_FLUX in addition to NOFLUX in global.param.file
         inconsistent with other FLUX options. The change will allow users to
         enter either string.
 
+
 Skip reading/writing of snow band for areafract <= 0 
 
         Files affected:
@@ -734,6 +741,7 @@ Skip reading/writing of snow band for areafract <= 0
         write_model_state.c
 
         This will reduce the size of the statefile.
+
 
 Changed argument order in fread, fwrite statements.
 
@@ -748,6 +756,7 @@ Changed argument order in fread, fwrite statements.
 
         Statements had arguments with ...1, sizeof()....Those were changed to
         ...sizeof(), 1, ...GCT
+
 
 OUTPUT_FORCE option does not close output files properly
 
@@ -832,6 +841,7 @@ If() statements in get_force_type() fail for some global parameter files
         have SIGNED or MULTIPLIER fields) vs. BINARY, we have removed
         the if() statements altogether.
 
+
 Aggregation methods of some variables not set properly.
 
         Files affected:
@@ -843,6 +853,7 @@ Aggregation methods of some variables not set properly.
         Corrected AGG_TYPE definitions for miscellaneous
         output variables; re-organized the code to make
         it easier to debug.
+
 
 Fixes for memory leaks and variable initialization.
 
@@ -865,31 +876,49 @@ Fixes for memory leaks and variable initialization.
 
 Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
-            Files Affected:
+	Files Affected:
 
-            get_force_type.c
-            get_global_param.c
-            initialize_global.c
-            read_soilparam.c
-            read_soilparam_arc.c
-            vicNl.c
+	get_force_type.c
+	get_global_param.c
+	initialize_global.c
+	read_soilparam.c
+	read_soilparam_arc.c
+	vicNl.c
 
-            Description:
+	Description:
 
-            Memory errors would occur when ARC_SOIL=TRUE and
-            OUTPUT_FORCE=TRUE.
-            In addition, the output files would not contain sufficient
-            contents due to not closing properly.
+	Memory errors would occur when ARC_SOIL=TRUE and
+	OUTPUT_FORCE=TRUE.
+	In addition, the output files would not contain sufficient
+	contents due to not closing properly.
+
 
 Fixed fread checks
 
-            Files affected:
+	Files affected:
 
-            read_initial_model_state.c
+	read_initial_model_state.c
 
-            Fixed fread checks to make sure correct number of items were read
-            in rather than the size of the item read in.  JCA
-            (port from 4.1.0_r4 GCT)
+	Fixed fread checks to make sure correct number of items were read
+	in rather than the size of the item read in.  JCA
+	(port from 4.1.0_r4 GCT)
+
+
+Bug fix for previous bug fix to dt_baseflow calculation.
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Fixed bug arising from earlier fix to dt_baseflow
+	calculation.  Earlier fix took residual moisture
+	into account in the linear part of the baseflow eqn,
+	but not in the non-linear part.  Now we take residual
+	moisture into account correctly throughout the whole
+	equation.
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

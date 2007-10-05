@@ -58,18 +58,23 @@ void runoff(layer_data_struct *layer_wet,
     01-24-00    simplified handling of soil moisture for the
                 frozen soil algorithm.  all option selection
 		now use the same soil moisture transport method   KAC
-    06-Sep-03   Changed calculation of dt_baseflow to go to zero when
-                soil liquid moisture <= residual moisture.  Changed
-                block that handles case of total soil moisture < residual
-                moisture to not allow dt_baseflow to go negative.  TJB
-    17-May-04	Changed block that handles baseflow when soil moisture
-		drops below residual moisture.  Now, the block is only
-		entered if baseflow > 0 and soil moisture < residual,
-		and the amount of water taken out of baseflow and given
-		to the soil cannot exceed baseflow.  In addition, error
-		messages are no longer printed, since it isn't an error
-		to be in that block.				TJB
-
+    06-Sep-03 Changed calculation of dt_baseflow to go to zero when
+	      soil liquid moisture <= residual moisture.  Changed
+	      block that handles case of total soil moisture < residual
+	      moisture to not allow dt_baseflow to go negative.		TJB
+    17-May-04 Changed block that handles baseflow when soil moisture
+	      drops below residual moisture.  Now, the block is only
+	      entered if baseflow > 0 and soil moisture < residual,
+	      and the amount of water taken out of baseflow and given
+	      to the soil cannot exceed baseflow.  In addition, error
+	      messages are no longer printed, since it isn't an error
+	      to be in that block.					TJB
+  2007-Jun-13 Fixed bug arising from earlier fix to dt_baseflow
+	      calculation.  Earlier fix took residual moisture
+	      into account in the linear part of the baseflow eqn,
+	      but not in the non-linear part.  Now we take residual
+	      moisture into account correctly throughout the whole
+	      equation.  Also re-wrote equation in simpler form.	TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -116,6 +121,7 @@ void runoff(layer_data_struct *layer_wet,
   double            *baseflow;
   double             tmp_mu;
   double             dt_baseflow;
+  double             rel_moist;
 #if LOW_RES_MOIST
   double             b[MAX_LAYERS];
   double             matric[MAX_LAYERS];
@@ -125,9 +131,9 @@ void runoff(layer_data_struct *layer_wet,
   layer_data_struct  tmp_layer;
 
   /** Set Residual Moisture **/
-  if(soil_con->resid_moist[0] > SMALL) 
-    for(i=0;i<options.Nlayer;i++) resid_moist[i] = soil_con->resid_moist[i] 
-				    * soil_con->depth[i] * 1000.;
+  if(soil_con->resid_moist[0] > SMALL)
+    for(i=0;i<options.Nlayer;i++) resid_moist[i] = soil_con->resid_moist[i]
+                                    * soil_con->depth[i] * 1000.;
   else for(i=0;i<options.Nlayer;i++) resid_moist[i] = 0.;
 
   /** Initialize Other Parameters **/
@@ -411,14 +417,16 @@ void runoff(layer_data_struct *layer_wet,
 	}
 #endif
       
-	frac = soil_con->Ds * Dsmax 
-	  / (soil_con->Ws * soil_con->max_moist[lindex]);
-	dt_baseflow = frac * ( moist[lindex] - resid_moist[lindex] );
-	if (moist[lindex] > soil_con->Ws * soil_con->max_moist[lindex]) {
-	  frac = (moist[lindex] - soil_con->Ws * soil_con->max_moist[lindex]) 
-	    / (soil_con->max_moist[lindex] - soil_con->Ws 
-	       * soil_con->max_moist[lindex]);
-	  dt_baseflow += (Dsmax - soil_con->Ds * Dsmax / soil_con->Ws) 
+	/** Compute relative moisture **/
+	rel_moist = (moist[lindex]-resid_moist[lindex])
+	  / (soil_con->max_moist[lindex]-resid_moist[lindex]);
+
+	/** Compute baseflow as function of relative moisture **/
+	frac = Dsmax * soil_con->Ds / soil_con->Ws;
+	dt_baseflow = frac * rel_moist;
+	if (rel_moist > soil_con->Ws) {
+	  frac = (rel_moist - soil_con->Ws) / (1 - soil_con->Ws);
+	  dt_baseflow += Dsmax * (1 - soil_con->Ds / soil_con->Ws)
 	    * pow(frac,soil_con->c);
 	}
 

@@ -9,17 +9,16 @@ double soil_thermal_eqn(double T, va_list ap) {
  /******************************************************************
   Modifications:
 
-  Apr 24, 2007: Added EXP_TRANS option.  JCA
-           (therefore fprime removed)
+  Apr 24, 2007: Added EXP_TRANS option.						JCA
+                (therefore fprime removed)
   Apr 24, 2007: Rearranged terms in finite-difference heat equation (equation 8
                 of Cherkauer et al. (1999)).  see note in solve_T_profile.
                 This affects the equation for value.  (also see below for 
-                the physical meaning of each of the terms)  JCA
+                the physical meaning of each of the terms).			JCA
   Apr 24, 2007: Added patch for the "cold nose" problem using the EXPLICIT  
-                option. (see comments on this in fda_heat_eqn in frozen_soil.c)
-                JCA
-  Aug 8, 2007: Added EXCESS_ICE option.  JCA
-
+                option. (see comments on this in fda_heat_eqn in frozen_soil.c)	JCA
+  Aug 08, 2007: Added EXCESS_ICE option.					JCA
+  Oct 08, 2007: Fixed error in EXP_TRANS formulation.				JCA
   ******************************************************************/
 
 
@@ -106,8 +105,8 @@ double soil_thermal_eqn(double T, va_list ap) {
   /* for EXP_TRANS, this constant is 4*deltat*Bexp^2*(Zsum[node]+1)^2 */
 
   if(!EXP_TRANS) {
-    //value = -A*(T-T0) + B*(TL-TU) + C*(TL-T) - D*(T-TU) + E*(ice-ice0);  //new formulation
-    value = -A*(T-T0) + B*(TL-TU) + C*(TL+TU-2*T) - D*(TL-TU) + E*(ice-ice0);  //old formulation
+    value = -A*(T-T0) + B*(TL-TU) + C*(TL-T) - D*(T-TU) + E*(ice-ice0);  //new formulation
+    //value = -A*(T-T0) + B*(TL-TU) + C*(TL+TU-2*T) - D*(TL-TU) + E*(ice-ice0);  //old formulation
 
     //inelegant fix for "cold nose" problem - when a very cold node skates off to
     //much colder and breaks the second law of thermodynamics (because
@@ -119,7 +118,7 @@ double soil_thermal_eqn(double T, va_list ap) {
       if(fabs(TL-TU)>5. && (T<TL && T<TU)){  //cold nose
 	if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 	  //set flux_term1 equal to zero
-	  //value = -A*(T-T0) + C*(TL-T) - D*(T-TU) + E*(ice-ice0); 
+	  value = -A*(T-T0) + C*(TL-T) - D*(T-TU) + E*(ice-ice0); //new formulation
 	}
       }
     }

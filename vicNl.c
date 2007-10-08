@@ -60,6 +60,9 @@ int main(int argc, char *argv[])
   2007-Sep-14 Excluded calls to free_veglib() and closing of parameter
 	      files other than the soil param file for the case
 	      when OUTPUT_FORCE=TRUE.				TJB
+  2007-Oct-08 Fixed typo in call to check_state_file().  Was assigning
+	      init_state file pointer to filep.statefile; now assigns
+	      pointer to filep.init_state.			TJB
 
 **********************************************************************/
 {
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
   startrec = 0;
 #if !OUTPUT_FORCE
   if ( options.INIT_STATE ) 
-    filep.statefile = check_state_file(filenames.init_state, dmy, 
+    filep.init_state = check_state_file(filenames.init_state, dmy, 
 					 &global_param, options.Nlayer, 
 					 options.Nnode, &startrec);
 

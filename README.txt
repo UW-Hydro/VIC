@@ -942,6 +942,19 @@ Removed logic that reset resid_moist[i].
 	set these explicitly in the soil parameter file.  TJB
 
 
+Seg fault when trying to read initial state file
+
+	Files Affected:
+
+	vicNl.c
+
+	Description:
+
+	Fixed typo in call to check_state_file().  Was assigning
+	init_state file pointer to filep.statefile; now assigns
+	pointer to filep.init_state.		TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

@@ -1038,6 +1038,18 @@ Force runoff() to use user-specified resid_moist
 	fixed typo in fprintf() on line 289.  TJB
 
 
+Fixed error in EXP_TRANS formulation
+
+	Files Affected:
+
+	frozen_soil.c
+	soil_thermal_eqn.c
+
+	Description:
+
+	Fixed error in EXP_TRANS formulation.			JCA
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

@@ -81,14 +81,14 @@
 /***** If TRUE VIC uses a uniform distribution function to simulate
        the spatial distribution of soil frost, if FALSE VIC assumes
        that the entire grid cell is frozen uniformly *****/
-#define SPATIAL_FROST TRUE
+#define SPATIAL_FROST FALSE
 #define FROST_SUBAREAS 10
 
 /***** If TRUE VIC uses a uniform distribution to simulate the partial
        coverage of the surface by a thin snowpack.  Coverage is 
        assumed to be uniform after snowfall until the pack begins to 
        melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
-#define SPATIAL_SNOW TRUE
+#define SPATIAL_SNOW FALSE
 
 /***** If TRUE VIC allows for excess ground ice, i.e. an expanded porosity
        to account for an initial volumetric ice fraction larger than

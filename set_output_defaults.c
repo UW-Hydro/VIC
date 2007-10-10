@@ -14,7 +14,10 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 
   Modifications:
   2006-Oct-10 Shortened the names of output variables whose names were
-              too long.  TJB
+              too long.							TJB
+  2007-Oct-09 Updated to reflect variables present in traditional 4.1.0
+	      output files.  Previously the defaults matched the traditional
+	      4.0.6 output files.					TJB
 
 *************************************************************/
 
@@ -62,23 +65,23 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   filenum = 0;
   strcpy(out_data_files[filenum].prefix,"fluxes");
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-    out_data_files[filenum].nvars = 20;
+    out_data_files[filenum].nvars = 26;
   }
   else {
-    out_data_files[filenum].nvars = 16;
+    out_data_files[filenum].nvars = 20;
   }
   filenum++;
   strcpy(out_data_files[filenum].prefix,"snow");
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-    out_data_files[filenum].nvars = 7;
+    out_data_files[filenum].nvars = 14;
   }
   else {
-    out_data_files[filenum].nvars = 3;
+    out_data_files[filenum].nvars = 4;
   }
   if (options.FROZEN_SOIL) {
     filenum++;
     strcpy(out_data_files[filenum].prefix,"fdepth");
-    out_data_files[filenum].nvars = 3;
+    out_data_files[filenum].nvars = 4;
   }
   if (options.PRT_SNOW_BAND) {
     filenum++;
@@ -124,10 +127,16 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SENSIBLE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GRND_FLUX", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTAH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_FUSION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_AERO_RESIST", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ALBEDO", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_REL_HUMID", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IN_LONG", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_AIR_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_WIND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     
   // Variables in second file
   filenum++;
@@ -135,11 +144,18 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_CANOPY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_COVER", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   if (options.FULL_ENERGY || options.FROZEN_SOIL)  {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_FLUX", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_RFRZ_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_MELT_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADV_SENS", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LATENT_SUB", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_PACK_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
 
   // Variables in other files
@@ -149,6 +165,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_FDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_TDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SOIL_MOIST", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SURF_FROST_FRAC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
   if (options.PRT_SNOW_BAND) {
     filenum++;

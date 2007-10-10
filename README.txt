@@ -1050,6 +1050,20 @@ Fixed error in EXP_TRANS formulation
 	Fixed error in EXP_TRANS formulation.			JCA
 
 
+Updated default output file variable lists to match traditional 4.1.0
+output files
+
+	Files Affected:
+
+	set_output_defaults.c
+
+	Description:
+
+	Updated to reflect variables present in traditional 4.1.0
+	output files.  Previously the defaults matched the traditional
+	4.0.6 output files.					TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

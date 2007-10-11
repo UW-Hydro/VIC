@@ -61,6 +61,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-23 Added initialization of some global parameters.		TJB
   2007-Sep-14 Added initialization of names->soil_dir.			TJB
+  2007-Oct-10 Added validation of dt, start date, end date, and nrecs.	TJB
 
 **********************************************************************/
 {
@@ -106,7 +107,6 @@ global_param_struct get_global_param(filenames_struct      *names,
 
   /** Initialize global parameters (that aren't part of the options struct) **/
   global.dt            = MISSING;
-  global.nrecs         = MISSING;
   global.startyear     = MISSING;
   global.startmonth    = MISSING;
   global.startday      = MISSING;
@@ -114,6 +114,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   global.endyear       = MISSING;
   global.endmonth      = MISSING;
   global.endday        = MISSING;
+  global.nrecs         = MISSING;
   global.resolution    = MISSING;
   global.MAX_SNOW_TEMP = 0;
   global.MIN_RAIN_TEMP = 0;
@@ -181,6 +182,9 @@ global_param_struct get_global_param(filenames_struct      *names,
       else if(strcasecmp("ENDDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.endday);
       }
+      else if(strcasecmp("NRECS",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.nrecs);
+      }
       else if(strcasecmp("SKIPYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.skipyear);
       }
@@ -195,9 +199,6 @@ global_param_struct get_global_param(filenames_struct      *names,
       }
       else if(strcasecmp("FORCEHOUR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.forcehour[file_num]);
-      }
-      else if(strcasecmp("NRECS",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.nrecs);
       }
       else if(strcasecmp("WIND_H",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&global.wind_h);
@@ -525,9 +526,76 @@ global_param_struct get_global_param(filenames_struct      *names,
   /******************************************
     Check for undefined required parameters
   ******************************************/
-  if ( strcmp ( names->f_path_pfx[0], "FALSE" ) == 0 )
-    nrerror("No forcing file has been defined, make sure that the global files defines FORCING1.");
 
+  // Model time step
+  if (global.dt == MISSING)
+    nrerror("Model time step has not been defined.  Make sure that the global file defines TIME_STEP.");
+  else if (global.dt < 1) {
+    sprintf(ErrStr,"The specified model time step (%d) < 1 hour.  Make sure that the global file defines a positive number of hours for TIME_STEP.",global.dt);
+    nrerror(ErrStr);
+  }
+
+  // Simulation start date
+  if (global.startyear == MISSING)
+    nrerror("Simulation start year has not been defined.  Make sure that the global file defines STARTYEAR.");
+  else if (global.startyear < 0) {
+    sprintf(ErrStr,"The specified simulation start year (%d) < 0.  Make sure that the global file defines a positive integer for STARTYEAR.",global.startyear);
+    nrerror(ErrStr);
+  }
+  if (global.startmonth == MISSING)
+    nrerror("Simulation start month has not been defined.  Make sure that the global file defines STARTMONTH.");
+  else if (global.startmonth < 0) {
+    sprintf(ErrStr,"The specified simulation start month (%d) < 0.  Make sure that the global file defines a positive integer for STARTMONTH.",global.startmonth);
+    nrerror(ErrStr);
+  }
+  if (global.startday == MISSING)
+    nrerror("Simulation start day has not been defined.  Make sure that the global file defines STARTDAY.");
+  else if (global.startday < 0) {
+    sprintf(ErrStr,"The specified simulation start day (%d) < 0.  Make sure that the global file defines a positive integer for STARTDAY.",global.startday);
+    nrerror(ErrStr);
+  }
+  if (global.starthour == MISSING) {
+    if (global.dt == 24)
+      global.starthour = 0;
+    else
+      nrerror("Simulation start hour has not been defined, yet model time step is less than 24 hours.  Make sure that the global file defines STARTHOUR.");
+  }
+  else if (global.starthour < 0) {
+    sprintf(ErrStr,"The specified simulation start hour (%d) < 0.  Make sure that the global file defines a positive integer for STARTHOUR.",global.starthour);
+    nrerror(ErrStr);
+  }
+
+  // Simulation end date and/or number of timesteps
+  if (global.nrecs == MISSING && global.endyear == MISSING && global.endmonth == MISSING && global.endday == MISSING)
+    nrerror("The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
+  else if (global.nrecs == MISSING) {
+    if (global.endyear == MISSING)
+      nrerror("Simulation end year has not been defined.  Make sure that the global file defines ENDYEAR.");
+    else if (global.endyear < 0) {
+      sprintf(ErrStr,"The specified simulation end year (%d) < 0.  Make sure that the global file defines a positive integer for ENDYEAR.",global.endyear);
+      nrerror(ErrStr);
+    }
+    if (global.endmonth == MISSING)
+      nrerror("Simulation end month has not been defined.  Make sure that the global file defines ENDMONTH.");
+    else if (global.endmonth < 0) {
+      sprintf(ErrStr,"The specified simulation end month (%d) < 0.  Make sure that the global file defines a positive integer for ENDMONTH.",global.endmonth);
+      nrerror(ErrStr);
+    }
+    if (global.endday == MISSING)
+      nrerror("Simulation end day has not been defined.  Make sure that the global file defines ENDDAY.");
+    else if (global.endday < 0) {
+      sprintf(ErrStr,"The specified simulation end day (%d) < 0.  Make sure that the global file defines a positive integer for ENDDAY.",global.endday);
+      nrerror(ErrStr);
+    }
+  }
+  else if (global.nrecs < 1) {
+    sprintf(ErrStr,"The specified duration of simulation (%d) < 1 time step.  Make sure that the global file defines a positive integer for NRECS.",global.nrecs);
+    nrerror(ErrStr);
+  }
+
+  // Forcing files and variables
+  if ( strcmp ( names->f_path_pfx[0], "FALSE" ) == 0 )
+    nrerror("No forcing file has been defined.  Make sure that the global file defines FORCING1.");
   for(i=0;i<2;i++) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
       if (param_set.N_TYPES[i] == MISSING) {

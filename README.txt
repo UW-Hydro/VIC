@@ -1087,6 +1087,18 @@ Miscellaneous bugs in frozen soils.
 	Fixed miscellaneous bugs (typos) in frozen soil equations.	JCA
 
 
+Output file headers contain "hour" field despite output dt == 24 hours.
+
+	Files affected:
+
+	write_header.c
+
+	Description:
+
+	Replaced all instances of global.dt with global.out_dt,
+	since out_dt is the time interval used in the output files.	TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

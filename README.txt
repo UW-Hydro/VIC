@@ -966,6 +966,18 @@ Model aborts when TIME_STEP = 24 and STARTHOUR not specified.
 	Added validation of dt, start date, end date, and nrecs.	TJB
 
 
+Output file headers contain "hour" field despite output dt == 24 hours.
+
+	Files affected:
+
+	write_header.c
+
+	Description:
+
+	Replaced all instances of global.dt with global.out_dt,
+	since out_dt is the time interval used in the output files.	TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

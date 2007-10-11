@@ -15,6 +15,9 @@ void write_header(out_data_file_struct *out_data_files,
   This subroutine writes a header for all output files.
 
   Modifications:
+  2007-Oct-11 Replaced all instances of global.dt with global.out_dt,
+	      since out_dt is the time interval used in the output
+	      files.							TJB
 
 **********************************************************************/
 {
@@ -54,7 +57,7 @@ void write_header(out_data_file_struct *out_data_files,
     // Part 1: Global Attributes
     // Nbytes1     (unsigned short)*1  Number of bytes in part 1
     // nrecs       (int)*1             Number of records in the file
-    // dt          (int)*1             Time step length in hours
+    // dt          (int)*1             Output time step length in hours
     // startyear   (int)*1             Year of first record
     // startmonth  (int)*1             Month of first record
     // startday    (int)*1             Day of first record
@@ -106,7 +109,7 @@ void write_header(out_data_file_struct *out_data_files,
       Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // year
       Nbytes2 += sizeof(char) + 5*sizeof(char) + sizeof(char) + sizeof(float); // month
       Nbytes2 += sizeof(char) + 3*sizeof(char) + sizeof(char) + sizeof(float); // day
-      if (global.dt < 24)
+      if (global.out_dt < 24)
         Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // hour
 #endif
 
@@ -143,7 +146,7 @@ void write_header(out_data_file_struct *out_data_files,
       fwrite(&(global.nrecs), sizeof(int), 1, out_data_files[file_idx].fh);
 
       // dt
-      fwrite(&(global.dt), sizeof(int), 1, out_data_files[file_idx].fh);
+      fwrite(&(global.out_dt), sizeof(int), 1, out_data_files[file_idx].fh);
 
       // start date (year, month, day, hour)
       fwrite(&(dmy->year), sizeof(int), 1, out_data_files[file_idx].fh);
@@ -157,7 +160,7 @@ void write_header(out_data_file_struct *out_data_files,
       // Nvars
       Nvars = out_data_files[file_idx].nvars;
 #if !OUTPUT_FORCE
-      if (global.dt < 24)
+      if (global.out_dt < 24)
         Nvars += 4;
       else
         Nvars += 3;
@@ -196,7 +199,7 @@ void write_header(out_data_file_struct *out_data_files,
       fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
       fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
 
-      if (global.dt < 24) {
+      if (global.out_dt < 24) {
         // hour
         strcpy(tmp_str,"HOUR");
         tmp_len = strlen(tmp_str);
@@ -243,7 +246,7 @@ void write_header(out_data_file_struct *out_data_files,
     //
     // where
     //    nrecs       = Number of records in the file
-    //    dt          = Time step length in hours
+    //    dt          = Output time step length in hours
     //    start date  = Date and time of first record of file
     //    ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
     //    Nvars       = Number of variables in the file, including date fields
@@ -254,13 +257,13 @@ void write_header(out_data_file_struct *out_data_files,
       // Header part 1: Global attributes
       Nvars = out_data_files[file_idx].nvars;
 #if !OUTPUT_FORCE
-      if (global.dt < 24)
+      if (global.out_dt < 24)
         Nvars += 4;
       else
         Nvars += 3;
 #endif
       fprintf(out_data_files[file_idx].fh, "# NRECS: %d\n", global.nrecs);
-      fprintf(out_data_files[file_idx].fh, "# DT: %d\n", global.dt);
+      fprintf(out_data_files[file_idx].fh, "# DT: %d\n", global.out_dt);
       fprintf(out_data_files[file_idx].fh, "# STARTDATE: %04d-%02d-%02d %02d:00:00\n",
         dmy->year, dmy->month, dmy->day, dmy->hour);
       fprintf(out_data_files[file_idx].fh, "# ALMA_OUTPUT: %d\n", tmp_ALMA_OUTPUT);
@@ -271,7 +274,7 @@ void write_header(out_data_file_struct *out_data_files,
 
 #if !OUTPUT_FORCE
       // Write the date
-      if (global.dt < 24) {
+      if (global.out_dt < 24) {
         // Write year, month, day, and hour
         fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\tHOUR\t");
       }

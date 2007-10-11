@@ -1064,6 +1064,17 @@ output files
 	4.0.6 output files.					TJB
 
 
+Model aborts when TIME_STEP = 24 and STARTHOUR is not specified.
+
+	Files Affected:
+
+	get_global_param.c
+
+	Description:
+
+	Added validation of dt, start date, end date, and nrecs.	TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

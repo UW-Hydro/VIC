@@ -167,6 +167,7 @@ int  solve_T_profile(double *T,
               approximation (a form found in most text books).			JCA
   2007-Aug-08 Added option for EXCESS_ICE.					JCA
   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
+  2007-Oct-11 Fixed error in EXP_TRANS formulation.				JCA
 **********************************************************************/
 
   extern option_struct options;
@@ -232,7 +233,7 @@ int  solve_T_profile(double *T,
 	j = Nnodes-1;
 	A[j] = 4*Bexp*Bexp*Cs[j]*(Zsum[j]+1)*(Zsum[j]+1);
 	B[j] = (kappa[j]-kappa[j-1])*deltat;
-	C[j] = 4*deltat*kappa[j]*Bexp*(Zsum[j]+1);
+	C[j] = 4*deltat*kappa[j];
 	D[j] = 2*deltat*kappa[j]*Bexp;
 	E[j] = 4*Bexp*Bexp*ice_density*Lf*(Zsum[j]+1)*(Zsum[j]+1);
       }

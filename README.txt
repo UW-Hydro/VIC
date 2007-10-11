@@ -1075,6 +1075,18 @@ Model aborts when TIME_STEP = 24 and STARTHOUR is not specified.
 	Added validation of dt, start date, end date, and nrecs.	TJB
 
 
+Miscellaneous bugs in frozen soils.
+
+	Files Affected:
+
+	frozen_soil.c
+	soil_conduction.c
+
+	Description:
+
+	Fixed miscellaneous bugs (typos) in frozen soil equations.	JCA
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****
 --------------------------------------------------------------------------------

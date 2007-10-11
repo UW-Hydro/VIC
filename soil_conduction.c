@@ -701,8 +701,8 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   int                Nnodes  number of defined thermal nodes
 
   Modifications:
-  2007-Apr-24 Passing in Zsum_node rather than recalculating.  JCA
-
+  2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
+  2007-Oct-10 Fixed reference to Zsum_node.				JCA
 ***********************************************************************/
 
   int    nidx, fidx; 
@@ -723,11 +723,11 @@ void find_0_degree_fronts(energy_bal_struct *energy,
   for(nidx=Nnodes-2;nidx>=0;nidx--) {
     deltaz = (dz[nidx] + dz[nidx+1]) / 2.;
     if(T[nidx] > 0 && T[nidx+1] <= 0 && Nthaw<MAX_FRONTS) {
-      tdepth[Nthaw] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx]-deltaz,Zsum_node[nidx]);
+      tdepth[Nthaw] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx+1]-deltaz,Zsum_node[nidx+1]);
       Nthaw++;
     }
     else if(T[nidx] < 0 && T[nidx+1] >= 0 && Nfrost<MAX_FRONTS) {
-      fdepth[Nfrost] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx]-deltaz,Zsum_node[nidx]);
+      fdepth[Nfrost] = linear_interp(0,T[nidx],T[nidx+1],Zsum_node[nidx+1]-deltaz,Zsum_node[nidx+1]);
       Nfrost++;
     }
   }

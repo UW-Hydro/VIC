@@ -110,6 +110,15 @@ int  runoff(layer_data_struct *layer_wet,
 	      residual moisture in all layers to be 0, the user should
 	      set these explicitly in the soil parameter file.  Also
 	      fixed typo in fprintf() on line 289.			TJB
+  2007-Oct-13 Fixed the checks on the lower bound of soil moisture.
+	      Previously, the condition was
+	        (moist[lindex]+ice[lindex]) < resid_moist[lindex]
+	      which led to liquid soil moisture falling below residual
+	      during winter conditions.  This has been changed to
+	        moist[lindex] < resid_moist[lindex]
+	      to eliminate these errors and make the logic consistent
+	      with the rest of the code.				TJB
+
 **********************************************************************/
 {  
   extern option_struct options;
@@ -137,11 +146,12 @@ int  runoff(layer_data_struct *layer_wet,
   double             ex, A, i_0, basis, frac;
   double             inflow;
   double             last_moist;
-  double             resid_moist[MAX_LAYERS];
-  double             org_moist[MAX_LAYERS];
-  double             moist[MAX_LAYERS];
-  double             ice[MAX_LAYERS];
-  double             max_moist[MAX_LAYERS];
+  double             resid_moist[MAX_LAYERS]; // residual moisture (mm)
+  double             org_moist[MAX_LAYERS];   // total soil moisture (liquid and frozen) at beginning of this function (mm)
+  double             avail_moist[MAX_LAYERS][FROST_SUBAREAS]; // liquid soil moisture available for evap/drainage (mm)
+  double             moist[MAX_LAYERS];       // current liquid soil moisture (mm)
+  double             ice[MAX_LAYERS];         // current frozen soil moisture (mm)
+  double             max_moist[MAX_LAYERS];   // maximum storable moisture (liquid and frozen) (mm)
   double             max_infil;
   double             Ksat[MAX_LAYERS];
   double             Q12[MAX_LAYERS-1];
@@ -149,8 +159,8 @@ int  runoff(layer_data_struct *layer_wet,
   double            *Cs;
   double            *M;
   double             Dsmax;
-  double             top_moist;
-  double             top_max_moist;
+  double             top_moist;     // total moisture (liquid and frozen) in topmost soil layers (mm)
+  double             top_max_moist; // maximum storable moisture (liquid and frozen) in topmost soil layers (mm)
   double             tmp_inflow;
   double             tmp_moist;
   double             dt_inflow, dt_outflow;
@@ -220,20 +230,20 @@ int  runoff(layer_data_struct *layer_wet,
 	evap[lindex][0] = layer[lindex].evap/(double)dt;
 	org_moist[lindex] = layer[lindex].moist;
 	layer[lindex].moist = 0;
-        if ( evap[lindex][0] != 0 ) {
-          // if there is evaporation
+        if ( evap[lindex][0] != 0 ) { // if there is evaporation
           sum_moist = 0;
-          for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-            // compute total available soil moisture between frost sub areas.
-            sum_moist += (org_moist[lindex] - layer[lindex].ice[frost_area]) * frost_fract[frost_area];
-          // compute fraction of avaiable soil moisture that is evaporated
+          // compute available soil moisture for each frost sub area.
+          for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+            avail_moist[lindex][frost_area] = (org_moist[lindex] - layer[lindex].ice[frost_area] - resid_moist[lindex]) * frost_fract[frost_area];
+            if (avail_moist[lindex][frost_area] < 0) avail_moist[lindex][frost_area] = 0;
+            sum_moist += avail_moist[lindex][frost_area];
+          }
+          // compute fraction of available soil moisture that is evaporated
           evap_percent = evap[lindex][0] / sum_moist;
           // distribute evaporation between frost sub areas by percentage
           evap_sum = evap[lindex][0];
           for ( frost_area = FROST_SUBAREAS - 1; frost_area >= 0; frost_area-- ) {
-            evap[lindex][frost_area] = ( org_moist[lindex]
-                                         - layer[lindex].ice[frost_area] )
-              * evap_percent;
+            evap[lindex][frost_area] = avail_moist[lindex][frost_area] * evap_percent;
             evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
           }
           if ( evap_sum > SMALL || evap_sum < -SMALL ) {
@@ -275,18 +285,18 @@ int  runoff(layer_data_struct *layer_wet,
 #else
 	  moist[lindex] = layer[lindex].moist - layer[lindex].ice;
 #endif // SPATIAL_FROST
-	  if(moist[lindex]<0) {
-	    if(fabs(moist[lindex]) < 1e-6)
-	      moist[lindex] = 0;
+          if (moist[lindex] < resid_moist[lindex]) {
+            if (fabs(moist[lindex]-resid_moist[lindex]) < 1e-6)
+              moist[lindex] = resid_moist[lindex];
 #if SPATIAL_FROST
-	    else if (layer[lindex].moist < layer[lindex].ice[frost_area])
+	    else if (layer[lindex].moist < layer[lindex].ice[frost_area] + resid_moist[lindex])
 #else
-	    else if (layer[lindex].moist < layer[lindex].ice)
+	    else if (layer[lindex].moist < layer[lindex].ice + resid_moist[lindex])
 #endif // SPATIAL_FROST
-	      moist[lindex] = 0;
+	      moist[lindex] = resid_moist[lindex];
 	    else {
-	      fprintf(stderr, "ERROR in runoff(): Layer %d has negative soil moisture, %f\n",
-                      lindex, moist[lindex]);
+	      fprintf(stderr, "ERROR in runoff(): Layer %d liquid soil moisture (%f) below residual moisture (%f)\n",
+                      lindex, moist[lindex], resid_moist[lindex]);
 	      return(ERROR);
 	    }
 	  }
@@ -323,9 +333,9 @@ int  runoff(layer_data_struct *layer_wet,
 	  /* set all layers to saturation*/
 	  for ( lindex = 0; lindex < options.Nlayer; lindex++ ){
 	    moist[lindex] = max_moist[lindex] - ice[lindex];
-	    if(moist[lindex]<0){
-	      fprintf(stderr, "ERROR in runoff(): Layer %d has negative soil moisture, %f\n",
-                      lindex, moist[lindex]);
+	    if(moist[lindex] < resid_moist[lindex]){
+	      fprintf(stderr, "ERROR in runoff(): Layer %d liquid soil moisture (%f) below residual moisture (%f)\n",
+                      lindex, moist[lindex], resid_moist[lindex]);
 	      return(ERROR);
 	    }
 	  }
@@ -602,7 +612,7 @@ int  runoff(layer_data_struct *layer_wet,
 	      firstlayer=FALSE;
 	      
 	      /** verify that current layer moisture is greater than minimum **/
-	      if ((moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
+	      if (moist[lindex] < resid_moist[lindex]) {
 		/** moisture cannot fall below residual moisture content **/
 		Q12[lindex] += moist[lindex] - resid_moist[lindex];
 		moist[lindex] = resid_moist[lindex];
@@ -656,21 +666,16 @@ int  runoff(layer_data_struct *layer_wet,
 	    
 	    /** Check Lower Sub-Layer Moistures **/
 	    tmp_moist = 0;
-	    
-	    /* If baseflow > 0 and soil moisture has gone below residual,
-	     * take water out of baseflow and add back to soil to make up the difference
-	     * Note: if baseflow is small, soil moisture may still be < residual after this */
-	    if(dt_baseflow > 0 && (moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
-	      if ( dt_baseflow > resid_moist[lindex] - (moist[lindex]+ice[lindex]) ) {
-		dt_baseflow -= resid_moist[lindex] - (moist[lindex]+ice[lindex]);
-		moist[lindex] += resid_moist[lindex] - (moist[lindex]+ice[lindex]);
-	      }
-	      else {
-		moist[lindex] += dt_baseflow;
-		dt_baseflow = 0.0;
-	      }
+
+	    /* If liquid soil moisture has gone below residual, take water out
+	     * of baseflow and add back to soil to make up the difference
+	     * Note: this may lead to negative baseflow, in which case we will
+	     * reduce evap to make up for it */
+	    if(moist[lindex] < resid_moist[lindex]) {
+	      dt_baseflow += moist[lindex] - resid_moist[lindex];
+	      moist[lindex] = resid_moist[lindex];
 	    }
-	    
+
 	    if((moist[lindex]+ice[lindex]) > max_moist[lindex]) {
 	      /* soil moisture above maximum */
 	      tmp_moist = ((moist[lindex]+ice[lindex]) - max_moist[lindex]);
@@ -711,10 +716,7 @@ int  runoff(layer_data_struct *layer_wet,
 	}//end if subsidence did not occur or non-simple scenario for subsidence
 #endif
 	
-	/*************************************************
-	    Store runoff, baseflow and soil layer moisture
-	*************************************************/
-	
+	/** If negative baseflow, reduce evap accordingly **/
 	if ( baseflow[frost_area] < 0 ) {
 	  layer[lindex].evap   += baseflow[frost_area];
 	  baseflow[frost_area]  = 0;

@@ -250,7 +250,6 @@ Flexible output configuration & aggregation of output variables
           year month day (hour) swe[0] swe[1] albedo[0] albedo[1]
 
 
-
 Cleanup of structures holding filenames and file pointers
 
 	Files affected:
@@ -280,7 +279,6 @@ Cleanup of structures holding filenames and file pointers
 	5. Added f_path_pfx[] to the filenames_struct, to store
 	   the path and prefix of forcing files.  Now, forcing[]
 	   only stores the full forcing file names.
-
 
 
 Soil thermal node temperature is now an output variable
@@ -338,6 +336,7 @@ Removed LAKE_MODEL compile-time option
 	to FALSE in the global parameter file (or omit the "LAKE" line
 	completely).
 
+
 More complete set of supported input variables
 
         Files affected:
@@ -366,6 +365,7 @@ More complete set of supported input variables
         appropriate specification of input variables and ALMA_INPUT option
         in the global parameter file, the file initialize_atmos_pilps.c
         has been removed.
+
 
 Optional headers for output and input files
 
@@ -442,7 +442,6 @@ Optional headers for output and input files
         follow the formats outlined above.
 
 
-
 Variable TYPE specifications for binary-format output files in the global parameter
 file must match the strings listed in vicNl_def.h.
 
@@ -455,6 +454,7 @@ file must match the strings listed in vicNl_def.h.
         When listing output variables in the global parameter file, if the
         output file format is binary, the variable data TYPE must match the string
         from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
+
 
 Added global option CONTINUEONERROR allowing simulation to continue on cell error.
 
@@ -498,6 +498,7 @@ Added global option CONTINUEONERROR allowing simulation to continue on cell erro
         as in previous versions of model. The return value of some modules
         was changed from void to an int numeric return value. The ERROR value is
         defined in vicNl_def.h.  
+
 
 Exponential grid transformation option for soil thermal nodes in finite different heat equation
 
@@ -588,6 +589,7 @@ Patch for "cold nose" problem
       flux_term1 exceeds flux_term2 in absolute magnitude).  Therefore, a check
       is now made to set the first term to zero when this begins to happen.
       This only seems to happen in the first and second near-surface nodes.
+
 
 Added EXCESS_ICE option (set in user_def.h)
 
@@ -690,7 +692,6 @@ Various bugs in output variables
 	3. Added OUT_IN_LONG
 
 
-
 Uninitialized value of ice[] in transpiration()
 
 	Files affected:
@@ -703,7 +704,6 @@ Uninitialized value of ice[] in transpiration()
 	available moisture (to avoid using uninitialized values later on).
 
 
-
 Uninitialized value of mixdepth in solve_lake()
 
 	Files affected:
@@ -714,7 +714,6 @@ Uninitialized value of mixdepth in solve_lake()
 
 	Now set mixdepth=0 for case of complete ice cover; this guarantees that
 	it is initialized for all cases.
-
 
 
 Incorrect sub-daily temperature interpolation when referencing GMT instead of
@@ -730,7 +729,6 @@ local time
 	temperature could cross the boundary of the current day.  This can
 	happen when referencing GMT instead of local time, for cells far away
 	from 0 E longitude.  This has been fixed. TJB
-
 
 
 Water budget errors in snow pack on top of lake ice
@@ -759,7 +757,6 @@ Incorrect filenames in Makefile for variable output list functions
 	set_output_defaults.o
 
 
-
 Output variable OUT_DELSURFSTOR not functioning
 
 	Files affected:
@@ -774,7 +771,6 @@ Output variable OUT_DELSURFSTOR not functioning
 	value in put_data.c.  These problems have been fixed.
 
 
-
 Pressure and vapor pressure output in wrong units
 
 	Files affected:
@@ -786,6 +782,7 @@ Pressure and vapor pressure output in wrong units
 
 	The output variables pressure and vapor pressure were output in Pa
 	instead of kPa.  This has been fixed.
+
 
 Changed OUT_SURF_TEMP from the average of T[0] and T[1] to exactly
 equal to T[0].
@@ -800,6 +797,7 @@ equal to T[0].
         temperatures T[0] and T[1].  This has been changed to just T[0],
         since OUT_SURF_TEMP represents the surface skin temperature.
 
+
 Added case of SPATIAL_FROST = TRUE in full_energy.c
 
         Files affected:
@@ -807,6 +805,7 @@ Added case of SPATIAL_FROST = TRUE in full_energy.c
         full_energy.c
 
         This module needed to handle the case of SPATIAL_FROST = TRUE. GCT
+
 
 Fixed fread statements
 
@@ -816,6 +815,7 @@ Fixed fread statements
 
         Fixed fread checks to make sure correct number of items were read
         in rather than the size of the item read in.  JCA
+
 
 Read in order incorrect in error_print_surf_energy_bal
 
@@ -850,6 +850,7 @@ Bug fix for previous bug fix to dt_baseflow calculation.
            moisture into account correctly throughout the whole
            equation.  TJB
 
+
 Sub-daily snow step for 24h wb mode not aggregating correctly
 
            Files affected:
@@ -870,17 +871,20 @@ Sub-daily snow step for 24h wb mode not aggregating correctly
            the units of snow melt were corrected to
            be consistent (mm) across functions.  TJB
 
+
 Moved Implicit error counting above call for solve_T_profile.
 
           Files affected:
 
           func_surf_energy_bal
 
+
 Moved ARNO/NIJSSEN conversion after calculation of max_moist.
 
           Files affected:
 
           read_soilparam_arc.c
+
 
 Added ErrorFlag return value from initialize_prcp.
 
@@ -914,6 +918,7 @@ Trap cases of T-errors matching variable ERROR for root_brent.
             against an error of -9998 - now they check for
             values less than -998, since ERROR = -999.  JCA
 
+
 Trap cases of negative soil moisture.
 
             Files affected:
@@ -923,6 +928,7 @@ Trap cases of negative soil moisture.
             No longer resets ice content to previous time-step ice content if
             subsidence has occurred.  JCA
 
+
 Fixed bug for read-in during EXCESS_ICE option.
 
             Files affected:
@@ -930,6 +936,7 @@ Fixed bug for read-in during EXCESS_ICE option.
             read_initial_model_state.c
 
             Fixed bug for read-in during EXCESS_ICE option.  JCA
+
 
 Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
@@ -1097,6 +1104,24 @@ Output file headers contain "hour" field despite output dt == 24 hours.
 
 	Replaced all instances of global.dt with global.out_dt,
 	since out_dt is the time interval used in the output files.	TJB
+
+
+Liquid soil moisture sometimes falls below residual.
+
+	Files affected:
+
+	runoff.c
+
+	Description:
+
+	Fixed the checks on the lower bound of soil moisture.
+	Previously, the condition was
+	  (moist[lindex]+ice[lindex]) < resid_moist[lindex]
+	which led to liquid soil moisture falling below residual
+	during winter conditions.  This has been changed to
+	  moist[lindex] < resid_moist[lindex]
+	to eliminate these errors and make the logic consistent
+	with the rest of the code.					TJB
 
 
 --------------------------------------------------------------------------------

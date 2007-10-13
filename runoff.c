@@ -83,6 +83,14 @@ void runoff(layer_data_struct *layer_wet,
 	      specified by the user.  If a user truly wants to specify
 	      residual moisture in all layers to be 0, the user should
 	      set these explicitly in the soil parameter file.		TJB
+  2007-Oct-13 Fixed the checks on the lower bound of soil moisture.
+	      Previously, the condition was
+	        (moist[lindex]+ice[lindex]) < resid_moist[lindex]
+	      which led to liquid soil moisture falling below residual
+	      during winter conditions.  This has been changed to
+	        moist[lindex] < resid_moist[lindex]
+	      to eliminate these errors and make the logic consistent
+	      with the rest of the code.				TJB
 
 **********************************************************************/
 {  
@@ -180,15 +188,15 @@ void runoff(layer_data_struct *layer_wet,
 
 	/** Set Layer Unfrozen Moisture Content **/
 	moist[lindex] = layer[lindex].moist - layer[lindex].ice;
-	if(moist[lindex]<0) {
-	  if(fabs(moist[lindex]) < 1e-6)
-	    moist[lindex] = 0;
-	  else if (layer[lindex].moist < layer[lindex].ice)
-	    moist[lindex] = 0;
+	if(moist[lindex] < resid_moist[lindex]) {
+	  if(fabs(moist[lindex] - resid_moist[lindex]) < 1e-6)
+	    moist[lindex] = resid_moist[lindex];
+	  else if (layer[lindex].moist < layer[lindex].ice + resid_moist[lindex])
+	    moist[lindex] = resid_moist[lindex];
 	  else {
 	    sprintf(ErrStr,
-		    "Layer %i has negative soil moisture, %f", 
-		    lindex, moist[lindex]);
+		    "Layer %i has liquid soil moisture (%f) below residual moisture (%f)", 
+		    lindex, moist[lindex], resid_moist[lindex]);
 	    vicerror(ErrStr);
 	  }
 	}
@@ -392,8 +400,8 @@ void runoff(layer_data_struct *layer_wet,
 	  firstlayer=FALSE;
 	  
 	  /** verify that current layer moisture is greater than minimum **/
-	  if ((moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
-	    /** moisture cannot fall below residual moisture content **/
+	  if (moist[lindex] < resid_moist[lindex]) {
+	    /** liquid moisture cannot fall below residual moisture content **/
 	    Q12[lindex] += moist[lindex] - resid_moist[lindex];
 	    moist[lindex] = resid_moist[lindex];
 	  }
@@ -448,18 +456,13 @@ void runoff(layer_data_struct *layer_wet,
 	/** Check Lower Sub-Layer Moistures **/
 	tmp_moist = 0;
 	
-        /* If baseflow > 0 and soil moisture has gone below residual,
-         * take water out of baseflow and add back to soil to make up the difference
-         * Note: if baseflow is small, soil moisture may still be < residual after this */
-	if(dt_baseflow > 0 && (moist[lindex]+ice[lindex]) < resid_moist[lindex]) {
-          if ( dt_baseflow > resid_moist[lindex] - (moist[lindex]+ice[lindex]) ) {
-            dt_baseflow -= resid_moist[lindex] - (moist[lindex]+ice[lindex]);
-            moist[lindex] += resid_moist[lindex] - (moist[lindex]+ice[lindex]);
-	  }
-          else {
-            moist[lindex] += dt_baseflow;
-            dt_baseflow = 0.0;
-          }
+        /* If liquid soil moisture has gone below residual, take water out
+         * of baseflow and add back to soil to make up the difference
+         * Note: this may lead to negative baseflow, in which case we will
+         * reduce evap to make up for it */
+	if(moist[lindex] < resid_moist[lindex]) {
+          dt_baseflow += moist[lindex] - resid_moist[lindex];
+          moist[lindex] = resid_moist[lindex];
 	}
 
 	if((moist[lindex]+ice[lindex]) > max_moist[lindex]) {
@@ -499,7 +502,13 @@ void runoff(layer_data_struct *layer_wet,
 	*baseflow += dt_baseflow;
 
       } /* end of hourly time step loop */
-      
+
+      /** If negative baseflow, reduce evap accordingly **/
+      if ( *baseflow < 0 ) {
+        layer[lindex].evap += *baseflow;
+        *baseflow = 0;
+      }
+
 #if LINK_DEBUG
       if(debug.PRT_BALANCE) {
 	debug.outflow[dist][band][options.Nlayer+2] = (*runoff + *baseflow);

@@ -32,6 +32,7 @@ Added sample global param file to distribution
         Files affected:
 
         global.param.sample (new)
+										TJB
 
 
 Flexible output configuration
@@ -219,7 +220,9 @@ Flexible output configuration
 
 	will result in an output file containing:
 
-	  year month day (hour) swe[0] swe[1] albedo[0] albedo[1]  TJB
+	  year month day (hour) swe[0] swe[1] albedo[0] albedo[1]
+
+										TJB
 
 
 ALMA-compliant input and output
@@ -304,7 +307,7 @@ ALMA-compliant input and output
 
 	In addition, several more variables have been added to the list of
 	available output variables.  See vicNl_def.h for the complete list
-	of available output variables.  TJB
+	of available output variables.						TJB
 
 
 Aggregation of output variables
@@ -325,7 +328,7 @@ Aggregation of output variables
 	output interval, via the OUT_STEP setting in the global parameter
 	file.  Currently, the largest output interval allowed is 24 hours,
 	so this option is only useful for simulations running at sub-daily
-	time steps.  TJB
+	time steps.								TJB
 
 
 Cleanup of structures holding filenames and file pointers
@@ -356,7 +359,7 @@ Cleanup of structures holding filenames and file pointers
 	4. Moved global.statename to filenames.statefile.
 	5. Added f_path_pfx[] to the filenames_struct, to store
 	   the path and prefix of forcing files.  Now, forcing[]
-	   only stores the full forcing file names.  TJB
+	   only stores the full forcing file names.				TJB
 
 
 More complete set of supported input variables
@@ -382,7 +385,7 @@ More complete set of supported input variables
         and PSURF from the list of supported met input variables, since
         AIR_TEMP and PRESSURE provide this ability when ALMA_INPUT is
         TRUE.  This also makes input variable specification more
-        consistent with output variable specification.  TJB
+        consistent with output variable specification.				TJB
 
 
 Atmos_data arrays are always allocated dynamically now.
@@ -397,7 +400,7 @@ Atmos_data arrays are always allocated dynamically now.
         25 elements (large enough to store 24 hourly values and 1 daily
         value).  This wasted memory and has been abandoned.  Now, the
         arrays in atmos_data are always allocated dynamically to be only
-        big enough to store exactly the number of necessary elements.  TJB
+        big enough to store exactly the number of necessary elements.		TJB
 
 
 Optional headers for output and input files
@@ -472,7 +475,7 @@ Optional headers for output and input files
         To accomodate input forcing files that might have been produced via
         VIC's OUTPUT_FORCE option, and therefore could contain a header,
         read_atmos_data.c has been modified to detect and skip headers that
-        follow the formats outlined above.  TJB
+        follow the formats outlined above.					TJB
 
 
 Variable TYPE specifications for binary-format output files in the global parameter
@@ -485,9 +488,9 @@ file must match the strings listed in vicNl_def.h.
         Description:
 
         When listing output variables in the global parameter file, if the
-        output file format is binary, the variable data TYPE must match the string
-        from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
-	TJB
+        output file format is binary, the variable data TYPE must match the
+	string from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than
+	just "INT".								TJB
 
 
 State file is now written at the END of the final timestep of the date indicated
@@ -513,7 +516,7 @@ in the global parameter file.
         all to align on the same time.  This simplifies re-starting the model for
         a forcing file that begins immediately after the previous forcing file
         ended, since the state file now is equivalent to the initial condition at
-        the beginning of the new forcing file.  TJB
+        the beginning of the new forcing file.					TJB
 
 
 STATE file option is now specified in global file, not in user_def.h at compile time
@@ -568,7 +571,7 @@ STATE file option is now specified in global file, not in user_def.h at compile 
         The state will be saved AFTER the FINAL time step of that
         date.  If all of these lines are absent or commented out, VIC
         will not save a state file.  If some (but not all) of these
-        lines are present, VIC will give an error.  TJB
+        lines are present, VIC will give an error.				TJB
 
 
 Bug Fixes:
@@ -607,7 +610,7 @@ Aerodynamic resistance incorrect in output fluxes file
         in flux computations, including any corrections that were applied.  In
         the case mentioned above in which two different aerodynamic resistances
         are in use at the same time, the one used for the snow pack is
-	written.  TJB
+	written.								TJB
 
 
 Aerodynamic resistance not correctly aggregated for output
@@ -633,7 +636,7 @@ Aerodynamic resistance not correctly aggregated for output
         computed the new way, will tend to be smaller than the old way
         when the values cover a wide range.  However, the effective
         aerodynamic resistance will never be smaller than the smallest
-        value among the various veg tiles in the cell.  TJB
+        value among the various veg tiles in the cell.				TJB
 
 
 Skipping deactivated cells in binary state file
@@ -644,7 +647,7 @@ Skipping deactivated cells in binary state file
         (Port from 4.1.0) Changed calculation of Nbytes in binary
         state file to account for bare soil values (extra veg class
         per grid cell). Without this fix, attempts to skip grid cells
-        fail.  GCT
+        fail.									GCT
 
 
 Fix reading/writing of state files when QUICK_FLUX is TRUE
@@ -662,7 +665,7 @@ Fix reading/writing of state files when QUICK_FLUX is TRUE
         file.  The resulting mismatch between Nnodes in the state
         file header and the actual number of node temperatures
         recorded in the state file prevents VIC from being able to
-        read the state file.  This has been fixed.  GCT
+        read the state file.  This has been fixed.				GCT
 
 
 Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
@@ -672,7 +675,8 @@ Fixed bug in error trapping when INIT_STATE filename matches SAVE_STATE filename
 
         Previously, the checks for matches would occur in get_global_param even
         though the SAVE_STATE filename wasn't created until open_state_file.
-        The output name setting was moved from open_state_file to get_global_param. GCT
+        The output name setting was moved from open_state_file to
+	get_global_param.							GCT
 
 
 Added checks for range/valid month days
@@ -682,7 +686,7 @@ Added checks for range/valid month days
 
         In previous versions the user could set a non-valid date for STATE files
         and the model would run without writing to STATE file. Code now checks
-        for valid date.  GCT
+        for valid date.								GCT
 
 
 Replace %i with %d in scanf statements.
@@ -698,7 +702,7 @@ Replace %i with %d in scanf statements.
 
         Having %i in fscanf statements was causing input values of
         "08" to be interpreted as octal rather than decimal.  These
-        instances of %i have been replaced with %d.  GCT
+        instances of %i have been replaced with %d.				GCT
 
 
 ARNO_PARAMS global parameter option changed to BASEFLOW
@@ -723,7 +727,7 @@ ARNO_PARAMS global parameter option changed to BASEFLOW
         values of "ARNO" and "NIJSSEN2001".  When BASEFLOW == NIJSSEN2001,
         VIC assumes the soil parameter file contains d1, d2, d3, and d4.
         When BASEFLOW == ARNO, VIC assumes the soil parameter file
-        contains Ds, Dsmax, Ws, and c.  TJB
+        contains Ds, Dsmax, Ws, and c.						TJB
 
 
 Allow NO_FLUX in addition to NOFLUX in global.param.file
@@ -733,7 +737,7 @@ Allow NO_FLUX in addition to NOFLUX in global.param.file
 
         The option NOFLUX has a syntax (ie, the missing underscore) that is
         inconsistent with other FLUX options. The change will allow users to
-        enter either string.  GCT
+        enter either string.							GCT
 
 
 Skip reading/writing of snow band for areafract <= 0 
@@ -742,7 +746,7 @@ Skip reading/writing of snow band for areafract <= 0
         read_initial_model_state.c
         write_model_state.c
 
-        This will reduce the size of the statefile.  GCT
+        This will reduce the size of the statefile.				GCT
 
 
 Changed argument order in fread, fwrite statements.
@@ -757,7 +761,7 @@ Changed argument order in fread, fwrite statements.
         write_model_state.c
 
         Statements had arguments with ...1, sizeof()....Those were changed to
-        ...sizeof(), 1, ...GCT
+        ...sizeof(), 1, ...							GCT
 
 
 OUTPUT_FORCE option does not close output files properly
@@ -779,7 +783,7 @@ OUTPUT_FORCE option does not close output files properly
         file, whose validation is not necessary for this option (and can prevent
         this option from working.  This fix remedies these problems, by
         including the necessary file-closing code and excluding the unnecessary
-        soil-parameter-file-checking code.  TJB
+        soil-parameter-file-checking code.					TJB
 
 
 Bus error in cells that have bare soil
@@ -789,7 +793,7 @@ Bus error in cells that have bare soil
         
 	An error in the flexible output configuration feature resulted in a bus
 	error in cells that have non-zero bare soil fractions.  This has been
-	fixed. TJB
+	fixed.									TJB
 
 
 Incorrect sub-daily temperature interpolation when referencing GMT instead of
@@ -801,7 +805,7 @@ local time
 	Temperature interpolation didn't account for case in which min or max
 	temperature could cross the boundary of the current day.  This can
 	happen when referencing GMT instead of local time, for cells far away
-	from 0 E longitude.  This has been fixed. TJB
+	from 0 E longitude.  This has been fixed.				TJB
 
 
 AIR_TEMP was not being allowed as an input forcing variable
@@ -812,7 +816,7 @@ AIR_TEMP was not being allowed as an input forcing variable
 	Description:
 	A typo in an "if" statement prevented AIR_TEMP from being allowed as
 	a valid input forcing variable at any time step.  This has been
-	fixed.	TJB
+	fixed.									TJB
 
 
 Bug: undeclared variable i in write_forcing_file.c
@@ -823,7 +827,7 @@ Bug: undeclared variable i in write_forcing_file.c
 
         Description:
 
-        Index i was not declared.  This has been fixed.  TJB
+        Index i was not declared.  This has been fixed.				TJB
 
 
 If() statements in get_force_type() fail for some global parameter files
@@ -841,7 +845,7 @@ If() statements in get_force_type() fail for some global parameter files
         forcing variables in order to work.  Since the sscanf()
         performs proper parsing regardless of ASCII (which doesn't
         have SIGNED or MULTIPLIER fields) vs. BINARY, we have removed
-        the if() statements altogether.  TJB
+        the if() statements altogether.					TJB
 
 
 Aggregation methods of some variables not set properly.
@@ -854,7 +858,7 @@ Aggregation methods of some variables not set properly.
 
         Corrected AGG_TYPE definitions for miscellaneous
         output variables; re-organized the code to make
-        it easier to debug.  TJB
+        it easier to debug.						TJB
 
 
 Fixes for memory leaks and variable initialization.
@@ -874,7 +878,7 @@ Fixes for memory leaks and variable initialization.
         Description:
 
         Miscellaneous fixes for memory leaks and variable
-	initialization.  TJB
+	initialization.							TJB
 
 
 Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
@@ -893,7 +897,7 @@ Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 	Memory errors would occur when ARC_SOIL=TRUE and
 	OUTPUT_FORCE=TRUE.  In addition, the output files
 	would not contain sufficient contents due to not
-	closing properly.  TJB
+	closing properly.						TJB
 
 
 Fixed fread checks
@@ -904,8 +908,8 @@ Fixed fread checks
 
 	Fixed fread checks to make sure correct number of
 	items were read in rather than the size of the item
-	read in.  JCA
-	(port from 4.1.0_r4 GCT)
+	read in.							JCA
+	port from 4.1.0_r4						GCT
 
 
 Bug fix for previous bug fix to dt_baseflow calculation.
@@ -921,7 +925,7 @@ Bug fix for previous bug fix to dt_baseflow calculation.
 	into account in the linear part of the baseflow eqn,
 	but not in the non-linear part.  Now we take residual
 	moisture into account correctly throughout the whole
-	equation.  TJB
+	equation.							TJB
 
 
 Removed logic that reset resid_moist[i].
@@ -939,7 +943,7 @@ Removed logic that reset resid_moist[i].
 	up using different residual moisture values than those
 	specified by the user.  If a user truly wants to specify
 	residual moisture in all layers to be 0, the user should
-	set these explicitly in the soil parameter file.  TJB
+	set these explicitly in the soil parameter file.		TJB
 
 
 Seg fault when trying to read initial state file
@@ -952,7 +956,7 @@ Seg fault when trying to read initial state file
 
 	Fixed typo in call to check_state_file().  Was assigning
 	init_state file pointer to filep.statefile; now assigns
-	pointer to filep.init_state.		TJB
+	pointer to filep.init_state.					TJB
 
 
 Model aborts when TIME_STEP = 24 and STARTHOUR not specified.
@@ -978,7 +982,24 @@ Output file headers contain "hour" field despite output dt == 24 hours.
 	since out_dt is the time interval used in the output files.	TJB
 
 
---------------------------------------------------------------------------------
+Liquid soil moisture sometimes falls below residual.
+
+	Files affected:
+
+	runoff.c
+
+	Description:
+
+	Fixed the checks on the lower bound of soil moisture.
+	Previously, the condition was
+	  (moist[lindex]+ice[lindex]) < resid_moist[lindex]
+	which led to liquid soil moisture falling below residual
+	during winter conditions.  This has been changed to
+	  moist[lindex] < resid_moist[lindex]
+	to eliminate these errors and make the logic consistent
+	with the rest of the code.					TJB
+
+-------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------
 

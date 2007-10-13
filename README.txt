@@ -999,6 +999,21 @@ Liquid soil moisture sometimes falls below residual.
 	to eliminate these errors and make the logic consistent
 	with the rest of the code.					TJB
 
+
+Variable "moist" in runoff() has different meaning than in other functions.
+
+	Files affected:
+
+	runoff.c
+
+	Description:
+
+	Renamed all *moist* variables to *liq* if they only refer
+	to liquid soil moisture.  This makes the logic much easier
+	to understand.							TJB
+
+
+
 -------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------

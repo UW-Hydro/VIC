@@ -1053,6 +1053,23 @@ FULL_ENERGY or FROZEN_SOIL = TRUE.
 	bottom-layer evap is reduced by (-baseflow) and baseflow is set to 0.	TJB
 
 
+Incorrect soil ice fractions for the case when FROZEN_SOIL = TRUE and
+options.SNOW_BAND > 1.
+
+	Files Affected:
+
+	full_energy.c
+	prepare_full_energy.c
+
+	Description:
+
+	Changed ice0 from a scalar to an array.  Previously,
+	when options.SNOW_BAND > 1, the value of ice0 computed
+	for earlier bands was always overwritten by the value
+	of ice0 computed for the final band (even if the final
+	band had 0 area).						JS via TJB
+
+
 
 -------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****

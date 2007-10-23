@@ -25,6 +25,11 @@ void prepare_full_energy(int               iveg,
   03-12-03 modified so that ice content is set to zero unless
            the frozen soil algorithm is implemented and active
            in the current grid cell.                          KAC
+  2007-Oct-22 Changed ice0 from a scalar to an array.  Previously,
+	      when options.SNOW_BAND > 1, the value of ice0 computed
+	      for earlier bands was always overwritten by the value
+	      of ice0 computed for the final band (even if the final
+	      band had 0 area).					JS via TJB
 
 *******************************************************************/
 
@@ -39,47 +44,58 @@ void prepare_full_energy(int               iveg,
 
   for(band=0;band<options.SNOW_BAND;band++) {
 
-    /* Compute average soil moisture values for distributed precipitation */
+    if (soil_con->AreaFract[band] > 0.0) {
 
-    for(i=0;i<options.Nlayer;i++) 
-      layer[i] = find_average_layer(&(prcp->cell[WET][iveg][band].layer[i]),
-				    &(prcp->cell[DRY][iveg][band].layer[i]),
-				    soil_con->depth[i], prcp->mu[iveg]);
+      /* Compute average soil moisture values for distributed precipitation */
+
+      for(i=0;i<options.Nlayer;i++) 
+        layer[i] = find_average_layer(&(prcp->cell[WET][iveg][band].layer[i]),
+				      &(prcp->cell[DRY][iveg][band].layer[i]),
+				      soil_con->depth[i], prcp->mu[iveg]);
     
-    /* Compute top soil layer moisture content (mm/mm) */
+      /* Compute top soil layer moisture content (mm/mm) */
 
-    (*moist) = layer[0].moist / ( soil_con->depth[0] * 1000. );
+      (*moist) = layer[0].moist / ( soil_con->depth[0] * 1000. );
 
-    /* Compute top soil layer ice content (mm/mm) */
+      /* Compute top soil layer ice content (mm/mm) */
 
-    if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
-      if((prcp->energy[iveg][band].T[0] 
-	  + prcp->energy[iveg][band].T[1])/2.<0.) {
-	(*ice0) = (*moist) 
-	  - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
-				    + prcp->energy[iveg][band].T[1]) / 2.,
-				   soil_con->max_moist[0]
-				   / (soil_con->depth[0] * 1000.),
-				   soil_con->bubble[0], soil_con->expt[0]);
-	if((*ice0)<0.) (*ice0)=0.;
+      if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
+        if((prcp->energy[iveg][band].T[0] 
+	    + prcp->energy[iveg][band].T[1])/2.<0.) {
+	  ice0[band] = (*moist) 
+	    - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
+				      + prcp->energy[iveg][band].T[1]) / 2.,
+				     soil_con->max_moist[0]
+				     / (soil_con->depth[0] * 1000.),
+				     soil_con->bubble[0], soil_con->expt[0]);
+	  if(ice0[band]<0.) ice0[band]=0.;
+        }
+        else ice0[band]=0.;
       }
-      else (*ice0)=0.;
-    }
-    else {
-      (*ice0) = 0.;
+      else {
+        ice0[band] = 0.;
+      }
+
+      /** Compute Soil Thermal Properties **/
+      compute_soil_layer_thermal_properties(layer,soil_con->depth,
+					    soil_con->bulk_density,
+					    soil_con->soil_density,
+					    soil_con->quartz,options.Nlayer);
+    
+      /** Save Thermal Conductivities for Energy Balance **/
+      prcp->energy[iveg][band].kappa[0] = layer[0].kappa; 
+      prcp->energy[iveg][band].Cs[0]    = layer[0].Cs; 
+      prcp->energy[iveg][band].kappa[1] = layer[1].kappa; 
+      prcp->energy[iveg][band].Cs[1]    = layer[1].Cs; 
+
     }
 
-    /** Compute Soil Thermal Properties **/
-    compute_soil_layer_thermal_properties(layer,soil_con->depth,
-					  soil_con->bulk_density,
-					  soil_con->soil_density,
-					  soil_con->quartz,options.Nlayer);
-    
-    /** Save Thermal Conductivities for Energy Balance **/
-    prcp->energy[iveg][band].kappa[0] = layer[0].kappa; 
-    prcp->energy[iveg][band].Cs[0]    = layer[0].Cs; 
-    prcp->energy[iveg][band].kappa[1] = layer[1].kappa; 
-    prcp->energy[iveg][band].Cs[1]    = layer[1].Cs; 
+    else {
+
+      ice0[band] = 0.;
+
+    }
+
   }
 
   free((char *)layer);

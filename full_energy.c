@@ -29,9 +29,14 @@ void full_energy(int                  rec,
 	   updated.  Also modified to use the new simplified 
 	   soil moisture storage for the frozen soil algorithm.    KAC
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    actually used in flux calculations.			TJB
+	    actually used in flux calculations.				TJB
   2006-Sep-14 Added computation of soil wetness and root zone soil
-	      moisture, as part of ALMA-compliant input/output.  TJB
+	      moisture, as part of ALMA-compliant input/output.		TJB
+  2007-Oct-22 Changed ice0 from a scalar to an array.  Previously,
+	      when options.SNOW_BAND > 1, the value of ice0 computed
+	      for earlier bands was always overwritten by the value
+	      of ice0 computed for the final band (even if the final
+	      band had 0 area).						JS via TJB
 
 **********************************************************************/
 {
@@ -62,7 +67,7 @@ void full_energy(int                  rec,
   double                 inshort;
   double                 inlong;
   double                 dp;
-  double                 ice0;
+  double                 ice0[MAX_BANDS];
   double                 moist;
   double                 surf_atten;
   double                 Tsurf;
@@ -213,7 +218,7 @@ void full_energy(int                  rec,
       /* Initialize soil thermal properties for the top two layers */
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
-			    soil_con, &moist, &ice0);
+			    soil_con, &moist, ice0);
       }
 
       /** Compute Bare Soil (free of snow) Albedo **/
@@ -301,7 +306,7 @@ void full_energy(int                  rec,
 	  }
 
 	  surface_fluxes(overstory, rec, band, veg_class, iveg, Nveg, Ndist, 
-			 Nbands, options.Nlayer, dp, prcp->mu[iveg], ice0, 
+			 Nbands, options.Nlayer, dp, prcp->mu[iveg], ice0[band], 
 			 moist, surf_atten, height, displacement, roughness, 
 			 ref_height, bare_albedo, 
 			 cell[WET][iveg][0].aero_resist, &(cell[WET][iveg][0].aero_resist_used),

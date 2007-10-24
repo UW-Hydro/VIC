@@ -1137,6 +1137,46 @@ Variable "moist" in runoff() has different meaning than in other functions.
 	to understand.							TJB
 
 
+Soil moisture drops below residual for sub-daily time step interval and
+FULL_ENERGY or FROZEN_SOIL = TRUE.
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Fixed the checks on the lower bound of soil moisture.  Previously,
+	the lower bound on soil moisture was
+	  (liquid + ice >= residual moisture)
+	and the way this bound was enforced was to reduce baseflow to
+	bring total liquid + ice content back up to residual, but this
+	compensation was limited so that the compensation would never
+	be larger than baseflow (i.e. the compensation would never create
+	negative baseflow).
+
+	However, this condition had two main problems: 1. it allowed liquid
+	moisture to fall to very low values (due to evap being over-estimated
+	in arno_evap() and transpiration(), and/or Q12 being over-estimated
+	earlier in runoff() due to bad numerics) in the presence of ice, and
+	2.  it had limited ability to recover from these low values because
+	baseflow (already small) wasn't allowed to be reduced below 0.
+
+	This behavior has been replaced with the following conditions: For
+	unfrozen soil, the new lower bound is
+	  (liquid >= resid_moist)
+	while for frozen soil, the new error condition is
+	  (liquid >= min_liq_fraction * resid_moist)
+	where
+	  min_liq_fraction = the value returned by maximum_unfrozen_water()
+	                     for a unit maximum moisture content.
+
+	If overestimates of evap or drainage do occur, baseflow is allowed
+	to be reduced below 0 to bring liquid water back up to the lower
+	limit.  Then, further down in the code, if baseflow is negative,
+	bottom-layer evap is reduced by (-baseflow) and baseflow is set to 0.	TJB
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r2 to VIC 4.1.0 beta r3 *****

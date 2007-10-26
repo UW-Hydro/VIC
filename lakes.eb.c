@@ -55,6 +55,7 @@ int lakemain(atmos_data_struct  *atmos,
   2007-Oct-24 Changed get_sarea, get_volume, and get_depth to return exit
 	      status so that errors can be trapped and communicated up the
 	      chain of function calls.						KAC via TJB
+  2007-Oct-24 Changed lakeice() to return exit status.				KAC via TJB
 
   Parameters :
 
@@ -523,12 +524,13 @@ int solve_lake(double             snow,
 	 *    within fraction that already has ice.
 	 **********************************************************************/
 	if(lake->hice > 0.0) {
-	   lakeice(&lake->tempi, Tcutoff, sw_ice, &lake->hice, Ti[0], 
+	  ErrorFlag = lakeice(&lake->tempi, Tcutoff, sw_ice, &lake->hice, Ti[0], 
 		   &lake->fraci, dt, lake_energy->snow_flux, qw, 
 		   &energy_ice_melt_bot, lake_snow->swq*RHO_W/RHOSNOW, 
 		   lake_energy->deltaCC, rec, dmy, &qf);
-	   // fprintf(stdout, ",%f,%f,%f,%f\n", lake->surface[0], lake->tempi,
-	   // T[0], Ti[0]); // -> KAC
+          if ( ErrorFlag == ERROR ) return (ERROR);
+	  // fprintf(stdout, ",%f,%f,%f,%f\n", lake->surface[0], lake->tempi,
+	  // T[0], Ti[0]); // -> KAC
 	}
         else {
           energy_ice_melt_bot = 0.;
@@ -1225,7 +1227,7 @@ void icerad (double  sw,
 		    +a2*sw*(1-exp(-(lamslw*hs+lamilw*hi))) );
 }
   
-void lakeice (double *tempi, double Tcutoff, double sw_ice, double *hice, 
+int lakeice (double *tempi, double Tcutoff, double sw_ice, double *hice, 
 	      double twater, double *fracice, int dt, double snowflux,
 	      double qw, double *energy_ice_melt_bot, double sdepth,
 	      double deltaCC, int rec, dmy_struct dmy, double *qf)
@@ -1334,6 +1336,9 @@ void lakeice (double *tempi, double Tcutoff, double sw_ice, double *hice,
     *hice=0.0;
     }
   */
+
+  return(0);
+
 }
 
 float lkdrag (float Tsurf, double Tair, double wind, double roughness, double Z1)
@@ -1950,8 +1955,11 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
  * This routine calculates the water balance of the lake
  
   Modifications:
-  Added features for EXCESS_ICE option.  JCA
- **********************************************************************/
+  2007-Aug-09 Added features for EXCESS_ICE option.				JCA
+  2007-Oct-24 Added rec to call for water_balance so that error and warning
+	      messages can report the model record number.			KAC via TJB
+  2007-Oct-24 Modified loop for get_sarea to include the active node.		KAC via TJB
+**********************************************************************/
 
 int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
 		    int rec, int iveg,int band, double lake_frac, soil_con_struct soil_con, 
@@ -2159,7 +2167,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   // lake->surface equals the area at the top of each dynamic solution layer 
   
   /* Re-calculate lake surface area  */
-  for(k=0; k< lake->activenod; k++) {
+  for(k=0; k <= lake->activenod; k++) {
     if(k==0)
       ldepth = lake->ldepth;
     else
@@ -2209,10 +2217,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 }
 
 
-/* This function combines the energy balance and snow data structures */
-/* such that the fluxes leaving the lake module represent a weighted average */
-/* from the open water and wetland portions. */
-
 void update_prcp(dist_prcp_struct *prcp, 
 		 energy_bal_struct *lake_energy, 
 		 snow_data_struct *lake_snow, 
@@ -2224,6 +2228,23 @@ void update_prcp(dist_prcp_struct *prcp,
 		 int band,
 		 double fraci,
 		 soil_con_struct soil_con) 
+/**************************************************************************
+  This function combines the energy balance and snow data structures
+  such that the fluxes leaving the lake module represent a weighted average
+  from the open water and wetland portions.
+
+  Modifications:
+  2007-Oct-24 Modified to include redistibution of snow density, without it
+	      snow left on the shore as the lake retreats can cause nans to
+	      appear as snow is updated without an initial density.		KAC via TJB
+  2007-Oct-24 modified to set lake ice fraction to 0 if new lake fraction is
+	      0, previously lake ice was always adjusted by dividing old by new
+	      fractions, which causes nans when the new fraction is 0.		KAC via TJB
+  2007-Oct-24 Modified redistribution of snow variables between wetland and
+	      lake ice.  Surface water is now stored as a lake variable and
+	      used to reestablish surf_water at the start of a new time step.	KAC via TJB
+  ***** What happens to lake ice when lake dissappears??? KAC *****
+**************************************************************************/
 {
   extern option_struct   options;
   energy_bal_struct    **wland_energy;
@@ -2304,11 +2325,16 @@ void update_prcp(dist_prcp_struct *prcp,
   
   wland_snow[iveg][band].surf_water *= (1.-lakefraction);
   wland_snow[iveg][band].surf_water += lakefraction * lake_snow->surf_water;
+  lake->surf_water = lake_snow->surf_water;
   
   wland_snow[iveg][band].depth *= (1.-lakefraction);
   wland_snow[iveg][band].depth += lakefraction * lake_snow->depth; 
   lake->sdepth = lake_snow->depth;
   
+  if ( wland_snow[iveg][band].density == 0 && wland_snow[iveg][band].depth > 0 )
+     wland_snow[iveg][band].density = 1000. *  wland_snow[iveg][band].swq
+       / wland_snow[iveg][band].depth;
+
   /* Update canopy storage terms. */
   veg_var[DRY][iveg][band].Wdew *= (1.-lakefraction);
   veg_var[WET][iveg][band].Wdew *= (1.-lakefraction);
@@ -2379,14 +2405,17 @@ void update_prcp(dist_prcp_struct *prcp,
 #endif // SPATIAL_FROST
     }
   }
-  
+ 
   /* Update lake ice fraction for change in surface area. */
-  lake->fraci = lake->fraci * lakefraction/newfraction;
+  if ( newfraction > 0 )
+    lake->fraci = lake->fraci * lakefraction/newfraction;
+  else
+    lake->fraci = 0;
   if(lake->fraci > 1.) {
     lake->hice *= lake->fraci;
     lake->fraci = 1.;
   }
-  
+ 
 } 
 
 
@@ -2395,12 +2424,16 @@ void update_prcp(dist_prcp_struct *prcp,
  structure of weighted averages from the previous time step.
 
   Modifications:
-  2006-Nov-07 Assigned value to MELTING.  TJB
+  2006-Nov-07 Assigned value to MELTING.					TJB
   2007-Aug-16 Added ErrorFlag to return value of
-               distribute_node_moisture_properties.  JCA
-  2007-Aug-21 Added features for EXCESS_ICE option.  JCA
+               distribute_node_moisture_properties.				JCA
+  2007-Aug-21 Added features for EXCESS_ICE option.
               Including moving distribute_node_moisture_properties call to
-              before surface_fluxes call in wetland_energy.
+              before surface_fluxes call in wetland_energy.			JCA
+  2007-Oct-24 Modified redistribution of snow variables between wetland and
+	      lake ice.  Surface water is now stored as a lake variable and
+	      used to reestablish surf_water at the start of a new time step.	KAC via TJB
+
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
 		    energy_bal_struct *lake_energy, 
@@ -2483,11 +2516,17 @@ int initialize_prcp(dist_prcp_struct *prcp,
   if(lakefrac < 0.999) {
     wland_snow[iveg][band].swq = (wland_snow[iveg][band].swq - lake->swe*lakefrac*fraci)/(1.-lakefrac);
     wland_snow[iveg][band].depth = (wland_snow[iveg][band].depth - lake->sdepth*lakefrac*fraci)/(1.-lakefrac);
-    wland_snow[iveg][band].surf_water /= (lakefrac*fraci + (1.-lakefrac));
-    
+    // modified to be the same format as previous calculations, not convinced original was correct
+    //wland_snow[iveg][band].surf_water /= (lakefrac*fraci + (1.-lakefrac));
+    wland_snow[iveg][band].surf_water = (wland_snow[iveg][band].surf_water - lake->surf_water*lakefrac*fraci)/(1.-lakefrac);
+    if ( wland_snow[iveg][band].swq < SMALL ) {
+      wland_snow[iveg][band].swq = 0.;
+      wland_snow[iveg][band].depth = 0.;
+      wland_snow[iveg][band].surf_water = 0.;
+    }
     if(fraci > 0.0) {
       lake_snow->swq = lake->swe;
-      lake_snow->surf_water = wland_snow[iveg][band].surf_water;
+      lake_snow->surf_water = lake->surf_water;
       lake_snow->depth = lake->sdepth; 
     }
     else {

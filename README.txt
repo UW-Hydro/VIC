@@ -54,8 +54,25 @@ Allow lakes to be empty or very shallow.
 	below the minimum volume of 1 lake node.  This modification removes
 	that constraint.  In addition, the lake-specific get_* functions were
 	modified to return ErrorFlag values instead of aborting on error,
-	making them more consistent with the CONTINUEONERROR option.		TJB
+	making them more consistent with the CONTINUEONERROR option.		KAC via TJB
 
+
+Lake snow and ice fixes
+
+	Files affected:
+
+	LAKE.h
+	lakes.eb.c
+	vicNl_def.h
+
+	Description:
+
+	Modified to set lake ice fraction to 0 if new lake fraction is 0.
+	Previously lake ice was always adjusted by dividing old by new fractions,
+	which causes nans when the new fraction is 0.  Modified redistribution of
+	snow variables between wetland and lake ice.  Surface water is now stored
+	as a lake variable and used to reestablish surf_water at the start of a
+	new time step.								KAC via TJB
 
 
 

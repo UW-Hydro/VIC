@@ -30,13 +30,14 @@
 	      of supported met input variables.				TJB
   2007-Jan-15 Added PRT_HEADER option.					TJB
   2007-Apr-03 Added CONTINUEONERROR option.				GCT
-  2007-Apr-03 Added ERROR value                                         KAC
-  2007-Apr-24 Added IMPLICIT option.                                    JCA
-  2007-Apr-24 Added EXP_TRANS option.                                   JCA
-  2007-Apr-24 Added Zsum_node to soil_con structure.                    JCA
-  2007-Aug-08 Added features for EXCESS_ICE option.                     JCA
-  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.              JCA
-  2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.      JCA
+  2007-Apr-03 Added ERROR value						KAC
+  2007-Apr-24 Added IMPLICIT option.					JCA
+  2007-Apr-24 Added EXP_TRANS option.					JCA
+  2007-Apr-24 Added Zsum_node to soil_con structure.			JCA
+  2007-Aug-08 Added features for EXCESS_ICE option.			JCA
+  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.		JCA
+  2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.	JCA
+  2007-Oct-24 Added surf_water to lake_var structure.			KAC via TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -565,7 +566,8 @@ typedef struct {
   double sdepth;                  /* Depth of snow on top of ice. */
   double snowmlt;
   double surface[MAX_LAKE_NODES];
-  double swe;
+  double surf_water;              // water content of surface snow layer
+  double swe;                     // water equivalence of lake snow cover
   double temp[MAX_LAKE_NODES];    /* Lake water temp. at each node (C). */
   double tempavg;
   double tempi;                   /* Lake ice temp (C). */

@@ -24,13 +24,13 @@ int wetland_energy(int                  rec,
 
   Modifications:
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.				TJB
+	    used in flux calculations.					TJB
   2006-Sep-23 Implemented flexible output configuration; atmos->out_rain
-	      and atmos->out_snow must be tracked now.  TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Apr-03 Changed routine type to int so that it can return numeric ERROR
-              values.    GCT from KAC. 
-  2007-Aug-21 Added features for EXCESS_ICE option.   JCA
+	      and atmos->out_snow must be tracked now.			TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Apr-03 Changed routine type to int so that it can return numeric
+	      ERROR values.						KAC via GCT
+  2007-Aug-21 Added features for EXCESS_ICE option.			JCA
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;

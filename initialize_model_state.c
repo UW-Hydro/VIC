@@ -53,26 +53,27 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   04-25-03 Modified to work with vegetation type specific storm 
            parameters.                                              KAC
   07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
-	    accessed in set_node_parameters().			TJB
+	    accessed in set_node_parameters().				TJB
   01-Nov-04 Added support for state files containing SPATIAL_FROST
-	    and LAKE_MODEL state variables.			TJB
-  2006-Sep-23 Implemented flexible output configuration; uses the new
-              save_data structure to track changes in moisture storage
-              over each time step; this needs initialization here.  TJB
-  2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe. TJB
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-	      This included removing the unused init_snow file. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  24-Apr-07 Added EXP_TRANS option.  JCA
-  24-Apr-07 Zsum_node loaded into soil_con structure for later use
-             without having to recalculate.  JCA
+	    and LAKE_MODEL state variables.				TJB
   2006-Apr-21 Replaced Cv (uninitialized) with lake_con.Cl[0] in
 	      surfstor calculation.					TJB
-  2007-Aug-09 Added features for EXCESS_ICE option.  JCA
+  2006-Sep-23 Implemented flexible output configuration; uses the new
+              save_data structure to track changes in moisture storage
+              over each time step; this needs initialization here.	TJB
+  2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe.	TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
+	      This included removing the unused init_snow file.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Apr-24 Added EXP_TRANS option.					JCA
+  2007-Apr-24 Zsum_node loaded into soil_con structure for later use
+	      without having to recalculate.				JCA
+  2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2007-Aug-21 Return value of ErrorFlag if error in
-                distribute_node_moisture_properties.  JCA
+	      distribute_node_moisture_properties.			JCA
   2007-Sep-18 Check for soil moist exceeding max moist moved from
-                 read_initial_model_state to here.  JCA
+	      read_initial_model_state to here.				JCA
+  2007-Oct-24 Modified initialize_lake() to return ErrorFlag.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -178,7 +179,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   ********************************************/
 
   if ( options.LAKES && lake_con.Cl[0] > 0) {
-    initialize_lake(lake_var, lake_con, &snow[Nveg+1][0], surf_temp);
+    ErrorFlag = initialize_lake(lake_var, lake_con, &snow[Nveg+1][0], surf_temp);
+    if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 
   /********************************************

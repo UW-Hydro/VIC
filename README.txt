@@ -24,6 +24,42 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****
+--------------------------------------------------------------------------------
+
+
+New Features:
+-------------
+
+
+
+
+Bug Fixes:
+----------
+
+Allow lakes to be empty or very shallow.
+
+	Files affected:
+
+	initialize_lake.c
+	initialize_model_state.c
+	LAKE.h
+	lakes.eb.c
+	read_lakeparam.c
+	wetland_energy.c
+
+	Description:
+
+	Previously, lakes could not be initialized to be empty or with volume
+	below the minimum volume of 1 lake node.  This modification removes
+	that constraint.  In addition, the lake-specific get_* functions were
+	modified to return ErrorFlag values instead of aborting on error,
+	making them more consistent with the CONTINUEONERROR option.		TJB
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------
 

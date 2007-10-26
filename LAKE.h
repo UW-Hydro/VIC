@@ -7,6 +7,7 @@
   2007-Oct-24 Changed get_sarea, get_volume, and get_depth to return exit
 	      status so that errors can be trapped and communicated up the
 	      chain of function calls.					KAC via TJB
+  2007-Oct-24 Changed lakeice() to return exit status.			KAC via TJB
 
 ******************************************************************************/
 
@@ -64,7 +65,7 @@ double get_dist(double, double, double, double);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *);
 void icerad(double,double ,double,double *, double *,double *);
 int initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, double);
-void lakeice(double *, double, double, double *, double, double *,int, 
+int lakeice(double *, double, double, double *, double, double *,int, 
 	     double, double, double *, double, double, int, dmy_struct, double *);
 int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_struct *,
 #if EXCESS_ICE

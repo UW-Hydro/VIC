@@ -1,9 +1,12 @@
 /******************************************************************************
 // $Id$
   Modifications:
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Aug-16 Made return value of initialize_prcp an int.  JCA
-  2007-Aug-21 Added features for EXCESS_ICE option.  JCA
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Aug-16 Made return value of initialize_prcp an int.		JCA
+  2007-Aug-21 Added features for EXCESS_ICE option.			JCA
+  2007-Oct-24 Changed get_sarea, get_volume, and get_depth to return exit
+	      status so that errors can be trapped and communicated up the
+	      chain of function calls.					KAC via TJB
 
 ******************************************************************************/
 
@@ -60,8 +63,7 @@ void energycalc(double *, double *, int, double, double,double *, double *, doub
 double get_dist(double, double, double, double);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *);
 void icerad(double,double ,double,double *, double *,double *);
-void initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, 
-		     double);
+int initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, double);
 void lakeice(double *, double, double, double *, double, double *,int, 
 	     double, double, double *, double, double, int, dmy_struct, double *);
 int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_struct *,
@@ -84,7 +86,7 @@ double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
-void water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, double, soil_con_struct, 
+int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct, 
 #if EXCESS_ICE
 		    int, double,
 #endif		    
@@ -100,9 +102,9 @@ double ErrorIcePackEnergyBalance(double Tsurf, ...);
 int  water_energy_balance(int, double*, double*, int,int,double, double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
 void write_lake_var(lake_var_struct, int);
-double get_sarea(lake_con_struct, double);
-double get_volume(lake_con_struct, double);
-double get_depth(lake_con_struct, double);
+int get_sarea(lake_con_struct, double, double *);
+int get_volume(lake_con_struct, double, double *);
+int get_depth(lake_con_struct, double, double *);
 int wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 		   global_param_struct *, soil_con_struct  *, 
 #if EXCESS_ICE

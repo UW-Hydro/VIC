@@ -39,19 +39,22 @@ int lakemain(atmos_data_struct  *atmos,
   11-18-02 Modifications were made to improve handling of snow and ice
            and to make the lake algorithm interact with the wetland 
            algorithm.                                          LCB
-  27-Aug-04 Added logic to handle blowing_flux and surface_flux.	TJB
+  27-Aug-04 Added logic to handle blowing_flux and surface_flux.		TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.					TJB
-  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+	    used in flux calculations.						TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
   2006-Jul-18 Changed sin(lat) to sin(fabs(lat)) in ks computation so that
-	      southern hemisphere locations can be handled correctly.	TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+	      southern hemisphere locations can be handled correctly.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
   2007-Apr-03 Modified to catch and return error flags from surface_fluxes
-              subroutine.                                         KAC
-  24-Apr-07  Passes soil_con.Zsum_node to distribute_node_moisture_properties.  JCA
-  09-Aug-07  Added features for EXCESS_ICE option.  JCA
-  2007-Aug-16 Added ErrorFlag return value from initialize_prcp.  JCA
+              subroutine.							KAC
+  2007-Apr-24 Passes soil_con.Zsum_node to distribute_node_moisture_properties. JCA
+  2007-Aug-09 Added features for EXCESS_ICE option.				JCA
+  2007-Aug-16 Added ErrorFlag return value from initialize_prcp.		JCA
+  2007-Oct-24 Changed get_sarea, get_volume, and get_depth to return exit
+	      status so that errors can be trapped and communicated up the
+	      chain of function calls.						KAC via TJB
 
   Parameters :
 
@@ -173,11 +176,12 @@ the grid cell average fluxes.
    * Solve the water budget for the lake.
    **********************************************************************/
 
-  water_balance( lake, lake_con, dt, prcp, iveg, band, lake->sarea/lake_con.basin[0], *soil_con, 
+  ErrorFlag = water_balance(lake, lake_con, dt, prcp, rec, iveg, band, lake->sarea/lake_con.basin[0], *soil_con, 
 #if EXCESS_ICE
 		 SubsidenceUpdate, total_meltwater,
 #endif		 
 		 snowprec+rainprec, oldvolume, oldsnow-lake_snow.swq, lake_snow.vapor_flux);
+  if ( ErrorFlag == ERROR ) return (ERROR);
 
   /**********************************************************************
    * Reallocate fluxes between lake and wetland fractions.
@@ -187,7 +191,9 @@ the grid cell average fluxes.
 	      lake_con, iveg, band, lake->fraci, *soil_con);
 
   // LakeFlow = lake->runoff_out * 3600. * dt / 1000.; // returns m/s
+
   return (0);
+
 }  /*End of  lake main. */
 
 
@@ -1465,6 +1471,10 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
 
   Modifications:
   2007-Apr-23 Added initialization of temph.				TJB
+  2007-Oct-24 Modified by moving closing bracket for if ( numnod==1 ) up
+	      so that the code actually calls energycalc() even if the
+	      lake is represented by only one node.			KAC via TJB
+
  **********************************************************************/
 
       double z[MAX_LAKE_NODES], zhalf[MAX_LAKE_NODES];
@@ -1656,22 +1666,23 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
      
       tridia(numnod,c,a,b,d,Tnew);
 
+    }
+
 /**********************************************************************
  * Adjust energy fluxes for change in density -> should be fixed by
  * moving to lagrangian scheme
  **********************************************************************/
     
-      energycalc(Tnew, &joulenew, numnod,dz, surfdz, surface, cp, water_density);
+    energycalc(Tnew, &joulenew, numnod,dz, surfdz, surface, cp, water_density);
      
-      *temph=0.0;
-      //for(k=0; k<numnod;k++) {        
-      //	water_density_new = calc_density(Tnew[k]);
-      // *temph +=z[k]*(water_density[k]-water_density_new)*Tnew[k]*cp[k]*surface[k];
-      //}
+    *temph=0.0;
+    //for(k=0; k<numnod;k++) {        
+    //	water_density_new = calc_density(Tnew[k]);
+    // *temph +=z[k]*(water_density[k]-water_density_new)*Tnew[k]*cp[k]*surface[k];
+    //}
 
-      *temph = joulenew;
+    *temph = joulenew;
 
-    }
 }
 
 void tracer_mixer (double *T, 
@@ -1942,8 +1953,8 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
   Added features for EXCESS_ICE option.  JCA
  **********************************************************************/
 
-void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int iveg,int band, double lake_frac, soil_con_struct soil_con, 
+int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
+		    int rec, int iveg,int band, double lake_frac, soil_con_struct soil_con, 
 #if EXCESS_ICE
 		    int SubsidenceUpdate, double total_meltwater,
 #endif
@@ -1967,6 +1978,7 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   double inflow, outflow, storage;
   double bpercent;
   double inflec, midrate;
+  int ErrorFlag;
 
   cell_data_struct    ***cell;
   
@@ -2018,8 +2030,16 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   
   
   // Find new lake depth and surface area
-  ldepth = get_depth(lake_con, lake->volume);
-  surfacearea = get_sarea(lake_con, ldepth);
+  ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
+  if ( ErrorFlag == ERROR ) {
+    fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,ldepth);
+    return ( ErrorFlag );
+  }
+  ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
+  if ( ErrorFlag == ERROR ) {
+    fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth,surfacearea);
+    return ( ErrorFlag );
+  }
   
   
   /**********************************************************************
@@ -2095,7 +2115,11 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   lake->baseflow_out  += (1. - lake_con.rpercent) * lake->baseflow_in;
   
   // Recalculate lake depth
-  lake->ldepth = get_depth(lake_con, lake->volume);
+  ErrorFlag = get_depth(lake_con, lake->volume, &(lake->ldepth));
+  if ( ErrorFlag == ERROR ) {
+    fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,lake->ldepth);
+    return ( ErrorFlag );
+  }
   
   // DEBUG output
   //fprintf(stdout,",%f,%f,%f", lake->runoff_out, lake->baseflow_out, lake->ldepth ); 
@@ -2141,7 +2165,11 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
     else
       ldepth = lake->dz*(lake->activenod - k);
     
-    lake->surface[k] = get_sarea(lake_con, ldepth);
+    ErrorFlag = get_sarea(lake_con, ldepth, &(lake->surface[k]));
+    if ( ErrorFlag == ERROR ) {
+      fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth,lake->surface[k]);
+      return ( ErrorFlag );
+    }
   }
   
   
@@ -2175,6 +2203,9 @@ void water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dis
   
   // DEBUG lake model
   //fprintf(stdout, "%f %f %f %f %f\n", lake->ldepth/lake_con.maxdepth, inflow, outflow, storage, storage + inflow - outflow);
+
+  return(0);
+
 }
 
 

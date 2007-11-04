@@ -68,6 +68,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Aug-08 Added EXCESS_ICE option.					JCA
   2007-Sep-14 Added initialization of names->soil_dir.			TJB
   2007-Oct-10 Added validation of dt, start date, end date, and nrecs.	TJB
+  2007-Oct-31 Added validation of input/output files.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -122,16 +123,24 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceday[i]   = 1;
     global.forcehour[i]  = 0;
     global.forceskip[i]  = 0;
-    strcpy(names->f_path_pfx[i],"FALSE");
+    strcpy(names->f_path_pfx[i],"MISSING");
   }
   file_num             = 0;
+  global.skipyear      = 0;
+  strcpy(names->init_state,   "MISSING");
   global.stateyear     = MISSING;
   global.statemonth    = MISSING;
   global.stateday      = MISSING;
-  strcpy(names->statefile, "NONE");
-  global.skipyear      = 0;
+  strcpy(names->statefile,    "MISSING");
+  strcpy(names->soil,         "MISSING");
+  strcpy(names->soil_dir,     "MISSING");
+  strcpy(names->veg,          "MISSING");
+  strcpy(names->veglib,       "MISSING");
+  strcpy(names->snowband,     "MISSING");
+  strcpy(names->lakeparam,    "MISSING");
+  strcpy(names->result_dir,   "MISSING");
   global.out_dt        = MISSING;
-  strcpy(names->soil_dir, ".");
+
 
   /** Read through global control file to find parameters **/
 
@@ -413,7 +422,7 @@ global_param_struct get_global_param(filenames_struct *names,
         Get Forcing Data File Information
 	**********************************/
       else if(strcasecmp("FORCING1",optstr)==0) {
-	if ( strcmp( names->f_path_pfx[0], "FALSE" ) != 0 ) 
+	if ( strcmp( names->f_path_pfx[0], "MISSING" ) != 0 ) 
 	  nrerror("Tried to define FORCING1 twice, if you want to use two forcing files, the second must be defined as FORCING2");
         sscanf(cmdstr,"%*s %s", names->f_path_pfx[0]);
 	file_num = 0;
@@ -569,7 +578,7 @@ global_param_struct get_global_param(filenames_struct *names,
     Check for undefined required parameters
   ******************************************/
 
-  // Model time step
+  // Validate model time step
   if (global.dt == MISSING)
     nrerror("Model time step has not been defined.  Make sure that the global file defines TIME_STEP.");
   else if (global.dt < 1) {
@@ -577,7 +586,29 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
 
-  // Simulation start date
+  // Validate the output step
+  if (global.out_dt == 0 || global.out_dt == MISSING) {
+    global.out_dt = global.dt;
+  }
+  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)){
+    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
+  }
+
+  // Validate SNOW_STEP and set NR and NF
+#if OUTPUT_FORCE
+  options.SNOW_STEP = global.dt;
+#endif  // OUTPUT_FORCE
+  if (global.dt < 24 && global.dt != options.SNOW_STEP)
+    nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
+  NF = global.dt/options.SNOW_STEP;
+  if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
+    nrerror("SNOW_STEP should be smaller than TIME_STEP and divide TIME_STEP evenly ");
+  if (NF == 1)
+    NR = 0;
+  else
+    NR = NF;
+
+  // Validate simulation start date
   if (global.startyear == MISSING)
     nrerror("Simulation start year has not been defined.  Make sure that the global file defines STARTYEAR.");
   else if (global.startyear < 0) {
@@ -607,7 +638,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
 
-  // Simulation end date and/or number of timesteps
+  // Validate simulation end date and/or number of timesteps
   if (global.nrecs == MISSING && global.endyear == MISSING && global.endmonth == MISSING && global.endday == MISSING)
     nrerror("The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
   else if (global.nrecs == MISSING) {
@@ -635,26 +666,26 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
 
-  // Forcing files and variables
-  if ( strcmp ( names->f_path_pfx[0], "FALSE" ) == 0 )
-    nrerror("No forcing file has been defined.  Make sure that the global files defines FORCING1.");
-  for ( i = 0; i < 2; i++ ) {
+  // Validate forcing files and variables
+  if ( strcmp ( names->f_path_pfx[0], "MISSING" ) == 0 )
+    nrerror("No forcing file has been defined.  Make sure that the global file defines FORCING1.");
+  for(i=0;i<2;i++) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
       if (param_set.N_TYPES[i] == MISSING) {
-	sprintf(ErrStr,"Need to specify the number forcing variables types in forcing file %d.", i);
-	nrerror(ErrStr);
+        sprintf(ErrStr,"Need to specify the number forcing variables types in forcing file %d.", i);
+        nrerror(ErrStr);
       }
       if (param_set.FORCE_FORMAT[i] == MISSING) {
-	sprintf(ErrStr,"Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",i);
-	nrerror(ErrStr);
+        sprintf(ErrStr,"Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",i);
+        nrerror(ErrStr);
       }
       if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i]-1] == MISSING) {
-	sprintf(ErrStr,"Did not define enough forcing variables in forcing file %d.",i);
-	nrerror(ErrStr);
+        sprintf(ErrStr,"Did not define enough forcing variables in forcing file %d.",i);
+        nrerror(ErrStr);
       }
       if(param_set.FORCE_DT[i] == MISSING ) {
-	sprintf(ErrStr,"Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",file_num);
-	nrerror(ErrStr);
+        sprintf(ErrStr,"Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",file_num);
+        nrerror(ErrStr);
       }
     }
   }
@@ -666,20 +697,89 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceskip[1] = 0;
   }
 
+  // Validate result directory
+  if ( strcmp ( names->result_dir, "MISSING" ) == 0 )
+    nrerror("No results directory has been defined.  Make sure that the global file defines the result directory on the line that begins with \"RESULT_DIR\".");
+
+  // Validate soil parameter file information
+  if ( strcmp ( names->soil, "MISSING" ) == 0 )
+    nrerror("No soil parameter file has been defined.  Make sure that the global file defines the soil parameter file on the line that begins with \"SOIL\".");
+  if (options.ARC_SOIL && strcmp ( names->soil_dir, "MISSING" ) == 0)
+    nrerror("\"ARC_SOIL\" was specified as TRUE, but no soil parameter directory (\"SOIL_DIR\") has been defined.  Make sure that the global file defines the soil parameter directory on the line that begins with \"SOIL_DIR\".");
+
+  /*******************************************************************************
+    Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
+  *******************************************************************************/
+
 #if !OUTPUT_FORCE
 
+  // Validate veg parameter information
+  if ( strcmp ( names->veg, "MISSING" ) == 0 )
+    nrerror("No vegetation parameter file has been defined.  Make sure that the global file defines the vegetation parameter file on the line that begins with \"VEGPARAM\".");
+  if ( strcmp ( names->veglib, "MISSING" ) == 0 )
+    nrerror("No vegetation library file has been defined.  Make sure that the global file defines the vegetation library file on the line that begins with \"VEGLIB\".");
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
+
+  // Validate the elevation band file information
+  if(options.SNOW_BAND > 1) {
+    if ( strcmp ( names->snowband, "MISSING" ) == 0 ) {
+      sprintf(ErrStr, "\"SNOW_BAND\" was specified with %d elevation bands, but no elevation band file has been defined.  Make sure that the global file defines the elevation band file on the line that begins with \"SNOW_BAND\" (after the number of bands).", options.SNOW_BAND);
+      nrerror(ErrStr);
+    }
+    if(options.SNOW_BAND > MAX_BANDS) {
+      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+      nrerror(ErrStr);
+    }
+  }
+  else if (options.SNOW_BAND <= 0) {
+    sprintf(ErrStr,"Invalid number of elevation bands specified in global file (%d).  Number of bands must be >= 1.",options.SNOW_BAND);
+    nrerror(ErrStr);
+  }
+
+  // Validate the input state file information
+  if( options.INIT_STATE ) {
+    if ( strcmp ( names->init_state, "MISSING" ) == 0 )
+      nrerror("\"INIT_STATE\" was specified, but no input state file has been defined.  Make sure that the global file defines the inputstate file on the line that begins with \"INIT_STATE\".");
+  }
+
+  // Validate the output state file information
+  if( options.SAVE_STATE ) {
+    if ( strcmp ( names->statefile, "MISSING" ) == 0)
+      nrerror("\"SAVE_STATE\" was specified, but no output state file has been defined.  Make sure that the global file defines the output state file on the line that begins with \"SAVE_STATE\".");
+    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
+      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
+    // Check for month, day in range
+    lastvalidday = lastday[global.statemonth - 1];
+    if ( global.statemonth == 2 ) {
+      if ( (global.stateyear % 4) == 0 && ( (global.stateyear % 100) != 0 || (global.stateyear % 400) == 0 ) ){
+        lastvalidday = 29;
+      }
+    }
+    if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
+      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
+  }
+  // Set the statename here to be able to compare with INIT_STATE name
+  if( options.SAVE_STATE ) {
+    sprintf(names->statefile,"%s_%04i%02i%02i", names->statefile,
+          global.stateyear, global.statemonth, global.stateday);
+  }
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, names->statefile ) == 0))  {
+      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
+      nrerror(ErrStr);
+  }
+
+  // Validate soil parameter/simulation mode combinations
   if(options.Nlayer > MAX_LAYERS) {
     sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
     sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
-    nrerror(ErrStr);
-  }
-  if ( options.Nlakenode > MAX_LAKE_NODES) {
-    sprintf(ErrStr,"Global file wants more lake thermal nodes (%d) than are defined by MAX_LAKE_NODES (%d).  Edit user_def.h and recompile.", options.Nlakenode, MAX_LAKE_NODES);
     nrerror(ErrStr);
   }
   if(options.QUICK_FLUX) {
@@ -694,12 +794,16 @@ global_param_struct get_global_param(filenames_struct *names,
   }
   else {
     if(options.Nnode < 4) {
-      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
+      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to %d.",options.Nnode);
       nrerror(ErrStr);
     }
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);
+    nrerror(ErrStr);
+  }
+  if((!options.FULL_ENERGY && !options.FROZEN_SOIL) && options.Nlayer<1) {
+    sprintf(ErrStr,"You must define at least 1 soil moisture layer to run the model.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
   if(!options.FULL_ENERGY && !options.FROZEN_SOIL && options.GRND_FLUX) {
@@ -710,77 +814,24 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"FULL_ENERGY is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
     nrerror(ErrStr);
   }
-  if(options.SNOW_BAND > MAX_BANDS) {
-    sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
-    nrerror(ErrStr);
-  }
-  if( options.SAVE_STATE ) {
-    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
-      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+
+  // Validate lake parameter information
+  if (options.LAKES) {
+    if (!options.FULL_ENERGY) {
+      sprintf(ErrStr, "FULL_ENERGY must be TRUE if the lake model is to be run.");
       nrerror(ErrStr);
-    } // Add the day range checking below here
-   // Check for month, day in range
-    lastvalidday = lastday[global.statemonth - 1];
-    if ( global.statemonth == 2 ) {
-      if ( (global.stateyear % 4) == 0 && ( (global.stateyear % 100) != 0 || (global.stateyear % 400) == 0 ) ){
-        lastvalidday = 29;
-      }
     }
-    if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
-      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+    if ( strcmp ( names->lakeparam, "MISSING" ) == 0 )
+      nrerror("\"LAKES\" was specified, but no lake parameter file has been defined.  Make sure that the global file defines the lake parameter file on the line that begins with \"LAKES\".");
+    if (global.resolution == 0) {
+      sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
+      nrerror(ErrStr);
+    }
+    if (global.resolution > 360 && !options.EQUAL_AREA) {
+      sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
       nrerror(ErrStr);
     }
   }
-  // Set the statefile name here to be able to compare with INIT_STATE name
-  if( options.SAVE_STATE ) {
-    sprintf(names->statefile,"%s_%04i%02i%02i", names->statefile, 
-	  global.stateyear, global.statemonth, global.stateday);
-  }
-  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, names->statefile ) == 0))  {
-    sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
-    nrerror(ErrStr);
-  }
-  // Validate lakes
-  if ( options.LAKES && !options.FULL_ENERGY ) {
-    sprintf(ErrStr, "FULL_ENERGY must be TRUE if the lake model is to be run.");
-    nrerror(ErrStr);
-  }
-  if ( global.resolution == 0 && options.LAKES ) {
-    sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
-    nrerror(ErrStr);
-  }
-  if ( options.LAKES && global.resolution > 360 && !options.EQUAL_AREA ) {
-    sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
-    nrerror(ErrStr);
-  }
-
-#endif  // !OUTPUT_FORCE
-
-  /* check the output step */
-  if (global.out_dt == 0 || global.out_dt == MISSING) {
-    global.out_dt = global.dt;
-  }
-  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {
-    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
-  }
-
-#if OUTPUT_FORCE
-  options.SNOW_STEP = global.dt;
-#endif  // OUTPUT_FORCE
-
-  /* set NR and NF */
-  if (global.dt < 24 && global.dt != options.SNOW_STEP)
-    nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
-
-  NF = global.dt/options.SNOW_STEP;
-  if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
-    nrerror("SNOW_STEP should be smaller than TIME_STEP and divide TIME_STEP evenly ");
-  if (NF == 1)
-    NR = 0;
-  else
-    NR = NF;
-
-#if !OUTPUT_FORCE
 
   /*********************************
     Output major options to stderr

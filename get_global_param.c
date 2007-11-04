@@ -430,6 +430,8 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("FORCING2",optstr)==0) {
         sscanf(cmdstr,"%*s %s", names->f_path_pfx[1]);
+        if (strcasecmp("FALSE",names->f_path_pfx[1])==0)
+          strcpy(names->f_path_pfx[1],"MISSING");
 	file_num = 1;
 	field=0;
       }

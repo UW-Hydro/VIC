@@ -61,6 +61,7 @@ void make_in_and_outfiles(filep_struct         *filep,
 
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
     strcpy(out_data_files[filenum].filename, filenames->result_dir);
+    strcat(out_data_files[filenum].filename, "/");
     strcat(out_data_files[filenum].filename, out_data_files[filenum].prefix);
     strcat(out_data_files[filenum].filename, "_");
     strcat(out_data_files[filenum].filename, latchar);

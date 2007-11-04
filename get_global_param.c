@@ -128,14 +128,21 @@ global_param_struct get_global_param(filenames_struct      *names,
     global.forceskip[i]  = 0;
   }
   file_num             = 0;
-  strcpy(names->f_path_pfx[1],"FALSE");
+  strcpy(names->f_path_pfx[0],"MISSING");
+  strcpy(names->f_path_pfx[1],"MISSING");
+  global.skipyear      = 0;
+  strcpy(names->init_state,   "MISSING");
   global.stateyear     = MISSING;
   global.statemonth    = MISSING;
   global.stateday      = MISSING;
-  strcpy(names->statefile, "NONE");
-  global.skipyear      = 0;
+  strcpy(names->statefile,    "MISSING");
+  strcpy(names->soil,         "MISSING");
+  strcpy(names->soil_dir,     "MISSING");
+  strcpy(names->veg,          "MISSING");
+  strcpy(names->veglib,       "MISSING");
+  strcpy(names->snowband,     "MISSING");
+  strcpy(names->result_dir,   "MISSING");
   global.out_dt        = MISSING;
-  strcpy(names->soil_dir, ".");
 
   /** Read through global control file to find parameters **/
 
@@ -527,7 +534,7 @@ global_param_struct get_global_param(filenames_struct      *names,
     Check for undefined required parameters
   ******************************************/
 
-  // Model time step
+  // Validate model time step
   if (global.dt == MISSING)
     nrerror("Model time step has not been defined.  Make sure that the global file defines TIME_STEP.");
   else if (global.dt < 1) {
@@ -535,7 +542,29 @@ global_param_struct get_global_param(filenames_struct      *names,
     nrerror(ErrStr);
   }
 
-  // Simulation start date
+  // Validate the output step
+  if (global.out_dt == 0 || global.out_dt == MISSING) {
+    global.out_dt = global.dt;
+  }
+  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {
+    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
+  }
+
+  // Validate SNOW_STEP and set NR and NF
+#if OUTPUT_FORCE
+  options.SNOW_STEP = global.dt;
+#endif  // OUTPUT_FORCE
+  if (global.dt < 24 && global.dt != options.SNOW_STEP)
+    nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
+  NF = global.dt/options.SNOW_STEP;
+  if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
+    nrerror("SNOW_STEP should be smaller than TIME_STEP and divide TIME_STEP evenly ");
+  if (NF == 1)
+    NR = 0;
+  else
+    NR = NF;
+
+  // Validate simulation start date
   if (global.startyear == MISSING)
     nrerror("Simulation start year has not been defined.  Make sure that the global file defines STARTYEAR.");
   else if (global.startyear < 0) {
@@ -565,7 +594,7 @@ global_param_struct get_global_param(filenames_struct      *names,
     nrerror(ErrStr);
   }
 
-  // Simulation end date and/or number of timesteps
+  // Validate simulation end date and/or number of timesteps
   if (global.nrecs == MISSING && global.endyear == MISSING && global.endmonth == MISSING && global.endday == MISSING)
     nrerror("The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
   else if (global.nrecs == MISSING) {
@@ -593,8 +622,8 @@ global_param_struct get_global_param(filenames_struct      *names,
     nrerror(ErrStr);
   }
 
-  // Forcing files and variables
-  if ( strcmp ( names->f_path_pfx[0], "FALSE" ) == 0 )
+  // Validate forcing files and variables
+  if ( strcmp ( names->f_path_pfx[0], "MISSING" ) == 0 )
     nrerror("No forcing file has been defined.  Make sure that the global file defines FORCING1.");
   for(i=0;i<2;i++) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
@@ -624,10 +653,83 @@ global_param_struct get_global_param(filenames_struct      *names,
     global.forceskip[1] = 0;
   }
 
+  // Validate result directory
+  if ( strcmp ( names->result_dir, "MISSING" ) == 0 )
+    nrerror("No results directory has been defined.  Make sure that the global file defines the result directory on the line that begins with \"RESULT_DIR\".");
+
+  // Validate soil parameter file information
+  if ( strcmp ( names->soil, "MISSING" ) == 0 )
+    nrerror("No soil parameter file has been defined.  Make sure that the global file defines the soil parameter file on the line that begins with \"SOIL\".");
+  if (options.ARC_SOIL && strcmp ( names->soil_dir, "MISSING" ) == 0)
+    nrerror("\"ARC_SOIL\" was specified as TRUE, but no soil parameter directory (\"SOIL_DIR\") has been defined.  Make sure that the global file defines the soil parameter directory on the line that begins with \"SOIL_DIR\".");
+
+  /*******************************************************************************
+    Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
+  *******************************************************************************/
+
 #if !OUTPUT_FORCE
 
+  // Validate veg parameter information
+  if ( strcmp ( names->veg, "MISSING" ) == 0 )
+    nrerror("No vegetation parameter file has been defined.  Make sure that the global file defines the vegetation parameter file on the line that begins with \"VEGPARAM\".");
+  if ( strcmp ( names->veglib, "MISSING" ) == 0 )
+    nrerror("No vegetation library file has been defined.  Make sure that the global file defines the vegetation library file on the line that begins with \"VEGLIB\".");
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
+
+  // Validate the elevation band file information
+  if(options.SNOW_BAND > 1) {
+    if ( strcmp ( names->snowband, "MISSING" ) == 0 ) {
+      sprintf(ErrStr, "\"SNOW_BAND\" was specified with %d elevation bands, but no elevation band file has been defined.  Make sure that the global file defines the elevation band file on the line that begins with \"SNOW_BAND\" (after the number of bands).", options.SNOW_BAND);
+      nrerror(ErrStr);
+    }
+    if(options.SNOW_BAND > MAX_BANDS) {
+      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+      nrerror(ErrStr);
+    }
+  }
+  else if (options.SNOW_BAND <= 0) {
+    sprintf(ErrStr,"Invalid number of elevation bands specified in global file (%d).  Number of bands must be >= 1.",options.SNOW_BAND);
+    nrerror(ErrStr);
+  }
+
+  // Validate the input state file information
+  if( options.INIT_STATE ) {
+    if ( strcmp ( names->init_state, "MISSING" ) == 0 )
+      nrerror("\"INIT_STATE\" was specified, but no input state file has been defined.  Make sure that the global file defines the input state file on the line that begins with \"INIT_STATE\".");
+  }
+
+  // Validate the output state file information
+  if( options.SAVE_STATE ) {
+    if ( strcmp ( names->statefile, "MISSING" ) == 0)
+      nrerror("\"SAVE_STATE\" was specified, but no output state file has been defined.  Make sure that the global file defines the output state file on the line that begins with \"SAVE_STATE\".");
+    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
+      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
+    // Check for month, day in range
+    lastvalidday = lastday[global.statemonth - 1];
+    if ( global.statemonth == 2 ) {
+      if ( (global.stateyear % 4) == 0 && ( (global.stateyear % 100) != 0 || (global.stateyear % 400) == 0 ) ){
+        lastvalidday = 29;
+      } 
+    }
+    if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
+      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
+      nrerror(ErrStr);
+    }
+  }
+  // Set the statename here to be able to compare with INIT_STATE name
+  if( options.SAVE_STATE ) {
+    sprintf(names->statefile,"%s_%04i%02i%02i", names->statefile, 
+	  global.stateyear, global.statemonth, global.stateday);
+  }
+  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, names->statefile ) == 0))  {
+      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
+      nrerror(ErrStr);
+  }
+
+  // Validate soil parameter/simulation mode combinations
   if(options.Nlayer > MAX_LAYERS) {
     sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
@@ -660,64 +762,6 @@ global_param_struct get_global_param(filenames_struct      *names,
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlaeyrs is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
-  if(options.SNOW_BAND > MAX_BANDS) {
-    sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
-    nrerror(ErrStr);
-  }
-  if( options.SAVE_STATE ) {
-    if ( global.stateyear == MISSING || global.statemonth == MISSING || global.stateday == MISSING )  {
-      sprintf(ErrStr,"Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
-      nrerror(ErrStr);
-    }
-    // Check for month, day in range
-    lastvalidday = lastday[global.statemonth - 1];
-    if ( global.statemonth == 2 ) {
-      if ( (global.stateyear % 4) == 0 && ( (global.stateyear % 100) != 0 || (global.stateyear % 400) == 0 ) ){
-        lastvalidday = 29;
-      } 
-    }
-    if ( global.stateday > lastvalidday || global.statemonth > 12 || global.statemonth < 1 || global.stateday > 31 || global.stateday < 1 ){
-      sprintf(ErrStr,"Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth, global.stateday);
-      nrerror(ErrStr);
-    }
-  }
-  // Set the statename here to be able to compare with INIT_STATE name
-  if( options.SAVE_STATE ) {
-    sprintf(names->statefile,"%s_%04i%02i%02i", names->statefile, 
-	  global.stateyear, global.statemonth, global.stateday);
-  }
-  if( options.INIT_STATE && options.SAVE_STATE && (strcmp( names->init_state, names->statefile ) == 0))  {
-      sprintf(ErrStr,"The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile, names->init_state);
-      nrerror(ErrStr);
-  }
-
-#endif  // !OUTPUT_FORCE
-
-  /* check the output step */
-  if (global.out_dt == 0 || global.out_dt == MISSING) {
-    global.out_dt = global.dt;
-  }
-  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)) {
-    nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
-  }
-
-#if OUTPUT_FORCE
-  options.SNOW_STEP = global.dt;
-#endif  // OUTPUT_FORCE
-
-  /* set NR and NF */
-  if (global.dt < 24 && global.dt != options.SNOW_STEP)
-    nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
-
-  NF = global.dt/options.SNOW_STEP;
-  if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
-    nrerror("SNOW_STEP should be smaller than TIME_STEP and divide TIME_STEP evenly ");
-  if (NF == 1)
-    NR = 0;
-  else
-    NR = NF;
-
-#if !OUTPUT_FORCE
 
   /*********************************
     Output major options to stderr
@@ -772,7 +816,7 @@ global_param_struct get_global_param(filenames_struct      *names,
     fprintf(stderr,"Debugging code has been included in the executable.\n");
   else 
     fprintf(stderr,"Debugging code has not been compiled.\n");
-#endif
+#endif // VERBOSE
 
 #endif // !OUTPUT_FORCE
 

@@ -155,6 +155,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     rewind(soilparam);
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     Ncells[0] = read_arcinfo_info(namestr,&lat,&lng,&cellnum);
   }
@@ -170,6 +171,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   /** Check if Grid Cell is Run in Model **/
   fscanf(soilparam,"%s",tmpstr);
   strcpy(namestr,soilparamdir);
+  strcat(namestr,"/");
   strcat(namestr,tmpstr);
   *RUN = (int)read_arcinfo_value(namestr,temp.lat,temp.lng);
   
@@ -182,42 +184,49 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     /** Get Average Grid Cell Elevation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.elevation = (float)read_arcinfo_value(namestr,temp.lat,temp.lng);
   
     /** Get Grid Cell Infiltration Parameter **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.b_infilt = read_arcinfo_value(namestr,temp.lat,temp.lng);
   
     /** Get Maximum Baseflow Fraction **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.Ds = read_arcinfo_value(namestr,temp.lat,temp.lng);
   
     /** Get Maximum Baseflow Velocity **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.Dsmax = read_arcinfo_value(namestr,temp.lat,temp.lng);
   
     /** Get Maximum Soil Moisture Fraction **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.Ws = read_arcinfo_value(namestr,temp.lat,temp.lng);
   
     /** Get Exponential **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.c = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     /** Get Average Soil Temperature **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.avg_temp = read_arcinfo_value(namestr,temp.lat,temp.lng);
     if(options.FULL_ENERGY && (temp.avg_temp>100. || temp.avg_temp<-50)) {
@@ -230,12 +239,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     /** Get Soil Thermal Damping Depth **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.dp = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     /** Get Data Time Zone Offset from GMT **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     off_gmt = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
@@ -243,6 +254,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       Wcr_FRACT[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -251,6 +263,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer = 0; layer < options.Nlayer; layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       Wpwp_FRACT[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -258,18 +271,21 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     /** Get Bare Soil Roughness **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     /** Get Snow Surface Roughness **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.snow_rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     /** Get Average Annual Precipitation **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.annual_prec = read_arcinfo_value(namestr,temp.lat,temp.lng);
 
@@ -277,6 +293,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       sand[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -285,6 +302,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       clay[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -293,6 +311,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.Ksat[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -301,6 +320,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.phi_s[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -309,6 +329,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.init_moist[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -317,6 +338,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.depth[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
@@ -336,6 +358,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.bulk_density[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -344,6 +367,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.porosity[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
@@ -351,12 +375,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     /** Activate Frozen Soil for Grid Cell **/
     fscanf(soilparam,"%s",tmpstr);
     strcpy(namestr,soilparamdir);
+    strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.FS_ACTIVE = (char)read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     if (options.COMPUTE_TREELINE && (fscanf(soilparam,"%s",tmpstr)) != EOF) {
       /** Get Avg July Air Temperature **/
       strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.avgJulyAirTemp = read_arcinfo_value(namestr,temp.lat,temp.lng);
       options.JULY_TAVG_SUPPLIED = TRUE;

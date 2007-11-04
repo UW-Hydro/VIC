@@ -1070,8 +1070,22 @@ options.SNOW_BAND > 1.
 	band had 0 area).						JS via TJB
 
 
+Better validation of global parameter file options
 
--------------------------------------------------------------------------------
+	Files Affected:
+	get_global_param.c
+	make_in_and_outfiles.c
+	read_soilparam_arc.c
+
+	Description:
+	Now, all options in the global parameter file involving input and
+	output files are checked to ensure that the filenames have been
+	specified.  In addition, SOIL_DIR and RESULT_DIR no longer require
+	a trailing "/"; a "/" is automatically appended when constructing
+	the soil parameter filename or results filename.		TJB
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.4 to VIC 4.0.5 *****
 --------------------------------------------------------------------------------
 

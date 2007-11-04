@@ -109,8 +109,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2007-Sep-14 Fixed typo in BASEFLOW option check.				TJB
   2007-Sep-14 Moved check on !OUTPUT_FORCE to after all files have been read
 	      because the forcing disaggregation requires annual precip.	TJB
-	       
-
+  2007-Oct-31 Append "/" to soil_dir so that this need not be done
+	      in global parameter file.						TJB
 **********************************************************************/
 {
   extern option_struct options;

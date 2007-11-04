@@ -62,6 +62,7 @@ global_param_struct get_global_param(filenames_struct      *names,
   2007-Apr-23 Added initialization of some global parameters.		TJB
   2007-Sep-14 Added initialization of names->soil_dir.			TJB
   2007-Oct-10 Added validation of dt, start date, end date, and nrecs.	TJB
+  2007-Oct-31 Added validation of input/output files.			TJB
 
 **********************************************************************/
 {

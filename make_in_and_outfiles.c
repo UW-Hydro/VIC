@@ -18,12 +18,14 @@ void make_in_and_outfiles(filep_struct         *filep,
   Modifications:
   5/20/96	The routine was modified to accept a variable
 		number of layers, as well as to work with 
-		frozen soils					KAC
+		frozen soils						KAC
   2006-Sep-11 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; removed the
-              OPTIMIZE and LDAS_OUTPUT options. 		TJB
+              OPTIMIZE and LDAS_OUTPUT options. 			TJB
   2006-Oct-26 Merged infiles and outfiles structs into filep_struct;
-	      Merged builtnames into filenames. 		TJB
+	      Merged builtnames into filenames. 			TJB
+  2007-Oct-31 Append "/" to result_dir so that this need not be done
+	      in global parameter file.					TJB
 
 **********************************************************************/
 {

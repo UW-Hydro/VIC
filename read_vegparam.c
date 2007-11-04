@@ -26,10 +26,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   03-27-03 Modified code to update Wdmax based on LAI values read in
            for the current grid cell.  If LAI is not obtained from this
            function, then the values cacluated in read_veglib.c are
-           left unchanged.                                   DP & KAC
-  2006-Nov-07 Allocates MaxVeg+1 veg tiles.  TJB
+           left unchanged.						DP & KAC
+  2006-Nov-07 Allocates MaxVeg+1 veg tiles.				TJB
   2007-May-11 Changed some 'fscanf' statements to 'fgets' and 'sscanf' 
-           to count rootzone and BLOWING fields. Also tests for fetch < 1.GCT
+	      to count rootzone and BLOWING fields. Also tests for
+	      fetch < 1.						GCT
+  2007-Oct-31 Added missing brackets in if(options.GLOBAL_LAI) block.	TJB
 **********************************************************************/
 {
 
@@ -177,7 +179,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
-    if ( options.GLOBAL_LAI )
+    if ( options.GLOBAL_LAI ) {
       // Read the LAI line
       if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
         sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading LAI for vegetat_type_num %d\n",vegcel,vegetat_type_num);
@@ -206,6 +208,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
        veg_lib[temp[i].veg_class].Wdmax[j] = 
 	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
+    }
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);

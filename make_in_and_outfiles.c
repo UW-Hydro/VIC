@@ -22,13 +22,15 @@ void make_in_and_outfiles(filep_struct         *filep,
   11-18-02 Modified to print notification that the output fluxes file
            will be in a binary format.                          LCB
   29-Oct-03 Distinguishing between input lakeparam file and output
-	    lake file.						TJB
-  2005-Mar-24 Modified to handle ALMA output files.		TJB
+	    lake file.							TJB
+  2005-Mar-24 Modified to handle ALMA output files.			TJB
   2006-Sep-23 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; removed the
-              OPTIMIZE and LDAS_OUTPUT options. TJB
+              OPTIMIZE and LDAS_OUTPUT options.				TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-	      Merged builtnames into filenames-> TJB
+	      Merged builtnames into filenames->			TJB
+  2007-Oct-31 Append "/" to result_dir so that this need not be done
+	      in global parameter file.					TJB
 
 **********************************************************************/
 {
@@ -36,7 +38,7 @@ void make_in_and_outfiles(filep_struct         *filep,
   extern param_set_struct param_set;
   extern FILE *open_file(char string[], char type[]);
 
-  char             latchar[10], lngchar[10], junk[5];
+  char   latchar[10], lngchar[10], junk[5];
   int filenum;
 
   sprintf(junk, "%%.%if", options.GRID_DECIMAL);
@@ -57,7 +59,7 @@ void make_in_and_outfiles(filep_struct         *filep,
     filep->forcing[0] = open_file(filenames->forcing[0], "r");
 
   filep->forcing[1] = NULL;
-  if(strcasecmp(filenames->f_path_pfx[1],"FALSE")!=0) {
+  if(strcasecmp(filenames->f_path_pfx[1],"MISSING")!=0) {
     strcpy(filenames->forcing[1], filenames->f_path_pfx[1]);
     strcat(filenames->forcing[1], latchar);
     strcat(filenames->forcing[1], "_");
@@ -74,6 +76,7 @@ void make_in_and_outfiles(filep_struct         *filep,
 
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
     strcpy(out_data_files[filenum].filename, filenames->result_dir);
+    strcat(out_data_files[filenum].filename, "/");
     strcat(out_data_files[filenum].filename, out_data_files[filenum].prefix);
     strcat(out_data_files[filenum].filename, "_");
     strcat(out_data_files[filenum].filename, latchar);

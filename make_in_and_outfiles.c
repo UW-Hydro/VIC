@@ -50,7 +50,7 @@ void make_in_and_outfiles(filep_struct         *filep,
     filep->forcing[0] = open_file(filenames->forcing[0], "r");
 
   filep->forcing[1] = NULL;
-  if(strcasecmp(filenames->f_path_pfx[1],"FALSE")!=0) {
+  if(strcasecmp(filenames->f_path_pfx[1],"MISSING")!=0) {
     strcpy(filenames->forcing[1], filenames->f_path_pfx[1]);
     strcat(filenames->forcing[1], latchar);
     strcat(filenames->forcing[1], "_");

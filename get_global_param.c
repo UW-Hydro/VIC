@@ -127,10 +127,9 @@ global_param_struct get_global_param(filenames_struct      *names,
     global.forceday[i]   = 1;
     global.forcehour[i]  = 0;
     global.forceskip[i]  = 0;
+    strcpy(names->f_path_pfx[i],"MISSING");
   }
   file_num             = 0;
-  strcpy(names->f_path_pfx[0],"MISSING");
-  strcpy(names->f_path_pfx[1],"MISSING");
   global.skipyear      = 0;
   strcpy(names->init_state,   "MISSING");
   global.stateyear     = MISSING;

@@ -39,21 +39,23 @@ int  full_energy(char                 NEWCELL,
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
 	    used in flux calculations.				TJB
   2006-Sep-23 Implemented flexible output configuration; now computation
-	      of soil wetness and root zone soil moisture happens here. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+	      of soil wetness and root zone soil moisture happens here.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
-           main subroutine, rather than ending the simulation.   GCT/KAC
+	      main subroutine, rather than ending the simulation.		GCT/KAC
   2007-May-01 Added case of SPATIAL_FROST = TRUE in modifications
-              from 2006-Sep-23. GCT
-  2007-Aug-10 Added features for EXCESS_ICE option.  JCA
-               Including calculating subsidence for each layer and
-               updating soil depth, effective porosity,
-               bulk density, and soil moisture and fluxes by calling
-               runoff function if subsidence occurs.
-  2007-Sep-7 No longer resets ice content to previous time-step ice content if
-               subsidence has occurred.  JCA
-  2007-09-19   Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.  JCA
-  2007-09-19   Fixed bug in subsidence calculation.  JCA
+	      from 2006-Sep-23.							GCT
+  2007-Aug-10 Added features for EXCESS_ICE option.
+	      Including calculating subsidence for each layer and
+	      updating soil depth, effective porosity,
+	      bulk density, and soil moisture and fluxes by calling
+	      runoff function if subsidence occurs.				JCA
+  2007-Sep-07 No longer resets ice content to previous time-step ice content if
+	      subsidence has occurred.						JCA
+  2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.		JCA
+  2007-Sep-19 Fixed bug in subsidence calculation.				JCA
+  2007-Nov-06 Added veg_con to parameter list of lakemain().  Replaced
+	      lake.fraci with lake.areai.					LCB via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -722,9 +724,9 @@ int  full_energy(char                 NEWCELL,
     lake_prec = ( gauge_correction[SNOW] * (atmos->prec[NR] - rainonly) 
 		  + gauge_correction[RAIN] * rainonly );
     // atmos->out_prec += lake_prec * lake_con->Cl[0];
-    
+
     ErrorFlag = lakemain(atmos, *lake_con, gauge_correction[SNOW] * (atmos->prec[NR] - rainonly),
-			 gauge_correction[RAIN] * rainonly, soil_con,
+			 gauge_correction[RAIN] * rainonly, soil_con, veg_con,
 #if EXCESS_ICE
 			 SubsidenceUpdate, total_meltwater,
 #endif
@@ -739,13 +741,13 @@ int  full_energy(char                 NEWCELL,
 	fprintf(debug.fg_lake,"Date,Rec,AeroResist,BasinflowIn,BaseflowOut");
 	for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	  fprintf(debug.fg_lake, ",Density%i", i);
-	fprintf(debug.fg_lake,",Evap,IceFract,IceHeight,LakeDepth,RunoffIn,RunoffOut,SurfaceArea,SnowDepth,SnowMelt");
+	fprintf(debug.fg_lake,",Evap,IceArea,IceHeight,LakeDepth,RunoffIn,RunoffOut,SurfaceArea,SnowDepth,SnowMelt");
 	for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	  fprintf(debug.fg_lake, ",Area%i", i);
 	fprintf(debug.fg_lake,",SWE");
 	for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	  fprintf(debug.fg_lake, ",Temp%i", i);
-	fprintf(debug.fg_lake,",IceTemp,TpIn,Volume,Nodes,MinMax");
+	fprintf(debug.fg_lake,",IceTemp,Volume,Nodes");
 	fprintf(debug.fg_lake,",AlbedoLake,AlbedoOver,AlbedoUnder,AtmosError,AtmosLatent,AtmosLatentSub,AtmosSensible,LongOverIn,LongUnderIn,LongUnderOut,NetLongAtmos,NetLongOver,NetLongUnder,NetShortAtmos,NetShortGrnd,NetShortOver,NetShortUnder");
 	fprintf(debug.fg_lake,",ShortOverIn,ShortUnderIn,advection,deltaCC,deltaH,error,fusion,grnd_flux,latent,latent_sub,longwave,melt_energy,out_long_surface,refreeze_energy,sensible,shortwave");
 	fprintf(debug.fg_lake,",Qnet,albedo,coldcontent,coverage,density,depth,mass_error,max_swq,melt,pack_temp,pack_water,store_coverage,store_swq,surf_temp,surf_water,swq,swq_slope,vapor_flux,last_snow,store_snow\n");
@@ -759,7 +761,7 @@ int  full_energy(char                 NEWCELL,
       for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	fprintf(debug.fg_lake, ",%f", lake_var->density[i]);
       fprintf(debug.fg_lake, ",%f", lake_var->evapw);
-      fprintf(debug.fg_lake, ",%f", lake_var->fraci);
+      fprintf(debug.fg_lake, ",%f", lake_var->areai);
       fprintf(debug.fg_lake, ",%f", lake_var->hice);
       fprintf(debug.fg_lake, ",%f", lake_var->ldepth);
       fprintf(debug.fg_lake, ",%f", lake_var->runoff_in);
@@ -773,10 +775,8 @@ int  full_energy(char                 NEWCELL,
       for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	fprintf(debug.fg_lake, ",%f", lake_var->temp[i]);
       fprintf(debug.fg_lake, ",%f", lake_var->tempi);
-      fprintf(debug.fg_lake, ",%f", lake_var->tp_in);
       fprintf(debug.fg_lake, ",%f", lake_var->volume);
       fprintf(debug.fg_lake, ",%i", lake_var->activenod);
-      fprintf(debug.fg_lake, ",%i", lake_var->mixmax);
       
       // print lake energy variables
       fprintf(debug.fg_lake, ",%f", energy[Nveg+1][0].AlbedoLake);

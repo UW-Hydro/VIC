@@ -17,7 +17,8 @@ int wetland_energy(int                  rec,
 		   int                  iveg,
 		   int                  band,
 		   double               lake_frac,
-		   lake_con_struct      lake_con)
+		   lake_con_struct      lake_con,
+		   veg_con_struct      *veg_con)
 
 /**********************************************************************
 	wetland_energy	Laura Bowling		May 12, 2002
@@ -31,6 +32,9 @@ int wetland_energy(int                  rec,
   2007-Apr-03 Changed routine type to int so that it can return numeric
 	      ERROR values.						KAC via GCT
   2007-Aug-21 Added features for EXCESS_ICE option.			JCA
+  2007-Nov-06 Modified so that wetland vegetation defaults to the first
+	      vegetation type in the parameter file, rather than
+	      hard-wired.						LCB via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -110,6 +114,10 @@ int wetland_energy(int                  rec,
   veg_var_struct        *wet_veg_var;
   veg_var_struct        *dry_veg_var;
   veg_var_struct         empty_veg_var;
+  float                  lag_one;
+  float                  sigma_slope;
+  float                  fetch;
+  double MOIST1, MOIST2, EVAP, DSWE, ERR, WDEW1, WDEW2;
 
   /* set local pointers */
   cell    = prcp->cell;
@@ -143,8 +151,15 @@ int wetland_energy(int                  rec,
     gauge_correction[1] = 1;
   }
 
+  MOIST1=0.0;
+  for(i=0; i<options.Nlayer; i++) {
+    MOIST1 += cell[WET][iveg][band].layer[i].moist;
+  }
+  DSWE = snow[iveg][band].swq;
+  WDEW1 = veg_var[WET][iveg][band].Wdew;
+
   /** Solve Wetland only if Lake Coverage Less than 100% **/
-  if (lake_frac  < 0.999) {
+  if (fabs(lake_frac - 1.0) > SMALL) {
 
     /* fraction of lake area. */
     Cv = 1. - lake_frac;
@@ -170,14 +185,14 @@ int wetland_energy(int                  rec,
       out_snow[j] = 0;
     }
 
-    wind_h = gp->wind_h;
+    /** Define vegetation class number **/
+    veg_class = veg_con[0].veg_class;
+    wind_h = veg_lib[veg_class].wind_h;
 
     /** Compute Surface Attenuation due to Vegetation Coverage **/
-    rad_atten = 0.4;
-    LAI = 3.;
-    surf_atten = exp(-rad_atten * LAI);
+    surf_atten = exp(-veg_lib[veg_class].rad_atten
+                     * veg_lib[veg_class].LAI[dmy[rec].month-1]);
 
-        
     /* Initialize soil thermal properties for the top two layers */
     if(options.FULL_ENERGY || options.FROZEN_SOIL) {
       prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
@@ -185,15 +200,17 @@ int wetland_energy(int                  rec,
     }
 
     /** Compute Bare Soil (free of snow) Albedo **/
-    bare_albedo = 0.2;       
-    overstory = FALSE;
+    bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];       
   
     /*************************************
 	Compute the aerodynamic resistance 
     *************************************/
 
-    displacement[0] = .218;
-    roughness[0]    = .04;
+    /* Set surface descriptive variables */
+    displacement[0] = veg_lib[veg_class].displacement[dmy[rec].month-1];
+    roughness[0]    = veg_lib[veg_class].roughness[dmy[rec].month-1];
+    overstory       = veg_lib[veg_class].overstory;
+    if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
 
     /* Initialize wind speeds */
     tmp_wind[0] = atmos->wind[NR];
@@ -210,11 +227,13 @@ int wetland_energy(int                  rec,
       ref_height[0] = displacement[0] + wind_h + roughness[0];
     
     /* Compute aerodynamic resistance over various surface types */
-    CalcAerodynamic(overstory, height, 0.2, 
-		    soil_con->snow_rough, soil_con->rough, 
-		    .4, gp->wind_h, cell[WET][iveg][0].aero_resist, tmp_wind, 
-		    displacement, ref_height, roughness, 
-		    Nveg, iveg);
+    if ( ( ErrorFlag = CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio,
+                    soil_con->snow_rough, soil_con->rough,
+                    veg_lib[veg_class].wind_atten, gp->wind_h,
+                    cell[WET][iveg][0].aero_resist, tmp_wind,
+                    displacement, ref_height, roughness,
+                    Nveg, iveg) ) == ERROR)
+      return(ERROR);
 
     /******************************
         Solve ground surface fluxes 
@@ -222,12 +241,9 @@ int wetland_energy(int                  rec,
     
     wet_veg_var = &(veg_var[WET][iveg][band]);
     dry_veg_var = &(veg_var[DRY][iveg][band]);
-
-    for(i=0; i<MAX_LAYERS; i++)
-      root[i] = 0.0;
-    root[0] = 1.;
-
-    veg_class=0;
+    lag_one     = veg_con[0].lag_one;
+    sigma_slope = veg_con[0].sigma_slope;
+    fetch       = veg_con[0].fetch;
 
 #if EXCESS_ICE
     if(SubsidenceUpdate == 1 ){ //if subsidence has occurred in this time-step,
@@ -330,31 +346,48 @@ int wetland_energy(int                  rec,
 #if EXCESS_ICE
 			       SubsidenceUpdate, dummy, dummy,
 #endif
-			       prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-			       cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used), 
-			       &(cell[DRY][iveg][band].baseflow), 
-			       &(cell[WET][iveg][band].baseflow), displacement, 
-			       gauge_correction, &(cell[DRY][iveg][band].inflow), 
-			       &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
-			       &out_rain[band*2], &out_snow[band*2], ref_height, roughness, 
-			       &(cell[DRY][iveg][band].runoff), 
-			       &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
-			       tmp_wind, root, Nbands, Ndist, 
-			       options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
-			       atmos, dmy, &(energy[iveg][band]), gp, 
-			       cell[DRY][iveg][band].layer, 
-			       cell[WET][iveg][band].layer, &(snow[iveg][band]), 
-			       soil_con, dry_veg_var, wet_veg_var, .8,
-			       .0001, 500.);
-    
+                               prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le,
+                               cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used),
+                               &(cell[DRY][iveg][band].baseflow),
+                               &(cell[WET][iveg][band].baseflow), displacement,
+                               gauge_correction, &(cell[DRY][iveg][band].inflow),
+                               &(cell[WET][iveg][band].inflow), &out_prec[band*2],
+                               &out_rain[band*2], &out_snow[band*2],
+                               ref_height, roughness,
+                               &(cell[DRY][iveg][band].runoff),
+                               &(cell[WET][iveg][band].runoff), &snow_inflow[band],
+                               tmp_wind, veg_con[0].root, Nbands, Ndist,
+                               options.Nlayer, Nveg, band, dp, iveg, rec, veg_class,
+                               atmos, dmy, &(energy[iveg][band]), gp,
+                               cell[DRY][iveg][band].layer,
+                               cell[WET][iveg][band].layer, &(snow[iveg][band]),
+                               soil_con, dry_veg_var, wet_veg_var, lag_one, sigma_slope, fetch);
+
     if ( ErrorFlag == ERROR )
       // Failed in surface_fluxes, return error flag
       return( ErrorFlag );
     
+    EVAP = MOIST2=0.0;
+    for(i=0; i<options.Nlayer; i++) {
+      MOIST2 += cell[WET][iveg][band].layer[i].moist;
+      EVAP += cell[WET][iveg][band].layer[i].evap;
+    }
+    EVAP += veg_var[WET][iveg][band].canopyevap;
+    EVAP += snow[iveg][band].vapor_flux * 1000.;
+    EVAP += snow[iveg][band].canopy_vapor_flux * 1000.;
+    WDEW2 = veg_var[WET][iveg][band].Wdew;
+    DSWE -= snow[iveg][band].swq;
+    ERR = out_prec[band*2] - (cell[WET][iveg][band].baseflow+cell[WET][iveg][band].runoff+EVAP)-(-1000*DSWE+(MOIST2-MOIST1)+(WDEW2-WDEW1));
+//    if(fabs(ERR) > SMALL) {
+//      fprintf(stderr, "prec=%f, b=%f, R=%f ET=%f DeltaM=%f DSWE=%f Ddew=%f ERR=%e\n",out_prec[band*2],cell[WET][iveg][band].baseflow,cell[WET][iveg][band].runoff, EVAP, MOIST2-MOIST1, -1000*DSWE, WDEW2-WDEW1, ERR);
+//    }
+
     atmos->out_prec += out_prec[band*2] * Cv * lake_con.Cl[0];
     atmos->out_rain += out_rain[band*2] * Cv * lake_con.Cl[0];
     atmos->out_snow += out_snow[band*2] * Cv * lake_con.Cl[0];
-  } /** end if lake_frac < 0.999 **/
+
+  } /** end if fabs(lake_frac-1.0) > SMALL **/
 
   return (0);  
+
 }

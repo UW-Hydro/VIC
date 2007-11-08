@@ -45,7 +45,7 @@ double calc_rainonly(double air_temp,
   double rainonly;
 
   rainonly = 0.;
-  if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP ){
+  if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP ) {
     fprintf( stderr, "ERROR: MAX_SNOW_TEMP must be greater then MIN_RAIN_TEMP");
     return (ERROR);
   }

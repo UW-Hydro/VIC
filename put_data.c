@@ -61,9 +61,11 @@ void put_data(dist_prcp_struct  *prcp,
   2007-Apr-21 Moved initialization of tmp_fract to immediately before the
 	        #if SPATIAL_FROST
 	      block, so that it would be initialized in all cases.	TJB
-  2007-Aug-17 Added EXCESS_ICE output variables.                        JCA
-  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.              JCA
-
+  2007-Aug-17 Added EXCESS_ICE output variables.			JCA
+  2007-Aug-22 Added OUT_WATER_ERROR as output variable.			JCA
+  2007-Nov-06 Lake area is now the larger of lake.areai and lake.sarea.
+	      Added wetland canopyevap and canopy_vapor_flux to grid
+	      cell flux aggregation.					LCB via TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -116,6 +118,7 @@ void put_data(dist_prcp_struct  *prcp,
   int                     out_dt_sec;
   int                     out_step_ratio;
   static int              step_count;
+  int                     ErrorFlag;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -642,8 +645,11 @@ void put_data(dist_prcp_struct  *prcp,
 
       /** If lake fraction exists store energy and water fluxes */
 
-      // Fraction of wetland with open water
-      Clake = lake_var.sarea/lake_con->basin[0];
+      // Fraction of wetland that is flooded
+      if (lake_var.areai > lake_var.sarea)
+        Clake = lake_var.areai/lake_con->basin[0];
+      else
+        Clake = lake_var.sarea/lake_con->basin[0];
 
       // Fraction of grid cell that is lakes and wetlands.
       Cv = lake_con->Cl[0];
@@ -651,15 +657,19 @@ void put_data(dist_prcp_struct  *prcp,
       band = 0;
       veg = veg_con[0].vegetat_type_num + 1;
 
-      tmp_evap = lake_var.evapw * Clake * Cv;
+      tmp_evap = lake_var.evapw * Clake;
 
+//      for ( index = 0; index < options.Nlayer; index++ )
+//        tmp_evap += cell[0][veg][band].layer[index].evap*(1.-Clake);
+//      tmp_evap += veg_var[0][veg][band].canopyevap*(1.-Clake);
       for ( index = 0; index < options.Nlayer; index++ )
-        tmp_evap += cell[0][veg][band].layer[index].evap*(1.-Clake)*Cv;
-      tmp_evap += veg_var[0][veg][band].canopyevap*(1.-Clake)*Cv;
+        tmp_evap += cell[0][veg][band].layer[index].evap;
+      tmp_evap += veg_var[0][veg][band].canopyevap;
 
-      tmp_evap += snow[veg][band].vapor_flux * 1000. * Cv;
+      tmp_evap += snow[veg][band].vapor_flux * 1000.;
+      tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
 
-      out_data[OUT_EVAP].data[0] += tmp_evap * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_EVAP].data[0] += tmp_evap * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       out_data[OUT_SUB_SNOW].data[0] += snow[veg][band].vapor_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_SUB_SURFACE].data[0] += snow[veg][band].surface_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -675,7 +685,7 @@ void put_data(dist_prcp_struct  *prcp,
 
       /** record freezing and thawing front depths **/
       if(options.FROZEN_SOIL) {
-        if(Clake != 1.) {
+        if(abs(Clake-1.0) > SMALL) {
           for(index = 0; index < MAX_FRONTS; index++) {
             if(energy[veg][band].fdepth[index] != MISSING)
               out_data[OUT_FDEPTH].data[index] += energy[veg][band].fdepth[index]
@@ -683,6 +693,14 @@ void put_data(dist_prcp_struct  *prcp,
             if(energy[veg][band].tdepth[index] != MISSING)
               out_data[OUT_TDEPTH].data[index] += energy[veg][band].tdepth[index]
                 * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
+          }
+        }
+        else {
+          for(index = 0; index < MAX_FRONTS; index++) {
+            if(energy[veg][band].fdepth[index] != MISSING)
+              out_data[OUT_FDEPTH].data[index] /= (1.-Cv);
+            if(energy[veg][band].tdepth[index] != MISSING)
+              out_data[OUT_TDEPTH].data[index] /= (1.-Cv);
           }
         }
       }
@@ -706,8 +724,10 @@ void put_data(dist_prcp_struct  *prcp,
 
       /** record lake moistures **/
       out_data[OUT_LAKE_MOIST].data[0] = (lake_var.volume / lake_con->basin[0]) * 1000. * Clake * Cv; // mm over gridcell
-      out_data[OUT_LAKE_ICE].data[0]   = ( ice_density * lake_var.fraci
-                               * lake_var.hice / RHO_W );
+      if (lake_var.areai > 0.0)
+        out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.areai) * ice_density / RHO_W;
+      else
+        out_data[OUT_LAKE_ICE].data[0]   = 0.0;
 
       for ( index = 0; index < options.Nlayer; index++ ) {
         tmp_moist = cell[0][veg][band].layer[index].moist;
@@ -729,6 +749,7 @@ void put_data(dist_prcp_struct  *prcp,
       }
       out_data[OUT_SOIL_WET].data[0] += cell[0][veg][band].wetness * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_ROOTMOIST].data[0] += cell[0][veg][band].rootmoist * Cv * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_WDEW].data[0] += veg_var[0][veg][band].Wdew * Cv;
 
       /** record layer temperatures **/
       for(index=0;index<options.Nlayer;index++) {
@@ -843,10 +864,20 @@ void put_data(dist_prcp_struct  *prcp,
       // Store Lake Specific Variables
       out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
       out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
-      out_data[OUT_LAKE_ICE_FRACT].data[0]  = lake_var.fraci*Cv;
-      out_data[OUT_LAKE_DEPTH].data[0]      = lake_var.ldepth;
-      //out_data[OUT_LAKE_SURF_AREA].data[0]  = Clake;
-      out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
+      if(lake_var.areai >= lake_var.sarea) {
+        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
+        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
+      }
+      else {
+        out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
+        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
+      }
+      //out_data[OUT_LAKE_DEPTH].data[0]      = lake_var.ldepth;
+      ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
+      if (ErrorFlag == ERROR) {
+        fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var.volume, out_data[OUT_LAKE_DEPTH].data[0], rec);
+        exit(0);
+      }
       out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
       out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
       out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_var.sarea) * 1000. * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band];

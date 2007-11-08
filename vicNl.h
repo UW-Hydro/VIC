@@ -42,8 +42,9 @@
 	      free_dmy
 	      free_out_data
 	      free_veglib
-  2007-Aug-09 Added features for EXCESS_ICE option.                     JCA
-  2007-Aug-22 Made calc_water_balance_error  type double.  JCA
+  2007-Aug-09 Added features for EXCESS_ICE option.			JCA
+  2007-Aug-22 Made calc_water_balance_error  type double.		JCA
+  2007-Nov-06 Moved get_dist() from LAKE.h to this file.		JCA
 ************************************************************************/
 
 #include <math.h>
@@ -268,6 +269,7 @@ double func_snow_ground_flux(double, va_list);
 double func_surf_energy_bal(double, va_list);
 
 double get_avg_temp(double, double, double *, double *, int);
+double get_dist(double, double, double, double);
 void   get_force_type(char *, int, int *);
 global_param_struct get_global_param(filenames_struct *, FILE *);
 void   get_next_time_step(int *, int *, int *, int *, int *, int);

@@ -79,33 +79,34 @@ static char vcid[] = "$Id$";
 
   Modifications:
   11-18-02 Modified method by which lake coverage fraction and ice height 
-           are updated.                                                LCB
+           are updated.                                                		LCB
   04-Jun-04 Added descriptive error message to beginning of screen dump in
-	    ErrorPrintIcePackEnergyBalance.				TJB
+	    ErrorPrintIcePackEnergyBalance.					TJB
   16-Jul-04 Changed VaporMassFlux to vapor_flux, to make it consistent with
 	    IceEnergyBalance(), in which VaporMassFlux is in (kg/m2s) and
 	    vapor_flux is in (m/timestep).  Changed calculations involving
-	    vapor_flux to reflect these new units.			TJB
+	    vapor_flux to reflect these new units.				TJB
   25-Aug-04 Added calculations for surface_flux and blowing_flux.  Note that
 	    blowing_flux is currently set to 0.  This can be replaced in the
-	    future with a call to CalcBlowingSnow().			TJB
+	    future with a call to CalcBlowingSnow().				TJB
   27-Aug-04 Replaced *DeltaColdContent with DeltaColdContent in parameter
 	    list for ErrorIcePackEnergyBalance() and
 	    ErrorPrintIcePackEnergyBalance() so that types match in the caller
-	    and callee.							TJB
+	    and callee.								TJB
   21-Sep-04 Added ErrorString to store error messages from
-	    root_brent.							TJB
+	    root_brent.								TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance used
-	    in flux calculations.					TJB
+	    in flux calculations.						TJB
   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
-	    sublimation from blowing snow is calculated for lakes.	TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.
-              GCT/KAC. 
-  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.
-            JCA
+	    sublimation from blowing snow is calculated for lakes.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
+  2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.	GCT/KAC. 
+  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.	JCA
   2007-Sep-25 Return ERROR instead of exiting, if ice_melt could not converge to
-            a solution in root_brent.  JCA
+	      a solution in root_brent.						JCA
+  2007-Nov-06 New parameters for CalcBlowingSnow().  Replaced lake.fraci,
+	      lake.hice with lake.areai and lake.ice_water_eq.  More accurate
+	      accounting of lake_snow->surf_water.				LCB via TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -192,7 +193,7 @@ int ice_melt(double            z2,
   *  lake model only uses one layer */
  
   SnowIce  = snow->swq  - snow->surf_water;
-  LakeIce = lake->hice * RHOICE/RHO_W;        /* meters of water equivalent. */
+  LakeIce = lake->ice_water_eq / lake->areai;        /* meters of water equivalent based on average ice thickness. */
   InitialIce = LakeIce;
     
   /* Distribute fresh snowfall */
@@ -202,22 +203,25 @@ int ice_melt(double            z2,
   icerad (net_short, lake->hice, SnowIce*RHO_W/RHOSNOW, &avgcond, &SWconducted, &deltaCC);
 
   /* Calculate blowing snow sublimation (m/timestep) */
+  // Currently have hard-wired parameters that are approximated for ice-covered area:
+  // lag-one autocorrelation = 0.95, sigma_slope = .005 (both appropriate for
+  // flat terrain. Fetch = 2000 m (i.e. unlimited fetch), roughness and displacement
+  // calculated assuming 10 cm high protrusions on frozen ponds.
+
   if(options.BLOWING && snow->swq > 0.) {
     Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
     snow->blowing_flux = CalcBlowingSnow((double) delta_t, air_temp,
 					 snow->last_snow, snow->surf_water,
 					 wind, Ls, density,
 					 pressure, vp, Z0,
-					 z2, snow->depth, 1.0, 0.0,
-					 snow->surf_temp, 0, 1, 1500.,
-					 0.01, 0.0, &snow->transport);
-
+					 z2, snow->depth, .95, 0.005,
+					 snow->surf_temp, 0, 1, 2000.,
+					 .067, .0123, &snow->transport);
     if ( (int)snow->blowing_flux == ERROR ) {
       fprintf( stderr, "ERROR: ice_melt.c has an error from the call to CalcBlowingSnow\n");
       fprintf( stderr, "Exiting module\n" );
       return ( ERROR );
     }
-
 
     snow->blowing_flux *= delta_t*SECPHOUR/RHO_W;
   }
@@ -229,9 +233,8 @@ int ice_melt(double            z2,
   blowing_flux = snow->blowing_flux;
   surface_flux = snow->surface_flux;
 
-
   /* Calculate the surface energy balance for snow_temp = 0.0 */
-  
+
   Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
 				  aero_resist_used, z2, displacement, Z0, wind, net_short, 
 				  longwave, density, Le, air_temp,
@@ -267,30 +270,31 @@ int ice_melt(double            z2,
       SnowMelt      = 0.0;
     }
     else {
-      
+
       /* Calculate snow melt if refreeze energy is negative */      
       SnowMelt = fabs(RefreezeEnergy)/(Lf * RHO_W) * 
         delta_t * SECPHOUR;
       melt_energy += RefreezeEnergy;
     }
 
-  
     /* Adjust snow->surf_water for vapor_flux */
     if ((SnowIce + snow->surf_water + LakeIce) < -(snow->vapor_flux)) {
       // if vapor_flux exceeds stored ice/water, we not only need to
       // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-//      snow->surface_flux *= -(SnowIce + snow->surf_water + LakeIce) / snow->vapor_flux;
       snow->blowing_flux *= -(SnowIce + snow->surf_water + LakeIce) / snow->vapor_flux;
       snow->vapor_flux = -(SnowIce + snow->surf_water + LakeIce);
       snow->surface_flux = -(SnowIce + snow->surf_water + LakeIce) - snow->blowing_flux;
       lake->volume -= LakeIce*fracprv*lake->surface[0];	    
       LakeIce=0.0;
       SnowIce=0.0; 
+      snow->surf_water=0.0;
     }  
     else if ((SnowIce + snow->surf_water) < -(snow->vapor_flux) && (SnowIce + snow->surf_water +LakeIce) > -(snow->vapor_flux)) {
-      LakeIce += (snow->vapor_flux+SnowIce);
-      lake->volume += lake->surface[0]*fracprv*(snow->vapor_flux+SnowIce);
+      // vapor_flux exceeds swq, but not LakeIce
+      LakeIce += (snow->vapor_flux+SnowIce+snow->surf_water);  /* extract flux from ice that is not satisfied by swq */
+      lake->volume += lake->areai*(snow->vapor_flux+SnowIce+snow->surf_water);
       SnowIce    = 0.0;
+      snow->surf_water=0.0;
     }
     else {
       if(-(snow->vapor_flux) > snow->surf_water)
@@ -298,8 +302,9 @@ int ice_melt(double            z2,
 	  SnowIce += (snow->vapor_flux + snow->surf_water);
 	  snow->surf_water = 0.0;
 	}
-      else
+      else {
 	snow->surf_water += snow->vapor_flux;
+      }
     }
  
     /* If SnowMelt < SnowIce, there was incomplete melting of the pack */
@@ -394,29 +399,27 @@ int ice_melt(double            z2,
     if ((SnowIce + LakeIce) < -(snow->vapor_flux)) {
       // if vapor_flux exceeds stored ice/water, we not only need to
       // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-//      snow->surface_flux *= -(SnowIce + LakeIce) / snow->vapor_flux;
       snow->blowing_flux *= -(SnowIce + LakeIce) / snow->vapor_flux;
       snow->vapor_flux = -(SnowIce + LakeIce);
       snow->surface_flux = -(SnowIce + LakeIce) - snow->blowing_flux;
-      lake->volume -= lake->surface[0]*fracprv*LakeIce;	    
+      lake->volume -= lake->ice_water_eq;
       LakeIce=0.0;
-      SnowIce=0.0; 
-    }  
+      SnowIce=0.0;
+    }
     else if (SnowIce < -(snow->vapor_flux) && (SnowIce + LakeIce) > -(snow->vapor_flux)) {
       LakeIce += (snow->vapor_flux+SnowIce);
-      lake->volume += lake->surface[0]*fracprv*(snow->vapor_flux+SnowIce);
+      lake->volume += lake->areai*(snow->vapor_flux+SnowIce);
       SnowIce    = 0.0;
     }
     else {
       if(SnowIce > 0.0)
 	SnowIce += snow->vapor_flux;
       else
-	lake->volume += lake->surface[0]*fracprv*snow->vapor_flux;
+	lake->volume += lake->areai*snow->vapor_flux;
     }
   }
 
- 
-  /* Done with iteration etc, now Update the liquid water content of theN
+  /* Done with iteration etc, now Update the liquid water content of the
      surface layer */ 
   
   MaxLiquidWater = LIQUID_WATER_CAPACITY * SnowIce;
@@ -430,35 +433,17 @@ int ice_melt(double            z2,
   /* Update snow properties */
   
   snow->swq = SnowIce + snow->surf_water;
-  lake->hice = LakeIce * RHO_W/RHOICE;
-  if(lake->hice <= 0.0)
-    {
-      lake->hice = 0.0;
-      lake->fraci = 0.0;
-    }
-  //  if (lake->hice < FRACMIN) {
-      /* ....................................................................
-       * If the ice height is lower than the minimum ice height increase the
-       * height and decrease the fractional cover in order to conserve
-       * numerical stability.  Ice covered fraction changes linearly up to FRACMIN.
-       * ....................................................................*/
+  lake->ice_water_eq = LakeIce * lake->areai;
 
-  //    lake->fraci=(lake->hice*lake->fraci)/FRACMIN;
-
-  //  if(lake->fraci > 0.0)
-  //lake->hice=FRACMIN;
-  //  else {
-  //lake->hice=0.0;
-  //lake->fraci = 0.0;
-  //  }
-  //}
+  if(lake->ice_water_eq <= 0.0) {
+    lake->ice_water_eq = 0.0;
+  }
 
   /* Mass balance test */
-
-    MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce) + (RainFall + SnowFall) 
-    - IceMelt - melt[0] + snow->vapor_flux; 
+  MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce) + (RainFall + SnowFall) 
+                     - IceMelt - melt[0] + snow->vapor_flux; 
     
-    //printf("MassBalanceError = %g\n", MassBalanceError);
+  //printf("MassBalanceError = %g %e\n", MassBalanceError, InitialIce - LakeIce);
 
   melt[0] *= 1000.; /* converts back to mm */
   snow->mass_error = MassBalanceError;
@@ -472,6 +457,7 @@ int ice_melt(double            z2,
   *save_Qnet = Qnet;
 
   return (0);
+
 }
 
 /*****************************************************************************

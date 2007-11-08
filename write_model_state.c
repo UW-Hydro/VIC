@@ -37,29 +37,31 @@ void write_model_state(dist_prcp_struct    *prcp,
   06-03-03 Modified to create ASCII as well as BINARY state file.  KAC
   06-06-03 It is not necessary to store the current ice content as
            it is recomputed in initialize_model_state.         KAC
-  09-Oct-03 Removed initial space on veg/band info line in ASCII
-	    file.                                                 TJB
+  09-Oct-03 Removed initial space on veg/band info line in ASCII file.		TJB
   26-Oct-04 Changed calculation of Nbytes in binary state file to
 	    account for bare soil values (extra veg class per grid
 	    cell).  Without this fix, attempts to skip grid cells
-	    fail.						TJB
+	    fail.								TJB
   01-Nov-04 Added storage of state variables for SPATIAL_FROST and
-	    LAKE_MODEL.						TJB
-  02-Nov-04 Added a few more lake state variables.		TJB
+	    LAKE_MODEL.								TJB
+  02-Nov-04 Added a few more lake state variables.				TJB
   03-Nov-04 Now outputs extra_veg to aid other programs in parsing
-	    state files.					TJB
-  2005-12-07 STATE_FILE option is set in global file            GCT
-  2005-01-10 writes temp[0] instead of tp_in for lake skin surface temperature JCA
-  2005-01-10 modified to write lake nodal variables for each of the active nodes JCA
-  2006-06-16 Skip writing snow band if areafract < 0            GCT
-  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
-  2006-09-07 Changed "Skip writing snow band if areafract < 0" to "<=0". GCT
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Apr-24  Modified to write Zsum_node.  JCA
-  2007-Apr-25  Removed variable Nsum.  JCA
-  2007-Aug-24  Added features for EXCESS_ICE option.  JCA
+	    state files.							TJB
+  2005-Dec-07 STATE_FILE option is set in global file.				GCT
+  2005-Jan-10 writes temp[0] instead of tp_in for lake skin surface
+	      temperature.							JCA
+  2005-Jan-10 modified to write lake nodal variables for each of the
+	      active nodes.							JCA
+  2006-Jun-16 Skip writing snow band if areafract < 0.				GCT
+  2006-Aug-23 Changed order of fread/fwrite statements from ...1, sizeof...
+	      to ...sizeof, 1,...						GCT
+  2006-Sep-07 Changed "Skip writing snow band if areafract < 0" to "<=0".	GCT
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
+  2007-Apr-24 Modified to write Zsum_node.					JCA
+  2007-Apr-25 Removed variable Nsum.						JCA
+  2007-Aug-24 Added features for EXCESS_ICE option.				JCA
+  2007-Nov-06 New list of lake state variables.					LCB via TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -156,22 +158,22 @@ void write_model_state(dist_prcp_struct    *prcp,
 	+ 9 * sizeof(double) // wetland snow parameters
 	+ options.Nnode * sizeof(double) // wetland soil temperatures
 	+ sizeof(int) // activenod
-	+ sizeof(double) // volume
-	+ sizeof(double) // ldepth
-	+ sizeof(double) // sarea
 	+ sizeof(double) // dz
 	+ sizeof(double) // surfdz
-	+ lake_var.activenod * sizeof(double) // surface
-	+ sizeof(double) // temp[0]
-	+ sizeof(double) // tempavg
+	+ sizeof(double) // ldepth
+	+ (lake_var.activenod+1) * sizeof(double) // surface
+	+ sizeof(double) // sarea
+	+ sizeof(double) // volume
 	+ lake_var.activenod * sizeof(double) // temp
-	+ lake_var.activenod * sizeof(double) // density
-	+ sizeof(int) // mixmax
-	+ sizeof(int) // numnod
-	+ sizeof(double) // tempi
+	+ sizeof(double) // tempavg
+	+ sizeof(double) // areai
+	+ sizeof(double) // new_ice_area
+	+ sizeof(double) // ice_water_eq
 	+ sizeof(double) // hice
-	+ sizeof(double) // fraci
+	+ sizeof(double) // tempi
 	+ sizeof(double) // swe
+	+ sizeof(double) // surf_water
+	+ sizeof(double) // SAlbedo
 	+ sizeof(double) // sdepth
 	;
     }
@@ -348,54 +350,50 @@ void write_model_state(dist_prcp_struct    *prcp,
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
       fwrite( &lake_var.activenod, sizeof(int), 1, filep->statefile );
-      fwrite( &lake_var.volume, sizeof(double), 1, filep->statefile );
-      fwrite( &lake_var.ldepth, sizeof(double), 1, filep->statefile );
-      fwrite( &lake_var.sarea, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.dz, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.surfdz, sizeof(double), 1, filep->statefile );
-      for ( node = 0; node < lake_var.activenod; node++ ) {
+      fwrite( &lake_var.ldepth, sizeof(double), 1, filep->statefile );
+      for ( node = 0; node <= lake_var.activenod; node++ ) {
         fwrite( &lake_var.surface[node], sizeof(double), 1, filep->statefile );
       }
-      fwrite( &lake_var.temp[0], sizeof(double), 1, filep->statefile );
-      fwrite( &lake_var.tempavg, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.sarea, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.volume, sizeof(double), 1, filep->statefile );
       for ( node = 0; node < lake_var.activenod; node++ ) {
         fwrite( &lake_var.temp[node], sizeof(double), 1, filep->statefile );
       }
-      for ( node = 0; node < lake_var.activenod; node++ ) {
-        fwrite( &lake_var.density[node], sizeof(double), 1, filep->statefile );
-      }
-      fwrite( &lake_var.mixmax, sizeof(int), 1, filep->statefile );
-      fwrite( &lake_con.numnod, sizeof(int), 1, filep->statefile );
-      fwrite( &lake_var.tempi, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.tempavg, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.areai, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.new_ice_area, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.ice_water_eq, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.hice, sizeof(double), 1, filep->statefile );
-      fwrite( &lake_var.fraci, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.tempi, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.swe, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.surf_water, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.SAlbedo, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.sdepth, sizeof(double), 1, filep->statefile );
     }
     else {
       fprintf( filep->statefile, "%d", lake_var.activenod );
-      fprintf( filep->statefile, " %f", lake_var.volume );
-      fprintf( filep->statefile, " %f", lake_var.ldepth );
-      fprintf( filep->statefile, " %f", lake_var.sarea );
       fprintf( filep->statefile, " %f", lake_var.dz );
       fprintf( filep->statefile, " %f", lake_var.surfdz );
-      for ( node = 0; node < lake_var.activenod; node++ ) {
+      fprintf( filep->statefile, " %f", lake_var.ldepth );
+      for ( node = 0; node <= lake_var.activenod; node++ ) {
         fprintf( filep->statefile, " %f", lake_var.surface[node] );
       }
-      fprintf( filep->statefile, " %f", lake_var.temp[0]);
-      fprintf( filep->statefile, " %f", lake_var.tempavg );
+      fprintf( filep->statefile, " %f", lake_var.sarea );
+      fprintf( filep->statefile, " %f", lake_var.volume );
       for ( node = 0; node < lake_var.activenod; node++ ) {
         fprintf( filep->statefile, " %f", lake_var.temp[node] );
       }
-      for ( node = 0; node < lake_var.activenod; node++ ) {
-        fprintf( filep->statefile, " %f", lake_var.density[node] );
-      }
-      fprintf( filep->statefile, " %d", lake_var.mixmax );
-      fprintf( filep->statefile, " %d", lake_con.numnod );
-      fprintf( filep->statefile, " %f", lake_var.tempi );
+      fprintf( filep->statefile, " %f", lake_var.tempavg );
+      fprintf( filep->statefile, " %f", lake_var.areai );
+      fprintf( filep->statefile, " %f", lake_var.new_ice_area );
+      fprintf( filep->statefile, " %f", lake_var.ice_water_eq );
       fprintf( filep->statefile, " %f", lake_var.hice );
-      fprintf( filep->statefile, " %f", lake_var.fraci );
+      fprintf( filep->statefile, " %f", lake_var.tempi );
       fprintf( filep->statefile, " %f", lake_var.swe );
+      fprintf( filep->statefile, " %f", lake_var.surf_water );
+      fprintf( filep->statefile, " %f", lake_var.SAlbedo );
       fprintf( filep->statefile, " %f", lake_var.sdepth );
       fprintf( filep->statefile, "\n" );
     }

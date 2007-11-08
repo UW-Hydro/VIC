@@ -93,43 +93,49 @@ double calc_surf_energy_bal(double             Le,
     07-30-03  Made sure that local NOFLUX variable is always set
               to the options flag value.                      KAC
     04-Jun-04 Placed "ERROR" at beginning of screen dump in
-	      error_print_surf_energy_bal.		TJB
+	      error_print_surf_energy_bal.				TJB
     16-Jul-04 Cast the last 6 variables in the parameter list
 	      passed to root_brent, error_calc_surf_energy_bal
 	      and solve_surf_energy_bal as double, since for
 	      some reason letting them remain ints or floats
 	      caused them to become garbage in the child
-	      functions.				TJB
+	      functions.						TJB
     16-Jul-04 Modified the cap on vapor_flux to re-scale
 	      blowing_flux and surface_flux proportionally
-	      so that vapor_flux still = their sum.	TJB
+	      so that vapor_flux still = their sum.			TJB
     05-Aug-04 Removed lag_one, sigma_slope, and fetch from
 	      parameter list, since these were only used in
 	      the call to root_brent/func_surf_energy_bal(),
-	      which no longer needs them.		TJB
+	      which no longer needs them.				TJB
     24-Aug-04 Modified the re-scaling of surface_flux to reduce
-	      round-off errors.				TJB
+	      round-off errors.						TJB
     21-Sep-04 Added ErrorString to store error messages from
-	      root_brent.				TJB
+	      root_brent.						TJB
     28-Sep-04 Added aero_resist_used to store the aerodynamic
-	      resistance used in flux calculations.	TJB
+	      resistance used in flux calculations.			TJB
   2007-Apr-06 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation. GCT/KAC
-    24-Apr-07 Changed the read-in order of iveg, and VEG in
-                error_print_surf_energy_bal to be consistent with the call order, also added
-                year, day, and hour to the argument list.   JCA
-    24-Apr-07 Features included for IMPLICIT frozen soils option. JCA 
-              (including passing in nrecs)  
-              (including passing nrec, nrecs, and iveg to func_surf_energy_bal)
-              (including passing bulk_density, soil_density, and quartz to func_surf_energy_bal)
-    24-Apr-07 Features included for EXP_TRANS option for frozen soils
-                algorithm. JCA
-    24-Apr-07 Passing in Zsum_node rather than recalculating.  JCA
-    08-Aug-07 Features included for EXCESS_ICE option for frozen soils
-                algorithm. JCA
-             including: passing in entire soil_con structure.
-    2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
-    2007-Sep-1 Checked for return value of ERROR from solve_surf_energy_bal.  JCA
+	      main subroutine, rather than ending the simulation.	GCT/KAC
+  2007-Apr-24 Changed the read-in order of iveg, and VEG in
+	      error_print_surf_energy_bal to be consistent with the
+	      call order, also added year, day, and hour to the
+	      argument list.						JCA
+  2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA 
+	      including:
+	        passing in nrecs
+	        passing nrec, nrecs, and iveg to func_surf_energy_bal
+	        passing bulk_density, soil_density, and quartz to
+	          func_surf_energy_bal
+  2007-Apr-24 Features included for EXP_TRANS option for frozen soils
+	      algorithm.						JCA
+  2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
+  2007-Aug-08 Features included for EXCESS_ICE option for frozen soils
+	      algorithm.						JCA
+	      including:
+	        passing in entire soil_con structure.
+  2007-Aug-31 Checked root_brent return value against -998 rather
+	      than -9998.						JCA
+  2007-Sep-01 Checked for return value of ERROR from
+	      solve_surf_energy_bal.					JCA
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;

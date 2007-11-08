@@ -43,30 +43,31 @@ int main(int argc, char *argv[])
            state initialization, which now stores wet and dry fractions
            rather than just averagedvalues.                      KAC
   29-Oct-03 Modified the version display banner to print the version
-	    string defined in global.h.				TJB
+	    string defined in global.h.					TJB
   01-Nov-04 Updated arglist for make_dist_prcp(), as part of fix for
-	    QUICK_FLUX state file compatibility.		TJB
+	    QUICK_FLUX state file compatibility.			TJB
   02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
-	    lake fraction readjustment.				TJB
-  2005-Apr-13 OUTPUT_FORCE option now calls close_files().	TJB
+	    lake fraction readjustment.					TJB
+  2005-Apr-13 OUTPUT_FORCE option now calls close_files().		TJB
   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data, out_data_files, and save_data structures. TJB
+              out_data, out_data_files, and save_data structures.	TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-	      This included merging builtnames into filenames.	TJB
-  2006-Nov-07 Removed LAKE_MODEL option.			TJB
+	      This included merging builtnames into filenames.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2006-Nov-07 Changed statefile to init_state in call to
-	      check_state_file().				TJB
+	      check_state_file().					TJB
   2007-Jan-15 Added PRT_HEADER option; added call to
-	      write_header().					TJB
-  2007-Apr-04 Added option to continue run after a cell fails GCT/KAC.
+	      write_header().						TJB
+  2007-Apr-04 Added option to continue run after a cell fails. 		GCT/KAC
   2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
 	      free_out_data(), and free_veglib().  Added closing of
-	      all parameter files.				TJB
-  2007-Aug-21 Return ErrorFlag from initialize_model_state.	JCA
+	      all parameter files.					TJB
+  2007-Aug-21 Return ErrorFlag from initialize_model_state.		JCA
   2007-Sep-14 Excluded calls to free_veglib() and closing of parameter
 	      files other than the soil param file for the case
-	      when OUTPUT_FORCE=TRUE.				TJB
-
+	      when OUTPUT_FORCE=TRUE.					TJB
+  2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
+	      read_soilparam() and read_soilparam_arc().		TJB
 **********************************************************************/
 {
 
@@ -237,8 +238,7 @@ int main(int argc, char *argv[])
 #endif /* LINK_DEBUG*/
 
       if ( options.LAKES ) 
-	lake_con = read_lakeparam(filep.lakeparam, soil_con, 
-				  veg_con, global_param.resolution);
+	lake_con = read_lakeparam(filep.lakeparam, soil_con, veg_con);
 
 #endif // !OUTPUT_FORCE
 

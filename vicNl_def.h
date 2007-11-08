@@ -38,6 +38,7 @@
   2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.		JCA
   2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.	JCA
   2007-Oct-24 Added surf_water to lake_var structure.			KAC via TJB
+  2007-Nov-06 Updated lake_var structure with new variables.		LCB via TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -86,7 +87,7 @@
 #define KELVIN       273.15	/* conversion factor C to K */
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
 #define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
-#define RHO_W        1000.0	/* Density of water (kg/m^3) at 0C */
+#define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
 #define Cp           1010.0	/* Specific heat at constant pressure of air 
 				   (J/deg/K) (H.B.H. p.4.7)*/
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
@@ -180,11 +181,11 @@
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 120
 // Water Balance Terms - state variables
-#define OUT_LAKE_DEPTH       0  /* lake depth [m] */
-#define OUT_LAKE_ICE         1  /* moisture stored as lake ice [mm] */
+#define OUT_LAKE_DEPTH       0  /* lake depth (distance between surface and deepest point) [m] */
+#define OUT_LAKE_ICE         1  /* moisture stored as lake ice [mm over lake ice area] */
 #define OUT_LAKE_ICE_FRACT   2  /* fractional coverage of lake ice [fraction] */
 #define OUT_LAKE_ICE_HEIGHT  3  /* thickness of lake ice [cm] */
-#define OUT_LAKE_MOIST       4  /* liquid water stored in lake [mm] */
+#define OUT_LAKE_MOIST       4  /* liquid water stored in lake [mm over grid cell] */
 #define OUT_LAKE_SURF_AREA   5  /* lake surface area [m2] */
 #define OUT_LAKE_VOLUME      6  /* lake volume [m3] */
 #define OUT_ROOTMOIST        7  /* root zone soil moisture  [mm] */
@@ -525,59 +526,62 @@ typedef struct {
   This structure stores the lake/wetland parameters for a grid cell
   ******************************************************************/
 typedef struct {
-  double Cl[MAX_LAKE_NODES];      /* fractional lake coverage area */
-  double z[MAX_LAKE_NODES];       /* Fixed elevation from bottom of each Cl. */  
-  double b;                       /* Exponent controlling lake depth y=Ax^b. */
-  double basin[MAX_LAKE_NODES];   /* Area of the basin at each node. */
-  double cell_area;               /* area of grid cell */
-  double depth_in;                /* initial lake depth */
-  double eta_a;                   /* Decline of solar rad w/ depth. */
-  double maxdepth;                /* Maximum lake depth. */
-  double maxrate;                 
-  double ratefrac;
-  double depthfrac;
-  double mindepth;                /* Minimum lake depth. */
-  double maxvolume;
-  float  bpercent;
-  float  rpercent;
-  int    wetland_veg_class;
-  int    gridcel;
-  int    numnod;                  /* Maximum number of solution nodes. */
+  // General information
+  int    wetland_veg_class;       /* Vegetation class of the wetland */
+  // Lake basin dimensions
+  int    numnod;                  /* Maximum number of lake nodes for this grid cell */
+  double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */  
+  double basin[MAX_LAKE_NODES+1]; /* Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
+  double Cl[MAX_LAKE_NODES+1];    /* Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
+  double b;                       /* Exponent in default lake depth-area profile (y=Ax^b) */
+  double maxdepth;                /* Maximum allowable lake depth (m) */
+  double mindepth;                /* Minimum allowable lake depth (m) */
+  double maxvolume;               /* Lake volume when lake depth is at maximum (m^3) */
+  double minvolume;               /* Lake volume when lake depth is at minimum (m^3) */
+  // Hydrological properties
+  float  bpercent;                /* Fraction of wetland baseflow (subsurface runoff) that flows into lake */
+  float  rpercent;                /* Fraction of wetland surface runoff that flows into lake */
+  double eta_a;                   /* Decline of solar radiation w/ depth (m^-1) */ /* not currently used */
+  double wfrac;                   /* Width of lake outlet, expressed as fraction of lake perimeter */
+  // Initial conditions
+  double depth_in;                /* Initial lake depth (distance from surface to deepest point) (m) */
 } lake_con_struct;
 
 /*****************************************************************
   This structure stores the lake/wetland variables for a grid cell
   *****************************************************************/
 typedef struct {
-  /** Use MAX_LAKE_NODES **/
-  double aero_resist;		  /* aerodynamic resistance (s/m) */
-  double aero_resist_used;	  /* aerodynamic resistance (s/m) 
-				     after stability correction */
-  double baseflow_in;
-  double baseflow_out;
-  double density[MAX_LAKE_NODES];
-  double evapw;
-  double fraci;                   /* Fractional coverage of ice. */
-  double hice;                    /* Height of lake ice. */ 
-  double ldepth;
-  double runoff_in;
-  double runoff_out;
-  double sarea;
-  double sdepth;                  /* Depth of snow on top of ice. */
-  double snowmlt;
-  double surface[MAX_LAKE_NODES];
-  double surf_water;              // water content of surface snow layer
-  double swe;                     // water equivalence of lake snow cover
-  double temp[MAX_LAKE_NODES];    /* Lake water temp. at each node (C). */
-  double tempavg;
-  double tempi;                   /* Lake ice temp (C). */
-  double tp_in;                   /* Lake skin temperature (C). */
-  double volume;
-  double dz;                      /* Distance between each water layer. */
-  double surfdz;
-  int    activenod;
-  int    mixmax;                  /* top depth (node #) of local 
-                                     instability. */
+  // Current lake dimensions and liquid water state variables
+  int    activenod;               /* Number of nodes whose corresponding layers currently contain water */
+  double dz;                      /* Vertical thickness of all horizontal water layers below the surface layer (m) */
+  double surfdz;                  /* Vertical thickness of surface (top) water layer (m) */
+  double ldepth;                  /* Current depth of liquid water in lake (distance from surface to deepest point) (m) */
+  double surface[MAX_LAKE_NODES+1];/* Area of horizontal cross-section of lake at each node (at end of time step) (m^2) */
+  double sarea;                   /* Current surface area of liquid water in lake (at beginning of time step) (m^2) */
+  double volume;                  /* Current lake water volume, including liquid water equivalent of lake ice and snow (m^3) */
+  double temp[MAX_LAKE_NODES];    /* Lake water temperature at each node (C) */
+  double tempavg;                 /* Average liquid water temperature of entire lake (C) */
+  // Current properties (state variables) specific to lake ice/snow
+  double areai;                   /* Area of ice coverage (at beginning of time step) (m^2) */
+  double new_ice_area;            /* Area of ice coverage (at end of time step) (m^2) */
+  double ice_water_eq;            /* Liquid water equivalent volume of lake ice (m^3) */
+  double hice;                    /* Height of lake ice at thickest point (m) */ 
+  double tempi;                   /* Lake ice temperature (C) */
+  double swe;                     /* Water equivalence of lake snow cover (m over lake ice area) */
+  double surf_water;              /* Water content of surface snow layer (m over lake ice area) */
+  double SAlbedo;                 /* Albedo of lake snow (fraction) */
+  double sdepth;                  /* Depth of snow on top of ice (m over lake ice area) */
+  // Other current lake properties (derived from state variables and forcings)
+  double aero_resist;		  /* Aerodynamic resistance (s/m) */
+  double aero_resist_used;	  /* Aerodynamic resistance (s/m) after stability correction */
+  double density[MAX_LAKE_NODES]; /* Lake water density profile (kg/m^3) */
+  // Moisture fluxes
+  double evapw;                   /* Evaporative flux from lake (and ice/snow) surface (mm over lake area) */
+  double baseflow_in;             /* Baseflow into lake from the rest of the grid cell (mm over grid cell area) */
+  double baseflow_out;            /* Baseflow out of lake to channel network (mm over grid cell area) */
+  double runoff_in;               /* Surface runoff into lake from the rest of the grid cell (mm over grid cell area) */
+  double runoff_out;              /* Surface runoff out of lake to channel network (mm over grid cell area) */
+  double snowmlt;                 /* Moisture released by melting of lake snow (mm over lake ice area) */
 } lake_var_struct;
 
 /***********************************************************
@@ -663,6 +667,7 @@ typedef struct {
   float    elevation;                 /* grid cell elevation (m) */
   float    lat;                       /* grid cell central latitude */
   float    lng;                       /* grid cell central longitude */
+  double   cell_area;                 /* Area of grid cell (m^2) */
   float    time_zone_lng;             /* central meridian of the time zone */
   float  **layer_node_fract;          /* fraction of all nodes within each 
 					 layer */

@@ -84,10 +84,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      to trap missing fields.					GCT
   2007-Aug-08 Added EXCESS_ICE option.					JCA
   2007-Sep-14 Clarified description in comment before BASEFLOW check.	TJB
+  2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
+	      here.							TJB
 **********************************************************************/
 {
   void ttrim( char *string );
   extern option_struct options;
+  extern global_param_struct global_param;
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
@@ -103,6 +106,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          off_gmt;
   double          tempdbl;
   double          extra_depth;
+  double          lat;
+  double          lng;
+  double          start_lat;
+  double          right_lng;
+  double          left_lng;
+  double          delta;
+  double          dist;
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
 #endif
@@ -589,6 +599,37 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	temp.Ds * temp.max_moist[layer];
       temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
       temp.Ws = temp.Ws/temp.max_moist[layer];
+    }
+
+    /*******************************************************************
+      Calculate grid cell area.
+    ******************************************************************/
+
+    if (options.EQUAL_AREA) {
+
+      temp.cell_area = global_param.resolution * 1000. * 1000.; /* Grid cell area in m^2. */
+
+    }
+    else {
+
+      lat = fabs(temp.lat);
+      lng = fabs(temp.lng);
+
+      start_lat = lat - global_param.resolution / 2;
+      right_lng = lng + global_param.resolution / 2;
+      left_lng  = lng - global_param.resolution / 2;
+
+      delta = get_dist(lat,lng,lat+global_param.resolution/10.,lng);
+
+      dist = 0.;
+
+      for ( i = 0; i < 10; i++ ) {
+        dist += get_dist(start_lat,left_lng,start_lat,right_lng) * delta;
+        start_lat += global_param.resolution/10;
+      }
+
+      temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
+
     }
 
 #endif /* !OUTPUT_FORCE */

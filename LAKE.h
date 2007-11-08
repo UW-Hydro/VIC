@@ -8,7 +8,8 @@
 	      status so that errors can be trapped and communicated up the
 	      chain of function calls.					KAC via TJB
   2007-Oct-24 Changed lakeice() to return exit status.			KAC via TJB
-
+  2007-Nov-06 New lake physics parameters.  Modified argument lists for
+	      various functions.  Moved get_dist() to vicNl.h.		LCB via TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -33,15 +34,15 @@
 #define CONDI 2.3        /* thermal conductivity of ice */
 #define CONDS 0.31       /* thermal conductivity of snow */ 
 
-// attenuation of short and longwave radiation through ice (W/m/K)
-#define lamisw 4.5 // 3.5  // should be 1.5
-#define lamilw 20   // should be 20.0
-// attenuation of short and longwave radiation through snow (W/m/K)
-#define lamssw 8 // 12.0 // 1.6  // should be 6.0 
-#define lamslw 20 // 1.5  // should be 20.0
-// attenuation of short and longwave radiation through water (W/m/K)
-#define lamwsw 1.1  // 2.3 1.2
-#define lamwlw .15 // .005  .05
+// attenuation of short and longwave radiation through ice (1/m)
+#define lamisw 1.5 // 1.5 in Patterson & Hamblin
+#define lamilw 20  // 20.0 in Patterson & Hamblin
+// attenuation of short and longwave radiation through snow (1/m)
+#define lamssw 6.0 // 6.0 in Patterson & Hamblin
+#define lamslw 20  // 20.0 in Patterson & Hamblin
+// attenuation of short and longwave radiation through water (1/m)
+#define lamwsw .3  // San Fran Bay data: 0.31 - 29.9 1/m (visible)
+#define lamwlw .2 // Hostetler and Bartlein assume 0.85 1/m (total)
 #define  a1 0.7        /* Percent of radiation in visible band. */
 #define  a2 0.3        /* Percent of radiation in infrared band. */
 #define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */
@@ -53,21 +54,21 @@
 
 double adjflux(double, double, double ,double, double, double, double,
 	       double, double, double, double *, double *);
-void alblake(double, double, float *, float *, float *, double, double, 
-	     int, int *, double, char *);
+void alblake(double, double, double *, double *, float *, float *, double, double, 
+	     int, int *, double, double, char *);
 void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
 void colavg (double *, double *, double *, float, double *, int, double, double);
 float dragcoeff(float, double, double);
 void eddy (int, double, double * , double *, double *, double, int, double, double);
 void energycalc(double *, double *, int, double, double,double *, double *, double *);
-double get_dist(double, double, double, double);
-void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *);
+void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
+int ice_depth(lake_con_struct, double, double, double *);
 int initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, double);
-int lakeice(double *, double, double, double *, double, double *,int, 
-	     double, double, double *, double, double, int, dmy_struct, double *);
-int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_struct *,
+int lakeice(double *, double, double, double, double, int, 
+	    double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
+int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_struct *, veg_con_struct *,
 #if EXCESS_ICE
 	     int, double,
 #endif
@@ -77,12 +78,12 @@ int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_stru
 void latsens(double,double, double, double, double, double, double, double,
 	     double *, double *, double);
 float lkdrag(float, double, double, double, double);
-lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *, float);
+lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void rhoinit(double *, double);
 int solve_lake(double, double, double, double, double, double, double, double, 
-		double, double, double, lake_var_struct *, lake_con_struct, 
+		double, double, lake_var_struct *, lake_con_struct, 
 		soil_con_struct, int, int, energy_bal_struct *, 
-		snow_data_struct *, double, dmy_struct);
+		snow_data_struct *, double, dmy_struct, double);
 double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
@@ -91,7 +92,7 @@ int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, 
 #if EXCESS_ICE
 		    int, double,
 #endif		    
-		    double, double, double, double);
+		    double, double, double, double, double);
 double func_lake_energy_balance(double, va_list);
 double solve_surf_energy_bal(double Tsurf, ...);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
@@ -100,8 +101,8 @@ double func_lake_energy_bal(double , va_list);
 double IceEnergyBalance(double, va_list);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
-int  water_energy_balance(int, double*, double*, int,int,double, double, double ,double ,double ,double ,double ,double ,double ,double,double,double ,double ,double *,double *,double *,double*,double *, double *,double *,double ,double *,double *, double *, double *);
-int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double, double *);
+int  water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
+int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);
 void write_lake_var(lake_var_struct, int);
 int get_sarea(lake_con_struct, double, double *);
 int get_volume(lake_con_struct, double, double *);
@@ -111,7 +112,7 @@ int wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
 #if EXCESS_ICE
 		   int,
 #endif
-		   int, int, double, lake_con_struct);
-void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, double, lake_var_struct *, lake_con_struct, int, int, double, soil_con_struct);
+		   int, int, double, lake_con_struct, veg_con_struct *);
+void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, lake_var_struct *, lake_con_struct, int, int, soil_con_struct);
 int initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, 
-		    double, soil_con_struct, lake_var_struct *, int, lake_con_struct);
+		    soil_con_struct, lake_var_struct *, int, lake_con_struct, double *, double *);

@@ -4,7 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-int initialize_lake (lake_var_struct  *lake, 
+int initialize_lake (lake_var_struct   *lake, 
 		      lake_con_struct   lake_con,
 		      snow_data_struct *lake_snow,
 		      double            airtemp)
@@ -16,12 +16,10 @@ int initialize_lake (lake_var_struct  *lake,
   grid cell.
 
   VARIABLES INITIALIZED:
-  lake.tp_in               Lake skin temperature (C). 
   lake.temp[MAXNOD]        Water temperature at each node.
   lake.tempi[MAXNOD]       Water temperature under ice at each node.
   lake.hice                Depth of lake ice.
-  lake.fraci               Fractional coverage of lake ice. 
-  lake.mixmax              Depth of local instability (node #).
+  lake.areai               Area of lake ice. 
   lake.volume
   lake.sarea
   
@@ -40,7 +38,8 @@ int initialize_lake (lake_var_struct  *lake,
   2007-Oct-24 Changed the error conditions so that get_depth does not
 	      exit when depth == 0.0 (as long as volume == 0.0 when
 	      depth == 0.0).						KAC via TJB
-
+  2007-Nov-06 Replaced lake.fraci with lake.areai.  Added ice_depth()
+	      function.							LCB via TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -63,8 +62,9 @@ int initialize_lake (lake_var_struct  *lake,
 
   lake->tempi = 0.0;
   lake->hice = 0.0;
-  lake->fraci = .0;
-  lake->mixmax = 0;
+  lake->areai = .0;
+  lake->new_ice_area = 0.0;
+  lake->ice_water_eq = 0.0;
   lake->aero_resist = 0;
   lake->aero_resist_used = 0;
   lake_snow->swq = 0.0;
@@ -103,13 +103,14 @@ int initialize_lake (lake_var_struct  *lake,
     lake->surfdz = 0.0;
     lake->dz = 0.0;
     lake->activenod = 0;
+    lake->ldepth = 0.0;
   }
 
   // lake_con.basin equals the surface area at specific depths as input by
   // the user in the lake parameter file or calculated in read_lakeparam(), 
   // lake->surface equals the area at the top of each dynamic solution layer 
  
-  for(k=0; k< lake->activenod; k++) {
+  for(k=0; k<= lake->activenod; k++) {
     if(k==0)
       depth = lake->ldepth;
     else
@@ -131,7 +132,7 @@ int initialize_lake (lake_var_struct  *lake,
     fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
   }
  
-  printf("initial volume = %e km3, initial depth = %f initial area = %e km2\n",lake->volume/(1000.*1000.*1000.), lake->ldepth, lake->sarea/(1000.*1000.));
+  printf("initial volume = %e km3, initial depth = %f m, initial area = %e km2\n",lake->volume/(1000.*1000.*1000.), lake->ldepth, lake->sarea/(1000.*1000.));
   lake->runoff_out=0.0;
   lake->baseflow_out=0.0;
 
@@ -142,9 +143,14 @@ int initialize_lake (lake_var_struct  *lake,
 
 int get_sarea(lake_con_struct lake_con, double depth, double *sarea)
 /******************************************************************************
-  Exit status values:
-       0: No errors
-    -999: Error: area cannot be reconciled with given lake depth and nodes
+  Function to compute surface area of liquid water in the lake, given the
+  current depth of liquid water.
+
+  Modifications:
+  2007-Oct-24 Added exit status.						TJB
+    Exit status values:
+          0: No errors
+      ERROR: Error: area cannot be reconciled with given lake depth and nodes
 ******************************************************************************/
 {
   int i;
@@ -162,7 +168,7 @@ int get_sarea(lake_con_struct lake_con, double depth, double *sarea)
 	*sarea = lake_con.basin[i+1] + (depth-lake_con.z[i+1])*(lake_con.basin[i] - lake_con.basin[i+1])/(lake_con.z[i] - lake_con.z[i+1]);
     }
     if (*sarea == 0.0 && depth != 0.0) {
-      status = -999;
+      status = ERROR;
     }
   }
 
@@ -172,10 +178,15 @@ int get_sarea(lake_con_struct lake_con, double depth, double *sarea)
 
 int get_volume(lake_con_struct lake_con, double depth, double *volume)
 /******************************************************************************
-  Exit status values:
-       0: No errors
-       1: Warning: lake depth exceeds maximum; setting to maximum
-    -999: Error: volume cannot be reconciled with given lake depth and nodes
+  Function to compute liquid water volume stored within the lake basin, given
+  the current depth of liquid water.
+
+  Modifications:
+  2007-Oct-24 Added exit status.						TJB
+    Exit status values:
+          0: No errors
+          1: Warning: lake depth exceeds maximum; setting to maximum
+      ERROR: Error: volume cannot be reconciled with given lake depth and nodes
 ******************************************************************************/
 {
   int i;
@@ -200,7 +211,7 @@ int get_volume(lake_con_struct lake_con, double depth, double *volume)
   }
 
   if (*volume == 0.0  && depth != 0.0) {
-    status = -999;
+    status = ERROR;
   }
 
   return status;
@@ -209,10 +220,17 @@ int get_volume(lake_con_struct lake_con, double depth, double *volume)
 
 int get_depth(lake_con_struct lake_con, double volume, double *depth)
 /******************************************************************************
-  Exit status values:
-       0: No errors
-       1: Warning: lake volume negative; setting to 0
-    -999: Error: depth cannot be reconciled with given lake volume and nodes
+  Function to compute the depth of liquid water in the lake (distance between
+  surface and deepest point), given volume of liquid water currently stored in
+  lake.
+
+  Modifications:
+  2007-Oct-24 Added exit status.						TJB
+    Exit status values:
+          0: No errors
+          1: Warning: lake volume negative; setting to 0
+      ERROR: Error: depth cannot be reconciled with given lake volume and nodes
+  2007-Oct-30 Initialized surface area for lake bottom.				LCB via TJB
 ******************************************************************************/
 {
   int k;
@@ -222,7 +240,7 @@ int get_depth(lake_con_struct lake_con, double volume, double *depth)
 
   status = 0;
 
-  if (volume < 0.0) {
+  if (volume < -1*SMALL) {
     volume = 0.0;
     status = 1;
   }
@@ -258,14 +276,125 @@ int get_depth(lake_con_struct lake_con, double volume, double *depth)
       }
     } 
     if (tempvolume/lake_con.basin[0] > SMALL )   {                  
-      status = -999;
+      status = ERROR;
     }
   }
 
   if (*depth < 0.0 || (*depth == 0.0 && volume >= SMALL) ) {
-    status = -999;
+    status = ERROR;
   }
   	
   return status;
 
 }
+
+int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, double *hice)
+/******************************************************************************
+  Function to compute liquid water equivalent of lake ice (expressed in mm over
+  the ice area), given the volume of liquid water currently stored in the lake
+  and the current equivalent liquid water volume of lake ice.
+
+  Modifications:
+  2007-Oct-30 Created function so ice volume is state variable, not depth.	LCB via TJB
+  2007-Oct-30 Added exit status.						TJB
+    Exit status values:
+          0: No errors
+          1: Warning: ice volume negative; setting to 0
+      ERROR: Error: ice depth cannot be reconciled with given ice volume
+             and water equivalent
+******************************************************************************/
+{
+  int k;
+  double ldepth;
+  double m;
+  double tempvolume;
+  double surfacearea;
+  int status;
+
+  status = 0;
+  ldepth = 0.0;
+  *hice = 0.0;
+
+  if (ice_water_eq < 0.0) {
+    ice_water_eq = 0.0;
+    status = 1;
+  }
+
+  status = get_depth(lake_con, volume-ice_water_eq, &ldepth);
+  if (status == ERROR) return(ERROR);
+  status = get_sarea(lake_con, ldepth, &surfacearea);
+  if (status == ERROR) return(ERROR);
+  tempvolume = ice_water_eq* RHOICE/RHO_W;
+
+  if(tempvolume >= lake_con.maxvolume) {
+    *hice = lake_con.maxdepth;
+    *hice += ((tempvolume - lake_con.maxvolume)/lake_con.basin[0]);
+  }
+  else {
+  // Update ice depth
+
+    for ( k = lake_con.numnod - 1 ; k >= 0; k-- ) {
+
+      /* Start calculation at top of water layer */
+      if(lake_con.z[k] > ldepth) {
+
+        /* First layer on top  of water. */
+        if(ldepth > lake_con.z[k+1]) {
+
+          /* Ice volume fills up this layer. */
+          if ( tempvolume >= ((lake_con.z[k]-ldepth) *(lake_con.basin[k]+surfacearea)/2.)) {
+            tempvolume -= (lake_con.z[k]-ldepth)*(lake_con.basin[k]+surfacearea)/2.;
+            *hice += lake_con.z[k] - ldepth;
+          }
+          /* Ice volume falls within this layer. */
+          else {
+            if(lake_con.basin[k] != lake_con.basin[k+1] ) {
+              m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
+              *hice += ((-1*surfacearea) + sqrt(surfacearea*surfacearea + 2.*m*tempvolume))/m;
+            }
+            else
+              *hice += tempvolume/surfacearea;
+
+            tempvolume = 0.0;
+          }
+        }
+        /* Next layers, until all volume accounted for. */
+        else if(tempvolume > 0.0) {
+
+          /* Ice volume fills up this layer. */
+          if ( tempvolume > ((lake_con.z[k]-lake_con.z[k+1]) *(lake_con.basin[k]+lake_con.basin[k+1])/2.)) {
+            // current layer completely filled
+            tempvolume -= (lake_con.z[k]-lake_con.z[k+1])*(lake_con.basin[k]+lake_con.basin[k+1])/2.;
+            *hice += lake_con.z[k] - lake_con.z[k+1];
+          }
+          /* Ice volume falls within this layer. */
+          else {
+             if(lake_con.basin[k] != lake_con.basin[k+1] ) {
+               m = (lake_con.basin[k]-lake_con.basin[k+1])/(lake_con.z[k] - lake_con.z[k+1]);
+               *hice += ((-1*lake_con.basin[k+1]) + sqrt(lake_con.basin[k+1]*lake_con.basin[k+1] + 2.*m*tempvolume))/m;
+             }
+             else
+               *hice += tempvolume/lake_con.basin[k];
+            tempvolume = 0.0;
+          }
+
+        } // end if (ldepth > lake_con.z[k+1])
+
+      } // end if (lake_con.z[k] > ldepth)
+
+    } // end loop over nodes
+
+  } // end if (tempvolume >= lake_con.maxvolume)
+
+  if(tempvolume/lake_con.basin[0] > SMALL )   {
+    status = ERROR;
+  }
+  else if(*hice <= 0.0  && ice_water_eq != 0.0) {
+    status = ERROR;
+  }
+  else if(*hice < 0.0) *hice = 0.0;
+
+  return(status);
+
+}
+

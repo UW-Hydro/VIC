@@ -1,6 +1,6 @@
 # VIC Makefile
 # Modifications:
-# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI	KAC
+# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI			KAC
 # 12-Nov-2003 Added "make depend" to the "all" and "default" options.
 #             This way, if a user always types "make", the user is
 #             guaranteed to have a .depend file and therefore *.o will
@@ -8,9 +8,9 @@
 #             user can override this behavior by typing "make model",
 #             which doesn't invoke "make depend".
 # 24-Mar-2005 Added 2 new files: conv_force_vic2alma.c and
-#	      conv_results_vic2alma.c.				TJB
-# 17-Apr-2005 Added vicInterp target.				TJB
-# 2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration. TJB
+#	      conv_results_vic2alma.c.						TJB
+# 17-Apr-2005 Added vicInterp target.						TJB
+# 2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration.	TJB
 #	      Removed 2 files:
 #		conv_force_vic2alma.c
 #		conv_results_vic2alma.c
@@ -23,8 +23,9 @@
 #               output_list_utils.o
 #               parse_output_info.o
 #               set_output_defaults.o
-# 2007-Jan-15 Added PRT_HEADER option; added write_header.c.	TJB
-# 24-Apr-2007 Added newt_raph_func_fast.c for IMPLICIT option.	JCA
+# 2007-Jan-15 Added PRT_HEADER option; added write_header.c.			TJB
+# 2007-Apr-24 Added newt_raph_func_fast.c for IMPLICIT option.			JCA
+# 2007-Nov-06 Added get_dist.c.							TJB
 #
 # $Id$
 #
@@ -75,7 +76,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	estimate_T1.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
-	func_surf_energy_bal.o get_force_type.o get_global_param.o \
+	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
 	initialize_atmos.o initialize_model_state.o \
 	initialize_global.o initialize_new_storm.o initialize_snow.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \

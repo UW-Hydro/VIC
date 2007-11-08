@@ -19,11 +19,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-#if CLOSE_ENERGY
 #define MAX_ITER 50
-#else
-#define MAX_ITER 1
-#endif // CLOSE_ENERGY
 
 //static char vcid[] = "$Id$";
 
@@ -38,32 +34,33 @@
   Comments     :
 
   Modifications:
-  15-Jun-04 Initialize mixmax to 0.					TJB
-  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Apr_03 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.  from  KAC
+  15-Jun-04 Initialize mixmax to 0.						TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
+  2007-Apr-03 Modified to handle grid cell errors by returning to the
+	      main subroutine, rather than ending the simulation.		KAC via GCT
+  2007-Nov-06 Replaced lake.fraci with lake.areai.  Added workaround for
+	      non-convergence of temperatures.					LCB via TJB
 *****************************************************************************/
-int water_under_ice(int freezeflag, 
-		     double sw_ice,
-		     double wind,
-		     double *Ti,
-		     double *water_density,
-		     double lat,
-		     int numnod,
-		     double dz,
-		     double surfdz,
-		     double Tcutoff,
-		     double *qw,
-		     double *surface,
-		     double *deltaH,
-		     double *water_cp,
-		     int mixdepth,
-		     double hice,
-		     double sdepth,
-		     double dt,
-		     double LakeFlow,
-		     double *energy_out_bottom)
+int water_under_ice(int     freezeflag, 
+		    double  sw_ice,
+		    double  wind,
+		    double *Ti,
+		    double *water_density,
+		    double  lat,
+		    int     numnod,
+		    double  dz,
+		    double  surfdz,
+		    double  Tcutoff,
+		    double *qw,
+		    double *surface,
+		    double *deltaH,
+		    double *water_cp,
+		    int     mixdepth,
+		    double  hice,
+		    double  sdepth,
+		    double  dt,
+		    double *energy_out_bottom)
 	      
 {
   double Tnew[MAX_LAKE_NODES];
@@ -76,10 +73,8 @@ int water_under_ice(int freezeflag,
   double epsilon = 0.0001;
   double qw_init, qw_mean, qw_final;
   double sw_underice_visible, sw_underice_nir;
-  int    mixmax;
   
   iterations = 0;
-  mixmax = 0;
 
   for(k=0; k<numnod; k++)
     Tnew[k] = Ti[k];
@@ -88,7 +83,7 @@ int water_under_ice(int freezeflag,
   eddy(freezeflag, wind, Ti, water_density, de, lat, numnod, dz, surfdz);
   
   // estimate the flux out of the water
-  qw_init =  0.57*(Ti[0]-Tcutoff)/(surfdz/2.) /*+ 4218. * RHO_W * 1.4e-3 * LakeFlow * (Tnew[0]-Tcutoff)*/;
+  qw_init =  0.57*(Ti[0]-Tcutoff)/(surfdz/2.);
   *qw = qw_init;
   qw_mean = -999.;
 
@@ -124,8 +119,6 @@ int water_under_ice(int freezeflag,
     tracer_mixer (Tnew, &mixdepth, freezeflag,
     		  surface,numnod, dz, surfdz, water_cp);
     
-    if(mixdepth > mixmax) mixmax=mixdepth;
-
     qw_final = 0.57*(Tnew[0]-Tcutoff)/(surfdz/2.);
     
     qw_mean = (qw_final + *qw)/2.;  
@@ -133,10 +126,23 @@ int water_under_ice(int freezeflag,
     iterations += 1;
 
   }
-    
-  *qw = qw_mean;
-  for ( k = 0; k < numnod; k++ )
-    Ti[k] = Tnew[k];
 
-  return (0);
+  if(fabs(qw_mean - *qw) <= epsilon) {
+    // Temperature reached convergence
+    for(k=0; k<numnod; k++)
+      Ti[k] = Tnew[k];
+    *qw = qw_mean;
+    return(0);
+  }
+  else {
+    fprintf(stderr, "Lake temps under ice failed to converge; temporary work around used.\n");
+    *qw = 0.0;
+    for(k=0; k<numnod; k++)
+      Ti[k] = Tcutoff;
+    energycalc(Ti, &joulenew, numnod,dz, surfdz, surface, water_cp, water_density);
+    *deltaH = (joulenew - jouleold)/(surface[0]*dt*SECPHOUR);
+    return(0);
+    // return (ERROR);
+  }
+
 }

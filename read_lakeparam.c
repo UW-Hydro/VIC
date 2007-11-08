@@ -7,8 +7,7 @@ static char vcid[] = "$Id$";
 
 lake_con_struct read_lakeparam(FILE            *lakeparam, 
 			       soil_con_struct  soil_con, 
-			       veg_con_struct  *veg_con, 
-			       float            res)
+			       veg_con_struct  *veg_con)
 /**********************************************************************
 	read_lakeparam		Laura Bowling		2000
 
@@ -18,11 +17,10 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   Parameters Read from File:
   TYPE   NAME                    UNITS   DESCRIPTION
-  double eta_a                   kPa/m (?) Decline of solar rad. w/ depth        
   double  maxdepth                 m      Maximum lake depth   
-  int    numnod                    -      Number of lake profile nodes.
+  int     numnod                   -      Number of lake profile nodes.
   double *surface                  m^2    Area of lake at each node. 
-  double    b                      -      Exponent controlling lake depth
+  double  b                        -      Exponent controlling lake depth
                                           profile (y=Ax^b)
   float rpercent;                  -      Fraction of the grid cell runoff 
                                           routed through the lake.
@@ -32,16 +30,14 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   Parameters Computed from those in the File:
   TYPE   NAME                    UNITS   DESCRIPTION
   double  dz                       m      Thickness of each solution layer.
-  double *surface                 m^2    Area of the lake at each node.
-  double cell_area                m^2    Area of the model grid cell.
-
+  double *surface                  m^2    Area of the lake at each node.
 
   Modifications:
   03-11-01 Modified Cv_sum so that it includes the lake fraction,
 	   thus 1 - Cv_sum is once again the bare soil fraction.  KAC
-  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
   02-Nov-04 Modified the adjustment of Cv_sum so that veg fractions
-	    share in area reduction along with the lake fraction.	TJB
+	    share in area reduction along with the lake fraction.		TJB
   22-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
   2005-03-08 Added EQUAL_AREA option.  When TRUE, res variable is interpreted
 	     to be the grid cell area in km^2.  When FALSE, res is interpreted
@@ -52,7 +48,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2006-Nov-07 Removed LAKE_MODEL option.					TJB
   2007-Oct-24 Modified to handle grid cells with empty or very shallow starting
 	      lake depths.							KAC via TJB
-  
+  2007-Nov-06 Updated to read new set of lake parameters (broad-crested wier)	LCB via TJB
 **********************************************************************/
 
 {
@@ -62,14 +58,13 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 #endif
 
   int    i;
+  int    lakecel;
   int    junk, flag;
-  double lat, lng;
-  double start_lat, right_lng, left_lng, delta;
-  double dist;
   double tempdz;
   double radius, A, x, y;
   char   instr[251];
   char   tmpstr[MAXSTRING+1];
+  int    ErrFlag;
 
   lake_con_struct temp;
   
@@ -78,49 +73,14 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 #endif // NO_REWIND
     
   /*******************************************************************/
-  /* Calculate grid cell area. */
-  /******************************************************************/
-
-  if (options.EQUAL_AREA) {
-
-    temp.cell_area = res * 1000. * 1000.; /* Grid cell area in m^2. */
-
-  }
-  else {
-
-    lat = fabs(soil_con.lat);
-    lng = fabs(soil_con.lng);
-
-    start_lat = lat - res / 2.;
-    right_lng = lng + res / 2;
-    left_lng  = lng - res / 2;
-
-    delta = get_dist(lat,lng,lat+res/10.,lng);
-
-    dist = 0.;
-
-    for ( i = 0; i < 10; i++ ) {
-      dist += get_dist(start_lat,left_lng,start_lat,right_lng) * delta;
-      start_lat += res/10;
-    }
-
-    temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
-
-  }
-
-  /*******************************************************************/
   /* Read in general lake parameters.                           */
   /******************************************************************/
 
-  /* VIC format files: */
-  
- /*   fgets(instr, 2500, lakeparam); */
-
   // Locate current grid cell
-  fscanf(lakeparam, "%d", &temp.gridcel);
-  while ( temp.gridcel != soil_con.gridcel ) {
+  fscanf(lakeparam, "%d", &lakecel);
+  while ( lakecel != soil_con.gridcel ) {
     fgets(tmpstr, MAXSTRING, lakeparam);
-    fscanf(lakeparam, "%d", &temp.gridcel);
+    fscanf(lakeparam, "%d", &lakecel);
   }
 
   // cell number not found
@@ -130,23 +90,15 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   }
 
   // read lake parameters from file
-  fscanf(lakeparam, "%lf %d", &temp.maxdepth, &temp.numnod);
-  fscanf(lakeparam, "%lf %lf", &temp.mindepth, &temp.maxrate);
-
-  // Comment out the following if depthfrac and ratefrac aren't used. 
-  fscanf(lakeparam, "%lf %lf", &temp.ratefrac, &temp.depthfrac);
-
+  fscanf(lakeparam, "%d", &temp.numnod);
+  fscanf(lakeparam, "%lf %lf", &temp.mindepth, &temp.wfrac);
   fscanf(lakeparam, "%lf", &temp.depth_in);
   fscanf(lakeparam, "%f", &temp.rpercent);
   temp.wetland_veg_class = 0;
   temp.bpercent=0.0;
-  
-  if(temp.numnod >= MAX_LAKE_NODES) {
-    nrerror("Number of lake nodes exceeds the maximum allowable, edit user_def.h.");
-  }
 
-  if(temp.depth_in > temp.maxdepth) {
-    nrerror("Initial depth exceeds the specified maximum lake depth.");
+  if(temp.numnod > MAX_LAKE_NODES) {
+    nrerror("Number of lake nodes exceeds the maximum allowable, edit user_def.h.");
   }
 
   /*******************************************************************/
@@ -158,23 +110,21 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
     fprintf(stderr, "LAKE PROFILE being computed. \n");
 
-    /* Compute water layer thickness */
-    tempdz = (temp.maxdepth) / ((float) temp.numnod); 
-
-    fscanf(lakeparam, "%lf", &temp.Cl[0]);
+    fscanf(lakeparam, "%lf %lf", &temp.z[0], &temp.Cl[0]);
+    temp.maxdepth = temp.z[0];
     if(temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0)
       nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
     
     fgets(tmpstr, MAXSTRING, lakeparam);
     	
-    temp.basin[0] = temp.Cl[0] * temp.cell_area;
+    temp.basin[0] = temp.Cl[0] * soil_con.cell_area;
 	
     /**********************************************
     Compute depth area relationship.
     **********************************************/
   
     radius = sqrt(temp.basin[0] / PI);
-    temp.z[0] = temp.maxdepth;
+
     temp.maxvolume = 0.0;
     for(i=1; i<= temp.numnod; i++) {
       temp.z[i] = (temp.numnod - i) * tempdz;             
@@ -192,32 +142,47 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   else{       
 
     fprintf(stderr, "Reading in the specified lake profile.\n");
+    temp.maxvolume=0.0;
     temp.Cl[0] = 0; // initialize to 0 in case no lake is defined
     for ( i = 0; i < temp.numnod; i++ ) {
       fscanf(lakeparam, "%lf %lf", &temp.z[i], &temp.Cl[i]);
-      temp.basin[i] = temp.Cl[i] * temp.cell_area;
+      temp.basin[i] = temp.Cl[i] * soil_con.cell_area;
       
+      if(i==0)
+        temp.maxdepth = temp.z[i];
+
       if(temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0)
 	nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
     }
     temp.z[temp.numnod] = 0.0;
     temp.basin[temp.numnod] = 0.0;
+    temp.Cl[temp.numnod] = 0.0;
 
-    temp.maxvolume=0.0;
-    if (temp.numnod > 0) {
-      for ( i = 1; i <= temp.numnod; i++ ) {
-        temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * (temp.z[i-1] - temp.z[i]) / 2.;
-      }
+    for ( i = 1; i <= temp.numnod; i++ ) {
+      temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * (temp.z[i-1] - temp.z[i]) / 2.;
     }
     fprintf(stderr, "maxvolume = %e km3\n",temp.maxvolume/(1000.*1000.*1000.));
 
   }
 
+  if(temp.depth_in > temp.maxdepth) {
+    nrerror("Initial depth exceeds the specified maximum lake depth.");
+  }
+
+  ErrFlag = get_volume(temp, temp.mindepth, &(temp.minvolume));
+  if (ErrFlag == ERROR) {
+    fprintf(stderr, "ERROR: problem in get_volume(): depth %f volume %f rec %d\n", temp.mindepth, temp.minvolume, 0);
+    exit(0);
+  }
+
+  /* Compute water layer thickness */
+  tempdz = (temp.maxdepth) / ((float) temp.numnod);
+
   // Add lake fraction to Cv_sum
   (veg_con[0].Cv_sum) += temp.Cl[0];
-  if ( veg_con[0].Cv_sum > 0.999 ) {
+  if ( veg_con[0].Cv_sum > 1.000 ) {
     // Adjust Cv_sum so that it is equal to 1
-    fprintf(stderr,"WARNING: Total Cv of veg fractions and lake fraction exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", temp.gridcel);
+    fprintf(stderr,"WARNING: Total Cv of veg fractions and lake fraction exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", soil_con.gridcel);
     for( i = 0; i < veg_con[0].vegetat_type_num; i++ )
       veg_con[i].Cv = veg_con[i].Cv / veg_con[0].Cv_sum;
     temp.Cl[0] = temp.Cl[0] / veg_con[0].Cv_sum;
@@ -227,37 +192,4 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   fprintf(stderr, "Lake area = %e km2\n",temp.basin[0]/(1000.*1000.));
   return temp;
 }
-
-/*******************************************************************************
-  Function: double distance(double lat1, double long1, double lat2, double long2)
-  Returns : distance between two locations
-********************************************************************************/
-
-double get_dist(double lat1, double long1, double lat2, double long2)
-{
-  double theta1;
-  double phi1;
-  double theta2;
-  double phi2;
-  double dtor;
-  double term1;
-  double term2;
-  double term3;
-  double temp;
-  double distance;
-
-  dtor = 2.0*PI/360.0;
-  theta1 = dtor*long1;
-  phi1 = dtor*lat1;
-  theta2 = dtor*long2;
-  phi2 = dtor*lat2;
-  term1 = cos(phi1)*cos(theta1)*cos(phi2)*cos(theta2);
-  term2 = cos(phi1)*sin(theta1)*cos(phi2)*sin(theta2);
-  term3 = sin(phi1)*sin(phi2);
-  temp = term1+term2+term3;
-  temp = (double) (1.0 < temp) ? 1.0 : temp;
-  distance = RADIUS*acos(temp);
-
-  return distance;
-}  
 

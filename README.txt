@@ -31,6 +31,41 @@ Usage:
 New Features:
 -------------
 
+Updated lake model.
+
+	Files affected:
+
+	full_energy.c
+	get_dist.c (new)
+	ice_melt.c
+	initialize_lake.c
+	lakes.eb.c
+	LAKE.h
+	Makefile
+	put_data.c
+	read_initial_model_state.c
+	read_lakeparam.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	vicNl_def.h
+	vicNl.c
+	vicNl.h
+	water_energy_balance.c
+	water_under_ice.c
+	wetland_energy.c
+	write_model_state.c
+
+	Description:
+
+	Merged Laura Bowling's latest lake model code into UW version.
+	Changes include:
+	  * Fixed lake snow physics to be consistent with land snow pack
+	  * Lake ice formation now takes into account availability of liquid water
+	  * Lake ice now explicitly tracked in water balance
+	  * Drainage now depends only on liquid water content, not total water+ice
+	  * Drainage now modeled as flow over broad-crested wier
+	  * New lake parameter file format - see read_lakeparam.c for details
+	  * Fixes for crashes in extreme cases; fixes for water balance errors
 
 
 

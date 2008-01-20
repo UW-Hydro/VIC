@@ -6,7 +6,7 @@
   29-Oct-03 Added version string and removed unused options from
 	    optstring.						TJB
 **********************************************************************/
-char *version = "4.0.6 Beta Release 1";
+char *version = "4.0.6";
 
 char *optstring = "g:vo";
 

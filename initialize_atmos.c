@@ -63,7 +63,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    record, eliminating the on the fly estimations used in
 	    previous versions of the model.              Bart and Greg
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
-           the model can make use of the computed treeline.     KAC
+           the model can make use of the computed treeline.			KAC
   09-02-2003 Moved COMPUTE_TREELINE flag from user_def.h to the 
              options structure.  Now when not set to FALSE, the 
              value indicates the default above treeline vegetation
@@ -71,25 +71,31 @@ void initialize_atmos(atmos_data_struct        *atmos,
              (i.e. everything has a canopy).  A negative value  
              will cause the model to use bare soil.  Make sure that 
              positive index value refer to a non-canopied vegetation
-             type in the vegetation library.                   KAC
+             type in the vegetation library.					KAC
   07-May-04 Replaced
 		rint(something)
 	    with
 		(float)(int)(something + 0.5)
 	    to handle rounding errors without resorting to rint()
-	    function.						TJB
+	    function.								TJB
   16-Jun-04 Modified to pass avgJulyAirTemp argument to
-	    compute_treeline().					TJB
-  2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option. TJB
+	    compute_treeline().							TJB
+  2006-Sep-01 (Port from 4.1.0) Modified support for OUTPUT_FORCE option.	TJB
   2006-Sep-11 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures. TJB
-  2006-Sep-14 (Port from 4.1.0) Added support for ALMA input variables. TJB
+              out_data and out_data_files structures.				TJB
+  2006-Sep-14 (Port from 4.1.0) Added support for ALMA input variables.		TJB
   2006-Nov-06 Fixed typo in the "if" statement at line 104 that was
-	      preventing AIR_TEMP from being accepted at any time step. TJB
-  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
-  2006-Dec-29 Added blocks to handle some neglected met input variables. TJB
+	      preventing AIR_TEMP from being accepted at any time step.		TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables.	TJB
+  2006-Dec-29 Added blocks to handle some neglected met input variables.	TJB
   2007-Jan-02 Added CSNOWF and LSSNOWF to list of supported met input variables. TJB
-  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of
+	      supported met input variables.					TJB
+  2008-Jan-19 Fixed conditions under which net longwave replaces incoming
+	      longwave in atmos[rec].longwave[NR].  Previously, net longwave
+	      was stored if SNOW_STEP != global.dt.  Now, net longwave is
+	      stored if options.FULL_ENERGY and options.FROZEN_SOIL are both
+	      FALSE, i.e. for a water balance mode run.				TJB
 
 **********************************************************************/
 {
@@ -584,18 +590,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ( !param_set.TYPE[LONGWAVE].SUPPLIED ) {
     /** Incoming longwave radiation not supplied **/
     for (rec = 0; rec < global_param.nrecs; rec++) {
-      if( NF > 1 ) {
-	for (i = 0; i < NF; i++) {
-	  calc_longwave(&(atmos[rec].longwave[i]), tskc[rec/stepspday],
-			atmos[rec].air_temp[i], atmos[rec].vp[i]);
-	}
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        calc_longwave(&(atmos[rec].longwave[i]), tskc[rec/stepspday],
+                        atmos[rec].air_temp[i], atmos[rec].vp[i]);
+        sum += atmos[rec].longwave[i];
+      }
+      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
 	calc_netlongwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
 			 atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
-      }
-      else {
-	calc_longwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
-		      atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
-      }
     }
   }
   else if(param_set.FORCE_DT[param_set.TYPE[LONGWAVE].SUPPLIED-1] == 24) {
@@ -608,7 +612,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  atmos[rec].longwave[j] = forcing_data[LONGWAVE][day];
 	  sum += atmos[rec].longwave[j];
 	}
-	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF - STEFAN_B 
+	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
+	if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+          atmos[rec].longwave[NR] -= STEFAN_B 
 		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
 		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
 	rec++;
@@ -625,7 +631,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	sum += atmos[rec].longwave[i];
 	idx++;
       }
-      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF - STEFAN_B 
+      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+        atmos[rec].longwave[NR] -= STEFAN_B 
 		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
 		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
     }
@@ -671,12 +679,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    sum += atmos[rec].wind[j];
 	  }
 	  if(NF>1) atmos[rec].wind[NR] = sum / (float)NF;
-	  if(global_param.dt == 24) {
-	    if(forcing_data[WIND][day] < options.MIN_WIND_SPEED)
-	      atmos[rec].wind[j] = options.MIN_WIND_SPEED;
-	    else 
-	      atmos[rec].wind[NR] = forcing_data[WIND][day];
-	  }
 	  rec++;
 	}
       }

@@ -1073,16 +1073,37 @@ options.SNOW_BAND > 1.
 Better validation of global parameter file options
 
 	Files Affected:
+
 	get_global_param.c
 	make_in_and_outfiles.c
 	read_soilparam_arc.c
 
 	Description:
+
 	Now, all options in the global parameter file involving input and
 	output files are checked to ensure that the filenames have been
 	specified.  In addition, SOIL_DIR and RESULT_DIR no longer require
 	a trailing "/"; a "/" is automatically appended when constructing
 	the soil parameter filename or results filename.		TJB
+
+
+Bad results when SNOW_STEP = 24 hours
+
+	Files Affected:
+
+	check_files.c
+	get_global_param.c
+	initialize_atmos.c
+
+	Description:
+
+	Fixed the criterion for deciding whether to store NET longwave or
+	INCOMING longwave in atmos[rec].longwave[NR].  Previously, VIC
+	stored NET lw if SNOW_STEP != global.dt, under the assumption that
+	this condition was equivalent to running in 24 h water balance mode.
+	However, this caused problems for users who unwittingly ran 24 h
+	water balance mode with SNOW_STEP = 24.  The new criterion is that
+	both FULL_ENERGY and FROZEN_SOIL must be FALSE.
 
 
 --------------------------------------------------------------------------------

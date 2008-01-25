@@ -56,6 +56,12 @@ int  full_energy(char                 NEWCELL,
   2007-Sep-19 Fixed bug in subsidence calculation.				JCA
   2007-Nov-06 Added veg_con to parameter list of lakemain().  Replaced
 	      lake.fraci with lake.areai.					LCB via TJB
+  2008-Jan-23 Changed ice0 from a scalar to an array.  Previously,
+	      when options.SNOW_BAND > 1, the value of ice0 computed
+	      for earlier bands was always overwritten by the value
+	      of ice0 computed for the final band (even if the final
+	      band had 0 area).							JS via TJB
+
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -83,7 +89,7 @@ int  full_energy(char                 NEWCELL,
   double                 out_snow[2*MAX_BANDS];
   double                 out_short=0;
   double                 dp;
-  double                 ice0;
+  double                 ice0[MAX_BANDS];
   double                 moist;
   double                 surf_atten;
   double                 Tend_surf;
@@ -251,7 +257,7 @@ int  full_energy(char                 NEWCELL,
       /* Initialize soil thermal properties for the top two layers */
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
-			    soil_con, &moist, &ice0);
+			    soil_con, &moist, ice0);
       }
 
       /** Compute Bare Soil (free of snow) Albedo **/
@@ -347,7 +353,7 @@ int  full_energy(char                 NEWCELL,
 	    fetch       = veg_con[0].fetch;
 	  }
 
-	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0, moist, 
+	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist, 
 #if EXCESS_ICE
 				     SubsidenceUpdate, evap_prior[DRY][iveg][band], evap_prior[WET][iveg][band],
 #endif

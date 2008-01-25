@@ -31,41 +31,21 @@ Usage:
 New Features:
 -------------
 
-Updated lake model.
+Lake snow pack now has 2 layers, compatible with upland snow pack model
 
 	Files affected:
 
-	full_energy.c
-	get_dist.c (new)
 	ice_melt.c
 	initialize_lake.c
 	lakes.eb.c
-	LAKE.h
-	Makefile
-	put_data.c
-	read_initial_model_state.c
-	read_lakeparam.c
-	read_soilparam_arc.c
-	read_soilparam.c
 	vicNl_def.h
-	vicNl.c
-	vicNl.h
-	water_energy_balance.c
-	water_under_ice.c
-	wetland_energy.c
-	write_model_state.c
 
 	Description:
 
-	Merged Laura Bowling's latest lake model code into UW version.
-	Changes include:
-	  * Fixed lake snow physics to be consistent with land snow pack
-	  * Lake ice formation now takes into account availability of liquid water
-	  * Lake ice now explicitly tracked in water balance
-	  * Drainage now depends only on liquid water content, not total water+ice
-	  * Drainage now modeled as flow over broad-crested wier
-	  * New lake parameter file format - see read_lakeparam.c for details
-	  * Fixes for crashes in extreme cases; fixes for water balance errors
+	Modified lake model to use the same 2-layer snow pack formulation
+	as is used for upland snow pack.					LCB via TJB
+
+
 
 
 
@@ -352,6 +332,8 @@ Flexible output configuration & aggregation of output variables
 
           year month day (hour) swe[0] swe[1] albedo[0] albedo[1]
 
+										TJB
+
 
 Cleanup of structures holding filenames and file pointers
 
@@ -382,6 +364,7 @@ Cleanup of structures holding filenames and file pointers
 	5. Added f_path_pfx[] to the filenames_struct, to store
 	   the path and prefix of forcing files.  Now, forcing[]
 	   only stores the full forcing file names.
+										TJB
 
 
 Soil thermal node temperature is now an output variable
@@ -396,7 +379,7 @@ Soil thermal node temperature is now an output variable
 
 	Soil thermal node temperature can now be selected for output, via the
 	key "OUT_SOIL_TNODE".  If selected, the temperatures at all valid soil
-	thermal nodes will be output.
+	thermal nodes will be output.						TJB
 
 
 Removed LAKE_MODEL compile-time option
@@ -437,7 +420,7 @@ Removed LAKE_MODEL compile-time option
 	in the interest of making the code easier to maintain and reducing
 	user confusion.  Now, to turn off lake functionality, simply set LAKE
 	to FALSE in the global parameter file (or omit the "LAKE" line
-	completely).
+	completely).								TJB
 
 
 More complete set of supported input variables
@@ -464,10 +447,11 @@ More complete set of supported input variables
         provide this ability when ALMA_INPUT is TRUE.  This also makes
         input variable specification more consistent with output variable
         specification.
+
         Since now the forcing files from PILPS can be read via the
         appropriate specification of input variables and ALMA_INPUT option
         in the global parameter file, the file initialize_atmos_pilps.c
-        has been removed.
+        has been removed.							TJB
 
 
 Optional headers for output and input files
@@ -542,232 +526,249 @@ Optional headers for output and input files
         To accomodate input forcing files that might have been produced via
         VIC's OUTPUT_FORCE option, and therefore could contain a header,
         read_atmos_data.c has been modified to detect and skip headers that
-        follow the formats outlined above.
+        follow the formats outlined above.					TJB
 
 
 Variable TYPE specifications for binary-format output files in the global parameter
 file must match the strings listed in vicNl_def.h.
 
-        Files affected:
+	Files affected:
 
-        parse_output_info.c
+	parse_output_info.c
 
-        Description:
+	Description:
 
-        When listing output variables in the global parameter file, if the
-        output file format is binary, the variable data TYPE must match the string
-        from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".
+	When listing output variables in the global parameter file, if the
+	output file format is binary, the variable data TYPE must match the string
+	from vicNl_def.h exactly, e.g. "OUT_TYPE_INT" rather than just "INT".	TJB
 
 
 Added global option CONTINUEONERROR allowing simulation to continue on cell error.
 
-        Files affected:
+	Files affected:
 
-        arno_evap.c
-        CalcAerodynamic.c
-        calc_atmos_energy_bal.c
-        CalcBlowingSnow.c
-        calc_rainonly.c
-        calc_surf_energy_bal.c
-        display_current_settings.c
-        dist_prec.c
-        frozen_soil.c
-        full_energy.c
-        func_surf_energy_bal.c
-        get_global_param.c
-        ice_melt.c
-        initialize_new_storm.c
-        lakes.eb.c
-        redistribute_during_storm.c
-        root_brent.c
-        runoff.c
-        snow_intercept.c
-        snow_melt.c
-        soil_conduction.c
-        solve_snow.c
-        surface_fluxes.c
-        vicNl.c
-        water_energy_balance.c
-        water_under_ice.c
-        wetland_energy.c
-        global.param.sample
-        LAKE.h
-        vicNl_def.h
-        vicNl.h
+	arno_evap.c
+	CalcAerodynamic.c
+	calc_atmos_energy_bal.c
+	CalcBlowingSnow.c
+	calc_rainonly.c
+	calc_surf_energy_bal.c
+	display_current_settings.c
+	dist_prec.c
+	frozen_soil.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	ice_melt.c
+	initialize_new_storm.c
+	lakes.eb.c
+	redistribute_during_storm.c
+	root_brent.c
+	runoff.c
+	snow_intercept.c
+	snow_melt.c
+	soil_conduction.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	water_energy_balance.c
+	water_under_ice.c
+	wetland_energy.c
+	global.param.sample
+	LAKE.h
+	vicNl_def.h
+	vicNl.h
 
-        If the global option CONTINUEONERROR is set to TRUE then the
-        simulation continues to run even if a cell fails and produces
-        partial output. Default is is for CONTINUEONERROR to be FALSE,
-        as in previous versions of model. The return value of some modules
-        was changed from void to an int numeric return value. The ERROR value is
-        defined in vicNl_def.h.  
+	Description:
+
+	If the global option CONTINUEONERROR is set to TRUE then the
+	simulation continues to run even if a cell fails and produces
+	partial output. Default is is for CONTINUEONERROR to be FALSE,
+	as in previous versions of model. The return value of some modules
+	was changed from void to an int numeric return value. The ERROR
+	value is defined in vicNl_def.h.					KAC via GCT
 
 
-Exponential grid transformation option for soil thermal nodes in finite different heat equation
+Exponential grid transformation option for soil thermal nodes in finite
+difference heat equation
 
-            Files affected:
-            calc_surf_energy_bal.c
-            display_current_settings.c
-            frozen_soil.c
-            func_surf_energy_bal.c
-            get_global_param.c
-            initialize_global.c
-            initialize_model_state.c
-            soil_conduction.c
-            soil_thermal_eqn.c
-            vicNl_def.h
+	Files affected:
 
-            Description: New option is now EXP_TRANS to have an exponential distribution
-            of the thermal node depths in the vertical dimension.  This allows for closer
-            thermal nodes near the surface of soil where the variance is greatest.  The
-            transformation allows for the solution to be solved in linear-space,
-            wherein the nodes are distributed linearly with depth, but the physical
-            system exists in exponential space.  This change also involves a
-            rearranging of the terms in the finite-difference equaton (equation 8
-            of Cherkauer et al. 1999).  Therefore the constants (A-E) are calculated in a new
-            way.  These constants are equal to the constants in each of the terms in equation 8
-            multiplied by alpha^2*deltat.
+	calc_surf_energy_bal.c
+	display_current_settings.c
+	frozen_soil.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	soil_conduction.c
+	soil_thermal_eqn.c
+	vicNl_def.h
+
+	Description:
+
+	New option is now EXP_TRANS to have an exponential distribution
+	of the thermal node depths in the vertical dimension.  This allows for
+	closer thermal nodes near the surface of soil where the variance is
+	greatest.  The transformation allows for the solution to be solved in
+	linear-space, wherein the nodes are distributed linearly with depth,
+	but the physical system exists in exponential space.  This change also
+	involves a rearranging of the terms in the finite-difference equaton
+	(equation 8 of Cherkauer et al. 1999).  Therefore the constants (A-E)
+	are calculated in a new way.  These constants are equal to the constants
+	in each of the terms in equation 8 multiplied by alpha^2*deltat.	JCA
 
 
 Implicit solution option for finite difference frozen soils algorithm
 
-            Files affected:
-            calc_surf_energy_bal.c
-            display_current_settings.c
-            frozen_soil.c
-            func_surf_energy_bal.c
-            get_global_param.c
-            initialize_global.c
-            Makefile
-            surface_fluxes.c
-            vicNl_def.h
-            vicNl.h
+	Files affected:
 
-            Description: The implicit solution uses Newton Raphson to solve the system of
-            non-linear equations.  Therefore there is a new option, IMPLICIT.  If the
-            implicit solution fails (which can sometimes occur at the initial formation
-            of ice in the soil column), the model will use the original explicit solver
-            to solve for the thermal temperatures for that time-step only.  The implicit
-            option is unconditionally stable and therefore the Courant-Friedrichs-Lewy condition
-            does not need to be checked (as it should be for the explicit solver).
+	calc_surf_energy_bal.c
+	display_current_settings.c
+	frozen_soil.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	Makefile
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	The implicit solution uses Newton Raphson to solve the system of non-
+	linear equations.  Therefore there is a new option, IMPLICIT.  If the
+	implicit solution fails (which can sometimes occur at the initial
+	formation of ice in the soil column), the model will use the original
+	explicit solver to solve for the thermal temperatures for that time
+	step only.  The implicit option is unconditionally stable and therefore
+	the Courant-Friedrichs-Lewy condition does not need to be checked (as
+	it should be for the explicit solver).					JCA
 
 
 Zsum_node calculated once and passed in soil_con to other subroutines
 
-          Files affected:
-          calc_surf_energy_bal.c
-          func_surf_energy_bal.c
-          initialize_model_state.c
-          lakes.eb.c
-          read_initial_model_state.c
-          runoff.c
-          soil_conduction.c
-          vicNl_def.h
-          write_debug.c
-          write_model_state.c
+	Files affected:
 
-          Description:  Zsum_node is the depth of each of the thermal nodes needed
-          for the finite difference frozen soils algorithm.  Rather than re-calculating
-          this value in various places, this vector is now passed in the soil_con
-          structure to the various subroutines where it is needed.  The one
-          exception is set_node_parameters, because this is a slightly different
-          definition of Zsum.
+	calc_surf_energy_bal.c
+	func_surf_energy_bal.c
+	initialize_model_state.c
+	lakes.eb.c
+	read_initial_model_state.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	write_debug.c
+	write_model_state.c
+
+	Description:
+
+	Zsum_node is the depth of each of the thermal nodes needed
+	for the finite difference frozen soils algorithm.  Rather than re-
+	calculating this value in various places, this vector is now passed
+	in the soil_con structure to the various subroutines where it is
+	needed.  The one exception is set_node_parameters, because this is
+	a slightly different definition of Zsum.				JCA
 
 
 Patch for "cold nose" problem
 
-      Files affected:
-      frozen_soil.c
-      soil_thermal_eqn.c
+	Files affected:
 
-      Description:
-      This is an inelegant fix for "cold nose" problem that may occur in
-      the finite different frozen soil algorithm in each mode of operation.
-      This involves a thermal node that is of a lower temperature than the
-      upper and lower thermal nodes.  Due to the first term of the heat
-      conduction term (the term that accounts for a change in the thermal
-      conductivity in space), the first term can become more negative
-      than the second term. This causes this cold node to become
-      much colder and thus breaks the second law of thermodynamics (because
-      flux_term1 exceeds flux_term2 in absolute magnitude).  Therefore, a check
-      is now made to set the first term to zero when this begins to happen.
-      This only seems to happen in the first and second near-surface nodes.
+	frozen_soil.c
+	soil_thermal_eqn.c
+
+	Description:
+
+	This is an inelegant fix for "cold nose" problem that may occur in
+	the finite different frozen soil algorithm in each mode of operation.
+	This involves a thermal node that is of a lower temperature than the
+	upper and lower thermal nodes.  Due to the first term of the heat
+	conduction term (the term that accounts for a change in the thermal
+	conductivity in space), the first term can become more negative
+	than the second term. This causes this cold node to become
+	much colder and thus breaks the second law of thermodynamics (because
+	flux_term1 exceeds flux_term2 in absolute magnitude).  Therefore, a check
+	is now made to set the first term to zero when this begins to happen.
+	This only seems to happen in the first and second near-surface nodes.	JCA
 
 
 Added EXCESS_ICE option (set in user_def.h)
 
-        Files affected:
-        calc_surf_energy_bal.c
-        calc_water_energy_balance_errors.c
-        display_current_settings.c
-        frozen_soil.c
-        full_energy.c
-        func_surf_energy_bal.c
-        get_global_param.c
-        initialize_model_state.c
-        initialize_soil.c
-        LAKE.h
-        lakes.eb.c
-        output_list_utils.c
-        prepare_full_energy.c
-        put_data.c
-        read_initial_model_state.c
-        read_soilparam_arc.c
-        read_soilparam.c
-        runoff.c
-        soil_conduction.c
-        soil_thermal_eqn.c
-        surface_fluxes.c
-        user_def.h
-        vicNl.c
-        vicNl_def.h
-        vicNl.h
-        wetland_energy.c
-        write_model_state.c
+	Files affected:
 
-        Description:
-        If TRUE, VIC allows for excess ground ice, i.e. an expanded porosity
-        to account for an initial volumetric ice fraction larger than
-        soil porosity.  The ground subsides (therefore soil depth is no
-        longer static) and the porosity decreases as the excess ice melts.
-        Once porosity reaches the soil porosity (1-bulk density/soil density),
-        it does not change.  The initial volumetric ice fraction for
-        each soil layer must be defined in the soil file. The maximum value
-        for this initial ice fraction is set by MAX_ICE_INIT in
-        vicNl_def.h.  Another new parameter is ICE_AT_SUBSIDENCE, also set
-        in vicNl_def.h.  This parameter controls the rate of subsidence as
-        the ground warms.  Setting a larger value will cause the ground to
-        subside sooner and faster.  The physical bounds of this parameter
-        are 0.0 and 1.0, although setting this to a value of 1.0 will result
-        in the ground continually subsiding despite very cold soil
-        temperatures because there is always a small amount of unfrozen water
-        in each soil layer due to the function used in maximum_unfrozen_water.
-        The recommended value is 0.8.
+	calc_surf_energy_bal.c
+	calc_water_energy_balance_errors.c
+	display_current_settings.c
+	frozen_soil.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_model_state.c
+	initialize_soil.c
+	LAKE.h
+	lakes.eb.c
+	output_list_utils.c
+	prepare_full_energy.c
+	put_data.c
+	read_initial_model_state.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	runoff.c
+	soil_conduction.c
+	soil_thermal_eqn.c
+	surface_fluxes.c
+	user_def.h
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	wetland_energy.c
+	write_model_state.c
+
+	Description:
+
+	If TRUE, VIC allows for excess ground ice, i.e. an expanded porosity
+	to account for an initial volumetric ice fraction larger than
+	soil porosity.  The ground subsides (therefore soil depth is no
+	longer static) and the porosity decreases as the excess ice melts.
+	Once porosity reaches the soil porosity (1-bulk density/soil density),
+	it does not change.  The initial volumetric ice fraction for
+	each soil layer must be defined in the soil file. The maximum value
+	for this initial ice fraction is set by MAX_ICE_INIT in
+	vicNl_def.h.  Another new parameter is ICE_AT_SUBSIDENCE, also set
+	in vicNl_def.h.  This parameter controls the rate of subsidence as
+	the ground warms.  Setting a larger value will cause the ground to
+	subside sooner and faster.  The physical bounds of this parameter
+	are 0.0 and 1.0, although setting this to a value of 1.0 will result
+	in the ground continually subsiding despite very cold soil
+	temperatures because there is always a small amount of unfrozen water
+	in each soil layer due to the function used in maximum_unfrozen_water.
+	The recommended value is 0.8.						JCA
 
 
 Bare soil evap for LAI=0
 
-        Files affected:
+	Files affected:
 
-        func_surf_energy_bal.c
+	func_surf_energy_bal.c
 
-        Description:
+	Description:
 
-        Modified to use arno_evap rather than canopy_evap if LAI
-        is 0, e.g. winter cropland.  KAC via TJB
+	Modified to use arno_evap rather than canopy_evap if LAI
+	is 0, e.g. winter cropland.						KAC via TJB
 
 
 Drop canopy snow if thin
 
-        Files Affected:
+	Files Affected:
 
-        snow_intercept.c
+	snow_intercept.c
 
-        Description:
+	Description:
 
-        Modified to drop canopy snow if it is especially thin
-        (< MIN_SWQ_EB_THRES), which should improve the numeric
-        stability of the canopy energy balance solution.  KAC via TJB
+	Modified to drop canopy snow if it is especially thin
+	(< MIN_SWQ_EB_THRES), which should improve the numeric
+	stability of the canopy energy balance solution.			KAC via TJB
 
 
 
@@ -793,6 +794,7 @@ Various bugs in output variables
 	1. Shortened the names of variables whose names were too long
 	2. Fixed typos in other names
 	3. Added OUT_IN_LONG
+										TJB
 
 
 Uninitialized value of ice[] in transpiration()
@@ -804,7 +806,7 @@ Uninitialized value of ice[] in transpiration()
 	Description:
 
 	Modified to initialize ice[] for all soil layers before computing
-	available moisture (to avoid using uninitialized values later on).
+	available moisture (to avoid using uninitialized values later on).	TJB
 
 
 Uninitialized value of mixdepth in solve_lake()
@@ -816,7 +818,7 @@ Uninitialized value of mixdepth in solve_lake()
 	Description:
 
 	Now set mixdepth=0 for case of complete ice cover; this guarantees that
-	it is initialized for all cases.
+	it is initialized for all cases.					TJB
 
 
 Incorrect sub-daily temperature interpolation when referencing GMT instead of
@@ -831,7 +833,7 @@ local time
 	Temperature interpolation didn't account for case in which min or max
 	temperature could cross the boundary of the current day.  This can
 	happen when referencing GMT instead of local time, for cells far away
-	from 0 E longitude.  This has been fixed. TJB
+	from 0 E longitude.  This has been fixed.				TJB
 
 
 Water budget errors in snow pack on top of lake ice
@@ -845,7 +847,7 @@ Water budget errors in snow pack on top of lake ice
 	Convert swq and surf_water from mm over lake to mm over ice fraction at
 	beginning of solve_lake().  This was needed to avoid a water budget
 	error since swq and surf_water were being converted to mm over lake at
-	end of solve_lake().
+	end of solve_lake().							TJB
 
 
 Incorrect filenames in Makefile for variable output list functions
@@ -857,7 +859,7 @@ Incorrect filenames in Makefile for variable output list functions
 	Description:
 
 	Changed ".c" to ".o" for output_list_utils.o, parse_output_info.o,
-	set_output_defaults.o
+	set_output_defaults.o							TJB
 
 
 Output variable OUT_DELSURFSTOR not functioning
@@ -871,7 +873,7 @@ Output variable OUT_DELSURFSTOR not functioning
 
 	Default properties for OUT_DELSURFSTOR were not set in
 	output_list_utils.c, and OUT_DELSURFSTOR was not assigned a
-	value in put_data.c.  These problems have been fixed.
+	value in put_data.c.  These problems have been fixed.			TJB
 
 
 Pressure and vapor pressure output in wrong units
@@ -884,249 +886,270 @@ Pressure and vapor pressure output in wrong units
 	Description:
 
 	The output variables pressure and vapor pressure were output in Pa
-	instead of kPa.  This has been fixed.
+	instead of kPa.  This has been fixed.					TJB
 
 
 Changed OUT_SURF_TEMP from the average of T[0] and T[1] to exactly
 equal to T[0].
 
-        Files affected:
+	Files affected:
 
-        put_data.c
+	put_data.c
 
-        Description:
+	Description:
 
-        Previously, OUT_SURF_TEMP had been set to the average of node
-        temperatures T[0] and T[1].  This has been changed to just T[0],
-        since OUT_SURF_TEMP represents the surface skin temperature.
+	Previously, OUT_SURF_TEMP had been set to the average of node
+	temperatures T[0] and T[1].  This has been changed to just T[0],
+	since OUT_SURF_TEMP represents the surface skin temperature.		TJB
 
 
 Added case of SPATIAL_FROST = TRUE in full_energy.c
 
-        Files affected:
+	Files affected:
 
-        full_energy.c
+	full_energy.c
 
-        This module needed to handle the case of SPATIAL_FROST = TRUE. GCT
+	Description:
+
+	This module needed to handle the case of SPATIAL_FROST = TRUE.		GCT
 
 
 Fixed fread statements
 
-        Files affected:
+	Files affected:
 
-        read_initial_model_state.c
+	read_initial_model_state.c
 
-        Fixed fread checks to make sure correct number of items were read
-        in rather than the size of the item read in.  JCA
+	Description:
+
+	Fixed fread checks to make sure correct number of items were read
+	in rather than the size of the item read in.				JCA
 
 
 Read in order incorrect in error_print_surf_energy_bal
 
-     Files affected:
-     calc_surf_energy_bal.c
+	Files affected:
+	calc_surf_energy_bal.c
+										GCT
 
 
 Removed (1.-snow_coverage) from three equations where it did not belong
 
-        Files affected:
-        func_surf_energy_bal.c
+	Files affected:
+
+	func_surf_energy_bal.c
+										GCT
 
 
 setup_frozen_soil subroutine removed as it is never called
 
-                   Files affected:
-                   frozen_soil.c
+	Files affected:
+
+	frozen_soil.c
+										GCT
 
 
 Bug fix for previous bug fix to dt_baseflow calculation.
 
-           Files Affected:
+	Files Affected:
 
-           runoff.c
+	runoff.c
 
-           Description:
+	Description:
 
-           Fixed bug arising from earlier fix to dt_baseflow
-           calculation.  Earlier fix took residual moisture
-           into account in the linear part of the baseflow eqn,
-           but not in the non-linear part.  Now we take residual
-           moisture into account correctly throughout the whole
-           equation.  TJB
+	Fixed bug arising from earlier fix to dt_baseflow
+	calculation.  Earlier fix took residual moisture
+	into account in the linear part of the baseflow eqn,
+	but not in the non-linear part.  Now we take residual
+	moisture into account correctly throughout the whole
+	equation.								TJB
 
 
 Sub-daily snow step for 24h wb mode not aggregating correctly
 
-           Files affected:
+	Files affected:
 
-           snow_melt.c (melt units corrected to mm)
-           solve_snow.c (melt units corrected to mm)
-           surface_fluxes.c (iter_* and step_* structures)
+	snow_melt.c
+	solve_snow.c
+	surface_fluxes.c
 
-           Description:
+	Description:
 
-           The implementation of the canopy iteration in surface_fluxes() 
-           caused the data structures containing the results
-           for the sub-daily snow steps to be reset at the beginning
-           of every sub-daily step, resulting in large water
-           balance errors and incorrect daily results.  This has been fixed by
-           creating distinct data structures to store results for 
-           iterations (iter_*) and steps (step_*).  In addition,
-           the units of snow melt were corrected to
-           be consistent (mm) across functions.  TJB
+	The implementation of the canopy iteration in surface_fluxes() 
+	caused the data structures containing the results
+	for the sub-daily snow steps to be reset at the beginning
+	of every sub-daily step, resulting in large water
+	balance errors and incorrect daily results.  This has been fixed by
+	creating distinct data structures to store results for 
+	iterations (iter_*) and steps (step_*).  In addition,
+	the units of snow melt were corrected to
+	be consistent (mm) across functions.					TJB
 
 
 Moved Implicit error counting above call for solve_T_profile.
 
-          Files affected:
+	Files affected:
 
-          func_surf_energy_bal
+	func_surf_energy_bal.c
+										GCT
 
 
 Moved ARNO/NIJSSEN conversion after calculation of max_moist.
 
-          Files affected:
+	Files affected:
 
-          read_soilparam_arc.c
+	read_soilparam_arc.c
+										GCT
 
 
 Added ErrorFlag return value from initialize_prcp.
 
-          Files affected:
+	Files affected:
 
-          lakes.eb.c
-          LAKE.h
+	lakes.eb.c
+	LAKE.h
+										GCT
 
 
 Trap cases of T-errors matching variable ERROR for root_brent.
 
-           
-            calc_atmos_energy_bal.c
-            calc_surf_energy_bal.c
-            frozen_soil.c
-            ice_melt.c
-            root_brent.c
-            snow_intercept.c
-            snow_melt.c
-           
-           
-            Basically, what was happening was that when root_brent was called
-            from calc_surf_energy_bal with func_surf_energy_bal as Function,
-            then func_surf_energy_bal was ocasionally returning a value of ERROR to
-            root_brent, and root_brent was then (in some cases) interpreting
-            this as an actual surface temperature and continuing merrily on
-            its way. So, there was an error in the model that was never
-            caught. So, now root_brent checks for this and returns a value of
-            ERROR if there is a problem. Because of this change, all of the
-            routines that call root_brent had to be changed since they checked
-            against an error of -9998 - now they check for
-            values less than -998, since ERROR = -999.  JCA
+	Files affected:
+        
+	calc_atmos_energy_bal.c
+	calc_surf_energy_bal.c
+	frozen_soil.c
+	ice_melt.c
+	root_brent.c
+	snow_intercept.c
+	snow_melt.c
+
+	Description:
+
+	Basically, what was happening was that when root_brent was called
+	from calc_surf_energy_bal with func_surf_energy_bal as Function,
+	then func_surf_energy_bal was ocasionally returning a value of ERROR to
+	root_brent, and root_brent was then (in some cases) interpreting
+	this as an actual surface temperature and continuing merrily on
+	its way. So, there was an error in the model that was never
+	caught. So, now root_brent checks for this and returns a value of
+	ERROR if there is a problem. Because of this change, all of the
+	routines that call root_brent had to be changed since they checked
+	against an error of -9998 - now they check for
+	values less than -998, since ERROR = -999.				JCA
 
 
 Trap cases of negative soil moisture.
 
-            Files affected:
+	Files affected:
 
-            full_energy.c
+	full_energy.c
 
-            No longer resets ice content to previous time-step ice content if
-            subsidence has occurred.  JCA
+	Description:
+
+	No longer resets ice content to previous time-step ice content if
+	subsidence has occurred.						JCA
 
 
 Fixed bug for read-in during EXCESS_ICE option.
 
-            Files affected:
+	Files affected:
 
-            read_initial_model_state.c
+	read_initial_model_state.c
 
-            Fixed bug for read-in during EXCESS_ICE option.  JCA
+	Description:
+
+	Fixed bug for read-in during EXCESS_ICE option.				JCA
 
 
 Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
-            Files Affected:
+	Files Affected:
 
-            get_force_type.c
-            get_global_param.c
-            initialize_global.c
-            read_soilparam.c
-            read_soilparam_arc.c
-            vicNl.c
+	get_force_type.c
+	get_global_param.c
+	initialize_global.c
+	read_soilparam.c
+	read_soilparam_arc.c
+	vicNl.c
 
-            Description:
+	Description:
 
-            Memory errors would occur when ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE.
-            In addition, the output files would not contain sufficient contents due
-            to not closing properly.  These have been fixed.  TJB
+	Memory errors would occur when ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE.
+	In addition, the output files would not contain sufficient contents due
+	to not closing properly.  These have been fixed.			TJB
 
 
 Handling of cells missing from snowband file
 
-            Files affected:
+	Files affected:
 
-            read_snowband.c
+	read_snowband.c
 
-            Description:
+	Description:
 
-            Previously, if SNOW_BAND = TRUE and a particular cell was not listed
-            in the snowband file, VIC would abort.  Now, when VIC encounters
-            cells with no information in the snowband file, VIC issues a warning
-            and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.  KAC via TJB
+	Previously, if SNOW_BAND = TRUE and a particular cell was not listed
+	in the snowband file, VIC would abort.  Now, when VIC encounters
+	cells with no information in the snowband file, VIC issues a warning
+	and sets the cells to have 1 band, with Tfactor = 0 and Pfactor = 1.	KAC via TJB
+
 
 Moved check for soil moisture > max to initialize_model_state.c
 
-         Files affected:
+	Files affected:
 
-         read_initial_model_state.c
-         initialize_model_state.c
+	read_initial_model_state.c
+	initialize_model_state.c
 
-         Description:
+	Description:
 
-         For initializing the model state the check for soil
-         moist > max moist was moved from read_initial_model_state.c
-         to initialize_model_state.c. The check is performed on all veg types
-         even if the area fraction = 0. There was a situation with
-         EXCESS_ICE = TRUE when the model was trying to distribute
-         moisture values that exceeded max moist to each thermal node
-         in the wetland area when Cl = 0.  JCA
+	For initializing the model state the check for soil
+	moist > max moist was moved from read_initial_model_state.c
+	to initialize_model_state.c. The check is performed on all veg types
+	even if the area fraction = 0. There was a situation with
+	EXCESS_ICE = TRUE when the model was trying to distribute
+	moisture values that exceeded max moist to each thermal node
+	in the wetland area when Cl = 0.					JCA
+
 
 Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
 
-         Files affected:
+	Files affected:
 
-         runoff.c
+	runoff.c
 
-         Description:
+	Description:
 
-         Modified to correctly handle evaporation from spatially
-         distributed soil frost.  Original version could produce
-         negative soil moisture in fractions with high ice content
-         since only total evaporation was checked versus total
-         liquid water content, not versus available liquid water
-         in each frost subsection.  KAC via TJB
+	Modified to correctly handle evaporation from spatially
+	distributed soil frost.  Original version could produce
+	negative soil moisture in fractions with high ice content
+	since only total evaporation was checked versus total
+	liquid water content, not versus available liquid water
+	in each frost subsection.						KAC via TJB
 
 
 Bug fixes in EXCESS_ICE calculations
 
-         Files affected:
+	Files affected:
 
-         full_energy.c
-         vicNl_def.h
+	full_energy.c
+	vicNl_def.h
 
-         Description:
+	Description:
 
-         Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.
-         Fixed bug in subsidence calculation.  JCA
+	Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.
+	Fixed bug in subsidence calculation.					JCA
+
 
 Return ERROR instead of exiting in ice_melt.c module
 
-         Files affected:
+	Files affected:
 
-         ice_melt.c
+	ice_melt.c
 
-         Description:
+	Description:
 
-         Return ERROR instead of exiting, if ice_melt could not converge to
-         a solution in root_brent.  JCA
+	Return ERROR instead of exiting, if ice_melt could not converge to
+	a solution in root_brent.						JCA
 
 
 Force runoff() to use user-specified resid_moist
@@ -1145,7 +1168,7 @@ Force runoff() to use user-specified resid_moist
 	specified by the user.  If a user truly wants to specify
 	residual moisture in all layers to be 0, the user should
 	set these explicitly in the soil parameter file.  Also
-	fixed typo in fprintf() on line 289.  TJB
+	fixed typo in fprintf() on line 289.					TJB
 
 
 Fixed error in EXP_TRANS formulation
@@ -1157,7 +1180,7 @@ Fixed error in EXP_TRANS formulation
 
 	Description:
 
-	Fixed error in EXP_TRANS formulation.			JCA
+	Fixed error in EXP_TRANS formulation.					JCA
 
 
 Updated default output file variable lists to match traditional 4.1.0
@@ -1171,7 +1194,7 @@ output files
 
 	Updated to reflect variables present in traditional 4.1.0
 	output files.  Previously the defaults matched the traditional
-	4.0.6 output files.					TJB
+	4.0.6 output files.							TJB
 
 
 Model aborts when TIME_STEP = 24 and STARTHOUR is not specified.
@@ -1182,7 +1205,7 @@ Model aborts when TIME_STEP = 24 and STARTHOUR is not specified.
 
 	Description:
 
-	Added validation of dt, start date, end date, and nrecs.	TJB
+	Added validation of dt, start date, end date, and nrecs.		TJB
 
 
 Miscellaneous bugs in frozen soils.
@@ -1194,7 +1217,7 @@ Miscellaneous bugs in frozen soils.
 
 	Description:
 
-	Fixed miscellaneous bugs (typos) in frozen soil equations.	JCA
+	Fixed miscellaneous bugs (typos) in frozen soil equations.		JCA
 
 
 Output file headers contain "hour" field despite output dt == 24 hours.
@@ -1206,7 +1229,7 @@ Output file headers contain "hour" field despite output dt == 24 hours.
 	Description:
 
 	Replaced all instances of global.dt with global.out_dt,
-	since out_dt is the time interval used in the output files.	TJB
+	since out_dt is the time interval used in the output files.		TJB
 
 
 Liquid soil moisture sometimes falls below residual.
@@ -1224,7 +1247,7 @@ Liquid soil moisture sometimes falls below residual.
 	during winter conditions.  This has been changed to
 	  moist[lindex] < resid_moist[lindex]
 	to eliminate these errors and make the logic consistent
-	with the rest of the code.					TJB
+	with the rest of the code.						TJB
 
 
 Variable "moist" in runoff() has different meaning than in other functions.
@@ -1237,7 +1260,7 @@ Variable "moist" in runoff() has different meaning than in other functions.
 
 	Renamed all *moist* variables to *liq* if they only refer
 	to liquid soil moisture.  This makes the logic much easier
-	to understand.							TJB
+	to understand.								TJB
 
 
 Soil moisture drops below residual for sub-daily time step interval and

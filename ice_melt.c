@@ -107,6 +107,8 @@ static char vcid[] = "$Id$";
   2007-Nov-06 New parameters for CalcBlowingSnow().  Replaced lake.fraci,
 	      lake.hice with lake.areai and lake.ice_water_eq.  More accurate
 	      accounting of lake_snow->surf_water.				LCB via TJB
+  2008-Jan-23 Modified lake snow pack to have 2 layers, similar to the modeling
+	      of snow pack on uplands.						LCB via TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -145,26 +147,30 @@ int ice_melt(double            z2,
   int    Twidth;
 
   double DeltaPackCC;            /* Change in cold content of the pack */
-  double DeltaPackSwq;           /* Change in snow water equivalent of the
-                                   pack (m) */
+  double DeltaPackSwq;           /* Change in snow water equivalent of the pack (m) */
   double InitialSwq;             /* Initial snow water equivalent (m) */
   double InitialIce;
   double MassBalanceError;       /* Mass balance error (m) */
   double MaxLiquidWater;         /* Maximum liquid water content of pack (m) */
   double OldTSurf;               /* Old snow surface temperature (C) */
-  
   double Qnet;                   /* Net energy exchange at the surface (W/m2) */
+  double PackRefreezeEnergy;     /* refreeze/melt energy in pack layer (W/m2) */
   double RefreezeEnergy;         /* refreeze energy (W/m2) */
   double RefrozenWater;          /* Amount of refrozen water (m) */
   double SnowFallCC;             /* Cold content of new snowfall (J) */
-  double SnowMelt;               /* Amount of snow melt during time interval
-                                   (m water equivalent) */
+  double SurfaceCC;
+  double PackCC;
+  double SurfaceSwq;
+  double PackSwq;
+  double PackIce;
+  double SnowMelt;               /* Amount of snow melt during time interval (m water equivalent) */
   double IceMelt;
   double LWnet;
   double avgcond;
   double SWconducted;
   double SnowIce;
   double LakeIce;
+  double Ice;
   double SnowFall;
   double RainFall;
   double vapor_flux;
@@ -181,23 +187,73 @@ int ice_melt(double            z2,
 
   char ErrorString[MAXSTRING];
 
-  SnowFall = snowfall / 1000.; /* convet to m */
-  RainFall = rainfall / 1000.; /* convet to m */
+  SnowFall = snowfall / 1000.; /* convert to m */
+  RainFall = rainfall / 1000.; /* convert to m */
   IceMelt = 0.0;
   RefrozenWater = 0.0;
   
   InitialSwq = snow->swq;
   OldTSurf = snow->surf_temp;
 
-  /* Initialize snowpack variables, differs from snow_melt.c because 
-  *  lake model only uses one layer */
- 
-  SnowIce  = snow->swq  - snow->surf_water;
+  /* Initialize snowpack variables */
+  SnowIce  = snow->swq - snow->pack_water - snow->surf_water;
   LakeIce = lake->ice_water_eq / lake->areai;        /* meters of water equivalent based on average ice thickness. */
   InitialIce = LakeIce;
-    
+  Ice = SnowIce + LakeIce;
+
+  /* Reconstruct snow pack */
+  if (Ice > MAX_SURFACE_SWE)
+    SurfaceSwq = MAX_SURFACE_SWE;
+  else
+    SurfaceSwq = Ice;
+  if(SurfaceSwq <= SnowIce) {
+    PackSwq = SnowIce - SurfaceSwq;
+    PackIce = LakeIce;
+  }
+  else {
+    PackSwq = 0.;
+    PackIce = Ice - SurfaceSwq;
+  }
+
+  /* Calculate cold contents */
+  SurfaceCC = CH_ICE * SurfaceSwq * snow->surf_temp;
+  PackCC = CH_ICE * (PackSwq+PackIce) * snow->pack_temp;
+  if (air_temp > 0.0)
+    SnowFallCC = 0.0;
+  else
+    SnowFallCC = CH_ICE * SnowFall * air_temp;
+
   /* Distribute fresh snowfall */
+  /* Surface layer was not already full, snow will exceed space.  What happens to snow if SurfaceSwq = MAX_SURFACE_SWE?*/
+  //  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq) && (MAX_SURFACE_SWE - SurfaceSwq) > SMALL) {
+  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq)) {
+    DeltaPackSwq = SurfaceSwq + SnowFall - MAX_SURFACE_SWE;
+    if (DeltaPackSwq > SurfaceSwq)
+      DeltaPackCC = SurfaceCC + (SnowFall - MAX_SURFACE_SWE)/SnowFall * SnowFallCC;
+    else
+      DeltaPackCC = DeltaPackSwq/SurfaceSwq * SurfaceCC;
+    SurfaceSwq = MAX_SURFACE_SWE;
+    SurfaceCC += SnowFallCC - DeltaPackCC;
+    PackSwq += DeltaPackSwq;
+    PackCC += DeltaPackCC;
+  }
+  else {
+    SurfaceSwq += SnowFall;
+    SurfaceCC += SnowFallCC;
+    DeltaPackCC = 0;
+  }
+  if (SurfaceSwq > 0.0)
+    snow->surf_temp = SurfaceCC/(CH_ICE * SurfaceSwq);
+  else
+    snow->surf_temp = 0.0;
+  if (PackSwq+PackIce > 0.0)
+    snow->pack_temp = PackCC/(CH_ICE * (PackSwq+PackIce));
+  else
+    snow->pack_temp = 0.0;
+
+  /* Adjust ice and snow->surf_water */
   SnowIce += SnowFall;
+  Ice += SnowFall;
   snow->surf_water += RainFall;
   
   icerad (net_short, lake->hice, SnowIce*RHO_W/RHOSNOW, &avgcond, &SWconducted, &deltaCC);
@@ -239,7 +295,7 @@ int ice_melt(double            z2,
 				  aero_resist_used, z2, displacement, Z0, wind, net_short, 
 				  longwave, density, Le, air_temp,
 				  pressure * 1000., vpd * 1000., vp * 1000.,
-				  RainFall, snow->swq+LakeIce, 
+				  RainFall, SurfaceSwq, 
 				  snow->surf_water, OldTSurf, &RefreezeEnergy,
 				  &vapor_flux, &blowing_flux, &surface_flux,
 				  &advection, deltaCC, Tcutoff, avgcond, 
@@ -251,20 +307,22 @@ int ice_melt(double            z2,
   snow->surface_flux = surface_flux;
   save_refreeze_energy[0] = RefreezeEnergy;
 
+  /* Check that snow swq exceeds minimum value for model stability */
+  //if ( !UNSTABLE_SNOW ) {
+
   /* If Qnet == 0.0, then set the surface temperature to 0.0 */
   if (Qnet == 0.0) {
     snow->surf_temp = 0.0;
     if (RefreezeEnergy >= 0.0) {                     /* Surface is freezing. */
-      RefrozenWater = RefreezeEnergy/(Lf * RHO_W) 
-          * delta_t * SECPHOUR; 
+      RefrozenWater = RefreezeEnergy/(Lf * RHO_W) * delta_t * SECPHOUR; 
       if (RefrozenWater > snow->surf_water) {
         RefrozenWater = snow->surf_water;
-        RefreezeEnergy = RefrozenWater * Lf * RHO_W/
-          (delta_t * SECPHOUR);
+        RefreezeEnergy = RefrozenWater * Lf * RHO_W/(delta_t * SECPHOUR);
       } 
       melt_energy  += RefreezeEnergy;
-      snow->swq    += RefrozenWater;
+      SurfaceSwq   += RefrozenWater;
       SnowIce      += RefrozenWater;
+      Ice          += RefrozenWater;
       snow->surf_water   -= RefrozenWater;
       assert(snow->surf_water >= 0.0);
       SnowMelt      = 0.0;
@@ -272,61 +330,80 @@ int ice_melt(double            z2,
     else {
 
       /* Calculate snow melt if refreeze energy is negative */      
-      SnowMelt = fabs(RefreezeEnergy)/(Lf * RHO_W) * 
-        delta_t * SECPHOUR;
+      SnowMelt = fabs(RefreezeEnergy)/(Lf * RHO_W) * delta_t * SECPHOUR;
       melt_energy += RefreezeEnergy;
     }
 
     /* Adjust snow->surf_water for vapor_flux */
-    if ((SnowIce + snow->surf_water + LakeIce) < -(snow->vapor_flux)) {
-      // if vapor_flux exceeds stored ice/water, we not only need to
+    if (snow->surf_water < -(snow->vapor_flux)) {
+      // if vapor_flux exceeds stored water, we not only need to
       // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-      snow->blowing_flux *= -(SnowIce + snow->surf_water + LakeIce) / snow->vapor_flux;
-      snow->vapor_flux = -(SnowIce + snow->surf_water + LakeIce);
-      snow->surface_flux = -(SnowIce + snow->surf_water + LakeIce) - snow->blowing_flux;
-      lake->volume -= LakeIce*fracprv*lake->surface[0];	    
-      LakeIce=0.0;
-      SnowIce=0.0; 
-      snow->surf_water=0.0;
+      snow->blowing_flux *= -(snow->surf_water) / snow->vapor_flux;
+      snow->vapor_flux    = -(snow->surf_water);
+      snow->surface_flux  = -(snow->surf_water) - snow->blowing_flux;
+      snow->surf_water    = 0.0;
     }  
-    else if ((SnowIce + snow->surf_water) < -(snow->vapor_flux) && (SnowIce + snow->surf_water +LakeIce) > -(snow->vapor_flux)) {
-      // vapor_flux exceeds swq, but not LakeIce
-      LakeIce += (snow->vapor_flux+SnowIce+snow->surf_water);  /* extract flux from ice that is not satisfied by swq */
-      lake->volume += lake->areai*(snow->vapor_flux+SnowIce+snow->surf_water);
-      SnowIce    = 0.0;
-      snow->surf_water=0.0;
-    }
     else {
-      if(-(snow->vapor_flux) > snow->surf_water)
-	{
-	  SnowIce += (snow->vapor_flux + snow->surf_water);
-	  snow->surf_water = 0.0;
-	}
-      else {
-	snow->surf_water += snow->vapor_flux;
-      }
+      snow->surf_water   += snow->vapor_flux;
     }
  
-    /* If SnowMelt < SnowIce, there was incomplete melting of the pack */
-    
-    if (SnowMelt < SnowIce) {
+    /* If SnowMelt < Ice, there was incomplete melting of the snow/ice */
+    if (SnowMelt < Ice) {
+      /* Subtract melt from snow pack and lake ice */
+      /* Since we redefine the snow surface layer to always encompass the topmost
+         portion of the snow, we essentially reduce the bottom snow layer first.
+         This is only for accounting purposes and may not reflect where in the
+         pack the melt actually occurs. */
+      if (SnowMelt <= PackSwq) { /* Only melt part of the pack (bottom) layer. */
         snow->surf_water += SnowMelt;
-        SnowIce        -= SnowMelt;
+        PackSwq          -= SnowMelt;
+        Ice              -= SnowMelt;
+        SnowIce          -= SnowMelt;
+      }
+      else if (SnowMelt <= SnowIce) { /* Melt all of pack layer and part of surface layer. */
+        snow->surf_water += SnowMelt + snow->pack_water;
+        snow->pack_water  = 0.0;
+        SurfaceSwq       -= (SnowMelt - PackSwq);
+        PackSwq           = 0.0;
+        SnowIce          -= SnowMelt;
+        Ice              -= SnowMelt;
+      }
+      else  { /* Melt snow pack completely and also part of the ice */
+        snow->surf_water += SnowIce + snow->pack_water;
+        snow->pack_water  = 0.0;
+        PackSwq           = 0.0;
+        Ice              -= SnowMelt;
+        LakeIce          -= SnowMelt-SnowIce;
+        IceMelt           = SnowMelt-SnowIce;
+        if(SurfaceSwq > SnowMelt) {
+          SurfaceSwq -= SnowMelt;
+        }
+        else {
+          SurfaceSwq = 0.0;
+          PackIce -= (SnowMelt-SurfaceSwq-PackSwq);
+        }
+        SnowIce = 0.0;
+      }
     }
-    /* Else if there was complete melting of the pack, but not of the ice. */
-    else if(SnowMelt >= SnowIce && SnowMelt < (SnowIce + LakeIce)) {
-      snow->surf_water += SnowIce;
-      LakeIce -= (SnowMelt-SnowIce);
-      IceMelt = (SnowMelt-SnowIce);
-      SnowIce = 0.0;
-    }
-    /* Else, SnowMelt > TotalIce and there was complete melting of the ice */
+    /* Else, SnowMelt > TotalIce and there was complete melting of the snow and ice */
     else {
-      SnowMelt    = SnowIce + LakeIce;
-      snow->surf_water += SnowIce;
-      IceMelt = LakeIce;
-      SnowIce         = 0.0;
-      LakeIce         =0.0;
+      snow->surf_water += SnowIce + snow->pack_water;
+      snow->pack_water  = 0.0;
+      PackSwq           = 0.0;
+      SurfaceSwq        = 0.0;
+      SnowIce           = 0.0;
+      SnowMelt          = Ice;
+      IceMelt           = LakeIce;
+      LakeIce           = 0.0;
+      PackIce           = 0.0;
+      Ice               = 0.0;
+      snow->surf_temp   = 0.0;
+      snow->pack_temp   = 0.0;
+      /* readjust melt energy to account for melt only of available snow */
+      melt_energy -= RefreezeEnergy;
+      RefreezeEnergy = RefreezeEnergy / fabs(RefreezeEnergy)
+                       * SnowMelt * Lf * RHO_W / ( delta_t );
+      melt_energy += RefreezeEnergy;
     } 
   }
   
@@ -335,13 +412,13 @@ int ice_melt(double            z2,
     /* Calculate surface layer temperature using "Brent method" */
 
     snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
-				 (double)0.0, ErrorString,
+				 (double)(snow->surf_temp+SNOW_DT), ErrorString,
 				 IceEnergyBalance, (double)delta_t, 
 				 aero_resist, aero_resist_used, z2, 
 				 displacement, Z0, wind, net_short, longwave,
 				 density, Le, air_temp, pressure * 1000.,
 				 vpd * 1000., vp * 1000., RainFall, 
-				 snow->swq+LakeIce,
+				 SurfaceSwq,
 				 snow->surf_water, OldTSurf, &RefreezeEnergy, 
 				 &vapor_flux, &blowing_flux, &surface_flux,
 				 &advection, deltaCC, Tcutoff, 
@@ -351,11 +428,16 @@ int ice_melt(double            z2,
 				 &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
     if( snow->surf_temp <= -998 ){
+#if VERBOSE
+      /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
+      fprintf(stderr,"Snow/Ice layer is too thin to solve separately \n");
+#endif // VERBOSE
+      snow->surf_temp = 999;
       ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				 aero_resist_used, z2, displacement, Z0, wind, net_short,
 				 longwave, density, Le, air_temp,
 				 pressure * 1000., vpd * 1000., vp * 1000.,
-				 RainFall, snow->swq+LakeIce, 
+				 RainFall, SurfaceSwq, 
 				 snow->surf_water, OldTSurf, &RefreezeEnergy,
 				 &vapor_flux, &blowing_flux, &surface_flux,
 				 &advection, deltaCC, Tcutoff, 
@@ -365,88 +447,191 @@ int ice_melt(double            z2,
 				 &sensible_heat, &LWnet, ErrorString);
       return( ERROR );
     }
-    Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
-				     aero_resist_used, z2, displacement, Z0, wind, net_short,
-				     longwave, density, Le, air_temp,
-				     pressure * 1000., vpd * 1000., 
-				     vp * 1000.,RainFall, snow->swq+LakeIce, 
-				     snow->surf_water, OldTSurf, &RefreezeEnergy, 
-				     &vapor_flux, &blowing_flux, &surface_flux,
-				     &advection, deltaCC, Tcutoff, 
-				     avgcond, SWconducted, snow->swq*RHO_W/RHOSNOW, 
-				     RHOSNOW,surf_atten, &SnowFlux, &latent_heat,
-				     &latent_heat_sub, &sensible_heat, &LWnet);
-    
-
-    snow->vapor_flux = vapor_flux;
-    snow->surface_flux = surface_flux;
-    save_refreeze_energy[0] = RefreezeEnergy;
-
-    /* since we iterated, the surface layer is below freezing and no snowmelt */ 
-    
-    SnowMelt = 0.0;
-    
-    /* Since updated snow_temp < 0.0, all of the liquid water in the surface
-       layer has been frozen */ 
-    
-    SnowIce        += snow->surf_water;
-    melt_energy += snow->surf_water * Lf 
-                       * RHO_W/(delta_t * SECPHOUR);
-    RefrozenWater = snow->surf_water;
-    snow->surf_water  = 0.0;
-    
-    /* Adjust SurfaceSwq for vapor_flux */
-    if ((SnowIce + LakeIce) < -(snow->vapor_flux)) {
-      // if vapor_flux exceeds stored ice/water, we not only need to
-      // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-      snow->blowing_flux *= -(SnowIce + LakeIce) / snow->vapor_flux;
-      snow->vapor_flux = -(SnowIce + LakeIce);
-      snow->surface_flux = -(SnowIce + LakeIce) - snow->blowing_flux;
-      lake->volume -= lake->ice_water_eq;
-      LakeIce=0.0;
-      SnowIce=0.0;
-    }
-    else if (SnowIce < -(snow->vapor_flux) && (SnowIce + LakeIce) > -(snow->vapor_flux)) {
-      LakeIce += (snow->vapor_flux+SnowIce);
-      lake->volume += lake->areai*(snow->vapor_flux+SnowIce);
-      SnowIce    = 0.0;
-    }
     else {
-      if(SnowIce > 0.0)
-	SnowIce += snow->vapor_flux;
-      else
-	lake->volume += lake->areai*snow->vapor_flux;
+      Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
+				      aero_resist_used, z2, displacement, Z0, wind, net_short,
+				      longwave, density, Le, air_temp,
+				      pressure * 1000., vpd * 1000., 
+				      vp * 1000.,RainFall, SurfaceSwq, 
+				      snow->surf_water, OldTSurf, &RefreezeEnergy, 
+				      &vapor_flux, &blowing_flux, &surface_flux,
+				      &advection, deltaCC, Tcutoff, 
+				      avgcond, SWconducted, snow->swq*RHO_W/RHOSNOW, 
+				      RHOSNOW,surf_atten, &SnowFlux, &latent_heat,
+				      &latent_heat_sub, &sensible_heat, &LWnet);
+
+      snow->vapor_flux = vapor_flux;
+      snow->surface_flux = surface_flux;
+      save_refreeze_energy[0] = RefreezeEnergy;
+
+      /* since we iterated, the surface layer is below freezing and no snowmelt */ 
+
+      SnowMelt = 0.0;
+      IceMelt  = 0.0;
+
+      /* Since updated snow_temp < 0.0, all of the liquid water in the surface
+         layer has been frozen */ 
+
+      SnowIce         += snow->surf_water;
+      Ice             += snow->surf_water;
+      melt_energy     += snow->surf_water * Lf * RHO_W/(delta_t * SECPHOUR);
+      RefrozenWater    = snow->surf_water;
+      snow->surf_water = 0.0;
+
+      /* Adjust SurfaceSwq for vapor_flux */
+      if (SurfaceSwq < -(snow->vapor_flux)) {
+        // if vapor_flux exceeds stored snow/ice, we not only need to
+        // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
+        if(SurfaceSwq > SnowIce) {
+          snow->blowing_flux *= -(SurfaceSwq) / snow->vapor_flux;
+          snow->vapor_flux    = -SurfaceSwq;
+          snow->surface_flux  = -SurfaceSwq - snow->blowing_flux;
+          LakeIce            -= SurfaceSwq - SnowIce;
+          Ice                 = PackIce;
+          SnowIce             = 0.0;
+        }
+        else {
+          snow->blowing_flux *= -(SurfaceSwq) / snow->vapor_flux;
+          snow->vapor_flux    = -SurfaceSwq;
+          snow->surface_flux  = -SurfaceSwq - snow->blowing_flux;
+          SurfaceSwq          = 0.0;
+          Ice                 = PackSwq + PackIce;
+        }
+      }
+      else {
+        SurfaceSwq += snow->vapor_flux;
+        if(SnowIce > -(snow->vapor_flux))
+          SnowIce += snow->vapor_flux;
+        else {
+          LakeIce += (snow->vapor_flux + SnowIce);
+          SnowIce = 0.;
+        }
+        Ice += snow->vapor_flux;
+      }
+
     }
+
   }
 
   /* Done with iteration etc, now Update the liquid water content of the
      surface layer */ 
   
-  MaxLiquidWater = LIQUID_WATER_CAPACITY * SnowIce;
-  if  (snow->surf_water > MaxLiquidWater) {
-    melt[0]    = snow->surf_water - MaxLiquidWater;
+  if(SnowIce > SurfaceSwq)
+    MaxLiquidWater = LIQUID_WATER_CAPACITY * SurfaceSwq;
+  else
+    MaxLiquidWater = LIQUID_WATER_CAPACITY * SnowIce;
+  if (snow->surf_water > MaxLiquidWater) {
+    melt[0]          = snow->surf_water - MaxLiquidWater;
     snow->surf_water = MaxLiquidWater;
   }
   else
     melt[0] = 0.0;
 
-  /* Update snow properties */
-  
-  snow->swq = SnowIce + snow->surf_water;
-  lake->ice_water_eq = LakeIce * lake->areai;
+  /* Refreeze liquid water in the pack.
+     variable 'RefreezeEnergy' is the heat released to the snow pack
+     if all liquid water were refrozen.
+     if RefreezeEnergy < PackCC then all water IS refrozen
+     PackCC always <=0.0
+     WORK IN PROGRESS: This energy is NOT added to MeltEnergy, since this does
+     not involve energy transported to the pixel.  Instead heat from the snow
+     pack is used to refreeze water */
+  snow->pack_water += melt[0]; /* add surface layer outflow to pack liquid water*/
+  PackRefreezeEnergy = snow->pack_water * Lf * RHO_W;
 
-  if(lake->ice_water_eq <= 0.0) {
-    lake->ice_water_eq = 0.0;
+  /* calculate energy released to freeze*/
+  if (PackCC < -PackRefreezeEnergy) { /* cold content not fully depleted*/
+    PackSwq         += snow->pack_water;    /* refreeze all water and update*/
+    Ice             += snow->pack_water;
+    SnowIce         += snow->pack_water;
+    snow->pack_water = 0.0;
+    if (PackSwq + PackIce > 0.0) {
+      PackCC          = (PackSwq+PackIce) * CH_ICE * snow->pack_temp + PackRefreezeEnergy;
+      snow->pack_temp = PackCC / (CH_ICE * (PackSwq+PackIce));
+      if(snow->pack_temp > 0.) snow->pack_temp = 0.;
+    }
+    else
+      snow->pack_temp = 0.0;
+  }
+  else {
+    /* cold content has been either exactly satisfied or exceeded. If
+       PackCC = refreeze then pack is ripe and all pack water is
+       refrozen, else if energy released in refreezing exceeds PackCC
+       then exactly the right amount of water is refrozen to satify PackCC.
+       The refrozen water is added to PackSwq and Ice */
+    snow->pack_temp   = 0.0;
+    DeltaPackSwq      = -PackCC/(Lf * RHO_W);
+    snow->pack_water -= DeltaPackSwq;
+    PackSwq          += DeltaPackSwq;
+    Ice              += DeltaPackSwq;
+    SnowIce          += DeltaPackSwq;
   }
 
+  /* Update the liquid water content of the pack */
+  MaxLiquidWater = LIQUID_WATER_CAPACITY * PackSwq;
+  if (snow->pack_water > MaxLiquidWater) {
+    melt[0]          = snow->pack_water - MaxLiquidWater;
+    snow->pack_water = MaxLiquidWater;
+  }
+  else
+    melt[0] = 0.0;
+
+  /* Update snow properties */
+  Ice  = PackIce + PackSwq + SurfaceSwq;
+  if (Ice > MAX_SURFACE_SWE) {
+    SurfaceCC   = CH_ICE * snow->surf_temp * SurfaceSwq;
+    PackCC      = CH_ICE * snow->pack_temp * (PackSwq + PackIce);
+    if (SurfaceSwq > MAX_SURFACE_SWE) {
+      PackCC     += SurfaceCC * (SurfaceSwq - MAX_SURFACE_SWE) / SurfaceSwq;
+      SurfaceCC  -= SurfaceCC * (SurfaceSwq - MAX_SURFACE_SWE) / SurfaceSwq;
+      PackSwq    += SurfaceSwq - MAX_SURFACE_SWE;
+      SurfaceSwq -= SurfaceSwq - MAX_SURFACE_SWE;
+    }
+    else if ( SurfaceSwq < MAX_SURFACE_SWE) {
+      PackCC     -= PackCC * (MAX_SURFACE_SWE - SurfaceSwq) / (PackSwq+PackIce);
+      SurfaceCC  += PackCC * (MAX_SURFACE_SWE - SurfaceSwq) / (PackSwq+PackIce);
+      PackSwq    -= MAX_SURFACE_SWE - SurfaceSwq;
+      SurfaceSwq += MAX_SURFACE_SWE - SurfaceSwq;
+    }
+    snow->pack_temp      = PackCC / (CH_ICE * (PackSwq+PackIce));
+    snow->surf_temp      = SurfaceCC / (CH_ICE * SurfaceSwq);
+  }
+  else {
+    PackSwq = 0.0;
+    PackCC  = 0.0;
+    PackIce = 0.0;
+    snow->pack_temp  = 0.0;
+  }
+  snow->swq = SnowIce + snow->surf_water + snow->pack_water;
+  lake->ice_water_eq = LakeIce * lake->areai;
+  lake->volume -= (InitialIce - LakeIce - IceMelt) * lake->areai;
+  if (lake->ice_water_eq <= 0.0) {
+    lake->ice_water_eq = 0.0;
+  }
+#if SPATIAL_SNOW
+  /*  snow->coverage = calc_snow_coverage(&snow->store_snow,
+      soil_con->depth_full_snow_cover,
+      old_coverage, snow->swq,
+      old_swq, snow->depth, old_depth,
+      melt + snow->vapor_flux,
+      &snow->max_swq, snowfall,
+      &snow->store_swq,
+      &snow->swq_slope,
+      &snow->store_coverage);
+  */
+#else
+  if ( snow->swq > 0 ) snow->coverage = 1.;
+  else snow->coverage = 0.;
+#endif
+
   /* Mass balance test */
-  MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce) + (RainFall + SnowFall) 
-                     - IceMelt - melt[0] + snow->vapor_flux; 
-    
-  //printf("MassBalanceError = %g %e\n", MassBalanceError, InitialIce - LakeIce);
+  MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce)
+                     + (RainFall + SnowFall) - IceMelt - melt[0] + snow->vapor_flux;
+  //   if(fabs(MassBalanceError) > SMALL)
+  //  fprintf(stderr, "MassBalanceError = %g %e %e %e, %e, \n", MassBalanceError, InitialIce - LakeIce, IceMelt, InitialSwq, snow->swq);
 
   melt[0] *= 1000.; /* converts back to mm */
   snow->mass_error = MassBalanceError;
+  snow->coldcontent        = SurfaceCC;
   snow->vapor_flux *= -1.;
   *save_LWnet = LWnet;
   *save_advection = advection;
@@ -454,6 +639,7 @@ int ice_melt(double            z2,
   *save_SnowFlux = SnowFlux;
   *save_latent = latent_heat + latent_heat_sub;
   *save_sensible = sensible_heat;
+  *save_refreeze_energy    = RefreezeEnergy;
   *save_Qnet = Qnet;
 
   return (0);

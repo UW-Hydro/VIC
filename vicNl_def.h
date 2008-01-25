@@ -569,6 +569,7 @@ typedef struct {
   double tempi;                   /* Lake ice temperature (C) */
   double swe;                     /* Water equivalence of lake snow cover (m over lake ice area) */
   double surf_water;              /* Water content of surface snow layer (m over lake ice area) */
+  double pack_water;              /* Water content of pack snow layer (m over lake ice area) */
   double SAlbedo;                 /* Albedo of lake snow (fraction) */
   double sdepth;                  /* Depth of snow on top of ice (m over lake ice area) */
   // Other current lake properties (derived from state variables and forcings)

@@ -2335,6 +2335,9 @@ void update_prcp(dist_prcp_struct *prcp,
 	      the lake cannot disappear if there is still ice cover, previously
 	      the volume of frozen water was not tracked or extracted from the
 	      liquid water portion of the lake, so ice could grow indefinitely.	LCB via TJB
+  2008-Jan-23 Added updates of wland_snow->pack_water and
+	      pack_temp in conjunction with 2-layer snow pack over
+	      lake ice.								LCB via TJB
 **************************************************************************/
 {
   extern option_struct   options;
@@ -2434,6 +2437,13 @@ void update_prcp(dist_prcp_struct *prcp,
   wland_snow[iveg][band].surf_water += lakefraction * lake_snow->surf_water;
   lake->surf_water = lake_snow->surf_water;
   
+  wland_snow[iveg][band].pack_temp *= (1.-lakefraction);
+  wland_snow[iveg][band].pack_temp += lakefraction * lake_snow->pack_temp;
+  
+  wland_snow[iveg][band].pack_water *= (1.-lakefraction);
+  wland_snow[iveg][band].pack_water += lakefraction * lake_snow->pack_water;
+  lake->pack_water = lake_snow->pack_water;
+  
   wland_snow[iveg][band].depth *= (1.-lakefraction);
   wland_snow[iveg][band].depth += lakefraction * lake_snow->depth; 
   lake->sdepth = lake_snow->depth;
@@ -2510,6 +2520,9 @@ void update_prcp(dist_prcp_struct *prcp,
   2007-Nov-06 Redistribution now takes into account evaporative fluxes from
 	      wetland.  Recharge due to lake expansion is now addressed in
 	      water_balance().  Replaced lake.fraci with lake.areai.		LCB via TJB
+  2008-Jan-23 Added initialization of lake_snow->pack_water and
+	      pack_temp in conjunction with 2-layer snow pack over
+	      lake ice.								LCB via TJB
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
 		    energy_bal_struct *lake_energy, 
@@ -2582,12 +2595,14 @@ int initialize_prcp(dist_prcp_struct *prcp,
     lake_snow->blowing_flux = wland_snow[iveg][band].blowing_flux;
     lake_snow->surface_flux = wland_snow[iveg][band].surface_flux;
     lake_snow->surf_temp = wland_snow[iveg][band].surf_temp;
+    lake_snow->pack_temp = wland_snow[iveg][band].pack_temp;
   }
   else {
     lake_snow->vapor_flux = 0.;  
     lake_snow->blowing_flux = 0.;  
     lake_snow->surface_flux = 0.;  
     lake_snow->surf_temp = 0.;
+    lake_snow->pack_temp = 0.;
   }
 
   if((lake->areai >= lake->sarea) && lake->areai > 0.0) {
@@ -2613,21 +2628,25 @@ int initialize_prcp(dist_prcp_struct *prcp,
     wland_snow[iveg][band].albedo = (wland_snow[iveg][band].albedo - lake->SAlbedo*(*lakefrac))/(1.-(*lakefrac));
     wland_snow[iveg][band].depth = (wland_snow[iveg][band].depth - lake->sdepth*(*lakefrac))/(1.-(*lakefrac));
     wland_snow[iveg][band].surf_water = (wland_snow[iveg][band].surf_water - lake->surf_water*(*lakefrac))/(1.-(*lakefrac));
+    wland_snow[iveg][band].pack_water = (wland_snow[iveg][band].pack_water - lake->pack_water*(*lakefrac))/(1.-(*lakefrac));
     if ( wland_snow[iveg][band].swq < SMALL ) {
       wland_snow[iveg][band].swq = 0.;
       wland_snow[iveg][band].depth = 0.;
       wland_snow[iveg][band].surf_water = 0.;
+      wland_snow[iveg][band].pack_water = 0.;
       wland_snow[iveg][band].albedo = 0.;
     }
     if(*fraci > 0.0) {
       lake_snow->swq = lake->swe;
       lake_snow->surf_water = lake->surf_water;
+      lake_snow->pack_water = lake->pack_water;
       lake_snow->depth = lake->sdepth; 
       lake_snow->albedo = lake->SAlbedo; 
     }
     else {
       lake_snow->swq = 0.0;
       lake_snow->surf_water = 0.0;
+      lake_snow->pack_water = 0.0;
       lake_snow->depth = 0.0; 
       lake_snow->albedo = 0.0; 
     }   
@@ -2636,18 +2655,21 @@ int initialize_prcp(dist_prcp_struct *prcp,
     if(*fraci > 0.0) {
       lake_snow->swq = lake->swe/(*fraci);
       lake_snow->surf_water = lake->surf_water/(*fraci);
+      lake_snow->pack_water = lake->pack_water/(*fraci);
       lake_snow->depth = lake->sdepth/(*fraci);
       lake_snow->albedo = lake->SAlbedo; 
     }
     else {
       lake_snow->swq = 0.0;
       lake_snow->surf_water = 0.0;
+      lake_snow->pack_water = 0.0;
       lake_snow->depth = 0.0; 
       lake_snow->albedo = 0.0; 
     }   
     wland_snow[iveg][band].swq =0.0;
     wland_snow[iveg][band].depth =0.0;
     wland_snow[iveg][band].surf_water =0.0;
+    wland_snow[iveg][band].pack_water =0.0;
     wland_snow[iveg][band].albedo =0.0;
   }
   if (lake_snow->swq == 0.0) {

@@ -40,6 +40,9 @@ int initialize_lake (lake_var_struct   *lake,
 	      depth == 0.0).						KAC via TJB
   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added ice_depth()
 	      function.							LCB via TJB
+  2008-Jan-23 Added initialization of lake_snow->surf_temp, pack_water,
+	      and pack_temp in conjunction with 2-layer snow pack over
+	      lake ice.							LCB via TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -69,7 +72,10 @@ int initialize_lake (lake_var_struct   *lake,
   lake->aero_resist_used = 0;
   lake_snow->swq = 0.0;
   lake_snow->depth = 0.0;
+  lake_snow->surf_water = 0.0;
   lake_snow->surf_temp = 0.0;
+  lake_snow->pack_water = 0.0;
+  lake_snow->pack_temp = 0.0;
   lake_snow->MELTING = FALSE;
   lake->swe = lake_snow->swq;
   lake->sdepth = lake_snow->depth;

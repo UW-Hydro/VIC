@@ -69,6 +69,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Sep-14 Added initialization of names->soil_dir.			TJB
   2007-Oct-10 Added validation of dt, start date, end date, and nrecs.	TJB
   2007-Oct-31 Added validation of input/output files.			TJB
+  2008-Jan-25 Removed setting of SNOW_STEP = global.dt for
+	      OUTPUT_FORCE == TRUE.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -597,14 +599,11 @@ global_param_struct get_global_param(filenames_struct *names,
   }
 
   // Validate SNOW_STEP and set NR and NF
-#if OUTPUT_FORCE
-  options.SNOW_STEP = global.dt;
-#endif  // OUTPUT_FORCE
   if (global.dt < 24 && global.dt != options.SNOW_STEP)
     nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
-  NF = global.dt/options.SNOW_STEP;
   if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
-    nrerror("SNOW_STEP should be smaller than TIME_STEP and divide TIME_STEP evenly ");
+    nrerror("SNOW_STEP should be <= TIME_STEP and divide TIME_STEP evenly ");
+  NF = global.dt/options.SNOW_STEP;
   if (NF == 1)
     NR = 0;
   else

@@ -52,7 +52,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
             daily.                                              KAC
   8-19-99   MIN_TDEW was added to prevent the dew point temperature
             estimated by Kimball's equations from becoming so low
-            that svp() fails.                                   Bart
+            that svp() fails.							Bart
   9-4-99    Code was largely rewritten to change make use of the MTCLIM
             meteorological preprocessor which estimates sub-daily 
 	    met forcings for all time steps.  The atmos_data_struct was
@@ -60,25 +60,31 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    model time step, but stores sub-time step forcing data
 	    (that might be needed for the snow model) within each
 	    record, eliminating the on the fly estimations used in
-	    previous versions of the model.              Bart and Greg
+	    previous versions of the model.					Bart and Greg
   01-17-01  Pressure and vapor pressure read from a forcing file are
             converted from kPa to Pa.  This preserves the original
             format of the forcing files (where pressure was supposed 
             to be in kPa, but allows VIC to use Pa internally, eliminating
-            the need to convert to Pa every time it is used.     KAC
+            the need to convert to Pa every time it is used.			KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
-           the model can make use of the computed treeline.     KAC
+           the model can make use of the computed treeline.			KAC
   04-Oct-04 Changed logic to allow VP to be supplied without
-	    SHORTWAVE.						TJB
-  2005-Mar-24 Modified to handle ALMA forcing variables.	TJB
-  2005-Apr-30 Fixed typo in QAIR calculation.			TJB
-  2005-May-01 Added logic for CSNOWF and LSSNOWF.		TJB
-  2005-May-02 Added logic for WIND_E and WIND_N.		TJB
+	    SHORTWAVE.								TJB
+  2005-Mar-24 Modified to handle ALMA forcing variables.			TJB
+  2005-Apr-30 Fixed typo in QAIR calculation.					TJB
+  2005-May-01 Added logic for CSNOWF and LSSNOWF.				TJB
+  2005-May-02 Added logic for WIND_E and WIND_N.				TJB
   2006-Sep-23 Implemented flexible output configuration; uses the new
-	      out_data and out_data_files structures.		TJB
-  2006-Dec-20 Replaced 1000.0 with kPa2Pa in pressure conversion. TJB
-  2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
-  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of supported met input variables. TJB
+	      out_data and out_data_files structures.				TJB
+  2006-Dec-20 Replaced 1000.0 with kPa2Pa in pressure conversion.		TJB
+  2006-Dec-29 Added REL_HUMID to the list of supported met input variables.	TJB
+  2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of
+	      supported met input variables.					TJB
+  2008-Jan-25 Fixed conditions under which net longwave replaces incoming
+	      longwave in atmos[rec].longwave[NR].  Previously, net longwave
+	      was stored if SNOW_STEP != global.dt.  Now, net longwave is
+	      stored if options.FULL_ENERGY and options.FROZEN_SOIL are both
+	      FALSE, i.e. for a water balance mode run.				TJB
 
 **********************************************************************/
 {
@@ -574,18 +580,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ( !param_set.TYPE[LONGWAVE].SUPPLIED ) {
     /** Incoming longwave radiation not supplied **/
     for (rec = 0; rec < global_param.nrecs; rec++) {
-      if( NF > 1 ) {
-	for (i = 0; i < NF; i++) {
-	  calc_longwave(&(atmos[rec].longwave[i]), tskc[rec/stepspday],
-			atmos[rec].air_temp[i], atmos[rec].vp[i]);
-	}
-	calc_netlongwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
-			 atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+	calc_longwave(&(atmos[rec].longwave[i]), tskc[rec/stepspday],
+		      atmos[rec].air_temp[i], atmos[rec].vp[i]);
+        sum += atmos[rec].longwave[i];
       }
-      else {
-	calc_longwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
-		      atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
-      }
+      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF;
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+        calc_netlongwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
+                         atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
     }
   }
   else if(param_set.FORCE_DT[param_set.TYPE[LONGWAVE].SUPPLIED-1] == 24) {
@@ -598,8 +602,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  atmos[rec].longwave[j] = forcing_data[LONGWAVE][day];
 	  sum += atmos[rec].longwave[j];
 	}
-	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF - STEFAN_B 
-		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
+	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
+	if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+	  atmos[rec].longwave[NR] -= STEFAN_B
+		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR]
 		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
 	rec++;
       }
@@ -615,8 +621,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	sum += atmos[rec].longwave[i];
 	idx++;
       }
-      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF - STEFAN_B 
-		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
+      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+	atmos[rec].longwave[NR] -= STEFAN_B
+		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR]
 		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
     }
   }

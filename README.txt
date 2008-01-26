@@ -143,6 +143,24 @@ options.SNOW_BAND > 1.
 	band had 0 area).							JS via TJB
 
 
+Bad results when SNOW_STEP = 24 hours
+
+	Files Affected:
+
+	get_global_param.c
+	initialize_atmos.c
+
+	Description:
+
+	Fixed the criterion for deciding whether to store NET longwave or
+	INCOMING longwave in atmos[rec].longwave[NR].  Previously, VIC
+	stored NET lw if SNOW_STEP != global.dt, under the assumption that
+	this condition was equivalent to running in 24 h water balance mode.
+	However, this caused problems for users who unwittingly ran 24 h
+	water balance mode with SNOW_STEP = 24.  The new criterion is that
+	both FULL_ENERGY and FROZEN_SOIL must be FALSE.				TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

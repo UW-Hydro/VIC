@@ -71,6 +71,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2007-Oct-31 Added validation of input/output files.			TJB
   2008-Jan-25 Removed setting of SNOW_STEP = global.dt for
 	      OUTPUT_FORCE == TRUE.					TJB
+  2008-Jan-28 Added check that end date falls AFTER start date.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -87,6 +88,8 @@ global_param_struct get_global_param(filenames_struct *names,
   int  file_num;
   int  field;
   int  i;
+  int  tmpstartdate;
+  int  tmpenddate;
   int  lastvalidday;
   int  lastday[] = {
             31, /* JANUARY */
@@ -659,6 +662,12 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror("Simulation end day has not been defined.  Make sure that the global file defines ENDDAY.");
     else if (global.endday < 0) {
       sprintf(ErrStr,"The specified simulation end day (%d) < 0.  Make sure that the global file defines a positive integer for ENDDAY.",global.endday);
+      nrerror(ErrStr);
+    }
+    tmpstartdate = global.startyear*10000 + global.startmonth*100 + global.startday;
+    tmpenddate = global.endyear*10000 + global.endmonth*100 + global.endday;
+    if (tmpenddate < tmpstartdate) {
+      sprintf(ErrStr,"The specified simulation end date (%04d-%02d-%02d) is EARLIER than the specified start date (%04d-%02d-%02d).",global.endyear,global.endmonth,global.endday,global.startyear,global.startmonth,global.startday);
       nrerror(ErrStr);
     }
   }

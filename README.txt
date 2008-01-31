@@ -32,6 +32,18 @@ Bug Fixes:
 ----------
 
 
+Better validation of global parameter file options
+
+	Files Affected:
+
+	get_global_param.c
+
+	Description:
+
+	Now makes sure simulation end date falls AFTER simulation start
+	date.								TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.5 to VIC 4.0.6 *****
 --------------------------------------------------------------------------------

@@ -136,6 +136,11 @@ double calc_surf_energy_bal(double             Le,
 	      than -9998.						JCA
   2007-Sep-01 Checked for return value of ERROR from
 	      solve_surf_energy_bal.					JCA
+  2007-Nov-09 Modified code to reset NOFLUX boundary to global option
+	      value before computing final soil column temperatures.
+	      Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
+	      estimates, but never reset to reflect actual bottom
+	      boundary conditions for final pass through solver.	KAC
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -317,7 +322,20 @@ double calc_surf_energy_bal(double             Le,
       }
       else tmpNnodes += 4;
       NOFLUX = FALSE;
-      EXP_TRANS = FALSE;
+
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+      EXP_TRANS = FALSE;  // Why would we do this???
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+/***********************************************************************/
+
     }
     else { 
       tmpNnodes = Nnodes;
@@ -412,6 +430,7 @@ double calc_surf_energy_bal(double             Le,
 
     if ( Ts_old * Tsurf < 0 && options.QUICK_SOLVE ) {
       tmpNnodes = Nnodes;
+      NOFLUX = options.NOFLUX;
       FIRST_SOLN[0] = TRUE;
       
       Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,

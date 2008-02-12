@@ -161,6 +161,21 @@ Bad results when SNOW_STEP = 24 hours
 	both FULL_ENERGY and FROZEN_SOIL must be FALSE.				TJB
 
 
+Incorrect setting for NOFLUX option in calc_surf_energy_bal()
+
+	Files Affected:
+
+	calc_surf_energy_bal.c
+
+	Description:
+
+	Modified code to reset NOFLUX boundary to global option
+	value before computing final soil column temperatures.
+	Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
+	estimates, but never reset to reflect actual bottom
+	boundary conditions for final pass through solver.			KAC
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

@@ -26,6 +26,8 @@
 # 2007-Jan-15 Added PRT_HEADER option; added write_header.c.			TJB
 # 2007-Apr-24 Added newt_raph_func_fast.c for IMPLICIT option.			JCA
 # 2007-Nov-06 Added get_dist.c.							TJB
+# 2008-Feb-14 Removed -g from normal compiling option.  Changed "vicInterp"
+#	      to "vicDisagg".							TJB
 #
 # $Id$
 #
@@ -42,7 +44,7 @@ SHELL = /bin/csh
 CC = gcc
 
 # Uncomment for normal optimized code flags (fastest run option)
-CFLAGS  = -I. -g  -Wall -Wno-unused
+CFLAGS  = -I. -Wall -Wno-unused
 LIBRARY = -lm
 
 # Uncomment to include debugging information
@@ -108,11 +110,11 @@ all:
 	make depend
 	make model
 
-interp:
+disagg:
 	sed -i.bak 's/OUTPUT_FORCE FALSE/OUTPUT_FORCE TRUE/' user_def.h
 	make clean
 	make depend
-	make vicInterp
+	make vicDisagg
 	sed -i.bak 's/OUTPUT_FORCE TRUE/OUTPUT_FORCE FALSE/' user_def.h
 	make clean
 	make depend
@@ -126,7 +128,7 @@ full:
 	make depend
 	make tags
 	make model
-	make interp
+	make disagg
 
 clean::
 	/bin/rm -f *.o core log *~
@@ -134,8 +136,8 @@ clean::
 model: $(OBJS)
 	$(CC) -o vicNl$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
 
-vicInterp: $(OBJS)
-	$(CC) -o vicInterp $(OBJS) $(CFLAGS) $(LIBRARY)
+vicDisagg: $(OBJS)
+	$(CC) -o vicDisagg $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags

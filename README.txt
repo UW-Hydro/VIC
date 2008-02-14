@@ -176,6 +176,39 @@ Incorrect setting for NOFLUX option in calc_surf_energy_bal()
 	boundary conditions for final pass through solver.			KAC
 
 
+Removed -g from normal compiling options.
+
+	Files Affected:
+
+	Makefile
+
+	Description:
+
+	At some point, "-g" was added to the normal compiling options.
+	This has been removed.  To use the -g option, users should uncomment
+	the "debug" section of the makefile.					TJB
+
+
+Changed "vicInterp" to "vicDisagg".
+
+	Files Affected:
+
+	Makefile
+
+	Description:
+
+	Changed the name of the makefile option to compile vic with the
+	OUTPUT_FORCE option set to TRUE.  The term "disaggregate" is more
+	correct than the term "interpolate", so "vicDisagg" seems more
+	appropriate.  The usage of this option is as follows:
+
+	At command prompt, type
+		make disagg
+
+	This will create the executable vicDisagg, which is simply vicNl
+	compiled with OUTPUT_FORCE set to TRUE in user_def.h.			TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

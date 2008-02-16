@@ -115,6 +115,7 @@ Better validation of global parameter file options
 	Files Affected:
 	get_global_param.c
 	make_in_and_outfiles.c
+	parse_output_info.c
 	read_soilparam_arc.c
 	read_vegparam.c
 
@@ -123,7 +124,9 @@ Better validation of global parameter file options
 	output files are checked to ensure that the filenames have been
 	specified.  In addition, SOIL_DIR and RESULT_DIR no longer require
 	a trailing "/"; a "/" is automatically appended when constructing
-	the soil parameter filename or results filename.			TJB
+	the soil parameter filename or results filename.  Also, makes sure
+	that N_OUTFILES matches number of output files actually defined in
+	the global param file.							TJB
 
 
 Incorrect soil ice fractions for the case when FROZEN_SOIL = TRUE and

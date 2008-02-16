@@ -1,19 +1,20 @@
 # VIC Makefile
 # Modifications:
-# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI       KAC
+# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI       	KAC
 # 12-Nov-2003 Added "make depend" to the "all" and "default" options.
 #             This way, if a user always types "make", the user is
 #             guaranteed to have a .depend file and therefore *.o will
 #             always be recompiled whenever a .h file is updated.  The
 #             user can override this behavior by typing "make model",
-#             which doesn't invoke "make depend".		TJB
-# 2006-Sep-11 Changes for flexible output configuration.	TJB
+#             which doesn't invoke "make depend".			TJB
+# 2006-Sep-11 Changes for flexible output configuration.		TJB
 #             Added the following files:
 #               calc_water_energy_balance_errors.c
 #               output_list_utils.c
 #               parse_output_info.c
 #               set_output_defaults.c
-# 2007-Jan-15 Added PRT_HEADER option;  Added write_header.c	TJB
+# 2007-Jan-15 Added PRT_HEADER option;  Added write_header.c		TJB
+# 2008-Feb-15 Set default compile options to be normal, optimized.	TJB
 #             
 # -----------------------------------------------------------------------
 
@@ -28,11 +29,11 @@ SHELL = /bin/csh
 CC = gcc
 
 # Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -I. -O3 -Wall -Wno-unused
+CFLAGS  = -I. -O3 -Wall -Wno-unused
 LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  = -I. -g -Wall -Wno-unused
+#CFLAGS  = -I. -g -Wall -Wno-unused
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information

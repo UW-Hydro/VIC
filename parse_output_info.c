@@ -21,6 +21,8 @@ void parse_output_info(filenames_struct      *names,
 	      output data type strings.				TJB
   2007-Apr-21 Added initialization for format, outfilenum, and
 	      outvarnum.					TJB
+  2008-Feb-15 Added check on number of output files defined vs.
+	      N_OUTFILES.					TJB
 
 **********************************************************************/
 {
@@ -39,6 +41,7 @@ void parse_output_info(filenames_struct      *names,
   char multstr[20];
   float mult;
   int  tmp_noutfiles;
+  char ErrStr[MAXSTRING];
 
   strcpy(format,"*");
 
@@ -65,6 +68,10 @@ void parse_output_info(filenames_struct      *names,
         outfilenum++;
         if (!options.Noutfiles) {
           nrerror("Error in global param file: \"N_OUTFILES\" must be specified before you can specify \"OUTFILE\".");
+        }
+        if (outfilenum >= options.Noutfiles) {
+          sprintf(ErrStr, "Error in global param file: number of output files specified in N_OUTFILES (%d) is less than actual number of output files defined in the global param file.",options.Noutfiles);
+          nrerror(ErrStr);
         }
         sscanf(cmdstr,"%*s %s %d",(*out_data_files)[outfilenum].prefix,&((*out_data_files)[outfilenum].nvars));
         (*out_data_files)[outfilenum].varid = (int *)calloc((*out_data_files)[outfilenum].nvars, sizeof(int));

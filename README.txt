@@ -37,11 +37,13 @@ Better validation of global parameter file options
 	Files Affected:
 
 	get_global_param.c
+	parse_output_info.c
 
 	Description:
 
 	Now makes sure simulation end date falls AFTER simulation start
-	date.								TJB
+	date.  Also checks that N_OUTFILES matches the number of output
+	files actually defined in the global param file.			TJB
 
 
 --------------------------------------------------------------------------------

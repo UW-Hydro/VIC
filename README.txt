@@ -212,6 +212,19 @@ Changed "vicInterp" to "vicDisagg".
 	compiled with OUTPUT_FORCE set to TRUE in user_def.h.			TJB
 
 
+Added end-of-file check to read_lakeparam.c
+
+	Files Affected:
+
+	read_lakeparam.c
+
+	Description:
+
+	Added check on !feof(lakeparam) to loop over lake param file, to
+	avoid infinite loop when current grid cell has no lakes and is not
+	mentioned in the lake param file.					TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

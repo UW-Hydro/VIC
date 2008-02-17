@@ -49,6 +49,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2007-Oct-24 Modified to handle grid cells with empty or very shallow starting
 	      lake depths.							KAC via TJB
   2007-Nov-06 Updated to read new set of lake parameters (broad-crested wier)	LCB via TJB
+  2008-Feb-16 Added !feof(lakeparam) condition to loop over lakeparam file.	TJB
 **********************************************************************/
 
 {
@@ -78,7 +79,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   // Locate current grid cell
   fscanf(lakeparam, "%d", &lakecel);
-  while ( lakecel != soil_con.gridcel ) {
+  while ( lakecel != soil_con.gridcel && !feof(lakeparam) ) {
     fgets(tmpstr, MAXSTRING, lakeparam);
     fscanf(lakeparam, "%d", &lakecel);
   }

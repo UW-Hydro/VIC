@@ -11,8 +11,10 @@
 
   Modifications:
   2006-Sep-23 Implemented flexible output configuration; removed the
-              OPTIMIZE and LDAS_OUTPUT options. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+              OPTIMIZE and LDAS_OUTPUT options.				TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2008-Feb-17 Moved constants related to snow albedo and trace snow to
+	      snow.h.							TJB
 
 **********************************************************************/
 
@@ -123,14 +125,3 @@
        calibration) *****/
 #define LWAVE_COR	1.
 
-/***** Snow albedo curve parameters.  Defaults are from Bras p263.
-       Should not be changed except for serious problems with snow melt *****/
-#define NEW_SNOW_ALB		0.85
-#define SNOW_ALB_ACCUM_A	0.94
-#define SNOW_ALB_ACCUM_B	0.58
-#define SNOW_ALB_THAW_A		0.82
-#define SNOW_ALB_THAW_B		0.46
-
-/***** Defines the minimum amount of new snow (mm) which will reset the
-       snowpack albedo to new snow *****/
-#define TraceSnow 0.03

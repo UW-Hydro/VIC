@@ -110,19 +110,21 @@ double solve_snow(char                 overstory,
   06-04-03 Added check so that MELTING flag is only TRUE if melt
            occurs in the melt season - currently this is defined
            between March 1 and October 1.  Otherwise the MELTING
-           flag can trigger rapid very early season melt	KAC
+           flag can trigger rapid very early season melt		KAC
   05-Aug-04 Removed lag_one, sigma_slope, and fetch from argument
 	    list since they were only used in call to snow_melt(),
-	    which no longer needs them.				TJB
+	    which no longer needs them.					TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.				TJB
-  2006-Sep-26 Added tracking of out_rain and out_snow.  TJB
+	    used in flux calculations.					TJB
+  2006-Sep-26 Added tracking of out_rain and out_snow.  		TJB
   2007-Apr-06 Modified to handle grid cell errors by returning to the
-           main subroutine, rather than ending the simulation. GCT/KAC
+           main subroutine, rather than ending the simulation. 		GCT/KAC
   2007-Apr-21 Added initialization of TmpAlbedoUnder[0] for the case
-	      in which snow->swq == 0.				TJB
+	      in which snow->swq == 0.					TJB
   2007-Jul-03 Units of melt are in mm, not m, so inserted *0.001 into
-	      call to calc_snow_coverage().			TJB
+	      call to calc_snow_coverage().				TJB
+  2008-Feb-17 Modified call to snow_density to match new version
+	      that is based on SNTHERM89.				KMA via TJB
 
 *********************************************************************/
 
@@ -220,7 +222,7 @@ double solve_snow(char                 overstory,
     if ( snow->swq > 0 ) 
       // age snow albedo if no new snow
       snow->albedo = snow_albedo( snowfall[WET], snow->swq, 
-				  snow->coldcontent, dt, 
+				  snow->coldcontent, (double)dt, 
 				  snow->last_snow, snow->MELTING); 
     else
       snow->albedo = TmpAlbedoUnder[0];
@@ -394,11 +396,7 @@ double solve_snow(char                 overstory,
 	/** Calculate Snow Density **/
 	if ( snow->surf_temp <= 0 )
 	  // snowpack present, compress and age density
-	  snow->density = snow_density(day_in_year, 
-				       snowfall[WET], 
-				       air_temp, old_swq, snow->depth, 
-				       snow->coldcontent, 
-				       (double)dt, snow->surf_temp);
+	  snow->density = snow_density(snow, snowfall[WET], old_swq, Tgrnd, air_temp, (double)dt);
 	else 
 	  // no snowpack present, start with new snow density
 	  if ( curr_snow == 1 ) 

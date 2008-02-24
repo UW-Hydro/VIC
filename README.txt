@@ -69,6 +69,27 @@ Updated lake model.
 										LCB via TJB
 
 
+Improved snow density computation.
+
+	Files affected:
+
+	snow.h
+	snow_utility.c
+	solve_snow.c
+	user_def.h
+	vicNl.h
+
+	Description:
+
+	Replaced previous algorithm (as a function of day of year, based on a
+	plot of seasonal variation of typical snow densities found in Bras,
+	figure 6.10, p 258) with new algorithm that computes the snow density
+	based on swe and snow metamorphism.  The new algorithm is taken from
+	SNTHERM89, adjusted for an essentially single-layer model.  Also moved
+	snow-related constants from user_def.h to snow.h, for consistency.	KMA via TJB
+
+
+
 Bug Fixes:
 ----------
 

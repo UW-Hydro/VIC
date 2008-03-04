@@ -41,6 +41,8 @@
 	      main subroutine, rather than ending the simulation.		KAC via GCT
   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added workaround for
 	      non-convergence of temperatures.					LCB via TJB
+  2008-Mar-01 Added assignments for Tcutk and Le to ensure that they are always
+	      assigned a value before being used.				TJB
 *****************************************************************************/
 int water_energy_balance(int     numnod,
 			 double *surface,
@@ -193,9 +195,11 @@ int water_energy_balance(int     numnod,
   else {
     //  fprintf(stderr, "Lake temperatures in open water fraction failed to converge; temporary work around used.\n");
     Tskin = T[0] + KELVIN;
+    Tcutk = Tcutoff + KELVIN;
     latsens (Tskin, Tcutk, 0.0, Tair, wind, pressure, vp, air_density,
              evapw, Qh, wind_h);
 
+    Le = (2.501 - 0.002361 * Tair) * 1.0e6;     /*J/kg  */
     *Qle = -1.*(*evapw)*Le;                          /* W/m^2 */
 
     *LWnet = longwave -EMH2O*STEFAN_B*Tskin*Tskin*Tskin*Tskin;

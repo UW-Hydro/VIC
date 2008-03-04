@@ -35,6 +35,8 @@ int wetland_energy(int                  rec,
   2007-Nov-06 Modified so that wetland vegetation defaults to the first
 	      vegetation type in the parameter file, rather than
 	      hard-wired.						LCB via TJB
+  2008-Mar-01 Reinserted logic for QUICK_FS in calls to
+	      distribute_node_moisture_properties().			TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -276,8 +278,12 @@ int wetland_energy(int                  rec,
 						    soil_con->Zsum_node,
 						    energy[iveg][band].T,
 						    soil_con->max_moist_node,
+#if QUICK_FS
+						    soil_con->ufwc_table_node,
+#else
 						    soil_con->expt_node,
 						    soil_con->bubble_node,
+#endif // QUICK_FS
 #if EXCESS_ICE
 						    soil_con->porosity_node,
 						    soil_con->effective_porosity_node,
@@ -309,6 +315,7 @@ int wetland_energy(int                  rec,
     
       for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
 	tmp_moist[iveg][band][lidx] = cell[0][iveg][band].layer[lidx].moist;
+// NOTE: this is the version of distribute_node_moisture_properties for EXCESS_ICE = TRUE
       ErrorFlag = distribute_node_moisture_properties(energy[iveg][band].moist,
 						      energy[iveg][band].ice,
 						      energy[iveg][band].kappa_node,
@@ -317,8 +324,12 @@ int wetland_energy(int                  rec,
 						      soil_con->Zsum_node,
 						      energy[iveg][band].T,
 						      soil_con->max_moist_node,
+#if QUICK_FS
+						      soil_con->ufwc_table_node,
+#else
 						      soil_con->expt_node,
 						      soil_con->bubble_node,
+#endif // QUICK_FS
 						      soil_con->porosity_node,
 						      soil_con->effective_porosity_node,
 						      tmp_moist[iveg][band],

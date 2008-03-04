@@ -81,6 +81,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
               calc_surf_energy_bal
   2007-Aug-24 Modified to use arno_evap rather than canopy_evap if LAI
               is 0, e.g. winter cropland.				KAC via TJB
+  2008-Mar-01 Fixed typo in declaration of ufwc_table_layer.		TJB
 
 **********************************************************************/
 {
@@ -211,7 +212,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* quick solution frozen soils terms */
 #if QUICK_FS
-  double **ufwc_table_layer;
+  double ***ufwc_table_layer;
   double ***ufwc_table_node;
 #endif
 

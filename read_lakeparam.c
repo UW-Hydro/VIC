@@ -50,6 +50,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 	      lake depths.							KAC via TJB
   2007-Nov-06 Updated to read new set of lake parameters (broad-crested wier)	LCB via TJB
   2008-Feb-16 Added !feof(lakeparam) condition to loop over lakeparam file.	TJB
+  2008-Mar-01 Moved assignment of tempdz so that it is always assigned a value.	TJB
 **********************************************************************/
 
 {
@@ -113,6 +114,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
     fscanf(lakeparam, "%lf %lf", &temp.z[0], &temp.Cl[0]);
     temp.maxdepth = temp.z[0];
+    tempdz = (temp.maxdepth) / ((float) temp.numnod);
     if(temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0)
       nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
     
@@ -149,8 +151,10 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
       fscanf(lakeparam, "%lf %lf", &temp.z[i], &temp.Cl[i]);
       temp.basin[i] = temp.Cl[i] * soil_con.cell_area;
       
-      if(i==0)
+      if(i==0) {
         temp.maxdepth = temp.z[i];
+        tempdz = (temp.maxdepth) / ((float) temp.numnod);
+      }
 
       if(temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0)
 	nrerror("Lake area must be a fraction between 0 and 1, check the lake parameter file.");
@@ -175,9 +179,6 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     fprintf(stderr, "ERROR: problem in get_volume(): depth %f volume %f rec %d\n", temp.mindepth, temp.minvolume, 0);
     exit(0);
   }
-
-  /* Compute water layer thickness */
-  tempdz = (temp.maxdepth) / ((float) temp.numnod);
 
   // Add lake fraction to Cv_sum
   (veg_con[0].Cv_sum) += temp.Cl[0];

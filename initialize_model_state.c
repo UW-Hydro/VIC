@@ -74,6 +74,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2007-Sep-18 Check for soil moist exceeding max moist moved from
 	      read_initial_model_state to here.				JCA
   2007-Oct-24 Modified initialize_lake() to return ErrorFlag.		TJB
+  2008-Mar-01 Reinserted missing logic for QUICK_FS in calls to
+	      distribute_node_moisture_properties() and
+	      estimate_layer_ice_content().				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -936,8 +939,12 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						  soil_con->Zsum_node,
 						  energy[veg][band].T,
 						  soil_con->max_moist_node,
+#if QUICK_FS
+						  soil_con->ufwc_table_node,
+#else
 						  soil_con->expt_node,
 						  soil_con->bubble_node,
+#endif // QUICK_FS
 #if EXCESS_ICE
 						  soil_con->porosity_node,
 						  soil_con->effective_porosity_node,
@@ -960,12 +967,20 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 					   soil_con->dz_node,
 					   energy[veg][band].T,
 					   soil_con->max_moist_node,
+#if QUICK_FS
+					   soil_con->ufwc_table_node,
+#else
 					   soil_con->expt_node,
 					   soil_con->bubble_node,
+#endif // QUICK_FS
 					   soil_con->depth,
 					   soil_con->max_moist,
+#if QUICK_FS
+					   soil_con->ufwc_table_layer,
+#else
 					   soil_con->expt,
 					   soil_con->bubble,
+#endif // QUICK_FS
 #if SPATIAL_FROST
 					   soil_con->frost_fract, 
 					   soil_con->frost_slope, 

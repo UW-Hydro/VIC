@@ -246,6 +246,24 @@ Added end-of-file check to read_lakeparam.c
 	mentioned in the lake param file.					TJB
 
 
+Compilation problems for QUICK_FS user_def.h option
+
+	Files Affected:
+
+	func_surf_energy_bal.c
+	initialize_model_state.c
+	read_lakeparam.c
+	water_energy_balance.c
+	wetland_energy.c
+
+	Description:
+
+	Previous updates for the EXCESS_ICE option had inadvertently introduced
+	bugs into the logic for the QUICK_FS option.  These included removal of
+	the logic that modifies calls to distribute_node_moisture_properties()
+	and estimate_layer_ice_content().					TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

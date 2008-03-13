@@ -251,6 +251,7 @@ Compilation problems for QUICK_FS user_def.h option
 	Files Affected:
 
 	func_surf_energy_bal.c
+	get_global_param.c
 	initialize_model_state.c
 	read_lakeparam.c
 	water_energy_balance.c

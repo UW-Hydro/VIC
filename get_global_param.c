@@ -36,42 +36,43 @@ global_param_struct get_global_param(filenames_struct *names,
            lake variables during debugging and reading Bart's 
            new Arno parameters.                           KAC
   11-May-04 Modified to display compile-time and run-time options
-	    if VERBOSE is set to TRUE.			TJB
-  13-Oct-04 Added validation for GRND_FLUX option.              TJB
+	    if VERBOSE is set to TRUE.						TJB
+  13-Oct-04 Added validation for GRND_FLUX option.              		TJB
   01-Nov-04 Added validation for Nnodes with QUICK_FLUX option, as
-	    part of fix for QUICK_FLUX state file compatibility.TJB
-  2005-03-08 Added EQUAL_AREA option.				TJB
-  2005-03-24 Added ALMA_OUTPUT option.				TJB
-  2005-04-07 Fixed state file warning check.			TJB
-  2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
-  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW	TJB
-  2005-11-29 SAVE_STATE is set in global_param (not at compile time) GCT
-  2005-12-06 Moved setting of statename from open_state_file to here. GCT
-  2005-12-07 Added checks for range of STATEMONTH and STATEDAY  GCT
+	    part of fix for QUICK_FLUX state file compatibility.		TJB
+  2005-03-08 Added EQUAL_AREA option.						TJB
+  2005-03-24 Added ALMA_OUTPUT option.						TJB
+  2005-04-07 Fixed state file warning check.					TJB
+  2005-Apr-13 Added logic for OUTPUT_FORCE option.				TJB
+  2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW			TJB
+  2005-11-29 SAVE_STATE is set in global_param (not at compile time)		GCT
+  2005-12-06 Moved setting of statename from open_state_file to here.		GCT
+  2005-12-07 Added checks for range of STATEMONTH and STATEDAY			GCT
   2005-12-07 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in
-             global.param.file  GCT
-  2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
+             global.param.file							GCT
+  2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.		TJB/GCT
   2006-Sep-23 Implemented flexible output configuration; removed the
               OPTIMIZE and LDAS_OUTPUT options; implemented aggregation of
-	      output variables.						TJB
+	      output variables.							TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
 	      This included moving global->statename to filenames->statefile;
-	      also added f_path_pfx to store forcing file path and prefix. TJB
-  2006-Nov-07 Removed LAKE_MODEL option.				TJB
-  2007-Jan-03 Added ALMA_INPUT option.					TJB
-  2007-Jan-15 Added PRT_HEADER option.					TJB
-  2007-Apr-03 Added CONTINUEONERROR option.				GCT
-  2007-Apr-24 Added EXP_TRANS option.					JCA
-  2007-Apr-24 Added IMPLICIT option.					JCA
-  2007-Apr-23 Added initialization of global parameters.		TJB
-  2007-Apr-23 Added check for FULL_ENERGY if lake model is run.		TJB
-  2007-Aug-08 Added EXCESS_ICE option.					JCA
-  2007-Sep-14 Added initialization of names->soil_dir.			TJB
-  2007-Oct-10 Added validation of dt, start date, end date, and nrecs.	TJB
-  2007-Oct-31 Added validation of input/output files.			TJB
+	      also added f_path_pfx to store forcing file path and prefix.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.					TJB
+  2007-Jan-03 Added ALMA_INPUT option.						TJB
+  2007-Jan-15 Added PRT_HEADER option.						TJB
+  2007-Apr-03 Added CONTINUEONERROR option.					GCT
+  2007-Apr-24 Added EXP_TRANS option.						JCA
+  2007-Apr-24 Added IMPLICIT option.						JCA
+  2007-Apr-23 Added initialization of global parameters.			TJB
+  2007-Apr-23 Added check for FULL_ENERGY if lake model is run.			TJB
+  2007-Aug-08 Added EXCESS_ICE option.						JCA
+  2007-Sep-14 Added initialization of names->soil_dir.				TJB
+  2007-Oct-10 Added validation of dt, start date, end date, and nrecs.		TJB
+  2007-Oct-31 Added validation of input/output files.				TJB
   2008-Jan-25 Removed setting of SNOW_STEP = global.dt for
-	      OUTPUT_FORCE == TRUE.					TJB
-  2008-Jan-28 Added check that end date falls AFTER start date.		TJB
+	      OUTPUT_FORCE == TRUE.						TJB
+  2008-Jan-28 Added check that end date falls AFTER start date.			TJB
+  2008-Mar-12 Relocated code validating IMPLICIT and EXCESS_ICE options.	TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -824,6 +825,24 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"FULL_ENERGY is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
     nrerror(ErrStr);
   }
+  if(options.IMPLICIT)  {
+    if ( QUICK_FS ) 
+      fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
+  }
+  if( EXCESS_ICE ) {
+    if ( !options.FULL_ENERGY )
+      nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
+    if ( !options.FROZEN_SOIL )
+      nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
+    if ( !options.GRND_FLUX )
+      nrerror("set GRND_FLUX = TRUE to run EXCESS_ICE option.");
+    if ( options.QUICK_SOLVE ) {
+      fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
+      options.QUICK_SOLVE=FALSE;  
+    }    
+    if ( QUICK_FS ) 
+      nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
+  }
 
   // Validate lake parameter information
   if (options.LAKES) {
@@ -886,25 +905,7 @@ global_param_struct get_global_param(filenames_struct *names,
   if( EXCESS_ICE )
     fprintf(stderr,".... Excess ground ice is being considered.\n\t\tTherefore, ground ice (as a volumetric fraction) must be initialized for each\n\t\t   soil layer in the soil file.\n\t\tCAUTION: When excess ice melts, subsidence occurs.\n\t\t  Therefore, soil layer depths, damping depth, thermal node depths,\n\t\t     bulk densities, porosities, and other properties are now dynamic!\n\t\t  EXERCISE EXTREME CAUTION IN INTERPRETING MODEL OUTPUT.\n\t\t  It is recommended to add OUT_SOIL_DEPTH to your list of output variables.\n");
   if ( QUICK_FS ){
-    if(options.IMPLICIT) 
-      fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
-    else
-      fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n",
-	      QUICK_FS_TEMPS);
-  }
-  if( EXCESS_ICE ) {
-    if ( !options.FULL_ENERGY )
-      nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
-    if ( !options.FROZEN_SOIL )
-      nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
-    if ( !options.GRND_FLUX )
-      nrerror("set GRND_FLUX = TRUE to run EXCESS_ICE option.");
-    if ( options.QUICK_SOLVE){
-      fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
-      options.QUICK_SOLVE=FALSE;  
-    }    
-    if ( QUICK_FS ) 
-      nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
+    fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n", QUICK_FS_TEMPS);
   }
   fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);

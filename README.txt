@@ -265,6 +265,22 @@ Compilation problems for QUICK_FS user_def.h option
 	and estimate_layer_ice_content().					TJB
 
 
+OUT_SUB_BLOWING, OUT_SUB_SURFACE, and OUT_SUB_SNOW missing from default snow_*
+output files.
+
+	Files Affected:
+
+	set_output_defaults.c
+
+	Description:
+
+	Added OUT_SUB_BLOWING, OUT_SUB_SURFACE, and OUT_SUB_SNOW to default
+	snow output file for case of options.BLOWING == TRUE.  This makes it
+	almost the same as previous versions of 4.1.0, (r3 and earlier) with
+	the exception that previous versions of 4.1.0 multiplied these terms
+	by 100 when saving to the snow file.					TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

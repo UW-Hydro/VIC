@@ -18,6 +18,12 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   2007-Oct-09 Updated to reflect variables present in traditional 4.1.0
 	      output files.  Previously the defaults matched the traditional
 	      4.0.6 output files.					TJB
+  2008-Apr-11 Added OUT_SUB_BLOWING, OUT_SUB_SURFACE, and OUT_SUB_SNOW to
+	      default snow output file for case of options.BLOWING == TRUE.
+	      This makes it almost the same as previous versions of 4.1.0,
+	      (r3 and earlier) with the exception that previous versions
+	      of 4.1.0 multiplied these terms by 100 when saving to the
+	      snow file.						TJB
 
 *************************************************************/
 
@@ -156,6 +162,11 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_PACK_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  }
+  if (options.BLOWING)  {
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_BLOWING", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SURFACE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
 
   // Variables in other files

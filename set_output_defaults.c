@@ -84,6 +84,9 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   else {
     out_data_files[filenum].nvars = 4;
   }
+  if (options.BLOWING) {
+    out_data_files[filenum].nvars+= 3;
+  }
   if (options.FROZEN_SOIL) {
     filenum++;
     strcpy(out_data_files[filenum].prefix,"fdepth");

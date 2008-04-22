@@ -284,6 +284,8 @@ int solve_lake(double             snow,
   2007-Apr-23 Added initialization of lake_energy->Tsurf.		TJB
   2007-Nov-06 Lake snow physics now consistent with land snow pack.
 	      Lake ice now limited by available lake water.		LCB via TJB
+  2008-Apr-21 Corrected omissions in previous mods.  Also added code to
+	      handle previously-unhandled case in deltaH computation.	TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -420,8 +422,8 @@ int solve_lake(double             snow,
      * -------------------------------------------------------------------- */
 
     alblake(Tcutoff, tair, &lake->SAlbedo, &tempalbs, &albi, &albw, snowfall,
-	    lake_snow->surf_temp, dt, &lake_snow->last_snow, 
-	    lake_snow->swq, lake_snow->depth, &lake_snow->MELTING );
+	    lake_snow->coldcontent, dt, &lake_snow->last_snow, 
+	    lake_snow->swq, lake_snow->depth, &lake_snow->MELTING, dmy.day_in_year );
 
     /* --------------------------------------------------------------------
      * Calculate the incoming solar radiaton for both the ice fraction
@@ -527,6 +529,8 @@ int solve_lake(double             snow,
 				     (double)dt, &energy_out_bottom_ice);     
         if ( ErrorFlag == ERROR ) return (ERROR);
       }
+      else
+        temphi = -sumjoulb;
 	
       /**********************************************************************
        *   8.  Calculate change in ice thickness and fraction
@@ -645,6 +649,7 @@ int solve_lake(double             snow,
     // wetland land tile in update_prcp.
     lake_snow->swq        *= fracprv;
     lake_snow->surf_water *= fracprv;
+    lake_snow->pack_water *= fracprv;
     lake_snow->depth = lake_snow->swq * RHO_W / RHOSNOW;
 
     /* Update ice area to include new ice growth in water fraction. */
@@ -786,7 +791,8 @@ void alblake (double  Tcutoff,
 	      int    *last_snow, 
 	      double  swq,
 	      double  depth,
-	      char   *MELTING)
+	      char   *MELTING,
+	      int     day_in_year)
 {
 /**********************************************************************
  * Calculate the albedo of snow, ice and water of the lake.
@@ -800,6 +806,7 @@ void alblake (double  Tcutoff,
  *
  * Modifications:
  * 2007-Nov-06 Lake snow physics now consistent with land snow pack.	LCB via TJB
+ * 2008-Apr-21 Corrected some omissions from the previous mods.		LCB via TJB
  **********************************************************************/
   double albgl, albgs;
 
@@ -830,13 +837,21 @@ void alblake (double  Tcutoff,
 
   /** Record if snowpack is melting this time step **/
   if (swq > 0.0) {
-    if ( coldcontent >= 0 ) *MELTING = TRUE;
-    else if ( *MELTING && newsnow > TraceSnow ) 
+    if ( coldcontent >= 0 && day_in_year > 60 // ~ March 1
+       && day_in_year < 273 // ~ October 1
+       ) {
+      *MELTING = TRUE;
+    }
+    else {
       *MELTING = FALSE;
+    }
   }
   else {
     *MELTING = FALSE;
   }
+
+  if ( *MELTING && newsnow > TraceSnow )
+    *MELTING = FALSE;
 
   // compute snow surface albedo
   if(swq > 0.0)
@@ -2009,6 +2024,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2007-Nov-06 Ice water content now tracked via ice_water_eq.  Lake area is
 	      now the larger of lake->areai and lake->sarea.  Drainage is now
 	      modeled as flow over a broad-crested wier.			LCB via TJB
+  2008-Apr-21 Corrected some omissions from the previous mods.			LCB via TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2034,7 +2050,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double newfraction, Recharge;
   int ErrorFlag;
   cell_data_struct    ***cell;
-  
+  int lindex;
+  double frac;
+
   cell    = prcp->cell;
   
   /**********************************************************************
@@ -2058,10 +2076,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   /* Convert from mm to m3. */
 #if EXCESS_ICE
   if(SubsidenceUpdate > 0 ) 
-    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*lake_con.rpercent + wetland_runoff + total_meltwater*lake_con.Cl[0]*lakefrac) / 1000. ) * soil_con.cell_area );  
+    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*bpercent + wetland_runoff + total_meltwater*lake_con.Cl[0]*lakefrac) / 1000. ) * soil_con.cell_area );  
   else
 #endif
-    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*lake_con.rpercent + wetland_runoff) / 1000. ) * soil_con.cell_area );  
+    runoff_volume = ( ( ( lake->runoff_in * lake_con.rpercent + lake->baseflow_in*bpercent + wetland_runoff) / 1000. ) * soil_con.cell_area );  
   
   
   /**********************************************************************
@@ -2124,10 +2142,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
       /* Update soil moisture storage terms. */
       for(j=0; j<options.Nlayer; j++) {
-        cell[DRY][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[DRY][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.
--lakefrac);
-        cell[WET][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[WET][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.
--lakefrac);
+        cell[DRY][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[DRY][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.-lakefrac);
+        cell[WET][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[WET][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.-lakefrac);
       }
     }
     else {
@@ -2155,6 +2171,28 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
    * Based on the equation for flow over a broad crested weir.
    **********************************************************************/
 
+  // If wetland baseflow is negative, it has already been extracted from the lake. */
+  if(cell[WET][iveg][band].baseflow < 0.0)
+    lake->baseflow_out = 0.0;
+  else {
+    lindex = options.Nlayer-1;
+    frac = soil_con.Ds * soil_con.Dsmax
+      / (soil_con.Ws * soil_con.max_moist[lindex]);
+    lake->baseflow_out = frac * (soil_con.max_moist[lindex] - soil_con.resid_moist[lindex] );
+
+    lake->baseflow_out += (soil_con.Dsmax - soil_con.Ds * soil_con.Dsmax / soil_con.Ws);
+    lake->baseflow_out *= lake_con.Cl[0]*(lakefrac)* soil_con.cell_area/1000.;
+
+    // extract baseflow volume from the lake m^3
+
+    if(lake->volume -lake->ice_water_eq >= lake->baseflow_out)
+      lake->volume -= ( lake->baseflow_out );
+    else {
+      lake->baseflow_out = lake->volume - lake->ice_water_eq;
+      lake->volume -= ( lake->baseflow_out );
+    }
+  }
+
   // Find new lake depth and surface area of the unfrozen portion for runoff calculations
   ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);
   if ( ErrorFlag == ERROR ) {
@@ -2175,7 +2213,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       lake->volume -= ( lake->runoff_out );
     }
   }
-  outflow = lake->runoff_out;
+  outflow = lake->runoff_out + lake->baseflow_out;
 
   // check that lake volume does not exceed its maximum
   if (lake->volume - lake_con.maxvolume > SMALL) {
@@ -2189,7 +2227,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     }
   }
   else if (lake->volume < SMALL)
-     lake->volume = 0.0;
+    lake->volume = 0.0;
 
   /**********************************************************************/
   /* End of runoff calculation */
@@ -2197,29 +2235,24 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   // adjust from m^3 to mm over entire gridcell
   lake->runoff_out = ( lake->runoff_out ) * 1000. / soil_con.cell_area;
-  
-  if(lake->baseflow_in != 0 && lake->runoff_in != 0) {
-    lake->baseflow_out = lake->runoff_out*(lake->baseflow_in/(lake->runoff_in+lake->baseflow_in));
-    lake->runoff_out *= (lake->runoff_in/(lake->runoff_in+lake->baseflow_in));
-  }
-  else if(lake->runoff_in == 0) {
-    lake->baseflow_out = lake->runoff_out;
-    lake->runoff_out = 0.0;
-  }
+
+  if(cell[WET][iveg][band].baseflow < 0.0)
+     lake->baseflow_out = cell[WET][iveg][band].baseflow* lake_con.Cl[0]*(1.-lakefrac);
   else
-    lake->baseflow_out = 0.0;
+    lake->baseflow_out *= 1000. / soil_con.cell_area;
+
   
   /* Add in runoff and baseflow that did not pass through the lake. */
   lake->runoff_out   += (1. - lake_con.rpercent) * lake->runoff_in;
-  lake->baseflow_out  += (1. - lake_con.rpercent) * lake->baseflow_in;
+  lake->baseflow_out  += (1. - bpercent) * lake->baseflow_in;
   
   // Recalculate lake depth
   if(1.-fracprv < FRACLIM)
-    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);
+    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &(lake->ldepth));
   else
-    ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
+    ErrorFlag = get_depth(lake_con, lake->volume, &(lake->ldepth));
   if ( ErrorFlag == ERROR ) {
-    fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,ldepth);
+    fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,lake->ldepth);
     return ( ErrorFlag );
   }
 
@@ -2338,6 +2371,7 @@ void update_prcp(dist_prcp_struct *prcp,
   2008-Jan-23 Added updates of wland_snow->pack_water and
 	      pack_temp in conjunction with 2-layer snow pack over
 	      lake ice.								LCB via TJB
+  2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent.			LCB via TJB
 **************************************************************************/
 {
   extern option_struct   options;
@@ -2413,6 +2447,9 @@ void update_prcp(dist_prcp_struct *prcp,
   wland_snow[iveg][band].albedo *= (1.-lakefraction);
   wland_snow[iveg][band].albedo += lakefraction * lake->SAlbedo;
 
+  wland_snow[iveg][band].coverage *= (1.-lakefraction);
+  wland_snow[iveg][band].coverage += lakefraction * lake_snow->coverage;
+ 
   wland_snow[iveg][band].vapor_flux *= (1.-lakefraction);
   wland_snow[iveg][band].vapor_flux += lakefraction * lake_snow->vapor_flux;
 
@@ -2432,18 +2469,24 @@ void update_prcp(dist_prcp_struct *prcp,
   
   wland_snow[iveg][band].surf_temp *= (1.-lakefraction);
   wland_snow[iveg][band].surf_temp += lakefraction * lake_snow->surf_temp;
+  lake->surf_temp = lake_snow->surf_temp;
+
+  wland_snow[iveg][band].pack_temp *= (1.-lakefraction);
+  wland_snow[iveg][band].pack_temp += lakefraction * lake_snow->pack_temp;
+  lake->pack_temp = lake_snow->pack_temp;
   
   wland_snow[iveg][band].surf_water *= (1.-lakefraction);
   wland_snow[iveg][band].surf_water += lakefraction * lake_snow->surf_water;
   lake->surf_water = lake_snow->surf_water;
   
-  wland_snow[iveg][band].pack_temp *= (1.-lakefraction);
-  wland_snow[iveg][band].pack_temp += lakefraction * lake_snow->pack_temp;
-  
   wland_snow[iveg][band].pack_water *= (1.-lakefraction);
   wland_snow[iveg][band].pack_water += lakefraction * lake_snow->pack_water;
   lake->pack_water = lake_snow->pack_water;
   
+  wland_snow[iveg][band].coldcontent *= (1.-lakefraction);
+  wland_snow[iveg][band].coldcontent += lakefraction * lake_snow->coldcontent;
+  lake->coldcontent = lake_snow->coldcontent;
+
   wland_snow[iveg][band].depth *= (1.-lakefraction);
   wland_snow[iveg][band].depth += lakefraction * lake_snow->depth; 
   lake->sdepth = lake_snow->depth;
@@ -2523,6 +2566,7 @@ void update_prcp(dist_prcp_struct *prcp,
   2008-Jan-23 Added initialization of lake_snow->pack_water and
 	      pack_temp in conjunction with 2-layer snow pack over
 	      lake ice.								LCB via TJB
+  2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent.			LCB via TJB
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
 		    energy_bal_struct *lake_energy, 
@@ -2589,6 +2633,7 @@ int initialize_prcp(dist_prcp_struct *prcp,
 
   /* Update snow variables. */
   lake_snow->last_snow = wland_snow[iveg][band].last_snow;
+  lake_snow->coverage = wland_snow[iveg][band].coverage;
 
   if(lake->areai > 0.0) {   
     lake_snow->vapor_flux = wland_snow[iveg][band].vapor_flux;
@@ -2629,26 +2674,39 @@ int initialize_prcp(dist_prcp_struct *prcp,
     wland_snow[iveg][band].depth = (wland_snow[iveg][band].depth - lake->sdepth*(*lakefrac))/(1.-(*lakefrac));
     wland_snow[iveg][band].surf_water = (wland_snow[iveg][band].surf_water - lake->surf_water*(*lakefrac))/(1.-(*lakefrac));
     wland_snow[iveg][band].pack_water = (wland_snow[iveg][band].pack_water - lake->pack_water*(*lakefrac))/(1.-(*lakefrac));
+    wland_snow[iveg][band].coldcontent = (wland_snow[iveg][band].coldcontent - lake->coldcontent*(*lakefrac))/(1.-(*lakefrac));
+    wland_snow[iveg][band].surf_temp = (wland_snow[iveg][band].surf_temp - lake->surf_temp*(*lakefrac))/(1.-(*lakefrac));
+    wland_snow[iveg][band].pack_temp = (wland_snow[iveg][band].pack_temp - lake->pack_temp*(*lakefrac))/(1.-(*lakefrac));
+
     if ( wland_snow[iveg][band].swq < SMALL ) {
-      wland_snow[iveg][band].swq = 0.;
-      wland_snow[iveg][band].depth = 0.;
-      wland_snow[iveg][band].surf_water = 0.;
-      wland_snow[iveg][band].pack_water = 0.;
-      wland_snow[iveg][band].albedo = 0.;
+      wland_snow[iveg][band].swq = 0.0;
+      wland_snow[iveg][band].depth = 0.0;
+      wland_snow[iveg][band].surf_water = 0.0;
+      wland_snow[iveg][band].pack_water = 0.0;
+      wland_snow[iveg][band].albedo = 0.0;
+      wland_snow[iveg][band].coldcontent = 0.0;
+      wland_snow[iveg][band].surf_temp = 0.0;
+      wland_snow[iveg][band].pack_temp = 0.0;
     }
     if(*fraci > 0.0) {
-      lake_snow->swq = lake->swe;
-      lake_snow->surf_water = lake->surf_water;
-      lake_snow->pack_water = lake->pack_water;
-      lake_snow->depth = lake->sdepth; 
-      lake_snow->albedo = lake->SAlbedo; 
+      lake_snow->swq = lake->swe/(*fraci);
+      lake_snow->surf_water = lake->surf_water/(*fraci);
+      lake_snow->pack_water = lake->pack_water/(*fraci);
+      lake_snow->depth = lake->sdepth/(*fraci);
+      lake_snow->albedo = lake->SAlbedo;
+      lake_snow->coldcontent = lake->coldcontent;
+      lake_snow->surf_temp = lake->surf_temp;
+      lake_snow->pack_temp = lake->pack_temp;
     }
     else {
       lake_snow->swq = 0.0;
       lake_snow->surf_water = 0.0;
       lake_snow->pack_water = 0.0;
-      lake_snow->depth = 0.0; 
-      lake_snow->albedo = 0.0; 
+      lake_snow->depth = 0.0;
+      lake_snow->albedo = 0.0;
+      lake_snow->coldcontent = 0.0;
+      lake_snow->surf_temp = 0.0;
+      lake_snow->pack_temp = 0.0;
     }   
   }
   else {
@@ -2658,6 +2716,9 @@ int initialize_prcp(dist_prcp_struct *prcp,
       lake_snow->pack_water = lake->pack_water/(*fraci);
       lake_snow->depth = lake->sdepth/(*fraci);
       lake_snow->albedo = lake->SAlbedo; 
+      lake_snow->coldcontent = lake->coldcontent;
+      lake_snow->surf_temp = lake->surf_temp;
+      lake_snow->pack_temp = lake->pack_temp;
     }
     else {
       lake_snow->swq = 0.0;
@@ -2665,12 +2726,18 @@ int initialize_prcp(dist_prcp_struct *prcp,
       lake_snow->pack_water = 0.0;
       lake_snow->depth = 0.0; 
       lake_snow->albedo = 0.0; 
-    }   
+      lake_snow->coldcontent = 0.0;
+      lake_snow->surf_temp = 0.0;
+      lake_snow->pack_temp = 0.0;
+    }
     wland_snow[iveg][band].swq =0.0;
     wland_snow[iveg][band].depth =0.0;
     wland_snow[iveg][band].surf_water =0.0;
     wland_snow[iveg][band].pack_water =0.0;
     wland_snow[iveg][band].albedo =0.0;
+    wland_snow[iveg][band].coldcontent = 0.0;
+    wland_snow[iveg][band].surf_temp = 0.0;
+    wland_snow[iveg][band].pack_temp = 0.0;
   }
   if (lake_snow->swq == 0.0) {
     lake_snow->MELTING = FALSE;
@@ -2700,8 +2767,8 @@ int initialize_prcp(dist_prcp_struct *prcp,
 //        cell[WET][iveg][band].layer[i].ice[frost_area] /= (1.-(*lakefrac));
 //      }
 //#else	
-//      cell[DRY][iveg][band].layer[i].ice /= (1.-lakefrac);
-//      cell[WET][iveg][band].layer[i].ice /= (1.-lakefrac);
+//      cell[DRY][iveg][band].layer[i].ice /= (1.-(*lakefrac));
+//      cell[WET][iveg][band].layer[i].ice /= (1.-(*lakefrac));
 //#endif // SPATIAL_FROST
     }
   }  

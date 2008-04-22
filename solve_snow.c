@@ -125,6 +125,7 @@ double solve_snow(char                 overstory,
 	      call to calc_snow_coverage().				TJB
   2008-Feb-17 Modified call to snow_density to match new version
 	      that is based on SNTHERM89.				KMA via TJB
+  2008-Apr-21 Modified to pass snow depth to snow_albedo().		KAC via TJB
 
 *********************************************************************/
 
@@ -221,8 +222,8 @@ double solve_snow(char                 overstory,
     TmpAlbedoUnder[0]   = NEW_SNOW_ALB; // albedo if new snow falls
     if ( snow->swq > 0 ) 
       // age snow albedo if no new snow
-      snow->albedo = snow_albedo( snowfall[WET], snow->swq, 
-				  snow->coldcontent, (double)dt, 
+      snow->albedo = snow_albedo( snowfall[WET], snow->swq, snow->depth,
+				  snow->albedo, snow->coldcontent, (double)dt, 
 				  snow->last_snow, snow->MELTING); 
     else
       snow->albedo = TmpAlbedoUnder[0];

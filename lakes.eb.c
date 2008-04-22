@@ -807,6 +807,7 @@ void alblake (double  Tcutoff,
  * Modifications:
  * 2007-Nov-06 Lake snow physics now consistent with land snow pack.	LCB via TJB
  * 2008-Apr-21 Corrected some omissions from the previous mods.		LCB via TJB
+ * 2008-Apr-21 Updated to be compatible with new snow_albedo().		KAC via TJB
  **********************************************************************/
   double albgl, albgs;
 
@@ -855,9 +856,7 @@ void alblake (double  Tcutoff,
 
   // compute snow surface albedo
   if(swq > 0.0)
-// Uncomment this if we take the update to snow_albedo() for Sun et al. 1999
-//    *snowalbedo = snow_albedo(newsnow, swq, depth, *snowalbedo, coldcontent, dt, *last_snow, *MELTING);
-    *snowalbedo = snow_albedo(newsnow, swq, coldcontent, dt, *last_snow, *MELTING);
+    *snowalbedo = snow_albedo(newsnow, swq, depth, *snowalbedo, coldcontent, dt, *last_snow, *MELTING);
   else if(swq == 0.0 && newsnow > 0.0)
     *snowalbedo = NEW_SNOW_ALB;
   else

@@ -73,6 +73,8 @@ global_param_struct get_global_param(filenames_struct *names,
 	      OUTPUT_FORCE == TRUE.						TJB
   2008-Jan-28 Added check that end date falls AFTER start date.			TJB
   2008-Mar-12 Relocated code validating IMPLICIT and EXCESS_ICE options.	TJB
+  2008-Apr-21 Added SNOW_ALBEDO option.						KAC via TJB
+  2008-Apr-21 Added SNOW_DENSITY option.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -323,6 +325,16 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
         else options.ARC_SOIL = FALSE;
+      }
+      else if (strcasecmp("SNOW_ALBEDO", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("SUN1999",flgstr)==0) options.SNOW_ALBEDO=SUN1999;
+        else options.SNOW_ALBEDO = USACE;
+      }
+      else if (strcasecmp("SNOW_DENSITY", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;
+        else options.SNOW_DENSITY = DENS_BRAS;
       }
       else if(strcasecmp("SNOW_STEP",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.SNOW_STEP);

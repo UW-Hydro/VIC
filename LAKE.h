@@ -10,6 +10,7 @@
   2007-Oct-24 Changed lakeice() to return exit status.			KAC via TJB
   2007-Nov-06 New lake physics parameters.  Modified argument lists for
 	      various functions.  Moved get_dist() to vicNl.h.		LCB via TJB
+  2008-Apr-21 Added argument to alblake.				LCB via TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -55,7 +56,7 @@
 double adjflux(double, double, double ,double, double, double, double,
 	       double, double, double, double *, double *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
-	     int, int *, double, double, char *);
+	     int, int *, double, double, char *, int);
 void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
 void colavg (double *, double *, double *, float, double *, int, double, double);

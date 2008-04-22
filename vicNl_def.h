@@ -39,6 +39,8 @@
   2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.	JCA
   2007-Oct-24 Added surf_water to lake_var structure.			KAC via TJB
   2007-Nov-06 Updated lake_var structure with new variables.		LCB via TJB
+  2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent to lake_var
+	      structure.						LCB via TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -185,7 +187,7 @@
 #define OUT_LAKE_ICE         1  /* moisture stored as lake ice [mm over lake ice area] */
 #define OUT_LAKE_ICE_FRACT   2  /* fractional coverage of lake ice [fraction] */
 #define OUT_LAKE_ICE_HEIGHT  3  /* thickness of lake ice [cm] */
-#define OUT_LAKE_MOIST       4  /* liquid water stored in lake [mm over grid cell] */
+#define OUT_LAKE_MOIST       4  /* liquid water and ice stored in lake [mm over grid cell] */
 #define OUT_LAKE_SURF_AREA   5  /* lake surface area [m2] */
 #define OUT_LAKE_VOLUME      6  /* lake volume [m3] */
 #define OUT_ROOTMOIST        7  /* root zone soil moisture  [mm] */
@@ -198,7 +200,7 @@
 #define OUT_SOIL_LIQ        14  /* soil liquid content  [mm] for each soil layer */
 #define OUT_SOIL_MOIST      15  /* soil total moisture content  [mm] for each soil layer */
 #define OUT_SOIL_WET        16  /* vertical average of (soil moisture - wilting point)/(maximum soil moisture - wilting point) [mm/mm] */
-#define OUT_SURFSTOR        17  /* storage of liquid water on surface (ponding) [mm] */
+#define OUT_SURFSTOR        17  /* storage of liquid water and ice (not snow) on surface (ponding) [mm] */
 #define OUT_SURF_FROST_FRAC 18  /* fraction of soil surface that is frozen [fraction] */
 #define OUT_SWE             19  /* snow water equivalent in snow pack (including vegetation-intercepted snow)  [mm] */
 #define OUT_WDEW            20  /* total moisture interception storage in canopy [mm] */
@@ -568,6 +570,9 @@ typedef struct {
   double hice;                    /* Height of lake ice at thickest point (m) */ 
   double tempi;                   /* Lake ice temperature (C) */
   double swe;                     /* Water equivalence of lake snow cover (m over lake ice area) */
+  double surf_temp;               /* Temperature of surface snow layer (C) */
+  double pack_temp;               /* Temperature of pack snow layer (C) */
+  double coldcontent;             /* cold content of snow pack */
   double surf_water;              /* Water content of surface snow layer (m over lake ice area) */
   double pack_water;              /* Water content of pack snow layer (m over lake ice area) */
   double SAlbedo;                 /* Albedo of lake snow (fraction) */

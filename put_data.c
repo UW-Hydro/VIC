@@ -66,6 +66,7 @@ void put_data(dist_prcp_struct  *prcp,
   2007-Nov-06 Lake area is now the larger of lake.areai and lake.sarea.
 	      Added wetland canopyevap and canopy_vapor_flux to grid
 	      cell flux aggregation.					LCB via TJB
+  2008-Apr-21 Made computation of out_data[OUT_SURFSTOR] more robust.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -723,7 +724,7 @@ void put_data(dist_prcp_struct  *prcp,
       }
 
       /** record lake moistures **/
-      out_data[OUT_LAKE_MOIST].data[0] = (lake_var.volume / lake_con->basin[0]) * 1000. * Clake * Cv; // mm over gridcell
+      out_data[OUT_LAKE_MOIST].data[0] = (lake_var.volume / lake_con->basin[0]) * 1000. * Cv; // mm over gridcell
       if (lake_var.areai > 0.0)
         out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.areai) * ice_density / RHO_W;
       else
@@ -865,12 +866,15 @@ void put_data(dist_prcp_struct  *prcp,
       out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
       out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
       if(lake_var.areai >= lake_var.sarea) {
-        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
         out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
+        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
       }
       else {
-        out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
         out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
+        if (lake_var.sarea > 0)
+          out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
+        else
+          out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
       }
       //out_data[OUT_LAKE_DEPTH].data[0]      = lake_var.ldepth;
       ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
@@ -880,7 +884,7 @@ void put_data(dist_prcp_struct  *prcp,
       }
       out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
       out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
-      out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_var.sarea) * 1000. * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_con->basin[0]) * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
 
     }
   }

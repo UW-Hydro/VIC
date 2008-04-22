@@ -20,6 +20,8 @@
   2008-Feb-17 Added parameters for new snow densification algorithm
 	      based on Lundberg and Pomeroy (1998);
 	      removed NEW_SNOW_DENSITY.					KMA via TJB
+  2008-Apr-21 Re-inserted NEW_SNOW_DENSITY, for backwards compatibility
+	      with previous snow density algorithm.			TJB
  */
 
 
@@ -42,6 +44,9 @@
 /* maximum depth of the surface layer in water equivalent (m)
    [default 0.125] */
 #define MAX_SURFACE_SWE			0.125
+
+/* density of new fallen snow [50] */
+#define NEW_SNOW_DENSITY        50.
 
 /* Density limit used in calculation of destructive metamorphism */
 #define SNDENS_DMLIMIT			100. // (kg/m^3)

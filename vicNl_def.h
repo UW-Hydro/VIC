@@ -41,6 +41,8 @@
   2007-Nov-06 Updated lake_var structure with new variables.		LCB via TJB
   2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent to lake_var
 	      structure.						LCB via TJB
+  2008-Apr-21 Added SNOW_ALBEDO option.					KAC via TJB
+  2008-Apr-21 Added SNOW_DENSITY option.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -60,6 +62,14 @@
 /***** Met file formats *****/
 #define ASCII 1
 #define BINARY 2
+
+/***** Snow Albedo parametrizations *****/
+#define USACE   0
+#define SUN1999 1
+
+/***** Snow Density parametrizations *****/
+#define DENS_BRAS   0
+#define DENS_SNTHRM 1
 
 /***** Baseflow parametrizations *****/
 #define ARNO        0
@@ -403,6 +413,8 @@ typedef struct {
   char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for 
 			    iteration, but explicit finite difference
 			    method for final step. */
+  char   SNOW_ALBEDO;    /* USACE: Use algorithm of US Army Corps of Engineers, 1956; SUN1999: Use algorithm of Sun et al., JGR, 1999 */
+  char   SNOW_DENSITY;   /* DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
   int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 

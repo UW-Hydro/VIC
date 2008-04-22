@@ -46,6 +46,7 @@
   2007-Aug-22 Made calc_water_balance_error  type double.		JCA
   2007-Nov-06 Moved get_dist() from LAKE.h to this file.		JCA
   2008-Feb-17 Changed argument list for snow_density().			KMA via TJB
+  2008-Apr-21 Added snow depth and albedo to snow_albedo() argument list.	KAC via TJB
 ************************************************************************/
 
 #include <math.h>
@@ -406,7 +407,7 @@ void set_node_parameters(double *, double *, double *, double *, double *, doubl
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 double shrad(double,double,double,double,double,int,double);
-double snow_albedo(double, double, double, double, int, char);
+double snow_albedo(double, double, double, double, double, double, int, char);
 double snow_density(snow_data_struct *, double, double, double, double, double);
 int    snow_intercept(double, double, double, double, double, double, double,
                       double, double, double, double, double, double, double, 

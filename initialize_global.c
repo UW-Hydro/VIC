@@ -97,6 +97,8 @@ void initialize_global() {
   2007-Sep-14 Replaced initialization of param_set.TYPE[i].SUPPLIED with a loop,
 	      and added initialization of param_set.TYPE[i].SIGNED and
 	      param_set.TYPE[i].multiplier.                                     TJB
+  2008-Apr-21 Added SNOW_ALBEDO option.						KAC via TJB
+  2008-Apr-21 Added SNOW_DENSITY option.					TJB
 
 *********************************************************************/
 
@@ -130,7 +132,9 @@ void initialize_global() {
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;
   options.ROOT_ZONES            = MISSING;
+  options.SNOW_ALBEDO           = USACE;
   options.SNOW_BAND             = 1;
+  options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
   // input options
   options.ARC_SOIL              = FALSE;

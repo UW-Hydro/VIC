@@ -69,24 +69,59 @@ Updated lake model.
 										LCB via TJB
 
 
-Improved snow density computation.
+New optional snow density computation.
 
 	Files affected:
 
+	display_current_settings.c
+	get_global_param.c
+	initialize_global.c
 	snow.h
 	snow_utility.c
 	solve_snow.c
 	user_def.h
+	vicNl_def.h
 	vicNl.h
 
 	Description:
 
-	Replaced previous algorithm (as a function of day of year, based on a
-	plot of seasonal variation of typical snow densities found in Bras,
-	figure 6.10, p 258) with new algorithm that computes the snow density
-	based on swe and snow metamorphism.  The new algorithm is taken from
-	SNTHERM89, adjusted for an essentially single-layer model.  Also moved
-	snow-related constants from user_def.h to snow.h, for consistency.	KMA via TJB
+	In addition to the previous algorithm (as a function of day of year,
+	based on a plot of seasonal variation of typical snow densities found
+	in Bras, figure 6.10, p 258), added a new algorithm that computes the
+	snow density based on swe and snow metamorphism.  The new algorithm is
+	taken from SNTHERM89, adjusted for an essentially single-layer model.
+	Introduced a new global parameter file option, SNOW_DENSITY, to choose
+	which of these density algorithms will be used.  If SNOW_DENSITY is set
+	to DENS_BRAS, the original algorithm is used.  If SNOW_DENSITY is set
+	to DENS_SNTHRM, the new algorithm is used.  The default value (i.e. if
+	SNOW_DENSITY is omitted) is DENS_BRAS.  Also moved snow-related
+	constants from user_def.h to snow.h, for consistency.			KMA via TJB
+
+
+
+New optional snow albedo algorithm.
+
+	Files affected:
+
+	display_current_settings.c
+	get_global_param.c
+	initialize_global.c
+	LAKE.h
+	lakes.eb.c
+	snow_utility.c
+	solve_snow.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	In addition to the previous algorithm (based on US Army Corps of
+	Engineers empirical snow albedo decay curves), added a new algorithm
+	based on Sun et al., 1999.  Introduced a new global parameter file
+	option, SNOW_ALBEDO, to choose which of these density algorithms will
+	be used.  If SNOW_ALBEDO is set to USACE, the original algorithm is
+	used.  If SNOW_ALBEDO is set to SUN1999, the new algorithm is used.
+	The default value (i.e. if SNOW_ALBEDO is omitted) is DENS_BRAS.	KAC via TJB
 
 
 

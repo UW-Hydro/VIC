@@ -30,9 +30,11 @@ void display_current_settings(int                 mode,
   2006-Nov-07 Removed LAKE_MODEL option.			TJB
   2007-Jan-03 Added ALMA_INPUT option.				TJB
   2007-Jan-15 Added PRT_HEADER option.				TJB
-  2007-04-24 Added IMPLICIT option.                             JCA
-  2007-04-24 Added EXP_TRANS option.                            JCA
-  2007-08-08 Added EXCESS_ICE option.                            JCA
+  2007-Apr-24 Added IMPLICIT option.				JCA
+  2007-Apr-24 Added EXP_TRANS option.				JCA
+  2007-Aug-08 Added EXCESS_ICE option.				JCA
+  2008-Apr-21 Added SNOW_ALBEDO option.				KAC via TJB
+  2008-Apr-21 Added SNOW_DENSITY option.			TJB
 **********************************************************************/
 {
 
@@ -242,6 +244,14 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"MIN_RAIN_TEMP\t\t%f\n",global->MIN_RAIN_TEMP);
   fprintf(stdout,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
   fprintf(stdout,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
+  if (options.SNOW_ALBEDO == USACE)
+    fprintf(stdout,"SNOW_ALBEDO\t\tUSACE\n");
+  else if (options.SNOW_ALBEDO == SUN1999)
+    fprintf(stdout,"SNOW_ALBEDO\t\tSUN1999\n");
+  if (options.SNOW_DENSITY == DENS_BRAS)
+    fprintf(stdout,"SNOW_DENSITY\t\tDENS_BRAS\n");
+  else if (options.SNOW_DENSITY == DENS_SNTHRM)
+    fprintf(stdout,"SNOW_DENSITY\t\tDENS_SNTHRM\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Forcing Data:\n");

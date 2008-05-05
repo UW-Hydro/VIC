@@ -61,6 +61,11 @@ int  full_energy(char                 NEWCELL,
 	      for earlier bands was always overwritten by the value
 	      of ice0 computed for the final band (even if the final
 	      band had 0 area).							JS via TJB
+  2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
+	      when options.SNOW_BAND > 1, the value of moist computed
+	      for earlier bands was always overwritten by the value
+	      of moist computed for the final band (even if the final
+	      band had 0 area).							KAC via TJB
 
 **********************************************************************/
 {
@@ -90,7 +95,7 @@ int  full_energy(char                 NEWCELL,
   double                 out_short=0;
   double                 dp;
   double                 ice0[MAX_BANDS];
-  double                 moist;
+  double                 moist0[MAX_BANDS];
   double                 surf_atten;
   double                 Tend_surf;
   double                 Tend_grnd;
@@ -257,7 +262,7 @@ int  full_energy(char                 NEWCELL,
       /* Initialize soil thermal properties for the top two layers */
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
-			    soil_con, &moist, ice0);
+			    soil_con, moist0, ice0);
       }
 
       /** Compute Bare Soil (free of snow) Albedo **/
@@ -353,7 +358,7 @@ int  full_energy(char                 NEWCELL,
 	    fetch       = veg_con[0].fetch;
 	  }
 
-	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist, 
+	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band], 
 #if EXCESS_ICE
 				     SubsidenceUpdate, evap_prior[DRY][iveg][band], evap_prior[WET][iveg][band],
 #endif

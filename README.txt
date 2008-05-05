@@ -192,14 +192,16 @@ options.SNOW_BAND > 1.
 
 	full_energy.c
 	prepare_full_energy.c
+	surface_fluxes.c
 
 	Description:
 
-	Changed ice0 from a scalar to an array.  Previously,
-	when options.SNOW_BAND > 1, the value of ice0 computed
-	for earlier bands was always overwritten by the value
-	of ice0 computed for the final band (even if the final
-	band had 0 area).							JS via TJB
+	Changed initial total and frozen moistures from scalars (moist and
+	ice0) to arrays (moist0 and ice0).  Previously, when
+	options.SNOW_BAND > 1, the values of moist and ice0 computed for
+	earlier bands were always overwritten by the values of moist and
+	ice0 computed for the final band (even if the final band had 0
+	area).									JS and KAC via TJB
 
 
 Bad results when SNOW_STEP = 24 hours
@@ -314,6 +316,20 @@ output files.
 	almost the same as previous versions of 4.1.0, (r3 and earlier) with
 	the exception that previous versions of 4.1.0 multiplied these terms
 	by 100 when saving to the snow file.					TJB
+
+
+Error in computation of initial water storage for DIST_PRCP = TRUE
+
+	Files Affected:
+
+	vicNl.c
+
+	Description:
+
+	Added dist_prcp fraction (mu) to the computation of initial water
+	storage terms.  Otherwise, when DIST_PRCP = TRUE, the water storage
+	terms for wet and dry fractions were added together with no weighting,
+	resulting in twice the storage as actually present.			TJB
 
 
 --------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ void prepare_full_energy(int               iveg,
 			 int               Nnodes,
 			 dist_prcp_struct *prcp,
 			 soil_con_struct  *soil_con,
-			 double           *moist,
+			 double           *moist0,
 			 double           *ice0) {
 /*******************************************************************
   prepare_full_energy.c      Keith Cherkauer       January 20, 2000
@@ -31,6 +31,11 @@ void prepare_full_energy(int               iveg,
 	      for earlier bands was always overwritten by the value
 	      of ice0 computed for the final band (even if the final
 	      band had 0 area).						JS via TJB
+  2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
+	      when options.SNOW_BAND > 1, the value of moist computed
+	      for earlier bands was always overwritten by the value
+	      of moist computed for the final band (even if the final
+	      band had 0 area).						KAC via TJB
 
 *******************************************************************/
 
@@ -56,14 +61,14 @@ void prepare_full_energy(int               iveg,
     
       /* Compute top soil layer moisture content (mm/mm) */
 
-      (*moist) = layer[0].moist / ( soil_con->depth[0] * 1000. );
+      moist0[band] = layer[0].moist / ( soil_con->depth[0] * 1000. );
 
       /* Compute top soil layer ice content (mm/mm) */
 
       if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
         if((prcp->energy[iveg][band].T[0] 
 	    + prcp->energy[iveg][band].T[1])/2.<0.) {
-	  ice0[band] = (*moist) 
+	  ice0[band] = moist0[band] 
 	    - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
 				      + prcp->energy[iveg][band].T[1]) / 2.,
 #if EXCESS_ICE

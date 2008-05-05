@@ -17,7 +17,7 @@ int surface_fluxes(char                 overstory,
 		   double               BareAlbedo,
 		   double               height,
 		   double               ice0,
-		   double               moist,
+		   double               moist0,
 #if EXCESS_ICE
 		   int                  SubsidenceUpdate,
 		   double              *evap_prior_dry,
@@ -117,6 +117,11 @@ int surface_fluxes(char                 overstory,
 	      water balance errors when model step = daily and snow
 	      step = sub-daily.						TJB
   2007-Aug-17 Added features for EXCESS_ICE option.                     JCA
+  2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
+	      when options.SNOW_BAND > 1, the value of moist computed
+	      for earlier bands was always overwritten by the value
+	      of moist computed for the final band (even if the final
+	      band had 0 area).						KAC via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -531,7 +536,7 @@ int surface_fluxes(char                 overstory,
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
 			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 
-			       dp, ice0, atmos->longwave[hidx], moist, mu, 
+			       dp, ice0, atmos->longwave[hidx], moist0, mu, 
 			       step_prec[WET], atmos->pressure[hidx], 
 			       atmos->shortwave[hidx], snow_grnd_flux, 
 			       VPcanopy, VPDcanopy, gp->wind_h, 
@@ -583,7 +588,7 @@ int surface_fluxes(char                 overstory,
 				     Tcanopy, VPDcanopy, 
 				     VPcanopy, iter_snow_energy.advection, 
 				     step_snow.coldcontent, delta_coverage, dp, 
-				     ice0, step_melt_energy, moist, mu, 
+				     ice0, step_melt_energy, moist0, mu, 
 				     iter_snow.coverage, 
 				     (step_snow.depth + iter_snow.depth) / 2., 
 				     BareAlbedo, surf_atten, 

@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
   2007-Oct-08 Fixed typo in call to check_state_file().  Was assigning
 	      init_state file pointer to filep.statefile; now assigns
 	      pointer to filep.init_state.			TJB
+  2008-May-05 Added dist_prcp fraction (mu) to computation of initial
+	      water storage.					TJB
 
 **********************************************************************/
 {
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
   int                      Ncells;
   int                      cell_cnt;
   int                      startrec;
+  float                    mu;
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
@@ -312,16 +315,27 @@ int main(int argc, char *argv[])
 	for ( band = 0; band < options.SNOW_BAND; band++ ) {
 	  band_fract = soil_con.AreaFract[band];
 	  if ( veg_fract > SMALL && band_fract > SMALL ) {
-	    for(index=0;index<options.Nlayer;index++)
-	      for ( dist = 0; dist < Ndist; dist ++ )
+	    for(index=0;index<options.Nlayer;index++) {
+	      for ( dist = 0; dist < Ndist; dist ++ ) {
+		if(dist==0)
+		  mu = prcp.mu[veg];
+		else
+		  mu = 1. - prcp.mu[veg];
 		storage += prcp.cell[dist][veg][band].layer[index].moist 
-		  * veg_fract * band_fract;
+		  * veg_fract * band_fract * mu;
+	      }
+	    }
 	    storage += prcp.snow[veg][band].swq * 1000. * veg_fract 
 	      * band_fract;
 	    if ( veg != veg_con[0].vegetat_type_num ) {
-	      for ( dist = 0; dist < Ndist; dist ++ ) 
+	      for ( dist = 0; dist < Ndist; dist ++ ) {
+		if(dist==0)
+		  mu = prcp.mu[veg];
+		else
+		  mu = 1. - prcp.mu[veg];
 		storage += prcp.veg_var[dist][veg][band].Wdew 
 		  * veg_fract * band_fract;
+	      }
 	      storage += prcp.snow[veg][band].snow_canopy * 1000. 
 		* veg_fract * band_fract;
 	    }

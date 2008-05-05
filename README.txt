@@ -46,6 +46,20 @@ Better validation of global parameter file options
 	files actually defined in the global param file.			TJB
 
 
+Fix water balance error in computation of initial water storage for
+DIST_PRCP=TRUE
+
+	Files Affected:
+
+	vicNl.c
+
+	Description:
+
+	Added dist_prcp fraction (mu) to computation of initial moisture
+	storage.  Without this, when DIST_PRCP=TRUE, initial moisture
+	storage ends up being twice as large as it should be.			TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.5 to VIC 4.0.6 *****
 --------------------------------------------------------------------------------

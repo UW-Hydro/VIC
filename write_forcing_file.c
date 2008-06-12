@@ -17,13 +17,14 @@ void write_forcing_file(atmos_data_struct *atmos,
 
   Modifications:
   xx-xx-01 Modified to output pressures, which are handled internally
-           in kPa, as Pa for backward compatability.              KAC
-  2005-Mar-24 Added support for ALMA variables.                 TJB
+           in kPa, as Pa for backward compatability.			KAC
+  2005-Mar-24 Added support for ALMA variables.				TJB
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
+             to ...sizeof, 1,...					GCT
   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures. TJB
-  2006-Nov-30 Convert pressure and vapor pressure to kPa for output. TJB
+              out_data and out_data_files structures.			TJB
+  2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
+  2008-Jun-10 Fixed typo in QAIR and REL_HUMID eqns.			TJB
 
 **********************************************************************/
 {
@@ -47,8 +48,8 @@ void write_forcing_file(atmos_data_struct *atmos,
       out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
       out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
       out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j]/kPa2Pa;
-      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos->pressure[j];
-      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos->vp[j]+atmos->vpd[j]);
+      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos[rec].pressure[j];
+      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos[rec].vp[j]+atmos[rec].vpd[j]);
       out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
       out_data[OUT_VP].data[0]        = atmos[rec].vp[j]/kPa2Pa;
       out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];

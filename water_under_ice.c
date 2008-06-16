@@ -135,7 +135,7 @@ int water_under_ice(int     freezeflag,
     return(0);
   }
   else {
-    fprintf(stderr, "Lake temps under ice failed to converge; temporary work around used.\n");
+//    fprintf(stderr, "Lake temps under ice failed to converge; temporary work around used.\n");
     *qw = 0.0;
     for(k=0; k<numnod; k++)
       Ti[k] = Tcutoff;

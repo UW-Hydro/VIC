@@ -148,6 +148,20 @@ Allow lakes to be empty or very shallow.
 	making them more consistent with the CONTINUEONERROR option.		KAC via TJB
 
 
+Miscellaneous fixes to lake model
+
+	Files affected:
+
+	lakes.eb.c
+	read_lakeparam.c
+	wetland_energy.c
+
+	Description:
+
+	Fixes for swe accounting errors and incorrect parsing of lake
+	parameter file.								LCB via TJB
+
+
 Lake snow and ice fixes
 
 	Files affected:

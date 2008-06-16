@@ -51,6 +51,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2007-Nov-06 Updated to read new set of lake parameters (broad-crested wier)	LCB via TJB
   2008-Feb-16 Added !feof(lakeparam) condition to loop over lakeparam file.	TJB
   2008-Mar-01 Moved assignment of tempdz so that it is always assigned a value.	TJB
+  2008-Jun-16 Added a second fgets to loop over grid cells, to correctly parse
+	      file.								LCB via TJB
 **********************************************************************/
 
 {
@@ -81,7 +83,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   // Locate current grid cell
   fscanf(lakeparam, "%d", &lakecel);
   while ( lakecel != soil_con.gridcel && !feof(lakeparam) ) {
-    fgets(tmpstr, MAXSTRING, lakeparam);
+    fgets(tmpstr, MAXSTRING, lakeparam); // grid cell number, etc.
+    fgets(tmpstr, MAXSTRING, lakeparam); // lake depth-area relationship
     fscanf(lakeparam, "%d", &lakecel);
   }
 

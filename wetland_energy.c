@@ -37,6 +37,7 @@ int wetland_energy(int                  rec,
 	      hard-wired.						LCB via TJB
   2008-Mar-01 Reinserted logic for QUICK_FS in calls to
 	      distribute_node_moisture_properties().			TJB
+  2008-Jun-16 Now runs even when wetland fraction is 0.			LCB via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -160,8 +161,8 @@ int wetland_energy(int                  rec,
   DSWE = snow[iveg][band].swq;
   WDEW1 = veg_var[WET][iveg][band].Wdew;
 
-  /** Solve Wetland only if Lake Coverage Less than 100% **/
-  if (fabs(lake_frac - 1.0) > SMALL) {
+//  /** Solve Wetland only if Lake Coverage Less than 100% **/
+//  if (fabs(lake_frac - 1.0) > SMALL) {
 
     /* fraction of lake area. */
     Cv = 1. - lake_frac;
@@ -397,7 +398,7 @@ int wetland_energy(int                  rec,
     atmos->out_rain += out_rain[band*2] * Cv * lake_con.Cl[0];
     atmos->out_snow += out_snow[band*2] * Cv * lake_con.Cl[0];
 
-  } /** end if fabs(lake_frac-1.0) > SMALL **/
+//  } /** end if fabs(lake_frac-1.0) > SMALL **/
 
   return (0);  
 

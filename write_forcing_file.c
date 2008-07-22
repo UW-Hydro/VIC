@@ -15,15 +15,14 @@ void write_forcing_file(atmos_data_struct *atmos,
   This routine writes the complete forcing data files for use in 
   future simulations.
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,...					GCT
+             to ...sizeof, 1,...				GCT
   2006-Sep-11 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures.			TJB
-  2006-Sep-14 Implemented ALMA-compliant input and output.		TJB
+              out_data and out_data_files structures.		TJB
+  2006-Sep-14 Implemented ALMA-compliant input and output.	TJB
   2006-Sep-23 Fixed bugs in computation of QAIR and REL_HUMID;
 	      updated aggdata[] arrays to make it compatible with
-	      aggregation.						TJB
-  2007-Jan-03 Bugfix: Declared index i.					TJB
-  2008-Jun-10 Fixed typo in QAIR and REL_HUMID eqns.			TJB
+	      aggregation.					TJB
+  2007-Jan-03 Bugfix: Declared index i.				TJB
 
 **********************************************************************/
 {
@@ -47,8 +46,8 @@ void write_forcing_file(atmos_data_struct *atmos,
       out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
       out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
       out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j];
-      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos[rec].pressure[j];
-      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos[rec].vp[j]+atmos[rec].vpd[j]);
+      out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos->pressure[j];
+      out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos->vp[j]+atmos->vpd[j]);
       out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
       out_data[OUT_VP].data[0]        = atmos[rec].vp[j];
       out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];

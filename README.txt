@@ -60,6 +60,17 @@ DIST_PRCP=TRUE
 	storage ends up being twice as large as it should be.			TJB
 
 
+Fixed incorrect text in global.param.sample
+
+	Files Affected:
+
+	global.param.sample
+
+	Description:
+
+	The description of proper syntax for the COMPUTE_TREELINE option was
+	wrong.  This has been fixed.						TJB
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.0.5 to VIC 4.0.6 *****
 --------------------------------------------------------------------------------

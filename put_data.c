@@ -67,6 +67,19 @@ void put_data(dist_prcp_struct  *prcp,
 	      Added wetland canopyevap and canopy_vapor_flux to grid
 	      cell flux aggregation.					LCB via TJB
   2008-Apr-21 Made computation of out_data[OUT_SURFSTOR] more robust.	TJB
+  2008-Sep-09 Calculate sarea in order to output lake surface area at
+	      the end of the time step.  The stored variable
+	      lake->sarea represents the sarea from the beginning of
+	      the time step, not the updated value from the end of the
+	      time step.						LCB via TJB
+  2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the soil
+	      temperature in the wetland fraction of the grid cell.	LCB via TJB
+  2008-Sep-09 Allow output of wetland frost/thaw depths even if Clake
+	      is 1.0 since wetland energy balance is always computed.	LCB via TJB
+  2008-Sep-09 Lake depth assignment moved up to precede sarea
+	      assignment.						LCB via TJB
+  2008-Sep-09 Check to make sure that area > 0.0 when checking to see
+	      if ice area > sarea.					LCB via TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -686,24 +699,14 @@ void put_data(dist_prcp_struct  *prcp,
 
       /** record freezing and thawing front depths **/
       if(options.FROZEN_SOIL) {
-        if(abs(Clake-1.0) > SMALL) {
-          for(index = 0; index < MAX_FRONTS; index++) {
-            if(energy[veg][band].fdepth[index] != MISSING)
-              out_data[OUT_FDEPTH].data[index] += energy[veg][band].fdepth[index]
-                * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-            if(energy[veg][band].tdepth[index] != MISSING)
-              out_data[OUT_TDEPTH].data[index] += energy[veg][band].tdepth[index]
-                * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-          }
-        }
-        else {
-          for(index = 0; index < MAX_FRONTS; index++) {
-            if(energy[veg][band].fdepth[index] != MISSING)
-              out_data[OUT_FDEPTH].data[index] /= (1.-Cv);
-            if(energy[veg][band].tdepth[index] != MISSING)
-              out_data[OUT_TDEPTH].data[index] /= (1.-Cv);
-          }
-        }
+	for(index = 0; index < MAX_FRONTS; index++) {
+	  if(energy[veg][band].fdepth[index] != MISSING)
+	    out_data[OUT_FDEPTH].data[index] += energy[veg][band].fdepth[index]
+	      * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
+	  if(energy[veg][band].tdepth[index] != MISSING)
+	    out_data[OUT_TDEPTH].data[index] += energy[veg][band].tdepth[index]
+	      * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
+	}
       }
 
       /** record aerodynamic conductivity **/
@@ -760,6 +763,7 @@ void put_data(dist_prcp_struct  *prcp,
       /** record thermal node temperatures **/
       for(index=0;index<options.Nnode;index++) {
         out_data[OUT_SOIL_TNODE].data[index] += energy[veg][band].T[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
+      	out_data[OUT_SOIL_TNODE_WL].data[index] = energy[veg][band].T[index];
       }
 
       /***************************************
@@ -865,23 +869,30 @@ void put_data(dist_prcp_struct  *prcp,
       // Store Lake Specific Variables
       out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
       out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
-      if(lake_var.areai >= lake_var.sarea) {
-        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
-        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
-      }
-      else {
-        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
-        if (lake_var.sarea > 0)
-          out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
-        else
-          out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
-      }
-      //out_data[OUT_LAKE_DEPTH].data[0]      = lake_var.ldepth;
+
       ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
       if (ErrorFlag == ERROR) {
         fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var.volume, out_data[OUT_LAKE_DEPTH].data[0], rec);
         exit(0);
       }
+
+      if(lake_var.areai >= lake_var.sarea && lake_var.areai > 0.0) {
+        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
+        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
+      }
+      else {
+	ErrorFlag = get_sarea(*lake_con, out_data[OUT_LAKE_DEPTH].data[0], &(out_data[OUT_LAKE_SURF_AREA].data[0]));
+	if ( ErrorFlag == ERROR ) {
+	  fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,out_data[OUT_LAKE_DEPTH].data[0], out_data[OUT_LAKE_SURF_AREA].data[0]);
+	  return ( ErrorFlag );
+	}
+
+        if (lake_var.sarea > 0)
+          out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
+        else
+          out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
+      }
+     
       out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
       out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
       out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_con->basin[0]) * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
@@ -1038,6 +1049,7 @@ void put_data(dist_prcp_struct  *prcp,
       }
       for (index=0; index<options.Nnode; index++) {
         out_data[OUT_SOIL_TNODE].aggdata[index] += KELVIN;
+        out_data[OUT_SOIL_TNODE_WL].aggdata[index] += KELVIN;
       }
       out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;
       out_data[OUT_VEGT].aggdata[0] += KELVIN;

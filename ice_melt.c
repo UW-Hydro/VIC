@@ -109,6 +109,8 @@ static char vcid[] = "$Id$";
 	      accounting of lake_snow->surf_water.				LCB via TJB
   2008-Jan-23 Modified lake snow pack to have 2 layers, similar to the modeling
 	      of snow pack on uplands.						LCB via TJB
+  2008-Sep-09 Reduced the fetch used with blowing snow calculations over lakes
+	      from 2000 m to 100 m.						LCB via TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -271,7 +273,7 @@ int ice_melt(double            z2,
 					 wind, Ls, density,
 					 pressure, vp, Z0,
 					 z2, snow->depth, .95, 0.005,
-					 snow->surf_temp, 0, 1, 2000.,
+					 snow->surf_temp, 0, 1, 100.,
 					 .067, .0123, &snow->transport);
     if ( (int)snow->blowing_flux == ERROR ) {
       fprintf( stderr, "ERROR: ice_melt.c has an error from the call to CalcBlowingSnow\n");

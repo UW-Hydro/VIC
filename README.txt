@@ -42,6 +42,7 @@ Updated lake model.
 	lakes.eb.c
 	LAKE.h
 	Makefile
+	output_list_utils.c
 	put_data.c
 	read_initial_model_state.c
 	read_lakeparam.c
@@ -66,6 +67,8 @@ Updated lake model.
 	  * Drainage now modeled as flow over broad-crested wier
 	  * New lake parameter file format - see read_lakeparam.c for details
 	  * Fixes for crashes in extreme cases; fixes for water balance errors
+	  * New output variable OUT_SOIL_TNODE_WL, the soil thermal node
+	    temperatures in the wetland tile
 										LCB via TJB
 
 

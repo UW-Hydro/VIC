@@ -26,6 +26,9 @@ out_data_struct *create_output_list() {
 	      it easier to debug.				TJB
   2007-Aug-17 Added EXCESS_ICE variables to output list.        JCA
   2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.      JCA
+  2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the
+	      soil temperature in the wetland fraction of the
+	      grid cell.					LCB via TJB
 *************************************************************/
 
   extern option_struct options;
@@ -94,6 +97,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SNOW_SURF_TEMP].varname,"OUT_SNOW_SURF_TEMP");   /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
   strcpy(out_data[OUT_SOIL_TNODE].varname,"OUT_SOIL_TNODE");           /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+  strcpy(out_data[OUT_SOIL_TNODE_WL].varname,"OUT_SOIL_TNODE_WL");     /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
   strcpy(out_data[OUT_SURF_TEMP].varname,"OUT_SURF_TEMP");             /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_TDEPTH].varname,"OUT_TDEPTH");                   /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
   strcpy(out_data[OUT_VEGT].varname,"OUT_VEGT");                       /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
@@ -184,6 +188,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_ZSUM_NODE].nelem = options.Nnode;
 #endif
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
+  out_data[OUT_SOIL_TNODE_WL].nelem = options.Nnode;
   out_data[OUT_ADVECTION_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_DELTACC_BAND].nelem = options.SNOW_BAND;

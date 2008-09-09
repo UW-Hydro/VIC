@@ -43,6 +43,7 @@ int initialize_lake (lake_var_struct   *lake,
   2008-Jan-23 Added initialization of lake_snow->surf_temp, pack_water,
 	      and pack_temp in conjunction with 2-layer snow pack over
 	      lake ice.							LCB via TJB
+  2008-Sep-09 Deleted initial volume print statement.			LCB via TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -138,7 +139,7 @@ int initialize_lake (lake_var_struct   *lake,
     fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
   }
  
-  printf("initial volume = %e km3, initial depth = %f m, initial area = %e km2\n",lake->volume/(1000.*1000.*1000.), lake->ldepth, lake->sarea/(1000.*1000.));
+ 
   lake->runoff_out=0.0;
   lake->baseflow_out=0.0;
 

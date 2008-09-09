@@ -66,8 +66,39 @@ int lakemain(atmos_data_struct  *atmos,
 	          area and lake ice surface area
 	        * Fixes for some crashes in extreme cases and water balance
 	          errors
-  2007-Jun-16 Fixes to initialize_prcp() and update_prcp() to address swe
+  2008-Jun-16 Fixes to initialize_prcp() and update_prcp() to address swe
 	      accounting errors.						LCB via TJB
+  2008-Sep-09 Fixed inconsistencies in lake level calculations.  Lake level
+	      is updated 3 times in the water_balance(): to find the area for
+	      recharge calculations; after baseflow and recharge are extracted
+	      and after runoff is extracted. The first and third times only
+	      the depth of liquid water was calculated if the lake had 100%
+	      ice-cover.  Runoff was always calculated based on the liquid
+	      water depth alone.  Code has been updated as follows.  The total
+	      lake depth (ice + liquid water) is calculated for recharge
+	      calculations (also calculated in put_data for output and at the
+	      beginning of lakemain to update sarea); If ice_water_equivalent
+	      exceeds liquid water, ice is not buoyant and depth for runoff
+	      calculations and for thermal solution is based on liquid water
+	      alone.  If ice_water_equivalent < liquid water, ice can displace
+	      liquid water anddepth is based on ice_water_equivalent+liquid
+	      water.								LCB via TJB
+  2008-Sep-09 A water balance error existed when flooded area reaches maximum
+	      extent, but the exposed wetland still had snow. Revised code to
+	      assign all of this snow to the lake_snow variable if ice exists,
+	      otherwise add to the lake volume.					LCB via TJB
+  2008-Sep-09 Update sarea at the begining of the time step with the surface
+	      area of combined lake/wetland volume.				LCB via TJB
+  2008-Sep-09 The way the if statement was constructed previously, runoff was
+	      not released from the lake unless the liquid water volume could
+	      satisfy both the runoff out and maintain the minimum volume of
+	      the lake.  If statement was restructured to check seperately
+	      that liquid water satisfies runoff out and total volume will
+	      satisfy minvolume.						LCB via TJB
+  2008-Sep-09 Deleted commented code that prevents ice formation until
+	      January 1st.							LCB via TJB
+  2008-Sep-09 Move calculation of internal variable outflow below runoff_out
+	      updates.								LCB via TJB
 
   Parameters :
 
@@ -108,6 +139,7 @@ the grid cell average fluxes.
   int i, ErrorFlag;
   double lakefrac;
   double fraci;
+  double ldepth;
 
   // DEBUG variables
   double V1, V2;
@@ -123,7 +155,16 @@ the grid cell average fluxes.
   lake    = &prcp->lake_var;
 
   /* Update sarea to equal new surface area from previous time step. */
-  lake->sarea = lake->surface[0];	
+  ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
+  if (ErrorFlag == ERROR) {
+    fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake->volume, ldepth, rec);
+    exit(0);
+  }
+  ErrorFlag = get_sarea(lake_con, ldepth, &(lake->sarea));
+  if ( ErrorFlag == ERROR ) {
+    fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth, lake->sarea);
+    return ( ErrorFlag );
+  }
   lake->areai = lake->new_ice_area;
 
   // Initialize DEBUG variables
@@ -473,12 +514,6 @@ int solve_lake(double             snow,
       if ( ErrorFlag == ERROR ) return (ERROR);
 
         if ( ErrorFlag == ERROR ) return (ERROR);
-
-	// Test for Torne simulation, should not be here otherwise.
-	//       if(dmy.day_in_year > 181) {
-	// 	new_ice_area = 0.;
-	// 	new_ice_height=0.0;
-	//    }
 
       /* --------------------------------------------------------------------
        * Do the convective mixing of the lake water.
@@ -2120,15 +2155,15 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   inflow = ( runoff_volume + snowmltvolume-evapvolume);
 
   // Find new lake depth and surface area of the unfrozen portion for recharge calculations
-  if(1.- fracprv < FRACLIM)
-    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);
-  else
+
     ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
+
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,ldepth);
     return ( ErrorFlag );
   }
   ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
+
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth,surfacearea);
     return ( ErrorFlag );
@@ -2226,26 +2261,35 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
 
   // Find new lake depth and surface area of the unfrozen portion for runoff calculations
-  ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);
+  if(lake->ice_water_eq > (lake->volume - lake->ice_water_eq)) /* Ice is not buoyant. */
+    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);  
+  else
+    ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
+
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,ldepth);
     return ( ErrorFlag );
   }
 
   // Compute runoff volume in m^3 and extract runoff volume from lake
-  if(ldepth <= lake_con.mindepth)
+  if(ldepth <= lake_con.mindepth )
     lake->runoff_out = 0.0;
   else {
     circum=2*PI*pow(surfacearea/PI,0.5);
     lake->runoff_out = lake_con.wfrac*circum*SECPHOUR*((double)dt)*1.6*pow(ldepth-lake_con.mindepth, 1.5);
-    if(lake->volume - lake->ice_water_eq-lake_con.minvolume >= lake->runoff_out)
+    if((lake->volume - lake->ice_water_eq) >= lake->runoff_out) { 
+      /*liquid water is available */
+      if( (lake->volume - lake->runoff_out) < lake_con.minvolume ) 
+	lake->runoff_out = lake->volume - lake_con.minvolume;
       lake->volume -= ( lake->runoff_out );
+      }
     else {
-      lake->runoff_out = lake->volume - lake->ice_water_eq-lake_con.minvolume ;
+      lake->runoff_out = lake->volume - lake->ice_water_eq;
+      if( (lake->volume - lake->runoff_out) < lake_con.minvolume ) 
+	lake->runoff_out = lake->volume - lake_con.minvolume;
       lake->volume -= ( lake->runoff_out );
     }
   }
-  outflow = lake->runoff_out + lake->baseflow_out;
 
   // check that lake volume does not exceed its maximum
   if (lake->volume - lake_con.maxvolume > SMALL) {
@@ -2260,6 +2304,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
   else if (lake->volume < SMALL)
     lake->volume = 0.0;
+
+  outflow = lake->runoff_out + lake->baseflow_out;
 
   /**********************************************************************/
   /* End of runoff calculation */
@@ -2278,11 +2324,12 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   lake->baseflow_out  += (1. - bpercent) * lake->baseflow_in;
 
   // Recalculate lake depth
-  if(1.-fracprv < FRACLIM)
+    if(lake->ice_water_eq > (lake->volume - lake->ice_water_eq)) /* Ice is not buoyant. */
     ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &(lake->ldepth));
   else
     ErrorFlag = get_depth(lake_con, lake->volume, &(lake->ldepth));
-  if ( ErrorFlag == ERROR ) {
+ 
+ if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,lake->ldepth);
     return ( ErrorFlag );
   }
@@ -2744,7 +2791,8 @@ int initialize_prcp(dist_prcp_struct *prcp,
   }
   else {
     if(*fraci > 0.0) {
-      lake_snow->swq = lake->swe/(*fraci);
+      lake_snow->swq = wland_snow[iveg][band].swq/(*fraci);
+      wland_snow[iveg][band].swq =0.0;
       lake_snow->surf_water = lake->surf_water/(*fraci);
       lake_snow->pack_water = lake->pack_water/(*fraci);
       lake_snow->depth = lake->sdepth/(*fraci);
@@ -2763,6 +2811,7 @@ int initialize_prcp(dist_prcp_struct *prcp,
       lake_snow->surf_temp = 0.0;
       lake_snow->pack_temp = 0.0;
     }
+    lake->volume += ( wland_snow[iveg][band].swq * lake->sarea );
     //  wland_snow[iveg][band].swq =0.0;
     //  wland_snow[iveg][band].depth =0.0;
     //   wland_snow[iveg][band].surf_water =0.0;

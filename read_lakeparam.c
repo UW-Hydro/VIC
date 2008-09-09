@@ -53,6 +53,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2008-Mar-01 Moved assignment of tempdz so that it is always assigned a value.	TJB
   2008-Jun-16 Added a second fgets to loop over grid cells, to correctly parse
 	      file.								LCB via TJB
+  2008-Sep-09 Deleted the fprintf statement for maxiumum lake volume.		LCB via TJB
 **********************************************************************/
 
 {
@@ -169,7 +170,6 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     for ( i = 1; i <= temp.numnod; i++ ) {
       temp.maxvolume += (temp.basin[i] + temp.basin[i-1]) * (temp.z[i-1] - temp.z[i]) / 2.;
     }
-    fprintf(stderr, "maxvolume = %e km3\n",temp.maxvolume/(1000.*1000.*1000.));
 
   }
 

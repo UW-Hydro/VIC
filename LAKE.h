@@ -11,6 +11,8 @@
   2007-Nov-06 New lake physics parameters.  Modified argument lists for
 	      various functions.  Moved get_dist() to vicNl.h.		LCB via TJB
   2008-Apr-21 Added argument to alblake.				LCB via TJB
+  2008-Sep-10 Updated values of CONDS and lamwlw to match Laura
+	      Bowling's lake work.					LCB via TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -33,7 +35,7 @@
 #define ZWATER 0.0045    // 0.004 - original value
 #define ZSNOW 0.005
 #define CONDI 2.3        /* thermal conductivity of ice */
-#define CONDS 0.31       /* thermal conductivity of snow */ 
+#define CONDS 0.7       /* thermal conductivity of snow */ 
 
 // attenuation of short and longwave radiation through ice (1/m)
 #define lamisw 1.5 // 1.5 in Patterson & Hamblin
@@ -43,7 +45,7 @@
 #define lamslw 20  // 20.0 in Patterson & Hamblin
 // attenuation of short and longwave radiation through water (1/m)
 #define lamwsw .3  // San Fran Bay data: 0.31 - 29.9 1/m (visible)
-#define lamwlw .2 // Hostetler and Bartlein assume 0.85 1/m (total)
+#define lamwlw 1.4 // Hostetler and Bartlein assume 0.85 1/m (total)
 #define  a1 0.7        /* Percent of radiation in visible band. */
 #define  a2 0.3        /* Percent of radiation in infrared band. */
 #define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */

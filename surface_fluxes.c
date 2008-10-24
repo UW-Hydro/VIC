@@ -89,27 +89,27 @@ int surface_fluxes(char                 overstory,
            evaporation was computed for SNOW_STEP hours rather than a
            full day.  This was fixed by introducing step_inc to 
            index the arrays, while step_dt keeps track of the correct
-           time step.                                            KAC
+           time step.                                          		KAC
   10-May-04 Fixed initialization of canopyevap to initialize for every
-	    value of dist, rather than just dist 0.		TJB
+	    value of dist, rather than just dist 0.			TJB
   16-Jul-04 Added variables store_blowing_flux and store_surface_flux
 	    so that surface_flux and blowing_flux are calculated
-	    correctly over a model time step.			TJB
+	    correctly over a model time step.				TJB
   16-Jul-04 Moved calculation of blowing_flux from this function
-	    into latent_heat_from_snow().			TJB
+	    into latent_heat_from_snow().				TJB
   05-Aug-04 Moved calculation of blowing_flux back into this function
 	    from latent_heat_from_snow().  Updated arg lists to
-	    calc_surf_energy_bal() and solve_snow() accordingly.TJB
+	    calc_surf_energy_bal() and solve_snow() accordingly.	TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.				TJB
-  04-Oct-04 Merged with Laura Bowling's updated lake model code.TJB
+	    used in flux calculations.					TJB
+  04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
   2006-Sep-23 Implemented flexible output configuration; moved tracking
               of rain and snow for output to this function.		TJB
   2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.	TJB
   2006-Dec-20 Modified iteration loop variables to be more intuitive.	TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
-	      main subroutine, rather than ending the simulation.   GCT/KAC
-  24-Apr-07 Features included for IMPLICIT frozen soils option. JCA
+	      main subroutine, rather than ending the simulation.	GCT/KAC
+  24-Apr-07 Features included for IMPLICIT frozen soils option.		JCA
 	    (passing nrecs to  calc_surf_energy_bal)
   2007-Jul-03 Added iter_snow, iter_bare_energy, and iter_snow_energy
 	      structures so that canopy/understory iterations don't
@@ -122,6 +122,10 @@ int surface_fluxes(char                 overstory,
 	      for earlier bands was always overwritten by the value
 	      of moist computed for the final band (even if the final
 	      band had 0 area).						KAC via TJB
+  2008-Oct-23 In call to CalcBlowing(), replaced
+	        veg_lib[iveg].displacement[dmy[rec].month-1] and
+	        veg_lib[iveg].roughness[dmy[rec].month-1] with
+	      *displacement and *roughness.				LCB via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -438,8 +442,7 @@ int surface_fluxes(char                 overstory,
 						ref_height[2], step_snow.depth,
 						lag_one, sigma_slope,
 						step_snow.surf_temp, iveg, Nveg, fetch,
-						veg_lib[iveg].displacement[dmy[rec].month-1],
-						veg_lib[iveg].roughness[dmy[rec].month-1],
+						displacement[1], roughness[1],
 						&step_snow.transport);
       if ( (int)step_snow.blowing_flux == ERROR ) {
         return ( ERROR );

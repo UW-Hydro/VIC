@@ -32,6 +32,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	      to count rootzone and BLOWING fields. Also tests for
 	      fetch < 1.						GCT
   2007-Oct-31 Added missing brackets in if(options.GLOBAL_LAI) block.	TJB
+  2008-Oct-23 Added blocks to free vegarr[].				LCB via TJB
 **********************************************************************/
 {
 
@@ -43,7 +44,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 #endif
 
   veg_con_struct *temp;
-  int             vegcel, i, j, vegetat_type_num, skip, veg_class;
+  int             vegcel, i, j, k, vegetat_type_num, skip, veg_class;
   int             MaxVeg;
   int             NF, NTOT;
   float           depth_sum;
@@ -179,6 +180,9 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
+    for(k=0; k<NF; k++)
+      free(vegarr[k]);
+
     if ( options.GLOBAL_LAI ) {
       // Read the LAI line
       if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
@@ -186,6 +190,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         nrerror(ErrStr);
       }      
       NF = 0;
+      vegarr[NF] = calloc( 500, sizeof(char));      
       strcpy(tmpline, line);
       ttrim( tmpline );
       token = strtok (tmpline, delimiters); 
@@ -209,6 +214,9 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
     }
+    for(k=0; k<NF; k++)
+      free(vegarr[k]);
+
   }
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);

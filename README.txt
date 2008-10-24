@@ -349,6 +349,29 @@ Error in computation of initial water storage for DIST_PRCP = TRUE
 	resulting in twice the storage as actually present.			TJB
 
 
+Fixed various issues with uninitialized variables, un-freed arrays, NaN's, etc.
+
+	Files Affected:
+
+	dist_prec.c
+	put_data.c
+	read_vegparam.c
+	runoff.c
+	surface_fluxes.c
+	vicNl.h
+
+	Description:
+
+	put_data() was attempting to return an ErrorFlag but it was defined
+	as type int.  Therefore, changed the type of put_data() and changed
+	the call to put_data() in dist_prec.c.  read_vegparam() allocated
+	but never freed a temporary array vegarr[].  This was fixed.
+	In runoff(), top_moist could sometimes exceed top_max_moist due
+	to rounding errors, leading to NaN's in i_0 and A_0.  surface_fluxes()
+	was sending incorrectly-indexed displacement and roughness values to
+	CalcBlowingSnow().  These have all been fixed.		LCB via TJB
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r3 to VIC 4.1.0 beta r4 *****
 --------------------------------------------------------------------------------

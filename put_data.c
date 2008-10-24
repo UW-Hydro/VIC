@@ -4,7 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-void put_data(dist_prcp_struct  *prcp,
+int  put_data(dist_prcp_struct  *prcp,
 	      atmos_data_struct *atmos,
               soil_con_struct   *soil_con,
 	      veg_con_struct    *veg_con,
@@ -80,6 +80,8 @@ void put_data(dist_prcp_struct  *prcp,
 	      assignment.						LCB via TJB
   2008-Sep-09 Check to make sure that area > 0.0 when checking to see
 	      if ice area > sarea.					LCB via TJB
+  2008-Oct-23 Changed data type of put_data() to be int so that it
+	      can return ErrorFlag.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;

@@ -46,7 +46,10 @@
   2007-Aug-22 Made calc_water_balance_error  type double.		JCA
   2007-Nov-06 Moved get_dist() from LAKE.h to this file.		JCA
   2008-Feb-17 Changed argument list for snow_density().			KMA via TJB
-  2008-Apr-21 Added snow depth and albedo to snow_albedo() argument list.	KAC via TJB
+  2008-Apr-21 Added snow depth and albedo to snow_albedo() argument
+	      list.							KAC via TJB
+  2008-Oct-23 Modified put_data() to be type int, so that it can
+	      return an error status.					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -346,7 +349,7 @@ double penman(double, double, double, double, double, double, double,
 void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
 			   soil_con_struct *, double *, double *); 
 double priestley(double, double);
-void   put_data(dist_prcp_struct *, atmos_data_struct *,
+int    put_data(dist_prcp_struct *, atmos_data_struct *,
 		soil_con_struct *, veg_con_struct *,
                 lake_con_struct *, out_data_file_struct *,
 		out_data_struct *, save_data_struct *,

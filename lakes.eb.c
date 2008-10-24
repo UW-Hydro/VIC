@@ -317,11 +317,11 @@ int solve_lake(double             snow,
 
   Modifications:
   2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
-	      guarantees that it is initialized for all cases.  TJB
+	      guarantees that it is initialized for all cases.		TJB
   2006-Nov-15 Convert swq and surf_water from mm over lake to mm over ice
 	      fraction at beginning of function; this was needed to avoid
 	      a water budget error since swq and surf_water were being
-	      converted to mm over lake at end of the function.  TJB
+	      converted to mm over lake at end of the function.		TJB
   2007-Apr-21 Added initialization of energy_ice_melt_bot and qf for case
 	      in which fracprv >= FRACLIM but hice == 0.0.		TJB
   2007-Apr-23 Added initialization of lake_energy->Tsurf.		TJB
@@ -329,6 +329,10 @@ int solve_lake(double             snow,
 	      Lake ice now limited by available lake water.		LCB via TJB
   2008-Apr-21 Corrected omissions in previous mods.  Also added code to
 	      handle previously-unhandled case in deltaH computation.	TJB
+  2008-Oct-23 Fixed problems with usage of uninitialized variables.	LCB via TJB
+  2008-Oct-23 Deleted call to ice_depth() in section 11, since it
+	      wasn't working correctly and wasn't necessary.  Now,
+	      the reported ice depth is the average over the lake.	LCB via TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -380,6 +384,7 @@ int solve_lake(double             snow,
   double qf;
   double inputs, outputs, internal, phasechange;
   double new_ice_water_eq;
+  double temp_refreeze_energy;
   
   /**********************************************************************
    * 1. Initialize variables.
@@ -397,7 +402,7 @@ int solve_lake(double             snow,
   energy_out_bottom = energy_out_bottom_ice = 0.0;
   lake_snow->vapor_flux=0.0;
   lake_energy->Tsurf = lake->temp[0];
-
+  temp_refreeze_energy = 0.0;
 
   if(lake->activenod > 0 || lake->areai > 0.0) {
 
@@ -513,8 +518,6 @@ int solve_lake(double             snow,
 					lake->volume-lake->ice_water_eq);
       if ( ErrorFlag == ERROR ) return (ERROR);
 
-        if ( ErrorFlag == ERROR ) return (ERROR);
-
       /* --------------------------------------------------------------------
        * Do the convective mixing of the lake water.
        * -------------------------------------------------------------------- */
@@ -523,6 +526,15 @@ int solve_lake(double             snow,
       tracer_mixer( T, &mixdepth, freezeflag, lake->surface, 
 		    lake->activenod, lake->dz, lake->surfdz, water_cp );
 
+      lake_energy->AtmosLatent      = ( 1. - fracprv ) * Qew;
+      lake_energy->AtmosSensible    = ( 1. - fracprv ) * Qhw;
+      lake_energy->NetLongAtmos     = ( 1. - fracprv ) * LWnetw;
+      lake_energy->NetShortAtmos    = ( 1. - fracprv ) * sw_water;
+      lake_energy->refreeze_energy  = energy_ice_formation*(1.-fracprv);
+      lake_energy->deltaH          *= ( 1. - fracprv );
+      lake_energy->grnd_flux        = -1.*(energy_out_bottom*(1.-fracprv));
+      lake_energy->Tsurf            = (1. - fracprv)*T[0];
+
     }          /* End of water fraction calculations. */
     else {
       // ice covers 100% of lake, reset open water fluxes
@@ -530,6 +542,16 @@ int solve_lake(double             snow,
       LWnetw = 0;
       Qew    = 0;
       Qhw    = 0;
+
+      lake_energy->AtmosLatent      = 0.0;
+      lake_energy->AtmosSensible    = 0.0;
+      lake_energy->NetLongAtmos     = 0.0;
+      lake_energy->NetShortAtmos    = 0.0;
+      lake_energy->refreeze_energy  = 0.0;
+      lake_energy->deltaH           = 0.0;
+      lake_energy->grnd_flux        = 0.0;
+      lake_energy->Tsurf            = 0.0;
+
     }
  
     /**********************************************************************
@@ -554,9 +576,10 @@ int solve_lake(double             snow,
 			    longin, air_density, pressure,  vpd,  vp, &lake->snowmlt, 
 			    &lake_energy->advection, &lake_energy->deltaCC, 
 			    &lake_energy->snow_flux, &Qei, &Qhi, &Qnet_ice, 
-			    &lake_energy->refreeze_energy, &LWneti, fracprv);
+			    &temp_refreeze_energy, &LWneti, fracprv);
       if ( ErrorFlag == ERROR ) return (ERROR);
 
+      lake_energy->refreeze_energy += temp_refreeze_energy*fracprv;
       lake->tempi = lake_snow->surf_temp;  
 
       /**********************************************************************
@@ -591,6 +614,18 @@ int solve_lake(double             snow,
 			    &lake->ice_water_eq, lake->volume-new_ice_water_eq, lake->surface[0]);
         if ( ErrorFlag == ERROR ) return (ERROR);
       }
+
+      lake_energy->AtmosLatent += fracprv * Qei;
+      lake_energy->advection       *= fracprv;
+      lake_energy->AtmosSensible    += fracprv * Qhi;
+      lake_energy->NetLongAtmos     += fracprv * LWneti;
+      lake_energy->NetShortAtmos    += fracprv * sw_ice;
+      lake_energy->deltaH          += fracprv*temphi;
+      lake_energy->deltaH          *= -1.;
+      lake_energy->grnd_flux  += -1.*(energy_out_bottom_ice*fracprv);
+      lake_energy->refreeze_energy += energy_ice_melt_bot;
+      lake_energy->Tsurf += fracprv*lake_snow->surf_temp;
+
     }
     else {
       /* No Lake Ice Fraction */
@@ -645,28 +680,7 @@ int solve_lake(double             snow,
     
     lake_energy->error = inputs - outputs - internal - phasechange;
     
-
-    lake_energy->AtmosLatent      = ( 1. - fracprv ) * Qew + fracprv * Qei; 
-    lake_energy->advection       *= fracprv;     
-    lake_energy->AtmosSensible    = ( 1. - fracprv ) * Qhw + fracprv * Qhi;
-    lake_energy->NetLongAtmos     = ( ( 1. - fracprv ) * LWnetw + fracprv 
-					* LWneti );
-    lake_energy->NetShortAtmos    = ( ( 1. - fracprv ) * sw_water 
-					+ fracprv * sw_ice );
-
-    lake_energy->refreeze_energy += energy_ice_melt_bot;
-    lake_energy->refreeze_energy *= fracprv;
-    lake_energy->refreeze_energy += energy_ice_formation*(1.-fracprv);
-
     lake_energy->snow_flux       = 0.0;
-    lake_energy->deltaH          *= ( 1. - fracprv );
-    lake_energy->deltaH          += fracprv*temphi;
-    lake_energy->deltaH          *= -1.;
-    lake_energy->deltaCC         = 0.0;
-    lake_energy->grnd_flux        = -1.*(energy_out_bottom*(1.-fracprv) +
-					   energy_out_bottom_ice*fracprv);
-
-    lake_energy->Tsurf = fracprv*lake_snow->surf_temp + (1. - fracprv)*T[0];
 
     lake_energy->error            = ( lake_energy->NetShortAtmos 
 				      + lake_energy->NetLongAtmos 
@@ -709,13 +723,7 @@ int solve_lake(double             snow,
     }
     
     if(lake->ice_water_eq > 0.0) {
-      if(fabs(fracprv-1.0) > FRACLIM ) {
-        lake->hice = (lake->ice_water_eq/lake->new_ice_area)*RHO_W/RHOICE;
-      }
-      else {
-	ErrorFlag = ice_depth(lake_con, lake->volume, lake->ice_water_eq, &(lake->hice));
-	if (ErrorFlag == ERROR) return(ERROR);
-      }	 
+      lake->hice = (lake->ice_water_eq/lake->new_ice_area)*RHO_W/RHOICE;
     }
     else
       lake->hice = 0.0;

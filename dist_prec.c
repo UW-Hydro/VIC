@@ -57,18 +57,19 @@ int  dist_prec(atmos_data_struct   *atmos,
   04-10-03 Modified to store STILL_STORM and DRY_TIME in the model
            statefile, so that full conditions will be preserved.  KAC
   01-Nov-04 Added support for state files containing SPATIAL_FROST and
-	    LAKE_MODEL state variables.				TJB
+	    LAKE_MODEL state variables.					TJB
   02-Feb-05 Modified to save state file at the end of the final timestep
 	    of the date indicated by STATEYEAR, STATEMONTH, and STATEDAY
-	    in the global parameter file.			TJB
+	    in the global parameter file.				TJB
   2005-Mar-24 Modified parameter list of put_data() to accomodate support
-	      for ALMA variables.				TJB
+	      for ALMA variables.					TJB
   2006-Sep-23 Implemented flexible output configuration; uses new out_data,
-	      out_data_files, and save_data structures. TJB
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+	      out_data_files, and save_data structures.			TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation. GCT/KAC
+              main subroutine, rather than ending the simulation.	GCT/KAC
+  2008-Oct-23 Modified call to put_data() to store ErrorFlag.		TJB
 
 **********************************************************************/
 
@@ -204,9 +205,9 @@ int  dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  put_data(prcp, atmos, soil_con, veg_con,
-	   lake_con, out_data_files, out_data, save_data,
-	   &dmy[rec], rec, options.Nnode);
+  ErrorFlag = put_data(prcp, atmos, soil_con, veg_con,
+	               lake_con, out_data_files, out_data, save_data,
+	               &dmy[rec], rec, options.Nnode);
 
 
   /************************************

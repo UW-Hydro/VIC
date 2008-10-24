@@ -135,6 +135,9 @@ int  runoff(layer_data_struct *layer_wet,
 	      residual.  This fix should set a reasonable lower bound
 	      and still ensure that no extra water is condensed out
 	      of the air simply to bring liquid water up to residual.	TJB
+  2008-Oct-23 Added check to make sure top_moist never exceeds
+	      top_max_moist; otherwise rounding errors could cause it
+	      to exceed top_max_moist and produce NaN's.		LCB via TJB
 
 
 **********************************************************************/
@@ -476,6 +479,7 @@ int  runoff(layer_data_struct *layer_wet,
 	  /** Runoff Calculations for Top Layer Only **/
 	  /** A and i_0 as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
 	  
+	  if(top_moist > top_max_moist) top_moist=top_max_moist;
 	  max_infil = (1.0+soil_con->b_infilt) * top_max_moist;
 	  
 	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);

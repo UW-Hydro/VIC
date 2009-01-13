@@ -1,4 +1,4 @@
-# README.txt - Release Notes
+# README.txt - VIC Model Release Notes
 #
 # $Id$
 #------------------------------------------------------------------------
@@ -21,6 +21,19 @@ Usage:
 	     <global_parameter_file> is a file that contains all needed model
 	     parameters as well as model option flags, and the names and
 	     locations of all other files.
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
+--------------------------------------------------------------------------------
+
+
+New Features:
+-------------
+
+
+Bug Fixes:
+----------
 
 
 --------------------------------------------------------------------------------

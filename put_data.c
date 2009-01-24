@@ -82,6 +82,14 @@ int  put_data(dist_prcp_struct  *prcp,
 	      if ice area > sarea.					LCB via TJB
   2008-Oct-23 Changed data type of put_data() to be int so that it
 	      can return ErrorFlag.					TJB
+  2009-Jan-12 Added a final return of (0) since the data type of put_data()
+	      is int rather than void.					TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
+	      surface and overstory values; changed AERO_COND
+	      and AERO_RESIST to track "scene" values.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -118,8 +126,11 @@ int  put_data(dist_prcp_struct  *prcp,
   double                  tmp_moist;
   double                  tmp_ice;
   double                  tmp_fract;
+  double                  tmp_cond1;
+  double                  tmp_cond2;
   double                  cv_baresoil;
   double                  cv_veg;
+  double                  cv_overstory;
   double                  cv_snow;
   double                  rad_temp;
   double                  surf_temp;
@@ -180,6 +191,7 @@ int  put_data(dist_prcp_struct  *prcp,
 
   cv_baresoil = 0;
   cv_veg = 0;
+  cv_overstory = 0;
   cv_snow = 0;
 
   // Initialize output data to zero
@@ -240,6 +252,16 @@ int  put_data(dist_prcp_struct  *prcp,
 	for(band=0;band<Nbands;band++) {
 	  if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
 
+            /** compute running totals of various landcovers **/
+            if ( veg < veg_con[0].vegetat_type_num )
+              cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
+            else
+              cv_baresoil += Cv * AreaFract[band] * TreeAdjustFactor[band];
+            if (overstory)
+              cv_overstory += Cv * AreaFract[band] * TreeAdjustFactor[band];
+            if (snow[veg][band].swq> 0.0)
+              cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
+
 	    tmp_evap = 0.0;
 	    for(index=0;index<options.Nlayer;index++)
 	      tmp_evap += cell[dist][veg][band].layer[index].evap;
@@ -289,16 +311,32 @@ int  put_data(dist_prcp_struct  *prcp,
 	      out_data[OUT_WDEW].data[0] += veg_var[dist][veg][band].Wdew 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
-            /** record aerodynamic conductance **/
-            if (cell[WET][veg][0].aero_resist_used > SMALL) {
-              out_data[OUT_AERO_COND].data[0] += (1/cell[WET][veg][0].aero_resist_used)
+            /** record aerodynamic conductance and resistance **/
+            if (cell[WET][veg][0].aero_resist_used[0] > SMALL) {
+              tmp_cond1 = (1/cell[WET][veg][0].aero_resist_used[0])
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
             else {
-              out_data[OUT_AERO_COND].data[0] = HUGE_RESIST;
-              out_data[OUT_AERO_RESIST].data[0] = cell[WET][veg][0].aero_resist_used;
+              tmp_cond1 = HUGE_RESIST;
             }
-	    
+            out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
+            if (overstory) {
+              if (cell[WET][veg][0].aero_resist_used[1] > SMALL) {
+                tmp_cond2 = (1/cell[WET][veg][0].aero_resist_used[1])
+                  * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+              }
+              else {
+                tmp_cond2 = HUGE_RESIST;
+              }
+              out_data[OUT_AERO_COND2].data[0] += tmp_cond2;
+            }
+            if (overstory) {
+              out_data[OUT_AERO_COND].data[0] += tmp_cond2;
+            }
+            else {
+              out_data[OUT_AERO_COND].data[0] += tmp_cond1;
+            }
+
 	    /** record layer moistures **/
 	    for(index=0;index<options.Nlayer;index++) {
 	      tmp_moist = cell[dist][veg][band].layer[index].moist;
@@ -406,7 +444,6 @@ int  put_data(dist_prcp_struct  *prcp,
           if(veg == veg_con[0].vegetat_type_num) {
             // landcover is bare soil
             out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-            cv_baresoil += AreaFract[band] * TreeAdjustFactor[band];
           }
           else {
             // landcover is vegetation
@@ -415,7 +452,6 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data[OUT_VEGT].data[0] += energy[veg][band].Tfoliage * Cv * AreaFract[band] * TreeAdjustFactor[band];
             else
               out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-            cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
           }
 
 	  /** record mean surface temperature [C]  **/
@@ -444,6 +480,17 @@ int  put_data(dist_prcp_struct  *prcp,
           else
             out_data[OUT_ALBEDO].data[0]    += energy[veg][band].AlbedoUnder
               * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//          if ( out_data[OUT_SHORTWAVE].data[0] > 0 )
+//            out_data[OUT_ALBEDO].data[0]    += ( out_data[OUT_SHORTWAVE].data[0] - energy[veg][band].NetShortAtmos ) / out_data[OUT_SHORTWAVE].data[0]
+//              * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//          else {
+//            if ( snow[veg][band].snow && overstory )
+//              out_data[OUT_ALBEDO].data[0]    += energy[veg][band].AlbedoOver
+//                * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//            else
+//              out_data[OUT_ALBEDO].data[0]    += energy[veg][band].AlbedoUnder
+//                * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//          }
 	  
 	  /** record latent heat flux **/
 	  out_data[OUT_LATENT].data[0]    -= energy[veg][band].AtmosLatent
@@ -499,7 +546,6 @@ int  put_data(dist_prcp_struct  *prcp,
               += snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
             out_data[OUT_SNOW_PACK_TEMP].data[0]
               += snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
-            cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
           }
 
 	  /** record canopy intercepted snow **/
@@ -513,13 +559,15 @@ int  put_data(dist_prcp_struct  *prcp,
 	    += snow[veg][band].melt * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snow cover fraction **/
-          if ( snow[veg][band].snow && overstory ) {
-            if ( snow[veg][band].snow_canopy > 0 )
-              out_data[OUT_SNOW_COVER].data[0] += 1. * Cv * AreaFract[band] * TreeAdjustFactor[band];
-          }
-          else
-            out_data[OUT_SNOW_COVER].data[0]
-              += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//          if ( snow[veg][band].snow && overstory ) {
+//            if ( snow[veg][band].snow_canopy > 0 )
+//              out_data[OUT_SNOW_COVER].data[0] += 1. * Cv * AreaFract[band] * TreeAdjustFactor[band];
+//          }
+//          else
+//            out_data[OUT_SNOW_COVER].data[0]
+//              += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          out_data[OUT_SNOW_COVER].data[0]
+            += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record snowpack cold content **/
 	  out_data[OUT_DELTACC].data[0]
@@ -632,6 +680,14 @@ int  put_data(dist_prcp_struct  *prcp,
             else
               out_data[OUT_ALBEDO_BAND].data[band]
 	        += energy[veg][band].AlbedoUnder * Cv;
+//          if ( out_data[OUT_SHORTWAVE].data[0] > 0 )
+//            out_data[OUT_ALBEDO_BAND].data[0]    += ( out_data[OUT_SHORTWAVE].data[0] - energy[veg][band].NetShortAtmos ) / out_data[OUT_SHORTWAVE].data[0] * Cv;
+//          else {
+//            if ( snow[veg][band].snow && overstory )
+//              out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoOver * Cv;
+//            else
+//              out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoUnder * Cv;
+//          }
 
 	    /** record band net latent heat flux **/
 	    out_data[OUT_LATENT_BAND].data[band]
@@ -672,6 +728,14 @@ int  put_data(dist_prcp_struct  *prcp,
       mu = 1;
       band = 0;
       veg = veg_con[0].vegetat_type_num + 1;
+      overstory = veg_lib[veg_con[veg].veg_class].overstory;
+ 
+      /** compute running totals of various landcovers **/
+      cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
+      if (overstory)
+        cv_overstory += Cv * AreaFract[band] * TreeAdjustFactor[band];
+      if (snow[veg][band].swq> 0.0)
+        cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       tmp_evap = lake_var.evapw * Clake;
 
@@ -711,22 +775,15 @@ int  put_data(dist_prcp_struct  *prcp,
 	}
       }
 
-      /** record aerodynamic conductivity **/
+      /** record aerodynamic conductance and resistance **/
       if (lake_var.aero_resist_used > SMALL) {
-        out_data[OUT_AERO_COND].data[0] += (1/lake_var.aero_resist_used) * Clake * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+        tmp_cond1 = (1/lake_var.aero_resist_used) * Clake * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
       }
       else {
-        out_data[OUT_AERO_COND].data[0] = HUGE_RESIST;
-        out_data[OUT_AERO_RESIST].data[0] = lake_var.aero_resist_used;
+        tmp_cond1 = HUGE_RESIST;
       }
-      if (cell[WET][veg][0].aero_resist_used > SMALL) {
-        out_data[OUT_AERO_COND].data[0] += (1/cell[WET][veg][0].aero_resist_used)
-              * Cv * mu * (1.-Clake) * AreaFract[band] * TreeAdjustFactor[band];
-      }
-      else {
-        out_data[OUT_AERO_COND].data[0] = HUGE_RESIST;
-        out_data[OUT_AERO_RESIST].data[0] = cell[WET][veg][0].aero_resist_used;
-      }
+      out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
+      out_data[OUT_AERO_COND].data[0] += tmp_cond1;
 
       /** record lake moistures **/
       out_data[OUT_LAKE_MOIST].data[0] = (lake_var.volume / lake_con->basin[0]) * 1000. * Cv; // mm over gridcell
@@ -779,16 +836,7 @@ int  put_data(dist_prcp_struct  *prcp,
       surf_temp = lake_var.temp[0];
 
       /** record landcover temperature **/
-      if(veg == veg_con[0].vegetat_type_num) {
-        // landcover is bare soil
-        out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        cv_baresoil += AreaFract[band] * TreeAdjustFactor[band];
-      }
-      else {
-        // landcover is vegetation
-        out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
-      }
+      out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
       /** record net shortwave radiation **/
       out_data[OUT_NET_SHORT].data[0] += energy[veg][band].NetShortAtmos * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -853,7 +901,6 @@ int  put_data(dist_prcp_struct  *prcp,
           += snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
         out_data[OUT_SNOW_PACK_TEMP].data[0]
           += snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
       }
 
       /** record snowpack cold content **/
@@ -925,6 +972,9 @@ int  put_data(dist_prcp_struct  *prcp,
   if (cv_veg > 0) {
     out_data[OUT_VEGT].data[0] /= cv_veg;
   }
+  if (cv_overstory > 0) {
+    out_data[OUT_AERO_COND2].data[0] /= cv_overstory;
+  }
   if (cv_snow > 0) {
     out_data[OUT_SALBEDO].data[0] /= cv_snow;
     out_data[OUT_SNOW_SURF_TEMP].data[0] /= cv_snow;
@@ -935,8 +985,23 @@ int  put_data(dist_prcp_struct  *prcp,
   out_data[OUT_RAD_TEMP].data[0] = pow(out_data[OUT_RAD_TEMP].data[0],0.25);
 
   // Aerodynamic conductance and resistance
-  if (out_data[OUT_AERO_COND].data[0] < HUGE_RESIST) {
+  if (out_data[OUT_AERO_COND1].data[0] > SMALL) {
+    out_data[OUT_AERO_RESIST1].data[0] = 1 / out_data[OUT_AERO_COND1].data[0];
+  }
+  else {
+    out_data[OUT_AERO_RESIST1].data[0] = HUGE_RESIST;
+  }
+  if (out_data[OUT_AERO_COND2].data[0] > SMALL) {
+    out_data[OUT_AERO_RESIST2].data[0] = 1 / out_data[OUT_AERO_COND2].data[0];
+  }
+  else {
+    out_data[OUT_AERO_RESIST2].data[0] = HUGE_RESIST;
+  }
+  if (out_data[OUT_AERO_COND].data[0] > SMALL) {
     out_data[OUT_AERO_RESIST].data[0] = 1 / out_data[OUT_AERO_COND].data[0];
+  }
+  else {
+    out_data[OUT_AERO_RESIST].data[0] = HUGE_RESIST;
   }
 
   /*****************************************
@@ -1014,6 +1079,9 @@ int  put_data(dist_prcp_struct  *prcp,
       }
     }
   }
+  out_data[OUT_AERO_RESIST].aggdata[0] = 1/out_data[OUT_AERO_COND].aggdata[0];
+  out_data[OUT_AERO_RESIST1].aggdata[0] = 1/out_data[OUT_AERO_COND1].aggdata[0];
+  out_data[OUT_AERO_RESIST2].aggdata[0] = 1/out_data[OUT_AERO_COND2].aggdata[0];
 
   /********************
     Output procedure
@@ -1089,5 +1157,7 @@ int  put_data(dist_prcp_struct  *prcp,
     }
 
   } // End of output procedure
+
+  return (0);
 
 }

@@ -71,6 +71,8 @@ int main(int argc, char *argv[])
   2008-May-05 Added prcp fraction (mu) to initial water storage
 	      computation.  This solves water balance errors for the
 	      case where DIST_PRCP is TRUE.				TJB
+  2009-Jan-16 Added soil_con.avgJulyAirTemp to argument list of
+	      initialize_atmos().					TJB
 **********************************************************************/
 {
 
@@ -280,7 +282,8 @@ int main(int argc, char *argv[])
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 
-		       soil_con.rough, soil_con.Tfactor, 
+		       soil_con.rough, soil_con.avgJulyAirTemp,
+		       soil_con.Tfactor, 
 #if OUTPUT_FORCE
 		       soil_con.AboveTreeLine, out_data_files, out_data); 
 #else /* OUTPUT_FORCE */

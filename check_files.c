@@ -9,13 +9,13 @@ void check_files(filep_struct     *filep,
 /**********************************************************************
 	check_files		Dag Lohmann		January 1996
 
-  This routine opens files for soil, vegitation, and global parameters.
+  This routine opens files for soil, vegetation, and global parameters.
 
   Modifcations:
   02-27-01 Added controls for lake model parameter file    KAC
-  2005-Apr-13 Added logic for OUTPUT_FORCE option.		TJB
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
+  2005-Apr-13 Added logic for OUTPUT_FORCE option.			TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
 
 **********************************************************************/
 {

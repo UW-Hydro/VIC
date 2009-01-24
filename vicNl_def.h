@@ -45,6 +45,13 @@
   2008-Apr-21 Added SNOW_DENSITY option.				TJB
   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the soil
 	      temperature in the wetland fraction of the grid cell.	LCB via TJB
+  2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
+	      surface and overstory values; changed AERO_COND
+	      and AERO_RESIST to track "scene" values.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -76,6 +83,12 @@
 /***** Baseflow parametrizations *****/
 #define ARNO        0
 #define NIJSSEN2001 1
+
+/***** Aerodynamic Resistance options *****/
+#define AR_406      0
+#define AR_406_FULL 1
+#define AR_410      2
+#define AR_COMBO    3
 
 /***** Time Constants *****/
 #define DAYS_PER_YEAR 365.
@@ -240,13 +253,13 @@
 #define OUT_TRANSP_VEG      41  /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_WATER_ERROR     42  /* water budget error [mm] */
 // Energy Balance Terms - state variables
-#define OUT_ALBEDO          43  /* albedo [fraction] */
+#define OUT_ALBEDO          43  /* average surface albedo [fraction] */
 #define OUT_BARESOILT       44  /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_FDEPTH          45  /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
 #define OUT_LAKE_ICE_TEMP   46  /* temperature of lake ice [K] */
 #define OUT_LAKE_SURF_TEMP  47  /* lake surface temperature [K] */
 #define OUT_RAD_TEMP        48  /* average radiative surface temperature [K] */
-#define OUT_SALBEDO         49  /* snow albedo [fraction] */
+#define OUT_SALBEDO         49  /* snow pack albedo [fraction] */
 #define OUT_SNOW_PACK_TEMP  50  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SNOW_SURF_TEMP  51  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SOIL_TEMP       52  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
@@ -256,7 +269,7 @@
 #define OUT_TDEPTH          56  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
 #define OUT_VEGT            57  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
 // Energy Balance Terms - fluxes
-#define OUT_ADV_SENS        58 /* net sensible flux advected to snow pack [W/m2] */
+#define OUT_ADV_SENS        58  /* net sensible flux advected to snow pack [W/m2] */
 #define OUT_ADVECTION       59  /* advected energy [W/m2] */
 #define OUT_DELTACC         60  /* rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
 #define OUT_DELTAH          61  /* rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
@@ -274,46 +287,50 @@
 #define OUT_SENSIBLE        73  /* net upward sensible heat flux [W/m2] */
 #define OUT_SNOW_FLUX       74  /* energy flux through snow pack [W/m2] */
 // Miscellaneous Terms
-#define OUT_AERO_RESIST     75  /* canopy aerodynamic resistance [s/m] */
-#define OUT_AERO_COND       76  /* canopy aerodynamic conductance [m/s] */
-#define OUT_AIR_TEMP        77  /* air temperature [C] (ALMA_OUTPUT: [K])*/
-#define OUT_DENSITY         78  /* near-surface atmospheric density [kg/m3]*/
-#define OUT_LONGWAVE        79  /* incoming longwave [W/m2] */
-#define OUT_PRESSURE        80  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
-#define OUT_QAIR            81  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID       82  /* relative humidity [fraction]*/
-#define OUT_SHORTWAVE       83  /* incoming shortwave [W/m2] */
-#define OUT_SURF_COND       84  /* surface conductance [m/s] */
-#define OUT_VP              85  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND            86  /* near surface wind speed [m/s] */
+#define OUT_AERO_COND       75  /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribute surface conductance) */
+#define OUT_AERO_COND1      76  /* surface aerodynamic conductance [m/s] */
+#define OUT_AERO_COND2      77  /* overstory aerodynamic conductance [m/s] */
+#define OUT_AERO_RESIST     78  /* "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
+#define OUT_AERO_RESIST1    79  /* surface aerodynamic resistance [s/m] */
+#define OUT_AERO_RESIST2    80  /* overstory aerodynamic resistance [s/m] */
+#define OUT_AIR_TEMP        81  /* air temperature [C] (ALMA_OUTPUT: [K])*/
+#define OUT_DENSITY         82  /* near-surface atmospheric density [kg/m3]*/
+#define OUT_LONGWAVE        83  /* incoming longwave [W/m2] */
+#define OUT_PRESSURE        84  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+#define OUT_QAIR            85  /* specific humidity [kg/kg] */
+#define OUT_REL_HUMID       86  /* relative humidity [fraction]*/
+#define OUT_SHORTWAVE       87  /* incoming shortwave [W/m2] */
+#define OUT_SURF_COND       88  /* surface conductance [m/s] */
+#define OUT_VP              89  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND            90  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND        87  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND       88  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND          89  /* albedo [fraction] */
-#define OUT_DELTACC_BAND         90  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND       91  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND         92  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND          93  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND      94  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND     95  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND        96  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND       97  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND     98  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND        99  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    100  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     101  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     102  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      103  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      104  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     105  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     106  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            107  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND        91  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND       92  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND          93  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND         94  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND       95  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND         96  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND          97  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND      98  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND     99  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       100  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      101  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    102  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       103  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    104  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     105  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     106  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      107  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      108  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     109  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     110  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            111  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          108  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          109  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            110  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           111  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          112  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          113  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            114  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           115  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/
@@ -384,7 +401,29 @@ typedef struct {
 typedef struct {
 
   // simulation modes
+  int    AboveTreelineVeg; /* Default veg type to use above treeline;
+			      Negative number indicates bare soil. */
+  char   AERO_RESIST_CANSNOW; /* "AR_406" = multiply aerodynamic resistance
+					    by 10 for latent heat but not
+					    for sensible heat (as in
+					    VIC 4.0.6); do NOT apply stability
+					    correction
+				 "AR_406_FULL" = multiply aerodynamic resistance
+					    by 10 for latent heat but not
+					    for sensible heat (as in VIC 4.0.6);
+					    DO apply stability correction
+				 "AR_410" = do not multiply aerodynamic
+					    resistance by 10 in snow-filled
+					    canopy (as in VIC 4.1.0);
+					    DO apply stability correction
+				 "AR_COMBO" = multiply aerodynamic resistance
+					    by 10 in snow-filled canopy for
+					    BOTH latent AND sensible heat
+					    computations AND apply stability
+					    correction; i.e. 406_FULL AND 410 */
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
+  char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
+			      vegetation from higher elevations */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
@@ -393,6 +432,9 @@ typedef struct {
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
+  char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
+			        then average July air temperature will be read
+			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
@@ -634,6 +676,7 @@ typedef struct {
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
   double   avg_temp;                  /* average soil temperature (C) */
+  double   avgJulyAirTemp;            /* Average July air temperature (C) */
   double   b_infilt;                  /* infiltration parameter */
   double   beta[MAX_NODES];           /* thermal solution constant */
   double   bubble[MAX_LAYERS];        /* bubbling pressure, HBH 5.15 (cm) */
@@ -679,8 +722,7 @@ typedef struct {
 					 elevation (fract) */
   double  *Tfactor;                   /* Change in temperature due to 
 					 elevation (C) */
-  char    *AboveTreeLine;             // Flag to indicate if band is above 
-                                      // the treeline
+  char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];
   double **ufwc_table_node[MAX_NODES]; 
@@ -831,17 +873,15 @@ typedef struct {
   ******************************************************************/
 typedef struct {
   double aero_resist[3];               /* aerodynamic resistance (s/m) 
-					  [0] = over vegetation or bare soil 
-					  [1] = over snow-filled overstory
-					  [2] = over snow */
-  double aero_resist_used;             /* The (stability-corrected) aerodynamic
+					  [0] = over non-overstory vegetation or bare soil 
+					  [1] = over overstory and non-overstory vegetation
+					  [2] = over snow pack
+					  i.e. for non-overstory vegetation, elements [0] and [1] are the same */
+  double aero_resist_used[2];          /* The (stability-corrected) aerodynamic
                                           resistance (s/m) that was actually used
-                                          in flux calculations.  For cases in which
-                                          a cell uses 2 different resistances for
-                                          flux computations in the same time step
-                                          (i.e. cell contains overstory and snow
-                                          is present on the ground), aero_resist_used
-                                          will contain the snow pack's resistance. */
+                                          in flux calculations.
+					  [0] = surface (bare soil, non-overstory veg, or snow pack)
+					  [1] = overstory */
   double baseflow;                     /* baseflow from current cell (mm/TS) */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */

@@ -29,6 +29,9 @@ out_data_struct *create_output_list() {
   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the
 	      soil temperature in the wetland fraction of the
 	      grid cell.					LCB via TJB
+  2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
+	      surface and overstory values; changed AERO_COND
+	      and AERO_RESIST to track "scene" values.		TJB
 *************************************************************/
 
   extern option_struct options;
@@ -123,8 +126,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SNOW_FLUX].varname,"OUT_SNOW_FLUX");             /* energy flux through snow pack [W/m2] */
 
   // Miscellaneous Terms
-  strcpy(out_data[OUT_AERO_RESIST].varname,"OUT_AERO_RESIST");         /* canopy aerodynamic resistance [s/m] */
-  strcpy(out_data[OUT_AERO_COND].varname,"OUT_AERO_COND");             /* canopy aerodynamic conductance [m/s] */
+  strcpy(out_data[OUT_AERO_COND].varname,"OUT_AERO_COND");             /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribue surface conductance) */
+  strcpy(out_data[OUT_AERO_COND1].varname,"OUT_AERO_COND1");           /* surface aerodynamic conductance [m/s] */
+  strcpy(out_data[OUT_AERO_COND2].varname,"OUT_AERO_COND2");           /* overstory aerodynamic conductance [m/s] */
+  strcpy(out_data[OUT_AERO_RESIST].varname,"OUT_AERO_RESIST");         /* "scene" aerodynamic resistance [s/m] (tiles with overstory contribute overstory resistance; others contribue surface resistance)*/
+  strcpy(out_data[OUT_AERO_RESIST1].varname,"OUT_AERO_RESIST1");       /* surface aerodynamic resistance [m/s] */
+  strcpy(out_data[OUT_AERO_RESIST2].varname,"OUT_AERO_RESIST2");       /* overstory aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AIR_TEMP].varname,"OUT_AIR_TEMP");               /* air temperature [C] */
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */

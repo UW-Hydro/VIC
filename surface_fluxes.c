@@ -126,6 +126,9 @@ int surface_fluxes(char                 overstory,
 	        veg_lib[iveg].displacement[dmy[rec].month-1] and
 	        veg_lib[iveg].roughness[dmy[rec].month-1] with
 	      *displacement and *roughness.				LCB via TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -247,6 +250,7 @@ int surface_fluxes(char                 overstory,
   // cell structure
   double                 store_layerevap[2][MAX_LAYERS];
   double                 store_ppt[2];
+  double                 store_aero_cond_used[2];
 
   // Structures holding values for current snow step
   energy_bal_struct      snow_energy;
@@ -263,6 +267,8 @@ int surface_fluxes(char                 overstory,
   veg_var_struct         iter_bare_veg_var[2];
   snow_data_struct       iter_snow;
   layer_data_struct      iter_layer[2][MAX_LAYERS];
+  double                 iter_aero_resist[3];
+  double                 iter_aero_resist_used[2];
 
   // handle bisection of understory solution
   double store_tol_under;
@@ -395,6 +401,8 @@ int surface_fluxes(char                 overstory,
   store_ppt[WET]          = 0;
   store_ppt[DRY]          = 0;
   step_prec[DRY]          = 0;
+  store_aero_cond_used[0] = 0;
+  store_aero_cond_used[1] = 0;
   (*snow_inflow)          = 0;
   N_steps                 = 0;
       
@@ -529,6 +537,11 @@ int surface_fluxes(char                 overstory,
 	  for ( lidx = 0; lidx < Nlayers; lidx ++ ) 
 	    iter_layer[dist][lidx].evap = 0;
         }
+        iter_aero_resist[0] = aero_resist[0];
+        iter_aero_resist[1] = aero_resist[1];
+        iter_aero_resist[2] = aero_resist[2];
+        iter_aero_resist_used[0] = aero_resist_used[0];
+        iter_aero_resist_used[1] = aero_resist_used[1];
 	iter_snow.canopy_vapor_flux = 0;
 	iter_snow.vapor_flux = 0;
 	iter_snow.surface_flux = 0;
@@ -546,7 +559,7 @@ int surface_fluxes(char                 overstory,
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
-			       aero_resist, aero_resist_used, &coverage, &delta_coverage, 
+			       iter_aero_resist, iter_aero_resist_used, &coverage, &delta_coverage, 
 			       &delta_snow_heat, displacement, 
 			       gauge_correction, &step_melt_energy, 
 			       &step_out_prec, &step_out_rain, &step_out_snow,
@@ -595,7 +608,7 @@ int surface_fluxes(char                 overstory,
 				     iter_snow.coverage, 
 				     (step_snow.depth + iter_snow.depth) / 2., 
 				     BareAlbedo, surf_atten, 
-				     iter_snow.vapor_flux, aero_resist, aero_resist_used,
+				     iter_snow.vapor_flux, iter_aero_resist, iter_aero_resist_used,
 				     displacement, &step_melt, step_ppt, 
 				     rainfall, ref_height, roughness, 
 				     snowfall, wind, root, INCLUDE_SNOW, 
@@ -633,7 +646,7 @@ int surface_fluxes(char                 overstory,
 					  iter_bare_energy.NetLongUnder, 
 					  iter_snow_energy.NetShortOver, 
 					  iter_bare_energy.NetShortUnder, 
-					  aero_resist[1], Tair, 
+					  iter_aero_resist_used[1], Tair, 
 					  atmos->density[hidx], 
 					  atmos->vp[hidx], atmos->vpd[hidx], 
 					  &iter_bare_energy.AtmosError, 
@@ -734,6 +747,8 @@ int surface_fluxes(char                 overstory,
 
       store_ppt[dist] += step_ppt[dist];
     }
+    store_aero_cond_used[0] += 1/iter_aero_resist_used[0];
+    store_aero_cond_used[1] += 1/iter_aero_resist_used[1];
 
     if(iveg != Nveg) 
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
@@ -900,6 +915,8 @@ int surface_fluxes(char                 overstory,
     evap_prior_dry[lidx] = store_layerevap[DRY][lidx];
 #endif
   }
+  aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
+  aero_resist_used[1] = 1/(store_aero_cond_used[1]/(double)N_steps);
 
   /********************************************************
     Compute Runoff, Baseflow, and Soil Moisture Transport

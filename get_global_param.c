@@ -75,6 +75,10 @@ global_param_struct get_global_param(filenames_struct *names,
   2008-Mar-12 Relocated code validating IMPLICIT and EXCESS_ICE options.	TJB
   2008-Apr-21 Added SNOW_ALBEDO option.						KAC via TJB
   2008-Apr-21 Added SNOW_DENSITY option.					TJB
+  2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -336,6 +340,13 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;
         else options.SNOW_DENSITY = DENS_BRAS;
       }
+      else if (strcasecmp("AERO_RESIST_CANSNOW", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("AR_406",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_406;
+        else if(strcasecmp("AR_406_FULL",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_406_FULL;
+        else if(strcasecmp("AR_410",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_410;
+        else if(strcasecmp("AR_COMBO",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_COMBO;
+      }
       else if(strcasecmp("SNOW_STEP",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.SNOW_STEP);
       }
@@ -418,6 +429,19 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("STATEDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.stateday);
+      }
+      else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.COMPUTE_TREELINE=FALSE;
+        else {
+          options.COMPUTE_TREELINE = TRUE;
+          options.AboveTreelineVeg = atoi( flgstr );
+        }
+      }
+      else if(strcasecmp("JULY_TAVG_SUPPLIED",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
+	else options.JULY_TAVG_SUPPLIED=TRUE;
       }
       else if(strcasecmp("LAKES",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
@@ -870,6 +894,10 @@ global_param_struct get_global_param(filenames_struct *names,
     }
     if (global.resolution > 360 && !options.EQUAL_AREA) {
       sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
+      nrerror(ErrStr);
+    }
+    if (options.COMPUTE_TREELINE) {
+      sprintf(ErrStr, "LAKES = TRUE and COMPUTE_TREELINE = TRUE are incompatible options.");
       nrerror(ErrStr);
     }
   }

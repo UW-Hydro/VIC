@@ -50,6 +50,8 @@
 	      list.							KAC via TJB
   2008-Oct-23 Modified put_data() to be type int, so that it can
 	      return an error status.					TJB
+  2009-Jan-16 Added avgJulyAirTemp to argument list of
+	      compute_treeline().					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -163,7 +165,7 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
                                              double *,
 #endif
 					     int);
-void   compute_treeline(atmos_data_struct *, dmy_struct *, double *, char *);
+void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
 out_data_struct *create_output_list();
 
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
@@ -286,7 +288,7 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
-                        double *, 
+                        double, double *, 
 #if OUTPUT_FORCE
 			char *, out_data_file_struct *, out_data_struct *);
 #else

@@ -27,13 +27,11 @@ PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if 
 MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 CONTINUEONERROR FALSE   # TRUE = continue simulation on cell error
-
-#######################################################################
-# Simulation Parameters for 4.1.0
-#######################################################################
+COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
+AERO_RESIST_CANSNOW	AR_X10	# Options for aerodynamic resistance in snow-filled canopy.  AR_X10 = apply stability correction AND multiply by 10; AR_406 = multiply by 10 but do NOT apply stability correction; AR_410 = apply stability correction but do NOT multiply by 10; default = AR_X10
 BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
-RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE)
+RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 
 #######################################################################
 # State Files and  Parameters
@@ -86,16 +84,13 @@ NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes 
 SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
+JULY_TAVG_SUPPLIED	FALSE	# TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
 ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 GLOBAL_LAI 	FALSE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
-
-#######################################################################
-# Land Surface Files and Parameters for 4.1.0
-#######################################################################
 LAKES		(put lake parameter path/file here)	# Lake parameter path/file
 LAKE_PROFILE	FALSE	# TRUE = User-specified depth-area parameters in lake parameter file; FALSE = VIC computes a parabolic depth-area profile
 

@@ -86,6 +86,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2007-Sep-14 Clarified description in comment before BASEFLOW check.	TJB
   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
 	      here.							TJB
+  2009-Jan-12 Added logic for JULY_TAVG_SUPPLIED.			TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -409,7 +410,22 @@ soil_con_struct read_soilparam(FILE *soilparam,
       sscanf(token, "%lf", &init_ice_fract[layer]);
     }
 #endif // EXCESS_ICE
-    
+ 
+    /* If specified, read cell average July air temperature in the final
+       column of the soil parameter file */
+    if (options.JULY_TAVG_SUPPLIED) {
+      if( ( token = strtok (NULL, delimiters)) == NULL ){
+        sprintf(ErrStr,"ERROR: Can't find values for average July Tair in soil file\n");
+        nrerror(ErrStr);
+      }  
+      sscanf(token, "%lf", &tempdbl);
+      temp.avgJulyAirTemp = tempdbl;
+    }
+
+    /*******************************************
+      End of soil parameters for this grid cell
+    *******************************************/
+
 #if !OUTPUT_FORCE
     /*******************************************
       Compute Soil Layer Properties

@@ -35,6 +35,8 @@ void display_current_settings(int                 mode,
   2007-Aug-08 Added EXCESS_ICE option.				JCA
   2008-Apr-21 Added SNOW_ALBEDO option.				KAC via TJB
   2008-Apr-21 Added SNOW_DENSITY option.			TJB
+  2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
+  2009-Jan-16 Added AERO_RESIST_CANSNOW option.			TJB
 **********************************************************************/
 {
 
@@ -96,11 +98,6 @@ void display_current_settings(int                 mode,
   fprintf(stdout,"CLOSE_ENERGY\t\tTRUE\n");
 #else
   fprintf(stdout,"CLOSE_ENERGY\t\tFALSE\n");
-#endif
-#if COMPUTE_TREELINE
-  fprintf(stdout,"COMPUTE_TREELINE\tTRUE\n");
-#else
-  fprintf(stdout,"COMPUTE_TREELINE\tFALSE\n");
 #endif
 #if LOW_RES_MOIST
   fprintf(stdout,"LOW_RES_MOIST\t\tTRUE\n");
@@ -233,6 +230,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"MOISTFRACT\t\tTRUE\n");
   else
     fprintf(stdout,"MOISTFRACT\t\tFALSE\n");
+  if (options.COMPUTE_TREELINE)
+    fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
+  else
+    fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
   if (options.CONTINUEONERROR)
     fprintf(stdout,"CONTINUEONERROR\t\tTRUE\n");
   else
@@ -252,6 +253,14 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"SNOW_DENSITY\t\tDENS_BRAS\n");
   else if (options.SNOW_DENSITY == DENS_SNTHRM)
     fprintf(stdout,"SNOW_DENSITY\t\tDENS_SNTHRM\n");
+  if (options.AERO_RESIST_CANSNOW == AR_406)
+    fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_406\n");
+  else if (options.AERO_RESIST_CANSNOW == AR_406_FULL)
+    fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_406_FULL\n");
+  else if (options.AERO_RESIST_CANSNOW == AR_410)
+    fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_410\n");
+  else if (options.AERO_RESIST_CANSNOW == AR_COMBO)
+    fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_COMBO\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Forcing Data:\n");
@@ -293,6 +302,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"BASEFLOW\t\tARNO\n");
   else if (options.BASEFLOW == NIJSSEN2001)
     fprintf(stdout,"BASEFLOW\t\tNIJSSEN2001\n");
+  if (options.JULY_TAVG_SUPPLIED)
+    fprintf(stdout,"JULY_TAVG_SUPPLIED\t\tTRUE\n");
+  else
+    fprintf(stdout,"JULY_TAVG_SUPPLIED\t\tFALSE\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Veg Data:\n");

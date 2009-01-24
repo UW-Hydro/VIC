@@ -31,6 +31,151 @@ Usage:
 New Features:
 -------------
 
+Modified reporting of aerodynamic resistance in output files.
+
+	Files Affected:
+
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	output_list_utils.c
+	put_data.c
+	surface_fluxes.c
+	vicNl_def.h
+	wetland_energy.c
+
+	Description:
+
+	Replaced the existing variables aero_resist_used and Ra_used with
+	arrays of two elements each; [0] corresponds to surface values
+	(bare soil or non-overstory veg; with snow or snow-free) and [1]
+	corresponds to overstory or non-overstory veg.  For non-overstory
+	veg, elements [0] and [1] are the same.
+
+	Added the following output variables to store the average aerodynamic
+	conductance and resistance of the grid cell corresponding to elements
+	[0] and [1], respectively: OUT_AERO_COND1, OUT_AERO_COND2,
+	OUT_AERO_RESIST1, and OUT_AERO_RESIST2.  Changed the computation
+	of OUT_AERO_COND and OUT_AERO_RESIST to be "scene" values, i.e.
+	veg tiles containing overstory contribute their overstory (element
+	[1]) values, and non-overstory veg tiles contribute their surface
+	(element [0]) values.  Earlier versions of VIC simply output the
+	values of AERO_COND and AERO_RESIST computed latest during the time
+	step (whether from surface or overstory).
+
+
+
+Added AERO_RESIST_CANSNOW option.
+
+	Files Affected:
+
+	display_current_settings.c
+	func_canopy_energy_bal.c
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	vicNl_def.h
+
+	Description:
+
+	This option allows the user to control how aerodynamic resistances
+	in the overstory are corrected for the presence of snow in the canopy.
+
+	Possible values are:
+	  AR_406: Multiply aerodynamic resistance by 10 but do not apply
+		  stability correction, as in VIC 4.0.6 and earlier.
+	  AR_410: Apply stability correction but do not multiply by 10, as in
+		  VIC 4.1.0.
+	  AR_X10: Apply stability correction and multiply resulting resistance
+		  by 10.  This may be the most correct computation.
+
+	VIC 4.1.0 differed from VIC 4.0.6 (and earlier) in the computation
+	of aerodynamic resistances in snow-filled canopy.  This new option
+	allows backwards-compatibility with both of these model versions, plus
+	the new "X10" behavior, for comparison.  Because "X10" is arguably
+	the most correct option, it is currently the default value of
+	AERO_RESIST_CANSNOW.  This needs to be verified with testing and
+	comparison against observations.
+
+
+
+Reinstated the COMPUTE_TREELINE option, with option to supply the average July
+air temperature.
+
+	Files Affected:
+
+	compute_treeline.c
+	display_current_settings.c
+	get_global_param.c
+	global.param.sample
+	initialize_atmos.c
+	initialize_global.c
+	read_snowband.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	read_vegparam.c
+	user_def.h
+	vicNl.c
+	vicNl.h
+	vicNl_def.h
+
+	Description:
+
+	COMPUTE_TREELINE:
+
+	This option revives the treeline elevation computation that is a
+	current feature of VIC 4.0.x.  If set to TRUE this flag will
+	force the VIC model to compute the elevation of the tree line,
+	based on elevation at which the average annual July air temperature
+	is at or below 10C.  All snowbands above this evelation are then
+	assumed to be above the treeline, and vegetation types with
+	overstory are removed from the snow band average variables.  If no
+	non-overstory vegetation types exist in an above-treeline band,
+	the band will be treated as if it consists of a default vegetation
+	type, specified by the user.
+
+	To use this option, insert the following line into the global
+	parameter file:
+	  COMPUTE_TREELINE	n
+	where n is the id number of the desired default vegetation type to use
+	when no non-overstory vegetation types exist in the band.  To specify
+	bare soil, set n to a negative number.
+
+	To deactivate treeline calculation, change the line in the global
+	parameter file to
+	  COMPUTE_TREELINE FALSE
+	or remove the line from the global control file.
+
+	WARNING #1: Since the model does not store default root zone
+	distributions, the default vegetation type will use the
+	values from the last defined vegetation type for the current
+	grid cell (i.e. veg type N-1, prior to the addition of the
+	new vegetation type).
+
+	WARNING #2: If you are using GLOBAL_LAI, than the LAI and
+	dew storage terms for the default vegetation type will be set
+	to the values used by the last occurrence of the default
+	vegetation type.
+
+	JULY_TAVG_SUPPLIED:
+
+	The default behavior of VIC is to compute the average July temperature
+	from the meteorological input forcings, over the time span of the
+	simulation.  One drawback to this behavior is that, for short
+	simulations over different periods of time, the average July
+	temperature can vary enough to change which elevation bands are
+	considered to be above the treeline.
+
+	Therefore, if desired, the user can specify the average July
+	temperature for each grid cell by taking the following 2 steps:
+	  1. Add each grid cell's average July air temperature to the soil
+	     parameter file, as the final field on each line.
+	  2. Set JULY_AVGT_SUPPLIED = TRUE in the global parameter file
+
+	The JULY_AVG_SUPPLIED option is ignored if COMPUTE_TREELINE is FALSE.
+
+
+
 
 Bug Fixes:
 ----------
@@ -46,7 +191,7 @@ New Features:
 
 Updated lake model.
 
-	Files affected:
+	Files Affected:
 
 	full_energy.c
 	get_dist.c (new)
@@ -87,7 +232,7 @@ Updated lake model.
 
 New optional snow density computation.
 
-	Files affected:
+	Files Affected:
 
 	display_current_settings.c
 	get_global_param.c
@@ -117,7 +262,7 @@ New optional snow density computation.
 
 New optional snow albedo algorithm.
 
-	Files affected:
+	Files Affected:
 
 	display_current_settings.c
 	get_global_param.c
@@ -146,7 +291,7 @@ Bug Fixes:
 
 Allow lakes to be empty or very shallow.
 
-	Files affected:
+	Files Affected:
 
 	initialize_lake.c
 	initialize_model_state.c
@@ -166,7 +311,7 @@ Allow lakes to be empty or very shallow.
 
 Miscellaneous fixes to lake model
 
-	Files affected:
+	Files Affected:
 
 	lakes.eb.c
 	read_lakeparam.c
@@ -180,7 +325,7 @@ Miscellaneous fixes to lake model
 
 Lake snow and ice fixes
 
-	Files affected:
+	Files Affected:
 
 	LAKE.h
 	lakes.eb.c
@@ -395,7 +540,7 @@ New Features:
 
 Flexible output configuration & aggregation of output variables
 
-        Files affected:
+        Files Affected:
 
         Makefile
 	alloc_atmos.c
@@ -616,7 +761,7 @@ Flexible output configuration & aggregation of output variables
 
 Cleanup of structures holding filenames and file pointers
 
-	Files affected:
+	Files Affected:
 
 	check_files.c
 	check_state_file.c
@@ -648,7 +793,7 @@ Cleanup of structures holding filenames and file pointers
 
 Soil thermal node temperature is now an output variable
 
-	Files affected:
+	Files Affected:
 
 	output_list_utils.c
 	put_data.c
@@ -663,7 +808,7 @@ Soil thermal node temperature is now an output variable
 
 Removed LAKE_MODEL compile-time option
 
-	Files affected:
+	Files Affected:
 
 	check_files.c
 	display_current_settings.c
@@ -704,7 +849,7 @@ Removed LAKE_MODEL compile-time option
 
 More complete set of supported input variables
 
-        Files affected:
+        Files Affected:
 
         display_current_settings.c
         get_force_type.c
@@ -735,7 +880,7 @@ More complete set of supported input variables
 
 Optional headers for output and input files
 
-        Files affected:
+        Files Affected:
 
         display_current_settings.c
         get_global_param.c
@@ -811,7 +956,7 @@ Optional headers for output and input files
 Variable TYPE specifications for binary-format output files in the global parameter
 file must match the strings listed in vicNl_def.h.
 
-	Files affected:
+	Files Affected:
 
 	parse_output_info.c
 
@@ -824,7 +969,7 @@ file must match the strings listed in vicNl_def.h.
 
 Added global option CONTINUEONERROR allowing simulation to continue on cell error.
 
-	Files affected:
+	Files Affected:
 
 	arno_evap.c
 	CalcAerodynamic.c
@@ -871,7 +1016,7 @@ Added global option CONTINUEONERROR allowing simulation to continue on cell erro
 Exponential grid transformation option for soil thermal nodes in finite
 difference heat equation
 
-	Files affected:
+	Files Affected:
 
 	calc_surf_energy_bal.c
 	display_current_settings.c
@@ -900,7 +1045,7 @@ difference heat equation
 
 Implicit solution option for finite difference frozen soils algorithm
 
-	Files affected:
+	Files Affected:
 
 	calc_surf_energy_bal.c
 	display_current_settings.c
@@ -927,7 +1072,7 @@ Implicit solution option for finite difference frozen soils algorithm
 
 Zsum_node calculated once and passed in soil_con to other subroutines
 
-	Files affected:
+	Files Affected:
 
 	calc_surf_energy_bal.c
 	func_surf_energy_bal.c
@@ -952,7 +1097,7 @@ Zsum_node calculated once and passed in soil_con to other subroutines
 
 Patch for "cold nose" problem
 
-	Files affected:
+	Files Affected:
 
 	frozen_soil.c
 	soil_thermal_eqn.c
@@ -974,7 +1119,7 @@ Patch for "cold nose" problem
 
 Added EXCESS_ICE option (set in user_def.h)
 
-	Files affected:
+	Files Affected:
 
 	calc_surf_energy_bal.c
 	calc_water_energy_balance_errors.c
@@ -1027,7 +1172,7 @@ Added EXCESS_ICE option (set in user_def.h)
 
 Bare soil evap for LAI=0
 
-	Files affected:
+	Files Affected:
 
 	func_surf_energy_bal.c
 
@@ -1057,7 +1202,7 @@ Bug Fixes:
 
 Various bugs in output variables
 
-	Files affected:
+	Files Affected:
 
 	global.param.sample
 	output_list_utils.c
@@ -1078,7 +1223,7 @@ Various bugs in output variables
 
 Uninitialized value of ice[] in transpiration()
 
-	Files affected:
+	Files Affected:
 
 	canopy_evap.c
 
@@ -1090,7 +1235,7 @@ Uninitialized value of ice[] in transpiration()
 
 Uninitialized value of mixdepth in solve_lake()
 
-	Files affected:
+	Files Affected:
 
 	lakes.eb.c
 
@@ -1103,7 +1248,7 @@ Uninitialized value of mixdepth in solve_lake()
 Incorrect sub-daily temperature interpolation when referencing GMT instead of
 local time
 
-	Files affected:
+	Files Affected:
 
 	calc_air_temperature.c
 
@@ -1117,7 +1262,7 @@ local time
 
 Water budget errors in snow pack on top of lake ice
 
-	Files affected:
+	Files Affected:
 
 	lakes.eb.c
 
@@ -1131,7 +1276,7 @@ Water budget errors in snow pack on top of lake ice
 
 Incorrect filenames in Makefile for variable output list functions
 
-	Files affected:
+	Files Affected:
 
 	Makefile
 
@@ -1143,7 +1288,7 @@ Incorrect filenames in Makefile for variable output list functions
 
 Output variable OUT_DELSURFSTOR not functioning
 
-	Files affected:
+	Files Affected:
 
 	output_list_utils.c
 	put_data.c
@@ -1157,7 +1302,7 @@ Output variable OUT_DELSURFSTOR not functioning
 
 Pressure and vapor pressure output in wrong units
 
-	Files affected:
+	Files Affected:
 
 	put_data.c
 	write_forcing_file.c
@@ -1171,7 +1316,7 @@ Pressure and vapor pressure output in wrong units
 Changed OUT_SURF_TEMP from the average of T[0] and T[1] to exactly
 equal to T[0].
 
-	Files affected:
+	Files Affected:
 
 	put_data.c
 
@@ -1184,7 +1329,7 @@ equal to T[0].
 
 Added case of SPATIAL_FROST = TRUE in full_energy.c
 
-	Files affected:
+	Files Affected:
 
 	full_energy.c
 
@@ -1195,7 +1340,7 @@ Added case of SPATIAL_FROST = TRUE in full_energy.c
 
 Fixed fread statements
 
-	Files affected:
+	Files Affected:
 
 	read_initial_model_state.c
 
@@ -1207,14 +1352,14 @@ Fixed fread statements
 
 Read in order incorrect in error_print_surf_energy_bal
 
-	Files affected:
+	Files Affected:
 	calc_surf_energy_bal.c
 										GCT
 
 
 Removed (1.-snow_coverage) from three equations where it did not belong
 
-	Files affected:
+	Files Affected:
 
 	func_surf_energy_bal.c
 										GCT
@@ -1222,7 +1367,7 @@ Removed (1.-snow_coverage) from three equations where it did not belong
 
 setup_frozen_soil subroutine removed as it is never called
 
-	Files affected:
+	Files Affected:
 
 	frozen_soil.c
 										GCT
@@ -1246,7 +1391,7 @@ Bug fix for previous bug fix to dt_baseflow calculation.
 
 Sub-daily snow step for 24h wb mode not aggregating correctly
 
-	Files affected:
+	Files Affected:
 
 	snow_melt.c
 	solve_snow.c
@@ -1267,7 +1412,7 @@ Sub-daily snow step for 24h wb mode not aggregating correctly
 
 Moved Implicit error counting above call for solve_T_profile.
 
-	Files affected:
+	Files Affected:
 
 	func_surf_energy_bal.c
 										GCT
@@ -1275,7 +1420,7 @@ Moved Implicit error counting above call for solve_T_profile.
 
 Moved ARNO/NIJSSEN conversion after calculation of max_moist.
 
-	Files affected:
+	Files Affected:
 
 	read_soilparam_arc.c
 										GCT
@@ -1283,7 +1428,7 @@ Moved ARNO/NIJSSEN conversion after calculation of max_moist.
 
 Added ErrorFlag return value from initialize_prcp.
 
-	Files affected:
+	Files Affected:
 
 	lakes.eb.c
 	LAKE.h
@@ -1292,7 +1437,7 @@ Added ErrorFlag return value from initialize_prcp.
 
 Trap cases of T-errors matching variable ERROR for root_brent.
 
-	Files affected:
+	Files Affected:
         
 	calc_atmos_energy_bal.c
 	calc_surf_energy_bal.c
@@ -1319,7 +1464,7 @@ Trap cases of T-errors matching variable ERROR for root_brent.
 
 Trap cases of negative soil moisture.
 
-	Files affected:
+	Files Affected:
 
 	full_energy.c
 
@@ -1331,7 +1476,7 @@ Trap cases of negative soil moisture.
 
 Fixed bug for read-in during EXCESS_ICE option.
 
-	Files affected:
+	Files Affected:
 
 	read_initial_model_state.c
 
@@ -1360,7 +1505,7 @@ Memory errors for ARC_SOIL=TRUE and OUTPUT_FORCE=TRUE
 
 Handling of cells missing from snowband file
 
-	Files affected:
+	Files Affected:
 
 	read_snowband.c
 
@@ -1374,7 +1519,7 @@ Handling of cells missing from snowband file
 
 Moved check for soil moisture > max to initialize_model_state.c
 
-	Files affected:
+	Files Affected:
 
 	read_initial_model_state.c
 	initialize_model_state.c
@@ -1392,7 +1537,7 @@ Moved check for soil moisture > max to initialize_model_state.c
 
 Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
 
-	Files affected:
+	Files Affected:
 
 	runoff.c
 
@@ -1408,7 +1553,7 @@ Incorrect limits on soil layer evap in runoff() for SPATIAL_FROST = TRUE
 
 Bug fixes in EXCESS_ICE calculations
 
-	Files affected:
+	Files Affected:
 
 	full_energy.c
 	vicNl_def.h
@@ -1421,7 +1566,7 @@ Bug fixes in EXCESS_ICE calculations
 
 Return ERROR instead of exiting in ice_melt.c module
 
-	Files affected:
+	Files Affected:
 
 	ice_melt.c
 
@@ -1501,7 +1646,7 @@ Miscellaneous bugs in frozen soils.
 
 Output file headers contain "hour" field despite output dt == 24 hours.
 
-	Files affected:
+	Files Affected:
 
 	write_header.c
 
@@ -1513,7 +1658,7 @@ Output file headers contain "hour" field despite output dt == 24 hours.
 
 Liquid soil moisture sometimes falls below residual.
 
-	Files affected:
+	Files Affected:
 
 	runoff.c
 
@@ -1531,7 +1676,7 @@ Liquid soil moisture sometimes falls below residual.
 
 Variable "moist" in runoff() has different meaning than in other functions.
 
-	Files affected:
+	Files Affected:
 
 	runoff.c
 
@@ -1623,7 +1768,7 @@ Improved lake model
 
 VIC now supports ALMA input and output variables.
 
-	Files affected:
+	Files Affected:
 	Makefile, conv_force_vic2alma.c, conv_results_vic2alma.c, close_files.c,
 	display_current_settings.c, dist_prec.c, get_force_type.c,
 	get_global_param.c, initialize_atmos.c, initialize_global.c,
@@ -1643,7 +1788,7 @@ VIC now supports ALMA input and output variables.
 State file is now written at the END of the final timestep of the date indicated
 in the global parameter file.
 
-	Files affected:
+	Files Affected:
 	dist_prec.c
 
 	Description:
@@ -1668,7 +1813,7 @@ in the global parameter file.
 
 EQUAL_AREA global parameter option
 
-	Files affected:
+	Files Affected:
 	display_current_settings.c, get_global_param.c, initialize_global.c,
 	read_lakeparam.c, vicNl_def.h
 
@@ -1684,7 +1829,7 @@ EQUAL_AREA global parameter option
 
 New vicInterp executable
 
-	Files affected:
+	Files Affected:
 	Makefile, check_files.c, close_files.c, get_global_param.c,
 	read_soilparam.c, vicNl.c
 
@@ -1744,7 +1889,7 @@ Bug Fixes:
 
 Large water balance errors in daily water balance mode when snow is present
 
-	Files affected:
+	Files Affected:
 	surface_fluxes.c
 
 	Description:
@@ -1758,7 +1903,7 @@ Large water balance errors in daily water balance mode when snow is present
 
 Aerodynamic resistance incorrect in output fluxes file
 
-        Files affected:
+        Files Affected:
         IceEnergyBalance.c, LAKE.h, SnowPackEnergyBalance.c,
         calc_surf_energy_bal.c, full_energy.c, func_canopy_energy_bal.c,
         func_surf_energy_bal.c, ice_melt.c, lakes.eb.c, put_data.c,
@@ -1798,7 +1943,7 @@ Aerodynamic resistance incorrect in output fluxes file
 
 Aerodynamic resistance not correctly aggregated for output
 
-	Files affected:
+	Files Affected:
 	conv_results_vic2alma.c, put_data.c, vicNl_def.h
 
 	Description:
@@ -1823,7 +1968,7 @@ Aerodynamic resistance not correctly aggregated for output
 State variables for SPATIAL_FROST and LAKE_MODEL options not stored in state
 file.
 
-	Files affected:
+	Files Affected:
 	dist_prec.c, initialize_model_state.c, read_initial_model_state.c,
 	vicNl.h, write_model_state.c
 
@@ -1840,7 +1985,7 @@ file.
 
 ARNO_PARAMS global parameter option changed to BASEFLOW
 
-        Files affected:
+        Files Affected:
         display_current_settings.c
         get_global_param.c
         global.param.sample
@@ -1865,7 +2010,7 @@ ARNO_PARAMS global parameter option changed to BASEFLOW
 
 Removed some snowband output
 
-	Files affected:
+	Files Affected:
 	write_data.c
 
 	Description:
@@ -1874,7 +2019,7 @@ Removed some snowband output
 
 STATE file option is now specified in global file, not in user_def.h at compile time
 
-        Files affected:
+        Files Affected:
 
         display_current_settings.c
         dist_prec.c
@@ -1929,13 +2074,13 @@ STATE file option is now specified in global file, not in user_def.h at compile 
 
 Now reads extra_veg from state file
 
-        Files affected:
+        Files Affected:
         read_initial_model_state.c
                
 
 Reverting from version 5.10 to 5.9 in surface_fluxes.c 
 
-        Files affected:
+        Files Affected:
         surface_fluxes.c
 
         Energy balance errors had been introduced in the changes from 5.9 to 5.10.
@@ -1946,7 +2091,7 @@ Reverting from version 5.10 to 5.9 in surface_fluxes.c
 
 Skip reading/writing of snow band for areafract <= 0
 
-        Files affected:
+        Files Affected:
         read_initial_model_state.c
         write_model_state.c
 
@@ -1955,7 +2100,7 @@ Skip reading/writing of snow band for areafract <= 0
 
 Lake model energy terms NaN for southern hemisphere lakes
 
-        Files affected:
+        Files Affected:
         lakes.eb.c
 
         The computation of ks in the eddy() function was attempting to compute
@@ -1969,7 +2114,7 @@ Lake model energy terms NaN for southern hemisphere lakes
 
 Miscellaneous fixes for memory leaks and uninitialized variables.
 
-        Files affected:
+        Files Affected:
 
         free_dist_prcp.c
         get_global_param.c
@@ -2003,7 +2148,7 @@ New Features:
 
 "-v" and "-o" command-line options and display of run/compile-time options
 
-        Files affected:
+        Files Affected:
         cmd_proc.c, display_current_settings.c, get_global_param.c, global.h,
         vicNl.c, vicNl.h, vicNl_def.h
 
@@ -2082,7 +2227,7 @@ New Features:
 
 Automatic recompilation on updates to *.h
 
-        Files affected:
+        Files Affected:
         Makefile
 
         Description:
@@ -2094,7 +2239,7 @@ Automatic recompilation on updates to *.h
 
 NEW_ARNO_TYPE global option is now ARNO_PARAMS
 
-	Files affected:
+	Files Affected:
 	get_global_param.c, read_soilparam.c, vicNl_def.h
 
 	Description:
@@ -2111,7 +2256,7 @@ Bug Fixes:
 
 Spurious condensation at low temperatures
 
-        Files affected:
+        Files Affected:
         arno_evap.c
 
         Description:
@@ -2137,7 +2282,7 @@ Spurious condensation at low temperatures
 
 Incorrect baseflow limits
 
-        Files affected:
+        Files Affected:
         runoff.c
 
         Description:
@@ -2161,7 +2306,7 @@ Incorrect baseflow limits
 Runs using initial state files starting at state file date rather than global
 start date
 
-        Files affected:
+        Files Affected:
         check_state_file.c
 
         Description:
@@ -2184,7 +2329,7 @@ start date
 
 Incorrect sublimation values for BLOWING option
 
-	Files affected:
+	Files Affected:
 	CalcBlowingSnow.c, IceEnergyBalance.c, SnowPackEnergyBalance.c,
 	calc_surf_energy_bal.c, func_surf_energy_bal.c, ice_melt.c, lakes.eb.c,
 	latent_heat_from_snow.c, put_data.c, snow_melt.c, solve_snow.c,
@@ -2209,7 +2354,7 @@ Incorrect sublimation values for BLOWING option
 
 Negative incoming shortwave radiation at high latitudes
 
-        Files affected:
+        Files Affected:
         mtclim42_vic.c
 
         Description:
@@ -2221,7 +2366,7 @@ Negative incoming shortwave radiation at high latitudes
 
 Undefined daily precipitation for deserts
 
-        Files affected:
+        Files Affected:
         mtclim42_vic.c
 
         Description:
@@ -2245,7 +2390,7 @@ Undefined daily precipitation for deserts
 
 Snow_flux incorrectly set to Tcanopy in fluxes output file
 
-	Files affected:
+	Files Affected:
 	put_data.c
 
 	Description:
@@ -2255,7 +2400,7 @@ Snow_flux incorrectly set to Tcanopy in fluxes output file
 
 Incorrect value for sub_snow in fluxes output file
 
-	Files affected:
+	Files Affected:
 	write_data.c
 
 	Description:
@@ -2264,7 +2409,7 @@ Incorrect value for sub_snow in fluxes output file
 
 Special case in Penman equation
 
-        Files affected:
+        Files Affected:
         penman.c
 
         Description:
@@ -2278,7 +2423,7 @@ Special case in Penman equation
 
 Rint() function not supported on all platforms
 
-        Files affected:
+        Files Affected:
         compute_dz.c, initialize_atmos.c, read_soilparam.c,
         read_soilparam_arc.c
 
@@ -2290,7 +2435,7 @@ Rint() function not supported on all platforms
 
 Global parameter initialization
 
-        Files affected:
+        Files Affected:
         initialize_global.c
 
         Description:
@@ -2301,7 +2446,7 @@ Global parameter initialization
 
 Bottom soil node thickness initialization
 
-        Files affected:
+        Files Affected:
         initialize_model_state.c
 
         Description:
@@ -2311,7 +2456,7 @@ Bottom soil node thickness initialization
 
 Canopy evaporation and distributed precipitation
 
-        Files affected:
+        Files Affected:
         surface_fluxes.c
 
         Description:
@@ -2321,7 +2466,7 @@ Canopy evaporation and distributed precipitation
 
 Output debug file error
 
-        Files affected:
+        Files Affected:
         write_atmosdata.c
 
         Description:
@@ -2331,7 +2476,7 @@ Output debug file error
 
 Calculation of deltaH when FS_ACTIVE is FALSE
 
-        Files affected:
+        Files Affected:
         func_surf_energy_bal.c
 
         Description:
@@ -2343,7 +2488,7 @@ Calculation of deltaH when FS_ACTIVE is FALSE
 
 Root_brent error message clarification
 
-        Files affected:
+        Files Affected:
         calc_atmos_energy_bal.c, calc_surf_energy_bal.c, frozen_soil.c,
 	ice_melt.c, root_brent.c, snow_intercept.c, snow_melt.c, vicNl.h
 
@@ -2356,7 +2501,7 @@ Root_brent error message clarification
 
 Display current grid cell number for arc/info soil files
 
-        Files affected:
+        Files Affected:
         read_soilparam_arc.c
 
         Description:
@@ -2367,7 +2512,7 @@ Display current grid cell number for arc/info soil files
 
 Inconsistent format in state file
 
-	Files affected:
+	Files Affected:
 	write_model_state.c
 
 	Description:

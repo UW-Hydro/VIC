@@ -78,6 +78,9 @@ static char vcid[] = "$Id$";
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
 	    calculations.						TJB
   2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.  TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -236,9 +239,9 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
 
   if (Wind > 0.0) 
-    *Ra_used = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]); 
+    Ra_used[0] = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]); 
   else
-    *Ra_used = HUGE_RESIST;
+    Ra_used[0] = HUGE_RESIST;
 
   /* Calculate longwave exchange and net radiation */
 
@@ -248,7 +251,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tair - TMean) / *Ra_used;
+  *SensibleHeat = AirDens * Cp * (Tair - TMean) / Ra_used[0];
 
 #if SPATIAL_SNOW  
   /* Add in Sensible heat flux turbulent exchange from surrounding 
@@ -256,7 +259,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   if ( SnowCoverFract > 0 ) {
     *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract, 
 						     AirDens, Tair, TGrnd, 
-						     *Ra_used);
+						     Ra_used[0]);
   }
   else (*AdvectedSensibleHeat) = 0;
 #else
@@ -273,7 +276,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate the saturated vapor pressure in the snow pack, 
      (Equation 3.32, Bras 1990) */
 
-  latent_heat_from_snow(AirDens, EactAir, Lv, Press, *Ra_used, TMean, Vpd,
+  latent_heat_from_snow(AirDens, EactAir, Lv, Press, Ra_used[0], TMean, Vpd,
 			LatentHeat, LatentHeatSub, &VaporMassFlux, &BlowingMassFlux, 
 			&SurfaceMassFlux);
 

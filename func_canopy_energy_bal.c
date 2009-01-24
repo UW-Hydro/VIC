@@ -14,10 +14,16 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   and the canopy and the ground.
 
   Modifications:
-  28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
-	    flux calculations.					TJB
+  2004-Sep-28 Added Ra_used to store the aerodynamic resistance used in
+	      flux calculations.					TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
+
  ********************************************************************/
 {
+
+  extern option_struct   options;
 
   /* General Model Parameters */
   int     band;
@@ -174,13 +180,15 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   *NetLongOver  = LongOverIn - (*LongOverOut);
 
-  *Ra_used = Ra[1];
-
   if ( IntSnow > 0 ) {
+
+    Ra_used[0] = Ra[0];
+    Ra_used[1] = Ra[1];
 
     /** Added multiplication by 10 to incorporate change in canopy resistance due
 	to smoothing by intercepted snow **/
-    /* *Ra_used *= 10.; */
+    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_406 || options.AERO_RESIST_CANSNOW == AR_406_FULL)
+      Ra_used[1] *= 10.;
 
     /** Calculate the vapor mass flux between intercepted snow in 
 	the canopy and the surrounding air mass **/
@@ -188,15 +196,17 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
     EsSnow = svp(Tfoliage); 
     
     /* Apply stability correction to aerodynamic resistance */
-    if (Wind[1] > 0.0) {
-      *Ra_used /= StabilityCorrection(ref_height[1], displacement[1], Tfoliage, 
-				      Tcanopy, Wind[1], roughness[1]);
+    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_410) {
+      if (Wind[1] > 0.0) {
+        Ra_used[1] /= StabilityCorrection(ref_height[1], displacement[1], Tfoliage, 
+				          Tcanopy, Wind[1], roughness[1]);
+      }
+      else
+        Ra_used[1] = HUGE_RESIST;
     }
-    else
-      *Ra_used = HUGE_RESIST;
 
     *VaporMassFlux = AirDens * ( 0.622 / Press ) * (EactAir - EsSnow) 
-      / *Ra_used / RHO_W; 
+      / Ra_used[1] / RHO_W; 
 
     if (Vpd == 0.0 && *VaporMassFlux < 0.0)
       *VaporMassFlux = 0.0;
@@ -209,15 +219,26 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
     *Evap = 0;
     veg_var_wet->throughfall = 0;
 
+    if (options.AERO_RESIST_CANSNOW == AR_406)
+      Ra_used[1] /= 10;
   }
   else {
+
+    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_410) {
+      Ra_used[0] = Ra[0];
+      Ra_used[1] = Ra[1];
+    }
+    else {
+      Ra_used[0] = Ra[0];
+      Ra_used[1] = Ra[0];
+    }
 
     Wdew[WET] = IntRain * 1000.;
     prec[WET] = *Rainfall * 1000;
     prec[DRY] = 0;
     *Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, FALSE, 
 			veg_class, month, mu, Wdew, delta_t, *NetRadiation, 
-			Vpd, NetShortOver, Tcanopy, *Ra_used, displacement[1], 
+			Vpd, NetShortOver, Tcanopy, Ra_used[1], displacement[1], 
 			roughness[1], ref_height[1], elevation, prec, 
 			depth, Wcr, Wpwp, 
 #if SPATIAL_FROST
@@ -233,7 +254,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tcanopy - Tfoliage) / *Ra_used;
+  *SensibleHeat = AirDens * Cp * (Tcanopy - Tfoliage) / Ra_used[1];
 
   /* Calculate the advected energy */
 

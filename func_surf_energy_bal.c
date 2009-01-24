@@ -646,22 +646,21 @@ double func_surf_energy_bal(double Ts, va_list ap)
   else
     ra_under = HUGE_RESIST;
   
-  *Ra_used = ra_under;
+  Ra_used[0] = ra_under;
   
   /*************************************************
     Compute Evapotranspiration if not snow covered
 
     Should evapotranspiration be active when the 
-    ground is only paritially covered with snow????
+    ground is only partially covered with snow????
 
     Use Arno Evap if LAI is set to zero (e.g. no
     winter crop planted).
   *************************************************/
   if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
-    *Ra_used = ra[1];
     Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
 		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
-		       NetShortBare, Tair, *Ra_used, 
+		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
 		       elevation, rainfall, depth, Wcr, Wpwp, 
 #if SPATIAL_FROST
@@ -673,7 +672,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
 		     NetShortBare, D1, max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, displacement[0], 
-		     roughness[0], ref_height[0], *Ra_used, delta_t, mu, 
+		     roughness[0], ref_height[0], ra_under, delta_t, mu, 
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else

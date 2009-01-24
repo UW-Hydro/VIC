@@ -112,6 +112,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	      in global parameter file.						TJB
   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
 	      here.								TJB
+  2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -411,6 +412,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       strcat(namestr,tmpstr);
       init_ice_fract[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // EXCESS_ICE
+    }
+
+    if (options.COMPUTE_TREELINE && options.JULY_TAVG_SUPPLIED && (fscanf(soilparam,"%s",tmpstr)) != EOF) {
+      /** Get Avg July Air Temperature **/
+      strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
+      strcat(namestr,tmpstr);
+      temp.avgJulyAirTemp = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
 
 #if !OUTPUT_FORCE

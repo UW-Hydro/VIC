@@ -14,6 +14,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 		      double                    annual_prec,
 		      double                    wind_h,
 		      double                    roughness,
+		      double                    avgJulyAirTemp,
 		      double                   *Tfactor,
 #if OUTPUT_FORCE
                       char                     *AboveTreeLine,
@@ -85,6 +86,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      was stored if SNOW_STEP != global.dt.  Now, net longwave is
 	      stored if options.FULL_ENERGY and options.FROZEN_SOIL are both
 	      FALSE, i.e. for a water balance mode run.				TJB
+  2009-Jan-12 Modified to pass avgJulyAirTemp argument to
+	      compute_treeline(). 						TJB
 
 **********************************************************************/
 {
@@ -854,18 +857,25 @@ void initialize_atmos(atmos_data_struct        *atmos,
       free((char *)forcing_data[i]);
   free((char *)forcing_data);
 
-#if COMPUTE_TREELINE
-  // If COMPUTE_TREELINE is set to TRUE, the full atmospheric data array
-  // is processed to identify the treeline.
-  if ( options.SNOW_BAND )
-    compute_treeline( atmos, dmy, Tfactor, AboveTreeLine );
-#endif // COMPUTE_TREELINE
-
 #if OUTPUT_FORCE_STATS
   calc_forcing_stats(global_param.nrecs, atmos);
 #endif // OUTPUT_FORCE_STATS
 
-#if OUTPUT_FORCE
+#if !OUTPUT_FORCE
+
+  // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
+  // specifically been turned off for this cell (by supplying avgJulyAirTemp
+  // and setting it to -999), calculate which snowbands are above the
+  // treeline, based on average July air temperature.
+  if (options.COMPUTE_TREELINE) {
+    if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
+      if ( options.SNOW_BAND ) {
+        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+      }
+    }
+  }
+
+#else
 
   // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
   // forcing data array is dumped into a new set of files.

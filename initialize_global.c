@@ -99,6 +99,8 @@ void initialize_global() {
 	      param_set.TYPE[i].multiplier.                                     TJB
   2008-Apr-21 Added SNOW_ALBEDO option.						KAC via TJB
   2008-Apr-21 Added SNOW_DENSITY option.					TJB
+  2009-Jan-12 Added COMPUTE_TREELINE option.					TJB
+  2009-Jan-16 Added options.AERO_RESIST_CANSNOW.				TJB
 
 *********************************************************************/
 
@@ -113,13 +115,17 @@ void initialize_global() {
   /** Initialize model option flags **/
 
   // simulation modes
+  options.AboveTreelineVeg      = -1;
+  options.AERO_RESIST_CANSNOW   = AR_410;
   options.BLOWING               = FALSE;
+  options.COMPUTE_TREELINE      = FALSE;
   options.CORRPREC              = FALSE;
   options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX             = FALSE;
+  options.JULY_TAVG_SUPPLIED    = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
   options.MIN_WIND_SPEED        = 0.0;

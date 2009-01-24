@@ -66,6 +66,9 @@ int  full_energy(char                 NEWCELL,
 	      for earlier bands was always overwritten by the value
 	      of moist computed for the final band (even if the final
 	      band had 0 area).							KAC via TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.					TJB
 
 **********************************************************************/
 {
@@ -311,6 +314,8 @@ int  full_energy(char                 NEWCELL,
                       displacement, ref_height, roughness, 
                       Nveg, iveg);
       if ( ErrorFlag == ERROR ) return ( ERROR );  
+      cell[WET][iveg][0].aero_resist_used[0] = cell[WET][iveg][0].aero_resist[0];
+      cell[WET][iveg][0].aero_resist_used[1] = cell[WET][iveg][0].aero_resist[1];
 
       /**************************************************
         Store Water Balance Terms for Debugging
@@ -363,7 +368,7 @@ int  full_energy(char                 NEWCELL,
 				     SubsidenceUpdate, evap_prior[DRY][iveg][band], evap_prior[WET][iveg][band],
 #endif
 				     prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-				     cell[WET][iveg][0].aero_resist, &(cell[WET][iveg][0].aero_resist_used),
+				     cell[WET][iveg][0].aero_resist, cell[WET][iveg][0].aero_resist_used,
 				     &(cell[DRY][iveg][band].baseflow), 
 				     &(cell[WET][iveg][band].baseflow), displacement, 
 				     gauge_correction, &(cell[DRY][iveg][band].inflow), 

@@ -33,6 +33,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	      fetch < 1.						GCT
   2007-Oct-31 Added missing brackets in if(options.GLOBAL_LAI) block.	TJB
   2008-Oct-23 Added blocks to free vegarr[].				LCB via TJB
+  2009-Jan-16 Added logic for COMPUTE_TREELINE option.			TJB
 **********************************************************************/
 {
 
@@ -47,6 +48,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   int             vegcel, i, j, k, vegetat_type_num, skip, veg_class;
   int             MaxVeg;
   int             NF, NTOT;
+  int             NoOverstory;
   float           depth_sum;
   float           sum;
   char            str[500];
@@ -60,11 +62,11 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   if(options.GLOBAL_LAI) skip=2;
   else skip=1;
 
+  NoOverstory = 0;
+
 #if !NO_REWIND
   rewind(vegparam);
 #endif  
-    
-
 
   while ( ( fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num) == 2 ) && vegcel != gridcel ){
     for (i = 0; i <= vegetat_type_num * skip; i++){
@@ -217,7 +219,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     for(k=0; k<NF; k++)
       free(vegarr[k]);
 
+    // Determine if cell contains non-overstory vegetation
+    if ( options.COMPUTE_TREELINE && !veg_lib[temp[i].veg_class].overstory )
+      NoOverstory++;
+
   }
+
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);
     for(j=0;j<vegetat_type_num;j++)
@@ -230,6 +237,81 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
     temp[0].Cv_sum = 1.;
   }
+
+  // Handle veg above the treeline
+  if ( options.SNOW_BAND > 1 && options.COMPUTE_TREELINE
+       && ( !NoOverstory && temp[0].Cv_sum == 1. ) ) {
+
+    // All vegetation in the current cell is defined with overstory.
+    // Add default non-overstory vegetation so that snow bands above treeline
+    // can be sucessfully simulated.
+
+    if ( options.AboveTreelineVeg < 0 ) {
+
+      // Above treeline snowband should be treated as bare soil
+      for ( j = 0; j < vegetat_type_num; j++ )
+        temp[j].Cv -= ( 0.001 / (float)vegetat_type_num );
+      temp[0].Cv_sum -= 0.001;
+
+    }
+    else {
+
+      // Above treeline snowband should use the defined vegetation
+      // add vegetation to typenum
+      // check that veg type exists in library and does not have overstory
+      if(vegetat_type_num > 0) {
+
+        for ( j = 0; j < vegetat_type_num; j++ ) {
+          temp[j].Cv -= ( 0.001 / (float)vegetat_type_num );
+          temp[j].vegetat_type_num++;
+        }
+
+        temp[vegetat_type_num].Cv         = 0.001;
+        temp[vegetat_type_num].veg_class  = options.AboveTreelineVeg;
+        temp[vegetat_type_num].Cv_sum     = temp[vegetat_type_num-1].Cv_sum;
+        temp[vegetat_type_num].zone_depth = calloc( options.ROOT_ZONES,
+                                                  sizeof(float));
+        temp[vegetat_type_num].zone_fract = calloc( options.ROOT_ZONES,
+                                                  sizeof(float));
+        temp[vegetat_type_num].vegetat_type_num = vegetat_type_num+1;
+
+        // Since root zones are not defined they are copied from the last
+        // vegetation type.
+        for ( j = 0; j < options.ROOT_ZONES; j++ ) {
+          temp[vegetat_type_num].zone_depth[j]
+            = temp[vegetat_type_num-1].zone_depth[j];
+          temp[vegetat_type_num].zone_fract[j]
+            = temp[vegetat_type_num-1].zone_fract[j];
+        }
+
+      }
+
+      // Identify current vegetation class
+      veg_class = MISSING;
+      for ( j = 0; j < Nveg_type; j++ ) {
+        if(temp[vegetat_type_num].veg_class == veg_lib[j].veg_class) {
+          veg_class = j;
+          break;
+        }
+      }
+
+      if ( veg_class == MISSING ) {
+        sprintf(ErrStr,"Vegetation class %i from cell %i is not defined in the vegetation library file.", temp[i].veg_class, gridcel);
+        nrerror(ErrStr);
+      }
+      else {
+        temp[vegetat_type_num].veg_class = veg_class;
+      }
+
+      if ( veg_lib[veg_class].overstory ) {
+        sprintf(ErrStr,"Vegetation class %i is defined to have overstory, so it cannot be used as the default vegetation type for above canopy snow bands.", veg_lib[veg_class].veg_class );
+        nrerror(ErrStr);
+      }
+
+    }
+
+  }
+
   return temp;
 } 
 

@@ -15,6 +15,8 @@
   2006-Nov-07 Removed LAKE_MODEL option.				TJB
   2008-Feb-17 Moved constants related to snow albedo and trace snow to
 	      snow.h.							TJB
+  2009-Jan-12 Removed COMPUTE_TREELINE option (moved into options
+	      struct).							TJB
 
 **********************************************************************/
 
@@ -62,14 +64,6 @@
        directory defined in the global control file, and are binary
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
-
-/***** Compute the treeline elevation.  If set to TRUE this flag will 
-       force the VIC model to compute the elevation of the tree line, 
-       based on elevation at which the average annual July air temperature
-       is at or below 10C.  All snowbands above this evelation are then 
-       assumed to be above the treeline, and vegetation types with 
-       overstory are removed from the snow band average variables. *****/
-#define COMPUTE_TREELINE FALSE
 
 /***** If TRUE VIC computes the mean, standard deviation, and sum
        and finds the minimum and maximum values of the forcing 
@@ -124,4 +118,3 @@
        longwave radiation (use 1, unless measured longwave available for
        calibration) *****/
 #define LWAVE_COR	1.
-

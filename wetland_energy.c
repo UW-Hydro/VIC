@@ -38,6 +38,9 @@ int wetland_energy(int                  rec,
   2008-Mar-01 Reinserted logic for QUICK_FS in calls to
 	      distribute_node_moisture_properties().			TJB
   2008-Jun-16 Now runs even when wetland fraction is 0.			LCB via TJB
+  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
+	      two elements (surface and overstory); added
+	      options.AERO_RESIST_CANSNOW.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -359,7 +362,7 @@ int wetland_energy(int                  rec,
 			       SubsidenceUpdate, dummy, dummy,
 #endif
                                prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le,
-                               cell[WET][iveg][0].aero_resist,&(cell[WET][iveg][0].aero_resist_used),
+                               cell[WET][iveg][0].aero_resist,cell[WET][iveg][0].aero_resist_used,
                                &(cell[DRY][iveg][band].baseflow),
                                &(cell[WET][iveg][band].baseflow), displacement,
                                gauge_correction, &(cell[DRY][iveg][band].inflow),

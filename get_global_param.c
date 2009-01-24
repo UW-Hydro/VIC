@@ -78,7 +78,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
-	      options.AERO_RESIST_CANSNOW.				TJB
+	      options.AERO_RESIST_CANSNOW.					TJB
 **********************************************************************/
 {
   extern option_struct    options;

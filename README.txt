@@ -82,20 +82,22 @@ Added AERO_RESIST_CANSNOW option.
 	in the overstory are corrected for the presence of snow in the canopy.
 
 	Possible values are:
-	  AR_406: Multiply aerodynamic resistance by 10 but do not apply
+	  AR_406: Multiply aerodynamic resistance by 10 for latent heat
+		  calculation but NOT for sensible heat, and do NOT apply
 		  stability correction, as in VIC 4.0.6 and earlier.
+	  AR_406_FULL: Multiply aerodynamic resistance by 10 for both latent
+		  and sensible calculations, but do NOT apply stability
+		  correction.
 	  AR_410: Apply stability correction but do not multiply by 10, as in
 		  VIC 4.1.0.
-	  AR_X10: Apply stability correction and multiply resulting resistance
-		  by 10.  This may be the most correct computation.
+	  AR_COMBO: Apply stability correction and multiply resulting resistance
+		  by 10.
 
 	VIC 4.1.0 differed from VIC 4.0.6 (and earlier) in the computation
 	of aerodynamic resistances in snow-filled canopy.  This new option
-	allows backwards-compatibility with both of these model versions, plus
-	the new "X10" behavior, for comparison.  Because "X10" is arguably
-	the most correct option, it is currently the default value of
-	AERO_RESIST_CANSNOW.  This needs to be verified with testing and
-	comparison against observations.
+	allows backwards-compatibility with both of these model versions, as
+	well as the new "406_FULL" and "COMBO" options, for comparison.  The
+	default is set to AR_410.
 
 
 

@@ -52,6 +52,7 @@
   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
 	      surface and overstory values; changed AERO_COND
 	      and AERO_RESIST to track "scene" values.			TJB
+  2009-Feb-09 Updated description of PRT_SNOW_BAND option.		TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -487,7 +488,10 @@ typedef struct {
   int    CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   int    Noutfiles;      /* Number of output files (not including state files) */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
-  char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band */
+  char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band. This is only used when default
+				   output files are used (for backwards-compatibility); if outfiles and
+				   variables are explicitly mentioned in global parameter file, this option
+				   is ignored. */
 
 } option_struct;
 

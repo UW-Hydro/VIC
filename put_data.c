@@ -89,7 +89,8 @@ int  put_data(dist_prcp_struct  *prcp,
 	      options.AERO_RESIST_CANSNOW.				TJB
   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
 	      surface and overstory values; changed AERO_COND
-	      and AERO_RESIST to track "scene" values.		TJB
+	      and AERO_RESIST to track "scene" values.			TJB
+  2009-Feb-09 Removed checks on PRT_SNOW_BAND option.			TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -604,104 +605,100 @@ int  put_data(dist_prcp_struct  *prcp,
             out_data[OUT_ADV_SENS].data[0]
               -= energy[veg][band].advected_sensible
               * Cv * AreaFract[band] * TreeAdjustFactor[band];
+ 
+	  /** record band snow water equivalent **/
+	  out_data[OUT_SWE_BAND].data[band]
+	    += snow[veg][band].swq * Cv * 1000.;
+	    
+	  /** record band snowpack depth **/
+	  out_data[OUT_SNOW_DEPTH_BAND].data[band]
+	    += snow[veg][band].depth * Cv * 100.;
 	  
-	  /** if snow elevation bands are to be printed separately **/
-	  if(options.PRT_SNOW_BAND) {
+	  /** record band canopy intercepted snow **/
+	  if ( veg < veg_con[0].vegetat_type_num )
+	    out_data[OUT_SNOW_CANOPY_BAND].data[band]
+	      += (snow[veg][band].snow_canopy) * Cv * 1000.;
 	    
-	    /** record band snow water equivalent **/
-	    out_data[OUT_SWE_BAND].data[band]
-	      += snow[veg][band].swq * Cv * 1000.;
+	  /** record band snow melt **/
+	  out_data[OUT_SNOW_MELT_BAND].data[band]
+	    += snow[veg][band].melt * Cv;
 	    
-	    /** record band snowpack depth **/
-	    out_data[OUT_SNOW_DEPTH_BAND].data[band]
-	      += snow[veg][band].depth * Cv * 100.;
+	  /** record band snow coverage **/
+	  out_data[OUT_SNOW_COVER_BAND].data[band]
+	    += snow[veg][band].coverage * Cv;
 	    
-	    /** record band canopy intercepted snow **/
-	    if ( veg < veg_con[0].vegetat_type_num )
-		out_data[OUT_SNOW_CANOPY_BAND].data[band]
-		+= (snow[veg][band].snow_canopy) * Cv * 1000.;
+	  /** record band cold content **/
+	  out_data[OUT_DELTACC_BAND].data[band]
+	    += energy[veg][band].deltaCC * Cv;
 	    
-	    /** record band snow melt **/
-	    out_data[OUT_SNOW_MELT_BAND].data[band]
-	      += snow[veg][band].melt * Cv;
+	  /** record band advection **/
+	  out_data[OUT_ADVECTION_BAND].data[band]
+	    += energy[veg][band].advection * Cv;
 	    
-	    /** record band snow coverage **/
-	    out_data[OUT_SNOW_COVER_BAND].data[band]
-	      += snow[veg][band].coverage * Cv;
+	  /** record band snow flux **/
+	  out_data[OUT_SNOW_FLUX_BAND].data[band]
+	    += energy[veg][band].snow_flux * Cv;
 	    
-	    /** record band cold content **/
-	    out_data[OUT_DELTACC_BAND].data[band]
-	      += energy[veg][band].deltaCC * Cv;
+	  /** record band refreeze energy **/
+	  out_data[OUT_RFRZ_ENERGY_BAND].data[band]
+	    += energy[veg][band].refreeze_energy * Cv;
 	    
-	    /** record band advection **/
-	    out_data[OUT_ADVECTION_BAND].data[band]
-	      += energy[veg][band].advection * Cv;
-	    
-	    /** record band snow flux **/
-	    out_data[OUT_SNOW_FLUX_BAND].data[band]
-	      += energy[veg][band].snow_flux * Cv;
-	    
-	    /** record band refreeze energy **/
-	    out_data[OUT_RFRZ_ENERGY_BAND].data[band]
-	      += energy[veg][band].refreeze_energy * Cv;
-	    
-            /** record band melt energy **/
-            out_data[OUT_MELT_ENERGY_BAND].data[band]
-              += energy[veg][band].melt_energy * Cv;
+          /** record band melt energy **/
+          out_data[OUT_MELT_ENERGY_BAND].data[band]
+            += energy[veg][band].melt_energy * Cv;
 
-            /** record band advected sensble heat **/
-            out_data[OUT_ADV_SENS_BAND].data[band]
-              -= energy[veg][band].advected_sensible * Cv;
+          /** record band advected sensble heat **/
+          out_data[OUT_ADV_SENS_BAND].data[band]
+            -= energy[veg][band].advected_sensible * Cv;
 
-            /** record surface layer temperature **/
-            out_data[OUT_SNOW_SURFT_BAND].data[band]
-              += snow[veg][band].surf_temp * Cv;
+          /** record surface layer temperature **/
+          out_data[OUT_SNOW_SURFT_BAND].data[band]
+            += snow[veg][band].surf_temp * Cv;
 
-            /** record pack layer temperature **/
-            out_data[OUT_SNOW_PACKT_BAND].data[band]
-              += snow[veg][band].pack_temp * Cv;
+          /** record pack layer temperature **/
+          out_data[OUT_SNOW_PACKT_BAND].data[band]
+            += snow[veg][band].pack_temp * Cv;
 
-            /** record latent heat of sublimation **/
-            out_data[OUT_LATENT_SUB_BAND].data[band]
-              += energy[veg][band].latent_sub * Cv;
+          /** record latent heat of sublimation **/
+          out_data[OUT_LATENT_SUB_BAND].data[band]
+            += energy[veg][band].latent_sub * Cv;
 
-	    /** record band net downwards shortwave radiation **/
-	    out_data[OUT_NET_SHORT_BAND].data[band]
-	      += energy[veg][band].NetShortAtmos * Cv;
+	  /** record band net downwards shortwave radiation **/
+	  out_data[OUT_NET_SHORT_BAND].data[band]
+	    += energy[veg][band].NetShortAtmos * Cv;
 
-	    /** record band net downwards longwave radiation **/
-	    out_data[OUT_NET_LONG_BAND].data[band]
-	      += energy[veg][band].NetLongAtmos * Cv;
+	  /** record band net downwards longwave radiation **/
+	  out_data[OUT_NET_LONG_BAND].data[band]
+	    += energy[veg][band].NetLongAtmos * Cv;
 
-	    /** record band albedo **/
-            if ( snow[veg][band].snow && overstory )
-              out_data[OUT_ALBEDO_BAND].data[band]
-	        += energy[veg][band].AlbedoOver * Cv;
-            else
-              out_data[OUT_ALBEDO_BAND].data[band]
-	        += energy[veg][band].AlbedoUnder * Cv;
-//          if ( out_data[OUT_SHORTWAVE].data[0] > 0 )
-//            out_data[OUT_ALBEDO_BAND].data[0]    += ( out_data[OUT_SHORTWAVE].data[0] - energy[veg][band].NetShortAtmos ) / out_data[OUT_SHORTWAVE].data[0] * Cv;
-//          else {
-//            if ( snow[veg][band].snow && overstory )
-//              out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoOver * Cv;
-//            else
-//              out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoUnder * Cv;
-//          }
+	  /** record band albedo **/
+          if ( snow[veg][band].snow && overstory )
+            out_data[OUT_ALBEDO_BAND].data[band]
+	      += energy[veg][band].AlbedoOver * Cv;
+          else
+            out_data[OUT_ALBEDO_BAND].data[band]
+	      += energy[veg][band].AlbedoUnder * Cv;
+//        if ( out_data[OUT_SHORTWAVE].data[0] > 0 )
+//          out_data[OUT_ALBEDO_BAND].data[0]    += ( out_data[OUT_SHORTWAVE].data[0] - energy[veg][band].NetShortAtmos ) / out_data[OUT_SHORTWAVE].data[0] * Cv;
+//        else {
+//          if ( snow[veg][band].snow && overstory )
+//            out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoOver * Cv;
+//          else
+//            out_data[OUT_ALBEDO_BAND].data[0]    += energy[veg][band].AlbedoUnder * Cv;
+//        }
 
-	    /** record band net latent heat flux **/
-	    out_data[OUT_LATENT_BAND].data[band]
-	      -= energy[veg][band].latent * Cv;
+	  /** record band net latent heat flux **/
+	  out_data[OUT_LATENT_BAND].data[band]
+	    -= energy[veg][band].latent * Cv;
 
-	    /** record band net sensible heat flux **/
-	    out_data[OUT_SENSIBLE_BAND].data[band]
-	      -= energy[veg][band].sensible * Cv;
+	  /** record band net sensible heat flux **/
+	  out_data[OUT_SENSIBLE_BAND].data[band]
+	    -= energy[veg][band].sensible * Cv;
 
-	    /** record band net ground heat flux **/
-	    out_data[OUT_GRND_FLUX_BAND].data[band]
-	      -= energy[veg][band].grnd_flux * Cv;
+	  /** record band net ground heat flux **/
+	  out_data[OUT_GRND_FLUX_BAND].data[band]
+	    -= energy[veg][band].grnd_flux * Cv;
 
-	  }
 	}
       }
 

@@ -182,6 +182,36 @@ air temperature.
 Bug Fixes:
 ----------
 
+Fixed conflict between PRT_SNOW_BAND option and flexible output configuration.
+
+	Files Affected:
+
+	global.param.sample
+	parse_output_info.c
+	put_data.c
+	vicNl_def.h
+
+	Description:
+
+	The PRT_SNOW_BAND option exists for backwards-compatibility with older
+	versions of VIC.  If the user is using the default output cofiguration,
+	and PRT_SNOW_BAND is set to TRUE, it creates "snowband" output files.
+	However, this was not made clear in the documentation; it is possible
+	to specify output files containing the snow-band-specific values of
+	variables without setting PRT_SNOW_BAND to TRUE.  However, put_data()
+	contained logic that only allowed it to record snow-band-specific
+	quantities if PRT_SNOW_BAND is TRUE, even if the user had specified
+	snow-band-specific output variables in the output files.
+
+	Therefore, the logic checking the value of PRT_SNOW_BAND was removed
+	from put_data().  Additionally, if the user has specified N_OUTFILES
+	in the global parameter file, PRT_SNOW_BAND will now be set to FALSE
+	by parse_output_info(), just to make sure that PRT_SNOW_BAND only
+	applies to the default output case.  Documentation in
+	global.param.sample and vicNl_def.h has been updated to reflect this
+	behavior.
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****

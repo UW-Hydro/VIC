@@ -23,6 +23,8 @@ void parse_output_info(filenames_struct      *names,
 	      outvarnum.					TJB
   2008-Feb-15 Added check on number of output files defined vs.
 	      N_OUTFILES.					TJB
+  2009-Feb-09 Sets PRT_SNOW_BAND to FALSE if N_OUTFILES has been
+	      specified.					TJB
 
 **********************************************************************/
 {
@@ -63,6 +65,8 @@ void parse_output_info(filenames_struct      *names,
         *out_data_files = (out_data_file_struct *)calloc(options.Noutfiles, sizeof(out_data_file_struct));
         outfilenum = -1;
         init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
+        // PRT_SNOW_BAND is ignored if N_OUTFILES has been specified
+        options.PRT_SNOW_BAND = FALSE;
       }
       else if(strcasecmp("OUTFILE",optstr)==0) {
         outfilenum++;

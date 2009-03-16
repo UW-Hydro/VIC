@@ -32,6 +32,7 @@ out_data_struct *create_output_list() {
   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
 	      surface and overstory values; changed AERO_COND
 	      and AERO_RESIST to track "scene" values.		TJB
+  2009-Feb-22 Added OUT_VPD.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -141,6 +142,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SHORTWAVE].varname,"OUT_SHORTWAVE");             /* incoming shortwave [W/m2] */
   strcpy(out_data[OUT_SURF_COND].varname,"OUT_SURF_COND");             /* surface conductance [m/s] */
   strcpy(out_data[OUT_VP].varname,"OUT_VP");                           /* near surface vapor pressure [kPa] */
+  strcpy(out_data[OUT_VPD].varname,"OUT_VPD");                         /* near surface vapor pressure deficit [kPa] */
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */
 
   // Dynamic Soil Layer Terms - EXCESS_ICE option

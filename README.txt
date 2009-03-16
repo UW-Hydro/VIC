@@ -177,6 +177,18 @@ air temperature.
 	The JULY_AVG_SUPPLIED option is ignored if COMPUTE_TREELINE is FALSE.
 
 
+Added OUT_VPD output variable.
+
+	Files Affected:
+
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+	write_forcing_file.c
+
+	Description:
+
+	Added the output variable OUT_VPD to track vapor pressure deficit.
 
 
 Bug Fixes:

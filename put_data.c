@@ -91,6 +91,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      surface and overstory values; changed AERO_COND
 	      and AERO_RESIST to track "scene" values.			TJB
   2009-Feb-09 Removed checks on PRT_SNOW_BAND option.			TJB
+  2009-Feb-22 Added OUT_VPD.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -210,6 +211,7 @@ int  put_data(dist_prcp_struct  *prcp,
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
   out_data[OUT_SNOWF].data[0]     = atmos->out_snow;
   out_data[OUT_VP].data[0]        = atmos->vp[NR]/kPa2Pa;
+  out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
  
   /*************************************************
@@ -1127,6 +1129,7 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
       out_data[OUT_PRESSURE].aggdata[0] *= 1000;
       out_data[OUT_VP].aggdata[0] *= 1000;
+      out_data[OUT_VPD].aggdata[0] *= 1000;
     }
 
     /*************

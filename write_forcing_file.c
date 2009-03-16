@@ -25,6 +25,7 @@ void write_forcing_file(atmos_data_struct *atmos,
               out_data and out_data_files structures.			TJB
   2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
   2008-Jun-10 Fixed typo in QAIR and REL_HUMID eqns.			TJB
+  2009-Feb-22 Added OUT_VPD.						TJB
 
 **********************************************************************/
 {
@@ -52,6 +53,7 @@ void write_forcing_file(atmos_data_struct *atmos,
       out_data[OUT_REL_HUMID].data[0] = 100.*atmos[rec].vp[j]/(atmos[rec].vp[j]+atmos[rec].vpd[j]);
       out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
       out_data[OUT_VP].data[0]        = atmos[rec].vp[j]/kPa2Pa;
+      out_data[OUT_VPD].data[0]       = atmos[rec].vpd[j]/kPa2Pa;
       out_data[OUT_WIND].data[0]      = atmos[rec].wind[j];
       if (out_data[OUT_AIR_TEMP].data[0] >= global_param.MAX_SNOW_TEMP) {
         out_data[OUT_RAINF].data[0] = out_data[OUT_PREC].data[0];
@@ -79,6 +81,7 @@ void write_forcing_file(atmos_data_struct *atmos,
         out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
         out_data[OUT_PRESSURE].aggdata[0] *= 1000;
         out_data[OUT_VP].aggdata[0] *= 1000;
+        out_data[OUT_VPD].aggdata[0] *= 1000;
       }
 
       if (options.BINARY_OUTPUT) {

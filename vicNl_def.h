@@ -53,6 +53,7 @@
 	      surface and overstory values; changed AERO_COND
 	      and AERO_RESIST to track "scene" values.			TJB
   2009-Feb-09 Updated description of PRT_SNOW_BAND option.		TJB
+  2009-Feb-22 Added OUT_VPD.						TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -303,35 +304,36 @@
 #define OUT_SHORTWAVE       87  /* incoming shortwave [W/m2] */
 #define OUT_SURF_COND       88  /* surface conductance [m/s] */
 #define OUT_VP              89  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND            90  /* near surface wind speed [m/s] */
+#define OUT_VPD             90  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND            91  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND        91  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND       92  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND          93  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND         94  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND       95  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND         96  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND          97  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND      98  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND     99  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       100  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      101  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    102  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       103  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    104  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     105  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     106  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      107  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      108  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     109  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     110  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            111  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND        92  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND       93  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND          94  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND         95  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND       96  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND         97  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND          98  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND      99  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    100  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       101  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      102  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    103  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       104  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    105  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     106  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     107  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      108  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      109  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     110  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     111  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            112  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          112  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          113  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            114  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           115  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          113  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          114  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            115  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           116  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/

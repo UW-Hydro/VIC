@@ -19,6 +19,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
 
  ********************************************************************/
 {
@@ -187,7 +188,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
     /** Added multiplication by 10 to incorporate change in canopy resistance due
 	to smoothing by intercepted snow **/
-    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_406 || options.AERO_RESIST_CANSNOW == AR_406_FULL)
+    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_406 || options.AERO_RESIST_CANSNOW == AR_406_LS || options.AERO_RESIST_CANSNOW == AR_406_FULL)
       Ra_used[1] *= 10.;
 
     /** Calculate the vapor mass flux between intercepted snow in 
@@ -224,7 +225,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   }
   else {
 
-    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_410) {
+    if (options.AERO_RESIST_CANSNOW == AR_406_FULL || options.AERO_RESIST_CANSNOW == AR_410 || options.AERO_RESIST_CANSNOW == AR_COMBO) {
       Ra_used[0] = Ra[0];
       Ra_used[1] = Ra[1];
     }

@@ -42,8 +42,11 @@ static char vcid[] = "$Id$";
 	    involved an incorrect calculation of the soil's ice content.
 	    Since the new logic doesn't require calculation of ice content,
 	    this calculation has been removed altogether.		TJB
-2007-Apr-06 Modified to handle grid cell errors by returning ERROR
-            status that can be trapped by calling routines.     GCT/KAC
+  2007-Apr-06 Modified to handle grid cell errors by returning ERROR
+	      status that can be trapped by calling routines.			GCT/KAC
+  2009-Mar-16 Modified to use min_liq (minimum allowable liquid water
+	      content) instead of resid_moist.  For unfrozen soil,
+	      min_liq = resid_moist.						TJB
 
 ****************************************************************************/
 
@@ -90,6 +93,7 @@ double arno_evap(layer_data_struct *layer_wet,
   double max_infil;
   double Evap;
   double tmpsum;
+  double min_liq;
   layer_data_struct *layer;
 
   if(options.DIST_PRCP) Ndist = 2;
@@ -110,12 +114,15 @@ double arno_evap(layer_data_struct *layer_wet,
     /* moist = liquid soil moisture */
 #if SPATIAL_FROST
     moist = 0;
+    min_liq = 0;
     for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
       moist += (layer[0].moist - layer[0].ice[frost_area])
 	* frost_fract[frost_area];
+      min_liq += layer[0].min_liq[frost_area]*frost_fract[frost_area];
     }
 #else
     moist = layer[0].moist - layer[0].ice;
+    min_liq = layer[0].min_liq;
 #endif
     if ( moist > max_moist ) moist = max_moist;
 
@@ -210,10 +217,10 @@ double arno_evap(layer_data_struct *layer_wet,
 
     /* only consider positive evaporation; we won't put limits on condensation */
     if (evap > 0.0) {
-      if (moist > moist_resid * D1 * 1000.) {
+      if (moist > min_liq * D1 * 1000.) {
         /* there is liquid moisture available; cap evap at available liquid moisture */
-        if (evap > moist -  moist_resid * D1 * 1000.) {
-          evap = moist -  moist_resid * D1 * 1000.;
+        if (evap > moist -  min_liq * D1 * 1000.) {
+          evap = moist -  min_liq * D1 * 1000.;
         }
       }
       else {

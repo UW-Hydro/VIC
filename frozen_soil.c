@@ -39,6 +39,10 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
   2009-Feb-09 Modified to handle error flags and pass Zsum_node instead 
               of dz_node to esimate_layer_ice_content.			KAC via TJB
+  2009-Mar-16 Added resid_moist to argument list of
+	      estimate_layer_ice_content().  This allows computation
+	      of min_liq, the minimum allowable liquid water content
+	      in each layer as a function of temperature.		TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -79,7 +83,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->effective_porosity,
 #endif // EXCESS_ICE
 					   soil_con->bulk_density,
-					   soil_con->soil_density, soil_con->quartz,
+					   soil_con->soil_density, soil_con->quartz, soil_con->resid_moist,
 					   soil_con->layer_node_fract, Nnodes, 
 					   options.Nlayer, soil_con->FS_ACTIVE);
   if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL)
@@ -103,7 +107,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->porosity, soil_con->effective_porosity,
 #endif // EXCESS_ICE
 					   soil_con->bulk_density, soil_con->soil_density, 
-					   soil_con->quartz, soil_con->layer_node_fract, 
+					   soil_con->quartz, soil_con->resid_moist, soil_con->layer_node_fract, 
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
   if ( ErrorFlag == ERROR ) return (ERROR);
   

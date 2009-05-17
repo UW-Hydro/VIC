@@ -2080,6 +2080,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 	      now the larger of lake->areai and lake->sarea.  Drainage is now
 	      modeled as flow over a broad-crested wier.			LCB via TJB
   2008-Apr-21 Corrected some omissions from the previous mods.			LCB via TJB
+  2009-Mar-16 Inserted missing logic for SPATIAL_FROST and replaced resid_moist
+	      with min_liq.							TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2092,7 +2094,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double m;
   float index;
   double newdepth;
-  int j,k;
+  int j,k, frost_area;
   double in;
   double Tnew[MAX_LAKE_NODES];
   double tempdepth;
@@ -2107,10 +2109,15 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   cell_data_struct    ***cell;
   int lindex;
   double frac;
-  double Dsmax, resid_moist,liq, rel_moist;
+  double Dsmax, min_liq, liq, rel_moist;
+  double *frost_frac;
 
   cell    = prcp->cell;
-  
+
+#if SPATIAL_FROST
+  frost_fract = soil_con.frost_fract;
+#endif
+
   /**********************************************************************
    * 1. convert runoff input/output volume to rate
    **********************************************************************/
@@ -2230,16 +2237,25 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   Dsmax = soil_con.Dsmax / 24.;
   lindex = options.Nlayer-1;
-  resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] * 1000.;
+#if SPATIAL_FROST
+  min_liq = 0;
+  liq = 0;
+  for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+    min_liq += cell[WET][iveg][band].layer[lindex].min_liq[frost_area] * soil_con.depth[lindex] * 1000. * frost_fract[frost_area];
+    liq += (soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
+  }
+#else
+  min_liq = cell[WET][iveg][band].layer[lindex].min_liq * soil_con.depth[lindex] * 1000.;
   liq = soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice;
+#endif
 
-// If wetland baseflow is negative, it has already been extracted from the lake. */
+  // If wetland baseflow is negative, it has already been extracted from the lake. */
   if(cell[WET][iveg][band].baseflow < 0.0)
     lake->baseflow_out = 0.0;
   else {
     /** Compute relative moisture **/
-    rel_moist = (liq-resid_moist)
-	      / (soil_con.max_moist[lindex]-resid_moist);
+    rel_moist = (liq-min_liq)
+	      / (soil_con.max_moist[lindex]-min_liq);
 
 
     /** Compute baseflow as function of relative moisture **/

@@ -53,6 +53,8 @@
   2009-Jan-16 Added avgJulyAirTemp to argument list of
 	      compute_treeline().					TJB
   2009-Feb-09 Removed dz_node from several functions.			KAC via TJB
+  2009-Mar-16 Added resid_moist to argument list of
+	      estimate_layer_ice_content().				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -222,7 +224,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if SPATIAL_FROST
 			       double *, double,
 #endif // SPATIAL_FROST
-			       double *, double *, double *, float **, 
+			       double *, double *, double *, double *, float **, 
 			       int, int, char);
 #else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
@@ -234,7 +236,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,
 #endif // EXCESS_ICE
-			       double *, double *, double *, float **, 
+			       double *, double *, double *, double *, float **, 
 			       int, int, char);
 #endif
 double estimate_T1(double, double, double, double, double, double, double, 

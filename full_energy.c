@@ -69,6 +69,7 @@ int  full_energy(char                 NEWCELL,
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.					TJB
+  2009-May-17 Added asat to cell_data.						TJB
 
 **********************************************************************/
 {
@@ -370,7 +371,9 @@ int  full_energy(char                 NEWCELL,
 				     prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
 				     cell[WET][iveg][0].aero_resist, cell[WET][iveg][0].aero_resist_used,
 				     &(cell[DRY][iveg][band].baseflow), 
-				     &(cell[WET][iveg][band].baseflow), displacement, 
+				     &(cell[WET][iveg][band].baseflow),
+				     &(cell[DRY][iveg][band].asat), 
+				     &(cell[WET][iveg][band].asat), displacement, 
 				     gauge_correction, &(cell[DRY][iveg][band].inflow), 
 				     &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
 				     &out_rain[band*2], &out_snow[band*2],

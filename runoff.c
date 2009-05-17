@@ -12,6 +12,8 @@ int  runoff(layer_data_struct *layer_wet,
 	    double            *runoff_dry, 
 	    double            *baseflow_wet,
 	    double            *baseflow_dry,
+	    double            *asat_wet,
+	    double            *asat_dry,
 	    double            *ppt, 
 #if EXCESS_ICE
 	    int                SubsidenceUpdate,
@@ -150,6 +152,7 @@ int  runoff(layer_data_struct *layer_wet,
 	      its value can be computed earlier in the model code, in a
 	      more efficient manner (in initialize_soil() and
 	      estimate_layer_ice_content()).				TJB
+  2009-May-17 Added asat to cell_data.					TJB
 
 **********************************************************************/
 {  
@@ -202,6 +205,7 @@ int  runoff(layer_data_struct *layer_wet,
   double             dt_runoff;
   double            *runoff_ptr;
   double            *baseflow_ptr;
+  double            *asat_ptr;
   double             runoff[FROST_SUBAREAS];
   double             baseflow[FROST_SUBAREAS];
   double             actual_frost_fract[FROST_SUBAREAS];
@@ -250,16 +254,19 @@ int  runoff(layer_data_struct *layer_wet,
       layer        = layer_dry;
       runoff_ptr   = runoff_dry;
       baseflow_ptr = baseflow_dry;
+      asat_ptr     = asat_dry;
       mu           = (1. - mu);
     }
     else {
       layer        = layer_wet;
       runoff_ptr   = runoff_wet;
       baseflow_ptr = baseflow_wet;
+      asat_ptr     = asat_wet;
     }
 
     *runoff_ptr   = 0;
     *baseflow_ptr = 0;
+    *asat_ptr = 0;
     for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
       baseflow[frost_area] = 0;
       
@@ -504,6 +511,9 @@ int  runoff(layer_data_struct *layer_wet,
 	  }
 	  if ( runoff[frost_area] < 0. ) runoff[frost_area] = 0.;
 	  
+          /** Store saturated area **/
+          *asat_ptr = A;
+
 	  /**************************************************
 	  Compute Flow Between Soil Layers (using an hourly time step)
 	  **************************************************/

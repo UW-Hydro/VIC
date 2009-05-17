@@ -15,18 +15,30 @@ void initialize_soil (cell_data_struct **cell,
 
   modifications:
   11-18-02 Modified to initialize wetland soil moisture.          LCB
-  2006-Nov-07 Removed LAKE_MODEL option. TJB
-  2007-Aug-10 Added features for EXCESS_ICE option.  JCA
+  2006-Nov-07 Removed LAKE_MODEL option.				TJB
+  2007-Aug-10 Added features for EXCESS_ICE option.			JCA
+  2009-Mar-16 Modified to use min_liq (minimum allowable liquid water
+	      content) instead of resid_moist.  For unfrozen soil,
+	      min_liq = resid_moist.					TJB
 **********************************************************************/
 {
   extern option_struct options;
 
-  int j, band, index;
+  int j, band, index, frost_area;
   
-  for ( j = 0 ; j <= veg_num ; j++)
-    for(band=0;band<options.SNOW_BAND;band++) 
-      for(index=0;index<options.Nlayer;index++)
+  for ( j = 0 ; j <= veg_num ; j++) {
+    for(band=0;band<options.SNOW_BAND;band++) {
+      for(index=0;index<options.Nlayer;index++) {
 	cell[j][band].layer[index].moist = soil_con->init_moist[index];
+#if SPATIAL_FROST
+        for(frost_area=0;frost_area<FROST_SUBAREAS;frost_area++)
+	  cell[j][band].layer[index].min_liq[frost_area] = soil_con->resid_moist[index];
+#else
+	cell[j][band].layer[index].min_liq = soil_con->resid_moist[index];
+#endif
+      }
+    }
+  }
 
   if ( options.LAKES ) {
     for(index=0;index<options.Nlayer;index++){

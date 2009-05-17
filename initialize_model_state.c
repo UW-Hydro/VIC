@@ -82,6 +82,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
   2009-Mar-15 Modified to not call estimate_layer_ice_content() if
 	      not modeling frozen soil.					KAC via TJB
+  2009-Mar-16 Added resid_moist to argument list of
+	      estimate_layer_ice_content().  This allows computation
+	      of min_liq, the minimum allowable liquid water content
+	      in each layer as a function of temperature.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -654,7 +658,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif // EXCESS_ICE
 						       soil_con->bulk_density,
 						       soil_con->soil_density,
-						       soil_con->quartz, 
+						       soil_con->quartz, soil_con->resid_moist,
 						       soil_con->layer_node_fract,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);
@@ -999,7 +1003,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #endif // EXCESS_ICE
 						       soil_con->bulk_density,
 						       soil_con->soil_density,
-						       soil_con->quartz, 
+						       soil_con->quartz, soil_con->resid_moist,
 						       soil_con->layer_node_fract,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      

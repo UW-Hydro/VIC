@@ -138,7 +138,18 @@ int  runoff(layer_data_struct *layer_wet,
   2008-Oct-23 Added check to make sure top_moist never exceeds
 	      top_max_moist; otherwise rounding errors could cause it
 	      to exceed top_max_moist and produce NaN's.		LCB via TJB
-
+  2009-Feb-09 Removed dz_node from call to
+	      distribute_node_moisture_properties.			KAC via TJB
+  2009=Feb-10 Replaced all occurrences of resid_moist with min_liq, after 
+	      min_liq was defined.  This makes the use of min_liq consistent 
+	      with its documented role in the subroutine.		KAC via TJB
+  2009-Feb-10 Removed Tlayer from selection criteria to include ice in
+	      min_liq calculation.  Soil layers can be above 0C with
+	      ice present, as ice content is set from soil nodes.	KAC via TJB
+  2009-Mar-16 Made min_liq an element of the layer_data_struct, so that
+	      its value can be computed earlier in the model code, in a
+	      more efficient manner (in initialize_soil() and
+	      estimate_layer_ice_content()).				TJB
 
 **********************************************************************/
 {  
@@ -263,7 +274,7 @@ int  runoff(layer_data_struct *layer_wet,
           sum_liq = 0;
           // compute available soil moisture for each frost sub area.
           for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-            avail_liq[lindex][frost_area] = (org_moist[lindex] - layer[lindex].ice[frost_area]);
+            avail_liq[lindex][frost_area] = (org_moist[lindex] - layer[lindex].ice[frost_area] - layer[lindex].min_liq[frost_area]);
             if (avail_liq[lindex][frost_area] < 0) avail_liq[lindex][frost_area] = 0;
             sum_liq += avail_liq[lindex][frost_area]*frost_fract[frost_area];
           }
@@ -328,6 +339,13 @@ int  runoff(layer_data_struct *layer_wet,
 	  liq[lindex] = layer[lindex].moist - layer[lindex].ice;
 #endif // SPATIAL_FROST
 	  
+	  /** Set Layer Minimum Liquid Moisture Content (= unfrozen portion of resid_moist) **/
+#if SPATIAL_FROST
+	  min_liq[lindex]       = layer[lindex].min_liq[frost_area];
+#else
+	  min_liq[lindex]       = layer[lindex].min_liq;
+#endif // SPATIAL_FROST
+
 	  /** Set Layer Frozen Moisture Content **/
 #if SPATIAL_FROST
 	  ice[lindex]       = layer[lindex].ice[frost_area];
@@ -345,24 +363,7 @@ int  runoff(layer_data_struct *layer_wet,
 	  Tlayer = layer[lindex].T;
 #endif // SPATIAL_FROST
 
-	  /** Compute minimum allowable unfrozen water content **/
-	  if (Tlayer < 0 && options.FROZEN_SOIL && soil_con->FS_ACTIVE) {
-	    // Here we assume that if soil temperature < 0 C, and soil is as
-	    // dry as possible, then total soil moisture will equal residual
-	    // moisture content, and liquid soil moisture would be the theoretical
-	    // unfrozen portion of residual moisture, at the current temperature.
-	    // This will be the absolute minimum allowable liquid content.
-	    min_liq[lindex] = resid_moist[lindex]
-				* maximum_unfrozen_water(Tlayer, 1.0,
-							 soil_con->bubble[lindex],
-							 soil_con->expt[lindex]);
-	  }
-	  else
-	    // For completely unfrozen soil, absolute minimum liquid water
-	    // content is residual moisture.
-	    min_liq[lindex] = resid_moist[lindex];
-
-	}//each layer
+	} // initialize variables for each layer
 	
 	/******************************************************
           In case of subsidence, check if total soil column 
@@ -396,8 +397,8 @@ int  runoff(layer_data_struct *layer_wet,
 	  Dsmax = soil_con->Dsmax / 24.;  
 	  for (time_step = 0; time_step < dt; time_step++) {
 	    /** Compute relative moisture **/
-	    rel_moist = (liq[lindex]-resid_moist[lindex])
-	      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
+	    rel_moist = (liq[lindex]-min_liq[lindex])
+	      / (soil_con->max_moist[lindex]-min_liq[lindex]);
 	    /** Compute baseflow as function of relative moisture **/
 	    frac = Dsmax * soil_con->Ds / soil_con->Ws;
 	    dt_baseflow = frac * rel_moist;
@@ -517,12 +518,12 @@ int  runoff(layer_data_struct *layer_wet,
 #if LOW_RES_MOIST
 	    for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
 	      if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
-		  < resid_moist[lindex] )
-		tmp_liq = resid_moist[lindex];
-	      if(tmp_liq > resid_moist[lindex])
+		  < min_liq[lindex] )
+		tmp_liq = min_liq[lindex];
+	      if(tmp_liq > min_liq[lindex])
 		matric[lindex] = soil_con->bubble[lindex] 
-		  * pow( (tmp_liq - resid_moist[lindex]) 
-			 / (soil_con->max_moist[lindex] - resid_moist[lindex]), 
+		  * pow( (tmp_liq - min_liq[lindex]) 
+			 / (soil_con->max_moist[lindex] - min_liq[lindex]), 
 			 -b[lindex]);
 	      else
 		matric[lindex] = HUGE_RESIST;
@@ -538,10 +539,10 @@ int  runoff(layer_data_struct *layer_wet,
 	      /** Brooks & Corey relation for hydraulic conductivity **/
 	      
 	      if((tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
-		 < resid_moist[lindex])
-		tmp_liq = resid_moist[lindex];
+		 < min_liq[lindex])
+		tmp_liq = min_liq[lindex];
 	      
-	      if(liq[lindex] > resid_moist[lindex]) {
+	      if(liq[lindex] > min_liq[lindex]) {
 #if LOW_RES_MOIST
 		avg_matric = pow( 10, (soil_con->depth[lindex+1] 
 				       * log10(fabs(matric[lindex]))
@@ -549,14 +550,14 @@ int  runoff(layer_data_struct *layer_wet,
 				       * log10(fabs(matric[lindex+1])))
 				  / (soil_con->depth[lindex] 
 				     + soil_con->depth[lindex+1]) );
-		tmp_liq = resid_moist[lindex]
-		  + ( soil_con->max_moist[lindex] - resid_moist[lindex] )
+		tmp_liq = min_liq[lindex]
+		  + ( soil_con->max_moist[lindex] - min_liq[lindex] )
 		  * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
 #endif // LOW_RES_MOIST
 		Q12[lindex] 
-		  = Ksat[lindex] * pow(((tmp_liq - resid_moist[lindex])
+		  = Ksat[lindex] * pow(((tmp_liq - min_liq[lindex])
 					/ (soil_con->max_moist[lindex]
-					   - resid_moist[lindex])),
+					   - min_liq[lindex])),
 				       soil_con->expt[lindex]); 
 	      }
 	      else Q12[lindex] = 0.;
@@ -697,8 +698,8 @@ int  runoff(layer_data_struct *layer_wet,
 #endif // LINK_DEBUG
 	    
 	    /** Compute relative moisture **/
-	    rel_moist = (liq[lindex]-resid_moist[lindex])
-	      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
+	    rel_moist = (liq[lindex]-min_liq[lindex])
+	      / (soil_con->max_moist[lindex]-min_liq[lindex]);
 	    
 	    /** Compute baseflow as function of relative moisture **/
 	    frac = Dsmax * soil_con->Ds / soil_con->Ws;
@@ -814,7 +815,7 @@ int  runoff(layer_data_struct *layer_wet,
 #endif
       ErrorFlag = distribute_node_moisture_properties(energy->moist, energy->ice,
 						      energy->kappa_node, energy->Cs_node,
-						      soil_con->dz_node, soil_con->Zsum_node, energy->T,
+						      soil_con->Zsum_node, energy->T,
 						      soil_con->max_moist_node,
 #if QUICK_FS
 						      soil_con->ufwc_table_node,

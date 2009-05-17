@@ -269,6 +269,28 @@ Fixed uninitialized value errors in parse_output_info.c.
 	can be omitted from global param file.			TJB
 
 
+Fixed inconsistencies in min_liq formulation.
+
+	Files Affected:
+
+	arno_evap.c
+	frozen_soil.c
+	initialize_model_state.c
+	initialize_soil.c
+	lakes.eb.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Made min_liq formulation more consistent across the model code.
+	Added min_liq to the layer_struct so that this temperature-dependent
+	quantity can be computed once per time step and communicated to all
+	functions that look at soil moisture.			TJB
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****

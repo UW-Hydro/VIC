@@ -54,6 +54,7 @@
 	      and AERO_RESIST to track "scene" values.			TJB
   2009-Feb-09 Updated description of PRT_SNOW_BAND option.		TJB
   2009-Feb-22 Added OUT_VPD.						TJB
+  2009-Mar-16 Added min_liq to the layer_data_struct.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -863,8 +864,10 @@ typedef struct {
   double evap;              /* evapotranspiration from soil layer (mm) */
 #if SPATIAL_FROST
   double ice[FROST_SUBAREAS]; /* ice content of the frozen sublayer (mm) */
+  double min_liq[FROST_SUBAREAS]; /* minimum unfrozen moisture content of the frozen sublayer (mm) */
 #else
   double ice;               /* ice content of the frozen sublayer (mm) */
+  double min_liq;           /* minimum unfrozen moisture content of the frozen sublayer (mm) */
 #endif
   double kappa;             /* average thermal conductivity of the current 
 			       layer (W/m/K) */

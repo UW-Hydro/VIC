@@ -56,6 +56,7 @@
   2009-Feb-22 Added OUT_VPD.						TJB
   2009-Mar-16 Added min_liq to the layer_data_struct.			TJB
   2009-May-17 Added OUT_ASAT.						TJB
+  2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -90,9 +91,10 @@
 
 /***** Aerodynamic Resistance options *****/
 #define AR_406      0
-#define AR_406_FULL 1
-#define AR_410      2
-#define AR_COMBO    3
+#define AR_406_LS   1
+#define AR_406_FULL 2
+#define AR_410      3
+#define AR_COMBO    4
 
 /***** Time Constants *****/
 #define DAYS_PER_YEAR 365.
@@ -413,20 +415,33 @@ typedef struct {
 					    by 10 for latent heat but not
 					    for sensible heat (as in
 					    VIC 4.0.6); do NOT apply stability
-					    correction
+					    correction; use surface aero_resist
+					    for ET when no snow in canopy.
+				 "AR_406_LS" = multiply aerodynamic resistance
+					    by 10 for BOTH latent heat AND
+					    sensible heat; do NOT apply
+					    stability correction;
+					    use surface aero_resist
+					    for ET when no snow in canopy.
 				 "AR_406_FULL" = multiply aerodynamic resistance
-					    by 10 for latent heat but not
-					    for sensible heat (as in VIC 4.0.6);
-					    DO apply stability correction
+					    by 10 for BOTH latent heat AND
+					    sensible heat; do NOT apply
+					    stability correction;
+					    always use canopy aero_resist
+					    for ET.
 				 "AR_410" = do not multiply aerodynamic
 					    resistance by 10 in snow-filled
 					    canopy (as in VIC 4.1.0);
-					    DO apply stability correction
+					    DO apply stability correction;
+					    always use canopy aero_resist
+					    for ET.
 				 "AR_COMBO" = multiply aerodynamic resistance
 					    by 10 in snow-filled canopy for
 					    BOTH latent AND sensible heat
 					    computations AND apply stability
-					    correction; i.e. 406_FULL AND 410 */
+					    correction AND always use canopy
+					    aero_resist for ET;
+					    i.e. 406_FULL AND 410 */
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */

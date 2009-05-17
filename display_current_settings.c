@@ -37,6 +37,7 @@ void display_current_settings(int                 mode,
   2008-Apr-21 Added SNOW_DENSITY option.			TJB
   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
   2009-Jan-16 Added AERO_RESIST_CANSNOW option.			TJB
+  2009-May-17 Added AR_406_LS to AERO_RESIST_CANSNOW.		TJB
 **********************************************************************/
 {
 
@@ -255,6 +256,8 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"SNOW_DENSITY\t\tDENS_SNTHRM\n");
   if (options.AERO_RESIST_CANSNOW == AR_406)
     fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_406\n");
+  else if (options.AERO_RESIST_CANSNOW == AR_406_LS)
+    fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_406_LS\n");
   else if (options.AERO_RESIST_CANSNOW == AR_406_FULL)
     fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_406_FULL\n");
   else if (options.AERO_RESIST_CANSNOW == AR_410)

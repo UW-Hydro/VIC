@@ -85,19 +85,25 @@ Added AERO_RESIST_CANSNOW option.
 	  AR_406: Multiply aerodynamic resistance by 10 for latent heat
 		  calculation but NOT for sensible heat, and do NOT apply
 		  stability correction, as in VIC 4.0.6 and earlier.
+		  Additionally, use surface aero_resist for ET when no
+		  no snow in canopy.
+	  AR_406_LS: Multiply aerodynamic resistance by 10 for both latent
+		  and sensible calculations, but do NOT apply stability
+		  correction.  Additionally, use surface aero_resist for
+		  ET when no no snow in canopy.
 	  AR_406_FULL: Multiply aerodynamic resistance by 10 for both latent
 		  and sensible calculations, but do NOT apply stability
-		  correction.
+		  correction.  Always use canopy aero_resist for ET.
 	  AR_410: Apply stability correction but do not multiply by 10, as in
-		  VIC 4.1.0.
+		  VIC 4.1.0.  Always use canopy aero_resist for ET.
 	  AR_COMBO: Apply stability correction and multiply resulting resistance
-		  by 10.
+		  by 10.  Always use canopy aero_resist for ET.
 
 	VIC 4.1.0 differed from VIC 4.0.6 (and earlier) in the computation
 	of aerodynamic resistances in snow-filled canopy.  This new option
 	allows backwards-compatibility with both of these model versions, as
-	well as the new "406_FULL" and "COMBO" options, for comparison.  The
-	default is set to AR_410.
+	well as the new "AR_406_LS", "406_FULL" and "AR_COMBO" options, for
+	comparison.  The default is set to AR_410.
 
 
 

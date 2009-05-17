@@ -141,6 +141,8 @@ double calc_surf_energy_bal(double             Le,
 	      Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
 	      estimates, but never reset to reflect actual bottom
 	      boundary conditions for final pass through solver.	KAC
+  2009-Feb-09 Removed dz_node from variables passed to
+	      func_surf_energy_bal.					KAC via TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -185,7 +187,6 @@ double calc_surf_energy_bal(double             Le,
   double   Wdew[2];
   double  *T_node;
   double   Tnew_node[MAX_NODES];
-  double  *dz_node;
   double  *Zsum_node;
   double  *kappa_node;
   double  *Cs_node;
@@ -273,7 +274,6 @@ double calc_surf_energy_bal(double             Le,
     kappa_node     = energy->kappa_node;
     Cs_node        = energy->Cs_node;
     T_node         = energy->T;
-    dz_node        = soil_con->dz_node;
     Zsum_node      = soil_con->Zsum_node;   
     ice_node       = energy->ice;
 
@@ -290,7 +290,6 @@ double calc_surf_energy_bal(double             Le,
     kappa_node     = NULL;
     Cs_node        = NULL;
     T_node         = NULL;
-    dz_node        = NULL;
     Zsum_node      = NULL;
     ice_node       = NULL;
 
@@ -362,7 +361,7 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->deltaCC, &energy->refreeze_energy, 
 		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
 		       tmpNnodes, Cs_node, T_node, Tnew_node, 
-		       alpha, beta, bubble_node, dz_node, Zsum_node, expt_node, gamma, 
+		       alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
 		       soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
 		       INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
@@ -400,7 +399,7 @@ double calc_surf_energy_bal(double             Le,
 					 &energy->refreeze_energy, 
 					 &snow->vapor_flux, Nnodes, Cs_node, 
 					 T_node, Tnew_node, alpha, beta, 
-					 bubble_node, dz_node, Zsum_node, expt_node, 
+					 bubble_node, Zsum_node, expt_node, 
 					 gamma, ice_node, kappa_node, 
 					 max_moist_node, moist_node, 
 #if SPATIAL_FROST
@@ -451,7 +450,7 @@ double calc_surf_energy_bal(double             Le,
 			 &energy->deltaCC, &energy->refreeze_energy, 
 			 &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
 			 tmpNnodes, Cs_node, T_node, Tnew_node, 
-			 alpha, beta, bubble_node, dz_node, Zsum_node, expt_node, gamma, 
+			 alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 			 ice_node, kappa_node, max_moist_node, moist_node, 
 			 soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
 			 INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
@@ -490,7 +489,7 @@ double calc_surf_energy_bal(double             Le,
 					   &energy->refreeze_energy, 
 					   &snow->vapor_flux, Nnodes, Cs_node, 
 					   T_node, Tnew_node, alpha, beta, 
-					   bubble_node, dz_node, Zsum_node, expt_node, 
+					   bubble_node, Zsum_node, expt_node, 
 					   gamma, ice_node, kappa_node, 
 					   max_moist_node, moist_node, 
 #if SPATIAL_FROST
@@ -546,7 +545,7 @@ double calc_surf_energy_bal(double             Le,
 				&energy->deltaCC, &energy->refreeze_energy, 
 				&snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
 				Nnodes, Cs_node, T_node, Tnew_node, 
-				alpha, beta, bubble_node, dz_node, Zsum_node, expt_node, gamma, 
+				alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 				ice_node, kappa_node, max_moist_node, moist_node, 
 				soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
 				INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
@@ -771,6 +770,11 @@ double error_calc_surf_energy_bal(double Tsurf, ...) {
 }
 
 double error_print_surf_energy_bal(double Ts, va_list ap) {
+/**********************************************************************
+  Modifications:
+  2009-Mar-03 Fixed format string for print statement, eliminates
+	      compiler WARNING.						KAC via TJB
+**********************************************************************/
 
   extern option_struct options;
 
@@ -866,7 +870,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *alpha;
   double *beta;
   double *bubble_node;
-  double *dz_node;
   double *Zsum_node;
   double *expt_node;
   double *gamma;
@@ -1017,7 +1020,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   alpha                   = (double *) va_arg(ap, double *);
   beta                    = (double *) va_arg(ap, double *);
   bubble_node             = (double *) va_arg(ap, double *);
-  dz_node                 = (double *) va_arg(ap, double *);
   Zsum_node               = (double *) va_arg(ap, double *);
   expt_node               = (double *) va_arg(ap, double *);
   gamma                   = (double *) va_arg(ap, double *);
@@ -1202,10 +1204,10 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
     write_vegvar(&(veg_var_dry[0]),iveg);
 
   if(!options.QUICK_FLUX) {
-    fprintf(stderr,"Node\tT\tTnew\tdz\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tmax_moist\tice\n");
+    fprintf(stderr,"Node\tT\tTnew\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tmax_moist\tice\n");
     for(i=0;i<Nnodes;i++) 
-      fprintf(stderr,"%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
-	      i, T_node[i], Tnew_node[i], dz_node[i], Zsum_node[i], kappa_node[i], 
+      fprintf(stderr,"%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
+	      i, T_node[i], Tnew_node[i], Zsum_node[i], kappa_node[i], 
 	      Cs_node[i], moist_node[i], bubble_node[i], expt_node[i], 
 	      max_moist_node[i], ice_node[i]);
   }

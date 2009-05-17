@@ -41,6 +41,9 @@ int wetland_energy(int                  rec,
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-Feb-09 Removed dz_node from call to
+	      distribute_node_moisture_properties.			KAC via TJB
+  2009-Mar-15 Added code to assign values to aero_resist_used.		TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -240,6 +243,8 @@ int wetland_energy(int                  rec,
                     displacement, ref_height, roughness,
                     Nveg, iveg) ) == ERROR)
       return(ERROR);
+    cell[WET][iveg][0].aero_resist_used[0] = cell[WET][iveg][0].aero_resist[0];
+    cell[WET][iveg][0].aero_resist_used[1] = cell[WET][iveg][0].aero_resist[1];
 
     /******************************
         Solve ground surface fluxes 
@@ -278,7 +283,6 @@ int wetland_energy(int                  rec,
 						    energy[iveg][band].ice,
 						    energy[iveg][band].kappa_node,
 						    energy[iveg][band].Cs_node,
-						    soil_con->dz_node,
 						    soil_con->Zsum_node,
 						    energy[iveg][band].T,
 						    soil_con->max_moist_node,
@@ -324,7 +328,6 @@ int wetland_energy(int                  rec,
 						      energy[iveg][band].ice,
 						      energy[iveg][band].kappa_node,
 						      energy[iveg][band].Cs_node,
-						      soil_con->dz_node,
 						      soil_con->Zsum_node,
 						      energy[iveg][band].T,
 						      soil_con->max_moist_node,

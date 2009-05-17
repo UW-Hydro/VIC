@@ -52,6 +52,7 @@
 	      return an error status.					TJB
   2009-Jan-16 Added avgJulyAirTemp to argument list of
 	      compute_treeline().					TJB
+  2009-Feb-09 Removed dz_node from several functions.			KAC via TJB
 ************************************************************************/
 
 #include <math.h>
@@ -177,20 +178,18 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 int, int, char, char, char *, int *);
 #if QUICK_FS
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
-					 double *, double *, double *,
-					 double *, double ***, 
+					 double *, double *, double *, double ***, 
 					 double *, double *, double *,
 					 double *, double *, int, int, char);
 #else
 #if EXCESS_ICE
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
+					 double *, double *, double *, double *, 
 					 double *, double *, double *,
-					 double *, double *, double *,
-					 double *, double *,
 					 double *, double *, double *,
 					 double *, double *, int, int, char);
 #else
-int  distribute_node_moisture_properties(double *, double *, double *, double *,
+int  distribute_node_moisture_properties(double *, double *, double *, 
 					 double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *,
@@ -217,26 +216,26 @@ double error_print_surf_energy_bal(double, va_list);
 double error_solve_T_profile(double Tsurf, ...);
 double estimate_dew_point(double, double, double, double, double);
 #if QUICK_FS
-void estimate_layer_ice_content(layer_data_struct *, double *, double *,
-				double *, double ***, double *,
-				double *, double ***, 
+int estimate_layer_ice_content(layer_data_struct *, double *, double *,
+			       double *, double ***, double *,
+			       double *, double ***, 
 #if SPATIAL_FROST
-                                double *, double,
+			       double *, double,
 #endif // SPATIAL_FROST
-                                double *, double *, double *, float **, 
-                                int, int, char);
+			       double *, double *, double *, float **, 
+			       int, int, char);
 #else
-void estimate_layer_ice_content(layer_data_struct *, double *, double *,
-				double *, double *, double *, double *,
-				double *, double *, double *, 
+int estimate_layer_ice_content(layer_data_struct *, double *, double *,
+			       double *, double *, double *, double *,
+			       double *, double *, double *, 
 #if SPATIAL_FROST
-                                double *, double, 
+			       double *, double, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-				double *, double *,
+			       double *, double *,
 #endif // EXCESS_ICE
-                                double *, double *, double *, float **, 
-                                int, int, char);
+			       double *, double *, double *, float **, 
+			       int, int, char);
 #endif
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
@@ -249,12 +248,12 @@ void   fda_heat_eqn(double *, double *, int, int, ...);
 void   fdjac3(double *, double *, double *, double *, double *,
             void (*vecfunc)(double *, double *, int, int, ...), 
             int);
-void   find_0_degree_fronts(energy_bal_struct *,double *, double *, double *, int);
+void   find_0_degree_fronts(energy_bal_struct *, double *, double *, int);
 layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
 				     double, double);
 void   find_sublayer_temperatures(layer_data_struct *, double *, double *,
 				  double *, double, double, int, int);
-void   finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
+int    finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
 				layer_data_struct *, layer_data_struct *,
 				soil_con_struct *, int, int, double, 
 				double *, double *, double *, double *);
@@ -457,12 +456,12 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
-int    solve_T_profile(double *, double *, double *, double *,double *, double *,
+int    solve_T_profile(double *, double *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *, double ***,
 		       int, int *, int, int, int, int);
 #else
-int    solve_T_profile(double *, double *, double *, double *,double *, double *,
+int    solve_T_profile(double *, double *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *,
 #if EXCESS_ICE
@@ -471,7 +470,7 @@ int    solve_T_profile(double *, double *, double *, double *,double *, double *
 		       int, int *, int, int, int, int);
 
 #endif
-int   solve_T_profile_implicit(double *, double *, double *, double *, double *,double *,
+int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
 			       double *, double, double *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,

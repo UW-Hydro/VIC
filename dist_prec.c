@@ -70,6 +70,8 @@ int  dist_prec(atmos_data_struct   *atmos,
   2007-Apr-04 Modified to handle grid cell errors by returning to the
               main subroutine, rather than ending the simulation.	GCT/KAC
   2008-Oct-23 Modified call to put_data() to store ErrorFlag.		TJB
+  2009-Mar-03 Modified routine to store put_data() error in ErrorFlag2 and 
+	      return a single ERROR value if an error occurs.		KAC via TJB
 
 **********************************************************************/
 
@@ -85,7 +87,7 @@ int  dist_prec(atmos_data_struct   *atmos,
   char    ANY_SNOW[MAX_VEG];
   int     veg, i;
   int     month;
-  int     ErrorFlag;
+  int     ErrorFlag, ErrorFlag2;
   double  Wdmax;
   double  NEW_MU;
 
@@ -205,10 +207,10 @@ int  dist_prec(atmos_data_struct   *atmos,
     Write cell average values for current time step
   **************************************************/
 
-  ErrorFlag = put_data(prcp, atmos, soil_con, veg_con,
-	               lake_con, out_data_files, out_data, save_data,
-	               &dmy[rec], rec, options.Nnode);
-
+  ErrorFlag2 = put_data(prcp, atmos, soil_con, veg_con,
+			lake_con, out_data_files, out_data, save_data,
+			&dmy[rec], rec, options.Nnode);
+  if ( ErrorFlag2 == ERROR ) ErrorFlag = ERROR;
 
   /************************************
     Save model state at assigned date

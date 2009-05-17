@@ -44,6 +44,7 @@ int wetland_energy(int                  rec,
   2009-Feb-09 Removed dz_node from call to
 	      distribute_node_moisture_properties.			KAC via TJB
   2009-Mar-15 Added code to assign values to aero_resist_used.		TJB
+  2009-May-17 Added asat to cell_data.					TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -265,7 +266,8 @@ int wetland_energy(int                  rec,
       ppt[DRY]=cell[DRY][iveg][band].inflow;
       ErrorFlag = runoff(cell[WET][iveg][band].layer, cell[DRY][iveg][band].layer, &(energy[iveg][band]), 
 			 soil_con, &(cell[WET][iveg][band].runoff), &(cell[DRY][iveg][band].runoff), 
-			 &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow), ppt, 
+			 &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow),
+			 &(cell[WET][iveg][band].asat), &(cell[DRY][iveg][band].asat), ppt, 
 			 SubsidenceUpdate,
 #if SPATIAL_FROST
 			 soil_con->frost_fract,
@@ -367,7 +369,9 @@ int wetland_energy(int                  rec,
                                prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le,
                                cell[WET][iveg][0].aero_resist,cell[WET][iveg][0].aero_resist_used,
                                &(cell[DRY][iveg][band].baseflow),
-                               &(cell[WET][iveg][band].baseflow), displacement,
+                               &(cell[WET][iveg][band].baseflow),
+                               &(cell[DRY][iveg][band].asat),
+                               &(cell[WET][iveg][band].asat), displacement,
                                gauge_correction, &(cell[DRY][iveg][band].inflow),
                                &(cell[WET][iveg][band].inflow), &out_prec[band*2],
                                &out_rain[band*2], &out_snow[band*2],

@@ -92,6 +92,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      and AERO_RESIST to track "scene" values.			TJB
   2009-Feb-09 Removed checks on PRT_SNOW_BAND option.			TJB
   2009-Feb-22 Added OUT_VPD.						TJB
+  2009-May-17 Added OUT_ASAT.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -296,6 +297,10 @@ int  put_data(dist_prcp_struct  *prcp,
 	    out_data[OUT_RUNOFF].data[0]   += cell[dist][veg][band].runoff 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    
+	    /** record saturated area fraction **/
+	    out_data[OUT_ASAT].data[0] += cell[dist][veg][band].asat 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+
 	    /** record baseflow **/
 	    out_data[OUT_BASEFLOW].data[0] += cell[dist][veg][band].baseflow 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
@@ -944,6 +949,10 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
       out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
       out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_con->basin[0]) * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
+
+      /** record saturated area fraction **/
+      out_data[OUT_ASAT].data[0] += lake_var.sarea/soil_con->cell_area 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 
     }
   }

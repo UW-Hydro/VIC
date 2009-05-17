@@ -31,6 +31,8 @@ int surface_fluxes(char                 overstory,
 		   double              *aero_resist_used,
 		   double              *baseflow_dry,
 		   double              *baseflow_wet,
+		   double              *asat_dry,
+		   double              *asat_wet,
 		   double              *displacement,
 		   double              *gauge_correction,
 		   double              *inflow_dry,
@@ -129,6 +131,7 @@ int surface_fluxes(char                 overstory,
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-May-17 Added asat to cell_data.					TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -929,7 +932,7 @@ int surface_fluxes(char                 overstory,
     (*inflow_dry) = ppt[DRY];
 
     ErrorFlag = runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
-		       baseflow_wet, baseflow_dry, ppt, 
+		       baseflow_wet, baseflow_dry, asat_wet, asat_dry, ppt, 
 #if EXCESS_ICE
 		       SubsidenceUpdate,
 #endif

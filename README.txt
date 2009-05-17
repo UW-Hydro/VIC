@@ -191,6 +191,24 @@ Added OUT_VPD output variable.
 	Added the output variable OUT_VPD to track vapor pressure deficit.
 
 
+Added OUT_ASAT output variable.
+
+	Files Affected:
+
+	full_energy.c
+	output_list_utils.c
+	put_data.c
+	runoff.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+	wetland_energy.c
+
+	Description:
+
+	Added the output variable OUT_ASAT to track saturated area.
+
+
 Bug Fixes:
 ----------
 

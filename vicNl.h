@@ -55,6 +55,8 @@
   2009-Feb-09 Removed dz_node from several functions.			KAC via TJB
   2009-Mar-16 Added resid_moist to argument list of
 	      estimate_layer_ice_content().				TJB
+  2009-May-17 Added asat to argument list of surface_fluxes(),
+	      full_energy(), and wetland_energy().			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -389,7 +391,7 @@ unsigned char redistribute_moisture_for_storm(double *, double *, double,
 					      double, double);
 double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
 int    runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *, 
-	      soil_con_struct *, double *, double *, double *, double *, 
+	      soil_con_struct *, double *, double *, double *, double *, double *, double *,
 	      double *, 
 #if EXCESS_ICE
 	      int,
@@ -489,7 +491,7 @@ int    surface_fluxes(char, double, double, double, double,
 		      int, double *, double *,
 #endif
 		      double, double, 
-                      double *, double *, double *, double *, double *, 
+                      double *, double *, double *, double *, double *, double *, double *,
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, float *,

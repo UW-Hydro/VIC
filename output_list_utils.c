@@ -33,6 +33,7 @@ out_data_struct *create_output_list() {
 	      surface and overstory values; changed AERO_COND
 	      and AERO_RESIST to track "scene" values.		TJB
   2009-Feb-22 Added OUT_VPD.					TJB
+  2009-May-17 Added OUT_ASAT.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -44,6 +45,7 @@ out_data_struct *create_output_list() {
   // Build the list of supported output variables
 
   // Water Balance Terms - state variables
+  strcpy(out_data[OUT_ASAT].varname,"OUT_ASAT");                       /* saturated area fraction */
   strcpy(out_data[OUT_LAKE_DEPTH].varname,"OUT_LAKE_DEPTH");           /* lake depth [m] */
   strcpy(out_data[OUT_LAKE_ICE].varname,"OUT_LAKE_ICE");               /* moisture stored as lake ice [mm] */
   strcpy(out_data[OUT_LAKE_ICE_FRACT].varname,"OUT_LAKE_ICE_FRACT");   /* fractional coverage of lake ice [fraction] */
@@ -218,6 +220,7 @@ out_data_struct *create_output_list() {
   for (v=0; v<N_OUTVAR_TYPES; v++) {
     out_data[v].aggtype = AGG_TYPE_AVG;
   }
+  out_data[OUT_ASAT].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_DEPTH].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE_FRACT].aggtype = AGG_TYPE_END;

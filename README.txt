@@ -221,7 +221,52 @@ Fixed conflict between PRT_SNOW_BAND option and flexible output configuration.
 	by parse_output_info(), just to make sure that PRT_SNOW_BAND only
 	applies to the default output case.  Documentation in
 	global.param.sample and vicNl_def.h has been updated to reflect this
-	behavior.
+	behavior.						TJB
+
+
+Fixed problems in soil temperature solution due to use of dz_node.
+
+	Files Affected:
+
+	calc_surf_energy_bal.c
+	frozen_soil.c
+	func_surf_energy_bal.c
+	initialize_model_state.c
+	lakes.eb.c
+	soil_conduction.c
+	vicNl.h
+	wetland_energy.c
+
+	Description:
+
+	The addition of the EXCESS_ICE option introduced a new variable,
+	Zsum_node, to the soil thermal solution code.  This conflicted with
+	the existing variable dz_sum.  Therefore, dz_sum has been replaced
+	by Zsum_node in several functions.			KAC via TJB
+
+
+Fixed problem of errors from put_data() not being caught.
+
+	Files Affected:
+
+	dist_prec.c
+
+	Description:
+
+	Modified routine to store put_data() error in ErrorFlag2 and
+	return a single ERROR value if an error occurs.		KAC via TJB
+
+
+Fixed uninitialized value errors in parse_output_info.c.
+
+	Files Affected:
+
+	parse_output_info.c
+
+	Description:
+
+	Added default values for format, typestr, and multstr, so that they
+	can be omitted from global param file.			TJB
 
 
 

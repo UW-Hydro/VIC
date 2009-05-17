@@ -25,7 +25,9 @@ void parse_output_info(filenames_struct      *names,
 	      N_OUTFILES.					TJB
   2009-Feb-09 Sets PRT_SNOW_BAND to FALSE if N_OUTFILES has been
 	      specified.					TJB
-
+  2009-Mar-15 Added default values for format, typestr, and
+	      multstr, so that they can be omitted from global
+	      param file.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -85,6 +87,9 @@ void parse_output_info(filenames_struct      *names,
         if (outfilenum < 0) {
           nrerror("Error in global param file: \"OUTFILE\" must be specified before you can specify \"OUTVAR\".");
         }
+        strcpy(format,"");
+        strcpy(typestr,"");
+        strcpy(multstr,"");
         sscanf(cmdstr,"%*s %s %s %s %s",varname, format, typestr, multstr);
         if (strcasecmp("",format) == 0) {
           strcpy(format,"*");

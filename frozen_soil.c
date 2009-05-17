@@ -8,19 +8,19 @@
 
 static char vcid[] = "$Id$";
 
-void   finish_frozen_soil_calcs(energy_bal_struct *energy,
-			      layer_data_struct *layer_wet,
-			      layer_data_struct *layer_dry,
-			      layer_data_struct *layer,
-			      soil_con_struct   *soil_con,
-			      int                Nnodes,
-			      int                veg,
-			      double             mu,
-			      double            *T,
-			      double            *kappa,
-			      double            *Cs,
-			      double            *moist) {
-/******************************************************************
+int finish_frozen_soil_calcs(energy_bal_struct *energy,
+			     layer_data_struct *layer_wet,
+			     layer_data_struct *layer_dry,
+			     layer_data_struct *layer,
+			     soil_con_struct   *soil_con,
+			     int                Nnodes,
+			     int                veg,
+			     double             mu,
+			     double            *T,
+			     double            *kappa,
+			     double            *Cs,
+			     double            *moist) {
+  /******************************************************************
   finish_frozen_soil_calcs      Keith Cherkauer      July 27, 1998
 
   This subroutine redistributes soil properties based on the 
@@ -36,6 +36,9 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
   2007-Apr-24 For IMPLICIT option, added Ming Pan's new functions
 	      (solve_T_profile_implicit and fda_heat_eqn).		JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
+  2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
+  2009-Feb-09 Modified to handle error flags and pass Zsum_node instead 
+              of dz_node to esimate_layer_ice_content.			KAC via TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -43,9 +46,9 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
   extern debug_struct  debug;
 #endif
 
-  int     i;
+  int     i, ErrorFlag;
 
-  find_0_degree_fronts(energy, soil_con->dz_node, soil_con->Zsum_node, T, Nnodes);
+  find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
 
   /** Store Layer Temperature Values **/
   for(i=0;i<Nnodes;i++) energy->T[i] = T[i];
@@ -55,53 +58,54 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
 
   /** Redistribute Soil Properties for New Frozen Soil Layer Size **/
   if(soil_con->FS_ACTIVE && options.FROZEN_SOIL)
-    estimate_layer_ice_content(layer_wet, soil_con->dz_node, energy->T,
-			       soil_con->max_moist_node, 
+    ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
+					   soil_con->max_moist_node, 
 #if QUICK_FS
-			       soil_con->ufwc_table_node,
+					   soil_con->ufwc_table_node,
 #else
-			       soil_con->expt_node, soil_con->bubble_node, 
+					   soil_con->expt_node, soil_con->bubble_node, 
 #endif // QUICK_FS
-			       soil_con->depth, soil_con->max_moist, 
+					   soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
-			       soil_con->ufwc_table_layer,
+					   soil_con->ufwc_table_layer,
 #else
-			       soil_con->expt, soil_con->bubble, 
+					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
 #if SPATIAL_FROST
-			       soil_con->frost_fract, soil_con->frost_slope, 
+					   soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-			       soil_con->porosity,
-			       soil_con->effective_porosity,
+					   soil_con->porosity,
+					   soil_con->effective_porosity,
 #endif // EXCESS_ICE
-			       soil_con->bulk_density,
-			       soil_con->soil_density, soil_con->quartz,
-			       soil_con->layer_node_fract, Nnodes, 
-			       options.Nlayer, soil_con->FS_ACTIVE);
+					   soil_con->bulk_density,
+					   soil_con->soil_density, soil_con->quartz,
+					   soil_con->layer_node_fract, Nnodes, 
+					   options.Nlayer, soil_con->FS_ACTIVE);
   if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL)
-    estimate_layer_ice_content(layer_dry, soil_con->dz_node, energy->T,
-			       soil_con->max_moist_node, 
+    ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
+					   soil_con->max_moist_node, 
 #if QUICK_FS
-			       soil_con->ufwc_table_node,
+					   soil_con->ufwc_table_node,
 #else
-			       soil_con->expt_node, soil_con->bubble_node, 
+					   soil_con->expt_node, soil_con->bubble_node, 
 #endif // QUICK_FS
-			       soil_con->depth, soil_con->max_moist, 
+					   soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
-			       soil_con->ufwc_table_layer,
+					   soil_con->ufwc_table_layer,
 #else
-			       soil_con->expt, soil_con->bubble, 
+					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
 #if SPATIAL_FROST
-			       soil_con->frost_fract, soil_con->frost_slope, 
+					   soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-			       soil_con->porosity, soil_con->effective_porosity,
+					   soil_con->porosity, soil_con->effective_porosity,
 #endif // EXCESS_ICE
-			       soil_con->bulk_density, soil_con->soil_density, 
-			       soil_con->quartz, soil_con->layer_node_fract, 
-			       Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
+					   soil_con->bulk_density, soil_con->soil_density, 
+					   soil_con->quartz, soil_con->layer_node_fract, 
+					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
+  if ( ErrorFlag == ERROR ) return (ERROR);
   
 #if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
@@ -114,12 +118,13 @@ void   finish_frozen_soil_calcs(energy_bal_struct *energy,
 #endif
   } 
 #endif
+
+  return (0);
   
 }
 
 int  solve_T_profile(double *T,
 		     double *T0,
-		     double *dz_node,
 		     double *Zsum,
 		     double *kappa,
 		     double *Cs,
@@ -168,6 +173,8 @@ int  solve_T_profile(double *T,
   2007-Aug-08 Added option for EXCESS_ICE.					JCA
   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
   2007-Oct-11 Fixed error in EXP_TRANS formulation.				JCA
+  2009-Feb-09 Removed dz_node from call to solve_T_profile and 
+              solve_T_profile_implicit.                                         KAC
 **********************************************************************/
 
   extern option_struct options;
@@ -271,7 +278,6 @@ int  solve_T_profile(double *T,
 
 int solve_T_profile_implicit(double *T,                           // update
 			     double *T0,                    // keep
-			     double *dz,                    // soil parameter
 			     double *Zsum,                  // soil parameter
 			     double *kappa,                 // update if necessary
 			     double *Cs,                    // update if necessary
@@ -315,6 +321,8 @@ int solve_T_profile_implicit(double *T,                           // update
   2006-Aug-09 Included terms needed for Cs and kappa nodal updating for
 	      new ice.							JCA
   2007-Aug-08 Added EXCESS_ICE OPTION.					JCA
+  2009-Feb-09 Removed dz_node from call to solve_T_profile and 
+              solve_T_profile_implicit.                                         KAC
 
   **********************************************************************/
   

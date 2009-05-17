@@ -77,6 +77,11 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2008-Mar-01 Reinserted missing logic for QUICK_FS in calls to
 	      distribute_node_moisture_properties() and
 	      estimate_layer_ice_content().				TJB
+  2009-Feb-09 Removed dz_node from call to
+	      distribute_node_moisture_properties.			KAC via TJB
+  2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
+  2009-Mar-15 Modified to not call estimate_layer_ice_content() if
+	      not modeling frozen soil.					KAC via TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -584,7 +589,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						energy[veg][band].ice,
 						energy[veg][band].kappa_node,
 						energy[veg][band].Cs_node,
-						soil_con->dz_node,
 						soil_con->Zsum_node,
 						energy[veg][band].T,
 						soil_con->max_moist_node,
@@ -621,46 +625,46 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 		cell[dry][veg][band].layer[lidx].ice = ice[veg][band][lidx];
 #endif
 	      }
-	      if ( !( options.LAKES && veg == MaxVeg ) ) {
-		estimate_layer_ice_content(cell[dry][veg][band].layer,
-					   soil_con->dz_node,
-					   energy[veg][band].T,
-					   soil_con->max_moist_node,
+	      if ( !( options.LAKES && veg == MaxVeg ) && options.FROZEN_SOIL && soil_con->FS_ACTIVE ) {
+		ErrorFlag = estimate_layer_ice_content(cell[dry][veg][band].layer,
+						       soil_con->Zsum_node,
+						       energy[veg][band].T,
+						       soil_con->max_moist_node,
 #if QUICK_FS
-					   soil_con->ufwc_table_node,
+						       soil_con->ufwc_table_node,
 #else
-					   soil_con->expt_node,
-					   soil_con->bubble_node,
+						       soil_con->expt_node,
+						       soil_con->bubble_node,
 #endif // QUICK_FS
-					   soil_con->depth,
-					   soil_con->max_moist,
+						       soil_con->depth,
+						       soil_con->max_moist,
 #if QUICK_FS
-					   soil_con->ufwc_table_layer,
+						       soil_con->ufwc_table_layer,
 #else
-					   soil_con->expt,
-					   soil_con->bubble,
+						       soil_con->expt,
+						       soil_con->bubble,
 #endif // QUICK_FS
 #if SPATIAL_FROST
-					   soil_con->frost_fract, 
-					   soil_con->frost_slope, 
+						       soil_con->frost_fract, 
+						       soil_con->frost_slope, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
+						       soil_con->porosity,
+						       soil_con->effective_porosity,
 #endif // EXCESS_ICE
-					   soil_con->bulk_density,
-					   soil_con->soil_density,
-					   soil_con->quartz, 
-					   soil_con->layer_node_fract,
-					   Nnodes, options.Nlayer, 
-					   soil_con->FS_ACTIVE);
+						       soil_con->bulk_density,
+						       soil_con->soil_density,
+						       soil_con->quartz, 
+						       soil_con->layer_node_fract,
+						       Nnodes, options.Nlayer, 
+						       soil_con->FS_ACTIVE);
 		
 	      }
 	    }
 	    
 	    /* Find freezing and thawing front depths */
 	    if(!options.QUICK_FLUX && soil_con->FS_ACTIVE) 
-	      find_0_degree_fronts(&energy[veg][band], soil_con->dz_node, soil_con->Zsum_node,
+	      find_0_degree_fronts(&energy[veg][band], soil_con->Zsum_node,
 				   energy[veg][band].T, Nnodes);
 	  }
 	}
@@ -759,6 +763,11 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
   node temperatures to the new depths, then recalculates the nodal
   thermal properties.  Much of this routine is taken directly from
   initialize_model_state.
+
+  Modifications:
+  2009-Feb-09 Removed dz_node from call to
+	      distribute_node_moisture_properties.			KAC via TJB
+  2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -935,7 +944,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						  energy[veg][band].ice,
 						  energy[veg][band].kappa_node,
 						  energy[veg][band].Cs_node,
-						  soil_con->dz_node,
 						  soil_con->Zsum_node,
 						  energy[veg][band].T,
 						  soil_con->max_moist_node,
@@ -963,44 +971,44 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 	    /* initialize layer moistures and ice contents */
 	    for ( dry = 0; dry < Ndist; dry++ ) {	      
 	      if ( !( options.LAKES && veg == MaxVeg ) ) 
-		estimate_layer_ice_content(cell[dry][veg][band].layer,
-					   soil_con->dz_node,
-					   energy[veg][band].T,
-					   soil_con->max_moist_node,
+		ErrorFlag = estimate_layer_ice_content(cell[dry][veg][band].layer,
+						       soil_con->Zsum_node,
+						       energy[veg][band].T,
+						       soil_con->max_moist_node,
 #if QUICK_FS
-					   soil_con->ufwc_table_node,
+						       soil_con->ufwc_table_node,
 #else
-					   soil_con->expt_node,
-					   soil_con->bubble_node,
+						       soil_con->expt_node,
+						       soil_con->bubble_node,
 #endif // QUICK_FS
-					   soil_con->depth,
-					   soil_con->max_moist,
+						       soil_con->depth,
+						       soil_con->max_moist,
 #if QUICK_FS
-					   soil_con->ufwc_table_layer,
+						       soil_con->ufwc_table_layer,
 #else
-					   soil_con->expt,
-					   soil_con->bubble,
+						       soil_con->expt,
+						       soil_con->bubble,
 #endif // QUICK_FS
 #if SPATIAL_FROST
-					   soil_con->frost_fract, 
-					   soil_con->frost_slope, 
+						       soil_con->frost_fract, 
+						       soil_con->frost_slope, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
+						       soil_con->porosity,
+						       soil_con->effective_porosity,
 #endif // EXCESS_ICE
-					   soil_con->bulk_density,
-					   soil_con->soil_density,
-					   soil_con->quartz, 
-					   soil_con->layer_node_fract,
-					   Nnodes, options.Nlayer, 
-					   soil_con->FS_ACTIVE);	      
+						       soil_con->bulk_density,
+						       soil_con->soil_density,
+						       soil_con->quartz, 
+						       soil_con->layer_node_fract,
+						       Nnodes, options.Nlayer, 
+						       soil_con->FS_ACTIVE);	      
 	    }
 	    
 	    /* Find freezing and thawing front depths */
 	    if(!options.QUICK_FLUX && soil_con->FS_ACTIVE) 
 	      if ( !( options.LAKES && veg == MaxVeg ) ) 
-		find_0_degree_fronts(&energy[veg][band], soil_con->dz_node, soil_con->Zsum_node,
+		find_0_degree_fronts(&energy[veg][band], soil_con->Zsum_node,
 				     energy[veg][band].T, Nnodes);
 	  }
 	}//band

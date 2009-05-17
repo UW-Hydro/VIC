@@ -82,6 +82,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2007-Aug-24 Modified to use arno_evap rather than canopy_evap if LAI
               is 0, e.g. winter cropland.				KAC via TJB
   2008-Mar-01 Fixed typo in declaration of ufwc_table_layer.		TJB
+  2009-Feb-09 Modified to remove dz_node.				KAC via TJB
 
 **********************************************************************/
 {
@@ -196,7 +197,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *alpha;
   double *beta;
   double *bubble_node;
-  double *dz_node;
   double *Zsum_node;
   double *expt_node;
   double *gamma;
@@ -359,7 +359,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   alpha                   = (double *) va_arg(ap, double *);
   beta                    = (double *) va_arg(ap, double *);
   bubble_node             = (double *) va_arg(ap, double *);
-  dz_node                 = (double *) va_arg(ap, double *);
   Zsum_node               = (double *) va_arg(ap, double *);
   expt_node               = (double *) va_arg(ap, double *);
   gamma                   = (double *) va_arg(ap, double *);
@@ -488,7 +487,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       
       /* IMPLICIT Solution */
       if(options.IMPLICIT) {
-	Error = solve_T_profile_implicit(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile_implicit(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
 					 moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
 #if EXCESS_ICE
 					 porosity_node, effective_porosity_node,
@@ -515,13 +514,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	if(options.IMPLICIT)
 	  FIRST_SOLN[0] = TRUE;
 #if QUICK_FS
-	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp,
 				depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
 				NOFLUX, EXP_TRANS, veg_class);
 #else
-	Error = solve_T_profile(Tnew_node, T_node, dz_node, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp, depth, 
 #if EXCESS_ICE

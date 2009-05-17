@@ -2654,6 +2654,8 @@ void update_prcp(dist_prcp_struct *prcp,
 	      lake ice.								LCB via TJB
   2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent.			LCB via TJB
   2008-Jun-16 Fix for swe accounting errors.					LCB via TJB
+  2009-Feb-09 Removed dz_node from call to
+	      distribute_node_moisture_properties.				KAC via TJB
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
 		    energy_bal_struct *lake_energy, 
@@ -2866,7 +2868,7 @@ int initialize_prcp(dist_prcp_struct *prcp,
     moist[index] = cell[WET][iveg][band].layer[index].moist;
   ErrorFlag = distribute_node_moisture_properties(wland_energy[iveg][band].moist, wland_energy[iveg][band].ice,
                                       wland_energy[iveg][band].kappa_node, wland_energy[iveg][band].Cs_node,
-                                      soil_con.dz_node, soil_con.Zsum_node, wland_energy[iveg][band].T,
+                                      soil_con.Zsum_node, wland_energy[iveg][band].T,
                                       soil_con.max_moist_node,
 #if QUICK_FS
                                       soil_con.ufwc_table_node,

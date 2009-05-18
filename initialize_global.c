@@ -101,6 +101,7 @@ void initialize_global() {
   2008-Apr-21 Added SNOW_DENSITY option.					TJB
   2009-Jan-12 Added COMPUTE_TREELINE option.					TJB
   2009-Jan-16 Added options.AERO_RESIST_CANSNOW.				TJB
+  2009-May-17 Added options.MIN_LIQ.						TJB
 
 *********************************************************************/
 
@@ -128,6 +129,7 @@ void initialize_global() {
   options.JULY_TAVG_SUPPLIED    = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
+  options.MIN_LIQ               = FALSE;
   options.MIN_WIND_SPEED        = 0.0;
   options.Nlayer                = 2;
   options.Nnode                 = 3;

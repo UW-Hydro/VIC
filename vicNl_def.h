@@ -57,6 +57,7 @@
   2009-Mar-16 Added min_liq to the layer_data_struct.			TJB
   2009-May-17 Added OUT_ASAT.						TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
+  2009-May-17 Added options.MIN_LIQ.					TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -457,6 +458,15 @@ typedef struct {
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
+  char   MIN_LIQ;        /* TRUE = replace residual moisture with "min_liq"
+			    in all equations that depend on soil moisture
+			    content; min_liq = residual moisture multiplied
+			    by the max_unfrozen_water content for the current
+			    temperature; this prevents all soil moisture
+			    from freezing.
+			    FALSE = use normal residual moisture in all
+			    moisture-dependent equations; this allows all
+			    soil moisture to freeze */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */

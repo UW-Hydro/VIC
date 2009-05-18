@@ -545,6 +545,10 @@ int estimate_layer_ice_content(layer_data_struct *layer,
   2009-Mar-16 Added resid_moist to argument list, so that
 	      min_liq (minimum allowable liquid water content)
 	      can be computed here for greater efficiency.	TJB
+  2009-May-17 Added options.MIN_LIQ.  Now use of min_liq is
+	      optional; if MIN_LIQ is FALSE, min_liq = residual
+	      residual moisture and model behaves as before
+	      the appearance of min_liq.			TJB
 
 **************************************************************/
 
@@ -652,7 +656,10 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 #endif
 #endif
 	if ( tmp_ice[nidx][frost_area] < 0 ) tmp_ice[nidx][frost_area] = 0.;
-        min_liq_node[nidx][frost_area] = resid_moist[lidx]*(layer[lidx].moist-tmp_ice[nidx][frost_area])/max_moist[lidx];
+        if (options.MIN_LIQ)
+          min_liq_node[nidx][frost_area] = resid_moist[lidx]*(layer[lidx].moist-tmp_ice[nidx][frost_area])/max_moist[lidx];
+        else
+          min_liq_node[nidx][frost_area] = resid_moist[lidx];
       }
     }
 

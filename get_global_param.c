@@ -80,6 +80,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.					TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.			TJB
+  2009-May-17 Added options.MIN_LIQ.						TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -458,6 +459,13 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("FALSE", flgstr) == 0) options.LAKE_PROFILE = FALSE;
         else {
 	  options.LAKE_PROFILE = TRUE;
+	}
+      }
+      else if(strcasecmp("MIN_LIQ",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("FALSE", flgstr) == 0) options.MIN_LIQ = FALSE;
+        else {
+	  options.MIN_LIQ = TRUE;
 	}
       }
 

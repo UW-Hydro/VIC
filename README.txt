@@ -215,6 +215,39 @@ Added OUT_ASAT output variable.
 	Added the output variable OUT_ASAT to track saturated area.
 
 
+New MIN_LIQ option, with fixes to min_liq formulation.
+
+	Files Affected:
+
+	arno_evap.c
+	frozen_soil.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	initialize_soil.c
+	lakes.eb.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Made use of min_liq (instead of residual moisture) optional, via
+	options.MIN_LIQ.  If MIN_LIQ is FALSE (or omitted) in global
+	parameter file, all equations that depend on liquid soil moisture
+	use residual moisture as their absolute minimum liquid water
+	content.  If MIN_LIQ is TRUE, all of these equations use min_liq
+	as their absolute minimum liquid water content.  Min_liq is
+	computed in soil_conduction.c as residual moisture multiplied
+	by the max_unfrozen_water content at the current temperature.
+
+	Made min_liq formulation more consistent across the model code.
+	Added min_liq to the layer_struct so that this temperature-dependent
+	quantity can be computed once per time step and communicated to all
+	functions that look at soil moisture.			TJB
+
+
 Bug Fixes:
 ----------
 
@@ -291,28 +324,6 @@ Fixed uninitialized value errors in parse_output_info.c.
 
 	Added default values for format, typestr, and multstr, so that they
 	can be omitted from global param file.			TJB
-
-
-Fixed inconsistencies in min_liq formulation.
-
-	Files Affected:
-
-	arno_evap.c
-	frozen_soil.c
-	initialize_model_state.c
-	initialize_soil.c
-	lakes.eb.c
-	runoff.c
-	soil_conduction.c
-	vicNl_def.h
-	vicNl.h
-
-	Description:
-
-	Made min_liq formulation more consistent across the model code.
-	Added min_liq to the layer_struct so that this temperature-dependent
-	quantity can be computed once per time step and communicated to all
-	functions that look at soil moisture.			TJB
 
 
 

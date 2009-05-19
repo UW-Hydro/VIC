@@ -38,6 +38,7 @@ void display_current_settings(int                 mode,
   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
   2009-Jan-16 Added AERO_RESIST_CANSNOW option.			TJB
   2009-May-17 Added AR_406_LS to AERO_RESIST_CANSNOW.		TJB
+  2009-May-18 Added PLAPSE option.				TJB
 **********************************************************************/
 {
 
@@ -207,6 +208,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"NOFLUX\t\t\tTRUE\n");
   else
     fprintf(stdout,"NOFLUX\t\t\tFALSE\n");
+  if (options.PLAPSE)
+    fprintf(stdout,"PLAPSE\t\tTRUE\n");
+  else
+    fprintf(stdout,"PLAPSE\t\tFALSE\n");
   if (options.IMPLICIT)
     fprintf(stdout,"IMPLICIT\t\tTRUE\n");
   else

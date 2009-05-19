@@ -58,6 +58,8 @@
   2009-May-17 Added OUT_ASAT.						TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
   2009-May-17 Added options.MIN_LIQ.					TJB
+  2009-May-18 Added options.PLAPSE and Rd, the gas constant for dry
+	      air.							TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -130,6 +132,7 @@
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
+#define Rd           287        /* Gas constant of dry air (J/degC*kg) */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */
 #define kPa2Pa 1000.            /* converts kPa to Pa */
@@ -450,10 +453,14 @@ typedef struct {
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
 			    FALSE = RESOLUTION stores grid cell side length in degrees */
+  char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node 
+			    distribution for soil heat flux calculations*/
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
+  char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
+			    soil thermal fluxes */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
@@ -475,10 +482,10 @@ typedef struct {
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
-  char   IMPLICIT;         /* TRUE = Use implicit solution when computing 
-			    soil thermal fluxes */
-  char   EXP_TRANS;         /* TRUE = Uses grid transform for exponential node 
-			       distribution for soil heat flux calculations*/
+  char   PLAPSE;         /* TRUE = If air pressure not supplied as an
+			    input forcing, compute it by lapsing sea-level
+			    pressure by grid cell average elevation;
+			    FALSE = air pressure set to constant 95.5 kPa */
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */

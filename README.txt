@@ -248,6 +248,24 @@ New MIN_LIQ option, with fixes to min_liq formulation.
 	functions that look at soil moisture.			TJB
 
 
+New PLAPSE option, which lapses air pressure (and density) by grid cell average elevation.
+
+	Files Affected:
+
+	display_current_settings.c
+	initialize_atmos.c
+	initialize_global.c
+	vicNl_def.h
+
+	Description:
+
+	Previously, when air pressure was not supplied in the input forcings,
+	VIC would set it equal to a constant 95.5 kPa.  Now, if options.PLAPSE
+	is TRUE, and if air pressure is not supplied, VIC computes it by
+	lapsing sea level pressure by grid cell average elevation.  Air
+	density is handled the same way.			TJB
+
+
 Bug Fixes:
 ----------
 

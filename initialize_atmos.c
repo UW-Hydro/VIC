@@ -88,6 +88,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      FALSE, i.e. for a water balance mode run.				TJB
   2009-Jan-12 Modified to pass avgJulyAirTemp argument to
 	      compute_treeline(). 						TJB
+  2009-May-18 Added options.PLAPSE, which when TRUE changes pressure
+	      calculation to be a function of elevation and air temperature
+	      (as opposed to a constant 95.5 kPa, as it was previously).
+	      Made similar change to density calculation.			TJB
 
 **********************************************************************/
 {
@@ -750,23 +754,46 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   if(!param_set.TYPE[PRESSURE].SUPPLIED) {
     if(!param_set.TYPE[DENSITY].SUPPLIED) {
-      /* set pressure to constant value */
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-	atmos[rec].pressure[NR] = 95500.;
-	for (i = 0; i < NF; i++) {
-	  atmos[rec].pressure[i] = atmos[rec].pressure[NR];
-	}
+      /* Estimate pressure */
+      if (options.PLAPSE) {
+        /* Assume average virtual temperature in air column
+           between ground and sea level = KELVIN+atmos[rec].air_temp[NR] + 0.5*elevation*LAPSE_PM */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+          atmos[rec].pressure[NR] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[NR]+0.5*elevation*LAPSE_PM)));
+          for (i = 0; i < NF; i++) {
+            atmos[rec].pressure[i] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[i]+0.5*elevation*LAPSE_PM)));
+          }
+        }
+      }
+      else {
+        /* set pressure to constant value */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+	  atmos[rec].pressure[NR] = 95500.;
+	  for (i = 0; i < NF; i++) {
+	    atmos[rec].pressure[i] = atmos[rec].pressure[NR];
+	  }
+        }
       }
     }
     else {
       /* use observed densities to estimate pressure */
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-	atmos[rec].pressure[NR] = (275.0 + atmos[rec].air_temp[NR])
-	  *atmos[rec].density[NR]/0.003486;
-	for (i = 0; i < NF; i++) {
-	  atmos[rec].pressure[i] = (275.0 + atmos[rec].air_temp[i])
-	    *atmos[rec].density[i]/0.003486;
-	}
+      if (options.PLAPSE) {
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+          atmos[rec].pressure[NR] = (KELVIN+atmos[rec].air_temp[NR])*atmos[rec].density[NR]*Rd;
+          for (i = 0; i < NF; i++) {
+            atmos[rec].pressure[i] = (KELVIN+atmos[rec].air_temp[i])*atmos[rec].density[i]*Rd;
+          }
+        }
+      }
+      else {
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+	  atmos[rec].pressure[NR] = (275.0 + atmos[rec].air_temp[NR])
+	    *atmos[rec].density[NR]/0.003486;
+	  for (i = 0; i < NF; i++) {
+	    atmos[rec].pressure[i] = (275.0 + atmos[rec].air_temp[i])
+	      *atmos[rec].density[i]/0.003486;
+	  }
+        }
       }
     }
   }
@@ -807,12 +834,23 @@ void initialize_atmos(atmos_data_struct        *atmos,
   ********************************************************/
 
   if(!param_set.TYPE[DENSITY].SUPPLIED) {
-    for (rec = 0; rec < global_param.nrecs; rec++) {
-      atmos[rec].density[NR] = 0.003486*atmos[rec].pressure[NR]/
-	(275.0 + atmos[rec].air_temp[NR]);
-      for (i = 0; i < NF; i++) {
-	atmos[rec].density[i] = 0.003486*atmos[rec].pressure[i]/
-	  (275.0 + atmos[rec].air_temp[i]);
+    /* use pressure to estimate density */
+    if (options.PLAPSE) {
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        atmos[rec].density[NR] = atmos[rec].pressure[NR]/(Rd*(KELVIN+atmos[rec].air_temp[NR]));
+        for (i = 0; i < NF; i++) {
+          atmos[rec].density[i] = atmos[rec].pressure[i]/(Rd*(KELVIN+atmos[rec].air_temp[i]));
+        }
+      }
+    }
+    else {
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        atmos[rec].density[NR] = 0.003486*atmos[rec].pressure[NR]/
+	  (275.0 + atmos[rec].air_temp[NR]);
+        for (i = 0; i < NF; i++) {
+	  atmos[rec].density[i] = 0.003486*atmos[rec].pressure[i]/
+	    (275.0 + atmos[rec].air_temp[i]);
+        }
       }
     }
   }

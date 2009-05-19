@@ -102,6 +102,7 @@ void initialize_global() {
   2009-Jan-12 Added COMPUTE_TREELINE option.					TJB
   2009-Jan-16 Added options.AERO_RESIST_CANSNOW.				TJB
   2009-May-17 Added options.MIN_LIQ.						TJB
+  2009-May-17 Added options.PLAPSE.						TJB
 
 *********************************************************************/
 
@@ -123,9 +124,11 @@ void initialize_global() {
   options.CORRPREC              = FALSE;
   options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
+  options.EXP_TRANS             = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX             = FALSE;
+  options.IMPLICIT              = FALSE;
   options.JULY_TAVG_SUPPLIED    = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
@@ -134,8 +137,7 @@ void initialize_global() {
   options.Nlayer                = 2;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
-  options.IMPLICIT              = FALSE;
-  options.EXP_TRANS             = FALSE;
+  options.PLAPSE                = FALSE;
   options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;

@@ -48,6 +48,10 @@ AERO_RESIST_CANSNOW	AR_410	# Options for aerodynamic resistance in snow-filled c
 				# default = AR_410
 BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
+MIN_LIQ		FALSE	# TRUE = use temperature-dependent minimum for liquid soil moisture instead of residual moisture
+PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing:
+			# TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation;
+			# FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 
 #######################################################################

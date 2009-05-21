@@ -111,8 +111,8 @@
 #define MAXIT_FE        25
  
 /***** Coefficient multiplied by the LAI to determine the amount of
-       water that can be storde in the canopy *****/
-#define LAI_WATER_FACTOR 0.1
+       water that can be stored in the canopy *****/
+#define LAI_WATER_FACTOR 0.2
 
 /***** Longwave correction factor, used to correct estimated incoming
        longwave radiation (use 1, unless measured longwave available for

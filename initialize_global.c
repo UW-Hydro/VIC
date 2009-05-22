@@ -102,7 +102,8 @@ void initialize_global() {
   2009-Jan-12 Added COMPUTE_TREELINE option.					TJB
   2009-Jan-16 Added options.AERO_RESIST_CANSNOW.				TJB
   2009-May-17 Added options.MIN_LIQ.						TJB
-  2009-May-17 Added options.PLAPSE.						TJB
+  2009-May-18 Added options.PLAPSE.						TJB
+  2009-May-20 Set default of options.AERO_RESIST_CANSNOW to AR_406_FULL.	TJB
 
 *********************************************************************/
 
@@ -118,7 +119,7 @@ void initialize_global() {
 
   // simulation modes
   options.AboveTreelineVeg      = -1;
-  options.AERO_RESIST_CANSNOW   = AR_410;
+  options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
   options.CORRPREC              = FALSE;

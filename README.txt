@@ -220,8 +220,10 @@ New MIN_LIQ option, with fixes to min_liq formulation.
 	Files Affected:
 
 	arno_evap.c
+	display_current_settings.c
 	frozen_soil.c
 	get_global_param.c
+	global.param.sample
 	initialize_global.c
 	initialize_model_state.c
 	initialize_soil.c
@@ -253,6 +255,7 @@ New PLAPSE option, which lapses air pressure (and density) by grid cell average 
 	Files Affected:
 
 	display_current_settings.c
+	global.param.sample
 	initialize_atmos.c
 	initialize_global.c
 	vicNl_def.h
@@ -264,6 +267,36 @@ New PLAPSE option, which lapses air pressure (and density) by grid cell average 
 	is TRUE, and if air pressure is not supplied, VIC computes it by
 	lapsing sea level pressure by grid cell average elevation.  Air
 	density is handled the same way.			TJB
+
+
+New GRND_FLUX_TYPE option, with fixes to deltaH and fusion equations.
+
+	Files Affected:
+
+	display_current_settings.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	surface_fluxes.c
+	vicNl_def.h
+
+	Description:
+
+	Corrected deltaH and fusion terms of surface energy balance, by taking
+	surf_atten into account, as in Liang et al 1999.  Added GRND_FLUX_TYPE
+	option, to allow backwards compatibility with versions 4.0.6 and
+	4.1.0.
+
+	Possible values are:
+	  GF_406: use (flawed) formulas for ground flux, deltaH, and fusion
+	          from VIC 4.0.6 and earlier
+	  GF_410: use formulas from VIC 4.1.0 (ground flux is correct,
+	          but deltaH and fusion ignore surf_atten)
+	  GF_FULL: use correct ground flux formula from VIC 4.1.0 and
+	          also take surf_atten into account in deltaH and fusion
+	GF_FULL is the default value.
+
 
 
 Bug Fixes:

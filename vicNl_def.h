@@ -60,6 +60,8 @@
   2009-May-17 Added options.MIN_LIQ.					TJB
   2009-May-18 Added options.PLAPSE and Rd, the gas constant for dry
 	      air.							TJB
+  2009-May-20 Added options.GRND_FLUX_TYPE.				TJB
+
 *********************************************************************/
 
 #include <user_def.h>
@@ -98,6 +100,11 @@
 #define AR_406_FULL 2
 #define AR_410      3
 #define AR_COMBO    4
+
+/***** Ground Flux options *****/
+#define GF_406  0
+#define GF_410  1
+#define GF_FULL 2
 
 /***** Time Constants *****/
 #define DAYS_PER_YEAR 365.
@@ -459,6 +466,12 @@ typedef struct {
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
 			    balance */
+  char   GRND_FLUX_TYPE; /* "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
+                                        from VIC 4.0.6 and earlier
+                            "GF_410"  = use formulas from VIC 4.1.0 (ground flux is correct,
+                                        but deltaH and fusion ignore surf_atten)
+                            "GF_FULL" = use correct ground flux formula from VIC 4.1.0 and
+                                        also take surf_atten into account in deltaH and fusion */
   char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
 			    soil thermal fluxes */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,

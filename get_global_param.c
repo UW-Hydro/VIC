@@ -81,6 +81,8 @@ global_param_struct get_global_param(filenames_struct *names,
 	      options.AERO_RESIST_CANSNOW.					TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.			TJB
   2009-May-17 Added options.MIN_LIQ.						TJB
+  2009-May-18 Added options.PLAPSE.						TJB
+  2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -467,6 +469,19 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.MIN_LIQ = TRUE;
 	}
+      }
+      else if(strcasecmp("PLAPSE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("FALSE", flgstr) == 0) options.PLAPSE = FALSE;
+        else {
+	  options.PLAPSE = TRUE;
+	}
+      }
+      else if (strcasecmp("GRND_FLUX_TYPE", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
+        else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
+        else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
       }
 
 

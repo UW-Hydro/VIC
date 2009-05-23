@@ -83,6 +83,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
               is 0, e.g. winter cropland.				KAC via TJB
   2008-Mar-01 Fixed typo in declaration of ufwc_table_layer.		TJB
   2009-Feb-09 Modified to remove dz_node.				KAC via TJB
+  2009-May-20 Corrected the deltaH and fusion terms to account for
+	      surf_atten, as in Liang et al, 1999.
+	      Added options.GRND_FLUX_TYPE to allow backwards-compatibility
+	      with versions 4.0.6 and 4.1.0.				TJB
 
 **********************************************************************/
 {
@@ -472,10 +476,16 @@ double func_surf_energy_bal(double Ts, va_list ap)
       /*****************************************************
 	Compute the Ground Heat Flux from the Top Soil Layer
       *****************************************************/
-      *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		    * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
-				     + (kappa2 / D1 * ( 1. - exp( -D1 / dp )) 
-					* (T2 - (*T1)))) / 2.;
+      if (options.GRND_FLUX_TYPE == GF_406) {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
+		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
+      }
+      else {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
+		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean)
+				       + (kappa2 / D2 * ( 1. - exp( -D1 / dp )) 
+					  * (T2 - (*T1)))) / 2.;
+      }
       
     }
     else {
@@ -540,10 +550,15 @@ double func_surf_energy_bal(double Ts, va_list ap)
       /*****************************************************
         Compute the Ground Heat Flux from the Top Soil Layer
       *****************************************************/
-      *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		    * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
-				     + (kappa2 / D2 * (Tnew_node[2] 
-						       - (*T1)))) / 2.;
+      if (options.GRND_FLUX_TYPE == GF_406) {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
+		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
+      }
+      else {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
+		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
+				       + (kappa2 / D2 * (Tnew_node[2] - (*T1)))) / 2.;
+      }
       
     }
 
@@ -561,12 +576,24 @@ double func_surf_energy_bal(double Ts, va_list ap)
     else ice=0.;
 
     /* compute the change in heat storage */
-    *deltaH = (Cs1 * ((Ts_old + T1_old) 
-				       - (TMean + *T1)) * D1 / delta_t / 2.);
+    if (options.GRND_FLUX_TYPE == GF_FULL) {
+      *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
+                * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+    }
+    else {
+      *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+    }
     
     /* compute the change in heat due to solid - liquid phase changes */
-    if (FS_ACTIVE && options.FROZEN_SOIL)
-      *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+    if (FS_ACTIVE && options.FROZEN_SOIL) {
+      if (options.GRND_FLUX_TYPE == GF_FULL) {
+        *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
+                  * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+      }
+      else {
+        *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+      }
+    }
     
     /* if thin snowpack, compute the change in energy stored in the pack */
     if ( INCLUDE_SNOW ) {

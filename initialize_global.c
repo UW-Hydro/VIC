@@ -104,6 +104,7 @@ void initialize_global() {
   2009-May-17 Added options.MIN_LIQ.						TJB
   2009-May-18 Added options.PLAPSE.						TJB
   2009-May-20 Set default of options.AERO_RESIST_CANSNOW to AR_406_FULL.	TJB
+  2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
 
 *********************************************************************/
 
@@ -129,6 +130,7 @@ void initialize_global() {
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX             = FALSE;
+  options.GRND_FLUX_TYPE        = GF_FULL;
   options.IMPLICIT              = FALSE;
   options.JULY_TAVG_SUPPLIED    = FALSE;
   options.LAKES                 = FALSE;

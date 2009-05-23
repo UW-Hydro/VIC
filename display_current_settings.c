@@ -39,6 +39,7 @@ void display_current_settings(int                 mode,
   2009-Jan-16 Added AERO_RESIST_CANSNOW option.			TJB
   2009-May-17 Added AR_406_LS to AERO_RESIST_CANSNOW.		TJB
   2009-May-18 Added PLAPSE option.				TJB
+  2009-May-20 Added GRND_FLUX_TYPE option.			TJB
 **********************************************************************/
 {
 
@@ -269,6 +270,12 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_410\n");
   else if (options.AERO_RESIST_CANSNOW == AR_COMBO)
     fprintf(stdout,"AERO_RESIST_CANSNOW\t\tAR_COMBO\n");
+  if (options.GRND_FLUX_TYPE == GF_406)
+    fprintf(stdout,"GRND_FLUX_TYPE\t\tGF_406\n");
+  else if (options.GRND_FLUX_TYPE == GF_410)
+    fprintf(stdout,"GRND_FLUX_TYPE\t\tGF_410\n");
+  else if (options.GRND_FLUX_TYPE == GF_FULL)
+    fprintf(stdout,"GRND_FLUX_TYPE\t\tGF_FULL\n");
 
   fprintf(stdout,"\n");
   fprintf(stdout,"Input Forcing Data:\n");

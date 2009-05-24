@@ -103,8 +103,9 @@ double calc_atmos_energy_bal(double  InOverSensible,
 
   if ( Tcanopy <= -998 ) {
     if (options.CONTINUEONERROR == TFALLBACK) {
-      if (VERBOSE)
+#if VERBOSE
         fprintf(stderr,"WARNING: func_atmos_energy_bal() failed to converge, but continuing with previous temperature.\n");
+#endif // VERBOSE
       Tcanopy = Tair;
     }
     else {

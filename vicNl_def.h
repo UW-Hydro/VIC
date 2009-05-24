@@ -61,6 +61,7 @@
   2009-May-18 Added options.PLAPSE and Rd, the gas constant for dry
 	      air.							TJB
   2009-May-20 Added options.GRND_FLUX_TYPE.				TJB
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.		TJB
 
 *********************************************************************/
 
@@ -77,6 +78,9 @@
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
 #define ERROR -999              /* Error Flag returned by subroutines */
+
+/***** Error-handling options *****/
+#define TFALLBACK 2
 
 /***** Met file formats *****/
 #define ASCII 1

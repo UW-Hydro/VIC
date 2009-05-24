@@ -411,6 +411,9 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	      explicit solution.						JCA
   2007-Aug-08 Added EXCESS_ICE option.						JCA
   2007-Aug-31 Checked root_brent return value against -998 rather than -9998.	JCA
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
+	      allows simulation to continue when energy balance fails
+	      to converge by using previous T value.				TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -466,11 +469,18 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #endif
 	
 	if(T[j] <= -998 ) {
-	  error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
-				max_moist[j], bubble[j], expt[j], ice[j], 
-				gamma[j-1], A[j], B[j], C[j], D[j], 
-				E[j], ErrorString);
-          return ( ERROR );
+          if (options.CONTINUEONERROR == TFALLBACK) {
+            if (VERBOSE)
+              fprintf(stderr,"WARNING: soil_thermal_eqn() failed to converge, but continuing with previous temperature.\n");
+            T[j] = oldT;
+          }
+          else {
+	    error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
+				  max_moist[j], bubble[j], expt[j], ice[j], 
+				  gamma[j-1], A[j], B[j], C[j], D[j], 
+				  E[j], ErrorString);
+            return ( ERROR );
+	  }
 	}
       }
       
@@ -514,14 +524,21 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #endif
 	
 	if(T[j] <= -998 ) {
-	  error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
-				T[Nnodes-2], T0[Nnodes-1], 
-				moist[Nnodes-1], max_moist[Nnodes-1], 
-				bubble[Nnodes-1], 
-				expt[Nnodes-1], ice[Nnodes-1], 
-				gamma[Nnodes-2], 
-				A[j], B[j], C[j], D[j], E[j], ErrorString);
-          return ( ERROR );
+          if (options.CONTINUEONERROR == TFALLBACK) {
+            if (VERBOSE)
+              fprintf(stderr,"WARNING: soil_thermal_eqn() failed to converge, but continuing with previous temperature.\n");
+            T[j] = oldT;
+          }
+          else {
+	    error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
+				  T[Nnodes-2], T0[Nnodes-1], 
+				  moist[Nnodes-1], max_moist[Nnodes-1], 
+				  bubble[Nnodes-1], 
+				  expt[Nnodes-1], ice[Nnodes-1], 
+				  gamma[Nnodes-2], 
+				  A[j], B[j], C[j], D[j], E[j], ErrorString);
+            return ( ERROR );
+          }
         }
       }
       

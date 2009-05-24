@@ -62,12 +62,16 @@ static char vcid[] = "$Id$";
 	    root_brent.						TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
 	    flux calculations.					TJB
-2007-Apr-11 Modified to handle grid cell errors by returning to the
-            main subroutine, rather than ending the simulation.	KAC
-2007-Aug-27 Modified to drop canopy snow if it is especially thin, which
-            should improve the numeric stability of the canopy energy
-            balance solution.					KAC via TJB
-2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+  2007-Apr-11 Modified to handle grid cell errors by returning to the
+	      main subroutine, rather than ending the simulation.	KAC
+  2007-Aug-27 Modified to drop canopy snow if it is especially thin, which
+	      should improve the numeric stability of the canopy energy
+	      balance solution.						KAC via TJB
+  2007-Aug-31 Checked root_brent return value against -998 rather than
+	      -9998.							JCA
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
+	      allows simulation to continue when energy balance fails
+	      to converge by using previous T value.			TJB
 *****************************************************************************/
 int snow_intercept(double  AirDens,
 		    double  Dt, 
@@ -122,6 +126,9 @@ int snow_intercept(double  AirDens,
 		    veg_var_struct    *veg_var_dry,
 		    veg_var_struct    *veg_var_wet)
 {
+
+  extern option_struct options;
+
   /* double AdvectedEnergy; */         /* Energy advected by the rain (W/m2) */
   double BlownSnow;              /* Depth of snow blown of the canopy (m) */
   double DeltaSnowInt;           /* Change in the physical swe of snow
@@ -165,6 +172,7 @@ int snow_intercept(double  AirDens,
   double Tupper;
   double Tlower;
   double Evap;
+  double OldTfoliage;
 
   char ErrorString[MAXSTRING];
 
@@ -186,7 +194,9 @@ int snow_intercept(double  AirDens,
   
   Drip = 0.0;
   ReleasedMass = 0.0;
-  
+
+  OldTfoliage = *Tfoliage;
+
   /* Determine the maximum snow interception water equivalent.           
      Kobayashi, D., 1986, Snow Accumulation on a Narrow Board,           
      Cold Regions Science and Technology, (13), pp. 239-245.           
@@ -364,28 +374,34 @@ int snow_intercept(double  AirDens,
 			   VaporMassFlux);
     
     if ( *Tfoliage <= -998 ) {
-      
-      Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
-					  soil_con->elevation, 
-					  soil_con->Wcr, soil_con->Wpwp, 
-					  soil_con->depth, 
+      if (options.CONTINUEONERROR == TFALLBACK) {
+        if (VERBOSE)
+          fprintf(stderr,"WARNING: func_canopy_energy_bal() failed to converge, but continuing with previous temperature.\n");
+        *Tfoliage = OldTfoliage;
+      }
+      else { 
+        Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
+					    soil_con->elevation, 
+					    soil_con->Wcr, soil_con->Wpwp, 
+					    soil_con->depth, 
 #if SPATIAL_FROST
-					  soil_con->frost_fract, 
+					    soil_con->frost_fract, 
 #endif
-					  AirDens, EactAir, Press, Le, 
-					  Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
-					  RainFall, Wind, UnderStory, iveg, 
-					  veg_class, displacement, ref_height, 
-					  roughness, root, IntRainOrg, *IntSnow, 
-					  IntRain, layer_wet, layer_dry, veg_var_wet, 
-					  veg_var_dry, 
-					  LongOverIn, LongUnderOut, *NetShortOver, 
-					  AdvectedEnergy, 
-					  LatentHeat, LatentHeatSub, 
-					  LongOverOut, NetLongOver, &NetRadiation, 
-					  &RefreezeEnergy, SensibleHeat, 
-					  VaporMassFlux, ErrorString);
-      return( ERROR );
+					    AirDens, EactAir, Press, Le, 
+					    Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
+					    RainFall, Wind, UnderStory, iveg, 
+					    veg_class, displacement, ref_height, 
+					    roughness, root, IntRainOrg, *IntSnow, 
+					    IntRain, layer_wet, layer_dry, veg_var_wet, 
+					    veg_var_dry, 
+					    LongOverIn, LongUnderOut, *NetShortOver, 
+					    AdvectedEnergy, 
+					    LatentHeat, LatentHeatSub, 
+					    LongOverOut, NetLongOver, &NetRadiation, 
+					    &RefreezeEnergy, SensibleHeat, 
+					    VaporMassFlux, ErrorString);
+        return( ERROR );
+      }
     }
     
     Qnet = solve_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 

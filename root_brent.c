@@ -96,16 +96,17 @@ static char vcid[] = "$Id$";
 	      the same reason.						TJB
     21-Sep-04 No longer print warning to stderr from this routine;
 	      instead store warning messages in parameter ErrorString.	TJB
-    2007-Aug-31 Corrected handling of Function return value if Function returns ERROR.  
-               This can happen if Function is func_surf_energy_bal.  JCA
-    2007-Sep-1 Removed the integer "eval" since it is never used for anything.  JCA
+  2007-Aug-31 Corrected handling of Function return value if Function returns
+	      ERROR.  This can happen if Function is func_surf_energy_bal.	JCA
+  2007-Sep-01 Removed the integer "eval" since it is never used for anything.	JCA
+  2009-May-22 Modified root-bracketing scheme to handle case when one bound
+	      yields garbage output from the target function.			TJB
 *****************************************************************************/
 double root_brent(double LowerBound, double UpperBound, char *ErrorString,
                 double (*Function)(double Estimate, va_list ap), ...)
 {
   const char *Routine = "RootBrent";
-  va_list ap;                   /* Used in traversing variable argument list
-                                 */ 
+  va_list ap;                   /* Used in traversing variable argument list */ 
   double a;
   double b;
   double c;
@@ -120,44 +121,148 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
   double r;
   double s;
   double tol;
+  double last_bad;
+  double last_good;
+  int which_err;
   int i;
   int j;
 
   /* initialize variable argument list */
   a = LowerBound;
-  b = UpperBound;;
+  b = UpperBound;
   va_start(ap, Function);
   fa = Function(a, ap);
   va_start(ap, Function);
   fb = Function(b, ap);
-  
-  // if Function returns value of ERROR, then make sure root isn't mistakenly bracketed by
-  // making fa = fb
-  if(fa == ERROR || fb == ERROR)
-    fprintf(stderr,"WARNING: ERROR returned to root_brent on root-bracketing attempt 0: lower = %.4f->error=%.2f, upper = %.4f->error=%.2f\n",a,fa,b,fb);
-  if(fa == ERROR)
-    fb = ERROR;
-  else if (fb == ERROR)
-    fa = ERROR;
+ 
+  which_err = 0;
+
+  // If Function returns values of ERROR for both bounds, give up
+  if (fa == ERROR && fb == ERROR) {
+    sprintf(ErrorString,"ERROR: %s: lower and upper bounds %f and %f failed to bracket the root because the given function was not defined at either point.\n",Routine,a,b);
+    va_end(ap);
+    return(ERROR);
+  }      
+
+  // If Function returns value of ERROR for one bound but not both bounds,
+  // move the offending bound until the Function returns a valid value
+  if(fa == ERROR || fb == ERROR) {
+
+    if (fa == ERROR) {
+      which_err = -1;
+      last_bad = a;
+      last_good = b;
+    }
+    else {
+      which_err = 1;
+      last_good = a;
+      last_bad = b;
+    }
+
+    c = 0.5*(last_bad+last_good);
+    va_start(ap, Function);
+    fc = Function(c, ap);
+
+    /* search for valid point via bisection */
+    j = 0;
+    while (fc == ERROR && j < MAXITER) {
+      last_bad = c;
+      c = 0.5*(last_bad+last_good);
+      va_start(ap, Function);
+      fc = Function(c, ap);
+      j++;
+    }
+
+    if (fc == ERROR) {
+      /* if we get here, we could not find a bound for which the function returns a valid value */
+      sprintf(ErrorString,"ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n",Routine,LowerBound,UpperBound);
+      va_end(ap);
+      return(ERROR);
+    }
+    else {
+      if (which_err == -1) {
+        a = c;
+        fa = fc;
+      }
+      else {
+        b = c;
+        fb = fc;
+      }
+    }
+
+  }
+
+  // At this point, we have two bounds that yield valid values of the target function
 
   /*  if root not bracketed attempt to bracket the root */
   j = 0;
   while ((fa * fb) >= 0  && j < MAXTRIES) {
-    a -= TSTEP;
-    b += TSTEP;
-    va_start(ap, Function);
-    fa = Function(a, ap);
-    va_start(ap, Function);
-    fb = Function(b, ap);
-    
-    // if Function returns value of ERROR, then make sure root isn't mistakenly bracketed
-    // by making fa = fb
-    if(fa == ERROR || fb == ERROR)
-      fprintf(stderr,"WARNING: ERROR returned to root_brent on root-bracketing attempt %d: lower = %.4f->error=%.2f, upper = %.4f->error=%.2f\n",j+1,a,fa,b,fb);
-    if(fa == ERROR)
-      fb = ERROR;
-    else if (fb == ERROR)
-      fa = ERROR;
+    /* Expansion of bounds depends on whether initial bounds encountered undefined function values */
+    if (which_err == 0) { // No undefined values were encountered
+      a -= TSTEP;
+      b += TSTEP;
+      va_start(ap, Function);
+      fa = Function(a, ap);
+      va_start(ap, Function);
+      fb = Function(b, ap);
+    }
+    else { // Undefined values were encountered
+      if (which_err == -1) { // Undefined values encountered in the lower direction
+        b += TSTEP;
+        va_start(ap, Function);
+        fb = Function(b, ap);
+        if (fb == ERROR) {
+          /* Undefined function values in both directions - give up */
+          sprintf(ErrorString,"ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n",Routine,LowerBound,UpperBound);
+          va_end(ap);
+          return(ERROR);
+        }
+        last_good = a;
+      }
+      else { // Undefined values encountered in the upper direction
+        a -= TSTEP;
+        va_start(ap, Function);
+        fa = Function(a, ap);
+        if (fa == ERROR) {
+          /* Undefined function values in both directions - give up */
+          sprintf(ErrorString,"ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n",Routine,LowerBound,UpperBound);
+          va_end(ap);
+          return(ERROR);
+        }
+        last_good = b;
+      }
+
+      /* search for valid point via bisection */
+      c = 0.5*(last_good+last_bad);
+      va_start(ap, Function);
+      fc = Function(c, ap);
+      i = 0;
+      while (fc == ERROR && i < MAXITER) {
+        last_bad = c;
+        c = 0.5*(last_bad+last_good);
+        va_start(ap, Function);
+        fc = Function(c, ap);
+        i++;
+      }
+
+      if (fc == ERROR) {
+        /* if we get here, we could not find a bound for which the function returns a valid value */
+        sprintf(ErrorString,"ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n",Routine,LowerBound,UpperBound);
+        va_end(ap);
+        return(ERROR);
+      }
+      else {
+        if (which_err == -1) {
+          a = c;
+          fa = fc;
+        }
+        else {
+          b = c;
+          fb = fc;
+        }
+      }
+
+    }
 
     j++;
   }
@@ -167,7 +272,11 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
     va_end(ap);
     return(ERROR);
   }
-  
+
+  // At this point, we have bracketed the root
+ 
+  // Now search for the root
+
   fc = fb;
 
   for (i = 0; i < MAXITER; i++) {
@@ -241,8 +350,7 @@ double root_brent(double LowerBound, double UpperBound, char *ErrorString,
       va_start(ap, Function);
       fb = Function(b, ap);
 
-      //don't allow ERROR from Function during iteration, because root_brent
-      //won't be able to find a solution
+      // Catch ERROR values returned from Function
       if(fb == ERROR){
 	sprintf(ErrorString,"ERROR returned to root_brent on iteration %d: temperature = %.4f\n",i+1,b);
 	va_end(ap);

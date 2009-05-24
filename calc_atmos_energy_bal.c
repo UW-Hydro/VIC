@@ -44,10 +44,16 @@ double calc_atmos_energy_bal(double  InOverSensible,
 	    dump in error_print_atmos_moist_bal.		TJB
   21-Sep-04 Added ErrorString to store error messages from
 	    root_brent.						TJB
-2007-Apr-06 Modified to handle grid cell errors by returning to the
-            main subroutine, rather than ending the simulation. GCT/KAC
- 2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+  2007-Apr-06 Modified to handle grid cell errors by returning to the
+	      main subroutine, rather than ending the simulation.	GCT/KAC
+  2007-Aug-31 Checked root_brent return value against -998 rather
+	      than -9998.						JCA
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
+	      allows simulation to continue when energy balance fails
+	      to converge by using previous T value.			TJB
 ************************************************************************/
+
+  extern option_struct options;
 
   double AtmosLatent;
   double F; // canopy closure fraction, not currently used by VIC
@@ -96,13 +102,20 @@ double calc_atmos_energy_bal(double  InOverSensible,
 		       SensibleHeat);
 
   if ( Tcanopy <= -998 ) {
-    // handle error flag from root brent
-    (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
-					   + (*LatentHeatSub), 
-					   NetRadiation, Ra, Tair, 
-					   atmos_density, InSensible, 
-					   SensibleHeat, ErrorString);
-    return ( ERROR );
+    if (options.CONTINUEONERROR == TFALLBACK) {
+      if (VERBOSE)
+        fprintf(stderr,"WARNING: func_atmos_energy_bal() failed to converge, but continuing with previous temperature.\n");
+      Tcanopy = Tair;
+    }
+    else {
+      // handle error flag from root brent
+      (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
+					     + (*LatentHeatSub), 
+					     NetRadiation, Ra, Tair, 
+					     atmos_density, InSensible, 
+					     SensibleHeat, ErrorString);
+      return ( ERROR );
+    }
   }
   // compute varaibles based on final temperature
   (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub), 

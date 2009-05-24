@@ -23,7 +23,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double Dsmax;  	         mm/day  maximum subsurface flow rate
   double Ws;		         fract   fraction of maximum soil moisture
   double c;                      N/A     exponent
-  double expt[MAX_LAYERS];         N/A     pore-size distribution, HBH 5.15
+  double expt[MAX_LAYERS];         N/A     exponent in Campbell's eqn for hydraulic conductivity, HBH 5.6
   double Ksat[MAX_LAYERS];         mm/day  saturated hydraulic  conductivity
   double phi_s[MAX_LAYERS];        mm/mm   saturated matrix potential
   double init_moist[MAX_LAYERS];   mm      initial layer moisture level
@@ -87,6 +87,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
 	      here.							TJB
   2009-Jan-12 Added logic for JULY_TAVG_SUPPLIED.			TJB
+  2009-May-22 Added validation of expt and bubble.			TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -190,6 +191,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }  
       sscanf(token, "%lf", &temp.expt[layer]);
+#if !OUTPUT_FORCE
+      if(temp.bubble[layer] < 0) {
+	fprintf(stderr,"ERROR: Exponent in layer %d is %f < 3.0; This must be > 3.0\n", layer, temp.expt[layer]);
+	exit(0);
+      }
+#endif /* !OUTPUT_FORCE */
     }
 
     /* read layer saturated hydraulic conductivity */
@@ -278,6 +285,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }  
       sscanf(token, "%lf", &temp.bubble[layer]);
+#if !OUTPUT_FORCE
+      if((options.FULL_ENERGY || options.FROZEN_SOIL) && temp.bubble[layer] < 0) {
+	fprintf(stderr,"ERROR: Bubbling pressure in layer %d is %f < 0; This must be positive for FULL_ENERGY = TRUE or FROZEN_SOIL = TRUE\n", layer, temp.bubble[layer]);
+	exit(0);
+      }
+#endif /* !OUTPUT_FORCE */
     }
 
     /* read layer quartz content */
@@ -530,7 +543,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
     }
     if(temp.depth[0] > temp.depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
+      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) > layer %d depth (%f m).\n",
 	      0,temp.depth[0],1,temp.depth[1]);
       nrerror(ErrStr);
     }
@@ -543,7 +556,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
     }
     if(temp.min_depth[0] > temp.min_depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
+      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) > layer %d depth (%f m).\n",
 	      0,temp.min_depth[0],1,temp.min_depth[1]);
       nrerror(ErrStr);
     }

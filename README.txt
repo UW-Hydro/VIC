@@ -299,6 +299,30 @@ New GRND_FLUX_TYPE option, with fixes to deltaH and fusion equations.
 
 
 
+Added validation of Campbell's expt and bubble pressure.
+
+	Files Affected:
+
+	read_soilparam.c
+
+	Description:
+
+	Previously, VIC did not check to see if "nodata" values such as -9999
+	were supplied in the soil parameter file for the Campbell's expt and
+	bubble pressure parameters.  These values would produce "nan" in
+	computations of soil hydraulic conductivity and soil ice content.  This
+	is especially insidious in the case of bubble pressure, as it is not
+	needed for the water balance mode, and therefore users often set it to
+	"nodata" values for water balance mode runs.  Subsequently using such a
+	soil parameter file for a full-energy balance or frozen soil simulation
+	would cause the model to crash without the cause being clear.  Now, the
+	validation in read_soilparam() prevents this case.
+
+	Note: read_soilparam_arc() computes these quantities internally and
+	already validates their values.
+
+
+
 Bug Fixes:
 ----------
 

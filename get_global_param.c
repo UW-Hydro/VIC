@@ -83,6 +83,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-May-17 Added options.MIN_LIQ.						TJB
   2009-May-18 Added options.PLAPSE.						TJB
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -390,9 +391,8 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.CONTINUEONERROR=TRUE;
-        else {
-	  options.CONTINUEONERROR = FALSE;
-	}
+        else if(strcasecmp("TFALLBACK",flgstr)==0) options.CONTINUEONERROR=TFALLBACK;
+        else options.CONTINUEONERROR = FALSE;
       }
       else if(strcasecmp("BINARY_STATE_FILE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

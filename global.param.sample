@@ -26,7 +26,7 @@ MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
 PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
 MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
-CONTINUEONERROR FALSE   # TRUE = continue simulation on cell error
+CONTINUEONERROR FALSE   # TRUE = continue simulation on cell error; TFALLBACK = when energy balance fails to converge, use previous T value
 COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
 AERO_RESIST_CANSNOW	AR_410	# Options for aerodynamic resistance in snow-filled canopy:
 				# AR_406 = multiply by 10 for latent heat but do NOT multiply by 10 for sensible heat

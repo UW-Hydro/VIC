@@ -298,7 +298,6 @@ New GRND_FLUX_TYPE option, with fixes to deltaH and fusion equations.
 	GF_FULL is the default value.
 
 
-
 Added validation of Campbell's expt and bubble pressure.
 
 	Files Affected:
@@ -320,6 +319,35 @@ Added validation of Campbell's expt and bubble pressure.
 
 	Note: read_soilparam_arc() computes these quantities internally and
 	already validates their values.
+
+
+Added option to continue with previous temperature when energy balance fails
+to converge.
+
+	Files Affected:
+
+	calc_atmos_energy_bal.c
+	calc_surf_energy_bal.c
+	display_current_settings.c
+	get_global_param.c
+	global.param.sample
+	frozen_soil.c
+	root_brent.c
+	snow_intercept.c
+	vicNl_def.h
+
+	Description:
+
+	Modified options.CONTINUEONERROR to take multiple values:
+	  FALSE: Do not continue on error; stop the entire simulation
+	  TRUE:  End simulation for current grid cell, but continue simulating
+	         other grid cells
+	  TFALLBACK: If energy balance solution fails to converge, use
+	             previous T value and continue
+
+	Additionally modified root_brent to continue attempting to bracket
+	root if one bound encounters undefined values/ERROR code from target
+	function.
 
 
 

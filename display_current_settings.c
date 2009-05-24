@@ -40,6 +40,7 @@ void display_current_settings(int                 mode,
   2009-May-17 Added AR_406_LS to AERO_RESIST_CANSNOW.		TJB
   2009-May-18 Added PLAPSE option.				TJB
   2009-May-20 Added GRND_FLUX_TYPE option.			TJB
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.	TJB
 **********************************************************************/
 {
 
@@ -241,8 +242,10 @@ void display_current_settings(int                 mode,
     fprintf(stdout,"COMPUTE_TREELINE\t\tTRUE\n");
   else
     fprintf(stdout,"COMPUTE_TREELINE\t\tFALSE\n");
-  if (options.CONTINUEONERROR)
+  if (options.CONTINUEONERROR == TRUE)
     fprintf(stdout,"CONTINUEONERROR\t\tTRUE\n");
+  else if (options.CONTINUEONERROR == TFALLBACK)
+    fprintf(stdout,"CONTINUEONERROR\t\tTFALLBACK\n");
   else
     fprintf(stdout,"CONTINUEONERROR\t\tFALSE\n");
   fprintf(stdout,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);

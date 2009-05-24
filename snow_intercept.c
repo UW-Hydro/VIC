@@ -375,8 +375,9 @@ int snow_intercept(double  AirDens,
     
     if ( *Tfoliage <= -998 ) {
       if (options.CONTINUEONERROR == TFALLBACK) {
-        if (VERBOSE)
+#if VERBOSE
           fprintf(stderr,"WARNING: func_canopy_energy_bal() failed to converge, but continuing with previous temperature.\n");
+#endif // VERBOSE
         *Tfoliage = OldTfoliage;
       }
       else { 

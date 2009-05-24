@@ -375,8 +375,9 @@ double calc_surf_energy_bal(double             Le,
  
     if(Tsurf <= -998 ) {  
       if (options.CONTINUEONERROR == TFALLBACK) {
-        if (VERBOSE)
+#if VERBOSE
           fprintf(stderr,"WARNING: func_surf_energy_bal() failed to converge, but continuing with previous temperature.\n");
+#endif // VERBOSE
         Tsurf = Ts_old;
       }
       else {
@@ -471,8 +472,9 @@ double calc_surf_energy_bal(double             Le,
       
       if(Tsurf <=  -998 ) {  
         if (options.CONTINUEONERROR == TFALLBACK) {
-          if (VERBOSE)
+#if VERBOSE
             fprintf(stderr,"WARNING: func_surf_energy_bal() failed to converge, but continuing with previous temperature.\n");
+#endif // VERBOSE
           Tsurf = Ts_old;
         }
         else {

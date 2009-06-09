@@ -75,19 +75,18 @@ int  CalcAerodynamic(char    OverStory,     /* overstory flag */
 		     double  Z0_SNOW,       /* snow roughness */
 		     double  Z0_SOIL,       /* soil roughness */
                      double  n,             /* wind attenuation parameter */
-		     double  wind_h,        /* wind mesurement height */
                      double *Ra,            /* aerodynamic resistances */
                      double *U,             /* adjusted wind speed */
                      double *displacement,  /* vegetation displacement */
                      double *ref_height,    /* vegetation reference height */
-                     double *roughness,     /* vegetation roughness */
-                     int     Nveg,          /* total number of veg types */
-                     int     iveg)          /* current veg type */
+                     double *roughness)     /* vegetation roughness */
 {
   /******************************************************************
   Modifications:
   2007-Apr-04 Modified to catch and return error flags from surface_fluxes
               subroutine.                                      GCT/KAC
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.				TJB
   *******************************************************************/
 
 
@@ -111,16 +110,9 @@ int  CalcAerodynamic(char    OverStory,     /* overstory flag */
   
   if ( OverStory == FALSE ) {
     
-    if ( iveg == Nveg ) {
-      /* bare soil */
-      Z0_Lower = Z0_SOIL;
-      d_Lower  = 0; 
-    }
-    else {
-      /* vegetation cover */
-      Z0_Lower = roughness[0];
-      d_Lower  = displacement[0];
-    }
+    /* vegetation cover */
+    Z0_Lower = roughness[0];
+    d_Lower  = displacement[0];
     
     /* No snow */
     U[0]  = log((2. + Z0_Lower)/Z0_Lower)/log((ref_height[0] - d_Lower)/Z0_Lower);

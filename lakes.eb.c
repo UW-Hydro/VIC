@@ -32,6 +32,31 @@ int lakemain(atmos_data_struct  *atmos,
   the lake module and serves as the primary driver for the lake model.
   (Based on Hostetler and Bartlein, WRR, 26 (10), 2603-2612, 10/1990)
  
+  Parameters :
+
+  soil_con.lat  	Latitude of the lake (degrees).
+  soil_con.lng 	        Longitude of the lake (degrees).
+  atmos                 Met forcings
+  lake_energy.latent	Latent heat flux (W/m2).
+  lake_energy.sensible	Sensible heat flux (W/m2).
+  lake_con.eta_a	Decline of solar radiation input with depth (m-1).  
+  lake_con.surface[numnod]	Area of the lake (m2).
+  lake.temp[numnod]	Temperature of the lake water (K).
+  lake.tempi	        Temperature of the lake ice (K).
+  lake.hice           	Maximum height of the lake ice (m over ice area).
+  lake.fraci	        Fractional coverage of ice (-).
+  lake_snow.sdepth	Height of the snow on top of the lake (m over ice area).
+  lake_snow.swe         SWE of snow on top of the lake (m).
+  lake.numnod        	Number of nodes in the lake (-).
+  global_param.dt	Time step size (hrs).
+
+Note: lake->sarea and lake->areai are updated at the begining of each time
+step and do not change during the time step.  They represent the lake surface
+area at the beginning of the time step, and are the values that are used
+DURING the time step, to determine the area of wetland and lake flux
+calculations.  Therefore they must be used in put_data() when determining 
+the grid cell average fluxes.  
+
   Modifications:
   12/2000 Model was converted to C and incorporated into VIC.  LCB
   11-18-02 Modifications were made to improve handling of snow and ice
@@ -99,31 +124,9 @@ int lakemain(atmos_data_struct  *atmos,
 	      January 1st.							LCB via TJB
   2008-Sep-09 Move calculation of internal variable outflow below runoff_out
 	      updates.								LCB via TJB
+  2009-Jun-09 Lake_var data structure now only stores final (corrected)
+	      values of aero_resist.					TJB
 
-  Parameters :
-
-  soil_con.lat  	Latitude of the lake (degrees).
-  soil_con.lng 	        Longitude of the lake (degrees).
-  atmos                 Met forcings
-  lake_energy.latent	Latent heat flux (W/m2).
-  lake_energy.sensible	Sensible heat flux (W/m2).
-  lake_con.eta_a	Decline of solar radiation input with depth (m-1).  
-  lake_con.surface[numnod]	Area of the lake (m2).
-  lake.temp[numnod]	Temperature of the lake water (K).
-  lake.tempi	        Temperature of the lake ice (K).
-  lake.hice           	Maximum height of the lake ice (m over ice area).
-  lake.fraci	        Fractional coverage of ice (-).
-  lake_snow.sdepth	Height of the snow on top of the lake (m over ice area).
-  lake_snow.swe         SWE of snow on top of the lake (m).
-  lake.numnod        	Number of nodes in the lake (-).
-  global_param.dt	Time step size (hrs).
-
-Note: lake->sarea and lake->areai are updated at the begining of each time
-step and do not change during the time step.  They represent the lake surface
-area at the beginning of the time step, and are the values that are used
-DURING the time step, to determine the area of wetland and lake flux
-calculations.  Therefore they must be used in put_data() when determining 
-the grid cell average fluxes.  
 **********************************************************************/
 
   extern option_struct   options;
@@ -570,7 +573,7 @@ int solve_lake(double             snow,
 
       /* Calculate snow/ice temperature and change in ice thickness from 
          surface melting. */
-      ErrorFlag = ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist_used),
+      ErrorFlag = ice_melt( wind_h+soil_con.snow_rough, lake->aero_resist, &(lake->aero_resist),
 			    Le, lake_snow, lake, dt,  0.0, soil_con.snow_rough, 1.0, 
 			    rainfall, snowfall,  windi, Tcutoff, tair, sw_ice, 
 			    longin, air_density, pressure,  vpd,  vp, &lake->snowmlt, 

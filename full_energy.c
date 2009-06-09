@@ -70,6 +70,15 @@ int  full_energy(char                 NEWCELL,
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.					TJB
   2009-May-17 Added asat to cell_data.						TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.						TJB
+  2009-Jun-09 Modified to compute aero_resist for all potential evap
+	      landcover types.							TJB
+  2009-Jun-09 Cell_data structure now only stores final aero_resist
+	      values (called "aero_resist").  Preliminary uncorrected
+	      aerodynamic resistances for current vegetation and various
+	      reference land cover types for use in potential evap
+	      calculations is stored in temporary array aero_resist.		TJB
 
 **********************************************************************/
 {
@@ -80,7 +89,7 @@ int  full_energy(char                 NEWCELL,
 #endif
 
   char                   overstory;
-  int                    i, j;
+  int                    i, j, p;
   int                    lidx;
   int                    Ndist;
   int                    dist;
@@ -108,6 +117,7 @@ int  full_energy(char                 NEWCELL,
   double                 displacement[3];
   double                 roughness[3];
   double                 ref_height[3];
+  double               **aero_resist;
   double                 Cv;
   double                 Le;
   double                 Melt[2*MAX_BANDS];
@@ -124,6 +134,7 @@ int  full_energy(char                 NEWCELL,
   float 	         lag_one;
   float 	         sigma_slope;
   float  	         fetch;
+  int                    pet_veg_class;
   lake_var_struct       *lake_var;
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -153,6 +164,12 @@ int  full_energy(char                 NEWCELL,
   double                 moist_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
   double                 evap_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
 #endif //EXCESS_ICE
+
+  /* Allocate aero_resist array */
+  aero_resist = (double**)calloc(N_PET_TYPES+1,sizeof(double*));
+  for (p=0; p<N_PET_TYPES+1; p++) {
+    aero_resist[p] = (double*)calloc(3,sizeof(double));
+  }
 
   /* set local pointers */
   cell    = prcp->cell;
@@ -215,11 +232,8 @@ int  full_energy(char                 NEWCELL,
   for(iveg = 0; iveg <= Nveg; iveg++){
 
     /** Solve Veg Type only if Coverage Greater than 0% **/
-    if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
-	(iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
-
-      if ( iveg < Nveg ) Cv = veg_con[iveg].Cv;
-      else Cv = 1. - veg_con[0].Cv_sum;
+    if (veg_con[iveg].Cv > 0.0) {
+      Cv = veg_con[iveg].Cv;
 
       /**************************************************
         Initialize Model Parameters
@@ -249,74 +263,79 @@ int  full_energy(char                 NEWCELL,
       }
     
       /** Define vegetation class number **/
-      if (iveg < Nveg) 
-	veg_class = veg_con[iveg].veg_class;
-      else 
-	veg_class = 0;
-      if ( iveg < Nveg ) wind_h = veg_lib[veg_class].wind_h;
-      else wind_h = gp->wind_h;
+      veg_class = veg_con[iveg].veg_class;
+
+      /** Assign wind_h **/
+      /** Note: this is ignored below **/
+      wind_h = veg_lib[veg_class].wind_h;
+      if (iveg == Nveg) wind_h = gp->wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      if ( iveg < Nveg )
-	surf_atten = exp(-veg_lib[veg_class].rad_atten 
-			 * veg_lib[veg_class].LAI[dmy[rec].month-1]);
-      else 
-	surf_atten = 1.;
-        
+      surf_atten = exp(-veg_lib[veg_class].rad_atten 
+		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
+
       /* Initialize soil thermal properties for the top two layers */
       if(options.FULL_ENERGY || options.FROZEN_SOIL) {
 	prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
 			    soil_con, moist0, ice0);
       }
 
-      /** Compute Bare Soil (free of snow) Albedo **/
-      if(iveg != Nveg) 
-	bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
-      else 
-	bare_albedo = BARE_SOIL_ALBEDO;
-      
+      /** Compute Bare (free of snow) Albedo **/
+      bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+
       /*************************************
 	Compute the aerodynamic resistance 
+	for current veg cover and various
+	types of potential evap
       *************************************/
 
-      /* Set surface descriptive variables */
-      overstory = FALSE;
-      if ( iveg < Nveg ) {
-        displacement[0] = veg_lib[veg_class].displacement[dmy[rec].month-1];
-        roughness[0]    = veg_lib[veg_class].roughness[dmy[rec].month-1];
-        overstory       = veg_lib[veg_class].overstory;
-	if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
-      }
-      if(iveg == Nveg || roughness == 0) {
-        displacement[0] = 0.;
-        roughness[0]    = soil_con->rough;
-        overstory       = FALSE;
-      }
+      /* Loop over types of potential evap, plus current veg */
+      /* Current veg will be last */
+      for (p=0; p<N_PET_TYPES+1; p++) {
 
-      /* Initialize wind speeds */
-      tmp_wind[0] = atmos->wind[NR];
-      tmp_wind[1] = -999.;
-      tmp_wind[2] = -999.;
+        /* Initialize wind speeds */
+        tmp_wind[0] = atmos->wind[NR];
+        tmp_wind[1] = -999.;
+        tmp_wind[2] = -999.;
  
-      /* Estimate vegetation height */
-      height = calc_veg_height(displacement[0]);
+        /* Set surface descriptive variables */
+        if (p < N_PET_TYPES_NON_NAT) {
+	  pet_veg_class = veg_lib[0].NVegLibTypes+p;
+        }
+        else {
+	  pet_veg_class = veg_class;
+        }
+        displacement[0] = veg_lib[pet_veg_class].displacement[dmy[rec].month-1];
+        roughness[0]    = veg_lib[pet_veg_class].roughness[dmy[rec].month-1];
+        overstory       = veg_lib[pet_veg_class].overstory;
+	if (p >= N_PET_TYPES_NON_NAT)
+          if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
 
-      /* Estimate reference height */
-      if(displacement[0] < wind_h) 
-	ref_height[0] = wind_h;
-      else 
-	ref_height[0] = displacement[0] + wind_h + roughness[0];
+        /* Estimate vegetation height */
+        height = calc_veg_height(displacement[0]);
 
-      /* Compute aerodynamic resistance over various surface types */
-      ErrorFlag = CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio, 
-                      soil_con->snow_rough, soil_con->rough, 
-		      veg_lib[veg_class].wind_atten,
-		      gp->wind_h, cell[WET][iveg][0].aero_resist, tmp_wind, 
-                      displacement, ref_height, roughness, 
-                      Nveg, iveg);
-      if ( ErrorFlag == ERROR ) return ( ERROR );  
-      cell[WET][iveg][0].aero_resist_used[0] = cell[WET][iveg][0].aero_resist[0];
-      cell[WET][iveg][0].aero_resist_used[1] = cell[WET][iveg][0].aero_resist[1];
+        /* Estimate reference height */
+        if(displacement[0] < wind_h) 
+          ref_height[0] = wind_h;
+        else 
+          ref_height[0] = displacement[0] + wind_h + roughness[0];
+
+        /* Compute aerodynamic resistance over various surface types */
+        /* Do this not only for current veg but also all types of PET */
+        ErrorFlag = CalcAerodynamic(overstory, height,
+		        veg_lib[pet_veg_class].trunk_ratio, 
+                        soil_con->snow_rough, soil_con->rough, 
+		        veg_lib[pet_veg_class].wind_atten,
+			aero_resist[p], tmp_wind,
+		        displacement, ref_height,
+		        roughness);
+        if ( ErrorFlag == ERROR ) return ( ERROR );  
+
+      }
+
+      /* Initialize final aerodynamic resistance values */
+      cell[WET][iveg][0].aero_resist[0] = aero_resist[N_PET_TYPES][0];
+      cell[WET][iveg][0].aero_resist[1] = aero_resist[N_PET_TYPES][1];
 
       /**************************************************
         Store Water Balance Terms for Debugging
@@ -352,29 +371,34 @@ int  full_energy(char                 NEWCELL,
 	  if ( iveg < Nveg ) {
 	    wet_veg_var = &(veg_var[WET][iveg][band]);
 	    dry_veg_var = &(veg_var[DRY][iveg][band]);
-	    lag_one     = veg_con[iveg].lag_one;
-	    sigma_slope = veg_con[iveg].sigma_slope;
-	    fetch       = veg_con[iveg].fetch;
 	  }
 	  else {
 	    wet_veg_var = &(empty_veg_var);
 	    dry_veg_var = &(empty_veg_var);
-	    lag_one     = veg_con[0].lag_one;
-	    sigma_slope = veg_con[0].sigma_slope;
-	    fetch       = veg_con[0].fetch;
 	  }
+	  lag_one     = veg_con[iveg].lag_one;
+	  sigma_slope = veg_con[iveg].sigma_slope;
+	  fetch       = veg_con[iveg].fetch;
+
+	  /* Initialize pot_evap */
+	  for (p=0; p<N_PET_TYPES; p++)
+	    cell[WET][iveg][band].pot_evap[p] = 0;
 
 	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band], 
 #if EXCESS_ICE
-				     SubsidenceUpdate, evap_prior[DRY][iveg][band], evap_prior[WET][iveg][band],
+				     SubsidenceUpdate, evap_prior[DRY][iveg][band],
+				     evap_prior[WET][iveg][band],
 #endif
 				     prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
-				     cell[WET][iveg][0].aero_resist, cell[WET][iveg][0].aero_resist_used,
+				     aero_resist,
+				     cell[WET][iveg][0].aero_resist,
 				     &(cell[DRY][iveg][band].baseflow), 
 				     &(cell[WET][iveg][band].baseflow),
 				     &(cell[DRY][iveg][band].asat), 
-				     &(cell[WET][iveg][band].asat), displacement, 
-				     gauge_correction, &(cell[DRY][iveg][band].inflow), 
+				     &(cell[WET][iveg][band].asat),
+				     cell[WET][iveg][band].pot_evap,
+				     displacement, gauge_correction,
+				     &(cell[DRY][iveg][band].inflow), 
 				     &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
 				     &out_rain[band*2], &out_snow[band*2],
 				     ref_height, roughness, 
@@ -468,21 +492,19 @@ int  full_energy(char                 NEWCELL,
 	  }  /** End loop through elevation bands **/
 	}
          
-	if(iveg != Nveg) {
-	  write_debug(atmos, soil_con, cell[j][iveg], ptr_energy, 
-		      tmp_snow, tmp_veg[j], &(dmy[rec]), gp, out_short, 
-		      tmp_mu, Nveg, iveg, rec, gridcell, j, NEWCELL); 
-	}
-	else {
-	  write_debug(atmos, soil_con, cell[j][iveg], ptr_energy, tmp_snow, 
-		      tmp_veg[j], &(dmy[rec]), gp, out_short, tmp_mu, Nveg, 
-		      iveg, rec, gridcell, j, NEWCELL); 
-	}
+	write_debug(atmos, soil_con, cell[j][iveg], ptr_energy, 
+		    tmp_snow, tmp_veg[j], &(dmy[rec]), gp, out_short, 
+		    tmp_mu, Nveg, iveg, rec, gridcell, j, NEWCELL); 
       }
 #endif // LINK_DEBUG
 
     } /** end current vegetation type **/
   } /** end of vegetation loop **/
+
+  for (p=0; p<N_PET_TYPES+1; p++) {
+    free((char *)aero_resist[p]);
+  }
+  free((char *)aero_resist);
 
   /****************************
      Calculate Subsidence
@@ -500,11 +522,9 @@ int  full_energy(char                 NEWCELL,
       for(band = 0; band < Nbands; band++) {//band
 	if(soil_con->AreaFract[band] > 0) {
 	  for(iveg = 0; iveg <= MaxVeg; iveg++){ //iveg  
-	    if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
-		(iveg == Nveg && veg_con[0].Cv_sum < 1.) ||
+	    if (veg_con[iveg].Cv  > 0. ||
 		(iveg == MaxVeg && MaxVeg > Nveg && lake_con->Cl[0] > 0. )) {    
-	      if ( iveg < Nveg ) Cv = veg_con[iveg].Cv;
-	      else if( iveg == Nveg) Cv = 1. - veg_con[0].Cv_sum;
+	      if ( iveg < MaxVeg ) Cv = veg_con[iveg].Cv;
 	      else
 		Cv = lake_con->Cl[0];
 	      for ( dist = 0; dist < Ndist; dist++ ) {// wet/dry
@@ -645,8 +665,7 @@ int  full_energy(char                 NEWCELL,
       }
     }
     for(iveg = 0; iveg <= Nveg; iveg++){
-      if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
-	  (iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
+      if (veg_con[iveg].Cv  > 0.) {
 	for ( band = 0; band < Nbands; band++ ) {
 	  if( soil_con->AreaFract[band] > 0 ) { 
 
@@ -701,8 +720,7 @@ int  full_energy(char                 NEWCELL,
 	for ( iveg = 0; iveg <= Nveg; iveg++ ) {
 	  
 	  /** Solve Veg Type only if Coverage Greater than 0% **/
-	  if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
-	      (iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
+	  if (veg_con[iveg].Cv  > 0.) {
 
 	    // Loop through distributed precipitation fractions
 	    for ( dist = 0; dist < 2; dist++ ) {
@@ -712,20 +730,11 @@ int  full_energy(char                 NEWCELL,
 	      else 
 		tmp_mu = 1. - prcp->mu[iveg]; 
 	      
-	      if ( iveg < Nveg ) {
-		Cv = veg_con[iveg].Cv;
-		sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu 
-				* Cv * soil_con->AreaFract[band] );
-		sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu 
-				  * Cv * soil_con->AreaFract[band] );
-	      }
-	      else {
-		Cv = 1. - veg_con[0].Cv_sum;
-		sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu 
-				* Cv * soil_con->AreaFract[band] );
-		sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu 
-				  * Cv * soil_con->AreaFract[band] ); 
-	      }
+	      Cv = veg_con[iveg].Cv;
+	      sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu 
+			    * Cv * soil_con->AreaFract[band] );
+	      sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu 
+			      * Cv * soil_con->AreaFract[band] );
 	    }
 	  }
 	}

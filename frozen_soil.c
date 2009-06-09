@@ -61,7 +61,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
   else energy->frozen = FALSE;
 
   /** Redistribute Soil Properties for New Frozen Soil Layer Size **/
-  if(soil_con->FS_ACTIVE && options.FROZEN_SOIL)
+  if(soil_con->FS_ACTIVE && options.FROZEN_SOIL) {
     ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
 #if QUICK_FS
@@ -86,7 +86,9 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->soil_density, soil_con->quartz, soil_con->resid_moist,
 					   soil_con->layer_node_fract, Nnodes, 
 					   options.Nlayer, soil_con->FS_ACTIVE);
-  if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL)
+    if ( ErrorFlag == ERROR ) return (ERROR);
+  }
+  if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL) {
     ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
 #if QUICK_FS
@@ -109,7 +111,8 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->bulk_density, soil_con->soil_density, 
 					   soil_con->quartz, soil_con->resid_moist, soil_con->layer_node_fract, 
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
-  if ( ErrorFlag == ERROR ) return (ERROR);
+    if ( ErrorFlag == ERROR ) return (ERROR);
+  }
   
 #if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {

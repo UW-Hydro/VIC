@@ -45,6 +45,15 @@ int wetland_energy(int                  rec,
 	      distribute_node_moisture_properties.			KAC via TJB
   2009-Mar-15 Added code to assign values to aero_resist_used.		TJB
   2009-May-17 Added asat to cell_data.					TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
+  2009-Jun-09 Modified to compute aero_resist for all potential evap
+	      landcover types.						TJB
+  2009-Jun-09 Cell_data structure now only stores final aero_resist
+	      values (called "aero_resist").  Preliminary uncorrected
+	      aerodynamic resistances for current vegetation and various
+	      reference land cover types for use in potential evap
+	      calculations is stored in temporary array aero_resist.	TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -54,7 +63,7 @@ int wetland_energy(int                  rec,
 #endif
   char                   overstory;
   char                   SOLVE_SURF_ENERGY;
-  int                    i, j, k;
+  int                    i, j, k, p;
   int                    Ndist;
   int                    dist;
   int                    Nveg;
@@ -63,6 +72,7 @@ int wetland_energy(int                  rec,
   int                    hour;
   int                    ErrorFlag;
   int                    lidx;
+  int                    pet_veg_class;
   double                 tmp_moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
 #if EXCESS_ICE
   double                 ppt[2]; 
@@ -113,6 +123,7 @@ int wetland_energy(int                  rec,
   double                 tmp_Tmin;
   float                  root[MAX_LAYERS];
   double                 gauge_correction[2];
+  double               **aero_resist;
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -128,6 +139,12 @@ int wetland_energy(int                  rec,
   float                  sigma_slope;
   float                  fetch;
   double MOIST1, MOIST2, EVAP, DSWE, ERR, WDEW1, WDEW2;
+
+  /* Allocate aero_resist array */
+  aero_resist = (double**)calloc(N_PET_TYPES+1,sizeof(double*));
+  for (p=0; p<N_PET_TYPES+1; p++) {
+    aero_resist[p] = (double*)calloc(3,sizeof(double));
+  }
 
   /* set local pointers */
   cell    = prcp->cell;
@@ -214,38 +231,57 @@ int wetland_energy(int                  rec,
   
     /*************************************
 	Compute the aerodynamic resistance 
+        for current veg cover and various
+        types of potential evap
     *************************************/
-
-    /* Set surface descriptive variables */
-    displacement[0] = veg_lib[veg_class].displacement[dmy[rec].month-1];
-    roughness[0]    = veg_lib[veg_class].roughness[dmy[rec].month-1];
-    overstory       = veg_lib[veg_class].overstory;
-    if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
 
     /* Initialize wind speeds */
     tmp_wind[0] = atmos->wind[NR];
     tmp_wind[1] = -999.;
     tmp_wind[2] = -999.;
  
-    /* Estimate vegetation height */
-    height = calc_veg_height(displacement[0]);
+    /* Loop over types of potential evap, plus current veg */
+    /* Current veg will be last */
+    for (p=0; p<N_PET_TYPES+1; p++) {
 
-    /* Estimate reference height */
-    if(displacement[0] < wind_h) 
-      ref_height[0] = wind_h;
-    else 
-      ref_height[0] = displacement[0] + wind_h + roughness[0];
+      /* Set surface descriptive variables */
+      if (p < N_PET_TYPES_NON_NAT) {
+        pet_veg_class = veg_lib[0].NVegLibTypes+p;
+      }
+      else {
+        pet_veg_class = veg_class;
+      }
+      displacement[0] = veg_lib[pet_veg_class].displacement[dmy[rec].month-1];
+      roughness[0]    = veg_lib[pet_veg_class].roughness[dmy[rec].month-1];
+      overstory       = veg_lib[pet_veg_class].overstory;
+      if (p >= N_PET_TYPES_NON_NAT)
+        if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
+
+      /* Estimate vegetation height */
+      height = calc_veg_height(displacement[0]);
+
+      /* Estimate reference height */
+      if(displacement[0] < wind_h) 
+        ref_height[0] = wind_h;
+      else 
+        ref_height[0] = displacement[0] + wind_h + roughness[0];
     
-    /* Compute aerodynamic resistance over various surface types */
-    if ( ( ErrorFlag = CalcAerodynamic(overstory, height, veg_lib[veg_class].trunk_ratio,
-                    soil_con->snow_rough, soil_con->rough,
-                    veg_lib[veg_class].wind_atten, gp->wind_h,
-                    cell[WET][iveg][0].aero_resist, tmp_wind,
-                    displacement, ref_height, roughness,
-                    Nveg, iveg) ) == ERROR)
-      return(ERROR);
-    cell[WET][iveg][0].aero_resist_used[0] = cell[WET][iveg][0].aero_resist[0];
-    cell[WET][iveg][0].aero_resist_used[1] = cell[WET][iveg][0].aero_resist[1];
+      /* Compute aerodynamic resistance over various surface types */
+      /* Do this not only for current veg but also all types of PET */
+      ErrorFlag = CalcAerodynamic(overstory, height,
+		      veg_lib[pet_veg_class].trunk_ratio,
+                      soil_con->snow_rough, soil_con->rough,
+                      veg_lib[pet_veg_class].wind_atten,
+                      aero_resist[p], tmp_wind,
+		      displacement, ref_height,
+		      roughness);
+      if ( ErrorFlag == ERROR ) return ( ERROR );
+
+    }
+
+    /* Initialize final aerodynamic resistance values */
+    cell[WET][iveg][0].aero_resist[0] = aero_resist[N_PET_TYPES][0];
+    cell[WET][iveg][0].aero_resist[1] = aero_resist[N_PET_TYPES][1];
 
     /******************************
         Solve ground surface fluxes 
@@ -256,6 +292,10 @@ int wetland_energy(int                  rec,
     lag_one     = veg_con[0].lag_one;
     sigma_slope = veg_con[0].sigma_slope;
     fetch       = veg_con[0].fetch;
+
+    /* Initialize pot_evap */
+    for (p=0; p<N_PET_TYPES; p++)
+      cell[WET][iveg][band].pot_evap[p] = 0;
 
 #if EXCESS_ICE
     if(SubsidenceUpdate == 1 ){ //if subsidence has occurred in this time-step,
@@ -367,12 +407,15 @@ int wetland_energy(int                  rec,
 			       SubsidenceUpdate, dummy, dummy,
 #endif
                                prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le,
-                               cell[WET][iveg][0].aero_resist,cell[WET][iveg][0].aero_resist_used,
+			       aero_resist,
+                               cell[WET][iveg][0].aero_resist,
                                &(cell[DRY][iveg][band].baseflow),
                                &(cell[WET][iveg][band].baseflow),
                                &(cell[DRY][iveg][band].asat),
-                               &(cell[WET][iveg][band].asat), displacement,
-                               gauge_correction, &(cell[DRY][iveg][band].inflow),
+                               &(cell[WET][iveg][band].asat),
+                               cell[WET][iveg][band].pot_evap,
+			       displacement, gauge_correction,
+			       &(cell[DRY][iveg][band].inflow),
                                &(cell[WET][iveg][band].inflow), &out_prec[band*2],
                                &out_rain[band*2], &out_snow[band*2],
                                ref_height, roughness,

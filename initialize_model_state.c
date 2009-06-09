@@ -86,6 +86,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      estimate_layer_ice_content().  This allows computation
 	      of min_liq, the minimum allowable liquid water content
 	      in each layer as a function of temperature.		TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -349,8 +351,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     /****** initialize moist and ice ************/
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
       
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -387,8 +388,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
       
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -420,8 +420,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   else if(!options.QUICK_FLUX) {
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
       
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -525,8 +524,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   else {
     for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
 
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -560,8 +558,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     FIRST_VEG = TRUE;
     for ( veg = 0 ; veg <= MaxVeg ; veg++) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
 
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -704,10 +701,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   save_data->surfstor = 0;
   for( veg = 0; veg <= Nveg; veg++ ) {
 
-    if ( veg < veg_con[0].vegetat_type_num )
-      Cv = veg_con[veg].Cv;
-    else
-      Cv = (1.0 - veg_con[0].Cv_sum);
+    Cv = veg_con[veg].Cv;
 
     if ( Cv > 0 ) {
 
@@ -885,8 +879,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
   ******************************************/
   for ( veg = 0 ; veg <= MaxVeg ; veg++ ) {
     // Initialize soil for existing vegetation types
-    if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-    else Cv = (1.0 - veg_con[0].Cv_sum);
+    Cv = veg_con[veg].Cv;
     
     if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
       for( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -912,8 +905,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
     FIRST_VEG = TRUE;
     for ( veg = 0 ; veg <= MaxVeg ; veg++) {
       // Initialize soil for existing vegetation types
-      if ( veg < Nveg ) Cv = veg_con[veg].Cv;
-      else Cv = (1.0 - veg_con[0].Cv_sum);
+      Cv = veg_con[veg].Cv;
 
       if ( Cv > 0 || ( veg == MaxVeg && MaxVeg > Nveg ) ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {

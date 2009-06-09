@@ -113,10 +113,13 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
 	      here.								TJB
   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.						TJB
 **********************************************************************/
 {
   extern option_struct options;
   extern global_param_struct global_param;
+  extern veg_lib_struct *veg_lib;
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
@@ -127,7 +130,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 
   int             layer;
   int             cnt;
-  int             i;
+  int             i,j;
   soil_con_struct temp; 
   double          Wcr_FRACT[MAX_LAYERS];
   double          Wpwp_FRACT[MAX_LAYERS];
@@ -288,6 +291,12 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
+    /* Overwrite default bare soil aerodynamic resistance parameters
+       with the values taken from the soil parameter file */
+    for (j=0; j<12; j++) {
+      veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
+      veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
+    }
 
     /** Get Snow Surface Roughness **/
     fscanf(soilparam,"%s",tmpstr);

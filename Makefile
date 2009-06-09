@@ -28,6 +28,7 @@
 # 2007-Nov-06 Added get_dist.c.							TJB
 # 2008-Feb-14 Removed -g from normal compiling option.  Changed "vicInterp"
 #	      to "vicDisagg".							TJB
+# 2009-Jun-09 Added compute_pot_evap.c.						TJB
 #
 # $Id$
 #
@@ -44,11 +45,11 @@ SHELL = /bin/csh
 CC = gcc
 
 # Uncomment for normal optimized code flags (fastest run option)
-CFLAGS  = -I. -O3 -Wall -Wno-unused
+#CFLAGS  = -I. -O3 -Wall -Wno-unused
 LIBRARY = -lm
 
 # Uncomment to include debugging information
-#CFLAGS  = -I. -g -Wall -Wno-unused
+CFLAGS  = -I. -g -Wall -Wno-unused
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information
@@ -73,7 +74,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
-	compress_files.o compute_dz.o compute_treeline.o \
+	compress_files.o compute_dz.o compute_pot_evap.o compute_treeline.o \
 	correct_precip.o display_current_settings.o dist_prec.o \
 	estimate_T1.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \

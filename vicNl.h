@@ -57,6 +57,12 @@
 	      estimate_layer_ice_content().				TJB
   2009-May-17 Added asat to argument list of surface_fluxes(),
 	      full_energy(), and wetland_energy().			TJB
+  2009-Jun-09 Modified argument lists of some functions that were
+	      modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
+  2009-Jun-09 Added compute_pot_evap().					TJB
+  2009-Jun-09 Removed unnecessary functions quick_penman() and
+	      compute_penman_constants().				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -77,9 +83,8 @@ double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 #endif // SPATIAL_FROST
 unsigned char average_moisture_for_storm(double *, double *, double, double);
 
-int   CalcAerodynamic(char, double, double, double, double, double, double, 
-	  	       double *, double *, double *, double *, double *, 
-                       int, int);
+int   CalcAerodynamic(char, double, double, double, double, double,
+	  	       double *, double *, double *, double *, double *);
 void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
 				 int, int, double *);
 void   calc_energy_balance_error(int, double, double, double, double, double);
@@ -90,6 +95,7 @@ void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
 double calc_rainonly(double,double,double,double,double);
+double calc_rc(double,double,float,double,double,double,double,char);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct *);
 double calc_snow_coverage(int *, double, double, double, double, double, 
                           double, double, double *, double *, double *, 
@@ -123,19 +129,19 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, 
                              double *, double *, double *, double *, 
                              double *, double *, double *, double *);
-double calc_surf_energy_bal(double, double, double, double, double, double, 
-                            double, double, double, double, double, double, 
-                            double, double, double, double, double, double, 
-                            double, double, double, double, double, double, 
-                            double, double, double, 
-                            double *, double *, double *, double *, double *, 
-                            double *, double *, double *, double *, double *, 
-                            float *, int, int, 
-                            int, int, int, int, int, int, int, int, int, int, 
-                            atmos_data_struct *, dmy_struct *, 
-                            energy_bal_struct *, layer_data_struct *, 
-                            layer_data_struct *, 
-                            snow_data_struct *, soil_con_struct *, 
+double calc_surf_energy_bal(double, double, double, double, double, double,
+                            double, double, double, double, double, double,
+                            double, double, double, double, double, double,
+                            double, double, double, double, double, double,
+                            double, double, double,
+                            double *, double *, double *, double *, double *,
+                            double *, double *, double *, double *, double *,
+                            float *, int, int,
+                            int, int, int, int, int, int, int, int, int, int,
+                            atmos_data_struct *, dmy_struct *,
+                            energy_bal_struct *, layer_data_struct *,
+                            layer_data_struct *,
+                            snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, veg_var_struct *, int);
 double calc_trans(double, double);
 double calc_veg_displacement(double);
@@ -159,10 +165,8 @@ void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
-void   compute_penman_constants(double, double, double, double, double, 
-				double, double, float, float, double *, 
-				double *, double *, double *, double *);
 void   correct_precip(double *, double, double, double, double);
+void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, 
 					     double *, 
@@ -349,8 +353,7 @@ FILE  *open_file(char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
-double penman(double, double, double, double, double, double, double, 
-	      double, double, float, float);
+double penman(double, double, double, double, double, double, double);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
 			   soil_con_struct *, double *, double *); 
 double priestley(double, double);
@@ -359,9 +362,6 @@ int    put_data(dist_prcp_struct *, atmos_data_struct *,
                 lake_con_struct *, out_data_file_struct *,
 		out_data_struct *, save_data_struct *,
  	        dmy_struct *, int, int); 
-
-double quick_penman(double, double, double, double, double, double, 
-		    double, double);
 
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
@@ -414,7 +414,6 @@ void set_node_parameters(double *, double *, double *, double *, double *, doubl
 			 int, int, char);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
-double shrad(double,double,double,double,double,int,double);
 double snow_albedo(double, double, double, double, double, double, int, char);
 double snow_density(snow_data_struct *, double, double, double, double, double);
 int    snow_intercept(double, double, double, double, double, double, double,
@@ -440,19 +439,19 @@ void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 energy_bal_struct, double *, double *, double *,
 			 int, int);
 double soil_thermal_eqn(double, va_list);
-double solve_snow(char, double, double, double, double, double, double, 
-                  double, double, double, double, double, double, double, 
-                  double, double, double, double, double, double, double, 
-                  double *, double *, double *, double *,
-                  double *, double *, double *, double *, double *, double *, 
-                  double *, double *, double *, double *, double *, double *, 
-                  double *, double *, double *, double *, double *, double *, 
+double solve_snow(char, double, double, double, double, double, double,
+                  double, double, double, double, double, double, double,
+                  double, double, double, double, double, double, double,
+                  double *, double *, double *, double *, double *,
+                  double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
-                  float *, 
-                  int, int, int, int, int, int, int, int, int, 
-                  int, int, int, int, int *, energy_bal_struct *, 
-                  layer_data_struct *, layer_data_struct *, 
-                  snow_data_struct *, soil_con_struct *, 
+                  double *, double *, double *, double *, double *, double *,
+                  double *, double *, double *, double *, double *, double *,
+                  float *,
+                  int, int, int, int, int, int, int, int, int,
+                  int, int, int, int, int *, energy_bal_struct *,
+                  layer_data_struct *, layer_data_struct *,
+                  snow_data_struct *, soil_con_struct *,
                   veg_var_struct *, veg_var_struct *);
 double solve_atmos_energy_bal(double Tcanopy, ...);
 double solve_atmos_moist_bal(double , ...);
@@ -490,12 +489,12 @@ int    surface_fluxes(char, double, double, double, double,
 #if EXCESS_ICE
 		      int, double *, double *,
 #endif
-		      double, double, 
-                      double *, double *, double *, double *, double *, double *, double *,
+		      double, double, double *, double *,
+		      double **, double *, double *, double *, double *,
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
-                      double *, double *, double *, double *, float *,
-		      int, int, int, int, int, 
+                      double *, double *, double *, double *, double *,
+		      float *, int, int, int, int, int, 
                       int, int, int, int, atmos_data_struct *, dmy_struct *, 
                       energy_bal_struct *, global_param_struct *, 
                       layer_data_struct *, layer_data_struct *, 

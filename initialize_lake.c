@@ -44,6 +44,8 @@ int initialize_lake (lake_var_struct   *lake,
 	      and pack_temp in conjunction with 2-layer snow pack over
 	      lake ice.							LCB via TJB
   2008-Sep-09 Deleted initial volume print statement.			LCB via TJB
+  2009-Jun-09 Lake_var data structure now only stores final (corrected)
+	      values of aero_resist.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -70,7 +72,6 @@ int initialize_lake (lake_var_struct   *lake,
   lake->new_ice_area = 0.0;
   lake->ice_water_eq = 0.0;
   lake->aero_resist = 0;
-  lake->aero_resist_used = 0;
   lake_snow->swq = 0.0;
   lake_snow->depth = 0.0;
   lake_snow->surf_water = 0.0;

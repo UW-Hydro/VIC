@@ -4,33 +4,6 @@
 
 static char vcid[] = "$Id$";
 
-double canopy_evap(layer_data_struct *layer_wet,
-                   layer_data_struct *layer_dry,
-                   veg_var_struct    *veg_var_wet, 
-                   veg_var_struct    *veg_var_dry, 
-		   char               CALC_EVAP,
-                   int                veg_class, 
-                   int                month, 
-                   double             mu,
-		   double            *Wdew,
-                   double             delta_t,
-                   double             rad,
-		   double             vpd,
-		   double             net_short,
-		   double             air_temp,
-                   double             ra,
-                   double             displacement,
-                   double             roughness,
-                   double             ref_height,
-		   double             elevation,
-                   double            *prec,
-		   double            *depth,
-		   double            *Wcr,
-		   double            *Wpwp,
-#if SPATIAL_FROST
-		   double            *frost_fract,
-#endif
-		   float             *root)
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 
@@ -69,6 +42,64 @@ double canopy_evap(layer_data_struct *layer_wet,
   5-8-2001 Modified to close the canopy energy balance.       KAC
 
 **********************************************************************/
+
+double canopy_evap(layer_data_struct *layer_wet,
+                   layer_data_struct *layer_dry,
+                   veg_var_struct    *veg_var_wet, 
+                   veg_var_struct    *veg_var_dry, 
+		   char               CALC_EVAP,
+                   int                veg_class, 
+                   int                month, 
+                   double             mu,
+		   double            *Wdew,
+                   double             delta_t,
+                   double             rad,
+		   double             vpd,
+		   double             net_short,
+		   double             air_temp,
+                   double             ra,
+                   double             displacement,
+                   double             roughness,
+                   double             ref_height,
+		   double             elevation,
+                   double            *prec,
+		   double            *depth,
+		   double            *Wcr,
+		   double            *Wpwp,
+#if SPATIAL_FROST
+		   double            *frost_fract,
+#endif
+		   float             *root)
+/********************************************************************** 
+  CANOPY EVAPORATION
+
+  Calculation of evaporation from the canopy, including the
+  possibility of potential evaporation exhausting ppt+canopy storage
+  2.16 + 2.17
+  Index [0] refers to current time step, index [1] to next one
+  If f < 1.0 then veg_var->canopyevap = veg_var->Wdew + ppt
+  and Wdew = 0.0
+
+  DEFINITIONS:
+  Wdmax - max monthly dew holding capacity
+  Wdew - dew trapped on vegetation
+
+  Modified 
+     04-14-98 to work within calc_surf_energy_balance.c  KAC
+     07-24-98 fixed problem that caused hourly precipitation
+              to evaporate from the canopy during the same
+	      time step that it falls (OK for daily time step, 
+	      but causes oscilations in surface temperature
+	      for hourly time step)                      KAC, Dag
+	        modifications:
+     6-8-2000 Modified to use spatially distributed soil frost if 
+              present.                                           KAC
+     5-8-2001 Modified to close the canopy energy balance.       KAC
+  2009-Jun-09 Moved computation of canopy resistance rc out of penman()
+	      and into separate function calc_rc().				TJB
+
+**********************************************************************/ 
+
 {
 
   /** declare global variables **/
@@ -90,36 +121,9 @@ double canopy_evap(layer_data_struct *layer_wet,
   double             canopyevap;
   double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
+  double             rc;
   layer_data_struct *tmp_layer;
   veg_var_struct    *tmp_veg_var;
-
-  /********************************************************************** 
-     CANOPY EVAPORATION
-
-     Calculation of evaporation from the canopy, including the
-     possibility of potential evaporation exhausting ppt+canopy storage
-     2.16 + 2.17
-     Index [0] refers to current time step, index [1] to next one
-     If f < 1.0 than veg_var->canopyevap = veg_var->Wdew + ppt and
-                     Wdew = 0.0
-
-     DEFINITIONS:
-     Wdmax - max monthly dew holding capacity
-     Wdew - dew trapped on vegetation
-
-     Modified 
-     04-14-98 to work within calc_surf_energy_balance.c  KAC
-     07-24-98 fixed problem that caused hourly precipitation
-              to evaporate from the canopy during the same
-	      time step that it falls (OK for daily time step, 
-	      but causes oscilations in surface temperature
-	      for hourly time step)                      KAC, Dag
-	        modifications:
-     6-8-2000 Modified to use spatially distributed soil frost if 
-              present.                                           KAC
-     5-8-2001 Modified to close the canopy energy balance.       KAC
-
-  **********************************************************************/ 
 
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;
@@ -161,14 +165,13 @@ double canopy_evap(layer_data_struct *layer_wet,
 	tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
       }
       
-      canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),
-		       (2.0/3.0))* penman(rad, vpd, ra, (double) 0.0, 
-					  veg_lib[veg_class].rarc,
-					  veg_lib[veg_class].LAI[month-1], 
-					  (double) 1.0, air_temp, 
-					  net_short, elevation, 
-					  veg_lib[veg_class].RGL) * delta_t 
-	/ SEC_PER_DAY;
+      rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
+		   air_temp, vpd, veg_lib[veg_class].LAI[month-1],
+		   (double)1.0, FALSE);
+      canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
+		   * penman(air_temp, elevation, rad,
+			    vpd, ra, rc, veg_lib[veg_class].rarc)
+		   * delta_t / SEC_PER_DAY;
 
       if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
 	/** If daily time step, evap can include current precipitation **/
@@ -258,7 +261,9 @@ void transpiration(layer_data_struct *layer,
            present.                                               KAC
   2006-Oct-16 Modified to initialize ice[] for all soil layers
 	      before computing available moisture (to avoid using
-	      uninitialized values later on).			TJB
+	      uninitialized values later on).				TJB
+  2009-Jun-09 Moved computation of canopy resistance rc out of penman()
+	      and into separate function calc_rc().			TJB
 
 **********************************************************************/
 {
@@ -277,6 +282,7 @@ void transpiration(layer_data_struct *layer,
   double spare_evap;                    /* evap for 2nd distribution */
   double avail_moist[MAX_LAYERS];         /* moisture available for trans */
   double ice[MAX_LAYERS];
+  double rc;
 
   /********************************************************************** 
      EVAPOTRANSPIRATION
@@ -356,12 +362,12 @@ void transpiration(layer_data_struct *layer,
       (moist2>=Wcr[options.Nlayer-1] &&
       root[options.Nlayer-1]>=0.5) ){
     gsm_inv=1.0;
-    evap = penman(rad, vpd, ra, veg_lib[veg_class].rmin,
-		  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
-		  gsm_inv, air_temp, net_short, elevation, 
-		  veg_lib[veg_class].RGL) * delta_t / SEC_PER_DAY *
-      (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
-		 (2.0/3.0)));
+    rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
+		 air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+    evap = penman(air_temp, elevation, rad, vpd, ra, rc,
+		  veg_lib[veg_class].rarc)
+	   * delta_t / SEC_PER_DAY
+	   * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0)));
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -416,13 +422,12 @@ void transpiration(layer_data_struct *layer,
 
       if(gsm_inv > 0.0){
 	/** Compute potential evapotranspiration **/
-        layerevap[i] = penman(rad, vpd, ra, veg_lib[veg_class].rmin,
-			      veg_lib[veg_class].rarc, 
-			      veg_lib[veg_class].LAI[month-1], gsm_inv, 
-			      air_temp, net_short, elevation, 
-			      veg_lib[veg_class].RGL) * delta_t / SEC_PER_DAY 
-	  * (double)root[i] * (1.0-f*pow((Wdew/
-					  veg_lib[veg_class].Wdmax[month-1]),
+        rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
+		     air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, rc,
+			      veg_lib[veg_class].rarc)
+		       * delta_t / SEC_PER_DAY * (double)root[i]
+		       * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
 					 (2.0/3.0)));
       }
       else layerevap[i] = 0.0;

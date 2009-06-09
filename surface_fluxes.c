@@ -27,12 +27,13 @@ int surface_fluxes(char                 overstory,
 		   double               surf_atten,
 		   double              *Melt,
 		   double              *Le,
-		   double              *aero_resist,
+		   double             **aero_resist,
 		   double              *aero_resist_used,
 		   double              *baseflow_dry,
 		   double              *baseflow_wet,
 		   double              *asat_dry,
 		   double              *asat_wet,
+		   double              *pot_evap,
 		   double              *displacement,
 		   double              *gauge_correction,
 		   double              *inflow_dry,
@@ -136,6 +137,15 @@ int surface_fluxes(char                 overstory,
 	      these data structures refer to the energy balance at the
 	      soil surface, regardless of whether the surface is covered
 	      by snow or some veg or is totally bare.			TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
+  2009-Jun-09 Added call to compute_pot_evap() to compute potential
+	      evaporation for various land cover types.			TJB
+  2009-Jun-09 Cell_data structure now only stores final aero_resist
+	      values (called "aero_resist").  Preliminary uncorrected
+	      aerodynamic resistances for current vegetation and various
+	      reference land cover types for use in potential evap
+	      calculations is stored in temporary array aero_resist.	TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -163,6 +173,7 @@ int surface_fluxes(char                 overstory,
   int                    lidx;
   int                    over_iter;
   int                    under_iter;
+  int                    p,q;
   double                 Evap;
   double                 Ls;
   double                 LongUnderIn; // inmoing LW to ground surface
@@ -208,6 +219,7 @@ int surface_fluxes(char                 overstory,
   double                 step_out_snow;
   double                 step_ppt[2];
   double                 step_prec[2];
+  double               **step_aero_resist;
 
   // Quantities that need to be summed or averaged over multiple snow steps
   // energy structure
@@ -258,6 +270,7 @@ int surface_fluxes(char                 overstory,
   double                 store_layerevap[2][MAX_LAYERS];
   double                 store_ppt[2];
   double                 store_aero_cond_used[2];
+  double                 store_pot_evap[N_PET_TYPES];
 
   // Structures holding values for current snow step
   energy_bal_struct      snow_energy; // energy fluxes at snowpack surface
@@ -276,6 +289,8 @@ int surface_fluxes(char                 overstory,
   layer_data_struct      iter_layer[2][MAX_LAYERS];
   double                 iter_aero_resist[3];
   double                 iter_aero_resist_used[2];
+  double                 stability_factor[2];
+  double                 iter_pot_evap[N_PET_TYPES];
 
   // handle bisection of understory solution
   double store_tol_under;
@@ -290,6 +305,11 @@ int surface_fluxes(char                 overstory,
   double B_tol_over;
   double A_Tcanopy;
   double B_Tcanopy;
+
+  step_aero_resist = (double**)calloc(N_PET_TYPES,sizeof(double*));
+  for (p=0; p<N_PET_TYPES; p++) {
+    step_aero_resist[p] = (double*)calloc(2,sizeof(double));
+  }
 
   /***********************************************************************
     Set temporary variables - preserves original values until iterations
@@ -411,6 +431,8 @@ int surface_fluxes(char                 overstory,
   store_aero_cond_used[0] = 0;
   store_aero_cond_used[1] = 0;
   (*snow_inflow)          = 0;
+  for (p=0; p<N_PET_TYPES; p++)
+    store_pot_evap[p] = 0;
   N_steps                 = 0;
       
   /*************************
@@ -544,9 +566,9 @@ int surface_fluxes(char                 overstory,
 	  for ( lidx = 0; lidx < Nlayers; lidx ++ ) 
 	    iter_layer[dist][lidx].evap = 0;
         }
-        iter_aero_resist[0] = aero_resist[0];
-        iter_aero_resist[1] = aero_resist[1];
-        iter_aero_resist[2] = aero_resist[2];
+	for (q=0; q<3; q++) {
+	  iter_aero_resist[q] = aero_resist[N_PET_TYPES][q];
+	}
         iter_aero_resist_used[0] = aero_resist_used[0];
         iter_aero_resist_used[1] = aero_resist_used[1];
 	iter_snow.canopy_vapor_flux = 0;
@@ -566,7 +588,8 @@ int surface_fluxes(char                 overstory,
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
-			       iter_aero_resist, iter_aero_resist_used, &coverage, &delta_coverage, 
+			       iter_aero_resist, iter_aero_resist_used,
+			       &coverage, &delta_coverage, 
 			       &delta_snow_heat, displacement, 
 			       gauge_correction, &step_melt_energy, 
 			       &step_out_prec, &step_out_rain, &step_out_snow,
@@ -615,7 +638,8 @@ int surface_fluxes(char                 overstory,
 				     iter_snow.coverage, 
 				     (step_snow.depth + iter_snow.depth) / 2., 
 				     BareAlbedo, surf_atten, 
-				     iter_snow.vapor_flux, iter_aero_resist, iter_aero_resist_used,
+				     iter_snow.vapor_flux,
+				     iter_aero_resist, iter_aero_resist_used,
 				     displacement, &step_melt, step_ppt, 
 				     rainfall, ref_height, roughness, 
 				     snowfall, wind, root, INCLUDE_SNOW, 
@@ -717,6 +741,38 @@ int surface_fluxes(char                 overstory,
 		&& overstory ) && ( tol_over != 0 ) 
 	      && (over_iter < MAX_ITER) );
  
+    /**************************************
+      Compute Potential Evap
+    **************************************/
+    // First, determine the stability correction used in the iteration
+    if (iter_aero_resist_used[0] == HUGE_RESIST)
+      stability_factor[0] = HUGE_RESIST;
+    else
+      stability_factor[0] = iter_aero_resist_used[0]/aero_resist[N_PET_TYPES][UnderStory];
+    if (iter_aero_resist_used[1] == iter_aero_resist_used[0])
+      stability_factor[1] = stability_factor[0];
+    else {
+      if (iter_aero_resist_used[1] == HUGE_RESIST)
+        stability_factor[1] = HUGE_RESIST;
+      else
+        stability_factor[1] = iter_aero_resist_used[1]/aero_resist[N_PET_TYPES][1];
+    }
+
+    // Next, loop over pot_evap types and apply the correction to the relevant aerodynamic resistance
+    for (p=0; p<N_PET_TYPES; p++) {
+      if (stability_factor[0] == HUGE_RESIST)
+        step_aero_resist[p][0] = HUGE_RESIST;
+      else
+        step_aero_resist[p][0] = aero_resist[p][UnderStory]*stability_factor[0];
+      if (stability_factor[1] == HUGE_RESIST)
+        step_aero_resist[p][1] = HUGE_RESIST;
+      else
+        step_aero_resist[p][1] = aero_resist[p][1]*stability_factor[1];
+    }
+
+    // Finally, compute pot_evap
+    compute_pot_evap(veg_class, dmy, rec, gp->dt, atmos->shortwave[hidx], iter_soil_energy.NetLongAtmos, Tair, VPDcanopy, soil_con->elevation, step_aero_resist, iter_pot_evap);
+
     /**************************************
       Store sub-model time step variables 
     **************************************/
@@ -824,6 +880,8 @@ int surface_fluxes(char                 overstory,
       store_snow_flux         += soil_energy.snow_flux * (step_snow.coverage + delta_coverage); 
       store_refreeze_energy   += snow_energy.refreeze_energy * (step_snow.coverage + delta_coverage); 
     }
+    for (p=0; p<N_PET_TYPES; p++)
+      store_pot_evap[p] += iter_pot_evap[p];
 
     /* increment time step */
     N_steps ++;
@@ -924,6 +982,13 @@ int surface_fluxes(char                 overstory,
   }
   aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
   aero_resist_used[1] = 1/(store_aero_cond_used[1]/(double)N_steps);
+  for (p=0; p<N_PET_TYPES; p++)
+    pot_evap[p] = store_pot_evap[p]/(double)N_steps;
+
+  for (p=0; p<N_PET_TYPES; p++) {
+    free((char *)step_aero_resist[p]);
+  }
+  free((char *)step_aero_resist);
 
   /********************************************************
     Compute Runoff, Baseflow, and Soil Moisture Transport

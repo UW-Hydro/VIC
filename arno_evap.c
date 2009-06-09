@@ -47,6 +47,8 @@ static char vcid[] = "$Id$";
   2009-Mar-16 Modified to use min_liq (minimum allowable liquid water
 	      content) instead of resid_moist.  For unfrozen soil,
 	      min_liq = resid_moist.						TJB
+  2009-Jun-09 Moved computation of canopy resistance rc out of penman()
+	      and into separate function calc_rc().				TJB
 
 ****************************************************************************/
 
@@ -128,8 +130,7 @@ double arno_evap(layer_data_struct *layer_wet,
 
     /* Calculate the potential bare soil evaporation (mm/time step) */
   
-    Epot = penman(rad, vpd, ra, 0.0, 0.0, 1.0, 1.0, 
- 	    air_temp, net_short, elevation, 0) * delta_t / SEC_PER_DAY;
+    Epot = penman(air_temp, elevation, rad, vpd, ra, 0.0, 0.0) * delta_t / SEC_PER_DAY;
   
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */

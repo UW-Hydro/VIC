@@ -88,11 +88,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      here.							TJB
   2009-Jan-12 Added logic for JULY_TAVG_SUPPLIED.			TJB
   2009-May-22 Added validation of expt and bubble.			TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
   extern option_struct options;
   extern global_param_struct global_param;
+  extern veg_lib_struct *veg_lib;
 #if LINK_DEBUG
   extern debug_struct debug;
 #endif
@@ -102,7 +105,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   char            tmpline[MAXSTRING];
   const char      delimiters[] = " ";
   char            *token;
-  int             layer, i, tempint;
+  int             layer, i, tempint, j;
   double          Wcr_FRACT[MAX_LAYERS];
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
@@ -192,7 +195,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }  
       sscanf(token, "%lf", &temp.expt[layer]);
 #if !OUTPUT_FORCE
-      if(temp.bubble[layer] < 0) {
+      if(temp.expt[layer] < 3.0) {
 	fprintf(stderr,"ERROR: Exponent in layer %d is %f < 3.0; This must be > 3.0\n", layer, temp.expt[layer]);
 	exit(0);
       }
@@ -361,6 +364,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.rough);
+    /* Overwrite default bare soil aerodynamic resistance parameters
+       with the values taken from the soil parameter file */
+    for (j=0; j<12; j++) {
+      veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
+      veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
+    }
     
     /* read snow roughness */
     if( ( token = strtok (NULL, delimiters)) == NULL ){

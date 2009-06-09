@@ -16,7 +16,9 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   09-24-98 Modified to remove root fractions from the library file.
            See read_vegparam.c and calc_root_fraction.c for new
            root fraction distribution information.               KAC
-
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information, as well as other land cover types
+	      used in potential evap calcualtions.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -41,12 +43,13 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   }
   rewind(veglib);
       
-  temp = (veg_lib_struct *)calloc(Nveg_type,sizeof(veg_lib_struct));
+  temp = (veg_lib_struct *)calloc(Nveg_type+N_PET_TYPES_NON_NAT,sizeof(veg_lib_struct));
 
   fscanf(veglib, "%s", str);
   i=0;
   while (!feof(veglib)) {
     if(str[0]<=57 && str[0]>=48) {
+      temp[i].NVegLibTypes = Nveg_type;
       temp[i].veg_class = atoi(str);
       fscanf(veglib, "%d",  &tmpflag);
       if(tmpflag==0) temp[i].overstory = FALSE;
@@ -115,6 +118,25 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
     nrerror(ErrStr);
   }
   *Ntype = Nveg_type;
+  for (i=0; i<N_PET_TYPES_NON_NAT; i++) {
+    temp[Nveg_type+i].NVegLibTypes = Nveg_type;
+    temp[Nveg_type+i].veg_class = Nveg_type+i+1;
+    temp[Nveg_type+i].overstory = ref_veg_over[i];
+    temp[Nveg_type+i].rarc = ref_veg_rarc[i];
+    temp[Nveg_type+i].rmin = ref_veg_rmin[i];
+    for (j=0; j<12; j++) {
+      temp[Nveg_type+i].LAI[j] = ref_veg_lai[i];
+      temp[Nveg_type+i].Wdmax[j] = LAI_WATER_FACTOR*ref_veg_lai[i];
+      temp[Nveg_type+i].albedo[j] = ref_veg_albedo[i];
+      temp[Nveg_type+i].roughness[j] = ref_veg_rough[i];
+      temp[Nveg_type+i].displacement[j] = ref_veg_displ[i];
+    }
+    temp[Nveg_type+i].wind_h = ref_veg_wind_h[i];
+    temp[Nveg_type+i].RGL = ref_veg_RGL[i];
+    temp[Nveg_type+i].rad_atten = ref_veg_rad_atten[i];
+    temp[Nveg_type+i].wind_atten = ref_veg_wind_atten[i];
+    temp[Nveg_type+i].trunk_ratio = ref_veg_trunk_ratio[i];
+  }
 
   return temp;
 } 

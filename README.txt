@@ -351,6 +351,69 @@ to converge.
 
 
 
+Added computation of 6 types of potential evaporation.
+
+	Files Affected:
+
+	arno_evap.c
+	CalcAerodynamic.c
+	canopy_evap.c
+	compute_pot_evap.c (new)
+	full_energy.c
+	global.h
+	initialize_lake.c
+	initialize_model_state.c
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	penman.c
+	put_data.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	read_veglib.c
+	read_vegparam.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	wetland_energy.c
+
+	Description:
+
+	Added computation of potential evaporation for 6 different reference
+	land cover types, along with new output variables for reporting them:
+	  OUT_PET_SATSOIL = pot evap from saturated soil
+	  OUT_PET_H2OSURF = pot evap from open water surface
+	  OUT_PET_SHORT   = pot evap from short reference crop (clipped grass)
+	  OUT_PET_TALL    = pot evap from tall reference crop (alfalfa)
+	  OUT_PET_NATVEG  = pot evap from current vegetation with canopy
+			    resistance computed in the usual manner except
+			    for the absence of water limitation
+	  OUT_PET_VEGNOCR = pot evap from current vegetation with canopy
+			    resistance set to 0
+
+	Four "default" veg library classes were created (defined in global.h)
+	so that veg characteristics for these landcover types (such as
+	roughness length, etc) are present regardless of the contents of the
+	externally-supplied vegetation library.  As a result, bare soil no
+	longer is treated as an exception within the code, but as a legitimate
+	class having its own area fraction Cv, etc.  This simplifies some of
+	the loops in the code.
+
+	In order to compute potential evaporation for these different cases,
+	several different aerodynamic resistances also needed to be computed.
+	Rather than store all of these in the cell_data structure, the
+	"aero_resist" array of the cell_data structure was removed and
+	the previously-named "aero_resist_used" array was renamed to
+	"aero_resist".  Now, the pre-stability-correction values of
+	aero_resist are stored in a temporary internal array and not reported.
+
+	Finally, computation of canopy resistance was moved out of penman()
+	and into a separate function calc_rc() within the same file.
+
+
+
+
 Bug Fixes:
 ----------
 

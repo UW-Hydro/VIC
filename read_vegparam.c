@@ -34,6 +34,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2007-Oct-31 Added missing brackets in if(options.GLOBAL_LAI) block.	TJB
   2008-Oct-23 Added blocks to free vegarr[].				LCB via TJB
   2009-Jan-16 Added logic for COMPUTE_TREELINE option.			TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
 **********************************************************************/
 {
 
@@ -69,6 +71,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 #endif  
 
   while ( ( fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num) == 2 ) && vegcel != gridcel ){
+    if (vegetat_type_num < 0) {
+      sprintf(ErrStr,"ERROR number of vegetation tiles (%i) given for cell %i is < 0.\n",vegetat_type_num,vegcel);
+      nrerror(ErrStr);
+    }
     for (i = 0; i <= vegetat_type_num * skip; i++){
       if ( fgets(str, 500, vegparam) == NULL ){
         sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading root zones and LAI\n",vegcel);
@@ -87,17 +93,13 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     nrerror(ErrStr);
   }
 
-  // Make sure to allocate extra memory for wetlands vegetation
+  // Make sure to allocate extra memory for bare soil tile and optionally a lake/wetland tile
+  MaxVeg = vegetat_type_num+1;
   if ( options.LAKES )
-    MaxVeg = vegetat_type_num+1;
-  else
-    MaxVeg = vegetat_type_num;
+    MaxVeg++;
 
   /** Allocate memory for vegetation grid cell parameters **/
-  if ( MaxVeg > 0 )
-    temp = (veg_con_struct*) calloc( MaxVeg+1, sizeof(veg_con_struct));
-  else
-    temp = (veg_con_struct*) calloc(1, sizeof(veg_con_struct));
+  temp = (veg_con_struct*) calloc( MaxVeg, sizeof(veg_con_struct));
   temp[0].Cv_sum = 0.0;
 
   for (i = 0; i < vegetat_type_num; i++) {
@@ -225,13 +227,14 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
   }
 
+  // Determine if we have bare soil
   if(temp[0].Cv_sum>1.0){
     fprintf(stderr,"WARNING: Cv exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", gridcel);
     for(j=0;j<vegetat_type_num;j++)
       temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
     temp[0].Cv_sum = 1.;
   }
-  if(temp[0].Cv_sum>0.99 && temp[0].Cv_sum<1.0){
+  else if(temp[0].Cv_sum>0.99 && temp[0].Cv_sum<1.0){
     fprintf(stderr,"WARNING: Cv > 0.99 and Cv < 1.0 at grid cell %d, model assuming that bare soil is not to be run - fractions being adjusted to equal 1\n", gridcel);
     for(j=0;j<vegetat_type_num;j++)
       temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
@@ -310,6 +313,26 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     }
 
+  }
+
+  // Bare soil tile
+  if (temp[0].Cv_sum < 1.) {
+    j = vegetat_type_num;
+    temp[j].veg_class = Nveg_type; // Create a veg_class ID for bare soil, which is not mentioned in the veg library
+    temp[j].Cv = 1.0 - temp[0].Cv_sum;
+    // Don't allocate any root-zone-related arrays
+    if(options.BLOWING) {
+      if (vegetat_type_num > 0) {
+        temp[j].sigma_slope = temp[0].sigma_slope;
+        temp[j].lag_one = temp[0].lag_one;
+        temp[j].fetch = temp[0].fetch;
+      }
+      else {
+        temp[j].sigma_slope = 0.005;
+        temp[j].lag_one = 0.95;
+        temp[j].fetch = 2000;
+      }
+    }
   }
 
   return temp;

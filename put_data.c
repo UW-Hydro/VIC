@@ -93,6 +93,15 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Feb-09 Removed checks on PRT_SNOW_BAND option.			TJB
   2009-Feb-22 Added OUT_VPD.						TJB
   2009-May-17 Added OUT_ASAT.						TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
+  2009-Jun-09 Added OUT_PET_*, potential evap computed for various
+	      reference land cover types.				TJB
+  2009-Jun-09 Cell_data structure now only stores final aero_resist
+	      values (called "aero_resist").  Preliminary uncorrected
+	      aerodynamic resistances for current vegetation and various
+	      reference land cover types for use in potential evap
+	      calculations is stored in temporary array aero_resist.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -230,10 +239,7 @@ int  put_data(dist_prcp_struct  *prcp,
   ****************************************/
   for ( veg = 0 ; veg <= veg_con[0].vegetat_type_num ; veg++) {
 
-    if ( veg < veg_con[0].vegetat_type_num ) 
-      Cv = veg_con[veg].Cv;
-    else
-      Cv = (1.0 - veg_con[0].Cv_sum);
+    Cv = veg_con[veg].Cv;
 
     if ( Cv > 0 ) {
 
@@ -293,6 +299,20 @@ int  put_data(dist_prcp_struct  *prcp,
 	    }
 	    out_data[OUT_EVAP].data[0] += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 
+	    /** record potential evap **/
+	    out_data[OUT_PET_SATSOIL].data[0] += cell[dist][veg][band].pot_evap[0] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_PET_H2OSURF].data[0] += cell[dist][veg][band].pot_evap[1] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_PET_SHORT].data[0] += cell[dist][veg][band].pot_evap[2] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_PET_TALL].data[0] += cell[dist][veg][band].pot_evap[3] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_PET_NATVEG].data[0] += cell[dist][veg][band].pot_evap[4] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	    out_data[OUT_PET_VEGNOCR].data[0] += cell[dist][veg][band].pot_evap[5] 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+
 	    /** record runoff **/
 	    out_data[OUT_RUNOFF].data[0]   += cell[dist][veg][band].runoff 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
@@ -320,8 +340,8 @@ int  put_data(dist_prcp_struct  *prcp,
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
             /** record aerodynamic conductance and resistance **/
-            if (cell[WET][veg][0].aero_resist_used[0] > SMALL) {
-              tmp_cond1 = (1/cell[WET][veg][0].aero_resist_used[0])
+            if (cell[WET][veg][0].aero_resist[0] > SMALL) {
+              tmp_cond1 = (1/cell[WET][veg][0].aero_resist[0])
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
             else {
@@ -329,8 +349,8 @@ int  put_data(dist_prcp_struct  *prcp,
             }
             out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
             if (overstory) {
-              if (cell[WET][veg][0].aero_resist_used[1] > SMALL) {
-                tmp_cond2 = (1/cell[WET][veg][0].aero_resist_used[1])
+              if (cell[WET][veg][0].aero_resist[1] > SMALL) {
+                tmp_cond2 = (1/cell[WET][veg][0].aero_resist[1])
                   * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
               }
               else {
@@ -755,6 +775,20 @@ int  put_data(dist_prcp_struct  *prcp,
 
       out_data[OUT_EVAP].data[0] += tmp_evap * Cv * AreaFract[band] * TreeAdjustFactor[band];
 
+      /** record potential evap **/
+      out_data[OUT_PET_SATSOIL].data[0] += cell[dist][veg][band].pot_evap[0] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_PET_H2OSURF].data[0] += cell[dist][veg][band].pot_evap[1] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_PET_SHORT].data[0] += cell[dist][veg][band].pot_evap[2] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_PET_TALL].data[0] += cell[dist][veg][band].pot_evap[3] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_PET_NATVEG].data[0] += cell[dist][veg][band].pot_evap[4] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      out_data[OUT_PET_VEGNOCR].data[0] += cell[dist][veg][band].pot_evap[5] 
+        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+
       out_data[OUT_SUB_SNOW].data[0] += snow[veg][band].vapor_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_SUB_SURFACE].data[0] += snow[veg][band].surface_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
       out_data[OUT_SUB_BLOWING].data[0] += snow[veg][band].blowing_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -780,8 +814,8 @@ int  put_data(dist_prcp_struct  *prcp,
       }
 
       /** record aerodynamic conductance and resistance **/
-      if (lake_var.aero_resist_used > SMALL) {
-        tmp_cond1 = (1/lake_var.aero_resist_used) * Clake * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+      if (lake_var.aero_resist > SMALL) {
+        tmp_cond1 = (1/lake_var.aero_resist) * Clake * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
       }
       else {
         tmp_cond1 = HUGE_RESIST;

@@ -73,6 +73,8 @@ int main(int argc, char *argv[])
 	      case where DIST_PRCP is TRUE.				TJB
   2009-Jan-16 Added soil_con.avgJulyAirTemp to argument list of
 	      initialize_atmos().					TJB
+  2009-Jun-09 Modified to use extension of veg_lib structure to contain
+	      bare soil information.					TJB
 **********************************************************************/
 {
 
@@ -339,8 +341,7 @@ int main(int argc, char *argv[])
 	***************************************************/
       storage = 0.;
       for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
-	if ( veg < veg_con[0].vegetat_type_num ) veg_fract = veg_con[veg].Cv;
-	else veg_fract = ( 1.0 - veg_con[0].Cv_sum );
+	veg_fract = veg_con[veg].Cv;
 	for ( band = 0; band < options.SNOW_BAND; band++ ) {
 	  band_fract = soil_con.AreaFract[band];
 	  if ( veg_fract > SMALL && band_fract > SMALL ) {

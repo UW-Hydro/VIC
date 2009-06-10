@@ -102,8 +102,8 @@ Added AERO_RESIST_CANSNOW option.
 	VIC 4.1.0 differed from VIC 4.0.6 (and earlier) in the computation
 	of aerodynamic resistances in snow-filled canopy.  This new option
 	allows backwards-compatibility with both of these model versions, as
-	well as the new "AR_406_LS", "406_FULL" and "AR_COMBO" options, for
-	comparison.  The default is set to AR_410.
+	well as the new "AR_406_LS", "AR_406_FULL" and "AR_COMBO" options, for
+	comparison.  The default is set to AR_406_FULL.
 
 
 

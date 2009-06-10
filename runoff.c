@@ -511,9 +511,6 @@ int  runoff(layer_data_struct *layer_wet,
 	  }
 	  if ( runoff[frost_area] < 0. ) runoff[frost_area] = 0.;
 	  
-          /** Store saturated area **/
-          *asat_ptr = A;
-
 	  /**************************************************
 	  Compute Flow Between Soil Layers (using an hourly time step)
 	  **************************************************/
@@ -775,6 +772,24 @@ int  runoff(layer_data_struct *layer_wet,
 	    baseflow[frost_area] += dt_baseflow;
 	    
 	  } /* end of hourly time step loop */
+
+	  /******************************************************
+            Recompute Asat based on final moisture level of upper layers
+	  ******************************************************/
+	  top_moist = 0.;
+	  top_max_moist=0.;
+	  for(lindex=0;lindex<2;lindex++) {
+	    top_moist += (liq[lindex] + ice[lindex]);
+	    top_max_moist += max_moist[lindex];
+	  }
+	  if(top_moist>top_max_moist) top_moist = top_max_moist;
+	  /** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
+	  if(top_moist > top_max_moist) top_moist=top_max_moist;
+	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
+	  A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+          /** Store saturated area **/
+          *asat_ptr = A;
+
 #if EXCESS_ICE
 	}//end if subsidence did not occur or non-simple scenario for subsidence
 #endif

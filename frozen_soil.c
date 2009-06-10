@@ -43,6 +43,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 	      estimate_layer_ice_content().  This allows computation
 	      of min_liq, the minimum allowable liquid water content
 	      in each layer as a function of temperature.		TJB
+  2009-Jun-10 Fixed incorrect placement of checks on ErrorFlag.		TJB
 ******************************************************************/
 
   extern option_struct options;

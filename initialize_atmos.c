@@ -92,6 +92,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      calculation to be a function of elevation and air temperature
 	      (as opposed to a constant 95.5 kPa, as it was previously).
 	      Made similar change to density calculation.			TJB
+  2009-Jun-10 Fixed incorrect handling of cases when incoming longwave and
+	      shortwave radiation are supplied.					TJB
 
 **********************************************************************/
 {
@@ -128,6 +130,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double  sum;
   double **forcing_data;
   int     type;
+  double  air_temp;
+  double  factor;
 
   /* compute number of simulation days */
   Ndays = ( global_param.nrecs * global_param.dt) / 24;
@@ -427,18 +431,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
     requires prec, tmax, and tmin
   **************************************************/
-  if(!(param_set.TYPE[VP].SUPPLIED && param_set.TYPE[SHORTWAVE].SUPPLIED)) {
-    /** do not use mtclim estimates if vapor pressure and shortwave
-	radiation are supplied **/
-    for (i = 0; i < Ndays; i++)
-      prec[i] = 0;
-    for (rec = 0; rec < global_param.nrecs; rec++) {
-      prec[rec/stepspday] += atmos[rec].prec[NR];
-    }
-    mtclim42_wrapper(0, 0, (theta_l-theta_s)*24./360., elevation, annual_prec,
-		     phi, &global_param, dmy, prec, tmax, tmin, tskc, vp,
-		     hourlyrad);
+  for (i = 0; i < Ndays; i++)
+    prec[i] = 0;
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    prec[rec/stepspday] += atmos[rec].prec[NR];
   }
+  mtclim42_wrapper(0, 0, (theta_l-theta_s)*24./360., elevation, annual_prec,
+		   phi, &global_param, dmy, prec, tmax, tmin, tskc, vp,
+		   hourlyrad);
 
   /***********************************************************
     reaggregate the hourly shortwave to the larger timesteps 
@@ -463,17 +463,53 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
   else {
-    /* sub-daily shortwave provided, so it will be used instead
-       of the mtclim estimates */
-    idx = 0;
-    for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
-      sum = 0;
-      for (i = 0; i < NF; i++, step++) {
-	atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
-	sum += atmos[rec].shortwave[i];
-	idx++;
+    if(param_set.FORCE_DT[param_set.TYPE[SHORTWAVE].SUPPLIED-1] == 24) {
+      /* daily shortwave provided; to get sub-daily, we will take the
+         mtclim estimates and scale them to match the supplied daily totals */
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
+        for (i = 0; i < NF; i++) {
+	  atmos[rec].shortwave[i] = 0;
+	  for (j = 0; j < options.SNOW_STEP; j++, hour++) {
+	    atmos[rec].shortwave[i] += hourlyrad[hour];
+	  }
+	  atmos[rec].shortwave[i] /= options.SNOW_STEP;
+        }
+        if (NF > 1) {
+	  atmos[rec].shortwave[NR] = 0;
+	  for (i = 0; i < NF; i++) {
+	    atmos[rec].shortwave[NR] += atmos[rec].shortwave[i];
+	  }
+	  atmos[rec].shortwave[NR] /= NF;
+        }
       }
-      if (NF > 1) atmos[rec].shortwave[NR] = sum / (float)NF;
+      rec = 0;
+      for (day = 0; day < Ndays; day++) {
+	if (forcing_data[SHORTWAVE][day] > 0 && atmos[rec].shortwave[NR] > 0)
+	  factor = forcing_data[SHORTWAVE][day]/atmos[rec].shortwave[NR];
+	else
+	  factor = 0;
+	for (i = 0; i < stepspday; i++) {
+	  for (j = 0; j < NF; j++)
+	    atmos[rec].shortwave[j] *= factor;
+	  if(NF > 1)
+	    atmos[rec].shortwave[NR] *= factor;
+	  rec++;
+        }
+      }
+    }
+    else {
+      /* sub-daily shortwave provided, so it will be used instead
+         of the mtclim estimates */
+      idx = 0;
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (i = 0; i < NF; i++, step++) {
+	  atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
+	  sum += atmos[rec].shortwave[i];
+	  idx++;
+        }
+        if (NF > 1) atmos[rec].shortwave[NR] = sum / (float)NF;
+      }
     }
   }
 
@@ -546,8 +582,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    atmos[rec].vp[NR] = sum / (float)NF;
 	    atmos[rec].vpd[NR] = (svp(atmos[rec].air_temp[NR]) 
 				  - atmos[rec].vp[NR]);
-	    rec++;
 	  }
+	  rec++;
 	}
       }
     }
@@ -610,10 +646,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  sum += atmos[rec].longwave[j];
 	}
 	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-	if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+	if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
+	  air_temp = atmos[rec].air_temp[NR] + KELVIN;
 	  atmos[rec].longwave[NR] -= STEFAN_B
-		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR]
-		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
+		   * air_temp * air_temp * air_temp * air_temp;
+	}
 	rec++;
       }
     }
@@ -630,9 +667,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
       }
       if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
       if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
-	atmos[rec].longwave[NR] -= STEFAN_B
-		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR]
-		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
+	if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
+	  air_temp = atmos[rec].air_temp[NR] + KELVIN;
+	  atmos[rec].longwave[NR] -= STEFAN_B
+		   * air_temp * air_temp * air_temp * air_temp;
+	}
     }
   }
 

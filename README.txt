@@ -492,6 +492,26 @@ Fixed uninitialized value errors in parse_output_info.c.
 	can be omitted from global param file.			TJB
 
 
+Fixed incorrect handling of cases when user supplies incoming longwave and
+shortwave radiation.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	Previously, when incoming longwave was supplied and the model was
+	running in water balance mode, outgoing longwave was computed using
+	air temperature in C rather than in Kelvin.  Thus the computed net
+	longwave was wrong.  This has been changed to use Kelvin.  Meanwhile,
+	there previously was no case to handle user-supplied incoming DAILY
+	AVERAGE shortwave.  This has been remedied.  Now, when daily shortwave
+	is supplied, the model computes sub-daily shortwave using mtclim
+	and rescales so that the daily average matches the supplied daily
+	average (courtesy of Ingjerd Haddeland).		TJB
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****

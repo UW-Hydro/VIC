@@ -102,8 +102,8 @@ Added AERO_RESIST_CANSNOW option.
 	VIC 4.1.0 differed from VIC 4.0.6 (and earlier) in the computation
 	of aerodynamic resistances in snow-filled canopy.  This new option
 	allows backwards-compatibility with both of these model versions, as
-	well as the new "AR_406_LS", "AR_406_FULL" and "AR_COMBO" options, for
-	comparison.  The default is set to AR_406_FULL.
+	well as the new "AR_406_LS", "406_FULL" and "AR_COMBO" options, for
+	comparison.  The default is set to AR_410.
 
 
 
@@ -490,26 +490,6 @@ Fixed uninitialized value errors in parse_output_info.c.
 
 	Added default values for format, typestr, and multstr, so that they
 	can be omitted from global param file.			TJB
-
-
-Fixed incorrect handling of cases when user supplies incoming longwave and
-shortwave radiation.
-
-	Files Affected:
-
-	initialize_atmos.c
-
-	Description:
-
-	Previously, when incoming longwave was supplied and the model was
-	running in water balance mode, outgoing longwave was computed using
-	air temperature in C rather than in Kelvin.  Thus the computed net
-	longwave was wrong.  This has been changed to use Kelvin.  Meanwhile,
-	there previously was no case to handle user-supplied incoming DAILY
-	AVERAGE shortwave.  This has been remedied.  Now, when daily shortwave
-	is supplied, the model computes sub-daily shortwave using mtclim
-	and rescales so that the daily average matches the supplied daily
-	average (courtesy of Ingjerd Haddeland).		TJB
 
 
 

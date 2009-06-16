@@ -5,6 +5,8 @@
 #######################################################################
 # Simulation Parameters
 #######################################################################
+NLAYER		3	# number of soil layers
+NODES		10	# number of soil thermal nodes 
 TIME_STEP 	3	# model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
 SNOW_STEP	3	# time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
 STARTYEAR	2000	# year model simulation starts
@@ -17,17 +19,23 @@ ENDDAY		31	# day model simulation ends
 FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water balance only
 FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
+QUICK_SOLVE	FALSE	# TRUE = Use Liang et al., 1999 formulation for iteration, but explicit finite difference method for final step.
 NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
 IMPLICIT	FALSE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
 EXP_TRANS	FALSE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution
+SNOW_ALBEDO	USACE	# USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
+SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
+BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 DIST_PRCP	FALSE	# TRUE = use distributed precipitation
+PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
 CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
-PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
 MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 CONTINUEONERROR FALSE   # TRUE = continue simulation on cell error; TFALLBACK = when energy balance fails to converge, use previous T value
 COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
+EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
+RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 AERO_RESIST_CANSNOW	AR_410	# Options for aerodynamic resistance in snow-filled canopy:
 				# AR_406 = multiply by 10 for latent heat but do NOT multiply by 10 for sensible heat
 				#          and do NOT apply stability correction (as in VIC 4.0.6).
@@ -53,13 +61,10 @@ GRND_FLUX_TYPE	GF_FULL	# Options for ground flux:
 			#           but deltaH and fusion ignore surf_atten)
 			# GF_FULL = use correct ground flux formula from VIC 4.1.0 and
 			#           also take surf_atten into account in deltaH and fusion
-BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
-EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
 MIN_LIQ		FALSE	# TRUE = use temperature-dependent minimum for liquid soil moisture instead of residual moisture
 PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing:
 			# TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation;
 			# FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
-RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 
 #######################################################################
 # State Files and  Parameters
@@ -88,7 +93,6 @@ RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if
 #			FORCE_TYPE	PREC
 #######################################################################
 FORCING1	(put the forcing path/prefix here)	# Forcing file path and prefix, ending in "_"
-GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
 FORCE_FORMAT	BINARY	# BINARY or ASCII
 FORCE_ENDIAN	LITTLE	# LITTLE (PC/Linux) or BIG (SUN)
 N_TYPES		4	# Number of variables (columns)
@@ -101,6 +105,7 @@ FORCEYEAR	2000	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
 FORCEHOUR	00	# Hour of first forcing record
+GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
 MEASURE_H       2.0     # height of humidity measurement (m)
 ALMA_INPUT	FALSE	# TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
@@ -108,12 +113,11 @@ ALMA_INPUT	FALSE	# TRUE = ALMA-compliant input variable units; FALSE = standard 
 #######################################################################
 # Land Surface Files and Parameters
 #######################################################################
-NLAYER		3	# number of soil layers
-NODES		10	# number of soil thermal nodes 
 SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
+ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
+#SOIL_DIR        (soil param directory)   # Directory containing ARC/INFO ASCII grids of soil parameters - only valid if ARC_SOIL is TRUE
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED	FALSE	# TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
-ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 GLOBAL_LAI 	FALSE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
@@ -131,6 +135,7 @@ SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
+MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
 PRT_HEADER	FALSE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
 PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables
 			# NOTE: this is ignored if N_OUTFILES is specified below.

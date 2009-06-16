@@ -84,6 +84,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-May-18 Added options.PLAPSE.						TJB
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.			TJB
+  2009-Jun-15 Changed order of options to match global parameter file.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -168,20 +169,20 @@ global_param_struct get_global_param(filenames_struct *names,
 
       sscanf(cmdstr,"%s",optstr);
 
-      /*******************************
-        Get Model Global Parameters
-	*****************************/
+      /*************************************
+       Get Model Global Parameters
+      *************************************/
       if(strcasecmp("NLAYER",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&options.Nlayer);
+      }
+      else if(strcasecmp("NODES",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&options.Nnode);
       }
       else if(strcasecmp("TIME_STEP",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.dt);
       }
-      else if(strcasecmp("OUT_STEP",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.out_dt);
-      }
-      else if(strcasecmp("RESOLUTION",optstr)==0) {
-        sscanf(cmdstr,"%*s %f",&global.resolution);
+      else if(strcasecmp("SNOW_STEP",optstr)==0) {
+	sscanf(cmdstr,"%*s %d",&options.SNOW_STEP);
       }
       else if(strcasecmp("STARTYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.startyear);
@@ -195,6 +196,9 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("STARTHOUR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.starthour);
       }
+      else if(strcasecmp("NRECS",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.nrecs);
+      }
       else if(strcasecmp("ENDYEAR",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.endyear);
       }
@@ -204,43 +208,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("ENDDAY",optstr)==0) {
         sscanf(cmdstr,"%*s %d",&global.endday);
       }
-      else if(strcasecmp("SKIPYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.skipyear);
-      }
-      else if(strcasecmp("FORCEYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.forceyear[file_num]);
-      }
-      else if(strcasecmp("FORCEMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.forcemonth[file_num]);
-      }
-      else if(strcasecmp("FORCEDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.forceday[file_num]);
-      }
-      else if(strcasecmp("FORCEHOUR",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.forcehour[file_num]);
-      }
-      else if(strcasecmp("NRECS",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.nrecs);
-      }
-      else if(strcasecmp("WIND_H",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&global.wind_h);
-      }
-      else if(strcasecmp("MEASURE_H",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&global.measure_h);
-      }
-      else if(strcasecmp("NODES",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&options.Nnode);
-      }
-      else if(strcasecmp("MIN_RAIN_TEMP",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&global.MIN_RAIN_TEMP);
-      }
-      else if(strcasecmp("MAX_SNOW_TEMP",optstr)==0) {
-        sscanf(cmdstr,"%*s %lf",&global.MAX_SNOW_TEMP);
-      }
-
-      /********************
-        Get Model Options
-	******************/
       else if(strcasecmp("FULL_ENERGY",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
@@ -258,6 +225,16 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.GRND_FLUX=TRUE;
 	}
         else options.FROZEN_SOIL = FALSE;
+      }
+      else if(strcasecmp("GRND_FLUX",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.GRND_FLUX=TRUE;
+        else options.GRND_FLUX = FALSE;
+      }
+      else if(strcasecmp("QUICK_FLUX",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.QUICK_FLUX=TRUE;
+        else options.QUICK_FLUX = FALSE;
       }
       else if(strcasecmp("QUICK_SOLVE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -279,62 +256,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.EXP_TRANS=TRUE;
         else options.EXP_TRANS = FALSE;
       }
-      else if(strcasecmp("DIST_PRCP",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
-        else options.DIST_PRCP = FALSE;
-      }
-      else if(strcasecmp("BLOWING",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
-        else options.BLOWING = FALSE;
-      }
-      else if(strcasecmp("COMPRESS",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.COMPRESS=TRUE;
-        else options.COMPRESS = FALSE;
-      }
-      else if(strcasecmp("CORRPREC",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.CORRPREC=TRUE;
-        else options.CORRPREC = FALSE;
-      }
-      else if(strcasecmp("PRT_SNOW_BAND",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.PRT_SNOW_BAND=TRUE;
-        else options.PRT_SNOW_BAND = FALSE;
-      }
-      else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&options.GRID_DECIMAL);
-      }
-      else if(strcasecmp("SNOW_BAND",optstr)==0) {
-	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snowband);
-      }
-      else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
-        else options.BINARY_OUTPUT = FALSE;
-      }
-      else if(strcasecmp("ALMA_OUTPUT",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
-        else options.ALMA_OUTPUT = FALSE;
-      }
-      else if(strcasecmp("PRT_HEADER",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.PRT_HEADER=TRUE;
-        else options.PRT_HEADER = FALSE;
-      }
-      else if(strcasecmp("EQUAL_AREA",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
-        else options.EQUAL_AREA = FALSE;
-      }
-      else if(strcasecmp("ARC_SOIL",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
-        else options.ARC_SOIL = FALSE;
-      }
       else if (strcasecmp("SNOW_ALBEDO", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("SUN1999",flgstr)==0) options.SNOW_ALBEDO=SUN1999;
@@ -345,6 +266,55 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;
         else options.SNOW_DENSITY = DENS_BRAS;
       }
+      else if(strcasecmp("BLOWING",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
+        else options.BLOWING = FALSE;
+      }
+      else if(strcasecmp("DIST_PRCP",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
+        else options.DIST_PRCP = FALSE;
+      }
+      else if(strcasecmp("PREC_EXPT",optstr)==0) {
+	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
+      }
+      else if(strcasecmp("CORRPREC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CORRPREC=TRUE;
+        else options.CORRPREC = FALSE;
+      }
+      else if(strcasecmp("MIN_WIND_SPEED",optstr)==0) {
+	sscanf(cmdstr,"%*s %f",&options.MIN_WIND_SPEED);
+      }
+      else if(strcasecmp("MIN_RAIN_TEMP",optstr)==0) {
+        sscanf(cmdstr,"%*s %lf",&global.MIN_RAIN_TEMP);
+      }
+      else if(strcasecmp("MAX_SNOW_TEMP",optstr)==0) {
+        sscanf(cmdstr,"%*s %lf",&global.MAX_SNOW_TEMP);
+      }
+      else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CONTINUEONERROR=TRUE;
+        else if(strcasecmp("TFALLBACK",flgstr)==0) options.CONTINUEONERROR=TFALLBACK;
+        else options.CONTINUEONERROR = FALSE;
+      }
+      else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.COMPUTE_TREELINE=FALSE;
+        else {
+          options.COMPUTE_TREELINE = TRUE;
+          options.AboveTreelineVeg = atoi( flgstr );
+        }
+      }
+      else if(strcasecmp("EQUAL_AREA",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.EQUAL_AREA=TRUE;
+        else options.EQUAL_AREA = FALSE;
+      }
+      else if(strcasecmp("RESOLUTION",optstr)==0) {
+        sscanf(cmdstr,"%*s %f",&global.resolution);
+      }
       else if (strcasecmp("AERO_RESIST_CANSNOW", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("AR_406",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_406;
@@ -353,33 +323,30 @@ global_param_struct get_global_param(filenames_struct *names,
         else if(strcasecmp("AR_410",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_410;
         else if(strcasecmp("AR_COMBO",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_COMBO;
       }
-      else if(strcasecmp("SNOW_STEP",optstr)==0) {
-	sscanf(cmdstr,"%*s %d",&options.SNOW_STEP);
+      else if (strcasecmp("GRND_FLUX_TYPE", optstr)==0) {
+        sscanf(cmdstr, "%*s %s", flgstr);
+        if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
+        else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
+        else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
       }
-      else if(strcasecmp("ROOT_ZONES",optstr)==0) {
-	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
+      else if(strcasecmp("MIN_LIQ",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("FALSE", flgstr) == 0) options.MIN_LIQ = FALSE;
+        else {
+	  options.MIN_LIQ = TRUE;
+	}
       }
-      else if(strcasecmp("PREC_EXPT",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
+      else if(strcasecmp("PLAPSE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("FALSE", flgstr) == 0) options.PLAPSE = FALSE;
+        else {
+	  options.PLAPSE = TRUE;
+	}
       }
-      else if(strcasecmp("MIN_WIND_SPEED",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.MIN_WIND_SPEED);
-      }
-      else if(strcasecmp("GRND_FLUX",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.GRND_FLUX=TRUE;
-        else options.GRND_FLUX = FALSE;
-      }
-      else if(strcasecmp("QUICK_FLUX",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.QUICK_FLUX=TRUE;
-        else options.QUICK_FLUX = FALSE;
-      }
-      else if(strcasecmp("MOISTFRACT",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
-        else options.MOISTFRACT = FALSE;
-      }
+
+      /*************************************
+       Define state files
+      *************************************/
       else if(strcasecmp("INIT_STATE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.INIT_STATE=FALSE;
@@ -388,16 +355,110 @@ global_param_struct get_global_param(filenames_struct *names,
 	  strcpy(names->init_state,flgstr);
 	}
       }
-      else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.CONTINUEONERROR=TRUE;
-        else if(strcasecmp("TFALLBACK",flgstr)==0) options.CONTINUEONERROR=TFALLBACK;
-        else options.CONTINUEONERROR = FALSE;
+      else if(strcasecmp("STATENAME",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->statefile);
+        options.SAVE_STATE = TRUE;
+      }
+      else if(strcasecmp("STATEYEAR",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.stateyear);
+      }
+      else if(strcasecmp("STATEMONTH",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.statemonth);
+      }
+      else if(strcasecmp("STATEDAY",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.stateday);
       }
       else if(strcasecmp("BINARY_STATE_FILE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.BINARY_STATE_FILE=FALSE;
 	else options.BINARY_STATE_FILE=TRUE;
+      }
+
+      /*************************************
+       Define forcing files
+      *************************************/
+      else if(strcasecmp("FORCING1",optstr)==0) {
+	if ( strcmp( names->f_path_pfx[0], "MISSING" ) != 0 ) 
+	  nrerror("Tried to define FORCING1 twice, if you want to use two forcing files, the second must be defined as FORCING2");
+        sscanf(cmdstr,"%*s %s", names->f_path_pfx[0]);
+	file_num = 0;
+	field=0;
+      }
+      else if(strcasecmp("FORCING2",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", names->f_path_pfx[1]);
+        if (strcasecmp("FALSE",names->f_path_pfx[1])==0)
+          strcpy(names->f_path_pfx[1],"MISSING");
+	file_num = 1;
+	field=0;
+      }
+      else if (strcasecmp("FORCE_FORMAT",optstr)==0) {
+	sscanf(cmdstr, "%*s %s", flgstr);
+	if (strcasecmp(flgstr, "BINARY") == 0)
+	  param_set.FORCE_FORMAT[file_num] = BINARY;
+	else if (strcasecmp(flgstr, "ASCII") == 0)
+	  param_set.FORCE_FORMAT[file_num] = ASCII;
+	else
+	  nrerror("FORCE_FORMAT must be either ASCII or BINARY.");
+      }
+      else if (strcasecmp("FORCE_ENDIAN",optstr)==0) {
+	sscanf(cmdstr, "%*s %s", flgstr);
+	if (strcasecmp(flgstr, "LITTLE") == 0)
+	  param_set.FORCE_ENDIAN[file_num] = LITTLE;
+	else if (strcasecmp(flgstr, "BIG") == 0)
+	  param_set.FORCE_ENDIAN[file_num] = BIG;
+	else
+	  nrerror("FORCE_ENDIAN must be either BIG or LITTLE.");
+      }
+      else if(strcasecmp("N_TYPES",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&param_set.N_TYPES[file_num]);
+      }
+      else if(strcasecmp("FORCE_TYPE",optstr)==0) {
+	get_force_type(cmdstr,file_num,&field);
+      }
+      else if(strcasecmp("FORCE_DT",optstr)==0) {
+	sscanf(cmdstr,"%*s %d ", &param_set.FORCE_DT[file_num]);
+      }
+      else if(strcasecmp("FORCEYEAR",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.forceyear[file_num]);
+      }
+      else if(strcasecmp("FORCEMONTH",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.forcemonth[file_num]);
+      }
+      else if(strcasecmp("FORCEDAY",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.forceday[file_num]);
+      }
+      else if(strcasecmp("FORCEHOUR",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.forcehour[file_num]);
+      }
+      else if(strcasecmp("GRID_DECIMAL",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&options.GRID_DECIMAL);
+      }
+      else if(strcasecmp("WIND_H",optstr)==0) {
+        sscanf(cmdstr,"%*s %lf",&global.wind_h);
+      }
+      else if(strcasecmp("MEASURE_H",optstr)==0) {
+        sscanf(cmdstr,"%*s %lf",&global.measure_h);
+      }
+      else if(strcasecmp("ALMA_INPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_INPUT=TRUE;
+        else options.ALMA_INPUT = FALSE;
+      }
+
+      /*************************************
+       Define parameter files
+      *************************************/
+
+      else if(strcasecmp("SOIL",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->soil);
+      }
+      else if(strcasecmp("ARC_SOIL",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
+        else options.ARC_SOIL = FALSE;
+      }
+      else if(strcasecmp("SOIL_DIR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->soil_dir);
       }
       else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -422,31 +483,27 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("NIJSSEN2001",flgstr)==0) options.BASEFLOW=NIJSSEN2001;
         else options.BASEFLOW = ARNO;
       }
-      else if(strcasecmp("STATENAME",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->statefile);
-        options.SAVE_STATE = TRUE;
-      }
-      else if(strcasecmp("STATEYEAR",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.stateyear);
-      }
-      else if(strcasecmp("STATEMONTH",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.statemonth);
-      }
-      else if(strcasecmp("STATEDAY",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&global.stateday);
-      }
-      else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("FALSE",flgstr)==0) options.COMPUTE_TREELINE=FALSE;
-        else {
-          options.COMPUTE_TREELINE = TRUE;
-          options.AboveTreelineVeg = atoi( flgstr );
-        }
-      }
       else if(strcasecmp("JULY_TAVG_SUPPLIED",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
 	else options.JULY_TAVG_SUPPLIED=TRUE;
+      }
+      else if(strcasecmp("VEGPARAM",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->veg);
+      }
+      else if(strcasecmp("ROOT_ZONES",optstr)==0) {
+	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
+      }
+      else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.GLOBAL_LAI=TRUE;
+        else options.GLOBAL_LAI = FALSE;
+      }
+      else if(strcasecmp("VEGLIB",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->veglib);
+      }
+      else if(strcasecmp("SNOW_BAND",optstr)==0) {
+	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snowband);
       }
       else if(strcasecmp("LAKES",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
@@ -463,106 +520,53 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.LAKE_PROFILE = TRUE;
 	}
       }
-      else if(strcasecmp("MIN_LIQ",optstr)==0) {
-        sscanf(cmdstr,"%*s %s", flgstr);
-        if(strcasecmp("FALSE", flgstr) == 0) options.MIN_LIQ = FALSE;
-        else {
-	  options.MIN_LIQ = TRUE;
-	}
-      }
-      else if(strcasecmp("PLAPSE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s", flgstr);
-        if(strcasecmp("FALSE", flgstr) == 0) options.PLAPSE = FALSE;
-        else {
-	  options.PLAPSE = TRUE;
-	}
-      }
-      else if (strcasecmp("GRND_FLUX_TYPE", optstr)==0) {
-        sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
-        else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
-        else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
-      }
 
-
-      /************************************
-        Get Forcing Data File Information
-	**********************************/
-      else if(strcasecmp("FORCING1",optstr)==0) {
-	if ( strcmp( names->f_path_pfx[0], "MISSING" ) != 0 ) 
-	  nrerror("Tried to define FORCING1 twice, if you want to use two forcing files, the second must be defined as FORCING2");
-        sscanf(cmdstr,"%*s %s", names->f_path_pfx[0]);
-	file_num = 0;
-	field=0;
-      }
-      else if(strcasecmp("FORCING2",optstr)==0) {
-        sscanf(cmdstr,"%*s %s", names->f_path_pfx[1]);
-        if (strcasecmp("FALSE",names->f_path_pfx[1])==0)
-          strcpy(names->f_path_pfx[1],"MISSING");
-	file_num = 1;
-	field=0;
-      }
-      else if(strcasecmp("N_TYPES",optstr)==0) {
-        sscanf(cmdstr,"%*s %d",&param_set.N_TYPES[file_num]);
-      }
-      else if(strcasecmp("FORCE_TYPE",optstr)==0) {
-	get_force_type(cmdstr,file_num,&field);
-      }
-      else if(strcasecmp("FORCE_DT",optstr)==0) {
-	sscanf(cmdstr,"%*s %d ", &param_set.FORCE_DT[file_num]);
-      }
-      else if (strcasecmp("FORCE_ENDIAN",optstr)==0) {
-	sscanf(cmdstr, "%*s %s", flgstr);
-	if (strcasecmp(flgstr, "LITTLE") == 0)
-	  param_set.FORCE_ENDIAN[file_num] = LITTLE;
-	else if (strcasecmp(flgstr, "BIG") == 0)
-	  param_set.FORCE_ENDIAN[file_num] = BIG;
-	else
-	  nrerror("FORCE_ENDIAN must be either BIG or LITTLE.");
-      }
-      else if (strcasecmp("FORCE_FORMAT",optstr)==0) {
-	sscanf(cmdstr, "%*s %s", flgstr);
-	if (strcasecmp(flgstr, "BINARY") == 0)
-	  param_set.FORCE_FORMAT[file_num] = BINARY;
-	else if (strcasecmp(flgstr, "ASCII") == 0)
-	  param_set.FORCE_FORMAT[file_num] = ASCII;
-	else
-	  nrerror("FORCE_FORMAT must be either ASCII or BINARY.");
-      }
-      else if(strcasecmp("ALMA_INPUT",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_INPUT=TRUE;
-        else options.ALMA_INPUT = FALSE;
-      }
-
-      /************************************
-	Get Information for Parameter Files 
-	************************************/
-      
-      else if(strcasecmp("SOIL",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->soil);
-      }
-      else if(strcasecmp("SOIL_DIR",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->soil_dir);
-      }
-      else if(strcasecmp("VEGPARAM",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->veg);
-      }
-      else if(strcasecmp("VEGLIB",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->veglib);
-      }
-      else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.GLOBAL_LAI=TRUE;
-        else options.GLOBAL_LAI = FALSE;
-      }
+      /*************************************
+       Define output files
+      *************************************/
       else if(strcasecmp("RESULT_DIR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->result_dir);
       }
+      else if(strcasecmp("OUT_STEP",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.out_dt);
+      }
+      else if(strcasecmp("SKIPYEAR",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&global.skipyear);
+      }
+      else if(strcasecmp("COMPRESS",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.COMPRESS=TRUE;
+        else options.COMPRESS = FALSE;
+      }
+      else if(strcasecmp("BINARY_OUTPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.BINARY_OUTPUT=TRUE;
+        else options.BINARY_OUTPUT = FALSE;
+      }
+      else if(strcasecmp("ALMA_OUTPUT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.ALMA_OUTPUT=TRUE;
+        else options.ALMA_OUTPUT = FALSE;
+      }
+      else if(strcasecmp("MOISTFRACT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
+        else options.MOISTFRACT = FALSE;
+      }
+      else if(strcasecmp("PRT_HEADER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.PRT_HEADER=TRUE;
+        else options.PRT_HEADER = FALSE;
+      }
+      else if(strcasecmp("PRT_SNOW_BAND",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.PRT_SNOW_BAND=TRUE;
+        else options.PRT_SNOW_BAND = FALSE;
+      }
 
-      /************************************
-        Get Output File Information
-        **********************************/
+      /*************************************
+       Define output file contents
+      *************************************/
       else if(strcasecmp("N_OUTFILES",optstr)==0) {
         ; // do nothing
       }

@@ -90,6 +90,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2009-May-22 Added validation of expt and bubble.			TJB
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
+  2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -103,7 +104,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   char            ErrStr[MAXSTRING];
   char            line[MAXSTRING];
   char            tmpline[MAXSTRING];
-  const char      delimiters[] = " ";
+  const char      delimiters[] = " \t";
   char            *token;
   int             layer, i, tempint, j;
   double          Wcr_FRACT[MAX_LAYERS];
@@ -118,6 +119,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          left_lng;
   double          delta;
   double          dist;
+  size_t          length;
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
 #endif
@@ -137,12 +139,16 @@ soil_con_struct read_soilparam(FILE *soilparam,
       nrerror(ErrStr);
     }
     sscanf(token, "%d", &temp.gridcel);
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for CELL LATITUDE in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%f", &temp.lat);
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for CELL LONGITUDE in soil file\n");
       nrerror(ErrStr);
     }  
@@ -153,35 +159,45 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif
     
     /* read infiltration parameter */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for INFILTRATION in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.b_infilt);
     
     /* read fraction of baseflow rate */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for FRACTION OF BASEFLOW RATE in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.Ds);
     
     /* read maximum baseflow rate */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for MAXIMUM BASEFLOW RATE in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.Dsmax);
     
     /* read fraction of bottom soil layer moisture */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for FRACTION OF BOTTOM SOIL LAYER MOISTURE in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.Ws);
     
     /* read exponential */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for EXPONENTIAL in soil file\n");
       nrerror(ErrStr);
     }  
@@ -189,7 +205,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read expt for each layer */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for EXPT for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -204,7 +222,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer saturated hydraulic conductivity */
     for(layer = 0; layer < options.Nlayer; layer++){
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for SATURATED HYDRAULIC CONDUCTIVITY for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -213,7 +233,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer phi_s */
     for(layer = 0; layer < options.Nlayer; layer++){
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for PHI_S for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -222,7 +244,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer initial moisture */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for INITIAL MOISTURE for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -236,7 +260,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read cell mean elevation */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for CELL MEAN ELEVATION in soil file\n");
       nrerror(ErrStr);
     }  
@@ -244,7 +270,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* soil layer thicknesses */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for LAYER THICKNESS for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -260,7 +288,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif /* !EXCESS_ICE */    
     
     /* read average soil temperature */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for AVERAGE SOIL TEMPERATURE in soil file\n");
       nrerror(ErrStr);
     }  
@@ -275,7 +305,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif /* !OUTPUT_FORCE */
     
     /* read soil damping depth */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for SOIL DAMPING DEPTH in soil file\n");
       nrerror(ErrStr);
     }  
@@ -283,7 +315,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read layer bubbling pressure */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for BUBBLING PRESSURE for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -298,7 +332,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer quartz content */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      token = strtok (NULL, delimiters);  
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
+        sprintf(ErrStr,"ERROR: Can't find values for QUARTZ CONTENT for layer %d in soil file\n", layer );
+        nrerror(ErrStr);
+      }  
       sscanf(token, "%lf", &temp.quartz[layer]);
 #if !OUTPUT_FORCE
       if(options.FULL_ENERGY 
@@ -313,7 +352,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read layer bulk density */
     for(layer = 0; layer < options.Nlayer; layer++){
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for BULK DENSITY for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -322,7 +363,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer soil density */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for SOIL DENSITY for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -334,7 +377,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read cell gmt offset */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for GMT OFFSET in soil file\n");
       nrerror(ErrStr);
     }  
@@ -342,7 +387,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read layer critical point */
     for(layer=0;layer<options.Nlayer;layer++){
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for CRITICAL POINT for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -351,7 +398,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
     /* read layer wilting point */
     for(layer=0;layer<options.Nlayer;layer++){
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for WILTING POINT for layer %d in soil file\n", layer );
         nrerror(ErrStr);
       }  
@@ -359,7 +408,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
 
     /* read soil roughness */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for SOIL ROUGHNESS in soil file\n");
       nrerror(ErrStr);
     }  
@@ -372,14 +423,18 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
     
     /* read snow roughness */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for SNOW ROUGHNESS in soil file\n");
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.snow_rough);
     
     /* read cell annual precipitation */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for ANNUAL PRECIPITATION in soil file\n");
       nrerror(ErrStr);
     }  
@@ -387,7 +442,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read layer residual moisture content */
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for RESIDUAL MOISTURE CONTENT for layer %d in soil file\n", layer);
         nrerror(ErrStr);
       }  
@@ -395,7 +452,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     }
 
     /* read frozen soil active flag */
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for FROZEN SOIL ACTIVE FLAG in soil file\n");
       nrerror(ErrStr);
     }  
@@ -404,7 +463,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read minimum snow depth for full coverage */
 #if SPATIAL_SNOW
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for SPATIAL SNOW in soil file\n");
       nrerror(ErrStr);
     }
@@ -414,7 +475,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     
     /* read slope of frozen soil distribution */
 #if SPATIAL_FROST
-    if( ( token = strtok (NULL, delimiters)) == NULL ){
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
       sprintf(ErrStr,"ERROR: Can't find values for SPATIAL FROST in soil file\n");
       nrerror(ErrStr);
     }  
@@ -425,7 +488,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /*read volumetric ice fraction for each soil layer */
 #if EXCESS_ICE
     for(layer = 0; layer < options.Nlayer; layer++) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
 	sprintf(ErrStr,"ERROR: Can't find values for VOLUMETRIC ICE FRACTION (EXCESS_ICE = TRUE) for layer %d in soil file\n", layer);
 	nrerror(ErrStr);
       }  
@@ -436,7 +501,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* If specified, read cell average July air temperature in the final
        column of the soil parameter file */
     if (options.JULY_TAVG_SUPPLIED) {
-      if( ( token = strtok (NULL, delimiters)) == NULL ){
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+      if( token == NULL ) {
         sprintf(ErrStr,"ERROR: Can't find values for average July Tair in soil file\n");
         nrerror(ErrStr);
       }  

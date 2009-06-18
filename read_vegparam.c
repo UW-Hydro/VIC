@@ -36,6 +36,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Jan-16 Added logic for COMPUTE_TREELINE option.			TJB
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
+  2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
 **********************************************************************/
 {
 
@@ -49,7 +50,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   veg_con_struct *temp;
   int             vegcel, i, j, k, vegetat_type_num, skip, veg_class;
   int             MaxVeg;
-  int             NF, NTOT;
+  int             Nfields, NfieldsMax;
   int             NoOverstory;
   float           depth_sum;
   float           sum;
@@ -57,9 +58,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   char            ErrStr[MAXSTRING];
   char            line[MAXSTRING];
   char            tmpline[MAXSTRING];
-  const char      delimiters[] = " ";
+  const char      delimiters[] = " \t";
   char            *token;
   char            *vegarr[500];
+  size_t	  length;
 
   if(options.GLOBAL_LAI) skip=2;
   else skip=1;
@@ -115,23 +117,27 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     strcpy(tmpline, line);
     ttrim( tmpline );
     token = strtok (tmpline, delimiters);    /*  token => veg_class, move 'line' pointer to next field */  
-    NF = 0;
-    vegarr[NF] = calloc( 500, sizeof(char));
-    strcpy(vegarr[NF],token);
-    NF++;
+    Nfields = 0;
+    vegarr[Nfields] = calloc( 500, sizeof(char));
+    strcpy(vegarr[Nfields],token);
+    Nfields++;
 
-    while( ( token = strtok (NULL, delimiters)) != NULL ){
-      vegarr[NF] = calloc( 500, sizeof(char));      
-      strcpy(vegarr[NF],token);
-      NF++;
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    while ( token != NULL ) {
+      vegarr[Nfields] = calloc( 500, sizeof(char));      
+      strcpy(vegarr[Nfields],token);
+      Nfields++;
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
     }
 
-    NTOT = 2 + 2 * options.ROOT_ZONES;  /* Number of expected fields this line */
+    NfieldsMax = 2 + 2 * options.ROOT_ZONES;  /* Number of expected fields this line */
     if( options.BLOWING ){
-      NTOT += 3;
+      NfieldsMax += 3;
     }
-    if ( NF != NTOT ) {
-      sprintf(ErrStr,"ERROR - cell %d - expecting %d fields but found %d in veg line %s\n",gridcel,NTOT, NF, line);
+    if ( Nfields != NfieldsMax ) {
+      sprintf(ErrStr,"ERROR - cell %d - expecting %d fields but found %d in veg line %s\n",gridcel,NfieldsMax, Nfields, line);
       nrerror(ErrStr);
     }
 
@@ -184,7 +190,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
     temp[0].Cv_sum += temp[i].Cv;
 
-    for(k=0; k<NF; k++)
+    for(k=0; k<Nfields; k++)
       free(vegarr[k]);
 
     if ( options.GLOBAL_LAI ) {
@@ -193,22 +199,22 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading LAI for vegetat_type_num %d\n",vegcel,vegetat_type_num);
         nrerror(ErrStr);
       }      
-      NF = 0;
-      vegarr[NF] = calloc( 500, sizeof(char));      
+      Nfields = 0;
+      vegarr[Nfields] = calloc( 500, sizeof(char));      
       strcpy(tmpline, line);
       ttrim( tmpline );
       token = strtok (tmpline, delimiters); 
-      strcpy(vegarr[NF],token);
-      NF++;
+      strcpy(vegarr[Nfields],token);
+      Nfields++;
  
       while( ( token = strtok (NULL, delimiters)) != NULL ){
-        vegarr[NF] = calloc( 500, sizeof(char));      
-        strcpy(vegarr[NF],token);
-        NF++;
+        vegarr[Nfields] = calloc( 500, sizeof(char));      
+        strcpy(vegarr[Nfields],token);
+        Nfields++;
      }
-     NTOT = 12; /* For LAI */
-     if ( NF != NTOT ) {
-       sprintf(ErrStr,"ERROR - cell %d - expecting %d LAI values but found %d in line %s\n",gridcel, NTOT, NF, line);
+     NfieldsMax = 12; /* For LAI */
+     if ( Nfields != NfieldsMax ) {
+       sprintf(ErrStr,"ERROR - cell %d - expecting %d LAI values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
        nrerror(ErrStr);
      }
 
@@ -218,7 +224,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
     }
-    for(k=0; k<NF; k++)
+    for(k=0; k<Nfields; k++)
       free(vegarr[k]);
 
     // Determine if cell contains non-overstory vegetation

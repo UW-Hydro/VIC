@@ -493,6 +493,24 @@ Fixed uninitialized value errors in parse_output_info.c.
 
 
 
+Fixed inability to read tabs in soil/veg parameter files.
+
+	Files Affected:
+
+	read_soilparam.c
+	read_vegparam.c
+
+	Description:
+
+	At some point in earlier versions, the functions that read soil/veg
+	parameter files were modified to use the "strtok" function, and as a
+	result, VIC lost the ability to understand tabs as field separators
+	in these files.  This ability has now been restored.	TJB
+	
+	can be omitted from global param file.			TJB
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

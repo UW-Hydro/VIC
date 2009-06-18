@@ -37,6 +37,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
+  2009-Jun-17 Fixed incorrect placement of free vegarr[] for case of
+	      GLOBAL_LAI==FALSE.					TJB
 **********************************************************************/
 {
 
@@ -211,21 +213,21 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         vegarr[Nfields] = calloc( 500, sizeof(char));      
         strcpy(vegarr[Nfields],token);
         Nfields++;
-     }
-     NfieldsMax = 12; /* For LAI */
-     if ( Nfields != NfieldsMax ) {
-       sprintf(ErrStr,"ERROR - cell %d - expecting %d LAI values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
-       nrerror(ErrStr);
-     }
+      }
+      NfieldsMax = 12; /* For LAI */
+      if ( Nfields != NfieldsMax ) {
+        sprintf(ErrStr,"ERROR - cell %d - expecting %d LAI values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
+        nrerror(ErrStr);
+      }
 
-     for ( j = 0; j < 12; j++ ) {
-       veg_lib[temp[i].veg_class].LAI[j] = atof( vegarr[j] );
-       veg_lib[temp[i].veg_class].Wdmax[j] = 
+      for ( j = 0; j < 12; j++ ) {
+        veg_lib[temp[i].veg_class].LAI[j] = atof( vegarr[j] );
+        veg_lib[temp[i].veg_class].Wdmax[j] = 
 	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
+      for(k=0; k<Nfields; k++)
+        free(vegarr[k]);
     }
-    for(k=0; k<Nfields; k++)
-      free(vegarr[k]);
 
     // Determine if cell contains non-overstory vegetation
     if ( options.COMPUTE_TREELINE && !veg_lib[temp[i].veg_class].overstory )

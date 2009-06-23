@@ -140,7 +140,7 @@ void initialize_global() {
   options.Nlayer                = 2;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
-  options.PLAPSE                = FALSE;
+  options.PLAPSE                = TRUE;
   options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;

@@ -328,13 +328,20 @@ to converge.
 
 	calc_atmos_energy_bal.c
 	calc_surf_energy_bal.c
+	dist_prec.c
 	display_current_settings.c
+	frozen_soil.c
+	func_surf_energy_bal.c
 	get_global_param.c
 	global.param.sample
-	frozen_soil.c
+	output_list_utils.c
+	put_data.c
 	root_brent.c
 	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
 	vicNl_def.h
+	vicNl.h
 
 	Description:
 
@@ -344,6 +351,23 @@ to converge.
 	         other grid cells
 	  TFALLBACK: If energy balance solution fails to converge, use
 	             previous T value and continue
+
+        For each veg tile / elevation band in the grid cell, if the T solution
+	fails to converge and the previous time step's T is used, a T-flag for
+	that variable is set to 1; otherwise it is set to 0.  There is a flag
+	for each T involved in root_brent: Tsurf, Tcanopy, Tfoliage, and each
+	of the T's of the soil thermal nodes.
+
+	To report the occurrence of T-fallback, 4 new output variables have
+	been defined:
+	  OUT_SOILT_FLAG = array of flags, one for each soil T node
+	  OUT_SURFT_FLAG = flag for Tsurf
+	  OUT_TCAN_FLAG = flag for Tcanopy
+	  OUT_TFOL_FLAG = flag for Tfoliage
+	Each of these contain the AVERAGE over the entire grid cell and over
+	the output time interval (if aggregating temporally) of the flag
+	values.  Thus, these are NOT integers but fractions ranging from 0 to
+	1.
 
 	Additionally modified root_brent to continue attempting to bracket
 	root if one bound encounters undefined values/ERROR code from target

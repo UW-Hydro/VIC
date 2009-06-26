@@ -87,6 +87,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      surf_atten, as in Liang et al, 1999.
 	      Added options.GRND_FLUX_TYPE to allow backwards-compatibility
 	      with versions 4.0.6 and 4.1.0.				TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 
 **********************************************************************/
 {
@@ -198,6 +199,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *Cs_node;
   double *T_node;
   double *Tnew_node;
+  char   *Tnew_flag;
   double *alpha;
   double *beta;
   double *bubble_node;
@@ -360,6 +362,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   Cs_node                 = (double *) va_arg(ap, double *);
   T_node                  = (double *) va_arg(ap, double *);
   Tnew_node               = (double *) va_arg(ap, double *);
+  Tnew_flag               = (char *) va_arg(ap, char *);
   alpha                   = (double *) va_arg(ap, double *);
   beta                    = (double *) va_arg(ap, double *);
   bubble_node             = (double *) va_arg(ap, double *);
@@ -524,13 +527,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	if(options.IMPLICIT)
 	  FIRST_SOLN[0] = TRUE;
 #if QUICK_FS
-	Error = solve_T_profile(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Tnew_flag, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp,
 				depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
 				NOFLUX, EXP_TRANS, veg_class);
 #else
-	Error = solve_T_profile(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Tnew_flag, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp, depth, 
 #if EXCESS_ICE

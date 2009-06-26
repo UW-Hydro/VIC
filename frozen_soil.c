@@ -133,6 +133,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 
 int  solve_T_profile(double *T,
 		     double *T0,
+		     char   *Tflag,
 		     double *Zsum,
 		     double *kappa,
 		     double *Cs,
@@ -183,6 +184,7 @@ int  solve_T_profile(double *T,
   2007-Oct-11 Fixed error in EXP_TRANS formulation.				JCA
   2009-Feb-09 Removed dz_node from call to solve_T_profile and 
               solve_T_profile_implicit.                                         KAC
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -264,12 +266,12 @@ int  solve_T_profile(double *T,
   for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
 #if QUICK_FS
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, moist, max_moist, ice, 
+  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tflag, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, ufwc_table_node, FS_ACTIVE, 
 				   NOFLUX, EXP_TRANS, veg_class);
 #else
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, moist, max_moist, ice, 
+  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tflag, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, 
 #if EXCESS_ICE
@@ -380,6 +382,7 @@ int solve_T_profile_implicit(double *T,                           // update
 int calc_soil_thermal_fluxes(int     Nnodes,
 			     double *T,
 			     double *T0,
+			     char   *Tflag,
 			     double *moist,
 			     double *max_moist,
 			     double *ice,
@@ -418,6 +421,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.				TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -437,7 +441,11 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   Error = 0;
   Done = FALSE;
   ItCount = 0;
-  
+ 
+  /* initialize Tflag */
+  for(j=1;j<Nnodes-1;j++)
+    Tflag[j] = 0;
+
   while(!Done && Error==0 && ItCount<MAXIT) {
     ItCount++;
     maxdiff=threshold;
@@ -474,10 +482,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	
 	if(T[j] <= -998 ) {
           if (options.CONTINUEONERROR == TFALLBACK) {
-#if VERBOSE
-              fprintf(stderr,"WARNING: soil_thermal_eqn() failed to converge, but continuing with previous temperature.\n");
-#endif // VERBOSE
             T[j] = oldT;
+            Tflag[j] = 1;
           }
           else {
 	    error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
@@ -530,10 +536,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	
 	if(T[j] <= -998 ) {
           if (options.CONTINUEONERROR == TFALLBACK) {
-#if VERBOSE
-              fprintf(stderr,"WARNING: soil_thermal_eqn() failed to converge, but continuing with previous temperature.\n");
-#endif // VERBOSE
             T[j] = oldT;
+            Tflag[j] = 1;
           }
           else {
 	    error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],
@@ -850,7 +854,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-	if(i==0 || i==1 ){//surface nodes only
+//	if(i==0 || i==1 ){//surface nodes only
 	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 	      flux_term1 = 0;
@@ -859,7 +863,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 #endif
 	    }
 	  }
-	}
+//	}
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1])/deltat;
         res[i] = flux_term + phase_term - storage_term;

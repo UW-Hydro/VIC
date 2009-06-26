@@ -63,6 +63,7 @@
   2009-Jun-09 Added compute_pot_evap().					TJB
   2009-Jun-09 Removed unnecessary functions quick_penman() and
 	      compute_penman_constants().				TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -106,12 +107,12 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
 			     snow_data_struct *, layer_data_struct *,
                              layer_data_struct *, soil_con_struct *, char *);
 #if QUICK_FS
-int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
+int    calc_soil_thermal_fluxes(int, double *, double *, char *, double *, double *, 
 				double *, double *, double *,double *, 
 				double *, double *, double *, 
 				double *, double *, double *, double ***, int, int, int, int);
 #else
-int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *, 
+int    calc_soil_thermal_fluxes(int, double *, double *, char *, double *, double *, 
 				double *, double *, double *,double *, 
 				double *, double *, double *, 
 				double *, double *, double *, 
@@ -128,7 +129,7 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, double, double, 
                              double, double, double, double, 
                              double *, double *, double *, double *, 
-                             double *, double *, double *, double *);
+                             double *, double *, double *, double *, char *);
 double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
@@ -361,7 +362,7 @@ int    put_data(dist_prcp_struct *, atmos_data_struct *,
 		soil_con_struct *, veg_con_struct *,
                 lake_con_struct *, out_data_file_struct *,
 		out_data_struct *, save_data_struct *,
- 	        dmy_struct *, int, int); 
+ 	        dmy_struct *, int); 
 
 double read_arcinfo_value(char *, double, double);
 int    read_arcinfo_info(char *, double **, double **, int **);
@@ -422,7 +423,7 @@ int    snow_intercept(double, double, double, double, double, double, double,
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
-                      double *, double *, double *, double *, double *, 
+                      double *, double *, char *, double *, double *, double *, 
                       double *, double *, double *, float *, int, int, int, 
                       int, int, int, int, layer_data_struct *, 
                       layer_data_struct *, soil_con_struct *, 
@@ -459,12 +460,12 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
-int    solve_T_profile(double *, double *, double *, double *,double *, 
+int    solve_T_profile(double *, double *, char *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *, double ***,
 		       int, int *, int, int, int, int);
 #else
-int    solve_T_profile(double *, double *, double *, double *,double *, 
+int    solve_T_profile(double *, double *, char *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *,
 #if EXCESS_ICE

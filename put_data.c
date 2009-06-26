@@ -13,8 +13,7 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data_struct   *out_data,
               save_data_struct  *save_data,
 	      dmy_struct        *dmy,
-              int                rec,
-	      int                Nnodes)
+              int                rec)
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996
 
@@ -102,6 +101,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      aerodynamic resistances for current vegetation and various
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.	TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -484,6 +484,13 @@ int  put_data(dist_prcp_struct  *prcp,
 
 	  /** record mean surface temperature [C]  **/
 	  out_data[OUT_SURF_TEMP].data[0] += surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	  
+	  /** record temperature flags  **/
+	  out_data[OUT_SURFT_FLAG].data[0] += energy[veg][band].Tsurf_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          for (index=0; index<options.Nnode; index++)
+	    out_data[OUT_SOILT_FLAG].data[index] += energy[veg][band].T_flag[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	  out_data[OUT_TFOL_FLAG].data[0] += energy[veg][band].Tfoliage_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
+	  out_data[OUT_TCAN_FLAG].data[0] += energy[veg][band].Tcanopy_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record net shortwave radiation **/
 	  out_data[OUT_NET_SHORT].data[0] += energy[veg][band].NetShortAtmos

@@ -126,6 +126,7 @@ double solve_snow(char                 overstory,
   2008-Feb-17 Modified call to snow_density to match new version
 	      that is based on SNTHERM89.				KMA via TJB
   2008-Apr-21 Modified to pass snow depth to snow_albedo().		KAC via TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 
 *********************************************************************/
 
@@ -260,13 +261,13 @@ double solve_snow(char                 overstory,
 		       &energy->canopy_refreeze, &energy->NetLongOver, 
 		       &energy->NetShortOver, 
 		       aero_resist, aero_resist_used, rainfall, 
-		       &energy->canopy_sensible, 
-		       snowfall, &energy->Tfoliage, &snow->tmp_int_storage, 
+		       &energy->canopy_sensible, snowfall,
+		       &energy->Tfoliage, &energy->Tfoliage_flag, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
 		       ref_height, roughness, root, *UnderStory, band, 
 		       hour, iveg, month, rec, veg_class, layer_dry, 
 		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
-      if ( ErrorFlag == ERROR ) return ( ERROR );
+        if ( ErrorFlag == ERROR ) return ( ERROR );
 
 	/* Store throughfall from canopy */
 	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
@@ -295,9 +296,10 @@ double solve_snow(char                 overstory,
 	veg_var_wet->Wdew         = 0.;
 	energy->NetLongOver       = 0;
 	energy->LongOverIn        = 0;
-	energy->Tfoliage             = air_temp;
+	energy->Tfoliage          = air_temp;
+	energy->Tfoliage_flag     = 0;
 	(*AlbedoUnder)            = TmpAlbedoUnder[0];
-	(*NetShortSnow)          = (1.0 - *AlbedoUnder) * shortwave; 
+	(*NetShortSnow)           = (1.0 - *AlbedoUnder) * shortwave; 
 
       } /* snow falling on vegetation with dew */
 
@@ -310,7 +312,8 @@ double solve_snow(char                 overstory,
 	veg_var_dry->throughfall = rainfall[DRY] + snowfall[DRY];
 	energy->NetLongOver      = 0;
 	energy->LongOverIn       = 0;
-	energy->Tfoliage    = air_temp;
+	energy->Tfoliage         = air_temp;
+	energy->Tfoliage_flag    = 0;
 	if ( snowfall[WET] > 0 ) { // net SW at snow/ground surface
 	  (*AlbedoUnder)   = TmpAlbedoUnder[0];
 	  (*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 

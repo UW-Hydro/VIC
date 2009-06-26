@@ -146,6 +146,7 @@ int surface_fluxes(char                 overstory,
 	      aerodynamic resistances for current vegetation and various
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.	TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -686,7 +687,8 @@ int surface_fluxes(char                 overstory,
 					  &iter_soil_energy.NetLongAtmos, 
 					  &iter_soil_energy.NetShortAtmos, 
 					  &iter_soil_energy.AtmosSensible, 
-					  &VPcanopy, &VPDcanopy);
+					  &VPcanopy, &VPDcanopy,
+					  &iter_soil_energy.Tcanopy_flag);
 	  /* iterate to find Tcanopy which will solve the atmospheric energy
 	     balance.  Since I do not know vp in the canopy, use the
 	     sum of latent heats from the ground and foliage, and iterate
@@ -707,6 +709,8 @@ int surface_fluxes(char                 overstory,
 	  iter_soil_energy.NetShortAtmos  = iter_soil_energy.NetShortUnder;
 	}
 	iter_soil_energy.Tcanopy = Tcanopy;
+	iter_snow_energy.Tcanopy = Tcanopy;
+	iter_soil_energy.Tcanopy_flag = iter_soil_energy.Tcanopy_flag;
 
 	/*****************************************
           Compute iteration tolerance statistics 
@@ -944,6 +948,7 @@ int surface_fluxes(char                 overstory,
     energy->snow_flux       = store_snow_flux / (double)N_steps; 
   }
   energy->Tfoliage          = snow_energy.Tfoliage;
+  energy->Tfoliage_flag     = snow_energy.Tfoliage_flag;
 
 // energy->AtmosSensible + energy->AtmosLatent + energy->AtmosLatentSub + energy->NetShortAtmos + energy->NetLongAtmos + energy->grnd_flux + energy->deltaH + energy->fusion + energy->advection - energy->deltaCC + energy->refreeze_energy + energy->advected_sensible
 

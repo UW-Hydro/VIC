@@ -72,6 +72,7 @@ static char vcid[] = "$Id$";
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.			TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 *****************************************************************************/
 int snow_intercept(double  AirDens,
 		    double  Dt, 
@@ -106,6 +107,7 @@ int snow_intercept(double  AirDens,
 		    double *SensibleHeat,
 		    double *SnowFall, 
 		    double *Tfoliage, 
+		    char   *Tfoliage_flag, 
 		    double *TempIntStorage, 
 		    double *VaporMassFlux,
 		    double *Wind,   
@@ -175,6 +177,9 @@ int snow_intercept(double  AirDens,
   double OldTfoliage;
 
   char ErrorString[MAXSTRING];
+
+  /* Initialize Tfoliage_flag */
+  *Tfoliage_flag = 0;
 
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
@@ -375,10 +380,8 @@ int snow_intercept(double  AirDens,
     
     if ( *Tfoliage <= -998 ) {
       if (options.CONTINUEONERROR == TFALLBACK) {
-#if VERBOSE
-          fprintf(stderr,"WARNING: func_canopy_energy_bal() failed to converge, but continuing with previous temperature.\n");
-#endif // VERBOSE
         *Tfoliage = OldTfoliage;
+        *Tfoliage_flag = 1;
       }
       else { 
         Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 

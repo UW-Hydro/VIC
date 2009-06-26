@@ -72,6 +72,7 @@ int  dist_prec(atmos_data_struct   *atmos,
   2008-Oct-23 Modified call to put_data() to store ErrorFlag.		TJB
   2009-Mar-03 Modified routine to store put_data() error in ErrorFlag2 and 
 	      return a single ERROR value if an error occurs.		KAC via TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
 
 **********************************************************************/
 
@@ -209,7 +210,7 @@ int  dist_prec(atmos_data_struct   *atmos,
 
   ErrorFlag2 = put_data(prcp, atmos, soil_con, veg_con,
 			lake_con, out_data_files, out_data, save_data,
-			&dmy[rec], rec, options.Nnode);
+			&dmy[rec], rec);
   if ( ErrorFlag2 == ERROR ) ErrorFlag = ERROR;
 
   /************************************

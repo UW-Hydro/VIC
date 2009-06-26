@@ -436,6 +436,22 @@ Added computation of 6 types of potential evaporation.
 	and into a separate function calc_rc() within the same file.
 
 
+Simplified argument lists of runoff() and surface_fluxes().
+
+	Files Affected:
+
+	full_energy.c
+	runoff.c
+	surface_fluxes.c
+	vicNl.h
+	wetland_energy.c
+
+	Description:
+
+	Simplified the argument lists of runoff() and surface_fluxes() by
+	replacing explicit references to individual cell_data variables by
+	a single reference to the cell_data structure.
+
 
 
 Bug Fixes:

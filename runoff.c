@@ -4,16 +4,10 @@
 #include <math.h>
 
 static char vcid[] = "$Id$";
-int  runoff(layer_data_struct *layer_wet,
-	    layer_data_struct *layer_dry,
+int  runoff(cell_data_struct  *cell_wet,
+	    cell_data_struct  *cell_dry,
             energy_bal_struct *energy,
             soil_con_struct   *soil_con,
-            double            *runoff_wet, 
-	    double            *runoff_dry, 
-	    double            *baseflow_wet,
-	    double            *baseflow_dry,
-	    double            *asat_wet,
-	    double            *asat_dry,
 	    double            *ppt, 
 #if EXCESS_ICE
 	    int                SubsidenceUpdate,
@@ -153,6 +147,8 @@ int  runoff(layer_data_struct *layer_wet,
 	      more efficient manner (in initialize_soil() and
 	      estimate_layer_ice_content()).				TJB
   2009-May-17 Added asat to cell_data.					TJB
+  2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
+	      variables via a single reference to the cell data structure.	TJB
 
 **********************************************************************/
 {  
@@ -203,9 +199,6 @@ int  runoff(layer_data_struct *layer_wet,
   double             tmp_liq;
   double             dt_inflow, dt_outflow;
   double             dt_runoff;
-  double            *runoff_ptr;
-  double            *baseflow_ptr;
-  double            *asat_ptr;
   double             runoff[FROST_SUBAREAS];
   double             baseflow[FROST_SUBAREAS];
   double             actual_frost_fract[FROST_SUBAREAS];
@@ -235,6 +228,7 @@ int  runoff(layer_data_struct *layer_wet,
 #endif //EXCESS_ICE
   layer_data_struct *layer;
   layer_data_struct  tmp_layer;
+  cell_data_struct  *cell;
 
   /** Set Residual Moisture **/
   for ( i = 0; i < options.Nlayer; i++ ) 
@@ -251,22 +245,18 @@ int  runoff(layer_data_struct *layer_wet,
     /* Loop through wet and dry cell fractions */
 
     if(dist>0) {
-      layer        = layer_dry;
-      runoff_ptr   = runoff_dry;
-      baseflow_ptr = baseflow_dry;
-      asat_ptr     = asat_dry;
+      cell         = cell_dry;
       mu           = (1. - mu);
     }
     else {
-      layer        = layer_wet;
-      runoff_ptr   = runoff_wet;
-      baseflow_ptr = baseflow_wet;
-      asat_ptr     = asat_wet;
+      cell         = cell_wet;
     }
+    layer = cell->layer;
 
-    *runoff_ptr   = 0;
-    *baseflow_ptr = 0;
-    *asat_ptr = 0;
+    cell->runoff = 0;
+    cell->baseflow = 0;
+    cell->asat = 0;
+
     for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
       baseflow[frost_area] = 0;
       
@@ -788,7 +778,7 @@ int  runoff(layer_data_struct *layer_wet,
 	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
 	  A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
           /** Store saturated area **/
-          *asat_ptr = A;
+          cell->asat = A;
 
 #if EXCESS_ICE
 	}//end if subsidence did not occur or non-simple scenario for subsidence
@@ -804,12 +794,12 @@ int  runoff(layer_data_struct *layer_wet,
 #if SPATIAL_FROST
 	  layer[lindex].moist += ((liq[lindex] + ice[lindex]) 
 				  * frost_fract[frost_area]); 
-	*runoff_ptr   += runoff[frost_area] * frost_fract[frost_area];
-	*baseflow_ptr += baseflow[frost_area] * frost_fract[frost_area];
+        cell->runoff   += runoff[frost_area] * frost_fract[frost_area];
+        cell->baseflow += baseflow[frost_area] * frost_fract[frost_area];
 #else
 	layer[lindex].moist = liq[lindex] + ice[lindex];      
-	*runoff_ptr   += runoff[frost_area];
-	*baseflow_ptr += baseflow[frost_area];
+        cell->runoff   += runoff[frost_area];
+        cell->baseflow += baseflow[frost_area];
 #endif // SPATIAL_FROST
 
 #if LINK_DEBUG
@@ -829,8 +819,8 @@ int  runoff(layer_data_struct *layer_wet,
   if(options.FULL_ENERGY || options.FROZEN_SOIL) {
     
     for(lindex=0;lindex<options.Nlayer;lindex++) {
-      tmp_layer = find_average_layer(&(layer_wet[lindex]), 
-				     &(layer_dry[lindex]), 
+      tmp_layer = find_average_layer(&(cell_wet->layer[lindex]), 
+				     &(cell_dry->layer[lindex]), 
 				     soil_con->depth[lindex], tmp_mu);
       moist[lindex] = tmp_layer.moist;
     }

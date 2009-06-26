@@ -28,23 +28,13 @@ int surface_fluxes(char                 overstory,
 		   double              *Melt,
 		   double              *Le,
 		   double             **aero_resist,
-		   double              *aero_resist_used,
-		   double              *baseflow_dry,
-		   double              *baseflow_wet,
-		   double              *asat_dry,
-		   double              *asat_wet,
-		   double              *pot_evap,
 		   double              *displacement,
 		   double              *gauge_correction,
-		   double              *inflow_dry,
-		   double              *inflow_wet,
 		   double              *out_prec,
 		   double              *out_rain,
 		   double              *out_snow,
 		   double              *ref_height,
 		   double              *roughness,
-		   double              *runoff_dry,
-		   double              *runoff_wet,
 		   double              *snow_inflow,
 		   double              *wind,
 		   float               *root,
@@ -61,8 +51,8 @@ int surface_fluxes(char                 overstory,
 		   dmy_struct          *dmy,
 		   energy_bal_struct   *energy,
 		   global_param_struct *gp,
-		   layer_data_struct   *layer_dry,
-		   layer_data_struct   *layer_wet,
+		   cell_data_struct    *cell_dry,
+		   cell_data_struct    *cell_wet,
 		   snow_data_struct    *snow,
 		   soil_con_struct     *soil_con,
 		   veg_var_struct      *veg_var_dry,
@@ -147,6 +137,8 @@ int surface_fluxes(char                 overstory,
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.	TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
+	      variables via a single reference to the cell data structure.	TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -209,6 +201,18 @@ int surface_fluxes(char                 overstory,
   double                 snow_grnd_flux; // ground heat flux into snowpack
   double                 tol_under;
   double                 tol_over;
+  double                *aero_resist_used;
+  double                *baseflow_dry;
+  double                *baseflow_wet;
+  double                *asat_dry;
+  double                *asat_wet;
+  double                *pot_evap;
+  double                *inflow_dry;
+  double                *inflow_wet;
+  double                *runoff_dry;
+  double                *runoff_wet;
+  layer_data_struct     *layer_dry;
+  layer_data_struct     *layer_wet;
 
   // Step-specific quantities
   double                 step_Evap;
@@ -306,6 +310,22 @@ int surface_fluxes(char                 overstory,
   double B_tol_over;
   double A_Tcanopy;
   double B_Tcanopy;
+
+  /***********************************************************************
+    Set temporary variables for convenience
+  ***********************************************************************/
+  aero_resist_used = cell_wet->aero_resist;
+  baseflow_dry = &(cell_dry->baseflow);
+  baseflow_wet = &(cell_wet->baseflow);
+  asat_dry = &(cell_dry->asat);
+  asat_wet = &(cell_wet->asat);
+  pot_evap = cell_wet->pot_evap;
+  inflow_dry = &(cell_dry->inflow);
+  inflow_wet = &(cell_wet->inflow);
+  runoff_dry = &(cell_dry->runoff);
+  runoff_wet = &(cell_wet->runoff);
+  layer_dry = cell_dry->layer;
+  layer_wet = cell_wet->layer;
 
   step_aero_resist = (double**)calloc(N_PET_TYPES,sizeof(double*));
   for (p=0; p<N_PET_TYPES; p++) {
@@ -1005,8 +1025,7 @@ int surface_fluxes(char                 overstory,
     (*inflow_wet) = ppt[WET];
     (*inflow_dry) = ppt[DRY];
 
-    ErrorFlag = runoff(layer_wet, layer_dry, energy, soil_con, runoff_wet, runoff_dry, 
-		       baseflow_wet, baseflow_dry, asat_wet, asat_dry, ppt, 
+    ErrorFlag = runoff(cell_wet, cell_dry, energy, soil_con, ppt, 
 #if EXCESS_ICE
 		       SubsidenceUpdate,
 #endif

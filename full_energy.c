@@ -79,6 +79,8 @@ int  full_energy(char                 NEWCELL,
 	      aerodynamic resistances for current vegetation and various
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.		TJB
+  2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
+	      variables via a single reference to the cell data structure.	TJB
 
 **********************************************************************/
 {
@@ -391,24 +393,17 @@ int  full_energy(char                 NEWCELL,
 #endif
 				     prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
 				     aero_resist,
-				     cell[WET][iveg][0].aero_resist,
-				     &(cell[DRY][iveg][band].baseflow), 
-				     &(cell[WET][iveg][band].baseflow),
-				     &(cell[DRY][iveg][band].asat), 
-				     &(cell[WET][iveg][band].asat),
-				     cell[WET][iveg][band].pot_evap,
 				     displacement, gauge_correction,
-				     &(cell[DRY][iveg][band].inflow), 
-				     &(cell[WET][iveg][band].inflow), &out_prec[band*2], 
+				     &out_prec[band*2], 
 				     &out_rain[band*2], &out_snow[band*2],
 				     ref_height, roughness, 
-				     &(cell[DRY][iveg][band].runoff), 
-				     &(cell[WET][iveg][band].runoff), &snow_inflow[band], 
+				     &snow_inflow[band], 
 				     tmp_wind, veg_con[iveg].root, Nbands, Ndist, 
 				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
 				     atmos, dmy, &(energy[iveg][band]), gp, 
-				     cell[DRY][iveg][band].layer, 
-				     cell[WET][iveg][band].layer, &(snow[iveg][band]), 
+				     &(cell[DRY][iveg][band]),
+				     &(cell[WET][iveg][band]),
+				     &(snow[iveg][band]), 
 				     soil_con, dry_veg_var, wet_veg_var, 
 				     lag_one, sigma_slope, fetch);
 	  
@@ -673,9 +668,8 @@ int  full_energy(char                 NEWCELL,
 	    ppt[WET]=cell[WET][iveg][band].inflow;
 	    ppt[DRY]=cell[DRY][iveg][band].inflow;
 	    
-	    ErrorFlag = runoff(cell[WET][iveg][band].layer, cell[DRY][iveg][band].layer, &(energy[iveg][band]), 
-			       soil_con, &(cell[WET][iveg][band].runoff), &(cell[DRY][iveg][band].runoff), 
-			       &(cell[WET][iveg][band].baseflow), &(cell[DRY][iveg][band].baseflow), ppt, 
+	    ErrorFlag = runoff(&(cell[WET][iveg][band]), &(cell[DRY][iveg][band]), &(energy[iveg][band]), 
+			       soil_con, ppt, 
 			       SubsidenceUpdate,
 #if SPATIAL_FROST
 			       soil_con->frost_fract,

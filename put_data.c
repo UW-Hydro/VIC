@@ -340,8 +340,8 @@ int  put_data(dist_prcp_struct  *prcp,
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	  
             /** record aerodynamic conductance and resistance **/
-            if (cell[WET][veg][0].aero_resist[0] > SMALL) {
-              tmp_cond1 = (1/cell[WET][veg][0].aero_resist[0])
+            if (cell[WET][veg][band].aero_resist[0] > SMALL) {
+              tmp_cond1 = (1/cell[WET][veg][band].aero_resist[0])
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
             else {
@@ -349,8 +349,8 @@ int  put_data(dist_prcp_struct  *prcp,
             }
             out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
             if (overstory) {
-              if (cell[WET][veg][0].aero_resist[1] > SMALL) {
-                tmp_cond2 = (1/cell[WET][veg][0].aero_resist[1])
+              if (cell[WET][veg][band].aero_resist[1] > SMALL) {
+                tmp_cond2 = (1/cell[WET][veg][band].aero_resist[1])
                   * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
               }
               else {

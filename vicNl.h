@@ -64,6 +64,8 @@
   2009-Jun-09 Removed unnecessary functions quick_penman() and
 	      compute_penman_constants().				TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
+	      variables via a single reference to the cell data structure.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -391,9 +393,8 @@ void   redistribute_moisture(layer_data_struct *, double *, double *,
 unsigned char redistribute_moisture_for_storm(double *, double *, double, 
 					      double, double);
 double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
-int    runoff(layer_data_struct *, layer_data_struct *, energy_bal_struct *, 
-	      soil_con_struct *, double *, double *, double *, double *, double *, double *,
-	      double *, 
+int    runoff(cell_data_struct *, cell_data_struct *,
+              energy_bal_struct *, soil_con_struct *, double *,
 #if EXCESS_ICE
 	      int,
 #endif
@@ -490,15 +491,13 @@ int    surface_fluxes(char, double, double, double, double,
 #if EXCESS_ICE
 		      int, double *, double *,
 #endif
-		      double, double, double *, double *,
-		      double **, double *, double *, double *, double *,
-                      double *, double *, double *, double *, double *, 
-                      double *, double *, double *, double *, double *, 
+		      double, double, double *, double *, double **,
+                      double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *,
 		      float *, int, int, int, int, int, 
                       int, int, int, int, atmos_data_struct *, dmy_struct *, 
                       energy_bal_struct *, global_param_struct *, 
-                      layer_data_struct *, layer_data_struct *, 
+                      cell_data_struct *, cell_data_struct *, 
                       snow_data_struct *, soil_con_struct *, 
                       veg_var_struct *, veg_var_struct *, float, float, float);
 double svp(double);

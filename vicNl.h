@@ -374,10 +374,6 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
 				global_param_struct *, int, int, int, 
 				soil_con_struct *, int, char *,
 				int *, lake_con_struct);
-void   read_PILPS2c(atmos_data_struct *, FILE *, int *, int, int, int);
-void   read_rosemount(atmos_data_struct *, FILE *, int *, int, int, int, int);
-void   read_sawd(atmos_data_struct *, FILE *, int *, int, int, int);
-void   read_sawd_binary(atmos_data_struct *, FILE *, int *, int, int, int);
 void   read_snowband(FILE *, int, double, double **, double **, double **, 
                      char **);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);

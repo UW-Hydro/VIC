@@ -79,6 +79,7 @@
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.	TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jul-07 Added BandElev[] to soil_con_struct.			TJB
 
 *********************************************************************/
 
@@ -827,12 +828,13 @@ typedef struct {
   double   rough;                     /* soil surface roughness (m) */
   double   snow_rough;                /* snow surface roughness (m) */
   double   soil_density[MAX_LAYERS];  /* soil partical density (kg/m^3) */
+  float   *BandElev;                  /* Elevation of each snow elevation band */
   double  *AreaFract;                 /* Fraction of grid cell included in 
-					 each elevation band */
+					 each snow elevation band */
   double  *Pfactor;                   /* Change in Precipitation due to 
-					 elevation (fract) */
+					 elevation (fract) in each snow elevation band */
   double  *Tfactor;                   /* Change in temperature due to 
-					 elevation (C) */
+					 elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];

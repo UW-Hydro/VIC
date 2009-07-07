@@ -7,10 +7,11 @@ static char vcid[] = "$Id$";
 
 void read_snowband(FILE    *snowband,
 		   int      gridcell,
-		   double   elev,
+		   float   *elev,
+		   double **AreaFract,
+		   float  **BandElev,
 		   double **Tfactor,
 		   double **Pfactor,
-		   double **AreaFract,
 		   char   **AboveTreeLine)
 /**********************************************************************
   read_snowband		Keith Cherkauer		July 9, 1998
@@ -24,6 +25,9 @@ void read_snowband(FILE    *snowband,
 	      file for the current grid cell.				KAC via TJB
   2009-Jan-12 Changed wording of error messages from "snow elevation band"
 	      to "snow band".						TJB
+  2009-Jul-07 Added code to store band elevations in soil_con.BandElev[].
+	      Added logic to make sure grid cell average elevation equals
+	      the average of the band elevations.			TJB
 
 **********************************************************************/
 {
@@ -35,13 +39,15 @@ void read_snowband(FILE    *snowband,
   int     cell;
   double  total;
   double  area_fract;
-  double  band_elev;
   double  prec_frac;
+  float   band_elev;
+  float   avg_elev;
 
   Nbands         = options.SNOW_BAND;
+  *AreaFract     = (double *)calloc(Nbands,sizeof(double));
+  *BandElev      = (float *)calloc(Nbands,sizeof(float));
   *Tfactor       = (double *)calloc(Nbands,sizeof(double));
   *Pfactor       = (double *)calloc(Nbands,sizeof(double));
-  *AreaFract     = (double *)calloc(Nbands,sizeof(double));
   *AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
 
   if (*Tfactor == NULL || *Pfactor == NULL || *AreaFract == NULL) 
@@ -55,6 +61,7 @@ void read_snowband(FILE    *snowband,
   /** Set default values for factors to use unmodified forcing data **/
   for (band = 0; band < Nbands; band++) {
     (*AreaFract)[band] = 0.;
+    (*BandElev)[band]  = (*elev);
     (*Tfactor)[band]   = 0.;
     (*Pfactor)[band]   = 1.;
   }
@@ -100,17 +107,26 @@ void read_snowband(FILE    *snowband,
     }
 
     /** Read Band Elevation **/
+    avg_elev = 0;
     for ( band = 0; band < Nbands; band++ ) {
-      fscanf(snowband, "%lf", &band_elev);
+      fscanf(snowband, "%f", &band_elev);
       if ( band_elev < 0 ) {
 	fprintf(stderr,"Negative snow band elevation (%f) read from file\n", 
 		band_elev);
       }
-      (*Tfactor)[band] = ( elev - band_elev ) / 1000. * T_lapse;
+      (*BandElev)[band] = band_elev;
+      avg_elev += (*BandElev)[band]*(*AreaFract)[band];
     }
-    total = 0.;
+    if (fabs(avg_elev-(*elev)) > 1.0) {
+      fprintf(stderr,"Warning: average band elevation %f not equal to grid_cell average elevation %f; setting grid cell elevation to average band elevation.\n", avg_elev, *elev);
+      *elev = (float)avg_elev;
+    }
+    for ( band = 0; band < Nbands; band++ ) {
+      (*Tfactor)[band] = ( (*elev) - (*BandElev)[band] ) / 1000. * T_lapse;
+    }
 
     /** Read Precipitation Fraction **/
+    total = 0.;
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
       fscanf(snowband, "%lf", &prec_frac);
       if(prec_frac<0) {

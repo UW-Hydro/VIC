@@ -547,7 +547,26 @@ Fixed inability to read tabs in soil/veg parameter files.
 	result, VIC lost the ability to understand tabs as field separators
 	in these files.  This ability has now been restored.	TJB
 	
-	can be omitted from global param file.			TJB
+
+
+Fixed bugs in snow bands implementation.
+
+	Files Affected:
+
+	output_list_utils.c
+	read_snowband.c
+	vicNl.c
+	vicNl.h
+	vicNl_def.h
+
+	Description:
+
+	Some snowband-specific output variables had an incorrect number of
+	elements allocated in output_list_utils.c.  This has been fixed.  In
+	addition, added BandElev[] array to soil_con_struct.  Also added logic
+	to ensure that grid-cell-average elevation (from soil parameter file)
+	matches the average of the band elevations.			TJB
+	
 
 
 

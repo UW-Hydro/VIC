@@ -66,6 +66,7 @@
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
+  2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -374,8 +375,8 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
 				global_param_struct *, int, int, int, 
 				soil_con_struct *, int, char *,
 				int *, lake_con_struct);
-void   read_snowband(FILE *, int, double, double **, double **, double **, 
-                     char **);
+void   read_snowband(FILE *, int, float *, double **, float **, double **, 
+                     double **, char **);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);

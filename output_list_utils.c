@@ -37,6 +37,7 @@ out_data_struct *create_output_list() {
   2009-Jun-09 Added OUT_PET_*, potential evap computed for
 	      various landcover types.				TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
 *************************************************************/
 
   extern option_struct options;
@@ -214,12 +215,15 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
   out_data[OUT_SOIL_TNODE_WL].nelem = options.Nnode;
   out_data[OUT_SOILT_FLAG].nelem = options.Nnode;
+  out_data[OUT_ADV_SENS_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ADVECTION_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_DELTACC_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_GRND_FLUX_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_IN_LONG_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_LATENT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_LATENT_SUB_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_MELT_ENERGY_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_NET_LONG_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_NET_SHORT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_RFRZ_ENERGY_BAND].nelem = options.SNOW_BAND;
@@ -228,6 +232,9 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_DEPTH_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_FLUX_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_SNOW_MELT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_SNOW_PACKT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_SNOW_SURFT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SWE_BAND].nelem = options.SNOW_BAND;
 
   // Set aggregation method - default is to average over the interval

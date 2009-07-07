@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 	      initialize_atmos().					TJB
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
+  2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
 **********************************************************************/
 {
 
@@ -262,9 +263,9 @@ int main(int argc, char *argv[])
 
       /** Read Elevation Band Data if Used **/
       read_snowband(filep.snowband,soil_con.gridcel,
-		    (double)soil_con.elevation, &soil_con.Tfactor, 
-		    &soil_con.Pfactor, &soil_con.AreaFract, 
-		    &soil_con.AboveTreeLine);
+		    &soil_con.elevation, &soil_con.AreaFract,
+		    &soil_con.BandElev, &soil_con.Tfactor, 
+		    &soil_con.Pfactor, &soil_con.AboveTreeLine);
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);

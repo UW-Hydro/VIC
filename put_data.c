@@ -992,8 +992,7 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_con->basin[0]) * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
 
       /** record saturated area fraction **/
-      out_data[OUT_ASAT].data[0] += lake_var.sarea/soil_con->cell_area 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+      out_data[OUT_ASAT].data[0] += lake_var.sarea/soil_con->cell_area; 
 
     }
   }

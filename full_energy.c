@@ -81,6 +81,7 @@ int  full_energy(char                 NEWCELL,
 	      calculations is stored in temporary array aero_resist.		TJB
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
+  2009-Jul-22 Fixed error in assignment of cell.aero_resist.			TJB
 
 **********************************************************************/
 {
@@ -336,8 +337,12 @@ int  full_energy(char                 NEWCELL,
       }
 
       /* Initialize final aerodynamic resistance values */
-      cell[WET][iveg][0].aero_resist[0] = aero_resist[N_PET_TYPES][0];
-      cell[WET][iveg][0].aero_resist[1] = aero_resist[N_PET_TYPES][1];
+      for ( band = 0; band < Nbands; band++ ) {
+	if( soil_con->AreaFract[band] > 0 ) {
+          cell[WET][iveg][band].aero_resist[0] = aero_resist[N_PET_TYPES][0];
+          cell[WET][iveg][band].aero_resist[1] = aero_resist[N_PET_TYPES][1];
+        }
+      }
 
       /**************************************************
         Store Water Balance Terms for Debugging

@@ -88,6 +88,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      Added options.GRND_FLUX_TYPE to allow backwards-compatibility
 	      with versions 4.0.6 and 4.1.0.				TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jul-26 Removed the special logic for the water balance mode, in
+	      which net longwave is stored in the "longwave" variable.	TJB
 
 **********************************************************************/
 {
@@ -625,40 +627,18 @@ double func_surf_energy_bal(double Ts, va_list ap)
   } /* End computation for ground heat flux */
   else { /* ground heat flux not estimated */
     
-    if ( delta_t < SEC_PER_DAY ) {
-      
-      /** Compute net surface radiation of snow-free area for evaporation 
-	  estimates **/
+    /** Compute net surface radiation of snow-free area for evaporation 
+	estimates **/
 
-      //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
-      LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+    //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
+    LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
 
-      if ( INCLUDE_SNOW ) { // compute net LW at snow surface
-	(*NetLongSnow) = (LongSnowIn - snow_coverage 
-			  * LongBareOut);
-      }
-      (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) 
-			  * LongBareOut); // net LW snow-free area
-      NetBareRad = NetShortBare + (*NetLongBare);
-      
+    if ( INCLUDE_SNOW ) { // compute net LW at snow surface
+      (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
     }
-    else {
+    (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
+    NetBareRad = NetShortBare + (*NetLongBare);
       
-      /** Daily water balance model provides average net shortwave and 
-	  longwave radiation **/
-
-      //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
-      LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-
-      if ( INCLUDE_SNOW ) {
-	(*NetLongSnow) = snow_coverage * LongBareIn / (1. - snow_coverage);
-      }
-      (*NetLongBare) = LongBareIn;
-
-      //NetBareRad = (1. - snow_coverage) * (NetShortBare + (*NetLongBare));
-      NetBareRad = NetShortBare + (*NetLongBare);
-
-    }
   }
 
   /** Compute atmospheric stability correction **/

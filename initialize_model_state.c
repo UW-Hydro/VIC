@@ -88,6 +88,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      in each layer as a function of temperature.		TJB
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
+  2009-Jul-26 Added initial estimate of incoming longwave at surface
+	      (LongUnderIn) for use in canopy snow T iteration.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -113,6 +115,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   Cv;
   double   Zsum, dp;
   double   tmpdp, tmpadj, Bexp;
+  double   tmp;
   double   Tair;
   double  *M;
   double   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
@@ -676,7 +679,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   // initialize energy balance terms before iterations begin
   for ( veg = 0 ; veg <= MaxVeg ; veg++) {
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
-	energy[veg][band].LongUnderOut = 0.;
+        /* Initial estimate of LongUnderOut for use by snow_intercept() */
+        tmp = energy[veg][band].T[0] + KELVIN;
+	energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
 	energy[veg][band].Tfoliage     = Tair;
     }
   }

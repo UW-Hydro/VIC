@@ -94,6 +94,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      Made similar change to density calculation.			TJB
   2009-Jun-10 Fixed incorrect handling of cases when incoming longwave and
 	      shortwave radiation are supplied.					TJB
+  2009-Jul-26 Removed the special logic for the water balance mode, in
+	      which net longwave is stored in the "longwave" variable.		TJB
 
 **********************************************************************/
 {
@@ -630,9 +632,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
         sum += atmos[rec].longwave[i];
       }
       if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF;
-      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
-        calc_netlongwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
-                         atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
     }
   }
   else if(param_set.FORCE_DT[param_set.TYPE[LONGWAVE].SUPPLIED-1] == 24) {
@@ -646,11 +645,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  sum += atmos[rec].longwave[j];
 	}
 	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-	if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
-	  air_temp = atmos[rec].air_temp[NR] + KELVIN;
-	  atmos[rec].longwave[NR] -= STEFAN_B
-		   * air_temp * air_temp * air_temp * air_temp;
-	}
 	rec++;
       }
     }
@@ -666,12 +660,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	idx++;
       }
       if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
-	if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
-	  air_temp = atmos[rec].air_temp[NR] + KELVIN;
-	  atmos[rec].longwave[NR] -= STEFAN_B
-		   * air_temp * air_temp * air_temp * air_temp;
-	}
     }
   }
 

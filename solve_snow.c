@@ -141,7 +141,6 @@ double solve_snow(char                 overstory,
 /*   double              LongUnderOut; */
   double              ShortOverIn;
 /*   double              Tgrnd; */
-  double              Tmp;
   double              melt;
   double              old_coverage;
   double              old_depth;

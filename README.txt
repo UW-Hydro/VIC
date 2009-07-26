@@ -555,6 +555,7 @@ Fixed bugs in snow bands implementation.
 
 	output_list_utils.c
 	read_snowband.c
+	read_vegparam.c
 	vicNl.c
 	vicNl.h
 	vicNl_def.h
@@ -565,8 +566,32 @@ Fixed bugs in snow bands implementation.
 	elements allocated in output_list_utils.c.  This has been fixed.  In
 	addition, added BandElev[] array to soil_con_struct.  Also added logic
 	to ensure that grid-cell-average elevation (from soil parameter file)
-	matches the average of the band elevations.			TJB
-	
+	matches the average of the band elevations.  Also added allocation of
+	extra veg tile for the case of a band being above the treeline in the
+	COMPUTE_TREELINE case.					TJB
+
+
+
+Removed special logic for longwave in water balance mode
+
+	Files Affected:
+
+	func_surf_energy_bal.c
+	intialize_atmos.c
+	initialize_model_state.c
+
+	Description:
+
+	In the 4.0.x branch of VIC, net longwave radiation was stored in the
+	atmos.longwave variable for the case of water balance mode.  This
+	required that special logic be inserted into various parts of the
+	code wherever the longwave variable was used.  In 4.1.x, new features
+	were added and several different types of longwave flux were added.
+	None of these new fluxes took the water-balance case into account, and
+	as a result, the water balance case was handled incorrectly.  Now the
+	special handling of the water balance case has been removed; atmos.longwave
+	always contains incoming longwave.  This also simplifies the code.
+	TJB
 
 
 

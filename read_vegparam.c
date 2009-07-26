@@ -39,6 +39,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
   2009-Jun-17 Fixed incorrect placement of free vegarr[] for case of
 	      GLOBAL_LAI==FALSE.					TJB
+  2009-Jul-26 Allocate extra veg tile for COMPUTE_TREELINE case.	TJB
 **********************************************************************/
 {
 
@@ -97,8 +98,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     nrerror(ErrStr);
   }
 
-  // Make sure to allocate extra memory for bare soil tile and optionally a lake/wetland tile
+  // Make sure to allocate extra memory for bare soil tile and optionally a above-treeline veg and/or a lake/wetland tile
   MaxVeg = vegetat_type_num+1;
+  if ( options.AboveTreelineVeg >= 0 )
+    MaxVeg++;
   if ( options.LAKES )
     MaxVeg++;
 

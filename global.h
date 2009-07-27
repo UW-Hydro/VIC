@@ -51,7 +51,8 @@ param_set_struct param_set;
       vegnocr = current vegetation with canopy resistance set to 0
     NOTE: these are external variables, declared in vicNl_def.h.
     NOTE2: bare soil roughness and displacement will be overwritten by the
-           values found in the soil parameter file
+           values found in the soil parameter file; bare soil wind_h will
+	   be overwritten by the value specified in the global param file.
   **************************************************************************/
 
   /* One element for each non-natural PET type */
@@ -62,7 +63,7 @@ param_set_struct param_set;
   double ref_veg_albedo[]      = { BARE_SOIL_ALBEDO, H2O_SURF_ALBEDO, 0.23, 0.23 };
   double ref_veg_rough[]       = { 0.001, 0.001, 0.0148, 0.0615 };
   double ref_veg_displ[]       = { 0.0054, 0.0054, 0.08, 0.3333 };
-  double ref_veg_wind_h[]      = { 0.0, 0.0, 0.0, 0.0 };
+  double ref_veg_wind_h[]      = { 10.0, 10.0, 10.0, 10.0 };
   double ref_veg_RGL[]         = { 0.0, 0.0, 100, 100 };
   double ref_veg_rad_atten[]   = { 0.0, 0.0, 0.0, 0.0 };
   double ref_veg_wind_atten[]  = { 0.0, 0.0, 0.0, 0.0 };

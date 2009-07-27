@@ -89,7 +89,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
   2009-Jul-26 Added initial estimate of incoming longwave at surface
-	      (LongUnderIn) for use in canopy snow T iteration.		TJB
+	      (LongUnderOut) for use in canopy snow T iteration.	TJB
 **********************************************************************/
 {
   extern option_struct options;

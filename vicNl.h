@@ -67,6 +67,8 @@
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
   2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
+  2009-Jul-31 Removed unused layer_node_fract array from
+	      estimate_layer_ice_content().				TJB 
 ************************************************************************/
 
 #include <math.h>
@@ -234,7 +236,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if SPATIAL_FROST
 			       double *, double,
 #endif // SPATIAL_FROST
-			       double *, double *, double *, double *, float **, 
+			       double *, double *, double *, double *, 
 			       int, int, char);
 #else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
@@ -246,7 +248,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,
 #endif // EXCESS_ICE
-			       double *, double *, double *, double *, float **, 
+			       double *, double *, double *, double *, 
 			       int, int, char);
 #endif
 double estimate_T1(double, double, double, double, double, double, double, 
@@ -315,7 +317,7 @@ int   initialize_model_state(dist_prcp_struct *, dmy_struct,
 int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **, int, int);
-void   initialize_soil(cell_data_struct **, soil_con_struct *, int);
+void   initialize_soil(cell_data_struct **, soil_con_struct *, veg_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *, int);
 
@@ -403,7 +405,7 @@ int    runoff(cell_data_struct *, cell_data_struct *,
 void set_max_min_hour(double *, int, int *, int *);
 void set_node_parameters(double *, double *, double *, double *, double *, double *,
 			 double *, double *, double *, double *, double *,
-			 double *, double *, float **,
+			 double *, double *,
 #if QUICK_FS
 			 double ***,
 #endif

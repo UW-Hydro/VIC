@@ -62,6 +62,8 @@ void write_model_state(dist_prcp_struct    *prcp,
   2007-Apr-25 Removed variable Nsum.						JCA
   2007-Aug-24 Added features for EXCESS_ICE option.				JCA
   2007-Nov-06 New list of lake state variables.					LCB via TJB
+  2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
+	      variables.							TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -75,7 +77,6 @@ void write_model_state(dist_prcp_struct    *prcp,
   int    Ndist;
   int    Nbands;
   int    byte, Nbytes;
-  int    extra_veg;
 #if SPATIAL_FROST
   int    frost_area;
 #endif // SPATIAL_FROST
@@ -99,20 +100,14 @@ void write_model_state(dist_prcp_struct    *prcp,
   energy  = prcp->energy;
   lake_var = prcp->lake_var;
  
-  extra_veg = 0;
-  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
-    extra_veg = 1; // add a veg type for the wetland
-  }
-
   /* write cell information */
   if ( options.BINARY_STATE_FILE ) {
     fwrite( &cellnum, sizeof(int), 1, filep->statefile );
     fwrite( &Nveg, sizeof(int), 1, filep->statefile );
-    fwrite( &extra_veg, sizeof(int), 1, filep->statefile );
     fwrite( &Nbands, sizeof(int), 1, filep->statefile );
   }
   else {
-    fprintf( filep->statefile, "%i %i %i %i", cellnum, Nveg, extra_veg, Nbands );
+    fprintf( filep->statefile, "%i %i %i", cellnum, Nveg, Nbands );
   }
   // This stores the number of bytes from after this value to the end 
   // of the line.  DO NOT CHANGE unless you have changed the values
@@ -172,7 +167,11 @@ void write_model_state(dist_prcp_struct    *prcp,
 	+ sizeof(double) // hice
 	+ sizeof(double) // tempi
 	+ sizeof(double) // swe
+	+ sizeof(double) // surf_temp
+	+ sizeof(double) // pack_temp
+	+ sizeof(double) // coldcontent
 	+ sizeof(double) // surf_water
+	+ sizeof(double) // pack_water
 	+ sizeof(double) // SAlbedo
 	+ sizeof(double) // sdepth
 	;
@@ -228,7 +227,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 #endif
   
   /* Output for all vegetation types */
-  for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
+  for ( veg = 0; veg <= Nveg; veg++ ) {
     
     // Store distributed precipitation fraction
     if ( options.BINARY_STATE_FILE )
@@ -246,8 +245,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       DRY_TIME[veg] );
     }
     
-    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
+    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == lake_con.lake_idx ) {
       Nbands = 1; // wetland veg type only occurs in band 0
+ 
   }
 
     /* Output for all snow bands */
@@ -301,7 +301,7 @@ void write_model_state(dist_prcp_struct    *prcp,
         }
 
 	/* Write dew storage */
-	if ( veg < Nveg || ( veg == Nveg+extra_veg && extra_veg > 0 ) ) {
+	if ( veg < Nveg ) {
 	  tmpval = veg_var[dist][veg][band].Wdew;
 	  if ( options.BINARY_STATE_FILE )
 	    fwrite( &tmpval, sizeof(double), 1, filep->statefile );
@@ -368,7 +368,11 @@ void write_model_state(dist_prcp_struct    *prcp,
       fwrite( &lake_var.hice, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.tempi, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.swe, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.surf_temp, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.pack_temp, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.coldcontent, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.surf_water, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.pack_water, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.SAlbedo, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.sdepth, sizeof(double), 1, filep->statefile );
     }
@@ -392,7 +396,11 @@ void write_model_state(dist_prcp_struct    *prcp,
       fprintf( filep->statefile, " %f", lake_var.hice );
       fprintf( filep->statefile, " %f", lake_var.tempi );
       fprintf( filep->statefile, " %f", lake_var.swe );
+      fprintf( filep->statefile, " %f", lake_var.surf_temp );
+      fprintf( filep->statefile, " %f", lake_var.pack_temp );
+      fprintf( filep->statefile, " %f", lake_var.coldcontent );
       fprintf( filep->statefile, " %f", lake_var.surf_water );
+      fprintf( filep->statefile, " %f", lake_var.pack_water );
       fprintf( filep->statefile, " %f", lake_var.SAlbedo );
       fprintf( filep->statefile, " %f", lake_var.sdepth );
       fprintf( filep->statefile, "\n" );

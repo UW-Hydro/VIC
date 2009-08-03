@@ -76,6 +76,8 @@ int main(int argc, char *argv[])
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
   2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
+  2009-Jul-31 Replaced references to N+1st veg tile with references
+	      to index of lake/wetland tile.				TJB
 **********************************************************************/
 {
 
@@ -112,6 +114,7 @@ int main(int argc, char *argv[])
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
+  double                   Clake;
   dmy_struct              *dmy;
   atmos_data_struct       *atmos;
   veg_con_struct          *veg_con;
@@ -343,6 +346,13 @@ int main(int argc, char *argv[])
       storage = 0.;
       for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
 	veg_fract = veg_con[veg].Cv;
+        if (veg_con[veg].LAKE) {
+          if (prcp.lake_var.areai > prcp.lake_var.sarea)
+            Clake = prcp.lake_var.areai/lake_con.basin[0];
+          else
+            Clake = prcp.lake_var.sarea/lake_con.basin[0];
+          veg_fract *= (1-Clake);
+        }
 	for ( band = 0; band < options.SNOW_BAND; band++ ) {
 	  band_fract = soil_con.AreaFract[band];
 	  if ( veg_fract > SMALL && band_fract > SMALL ) {
@@ -375,13 +385,24 @@ int main(int argc, char *argv[])
       }
 
       if ( options.LAKES && lake_con.Cl[0] > 0) {
+        veg = lake_con.lake_idx;
+        if (prcp.lake_var.areai > prcp.lake_var.sarea)
+          Clake = prcp.lake_var.areai/lake_con.basin[0];
+        else
+          Clake = prcp.lake_var.sarea/lake_con.basin[0];
+        veg_fract = veg_con[veg].Cv * Clake;
 	/** COMPUTE MOISTURE STORAGE IN LAKE FRACTION **/
+	for(index=0;index<options.Nlayer;index++) {
+	  for ( dist = 0; dist < Ndist; dist ++ ) {
+	    if(dist==0) 
+	      mu = prcp.mu[veg];
+	    else 
+	      mu = 1. - prcp.mu[veg];
+	    storage += soil_con.max_moist[index] * veg_fract * mu;
+          }
+        }
 	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
 				     / lake_con.basin[0]) * 1000.;
-	band = 0;
-	veg = veg_con[0].vegetat_type_num + 1;
-	for(index=0;index<options.Nlayer;index++)
-	  storage += lake_con.Cl[0] * prcp.cell[WET][veg][band].layer[index].moist; 
       }
 
       calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
@@ -416,8 +437,6 @@ int main(int argc, char *argv[])
         NEWCELL=FALSE;
 	for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ )
 	  init_DRY_TIME[veg] = -999;
-	if ( options.LAKES )
-	  init_DRY_TIME[veg_con[0].vegetat_type_num+1] = -999;
 
       }	/* End Rec Loop */
 
@@ -448,9 +467,6 @@ int main(int argc, char *argv[])
       free((char *)soil_con.Tfactor);
       free((char *)soil_con.Pfactor);
       free((char *)soil_con.AboveTreeLine);
-      for(index=0;index<=options.Nlayer;index++) 
-	free((char*)soil_con.layer_node_fract[index]);
-      free((char*)soil_con.layer_node_fract);
       free((char*)init_STILL_STORM);
       free((char*)init_DRY_TIME);
 #endif /* !OUTPUT_FORCE */

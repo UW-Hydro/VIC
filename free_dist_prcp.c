@@ -18,6 +18,7 @@ void free_dist_prcp(dist_prcp_struct *prcp,
            data structures                                          KAC
   2007-Apr-21 Replaced loop over Nveg to loop over Nitems, so that lake-
 	      specific veg tiles could be freed.			TJB
+  2009-Jul-31 Removed extra veg tile for lake/wetland.			TJB
 
 **********************************************************************/
 {
@@ -27,8 +28,7 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   int i, j, Nitems;
 
   Ndist = 2;
-  if (options.LAKES) Nitems = Nveg + 2;
-  else Nitems = Nveg + 1;
+  Nitems = Nveg + 1;
 
   for(i=0;i<Ndist;i++) {
     for(j=0;j<Nitems;j++) {

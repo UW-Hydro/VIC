@@ -91,6 +91,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.					TJB
   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
+  2009-Jul-31 Removed unused layer_node_fract array.			TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -745,11 +746,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
     *************************************************/
     temp.time_zone_lng = off_gmt * 360./24.;
     
-    /* Allocate Layer - Node fraction array */
-    temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
-    for(layer=0;layer<=options.Nlayer;layer++) 
-      temp.layer_node_fract[layer] = (float *)malloc(options.Nnode*sizeof(float));
-
 }
   /* ELSE Grid cell is not active (RUN_MODEL=0), skip soil parameter data */
   

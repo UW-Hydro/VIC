@@ -44,6 +44,8 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 	      of min_liq, the minimum allowable liquid water content
 	      in each layer as a function of temperature.		TJB
   2009-Jun-10 Fixed incorrect placement of checks on ErrorFlag.		TJB
+  2009-Jul-31 Removed unused layer_node_fract array from call to
+	      estimate_layer_ice_content().				TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -84,8 +86,8 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->effective_porosity,
 #endif // EXCESS_ICE
 					   soil_con->bulk_density,
-					   soil_con->soil_density, soil_con->quartz, soil_con->resid_moist,
-					   soil_con->layer_node_fract, Nnodes, 
+					   soil_con->soil_density, soil_con->quartz,
+					   soil_con->resid_moist, Nnodes, 
 					   options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
   }
@@ -110,7 +112,7 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->porosity, soil_con->effective_porosity,
 #endif // EXCESS_ICE
 					   soil_con->bulk_density, soil_con->soil_density, 
-					   soil_con->quartz, soil_con->resid_moist, soil_con->layer_node_fract, 
+					   soil_con->quartz, soil_con->resid_moist, 
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
   }

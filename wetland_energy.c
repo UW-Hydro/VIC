@@ -56,6 +56,7 @@ int wetland_energy(int                  rec,
 	      calculations is stored in temporary array aero_resist.	TJB
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
+  2009-Jul-31 The function wetland_energy() has been removed from VIC.	TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;

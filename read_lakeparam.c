@@ -54,6 +54,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2008-Jun-16 Added a second fgets to loop over grid cells, to correctly parse
 	      file.								LCB via TJB
   2008-Sep-09 Deleted the fprintf statement for maxiumum lake volume.		LCB via TJB
+  2009-Jul-31 Added new parameter: index of veg tile (from veg param file) that
+	      contains the lake/wetland.					TJB
 **********************************************************************/
 
 {
@@ -96,8 +98,11 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   }
 
   // read lake parameters from file
+  fscanf(lakeparam, "%d", &temp.lake_idx);
+  veg_con[temp.lake_idx].LAKE = 1;
   fscanf(lakeparam, "%d", &temp.numnod);
-  fscanf(lakeparam, "%lf %lf", &temp.mindepth, &temp.wfrac);
+  fscanf(lakeparam, "%lf", &temp.mindepth);
+  fscanf(lakeparam, "%lf", &temp.wfrac);
   fscanf(lakeparam, "%lf", &temp.depth_in);
   fscanf(lakeparam, "%f", &temp.rpercent);
   temp.wetland_veg_class = 0;
@@ -181,17 +186,6 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   if (ErrFlag == ERROR) {
     fprintf(stderr, "ERROR: problem in get_volume(): depth %f volume %f rec %d\n", temp.mindepth, temp.minvolume, 0);
     exit(0);
-  }
-
-  // Add lake fraction to Cv_sum
-  (veg_con[0].Cv_sum) += temp.Cl[0];
-  if ( veg_con[0].Cv_sum > 1.000 ) {
-    // Adjust Cv_sum so that it is equal to 1
-    fprintf(stderr,"WARNING: Total Cv of veg fractions and lake fraction exceeds 1.0 at grid cell %d, fractions being adjusted to equal 1\n", soil_con.gridcel);
-    for( i = 0; i < veg_con[0].vegetat_type_num; i++ )
-      veg_con[i].Cv = veg_con[i].Cv / veg_con[0].Cv_sum;
-    temp.Cl[0] = temp.Cl[0] / veg_con[0].Cv_sum;
-    veg_con[0].Cv_sum = 1;
   }
 
   fprintf(stderr, "Lake area = %e km2\n",temp.basin[0]/(1000.*1000.));

@@ -40,6 +40,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Jun-17 Fixed incorrect placement of free vegarr[] for case of
 	      GLOBAL_LAI==FALSE.					TJB
   2009-Jul-26 Allocate extra veg tile for COMPUTE_TREELINE case.	TJB
+  2009-Jul-31 Removed extra veg tile for lake/wetland case.		TJB
 **********************************************************************/
 {
 
@@ -98,11 +99,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     nrerror(ErrStr);
   }
 
-  // Make sure to allocate extra memory for bare soil tile and optionally a above-treeline veg and/or a lake/wetland tile
+  // Make sure to allocate extra memory for bare soil tile
+  // and optionally an above-treeline veg tile
   MaxVeg = vegetat_type_num+1;
   if ( options.AboveTreelineVeg >= 0 )
-    MaxVeg++;
-  if ( options.LAKES )
     MaxVeg++;
 
   /** Allocate memory for vegetation grid cell parameters **/
@@ -146,6 +146,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       nrerror(ErrStr);
     }
 
+    temp[i].LAKE = 0;
     temp[i].veg_class = atoi( vegarr[0] );
     temp[i].Cv = atof( vegarr[1] );
     depth_sum = 0;

@@ -115,6 +115,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.						TJB
+  2009-Jul-31 Removed unused layer_node_fract array.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -715,15 +716,5 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   }
   else RUN[0] = 0;
  
-#if !OUTPUT_FORCE
-
-  /* Allocate Layer - Node fraction array */
-  temp.layer_node_fract = (float **)malloc((options.Nlayer+1)*sizeof(float *));
-  for(layer=0;layer<=options.Nlayer;layer++) 
-    temp.layer_node_fract[layer] 
-      = (float *)malloc(options.Nnode*sizeof(float));
-
-#endif /* !OUTPUT_FORCE */
-
   return temp;
 } 

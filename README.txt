@@ -454,6 +454,64 @@ Simplified argument lists of runoff() and surface_fluxes().
 
 
 
+Wetland portion of lake/wetland tile is now simulated in full_energy().
+
+	Files Affected:
+
+	free_dist_prcp.c
+	frozen_soil.c
+	full_energy.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	LAKE.h
+	lakes.eb.c
+	make_dist_prcp.c
+	Makefile
+	put_data.c
+	read_initial_model_state.c
+	read_lakeparam.c
+	read_soilparam.c
+	read_soilparam_arc.c
+	read_vegparam.c
+	soil_conduction.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	wetland_energy.c (removed)
+	write_model_state.c
+
+	Description:
+
+	In previous versions of 4.1.x, the wetland portion of the lake/wetland
+	tile was stored in the (N+1)st vegetation tile, and processed in the
+`	function wetland_energy(), which was an almost exact duplicate of
+	full_energy().  This created several difficulties, including a) potential
+	conflicts with the COMPUTE_TREELINE option, b) conflicts with the new
+	implementation of bare soil and potential evap, c) hard-coding of
+	wetland vegetation to be equal to the grid cell's first listed cover
+	type, and d) general complexities in maintaining the code/adding new
+	features.
+
+	Now, the wetland portion of the lake/wetland tile must be listed in
+	the vegetation parameter file in the same was as all other veg cover
+	types.  Similarly, the wetland portion of the lake/wetland tile is
+	processed in full_energy() in the exact same way as all other tiles.
+	Wetland_energy() has been removed.  Lakemain() has also been removed,
+	as the calls to lake-specific functions are now executed directly from
+	full_energy().  To make all of this happen, the index of the veg tile
+	containing the lake/wetland must be indicated in the lake parameter
+	file (thus, the lake parameter file must contain an additional
+	value for each grid cell).
+
+	Users may now specify any type of desired vegetation to fill the
+	wetland portion of the lake/wetland tile, simply by listing the
+	desired veg cover in the veg param file and placing the index of this
+	tile in the lake parameter file.  The user is also free now to create
+	a new wetland vegetation class in the vegetation library.
+
+
+
 Bug Fixes:
 ----------
 

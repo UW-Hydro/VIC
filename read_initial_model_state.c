@@ -73,6 +73,8 @@ void read_initial_model_state(FILE                *init_state,
   2007-Sep-18 Check for soil moist exceeding max moist moved from
 	      here to initialize_model_state.					JCA
   2007-Nov-06 New list of lake state variables.					LCB via TJB
+  2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
+	      variables.							TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -93,7 +95,6 @@ void read_initial_model_state(FILE                *init_state,
   int    tmp_char;
   int    byte, Nbytes;
   int    tmp_int, node;
-  int    extra_veg;
 #if SPATIAL_FROST
   int    frost_area;
 #endif
@@ -126,12 +127,11 @@ void read_initial_model_state(FILE                *init_state,
   if ( options.BINARY_STATE_FILE ) {
     fread( &tmp_cellnum, sizeof(int), 1, init_state );
     fread( &tmp_Nveg, sizeof(int), 1, init_state );
-    fread( &extra_veg, sizeof(int), 1, init_state );
     fread( &tmp_Nband, sizeof(int), 1, init_state );
     fread( &Nbytes, sizeof(int), 1, init_state );
   }
   else 
-    fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
+    fscanf( init_state, "%d %d %d", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
   // Skip over unused cell information
   while ( tmp_cellnum != cellnum && !feof(init_state) ) {
     if ( options.BINARY_STATE_FILE ) {
@@ -141,7 +141,6 @@ void read_initial_model_state(FILE                *init_state,
       // read info for next cell
       fread( &tmp_cellnum, sizeof(int), 1, init_state );
       fread( &tmp_Nveg, sizeof(int), 1, init_state );
-      fread( &extra_veg, sizeof(int), 1, init_state );
       fread( &tmp_Nband, sizeof(int), 1, init_state );
       fread( &Nbytes, sizeof(int), 1, init_state );
     }
@@ -151,19 +150,19 @@ void read_initial_model_state(FILE                *init_state,
 #if EXCESS_ICE      
       fgets(tmpstr, MAXSTRING, init_state); //excess ice info
 #endif
-      for ( veg = 0; veg <= tmp_Nveg+extra_veg; veg++ ) {
+      for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
-	if ( options.LAKES && extra_veg == 1 && veg == tmp_Nveg + extra_veg ) {
+	if ( options.LAKES && veg == lake_con.lake_idx ) {
 	  tmp_Nband = 1; // wetland veg type only occurs in band 0
 	}
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, init_state); // skip snowband info
       }
-      if ( options.LAKES && extra_veg == 1 ) {
+      if ( options.LAKES ) {
         fgets(tmpstr, MAXSTRING, init_state); // skip lake info
       }
       // read info for next cell
-      fscanf( init_state, "%d %d %d %d", &tmp_cellnum, &tmp_Nveg, &extra_veg, &tmp_Nband );
+      fscanf( init_state, "%d %d %d", &tmp_cellnum, &tmp_Nveg, &tmp_Nband );
     }//end if
   }//end while
   
@@ -181,18 +180,7 @@ void read_initial_model_state(FILE                *init_state,
     sprintf(ErrStr,"The number of snow bands in cell %d (%d) does not equal that defined in the snow band file (%d).  Check your input files.", cellnum, tmp_Nband, Nbands);
     nrerror(ErrStr);
   }
-  
-  if ( options.LAKES ) {
-    if ( lake_con.Cl[0] > 0 && extra_veg == 0 ) {
-      sprintf(ErrStr,"The model state file does not list a lake for this cell, but the lake coverage given by the lake parameter file is > 0.  Check your input files.");
-      nrerror(ErrStr);
-    }
-    else if ( lake_con.Cl[0] == 0 && extra_veg == 1 ) {
-      sprintf(ErrStr,"The model state file lists a lake for this cell, but the lake coverage given by the lake parameter file is 0.  Check your input files.");
-      nrerror(ErrStr);
-    }
-  }
-  
+ 
   /* Read soil thermal node deltas */
   for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
     if ( options.BINARY_STATE_FILE ) 
@@ -241,7 +229,7 @@ void read_initial_model_state(FILE                *init_state,
 #endif //EXCESS_ICE
   
   /* Input for all vegetation types */
-  for ( veg = 0; veg <= Nveg + extra_veg; veg++ ) {
+  for ( veg = 0; veg <= Nveg; veg++ ) {
     
     // read distributed precipitation variables
     if ( options.BINARY_STATE_FILE ) {
@@ -254,11 +242,7 @@ void read_initial_model_state(FILE                *init_state,
 	      &init_DRY_TIME[veg] );
       init_STILL_STORM[veg] = (char)tmp_char;
     }
-    
-    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == Nveg + extra_veg ) {
-      Nbands = 1; // wetland veg type only occurs in band 0
-    }
-    
+ 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Skip reading if areafract <= 0 */
@@ -328,7 +312,7 @@ void read_initial_model_state(FILE                *init_state,
 	}
 	
 	/* Read dew storage */
-	if ( veg < Nveg || ( veg == Nveg+extra_veg && extra_veg > 0 ) ) {
+	if ( veg < Nveg || veg == Nveg ) {
 	  if ( options.BINARY_STATE_FILE ) {
 	    if ( fread( &veg_var[dist][veg][band].Wdew, sizeof(double), 1, 
 			init_state ) != 1 ) 
@@ -443,7 +427,15 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->swe, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->surf_temp, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->pack_temp, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->coldcontent, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->surf_water, sizeof(double), 1, init_state ) != 1 )
+	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->pack_water, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->SAlbedo, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
@@ -485,7 +477,15 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(init_state," %lf", &lake_var->swe) == EOF )
 	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(init_state," %lf", &lake_var->surf_temp) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(init_state," %lf", &lake_var->pack_temp) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(init_state," %lf", &lake_var->coldcontent) == EOF )
+	nrerror("End of model state file found unexpectedly");
       if ( fscanf(init_state," %lf", &lake_var->surf_water) == EOF )
+	nrerror("End of model state file found unexpectedly");
+      if ( fscanf(init_state," %lf", &lake_var->pack_water) == EOF )
 	nrerror("End of model state file found unexpectedly");
       if ( fscanf(init_state," %lf", &lake_var->SAlbedo) == EOF )
 	nrerror("End of model state file found unexpectedly");

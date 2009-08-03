@@ -13,6 +13,8 @@
   2008-Apr-21 Added argument to alblake.				LCB via TJB
   2008-Sep-10 Updated values of CONDS and lamwlw to match Laura
 	      Bowling's lake work.					LCB via TJB
+  2009-Jul-31 Removed lakemain() and wetland_energy(); initialize_lake
+	      no longer takes a snow structure as input.		TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -68,16 +70,9 @@ void energycalc(double *, double *, int, double, double,double *, double *, doub
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
 int ice_depth(lake_con_struct, double, double, double *);
-int initialize_lake(lake_var_struct *, lake_con_struct, snow_data_struct *, double);
+int initialize_lake(lake_var_struct *, lake_con_struct, double);
 int lakeice(double *, double, double, double, double, int, 
 	    double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
-int lakemain(atmos_data_struct *, lake_con_struct, double, double, soil_con_struct *, veg_con_struct *,
-#if EXCESS_ICE
-	     int, double,
-#endif
-	     int, dist_prcp_struct *, 
-	     int, int, double, global_param_struct *, dmy_struct *, 
-	     int, int);
 void latsens(double,double, double, double, double, double, double, double,
 	     double *, double *, double);
 float lkdrag(float, double, double, double, double);
@@ -110,12 +105,6 @@ void write_lake_var(lake_var_struct, int);
 int get_sarea(lake_con_struct, double, double *);
 int get_volume(lake_con_struct, double, double *);
 int get_depth(lake_con_struct, double, double *);
-int wetland_energy(int, atmos_data_struct *, dist_prcp_struct *, dmy_struct *,
-		   global_param_struct *, soil_con_struct  *, 
-#if EXCESS_ICE
-		   int,
-#endif
-		   int, int, double, lake_con_struct, veg_con_struct *);
 void update_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, double, lake_var_struct *, lake_con_struct, int, int, soil_con_struct);
 int initialize_prcp(dist_prcp_struct *, energy_bal_struct *,  snow_data_struct *, int, int, 
 		    soil_con_struct, lake_var_struct *, int, lake_con_struct, double *, double *);

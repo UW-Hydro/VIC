@@ -6,7 +6,6 @@ static char vcid[] = "$Id$";
 
 int initialize_lake (lake_var_struct   *lake, 
 		      lake_con_struct   lake_con,
-		      snow_data_struct *lake_snow,
 		      double            airtemp)
 
 /**********************************************************************
@@ -46,6 +45,8 @@ int initialize_lake (lake_var_struct   *lake,
   2008-Sep-09 Deleted initial volume print statement.			LCB via TJB
   2009-Jun-09 Lake_var data structure now only stores final (corrected)
 	      values of aero_resist.					TJB
+  2009-Jul-31 Removed references to lake_snow structure, which doesn't
+	      exist outside of full_energy().				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -72,15 +73,8 @@ int initialize_lake (lake_var_struct   *lake,
   lake->new_ice_area = 0.0;
   lake->ice_water_eq = 0.0;
   lake->aero_resist = 0;
-  lake_snow->swq = 0.0;
-  lake_snow->depth = 0.0;
-  lake_snow->surf_water = 0.0;
-  lake_snow->surf_temp = 0.0;
-  lake_snow->pack_water = 0.0;
-  lake_snow->pack_temp = 0.0;
-  lake_snow->MELTING = FALSE;
-  lake->swe = lake_snow->swq;
-  lake->sdepth = lake_snow->depth;
+  lake->swe = 0.0;
+  lake->sdepth = 0.0;
 
   /********************************************************************/
   /* Initialize lake physical parameters.                             */

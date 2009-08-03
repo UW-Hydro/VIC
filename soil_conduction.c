@@ -126,7 +126,6 @@ void set_node_parameters(double   *dz_node,
 			 double   *expt,
 			 double   *bubble,
 			 double   *quartz,
-			 float   **layer_node_fract,
 #if QUICK_FS
 			 double ***ufwc_table_node,
 #endif
@@ -184,6 +183,7 @@ void set_node_parameters(double   *dz_node,
 	      in solve_T_profile.  This affects the equations for
 	      beta and gamma.						JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
+  2009-Jul-31 Removed unused layer_node_fract array.			TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -243,57 +243,17 @@ void set_node_parameters(double   *dz_node,
 
   /* set constant variables for thermal calculations */
   for(nidx=0;nidx<Nnodes-2;nidx++) {
-/*     alpha[nidx] = ((dz_node[nidx+2] + dz_node[nidx+1]) / 2.0  */
-/* 		   + (dz_node[nidx+1] + dz_node[nidx]) / 2.0); */
     alpha[nidx] = Zsum_node[nidx+2] - Zsum_node[nidx];
-/*     beta[nidx] = (dz_node[nidx] + dz_node[nidx+1]) / 2.0; */
     beta[nidx] = Zsum_node[nidx+1] - Zsum_node[nidx];
-/*     gamma[nidx] = (dz_node[nidx+2] + dz_node[nidx+1]) / 2.0; */
     gamma[nidx] = Zsum_node[nidx+2] - Zsum_node[nidx+1];
   }
   if(options.NOFLUX) {
     /* no flux bottom boundary activated */
-/*     alpha[Nnodes-2] = ((dz_node[Nnodes-1] + dz_node[Nnodes-1]) / 2.0  */
-/* 		       + (dz_node[Nnodes-1] + dz_node[Nnodes-2]) / 2.0); */
     alpha[Nnodes-2] = 2. * (Zsum_node[Nnodes-1] - Zsum_node[Nnodes-2]);
-/*     beta[nidx] = (dz_node[Nnodes-1] + dz_node[Nnodes-2]) / 2.0; */
     beta[nidx] = Zsum_node[Nnodes-1] - Zsum_node[Nnodes-2];
-/*     gamma[nidx] = (dz_node[Nnodes-1] + dz_node[Nnodes-1]) / 2.0; */
     gamma[nidx] = Zsum_node[Nnodes-1] - Zsum_node[Nnodes-2];
   }
 
-  /* set fraction of soil thermal node in each soil layer */
-  Lsum = 0;
-/*   deltaL[Nlayers] = 0; */
-/*   for(lidx=0;lidx<Nlayers;lidx++) { */
-/*     deltaL[lidx] = depth[lidx]; */
-/*     deltaL[Nlayers] -= depth[lidx]; */
-/*   } */
-/*   for(nidx=0;nidx<Nnodes-1;nidx++)  */
-/*     deltaL[Nlayers] += (dz_node[nidx] + dz_node[nidx+1]) / 2.;     */
-/*   for(lidx=0;lidx<=Nlayers;lidx++) { */
-/*     Zsum = -dz_node[0] / 2.;  */
-/*     for(nidx=0;nidx<Nnodes;nidx++) { */
-/*       if( Zsum < Lsum && Zsum + dz_node[nidx] >= Lsum ) { */
-/* 	layer_node_fract[lidx][nidx] = 1.  */
-/* 	  - (float)linear_interp(Lsum, Zsum, Zsum + dz_node[nidx], 0, 1); */
-/* 	if(Lsum + deltaL[lidx] < Zsum + dz_node[nidx]) */
-/* 	  layer_node_fract[lidx][nidx] -=  */
-/* 	    (float)linear_interp(Lsum + deltaL[lidx], Zsum, Zsum + dz_node[nidx], 1, 0); */
-/*       } */
-/*       else if( Zsum < Lsum + deltaL[lidx] &&  */
-/* 	       Zsum + dz_node[nidx] >= Lsum + deltaL[lidx] ) */
-/* 	layer_node_fract[lidx][nidx] =  */
-/* 	  (float)linear_interp(Lsum + deltaL[lidx], Zsum,  */
-/* 			       Zsum + dz_node[nidx], 0, 1); */
-/*       else if( Zsum >= Lsum && Zsum + dz_node[nidx] <= Lsum + deltaL[lidx] ) */
-/* 	layer_node_fract[lidx][nidx] = 1; */
-/*       else layer_node_fract[lidx][nidx] = 0; */
-/*       Zsum += dz_node[nidx]; */
-/*     } */
-/*     Lsum += deltaL[lidx]; */
-/*   } */
-    
 
 #if QUICK_FS
 
@@ -512,7 +472,6 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *soil_density,
 			       double            *quartz,
 			       double            *resid_moist,
-			       float            **layer_node_fract,
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -549,6 +508,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 	      optional; if MIN_LIQ is FALSE, min_liq = residual
 	      residual moisture and model behaves as before
 	      the appearance of min_liq.			TJB
+  2009-Jul-31 Removed unused layer_node_fract array.		TJB
 
 **************************************************************/
 

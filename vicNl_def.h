@@ -80,6 +80,8 @@
 	      calculations is stored in temporary array aero_resist.	TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jul-07 Added BandElev[] to soil_con_struct.			TJB
+  2009-Jul-31 Added lake_idx to lake_con struct and LAKE to veg_con
+	      struct.							TJB
 
 *********************************************************************/
 
@@ -717,6 +719,7 @@ typedef struct {
   double wfrac;                   /* Width of lake outlet, expressed as fraction of lake perimeter */
   // Initial conditions
   double depth_in;                /* Initial lake depth (distance from surface to deepest point) (m) */
+  int    lake_idx;                /* index number of the lake/wetland veg tile */
 } lake_con_struct;
 
 /*****************************************************************
@@ -891,6 +894,7 @@ typedef struct {
   float   sigma_slope;      /* Std. deviation of terrain slope for each vegetation class. */
   float   lag_one;          /* Lag one gradient autocorrelation of terrain slope */
   float   fetch;            /* Average fetch length for each vegetation class. */
+  int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
 } veg_con_struct;
 
 /******************************************************************
@@ -1027,18 +1031,18 @@ typedef struct {
 				    (J/m^3/K) */
   double  LongOverIn;            /* incoming longwave to overstory */
   double  LongUnderIn;           /* incoming longwave to understory */
-  double  LongUnderOut;          /* outgoing longwave to understory */
+  double  LongUnderOut;          /* outgoing longwave from understory */
   double  NetLongAtmos;          /* net longwave radiation to the atmosphere 
 				    (W/m^2) */
-  double  NetLongOver;           /* net longwave radiation from the canopy 
+  double  NetLongOver;           /* net longwave radiation from the overstory 
 				    (W/m^2) */
-  double  NetLongUnder;          /* net longwave radiation from the canopy 
+  double  NetLongUnder;          /* net longwave radiation from the understory 
 				    (W/m^2) */
   double  NetShortAtmos;         /* net shortwave to the atmosphere */
   double  NetShortGrnd;          /* net shortwave penetrating snowpack */
-  double  NetShortOver;          /* net shortwave radiation from the canopy 
+  double  NetShortOver;          /* net shortwave radiation from the overstory 
 				    (W/m^2) */
-  double  NetShortUnder;         /* net shortwave radiation from the canopy 
+  double  NetShortUnder;         /* net shortwave radiation from the understory 
 				    (W/m^2) */
   double  ShortOverIn;           /* incoming shortwave to overstory */
   double  ShortUnderIn;          /* incoming shortwave to understory */

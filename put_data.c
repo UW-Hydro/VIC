@@ -102,6 +102,9 @@ int  put_data(dist_prcp_struct  *prcp,
 	      reference land cover types for use in potential evap
 	      calculations is stored in temporary array aero_resist.	TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jul-31 Modified so that wetland veg is now included in main loop
+	      over veg tiles and aggregated the same way as all other
+	      veg tiles.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -158,6 +161,7 @@ int  put_data(dist_prcp_struct  *prcp,
   int                     out_step_ratio;
   static int              step_count;
   int                     ErrorFlag;
+  double                  Cv_tmp;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -240,6 +244,14 @@ int  put_data(dist_prcp_struct  *prcp,
   for ( veg = 0 ; veg <= veg_con[0].vegetat_type_num ; veg++) {
 
     Cv = veg_con[veg].Cv;
+    // Check if this is lake/wetland tile
+    if (options.LAKES && veg_con[veg].LAKE) {
+      // Fraction of tile that is flooded
+      if (lake_var.areai > lake_var.sarea)
+        Clake = lake_var.areai/lake_con->basin[0];
+      else
+        Clake = lake_var.sarea/lake_con->basin[0];
+    }
 
     if ( Cv > 0 ) {
 
@@ -263,14 +275,18 @@ int  put_data(dist_prcp_struct  *prcp,
 	  if(AreaFract[band] > 0. && ( veg == veg_con[0].vegetat_type_num || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
 
             /** compute running totals of various landcovers **/
-            if ( veg < veg_con[0].vegetat_type_num )
-              cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
+            if (options.LAKES && veg_con[veg].LAKE && band==0)
+              Cv_tmp = Cv * (1-Clake);
             else
-              cv_baresoil += Cv * AreaFract[band] * TreeAdjustFactor[band];
+              Cv_tmp = Cv;
+            if ( veg < veg_con[0].vegetat_type_num )
+              cv_veg += Cv_tmp * AreaFract[band] * TreeAdjustFactor[band];
+            else
+              cv_baresoil += Cv_tmp * AreaFract[band] * TreeAdjustFactor[band];
             if (overstory)
-              cv_overstory += Cv * AreaFract[band] * TreeAdjustFactor[band];
+              cv_overstory += Cv_tmp * AreaFract[band] * TreeAdjustFactor[band];
             if (snow[veg][band].swq> 0.0)
-              cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
+              cv_snow += Cv_tmp * AreaFract[band] * TreeAdjustFactor[band];
 
 	    tmp_evap = 0.0;
 	    for(index=0;index<options.Nlayer;index++)
@@ -297,6 +313,10 @@ int  put_data(dist_prcp_struct  *prcp,
 	      out_data[OUT_EVAP_CANOP].data[0] += veg_var[dist][veg][band].canopyevap 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 	    }
+            if (options.LAKES && veg_con[veg].LAKE && band==0)  {
+              tmp_evap += lake_var.evapw;
+              out_data[OUT_EVAP_LAKE].data[0] += lake_var.evapw * Cv * AreaFract[band] * TreeAdjustFactor[band]; // mm over gridcell
+            }
 	    out_data[OUT_EVAP].data[0] += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 
 	    /** record potential evap **/
@@ -313,13 +333,13 @@ int  put_data(dist_prcp_struct  *prcp,
 	    out_data[OUT_PET_VEGNOCR].data[0] += cell[dist][veg][band].pot_evap[5] 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 
-	    /** record runoff **/
-	    out_data[OUT_RUNOFF].data[0]   += cell[dist][veg][band].runoff 
-	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-	    
 	    /** record saturated area fraction **/
 	    out_data[OUT_ASAT].data[0] += cell[dist][veg][band].asat 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+
+	    /** record runoff **/
+	    out_data[OUT_RUNOFF].data[0]   += cell[dist][veg][band].runoff 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 
 	    /** record baseflow **/
 	    out_data[OUT_BASEFLOW].data[0] += cell[dist][veg][band].baseflow 
@@ -333,19 +353,19 @@ int  put_data(dist_prcp_struct  *prcp,
 	    else 
 	      out_data[OUT_INFLOW].data[0] += (cell[dist][veg][band].inflow) 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-	    
+    
 	    /** record canopy interception **/
 	    if ( veg < veg_con[0].vegetat_type_num ) 
 	      out_data[OUT_WDEW].data[0] += veg_var[dist][veg][band].Wdew 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-	  
+  
             /** record aerodynamic conductance and resistance **/
             if (cell[WET][veg][band].aero_resist[0] > SMALL) {
               tmp_cond1 = (1/cell[WET][veg][band].aero_resist[0])
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
             }
             else {
-              tmp_cond1 = HUGE_RESIST;
+              tmp_cond1 = 0;
             }
             out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
             if (overstory) {
@@ -354,7 +374,7 @@ int  put_data(dist_prcp_struct  *prcp,
                   * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
               }
               else {
-                tmp_cond2 = HUGE_RESIST;
+                tmp_cond2 = 0;
               }
               out_data[OUT_AERO_COND2].data[0] += tmp_cond2;
             }
@@ -401,6 +421,11 @@ int  put_data(dist_prcp_struct  *prcp,
 	    for(index=0;index<options.Nnode;index++) {
 	      out_data[OUT_SOIL_TNODE].data[index] += energy[veg][band].T[index]
                 * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+            }
+            if (options.LAKES && veg_con[veg].LAKE && band==0) {
+              for(index=0;index<options.Nnode;index++) {
+      	        out_data[OUT_SOIL_TNODE_WL].data[index] = energy[veg][band].T[index];
+              }
             }
 
 	  }
@@ -460,13 +485,14 @@ int  put_data(dist_prcp_struct  *prcp,
 	  **********************************/
 
 	  /** record surface radiative temperature **/
-          if ( overstory && snow[veg][band].snow )
+          if ( overstory && snow[veg][band].snow && !(options.LAKES && veg_con[veg].LAKE && band==0)) {
             rad_temp = energy[veg][band].Tcanopy + KELVIN;
+          }
           else
             rad_temp = energy[veg][band].Tsurf + KELVIN;
 
           /** record surface skin temperature **/
-          surf_temp = energy[veg][band].T[0];
+          surf_temp = energy[veg][band].Tsurf;
 
           /** record landcover temperature **/
           if(veg == veg_con[0].vegetat_type_num) {
@@ -603,7 +629,7 @@ int  put_data(dist_prcp_struct  *prcp,
 //              += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
           out_data[OUT_SNOW_COVER].data[0]
             += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  
+
 	  /** record snowpack cold content **/
 	  out_data[OUT_DELTACC].data[0]
 	    += energy[veg][band].deltaCC * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -734,268 +760,68 @@ int  put_data(dist_prcp_struct  *prcp,
 	    -= energy[veg][band].grnd_flux * Cv;
 
 	}
-      }
 
-    }
-  }
- 
-  /********************
-    Lake Model Output
-  ********************/
+        if (options.LAKES && veg_con[veg].LAKE) {
 
-  if ( options.LAKES ) {
-    if (lake_con->Cl[0] > 0 ) {
+          /**********************************
+            Record Lake Snow Pack Variables
+          **********************************/
+          band = 0;
 
-      /** If lake fraction exists store energy and water fluxes */
+          // Store Lake Specific Variables
 
-      // Fraction of wetland that is flooded
-      if (lake_var.areai > lake_var.sarea)
-        Clake = lake_var.areai/lake_con->basin[0];
-      else
-        Clake = lake_var.sarea/lake_con->basin[0];
+          // Lake ice
+          if (lake_var.areai > 0.0) {
+            out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.areai) * ice_density / RHO_W;
+            out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
+            out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
+          }
+          else {
+            out_data[OUT_LAKE_ICE].data[0]   = 0.0;
+            out_data[OUT_LAKE_ICE_TEMP].data[0]   = 0.0;
+            out_data[OUT_LAKE_ICE_HEIGHT].data[0]   = 0.0;
+          }
 
-      // Fraction of grid cell that is lakes and wetlands.
-      Cv = lake_con->Cl[0];
-      mu = 1;
-      band = 0;
-      veg = veg_con[0].vegetat_type_num + 1;
-      overstory = veg_lib[veg_con[veg].veg_class].overstory;
- 
-      /** compute running totals of various landcovers **/
-      cv_veg += Cv * AreaFract[band] * TreeAdjustFactor[band];
-      if (overstory)
-        cv_overstory += Cv * AreaFract[band] * TreeAdjustFactor[band];
-      if (snow[veg][band].swq> 0.0)
-        cv_snow += Cv * AreaFract[band] * TreeAdjustFactor[band];
+          ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
+          if (ErrorFlag == ERROR) {
+            fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var.volume, out_data[OUT_LAKE_DEPTH].data[0], rec);
+            exit(0);
+          }
 
-      tmp_evap = lake_var.evapw * Clake;
-
-//      for ( index = 0; index < options.Nlayer; index++ )
-//        tmp_evap += cell[0][veg][band].layer[index].evap*(1.-Clake);
-//      tmp_evap += veg_var[0][veg][band].canopyevap*(1.-Clake);
-      for ( index = 0; index < options.Nlayer; index++ )
-        tmp_evap += cell[0][veg][band].layer[index].evap;
-      tmp_evap += veg_var[0][veg][band].canopyevap;
-
-      tmp_evap += snow[veg][band].vapor_flux * 1000.;
-      tmp_evap += snow[veg][band].canopy_vapor_flux * 1000.;
-
-      out_data[OUT_EVAP].data[0] += tmp_evap * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record potential evap **/
-      out_data[OUT_PET_SATSOIL].data[0] += cell[dist][veg][band].pot_evap[0] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_PET_H2OSURF].data[0] += cell[dist][veg][band].pot_evap[1] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_PET_SHORT].data[0] += cell[dist][veg][band].pot_evap[2] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_PET_TALL].data[0] += cell[dist][veg][band].pot_evap[3] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_PET_NATVEG].data[0] += cell[dist][veg][band].pot_evap[4] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_PET_VEGNOCR].data[0] += cell[dist][veg][band].pot_evap[5] 
-        * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-
-      out_data[OUT_SUB_SNOW].data[0] += snow[veg][band].vapor_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_SUB_SURFACE].data[0] += snow[veg][band].surface_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_SUB_BLOWING].data[0] += snow[veg][band].blowing_flux * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_EVAP_LAKE].data[0] = lake_var.evapw * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band]; // mm over gridcell
-      out_data[OUT_SNOW_MELT].data[0] += snow[veg][band].melt * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record runoff **/
-      out_data[OUT_RUNOFF].data[0]   = lake_var.runoff_out;
-
-      /** record baseflow **/
-      out_data[OUT_BASEFLOW].data[0] = lake_var.baseflow_out;
-
-      /** record freezing and thawing front depths **/
-      if(options.FROZEN_SOIL) {
-	for(index = 0; index < MAX_FRONTS; index++) {
-	  if(energy[veg][band].fdepth[index] != MISSING)
-	    out_data[OUT_FDEPTH].data[index] += energy[veg][band].fdepth[index]
-	      * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-	  if(energy[veg][band].tdepth[index] != MISSING)
-	    out_data[OUT_TDEPTH].data[index] += energy[veg][band].tdepth[index]
-	      * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-	}
-      }
-
-      /** record aerodynamic conductance and resistance **/
-      if (lake_var.aero_resist > SMALL) {
-        tmp_cond1 = (1/lake_var.aero_resist) * Clake * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
-      }
-      else {
-        tmp_cond1 = HUGE_RESIST;
-      }
-      out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
-      out_data[OUT_AERO_COND].data[0] += tmp_cond1;
-
-      /** record lake moistures **/
-      out_data[OUT_LAKE_MOIST].data[0] = (lake_var.volume / lake_con->basin[0]) * 1000. * Cv; // mm over gridcell
-      if (lake_var.areai > 0.0)
-        out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.areai) * ice_density / RHO_W;
-      else
-        out_data[OUT_LAKE_ICE].data[0]   = 0.0;
-
-      for ( index = 0; index < options.Nlayer; index++ ) {
-        tmp_moist = cell[0][veg][band].layer[index].moist;
-#if SPATIAL_FROST
-        tmp_ice = 0;
-        for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-          tmp_ice  += (cell[0][veg][band].layer[index].ice[frost_area]
-                       * frost_fract[frost_area]);
-#else
-        tmp_ice   = cell[0][veg][band].layer[index].ice;
-#endif
-        tmp_moist -= tmp_ice;
-        if(options.MOISTFRACT) {
-          tmp_moist /= depth[index] * 1000.;
-          tmp_ice /= depth[index] * 1000.;
-        }
-        out_data[OUT_SOIL_LIQ].data[index] += tmp_moist * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        out_data[OUT_SOIL_ICE].data[index] += tmp_ice * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      }
-      out_data[OUT_SOIL_WET].data[0] += cell[0][veg][band].wetness * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_ROOTMOIST].data[0] += cell[0][veg][band].rootmoist * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      out_data[OUT_WDEW].data[0] += veg_var[0][veg][band].Wdew * Cv;
-
-      /** record layer temperatures **/
-      for(index=0;index<options.Nlayer;index++) {
-        out_data[OUT_SOIL_TEMP].data[index] += cell[0][veg][band].layer[index].T * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      }
-
-      /** record thermal node temperatures **/
-      for(index=0;index<options.Nnode;index++) {
-        out_data[OUT_SOIL_TNODE].data[index] += energy[veg][band].T[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      	out_data[OUT_SOIL_TNODE_WL].data[index] = energy[veg][band].T[index];
-      }
-
-      /***************************************
-        Record Lake Energy Balance Variables
-      ***************************************/
-
-      /** record surface radiative temperature **/
-      rad_temp = energy[veg][band].Tsurf + KELVIN;
-
-      /** record lake surface temperature **/
-      surf_temp = lake_var.temp[0];
-
-      /** record landcover temperature **/
-      out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record net shortwave radiation **/
-      out_data[OUT_NET_SHORT].data[0] += energy[veg][band].NetShortAtmos * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record net longwave radiation **/
-      out_data[OUT_NET_LONG].data[0] += energy[veg][band].NetLongAtmos * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record incoming longwave radiation at ground surface (under veg) **/
-      out_data[OUT_IN_LONG].data[0] += (energy[veg][band].NetLongAtmos + STEFAN_B
-                              * (rad_temp) * (rad_temp) * (rad_temp) * (rad_temp))
-                              * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record albedo **/
-      out_data[OUT_ALBEDO].data[0] += (energy[veg][band].AlbedoLake*Clake
-                              + energy[veg][band].AlbedoUnder*(1.-Clake))* Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record latent heat flux **/
-      out_data[OUT_LATENT].data[0] -= energy[veg][band].AtmosLatent * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record latent heat flux **/
-      out_data[OUT_LATENT_SUB].data[0] -= energy[veg][band].AtmosLatentSub * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record sensible heat flux **/
-      out_data[OUT_SENSIBLE].data[0] -= ( energy[veg][band].AtmosSensible
-                               + energy[veg][band].snow_flux ) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record ground heat flux (+ heat storage) **/
-      out_data[OUT_GRND_FLUX].data[0] -= (energy[veg][band].grnd_flux) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record heat storage **/
-      out_data[OUT_DELTAH].data[0] -= energy[veg][band].deltaH * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record energy balance error **/
-      out_data[OUT_ENERGY_ERROR].data[0] += energy[veg][band].error * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record radiative effective temperature [K],
-          emissivities set = 1.0  **/
-      out_data[OUT_RAD_TEMP].data[0] += ((rad_temp) * (rad_temp)
-                             * (rad_temp) * (rad_temp)) * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record mean surface temperature [C]  **/
-      out_data[OUT_SURF_TEMP].data[0] += surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /**********************************
-        Record Lake Snow Pack Variables
-      **********************************/
-
-      /** record snow water equivalence **/
-      out_data[OUT_SWE].data[0] += snow[veg][band].swq * Cv * 1000. * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record snowpack depth **/
-      out_data[OUT_SNOW_DEPTH].data[0] += snow[veg][band].depth * Cv * 100. * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record snow cover fraction **/
-      out_data[OUT_SNOW_COVER].data[0] += snow[veg][band].coverage * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record snowpack albedo, temperature **/
-      if (snow[veg][band].swq> 0.0) {
-        out_data[OUT_SALBEDO].data[0]
-          += snow[veg][band].albedo * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        out_data[OUT_SNOW_SURF_TEMP].data[0]
-          += snow[veg][band].surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
-        out_data[OUT_SNOW_PACK_TEMP].data[0]
-          += snow[veg][band].pack_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
-      }
-
-      /** record snowpack cold content **/
-      out_data[OUT_DELTACC].data[0] += energy[veg][band].deltaCC * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record snowpack advection **/
-      out_data[OUT_ADVECTION].data[0] += energy[veg][band].advection * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record snow energy flux **/
-      out_data[OUT_SNOW_FLUX].data[0] += energy[veg][band].snow_flux * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      /** record refreeze energy **/
-      out_data[OUT_RFRZ_ENERGY].data[0] += energy[veg][band].refreeze_energy * Cv * AreaFract[band] * TreeAdjustFactor[band];
-
-      // Store Lake Specific Variables
-      out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
-      out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
-
-      ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
-      if (ErrorFlag == ERROR) {
-        fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var.volume, out_data[OUT_LAKE_DEPTH].data[0], rec);
-        exit(0);
-      }
-
-      if(lake_var.areai >= lake_var.sarea && lake_var.areai > 0.0) {
-        out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
-        out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
-      }
-      else {
-	ErrorFlag = get_sarea(*lake_con, out_data[OUT_LAKE_DEPTH].data[0], &(out_data[OUT_LAKE_SURF_AREA].data[0]));
-	if ( ErrorFlag == ERROR ) {
-	  fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,out_data[OUT_LAKE_DEPTH].data[0], out_data[OUT_LAKE_SURF_AREA].data[0]);
-	  return ( ErrorFlag );
-	}
-
-        if (lake_var.sarea > 0)
-          out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/lake_var.sarea);
-        else
-          out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
-      }
+	  ErrorFlag = get_sarea(*lake_con, out_data[OUT_LAKE_DEPTH].data[0], &(out_data[OUT_LAKE_SURF_AREA].data[0]));
+	  if ( ErrorFlag == ERROR ) {
+	    fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,out_data[OUT_LAKE_DEPTH].data[0], out_data[OUT_LAKE_SURF_AREA].data[0]);
+	    return ( ErrorFlag );
+	  }
+          if(lake_var.areai >= out_data[OUT_LAKE_SURF_AREA].data[0] && lake_var.areai > 0.0) {
+            out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
+            out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
+          }
+          else {
+            if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0)
+              out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/out_data[OUT_LAKE_SURF_AREA].data[0]);
+            else
+              out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
+          }
      
-      out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
-      out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
-      out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume/lake_con->basin[0]) * 1000. * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
+          out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
+          out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
+          if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0) {
+            out_data[OUT_LAKE_MOIST].data[0]      = (lake_var.volume / out_data[OUT_LAKE_SURF_AREA].data[0]) * 1000. * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band]; // mm over gridcell
+            out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume / out_data[OUT_LAKE_SURF_AREA].data[0]) * 1000. * Clake * Cv * AreaFract[band] * TreeAdjustFactor[band]; // same as OUT_LAKE_MOIST
+          }
+          else {
+            out_data[OUT_LAKE_MOIST].data[0] = 0;
+            out_data[OUT_SURFSTOR].data[0] = 0;
+          }
 
-      /** record saturated area fraction **/
-      out_data[OUT_ASAT].data[0] += lake_var.sarea/soil_con->cell_area; 
+        }
+
+      }
 
     }
   }
+ 
 
   /*****************************************
     Aggregation of Dynamic Soil Properties      

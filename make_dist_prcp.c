@@ -22,6 +22,7 @@ dist_prcp_struct make_dist_prcp(int  nveg)
   01-Nov-04 Updated arglist to make_energy_bal() as part of fix for
 	    QUICK_FLUX state file compatibility.		TJB
   2006-Nov-07 Removed LAKE_MODEL option.  TJB
+  2009-Jul-31 Removed extra lake/wetland tile.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -30,8 +31,7 @@ dist_prcp_struct make_dist_prcp(int  nveg)
   int              i;
   int              Nitems;
 
-  if ( options.LAKES ) Nitems = nveg + 2;
-  else Nitems = nveg + 1;
+  Nitems = nveg + 1;
 
   temp.mu     = (double *)calloc(Nitems,sizeof(double));
   for ( i = 0; i < Nitems; i++ ) temp.mu[i] = 1;

@@ -29,6 +29,7 @@
 # 2008-Feb-14 Removed -g from normal compiling option.  Changed "vicInterp"
 #	      to "vicDisagg".							TJB
 # 2009-Jun-09 Added compute_pot_evap.c.						TJB
+# 2009-Jul-31 Removed wetland_energy.c.						TJB
 #
 # $Id$
 #
@@ -100,7 +101,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	write_model_state.o write_snow_data.o write_soilparam.o \
 	write_vegparam.o write_vegvar.o lakes.eb.o initialize_lake.o \
 	read_lakeparam.o ice_melt.o IceEnergyBalance.o water_energy_balance.o \
-	water_under_ice.o wetland_energy.o
+	water_under_ice.o
 
 SRCS = $(OBJS:%.o=%.c) 
 

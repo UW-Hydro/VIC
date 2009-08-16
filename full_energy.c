@@ -179,9 +179,6 @@ int  full_energy(char                 NEWCELL,
   double                 moist_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
   double                 evap_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
 #endif //EXCESS_ICE
-  double tmp_error;
-  double old_storage[3];
-  double new_storage;
 
   /* Allocate aero_resist array */
   aero_resist = (double**)calloc(N_PET_TYPES+1,sizeof(double*));
@@ -239,9 +236,6 @@ int  full_energy(char                 NEWCELL,
 #endif //EXCESS_ICE
 
 
-for (iveg=0; iveg<=Nveg; iveg++) {
-old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].moist+cell[0][iveg][0].layer[2].moist;
-}
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
@@ -251,6 +245,7 @@ old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].mo
     /** Solve Veg Type only if Coverage Greater than 0% **/
     if (veg_con[iveg].Cv > 0.0) {
       Cv = veg_con[iveg].Cv;
+      Nbands = options.SNOW_BAND;
 
       /** Lake-specific processing **/
       if (veg_con[iveg].LAKE) {
@@ -547,11 +542,16 @@ old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].mo
       /* find average ice/porosity fraction and sub-grid with greatest ice/porosity fraction */
       ave_ice = 0;
       max_ice_layer = 0;
-      for(band = 0; band < Nbands; band++) {//band
-	if(soil_con->AreaFract[band] > 0) {
-	  for(iveg = 0; iveg <= Nveg; iveg++){ //iveg  
-	    if (veg_con[iveg].Cv  > 0.) {
-	      Cv = veg_con[iveg].Cv;
+      for(iveg = 0; iveg <= Nveg; iveg++){ //iveg  
+        if (veg_con[iveg].Cv  > 0.) {
+	  Cv = veg_con[iveg].Cv;
+          Nbands = options.SNOW_BAND;
+          if (veg_con[iveg].LAKE) {
+            Cv *= (1-lakefrac);
+            Nbands = 1;
+          }
+          for(band = 0; band < Nbands; band++) {//band
+	    if(soil_con->AreaFract[band] > 0) {
 	      for ( dist = 0; dist < Ndist; dist++ ) {// wet/dry
 		if(dist==0) 
 		  tmp_mu = prcp->mu[iveg];
@@ -575,9 +575,9 @@ old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].mo
 		ave_ice += tmp_ice * Cv * tmp_mu * soil_con->AreaFract[band];
 	      }// wet/dry
 	    }
-	  }//iveg
+	  }//band
 	}
-      } //band
+      } //iveg
       ave_ice_fract = ave_ice/soil_con->max_moist[lidx];
 
       /*check to see if threshold is exceeded by average ice/porosity fraction*/
@@ -680,17 +680,27 @@ old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].mo
        using soil moisture values from previous time-step; i.e.
        as if prior runoff call did not occur.*/
     for(iveg = 0; iveg <= Nveg; iveg++){
-      for ( band = 0; band < Nbands; band++ ) {
-	for ( dist = 0; dist < Ndist; dist++ ) {
-	  for(lidx=0;lidx<options.Nlayer;lidx++) {
-	    cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
-	    cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
+      if (veg_con[iveg].Cv  > 0.) {
+        Nbands = options.SNOW_BAND;
+        if (veg_con[iveg].LAKE) {
+          Nbands = 1;
+        }
+        for ( band = 0; band < Nbands; band++ ) {
+	  for ( dist = 0; dist < Ndist; dist++ ) {
+	    for(lidx=0;lidx<options.Nlayer;lidx++) {
+	      cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
+	      cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
+	    }
 	  }
-	}
+        }
       }
     }
     for(iveg = 0; iveg <= Nveg; iveg++){
       if (veg_con[iveg].Cv  > 0.) {
+        Nbands = options.SNOW_BAND;
+        if (veg_con[iveg].LAKE) {
+          Nbands = 1;
+        }
 	for ( band = 0; band < Nbands; band++ ) {
 	  if( soil_con->AreaFract[band] > 0 ) { 
 
@@ -737,19 +747,23 @@ old_storage[iveg] = cell[0][iveg][0].layer[0].moist+cell[0][iveg][0].layer[1].mo
     wetland_runoff = wetland_baseflow = 0;
     sum_runoff = sum_baseflow = 0;
 	
-    // Loop through snow elevation bands
-    for ( band = 0; band < Nbands; band++ ) {
-      if ( soil_con->AreaFract[band] > 0 ) {
-	
-	// Loop through all vegetation types
-	for ( iveg = 0; iveg <= Nveg; iveg++ ) {
+    // Loop through all vegetation tiles
+    for ( iveg = 0; iveg <= Nveg; iveg++ ) {
 	  
-	  /** Solve Veg Type only if Coverage Greater than 0% **/
-	  if (veg_con[iveg].Cv  > 0.) {
+      /** Solve Veg Tile only if Coverage Greater than 0% **/
+      if (veg_con[iveg].Cv  > 0.) {
 
-	    Cv = veg_con[iveg].Cv;
-	    if (veg_con[iveg].LAKE) Cv *= (1-lakefrac);
+	Cv = veg_con[iveg].Cv;
+        Nbands = options.SNOW_BAND;
+        if (veg_con[iveg].LAKE) {
+          Cv *= (1-lakefrac);
+          Nbands = 1;
+        }
 
+        // Loop through snow elevation bands
+        for ( band = 0; band < Nbands; band++ ) {
+          if ( soil_con->AreaFract[band] > 0 ) {
+	
 	    // Loop through distributed precipitation fractions
 	    for ( dist = 0; dist < 2; dist++ ) {
 	      

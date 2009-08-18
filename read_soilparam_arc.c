@@ -51,8 +51,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
                                          flow rate
   double Dsmax;  	         mm/day  maximum subsurface flow rate
   double Ws;		         fract   fraction of maximum soil moisture
-  double c;                      N/A     exponent
-  double expt[MAX_LAYERS];         N/A     pore-size distribution, HBH 5.15
+  double c;                      N/A     exponent in ARNO baseflow curve
+  double expt[MAX_LAYERS];         N/A     exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6
   double Ksat[MAX_LAYERS];         mm/day  saturated hydraulic  conductivity
   double phi_s[MAX_LAYERS];        mm/mm   saturated matrix potential
   double init_moist[MAX_LAYERS];   mm      initial layer moisture level

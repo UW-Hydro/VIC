@@ -807,9 +807,8 @@ typedef struct {
   double   dp;                        /* soil thermal damping depth (m) */
   double   dz_node[MAX_NODES];        /* thermal node thickness (m) */
   double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
-  double   expt[MAX_LAYERS];          /* pore-size distribution per layer, 
-					 HBH 5.15 */
-  double   expt_node[MAX_NODES];      /* pore-size distribution per node */
+  double   expt[MAX_LAYERS];          /* layer-specific exponent n (=3+2/lambda) in Campbell's eqn, HBH 5.6 */
+  double   expt_node[MAX_NODES];      /* node-specific exponent n (=3+2/lambda) in Campbell's eqn, HBH 5.6 */
 #if SPATIAL_FROST
   double   frost_fract[FROST_SUBAREAS]; /* spatially distributed frost 
 					   coverage fractions */

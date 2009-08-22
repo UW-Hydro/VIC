@@ -23,6 +23,7 @@ void compute_pot_evap(int veg_class,
                     vicNl_def.h and global.h).
 
   modifications:
+  2009-Aug-21 Fixed bug in assignment of albedo for natural vegetation.	TJB
 
 ****************************************************************************/
 {
@@ -49,26 +50,20 @@ void compute_pot_evap(int veg_class,
 
   NVegLibTypes = veg_lib[0].NVegLibTypes;
   for (i=0; i<N_PET_TYPES; i++) {
-    albedo = veg_lib[NVegLibTypes+i].albedo[dmy[rec].month-1];
-    net_short = (1.0 - albedo) * shortwave;
-    net_rad = net_short + net_longwave;
     if (i < N_PET_TYPES_NON_NAT) {
       rs = veg_lib[NVegLibTypes+i].rmin;
       rarc = veg_lib[NVegLibTypes+i].rarc;
       RGL = veg_lib[NVegLibTypes+i].RGL;
       lai = veg_lib[NVegLibTypes+i].LAI[dmy[rec].month-1];
-    }
-    else if (i == PET_VEGNOCR) {
-      rs = 0;
-      rarc = veg_lib[veg_class].rarc;
-      RGL = veg_lib[veg_class].RGL;
-      lai = veg_lib[veg_class].LAI[dmy[rec].month-1];
+      albedo = veg_lib[NVegLibTypes+i].albedo[dmy[rec].month-1];
     }
     else {
       rs = veg_lib[veg_class].rmin;
+      if (i == PET_VEGNOCR) rs = 0;
       rarc = veg_lib[veg_class].rarc;
       RGL = veg_lib[veg_class].RGL;
       lai = veg_lib[veg_class].LAI[dmy[rec].month-1];
+      albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
     }
     gsm_inv = 1.0;
     ref_crop = ref_veg_ref_crop[i];
@@ -77,6 +72,8 @@ void compute_pot_evap(int veg_class,
       ra = aero_resist[i][0];
     else
       ra = aero_resist[i][1];
+    net_short = (1.0 - albedo) * shortwave;
+    net_rad = net_short + net_longwave;
     pot_evap[i] = penman(tair, elevation, net_rad, vpd, ra, rc, rarc) * dt/24.0;
   }
 

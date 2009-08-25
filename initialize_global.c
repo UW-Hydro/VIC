@@ -105,6 +105,7 @@ void initialize_global() {
   2009-May-18 Added options.PLAPSE.						TJB
   2009-May-20 Set default of options.AERO_RESIST_CANSNOW to AR_406_FULL.	TJB
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
+  2009-Aug-25 Changed default of options.BINARY_STATE_FILE to FALSE.		TJB
 
 *********************************************************************/
 
@@ -155,7 +156,7 @@ void initialize_global() {
   options.GLOBAL_LAI            = FALSE;
   options.GRID_DECIMAL          = 2;
   // state options
-  options.BINARY_STATE_FILE     = TRUE;
+  options.BINARY_STATE_FILE     = FALSE;
   options.INIT_STATE            = FALSE;
   options.SAVE_STATE            = FALSE;
   // output options

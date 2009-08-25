@@ -42,7 +42,7 @@ AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-fil
 			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
 			# AR_COMBO 	= multiply by 10 AND apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
-			# Default 	= AR_410
+			# Default 	= AR_406_FULL
 GRND_FLUX_TYPE	GF_FULL	# Options for ground flux:
 			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
 			# GF_410 = use formulas from VIC 4.1.0 (ground flux is correct, but deltaH and fusion ignore surf_atten);

@@ -114,7 +114,7 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 #######################################################################
 # Output Files and Parameters
 #######################################################################
-RESULT_DIR      (put the result directory path here)	# Results directory path (with trailing "/")
+RESULT_DIR      (put the result directory path here)	# Results directory path
 OUT_STEP        0       # Output interval (hours); if 0, OUT_STEP = TIME_STEP
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done

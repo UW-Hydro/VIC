@@ -64,6 +64,10 @@ void write_model_state(dist_prcp_struct    *prcp,
   2007-Nov-06 New list of lake state variables.					LCB via TJB
   2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
 	      variables.							TJB
+  2009-Aug-27 Now once again writes data for all bands, regardless of
+	      whether they have area > 0.  This makes it much easier to ensure
+	      that the value of Nbands stored in the state file matches the number
+	      of bands actually stored in the state file.			TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -137,22 +141,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
     if ( options.LAKES && lake_con.Cl[0] > 0 ) {
-      Nbytes += sizeof(double) // wetland mu
-	+ sizeof(char) // wetland STILL_STORM
-	+ sizeof(int) // wetland DRY_TIME
-	+ 2 * sizeof(int) // wetland veg and band (band = 0 for wetland)
-	+ Ndist * options.Nlayer * sizeof(double) // wetland soil moisture
-#if SPATIAL_FROST
-	+ Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // wetland soil ice
-#else
-	+ Ndist * options.Nlayer * sizeof(double) // wetland soil ice
-#endif // SPATIAL_FROST
-	+ sizeof(double) // wetland dew
-	+ sizeof(int) // wetland last_snow
-	+ sizeof(char) // wetland MELTING
-	+ 9 * sizeof(double) // wetland snow parameters
-	+ options.Nnode * sizeof(double) // wetland soil temperatures
-	+ sizeof(int) // activenod
+      /* Lake/wetland tiles have lake-specific state vars */
+      Nbytes += sizeof(int) // activenod
 	+ sizeof(double) // dz
 	+ sizeof(double) // surfdz
 	+ sizeof(double) // ldepth
@@ -245,17 +235,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       DRY_TIME[veg] );
     }
     
-    if ( options.LAKES && lake_con.Cl[0] > 0 && veg == lake_con.lake_idx ) {
-      Nbands = 1; // wetland veg type only occurs in band 0
- 
-  }
 
     /* Output for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      /* Skip writing if areafract <= 0 */
-      if ( soil_con->AreaFract <= 0 ) {
-        continue;
-      }
       /* Write cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	fwrite( &veg, sizeof(int), 1, filep->statefile );

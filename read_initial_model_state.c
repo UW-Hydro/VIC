@@ -75,6 +75,10 @@ void read_initial_model_state(FILE                *init_state,
   2007-Nov-06 New list of lake state variables.					LCB via TJB
   2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
 	      variables.							TJB
+  2009-Aug-27 Now once again expects to read data for all bands, regardless of
+	      whether they have area > 0.  This makes it much easier to ensure
+	      that the value of Nbands stored in the state file matches the number
+	      of bands actually stored in the state file.			TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -152,9 +156,6 @@ void read_initial_model_state(FILE                *init_state,
 #endif
       for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
-	if ( options.LAKES && veg == lake_con.lake_idx ) {
-	  tmp_Nband = 1; // wetland veg type only occurs in band 0
-	}
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, init_state); // skip snowband info
       }
@@ -245,10 +246,6 @@ void read_initial_model_state(FILE                *init_state,
  
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
-      /* Skip reading if areafract <= 0 */
-      if ( soil_con->AreaFract[band] <= 0 ) {
-        continue;
-      }
       /* Read cell identification information */
       if ( options.BINARY_STATE_FILE ) {
 	if ( fread( &iveg, sizeof(int), 1, init_state) != 1 ) 
@@ -261,7 +258,7 @@ void read_initial_model_state(FILE                *init_state,
 	  nrerror("End of model state file found unexpectedly");
       }
       if ( iveg != veg || iband != band ) {
-	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %d, band = %d) do not match those currently requested (veg = %d , band = %d).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.", iveg, iband, veg, band);
+	fprintf(stderr,"The vegetation and snow band indices in the model state file (veg = %d, band = %d) do not match those currently requested (veg = %d , band = %d).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.\n", iveg, iband, veg, band);
 	nrerror(ErrStr);
       }
       

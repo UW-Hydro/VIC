@@ -82,6 +82,7 @@
   2009-Jul-07 Added BandElev[] to soil_con_struct.			TJB
   2009-Jul-31 Added lake_idx to lake_con struct and LAKE to veg_con
 	      struct.							TJB
+  2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
 
 *********************************************************************/
 
@@ -331,8 +332,8 @@ extern char ref_veg_ref_crop[];
 #define OUT_ALBEDO          50  /* average surface albedo [fraction] */
 #define OUT_BARESOILT       51  /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_FDEPTH          52  /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
-#define OUT_LAKE_ICE_TEMP   53  /* temperature of lake ice [K] */
-#define OUT_LAKE_SURF_TEMP  54  /* lake surface temperature [K] */
+#define OUT_LAKE_ICE_TEMP   53  /* temperature of lake ice [C] (ALMA_OUTPUT: [K]) */
+#define OUT_LAKE_SURF_TEMP  54  /* lake surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_RAD_TEMP        55  /* average radiative surface temperature [K] */
 #define OUT_SALBEDO         56  /* snow pack albedo [fraction] */
 #define OUT_SNOW_PACK_TEMP  57  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */

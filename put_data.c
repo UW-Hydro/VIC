@@ -105,6 +105,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Jul-31 Modified so that wetland veg is now included in main loop
 	      over veg tiles and aggregated the same way as all other
 	      veg tiles.						TJB
+  2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -973,6 +974,8 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_EVAP_CANOP].aggdata[0] /= out_dt_sec;
       out_data[OUT_EVAP_LAKE].aggdata[0] /= out_dt_sec;
       out_data[OUT_INFLOW].aggdata[0] /= out_dt_sec;
+      out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += KELVIN;
+      out_data[OUT_LAKE_SURF_TEMP].aggdata[0] += KELVIN;
       out_data[OUT_PREC].aggdata[0] /= out_dt_sec;
       out_data[OUT_RAINF].aggdata[0] /= out_dt_sec;
       out_data[OUT_REFREEZE].aggdata[0] /= out_dt_sec;

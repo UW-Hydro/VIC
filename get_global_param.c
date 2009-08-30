@@ -85,6 +85,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.			TJB
   2009-Jun-15 Changed order of options to match global parameter file.		TJB
+  2009-Aug-29 Now handles commented lines that are indented.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -168,6 +169,12 @@ global_param_struct get_global_param(filenames_struct *names,
     if(cmdstr[0]!='#' && cmdstr[0]!='\n' && cmdstr[0]!='\0') {
 
       sscanf(cmdstr,"%s",optstr);
+
+      /* Handle case of comment line in which '#' is indented */
+      if (optstr[0] == '#') {
+        fgets(cmdstr,MAXSTRING,gp);
+        continue;
+      }
 
       /*************************************
        Get Model Global Parameters

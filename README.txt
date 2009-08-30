@@ -512,6 +512,22 @@ Wetland portion of lake/wetland tile is now simulated in full_energy().
 
 
 
+State files now contain data for 0-area bands.
+
+	Files Affected:
+
+	read_initial_model_state.c
+	write_model_state.c
+
+	Description:
+
+	In order to ensure that the value of Nbands saved in the state file
+	accurately accounted for the number of bands whose states are stored
+	in the state file, changed VIC to read/write data for all bands,
+	whether or not their area is 0.
+
+
+
 Bug Fixes:
 ----------
 
@@ -650,6 +666,21 @@ Removed special logic for longwave in water balance mode
 	special handling of the water balance case has been removed; atmos.longwave
 	always contains incoming longwave.  This also simplifies the code.
 	TJB
+
+
+
+VIC now can understand indented comment lines in the global parameter file
+
+	Files Affected:
+
+	get_global_param.c
+
+	Description:
+
+	Previously, VIC only understood a line to be a comment if it began
+	with a '#' character at the very beginning of the line, i.e. no
+	leading white space such as spaces or tabs.  Now, any line whose first
+	non-whitespace character is '#' is considered to be a comment.
 
 
 

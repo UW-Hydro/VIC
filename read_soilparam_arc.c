@@ -116,6 +116,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information.						TJB
   2009-Jul-31 Removed unused layer_node_fract array.				TJB
+  2009-Sep-11 Added correct OUTPUT_FORCE logic around the new bare soil/veglib
+	      code.								TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -292,12 +294,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
+#if !OUTPUT_FORCE
     /* Overwrite default bare soil aerodynamic resistance parameters
        with the values taken from the soil parameter file */
     for (j=0; j<12; j++) {
       veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
       veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
     }
+#endif // !OUTPUT_FORCE
 
     /** Get Snow Surface Roughness **/
     fscanf(soilparam,"%s",tmpstr);

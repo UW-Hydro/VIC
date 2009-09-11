@@ -92,6 +92,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      bare soil information.					TJB
   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
   2009-Jul-31 Removed unused layer_node_fract array.			TJB
+  2009-Sep-11 Added correct OUTPUT_FORCE logic around the new bare
+	      soil/veg lib code.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -416,12 +418,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
       nrerror(ErrStr);
     }  
     sscanf(token, "%lf", &temp.rough);
+#if !OUTPUT_FORCE
     /* Overwrite default bare soil aerodynamic resistance parameters
        with the values taken from the soil parameter file */
     for (j=0; j<12; j++) {
       veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
       veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
     }
+#endif // !OUTPUT_FORCE
     
     /* read snow roughness */
     token = strtok (NULL, delimiters);

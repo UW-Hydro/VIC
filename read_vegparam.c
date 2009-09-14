@@ -41,6 +41,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 	      GLOBAL_LAI==FALSE.					TJB
   2009-Jul-26 Allocate extra veg tile for COMPUTE_TREELINE case.	TJB
   2009-Jul-31 Removed extra veg tile for lake/wetland case.		TJB
+  2009-Sep-14 Made error messages clearer.				TJB
 **********************************************************************/
 {
 
@@ -95,7 +96,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     exit(99);
   }
   if(vegetat_type_num >= MAX_VEG) {
-    sprintf(ErrStr,"Vegetation parameter file wants more vegetation types in grid cell %i (%i) than are defined by MAX_VEG (%i) [NOTE: bare soil class is assumed].  Edit vicNl_def.h and recompile.",gridcel,vegetat_type_num+1,MAX_VEG);
+    sprintf(ErrStr,"Vegetation parameter file wants more vegetation tiles in grid cell %i (%i) than are allowed by MAX_VEG (%i) [NOTE: bare soil class is assumed].  Edit vicNl_def.h and recompile.",gridcel,vegetat_type_num+1,MAX_VEG);
     nrerror(ErrStr);
   }
 
@@ -188,7 +189,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       if(temp[i].veg_class == veg_lib[j].veg_class)
 	veg_class = j;
     if(veg_class == MISSING) {
-      sprintf(ErrStr,"Vegetation class %i from cell %i is not defined in the vegetation library file.", temp[i].veg_class, gridcel);
+      sprintf(ErrStr,"The vegetation class id %i in vegetation tile %i from cell %i is not defined in the vegetation library file.", temp[i].veg_class, i, gridcel);
       nrerror(ErrStr);
     }
     else
@@ -309,9 +310,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
           break;
         }
       }
-
       if ( veg_class == MISSING ) {
-        sprintf(ErrStr,"Vegetation class %i from cell %i is not defined in the vegetation library file.", temp[i].veg_class, gridcel);
+        sprintf(ErrStr,"The vegetation class id %i defined for above-treeline from cell %i is not defined in the vegetation library file.", temp[vegetat_type_num].veg_class, gridcel);
         nrerror(ErrStr);
       }
       else {

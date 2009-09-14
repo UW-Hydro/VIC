@@ -20,6 +20,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
+  2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
 
  ********************************************************************/
 {
@@ -206,7 +207,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
         Ra_used[1] = HUGE_RESIST;
     }
 
-    *VaporMassFlux = AirDens * ( 0.622 / Press ) * (EactAir - EsSnow) 
+    *VaporMassFlux = AirDens * ( EPS / Press ) * (EactAir - EsSnow) 
       / Ra_used[1] / RHO_W; 
 
     if (Vpd == 0.0 && *VaporMassFlux < 0.0)

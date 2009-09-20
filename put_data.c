@@ -106,6 +106,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      over veg tiles and aggregated the same way as all other
 	      veg tiles.						TJB
   2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -163,6 +164,10 @@ int  put_data(dist_prcp_struct  *prcp,
   static int              step_count;
   int                     ErrorFlag;
   double                  Cv_tmp;
+  int                     Tfoliage_fbcount_total;
+  int                     Tcanopy_fbcount_total;
+  int                     Tsurf_fbcount_total;
+  int                     Tsoil_fbcount_total;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -513,12 +518,17 @@ int  put_data(dist_prcp_struct  *prcp,
 	  out_data[OUT_SURF_TEMP].data[0] += surf_temp * Cv * AreaFract[band] * TreeAdjustFactor[band];
 	  
 	  /** record temperature flags  **/
-	  out_data[OUT_SURFT_FLAG].data[0] += energy[veg][band].Tsurf_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
-          for (index=0; index<options.Nnode; index++)
-	    out_data[OUT_SOILT_FLAG].data[index] += energy[veg][band].T_flag[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  out_data[OUT_TFOL_FLAG].data[0] += energy[veg][band].Tfoliage_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  out_data[OUT_TCAN_FLAG].data[0] += energy[veg][band].Tcanopy_flag * Cv * AreaFract[band] * TreeAdjustFactor[band];
-	  
+	  out_data[OUT_SURFT_FBFLAG].data[0] += energy[veg][band].Tsurf_fbflag * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          Tsurf_fbcount_total += energy[veg][band].Tsurf_fbcount;
+          for (index=0; index<options.Nnode; index++) {
+	    out_data[OUT_SOILT_FBFLAG].data[index] += energy[veg][band].T_fbflag[index] * Cv * AreaFract[band] * TreeAdjustFactor[band];
+            Tsoil_fbcount_total += energy[veg][band].T_fbcount[index];
+          }
+	  out_data[OUT_TFOL_FBFLAG].data[0] += energy[veg][band].Tfoliage_fbflag * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          Tfoliage_fbcount_total += energy[veg][band].Tfoliage_fbcount;
+	  out_data[OUT_TCAN_FBFLAG].data[0] += energy[veg][band].Tcanopy_fbflag * Cv * AreaFract[band] * TreeAdjustFactor[band];
+          Tcanopy_fbcount_total += energy[veg][band].Tcanopy_fbcount;
+	 
 	  /** record net shortwave radiation **/
 	  out_data[OUT_NET_SHORT].data[0] += energy[veg][band].NetShortAtmos
 	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -933,6 +943,16 @@ int  put_data(dist_prcp_struct  *prcp,
 			      out_data[OUT_GRND_FLUX].data[0]+out_data[OUT_DELTAH].data[0]+out_data[OUT_FUSION].data[0],
 			      out_data[OUT_ADVECTION].data[0] - out_data[OUT_DELTACC].data[0]
 			      - out_data[OUT_SNOW_FLUX].data[0] + out_data[OUT_RFRZ_ENERGY].data[0]);
+
+  /********************
+    Report T Fallback Occurrences
+    ********************/
+  if (rec == global_param.nrecs-1) {
+    fprintf(stdout,"Total number of fallbacks in Tfoliage: %d\n", Tfoliage_fbcount_total);
+    fprintf(stdout,"Total number of fallbacks in Tcanopy: %d\n", Tcanopy_fbcount_total);
+    fprintf(stdout,"Total number of fallbacks in Tsurf: %d\n", Tsurf_fbcount_total);
+    fprintf(stdout,"Total number of fallbacks in soil T profile: %d\n", Tsoil_fbcount_total);
+  }
 
   /********************
     Temporal Aggregation 

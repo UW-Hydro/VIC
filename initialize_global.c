@@ -106,6 +106,7 @@ void initialize_global() {
   2009-May-20 Set default of options.AERO_RESIST_CANSNOW to AR_406_FULL.	TJB
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
   2009-Aug-25 Changed default of options.BINARY_STATE_FILE to FALSE.		TJB
+  2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
 
 *********************************************************************/
 
@@ -124,6 +125,7 @@ void initialize_global() {
   options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
+  options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
   options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
@@ -133,7 +135,6 @@ void initialize_global() {
   options.GRND_FLUX             = FALSE;
   options.GRND_FLUX_TYPE        = GF_FULL;
   options.IMPLICIT              = FALSE;
-  options.JULY_TAVG_SUPPLIED    = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
   options.MIN_LIQ               = FALSE;
@@ -150,11 +151,13 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
+  options.TFALLBACK             = TRUE;
   // input options
   options.ARC_SOIL              = FALSE;
   options.BASEFLOW              = ARNO;
   options.GLOBAL_LAI            = FALSE;
   options.GRID_DECIMAL          = 2;
+  options.JULY_TAVG_SUPPLIED    = FALSE;
   // state options
   options.BINARY_STATE_FILE     = FALSE;
   options.INIT_STATE            = FALSE;

@@ -91,6 +91,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Jul-26 Added initial estimate of incoming longwave at surface
 	      (LongUnderOut) for use in canopy snow T iteration.	TJB
   2009-Jul-31 Removed extra lake/wetland veg tile.			TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Sep-19 Made initialization of Tfoliage more accurate for snow bands.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -676,7 +678,19 @@ int initialize_model_state(dist_prcp_struct    *prcp,
         /* Initial estimate of LongUnderOut for use by snow_intercept() */
         tmp = energy[veg][band].T[0] + KELVIN;
 	energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
-	energy[veg][band].Tfoliage     = Tair;
+	energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
+    }
+  }
+
+  // initialize Tfallback counters
+  for ( veg = 0 ; veg <= Nveg ; veg++) {
+    for ( band = 0; band < options.SNOW_BAND; band++ ) {
+      energy[veg][band].Tfoliage_fbcount = 0;
+      energy[veg][band].Tcanopy_fbcount = 0;
+      energy[veg][band].Tsurf_fbcount = 0;
+      for ( index = 0; index < Nnodes-1; index++ ) {
+	energy[veg][band].T_fbcount[index] = 0;
+      }
     }
   }
 

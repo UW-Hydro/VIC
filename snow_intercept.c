@@ -73,6 +73,7 @@ static char vcid[] = "$Id$";
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.			TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 *****************************************************************************/
 int snow_intercept(double  AirDens,
 		    double  Dt, 
@@ -92,7 +93,6 @@ int snow_intercept(double  AirDens,
 		    double  mu, // fraction of precipitation area
 		    double *AdvectedEnergy,
 		    double *AlbedoOver, // overstory albedo
-		    double *AlbedoUnder, // understory albedo
 		    double *IntRain, // intercepted rain
 		    double *IntSnow, // intercepted snow
 		    double *LatentHeat, // latent heat from overstory
@@ -107,7 +107,8 @@ int snow_intercept(double  AirDens,
 		    double *SensibleHeat,
 		    double *SnowFall, 
 		    double *Tfoliage, 
-		    char   *Tfoliage_flag, 
+		    char   *Tfoliage_fbflag, 
+		    int    *Tfoliage_fbcount, 
 		    double *TempIntStorage, 
 		    double *VaporMassFlux,
 		    double *Wind,   
@@ -178,8 +179,8 @@ int snow_intercept(double  AirDens,
 
   char ErrorString[MAXSTRING];
 
-  /* Initialize Tfoliage_flag */
-  *Tfoliage_flag = 0;
+  /* Initialize Tfoliage_fbflag */
+  *Tfoliage_fbflag = 0;
 
   /* Convert Units from VIC (mm -> m) */
   *RainFall /= 1000.;
@@ -261,6 +262,8 @@ int snow_intercept(double  AirDens,
 
   /* physical depth */
   *IntSnow += DeltaSnowInt;
+  if (*IntSnow < SMALL)
+    *IntSnow = 0.0;
   
   /* Calculate amount of rain intercepted on branches and stored in
      intercepted snow. */  
@@ -280,6 +283,12 @@ int snow_intercept(double  AirDens,
       (*RainFall * (1 - F));
     /* physical depth */
     *IntRain = MaxWaterInt;
+  }
+
+  // Liquid water in canopy too thin for EB calculations; let it fall through
+  if ( *RainFall == 0 && *IntRain < MIN_SWQ_EB_THRES ) {
+    RainThroughFall += *IntRain;
+    *IntRain = 0.0;
   }
 
   /* at this point we have calculated the amount of snowfall intercepted and
@@ -302,6 +311,12 @@ int snow_intercept(double  AirDens,
     SnowThroughFall = SnowThroughFall + (Overload * IntSnowFract) * F;
   }
 
+  // If we've lost all intercepted moisture, we've essentially lost the thermal
+  // mass of the canopy and Tfoliage should be equal to Tcanopy
+  if (*IntRain + *IntSnow < SMALL) {
+    *Tfoliage = Tcanopy;
+  }
+
   /* Calculate the net radiation at the canopy surface, using the canopy 
      temperature.  The outgoing longwave is subtracted twice, because the 
      canopy radiates in two directions */
@@ -313,7 +328,6 @@ int snow_intercept(double  AirDens,
 
     *AlbedoOver = NEW_SNOW_ALB; // albedo of intercepted snow in canopy
     *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
-
 
     Qnet = solve_canopy_energy_bal(0., band, month, rec, Dt, 
 				   soil_con->elevation, 
@@ -359,10 +373,10 @@ int snow_intercept(double  AirDens,
   if ( Tupper != MISSING && Tlower != MISSING ) {
 
     *Tfoliage = root_brent(Tlower, Tupper, ErrorString, func_canopy_energy_bal,  band, 
-			  month, rec, Dt, soil_con->elevation, 
-			  soil_con->Wcr, soil_con->Wpwp, soil_con->depth, 
+			   month, rec, Dt, soil_con->elevation, 
+			   soil_con->Wcr, soil_con->Wpwp, soil_con->depth, 
 #if SPATIAL_FROST
-			  soil_con->frost_fract, 
+			   soil_con->frost_fract, 
 #endif
 			   AirDens, EactAir, Press, Le, 
 			   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
@@ -379,9 +393,10 @@ int snow_intercept(double  AirDens,
 			   VaporMassFlux);
     
     if ( *Tfoliage <= -998 ) {
-      if (options.CONTINUEONERROR == TFALLBACK) {
+      if (options.TFALLBACK) {
         *Tfoliage = OldTfoliage;
-        *Tfoliage_flag = 1;
+        *Tfoliage_fbflag = 1;
+        (*Tfoliage_fbcount)++;
       }
       else { 
         Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
@@ -455,7 +470,7 @@ int snow_intercept(double  AirDens,
     else
       *IntRain += *VaporMassFlux;
 
-    if (RefreezeEnergy < 0 ) {
+    if ( RefreezeEnergy < 0 ) {
       /* intercepted snow is ripe, melt can occur */
       PotSnowMelt = min((-RefreezeEnergy/Lf/RHO_W), *IntSnow);
       *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt);

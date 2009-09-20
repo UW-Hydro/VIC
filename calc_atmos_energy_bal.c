@@ -29,7 +29,8 @@ double calc_atmos_energy_bal(double  InOverSensible,
 			     double *SensibleHeat, 
 			     double *VPcanopy,
 			     double *VPDcanopy,
-			     char   *Tcanopy_flag) {
+			     char   *Tcanopy_fbflag,
+			     int    *Tcanopy_fbcount) {
 /************************************************************************
   calc_atmos_energy_bal.c        Keith Cherkauer       February 6, 2001
 
@@ -52,7 +53,8 @@ double calc_atmos_energy_bal(double  InOverSensible,
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.			TJB
-  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 ************************************************************************/
 
   extern option_struct options;
@@ -92,8 +94,8 @@ double calc_atmos_energy_bal(double  InOverSensible,
   /******************************
     Find Canopy Air Temperature
   ******************************/
-  /* initialize Tcanopy_flag */
-  *Tcanopy_flag = 0;
+  /* initialize Tcanopy_fbflag */
+  *Tcanopy_fbflag = 0;
 
   /* set initial bounds for root brent **/
   T_lower = (Tair) - CANOPY_DT;
@@ -106,9 +108,10 @@ double calc_atmos_energy_bal(double  InOverSensible,
 		       SensibleHeat);
 
   if ( Tcanopy <= -998 ) {
-    if (options.CONTINUEONERROR == TFALLBACK) {
+    if (options.TFALLBACK) {
       Tcanopy = Tair;
-      *Tcanopy_flag = 1;
+      *Tcanopy_fbflag = 1;
+      (*Tcanopy_fbcount)++;
     }
     else {
       // handle error flag from root brent

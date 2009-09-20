@@ -69,6 +69,7 @@
   2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
   2009-Jul-31 Removed unused layer_node_fract array from
 	      estimate_layer_ice_content().				TJB 
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 ************************************************************************/
 
 #include <math.h>
@@ -112,12 +113,12 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
 			     snow_data_struct *, layer_data_struct *,
                              layer_data_struct *, soil_con_struct *, char *);
 #if QUICK_FS
-int    calc_soil_thermal_fluxes(int, double *, double *, char *, double *, double *, 
+int    calc_soil_thermal_fluxes(int, double *, double *, char *, int *, double *, double *, 
 				double *, double *, double *,double *, 
 				double *, double *, double *, 
 				double *, double *, double *, double ***, int, int, int, int);
 #else
-int    calc_soil_thermal_fluxes(int, double *, double *, char *, double *, double *, 
+int    calc_soil_thermal_fluxes(int, double *, double *, char *, int *, double *, double *, 
 				double *, double *, double *,double *, 
 				double *, double *, double *, 
 				double *, double *, double *, 
@@ -134,7 +135,7 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, double, double, 
                              double, double, double, double, 
                              double *, double *, double *, double *, 
-                             double *, double *, double *, double *, char *);
+                             double *, double *, double *, double *, char *, int *);
 double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
@@ -423,7 +424,7 @@ int    snow_intercept(double, double, double, double, double, double, double,
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
-                      double *, double *, char *, double *, double *, double *, 
+                      double *, char *, int *, double *, double *, double *, 
                       double *, double *, double *, float *, int, int, int, 
                       int, int, int, int, layer_data_struct *, 
                       layer_data_struct *, soil_con_struct *, 
@@ -460,12 +461,12 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
-int    solve_T_profile(double *, double *, char *, double *, double *,double *, 
+int    solve_T_profile(double *, double *, char *, int *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *, double ***,
 		       int, int *, int, int, int, int);
 #else
-int    solve_T_profile(double *, double *, char *, double *, double *,double *, 
+int    solve_T_profile(double *, double *, char *, int *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *,
 #if EXCESS_ICE

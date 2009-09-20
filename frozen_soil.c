@@ -135,7 +135,8 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 
 int  solve_T_profile(double *T,
 		     double *T0,
-		     char   *Tflag,
+		     char   *Tfbflag,
+		     int    *Tfbcount,
 		     double *Zsum,
 		     double *kappa,
 		     double *Cs,
@@ -186,7 +187,8 @@ int  solve_T_profile(double *T,
   2007-Oct-11 Fixed error in EXP_TRANS formulation.				JCA
   2009-Feb-09 Removed dz_node from call to solve_T_profile and 
               solve_T_profile_implicit.                                         KAC
-  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -268,12 +270,12 @@ int  solve_T_profile(double *T,
   for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
 #if QUICK_FS
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tflag, moist, max_moist, ice, 
+  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, ufwc_table_node, FS_ACTIVE, 
 				   NOFLUX, EXP_TRANS, veg_class);
 #else
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tflag, moist, max_moist, ice, 
+  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, 
 #if EXCESS_ICE
@@ -384,7 +386,8 @@ int solve_T_profile_implicit(double *T,                           // update
 int calc_soil_thermal_fluxes(int     Nnodes,
 			     double *T,
 			     double *T0,
-			     char   *Tflag,
+			     char   *Tfbflag,
+			     int    *Tfbcount,
 			     double *moist,
 			     double *max_moist,
 			     double *ice,
@@ -423,7 +426,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.				TJB
-  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -444,9 +448,9 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   Done = FALSE;
   ItCount = 0;
  
-  /* initialize Tflag */
+  /* initialize Tfbflag */
   for(j=1;j<Nnodes-1;j++)
-    Tflag[j] = 0;
+    Tfbflag[j] = 0;
 
   while(!Done && Error==0 && ItCount<MAXIT) {
     ItCount++;
@@ -483,9 +487,10 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #endif
 	
 	if(T[j] <= -998 ) {
-          if (options.CONTINUEONERROR == TFALLBACK) {
+          if (options.TFALLBACK) {
             T[j] = oldT;
-            Tflag[j] = 1;
+            Tfbflag[j] = 1;
+            Tfbcount[j]++;
           }
           else {
 	    error_solve_T_profile(T[j], T[j+1], T[j-1], T0[j], moist[j], 
@@ -537,9 +542,10 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 #endif
 	
 	if(T[j] <= -998 ) {
-          if (options.CONTINUEONERROR == TFALLBACK) {
+          if (options.TFALLBACK) {
             T[j] = oldT;
-            Tflag[j] = 1;
+            Tfbflag[j] = 1;
+            Tfbcount[j]++;
           }
           else {
 	    error_solve_T_profile(T[Nnodes-1], T[Nnodes-1],

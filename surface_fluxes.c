@@ -139,6 +139,7 @@ int surface_fluxes(char                 overstory,
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -599,6 +600,9 @@ int surface_fluxes(char                 overstory,
 	LongUnderOut       = iter_soil_energy.LongUnderOut;
 
 	/** Solve snow accumulation, ablation and interception **/
+//if (band == 2) {
+fprintf(stdout,"rec %d hidx %d iveg %d band %d\n",rec,hidx,iveg,band);
+//}
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
 			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 
@@ -708,7 +712,8 @@ int surface_fluxes(char                 overstory,
 					  &iter_soil_energy.NetShortAtmos, 
 					  &iter_soil_energy.AtmosSensible, 
 					  &VPcanopy, &VPDcanopy,
-					  &iter_soil_energy.Tcanopy_flag);
+					  &iter_soil_energy.Tcanopy_fbflag,
+					  &iter_soil_energy.Tcanopy_fbcount);
 	  /* iterate to find Tcanopy which will solve the atmospheric energy
 	     balance.  Since I do not know vp in the canopy, use the
 	     sum of latent heats from the ground and foliage, and iterate
@@ -730,7 +735,6 @@ int surface_fluxes(char                 overstory,
 	}
 	iter_soil_energy.Tcanopy = Tcanopy;
 	iter_snow_energy.Tcanopy = Tcanopy;
-	iter_soil_energy.Tcanopy_flag = iter_soil_energy.Tcanopy_flag;
 
 	/*****************************************
           Compute iteration tolerance statistics 
@@ -968,7 +972,8 @@ int surface_fluxes(char                 overstory,
     energy->snow_flux       = store_snow_flux / (double)N_steps; 
   }
   energy->Tfoliage          = snow_energy.Tfoliage;
-  energy->Tfoliage_flag     = snow_energy.Tfoliage_flag;
+  energy->Tfoliage_fbflag   = snow_energy.Tfoliage_fbflag;
+  energy->Tfoliage_fbcount  = snow_energy.Tfoliage_fbcount;
 
 // energy->AtmosSensible + energy->AtmosLatent + energy->AtmosLatentSub + energy->NetShortAtmos + energy->NetLongAtmos + energy->grnd_flux + energy->deltaH + energy->fusion + energy->advection - energy->deltaCC + energy->refreeze_energy + energy->advected_sensible
 

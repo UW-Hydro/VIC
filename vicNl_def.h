@@ -83,6 +83,9 @@
   2009-Jul-31 Added lake_idx to lake_con struct and LAKE to veg_con
 	      struct.							TJB
   2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Sep-19 Changed Cp to be 1013, the value for moist air.		TJB
+  2009-Sep-19 Made TFALLBACK a separate option from CONTINUEONERROR.	TJB
 
 *********************************************************************/
 
@@ -99,9 +102,6 @@
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
 #define ERROR -999              /* Error Flag returned by subroutines */
-
-/***** Error-handling options *****/
-#define TFALLBACK 2
 
 /***** Met file formats *****/
 #define ASCII 1
@@ -183,8 +183,8 @@ extern char ref_veg_ref_crop[];
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
 #define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
 #define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
-#define Cp           1010.0	/* Specific heat at constant pressure of air 
-				   (J/deg/K) (H.B.H. p.4.7)*/
+#define Cp           1013.0	/* Specific heat at constant pressure of moist air 
+				   (J/deg/K) (H.B.H. p.4.13)*/
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
@@ -341,12 +341,12 @@ extern char ref_veg_ref_crop[];
 #define OUT_SOIL_TEMP       59  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
 #define OUT_SOIL_TNODE      60  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
 #define OUT_SOIL_TNODE_WL   61  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
-#define OUT_SOILT_FLAG      62  /* soil temperature flag for each soil thermal node */
+#define OUT_SOILT_FBFLAG    62  /* soil temperature flag for each soil thermal node */
 #define OUT_SURF_TEMP       63  /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SURFT_FLAG      64  /* surface temperature flag */
-#define OUT_TCAN_FLAG       65  /* Tcanopy flag */
+#define OUT_SURFT_FBFLAG    64  /* surface temperature flag */
+#define OUT_TCAN_FBFLAG     65  /* Tcanopy flag */
 #define OUT_TDEPTH          66  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
-#define OUT_TFOL_FLAG       67  /* Tfoliage flag */
+#define OUT_TFOL_FBFLAG     67  /* Tfoliage flag */
 #define OUT_VEGT            68  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
 // Energy Balance Terms - fluxes
 #define OUT_ADV_SENS        69  /* net sensible flux advected to snow pack [W/m2] */
@@ -518,6 +518,7 @@ typedef struct {
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */
+  char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
   char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
@@ -577,6 +578,13 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  char   TFALLBACK;      /* TRUE = when any temperature iterations fail to converge,
+                                   use temperature from previous time step; the number
+                                   of instances when this occurs will be logged and
+                                   reported at the end of the cell's simulation
+                            FALSE = when iterations fail to converge, report an error
+                                    and abort simulation for current grid cell
+                            Default = TRUE */
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
@@ -597,7 +605,6 @@ typedef struct {
   char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
-  int    CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   int    Noutfiles;      /* Number of output files (not including state files) */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band. This is only used when default
@@ -1047,13 +1054,17 @@ typedef struct {
   double  ShortOverIn;           /* incoming shortwave to overstory */
   double  ShortUnderIn;          /* incoming shortwave to understory */
   double  T[MAX_NODES];          /* thermal node temperatures (C) */
-  char    T_flag[MAX_NODES];     /* flag indicating if previous day's temperature was used */
+  char    T_fbflag[MAX_NODES];   /* flag indicating if previous day's temperature was used */
+  int     T_fbcount[MAX_NODES];  /* running total number of times that previous step's temperature was used */
   double  Tcanopy;               /* temperature of the canopy air */
-  char    Tcanopy_flag;          /* flag indicating if previous day's temperature was used */
+  char    Tcanopy_fbflag;        /* flag indicating if previous day's temperature was used */
+  int     Tcanopy_fbcount;       /* running total number of times that previous step's temperature was used */
   double  Tfoliage;              /* temperature of the overstory vegetation */
-  char    Tfoliage_flag;         /* flag indicating if previous day's temperature was used */
+  char    Tfoliage_fbflag;       /* flag indicating if previous day's temperature was used */
+  int     Tfoliage_fbcount;      /* running total number of times that previous step's temperature was used */
   double  Tsurf;                 /* temperature of the understory */
-  char    Tsurf_flag;            /* flag indicating if previous day's temperature was used */
+  char    Tsurf_fbflag;          /* flag indicating if previous day's temperature was used */
+  int     Tsurf_fbcount;         /* running total number of times that previous step's temperature was used */
   double  advected_sensible;     /* net sensible heat flux advected to 
 				    snowpack (Wm-2) */
   double  advection;             /* advective flux (Wm-2) */

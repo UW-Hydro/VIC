@@ -38,6 +38,7 @@ out_data_struct *create_output_list() {
 	      various landcover types.				TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
+  2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".			TJB
 *************************************************************/
 
   extern option_struct options;
@@ -114,12 +115,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
   strcpy(out_data[OUT_SOIL_TNODE].varname,"OUT_SOIL_TNODE");           /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
   strcpy(out_data[OUT_SOIL_TNODE_WL].varname,"OUT_SOIL_TNODE_WL");     /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
-  strcpy(out_data[OUT_SOILT_FLAG].varname,"OUT_SOILT_FLAG");           /* soil temperature flag for each soil thermal node */
+  strcpy(out_data[OUT_SOILT_FBFLAG].varname,"OUT_SOILT_FBFLAG");       /* soil temperature flag for each soil thermal node */
   strcpy(out_data[OUT_SURF_TEMP].varname,"OUT_SURF_TEMP");             /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
-  strcpy(out_data[OUT_SURFT_FLAG].varname,"OUT_SURFT_FLAG");           /* surface temperature flag */
-  strcpy(out_data[OUT_TCAN_FLAG].varname,"OUT_TCAN_FLAG");             /* Tcanopy flag */
+  strcpy(out_data[OUT_SURFT_FBFLAG].varname,"OUT_SURFT_FBFLAG");       /* surface temperature flag */
+  strcpy(out_data[OUT_TCAN_FBFLAG].varname,"OUT_TCAN_FBFLAG");         /* Tcanopy flag */
   strcpy(out_data[OUT_TDEPTH].varname,"OUT_TDEPTH");                   /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
-  strcpy(out_data[OUT_TFOL_FLAG].varname,"OUT_TFOL_FLAG");             /* Tfoliage flag */
+  strcpy(out_data[OUT_TFOL_FBFLAG].varname,"OUT_TFOL_FBFLAG");         /* Tfoliage flag */
   strcpy(out_data[OUT_VEGT].varname,"OUT_VEGT");                       /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
 
   // Energy Balance Terms - fluxes
@@ -214,7 +215,7 @@ out_data_struct *create_output_list() {
 #endif
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
   out_data[OUT_SOIL_TNODE_WL].nelem = options.Nnode;
-  out_data[OUT_SOILT_FLAG].nelem = options.Nnode;
+  out_data[OUT_SOILT_FBFLAG].nelem = options.Nnode;
   out_data[OUT_ADV_SENS_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ADVECTION_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_ALBEDO_BAND].nelem = options.SNOW_BAND;
@@ -302,10 +303,10 @@ out_data_struct *create_output_list() {
   out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELTACC_BAND].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_SOILT_FLAG].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_SURFT_FLAG].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_TCAN_FLAG].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_TFOL_FLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SOILT_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SURFT_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_TCAN_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_TFOL_FBFLAG].aggtype = AGG_TYPE_SUM;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

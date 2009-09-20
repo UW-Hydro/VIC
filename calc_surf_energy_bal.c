@@ -147,6 +147,7 @@ double calc_surf_energy_bal(double             Le,
 	      allows simulation to continue when energy balance fails
 	      to converge by using previous T value.			TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -173,7 +174,8 @@ double calc_surf_energy_bal(double             Le,
   double   Ts_old;
   double   Tsnow_surf;
   double   Tsurf; 
-  double   Tsurf_flag; 
+  char     Tsurf_fbflag; 
+  int      Tsurf_fbcount; 
   double   albedo;
   double   atmos_density;
   double   atmos_pressure;
@@ -192,7 +194,8 @@ double calc_surf_energy_bal(double             Le,
   double   Wdew[2];
   double  *T_node;
   double   Tnew_node[MAX_NODES];
-  char     Tnew_flag[MAX_NODES];
+  char     Tnew_fbflag[MAX_NODES];
+  int      Tnew_fbcount[MAX_NODES];
   double  *Zsum_node;
   double  *kappa_node;
   double  *Cs_node;
@@ -216,10 +219,13 @@ double calc_surf_energy_bal(double             Le,
   /**************************************************
     Set All Variables For Use
   **************************************************/
-  /* Initialize T_flag */
-  Tsurf_flag = 0;
-  for (nidx=0; nidx<Nnodes; nidx++) 
-    Tnew_flag[nidx] = 0;
+  /* Initialize T_fbflag */
+  Tsurf_fbflag = 0;
+  Tsurf_fbcount = energy->Tsurf_fbcount;
+  for (nidx=0; nidx<Nnodes; nidx++) {
+    Tnew_fbflag[nidx] = 0;
+    Tnew_fbcount[nidx] = 0;
+  }
 
   if(iveg!=Nveg) {
     if(veg_lib[veg_class].LAI[dmy->month-1] > 0.0) VEG = TRUE;
@@ -371,7 +377,7 @@ double calc_surf_energy_bal(double             Le,
 		       snow->density, snow->swq, snow->surf_water,
 		       &energy->deltaCC, &energy->refreeze_energy, 
 		       &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
-		       tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_flag,
+		       tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 		       alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
 		       soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
@@ -382,9 +388,10 @@ double calc_surf_energy_bal(double             Le,
 		       &energy->sensible, &energy->snow_flux, &energy->error);
  
     if(Tsurf <= -998 ) {  
-      if (options.CONTINUEONERROR == TFALLBACK) {
+      if (options.TFALLBACK) {
         Tsurf = Ts_old;
-        Tsurf_flag = 1;
+        Tsurf_fbflag = 1;
+        Tsurf_fbcount++;
       }
       else {
         fprintf(stderr, "SURF_DT = %.2f\n", SURF_DT);
@@ -466,7 +473,7 @@ double calc_surf_energy_bal(double             Le,
 			 snow->density, snow->swq, snow->surf_water,
 			 &energy->deltaCC, &energy->refreeze_energy, 
 			 &snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
-			 tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_flag,
+			 tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 			 alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 			 ice_node, kappa_node, max_moist_node, moist_node, 
 			 soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
@@ -477,9 +484,10 @@ double calc_surf_energy_bal(double             Le,
 			 &energy->sensible, &energy->snow_flux, &energy->error);
       
       if(Tsurf <=  -998 ) {  
-        if (options.CONTINUEONERROR == TFALLBACK) {
+        if (options.TFALLBACK) {
           Tsurf = Ts_old;
-          Tsurf_flag = 1;
+          Tsurf_fbflag = 1;
+          Tsurf_fbcount++;
         }
         else {
 	  error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month, dmy->day, dmy->hour, VEG, iveg,
@@ -567,7 +575,7 @@ double calc_surf_energy_bal(double             Le,
 				snow->density, snow->swq, snow->surf_water,
 				&energy->deltaCC, &energy->refreeze_energy, 
 				&snow->vapor_flux, &snow->blowing_flux, &snow->surface_flux,
-				Nnodes, Cs_node, T_node, Tnew_node, Tnew_flag,
+				Nnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 				alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 				ice_node, kappa_node, max_moist_node, moist_node, 
 				soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
@@ -760,9 +768,12 @@ double calc_surf_energy_bal(double             Le,
   }
 
   /** record T flag values **/
-  energy->Tsurf_flag = Tsurf_flag;
-  for (nidx=0; nidx<Nnodes; nidx++)
-    energy->T_flag[nidx] = Tnew_flag[nidx];
+  energy->Tsurf_fbflag = Tsurf_fbflag;
+  energy->Tsurf_fbcount += Tsurf_fbcount;
+  for (nidx=0; nidx<Nnodes; nidx++) {
+    energy->T_fbflag[nidx] = Tnew_fbflag[nidx];
+    energy->T_fbcount[nidx] += Tnew_fbcount[nidx];
+  }
 
   /** Return soil surface temperature **/
   return (Tsurf);

@@ -51,6 +51,7 @@ void initialize_snow (snow_data_struct **snow,
   xx-xx-01 modified to initialize spatially distributed snow variables. KAC
   11-18-02 modified to initalize blowing_snow variable.          LCB
   2006-Oct-16 Removed unused init_snow file.  TJB
+  2009-Sep-19 Initializing last_snow to MISSING.	TJB
 
 **********************************************************************/
 {
@@ -68,7 +69,7 @@ void initialize_snow (snow_data_struct **snow,
   for ( i = 0 ; i <= veg_num ; i++ ) {
     for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
       snow[i][j].snow            = 0;
-      snow[i][j].last_snow       = 0;
+      snow[i][j].last_snow       = MISSING;
       snow[i][j].swq             = 0.0;
       snow[i][j].surf_temp       = 0.0;
       snow[i][j].density         = 0.0;

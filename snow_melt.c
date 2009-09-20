@@ -81,39 +81,40 @@ static char vcid[] = "$Id$";
   04-Jun-04 For the case in which snowpack is too thin to solve
 	    separately, added message explaining that root_brent's
 	    error is not fatal and that snow pack will be solved in
-	    conjunction with surface energy balance.		TJB
+	    conjunction with surface energy balance.			TJB
   16-Jul-04 Added "month" to parameter list to allow this function to
 	    pass month to latent_heat_from_snow().  Changed calculations
 	    involving vapor_flux to make it consistent with convention
-	    that vapor_flux has units of m/timestep.		TJB
+	    that vapor_flux has units of m/timestep.			TJB
   16-Jul-04 Changed the type of the last few variables (lag_one, iveg,
 	    etc) to be double in the parameter lists of root_brent
 	    and CalcSnowPackEnergyBalance.  For some reason, passing
 	    them as float or int caused them to become garbage.  This may
 	    have to do with the fact that they followed variables of type
 	    (double *) in va_list, which may have caused memory alignment
-	    problems.						TJB
+	    problems.							TJB
   16-Jul-04 Modified cap on vapor_flux to re-scale values of blowing_flux
 	    and surface_flux so that blowing_flux and surface_flux still
-	    add up to the new value of vapor_flux.		TJB
+	    add up to the new value of vapor_flux.			TJB
   05-Aug-04 Removed overstory, lag_one, sigma_slope, fetch, iveg, Nveg,
 	    and month from argument list, since these were only used in
 	    call to SnowPackEnergyBalance (and ErrorSnowPackEnergyBalance),
-	    which no longer needs them.				TJB
+	    which no longer needs them.					TJB
   25-Aug-04 Modified re-scaling of surface_flux to reduce round-off
-	    error.						TJB
+	    error.							TJB
   21-Sep-04 Added ErrorString to store error messages from
-	    root_brent.						TJB
+	    root_brent.							TJB
 	    Removed message explaining non-fatal root_brent warning.
 	    These warnings were not a sign of any failures, and served
 	    only to confuse users and take up valuable space in the
-	    output display.					TJB
+	    output display.						TJB
   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.				TJB
-2007-Apr-11 Modified to handle grid cell errors by returning to the
-            main subroutine, rather than ending the simulation.    KAC
-2007-Jul-03 Corrected the units of melt in the comment section.	TJB
-2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+	    used in flux calculations.					TJB
+  2007-Apr-11 Modified to handle grid cell errors by returning to the
+	      main subroutine, rather than ending the simulation.	KAC via TJB
+  2007-Jul-03 Corrected the units of melt in the comment section.	TJB
+  2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 
 *****************************************************************************/
 int  snow_melt(double            Le, 
@@ -229,7 +230,6 @@ int  snow_melt(double            Le,
   else {
     SurfaceSwq += SnowFall;
     SurfaceCC += SnowFallCC;
-    DeltaPackCC = 0;
   }
   if (SurfaceSwq > 0.0)
     snow->surf_temp = SurfaceCC/(CH_ICE * SurfaceSwq);
@@ -251,11 +251,11 @@ int  snow_melt(double            Le,
 				   density, vp, LongSnowIn, Le, pressure,
 				   RainFall, NetShortSnow, vpd, 
 				   wind, (*OldTSurf), coverage, 
-				   snow->density,
+				   snow->depth, snow->density,
 				   snow->surf_water, SurfaceSwq, 
 				   Tcanopy, Tgrnd, 
 				   &advection, &advected_sensible_heat, 
-				   &deltaCC, &DeltaPackCC, 
+				   &deltaCC, 
 				   &grnd_flux, &latent_heat, 
 				   &latent_heat_sub, NetLongSnow, 
 				   &RefreezeEnergy, &sensible_heat, 
@@ -352,11 +352,11 @@ int  snow_melt(double            Le,
 				     density, vp, LongSnowIn, Le, pressure,
 				     RainFall, NetShortSnow, vpd, 
 				     wind, (*OldTSurf), coverage, 
-				     snow->density, 
+				     snow->depth, snow->density, 
 				     snow->surf_water, SurfaceSwq, 
 				     Tcanopy, Tgrnd, 
 				     &advection, &advected_sensible_heat, 
-				     &deltaCC, &DeltaPackCC, 
+				     &deltaCC, 
 				     &grnd_flux, &latent_heat, 
 				     &latent_heat_sub, NetLongSnow, 
 				     &RefreezeEnergy, &sensible_heat, 
@@ -379,11 +379,11 @@ int  snow_melt(double            Le,
 					 density, vp, LongSnowIn, Le, pressure,
 					 RainFall, NetShortSnow, vpd, 
 					 wind, (*OldTSurf), coverage, 
-					 snow->density,
+					 snow->depth, snow->density,
 					 snow->surf_water, SurfaceSwq, 
 					 Tcanopy, Tgrnd, 
 					 &advection, &advected_sensible_heat, 
-					 &deltaCC, &DeltaPackCC, 
+					 &deltaCC, 
 					 &grnd_flux, &latent_heat, 
 					 &latent_heat_sub, 
 					 NetLongSnow, &RefreezeEnergy, 

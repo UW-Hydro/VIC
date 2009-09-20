@@ -90,6 +90,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jul-26 Removed the special logic for the water balance mode, in
 	      which net longwave is stored in the "longwave" variable.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 
 **********************************************************************/
 {
@@ -201,7 +202,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *Cs_node;
   double *T_node;
   double *Tnew_node;
-  char   *Tnew_flag;
+  char   *Tnew_fbflag;
+  int    *Tnew_fbcount;
   double *alpha;
   double *beta;
   double *bubble_node;
@@ -364,7 +366,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   Cs_node                 = (double *) va_arg(ap, double *);
   T_node                  = (double *) va_arg(ap, double *);
   Tnew_node               = (double *) va_arg(ap, double *);
-  Tnew_flag               = (char *) va_arg(ap, char *);
+  Tnew_fbflag             = (char *) va_arg(ap, char *);
+  Tnew_fbcount            = (int *) va_arg(ap, int *);
   alpha                   = (double *) va_arg(ap, double *);
   beta                    = (double *) va_arg(ap, double *);
   bubble_node             = (double *) va_arg(ap, double *);
@@ -529,13 +532,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	if(options.IMPLICIT)
 	  FIRST_SOLN[0] = TRUE;
 #if QUICK_FS
-	Error = solve_T_profile(Tnew_node, T_node, Tnew_flag, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp,
 				depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
 				NOFLUX, EXP_TRANS, veg_class);
 #else
-	Error = solve_T_profile(Tnew_node, T_node, Tnew_flag, Zsum_node, kappa_node, Cs_node, 
+	Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 				moist_node, delta_t, max_moist_node, bubble_node, 
 				expt_node, ice_node, alpha, beta, gamma, dp, depth, 
 #if EXCESS_ICE

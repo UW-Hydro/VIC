@@ -86,6 +86,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.			TJB
   2009-Jun-15 Changed order of options to match global parameter file.		TJB
   2009-Aug-29 Now handles commented lines that are indented.			TJB
+  2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -303,7 +304,6 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.CONTINUEONERROR=TRUE;
-        else if(strcasecmp("TFALLBACK",flgstr)==0) options.CONTINUEONERROR=TFALLBACK;
         else options.CONTINUEONERROR = FALSE;
       }
       else if(strcasecmp("COMPUTE_TREELINE",optstr)==0) {
@@ -349,6 +349,11 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.PLAPSE = TRUE;
 	}
+      }
+      else if(strcasecmp("TFALLBACK",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.TFALLBACK=TRUE;
+        else options.TFALLBACK = FALSE;
       }
 
       /*************************************

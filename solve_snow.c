@@ -127,6 +127,8 @@ double solve_snow(char                 overstory,
 	      that is based on SNTHERM89.				KMA via TJB
   2008-Apr-21 Modified to pass snow depth to snow_albedo().		KAC via TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Sep-19 Fixed snow albedo aging logic.				TJB
 
 *********************************************************************/
 
@@ -137,10 +139,7 @@ double solve_snow(char                 overstory,
   char                FIRST_SOLN[1];
   int                 ErrorFlag;
   float               tempstep;
-  double              TmpAlbedoUnder[2];
-/*   double              LongUnderOut; */
   double              ShortOverIn;
-/*   double              Tgrnd; */
   double              melt;
   double              old_coverage;
   double              old_depth;
@@ -149,9 +148,9 @@ double solve_snow(char                 overstory,
   double              tmp_Wdew[2];
   double              tmp_grnd_flux;
   double              store_snowfall;
-  int                 curr_snow;
+  double              tmp_ref_height;
 
-  /* initialize moisture variable s*/
+  /* initialize moisture variables */
   melt     = 0.;
   ppt[WET] = 0.; 
   ppt[DRY] = 0.; 
@@ -160,7 +159,7 @@ double solve_snow(char                 overstory,
      cover fraction */
   (*melt_energy)     = 0.;
 
-  /* initialize change in snow[pack heat storage */
+  /* initialize change in snowpack heat storage */
   (*delta_snow_heat) = 0.;
 
   /** Calculate Fraction of Precipitation that falls as Rain **/
@@ -218,18 +217,6 @@ double solve_snow(char                 overstory,
 
     old_coverage = snow->coverage; // store previous coverage fraction
       
-    /** compute understory albedo **/
-    TmpAlbedoUnder[0]   = NEW_SNOW_ALB; // albedo if new snow falls
-    if ( snow->swq > 0 ) 
-      // age snow albedo if no new snow
-      snow->albedo = snow_albedo( snowfall[WET], snow->swq, snow->depth,
-				  snow->albedo, snow->coldcontent, (double)dt, 
-				  snow->last_snow, snow->MELTING); 
-    else
-      snow->albedo = TmpAlbedoUnder[0];
-    TmpAlbedoUnder[1]   = (*coverage * snow->albedo
-			   + (1. - *coverage) * BareAlbedo); 
-
     /** Compute Radiation Balance over Snow **/ 
     
     if ( iveg != Nveg ) {
@@ -246,6 +233,9 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
+//if (band==2) {
+fprintf(stdout,"before snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
+//}
 	ErrorFlag = snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
 		       veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
@@ -253,7 +243,7 @@ double solve_snow(char                 overstory,
 		       ShortOverIn, *ShortUnderIn, 
 		       Tcanopy, vpd, 
 		       BareAlbedo, mu, &energy->canopy_advection, 
-		       &energy->AlbedoOver, TmpAlbedoUnder, 
+		       &energy->AlbedoOver, 
 		       &veg_var_wet->Wdew, &snow->snow_canopy, 
 		       &energy->canopy_latent, 
 		       &energy->canopy_latent_sub, LongUnderIn, 
@@ -261,26 +251,19 @@ double solve_snow(char                 overstory,
 		       &energy->NetShortOver, 
 		       aero_resist, aero_resist_used, rainfall, 
 		       &energy->canopy_sensible, snowfall,
-		       &energy->Tfoliage, &energy->Tfoliage_flag, &snow->tmp_int_storage, 
+		       &energy->Tfoliage, &energy->Tfoliage_fbflag, 
+                       &energy->Tfoliage_fbcount, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
 		       ref_height, roughness, root, *UnderStory, band, 
 		       hour, iveg, month, rec, veg_class, layer_dry, 
 		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
+//if (band==2) {
+fprintf(stdout,"after snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
+//}
 
 	/* Store throughfall from canopy */
 	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
-
-	/* Determine under canopy net shortwave */
-	if ( veg_var_wet->throughfall > 0 ) {
-	  (*AlbedoUnder) = TmpAlbedoUnder[0];
-	  *NetShortSnow = ( 1. - *AlbedoUnder ) * *ShortUnderIn; 
-	}
-	else {
-	  (*AlbedoUnder) = TmpAlbedoUnder[1];
-	  *NetShortSnow = ( 1. - *AlbedoUnder ) * *ShortUnderIn; 
-	}
-  
 
 	energy->LongOverIn = longwave;
 
@@ -296,9 +279,7 @@ double solve_snow(char                 overstory,
 	energy->NetLongOver       = 0;
 	energy->LongOverIn        = 0;
 	energy->Tfoliage          = air_temp;
-	energy->Tfoliage_flag     = 0;
-	(*AlbedoUnder)            = TmpAlbedoUnder[0];
-	(*NetShortSnow)           = (1.0 - *AlbedoUnder) * shortwave; 
+	energy->Tfoliage_fbflag     = 0;
 
       } /* snow falling on vegetation with dew */
 
@@ -312,15 +293,7 @@ double solve_snow(char                 overstory,
 	energy->NetLongOver      = 0;
 	energy->LongOverIn       = 0;
 	energy->Tfoliage         = air_temp;
-	energy->Tfoliage_flag    = 0;
-	if ( snowfall[WET] > 0 ) { // net SW at snow/ground surface
-	  (*AlbedoUnder)   = TmpAlbedoUnder[0];
-	  (*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
-	}
-	else {
-	  (*AlbedoUnder)   = TmpAlbedoUnder[1];
-	  (*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
-	}
+	energy->Tfoliage_fbflag    = 0;
 
       } /* vegetation already covered by snow */
 
@@ -328,14 +301,6 @@ double solve_snow(char                 overstory,
     else { /* no vegetation present */
       energy->NetLongOver = 0;
       energy->LongOverIn  = 0;
-      if ( snowfall[WET] > 0 ) { // net SW at snow/ground surface
-	(*AlbedoUnder)   = TmpAlbedoUnder[0];
-	(*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
-      }
-      else {
-	(*AlbedoUnder)   = TmpAlbedoUnder[1];
-	(*NetShortSnow) = (1.0 - *AlbedoUnder) * shortwave; 
-      }
     }
     
     if ( snow->swq > 0.0 || snowfall[0] > 0 ) {
@@ -344,18 +309,9 @@ double solve_snow(char                 overstory,
 	Snow Pack Present on Ground
       ******************************/
 
-      // store snowfall reaching the ground for determining the albedo
-      store_snowfall            = snowfall[WET];
-
-      /** Age Snowpack **/
-      if( snowfall[WET] > 0 ) curr_snow = 1; // new snow - reset pack age
-      else curr_snow = snow->last_snow + 1; // age pack by one time step
-      
       (*NetShortGrnd) = 0.;
    
       (*snow_inflow) += rainfall[WET] + snowfall[WET];
-
-      /** Call snow pack accumulation and ablation algorithm **/
 
       old_swq       = snow->swq; /* store swq for density calculations */
       (*UnderStory) = 2;         /* ground snow is present of accumulating 
@@ -373,6 +329,25 @@ double solve_snow(char                 overstory,
       }
 #endif
 
+      /** compute understory albedo and net shortwave radiation **/
+      if ( snow->swq > 0 && store_snowfall == 0 ) {
+        // age snow albedo if no new snowfall
+        // ignore effects of snow dropping from canopy; only consider fresh snow from sky
+        snow->last_snow++;
+        snow->albedo = snow_albedo( snowfall[WET], snow->swq, snow->depth,
+				    snow->albedo, snow->coldcontent, (double)dt, 
+				    snow->last_snow, snow->MELTING); 
+        (*AlbedoUnder) = (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
+      }
+      else {
+        // set snow albedo to new snow albedo
+        snow->last_snow = 0;
+        snow->albedo = NEW_SNOW_ALB;
+        (*AlbedoUnder) = snow->albedo;
+      }
+      (*NetShortSnow) = (1.0 - *AlbedoUnder) * (*ShortUnderIn);
+
+      /** Call snow pack accumulation and ablation algorithm **/
       ErrorFlag = snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd, 
 		roughness, aero_resist[*UnderStory], aero_resist_used,
 		air_temp, *coverage, (double)dt * SECPHOUR, density, 
@@ -391,7 +366,7 @@ double solve_snow(char                 overstory,
       ppt[WET] += melt;
 
       // store snow albedo
-      energy->AlbedoUnder   = TmpAlbedoUnder[1];
+      energy->AlbedoUnder   = *AlbedoUnder;
       
       /** Compute Snow Parameters **/
       if(snow->swq > 0.) {
@@ -402,7 +377,7 @@ double solve_snow(char                 overstory,
 	  snow->density = snow_density(snow, snowfall[WET], old_swq, Tgrnd, air_temp, (double)dt);
 	else 
 	  // no snowpack present, start with new snow density
-	  if ( curr_snow == 1 ) 
+	  if ( snow->last_snow == 0 ) 
 	    snow->density = new_snow_density(air_temp);
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
@@ -413,10 +388,7 @@ double solve_snow(char                 overstory,
 	if ( snow->coldcontent >= 0 && day_in_year > 60 // ~ March 1
 	     && day_in_year < 273 // ~ October 1
 	     ) snow->MELTING = TRUE;
-	else
-	  snow->MELTING = FALSE;
-
-	if ( snow->MELTING && snowfall[WET] > TraceSnow )
+	else if ( snow->MELTING && snowfall[WET] > TraceSnow )
 	  snow->MELTING = FALSE;
 
 
@@ -538,23 +510,13 @@ double solve_snow(char                 overstory,
       energy->latent          = 0.;
       energy->latent_sub      = 0.;
       energy->sensible        = 0.;
-      curr_snow               = 0;
+      snow->last_snow         = MISSING;
       snow->store_swq         = 0;
       snow->store_coverage    = 1;
       snow->MELTING           = FALSE;
 
     }
 
-    if ( store_snowfall > TraceSnow || store_snowfall == 0 ) {
-      // reset snow albedo ago if new snow is sufficiently deep
-      //fprintf(stdout,"YES: last_snow -> %i, curr_snow -> %i, snowfall -> %f\n", snow->last_snow, curr_snow, store_snowfall);
-      snow->last_snow = curr_snow;
-    }
-    else {
-      //fprintf(stdout,"NO:  last_snow -> %i, curr_snow -> %i, snowfall -> %f\n", snow->last_snow, curr_snow, store_snowfall);
-      snow->last_snow++;
-    }
-    
   }
   else {
     
@@ -585,6 +547,8 @@ double solve_snow(char                 overstory,
     snow->store_swq      = 0;
     snow->store_coverage = 1;
     snow->MELTING        = FALSE;
+    snow->last_snow      = MISSING;
+    snow->albedo         = NEW_SNOW_ALB;
   }
 
   energy->melt_energy *= -1.;

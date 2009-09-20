@@ -77,10 +77,11 @@ static char vcid[] = "$Id$";
 	    them.							TJB
   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
 	    calculations.						TJB
-  2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.  TJB
+  2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.	TJB
   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
+  2009-Sep-19 Added Added ground flux computation consistent with 4.0.6.	TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -118,6 +119,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   double OldTSurf;                /* Surface temperature during previous time
 				     step */ 
   double SnowCoverFract;          /* Fraction of area covered by snow */
+  double SnowDepth;               /* Depth of snowpack (m) */
   double SnowDensity;             /* Density of snowpack (kg/m^3) */
   double SurfaceLiquidWater;      /* Liquid water in the surface layer (m) */
   double SweSurfaceLayer;         /* Snow water equivalent in surface layer 
@@ -132,8 +134,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 				     area into snow covered area (W/m^2) */
   double *DeltaColdContent;       /* Change in cold content of surface 
 				     layer (W/m2) */
-  double *DeltaPackColdContent;   /* Change in sold content of pack 
-				     layer (W/m^2) */
   double *GroundFlux;		  /* Ground Heat Flux (W/m2) */
   double *LatentHeat;		  /* Latent heat exchange at surface (W/m2) */
   double *LatentHeatSub;  /* Latent heat of sublimation exchange at 
@@ -201,6 +201,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Snowpack Variables */
   OldTSurf           = (double) va_arg(ap, double);
   SnowCoverFract     = (double) va_arg(ap, double);
+  SnowDepth          = (double) va_arg(ap, double);
   SnowDensity        = (double) va_arg(ap, double);
   SurfaceLiquidWater = (double) va_arg(ap, double);
   SweSurfaceLayer    = (double) va_arg(ap, double);
@@ -212,7 +213,6 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   AdvectedEnergy        = (double *) va_arg(ap, double *);
   AdvectedSensibleHeat  = (double *)va_arg(ap, double *);
   DeltaColdContent      = (double *) va_arg(ap, double *);
-  DeltaPackColdContent  = (double *) va_arg(ap, double *);
   GroundFlux            = (double *) va_arg(ap, double *);
   LatentHeat            = (double *) va_arg(ap, double *);
   LatentHeatSub         = (double *) va_arg(ap, double *);
@@ -294,13 +294,17 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
     *AdvectedEnergy = 0.;
   
   /* Calculate change in cold content */
-  
   *DeltaColdContent = CH_ICE * SweSurfaceLayer * (TSurf - OldTSurf) /
     (Dt);
 
   /* Calculate Ground Heat Flux */
-/*   *DeltaColdContent -= *DeltaPackColdContent; */
-  
+  if(SnowDepth>0.) {
+    *GroundFlux = 2.9302e-6 * SnowDensity * SnowDensity
+        * (TGrnd - TMean) / SnowDepth / (Dt);
+  }
+  else *GroundFlux=0;
+  *DeltaColdContent -= *GroundFlux;
+
   /* Calculate energy balance error at the snowpack surface */
   RestTerm = NetRad + *SensibleHeat + *LatentHeat + *LatentHeatSub 
     + *AdvectedEnergy + *GroundFlux - *DeltaColdContent 

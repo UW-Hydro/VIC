@@ -2226,6 +2226,7 @@ void update_prcp(dist_prcp_struct *prcp,
   2008-Jun-16 Fix for swe accounting errors.					LCB via TJB
   2009-Jul-31 Updated to simplify aggregation of lake/wetland storages and
 	      fluxes.								TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
 **************************************************************************/
 {
   extern option_struct   options;
@@ -2288,13 +2289,17 @@ void update_prcp(dist_prcp_struct *prcp,
   // These should be changed whenever energy balance at bottom of lake is computed
   for (i=0; i<options.Nnode; i++) {
     lake_energy->T[i] = wland_energy[iveg][band].T[i];
-    lake_energy->T_flag[i] = wland_energy[iveg][band].T_flag[i];
+    lake_energy->T_fbflag[i] = wland_energy[iveg][band].T_fbflag[i];
+    lake_energy->T_fbcount[i] = wland_energy[iveg][band].T_fbcount[i];
   }
   lake_energy->Tcanopy = 0;
-  lake_energy->Tcanopy_flag = 0;
+  lake_energy->Tcanopy_fbflag = 0;
+  lake_energy->Tcanopy_fbcount = wland_energy[iveg][band].Tcanopy_fbcount;
   lake_energy->Tfoliage = 0;
-  lake_energy->Tfoliage_flag = 0;
-  lake_energy->Tsurf_flag = 0;
+  lake_energy->Tfoliage_fbflag = 0;
+  lake_energy->Tfoliage_fbcount = wland_energy[iveg][band].Tfoliage_fbcount;
+  lake_energy->Tsurf_fbflag = 0;
+  lake_energy->Tsurf_fbcount = wland_energy[iveg][band].Tsurf_fbcount;
   lake_energy->advected_sensible = 0;
   lake_energy->canopy_advection = 0;
   lake_energy->canopy_latent = 0;
@@ -2404,21 +2409,23 @@ void update_prcp(dist_prcp_struct *prcp,
   for(i=0; i<options.Nnode; i++) {
     wland_energy[iveg][band].T[i] *= (1.-lakefraction);
     wland_energy[iveg][band].T[i] += lakefraction * lake_energy->T[i];
-    wland_energy[iveg][band].T_flag[i] *= (1.-lakefraction);
-    wland_energy[iveg][band].T_flag[i] += lakefraction * lake_energy->T_flag[i];
+    wland_energy[iveg][band].T_fbflag[i] *= (1.-lakefraction);
+    wland_energy[iveg][band].T_fbflag[i] += lakefraction * lake_energy->T_fbflag[i];
+    wland_energy[iveg][band].T_fbcount[i] += lake_energy->T_fbcount[i];
   }
 
   /** Vegetation-related quantities have no lake equivalent **/
 //  wland_energy[iveg][band].Tcanopy *= (1.-lakefraction);
-//  wland_energy[iveg][band].Tcanopy_flag *= (1.-lakefraction);
+//  wland_energy[iveg][band].Tcanopy_fbflag *= (1.-lakefraction);
 //  wland_energy[iveg][band].Tfoliage *= (1.-lakefraction);
-//  wland_energy[iveg][band].Tfoliage_flag *= (1.-lakefraction);
+//  wland_energy[iveg][band].Tfoliage_fbflag *= (1.-lakefraction);
 
   wland_energy[iveg][band].Tsurf *= (1.-lakefraction);
   wland_energy[iveg][band].Tsurf += lakefraction * lake_energy->Tsurf;
 
-  wland_energy[iveg][band].Tsurf_flag *= (1.-lakefraction);
-  wland_energy[iveg][band].Tsurf_flag += lakefraction * lake_energy->Tsurf_flag;
+  wland_energy[iveg][band].Tsurf_fbflag *= (1.-lakefraction);
+  wland_energy[iveg][band].Tsurf_fbflag += lakefraction * lake_energy->Tsurf_fbflag;
+  wland_energy[iveg][band].Tsurf_fbcount += lake_energy->Tsurf_fbcount;
 
   wland_energy[iveg][band].advected_sensible *= (1.-lakefraction);
   wland_energy[iveg][band].advected_sensible += lakefraction * lake_energy->advected_sensible;
@@ -2694,6 +2701,7 @@ void update_prcp(dist_prcp_struct *prcp,
 	      distribute_node_moisture_properties.				KAC via TJB
   2009-Jul-31 Updated to simplify disaggregation of lake/wetland storages and
 	      fluxes.								TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
 **************************************************************************/
 int initialize_prcp(dist_prcp_struct *prcp, 
 		    energy_bal_struct *lake_energy, 
@@ -2747,6 +2755,12 @@ int initialize_prcp(dist_prcp_struct *prcp,
   lake_energy->AtmosLatent =  wland_energy[iveg][band].AtmosLatent;
   lake_energy->AtmosSensible =  wland_energy[iveg][band].AtmosSensible;
   lake_energy->error = wland_energy[iveg][band].error;
+  lake_energy->Tfoliage_fbcount = 0;
+  lake_energy->Tcanopy_fbcount = 0;
+  lake_energy->Tsurf_fbcount = 0;
+  for(i=0; i<options.Nnode; i++) {
+    lake_energy->T_fbcount[i] = 0;
+  }
 
   /* Initialize snow variables. */
   lake_snow->canopy_albedo = 0;

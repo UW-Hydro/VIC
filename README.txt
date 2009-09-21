@@ -321,8 +321,12 @@ Added validation of Campbell's expt and bubble pressure.
 	already validates their values.
 
 
-Added option to continue with previous temperature when energy balance fails
-to converge.
+	initialize_snow.c
+	SnowPackEnergyBalance.c
+	snow_melt.c
+
+Added TFALLBACK option, to continue with previous temperature when energy
+balance iteration fails to converge.
 
 	Files Affected:
 
@@ -334,6 +338,9 @@ to converge.
 	func_surf_energy_bal.c
 	get_global_param.c
 	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+	lakes.eb.c
 	output_list_utils.c
 	put_data.c
 	root_brent.c
@@ -345,21 +352,32 @@ to converge.
 
 	Description:
 
-	Modified options.CONTINUEONERROR to take multiple values:
-	  FALSE: Do not continue on error; stop the entire simulation
-	  TRUE:  End simulation for current grid cell, but continue simulating
-	         other grid cells
-	  TFALLBACK: If energy balance solution fails to converge, use
-	             previous T value and continue
+	Added options.TFALLBACK, which can take the following values:
+	  TRUE: If energy balance solution fails to converge, use previous
+	        T value and continue
+	  FALSE: If energy balance solution fails to converge, report an
+	         error
+	Default = TRUE.
 
-        For each veg tile / elevation band in the grid cell, if the T solution
-	fails to converge and the previous time step's T is used, a T-flag for
-	that variable is set to 1; otherwise it is set to 0.  There is a flag
-	for each T involved in root_brent: Tsurf, Tcanopy, Tfoliage, and each
-	of the T's of the soil thermal nodes.
+	Currently, the following temperature variables are affected by the
+	TFALLBACK option:
+		energy.T[]      : soil T profile nodes
+		energy.Tsurf    : surface temperature
+		energy.Tcanopy  : temperature of canopy air
+		energy.Tfoliage : temperature of canopy snow
 
-	To report the occurrence of T-fallback, 4 new output variables have
-	been defined:
+        For each grid cell, for each of the above variables, VIC will count
+	the number of instances when the previous step's T was used.  These
+	totals will be reported at the end of the grid cell's simulation.
+
+	In addition, VIC tracks occurrences of T fallbacks through time via
+	"flag" variables.  For each T variable, there is a corresponding T
+	fallback flag, which is set to 1 if, in a given time step, the
+	previous step's T was used in that time step, and 0 otherwise.  This
+	holds for each veg tile / elevation band combination in the grid cell.
+
+	These time series of occurrences of T fallbacks can be reported in
+	output files via the following 4 new output variables:
 	  OUT_SOILT_FLAG = array of flags, one for each soil T node
 	  OUT_SURFT_FLAG = flag for Tsurf
 	  OUT_TCAN_FLAG = flag for Tcanopy

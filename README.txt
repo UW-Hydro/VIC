@@ -321,10 +321,6 @@ Added validation of Campbell's expt and bubble pressure.
 	already validates their values.
 
 
-	initialize_snow.c
-	SnowPackEnergyBalance.c
-	snow_melt.c
-
 Added TFALLBACK option, to continue with previous temperature when energy
 balance iteration fails to converge.
 
@@ -699,6 +695,24 @@ VIC now can understand indented comment lines in the global parameter file
 	with a '#' character at the very beginning of the line, i.e. no
 	leading white space such as spaces or tabs.  Now, any line whose first
 	non-whitespace character is '#' is considered to be a comment.
+
+
+
+Miscellaneous fixes to snow albedo aging scheme
+
+	Files Affected:
+
+	initialize_snow.c
+	SnowPackEnergyBalance.c
+	snow_melt.c
+	solve_snow.c
+
+	Description:
+
+	Previously, VIC's last_snow counter, which keeps track of the number
+	of time steps since the last fresh snowfall, and which is used to
+	compute the snow albedo, was not reset to 0 at the proper times.  This
+	has been fixed, along with its initialization.
 
 
 

@@ -94,6 +94,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2009-Jul-31 Removed unused layer_node_fract array.			TJB
   2009-Sep-11 Added correct OUTPUT_FORCE logic around the new bare
 	      soil/veg lib code.					TJB
+  2009-Sep-28 Added initialization of snowband parameters.		TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -123,6 +124,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          delta;
   double          dist;
   size_t          length;
+  int             Nbands,band;
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
 #endif
@@ -750,6 +752,33 @@ soil_con_struct read_soilparam(FILE *soilparam,
     *************************************************/
     temp.time_zone_lng = off_gmt * 360./24.;
     
+    /*************************************************
+      Allocate and Initialize Snow Band Parameters
+    *************************************************/
+    Nbands         = options.SNOW_BAND;
+    temp.AreaFract     = (double *)calloc(Nbands,sizeof(double));
+    temp.BandElev      = (float *)calloc(Nbands,sizeof(float));
+    temp.Tfactor       = (double *)calloc(Nbands,sizeof(double));
+    temp.Pfactor       = (double *)calloc(Nbands,sizeof(double));
+    temp.AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
+
+    if (temp.Tfactor == NULL || temp.Pfactor == NULL || temp.AreaFract == NULL) 
+      nrerror("Memory allocation failure in read_snowband");
+
+    if ( Nbands <= 0 ) {
+      sprintf(ErrStr,"Number of snow bands must be > 0 (%d)",Nbands);
+      nrerror(ErrStr);
+    }
+
+    /** Set default values for factors to use unmodified forcing data **/
+    for (band = 0; band < Nbands; band++) {
+      temp.AreaFract[band] = 0.;
+      temp.BandElev[band]  = temp.elevation;
+      temp.Tfactor[band]   = 0.;
+      temp.Pfactor[band]   = 1.;
+    }
+    temp.AreaFract[0] = 1.;
+
 }
   /* ELSE Grid cell is not active (RUN_MODEL=0), skip soil parameter data */
   

@@ -716,6 +716,55 @@ Miscellaneous fixes to snow albedo aging scheme
 
 
 
+Fixed errors in summing output variables
+
+	Files Affected:
+
+	dist_prec.c
+	full_energy.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_snow.c
+	LAKE.h
+	lakes.eb.c
+	put_data.c
+	read_initial_model_state.c
+	read_snowband.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	Previously, many lake water and energy budget terms were lumped into
+	the wetland soil, snow, and energy structures.  This often led to
+	water/energy balance errors both internally and in summing these terms
+	for output.  To solve this problem, new cell, snow, and energy
+	structures were added to the lake_var structure.  These structures
+	allow all lake water and energy budget terms to be tracked
+	independently of the wetland.
+
+	In addition, previously, the initial computation of water/energy
+	storages for use in the water/energy balance checks was done in
+	vicNl().  This logic was not in sync with the computations in put_data().
+	Therefore the logic was replaced with an initial call to put_data()
+	(using rec= -Nrecs).  Within put_data(), two new functions were
+	created to help ensure that summing was consistent among upland veg
+	tiles, wetland, and lake: collect_wb_terms() and collect_eb_terms().  
+
+	Finally, another source of errors arose from the allocation and
+	initialization of snowband parameters in read_snowband().  These
+	terms were only initialized in read_snowband(), but were in some cases
+	used in put_data() for the non-snowband case.  Therefore, we have
+	moved the allocation/initialization of these terms to read_soilparam()
+	and read_soilparam_arc().  These parameters are further modified in
+	read_snowband(), as necessary.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

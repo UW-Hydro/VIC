@@ -70,6 +70,8 @@
   2009-Jul-31 Removed unused layer_node_fract array from
 	      estimate_layer_ice_content().				TJB 
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Sep-28 Added collect_wb_terms() and collect_eb_terms(). Changed
+	      argument list of read_snowband().				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -170,6 +172,15 @@ FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int,
                         int *);
 void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
+void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
+                        int *, int *, int *, int *, double, double, double,
+                        int, int, int, int, double *, double *,
+#if SPATIAL_FROST
+                        double *, double,
+#endif
+                        out_data_struct *);
+void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
+                        double, double, double, double, int, int, int, double *, out_data_struct *);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
@@ -378,8 +389,7 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
 				global_param_struct *, int, int, int, 
 				soil_con_struct *, int, char *,
 				int *, lake_con_struct);
-void   read_snowband(FILE *, int, float *, double **, float **, double **, 
-                     double **, char **);
+void   read_snowband(FILE *, soil_con_struct *);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);

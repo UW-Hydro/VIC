@@ -93,6 +93,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Jul-31 Removed extra lake/wetland veg tile.			TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-19 Made initialization of Tfoliage more accurate for snow bands.	TJB
+  2009-Sep-28 Added initialization of energy structure.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -193,7 +194,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   ********************************************/
 
   if ( options.LAKES && lake_con.Cl[0] > 0) {
-    ErrorFlag = initialize_lake(lake_var, lake_con, surf_temp);
+    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, surf_temp);
     if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 
@@ -379,6 +380,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     
   else if(options.QUICK_FLUX) {
 
+    /* Initialize soil node thicknesses */
     soil_con->dz_node[0]   = soil_con->depth[0];
     soil_con->dz_node[1]   = soil_con->depth[0];
     soil_con->dz_node[2]   = 2. * (dp - 1.5 * soil_con->depth[0]);    
@@ -393,12 +395,12 @@ int initialize_model_state(dist_prcp_struct    *prcp,
       if ( Cv > 0 ) {
 	for( band = 0; band < options.SNOW_BAND; band++ ) {
 
-	  /* Initialize soil node temperatures and thicknesses */
-	  
+	  /* Initialize soil node temperatures */
 	  energy[veg][band].T[0] = surf_temp;
 	  energy[veg][band].T[1] = surf_temp;
 	  energy[veg][band].T[2] = soil_con->avg_temp;
-	  
+
+	  /* Initialize soil layer thicknesses */
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 #if SPATIAL_FROST
@@ -672,13 +674,52 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     }	
   }
 
-  // initialize energy balance terms before iterations begin
+  // initialize miscellaneous energy balance terms
   for ( veg = 0 ; veg <= Nveg ; veg++) {
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
-        /* Initial estimate of LongUnderOut for use by snow_intercept() */
-        tmp = energy[veg][band].T[0] + KELVIN;
-	energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
-	energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
+      /* Initial estimate of LongUnderOut for use by snow_intercept() */
+      tmp = energy[veg][band].T[0] + KELVIN;
+      energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
+      energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
+      /* Set fluxes to 0 */
+      energy[veg][band].advected_sensible = 0.0;
+      energy[veg][band].advection         = 0.0;
+      energy[veg][band].AtmosError        = 0.0;
+      energy[veg][band].AtmosLatent       = 0.0;
+      energy[veg][band].AtmosLatentSub    = 0.0;
+      energy[veg][band].AtmosSensible     = 0.0;
+      energy[veg][band].canopy_advection  = 0.0;
+      energy[veg][band].canopy_latent     = 0.0;
+      energy[veg][band].canopy_latent_sub = 0.0;
+      energy[veg][band].canopy_refreeze   = 0.0;
+      energy[veg][band].canopy_sensible   = 0.0;
+      energy[veg][band].deltaCC           = 0.0;
+      energy[veg][band].deltaH            = 0.0;
+      energy[veg][band].error             = 0.0;
+      energy[veg][band].fusion            = 0.0;
+      energy[veg][band].grnd_flux         = 0.0;
+      energy[veg][band].latent            = 0.0;
+      energy[veg][band].latent_sub        = 0.0;
+      energy[veg][band].longwave          = 0.0;
+      energy[veg][band].LongOverIn        = 0.0;
+      energy[veg][band].LongUnderIn       = 0.0;
+      energy[veg][band].LongUnderOut      = 0.0;
+      energy[veg][band].melt_energy       = 0.0;
+      energy[veg][band].NetLongAtmos      = 0.0;
+      energy[veg][band].NetLongOver       = 0.0;
+      energy[veg][band].NetLongUnder      = 0.0;
+      energy[veg][band].NetShortAtmos     = 0.0;
+      energy[veg][band].NetShortGrnd      = 0.0;
+      energy[veg][band].NetShortOver      = 0.0;
+      energy[veg][band].NetShortUnder     = 0.0;
+      energy[veg][band].out_long_canopy   = 0.0;
+      energy[veg][band].out_long_surface  = 0.0;
+      energy[veg][band].refreeze_energy   = 0.0;
+      energy[veg][band].sensible          = 0.0;
+      energy[veg][band].shortwave         = 0.0;
+      energy[veg][band].ShortOverIn       = 0.0;
+      energy[veg][band].ShortUnderIn      = 0.0;
+      energy[veg][band].snow_flux         = 0.0;
     }
   }
 

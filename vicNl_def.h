@@ -86,6 +86,7 @@
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-19 Changed Cp to be 1013, the value for moist air.		TJB
   2009-Sep-19 Made TFALLBACK a separate option from CONTINUEONERROR.	TJB
+  2009-Sep-28 Added snow and energy structures to lake_var_struct.	TJB
 
 *********************************************************************/
 
@@ -704,72 +705,6 @@ typedef struct {
   int    stateyear;  /* Year of the simulation at which to save model state */
 } global_param_struct;
 
-/******************************************************************
-  This structure stores the lake/wetland parameters for a grid cell
-  ******************************************************************/
-typedef struct {
-  // General information
-  int    wetland_veg_class;       /* Vegetation class of the wetland */
-  // Lake basin dimensions
-  int    numnod;                  /* Maximum number of lake nodes for this grid cell */
-  double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */  
-  double basin[MAX_LAKE_NODES+1]; /* Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
-  double Cl[MAX_LAKE_NODES+1];    /* Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
-  double b;                       /* Exponent in default lake depth-area profile (y=Ax^b) */
-  double maxdepth;                /* Maximum allowable lake depth (m) */
-  double mindepth;                /* Minimum allowable lake depth (m) */
-  double maxvolume;               /* Lake volume when lake depth is at maximum (m^3) */
-  double minvolume;               /* Lake volume when lake depth is at minimum (m^3) */
-  // Hydrological properties
-  float  bpercent;                /* Fraction of wetland baseflow (subsurface runoff) that flows into lake */
-  float  rpercent;                /* Fraction of wetland surface runoff that flows into lake */
-  double eta_a;                   /* Decline of solar radiation w/ depth (m^-1) */ /* not currently used */
-  double wfrac;                   /* Width of lake outlet, expressed as fraction of lake perimeter */
-  // Initial conditions
-  double depth_in;                /* Initial lake depth (distance from surface to deepest point) (m) */
-  int    lake_idx;                /* index number of the lake/wetland veg tile */
-} lake_con_struct;
-
-/*****************************************************************
-  This structure stores the lake/wetland variables for a grid cell
-  *****************************************************************/
-typedef struct {
-  // Current lake dimensions and liquid water state variables
-  int    activenod;               /* Number of nodes whose corresponding layers currently contain water */
-  double dz;                      /* Vertical thickness of all horizontal water layers below the surface layer (m) */
-  double surfdz;                  /* Vertical thickness of surface (top) water layer (m) */
-  double ldepth;                  /* Current depth of liquid water in lake (distance from surface to deepest point) (m) */
-  double surface[MAX_LAKE_NODES+1];/* Area of horizontal cross-section of lake at each node (at end of time step) (m^2) */
-  double sarea;                   /* Current surface area of liquid water in lake (at beginning of time step) (m^2) */
-  double volume;                  /* Current lake water volume, including liquid water equivalent of lake ice and snow (m^3) */
-  double temp[MAX_LAKE_NODES];    /* Lake water temperature at each node (C) */
-  double tempavg;                 /* Average liquid water temperature of entire lake (C) */
-  // Current properties (state variables) specific to lake ice/snow
-  double areai;                   /* Area of ice coverage (at beginning of time step) (m^2) */
-  double new_ice_area;            /* Area of ice coverage (at end of time step) (m^2) */
-  double ice_water_eq;            /* Liquid water equivalent volume of lake ice (m^3) */
-  double hice;                    /* Height of lake ice at thickest point (m) */ 
-  double tempi;                   /* Lake ice temperature (C) */
-  double swe;                     /* Water equivalence of lake snow cover (m over lake ice area) */
-  double surf_temp;               /* Temperature of surface snow layer (C) */
-  double pack_temp;               /* Temperature of pack snow layer (C) */
-  double coldcontent;             /* cold content of snow pack */
-  double surf_water;              /* Water content of surface snow layer (m over lake ice area) */
-  double pack_water;              /* Water content of pack snow layer (m over lake ice area) */
-  double SAlbedo;                 /* Albedo of lake snow (fraction) */
-  double sdepth;                  /* Depth of snow on top of ice (m over lake ice area) */
-  // Other current lake properties (derived from state variables and forcings)
-  double aero_resist;	          /* Aerodynamic resistance (s/m) after stability correction */
-  double density[MAX_LAKE_NODES]; /* Lake water density profile (kg/m^3) */
-  // Moisture fluxes
-  double evapw;                   /* Evaporative flux from lake (and ice/snow) surface (mm over lake area) */
-  double baseflow_in;             /* Baseflow into lake from the rest of the grid cell (mm over grid cell area) */
-  double baseflow_out;            /* Baseflow out of lake to channel network (mm over grid cell area) */
-  double runoff_in;               /* Surface runoff into lake from the rest of the grid cell (mm over grid cell area) */
-  double runoff_out;              /* Surface runoff out of lake to channel network (mm over grid cell area) */
-  double snowmlt;                 /* Moisture released by melting of lake snow (mm over lake ice area) */
-} lake_var_struct;
-
 /***********************************************************
   This structure stores the soil parameters for a grid cell.
   ***********************************************************/
@@ -1024,90 +959,74 @@ typedef struct {
   solve the thermal fluxes through the soil column.
   ***********************************************************************/
 typedef struct {
-  char    frozen;                /* TRUE = frozen soil present */
+  // State variables
   double  AlbedoLake;            /* albedo of lake surface (fract) */
   double  AlbedoOver;            /* albedo of intercepted snow (fract) */
   double  AlbedoUnder;           /* surface albedo (fraction) */
-  double  AtmosError;
-  double  AtmosLatent;           /* latent heat exchange with atmosphere */
-  double  AtmosLatentSub;        /* latent sub heat exchange with atmosphere */
-  double  AtmosSensible;         /* sensible heat exchange with atmosphere */
-  double  Cs[2];                 /* heat capacity for top two layers 
-				    (J/m^3/K) */
-  double  Cs_node[MAX_NODES];    /* heat capacity of the soil thermal nodes 
-				    (J/m^3/K) */
-  double  LongOverIn;            /* incoming longwave to overstory */
-  double  LongUnderIn;           /* incoming longwave to understory */
-  double  LongUnderOut;          /* outgoing longwave from understory */
-  double  NetLongAtmos;          /* net longwave radiation to the atmosphere 
-				    (W/m^2) */
-  double  NetLongOver;           /* net longwave radiation from the overstory 
-				    (W/m^2) */
-  double  NetLongUnder;          /* net longwave radiation from the understory 
-				    (W/m^2) */
-  double  NetShortAtmos;         /* net shortwave to the atmosphere */
-  double  NetShortGrnd;          /* net shortwave penetrating snowpack */
-  double  NetShortOver;          /* net shortwave radiation from the overstory 
-				    (W/m^2) */
-  double  NetShortUnder;         /* net shortwave radiation from the understory 
-				    (W/m^2) */
-  double  ShortOverIn;           /* incoming shortwave to overstory */
-  double  ShortUnderIn;          /* incoming shortwave to understory */
+  double  Cs[2];                 /* heat capacity for top two layers (J/m^3/K) */
+  double  Cs_node[MAX_NODES];    /* heat capacity of the soil thermal nodes (J/m^3/K) */
+  double  fdepth[MAX_FRONTS];    /* all simulated freezing front depths */
+  char    frozen;                /* TRUE = frozen soil present */
+  double  ice[MAX_NODES];        /* thermal node ice content */
+  double  kappa[2];              /* soil thermal conductivity for top two layers (W/m/K) */
+  double  kappa_node[MAX_NODES]; /* thermal conductivity of the soil thermal nodes (W/m/K) */
+  double  moist[MAX_NODES];      /* thermal node moisture content */
+  int     Nfrost;                /* number of simulated freezing fronts */
+  int     Nthaw;                 /* number of simulated thawing fronts */
   double  T[MAX_NODES];          /* thermal node temperatures (C) */
   char    T_fbflag[MAX_NODES];   /* flag indicating if previous day's temperature was used */
   int     T_fbcount[MAX_NODES];  /* running total number of times that previous step's temperature was used */
+  int     T1_index;              /* soil node at the bottom of the top layer */
   double  Tcanopy;               /* temperature of the canopy air */
   char    Tcanopy_fbflag;        /* flag indicating if previous day's temperature was used */
   int     Tcanopy_fbcount;       /* running total number of times that previous step's temperature was used */
+  double  tdepth[MAX_FRONTS];    /* all simulated thawing front depths */
   double  Tfoliage;              /* temperature of the overstory vegetation */
   char    Tfoliage_fbflag;       /* flag indicating if previous day's temperature was used */
   int     Tfoliage_fbcount;      /* running total number of times that previous step's temperature was used */
   double  Tsurf;                 /* temperature of the understory */
   char    Tsurf_fbflag;          /* flag indicating if previous day's temperature was used */
   int     Tsurf_fbcount;         /* running total number of times that previous step's temperature was used */
-  double  advected_sensible;     /* net sensible heat flux advected to 
-				    snowpack (Wm-2) */
+  double  unfrozen;              /* frozen layer water content that is unfrozen */
+  // Fluxes
+  double  advected_sensible;     /* net sensible heat flux advected to snowpack (Wm-2) */
   double  advection;             /* advective flux (Wm-2) */
-  double  canopy_advection;      /* advection heat flux from the canopy 
-				    (W/m^2) */
+  double  AtmosError;
+  double  AtmosLatent;           /* latent heat exchange with atmosphere */
+  double  AtmosLatentSub;        /* latent sub heat exchange with atmosphere */
+  double  AtmosSensible;         /* sensible heat exchange with atmosphere */
+  double  canopy_advection;      /* advection heat flux from the canopy (W/m^2) */
   double  canopy_latent;         /* latent heat flux from the canopy (W/m^2) */
-  double  canopy_latent_sub;     /* latent heat flux of sublimation 
-				    from the canopy (W/m^2) */
-  double  canopy_refreeze;       /* energy used to refreeze/melt canopy 
-				    intercepted snow (W/m^2) */
-  double  canopy_sensible;       /* sensible heat flux from canopy 
-                                    interception (W/m^2) */
+  double  canopy_latent_sub;     /* latent heat flux of sublimation from the canopy (W/m^2) */
+  double  canopy_refreeze;       /* energy used to refreeze/melt canopy intercepted snow (W/m^2) */
+  double  canopy_sensible;       /* sensible heat flux from canopy interception (W/m^2) */
   double  deltaCC;               /* change in snow heat storage (Wm-2) */
   double  deltaH;                /* change in soil heat storage (Wm-2) */
   double  error;                 /* energy balance error (W/m^2) */
-  double  fdepth[MAX_FRONTS];    /* all simulated freezing front depths */
   double  fusion;                /* energy used to freeze/thaw soil water */
   double  grnd_flux;             /* ground heat flux (Wm-2) */
-  double  ice[MAX_NODES];        /* thermal node ice content */
-  double  kappa[2];              /* soil thermal conductivity for top two 
-				    layers (W/m/K) */
-  double  kappa_node[MAX_NODES]; /* thermal conductivity of the soil thermal 
-				    nodes (W/m/K) */
   double  latent;                /* net latent heat flux (Wm-2) */
   double  latent_sub;            /* net latent heat flux from snow (Wm-2) */
   double  longwave;              /* net longwave flux (Wm-2) */
-  double  melt_energy;           /* energy used to reduce snow cover 
-				    fraction (Wm-2) */
-  double  moist[MAX_NODES];      /* thermal node moisture content */
+  double  LongOverIn;            /* incoming longwave to overstory */
+  double  LongUnderIn;           /* incoming longwave to understory */
+  double  LongUnderOut;          /* outgoing longwave from understory */
+  double  melt_energy;           /* energy used to reduce snow cover fraction (Wm-2) */
+  double  NetLongAtmos;          /* net longwave radiation to the atmosphere (W/m^2) */
+  double  NetLongOver;           /* net longwave radiation from the overstory (W/m^2) */
+  double  NetLongUnder;          /* net longwave radiation from the understory (W/m^2) */
+  double  NetShortAtmos;         /* net shortwave to the atmosphere */
+  double  NetShortGrnd;          /* net shortwave penetrating snowpack */
+  double  NetShortOver;          /* net shortwave radiation from the overstory (W/m^2) */
+  double  NetShortUnder;         /* net shortwave radiation from the understory (W/m^2) */
   double  out_long_canopy;       /* outgoing longwave to canopy */
   double  out_long_surface;      /* outgoing longwave to surface */
-  double  refreeze_energy;       /* energy used to refreeze the snowpack 
-				    (Wm-2) */
+  double  refreeze_energy;       /* energy used to refreeze the snowpack (Wm-2) */
   double  sensible;              /* net sensible heat flux (Wm-2) */
   double  shortwave;             /* net shortwave radiation (Wm-2) */
-  double  snow_flux;             /* thermal flux through the snow pack 
-				    (Wm-2) */
-  double  tdepth[MAX_FRONTS];    /* all simulated thawing front depths */
-  double  unfrozen;              /* frozen layer water content that is 
-				    unfrozen */
-  int     Nfrost;                /* number of simulated freezing fronts */
-  int     Nthaw;                 /* number of simulated thawing fronts */
-  int     T1_index;              /* soil node at the bottom of the top layer */
+  double  ShortOverIn;           /* incoming shortwave to overstory */
+  double  ShortUnderIn;          /* incoming shortwave to understory */
+  double  snow_flux;             /* thermal flux through the snow pack (Wm-2) */
 } energy_bal_struct;
 
 /***********************************************************************
@@ -1125,29 +1044,25 @@ typedef struct {
   This structure stores snow pack variables needed to run the snow model.
   ************************************************************************/
 typedef struct {
-  char   MELTING;           /* flag indicating that snowpack melted 
-			       previously */
-  int    snow;              /* TRUE = snow, FALSE = no snow */
-  double Qnet;              /* New energy at snowpack surface */
+  // State variables
   double albedo;            /* snow surface albedo (fraction) */
   double canopy_albedo;     /* albedo of the canopy (fract) */
-  double canopy_vapor_flux; /* depth of water evaporation, sublimation, or 
-			       condensation from intercepted snow (m) */
   double coldcontent;       /* cold content of snow pack */
-  double coverage;          /* fraction of snow band that is covered with 
-			       snow */
+  double coverage;          /* fraction of snow band that is covered with snow */
   double density;           /* snow density (kg/m^3) */
   double depth;             /* snow depth (m) */
-  double mass_error;        /* snow mass balance error */
+  int    last_snow;         /* time steps since last snowfall */
   double max_swq;           /* last maximum swq - used to determine coverage
 			       fraction during current melt period (m) */
-  double melt;              /* snowpack melt (mm) */
-  double pack_temp;         /* depth averaged temperature of the snowpack 
-			       (C) */
+  char   MELTING;           /* flag indicating that snowpack melted 
+			       previously */
+  double pack_temp;         /* depth averaged temperature of the snowpack (C) */
   double pack_water;        /* liquid water content of the snow pack (m) */
+  int    snow;              /* TRUE = snow, FALSE = no snow */
   double snow_canopy;       /* amount of snow on canopy (m) */
-  double store_coverage;    /* stores coverage fraction covered by new 
-			       snow (m) */
+  double store_coverage;    /* stores coverage fraction covered by new snow (m) */
+  int    store_snow;        /* flag indicating whether or not new accumulation
+			       is stored on top of an existing distribution */
   double store_swq;         /* stores newly accumulated snow over an 
 			       established snowpack melt distribution (m) */
   double surf_temp;         /* depth averaged temperature of the snow pack 
@@ -1156,15 +1071,89 @@ typedef struct {
   double swq;               /* snow water equivalent of the entire pack (m) */
   double swq_slope;         /* slope of uniform snow distribution (m/fract) */
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
+  // Fluxes
+  double blowing_flux;      /* depth of sublimation from blowing snow (m) */
+  double canopy_vapor_flux; /* depth of water evaporation, sublimation, or 
+			       condensation from intercepted snow (m) */
+  double mass_error;        /* snow mass balance error */
+  double melt;              /* snowpack melt (mm) */
+  double Qnet;              /* Residual of energy balance at snowpack surface */
+  double surface_flux;      /* depth of sublimation from blowing snow (m) */
+  double transport;	    /* flux of snow (potentially) transported from veg type */
   double vapor_flux;        /* depth of water evaporation, sublimation, or 
 			       condensation from snow pack (m) */
-  double blowing_flux;      /* depth of sublimation from blowing snow (m) */
-  double surface_flux;      /* depth of sublimation from blowing snow (m) */
-  int    last_snow;         /* time steps since last snowfall */
-  int    store_snow;        /* flag indicating whether or not new accumulation
-			       is stored on top of an existing distribution */
-  double transport;	    /* flux of snow (potentially) transported from veg type */
-} snow_data_struct;	    /* an array of size Nrec */
+} snow_data_struct;
+
+/******************************************************************
+  This structure stores the lake/wetland parameters for a grid cell
+  ******************************************************************/
+typedef struct {
+  // General information
+  int    wetland_veg_class;       /* Vegetation class of the wetland */
+  // Lake basin dimensions
+  int    numnod;                  /* Maximum number of lake nodes for this grid cell */
+  double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */  
+  double basin[MAX_LAKE_NODES+1]; /* Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
+  double Cl[MAX_LAKE_NODES+1];    /* Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
+  double b;                       /* Exponent in default lake depth-area profile (y=Ax^b) */
+  double maxdepth;                /* Maximum allowable lake depth (m) */
+  double mindepth;                /* Minimum allowable lake depth (m) */
+  double maxvolume;               /* Lake volume when lake depth is at maximum (m^3) */
+  double minvolume;               /* Lake volume when lake depth is at minimum (m^3) */
+  // Hydrological properties
+  float  bpercent;                /* Fraction of wetland baseflow (subsurface runoff) that flows into lake */
+  float  rpercent;                /* Fraction of wetland surface runoff that flows into lake */
+  double eta_a;                   /* Decline of solar radiation w/ depth (m^-1) */ /* not currently used */
+  double wfrac;                   /* Width of lake outlet, expressed as fraction of lake perimeter */
+  // Initial conditions
+  double depth_in;                /* Initial lake depth (distance from surface to deepest point) (m) */
+  int    lake_idx;                /* index number of the lake/wetland veg tile */
+} lake_con_struct;
+
+/*****************************************************************
+  This structure stores the lake/wetland variables for a grid cell
+  *****************************************************************/
+typedef struct {
+  // Current lake dimensions and liquid water state variables
+  int    activenod;               /* Number of nodes whose corresponding layers currently contain water */
+  double dz;                      /* Vertical thickness of all horizontal water layers below the surface layer (m) */
+  double surfdz;                  /* Vertical thickness of surface (top) water layer (m) */
+  double ldepth;                  /* Current depth of liquid water in lake (distance from surface to deepest point) (m) */
+  double surface[MAX_LAKE_NODES+1];/* Area of horizontal cross-section of lake at each node (at end of time step) (m^2) */
+  double sarea;                   /* Current surface area of liquid water in lake (at beginning of time step) (m^2) */
+  double volume;                  /* Current lake water volume, including liquid water equivalent of lake ice and snow (m^3) */
+  double temp[MAX_LAKE_NODES];    /* Lake water temperature at each node (C) */
+  double tempavg;                 /* Average liquid water temperature of entire lake (C) */
+  // Current properties (state variables) specific to lake ice/snow
+  double areai;                   /* Area of ice coverage (at beginning of time step) (m^2) */
+  double new_ice_area;            /* Area of ice coverage (at end of time step) (m^2) */
+  double ice_water_eq;            /* Liquid water equivalent volume of lake ice (m^3) */
+  double hice;                    /* Height of lake ice at thickest point (m) */ 
+  double tempi;                   /* Lake ice temperature (C) */
+  double swe;                     /* Water equivalence of lake snow cover (m over lake ice area) */
+  double surf_temp;               /* Temperature of surface snow layer (C) */
+  double pack_temp;               /* Temperature of pack snow layer (C) */
+  double coldcontent;             /* cold content of snow pack */
+  double surf_water;              /* Water content of surface snow layer (m over lake ice area) */
+  double pack_water;              /* Water content of pack snow layer (m over lake ice area) */
+  double SAlbedo;                 /* Albedo of lake snow (fraction) */
+  double sdepth;                  /* Depth of snow on top of ice (m over lake ice area) */
+  // Other current lake properties (derived from state variables and forcings)
+  double aero_resist;	          /* Aerodynamic resistance (s/m) after stability correction */
+  double density[MAX_LAKE_NODES]; /* Lake water density profile (kg/m^3) */
+  // Moisture fluxes
+  double evapw;                   /* Evaporative flux from lake (and ice/snow) surface (mm over lake area) */
+  double baseflow_in;             /* Baseflow into lake from the rest of the grid cell (mm over grid cell area) */
+  double baseflow_out;            /* Baseflow out of lake to channel network (mm over grid cell area) */
+  double runoff_in;               /* Surface runoff into lake from the rest of the grid cell (mm over grid cell area) */
+  double runoff_out;              /* Surface runoff out of lake to channel network (mm over grid cell area) */
+  double snowmlt;                 /* Moisture released by melting of lake snow (mm over lake ice area) */
+  // Structures compatible with other land cover types
+  // Some of this information is currently redundant with other variables in the lake_var structure
+  snow_data_struct  snow;         /* Snow pack on top of lake ice */
+  energy_bal_struct energy;       /* Energy fluxes and soil temperatures */
+  cell_data_struct  soil;         /* Soil column below lake */
+} lake_var_struct;
 
 /*****************************************************************
   This structure stores all variables needed to solve, or save 

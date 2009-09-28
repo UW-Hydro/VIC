@@ -677,10 +677,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   // initialize miscellaneous energy balance terms
   for ( veg = 0 ; veg <= Nveg ; veg++) {
     for ( band = 0; band < options.SNOW_BAND; band++ ) {
-      /* Initial estimate of LongUnderOut for use by snow_intercept() */
-      tmp = energy[veg][band].T[0] + KELVIN;
-      energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
-      energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
       /* Set fluxes to 0 */
       energy[veg][band].advected_sensible = 0.0;
       energy[veg][band].advection         = 0.0;
@@ -720,6 +716,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
       energy[veg][band].ShortOverIn       = 0.0;
       energy[veg][band].ShortUnderIn      = 0.0;
       energy[veg][band].snow_flux         = 0.0;
+      /* Initial estimate of LongUnderOut for use by snow_intercept() */
+      tmp = energy[veg][band].T[0] + KELVIN;
+      energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
+      energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
     }
   }
 

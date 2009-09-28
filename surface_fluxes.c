@@ -600,9 +600,6 @@ int surface_fluxes(char                 overstory,
 	LongUnderOut       = iter_soil_energy.LongUnderOut;
 
 	/** Solve snow accumulation, ablation and interception **/
-//if (band == 2) {
-fprintf(stdout,"rec %d hidx %d iveg %d band %d\n",rec,hidx,iveg,band);
-//}
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
 			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 

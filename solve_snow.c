@@ -233,9 +233,6 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-//if (band==2) {
-fprintf(stdout,"before snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
-//}
 	ErrorFlag = snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
 		       veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
@@ -258,9 +255,6 @@ fprintf(stdout,"before snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n"
 		       hour, iveg, month, rec, veg_class, layer_dry, 
 		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
-//if (band==2) {
-fprintf(stdout,"after snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
-//}
 
 	/* Store throughfall from canopy */
 	veg_var_wet->throughfall = rainfall[0] + snowfall[0];

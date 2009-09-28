@@ -68,6 +68,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      whether they have area > 0.  This makes it much easier to ensure
 	      that the value of Nbands stored in the state file matches the number
 	      of bands actually stored in the state file.			TJB
+  2009-Sep-28 Now stores soil, snow, and energy states from lake separately
+	      from wetland.							TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -164,6 +166,16 @@ void write_model_state(dist_prcp_struct    *prcp,
 	+ sizeof(double) // pack_water
 	+ sizeof(double) // SAlbedo
 	+ sizeof(double) // sdepth
+	+ Ndist * options.Nlayer * sizeof(double) // soil moisture
+#if SPATIAL_FROST
+	+ Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // soil ice
+#else
+	+ Ndist * options.Nlayer * sizeof(double) // soil ice
+#endif // SPATIAL_FROST
+	+ sizeof(int) // last_snow
+	+ sizeof(char) // MELTING
+	+ sizeof(double) * 9 // other snow parameters
+	+ options.Nnode * sizeof(double) // soil temperatures
 	;
     }
     fwrite( &Nbytes, sizeof(int), 1, filep->statefile );
@@ -331,6 +343,43 @@ void write_model_state(dist_prcp_struct    *prcp,
 
   if ( options.LAKES && lake_con.Cl[0] > 0 ) {
     if ( options.BINARY_STATE_FILE ) {
+      for ( dist = 0; dist < Ndist; dist ++ ) {
+	// Store both wet and dry fractions if using distributed precipitation
+
+	/* Write total soil moisture */
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	  fwrite( &lake_var.soil.layer[lidx].moist, sizeof(double), 1, filep->statefile );
+	}
+
+        /* Write average ice content */
+        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	    fwrite( &lake_var.soil.layer[lidx].ice[frost_area], sizeof(double), 1, filep->statefile );
+	  }
+#else
+	  fwrite( &lake_var.soil.layer[lidx].ice, sizeof(double), 1, filep->statefile );
+#endif // SPATIAL_FROST
+        }
+      }
+      /* Write snow data */
+      fwrite( &lake_var.snow.last_snow, sizeof(int), 1, filep->statefile );
+      fwrite( &lake_var.snow.MELTING, sizeof(char), 1, filep->statefile );
+      fwrite( &lake_var.snow.coverage, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.swq, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.surf_temp, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.surf_water, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.pack_temp, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.pack_water, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.density, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.coldcontent, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.snow_canopy, sizeof(double), 1, filep->statefile );
+      
+      /* Write soil thermal node temperatures */
+      for ( nidx = 0; nidx < options.Nnode; nidx++ ) 
+	fwrite( &lake_var.energy.T[nidx], sizeof(double), 1, filep->statefile );
+
+      /* Write lake-specific variables */
       fwrite( &lake_var.activenod, sizeof(int), 1, filep->statefile );
       fwrite( &lake_var.dz, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.surfdz, sizeof(double), 1, filep->statefile );
@@ -359,6 +408,40 @@ void write_model_state(dist_prcp_struct    *prcp,
       fwrite( &lake_var.sdepth, sizeof(double), 1, filep->statefile );
     }
     else {
+      for ( dist = 0; dist < Ndist; dist ++ ) {
+	// Store both wet and dry fractions if using distributed precipitation
+
+	/* Write total soil moisture */
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	  fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].moist );
+	}
+
+        /* Write average ice content */
+        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	    fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice[frost_area] );
+	  }
+#else
+	  fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice );
+#endif // SPATIAL_FROST
+        }
+      }
+
+      /* Write snow data */
+      fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f", 
+		 lake_var.snow.last_snow, (int)lake_var.snow.MELTING, 
+		 lake_var.snow.coverage, lake_var.snow.swq, 
+		 lake_var.snow.surf_temp, lake_var.snow.surf_water, 
+		 lake_var.snow.pack_temp, lake_var.snow.pack_water, 
+		 lake_var.snow.density, lake_var.snow.coldcontent, 
+		 lake_var.snow.snow_canopy );
+      
+      /* Write soil thermal node temperatures */
+      for ( nidx = 0; nidx < options.Nnode; nidx++ ) 
+	fprintf( filep->statefile, " %f", lake_var.energy.T[nidx] );
+      
+      /* Write lake-specific variables */
       fprintf( filep->statefile, "%d", lake_var.activenod );
       fprintf( filep->statefile, " %f", lake_var.dz );
       fprintf( filep->statefile, " %f", lake_var.surfdz );
@@ -385,6 +468,7 @@ void write_model_state(dist_prcp_struct    *prcp,
       fprintf( filep->statefile, " %f", lake_var.pack_water );
       fprintf( filep->statefile, " %f", lake_var.SAlbedo );
       fprintf( filep->statefile, " %f", lake_var.sdepth );
+
       fprintf( filep->statefile, "\n" );
     }
   }

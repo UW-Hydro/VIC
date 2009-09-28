@@ -49,9 +49,11 @@ void initialize_snow (snow_data_struct **snow,
            file read is now incorporated into a single model state
            file.                                                  KAC
   xx-xx-01 modified to initialize spatially distributed snow variables. KAC
-  11-18-02 modified to initalize blowing_snow variable.          LCB
-  2006-Oct-16 Removed unused init_snow file.  TJB
-  2009-Sep-19 Initializing last_snow to MISSING.	TJB
+  11-18-02 modified to initalize blowing_snow variable.			LCB
+  2006-Oct-16 Removed unused init_snow file.				TJB
+  2009-Sep-19 Initializing last_snow to MISSING.			TJB
+  2009-Sep-28 Added initialization of some terms that previously had
+	      not been initialized.					TJB
 
 **********************************************************************/
 {
@@ -68,25 +70,37 @@ void initialize_snow (snow_data_struct **snow,
 
   for ( i = 0 ; i <= veg_num ; i++ ) {
     for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
-      snow[i][j].snow            = 0;
-      snow[i][j].last_snow       = MISSING;
-      snow[i][j].swq             = 0.0;
-      snow[i][j].surf_temp       = 0.0;
-      snow[i][j].density         = 0.0;
-      snow[i][j].coverage        = 0.0;
-      snow[i][j].pack_water      = 0.0;
-      snow[i][j].surf_water      = 0.0;
-      snow[i][j].vapor_flux      = 0.0;
+      // State vars
+      snow[i][j].albedo            = 0.0;
+      snow[i][j].canopy_albedo     = 0.0;
+      snow[i][j].coldcontent       = 0.0;
+      snow[i][j].coverage          = 0.0;
+      snow[i][j].density           = 0.0;
+      snow[i][j].depth             = 0.0;
+      snow[i][j].last_snow         = MISSING;
+      snow[i][j].max_swq           = 0.0;
+      snow[i][j].MELTING           = FALSE;
+      snow[i][j].pack_temp         = 0.0;
+      snow[i][j].pack_water        = 0.0;
+      snow[i][j].snow              = FALSE;
+      snow[i][j].snow_canopy       = 0.0;
+      snow[i][j].store_coverage    = 0.0;
+      snow[i][j].store_snow        = FALSE;
+      snow[i][j].store_swq         = 0.0;
+      snow[i][j].surf_temp         = 0.0;
+      snow[i][j].surf_water        = 0.0;
+      snow[i][j].swq               = 0.0;
+      snow[i][j].swq_slope         = 0.0;
+      snow[i][j].tmp_int_storage   = 0.0;
+      // Fluxes
       snow[i][j].blowing_flux      = 0.0;
-      snow[i][j].pack_temp       = 0.0;
-      snow[i][j].snow_canopy     = 0.0;
-      snow[i][j].store_swq       = 0.0;
-      snow[i][j].store_snow      = FALSE;
-      snow[i][j].swq_slope       = 0.0;
-      snow[i][j].tmp_int_storage = 0.0;
-      if(snow[i][j].density>0.) 
-	snow[i][j].depth = 1000. * snow[i][j].swq / snow[i][j].density;
-      else snow[i][j].depth = 0.;
+      snow[i][j].canopy_vapor_flux = 0.0;
+      snow[i][j].mass_error        = 0.0;
+      snow[i][j].melt              = 0.0;
+      snow[i][j].Qnet              = 0.0;
+      snow[i][j].surface_flux      = 0.0;
+      snow[i][j].transport         = 0.0;
+      snow[i][j].vapor_flux        = 0.0;
     }
   }
 }

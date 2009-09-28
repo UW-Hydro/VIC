@@ -78,6 +78,10 @@ int main(int argc, char *argv[])
   2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
   2009-Jul-31 Replaced references to N+1st veg tile with references
 	      to index of lake/wetland tile.				TJB
+  2009-Sep-28 Replaced initial water/energy storage computations and
+	      calls to calc_water_balance_error/calc_energy_balance_error
+	      with an initial call to put_data.  Modified the call to
+	      read_snowband().						TJB
 **********************************************************************/
 {
 
@@ -265,10 +269,7 @@ int main(int argc, char *argv[])
 #if !OUTPUT_FORCE
 
       /** Read Elevation Band Data if Used **/
-      read_snowband(filep.snowband,soil_con.gridcel,
-		    &soil_con.elevation, &soil_con.AreaFract,
-		    &soil_con.BandElev, &soil_con.Tfactor, 
-		    &soil_con.Pfactor, &soil_con.AboveTreeLine);
+      read_snowband(filep.snowband, &soil_con);
 
       /** Make Precipitation Distribution Control Structure **/
       prcp     = make_dist_prcp(veg_con[0].vegetat_type_num);
@@ -334,79 +335,12 @@ int main(int argc, char *argv[])
       Error.filep = filep;
       Error.out_data_files = out_data_files;
 
-      /***************************************************
-	Intialize Moisture and Energy Balance Error Checks
-        --- As of 4/15/03 this does not properly initialize
-            storage from bands above treeline, when the model 
-            state is restored from a file.  This can lead to 
-            water balance errors in the initial time step but 
-            does not impact the actual simulation.  It will
-            be addressed in the next release version.  KAC
-	***************************************************/
-      storage = 0.;
-      for ( veg = 0; veg <= veg_con[0].vegetat_type_num; veg++ ) {
-	veg_fract = veg_con[veg].Cv;
-        if (veg_con[veg].LAKE) {
-          if (prcp.lake_var.areai > prcp.lake_var.sarea)
-            Clake = prcp.lake_var.areai/lake_con.basin[0];
-          else
-            Clake = prcp.lake_var.sarea/lake_con.basin[0];
-          veg_fract *= (1-Clake);
-        }
-	for ( band = 0; band < options.SNOW_BAND; band++ ) {
-	  band_fract = soil_con.AreaFract[band];
-	  if ( veg_fract > SMALL && band_fract > SMALL ) {
-	    for(index=0;index<options.Nlayer;index++) {
-	      for ( dist = 0; dist < Ndist; dist ++ ) {
-		if(dist==0) 
-		  mu = prcp.mu[veg];
-		else 
-		  mu = 1. - prcp.mu[veg];
-		storage += prcp.cell[dist][veg][band].layer[index].moist 
-		  * veg_fract * band_fract * mu;
-              }
-            }
-	    storage += prcp.snow[veg][band].swq * 1000. * veg_fract 
-	      * band_fract;
-	    if ( veg != veg_con[0].vegetat_type_num ) {
-	      for ( dist = 0; dist < Ndist; dist ++ ) {
-		if(dist==0) 
-		  mu = prcp.mu[veg];
-		else 
-		  mu = 1. - prcp.mu[veg];
-		storage += prcp.veg_var[dist][veg][band].Wdew 
-		  * veg_fract * band_fract * mu;
-	      }
-	      storage += prcp.snow[veg][band].snow_canopy * 1000. 
-		* veg_fract * band_fract;
-	    }
-	  }
-	}
-      }
-
-      if ( options.LAKES && lake_con.Cl[0] > 0) {
-        veg = lake_con.lake_idx;
-        if (prcp.lake_var.areai > prcp.lake_var.sarea)
-          Clake = prcp.lake_var.areai/lake_con.basin[0];
-        else
-          Clake = prcp.lake_var.sarea/lake_con.basin[0];
-        veg_fract = veg_con[veg].Cv * Clake;
-	/** COMPUTE MOISTURE STORAGE IN LAKE FRACTION **/
-	for(index=0;index<options.Nlayer;index++) {
-	  for ( dist = 0; dist < Ndist; dist ++ ) {
-	    if(dist==0) 
-	      mu = prcp.mu[veg];
-	    else 
-	      mu = 1. - prcp.mu[veg];
-	    storage += soil_con.max_moist[index] * veg_fract * mu;
-          }
-        }
-	storage += lake_con.Cl[0] * (prcp.lake_var.volume 
-				     / lake_con.basin[0]) * 1000.;
-      }
-
-      calc_water_balance_error(-global_param.nrecs,0.,0.,storage);
-      calc_energy_balance_error(-global_param.nrecs,0.,0.,0.,0.,0.);
+      /** Initialize the storage terms in the water and energy balances **/
+      /** Sending a negative record number (-global_param.nrecs) to dist_prec() will accomplish this **/
+      ErrorFlag = dist_prec(&atmos[0], &prcp, &soil_con, veg_con,
+		  &lake_con, dmy, &global_param, &filep, out_data_files,
+		  out_data, &save_data, -global_param.nrecs, cellnum,
+                  NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME);
 
       /******************************************
 	Run Model in Grid Cell for all Time Steps

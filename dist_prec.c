@@ -73,6 +73,7 @@ int  dist_prec(atmos_data_struct   *atmos,
   2009-Mar-03 Modified routine to store put_data() error in ErrorFlag2 and 
 	      return a single ERROR value if an error occurs.		KAC via TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-28 Added logic for initial (pre-simulation) call to put_data.TJB
 
 **********************************************************************/
 
@@ -92,6 +93,20 @@ int  dist_prec(atmos_data_struct   *atmos,
   double  Wdmax;
   double  NEW_MU;
 
+  /**************************************************
+    If rec < 0, initialize the storage terms for water and energy balances
+  **************************************************/
+  if (rec < 0) {
+    ErrorFlag2 = put_data(prcp, atmos, soil_con, veg_con,
+			  lake_con, out_data_files, out_data, save_data,
+			  &dmy[0], rec);
+    if ( ErrorFlag2 == ERROR ) ErrorFlag = ERROR;
+    return (0);
+  }
+
+  /**************************************************
+    If rec >= 0, proceed with simulation
+  **************************************************/
   // check if state file has been used to initialize storm tracking
   if ( init_DRY_TIME >= 0 ) {
     // initialize storm tracking

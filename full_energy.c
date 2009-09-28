@@ -85,6 +85,8 @@ int  full_energy(char                 NEWCELL,
   2009-Jul-31 Wetland portion of lake/wetland tile is now processed in
 	      full_energy() instead of wetland_energy().  Lake funcions are
 	      now called directly from full_energy instead of lakemain().	TJB
+  2009-Sep-28 Moved lake_snow and lake_energy into lake_var structure.
+	      Removed calls to initialize_prcp and update_prcp.			TJB
 
 **********************************************************************/
 {
@@ -160,8 +162,6 @@ int  full_energy(char                 NEWCELL,
   veg_var_struct        *wet_veg_var;
   veg_var_struct        *dry_veg_var;
   veg_var_struct         empty_veg_var;
-  energy_bal_struct      lake_energy;
-  snow_data_struct       lake_snow;
 #if EXCESS_ICE
   int                    SubsidenceUpdate = 0;
   int                    index;
@@ -263,13 +263,18 @@ int  full_energy(char                 NEWCELL,
         }
         lake_var->areai = lake_var->new_ice_area;
 
-        // Initialize lake data structures
-        band = 0;
-        ErrorFlag = initialize_prcp(prcp, &lake_energy, &lake_snow, iveg, band,
-                                *soil_con, lake_var, rec, *lake_con, &lakefrac, &fraci);
-        if ( ErrorFlag == ERROR )
-          // Return failure flag to main routine
-          return ( ErrorFlag );
+        if((lake_var->areai >= lake_var->sarea) && lake_var->areai > 0.0) {
+          lakefrac = lake_var->areai/lake_con->basin[0];
+          fraci = 1.0;
+        }
+        else if (lake_var->areai > 0.0) {
+          fraci = lake_var->areai/lake_var->sarea;
+          lakefrac = lake_var->sarea/lake_con->basin[0];
+        }
+        else { /* ice area = 0.0 */
+          fraci = 0.0;
+          lakefrac = lake_var->sarea/lake_con->basin[0];
+        }
 
         Nbands = 1;
         Cv *= (1-lakefrac);
@@ -811,7 +816,7 @@ int  full_energy(char                 NEWCELL,
      **********************************************************************/
 
     oldvolume = lake_var->volume;
-    oldsnow = lake_snow.swq;
+    oldsnow = lake_var->snow.swq;
     snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
     rainprec = gauge_correction[SNOW] * rainonly;
     atmos->out_prec += (snowprec + rainprec) * lake_con->Cl[0] * lakefrac;
@@ -822,8 +827,7 @@ int  full_energy(char                 NEWCELL,
                            atmos->vpd[NR] / 1000.,
                            atmos->pressure[NR] / 1000.,
                            atmos->density[NR], lake_var, *lake_con,
-                           *soil_con, gp->dt, rec, &lake_energy, &lake_snow,
-                           gp->wind_h, dmy[rec], fraci);
+                           *soil_con, gp->dt, rec, gp->wind_h, dmy[rec], fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);
 
     /**********************************************************************
@@ -836,18 +840,9 @@ int  full_energy(char                 NEWCELL,
                               SubsidenceUpdate, total_meltwater,
 #endif
                               snowprec+rainprec, oldvolume,
-                              oldsnow-lake_snow.swq, lake_snow.vapor_flux,
+                              oldsnow-lake_var->snow.swq, lake_var->snow.vapor_flux,
                               fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);
-
-    /**********************************************************************
-     * Reallocate fluxes between lake and wetland fractions.
-     **********************************************************************/
-
-    update_prcp(prcp, &lake_energy, &lake_snow, lakefrac, lake_var,
-                *lake_con, iveg, band, *soil_con);
-
-
 
 #if LINK_DEBUG
     if ( debug.PRT_LAKE ) { 

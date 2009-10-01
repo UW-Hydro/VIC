@@ -15,10 +15,11 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   Modifications:
   09-24-98 Modified to remove root fractions from the library file.
            See read_vegparam.c and calc_root_fraction.c for new
-           root fraction distribution information.               KAC
+           root fraction distribution information.               	KAC
   2009-Jun-09 Modified to use extension of veg_lib structure to contain
 	      bare soil information, as well as other land cover types
-	      used in potential evap calcualtions.		TJB
+	      used in potential evap calcualtions.			TJB
+  2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -58,6 +59,10 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       fscanf(veglib, "%lf", &temp[i].rmin);
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].LAI[j]);
+        if (!options.GLOBAL_LAI && temp[i].overstory && temp[i].LAI[j] == 0) {
+          sprintf(ErrStr,"ERROR: veg library: the specified veg class (%d) is listed as an overstory class, but the LAI given for this class for month %d is 0\n", temp[i].veg_class, j);
+          nrerror(ErrStr);
+        }
         temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
       }
       for (j = 0; j < 12; j++) {

@@ -765,6 +765,25 @@ Fixed errors in summing output variables
 
 
 
+Added error messages for case when LAI==0 and overstory==1.
+
+	Files Affected:
+
+	read_veglib.c
+	read_vegparam.c
+
+	Description:
+
+	Added error messages for case when LAI==0 and overstory==1.  Without
+	this check, a user could specify LAI of 0 for an overstory type (e.g.
+	a deciduous tree).  Unforutunately, the model code assumes that the
+	overstory itself always contains some minimum LAI (perhaps assuming
+	that the LAI contains stem area as well?), and in some cases divides
+	by the LAI.  If LAI ever is 0 for an overstory type, this will lead
+	to nan values in evap, soil moisture, canopy storage, etc.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.0 beta r4 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

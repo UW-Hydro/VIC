@@ -112,6 +112,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      wetland veg tile, and lake.  Added logic to handle an
 	      initial (pre-simulation) call for purpose of initializing
 	      water and energy balance checks.				TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.			TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -441,8 +442,8 @@ int  put_data(dist_prcp_struct  *prcp,
             // Store Lake-Specific Variables
 
             // Lake ice
-            if (lake_var.areai > 0.0) {
-              out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.areai) * ice_density / RHO_W;
+            if (lake_var.new_ice_area > 0.0) {
+              out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.new_ice_area) * ice_density / RHO_W;
               out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
               out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
             }
@@ -452,33 +453,26 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data[OUT_LAKE_ICE_HEIGHT].data[0]   = 0.0;
             }
 
-            ErrorFlag = get_depth(*lake_con, lake_var.volume, &(out_data[OUT_LAKE_DEPTH].data[0]));
-            if (ErrorFlag == ERROR) {
-              fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var.volume, out_data[OUT_LAKE_DEPTH].data[0], rec);
-              exit(0);
-            }
-
-	    ErrorFlag = get_sarea(*lake_con, out_data[OUT_LAKE_DEPTH].data[0], &(out_data[OUT_LAKE_SURF_AREA].data[0]));
-	    if ( ErrorFlag == ERROR ) {
-	      fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,out_data[OUT_LAKE_DEPTH].data[0], out_data[OUT_LAKE_SURF_AREA].data[0]);
-	      return ( ErrorFlag );
-	    }
-            if(lake_var.areai >= out_data[OUT_LAKE_SURF_AREA].data[0] && lake_var.areai > 0.0) {
-              out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.areai;
+            // Lake dimensions
+            out_data[OUT_LAKE_DEPTH].data[0] = lake_var.ldepth;
+            if(lake_var.new_ice_area >= lake_var.surface[0]) {
               out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
+              out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.new_ice_area;
             }
             else {
               if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0)
-                out_data[OUT_LAKE_ICE_FRACT].data[0]  = (lake_var.areai/out_data[OUT_LAKE_SURF_AREA].data[0]);
+                out_data[OUT_LAKE_ICE_FRACT].data[0]  = lake_var.new_ice_area/lake_var.surface[0];
               else
                 out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
+              out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.surface[0];
             }
-     
             out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
+
+            // Other lake characteristics
             out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
             if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0) {
-              out_data[OUT_LAKE_MOIST].data[0]      = (lake_var.volume / out_data[OUT_LAKE_SURF_AREA].data[0]) * 1000. * Clake * Cv * ThisAreaFract * ThisTreeAdjust; // mm over gridcell
-              out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume / out_data[OUT_LAKE_SURF_AREA].data[0]) * 1000. * Clake * Cv * ThisAreaFract * ThisTreeAdjust; // same as OUT_LAKE_MOIST
+              out_data[OUT_LAKE_MOIST].data[0]      = (lake_var.volume / soil_con->cell_area) * 1000.; // mm over gridcell
+              out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume / soil_con->cell_area) * 1000.; // same as OUT_LAKE_MOIST
             }
             else {
               out_data[OUT_LAKE_MOIST].data[0] = 0;

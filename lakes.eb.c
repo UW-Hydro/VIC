@@ -5,8 +5,8 @@
 
 static char vcid[] = "$Id$";
 
-int solve_lake(double             snow,
-	       double             rain,
+int solve_lake(double             snowfall,
+	       double             rainfall,
 	       double             tair, 
 	       double             wind, 
 	       double             vp, 
@@ -73,6 +73,7 @@ int solve_lake(double             snow,
   2009-Sep-28 Removed initialize_prcp() and update_prcp().  Changed
 	      final units of runoff_out, baseflow_out, and evapw to
 	      mm over lake (to be consistent with changes in put_data).	TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.			TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -110,7 +111,6 @@ int solve_lake(double             snow,
   double T_lower, T_upper;
   double Tsurf;
   double new_ice_height;
-  double rainfall, snowfall;
   double windw, windi;
   double energy_ice_formation;
   double energy_ice_melt_bot;
@@ -176,31 +176,31 @@ int solve_lake(double             snow,
      * 2. Calculate added precipitation and total snow height.
      **********************************************************************/
 
-    if ( fracprv >= 1.0) {  /* areai is relevant */
-      rainfall = rain;
-      snowfall = snow;
+    // Convert swq from mm/(lake area) to mm/(ice area)
+    if (fracprv > 0.0 && lake_snow->swq > 0.0)
+      lake_snow->swq /= fracprv;
 
-      // If there is no snow, add the rain directly to the lake.
+    if ( fracprv >= 1.0) {  /* areai is relevant */
+
+      // If there is no snow, add the rain over ice directly to the lake.
       if(lake_snow->swq <=0.0 && rainfall > 0.0) {
         lake->volume += (rainfall/1000.)*lake->areai;
         rainfall = 0.0;
       }
     }
-    else if ( fracprv > FRACLIM && fracprv < 1.0 ) { /*sarea is relevant */
-      rainfall = rain;
-      snowfall = snow;
+    else if ( fracprv > FRACLIM && fracprv < 1.0 ) { /* sarea is relevant */
 
       /* Precip over open water directly increases lake volume. */
-      lake->volume += ( (snow/1000. + rain/1000.)*(1-fracprv)
-                        * lake->sarea );
+      lake->volume += ( (snowfall/1000. + rainfall/1000.)*(1-fracprv) * lake->sarea );
 
+      // If there is no snow, add the rain over ice directly to the lake.
       if(lake_snow->swq <= 0.0 && rainfall > 0.0) {
-        lake->volume += (rain/1000.)*fracprv*lake->sarea;
+        lake->volume += (rainfall/1000.)*fracprv*lake->sarea;
         rainfall = 0.0; /* Because do not want it added to snow->surf_water */
       }
     }
     else {
-      lake->volume += ((rain+snow)/1000.)*lake->sarea;
+      lake->volume += ((rainfall+snowfall)/1000.)*lake->sarea;
       rainfall = 0.0;
       snowfall = 0.0;
     }
@@ -1812,11 +1812,11 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
 }
 
 int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con, 
+		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
 #if EXCESS_ICE
 		    int SubsidenceUpdate, double total_meltwater,
 #endif
-		    double prec,  double oldvolume, double deltasnow, double vapor_flux, double fracprv)
+		    double deltasnow, double vapor_flux)
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1831,12 +1831,14 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2008-Apr-21 Corrected some omissions from the previous mods.			LCB via TJB
   2009-Mar-16 Inserted missing logic for SPATIAL_FROST and replaced resid_moist
 	      with min_liq.							TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.				TJB
 **********************************************************************/
 {
   extern option_struct   options;
   int isave_n;
   double d_area, d_level, d_volume;
   double runoff_volume;
+  double oldvolume;
   double tempvolume,surfacearea,ldepth;
   double remain;
   double i;
@@ -1856,16 +1858,29 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double newfraction, Recharge;
   int ErrorFlag;
   cell_data_struct    ***cell;
+  veg_var_struct      ***veg_var;
+  snow_data_struct     **snow;
+  energy_bal_struct    **energy;
   int lindex;
   double frac;
   double Dsmax, min_liq, liq, rel_moist;
   double *frost_frac;
+  double volume_save;
+  int dist, Ndist;
 
   cell    = prcp->cell;
+  veg_var = prcp->veg_var;
+  snow    = prcp->snow;
+  energy  = prcp->energy;
 
 #if SPATIAL_FROST
   frost_fract = soil_con.frost_fract;
 #endif
+
+  if (options.DIST_PRCP)
+    Ndist = 2;
+  else
+    Ndist = 1;
 
   /**********************************************************************
    * 1. convert runoff input/output volume to rate
@@ -1876,13 +1891,13 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   /* Assume baseflow enters lake in same proportion as runoff. */
   bpercent = lake_con.rpercent;
 
-  /* Convert from mm to m3. */
+  /* Convert from mm over lake area to m3. */
 #if EXCESS_ICE
   if(SubsidenceUpdate > 0 ) 
-    runoff_volume = ( ( ( lake->runoff_in + lake->baseflow_in + total_meltwater*lake_con.Cl[0]*lakefrac) / 1000. ) * soil_con.cell_area );  
+    runoff_volume = ( (lake->runoff_in + lake->baseflow_in + total_meltwater) / 1000. ) * soil_con.cell_area*lake_con.Cl[0]*lakefrac;
   else
 #endif
-    runoff_volume = ( ( ( lake->runoff_in + lake->baseflow_in) / 1000. ) * soil_con.cell_area );  
+    runoff_volume = ( (lake->runoff_in + lake->baseflow_in) / 1000. ) * soil_con.cell_area*lake_con.Cl[0]*lakefrac;
 
   /**********************************************************************
    * 2. calculate change in lake level
@@ -1907,65 +1922,106 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
   inflow = ( runoff_volume + snowmltvolume-evapvolume);
 
-  // Find new lake depth and surface area of the unfrozen portion for recharge calculations
-
+  // Estimate new lake depth and surface area of the unfrozen portion for recharge calculations
+  volume_save = lake->volume;
+  if(lake->ice_water_eq > (lake->volume - lake->ice_water_eq)) /* Ice is not buoyant. */
+    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);  
+  else
     ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
 
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,ldepth);
     return ( ErrorFlag );
   }
-  ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
 
+  ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth,surfacearea);
     return ( ErrorFlag );
   }
 
-  // Extract moisture for recharge first
-  if(lake->areai > surfacearea)
-    newfraction = lake->areai/lake_con.basin[0];
+  if(lake->new_ice_area > surfacearea)
+    newfraction = lake->new_ice_area/lake_con.basin[0];
   else
     newfraction = surfacearea/lake_con.basin[0];
 
-  if(newfraction > lakefrac) {
+  // Based on the above initial estimate of lake area, the lake
+  // will either inundate some of the wetland or will recede and
+  // expose new wetland.  In the case of inundation, we will
+  // take all above-ground moisture storage (snowpack, etc) and
+  // give it to the lake, but at the same time we will take water
+  // from the lake and fill the inundated soil to saturation.
+  // In the case of a receding lake, newly-exposed wetland is
+  // assumed to have saturated soil and 0 above-ground storage.
 
-  // Check if sufficient liquid volume exists to 'fill' newly flooded soil
-  // If not enough liquid water level goes to zero.
+  // Note:
+  // This does not account for phase changes and temperature
+  // changes, so will generate some energy balance errors.
+  // In addition, these moisture exchanges with the wetland
+  // will make our initial estimate of the new lake area
+  // somewhat inaccurate.  However, lake dimensions will be
+  // recalculated after runoff and baseflow are subtracted
+  // from the lake.
+
+  if(newfraction > lakefrac) {
 
     Recharge = 0.0;
     for(j=0; j<options.Nlayer; j++) {
-      Recharge += ((soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist ) / 1000. )
-        * (newfraction-lakefrac) * lake_con.basin[0];
+      Recharge += ((soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist ) / 1000. ) * (newfraction-lakefrac) * lake_con.basin[0];
     }
+    Recharge -= (veg_var[WET][iveg][band].Wdew/1000. + snow[iveg][band].snow_canopy + snow[iveg][band].swq) * (newfraction-lakefrac) * lake_con.basin[0];
 
+    /* Update wetland above-surface moisture storage terms. */
+    // Above-ground storage goes to 0 in inundated area
+    for ( dist = 0; dist < Ndist; dist++ ) {
+      veg_var[dist][iveg][band].Wdew *= (1-newfraction)/(1-lakefrac);
+    }
+    snow[iveg][band].depth *= (1-newfraction)/(1-lakefrac);
+    snow[iveg][band].pack_water *= (1-newfraction)/(1-lakefrac);
+    snow[iveg][band].snow_canopy *= (1-newfraction)/(1-lakefrac);
+    snow[iveg][band].surf_water *= (1-newfraction)/(1-lakefrac);
+    snow[iveg][band].swq *= (1-newfraction)/(1-lakefrac);
+
+    // Fill the soil to saturation if possible in inundated area
+    // Subtract the Recharge (which may be negative) from the lake
     if(lake->volume-lake->ice_water_eq > Recharge) {
       lake->volume -= Recharge;
+      lake->recharge = Recharge*1000/(lake_con.basin[0]*lakefrac); // mm over lake area
 
-      /* Update soil moisture storage terms. */
+      /* Update wetland soil moisture storage terms. */
       for(j=0; j<options.Nlayer; j++) {
-        cell[DRY][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[DRY][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.-lakefrac);
-        cell[WET][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[WET][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.-lakefrac);
+        for ( dist = 0; dist < Ndist; dist++ ) {
+          cell[dist][iveg][band].layer[j].moist += (soil_con.max_moist[j] -cell[dist][iveg][band].layer[j].moist )*(newfraction-lakefrac)/(1.-lakefrac);
+        }
       }
     }
     else {
 
-      Recharge = (lake->volume-lake->ice_water_eq)* 1000./((1.-lakefrac)*lake_con.basin[0]);
+      Recharge = (lake->volume-lake->ice_water_eq)* 1000./((1.-lakefrac)*lake_con.basin[0]) - (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.)*(newfraction-lakefrac)/(1.-lakefrac);
       lake->volume = lake->ice_water_eq;
+      lake->recharge = Recharge*(1-lakefrac)/lakefrac; // mm over lake area
 
       for(j=0; j<options.Nlayer; j++) {
 
         if(Recharge > (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist)) {
           Recharge -= (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist);
-          cell[WET][iveg][band].layer[j].moist = soil_con.max_moist[j];
+          for ( dist = 0; dist < Ndist; dist++ ) {
+            cell[dist][iveg][band].layer[j].moist = soil_con.max_moist[j];
+          }
         }
         else {
-          cell[WET][iveg][band].layer[j].moist += Recharge;
+          for ( dist = 0; dist < Ndist; dist++ ) {
+            cell[dist][iveg][band].layer[j].moist += Recharge;
+          }
           Recharge = 0.0;
         }
       }
 
     }
+
+  }
+  else {
+    lake->recharge = 0.0;
   }
 
   /**********************************************************************
@@ -2047,6 +2103,15 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     }
   }
 
+  // Check that lake volume does not exceed our earlier estimate.
+  // This will prevent runaway lake growth for the case in which
+  // the lake recharge to wetland is negative and large enough to
+  // more than compensate for runoff and baseflow out of the lake.
+  if (lake->volume > volume_save) {
+    lake->runoff_out += lake->volume - volume_save;
+    lake->volume = volume_save;
+  }
+
   // check that lake volume does not exceed its maximum
   if (lake->volume - lake_con.maxvolume > SMALL) {
     if(lake->ice_water_eq > lake_con.maxvolume) {
@@ -2085,12 +2150,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,lake->ldepth);
     return ( ErrorFlag );
   }
-//if (lake->areai > 0) {
-//fprintf(stdout, "rec %d swe %f areai %f sarea %f surface0 %f fraci %f\n",rec,lake->swe,lake->areai,lake->sarea,lake->surface[0],lake->areai/lake->sarea);
-//}
-//if (lake->swe> 0) {
-//fprintf(stdout, "rec %d swe %f areai %f sarea %f surface0 %f fraci %f\n",rec,lake->swe,lake->areai,lake->sarea,lake->surface[0],lake->areai/lake->sarea);
-//}
 
   /**********************************************************************
    *  4. Adjust the activenodes and lake area array. 
@@ -2141,6 +2200,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       return ( ErrorFlag );
     }
   }
+  if (lake->new_ice_area > lake->surface[0])
+    newfraction = lake->new_ice_area/lake_con.basin[0];
+  else
+    newfraction = lake->surface[0]/lake_con.basin[0];
   
   /*******************************************************************/  
   /* Adjust temperature distribution if number of nodes has changed. 
@@ -2172,11 +2235,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   lake->soil.baseflow = lake->baseflow_out;
   lake->soil.inflow = lake->baseflow_out;
  
-  // DEBUG water balance
-  storage = oldvolume - lake->volume;
-
   return(0);
 
 }
-
 

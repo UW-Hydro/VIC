@@ -87,6 +87,7 @@
   2009-Sep-19 Changed Cp to be 1013, the value for moist air.		TJB
   2009-Sep-19 Made TFALLBACK a separate option from CONTINUEONERROR.	TJB
   2009-Sep-28 Added snow and energy structures to lake_var_struct.	TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.			TJB
 
 *********************************************************************/
 
@@ -1142,11 +1143,12 @@ typedef struct {
   double aero_resist;	          /* Aerodynamic resistance (s/m) after stability correction */
   double density[MAX_LAKE_NODES]; /* Lake water density profile (kg/m^3) */
   // Moisture fluxes
+  double baseflow_in;             /* Baseflow into lake from the rest of the grid cell (mm over lake area) */
+  double baseflow_out;            /* Baseflow out of lake to channel network (mm over lake area) */
   double evapw;                   /* Evaporative flux from lake (and ice/snow) surface (mm over lake area) */
-  double baseflow_in;             /* Baseflow into lake from the rest of the grid cell (mm over grid cell area) */
-  double baseflow_out;            /* Baseflow out of lake to channel network (mm over grid cell area) */
-  double runoff_in;               /* Surface runoff into lake from the rest of the grid cell (mm over grid cell area) */
-  double runoff_out;              /* Surface runoff out of lake to channel network (mm over grid cell area) */
+  double recharge;                /* Recharge from lake to wetland (mm over lake area) */
+  double runoff_in;               /* Surface runoff into lake from the rest of the grid cell (mm over lake area) */
+  double runoff_out;              /* Surface runoff out of lake to channel network (mm over lake area) */
   double snowmlt;                 /* Moisture released by melting of lake snow (mm over lake ice area) */
   // Structures compatible with other land cover types
   // Some of this information is currently redundant with other variables in the lake_var structure

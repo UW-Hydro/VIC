@@ -50,6 +50,7 @@ int initialize_lake (lake_var_struct   *lake,
 	      exist outside of full_energy().				TJB
   2009-Sep-28 Added initialization of the new lake->snow, lake->soil,
 	      and lake->energy structures.				TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -62,6 +63,7 @@ int initialize_lake (lake_var_struct   *lake,
   double depth;
   double remain;
   double in;
+  double tmp_volume;
 
   /*  Assume no ice present, lake completely equilibrated with atmosphere. */
 
@@ -128,18 +130,24 @@ int initialize_lake (lake_var_struct   *lake,
   }
 
   lake->sarea = lake->surface[0];
-  status = get_volume(lake_con, lake->ldepth, &(lake->volume));
+  status = get_volume(lake_con, lake->ldepth, &tmp_volume);
   if (status < 0) {
-    fprintf(stderr, "Error in get_volume: record = %d, depth = %f, volume = %e\n",0,depth,lake->volume);
+    fprintf(stderr, "Error in get_volume: record = %d, depth = %f, volume = %e\n",0,depth,tmp_volume);
     return(status);
   }
   else if (status > 0) {
     fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
   }
+  lake->volume = tmp_volume+lake->ice_water_eq;
  
- 
-  lake->runoff_out=0.0;
+  // Initialize lake moisture fluxes to 0
+  lake->baseflow_in=0.0;
   lake->baseflow_out=0.0;
+  lake->evapw=0.0;
+  lake->recharge=0.0;
+  lake->runoff_in=0.0;
+  lake->runoff_out=0.0;
+  lake->snowmlt=0.0;
 
   // Initialize the snow, energy, and soil components of lake structure
   // If we implement heat flux between lake and underlying soil, we will need to initialize these more correctly
@@ -445,6 +453,7 @@ int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, doub
           1: Warning: ice volume negative; setting to 0
       ERROR: Error: ice depth cannot be reconciled with given ice volume
              and water equivalent
+  2009-Sep-30 Miscellaneous fixes for lake model.				TJB
 ******************************************************************************/
 {
   int k;
@@ -463,7 +472,10 @@ int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, doub
     status = 1;
   }
 
-  status = get_depth(lake_con, volume-ice_water_eq, &ldepth);
+  if(ice_water_eq > (volume - ice_water_eq)) /* Ice is not buoyant. */
+    status = get_depth(lake_con, volume-ice_water_eq, &ldepth);
+  else
+    status = get_depth(lake_con, volume, &ldepth);
   if (status == ERROR) return(ERROR);
   status = get_sarea(lake_con, ldepth, &surfacearea);
   if (status == ERROR) return(ERROR);

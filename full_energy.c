@@ -87,6 +87,7 @@ int  full_energy(char                 NEWCELL,
 	      now called directly from full_energy instead of lakemain().	TJB
   2009-Sep-28 Moved lake_snow and lake_energy into lake_var structure.
 	      Removed calls to initialize_prcp and update_prcp.			TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.				TJB
 
 **********************************************************************/
 {
@@ -142,13 +143,14 @@ int  full_energy(char                 NEWCELL,
   float 	         sigma_slope;
   float  	         fetch;
   int                    pet_veg_class;
-  double                 ldepth;
   double                 lakefrac;
   double                 fraci;
   double                 wetland_runoff;
   double                 wetland_baseflow;
-  double                 oldvolume;
   double                 oldsnow;
+//  double                 oldstorage;
+//  double                 newfrac;
+//  double                 wberror;
   double                 snowprec;
   double                 rainprec;
   lake_var_struct       *lake_var;
@@ -251,28 +253,23 @@ int  full_energy(char                 NEWCELL,
       if (veg_con[iveg].LAKE) {
 
         /* Update sarea to equal new surface area from previous time step. */
-        ErrorFlag = get_depth(*lake_con, lake_var->volume, &ldepth);
-        if (ErrorFlag == ERROR) {
-          fprintf(stderr,"ERROR: problem in get_depth(): volume %f depth %f rec %d\n", lake_var->volume, ldepth, rec);
-          return ( ErrorFlag );
-        }
-        ErrorFlag = get_sarea(*lake_con, ldepth, &(lake_var->sarea));
-        if ( ErrorFlag == ERROR ) {
-          fprintf(stderr, "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n",rec,ldepth, lake_var->sarea);
-          return ( ErrorFlag );
-        }
+        lake_var->sarea = lake_var->surface[0];
+        if (lake_var->sarea < 0) lake_var->sarea = 0;
+
+        /* Update areai to equal new ice area from previous time step. */
         lake_var->areai = lake_var->new_ice_area;
 
-        if((lake_var->areai >= lake_var->sarea) && lake_var->areai > 0.0) {
-          lakefrac = lake_var->areai/lake_con->basin[0];
+        /* Compute lake fraction and ice-covered fraction */
+        if (lake_var->areai < 0) lake_var->areai = 0;
+        if (lake_var->areai >= lake_var->sarea) {
           fraci = 1.0;
+          lakefrac = lake_var->areai/lake_con->basin[0];
         }
-        else if (lake_var->areai > 0.0) {
-          fraci = lake_var->areai/lake_var->sarea;
-          lakefrac = lake_var->sarea/lake_con->basin[0];
-        }
-        else { /* ice area = 0.0 */
-          fraci = 0.0;
+        else {
+          if (lake_var->sarea > 0)
+            fraci = lake_var->areai/lake_var->sarea;
+          else
+            fraci = 0.0;
           lakefrac = lake_var->sarea/lake_con->basin[0];
         }
 
@@ -458,25 +455,17 @@ int  full_energy(char                 NEWCELL,
             Compute soil wetness and root zone soil moisture
           ********************************************************/
           // Loop through distributed precipitation fractions
-          for ( dist = 0; dist < 2; dist++ ) {
+          for ( dist = 0; dist < Ndist; dist++ ) {
             cell[dist][iveg][band].rootmoist = 0;
             cell[dist][iveg][band].wetness = 0;
             for(lidx=0;lidx<options.Nlayer;lidx++) {
-#if SPATIAL_FROST
-              tmp_total_moist = cell[dist][iveg][band].layer[lidx].moist;
-              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-                tmp_total_moist += cell[dist][iveg][band].layer[lidx].ice[frost_area];
-	      }
-#else
-              tmp_total_moist = cell[dist][iveg][band].layer[lidx].moist + cell[dist][iveg][band].layer[lidx].ice;
-#endif // SPATIAL_FROST 
               if (veg_con->root[lidx] > 0) {
-                cell[dist][iveg][band].rootmoist += tmp_total_moist;
+                cell[dist][iveg][band].rootmoist += cell[dist][iveg][band].layer[lidx].moist;
               }
 #if EXCESS_ICE
-	      cell[dist][iveg][band].wetness += (tmp_total_moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+	      cell[dist][iveg][band].wetness += (cell[dist][iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
 #else
-	      cell[dist][iveg][band].wetness += (tmp_total_moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+	      cell[dist][iveg][band].wetness += (cell[dist][iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
 #endif
             }
             cell[dist][iveg][band].wetness /= options.Nlayer;
@@ -803,8 +792,8 @@ int  full_energy(char                 NEWCELL,
     /** Run lake model **/
     iveg = lake_con->lake_idx;
     band = 0;
-    lake_var->runoff_in   = sum_runoff * lake_con->rpercent + wetland_runoff;
-    lake_var->baseflow_in = sum_baseflow * lake_con->rpercent + wetland_baseflow;
+    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)/(lake_con->Cl[0]*lakefrac); // mm over lake area
+    lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)/(lake_con->Cl[0]*lakefrac); // mm over lake area
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
     if ( (int)rainonly == ERROR ) {
@@ -812,10 +801,10 @@ int  full_energy(char                 NEWCELL,
     }
 
     /**********************************************************************
-     * Solve the energy budget for the lake.
+       Solve the energy budget for the lake.
      **********************************************************************/
 
-    oldvolume = lake_var->volume;
+//    oldstorage = lake_var->volume/(lake_con->basin[0]*lakefrac);
     oldsnow = lake_var->snow.swq;
     snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
     rainprec = gauge_correction[SNOW] * rainonly;
@@ -831,7 +820,7 @@ int  full_energy(char                 NEWCELL,
     if ( ErrorFlag == ERROR ) return (ERROR);
 
     /**********************************************************************
-     * Solve the water budget for the lake.
+       Solve the water budget for the lake.
      **********************************************************************/
 
     ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, prcp, rec, iveg, band,
@@ -839,10 +828,18 @@ int  full_energy(char                 NEWCELL,
 #if EXCESS_ICE
                               SubsidenceUpdate, total_meltwater,
 #endif
-                              snowprec+rainprec, oldvolume,
-                              oldsnow-lake_var->snow.swq, lake_var->snow.vapor_flux,
-                              fraci);
+                              oldsnow-lake_var->snow.swq, lake_var->snow.vapor_flux);
     if ( ErrorFlag == ERROR ) return (ERROR);
+
+//    if (lake_var->new_ice_area > lake_var->surface[0]) {
+//      newfrac = 1.0;
+//    }
+//    else {
+//      newfrac = lake_var->new_ice_area/lake_var->surface[0];
+//    }
+//    
+//    wberror = snowprec + rainprec + lake_var->runoff_in + lake_var->baseflow_in - lake_var->evapw - lake_var->runoff_out - lake_var->baseflow_out -lake_var->recharge - lake_var->snow.vapor_flux*1000 + oldstorage*1000 + oldsnow*1000 - lake_var->volume/(lake_con->basin[0]*lakefrac)*1000 - lake_var->snow.swq*1000;
+//  fprintf(stdout,"rec %d lake wberror %.6f                  fraci %.6f newfrac %.6f snow %.6f rain %.6f runin %.6f bflowin %.6f evap %.6f runout %.6f bflowout %.6f recharge %.6f sub %.6f oldstor %.6f oldsnow %.6f newstor %.6f newsnow %.6f ldepth %f areai %f sarea %f\n",rec,wberror,fraci,newfrac,snowprec,rainprec,lake_var->runoff_in/(lake_con->Cl[0] * lakefrac),lake_var->baseflow_in/(lake_con->Cl[0] * lakefrac),lake_var->evapw,lake_var->runoff_out,lake_var->baseflow_out,lake_var->recharge,lake_var->snow.vapor_flux*1000,oldstorage*1000,oldsnow*1000,lake_var->volume/(lake_con->basin[0]*lakefrac)*1000,lake_var->snow.swq*1000,lake_var->ldepth,lake_var->new_ice_area,lake_var->surface[0]);
 
 #if LINK_DEBUG
     if ( debug.PRT_LAKE ) { 

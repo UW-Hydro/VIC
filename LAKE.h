@@ -17,6 +17,7 @@
 	      no longer takes a snow structure as input.		TJB
   2009-Sep-28 Removed initialize_prcp and update_prcp.  Modified
 	      argument list of initialize_lake.				TJB
+  2009-Sep-30 Miscellaneous fixes for lake model.			TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -65,13 +66,21 @@ void alblake(double, double, double *, double *, float *, float *, double, doubl
 	     int, int *, double, double, char *, int);
 void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
+double CalcIcePackEnergyBalance(double Tsurf, ...);
 void colavg (double *, double *, double *, float, double *, int, double, double);
 float dragcoeff(float, double, double);
 void eddy (int, double, double * , double *, double *, double, int, double, double);
 void energycalc(double *, double *, int, double, double,double *, double *, double *);
+double ErrorIcePackEnergyBalance(double Tsurf, ...);
+double ErrorPrintIcePackEnergyBalance(double, va_list);
+int get_depth(lake_con_struct, double, double *);
+int get_sarea(lake_con_struct, double, double *);
+int get_volume(lake_con_struct, double, double *);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
 int ice_depth(lake_con_struct, double, double, double *);
+int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
+double IceEnergyBalance(double, va_list);
 int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, double);
 int lakeice(double *, double, double, double, double, int, 
 	    double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
@@ -87,22 +96,10 @@ double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
-int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct, 
+int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct,
 #if EXCESS_ICE
 		    int, double,
 #endif		    
-		    double, double, double, double, double);
-double func_lake_energy_balance(double, va_list);
-double solve_surf_energy_bal(double Tsurf, ...);
-int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
-double CalcIcePackEnergyBalance(double Tsurf, ...);
-double func_lake_energy_bal(double , va_list);
-double IceEnergyBalance(double, va_list);
-double ErrorPrintIcePackEnergyBalance(double, va_list);
-double ErrorIcePackEnergyBalance(double Tsurf, ...);
+		    double, double);
 int  water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);
-void write_lake_var(lake_var_struct, int);
-int get_depth(lake_con_struct, double, double *);
-int get_sarea(lake_con_struct, double, double *);
-int get_volume(lake_con_struct, double, double *);

@@ -88,6 +88,9 @@ int  full_energy(char                 NEWCELL,
   2009-Sep-28 Moved lake_snow and lake_energy into lake_var structure.
 	      Removed calls to initialize_prcp and update_prcp.			TJB
   2009-Sep-30 Miscellaneous fixes for lake model.				TJB
+  2009-Oct-05 Miscellaneous fixes for lake model, including updating/
+	      rescaling of lake and wetland storages and fluxes to account
+	      for changes in lake area.						TJB
 
 **********************************************************************/
 {
@@ -148,9 +151,6 @@ int  full_energy(char                 NEWCELL,
   double                 wetland_runoff;
   double                 wetland_baseflow;
   double                 oldsnow;
-//  double                 oldstorage;
-//  double                 newfrac;
-//  double                 wberror;
   double                 snowprec;
   double                 rainprec;
   lake_var_struct       *lake_var;
@@ -275,6 +275,9 @@ int  full_energy(char                 NEWCELL,
 
         Nbands = 1;
         Cv *= (1-lakefrac);
+
+        if (Cv == 0)
+          continue;
 
       }
 
@@ -804,7 +807,6 @@ int  full_energy(char                 NEWCELL,
        Solve the energy budget for the lake.
      **********************************************************************/
 
-//    oldstorage = lake_var->volume/(lake_con->basin[0]*lakefrac);
     oldsnow = lake_var->snow.swq;
     snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
     rainprec = gauge_correction[SNOW] * rainonly;
@@ -824,22 +826,12 @@ int  full_energy(char                 NEWCELL,
      **********************************************************************/
 
     ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, prcp, rec, iveg, band,
-                              lakefrac, *soil_con,
+                              lakefrac, *soil_con, *veg_con,
 #if EXCESS_ICE
                               SubsidenceUpdate, total_meltwater,
 #endif
                               oldsnow-lake_var->snow.swq, lake_var->snow.vapor_flux);
     if ( ErrorFlag == ERROR ) return (ERROR);
-
-//    if (lake_var->new_ice_area > lake_var->surface[0]) {
-//      newfrac = 1.0;
-//    }
-//    else {
-//      newfrac = lake_var->new_ice_area/lake_var->surface[0];
-//    }
-//    
-//    wberror = snowprec + rainprec + lake_var->runoff_in + lake_var->baseflow_in - lake_var->evapw - lake_var->runoff_out - lake_var->baseflow_out -lake_var->recharge - lake_var->snow.vapor_flux*1000 + oldstorage*1000 + oldsnow*1000 - lake_var->volume/(lake_con->basin[0]*lakefrac)*1000 - lake_var->snow.swq*1000;
-//  fprintf(stdout,"rec %d lake wberror %.6f                  fraci %.6f newfrac %.6f snow %.6f rain %.6f runin %.6f bflowin %.6f evap %.6f runout %.6f bflowout %.6f recharge %.6f sub %.6f oldstor %.6f oldsnow %.6f newstor %.6f newsnow %.6f ldepth %f areai %f sarea %f\n",rec,wberror,fraci,newfrac,snowprec,rainprec,lake_var->runoff_in/(lake_con->Cl[0] * lakefrac),lake_var->baseflow_in/(lake_con->Cl[0] * lakefrac),lake_var->evapw,lake_var->runoff_out,lake_var->baseflow_out,lake_var->recharge,lake_var->snow.vapor_flux*1000,oldstorage*1000,oldsnow*1000,lake_var->volume/(lake_con->basin[0]*lakefrac)*1000,lake_var->snow.swq*1000,lake_var->ldepth,lake_var->new_ice_area,lake_var->surface[0]);
 
 #if LINK_DEBUG
     if ( debug.PRT_LAKE ) { 

@@ -72,6 +72,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   char   instr[251];
   char   tmpstr[MAXSTRING+1];
   int    ErrFlag;
+  double tmp_mindepth, tmp_maxdepth;
 
   lake_con_struct temp;
   
@@ -178,14 +179,27 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   }
 
-  if(temp.depth_in > temp.maxdepth) {
-    nrerror("Initial depth exceeds the specified maximum lake depth.");
-  }
-
+  // Compute volume corresponding to mindepth
   ErrFlag = get_volume(temp, temp.mindepth, &(temp.minvolume));
   if (ErrFlag == ERROR) {
-    fprintf(stderr, "ERROR: problem in get_volume(): depth %f volume %f rec %d\n", temp.mindepth, temp.minvolume, 0);
-    exit(0);
+    sprintf(tmpstr, "ERROR: problem in get_volume(): depth %f volume %f rec %d\n", temp.mindepth, temp.minvolume, 0);
+    nrerror(tmpstr);
+  }
+
+  // Make sure min < max
+  if(temp.mindepth > temp.maxdepth) {
+    sprintf(tmpstr, "Adjusted minimum lake depth %f exceeds the adjusted maximum lake depth %f.", temp.mindepth, temp.maxdepth);
+    nrerror(tmpstr);
+  }
+
+  // Validate initial conditions
+  if(temp.depth_in > temp.maxdepth) {
+    fprintf(stderr, "WARNING: Initial lake depth %f exceeds the maximum lake depth %f; setting initial lake depth equal to max lake depth.", temp.depth_in, temp.maxdepth);
+    temp.depth_in = temp.maxdepth;
+  }
+  else if(temp.depth_in < temp.mindepth) {
+    fprintf(stderr, "WARNING: Initial lake depth %f is less than the minimum lake depth %f; setting initial lake depth equal to min lake depth.", temp.depth_in, temp.mindepth);
+    temp.depth_in = temp.mindepth;
   }
 
   fprintf(stderr, "Lake area = %e km2\n",temp.basin[0]/(1000.*1000.));

@@ -1097,8 +1097,8 @@ typedef struct {
   double basin[MAX_LAKE_NODES+1]; /* Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
   double Cl[MAX_LAKE_NODES+1];    /* Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
   double b;                       /* Exponent in default lake depth-area profile (y=Ax^b) */
-  double maxdepth;                /* Maximum allowable lake depth (m) */
-  double mindepth;                /* Minimum allowable lake depth (m) */
+  double maxdepth;                /* Maximum allowable depth of liquid portion of lake (m) */
+  double mindepth;                /* Minimum allowable depth of liquid portion of lake (m) */
   double maxvolume;               /* Lake volume when lake depth is at maximum (m^3) */
   double minvolume;               /* Lake volume when lake depth is at minimum (m^3) */
   // Hydrological properties

@@ -114,6 +114,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      water and energy balance checks.				TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-05 Modifications for taking changes in lake area into account.	TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -166,6 +167,7 @@ int  put_data(dist_prcp_struct  *prcp,
   int                     ErrorFlag;
   int                     Tfoliage_fbcount_total;
   int                     Tcanopy_fbcount_total;
+  int                     Tsnowsurf_fbcount_total;
   int                     Tsurf_fbcount_total;
   int                     Tsoil_fbcount_total;
 
@@ -343,6 +345,7 @@ int  put_data(dist_prcp_struct  *prcp,
                            cell[WET][veg][band],
                            &Tsoil_fbcount_total,
                            &Tsurf_fbcount_total,
+                           &Tsnowsurf_fbcount_total,
                            &Tcanopy_fbcount_total,
                            &Tfoliage_fbcount_total,
                            Cv,
@@ -424,6 +427,7 @@ int  put_data(dist_prcp_struct  *prcp,
                              lake_var.soil,
                              &Tsoil_fbcount_total,
                              &Tsurf_fbcount_total,
+                             &Tsnowsurf_fbcount_total,
                              &Tcanopy_fbcount_total,
                              &Tfoliage_fbcount_total,
                              Cv*Clake,
@@ -617,6 +621,7 @@ int  put_data(dist_prcp_struct  *prcp,
   if (rec == global_param.nrecs-1) {
     fprintf(stdout,"Total number of fallbacks in Tfoliage: %d\n", Tfoliage_fbcount_total);
     fprintf(stdout,"Total number of fallbacks in Tcanopy: %d\n", Tcanopy_fbcount_total);
+    fprintf(stdout,"Total number of fallbacks in Tsnowsurf: %d\n", Tsnowsurf_fbcount_total);
     fprintf(stdout,"Total number of fallbacks in Tsurf: %d\n", Tsurf_fbcount_total);
     fprintf(stdout,"Total number of fallbacks in soil T profile: %d\n", Tsoil_fbcount_total);
   }
@@ -893,6 +898,7 @@ void collect_eb_terms(energy_bal_struct energy,
                       cell_data_struct  cell_wet,
                       int              *Tsoil_fbcount_total,
                       int              *Tsurf_fbcount_total,
+                      int              *Tsnowsurf_fbcount_total,
                       int              *Tcanopy_fbcount_total,
                       int              *Tfoliage_fbcount_total,
                       double            Cv,
@@ -1009,6 +1015,8 @@ void collect_eb_terms(energy_bal_struct energy,
     out_data[OUT_SOILT_FBFLAG].data[index] += energy.T_fbflag[index] * AreaFactor;
     *Tsoil_fbcount_total += energy.T_fbcount[index];
   }
+  out_data[OUT_SNOWT_FBFLAG].data[0] += snow.surf_temp_fbflag * AreaFactor;
+  *Tsnowsurf_fbcount_total += snow.surf_temp_fbcount;
   out_data[OUT_TFOL_FBFLAG].data[0] += energy.Tfoliage_fbflag * AreaFactor;
   *Tfoliage_fbcount_total += energy.Tfoliage_fbcount;
   out_data[OUT_TCAN_FBFLAG].data[0] += energy.Tcanopy_fbflag * AreaFactor;

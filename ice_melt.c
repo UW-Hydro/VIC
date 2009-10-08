@@ -111,6 +111,7 @@ static char vcid[] = "$Id$";
 	      of snow pack on uplands.						LCB via TJB
   2008-Sep-09 Reduced the fetch used with blowing snow calculations over lakes
 	      from 2000 m to 100 m.						LCB via TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.			TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -403,8 +404,7 @@ int ice_melt(double            z2,
       snow->pack_temp   = 0.0;
       /* readjust melt energy to account for melt only of available snow */
       melt_energy -= RefreezeEnergy;
-      RefreezeEnergy = RefreezeEnergy / fabs(RefreezeEnergy)
-                       * SnowMelt * Lf * RHO_W / ( delta_t );
+      RefreezeEnergy = RefreezeEnergy / fabs(RefreezeEnergy) * SnowMelt * Lf * RHO_W / ( delta_t );
       melt_energy += RefreezeEnergy;
     } 
   }
@@ -412,44 +412,51 @@ int ice_melt(double            z2,
   /* Else, IceEnergyBalance(T=0.0) <= 0.0 */
   else  {
     /* Calculate surface layer temperature using "Brent method" */
+    if (SurfaceSwq > MIN_SWQ_EB_THRES) {
+      snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
+				   (double)(snow->surf_temp+SNOW_DT), ErrorString,
+				   IceEnergyBalance, (double)delta_t, 
+				   aero_resist, aero_resist_used, z2, 
+				   displacement, Z0, wind, net_short, longwave,
+				   density, Le, air_temp, pressure * 1000.,
+				   vpd * 1000., vp * 1000., RainFall, 
+				   SurfaceSwq,
+				   snow->surf_water, OldTSurf, &RefreezeEnergy, 
+				   &vapor_flux, &blowing_flux, &surface_flux,
+				   &advection, deltaCC, Tcutoff, 
+				   avgcond, SWconducted,
+				   snow->swq*RHO_W/RHOSNOW,
+				   RHOSNOW,surf_atten,&SnowFlux,
+				   &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
 
-    snow->surf_temp = root_brent((double)(snow->surf_temp-SNOW_DT), 
-				 (double)(snow->surf_temp+SNOW_DT), ErrorString,
-				 IceEnergyBalance, (double)delta_t, 
-				 aero_resist, aero_resist_used, z2, 
-				 displacement, Z0, wind, net_short, longwave,
-				 density, Le, air_temp, pressure * 1000.,
-				 vpd * 1000., vp * 1000., RainFall, 
-				 SurfaceSwq,
-				 snow->surf_water, OldTSurf, &RefreezeEnergy, 
-				 &vapor_flux, &blowing_flux, &surface_flux,
-				 &advection, deltaCC, Tcutoff, 
-				 avgcond, SWconducted,
-				 snow->swq*RHO_W/RHOSNOW,
-				 RHOSNOW,surf_atten,&SnowFlux,
-				 &latent_heat, &latent_heat_sub, &sensible_heat, &LWnet);
-
-    if( snow->surf_temp <= -998 ){
-#if VERBOSE
-      /* If we get here, root_brent has printed a warning.  We need to explain the warning. */
-      fprintf(stderr,"Snow/Ice layer is too thin to solve separately \n");
-#endif // VERBOSE
-      snow->surf_temp = 999;
-      ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
-				 aero_resist_used, z2, displacement, Z0, wind, net_short,
-				 longwave, density, Le, air_temp,
-				 pressure * 1000., vpd * 1000., vp * 1000.,
-				 RainFall, SurfaceSwq, 
-				 snow->surf_water, OldTSurf, &RefreezeEnergy,
-				 &vapor_flux, &blowing_flux, &surface_flux,
-				 &advection, deltaCC, Tcutoff, 
-				 avgcond, SWconducted,		
-				 snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
-				 &SnowFlux, &latent_heat, &latent_heat_sub,
-				 &sensible_heat, &LWnet, ErrorString);
-      return( ERROR );
+      if (snow->surf_temp <= -998) {
+        if (options.TFALLBACK) {
+          snow->surf_temp = OldTSurf;
+          snow->surf_temp_fbflag = 1;
+          snow->surf_temp_fbcount++;
+        }
+        else {
+          ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
+				    aero_resist_used, z2, displacement, Z0, wind, net_short,
+				    longwave, density, Le, air_temp,
+				    pressure * 1000., vpd * 1000., vp * 1000.,
+				    RainFall, SurfaceSwq, 
+				    snow->surf_water, OldTSurf, &RefreezeEnergy,
+				    &vapor_flux, &blowing_flux, &surface_flux,
+				    &advection, deltaCC, Tcutoff, 
+				    avgcond, SWconducted,		
+				    snow->swq*RHO_W/RHOSNOW, RHOSNOW,surf_atten,
+				    &SnowFlux, &latent_heat, &latent_heat_sub,
+				    &sensible_heat, &LWnet, ErrorString);
+          return( ERROR );
+        }
+      }
     }
     else {
+//        fprintf(stderr,"Snow/Ice layer is too thin to solve separately \n");
+      snow->surf_temp = 999;
+    }
+    if (snow->surf_temp > -998 && snow->surf_temp < 999) {
       Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				      aero_resist_used, z2, displacement, Z0, wind, net_short,
 				      longwave, density, Le, air_temp,
@@ -511,6 +518,10 @@ int ice_melt(double            z2,
         Ice += snow->vapor_flux;
       }
 
+    }
+
+    else {
+      snow->surf_temp = 999;
     }
 
   }

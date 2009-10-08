@@ -129,6 +129,7 @@ double solve_snow(char                 overstory,
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-19 Fixed snow albedo aging logic.				TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
 
 *********************************************************************/
 
@@ -233,6 +234,9 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
+//if (band==2) {
+//fprintf(stdout,"before snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
+//}
 	ErrorFlag = snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
 		       veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
@@ -255,6 +259,9 @@ double solve_snow(char                 overstory,
 		       hour, iveg, month, rec, veg_class, layer_dry, 
 		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
+//if (band==2) {
+//fprintf(stdout,"after snow_intercept: %f %f %f %f %f %f %f %f %f %f %f %f %f\n", longwave, LongUnderOut, ShortOverIn, *ShortUnderIn, Tcanopy, vpd, veg_var_wet->Wdew, snow->snow_canopy*1000, rainfall[WET], snowfall[WET], snow->tmp_int_storage, snow->canopy_vapor_flux*1000, energy->Tfoliage);
+//}
 
 	/* Store throughfall from canopy */
 	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
@@ -352,8 +359,8 @@ double solve_snow(char                 overstory,
 		&energy->advected_sensible, &energy->advection, 
 		&energy->deltaCC, &tmp_grnd_flux, &energy->latent, 
 		&energy->latent_sub, &energy->refreeze_energy, 
-		&energy->sensible, INCLUDE_SNOW, band, 
-		rec, snow, soil_con);
+		&energy->sensible, INCLUDE_SNOW,
+		rec, iveg, band, snow, soil_con);
       if ( ErrorFlag == ERROR ) return ( ERROR );
 
       // store melt water

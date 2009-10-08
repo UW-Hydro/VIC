@@ -39,6 +39,7 @@ out_data_struct *create_output_list() {
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
   2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".			TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.	TJB
 *************************************************************/
 
   extern option_struct options;
@@ -112,6 +113,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SALBEDO].varname,"OUT_SALBEDO");                 /* snow albedo [fraction] */
   strcpy(out_data[OUT_SNOW_PACK_TEMP].varname,"OUT_SNOW_PACK_TEMP");   /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SNOW_SURF_TEMP].varname,"OUT_SNOW_SURF_TEMP");   /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+  strcpy(out_data[OUT_SNOWT_FBFLAG].varname,"OUT_SNOWT_FBFLAG");       /* snow surface temperature flag */
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
   strcpy(out_data[OUT_SOIL_TNODE].varname,"OUT_SOIL_TNODE");           /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
   strcpy(out_data[OUT_SOIL_TNODE_WL].varname,"OUT_SOIL_TNODE_WL");     /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
@@ -303,6 +305,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_TRANSP_VEG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELTACC_BAND].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_SNOWT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SOILT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SURFT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TCAN_FBFLAG].aggtype = AGG_TYPE_SUM;

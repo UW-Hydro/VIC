@@ -51,6 +51,7 @@ int initialize_lake (lake_var_struct   *lake,
   2009-Sep-28 Added initialization of the new lake->snow, lake->soil,
 	      and lake->energy structures.				TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -169,6 +170,8 @@ int initialize_lake (lake_var_struct   *lake,
   lake->snow.store_snow        = FALSE;
   lake->snow.store_swq         = 0.0;
   lake->snow.surf_temp         = 0.0;
+  lake->snow.surf_temp_fbflag  = 0;
+  lake->snow.surf_temp_fbcount = 0;
   lake->snow.surf_water        = 0.0;
   lake->snow.swq               = 0.0;
   lake->snow.swq_slope         = 0.0;

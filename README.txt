@@ -334,13 +334,16 @@ balance iteration fails to converge.
 	func_surf_energy_bal.c
 	get_global_param.c
 	global.param.sample
+	ice_melt.c
 	initialize_global.c
+	initialize_lake.c
 	initialize_model_state.c
 	lakes.eb.c
 	output_list_utils.c
 	put_data.c
 	root_brent.c
 	snow_intercept.c
+	snow_melt.c
 	solve_snow.c
 	surface_fluxes.c
 	vicNl_def.h
@@ -357,6 +360,7 @@ balance iteration fails to converge.
 
 	Currently, the following temperature variables are affected by the
 	TFALLBACK option:
+		snow.surf_temp  : snow pack surface temperature
 		energy.T[]      : soil T profile nodes
 		energy.Tsurf    : surface temperature
 		energy.Tcanopy  : temperature of canopy air
@@ -376,6 +380,7 @@ balance iteration fails to converge.
 	output files via the following 4 new output variables:
 	  OUT_SOILT_FLAG = array of flags, one for each soil T node
 	  OUT_SURFT_FLAG = flag for Tsurf
+	  OUT_SNOWT_FLAG = flag for snow.surf_temp
 	  OUT_TCAN_FLAG = flag for Tcanopy
 	  OUT_TFOL_FLAG = flag for Tfoliage
 	Each of these contain the AVERAGE over the entire grid cell and over

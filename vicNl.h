@@ -72,6 +72,7 @@
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-28 Added collect_wb_terms() and collect_eb_terms(). Changed
 	      argument list of read_snowband().				TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
 ************************************************************************/
 
 #include <math.h>
@@ -173,7 +174,7 @@ FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int,
 void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
-                        int *, int *, int *, int *, double, double, double,
+                        int *, int *, int *, int *, int *, double, double, double,
                         int, int, int, int, double *, double *,
 #if SPATIAL_FROST
                         double *, double,
@@ -444,7 +445,7 @@ int    snow_melt(double, double, double, double, double *, double, double *, dou
                  double, double, double, double, double, double, 
                  double *, double *, double *, double *, double *, double *, 
                  double *, double *, double *, double *, double *, double *, 
-                 int, int, int, snow_data_struct *, soil_con_struct *);
+                 int, int, int, int, snow_data_struct *, soil_con_struct *);
 double SnowPackEnergyBalance(double, va_list);
 double soil_conductivity(double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,

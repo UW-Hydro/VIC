@@ -88,7 +88,7 @@
   2009-Sep-19 Made TFALLBACK a separate option from CONTINUEONERROR.	TJB
   2009-Sep-28 Added snow and energy structures to lake_var_struct.	TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
-
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -340,80 +340,81 @@ extern char ref_veg_ref_crop[];
 #define OUT_SALBEDO         56  /* snow pack albedo [fraction] */
 #define OUT_SNOW_PACK_TEMP  57  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SNOW_SURF_TEMP  58  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SOIL_TEMP       59  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
-#define OUT_SOIL_TNODE      60  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
-#define OUT_SOIL_TNODE_WL   61  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
-#define OUT_SOILT_FBFLAG    62  /* soil temperature flag for each soil thermal node */
-#define OUT_SURF_TEMP       63  /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SURFT_FBFLAG    64  /* surface temperature flag */
-#define OUT_TCAN_FBFLAG     65  /* Tcanopy flag */
-#define OUT_TDEPTH          66  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
-#define OUT_TFOL_FBFLAG     67  /* Tfoliage flag */
-#define OUT_VEGT            68  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOWT_FBFLAG    59  /* snow surface temperature flag */
+#define OUT_SOIL_TEMP       60  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
+#define OUT_SOIL_TNODE      61  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+#define OUT_SOIL_TNODE_WL   62  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
+#define OUT_SOILT_FBFLAG    63  /* soil temperature flag for each soil thermal node */
+#define OUT_SURF_TEMP       64  /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SURFT_FBFLAG    65  /* surface temperature flag */
+#define OUT_TCAN_FBFLAG     66  /* Tcanopy flag */
+#define OUT_TDEPTH          67  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
+#define OUT_TFOL_FBFLAG     68  /* Tfoliage flag */
+#define OUT_VEGT            69  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
 // Energy Balance Terms - fluxes
-#define OUT_ADV_SENS        69  /* net sensible flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION       70  /* advected energy [W/m2] */
-#define OUT_DELTACC         71  /* rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
-#define OUT_DELTAH          72  /* rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
-#define OUT_ENERGY_ERROR    73  /* energy budget error [W/m2] */
-#define OUT_FUSION          74  /* net energy used to melt/freeze soil moisture [W/m2] */
-#define OUT_GRND_FLUX       75  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG         76  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT          77  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB      78  /* net upward latent heat flux from sublimation [W/m2] */
-#define OUT_MELT_ENERGY     79  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG        80  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT       81  /* net downward shortwave flux [W/m2] */
-#define OUT_R_NET           82  /* net downward radiation flux [W/m2] */
-#define OUT_RFRZ_ENERGY     83  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE        84  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_FLUX       85  /* energy flux through snow pack [W/m2] */
+#define OUT_ADV_SENS        70  /* net sensible flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION       71  /* advected energy [W/m2] */
+#define OUT_DELTACC         72  /* rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
+#define OUT_DELTAH          73  /* rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
+#define OUT_ENERGY_ERROR    74  /* energy budget error [W/m2] */
+#define OUT_FUSION          75  /* net energy used to melt/freeze soil moisture [W/m2] */
+#define OUT_GRND_FLUX       76  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG         77  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT          78  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB      79  /* net upward latent heat flux from sublimation [W/m2] */
+#define OUT_MELT_ENERGY     80  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG        81  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT       82  /* net downward shortwave flux [W/m2] */
+#define OUT_R_NET           83  /* net downward radiation flux [W/m2] */
+#define OUT_RFRZ_ENERGY     84  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE        85  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_FLUX       86  /* energy flux through snow pack [W/m2] */
 // Miscellaneous Terms
-#define OUT_AERO_COND       86  /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribute surface conductance) */
-#define OUT_AERO_COND1      87  /* surface aerodynamic conductance [m/s] */
-#define OUT_AERO_COND2      88  /* overstory aerodynamic conductance [m/s] */
-#define OUT_AERO_RESIST     89  /* "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
-#define OUT_AERO_RESIST1    90  /* surface aerodynamic resistance [s/m] */
-#define OUT_AERO_RESIST2    91  /* overstory aerodynamic resistance [s/m] */
-#define OUT_AIR_TEMP        92  /* air temperature [C] (ALMA_OUTPUT: [K])*/
-#define OUT_DENSITY         93  /* near-surface atmospheric density [kg/m3]*/
-#define OUT_LONGWAVE        94  /* incoming longwave [W/m2] */
-#define OUT_PRESSURE        95  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
-#define OUT_QAIR            96  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID       97  /* relative humidity [fraction]*/
-#define OUT_SHORTWAVE       98  /* incoming shortwave [W/m2] */
-#define OUT_SURF_COND       99  /* surface conductance [m/s] */
-#define OUT_VP             100  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            101  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           102  /* near surface wind speed [m/s] */
+#define OUT_AERO_COND       87  /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribute surface conductance) */
+#define OUT_AERO_COND1      88  /* surface aerodynamic conductance [m/s] */
+#define OUT_AERO_COND2      89  /* overstory aerodynamic conductance [m/s] */
+#define OUT_AERO_RESIST     90  /* "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
+#define OUT_AERO_RESIST1    91  /* surface aerodynamic resistance [s/m] */
+#define OUT_AERO_RESIST2    92  /* overstory aerodynamic resistance [s/m] */
+#define OUT_AIR_TEMP        93  /* air temperature [C] (ALMA_OUTPUT: [K])*/
+#define OUT_DENSITY         94  /* near-surface atmospheric density [kg/m3]*/
+#define OUT_LONGWAVE        95  /* incoming longwave [W/m2] */
+#define OUT_PRESSURE        96  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+#define OUT_QAIR            97  /* specific humidity [kg/kg] */
+#define OUT_REL_HUMID       98  /* relative humidity [fraction]*/
+#define OUT_SHORTWAVE       99  /* incoming shortwave [W/m2] */
+#define OUT_SURF_COND      100  /* surface conductance [m/s] */
+#define OUT_VP             101  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            102  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           103  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       103  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      104  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         105  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        106  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      107  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        108  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         109  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     110  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    111  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       112  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      113  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    114  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       115  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    116  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     117  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     118  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      119  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      120  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     121  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     122  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            123  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND       104  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      105  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         106  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        107  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      108  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        109  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         110  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     111  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    112  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       113  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      114  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    115  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       116  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    117  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     118  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     119  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      120  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      121  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     122  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     123  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            124  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          124  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          125  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            126  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           127  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          125  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          126  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            127  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           128  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/
@@ -975,18 +976,18 @@ typedef struct {
   int     Nfrost;                /* number of simulated freezing fronts */
   int     Nthaw;                 /* number of simulated thawing fronts */
   double  T[MAX_NODES];          /* thermal node temperatures (C) */
-  char    T_fbflag[MAX_NODES];   /* flag indicating if previous day's temperature was used */
+  char    T_fbflag[MAX_NODES];   /* flag indicating if previous step's temperature was used */
   int     T_fbcount[MAX_NODES];  /* running total number of times that previous step's temperature was used */
   int     T1_index;              /* soil node at the bottom of the top layer */
   double  Tcanopy;               /* temperature of the canopy air */
-  char    Tcanopy_fbflag;        /* flag indicating if previous day's temperature was used */
+  char    Tcanopy_fbflag;        /* flag indicating if previous step's temperature was used */
   int     Tcanopy_fbcount;       /* running total number of times that previous step's temperature was used */
   double  tdepth[MAX_FRONTS];    /* all simulated thawing front depths */
   double  Tfoliage;              /* temperature of the overstory vegetation */
-  char    Tfoliage_fbflag;       /* flag indicating if previous day's temperature was used */
+  char    Tfoliage_fbflag;       /* flag indicating if previous step's temperature was used */
   int     Tfoliage_fbcount;      /* running total number of times that previous step's temperature was used */
   double  Tsurf;                 /* temperature of the understory */
-  char    Tsurf_fbflag;          /* flag indicating if previous day's temperature was used */
+  char    Tsurf_fbflag;          /* flag indicating if previous step's temperature was used */
   int     Tsurf_fbcount;         /* running total number of times that previous step's temperature was used */
   double  unfrozen;              /* frozen layer water content that is unfrozen */
   // Fluxes
@@ -1066,8 +1067,9 @@ typedef struct {
 			       is stored on top of an existing distribution */
   double store_swq;         /* stores newly accumulated snow over an 
 			       established snowpack melt distribution (m) */
-  double surf_temp;         /* depth averaged temperature of the snow pack 
-			       surface layer (C) */
+  double surf_temp;         /* depth averaged temperature of the snow pack surface layer (C) */
+  double surf_temp_fbcount; /* running total number of times that previous step's temperature was used */
+  double surf_temp_fbflag;  /* flag indicating if previous step's temperature was used */
   double surf_water;        /* liquid water content of the surface layer (m) */
   double swq;               /* snow water equivalent of the entire pack (m) */
   double swq_slope;         /* slope of uniform snow distribution (m/fract) */

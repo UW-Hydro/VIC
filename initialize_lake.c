@@ -439,6 +439,37 @@ int get_depth(lake_con_struct lake_con, double volume, double *depth)
 
 }
 
+int get_depth_from_sarea(lake_con_struct lake_con, double sarea, double *depth)
+/******************************************************************************
+  Function to compute depth of liquid water in the lake, given the
+  current surface area of liquid water.
+
+  Modifications:
+******************************************************************************/
+{
+  int i;
+  int status;
+
+  status = 0;
+  *depth = 0.0;
+
+  if (sarea > lake_con.basin[0]) {
+    *depth = lake_con.z[0];
+  }
+  else {
+    for (i=0; i< lake_con.numnod; i++) {
+      if (sarea <= lake_con.basin[i] && sarea > lake_con.basin[i+1])
+        *depth = lake_con.z[i+1] + (sarea-lake_con.basin[i+1])*(lake_con.z[i] - lake_con.z[i+1])/(lake_con.basin[i] - lake_con.basin[i+1]);
+    }
+    if (*depth == 0.0 && sarea != 0.0) {
+      status = ERROR;
+    }
+  }
+
+  return status;
+
+}
+
 int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, double *hice)
 /******************************************************************************
   Function to compute liquid water equivalent of lake ice (expressed in mm over
@@ -453,7 +484,6 @@ int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, doub
           1: Warning: ice volume negative; setting to 0
       ERROR: Error: ice depth cannot be reconciled with given ice volume
              and water equivalent
-  2009-Sep-30 Miscellaneous fixes for lake model.				TJB
 ******************************************************************************/
 {
   int k;

@@ -113,6 +113,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      initial (pre-simulation) call for purpose of initializing
 	      water and energy balance checks.				TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
+  2009-Oct-05 Modifications for taking changes in lake area into account.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -143,7 +144,7 @@ int  put_data(dist_prcp_struct  *prcp,
   int                skipyear;
   double                  Cv;
   double                  Clake;
-  double                  Cv_tmp;
+  double                  Cv_save;
   double                  mu;
   double                  cv_baresoil;
   double                  cv_veg;
@@ -203,10 +204,10 @@ int  put_data(dist_prcp_struct  *prcp,
           if (options.LAKES && veg_con[veg].LAKE) {
             if (band == 0) {
               // Fraction of tile that is flooded
-              if (lake_var.areai > lake_var.sarea)
-                Clake = lake_var.areai/lake_con->basin[0];
+              if (lake_var.new_ice_area > lake_var.surface[0])
+                Clake = lake_var.new_ice_area/lake_con->basin[0];
               else
-                Clake = lake_var.sarea/lake_con->basin[0];
+                Clake = lake_var.surface[0]/lake_con->basin[0];
 	      Cv += veg_con[veg].Cv*(1-Clake);
             }
           }
@@ -262,10 +263,11 @@ int  put_data(dist_prcp_struct  *prcp,
     // Check if this is lake/wetland tile
     if (options.LAKES && veg_con[veg].LAKE) {
       // Only consider non-flooded portion of wetland tile
-      if (lake_var.areai > lake_var.sarea)
-        Clake = lake_var.areai/lake_con->basin[0];
+      if (lake_var.new_ice_area > lake_var.surface[0])
+        Clake = lake_var.new_ice_area/lake_con->basin[0];
       else
-        Clake = lake_var.sarea/lake_con->basin[0];
+        Clake = lake_var.surface[0]/lake_con->basin[0];
+      Cv_save = Cv;
       Cv *= (1-Clake);
       Nbands = 1;
       IsWet = 1;
@@ -276,7 +278,7 @@ int  put_data(dist_prcp_struct  *prcp,
     else
       HasVeg = 0;
 
-    if ( Cv > 0 ) {
+    if ( Cv > 0  || Clake > 0) {
 
       overstory = veg_lib[veg_con[veg].veg_class].overstory;
 
@@ -373,7 +375,7 @@ int  put_data(dist_prcp_struct  *prcp,
           if (IsWet) {
 
             // Recover the total lake/wetland tile fraction
-            Cv /= (1-Clake);
+            Cv = Cv_save;
 
             // Override some variables of soil under lake with those of wetland
             // This is for those variables whose lake values shouldn't be included

@@ -2285,6 +2285,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
 
   free((char*)delta_moist);
+  free((char*)moist);
 
   return(0);
 

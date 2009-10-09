@@ -165,11 +165,11 @@ int  put_data(dist_prcp_struct  *prcp,
   int                     out_step_ratio;
   static int              step_count;
   int                     ErrorFlag;
-  int                     Tfoliage_fbcount_total;
-  int                     Tcanopy_fbcount_total;
-  int                     Tsnowsurf_fbcount_total;
-  int                     Tsurf_fbcount_total;
-  int                     Tsoil_fbcount_total;
+  static int              Tfoliage_fbcount_total;
+  static int              Tcanopy_fbcount_total;
+  static int              Tsnowsurf_fbcount_total;
+  static int              Tsurf_fbcount_total;
+  static int              Tsoil_fbcount_total;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;

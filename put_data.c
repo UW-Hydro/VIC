@@ -191,6 +191,13 @@ int  put_data(dist_prcp_struct  *prcp,
   out_dt_sec = global_param.out_dt*SECPHOUR;
   out_step_ratio = (int)(out_dt_sec/dt_sec);
   if (rec >= 0) step_count++;
+  if (rec == 0) {
+    Tsoil_fbcount_total = 0;
+    Tsurf_fbcount_total = 0;
+    Tsnowsurf_fbcount_total = 0;
+    Tcanopy_fbcount_total = 0;
+    Tfoliage_fbcount_total = 0;
+  }
 
   if(options.DIST_PRCP) 
     Ndist = 2;

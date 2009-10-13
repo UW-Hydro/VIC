@@ -96,6 +96,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      shortwave radiation are supplied.					TJB
   2009-Jul-26 Removed the special logic for the water balance mode, in
 	      which net longwave is stored in the "longwave" variable.		TJB
+  2009-Oct-13 Removed condition if(options.SNOW_BAND) for call to
+	      compute_treeline(), since options.SNOW_BAND is always > 0.	TJB
 
 **********************************************************************/
 {
@@ -934,9 +936,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   // treeline, based on average July air temperature.
   if (options.COMPUTE_TREELINE) {
     if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
-      if ( options.SNOW_BAND ) {
-        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
-      }
+      compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
     }
   }
 

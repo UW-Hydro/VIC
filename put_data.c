@@ -267,6 +267,7 @@ int  put_data(dist_prcp_struct  *prcp,
   for ( veg = 0 ; veg <= veg_con[0].vegetat_type_num ; veg++) {
 
     Cv = veg_con[veg].Cv;
+    Clake = 0;
     Nbands = options.SNOW_BAND;
     IsWet = 0;
     // Check if this is lake/wetland tile

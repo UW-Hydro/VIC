@@ -314,10 +314,10 @@ extern char ref_veg_ref_crop[];
 #define OUT_INFLOW          31  /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_PET_SATSOIL     32  /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_PET_H2OSURF     33  /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_SHORT       34  /* potential evap from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_TALL        35  /* potential evap from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_NATVEG      36  /* potential evap from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_VEGNOCR     37  /* potential evap from current vegetation and 0 canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_SHORT       34  /* potential evap (transpiration only) from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_TALL        35  /* potential evap (transpiration only) from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_NATVEG      36  /* potential evap (transpiration only) from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_VEGNOCR     37  /* potential evap (transpiration only) from current vegetation and 0 canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_PREC            38  /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_RAINF           39  /* rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_REFREEZE        40  /* refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */

@@ -115,6 +115,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-05 Modifications for taking changes in lake area into account.	TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -213,10 +214,7 @@ int  put_data(dist_prcp_struct  *prcp,
           if (options.LAKES && veg_con[veg].LAKE) {
             if (band == 0) {
               // Fraction of tile that is flooded
-              if (lake_var.new_ice_area > lake_var.surface[0])
-                Clake = lake_var.new_ice_area/lake_con->basin[0];
-              else
-                Clake = lake_var.surface[0]/lake_con->basin[0];
+                Clake = lake_var.sarea/lake_con->basin[0];
 	      Cv += veg_con[veg].Cv*(1-Clake);
             }
           }
@@ -273,10 +271,7 @@ int  put_data(dist_prcp_struct  *prcp,
     // Check if this is lake/wetland tile
     if (options.LAKES && veg_con[veg].LAKE) {
       // Only consider non-flooded portion of wetland tile
-      if (lake_var.new_ice_area > lake_var.surface[0])
-        Clake = lake_var.new_ice_area/lake_con->basin[0];
-      else
-        Clake = lake_var.surface[0]/lake_con->basin[0];
+        Clake = lake_var.sarea/lake_con->basin[0];
       Cv_save = Cv;
       Cv *= (1-Clake);
       Nbands = 1;
@@ -469,17 +464,11 @@ int  put_data(dist_prcp_struct  *prcp,
 
             // Lake dimensions
             out_data[OUT_LAKE_DEPTH].data[0] = lake_var.ldepth;
-            if(lake_var.new_ice_area >= lake_var.surface[0]) {
-              out_data[OUT_LAKE_ICE_FRACT].data[0]  = 1.0;
-              out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.new_ice_area;
-            }
-            else {
-              if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0)
-                out_data[OUT_LAKE_ICE_FRACT].data[0]  = lake_var.new_ice_area/lake_var.surface[0];
-              else
-                out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0;
-              out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.surface[0];
-            }
+	    out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
+	    if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0)
+	      out_data[OUT_LAKE_ICE_FRACT].data[0]  = lake_var.new_ice_area/out_data[OUT_LAKE_SURF_AREA].data[0];
+	    else
+	      out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0.;
             out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
 
             // Other lake characteristics

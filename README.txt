@@ -24,6 +24,36 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2 to VIC 4.1.1 *****
+--------------------------------------------------------------------------------
+
+
+New Features:
+-------------
+
+Bug Fixes:
+----------
+
+Fixed various water balance errors in the lake model and added logic to handle
+the case when lake area goes to 0.
+
+	Files Affected:
+
+	full_energy.c
+	lakes.eb.c
+	put_data.c
+	vicNl_def.h
+
+	Description:
+
+	In 4.1.1, the lake model would generate small water balance errors
+	when lake area would change, particularly in the presence of lake ice.
+	In addition, lake water balance terms would become NaN when lake
+	fraction went to 0.  These errors have been fixed.
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------
 

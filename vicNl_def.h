@@ -89,6 +89,7 @@
   2009-Sep-28 Added snow and energy structures to lake_var_struct.	TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -1122,8 +1123,8 @@ typedef struct {
   double dz;                      /* Vertical thickness of all horizontal water layers below the surface layer (m) */
   double surfdz;                  /* Vertical thickness of surface (top) water layer (m) */
   double ldepth;                  /* Current depth of liquid water in lake (distance from surface to deepest point) (m) */
-  double surface[MAX_LAKE_NODES+1];/* Area of horizontal cross-section of lake at each node (at end of time step) (m^2) */
-  double sarea;                   /* Current surface area of liquid water in lake (at beginning of time step) (m^2) */
+  double surface[MAX_LAKE_NODES+1];/* Area of horizontal cross-section of liquid water in lake at each node (m^2) */
+  double sarea;                   /* Current surface area of ice+liquid water on lake surface (m^2) */
   double volume;                  /* Current lake water volume, including liquid water equivalent of lake ice and snow (m^3) */
   double temp[MAX_LAKE_NODES];    /* Lake water temperature at each node (C) */
   double tempavg;                 /* Average liquid water temperature of entire lake (C) */

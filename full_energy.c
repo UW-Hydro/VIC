@@ -91,6 +91,8 @@ int  full_energy(char                 NEWCELL,
   2009-Oct-05 Miscellaneous fixes for lake model, including updating/
 	      rescaling of lake and wetland storages and fluxes to account
 	      for changes in lake area.						TJB
+  2009-Nov-09 Changed definition of lake->sarea to include ice extent; other
+	      changes to handle case when lake fraction goes to 0.		LCB via TJB
 
 **********************************************************************/
 {
@@ -252,26 +254,18 @@ int  full_energy(char                 NEWCELL,
       /** Lake-specific processing **/
       if (veg_con[iveg].LAKE) {
 
-        /* Update sarea to equal new surface area from previous time step. */
-        lake_var->sarea = lake_var->surface[0];
-        if (lake_var->sarea < 0) lake_var->sarea = 0;
-
         /* Update areai to equal new ice area from previous time step. */
         lake_var->areai = lake_var->new_ice_area;
 
         /* Compute lake fraction and ice-covered fraction */
         if (lake_var->areai < 0) lake_var->areai = 0;
-        if (lake_var->areai >= lake_var->sarea) {
-          fraci = 1.0;
-          lakefrac = lake_var->areai/lake_con->basin[0];
-        }
-        else {
-          if (lake_var->sarea > 0)
-            fraci = lake_var->areai/lake_var->sarea;
-          else
-            fraci = 0.0;
-          lakefrac = lake_var->sarea/lake_con->basin[0];
-        }
+	if (lake_var->sarea > 0) {
+	  fraci = lake_var->areai/lake_var->sarea;
+	  if(fraci > 1.0) fraci = 1.0;
+	}
+	else
+	  fraci = 0.0;
+	lakefrac = lake_var->sarea/lake_con->basin[0];
 
         Nbands = 1;
         Cv *= (1-lakefrac);
@@ -795,8 +789,8 @@ int  full_energy(char                 NEWCELL,
     /** Run lake model **/
     iveg = lake_con->lake_idx;
     band = 0;
-    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)/(lake_con->Cl[0]*lakefrac); // mm over lake area
-    lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)/(lake_con->Cl[0]*lakefrac); // mm over lake area
+    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)/(lake_con->Cl[0]); // mm over lake/wetland tile
+    lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)/(lake_con->Cl[0]); // mm over lake/wetland tile
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
     if ( (int)rainonly == ERROR ) {

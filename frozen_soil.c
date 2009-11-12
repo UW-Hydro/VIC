@@ -428,6 +428,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	      to converge by using previous T value.				TJB
   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
+  2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -488,7 +489,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
-            T[j] = oldT;
+            T[j] = T0[j];
             Tfbflag[j] = 1;
             Tfbcount[j]++;
           }
@@ -508,8 +509,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
     
     if(NOFLUX) { 
       /** Solve for bottom temperature if using no flux lower boundary **/
-      oldT=T[Nnodes-1];
       j = Nnodes-1;
+      oldT=T[j];
       
       if(T[j] >= 0 || !FS_ACTIVE || !options.FROZEN_SOIL) {
 	if(!EXP_TRANS )
@@ -543,7 +544,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
-            T[j] = oldT;
+            T[j] = T0[j];
             Tfbflag[j] = 1;
             Tfbcount[j]++;
           }

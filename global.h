@@ -19,7 +19,7 @@
 	      mainly for pot_evap computations but also defines the
 	      characteristics of bare soil.				TJB
 **********************************************************************/
-char *version = "4.1.2 beta";
+char *version = "4.1.2 beta 1";
 
 char *optstring = "g:vo";
 

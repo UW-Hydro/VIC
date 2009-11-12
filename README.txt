@@ -34,6 +34,21 @@ New Features:
 Bug Fixes:
 ----------
 
+Fixed typo in setting of fallback T value for the soil T profile.
+
+	Files Affected:
+
+	frozen_soil.c
+
+	Description:
+
+	In 4.1.1, the fallback temperature was erroneously set to "oldT",
+	which is the T value of the previous iteration, but not the value
+	from the beginning of the time step (except on the first iteration).
+	Now, "oldT" has been replaced by "T0".
+
+
+
 Fixed various water balance errors in the lake model and added logic to handle
 the case when lake area goes to 0.
 

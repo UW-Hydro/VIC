@@ -34,6 +34,22 @@ New Features:
 Bug Fixes:
 ----------
 
+Simulation log messages appear out of order.
+
+	Files Affected:
+
+	display_current_settings.c
+	put_data.c
+
+	Description:
+
+	In 4.1.1, some messages sent to the screen would appear out of order
+	when saved to a log file.  This has been fixed by redirecting messages
+	from stdout to stderr.
+
+
+
+
 Fixed typo in setting of fallback T value for the soil T profile.
 
 	Files Affected:

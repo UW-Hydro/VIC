@@ -116,6 +116,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Oct-05 Modifications for taking changes in lake area into account.	TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
+  2009-Nov-15 Redirected T fallback messages to stderr.			TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -616,11 +617,11 @@ int  put_data(dist_prcp_struct  *prcp,
     Report T Fallback Occurrences
   ********************/
   if (rec == global_param.nrecs-1) {
-    fprintf(stdout,"Total number of fallbacks in Tfoliage: %d\n", Tfoliage_fbcount_total);
-    fprintf(stdout,"Total number of fallbacks in Tcanopy: %d\n", Tcanopy_fbcount_total);
-    fprintf(stdout,"Total number of fallbacks in Tsnowsurf: %d\n", Tsnowsurf_fbcount_total);
-    fprintf(stdout,"Total number of fallbacks in Tsurf: %d\n", Tsurf_fbcount_total);
-    fprintf(stdout,"Total number of fallbacks in soil T profile: %d\n", Tsoil_fbcount_total);
+    fprintf(stderr,"Total number of fallbacks in Tfoliage: %d\n", Tfoliage_fbcount_total);
+    fprintf(stderr,"Total number of fallbacks in Tcanopy: %d\n", Tcanopy_fbcount_total);
+    fprintf(stderr,"Total number of fallbacks in Tsnowsurf: %d\n", Tsnowsurf_fbcount_total);
+    fprintf(stderr,"Total number of fallbacks in Tsurf: %d\n", Tsurf_fbcount_total);
+    fprintf(stderr,"Total number of fallbacks in soil T profile: %d\n", Tsoil_fbcount_total);
   }
 
   /********************

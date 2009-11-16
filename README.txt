@@ -34,6 +34,30 @@ New Features:
 Bug Fixes:
 ----------
 
+Incorrect calculation of grnd_flux, deltaH, and fusion for EXP_TRANS=TRUE.
+
+	Files Affected:
+
+	arno_evap.c
+	calc_surf_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_model_state.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.h
+
+	Description:
+
+	In 4.1.1, the calculation of grnd_flux, deltaH, and fusion involved
+	the assumption that soil thermal nodes 1 and 2 were at depths of
+	1*soil_con->depth[0] and 2*soil_con->depth[0], respectively.  This is
+	not true for exponential node spacing (EXP_TRANS=TRUE) or any other
+	node spacing scheme in general.  This has been fixed to allow
+	aribitrary node spacing.
+
+
+
 Simulation log messages appear out of order.
 
 	Files Affected:
@@ -46,7 +70,6 @@ Simulation log messages appear out of order.
 	In 4.1.1, some messages sent to the screen would appear out of order
 	when saved to a log file.  This has been fixed by redirecting messages
 	from stdout to stderr.
-
 
 
 

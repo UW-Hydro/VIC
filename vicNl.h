@@ -73,6 +73,8 @@
   2009-Sep-28 Added collect_wb_terms() and collect_eb_terms(). Changed
 	      argument list of read_snowband().				TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2009-Nov-15 Removed ice0 and moist0 from argument list of solve_snow,
+	      since they are never used.				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -454,7 +456,7 @@ void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 double soil_thermal_eqn(double, va_list);
 double solve_snow(char, double, double, double, double, double, double,
                   double, double, double, double, double, double, double,
-                  double, double, double, double, double, double, double,
+                  double, double, double, double, double,
                   double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,

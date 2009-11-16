@@ -87,6 +87,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-Jun-15 Changed order of options to match global parameter file.		TJB
   2009-Aug-29 Now handles commented lines that are indented.			TJB
   2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
+  2009-Nov-15 Added prohibition of QUICK_FLUX=TRUE when IMPLICIT=TRUE or
+	      EXP_TRANS=TRUE.							TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -877,6 +879,10 @@ global_param_struct get_global_param(filenames_struct *names,
     }
     else if (!options.FULL_ENERGY && !options.FROZEN_SOIL && options.Nnode != 1) {
       sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %d.",options.Nnode);
+      nrerror(ErrStr);
+    }
+    if(options.IMPLICIT || options.EXP_TRANS) {
+      sprintf(ErrStr,"To run the model with QUICK_FLUX=TRUE, you cannot have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
       nrerror(ErrStr);
     }
   }

@@ -148,6 +148,9 @@ double calc_surf_energy_bal(double             Le,
 	      to converge by using previous T value.			TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Nov-15 Fixed initialization of Tsurf_fbcount.			TJB
+  2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
+	      node spacing.						TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -221,7 +224,7 @@ double calc_surf_energy_bal(double             Le,
   **************************************************/
   /* Initialize T_fbflag */
   Tsurf_fbflag = 0;
-  Tsurf_fbcount = energy->Tsurf_fbcount;
+  Tsurf_fbcount = 0;
   for (nidx=0; nidx<Nnodes; nidx++) {
     Tnew_fbflag[nidx] = 0;
     Tnew_fbcount[nidx] = 0;
@@ -243,8 +246,8 @@ double calc_surf_energy_bal(double             Le,
   kappa2              = energy->kappa[1]; // second node conductivity
   Cs1                 = energy->Cs[0]; // top node heat capacity
   Cs2                 = energy->Cs[1]; // second node heat capacity
-  D1                  = soil_con->depth[0]; // top node thickness
-  D2                  = soil_con->depth[0]; // second node thickness
+  D1                  = soil_con->Zsum_node[1]-soil_con->Zsum_node[0]; // top node thickness
+  D2                  = soil_con->Zsum_node[2]-soil_con->Zsum_node[1]; // second node thickness
   delta_t             = (double)dt * 3600.;
   max_moist           = soil_con->max_moist[0] / (soil_con->depth[0]*1000.);
   bubble              = soil_con->bubble[0];

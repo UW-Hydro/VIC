@@ -94,6 +94,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-19 Made initialization of Tfoliage more accurate for snow bands.	TJB
   2009-Sep-28 Added initialization of energy structure.			TJB
+  2009-Nov-15 Added check to ensure that depth of first thermal node
+	      is <= depth of first soil layer.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -483,6 +485,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      Bexp = logf(dp+1.)/(double)(Nnodes-1); //to force Zsum=dp at bottom node
 	      for ( index = 0; index <= Nnodes-1; index++ )
 		soil_con->Zsum_node[index] = expf(Bexp*index)-1.;
+	      if(soil_con->Zsum_node[0] > soil_con->depth[0]) {
+		sprintf(ErrStr,"Depth of first thermal node (%f) in initialize_model_state is greater than depth of first soil layer (%f); increase the number of nodes or decrease the thermal damping depth dp (%f)",soil_con->Zsum_node[0],soil_con->depth[0],dp);
+		nrerror(ErrStr);
+	      }
 	    }	    
 	    
 	    //top node	  

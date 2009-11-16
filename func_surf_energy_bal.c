@@ -91,6 +91,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2009-Jul-26 Removed the special logic for the water balance mode, in
 	      which net longwave is stored in the "longwave" variable.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
+	      node spacing.						TJB
 
 **********************************************************************/
 {
@@ -556,7 +558,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       
 
       /*****************************************************
-        Compute the Ground Heat Flux from the Top Soil Layer
+        Compute the Ground Heat Flux between nodes 0 and 1
       *****************************************************/
       if (options.GRND_FLUX_TYPE == GF_406) {
         *grnd_flux = (snow_coverage + (1. - snow_coverage) 
@@ -571,19 +573,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
     }
 
     /******************************************************
-      Compute the Current Ice Content of the Top Soil Layer
+      Compute the change in heat storage in the region between nodes 0 and 1
+      (this will correspond to top soil layer for the default (non-exponential) node spacing)
     ******************************************************/
-    if((FS_ACTIVE && options.FROZEN_SOIL) && (TMean+ *T1)/2.<0.) {
-      ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
-#if EXCESS_ICE
-					   porosity,effective_porosity,
-#endif
-					   max_moist,bubble,expt);
-      if(ice<0.) ice=0.;
-    }
-    else ice=0.;
-
-    /* compute the change in heat storage */
     if (options.GRND_FLUX_TYPE == GF_FULL) {
       *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
                 * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
@@ -591,9 +583,23 @@ double func_surf_energy_bal(double Ts, va_list ap)
     else {
       *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
     }
-    
-    /* compute the change in heat due to solid - liquid phase changes */
+
+    /******************************************************
+      Compute the change in heat due to solid-liquid phase changes in the region between nodes 0 and 1
+      (this will correspond to top soil layer for the default (non-exponential) node spacing)
+    ******************************************************/
     if (FS_ACTIVE && options.FROZEN_SOIL) {
+
+      if((TMean+ *T1)/2.<0.) {
+        ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
+#if EXCESS_ICE
+					     porosity,effective_porosity,
+#endif
+					     max_moist,bubble,expt);
+        if(ice<0.) ice=0.;
+      }
+      else ice=0.;
+
       if (options.GRND_FLUX_TYPE == GF_FULL) {
         *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
                   * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
@@ -601,6 +607,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       else {
         *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
       }
+
     }
     
     /* if thin snowpack, compute the change in energy stored in the pack */
@@ -682,13 +689,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
-		     NetShortBare, D1, max_moist * depth[0] * 1000., 
+		     NetShortBare, depth[0], max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, displacement[0], 
 		     roughness[0], ref_height[0], ra_under, delta_t, mu, 
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else
-    resid_moist[0]);
+                     resid_moist[0]);
 #endif // SPATIAL_FROST
   }
   else Evap = 0.;

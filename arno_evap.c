@@ -21,7 +21,7 @@ static char vcid[] = "$Id$";
   6-8-2000  modified to make use of spatially distributed frost   KAC
   2-24-03   moved unit conversion of moist_resid outside of distributed
             precipitation loop.  Moist_resid was being multiplied by
-            D! * 1000 twice for the dry fraction.                 KAC
+            D1 * 1000 twice for the dry fraction.                 KAC
   04-Jun-04 Moved unit conversion of moist_resid back inside distributed
 	    precipitation loop in such a way that it does not get multiplied
 	    by D1 * 1000 twice.					TJB
@@ -49,6 +49,9 @@ static char vcid[] = "$Id$";
 	      min_liq = resid_moist.						TJB
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
 	      and into separate function calc_rc().				TJB
+  2009-Nov-15 Changed D1 to depth1 to avoid confusion with the D1 used in
+	      func_surf_energy_bal() (the parent function), which refers
+	      to the depth of the 1st soil thermal node in some cases.		TJB
 
 ****************************************************************************/
 
@@ -58,7 +61,7 @@ double arno_evap(layer_data_struct *layer_wet,
 		 double             air_temp,
 		 double             vpd,
 		 double             net_short,
-		 double             D1,
+		 double             depth1,
 		 double             max_moist,
 		 double             elevation,
 		 double             b_infilt,
@@ -218,10 +221,10 @@ double arno_evap(layer_data_struct *layer_wet,
 
     /* only consider positive evaporation; we won't put limits on condensation */
     if (evap > 0.0) {
-      if (moist > min_liq * D1 * 1000.) {
+      if (moist > min_liq * depth1 * 1000.) {
         /* there is liquid moisture available; cap evap at available liquid moisture */
-        if (evap > moist -  min_liq * D1 * 1000.) {
-          evap = moist -  min_liq * D1 * 1000.;
+        if (evap > moist -  min_liq * depth1 * 1000.) {
+          evap = moist -  min_liq * depth1 * 1000.;
         }
       }
       else {

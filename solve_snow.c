@@ -14,9 +14,7 @@ double solve_snow(char                 overstory,
 		  double               air_temp, // air temperature
 		  double               density,
 		  double               dp,
-		  double               ice0,
 		  double               longwave,
-		  double               moist,
 		  double               mu,
 		  double               prec,
 		  double               pressure,
@@ -130,6 +128,8 @@ double solve_snow(char                 overstory,
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Sep-19 Fixed snow albedo aging logic.				TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2009-Nov-15 Removed ice0 and moist0 from argument list, since they
+	      are never used.						TJB
 
 *********************************************************************/
 

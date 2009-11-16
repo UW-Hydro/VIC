@@ -140,6 +140,8 @@ int surface_fluxes(char                 overstory,
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Nov-15 Removed ice0 and moist0 from argument list of solve_snow,
+	      since they are never used.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -603,7 +605,7 @@ int surface_fluxes(char                 overstory,
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
 			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 
-			       dp, ice0, atmos->longwave[hidx], moist0, mu, 
+			       dp, atmos->longwave[hidx], mu, 
 			       step_prec[WET], atmos->pressure[hidx], 
 			       atmos->shortwave[hidx], snow_grnd_flux, 
 			       VPcanopy, VPDcanopy, gp->wind_h, 

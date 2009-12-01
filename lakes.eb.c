@@ -1877,7 +1877,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double Dsmax, min_liq, liq, rel_moist;
   double *frost_frac;
   double volume_save;
-  int dist, Ndist;
   double *delta_moist;
   double *moist;
   double max_newfraction;
@@ -1894,11 +1893,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   delta_moist = (double*)calloc(options.Nlayer,sizeof(double));
   moist = (double*)calloc(options.Nlayer,sizeof(double));
-
-  if (options.DIST_PRCP)
-    Ndist = 2;
-  else
-    Ndist = 1;
 
   /**********************************************************************
    * 1. convert runoff input/output volume to rate

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include "vicNl.h"
 
 static char vcid[] = "$Id$";
@@ -151,6 +150,7 @@ double calc_surf_energy_bal(double             Le,
   2009-Nov-15 Fixed initialization of Tsurf_fbcount.			TJB
   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
 	      node spacing.						TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -706,7 +706,7 @@ double calc_surf_energy_bal(double             Le,
         energy->refreeze_energy = refrozen_water * Lf * RHO_W / delta_t;
       } 
       snow->surf_water -= refrozen_water;
-      assert(snow->surf_water >= 0.0);
+      if (snow->surf_water < 0.0) snow->surf_water = 0.0;
       (*melt)           = 0.0;
 
     }

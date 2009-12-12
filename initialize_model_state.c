@@ -18,8 +18,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 			   veg_con_struct      *veg_con,
 			   lake_con_struct      lake_con,
 			   char               **init_STILL_STORM,
-			   int                **init_DRY_TIME,
-			   save_data_struct    *save_data)
+			   int                **init_DRY_TIME)
 /**********************************************************************
   initialize_model_state      Keith Cherkauer	    April 17, 2000
 
@@ -96,6 +95,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Sep-28 Added initialization of energy structure.			TJB
   2009-Nov-15 Added check to ensure that depth of first thermal node
 	      is <= depth of first soil layer.				TJB
+  2009-Dec-11 Removed initialization of save_data structure, since this
+	      is now performed by the initial call to put_data().	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -753,55 +754,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     }
     else TreeAdjustFactor[band] = 1.;
   }
-
-  // Save initial moisture storages for differencing at end of time step
-  save_data->total_soil_moist = 0;
-  save_data->swe = 0;
-  save_data->wdew = 0;
-  save_data->surfstor = 0;
-  for( veg = 0; veg <= Nveg; veg++ ) {
-
-    Cv = veg_con[veg].Cv;
-
-    if ( Cv > 0 ) {
-
-      for ( dist = 0; dist < Ndist; dist++ ) {
-
-        if(dist==0)
-          mu = prcp[0].mu[veg];
-        else
-          mu = 1. - prcp[0].mu[veg];
-
-        for( band = 0; band < options.SNOW_BAND; band++ ) {
-
-          if (soil_con->AreaFract[band] > 0.
-              && ( veg == veg_con[0].vegetat_type_num
-                  || ( !soil_con->AboveTreeLine[band]
-                      || (soil_con->AboveTreeLine[band] && !veg_lib[veg_con[veg].veg_class].overstory)))) {
-
-            for(lidx=0;lidx<options.Nlayer;lidx++) {
-              save_data->total_soil_moist +=
-                (cell[dist][veg][band].layer[lidx].moist) // layer[].moist appears to contain both liquid and ice
-                * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
-            }
-            save_data->wdew += veg_var[dist][veg][band].Wdew * Cv * mu * soil_con->AreaFract[band] * TreeAdjustFactor[band];
-
-          }
-
-        }
-
-      }
-
-      for( band = 0; band < options.SNOW_BAND; band++ ) {
-        save_data->swe += (snow[veg][band].swq + snow[veg][band].snow_canopy)
-                         * Cv * soil_con->AreaFract[band] * TreeAdjustFactor[band];
-      }
-
-    }
-
-  }
-  Clake = lake_var->sarea/lake_con.basin[0];
-  save_data->surfstor = (lake_var->volume/lake_var->sarea)*1000. * Clake * lake_con.Cl[0] * soil_con->AreaFract[0] * TreeAdjustFactor[0];
 
   return(0);
 }

@@ -82,6 +82,8 @@ int main(int argc, char *argv[])
 	      calls to calc_water_balance_error/calc_energy_balance_error
 	      with an initial call to put_data.  Modified the call to
 	      read_snowband().						TJB
+  2009-Dec-11 Removed save_data structure from argument list of 
+	      initialize_model_state().					TJB
 **********************************************************************/
 {
 
@@ -314,7 +316,7 @@ int main(int argc, char *argv[])
 			     options.Nnode, Ndist, 
 			     atmos[0].air_temp[NR],
 			     &soil_con, veg_con, lake_con,
-			     &init_STILL_STORM, &init_DRY_TIME, &save_data);
+			     &init_STILL_STORM, &init_DRY_TIME);
       if ( ErrorFlag == ERROR ) {
 	if ( options.CONTINUEONERROR == TRUE ) {
 	  // Handle grid cell solution error

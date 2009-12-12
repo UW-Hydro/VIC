@@ -75,6 +75,8 @@
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-15 Removed ice0 and moist0 from argument list of solve_snow,
 	      since they are never used.				TJB
+  2009-Dec-11 Removed save_data structure from argument list of 
+	      initialize_model_state().					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -328,7 +330,7 @@ int   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      int, int, int, int, 
 			      double, soil_con_struct *,
                               veg_con_struct *, lake_con_struct,
-			      char **, int **, save_data_struct *);
+			      char **, int **);
 int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 void   initialize_snow(snow_data_struct **, int, int);

@@ -14,7 +14,6 @@
  * COMMENTS:     
  */
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,6 +111,7 @@ static char vcid[] = "$Id$";
   2008-Sep-09 Reduced the fetch used with blowing snow calculations over lakes
 	      from 2000 m to 100 m.						LCB via TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.			TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -327,7 +327,7 @@ int ice_melt(double            z2,
       SnowIce      += RefrozenWater;
       Ice          += RefrozenWater;
       snow->surf_water   -= RefrozenWater;
-      assert(snow->surf_water >= 0.0);
+      if (snow->surf_water < 0.0) snow->surf_water = 0.0;
       SnowMelt      = 0.0;
     }
     else {

@@ -13,7 +13,6 @@
  * COMMENTS:     
  */
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +42,7 @@
 	      non-convergence of temperatures.					LCB via TJB
   2008-Mar-01 Added assignments for Tcutk and Le to ensure that they are always
 	      assigned a value before being used.				TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
 *****************************************************************************/
 int water_energy_balance(int     numnod,
 			 double *surface,

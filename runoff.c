@@ -714,6 +714,15 @@ int  runoff(cell_data_struct  *cell_wet,
 	    /** Check Lower Sub-Layer Moistures **/
 	    tmp_moist = 0;
 
+	    /* If soil moisture has gone below minimum, take water out
+	     * of baseflow and add back to soil to make up the difference
+	     * Note: this may lead to negative baseflow, in which case we will
+	     * reduce evap to make up for it */
+	    if((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
+	      dt_baseflow += (liq[lindex]+ice[lindex]) - resid_moist[lindex];
+	      liq[lindex] = resid_moist[lindex] - ice[lindex];
+	    }
+
 	    if((liq[lindex]+ice[lindex]) > max_moist[lindex]) {
 	      /* soil moisture above maximum */
 	      tmp_moist = ((liq[lindex]+ice[lindex]) - max_moist[lindex]);

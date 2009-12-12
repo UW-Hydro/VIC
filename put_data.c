@@ -117,6 +117,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
   2009-Nov-15 Redirected T fallback messages to stderr.			TJB
+  2009-Dec-11 Added logic for initialization of save_data structure.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -560,10 +561,12 @@ int  put_data(dist_prcp_struct  *prcp,
     out_data[OUT_SMLIQFRAC].data[index] = out_data[OUT_SOIL_LIQ].data[index]/out_data[OUT_SOIL_MOIST].data[index];
     out_data[OUT_SMFROZFRAC].data[index] = 1 - out_data[OUT_SMLIQFRAC].data[index];
   }
-  out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
-  out_data[OUT_DELSWE].data[0] = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] - save_data->swe;
-  out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
-  out_data[OUT_DELSURFSTOR].data[0] = out_data[OUT_SURFSTOR].data[0] - save_data->surfstor;
+  if (rec >= 0) {
+    out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
+    out_data[OUT_DELSWE].data[0] = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] - save_data->swe;
+    out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
+    out_data[OUT_DELSURFSTOR].data[0] = out_data[OUT_SURFSTOR].data[0] - save_data->surfstor;
+  }
 
   // Energy terms
   out_data[OUT_REFREEZE].data[0] = (out_data[OUT_RFRZ_ENERGY].data[0]/Lf)*dt_sec;

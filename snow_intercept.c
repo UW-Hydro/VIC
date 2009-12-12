@@ -74,6 +74,7 @@ static char vcid[] = "$Id$";
 	      to converge by using previous T value.			TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
 *****************************************************************************/
 int snow_intercept(double  AirDens,
 		    double  Dt, 

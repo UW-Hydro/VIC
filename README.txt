@@ -107,6 +107,50 @@ the case when lake area goes to 0.
 
 
 
+Replaced "assert" statements with "if" statements.
+
+	Files Affected:
+
+	calc_atmos_energy_bal.c
+	calc_surf_energy_bal.c
+	ice_melt.c
+	snow_intercept.c
+	snow_melt.c
+	water_energy_balance.c
+	water_under_ice.c
+
+	Description:
+
+	Previous versions of these files contain "assert" statements, which
+	cause the model to abort if the assertions are not true.  These have
+	been replaced by "if" statements, so that the offending conditions can
+	be remedied and the simulation can continue.
+
+
+
+Removed save_data structure initialization from initialize_model_state().
+
+	Files Affected:
+
+	initialize_model_state.c
+	put_data.c
+	vicNl.c
+	vicNl.h
+
+	Description:
+
+	For each time step, the initial values of the major moisture storage
+	terms are stored in the save_data structure, so that the difference
+	between final and initial states can be computed and written to
+	output.  In earlier versions, these variables needed to be initialized
+	in initialize_model_state() so that they contained valid values before
+	the first call to put_data().  This is no longer necessary, as the
+	model now initializes all output variables with an initial call to
+	put_data() before the simulation begins.  Thus, the initialization
+	has been removed from initialize_model_state().
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

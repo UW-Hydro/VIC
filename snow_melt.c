@@ -14,7 +14,6 @@
  * COMMENTS:     
  */
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -279,7 +278,7 @@ int  snow_melt(double            Le,
 	SurfaceSwq   += RefrozenWater;
 	Ice          += RefrozenWater;
 	snow->surf_water   -= RefrozenWater;
-	assert(snow->surf_water >= 0.0);
+	if (snow->surf_water < 0.0) snow->surf_water = 0.0;
 	SnowMelt      = 0.0;
       }
       else {

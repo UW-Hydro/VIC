@@ -13,7 +13,6 @@
  * COMMENTS:     
  */
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +40,7 @@
 	      main subroutine, rather than ending the simulation.		KAC via GCT
   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added workaround for
 	      non-convergence of temperatures.					LCB via TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
 *****************************************************************************/
 int water_under_ice(int     freezeflag, 
 		    double  sw_ice,

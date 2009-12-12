@@ -151,6 +151,34 @@ Removed save_data structure initialization from initialize_model_state().
 
 
 
+Removed MIN_LIQ option.
+
+	Files Affected:
+
+	arno_evap.c
+	frozen_soil.c
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	lakes.eb.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	This option was intended to allow a dynamic (temperature-dependent)
+	lower bound on liquid soil moisture, based on the principle that, even
+	at very low temperatures, some moisture remains unfrozen.  However,
+	it ended up being unnecessary and its implementation introduced
+	undesirable complexity into the code.  Therefore it has been removed.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

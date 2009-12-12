@@ -97,6 +97,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      is <= depth of first soil layer.				TJB
   2009-Dec-11 Removed initialization of save_data structure, since this
 	      is now performed by the initial call to put_data().	TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -664,7 +665,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						       soil_con->bulk_density,
 						       soil_con->soil_density,
 						       soil_con->quartz,
-						       soil_con->resid_moist,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);
 		
@@ -1001,7 +1001,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						       soil_con->bulk_density,
 						       soil_con->soil_density,
 						       soil_con->quartz,
-						       soil_con->resid_moist,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      
 	    }

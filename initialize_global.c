@@ -107,6 +107,7 @@ void initialize_global() {
   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
   2009-Aug-25 Changed default of options.BINARY_STATE_FILE to FALSE.		TJB
   2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
 
 *********************************************************************/
 
@@ -137,7 +138,6 @@ void initialize_global() {
   options.IMPLICIT              = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
-  options.MIN_LIQ               = FALSE;
   options.MIN_WIND_SPEED        = 0.0;
   options.Nlayer                = 2;
   options.Nnode                 = 3;

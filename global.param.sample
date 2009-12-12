@@ -49,7 +49,6 @@ GRND_FLUX_TYPE	GF_FULL	# Options for ground flux:
 			# GF_410 = use formulas from VIC 4.1.0 (ground flux is correct, but deltaH and fusion ignore surf_atten);
 			# GF_FULL = use correct ground flux formula from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
 			# Default 	= GF_FULL
-MIN_LIQ		FALSE	# TRUE = use temperature-dependent minimum for liquid soil moisture instead of residual moisture
 PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 
 #######################################################################

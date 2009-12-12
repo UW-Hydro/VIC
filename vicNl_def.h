@@ -90,6 +90,7 @@
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -545,15 +546,6 @@ typedef struct {
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
-  char   MIN_LIQ;        /* TRUE = replace residual moisture with "min_liq"
-			    in all equations that depend on soil moisture
-			    content; min_liq = residual moisture multiplied
-			    by the max_unfrozen_water content for the current
-			    temperature; this prevents all soil moisture
-			    from freezing.
-			    FALSE = use normal residual moisture in all
-			    moisture-dependent equations; this allows all
-			    soil moisture to freeze */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
   char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
@@ -920,10 +912,8 @@ typedef struct {
   double evap;              /* evapotranspiration from soil layer (mm) */
 #if SPATIAL_FROST
   double ice[FROST_SUBAREAS]; /* ice content of the frozen sublayer (mm) */
-  double min_liq[FROST_SUBAREAS]; /* minimum unfrozen moisture content of the frozen sublayer (mm) */
 #else
   double ice;               /* ice content of the frozen sublayer (mm) */
-  double min_liq;           /* minimum unfrozen moisture content of the frozen sublayer (mm) */
 #endif
   double kappa;             /* average thermal conductivity of the current 
 			       layer (W/m/K) */

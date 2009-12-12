@@ -52,6 +52,7 @@ int initialize_lake (lake_var_struct   *lake,
 	      and lake->energy structures.				TJB
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -279,11 +280,9 @@ int initialize_lake (lake_var_struct   *lake,
 #if SPATIAL_FROST
     for (k=0; k<FROST_SUBAREAS; k++) {
       lake->soil.layer[i].ice[k]     = 0.0;
-      lake->soil.layer[i].min_liq[k] = soil_con->resid_moist[i];
     }
 #else
     lake->soil.layer[i].ice      = 0.0;
-    lake->soil.layer[i].min_liq  = soil_con->resid_moist[i];
 #endif
   }
   for (i=0; i<N_PET_TYPES; i++) {

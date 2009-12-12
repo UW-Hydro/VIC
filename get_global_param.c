@@ -89,6 +89,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
   2009-Nov-15 Added prohibition of QUICK_FLUX=TRUE when IMPLICIT=TRUE or
 	      EXP_TRANS=TRUE.							TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -337,13 +338,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
         else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
-      }
-      else if(strcasecmp("MIN_LIQ",optstr)==0) {
-        sscanf(cmdstr,"%*s %s", flgstr);
-        if(strcasecmp("FALSE", flgstr) == 0) options.MIN_LIQ = FALSE;
-        else {
-	  options.MIN_LIQ = TRUE;
-	}
       }
       else if(strcasecmp("PLAPSE",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);

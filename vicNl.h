@@ -77,6 +77,7 @@
 	      since they are never used.				TJB
   2009-Dec-11 Removed save_data structure from argument list of 
 	      initialize_model_state().					TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -253,7 +254,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if SPATIAL_FROST
 			       double *, double,
 #endif // SPATIAL_FROST
-			       double *, double *, double *, double *, 
+			       double *, double *, double *, 
 			       int, int, char);
 #else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
@@ -265,7 +266,7 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,
 #endif // EXCESS_ICE
-			       double *, double *, double *, double *, 
+			       double *, double *, double *, 
 			       int, int, char);
 #endif
 double estimate_T1(double, double, double, double, double, double, double, 

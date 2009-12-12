@@ -149,6 +149,11 @@ int  runoff(cell_data_struct  *cell_wet,
   2009-May-17 Added asat to cell_data.					TJB
   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
 	      variables via a single reference to the cell data structure.	TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.  Constraints on
+	      liq[lindex] have been removed and/or replaced by
+	      constraints on (liq[lindex]+ice[lindex]).  Thus, it is
+	      possible to freeze all of the soil moisture, as long as
+	      total moisture > residual moisture.				TJB
 
 **********************************************************************/
 {  
@@ -180,7 +185,6 @@ int  runoff(cell_data_struct  *cell_wet,
   double             resid_moist[MAX_LAYERS]; // residual moisture (mm)
   double             org_moist[MAX_LAYERS];   // total soil moisture (liquid and frozen) at beginning of this function (mm)
   double             avail_liq[MAX_LAYERS][FROST_SUBAREAS]; // liquid soil moisture available for evap/drainage (mm)
-  double             min_liq[MAX_LAYERS];     // minimum allowable liquid soil moisture (mm)
   double             liq[MAX_LAYERS];         // current liquid soil moisture (mm)
   double             ice[MAX_LAYERS];         // current frozen soil moisture (mm)
   double             moist[MAX_LAYERS];       // current total soil moisture (liquid and frozen) (mm)
@@ -271,7 +275,7 @@ int  runoff(cell_data_struct  *cell_wet,
           sum_liq = 0;
           // compute available soil moisture for each frost sub area.
           for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-            avail_liq[lindex][frost_area] = (org_moist[lindex] - layer[lindex].ice[frost_area] - layer[lindex].min_liq[frost_area]);
+            avail_liq[lindex][frost_area] = (org_moist[lindex] - layer[lindex].ice[frost_area] - resid_moist[lindex]);
             if (avail_liq[lindex][frost_area] < 0) avail_liq[lindex][frost_area] = 0;
             sum_liq += avail_liq[lindex][frost_area]*frost_fract[frost_area];
           }
@@ -336,13 +340,6 @@ int  runoff(cell_data_struct  *cell_wet,
 	  liq[lindex] = layer[lindex].moist - layer[lindex].ice;
 #endif // SPATIAL_FROST
 	  
-	  /** Set Layer Minimum Liquid Moisture Content (= unfrozen portion of resid_moist) **/
-#if SPATIAL_FROST
-	  min_liq[lindex]       = layer[lindex].min_liq[frost_area];
-#else
-	  min_liq[lindex]       = layer[lindex].min_liq;
-#endif // SPATIAL_FROST
-
 	  /** Set Layer Frozen Moisture Content **/
 #if SPATIAL_FROST
 	  ice[lindex]       = layer[lindex].ice[frost_area];
@@ -382,9 +379,9 @@ int  runoff(cell_data_struct  *cell_wet,
 	  /* set all layers to saturation*/
 	  for ( lindex = 0; lindex < options.Nlayer; lindex++ ){
 	    liq[lindex] = max_moist[lindex] - ice[lindex];
-	    if(liq[lindex] < min_liq[lindex]){
+	    if(liq[lindex] < resid_moist[lindex]){
 	      fprintf(stderr, "ERROR in runoff(): Layer %d liquid soil moisture (%f) below minimum allowable liquid moisture (%f)\n",
-                      lindex, liq[lindex], min_liq[lindex]);
+                      lindex, liq[lindex], resid_moist[lindex]);
 	      return(ERROR);
 	    }
 	  }
@@ -394,8 +391,8 @@ int  runoff(cell_data_struct  *cell_wet,
 	  Dsmax = soil_con->Dsmax / 24.;  
 	  for (time_step = 0; time_step < dt; time_step++) {
 	    /** Compute relative moisture **/
-	    rel_moist = (liq[lindex]-min_liq[lindex])
-	      / (soil_con->max_moist[lindex]-min_liq[lindex]);
+	    rel_moist = (liq[lindex]-resid_moist[lindex])
+	      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
 	    /** Compute baseflow as function of relative moisture **/
 	    frac = Dsmax * soil_con->Ds / soil_con->Ws;
 	    dt_baseflow = frac * rel_moist;
@@ -515,12 +512,12 @@ int  runoff(cell_data_struct  *cell_wet,
 #if LOW_RES_MOIST
 	    for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
 	      if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
-		  < min_liq[lindex] )
-		tmp_liq = min_liq[lindex];
-	      if(tmp_liq > min_liq[lindex])
+		  < resid_moist[lindex] )
+		tmp_liq = resid_moist[lindex];
+	      if(tmp_liq > resid_moist[lindex])
 		matric[lindex] = soil_con->bubble[lindex] 
-		  * pow( (tmp_liq - min_liq[lindex]) 
-			 / (soil_con->max_moist[lindex] - min_liq[lindex]), 
+		  * pow( (tmp_liq - resid_moist[lindex]) 
+			 / (soil_con->max_moist[lindex] - resid_moist[lindex]), 
 			 -b[lindex]);
 	      else
 		matric[lindex] = HUGE_RESIST;
@@ -536,10 +533,10 @@ int  runoff(cell_data_struct  *cell_wet,
 	      /** Brooks & Corey relation for hydraulic conductivity **/
 	      
 	      if((tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
-		 < min_liq[lindex])
-		tmp_liq = min_liq[lindex];
+		 < resid_moist[lindex])
+		tmp_liq = resid_moist[lindex];
 	      
-	      if(liq[lindex] > min_liq[lindex]) {
+	      if(liq[lindex] > resid_moist[lindex]) {
 #if LOW_RES_MOIST
 		avg_matric = pow( 10, (soil_con->depth[lindex+1] 
 				       * log10(fabs(matric[lindex]))
@@ -547,14 +544,14 @@ int  runoff(cell_data_struct  *cell_wet,
 				       * log10(fabs(matric[lindex+1])))
 				  / (soil_con->depth[lindex] 
 				     + soil_con->depth[lindex+1]) );
-		tmp_liq = min_liq[lindex]
-		  + ( soil_con->max_moist[lindex] - min_liq[lindex] )
+		tmp_liq = resid_moist[lindex]
+		  + ( soil_con->max_moist[lindex] - resid_moist[lindex] )
 		  * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
 #endif // LOW_RES_MOIST
 		Q12[lindex] 
-		  = Ksat[lindex] * pow(((tmp_liq - min_liq[lindex])
+		  = Ksat[lindex] * pow(((tmp_liq - resid_moist[lindex])
 					/ (soil_con->max_moist[lindex]
-					   - min_liq[lindex])),
+					   - resid_moist[lindex])),
 				       soil_con->expt[lindex]); 
 	      }
 	      else Q12[lindex] = 0.;
@@ -662,10 +659,10 @@ int  runoff(cell_data_struct  *cell_wet,
 	      firstlayer=FALSE;
 	      
 	      /** verify that current layer moisture is greater than minimum **/
-	      if (liq[lindex] < min_liq[lindex]) {
+	      if ((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
 		/** moisture cannot fall below minimum **/
-		Q12[lindex] += liq[lindex] - min_liq[lindex];
-		liq[lindex] = min_liq[lindex];
+		Q12[lindex] += (liq[lindex]+ice[lindex]) - resid_moist[lindex];
+		liq[lindex] = resid_moist[lindex] - ice[lindex];
 	      }
 	      
 	      inflow = (Q12[lindex]+tmp_inflow);
@@ -695,8 +692,8 @@ int  runoff(cell_data_struct  *cell_wet,
 #endif // LINK_DEBUG
 	    
 	    /** Compute relative moisture **/
-	    rel_moist = (liq[lindex]-min_liq[lindex])
-	      / (soil_con->max_moist[lindex]-min_liq[lindex]);
+	    rel_moist = (liq[lindex]-resid_moist[lindex])
+	      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
 	    
 	    /** Compute baseflow as function of relative moisture **/
 	    frac = Dsmax * soil_con->Ds / soil_con->Ws;
@@ -716,15 +713,6 @@ int  runoff(cell_data_struct  *cell_wet,
 	    
 	    /** Check Lower Sub-Layer Moistures **/
 	    tmp_moist = 0;
-
-	    /* If liquid soil moisture has gone below minimum, take water out
-	     * of baseflow and add back to soil to make up the difference
-	     * Note: this may lead to negative baseflow, in which case we will
-	     * reduce evap to make up for it */
-	    if(liq[lindex] < min_liq[lindex]) {
-	      dt_baseflow += liq[lindex] - min_liq[lindex];
-	      liq[lindex] = min_liq[lindex];
-	    }
 
 	    if((liq[lindex]+ice[lindex]) > max_moist[lindex]) {
 	      /* soil moisture above maximum */

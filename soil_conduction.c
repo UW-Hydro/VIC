@@ -471,7 +471,6 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *bulk_density,
 			       double            *soil_density,
 			       double            *quartz,
-			       double            *resid_moist,
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -509,6 +508,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 	      residual moisture and model behaves as before
 	      the appearance of min_liq.			TJB
   2009-Jul-31 Removed unused layer_node_fract array.		TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
 
 **************************************************************/
 
@@ -519,11 +519,9 @@ int estimate_layer_ice_content(layer_data_struct *layer,
   double Lsum[MAX_LAYERS+1];
 #if SPATIAL_FROST
   double tmp_ice[MAX_NODES][FROST_SUBAREAS];
-  double min_liq_node[MAX_NODES][FROST_SUBAREAS];
   double tmpT[MAX_NODES][FROST_SUBAREAS+1];
 #else
   double tmp_ice[MAX_NODES][1];
-  double min_liq_node[MAX_NODES][1];
   double tmpT[MAX_NODES][1+1];
   double frost_fract[1];
 #endif
@@ -548,11 +546,9 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 #if SPATIAL_FROST
     for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
       layer[lidx].ice[frost_area] = 0.;
-      layer[lidx].min_liq[frost_area] = 0.;
     }
 #else
     layer[lidx].ice = 0.;
-    layer[lidx].min_liq = 0.;
 #endif
 
     // Bracket current layer between nodes
@@ -616,34 +612,25 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 #endif
 #endif
 	if ( tmp_ice[nidx][frost_area] < 0 ) tmp_ice[nidx][frost_area] = 0.;
-        if (options.MIN_LIQ)
-          min_liq_node[nidx][frost_area] = resid_moist[lidx]*(layer[lidx].moist-tmp_ice[nidx][frost_area])/max_moist[lidx];
-        else
-          min_liq_node[nidx][frost_area] = resid_moist[lidx];
       }
     }
 
     // Compute average soil layer values
-    layer[lidx].T = 0;
     for ( nidx = min_nidx; nidx < max_nidx; nidx++ ) {
 #if SPATIAL_FROST
       for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
 	layer[lidx].ice[frost_area] += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][frost_area]+tmp_ice[nidx][frost_area])/2.;
-        layer[lidx].min_liq[frost_area] += (tmpZ[nidx+1]-tmpZ[nidx])*(min_liq_node[nidx+1][frost_area]+min_liq_node[nidx][frost_area])/2.;
       }
 #else
       layer[lidx].ice += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][0]+tmp_ice[nidx][0])/2.;
-      layer[lidx].min_liq += (tmpZ[nidx+1]-tmpZ[nidx])*(min_liq_node[nidx+1][0]+min_liq_node[nidx][0])/2.;
 #endif  // SPATIAL_FROST
       layer[lidx].T += (tmpZ[nidx+1]-tmpZ[nidx])*(tmpT[nidx+1][Nfrost]+tmpT[nidx][Nfrost])/2.;
     }
 #if SPATIAL_FROST
     for ( frost_area = 0; frost_area < Nfrost; frost_area++ )
       layer[lidx].ice[frost_area] /= depth[lidx];
-      layer[lidx].min_liq[frost_area] /= depth[lidx];
 #else
     layer[lidx].ice /= depth[lidx];
-    layer[lidx].min_liq /= depth[lidx];
 #endif  // SPATIAL_FROST
     layer[lidx].T /= depth[lidx];
 

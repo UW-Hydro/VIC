@@ -1843,6 +1843,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2009-Nov-09 Modified to fix wb errors and case when lake fraction goes to 0.	LCB via TJB
   2009-Nov-30 Removed loops over dist in delta_moist assignments and elsewhere.
 	      Clarified conditions for rescaling/advecting.			TJB
+  2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1874,7 +1875,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   energy_bal_struct    **energy;
   int lindex;
   double frac;
-  double Dsmax, min_liq, liq, rel_moist;
+  double Dsmax, resid_moist, liq, rel_moist;
   double *frost_frac;
   double volume_save;
   double *delta_moist;
@@ -2042,19 +2043,17 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   Dsmax = soil_con.Dsmax / 24.;
   lindex = options.Nlayer-1;
 #if SPATIAL_FROST
-  min_liq = 0;
   liq = 0;
   for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
-    min_liq += cell[WET][iveg][band].layer[lindex].min_liq[frost_area] * soil_con.depth[lindex] * 1000. * frost_fract[frost_area];
     liq += (soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
   }
 #else
-  min_liq = cell[WET][iveg][band].layer[lindex].min_liq * soil_con.depth[lindex] * 1000.;
   liq = soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice;
 #endif
+  resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] * 1000.;
 
   /** Compute relative moisture **/
-  rel_moist = (liq-min_liq) / (soil_con.max_moist[lindex]-min_liq);
+  rel_moist = (liq-resid_moist) / (soil_con.max_moist[lindex]-resid_moist);
 
   /** Compute baseflow as function of relative moisture **/
   frac = Dsmax * soil_con.Ds / soil_con.Ws;
@@ -2405,11 +2404,9 @@ void advect_soil_veg_storage(double lakefrac,
 #if SPATIAL_FROST
       for (k=0; k<FROST_SUBAREAS; k++) {
         cell->layer[lidx].ice[k]     = 0.0;
-        cell->layer[lidx].min_liq[k] = soil_con->resid_moist[lidx];
       }
 #else
       cell->layer[lidx].ice      = 0.0;
-      cell->layer[lidx].min_liq  = soil_con->resid_moist[lidx];
 #endif
     }
     cell->asat = 1.0;

@@ -379,11 +379,11 @@ int  runoff(cell_data_struct  *cell_wet,
 	  /* set all layers to saturation*/
 	  for ( lindex = 0; lindex < options.Nlayer; lindex++ ){
 	    liq[lindex] = max_moist[lindex] - ice[lindex];
-	    if(liq[lindex] < resid_moist[lindex]){
-	      fprintf(stderr, "ERROR in runoff(): Layer %d liquid soil moisture (%f) below minimum allowable liquid moisture (%f)\n",
-                      lindex, liq[lindex], resid_moist[lindex]);
-	      return(ERROR);
-	    }
+//	    if(liq[lindex] < resid_moist[lindex]){
+//	      fprintf(stderr, "ERROR in runoff(): Layer %d liquid soil moisture (%f) below minimum allowable liquid moisture (%f)\n",
+//                      lindex, liq[lindex], resid_moist[lindex]);
+//	      return(ERROR);
+//	    }
 	  }
 	  
 	  /*estimate baseflow contribution, same method as below*/
@@ -401,8 +401,7 @@ int  runoff(cell_data_struct  *cell_wet,
 	      dt_baseflow += Dsmax * (1 - soil_con->Ds / soil_con->Ws)
 		* pow(frac,soil_con->c);
 	    }	    
-	    if(dt_baseflow < 0) 
-	      dt_baseflow = 0;
+	    if(dt_baseflow < 0) dt_baseflow = 0;
 	    baseflow[frost_area] += dt_baseflow;
 	  }
 	  

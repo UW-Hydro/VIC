@@ -431,6 +431,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
   2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
+  2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -452,7 +453,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   ItCount = 0;
  
   /* initialize Tfbflag */
-  for(j=1;j<Nnodes-1;j++)
+  for(j=0;j<Nnodes;j++)
     Tfbflag[j] = 0;
 
   while(!Done && Error==0 && ItCount<MAXIT) {

@@ -81,6 +81,7 @@ void read_initial_model_state(FILE                *init_state,
 	      of bands actually stored in the state file.			TJB
   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
 	      from wetland.							TJB
+  2010-Jan-10 Corrected typo in condition for checking Wdew.			TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -311,7 +312,7 @@ void read_initial_model_state(FILE                *init_state,
 	}
 	
 	/* Read dew storage */
-	if ( veg < Nveg || veg == Nveg ) {
+	if ( veg < Nveg ) {
 	  if ( options.BINARY_STATE_FILE ) {
 	    if ( fread( &veg_var[dist][veg][band].Wdew, sizeof(double), 1, 
 			init_state ) != 1 ) 

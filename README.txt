@@ -88,6 +88,20 @@ Fixed typo in setting of fallback T value for the soil T profile.
 
 
 
+Fixed typo in initialization of fallback counts for the soil T profile.
+
+	Files Affected:
+
+	frozen_soil.c
+
+	Description:
+
+	In 4.1.1, only the fallback counts for nodes 1 to Nnodes-2 were
+	initialized (to 0).  Now initialization is done for nodes 0 to
+	Nnodes-1.
+
+
+
 Fixed various water balance errors in the lake model and added logic to handle
 the case when lake area goes to 0.
 
@@ -176,6 +190,21 @@ Removed MIN_LIQ option.
 	at very low temperatures, some moisture remains unfrozen.  However,
 	it ended up being unnecessary and its implementation introduced
 	undesirable complexity into the code.  Therefore it has been removed.
+
+
+
+Fixed typo in condition for reading Wdew values.
+
+	Files Affected:
+
+	read_initial_model_state.c
+
+	Description:
+
+	In 4.1.1, Wdew values were expected for even the bare soil veg tile,
+	despite the fact that these values are not saved for bare soil in the
+	function write_model_state().  This has been fixed; Wdew is no longer
+	expected for the bare soil tile.
 
 
 

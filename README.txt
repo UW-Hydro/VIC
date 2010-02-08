@@ -208,6 +208,32 @@ Fixed typo in condition for reading Wdew values.
 
 
 
+Fixed bug in runoff computation when soil column is completely saturated.
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	runoff() first computes total runoff for the timestep, and then computes
+	hourly vertical water movement through the soil column.  During the
+	hourly computations, if the entire soil column becomes saturated, some
+	downward-moving water may be "regurgitated" back up to the surface,
+	where it is added to the total runoff for the time step.
+
+	In 4.1.1, the hourly infiltration into the soil column is computed
+	using runoff[frost_area].  However, in the case of complete saturation,
+	the regurgitated excess water is added to runoff[frost_area] within
+	the hourly loop, so that the next hour's infiltration is computed
+	using a larger value of runoff[frost_area].  This leads to water
+	balance errors.  This has been fixed in 4.1.2.  Now, hourly
+	infiltration is only computed relative to the original estimate of
+	runoff[frost_area], before any regurgitated excess water is added to
+	it.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

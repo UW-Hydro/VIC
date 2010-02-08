@@ -154,6 +154,8 @@ int  runoff(cell_data_struct  *cell_wet,
 	      constraints on (liq[lindex]+ice[lindex]).  Thus, it is
 	      possible to freeze all of the soil moisture, as long as
 	      total moisture > residual moisture.				TJB
+  2010-Feb-07 Fixed bug in runoff computation for case when soil column
+	      is completely saturated.						TJB
 
 **********************************************************************/
 {  
@@ -204,6 +206,7 @@ int  runoff(cell_data_struct  *cell_wet,
   double             dt_inflow, dt_outflow;
   double             dt_runoff;
   double             runoff[FROST_SUBAREAS];
+  double             tmp_dt_runoff[FROST_SUBAREAS];
   double             baseflow[FROST_SUBAREAS];
   double             actual_frost_fract[FROST_SUBAREAS];
   double             tmp_mu;
@@ -496,6 +499,9 @@ int  runoff(cell_data_struct  *cell_wet,
 				  * pow(basis,1.0*(1.0+soil_con->b_infilt)));
 	  }
 	  if ( runoff[frost_area] < 0. ) runoff[frost_area] = 0.;
+          // save dt_runoff based on initial runoff estimate,
+          // since we will modify total runoff below for the case of completely saturated soil
+          tmp_dt_runoff[frost_area] = runoff[frost_area] / (double) dt;
 	  
 	  /**************************************************
 	  Compute Flow Between Soil Layers (using an hourly time step)
@@ -567,7 +573,7 @@ int  runoff(cell_data_struct  *cell_wet,
 	    last_index = 0;
 	    for ( lindex = 0; lindex < options.Nlayer - 1; lindex++ ) {
 	      
-	      if ( lindex == 0 ) dt_runoff = runoff[frost_area] / (double) dt;
+	      if ( lindex == 0 ) dt_runoff = tmp_dt_runoff[frost_area];
 	      else dt_runoff = 0;
 	      
 	      /* Store moistures for water balance debugging */

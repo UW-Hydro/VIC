@@ -31,6 +31,25 @@ Usage:
 New Features:
 -------------
 
+Added the output variable OUT_LAKE_AREA_FRAC, the lake surface area as a
+fraction of the grid cell area.
+
+	Files Affected:
+
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+
+	Description:
+
+	Added the output variable OUT_LAKE_AREA_FRAC, which tracks the lake
+	surface area as a fraction of the grid cell area.  This allows quick
+	comparison of VIC outputs with lake area observations (e.g. from
+	remote sensing).
+
+
+
+
 Bug Fixes:
 ----------
 

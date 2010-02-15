@@ -118,6 +118,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
   2009-Nov-15 Redirected T fallback messages to stderr.			TJB
   2009-Dec-11 Added logic for initialization of save_data structure.	TJB
+  2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -465,6 +466,7 @@ int  put_data(dist_prcp_struct  *prcp,
             }
 
             // Lake dimensions
+            out_data[OUT_LAKE_AREA_FRAC].data[0] = Cv*Clake;
             out_data[OUT_LAKE_DEPTH].data[0] = lake_var.ldepth;
 	    out_data[OUT_LAKE_SURF_AREA].data[0]  = lake_var.sarea;
 	    if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0)

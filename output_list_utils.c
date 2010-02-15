@@ -40,6 +40,7 @@ out_data_struct *create_output_list() {
   2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
   2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.	TJB
+  2010-Feb-14 Added OUT_LAKE_AREA_FRAC.				TJB
 *************************************************************/
 
   extern option_struct options;
@@ -52,6 +53,7 @@ out_data_struct *create_output_list() {
 
   // Water Balance Terms - state variables
   strcpy(out_data[OUT_ASAT].varname,"OUT_ASAT");                       /* saturated area fraction */
+  strcpy(out_data[OUT_LAKE_AREA_FRAC].varname,"OUT_LAKE_AREA_FRAC");   /* lake surface area as fraction of grid cell area [fraction] */
   strcpy(out_data[OUT_LAKE_DEPTH].varname,"OUT_LAKE_DEPTH");           /* lake depth [m] */
   strcpy(out_data[OUT_LAKE_ICE].varname,"OUT_LAKE_ICE");               /* moisture stored as lake ice [mm] */
   strcpy(out_data[OUT_LAKE_ICE_FRACT].varname,"OUT_LAKE_ICE_FRACT");   /* fractional coverage of lake ice [fraction] */
@@ -245,6 +247,7 @@ out_data_struct *create_output_list() {
     out_data[v].aggtype = AGG_TYPE_AVG;
   }
   out_data[OUT_ASAT].aggtype = AGG_TYPE_END;
+  out_data[OUT_LAKE_AREA_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_DEPTH].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE_FRACT].aggtype = AGG_TYPE_END;

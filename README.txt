@@ -253,6 +253,23 @@ Fixed bug in runoff computation when soil column is completely saturated.
 
 
 
+Fixed typo in writing of number of lake active nodes to ASCII-format state file.
+
+	Files Affected:
+
+	write_model_state.c
+
+	Description:
+
+	Fixed a typo in the writing of the number of lake active nodes to the
+	statefile, for ASCII format.  The error involved omitting a space that
+	would separate the active node number from the temperature of the
+	deepest soil thermal node, preventing the state file from being read
+	correctly in subsequent VIC runs.
+
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
 --------------------------------------------------------------------------------

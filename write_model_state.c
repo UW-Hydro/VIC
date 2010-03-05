@@ -70,6 +70,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      of bands actually stored in the state file.			TJB
   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
 	      from wetland.							TJB
+  2010-Mar-05 Fixed typo in writing of number of lake active nodes.		TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -442,7 +443,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	fprintf( filep->statefile, " %f", lake_var.energy.T[nidx] );
       
       /* Write lake-specific variables */
-      fprintf( filep->statefile, "%d", lake_var.activenod );
+      fprintf( filep->statefile, " %d", lake_var.activenod );
       fprintf( filep->statefile, " %f", lake_var.dz );
       fprintf( filep->statefile, " %f", lake_var.surfdz );
       fprintf( filep->statefile, " %f", lake_var.ldepth );

@@ -432,6 +432,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
   2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
   2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
+  2010-Mar-08 Added TFallback logic for case in which max iterations exceeded.	TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -573,11 +574,20 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   }
   
   if(!Done && !Error) {
-    fprintf(stderr,"ERROR: Temperature Profile Unable to Converge!!!\n");
-    fprintf(stderr,"Dumping Profile Temperatures (last, new).\n");
-    for(j=0;j<Nnodes;j++) fprintf(stderr,"%f\t%f\n",T0[j],T[j]);
-    fprintf(stderr,"ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile\n");
-    return ( ERROR );
+    if (options.TFALLBACK) {
+      for(j=0;j<Nnodes;j++) {
+        T[j] = T0[j];
+        Tfbflag[j] = 1;
+        Tfbcount[j]++;
+      }
+    }
+    else {
+      fprintf(stderr,"ERROR: Temperature Profile Unable to Converge!!!\n");
+      fprintf(stderr,"Dumping Profile Temperatures (last, new).\n");
+      for(j=0;j<Nnodes;j++) fprintf(stderr,"%f\t%f\n",T0[j],T[j]);
+      fprintf(stderr,"ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile\n");
+      return ( ERROR );
+    }
   }
 
   return (Error);

@@ -269,6 +269,22 @@ Fixed typo in writing of number of lake active nodes to ASCII-format state file.
 
 
 
+Added TFALLBACK logic to soil thermal profile solution for case in which max
+iterations are exceeded.
+
+	Files Affected:
+
+	frozen_soil.c
+
+	Description:
+
+	In 4.1.1, errors due to exceeding the maximum number of iterations in
+	the soil temperature profile computation in calc_soil_thermal_fluxes()
+	were not handled by the TFALLBACK option.  Logic to handle this case
+	has now been added.
+
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****

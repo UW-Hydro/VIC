@@ -33,6 +33,7 @@ void get_force_type(char   *cmdstr,
               or MULTIPLIER fields) vs. BINARY, I removed the if() statements
               altogether.                                               TJB
   2007-Sep-14 Initialize flgstr to "NULL".				TJB
+  2010-Mar-31 Added RUNOFF_IN.						TJB
 
 *************************************************************/
 
@@ -200,7 +201,18 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 13: shortwave radiation [W/m2] */
+  /* type 13: incoming upslope runoff [m3] (ALMA_INPUT: [m3/s]) */
+  else if(strcasecmp("RUNOFF_IN",optstr)==0){
+    type = RUNOFF_IN;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    sscanf(cmdstr,"%*s %*s %s %lf",flgstr,
+	   &param_set.TYPE[type].multiplier);
+    if(strcasecmp("SIGNED",flgstr)==0) param_set.TYPE[type].SIGNED=TRUE;
+    else param_set.TYPE[type].SIGNED=FALSE;
+  }
+
+  /* type 14: shortwave radiation [W/m2] */
   else if(strcasecmp("SHORTWAVE",optstr)==0 || strcasecmp("SWDOWN",optstr)==0){
     type = SHORTWAVE;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -211,7 +223,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 14: snowfall [mm] (ALMA_INPUT: [mm/s]) */
+  /* type 15: snowfall [mm] (ALMA_INPUT: [mm/s]) */
   else if(strcasecmp("SNOWF",optstr)==0){
     type = SNOWF;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -222,7 +234,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 15: maximum daily temperature [C] (ALMA_INPUT: [K]) */
+  /* type 16: maximum daily temperature [C] (ALMA_INPUT: [K]) */
   else if(strcasecmp("TMAX",optstr)==0){
     type = TMAX;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -233,7 +245,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 16: minimum daily temperature [C] (ALMA_INPUT: [K]) */
+  /* type 17: minimum daily temperature [C] (ALMA_INPUT: [K]) */
   else if(strcasecmp("TMIN",optstr)==0){
     type = TMIN;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -244,7 +256,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 17: sky cover */
+  /* type 18: sky cover */
   else if(strcasecmp("TSKC",optstr)==0){
     type = TSKC;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -255,7 +267,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 18: vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+  /* type 19: vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
   else if(strcasecmp("VP",optstr)==0){
     type = VP;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -266,7 +278,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 19: wind speed [m/s] */
+  /* type 20: wind speed [m/s] */
   else if(strcasecmp("WIND",optstr)==0){
     type = WIND;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -277,7 +289,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 20: zonal component of wind speed [m/s] */
+  /* type 21: zonal component of wind speed [m/s] */
   else if(strcasecmp("WIND_E",optstr)==0){
     type = WIND_E;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -288,7 +300,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 21: meridional component of wind speed [m/s] */
+  /* type 22: meridional component of wind speed [m/s] */
   else if(strcasecmp("WIND_N",optstr)==0){
     type = WIND_N;
     param_set.TYPE[type].SUPPLIED=file_num+1;
@@ -299,7 +311,7 @@ void get_force_type(char   *cmdstr,
     else param_set.TYPE[type].SIGNED=FALSE;
   }
 
-  /* type 22: unused (blank) data */
+  /* type 23: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
     param_set.TYPE[type].SUPPLIED=file_num+1;

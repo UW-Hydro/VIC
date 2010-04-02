@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
 	      read_snowband().						TJB
   2009-Dec-11 Removed save_data structure from argument list of 
 	      initialize_model_state().					TJB
+  2010-Mar-31 Added cell_area to initialize_atmos().			TJB
 **********************************************************************/
 {
 
@@ -287,7 +288,7 @@ int main(int argc, char *argv[])
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
 
-      initialize_atmos(atmos, dmy, filep.forcing,
+      initialize_atmos(atmos, dmy, filep.forcing, soil_con.cell_area,
 		       (double)soil_con.time_zone_lng, (double)soil_con.lng,
 		       (double)soil_con.lat, soil_con.elevation,
 		       soil_con.annual_prec, global_param.wind_h, 

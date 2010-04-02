@@ -31,6 +31,37 @@ Usage:
 New Features:
 -------------
 
+Added the input/output variables RUNOFF_IN and OUT_RUNOFF_IN, allowing input
+of runoff from upslope grid cells into the lake model.
+
+	Files Affected:
+
+	alloc_atmos.c
+	full_energy.c
+	get_force_type.c
+	initialize_atmos.c
+	output_list_utils.c
+	put_data.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added forcing variable RUNOFF_IN to allow runoff from upslope grid
+	cells to be inputs into the lake.  This variable is ignored if LAKES
+	are set to FALSE or the lake/wetland tile has 0 area in a given grid
+	cell.  RUNOFF_IN must be in units of cubic meters [m3] per forcing
+	time step (or cubic meters per second [m3/s] if ALMA_INPUT is TRUE).
+
+	The amount of incoming runoff is also stored in the output variable
+	OUT_RUNOFF_IN, for purposes of tracking and computing the cell's water
+	budget.  OUT_RUNOFF_IN is expressed in units of [mm over the grid
+	cell] per output time step (or [mm/s] if ALMA_OUTPUT is TRUE).
+
+
+
+
 Added the output variable OUT_LAKE_AREA_FRAC, the lake surface area as a
 fraction of the grid cell area.
 

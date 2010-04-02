@@ -30,6 +30,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
   2006-Sep-23 Implemented flexible output configuration; removed
 	      LDAS_OUTPUT and OPTIMIZE compile-time options.  TJB
   2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
+  2010-Mar-31 Added runoff_in.							TJB
 
 *******************************************************************/
 {
@@ -72,6 +73,9 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     (*atmos)[i].snowflag = (char *) calloc(NR+1, sizeof(char));	
     if ((*atmos)[i].snowflag == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].runoff_in = (double *) calloc(NR+1, sizeof(double));	
+    if ((*atmos)[i].runoff_in == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
   }    			
 
 }
@@ -88,6 +92,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
   2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
 	      removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
   2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
+  2010-Mar-31 Added runoff_in.							TJB
 ***************************************************************************/
 {
   int i;
@@ -106,6 +111,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
     free((*atmos)[i].shortwave);
     free((*atmos)[i].longwave);
     free((*atmos)[i].snowflag);
+    free((*atmos)[i].runoff_in);
   }
 
   free(*atmos);

@@ -41,6 +41,7 @@ out_data_struct *create_output_list() {
   2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.	TJB
   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.				TJB
+  2010-Mar-31 Added OUT_RUNOFF_IN.				TJB
 *************************************************************/
 
   extern option_struct options;
@@ -97,6 +98,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_RAINF].varname,"OUT_RAINF");                     /* rainfall [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_REFREEZE].varname,"OUT_REFREEZE");               /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_RUNOFF].varname,"OUT_RUNOFF");                   /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_RUNOFF_IN].varname,"OUT_RUNOFF_IN");             /* incoming upslope runoff [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOW_MELT].varname,"OUT_SNOW_MELT");             /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOWF].varname,"OUT_SNOWF");                     /* snowfall [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SUB_BLOWING].varname,"OUT_SUB_BLOWING");         /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -299,6 +301,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_RAINF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_REFREEZE].aggtype = AGG_TYPE_SUM;
   out_data[OUT_RUNOFF].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_RUNOFF_IN].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOWF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SUB_BLOWING].aggtype = AGG_TYPE_SUM;

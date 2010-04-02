@@ -7,6 +7,7 @@ static char vcid[] = "$Id$";
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,
+                      double                    cell_area,
                       double                    theta_l,
                       double                    theta_s,
                       double                    phi,
@@ -98,6 +99,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      which net longwave is stored in the "longwave" variable.		TJB
   2009-Oct-13 Removed condition if(options.SNOW_BAND) for call to
 	      compute_treeline(), since options.SNOW_BAND is always > 0.	TJB
+  2010-Mar-31 Added RUNOFF_IN.							TJB
 
 **********************************************************************/
 {
@@ -201,6 +203,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
             || type == SNOWF
             || type == CSNOWF
             || type == LSSNOWF
+            || type == RUNOFF_IN
            ) {
           for (idx=0; idx<(global_param.nrecs*NF); idx++) {
             forcing_data[type][idx] *= global_param.dt * 3600;
@@ -230,6 +233,61 @@ void initialize_atmos(atmos_data_struct        *atmos,
           }
         }
       }
+    }
+  }
+
+  /*************************************************
+    Incoming Upslope Runoff
+  *************************************************/
+
+  /*************************************************
+    Create sub-daily runoff_in if not provided
+  *************************************************/
+
+  if(param_set.TYPE[RUNOFF_IN].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[RUNOFF_IN].SUPPLIED-1] == 24) {
+      /* daily runoff_in provided */
+      rec = 0;
+      for (day = 0; day < Ndays; day++) {
+        for (i = 0; i < stepspday; i++) {
+	  sum = 0;
+	  for (j = 0; j < NF; j++) {
+	    atmos[rec].runoff_in[j] = forcing_data[RUNOFF_IN][day] 
+	      / (float)(NF * stepspday);
+	    atmos[rec].runoff_in[j] *= 1000/cell_area; // convert to mm over grid cell 
+	    sum += atmos[rec].runoff_in[j];
+	  }
+	  if(NF>1) atmos[rec].runoff_in[NR] = sum;
+	  if(global_param.dt == 24) atmos[rec].runoff_in[NR] = forcing_data[RUNOFF_IN][day];
+	  rec++;
+        }
+      }
+    }
+    else {
+      /* sub-daily runoff_in provided */
+      idx = 0;
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+	  atmos[rec].runoff_in[i] = forcing_data[RUNOFF_IN][idx];
+	  atmos[rec].runoff_in[i] *= 1000/cell_area; // convert to mm over grid cell 
+	  sum += atmos[rec].runoff_in[i];
+	  idx++;
+        }
+        if(NF>1) atmos[rec].runoff_in[NR] = sum;
+      }
+    }
+  }
+  else {
+    idx = 0;
+    for(rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for(i = 0; i < NF; i++) {
+        atmos[rec].runoff_in[i] = 0;
+        sum += atmos[rec].runoff_in[i];
+        idx++;
+      }
+      if(NF>1) atmos[rec].runoff_in[NR] = sum;
     }
   }
 

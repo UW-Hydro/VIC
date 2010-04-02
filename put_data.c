@@ -119,6 +119,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2009-Nov-15 Redirected T fallback messages to stderr.			TJB
   2009-Dec-11 Added logic for initialization of save_data structure.	TJB
   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
+  2010-Mar-31 Added OUT_RUNOFF_IN.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -245,13 +246,17 @@ int  put_data(dist_prcp_struct  *prcp,
   out_data[OUT_AIR_TEMP].data[0]  = atmos->air_temp[NR];
   out_data[OUT_DENSITY].data[0]   = atmos->density[NR];
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
-  out_data[OUT_PREC].data[0]      = atmos->out_prec;
+  out_data[OUT_PREC].data[0]      = atmos->out_prec; // mm over grid cell
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR]/kPa2Pa;
   out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];
-  out_data[OUT_RAINF].data[0]     = atmos->out_rain;
+  out_data[OUT_RAINF].data[0]     = atmos->out_rain; // mm over grid cell
   out_data[OUT_REL_HUMID].data[0] = 100.*atmos->vp[NR]/(atmos->vp[NR]+atmos->vpd[NR]);
+  if (options.LAKES && lake_con->Cl[0] > 0)
+    out_data[OUT_RUNOFF_IN].data[0] = atmos->runoff_in[NR]; // mm over grid cell
+  else
+    out_data[OUT_RUNOFF_IN].data[0] = 0;
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
-  out_data[OUT_SNOWF].data[0]     = atmos->out_snow;
+  out_data[OUT_SNOWF].data[0]     = atmos->out_snow; // mm over grid cell
   out_data[OUT_VP].data[0]        = atmos->vp[NR]/kPa2Pa;
   out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
@@ -586,8 +591,8 @@ int  put_data(dist_prcp_struct  *prcp,
   /********************
     Check Water Balance 
     ********************/
-  inflow  = out_data[OUT_PREC].data[0];
-  outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0];
+  inflow  = out_data[OUT_PREC].data[0] + out_data[OUT_RUNOFF_IN].data[0]; // mm over grid cell
+  outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0]; // mm over grid cell
   storage = 0.;
   for(index=0;index<options.Nlayer;index++)
     if(options.MOISTFRACT)
@@ -675,6 +680,7 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_RAINF].aggdata[0] /= out_dt_sec;
       out_data[OUT_REFREEZE].aggdata[0] /= out_dt_sec;
       out_data[OUT_RUNOFF].aggdata[0] /= out_dt_sec;
+      out_data[OUT_RUNOFF_IN].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOW_MELT].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOWF].aggdata[0] /= out_dt_sec;
       out_data[OUT_SUB_BLOWING].aggdata[0] /= out_dt_sec;

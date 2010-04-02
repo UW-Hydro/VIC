@@ -78,6 +78,7 @@
   2009-Dec-11 Removed save_data structure from argument list of 
 	      initialize_model_state().					TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
+  2010-Mar-31 Added cell_area to initialize_atmos().			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -319,7 +320,7 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
 			double, double, double, double, double, double, 
-                        double, double *, 
+                        double, double, double *, 
 #if OUTPUT_FORCE
 			char *, out_data_file_struct *, out_data_struct *);
 #else

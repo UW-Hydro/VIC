@@ -54,6 +54,7 @@ void initialize_snow (snow_data_struct **snow,
   2009-Sep-19 Initializing last_snow to MISSING.			TJB
   2009-Sep-28 Added initialization of some terms that previously had
 	      not been initialized.					TJB
+  2010-Apr-24 Added initialization of surf_temp_fbcount and fbflag.	TJB
 
 **********************************************************************/
 {
@@ -88,6 +89,8 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].store_snow        = FALSE;
       snow[i][j].store_swq         = 0.0;
       snow[i][j].surf_temp         = 0.0;
+      snow[i][j].surf_temp_fbflag  = 0;
+      snow[i][j].surf_temp_fbcount = 0;
       snow[i][j].surf_water        = 0.0;
       snow[i][j].swq               = 0.0;
       snow[i][j].swq_slope         = 0.0;

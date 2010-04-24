@@ -142,6 +142,8 @@ int surface_fluxes(char                 overstory,
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Nov-15 Removed ice0 and moist0 from argument list of solve_snow,
 	      since they are never used.				TJB
+  2010-Apr-24 Added logic to handle case when aero_cond or aero_resist
+	      are very large or 0.					TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -837,8 +839,14 @@ int surface_fluxes(char                 overstory,
 
       store_ppt[dist] += step_ppt[dist];
     }
-    store_aero_cond_used[0] += 1/iter_aero_resist_used[0];
-    store_aero_cond_used[1] += 1/iter_aero_resist_used[1];
+    if (iter_aero_resist_used[0]>0)
+      store_aero_cond_used[0] += 1/iter_aero_resist_used[0];
+    else
+      store_aero_cond_used[0] += HUGE_RESIST;
+    if (iter_aero_resist_used[1]>0)
+      store_aero_cond_used[1] += 1/iter_aero_resist_used[1];
+    else
+      store_aero_cond_used[1] += HUGE_RESIST;
 
     if(iveg != Nveg) 
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
@@ -1009,8 +1017,18 @@ int surface_fluxes(char                 overstory,
     evap_prior_dry[lidx] = store_layerevap[DRY][lidx];
 #endif
   }
-  aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
-  aero_resist_used[1] = 1/(store_aero_cond_used[1]/(double)N_steps);
+  if (store_aero_cond_used[0]>0 && store_aero_cond_used[0]<HUGE_RESIST)
+    aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
+  else if (store_aero_cond_used[0]>=HUGE_RESIST)
+    aero_resist_used[0] = 0;
+  else
+    aero_resist_used[0] = HUGE_RESIST;
+  if (store_aero_cond_used[1]>0 && store_aero_cond_used[1]<HUGE_RESIST)
+    aero_resist_used[1] = 1/(store_aero_cond_used[1]/(double)N_steps);
+  else if (store_aero_cond_used[1]>=HUGE_RESIST)
+    aero_resist_used[1] = 0;
+  else
+    aero_resist_used[1] = HUGE_RESIST;
   for (p=0; p<N_PET_TYPES; p++)
     pot_evap[p] = store_pot_evap[p]/(double)N_steps;
 

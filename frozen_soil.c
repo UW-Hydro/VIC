@@ -433,6 +433,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
   2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
   2010-Mar-08 Added TFallback logic for case in which max iterations exceeded.	TJB
+  2010-Apr-24 Addeed initialization of Tfbcount.				TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -453,9 +454,11 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   Done = FALSE;
   ItCount = 0;
  
-  /* initialize Tfbflag */
-  for(j=0;j<Nnodes;j++)
+  /* initialize Tfbflag, Tfbcount */
+  for(j=0;j<Nnodes;j++) {
     Tfbflag[j] = 0;
+    Tfbcount[j] = 0;
+  }
 
   while(!Done && Error==0 && ItCount<MAXIT) {
     ItCount++;

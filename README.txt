@@ -316,6 +316,23 @@ iterations are exceeded.
 
 
 
+Misc fixes to handling of aerodynamic resistance.
+
+	Files Affected:
+
+	func_surf_energy_bal.c
+	surface_fluxes.c
+
+	Description:
+
+	Replaced ra_under with Ra_used[0] in func_surf_energy_bal.c - this
+	should not change behavior; it simply cleans up the code a tad.
+
+	Added logic to surface_fluxes.c to handle cases when aero_cond and
+	aero_resist are 0 or very large.
+
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****

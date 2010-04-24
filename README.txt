@@ -316,18 +316,18 @@ iterations are exceeded.
 
 
 
-Added proper initialization of snow.surf_temp_fbcount and
-snow.surf_temp_fbflag for TFALLBACK option.
+Fixed bugs in initialization of various TFallback counts and flags.
 
 	Files Affected:
 
 	initialize_snow.c
+	frozen_soil.c
 
 	Description:
 
 	In 4.1.1, the number of Tfallbacks reported to the screen sometimes came
 	out negative; this has been fixed for fallbacks in snow surface
-	temperature.
+	temperature and soil temperature profile.
 
 
 

@@ -93,6 +93,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
 	      node spacing.						TJB
+  2010-Apr-24 Replaced ra_under with Ra_used[0].			TJB
 
 **********************************************************************/
 {
@@ -275,7 +276,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double ice;
 /*   double             kappa_snow; */
   double out_long;
-  double ra_under;
   double temp_latent_heat;
   double temp_latent_heat_sub;
   double VaporMassFlux;
@@ -654,18 +654,16 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /** Compute atmospheric stability correction **/
   /** CHECK THAT THIS WORKS FOR ALL SUMMER SITUATIONS **/
   if ( wind[UnderStory] > 0.0 && overstory && SNOWING )
-    ra_under = ra[UnderStory] 
+    Ra_used[0] = ra[UnderStory] 
       / StabilityCorrection(ref_height[UnderStory], 0.f, TMean, Tair, 
 			    wind[UnderStory], roughness[UnderStory]);
   else if ( wind[UnderStory] > 0.0 )
-    ra_under = ra[UnderStory] 
+    Ra_used[0] = ra[UnderStory] 
       / StabilityCorrection(ref_height[UnderStory], displacement[UnderStory], 
 			    TMean, Tair, wind[UnderStory], 
 			    roughness[UnderStory]);
   else
-    ra_under = HUGE_RESIST;
-  
-  Ra_used[0] = ra_under;
+    Ra_used[0] = HUGE_RESIST;
   
   /*************************************************
     Compute Evapotranspiration if not snow covered
@@ -691,7 +689,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
 		     NetShortBare, depth[0], max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, displacement[0], 
-		     roughness[0], ref_height[0], ra_under, delta_t, mu, 
+		     roughness[0], ref_height[0], Ra_used[0], delta_t, mu, 
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else
@@ -715,7 +713,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     SurfaceMassFlux = *surface_flux * ice_density / delta_t;
 
     latent_heat_from_snow(atmos_density, vp, Le, atmos_pressure, 
-			  ra_under, TMean, vpd, &temp_latent_heat, 
+			  Ra_used[0], TMean, vpd, &temp_latent_heat, 
 			  &temp_latent_heat_sub, &VaporMassFlux,
                           &BlowingMassFlux, &SurfaceMassFlux);
     *latent_heat += temp_latent_heat * snow_coverage;
@@ -733,7 +731,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute the Sensible Heat Flux from the Surface
   ************************************************/
   if ( snow_coverage < 1 || INCLUDE_SNOW ) {
-    *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / ra_under;
+    *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / Ra_used[0];
     if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
   }
   else *sensible_heat = 0.;

@@ -434,6 +434,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
   2010-Mar-08 Added TFallback logic for case in which max iterations exceeded.	TJB
   2010-Apr-24 Addeed initialization of Tfbcount.				TJB
+  2010-Apr-24 Addeed hack to prevent cold nose.  Only active when TFALLBACK
+	      is TRUE.								TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -449,11 +451,16 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   double diff;
   double oldT;
   char ErrorString[MAXSTRING];
+  double Tlast[MAX_NODES];
 
   Error = 0;
   Done = FALSE;
   ItCount = 0;
  
+  /* initialize Tlast */
+  for(j=0;j<Nnodes;j++)
+    Tlast[j] = T[j];
+
   /* initialize Tfbflag, Tfbcount */
   for(j=0;j<Nnodes;j++) {
     Tfbflag[j] = 0;
@@ -576,6 +583,22 @@ int calc_soil_thermal_fluxes(int     Nnodes,
     
   }
   
+  if (options.TFALLBACK) {
+    // HACK to prevent runaway cold nose
+    // Handle the case in which the a node was colder than both the nodes above and below
+    // in the last time step, and that both differences have increased between the last
+    // time step and the current one.
+    for(j=1;j<Nnodes-1;j++) {
+      if ( Tlast[j-1]-Tlast[j] > 0 && Tlast[j+1]-T[j] > 0
+           && (T[j-1]-T[j]) - (Tlast[j-1]-Tlast[j]) > 0
+           && (T[j+1]-T[j]) - (Tlast[j+1]-Tlast[j]) > 0 ) {
+        T[j] = 0.5*(T[j-1]+T[j+1]); // crude fix for now; just average the T's without taking distance, conductivities into account
+        Tfbflag[j] = 1;
+        Tfbcount[j]++;
+      }
+    }
+  }
+
   if(!Done && !Error) {
     if (options.TFALLBACK) {
       for(j=0;j<Nnodes;j++) {

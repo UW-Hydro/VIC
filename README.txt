@@ -348,6 +348,27 @@ Misc fixes to handling of aerodynamic resistance.
 
 
 
+Added hack to prevent runaway cold nose in soil temperature profile.  This is
+only enabled when options.TFALLBACK = TRUE.
+
+	Files Affected:
+
+	frozen_soil.c
+
+	Description:
+
+	In 4.1.1, the soil temprature computation could sometimes encounter a
+	runaway "cold nose", in which one node was colder than its neighbors
+	and continued to grow colder than its neighbors over time, due to
+	instabilities in the soil heat equation (in the presence of ice in the
+	soil).  A rigorous numerical solution to this problem has not yet been
+	implemented, but this hack causes the offending node to be reset to
+	the average of its neighbors' temperatures as soon as the runaway
+	behavior is detected.  We hope to implement a more rigorous solution
+	to this problem in future releases.
+
+
+
 
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****

@@ -399,6 +399,7 @@ Replaced GLOBAL_LAI option with 2 options: VEGPARAM_LAI and LAI_SRC.
 
 	display_current_settings.c
 	get_global_param.c
+	global.param.sample
 	initialize_global.c
 	read_veglib.c
 	read_vegparam.c

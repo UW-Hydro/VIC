@@ -325,8 +325,8 @@ Fixed bugs in initialization of various TFallback counts and flags.
 
 	Description:
 
-	In 4.1.1, the number of Tfallbacks reported to the screen sometimes came
-	out negative; this has been fixed for fallbacks in snow surface
+	In 4.1.1, the number of Tfallbacks reported to the screen sometimes
+	came out negative; this has been fixed for fallbacks in snow surface
 	temperature and soil temperature profile.
 
 
@@ -366,6 +366,84 @@ only enabled when options.TFALLBACK = TRUE.
 	the average of its neighbors' temperatures as soon as the runaway
 	behavior is detected.  We hope to implement a more rigorous solution
 	to this problem in future releases.
+
+
+
+Simplified arguments lists of various functions.
+
+	Files Affected:
+
+	arno_evap.c
+	canopy_evap.c
+	func_surf_energy_bal.c
+	initialize_atmos.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl.h
+
+	Description:
+
+	Replaced individual forcing and date/time variables in argument
+	lists of solve_snow() and snow_intercept() with the dmy and atmos
+	data structures.  Removed several unused variables from the arg list
+	of arno_evap().  Replaced individual soil_con variables in arg list
+	of initialize_atmos() with the soil_con structure.
+
+
+
+Replaced GLOBAL_LAI option with 2 options: VEGPARAM_LAI and LAI_SRC.
+
+	Files Affected:
+
+	display_current_settings.c
+	get_global_param.c
+	initialize_global.c
+	read_veglib.c
+	read_vegparam.c
+	vicNl_def.h
+
+	Description:
+
+	In previous versions, the GLOBAL_LAI option caused some confusion.
+	GLOBAL_LAI=TRUE indicated that LAI values should be read from the veg
+	parameter file (usually because they vary globally), and FALSE
+	indicated that LAI values should be read from the veg library (meaning
+	they were constant across the globe).  But the natural interpretation
+	of "GLOBAL_LAI=TRUE" is that LAI values are globally constant.  In
+	addition, the presence of LAI values in the veg param file was
+	dictated by the setting of GLOBAL_LAI.  If the user wanted to have VIC
+	read LAI values from the veg library, GLOBAL_LAI would need to be
+	FALSE, and the veg param file would need to have its LAI values
+	removed.  This linkage of veg param file format and where VIC was
+	looking for LAI values seemed unnecesary.
+
+	There are now 2 options controlling these 2 separate aspects of LAI.
+	VEGPARAM_LAI controls the *format* of the veg param file.  Independent
+	of this, LAI_SRC controls *where* VIC looks for LAI values.  This way,
+	1) the user can switch between the two sources of LAI values without
+	having to change the veg param file, and 2) the meanings of these
+	options are more clear than the old GLOBAL_LAI option.
+
+	The old GLOBAL_LAI setting has been maintained for backwards-
+	compatibility, i.e. if VIC encounters GLOBAL_LAI in the global
+	param file, it will set VEGPARAM_LAI and LAI_SRC appropriately.
+
+
+
+Changed default number of soil layers from 2 to 3 (the most common
+configuration).
+
+	Files Affected:
+
+	initialize_global.c
+
+	Description:
+
+	The default number of soil layers has been changed from 2 to 3 (the
+	most common configuration).  This will only affect users who have
+	omitted this setting from their global parameter files.
 
 
 

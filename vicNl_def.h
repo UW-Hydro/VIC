@@ -93,6 +93,7 @@
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
   2010-Mar-31 Added RUNOFF_IN and OUT_RUNOFF_IN.			TJB
+  2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -147,6 +148,10 @@
 #define N_PET_TYPES_NAT 2
 #define PET_NATVEG  4
 #define PET_VEGNOCR 5
+
+/***** LAI source types *****/
+#define LAI_FROM_VEGLIB     0
+#define LAI_FROM_VEGPARAM   1
 
 /***** Hard-coded veg class parameters (mainly for pot_evap) *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
@@ -593,8 +598,9 @@ typedef struct {
 			    parameters*/
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
-  char   GLOBAL_LAI;     /* TRUE = read LAI values for each vegetation type
-			    from the veg param file */
+  char   VEGPARAM_LAI;   /* TRUE = veg param file contains monthly LAI values */
+  char   LAI_SRC;        /* LAI_FROM_VEGLIB = read LAI values from veg library file
+                            LAI_FROM_VEGPARAM = read LAI values from the veg param file */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
 
   // state options

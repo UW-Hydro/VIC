@@ -433,8 +433,8 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
   2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
   2010-Mar-08 Added TFallback logic for case in which max iterations exceeded.	TJB
-  2010-Apr-24 Addeed initialization of Tfbcount.				TJB
-  2010-Apr-24 Addeed hack to prevent cold nose.  Only active when TFALLBACK
+  2010-Apr-24 Added initialization of Tfbcount.					TJB
+  2010-Apr-24 Added hack to prevent cold nose.  Only active when TFALLBACK
 	      is TRUE.								TJB
   **********************************************************************/
 

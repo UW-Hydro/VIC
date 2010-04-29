@@ -43,6 +43,7 @@ void display_current_settings(int                 mode,
   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.	TJB
   2009-Sep-19 Moved TFALLBACK to its own separate option.	TJB
   2009-Nov-15 Redirected output to stderr.			TJB
+  2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.TJB
 **********************************************************************/
 {
 
@@ -327,13 +328,17 @@ void display_current_settings(int                 mode,
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Veg Data:\n");
+  fprintf(stderr,"Veg library file\t%s\n",names->veglib);
   fprintf(stderr,"Veg param file\t\t%s\n",names->veg);
   fprintf(stderr,"ROOT_ZONES\t\t%d\n",options.ROOT_ZONES);
-  fprintf(stderr,"Veg library file\t%s\n",names->veglib);
-  if (options.GLOBAL_LAI)
-    fprintf(stderr,"GLOBAL_LAI\t\tTRUE\n");
+  if (options.VEGPARAM_LAI)
+    fprintf(stderr,"VEGPARAM_LAI\t\tTRUE\n");
   else
-    fprintf(stderr,"GLOBAL_LAI\t\tFALSE\n");
+    fprintf(stderr,"VEGPARAM_LAI\t\tFALSE\n");
+  if (options.LAI_SRC == LAI_FROM_VEGPARAM)
+    fprintf(stderr,"LAI_SRC\t\tLAI_FROM_VEGPARAM\n");
+  else if (options.LAI_SRC == LAI_FROM_VEGLIB)
+    fprintf(stderr,"LAI_SRC\t\tLAI_FROM_VEGLIB\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Elevation Data:\n");

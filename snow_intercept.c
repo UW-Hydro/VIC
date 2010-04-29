@@ -75,60 +75,60 @@ static char vcid[] = "$Id$";
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
+  2010-Apr-26 Replaced individual forcing variables with atmos_data
+	      in argument list.						TJB
 *****************************************************************************/
-int snow_intercept(double  AirDens,
-		    double  Dt, 
-		    double  EactAir, 		    
-		    double  F,  
-		    double  LAI, 
-		    double  Le, 
-		    double  LongOverIn, // incominf LW from sky
-		    double  LongUnderOut, // incoming LW from understroy
-		    double  MaxInt, // maximum interception capacity
-		    double  Press, // atmospheric pressure
-		    double  ShortOverIn,  // incoming SW to overstory
-		    double  ShortUnderIn,  // incoming SW to understory
-		    double  Tcanopy, // canopy air temperature
-		    double  Vpd, // vapor pressure defficit
-		    double  bare_albedo, // albedo of snow-free ground
-		    double  mu, // fraction of precipitation area
-		    double *AdvectedEnergy,
-		    double *AlbedoOver, // overstory albedo
-		    double *IntRain, // intercepted rain
-		    double *IntSnow, // intercepted snow
-		    double *LatentHeat, // latent heat from overstory
-		    double *LatentHeatSub, // sublimation heat from overstory
-		    double *LongOverOut, // longwave emitted by canopy
-		    double *MeltEnergy, 
-		    double *NetLongOver,
-		    double *NetShortOver,
-		    double *Ra,
-		    double *Ra_used,
-		    double *RainFall,
-		    double *SensibleHeat,
-		    double *SnowFall, 
-		    double *Tfoliage, 
-		    char   *Tfoliage_fbflag, 
-		    int    *Tfoliage_fbcount, 
-		    double *TempIntStorage, 
-		    double *VaporMassFlux,
-		    double *Wind,   
-		    double *displacement,
-		    double *ref_height,
-		    double *roughness,
-		    float  *root, 
-		    int     UnderStory,
-		    int     band, 
-		    int     hour, 
-		    int     iveg, 
-		    int     month, 
-		    int     rec,
-		    int     veg_class,
-		    layer_data_struct *layer_dry,
-		    layer_data_struct *layer_wet,
-		    soil_con_struct   *soil_con,
-		    veg_var_struct    *veg_var_dry,
-		    veg_var_struct    *veg_var_wet)
+int snow_intercept(double  Dt,
+		   double  F,  
+		   double  LAI, 
+		   double  Le, 
+		   double  LongOverIn, // incominf LW from sky
+		   double  LongUnderOut, // incoming LW from understroy
+		   double  MaxInt, // maximum interception capacity
+		   double  ShortOverIn,  // incoming SW to overstory
+		   double  ShortUnderIn,  // incoming SW to understory
+		   double  Tcanopy, // canopy air temperature
+		   double  bare_albedo, // albedo of snow-free ground
+		   double  mu, // fraction of precipitation area
+		   double *AdvectedEnergy,
+		   double *AlbedoOver, // overstory albedo
+		   double *IntRain, // intercepted rain
+		   double *IntSnow, // intercepted snow
+		   double *LatentHeat, // latent heat from overstory
+		   double *LatentHeatSub, // sublimation heat from overstory
+		   double *LongOverOut, // longwave emitted by canopy
+		   double *MeltEnergy, 
+		   double *NetLongOver,
+		   double *NetShortOver,
+		   double *Ra,
+		   double *Ra_used,
+		   double *RainFall,
+		   double *SensibleHeat,
+		   double *SnowFall, 
+		   double *Tfoliage, 
+		   char   *Tfoliage_fbflag, 
+		   int    *Tfoliage_fbcount, 
+		   double *TempIntStorage, 
+		   double *VaporMassFlux,
+		   double *Wind,   
+		   double *displacement,
+		   double *ref_height,
+		   double *roughness,
+		   float  *root, 
+		   int     UnderStory,
+		   int     band, 
+		   int     hour, 
+		   int     iveg, 
+		   int     month, 
+		   int     rec,
+		   int     hidx,
+		   int     veg_class,
+		   atmos_data_struct *atmos,
+		   layer_data_struct *layer_dry,
+		   layer_data_struct *layer_wet,
+		   soil_con_struct   *soil_con,
+		   veg_var_struct    *veg_var_dry,
+		   veg_var_struct    *veg_var_wet)
 {
 
   extern option_struct options;
@@ -178,7 +178,19 @@ int snow_intercept(double  AirDens,
   double Evap;
   double OldTfoliage;
 
+  double  AirDens;
+  double  EactAir;
+  double  Press; // atmospheric pressure
+  double  Vpd; // vapor pressure defficit
+  double  shortwave; //
+
   char ErrorString[MAXSTRING];
+
+  AirDens   = atmos->density[hidx];
+  EactAir   = atmos->vp[hidx];
+  Press     = atmos->pressure[hidx];
+  Vpd       = atmos->vpd[hidx];
+  shortwave = atmos->shortwave[hidx];
 
   /* Initialize Tfoliage_fbflag */
   *Tfoliage_fbflag = 0;

@@ -144,6 +144,8 @@ int surface_fluxes(char                 overstory,
 	      since they are never used.				TJB
   2010-Apr-24 Added logic to handle case when aero_cond or aero_resist
 	      are very large or 0.					TJB
+  2010-Apr-26 Simplified argument lists for solve_snow() and
+	      snow_intercept().						TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -606,11 +608,8 @@ int surface_fluxes(char                 overstory,
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
-			       Tcanopy, Tgrnd, Tair, atmos->density[hidx], 
-			       dp, atmos->longwave[hidx], mu, 
-			       step_prec[WET], atmos->pressure[hidx], 
-			       atmos->shortwave[hidx], snow_grnd_flux, 
-			       VPcanopy, VPDcanopy, gp->wind_h, 
+			       Tcanopy, Tgrnd, Tair, dp, mu, 
+			       step_prec[WET], snow_grnd_flux, gp->wind_h, 
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
@@ -622,10 +621,8 @@ int surface_fluxes(char                 overstory,
 			       step_ppt, rainfall, ref_height, 
 			       roughness, snow_inflow, snowfall, &surf_atten, 
 			       wind, root, UNSTABLE_SNOW, options.Nnode, 
-			       Nveg, band, dmy[rec].hour, iveg, 
-			       dmy[rec].day_in_year, step_dt, 
-			       dmy[rec].month, dmy[rec].day, dmy[rec].year, 
-			       rec, veg_class, &UnderStory, &(iter_snow_energy), 
+			       Nveg, iveg, band, step_dt, rec, hidx, veg_class,
+			       &UnderStory, dmy, atmos, &(iter_snow_energy), 
 			       iter_layer[DRY], iter_layer[WET], &(iter_snow), 
 			       soil_con, &(iter_snow_veg_var[DRY]), 
 			       &(iter_snow_veg_var[WET]));

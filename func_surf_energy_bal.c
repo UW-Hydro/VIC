@@ -94,6 +94,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
 	      node spacing.						TJB
   2010-Apr-24 Replaced ra_under with Ra_used[0].			TJB
+  2010-Apr-28 Removed net_short, displacement, roughness, and ref_height
+	      from arg list of arno_evap() as they are no longer used.	TJB
 
 **********************************************************************/
 {
@@ -687,9 +689,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
-		     NetShortBare, depth[0], max_moist * depth[0] * 1000., 
-		     elevation, b_infilt, displacement[0], 
-		     roughness[0], ref_height[0], Ra_used[0], delta_t, mu, 
+		     depth[0], max_moist * depth[0] * 1000., 
+		     elevation, b_infilt, Ra_used[0], delta_t, mu, 
 #if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
 #else

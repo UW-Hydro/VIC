@@ -43,6 +43,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Jul-31 Removed extra veg tile for lake/wetland case.		TJB
   2009-Sep-14 Made error messages clearer.				TJB
   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
+  2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
 **********************************************************************/
 {
 
@@ -69,7 +70,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   char            *vegarr[500];
   size_t	  length;
 
-  if(options.GLOBAL_LAI) skip=2;
+  if(options.VEGPARAM_LAI) skip=2;
   else skip=1;
 
   NoOverstory = 0;
@@ -201,7 +202,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     for(k=0; k<Nfields; k++)
       free(vegarr[k]);
 
-    if ( options.GLOBAL_LAI ) {
+    if ( options.VEGPARAM_LAI ) {
       // Read the LAI line
       if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
         sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading LAI for vegetat_type_num %d\n",vegcel,vegetat_type_num);
@@ -227,13 +228,15 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       }
 
       for ( j = 0; j < 12; j++ ) {
-        veg_lib[temp[i].veg_class].LAI[j] = atof( vegarr[j] );
-        if (veg_lib[temp[i].veg_class].overstory && veg_lib[temp[i].veg_class].LAI[j] == 0) {
-          sprintf(ErrStr,"ERROR: cell %d, veg tile %d: the specified veg class (%d) is listed as an overstory class in the veg LIBRARY, but the LAI given in the veg PARAM FILE for this tile for month %d is 0.\n",gridcel, i+1, temp[i].veg_class+1, j+1);
-          nrerror(ErrStr);
+        if (options.LAI_SRC == LAI_FROM_VEGPARAM) {
+          veg_lib[temp[i].veg_class].LAI[j] = atof( vegarr[j] );
+          if (veg_lib[temp[i].veg_class].overstory && veg_lib[temp[i].veg_class].LAI[j] == 0) {
+            sprintf(ErrStr,"ERROR: cell %d, veg tile %d: the specified veg class (%d) is listed as an overstory class in the veg LIBRARY, but the LAI given in the veg PARAM FILE for this tile for month %d is 0.\n",gridcel, i+1, temp[i].veg_class+1, j+1);
+            nrerror(ErrStr);
+          }
+          veg_lib[temp[i].veg_class].Wdmax[j] = 
+	    LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
         }
-        veg_lib[temp[i].veg_class].Wdmax[j] = 
-	  LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
       for(k=0; k<Nfields; k++)
         free(vegarr[k]);

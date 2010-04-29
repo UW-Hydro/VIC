@@ -79,6 +79,12 @@
 	      initialize_model_state().					TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2010-Mar-31 Added cell_area to initialize_atmos().			TJB
+  2010-Apr-26 Simplified argument lists for solve_snow() and
+	      snow_intercept().						TJB
+  2010-Apr-28 Removed net_short, displacement, roughness, and ref_height
+	      from arg list of arno_evap() as they are no longer used.	TJB
+  2010-Apr-28 Removed individual soil_con variables from argument list
+	      of initialize_atmos() and replaced with *soil_con.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -90,8 +96,7 @@
 double advected_sensible_heat(double, double, double, double, double);
 void alloc_atmos(int, atmos_data_struct **);
 double arno_evap(layer_data_struct *, layer_data_struct *, double, double, 
-		 double, double, double, double, double, double, double, 
-		 double, double, double, double, double, 
+		 double, double, double, double, double, double, double, double, 
 #if SPATIAL_FROST
 		 double, double *);
 #else
@@ -318,13 +323,11 @@ void   hermite(int, double *, double *, double *, double *, double *);
 void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
 void   init_output_list(out_data_struct *, int, char *, int, float);
-void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **, double, 
-			double, double, double, double, double, double, 
-                        double, double, double *, 
+void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
 #if OUTPUT_FORCE
-			char *, out_data_file_struct *, out_data_struct *);
+			soil_con_struct *, out_data_file_struct *, out_data_struct *);
 #else
-			char *);
+			soil_con_struct *);
 #endif
 void   initialize_global();
 int   initialize_model_state(dist_prcp_struct *, dmy_struct,
@@ -435,15 +438,15 @@ out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 double snow_albedo(double, double, double, double, double, double, int, char);
 double snow_density(snow_data_struct *, double, double, double, double, double);
-int    snow_intercept(double, double, double, double, double, double, double,
-                      double, double, double, double, double, double, double, 
-                      double, double, 
+int    snow_intercept(double, double, double, double, double, double,
+                      double, double, double, double, double, double, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, double *, double *, double *, double *, 
                       double *, char *, int *, double *, double *, double *, 
-                      double *, double *, double *, float *, int, int, int, 
-                      int, int, int, int, layer_data_struct *, 
+                      double *, double *, double *, float *,
+                      int, int, int, int, int, int, int, int,
+                      atmos_data_struct *, layer_data_struct *, 
                       layer_data_struct *, soil_con_struct *, 
                       veg_var_struct *, veg_var_struct *);
 int    snow_melt(double, double, double, double, double *, double, double *, double, 
@@ -459,16 +462,14 @@ void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 int, int);
 double soil_thermal_eqn(double, va_list);
 double solve_snow(char, double, double, double, double, double, double,
-                  double, double, double, double, double, double, double,
-                  double, double, double, double, double,
+                  double, double, double, double, double, double,
                   double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
-                  float *,
-                  int, int, int, int, int, int, int, int, int,
-                  int, int, int, int, int *, energy_bal_struct *,
+                  float *, int, int, int, int, int, int, int, int, int, int *,
+                  dmy_struct *, atmos_data_struct *, energy_bal_struct *,
                   layer_data_struct *, layer_data_struct *,
                   snow_data_struct *, soil_con_struct *,
                   veg_var_struct *, veg_var_struct *);
@@ -522,7 +523,7 @@ double svp_slope(double);
 
 void transpiration(layer_data_struct *, int, int, double, double, double, 
 		   double, double, double, double, double, double, double, 
-		   double *, double *, double *, double *, double *, double *,
+		   double *, double *, double *, double *, double *,
 #if SPATIAL_FROST
                    double *,
 #endif

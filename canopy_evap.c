@@ -96,7 +96,10 @@ double canopy_evap(layer_data_struct *layer_wet,
               present.                                           KAC
      5-8-2001 Modified to close the canopy energy balance.       KAC
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
-	      and into separate function calc_rc().				TJB
+	      and into separate function calc_rc().			TJB
+  2010-Apr-28 Moved computation of fraction of timestep for which canopy
+	      was dry up to canopy_evap(); now this is passed to
+	      transpiration() via dryFrac.				TJB
 
 **********************************************************************/ 
 
@@ -122,6 +125,7 @@ double canopy_evap(layer_data_struct *layer_wet,
   double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
   double             rc;
+  double             dryFrac;
   layer_data_struct *tmp_layer;
   veg_var_struct    *tmp_veg_var;
 
@@ -169,8 +173,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   air_temp, vpd, veg_lib[veg_class].LAI[month-1],
 		   (double)1.0, FALSE);
       canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
-		   * penman(air_temp, elevation, rad,
-			    vpd, ra, rc, veg_lib[veg_class].rarc)
+		   * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
 		   * delta_t / SEC_PER_DAY;
 
       if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
@@ -182,7 +185,11 @@ double canopy_evap(layer_data_struct *layer_wet,
       else
 	f = 1.0;
       canopyevap *= f;
-    
+
+      /* compute fraction of step for which canopy was dry */
+// NOTE: possibly should use tmp_Wdew, but leaving it for now to be consistent with previous version
+      dryFrac = 1.0-f*pow((tmp_veg_var->Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+
       tmp_Wdew += ppt - canopyevap;
       if (tmp_Wdew < 0.0) 
 	tmp_Wdew = 0.0;
@@ -198,8 +205,8 @@ double canopy_evap(layer_data_struct *layer_wet,
       *******************************************/
       if(CALC_EVAP)
 	transpiration(tmp_layer, veg_class, month, rad, vpd, net_short, 
-		      air_temp, ra, ppt, f, delta_t, tmp_veg_var->Wdew, 
-		      elevation, depth, Wcr, Wpwp, &tmp_Wdew, &canopyevap, 
+		      air_temp, ra, ppt, f, delta_t, dryFrac, 
+		      elevation, depth, Wcr, Wpwp, &canopyevap, 
 		      layerevap, 
 #if SPATIAL_FROST
 		      frost_fract, 
@@ -240,12 +247,11 @@ void transpiration(layer_data_struct *layer,
 		   double ppt,
 		   double f,
 		   double delta_t,
-		   double Wdew,
+		   double dryFrac,
 		   double elevation,
 		   double *depth,
 		   double *Wcr,
 		   double *Wpwp,
-		   double *new_Wdew,
 		   double *canopyevap,
 		   double *layerevap,
 #if SPATIAL_FROST
@@ -264,6 +270,9 @@ void transpiration(layer_data_struct *layer,
 	      uninitialized values later on).				TJB
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
 	      and into separate function calc_rc().			TJB
+  2010-Apr-28 Moved computation of fraction of timestep for which canopy
+	      was dry up to canopy_evap(); now this is passed to
+	      transpiration() via dryFrac.				TJB
 
 **********************************************************************/
 {
@@ -364,10 +373,8 @@ void transpiration(layer_data_struct *layer,
     gsm_inv=1.0;
     rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
 		 air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
-    evap = penman(air_temp, elevation, rad, vpd, ra, rc,
-		  veg_lib[veg_class].rarc)
-	   * delta_t / SEC_PER_DAY
-	   * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0)));
+    evap = penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
+	   * delta_t / SEC_PER_DAY * dryFrac;
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -424,11 +431,8 @@ void transpiration(layer_data_struct *layer,
 	/** Compute potential evapotranspiration **/
         rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
 		     air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
-        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, rc,
-			      veg_lib[veg_class].rarc)
-		       * delta_t / SEC_PER_DAY * (double)root[i]
-		       * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
-					 (2.0/3.0)));
+        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
+		       * delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
       }
       else layerevap[i] = 0.0;
 

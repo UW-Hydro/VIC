@@ -53,6 +53,8 @@ static char vcid[] = "$Id$";
 	      func_surf_energy_bal() (the parent function), which refers
 	      to the depth of the 1st soil thermal node in some cases.		TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
+  2010-Apr-28 Removed net_short, displacement, roughness, and ref_height from
+	      arg list as they are no longer used.				TJB
 
 ****************************************************************************/
 
@@ -61,14 +63,10 @@ double arno_evap(layer_data_struct *layer_wet,
 		 double             rad,
 		 double             air_temp,
 		 double             vpd,
-		 double             net_short,
 		 double             depth1,
 		 double             max_moist,
 		 double             elevation,
 		 double             b_infilt,
-		 double             displacement,
-		 double             roughness,
-		 double             ref_height,
 		 double             ra,
 		 double             delta_t,
 		 double             mu,

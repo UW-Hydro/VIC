@@ -12,16 +12,10 @@ double solve_snow(char                 overstory,
 		  double               Tcanopy, // canopy air temperature
 		  double               Tgrnd, // soil surface temperature
 		  double               air_temp, // air temperature
-		  double               density,
 		  double               dp,
-		  double               longwave,
 		  double               mu,
 		  double               prec,
-		  double               pressure,
-		  double               shortwave,
 		  double               snow_grnd_flux,
-		  double               vp,
-		  double               vpd,
 		  double               wind_h,
 		  double              *AlbedoUnder,
 		  double              *Evap,
@@ -55,17 +49,15 @@ double solve_snow(char                 overstory,
 		  int                  INCLUDE_SNOW,
 		  int                  Nnodes,
 		  int                  Nveg,
-		  int                  band,
-		  int                  hour,
 		  int                  iveg,
-		  int                  day_in_year,
+		  int                  band,
 		  int                  dt,
-		  int                  month,
-		  int                  day, 
-		  int                  year, 
 		  int                  rec,
+		  int                  hidx,
 		  int                  veg_class,
 		  int                 *UnderStory,
+		  dmy_struct          *dmy,
+		  atmos_data_struct   *atmos,
 		  energy_bal_struct   *energy,
 		  layer_data_struct   *layer_dry,
 		  layer_data_struct   *layer_wet,
@@ -130,6 +122,9 @@ double solve_snow(char                 overstory,
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-15 Removed ice0 and moist0 from argument list, since they
 	      are never used.						TJB
+  2010-Apr_26 Replaced individual forcing variables with atmos_data
+	      in argument list.  Replaced individual time variables
+	      with dmy_struct in argument list.				TJB
 
 *********************************************************************/
 
@@ -150,6 +145,26 @@ double solve_snow(char                 overstory,
   double              tmp_grnd_flux;
   double              store_snowfall;
   double              tmp_ref_height;
+  int                 month;
+  int                 hour;
+  int                 day_in_year;
+  double              density;
+  double              longwave;
+  double              pressure;
+  double              shortwave;
+  double              vp;
+  double              vpd;
+
+  month       = dmy[rec].month;
+  hour        = dmy[rec].hour;
+  day_in_year = dmy[rec].day_in_year;
+
+  density   = atmos->density[hidx];
+  longwave  = atmos->longwave[hidx];
+  pressure  = atmos->pressure[hidx];
+  shortwave = atmos->shortwave[hidx];
+  vp        = atmos->vp[hidx];
+  vpd       = atmos->vpd[hidx];
 
   /* initialize moisture variables */
   melt     = 0.;
@@ -234,12 +249,11 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-	ErrorFlag = snow_intercept(density, (double)dt * SECPHOUR, vp, 1., 
+	ErrorFlag = snow_intercept((double)dt * SECPHOUR, 1., 
 		       veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
-		       veg_lib[veg_class].Wdmax[month-1], pressure, 
-		       ShortOverIn, *ShortUnderIn, 
-		       Tcanopy, vpd, 
+		       veg_lib[veg_class].Wdmax[month-1], 
+		       ShortOverIn, *ShortUnderIn, Tcanopy,
 		       BareAlbedo, mu, &energy->canopy_advection, 
 		       &energy->AlbedoOver, 
 		       &veg_var_wet->Wdew, &snow->snow_canopy, 
@@ -253,8 +267,8 @@ double solve_snow(char                 overstory,
                        &energy->Tfoliage_fbcount, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
 		       ref_height, roughness, root, *UnderStory, band, 
-		       hour, iveg, month, rec, veg_class, layer_dry, 
-		       layer_wet, soil_con, veg_var_dry, veg_var_wet);
+		       hour, iveg, month, rec, hidx, veg_class, atmos, 
+		       layer_dry, layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
 
 	/* Store throughfall from canopy */

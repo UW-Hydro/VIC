@@ -90,6 +90,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-Nov-15 Added prohibition of QUICK_FLUX=TRUE when IMPLICIT=TRUE or
 	      EXP_TRANS=TRUE.							TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
+  2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -496,19 +497,41 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
 	else options.JULY_TAVG_SUPPLIED=TRUE;
       }
+      else if(strcasecmp("VEGLIB",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",names->veglib);
+      }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
       }
+      else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
+        fprintf(stderr, "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n"); 
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) {
+//          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  LAI_FROM_VEGPARAM\"");
+          options.VEGPARAM_LAI=TRUE;
+          options.LAI_SRC=LAI_FROM_VEGPARAM;
+        }
+        else {
+//          nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  LAI_FROM_VEGLIB\"");
+          options.LAI_SRC=LAI_FROM_VEGLIB;
+        }
+      }
+      else if(strcasecmp("VEGPARAM_LAI",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_LAI=TRUE;
+        else options.VEGPARAM_LAI = FALSE;
+      }
+      else if(strcasecmp("LAI_SRC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("LAI_FROM_VEGPARAM",flgstr)==0)
+          options.LAI_SRC=LAI_FROM_VEGPARAM;
+        else
+          options.LAI_SRC=LAI_FROM_VEGLIB;
+      }
       else if(strcasecmp("ROOT_ZONES",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
-      }
-      else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.GLOBAL_LAI=TRUE;
-        else options.GLOBAL_LAI = FALSE;
-      }
-      else if(strcasecmp("VEGLIB",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->veglib);
       }
       else if(strcasecmp("SNOW_BAND",optstr)==0) {
 	sscanf(cmdstr,"%*s %d %s",&options.SNOW_BAND,names->snowband);
@@ -804,6 +827,10 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror("No vegetation library file has been defined.  Make sure that the global file defines the vegetation library file on the line that begins with \"VEGLIB\".");
   if(options.ROOT_ZONES<0)
     nrerror("ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
+  if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
+      sprintf(ErrStr, "\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global parameter file.  If you want VIC to read LAI values from the vegparam file, you MUST make sure the veg param file contains 1 line of 12 monthly LAI values for EACH veg tile in EACH grid cell, and you MUST specify \"VEGPARAM_LAI\" as \"TRUE\" in the global parameter file.  Alternatively, if you want VIC to read LAI values from the veg library file, set \"LAI_SRC\" ro \"LAI_FROM_VEGLIB\" in the global parameter file.  In either case, the setting of \"VEGPARAM_LAI\" must be consistent with the contents of the veg param file (i.e. whether or not it contains LAI values).");
+      nrerror(ErrStr);
+  }
 
   // Validate the elevation band file information
   if(options.SNOW_BAND > 1) {

@@ -7,22 +7,12 @@ static char vcid[] = "$Id$";
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,
-                      double                    cell_area,
-                      double                    theta_l,
-                      double                    theta_s,
-                      double                    phi,
-		      double                    elevation,
-		      double                    annual_prec,
-		      double                    wind_h,
-		      double                    roughness,
-		      double                    avgJulyAirTemp,
-		      double                   *Tfactor,
 #if OUTPUT_FORCE
-                      char                     *AboveTreeLine,
+		      soil_con_struct          *soil_con,
                       out_data_file_struct     *out_data_files,
                       out_data_struct          *out_data)
 #else /* OUTPUT_FORCE */
-                      char                     *AboveTreeLine)
+		      soil_con_struct          *soil_con)
 #endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
@@ -100,6 +90,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2009-Oct-13 Removed condition if(options.SNOW_BAND) for call to
 	      compute_treeline(), since options.SNOW_BAND is always > 0.	TJB
   2010-Mar-31 Added RUNOFF_IN.							TJB
+  2010-Apr-28 Removed individual soil_con variables from argument list and
+	      replaced with *soil_con.						TJB
 
 **********************************************************************/
 {
@@ -119,6 +111,17 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int    *tmaxhour;
   int    *tminhour;
   double  deltat;
+  double  cell_area;
+  double  theta_l;
+  double  theta_s;
+  double  phi;
+  double  elevation;
+  double  annual_prec;
+  double  wind_h;
+  double  roughness;
+  double  avgJulyAirTemp;
+  double *Tfactor;
+  char   *AboveTreeLine;
   double  min_Tfactor;
   double  shortwave;
   double  svp_tair;
@@ -138,6 +141,18 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int     type;
   double  air_temp;
   double  factor;
+
+  wind_h = global_param.wind_h;
+  theta_l = (double)soil_con->time_zone_lng;
+  theta_s = (double)soil_con->lng;
+  phi = soil_con->lat;
+  elevation = soil_con->elevation;
+  annual_prec = soil_con->annual_prec;
+  roughness = soil_con->rough;
+  cell_area = soil_con->cell_area;
+  avgJulyAirTemp = soil_con->avgJulyAirTemp;
+  Tfactor = soil_con->Tfactor;
+  AboveTreeLine = soil_con->AboveTreeLine;
 
   /* compute number of simulation days */
   Ndays = ( global_param.nrecs * global_param.dt) / 24;

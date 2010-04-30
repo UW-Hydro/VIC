@@ -374,7 +374,6 @@ Simplified arguments lists of various functions.
 	Files Affected:
 
 	arno_evap.c
-	canopy_evap.c
 	func_surf_energy_bal.c
 	initialize_atmos.c
 	snow_intercept.c

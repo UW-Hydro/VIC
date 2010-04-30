@@ -523,7 +523,7 @@ double svp_slope(double);
 
 void transpiration(layer_data_struct *, int, int, double, double, double, 
 		   double, double, double, double, double, double, double, 
-		   double *, double *, double *, double *, double *,
+		   double *, double *, double *, double *, double *, double *,
 #if SPATIAL_FROST
                    double *,
 #endif

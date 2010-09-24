@@ -1844,6 +1844,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2009-Nov-30 Removed loops over dist in delta_moist assignments and elsewhere.
 	      Clarified conditions for rescaling/advecting.			TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
+  2010-Sep-24 Added channgel_in to store channel inflow separately from
+	      incoming runoff from the catchment.				TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1907,10 +1909,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   /* Convert from mm over lake/wetland tile to m3. */
 #if EXCESS_ICE
   if(SubsidenceUpdate > 0 ) 
-    runoff_volume = ( (lake->runoff_in + lake->baseflow_in + total_meltwater*lakefrac) / 1000. ) * soil_con.cell_area*lake_con.Cl[0];
+    runoff_volume = ( (lake->runoff_in + lake->baseflow_in + lake->channel_in + total_meltwater*lakefrac) / 1000. ) * soil_con.cell_area*lake_con.Cl[0];
   else
 #endif
-    runoff_volume = ( (lake->runoff_in + lake->baseflow_in) / 1000. ) * soil_con.cell_area*lake_con.Cl[0];
+    runoff_volume = ( (lake->runoff_in + lake->baseflow_in + lake->channel_in) / 1000. ) * soil_con.cell_area*lake_con.Cl[0];
  
   /**********************************************************************
    * 2. calculate change in lake level for lake outflow calculation

@@ -28,9 +28,11 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
   Modifications:
   01-11-00 Fixed allocation bug                             KAC
   2006-Sep-23 Implemented flexible output configuration; removed
-	      LDAS_OUTPUT and OPTIMIZE compile-time options.  TJB
-  2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
-  2010-Mar-31 Added runoff_in.							TJB
+	      LDAS_OUTPUT and OPTIMIZE compile-time options.		TJB
+  2006-Dec-20 All atmos_data arrays are always dynamically allocated
+	      now.							TJB
+  2010-Mar-31 Added runoff_in.						TJB
+  2010-Sep-24 Renamed runoff_in to channel_in.				TJB
 
 *******************************************************************/
 {
@@ -43,38 +45,38 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     vicerror("Memory allocation error in alloc_atmos().");
 
   for (i = 0; i < nrecs; i++) {
-    (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].prec == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");      
     (*atmos)[i].air_temp = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].air_temp == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].wind = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].wind == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].vpd = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].vpd == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].vp = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].vp == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].pressure = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].pressure == NULL)
+    (*atmos)[i].channel_in = (double *) calloc(NR+1, sizeof(double));	
+    if ((*atmos)[i].channel_in == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].density = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].density == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].shortwave = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].shortwave == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].longwave = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].longwave == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].prec == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");      
+    (*atmos)[i].pressure = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].pressure == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].shortwave = (double *) calloc(NR+1, sizeof(double));	
+    if ((*atmos)[i].shortwave == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].snowflag = (char *) calloc(NR+1, sizeof(char));	
     if ((*atmos)[i].snowflag == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].runoff_in = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].runoff_in == NULL)
+    (*atmos)[i].vp = (double *) calloc(NR+1, sizeof(double));	
+    if ((*atmos)[i].vp == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].vpd = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].vpd == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].wind = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].wind == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
   }    			
 
@@ -93,6 +95,11 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
 	      removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
   2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
   2010-Mar-31 Added runoff_in.							TJB
+  2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
+	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
+	      to OUT_LAKE_EVAP.  Added other lake water balance terms
+	      to set of output variables.  Added volumetric versions 
+	      of these too.						TJB
 ***************************************************************************/
 {
   int i;
@@ -101,17 +108,17 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
     return;
 
   for (i = 0; i < nrecs; i++) {
-    free((*atmos)[i].prec);
     free((*atmos)[i].air_temp);
-    free((*atmos)[i].wind);
-    free((*atmos)[i].vpd);
-    free((*atmos)[i].vp);
-    free((*atmos)[i].pressure);
+    free((*atmos)[i].channel_in);
     free((*atmos)[i].density);
-    free((*atmos)[i].shortwave);
     free((*atmos)[i].longwave);
+    free((*atmos)[i].prec);
+    free((*atmos)[i].pressure);
+    free((*atmos)[i].shortwave);
     free((*atmos)[i].snowflag);
-    free((*atmos)[i].runoff_in);
+    free((*atmos)[i].vp);
+    free((*atmos)[i].vpd);
+    free((*atmos)[i].wind);
   }
 
   free(*atmos);

@@ -94,6 +94,8 @@ int  full_energy(char                 NEWCELL,
   2009-Nov-09 Changed definition of lake->sarea to include ice extent; other
 	      changes to handle case when lake fraction goes to 0.		LCB via TJB
   2010-Mar-31 Added runoff_in.							TJB
+  2010-Sep-24 Changed atmos.runoff_in to atmos.channel_in.  Added
+	      lake_var.channel_in to store it.					TJB
 
 **********************************************************************/
 {
@@ -790,8 +792,9 @@ int  full_energy(char                 NEWCELL,
     /** Run lake model **/
     iveg = lake_con->lake_idx;
     band = 0;
-    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff + atmos->runoff_in[NR])/(lake_con->Cl[0]); // mm over lake/wetland tile
+    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)/(lake_con->Cl[0]); // mm over lake/wetland tile
     lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)/(lake_con->Cl[0]); // mm over lake/wetland tile
+    lake_var->channel_in  = atmos->channel_in[NR]/lake_con->Cl[0]; // mm over lake/wetland tile
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
     if ( (int)rainonly == ERROR ) {

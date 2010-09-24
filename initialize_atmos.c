@@ -92,6 +92,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2010-Mar-31 Added RUNOFF_IN.							TJB
   2010-Apr-28 Removed individual soil_con variables from argument list and
 	      replaced with *soil_con.						TJB
+  2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.					TJB
 
 **********************************************************************/
 {
@@ -218,7 +219,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
             || type == SNOWF
             || type == CSNOWF
             || type == LSSNOWF
-            || type == RUNOFF_IN
+            || type == CHANNEL_IN
            ) {
           for (idx=0; idx<(global_param.nrecs*NF); idx++) {
             forcing_data[type][idx] *= global_param.dt * 3600;
@@ -256,40 +257,40 @@ void initialize_atmos(atmos_data_struct        *atmos,
   *************************************************/
 
   /*************************************************
-    Create sub-daily runoff_in if not provided
+    Create sub-daily channel_in if not provided
   *************************************************/
 
-  if(param_set.TYPE[RUNOFF_IN].SUPPLIED) {
-    if(param_set.FORCE_DT[param_set.TYPE[RUNOFF_IN].SUPPLIED-1] == 24) {
-      /* daily runoff_in provided */
+  if(param_set.TYPE[CHANNEL_IN].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[CHANNEL_IN].SUPPLIED-1] == 24) {
+      /* daily channel_in provided */
       rec = 0;
       for (day = 0; day < Ndays; day++) {
         for (i = 0; i < stepspday; i++) {
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
-	    atmos[rec].runoff_in[j] = forcing_data[RUNOFF_IN][day] 
+	    atmos[rec].channel_in[j] = forcing_data[CHANNEL_IN][day] 
 	      / (float)(NF * stepspday);
-	    atmos[rec].runoff_in[j] *= 1000/cell_area; // convert to mm over grid cell 
-	    sum += atmos[rec].runoff_in[j];
+	    atmos[rec].channel_in[j] *= 1000/cell_area; // convert to mm over grid cell 
+	    sum += atmos[rec].channel_in[j];
 	  }
-	  if(NF>1) atmos[rec].runoff_in[NR] = sum;
-	  if(global_param.dt == 24) atmos[rec].runoff_in[NR] = forcing_data[RUNOFF_IN][day];
+	  if(NF>1) atmos[rec].channel_in[NR] = sum;
+	  if(global_param.dt == 24) atmos[rec].channel_in[NR] = forcing_data[CHANNEL_IN][day];
 	  rec++;
         }
       }
     }
     else {
-      /* sub-daily runoff_in provided */
+      /* sub-daily channel_in provided */
       idx = 0;
       for(rec = 0; rec < global_param.nrecs; rec++) {
         sum = 0;
         for(i = 0; i < NF; i++) {
-	  atmos[rec].runoff_in[i] = forcing_data[RUNOFF_IN][idx];
-	  atmos[rec].runoff_in[i] *= 1000/cell_area; // convert to mm over grid cell 
-	  sum += atmos[rec].runoff_in[i];
+	  atmos[rec].channel_in[i] = forcing_data[CHANNEL_IN][idx];
+	  atmos[rec].channel_in[i] *= 1000/cell_area; // convert to mm over grid cell 
+	  sum += atmos[rec].channel_in[i];
 	  idx++;
         }
-        if(NF>1) atmos[rec].runoff_in[NR] = sum;
+        if(NF>1) atmos[rec].channel_in[NR] = sum;
       }
     }
   }
@@ -298,11 +299,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for(rec = 0; rec < global_param.nrecs; rec++) {
       sum = 0;
       for(i = 0; i < NF; i++) {
-        atmos[rec].runoff_in[i] = 0;
-        sum += atmos[rec].runoff_in[i];
+        atmos[rec].channel_in[i] = 0;
+        sum += atmos[rec].channel_in[i];
         idx++;
       }
-      if(NF>1) atmos[rec].runoff_in[NR] = sum;
+      if(NF>1) atmos[rec].channel_in[NR] = sum;
     }
   }
 

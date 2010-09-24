@@ -31,8 +31,8 @@ Usage:
 New Features:
 -------------
 
-Added the input/output variables RUNOFF_IN and OUT_RUNOFF_IN, allowing input
-of runoff from upslope grid cells into the lake model.
+Added channel inflow from upstream into the lake to the list of forcing
+variables.  Added lake water balance terms to input/output variables.
 
 	Files Affected:
 
@@ -40,6 +40,8 @@ of runoff from upslope grid cells into the lake model.
 	full_energy.c
 	get_force_type.c
 	initialize_atmos.c
+	initialize_lake.c
+	lakes.eb.c
 	output_list_utils.c
 	put_data.c
 	vicNl.c
@@ -48,16 +50,36 @@ of runoff from upslope grid cells into the lake model.
 
 	Description:
 
-	Added forcing variable RUNOFF_IN to allow runoff from upslope grid
-	cells to be inputs into the lake.  This variable is ignored if LAKES
-	are set to FALSE or the lake/wetland tile has 0 area in a given grid
-	cell.  RUNOFF_IN must be in units of cubic meters [m3] per forcing
+	Added forcing variable CHANNEL_IN to allow channel flow from
+	upstream grid cells to be an input into the lake.  This variable
+	is ignored if LAKES is set to FALSE or the lake/wetland tile has 0
+	area.  CHANNEL_IN must be in units of cubic meters [m3] per forcing
 	time step (or cubic meters per second [m3/s] if ALMA_INPUT is TRUE).
 
-	The amount of incoming runoff is also stored in the output variable
-	OUT_RUNOFF_IN, for purposes of tracking and computing the cell's water
-	budget.  OUT_RUNOFF_IN is expressed in units of [mm over the grid
-	cell] per output time step (or [mm/s] if ALMA_OUTPUT is TRUE).
+	Several output variables have been added to aid in tracking the
+	lake water budget.  The complete set of lake water budget variables
+	is (in mm over grid cell area):
+	  OUT_LAKE_BF_IN	baseflow into lake from catchment
+	  OUT_LAKE_BF_OUT	baseflow out of lake
+	  OUT_LAKE_CHAN_IN	channel inflow into lake
+	  OUT_LAKE_CHAN_OUT	channel outflow from lake
+	  OUT_DELSURFSTOR	(already existed) change in surface water
+					storage
+	  OUT_LAKE_EVAP		(was OUT_EVAP_LAKE)
+	  OUT_PREC		(already existed)
+	  OUT_LAKE_RO_IN	runoff into lake from catchment
+	These same variables exist in units of volume (m**3):
+	  OUT_LAKE_BF_IN_V	baseflow into lake from catchment
+	  OUT_LAKE_BF_OUT_V	baseflow out of lake
+	  OUT_LAKE_CHAN_IN_V	channel inflow into lake
+	  OUT_LAKE_CHAN_OUT_V	channel outflow from lake
+	  OUT_LAKE_EVAP_V	evap from lake
+	  OUT_LAKE_PREC_V	(note the "LAKE" in the name)
+	  OUT_LAKE_RO_IN_V	runoff into lake from catchment
+	Note: there currently is no "_V" form of OUT_DELSURFSTOR.  If needed
+	we may add it later.  In the meantime, users can compute the
+	difference in OUT_LAKE_VOLUME between the current and previous time
+	steps.
 
 
 

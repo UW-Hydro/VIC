@@ -42,6 +42,11 @@ out_data_struct *create_output_list() {
   2009-Oct-08 Extended T fallback scheme to snow and ice T.	TJB
   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.				TJB
   2010-Mar-31 Added OUT_RUNOFF_IN.				TJB
+  2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
+	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
+	      to OUT_LAKE_EVAP.  Added other lake water balance terms
+	      to set of output variables.  Added volumetric versions 
+	      of these too.						TJB
 *************************************************************/
 
   extern option_struct options;
@@ -86,8 +91,20 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_EVAP].varname,"OUT_EVAP");                       /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_EVAP_BARE].varname,"OUT_EVAP_BARE");             /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_EVAP_CANOP].varname,"OUT_EVAP_CANOP");           /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
-  strcpy(out_data[OUT_EVAP_LAKE].varname,"OUT_EVAP_LAKE");             /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_INFLOW].varname,"OUT_INFLOW");                   /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_BF_IN].varname,"OUT_LAKE_BF_IN");           /* incoming baseflow from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_BF_IN_V].varname,"OUT_LAKE_BF_IN_V");       /* incoming volumetric baseflow from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_BF_OUT].varname,"OUT_LAKE_BF_OUT");         /* outgoing baseflow lake [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_BF_OUT_V].varname,"OUT_LAKE_BF_OUT_V");     /* outgoing volumetric baseflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_CHAN_IN].varname,"OUT_LAKE_CHAN_IN");       /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_CHAN_IN_V].varname,"OUT_LAKE_CHAN_IN_V");   /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_CHAN_OUT].varname,"OUT_LAKE_CHAN_OUT");     /* channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_CHAN_OUT_V].varname,"OUT_LAKE_CHAN_OUT_V"); /* volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_EVAP].varname,"OUT_LAKE_EVAP");             /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_EVAP_V].varname,"OUT_LAKE_EVAP_V");         /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_PREC_V].varname,"OUT_LAKE_PREC_V");         /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_RO_IN].varname,"OUT_LAKE_RO_IN");           /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_RO_IN_V].varname,"OUT_LAKE_RO_IN_V");       /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_PET_SATSOIL].varname,"OUT_PET_SATSOIL");         /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_PET_H2OSURF].varname,"OUT_PET_H2OSURF");         /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_PET_SHORT].varname,"OUT_PET_SHORT");             /* potential evap from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -98,7 +115,6 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_RAINF].varname,"OUT_RAINF");                     /* rainfall [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_REFREEZE].varname,"OUT_REFREEZE");               /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_RUNOFF].varname,"OUT_RUNOFF");                   /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
-  strcpy(out_data[OUT_RUNOFF_IN].varname,"OUT_RUNOFF_IN");             /* incoming upslope runoff [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOW_MELT].varname,"OUT_SNOW_MELT");             /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOWF].varname,"OUT_SNOWF");                     /* snowfall [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SUB_BLOWING].varname,"OUT_SUB_BLOWING");         /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -289,8 +305,20 @@ out_data_struct *create_output_list() {
   out_data[OUT_EVAP].aggtype = AGG_TYPE_SUM;
   out_data[OUT_EVAP_BARE].aggtype = AGG_TYPE_SUM;
   out_data[OUT_EVAP_CANOP].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_EVAP_LAKE].aggtype = AGG_TYPE_SUM;
   out_data[OUT_INFLOW].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_BF_IN].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_BF_IN_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_BF_OUT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_BF_OUT_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_CHAN_IN].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_CHAN_IN_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_CHAN_OUT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_CHAN_OUT_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_EVAP].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_EVAP_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_PREC_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_RO_IN].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_RO_IN_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_SATSOIL].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_H2OSURF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_SHORT].aggtype = AGG_TYPE_SUM;
@@ -301,7 +329,6 @@ out_data_struct *create_output_list() {
   out_data[OUT_RAINF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_REFREEZE].aggtype = AGG_TYPE_SUM;
   out_data[OUT_RUNOFF].aggtype = AGG_TYPE_SUM;
-  out_data[OUT_RUNOFF_IN].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOW_MELT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SNOWF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_SUB_BLOWING].aggtype = AGG_TYPE_SUM;

@@ -56,6 +56,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2008-Sep-09 Deleted the fprintf statement for maxiumum lake volume.		LCB via TJB
   2009-Jul-31 Added new parameter: index of veg tile (from veg param file) that
 	      contains the lake/wetland.					TJB
+  2010-Sep-24 Clarified the fprintf statement describing lake basin area as
+	      lake plus wetland area.						TJB
 **********************************************************************/
 
 {
@@ -202,7 +204,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     temp.depth_in = temp.mindepth;
   }
 
-  fprintf(stderr, "Lake area = %e km2\n",temp.basin[0]/(1000.*1000.));
+  fprintf(stderr, "Lake plus wetland area = %e km2\n",temp.basin[0]/(1000.*1000.));
   return temp;
 }
 

@@ -93,13 +93,10 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
              should not be freed.                                   KAC
   2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
 	      removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
-  2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
-  2010-Mar-31 Added runoff_in.							TJB
-  2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
-	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
-	      to OUT_LAKE_EVAP.  Added other lake water balance terms
-	      to set of output variables.  Added volumetric versions 
-	      of these too.						TJB
+  2006-Dec-20 All atmos_data arrays are always dynamically allocated
+	      now.							TJB
+  2010-Mar-31 Added runoff_in.						TJB
+  2010-Sep-24 Renamed runoff_in to channel_in.				TJB
 ***************************************************************************/
 {
   int i;

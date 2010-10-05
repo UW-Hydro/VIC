@@ -43,7 +43,11 @@ variables.  Added lake water balance terms to input/output variables.
 	initialize_lake.c
 	lakes.eb.c
 	output_list_utils.c
+	output.PILPS-2E.ALMA.template
+	output.TRADITIONAL.410.template
+	set_output_defaults.c
 	put_data.c
+	read_lakeparam.c
 	vicNl.c
 	vicNl_def.h
 	vicNl.h

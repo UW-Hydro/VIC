@@ -1,5 +1,9 @@
 # Output List for VIC TRADITIONAL 4.1.0 Configuration
 # RCS ID: $Id$
+#
+# Modifications:
+#
+# 2010-Sep-24 Changed OUT_EVAP_LAKE to OUT_LAKE_EVAP.			TJB
 ################################################################################
 # If FROZEN_SOIL is TRUE, increase N_OUTFILES by 1
 # If PRT_SNOW_BAND is TRUE, increase N_OUTFILES by 1
@@ -105,4 +109,4 @@ OUTVAR		OUT_SNOW_COVER	%.4f	OUT_TYPE_FLOAT	1
 #OUTVAR		OUT_LAKE_SURF_AREA	%.4f	OUT_TYPE_FLOAT	1
 #OUTVAR		OUT_LAKE_VOLUME		%.4f	OUT_TYPE_FLOAT	1
 #OUTVAR		OUT_LAKE_SURF_TEMP	%.4f	OUT_TYPE_FLOAT	1
-#OUTVAR		OUT_EVAP_LAKE		%.4f	OUT_TYPE_FLOAT	1
+#OUTVAR		OUT_LAKE_EVAP		%.4f	OUT_TYPE_FLOAT	1

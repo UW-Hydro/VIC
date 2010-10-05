@@ -53,7 +53,7 @@ int initialize_lake (lake_var_struct   *lake,
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
-  2010-Sep-24 Added channgel_in to store channel inflow separately from
+  2010-Sep-24 Added channel_in to store channel inflow separately from
 	      incoming runoff from the catchment.			TJB
 **********************************************************************/
 {

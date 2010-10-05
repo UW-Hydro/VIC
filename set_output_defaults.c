@@ -24,6 +24,11 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 	      (r3 and earlier) with the exception that previous versions
 	      of 4.1.0 multiplied these terms by 100 when saving to the
 	      snow file.						TJB
+  2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
+	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
+	      to OUT_LAKE_EVAP.  Added other lake water balance terms
+	      to set of output variables.  Added volumetric versions
+	      of these too.						TJB
 
 *************************************************************/
 
@@ -210,7 +215,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_SURF_AREA", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_VOLUME", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_EVAP_LAKE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_EVAP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
 
 #endif //OUTPUT_FORCE

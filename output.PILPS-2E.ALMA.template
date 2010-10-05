@@ -1,5 +1,9 @@
 # Output List for VIC ALMA-compliant PILPS-2E Configuration
 # RCS ID: $Id$
+#
+# Modifications:
+#
+# 2010-Sep-24 Changed OUT_EVAP_LAKE to OUT_LAKE_EVAP.			TJB
 ################################################################################
 ALMA_OUTPUT	TRUE
 N_OUTFILES	6
@@ -51,7 +55,7 @@ OUTFILE		eva	9
 OUTVAR		OUT_EVAP_CANOP	%.7e	*	*
 OUTVAR		OUT_TRANSP_VEG	%.7e	*	*
 OUTVAR		OUT_EVAP_BARE	%.7e	*	*
-OUTVAR		OUT_EVAP_LAKE	%.7e	*	*
+OUTVAR		OUT_LAKE_EVAP	%.7e	*	*
 OUTVAR		OUT_ROOTMOIST	%.4f	*	*
 OUTVAR		OUT_WDEW	%.4f	*	*
 OUTVAR		OUT_SUB_SNOW	%.7e	*	*

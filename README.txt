@@ -107,8 +107,54 @@ fraction of the grid cell area.
 
 
 
+Removed MIN_LIQ option.
+
+	Files Affected:
+
+	arno_evap.c
+	frozen_soil.c
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	lakes.eb.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	This option was intended to allow a dynamic (temperature-dependent)
+	lower bound on liquid soil moisture, based on the principle that, even
+	at very low temperatures, some moisture remains unfrozen.  However,
+	it ended up being unnecessary and its implementation introduced
+	undesirable complexity into the code.  In addition, it contained a bug
+	that allowed soil moisture to fall below residual moisture level.
+	Therefore this feature has been removed.
+
+
+
+
 Bug Fixes:
 ----------
+
+Soil moisture falls below residual moisture level in some cases.
+
+	Files Affected:
+
+	(see "Removed MIN_LIQ option" under "New Features")
+
+	Description:
+
+	The MIN_LIQ option contained a bug that allowed soil moisture to fall
+	below residual moisture level in some cases.  This feature has been
+	removed (see "Removed MIN_LIQ option" under "New Features").
+
+
+
 
 Incorrect calculation of grnd_flux, deltaH, and fusion for EXP_TRANS=TRUE.
 
@@ -238,34 +284,6 @@ Removed save_data structure initialization from initialize_model_state().
 	model now initializes all output variables with an initial call to
 	put_data() before the simulation begins.  Thus, the initialization
 	has been removed from initialize_model_state().
-
-
-
-Removed MIN_LIQ option.
-
-	Files Affected:
-
-	arno_evap.c
-	frozen_soil.c
-	get_global_param.c
-	global.param.sample
-	initialize_global.c
-	initialize_lake.c
-	initialize_model_state.c
-	initialize_soil.c
-	lakes.eb.c
-	runoff.c
-	soil_conduction.c
-	vicNl_def.h
-	vicNl.h
-
-	Description:
-
-	This option was intended to allow a dynamic (temperature-dependent)
-	lower bound on liquid soil moisture, based on the principle that, even
-	at very low temperatures, some moisture remains unfrozen.  However,
-	it ended up being unnecessary and its implementation introduced
-	undesirable complexity into the code.  Therefore it has been removed.
 
 
 

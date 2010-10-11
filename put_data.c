@@ -502,7 +502,7 @@ int  put_data(dist_prcp_struct  *prcp,
             out_data[OUT_LAKE_CHAN_IN_V].data[0] = out_data[OUT_LAKE_CHAN_IN].data[0]*soil_con->cell_area/1000; // m3
             out_data[OUT_LAKE_CHAN_OUT_V].data[0] = out_data[OUT_LAKE_CHAN_OUT].data[0]*soil_con->cell_area/1000; // m3
             out_data[OUT_LAKE_EVAP_V].data[0] = out_data[OUT_LAKE_EVAP].data[0]*soil_con->cell_area/1000; // m3
-            out_data[OUT_LAKE_PREC_V].data[0] = out_data[OUT_PREC].data[0]*out_data[LAKE_AREA_FRAC].data[0]*soil_con->cell_area/1000; // m3
+            out_data[OUT_LAKE_PREC_V].data[0] = out_data[OUT_PREC].data[0]*out_data[OUT_LAKE_AREA_FRAC].data[0]*soil_con->cell_area/1000; // m3
             out_data[OUT_LAKE_RO_IN_V].data[0] = out_data[OUT_LAKE_RO_IN].data[0]*soil_con->cell_area/1000; // m3
 
           } // End if options.LAKES etc.

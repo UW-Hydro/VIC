@@ -58,6 +58,8 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 	      contains the lake/wetland.					TJB
   2010-Sep-24 Clarified the fprintf statement describing lake basin area as
 	      lake plus wetland area.						TJB
+  2010-Oct-10 Corrected the check on initial depth to allow initial depth <
+	      mindepth.								TJB
 **********************************************************************/
 
 {
@@ -196,12 +198,12 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   // Validate initial conditions
   if(temp.depth_in > temp.maxdepth) {
-    fprintf(stderr, "WARNING: Initial lake depth %f exceeds the maximum lake depth %f; setting initial lake depth equal to max lake depth.", temp.depth_in, temp.maxdepth);
+    fprintf(stderr, "WARNING: Initial lake depth %f exceeds the maximum lake depth %f; setting initial lake depth equal to max lake depth.\n", temp.depth_in, temp.maxdepth);
     temp.depth_in = temp.maxdepth;
   }
-  else if(temp.depth_in < temp.mindepth) {
-    fprintf(stderr, "WARNING: Initial lake depth %f is less than the minimum lake depth %f; setting initial lake depth equal to min lake depth.", temp.depth_in, temp.mindepth);
-    temp.depth_in = temp.mindepth;
+  else if(temp.depth_in < 0) {
+    fprintf(stderr, "WARNING: Initial lake depth %f < 0; setting to 0.\n", temp.depth_in);
+    temp.depth_in = 0;
   }
 
   fprintf(stderr, "Lake plus wetland area = %e km2\n",temp.basin[0]/(1000.*1000.));

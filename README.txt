@@ -141,6 +141,20 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+Initial lake depth < mindepth is reset to mindepth.
+
+	Files Affected:
+
+	read_lakeparam.c
+
+	Description:
+
+	The validation of initial lake depth was incorrectly resetting depth
+	to mindepth if initial depth < mindepth.  This has been fixed.
+
+
+
+
 Soil moisture falls below residual moisture level in some cases.
 
 	Files Affected:

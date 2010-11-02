@@ -55,6 +55,8 @@ int initialize_lake (lake_var_struct   *lake,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2010-Sep-24 Added channel_in to store channel inflow separately from
 	      incoming runoff from the catchment.			TJB
+  2010-Nov-02 Added initialization of several lake_var variables that 
+	      hadn't been initialized.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -76,14 +78,17 @@ int initialize_lake (lake_var_struct   *lake,
     lake->surface[i] = 0.0;
   }
 
-  lake->tempi = 0.0;
+  lake->areai = 0.0;
+  lake->coldcontent = 0.0;
   lake->hice = 0.0;
-  lake->areai = .0;
-  lake->new_ice_area = 0.0;
   lake->ice_water_eq = 0.0;
-  lake->aero_resist = 0;
-  lake->swe = 0.0;
+  lake->new_ice_area = 0.0;
+  lake->pack_temp = 0.0;
+  lake->SAlbedo = 0.0;
   lake->sdepth = 0.0;
+  lake->surf_temp = 0.0;
+  lake->swe = 0.0;
+  lake->tempi = 0.0;
 
   /********************************************************************/
   /* Initialize lake physical parameters.                             */
@@ -134,6 +139,7 @@ int initialize_lake (lake_var_struct   *lake,
   }
 
   lake->sarea = lake->surface[0];
+  lake->sarea_save = lake->sarea;
   status = get_volume(lake_con, lake->ldepth, &tmp_volume);
   if (status < 0) {
     fprintf(stderr, "Error in get_volume: record = %d, depth = %f, volume = %e\n",0,depth,tmp_volume);
@@ -153,6 +159,12 @@ int initialize_lake (lake_var_struct   *lake,
   lake->runoff_in=0.0;
   lake->runoff_out=0.0;
   lake->snowmlt=0.0;
+
+  // Initialize other miscellaneous lake properties
+  lake->aero_resist = 0;
+  for(k=0; k < lake->activenod; k++) {
+    lake->density[k] = RHO_W;
+  }
 
   // Initialize the snow, energy, and soil components of lake structure
   // If we implement heat flux between lake and underlying soil, we will need to initialize these more correctly

@@ -13,40 +13,45 @@ out_data_struct *create_output_list() {
 
   Modifications:
   2006-Sep-14 Implemented ALMA-compliant input and output;
-              now more variables are tracked.			TJB
-  2006-Sep-18 Implemented aggregation of output variables.	TJB
+              now more variables are tracked.				TJB
+  2006-Sep-18 Implemented aggregation of output variables.		TJB
   2006-Oct-10 Shortened the names of variables whose names were
 	      too long; fixed typos in other names; added
-	      OUT_IN_LONG.					TJB
-  2006-Nov-07 Changed default precision from %.1f to %.4f.	TJB
-  2006-Nov-07 Added OUT_SOIL_TNODE.				TJB
-  2006-Nov-30 Added OUT_DELSURFSTOR.				TJB
+	      OUT_IN_LONG.						TJB
+  2006-Nov-07 Changed default precision from %.1f to %.4f.		TJB
+  2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
+  2006-Nov-30 Added OUT_DELSURFSTOR.					TJB
   2007-Feb-28 Corrected AGG_TYPE definitions for miscellaneous
 	      output variables; re-organized the code to make
-	      it easier to debug.				TJB
-  2007-Aug-17 Added EXCESS_ICE variables to output list.        JCA
-  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.      JCA
+	      it easier to debug.					TJB
+  2007-Aug-17 Added EXCESS_ICE variables to output list.        	JCA
+  2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.      	JCA
   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the
 	      soil temperature in the wetland fraction of the
-	      grid cell.					LCB via TJB
+	      grid cell.						LCB via TJB
   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
 	      surface and overstory values; changed AERO_COND
-	      and AERO_RESIST to track "scene" values.		TJB
-  2009-Feb-22 Added OUT_VPD.					TJB
-  2009-May-17 Added OUT_ASAT.					TJB
+	      and AERO_RESIST to track "scene" values.			TJB
+  2009-Feb-22 Added OUT_VPD.						TJB
+  2009-May-17 Added OUT_ASAT.						TJB
   2009-Jun-09 Added OUT_PET_*, potential evap computed for
-	      various landcover types.				TJB
+	      various landcover types.					TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
-  2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".			TJB
-  2009-Oct-08 Extended T fallback scheme to snow and ice T.	TJB
-  2010-Feb-14 Added OUT_LAKE_AREA_FRAC.				TJB
-  2010-Mar-31 Added OUT_RUNOFF_IN.				TJB
+  2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".				TJB
+  2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
+  2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
+  2010-Mar-31 Added OUT_RUNOFF_IN.					TJB
   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
 	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
 	      to OUT_LAKE_EVAP.  Added other lake water balance terms
 	      to set of output variables.  Added volumetric versions 
 	      of these too.						TJB
+  2010-Nov-02 Added OUT_LAKE_RO_IN and OUT_LAKE_RO_IN_V for reporting
+	      overland runoff input to lake.  Added OUT_LAKE_RCHRG and
+	      OUT_LAKE_RCHRG_V for reporting lake recharge of
+	      surrounding wetland.  Added OUT_LAKE_VAPFLX and
+	      OUT_LAKE_VAPFLX_V.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -103,8 +108,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_LAKE_EVAP].varname,"OUT_LAKE_EVAP");             /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_LAKE_EVAP_V].varname,"OUT_LAKE_EVAP_V");         /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_LAKE_PREC_V].varname,"OUT_LAKE_PREC_V");         /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
-  strcpy(out_data[OUT_LAKE_RO_IN].varname,"OUT_LAKE_RO_IN");           /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
-  strcpy(out_data[OUT_LAKE_RO_IN_V].varname,"OUT_LAKE_RO_IN_V");       /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_RCHRG].varname,"OUT_LAKE_RCHRG");           /* recharge from lake to surrounding wetland [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_RCHRG_V].varname,"OUT_LAKE_RCHRG_V");       /* volumetric recharge from lake to surrounding wetland [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_RO_IN].varname,"OUT_LAKE_RO_IN");           /* incoming runoff from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_RO_IN_V].varname,"OUT_LAKE_RO_IN_V");       /* incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_VAPFLX].varname,"OUT_LAKE_VAPFLX");         /* sublimation from lake snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_VAPFLX_V].varname,"OUT_LAKE_VAPFLX_V");     /* volumetric sublimation from lake snow pack [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_PET_SATSOIL].varname,"OUT_PET_SATSOIL");         /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_PET_H2OSURF].varname,"OUT_PET_H2OSURF");         /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_PET_SHORT].varname,"OUT_PET_SHORT");             /* potential evap from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -317,8 +326,12 @@ out_data_struct *create_output_list() {
   out_data[OUT_LAKE_EVAP].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_EVAP_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_PREC_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_RCHRG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_RCHRG_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_RO_IN].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_RO_IN_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_VAPFLX].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_VAPFLX_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_SATSOIL].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_H2OSURF].aggtype = AGG_TYPE_SUM;
   out_data[OUT_PET_SHORT].aggtype = AGG_TYPE_SUM;

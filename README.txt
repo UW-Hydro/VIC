@@ -71,7 +71,9 @@ variables.  Added lake water balance terms to input/output variables.
 					storage
 	  OUT_LAKE_EVAP		(was OUT_EVAP_LAKE)
 	  OUT_PREC		(already existed)
+	  OUT_LAKE_RCHRG	recharge from lake to wetland
 	  OUT_LAKE_RO_IN	runoff into lake from catchment
+	  OUT_LAKE_VAPFLX	sublimation from lake snow
 	These same variables exist in units of volume (m**3):
 	  OUT_LAKE_BF_IN_V	baseflow into lake from catchment
 	  OUT_LAKE_BF_OUT_V	baseflow out of lake
@@ -79,7 +81,9 @@ variables.  Added lake water balance terms to input/output variables.
 	  OUT_LAKE_CHAN_OUT_V	channel outflow from lake
 	  OUT_LAKE_EVAP_V	evap from lake
 	  OUT_LAKE_PREC_V	(note the "LAKE" in the name)
+	  OUT_LAKE_RCHRG_V	recharge from lake to wetland
 	  OUT_LAKE_RO_IN_V	runoff into lake from catchment
+	  OUT_LAKE_VAPFLX_V	sublimation from lake snow
 	Note: there currently is no "_V" form of OUT_DELSURFSTOR.  If needed
 	we may add it later.  In the meantime, users can compute the
 	difference in OUT_LAKE_VOLUME between the current and previous time
@@ -140,6 +144,24 @@ Removed MIN_LIQ option.
 
 Bug Fixes:
 ----------
+
+VIC aborts with soil temperature node moisture > max moisture.
+
+	Files Affected:
+
+	soil_conduction.c
+
+	Description:
+
+	Previously VIC would abort the simulation if soil temperature node
+	moisture ever became greater than the maximum allowable moisture.
+	This behavior has been replaced with a resetting of node moisture to
+	the maximum.  This is not intended to be a permanent fix; it simply
+	allows simulations to continue with minimal errors.  A more robust
+	fix is planned.
+
+
+
 
 Initial lake depth < mindepth is reset to mindepth.
 

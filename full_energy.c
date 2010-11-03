@@ -96,6 +96,7 @@ int  full_energy(char                 NEWCELL,
   2010-Mar-31 Added runoff_in.							TJB
   2010-Sep-24 Changed atmos.runoff_in to atmos.channel_in.  Added
 	      lake_var.channel_in to store it.					TJB
+  2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
 
 **********************************************************************/
 {
@@ -792,9 +793,10 @@ int  full_energy(char                 NEWCELL,
     /** Run lake model **/
     iveg = lake_con->lake_idx;
     band = 0;
-    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)/(lake_con->Cl[0]); // mm over lake/wetland tile
-    lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)/(lake_con->Cl[0]); // mm over lake/wetland tile
-    lake_var->channel_in  = atmos->channel_in[NR]/lake_con->Cl[0]; // mm over lake/wetland tile
+    lake_var->runoff_in   = (sum_runoff * lake_con->rpercent + wetland_runoff)*soil_con->cell_area*0.001; // m3
+    lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)*soil_con->cell_area*0.001; // m3
+    lake_var->channel_in  = atmos->channel_in[NR]*soil_con->cell_area*0.001; // m3
+    lake_var->prec        = atmos->prec[NR]*lake_var->sarea*0.001; // m3
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
     if ( (int)rainonly == ERROR ) {
@@ -852,28 +854,32 @@ int  full_energy(char                 NEWCELL,
 
       // print lake variables
       fprintf(debug.fg_lake, "%i/%i/%i %i:00:00,%i", dmy[rec].month, dmy[rec].day, dmy[rec].year, dmy[rec].hour, rec);
-      fprintf(debug.fg_lake, ",%f", lake_var->aero_resist);
-      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_in);
-      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_out);
-      for ( i = 0; i < MAX_LAKE_NODES; i++ )
-	fprintf(debug.fg_lake, ",%f", lake_var->density[i]);
-      fprintf(debug.fg_lake, ",%f", lake_var->evapw);
-      fprintf(debug.fg_lake, ",%f", lake_var->areai);
-      fprintf(debug.fg_lake, ",%f", lake_var->hice);
+      fprintf(debug.fg_lake, ",%i", lake_var->activenod);
       fprintf(debug.fg_lake, ",%f", lake_var->ldepth);
-      fprintf(debug.fg_lake, ",%f", lake_var->runoff_in);
-      fprintf(debug.fg_lake, ",%f", lake_var->runoff_out);
       fprintf(debug.fg_lake, ",%f", lake_var->sarea);
-      fprintf(debug.fg_lake, ",%f", lake_var->sdepth);
-      fprintf(debug.fg_lake, ",%f", lake_var->snowmlt);
       for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	fprintf(debug.fg_lake, ",%f", lake_var->surface[i]);
-      fprintf(debug.fg_lake, ",%f", lake_var->swe);
+      fprintf(debug.fg_lake, ",%f", lake_var->volume);
+      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->baseflow_out);
+      fprintf(debug.fg_lake, ",%f", lake_var->channel_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->evapw);
+      fprintf(debug.fg_lake, ",%f", lake_var->prec);
+      fprintf(debug.fg_lake, ",%f", lake_var->recharge);
+      fprintf(debug.fg_lake, ",%f", lake_var->runoff_in);
+      fprintf(debug.fg_lake, ",%f", lake_var->runoff_out);
+      fprintf(debug.fg_lake, ",%f", lake_var->snowmlt);
+      fprintf(debug.fg_lake, ",%f", lake_var->vapor_flux);
       for ( i = 0; i < MAX_LAKE_NODES; i++ )
 	fprintf(debug.fg_lake, ",%f", lake_var->temp[i]);
+      for ( i = 0; i < MAX_LAKE_NODES; i++ )
+	fprintf(debug.fg_lake, ",%f", lake_var->density[i]);
+      fprintf(debug.fg_lake, ",%f", lake_var->areai);
+      fprintf(debug.fg_lake, ",%f", lake_var->hice);
+      fprintf(debug.fg_lake, ",%f", lake_var->sdepth);
+      fprintf(debug.fg_lake, ",%f", lake_var->swe);
       fprintf(debug.fg_lake, ",%f", lake_var->tempi);
-      fprintf(debug.fg_lake, ",%f", lake_var->volume);
-      fprintf(debug.fg_lake, ",%i", lake_var->activenod);
+      fprintf(debug.fg_lake, ",%f", lake_var->aero_resist);
       
       // print lake energy variables
       fprintf(debug.fg_lake, ",%f", energy[lake_con->lake_idx][0].AlbedoLake);

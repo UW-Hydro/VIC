@@ -155,10 +155,12 @@ int initialize_lake (lake_var_struct   *lake,
   lake->baseflow_out=0.0;
   lake->channel_in=0.0;
   lake->evapw=0.0;
+  lake->prec=0.0;
   lake->recharge=0.0;
   lake->runoff_in=0.0;
   lake->runoff_out=0.0;
   lake->snowmlt=0.0;
+  lake->vapor_flux=0.0;
 
   // Initialize other miscellaneous lake properties
   lake->aero_resist = 0;

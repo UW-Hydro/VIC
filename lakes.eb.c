@@ -2229,9 +2229,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
 
   // Copy moisture fluxes into lake->soil structure
-  lake->soil.runoff = lake->runoff_out*1000/lake->sarea;
-  lake->soil.baseflow = lake->baseflow_out*1000/lake->sarea;
-  lake->soil.inflow = lake->baseflow_out*1000/lake->sarea;
+  lake->soil.runoff = lake->runoff_out*1000/lake->sarea_save;
+  lake->soil.baseflow = lake->baseflow_out*1000/lake->sarea_save;
+  lake->soil.inflow = lake->baseflow_out*1000/lake->sarea_save;
  
   /**********************************************************************
       5. Rescale the fluxes in the lake and the wetland by the change in lake area;

@@ -499,6 +499,16 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data[OUT_SURFSTOR].data[0] = 0;
             }
 
+            // Lake moisture fluxes in units of mm over gridcell
+            out_data[OUT_LAKE_BF_IN].data[0] += lake_var.baseflow_in*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_BF_OUT].data[0] += lake_var.baseflow_out*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_CHAN_OUT].data[0] += lake_var.runoff_out*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_EVAP].data[0] += lake_var.evapw*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_RCHRG].data[0] += lake_var.recharge*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_RO_IN].data[0] += lake_var.runoff_in*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_VAPFLX].data[0] += lake_var.vapor_flux*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_EVAP].data[0] += out_data[OUT_LAKE_EVAP].data[0];
+
           } // End if options.LAKES etc.
 
 	} // End if ThisAreaFract etc.
@@ -813,11 +823,6 @@ void collect_wb_terms(cell_data_struct  cell,
     tmp_evap += veg_var.canopyevap;
     out_data[OUT_EVAP_CANOP].data[0] += veg_var.canopyevap * AreaFactor; 
   }
-  if (IsWet)  {
-    out_data[OUT_LAKE_EVAP_V].data[0] += lake_var.evapw; // m3
-    tmp_evap += lake_var.evapw*1000./lake_var.sarea; // mm over lake
-    out_data[OUT_LAKE_EVAP].data[0] += lake_var.evapw*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-  }
   out_data[OUT_EVAP].data[0] += tmp_evap * AreaFactor; // mm over gridcell
 
   /** record lake-specific moisture fluxes **/
@@ -826,16 +831,11 @@ void collect_wb_terms(cell_data_struct  cell,
     out_data[OUT_LAKE_BF_OUT_V].data[0] += lake_var.baseflow_out; // m3
     out_data[OUT_LAKE_CHAN_IN_V].data[0] += lake_var.channel_in; // m3
     out_data[OUT_LAKE_CHAN_OUT_V].data[0] += lake_var.runoff_out; // m3
+    out_data[OUT_LAKE_EVAP_V].data[0] += lake_var.evapw; // m3
     out_data[OUT_LAKE_PREC_V].data[0] += lake_var.prec; // m3
     out_data[OUT_LAKE_RCHRG_V].data[0] += lake_var.recharge; // m3
     out_data[OUT_LAKE_RO_IN_V].data[0] += lake_var.runoff_in; // m3
     out_data[OUT_LAKE_VAPFLX_V].data[0] += lake_var.vapor_flux; // m3
-    out_data[OUT_LAKE_BF_IN].data[0] += lake_var.baseflow_in*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-    out_data[OUT_LAKE_BF_OUT].data[0] += lake_var.baseflow_out*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-    out_data[OUT_LAKE_CHAN_OUT].data[0] += lake_var.runoff_out*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-    out_data[OUT_LAKE_RCHRG].data[0] += lake_var.recharge*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-    out_data[OUT_LAKE_RO_IN].data[0] += lake_var.runoff_in*1000./lake_var.sarea * AreaFactor; // mm over gridcell
-    out_data[OUT_LAKE_VAPFLX].data[0] += lake_var.vapor_flux*1000./lake_var.sarea * AreaFactor; // mm over gridcell
   }
 
   /** record potential evap **/

@@ -1906,7 +1906,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
  
   lake->evapw  *= 0.001*lake->sarea; // in m3
-  lake->snowmlt *= 0.001*lake->sarea; // in m3
+  lake->snowmlt *= 0.001*lake->areai; // in m3
   lake->vapor_flux = vapor_flux*lake->sarea; // in m3
 
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;

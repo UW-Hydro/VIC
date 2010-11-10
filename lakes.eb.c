@@ -1851,6 +1851,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2010-Sep-24 Added channel_in to store channel inflow separately from
 	      incoming runoff from the catchment.				TJB
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
+  2010-Nov-09 Added conditional check on lake area before dividing by it.	TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2229,9 +2230,16 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
 
   // Copy moisture fluxes into lake->soil structure
-  lake->soil.runoff = lake->runoff_out*1000/lake->sarea_save;
-  lake->soil.baseflow = lake->baseflow_out*1000/lake->sarea_save;
-  lake->soil.inflow = lake->baseflow_out*1000/lake->sarea_save;
+  if (lake->sarea_save > 0) {
+    lake->soil.runoff = lake->runoff_out*1000/lake->sarea_save;
+    lake->soil.baseflow = lake->baseflow_out*1000/lake->sarea_save;
+    lake->soil.inflow = lake->baseflow_out*1000/lake->sarea_save;
+  }
+  else {
+    lake->soil.runoff = HUGE_RESIST;
+    lake->soil.baseflow = HUGE_RESIST;
+    lake->soil.inflow = HUGE_RESIST;
+  }
  
   /**********************************************************************
       5. Rescale the fluxes in the lake and the wetland by the change in lake area;

@@ -26,6 +26,7 @@ void close_files(filep_struct         *filep,
   2006-Sep-23 Implemented flexible output configuration; uses new
 	      out_data_files structure. TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
+  2010-Nov-10 Added closing of state files.			TJB
 
 **********************************************************************/
 {
@@ -49,11 +50,18 @@ void close_files(filep_struct         *filep,
   /*******************
     Close Output Files
     *******************/
-
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
     fclose(out_data_files[filenum].fh);
     if(options.COMPRESS) compress_files(out_data_files[filenum].filename);
   }
+
+  /*******************
+    Close State Files
+    *******************/
+  if ( options.INIT_STATE )
+    fclose(filep->init_state);
+  if ( options.SAVE_STATE && strcmp( fnames->statefile, "NONE" ) != 0 )
+    fclose(filep->statefile);
 
 #if !OUTPUT_FORCE
 

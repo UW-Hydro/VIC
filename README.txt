@@ -145,6 +145,20 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+State file handles are never closed.
+
+	Files Affected:
+
+	close_files.c
+
+	Description:
+
+	Previously VIC was not closing the intial and final state files.
+	This has been fixed.
+
+
+
+
 VIC aborts with soil temperature node moisture > max moisture.
 
 	Files Affected:

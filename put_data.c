@@ -1090,9 +1090,9 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record albedo **/
   if ( snow.snow && overstory )
-    out_data[OUT_ALBEDO].data[0]    += energy.AlbedoOver * AreaFactor;
+    out_data[OUT_ALBEDO].data[0]    += energy.AlbedoOver * AreaFactorLake;
   else
-    out_data[OUT_ALBEDO].data[0]    += energy.AlbedoUnder * AreaFactor;
+    out_data[OUT_ALBEDO].data[0]    += energy.AlbedoUnder * AreaFactorLake;
 
   /** record latent heat flux **/
   out_data[OUT_LATENT].data[0]    -= energy.AtmosLatent * AreaFactor;

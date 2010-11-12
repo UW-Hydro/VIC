@@ -98,6 +98,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Dec-11 Removed initialization of save_data structure, since this
 	      is now performed by the initial call to put_data().	TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
+  2010-Nov-11 Updated call to initialize_lake() to accommodate new
+	      skip_hydro flag.						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -198,7 +200,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   ********************************************/
 
   if ( options.LAKES && lake_con.Cl[0] > 0) {
-    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, surf_temp);
+    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, surf_temp, 0);
     if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 

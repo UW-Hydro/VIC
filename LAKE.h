@@ -20,6 +20,8 @@
   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
   2009-Oct-05 Added functions for updating/rescaling lake and wetland
 	      fluxes and storages when lake area changes.		TJB
+  2010-Nov-11 Added skip_hydro flag to initialize_lake() arg list.
+	      Removed rescale_lake_fluxes().				TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -86,14 +88,13 @@ void icerad(double,double ,double,double *, double *,double *);
 int ice_depth(lake_con_struct, double, double, double *);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double IceEnergyBalance(double, va_list);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, double);
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, double, int);
 int lakeice(double *, double, double, double, double, int, 
 	    double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
 void latsens(double,double, double, double, double, double, double, double,
 	     double *, double *, double);
 float lkdrag(float, double, double, double, double);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
-void rescale_lake_fluxes(double, double, lake_var_struct *);
 void rescale_soil_veg_fluxes(double, double, cell_data_struct *, veg_var_struct *);
 void rescale_snow_energy_fluxes(double, double, snow_data_struct *, energy_bal_struct *);
 void rhoinit(double *, double);

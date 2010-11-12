@@ -1852,6 +1852,13 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 	      incoming runoff from the catchment.				TJB
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
   2010-Nov-09 Added conditional check on lake area before dividing by it.	TJB
+  2010-Nov-11 Fixed incorrect computation of lake->recharge for case in which
+	      lake does not contain enough water to saturate the soil.  Changed
+	      the units of lake and wetland cell (or soil) moisture fluxes
+	      (layer.evap, baseflow, runoff, inflow) and energy & snow fluxes
+	      to be in mm / (lake-wetland tile area) instead of mm / lake or 
+	      mm / wetland area.  This fixed bugs in reporting of grid-cell
+	      average fluxes to output files.  Removed rescale_lake_fluxes().	TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1873,6 +1880,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double circum;
   double baseflow_out_mm;
   double newfraction, Recharge;
+  double abovegrnd_storage;
   int ErrorFlag;
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -1986,11 +1994,15 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   if(newfraction > lakefrac) {
 
+    // Lake must fill soil to saturation in the newly-flooded area
     lake->recharge = 0.0;
     for(j=0; j<options.Nlayer; j++) {
       lake->recharge += ((soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist ) / 1000. ) * (newfraction-lakefrac) * lake_con.basin[0];
     }
-    lake->recharge -= (veg_var[WET][iveg][band].Wdew/1000. + snow[iveg][band].snow_canopy + snow[iveg][band].swq) * (newfraction-lakefrac) * lake_con.basin[0];
+
+    // Above-ground storage in newly-flooded area is liberated and goes to lake
+    abovegrnd_storage = (veg_var[WET][iveg][band].Wdew/1000. + snow[iveg][band].snow_canopy + snow[iveg][band].swq) * (newfraction-lakefrac) * lake_con.basin[0];
+    lake->recharge -= abovegrnd_storage;
 
     // Fill the soil to saturation if possible in inundated area
     // Subtract the recharge (which may be negative) from the lake
@@ -2004,9 +2016,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     }
     else { // not enough liquid water to support recharge; fill soil as much as allowed by available liquid water in lake and above-ground storage in newly-flooded area
 
-      Recharge = 1000.*(lake->volume-lake->ice_water_eq)/((newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
-      lake->recharge = lake->volume-lake->ice_water_eq + (veg_var[WET][iveg][band].Wdew*0.001 + snow[iveg][band].snow_canopy + snow[iveg][band].swq)*(newfraction-lakefrac)*lake_con.basin[0]; // m3
+      lake->recharge = lake->volume-lake->ice_water_eq;
       lake->volume = lake->ice_water_eq;
+
+      Recharge = 1000.*(lake->volume-lake->ice_water_eq)/((newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
 
       for(j=0; j<options.Nlayer; j++) {
 
@@ -2229,18 +2242,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   if(lake->activenod == isave_n && isave_n == 0)
     lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
 
-  // Copy moisture fluxes into lake->soil structure
-  if (lake->sarea_save > 0) {
-    lake->soil.runoff = lake->runoff_out*1000/lake->sarea_save;
-    lake->soil.baseflow = lake->baseflow_out*1000/lake->sarea_save;
-    lake->soil.inflow = lake->baseflow_out*1000/lake->sarea_save;
-  }
-  else {
-    lake->soil.runoff = HUGE_RESIST;
-    lake->soil.baseflow = HUGE_RESIST;
-    lake->soil.inflow = HUGE_RESIST;
-  }
- 
   /**********************************************************************
       5. Rescale the fluxes in the lake and the wetland by the change in lake area;
          Advect the storages.
@@ -2249,9 +2250,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   // Wetland
   if (newfraction < 1.0) { // wetland exists at end of time step
     advect_soil_veg_storage(lakefrac, max_newfraction, newfraction, delta_moist, &soil_con, &veg_con, &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]));
-    rescale_soil_veg_fluxes((1-lakefrac), (1-newfraction), &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]));
+    rescale_soil_veg_fluxes((1-lakefrac), 1.0, &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]));
     advect_snow_storage(lakefrac, max_newfraction, newfraction, &(snow[iveg][band])); 
-    rescale_snow_energy_fluxes((1-lakefrac), (1-newfraction), &(snow[iveg][band]), &(energy[iveg][band])); 
+    rescale_snow_energy_fluxes((1-lakefrac), 1.0, &(snow[iveg][band]), &(energy[iveg][band])); 
     for (j=0; j<options.Nlayer; j++) moist[j] = cell[0][iveg][band].layer[j].moist;
     ErrorFlag = distribute_node_moisture_properties(energy[iveg][band].moist, energy[iveg][band].ice,
                                                     energy[iveg][band].kappa_node, energy[iveg][band].Cs_node,
@@ -2286,17 +2287,22 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
 
   // Lake
+  // Copy moisture fluxes into lake->soil structure, mm/lake-wetland tile
+  lake->soil.runoff = lake->runoff_out*1000/lake_con.basin[0];
+  lake->soil.baseflow = lake->baseflow_out*1000/lake_con.basin[0];
+  lake->soil.inflow = lake->baseflow_out*1000/lake_con.basin[0];
+  for (lindex=0; lindex<options.Nlayer; lindex++) {
+    lake->soil.layer[lindex].evap = 0;
+  }
+  lake->soil.layer[0].evap += lake->evapw*1000/lake_con.basin[0];
+  // Rescale other fluxes and storages
   if (newfraction > 0.0) { // lake exists at end of time step
     if (lakefrac > 0.0) { // lake existed at beginning of time step
-      rescale_soil_veg_fluxes(lakefrac, newfraction, &(lake->soil), NULL); 
-      rescale_snow_energy_fluxes(lakefrac, newfraction, &(lake->snow), &(lake->energy)); 
-      rescale_lake_fluxes(lakefrac, newfraction, lake); 
+      lake->snow.swq *= lakefrac;
+      rescale_snow_energy_fluxes(lakefrac, 1.0, &(lake->snow), &(lake->energy)); 
     }
     else { // lake didn't exist at beginning of time step; create new lake
-      depth_in_save = lake_con.depth_in;
-      lake_con.depth_in = lake->ldepth;
-      initialize_lake(lake, lake_con, &soil_con, energy[iveg][band].T[0]);
-      lake_con.depth_in = depth_in_save;
+      initialize_lake(lake, lake_con, &soil_con, energy[iveg][band].T[0], 1);
     }
   }
   else if (lakefrac > 0.0) { // lake is gone at end of time step, but existed at beginning of step
@@ -2608,25 +2614,6 @@ void rescale_snow_energy_fluxes(double oldfrac,
     energy->ShortOverIn = 0.0;
     energy->ShortUnderIn = 0.0;
     energy->snow_flux = 0.0;
-  }
-
-}
-
-void rescale_lake_fluxes(double oldfrac,
-                         double newfrac,
-                         lake_var_struct *lake)
-/**********************************************************************
-  Modifications:
-  2009-Nov-30 Added rescaling of snow->swq.				TJB
-**********************************************************************/
-{
-
-  if (newfrac < SMALL) {
-    newfrac = SMALL;
-  }
-
-  if (oldfrac > 0.0) { // existed at beginning of time step
-    lake->snow.swq *= oldfrac/newfrac;  // not a flux but needs to be done
   }
 
 }

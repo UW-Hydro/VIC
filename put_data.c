@@ -128,6 +128,9 @@ int  put_data(dist_prcp_struct  *prcp,
   2010-Nov-02 Added OUT_LAKE_RCHRG, OUT_LAKE_RCHRG_V, OUT_RO_IN,
 	      OUT_LAKE_RO_IN_V, OUT_LAKE_VAPFLX, and OUT_LAKE_VAPFLX_V.	TJB
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).	TJB
+  2010-Nov-11 Moved assignment of all OUT_LAKE* variables outside
+	      collect_wb_terms().  Added lakefactor to collect_wb_terms()
+	      arg list.							TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -226,7 +229,7 @@ int  put_data(dist_prcp_struct  *prcp,
           if (options.LAKES && veg_con[veg].LAKE) {
             if (band == 0) {
               // Fraction of tile that is flooded
-                Clake = lake_var.sarea/lake_con->basin[0];
+              Clake = lake_var.sarea/lake_con->basin[0];
 	      Cv += veg_con[veg].Cv*(1-Clake);
             }
           }
@@ -284,22 +287,20 @@ int  put_data(dist_prcp_struct  *prcp,
     Clake = 0;
     Nbands = options.SNOW_BAND;
     IsWet = 0;
-    // Check if this is lake/wetland tile
-    if (options.LAKES && veg_con[veg].LAKE) {
-      // Only consider non-flooded portion of wetland tile
-        Clake = lake_var.sarea/lake_con->basin[0];
-      Cv_save = Cv;
-      Cv *= (1-Clake);
-      Nbands = 1;
-      IsWet = 1;
-    }
 
     if (veg < veg_con[0].vegetat_type_num)
       HasVeg = 1;
     else
       HasVeg = 0;
 
-    if ( Cv > 0  || Clake > 0) {
+    if ( Cv > 0) {
+
+      // Check if this is lake/wetland tile
+      if (options.LAKES && veg_con[veg].LAKE) {
+        Clake = lake_var.sarea/lake_con->basin[0];
+        Nbands = 1;
+        IsWet = 1;
+      }
 
       overstory = veg_lib[veg_con[veg].veg_class].overstory;
 
@@ -350,6 +351,7 @@ int  put_data(dist_prcp_struct  *prcp,
                              ThisTreeAdjust,
                              HasVeg,
                              0,
+                             (1-Clake),
                              overstory,
                              depth,
                              out_data);
@@ -372,6 +374,7 @@ int  put_data(dist_prcp_struct  *prcp,
                            ThisTreeAdjust,
                            HasVeg,
                            0,
+                           (1-Clake),
                            overstory,
                            band,
                            depth,
@@ -395,9 +398,6 @@ int  put_data(dist_prcp_struct  *prcp,
             Record Lake Variables
           **********************************/
           if (IsWet) {
-
-            // Recover the total lake/wetland tile fraction
-            Cv = Cv_save;
 
             // Override some variables of soil under lake with those of wetland
             // This is for those variables whose lake values shouldn't be included
@@ -429,11 +429,12 @@ int  put_data(dist_prcp_struct  *prcp,
                              lake_var.snow,
                              lake_var,
                              1.0,
-                             Cv*Clake,
+                             Cv,
                              ThisAreaFract,
                              ThisTreeAdjust,
                              0,
                              1,
+                             Clake,
                              overstory,
                              depth,
                              out_data);
@@ -449,11 +450,12 @@ int  put_data(dist_prcp_struct  *prcp,
                              &Tsnowsurf_fbcount_total,
                              &Tcanopy_fbcount_total,
                              &Tfoliage_fbcount_total,
-                             Cv*Clake,
+                             Cv,
                              ThisAreaFract,
                              ThisTreeAdjust,
                              0,
                              1,
+                             Clake,
                              overstory,
                              band,
                              depth,
@@ -499,7 +501,16 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data[OUT_SURFSTOR].data[0] = 0;
             }
 
-            // Lake moisture fluxes in units of mm over gridcell
+            // Lake moisture fluxes
+            out_data[OUT_LAKE_BF_IN_V].data[0] += lake_var.baseflow_in; // m3
+            out_data[OUT_LAKE_BF_OUT_V].data[0] += lake_var.baseflow_out; // m3
+            out_data[OUT_LAKE_CHAN_IN_V].data[0] += lake_var.channel_in; // m3
+            out_data[OUT_LAKE_CHAN_OUT_V].data[0] += lake_var.runoff_out; // m3
+            out_data[OUT_LAKE_EVAP_V].data[0] += lake_var.evapw; // m3
+            out_data[OUT_LAKE_PREC_V].data[0] += lake_var.prec; // m3
+            out_data[OUT_LAKE_RCHRG_V].data[0] += lake_var.recharge; // m3
+            out_data[OUT_LAKE_RO_IN_V].data[0] += lake_var.runoff_in; // m3
+            out_data[OUT_LAKE_VAPFLX_V].data[0] += lake_var.vapor_flux; // m3
             out_data[OUT_LAKE_BF_IN].data[0] += lake_var.baseflow_in*1000./soil_con->cell_area; // mm over gridcell
             out_data[OUT_LAKE_BF_OUT].data[0] += lake_var.baseflow_out*1000./soil_con->cell_area; // mm over gridcell
             out_data[OUT_LAKE_CHAN_OUT].data[0] += lake_var.runoff_out*1000./soil_con->cell_area; // mm over gridcell
@@ -507,7 +518,6 @@ int  put_data(dist_prcp_struct  *prcp,
             out_data[OUT_LAKE_RCHRG].data[0] += lake_var.recharge*1000./soil_con->cell_area; // mm over gridcell
             out_data[OUT_LAKE_RO_IN].data[0] += lake_var.runoff_in*1000./soil_con->cell_area; // mm over gridcell
             out_data[OUT_LAKE_VAPFLX].data[0] += lake_var.vapor_flux*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_EVAP].data[0] += out_data[OUT_LAKE_EVAP].data[0];
 
           } // End if options.LAKES etc.
 
@@ -784,6 +794,7 @@ void collect_wb_terms(cell_data_struct  cell,
                       double            TreeAdjustFactor,
                       int               HasVeg,
                       int               IsWet,
+                      double            lakefactor,
                       int               overstory,
                       double           *depth,
                       out_data_struct  *out_data)
@@ -791,6 +802,7 @@ void collect_wb_terms(cell_data_struct  cell,
 
   extern option_struct    options;
   double AreaFactor;
+  double AreaFactorLake;
   double tmp_evap;
   double tmp_cond1;
   double tmp_cond2;
@@ -802,6 +814,7 @@ void collect_wb_terms(cell_data_struct  cell,
 #endif
 
   AreaFactor = Cv * mu * AreaFract * TreeAdjustFactor;
+  AreaFactorLake = Cv * mu * AreaFract * TreeAdjustFactor * lakefactor;
 
   /** record evaporation components **/
   tmp_evap = 0.0;
@@ -825,19 +838,6 @@ void collect_wb_terms(cell_data_struct  cell,
   }
   out_data[OUT_EVAP].data[0] += tmp_evap * AreaFactor; // mm over gridcell
 
-  /** record lake-specific moisture fluxes **/
-  if (IsWet)  {
-    out_data[OUT_LAKE_BF_IN_V].data[0] += lake_var.baseflow_in; // m3
-    out_data[OUT_LAKE_BF_OUT_V].data[0] += lake_var.baseflow_out; // m3
-    out_data[OUT_LAKE_CHAN_IN_V].data[0] += lake_var.channel_in; // m3
-    out_data[OUT_LAKE_CHAN_OUT_V].data[0] += lake_var.runoff_out; // m3
-    out_data[OUT_LAKE_EVAP_V].data[0] += lake_var.evapw; // m3
-    out_data[OUT_LAKE_PREC_V].data[0] += lake_var.prec; // m3
-    out_data[OUT_LAKE_RCHRG_V].data[0] += lake_var.recharge; // m3
-    out_data[OUT_LAKE_RO_IN_V].data[0] += lake_var.runoff_in; // m3
-    out_data[OUT_LAKE_VAPFLX_V].data[0] += lake_var.vapor_flux; // m3
-  }
-
   /** record potential evap **/
   out_data[OUT_PET_SATSOIL].data[0] += cell.pot_evap[0] * AreaFactor;
   out_data[OUT_PET_H2OSURF].data[0] += cell.pot_evap[1] * AreaFactor;
@@ -847,7 +847,7 @@ void collect_wb_terms(cell_data_struct  cell,
   out_data[OUT_PET_VEGNOCR].data[0] += cell.pot_evap[5] * AreaFactor;
 
   /** record saturated area fraction **/
-  out_data[OUT_ASAT].data[0] += cell.asat * AreaFactor; 
+  out_data[OUT_ASAT].data[0] += cell.asat * AreaFactorLake; 
 
   /** record runoff **/
   out_data[OUT_RUNOFF].data[0]   += cell.runoff * AreaFactor;
@@ -863,22 +863,22 @@ void collect_wb_terms(cell_data_struct  cell,
  
   /** record canopy interception **/
   if (HasVeg) 
-    out_data[OUT_WDEW].data[0] += veg_var.Wdew * AreaFactor;
+    out_data[OUT_WDEW].data[0] += veg_var.Wdew * AreaFactorLake;
 
   /** record aerodynamic conductance and resistance **/
   if (cell.aero_resist[0] > SMALL) {
-    tmp_cond1 = (1/cell.aero_resist[0]) * AreaFactor;
+    tmp_cond1 = (1/cell.aero_resist[0]) * AreaFactorLake;
   }
   else {
-    tmp_cond1 = 0;
+    tmp_cond1 = HUGE_RESIST;
   }
   out_data[OUT_AERO_COND1].data[0] += tmp_cond1;
   if (overstory) {
     if (cell.aero_resist[1] > SMALL) {
-      tmp_cond2 = (1/cell.aero_resist[1]) * AreaFactor;
+      tmp_cond2 = (1/cell.aero_resist[1]) * AreaFactorLake;
     }
     else {
-      tmp_cond2 = 0;
+      tmp_cond2 = HUGE_RESIST;
     }
     out_data[OUT_AERO_COND2].data[0] += tmp_cond2;
   }
@@ -904,15 +904,15 @@ void collect_wb_terms(cell_data_struct  cell,
       tmp_moist /= depth[index] * 1000.;
       tmp_ice /= depth[index] * 1000.;
     }
-    out_data[OUT_SOIL_LIQ].data[index] += tmp_moist * AreaFactor;
-    out_data[OUT_SOIL_ICE].data[index] += tmp_ice * AreaFactor;
+    out_data[OUT_SOIL_LIQ].data[index] += tmp_moist * AreaFactorLake;
+    out_data[OUT_SOIL_ICE].data[index] += tmp_ice * AreaFactorLake;
   }
-  out_data[OUT_SOIL_WET].data[0] += cell.wetness * AreaFactor;
-  out_data[OUT_ROOTMOIST].data[0] += cell.rootmoist * AreaFactor;
+  out_data[OUT_SOIL_WET].data[0] += cell.wetness * AreaFactorLake;
+  out_data[OUT_ROOTMOIST].data[0] += cell.rootmoist * AreaFactorLake;
 
   /** record layer temperatures **/
   for(index=0;index<options.Nlayer;index++) {
-    out_data[OUT_SOIL_TEMP].data[index] += cell.layer[index].T * AreaFactor;
+    out_data[OUT_SOIL_TEMP].data[index] += cell.layer[index].T * AreaFactorLake;
   }
 
   /*****************************
@@ -920,27 +920,27 @@ void collect_wb_terms(cell_data_struct  cell,
   *****************************/
   
   /** record snow water equivalence **/
-  out_data[OUT_SWE].data[0] += snow.swq * AreaFactor * 1000.;
+  out_data[OUT_SWE].data[0] += snow.swq * AreaFactorLake * 1000.;
   
   /** record snowpack depth **/
-  out_data[OUT_SNOW_DEPTH].data[0] += snow.depth * AreaFactor * 100.;
+  out_data[OUT_SNOW_DEPTH].data[0] += snow.depth * AreaFactorLake * 100.;
   
   /** record snowpack albedo, temperature **/
   if (snow.swq> 0.0) {
-    out_data[OUT_SALBEDO].data[0] += snow.albedo * AreaFactor;
-    out_data[OUT_SNOW_SURF_TEMP].data[0] += snow.surf_temp * AreaFactor;
-    out_data[OUT_SNOW_PACK_TEMP].data[0] += snow.pack_temp * AreaFactor;
+    out_data[OUT_SALBEDO].data[0] += snow.albedo * AreaFactorLake;
+    out_data[OUT_SNOW_SURF_TEMP].data[0] += snow.surf_temp * AreaFactorLake;
+    out_data[OUT_SNOW_PACK_TEMP].data[0] += snow.pack_temp * AreaFactorLake;
   }
 
   /** record canopy intercepted snow **/
   if (HasVeg)
-    out_data[OUT_SNOW_CANOPY].data[0] += (snow.snow_canopy) * AreaFactor * 1000.;
+    out_data[OUT_SNOW_CANOPY].data[0] += (snow.snow_canopy) * AreaFactorLake * 1000.;
 
   /** record snowpack melt **/
-  out_data[OUT_SNOW_MELT].data[0] += snow.melt * AreaFactor;
+  out_data[OUT_SNOW_MELT].data[0] += snow.melt * AreaFactorLake;
 
   /** record snow cover fraction **/
-  out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
+  out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactorLake;
 
 }
 
@@ -957,6 +957,7 @@ void collect_eb_terms(energy_bal_struct energy,
                       double            TreeAdjustFactor,
                       int               HasVeg,
                       int               IsWet,
+                      double            lakefactor,
                       int               overstory,
                       int               band,
                       double           *depth,
@@ -970,6 +971,7 @@ void collect_eb_terms(energy_bal_struct energy,
 
   extern option_struct    options;
   double AreaFactor;
+  double AreaFactorLake;
   double tmp_fract;
   double rad_temp;
   double surf_temp;
@@ -979,6 +981,7 @@ void collect_eb_terms(energy_bal_struct energy,
 #endif // SPATIAL_FROST
 
   AreaFactor = Cv * AreaFract * TreeAdjustFactor;
+  AreaFactorLake = Cv * AreaFract * TreeAdjustFactor * lakefactor;
 
   /**********************************
     Record Frozen Soil Variables
@@ -988,9 +991,9 @@ void collect_eb_terms(energy_bal_struct energy,
   if(options.FROZEN_SOIL) {
     for(index = 0; index < MAX_FRONTS; index++) {
       if(energy.fdepth[index] != MISSING)
-        out_data[OUT_FDEPTH].data[index] += energy.fdepth[index] * AreaFactor * 100.;
+        out_data[OUT_FDEPTH].data[index] += energy.fdepth[index] * AreaFactorLake * 100.;
       if(energy.tdepth[index] != MISSING)
-        out_data[OUT_TDEPTH].data[index] += energy.tdepth[index] * AreaFactor * 100.;
+        out_data[OUT_TDEPTH].data[index] += energy.tdepth[index] * AreaFactorLake * 100.;
     }
   }
 
@@ -1003,19 +1006,19 @@ void collect_eb_terms(energy_bal_struct energy,
   if ( cell_wet.layer[0].ice > 0 )
     tmp_fract   = 1.;
 #endif
-  out_data[OUT_SURF_FROST_FRAC].data[0] += tmp_fract * AreaFactor;
+  out_data[OUT_SURF_FROST_FRAC].data[0] += tmp_fract * AreaFactorLake;
 
   tmp_fract = 0;
 #if SPATIAL_FROST
   if ( (energy.T[0] + frost_slope / 2.) > 0 ) {
     if ( (energy.T[0] - frost_slope / 2.) <= 0 )
-      tmp_fract += linear_interp( 0, (energy.T[0] + frost_slope / 2.), (energy.T[0] - frost_slope / 2.), 1, 0) * AreaFactor;
+      tmp_fract += linear_interp( 0, (energy.T[0] + frost_slope / 2.), (energy.T[0] - frost_slope / 2.), 1, 0) * AreaFactorLake;
   }
   else
-    tmp_fract += 1 * AreaFactor;
+    tmp_fract += 1 * AreaFactorLake;
 #else
   if ( energy.T[0] <= 0 )
-    tmp_fract = 1 * AreaFactor;
+    tmp_fract = 1 * AreaFactorLake;
 #endif
 
   /**********************************
@@ -1035,23 +1038,23 @@ void collect_eb_terms(energy_bal_struct energy,
   /** record landcover temperature **/
   if(HasVeg) {
     // landcover is bare soil
-    out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * AreaFactor;
+    out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * AreaFactorLake;
   }
   else {
     // landcover is vegetation
     if ( overstory && !snow.snow )
       // here, rad_temp will be wrong since it will pick the understory temperature
-      out_data[OUT_VEGT].data[0] += energy.Tfoliage * AreaFactor;
+      out_data[OUT_VEGT].data[0] += energy.Tfoliage * AreaFactorLake;
     else
-      out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * AreaFactor;
+      out_data[OUT_VEGT].data[0] += (rad_temp-KELVIN) * AreaFactorLake;
   }
 
   /** record mean surface temperature [C]  **/
-  out_data[OUT_SURF_TEMP].data[0] += surf_temp * AreaFactor;
+  out_data[OUT_SURF_TEMP].data[0] += surf_temp * AreaFactorLake;
   
   /** record thermal node temperatures **/
   for(index=0;index<options.Nnode;index++) {
-    out_data[OUT_SOIL_TNODE].data[index] += energy.T[index] * AreaFactor;
+    out_data[OUT_SOIL_TNODE].data[index] += energy.T[index] * AreaFactorLake;
   }
   if (IsWet) {
     for(index=0;index<options.Nnode;index++) {
@@ -1060,17 +1063,17 @@ void collect_eb_terms(energy_bal_struct energy,
   }
 
   /** record temperature flags  **/
-  out_data[OUT_SURFT_FBFLAG].data[0] += energy.Tsurf_fbflag * AreaFactor;
+  out_data[OUT_SURFT_FBFLAG].data[0] += energy.Tsurf_fbflag * AreaFactorLake;
   *Tsurf_fbcount_total += energy.Tsurf_fbcount;
   for (index=0; index<options.Nnode; index++) {
-    out_data[OUT_SOILT_FBFLAG].data[index] += energy.T_fbflag[index] * AreaFactor;
+    out_data[OUT_SOILT_FBFLAG].data[index] += energy.T_fbflag[index] * AreaFactorLake;
     *Tsoil_fbcount_total += energy.T_fbcount[index];
   }
-  out_data[OUT_SNOWT_FBFLAG].data[0] += snow.surf_temp_fbflag * AreaFactor;
+  out_data[OUT_SNOWT_FBFLAG].data[0] += snow.surf_temp_fbflag * AreaFactorLake;
   *Tsnowsurf_fbcount_total += snow.surf_temp_fbcount;
-  out_data[OUT_TFOL_FBFLAG].data[0] += energy.Tfoliage_fbflag * AreaFactor;
+  out_data[OUT_TFOL_FBFLAG].data[0] += energy.Tfoliage_fbflag * AreaFactorLake;
   *Tfoliage_fbcount_total += energy.Tfoliage_fbcount;
-  out_data[OUT_TCAN_FBFLAG].data[0] += energy.Tcanopy_fbflag * AreaFactor;
+  out_data[OUT_TCAN_FBFLAG].data[0] += energy.Tcanopy_fbflag * AreaFactorLake;
   *Tcanopy_fbcount_total += energy.Tcanopy_fbcount;
 
   /** record net shortwave radiation **/
@@ -1114,7 +1117,7 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record radiative effective temperature [K], 
       emissivities set = 1.0  **/
-  out_data[OUT_RAD_TEMP].data[0] += ((rad_temp) * (rad_temp) * (rad_temp) * (rad_temp)) * AreaFactor;
+  out_data[OUT_RAD_TEMP].data[0] += ((rad_temp) * (rad_temp) * (rad_temp) * (rad_temp)) * AreaFactorLake;
   
   /** record snowpack cold content **/
   out_data[OUT_DELTACC].data[0] += energy.deltaCC * AreaFactor;
@@ -1144,67 +1147,67 @@ void collect_eb_terms(energy_bal_struct energy,
   **********************************/
 
   /** record band snow water equivalent **/
-  out_data[OUT_SWE_BAND].data[band] += snow.swq * Cv * 1000.;
+  out_data[OUT_SWE_BAND].data[band] += snow.swq * Cv * lakefactor * 1000.;
 
   /** record band snowpack depth **/
-  out_data[OUT_SNOW_DEPTH_BAND].data[band] += snow.depth * Cv * 100.;
+  out_data[OUT_SNOW_DEPTH_BAND].data[band] += snow.depth * Cv * lakefactor * 100.;
 
   /** record band canopy intercepted snow **/
   if (HasVeg)
-    out_data[OUT_SNOW_CANOPY_BAND].data[band] += (snow.snow_canopy) * Cv * 1000.;
+    out_data[OUT_SNOW_CANOPY_BAND].data[band] += (snow.snow_canopy) * Cv * lakefactor * 1000.;
 
   /** record band snow melt **/
-  out_data[OUT_SNOW_MELT_BAND].data[band] += snow.melt * Cv;
+  out_data[OUT_SNOW_MELT_BAND].data[band] += snow.melt * Cv * lakefactor;
 
   /** record band snow coverage **/
-  out_data[OUT_SNOW_COVER_BAND].data[band] += snow.coverage * Cv;
+  out_data[OUT_SNOW_COVER_BAND].data[band] += snow.coverage * Cv * lakefactor;
 
   /** record band cold content **/
-  out_data[OUT_DELTACC_BAND].data[band] += energy.deltaCC * Cv;
+  out_data[OUT_DELTACC_BAND].data[band] += energy.deltaCC * Cv * lakefactor;
     
   /** record band advection **/
-  out_data[OUT_ADVECTION_BAND].data[band] += energy.advection * Cv;
+  out_data[OUT_ADVECTION_BAND].data[band] += energy.advection * Cv * lakefactor;
     
   /** record band snow flux **/
-  out_data[OUT_SNOW_FLUX_BAND].data[band] += energy.snow_flux * Cv;
+  out_data[OUT_SNOW_FLUX_BAND].data[band] += energy.snow_flux * Cv * lakefactor;
     
   /** record band refreeze energy **/
-  out_data[OUT_RFRZ_ENERGY_BAND].data[band] += energy.refreeze_energy * Cv;
+  out_data[OUT_RFRZ_ENERGY_BAND].data[band] += energy.refreeze_energy * Cv * lakefactor;
     
   /** record band melt energy **/
-  out_data[OUT_MELT_ENERGY_BAND].data[band] += energy.melt_energy * Cv;
+  out_data[OUT_MELT_ENERGY_BAND].data[band] += energy.melt_energy * Cv * lakefactor;
 
   /** record band advected sensble heat **/
-  out_data[OUT_ADV_SENS_BAND].data[band] -= energy.advected_sensible * Cv;
+  out_data[OUT_ADV_SENS_BAND].data[band] -= energy.advected_sensible * Cv * lakefactor;
 
   /** record surface layer temperature **/
-  out_data[OUT_SNOW_SURFT_BAND].data[band] += snow.surf_temp * Cv;
+  out_data[OUT_SNOW_SURFT_BAND].data[band] += snow.surf_temp * Cv * lakefactor;
 
   /** record pack layer temperature **/
-  out_data[OUT_SNOW_PACKT_BAND].data[band] += snow.pack_temp * Cv;
+  out_data[OUT_SNOW_PACKT_BAND].data[band] += snow.pack_temp * Cv * lakefactor;
 
   /** record latent heat of sublimation **/
-  out_data[OUT_LATENT_SUB_BAND].data[band] += energy.latent_sub * Cv;
+  out_data[OUT_LATENT_SUB_BAND].data[band] += energy.latent_sub * Cv * lakefactor;
 
   /** record band net downwards shortwave radiation **/
-  out_data[OUT_NET_SHORT_BAND].data[band] += energy.NetShortAtmos * Cv;
+  out_data[OUT_NET_SHORT_BAND].data[band] += energy.NetShortAtmos * Cv * lakefactor;
 
   /** record band net downwards longwave radiation **/
-  out_data[OUT_NET_LONG_BAND].data[band] += energy.NetLongAtmos * Cv;
+  out_data[OUT_NET_LONG_BAND].data[band] += energy.NetLongAtmos * Cv * lakefactor;
 
   /** record band albedo **/
   if (snow.snow && overstory)
-    out_data[OUT_ALBEDO_BAND].data[band] += energy.AlbedoOver * Cv;
+    out_data[OUT_ALBEDO_BAND].data[band] += energy.AlbedoOver * Cv * lakefactor;
   else
-    out_data[OUT_ALBEDO_BAND].data[band] += energy.AlbedoUnder * Cv;
+    out_data[OUT_ALBEDO_BAND].data[band] += energy.AlbedoUnder * Cv * lakefactor;
 
   /** record band net latent heat flux **/
-  out_data[OUT_LATENT_BAND].data[band] -= energy.latent * Cv;
+  out_data[OUT_LATENT_BAND].data[band] -= energy.latent * Cv * lakefactor;
 
   /** record band net sensible heat flux **/
-  out_data[OUT_SENSIBLE_BAND].data[band] -= energy.sensible * Cv;
+  out_data[OUT_SENSIBLE_BAND].data[band] -= energy.sensible * Cv * lakefactor;
 
   /** record band net ground heat flux **/
-  out_data[OUT_GRND_FLUX_BAND].data[band] -= energy.grnd_flux * Cv;
+  out_data[OUT_GRND_FLUX_BAND].data[band] -= energy.grnd_flux * Cv * lakefactor;
 
 }

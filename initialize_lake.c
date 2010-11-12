@@ -7,7 +7,8 @@ static char vcid[] = "$Id$";
 int initialize_lake (lake_var_struct   *lake, 
 		      lake_con_struct   lake_con,
 		      soil_con_struct  *soil_con,
-		      double            airtemp)
+		      double            airtemp,
+		      int               skip_hydro)
 
 /**********************************************************************
 	initialize_lake		Laura Bowling		March 8, 2000
@@ -57,6 +58,10 @@ int initialize_lake (lake_var_struct   *lake,
 	      incoming runoff from the catchment.			TJB
   2010-Nov-02 Added initialization of several lake_var variables that 
 	      hadn't been initialized.					TJB
+  2010-Nov-11 Added conditional skipping of initialization of moisture
+	      fluxes, so that this function can be used to initialize
+	      a lake that appears mid-timestep but whose moisture fluxes
+	      have already been calculated.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -94,73 +99,77 @@ int initialize_lake (lake_var_struct   *lake,
   /* Initialize lake physical parameters.                             */
   /********************************************************************/
 
-  lake->ldepth = lake_con.depth_in;
+  if (!skip_hydro) {
 
-  if(lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2*MAX_SURFACE_LAKE) {
-    /* Not quite enough for two full layers. */
-    lake->surfdz = lake->ldepth/2.;
-    lake->dz = lake->ldepth/2.;
-    lake->activenod = 2;
-  }
-  else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
-    /* More than two layers. */	
-    lake->surfdz = MAX_SURFACE_LAKE;
-    lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
-    if(lake->activenod > MAX_LAKE_NODES)
-      lake->activenod = MAX_LAKE_NODES;
-    lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
-  }
-  else if(lake->ldepth > 0.0) {
-    lake->surfdz = lake->ldepth;
-    lake->dz = 0.0;
-    lake->activenod = 1;
-  }
-  else {
-    lake->surfdz = 0.0;
-    lake->dz = 0.0;
-    lake->activenod = 0;
-    lake->ldepth = 0.0;
-  }
+    lake->ldepth = lake_con.depth_in;
 
-  // lake_con.basin equals the surface area at specific depths as input by
-  // the user in the lake parameter file or calculated in read_lakeparam(), 
-  // lake->surface equals the area at the top of each dynamic solution layer 
+    if(lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2*MAX_SURFACE_LAKE) {
+      /* Not quite enough for two full layers. */
+      lake->surfdz = lake->ldepth/2.;
+      lake->dz = lake->ldepth/2.;
+      lake->activenod = 2;
+    }
+    else if(lake->ldepth >= 2* MAX_SURFACE_LAKE) {
+      /* More than two layers. */	
+      lake->surfdz = MAX_SURFACE_LAKE;
+      lake->activenod = (int) (lake->ldepth/MAX_SURFACE_LAKE);
+      if(lake->activenod > MAX_LAKE_NODES)
+        lake->activenod = MAX_LAKE_NODES;
+      lake->dz = (lake->ldepth-lake->surfdz)/((float)(lake->activenod-1));
+    }
+    else if(lake->ldepth > 0.0) {
+      lake->surfdz = lake->ldepth;
+      lake->dz = 0.0;
+      lake->activenod = 1;
+    }
+    else {
+      lake->surfdz = 0.0;
+      lake->dz = 0.0;
+      lake->activenod = 0;
+      lake->ldepth = 0.0;
+    }
+
+    // lake_con.basin equals the surface area at specific depths as input by
+    // the user in the lake parameter file or calculated in read_lakeparam(), 
+    // lake->surface equals the area at the top of each dynamic solution layer 
  
-  for(k=0; k<= lake->activenod; k++) {
-    if(k==0)
-      depth = lake->ldepth;
-    else
-      depth = lake->dz*(lake->activenod - k);
-    status = get_sarea(lake_con, depth, &(lake->surface[k]));
+    for(k=0; k<= lake->activenod; k++) {
+      if(k==0)
+        depth = lake->ldepth;
+      else
+        depth = lake->dz*(lake->activenod - k);
+      status = get_sarea(lake_con, depth, &(lake->surface[k]));
+      if (status < 0) {
+        fprintf(stderr, "Error in get_sarea: record = %d, depth = %f, sarea = %e\n",0,depth,lake->surface[k]);
+        return(status);
+      }
+    }
+
+    lake->sarea = lake->surface[0];
+    lake->sarea_save = lake->sarea;
+    status = get_volume(lake_con, lake->ldepth, &tmp_volume);
     if (status < 0) {
-      fprintf(stderr, "Error in get_sarea: record = %d, depth = %f, sarea = %e\n",0,depth,lake->surface[k]);
+      fprintf(stderr, "Error in get_volume: record = %d, depth = %f, volume = %e\n",0,depth,tmp_volume);
       return(status);
     }
-  }
-
-  lake->sarea = lake->surface[0];
-  lake->sarea_save = lake->sarea;
-  status = get_volume(lake_con, lake->ldepth, &tmp_volume);
-  if (status < 0) {
-    fprintf(stderr, "Error in get_volume: record = %d, depth = %f, volume = %e\n",0,depth,tmp_volume);
-    return(status);
-  }
-  else if (status > 0) {
-    fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
-  }
-  lake->volume = tmp_volume+lake->ice_water_eq;
+    else if (status > 0) {
+      fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
+    }
+    lake->volume = tmp_volume+lake->ice_water_eq;
  
-  // Initialize lake moisture fluxes to 0
-  lake->baseflow_in=0.0;
-  lake->baseflow_out=0.0;
-  lake->channel_in=0.0;
-  lake->evapw=0.0;
-  lake->prec=0.0;
-  lake->recharge=0.0;
-  lake->runoff_in=0.0;
-  lake->runoff_out=0.0;
-  lake->snowmlt=0.0;
-  lake->vapor_flux=0.0;
+    // Initialize lake moisture fluxes to 0
+    lake->baseflow_in=0.0;
+    lake->baseflow_out=0.0;
+    lake->channel_in=0.0;
+    lake->evapw=0.0;
+    lake->prec=0.0;
+    lake->recharge=0.0;
+    lake->runoff_in=0.0;
+    lake->runoff_out=0.0;
+    lake->snowmlt=0.0;
+    lake->vapor_flux=0.0;
+
+  } // if (!skip_hydro)
 
   // Initialize other miscellaneous lake properties
   lake->aero_resist = 0;
@@ -279,9 +288,11 @@ int initialize_lake (lake_var_struct   *lake,
   lake->energy.snow_flux         = 0.0;
   // Soil states and fluxes
   lake->soil.asat                = 1.0;
-  lake->soil.baseflow            = 0.0;
-  lake->soil.inflow              = 0.0;
-  lake->soil.runoff              = 0.0;
+  if (!skip_hydro) {
+    lake->soil.baseflow            = 0.0;
+    lake->soil.inflow              = 0.0;
+    lake->soil.runoff              = 0.0;
+  }
   lake->soil.rootmoist           = 0.0;
   lake->soil.wetness             = 1.0;
   for (i=0; i<2; i++) {
@@ -302,8 +313,10 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.layer[i].ice      = 0.0;
 #endif
   }
-  for (i=0; i<N_PET_TYPES; i++) {
-    lake->soil.pot_evap[i]       = 0.0;
+  if (!skip_hydro) {
+    for (i=0; i<N_PET_TYPES; i++) {
+      lake->soil.pot_evap[i]       = 0.0;
+    }
   }
 
   return(0);

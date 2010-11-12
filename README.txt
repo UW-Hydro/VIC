@@ -41,6 +41,8 @@ variables.  Added lake water balance terms to input/output variables.
 	get_force_type.c
 	initialize_atmos.c
 	initialize_lake.c
+	initialize_model_state.c
+	LAKE.h
 	lakes.eb.c
 	output_list_utils.c
 	output.PILPS-2E.ALMA.template
@@ -63,6 +65,7 @@ variables.  Added lake water balance terms to input/output variables.
 	Several output variables have been added to aid in tracking the
 	lake water budget.  The complete set of lake water budget variables
 	is (in mm over grid cell area):
+
 	  OUT_LAKE_BF_IN	baseflow into lake from catchment
 	  OUT_LAKE_BF_OUT	baseflow out of lake
 	  OUT_LAKE_CHAN_IN	channel inflow into lake
@@ -84,10 +87,16 @@ variables.  Added lake water balance terms to input/output variables.
 	  OUT_LAKE_RCHRG_V	recharge from lake to wetland
 	  OUT_LAKE_RO_IN_V	runoff into lake from catchment
 	  OUT_LAKE_VAPFLX_V	sublimation from lake snow
+
 	Note: there currently is no "_V" form of OUT_DELSURFSTOR.  If needed
 	we may add it later.  In the meantime, users can compute the
 	difference in OUT_LAKE_VOLUME between the current and previous time
 	steps.
+
+	This change also involved changing how lake fluxes are represented
+	internally in VIC.  They are now represented as volumes (m3) per step.
+	This allows better handling of cases in which the lake shrinks to 0
+	area.
 
 
 

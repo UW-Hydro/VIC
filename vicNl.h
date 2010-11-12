@@ -85,6 +85,9 @@
 	      from arg list of arno_evap() as they are no longer used.	TJB
   2010-Apr-28 Removed individual soil_con variables from argument list
 	      of initialize_atmos() and replaced with *soil_con.	TJB
+  2010-Nov-11 Added lakefactor to collect_wb_terms() and collect_eb_terms()
+	      so that these functions could handle changes in how lake
+	      and wetland cell/soil/snow/energy fluxes are represented.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -186,13 +189,13 @@ void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                         int *, int *, int *, int *, int *, double, double, double,
-                        int, int, int, int, double *, double *,
+                        int, int, double, int, int, double *, double *,
 #if SPATIAL_FROST
                         double *, double,
 #endif
                         out_data_struct *);
 void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
-                        double, double, double, double, int, int, int, double *, out_data_struct *);
+                        double, double, double, double, int, int, double, int, double *, out_data_struct *);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);

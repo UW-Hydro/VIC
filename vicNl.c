@@ -87,6 +87,7 @@ int main(int argc, char *argv[])
   2010-Mar-31 Added cell_area to initialize_atmos().			TJB
   2010-Apr-28 Removed individual soil_con variables from argument list
 	      of initialize_atmos() and replaced with *soil_con.	TJB
+  2010-Nov-10 Added closing of state files.			TJB
 **********************************************************************/
 {
 
@@ -423,6 +424,11 @@ int main(int argc, char *argv[])
     fclose(filep.snowband);
   if (options.LAKES)
     fclose(filep.lakeparam);
+  if ( options.INIT_STATE )
+    fclose(filep.init_state);
+  if ( options.SAVE_STATE && strcmp( filenames.statefile, "NONE" ) != 0 )
+    fclose(filep.statefile);
+
 #endif /* !OUTPUT_FORCE */
 
   return EXIT_SUCCESS;

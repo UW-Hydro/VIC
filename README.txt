@@ -158,7 +158,7 @@ State file handles are never closed.
 
 	Files Affected:
 
-	close_files.c
+	vicNl.c
 
 	Description:
 

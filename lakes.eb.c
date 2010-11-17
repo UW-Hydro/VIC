@@ -2019,7 +2019,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       lake->recharge = lake->volume-lake->ice_water_eq;
       lake->volume = lake->ice_water_eq;
 
-      Recharge = 1000.*(lake->volume-lake->ice_water_eq)/((newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
+      Recharge = 1000.*lake->recharge/((newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
 
       for(j=0; j<options.Nlayer; j++) {
 

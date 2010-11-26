@@ -131,6 +131,9 @@ int  put_data(dist_prcp_struct  *prcp,
   2010-Nov-11 Moved assignment of all OUT_LAKE* variables outside
 	      collect_wb_terms().  Added lakefactor to collect_wb_terms()
 	      arg list.							TJB
+  2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
+	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
+  2010-Nov-26 Changed += to = in assignment of OUT_LAKE_* variables.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -473,12 +476,20 @@ int  put_data(dist_prcp_struct  *prcp,
               out_data[OUT_LAKE_ICE].data[0]   = (lake_var.ice_water_eq/lake_var.new_ice_area) * ice_density / RHO_W;
               out_data[OUT_LAKE_ICE_TEMP].data[0]   = lake_var.tempi;
               out_data[OUT_LAKE_ICE_HEIGHT].data[0] = lake_var.hice;
+//              out_data[OUT_LAKE_SWE].data[0] = lake_var.snow.swq*lake_var.sarea/lake_var.areai; // m over lake ice
+              out_data[OUT_LAKE_SWE].data[0] = lake_var.swe; // m over lake ice
+//              out_data[OUT_LAKE_SWE_V].data[0] = lake_var.snow.swq*lake_var.sarea; // m3
+              out_data[OUT_LAKE_SWE_V].data[0] = lake_var.swe*lake_var.areai; // m3
             }
             else {
               out_data[OUT_LAKE_ICE].data[0]   = 0.0;
               out_data[OUT_LAKE_ICE_TEMP].data[0]   = 0.0;
               out_data[OUT_LAKE_ICE_HEIGHT].data[0]   = 0.0;
+              out_data[OUT_LAKE_SWE].data[0]   = 0.0;
+              out_data[OUT_LAKE_SWE_V].data[0]   = 0.0;
             }
+            out_data[OUT_LAKE_DSWE_V].data[0] = (lake_var.swe - lake_var.swe_save)*lake_var.areai; // m3
+            out_data[OUT_LAKE_DSWE].data[0] = (lake_var.swe - lake_var.swe_save)*lake_var.areai*1000/soil_con->cell_area; // mm over gridcell
 
             // Lake dimensions
             out_data[OUT_LAKE_AREA_FRAC].data[0] = Cv*Clake;
@@ -489,6 +500,8 @@ int  put_data(dist_prcp_struct  *prcp,
 	    else
 	      out_data[OUT_LAKE_ICE_FRACT].data[0]  = 0.;
             out_data[OUT_LAKE_VOLUME].data[0]     = lake_var.volume;
+            out_data[OUT_LAKE_DSTOR_V].data[0]    = lake_var.volume - lake_var.volume_save;
+            out_data[OUT_LAKE_DSTOR].data[0]      = (lake_var.volume - lake_var.volume_save)*1000/soil_con->cell_area; // mm over gridcell
 
             // Other lake characteristics
             out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
@@ -502,22 +515,22 @@ int  put_data(dist_prcp_struct  *prcp,
             }
 
             // Lake moisture fluxes
-            out_data[OUT_LAKE_BF_IN_V].data[0] += lake_var.baseflow_in; // m3
-            out_data[OUT_LAKE_BF_OUT_V].data[0] += lake_var.baseflow_out; // m3
-            out_data[OUT_LAKE_CHAN_IN_V].data[0] += lake_var.channel_in; // m3
-            out_data[OUT_LAKE_CHAN_OUT_V].data[0] += lake_var.runoff_out; // m3
-            out_data[OUT_LAKE_EVAP_V].data[0] += lake_var.evapw; // m3
-            out_data[OUT_LAKE_PREC_V].data[0] += lake_var.prec; // m3
-            out_data[OUT_LAKE_RCHRG_V].data[0] += lake_var.recharge; // m3
-            out_data[OUT_LAKE_RO_IN_V].data[0] += lake_var.runoff_in; // m3
-            out_data[OUT_LAKE_VAPFLX_V].data[0] += lake_var.vapor_flux; // m3
-            out_data[OUT_LAKE_BF_IN].data[0] += lake_var.baseflow_in*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_BF_OUT].data[0] += lake_var.baseflow_out*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_CHAN_OUT].data[0] += lake_var.runoff_out*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_EVAP].data[0] += lake_var.evapw*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_RCHRG].data[0] += lake_var.recharge*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_RO_IN].data[0] += lake_var.runoff_in*1000./soil_con->cell_area; // mm over gridcell
-            out_data[OUT_LAKE_VAPFLX].data[0] += lake_var.vapor_flux*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_BF_IN_V].data[0] = lake_var.baseflow_in; // m3
+            out_data[OUT_LAKE_BF_OUT_V].data[0] = lake_var.baseflow_out; // m3
+            out_data[OUT_LAKE_CHAN_IN_V].data[0] = lake_var.channel_in; // m3
+            out_data[OUT_LAKE_CHAN_OUT_V].data[0] = lake_var.runoff_out; // m3
+            out_data[OUT_LAKE_EVAP_V].data[0] = lake_var.evapw; // m3
+            out_data[OUT_LAKE_PREC_V].data[0] = lake_var.prec; // m3
+            out_data[OUT_LAKE_RCHRG_V].data[0] = lake_var.recharge; // m3
+            out_data[OUT_LAKE_RO_IN_V].data[0] = lake_var.runoff_in; // m3
+            out_data[OUT_LAKE_VAPFLX_V].data[0] = lake_var.vapor_flux; // m3
+            out_data[OUT_LAKE_BF_IN].data[0] = lake_var.baseflow_in*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_BF_OUT].data[0] = lake_var.baseflow_out*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_CHAN_OUT].data[0] = lake_var.runoff_out*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_EVAP].data[0] = lake_var.evapw*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_RCHRG].data[0] = lake_var.recharge*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_RO_IN].data[0] = lake_var.runoff_in*1000./soil_con->cell_area; // mm over gridcell
+            out_data[OUT_LAKE_VAPFLX].data[0] = lake_var.vapor_flux*1000./soil_con->cell_area; // mm over gridcell
 
           } // End if options.LAKES etc.
 
@@ -709,6 +722,10 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_LAKE_CHAN_IN_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_CHAN_OUT].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_CHAN_OUT_V].aggdata[0] /= out_dt_sec;
+      out_data[OUT_LAKE_DSTOR].aggdata[0] /= out_dt_sec;
+      out_data[OUT_LAKE_DSTOR_V].aggdata[0] /= out_dt_sec;
+      out_data[OUT_LAKE_DSWE].aggdata[0] /= out_dt_sec;
+      out_data[OUT_LAKE_DSWE_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_EVAP].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_EVAP_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += KELVIN;

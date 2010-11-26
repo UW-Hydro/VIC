@@ -52,6 +52,8 @@ out_data_struct *create_output_list() {
 	      OUT_LAKE_RCHRG_V for reporting lake recharge of
 	      surrounding wetland.  Added OUT_LAKE_VAPFLX and
 	      OUT_LAKE_VAPFLX_V.					TJB
+  2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
+	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
 *************************************************************/
 
   extern option_struct options;
@@ -71,6 +73,8 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_LAKE_ICE_HEIGHT].varname,"OUT_LAKE_ICE_HEIGHT"); /* thickness of lake ice [cm] */
   strcpy(out_data[OUT_LAKE_MOIST].varname,"OUT_LAKE_MOIST");           /* liquid water stored in lake [mm over lake area?] */
   strcpy(out_data[OUT_LAKE_SURF_AREA].varname,"OUT_LAKE_SURF_AREA");   /* lake surface area [m2] */
+  strcpy(out_data[OUT_LAKE_SWE].varname,"OUT_LAKE_SWE");               /* liquid water equivalent of snow on top of lake ice [m over lake ice] */
+  strcpy(out_data[OUT_LAKE_SWE_V].varname,"OUT_LAKE_SWE_V");           /* volumetric liquid water equivalent of snow on top of lake ice [m3] */
   strcpy(out_data[OUT_LAKE_VOLUME].varname,"OUT_LAKE_VOLUME");         /* lake volume [m3] */
   strcpy(out_data[OUT_ROOTMOIST].varname,"OUT_ROOTMOIST");             /* root zone soil moisture [mm] */
   strcpy(out_data[OUT_SMFROZFRAC].varname,"OUT_SMFROZFRAC");           /* fraction of soil moisture (by mass) that is ice, for each soil layer */
@@ -105,6 +109,10 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_LAKE_CHAN_IN_V].varname,"OUT_LAKE_CHAN_IN_V");   /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_LAKE_CHAN_OUT].varname,"OUT_LAKE_CHAN_OUT");     /* channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_LAKE_CHAN_OUT_V].varname,"OUT_LAKE_CHAN_OUT_V"); /* volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_DSTOR].varname,"OUT_LAKE_DSTOR");           /* change in lake moisture storage (liquid plus ice cover) [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_DSTOR_V].varname,"OUT_LAKE_DSTOR_V");       /* volumetric change in lake moisture storage (liquid plus ice cover) [m3] (ALMA_OUTPUT: [m3/s]) */
+  strcpy(out_data[OUT_LAKE_DSWE].varname,"OUT_LAKE_DSWE");             /* change in snowpack on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_LAKE_DSWE_V].varname,"OUT_LAKE_DSWE_V");         /* volumetric change in snowpack on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_LAKE_EVAP].varname,"OUT_LAKE_EVAP");             /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_LAKE_EVAP_V].varname,"OUT_LAKE_EVAP_V");         /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
   strcpy(out_data[OUT_LAKE_PREC_V].varname,"OUT_LAKE_PREC_V");         /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
@@ -281,6 +289,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_LAKE_ICE_HEIGHT].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_MOIST].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_SURF_AREA].aggtype = AGG_TYPE_END;
+  out_data[OUT_LAKE_SWE].aggtype = AGG_TYPE_END;
+  out_data[OUT_LAKE_SWE_V].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_VOLUME].aggtype = AGG_TYPE_END;
   out_data[OUT_ROOTMOIST].aggtype = AGG_TYPE_END;
   out_data[OUT_SMFROZFRAC].aggtype = AGG_TYPE_END;
@@ -323,6 +333,10 @@ out_data_struct *create_output_list() {
   out_data[OUT_LAKE_CHAN_IN_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_CHAN_OUT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_CHAN_OUT_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_DSTOR].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_DSTOR_V].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_DSWE].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_LAKE_DSWE_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_EVAP].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_EVAP_V].aggtype = AGG_TYPE_SUM;
   out_data[OUT_LAKE_PREC_V].aggtype = AGG_TYPE_SUM;

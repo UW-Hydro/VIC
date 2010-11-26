@@ -22,6 +22,7 @@
 	      fluxes and storages when lake area changes.		TJB
   2010-Nov-11 Added skip_hydro flag to initialize_lake() arg list.
 	      Removed rescale_lake_fluxes().				TJB
+  2010-Nov-26 Changed the argument list of water_balance().		TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -105,10 +106,11 @@ double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
-int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct, veg_con_struct,
+int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct,
 #if EXCESS_ICE
-		    int, double,
+		    veg_con_struct, int, double);
+#else
+		    veg_con_struct);
 #endif		    
-		    double, double);
 int  water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);

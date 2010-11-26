@@ -62,6 +62,9 @@ int initialize_lake (lake_var_struct   *lake,
 	      fluxes, so that this function can be used to initialize
 	      a lake that appears mid-timestep but whose moisture fluxes
 	      have already been calculated.				TJB
+  2010-Nov-21 Added lake->swe_save and lake->volume_save.		TJB
+  2010-Nov-26 Added initialization of snow-related terms that are stored
+	      in the lake_var structure.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -80,7 +83,6 @@ int initialize_lake (lake_var_struct   *lake,
 
   for ( i = 0 ; i < MAX_LAKE_NODES; i++ ) {      
     lake->temp[i] = max(airtemp,0.0);
-    lake->surface[i] = 0.0;
   }
 
   lake->areai = 0.0;
@@ -89,10 +91,13 @@ int initialize_lake (lake_var_struct   *lake,
   lake->ice_water_eq = 0.0;
   lake->new_ice_area = 0.0;
   lake->pack_temp = 0.0;
+  lake->pack_water = 0.0;
   lake->SAlbedo = 0.0;
   lake->sdepth = 0.0;
   lake->surf_temp = 0.0;
+  lake->surf_water = 0.0;
   lake->swe = 0.0;
+  lake->swe_save = 0.0;
   lake->tempi = 0.0;
 
   /********************************************************************/
@@ -156,6 +161,7 @@ int initialize_lake (lake_var_struct   *lake,
       fprintf(stderr, "Warning in get_volume: lake depth exceeds maximum; setting to maximum; record = %d\n",0);
     }
     lake->volume = tmp_volume+lake->ice_water_eq;
+    lake->volume_save = lake->volume;
  
     // Initialize lake moisture fluxes to 0
     lake->baseflow_in=0.0;
@@ -534,7 +540,7 @@ int ice_depth(lake_con_struct lake_con, double volume, double ice_water_eq, doub
     status = 1;
   }
 
-  if(ice_water_eq > (volume - ice_water_eq)) /* Ice is not buoyant. */
+  if(ice_water_eq > 0.5*volume) /* Ice is not buoyant. */
     status = get_depth(lake_con, volume-ice_water_eq, &ldepth);
   else
     status = get_depth(lake_con, volume, &ldepth);

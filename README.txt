@@ -70,8 +70,9 @@ variables.  Added lake water balance terms to input/output variables.
 	  OUT_LAKE_BF_OUT	baseflow out of lake
 	  OUT_LAKE_CHAN_IN	channel inflow into lake
 	  OUT_LAKE_CHAN_OUT	channel outflow from lake
-	  OUT_DELSURFSTOR	(already existed) change in surface water
-					storage
+	  OUT_LAKE_DSTOR  	change in lake moisture storage (liquid plus
+					ice cover)
+	  OUT_LAKE_DSWE  	change in snowpack on top of lake ice
 	  OUT_LAKE_EVAP		(was OUT_EVAP_LAKE)
 	  OUT_PREC		(already existed)
 	  OUT_LAKE_RCHRG	recharge from lake to wetland
@@ -82,16 +83,14 @@ variables.  Added lake water balance terms to input/output variables.
 	  OUT_LAKE_BF_OUT_V	baseflow out of lake
 	  OUT_LAKE_CHAN_IN_V	channel inflow into lake
 	  OUT_LAKE_CHAN_OUT_V	channel outflow from lake
+	  OUT_LAKE_DSTOR_V	change in lake moisture storage (liquid plus
+					ice cover)
+	  OUT_LAKE_DSWE_V	change in snowpack on top of lake ice
 	  OUT_LAKE_EVAP_V	evap from lake
 	  OUT_LAKE_PREC_V	(note the "LAKE" in the name)
 	  OUT_LAKE_RCHRG_V	recharge from lake to wetland
 	  OUT_LAKE_RO_IN_V	runoff into lake from catchment
 	  OUT_LAKE_VAPFLX_V	sublimation from lake snow
-
-	Note: there currently is no "_V" form of OUT_DELSURFSTOR.  If needed
-	we may add it later.  In the meantime, users can compute the
-	difference in OUT_LAKE_VOLUME between the current and previous time
-	steps.
 
 	This change also involved changing how lake fluxes are represented
 	internally in VIC.  They are now represented as volumes (m3) per step.

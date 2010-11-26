@@ -75,6 +75,14 @@ int solve_lake(double             snowfall,
 	      mm over lake (to be consistent with changes in put_data).	TJB
   2009-Nov-09 Handle lake snow when lake ice disappears.		LCB via TJB
   2010-Nov-02 Add condition of ice area > 0 to calculation of hice.	TJB
+  2010-Nov-21 Added lake->volume_save and lake->swe_save.  Added storing
+	      of lake snow variables over lake ice area in the lake_var
+	      structure.						TJB
+  2010-Nov-26 Added lake->ice_throughfall to store rainfall (over ice
+	      and open water) and snowfall, so that we can wait to add
+	      these to the lake volume until water_balance().		TJB
+  2010-Nov-26 Added storing of lake snow variables (in depth over lake
+	      ice area) to the lake_var structure.			TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -134,6 +142,8 @@ int solve_lake(double             snowfall,
    **********************************************************************/
 
   lake->sarea_save = lake->sarea;
+  lake->volume_save = lake->volume;
+  lake->swe_save = lake->swe;
  
   lake_energy = &(lake->energy);
   lake_snow = &(lake->snow);
@@ -152,6 +162,7 @@ int solve_lake(double             snowfall,
   lake->vapor_flux=0.0;
   lake_energy->Tsurf = lake->temp[0];
   temp_refreeze_energy = 0.0;
+  lake->ice_throughfall = 0.0;
 
   if(lake->activenod > 0 || lake->areai > 0.0) {
 
@@ -180,12 +191,12 @@ int solve_lake(double             snowfall,
      * 2. Calculate added precipitation and total snow height.
      **********************************************************************/
 
-    // Convert swq from mm/(lake area) to mm/(ice area)
+    // Convert swq from m/(lake area) to m/(ice area)
     if (lake_snow->swq > 0.0) {
       if (fracprv > 0.0)
         lake_snow->swq /= fracprv;
       else if (fracprv == 0.0) {
-        lake->volume += (lake->sarea)*(lake_snow->swq);
+        lake->ice_throughfall += (lake->sarea)*(lake_snow->swq);
         lake_snow->swq = 0.0;
       }
     }
@@ -194,23 +205,23 @@ int solve_lake(double             snowfall,
 
       // If there is no snow, add the rain over ice directly to the lake.
       if(lake_snow->swq <=0.0 && rainfall > 0.0) {
-        lake->volume += (rainfall/1000.)*lake->areai;
+        lake->ice_throughfall += (rainfall/1000.)*lake->areai;
         rainfall = 0.0;
       }
     }
     else if ( fracprv > FRACLIM && fracprv < 1.0 ) { /* sarea is relevant */
 
       /* Precip over open water directly increases lake volume. */
-      lake->volume += ( (snowfall/1000. + rainfall/1000.)*(1-fracprv) * lake->sarea );
+      lake->ice_throughfall += ( (snowfall/1000. + rainfall/1000.)*(1-fracprv) * lake->sarea );
 
       // If there is no snow, add the rain over ice directly to the lake.
       if(lake_snow->swq <= 0.0 && rainfall > 0.0) {
-        lake->volume += (rainfall/1000.)*fracprv*lake->sarea;
+        lake->ice_throughfall += (rainfall/1000.)*fracprv*lake->sarea;
         rainfall = 0.0; /* Because do not want it added to snow->surf_water */
       }
     }
     else {
-      lake->volume += ((rainfall+snowfall)/1000.)*lake->sarea;
+      lake->ice_throughfall += ((rainfall+snowfall)/1000.)*lake->sarea;
       rainfall = 0.0;
       snowfall = 0.0;
     }
@@ -254,7 +265,7 @@ int solve_lake(double             snowfall,
     sw_water = shortin * (1.-albw);
 
     /**********************************************************************
-     * 4. Calculate initial energy balance over water.
+     * 4. Calculate initial energy balance over ice-free water.
      **********************************************************************/
    
     if( (1.-fracprv) > SMALL && lake->activenod > 0) {
@@ -455,6 +466,13 @@ int solve_lake(double             snowfall,
      * 11. Final accounting for passing variables back to VIC.
      **********************************************************************/
  
+    lake->pack_temp = lake_snow->pack_temp;
+    lake->pack_water = lake_snow->pack_water;
+    lake->sdepth = lake_snow->depth;
+    lake->surf_temp = lake_snow->surf_temp;
+    lake->surf_water = lake_snow->surf_water;
+    lake->swe = lake_snow->swq;
+
     /* Adjust water and ice evaporation to be representative of 
        entire lake. */
     lake->evapw           *= ( (1. - fracprv ) * dt * SECPHOUR ); // in mm
@@ -1211,7 +1229,7 @@ int lakeice (double *tempi, double Tcutoff, double sw_ice,
 
   }
   // *energy_ice_melt_bottom is not currently adjusted if there is not enough water to freeze or ice to melt.
-  // This energy should go to ? and warming the water?, respectively.
+  // This energy should go to cooling the ice and warming the water, respectively.
 
   return (0);
 
@@ -1333,7 +1351,7 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
 	       double *T, double *Tnew, double *water_density, double *de,
 	       int dt, double *surface, int numnod, double dz, double surfdz, double *temph, 
 	       double *cp, double *energy_out_bottom)
-    {
+{
 /********************************************************************** 				       
   Calculate the water temperature for different levels in the lake.
  
@@ -1355,26 +1373,25 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
   2007-Oct-24 Modified by moving closing bracket for if ( numnod==1 ) up
 	      so that the code actually calls energycalc() even if the
 	      lake is represented by only one node.			KAC via TJB
+  2010-Nov-21 Fixed bug in definition of zhalf.				TJB
 
  **********************************************************************/
 
-      double z[MAX_LAKE_NODES], zhalf[MAX_LAKE_NODES];
-      double a[MAX_LAKE_NODES], b[MAX_LAKE_NODES], c[MAX_LAKE_NODES];
-      double d[MAX_LAKE_NODES];
-      double told[MAX_LAKE_NODES];
-     
-      double dist12;
-      int k;
-      double surface_1, surface_2, surface_avg, T1;
-      double cnextra;
-      double swtop; /* The solar radiation at the top of the water column. */
-      double top, bot; /* The depth of the top and the bottom of the current water layer. */
-      double water_density_new;
-      double jouleold, joulenew;
-      double energyinput;
-      double energymixed;
-      double term1, term2;
-      double totalenergy;
+  double z[MAX_LAKE_NODES], zhalf[MAX_LAKE_NODES];
+  double a[MAX_LAKE_NODES], b[MAX_LAKE_NODES], c[MAX_LAKE_NODES];
+  double d[MAX_LAKE_NODES];
+ 
+  double dist12;
+  int k;
+  double surface_1, surface_2, surface_avg, T1;
+  double cnextra;
+  double swtop; /* The solar radiation at the top of the water column. */
+  double top, bot; /* The depth of the top and the bottom of the current water layer. */
+  double water_density_new;
+  double jouleold, joulenew;
+  double energyinput;
+  double energymixed;
+  double term1, term2;
 
 /**********************************************************************
  * Calculate the distance between the centers of the surface and first
@@ -1386,177 +1403,181 @@ void temp_area(double sw_visible, double sw_nir, double surface_force,
  * and distance between all nodes.
  **********************************************************************/
 
-      for(k=0; k<numnod; k++) {
-	 if(k==0)
-	   z[k] = surfdz;
-	 else
-	   z[k]=dz;
-         zhalf[k]=dz;
-      }
-      zhalf[0]=0.5*(z[0]+z[1]);
-      energyinput=0.0;
-      energymixed = 0.0;
+  for(k=0; k<numnod; k++) {
+    if(k==0)
+      z[k] = surfdz;
+    else
+      z[k]=dz;
+    zhalf[k]=dz;
+  }
+  if (numnod > 1)
+    zhalf[0]=0.5*(z[0]+z[1]);
+  else
+    zhalf[0]=0.5*z[0];
+  energyinput=0.0;
+  energymixed = 0.0;
 
 /**********************************************************************
  * Calculate the right hand side vector in the tridiagonal matrix system
  * of equations.
  **********************************************************************/
 
-	
-      surface_1 = surface[0];
-      surface_2 = surface[1];
-      surface_avg = (surface_1 + surface_2)/2.;
+  surface_1 = surface[0];
+  surface_2 = surface[1];
+  surface_avg = (surface_1 + surface_2)/2.;
 
-       T1 = (sw_visible*(1*surface_1-surface_2*exp(-lamwsw*surfdz)) + 
-      	    sw_nir*(1*surface_1-surface_2*exp(-lamwlw*surfdz)))/surface_avg 
-      	+ (surface_force*surface_1)/surface_avg;          /* W/m2 */
+  T1 = (sw_visible*(1*surface_1-surface_2*exp(-lamwsw*surfdz)) + 
+       sw_nir*(1*surface_1-surface_2*exp(-lamwlw*surfdz)))/surface_avg 
+  + (surface_force*surface_1)/surface_avg;          /* W/m2 */
 
-       totalenergy = sw_visible  + sw_nir + surface_force;
-       energyinput +=T1*surface_avg;
-       cnextra = 0.5*(surface_2/surface_avg)*(de[0]/zhalf[0])*((T[1]-T[0])/z[0]);
+  energyinput +=T1*surface_avg;
+  cnextra = 0.5*(surface_2/surface_avg)*(de[0]/zhalf[0])*((T[1]-T[0])/z[0]);
       
-       energymixed += cnextra;
+  energymixed += cnextra;
 
-       *temph=0.0;
+  *temph=0.0;
        
-       if(numnod==1)
-	 Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
-       else {	
+  if(numnod==1)
+    Tnew[0] = T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0]);
+  else {	
 	 
-	 /* --------------------------------------------------------------------
-	  * First calculate d for the surface layer of the lake.
-	  * -------------------------------------------------------------------- */
+    /* --------------------------------------------------------------------
+     * First calculate d for the surface layer of the lake.
+     * -------------------------------------------------------------------- */
 	 
-	 d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
+    d[0]= T[0]+(T1*dt*SECPHOUR)/((1.e3+water_density[0])*cp[0]*z[0])+cnextra*dt*SECPHOUR;
+
+    *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
+						      sw_nir*exp(-lamwlw*surfdz));
 	 
-	 *energy_out_bottom = (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*surfdz) + 
-						       sw_nir*exp(-lamwlw*surfdz));
 	 
 	 
-	 
-/* --------------------------------------------------------------------
- * Calculate d for the remainder of the column.
- * --------------------------------------------------------------------*/
+    /* --------------------------------------------------------------------
+     * Calculate d for the remainder of the column.
+     * --------------------------------------------------------------------*/
 
-/* ....................................................................
- * All nodes but the deepest node.
- * ....................................................................*/
+    /* ....................................................................
+     * All nodes but the deepest node.
+     * ....................................................................*/
 
-      for(k=1; k<numnod-1; k++) {
-	top = (surfdz+(k-1)*dz);
-        bot = (surfdz+(k)*dz);
+    for(k=1; k<numnod-1; k++) {
 
-         surface_1 = surface[k]; 
-	 surface_2 = surface[k+1];
-         surface_avg =( surface[k]  + surface[k+1]) / 2.;
-
-
-	  T1 = (sw_visible*(surface_1*exp(-lamwsw*top)-surface_2*exp(-lamwsw*bot)) + 
-	       sw_nir*(surface_1*exp(-lamwlw*top)-surface_2*exp(-lamwlw*bot)))/surface_avg; 
-
-	  energyinput +=T1*surface_avg;
-	  term1 = 0.5 *(1./surface_avg)*((de[k]/zhalf[k])*((T[k+1]-T[k])/z[k]))*surface_2;
-	  term2 = 0.5 *(-1./surface_avg)*((de[k-1]/zhalf[k-1])*((T[k]-T[k-1])/z[k]))*surface_1;
-	 
-	  cnextra = term1 + term2;
-	
-	 energymixed += (term1+term2);
-         d[k]= T[k]+(T1*dt*SECPHOUR)/((1.e3+water_density[k])*cp[k]*z[k])+cnextra*dt*SECPHOUR;
-
-	 	 *energy_out_bottom += (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*bot) + 
-	 						sw_nir*exp(-lamwlw*bot));
-
-      }
-/* ....................................................................
- * Calculation for the deepest node.
- * ....................................................................*/
-       k=numnod-1;
-      surface_1 = surface[k];
-      surface_2 = surface[k];
-      surface_avg = surface[k];
-     
       top = (surfdz+(k-1)*dz);
       bot = (surfdz+(k)*dz);
 
-      //       T1 = (sw_visible*(exp(-lamwsw*top)) + 
-      //	    sw_nir*(exp(-lamwlw*top)))*surface_1/surface_avg; 
+      surface_1 = surface[k]; 
+      surface_2 = surface[k+1];
+      surface_avg =( surface[k]  + surface[k+1]) / 2.;
+
 
       T1 = (sw_visible*(surface_1*exp(-lamwsw*top)-surface_2*exp(-lamwsw*bot)) + 
-	    sw_nir*(surface_1*exp(-lamwlw*top)-surface_2*exp(-lamwlw*bot)))/surface_avg; 
+	   sw_nir*(surface_1*exp(-lamwlw*top)-surface_2*exp(-lamwlw*bot)))/surface_avg; 
 
       energyinput +=T1*surface_avg;
-      energyinput /= surface[0];
+      term1 = 0.5 *(1./surface_avg)*((de[k]/zhalf[k])*((T[k+1]-T[k])/z[k]))*surface_2;
+      term2 = 0.5 *(-1./surface_avg)*((de[k-1]/zhalf[k-1])*((T[k]-T[k-1])/z[k]))*surface_1;
+	 
+      cnextra = term1 + term2;
+	
+      energymixed += (term1+term2);
+      d[k]= T[k]+(T1*dt*SECPHOUR)/((1.e3+water_density[k])*cp[k]*z[k])
+                +cnextra*dt*SECPHOUR;
 
-      cnextra = 0.5 * (-1.*surface_1/surface_avg)*((de[k-1]/zhalf[k-1])*((T[k]-T[k-1])/z[k]));
-
-            *energy_out_bottom = 0.;
-      *energy_out_bottom += surface_2*(sw_visible*exp(-lamwsw*bot) + sw_nir*exp(-lamwlw*bot));
-      *energy_out_bottom /= surface[0];
-
-      energymixed += cnextra;
-    
-      d[k] = T[k]+(T1*dt*SECPHOUR)/((1.e3+water_density[k])*cp[k]*z[k])+cnextra*dt*SECPHOUR;
-
-/**********************************************************************
- * Calculate arrays for tridiagonal matrix.
- **********************************************************************/
-
-/* --------------------------------------------------------------------
- * Top node of the column.
- * --------------------------------------------------------------------*/
-
-     
-      surface_2 = surface[1];
-      surface_avg = (surface[0] + surface[1] ) / 2.;
-
-      b[0] = -0.5 * ( de[0] / zhalf[0] ) *
-	(  dt*SECPHOUR / z[0] ) * surface_2/surface_avg;
-      a[0] = 1. - b[0];
-
-/* --------------------------------------------------------------------
- * Second to second last node of the column.
- * --------------------------------------------------------------------*/
-
-      for(k=1;k<numnod-1;k++) {
-         surface_1 = surface[k];
-         surface_2 = surface[k+1];
-	 surface_avg = ( surface[k]  + surface[k+1]) / 2.;
-
-         b[k] = -0.5 * ( de[k] / zhalf[k] ) *
-	   (  dt*SECPHOUR / z[k] )*surface_2/surface_avg;
-         c[k] = -0.5 * ( de[k-1] / zhalf[k-1] ) *
-	   (  dt*SECPHOUR / z[k] )*surface_1/surface_avg;
-         a[k] = 1. - b[k] - c[k];
-
-	   }
-/* --------------------------------------------------------------------
- * Deepest node of the column.
- * --------------------------------------------------------------------*/
-
-      surface_1 = surface[numnod-1];
-      surface_avg = surface[numnod-1];
-      c[numnod-1] = -0.5 * ( de[numnod-1] / zhalf[numnod-1] ) *
-	(  dt*SECPHOUR / z[numnod-1] ) * surface_1/surface_avg;
-      a[numnod-1] = 1. - c[numnod-1];
-
-/**********************************************************************
- * Solve the tridiagonal matrix.
- **********************************************************************/
-     
-      tridia(numnod,c,a,b,d,Tnew);
+      *energy_out_bottom += (surface_1 - surface_2)*(sw_visible*exp(-lamwsw*bot) + 
+	 						sw_nir*exp(-lamwlw*bot));
 
     }
-
-/**********************************************************************
- * Adjust energy fluxes for change in density -> should be fixed by
- * moving to lagrangian scheme
- **********************************************************************/
-    
-    energycalc(Tnew, &joulenew, numnod,dz, surfdz, surface, cp, water_density);
+    /* ....................................................................
+     * Calculation for the deepest node.
+     * ....................................................................*/
+    k=numnod-1;
+    surface_1 = surface[k];
+    surface_2 = surface[k];
+    surface_avg = surface[k];
      
-    *temph=0.0;
+    top = (surfdz+(k-1)*dz);
+    bot = (surfdz+(k)*dz);
 
-    *temph = joulenew;
+    //       T1 = (sw_visible*(exp(-lamwsw*top)) + 
+    //	    sw_nir*(exp(-lamwlw*top)))*surface_1/surface_avg; 
+
+    T1 = (sw_visible*(surface_1*exp(-lamwsw*top)-surface_2*exp(-lamwsw*bot)) + 
+	 sw_nir*(surface_1*exp(-lamwlw*top)-surface_2*exp(-lamwlw*bot)))/surface_avg; 
+
+    energyinput +=T1*surface_avg;
+    energyinput /= surface[0];
+
+    cnextra = 0.5 * (-1.*surface_1/surface_avg)*((de[k-1]/zhalf[k-1])*((T[k]-T[k-1])/z[k]));
+
+    *energy_out_bottom = 0.;
+    *energy_out_bottom += surface_2*(sw_visible*exp(-lamwsw*bot) + sw_nir*exp(-lamwlw*bot));
+    *energy_out_bottom /= surface[0];
+
+    energymixed += cnextra;
+    
+    d[k] = T[k]+(T1*dt*SECPHOUR)/((1.e3+water_density[k])*cp[k]*z[k])
+               +cnextra*dt*SECPHOUR;
+
+    /**********************************************************************
+     * Calculate arrays for tridiagonal matrix.
+     **********************************************************************/
+
+    /* --------------------------------------------------------------------
+     * Top node of the column.
+     * --------------------------------------------------------------------*/
+
+     
+    surface_2 = surface[1];
+    surface_avg = (surface[0] + surface[1] ) / 2.;
+
+    b[0] = -0.5 * ( de[0] / zhalf[0] )
+          * ( dt*SECPHOUR / z[0] ) * surface_2/surface_avg;
+    a[0] = 1. - b[0];
+
+    /* --------------------------------------------------------------------
+     * Second to second last node of the column.
+     * --------------------------------------------------------------------*/
+
+    for(k=1;k<numnod-1;k++) {
+      surface_1 = surface[k];
+      surface_2 = surface[k+1];
+      surface_avg = ( surface[k]  + surface[k+1]) / 2.;
+
+      b[k] = -0.5 * ( de[k] / zhalf[k] )
+	     * ( dt*SECPHOUR / z[k] )*surface_2/surface_avg;
+      c[k] = -0.5 * ( de[k-1] / zhalf[k-1] )
+	     * ( dt*SECPHOUR / z[k] )*surface_1/surface_avg;
+      a[k] = 1. - b[k] - c[k];
+
+    }
+    /* --------------------------------------------------------------------
+     * Deepest node of the column.
+     * --------------------------------------------------------------------*/
+
+    surface_1 = surface[numnod-1];
+    surface_avg = surface[numnod-1];
+    c[numnod-1] = -0.5 * ( de[numnod-1] / zhalf[numnod-1] )
+	          * ( dt*SECPHOUR / z[numnod-1] ) * surface_1/surface_avg;
+    a[numnod-1] = 1. - c[numnod-1];
+
+    /**********************************************************************
+     * Solve the tridiagonal matrix.
+     **********************************************************************/
+     
+    tridia(numnod,c,a,b,d,Tnew);
+
+  }
+
+  /**********************************************************************
+   * Adjust energy fluxes for change in density -> should be fixed by
+   * moving to lagrangian scheme
+   **********************************************************************/
+    
+  energycalc(Tnew, &joulenew, numnod,dz, surfdz, surface, cp, water_density);
+     
+  *temph=0.0;
+
+  *temph = joulenew;
 
 }
 
@@ -1822,11 +1843,11 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
 }
 
 int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con, veg_con_struct veg_con,
+		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
 #if EXCESS_ICE
-		    int SubsidenceUpdate, double total_meltwater,
+		    veg_con_struct veg_con, int SubsidenceUpdate, double total_meltwater)
 #endif
-		    double deltasnow, double vapor_flux)
+		    veg_con_struct veg_con)
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1859,6 +1880,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 	      to be in mm / (lake-wetland tile area) instead of mm / lake or 
 	      mm / wetland area.  This fixed bugs in reporting of grid-cell
 	      average fluxes to output files.  Removed rescale_lake_fluxes().	TJB
+  2010-Nov-21 Removed rescaling of lake->snow.swq to tile area.			TJB
+  2010-Nov-26 Changed argument list to remove unneeded terms.  Now all precip
+	      that didn't get added to the snowpack in solve_lake() is added
+	      to lake volume here.						TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1916,7 +1941,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
  
   lake->evapw  *= 0.001*lake->sarea; // in m3
   lake->snowmlt *= 0.001*lake->areai; // in m3
-  lake->vapor_flux = vapor_flux*lake->sarea; // in m3
+  lake->vapor_flux = lake->snow.vapor_flux*lake->sarea; // in m3
 
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;
 #if EXCESS_ICE
@@ -1935,15 +1960,15 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   // Add runoff from rest of grid cell and wetland to lake, remove evaporation
   // (precip was added in solve_lake, to allow for snow interception)
   // Evaporation is not allowed to exceed the liquid volume of the lake (after incoming runoff & baseflow are added)
-  if (fabs(lake->evapw) > SMALL && lake->evapw > ((lake->volume-lake->ice_water_eq) + inflow_volume + lake->snowmlt)) {
-    lake->evapw = (lake->volume-lake->ice_water_eq) + inflow_volume + lake->snowmlt;
+  if (fabs(lake->evapw) > SMALL && lake->evapw > ((lake->volume-lake->ice_water_eq) + lake->ice_throughfall + inflow_volume + lake->snowmlt)) {
+    lake->evapw = (lake->volume-lake->ice_water_eq) + lake->ice_throughfall + inflow_volume + lake->snowmlt;
     lake->volume = lake->ice_water_eq;
   }
   else {
-    lake->volume += ( inflow_volume + lake->snowmlt-lake->evapw);
+    lake->volume += (lake->ice_throughfall + inflow_volume + lake->snowmlt - lake->evapw);
   }
 
-  // Estimate new surface area (of ice+liquid water, so that this is never an underestimate) for recharge calculations
+  // Estimate new surface area of ice+liquid water for recharge calculations
   volume_save = lake->volume;
   ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
   if ( ErrorFlag == ERROR ) {
@@ -2014,7 +2039,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
         delta_moist[j] = (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist);
       }
     }
-    else { // not enough liquid water to support recharge; fill soil as much as allowed by available liquid water in lake and above-ground storage in newly-flooded area
+    else { // not enough liquid water to support recharge; fill soil as much as allowed by available liquid water in lake and above-ground storage in newly-flooded area; lake will recede back from this point after recharge is taken out of it
 
       lake->recharge = lake->volume-lake->ice_water_eq;
       lake->volume = lake->ice_water_eq;
@@ -2085,8 +2110,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
 
   // Find new lake depth for runoff calculations
-  if(lake->ice_water_eq > (lake->volume - lake->ice_water_eq)) /* Ice is not buoyant. */
-    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);  
+  // Check for ice buoyancy
+  if (lake->ice_water_eq > 0.5*lake->volume) /* ice is not buoyant */
+    ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &ldepth);
   else
     ErrorFlag = get_depth(lake_con, lake->volume, &ldepth);
   if ( ErrorFlag == ERROR ) {
@@ -2144,7 +2170,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   // Recalculate lake depth to define surface[] for next time step
   // Here, we only want depth of liquid water (below ice bottom), since surface[] array only applies to liquid water
   ErrorFlag = get_depth(lake_con, lake->volume-lake->ice_water_eq, &(lake->ldepth));
-  
   if ( ErrorFlag == ERROR ) {
     fprintf(stderr, "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n",rec,lake->volume,lake->ldepth);
     return ( ErrorFlag );
@@ -2298,7 +2323,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   // Rescale other fluxes and storages
   if (newfraction > 0.0) { // lake exists at end of time step
     if (lakefrac > 0.0) { // lake existed at beginning of time step
-      lake->snow.swq *= lakefrac;
       rescale_snow_energy_fluxes(lakefrac, 1.0, &(lake->snow), &(lake->energy)); 
     }
     else { // lake didn't exist at beginning of time step; create new lake

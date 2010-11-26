@@ -97,6 +97,7 @@ int  full_energy(char                 NEWCELL,
   2010-Sep-24 Changed atmos.runoff_in to atmos.channel_in.  Added
 	      lake_var.channel_in to store it.					TJB
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
+  2010-Nov-26 Changed argument list of water_balance().				TJB
 
 **********************************************************************/
 {
@@ -826,11 +827,12 @@ int  full_energy(char                 NEWCELL,
      **********************************************************************/
 
     ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, prcp, rec, iveg, band,
-                              lakefrac, *soil_con, *veg_con,
+                              lakefrac, *soil_con,
 #if EXCESS_ICE
-                              SubsidenceUpdate, total_meltwater,
+                              *veg_con, SubsidenceUpdate, total_meltwater);
+#else
+                              *veg_con);
 #endif
-                              oldsnow-lake_var->snow.swq, lake_var->snow.vapor_flux);
     if ( ErrorFlag == ERROR ) return (ERROR);
 
 #if LINK_DEBUG

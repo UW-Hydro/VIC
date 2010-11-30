@@ -153,6 +153,21 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+Saturated area fraction incorrect for SPATIAL_FROST = TRUE.
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Previously the computation of cell.Asat occurred in the wrong
+	place in runoff.c so that it was only correct for SPATIAL_FROST
+	= FALSE.  This has been fixed.
+
+
+
+
 State file handles are never closed.
 
 	Files Affected:

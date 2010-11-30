@@ -156,6 +156,8 @@ int  runoff(cell_data_struct  *cell_wet,
 	      total moisture > residual moisture.				TJB
   2010-Feb-07 Fixed bug in runoff computation for case when soil column
 	      is completely saturated.						TJB
+  2010-Nov-29 Moved computation of saturated area to correct place in
+	      code for handling SPATIAL_FROST.					TJB
 
 **********************************************************************/
 {  
@@ -765,23 +767,6 @@ int  runoff(cell_data_struct  *cell_wet,
 	    
 	  } /* end of hourly time step loop */
 
-	  /******************************************************
-            Recompute Asat based on final moisture level of upper layers
-	  ******************************************************/
-	  top_moist = 0.;
-	  top_max_moist=0.;
-	  for(lindex=0;lindex<2;lindex++) {
-	    top_moist += (liq[lindex] + ice[lindex]);
-	    top_max_moist += max_moist[lindex];
-	  }
-	  if(top_moist>top_max_moist) top_moist = top_max_moist;
-	  /** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
-	  if(top_moist > top_max_moist) top_moist=top_max_moist;
-	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
-	  A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
-          /** Store saturated area **/
-          cell->asat = A;
-
 #if EXCESS_ICE
 	}//end if subsidence did not occur or non-simple scenario for subsidence
 #endif
@@ -792,14 +777,30 @@ int  runoff(cell_data_struct  *cell_wet,
 	  baseflow[frost_area]  = 0;
 	}
 
-	for ( lindex = 0; lindex < options.Nlayer; lindex++ ) 
+        /** Recompute Asat based on final moisture level of upper layers **/
+	top_moist = 0.;
+	top_max_moist=0.;
+	for(lindex=0;lindex<2;lindex++) {
+	  top_moist += (liq[lindex] + ice[lindex]);
+	  top_max_moist += max_moist[lindex];
+	}
+	if(top_moist>top_max_moist) top_moist = top_max_moist;
+	/** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
+	if(top_moist > top_max_moist) top_moist=top_max_moist;
+	ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
+	A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+
+        /** Store tile-wide values **/
 #if SPATIAL_FROST
-	  layer[lindex].moist += ((liq[lindex] + ice[lindex]) 
-				  * frost_fract[frost_area]); 
+	for ( lindex = 0; lindex < options.Nlayer; lindex++ ) 
+	  layer[lindex].moist += ((liq[lindex] + ice[lindex]) * frost_fract[frost_area]); 
+        cell->asat     += A * frost_fract[frost_area];
         cell->runoff   += runoff[frost_area] * frost_fract[frost_area];
         cell->baseflow += baseflow[frost_area] * frost_fract[frost_area];
 #else
-	layer[lindex].moist = liq[lindex] + ice[lindex];      
+	for ( lindex = 0; lindex < options.Nlayer; lindex++ ) 
+	  layer[lindex].moist = liq[lindex] + ice[lindex];      
+        cell->asat     += A;
         cell->runoff   += runoff[frost_area];
         cell->baseflow += baseflow[frost_area];
 #endif // SPATIAL_FROST

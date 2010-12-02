@@ -134,6 +134,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
 	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
   2010-Nov-26 Changed += to = in assignment of OUT_LAKE_* variables.	TJB
+  2010-Dec-01 Added OUT_ZWT.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -926,6 +927,9 @@ void collect_wb_terms(cell_data_struct  cell,
   }
   out_data[OUT_SOIL_WET].data[0] += cell.wetness * AreaFactorLake;
   out_data[OUT_ROOTMOIST].data[0] += cell.rootmoist * AreaFactorLake;
+
+  /** record water table position **/
+  out_data[OUT_ZWT].data[0] += cell.zwt * AreaFactorLake;
 
   /** record layer temperatures **/
   for(index=0;index<options.Nlayer;index++) {

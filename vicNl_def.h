@@ -106,6 +106,7 @@
 	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
   2010-Nov-26 Added lake->ice_throughfall, lake->swe_save, and
 	      lake->volume_save.					TJB
+  2010-Dec-01 Added cell->zwt and OUT_ZWT.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -326,140 +327,141 @@ extern char ref_veg_ref_crop[];
 #define OUT_SURF_FROST_FRAC 22  /* fraction of soil surface that is frozen [fraction] */
 #define OUT_SWE             23  /* snow water equivalent in snow pack (including vegetation-intercepted snow)  [mm] */
 #define OUT_WDEW            24  /* total moisture interception storage in canopy [mm] */
+#define OUT_ZWT             25  /* water table position [cm] */
 // Water Balance Terms - fluxes
-#define OUT_BASEFLOW        25  /* baseflow out of the bottom layer  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_DELINTERCEPT    26  /* change in canopy interception storage  [mm] */
-#define OUT_DELSOILMOIST    27  /* change in soil water content  [mm] */
-#define OUT_DELSURFSTOR     28  /* change in surface liquid water storage  [mm] */
-#define OUT_DELSWE          29  /* change in snow water equivalent  [mm] */
-#define OUT_EVAP            30  /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_EVAP_BARE       31  /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_EVAP_CANOP      32  /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_INFLOW          33  /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_BF_IN      34  /* incoming baseflow from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_BF_IN_V    35  /* incoming volumetric baseflow from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_BF_OUT     36  /* outgoing baseflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_BF_OUT_V   37  /* outgoing volumetric baseflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_CHAN_IN    38  /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_CHAN_IN_V  39  /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_CHAN_OUT   40  /* channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_CHAN_OUT_V 41  /* volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_DSTOR      42  /* change in lake moisture storage (liquid plus ice cover) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_DSTOR_V    43  /* volumetric change in lake moisture storage (liquid plus ice cover) [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_DSWE       44  /* change in swe on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_DSWE_V     45  /* volumetric change in swe on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_EVAP       46  /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_EVAP_V     47  /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_PREC_V     48  /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_RCHRG      49  /* recharge from lake to surrounding wetland [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_RCHRG_V    50  /* volumetric recharge from lake to surrounding wetland [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_RO_IN      51  /* incoming runoff from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_RO_IN_V    52  /* incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_LAKE_VAPFLX     53  /* outgoing sublimation from snow on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_LAKE_VAPFLX_V   54  /* outgoing volumetric sublimation from snow on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
-#define OUT_PET_SATSOIL     55  /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_H2OSURF     56  /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_SHORT       57  /* potential evap (transpiration only) from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_TALL        58  /* potential evap (transpiration only) from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_NATVEG      59  /* potential evap (transpiration only) from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PET_VEGNOCR     60  /* potential evap (transpiration only) from current vegetation and 0 canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_PREC            61  /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_RAINF           62  /* rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_REFREEZE        63  /* refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_RUNOFF          64  /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_MELT       65  /* snow melt  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOWF           66  /* snowfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_BLOWING     67  /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_CANOP       68  /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_SNOW        69  /* total net sublimation from snow pack (surface and blowing) [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SUB_SURFACE     70  /* net sublimation from snow pack surface [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_TRANSP_VEG      71  /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_WATER_ERROR     72  /* water budget error [mm] */
+#define OUT_BASEFLOW        26  /* baseflow out of the bottom layer  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_DELINTERCEPT    27  /* change in canopy interception storage  [mm] */
+#define OUT_DELSOILMOIST    28  /* change in soil water content  [mm] */
+#define OUT_DELSURFSTOR     29  /* change in surface liquid water storage  [mm] */
+#define OUT_DELSWE          30  /* change in snow water equivalent  [mm] */
+#define OUT_EVAP            31  /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_EVAP_BARE       32  /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_EVAP_CANOP      33  /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_INFLOW          34  /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_BF_IN      35  /* incoming baseflow from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_BF_IN_V    36  /* incoming volumetric baseflow from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_BF_OUT     37  /* outgoing baseflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_BF_OUT_V   38  /* outgoing volumetric baseflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_CHAN_IN    39  /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_CHAN_IN_V  40  /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_CHAN_OUT   41  /* channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_CHAN_OUT_V 42  /* volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_DSTOR      43  /* change in lake moisture storage (liquid plus ice cover) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_DSTOR_V    44  /* volumetric change in lake moisture storage (liquid plus ice cover) [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_DSWE       45  /* change in swe on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_DSWE_V     46  /* volumetric change in swe on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_EVAP       47  /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_EVAP_V     48  /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_PREC_V     49  /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_RCHRG      50  /* recharge from lake to surrounding wetland [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_RCHRG_V    51  /* volumetric recharge from lake to surrounding wetland [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_RO_IN      52  /* incoming runoff from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_RO_IN_V    53  /* incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_LAKE_VAPFLX     54  /* outgoing sublimation from snow on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_LAKE_VAPFLX_V   55  /* outgoing volumetric sublimation from snow on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
+#define OUT_PET_SATSOIL     56  /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_H2OSURF     57  /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_SHORT       58  /* potential evap (transpiration only) from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_TALL        59  /* potential evap (transpiration only) from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_NATVEG      60  /* potential evap (transpiration only) from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PET_VEGNOCR     61  /* potential evap (transpiration only) from current vegetation and 0 canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_PREC            62  /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_RAINF           63  /* rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_REFREEZE        64  /* refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_RUNOFF          65  /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_MELT       66  /* snow melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOWF           67  /* snowfall  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_BLOWING     68  /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_CANOP       69  /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_SNOW        70  /* total net sublimation from snow pack (surface and blowing) [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SUB_SURFACE     71  /* net sublimation from snow pack surface [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_TRANSP_VEG      72  /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_WATER_ERROR     73  /* water budget error [mm] */
 // Energy Balance Terms - state variables
-#define OUT_ALBEDO          73  /* average surface albedo [fraction] */
-#define OUT_BARESOILT       74  /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_FDEPTH          75  /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
-#define OUT_LAKE_ICE_TEMP   76  /* temperature of lake ice [C] (ALMA_OUTPUT: [K]) */
-#define OUT_LAKE_SURF_TEMP  77  /* lake surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_RAD_TEMP        78  /* average radiative surface temperature [K] */
-#define OUT_SALBEDO         79  /* snow pack albedo [fraction] */
-#define OUT_SNOW_PACK_TEMP  80  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURF_TEMP  81  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOWT_FBFLAG    82  /* snow surface temperature flag */
-#define OUT_SOIL_TEMP       83  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
-#define OUT_SOIL_TNODE      84  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
-#define OUT_SOIL_TNODE_WL   85  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
-#define OUT_SOILT_FBFLAG    86  /* soil temperature flag for each soil thermal node */
-#define OUT_SURF_TEMP       87  /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SURFT_FBFLAG    88  /* surface temperature flag */
-#define OUT_TCAN_FBFLAG     89  /* Tcanopy flag */
-#define OUT_TDEPTH          90  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
-#define OUT_TFOL_FBFLAG     91  /* Tfoliage flag */
-#define OUT_VEGT            92  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_ALBEDO          74  /* average surface albedo [fraction] */
+#define OUT_BARESOILT       75  /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_FDEPTH          76  /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
+#define OUT_LAKE_ICE_TEMP   77  /* temperature of lake ice [C] (ALMA_OUTPUT: [K]) */
+#define OUT_LAKE_SURF_TEMP  78  /* lake surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_RAD_TEMP        79  /* average radiative surface temperature [K] */
+#define OUT_SALBEDO         80  /* snow pack albedo [fraction] */
+#define OUT_SNOW_PACK_TEMP  81  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURF_TEMP  82  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOWT_FBFLAG    83  /* snow surface temperature flag */
+#define OUT_SOIL_TEMP       84  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
+#define OUT_SOIL_TNODE      85  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+#define OUT_SOIL_TNODE_WL   86  /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
+#define OUT_SOILT_FBFLAG    87  /* soil temperature flag for each soil thermal node */
+#define OUT_SURF_TEMP       88  /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SURFT_FBFLAG    89  /* surface temperature flag */
+#define OUT_TCAN_FBFLAG     90  /* Tcanopy flag */
+#define OUT_TDEPTH          91  /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
+#define OUT_TFOL_FBFLAG     92  /* Tfoliage flag */
+#define OUT_VEGT            93  /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
 // Energy Balance Terms - fluxes
-#define OUT_ADV_SENS        93  /* net sensible flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION       94  /* advected energy [W/m2] */
-#define OUT_DELTACC         95  /* rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
-#define OUT_DELTAH          96  /* rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
-#define OUT_ENERGY_ERROR    97  /* energy budget error [W/m2] */
-#define OUT_FUSION          98  /* net energy used to melt/freeze soil moisture [W/m2] */
-#define OUT_GRND_FLUX       99  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG        100  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT         101  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB     102  /* net upward latent heat flux from sublimation [W/m2] */
-#define OUT_MELT_ENERGY    103  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG       104  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT      105  /* net downward shortwave flux [W/m2] */
-#define OUT_R_NET          106  /* net downward radiation flux [W/m2] */
-#define OUT_RFRZ_ENERGY    107  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE       108  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_FLUX      109  /* energy flux through snow pack [W/m2] */
+#define OUT_ADV_SENS        94  /* net sensible flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION       95  /* advected energy [W/m2] */
+#define OUT_DELTACC         96  /* rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
+#define OUT_DELTAH          97  /* rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
+#define OUT_ENERGY_ERROR    98  /* energy budget error [W/m2] */
+#define OUT_FUSION          99  /* net energy used to melt/freeze soil moisture [W/m2] */
+#define OUT_GRND_FLUX      100  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG        101  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT         102  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB     103  /* net upward latent heat flux from sublimation [W/m2] */
+#define OUT_MELT_ENERGY    104  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG       105  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT      106  /* net downward shortwave flux [W/m2] */
+#define OUT_R_NET          107  /* net downward radiation flux [W/m2] */
+#define OUT_RFRZ_ENERGY    108  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE       109  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_FLUX      110  /* energy flux through snow pack [W/m2] */
 // Miscellaneous Terms
-#define OUT_AERO_COND      110  /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribute surface conductance) */
-#define OUT_AERO_COND1     111  /* surface aerodynamic conductance [m/s] */
-#define OUT_AERO_COND2     112  /* overstory aerodynamic conductance [m/s] */
-#define OUT_AERO_RESIST    113  /* "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
-#define OUT_AERO_RESIST1   114  /* surface aerodynamic resistance [s/m] */
-#define OUT_AERO_RESIST2   115  /* overstory aerodynamic resistance [s/m] */
-#define OUT_AIR_TEMP       116  /* air temperature [C] (ALMA_OUTPUT: [K])*/
-#define OUT_DENSITY        117  /* near-surface atmospheric density [kg/m3]*/
-#define OUT_LONGWAVE       118  /* incoming longwave [W/m2] */
-#define OUT_PRESSURE       119  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
-#define OUT_QAIR           120  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID      121  /* relative humidity [fraction]*/
-#define OUT_SHORTWAVE      122  /* incoming shortwave [W/m2] */
-#define OUT_SURF_COND      123  /* surface conductance [m/s] */
-#define OUT_VP             124  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            125  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           126  /* near surface wind speed [m/s] */
+#define OUT_AERO_COND      111  /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute overstory conductance; others contribute surface conductance) */
+#define OUT_AERO_COND1     112  /* surface aerodynamic conductance [m/s] */
+#define OUT_AERO_COND2     113  /* overstory aerodynamic conductance [m/s] */
+#define OUT_AERO_RESIST    114  /* "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
+#define OUT_AERO_RESIST1   115  /* surface aerodynamic resistance [s/m] */
+#define OUT_AERO_RESIST2   116  /* overstory aerodynamic resistance [s/m] */
+#define OUT_AIR_TEMP       117  /* air temperature [C] (ALMA_OUTPUT: [K])*/
+#define OUT_DENSITY        118  /* near-surface atmospheric density [kg/m3]*/
+#define OUT_LONGWAVE       119  /* incoming longwave [W/m2] */
+#define OUT_PRESSURE       120  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+#define OUT_QAIR           121  /* specific humidity [kg/kg] */
+#define OUT_REL_HUMID      122  /* relative humidity [fraction]*/
+#define OUT_SHORTWAVE      123  /* incoming shortwave [W/m2] */
+#define OUT_SURF_COND      124  /* surface conductance [m/s] */
+#define OUT_VP             125  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            126  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           127  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       127  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      128  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         129  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        130  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      131  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        132  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         133  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     134  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    135  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       136  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      137  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    138  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       139  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    140  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     141  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     142  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      143  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      144  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     145  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     146  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            147  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND       128  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      129  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         130  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        131  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      132  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        133  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         134  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     135  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    136  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       137  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      138  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    139  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       140  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    141  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     142  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     143  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      144  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      145  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     146  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     147  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            148  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          148  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          149  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            150  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           151  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          149  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          150  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            151  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           152  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/
@@ -990,6 +992,7 @@ typedef struct {
   double wetness;                      /* average of
                                           (layer.moist - Wpwp)/(porosity*depth - Wpwp)
                                           over all layers (fraction) */
+  double zwt;                          /* water table position [cm] */
 } cell_data_struct;
 
 /***********************************************************************

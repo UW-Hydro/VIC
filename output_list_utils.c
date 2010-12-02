@@ -54,6 +54,7 @@ out_data_struct *create_output_list() {
 	      OUT_LAKE_VAPFLX_V.					TJB
   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
 	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
+  2010-Dec-01 Added OUT_ZWT.						TJB
 *************************************************************/
 
   extern option_struct options;
@@ -90,6 +91,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SURF_FROST_FRAC].varname,"OUT_SURF_FROST_FRAC"); /* fraction of soil surface that is frozen [fraction] */
   strcpy(out_data[OUT_SWE].varname,"OUT_SWE");                         /* snow water equivalent in snow pack [mm] */
   strcpy(out_data[OUT_WDEW].varname,"OUT_WDEW");                       /* total moisture interception storage in canopy [mm] */
+  strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                         /* water table position [cm] */
 
   // Water Balance Terms - fluxes
   strcpy(out_data[OUT_BASEFLOW].varname,"OUT_BASEFLOW");               /* baseflow out of the bottom layer [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -306,6 +308,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURF_FROST_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE].aggtype = AGG_TYPE_END;
   out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
+  out_data[OUT_ZWT].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_CANOPY_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;

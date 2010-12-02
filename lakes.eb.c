@@ -2354,6 +2354,7 @@ void advect_soil_veg_storage(double lakefrac,
   Modifications:
   2009-Nov-09 Removed advection of ice from lake to wetland.		LCB via TJB
   2009-Nov-22 Corrected calculation of asat.				TJB
+  2010-Dec-01 Added calculation of zwt.					TJB
 **********************************************************************/
 {
 
@@ -2392,6 +2393,7 @@ void advect_soil_veg_storage(double lakefrac,
 
     if (max_newfraction <= lakefrac) { // lake receded
       cell->asat = (cell->asat*(1-lakefrac) + lakefrac-newfraction) / (1-newfraction);
+      cell->zwt = cell->zwt*(1-lakefrac) / (1-newfraction);
       if (veg_var != NULL) {
         veg_var->Wdew *= (1-lakefrac)/(1-newfraction);
       }

@@ -88,6 +88,7 @@
   2010-Nov-11 Added lakefactor to collect_wb_terms() and collect_eb_terms()
 	      so that these functions could handle changes in how lake
 	      and wetland cell/soil/snow/energy fluxes are represented.	TJB
+  2010-Dec-01 Added compute_zwt().					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -208,6 +209,7 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 #endif
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
+void   compute_zwt(soil_con_struct *, cell_data_struct *);
 out_data_struct *create_output_list();
 
 void   display_current_settings(int, filenames_struct *, global_param_struct *);

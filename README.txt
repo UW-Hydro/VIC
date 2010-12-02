@@ -31,6 +31,41 @@ Usage:
 New Features:
 -------------
 
+Added simplistic computation of water table position.
+
+
+	Files Affected:
+
+	compute_zwt.c (new)
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	put_data.c
+	runoff.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added a simplistic computation of the water table position, "zwt".
+	Units are [cm] and the position is negative below the soil surface.
+
+	The water table position falls in the highest layer having complete
+	saturation in all layers below it (this is usually the lowest layer,
+	since the lowest layer is rarely completely saturated).
+
+	The water table's position within a soil layer is computed assuming
+	that the average soil moisture above the water table is at the critical
+	point (below which transpiration begins to decrease).
+
+	We hope to replace this with a more sophisticated scheme (e.g. using
+	a van Genuchten curve) in the future.
+
+	To monitor this quantity, we have added the output variable OUT_ZWT.
+
+
+
+
 Added channel inflow from upstream into the lake to the list of forcing
 variables.  Added lake water balance terms to input/output variables.
 

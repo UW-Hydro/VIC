@@ -158,6 +158,7 @@ int  runoff(cell_data_struct  *cell_wet,
 	      is completely saturated.						TJB
   2010-Nov-29 Moved computation of saturated area to correct place in
 	      code for handling SPATIAL_FROST.					TJB
+  2010-Dec-01 Added call to compute_zwt().					TJB
 
 **********************************************************************/
 {  
@@ -816,6 +817,10 @@ int  runoff(cell_data_struct  *cell_wet,
 #endif // SPATIAL_FROST
 
     } /* if mu>0 */
+
+    /** Compute water table depth **/
+    compute_zwt(soil_con, cell);
+
   } /** Loop over wet and dry fractions **/
 
   /** Recompute Thermal Parameters Based on New Moisture Distribution **/

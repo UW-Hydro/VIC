@@ -83,6 +83,7 @@ int solve_lake(double             snowfall,
 	      these to the lake volume until water_balance().		TJB
   2010-Nov-26 Added storing of lake snow variables (in depth over lake
 	      ice area) to the lake_var structure.			TJB
+  2010-Dec-28 Added latitude to arglist of alblake().			TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -238,7 +239,8 @@ int solve_lake(double             snowfall,
 
     alblake(Tcutoff, tair, &lake->SAlbedo, &tempalbs, &albi, &albw, snowfall,
 	    lake_snow->coldcontent, dt, &lake_snow->last_snow, 
-	    lake_snow->swq, lake_snow->depth, &lake_snow->MELTING, dmy.day_in_year );
+	    lake_snow->swq, lake_snow->depth, &lake_snow->MELTING,
+	    dmy.day_in_year, (double)soil_con.lat);
 
     /* --------------------------------------------------------------------
      * Calculate the incoming solar radiaton for both the ice fraction
@@ -626,7 +628,8 @@ void alblake (double  Tcutoff,
 	      double  swq,
 	      double  depth,
 	      char   *MELTING,
-	      int     day_in_year)
+	      int     day_in_year,
+	      double  latitude)
 {
 /**********************************************************************
  * Calculate the albedo of snow, ice and water of the lake.
@@ -642,6 +645,8 @@ void alblake (double  Tcutoff,
  * 2007-Nov-06 Lake snow physics now consistent with land snow pack.	LCB via TJB
  * 2008-Apr-21 Corrected some omissions from the previous mods.		LCB via TJB
  * 2008-Apr-21 Updated to be compatible with new snow_albedo().		KAC via TJB
+ * 2010-Dec-28 Fixed MELTING date condition to be correct in southern
+ *             hemisphere.						TJB
  **********************************************************************/
   double albgl, albgs;
 
@@ -672,9 +677,12 @@ void alblake (double  Tcutoff,
 
   /** Record if snowpack is melting this time step **/
   if (swq > 0.0) {
-    if ( coldcontent >= 0 && day_in_year > 60 // ~ March 1
-       && day_in_year < 273 // ~ October 1
-       ) {
+    if ( coldcontent >= 0 && (
+         (latitude >= 0 && (day_in_year > 60 // ~ March 1
+	                    && day_in_year < 273)) // ~ October 1
+         || (latitude <  0 && (day_in_year < 60 // ~ March 1
+                               || day_in_year > 273)) // ~ October 1
+       ) ) {
       *MELTING = TRUE;
     }
     else {

@@ -122,9 +122,11 @@ double solve_snow(char                 overstory,
   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
   2009-Nov-15 Removed ice0 and moist0 from argument list, since they
 	      are never used.						TJB
-  2010-Apr_26 Replaced individual forcing variables with atmos_data
+  2010-Apr-26 Replaced individual forcing variables with atmos_data
 	      in argument list.  Replaced individual time variables
 	      with dmy_struct in argument list.				TJB
+  2010-Dec-28 Fixed MELTING date condition to be correct in southern
+	      hemisphere.						TJB
 
 *********************************************************************/
 
@@ -394,9 +396,12 @@ double solve_snow(char                 overstory,
 	snow->depth = 1000. * snow->swq / snow->density; 
 
 	/** Record if snowpack is melting this time step **/
-	if ( snow->coldcontent >= 0 && day_in_year > 60 // ~ March 1
-	     && day_in_year < 273 // ~ October 1
-	     ) snow->MELTING = TRUE;
+	if ( snow->coldcontent >= 0 && (
+             (soil_con->lat >= 0 && (day_in_year > 60 // ~ March 1
+	                             && day_in_year < 273)) // ~ October 1
+             || (soil_con->lat <  0 && (day_in_year < 60 // ~ March 1
+                                        || day_in_year > 273)) // ~ October 1
+	     ) ) snow->MELTING = TRUE;
 	else if ( snow->MELTING && snowfall[WET] > TraceSnow )
 	  snow->MELTING = FALSE;
 

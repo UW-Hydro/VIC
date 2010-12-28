@@ -23,6 +23,7 @@
   2010-Nov-11 Added skip_hydro flag to initialize_lake() arg list.
 	      Removed rescale_lake_fluxes().				TJB
   2010-Nov-26 Changed the argument list of water_balance().		TJB
+  2010-Dec-28 Added latitude to alblake() arglist.			TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -70,7 +71,7 @@ double adjflux(double, double, double ,double, double, double, double,
 void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
-	     int, int *, double, double, char *, int);
+	     int, int *, double, double, char *, int, double);
 void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
 double CalcIcePackEnergyBalance(double Tsurf, ...);

@@ -188,6 +188,25 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+Fixed incorrect snow albedo decay for southern hemisphere.
+
+	Files Affected:
+
+	LAKE.h
+	lakes.eb.c
+	solve_snow.c
+
+	Description:
+
+	Previously the computation of the USACE snow albedo decay would
+	only switch from accumulation to melt curves for dates between
+	March 1 and October 1.  These dates are only appropriate for the
+	northern hemisphere.  This has been fixed so that the reverse
+	condition must be met in the southern hemisphere.
+
+
+
+
 Saturated area fraction incorrect for SPATIAL_FROST = TRUE.
 
 	Files Affected:

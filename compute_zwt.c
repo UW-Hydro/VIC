@@ -23,25 +23,40 @@ void compute_zwt(soil_con_struct  *soil_con,
   extern debug_struct debug;
 #endif
 
+  int    i;
   int    lindex;
   double tmp_depth;
 
-  /** Compute Zwt assuming moisture above water table has average value of Wcr **/
+  /** Compute each layer's zwt using soil moisture v zwt curve **/
+  for (lindex=0; lindex<options.Nlayer; lindex++) {
+    i = MAX_ZWTVMOIST-1;
+    while (i>=1 && cell->layer[lindex].moist > soil_con->zwtvmoist_moist[lindex][i]) {
+      i--;
+    }
+    if (i == MAX_ZWTVMOIST-1) {
+      if (cell->layer[lindex].moist < soil_con->zwtvmoist_moist[lindex][i])
+        cell->layer[lindex].zwt = 999; // 999 indicates water table not present in this layer
+      else if (cell->layer[lindex].moist == soil_con->zwtvmoist_moist[lindex][i])
+        cell->layer[lindex].zwt = soil_con->zwtvmoist_zwt[lindex][i];
+    }
+    else {
+      cell->layer[lindex].zwt = soil_con->zwtvmoist_zwt[lindex][i+1] + (soil_con->zwtvmoist_zwt[lindex][i]-soil_con->zwtvmoist_zwt[lindex][i+1]) * (cell->layer[lindex].moist-soil_con->zwtvmoist_moist[lindex][i+1])/(soil_con->zwtvmoist_moist[lindex][i]-soil_con->zwtvmoist_moist[lindex][i+1]);
+    }
+  }
+
+  /** Compute total soil column's zwt; this will be the zwt of the lowest layer that isn't completely saturated **/
   tmp_depth = 0;
   for (lindex=0; lindex<options.Nlayer; lindex++) {
     tmp_depth += soil_con->depth[lindex];
   }
   lindex = options.Nlayer-1;
-  while (lindex >= 0 && soil_con->max_moist[lindex]-cell->layer[lindex].moist <= SMALL) {
+  while (lindex>=0 && soil_con->max_moist[lindex]-cell->layer[lindex].moist<=SMALL) {
     tmp_depth -= soil_con->depth[lindex];
     lindex--;
   }
-  if (lindex < 0) {
-    cell->zwt = 0;
-  }
-  else {
-    tmp_depth -= (cell->layer[lindex].moist-soil_con->Wcr[lindex])/(soil_con->max_moist[lindex]-soil_con->Wcr[lindex])*soil_con->depth[lindex];
-    cell->zwt = -tmp_depth*100; // convert to cm
-  }
+  if (cell->layer[lindex].zwt != 999)
+    cell->zwt = cell->layer[lindex].zwt;
+  else
+    cell->zwt = -tmp_depth*100;
 
 }

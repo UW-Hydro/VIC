@@ -31,7 +31,7 @@ Usage:
 New Features:
 -------------
 
-Added simplistic computation of water table position.
+Added computation of water table position.
 
 
 	Files Affected:
@@ -41,27 +41,65 @@ Added simplistic computation of water table position.
 	Makefile
 	output_list_utils.c
 	put_data.c
+	read_soilparam.c
+	read_soilparam_arc.c
 	runoff.c
+	runoff.c
+	user_def.h
 	vicNl_def.h
+	vicNl.c
 	vicNl.h
 
 	Description:
 
-	Added a simplistic computation of the water table position, "zwt".
-	Units are [cm] and the position is negative below the soil surface.
+	Added computation of the water table position, "zwt".  Units are [cm]
+	and the position is negative below the soil surface.  To monitor
+	the water table position, we have added the output variable "OUT_ZWT".
 
 	The water table position falls in the highest layer having complete
 	saturation in all layers below it (this is usually the lowest layer,
 	since the lowest layer is rarely completely saturated).
 
-	The water table's position within a soil layer is computed assuming
-	that the average soil moisture above the water table is at the critical
-	point (below which transpiration begins to decrease).
+	The water table's position within a soil layer is computed from soil
+	water retention curves following Letts et al. (2000):
 
-	We hope to replace this with a more sophisticated scheme (e.g. using
-	a van Genuchten curve) in the future.
+	  w(z) = { ((z-zwt)/bubble)**(-1/b), z >  zwt+bubble
+	         { 1.0,                      z <= zwt+bubble
+	where
+	  z      = elevation within the soil column [cm]; soil surface
+	           has z=0; below soil surface, z < 0
+	  w(z)   = relative moisture at elevation z given by
+	           (moist(z) - resid_moist) / (max_moist - resid_moist)
+	  zwt    = elevation of water table [cm]
+	  bubble = bubbling pressure [cm]
+	  b      = 0.5*(expt-3)
+	(note that zwt+bubble = elevation of the free water surface, i.e.
+	elevation below which soil is completely saturated)
 
-	To monitor this quantity, we have added the output variable OUT_ZWT.
+	This assumes water in unsaturated zone above water table
+	is always in equilibrium between gravitational and matric
+	tension (e.g., Frolking et al, 2002).
+
+	So, to find the soil moisture value in a layer corresponding
+	to a given water table depth zwt, we integrate w(z) over the
+	whole layer:
+
+	w_avg = average w over whole layer = (integral of w*dz) / layer depth
+
+	Then,
+	  layer moisture = w_avg * (max_moist - resid_moist) + resid_moist
+
+	To store the (zwt,moisture) pairs in this relationship for each layer,
+	two new variables have been added to the soil_con_struct:
+	  zwtvmoist_zwt[MAX_LAYER][MAX_ZWTVMOIST]
+	  zwtvmoist_moist[MAX_LAYER][MAX_ZWTVMOIST]
+	These are computed in read_soilparam().  Then, in compute_zwt() VIC
+	interpolates between these points to estimate the water table depth
+	in each layer given the layer's current soil moisture.  As mentioned
+	above, the water table position for the entire soil column is the
+	water table position in the lowest layer having complete saturation
+	below it.  Water table positions in higher layers are considered to
+	be "perched" water tables.
 
 
 

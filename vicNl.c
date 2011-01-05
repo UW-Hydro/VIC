@@ -87,7 +87,9 @@ int main(int argc, char *argv[])
   2010-Mar-31 Added cell_area to initialize_atmos().			TJB
   2010-Apr-28 Removed individual soil_con variables from argument list
 	      of initialize_atmos() and replaced with *soil_con.	TJB
-  2010-Nov-10 Added closing of state files.			TJB
+  2010-Nov-10 Added closing of state files.				TJB
+  2011-Jan-04 Made read_soilparam_arc() a sub-function of
+	      read_soilparam().						TJB
 **********************************************************************/
 {
 

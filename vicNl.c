@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
   char                     NEWCELL;
   char                     LASTREC;
   char                     MODEL_DONE;
+  char                     RUN_MODEL;
   char                    *init_STILL_STORM;
   char                     ErrStr[MAXSTRING];
   int                      rec, i, j;
@@ -115,7 +116,6 @@ int main(int argc, char *argv[])
   int                      cellnum;
   int                      index;
   int                     *init_DRY_TIME;
-  int                      RUN_MODEL;
   int                      Ncells;
   int                      cell_cnt;
   int                      startrec;
@@ -205,25 +205,9 @@ int main(int argc, char *argv[])
   MODEL_DONE = FALSE;
   cell_cnt=0;
   while(!MODEL_DONE) {
-    if(!options.ARC_SOIL) {
-      if((fscanf(filep.soilparam, "%d", &flag))!=EOF) {
-	if(flag) RUN_MODEL=TRUE;
-	else     RUN_MODEL=FALSE;
-      }
-      else {
-	MODEL_DONE = TRUE;
-	RUN_MODEL = FALSE;
-      }
-      if(!MODEL_DONE) soil_con = read_soilparam(filep.soilparam, RUN_MODEL);
 
-    }
-    else {
-      soil_con = read_soilparam_arc(filep.soilparam, 
-				    filenames.soil_dir, &Ncells, 
-				    &RUN_MODEL, cell_cnt);
-      cell_cnt++;
-      if(cell_cnt==Ncells) MODEL_DONE = TRUE;
-    }
+    soil_con = read_soilparam(filep.soilparam, filenames.soil_dir, &cell_cnt, &RUN_MODEL, &MODEL_DONE);
+
     if(RUN_MODEL) {
 #if LINK_DEBUG
       if(debug.PRT_SOIL) write_soilparam(&soil_con); 

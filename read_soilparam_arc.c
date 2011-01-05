@@ -8,7 +8,7 @@ static char vcid[] = "$Id$";
 soil_con_struct read_soilparam_arc(FILE *soilparam, 
 				   char *soilparamdir, 
 				   int  *Ncells,
-				   int  *RUN,
+				   char *RUN,
 				   int   cell)
 /**********************************************************************
 	read_soilparam_arc     Keith Cherkauer		May 5, 1998
@@ -119,6 +119,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2009-Sep-11 Added correct OUTPUT_FORCE logic around the new bare soil/veglib
 	      code.								TJB
   2009-Sep-28 Added initialization of snowband parameters.			TJB
+  2011-Jan-04 Made read_soilparam_arc() a sub-function of read_soilparam().
+	      Removed all validation/computation that was also in
+	      read_soilparam().							TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -521,231 +524,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     }
     for(layer=0;layer<options.Nlayer;layer++) temp.bubble[layer] = tmp_bubble/3.;
 
-#if !EXCESS_ICE
-    /*******************************************
-      Validate Initial Soil Layer Moisture Content for !EXCESS_ICE option
-    *******************************************/
-    if (!options.INIT_STATE) {
-      for(layer = 0; layer < options.Nlayer; layer++) {
-	if(temp.init_moist[layer] > temp.max_moist[layer]) {
-	  fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %i.\n\tResetting soil moisture to maximum.\n",
-		temp.init_moist[layer], temp.max_moist[layer], layer);
-	  temp.init_moist[layer] = temp.max_moist[layer];
-	}
-	if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-	  fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tResetting soil moisture to residual moisture.\n",
-		temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
-	  temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
-	}
-      }
-    }
-#endif
-
-#if EXCESS_ICE
-    /*******************************************
-      Compute Soil Layer Properties for EXCESS_ICE option
-    *******************************************/
-    extra_depth=0;
-    for(layer = 0; layer < options.Nlayer; layer++) {
-      temp.min_depth[layer]=temp.depth[layer];
-      if(init_ice_fract[layer]>MAX_ICE_INIT){ // validate amount based on physical constraints
-	fprintf(stderr,"Initial ice fraction (%f) is greater than maximum ice content for layer %d.\n\tResetting to maximum of %f\n",init_ice_fract[layer],layer,MAX_ICE_INIT);
-	init_ice_fract[layer]=MAX_ICE_INIT;
-      }
-      if(init_ice_fract[layer]>=temp.porosity[layer]){//excess ground ice present
-	fprintf(stderr,"Excess ground ice present in layer %d:\n",layer+1);
-	fprintf(stderr,"\t\tSubsidence will occur when the average soil layer\n\t\t  temperature exceeds %.2f degrees Celsius.\n",powf((1.-ICE_AT_SUBSIDENCE),(3.-temp.expt[layer])/2.)*273.16*9.81*temp.bubble[layer]/(-Lf*100.));	
-	temp.effective_porosity[layer]=init_ice_fract[layer];
-	fprintf(stderr,"\t\tEffective porosity increased from %.2f to %.2f.\n",temp.porosity[layer],temp.effective_porosity[layer]);
-	temp.depth[layer] = temp.min_depth[layer]*(1.0 - temp.porosity[layer])/(1.0 - temp.effective_porosity[layer]); //adjust soil layer depth
-	extra_depth += temp.depth[layer]-temp.min_depth[layer]; //net increase in depth due to excess ice
-	fprintf(stderr,"\t\tDepth of soil layer adjusted for excess ground ice: from %.2f m to %.2f m.\n",temp.min_depth[layer],temp.depth[layer]);
-	fprintf(stderr,"\t\tBulk density adjusted for excess ground ice: from %.2f kg/m^3 to %.2f kg/m^3.\n",temp.bulk_density[layer],(1.0-temp.effective_porosity[layer])*temp.soil_density[layer]);
-	temp.bulk_density[layer] = (1.0-temp.effective_porosity[layer])*temp.soil_density[layer]; //adjust bulk density
-      }
-      else //excess ground ice not present
-	temp.effective_porosity[layer]=temp.porosity[layer];
-    }
-    if(extra_depth>0) {
-      fprintf(stderr,"Damping depth adjusted for excess ground ice: from %.2f m to %.2f m.\n",temp.dp,temp.dp+extra_depth);
-      temp.dp = temp.dp + extra_depth;  //adjust damping depth
-    }
-    
-    /* final soil layer thicknesses for EXCESS_ICE option */
-    for(layer = 0; layer < options.Nlayer; layer++) 
-      temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
-    
-    /* Calculate and Validate Maximum Initial Soil Layer Moisture Content for EXCESS_ICE option */
-    for(layer = 0; layer < options.Nlayer; layer++) {
-      temp.max_moist[layer] = temp.depth[layer] * temp.effective_porosity[layer] * 1000.;
-      if(temp.effective_porosity[layer]>temp.porosity[layer])//excess ground ice present
-	temp.init_moist[layer] = temp.max_moist[layer]; 
-      else {//excess ground ice not present
-	if(temp.depth[layer] * init_ice_fract[layer] * 1000. > temp.init_moist[layer])
-	  temp.init_moist[layer] = temp.depth[layer] * init_ice_fract[layer] * 1000.;
-      }
-    }
-    for(layer = 0; layer < options.Nlayer; layer++) {
-      if(temp.init_moist[layer] > temp.max_moist[layer]) {
-	fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %d.\n\tResetting soil moisture to maximum.\n",
-		temp.init_moist[layer], temp.max_moist[layer], layer);
-	temp.init_moist[layer] = temp.max_moist[layer];
-      }
-      if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) { 
-	fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tResetting soil moisture to residual moisture.\n",
-		temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
-	temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
-      }
-    }
-    /* print final values for each layer */
-    //for(layer = 0; layer < options.Nlayer; layer++)
-    //fprintf(stderr,"final soil values: %d %.2f %.2f %.2f %.2f %.2f\n",layer,temp.effective_porosity[layer],temp.depth[layer],temp.bulk_density[layer],temp.max_moist[layer],temp.init_moist[layer]);
-#endif // EXCESS_ICE   
-
-    /*******************************************
-      Validate Soil Layer Thicknesses                    
-    *******************************************/
-    for(layer=0;layer<options.Nlayer;layer++) {
-      if(temp.depth[layer] < MINSOILDEPTH) {
-	fprintf(stderr,"Model will not function with layer depth %f < %f m.\n",
-		temp.depth[layer],MINSOILDEPTH);
-	exit(0);
-      }
-    }
-    if(temp.depth[0] > temp.depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %i depth (%f m) < layer %i depth (%f m).\n",
-	      0,temp.depth[0],1,temp.depth[1]);
-      nrerror(ErrStr);
-    }
-#if EXCESS_ICE
-    for(layer = 0; layer < options.Nlayer; layer++) {
-      if(temp.min_depth[layer] < MINSOILDEPTH) {
-	sprintf(ErrStr,"ERROR: Model will not function with layer %d depth %f < %f m.\n",
-		layer,temp.min_depth[layer],MINSOILDEPTH);
-	nrerror(ErrStr);
-      }
-    }
-    if(temp.min_depth[0] > temp.min_depth[1]) {
-      sprintf(ErrStr,"ERROR: Model will not function with layer %d depth (%f m) < layer %d depth (%f m).\n",
-	      0,temp.min_depth[0],1,temp.min_depth[1]);
-      nrerror(ErrStr);
-    }
-#endif /* EXCESS_ICE */
-
-    /**********************************************
-      Compute Maximum Infiltration for Upper Layers
-      **********************************************/
-    if(options.Nlayer==2)
-      temp.max_infil = (1.0+temp.b_infilt)*temp.max_moist[0];
-    else
-      temp.max_infil = (1.0+temp.b_infilt)*(temp.max_moist[0]
-					    + temp.max_moist[1]);
-
-    /****************************************************************
-      Compute Soil Layer Critical and Wilting Point Moisture Contents
-      ****************************************************************/
-    for(layer=0;layer<options.Nlayer;layer++) {
-      temp.Wcr[layer]  = Wcr_FRACT[layer] * temp.max_moist[layer];
-      temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
-#if EXCESS_ICE
-      temp.Wcr_FRACT[layer]  = Wcr_FRACT[layer];
-      temp.Wpwp_FRACT[layer] = Wpwp_FRACT[layer]; 
-#endif
-      if(temp.Wpwp[layer] > temp.Wcr[layer]) {
-	sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is greater than calculated critical point moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
-		temp.Wpwp[layer], temp.Wcr[layer], layer);
-	nrerror(ErrStr);
-      }
-      if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-	sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-		temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
-	nrerror(ErrStr);
-      }
-    }
-
-    /*************************************************
-    if BASEFLOW == NIJSSEN2001 then convert the baseflow
-    parameters d1, d2, d3, d4 to Ds, Dsmax, Ws, and c.  JA
-    *************************************************/
-#if EXCESS_ICE
-    temp.Dsmax_orig = temp.Dsmax;
-    temp.Ds_orig = temp.Ds;
-    temp.Ws_orig = temp.Ws;
-#endif
-    if(options.BASEFLOW == NIJSSEN2001) {
-      layer = options.Nlayer-1;
-      temp.Dsmax = temp.Dsmax * 
-	pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
-	temp.Ds * temp.max_moist[layer];
-      temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
-      temp.Ws = temp.Ws/temp.max_moist[layer];
-    }
-
-    /*******************************************************************
-      Calculate grid cell area.
-    ******************************************************************/
-
-    if (options.EQUAL_AREA) {
-
-      temp.cell_area = global_param.resolution * 1000. * 1000.; /* Grid cell area in m^2. */
-
-    }
-    else {
-
-      tmp_lat = fabs(*lat);
-      tmp_lng = fabs(*lng);
-
-      start_lat = tmp_lat - global_param.resolution / 2;
-      right_lng = tmp_lng + global_param.resolution / 2;
-      left_lng  = tmp_lng - global_param.resolution / 2;
-
-      delta = get_dist(tmp_lat,tmp_lng,tmp_lat+global_param.resolution/10.,tmp_lng);
-
-      dist = 0.;
-
-      for ( i = 0; i < 10; i++ ) {
-        dist += get_dist(start_lat,left_lng,start_lat,right_lng) * delta;
-        start_lat += global_param.resolution/10;
-      }
-
-      temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
-
-    }
-
 #endif /* !OUTPUT_FORCE */
     
-    /*************************************************
-      Determine Central Longitude of Current Time Zone 
-    *************************************************/
-    temp.time_zone_lng = off_gmt * 360./24.;
-    
-    /*************************************************
-      Allocate and Initialize Snow Band Parameters
-    *************************************************/
-    Nbands         = options.SNOW_BAND;
-    temp.AreaFract     = (double *)calloc(Nbands,sizeof(double));
-    temp.BandElev      = (float *)calloc(Nbands,sizeof(float));
-    temp.Tfactor       = (double *)calloc(Nbands,sizeof(double));
-    temp.Pfactor       = (double *)calloc(Nbands,sizeof(double));
-    temp.AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
-
-    if (temp.Tfactor == NULL || temp.Pfactor == NULL || temp.AreaFract == NULL) 
-      nrerror("Memory allocation failure in read_snowband");
-
-    if ( Nbands <= 0 ) {
-      sprintf(ErrStr,"Number of snow bands must be > 0 (%d)",Nbands);
-      nrerror(ErrStr);
-    }
-
-    /** Set default values for factors to use unmodified forcing data **/
-    for (band = 0; band < Nbands; band++) {
-      temp.AreaFract[band] = 0.;
-      temp.BandElev[band]  = temp.elevation;
-      temp.Tfactor[band]   = 0.;
-      temp.Pfactor[band]   = 1.;
-    }
-    temp.AreaFract[0] = 1.;
-
   }
   else RUN[0] = 0;
  

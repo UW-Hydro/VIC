@@ -107,6 +107,9 @@
   2010-Nov-26 Added lake->ice_throughfall, lake->swe_save, and
 	      lake->volume_save.					TJB
   2010-Dec-01 Added cell->zwt and OUT_ZWT.				TJB
+  2011-Jan-04 Added zwtvmoist_zwt and zwtvmoist_moist to soil_con_struct
+	      for storing relationship between soil moisture and water
+	      water table position based on soil water retention curve.	TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -834,6 +837,8 @@ typedef struct {
   float  **layer_node_fract;          /* fraction of all nodes within each 
 					 layer */
   int      gridcel;                   /* grid cell number */
+  double   zwtvmoist_zwt[MAX_LAYERS][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
+  double   zwtvmoist_moist[MAX_LAYERS][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
 #if EXCESS_ICE
   double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m). 
 					 The effective depth will always be >= this value. */
@@ -967,6 +972,7 @@ typedef struct {
   double moist;             /* moisture content of the unfrozen sublayer 
 			       (mm) */
   double phi;               /* moisture diffusion parameter */
+  double zwt;               /* water table position relative to soil surface within the layer (cm) */
 } layer_data_struct;
 
 /******************************************************************

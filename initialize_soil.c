@@ -24,23 +24,35 @@ void initialize_soil (cell_data_struct **cell,
   2009-Jul-31 Replaced extra lake/wetland veg tile with reference to
 	      veg_con[j].LAKE.						TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
+  2011-Mar-01 Now initializes more cell data structure terms, including
+	      asat and zwt.						TJB
 **********************************************************************/
 {
   extern option_struct options;
 
-  int j, band, index, frost_area;
+  int veg, band, lindex, frost_area;
+  double tmp_moist[MAX_LAYERS];
+  double tmp_runoff;
   
-  for ( j = 0 ; j <= veg_num ; j++) {
+  for ( veg = 0 ; veg <= veg_num ; veg++) {
     for(band=0;band<options.SNOW_BAND;band++) {
-      for(index=0;index<options.Nlayer;index++) {
-	cell[j][band].layer[index].moist = soil_con->init_moist[index];
-        if (options.LAKES && veg_con[j].LAKE)
-#if EXCESS_ICE
-          cell[j][0].layer[index].moist = soil_con->effective_porosity[index]*soil_con->depth[index]*1000.;
+      cell[veg][band].baseflow = 0;
+      cell[veg][band].runoff = 0;
+      for(lindex=0;lindex<options.Nlayer;lindex++) {
+	cell[veg][band].layer[lindex].evap = 0;
+	cell[veg][band].layer[lindex].moist = soil_con->init_moist[lindex];
+        if (cell[veg][band].layer[lindex].moist > soil_con->max_moist[lindex]) cell[veg][band].layer[lindex].moist = soil_con->max_moist[ lindex];
+        tmp_moist[lindex] = cell[veg][band].layer[lindex].moist;
+#if SPATIAL_FROST
+        for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+          cell[veg][band].layer[lindex].ice[frost_area] = 0;
+        }
 #else
-          cell[j][0].layer[index].moist = soil_con->porosity[index]*soil_con->depth[index]*1000.;
+        cell[veg][band].layer[lindex].ice = 0;
 #endif
       }
+      compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[veg][band].asat), &tmp_runoff);
+      wrap_compute_zwt(soil_con, &(cell[veg][band]));
     }
   }
 

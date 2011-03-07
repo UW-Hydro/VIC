@@ -24,6 +24,8 @@
 	      Removed rescale_lake_fluxes().				TJB
   2010-Nov-26 Changed the argument list of water_balance().		TJB
   2010-Dec-28 Added latitude to alblake() arglist.			TJB
+  2011-Mar-01 Added rescale_snow_storage().  Added terms to argument
+	      list of initialize_lake().				TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -68,7 +70,7 @@
 
 double adjflux(double, double, double ,double, double, double, double,
 	       double, double, double, double *, double *);
-void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *);
+void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
 	     int, int *, double, double, char *, int, double);
@@ -90,7 +92,7 @@ void icerad(double,double ,double,double *, double *,double *);
 int ice_depth(lake_con_struct, double, double, double *);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double IceEnergyBalance(double, va_list);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, double, int);
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
 int lakeice(double *, double, double, double, double, int, 
 	    double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
 void latsens(double,double, double, double, double, double, double, double,
@@ -99,6 +101,7 @@ float lkdrag(float, double, double, double, double);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void rescale_soil_veg_fluxes(double, double, cell_data_struct *, veg_var_struct *);
 void rescale_snow_energy_fluxes(double, double, snow_data_struct *, energy_bal_struct *);
+void rescale_snow_storage(double, double, snow_data_struct *);
 void rhoinit(double *, double);
 int solve_lake(double, double, double, double, double, double, double, double, 
 		double, double, lake_var_struct *, lake_con_struct, 

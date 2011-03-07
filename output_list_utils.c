@@ -55,6 +55,7 @@ out_data_struct *create_output_list() {
   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
 	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
   2010-Dec-01 Added OUT_ZWT.						TJB
+  2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
 *************************************************************/
 
   extern option_struct options;
@@ -91,7 +92,10 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SURF_FROST_FRAC].varname,"OUT_SURF_FROST_FRAC"); /* fraction of soil surface that is frozen [fraction] */
   strcpy(out_data[OUT_SWE].varname,"OUT_SWE");                         /* snow water equivalent in snow pack [mm] */
   strcpy(out_data[OUT_WDEW].varname,"OUT_WDEW");                       /* total moisture interception storage in canopy [mm] */
-  strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                         /* water table position [cm] */
+  strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                         /* water table position [cm] - method 1 (zwt within lowest unsaturated layer) */
+  strcpy(out_data[OUT_ZWT2].varname,"OUT_ZWT2");                       /* water table position [cm] - method 2 (zwt of total moisture across top-most N-1 layers, lumped together) */
+  strcpy(out_data[OUT_ZWT3].varname,"OUT_ZWT3");                       /* water table position [cm] - method 3 (zwt of total moisture across all layers, lumped together) */
+  strcpy(out_data[OUT_ZWTL].varname,"OUT_ZWTL");                       /* per-layer water table positions [cm] (one per soil layer) */
 
   // Water Balance Terms - fluxes
   strcpy(out_data[OUT_BASEFLOW].varname,"OUT_BASEFLOW");               /* baseflow out of the bottom layer [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -248,6 +252,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_LIQ].nelem = options.Nlayer;
   out_data[OUT_SOIL_MOIST].nelem = options.Nlayer;
   out_data[OUT_SOIL_TEMP].nelem = options.Nlayer;
+  out_data[OUT_ZWTL].nelem = options.Nlayer;
 #if EXCESS_ICE
   out_data[OUT_SOIL_DEPTH].nelem = options.Nlayer;
   out_data[OUT_SUBSIDENCE].nelem = options.Nlayer;
@@ -309,6 +314,9 @@ out_data_struct *create_output_list() {
   out_data[OUT_SWE].aggtype = AGG_TYPE_END;
   out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
   out_data[OUT_ZWT].aggtype = AGG_TYPE_END;
+  out_data[OUT_ZWT2].aggtype = AGG_TYPE_END;
+  out_data[OUT_ZWT3].aggtype = AGG_TYPE_END;
+  out_data[OUT_ZWTL].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_CANOPY_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;

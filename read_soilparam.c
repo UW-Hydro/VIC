@@ -102,6 +102,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      read_soilparam().						TJB
   2011-Jan-04 Added computation of relationship between soil moisture
 	      and water table depth given by soil water retention curve.TJB
+  2011-Mar-01 Updated soil water retention curve relationship.		TJB
+  2011-Mar-05 Now does fgets whether or not RUN_MODEL is true - this
+	      fixes bug introduced when read_soilparam_arc() was moved
+	      to a sub-function of read_soilparam().			TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -135,10 +139,11 @@ soil_con_struct read_soilparam(FILE *soilparam,
   int             Ncells;
   int             flag;
   double          tmp_depth;
-  double          zwtvmoist_zwt;
   double          b;
+  double          bubble;
+  double          tmp_max_moist;
   double          tmp_resid_moist;
-  double          zwt_in_layer;
+  double          zwt_prime;
   double          w_avg;
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
@@ -165,12 +170,15 @@ soil_con_struct read_soilparam(FILE *soilparam,
       *RUN_MODEL = FALSE;
     }
 
-    if(!(*MODEL_DONE) && (*RUN_MODEL)) {
+    if(!(*MODEL_DONE)) {
 
       if( fgets( line, MAXSTRING, soilparam ) == NULL ){
         sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
         nrerror(ErrStr);
       }
+
+      if (*RUN_MODEL) {
+
 
       strcpy(tmpline, line);
       ttrim( tmpline );
@@ -815,18 +823,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
       /*************************************************
         Compute soil moistures for various values of water table depth
         Here we use the relationship (e.g., Letts et al., 2000)
-          w(z) = { ((z-zwt)/bubble)**(-1/b), z >  zwt+bubble
-                 { 1.0,                      z <= zwt+bubble
+          w(z) = { ((zwt-z)/bubble)**(-1/b), z <  zwt-bubble
+                 { 1.0,                      z >= zwt-bubble
         where
-          z      = elevation within the soil column [cm]; soil surface
-                   has z=0; below soil surface, z < 0
-          w(z)   = relative moisture at elevation z given by
+          z      = depth below surface [cm]
+          w(z)   = relative moisture at depth z given by
                    (moist(z) - resid_moist) / (max_moist - resid_moist)
-          zwt    = elevation of water table [cm]
+          zwt    = depth of water table below surface [cm]
           bubble = bubbling pressure [cm]
           b      = 0.5*(expt-3)
-        (note that zwt+bubble = elevation of the free water surface, i.e.
-        elevation below which soil is completely saturated)
+        Note that zwt-bubble = depth of the free water surface, i.e.
+        position below which soil is completely saturated.
 
         This assumes water in unsaturated zone above water table
         is always in equilibrium between gravitational and matric
@@ -841,28 +848,93 @@ soil_con_struct read_soilparam(FILE *soilparam,
         Then,
           layer moisture = w_avg * (max_moist - resid_moist) + resid_moist
 
+        Instead of the zwt defined above, will actually report free
+        water surface elevation zwt' = -(zwt-bubble).  I.e. zwt' < 0
+        below the soil surface, and marks the point of saturation
+        rather than pressure = 1 atm.
+
+        Do this for each layer individually and also for a) the top N-1 layers
+        lumped together, and b) the entire soil column lumped together.
+
       *************************************************/
+
+      /* Individual layers */
       tmp_depth = 0;
       for (layer=0; layer<options.Nlayer; layer++) {
         b = 0.5*(temp.expt[layer]-3);
-        tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer];
-        zwtvmoist_zwt = -tmp_depth*100; // in cm
+        tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000; // in mm
+        zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
         for (i=0; i<MAX_ZWTVMOIST; i++) {
-          temp.zwtvmoist_zwt[layer][i] = zwtvmoist_zwt;
-          zwt_in_layer = zwtvmoist_zwt + tmp_depth*100; // in cm
-          if (zwt_in_layer > 0) zwt_in_layer = 0;
-          w_avg = ( zwt_in_layer+temp.bubble[layer]+temp.depth[layer]*100
-                   + (b-1)/b*temp.bubble[layer]*(pow(-zwt_in_layer/temp.bubble[layer],(b-1)/b)-1) )
+          temp.zwtvmoist_zwt[layer][i] = -tmp_depth*100-zwt_prime; // elevation (cm) relative to soil surface
+          w_avg = ( temp.depth[layer]*100 - zwt_prime
+                   - (b-1)/b*temp.bubble[layer]*(1-pow((zwt_prime+temp.bubble[layer])/temp.bubble[layer],(b-1)/b)) )
                   / (temp.depth[layer]*100); // in cm
           if (w_avg < 0) w_avg = 0;
           if (w_avg > 1) w_avg = 1;
           temp.zwtvmoist_moist[layer][i] = w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
-          zwtvmoist_zwt -= temp.depth[layer]*100/(MAX_ZWTVMOIST-1); // in cm
+          zwt_prime += temp.depth[layer]*100/(MAX_ZWTVMOIST-1); // in cm
         }
         tmp_depth += temp.depth[layer];
       }
 
-    } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
+      /* Top N-1 layers lumped together */
+      tmp_depth = 0;
+      b = 0;
+      bubble = 0;
+      tmp_max_moist = 0;
+      tmp_resid_moist = 0;
+      for (layer=0; layer<options.Nlayer-1; layer++) {
+        b += 0.5*(temp.expt[layer]-3)*temp.depth[layer];
+        bubble += temp.bubble[layer]*temp.depth[layer];
+        tmp_max_moist += temp.max_moist[layer]; // total max_moist
+        tmp_resid_moist += temp.resid_moist[layer]*temp.depth[layer]*1000; // total resid_moist in mm
+        tmp_depth += temp.depth[layer];
+      }
+      b /= tmp_depth; // average b
+      bubble /= tmp_depth; // average bubble
+      zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
+      for (i=0; i<MAX_ZWTVMOIST; i++) {
+        temp.zwtvmoist_zwt[options.Nlayer][i] = -zwt_prime; // elevation (cm) relative to soil surface
+        w_avg = ( tmp_depth*100 - zwt_prime
+                   - (b-1)/b*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
+                  / (tmp_depth*100); // in cm
+        if (w_avg < 0) w_avg = 0;
+        if (w_avg > 1) w_avg = 1;
+        temp.zwtvmoist_moist[options.Nlayer][i] = w_avg*(tmp_max_moist-tmp_resid_moist)+tmp_resid_moist;
+        zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
+      }
+
+      /* All N layers lumped together */
+      tmp_depth = 0;
+      b = 0;
+      bubble = 0;
+      tmp_max_moist = 0;
+      tmp_resid_moist = 0;
+      for (layer=0; layer<options.Nlayer; layer++) {
+        b += 0.5*(temp.expt[layer]-3)*temp.depth[layer];
+        bubble += temp.bubble[layer]*temp.depth[layer];
+        tmp_max_moist += temp.max_moist[layer]; // total max_moist
+        tmp_resid_moist += temp.resid_moist[layer]*temp.depth[layer]*1000; // total resid_moist in mm
+        tmp_depth += temp.depth[layer];
+      }
+      b /= tmp_depth; // average b
+      bubble /= tmp_depth; // average bubble
+      zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
+      for (i=0; i<MAX_ZWTVMOIST; i++) {
+        temp.zwtvmoist_zwt[options.Nlayer+1][i] = -zwt_prime; // elevation (cm) relative to soil surface
+        w_avg = ( tmp_depth*100 - zwt_prime
+                   - (b-1)/b*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
+                  / (tmp_depth*100); // in cm
+        if (w_avg < 0) w_avg = 0;
+        if (w_avg > 1) w_avg = 1;
+        temp.zwtvmoist_moist[options.Nlayer+1][i] = w_avg*(tmp_max_moist-tmp_resid_moist)+tmp_resid_moist;
+        zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
+      }
+
+
+      } // end if (*RUN_MODEL)
+
+    } // end if(!(*MODEL_DONE))
 
   } // end if (options.ARC_SOIL)
 

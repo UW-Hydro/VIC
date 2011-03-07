@@ -367,7 +367,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif
               cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
               tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
-              compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);
 	    }
 
 #if SPATIAL_FROST
@@ -381,6 +380,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif
 
 	  }
+          compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);
 	}
 
         if (options.LAKES && veg == lake_con.lake_idx) {
@@ -395,7 +395,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif
               lake_var->soil.layer[lidx].moist = soil_con->max_moist[lidx];
               tmp_moist[lidx] = lake_var->soil.layer[lidx].moist;
-              compute_runoff_and_asat(soil_con, tmp_moist, 0, &(lake_var->soil.asat), &tmp_runoff);
             }
 #if SPATIAL_FROST
             for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
@@ -407,6 +406,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
               lake_var->soil.layer[lidx].ice = lake_var->soil.layer[lidx].moist;
 #endif
           }
+          compute_runoff_and_asat(soil_con, tmp_moist, 0, &(lake_var->soil.asat), &tmp_runoff);
 	}
       }
     }

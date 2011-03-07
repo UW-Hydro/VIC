@@ -159,7 +159,10 @@ int  runoff(cell_data_struct  *cell_wet,
   2010-Nov-29 Moved computation of saturated area to correct place in
 	      code for handling SPATIAL_FROST.					TJB
   2010-Dec-01 Added call to compute_zwt().					TJB
-
+  2011-Mar-01 Replaced compute_zwt() with wrap_compute_zwt().  Moved
+	      computation of runoff and saturated area to a separate
+	      function compute_runoff_and_asat(), which can be called
+	      elsewhere.							TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -184,7 +187,8 @@ int  runoff(cell_data_struct  *cell_wet,
   int                tmplayer;
   int                frost_area;
   int                ErrorFlag;
-  double             ex, A, i_0, basis, frac;
+  double             A, frac;
+  double             tmp_runoff;
   double             inflow;
   double             last_liq;
   double             resid_moist[MAX_LAYERS]; // residual moisture (mm)
@@ -205,6 +209,7 @@ int  runoff(cell_data_struct  *cell_wet,
   double             top_max_moist; // maximum storable moisture (liquid and frozen) in topmost soil layers (mm)
   double             tmp_inflow;
   double             tmp_moist;
+  double             tmp_moist_for_runoff[MAX_LAYERS];
   double             tmp_liq;
   double             dt_inflow, dt_outflow;
   double             dt_runoff;
@@ -463,45 +468,12 @@ int  runoff(cell_data_struct  *cell_wet,
 	  /******************************************************
           Runoff Based on Soil Moisture Level of Upper Layers
 	  ******************************************************/
-	  
-	  top_moist = 0.;
-	  top_max_moist=0.;
-	  for(lindex=0;lindex<2;lindex++) {
-	    top_moist += (liq[lindex] + ice[lindex]);
-	    top_max_moist += max_moist[lindex];
-	  }
-	  if(top_moist>top_max_moist) top_moist = top_max_moist;
-	  
-	  /**************************************************
-          Calculate Runoff from Surface
-	  **************************************************/
-	  
-	  /** Runoff Calculations for Top Layer Only **/
-	  /** A and i_0 as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
-	  
-	  if(top_moist > top_max_moist) top_moist=top_max_moist;
-	  max_infil = (1.0+soil_con->b_infilt) * top_max_moist;
-	  
-	  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
-	  A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
-	  i_0       = max_infil * (1.0 - pow((1.0 - A),(1.0 / soil_con->b_infilt))); 
-	  /* Maximum Inflow */
-	  
-	  /** equation (3a) Wood et al. **/
-	  
-	  if (inflow == 0.0) runoff[frost_area] = 0.0;
-	  else if (max_infil == 0.0) runoff[frost_area] = inflow;
-	  else if ((i_0 + inflow) > max_infil) 
-	    runoff[frost_area] = inflow - top_max_moist + top_moist;
-	  
-	  /** equation (3b) Wood et al. (wrong in paper) **/
-	  else {
-	    basis = 1.0 - (i_0 + inflow) / max_infil;
-	    runoff[frost_area] = (inflow - top_max_moist + top_moist 
-				  + top_max_moist
-				  * pow(basis,1.0*(1.0+soil_con->b_infilt)));
-	  }
-	  if ( runoff[frost_area] < 0. ) runoff[frost_area] = 0.;
+
+          for(lindex=0;lindex<options.Nlayer;lindex++) {
+            tmp_moist_for_runoff[lindex] = (liq[lindex] + ice[lindex]);
+          }
+          compute_runoff_and_asat(soil_con, tmp_moist_for_runoff, inflow, &A, &(runoff[frost_area]));
+
           // save dt_runoff based on initial runoff estimate,
           // since we will modify total runoff below for the case of completely saturated soil
           tmp_dt_runoff[frost_area] = runoff[frost_area] / (double) dt;
@@ -779,17 +751,10 @@ int  runoff(cell_data_struct  *cell_wet,
 	}
 
         /** Recompute Asat based on final moisture level of upper layers **/
-	top_moist = 0.;
-	top_max_moist=0.;
-	for(lindex=0;lindex<2;lindex++) {
-	  top_moist += (liq[lindex] + ice[lindex]);
-	  top_max_moist += max_moist[lindex];
-	}
-	if(top_moist>top_max_moist) top_moist = top_max_moist;
-	/** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
-	if(top_moist > top_max_moist) top_moist=top_max_moist;
-	ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
-	A         = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+        for(lindex=0;lindex<options.Nlayer;lindex++) {
+          tmp_moist_for_runoff[lindex] = (liq[lindex] + ice[lindex]);
+        }
+        compute_runoff_and_asat(soil_con, tmp_moist_for_runoff, 0, &A, &tmp_runoff);
 
         /** Store tile-wide values **/
 #if SPATIAL_FROST
@@ -819,7 +784,7 @@ int  runoff(cell_data_struct  *cell_wet,
     } /* if mu>0 */
 
     /** Compute water table depth **/
-    compute_zwt(soil_con, cell);
+    wrap_compute_zwt(soil_con, cell);
 
   } /** Loop over wet and dry fractions **/
 
@@ -863,3 +828,48 @@ int  runoff(cell_data_struct  *cell_wet,
   return (0);
 
 }
+
+void compute_runoff_and_asat(soil_con_struct *soil_con, double *moist, double inflow, double *A, double *runoff)
+{
+
+  extern option_struct options;
+  double top_moist;
+  double top_max_moist;
+  int lindex;
+  double ex;
+  double max_infil;
+  double i_0;
+  double basis;
+
+  top_moist = 0.;
+  top_max_moist=0.;
+  for(lindex=0;lindex<options.Nlayer-1;lindex++) {
+    top_moist += moist[lindex];
+    top_max_moist += soil_con->max_moist[lindex];
+  }
+  if(top_moist>top_max_moist) top_moist = top_max_moist;
+
+  /** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
+  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
+  *A        = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+
+  max_infil = (1.0+soil_con->b_infilt) * top_max_moist;
+  i_0      = max_infil * (1.0 - pow((1.0 - *A),(1.0 / soil_con->b_infilt)));
+
+  /** equation (3a) Wood et al. **/
+
+  if (inflow == 0.0) *runoff = 0.0;
+  else if (max_infil == 0.0) *runoff = inflow;
+  else if ((i_0 + inflow) > max_infil)
+    *runoff = inflow - top_max_moist + top_moist;
+
+  /** equation (3b) Wood et al. (wrong in paper) **/
+  else {
+    basis = 1.0 - (i_0 + inflow) / max_infil;
+    *runoff = (inflow - top_max_moist + top_moist
+               + top_max_moist * pow(basis,1.0*(1.0+soil_con->b_infilt)));
+  }
+  if (*runoff < 0.) *runoff = 0.;
+
+}
+

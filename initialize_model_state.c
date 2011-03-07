@@ -100,6 +100,11 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2010-Nov-11 Updated call to initialize_lake() to accommodate new
 	      skip_hydro flag.						TJB
+  2011-Mar-01 Updated calls to initialize_soil() and initialize_lake()
+	      to accommodate new arguments.  Added more detailed validation
+	      of soil moisture.						TJB
+  2011-Mar-05 Added validation of initial soil moisture, ice, and snow
+	      variables to make sure they are self-consistent.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -115,6 +120,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   char     FIRST_VEG;
   int      i, j, ii, veg, index, dist;
   int      lidx;
+  double   tmp_moist[MAX_LAYERS];
+  double   tmp_runoff;
   int      dry;
   int      band;
 #if SPATIAL_FROST
@@ -138,6 +145,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif
   double   Clake;
   double   mu;
+  double   surf_swq;
+  double   pack_swq;
   double   TreeAdjustFactor[MAX_BANDS];
 #if EXCESS_ICE
   double   sum_mindepth, sum_depth_pre, sum_depth_post, tmp_mindepth;
@@ -200,7 +209,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   ********************************************/
 
   if ( options.LAKES && lake_con.Cl[0] > 0) {
-    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, surf_temp, 0);
+    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, &(cell[WET][lake_con.lake_idx][0]), surf_temp, 0);
     if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 
@@ -342,18 +351,66 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif //EXCESS_ICE
 
     /******Check that soil moisture does not exceed maximum allowed************/
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
-      for( band = 0; band < options.SNOW_BAND; band++ ) {
-	for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
-	  for ( dist = 0; dist < Ndist; dist ++ ) {
+    for ( dist = 0; dist < Ndist; dist ++ ) {
+      for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+
+        for( band = 0; band < options.SNOW_BAND; band++ ) {
+	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
+
 	    if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
-	      fprintf( stderr, "WARNING: Maximum soil moisture exceeded in layer %d for veg type %d and snow band %d.  Value of %f reset to maximum (%f mm).\n", lidx, veg, band, cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx] );
-	      cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
-	    }	    
+              fprintf( stderr, "WARNING: Initial soil moisture (%f mm) exceeds maximum (%f mm) in layer %d for veg tile %d and snow band%d.  Resetting to maximum.\n", cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx], lidx, veg, band );
+#if SPATIAL_FROST
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++)
+                cell[dist][veg][band].layer[lidx].ice[frost_area] *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
+#else
+              cell[dist][veg][band].layer[lidx].ice *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
+#endif
+              cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
+              tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
+              compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);
+	    }
+
+#if SPATIAL_FROST
+            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+              if (cell[dist][veg][band].layer[lidx].ice[frost_area] > cell[dist][veg][band].layer[lidx].moist)
+                cell[dist][veg][band].layer[lidx].ice[frost_area] = cell[dist][veg][band].layer[lidx].moist;
+            }
+#else
+            if (cell[dist][veg][band].layer[lidx].ice > cell[dist][veg][band].layer[lidx].moist)
+              cell[dist][veg][band].layer[lidx].ice = cell[dist][veg][band].layer[lidx].moist;
+#endif
+
 	  }
 	}
-      }      
+
+        if (options.LAKES && veg == lake_con.lake_idx) {
+          for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+            if ( lake_var->soil.layer[lidx].moist > soil_con->max_moist[lidx]) {
+              fprintf( stderr, "WARNING: Initial soil moisture (%f mm) exceeds maximum (%f mm) in layer %d for lake portion of veg tile %d.  Resetting to maximum.\n", lake_var->soil.layer[lidx].moist, soil_con->max_moist[lidx], lidx, veg );
+#if SPATIAL_FROST
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++)
+                lake_var->soil.layer[lidx].ice[frost_area] *= soil_con->max_moist[lidx]/lake_var->soil.layer[lidx].moist;
+#else
+              lake_var->soil.layer[lidx].ice *= soil_con->max_moist[lidx]/lake_var->soil.layer[lidx].moist;
+#endif
+              lake_var->soil.layer[lidx].moist = soil_con->max_moist[lidx];
+              tmp_moist[lidx] = lake_var->soil.layer[lidx].moist;
+              compute_runoff_and_asat(soil_con, tmp_moist, 0, &(lake_var->soil.asat), &tmp_runoff);
+            }
+#if SPATIAL_FROST
+            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+              if (lake_var->soil.layer[lidx].ice[frost_area] > lake_var->soil.layer[lidx].moist)
+                lake_var->soil.layer[lidx].ice[frost_area] = lake_var->soil.layer[lidx].moist;
+            }
+#else
+            if (lake_var->soil.layer[lidx].ice > lake_var->soil.layer[lidx].moist)
+              lake_var->soil.layer[lidx].ice = lake_var->soil.layer[lidx].moist;
+#endif
+          }
+	}
+      }
     }
+
 
     /****** initialize moist and ice ************/
     for ( veg = 0 ; veg <= Nveg ; veg++ ) {
@@ -367,13 +424,34 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 
 #if SPATIAL_FROST
 	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-	      ice[veg][band][lidx][frost_area] 
-		= cell[0][veg][band].layer[lidx].ice[frost_area];
+	      ice[veg][band][lidx][frost_area] = cell[0][veg][band].layer[lidx].ice[frost_area];
 #else
 	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
 #endif
 	  }
 	}
+      }
+    }
+
+    /******Check that snow pack terms are self-consistent************/
+    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
+      for ( band = 0 ; band < options.SNOW_BAND ; band++ ) {
+        if (snow[veg][band].swq > MAX_SURFACE_SWE) {
+          pack_swq = snow[veg][band].swq-MAX_SURFACE_SWE;
+          surf_swq = MAX_SURFACE_SWE;
+        }
+        else {
+          pack_swq = 0;
+          surf_swq = snow[veg][band].swq;
+          snow[veg][band].pack_temp = 0;
+        }
+        if (snow[veg][band].surf_water > LIQUID_WATER_CAPACITY*surf_swq) {
+          snow[veg][band].pack_water += snow[veg][band].surf_water - (LIQUID_WATER_CAPACITY*surf_swq);
+          snow[veg][band].surf_water = LIQUID_WATER_CAPACITY*surf_swq;
+        }
+        if (snow[veg][band].pack_water > LIQUID_WATER_CAPACITY*pack_swq) {
+          snow[veg][band].pack_water = LIQUID_WATER_CAPACITY*pack_swq;
+        }
       }
     }
 

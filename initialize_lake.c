@@ -7,6 +7,7 @@ static char vcid[] = "$Id$";
 int initialize_lake (lake_var_struct   *lake, 
 		      lake_con_struct   lake_con,
 		      soil_con_struct  *soil_con,
+		      cell_data_struct *cell,
 		      double            airtemp,
 		      int               skip_hydro)
 
@@ -65,6 +66,8 @@ int initialize_lake (lake_var_struct   *lake,
   2010-Nov-21 Added lake->swe_save and lake->volume_save.		TJB
   2010-Nov-26 Added initialization of snow-related terms that are stored
 	      in the lake_var structure.				TJB
+  2011-Mar-01 Lake->soil state terms are now initialized to match those
+	      of the cell data structure for the lake/wetland tile.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -305,12 +308,12 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.aero_resist[i]    = 0.0;
   }
   for (i=0; i<MAX_LAYERS; i++) {
-    lake->soil.layer[i].Cs       = 0.0;
+    lake->soil.layer[i].Cs       = cell->layer[i].Cs;
     lake->soil.layer[i].T        = lake->temp[0];
     lake->soil.layer[i].evap     = 0.0;
-    lake->soil.layer[i].kappa    = 0.0;
+    lake->soil.layer[i].kappa    = cell->layer[i].kappa;
     lake->soil.layer[i].moist    = soil_con->porosity[i]*soil_con->depth[i]*1000.;
-    lake->soil.layer[i].phi      = 0.0;
+    lake->soil.layer[i].phi      = cell->layer[i].phi;
 #if SPATIAL_FROST
     for (k=0; k<FROST_SUBAREAS; k++) {
       lake->soil.layer[i].ice[k]     = 0.0;
@@ -319,6 +322,9 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.layer[i].ice      = 0.0;
 #endif
   }
+  lake->soil.zwt = 0.0;
+  lake->soil.zwt2 = 0.0;
+  lake->soil.zwt3 = 0.0;
   if (!skip_hydro) {
     for (i=0; i<N_PET_TYPES; i++) {
       lake->soil.pot_evap[i]       = 0.0;

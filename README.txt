@@ -37,13 +37,14 @@ Added computation of water table position.
 	Files Affected:
 
 	compute_zwt.c (new)
+	initialize_lake.c
+	initialize_soil.c
 	lakes.eb.c
 	Makefile
 	output_list_utils.c
 	put_data.c
 	read_soilparam.c
 	read_soilparam_arc.c
-	runoff.c
 	runoff.c
 	user_def.h
 	vicNl_def.h
@@ -54,27 +55,35 @@ Added computation of water table position.
 
 	Added computation of the water table position, "zwt".  Units are [cm]
 	and the position is negative below the soil surface.  To monitor
-	the water table position, we have added the output variable "OUT_ZWT".
+	the water table position, we have added the following output variables:
 
-	The water table position falls in the highest layer having complete
-	saturation in all layers below it (this is usually the lowest layer,
-	since the lowest layer is rarely completely saturated).
+	  OUT_ZWT  - water table position [cm] computed by requiring that all
+		     layers below it are saturated, i.e. the water table will
+		     appear only in the lowest unsaturated layer.
+	  OUT_ZWT2 - water table position [cm] computed by combining the top
+		     (N-1) layers into a single layer and assuming the soil
+		     below is completely saturated.
+	  OUT_ZWT3 - water table position [cm] computed by combining all soil
+		     layers into a single layer and assuming the soil below
+		     is completely saturated.
+	  OUT_ZWTL - water table position [cm] of each individual soil layer,
+		     treating each layer as if all soil below it is completely
+		     saturated.  This is an array of N values, one per layer.
 
 	The water table's position within a soil layer is computed from soil
 	water retention curves following Letts et al. (2000):
 
-	  w(z) = { ((z-zwt)/bubble)**(-1/b), z >  zwt+bubble
-	         { 1.0,                      z <= zwt+bubble
+	  w(z) = { ((zwt-z)/bubble)**(-1/b), z <  zwt-bubble
+	         { 1.0,                      z >= zwt-bubble
 	where
-	  z      = elevation within the soil column [cm]; soil surface
-	           has z=0; below soil surface, z < 0
-	  w(z)   = relative moisture at elevation z given by
+	  z      = depth below surface [cm]
+	  w(z)   = relative moisture at depth z given by
 	           (moist(z) - resid_moist) / (max_moist - resid_moist)
-	  zwt    = elevation of water table [cm]
+	  zwt    = depth of water table below surface [cm]
 	  bubble = bubbling pressure [cm]
 	  b      = 0.5*(expt-3)
-	(note that zwt+bubble = elevation of the free water surface, i.e.
-	elevation below which soil is completely saturated)
+	Note that zwt-bubble = depth of the free water surface, i.e.
+	position below which soil is completely saturated.
 
 	This assumes water in unsaturated zone above water table
 	is always in equilibrium between gravitational and matric
@@ -89,17 +98,18 @@ Added computation of water table position.
 	Then,
 	  layer moisture = w_avg * (max_moist - resid_moist) + resid_moist
 
+	Instead of the zwt defined above, we actually report free
+	water surface elevation zwt* = -(zwt-bubble).  I.e. zwt* < 0
+	below the soil surface, and marks the point of saturation
+	rather than pressure = 1 atm.
+
 	To store the (zwt,moisture) pairs in this relationship for each layer,
 	two new variables have been added to the soil_con_struct:
 	  zwtvmoist_zwt[MAX_LAYER][MAX_ZWTVMOIST]
 	  zwtvmoist_moist[MAX_LAYER][MAX_ZWTVMOIST]
 	These are computed in read_soilparam().  Then, in compute_zwt() VIC
 	interpolates between these points to estimate the water table depth
-	in each layer given the layer's current soil moisture.  As mentioned
-	above, the water table position for the entire soil column is the
-	water table position in the lowest layer having complete saturation
-	below it.  Water table positions in higher layers are considered to
-	be "perched" water tables.
+	in each layer given the layer's current soil moisture.
 
 
 
@@ -225,6 +235,39 @@ Removed MIN_LIQ option.
 
 Bug Fixes:
 ----------
+
+Fixed various lake water balance errors.
+
+	Files Affected:
+
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	LAKE.h
+	lakes.eb.c
+	runoff.c
+	vicNl.h
+
+	Description:
+
+	Now calls to get_depth() are all consistent, using *liquid* water
+	volume instead of total volume (thus ldepth is always the liquid water
+	depth).  Lake ice area is not allowed to increase if ice area > liquid
+	area.  Ice cover is now treated like a "skin" on top of the liquid
+	(regardless of its thickness).  Ice is assumed to be completely buoyant,
+	i.e. none of the ice is below the water line.  If ice completely covers
+	the lake and the liquid part of the lake shrinks, the ice is assumed to
+	bend like a blanket, so that the outer edges now rest on land but the
+	center rests on top of the liquid.  The lake "area" is still considered
+	to be the ice cover in this case.  Baseflow out of the lake is only
+	allowed in the area of the lake containing liquid.  The edges of the ice
+	sheet are assumed to be vertical, i.e. the surface area of the top of the
+	ice sheet is equal to the surface area of the bottom of the ice sheet.
+	This fixes water balance errors arising from inconsistent estimates of
+	lake ice area.  Also fixed bugs in computation of lake->recharge.                
+
+
+
 
 Fixed incorrect snow albedo decay for southern hemisphere.
 

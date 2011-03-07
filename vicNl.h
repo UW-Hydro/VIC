@@ -91,6 +91,8 @@
   2010-Dec-01 Added compute_zwt().					TJB
   2011-Jan-04 Made read_soilparam_arc() a sub-function of
 	      read_soilparam().						TJB
+  2011-Mar-01 Added wrap_compute_zwt().  Added compute_runoff_and_asat().
+	      Changed the argument list of initialize_soil().		TJB
 ************************************************************************/
 
 #include <math.h>
@@ -203,6 +205,7 @@ void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
+void   compute_runoff_and_asat(soil_con_struct *, double *, double, double *, double *);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, 
 					     double *, 
@@ -211,7 +214,7 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 #endif
 					     int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
-void   compute_zwt(soil_con_struct *, cell_data_struct *);
+double compute_zwt(soil_con_struct *, int, double);
 out_data_struct *create_output_list();
 
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
@@ -544,6 +547,7 @@ void usage(char *);
 void   vicerror(char *);
 double volumetric_heat_capacity(double,double,double);
 
+void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_atmosdata(atmos_data_struct *, int);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
 void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,

@@ -136,6 +136,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2010-Nov-26 Changed += to = in assignment of OUT_LAKE_* variables.	TJB
   2010-Dec-01 Added OUT_ZWT.						TJB
   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
+  2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -359,6 +360,9 @@ int  put_data(dist_prcp_struct  *prcp,
                              (1-Clake),
                              overstory,
                              depth,
+#if SPATIAL_FROST
+                             frost_fract,
+#endif // SPATIAL_FROST
                              out_data);
 
 	  } // End wet/dry loop
@@ -442,6 +446,9 @@ int  put_data(dist_prcp_struct  *prcp,
                              Clake,
                              overstory,
                              depth,
+#if SPATIAL_FROST
+                             frost_fract,
+#endif // SPATIAL_FROST
                              out_data);
 
 	    /**********************************
@@ -814,6 +821,9 @@ void collect_wb_terms(cell_data_struct  cell,
                       double            lakefactor,
                       int               overstory,
                       double           *depth,
+#if SPATIAL_FROST
+                      double           *frost_fract,
+#endif // SPATIAL_FROST
                       out_data_struct  *out_data)
 {
 

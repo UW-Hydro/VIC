@@ -1919,6 +1919,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-01 Fixed bugs in computation of lake->recharge.			TJB
   2011-Mar-01 Changed units of lake.snow and lake.energy fluxes/storages to be
 	      over lake area (rather than just ice or over entire tile).	TJB
+  2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
+  2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1949,7 +1951,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   int lindex;
   double frac;
   double Dsmax, resid_moist, liq, rel_moist;
-  double *frost_frac;
+  double *frost_fract;
   double volume_save;
   double *delta_moist;
   double *moist;
@@ -2338,16 +2340,16 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   }
 
   // Lake
-  // Copy moisture fluxes into lake->soil structure, mm over end-of-step lake area
-  lake->soil.runoff = lake->runoff_out*1000/(newfraction*lake_con.basin[0]);
-  lake->soil.baseflow = lake->baseflow_out*1000/(newfraction*lake_con.basin[0]);
-  lake->soil.inflow = lake->baseflow_out*1000/(newfraction*lake_con.basin[0]);
-  for (lindex=0; lindex<options.Nlayer; lindex++) {
-    lake->soil.layer[lindex].evap = 0;
-  }
-  lake->soil.layer[0].evap += lake->evapw*1000/(newfraction*lake_con.basin[0]);
-  // Rescale other fluxes and storages to mm over end-of-step lake area
   if (newfraction > 0.0) { // lake exists at end of time step
+    // Copy moisture fluxes into lake->soil structure, mm over end-of-step lake area
+    lake->soil.runoff = lake->runoff_out*1000/(newfraction*lake_con.basin[0]);
+    lake->soil.baseflow = lake->baseflow_out*1000/(newfraction*lake_con.basin[0]);
+    lake->soil.inflow = lake->baseflow_out*1000/(newfraction*lake_con.basin[0]);
+    for (lindex=0; lindex<options.Nlayer; lindex++) {
+      lake->soil.layer[lindex].evap = 0;
+    }
+    lake->soil.layer[0].evap += lake->evapw*1000/(newfraction*lake_con.basin[0]);
+    // Rescale other fluxes and storages to mm over end-of-step lake area
     if (lakefrac > 0.0) { // lake existed at beginning of time step
       rescale_snow_storage(lakefrac, newfraction, &(lake->snow));
       rescale_snow_energy_fluxes(lakefrac, newfraction, &(lake->snow), &(lake->energy)); 
@@ -2359,6 +2361,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   else if (lakefrac > 0.0) { // lake is gone at end of time step, but existed at beginning of step
     if (lakefrac < 1.0) { // wetland also existed at beginning of step
       cell[WET][iveg][band].layer[0].evap += 1000.*lake->evapw/((1.-newfraction)*lake_con.basin[0]);
+      cell[WET][iveg][band].runoff += 1000.*lake->runoff_out/((1.-newfraction)*lake_con.basin[0]);
+      cell[WET][iveg][band].baseflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
+      cell[WET][iveg][band].inflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
     }
   }
 
@@ -2398,6 +2403,7 @@ void advect_soil_veg_storage(double lakefrac,
   double new_moist[MAX_LAYERS];
   double tmp_moist[MAX_LAYERS];
   double tmp_runoff;
+  int k;
 
   if (lakefrac < 1.0) { // wetland existed during this step
 

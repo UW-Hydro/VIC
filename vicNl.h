@@ -93,6 +93,7 @@
 	      read_soilparam().						TJB
   2011-Mar-01 Added wrap_compute_zwt().  Added compute_runoff_and_asat().
 	      Changed the argument list of initialize_soil().		TJB
+  2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
 ************************************************************************/
 
 #include <math.h>
@@ -200,7 +201,7 @@ void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 #endif
                         out_data_struct *);
 void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
-                        double, double, double, double, int, int, double, int, double *, out_data_struct *);
+                        double, double, double, double, int, int, double, int, double *, double *, out_data_struct *);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);

@@ -236,6 +236,22 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+Fixed bugs in declarations of frost_fract for SPATIAL_FROST TRUE
+
+	Files Affected:
+
+	lakes.eb.c
+	put_data.c
+	vicNl.h
+
+	Description:
+
+	Declarations for frost_fract were wrong or missing.  This has
+	been fixed.        
+
+
+
+
 Fixed various lake water balance errors.
 
 	Files Affected:

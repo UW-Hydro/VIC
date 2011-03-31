@@ -201,7 +201,11 @@ void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 #endif
                         out_data_struct *);
 void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
-                        double, double, double, double, int, int, double, int, double *, double *, out_data_struct *);
+                        double, double, double, double, int, int, double, int, double *,
+#if SPATIAL_FROST
+                        double *,
+#endif
+                        out_data_struct *);
 void   compress_files(char string[]);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);

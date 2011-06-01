@@ -110,6 +110,8 @@ void initialize_global() {
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
   2010-Apr-28 Changed default for Nlayer from 2 to 3.				TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
+  2011-May-31 Removed options.GRND_FLUX.  Options.QUICK_FLUX default is now
+	      TRUE.								TJB
 
 *********************************************************************/
 
@@ -135,7 +137,6 @@ void initialize_global() {
   options.EXP_TRANS             = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
-  options.GRND_FLUX             = FALSE;
   options.GRND_FLUX_TYPE        = GF_FULL;
   options.IMPLICIT              = FALSE;
   options.LAKES                 = FALSE;

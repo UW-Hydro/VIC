@@ -91,6 +91,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      EXP_TRANS=TRUE.							TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
+  2011-May-31 Removed options.GRND_FLUX.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -224,8 +225,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FULL_ENERGY=TRUE;
- 	  options.QUICK_FLUX=TRUE;
-	  options.GRND_FLUX=TRUE;
 	}
 	else options.FULL_ENERGY = FALSE;
       }
@@ -234,14 +233,8 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
 	  options.QUICK_FLUX=FALSE;
-	  options.GRND_FLUX=TRUE;
 	}
         else options.FROZEN_SOIL = FALSE;
-      }
-      else if(strcasecmp("GRND_FLUX",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.GRND_FLUX=TRUE;
-        else options.GRND_FLUX = FALSE;
       }
       else if(strcasecmp("QUICK_FLUX",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -885,31 +878,13 @@ global_param_struct get_global_param(filenames_struct *names,
   }
 
   // Validate soil parameter/simulation mode combinations
-  if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
-    nrerror(ErrStr);
-  }
-  if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
-    nrerror(ErrStr);
-  }
   if(options.QUICK_FLUX) {
-    if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nnode != 3) {
-      sprintf(ErrStr,"To run the model in FULL_ENERGY or FROZEN_SOIL modes with QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to  %d.",options.Nnode);
-      nrerror(ErrStr);
-    }
-    else if (!options.FULL_ENERGY && !options.FROZEN_SOIL && options.Nnode != 1) {
-      sprintf(ErrStr,"To run the model with FULL_ENERGY=FALSE, FROZEN_SOIL=FALSE, and QUICK_FLUX=TRUE, you must define exactly 1 soil thermal node.  Currently Nnodes is set to  %d.",options.Nnode);
-      nrerror(ErrStr);
+    if(options.Nnode != 3) {
+      fprintf(stderr,"WARNING: To run the model QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to %d.  Setting Nnodes to 3.\n",options.Nnode);
+      options.Nnode = 3;
     }
     if(options.IMPLICIT || options.EXP_TRANS) {
       sprintf(ErrStr,"To run the model with QUICK_FLUX=TRUE, you cannot have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
-      nrerror(ErrStr);
-    }
-  }
-  else {
-    if(options.Nnode < 4) {
-      sprintf(ErrStr,"To run the model with QUICK_FLUX=FALSE, you must define at least 4 soil thermal nodes.  Currently Nnodes is set to %d.",options.Nnode);
       nrerror(ErrStr);
     }
   }
@@ -921,14 +896,6 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"You must define at least 1 soil moisture layer to run the model.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
-  if(!options.FULL_ENERGY && !options.FROZEN_SOIL && options.GRND_FLUX) {
-    sprintf(ErrStr,"Both FULL_ENERGY and FROZEN_SOIL are FALSE, but GRND_FLUX is TRUE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
-    nrerror(ErrStr);
-  }
-  if(options.FULL_ENERGY && !options.GRND_FLUX) {
-    sprintf(ErrStr,"FULL_ENERGY is TRUE, but GRND_FLUX is explicitly set to FALSE.\nThis combination of options is not recommended.  Unless you intend\nto use this combination of options, we recommend commenting out\nthe GRND_FLUX entry in your global file.  To do this,place a \"#\"\nat the beginning of the line containing \"GRND_FLUX\".\n");
-    nrerror(ErrStr);
-  }
   if(options.IMPLICIT)  {
     if ( QUICK_FS ) 
       fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
@@ -938,14 +905,20 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
     if ( !options.FROZEN_SOIL )
       nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
-    if ( !options.GRND_FLUX )
-      nrerror("set GRND_FLUX = TRUE to run EXCESS_ICE option.");
     if ( options.QUICK_SOLVE ) {
       fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
       options.QUICK_SOLVE=FALSE;  
     }    
     if ( QUICK_FS ) 
       nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
+  }
+  if(options.Nlayer > MAX_LAYERS) {
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    nrerror(ErrStr);
+  }
+  if(options.Nnode > MAX_NODES) {
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
+    nrerror(ErrStr);
   }
 
   // Validate lake parameter information
@@ -992,15 +965,11 @@ global_param_struct get_global_param(filenames_struct *names,
   fprintf(stderr,"Use Distributed Precipitation.(%d)\n",options.DIST_PRCP);
   if(options.DIST_PRCP)
     fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
-  if ( options.GRND_FLUX ) {
-    fprintf(stderr,"Ground heat flux will be estimated ");
-    if ( options.QUICK_FLUX ) 
-      fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");
-    else 
-      fprintf(stderr,"using Cherkauer and Lettenmaier (1999).\n");
-  }
-  else
-    fprintf(stderr,"Ground heat flux not computed (no energy balance).\n");
+  fprintf(stderr,"Ground heat flux will be estimated ");
+  if ( options.QUICK_FLUX ) 
+    fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");
+  else 
+    fprintf(stderr,"using Cherkauer and Lettenmaier (1999).\n");
   fprintf(stderr,"Use Frozen Soil Model.........(%d)\n",options.FROZEN_SOIL);
   if( options.IMPLICIT ) 
     fprintf(stderr,".... Using the implicit solution for the soil heat equation.\n");

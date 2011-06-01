@@ -98,6 +98,7 @@ int  full_energy(char                 NEWCELL,
 	      lake_var.channel_in to store it.					TJB
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
   2010-Nov-26 Changed argument list of water_balance().				TJB
+  2011-May-31 Prepare_full_energy() is now always called.			TJB
 
 **********************************************************************/
 {
@@ -319,10 +320,7 @@ int  full_energy(char                 NEWCELL,
 		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
 
       /* Initialize soil thermal properties for the top two layers */
-      if(options.FULL_ENERGY || options.FROZEN_SOIL) {
-	prepare_full_energy(iveg, Nveg, options.Nnode, prcp, 
-			    soil_con, moist0, ice0);
-      }
+      prepare_full_energy(iveg, Nveg, options.Nnode, prcp, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
       bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];

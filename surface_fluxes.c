@@ -146,6 +146,7 @@ int surface_fluxes(char                 overstory,
 	      are very large or 0.					TJB
   2010-Apr-26 Simplified argument lists for solve_snow() and
 	      snow_intercept().						TJB
+  2011-May-31 Removed options.GRND_FLUX.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -477,8 +478,7 @@ int surface_fluxes(char                 overstory,
     step_prec[WET] = atmos->prec[hidx] / mu * soil_con->Pfactor[band];
     
     // initialize ground surface temperaure
-    if ( options.GRND_FLUX ) Tgrnd = energy->T[0];
-    else Tgrnd = Tair;
+    Tgrnd = energy->T[0];
 
     // initialize canopy terms
     Tcanopy = Tair;

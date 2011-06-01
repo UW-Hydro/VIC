@@ -151,6 +151,13 @@ double calc_surf_energy_bal(double             Le,
   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
 	      node spacing.						TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
+  2011-May-24 Replaced call to finish_frozen_soil_calcs() with a call
+	      to calc_layer_average_thermal_props(); expanded the set of
+	      cases for which this function is called to include
+	      FROZEN_SOIL FALSE and QUICK_FLUX TRUE, so that a soil T
+	      profile can be estimated and output in these cases.	TJB
+  2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
+	      ground flux are always computed.				TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -282,7 +289,7 @@ double calc_surf_energy_bal(double             Le,
     Prepare soil node variables for finite difference solution
   *************************************************************/
 
-  if(!options.QUICK_FLUX) {
+  if(!options.QUICK_FLUX || options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE) ) {
 
     bubble_node    = soil_con->bubble_node; 
     expt_node      = soil_con->expt_node; 
@@ -595,27 +602,15 @@ double calc_surf_energy_bal(double             Le,
   /***************************************************
     Recalculate Soil Moisture and Thermal Properties
   ***************************************************/
-  if(options.GRND_FLUX) {
-    if(options.QUICK_FLUX) {
-      
-      energy->T[0] = Tsurf;
-      energy->T[1] = T1;
-      
-    }
-    else {
-      
-      finish_frozen_soil_calcs(energy, layer_wet, layer_dry, layer, soil_con, 
-			       Nnodes, iveg, mu, Tnew_node, kappa_node, 
-			       Cs_node, moist_node);
-      
-    }
-    
-  }
-  else {
+    if(options.QUICK_FLUX || !(options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE))) {
 
-    energy->T[0] = Tsurf;
+      Tnew_node[0] = Tsurf;
+      Tnew_node[1] = T1;
+      Tnew_node[2] = T2;
 
-  }
+    }
+    calc_layer_average_thermal_props(energy, layer_wet, layer_dry, layer, soil_con, 
+				     Nnodes, iveg, Tnew_node);
 
   /** Store precipitation that reaches the surface */
   if ( !snow->snow && !INCLUDE_SNOW ) {

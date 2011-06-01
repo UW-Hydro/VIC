@@ -94,6 +94,9 @@
   2011-Mar-01 Added wrap_compute_zwt().  Added compute_runoff_and_asat().
 	      Changed the argument list of initialize_soil().		TJB
   2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
+  2011-May-24 Replaced finish_frozen_soil_calcs() with
+	      calc_layer_average_thermal_props().  Added
+	      estimate_layer_ice_content_quick_flux().			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -159,6 +162,9 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, 
                              double *, double *, double *, double *, 
                              double *, double *, double *, double *, char *, int *);
+int    calc_layer_average_thermal_props(energy_bal_struct *, layer_data_struct *,
+					layer_data_struct *, layer_data_struct *,
+					soil_con_struct *, int, int, double *);
 double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
@@ -290,6 +296,21 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 			       double *, double *, double *, 
 			       int, int, char);
 #endif
+int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
+					  double, double, double, double,
+					  double *,
+#if QUICK_FS
+					  double ***,
+#else
+					  double *, double *,
+#endif // QUICK_FS
+#if SPATIAL_FROST
+					  double *, double,
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+					  double *, double *,
+#endif // EXCESS_ICE
+					  char);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
 double exp_interp(double,double,double,double,double);
@@ -306,10 +327,6 @@ layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
 				     double, double);
 void   find_sublayer_temperatures(layer_data_struct *, double *, double *,
 				  double *, double, double, int, int);
-int    finish_frozen_soil_calcs(energy_bal_struct *, layer_data_struct *,
-				layer_data_struct *, layer_data_struct *,
-				soil_con_struct *, int, int, double, 
-				double *, double *, double *, double *);
 void   free_atmos(int nrecs, atmos_data_struct **atmos);
 void   free_dist_prcp(dist_prcp_struct *, int);
 void   free_dmy(dmy_struct **dmy);

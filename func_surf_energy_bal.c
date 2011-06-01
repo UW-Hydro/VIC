@@ -96,6 +96,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2010-Apr-24 Replaced ra_under with Ra_used[0].			TJB
   2010-Apr-28 Removed net_short, displacement, roughness, and ref_height
 	      from arg list of arno_evap() as they are no longer used.	TJB
+  2011-May-31 Removed options.GRND_FLUX.  Soil temperatures and ground
+	      flux are now always computed.				TJB
 
 **********************************************************************/
 {
@@ -452,207 +454,176 @@ double func_surf_energy_bal(double Ts, va_list ap)
   TMean = Ts;
   Tmp = TMean + KELVIN;
 
-  if(options.GRND_FLUX) {
-  
-    /**********************************************
-      Compute Surface Temperature at Half Time Step
-    **********************************************/
+  /**********************************************
+    Compute Surface Temperature at Half Time Step
+  **********************************************/
 
-    if ( snow_coverage > 0 && !INCLUDE_SNOW ) {
+  if ( snow_coverage > 0 && !INCLUDE_SNOW ) {
 
-      /****************************************
-        Compute energy flux through snow pack
-      ****************************************/
+    /****************************************
+      Compute energy flux through snow pack
+    ****************************************/
 
-      *snow_flux = ( kappa_snow * (Tsnow_surf - TMean) );
+    *snow_flux = ( kappa_snow * (Tsnow_surf - TMean) );
 
-    }
-    else if ( INCLUDE_SNOW ) {
-      *snow_flux = 0;
-      Tsnow_surf = TMean;
-    }
-    else *snow_flux = 0;
+  }
+  else if ( INCLUDE_SNOW ) {
+    *snow_flux = 0;
+    Tsnow_surf = TMean;
+  }
+  else *snow_flux = 0;
 
-    /***************************************************************
-      Estimate soil temperatures for ground heat flux calculations
-    ***************************************************************/
+  /***************************************************************
+    Estimate soil temperatures for ground heat flux calculations
+  ***************************************************************/
 
-    if ( options.QUICK_FLUX ) {
-      /**************************************************************
-        Use Liang et al. 1999 Equations to Calculate Ground Heat 
-	Flux
-      **************************************************************/
-      *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, 
-			Cs2, dp, delta_t);
+  if ( options.QUICK_FLUX || !( options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE) ) ) {
+    /**************************************************************
+      Use Liang et al. 1999 Equations to Calculate Ground Heat Flux
+    **************************************************************/
+    *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, Cs2, dp, delta_t);
     
-      /*****************************************************
-	Compute the Ground Heat Flux from the Top Soil Layer
-      *****************************************************/
-      if (options.GRND_FLUX_TYPE == GF_406) {
-        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
-      }
-      else {
-        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean)
-				       + (kappa2 / D2 * ( 1. - exp( -D1 / dp )) 
-					  * (T2 - (*T1)))) / 2.;
-      }
-      
+    /*****************************************************
+      Compute the Ground Heat Flux from the Top Soil Layer
+    *****************************************************/
+    if (options.GRND_FLUX_TYPE == GF_406) {
+      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
     }
     else {
+      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean)
+				       + (kappa2 / D2 * ( 1. - exp( -D1 / dp )) * (T2 - (*T1)))) / 2.;
+    }
+      
+  }
+  else {
     /*************************************************************
       Use Finite Difference Method to Solve Ground Heat
       Flux at Soil Thermal Nodes (Cherkauer and Lettenmaier, 1999)
     *************************************************************/
-      T_node[0] = TMean;
+    T_node[0] = TMean;
       
-      /* IMPLICIT Solution */
-      if(options.IMPLICIT) {
-	Error = solve_T_profile_implicit(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
-					 moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
+    /* IMPLICIT Solution */
+    if(options.IMPLICIT) {
+      Error = solve_T_profile_implicit(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
+				       moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
 #if EXCESS_ICE
-					 porosity_node, effective_porosity_node,
+				       porosity_node, effective_porosity_node,
 #endif
-					 ice_node, alpha, beta, gamma, dp, Nnodes, 
-					 FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
+				       ice_node, alpha, beta, gamma, dp, Nnodes, 
+				       FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
       
-	/* print out error information for IMPLICIT solution */
-	if(Error==0)
-	  error_cnt0++;
-	else
-	  error_cnt1++;
-	if(FIRST_SOLN[1]){
-	  FIRST_SOLN[1] = FALSE;
+      /* print out error information for IMPLICIT solution */
+      if(Error==0)
+        error_cnt0++;
+      else
+        error_cnt1++;
+      if(FIRST_SOLN[1]){
+        FIRST_SOLN[1] = FALSE;
 #if VERBOSE
-	  if ( iveg == 0 && rec == nrecs - 1) 
-	    fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
-#endif
-	}
-      }
-
-      /* EXPLICIT Solution, or if IMPLICIT Solution Failed */
-      if(!options.IMPLICIT || Error == 1) {
-	if(options.IMPLICIT)
-	  FIRST_SOLN[0] = TRUE;
-#if QUICK_FS
-	Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
-				moist_node, delta_t, max_moist_node, bubble_node, 
-				expt_node, ice_node, alpha, beta, gamma, dp,
-				depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
-				NOFLUX, EXP_TRANS, veg_class);
-#else
-	Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
-				moist_node, delta_t, max_moist_node, bubble_node, 
-				expt_node, ice_node, alpha, beta, gamma, dp, depth, 
-#if EXCESS_ICE
-				porosity_node, effective_porosity_node,
-#endif
-				Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+        if ( iveg == 0 && rec == nrecs - 1) 
+          fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
 #endif
       }
-      
-      if ( (int)Error == ERROR ) {
-	fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
-	return( ERROR ); 
-      }
-      *T1 = Tnew_node[1];
-      
-
-      /*****************************************************
-        Compute the Ground Heat Flux between nodes 0 and 1
-      *****************************************************/
-      if (options.GRND_FLUX_TYPE == GF_406) {
-        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
-      }
-      else {
-        *grnd_flux = (snow_coverage + (1. - snow_coverage) 
-		      * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
-				       + (kappa2 / D2 * (Tnew_node[2] - (*T1)))) / 2.;
-      }
-      
     }
 
-    /******************************************************
-      Compute the change in heat storage in the region between nodes 0 and 1
-      (this will correspond to top soil layer for the default (non-exponential) node spacing)
-    ******************************************************/
-    if (options.GRND_FLUX_TYPE == GF_FULL) {
-      *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
-                * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+    /* EXPLICIT Solution, or if IMPLICIT Solution Failed */
+    if(!options.IMPLICIT || Error == 1) {
+      if(options.IMPLICIT)
+        FIRST_SOLN[0] = TRUE;
+#if QUICK_FS
+      Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
+			      moist_node, delta_t, max_moist_node, bubble_node, 
+			      expt_node, ice_node, alpha, beta, gamma, dp,
+			      depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
+			      NOFLUX, EXP_TRANS, veg_class);
+#else
+      Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
+			      moist_node, delta_t, max_moist_node, bubble_node, 
+			      expt_node, ice_node, alpha, beta, gamma, dp, depth, 
+#if EXCESS_ICE
+			      porosity_node, effective_porosity_node,
+#endif
+			      Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+#endif
+    }
+      
+    if ( (int)Error == ERROR ) {
+      fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
+      return( ERROR ); 
+    }
+    *T1 = Tnew_node[1];
+      
+
+    /*****************************************************
+      Compute the Ground Heat Flux between nodes 0 and 1
+    *****************************************************/
+    if (options.GRND_FLUX_TYPE == GF_406) {
+      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
     }
     else {
-      *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
+		     + (kappa2 / D2 * (Tnew_node[2] - (*T1)))) / 2.;
     }
-
-    /******************************************************
-      Compute the change in heat due to solid-liquid phase changes in the region between nodes 0 and 1
-      (this will correspond to top soil layer for the default (non-exponential) node spacing)
-    ******************************************************/
-    if (FS_ACTIVE && options.FROZEN_SOIL) {
-
-      if((TMean+ *T1)/2.<0.) {
-        ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
-#if EXCESS_ICE
-					     porosity,effective_porosity,
-#endif
-					     max_moist,bubble,expt);
-        if(ice<0.) ice=0.;
-      }
-      else ice=0.;
-
-      if (options.GRND_FLUX_TYPE == GF_FULL) {
-        *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
-                  * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
-      }
-      else {
-        *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
-      }
-
-    }
-    
-    /* if thin snowpack, compute the change in energy stored in the pack */
-    if ( INCLUDE_SNOW ) {
-      if ( TMean > 0 )
-	*deltaCC = CH_ICE * (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
-      else
-	*deltaCC = CH_ICE * (snow_swq - snow_water) * (TMean - OldTSurf) 
-	  / delta_t;
-      *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
-      *deltaCC *= snow_coverage; // adjust for snow cover fraction
-      *refreeze_energy *= snow_coverage; // adjust for snow cover fraction
-    }
-    
-    /** Compute net surface radiation of snow-free area for evaporation 
-	estimates **/
-    LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-    if ( INCLUDE_SNOW ) { // compute net LW at snow surface
-      (*NetLongSnow) = (LongSnowIn - snow_coverage 
-			* LongBareOut);
-    }
-    (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) 
-			* LongBareOut); // net LW snow-free area
-    NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH 
-		  + *fusion);
-    
-  } /* End computation for ground heat flux */
-  else { /* ground heat flux not estimated */
-    
-    /** Compute net surface radiation of snow-free area for evaporation 
-	estimates **/
-
-    //LongBareOut = (1. - snow_coverage) * STEFAN_B * Tmp * Tmp * Tmp * Tmp;      
-    LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-
-    if ( INCLUDE_SNOW ) { // compute net LW at snow surface
-      (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
-    }
-    (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
-    NetBareRad = NetShortBare + (*NetLongBare);
       
   }
 
+  /******************************************************
+    Compute the change in heat storage in the region between nodes 0 and 1
+    (this will correspond to top soil layer for the default (non-exponential) node spacing)
+  ******************************************************/
+  if (options.GRND_FLUX_TYPE == GF_FULL) {
+    *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
+              * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+  }
+  else {
+    *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+  }
+
+  /******************************************************
+    Compute the change in heat due to solid-liquid phase changes in the region between nodes 0 and 1
+    (this will correspond to top soil layer for the default (non-exponential) node spacing)
+  ******************************************************/
+  if (FS_ACTIVE && options.FROZEN_SOIL) {
+
+    if((TMean+ *T1)/2.<0.) {
+      ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
+#if EXCESS_ICE
+					   porosity,effective_porosity,
+#endif
+					   max_moist,bubble,expt);
+      if(ice<0.) ice=0.;
+    }
+    else ice=0.;
+
+    if (options.GRND_FLUX_TYPE == GF_FULL) {
+      *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
+                * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+    }
+    else {
+      *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+    }
+
+  }
+    
+  /* if thin snowpack, compute the change in energy stored in the pack */
+  if ( INCLUDE_SNOW ) {
+    if ( TMean > 0 )
+      *deltaCC = CH_ICE * (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
+    else
+      *deltaCC = CH_ICE * (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
+    *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
+    *deltaCC *= snow_coverage; // adjust for snow cover fraction
+    *refreeze_energy *= snow_coverage; // adjust for snow cover fraction
+  }
+    
+  /** Compute net surface radiation of snow-free area for evaporation estimates **/
+  LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+  if ( INCLUDE_SNOW ) { // compute net LW at snow surface
+    (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
+  }
+  (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
+  NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
+    
   /** Compute atmospheric stability correction **/
   /** CHECK THAT THIS WORKS FOR ALL SUMMER SITUATIONS **/
   if ( wind[UnderStory] > 0.0 && overstory && SNOWING )
@@ -662,8 +633,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   else if ( wind[UnderStory] > 0.0 )
     Ra_used[0] = ra[UnderStory] 
       / StabilityCorrection(ref_height[UnderStory], displacement[UnderStory], 
-			    TMean, Tair, wind[UnderStory], 
-			    roughness[UnderStory]);
+			    TMean, Tair, wind[UnderStory], roughness[UnderStory]);
   else
     Ra_used[0] = HUGE_RESIST;
   
@@ -737,36 +707,32 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
   else *sensible_heat = 0.;
 
-  if(options.GRND_FLUX) {
-  
-    /*************************************
-      Compute Surface Energy Balance Error
-    *************************************/
-    error = (NetBareRad // net radiation on snow-free area
-	     + NetShortGrnd + NetShortSnow // net surface SW 
-	     + emissivity * (*NetLongSnow)) // net surface LW 
-	     + *sensible_heat // surface sensible heat
-	     + (*latent_heat + *latent_heat_sub) // surface latent heats
-	     /* heat flux through snowpack - for snow covered fraction */
-	     + *snow_flux * snow_coverage
-	     /* energy used in reducing snow coverage area */
-	     + melt_energy 
-	     /* snow energy terms - values are 0 unless INCLUDE_SNOW */
-	     + Advection - *deltaCC;
+  /*************************************
+    Compute Surface Energy Balance Error
+  *************************************/
+  error = (NetBareRad // net radiation on snow-free area
+	   + NetShortGrnd + NetShortSnow // net surface SW 
+	   + emissivity * (*NetLongSnow)) // net surface LW 
+	   + *sensible_heat // surface sensible heat
+	   + (*latent_heat + *latent_heat_sub) // surface latent heats
+	   /* heat flux through snowpack - for snow covered fraction */
+	   + *snow_flux * snow_coverage
+	   /* energy used in reducing snow coverage area */
+	   + melt_energy 
+	   /* snow energy terms - values are 0 unless INCLUDE_SNOW */
+	   + Advection - *deltaCC;
     
-    if ( INCLUDE_SNOW ) {
-      if (Tsnow_surf == 0.0 && error > -(*refreeze_energy)) {
-	*refreeze_energy = -error;
-	error = 0.0;
-      }
-      else {
-	error += *refreeze_energy;
-      }
+  if ( INCLUDE_SNOW ) {
+    if (Tsnow_surf == 0.0 && error > -(*refreeze_energy)) {
+      *refreeze_energy = -error;
+      error = 0.0;
     }
-
-    *store_error = error;
+    else {
+      error += *refreeze_energy;
+    }
   }
-  else error = MISSING;
+
+  *store_error = error;
 
   return error;
 

@@ -106,6 +106,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2011-Mar-05 Now does fgets whether or not RUN_MODEL is true - this
 	      fixes bug introduced when read_soilparam_arc() was moved
 	      to a sub-function of read_soilparam().			TJB
+  2011-May-25 Expanded latchar, lngchar, and junk allocations to handle
+	      GRID_DECIMAL > 4.						TJB
+  2011-May-25 Moved fgets() so that it always gets called, even when
+	      cells are skipped.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -139,12 +143,15 @@ soil_con_struct read_soilparam(FILE *soilparam,
   int             Ncells;
   int             flag;
   double          tmp_depth;
-  double          b;
-  double          bubble;
+  double          tmp_depth2, tmp_depth2_save;
+  double          b, b_save;
+  double          bubble, bub_save;
   double          tmp_max_moist;
   double          tmp_resid_moist;
-  double          zwt_prime;
+  double          zwt_prime, zwt_prime_eff;
+  double          tmp_moist;
   double          w_avg;
+  char   latchar[20], lngchar[20], junk[6];
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
 #endif
@@ -164,21 +171,19 @@ soil_con_struct read_soilparam(FILE *soilparam,
     if((fscanf(soilparam, "%d", &flag))!=EOF) {
       if(flag) *RUN_MODEL=TRUE;
       else     *RUN_MODEL=FALSE;
-    }
-    else {
-      *MODEL_DONE = TRUE;
-      *RUN_MODEL = FALSE;
-    }
-
-    if(!(*MODEL_DONE)) {
 
       if( fgets( line, MAXSTRING, soilparam ) == NULL ){
         sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
         nrerror(ErrStr);
       }
 
-      if (*RUN_MODEL) {
+    }
+    else {
+      *MODEL_DONE = TRUE;
+      *RUN_MODEL = FALSE;
+    }
 
+    if(!(*MODEL_DONE) && (*RUN_MODEL)) {
 
       strcpy(tmpline, line);
       ttrim( tmpline );
@@ -862,12 +867,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
       tmp_depth = 0;
       for (layer=0; layer<options.Nlayer; layer++) {
         b = 0.5*(temp.expt[layer]-3);
+        bubble = temp.bubble[layer];
         tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000; // in mm
         zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
         for (i=0; i<MAX_ZWTVMOIST; i++) {
           temp.zwtvmoist_zwt[layer][i] = -tmp_depth*100-zwt_prime; // elevation (cm) relative to soil surface
           w_avg = ( temp.depth[layer]*100 - zwt_prime
-                   - (b-1)/b*temp.bubble[layer]*(1-pow((zwt_prime+temp.bubble[layer])/temp.bubble[layer],(b-1)/b)) )
+                   - (b/(b-1))*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
                   / (temp.depth[layer]*100); // in cm
           if (w_avg < 0) w_avg = 0;
           if (w_avg > 1) w_avg = 1;
@@ -877,7 +883,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
         tmp_depth += temp.depth[layer];
       }
 
-      /* Top N-1 layers lumped together */
+      /* Top N-1 layers lumped together (with average soil properties) */
       tmp_depth = 0;
       b = 0;
       bubble = 0;
@@ -896,7 +902,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       for (i=0; i<MAX_ZWTVMOIST; i++) {
         temp.zwtvmoist_zwt[options.Nlayer][i] = -zwt_prime; // elevation (cm) relative to soil surface
         w_avg = ( tmp_depth*100 - zwt_prime
-                   - (b-1)/b*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
+                   - (b/(b-1))*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
                   / (tmp_depth*100); // in cm
         if (w_avg < 0) w_avg = 0;
         if (w_avg > 1) w_avg = 1;
@@ -904,37 +910,58 @@ soil_con_struct read_soilparam(FILE *soilparam,
         zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
       }
 
-      /* All N layers lumped together */
+      /* Compute zwt by taking total column soil moisture and filling column from bottom up */
       tmp_depth = 0;
-      b = 0;
-      bubble = 0;
-      tmp_max_moist = 0;
-      tmp_resid_moist = 0;
       for (layer=0; layer<options.Nlayer; layer++) {
-        b += 0.5*(temp.expt[layer]-3)*temp.depth[layer];
-        bubble += temp.bubble[layer]*temp.depth[layer];
-        tmp_max_moist += temp.max_moist[layer]; // total max_moist
-        tmp_resid_moist += temp.resid_moist[layer]*temp.depth[layer]*1000; // total resid_moist in mm
         tmp_depth += temp.depth[layer];
       }
-      b /= tmp_depth; // average b
-      bubble /= tmp_depth; // average bubble
-      zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
+      zwt_prime = 0; // depth of free water surface below soil surface (not yet elevation)
       for (i=0; i<MAX_ZWTVMOIST; i++) {
         temp.zwtvmoist_zwt[options.Nlayer+1][i] = -zwt_prime; // elevation (cm) relative to soil surface
-        w_avg = ( tmp_depth*100 - zwt_prime
-                   - (b-1)/b*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
-                  / (tmp_depth*100); // in cm
-        if (w_avg < 0) w_avg = 0;
-        if (w_avg > 1) w_avg = 1;
-        temp.zwtvmoist_moist[options.Nlayer+1][i] = w_avg*(tmp_max_moist-tmp_resid_moist)+tmp_resid_moist;
+        // Integrate w_avg in pieces
+        if (zwt_prime == 0) {
+          tmp_moist = 0;
+          for (layer=0; layer<options.Nlayer; layer++)
+            tmp_moist += temp.max_moist[layer];
+          temp.zwtvmoist_moist[options.Nlayer+1][i] = tmp_moist;
+        }
+        else {
+          tmp_moist = 0;
+          layer = options.Nlayer-1;
+          tmp_depth2 = tmp_depth-temp.depth[layer];
+          while (layer>0 && zwt_prime <= tmp_depth2*100) {
+            tmp_moist += temp.max_moist[layer];
+            layer--;
+            tmp_depth2 -= temp.depth[layer];
+          }
+          w_avg = (tmp_depth2*100+temp.depth[layer]*100-zwt_prime)/(temp.depth[layer]*100);
+          b = 0.5*(temp.expt[layer]-3);
+          bubble = temp.bubble[layer];
+          tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000;
+          w_avg += -(b/(b-1))*bubble*( 1 - pow((zwt_prime+bubble-tmp_depth2*100)/bubble,(b-1)/b) ) / (temp.depth[layer]*100);
+          tmp_moist += w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
+          b_save = b;
+          bub_save = bubble;
+          tmp_depth2_save = tmp_depth2;
+          while (layer>0) {
+            layer--;
+            tmp_depth2 -= temp.depth[layer];
+            b = 0.5*(temp.expt[layer]-3);
+            bubble = temp.bubble[layer];
+            tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000;
+            zwt_prime_eff = tmp_depth2_save*100-bubble+bubble*pow((zwt_prime+bub_save-tmp_depth2_save*100)/bub_save,b/b_save);
+            w_avg = -(b/(b-1))*bubble*( 1 - pow((zwt_prime_eff+bubble-tmp_depth2*100)/bubble,(b-1)/b) ) / (temp.depth[layer]*100);
+            tmp_moist += w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
+            b_save = b;
+            bub_save = bubble;
+            tmp_depth2_save = tmp_depth2;
+          }
+          temp.zwtvmoist_moist[options.Nlayer+1][i] = tmp_moist;
+        }
         zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
       }
 
-
-      } // end if (*RUN_MODEL)
-
-    } // end if(!(*MODEL_DONE))
+    } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
 
   } // end if (options.ARC_SOIL)
 

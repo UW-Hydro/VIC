@@ -44,6 +44,7 @@ void display_current_settings(int                 mode,
   2009-Sep-19 Moved TFALLBACK to its own separate option.	TJB
   2009-Nov-15 Redirected output to stderr.			TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.TJB
+  2011-May-31 Removed GRND_FLUX option.				TJB
 **********************************************************************/
 {
 
@@ -231,10 +232,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"FULL_ENERGY\t\tTRUE\n");
   else
     fprintf(stderr,"FULL_ENERGY\t\tFALSE\n");
-  if (options.GRND_FLUX)
-    fprintf(stderr,"GRND_FLUX\t\tTRUE\n");
-  else
-    fprintf(stderr,"GRND_FLUX\t\tFALSE\n");
   if (options.GRND_FLUX_TYPE == GF_406)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)

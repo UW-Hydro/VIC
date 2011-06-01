@@ -112,6 +112,8 @@
 	      water table position based on soil water retention curve.	TJB
   2011-Mar-01 Added cell->zwt2, cell->zwt3, OUT_ZWT2, OUT_ZWT3, and
 	      OUT_ZWTL.							TJB
+  2011-May-31 Removed options.GRND_FLUX.				TJB
+  2011-May-31 Increased length of zwtvmoist_* arrays.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -585,8 +587,6 @@ typedef struct {
 			    distribution for soil heat flux calculations*/
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
-  char   GRND_FLUX;      /* TRUE = compute ground heat flux and energy 
-			    balance */
   char   GRND_FLUX_TYPE; /* "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
                                         from VIC 4.0.6 and earlier
                             "GF_410"  = use formulas from VIC 4.1.0 (ground flux is correct,
@@ -842,8 +842,8 @@ typedef struct {
   float  **layer_node_fract;          /* fraction of all nodes within each 
 					 layer */
   int      gridcel;                   /* grid cell number */
-  double   zwtvmoist_zwt[MAX_LAYERS][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
-  double   zwtvmoist_moist[MAX_LAYERS][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
+  double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
+  double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
 #if EXCESS_ICE
   double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m). 
 					 The effective depth will always be >= this value. */

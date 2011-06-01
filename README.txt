@@ -31,6 +31,70 @@ Usage:
 New Features:
 -------------
 
+Extended computation of soil temperatures and ground heat flux to all modes of
+operation.
+
+
+	Files Affected:
+
+	calc_surf_energy_bal.c
+	display_current_settings.c
+	frozen_soil.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	soil_conduction.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Extended computation of soil temperatures and ground heat flux to all
+	modes of model operation.  Previously these quantities were only
+	computed when FROZEN_SOIL was TRUE.
+
+	Now soil temperatures, ice content, and ground heat flux are computed
+	as follows:
+
+	1. If FROZEN_SOIL is TRUE, there is no change to previous model
+		behavior.  By default, soil temperature profile is computed via
+		the finite element method of Cherkauer and Lettenmaier (1999),
+		taking account of the phase change of ice.  (To use the Liang
+		et al (1999) approximation, set QUICK_FLUX to TRUE; however
+		this is not recommended because it doesn't handle the phase
+		change of ice.)  If FULL_ENERGY is also TRUE, the surface
+		temperature is computed via iteration over the surface energy
+		balance; if FULL_ENERGY is FALSE, the surface temperature is
+		set to air temperature.  Soil layer average temperatures and
+		ice contents are computed and available for output.
+
+	2. If FROZEN_SOIL is FALSE, the ice phase change is not accounted for
+		and soil layer ice contents are all set to 0.  Unlike previous
+		versions, the soil layer temperatures and ice contents (=0)
+		are now available for output.  The default method of computing
+		soil temperature profile depends on the setting the FULL_ENERGY
+		option:
+		a. FULL_ENERGY TRUE: the default method for computing the soil
+		temperature profile is the finite element method of Cherkauer
+		and Lettenmaier (1999) as in the case of FROZEN_SOIL TRUE.  To
+		use the Liang et al (1999) approximation while FULL_ENERGY is
+		TRUE, the user must set QUICK_FLUX to TRUE in the global
+		parameter file.
+		b. FULL_ENERGY FALSE: the default method for computing the
+		soil temperature profile is the approximation of Liang et al
+		(1999) (same as QUICK_FLUX = TRUE).  To use the finite element
+		method, the user must set QUICK_FLUX to FALSE in the global
+		parameter file.
+
+	Now that soil temperatures, ice contents, and ground heat fluxes are
+	always computed, the GRND_FLUX option has been removed.
+
+
+
+
 Added computation of water table position.
 
 
@@ -235,6 +299,23 @@ Removed MIN_LIQ option.
 
 Bug Fixes:
 ----------
+
+Fixed bug that prevented VIC from dealing with 5-digit lat/lons
+
+	Files Affected:
+
+	make_in_and_outfiles.c
+	read_soilparam.c
+
+	Description:
+
+	Previously VIC didn't allocate enough space in its internal
+	lat and lon strings to handle 5-digit lat/lons.  This prevented
+	VIC from running at grid resolutions of 16th degree or smaller.
+	This has been fixed.
+
+
+
 
 Fixed bugs in declarations of frost_fract for SPATIAL_FROST TRUE
 

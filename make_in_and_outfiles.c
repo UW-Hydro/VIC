@@ -31,6 +31,8 @@ void make_in_and_outfiles(filep_struct         *filep,
 	      Merged builtnames into filenames->			TJB
   2007-Oct-31 Append "/" to result_dir so that this need not be done
 	      in global parameter file.					TJB
+  2011-May-25 Expanded latchar, lngchar, and junk allocations to handle
+	      GRID_DECIMAL > 4.						TJB
 
 **********************************************************************/
 {
@@ -38,7 +40,7 @@ void make_in_and_outfiles(filep_struct         *filep,
   extern param_set_struct param_set;
   extern FILE *open_file(char string[], char type[]);
 
-  char   latchar[10], lngchar[10], junk[5];
+  char   latchar[20], lngchar[20], junk[6];
   int filenum;
 
   sprintf(junk, "%%.%if", options.GRID_DECIMAL);

@@ -8,20 +8,16 @@
 
 static char vcid[] = "$Id$";
 
-int finish_frozen_soil_calcs(energy_bal_struct *energy,
-			     layer_data_struct *layer_wet,
-			     layer_data_struct *layer_dry,
-			     layer_data_struct *layer,
-			     soil_con_struct   *soil_con,
-			     int                Nnodes,
-			     int                veg,
-			     double             mu,
-			     double            *T,
-			     double            *kappa,
-			     double            *Cs,
-			     double            *moist) {
+int calc_layer_average_thermal_props(energy_bal_struct *energy,
+				     layer_data_struct *layer_wet,
+				     layer_data_struct *layer_dry,
+				     layer_data_struct *layer,
+				     soil_con_struct   *soil_con,
+				     int                Nnodes,
+				     int                veg,
+				     double            *T) {
   /******************************************************************
-  finish_frozen_soil_calcs      Keith Cherkauer      July 27, 1998
+  calc_layer_average_thermal_props      Keith Cherkauer      July 27, 1998
 
   This subroutine redistributes soil properties based on the 
   thermal solutions found for the current time step.
@@ -49,6 +45,13 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.  As a result, no
 	      longer need to include resid_moist in the arg list for
 	      estimate_layer_ice_content().				TJB
+  2011-May-24 Added calls to estimate_layer_ice_content_quick_flux to
+	      handle the cases for QUICK_FLUX = TRUE (or any other case
+	      in which the full finite-element T profile is not used).
+	      Changed name from finish_frozen_soil_calcs to
+	      calc_layer_average_thermal_props.  This function now can
+	      be used to compute soil layer average T and ice, regardless
+	      of the settings of FROZEN_SOIL, QUICK_FLUX, etc.		TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -58,7 +61,10 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 
   int     i, ErrorFlag;
 
-  find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
+  if (options.FROZEN_SOIL && soil_con->FS_ACTIVE)
+    find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
+  else
+    energy->Nfrost = 0;
 
   /** Store Layer Temperature Values **/
   for(i=0;i<Nnodes;i++) energy->T[i] = T[i];
@@ -66,8 +72,46 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
   if(energy->Nfrost>0) energy->frozen = TRUE;
   else energy->frozen = FALSE;
 
-  /** Redistribute Soil Properties for New Frozen Soil Layer Size **/
-  if(soil_con->FS_ACTIVE && options.FROZEN_SOIL) {
+  /** Compute Soil Layer average  properties **/
+  if (options.QUICK_FLUX) {
+    ErrorFlag = estimate_layer_ice_content_quick_flux(layer_wet, soil_con->depth, soil_con->dp,
+					   energy->T[0], energy->T[1], soil_con->avg_temp,
+					   soil_con->max_moist, 
+#if QUICK_FS
+					   soil_con->ufwc_table_layer,
+#else
+					   soil_con->expt, soil_con->bubble, 
+#endif // QUICK_FS
+#if SPATIAL_FROST
+					   soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+					   soil_con->porosity,
+					   soil_con->effective_porosity,
+#endif // EXCESS_ICE
+					   soil_con->FS_ACTIVE);
+    if ( ErrorFlag == ERROR ) return (ERROR);
+    if(options.DIST_PRCP) {
+      ErrorFlag = estimate_layer_ice_content_quick_flux(layer_dry, soil_con->depth, soil_con->dp,
+					     energy->T[0], energy->T[1], soil_con->avg_temp,
+					     soil_con->max_moist, 
+#if QUICK_FS
+					     soil_con->ufwc_table_layer,
+#else
+					     soil_con->expt, soil_con->bubble, 
+#endif // QUICK_FS
+#if SPATIAL_FROST
+					     soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+					     soil_con->porosity,
+					     soil_con->effective_porosity,
+#endif // EXCESS_ICE
+					     soil_con->FS_ACTIVE);
+      if ( ErrorFlag == ERROR ) return (ERROR);
+    }
+  }
+  else {
     ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
 #if QUICK_FS
@@ -92,39 +136,38 @@ int finish_frozen_soil_calcs(energy_bal_struct *energy,
 					   soil_con->soil_density, soil_con->quartz,
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
-  }
-  if(options.DIST_PRCP && soil_con->FS_ACTIVE && options.FROZEN_SOIL) {
-    ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
-					   soil_con->max_moist_node, 
+    if(options.DIST_PRCP) {
+      ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
+					     soil_con->max_moist_node, 
 #if QUICK_FS
-					   soil_con->ufwc_table_node,
+					     soil_con->ufwc_table_node,
 #else
-					   soil_con->expt_node, soil_con->bubble_node, 
+					     soil_con->expt_node, soil_con->bubble_node, 
 #endif // QUICK_FS
-					   soil_con->depth, soil_con->max_moist, 
+					     soil_con->depth, soil_con->max_moist, 
 #if QUICK_FS
-					   soil_con->ufwc_table_layer,
+					     soil_con->ufwc_table_layer,
 #else
-					   soil_con->expt, soil_con->bubble, 
+					     soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
 #if SPATIAL_FROST
-					   soil_con->frost_fract, soil_con->frost_slope, 
+					     soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
 #if EXCESS_ICE
-					   soil_con->porosity, soil_con->effective_porosity,
+					     soil_con->porosity, soil_con->effective_porosity,
 #endif // EXCESS_ICE
-					   soil_con->bulk_density, soil_con->soil_density, 
-					   soil_con->quartz, 
-					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
-    if ( ErrorFlag == ERROR ) return (ERROR);
+					     soil_con->bulk_density, soil_con->soil_density, 
+					     soil_con->quartz, 
+					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
+      if ( ErrorFlag == ERROR ) return (ERROR);
+    }
   }
   
 #if LINK_DEBUG
   if(debug.PRT_BALANCE && debug.DEBUG) {
     printf("After Moisture Redistribution\n");
 #if SPATIAL_FROST
-    write_layer(layer, veg, options.Nlayer, soil_con->frost_fract,
-		soil_con->depth);
+    write_layer(layer, veg, options.Nlayer, soil_con->frost_fract, soil_con->depth);
 #else
     write_layer(layer, veg, options.Nlayer, soil_con->depth);
 #endif

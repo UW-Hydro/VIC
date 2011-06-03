@@ -112,6 +112,8 @@ void initialize_global() {
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
   2011-May-31 Removed options.GRND_FLUX.  Options.QUICK_FLUX default is now
 	      TRUE.								TJB
+  2011-Jun-01 Changed default GRND_FLUX_TYPE to GF_410.  Not sure GF_FULL is
+	      correct - may be double-counting attentuation of canopy.		TJB
 
 *********************************************************************/
 
@@ -137,7 +139,7 @@ void initialize_global() {
   options.EXP_TRANS             = FALSE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
-  options.GRND_FLUX_TYPE        = GF_FULL;
+  options.GRND_FLUX_TYPE        = GF_410;
   options.IMPLICIT              = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;

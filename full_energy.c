@@ -99,6 +99,8 @@ int  full_energy(char                 NEWCELL,
   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
   2010-Nov-26 Changed argument list of water_balance().				TJB
   2011-May-31 Prepare_full_energy() is now always called.			TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 
 **********************************************************************/
 {
@@ -608,6 +610,9 @@ int  full_energy(char                 NEWCELL,
 #if VERBOSE
 	  fprintf(stderr,"\t\tBulk density increased from %.2f kg/m^3 to %.2f kg/m^3.\n",soil_con->bulk_density[lidx],(1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]);
 #endif
+	  soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
+	  if (soil_con->organic[layer] > 0)
+	    soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
 	  soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; //adjust bulk density
 	  total_meltwater += soil_con->max_moist[lidx] - soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.; //for lake model (uses prior max_moist, 
 	                                                                                                                     //so must come before new max_moist calculation

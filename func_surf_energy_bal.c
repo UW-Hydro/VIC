@@ -98,6 +98,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      from arg list of arno_evap() as they are no longer used.	TJB
   2011-May-31 Removed options.GRND_FLUX.  Soil temperatures and ground
 	      flux are now always computed.				TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 
 **********************************************************************/
 {
@@ -147,9 +149,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *Wpwp;
   double *depth;
   double *resid_moist;
+  double *bulk_dens_min;
+  double *soil_dens_min;
+  double *quartz;
   double *bulk_density;
   double *soil_density;
-  double *quartz;
+  double *organic;
 
   float *root;
 
@@ -436,9 +441,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
 #endif
   FS_ACTIVE = soil_con->FS_ACTIVE;
   /* more soil layer terms for IMPLICIT option*/
+  bulk_dens_min = soil_con->bulk_dens_min;
+  soil_dens_min = soil_con->soil_dens_min;
+  quartz = soil_con->quartz;
   bulk_density = soil_con->bulk_density;
   soil_density = soil_con->soil_density;
-  quartz = soil_con->quartz;
+  organic = soil_con->organic;
 
 
   /***************
@@ -510,7 +518,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 				       porosity_node, effective_porosity_node,
 #endif
 				       ice_node, alpha, beta, gamma, dp, Nnodes, 
-				       FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class, bulk_density, soil_density, quartz, depth);
+				       FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class,
+				       bulk_dens_min, soil_dens_min, quartz, bulk_density, soil_density, organic, depth);
       
       /* print out error information for IMPLICIT solution */
       if(Error==0)

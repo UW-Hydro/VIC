@@ -62,6 +62,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double dp;		         m       soil thermal damping depth
   double bubble;	         cm      bubbling pressure, HBH 5.15
   double quartz;	         fract   quartz content of soil
+  double organic;	         fract   organic content of soil
   double bulk_density[MAX_LAYERS]; kg/m^3  soil bulk density
   double soil_density;		 kg/m^3  soil partical density
   double rough;		         m       soil surface roughness
@@ -122,6 +123,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2011-Jan-04 Made read_soilparam_arc() a sub-function of read_soilparam().
 	      Removed all validation/computation that was also in
 	      read_soilparam().							TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  If TRUE, VIC expects organic
+	      fraction and organic bulk and soil densities to be supplied
+	      for each grid cell.						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -379,16 +383,16 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 #endif
     }
 
-    /** Get Layer Bulk Density **/
+    /** Get Layer Mineral Bulk Density **/
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
       strcat(namestr,"/");
       strcat(namestr,tmpstr);
-      temp.bulk_density[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
+      temp.bulk_dens_min[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
 
-    /** Get Layer Porosity **/
+    /** Get Layer Mineral Porosity **/
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
@@ -440,6 +444,45 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       strcat(namestr,tmpstr);
       temp.avgJulyAirTemp = read_arcinfo_value(namestr,temp.lat,temp.lng);
     }
+    if (options.ORGANIC_FRACT && (fscanf(soilparam,"%s",tmpstr)) != EOF) {
+      /** Get Layer Percent Organic **/
+      for(layer=0;layer<options.Nlayer;layer++) {
+        fscanf(soilparam,"%s",tmpstr);
+        strcpy(namestr,soilparamdir);
+        strcat(namestr,"/");
+        strcat(namestr,tmpstr);
+        temp.organic[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
+      }
+      /** Get Layer Organic Bulk Density **/
+      for(layer=0;layer<options.Nlayer;layer++) {
+        fscanf(soilparam,"%s",tmpstr);
+        strcpy(namestr,soilparamdir);
+        strcat(namestr,"/");
+        strcat(namestr,tmpstr);
+        temp.bulk_dens_org[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
+        if (temp.bulk_dens_org[layer] < 0) {
+          temp.bulk_dens_org[layer] = temp.bulk_dens_min[layer];
+        }
+      }
+      /** Get Layer Organic Soil Density **/
+      for(layer=0;layer<options.Nlayer;layer++) {
+        fscanf(soilparam,"%s",tmpstr);
+        strcpy(namestr,soilparamdir);
+        strcat(namestr,"/");
+        strcat(namestr,tmpstr);
+        temp.soil_dens_org[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
+        if (temp.soil_dens_org[layer] < 0) {
+          temp.soil_dens_org[layer] = temp.soil_dens_min[layer];
+        }
+      }
+    }
+    else {
+      for(layer=0;layer<options.Nlayer;layer++) {
+        temp.organic[layer] = 0.0;
+        temp.bulk_dens_org[layer] = -9999;
+        temp.soil_dens_org[layer] = -9999;
+      }
+    }
 
 #if !OUTPUT_FORCE
     /*******************************************
@@ -448,9 +491,13 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     sum_depth   = 0.;
     for(layer = 0; layer < options.Nlayer; layer++) {
       sum_depth += temp.depth[layer];
-      temp.bulk_density[layer] *= 1000.;
-      temp.soil_density[layer] = temp.bulk_density[layer] 
-	/ (1.0 - temp.porosity[layer]);
+      temp.bulk_dens_min[layer] *= 1000.;
+      temp.soil_dens_min[layer] = temp.bulk_dens_min[layer] / (1.0 - temp.porosity[layer]);
+      temp.bulk_dens_org[layer] *= 1000.;
+      temp.soil_dens_org[layer] *= 1000.;
+      temp.bulk_density[layer] = (1-temp.organic[layer])*temp.bulk_dens_min[layer] + temp.organic[layer]*temp.bulk_dens_org[layer];
+      temp.soil_density[layer] = (1-temp.organic[layer])*temp.soil_dens_min[layer] + temp.organic[layer]*temp.soil_dens_org[layer];
+      temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
       temp.quartz[layer] = sand[layer] / 100.;
 #if !EXCESS_ICE
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;

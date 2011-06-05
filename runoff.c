@@ -163,6 +163,8 @@ int  runoff(cell_data_struct  *cell_wet,
 	      computation of runoff and saturated area to a separate
 	      function compute_runoff_and_asat(), which can be called
 	      elsewhere.							TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -816,9 +818,12 @@ int  runoff(cell_data_struct  *cell_wet,
 						      soil_con->effective_porosity_node,
 #endif // EXCESS_ICE
 						      moist, soil_con->depth, 
+						      soil_con->soil_dens_min,
+						      soil_con->bulk_dens_min,
+						      soil_con->quartz, 
 						      soil_con->soil_density,
 						      soil_con->bulk_density,
-						      soil_con->quartz, Nnodes, 
+						      soil_con->organic, Nnodes, 
 						      options.Nlayer, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
 #if EXCESS_ICE

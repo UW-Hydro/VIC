@@ -114,6 +114,8 @@ void initialize_global() {
 	      TRUE.								TJB
   2011-Jun-01 Changed default GRND_FLUX_TYPE to GF_410.  Not sure GF_FULL is
 	      correct - may be double-counting attentuation of canopy.		TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 
 *********************************************************************/
 
@@ -162,6 +164,7 @@ void initialize_global() {
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;
+  options.ORGANIC_FRACT         = FALSE;
   options.VEGPARAM_LAI          = FALSE;
   options.LAI_SRC               = LAI_FROM_VEGLIB;
   // state options

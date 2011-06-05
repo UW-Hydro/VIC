@@ -107,6 +107,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      variables to make sure they are self-consistent.		TJB
   2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and 
 	      ground flux are always computed.				TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -294,6 +296,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     if( sum_depth_post != sum_depth_pre) {
       /*update soil_con properties*/
       for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+        soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
+        if (soil_con->organic[layer] > 0)
+          soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
 	soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; 
 	soil_con->max_moist[lidx] = soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.;	
       } //loop for each soil layer      
@@ -688,9 +693,12 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #endif // EXCESS_ICE
 						moist[veg][band], 
 						soil_con->depth,
+						soil_con->soil_dens_min,
+						soil_con->bulk_dens_min,
+						soil_con->quartz,
 						soil_con->soil_density,
 						soil_con->bulk_density,
-						soil_con->quartz,
+						soil_con->organic,
 						Nnodes, options.Nlayer,
 						soil_con->FS_ACTIVE);
 	  if ( ErrorFlag == ERROR ) return ( ErrorFlag );
@@ -753,9 +761,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						       soil_con->porosity,
 						       soil_con->effective_porosity,
 #endif // EXCESS_ICE
-						       soil_con->bulk_density,
-						       soil_con->soil_density,
-						       soil_con->quartz,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);
 		
@@ -1047,9 +1052,12 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #endif // EXCESS_ICE
 						  moist[veg][band],
 						  soil_con->depth,
+						  soil_con->soil_dens_min,
+						  soil_con->bulk_dens_min,
+						  soil_con->quartz,
 						  soil_con->soil_density,
 						  soil_con->bulk_density,
-						  soil_con->quartz,
+						  soil_con->organic,
 						  Nnodes, options.Nlayer,
 						  soil_con->FS_ACTIVE);
 	    if ( ErrorFlag == ERROR ) return ( ErrorFlag );
@@ -1104,9 +1112,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						       soil_con->porosity,
 						       soil_con->effective_porosity,
 #endif // EXCESS_ICE
-						       soil_con->bulk_density,
-						       soil_con->soil_density,
-						       soil_con->quartz,
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      
 	      }

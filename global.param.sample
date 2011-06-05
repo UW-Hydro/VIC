@@ -46,9 +46,9 @@ AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-fil
 			# Default 	= AR_406_FULL
 GRND_FLUX_TYPE	GF_FULL	# Options for ground flux:
 			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
-			# GF_410 = use formulas from VIC 4.1.0 (ground flux is correct, but deltaH and fusion ignore surf_atten);
-			# GF_FULL = use correct ground flux formula from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
-			# Default 	= GF_FULL
+			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
+			# GF_FULL = use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
+			# Default 	= GF_410
 PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 
 #######################################################################
@@ -103,6 +103,7 @@ ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
 #SOIL_DIR        (soil param directory)   # Directory containing ARC/INFO ASCII grids of soil parameters - only valid if ARC_SOIL is TRUE
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED	FALSE	# TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
+ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*Nlayer extra columns, listing for each layer the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer; FALSE = soil param file does not contain any information about organic soil, and organic fraction should be assumed to be 0
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)

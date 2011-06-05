@@ -8,7 +8,8 @@ double soil_conductivity(double moist,
 			 double Wu, 
 			 double soil_density, 
 			 double bulk_density,
-			 double quartz) {
+			 double quartz,
+			 double organic) {
 /**********************************************************************
   Soil thermal conductivity calculated using Johansen's method.
 
@@ -31,30 +32,47 @@ double soil_conductivity(double moist,
   double Wu            liquid water content (mm/mm)
   double soil_density  soil density (kg m-3)
   double bulk_density  soil bulk density (kg m-3)
-  double quartz        soil quartz content (fraction)
+  double quartz        mineral soil quartz content (fraction of mineral soil volume)
+  double organic       total soil organic content (fraction of total solid soil volume)
+                         i.e., organic fraction of solid soil = organic*(1-porosity)
+                               mineral fraction of solid soil = (1-organic)*(1-porosity)
 
+  Modifications:
+
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 **********************************************************************/
   double Ke;
-  double Ki = 2.2;	/* thermal conductivity of ice (W/mK) */
-  double Kw = 0.57;	/* thermal conductivity of water (W/mK) */
+  double Ki = 2.2;      /* thermal conductivity of ice (W/mK) */
+  double Kw = 0.57;     /* thermal conductivity of water (W/mK) */
   double Ksat;
-  double Ks;		/* thermal conductivity of solid (W/mK)
-			   function of quartz content */
-  double Kdry;
-  double Sr;		/* fractional degree of saturation */
+  double Kdry;          /* Dry thermal conductivity of soil (W/mK), including mineral and organic fractions */
+  double Kdry_org = 0.05; /* Dry thermal conductivity of organic fraction (W/mK) (Farouki 1981) */
+  double Kdry_min;      /* Dry thermal conductivity of mineral fraction (W/mK) */
+  double Ks;            /* thermal conductivity of solid (W/mK), including mineral and organic fractions */
+  double Ks_org = 0.25; /* thermal conductivity of organic fraction of solid (W/mK) (Farouki 1981) */
+  double Ks_min;        /* thermal conductivity of mineral fraction of solid (W/mK) */
+  double Sr;            /* fractional degree of saturation */
   double K;
   double porosity;
 
-  Kdry = (0.135*bulk_density+64.7)/(soil_density-0.947*bulk_density);
+  /* Calculate dry conductivity as weighted average of mineral and organic fractions. */
+  Kdry_min = (0.135*bulk_density+64.7)/(soil_density-0.947*bulk_density);
+  Kdry = (1-organic)*Kdry_min + organic*Kdry_org;
 
   if(moist>0.) {
 
     porosity = 1.0 - bulk_density / soil_density; //NOTE: if excess_ice present,
-						  //this is actually effective_porosity
+                                                  //this is actually effective_porosity
 
     Sr = moist/porosity;
 
-    Ks = pow(7.7,quartz) * pow(2.2,1.0-quartz);
+    // Compute Ks of mineral soil; here "quartz" is the fraction (quartz volume / mineral soil volume)
+    if(quartz < .2)
+      Ks_min = pow(7.7,quartz) * pow(3.0,1.0-quartz);  // when quartz is less than 0.2
+    else
+      Ks_min = pow(7.7,quartz) * pow(2.2,1.0-quartz);  // when quartz is greater than 0.2
+    Ks = (1-organic)*Ks_min + organic*Ks_org;
 
     if(Wu==moist) {
 
@@ -77,41 +95,43 @@ double soil_conductivity(double moist,
   }
   else K=Kdry;
 
-  return (K); 
+  return (K);
 }
 
 
-#define organic_fract 0.00
-
 double volumetric_heat_capacity(double soil_fract,
                                 double water_fract,
-                                double ice_fract) {
+                                double ice_fract,
+                                double organic_fract) {
 /**********************************************************************
   This subroutine calculates the soil volumetric heat capacity based 
   on the fractional volume of its component parts.
 
   Constant values are volumetric heat capacities in J/m^3/K
-	Soil value is for clay or quartz - assumed for all other types
 
-  double soil_fract   fraction of soil volume composed of actual soil (fract)
-  double water_fract  fraction of soil volume composed of liquid water (fract)
-  double ice_fract    fraction of soil volume composed of ice (fract)
+  double soil_fract    fraction of soil volume composed of solid soil (fract)
+  double organic_fract fraction of solid soil volume composed of organic matter (fract)
+  double water_fract   fraction of soil volume composed of liquid water (fract)
+  double ice_fract     fraction of soil volume composed of ice (fract)
 
+  Modifications:
+
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 **********************************************************************/
 
   double Cs;
 
-  Cs = 2.0e6 * (soil_fract - organic_fract);
+  Cs  = 2.0e6 * soil_fract*(1-organic_fract);
+  Cs += 2.7e6 * soil_fract*organic_fract;
   Cs += 4.2e6 * water_fract;
   Cs += 1.9e6 * ice_fract;
-  Cs += 2.7e6 * organic_fract;
-  Cs += 1.3e3 * (1. - (soil_fract + water_fract + ice_fract + organic_fract));
+  Cs += 1.3e3 * (1. - (soil_fract + water_fract + ice_fract)); // air
 
   return (Cs);
 
 }
 
-#undef organic_fract
 
 void set_node_parameters(double   *dz_node,
 			 double   *Zsum_node,
@@ -300,9 +320,12 @@ int distribute_node_moisture_properties(double *moist_node,
 #endif
 					double *moist,
 					double *depth,
+					double *soil_dens_min,
+					double *bulk_dens_min,
+					double *quartz,
 					double *soil_density,
 					double *bulk_density,
-					double *quartz,
+					double *organic,
 					int     Nnodes,
 					int     Nlayers,
 					char    FS_ACTIVE) {
@@ -324,9 +347,12 @@ int distribute_node_moisture_properties(double *moist_node,
   double *bubble_node     thermal node bubbling pressure (cm)
   double *moist           soil layer moisture (mm)
   double *depth           soil layer thickness (m)
-  double  soil_density    soil density (kg m-3)
-  double *bulk_density    soil layer bulk density (kg m-3)
-  double  quartz          soil quartz content (fract)
+  double *soil_dens_min   mineral soil particle density (kg m-3)
+  double *bulk_dens_min   mineral soil bulk density (kg m-3)
+  double  quartz          mineral soil quartz content (fract)
+  double *soil_density    soil particle density (kg m-3)
+  double *bulk_density    soil bulk density (kg m-3)
+  double  organic         soil organic content (fract)
   int     Nnodes          number of soil thermal nodes
   int     Nlayers         number of soil moisture layers
 
@@ -350,6 +376,8 @@ int distribute_node_moisture_properties(double *moist_node,
   2010-Nov-02 Turned off error reporting for when node moisture exceeds
 	      maximum; now node moisture greater than maximum is simply
 	      reset to maximum.						TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 
 *********************************************************************/
 
@@ -411,9 +439,8 @@ int distribute_node_moisture_properties(double *moist_node,
 
       /* compute thermal conductivity */
       kappa_node[nidx] 
-	= soil_conductivity(moist_node[nidx], moist_node[nidx] 
-			    - ice_node[nidx], 
-			    soil_density[lidx], bulk_density[lidx], quartz[lidx]);
+	= soil_conductivity(moist_node[nidx], moist_node[nidx] - ice_node[nidx], 
+			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
 
     }
     else {
@@ -422,14 +449,11 @@ int distribute_node_moisture_properties(double *moist_node,
       /* compute thermal conductivity */
       kappa_node[nidx] 
 	= soil_conductivity(moist_node[nidx], moist_node[nidx], 
-			    soil_density[lidx], bulk_density[lidx], 
-			    quartz[lidx]);
+			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
     }
     /* compute volumetric heat capacity */
-    Cs_node[nidx] = volumetric_heat_capacity(bulk_density[lidx] 
-					     / soil_density[lidx],
-					     moist_node[nidx] - ice_node[nidx],
-					     ice_node[nidx]);
+    Cs_node[nidx] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx],
+					     moist_node[nidx] - ice_node[nidx], ice_node[nidx], organic[lidx]);
 
     if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
@@ -472,9 +496,6 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *porosity,
 			       double            *effective_porosity,
 #endif // EXCESS_ICE
-			       double            *bulk_density,
-			       double            *soil_density,
-			       double            *quartz,
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -493,9 +514,6 @@ int estimate_layer_ice_content(layer_data_struct *layer,
   double       *max_moist       soil layer maximum soil moisture (mm)
   double       *expt            soil layer exponential ()
   double       *bubble          soil layer bubling pressure (cm)
-  double       *bulk_density    soil layer bulk density (kg m-3)
-  double        soil_density    soil layer soil density (kg m-3)
-  double        quartz          soil layer quartz content (fract)
   int           Nnodes          number of soil thermal nodes
   int           Nlayer          number of soil moisture layers
 
@@ -769,9 +787,12 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 
 void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 					   double            *depth,
+					   double            *bulk_dens_min,
+					   double            *soil_dens_min,
+					   double            *quartz,
 					   double            *bulk_density,
 					   double            *soil_density,
-					   double            *quartz,
+					   double            *organic,
 #if SPATIAL_FROST
 					   double            *frost_fract,
 #endif
@@ -784,13 +805,18 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 
   layer_data_struct *layer          structure with all soil layer variables
   double            *depth          soil layer depths (m)
-  double            *bulk_density   soil layer bulk density (kg/m^3)
-  double             soil_density   soil layer soil density (kg/m^3)
-  double             quartz         soil layer quartz content (fract)
+  double            *bulk_dens_min  mineral soil bulk density (kg/m^3)
+  double            *soil_dens_min  mineral soil particle density (kg/m^3)
+  double             quartz         mineral soil quartz content (fract)
+  double            *bulk_density   soil bulk density (kg/m^3)
+  double            *soil_density   soil particle density (kg/m^3)
+  double             organic        soil organic content (fract)
   int                Nlayers        number of soil layers
 
   MODIFICATIONS:
-  2007-Aug-10 Added features for EXCESS_ICE option.		JCA
+  2007-Aug-10 Added features for EXCESS_ICE option.			JCA
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 
 ********************************************************************/
 
@@ -813,10 +839,9 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 #endif
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, 
-			  soil_density[lidx], bulk_density[lidx], quartz[lidx]);
+			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
     layer[lidx].Cs 
-      = volumetric_heat_capacity(bulk_density[lidx] / soil_density[lidx], 
-				 moist - ice, ice);
+      = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist-ice, ice, organic[lidx]);
   }
 }
 

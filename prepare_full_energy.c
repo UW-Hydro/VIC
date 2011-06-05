@@ -36,6 +36,8 @@ void prepare_full_energy(int               iveg,
 	      for earlier bands was always overwritten by the value
 	      of moist computed for the final band (even if the final
 	      band had 0 area).						KAC via TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 
 *******************************************************************/
 
@@ -87,9 +89,12 @@ void prepare_full_energy(int               iveg,
 
       /** Compute Soil Thermal Properties **/
       compute_soil_layer_thermal_properties(layer,soil_con->depth,
+					    soil_con->bulk_dens_min,
+					    soil_con->soil_dens_min,
+					    soil_con->quartz,
 					    soil_con->bulk_density,
 					    soil_con->soil_density,
-					    soil_con->quartz,
+					    soil_con->organic,
 #if SPATIAL_FROST
 					    soil_con->frost_fract,
 #endif

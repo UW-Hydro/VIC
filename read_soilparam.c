@@ -36,6 +36,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double dp;		         m       soil thermal damping depth
   double bubble;	         cm      bubbling pressure, HBH 5.15
   double quartz;	         fract   quartz content of soil
+  double organic;	         fract   organic content of soil
   double bulk_density[MAX_LAYERS]; kg/m^3  soil bulk density
   double soil_density;		 kg/m^3  soil partical density
   double rough;		         m       soil surface roughness
@@ -110,6 +111,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      GRID_DECIMAL > 4.						TJB
   2011-May-25 Moved fgets() so that it always gets called, even when
 	      cells are skipped.					TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  If TRUE, VIC expects organic
+	      fraction and organic bulk and soil densities to be supplied
+	      for each grid cell.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -406,10 +410,16 @@ soil_con_struct read_soilparam(FILE *soilparam,
         token = strtok (NULL, delimiters);
         while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
         if( token == NULL ) {
-          sprintf(ErrStr,"ERROR: Can't find values for BULK DENSITY for layer %d in soil file\n", layer );
+          sprintf(ErrStr,"ERROR: Can't find values for mineral BULK DENSITY for layer %d in soil file\n", layer );
           nrerror(ErrStr);
         }
-        sscanf(token, "%lf", &temp.bulk_density[layer]);
+        sscanf(token, "%lf", &temp.bulk_dens_min[layer]);
+#if !OUTPUT_FORCE
+        if(temp.bulk_dens_min[layer] <= 0) {
+          sprintf(ErrStr,"ERROR: layer %d mineral bulk density (%f) must be > 0", layer, temp.bulk_dens_min[layer] );
+          nrerror(ErrStr);
+        }
+#endif /* !OUTPUT_FORCE */
       }
 
       /* read layer soil density */
@@ -417,14 +427,83 @@ soil_con_struct read_soilparam(FILE *soilparam,
         token = strtok (NULL, delimiters);
         while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
         if( token == NULL ) {
-          sprintf(ErrStr,"ERROR: Can't find values for SOIL DENSITY for layer %d in soil file\n", layer );
+          sprintf(ErrStr,"ERROR: Can't find values for mineral SOIL DENSITY for layer %d in soil file\n", layer );
           nrerror(ErrStr);
         }
-        sscanf(token, "%lf", &temp.soil_density[layer]);
+        sscanf(token, "%lf", &temp.soil_dens_min[layer]);
 #if !OUTPUT_FORCE
-        if(temp.bulk_density[layer]>=temp.soil_density[layer])
-          nrerror("Layer bulk density must be less then soil density");
+        if(temp.soil_dens_min[layer] <= 0) {
+          sprintf(ErrStr,"ERROR: layer %d mineral soil density (%f) must be > 0", layer, temp.soil_dens_min[layer] );
+          nrerror(ErrStr);
+        }
+        if(temp.bulk_dens_min[layer]>=temp.soil_dens_min[layer])
+          nrerror("Layer mineral bulk density must be less than mineral soil density");
 #endif /* !OUTPUT_FORCE */
+      }
+
+      if (options.ORGANIC_FRACT) {
+        /* read layer organic content */
+        for(layer = 0; layer < options.Nlayer; layer++){
+          token = strtok (NULL, delimiters);
+          while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+          if( token == NULL ) {
+            sprintf(ErrStr,"ERROR: Can't find values for ORGANIC CONTENT for layer %d in soil file\n", layer );
+            nrerror(ErrStr);
+          }
+          sscanf(token, "%lf", &temp.organic[layer]);
+#if !OUTPUT_FORCE
+          if(temp.organic[layer] > 1. || temp.organic[layer] < 0) {
+            sprintf(ErrStr,"ERROR: Need valid volumetric organic soil fraction when options.ORGANIC_FRACT is set to TRUE.\n  %f is not acceptable.\n", temp.organic[layer]);
+            nrerror(ErrStr);
+          }
+#endif /* !OUTPUT_FORCE */
+        }
+
+        /* read layer bulk density */
+        for(layer = 0; layer < options.Nlayer; layer++){
+          token = strtok (NULL, delimiters);
+          while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+          if( token == NULL ) {
+            sprintf(ErrStr,"ERROR: Can't find values for organic BULK DENSITY for layer %d in soil file\n", layer );
+            nrerror(ErrStr);
+          }
+          sscanf(token, "%lf", &temp.bulk_dens_org[layer]);
+#if !OUTPUT_FORCE
+          if(temp.bulk_dens_org[layer] <= 0 && temp.organic[layer] > 0) {
+            fprintf(stderr,"WARNING: layer %d organic bulk density (%f) must be > 0; setting to mineral bulk density (%f)\n", layer, temp.bulk_dens_org[layer], temp.bulk_dens_min[layer] );
+            temp.bulk_dens_org[layer] = temp.bulk_dens_min[layer];
+          }
+#endif /* !OUTPUT_FORCE */
+        }
+
+        /* read layer soil density */
+        for(layer = 0; layer < options.Nlayer; layer++) {
+          token = strtok (NULL, delimiters);
+          while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+          if( token == NULL ) {
+            sprintf(ErrStr,"ERROR: Can't find values for organic SOIL DENSITY for layer %d in soil file\n", layer );
+            nrerror(ErrStr);
+          }
+          sscanf(token, "%lf", &temp.soil_dens_org[layer]);
+#if !OUTPUT_FORCE
+          if(temp.soil_dens_org[layer] <= 0 && temp.organic[layer] > 0) {
+            fprintf(stderr,"WARNING: layer %d organic soil density (%f) must be > 0; setting to mineral soil density (%f)\n", layer, temp.soil_dens_org[layer], temp.soil_dens_min[layer] );
+            temp.soil_dens_org[layer] = temp.soil_dens_min[layer];
+          }
+          if(temp.organic[layer] > 0 && temp.bulk_dens_org[layer]>=temp.soil_dens_org[layer]) {
+            sprintf(ErrStr,"ERROR: layer %d organic bulk density (%f) must be less than organic soil density (%f)", layer, temp.bulk_dens_org[layer], temp.soil_dens_org[layer] );
+            nrerror(ErrStr);
+          }
+#endif /* !OUTPUT_FORCE */
+        }
+
+      }
+      else {
+        for(layer = 0; layer < options.Nlayer; layer++){
+          temp.organic[layer] = 0.0;
+          temp.bulk_dens_org[layer] = -9999;
+          temp.soil_dens_org[layer] = -9999;
+        }
       }
 
       /* read cell gmt offset */
@@ -573,10 +652,11 @@ soil_con_struct read_soilparam(FILE *soilparam,
         Compute Soil Layer Properties
       *******************************************/
       for(layer = 0; layer < options.Nlayer; layer++) {
+        temp.bulk_density[layer] = (1-temp.organic[layer])*temp.bulk_dens_min[layer] + temp.organic[layer]*temp.bulk_dens_org[layer];
+        temp.soil_density[layer] = (1-temp.organic[layer])*temp.soil_dens_min[layer] + temp.organic[layer]*temp.soil_dens_org[layer];
         if (temp.resid_moist[layer] == MISSING)
             temp.resid_moist[layer] = RESID_MOIST;
-        temp.porosity[layer] = 1.0 - temp.bulk_density[layer]
-            / temp.soil_density[layer];
+        temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
 #if !EXCESS_ICE
         temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
 #endif
@@ -622,6 +702,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
           extra_depth += temp.depth[layer]-temp.min_depth[layer]; //net increase in depth due to excess ice
           fprintf(stderr,"\t\tDepth of soil layer adjusted for excess ground ice: from %.2f m to %.2f m.\n",temp.min_depth[layer],temp.depth[layer]);
           fprintf(stderr,"\t\tBulk density adjusted for excess ground ice: from %.2f kg/m^3 to %.2f kg/m^3.\n",temp.bulk_density[layer],(1.0-temp.effective_porosity[layer])*temp.soil_density[layer]);
+          temp.bulk_dens_min[layer] *= (1.0-temp.effective_porosity[layer])*temp.soil_density[layer]/temp.bulk_density[layer];
+          if (temp.organic[layer] > 0)
+            temp.bulk_dens_org[layer] *= (1.0-temp.effective_porosity[layer])*temp.soil_density[layer]/temp.bulk_density[layer];
           temp.bulk_density[layer] = (1.0-temp.effective_porosity[layer])*temp.soil_density[layer]; //adjust bulk density
         }
         else //excess ground ice not present

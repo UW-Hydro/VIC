@@ -92,6 +92,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
   2011-May-31 Removed options.GRND_FLUX.					TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -489,6 +491,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
 	else options.JULY_TAVG_SUPPLIED=TRUE;
+      }
+      else if(strcasecmp("ORGANIC_FRACT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FALSE",flgstr)==0) options.ORGANIC_FRACT=FALSE;
+        else options.ORGANIC_FRACT=TRUE;
       }
       else if(strcasecmp("VEGLIB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veglib);

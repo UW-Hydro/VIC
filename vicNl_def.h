@@ -114,6 +114,8 @@
 	      OUT_ZWTL.							TJB
   2011-May-31 Removed options.GRND_FLUX.				TJB
   2011-May-31 Increased length of zwtvmoist_* arrays.			TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -645,6 +647,7 @@ typedef struct {
   char   LAI_SRC;        /* LAI_FROM_VEGLIB = read LAI values from veg library file
                             LAI_FROM_VEGPARAM = read LAI values from the veg param file */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
+  char   ORGANIC_FRACT;  /* TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
   // state options
   char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
@@ -789,10 +792,10 @@ typedef struct {
   double   bubble[MAX_LAYERS];        /* bubbling pressure, HBH 5.15 (cm) */
   double   bubble_node[MAX_NODES];    /* bubbling pressure (cm) */
   double   bulk_density[MAX_LAYERS];  /* soil bulk density (kg/m^3) */
+  double   bulk_dens_min[MAX_LAYERS]; /* bulk density of mineral soil (kg/m^3) */
+  double   bulk_dens_org[MAX_LAYERS]; /* bulk density of organic soil (kg/m^3) */
   double   c;                         /* exponent in ARNO baseflow scheme */
-  double   depth[MAX_LAYERS];         /* thickness of each soil moisture 
-					 layer (m).  In the case of EXCESS_ICE,
-				         this is the effective (dynamic) depth. */
+  double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m).  In the case of EXCESS_ICE, this is the effective (dynamic) depth. */
 #if SPATIAL_SNOW
   double   depth_full_snow_cover;     // minimum depth for full snow cover
 #endif // SPATIAL_SNOW
@@ -802,33 +805,28 @@ typedef struct {
   double   expt[MAX_LAYERS];          /* layer-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
   double   expt_node[MAX_NODES];      /* node-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
 #if SPATIAL_FROST
-  double   frost_fract[FROST_SUBAREAS]; /* spatially distributed frost 
-					   coverage fractions */
+  double   frost_fract[FROST_SUBAREAS]; /* spatially distributed frost coverage fractions */
   double   frost_slope;               // slope of frost distribution
 #endif // SPATIAL_FROST
   double   gamma[MAX_NODES];          /* thermal solution constant */
   double   init_moist[MAX_LAYERS];    /* initial layer moisture level (mm) */
   double   max_infil;                 /* maximum infiltration rate */
-  double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per 
-					 layer */
-  double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per 
-					 node */
-  double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter 
-					 (mm/mm) */
+  double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per layer */
+  double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per node */
+  double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter (mm/mm) */
   double   porosity[MAX_LAYERS];      /* porosity (fraction) */
-  double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction) */
-  double   resid_moist[MAX_LAYERS];   /* residual moisture content of soil 
-					 layer */
+  double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction of mineral soil volume) */
+  double   organic[MAX_LAYERS];       /* organic content of soil (fraction of total soil volume) */
+  double   resid_moist[MAX_LAYERS];   /* residual moisture content of soil layer */
   double   rough;                     /* soil surface roughness (m) */
   double   snow_rough;                /* snow surface roughness (m) */
-  double   soil_density[MAX_LAYERS];  /* soil partical density (kg/m^3) */
+  double   soil_density[MAX_LAYERS];  /* soil particle density (kg/m^3) */
+  double   soil_dens_min[MAX_LAYERS]; /* particle density of mineral soil (kg/m^3) */
+  double   soil_dens_org[MAX_LAYERS]; /* particle density of organic soil (kg/m^3) */
   float   *BandElev;                  /* Elevation of each snow elevation band */
-  double  *AreaFract;                 /* Fraction of grid cell included in 
-					 each snow elevation band */
-  double  *Pfactor;                   /* Change in Precipitation due to 
-					 elevation (fract) in each snow elevation band */
-  double  *Tfactor;                   /* Change in temperature due to 
-					 elevation (C) in each snow elevation band */
+  double  *AreaFract;                 /* Fraction of grid cell included in each snow elevation band */
+  double  *Pfactor;                   /* Change in Precipitation due to elevation (fract) in each snow elevation band */
+  double  *Tfactor;                   /* Change in temperature due to elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];
@@ -839,21 +837,15 @@ typedef struct {
   float    lng;                       /* grid cell central longitude */
   double   cell_area;                 /* Area of grid cell (m^2) */
   float    time_zone_lng;             /* central meridian of the time zone */
-  float  **layer_node_fract;          /* fraction of all nodes within each 
-					 layer */
+  float  **layer_node_fract;          /* fraction of all nodes within each layer */
   int      gridcel;                   /* grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
   double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
 #if EXCESS_ICE
-  double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m). 
-					 The effective depth will always be >= this value. */
+  double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m).  The effective depth will always be >= this value. */
   double   porosity_node[MAX_NODES];  /* porosity for each thermal node */
-  double   effective_porosity[MAX_LAYERS]; /* effective soil porosity (fraction)
-					   when soil pores are expanded due to
-					   excess ground ice */
-  double   effective_porosity_node[MAX_NODES]; /* effective soil porosity (fraction)
-					   when soil pores are expanded due to
-					   excess ground ice */
+  double   effective_porosity[MAX_LAYERS]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
+  double   effective_porosity_node[MAX_NODES]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
   double   Wcr_FRACT[MAX_LAYERS];
   double   Wpwp_FRACT[MAX_LAYERS];
   double   subsidence[MAX_LAYERS];      /* subsidence of soil layer, mm*/

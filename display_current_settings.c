@@ -45,6 +45,7 @@ void display_current_settings(int                 mode,
   2009-Nov-15 Redirected output to stderr.			TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.TJB
   2011-May-31 Removed GRND_FLUX option.				TJB
+  2011-Jun-03 Added ORGANIC_FRACT option.			TJB
 **********************************************************************/
 {
 
@@ -322,6 +323,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"JULY_TAVG_SUPPLIED\t\tTRUE\n");
   else
     fprintf(stderr,"JULY_TAVG_SUPPLIED\t\tFALSE\n");
+  if (options.ORGANIC_FRACT)
+    fprintf(stderr,"ORGANIC_FRACT\t\tTRUE\n");
+  else
+    fprintf(stderr,"ORGANIC_FRACT\t\tFALSE\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Veg Data:\n");

@@ -86,6 +86,8 @@ int solve_lake(double             snowfall,
   2010-Dec-28 Added latitude to arglist of alblake().			TJB
   2011-Mar-01 Changed units of snow and energy fluxes to be over entire
 	      lake; this fixes several water/energy balance errors.	TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -2322,9 +2324,12 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
                                                     soil_con.effective_porosity_node,
 #endif // EXCESS_ICE
                                                     moist, soil_con.depth,
+                                                    soil_con.soil_dens_min,
+                                                    soil_con.bulk_dens_min,
+                                                    soil_con.quartz,
                                                     soil_con.soil_density,
                                                     soil_con.bulk_density,
-                                                    soil_con.quartz, options.Nnode,
+                                                    soil_con.organic, options.Nnode,
                                                     options.Nlayer, soil_con.FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
   }

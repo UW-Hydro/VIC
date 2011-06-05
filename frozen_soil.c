@@ -132,8 +132,6 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 					   soil_con->porosity,
 					   soil_con->effective_porosity,
 #endif // EXCESS_ICE
-					   soil_con->bulk_density,
-					   soil_con->soil_density, soil_con->quartz,
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     if(options.DIST_PRCP) {
@@ -156,8 +154,6 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 #if EXCESS_ICE
 					     soil_con->porosity, soil_con->effective_porosity,
 #endif // EXCESS_ICE
-					     soil_con->bulk_density, soil_con->soil_density, 
-					     soil_con->quartz, 
 					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
     }
@@ -360,9 +356,12 @@ int solve_T_profile_implicit(double *T,                           // update
 			     int  NOFLUX,
 			     int EXP_TRANS,
 			     int veg_class,                // model parameter
+			     double *bulk_dens_min,          // soil parameter
+			     double *soil_dens_min,          // soil parameter
+			     double *quartz,                // soil parameter
 			     double *bulk_density,          // soil parameter
 			     double *soil_density,          // soil parameter
-			     double *quartz,                // soil parameter
+			     double *organic,                // soil parameter
 			     double *depth)                 // soil parameter
 {    
   /**********************************************************************
@@ -381,7 +380,10 @@ int solve_T_profile_implicit(double *T,                           // update
 	      new ice.							JCA
   2007-Aug-08 Added EXCESS_ICE OPTION.					JCA
   2009-Feb-09 Removed dz_node from call to solve_T_profile and 
-              solve_T_profile_implicit.                                         KAC
+              solve_T_profile_implicit.					KAC
+  2011-Jun-03 Added ORGANIC_FRACT option.				TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 
   **********************************************************************/
   
@@ -409,7 +411,7 @@ int solve_T_profile_implicit(double *T,                           // update
 #if EXCESS_ICE
 	       porosity, effective_porosity,
 #endif
-	       alpha, beta, gamma, Zsum, Dp, bulk_density, soil_density, quartz, depth, options.Nlayer);
+	       alpha, beta, gamma, Zsum, Dp, bulk_dens_min, soil_dens_min, quartz, bulk_density, soil_density, organic, depth, options.Nlayer);
   
   // modified Newton-Raphson to solve for new T
   vecfunc = &(fda_heat_eqn);
@@ -759,6 +761,8 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	      time-varying changes in Cs.					JCA
   2007-Aug-08 Added EXCESS_ICE option.						JCA
   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.					TJB
   **********************************************************************/
     
   static double  deltat;
@@ -782,9 +786,12 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   static double *gamma;
   static double *Zsum;
   static double Dp;
+  static double *bulk_dens_min;
+  static double *soil_dens_min;
+  static double *quartz;
   static double *bulk_density;
   static double *soil_density;
-  static double *quartz;
+  static double *organic;
   static double *depth;
   static int Nlayers;
   
@@ -831,9 +838,12 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
     gamma      = va_arg(arg_addr, double *);
     Zsum       = va_arg(arg_addr, double *);
     Dp         = va_arg(arg_addr, double);
+    bulk_dens_min = va_arg(arg_addr, double *);
+    soil_dens_min = va_arg(arg_addr, double *);
+    quartz     = va_arg(arg_addr, double *);
     bulk_density = va_arg(arg_addr, double *);
     soil_density = va_arg(arg_addr, double *);
-    quartz     = va_arg(arg_addr, double *);
+    organic    = va_arg(arg_addr, double *);
     depth      = va_arg(arg_addr, double *);
     Nlayers    = va_arg(arg_addr, int);
     
@@ -884,9 +894,9 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	  // update other states due to ice content change
 	  /***********************************************/
 	  if (ice_new[i]!=ice[i]) {
-	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_density[lidx],
-	    				     bulk_density[lidx], quartz[lidx]);
-	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i]);
+	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_dens_min[lidx],
+	    				     bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i], organic[lidx]);
 	  }
 	  /************************************************/	  
 	}
@@ -987,9 +997,9 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
       for (i=0; i<=right+1; i++) {
 	if(i>=left+1) {
 	  if (ice_new[i]!=ice[i]) {
-	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_density[lidx],
-					     bulk_density[lidx], quartz[lidx]);
-	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i]);
+	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_dens_min[lidx],
+					     bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i], organic[lidx]);
 	  }
 	}
 	if(Zsum[i] > Lsum + depth[lidx] && !PAST_BOTTOM) {

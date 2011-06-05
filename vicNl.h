@@ -97,6 +97,8 @@
   2011-May-24 Replaced finish_frozen_soil_calcs() with
 	      calc_layer_average_thermal_props().  Added
 	      estimate_layer_ice_content_quick_flux().			TJB
+  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
+	      organic fraction into account.				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -218,8 +220,8 @@ void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
 void   compute_runoff_and_asat(soil_con_struct *, double *, double, double *, double *);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
-					     double *, double *, 
-					     double *, 
+					     double *, double *, double *, 
+					     double *, double *, double *, 
 #if SPATIAL_FROST
                                              double *,
 #endif
@@ -238,21 +240,21 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 #if QUICK_FS
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *, double ***, 
-					 double *, double *, double *,
-					 double *, double *, int, int, char);
+					 double *, double *, double *, double *, double *,
+					 double *, double *, double *, int, int, char);
 #else
 #if EXCESS_ICE
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *, double *, 
 					 double *, double *, double *,
-					 double *, double *, double *,
-					 double *, double *, int, int, char);
+					 double *, double *, double *, double *, double *,
+					 double *, double *, double *, int, int, char);
 #else
 int  distribute_node_moisture_properties(double *, double *, double *, 
 					 double *, double *, double *,
 					 double *, double *, double *,
-					 double *, double *, double *,
-					 double *, double *, int, int, char);
+					 double *, double *, double *, double *, double *,
+					 double *, double *, double *, int, int, char);
 #endif
 #endif
 void   distribute_soil_property(double *,double,double,
@@ -281,7 +283,6 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if SPATIAL_FROST
 			       double *, double,
 #endif // SPATIAL_FROST
-			       double *, double *, double *, 
 			       int, int, char);
 #else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
@@ -293,7 +294,6 @@ int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,
 #endif // EXCESS_ICE
-			       double *, double *, double *, 
 			       int, int, char);
 #endif
 int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
@@ -488,7 +488,7 @@ int    snow_melt(double, double, double, double, double *, double, double *, dou
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, snow_data_struct *, soil_con_struct *);
 double SnowPackEnergyBalance(double, va_list);
-double soil_conductivity(double, double, double, double, double);
+double soil_conductivity(double, double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 energy_bal_struct, double *, double *, double *,
 			 int, int);
@@ -532,7 +532,7 @@ int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
 #endif
 			       double *, double *, double *, double *, double, int, int *,
 			       int, int, int, int, 
-			       double *, double *, double *, double *);
+			       double *, double *, double *, double *, double *, double *, double *);
 double StabilityCorrection(double, double, double, double, double, double);
 void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,
 				veg_var_struct ***,snow_data_struct **,
@@ -567,7 +567,7 @@ int update_thermal_nodes(dist_prcp_struct *,
 void usage(char *);
 
 void   vicerror(char *);
-double volumetric_heat_capacity(double,double,double);
+double volumetric_heat_capacity(double,double,double,double);
 
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_atmosdata(atmos_data_struct *, int);

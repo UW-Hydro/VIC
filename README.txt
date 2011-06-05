@@ -31,6 +31,54 @@ Usage:
 New Features:
 -------------
 
+Added the ability to simulate organic soil.
+
+	Files Affected:
+
+	display_current_settings.c
+	frozen_soil.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+	lakes.eb.c
+	prepare_full_energy.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	runoff.c
+	soil_conduction.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added logic to handle organic soil properties.  Added a new global
+	parameter file option, ORGANIC_FRACT. If ORGANIC_FRACT is TRUE, VIC
+	assumes that there are 3*Nlayer extra columns in the soil parameter
+	file, containing for each layer the organic fraction and bulk and soil
+	densities of the organic matter.  If ORGANIC_FRACT is FALSE or is
+	omitted, VIC assumes that the soil param file does not contain these
+	extra columns, and assumes that the soil contains 0 organic matter (as
+	in previous versions of VIC).
+
+	The organic fraction in the soil parameter file is the fraction of
+	soil (by volume) that is organic matter.  If this fraction is > 0,
+	then the quartz content and the original bulk and soil densities are
+	assumed to apply only to the mineral portion of the soil.  Internally,
+	VIC will compute the aggregate bulk and soil densities of the combined
+	mineral and organic portions of the soil and compute an aggregate soil
+	porosity.
+
+	VIC now uses equations taken from Farouki 1986 to compute the thermal
+	conductivity and heat capacity of the soil containing organic matter.
+	As organic fraction approaches 0, the soil properties approach those
+	of the mineral portion of the soil.
+
+
+
+
 Extended computation of soil temperatures and ground heat flux to all modes of
 operation.
 

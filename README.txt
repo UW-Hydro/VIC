@@ -85,6 +85,7 @@ operation.
 
 	Files Affected:
 
+	calc_soil_thermal_eqn.c
 	calc_surf_energy_bal.c
 	display_current_settings.c
 	frozen_soil.c

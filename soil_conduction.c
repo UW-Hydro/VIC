@@ -30,8 +30,8 @@ double soil_conductivity(double moist,
 
   double moist         total moisture content (mm/mm)
   double Wu            liquid water content (mm/mm)
-  double soil_density  soil density (kg m-3)
-  double bulk_density  soil bulk density (kg m-3)
+  double soil_density  mineral soil density (kg m-3)
+  double bulk_density  mineral soil bulk density (kg m-3)
   double quartz        mineral soil quartz content (fraction of mineral soil volume)
   double organic       total soil organic content (fraction of total solid soil volume)
                          i.e., organic fraction of solid soil = organic*(1-porosity)

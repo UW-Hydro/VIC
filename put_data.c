@@ -881,10 +881,7 @@ void collect_wb_terms(cell_data_struct  cell,
   out_data[OUT_BASEFLOW].data[0] += cell.baseflow * AreaFactor; 
 
   /** record inflow **/
-  if (HasVeg) 
-    out_data[OUT_INFLOW].data[0] += (cell.inflow + veg_var.canopyevap) * AreaFactor;
-  else 
-    out_data[OUT_INFLOW].data[0] += (cell.inflow) * AreaFactor;
+  out_data[OUT_INFLOW].data[0] += (cell.inflow) * AreaFactor;
  
   /** record canopy interception **/
   if (HasVeg) 

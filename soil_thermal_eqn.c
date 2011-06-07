@@ -9,16 +9,16 @@ double soil_thermal_eqn(double T, va_list ap) {
  /******************************************************************
   Modifications:
 
-  Apr 24, 2007: Added EXP_TRANS option.						JCA
-                (therefore fprime removed)
-  Apr 24, 2007: Rearranged terms in finite-difference heat equation (equation 8
-                of Cherkauer et al. (1999)).  see note in solve_T_profile.
-                This affects the equation for value.  (also see below for 
-                the physical meaning of each of the terms).			JCA
-  Apr 24, 2007: Added patch for the "cold nose" problem using the EXPLICIT  
-                option. (see comments on this in fda_heat_eqn in frozen_soil.c)	JCA
-  Aug 08, 2007: Added EXCESS_ICE option.					JCA
-  Oct 08, 2007: Fixed error in EXP_TRANS formulation.				JCA
+  2007-Apr-24 Added EXP_TRANS option.						JCA
+              (therefore fprime removed)
+  2007-Apr-24 Rearranged terms in finite-difference heat equation (equation 8
+              of Cherkauer et al. (1999)).  see note in solve_T_profile.
+              This affects the equation for value.  (also see below for 
+              the physical meaning of each of the terms).			JCA
+  2007-Apr-24 Added patch for the "cold nose" problem using the EXPLICIT  
+              option. (see comments on this in fda_heat_eqn in frozen_soil.c)	JCA
+  2007-Aug-08 Added EXCESS_ICE option.						JCA
+  2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
   ******************************************************************/
 
 

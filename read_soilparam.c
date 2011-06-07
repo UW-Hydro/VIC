@@ -436,8 +436,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
           sprintf(ErrStr,"ERROR: layer %d mineral soil density (%f) must be > 0", layer, temp.soil_dens_min[layer] );
           nrerror(ErrStr);
         }
-        if(temp.bulk_dens_min[layer]>=temp.soil_dens_min[layer])
-          nrerror("Layer mineral bulk density must be less than mineral soil density");
+        if(temp.bulk_dens_min[layer]>=temp.soil_dens_min[layer]) {
+          sprintf(ErrStr,"ERROR: layer %d mineral bulk density (%f) must be less than mineral soil density (%f)", layer, temp.bulk_dens_min[layer], temp.soil_dens_min[layer] );
+          nrerror(ErrStr);
+        }
 #endif /* !OUTPUT_FORCE */
       }
 

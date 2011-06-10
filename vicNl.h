@@ -99,6 +99,8 @@
 	      estimate_layer_ice_content_quick_flux().			TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
+	      soil_conductivity() to fix bug in commputation of kappa.	TJB
 ************************************************************************/
 
 #include <math.h>
@@ -488,7 +490,7 @@ int    snow_melt(double, double, double, double, double *, double, double *, dou
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, snow_data_struct *, soil_con_struct *);
 double SnowPackEnergyBalance(double, va_list);
-double soil_conductivity(double, double, double, double, double, double);
+double soil_conductivity(double, double, double, double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 energy_bal_struct, double *, double *, double *,
 			 int, int);

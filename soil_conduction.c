@@ -6,9 +6,11 @@ static char vcid[] = "$Id$";
 
 double soil_conductivity(double moist, 
 			 double Wu, 
+			 double soil_dens_min, 
+			 double bulk_dens_min,
+			 double quartz,
 			 double soil_density, 
 			 double bulk_density,
-			 double quartz,
 			 double organic) {
 /**********************************************************************
   Soil thermal conductivity calculated using Johansen's method.
@@ -30,9 +32,11 @@ double soil_conductivity(double moist,
 
   double moist         total moisture content (mm/mm)
   double Wu            liquid water content (mm/mm)
-  double soil_density  mineral soil density (kg m-3)
-  double bulk_density  mineral soil bulk density (kg m-3)
+  double soil_dens_min mineral soil particle density (kg m-3)
+  double bulk_dens_min mineral soil bulk density (kg m-3)
   double quartz        mineral soil quartz content (fraction of mineral soil volume)
+  double soil_density  soil particle density (kg m-3)
+  double bulk_density  soil bulk density (kg m-3)
   double organic       total soil organic content (fraction of total solid soil volume)
                          i.e., organic fraction of solid soil = organic*(1-porosity)
                                mineral fraction of solid soil = (1-organic)*(1-porosity)
@@ -41,6 +45,8 @@ double soil_conductivity(double moist,
 
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
+	      soil_conductivity() to fix bug in commputation of kappa.		TJB
 **********************************************************************/
   double Ke;
   double Ki = 2.2;      /* thermal conductivity of ice (W/mK) */
@@ -57,7 +63,7 @@ double soil_conductivity(double moist,
   double porosity;
 
   /* Calculate dry conductivity as weighted average of mineral and organic fractions. */
-  Kdry_min = (0.135*bulk_density+64.7)/(soil_density-0.947*bulk_density);
+  Kdry_min = (0.135*bulk_dens_min+64.7)/(soil_dens_min-0.947*bulk_dens_min);
   Kdry = (1-organic)*Kdry_min + organic*Kdry_org;
 
   if(moist>0.) {
@@ -440,7 +446,8 @@ int distribute_node_moisture_properties(double *moist_node,
       /* compute thermal conductivity */
       kappa_node[nidx] 
 	= soil_conductivity(moist_node[nidx], moist_node[nidx] - ice_node[nidx], 
-			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
+			    soil_density[lidx], bulk_density[lidx], organic[lidx]);
 
     }
     else {
@@ -449,7 +456,8 @@ int distribute_node_moisture_properties(double *moist_node,
       /* compute thermal conductivity */
       kappa_node[nidx] 
 	= soil_conductivity(moist_node[nidx], moist_node[nidx], 
-			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+			    soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
+			    soil_density[lidx], bulk_density[lidx], organic[lidx]);
     }
     /* compute volumetric heat capacity */
     Cs_node[nidx] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx],
@@ -817,6 +825,8 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
   2007-Aug-10 Added features for EXCESS_ICE option.			JCA
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
+	      soil_conductivity() to fix bug in commputation of kappa.	TJB
 
 ********************************************************************/
 
@@ -839,7 +849,8 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 #endif
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, 
-			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
+			  soil_density[lidx], bulk_density[lidx], organic[lidx]);
     layer[lidx].Cs 
       = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist-ice, ice, organic[lidx]);
   }

@@ -763,6 +763,8 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
+	      soil_conductivity() to fix bug in commputation of kappa.		TJB
   **********************************************************************/
     
   static double  deltat;
@@ -894,8 +896,9 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	  // update other states due to ice content change
 	  /***********************************************/
 	  if (ice_new[i]!=ice[i]) {
-	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_dens_min[lidx],
-	    				     bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i],
+					     soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
+					     soil_density[lidx], bulk_density[lidx], organic[lidx]);
 	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i], organic[lidx]);
 	  }
 	  /************************************************/	  
@@ -997,8 +1000,9 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
       for (i=0; i<=right+1; i++) {
 	if(i>=left+1) {
 	  if (ice_new[i]!=ice[i]) {
-	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i], soil_dens_min[lidx],
-					     bulk_dens_min[lidx], quartz[lidx], organic[lidx]);
+	    kappa_new[i] = soil_conductivity(moist[i], moist[i] - ice_new[i],
+					     soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
+					     soil_density[lidx], bulk_density[lidx], organic[lidx]);
 	    Cs_new[i] = volumetric_heat_capacity(bulk_density[lidx]/soil_density[lidx], moist[i]-ice_new[i], ice_new[i], organic[lidx]);
 	  }
 	}

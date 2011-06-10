@@ -984,8 +984,14 @@ layer_data_struct find_average_layer(layer_data_struct *wet,
   energy balance parameters.  Other layer variables are copied 
   from the wet fraction structure since they are they same for 
   wet and dry fractions.
+
+  Modifications:
+
+  2011-Jun-07 Added condition that wet and dry portions are
+	      only averaged together if DIST_PRCP is TRUE.	TJB
 **************************************************************/
 
+  extern option_struct options;
   layer_data_struct layer;
 #if SPATIAL_FROST
   int frost_area;
@@ -993,14 +999,18 @@ layer_data_struct find_average_layer(layer_data_struct *wet,
 
   layer = *wet;
 
+  if (options.DIST_PRCP) {
+
 #if SPATIAL_FROST
-  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-    layer.ice[frost_area] = ((wet->ice[frost_area] * mu) 
-			     + (dry->ice[frost_area] * (1. - mu)));
+    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+      layer.ice[frost_area] = ((wet->ice[frost_area] * mu) 
+			       + (dry->ice[frost_area] * (1. - mu)));
 #else
-  layer.ice = ((wet->ice * mu) + (dry->ice * (1. - mu)));
+    layer.ice = ((wet->ice * mu) + (dry->ice * (1. - mu)));
 #endif
-  layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
+    layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
+
+  }
 
   return(layer);
 

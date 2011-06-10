@@ -384,6 +384,8 @@ int distribute_node_moisture_properties(double *moist_node,
 	      reset to maximum.						TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
+	      soil_conductivity() to fix bug in commputation of kappa.		TJB
 
 *********************************************************************/
 

@@ -93,7 +93,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2010-Apr-28 Removed individual soil_con variables from argument list and
 	      replaced with *soil_con.						TJB
   2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.					TJB
-  2011-Jun-30 Removed unnecessary restriction that VP and SHORTWAVE be supplied together.									TJB
+  2011-Jun-30 Removed unnecessary requirement that VP and SHORTWAVE be
+	      supplied together.  Improved checks on input forcings.		TJB
 
 **********************************************************************/
 {
@@ -165,14 +166,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ( !param_set.TYPE[PREC].SUPPLIED
     && ( ( !param_set.TYPE[RAINF].SUPPLIED && ( !param_set.TYPE[LSRAINF].SUPPLIED || !param_set.TYPE[CRAINF].SUPPLIED ) )
       || ( ( !param_set.TYPE[SNOWF].SUPPLIED && ( !param_set.TYPE[LSSNOWF].SUPPLIED || !param_set.TYPE[CSNOWF].SUPPLIED ) ) ) ) )
-    nrerror("Precipitation (PREC, or { {RAINF or {LSRAINF and CRAINF}} and {SNOWF or {LSSNOWF and CSNOWF}} }) must be given to the model, check input files\n");
+    nrerror("Input meteorological forcing files must contain some form of precipitation (PREC, or { {RAINF or {LSRAINF and CRAINF}} and {SNOWF or {LSSNOWF and CSNOWF}} }); check input files\n");
 
-  if ((!param_set.TYPE[TMAX].SUPPLIED || !param_set.TYPE[TMIN].SUPPLIED) && !param_set.TYPE[AIR_TEMP].SUPPLIED )
-    nrerror("Daily maximum and minimum air temperature or sub-daily air temperature must be given to the model, check input files\n");
-  
-  if ( param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24 )
-    nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
-  
+  if (   !(   param_set.TYPE[TMAX].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[TMAX].SUPPLIED-1] == 24
+           && param_set.TYPE[TMIN].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[TMIN].SUPPLIED-1] == 24 )
+      && !(param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] < 24) )
+    nrerror("Input meteorological forcing files must contain either: a. Daily TMAX and TMIN (maximum and minimum air temperature) or b. sub-daily AIR_TEMP (air temperature); check input files\n");
+
+  if ( !param_set.TYPE[WIND].SUPPLIED )
+    nrerror("Input meteorological forcing files must contain WIND (wind speed); check input files\n");
+
   /* mtclim routine memory allocations */
 
   hourlyrad  = (double *) calloc(Ndays*24, sizeof(double));

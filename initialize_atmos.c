@@ -93,6 +93,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2010-Apr-28 Removed individual soil_con variables from argument list and
 	      replaced with *soil_con.						TJB
   2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.					TJB
+  2011-Jun-30 Removed unnecessary restriction that VP and SHORTWAVE be supplied together.									TJB
 
 **********************************************************************/
 {
@@ -172,10 +173,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if ( param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24 )
     nrerror("Model cannot use daily average temperature, must provide daily maximum and minimum or sub-daily temperatures.");
   
-  if ( param_set.TYPE[SHORTWAVE].SUPPLIED
-        && !(param_set.TYPE[VP].SUPPLIED || param_set.TYPE[QAIR].SUPPLIED || param_set.TYPE[REL_HUMID].SUPPLIED) )
-    nrerror("Sub-daily shortwave and vapor pressure forcing data must be supplied together.");
-
   /* mtclim routine memory allocations */
 
   hourlyrad  = (double *) calloc(Ndays*24, sizeof(double));

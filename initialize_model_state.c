@@ -109,6 +109,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      ground flux are always computed.				TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Jul-05 Changed logic initializing soil temperatures so that
+	      type of initialization depends solely on options.QUICK_FLUX;
+	      options.Nnodes is no longer automatically reset here.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -460,8 +463,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     soil properties file given
   ************************************************************************/
     
-  else if(options.QUICK_FLUX || !( options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE) ) ) {
-    options.Nnode = 3;
+  else if(options.QUICK_FLUX) {
     Nnodes = options.Nnode;
 
     /* Initialize soil node thicknesses */

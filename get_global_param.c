@@ -94,6 +94,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2011-May-31 Removed options.GRND_FLUX.					TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2011-Jul-05 Removed automatic setting of options.QUICK_FLUX when FULL_ENERGY=TRUE
+	      or FROZEN_SOIL=TRUE.						TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -234,7 +236,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
-	  options.QUICK_FLUX=FALSE;
 	}
         else options.FROZEN_SOIL = FALSE;
       }

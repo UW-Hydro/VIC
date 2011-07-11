@@ -173,8 +173,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       && !(param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] < 24) )
     nrerror("Input meteorological forcing files must contain either: a. Daily TMAX and TMIN (maximum and minimum air temperature) or b. sub-daily AIR_TEMP (air temperature); check input files\n");
 
-  if ( !param_set.TYPE[WIND].SUPPLIED )
-    nrerror("Input meteorological forcing files must contain WIND (wind speed); check input files\n");
+  if ( !param_set.TYPE[WIND].SUPPLIED && !(param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED) )
+    nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
 
   /* mtclim routine memory allocations */
 

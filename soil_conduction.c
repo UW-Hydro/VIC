@@ -717,6 +717,8 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   function should not be called when FROZEN_SOIL is TRUE.
 
   Modifications:
+  2011-Jul-19 Fixed bug in how ice content was computed for case of 
+	      SPATIAL_FROST = TRUE.					TJB
 
 ********************************************************************/
 
@@ -744,8 +746,15 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 
   // estimate soil layer ice contents
   for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+
+#if SPATIAL_FROST
+    for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) layer[lidx].ice[frost_area] = 0;
+#else
     layer[lidx].ice = 0;
+#endif
+
     if (options.FROZEN_SOIL && FS_ACTIVE) {
+
 #if SPATIAL_FROST
 
       min_temp = layer[lidx].T - frost_slope / 2.;
@@ -764,7 +773,14 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 	    - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], expt[lidx]);
 #endif
 #endif
-        layer[lidx].ice += frost_fract[frost_area] * tmp_ice;
+        layer[lidx].ice[frost_area] = frost_fract[frost_area] * tmp_ice;
+        if (layer[lidx].ice[frost_area] < 0) {
+          layer[lidx].ice[frost_area] = 0;
+        }
+        if (layer[lidx].ice[frost_area] > layer[lidx].moist) {
+          layer[lidx].ice[frost_area] = layer[lidx].moist;
+        }
+
       }
 
 #else
@@ -780,14 +796,17 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 #endif
 #endif
 
+      if (layer[lidx].ice < 0) {
+        layer[lidx].ice = 0;
+      }
+      if (layer[lidx].ice > layer[lidx].moist) {
+        layer[lidx].ice = layer[lidx].moist;
+      }
+
 #endif
+
     }
-    if (layer[lidx].ice < 0) {
-      layer[lidx].ice = 0;
-    }
-    if (layer[lidx].ice > layer[lidx].moist) {
-      layer[lidx].ice = layer[lidx].moist;
-    }
+
   }
 
   return (0);

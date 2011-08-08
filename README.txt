@@ -96,6 +96,7 @@ operation.
 	initialize_model_state.c
 	soil_conduction.c
 	surface_fluxes.c
+	user_def.h
 	vicNl_def.h
 	vicNl.h
 

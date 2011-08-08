@@ -94,8 +94,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2011-May-31 Removed options.GRND_FLUX.					TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
-  2011-Jul-05 Removed automatic setting of options.QUICK_FLUX when FULL_ENERGY=TRUE
-	      or FROZEN_SOIL=TRUE.						TJB
+  2011-Jul-05 Now QUICK_FLUX=FALSE is prohibited in water balance mode
+	      (when both FULL_ENERGY and FROZEN_SOIL are FALSE).		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -236,6 +236,7 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
+          options.QUICK_FLUX = FALSE;
 	}
         else options.FROZEN_SOIL = FALSE;
       }
@@ -895,6 +896,10 @@ global_param_struct get_global_param(filenames_struct *names,
       sprintf(ErrStr,"To run the model with QUICK_FLUX=TRUE, you cannot have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
       nrerror(ErrStr);
     }
+  }
+  if(!options.QUICK_FLUX && !(options.FULL_ENERGY || options.FROZEN_SOIL)) {
+    sprintf(ErrStr,"To run the model in water balance mode (both FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your global parameter file).");
+    nrerror(ErrStr);
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);

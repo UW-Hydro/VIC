@@ -289,38 +289,18 @@ double calc_surf_energy_bal(double             Le,
     Prepare soil node variables for finite difference solution
   *************************************************************/
 
-  if(!options.QUICK_FLUX || options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE) ) {
-
-    bubble_node    = soil_con->bubble_node; 
-    expt_node      = soil_con->expt_node; 
-    max_moist_node = soil_con->max_moist_node;  
-    alpha          = soil_con->alpha; 
-    beta           = soil_con->beta; 
-    gamma          = soil_con->gamma; 
-    moist_node     = energy->moist;
-    kappa_node     = energy->kappa_node;
-    Cs_node        = energy->Cs_node;
-    T_node         = energy->T;
-    Zsum_node      = soil_con->Zsum_node;   
-    ice_node       = energy->ice;
-
-  }
-  else {
-
-    bubble_node    = NULL; 
-    expt_node      = NULL; 
-    max_moist_node = NULL;  
-    alpha          = NULL; 
-    beta           = NULL; 
-    gamma          = NULL; 
-    moist_node     = NULL;
-    kappa_node     = NULL;
-    Cs_node        = NULL;
-    T_node         = NULL;
-    Zsum_node      = NULL;
-    ice_node       = NULL;
-
-  }
+  bubble_node    = soil_con->bubble_node; 
+  expt_node      = soil_con->expt_node; 
+  max_moist_node = soil_con->max_moist_node;  
+  alpha          = soil_con->alpha; 
+  beta           = soil_con->beta; 
+  gamma          = soil_con->gamma; 
+  moist_node     = energy->moist;
+  kappa_node     = energy->kappa_node;
+  Cs_node        = energy->Cs_node;
+  T_node         = energy->T;
+  Zsum_node      = soil_con->Zsum_node;   
+  ice_node       = energy->ice;
 
   /**************************************************
     Find Surface Temperature Using Root Brent Method

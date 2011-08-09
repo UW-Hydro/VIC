@@ -96,7 +96,6 @@ operation.
 	initialize_model_state.c
 	soil_conduction.c
 	surface_fluxes.c
-	user_def.h
 	vicNl_def.h
 	vicNl.h
 
@@ -125,19 +124,13 @@ operation.
 		and soil layer ice contents are all set to 0.  Unlike previous
 		versions, the soil layer temperatures and ice contents (=0)
 		are now available for output.  The default method of computing
-		soil temperature profile depends on the setting the FULL_ENERGY
-		option:
-		a. FULL_ENERGY TRUE: the default method for computing the soil
-		temperature profile is the finite element method of Cherkauer
-		and Lettenmaier (1999) as in the case of FROZEN_SOIL TRUE.  To
-		use the Liang et al (1999) approximation while FULL_ENERGY is
-		TRUE, the user must set QUICK_FLUX to TRUE in the global
-		parameter file.
-		b. FULL_ENERGY FALSE: the default method for computing the
-		soil temperature profile is the approximation of Liang et al
-		(1999) (same as QUICK_FLUX = TRUE).  To use the finite element
-		method, the user must set QUICK_FLUX to FALSE in the global
-		parameter file.
+		soil temperature profile depends on the setting of the
+		QUICK_FLUX option:
+		a. QUICK_FLUX FALSE: use approximation of Liang et al (1999).
+		   This is the default method, if QUICK_FLUX is not specified
+		   in the global param file.
+		b. QUICK_FLUX TRUE: use finite element method of Cherkauer et
+		   al. (1999).
 
 	Now that soil temperatures, ice contents, and ground heat fluxes are
 	always computed, the GRND_FLUX option has been removed.

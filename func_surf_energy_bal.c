@@ -100,6 +100,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      flux are now always computed.				TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Aug-09 Now method used for estimating soil temperatures depends only
+	      on QUICK_FLUX setting.					TJB
 
 **********************************************************************/
 {
@@ -485,7 +487,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Estimate soil temperatures for ground heat flux calculations
   ***************************************************************/
 
-  if ( options.QUICK_FLUX || !( options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE) ) ) {
+  if ( options.QUICK_FLUX ) {
     /**************************************************************
       Use Liang et al. 1999 Equations to Calculate Ground Heat Flux
     **************************************************************/

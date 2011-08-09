@@ -158,6 +158,8 @@ double calc_surf_energy_bal(double             Le,
 	      profile can be estimated and output in these cases.	TJB
   2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
 	      ground flux are always computed.				TJB
+  2011-Aug-09 Now initialize soil thermal properties for all modes of
+	      operation.						TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;

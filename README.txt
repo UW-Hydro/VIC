@@ -309,6 +309,20 @@ fraction of the grid cell area.
 
 
 
+Added validation of b_infilt
+
+	Files Affected:
+
+	read_soilparam.c
+
+	Description:
+
+	VIC now checks to make sure b_infilt > 0.  If the value is <= 0,
+	VIC exits with an error message.
+
+
+
+
 Removed MIN_LIQ option.
 
 	Files Affected:
@@ -343,19 +357,16 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
-Fixed bug that prevented VIC from dealing with 5-digit lat/lons
+Fixed incorrect computation of snow cover fraction over lake/wetland
 
 	Files Affected:
 
-	make_in_and_outfiles.c
-	read_soilparam.c
+	lakes.eb.c
 
 	Description:
 
-	Previously VIC didn't allocate enough space in its internal
-	lat and lon strings to handle 5-digit lat/lons.  This prevented
-	VIC from running at grid resolutions of 16th degree or smaller.
-	This has been fixed.
+	Previously VIC didn't compute snow cover fraction correctly
+	over the lake/wetland tile.  This has been fixed.
 
 
 

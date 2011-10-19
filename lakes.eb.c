@@ -88,6 +88,7 @@ int solve_lake(double             snowfall,
 	      lake; this fixes several water/energy balance errors.	TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -527,6 +528,12 @@ int solve_lake(double             snowfall,
       lake->new_ice_area = (lake->new_ice_area * lake->hice) / FRACMIN;
       lake->hice = FRACMIN;
     }
+
+    if (lake->snow.swq > 0)
+      lake->snow.coverage = lake->new_ice_area/lake->sarea;
+    else
+      lake->snow.coverage = 0;
+
   } /* End of if activenods > 0 */
 
  
@@ -1923,6 +1930,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 	      over lake area (rather than just ice or over entire tile).	TJB
   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
+  2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2358,6 +2366,11 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     if (lakefrac > 0.0) { // lake existed at beginning of time step
       rescale_snow_storage(lakefrac, newfraction, &(lake->snow));
       rescale_snow_energy_fluxes(lakefrac, newfraction, &(lake->snow), &(lake->energy)); 
+      if (lake->snow.swq>0) {
+        lake->snow.coverage = lake->new_ice_area/lake->sarea;
+      }
+      else
+        lake->snow.coverage = 0;
     }
     else { // lake didn't exist at beginning of time step; create new lake
       initialize_lake(lake, lake_con, &soil_con, &(cell[WET][iveg][band]), energy[iveg][band].T[0], 1);

@@ -114,6 +114,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2011-Jun-03 Added options.ORGANIC_FRACT.  If TRUE, VIC expects organic
 	      fraction and organic bulk and soil densities to be supplied
 	      for each grid cell.					TJB
+  2011-Sep-28 Added validation of b_infilt.				TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -223,6 +224,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }
       sscanf(token, "%lf", &temp.b_infilt);
+      if (temp.b_infilt <= 0) {
+        sprintf(ErrStr,"ERROR: b_infilt (%f) in soil file is <= 0; b_infilt must be positive\n",temp.b_infilt);
+        nrerror(ErrStr);
+      }
 
       /* read fraction of baseflow rate */
       token = strtok (NULL, delimiters);

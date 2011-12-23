@@ -7,8 +7,8 @@
  */
 
 /* 
-mtclim42.h
-constants typedefs, and function prototypes for MTCLIM 4.2
+mtclim_constants_vic.h
+constants typedefs, and function prototypes for MTCLIM 4.3
 
 Peter Thornton
 NTSG, School of Forestry
@@ -20,7 +20,10 @@ University of Montana
 Adapted for inclusion in VIC-code:
 Bart Nijssen
 Sat Aug 21 16:58:43 1999
-Last Changed: Fri Apr 25 11:37:15 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
+
+  Modified:
+  2011-Nov-04 Updated to MTCLIM 4.3				TJB
+
 */
 
 
@@ -59,7 +62,9 @@ Last Changed: Fri Apr 25 11:37:15 2003 by Keith Cherkauer <cherkaue@u.washington
 typedef struct
 {
   int ndays;             /* number of days of data in input file */
+  int insw;              /* input shortwave radiation flag (0=NO, 1=YES) */
   int indewpt;           /* input dewpoint temperature flag (0=NO, 1=YES) */
+  int invp;              /* input vapor pressure flag (0=NO, 1=YES) */
   int outhum;            /* output humidity flag            (0=VPD, 1=VP) */
   int inyear;            /* input year flag                 (0=NO, 1=YES) */
 } control_struct;
@@ -94,8 +99,13 @@ typedef struct
   double *s_hum;         /* array of site humidity values (VPD or VP, Pa) */
   double *s_srad;        /* array of site shortwave radiation values */
   double *s_dayl;        /* array of site daylength values */
+  double *s_swe;         /* array of site snowpack values */
   /* start vic_change */
   double *s_tskc;	 /* array of cloudiness values */
+double *s_ppratio; /* array of pet/prcp ratio values */
+double *s_potrad; /* array of potential rad values */
+double *s_ttmax; /* array of clear sky transmittance values */
+double *s_tfmax; /* array of cloud transmittance factor values */
   /* end vic_change */
 } data_struct;
 
@@ -110,12 +120,15 @@ int calc_prcp(const control_struct *ctrl, const parameter_struct *p,
 	      data_struct *data);
 /* start vic_change */
 int calc_srad_humidity(const control_struct *ctrl, const parameter_struct *p, 
-		       data_struct *data, double *tiny_radfract);
+		       data_struct *data, double **tiny_radfract);
 /* end vic_change */
 /* start vic_change */
 int calc_srad_humidity_iterative(const control_struct *ctrl,
 				 const parameter_struct *p, data_struct *data,
-				 double *hourly_radfract);
+				 double **tiny_radfract);
+int snowpack(const control_struct *ctrl, const parameter_struct *p, 
+	      data_struct *data);
+void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_struct *data, double *tdew, double *pva, double *ttmax0, double *flat_potrad, double *slope_potrad, double sky_prop, double *daylength, double *pet, double *parray, double pa, double *dtr);
 /* end vic_change */
 int data_alloc(const control_struct *ctrl, data_struct *data);
 int data_free(const control_struct *ctrl, data_struct *data);

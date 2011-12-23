@@ -12,22 +12,23 @@
  * FUNCTIONS:    CalcBlowingSnow()
  * COMMENTS:     
  * Modifications:
- *   05-Aug-04 Merged with Laura Bowling's updated code to fix the following problems:
- *	       - Error in array declaration line 373 and 375
- *	       - Added calculation of blowing snow transport.  This is not really used
- *	         currently, but it is something Laura is experimenting with.
- *	       - Fixed RH profile.
- *	       - Fixed vertical integration functions.
+ *   2005-Aug-05 Merged with Laura Bowling's updated code to fix the following problems:
+ *	         - Error in array declaration line 373 and 375
+ *	         - Added calculation of blowing snow transport.  This is not really used
+ *	           currently, but it is something Laura is experimenting with.
+ *	         - Fixed RH profile.
+ *	         - Fixed vertical integration functions.
  *										TJB
- *   04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
+ *   2004-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
  *   2007-Apr-03 Module returns an ERROR value that can be trapped in main      GCT
+ *   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.			TJB
  */
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
-#include <mtclim42_vic.h>
+#include <mtclim_constants_vic.h>
 
 static char vcid[] = "$Id$";
 

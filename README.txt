@@ -31,6 +31,122 @@ Usage:
 New Features:
 -------------
 
+Overhaul of meteorological forcing processing
+
+Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
+1999) from version 4.2 to version 4.3.
+
+        Files Affected:
+
+        alloc_atmos.c
+        CalcBlowingSnow.c
+	calc_air_temperature.c
+	calc_longwave.c
+	display_current_settings.c
+        get_force_type.c
+        get_global_param.c
+        global.param.sample
+        initialize_atmos.c
+        initialize_global.c
+        Makefile
+        mtclim_constants_vic.h (was mtclim42_vic.h)
+        mtclim_parameters_vic.h (new file)
+        mtclim_wrapper.c (was mtclim42_wrapper.c)
+        mtclim_vic.c (was mtclim42_vic.c)
+        output_list_utils.c
+        put_data.c
+        read_atmos_data.c
+        read_soilparam.c
+        vicNl_def.h
+        vicNl.h
+        write_forcing_file.c
+
+        Description:
+
+	Numerous bug fixes and improvements to VIC's meteorological forcing
+	processing.
+
+	Bug fixes:
+
+	Two main bugs fixed, both primarily affecting high-latitude grid
+	cells:
+
+	1. On days having only 1 hour of darkness, the diurnal cycle
+	   of temperature was incorrect, skipping that day's minimum
+	   temperature and smoothly transitioning to the next day's
+	   maximum.
+
+	2. The seasonal evolution of the diurnal cycle of solar radiation
+	   was always 366 days long, so that the number of daylight hours got
+	   increasingly out of phase with the time of year (by one day per
+	   non-leap year) as the simulation progressed.  After 20-30 years,
+	   the diurnal cycle was substantially different from what it should
+	   be.  Above 60 N, the number of days having no sunlight was
+	   substantially longer than it should be.
+
+	Also fixed inconsistencies in the timing of meteorological variables
+	when sub-daily met variables were supplied by the user.
+
+	New features:
+
+        Updated VIC's internal version of the MTCLIM forcing disaggregation
+        functions from version 4.2 (Thornton and Running, 1999) to include
+	elements of version 4.3 (Thornton et al 2000).  
+
+        This update includes two main changes to the forcing estimation scheme:
+
+        1. Optional correction of downward shortwave for the effect of snow.
+	   In the presence of snow, incoming shortwave radiation has been
+	   observed to be higher than MTCLIM 4.2's estimates, due to
+	   scattering of light from the snow back into the atmosphere (and
+	   ultimately back to the ground again).  This correction is optional
+	   and is controlled by the new global parameter option MTCLIM_SWE_CORR.
+	   If this is set to TRUE, the correction is performed when snow is
+	   present on the ground (estimated by a simple degree-day model in
+	   the forcing pre-processor).  If FALSE, the correction is not
+	   performed (and shortwave is estimated as in previous versions of
+	   VIC).  The default value of MTCLIM_SWE_CORR is TRUE.
+	   
+        2. Optional changes in the iteration between shortwave and VP
+	   estimates.  The algorithm for estimating shortwave requires
+	   observed VP as an input; the algorithm for estimating VP requires
+	   observed shortwave as an input.  Therefore, when neither quantity is
+	   observed, MTCLIM 4.2 (and previous versions of VIC) used the
+	   Tdew = Tmin approximation to supply the shortwave estimate with
+	   an estimate of daily vapor pressure.  Then the resulting shortwave
+	   estimate was used to compute a more accurate estimate of Tdew and
+	   vapor pressure.  MTCLIM 4.3 imposes an annual aridity criterion for
+	   performing this final step; for humid environments (annual PET <
+	   2.5 * annual precip) the scheme simply assumes daily Tdew = daily
+	   Tmin.  We have found that this behavior introduces a strong
+	   positive bias into vapor pressure, and have chosen to make it
+	   optional.  Therefore, we have introduced the new global
+	   parameter option VP_ITER to control the shortwave-vp iteration.  It
+	   can take on the following values:
+
+	     VP_ITER_NEVER = never perform the final update of Tdew and VP
+	     VP_ITER_ALWAYS = always perform the final update of Tdew and VP
+	     VP_ITER_ANNUAL = use the annual aridity criterion (annual PET <
+                              2.5 * annual precip) do decide whether to perform
+	                      the final update
+	     VP_ITER_CONVERGE = continue iterating between shortwave and vp
+	                        until the two values stabilize (this tends
+	                        to give almost identical results to
+	                        VP_ITER_ALWAYS)
+
+	   The default value of VP_ITER is VP_ITER_ALWAYS.
+
+	To make the sub-daily values of VP more accurate, we have introduced
+	another global parameter option: VP_INTERP.  If set to TRUE, VIC will
+	assign the daily VP value computed by the MTCLIM functions to the
+	time of sunrise on that day, and interpolate linearly between sunrise
+	vapor pressure values of adjacent days.  If set to FALSE, VIC will
+	hold vapor pressure constant over the entire day as in previous
+	versions.  The default value of VP_INTERP is TRUE.
+
+
+
+
 Added the ability to simulate organic soil.
 
 	Files Affected:
@@ -356,6 +472,33 @@ Removed MIN_LIQ option.
 
 Bug Fixes:
 ----------
+
+Fixed incorrect diurnal radiation cycle at high latitudes
+
+	Files Affected:
+
+	See "Overhaul of meteorological forcing processing" under
+	new features
+
+	Description:
+
+	See "Overhaul of meteorological forcing processing" under
+	new features.  Two main bugs fixed, both primarily affecting
+	high-latitude grid cells:
+	  1. On days having only 1 hour of darkness, the diurnal cycle
+	     of temperature was incorrect, skipping that day's minimum
+	     temperature and smoothly transitioning to the next day's
+	     maximum.
+	  2. The seasonal evolution of the diurnal cycle of solar radiation
+	     was always 366 days long, so that the number of daylight hours got
+	     increasingly out of phase with the time of year (by one day per
+	     non-leap year) as the simulation progressed.  After 20-30 years,
+	     the diurnal cycle was substantially different from what it should
+	     be.  Above 60 N, the number of days having no sunlight was
+	     substantially longer than it should be.
+
+
+
 
 Fixed incorrect computation of snow cover fraction over lake/wetland
 

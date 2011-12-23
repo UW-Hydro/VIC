@@ -35,6 +35,7 @@ void get_force_type(char   *cmdstr,
   2007-Sep-14 Initialize flgstr to "NULL".				TJB
   2010-Mar-31 Added RUNOFF_IN.						TJB
   2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.				TJB
+  2011-Nov-04 Fixed comment describing TSKC.				TJB
 
 *************************************************************/
 
@@ -149,7 +150,7 @@ void get_force_type(char   *cmdstr,
     type = TMIN;
   }
 
-  /* type 18: sky cover */
+  /* type 18: cloud cover fraction */
   else if(strcasecmp("TSKC",optstr)==0){
     type = TSKC;
   }

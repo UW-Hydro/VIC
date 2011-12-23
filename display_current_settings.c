@@ -46,6 +46,8 @@ void display_current_settings(int                 mode,
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.TJB
   2011-May-31 Removed GRND_FLUX option.				TJB
   2011-Jun-03 Added ORGANIC_FRACT option.			TJB
+  2011-Nov-04 Added options for accessing new forcing estimation
+	      features.						TJB
 **********************************************************************/
 {
 
@@ -239,6 +241,22 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_410\n");
   else if (options.GRND_FLUX_TYPE == GF_FULL)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_FULL\n");
+  if (options.LW_TYPE == LW_TVA)
+    fprintf(stderr,"LW_TYPE\t\tLW_TVA\n");
+  else if (options.LW_TYPE == LW_ANDERSON)
+    fprintf(stderr,"LW_TYPE\t\tLW_ANDERSON\n");
+  else if (options.LW_TYPE == LW_BRUTSAERT)
+    fprintf(stderr,"LW_TYPE\t\tLW_BRUTSAERT\n");
+  else if (options.LW_TYPE == LW_SATTERLUND)
+    fprintf(stderr,"LW_TYPE\t\tLW_SATTERLUND\n");
+  else if (options.LW_TYPE == LW_IDSO)
+    fprintf(stderr,"LW_TYPE\t\tLW_IDSO\n");
+  else if (options.LW_TYPE == LW_PRATA)
+    fprintf(stderr,"LW_TYPE\t\tLW_PRATA\n");
+  if (options.LW_CLOUD == LW_CLOUD_DEARDORFF)
+    fprintf(stderr,"LW_CLOUD\t\tLW_CLOUD_DEARDORFF\n");
+  else
+    fprintf(stderr,"LW_CLOUD\t\tLW_CLOUD_BRAS\n");
   if (options.IMPLICIT)
     fprintf(stderr,"IMPLICIT\t\tTRUE\n");
   else
@@ -247,6 +265,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"NOFLUX\t\t\tTRUE\n");
   else
     fprintf(stderr,"NOFLUX\t\t\tFALSE\n");
+  if (options.MTCLIM_SWE_CORR)
+    fprintf(stderr,"MTCLIM_SWE_CORR\t\tTRUE\n");
+  else
+    fprintf(stderr,"MTCLIM_SWE_CORR\t\tFALSE\n");
   if (options.PLAPSE)
     fprintf(stderr,"PLAPSE\t\tTRUE\n");
   else
@@ -267,10 +289,23 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"SNOW_DENSITY\t\tDENS_BRAS\n");
   else if (options.SNOW_DENSITY == DENS_SNTHRM)
     fprintf(stderr,"SNOW_DENSITY\t\tDENS_SNTHRM\n");
+  fprintf(stderr,"SW_PREC_THRESH\t\t%f\n",options.SW_PREC_THRESH);
   if (options.TFALLBACK == TRUE)
     fprintf(stderr,"TFALLBACK\t\tTRUE\n");
   else
     fprintf(stderr,"TFALLBACK\t\tFALSE\n");
+  if (options.VP_INTERP == TRUE)
+    fprintf(stderr,"VP_INTERP\t\tTRUE\n");
+  else
+    fprintf(stderr,"VP_INTERP\t\tFALSE\n");
+  if (options.VP_ITER == VP_ITER_NONE)
+    fprintf(stderr,"VP_ITER\t\tVP_ITER_NONE\n");
+  else if (options.VP_ITER == VP_ITER_ALWAYS)
+    fprintf(stderr,"VP_ITER\t\tVP_ITER_ALWAYS\n");
+  else if (options.VP_ITER == VP_ITER_ANNUAL)
+    fprintf(stderr,"VP_ITER\t\tVP_ITER_ANNUAL\n");
+  else if (options.VP_ITER == VP_ITER_CONVERGE)
+    fprintf(stderr,"VP_ITER\t\tVP_ITER_CONVERGE\n");
   fprintf(stderr,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
   fprintf(stderr,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stderr,"MEASURE_H\t\t%f\n",global->measure_h);

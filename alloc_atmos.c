@@ -33,6 +33,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
 	      now.							TJB
   2010-Mar-31 Added runoff_in.						TJB
   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
+  2011-Nov-04 Added tskc.						TJB
 
 *******************************************************************/
 {
@@ -69,6 +70,9 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     (*atmos)[i].snowflag = (char *) calloc(NR+1, sizeof(char));	
     if ((*atmos)[i].snowflag == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].tskc = (double *) calloc(NR+1, sizeof(double));	
+    if ((*atmos)[i].tskc == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].vp = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].vp == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
@@ -97,6 +101,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
 	      now.							TJB
   2010-Mar-31 Added runoff_in.						TJB
   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
+  2011-Nov-04 Added tskc.						TJB
 ***************************************************************************/
 {
   int i;
@@ -113,6 +118,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
     free((*atmos)[i].pressure);
     free((*atmos)[i].shortwave);
     free((*atmos)[i].snowflag);
+    free((*atmos)[i].tskc);
     free((*atmos)[i].vp);
     free((*atmos)[i].vpd);
     free((*atmos)[i].wind);

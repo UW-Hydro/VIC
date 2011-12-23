@@ -96,6 +96,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      organic fraction into account.					TJB
   2011-Jul-05 Now QUICK_FLUX=FALSE is prohibited in water balance mode
 	      (when both FULL_ENERGY and FROZEN_SOIL are FALSE).		TJB
+  2011-Nov-04 Added options to access new forcing estimation features.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -337,6 +338,25 @@ global_param_struct get_global_param(filenames_struct *names,
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
         else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
       }
+      else if(strcasecmp("LW_TYPE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("LW_TVA",flgstr)==0) options.LW_TYPE=LW_TVA;
+        else if(strcasecmp("LW_ANDERSON",flgstr)==0) options.LW_TYPE=LW_ANDERSON;
+        else if(strcasecmp("LW_BRUTSAERT",flgstr)==0) options.LW_TYPE=LW_BRUTSAERT;
+        else if(strcasecmp("LW_SATTERLUND",flgstr)==0) options.LW_TYPE=LW_SATTERLUND;
+        else if(strcasecmp("LW_IDSO",flgstr)==0) options.LW_TYPE=LW_IDSO;
+        else if(strcasecmp("LW_PRATA",flgstr)==0) options.LW_TYPE=LW_PRATA;
+      }
+      else if(strcasecmp("LW_CLOUD",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("LW_CLOUD_DEARDORFF",flgstr)==0) options.LW_CLOUD=LW_CLOUD_DEARDORFF;
+        else options.LW_CLOUD = LW_CLOUD_BRAS;
+      }
+      else if(strcasecmp("MTCLIM_SWE_CORR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.MTCLIM_SWE_CORR=TRUE;
+        else options.MTCLIM_SWE_CORR = FALSE;
+      }
       else if(strcasecmp("PLAPSE",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
         if(strcasecmp("FALSE", flgstr) == 0) options.PLAPSE = FALSE;
@@ -344,10 +364,27 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.PLAPSE = TRUE;
 	}
       }
+      else if(strcasecmp("SW_PREC_THRESH",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        options.SW_PREC_THRESH = atof(flgstr);
+      }
       else if(strcasecmp("TFALLBACK",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.TFALLBACK=TRUE;
         else options.TFALLBACK = FALSE;
+      }
+      else if(strcasecmp("VP_INTERP",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VP_INTERP=TRUE;
+        else options.VP_INTERP = FALSE;
+      }
+      else if(strcasecmp("VP_ITER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("VP_ITER_NONE",flgstr)==0) options.VP_ITER=VP_ITER_NONE;
+        if(strcasecmp("VP_ITER_ALWAYS",flgstr)==0) options.VP_ITER=VP_ITER_ALWAYS;
+        if(strcasecmp("VP_ITER_ANNUAL",flgstr)==0) options.VP_ITER=VP_ITER_ANNUAL;
+        if(strcasecmp("VP_ITER_CONVERGE",flgstr)==0) options.VP_ITER=VP_ITER_CONVERGE;
+        else options.VP_INTERP = VP_ITER_ALWAYS;
       }
 
       /*************************************

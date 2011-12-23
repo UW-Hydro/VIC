@@ -15,43 +15,60 @@ void calc_longwave(double *longwave,
   pressure (Pa).
 
   Modifications:
-  10-27-00 Modified to use vapor pressure in Pa instead of kPa   KAC
+  2000-Oct-27 Modified to use vapor pressure in Pa instead of kPa.	KAC
+  2011-Nov-04 Added new option for handling the effect of clouds.	TJB
+  2011-Nov-04 Added alternative clear-sky longwave algorithm.		TJB
+  
 ***************************************************************************/
 {
+  extern option_struct options;
+  double emissivity;
+  double emissivity_clear;
+  double cloudfactor;
+  double cloudfrac;
+  double x;
+  
+  air_temp += KELVIN; // convert to Kelvin
+  vp /= 100; // convert to mbar
+
   /* See Bras, R. F. , "Hydrology, an introduction to hydrologic science",
      Addison-Wesley, 1990, p. 42-45 */
-  double emissivity;
-  double cloudfactor;
-  
-  emissivity = 0.740 + 0.0049 * vp / 100.; /* Bras 2.35 */
-  cloudfactor = 1.0 + 0.17 * tskc * tskc; /* Bras 2.43 */
-  air_temp += KELVIN;
-  
-  *longwave = emissivity * cloudfactor * STEFAN_B * air_temp * air_temp *
+
+  if (options.LW_TYPE == LW_TVA) {
+    emissivity_clear = 0.740 + 0.0049 * vp; // TVA (1972) - see Bras 2.35
+  }
+  else if (options.LW_TYPE == LW_ANDERSON) {
+    emissivity_clear = 0.68 + 0.036*pow(vp,0.5); // Anderson (1964)
+  }
+  else if (options.LW_TYPE == LW_BRUTSAERT) {
+    x = vp/air_temp;
+    emissivity_clear = 1.24*pow(x,0.14285714); // Brutsaert (1975)
+  }
+  else if (options.LW_TYPE == LW_SATTERLUND) {
+    emissivity_clear = 1.08*(1-exp(-1*pow(vp,(air_temp/2016)))); // Satterlund (1979)
+  }
+  else if (options.LW_TYPE == LW_IDSO) {
+    emissivity_clear = 0.7 + 5.95e-5*vp*exp(1500/air_temp); // Idso (1981)
+  }
+  else if (options.LW_TYPE == LW_PRATA) {
+    x = 46.5*vp/air_temp;
+    emissivity_clear = 1 - (1+x)*exp(-1*pow((1.2+3*x),0.5)); // Prata (1996)
+  }
+
+  if (options.LW_CLOUD == LW_CLOUD_DEARDORFF) {
+    /* Assume emissivity of clouds is 1.0, and that total emissivity is weighted
+       average of cloud emission plus clear-sky emission, weighted by fraction of
+       sky occupied by each (method of Deardorff, 1978) */
+    cloudfrac = 0.65*tskc*tskc;
+    emissivity = cloudfrac*1.0 + (1-cloudfrac)*emissivity_clear; // Deardorff (1978)
+  }
+  else {
+    cloudfactor = 1.0 + 0.17 * tskc * tskc; // see Bras 2.43
+    emissivity = cloudfactor*emissivity_clear;
+  }
+
+  *longwave = emissivity * STEFAN_B * air_temp * air_temp *
     air_temp * air_temp / LWAVE_COR; 
 
 }
 
-void calc_netlongwave(double *longwave, 
-		      double  tskc, 
-		      double  air_temp, 
-		      double  vp)
-/****************************************************************************
-  Function to calculate the daily net incoming longwave radiation in W/m2 
-  (Bras 1990).  Uses the fractional cloud cover (tskc), air temperature (C)
-  and vapor pressure (Pa).
-
-  Modifcations:
-  10-25-00 Modifeid to use vp in Pa instead of kPa               KAC
-****************************************************************************/
-{
-  double emissivity;            /* emissivity of the atmosphere */
-  double cloudfactor;           /* cloudiness correction factor */
-  
-  emissivity = 0.740 + 0.0049 * vp / 100.; /* Bras 2.35 */
-  cloudfactor = 1.0 + 0.17 * tskc * tskc; /* Bras 2.43 */
-  air_temp += KELVIN;
- 
-  *longwave = (emissivity * cloudfactor / LWAVE_COR - 1 ) * STEFAN_B 
-    * air_temp * air_temp * air_temp * air_temp ; 
-}

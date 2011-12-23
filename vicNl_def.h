@@ -116,6 +116,7 @@
   2011-May-31 Increased length of zwtvmoist_* arrays.			TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
+  2011-Nov-04 Added options to handle new forcing estimation features.	TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -159,6 +160,24 @@
 #define GF_406  0
 #define GF_410  1
 #define GF_FULL 2
+
+/***** VP algorithm options *****/
+#define VP_ITER_NONE     0
+#define VP_ITER_ALWAYS   1
+#define VP_ITER_ANNUAL   2
+#define VP_ITER_CONVERGE 3
+
+/***** Longwave Clear-Sky Algorithm options *****/
+#define LW_TVA        0
+#define LW_ANDERSON   1
+#define LW_BRUTSAERT  2
+#define LW_SATTERLUND 3
+#define LW_IDSO       4
+#define LW_PRATA      5
+
+/***** Longwave Cloud Algorithm options *****/
+#define LW_CLOUD_BRAS       0
+#define LW_CLOUD_DEARDORFF  1
 
 /***** Potential Evap types *****/
 #define N_PET_TYPES 6
@@ -301,7 +320,7 @@ extern char ref_veg_ref_crop[];
 #define SNOWF     15 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
 #define TMAX      16 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
 #define TMIN      17 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
-#define TSKC      18 /* cloud cover [fraction] */
+#define TSKC      18 /* cloud cover fraction [fraction] */
 #define VP        19 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
 #define WIND      20 /* wind speed [m/s] */
 #define WIND_E    21 /* zonal component of wind speed [m/s] */
@@ -443,37 +462,38 @@ extern char ref_veg_ref_crop[];
 #define OUT_REL_HUMID      125  /* relative humidity [fraction]*/
 #define OUT_SHORTWAVE      126  /* incoming shortwave [W/m2] */
 #define OUT_SURF_COND      127  /* surface conductance [m/s] */
-#define OUT_VP             128  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            129  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           130  /* near surface wind speed [m/s] */
+#define OUT_TSKC           128  /* cloud cover fraction [fraction] */
+#define OUT_VP             129  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            130  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           131  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       131  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      132  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         133  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        134  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      135  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        136  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         137  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     138  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    139  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       140  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      141  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    142  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       143  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    144  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     145  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     146  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      147  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      148  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     149  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     150  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            151  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND       132  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      133  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         134  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        135  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      136  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        137  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         138  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     139  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    140  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       141  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      142  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    143  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       144  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    145  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     146  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     147  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      148  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      149  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     150  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     151  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            152  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          152  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          153  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            154  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           155  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          153  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          154  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            155  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           156  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/
@@ -591,20 +611,23 @@ typedef struct {
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX_TYPE; /* "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
                                         from VIC 4.0.6 and earlier
-                            "GF_410"  = use formulas from VIC 4.1.0 (ground flux is correct,
-                                        but deltaH and fusion ignore surf_atten)
-                            "GF_FULL" = use correct ground flux formula from VIC 4.1.0 and
-                                        also take surf_atten into account in deltaH and fusion */
+                            "GF_410"  = use formulas from VIC 4.1.0
+                            "GF_FULL" = (use of this option is discouraged due to double-counting of surf_atten;
+                                        this option has only been kept for backwards- compatibility) use ground
+                                        flux formula from VIC 4.1.0 and also take surf_atten into account in
+                                        deltaH and fusion
+                            default = GF_410 */
   char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
 			    soil thermal fluxes */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
+  char   LW_CLOUD;       /* Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
+  char   LW_TYPE;        /* Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
 			    the model. **/
-  char   MOISTFRACT;     /* TRUE = output soil moisture as moisture content */
-  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
+  char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
@@ -629,6 +652,7 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  float  SW_PREC_THRESH; /* Minimum daily precipitation [mm] that can cause "dimming" of incoming shortwave radiation */
   char   TFALLBACK;      /* TRUE = when any temperature iterations fail to converge,
                                    use temperature from previous time step; the number
                                    of instances when this occurs will be logged and
@@ -636,6 +660,14 @@ typedef struct {
                             FALSE = when iterations fail to converge, report an error
                                     and abort simulation for current grid cell
                             Default = TRUE */
+  char   VP_INTERP;      /* How to disaggregate VP from daily to sub-daily;
+                            TRUE = linearly interpolate between daily VP values, assuming they occur at the times of Tmin;
+                            FALSE = hold VP constant at the daily value */
+  char   VP_ITER;        /* VP_ITER_NONE = never iterate with SW
+                            VP_ITER_ALWAYS = always iterate with SW
+                            VP_ITER_ANNUAL = use annual Epot/PRCP criterion
+                            VP_ITER_CONVERGE = always iterate until convergence */
+  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
@@ -658,6 +690,7 @@ typedef struct {
   char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
+  char   MOISTFRACT;     /* TRUE = output soil moisture as fractional moisture content */
   int    Noutfiles;      /* Number of output files (not including state files) */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band. This is only used when default
@@ -841,6 +874,10 @@ typedef struct {
   int      gridcel;                   /* grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
   double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
+  double   slope;
+  double   aspect;
+  double   ehoriz;
+  double   whoriz;
 #if EXCESS_ICE
   double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m).  The effective depth will always be >= this value. */
   double   porosity_node[MAX_NODES];  /* porosity for each thermal node */
@@ -933,6 +970,7 @@ typedef struct {
   double *shortwave; /* incoming shortwave radiation (W/m^2) */
   char   *snowflag;  /* TRUE if there is snowfall in any of the snow
                         bands during the timestep, FALSE otherwise*/
+  double *tskc;      /* cloud cover fraction (fraction) */
   double *vp;        /* atmospheric vapor pressure (kPa) */
   double *vpd;       /* atmospheric vapor pressure deficit (kPa) */
   double *wind;      /* wind speed (m/s) */

@@ -54,6 +54,8 @@ void read_atmos_data(FILE                 *infile,
   2006-Sep-23 Fixed RCS ID string.				TJB
   2007-Jan-15 Added PRT_HEADER option; now binary forcing files
 	      might have headers, and these need to be skipped.	TJB
+  2011-Nov-04 Fixed warning message dealing with insufficient
+	      records.						TJB
 
   **********************************************************************/
 {
@@ -211,7 +213,7 @@ void read_atmos_data(FILE                 *infile,
   
   if(rec * param_set.FORCE_DT[file_num] 
      < global_param.nrecs * global_param.dt ) {
-    sprintf(ErrStr,"Not enough records in the forcing file (%i * %i = %i) to run the number of records defined in the global file (%i * %i = %i).  Check forcing file time step, and global file", rec, param_set.FORCE_DT[file_num], 
+    sprintf(ErrStr,"Not enough records in forcing file %i (%i * %i = %i) to run the number of records defined in the global file (%i * %i = %i).  Check forcing file time step, and global file", file_num+1, rec, param_set.FORCE_DT[file_num],
 	    rec*param_set.FORCE_DT[file_num], global_param.nrecs, 
 	    global_param.dt, global_param.nrecs*global_param.dt);
     nrerror(ErrStr);

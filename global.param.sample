@@ -44,12 +44,28 @@ AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-fil
 			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
 			# AR_COMBO 	= multiply by 10 AND apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 			# Default 	= AR_406_FULL
-GRND_FLUX_TYPE	GF_FULL	# Options for ground flux:
+GRND_FLUX_TYPE	GF_410	# Options for ground flux:
 			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
 			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
-			# GF_FULL = use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
-			# Default 	= GF_410
+			# GF_FULL = (use is discouraged; only kept for backwards-compatibility) use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
+			# Default = GF_410
 PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
+MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
+VP_ITER		VP_ITER_ALWAYS	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
+			# VP_ITER_NEVER = never iterate; make estimates separately
+			# VP_ITER_ALWAYS = always iterate once
+			# VP_ITER_ANNUAL = iterate once for arid climates based on annual Precip/PET ratio
+			# VP_ITER_CONVERGE = iterate until shortwave and vp stabilize
+			# default = VP_ITER_ALWAYS
+VP_INTERP	TRUE	# This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
+LW_TYPE		LW_TVA	# This controls the algorithm used to estimate clear-sky longwave radiation:
+			# LW_TVA = Tennessee Valley Authority algorithm (1972)
+			# other options listed in vicNl_def.h
+			# default = LW_TVA (this was also the traditional VIC algorithm)
+LW_CLOUD	LW_CLOUD_DEARDORFF	# This controls the algorithm used to estimate the influence of clouds on total longwave:
+			# LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
+			# LW_CLOUD_DEARDORFF = method of Deardorff (1978)
+			# default = LW_CLOUD_DEARDORFF
 
 #######################################################################
 # State Files and  Parameters

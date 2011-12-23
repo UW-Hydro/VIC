@@ -56,6 +56,7 @@ out_data_struct *create_output_list() {
 	      OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
   2010-Dec-01 Added OUT_ZWT.						TJB
   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
+  2011-Nov-04 Added OUT_TSKC.						TJB
 *************************************************************/
 
   extern option_struct options;
@@ -203,6 +204,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_REL_HUMID].varname,"OUT_REL_HUMID");             /* relative humidity [fraction]*/
   strcpy(out_data[OUT_SHORTWAVE].varname,"OUT_SHORTWAVE");             /* incoming shortwave [W/m2] */
   strcpy(out_data[OUT_SURF_COND].varname,"OUT_SURF_COND");             /* surface conductance [m/s] */
+  strcpy(out_data[OUT_TSKC].varname,"OUT_TSKC");                       /* cloud cover fraction [fraction] */
   strcpy(out_data[OUT_VP].varname,"OUT_VP");                           /* near surface vapor pressure [kPa] */
   strcpy(out_data[OUT_VPD].varname,"OUT_VPD");                         /* near surface vapor pressure deficit [kPa] */
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */

@@ -115,6 +115,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      fraction and organic bulk and soil densities to be supplied
 	      for each grid cell.					TJB
   2011-Sep-28 Added validation of b_infilt.				TJB
+  2011-Nov-04 Added hard-coding of slope, aspect, and horizons to 0.	TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -1050,6 +1051,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
         }
         zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
       }
+
+      /* Assume flat grid cell for radiation calculations */
+      temp.slope = 0;
+      temp.aspect = 0;
+      temp.whoriz = 0;
+      temp.ehoriz = 0;
 
     } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
 

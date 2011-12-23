@@ -101,6 +101,7 @@
 	      organic fraction into account.				TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
+  2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.                   TJB
 ************************************************************************/
 
 #include <math.h>
@@ -401,9 +402,10 @@ double maximum_unfrozen_water(double, double, double, double);
 double maximum_unfrozen_water_quick(double, double, double **);
 #endif
 double modify_Ksat(double);
-void mtclim42_wrapper(int, int, double, double, double, double, 
-		      global_param_struct *, dmy_struct *, double *, 
-		      double *, double *, double *, double *, double *);
+void mtclim_wrapper(int, int, double, double, double, double,
+                      double, double, double, double,
+                      int, dmy_struct *, double *,
+                      double *, double *, double *, double *, double *);
 
 double new_snow_density(double);
 int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...), 

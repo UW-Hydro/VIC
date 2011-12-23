@@ -31,6 +31,7 @@
 # 2009-Jun-09 Added compute_pot_evap.c.						TJB
 # 2009-Jul-31 Removed wetland_energy.c.						TJB
 # 2010-Dec-01 Added compute_zwt.c.						TJB
+# 2011-Nov-04 Renamed mtclim* files to remove version number from filenames.	TJB
 #
 # $Id$
 #
@@ -66,7 +67,7 @@ CFLAGS  = -I. -g -Wall -Wno-unused
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim42_vic.h LAKE.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
@@ -87,7 +88,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \
 	make_cell_data.o make_dist_prcp.o make_dmy.o make_energy_bal.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
-	modify_Ksat.o mtclim42_vic.o mtclim42_wrapper.o newt_raph_func_fast.o nrerror.o \
+	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o nrerror.o \
 	open_debug.o open_file.o open_state_file.o \
 	output_list_utils.o parse_output_info.o penman.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \

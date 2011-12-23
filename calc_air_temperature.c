@@ -11,12 +11,7 @@ static char vcid[] = "$Id$";
 
   Modifications:
   June 23, 1998 by Keith Cherkauer to be run within the VIC-NL model.
-  August 19, 1999 by Bart Nijssen to function in polar regions where
-    daylight or darkness may last for 24 hours.
-  2006-Oct-26 Shift tminhour and tmaxhour if necessary to remain within
-	      the current day. TJB
-
-  ***************************************************************************/
+*****************************************************************************/
 
 /****************************************************************************/
 /*				    hermite                                 */
@@ -150,64 +145,54 @@ void set_max_min_hour(double *hourlyrad,
 		      int ndays, 
 		      int *tmaxhour,
 		      int *tminhour)
+/****************************************************************************
+                             set_max_min_hour
+
+  This function estimates the times of minimum and maximum temperature for
+  each day of the simulation, based on the hourly cycle of incoming solar
+  radiation.
+
+  Modifications
+
+  1999-Aug-19 Modified to function in polar regions where daylight or
+	      darkness may last for 24 hours.				BN
+  2006-Oct-26 Shift tminhour and tmaxhour if necessary to remain within
+	      the current day.						TJB
+  2011-Nov-04 Changed algorithm because previous algorithm had bugs in
+	      identifying the times of sunrise and sunset in some cases.
+	      The new algorithm relies on the assumption that the
+	      hourlyrad array is referenced to local time, i.e. hour 0 is
+	      halfway between the previous day's sunset and the current
+	      day's sunrise.  Another assumption is that the hourlyrad
+	      array begins on hour 0 of the first day.			TJB
+****************************************************************************/
 {
   int risehour;
   int sethour;
   int hour;
   int i;
-  int j;
  
-  /* treat the first day separately */
-  risehour = -999;
-  sethour = -999;
-  if (hourlyrad[0] > 0 && hourlyrad[23] <= 0)
-    risehour = 0;
-  if (hourlyrad[0] <= 0 && hourlyrad[23] > 0)
-    sethour = 0;
-  for (hour = 1; hour < 24; hour++) {
-    if (hourlyrad[hour] > 0 && hourlyrad[hour-1] <= 0)
-      risehour = hour;
-    if (hourlyrad[hour] <= 0 && hourlyrad[hour-1] > 0)
-      sethour = hour;
-  }
-  if (risehour == -999 || sethour == -999) {
-    /* arbitrarily set the min and max time to 2am and 2pm */
-    tminhour[0] = 2;
-    tmaxhour[0] = 14;
-  }
-  else {
-    if (risehour > sethour)
-      risehour -= 24;
-    tmaxhour[0] = 0.67 * (sethour - risehour) + risehour;
-    tminhour[0] = risehour - 1;
-    // shift tminhour and tmaxhour if necessary to remain within the current day
-    if (tminhour[0] < 0) tminhour[0] += 24;
-    if (tmaxhour[0] < 0) tmaxhour[0] += 24;
-  }
-
-  /* treat remaining days */
-  for (i = 1, hour = 24; i < ndays; i++) {
+  for (i = 0; i < ndays; i++) {
     risehour = -999;
     sethour = -999;
-    for (j = 0; j < 24; j++, hour++) {
-      if (hourlyrad[hour] > 0 && hourlyrad[hour-1] <= 0)
-	risehour = j;
-      if (hourlyrad[hour] <= 0 && hourlyrad[hour-1] > 0)
-	sethour = j;
+    for (hour = 0; hour < 12; hour++) {
+      if (hourlyrad[i*24+hour] > 0 && hourlyrad[i*24+hour-1] <= 0)
+	risehour = hour;
     }
-    if (risehour == -999 || sethour == -999) {
-      /* arbitrarily set the min and max time to 2am and 2pm */
+    for (hour = 12; hour < 24; hour++) {
+      if (hourlyrad[i*24+hour] <= 0 && hourlyrad[i*24+hour-1] > 0)
+	sethour = hour;
+    }
+    if (risehour >= 0 && sethour >= 0) {
+      tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
+      tminhour[i] = risehour - 1;
+    }
+    else {
+      /* arbitrarily set the min and max times to 2am and 2pm */
       tminhour[i] = 2;
       tmaxhour[i] = 14;
     }
-    else {
-      if (risehour > sethour)
-	risehour -= 24;
-      tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
-      tminhour[i] = risehour - 1;
-      // shift tminhour and tmaxhour if necessary to remain within the current day
-      if (tminhour[i] < 0) tminhour[i] += 24;
-      if (tmaxhour[i] < 0) tmaxhour[i] += 24;
-    }
+
   }
+
 }

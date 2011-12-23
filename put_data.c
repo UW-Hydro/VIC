@@ -137,6 +137,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2010-Dec-01 Added OUT_ZWT.						TJB
   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
   2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
+  2011-Nov-04 Added OUT_TSKC.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -274,6 +275,7 @@ int  put_data(dist_prcp_struct  *prcp,
     out_data[OUT_LAKE_CHAN_IN].data[0] = 0;
   out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
   out_data[OUT_SNOWF].data[0]     = atmos->out_snow; // mm over grid cell
+  out_data[OUT_TSKC].data[0]      = atmos->tskc[NR];
   out_data[OUT_VP].data[0]        = atmos->vp[NR]/kPa2Pa;
   out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];

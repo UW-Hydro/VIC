@@ -116,6 +116,7 @@ void initialize_global() {
 	      correct - may be double-counting attentuation of canopy.		TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2011-Nov-04 Added options to access new forcing estimation features.		TJB
 
 *********************************************************************/
 
@@ -145,7 +146,10 @@ void initialize_global() {
   options.IMPLICIT              = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
+  options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
+  options.LW_TYPE               = LW_TVA;
   options.MIN_WIND_SPEED        = 0.0;
+  options.MTCLIM_SWE_CORR       = TRUE;
   options.Nlayer                = 3;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
@@ -158,7 +162,10 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
+  options.SW_PREC_THRESH        = 0;
   options.TFALLBACK             = TRUE;
+  options.VP_INTERP             = TRUE;
+  options.VP_ITER               = VP_ITER_ALWAYS;
   // input options
   options.ARC_SOIL              = FALSE;
   options.BASEFLOW              = ARNO;

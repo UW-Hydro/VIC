@@ -85,7 +85,13 @@ Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
 	   substantially longer than it should be.
 
 	Also fixed inconsistencies in the timing of meteorological variables
-	when sub-daily met variables were supplied by the user.
+	when sub-daily met variables were supplied by the user.  Now, we have
+	adopted the following convention:
+          daily supplied forcings are assumed to start/end at midnight in
+	    local time; for these forcings, off_gmt in the soil parameter file
+	    is ignored
+	  sub-daily supplied forcings are assumed to occur relative to the time
+	    zone indicated by off_gmt in the soil parameter file
 
 	New features:
 

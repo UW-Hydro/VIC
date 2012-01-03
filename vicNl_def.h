@@ -117,6 +117,7 @@
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
   2011-Nov-04 Added options to handle new forcing estimation features.	TJB
+  2012-Jan-02 Removed wetland_veg_class from lake_con_struct.		TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -1173,8 +1174,6 @@ typedef struct {
   This structure stores the lake/wetland parameters for a grid cell
   ******************************************************************/
 typedef struct {
-  // General information
-  int    wetland_veg_class;       /* Vegetation class of the wetland */
   // Lake basin dimensions
   int    numnod;                  /* Maximum number of lake nodes for this grid cell */
   double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */  

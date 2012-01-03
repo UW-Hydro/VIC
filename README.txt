@@ -514,6 +514,33 @@ Fixed incorrect computation of snow cover fraction over lake/wetland
 
 
 
+Fixed VIC's inability to handle the case where some cells have lakes and
+others don't.
+
+	Files Affected:
+
+	full_energy.c
+	read_initial_model_state.c
+	read_lakeparam.c
+	vicNl_def.h
+	write_model_state.c
+
+	Description:
+
+	VIC 4.1.1 and previous versions of 4.1.2 were unable to handle the
+	case in which some cells contain lakes and others don't.  If
+	options.LAKES was TRUE, all cells were required to have a valid
+	value of lake_idx to indicate which veg tile contained a lake,
+	even if no lakes existed in the cell.
+
+	This has been fixed.  Now, users can specify a cell that has no
+	lakes by setting lake_idx to -1 in the lake parameter file.  In
+	this case, VIC will ignore all other lake parameters for the cell
+	and set the cell's lake area permanently to 0.
+
+
+
+
 Fixed bugs in declarations of frost_fract for SPATIAL_FROST TRUE
 
 	Files Affected:

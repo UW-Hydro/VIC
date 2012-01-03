@@ -101,6 +101,8 @@ int  full_energy(char                 NEWCELL,
   2011-May-31 Prepare_full_energy() is now always called.			TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2012-Jan-01 Modified condition for determining whether to simulate lakes
+	      to check whether lake_idx >= 0.					TJB
 
 **********************************************************************/
 {
@@ -741,7 +743,7 @@ int  full_energy(char                 NEWCELL,
 
   /** Compute total runoff and baseflow for all vegetation types
       within each snowband. **/
-  if ( options.LAKES && lake_con->Cl[0] > 0 ) {
+  if ( options.LAKES && lake_con->lake_idx >= 0 ) {
 
     wetland_runoff = wetland_baseflow = 0;
     sum_runoff = sum_baseflow = 0;
@@ -946,7 +948,7 @@ int  full_energy(char                 NEWCELL,
     }
 #endif // LINK_DEBUG
 
-  }
+  } // end if (options.LAKES && lake_con->lake_idx >= 0)
 
   return (0);
 }

@@ -82,6 +82,10 @@ void read_initial_model_state(FILE                *init_state,
   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
 	      from wetland.							TJB
   2010-Jan-10 Corrected typo in condition for checking Wdew.			TJB
+  2012-Jan-01 Removed lake area condition from logic determining whether to read
+	      lake state data.  Now, if options.LAKES is TRUE, every grid cell
+	      will save lake state data.  If no lake is present, default NULL
+	      values will be stored.						TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -391,7 +395,7 @@ void read_initial_model_state(FILE                *init_state,
       }
     }
   }
-  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+  if ( options.LAKES ) {
     if ( options.BINARY_STATE_FILE ) {
       // Read both wet and dry fractions if using distributed precipitation
       for ( dist = 0; dist < Ndist; dist ++ ) {

@@ -71,6 +71,10 @@ void write_model_state(dist_prcp_struct    *prcp,
   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
 	      from wetland.							TJB
   2010-Mar-05 Fixed typo in writing of number of lake active nodes.		TJB
+  2012-Jan-01 Removed lake area condition from logic determining whether to write
+	      lake state data.  Now, if options.LAKES is TRUE, every grid cell
+	      will save lake state data.  If no lake is present, default NULL
+	      values will be stored.						TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -143,7 +147,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double) ); // soil temperatures
-    if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+    if ( options.LAKES ) {
       /* Lake/wetland tiles have lake-specific state vars */
       Nbytes += sizeof(int) // activenod
 	+ sizeof(double) // dz
@@ -342,7 +346,7 @@ void write_model_state(dist_prcp_struct    *prcp,
     }
   }
 
-  if ( options.LAKES && lake_con.Cl[0] > 0 ) {
+  if ( options.LAKES ) {
     if ( options.BINARY_STATE_FILE ) {
       for ( dist = 0; dist < Ndist; dist ++ ) {
 	// Store both wet and dry fractions if using distributed precipitation

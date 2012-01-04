@@ -99,7 +99,7 @@ Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
         functions from version 4.2 (Thornton and Running, 1999) to include
 	elements of version 4.3 (Thornton et al 2000).  
 
-        This update includes two main changes to the forcing estimation scheme:
+        This update includes 5 main changes to the forcing estimation scheme:
 
         1. Optional correction of downward shortwave for the effect of snow.
 	   In the presence of snow, incoming shortwave radiation has been
@@ -142,13 +142,55 @@ Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
 
 	   The default value of VP_ITER is VP_ITER_ALWAYS.
 
-	To make the sub-daily values of VP more accurate, we have introduced
-	another global parameter option: VP_INTERP.  If set to TRUE, VIC will
-	assign the daily VP value computed by the MTCLIM functions to the
-	time of sunrise on that day, and interpolate linearly between sunrise
-	vapor pressure values of adjacent days.  If set to FALSE, VIC will
-	hold vapor pressure constant over the entire day as in previous
-	versions.  The default value of VP_INTERP is TRUE.
+	3. To make the sub-daily values of VP more accurate, we have introduced
+	   another global parameter option: VP_INTERP.  If set to TRUE, VIC will
+	   assign the daily VP value computed by the MTCLIM functions to the
+	   time of sunrise on that day, and interpolate linearly between sunrise
+	   vapor pressure values of adjacent days.  If set to FALSE, VIC will
+	   hold vapor pressure constant over the entire day as in previous
+	   versions.  The default value of VP_INTERP is TRUE.
+
+	4. Alternative clear-sky longwave algorithms.  We have introduced a
+	   new global parameter option: LW_TYPE.  This option determines which
+	   algorithm is used to compute clear-sky longwave radiation.
+	   Choices are:
+
+	     LW_TVA = algorithm of Tennessee Valley Authority (TVA, 1972)
+		(This is what all previous versions of VIC have used.  Our tests
+		indicate that this algorithm is still the best when sub-daily
+		temperatures are estimated by the spline method used in VIC, as
+		opposed to being supplied as a forcing.)
+	     LW_ANDERSON = algorithm of Anderson (1964)
+	     LW_BRUTSAERT = algorithm of Brutseart (1975)
+	     LW_SATTERLUND = algorithm of Satterlund (1979)
+	     LW_IDSO = algorithm of Idso (1981)
+	     LW_PRATA = algorithm of Prata (1996) (Our tests indicate that
+		this algorithm is best when sub-daily temperatures are supplied
+		as a forcing.)
+
+	   Default is set to LW_TVA.
+
+	5. Alternative cloud longwave emission algorithms.  We have introduced
+	   a new global parameter option: LW_CLOUD_TYPE.  This option
+	   determines which algorithm is used to simulate the effect of
+	   cloudiness on incoming longwave radiation.  Choices are:
+
+	     LW_CLOUD_BRAS = algorithm composed of equations 2.29 and 2.43
+		from the Bras textbook (Bras, R. L., "Hydrology, an
+		introduction to hydrologic science", Addison-Wesley, Reading,
+		Massachusetts, 1990).  This was the algorithm used in all
+		previous releases of VIC. (Our tests indicate that this
+		algorithm introduces substantial temperature-dependent biases
+		in longwave estimates outside of the temperate zone)
+	     LW_CLOUD_DEARDORFF = algorithm used in Deardorff (1978) in which
+		cloud_fraction is assumed equal to
+			(1 - actual_shortwave/theoretical_clear_sky_shortwave)
+		and total sky emissivity is represented as the weighted average:
+			cloud_fraction * cloud_emissivity
+			+ (1-cloud_fraction) * clear_sky_emissivity
+		(Our tests indicate that this algorithm is superior)
+
+	   Default is set to LW_CLOUD_DEARDORFF.
 
 
 

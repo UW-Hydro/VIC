@@ -157,21 +157,21 @@ Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
 
 	     LW_TVA = algorithm of Tennessee Valley Authority (TVA, 1972)
 		(This is what all previous versions of VIC have used.  Our tests
-		indicate that this algorithm is still the best when sub-daily
-		temperatures are estimated by the spline method used in VIC, as
-		opposed to being supplied as a forcing.)
+		indicate that this algorithm is still the best when observed
+		cloud fractions are unavailable and are estimated by MTCLIM,
+		which is the current situation for VIC.)
 	     LW_ANDERSON = algorithm of Anderson (1964)
 	     LW_BRUTSAERT = algorithm of Brutseart (1975)
 	     LW_SATTERLUND = algorithm of Satterlund (1979)
 	     LW_IDSO = algorithm of Idso (1981)
 	     LW_PRATA = algorithm of Prata (1996) (Our tests indicate that
-		this algorithm is best when sub-daily temperatures are supplied
-		as a forcing.)
+		this algorithm is best when observed cloud fractions are
+		supplied as a forcing.)
 
 	   Default is set to LW_TVA.
 
 	5. Alternative cloud longwave emission algorithms.  We have introduced
-	   a new global parameter option: LW_CLOUD_TYPE.  This option
+	   a new global parameter option: LW_CLOUD.  This option
 	   determines which algorithm is used to simulate the effect of
 	   cloudiness on incoming longwave radiation.  Choices are:
 

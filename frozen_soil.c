@@ -765,6 +765,8 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	      organic fraction into account.					TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
+  2012-Jan-28 Removed restriction of cold nose fix to just top two nodes;
+	      now all nodes are checked and corrected if necessary.		TJB
   **********************************************************************/
     
   static double  deltat;
@@ -1064,7 +1066,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-	if(i==0 || i==1 ){//surface nodes only
+//	if(i==0 || i==1 ){//surface nodes only
 	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 	      flux_term1 = 0;
@@ -1073,7 +1075,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 #endif
 	    }
 	  }
-	}
+//	}
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1]) / deltat;
         res[i] = flux_term + phase_term - storage_term;

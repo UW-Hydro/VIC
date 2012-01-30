@@ -160,6 +160,12 @@ double calc_surf_energy_bal(double             Le,
 	      ground flux are always computed.				TJB
   2011-Aug-09 Now initialize soil thermal properties for all modes of
 	      operation.						TJB
+  2012-Jan-28 Changed the calculations of ground flux etc for the 
+	      exponential node distribution case to be over the same
+	      control volume (first soil layer) as for the linear node
+	      distribution and quick flux cases.  Now we need to pass
+	      entire array of node temperatures to
+	      func_surf_energy_bal().					TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -245,18 +251,29 @@ double calc_surf_energy_bal(double             Le,
   }
   else VEG = FALSE;
 
-  T2                  = energy->T[Nnodes-1]; // soil column bottom temp
+  // Define control volume for ground flux etc calculations to be first soil layer
+  T2                  = soil_con->avg_temp; // soil temperature at very deep depth (>> dp; *NOT* at depth D2)
   Ts_old              = energy->T[0]; // previous surface temperature
-  T1_old              = energy->T[1]; // previous first node temperature
+  /* Compute previous temperature at boundary between first and second layers */
+  if (options.QUICK_FLUX || !options.EXP_TRANS) {
+    // T[1] is defined to be the temperature at the boundary between first and second layers
+    T1_old              = energy->T[1];
+  }
+  else {
+    // need to interpolate to find temperature at the boundary between first and second layers
+    i=0;
+    while (soil_con->Zsum_node[i] < soil_con->depth[0]) { i++; }
+    T1_old              = energy->T[i-1] + (energy->T[i]-energy->T[i-1])*(soil_con->depth[0]-soil_con->Zsum_node[i-1])/(soil_con->Zsum_node[i]-soil_con->Zsum_node[i-1]); // i should be greater than 0, else code would have aborted in initialize_model_state()
+  }
+  D1                  = soil_con->depth[0]; // top layer thickness
+  D2                  = soil_con->depth[0]; // Distance below layer boundary to consider (= top layer thickness)
+  kappa1              = energy->kappa[0]; // top layer conductivity
+  kappa2              = energy->kappa[1]; // second layer conductivity
+  Cs1                 = energy->Cs[0]; // top layer heat capacity
+  Cs2                 = energy->Cs[1]; // second layer heat capacity
   atmos_density       = atmos->density[hour]; // atmospheric density
   atmos_pressure      = atmos->pressure[hour]; // atmospheric pressure
   emissivity          = 1.; // longwave emissivity
-  kappa1              = energy->kappa[0]; // top node conductivity
-  kappa2              = energy->kappa[1]; // second node conductivity
-  Cs1                 = energy->Cs[0]; // top node heat capacity
-  Cs2                 = energy->Cs[1]; // second node heat capacity
-  D1                  = soil_con->Zsum_node[1]-soil_con->Zsum_node[0]; // top node thickness
-  D2                  = soil_con->Zsum_node[2]-soil_con->Zsum_node[1]; // second node thickness
   delta_t             = (double)dt * 3600.;
   max_moist           = soil_con->max_moist[0] / (soil_con->depth[0]*1000.);
   bubble              = soil_con->bubble[0];
@@ -353,7 +370,7 @@ double calc_surf_energy_bal(double             Le,
 
     Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
 		       rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2,
-		       T1_old, T2, Ts_old, bubble, dp, 
+		       T1_old, T2, Ts_old, energy->T, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, 
 		       max_moist, moist, root, 
 		       UnderStory, overstory, NetShortBare, NetShortGrnd, 
@@ -389,7 +406,7 @@ double calc_surf_energy_bal(double             Le,
         fprintf(stderr, "SURF_DT = %.2f\n", SURF_DT);
         error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month, dmy->day, dmy->hour, VEG, iveg,
 					   veg_class, delta_t, Cs1, Cs2, D1, D2, 
-					   T1_old, T2, Ts_old, 
+					   T1_old, T2, Ts_old, energy->T,
 					   soil_con->b_infilt, bubble, dp, 
 					   expt, ice0, kappa1, kappa2, 
 					   soil_con->max_infil, max_moist, 
@@ -450,7 +467,7 @@ double calc_surf_energy_bal(double             Le,
       
       Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
 			 rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2, 
-			 T1_old, T2, Ts_old, bubble, dp, 
+			 T1_old, T2, Ts_old, energy->T, bubble, dp, 
 			 expt, ice0, kappa1, kappa2, 
 			 max_moist, moist, root, 
 			 UnderStory, overstory, NetShortBare, NetShortGrnd, 
@@ -484,7 +501,7 @@ double calc_surf_energy_bal(double             Le,
         else {
 	  error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month, dmy->day, dmy->hour, VEG, iveg,
 					     veg_class, delta_t, Cs1, Cs2, D1, 
-					     D2, T1_old, T2, Ts_old, 
+					     D2, T1_old, T2, Ts_old, energy->T,
 					     soil_con->b_infilt, bubble, dp, 
 					     expt, ice0, kappa1, kappa2, 
 					     soil_con->max_infil, max_moist, 
@@ -552,7 +569,7 @@ double calc_surf_energy_bal(double             Le,
   
   error = solve_surf_energy_bal(Tsurf, 
 				rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2, 
-				T1_old, T2, Ts_old, bubble, dp, 
+				T1_old, T2, Ts_old, energy->T, bubble, dp, 
 				expt, ice0, kappa1, kappa2, 
 				max_moist, moist, root, 
 				UnderStory, overstory, NetShortBare, NetShortGrnd, 
@@ -584,11 +601,11 @@ double calc_surf_energy_bal(double             Le,
   /***************************************************
     Recalculate Soil Moisture and Thermal Properties
   ***************************************************/
-    if(options.QUICK_FLUX || !(options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE))) {
+    if(options.QUICK_FLUX) {
 
       Tnew_node[0] = Tsurf;
       Tnew_node[1] = T1;
-      Tnew_node[2] = T2;
+      Tnew_node[2] = soil_con->avg_temp + (T1-soil_con->avg_temp)*exp(-(soil_con->Zsum_node[2]-D1)/dp);
 
     }
     calc_layer_average_thermal_props(energy, layer_wet, layer_dry, layer, soil_con, 
@@ -793,6 +810,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   Modifications:
   2009-Mar-03 Fixed format string for print statement, eliminates
 	      compiler WARNING.						KAC via TJB
+  2012-Jan-28 Added Told_node array.					TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -815,6 +833,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double T1_old;
   double T2;
   double Ts_old;
+  double *Told_node;
   double b_infilt;
   double bubble;
   double dp;
@@ -965,6 +984,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   T1_old                  = (double) va_arg(ap, double);
   T2                      = (double) va_arg(ap, double);
   Ts_old                  = (double) va_arg(ap, double);
+  Told_node               = (double *) va_arg(ap, double *);
   b_infilt                = (double) va_arg(ap, double);
   bubble                  = (double) va_arg(ap, double);
   dp                      = (double) va_arg(ap, double);

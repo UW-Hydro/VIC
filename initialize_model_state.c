@@ -112,6 +112,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2011-Jul-05 Changed logic initializing soil temperatures so that
 	      type of initialization depends solely on options.QUICK_FLUX;
 	      options.Nnodes is no longer automatically reset here.	TJB
+  2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
+	      IMPLICIT=FALSE).						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -158,6 +160,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #if EXCESS_ICE
   double   sum_mindepth, sum_depth_pre, sum_depth_post, tmp_mindepth;
 #endif
+  double dt_thresh;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -484,7 +487,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  /* Initialize soil node temperatures */
 	  energy[veg][band].T[0] = surf_temp;
 	  energy[veg][band].T[1] = surf_temp;
-//	  energy[veg][band].T[2] = soil_con->avg_temp + (surf_temp-soil_con->avg_temp)*exp(-(soil_con->Zsum_node[2]-soil_con->Zsum_node[1])/dp);
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 
 	  /* Initialize soil layer thicknesses */
@@ -704,7 +706,17 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						Nnodes, options.Nlayer,
 						soil_con->FS_ACTIVE);
 	  if ( ErrorFlag == ERROR ) return ( ErrorFlag );
-	    
+
+          /* Check node spacing v time step */
+          /* (note this is only approximate since heat capacity and conductivity can change considerably during the simulation depending on soil moisture and ice content) */
+          if (!options.IMPLICIT) {
+            dt_thresh = 0.5*energy[veg][band].Cs_node[1]/energy[veg][band].kappa_node[1]*pow((soil_con->dz_node[1]),2)/3600; // in hours
+            if (global_param->dt > dt_thresh) {
+              sprintf(ErrStr,"ERROR: You are currently running FROZEN SOIL with an explicit method (IMPLICIT is set to FALSE).  For the explicit method to be stable, time step %d hours is too large for the given thermal node spacing %f m, soil heat capacity %f J/m3/K, and soil thermal conductivity %f J/m/s/K.  Either set IMPLICIT to TRUE in your global parameter file (this is the recommended action), or decrease time step length to <= %f hours, or decrease the number of soil thermal nodes.",global_param->dt,soil_con->dz_node[1],energy[veg][band].Cs_node[1],energy[veg][band].kappa_node[1],dt_thresh);
+              nrerror(ErrStr);
+            }
+          }
+
 	  /* initialize layer moistures and ice contents */
 	  for ( dry = 0; dry < Ndist; dry++ ) {
 	    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {

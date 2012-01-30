@@ -31,10 +31,31 @@ Usage:
 New Features:
 -------------
 
-Overhaul of meteorological forcing processing
+Cleaned up the sample global parameter file
 
-Updated the MTCLIM forcing dissaggregation algorithm (Thornton and Running,
-1999) from version 4.2 to version 4.3.
+	Files Affected:
+
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+
+	Description:
+
+	The large number of options available in VIC 4.1.2 has begun
+	to clutter the global parameter file, making it difficult for
+	users to determine which options need to be set.
+
+	Now the sample global parameter file groups the various options
+	into several categories, making a clear distinction between
+	those options that need to be changed by the user for each
+	simulation, and those that rarely need to be changed.  Those
+	options that rarely need to be changed are commented out, and VIC
+	now sets those options to the most commonly-used default values.
+
+
+
+
+Overhaul of meteorological forcing processing
 
         Files Affected:
 
@@ -521,6 +542,39 @@ Removed MIN_LIQ option.
 Bug Fixes:
 ----------
 
+Users can inadvertently choose an unstable soil temperature scheme
+
+	Files Affected:
+
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	newt_raph_func_fast.c
+
+	Description:
+
+	Previously VIC's default soil temperature scheme when
+	FROZEN_SOIL=TRUE was an explicit scheme whose stability
+	was not guaranteed.  VIC has had an optional implicit
+	scheme but this was not turned on unless the user chose
+	it.  This led to users inadvertently running VIC with
+	an unstable temperature scheme under certain combinations
+	of model time step and thermal node spacing.
+
+	This has been fixed.  Now the implicit scheme is turned
+	on by default (IMPLICIT=TRUE by default when FROZEN_SOIL
+	is TRUE).  The implicit scheme is stable for all combinations
+	of model time step and thermal node spacing.  Because this
+	can slow down VIC simulations in some cases, this option
+	can still be overridden by setting IMPLICIT to FALSE in the
+	global parameter file.  However, if the user does this,
+	VIC now checks to see if the simulation's model time step
+	and thermal node spacing are in the stable region; if not,
+	VIC aborts with an error message.
+
+
+
+
 Fixed incorrect diurnal radiation cycle at high latitudes
 
 	Files Affected:
@@ -739,6 +793,7 @@ Incorrect calculation of grnd_flux, deltaH, and fusion for EXP_TRANS=TRUE.
 
 	arno_evap.c
 	calc_surf_energy_bal.c
+	frozen_soil.c
 	func_surf_energy_bal.c
 	get_global_param.c
 	initialize_model_state.c
@@ -754,6 +809,14 @@ Incorrect calculation of grnd_flux, deltaH, and fusion for EXP_TRANS=TRUE.
 	not true for exponential node spacing (EXP_TRANS=TRUE) or any other
 	node spacing scheme in general.  This has been fixed to allow
 	aribitrary node spacing.
+
+	The temperature profile given by the exponential node spacing is now
+	interpolated to find the temperatures at the same depths as for the
+	linear node spacing, i.e.  the boundary between the first and second
+	soil hydrologic layers.  This makes the computation of grnd_flux,
+	deltaH, and fusion consistent across all modes of operation (linear
+	and exponential node spacing AND the QUICK_FLUX approximation), since
+	now they all apply to the same control volume (first soil layer).
 
 
 

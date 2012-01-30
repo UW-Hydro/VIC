@@ -1624,6 +1624,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
   free(pet);
   free(pva);
   free(tdew_save);
+  free(pva_save);
 
   return (!ok);
 

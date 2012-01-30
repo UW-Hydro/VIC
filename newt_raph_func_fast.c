@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <vicNl.h>
 
-#define MAXSIZE  20
 #define MAXTRIAL 150
 #define TOLX     1e-4
 #define TOLF     1e-1
@@ -27,11 +26,15 @@ int newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
  to converge during the initial formation of ice, where the shape 
  of the residual function becomes very difficult 
 
+  Modifications:
+  2012-Jan-28 Replaced local precompile variable MAXSIZE with VIC's
+	      MAX_NODES so that array lengths here are always in sync
+	      with array lengths in the rest of VIC.			TJB 
 ******************************************************************/
 
-  int k, i, index[MAXSIZE], Error;
-  double errx, errf, d, fvec[MAXSIZE], fjac[MAXSIZE*MAXSIZE], p[MAXSIZE];
-  double a[MAXSIZE], b[MAXSIZE], c[MAXSIZE];
+  int k, i, index[MAX_NODES], Error;
+  double errx, errf, d, fvec[MAX_NODES], fjac[MAX_NODES*MAX_NODES], p[MAX_NODES];
+  double a[MAX_NODES], b[MAX_NODES], c[MAX_NODES];
 
   Error = 0;
 
@@ -113,7 +116,7 @@ void fdjac3(double x[], double fvec[], double a[], double b[], double c[],
 ******************************************************************/
 
   int i, j;
-  double h, temp, f[MAXSIZE];
+  double h, temp, f[MAX_NODES];
 
   for (j=0; j<n; j++) {
     temp=x[j];
@@ -135,7 +138,6 @@ void fdjac3(double x[], double fvec[], double a[], double b[], double c[],
 }
 
 #undef EPS2
-#undef MAXSIZE
 
 
 void tridiag(double a[], double b[], double c[], double r[], unsigned n)

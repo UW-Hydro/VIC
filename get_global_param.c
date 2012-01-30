@@ -97,6 +97,10 @@ global_param_struct get_global_param(filenames_struct *names,
   2011-Jul-05 Now QUICK_FLUX=FALSE is prohibited in water balance mode
 	      (when both FULL_ENERGY and FROZEN_SOIL are FALSE).		TJB
   2011-Nov-04 Added options to access new forcing estimation features.		TJB
+  2012-Jan-28 IMPLICIT is now set to TRUE by default if FROZEN_SOIL is
+	      TRUE.								TJB
+  2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
+	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -143,8 +147,8 @@ global_param_struct get_global_param(filenames_struct *names,
   global.endmonth      = MISSING;
   global.endday        = MISSING;
   global.resolution    = MISSING;
-  global.MAX_SNOW_TEMP = 0;
-  global.MIN_RAIN_TEMP = 0;
+  global.MAX_SNOW_TEMP = 0.5;
+  global.MIN_RAIN_TEMP = -0.5;
   global.measure_h     = 2.0;
   global.wind_h        = 10.0;
   for(i = 0; i < 2; i++) {
@@ -238,6 +242,7 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
           options.QUICK_FLUX = FALSE;
+          options.IMPLICIT = TRUE;
 	}
         else options.FROZEN_SOIL = FALSE;
       }
@@ -934,9 +939,11 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
     }
   }
-  if(!options.QUICK_FLUX && !(options.FULL_ENERGY || options.FROZEN_SOIL)) {
-    sprintf(ErrStr,"To run the model in water balance mode (both FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your global parameter file).");
-    nrerror(ErrStr);
+  else {
+    if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
+      sprintf(ErrStr,"To run the model in water balance mode (both FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your global parameter file).");
+      nrerror(ErrStr);
+    }
   }
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);

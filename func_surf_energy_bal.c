@@ -102,6 +102,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      organic fraction into account.				TJB
   2011-Aug-09 Now method used for estimating soil temperatures depends only
 	      on QUICK_FLUX setting.					TJB
+  2012-Jan-28 Changed ground flux etc calculations for case of exponential
+	      node distribution to be over the same control volume as for
+	      the linear node distribution and quick flux cases.	TJB
 
 **********************************************************************/
 {
@@ -136,6 +139,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double T1_old;
   double T2;
   double Ts_old;
+  double *Told_node;
   double b_infilt;
   double bubble;
   double dp;
@@ -292,6 +296,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double VaporMassFlux;
   double BlowingMassFlux;
   double SurfaceMassFlux;
+  double T11;
+  double T1_minus;
+  double T1_plus;
+  double D1_minus;
+  double D1_plus;
 
   /************************************
     Read variables from variable list 
@@ -314,6 +323,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   T1_old                  = (double) va_arg(ap, double);
   T2                      = (double) va_arg(ap, double);
   Ts_old                  = (double) va_arg(ap, double);
+  Told_node               = (double *) va_arg(ap, double *);
   bubble                  = (double) va_arg(ap, double);
   dp                      = (double) va_arg(ap, double);
   expt                    = (double) va_arg(ap, double);
@@ -490,6 +500,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   if ( options.QUICK_FLUX ) {
     /**************************************************************
       Use Liang et al. 1999 Equations to Calculate Ground Heat Flux
+      NOTE: T2 is not the temperature of layer 2, nor of node 2, nor at depth dp;
+      T2 is the constant temperature at depths much greater than dp to which
+      the soil temperature profile is asymptotic.
     **************************************************************/
     *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, Cs2, dp, delta_t);
     
@@ -503,7 +516,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean)
 				       + (kappa2 / D2 * ( 1. - exp( -D1 / dp )) * (T2 - (*T1)))) / 2.;
     }
-      
+ 
   }
   else {
     /*************************************************************
@@ -562,56 +575,133 @@ double func_surf_energy_bal(double Ts, va_list ap)
       fprintf(stderr, "ERROR: func_surf_energy_bal calling solve_T_profile\n");
       return( ERROR ); 
     }
-    *T1 = Tnew_node[1];
+    /* Compute temperatures for calculations of ground heat flux, delta_H, and fusion */
+    if (!options.EXP_TRANS) {
+      *T1 = Tnew_node[1];
+      T11 = Tnew_node[2];
+    }
+    else {
+      i=0;
+      while (soil_con->Zsum_node[i] < D1) { i++; }
+      D1_minus = soil_con->Zsum_node[i-1];
+      D1_plus = soil_con->Zsum_node[i];
+      T1_minus = Tnew_node[i-1];
+      T1_plus = Tnew_node[i];
+      *T1 = T1_minus + (T1_plus - T1_minus)*(D1-D1_minus)/(D1_plus-D1_minus);
+    }
       
 
     /*****************************************************
-      Compute the Ground Heat Flux between nodes 0 and 1
+      Compute the Ground Heat Flux between layers 0 and 1
     *****************************************************/
-    if (options.GRND_FLUX_TYPE == GF_406) {
-      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
+    if (!options.EXP_TRANS) {
+      if (options.GRND_FLUX_TYPE == GF_406) {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
+      }
+      else {
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
+		       + (kappa2 / D2 * (T11 - (*T1)))) / 2.;
+      }
     }
     else {
-      *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / D1 * ((*T1) - TMean) 
-		     + (kappa2 / D2 * (Tnew_node[2] - (*T1)))) / 2.;
+        *grnd_flux = (snow_coverage + (1. - snow_coverage) * surf_atten) * (kappa1 / (D1-D1_minus) * ((*T1) - T1_minus) 
+		       + (kappa2 / (D1_plus-D1) * (T1_plus - (*T1)))) / 2.;
     }
-      
+
   }
 
   /******************************************************
-    Compute the change in heat storage in the region between nodes 0 and 1
-    (this will correspond to top soil layer for the default (non-exponential) node spacing)
+    Compute the change in heat storage in the region between layers 0 and 1
   ******************************************************/
-  if (options.GRND_FLUX_TYPE == GF_FULL) {
-    *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
-              * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+  if (!options.EXP_TRANS) {
+    if (options.GRND_FLUX_TYPE == GF_FULL) {
+      *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
+                * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+    }
+    else {
+      *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+    }
   }
   else {
-    *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
+//NOTE: handle options.GRND_FLUX_TYPE == GF_FULL?  Or remove that option?
+    *deltaH = 0;
+    i=0;
+    while (soil_con->Zsum_node[i+1] < D1) {
+      *deltaH += (Cs1 * ((Told_node[i] + Told_node[i+1]) - (Tnew_node[i] + Tnew_node[i+1])) * (soil_con->Zsum_node[i+1]-soil_con->Zsum_node[i]) / delta_t / 2.);
+      i++;
+    }
+    *deltaH += (Cs1 * ((Told_node[i] + T1_old) - (Tnew_node[i] + *T1)) * (D1-soil_con->Zsum_node[i]) / delta_t / 2.);
   }
 
   /******************************************************
-    Compute the change in heat due to solid-liquid phase changes in the region between nodes 0 and 1
-    (this will correspond to top soil layer for the default (non-exponential) node spacing)
+    Compute the change in heat due to solid-liquid phase changes in the region between layers 0 and 1
   ******************************************************/
   if (FS_ACTIVE && options.FROZEN_SOIL) {
 
-    if((TMean+ *T1)/2.<0.) {
-      ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
+    if (!options.EXP_TRANS) {
+      if((TMean+ *T1)/2.<0.) {
+        ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
 #if EXCESS_ICE
-					   porosity,effective_porosity,
+					     porosity,effective_porosity,
 #endif
-					   max_moist,bubble,expt);
-      if(ice<0.) ice=0.;
-    }
-    else ice=0.;
+					     max_moist,bubble,expt);
+        if(ice<0.) ice=0.;
+      }
+      else ice=0.;
 
-    if (options.GRND_FLUX_TYPE == GF_FULL) {
-      *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
-                * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+      if (options.GRND_FLUX_TYPE == GF_FULL) {
+        *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
+                  * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+      }
+      else {
+        *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+      }
     }
     else {
-      *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+//NOTE: handle options.GRND_FLUX_TYPE == GF_FULL?  Or remove that option?
+      *fusion = 0;
+      i=0;
+      while (soil_con->Zsum_node[i+1] < D1) {
+        if((Told_node[i]+Told_node[i+1])/2.<0.) {
+          ice0 = moist - maximum_unfrozen_water((Told_node[i]+Told_node[i+1])/2.,
+#if EXCESS_ICE
+					       porosity,effective_porosity,
+#endif
+					       max_moist,bubble,expt);
+          if(ice0<0.) ice0=0.;
+        }
+        else ice0=0.;
+        if((Tnew_node[i]+Tnew_node[i+1])/2.<0.) {
+          ice = moist - maximum_unfrozen_water((Tnew_node[i]+Tnew_node[i+1])/2.,
+#if EXCESS_ICE
+					       porosity,effective_porosity,
+#endif
+					       max_moist,bubble,expt);
+          if(ice<0.) ice=0.;
+        }
+        else ice=0.;
+        *fusion += (-ice_density * Lf * (ice0 - ice) * (soil_con->Zsum_node[i+1]-soil_con->Zsum_node[i]) / delta_t);
+        i++;
+      }
+      if((Told_node[i]+T1_old)/2.<0.) {
+        ice0 = moist - maximum_unfrozen_water((Told_node[i]+T1_old)/2.,
+#if EXCESS_ICE
+					     porosity,effective_porosity,
+#endif
+					     max_moist,bubble,expt);
+        if(ice0<0.) ice0=0.;
+      }
+      else ice0=0.;
+      if((Tnew_node[i]+ *T1)/2.<0.) {
+        ice = moist - maximum_unfrozen_water((Tnew_node[i]+ *T1)/2.,
+#if EXCESS_ICE
+					     porosity,effective_porosity,
+#endif
+					     max_moist,bubble,expt);
+        if(ice<0.) ice=0.;
+      }
+      else ice=0.;
+      *fusion += (-ice_density * Lf * (ice0 - ice) * (D1-soil_con->Zsum_node[i]) / delta_t);
     }
 
   }

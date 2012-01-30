@@ -18,57 +18,88 @@ ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
 FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water balance only
 FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
-QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
-QUICK_SOLVE	FALSE	# TRUE = Use Liang et al., 1999 formulation for iteration, but explicit finite difference method for final step.
-NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
-IMPLICIT	FALSE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
-EXP_TRANS	FALSE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution
-SNOW_ALBEDO	USACE	# USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
-SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
-BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
-DIST_PRCP	FALSE	# TRUE = use distributed precipitation
-PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
-CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
-MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
-MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
-MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
-CONTINUEONERROR	TRUE	# TRUE = if simulation aborts on one grid cell, continue to next grid cell
-TFALLBACK	TRUE	# TRUE = when temperature iteration fails to converge, use previous time step's T value
-COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
-EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
-RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
-AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-filled canopy:
-			# AR_406 	= multiply by 10 for latent heat but do NOT multiply by 10 for sensible heat and do NOT apply stability correction (as in VIC 4.0.6); when no snow in canopy, use surface aero_resist for ET.
-			# AR_406_LS 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; when no snow in canopy, use surface aero_resist for ET.
-			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
-			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
-			# AR_COMBO 	= multiply by 10 AND apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
-			# Default 	= AR_406_FULL
-GRND_FLUX_TYPE	GF_410	# Options for ground flux:
-			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
-			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
-			# GF_FULL = (use is discouraged; only kept for backwards-compatibility) use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
-			# Default = GF_410
-PLAPSE		FALSE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
-MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
-VP_ITER		VP_ITER_ALWAYS	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
-			# VP_ITER_NEVER = never iterate; make estimates separately
-			# VP_ITER_ALWAYS = always iterate once
-			# VP_ITER_ANNUAL = iterate once for arid climates based on annual Precip/PET ratio
-			# VP_ITER_CONVERGE = iterate until shortwave and vp stabilize
-			# default = VP_ITER_ALWAYS
-VP_INTERP	TRUE	# This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
-LW_TYPE		LW_TVA	# This controls the algorithm used to estimate clear-sky longwave radiation:
-			# LW_TVA = Tennessee Valley Authority algorithm (1972)
-			# other options listed in vicNl_def.h
-			# default = LW_TVA (this was also the traditional VIC algorithm)
-LW_CLOUD	LW_CLOUD_DEARDORFF	# This controls the algorithm used to estimate the influence of clouds on total longwave:
-			# LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
-			# LW_CLOUD_DEARDORFF = method of Deardorff (1978)
-			# default = LW_CLOUD_DEARDORFF
 
 #######################################################################
-# State Files and  Parameters
+# Soil Temperature Parameters
+# VIC will choose appropriate values for QUICK_FLUX and IMPLICIT depending on values of FULL_ENERGY and FROZEN_SOIL; the user should only need to override VIC's choices in special cases.
+# The other options in this section are only applicable when FROZEN_SOIL is TRUE and their values depend on the application.
+#######################################################################
+#QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
+#IMPLICIT	TRUE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
+#QUICK_SOLVE	FALSE	# TRUE = Use Liang et al., 1999 formulation for iteration, but explicit finite difference method for final step.
+#NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
+#EXP_TRANS	FALSE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution
+#GRND_FLUX_TYPE	GF_410	# Options for ground flux:
+#			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
+#			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
+#			# GF_FULL = (use is discouraged; only kept for backwards-compatibility) use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
+#			# Default = GF_410
+
+#######################################################################
+# Precip (Rain and Snow) Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#SNOW_ALBEDO	USACE	# USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
+#SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
+#BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
+#COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
+#DIST_PRCP	FALSE	# TRUE = use distributed precipitation
+#PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
+#CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
+#MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
+#MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
+
+#######################################################################
+# Miscellaneous Simulation Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#CONTINUEONERROR	TRUE	# TRUE = if simulation aborts on one grid cell, continue to next grid cell
+#TFALLBACK	TRUE	# TRUE = when temperature iteration fails to converge, use previous time step's T value
+
+#######################################################################
+# Lake Simulation Parameters
+# These need to be un-commented and set to correct values only when running lake model (LAKES is not FALSE)
+#######################################################################
+#EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
+#RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
+
+#######################################################################
+# Turbulent Flux Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
+#AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-filled canopy:
+#			# AR_406 	= multiply by 10 for latent heat but do NOT multiply by 10 for sensible heat and do NOT apply stability correction (as in VIC 4.0.6); when no snow in canopy, use surface aero_resist for ET.
+#			# AR_406_LS 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; when no snow in canopy, use surface aero_resist for ET.
+#			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
+#			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
+#			# AR_COMBO 	= multiply by 10 AND apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
+#			# Default 	= AR_406_FULL
+
+#######################################################################
+# Meteorological Forcing Disaggregation Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
+#MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
+#VP_ITER		VP_ITER_ALWAYS	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
+#			# VP_ITER_NEVER = never iterate; make estimates separately
+#			# VP_ITER_ALWAYS = always iterate once
+#			# VP_ITER_ANNUAL = iterate once for arid climates based on annual Precip/PET ratio
+#			# VP_ITER_CONVERGE = iterate until shortwave and vp stabilize
+#			# default = VP_ITER_ALWAYS
+#VP_INTERP	TRUE	# This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
+#LW_TYPE		LW_TVA	# This controls the algorithm used to estimate clear-sky longwave radiation:
+#			# LW_TVA = Tennessee Valley Authority algorithm (1972)
+#			# other options listed in vicNl_def.h
+#			# default = LW_TVA (this was also the traditional VIC algorithm)
+#LW_CLOUD	LW_CLOUD_DEARDORFF	# This controls the algorithm used to estimate the influence of clouds on total longwave:
+#			# LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
+#			# LW_CLOUD_DEARDORFF = method of Deardorff (1978)
+#			# default = LW_CLOUD_DEARDORFF
+
+#######################################################################
+# State Files and Parameters
 #######################################################################
 #INIT_STATE	(put the initial state path/filename here)	# Initial state path/file
 #STATENAME	(put the path/prefix of output state file here)	# Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY) will be appended to the prefix automatically in the format yyyymmdd.
@@ -123,7 +154,7 @@ ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
-VEGPARAM_LAI 	FALSE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
+VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 LAI_SRC 	LAI_FROM_VEGLIB    # LAI_FROM_VEGPARAM = read LAI from veg param file; LAI_FROM_VEGLIB = read LAI from veg library file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 #LAKES		(put lake parameter path/file here)	# Lake parameter path/file

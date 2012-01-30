@@ -165,6 +165,8 @@ void set_max_min_hour(double *hourlyrad,
 	      halfway between the previous day's sunset and the current
 	      day's sunrise.  Another assumption is that the hourlyrad
 	      array begins on hour 0 of the first day.			TJB
+  2012-Jan-28 Added logic to prevent overstepping bounds of hourlyrad
+	      array.							TJB
 ****************************************************************************/
 {
   int risehour;
@@ -176,13 +178,14 @@ void set_max_min_hour(double *hourlyrad,
     risehour = -999;
     sethour = -999;
     for (hour = 0; hour < 12; hour++) {
-      if (hourlyrad[i*24+hour] > 0 && hourlyrad[i*24+hour-1] <= 0)
+      if (hourlyrad[i*24+hour] > 0 && (i*24+hour == 0 || hourlyrad[i*24+hour-1] <= 0))
 	risehour = hour;
     }
     for (hour = 12; hour < 24; hour++) {
       if (hourlyrad[i*24+hour] <= 0 && hourlyrad[i*24+hour-1] > 0)
 	sethour = hour;
     }
+    if (i == ndays-1 && sethour == -999) sethour = 23;
     if (risehour >= 0 && sethour >= 0) {
       tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
       tminhour[i] = risehour - 1;

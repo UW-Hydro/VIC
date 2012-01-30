@@ -117,6 +117,8 @@ void initialize_global() {
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
   2011-Nov-04 Added options to access new forcing estimation features.		TJB
+  2012-Jan-28 Changed default for MIN_WIND_SPEED to reflect most commonly-
+	      used value.							TJB
 
 *********************************************************************/
 
@@ -148,7 +150,7 @@ void initialize_global() {
   options.LAKE_PROFILE          = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
   options.LW_TYPE               = LW_TVA;
-  options.MIN_WIND_SPEED        = 0.0;
+  options.MIN_WIND_SPEED        = 0.1;
   options.MTCLIM_SWE_CORR       = TRUE;
   options.Nlayer                = 3;
   options.Nnode                 = 3;

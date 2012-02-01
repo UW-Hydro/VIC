@@ -55,6 +55,32 @@ Cleaned up the sample global parameter file
 
 
 
+Removal of undesirable model option values
+
+        Files Affected:
+
+        display_current_settings.c
+        func_canopy_energy_bal.c
+        func_surf_energy_bal.c
+        get_global_param.c
+        global.param.sample
+        initialize_global.c
+        vicNl_def.h
+
+        Description:
+
+	We have removed some of the available values for some model simulation
+	options, due to their being unrealistic or otherwise undesirable.
+	These include:
+
+	  GF_FULL value of GRND_FLUX_TYPE option.  This setting double-counted
+	    the effect of canopy attenuation of radiation.
+	  AR_COMBO value of AERO_RESIST_CANSNOW option.  This setting double-
+	    counted the effects of canopy snow on aerodynamic resistance.
+
+
+
+
 Overhaul of meteorological forcing processing
 
         Files Affected:
@@ -120,7 +146,7 @@ Overhaul of meteorological forcing processing
         functions from version 4.2 (Thornton and Running, 1999) to include
 	elements of version 4.3 (Thornton et al 2000).  
 
-        This update includes 5 main changes to the forcing estimation scheme:
+        This update includes 6 main changes to the forcing estimation scheme:
 
         1. Optional correction of downward shortwave for the effect of snow.
 	   In the presence of snow, incoming shortwave radiation has been
@@ -212,6 +238,18 @@ Overhaul of meteorological forcing processing
 		(Our tests indicate that this algorithm is superior)
 
 	   Default is set to LW_CLOUD_DEARDORFF.
+
+	6. Optional threshold for daily precipitation to cause dimming of
+	   incoming shortwave radiation.  Previously, any precipitation would
+	   cause estimated daily incoming shortwave radiation to dim by 25%.
+	   Because the smoothing/resampling methods used in creating gridded
+	   forcings can artificially "bleed" trace amounts of precipitation
+	   into neighboring grid cells, we introduced this threshold to
+	   counteract any resulting low biases in shortwave.  This is
+	   controlled by the global parameter file option SW_PREC_THRESH,
+	   which is the minimum amount of daily precipitation (in mm) that
+	   must be exceeded for shortwave to dim.  The default value is set to
+	   0.1 mm.
 
 
 

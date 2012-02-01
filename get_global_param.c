@@ -335,13 +335,11 @@ global_param_struct get_global_param(filenames_struct *names,
         else if(strcasecmp("AR_406_LS",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_406_LS;
         else if(strcasecmp("AR_406_FULL",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_406_FULL;
         else if(strcasecmp("AR_410",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_410;
-        else if(strcasecmp("AR_COMBO",flgstr)==0) options.AERO_RESIST_CANSNOW=AR_COMBO;
       }
       else if (strcasecmp("GRND_FLUX_TYPE", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
-        else if(strcasecmp("GF_FULL",flgstr)==0) options.GRND_FLUX_TYPE=GF_FULL;
       }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

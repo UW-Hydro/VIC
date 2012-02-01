@@ -189,7 +189,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
     /** Added multiplication by 10 to incorporate change in canopy resistance due
 	to smoothing by intercepted snow **/
-    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_406 || options.AERO_RESIST_CANSNOW == AR_406_LS || options.AERO_RESIST_CANSNOW == AR_406_FULL)
+    if (options.AERO_RESIST_CANSNOW == AR_406 || options.AERO_RESIST_CANSNOW == AR_406_LS || options.AERO_RESIST_CANSNOW == AR_406_FULL)
       Ra_used[1] *= 10.;
 
     /** Calculate the vapor mass flux between intercepted snow in 
@@ -198,7 +198,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
     EsSnow = svp(Tfoliage); 
     
     /* Apply stability correction to aerodynamic resistance */
-    if (options.AERO_RESIST_CANSNOW == AR_COMBO || options.AERO_RESIST_CANSNOW == AR_410) {
+    if (options.AERO_RESIST_CANSNOW == AR_410) {
       if (Wind[1] > 0.0) {
         Ra_used[1] /= StabilityCorrection(ref_height[1], displacement[1], Tfoliage, 
 				          Tcanopy, Wind[1], roughness[1]);
@@ -226,7 +226,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   }
   else {
 
-    if (options.AERO_RESIST_CANSNOW == AR_406_FULL || options.AERO_RESIST_CANSNOW == AR_410 || options.AERO_RESIST_CANSNOW == AR_COMBO) {
+    if (options.AERO_RESIST_CANSNOW == AR_406_FULL || options.AERO_RESIST_CANSNOW == AR_410) {
       Ra_used[0] = Ra[0];
       Ra_used[1] = Ra[1];
     }

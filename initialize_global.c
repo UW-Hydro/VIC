@@ -164,7 +164,7 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
-  options.SW_PREC_THRESH        = 0;
+  options.SW_PREC_THRESH        = 0.1;
   options.TFALLBACK             = TRUE;
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;

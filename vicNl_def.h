@@ -155,12 +155,10 @@
 #define AR_406_LS   1
 #define AR_406_FULL 2
 #define AR_410      3
-#define AR_COMBO    4
 
 /***** Ground Flux options *****/
 #define GF_406  0
 #define GF_410  1
-#define GF_FULL 2
 
 /***** VP algorithm options *****/
 #define VP_ITER_NONE     0
@@ -590,14 +588,7 @@ typedef struct {
 					    canopy (as in VIC 4.1.0);
 					    DO apply stability correction;
 					    always use canopy aero_resist
-					    for ET.
-				 "AR_COMBO" = multiply aerodynamic resistance
-					    by 10 in snow-filled canopy for
-					    BOTH latent AND sensible heat
-					    computations AND apply stability
-					    correction AND always use canopy
-					    aero_resist for ET;
-					    i.e. 406_FULL AND 410 */
+					    for ET. */
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */
@@ -612,12 +603,7 @@ typedef struct {
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX_TYPE; /* "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
                                         from VIC 4.0.6 and earlier
-                            "GF_410"  = use formulas from VIC 4.1.0
-                            "GF_FULL" = (use of this option is discouraged due to double-counting of surf_atten;
-                                        this option has only been kept for backwards- compatibility) use ground
-                                        flux formula from VIC 4.1.0 and also take surf_atten into account in
-                                        deltaH and fusion
-                            default = GF_410 */
+                            "GF_410"  = use formulas from VIC 4.1.0 */
   char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
 			    soil thermal fluxes */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,

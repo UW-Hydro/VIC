@@ -614,16 +614,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute the change in heat storage in the region between layers 0 and 1
   ******************************************************/
   if (!options.EXP_TRANS) {
-    if (options.GRND_FLUX_TYPE == GF_FULL) {
-      *deltaH = (snow_coverage + (1. - snow_coverage) * surf_atten)
-                * (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
-    }
-    else {
-      *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
-    }
+    *deltaH = (Cs1 * ((Ts_old + T1_old) - (TMean + *T1)) * D1 / delta_t / 2.);
   }
   else {
-//NOTE: handle options.GRND_FLUX_TYPE == GF_FULL?  Or remove that option?
     *deltaH = 0;
     i=0;
     while (soil_con->Zsum_node[i+1] < D1) {
@@ -648,17 +641,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
         if(ice<0.) ice=0.;
       }
       else ice=0.;
-
-      if (options.GRND_FLUX_TYPE == GF_FULL) {
-        *fusion = (snow_coverage + (1. - snow_coverage) * surf_atten)
-                  * (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
-      }
-      else {
-        *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
-      }
+      *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
     }
     else {
-//NOTE: handle options.GRND_FLUX_TYPE == GF_FULL?  Or remove that option?
       *fusion = 0;
       i=0;
       while (soil_con->Zsum_node[i+1] < D1) {

@@ -32,7 +32,6 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #GRND_FLUX_TYPE	GF_410	# Options for ground flux:
 #			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
 #			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
-#			# GF_FULL = (use is discouraged; only kept for backwards-compatibility) use formulas from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
 #			# Default = GF_410
 
 #######################################################################
@@ -73,7 +72,6 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #			# AR_406_LS 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; when no snow in canopy, use surface aero_resist for ET.
 #			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
-#			# AR_COMBO 	= multiply by 10 AND apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# Default 	= AR_406_FULL
 
 #######################################################################
@@ -81,6 +79,7 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 # Generally these default values do not need to be overridden
 #######################################################################
 #PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
+#SW_PREC_THRESH		0	# Minimum daily precip [mm] that can cause dimming of incoming shortwave; default = 0.
 #MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
 #VP_ITER		VP_ITER_ALWAYS	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
 #			# VP_ITER_NEVER = never iterate; make estimates separately

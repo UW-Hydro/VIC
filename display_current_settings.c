@@ -201,8 +201,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_406_FULL\n");
   else if (options.AERO_RESIST_CANSNOW == AR_410)
     fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_410\n");
-  else if (options.AERO_RESIST_CANSNOW == AR_COMBO)
-    fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_COMBO\n");
   if (options.BLOWING)
     fprintf(stderr,"BLOWING\t\t\tTRUE\n");
   else
@@ -239,8 +237,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_410\n");
-  else if (options.GRND_FLUX_TYPE == GF_FULL)
-    fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_FULL\n");
   if (options.LW_TYPE == LW_TVA)
     fprintf(stderr,"LW_TYPE\t\tLW_TVA\n");
   else if (options.LW_TYPE == LW_ANDERSON)

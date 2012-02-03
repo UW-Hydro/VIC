@@ -9,7 +9,20 @@ double linear_interp(double x,double lx,double ux,double ly,double uy) {
 }
 
 double exp_interp(double x,double lx,double ux,double ly,double uy) {
-  return(uy+(ly-uy)*exp(-(x-lx)));
+/**********************************************************************
+  This subroutine interpolates the soil temperature at a given depth,
+  under the assumption that the temperature decays exponentially with
+  depth from a surface temperature of "ly" to an asymptotic limit of
+  "uy".  "ux" here is the "damping" depth, at which difference between
+  temperature at that depth and the asymptotic deep temperature is 1/e
+  of the diffence at the surface.
+
+  Modifications:
+
+  2012-Feb-02 Fixed typo in the original formulation, which omitted the
+	      division by ux.						TJB
+**********************************************************************/
+  return(uy+(ly-uy)*exp(-(x-lx)/ux));
 }
 
 double modify_Ksat(double Temp) {

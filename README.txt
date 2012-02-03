@@ -835,6 +835,7 @@ Incorrect calculation of grnd_flux, deltaH, and fusion for EXP_TRANS=TRUE.
 	func_surf_energy_bal.c
 	get_global_param.c
 	initialize_model_state.c
+	modify_Ksat.c
 	solve_snow.c
 	surface_fluxes.c
 	vicNl.h

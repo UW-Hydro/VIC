@@ -117,15 +117,13 @@ void initialize_global() {
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
   2011-Nov-04 Added options to access new forcing estimation features.		TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Jan-28 Changed default for MIN_WIND_SPEED to reflect most commonly-
 	      used value.							TJB
 
 *********************************************************************/
 
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
   extern param_set_struct param_set;
 
   int i, j;
@@ -188,28 +186,6 @@ void initialize_global() {
   options.Noutfiles             = 2;
   options.PRT_HEADER            = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
-
-#if LINK_DEBUG 
-
-  /** Initialize debugging control flags **/
-
-  debug.DEBUG       = FALSE;
-  debug.PRT_SOIL    = FALSE;
-  debug.PRT_VEGE    = FALSE;
-  debug.PRT_GLOBAL  = FALSE;
-  debug.PRT_ATMOS   = FALSE;
-  debug.PRT_SNOW    = FALSE;
-  debug.PRT_FLUX    = FALSE;
-  debug.PRT_VAR     = FALSE;
-  debug.PRT_TEMP    = FALSE;
-  debug.PRT_MOIST   = FALSE;
-  debug.PRT_LAKE    = FALSE;
-  debug.PRT_KAPPA   = FALSE;
-  debug.PRT_BALANCE = FALSE;
-  debug.PRT_GRID    = FALSE;
-  strcpy(debug.debug_dir,"./");
-
-#endif // LINK_DEBUG
 
   /** Initialize forcing file input controls **/
 

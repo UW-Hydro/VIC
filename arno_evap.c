@@ -55,7 +55,7 @@ static char vcid[] = "$Id$";
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
   2010-Apr-28 Removed net_short, displacement, roughness, and ref_height from
 	      arg list as they are no longer used.				TJB
-
+  2012-Jan-16 Removed LINK_DEBUG code						BN
 ****************************************************************************/
 
 double arno_evap(layer_data_struct *layer_wet,
@@ -78,9 +78,6 @@ double arno_evap(layer_data_struct *layer_wet,
 #endif
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
 
   int    num_term;
   int    i;

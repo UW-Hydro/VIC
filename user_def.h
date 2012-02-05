@@ -19,6 +19,7 @@
 	      struct).							TJB
   2011-Jan-04 Added MAX_ZWTVMOIST for storing array of soil moisture vs
 	      water table position.					TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 
 **********************************************************************/
 
@@ -31,12 +32,6 @@
        based on those from the previous time step, results should
        be similar, however, the model will report energy balance errors *****/
 #define CLOSE_ENERGY FALSE
-
-/***** If TRUE include all debugging code - debugging options still
-       have to be activated to get extra output.  When set to FALSE
-       all debugging if-then statements are removed from the compiled 
-       code *****/
-#define LINK_DEBUG FALSE
 
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 

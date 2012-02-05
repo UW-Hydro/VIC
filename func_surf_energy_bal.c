@@ -102,17 +102,15 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      organic fraction into account.				TJB
   2011-Aug-09 Now method used for estimating soil temperatures depends only
 	      on QUICK_FLUX setting.					TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Jan-28 Changed ground flux etc calculations for case of exponential
 	      node distribution to be over the same control volume as for
 	      the linear node distribution and quick flux cases.	TJB
-
+  2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
 **********************************************************************/
 {
   extern option_struct options;
   extern veg_lib_struct *veg_lib;
-#if LINK_DEBUG
-  extern debug_struct  debug;
-#endif
 
   /* define routine input variables */
 

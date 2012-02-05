@@ -147,14 +147,11 @@ int surface_fluxes(char                 overstory,
   2010-Apr-26 Simplified argument lists for solve_snow() and
 	      snow_intercept().						TJB
   2011-May-31 Removed options.GRND_FLUX.				TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
   extern option_struct   options;
-#if LINK_DEBUG
-  extern debug_struct    debug;
-#endif // LINK_DEBUG
- 
   double                 total_store_moist[3];
   double                 step_store_moist[3];
 

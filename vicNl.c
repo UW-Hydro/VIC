@@ -90,14 +90,12 @@ int main(int argc, char *argv[])
   2010-Nov-10 Added closing of state files.				TJB
   2011-Jan-04 Made read_soilparam_arc() a sub-function of
 	      read_soilparam().						TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
 
   extern veg_lib_struct *veg_lib;
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif // LINK_DEBUG
   extern Error_struct Error;
   extern global_param_struct global_param;
 
@@ -164,11 +162,6 @@ int main(int argc, char *argv[])
 
 #if !OUTPUT_FORCE
 
-  /** Check and Open Debugging Files **/
-#if LINK_DEBUG
-  open_debug();
-#endif
-
   /** Read Vegetation Library File **/
   veg_lib = read_veglib(filep.veglib,&Nveg_type);
 
@@ -211,9 +204,6 @@ int main(int argc, char *argv[])
     soil_con = read_soilparam(filep.soilparam, filenames.soil_dir, &cell_cnt, &RUN_MODEL, &MODEL_DONE);
 
     if(RUN_MODEL) {
-#if LINK_DEBUG
-      if(debug.PRT_SOIL) write_soilparam(&soil_con); 
-#endif
 
 #if QUICK_FS
       /** Allocate Unfrozen Water Content Table **/
@@ -241,9 +231,6 @@ int main(int argc, char *argv[])
       veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
                               Nveg_type);
       calc_root_fractions(veg_con, &soil_con);
-#if LINK_DEBUG
-      if(debug.PRT_VEGE) write_vegparam(veg_con); 
-#endif /* LINK_DEBUG*/
 
       if ( options.LAKES ) 
 	lake_con = read_lakeparam(filep.lakeparam, soil_con, veg_con);
@@ -285,9 +272,6 @@ int main(int argc, char *argv[])
 #endif /* OUTPUT_FORCE */
 
 #if !OUTPUT_FORCE
-#if LINK_DEBUG
-      if(debug.PRT_ATMOS) write_atmosdata(atmos, global_param.nrecs);
-#endif
 
       /**************************************************
         Initialize Energy Balance and Snow Variables 

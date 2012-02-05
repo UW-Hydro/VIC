@@ -55,14 +55,11 @@ void initialize_snow (snow_data_struct **snow,
   2009-Sep-28 Added initialization of some terms that previously had
 	      not been initialized.					TJB
   2010-Apr-24 Added initialization of surf_temp_fbcount and fbflag.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 
 **********************************************************************/
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   int i, j;
   int startlayer;
 

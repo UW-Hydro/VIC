@@ -138,15 +138,12 @@ int  put_data(dist_prcp_struct  *prcp,
   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
   2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
   2011-Nov-04 Added OUT_TSKC.						TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern global_param_struct global_param;
   extern veg_lib_struct  *veg_lib;
   extern option_struct    options;
-#if LINK_DEBUG
-  extern debug_struct     debug;
-#endif
-
   int                     veg;
   int                     index;
   int                     Ndist;

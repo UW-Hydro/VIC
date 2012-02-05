@@ -15,17 +15,13 @@ void vicerror(char error_text[])
 
   Modifications:
   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures. TJB
-  2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-
+              out_data and out_data_files structures.xi			TJB
+  2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
         extern option_struct options;
 	extern Error_struct Error;
-#if LINK_DEBUG
-        extern debug_struct debug;
-#endif
-
         filenames_struct fnames;
 	void _exit();
 

@@ -102,6 +102,7 @@
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.                   TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 ************************************************************************/
 
 #include <math.h>
@@ -412,7 +413,6 @@ int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...),
                double *, int);
 void   nrerror(char *);
 
-void   open_debug();
 FILE  *open_file(char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
@@ -538,9 +538,6 @@ int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
 			       int, int, int, int, 
 			       double *, double *, double *, double *, double *, double *, double *);
 double StabilityCorrection(double, double, double, double, double, double);
-void   store_moisture_for_debug(int,int,double *,cell_data_struct ***,
-				veg_var_struct ***,snow_data_struct **,
-				soil_con_struct *);
 int    surface_fluxes(char, double, double, double, double, 
 #if EXCESS_ICE
 		      int, double *, double *,
@@ -574,12 +571,7 @@ void   vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);
 
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
-void write_atmosdata(atmos_data_struct *, int);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
-void write_debug(atmos_data_struct *, soil_con_struct *, cell_data_struct *,
-                 energy_bal_struct *, snow_data_struct *, veg_var_struct *,
-                 dmy_struct *, global_param_struct *,
-                 double, double, int, int, int, int, int, char);
 void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);

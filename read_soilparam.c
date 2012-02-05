@@ -116,16 +116,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      for each grid cell.					TJB
   2011-Sep-28 Added validation of b_infilt.				TJB
   2011-Nov-04 Added hard-coding of slope, aspect, and horizons to 0.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   void ttrim( char *string );
   extern option_struct options;
   extern global_param_struct global_param;
   extern veg_lib_struct *veg_lib;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   char            ErrStr[MAXSTRING];
   char            line[MAXSTRING];
   char            tmpline[MAXSTRING];

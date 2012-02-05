@@ -32,6 +32,11 @@
 # 2009-Jul-31 Removed wetland_energy.c.						TJB
 # 2010-Dec-01 Added compute_zwt.c.						TJB
 # 2011-Nov-04 Renamed mtclim* files to remove version number from filenames.	TJB
+# 2012-Jan-16 Removed .o files associated with LINK_DEBUG code:
+#             open_debug.o 
+#             store_moisture_for_debug.o
+#             write_atmosdata.o
+#             write_debug.o  
 #
 # $Id$
 #
@@ -89,7 +94,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	make_cell_data.o make_dist_prcp.o make_dmy.o make_energy_bal.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
 	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o nrerror.o \
-	open_debug.o open_file.o open_state_file.o \
+	open_file.o open_state_file.o \
 	output_list_utils.o parse_output_info.o penman.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
@@ -97,9 +102,9 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
 	set_output_defaults.o snow_intercept.o snow_melt.o \
 	snow_utility.o soil_conduction.o \
-	soil_thermal_eqn.o solve_snow.o store_moisture_for_debug.o \
-	surface_fluxes.o svp.o vicNl.o vicerror.o write_atmosdata.o \
-	write_data.o write_debug.o write_forcing_file.o write_header.o write_layer.o \
+	soil_thermal_eqn.o solve_snow.o \
+	surface_fluxes.o svp.o vicNl.o vicerror.o \
+	write_data.o write_forcing_file.o write_header.o write_layer.o \
 	write_model_state.o write_snow_data.o write_soilparam.o \
 	write_vegparam.o write_vegvar.o lakes.eb.o initialize_lake.o \
 	read_lakeparam.o ice_melt.o IceEnergyBalance.o water_energy_balance.o \

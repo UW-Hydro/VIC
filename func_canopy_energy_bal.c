@@ -21,7 +21,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 	      options.AERO_RESIST_CANSNOW.				TJB
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
   2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
-
+  2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
  ********************************************************************/
 {
 

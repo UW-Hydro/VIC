@@ -74,14 +74,11 @@ int  dist_prec(atmos_data_struct   *atmos,
 	      return a single ERROR value if an error occurs.		KAC via TJB
   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-28 Added logic for initial (pre-simulation) call to put_data.TJB
-
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 
   extern option_struct   options;
   extern veg_lib_struct *veg_lib; 
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
 
   static char STILL_STORM[MAX_VEG];
   static int  DRY_TIME[MAX_VEG];

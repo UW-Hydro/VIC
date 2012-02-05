@@ -55,28 +55,56 @@ Cleaned up the sample global parameter file
 
 
 
-Removal of undesirable model option values
+Removal of obsolete model options
 
         Files Affected:
 
+        arno_evap.c
+        canopy_evap.c
+        close_files.c
+        cmd_proc.c
+        compute_zwt.c
         display_current_settings.c
+        dist_prec.c
+        frozen_soil.c
+        full_energy.c
         func_canopy_energy_bal.c
         func_surf_energy_bal.c
         get_global_param.c
+        global.h
         global.param.sample
         initialize_global.c
+        initialize_lake.c
+        initialize_model_state.c
+        initialize_snow.c
+        Makefile
+        put_data.c
+        read_lakeparam.c
+        read_soilparam_arc.c
+        read_soilparam.c
+        read_veglib.c
+        read_vegparam.c
+        runoff.c
+        surface_fluxes.c
+        user_def.h
+        vicerror.c
+        vicNl.c
         vicNl_def.h
+        vicNl.h
+        write_data.c
 
         Description:
 
-	We have removed some of the available values for some model simulation
-	options, due to their being unrealistic or otherwise undesirable.
-	These include:
+	We have removed some of the available model simulation options, due
+	to their being unrealistic or rarely used.  These include:
 
 	  GF_FULL value of GRND_FLUX_TYPE option.  This setting double-counted
 	    the effect of canopy attenuation of radiation.
 	  AR_COMBO value of AERO_RESIST_CANSNOW option.  This setting double-
 	    counted the effects of canopy snow on aerodynamic resistance.
+	  LINK_DEBUG option.  This user_def.h option would print out values of
+	    various water balance terms for debugging purposes, but was rarely
+	    used and difficult to maintain.
 
 
 

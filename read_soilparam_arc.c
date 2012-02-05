@@ -126,15 +126,12 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2011-Jun-03 Added options.ORGANIC_FRACT.  If TRUE, VIC expects organic
 	      fraction and organic bulk and soil densities to be supplied
 	      for each grid cell.						TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
 **********************************************************************/
 {
   extern option_struct options;
   extern global_param_struct global_param;
   extern veg_lib_struct *veg_lib;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   static double *lat;
   static double *lng;
   static int    *cellnum;

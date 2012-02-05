@@ -62,14 +62,11 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 	      mindepth.								TJB
   2012-Jan-02 Modified to turn off lakes in a grid cell if lake_idx is < 0.
 	      Added validation of parameter values.				TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
 **********************************************************************/
 
 {
   extern option_struct   options;
-#if LINK_DEBUG
-  extern debug_struct    debug;
-#endif
-
   int    i;
   int    lakecel;
   int    junk, flag;

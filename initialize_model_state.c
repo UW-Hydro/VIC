@@ -112,15 +112,13 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2011-Jul-05 Changed logic initializing soil temperatures so that
 	      type of initialization depends solely on options.QUICK_FLUX;
 	      options.Nnodes is no longer automatically reset here.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
 	      IMPLICIT=FALSE).						TJB
 **********************************************************************/
 {
   extern option_struct options;
   extern veg_lib_struct *veg_lib;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
 #if QUICK_FS
   extern double temps[];
 #endif
@@ -886,14 +884,11 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
   2009-Feb-09 Removed dz_node from call to
 	      distribute_node_moisture_properties.			KAC via TJB
   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern option_struct options;
   extern veg_lib_struct *veg_lib;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   char     ErrStr[MAXSTRING];
   char     FIRST_VEG;
   int      veg, index, dist;

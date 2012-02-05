@@ -58,32 +58,28 @@ void write_data(out_data_file_struct *out_data_files,
                 integer.  This reduces stored value precision to 0.1,
                 but increases the maximum storable SWQ, which was
                 exceeded in previous LDAS simulations.          KAC
-  07-30-2003    Corrected output of sub_snow variable to item [0]
-                rather than a point - will need to decide what
-                parts of this array are important to output.    KAC
-  30-Oct-03     Replaced output of sub_snow[0] in fluxes file with
-                sub_total.                                      TJB
-  2005-Mar-24 Added support for ALMA variables.                 TJB
-  2005-11-08    Corrected outfiles from fluxes to snow for blowing snow
-                sublimation. Corrected outfiles from snow to snowband
-                for options.PRT_SNOW_BAND. Removed the following from
-                snowband output: net sw radiation, net lw, albedo,
-                latent heat flux, sensible heat flux, ground heat flux.  GCT
-  2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
+  2003-Jul-07 Corrected output of sub_snow variable to item [0]
+              rather than a point - will need to decide what
+              parts of this array are important to output.		KAC
+  2003-Oct-30 Replaced output of sub_snow[0] in fluxes file with
+              sub_total.						TJB
+  2005-Mar-24 Added support for ALMA variables.				TJB
+  2005-Nov-08 Corrected outfiles from fluxes to snow for blowing snow
+              sublimation. Corrected outfiles from snow to snowband
+              for options.PRT_SNOW_BAND. Removed the following from
+              snowband output: net sw radiation, net lw, albedo,
+              latent heat flux, sensible heat flux, ground heat flux.	GCT
+  2006-Aug-23 Changed order of fread/fwrite statements from ...1, sizeof...
+              to ...sizeof, 1,...					GCT
   2006-Sep-23 Implemented flexible output configuration; uses the new
               out_data and out_data_files structures; moved the functions
               calc_energy_balance_error and calc_water_balance_error to
               the file calc_water_energy_balance_errors.c; implemented
-	      aggregation of output variables.  TJB
-
+	      aggregation of output variables.				TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   int                 file_idx;
   int                 var_idx;
   int                 elem_idx;

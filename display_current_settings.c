@@ -48,6 +48,8 @@ void display_current_settings(int                 mode,
   2011-Jun-03 Added ORGANIC_FRACT option.			TJB
   2011-Nov-04 Added options for accessing new forcing estimation
 	      features.						TJB
+  2012-Jan-16 Removed LINK_DEBUG code				BN
+  2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
 **********************************************************************/
 {
 
@@ -92,11 +94,6 @@ void display_current_settings(int                 mode,
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Output Files:\n");
-#if LINK_DEBUG
-  fprintf(stderr,"LINK_DEBUG\t\tTRUE\n");
-#else
-  fprintf(stderr,"LINK_DEBUG\t\tFALSE\n");
-#endif
 #if OUTPUT_FORCE
   fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
 #else

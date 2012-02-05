@@ -52,13 +52,10 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 	      calc_layer_average_thermal_props.  This function now can
 	      be used to compute soil layer average T and ice, regardless
 	      of the settings of FROZEN_SOIL, QUICK_FLUX, etc.		TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 ******************************************************************/
 
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct  debug;
-#endif
-
   int     i, ErrorFlag;
 
   if (options.FROZEN_SOIL && soil_con->FS_ACTIVE)
@@ -159,17 +156,6 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
     }
   }
   
-#if LINK_DEBUG
-  if(debug.PRT_BALANCE && debug.DEBUG) {
-    printf("After Moisture Redistribution\n");
-#if SPATIAL_FROST
-    write_layer(layer, veg, options.Nlayer, soil_con->frost_fract, soil_con->depth);
-#else
-    write_layer(layer, veg, options.Nlayer, soil_con->depth);
-#endif
-  } 
-#endif
-
   return (0);
   
 }
@@ -230,13 +216,10 @@ int  solve_T_profile(double *T,
               solve_T_profile_implicit.                                         KAC
   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
 **********************************************************************/
 
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct  debug;
-#endif
-  
   static double A[MAX_NODES];
   static double B[MAX_NODES];
   static double C[MAX_NODES];
@@ -384,14 +367,10 @@ int solve_T_profile_implicit(double *T,                           // update
   2011-Jun-03 Added ORGANIC_FRACT option.				TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
-
+  2012-Jan-16 Removed LINK_DEBUG code					BN
   **********************************************************************/
   
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct  debug;
-#endif
-  
   int  n, Error;
   double res[MAX_NODES];
   void (*vecfunc)(double *, double *, int, int, ...);

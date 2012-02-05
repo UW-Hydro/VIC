@@ -97,6 +97,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2011-Jul-05 Now QUICK_FLUX=FALSE is prohibited in water balance mode
 	      (when both FULL_ENERGY and FROZEN_SOIL are FALSE).		TJB
   2011-Nov-04 Added options to access new forcing estimation features.		TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
+  2012-Jan-28 Removed AR_COMBO and GF_FULL.					TJB
   2012-Jan-28 IMPLICIT is now set to TRUE by default if FROZEN_SOIL is
 	      TRUE.								TJB
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
@@ -105,9 +107,6 @@ global_param_struct get_global_param(filenames_struct *names,
 {
   extern option_struct    options;
   extern param_set_struct param_set;
-#if LINK_DEBUG
-  extern debug_struct     debug;
-#endif
   extern int              NF, NR;
 
   char cmdstr[MAXSTRING];
@@ -650,66 +649,6 @@ global_param_struct get_global_param(filenames_struct *names,
         ; // do nothing
       }
 
-      /******************************
-        Get Model Debugging Options
-	****************************/
-
-#if LINK_DEBUG
-      else if(strcasecmp("PRT_FLUX",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_FLUX=TRUE;
-        else debug.PRT_FLUX = FALSE;
-      }
-      else if(strcasecmp("PRT_BALANCE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_BALANCE=TRUE;
-        else debug.PRT_BALANCE = FALSE;
-      }
-      else if(strcasecmp("PRT_SOIL",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_SOIL=TRUE;
-        else debug.PRT_SOIL = FALSE;
-      }
-      else if(strcasecmp("PRT_VEGE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_VEGE=TRUE;
-        else debug.PRT_VEGE = FALSE;
-      }
-      else if(strcasecmp("PRT_GLOBAL",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_GLOBAL=TRUE;
-        else debug.PRT_GLOBAL = FALSE;
-      }
-      else if(strcasecmp("PRT_ATMOS",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_ATMOS=TRUE;
-        else debug.PRT_ATMOS = FALSE;
-      }
-      else if(strcasecmp("PRT_SNOW",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_SNOW=TRUE;
-        else debug.PRT_SNOW = FALSE;
-      }
-      else if(strcasecmp("PRT_MOIST",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_MOIST=TRUE;
-        else debug.PRT_MOIST = FALSE;
-      }
-      else if(strcasecmp("PRT_LAKE",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_LAKE=TRUE;
-        else debug.PRT_LAKE = FALSE;
-      }
-      else if(strcasecmp("PRT_TEMP",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) debug.PRT_TEMP=TRUE;
-        else debug.PRT_TEMP = FALSE;
-      }
-      else if(strcasecmp("DEBUG_DIR",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",debug.debug_dir);
-      }
-#endif
-
       /***********************************
         Unrecognized Global Parameter Flag
         ***********************************/
@@ -1053,11 +992,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,"Model output is in standard BINARY format.\n");
   else 
     fprintf(stderr,"Model output is in standard ASCII format.\n");
-  if ( LINK_DEBUG ) 
-    fprintf(stderr,"Debugging code has been included in the executable.\n");
-  else 
-    fprintf(stderr,"Debugging code has not been compiled.\n");
-#endif
 
 #endif // !OUTPUT_FORCE
 

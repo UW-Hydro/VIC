@@ -44,16 +44,13 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Sep-14 Made error messages clearer.				TJB
   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
 
   void ttrim( char *string );
   extern veg_lib_struct *veg_lib;
   extern option_struct   options;
-#if LINK_DEBUG
-  extern debug_struct    debug;
-#endif
-
   veg_con_struct *temp;
   int             vegcel, i, j, k, vegetat_type_num, skip, veg_class;
   int             MaxVeg;

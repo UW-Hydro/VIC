@@ -68,13 +68,10 @@ int initialize_lake (lake_var_struct   *lake,
 	      in the lake_var structure.				TJB
   2011-Mar-01 Lake->soil state terms are now initialized to match those
 	      of the cell data structure for the lake/wetland tile.	TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
-
   int i, k;
   int status;
   double depth;

@@ -17,13 +17,11 @@ double compute_zwt(soil_con_struct  *soil_con,
   modifications:
   2011-Mar-01 Simplified this function and added wrap_compute_zwt() to
 	      call it.							TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 ****************************************************************************/
 
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
 
   int    i;
   double zwt;
@@ -59,14 +57,11 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
   table position is measured in cm and is negative below the soil surface.
 
   modifications:
-
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 ****************************************************************************/
 
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
 
   int    i;
   int    lindex;

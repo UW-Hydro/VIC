@@ -18,14 +18,11 @@ filenames_struct cmd_proc(int argc, char *argv[])
   11-18-98  Added comment block to cmd_proc() and fixed routine so
             that it will exit if global command file is not defined
             using the "-g" flag.                                KAC
-  30-Oct-03 Added -v option to display version information.	TJB
-
+  2003-Oct-03 Added -v option to display version information.		TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 {
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
   extern int getopt();
   extern char *optarg;
   extern char *optstring;

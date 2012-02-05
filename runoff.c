@@ -165,13 +165,10 @@ int  runoff(cell_data_struct  *cell_wet,
 	      elsewhere.							TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
+  2012-Jan-16 Removed LINK_DEBUG code						BN
 **********************************************************************/
 {  
   extern option_struct options;
-#if LINK_DEBUG
-  extern debug_struct  debug;
-#endif // LINK_DEBUG
-
   char               ErrStr[MAXSTRING];
   int                firstlayer, lindex, sub;
   int                i;
@@ -552,47 +549,9 @@ int  runoff(cell_data_struct  *cell_wet,
 	      
 	      if ( lindex == 0 ) dt_runoff = tmp_dt_runoff[frost_area];
 	      else dt_runoff = 0;
-	      
-	      /* Store moistures for water balance debugging */
-#if LINK_DEBUG
-	      if ( debug.PRT_BALANCE ) {
-		if ( time_step == 0 ) {
-		  if ( firstlayer )
-#if SPATIAL_FROST
-		    debug.inflow[dist][band][lindex+2] 
-		      += (inflow - dt_runoff) * frost_fract[frost_area];
-#else
-		  debug.inflow[dist][band][lindex+2] = inflow - dt_runoff;
-#endif // SPATIAL_FROST
-		  else {
-#if SPATIAL_FROST
-		    debug.inflow[dist][band][lindex+2] 
-		      += inflow * frost_fract[frost_area];
-		    debug.outflow[dist][band][lindex+1] 
-		      += inflow * frost_fract[frost_area];
-#else
-		    debug.inflow[dist][band][lindex+2] = inflow;
-		    debug.outflow[dist][band][lindex+1] = inflow;
-#endif // SPATIAL_FROST
-		  }
-		}
-		else {
-		  if ( firstlayer )
-		    debug.inflow[dist][band][lindex+2]  += inflow - dt_runoff;
-		  else {
-		    debug.inflow[dist][band][lindex+2]  += inflow;
-		    debug.outflow[dist][band][lindex+1] += inflow;
-		  }
-		}
-	      }
-#endif // LINK_DEBUG
-	      
+
 	      /* transport moisture for all sublayers **/
-#if LINK_DEBUG
-	      if(debug.DEBUG || debug.PRT_BALANCE) 
-		last_liq = liq[lindex];
-#endif // LINK_DEBUG
-	      
+
 	      tmp_inflow = 0.;
 	      
 	      /** Update soil layer moisture content **/
@@ -612,13 +571,6 @@ int  runoff(cell_data_struct  *cell_wet,
 		  tmplayer = lindex;
 		  while(tmp_inflow > 0) {
 		    tmplayer--;
-#if LINK_DEBUG
-		    if(debug.PRT_BALANCE) {
-		      /** Update debugging storage terms **/
-		      debug.inflow[dist][band][lindex+2]  -= tmp_inflow;
-		      debug.outflow[dist][band][lindex+1] -= tmp_inflow;
-		    }
-#endif // LINK_DEBUG
 		    if ( tmplayer < 0 ) {
 		      /** If top layer saturated, add to runoff **/
 		      runoff[frost_area] += tmp_inflow;
@@ -663,16 +615,7 @@ int  runoff(cell_data_struct  *cell_wet,
 	    
 	    lindex = options.Nlayer-1;
 	    Dsmax = soil_con->Dsmax / 24.;
-	    
-#if LINK_DEBUG
-	    if(debug.DEBUG || debug.PRT_BALANCE) {
-	      last_liq = liq[lindex];
-	      /** Update debugging storage terms **/
-	      debug.outflow[dist][band][lindex+1] += Q12[lindex-1];
-	      debug.inflow[dist][band][lindex+2]  += Q12[lindex-1];
-	    }
-#endif // LINK_DEBUG
-	    
+
 	    /** Compute relative moisture **/
 	    rel_moist = (liq[lindex]-resid_moist[lindex])
 	      / (soil_con->max_moist[lindex]-resid_moist[lindex]);
@@ -712,13 +655,6 @@ int  runoff(cell_data_struct  *cell_wet,
 	      tmplayer = lindex;
 	      while(tmp_moist > 0) {
 		tmplayer--;
-#if LINK_DEBUG
-		if(debug.PRT_BALANCE) {
-		  /** Update debugging storage terms **/
-		  debug.inflow[dist][band][lindex+2]  -= tmp_moist;
-		  debug.outflow[dist][band][lindex+1] -= tmp_moist;
-		}
-#endif // LINK_DEBUG
 		if(tmplayer<0) {
 		  /** If top layer saturated, add to runoff **/
 		  runoff[frost_area] += tmp_moist;
@@ -773,12 +709,6 @@ int  runoff(cell_data_struct  *cell_wet,
         cell->baseflow += baseflow[frost_area];
 #endif // SPATIAL_FROST
 
-#if LINK_DEBUG
-	if(debug.PRT_BALANCE) {
-	  debug.outflow[dist][band][options.Nlayer+2] = (runoff[frost_area] + baseflow[frost_area]);
-	  debug.outflow[dist][band][options.Nlayer+1] = *baseflow;
-	}
-#endif // LINK_DEBUG
 #if SPATIAL_FROST
       }
 #endif // SPATIAL_FROST

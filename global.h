@@ -13,11 +13,12 @@
 
   $Id$
 
-  29-Oct-03 Added version string and removed unused options from
-	    optstring.							TJB
+  2003-Oct-29 Added version string and removed unused options from
+	      optstring.						TJB
   2009-Jun-09 Added definitions of reference landcover types, used
 	      mainly for pot_evap computations but also defines the
 	      characteristics of bare soil.				TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
 char *version = "4.1.2 beta 1";
 
@@ -32,9 +33,6 @@ int flag;
 global_param_struct global_param;
 veg_lib_struct *veg_lib;
 option_struct options;
-#if LINK_DEBUG
-debug_struct debug;
-#endif
 Error_struct Error;
 param_set_struct param_set;
 

@@ -96,17 +96,14 @@ double canopy_evap(layer_data_struct *layer_wet,
               present.                                           KAC
      5-8-2001 Modified to close the canopy energy balance.       KAC
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
-	      and into separate function calc_rc().				TJB
-
+	      and into separate function calc_rc().			TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/ 
 
 {
 
   /** declare global variables **/
   extern veg_lib_struct *veg_lib; 
-#if LINK_DEBUG
-  extern debug_struct debug;
-#endif
   extern option_struct options;
 
   /** declare local variables **/

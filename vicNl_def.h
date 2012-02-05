@@ -118,6 +118,8 @@
 	      organic fraction into account.				TJB
   2011-Nov-04 Added options to handle new forcing estimation features.	TJB
   2012-Jan-02 Removed wetland_veg_class from lake_con_struct.		TJB
+  2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -686,41 +688,6 @@ typedef struct {
 				   is ignored. */
 
 } option_struct;
-
-#if LINK_DEBUG
-
-typedef struct {
-  FILE    *fg_balance;
-  FILE    *fg_energy;
-  FILE    *fg_grid;
-  FILE    *fg_kappa;
-  FILE    *fg_lake;
-  FILE    *fg_modelstep_atmos;
-  FILE    *fg_moist;
-  FILE    *fg_snow;
-  FILE    *fg_snowstep_atmos;
-  FILE    *fg_temp;
-  char     DEBUG;
-  char     PRT_ATMOS;
-  char     PRT_BALANCE;
-  char     PRT_FLUX;
-  char     PRT_GLOBAL;
-  char     PRT_GRID;
-  char     PRT_KAPPA;
-  char     PRT_LAKE;
-  char     PRT_MOIST;
-  char     PRT_SNOW;
-  char     PRT_SOIL;
-  char     PRT_TEMP;
-  char     PRT_VAR;
-  char     PRT_VEGE;
-  char     debug_dir[512];
-  double **inflow[2];
-  double **outflow[2];
-  double **store_moist[2];
-} debug_struct;
-
-#endif
 
 /*******************************************************
   Stores forcing file input information.

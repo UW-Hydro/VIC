@@ -78,6 +78,7 @@ Removal of obsolete model options
         initialize_model_state.c
         initialize_snow.c
         Makefile
+        open_debug.c (removed)
         put_data.c
         read_lakeparam.c
         read_soilparam_arc.c
@@ -85,13 +86,16 @@ Removal of obsolete model options
         read_veglib.c
         read_vegparam.c
         runoff.c
+        store_moisture_for_debug.c (removed)
         surface_fluxes.c
         user_def.h
         vicerror.c
         vicNl.c
         vicNl_def.h
         vicNl.h
+        write_atmosdata.c (removed)
         write_data.c
+        write_debug.c (removed)
 
         Description:
 

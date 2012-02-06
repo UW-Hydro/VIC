@@ -993,6 +993,8 @@ global_param_struct get_global_param(filenames_struct *names,
   else 
     fprintf(stderr,"Model output is in standard ASCII format.\n");
 
+#endif // VERBOSE
+
 #endif // !OUTPUT_FORCE
 
   return global;

@@ -112,6 +112,9 @@ static char vcid[] = "$Id$";
 	      from 2000 m to 100 m.						LCB via TJB
   2009-Oct-08 Extended T fallback scheme to snow and ice T.			TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.								TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -622,13 +625,13 @@ int ice_melt(double            z2,
   }
 #if SPATIAL_SNOW
   /*  snow->coverage = calc_snow_coverage(&snow->store_snow,
-      soil_con->depth_full_snow_cover,
+      soil_con->max_snow_distrib_slope,
       old_coverage, snow->swq,
       old_swq, snow->depth, old_depth,
       melt + snow->vapor_flux,
-      &snow->max_swq, snowfall,
+      &snow->max_snow_depth, snowfall,
       &snow->store_swq,
-      &snow->swq_slope,
+      &snow->snow_distrib_slope,
       &snow->store_coverage);
   */
 #else

@@ -117,6 +117,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2011-Sep-28 Added validation of b_infilt.				TJB
   2011-Nov-04 Added hard-coding of slope, aspect, and horizons to 0.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -607,7 +610,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }
       sscanf(token, "%lf", &tempdbl);
-      temp.depth_full_snow_cover = tempdbl;
+      temp.max_snow_distrib_slope = tempdbl;
 #endif // SPATIAL_SNOW
 
       /* read slope of frozen soil distribution */
@@ -814,8 +817,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
         Validate Spatial Snow/Frost Params
       **********************************************/
 #if SPATIAL_SNOW
-      if (temp.depth_full_snow_cover < 0.0) {
-        sprintf(ErrStr,"depth_full_snow_cover (%f) must be positive.\n", temp.depth_full_snow_cover);
+      if (temp.max_snow_distrib_slope < 0.0) {
+        sprintf(ErrStr,"max_snow_distrib_slope (%f) must be positive.\n", temp.max_snow_distrib_slope);
         nrerror(ErrStr);
       }
 #endif // SPATIAL_SNOW

@@ -71,6 +71,9 @@ int initialize_lake (lake_var_struct   *lake,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -195,7 +198,7 @@ int initialize_lake (lake_var_struct   *lake,
   lake->snow.density           = 0.0;
   lake->snow.depth             = 0.0;
   lake->snow.last_snow         = MISSING;
-  lake->snow.max_swq           = 0.0;
+  lake->snow.max_snow_depth    = 0.0;
   lake->snow.MELTING           = FALSE;
   lake->snow.pack_temp         = 0.0;
   lake->snow.pack_water        = 0.0;
@@ -209,7 +212,7 @@ int initialize_lake (lake_var_struct   *lake,
   lake->snow.surf_temp_fbcount = 0;
   lake->snow.surf_water        = 0.0;
   lake->snow.swq               = 0.0;
-  lake->snow.swq_slope         = 0.0;
+  lake->snow.snow_distrib_slope= 0.0;
   lake->snow.tmp_int_storage   = 0.0;
   // Snow fluxes
   lake->snow.blowing_flux      = 0.0;

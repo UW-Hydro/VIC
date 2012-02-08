@@ -166,6 +166,9 @@ double calc_surf_energy_bal(double             Le,
 	      distribution and quick flux cases.  Now we need to pass
 	      entire array of node temperatures to
 	      func_surf_energy_bal().					TJB
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -729,13 +732,13 @@ double calc_surf_energy_bal(double             Le,
 	  exists only if not snowing and snowpack has started to melt **/
 #if SPATIAL_SNOW
       snow->coverage = calc_snow_coverage(&snow->store_snow, 
-					  soil_con->depth_full_snow_cover, 
+					  soil_con->max_snow_distrib_slope, 
 					  snow_coverage, snow->swq,
 					  old_swq, snow->depth, old_depth, 
 					  (*melt) - snow->vapor_flux, 
 					  &snow->max_swq, snowfall, 
 					  &snow->store_swq, 
-					  &snow->swq_slope,
+					  &snow->snow_distrib_slope,
 					  &snow->store_coverage);
       
 #else

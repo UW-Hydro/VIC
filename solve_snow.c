@@ -127,7 +127,9 @@ double solve_snow(char                 overstory,
 	      with dmy_struct in argument list.				TJB
   2010-Dec-28 Fixed MELTING date condition to be correct in southern
 	      hemisphere.						TJB
-
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 *********************************************************************/
 
   extern option_struct   options;
@@ -410,13 +412,13 @@ double solve_snow(char                 overstory,
 	 exists only if not snowing and snowpack has started to melt **/
 #if SPATIAL_SNOW
 	snow->coverage = calc_snow_coverage(&snow->store_snow, 
-					    soil_con->depth_full_snow_cover, 
+					    soil_con->max_snow_distrib_slope, 
 					    old_coverage, snow->swq,
 					    old_swq, snow->depth, old_depth, 
 					    melt*0.001 + snow->vapor_flux, 
-					    &snow->max_swq, snowfall, 
+					    &snow->max_snow_depth, snowfall, 
 					    &snow->store_swq, 
-					    &snow->swq_slope,
+					    &snow->snow_distrib_slope,
 					    &snow->store_coverage);
 
 #else
@@ -499,7 +501,7 @@ double solve_snow(char                 overstory,
 	snow->surf_temp  = 0;
 	snow->pack_temp  = 0;
 	snow->coverage   = 0;
-	snow->swq_slope  = 0;
+	snow->snow_distrib_slope  = 0;
 	snow->store_snow = TRUE;
 	snow->MELTING    = FALSE;
 	

@@ -127,6 +127,9 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	      fraction and organic bulk and soil densities to be supplied
 	      for each grid cell.						TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.								TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -411,7 +414,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcpy(namestr,soilparamdir);
     strcat(namestr,"/");
     strcat(namestr,tmpstr);
-    temp.depth_full_snow_cover = read_arcinfo_value(namestr,temp.lat,temp.lng);
+    temp.max_snow_distrib_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
 #endif // SPATIAL_SNOW
 
     /** Slope of Frozen Soil Distribution **/

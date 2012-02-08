@@ -69,6 +69,8 @@ int initialize_lake (lake_var_struct   *lake,
   2011-Mar-01 Lake->soil state terms are now initialized to match those
 	      of the cell data structure for the lake/wetland tile.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
+	      OUT_ZWT_LUMPED.						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -320,8 +322,7 @@ int initialize_lake (lake_var_struct   *lake,
 #endif
   }
   lake->soil.zwt = 0.0;
-  lake->soil.zwt2 = 0.0;
-  lake->soil.zwt3 = 0.0;
+  lake->soil.zwt_lumped = 0.0;
   if (!skip_hydro) {
     for (i=0; i<N_PET_TYPES; i++) {
       lake->soil.pot_evap[i]       = 0.0;

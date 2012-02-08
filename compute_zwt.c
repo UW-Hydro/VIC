@@ -58,6 +58,8 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
 
   modifications:
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
+	      OUT_ZWT_LUMPED.						TJB
 ****************************************************************************/
 
 {
@@ -81,7 +83,7 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
   }
   if (cell->layer[options.Nlayer-1].zwt == 999) cell->layer[options.Nlayer-1].zwt = -total_depth*100; // in cm
 
-  /** Compute total soil column's zwt1; this will be the zwt of the lowest layer that isn't completely saturated **/
+  /** Compute total soil column's zwt; this will be the zwt of the lowest layer that isn't completely saturated **/
   lindex = options.Nlayer-1;
   tmp_depth = total_depth;
   while (lindex>=0 && soil_con->max_moist[lindex]-cell->layer[lindex].moist<=SMALL) {
@@ -98,21 +100,12 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
   else
     cell->zwt = cell->layer[lindex].zwt;
 
-  /** Compute total soil column's zwt2; this will be the zwt of the top N-1 layers lumped together,
-      or of the lowest layer if not enough moisture is in the top N-1 layers to have a water table **/
-  tmp_moist = 0;
-  for (lindex=0; lindex<options.Nlayer-1; lindex++) {
-    tmp_moist += cell->layer[lindex].moist;
-  }
-  cell->zwt2 = compute_zwt(soil_con, options.Nlayer, tmp_moist);
-  if (cell->zwt2 == 999) cell->zwt2 = cell->layer[options.Nlayer-1].zwt;
-
-  /** Compute total soil column's zwt3; this will be the zwt of all N layers lumped together. **/
+  /** Compute total soil column's zwt_lumped; this will be the zwt of all N layers lumped together. **/
   tmp_moist = 0;
   for (lindex=0; lindex<options.Nlayer; lindex++) {
     tmp_moist += cell->layer[lindex].moist;
   }
-  cell->zwt3 = compute_zwt(soil_con, options.Nlayer+1, tmp_moist);
-  if (cell->zwt3 == 999) cell->zwt3 = -total_depth*100; // in cm;
+  cell->zwt_lumped = compute_zwt(soil_con, options.Nlayer+1, tmp_moist);
+  if (cell->zwt_lumped == 999) cell->zwt_lumped = -total_depth*100; // in cm;
 
 }

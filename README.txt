@@ -422,15 +422,9 @@ Added computation of water table position.
 	  OUT_ZWT  - water table position [cm] computed by requiring that all
 		     layers below it are saturated, i.e. the water table will
 		     appear only in the lowest unsaturated layer.
-	  OUT_ZWT2 - water table position [cm] computed by combining the top
-		     (N-1) layers into a single layer and assuming the soil
-		     below is completely saturated.
-	  OUT_ZWT3 - water table position [cm] computed by combining all soil
+	  OUT_ZWT_LUMPED - water table position [cm] computed by combining all soil
 		     layers into a single layer and assuming the soil below
 		     is completely saturated.
-	  OUT_ZWTL - water table position [cm] of each individual soil layer,
-		     treating each layer as if all soil below it is completely
-		     saturated.  This is an array of N values, one per layer.
 
 	The water table's position within a soil layer is computed from soil
 	water retention curves following Letts et al. (2000):

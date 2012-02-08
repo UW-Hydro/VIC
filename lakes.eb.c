@@ -2413,6 +2413,8 @@ void advect_soil_veg_storage(double lakefrac,
   2010-Dec-01 Added calculation of zwt.					TJB
   2011-Mar-01 Corrected the addition of delta_moist to soil moisture.
 	      Added calculation of zwt2, zwt3.				TJB
+  2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
+	      OUT_ZWT_LUMPED.						TJB
 **********************************************************************/
 {
 
@@ -2503,8 +2505,7 @@ void advect_soil_veg_storage(double lakefrac,
     }
     cell->asat = 1.0;
     cell->zwt = 0;
-    cell->zwt2 = 0;
-    cell->zwt3 = 0;
+    cell->zwt_lumped = 0;
 
     if (veg_var != NULL) {
       veg_var->Wdew = 0.0;

@@ -639,6 +639,37 @@ Users can inadvertently choose an unstable soil temperature scheme
 
 
 
+Clarified description and variable names in SPATIAL_SNOW option
+
+	Files Affected:
+
+	calc_snow_coverage.c
+	calc_surf_energy_bal.c
+	ice_melt.c
+	initialize_lake.c
+	read_soilparam_arc.c
+	read_soilparam.c
+	solve_snow.c
+	vicNl_def.h
+	write_snow_data.c
+
+	Description:
+
+	The parameter for the snow pack depth distribution was previously
+	named "depth_full_snow_cover".  However, this parameter's function
+	was actually to represent the slope of the snow pack depth
+	distribution.  If we define "depth_thresh" to be the minimum snow
+	pack depth below which the coverage < 1, then
+	  depth_full_snow_cover MUST = 2*depth_thresh
+	This was very misleading and caused users some confusion.  Therefore
+	we have changed the name of the parameter to "max_snow_distrib_slope".
+	In addition, other associated variables in the snow_data structure
+	have been renamed accordingly (max_swq became max_snow_depth and
+	swq_slope became snow_distrib_slope).
+
+
+
+
 Fixed incorrect diurnal radiation cycle at high latitudes
 
 	Files Affected:

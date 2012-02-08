@@ -122,6 +122,9 @@
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -783,9 +786,6 @@ typedef struct {
   double   bulk_dens_org[MAX_LAYERS]; /* bulk density of organic soil (kg/m^3) */
   double   c;                         /* exponent in ARNO baseflow scheme */
   double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m).  In the case of EXCESS_ICE, this is the effective (dynamic) depth. */
-#if SPATIAL_SNOW
-  double   depth_full_snow_cover;     // minimum depth for full snow cover
-#endif // SPATIAL_SNOW
   double   dp;                        /* soil thermal damping depth (m) */
   double   dz_node[MAX_NODES];        /* thermal node thickness (m) */
   double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
@@ -800,6 +800,9 @@ typedef struct {
   double   max_infil;                 /* maximum infiltration rate */
   double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per layer */
   double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per node */
+#if SPATIAL_SNOW
+  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1. */
+#endif // SPATIAL_SNOW
   double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter (mm/mm) */
   double   porosity[MAX_LAYERS];      /* porosity (fraction) */
   double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction of mineral soil volume) */
@@ -1089,7 +1092,7 @@ typedef struct {
   double density;           /* snow density (kg/m^3) */
   double depth;             /* snow depth (m) */
   int    last_snow;         /* time steps since last snowfall */
-  double max_swq;           /* last maximum swq - used to determine coverage
+  double max_snow_depth;    /* last maximum snow depth - used to determine coverage
 			       fraction during current melt period (m) */
   char   MELTING;           /* flag indicating that snowpack melted 
 			       previously */
@@ -1107,7 +1110,7 @@ typedef struct {
   double surf_temp_fbflag;  /* flag indicating if previous step's temperature was used */
   double surf_water;        /* liquid water content of the surface layer (m) */
   double swq;               /* snow water equivalent of the entire pack (m) */
-  double swq_slope;         /* slope of uniform snow distribution (m/fract) */
+  double snow_distrib_slope;/* current slope of uniform snow distribution (m/fract) */
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
   // Fluxes
   double blowing_flux;      /* depth of sublimation from blowing snow (m) */

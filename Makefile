@@ -32,11 +32,11 @@
 # 2009-Jul-31 Removed wetland_energy.c.						TJB
 # 2010-Dec-01 Added compute_zwt.c.						TJB
 # 2011-Nov-04 Renamed mtclim* files to remove version number from filenames.	TJB
-# 2012-Jan-16 Removed .o files associated with LINK_DEBUG code:
-#             open_debug.o 
-#             store_moisture_for_debug.o
-#             write_atmosdata.o
-#             write_debug.o  
+# 2012-Jan-16 Removed files associated with LINK_DEBUG code:
+#             open_debug.c 
+#             store_moisture_for_debug.c
+#             write_atmosdata.c
+#             write_debug.c
 #
 # $Id$
 #

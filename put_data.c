@@ -139,6 +139,8 @@ int  put_data(dist_prcp_struct  *prcp,
   2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
   2011-Nov-04 Added OUT_TSKC.						TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
+	      OUT_ZWT_LUMPED.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -933,11 +935,7 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record water table position **/
   out_data[OUT_ZWT].data[0] += cell.zwt * AreaFactor;
-  out_data[OUT_ZWT2].data[0] += cell.zwt2 * AreaFactor;
-  out_data[OUT_ZWT3].data[0] += cell.zwt3 * AreaFactor;
-  for(index=0;index<options.Nlayer;index++) {
-    out_data[OUT_ZWTL].data[index] += cell.layer[index].zwt * AreaFactor;
-  }
+  out_data[OUT_ZWT_LUMPED].data[0] += cell.zwt_lumped * AreaFactor;
 
   /** record layer temperatures **/
   for(index=0;index<options.Nlayer;index++) {

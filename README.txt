@@ -647,6 +647,7 @@ Clarified description and variable names in SPATIAL_SNOW option
 	calc_surf_energy_bal.c
 	ice_melt.c
 	initialize_lake.c
+	initialize_snow.c
 	read_soilparam_arc.c
 	read_soilparam.c
 	solve_snow.c

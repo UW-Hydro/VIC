@@ -56,7 +56,9 @@ void initialize_snow (snow_data_struct **snow,
 	      not been initialized.					TJB
   2010-Apr-24 Added initialization of surf_temp_fbcount and fbflag.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -76,7 +78,7 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].density           = 0.0;
       snow[i][j].depth             = 0.0;
       snow[i][j].last_snow         = MISSING;
-      snow[i][j].max_swq           = 0.0;
+      snow[i][j].max_snow_depth    = 0.0;
       snow[i][j].MELTING           = FALSE;
       snow[i][j].pack_temp         = 0.0;
       snow[i][j].pack_water        = 0.0;
@@ -90,7 +92,7 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].surf_temp_fbcount = 0;
       snow[i][j].surf_water        = 0.0;
       snow[i][j].swq               = 0.0;
-      snow[i][j].swq_slope         = 0.0;
+      snow[i][j].snow_distrib_slope= 0.0;
       snow[i][j].tmp_int_storage   = 0.0;
       // Fluxes
       snow[i][j].blowing_flux      = 0.0;

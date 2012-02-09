@@ -736,7 +736,7 @@ double calc_surf_energy_bal(double             Le,
 					  snow_coverage, snow->swq,
 					  old_swq, snow->depth, old_depth, 
 					  (*melt) - snow->vapor_flux, 
-					  &snow->max_swq, snowfall, 
+					  &snow->max_snow_depth, snowfall, 
 					  &snow->store_swq, 
 					  &snow->snow_distrib_slope,
 					  &snow->store_coverage);

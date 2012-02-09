@@ -1548,7 +1548,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
   /* humidity algorithm decision: 
   PET/prcp >= 2.5 -> arid correction
   PET/prcp <  2.5 -> use tdew=tmin */
-  printf("PET/PRCP = %.4lf\n",ann_pet/ann_prcp);
+  //printf("PET/PRCP = %.4lf\n",ann_pet/ann_prcp);
 
   /* Reset humidity terms if no iteration desired */
   if (ctrl->indewpt || ctrl->invp || (options.VP_ITER == VP_ITER_ANNUAL && ann_pet/ann_prcp >= 2.5) ) {
@@ -1560,7 +1560,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
 
   /* Set up srad-humidity iterations */
   if (options.VP_ITER == VP_ITER_ALWAYS || (options.VP_ITER == VP_ITER_ANNUAL && ann_pet/ann_prcp >= 2.5) || options.VP_ITER == VP_ITER_CONVERGE) {
-    printf("Using arid-climate humidity algorithm\n");
+    //printf("Using arid-climate humidity algorithm\n");
     if (options.VP_ITER == VP_ITER_CONVERGE) {
       max_iter = 100;
     }
@@ -1569,7 +1569,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
     }
   }
   else {
-    printf("Using Tdew=Tmin humidity algorithm\n");
+    //printf("Using Tdew=Tmin humidity algorithm\n");
     max_iter = 1;
   }
 

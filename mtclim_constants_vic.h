@@ -23,6 +23,7 @@ Sat Aug 21 16:58:43 1999
 
   Modified:
   2011-Nov-04 Updated to MTCLIM 4.3				TJB
+  2012-Feb-16 Removed calc_srad_humidity().			TJB
 
 */
 
@@ -102,10 +103,10 @@ typedef struct
   double *s_swe;         /* array of site snowpack values */
   /* start vic_change */
   double *s_tskc;	 /* array of cloudiness values */
-double *s_ppratio; /* array of pet/prcp ratio values */
-double *s_potrad; /* array of potential rad values */
-double *s_ttmax; /* array of clear sky transmittance values */
-double *s_tfmax; /* array of cloud transmittance factor values */
+  double *s_ppratio; /* array of pet/prcp ratio values */
+  double *s_potrad; /* array of potential rad values */
+  double *s_ttmax; /* array of clear sky transmittance values */
+  double *s_tfmax; /* array of cloud transmittance factor values */
   /* end vic_change */
 } data_struct;
 
@@ -118,10 +119,6 @@ int calc_tair(const control_struct *ctrl, const parameter_struct *p,
 	      data_struct *data);
 int calc_prcp(const control_struct *ctrl, const parameter_struct *p, 
 	      data_struct *data);
-/* start vic_change */
-int calc_srad_humidity(const control_struct *ctrl, const parameter_struct *p, 
-		       data_struct *data, double **tiny_radfract);
-/* end vic_change */
 /* start vic_change */
 int calc_srad_humidity_iterative(const control_struct *ctrl,
 				 const parameter_struct *p, data_struct *data,

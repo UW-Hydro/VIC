@@ -99,7 +99,15 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2011-Nov-04 Overhauled logic to fix several inconsistencies in timing of
 	      sub-daily data, and to correctly handle user-supplied observed
 	      shortwave and/or vapor pressure.					TJB
-
+  2012-Feb-16 Changed definition of hour_offset to prevent double-shifting of
+	      of hourlyrad timeseries when off_gmt is 0 (i.e. VIC times are
+	      referenced to GTM instead of local time).  Added recomputing of
+	      hourlyrad after call to mtclim_wrapper() in the case of sub-daily
+	      shortwave supplied as a forcing so that it overwrites MTCLIM's
+	      estimated hourly shortwave.  Meanwhile, now MTCLIM always stores
+	      its estimated hourly shortwave in hourlyrad, so that if daily
+	      shortwave is supplied as a forcing, MTCLIM can disaggregate it to
+	      sub-daily.							TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -182,6 +190,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     hour_offset_int = (int)(hour_offset-0.5);
   else
     hour_offset_int = (int)(hour_offset+0.5);
+  hour_offset -= hour_offset_int; // hour_offset is now the distance from the center of local time zone
   phi = soil_con->lat;
   elevation = soil_con->elevation;
   slope = soil_con->slope;
@@ -885,6 +894,15 @@ void initialize_atmos(atmos_data_struct        *atmos,
     c) completely estimated by MTCLIM, if no shortwave was supplied as a forcing
   ***********************************************************/
 
+  // Ignore MTCLIM estimates if sub-daily SW was supplied
+  if (param_set.TYPE[SHORTWAVE].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[SHORTWAVE].SUPPLIED-1] < 24) {
+    for (day=0; day<Ndays_local; day++) {
+      for (hour=0; hour<24; hour++) {
+        hourlyrad[day*24+hour] = local_forcing_data[SHORTWAVE][day*24+hour];
+      }
+    }
+  }
+  // Transfer hourlyrad to atmos structure
   for(rec = 0; rec < global_param.nrecs; rec++) {
     sum = 0;
     for(i = 0; i < NF; i++) {

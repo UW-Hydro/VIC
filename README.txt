@@ -24,6 +24,57 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2a to VIC 4.1.2 *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Incorrect timing of disaggregated radiation and air temperature when daily
+forcings are supplied and off_gmt is 0.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	VIC was double-shifting the timeseries of subdaily radiation and
+	temperature in cases in which VIC was *not* given sub-daily incoming
+	shortwave as an input forcing *and* soil parameter "off_gmt" was not
+	set to the local time zone offset (i.e. not set to longitude*24/360).
+	This caused incorrect timing of the diurnal cycle of radiation and
+	air temperature.
+
+	This has been fixed.
+
+
+
+
+Disaggregated radiation is constant throughout the day when daily incoming
+shortwave radiation is supplied as an input forcing.
+
+	Files Affected:
+
+	initialize_atmos.c
+	mtclim_constants_vic.h
+	mtclim_vic.c
+	mtclim_wrapper.c
+
+	Description:
+
+	When VIC was supplied with *daily* incoming shortwave as an input
+	forcing variable, VIC would fail to disaggregate this correctly to
+	sub-daily time steps; it would simply repeat the daily average for
+	every sub-daily time step.  This has been fixed.  Now VIC will
+	compute a diurnal cycle whose daily average matches the supplied daily
+	average.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2 to VIC 4.1.1 *****
 --------------------------------------------------------------------------------
 

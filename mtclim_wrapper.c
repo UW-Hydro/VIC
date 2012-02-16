@@ -70,6 +70,12 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
 		      int Ndays, dmy_struct *dmy, 
 		      double *prec, double *tmax, double *tmin, double *tskc,
 		      double *vp, double *hourlyrad) 
+/******************************************************************************
+  mtclim_wrapper: interface between VIC and MTCLIM.
+
+  Modifications:
+  2012-Feb-16 Cleaned up commented code.					TJB
+******************************************************************************/
 {
   control_struct ctrl;
   parameter_struct p;
@@ -110,20 +116,10 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
     nrerror("Error in snowpack()... exiting\n");
   }
   
-//  /* test for the presence of Tdew, VP, and/or SW observations, and branch to the
-//     appropriate srad and humidity algorithms */
-//  if (ctrl.indewpt || ctrl.invp || ctrl.insw) {
-//    /* calculate srad and humidity using real Tdew or VP or SW data */
-//    if (calc_srad_humidity(&ctrl, &p, &mtclim_data, tiny_radfract)) {
-//      nrerror("Error in calc_srad_humidity()... exiting\n");
-//    }
-//  }
-//  else { /* no dewpoint temperature, VP, or SW data */
-    /* calculate srad and humidity with iterative algorithm */
-    if (calc_srad_humidity_iterative(&ctrl, &p, &mtclim_data, tiny_radfract)) { 
-      nrerror("Error in calc_srad_humidity_iterative()... exiting\n");
-    }
-//  }
+  /* calculate srad and humidity with iterative algorithm */
+  if (calc_srad_humidity_iterative(&ctrl, &p, &mtclim_data, tiny_radfract)) { 
+    nrerror("Error in calc_srad_humidity_iterative()... exiting\n");
+  }
 
   /* translate the mtclim structures back to the VIC data structures */
   mtclim_to_vic(hour_offset, Ndays,
@@ -157,7 +153,6 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
   ctrl->indewpt = 0;
   ctrl->invp = 0;
   if (have_dewpt) {
-//    nrerror("have_dewpt not yet implemented...\n");
     if (have_dewpt == 1) {
       nrerror("have_dewpt not yet implemented for tdew; however you can supply observed vapor pressure and set have_dewpt to 2\n");
     }
@@ -223,6 +218,13 @@ void mtclim_to_vic(double hour_offset,
 		     double **tiny_radfract, control_struct *ctrl, 
 		     data_struct *mtclim_data, double *tskc, double *vp, 
 		     double *hourlyrad)
+/******************************************************************************
+  mtclim_to_vic: Store MTCLIM variables in VIC arrays.
+
+  Modifications:
+  2012-Feb-16 Removed check on mtclim_data->insw for storing tinyradfract data
+	      in hourlyrad array.						TJB
+******************************************************************************/
 {
   int i,j,k;
   int tinystepsphour;
@@ -232,36 +234,33 @@ void mtclim_to_vic(double hour_offset,
   
   tinystepsphour = 3600/SRADDT;
 
-  if (!ctrl->insw) {
-    tiny_offset = (int)((float)tinystepsphour * hour_offset);
-    for (i = 0; i < ctrl->ndays; i++) {
-      // s_srad = avg SW flux (W/m2) over daylight hours
-      // s_dayl = number of seconds of daylight in current day
-      // total_daily_sw = s_srad*s_dayl  (J/m2)
-      // tiny_radfrac = fraction of total daily sw falling in each SRADDT interval
-      // hourlyrad = SW flux (W/m2) over each hour = total_daily_sw * sum_over_hour(tiny_radfract) / 3600
-      //                                           = tmp_rad * sum_over_hour(tiny_radfract)
-      tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
-      for (j = 0; j < 24; j++) {
-        hourlyrad[i*24+j] = 0;
-        for (k = 0; k < tinystepsphour; k++) {
-          tinystep = j*tinystepsphour + k - tiny_offset;
-          if (tinystep < 0) {
-            tinystep += 24*tinystepsphour; 
-          }
-          if (tinystep > 24*tinystepsphour-1) {
-            tinystep -= 24*tinystepsphour; 
-          }
-          hourlyrad[i*24+j] += tiny_radfract[dmy[i*24+j].day_in_year-1][tinystep];
+  tiny_offset = (int)((float)tinystepsphour * hour_offset);
+  for (i = 0; i < ctrl->ndays; i++) {
+    // s_srad = avg SW flux (W/m2) over daylight hours
+    // s_dayl = number of seconds of daylight in current day
+    // total_daily_sw = s_srad*s_dayl  (J/m2)
+    // tiny_radfrac = fraction of total daily sw falling in each SRADDT interval
+    // hourlyrad = SW flux (W/m2) over each hour = total_daily_sw * sum_over_hour(tiny_radfract) / 3600
+    //                                           = tmp_rad * sum_over_hour(tiny_radfract)
+    tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
+    for (j = 0; j < 24; j++) {
+      hourlyrad[i*24+j] = 0;
+      for (k = 0; k < tinystepsphour; k++) {
+        tinystep = j*tinystepsphour + k - tiny_offset;
+        if (tinystep < 0) {
+          tinystep += 24*tinystepsphour; 
         }
-        hourlyrad[i*24+j] *= tmp_rad;
+        if (tinystep > 24*tinystepsphour-1) {
+          tinystep -= 24*tinystepsphour; 
+        }
+        hourlyrad[i*24+j] += tiny_radfract[dmy[i*24+j].day_in_year-1][tinystep];
       }
+      hourlyrad[i*24+j] *= tmp_rad;
     }
   }
   
   for (i = 0; i < ctrl->ndays; i++) {
     tskc[i] = mtclim_data->s_tskc[i];
     vp[i] = mtclim_data->s_hum[i];
-//fprintf(stderr, "mtclim_swe: %d %d %d %f %f %f %f %f\n",dmy[i*24].year,dmy[i*24].month,dmy[i*24].day,mtclim_data->s_swe[i],mtclim_data->s_ppratio[i],mtclim_data->s_potrad[i],mtclim_data->s_ttmax[i],mtclim_data->s_tfmax[i]);
   }
 }

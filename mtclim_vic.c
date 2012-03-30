@@ -40,6 +40,9 @@
 	      current cell due to the regridding scheme.			TJB
   2012-Feb-16 Removed function calc_srad_humidity(), which is no longer called.
 	      Cleaned up unneeded comment statements.				TJB
+  2012-Mar-28 Moved computation of data->s_tskc to after conditional overwriting of
+	      data->s_tfmax, so that data->s_tskc reflects observed SW if observed
+	      SW is provided.							TJB
 */
 
 /*
@@ -1116,10 +1119,6 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     /* final daily total transmittance */
     t_final = t_tmax * data->s_tfmax[i];
 
-    /* start vic_change */
-    data->s_tskc[i] = sqrt((1.-data->s_tfmax[i])/0.65);
-    /* end vic_change */
-
     /* estimate fraction of radiation that is diffuse, on an
     instantaneous basis, from relationship with daily total
     transmittance in Jones (Plants and Microclimate, 1992)
@@ -1169,6 +1168,10 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     else {
       data->s_srad[i] = srad1 + srad2 +sc;
     }
+
+    /* start vic_change */
+    data->s_tskc[i] = sqrt((1.-data->s_tfmax[i])/0.65);
+    /* end vic_change */
 
   }
 

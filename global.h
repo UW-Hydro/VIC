@@ -20,7 +20,7 @@
 	      characteristics of bare soil.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
-char *version = "4.1.2.a bug fix update 2012-Mar-01";
+char *version = "4.1.2.b bug fix update 2012-Apr-01";
 
 char *optstring = "g:vo";
 

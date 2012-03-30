@@ -24,7 +24,41 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2a to VIC 4.1.2 *****
+***** Description of changes from VIC 4.1.2.b to VIC 4.1.2.a *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Cloud fraction tskc was not accounting for the case in which observed incoming
+shortwave is supplied as a forcing.
+
+	Files Affected:
+
+	mtclim_vic.c
+
+	Description:
+
+	In the absence of observations, VIC's estimate of cloud fraction, tskc,
+	is a function of some intermediate quantities that are computed within
+	the MTCLIM algorithm (in mtclim_vic.c).  These intermediate terms
+	can be computed from either observed daily shortwave radiation (if
+	available) or simulated daily shortwave radiation.  The computation
+	of tskc was previously taking place in a part of the code where
+	only the simulated daily shortwave radiation was available.  Thus,
+	tskc would not reflect the actual amount of incident shortwave, even
+	if observed incident shortwave was supplied as a forcing.
+
+	This has been fixed.  The tskc computation has been moved to another
+	location in the code where the observed daily shortwave can be
+	accessed (if supplied by the user as a forcing).
+
+
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.a to VIC 4.1.2 *****
 --------------------------------------------------------------------------------
 
 

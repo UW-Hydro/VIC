@@ -31,6 +31,24 @@ Usage:
 Bug Fixes:
 ----------
 
+VIC was unnecessarily requiring WIND to be supplied as an input forcing.
+
+	Files Affected:
+
+	initialize_atmos.c
+	vicNl_def.h
+
+	Description:
+
+	VIC was requiring WIND (or the zonal and meridional components of
+	wind, WIND_E and WIND_N) to be supplied as an input forcing.  Now VIC
+	allows WIND to be omitted.  If WIND is not supplied as an input
+	forcing, VIC will supply a default wind speed, defined in vicNl_def.h
+	as DEFAULT_WIND_SPEED and currently set to 3.0 m/s.
+
+
+
+
 Cloud fraction tskc was not accounting for the case in which observed incoming
 shortwave is supplied as a forcing.
 

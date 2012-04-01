@@ -125,6 +125,7 @@
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -285,6 +286,7 @@ extern char ref_veg_ref_crop[];
                                    while computing energy balance (C) */
 #define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
                                    while computing moisture balance (Pa) */
+#define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
 
 /***** Define Boolean Values *****/
 #ifndef FALSE
@@ -617,8 +619,7 @@ typedef struct {
   char   LAKES;          /* TRUE = use lake energy code */
   char   LW_CLOUD;       /* Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
   char   LW_TYPE;        /* Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
-  float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by 
-			    the model. **/
+  float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
   char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */

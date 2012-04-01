@@ -218,8 +218,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
       && !(param_set.TYPE[AIR_TEMP].SUPPLIED && param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] < 24) )
     nrerror("Input meteorological forcing files must contain either: a. Daily TMAX and TMIN (maximum and minimum air temperature) or b. sub-daily AIR_TEMP (air temperature); check input files\n");
 
-  if ( !param_set.TYPE[WIND].SUPPLIED && !(param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED) )
-    nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
+//  if ( !param_set.TYPE[WIND].SUPPLIED && !(param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED) )
+//    nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
 
   /* compute number of simulation days */
   tmp_starthour = 0;
@@ -616,9 +616,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
     /* no wind data provided, use default constant */
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for (i = 0; i < NF; i++) {
-	atmos[rec].wind[i] = 1.5;
+	atmos[rec].wind[i] = DEFAULT_WIND_SPEED;
       }
-      atmos[rec].wind[NR] = 1.5;	
+      atmos[rec].wind[NR] = DEFAULT_WIND_SPEED;	
     }
   }
 

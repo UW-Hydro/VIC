@@ -120,7 +120,6 @@ void initialize_global() {
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Jan-28 Changed default for MIN_WIND_SPEED to reflect most commonly-
 	      used value.							TJB
-
 *********************************************************************/
 
   extern option_struct options;

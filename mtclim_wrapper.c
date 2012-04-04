@@ -261,8 +261,6 @@ void mtclim_to_vic(double hour_offset,
   
   for (i = 0; i < ctrl->ndays; i++) {
     tskc[i] = mtclim_data->s_tskc[i];
-//fprintf(stderr, "tskc: %d %d %d %f %f %f\n",dmy[i*24].year,dmy[i*24].month,dmy[i*24].day,mtclim_data->s_tskc[i],tskc[i],mtclim_data->s_srad[i]);
     vp[i] = mtclim_data->s_hum[i];
-//fprintf(stderr, "mtclim_swe: %d %d %d %f %f %f %f %f\n",dmy[i*24].year,dmy[i*24].month,dmy[i*24].day,mtclim_data->s_swe[i],mtclim_data->s_ppratio[i],mtclim_data->s_potrad[i],mtclim_data->s_ttmax[i],mtclim_data->s_tfmax[i]);
   }
 }

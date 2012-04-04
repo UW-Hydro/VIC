@@ -24,6 +24,56 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.c to VIC 4.1.2.b *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Vapor pressure set to 0 if user supplies (QAIR or REL_HUMID) + PRESSURE as
+input forcings instead of vapor pressure.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	For the cases of the combination of (QAIR or REL_HUMID) plus PRESSURE
+	supplied as input forcings instead of VP, VIC was supposed to compute
+	VP from (QAIR or REL_HUMID) and PRESSURE, then transfer the computed
+	VP to the atmos data structure.  This transfer was being skipped, and
+	vapor pressure was consequently set to 0 during the simulation.  This
+	has been fixed.
+
+
+
+
+Computed longwave sometimes is extremely large at high latitudes.
+
+	Files Affected:
+
+	mtclim_vic.c
+
+	Description:
+
+	Previously (VIC 4.1.2, 4.1.2.a, and 4.1.2.b only), when SHORTWAVE and
+	VP were supplied to VIC as input forcings (and LONGWAVE was NOT
+	supplied as a forcing), the incoming longwave radiation computed by
+	VIC would in rare cases become extremely large.  This happens only at
+	high latitudes in winter when the theoretical clear-sky potential
+	solar radiation is very small.  If the supplied VP was large enough,
+	it could cause the internal variable t_tmax (clear-sky transmittance)
+	to go negative.  This in turn would cause the internal variable
+	t_fmax (cloud transmittance) to go negative as well.  This, finally,
+	would cause computed LONGWAVE values to become extremely large, if
+	the LW_CLOUD method was set to DEARDORFF.  This has been fixed.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.b to VIC 4.1.2.a *****
 --------------------------------------------------------------------------------
 

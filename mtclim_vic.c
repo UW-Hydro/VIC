@@ -43,6 +43,7 @@
   2012-Mar-28 Moved computation of data->s_tskc to after conditional overwriting of
 	      data->s_tfmax, so that data->s_tskc reflects observed SW if observed
 	      SW is provided.							TJB
+  2012-Apr-03 Added check to make sure t_tmax is always positive.		TJB
 */
 
 /*
@@ -1114,6 +1115,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     /*** Compute SW radiation ***/
 
     t_tmax = ttmax0[yday] + ABASE * pva[i];
+    if (t_tmax < 0.0001) t_tmax = 0.0001; // this is mainly for the case of observed VP supplied, for which t_tmax sometimes ends up being negative (when potential radiation is low and VP is high)
     data->s_ttmax[i] = t_tmax;
 
     /* final daily total transmittance */

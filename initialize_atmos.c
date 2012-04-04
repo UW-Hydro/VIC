@@ -108,6 +108,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      its estimated hourly shortwave in hourlyrad, so that if daily
 	      shortwave is supplied as a forcing, MTCLIM can disaggregate it to
 	      sub-daily.							TJB
+  2012-Apr-03 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
+	      which the computed vapor pressure arrays were never transferred
+	      to the atmos structure.						TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -704,57 +707,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Vapor Pressure, part 1.
   *************************************************/
 
-  /*************************************************
-    If vapor pressure supplied, transfer to appropriate arrays
-  *************************************************/
-
-  if(param_set.TYPE[VP].SUPPLIED) {
-
-    if(param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) {
-      /* daily vp provided */
-      for (day=0; day<Ndays_local; day++) {
-        daily_vp[day] = local_forcing_data[VP][day];
-      }
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-        sum = 0;
-        for (j = 0; j < NF; j++) {
-          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-          if (global_param.starthour - hour_offset_int < 0) hour += 24;
-          idx = (int)((float)hour/24.0);
-          atmos[rec].vp[j] = local_forcing_data[VP][idx]; // assume constant over the day
-          sum += atmos[rec].vp[j];
-        }
-        if(NF>1) atmos[rec].vp[NR] = sum / (float)NF;
-      }
-    }
-    else {
-      /* sub-daily vp provided */
-      for (day=0; day<Ndays_local; day++) {
-        daily_vp[day] = 0;
-        for (hour=0; hour<24; hour++) {
-          daily_vp[day] += local_forcing_data[VP][day*24+hour];
-        }
-        daily_vp[day] /= 24;
-      }
-      for(rec = 0; rec < global_param.nrecs; rec++) {
-        sum = 0;
-        for(i = 0; i < NF; i++) {
-          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-          if (global_param.starthour - hour_offset_int < 0) hour += 24;
-          atmos[rec].vp[i] = 0;
-          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
-	    atmos[rec].vp[i] += local_forcing_data[VP][idx];
-          }
-          atmos[rec].vp[i] /= options.SNOW_STEP;
-	  sum += atmos[rec].vp[i];
-        }
-        if(NF>1) atmos[rec].vp[NR] = sum / (float)NF;
-      }
-    }
-
-  } // end if VP supplied
-
-  else {
+  if(!param_set.TYPE[VP].SUPPLIED) {
 
     /*************************************************
       If provided, translate specific humidity and atm. pressure
@@ -842,12 +795,60 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   } // end if VP not supplied
 
-  if (param_set.TYPE[VP].SUPPLIED) {
+  /*************************************************
+    If vapor pressure supplied, transfer to appropriate arrays
+  *************************************************/
+
+  if(param_set.TYPE[VP].SUPPLIED) {
+
     have_dewpt = 2; // flag for MTCLIM
+
+    if(param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) {
+      /* daily vp provided */
+      for (day=0; day<Ndays_local; day++) {
+        daily_vp[day] = local_forcing_data[VP][day];
+      }
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          atmos[rec].vp[j] = local_forcing_data[VP][idx]; // assume constant over the day
+          sum += atmos[rec].vp[j];
+        }
+        if(NF>1) atmos[rec].vp[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily vp provided */
+      for (day=0; day<Ndays_local; day++) {
+        daily_vp[day] = 0;
+        for (hour=0; hour<24; hour++) {
+          daily_vp[day] += local_forcing_data[VP][day*24+hour];
+        }
+        daily_vp[day] /= 24;
+      }
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].vp[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].vp[i] += local_forcing_data[VP][idx];
+          }
+          atmos[rec].vp[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].vp[i];
+        }
+        if(NF>1) atmos[rec].vp[NR] = sum / (float)NF;
+      }
+    }
+
   }
   else {
     have_dewpt = 0;
-  }
+  } // end if VP supplied
 
 
   /*************************************************

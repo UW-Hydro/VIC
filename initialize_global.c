@@ -120,6 +120,8 @@ void initialize_global() {
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Jan-28 Changed default for MIN_WIND_SPEED to reflect most commonly-
 	      used value.							TJB
+  2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
+	      for LW_TYPE to LW_PRATA.						TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -146,9 +148,9 @@ void initialize_global() {
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
-  options.LW_TYPE               = LW_TVA;
+  options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;
-  options.MTCLIM_SWE_CORR       = TRUE;
+  options.MTCLIM_SWE_CORR       = FALSE;
   options.Nlayer                = 3;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;

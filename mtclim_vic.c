@@ -44,6 +44,8 @@
 	      data->s_tfmax, so that data->s_tskc reflects observed SW if observed
 	      SW is provided.							TJB
   2012-Apr-03 Added check to make sure t_tmax is always positive.		TJB
+  2012-Apr-13 Simplified the relationship between tskc and tfmax for LW_CLOUD
+	      == LW_CLOUD_DEARDORFF.						TJB
 */
 
 /*
@@ -1175,7 +1177,12 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     }
 
     /* start vic_change */
-    data->s_tskc[i] = sqrt((1.-data->s_tfmax[i])/0.65);
+    if (options.LW_CLOUD == LW_CLOUD_DEARDORFF) {
+      data->s_tskc[i] = (1.-data->s_tfmax[i]);
+    }
+    else {
+      data->s_tskc[i] = sqrt((1.-data->s_tfmax[i])/0.65);
+    }
     /* end vic_change */
 
   }

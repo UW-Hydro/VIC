@@ -31,6 +31,45 @@ Usage:
 Bug Fixes:
 ----------
 
+Incorrect handling of user-supplied tskc (cloud fraction) for LW_CLOUD==LW_CLOUD_DEARDORFF
+
+	Files Affected:
+
+	calc_longwave.c
+	mtclim_vic.c
+
+	Description:
+
+	Previous versions of VIC (before 4.1.2) used a full-sky longwave
+	formulation taken from two formulas in the Bras hydrology text.  For
+	the new Deardorff full-sky longwave formulation, the dependence on
+	cloud fraction is different from the old Bras formulation.   In 
+	4.1.2 (and 4.1.2.a-b), the new Deardorff formulation did not account
+	for the possibility of user-supplied cloud fraction; if the user
+	supplied cloud fraction as an input forcing, the resulting longwave
+	was wrong.  This has been fixed.
+
+
+
+
+Changed default settings of MTCLIM_SWE_CORR and LW_TYPE to reflect best
+general settings
+
+	Files Affected:
+
+	initialize_global.c
+	global.param.sample
+
+	Description:
+
+	In light of the findings of Bohn et al. (2012), we have changed the
+	default setting of MTCLIM_SWE_CORR to FALSE and of LW_TYPE to
+	LW_PRATA.  These settings give forcing estimates that are less biased
+	in general.
+
+
+
+
 Vapor pressure set to 0 if user supplies (QAIR or REL_HUMID) + PRESSURE as
 input forcings instead of vapor pressure.
 

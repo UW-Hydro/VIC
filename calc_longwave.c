@@ -18,6 +18,9 @@ void calc_longwave(double *longwave,
   2000-Oct-27 Modified to use vapor pressure in Pa instead of kPa.	KAC
   2011-Nov-04 Added new option for handling the effect of clouds.	TJB
   2011-Nov-04 Added alternative clear-sky longwave algorithm.		TJB
+  2012-Apr-13 Changed relationship between cloud_fraction and tskc for
+	      LW_CLOUD==LW_CLOUD_DEARDORFF, to account for new, simplified
+	      meaning of tskc.						TJB
   
 ***************************************************************************/
 {
@@ -59,7 +62,7 @@ void calc_longwave(double *longwave,
     /* Assume emissivity of clouds is 1.0, and that total emissivity is weighted
        average of cloud emission plus clear-sky emission, weighted by fraction of
        sky occupied by each (method of Deardorff, 1978) */
-    cloudfrac = 0.65*tskc*tskc;
+    cloudfrac = tskc;
     emissivity = cloudfrac*1.0 + (1-cloudfrac)*emissivity_clear; // Deardorff (1978)
   }
   else {

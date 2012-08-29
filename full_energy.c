@@ -104,6 +104,8 @@ int  full_energy(char                 NEWCELL,
   2012-Jan-01 Modified condition for determining whether to simulate lakes
 	      to check whether lake_idx >= 0.					TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
+	      totals.								TJB
 
 **********************************************************************/
 {
@@ -751,6 +753,8 @@ int  full_energy(char                 NEWCELL,
     snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
     rainprec = gauge_correction[SNOW] * rainonly;
     atmos->out_prec += (snowprec + rainprec) * lake_con->Cl[0] * lakefrac;
+    atmos->out_rain += rainprec * lake_con->Cl[0] * lakefrac;
+    atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
 
     ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
                            atmos->wind[NR], atmos->vp[NR] / 1000.,

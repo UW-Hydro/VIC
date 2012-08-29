@@ -111,6 +111,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2012-Apr-03 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
 	      which the computed vapor pressure arrays were never transferred
 	      to the atmos structure.						TJB
+  2012-Aug-07 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
+	      which the cases for daily and sub-daily supplied pressure were
+	      switched.								TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -718,7 +721,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* specific humidity and atm. pressure supplied */
       if(param_set.FORCE_DT[param_set.TYPE[QAIR].SUPPLIED-1] == 24) {
         for (day=0; day<Ndays_local; day++) {
-          if(param_set.FORCE_DT[param_set.TYPE[PRESSURE].SUPPLIED-1] == 24) {
+          if(param_set.FORCE_DT[param_set.TYPE[PRESSURE].SUPPLIED-1] < 24) {
             tmp_double = 0;
             for (hour=0; hour<24; hour++) {
               tmp_double += local_forcing_data[PRESSURE][day*24+hour];
@@ -760,7 +763,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* relative humidity and atm. pressure supplied */
       if(param_set.FORCE_DT[param_set.TYPE[REL_HUMID].SUPPLIED-1] == 24) {
         for (day=0; day<Ndays_local; day++) {
-          if(param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] == 24) {
+          if(param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED-1] < 24) {
             tmp_double = 0;
             for (hour=0; hour<24; hour++) {
               tmp_double += svp(local_forcing_data[AIR_TEMP][day*24+hour]);

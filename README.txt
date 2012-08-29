@@ -24,6 +24,46 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.d to VIC 4.1.2.c *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed incorrect summing of rain and snow components of precipitation over grid
+cell
+
+	Files Affected:
+
+	full_energy.c
+
+	Description:
+
+	The amounts of rainfall and snowfall over the lake (or inundated wetland)
+	were being omitted from the grid cell totals.  This has been fixed.
+
+
+
+
+Vapor pressure incorrect if user supplies (QAIR or REL_HUMID) + PRESSURE as
+input forcings instead of vapor pressure.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	For the cases of the combination of (QAIR or REL_HUMID) plus PRESSURE
+	supplied as input forcings instead of VP, the logic distinguishing
+	between daily and sub-daily supplied PRESSURE was flawed, resulting
+	in incorrect values in both cases.  This has been fixed.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.c to VIC 4.1.2.b *****
 --------------------------------------------------------------------------------
 

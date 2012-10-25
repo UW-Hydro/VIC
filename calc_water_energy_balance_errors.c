@@ -54,12 +54,12 @@ double calc_water_balance_error(int    rec,
 
 }
 
-void calc_energy_balance_error(int    rec,
-			       double net_rad,
-			       double latent,
-			       double sensible,
-			       double grnd_flux,
-			       double snow_fluxes) {
+double calc_energy_balance_error(int    rec,
+			         double net_rad,
+			         double latent,
+			         double sensible,
+			         double grnd_flux,
+			         double snow_fluxes) {
 /***************************************************************
   calc_energy_balance_error   Keith Cherkauer     April 1998
 
@@ -68,6 +68,9 @@ void calc_energy_balance_error(int    rec,
   user.  The total cumulative error for the grid cell is also 
   computed and reported at the end of the model run.
 
+  Modifications:
+  2012-Oct-25 Changed to return the energy balance error to the
+	      parent function for tracking purposes.		CL via TJB
 ***************************************************************/
 
   static double cum_error;
@@ -98,6 +101,8 @@ void calc_energy_balance_error(int    rec,
 	      cum_error/(double)rec);
     }
   }
+
+  return(error);
 
 }
 

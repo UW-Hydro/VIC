@@ -55,6 +55,12 @@ double calc_atmos_energy_bal(double  InOverSensible,
   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.	TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
+  2012-Oct-25 Now this function is called whenever there is a canopy with snow.
+	      This way, all canopy energy balance terms are computed the same
+	      way (except Tcanopy) regardless of the setting of CLOSE_ENERGY.
+	      Tcanopy iteration is only performed if CLOSE_ENERGY is TRUE; else
+	      Tcanopy is set to Tair.  Also fixed bug in passing SensibleHeat
+	      between this function and root_brent, etc.		CL via TJB
 ************************************************************************/
 
   extern option_struct options;
@@ -76,6 +82,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
 
   // compute incoming sensible heat
   InSensible = InOverSensible + InUnderSensible;
+  (*SensibleHeat) = InOverSensible + InUnderSensible;
 
   // compute net radiation
   (*NetLongAtmos ) = (F * NetLongOver + (1. - F) * NetLongUnder);
@@ -94,39 +101,49 @@ double calc_atmos_energy_bal(double  InOverSensible,
   /******************************
     Find Canopy Air Temperature
   ******************************/
-  /* initialize Tcanopy_fbflag */
-  *Tcanopy_fbflag = 0;
 
-  /* set initial bounds for root brent **/
-  T_lower = (Tair) - CANOPY_DT;
-  T_upper = (Tair) + CANOPY_DT;
+#if CLOSE_ENERGY
 
-  // iterate for canopy air temperature
-  Tcanopy = root_brent(T_lower, T_upper, ErrorString, func_atmos_energy_bal, 
-		       (*LatentHeat) + (*LatentHeatSub), 
-		       NetRadiation, Ra, Tair, atmos_density, InSensible, 
-		       SensibleHeat);
+    /* initialize Tcanopy_fbflag */
+    *Tcanopy_fbflag = 0;
 
-  if ( Tcanopy <= -998 ) {
-    if (options.TFALLBACK) {
-      Tcanopy = Tair;
-      *Tcanopy_fbflag = 1;
-      (*Tcanopy_fbcount)++;
+    /* set initial bounds for root brent **/
+    T_lower = (Tair) - CANOPY_DT;
+    T_upper = (Tair) + CANOPY_DT;
+
+    // iterate for canopy air temperature
+    Tcanopy = root_brent(T_lower, T_upper, ErrorString, func_atmos_energy_bal, 
+		         (*LatentHeat) + (*LatentHeatSub), 
+		         NetRadiation, Ra, Tair, atmos_density, InSensible, 
+		         (*SensibleHeat) );
+
+    if ( Tcanopy <= -998 ) {
+      if (options.TFALLBACK) {
+        Tcanopy = Tair;
+        *Tcanopy_fbflag = 1;
+        (*Tcanopy_fbcount)++;
+      }
+      else {
+        // handle error flag from root brent
+        (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
+					       + (*LatentHeatSub), 
+					       NetRadiation, Ra, Tair, 
+					       atmos_density, InSensible, 
+					       (*SensibleHeat), ErrorString);
+        return ( ERROR );
+      }
     }
-    else {
-      // handle error flag from root brent
-      (*Error) = error_calc_atmos_energy_bal(Tcanopy, (*LatentHeat) 
-					     + (*LatentHeatSub), 
-					     NetRadiation, Ra, Tair, 
-					     atmos_density, InSensible, 
-					     SensibleHeat, ErrorString);
-      return ( ERROR );
-    }
-  }
-  // compute varaibles based on final temperature
+
+#else
+
+    Tcanopy = Tair;
+
+#endif
+
+  // compute variables based on final temperature
   (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub), 
 				    NetRadiation, Ra, Tair, atmos_density, 
-				    InSensible, SensibleHeat);
+				    InSensible, (*SensibleHeat));
 
   /*****************************
     Find Canopy Vapor Pressure

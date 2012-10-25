@@ -6,7 +6,7 @@
 static char vcid[] = "$Id$";
 
 #if CLOSE_ENERGY
-#define MAX_ITER 250 /* Max number of iterations for total energy balance */
+#define MAX_ITER 10 /* Max number of iterations for total energy balance */
 #else
 #define MAX_ITER 0   /* No iterations */
 #endif // CLOSE_ENERGY
@@ -148,6 +148,8 @@ int surface_fluxes(char                 overstory,
 	      snow_intercept().						TJB
   2011-May-31 Removed options.GRND_FLUX.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Oct-25 Now call calc_atmos_energy_bal() whenever there is a canopy
+	      with snow, regardless of the setting of CLOSE_ENERGY.	CL via TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -684,7 +686,7 @@ int surface_fluxes(char                 overstory,
 	/*****************************************
           Compute energy balance with atmosphere
         *****************************************/
-	if ( iter_snow.snow && overstory && MAX_ITER > 0 ) {
+	if ( iter_snow.snow && overstory ) {
 	  // do this if overstory is active and energy balance is closed
 	  Tcanopy = calc_atmos_energy_bal(iter_snow_energy.canopy_sensible,
 					  iter_soil_energy.sensible, 

@@ -103,6 +103,8 @@
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.                   TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2012-Oct-25 Changed calc_energy_balance_error to return the error to
+	      the parent function.					CL via TJB
 ************************************************************************/
 
 #include <math.h>
@@ -126,7 +128,7 @@ int   CalcAerodynamic(char, double, double, double, double, double,
 	  	       double *, double *, double *, double *, double *);
 void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
 				 int, int, double *);
-void   calc_energy_balance_error(int, double, double, double, double, double);
+double calc_energy_balance_error(int, double, double, double, double, double);
 #if OUTPUT_FORCE_STATS
 void   calc_forcing_stats(int, atmos_data_struct *);
 #endif // OUTPUT_FORCE_STATS

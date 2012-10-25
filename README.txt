@@ -24,6 +24,38 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.e to VIC 4.1.2.d *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed incorrect reporting of canopy energy balance terms.
+
+	Files Affected:
+
+	calc_atmos_energy_bal.c
+	calc_water_energy_balance_errors.c
+	put_data.c
+	surface_fluxes.c
+	vicNl.h
+
+	Description:
+
+	VIC was not summing under- and over-story energy fluxes correctly for the
+	case of a forest canopy with snow.  This only affected the reporting of
+	energy balance terms in VIC's output; internal calculations were fine.
+
+	In addition, a bug (sign error in flux summation) in VIC's calculation of
+	the surface energy balance (for output only) was fixed.  This reduces the
+	vast majority of the energy balance errors reported during the course of
+	a typical energy balance simulation.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.d to VIC 4.1.2.c *****
 --------------------------------------------------------------------------------
 

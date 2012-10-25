@@ -141,6 +141,12 @@ int  put_data(dist_prcp_struct  *prcp,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2012-Oct-25 Fixed sign errors in flux summations in call to calc_energy_balance_error().
+	      Changed calc_energy_balance_error() to return the error, and
+	      now out_data[OUT_ENERGY_ERROR].data[0] is assigned to this
+	      error.  Corrected the setting of rad_temp when there is snow
+	      in the canopy to Tfoliage (canopy snow temperature) instead
+	      of Tcanopy (canopy air temperature).			CL via TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -656,13 +662,14 @@ int  put_data(dist_prcp_struct  *prcp,
     Check Energy Balance 
   ********************/
   if(options.FULL_ENERGY)
-    calc_energy_balance_error(rec, out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0],
+    out_data[OUT_ENERGY_ERROR].data[0] = calc_energy_balance_error(rec, 
+                              out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0],
 			      out_data[OUT_LATENT].data[0]+out_data[OUT_LATENT_SUB].data[0],
 			      out_data[OUT_SENSIBLE].data[0]+out_data[OUT_ADV_SENS].data[0],
 			      out_data[OUT_GRND_FLUX].data[0]+out_data[OUT_DELTAH].data[0]+out_data[OUT_FUSION].data[0],
-			      out_data[OUT_ADVECTION].data[0] - out_data[OUT_DELTACC].data[0]
-			      - out_data[OUT_SNOW_FLUX].data[0] + out_data[OUT_RFRZ_ENERGY].data[0]);
-
+			      out_data[OUT_ADVECTION].data[0] - out_data[OUT_DELTACC].data[0] + out_data[OUT_SNOW_FLUX].data[0] + out_data[OUT_RFRZ_ENERGY].data[0]);
+  else
+    out_data[OUT_ENERGY_ERROR].data[0] = 0; // Perhaps this should be replaced with a NODATA value in this case
 
 
   /******************************************************************************************
@@ -1052,7 +1059,7 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record surface radiative temperature **/
   if ( overstory && snow.snow && !(options.LAKES && IsWet)) {
-    rad_temp = energy.Tcanopy + KELVIN;
+    rad_temp = energy.Tfoliage + KELVIN;
   }
   else
     rad_temp = energy.Tsurf + KELVIN;
@@ -1061,7 +1068,7 @@ void collect_eb_terms(energy_bal_struct energy,
   surf_temp = energy.Tsurf;
 
   /** record landcover temperature **/
-  if(HasVeg) {
+  if(!HasVeg) {
     // landcover is bare soil
     out_data[OUT_BARESOILT].data[0] += (rad_temp-KELVIN) * AreaFactor;
   }
@@ -1137,8 +1144,8 @@ void collect_eb_terms(energy_bal_struct energy,
   /** record heat of fusion **/
   out_data[OUT_FUSION].data[0]    -= energy.fusion * AreaFactor;
 
-  /** record energy balance error **/
-  out_data[OUT_ENERGY_ERROR].data[0] += energy.error * AreaFactor;
+//  /** record energy balance error **/
+//  out_data[OUT_ENERGY_ERROR].data[0] += energy.error * AreaFactor;
 
   /** record radiative effective temperature [K], 
       emissivities set = 1.0  **/

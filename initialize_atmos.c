@@ -114,6 +114,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2012-Aug-07 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
 	      which the cases for daily and sub-daily supplied pressure were
 	      switched.								TJB
+  2012-Dec-20 Fixed bug in converting from ALMA_INPUT moisture flux units
+	      to traditional units (was multiplying by number of seconds in
+	      model step when should have been multiplying by number of seconds
+	      in forcing step).							TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -352,7 +356,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
             || type == CHANNEL_IN
            ) {
           for (idx=0; idx<(global_param.nrecs*NF); idx++) {
-            forcing_data[type][idx] *= global_param.dt * 3600;
+            forcing_data[type][idx] *= param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1] * 3600;
           }
         }
         /* Convert temperatures from K to C */

@@ -23,6 +23,49 @@ Usage:
 	     locations of all other files.
 
 
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.f to VIC 4.1.2.e *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed use of uninitialized variable in cold nose fix for frozen soil
+
+	Files Affected:
+
+	frozen_soil.c
+
+	Description:
+
+	Fixed use of uninitialized variable in cold nose fix for
+	frozen soil.  Code was attempting to check all nodes for a
+	cold nose, but this check requires accessing the value of the
+	next node, which is undefined when we check the bottom node.
+	Now the code does not check the bottom node (which is unlikely
+	to experience a cold nose anyway).
+
+
+
+
+Fixed bug in converting from ALMA_INPUT moisture flux units
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	Fixed bug in converting from ALMA_INPUT moisture flux units
+	to traditional units (was multiplying by number of seconds in
+	model step when should have been multiplying by number of seconds
+	in forcing step).
+
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.e to VIC 4.1.2.d *****
 --------------------------------------------------------------------------------

@@ -746,6 +746,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
   2012-Jan-28 Removed restriction of cold nose fix to just top two nodes;
 	      now all nodes are checked and corrected if necessary.		TJB
+  2013-Jan-08 Excluded bottom node from check in cold nose fix.			TJB
   **********************************************************************/
     
   static double  deltat;
@@ -939,7 +940,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-//	if(i==0 || i==1 ){//surface nodes only
+	if (i<n-1) {
 	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 	      flux_term1 = 0;
@@ -948,7 +949,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 #endif
 	    }
 	  }
-//	}
+	}
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1])/deltat;
         res[i] = flux_term + phase_term - storage_term;
@@ -1045,7 +1046,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-//	if(i==0 || i==1 ){//surface nodes only
+	if (i<n-1) {
 	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 	      flux_term1 = 0;
@@ -1054,7 +1055,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 #endif
 	    }
 	  }
-//	}
+	}
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1]) / deltat;
         res[i] = flux_term + phase_term - storage_term;

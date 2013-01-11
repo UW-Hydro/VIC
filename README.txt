@@ -24,6 +24,30 @@ Usage:
 
 
 
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.g to VIC 4.1.2.f *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed error in passing SensibleHeat to func_atmos_energy_bal.
+
+	Files Affected:
+
+	calc_atmos_energy_bal.c
+
+	Description:
+
+	Replaced (*SensibleHeat) with SensibleHeat in argument lists
+	of root_brent, error_print_atmos_energy_bal and
+	solve_atmos_energy_bal.
+
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.f to VIC 4.1.2.e *****
 --------------------------------------------------------------------------------

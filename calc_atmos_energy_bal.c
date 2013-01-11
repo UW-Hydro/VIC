@@ -61,6 +61,9 @@ double calc_atmos_energy_bal(double  InOverSensible,
 	      Tcanopy iteration is only performed if CLOSE_ENERGY is TRUE; else
 	      Tcanopy is set to Tair.  Also fixed bug in passing SensibleHeat
 	      between this function and root_brent, etc.		CL via TJB
+  2013-Jan-11 Replaced (*SensibleHeat) with SensibleHeat in argument lists
+	      of root_brent, error_print_atmos_energy_bal and
+	      solve_atmos_energy_bal.					TJB
 ************************************************************************/
 
   extern option_struct options;
@@ -115,7 +118,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
     Tcanopy = root_brent(T_lower, T_upper, ErrorString, func_atmos_energy_bal, 
 		         (*LatentHeat) + (*LatentHeatSub), 
 		         NetRadiation, Ra, Tair, atmos_density, InSensible, 
-		         (*SensibleHeat) );
+		         SensibleHeat);
 
     if ( Tcanopy <= -998 ) {
       if (options.TFALLBACK) {
@@ -129,7 +132,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
 					       + (*LatentHeatSub), 
 					       NetRadiation, Ra, Tair, 
 					       atmos_density, InSensible, 
-					       (*SensibleHeat), ErrorString);
+					       SensibleHeat, ErrorString);
         return ( ERROR );
       }
     }
@@ -143,7 +146,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
   // compute variables based on final temperature
   (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub), 
 				    NetRadiation, Ra, Tair, atmos_density, 
-				    InSensible, (*SensibleHeat));
+				    InSensible, SensibleHeat);
 
   /*****************************
     Find Canopy Vapor Pressure

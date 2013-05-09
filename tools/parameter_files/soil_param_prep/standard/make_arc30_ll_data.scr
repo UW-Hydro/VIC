@@ -1,0 +1,24 @@
+#!/bin/csh -v
+# This script is used to make lon lat data file in arc30 resoution for *.srf file, which dissegregate the 5-minutes *.srf file into 30second resolution. This output will be used to later aggregation into 1/8 degree VIC cell.   
+
+awk '{if (NR==4) col=$3*10; if(NR==5) row=$3*10; if (NR==9) xll=$4+1/240; if (NR==12) yll=$4-1/240 } END {for(i=1;i<=row;i++) {for (j=1;j<=col;j++) print xll+(j-1)*(1/120), yll-(i-1)*(1/120)}}' Clay.doc >! junk
+
+
+foreach type (Sand Clay BulkDens)
+
+echo $type
+
+
+####row is 288 col is 288 #####################################
+
+awk '{data[NR]=$1} END {for (i=1;i<=288;i++) {for (k=1;k<=10;k++) {for (j=1;j<=288;j++){for (l=1;l<=10;l++) print data[(i-1)*288+j]}}}}' $type\.srf.bak >! junk2
+
+paste junk junk2 >! lonlat30_$type
+
+end
+
+
+exit
+
+
+

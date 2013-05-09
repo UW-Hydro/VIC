@@ -1,0 +1,40 @@
+#QSUB -eo -q sb -lT 1200 -s /bin/csh
+#Run on an HP-UX machine or norway to access ncks
+# lat and lon are in decimal degrees
+# These must be identical between this script and run_regrid_wind.scr
+
+set MIN_LAT = 31
+set MAX_LAT = 50
+set MIN_LON = -104
+set MAX_LON = -71
+set OUTDIR = /nfs/logic/home/edm/glakes/metdata/NCAR-wind/raw_wind/
+set STARTYR = 1949
+set ENDYR = 2000
+
+#First option is for HP-UX, second is when logged into norway
+#set NCKS = /nfs/norway/home/nijssen/hpux/bin/ncks
+set NCKS = /usr/local/bin/ncks
+
+#######################################################################
+set YEAR = $STARTYR
+while ( $YEAR <= $ENDYR )
+
+set LONMN = `echo $MIN_LON '+' 360.0 | bc -l`
+set LONMX = `echo $MAX_LON '+' 360.0 | bc -l`
+set LAT1 = `awk '{if($1<'$MAX_LAT') {print NR-1;exit}}' gauss_t62_lat.list`
+set LAT2 = `awk '{if($1<'$MIN_LAT') {print NR;exit}}' gauss_t62_lat.list`
+set LON1 = `awk '{if($1>'$LONMN') {print NR-1;exit}}' gauss_t62_lon.list`
+set LON2 = `awk '{if($1>'$LONMX') {print NR;exit}}' gauss_t62_lon.list`
+
+#putting the -R flag after ncks retains the raw netCDF data files
+echo $YEAR
+
+$NCKS -p ftp://ftp.cdc.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/surface_gauss/ -H -C -v uwnd -s "%d\n" -d lat,$LAT1,$LAT2 -d lon,$LON1,$LON2 -l $OUTDIR uwnd.10m.gauss.$YEAR.nc > $OUTDIR/uwnd.$YEAR.asc
+
+$NCKS -p ftp://ftp.cdc.noaa.gov/Datasets/ncep.reanalysis.dailyavgs/surface_gauss/ -H -C -v vwnd -s "%d\n" -d lat,$LAT1,$LAT2 -d lon,$LON1,$LON2 -l $OUTDIR vwnd.10m.gauss.$YEAR.nc > $OUTDIR/vwnd.$YEAR.asc
+
+/bin/rm -f uwnd.10m.gauss.$YEAR.nc
+/bin/rm -f vwnd.10m.gauss.$YEAR.nc
+@ YEAR ++
+
+end

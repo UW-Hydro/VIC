@@ -1,0 +1,23 @@
+#!/bin/csh
+
+#set maskfile      = "../../../mo_append/append/dem1_8.asc"
+#set inp_monthly   = "../../../mo_append/append/prcp/mk_mnth/monthly."
+#set inp_prism     = "../../../mo_append/append/prcp/prism/prism."
+#set in_grd        = "../../../mo_append/append/prcp/mo_prcp_new.grd1"
+#set out_grd       = "../../../mo_append/append/prcp/mo_prcp_new.rsc"
+set maskfile      = "/usr2/edm/east_met/NCDC-daily/east_dem.asc"
+set inp_monthly   = "./mk_mnth/monthly."
+set inp_prism     = "./prism/prism."
+set in_grd        = "/usr2/edm/east_met/NCDC-daily/append_prcp.grd1"
+set out_grd       = "./append_prcp.rsc"
+set starty        = 2000
+set startmo       = 1
+set endyy         = 2000
+set endmo         = 2
+set bin_flag      = 1
+set mult          = 40
+rescl $maskfile $inp_monthly $inp_prism $in_grd $out_grd $starty $startmo $endyy $endmo $bin_flag $mult
+
+# Look in source code for more detailed info about the program
+# bin_flag = 1 means signed 2-byte integer data, 0 for ascii data
+# multiplier only used for binary data

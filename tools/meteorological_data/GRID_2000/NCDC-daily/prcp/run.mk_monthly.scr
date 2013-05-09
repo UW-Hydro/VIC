@@ -1,0 +1,19 @@
+# Script made by Bernt Matheussen 02.08.98
+# This script is used to run 'mk_monthly'
+# The output directory for 'jan.monthly, feb.monthly, etc 
+# must be made before program execution.
+# binflag=1 means data is in 2-byte signed binary format
+# mult is the data multiplier (saved as data*mult) -- only used for binary
+
+#set maskfile =           ../../../mo_append/append/dem1_8.asc
+#set BIG_inputfile =      ../../../mo_append/append/prcp/mo_prcp_new.grd1
+#set output_directory =   ../../../mo_append/append/prcp/mk_mnth/
+set maskfile =           ../dem1_8.txt
+set BIG_inputfile =      ../east_prcp.grd1
+set output_directory =   ./mk_mnth/
+set start_dat =          1950
+set start_prd =          1961
+set end_prd =            1990
+set bin_flag =	         1
+set mult =               40
+mk_monthly $maskfile $BIG_inputfile $output_directory $start_dat $start_prd $end_prd $bin_flag $mult

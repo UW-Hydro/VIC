@@ -1,0 +1,32 @@
+#!/bin/csh -x
+# this script is a copy of  make_arc30_ll_data.scr  but I want to keep the 5 minutes resolution as this is my final resolution
+
+# Note that the raw .srf file have been preprocessed for carriage returns
+
+awk '{if (NR==4) col=$3; if(NR==5) row=$3; if (NR==9) xll=$4+1/12/2; if (NR==12) yll=$4-1/12/2 } END {for( i=1;i<=row;i++) {for (j=1;j<=col;j++) printf(" %f %f \n", xll+(j-1)*(1/12) ,  yll-(i-1)*(1/12)) }}' Work/BulkDens10.doc >! junk
+
+cp junk  zambezi_box.ll
+
+#foreach type (Sand Clay BulkDens Silt Ks FieldCap WiltPont)
+foreach type ( BulkDens10 BulkDens150 Sand10 Sand150 Clay10 Clay150 FieldCap10 FieldCap150 ThetaR10 ThetaR150 WaterN10 WaterN150 WiltPont10 WiltPont150 Ks10 Ks150)
+
+echo $type
+
+####row is 288 col is 288 #####################################
+### new row is 144 an col is 216
+
+#tail +2 ./Work/$type\.srf >! junk3
+tail +2 ./Work/$type\.txt >! junk3
+
+# previous command to disaggregate to 30 arc second, not needed anymore
+#awk '{ if (NR>1) {data[NR]=$1}}END{\
+#     { for (i=1;i<=144;i++) { for (j=1;j<=216;j++) print data[(i-1)*216+j] }}' junk3  >! junk2
+
+paste junk junk3 >! ./Output/lonlat_$type
+end
+
+
+exit
+
+
+

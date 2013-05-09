@@ -1,0 +1,59 @@
+This describes the 4 steps to appending the older VIC met data with more recent
+data from NCDC. These were written by Ed Maurer, for the purpose of appending
+the data retrieved from the Earthinfo CDs through 12/1997 with newer data
+through 12/1999. This uses the following programs and data files:
+ preproc_append.scr
+ preproc_append_prcp.AWK 
+ preproc_append_tmax.AWK 
+ preproc_append_tmin.AWK 
+ filename
+ append_prec.c
+ append_temp.c
+ run_append_prec.scr
+ run_append_temp.scr
+
+1) Retrieve the daily data from the all of the states of interest from the web.
+This data is available at:
+http://cdo.ncdc.noaa.gov/plclimprod/plsql/poemain.poe
+
+Select "Surface Data, Daily" from the first menu,then select "Advanced Options"
+
+Select the state of interest, and "Entire State". Then select output to File.
+ 
+Select PRCP,TMAX and TMIN (you have to manually UNselect the ALL parameters too, or 
+you'll get everything). For only a few years, you can download these together
+without exceeding their 40MB file limit. Select the period of record to append
+to the data downloaded from the CDs. Select the first option for format: 
+Delimited - No Station Names and keep the default of comma delimited files (with data flags). NCDC sends 
+4 files with the request -- but only the daily data file (which comes as either 
+a text or a zipped file, and should be saved with a name something like 
+"ppt_data.dly.gz", or ".dly" and then zipped)
+
+2) Preprocess the data to remove commas and fill in missing months with no_data
+(no_data is set at -99, to be consistent with the other regridding programs).
+First, set up a file with the names of the daily data files for each state. 
+By default, the preproc_append.scr assumes the filenames all end with .dly.gz,
+and the file list should only have the root preceding this.
+Then run the preproc_append.scr with the command line option of the filename 
+list. Modify the script if different filename extensions than .dly.gz are used.
+This creates one output file for all states for each parameter 
+      append_prec.daily,
+      append_tmax.daily, 
+      append_tmin.daily.
+If you want different output filenames change the script.
+
+3) Compile the programs append_prec.c or append_temp.c (which compile using gcc 
+on FreeBSD, cc on sun-os), and modify the filenames and dates in the script 
+run_append_prec.scr. Run run_append_prec.scr, which references the station 
+information file (something.inf) used in the processing of the data from the CDs. 
+This produces an output file with the same format as the output from 
+read_prec_dly.f. By using the filtered station list from the CDs, the list of 
+criteria used for including stations is preserved, since no new stations are 
+added in the appending.
+
+4) Concatenate the append file to the old .fmt file, and continue with the 
+regridding program (regrid.f) as was done with the CD data.
+
+In the case of suspicious output data from the preproc_append.scr, all even 
+rows should have 366 columns. This can be cehcked with comething like:
+gawk '{if(!(NR%2)) {if(NF!=366) print NR,NF}}' file.daily

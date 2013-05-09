@@ -1,0 +1,12 @@
+# Script made by Bernt Matheussen 02.08.98
+# This script is used to run 'mk_monthly'
+# The output directory for 'jan.monthly, feb.monthly, etc 
+# must be made before program execution.
+
+set maskfile =           elev_msk.cbr8
+set BIG_inputfile =      cmb_tmax60-92.grd
+set output_directory =   ./month/
+set start_dat =          1960
+set start_prd =          1961
+set end_prd =            1990
+mk_monthly $maskfile $BIG_inputfile $output_directory $start_dat $start_prd $end_prd

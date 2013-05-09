@@ -1,0 +1,36 @@
+#!/bin/csh -x
+#Nathalie Voisin May 2009
+
+# Note that the raw .srf file have been preprocessed for carriage returns
+if($#argv == 4) then
+  set resolution = "${argv[1]}"
+  set docfile = ${argv[2]}
+  set srfdir = ${argv[3]}
+  set outputfile = ${argv[4]}
+else
+echo "ERROR- resolution .docfile srfdir outputfile.ll "
+exit
+endif
+
+
+awk '{if (NR==4) col=$3; if(NR==5) row=$3; if (NR==9) xll=$4+'$resolution'/2; if (NR==12) yll=$4-'$resolution'/2 } END {for( i=1;i<=row;i++) {for (j=1;j<=col;j++) printf(" %f %f \n", xll+(j-1)*('$resolution') ,  yll-(i-1)*('$resolution')) }}' $docfile >! junk
+
+cp junk  $outputfile
+
+ls $srfdir/*.txt > list.txt
+sed 's/'$srfdir'/g' list.txt > list2.txt
+sed 's/\///g' list2.txt > list.txt
+foreach type (`cat list.txt`)
+
+echo $type
+tail +2 $srfdir/$type >! junk3
+
+paste junk junk3 >! $srfdir/lonlat_$type
+end
+
+rm junk3 junk  list.txt
+
+exit
+
+
+

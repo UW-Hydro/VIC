@@ -1,0 +1,35 @@
+#!/bin/csh
+set MASK = ../mask_7576.asc
+set RAWDIR = ../prism-rawdata/
+set OUTDIR = ./prism/
+
+set jan = can_us_prism.jan
+set feb = can_us_prism.feb
+set mar = can_us_prism.mar
+set apr = can_us_prism.apr
+set may = can_us_prism.may
+set jun = can_us_prism.jun
+set jul = can_us_prism.jul
+set aug = can_us_prism.aug
+set sep = can_us_prism.sep
+set oct = can_us_prism.oct
+set nov = can_us_prism.nov
+set dec = can_us_prism.dec
+
+get_prism $MASK $RAWDIR$jan $OUTDIR\prism.jan
+get_prism $MASK $RAWDIR$feb $OUTDIR\prism.feb
+get_prism $MASK $RAWDIR$mar $OUTDIR\prism.mar
+get_prism $MASK $RAWDIR$apr $OUTDIR\prism.apr
+get_prism $MASK $RAWDIR$may $OUTDIR\prism.may
+get_prism $MASK $RAWDIR$jun $OUTDIR\prism.jun
+get_prism $MASK $RAWDIR$jul $OUTDIR\prism.jul
+get_prism $MASK $RAWDIR$aug $OUTDIR\prism.aug
+get_prism $MASK $RAWDIR$sep $OUTDIR\prism.sep
+get_prism $MASK $RAWDIR$oct $OUTDIR\prism.oct
+get_prism $MASK $RAWDIR$nov $OUTDIR\prism.nov
+get_prism $MASK $RAWDIR$dec $OUTDIR\prism.dec
+
+
+
+
+

@@ -1,0 +1,28 @@
+#!/bin/csh
+#This script compiles the snowband tool
+#and runs it to make a snowband file
+echo "compiling snowband.c"
+gcc -o snowband snowband.c
+
+# spatial resolution
+set RES = 0.125
+# DEM file name and path
+set DEM =  ../gt30_unfill_dem.30as.ldasarea
+# soil file name and path
+#set CELL_DATA  = all_ldas.soil
+set CELL_DATA  = soil_ldas.cali
+# set output file name and path
+set OUT = snowbands_125.0903.cali
+# prism flag: if 1, do prism scaling, else prec fract = snowband area fract
+set PRISM_flag = 1 
+# PRISM grid info (if PRISM_flag = 0, still need dummy filename even if not used)
+set PRISM = ../prism_annual_p.30as.ldasarea
+
+awk '{print $1,$2,$3,$4,$22}' $CELL_DATA > junksoil
+
+echo Arguments: snowband $CELL_DATA $RES $DEM $PRISM $PRISM_flag $OUT
+snowband junksoil $RES $DEM $PRISM $PRISM_flag $OUT
+
+\rm junksoil
+
+

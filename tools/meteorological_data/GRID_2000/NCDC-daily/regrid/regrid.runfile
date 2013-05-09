@@ -1,0 +1,37 @@
+'t'
+4 50
+"/nfs/ontario/usr2/edm/east_met/NCDC-daily/tmin/east_tmin.inf"
+"/nfs/ontario/usr2/edm/east_met/NCDC-daily/east_dem.asc"
+"/nfs/ontario/usr2/edm/east_met/NCDC-daily/tmin/append_tmin.fmt"
+"/nfs/ontario/usr2/edm/east_met/NCDC-daily/append_tmin.grd"
+0
+2
+100
+
+
+tpswitch (p don't lapse data by altitude, t lapse data by altitude)
+minimum number of nearest neighbours (recommended: 4); maximum (50)
+infofile
+maskfile
+inputfile
+outputfile
+stop for no data (0 no, 1 yes)
+output format (0 ascii, 1 4-byte binary float, 2 2-byte integer, 3 netCDF)
+data multiplier -- used with 2-byte (signed) integer format
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+# Script made by Bernt Matheussen 02.12.98
+# This script runs the rescale program
+# Last used 03.01.98
+
+
+set maskfile      = elev_msk.cbr8
+set inp_monthly   = ./month/monthly.
+set inp_prism     = ./prism/prism_month.
+set in_grd        = cmb_tmin60-92.grd
+set out_grd       = cmb_tmin60-92.rsc
+set starty        = 1960
+set endyy         = 1992
+
+rescale $maskfile $inp_monthly $inp_prism $in_grd $out_grd $starty $endyy
+
+# Look in source code for more detailed info about the program
+

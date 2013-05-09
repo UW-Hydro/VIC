@@ -1,0 +1,25 @@
+#!/bin/csh -v
+
+
+
+
+#foreach type (Sand Clay BulkDens)
+
+foreach type (BulkDens)
+echo $type
+
+
+aggr_soil_2vic latlon.txt lonlat30_$type vic_plata_$type
+
+
+end
+
+#paste vic_plata_Sand vic_plata_Clay >! vic_plata_sand_clay
+
+#\rm -f vic_plata_Sand
+
+#\rm -f vic_plata_Clay
+
+
+
+exit

@@ -1,0 +1,14 @@
+#!/bin/csh
+# For running the combine_wind program
+# This program only accepts 2-byte binary input and output
+
+# NOTE THAT APPEND_FLAG=1 APPENDS THE DATA TO EXISTING FILES
+# VALUES OTHER THAN 1 WILL OVERWRITE EXISTING FILES
+
+set met_file_path     =    /usr2/edm/east_met/temp_met/
+set wind_file_path    =    /usr2/edm/east_met/wind/temp_wind/
+set latlong    =           /usr2/edm/east_met/NCDC-daily/vicinput/latlong99.txt
+set out_dir  =             /home/edm/east/forcing/
+set APPEND_FLAG =          1
+
+combine_wind $met_file_path $wind_file_path $latlong $out_dir $APPEND_FLAG

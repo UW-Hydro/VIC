@@ -1,0 +1,25 @@
+#!/bin/csh
+
+#Inputs are:
+#     1) station info file (from CD data)
+#     2) daily data (preprocessed) to be appended to record
+#     3) start year for data to be appended
+#     4) start month
+#     5) end year for data to be appended
+#     6) end month
+#     7) output file of formatted data, for later appending to CD data
+
+set STA_INFO =  sw_tmax.inf
+set APP_DATA =  append_tmax.daily
+set ST_YR =     1998
+set ST_MO =     1
+set END_YR =    1999
+set END_MO =    12
+set OUTF =      append_tmax.fmt
+################################################
+set NREC = `wc $APP_DATA | awk '{print $1/2}'`
+
+append_temp $STA_INFO $APP_DATA $ST_YR $ST_MO $END_YR $END_MO $OUTF $NREC
+
+#now you can manually cat the OUTF to the old data, and continue
+#with the regridding process, or just regrid this separately.

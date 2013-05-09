@@ -1,0 +1,155 @@
+#!/bin/csh 
+
+# Written by Greg O'Donnell
+# 31-Aug-98
+#
+# Preliminary processing of NCDC data file.
+#
+#  Requires a commandline option file with filename roots, see below
+#  eg to create using the filename conventions given below
+#     $foreach input (*.dat.gz)
+#     $echo $input | sed 's/.dat.gz//'
+#     $end
+#
+#  Cat input station data files together and pipe
+#      -input data files are 'gzip'-ed (ie '*.gz')
+#      -input data files are of the form *.$EXT_DAT.gz
+#      -output to $DAT
+#  Cat input station info files together and pipe
+#      -input station files are NOT compressed
+#      -input station files are of the form *.$EXT_INF
+#      -output to $INFO
+
+
+#test for command line arguments
+if(  $#argv != 1 ) then
+  echo 'Incorrect usage:'
+  echo 'preproc_tmin.scr <file>'
+  exit
+else
+  set NCDC_LIST = $argv[1]
+  if ( ! -e $NCDC_LIST ) then
+    echo Command line file $NCDC_LIST does not exist
+    exit
+  endif
+endif
+
+# MAKE CHANGES HERE
+# macro definitions
+# output filenames
+set INFO = ./east_tmin.info
+set DAT =  ./east_tmin.daily
+# input filename extensions 
+set EXT_DAT = dly
+set EXT_INF = sta
+# END OF CHANGES
+set sum
+
+# select awk based on OS, only SUNOS and HP-UX supported
+set OS = `uname`
+switch ( $OS )
+  case "HP-UX"
+    set AWK = awk
+    breaksw
+  case "SunOS"
+    set AWK = nawk
+    breaksw
+  case "Linux"
+    set AWK = gawk
+    breaksw
+  case "FreeBSD"
+    set AWK = gawk
+    breaksw
+   default
+    echo Unknown OS - using awk
+    set AWK = awk
+    breaksw
+endsw
+
+# test files do not exist
+if ( -e $INFO ) then
+  echo File exists $INFO
+  exit
+endif
+if ( -e $DAT ) then
+  echo File exists $DAT
+  exit
+endif
+
+#files do not exist so create
+echo > $DAT
+# calculate # of lines in info files
+# and place in info outfile
+foreach STATE ( `cat $NCDC_LIST` )
+  @ sum += `wc $STATE.$EXT_INF | awk '{print $1}'`
+end
+echo $sum  > $INFO
+echo "# of stations to be processed: " $sum
+
+#cycle thru and cat
+foreach STATE ( `cat  $NCDC_LIST` )
+  echo Processing station file: $STATE
+  if ( ! -e $STATE.$EXT_DAT.gz || ! -e $STATE.$EXT_INF ) then
+    echo File $STATE.$EXT_DAT.gz and/or $STATE.$EXT_INF do not exist
+    exit
+  endif
+
+  gzip -d -c $STATE.$EXT_DAT | $AWK    \
+  'BEGIN{ FS=">"; void=-99}	       \
+    {                                  \
+	yr_pos=index($0,"TMin")+7      \
+	year=substr($0,yr_pos,4)       \
+        stat_id=substr($0,1,50)        \
+        split(stat_id,stat_inf,"|")    \
+        $0=substr($0,yr_pos+6)         \
+        gsub(/\|\|/,"|"void"|")        \
+        gsub(/\|\|/,"|"void"|")        \
+        gsub(/\|/," ")                 \
+        gsub("---",void)               \
+        printf("%6d %23s %4d\n", stat_inf[2], stat_inf[3], year) \
+        print $0                       \
+   }' >> $DAT
+    
+# above awk command:
+# locate position of year in file (find relative to "TMIN")
+# do not require intial data - dump
+# replace missing values with void, else this info will be lost when
+# pipes are stripped
+# ignore "T"race values
+# temporarily "A"ccumulated values have been left in to conserve mass
+# replace the missing value "---" void
+# NOTE: occasionally 2stations share the same name - ie changed location
+# hence stat_name also extracts the station id so precstat.f can trap
+# this situation
+
+cat $STATE.$EXT_INF | $AWK                 \
+'BEGIN{FS="|"}                             \
+{                                          \
+if(sub("S","",$7) == 1)                    \
+  ve=-1.0                                  \
+    else {                                 \
+  sub("N","",$7)                           \
+  ve= 1.0                                  \
+    }                                      \
+split($7,tmp,":")                          \
+$7=(tmp[1]+0.+tmp[2]/60.+tmp[3]/3600.)*ve  \
+if(sub("E"," ",$8) == 1)                   \
+  ve=1.0                                   \
+    else {                                 \
+  sub("W"," ",$8)                          \
+  ve=-1.0                                  \
+    }                                      \
+split($8,tmp,":")                          \
+$6*=0.305                                  \
+$8=(tmp[1]+0.+tmp[2]/60.+tmp[3]/3600.)*ve  \
+printf("%10.4f %10.4f %8.1f %23s %2.2d%4.4d %4s %2s %10s %10s %3d %3d %2d %12s %3d\n", $7, $8, $6, $4, $2, $3, $5, $1, $9, $10, $11, $12, $13, $14, $15) \
+}' >> $INFO
+# Above awk command:
+# Reformat the station information file.
+# Convert station elevation from feet to meters (CD always downloads in feet)
+# Convert C##:##:## to decimal degrees by substuting 1st char
+# for appropriate sign then splitting string into an array on ":".
+
+end
+
+

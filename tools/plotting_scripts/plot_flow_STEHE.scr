@@ -1,0 +1,51 @@
+#!/bin/csh
+
+## Plot monthly discharge, using the Stehekin basin as an example
+
+gmtset ANOT_FONT_SIZE 14 LABEL_FONT_SIZE 14 HEADER_FONT_SIZE 16
+set outfile = flow.STEHE.ps
+set projPage = -Jx1
+set coordPage = -R0/8.5/0/11
+set projData = -JX5T/1.5
+set coordData = -R1949-01-01T00:00:00/1951-12-31T00:00:00/0/8000
+set pen_obs = "-W5,black"
+set pen_sim = "-W5,blue,--"
+set projText = -JX5/1.5
+set coordText = -R0/1/0/1
+
+gmtset D_FORMAT "%lg"
+gmtset INPUT_DATE_FORMAT "yyyy-mm"
+gmtset OUTPUT_DATE_FORMAT "yyyy-mm"
+gmtset PLOT_DATE_FORMAT "yyyy-mm"
+gmtset TIME_IS_INTERVAL +1o
+
+set obsfile = ../obs/flow.STEHE.month.cfs
+set simfile = ../results/rout/default/STEHE.month
+
+## Set up page
+pstext -P -K -V -N $projPage $coordPage -Y11 -X1 <<END> $outfile
+END
+
+## plot data ---------------------------------------
+perl -e 'while (<>) {chomp; s/^\s+//; @fields = split /\s+/; printf "%04d-%02d %.4f\n", $fields[0],$fields[1],$fields[2];}' $obsfile |\
+  psxy -O -K -V $projData $coordData -Y-2 -X0 $pen_obs --FRAME_PEN=1.5p --TICK_PEN=1p --TICK_LENGTH=-0.2c -Ba1Yf1o:"Time":/1000:"Flow (cfs)"::.:SWne >> $outfile
+perl -e 'while (<>) {chomp; s/^\s+//; @fields = split /\s+/; printf "%04d-%02d %.4f\n", $fields[0],$fields[1],$fields[2];}' $simfile |\
+  psxy -O -K -V $projData $coordData $pen_sim >> $outfile
+pstext -O -K -V -N $projText $coordText <<END>> $outfile
+0.15 0.8 10 0 0 5 Observed
+END
+pstext -O -K -V -N $projText $coordText <<END>> $outfile
+0.15 0.7 10 0 0 5 Simulated
+END
+psxy -O -K -V $projText $coordText $pen_obs <<END>> $outfile
+0.025 0.8
+0.125 0.8
+END
+psxy -O -K -V $projText $coordText $pen_sim <<END>> $outfile
+0.025 0.7
+0.125 0.7
+END
+
+## Finish the plot
+pstext -O -V -N $projText $coordText <<END>> $outfile
+END

@@ -1,0 +1,92 @@
+#!/bin/csh 
+#!/bin/csh -v
+#debugging mode
+
+# Written by Bernt Viggo Matheussen
+# 23-Nov-98
+#
+# Cleans the wind datafile and station file before 
+# simpel gridding program is used
+
+# Before using the script cat all station files into one file
+# cat also all the monthly datafiles into one file
+# Remember to have the files in the same order
+# cat montana.asc wash.asc > statfile.asc
+# cat montana.dta wash.dta > monthly.dta
+
+#test for command line arguments
+if(  $#argv != 3 ) then
+  echo 'Incorrect usage:'
+  echo 'format_wind.scr stationfile datafile outputfile'
+  exit
+endif
+
+set STATFILE = $argv[1]
+set DATAFILE = $argv[2]
+set OUTFILE = $argv[3]
+#######################################
+
+# NO CHANGES BELOW THIS POINT
+
+# TEMPORARY FILES #####################
+set TMP1=tmp1.$$
+set TMP2=tmp2.$$
+set TMP3=tmp3.$$
+#######################################
+
+echo ""
+echo "--------------------------------"
+echo "------- format_wind.scr --------"
+echo "--------------------------------"
+echo ""
+echo "Inputfiles:    $STATFILE  $DATAFILE "
+echo "Outputfiles:   $OUTFILE"
+echo ""
+
+#####################################################
+# Input files are in km/day converting them to m/s
+echo Processing monthly datafile
+awk 'BEGIN {FS = "|"};{ \
+    printf "%s %-5s ",$1,$2 \
+    for(i = 19; i<= 31; i++) {printf "%5.1f",($i/(24*3.6))} \
+    printf "\n" \
+    }' $DATAFILE >! $TMP1
+########################################################
+
+#########################################################
+echo Processing station information file
+awk 'BEGIN {FS = "|"};{ \
+    split($11,lat,":") \
+    sub(/N/,"",lat[1]) \
+    split($12,lon,":") \
+    sub(/W/,"-",lon[1]) \
+    printf "%s %-5s ",$1,$2 \
+    printf "%6.2f ",(lat[1] + (lat[2]/60) + (lat[3]/3600)) \
+    printf "%6.2f\n",(lon[1] - (lon[2]/60) - (lon[3]/3600)) \
+    }' $STATFILE >! $TMP2
+########################################################
+
+# Pasting files together #####
+echo "Pasting files together"
+paste $TMP1 $TMP2 > $TMP3
+
+
+#######################################################
+# Final procesing
+echo "Final processing"
+awk '{ \
+    if($1 != $16) {print "ERROR not same state",$1,$16; exit} \
+    if($2 != $17) {print "ERROR not station number",$2,$17; exit} \
+    printf "%s %s ",$18,$19 \
+    for(i = 3; i<= 15; i++) {printf "%5.1f",$i} \
+    printf "\n" \
+    }' \
+    $TMP3 >! $OUTFILE
+#######################################################
+
+
+# Remove temporary files ###########
+echo "Removing temporary files"
+/bin/rm -f *.$$
+###################################
+

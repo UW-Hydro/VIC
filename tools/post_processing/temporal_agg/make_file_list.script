@@ -1,0 +1,23 @@
+#!/bin/csh
+
+if( $1 != "" ) then
+
+rm tmp.list file.list
+
+set CURRDIR = `pwd`
+cd $1
+ls -1 $2* > $CURRDIR/tmp.list
+cd $CURRDIR
+
+awk 'BEGIN {FS="_"} \
+     {	gsub(".gz","") \
+	printf("_%s_%s %s %s\n", $2, $3, $2, $3) \
+     }' tmp.list > file.list
+
+rm tmp.list
+
+else
+
+echo Usage: $0 results_directory result_file_prefix
+
+endif

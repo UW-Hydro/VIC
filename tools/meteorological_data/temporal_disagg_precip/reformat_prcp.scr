@@ -1,0 +1,136 @@
+#!/usr/local/bin/tcsh
+
+# reformats hourly precipitation retrieved from the EarthInfo CDs
+# in ascii format. Produces a station file and a data file with
+# hourly data
+# command line lists file with filename roots, without the "hly" or 
+# "dly" or the .gz extension (hourly data files are gzipped), e.g.:
+# if station and data from CD are in junk.sta and junk.hly.gz, the
+# command line file would consist of the single line "junk" (w/o quotes)
+ 
+# station information files are produced by downloading the 
+# "summary" of all the stations (after selecting the desired stations,
+# use "step to" to get to the summary view, which can then be selected
+# with {ctrl}-a and then downloading) not just downloading the stations
+# Data files are selected by stepping to the hourly display, selecting all
+# records and downloading in ascii format
+
+# when downloading data from CDs specify a long record length (min maybe 
+# 20-30 years) and a high % coverage (min 90%) to ensure few no_data values
+
+# input filename extensions (not included in the input file)
+set EXT_DAT = hly
+set EXT_INF = sta
+# output filenames, station information and data files
+set INFO = ./hly_prcp.inf
+set DAT =  ./hly_prcp.dat
+
+# end of changes ##########################################
+# command line argument
+if(  $#argv != 1 ) then
+  echo 'Incorrect usage:'
+  echo 'preproc_precip.scr <file>'
+  exit
+else
+  set NCDC_LIST = $argv[1]
+  if ( ! -e $NCDC_LIST ) then
+    echo Command line file $NCDC_LIST does not exist
+    exit
+  endif
+endif
+
+# find OS and set awk alias
+set OS = `uname`
+switch ( $OS )
+  case "HP-UX"
+    set AWK = awk
+    breaksw
+  case "SunOS"
+    set AWK = nawk
+    breaksw
+  case "FreeBSD"
+    set AWK = gawk
+    breaksw
+  default
+    set AWK = awk
+    breaksw
+endsw
+###############################
+# check file status -- overwrite output file if it already exists
+if ( -e $INFO ) then
+  echo File exists $INFO , overwriting file with new one
+  echo >! $INFO
+endif
+if ( -e $DAT ) then
+  echo File exists $DAT , overwriting file with new one
+  echo >! $DAT
+endif
+###############################
+# calculate # of lines in info files
+foreach STATE ( `cat $NCDC_LIST` )
+  @ sum += `wc $STATE.$EXT_INF | awk '{print $1}'`
+end
+#echo $sum  > $INFO
+echo "# of stations to be processed: " $sum
+###############################
+#cycle through each file in $NCDC_LIST and cat together
+foreach STATE ( `cat  $NCDC_LIST` )
+
+#make sure files exist
+  echo Processing station file: $STATE
+  if ( ! -e $STATE.$EXT_DAT.gz || ! -e $STATE.$EXT_INF ) then
+    echo File $STATE.$EXT_DAT.gz and/or $STATE.$EXT_INF do not exist
+    exit
+  endif
+
+#process station file
+cat $STATE.$EXT_INF | $AWK \
+'BEGIN{FS="|"}                             \
+{                                          \
+if(sub("S","",$10) == 1)                   \
+  ve=-1.0                                  \
+    else {                                 \
+  sub("N","",$10)                          \
+  ve= 1.0                                  \
+    }                                      \
+split($10,tmp,":")                         \
+$10=(tmp[1]+0.+tmp[2]/60.+tmp[3]/3600.)*ve \
+if(sub("E"," ",$11) == 1)                  \
+  ve=1.0                                   \
+    else {                                 \
+  sub("W"," ",$11)                         \
+  ve=-1.0                                  \
+    }                                      \
+split($11,tmp,":")                         \
+$9*=0.305                                  \
+$11=(tmp[1]+0.+tmp[2]/60.+tmp[3]/3600.)*ve \
+printf("%10.4f %10.4f %7.1f %s %d %23s\n", $10, $11, $9, $1, $2, $3) \
+}' >> $INFO
+
+# Above awk command:
+# Reformat the station information file.
+# Convert station elevation from feet to meters (CD always downloads in feet)
+# Convert C##:##:## to decimal degrees by substuting 1st char
+# for appropriate sign then splitting string into an array on ":".
+# print out new station file with lat, long, elev, state, ID, name
+
+#next process hourly data file associated with the station file
+  gzip -d -c $STATE.$EXT_DAT.gz | $AWK                      \
+    'BEGIN{FS="|"}					 \
+      {split($5,date,"/")				 \
+       if(date[3]>=1950 && data[3]<=1999){		 \
+       printf("%2s %d %d %d %d ",$1,$2,date[3],date[1],date[2]) \
+       for(i=6;i<=52;i+=2){				 \
+	  if($i=="\.")$i=0				 \
+	  if($i=="---")$i=-9				 \
+          printf("%.2f ", $i)                            \
+	}						 \
+	printf("\n")                            \
+       }						 \
+    }' >> $DAT
+
+#above awk command:
+# extract from the station information file the state, ID, year,
+# month, day, and 24 hourly precip amounts (29 columns total)
+
+end

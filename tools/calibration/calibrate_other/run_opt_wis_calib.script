@@ -1,0 +1,34 @@
+#!/bin/csh
+# This script was written to run all processing steps necessary to create
+# new parameter files, run the model, and process the output for a new
+# calibration parameter set.
+
+if ( $5 != "" ) then
+
+	set BI = $1
+	set DS = $2
+	set WS = $3
+	set D2 = $4
+	set D3 = $5
+	set OUTFILE = R2.wis.opt
+	set R2FILE = $6
+
+	/bin/rm -f $R2FILE
+
+	calibrate_wis_opti.script $BI $DS $WS $D2 $D3
+
+	set CALIBDIR = ARCINFO/WIS_OPTI
+
+	echo Running Model
+	/bin/rm -f $CALIBDIR/runlog
+	SOURCE_OPTI/vicNl -g VIC_PARAM/wis_global_ewb_calib_opt >& $CALIBDIR/runlog
+
+	opti_rout rout_opti.wis
+
+	compute_R2 RESULTS/CURRENT_RUN/DAILY/WISCR.day ROUTING/WISCR/wisc_daily.txt 366 1460 0.80 $OUTFILE > $R2FILE
+
+else
+
+        echo "Usage: $0 <b_infilt> <Ds> <Ws> <depth2> <depth3> <Answer File>"
+
+endif

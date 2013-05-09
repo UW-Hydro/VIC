@@ -1,0 +1,32 @@
+#!/bin/csh
+
+# This script is designed to change all of the files associated with
+# running the model for the current subbasin.  The parameters calibrated
+# are b_infilt, Ws, Ds, depth2, and depth3.
+
+set BASINNAME = wis
+set CALIBDIR = ARCINFO/
+set CALIBPREFIX = WIS_OPTI/
+
+if ( $5 != "" ) then
+
+	cd $CALIBDIR
+
+	set_basin_param.linux $BASINNAME"_run.asc" b_infilt.upm $CALIBPREFIX/b_infilt.upm $1
+
+	set_basin_param.linux $BASINNAME"_run.asc" Ds.upm $CALIBPREFIX/Ds.upm $2
+
+	set_basin_param.linux $BASINNAME"_run.asc" Ws.upm $CALIBPREFIX/Ws.upm $3
+
+	set_basin_param.linux $BASINNAME"_run.asc" depth2.upm $CALIBPREFIX/depth2.upm $4
+
+	set_basin_param.linux $BASINNAME"_run.asc" depth3.upm $CALIBPREFIX/depth3.upm $5
+
+	cd ..
+
+else
+
+	echo "Usage: $0 <b_infilt> <Ds> <Ws> <depth2> <depth3>"
+
+endif
+

@@ -1,0 +1,116 @@
+#######################################################################
+# This text file contains information used by the vicNl model to define
+# needed global variables, and model parameters, as well as allowing the
+# user to control the features of the model to be used in the current 
+# model run.
+#
+# Model parameter or options name must be followed by TRUE or FALSE (TRUE
+# meaning the option is to be used), or the appropriate information.
+#
+# Lines proceeded by a '#' are comments, and are not processed by the model
+#
+# Created:	April 5, 1998 by Keith Cherkauer
+# Comments:    	Global Parameter file for the Ohio River.
+#		Runs the model in water balance mode using distributed 
+#		precipitation, 3 soil layers, and a daily time step.
+#		Snow model is activated.
+#######################################################################
+
+#######################################################################
+# Define Global Parameters
+#######################################################################
+NLAYER		3	# number of layers
+TIME_STEP	3	# model time step in hours (= 24 for water balance)
+RESOLUTION	0.5	# model grid cell resolution
+STARTYEAR	1980	# year model simulation starts
+STARTMONTH	1	# month model simulation starts
+STARTDAY	1	# day model simulation starts
+STARTHOUR	0	# hour model simulation starts
+NRECS		11688	# hour model simulation starts (122736 total for UPM)
+WIND_H		2.0	# height of wind speed measurement
+MEASURE_H	2.0	# height of humidity measurement
+NODES		7	# number of soil thermal nodes 
+MAX_SNOW_TEMP	2.0	# maximum temperature at which snow can fall
+MIN_RAIN_TEMP	-0.5	# minimum temperature at which rain can fall
+GRID_DECIMAL	3	# number of decimals to use in gridded file names
+TRUNK_RATIO	0.2	# ratio of trunk height to total vegetation height
+OVERSTORY_ATTENUATION	0.5	# parameter controlling attenuation of wind through overstory
+SNOW_STEP	1	# time step in hour for which to solve the snow model
+PREC_EXPT	0.85	# exponential for distributed precipitation (0.6)
+
+#######################################################################
+# Define Global Parameters
+#######################################################################
+FULL_ENERGY	TRUE	# calculate full energy balance
+FROZEN_SOIL	TRUE	# calculate frozen soils
+SNOW_MODEL	TRUE	# use internal snow model
+DIST_PRCP	TRUE	# use distributed precipitation
+COMPRESS	FALSE	# compress input and output files when done
+CORRPREC	FALSE	# correct precipitation for gauge undercatch
+BINARY_OUTPUT	FALSE	# output files in binary format
+ARC_SOIL        TRUE    # read soil parameters from ARC/INFO ASCII grids
+
+#######################################################################
+# Define Data Files
+#
+# Possible FORCING TYPEs and their needed FORING FILE TYPES:
+#       PILPS
+#               FORCING1 = hourly data file in PILPS2c Format
+#               FORCING2 = FALSE
+#       SAWD
+#               FORCING1 = hourly SAWD ASCII files
+#                               (with or without hourly precip)
+#               FORCING2 = FALSE or daily precip file if hourly precip
+#                               not included in FORCING1
+#       SHAW
+#               FORCING1 = hourly data in SHAW model format
+#               FORCING2 = FALSE
+#       PILPS
+#               FORCING1 = Daily precipitation and temperature file
+#               FORCING2 = FALSE or output from NWS snow model
+#
+#       All FORCING filenames are actually the pathname, and prefix
+#               for gridded data types: ex. DATA/forcing_
+#               Latiude and longitude index suffix is added by VIC
+#######################################################################
+FORCE_TYPE	SAWD_BIN
+FORCING1	FORCING_DATA/SAWD_FORCING/sawd_
+FORCING2	FORCING_DATA/DAILY_FORCING/data_
+FORCE_DT	1	24
+ 
+#######################################################################
+# Soil parameter file
+#######################################################################
+SOIL		ARCINFO/wis_file_list_opti
+SOIL_DIR	ARCINFO/
+ 
+#######################################################################
+# Vegetation Grid Cell Assingment Parameters
+#######################################################################
+VEGPARAM	ARCINFO/veg_param.upm.shallower
+ROOT_ZONES	3	# Number of root zones defined in VEGPARAM file
+ 
+#######################################################################
+# Vegetation Type Parameter Library File
+#######################################################################
+VEGLIB		ARCINFO/vegetation_library
+ 
+#######################################################################
+# Model Output Directory
+#######################################################################
+RESULT_DIR	RESULTS/CURRENT_RUN/DAILY/
+ 
+#######################################################################
+# Define Debugging Parameters
+#######################################################################
+PRT_FLUX	FALSE	# print energy fluxes debugging files
+PRT_BALANCE	FALSE	# print water balance debugging files
+PRT_SOIL	FALSE	# print soil parameter debugging files
+PRT_VEGE	FALSE	# print vegetation parameter debugging files
+PRT_GLOBAL	FALSE	# print global parameter debugging files
+PRT_ATMOS	FALSE	# print forcing data debugging files
+PRT_SNOW	FALSE	# print snow debugging files
+PRT_MOIST	FALSE	# print soil moisture debugging files
+PRT_TEMP	FALSE	# print soil temperature profile debugging files
+DEBUG_DIR	.	# debugging files output directory (defaut '.')
+

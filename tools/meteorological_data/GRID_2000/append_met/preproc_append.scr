@@ -1,0 +1,136 @@
+#!/bin/csh
+# PREPROC_APPEND.SCR for formatting the raw NCDC data downloaded
+# from the web site to append to the data downloaded from the
+# Earthinfo CDs. The output from this script is input to
+# append_NCDC.c to add the specified years to the end of the .fmt
+# file, output from earlier processing of the CD data with read_prec.dly.f
+# 
+# Written by Ed Maurer, adapted from preproc_precip.scr by GMOD
+# 3/27/2000
+#
+# Select "surface data, daily" from the site:
+# http://www5.ncdc.noaa.gov:7777/plclimprod/plsql/poemain.poe 
+# select the state, then select "PRCP" "TMAX" and "TMIN" and UNselect
+# the "*ALL* ALL ELEMENTS" that will already be highlighted. Select the 
+# period of record to append to the data downloaded from the CDs
+# Select the first option for format: Delimited - No Station Names
+# and keep the default of comma delimited files.
+#
+# Requires the commandline argument of a file with the filenames 
+# of all of the raw data files for the parameter of interest. All
+# station filnames must have the common extensions as below:
+#
+#  Requires a commandline option file with filename roots, see below
+#  eg to create using the filename conventions given below
+#     $foreach input (*.dat.gz)
+#     $echo $input | sed 's/.dat.gz//'
+#     $end
+#
+#  Cat input station data files together and pipe thru prec_dly.awk
+#      -input data files are 'gzip'-ed (ie '*.gz')
+#      -input data files are of the form *.$EXT_DAT.gz
+#      -output to $DAT
+
+#test for command line arguments
+if(  $#argv != 1 ) then
+  echo 'Incorrect usage:'
+  echo 'preproc_append.scr <file>'
+  echo '<file> is the list of filenames without extensions'
+  echo 'see script or documentation for details'
+  exit
+else
+  set NCDC_LIST = $argv[1]
+  if ( ! -e $NCDC_LIST ) then
+    echo 'Command line file $NCDC_LIST does not exist'
+    exit
+  endif
+endif
+
+# INPUT FOR THIS SCRIPT#############################################
+
+# parameter: either "prcp", "tmax", or "tmin" (use lowercase)
+foreach PARAM ( prcp tmax tmin )
+# input filename extensions
+set EXT_DAT = dly
+# output filename
+set DAT =  ./append_$PARAM.daily
+
+# END OF INPUT FOR THIS SCRIPT######################################
+
+# select awk based on OS.
+switch ( $HOSTTYPE )
+  case "HP-UX"
+    set AWK = awk
+    breaksw
+  case "SunOS"
+    set AWK = nawk
+    breaksw
+  case "Linux"
+    set AWK = gawk
+    breaksw
+  case "FreeBSD"
+    set AWK = awk
+    breaksw
+  default
+    echo Unknown OS - using awk
+    set AWK = awk
+    breaksw
+endsw
+
+# check parameter for typos
+switch ( $PARAM )
+  case "prcp"
+    echo 'current parameter: prcp'
+    breaksw
+  case "tmax"
+    echo 'current parameter: tmax'
+    breaksw
+  case "tmin"
+    echo 'current parameter: tmin'
+    breaksw
+  default
+    echo 'Unknown parameter. Use prcp, tmax or tmin'
+    exit
+    breaksw
+endsw
+
+# test if output file exists
+if ( -e $DAT ) then
+  echo File exists $DAT
+  echo removing old file
+  \rm -f $DAT
+endif
+
+#files do not exist so create
+echo > $DAT
+# calculate # of lines in info files
+# and place in info outfile
+#foreach STATE ( `cat $NCDC_LIST` )
+#  @ sum += `wc $STATE.$EXT_INF | awk '{print $1}'`
+#end
+
+#echo $sum  > $INFO
+#echo "# of stations to be processed: " $sum
+
+#cycle thru and cat
+foreach STATE ( `cat  $NCDC_LIST` )
+  echo Processing data file: $STATE.$EXT_DAT.gz
+  if ( ! -e $STATE.$EXT_DAT.gz ) then
+    echo File $STATE.$EXT_DAT.gz does not exist
+    exit
+  endif
+
+gzip -d -c $STATE.$EXT_DAT.gz | \
+    $AWK -f preproc_append_$PARAM.AWK >> $DAT
+
+# above awk command:
+# First two records are column headers
+# locate position of year, month, coop-id in file -- fixed column widths
+#  in raw data
+#  yc = year_current, ic=id_current, lmo=last_month
+#  replace missing values with -99, else this info will be lost
+# print out 6 digit COOPID, YEAR, 366 values in inches/day
+
+end
+
+end

@@ -1,0 +1,25 @@
+#!/bin/csh -x
+
+#foreach type ( BulkDens.txt Silt.txt Ks.txt FieldCap.txt )
+#foreach type (WiltPoint)
+#foreach type ( sandclay10.txt sandclay150.txt)
+foreach type ( BulkDens.txt WaterN )
+
+echo 'process $type'
+
+#clipSoilVariable ../Output/$type ./$type
+
+end
+echo 'DONE!'
+
+exit
+
+#foreach type (soilclas.10.out soilclas.150.out)
+#clipSoilVariableClass ../Output/$type ./$type
+#end
+
+exit
+echo 'DONE!'
+
+
+

@@ -1,0 +1,20 @@
+#!/usr/local/bin/tcsh
+
+# Runs the make_lookup_table program
+
+set STA_INF = hly_prcp.inf
+set STA_DAT = hly_prcp.dat
+set OUT_HR  = hp_hour.lookup
+set OUT_DUR = hp_dur.lookup
+set SEAS_FLG = 1
+# SEAS_FLG of 1 results in output by season rather than for each month
+
+# In program output files are opened in append mode only
+# clobber old files here
+echo >! $OUT_HR
+echo >! $OUT_DUR
+
+# echo command line arguments for input to debugger
+echo make_lookup_table $STA_INF $STA_DAT $OUT_HR $OUT_DUR $SEAS_FLG
+
+make_lookup_table $STA_INF $STA_DAT $OUT_HR $OUT_DUR $SEAS_FLG

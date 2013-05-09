@@ -1,0 +1,18 @@
+#!/bin/csh -x
+#Nathalie Voisin
+# script to remove the carriage return in the srf files
+
+if($#argv == 1) then
+  set dir = ${argv[1]}
+else
+echo "ERROR- need location of files"
+exit
+endif
+
+ls $dir/*.srf > list.srf
+foreach file ( `cat list.srf` )
+  set outfile = $file:r.txt
+  sed -e 's/.$//' $file > $outfile
+end
+rm list.srf
+   

@@ -1,0 +1,28 @@
+#!/bin/csh -x
+
+# make Ks.txt, porosity.txt, fieldCap.txt and WiltPint.txt, and b.txt, each with 3 columns for each soil layer, 
+#based on the created para_hydro.txt
+
+set param = ( Ks porosity FieldCap WiltPoint)
+set X=1
+set file1 = ./Output/para_hydro.10.txt
+set file2 = ./Output/para_hydro.150.txt
+
+while ($X<5)
+awk '{ print $'$X' }' $file1 > toplayer
+awk '{ print $'$X' }' $file2 > deeplayer
+paste toplayer deeplayer deeplayer > Output/$param[$X].txt
+paste toplayer deeplayer deeplayer > $param[$X].txt
+\rm toplayer
+\rm deeplayer
+@ X++
+end
+
+####################
+# create BulkDens.txt from the soil program
+paste Work/BulkDens10.txt Work/BulkDens150.txt Work/BulkDens150.txt >! BulkDens.txt
+
+# create WaterN from the soil program
+paste Work/WaterN10.txt Work/WaterN150.txt Work/WaterN150.txt >! Output/WaterN.txt
+
+exit

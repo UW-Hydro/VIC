@@ -1,0 +1,41 @@
+#!/usr/local/bin/tcsh
+
+# Runs the dissag_prec program
+# operates on all data_<lat>_<lon> files in IN_DIR
+# output is a second set of data_<lat>_<lon> files in OUT_DIR
+# containing only disaggregated precipitation
+# The code is fixed to four column binary (short int) or ascii
+#  forcing files with a define statement. For ascii, PMULT is ignored.
+
+set STA_INF = hly_prcp.inf
+set S_LOOKUP = hp_hour.lookup
+set D_LOOKUP = hp_dur.lookup
+set IN_DIR = /home/edm/mo_met/forcing/
+set OUT_DIR = /home/edm/mo_met/forcing/disag_p/
+set DISAG_HR = 3
+set SEAS_FLG = 1
+set PMULT = 40
+set ST_YR = 1949
+set ST_MO = 1
+
+#Description of input variables:
+#STA_INF      station information file
+#S_LOOKUP     lookup file of hourly rainfall occurence probability
+#D_LOOKUP     lookup file of hourly duration probability
+#IN_DIR       location of the VIC forcing data_<lat>_<lon> files
+#OUT_DIR      loction into which new data_<lat>_<lon> files
+#SEAS_FLG     A value of 1 results indicates the lookup tables were created 
+#                 by seasonal statistics rather than by month
+#PMULT        Multiplier for binary precipitation values in VIC forcing files
+#ST_YR        Year forcing files start
+#ST_MO        Month forcing files start
+
+#create input file list
+ls -1 $IN_DIR | grep data_ | awk '{printf("'$IN_DIR'%s\n",$0)}' >! flist
+
+# echo command line arguments for input to debugger
+echo disagg_prec $STA_INF $S_LOOKUP $D_LOOKUP $OUT_DIR flist $DISAG_HR $SEAS_FLG $PMULT $ST_YR $ST_MO
+
+disagg_prec $STA_INF $S_LOOKUP $D_LOOKUP $OUT_DIR flist $DISAG_HR $SEAS_FLG $PMULT $ST_YR $ST_MO
+
+#/bin/rm -f flist

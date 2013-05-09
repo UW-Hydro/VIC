@@ -1,0 +1,14 @@
+#!/bin/csh -x
+
+# Runs the vicinput program
+
+set prcp     =    ../prcp/append_prcp.rsc
+set tmax     =    ../append_tmax.grd1
+set tmin     =    ../append_tmin.grd1
+set e_msk    =    ../east_dem.asc
+set out_dir  =    ../../temp_met/
+set binflag  =    1
+
+vicinput $prcp $tmax $tmin $e_msk $out_dir $binflag
+
+# binflag=1 means input and output are in 2-byte (signed) binary format

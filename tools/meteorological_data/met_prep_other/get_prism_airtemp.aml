@@ -1,0 +1,89 @@
+/* BVM Feb 1999
+/* Script used to calculate airtemp PRISM monthly means in each gridcell
+/* output from this script will be used to scale airtemp data.
+
+
+&type Welcome to get_prism_airtemp.aml
+&type How are you today [username] ?
+&type
+
+
+&setvar ascend := [response 'Name of ascend_mask file ?']
+&setvar indir := [response 'Name of directory to prism-raw data ?']
+
+
+/*&setvar ascend := /nfs/norway/home/tempbvm/cbr8/metdata/tmax/ascend_mask.txt
+/*&setvar indir := ./raw-prism/us_tmax_
+
+&setvar CLASSES := 12
+
+/* Import asciigrid to ArcInfo. This file is produced with 
+/* the program ascend.c. 
+arc asciigrid %ascend% asc1 int
+zonefile  = resample(asc1,0.041666)
+/* PRISM resolution is 0.0416666
+
+asc2 = con(asc1 > 0,1,0)
+
+pasc1 = gridpoly(asc2,0.00)
+arc clean pasc1
+
+
+&do i := 1 &to %CLASSES% &by 1
+/* Make filenames
+&if %i% <= 9 &then 
+  &do 
+  &setvar null1 := 0
+  &setvar tmpdir = %indir%%null1%
+  &setvar infile = %tmpdir%%i%
+  &end
+
+&if %i% >= 10 &then 
+  &do 
+  &setvar infile = %indir%%i%
+  &end
+&type %infile%
+
+/* Import PRISM data and then calc zonalmeans
+arc asciigrid %infile% raw%i% float 
+
+prism%i% = setnull(raw%i% == -999,raw%i%) 
+
+kill raw%i%
+gridclip prism%i% clip%i% COVER pasc1
+kill prism%i% all
+
+/* Data are in tens of Farenheit 
+format%i% =  (((clip%i% / 10) - 32) / 9) * 5 
+
+kill clip%i% all
+zmean%i% = zonalmean(zonefile,format%i%,data)
+kill format%i% all
+
+res%i% = resample(zmean%i%,0.125,nearest)
+kill zmean%i% all
+
+/* Export final asciigridded files to UNIX
+arc gridascii res%i% prism_month%i%.asc
+kill res%i% all
+
+
+/* END LOOP
+&end
+
+
+/* kill rest of files that will not be used again
+kill asc1 all
+kill asc2 all
+kill zonefile all 
+kill pasc1 all
+
+
+
+
+
+
+
+
+
+

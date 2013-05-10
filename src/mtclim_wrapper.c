@@ -242,7 +242,7 @@ void mtclim_to_vic(double hour_offset,
     // tiny_radfrac = fraction of total daily sw falling in each SRADDT interval
     // hourlyrad = SW flux (W/m2) over each hour = total_daily_sw * sum_over_hour(tiny_radfract) / 3600
     //                                           = tmp_rad * sum_over_hour(tiny_radfract)
-    tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
+    tmp_rad = mtclim_data->s_srad[i] * 24.;//mtclim_data->s_dayl[i] / 3600.;
     for (j = 0; j < 24; j++) {
       hourlyrad[i*24+j] = 0;
       for (k = 0; k < tinystepsphour; k++) {

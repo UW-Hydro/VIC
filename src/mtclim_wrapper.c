@@ -242,7 +242,15 @@ void mtclim_to_vic(double hour_offset,
     // tiny_radfrac = fraction of total daily sw falling in each SRADDT interval
     // hourlyrad = SW flux (W/m2) over each hour = total_daily_sw * sum_over_hour(tiny_radfract) / 3600
     //                                           = tmp_rad * sum_over_hour(tiny_radfract)
-    tmp_rad = mtclim_data->s_srad[i] * 24.;//mtclim_data->s_dayl[i] / 3600.;
+
+    //if radiation read from input file, assume it's a 24 hours average, 
+    //else (i.e., MTCLIM calculated), assume it's a daylight period average
+    if (ctrl->insw) {
+      tmp_rad = mtclim_data->s_srad[i] * 24.;
+    }
+    else {
+      tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
+    }    
     for (j = 0; j < 24; j++) {
       hourlyrad[i*24+j] = 0;
       for (k = 0; k < tinystepsphour; k++) {

@@ -82,10 +82,12 @@ void calc_root_fractions(veg_con_struct  *veg_con,
       if(Zsum + Zstep < Lsum) {
 	Zsum += Zstep;
 	zone ++;
+	Zstep = (double)veg_con[veg].zone_depth[zone];
       }
       else if(Zsum + Zstep == Lsum) {
 	Zsum += Zstep;
 	zone ++;
+	Zstep = (double)veg_con[veg].zone_depth[zone];
 	if(layer<options.Nlayer) {
 	  veg_con[veg].root[layer] = sum_fract;
 	  sum_fract = 0.;
@@ -96,7 +98,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 	  Lsum  += Lstep;
 	}
 	else if(layer==options.Nlayer) {
-	  Lstep  = Zsum + (double)veg_con[veg].zone_depth[zone] - Lsum;
+	  Lstep  = Zsum + Zstep - Lsum;
 	  if(zone<options.ROOT_ZONES-1) {
 	    for(i=zone+1;i<options.ROOT_ZONES;i++) {
 	      Lstep += veg_con[veg].zone_depth[i];
@@ -116,7 +118,7 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 	  Lsum  += Lstep;
 	}
 	else if(layer==options.Nlayer) {
-	  Lstep  = Zsum + (double)veg_con[veg].zone_depth[zone] - Lsum;
+	  Lstep  = Zsum + Zstep - Lsum;
 	  if(zone<options.ROOT_ZONES-1) {
 	    for(i=zone+1;i<options.ROOT_ZONES;i++) {
 	      Lstep += veg_con[veg].zone_depth[i];

@@ -82,10 +82,12 @@ void calc_root_fractions(veg_con_struct  *veg_con,
       if(Zsum + Zstep < Lsum) {
 	Zsum += Zstep;
 	zone ++;
+	Zstep = (double)veg_con[veg].zone_depth[zone];
       }
       else if(Zsum + Zstep == Lsum) {
 	Zsum += Zstep;
 	zone ++;
+	Zstep = (double)veg_con[veg].zone_depth[zone];
 	if(layer<options.Nlayer) {
 	  veg_con[veg].root[layer] = sum_fract;
 	  sum_fract = 0.;

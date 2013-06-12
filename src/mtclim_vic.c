@@ -1168,7 +1168,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     data->s_potrad[i] = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
     if (ctrl->insw) {
       if (data->s_potrad[i]>0 && data->s_srad[i]>0 && daylength[yday]>0) {
-	data->s_tfmax[i] = (data->s_srad[i]*HOURSPERDAY/daylength[yday])/(data->s_potrad[i]*t_tmax);
+	data->s_tfmax[i] = (data->s_srad[i]*SECPHOUR*HOURSPERDAY/daylength[yday])/(data->s_potrad[i]*t_tmax);
 	if (data->s_tfmax[i] > 1.0) data->s_tfmax[i] = 1.0;
       }
       else {

@@ -1205,7 +1205,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   } // end if VP not supplied
 
-  if if ((!param_set.TYPE[VP].SUPPLIED || param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) && param_set.TYPE[PRESSURE].SUPPLIED ) {
+  if if ((!param_set.TYPE[VP].SUPPLIED || param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) &&  !(!param_set.TYPE[PRESSURE].SUPPLIED && param_set.TYPE[QAIR].SUPPLIED)) {
 
     /**************************************************
       Either no observations of VP, QAIR, or REL_HUMID were supplied,

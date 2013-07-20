@@ -28,6 +28,8 @@
 	      every non-leap year.  At high latitudes this resulted in
 	      substantial errors in the diurnal cycle after 20-30 years
 	      of simulation.  This has been fixed.			TJB
+  2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
+	      is supplied by the user.					HFC via TJB
 
 *******************************************************************************/
 /******************************************************************************/

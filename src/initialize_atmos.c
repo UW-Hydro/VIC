@@ -1171,12 +1171,16 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   } // end if VP not supplied
 
-  if (!param_set.TYPE[VP].SUPPLIED || param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) {
+  if if ((!param_set.TYPE[VP].SUPPLIED || param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED-1] == 24) &&  !(!param_set.TYPE[PRESSURE].SUPPLIED && param_set.TYPE[QAIR].SUPPLIED)) {
 
     /**************************************************
       Either no observations of VP, QAIR, or REL_HUMID were supplied,
       in which case we will use MTCLIM's estimates of daily vapor pressure,
       or daily VP was supplied.
+      If daily QAIR is supplied, but daily pressure is not, then subdaily 
+      vapor pressure is not calculated here since it's already calculated 
+      using internally computed subdaily pressure based on air temperature 
+      and elevation.
       Now, calculate subdaily vapor pressure 
     **************************************************/
 

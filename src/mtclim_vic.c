@@ -46,6 +46,8 @@
   2012-Apr-03 Added check to make sure t_tmax is always positive.		TJB
   2012-Apr-13 Simplified the relationship between tskc and tfmax for LW_CLOUD
 	      == LW_CLOUD_DEARDORFF.						TJB
+  2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
+	      is supplied by the user.						HFC via TJB
 */
 
 /*

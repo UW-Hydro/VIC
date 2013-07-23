@@ -46,6 +46,8 @@
   2012-Apr-03 Added check to make sure t_tmax is always positive.		TJB
   2012-Apr-13 Simplified the relationship between tskc and tfmax for LW_CLOUD
 	      == LW_CLOUD_DEARDORFF.						TJB
+  2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
+	      is supplied by the user.						HFC via TJB
 */
 
 /*
@@ -1168,7 +1170,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     data->s_potrad[i] = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
     if (ctrl->insw) {
       if (data->s_potrad[i]>0 && data->s_srad[i]>0 && daylength[yday]>0) {
-	data->s_tfmax[i] = (data->s_srad[i]*HOURSPERDAY/daylength[yday])/(data->s_potrad[i]*t_tmax);
+	data->s_tfmax[i] = (data->s_srad[i]*SECPHOUR*HOURSPERDAY/daylength[yday])/(data->s_potrad[i]*t_tmax);
 	if (data->s_tfmax[i] > 1.0) data->s_tfmax[i] = 1.0;
       }
       else {

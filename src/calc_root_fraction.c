@@ -15,6 +15,9 @@ void calc_root_fractions(veg_con_struct  *veg_con,
   file.  Roots are assumed to be linearly distributed within each
   root zone.
 
+  Modifications:
+  2013-Jul-19 Fix for infinite loop that occurs when the total of root zone dephs exceeds the total
+	      soil depth and one of the root zone boundaries coincides with a soil layer boundary.	HFC via TJB
 **********************************************************************/
 {
   extern option_struct options;

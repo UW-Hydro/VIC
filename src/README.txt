@@ -26,6 +26,48 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.g *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed errors in forcing disaggregation under certain input cases.
+
+	Files Affected:
+
+	initialize_atmos.c
+	mtclim_vic.c
+	mtclim_wrapper.c
+
+	Description:
+
+	Fixed bugs in the following cases:
+	1. User supplied daily incoming shortwave (not sub-daily)
+	2. User supplied daily specific or relative humidity without supplying
+	   average daily pressure or temperature, respectively (with which to
+	   convert these to daily vapor pressure).
+
+
+
+
+Fixed bug in root zone calculation.
+
+	Files Affected:
+
+	calc_root_fraction.c
+
+	Description:
+
+	Fixed infinite loop that was occurring when the total  of root zone
+	depths exceeded the total soil depth and one of the root zone boundaries
+	coincided with a soil layer boundary.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.g to VIC 4.1.2.f *****
 --------------------------------------------------------------------------------
 

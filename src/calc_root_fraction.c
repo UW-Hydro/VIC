@@ -16,8 +16,9 @@ void calc_root_fractions(veg_con_struct  *veg_con,
   root zone.
 
   Modifications:
-  2013-Jul-19 Fix for infinite loop that occurs when the total of root zone dephs exceeds the total
+  2013-Jul-19 Fix for infinite loop that occurs when the total of root zone depths exceeds the total
 	      soil depth and one of the root zone boundaries coincides with a soil layer boundary.	HFC via TJB
+  2013-Jul-26 Fix to previous fix, avoids overstepping bounds of zone_depth[] array.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -85,12 +86,10 @@ void calc_root_fractions(veg_con_struct  *veg_con,
       if(Zsum + Zstep < Lsum) {
 	Zsum += Zstep;
 	zone ++;
-	Zstep = (double)veg_con[veg].zone_depth[zone];
       }
       else if(Zsum + Zstep == Lsum) {
 	Zsum += Zstep;
 	zone ++;
-	Zstep = (double)veg_con[veg].zone_depth[zone];
 	if(layer<options.Nlayer) {
 	  veg_con[veg].root[layer] = sum_fract;
 	  sum_fract = 0.;
@@ -100,7 +99,8 @@ void calc_root_fractions(veg_con_struct  *veg_con,
 	  Lstep  = soil_con->depth[layer];
 	  Lsum  += Lstep;
 	}
-	else if(layer==options.Nlayer) {
+	else if(layer==options.Nlayer && zone < options.ROOT_ZONES) {
+	  Zstep = (double)veg_con[veg].zone_depth[zone];
 	  Lstep  = Zsum + Zstep - Lsum;
 	  if(zone<options.ROOT_ZONES-1) {
 	    for(i=zone+1;i<options.ROOT_ZONES;i++) {

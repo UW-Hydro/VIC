@@ -115,6 +115,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
 	      IMPLICIT=FALSE).						TJB
+  2013-Jul-30 Moved computation of tmp_moist argument of
+	      compute_runoff_and_asat() so that it would always be
+	      initialized.						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -377,7 +380,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
               cell[dist][veg][band].layer[lidx].ice *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
 #endif
               cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
-              tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
 	    }
 
 #if SPATIAL_FROST
@@ -389,6 +391,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
             if (cell[dist][veg][band].layer[lidx].ice > cell[dist][veg][band].layer[lidx].moist)
               cell[dist][veg][band].layer[lidx].ice = cell[dist][veg][band].layer[lidx].moist;
 #endif
+            tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
 
 	  }
           compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);

@@ -33,6 +33,23 @@ Usage:
 Bug Fixes:
 ----------
 
+Fixed use of uninitialized soil moisture values on first time step.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	The tmp_moist array, used in initialize_model_state() as an input to
+	compute_runoff_and_asat(), was initialized within an if statement that
+	caused it to be sent to compute_runoff_and_asat() without initialization
+	in some cases.  This has been fixed by moving the initialization of
+	tmp_moist outside the if statement.
+
+
+
+
 Fixed errors in forcing disaggregation under certain input cases.
 
 	Files Affected:

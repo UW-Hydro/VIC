@@ -392,7 +392,7 @@ void transpiration(layer_data_struct *layer,
     gsm_inv=1.0;
 
     /* compute whole-canopy stomatal resistance */
-    if (options.RC_MODE == RC_JARVIS) {
+    if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
       /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
       *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
 		   veg_lib[veg_class].RGL, air_temp, vpd,

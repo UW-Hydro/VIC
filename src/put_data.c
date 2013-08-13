@@ -148,6 +148,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      in the canopy to Tfoliage (canopy snow temperature) instead
 	      of Tcanopy (canopy air temperature).			CL via TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
+  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, OUT_APAR.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -205,6 +206,12 @@ int  put_data(dist_prcp_struct  *prcp,
   lake_var_struct         lake_var;
   snow_data_struct      **snow;
   veg_var_struct       ***veg_var;
+
+  cell    = prcp->cell;
+  energy  = prcp->energy;
+  lake_var = prcp->lake_var;
+  snow    = prcp->snow;
+  veg_var = prcp->veg_var;
 
   AboveTreeLine = soil_con->AboveTreeLine;
   AreaFract = soil_con->AreaFract;
@@ -290,12 +297,6 @@ int  put_data(dist_prcp_struct  *prcp,
   out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
  
-  cell    = prcp->cell;
-  energy  = prcp->energy;
-  lake_var = prcp->lake_var;
-  snow    = prcp->snow;
-  veg_var = prcp->veg_var;
-
   /****************************************
     Store Output for all Vegetation Types (except lakes)
   ****************************************/
@@ -980,6 +981,18 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record snow cover fraction **/
   out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
+
+  /*****************************
+    Record Carbon Cycling Variables 
+  *****************************/
+  if (options.CARBON) {
+
+    out_data[OUT_GPP].data[0] += veg_var.GPP * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_RAUT].data[0] += veg_var.Raut * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_NPP].data[0] += veg_var.NPP * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_APAR].data[0] += veg_var.aPAR * AreaFactor;
+
+  }
 
 }
 

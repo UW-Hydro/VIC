@@ -45,6 +45,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Jul-25 Added photosynthesis parameters.				TJB
 **********************************************************************/
 {
 
@@ -66,6 +67,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   char            *token;
   char            *vegarr[500];
   size_t	  length;
+  int             cidx;
 
   if(options.VEGPARAM_LAI) skip=2;
   else skip=1;
@@ -113,6 +115,15 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     temp[i].zone_depth = calloc(options.ROOT_ZONES,sizeof(float));
     temp[i].zone_fract = calloc(options.ROOT_ZONES,sizeof(float));
     temp[i].vegetat_type_num = vegetat_type_num;
+
+    /* Upper boundaries of canopy layers, expressed in terms of fraction of total LAI  */
+    if (options.CARBON) {
+      temp[i].CanopLayerBnd = calloc(options.Ncanopy,sizeof(double));
+      for (cidx=0; cidx<options.Ncanopy; cidx++) {
+        /* apportion LAI equally among layers */
+        temp[i].CanopLayerBnd[cidx] = (double)((cidx+1))/(double)(options.Ncanopy);
+      }
+    }
 
     // Read the root zones line
     if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
@@ -231,9 +242,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
             sprintf(ErrStr,"ERROR: cell %d, veg tile %d: the specified veg class (%d) is listed as an overstory class in the veg LIBRARY, but the LAI given in the veg PARAM FILE for this tile for month %d is 0.\n",gridcel, i+1, temp[i].veg_class+1, j+1);
             nrerror(ErrStr);
           }
-          veg_lib[temp[i].veg_class].Wdmax[j] = 
-	    LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
         }
+        veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
       }
       for(k=0; k<Nfields; k++)
         free(vegarr[k]);

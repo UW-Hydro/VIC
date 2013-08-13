@@ -56,6 +56,8 @@ double solve_snow(char                 overstory,
 		  int                  hidx,
 		  int                  veg_class,
 		  int                 *UnderStory,
+		  double              *CanopLayerBnd,
+		  double              *dryFrac,
 		  dmy_struct          *dmy,
 		  atmos_data_struct   *atmos,
 		  energy_bal_struct   *energy,
@@ -130,6 +132,7 @@ double solve_snow(char                 overstory,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 *********************************************************************/
 
   extern option_struct   options;
@@ -271,7 +274,8 @@ double solve_snow(char                 overstory,
                        &energy->Tfoliage_fbcount, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
 		       ref_height, roughness, root, *UnderStory, band, 
-		       hour, iveg, month, rec, hidx, veg_class, atmos, 
+		       hour, iveg, month, rec, hidx, veg_class,
+		       CanopLayerBnd, dryFrac, atmos,
 		       layer_dry, layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
 

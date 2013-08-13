@@ -106,6 +106,7 @@ int  full_energy(char                 NEWCELL,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
 	      totals.								TJB
+  2013-Jul-25 Added photosynthesis terms.					TJB
 
 **********************************************************************/
 {
@@ -164,6 +165,7 @@ int  full_energy(char                 NEWCELL,
   double                 oldsnow;
   double                 snowprec;
   double                 rainprec;
+  int                    cidx;
   lake_var_struct       *lake_var;
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -314,6 +316,15 @@ int  full_energy(char                 NEWCELL,
       /** Define vegetation class number **/
       veg_class = veg_con[iveg].veg_class;
 
+      /** Initialize other veg vars **/
+      if (iveg < Nveg) {
+        for (dist=0; dist<Ndist; dist++) {
+	  for(band=0; band<Nbands; band++) {
+            veg_var[dist][iveg][band].rc = HUGE_RESIST;
+          }
+        }
+      }
+
       /** Assign wind_h **/
       /** Note: this is ignored below **/
       wind_h = veg_lib[veg_class].wind_h;
@@ -387,6 +398,34 @@ int  full_energy(char                 NEWCELL,
       }
 
       /******************************
+        Compute nitrogen scaling factors and initialize other veg vars
+      ******************************/
+      if (options.CARBON && iveg < Nveg) {
+        for (dist=0; dist<Ndist; dist++) {
+	  for(band=0; band<Nbands; band++) {
+            for (cidx=0; cidx<options.Ncanopy; cidx++) {
+              veg_var[dist][iveg][band].rsLayer[cidx] = HUGE_RESIST;
+            }
+            veg_var[dist][iveg][band].aPAR = 0;
+          }
+        }
+        if (dmy[rec].hour == 0) {
+          for (dist=0; dist<Ndist; dist++) {
+	    for(band=0; band<Nbands; band++) {
+              calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
+                                  veg_con[iveg].CanopLayerBnd,
+                                  veg_lib[veg_class].LAI[dmy[rec].month-1],
+                                  soil_con->lat,
+                                  soil_con->lng,
+                                  soil_con->time_zone_lng,
+                                  dmy[rec],
+                                  veg_var[dist][iveg][band].NscaleFactor);
+            }
+          }
+        }
+      }
+
+      /******************************
         Solve ground surface fluxes 
       ******************************/
   
@@ -422,7 +461,7 @@ int  full_energy(char                 NEWCELL,
 				     &(cell[WET][iveg][band]),
 				     &(snow[iveg][band]), 
 				     soil_con, dry_veg_var, wet_veg_var, 
-				     lag_one, sigma_slope, fetch);
+				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
 	  
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
 	  

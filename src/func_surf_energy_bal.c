@@ -107,6 +107,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      node distribution to be over the same control volume as for
 	      the linear node distribution and quick flux cases.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -149,6 +150,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double max_moist;
   double moist;
 
+  double *Wmax;
   double *Wcr;
   double *Wpwp;
   double *depth;
@@ -161,6 +163,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *organic;
 
   float *root;
+  double *CanopLayerBnd;
 
   /* meteorological forcing terms */
   int UnderStory;
@@ -180,6 +183,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double surf_atten;
   double vp;
   double vpd;
+  double shortwave;
+  double Catm;
+  double *dryFrac;
 
   double *Wdew;
   double *displacement;
@@ -332,6 +338,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   moist                   = (double) va_arg(ap, double);
 
   root                    = (float  *) va_arg(ap, float  *);
+  CanopLayerBnd           = (double *) va_arg(ap, double *);
 
   /* meteorological forcing terms */
   UnderStory              = (int) va_arg(ap, int);
@@ -350,6 +357,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
+  shortwave               = (double) va_arg(ap, double);
+  Catm                    = (double) va_arg(ap, double);
+  dryFrac                 = (double *) va_arg(ap, double *);
 
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
@@ -431,6 +441,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /* take additional variables from soil_con structure */
   b_infilt = soil_con->b_infilt;
   max_infil = soil_con->max_infil;
+  Wmax = soil_con->max_moist;
   Wcr = soil_con->Wcr;
   Wpwp = soil_con->Wpwp;
   depth = soil_con->depth;
@@ -735,11 +746,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
 		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
-		       elevation, rainfall, depth, Wcr, Wpwp, 
+		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, 
 #if SPATIAL_FROST
 		       frost_fract,
 #endif // SPATIAL_FROST
-		       root);
+		       root, dryFrac, shortwave, Catm, CanopLayerBnd);
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 

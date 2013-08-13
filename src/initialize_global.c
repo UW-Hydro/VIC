@@ -122,6 +122,7 @@ void initialize_global() {
 	      used value.							TJB
   2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
 	      for LW_TYPE to LW_PRATA.						TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -135,6 +136,7 @@ void initialize_global() {
   options.AboveTreelineVeg      = -1;
   options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
+  options.CARBON                = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
@@ -151,6 +153,7 @@ void initialize_global() {
   options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;
   options.MTCLIM_SWE_CORR       = FALSE;
+  options.Ncanopy               = 3;
   options.Nlayer                = 3;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
@@ -158,7 +161,9 @@ void initialize_global() {
   options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;
+  options.RC_MODE               = RC_JARVIS;
   options.ROOT_ZONES            = MISSING;
+  options.SHARE_LAYER_MOIST     = TRUE;
   options.SNOW_ALBEDO           = USACE;
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
@@ -173,6 +178,7 @@ void initialize_global() {
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;
   options.ORGANIC_FRACT         = FALSE;
+  options.VEGLIB_PHOTO          = FALSE;
   options.VEGPARAM_LAI          = FALSE;
   options.LAI_SRC               = LAI_FROM_VEGLIB;
   // state options

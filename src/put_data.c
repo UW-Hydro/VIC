@@ -147,6 +147,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      error.  Corrected the setting of rad_temp when there is snow
 	      in the canopy to Tfoliage (canopy snow temperature) instead
 	      of Tcanopy (canopy air temperature).			CL via TJB
+  2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -267,8 +268,12 @@ int  put_data(dist_prcp_struct  *prcp,
 
   // Set output versions of input forcings
   out_data[OUT_AIR_TEMP].data[0]  = atmos->air_temp[NR];
+  out_data[OUT_CATM].data[0]      = atmos->Catm[NR]*1e6;
+  out_data[OUT_COSZEN].data[0]    = atmos->coszen[NR];
   out_data[OUT_DENSITY].data[0]   = atmos->density[NR];
+  out_data[OUT_FDIR].data[0]      = atmos->fdir[NR];
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
+  out_data[OUT_PAR].data[0]       = atmos->par[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec; // mm over grid cell
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR]/kPa2Pa;
   out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];

@@ -26,12 +26,83 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes between VIC 4.1.2_wet and VIC 4.1.2.h *****
+--------------------------------------------------------------------------------
+
+New Features:
+-------------
+
+New forcing variables.
+
+	Files Affected:
+
+	alloc_atmos.c
+	compute_coszen.c (new)
+	get_force_type.c
+	initialize_atmos.c
+	Makefile
+	mtclim_constants_vic.h
+	mtclim_vic.c
+	mtclim_wrapper.c
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+	vicNl.h
+	write_forcing_file.c
+
+	Description:
+
+	Added the following new input forcing variables (used for simulations
+	of carbon cycle processes):
+	  CATM: Atmospheric CO2 mixing ratio [ppm]
+	  FDIR: Fraction of incoming shortwave that is direct [fraction]
+	  PAR:  Photosynthetically active radiation [W/m2]
+
+	These variables are optional; if not supplied as forcings, VIC will use
+	default values for them, as follows:
+	  CATM: Value of CatmCurrent defined in vicNl_def.h
+	  FDIR: Value computed by MTCLIM module
+	  PAR:  SHORTWAVE*SW2PAR, with SW2PAR defined in vicNl_def.h
+
+	Similarly, added the following new output variables:
+	  OUT_CATM:   (equals CATM)
+	  OUT_COSZEN: Cosine of the solar zenith angle, computed by MTCLIM module
+	  OUT_FDIR:   (equals FDIR)
+	  OUT_PAR:    (equals PAR)
+
+
+
+
+Bug Fixes:
+----------
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.g *****
 --------------------------------------------------------------------------------
 
 
 Bug Fixes:
 ----------
+
+Fixed use of uninitialized soil moisture values on first time step.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	The tmp_moist array, used in initialize_model_state() as an input to
+	compute_runoff_and_asat(), was initialized within an if statement that
+	caused it to be sent to compute_runoff_and_asat() without initialization
+	in some cases.  This has been fixed by moving the initialization of
+	tmp_moist outside the if statement.
+
+
+
 
 Fixed errors in forcing disaggregation under certain input cases.
 

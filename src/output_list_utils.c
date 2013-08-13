@@ -59,6 +59,7 @@ out_data_struct *create_output_list() {
   2011-Nov-04 Added OUT_TSKC.						TJB
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
 *************************************************************/
 
   extern option_struct options;
@@ -197,8 +198,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_AERO_RESIST1].varname,"OUT_AERO_RESIST1");       /* surface aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AERO_RESIST2].varname,"OUT_AERO_RESIST2");       /* overstory aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AIR_TEMP].varname,"OUT_AIR_TEMP");               /* air temperature [C] */
+  strcpy(out_data[OUT_CATM].varname,"OUT_CATM");                       /* atmospheric CO2 concentration [ppm] */
+  strcpy(out_data[OUT_COSZEN].varname,"OUT_COSZEN");                   /* cosine of solar zenith angle [fraction] */
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
+  strcpy(out_data[OUT_FDIR].varname,"OUT_FDIR");                       /* fraction of incoming shortwave that is direct [fraction] */
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */
+  strcpy(out_data[OUT_PAR].varname,"OUT_PAR");                         /* incoming photosynthetically active radiation [W/m2] */
   strcpy(out_data[OUT_PRESSURE].varname,"OUT_PRESSURE");               /* near surface atmospheric pressure [kPa] */
   strcpy(out_data[OUT_QAIR].varname,"OUT_QAIR");                       /* specific humidity [kg/kg] */
   strcpy(out_data[OUT_REL_HUMID].varname,"OUT_REL_HUMID");             /* relative humidity [fraction]*/

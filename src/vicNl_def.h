@@ -126,6 +126,8 @@
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
+  2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
+	      OUT_FDIR, and OUT_PAR.					TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -251,6 +253,7 @@ extern char ref_veg_ref_crop[];
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
 #define Rd           287        /* Gas constant of dry air (J/degC*kg) */
+#define Rgas         8.3143     /* [m3 Pa mol-1 K-1] universal gas law constant */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */
 #define kPa2Pa 1000.            /* converts kPa to Pa */
@@ -269,6 +272,12 @@ extern char ref_veg_ref_crop[];
 				   (Handbook of Hydrology) */
 #define PS_PM 101300		/* sea level air pressure in Pa */
 #define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
+
+/***** Carbon Cycling constants *****/
+
+#define CatmCurrent  383       /* Current global atmospheric CO2 mixing ratio (ppm) */
+#define SW2PAR       0.45      /* Empirical ratio of PAR [W/m2] to SHORTWAVE
+                                 [W/m2] from Lopez et al., 2001 */
 
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
@@ -309,31 +318,34 @@ extern char ref_veg_ref_crop[];
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 24
+#define N_FORCING_TYPES 27
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
-#define CHANNEL_IN 2 /* incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
-#define CRAINF     3 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
-#define CSNOWF     4 /* convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
-#define DENSITY    5 /* atmospheric density [kg/m3] */
-#define LONGWAVE   6 /* incoming longwave radiation [W/m2] */
-#define LSRAINF    7 /* large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
-#define LSSNOWF    8 /* large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
-#define PREC       9 /* total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
-#define PRESSURE  10 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
-#define QAIR      11 /* specific humidity [kg/kg] */
-#define RAINF     12 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define REL_HUMID 13 /* relative humidity [fraction] */
-#define SHORTWAVE 14 /* incoming shortwave [W/m2] */
-#define SNOWF     15 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define TMAX      16 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
-#define TMIN      17 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
-#define TSKC      18 /* cloud cover fraction [fraction] */
-#define VP        19 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
-#define WIND      20 /* wind speed [m/s] */
-#define WIND_E    21 /* zonal component of wind speed [m/s] */
-#define WIND_N    22 /* meridional component of wind speed [m/s] */
-#define SKIP      23 /* place holder for unused data columns */
+#define CATM       2 /* atmospheric CO2 concentration [ppm] */
+#define CHANNEL_IN 3 /* incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
+#define CRAINF     4 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define CSNOWF     5 /* convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define DENSITY    6 /* atmospheric density [kg/m3] */
+#define FDIR       7 /* fraction of incoming shortwave that is direct [fraction] */
+#define LONGWAVE   8 /* incoming longwave radiation [W/m2] */
+#define LSRAINF    9 /* large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define LSSNOWF   10 /* large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define PAR       11 /* incoming photosynthetically active radiation [W/m2] */
+#define PREC      12 /* total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
+#define PRESSURE  13 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define QAIR      14 /* specific humidity [kg/kg] */
+#define RAINF     15 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define REL_HUMID 16 /* relative humidity [fraction] */
+#define SHORTWAVE 17 /* incoming shortwave [W/m2] */
+#define SNOWF     18 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define TMAX      19 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TMIN      20 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TSKC      21 /* cloud cover fraction [fraction] */
+#define VP        22 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define WIND      23 /* wind speed [m/s] */
+#define WIND_E    24 /* zonal component of wind speed [m/s] */
+#define WIND_N    25 /* meridional component of wind speed [m/s] */
+#define SKIP      26 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 160
@@ -461,45 +473,49 @@ extern char ref_veg_ref_crop[];
 #define OUT_AERO_RESIST1   116  /* surface aerodynamic resistance [s/m] */
 #define OUT_AERO_RESIST2   117  /* overstory aerodynamic resistance [s/m] */
 #define OUT_AIR_TEMP       118  /* air temperature [C] (ALMA_OUTPUT: [K])*/
-#define OUT_DENSITY        119  /* near-surface atmospheric density [kg/m3]*/
-#define OUT_LONGWAVE       120  /* incoming longwave [W/m2] */
-#define OUT_PRESSURE       121  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
-#define OUT_QAIR           122  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID      123  /* relative humidity [fraction]*/
-#define OUT_SHORTWAVE      124  /* incoming shortwave [W/m2] */
-#define OUT_SURF_COND      125  /* surface conductance [m/s] */
-#define OUT_TSKC           126  /* cloud cover fraction [fraction] */
-#define OUT_VP             127  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            128  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           129  /* near surface wind speed [m/s] */
+#define OUT_CATM           119  /* atmospheric CO2 concentrtaion [ppm]*/
+#define OUT_COSZEN         120  /* cosine of solar zenith angle [fraction]*/
+#define OUT_DENSITY        121  /* near-surface atmospheric density [kg/m3]*/
+#define OUT_FDIR           122  /* fraction of incoming shortwave that is direct [fraction]*/
+#define OUT_LONGWAVE       123  /* incoming longwave [W/m2] */
+#define OUT_PAR            124  /* incoming photosynthetically active radiation [W/m2] */
+#define OUT_PRESSURE       125  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+#define OUT_QAIR           126  /* specific humidity [kg/kg] */
+#define OUT_REL_HUMID      127  /* relative humidity [fraction]*/
+#define OUT_SHORTWAVE      128  /* incoming shortwave [W/m2] */
+#define OUT_SURF_COND      129  /* surface conductance [m/s] */
+#define OUT_TSKC           130  /* cloud cover fraction [fraction] */
+#define OUT_VP             131  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            132  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           133  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       130  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      131  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         132  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        133  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      134  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        135  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         136  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     137  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    138  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       139  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      140  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    141  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       142  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    143  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     144  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     145  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      146  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      147  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     148  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     149  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            150  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND       134  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      135  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         136  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        137  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      138  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        139  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         140  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     141  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    142  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       143  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      144  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    145  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       146  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    147  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     148  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     149  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      150  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      151  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     152  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     153  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            154  /* snow water equivalent in snow pack [mm] */
 // Dynamic Soil Property Terms - EXCESS_ICE option
 #if EXCESS_ICE
-#define OUT_SOIL_DEPTH          151  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          152  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            153  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           154  /* depths of thermal nodes [m] */
+#define OUT_SOIL_DEPTH          155  /* soil moisture layer depths [m] */
+#define OUT_SUBSIDENCE          156  /* subsidence of soil layer [mm] */
+#define OUT_POROSITY            157  /* porosity [mm/mm] */
+#define OUT_ZSUM_NODE           158  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 
 /***** Output BINARY format types *****/
@@ -915,14 +931,18 @@ typedef struct {
 ***************************************************************************/
 typedef struct {
   double *air_temp;  /* air temperature (C) */
+  double *Catm;      /* atmospheric CO2 mixing ratio (mol CO2/ mol air) */
   double *channel_in;/* incoming channel inflow for time step (mm) */
+  double *coszen;    /* cosine of solar zenith angle (fraction) */
   double *density;   /* atmospheric density (kg/m^3) */
+  double *fdir;      /* fraction of incoming shortwave that is direct (fraction) */
   double *longwave;  /* incoming longwave radiation (W/m^2) (net incoming
                         longwave for water balance model) */
   double out_prec;   /* Total precipitation for time step - accounts
                         for corrected precipitation totals */
   double out_rain;   /* Rainfall for time step (mm) */
   double out_snow;   /* Snowfall for time step (mm) */
+  double *par;       /* incoming photosynthetically active radiation () */
   double *prec;      /* average precipitation in grid cell (mm) */
   double *pressure;  /* atmospheric pressure (kPa) */
   double *shortwave; /* incoming shortwave radiation (W/m^2) */

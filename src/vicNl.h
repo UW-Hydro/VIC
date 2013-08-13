@@ -105,6 +105,7 @@
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Oct-25 Changed calc_energy_balance_error to return the error to
 	      the parent function.					CL via TJB
+  2013-Jul-25 Added fdir to mtclim functions.				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -221,6 +222,7 @@ void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake
 #endif
                         out_data_struct *);
 void   compress_files(char string[]);
+double compute_coszen(double, double, double, dmy_struct);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
@@ -408,7 +410,7 @@ double modify_Ksat(double);
 void mtclim_wrapper(int, int, double, double, double, double,
                       double, double, double, double,
                       int, dmy_struct *, double *,
-                      double *, double *, double *, double *, double *);
+                      double *, double *, double *, double *, double *, double *);
 
 double new_snow_density(double);
 int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...), 

@@ -543,6 +543,8 @@ void transpiration(layer_data_struct *layer,
       }
     }
 
+    if (options.CARBON) free((char *)gsLayer);
+
   }
 
   /****************************************************************
@@ -568,7 +570,5 @@ void transpiration(layer_data_struct *layer,
     }
     if ( layerevap[i] < 0.0 ) layerevap[i] = 0.0;
   }
-
-  if (options.CARBON) free((char *)gsLayer);
 
 }

@@ -459,9 +459,11 @@ void transpiration(layer_data_struct *layer,
 
     /* Initialize conductances for aggregation over soil layers */
     gc =  0;
-    gsLayer = (double *)calloc(options.Ncanopy, sizeof(double));
-    for (cidx=0; cidx<options.Ncanopy; cidx++) {
-      gsLayer[cidx] = 0;
+    if (options.CARBON) {
+      gsLayer = (double *)calloc(options.Ncanopy, sizeof(double));
+      for (cidx=0; cidx<options.Ncanopy; cidx++) {
+        gsLayer[cidx] = 0;
+      }
     }
 
     for (i=0;i<options.Nlayer;i++) {

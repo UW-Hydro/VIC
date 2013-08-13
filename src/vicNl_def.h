@@ -128,6 +128,7 @@
   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
   2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
 	      OUT_FDIR, and OUT_PAR.					TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -203,6 +204,18 @@
 #define LAI_FROM_VEGLIB     0
 #define LAI_FROM_VEGPARAM   1
 
+/***** Canopy resistance parametrizations *****/
+#define RC_JARVIS 0
+#define RC_PHOTO  1
+
+/***** Photosynthesis parametrizations *****/
+#define PS_FARQUHAR 1
+#define PS_MONTEITH 2
+
+/***** Photosynthetic pathways  *****/
+#define PHOTO_C3 0
+#define PHOTO_C4 1
+
 /***** Hard-coded veg class parameters (mainly for pot_evap) *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
 #define H2O_SURF_ALBEDO 0.08	    /* albedo for deep water surface */
@@ -249,6 +262,8 @@ extern char ref_veg_ref_crop[];
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
+#define K_AIR        2.32e-2    /* conductivity of air (W/mK) */
+#define K_ICE        2.29       /* conductivity of ice (W/mK) */
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
@@ -278,6 +293,59 @@ extern char ref_veg_ref_crop[];
 #define CatmCurrent  383       /* Current global atmospheric CO2 mixing ratio (ppm) */
 #define SW2PAR       0.45      /* Empirical ratio of PAR [W/m2] to SHORTWAVE
                                  [W/m2] from Lopez et al., 2001 */
+
+/* Photosynthesis Parameters */
+#define OMEGA        0.12      /* single leaf scattering albedo */
+#define LaiMax       8         /* Maximum LAI in nitrogen scaling */
+#define LaiLimit     3         /* Minimum LAI in nitrogen scaling and
+                                  maximum LAI in PAR computation */
+#define LaiMin       1e-9      /* Minimum LAI in PAR computation */
+#define Epar         2.2e5     /* Energy content of PAR [J/mol photons]
+                                  = (4.6 mol/MJ PAR)^-1 */
+#define FcMax        0.9       /* Maximum fractional veg cover;
+                                  (1-FcMax) = min amount of ground visible */
+#define FcMin        1e-3      /* Minimum fractional veg cover;
+                                  (1-FcMin) = max amount of ground visible */
+#define ZenithMin    0.0174524 /* Check for solar zenith angle > 89 deg */
+#define ZenithMinPar 1e-3      /* Cosine of the minimum solar zenith
+                                  angle for photosynthesis to take place */
+#define AlbSoiParMin 0.0       /* Minimum soil reflectivity in PAR range */
+#define minMaxETrans 1e-12     /* Minimum of maximum electron transport
+                                  rate [10e-12 mol/(m^2 s)] */
+#define minStomCond  0.0       /* Minimum stomatal conductance [mol H2O/m2s] */
+#define MCO2kg       44.011e-3 /* Molar mass of CO2 (kg/mol) */
+#define MAIRkg       28.97e-3  /* Molar mass of air (kg/mol) */
+#define MCg          12.01     /* Molar mass of C (g/mol) */
+/* Factors that relate leaf internal CO2 concentration to ambient CO2 concentration */
+#define FCI1C3       0.87      /* C3 Plants */
+#define FCI1C4       0.67      /* C4 Plants */
+
+/* C3 PLANTS: FARQUHAR, G.D., S. VON CAEMMERER AND J.A. BERRY, 1980.
+              A BIOCHEMICAL MODEL OF PHOTOYNTHESIS IN LEAVES OF C3 SPECIES.
+              PLANTA 149, 78-90. */
+
+#define OX     0.21    /* OXYGEN CONCENTRATION [MOL(O2) / MOL(AIR)] */
+#define KC0    460.e-6 /* MICHAELIS-MENTEN CONSTANT FOR CO2 AT 25C [MOL(CO2) / MOL(AIR)] */
+#define KO0    330.e-3 /* MICHAELIS-MENTEN CONSTANT FOR O2 AT 25C [MOL(O2) / MOL(AIR)] */
+#define EC     59356.  /* ACTIVATION ENERGY FOR KC [J / MOL] */
+#define EO     35948.  /* ACTIVATION ENERGY FOR KO [J / MOL] */
+#define EV     58520.  /* ACTIVATION ENERGY FOR VCMAX [J / MOL] */
+#define ER     45000.  /* ACTIVATION ENERGY FOR DARK RESPIRATION [J / MOL] */
+#define ALC3   0.28    /* EFFICIENCY OF OF PHOTON CAPTURE */
+#define FRDC3  0.011   /* RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C3 */
+
+/* C4 PLANTS: COLLATZ, G.J., M. RIBAS-CARBO AND J.A. BERRY, 1992.
+              COUPLED PHOTOSYNTHESIS-STOMATAL CONDUCTANCE MODEL FOR LEAVES
+              OF C4 PLANTS. AUST. J. PLANT PHYSIOL. 19, 519-538. */
+
+#define EK     50967.  /*  = Q10=2 (Collatz et al. 1992) */
+#define ALC4   0.04    /* EFFECTIVE QUANTUM EFFICIENCY */
+#define FRDC4  0.042   /* RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C4 */
+#define THETA  0.83    /* CURVATURE PARAMETER */
+
+/* Plant Maintenance and Growth Respiration Parameters */
+#define FRLeaf   0.4   /* Ratio of canopy leaf respiration to whole plant maintenance respiration */
+#define FRGrowth 0.25  /* Ratio of plant growth respiration to NPP */
 
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
@@ -348,7 +416,7 @@ extern char ref_veg_ref_crop[];
 #define SKIP      26 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 160
+#define N_OUTVAR_TYPES 180
 // Water Balance Terms - state variables
 #define OUT_ASAT             0  /* Saturated Area Fraction */
 #define OUT_LAKE_AREA_FRAC   1  /* lake surface area as fraction of the grid cell area [fraction] */
@@ -517,6 +585,11 @@ extern char ref_veg_ref_crop[];
 #define OUT_POROSITY            157  /* porosity [mm/mm] */
 #define OUT_ZSUM_NODE           158  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
+// Carbon-Cycling Terms
+#define OUT_GPP            159  /* gross primary productivity [g C/m2d] */
+#define OUT_RAUT           160  /* autotrophic respiration [g C/m2d] */
+#define OUT_NPP            161  /* net primary productivity [g C/m2d] */
+#define OUT_APAR           162  /* absorbed PAR [W/m2] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -613,6 +686,8 @@ typedef struct {
 					    always use canopy aero_resist
 					    for ET. */
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
+  char   CARBON;         /* TRUE = simulate carbon cycling processes;
+			    FALSE = no carbon cycling (default) */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */
   char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
@@ -637,6 +712,7 @@ typedef struct {
   char   LW_TYPE;        /* Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
   char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
+  int    Ncanopy;        /* Number of canopy layers in the model. */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
@@ -648,6 +724,8 @@ typedef struct {
   float  PREC_EXPT;      /* Exponential that controls the fraction of a
 			    grid cell that receives rain during a storm
 			    of given intensity */
+  char   RC_MODE;        /* RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
+                            RC_PHOTO = compute canopy resistance based on photosynthetic activity */
   int    ROOT_ZONES;     /* Number of root zones used in simulation */
   char   QUICK_FLUX;     /* TRUE = Use Liang et al., 1999 formulation for
 			    ground heat flux, if FALSE use explicit finite
@@ -655,6 +733,7 @@ typedef struct {
   char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for 
 			    iteration, but explicit finite difference
 			    method for final step. */
+  char   SHARE_LAYER_MOIST; /* TRUE = transpiration in moisture-limited layers can draw from other layers (default) */
   char   SNOW_ALBEDO;    /* USACE: Use algorithm of US Army Corps of Engineers, 1956; SUN1999: Use algorithm of Sun et al., JGR, 1999 */
   char   SNOW_DENSITY;   /* DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
   int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
@@ -684,6 +763,7 @@ typedef struct {
 			    parameters*/
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
+  char   VEGLIB_PHOTO;   /* TRUE = veg library contains photosynthesis parameters */
   char   VEGPARAM_LAI;   /* TRUE = veg param file contains monthly LAI values */
   char   LAI_SRC;        /* LAI_FROM_VEGLIB = read LAI values from veg library file
                             LAI_FROM_VEGPARAM = read LAI values from the veg param file */
@@ -790,6 +870,7 @@ typedef struct {
 					 (mm/day) */
   double   Ws_orig;                   /* fraction of maximum soil moisture */
 #endif  
+  float    AlbedoPar;                 /* soil albedo in PAR range (400-700nm) */
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
   double   avg_temp;                  /* average soil temperature (C) */
@@ -891,6 +972,7 @@ typedef struct {
   float   lag_one;          /* Lag one gradient autocorrelation of terrain slope */
   float   fetch;            /* Average fetch length for each vegetation class. */
   int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
+  double *CanopLayerBnd;    /* Upper boundary of each canopy layer, expressed as fraction of total LAI */
 } veg_con_struct;
 
 /******************************************************************
@@ -899,8 +981,8 @@ typedef struct {
 typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow 
 			      accumulation in canopy */
-  double LAI[12];          /* monthly leaf area index */
-  double Wdmax[12];        /* maximum monthly dew holding capacity (mm) */
+  double LAI[12];          /* leaf area index */
+  double Wdmax[12];        /* maximum dew holding capacity (mm) */
   double albedo[12];       /* vegetation albedo (added for full energy) 
 			      (fraction) */
   double displacement[12]; /* vegetation displacement height (m) */
@@ -920,6 +1002,18 @@ typedef struct {
 			      will be no transpiration (ranges from 
 			      ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
   int    veg_class;        /* vegetation class reference number */
+  char   Ctype;            /* Photosynthetic pathway; can be C3 or C4 */
+  double MaxCarboxRate;    /* maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
+  double MaxETransport;    /* maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
+  double CO2Specificity;   /* CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants) */
+  double LightUseEff;      /* Light-use efficiency (mol(CO2)/mol(photons)) */
+  char   NscaleFlag;       /* TRUE = nitrogen-scaling factors are applicable
+                              to this veg class */
+  double Wnpp_inhib;       /* moisture level (fraction of maximum moisture) above which photosynthesis
+                              experiencing saturation inhibition, i.e. too wet for optimal photosynthesis;
+                              only applies to top soil layer */
+  double NPPfactor_sat;    /* photosynthesis multiplier (fraction of maximum) when top soil
+                              layer is saturated */
 } veg_lib_struct;
 
 /***************************************************************************
@@ -1099,6 +1193,21 @@ typedef struct {
   double throughfall;		/* water that reaches the ground through 
                                    the canopy (mm/TS) */
   double Wdew;			/* dew trapped on vegetation (mm) */
+  double *NscaleFactor;         /* array of per-layer nitrogen scaling factors */
+  double *aPARLayer;            /* array of per-layer absorbed PAR (mol(photons)/m2 leaf area s) */
+  double *CiLayer;              /* array of per-layer leaf-internal CO2 mixing ratio (mol CO2/mol air) */
+  double *rsLayer;              /* array of per-layer stomatal resistance (s/m) */
+  double aPAR;                  /* whole-canopy absorbed PAR (mol(photons)/m2 leaf area s) */
+  double Ci;                    /* whole-canopy leaf-internal CO2 mixing ratio (mol CO2/mol air) */
+  double rc;                    /* whole-canopy stomatal resistance (s/m) */
+  double NPPfactor;             /* whole-canopy photosynthesis multiplier to account for inhibition separate from stomatal resistance */
+  double GPP;                   /* whole-canopy gross assimilation (photosynthesis) (umol(CO2)/m2s) */
+  double Rphoto;                /* whole-canopy photorespiration (umol(CO2)/m2s) */
+  double Rdark;                 /* whole-canopy 'dark' respiration (umol(CO2)/m2s) */
+  double Rmaint;                /* plant maintenance respiration (= Rdark/FRLeaf) (umol(CO2)/m2s) */
+  double Rgrowth;               /* growth respiration ( = (GPP-Rmaint)*FRGrowth/(1+FRGrowth) ) (umol(CO2)/m2s) */
+  double Raut;                  /* total plant respiration (= Rmaint + Rgrowth) (umol(CO2)/m2s) */
+  double NPP;                   /* net primary productivity (= GPP - Raut) (umol(CO2)/m2s) */
 } veg_var_struct;
 
 /************************************************************************

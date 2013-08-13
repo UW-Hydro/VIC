@@ -73,6 +73,78 @@ New forcing variables.
 
 
 
+Added simulation of photosynthesis.
+
+	Files Affected:
+
+	calc_Nscale_factors.c (new)
+	calc_surf_energy_bal.c
+	canopy_assimilation.c (new)
+	canopy_evap.c
+	display_current_settings.c
+	faparl.c (new)
+	free_dist_prcp.c
+	free_vegcon.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_veg.c
+	Makefile
+	make_veg_var.c
+	output_list_utils.c
+	penman.c
+	photosynth.c (new)
+	put_data.c
+	read_soilparam.c
+	read_veglib.c
+	read_vegparam.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added simulation of photosynthesis.  The photosynthesis formulation was
+	taken from the BETHY model (Knorr, 2000), which in turn used the Farquhar
+	model for C3 plants and the Collatz model for C4 plants.  In addition,
+	inhibition of photosynthesis under saturated conditions (as described
+	by Frolking et al, 2002) is allowed for.
+
+	This feature requires several new veg parameters to be in the veg
+	library file:
+	  Ctype:          Photosynthetic pathway; can be C3 or C4
+	  MaxCarboxRate:  Maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s)
+	  MaxETransport:  Maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants)
+	  CO2Specificity: CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants)
+	  LightUseEff:    Light-use efficiency (mol(CO2)/mol(photons))
+	  NscaleFlag:     TRUE = nitrogen-scaling factors are applicable to this veg class
+	  Wnpp_inhib:     Moisture level (fraction of maximum moisture) above which photosynthesis experiencing saturation inhibition, i.e. too wet for optimal photosynthesis; only applies to top soil layer
+	  NPPfactor_sat:  Photosynthesis multiplier (fraction of maximum) when top soil layer is saturated
+
+	There are several new output variables associated with this feature:
+	  OUT_GPP:  Gross primary productivity [g C/m2d]
+	  OUT_RAUT: Autotrophic respiration [g C/m2d]
+	  OUT_NPP:  Net primary productivity [g C/m2d]
+	  OUT_APAR: Absorbed PAR [W/m2]
+
+	By default, this feature is turned off.  To turn this feature on, set
+	CARBON to TRUE in the global parameter file.
+
+	When this feature is turned on, you can choose to compute stomatal
+	resistance via the Jarvis formulation (the formulation used by all
+	previous versions of VIC) or as a function of photosynthetic demand.
+	This is determined by the setting of RC_MODE in the global parameter
+	file.  A value of RC_JARVIS (which is the default) selects the Jarvis
+	formulation.  A value of RC_PHOTO selects the photosynthetic demand
+	formulation.
+
+
+
+
 Bug Fixes:
 ----------
 

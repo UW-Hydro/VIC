@@ -120,6 +120,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -1057,6 +1058,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.aspect = 0;
       temp.whoriz = 0;
       temp.ehoriz = 0;
+
+      /* Compute soil albedo in PAR range (400-700nm) following eqn 122 in Knorr 1997 */
+      if (options.CARBON) {
+        temp.AlbedoPar = 0.92 * BARE_SOIL_ALBEDO - 0.015;
+        if (temp.AlbedoPar < AlbSoiParMin) temp.AlbedoPar = AlbSoiParMin;
+      }
 
     } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
 

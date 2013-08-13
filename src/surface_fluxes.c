@@ -59,7 +59,8 @@ int surface_fluxes(char                 overstory,
 		   veg_var_struct      *veg_var_wet,
 		   float              lag_one,
 		   float              sigma_slope,
-		   float              fetch)
+		   float              fetch,
+		   double            *CanopLayerBnd)
 /**********************************************************************
 	surface_fluxes	Keith Cherkauer		February 29, 2000
 
@@ -150,6 +151,7 @@ int surface_fluxes(char                 overstory,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Oct-25 Now call calc_atmos_energy_bal() whenever there is a canopy
 	      with snow, regardless of the setting of CLOSE_ENERGY.	CL via TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -318,6 +320,28 @@ int surface_fluxes(char                 overstory,
   double A_Tcanopy;
   double B_Tcanopy;
 
+  // Carbon cycling
+  double  dryFrac;
+  double *LAIlayer;
+  double *faPAR;
+  int cidx;
+  double  store_gc[2];
+  double *store_gsLayer[2];
+  double  store_Ci[2];
+  double  store_GPP[2];
+  double  store_Rdark[2];
+  double  store_Rphoto[2];
+  double  store_Rmaint[2];
+  double  store_Rgrowth[2];
+  double  store_Raut[2];
+  double  store_NPP[2];
+
+  if (options.CARBON) {
+    for (dist=0; dist<2; dist++) {
+      store_gsLayer[dist] = (double*)calloc(options.Ncanopy,sizeof(double));
+    }
+  }
+
   /***********************************************************************
     Set temporary variables for convenience
   ***********************************************************************/
@@ -462,7 +486,25 @@ int surface_fluxes(char                 overstory,
   for (p=0; p<N_PET_TYPES; p++)
     store_pot_evap[p] = 0;
   N_steps                 = 0;
-      
+
+  // Carbon cycling
+  if (options.CARBON) {
+    for (dist=0; dist<2; dist++) {
+      store_gc[dist]        = 0;
+      for (cidx=0; cidx<options.Ncanopy; cidx++) {
+        store_gsLayer[dist][cidx] = 0;
+      }
+      store_Ci[dist]        = 0;
+      store_GPP[dist]       = 0;
+      store_Rdark[dist]     = 0;
+      store_Rphoto[dist]    = 0;
+      store_Rmaint[dist]    = 0;
+      store_Rgrowth[dist]   = 0;
+      store_Raut[dist]      = 0;
+      store_NPP[dist]       = 0;
+    }
+  }
+
   /*************************
     Compute surface fluxes 
   *************************/
@@ -489,6 +531,39 @@ int surface_fluxes(char                 overstory,
 
     last_Tcanopy      = 999;
     last_snow_flux    = 999;
+
+    // compute LAI and absorbed PAR per canopy layer
+    if (options.CARBON && iveg < Nveg) {
+      LAIlayer = (double *)calloc(options.Ncanopy,sizeof(double));
+      faPAR = (double *)calloc(options.Ncanopy,sizeof(double));
+      /* Compute absorbed PAR per ground area per canopy layer (W/m2)
+         normalized to PAR = 1 W, i.e. the canopy albedo in the PAR
+         range (alb_total ~ 0.45*alb_par + 0.55*alb_other) */
+      faparl(CanopLayerBnd,
+             veg_lib[veg_class].LAI[dmy[rec].month-1],
+             soil_con->AlbedoPar,
+             atmos->coszen[hidx],
+             atmos->fdir[hidx],
+             LAIlayer,
+             faPAR);
+      /* Convert to absolute (unnormalized) absorbed PAR per leaf area per canopy layer
+         (umol(photons)/m2 leaf area / s); dividing by Epar converts PAR from W to umol(photons)/s */
+      veg_var_wet->aPAR = 0;
+      for (cidx=0; cidx<options.Ncanopy; cidx++) {
+        if (LAIlayer[cidx] > 1e-10) {
+          veg_var_wet->aPARLayer[cidx] = (atmos->par[hidx]/Epar) * faPAR[cidx] / LAIlayer[cidx];
+          veg_var_wet->aPAR += atmos->par[hidx] * faPAR[cidx] / LAIlayer[cidx];
+        }
+        else {
+          veg_var_wet->aPARLayer[cidx] = atmos->par[hidx]/Epar * faPAR[cidx] / 1e-10;
+          veg_var_wet->aPAR += atmos->par[hidx] * faPAR[cidx] / 1e-10;
+        }
+        veg_var_dry->aPARLayer[cidx] = veg_var_wet->aPARLayer[cidx];
+        veg_var_dry->aPAR = veg_var_wet->aPAR;
+      }
+      free((char*)LAIlayer);
+      free((char*)faPAR);
+    }
 
     // initialize bisection startup
     BISECT_OVER  = FALSE;
@@ -603,6 +678,7 @@ int surface_fluxes(char                 overstory,
 	iter_snow.surface_flux = 0;
         /* iter_snow.blowing_flux has already been reset to step_snow.blowing_flux */
 	LongUnderOut       = iter_soil_energy.LongUnderOut;
+        dryFrac = -1;
 
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
@@ -621,7 +697,8 @@ int surface_fluxes(char                 overstory,
 			       roughness, snow_inflow, snowfall, &surf_atten, 
 			       wind, root, UNSTABLE_SNOW, options.Nnode, 
 			       Nveg, iveg, band, step_dt, rec, hidx, veg_class,
-			       &UnderStory, dmy, atmos, &(iter_snow_energy), 
+			       &UnderStory, CanopLayerBnd, &dryFrac, 
+			       dmy, atmos, &(iter_snow_energy), 
 			       iter_layer[DRY], iter_layer[WET], &(iter_snow), 
 			       soil_con, &(iter_snow_veg_var[DRY]), 
 			       &(iter_snow_veg_var[WET]));
@@ -667,7 +744,8 @@ int surface_fluxes(char                 overstory,
 				     snowfall, wind, root, INCLUDE_SNOW, 
 				     UnderStory, options.Nnode, Nveg, band, 
 				     step_dt, hidx, iveg, options.Nlayer, 
-				     (int)overstory, rec, veg_class, atmos, 
+				     (int)overstory, rec, veg_class, 
+				     CanopLayerBnd, &dryFrac, atmos, 
 				     &(dmy[rec]), &iter_soil_energy, 
 				     iter_layer[DRY], iter_layer[WET], 
 				     &(iter_snow), soil_con, 
@@ -767,6 +845,63 @@ int surface_fluxes(char                 overstory,
 	      && (over_iter < MAX_ITER) );
  
     /**************************************
+      Compute GPP, Raut, and NPP
+    **************************************/
+    if (options.CARBON) {
+      if (iveg < Nveg && !step_snow.snow && dryFrac > 0) {
+        for (dist=0; dist<Ndist; dist++) {
+          canopy_assimilation(veg_lib[veg_class].Ctype,
+                              veg_lib[veg_class].MaxCarboxRate,
+                              veg_lib[veg_class].MaxETransport,
+                              veg_lib[veg_class].CO2Specificity,
+                              iter_soil_veg_var[dist].NscaleFactor,
+                              Tair,
+                              atmos->shortwave[hidx],
+                              iter_soil_veg_var[dist].aPARLayer,
+                              soil_con->elevation,
+                              atmos->Catm[hidx],
+                              CanopLayerBnd,
+                              veg_lib[veg_class].LAI[dmy[rec].month-1],
+                              "rs",
+                              iter_soil_veg_var[dist].rsLayer,
+                              &(iter_soil_veg_var[dist].rc),
+                              &(iter_soil_veg_var[dist].Ci),
+                              &(iter_soil_veg_var[dist].GPP),
+                              &(iter_soil_veg_var[dist].Rdark),
+                              &(iter_soil_veg_var[dist].Rphoto),
+                              &(iter_soil_veg_var[dist].Rmaint),
+                              &(iter_soil_veg_var[dist].Rgrowth),
+                              &(iter_soil_veg_var[dist].Raut),
+                              &(iter_soil_veg_var[dist].NPP));
+          /* Adjust by fraction of canopy that was dry and account for any other inhibition`*/
+          dryFrac *= iter_soil_veg_var[dist].NPPfactor;
+          iter_soil_veg_var[dist].GPP *= dryFrac;
+          iter_soil_veg_var[dist].Rdark *= dryFrac;
+          iter_soil_veg_var[dist].Rphoto *= dryFrac;
+          iter_soil_veg_var[dist].Rmaint *= dryFrac;
+          iter_soil_veg_var[dist].Rgrowth *= dryFrac;
+          iter_soil_veg_var[dist].Raut *= dryFrac;
+          iter_soil_veg_var[dist].NPP *= dryFrac;
+        }
+      }
+      else {
+        for (dist=0; dist<Ndist; dist++) {
+          iter_soil_veg_var[dist].rc = HUGE_RESIST;
+          for (cidx=0; cidx<options.Ncanopy; cidx++)
+            iter_soil_veg_var[dist].rsLayer[cidx] = HUGE_RESIST;
+          iter_soil_veg_var[dist].Ci = 0;
+          iter_soil_veg_var[dist].GPP = 0;
+          iter_soil_veg_var[dist].Rdark = 0;
+          iter_soil_veg_var[dist].Rphoto = 0;
+          iter_soil_veg_var[dist].Rmaint = 0;
+          iter_soil_veg_var[dist].Rgrowth = 0;
+          iter_soil_veg_var[dist].Raut = 0;
+          iter_soil_veg_var[dist].NPP = 0;
+        }
+      }
+    }
+
+    /**************************************
       Compute Potential Evap
     **************************************/
     // First, determine the stability correction used in the iteration
@@ -828,6 +963,20 @@ int surface_fluxes(char                 overstory,
 	  snow_veg_var[dist].Wdew  = soil_veg_var[dist].Wdew;
 	}
         step_Wdew[dist] = soil_veg_var[dist].Wdew;
+        if (options.CARBON) {
+          store_gc[dist]  += 1/soil_veg_var[dist].rc;
+          for (cidx=0; cidx<options.Ncanopy; cidx++) {
+            store_gsLayer[dist][cidx]  += 1/soil_veg_var[dist].rsLayer[cidx];
+          }
+          store_Ci[dist]  += soil_veg_var[dist].Ci;
+          store_GPP[dist]  += soil_veg_var[dist].GPP;
+          store_Rdark[dist]  += soil_veg_var[dist].Rdark;
+          store_Rphoto[dist]  += soil_veg_var[dist].Rphoto;
+          store_Rmaint[dist]  += soil_veg_var[dist].Rmaint;
+          store_Rgrowth[dist]  += soil_veg_var[dist].Rgrowth;
+          store_Raut[dist]  += soil_veg_var[dist].Raut;
+          store_NPP[dist]  += soil_veg_var[dist].NPP;
+        }
       }
 
       for(lidx = 0; lidx < options.Nlayer; lidx++)
@@ -1032,6 +1181,43 @@ int surface_fluxes(char                 overstory,
     free((char *)step_aero_resist[p]);
   }
   free((char *)step_aero_resist);
+
+  /**********************************************************
+    Store carbon cycle variable sums for sub-model time steps
+  **********************************************************/
+
+  if(options.CARBON && iveg != Nveg) {
+    veg_var_wet->rc       = 1/store_gc[WET]/(double)N_steps;
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      veg_var_wet->rsLayer[cidx] = 1/store_gsLayer[WET][cidx]/(double)N_steps;
+    }
+    veg_var_wet->Ci       = store_Ci[WET]/(double)N_steps;
+    veg_var_wet->GPP      = store_GPP[WET]/(double)N_steps;
+    veg_var_wet->Rdark    = store_Rdark[WET]/(double)N_steps;
+    veg_var_wet->Rphoto   = store_Rphoto[WET]/(double)N_steps;
+    veg_var_wet->Rmaint   = store_Rmaint[WET]/(double)N_steps;
+    veg_var_wet->Rgrowth  = store_Rgrowth[WET]/(double)N_steps;
+    veg_var_wet->Raut     = store_Raut[WET]/(double)N_steps;
+    veg_var_wet->NPP      = store_NPP[WET]/(double)N_steps;
+    veg_var_dry->rc       = 1/store_gc[DRY]/(double)N_steps;
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      veg_var_dry->rsLayer[cidx] = 1/store_gsLayer[DRY][cidx]/(double)N_steps;
+    }
+    veg_var_dry->Ci       = store_Ci[DRY]/(double)N_steps;
+    veg_var_dry->GPP      = store_GPP[DRY]/(double)N_steps;
+    veg_var_dry->Rdark    = store_Rdark[DRY]/(double)N_steps;
+    veg_var_dry->Rphoto   = store_Rphoto[DRY]/(double)N_steps;
+    veg_var_dry->Rmaint   = store_Rmaint[DRY]/(double)N_steps;
+    veg_var_dry->Rgrowth  = store_Rgrowth[DRY]/(double)N_steps;
+    veg_var_dry->Raut     = store_Raut[DRY]/(double)N_steps;
+    veg_var_dry->NPP      = store_NPP[DRY]/(double)N_steps;
+
+  }
+  if (options.CARBON) {
+    for (dist=0; dist<2; dist++) {
+      free((char *)(store_gsLayer[dist]));
+    }
+  }
 
   /********************************************************
     Compute Runoff, Baseflow, and Soil Moisture Transport

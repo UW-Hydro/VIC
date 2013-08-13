@@ -59,7 +59,7 @@ out_data_struct *create_output_list() {
   2011-Nov-04 Added OUT_TSKC.						TJB
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
-  2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 *************************************************************/
 
   extern option_struct options;
@@ -221,6 +221,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_POROSITY].varname,"OUT_POROSITY");                 /* porosity [mm/mm] */
   strcpy(out_data[OUT_ZSUM_NODE].varname,"OUT_ZSUM_NODE");               /* depths of thermal nodes [m] */
 #endif
+
+  // Carbon-cycling Terms
+  strcpy(out_data[OUT_GPP].varname,"OUT_GPP");                         /* gross primary productivity [g C/m2s] */
+  strcpy(out_data[OUT_RAUT].varname,"OUT_RAUT");                       /* autotrophic respiration [g C/m2s] */
+  strcpy(out_data[OUT_NPP].varname,"OUT_NPP");                         /* net primary productivity [g C/m2s] */
+  strcpy(out_data[OUT_APAR].varname,"OUT_APAR");                       /* absorbed PAR [W/m2] */
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */

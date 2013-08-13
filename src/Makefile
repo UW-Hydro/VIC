@@ -38,6 +38,8 @@
 #             write_atmosdata.c
 #             write_debug.c
 # 2013-Jul-25 Added compute_coszen.c.						TJB
+# 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
+# 	      photosynth.c.							TJB
 #
 # $Id$
 #
@@ -79,13 +81,13 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
         arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
 	calc_cloud_cover_fraction.o calc_forcing_stats.o calc_longwave.o \
-	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
+	calc_Nscale_factors.o calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
-	calc_water_energy_balance_errors.o canopy_evap.o \
+	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
 	compress_files.o compute_coszen.o compute_dz.o compute_pot_evap.o \
 	compute_treeline.o compute_zwt.o correct_precip.o \
-	display_current_settings.o dist_prec.o estimate_T1.o free_dist_prcp.o \
+	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
 	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
@@ -96,7 +98,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
 	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o \
 	nrerror.o open_file.o open_state_file.o \
-	output_list_utils.o parse_output_info.o penman.o \
+	output_list_utils.o parse_output_info.o penman.o photosynth.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
 	read_snowband.o read_soilparam.o read_soilparam_arc.o read_veglib.o \

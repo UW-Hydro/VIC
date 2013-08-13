@@ -19,13 +19,13 @@ void free_dist_prcp(dist_prcp_struct *prcp,
   2007-Apr-21 Replaced loop over Nveg to loop over Nitems, so that lake-
 	      specific veg tiles could be freed.			TJB
   2009-Jul-31 Removed extra veg tile for lake/wetland.			TJB
-
+  2013-Jul-29 Added freeing of photosynthesis terms.			TJB
 **********************************************************************/
 {
   extern option_struct options;
 
   int Ndist;
-  int i, j, Nitems;
+  int i, j, k, Nitems;
 
   Ndist = 2;
   Nitems = Nveg + 1;
@@ -35,8 +35,17 @@ void free_dist_prcp(dist_prcp_struct *prcp,
       free((char *)prcp[0].cell[i][j]);
     }
     free((char *)prcp[0].cell[i]);
-    for(j=0;j<Nitems;j++) 
+    for(j=0;j<Nitems;j++) {
+      if (options.CARBON) {
+        for ( k = 0 ; k < options.SNOW_BAND ; k++ ) {
+          free((char *)prcp[0].veg_var[i][j][k].NscaleFactor);
+          free((char *)prcp[0].veg_var[i][j][k].aPARLayer);
+          free((char *)prcp[0].veg_var[i][j][k].CiLayer);
+          free((char *)prcp[0].veg_var[i][j][k].rsLayer);
+        }
+      }
       free((char *)(*prcp).veg_var[i][j]);
+    }
     free((char *)(*prcp).veg_var[i]);
   }
   for(j=0;j<Nitems;j++) {

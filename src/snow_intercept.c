@@ -77,6 +77,7 @@ static char vcid[] = "$Id$";
   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
   2010-Apr-26 Replaced individual forcing variables with atmos_data
 	      in argument list.						TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 *****************************************************************************/
 int snow_intercept(double  Dt,
 		   double  F,  
@@ -123,6 +124,8 @@ int snow_intercept(double  Dt,
 		   int     rec,
 		   int     hidx,
 		   int     veg_class,
+		   double *CanopLayerBnd,
+		   double *dryFrac,
 		   atmos_data_struct *atmos,
 		   layer_data_struct *layer_dry,
 		   layer_data_struct *layer_wet,
@@ -183,6 +186,7 @@ int snow_intercept(double  Dt,
   double  Press; // atmospheric pressure
   double  Vpd; // vapor pressure defficit
   double  shortwave; //
+  double  Catm; //
 
   char ErrorString[MAXSTRING];
 
@@ -191,6 +195,7 @@ int snow_intercept(double  Dt,
   Press     = atmos->pressure[hidx];
   Vpd       = atmos->vpd[hidx];
   shortwave = atmos->shortwave[hidx];
+  Catm      = atmos->Catm[hidx];
 
   /* Initialize Tfoliage_fbflag */
   *Tfoliage_fbflag = 0;
@@ -343,17 +348,20 @@ int snow_intercept(double  Dt,
     *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
 
     Qnet = solve_canopy_energy_bal(0., band, month, rec, Dt, 
-				   soil_con->elevation, 
+				   soil_con->elevation, soil_con->max_moist,
 				   soil_con->Wcr, soil_con->Wpwp, 
 				   soil_con->depth, 
 #if SPATIAL_FROST
 				   soil_con->frost_fract, 
 #endif
 				   AirDens, EactAir, Press, Le, 
-				   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
+				   Tcanopy, Vpd, mu,
+				   shortwave, Catm, dryFrac,
+				   &Evap, Ra, Ra_used,
 				   RainFall, Wind, UnderStory, iveg, 
 				   veg_class, displacement, ref_height, 
-				   roughness, root, IntRainOrg, *IntSnow, 
+				   roughness, root, CanopLayerBnd, 
+				   IntRainOrg, *IntSnow, 
 				   IntRain, layer_wet, layer_dry, veg_var_wet, 
 				   veg_var_dry, LongOverIn, LongUnderOut, 
 				   *NetShortOver, 
@@ -386,16 +394,17 @@ int snow_intercept(double  Dt,
   if ( Tupper != MISSING && Tlower != MISSING ) {
 
     *Tfoliage = root_brent(Tlower, Tupper, ErrorString, func_canopy_energy_bal,  band, 
-			   month, rec, Dt, soil_con->elevation, 
+			   month, rec, Dt, soil_con->elevation, soil_con->max_moist, 
 			   soil_con->Wcr, soil_con->Wpwp, soil_con->depth, 
 #if SPATIAL_FROST
 			   soil_con->frost_fract, 
 #endif
 			   AirDens, EactAir, Press, Le, 
-			   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
+			   Tcanopy, Vpd, mu, shortwave, Catm, dryFrac,
+			   &Evap, Ra, Ra_used,
 			   RainFall, Wind, UnderStory, iveg, 
 			   veg_class, displacement, ref_height, 
-			   roughness, root, IntRainOrg, *IntSnow, 
+			   roughness, root, CanopLayerBnd, IntRainOrg, *IntSnow, 
 			   IntRain, layer_wet, layer_dry, veg_var_wet, 
 			   veg_var_dry, LongOverIn, LongUnderOut, 
 			   *NetShortOver, 
@@ -413,17 +422,18 @@ int snow_intercept(double  Dt,
       }
       else { 
         Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
-					    soil_con->elevation, 
+					    soil_con->elevation, soil_con->max_moist, 
 					    soil_con->Wcr, soil_con->Wpwp, 
 					    soil_con->depth, 
 #if SPATIAL_FROST
 					    soil_con->frost_fract, 
 #endif
 					    AirDens, EactAir, Press, Le, 
-					    Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
+					    Tcanopy, Vpd, mu, shortwave, Catm, dryFrac,
+					    &Evap, Ra, Ra_used,
 					    RainFall, Wind, UnderStory, iveg, 
 					    veg_class, displacement, ref_height, 
-					    roughness, root, IntRainOrg, *IntSnow, 
+					    roughness, root, CanopLayerBnd, IntRainOrg, *IntSnow, 
 					    IntRain, layer_wet, layer_dry, veg_var_wet, 
 					    veg_var_dry, 
 					    LongOverIn, LongUnderOut, *NetShortOver, 
@@ -437,16 +447,18 @@ int snow_intercept(double  Dt,
     }
     
     Qnet = solve_canopy_energy_bal(*Tfoliage, band, month, rec, Dt, 
-				   soil_con->elevation, soil_con->Wcr, 
+				   soil_con->elevation, soil_con->max_moist, soil_con->Wcr, 
 				   soil_con->Wpwp, soil_con->depth, 
 #if SPATIAL_FROST
 				   soil_con->frost_fract, 
 #endif
 				   AirDens, EactAir, Press, Le, 
-				   Tcanopy, Vpd, mu, &Evap, Ra, Ra_used,
+				   Tcanopy, Vpd, mu, shortwave, Catm, dryFrac,
+				   &Evap, Ra, Ra_used,
 				   RainFall, Wind, UnderStory, iveg, 
 				   veg_class, displacement, ref_height, 
-				   roughness, root, IntRainOrg, *IntSnow, 
+				   roughness, root, CanopLayerBnd,
+				   IntRainOrg, *IntSnow, 
 				   IntRain, layer_wet, layer_dry, veg_var_wet, 
 				   veg_var_dry, LongOverIn, LongUnderOut, 
 				   *NetShortOver, 
@@ -658,6 +670,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   double  delta_t;
   double  elevation;
 
+  double *Wmax;
   double *Wcr;
   double *Wpwp;
   double *depth;
@@ -673,6 +686,9 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   double  Tcanopy;
   double  Vpd;
   double  mu;
+  double  shortwave;
+  double  Catm;
+  double  *dryFrac;
 
   double *Evap;
   double *Ra;
@@ -690,6 +706,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   double *roughness;
 
   float  *root;
+  double *CanopLayerBnd;
 
   /* Water Flux Terms */
   double  IntRain;
@@ -718,6 +735,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   double *VaporMassFlux;
 
   char *ErrorString;
+  int   cidx;
 
   /** Read variables from variable length argument list **/
 
@@ -729,6 +747,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   delta_t   = (double) va_arg(ap, double);
   elevation = (double) va_arg(ap, double);
 
+  Wmax  = (double *) va_arg(ap, double *);
   Wcr   = (double *) va_arg(ap, double *);
   Wpwp  = (double *) va_arg(ap, double *);
   depth = (double *) va_arg(ap, double *);
@@ -744,6 +763,9 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   Tcanopy = (double) va_arg(ap, double);
   Vpd     = (double) va_arg(ap, double);
   mu      = (double) va_arg(ap, double);
+  shortwave=(double) va_arg(ap, double);
+  Catm    = (double) va_arg(ap, double);
+  dryFrac = (double *) va_arg(ap, double *);
 
   Evap     = (double *) va_arg(ap, double *);
   Ra       = (double *) va_arg(ap, double *);
@@ -761,6 +783,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   roughness    = (double *) va_arg(ap, double *);
 
   root = (float *) va_arg(ap, float *);
+  CanopLayerBnd = (double *) va_arg(ap, double *);
 
   /* Water Flux Terms */
   IntRain = (double) va_arg(ap, double);
@@ -801,6 +824,7 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("delta_t = %f\n", delta_t);
   printf("elevation = %f\n",  elevation);
   
+  printf("*Wmax = %f\n", *Wmax);
   printf("*Wcr = %f\n", *Wcr);
   printf("*Wpwp = %f\n", *Wpwp);
   printf("*depth = %f\n", *depth);
@@ -818,6 +842,9 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("Tcanopy = %f\n",  Tcanopy);
   printf("Vpd = %f\n",  Vpd);
   printf("mu = %f\n",  mu);
+  printf("shortwave = %f\n",  shortwave);
+  printf("Catm = %f\n",  Catm);
+  printf("dryFrac = %f\n",  *dryFrac);
 
   printf("Evap = %f\n", *Evap);
   printf("Rainfall = %f\n", *Rainfall);
@@ -833,6 +860,14 @@ double error_print_canopy_energy_bal(double Tfoliage, va_list ap)
   printf("roughness = [%f, %f]\n",  roughness[1], roughness[UnderStory]);
 
   printf("root = %f\n", *root);
+
+  if (options.CARBON) {
+    printf("CanopLayerBnd =");
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      printf(" %f", CanopLayerBnd[cidx]);
+    }
+    printf("\n");
+  }
 
   /* Water Flux Terms */
   printf("IntRain = %f\n",  IntRain);

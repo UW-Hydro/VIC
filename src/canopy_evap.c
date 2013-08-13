@@ -397,9 +397,11 @@ void transpiration(layer_data_struct *layer,
       *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
 		   veg_lib[veg_class].RGL, air_temp, vpd,
 		   veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
-      for (cidx=0; cidx<options.Ncanopy; cidx++) {
-        rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
-        if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+      if (options.CARBON) {
+        for (cidx=0; cidx<options.Ncanopy; cidx++) {
+          rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
+          if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+        }
       }
     }
     else {

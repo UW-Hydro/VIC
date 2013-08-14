@@ -130,6 +130,7 @@
 	      OUT_FDIR, and OUT_PAR.					TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Jul-25 Added SLAB_MOIST.						TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -379,6 +380,7 @@ extern char ref_veg_ref_crop[];
 #define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
+#define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
 
 /***** Define Boolean Values *****/
 #ifndef FALSE

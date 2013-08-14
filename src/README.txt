@@ -203,6 +203,24 @@ Added simulation of soil carbon storage and fluxes.
 
 
 
+Added soil moisture content for half-space below bottom soil layer
+
+	Files Affected:
+
+	soil_conduction.c
+	vicNl_def.h
+
+	Description:
+
+	VIC's soil thermal profile can extend well below its soil hydrologic
+	layers.  Previously, the moisture content of these soil thermal nodes
+	was set to that of the bottom soil layer.  Now, the moisture content can
+	be set to a user-specified value, SLAB_MOIST_FRACT, defined in
+	vicNl_def.h.
+
+
+
+
 Bug Fixes:
 ----------
 

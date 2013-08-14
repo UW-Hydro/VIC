@@ -26,7 +26,7 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes between VIC 4.1.2_wet and VIC 4.1.2.h *****
+***** Description of changes between VIC 4.1.2_wet and VIC 4.1.2.i *****
 --------------------------------------------------------------------------------
 
 New Features:
@@ -221,8 +221,89 @@ Added soil moisture content for half-space below bottom soil layer
 
 
 
+Implemented heat flux between lake and underlying soil.
+
+	Files Affected:
+
+	full_energy.c
+	func_surf_energy_bal.c
+	func_lake_energy_bal.c (new)
+	initialize_lake.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	prepare_full_energy.c
+	put_data.c
+	vicNl_def.h
+	vicNl.h
+	water_energy_balance.c
+	water_under_ice.c
+
+	Description:
+
+	Implemented heat flux between lake and underlying soil.
+
+	Previously, the lake bottom was treated as a no flux boundary, so
+	that no heat traveled between the lake and the underlying soil.  Soil
+	temperatures in the lake/wetland tile were determined only from the
+	energy fluxes through the wetland surface.  In other words, the soil
+	under the lake had the exact same temperature as the soil in the
+	exposed wetland, as if the lake were not present.
+
+	Now, the soil under the lake has its own temperature profile,
+	independent of that in the exposed wetland.  Heat and any un-absorbed
+	shortwave radiation in the lowest lake layer now can pass into the top
+	of the soil column beneath the lake.
+
+	There are now two new output variableis that track the soil temperature
+	profile under the lake:
+	  OUT_SOIL_TEMP_LAKE:  Average temperature in the hydrologic soil layers beneath the lake
+	  OUT_SOIL_TNODE_LAKE: Soil thermal node temperatures beneath the lake
+
+
+
+
 Bug Fixes:
 ----------
+
+
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.i to VIC 4.1.2.h *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed incorrect handling of case of a mix of cells with and without lakes.
+
+	Files Affected:
+
+	initialize_model_state.c
+	read_lakeparam.c
+
+	Description:
+
+	VIC was neither reading the lake parameter file correctly nor
+	initializing the lake data structures correctly for the case of a
+	mix of cells with and without lakes within a single lake parameter
+	file.  This has been fixed.
+
+
+
+
+Fixed use of tmp_moist array without initialization.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	Fixed use of tmp_moist array without initialization.
 
 
 

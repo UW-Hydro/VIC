@@ -10,7 +10,6 @@ int initialize_lake (lake_var_struct   *lake,
 		      cell_data_struct *cell,
 		      double            airtemp,
 		      int               skip_hydro)
-
 /**********************************************************************
 	initialize_lake		Laura Bowling		March 8, 2000
 
@@ -75,6 +74,7 @@ int initialize_lake (lake_var_struct   *lake,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -231,13 +231,16 @@ int initialize_lake (lake_var_struct   *lake,
   lake->energy.frozen           = 0.0;
   lake->energy.Nfrost           = 0;
   lake->energy.Nthaw            = 0;
-  lake->energy.T1_index         = 0;
+  lake->energy.T1_index         = lake->temp[0];
   lake->energy.Tcanopy          = 0.0;
   lake->energy.Tcanopy_fbflag   = 0;
   lake->energy.Tcanopy_fbcount  = 0;
   lake->energy.Tfoliage         = 0.0;
   lake->energy.Tfoliage_fbflag  = 0;
   lake->energy.Tfoliage_fbcount = 0;
+  lake->energy.Tlakebot         = lake->temp[0];
+  lake->energy.Tlakebot_fbflag  = 0;
+  lake->energy.Tlakebot_fbcount = 0;
   lake->energy.Tsurf            = lake->temp[0];
   lake->energy.Tsurf_fbflag     = 0;
   lake->energy.Tsurf_fbcount    = 0;
@@ -276,6 +279,8 @@ int initialize_lake (lake_var_struct   *lake,
   lake->energy.error             = 0.0;
   lake->energy.fusion            = 0.0;
   lake->energy.grnd_flux         = 0.0;
+  lake->energy.lake_soil_heat_flux            = 0.0;
+  lake->energy.lake_soil_net_short            = 0.0;
   lake->energy.latent            = 0.0;
   lake->energy.latent_sub        = 0.0;
   lake->energy.longwave          = 0.0;
@@ -310,6 +315,7 @@ int initialize_lake (lake_var_struct   *lake,
   for (i=0; i<2; i++) {
     lake->soil.aero_resist[i]    = 0.0;
   }
+  depth = 0;
   for (i=0; i<MAX_LAYERS; i++) {
     lake->soil.layer[i].Cs       = cell->layer[i].Cs;
     lake->soil.layer[i].T        = lake->temp[0];
@@ -319,11 +325,18 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.layer[i].phi      = cell->layer[i].phi;
 #if SPATIAL_FROST
     for (k=0; k<FROST_SUBAREAS; k++) {
-      lake->soil.layer[i].ice[k]     = 0.0;
+      lake->soil.layer[i].ice[k]     = cell->layer[i].ice[k];
     }
 #else
-    lake->soil.layer[i].ice      = 0.0;
+    lake->soil.layer[i].ice      = cell->layer[i].ice;
 #endif
+    if (i==0) {
+      lake->soil.layer[i].zwt      = 0.0;
+    }
+    else {
+      depth += soil_con->depth[i-1];
+      lake->soil.layer[i].zwt      = -depth*100;
+    }
   }
   lake->soil.zwt = 0.0;
   lake->soil.zwt_lumped = 0.0;

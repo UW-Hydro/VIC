@@ -148,9 +148,10 @@ int  put_data(dist_prcp_struct  *prcp,
 	      in the canopy to Tfoliage (canopy snow temperature) instead
 	      of Tcanopy (canopy air temperature).			CL via TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, and OUT_APAR.		TJB
+  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, OUT_APAR.		TJB
   2013-Jul-25 Added OUT_LITTERFALL, OUT_RHET, OUT_NEE, OUT_CLITTER,
 	      OUT_CINTER, and OUT_CSLOW. 				TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -409,41 +410,10 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                            out_data);
 
-          // Store Wetland-Specific Variables
-
-          if (IsWet) {
-            // Wetland soil temperatures
-            for(i=0;i<options.Nnode;i++) {
-              out_data[OUT_SOIL_TNODE_WL].data[i] = energy[veg][band].T[i];
-            }
-          }
-
           /**********************************
             Record Lake Variables
           **********************************/
           if (IsWet) {
-
-            // Override some variables of soil under lake with those of wetland
-            // This is for those variables whose lake values shouldn't be included
-            // in grid cell average
-            // Note: doing this for eb terms will lead to reporting of eb errors 
-            // this should be fixed when we implement full thermal solution beneath lake
-            for (i=0; i<MAX_FRONTS; i++) {
-              lake_var.energy.fdepth[i]      = energy[veg][band].fdepth[i];
-              lake_var.energy.tdepth[i]      = energy[veg][band].fdepth[i];
-            }
-            for (i=0; i<options.Nnode; i++) {
-              lake_var.energy.ice[i]         = energy[veg][band].ice[i];
-              lake_var.energy.T[i]           = energy[veg][band].T[i];
-            }
-            for (i=0; i<N_PET_TYPES; i++) {
-              lake_var.soil.pot_evap[i]      = cell[WET][veg][band].pot_evap[i];
-            }
-            lake_var.soil.rootmoist          = cell[WET][veg][band].rootmoist;
-            lake_var.energy.deltaH           = energy[veg][band].deltaH;
-            lake_var.energy.fusion           = energy[veg][band].fusion;
-            lake_var.energy.grnd_flux        = energy[veg][band].grnd_flux;
-
 
   	    /*********************************
               Record Water Balance Terms 
@@ -493,7 +463,25 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                              out_data);
 
+            // Wetland soil temperatures
+            for(i=0;i<options.Nnode;i++) {
+              if (Clake < 1) {
+                out_data[OUT_SOIL_TNODE_WL].data[i] = energy[veg][band].T[i];
+              }
+              else {
+                out_data[OUT_SOIL_TNODE_WL].data[i] = lake_var.energy.T[i];
+              }
+            }
+
             // Store Lake-Specific Variables
+
+            // Lake soil temperatures
+            for(i=0;i<options.Nnode;i++) {
+              out_data[OUT_SOIL_TNODE_LAKE].data[i] = lake_var.energy.T[i];
+            }
+            for(i=0;i<options.Nlayer;i++) {
+              out_data[OUT_SOIL_TEMP_LAKE].data[i] = lake_var.soil.layer[i].T;
+            }
 
             // Lake ice
             if (lake_var.new_ice_area > 0.0) {
@@ -527,6 +515,12 @@ int  put_data(dist_prcp_struct  *prcp,
 
             // Other lake characteristics
             out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
+            for(i=0;i<MAX_LAKE_NODES;i++) {
+              out_data[OUT_LAKE_LAYER_TEMP].data[i] = 0;
+            }
+            for(i=0;i<lake_var.activenod;i++) {
+              out_data[OUT_LAKE_LAYER_TEMP].data[i] = lake_var.temp[i];
+            }
             if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0) {
               out_data[OUT_LAKE_MOIST].data[0]      = (lake_var.volume / soil_con->cell_area) * 1000.; // mm over gridcell
               out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume / soil_con->cell_area) * 1000.; // same as OUT_LAKE_MOIST
@@ -758,6 +752,9 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_LAKE_EVAP].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_EVAP_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += KELVIN;
+      for(index=0;index<MAX_LAKE_NODES;index++) {
+        out_data[OUT_LAKE_LAYER_TEMP].data[index] += KELVIN;
+      }
       out_data[OUT_LAKE_PREC_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_RCHRG].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_RCHRG_V].aggdata[0] /= out_dt_sec;
@@ -783,9 +780,11 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += KELVIN;
       for (index=0; index<options.Nlayer; index++) {
         out_data[OUT_SOIL_TEMP].aggdata[index] += KELVIN;
+        out_data[OUT_SOIL_TEMP_LAKE].aggdata[index] += KELVIN;
       }
       for (index=0; index<options.Nnode; index++) {
         out_data[OUT_SOIL_TNODE].aggdata[index] += KELVIN;
+        out_data[OUT_SOIL_TNODE_LAKE].aggdata[index] += KELVIN;
         out_data[OUT_SOIL_TNODE_WL].aggdata[index] += KELVIN;
       }
       out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;

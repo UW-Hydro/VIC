@@ -41,6 +41,7 @@
   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added workaround for
 	      non-convergence of temperatures.					LCB via TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.			TJB
 *****************************************************************************/
 int water_under_ice(int     freezeflag, 
 		    double  sw_ice,
@@ -60,7 +61,12 @@ int water_under_ice(int     freezeflag,
 		    double  hice,
 		    double  sdepth,
 		    double  dt,
-		    double *energy_out_bottom)
+		    double *energy_out_bottom,
+		    double  z_soil,
+		    double  kappa_soil,
+		    double  Tlakebot,
+		    double  Tsoil,
+		    double *heat_cond_to_soil)
 	      
 {
   double Tnew[MAX_LAKE_NODES];
@@ -107,7 +113,8 @@ int water_under_ice(int     freezeflag,
 	
     temp_area (sw_underice_visible, sw_underice_nir, -1.*(*qw) , Ti, Tnew,
 	       water_density, de, dt, surface, numnod, 
-	       dz, surfdz, &joulenew, water_cp, energy_out_bottom);
+	       dz, surfdz, &joulenew, water_cp, energy_out_bottom,
+	       z_soil, kappa_soil, Tlakebot, Tsoil, heat_cond_to_soil);
 
     // recompute storage of heat in the lake
     *deltaH = (joulenew - jouleold)/(surface[0]*dt*SECPHOUR);

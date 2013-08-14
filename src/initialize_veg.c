@@ -22,7 +22,6 @@ void initialize_veg(veg_var_struct      **veg_var,
            lake model is active.                                  LCB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added AnnualNPP.						TJB
-
 **********************************************************************/
 {
   extern option_struct   options;

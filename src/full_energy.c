@@ -108,6 +108,7 @@ int  full_energy(char                 NEWCELL,
 	      totals.								TJB
   2013-Jul-25 Added photosynthesis terms.					TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.			TJB
 
 **********************************************************************/
 {
@@ -335,7 +336,17 @@ int  full_energy(char                 NEWCELL,
 		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
 
       /* Initialize soil thermal properties for the top two layers */
-      prepare_full_energy(iveg, Nveg, options.Nnode, prcp, soil_con, moist0, ice0);
+      for ( band = 0; band < Nbands; band++ ) {
+        if (soil_con->AreaFract[band] > 0.0) {
+          prepare_full_energy(cell[WET][iveg][band],
+			      cell[DRY][iveg][band],
+			      &(energy[iveg][band]),
+			      soil_con, prcp->mu[iveg],
+			      &(moist0[band]),
+			      &(ice0[band]));
+        }
+      }
+
 
       /** Compute Bare (free of snow) Albedo **/
       bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
@@ -408,7 +419,7 @@ int  full_energy(char                 NEWCELL,
               veg_var[dist][iveg][band].rsLayer[cidx] = HUGE_RESIST;
             }
             veg_var[dist][iveg][band].aPAR = 0;
-            if (dmy->hour == 0) {
+            if (dmy[rec].hour == 0) {
               calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
                                   veg_con[iveg].CanopLayerBnd,
                                   veg_lib[veg_class].LAI[dmy[rec].month-1],
@@ -425,6 +436,7 @@ int  full_energy(char                 NEWCELL,
           }
         }
       }
+
 
       /******************************
         Solve ground surface fluxes 
@@ -802,7 +814,7 @@ int  full_energy(char                 NEWCELL,
                            atmos->vpd[NR] / 1000.,
                            atmos->pressure[NR] / 1000.,
                            atmos->density[NR], lake_var, *lake_con,
-                           *soil_con, gp->dt, rec, gp->wind_h, dmy[rec], fraci);
+                           *soil_con, gp->dt, rec, gp->nrecs, gp->wind_h, dmy[rec], fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);
 
     /**********************************************************************

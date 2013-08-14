@@ -41,6 +41,7 @@
 # 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
 # 	      photosynth.c.							TJB
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
+# 2013-Jul-25 Added func_lake_energy_bal.c.					TJB
 #
 # $Id$
 #
@@ -90,7 +91,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
 	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
-	func_atmos_moist_bal.o func_canopy_energy_bal.o \
+	func_atmos_moist_bal.o func_canopy_energy_bal.o func_lake_energy_bal.o \
 	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
 	initialize_atmos.o initialize_model_state.o \
 	initialize_global.o initialize_new_storm.o initialize_snow.o \

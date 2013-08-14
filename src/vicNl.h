@@ -108,6 +108,7 @@
   2013-Jul-25 Added fdir to mtclim functions.				TJB
   2013-Jul-25 Added photosynthesis functions.				TJB
   2013-Jul-25 Added soil carbon functions.				TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
 ************************************************************************/
 
 #include <math.h>
@@ -442,8 +443,9 @@ double penman(double, double, double, double, double, double, double);
 void photosynth(char, double, double, double, double, double, double,
                 double, double, double, char *, double *, double *,
                 double *, double *, double *);
-void   prepare_full_energy(int, int, int, dist_prcp_struct *, 
-			   soil_con_struct *, double *, double *); 
+void   prepare_full_energy(cell_data_struct, cell_data_struct,
+			   energy_bal_struct *, soil_con_struct *,
+			   double, double *, double *); 
 double priestley(double, double);
 int    put_data(dist_prcp_struct *, atmos_data_struct *,
 		soil_con_struct *, veg_con_struct *,
@@ -517,9 +519,9 @@ int    snow_melt(double, double, double, double, double *, double, double *, dou
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, snow_data_struct *, soil_con_struct *);
 double SnowPackEnergyBalance(double, va_list);
+double soil_conductivity(double, double, double, double, double, double, double, double);
 void   soil_carbon_balance(soil_con_struct *, energy_bal_struct *,
                            cell_data_struct *, veg_var_struct *);
-double soil_conductivity(double, double, double, double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 energy_bal_struct, double *, double *, double *,
 			 int, int);

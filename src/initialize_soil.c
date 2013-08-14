@@ -26,6 +26,7 @@ void initialize_soil (cell_data_struct **cell,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2011-Mar-01 Now initializes more cell data structure terms, including
 	      asat and zwt.						TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -53,6 +54,9 @@ void initialize_soil (cell_data_struct **cell,
       }
       compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[veg][band].asat), &tmp_runoff);
       wrap_compute_zwt(soil_con, &(cell[veg][band]));
+      cell[veg][band].CLitter = 0;
+      cell[veg][band].CInter = 0;
+      cell[veg][band].CSlow = 0;
     }
   }
 

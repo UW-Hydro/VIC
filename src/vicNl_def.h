@@ -129,6 +129,7 @@
   2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
 	      OUT_FDIR, and OUT_PAR.					TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -346,6 +347,20 @@ extern char ref_veg_ref_crop[];
 /* Plant Maintenance and Growth Respiration Parameters */
 #define FRLeaf   0.4   /* Ratio of canopy leaf respiration to whole plant maintenance respiration */
 #define FRGrowth 0.25  /* Ratio of plant growth respiration to NPP */
+
+/* Soil Respiration Parameters */
+#define E0_LT	308.56 /* Lloyd-Taylor E0 parameter [K] */
+#define T0_LT	227.13 /* Lloyd-Taylor T0 parameter [K] */
+#define wminFM  0.0    /* minimum soil moisture (fraction) at which soil respiration can occur */
+#define wmaxFM  1.0    /* maximum soil moisture (fraction) at which soil respiration can occur */
+#define woptFM  0.5    /* soil moisture (fraction) at which maximum soil respiration occurs */
+#define Rhsat   0.15   /* ratio of soil respiration rate under saturated conditions (w=wmaxFM) to that under optimal conditions (w=woptFM) */
+#define Rfactor 0.5    /* scaling factor to account for other (non-moisture) sources of inhibition of respiration */
+#define tauLitter 2.86 /* Litter pool turnover time [y] */
+#define tauInter  33.3 /* Intermediate pool turnover time [y] */
+#define tauSlow   1000 /* Slow pool turnover time [y] */
+#define fAir    0.7    /* Fraction of respired carbon from litter pool that is lost to atmosphere */
+#define fInter  0.985  /* Fraction of [respired carbon from litter pool that goes to soil] that goes to intermediate pool */
 
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
@@ -586,10 +601,16 @@ extern char ref_veg_ref_crop[];
 #define OUT_ZSUM_NODE           158  /* depths of thermal nodes [m] */
 #endif // EXCESS_ICE
 // Carbon-Cycling Terms
-#define OUT_GPP            159  /* gross primary productivity [g C/m2d] */
-#define OUT_RAUT           160  /* autotrophic respiration [g C/m2d] */
-#define OUT_NPP            161  /* net primary productivity [g C/m2d] */
-#define OUT_APAR           162  /* absorbed PAR [W/m2] */
+#define OUT_APAR           159  /* absorbed PAR [W/m2] */
+#define OUT_GPP            160  /* gross primary productivity [g C/m2d] */
+#define OUT_RAUT           161  /* autotrophic respiration [g C/m2d] */
+#define OUT_NPP            162  /* net primary productivity [g C/m2d] */
+#define OUT_LITTERFALL     163  /* flux of carbon from living biomass into soil [g C/m2d] */
+#define OUT_RHET           164  /* soil respiration (heterotrophic respiration) [g C/m2d] */
+#define OUT_NEE            165  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
+#define OUT_CLITTER        166  /* Carbon density in litter pool [g C/m2d] */
+#define OUT_CINTER         167  /* Carbon density in intermediate pool [g C/m2d] */
+#define OUT_CSLOW          168  /* Carbon density in slow pool [g C/m2d] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -1094,12 +1115,20 @@ typedef struct {
 					  [1] = overstory */
   double asat;                         /* saturated area fraction */
   double baseflow;                     /* baseflow from current cell (mm/TS) */
+  double CLitter;                      /* carbon storage in litter pool [gC/m2] */
+  double CInter;                       /* carbon storage in intermediate pool [gC/m2] */
+  double CSlow;                        /* carbon storage in slow pool [gC/m2] */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */
   double pot_evap[N_PET_TYPES];        /* array of different types of potential evaporation (mm) */
   double runoff;                       /* runoff from current cell (mm/TS) */
   layer_data_struct layer[MAX_LAYERS]; /* structure containing soil variables 
 					  for each layer (see above) */
+  double RhLitter;                     /* soil respiration from litter pool [gC/m2] */
+  double RhLitter2Atm;                 /* soil respiration from litter pool [gC/m2] that goes to atmosphere */
+  double RhInter;                      /* soil respiration from intermediate pool [gC/m2] */
+  double RhSlow;                       /* soil respiration from slow pool [gC/m2] */
+  double RhTot;                        /* total soil respiration over all pools [gC/m2] (=RhLitter2Atm+RhInter+RhSlow) */
   double rootmoist;                    /* total of layer.moist over all layers
                                           in the root zone (mm) */
   double wetness;                      /* average of
@@ -1208,6 +1237,9 @@ typedef struct {
   double Rgrowth;               /* growth respiration ( = (GPP-Rmaint)*FRGrowth/(1+FRGrowth) ) (umol(CO2)/m2s) */
   double Raut;                  /* total plant respiration (= Rmaint + Rgrowth) (umol(CO2)/m2s) */
   double NPP;                   /* net primary productivity (= GPP - Raut) (umol(CO2)/m2s) */
+  double Litterfall;            /* flux of carbon from living biomass to litter pool [gC/m2] */
+  double AnnualNPP;             /* running total annual NPP [gC/m2] */
+  double AnnualNPPPrev;         /* total annual NPP from previous year [gC/m2] */
 } veg_var_struct;
 
 /************************************************************************

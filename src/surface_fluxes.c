@@ -152,6 +152,7 @@ int surface_fluxes(char                 overstory,
   2012-Oct-25 Now call calc_atmos_energy_bal() whenever there is a canopy
 	      with snow, regardless of the setting of CLOSE_ENERGY.	CL via TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -1212,11 +1213,17 @@ int surface_fluxes(char                 overstory,
     veg_var_dry->Raut     = store_Raut[DRY]/(double)N_steps;
     veg_var_dry->NPP      = store_NPP[DRY]/(double)N_steps;
 
-  }
-  if (options.CARBON) {
     for (dist=0; dist<2; dist++) {
       free((char *)(store_gsLayer[dist]));
     }
+
+    soil_carbon_balance(soil_con,energy,cell_wet,veg_var_wet);
+    soil_carbon_balance(soil_con,energy,cell_dry,veg_var_dry);
+
+    // Update running total annual NPP
+    if (veg_var_wet->NPP > 0) veg_var_wet->AnnualNPP += veg_var_wet->NPP*MCg*3600*gp->dt;
+    if (veg_var_dry->NPP > 0) veg_var_dry->AnnualNPP += veg_var_dry->NPP*MCg*3600*gp->dt;
+
   }
 
   /********************************************************

@@ -40,6 +40,7 @@
 # 2013-Jul-25 Added compute_coszen.c.						TJB
 # 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
 # 	      photosynth.c.							TJB
+# 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
 #
 # $Id$
 #
@@ -86,7 +87,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
 	compress_files.o compute_coszen.o compute_dz.o compute_pot_evap.o \
-	compute_treeline.o compute_zwt.o correct_precip.o \
+	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
 	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
@@ -104,7 +105,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	read_snowband.o read_soilparam.o read_soilparam_arc.o read_veglib.o \
 	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
 	set_output_defaults.o snow_intercept.o snow_melt.o \
-	snow_utility.o soil_conduction.o \
+	snow_utility.o soil_carbon_balance.o soil_conduction.o \
 	soil_thermal_eqn.o solve_snow.o \
 	surface_fluxes.o svp.o vicNl.o vicerror.o \
 	write_data.o write_forcing_file.o write_header.o write_layer.o \

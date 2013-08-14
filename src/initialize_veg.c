@@ -21,6 +21,7 @@ void initialize_veg(veg_var_struct      **veg_var,
            types to include the wetland vegetation fraction when the 
            lake model is active.                                  LCB
   2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added AnnualNPP.						TJB
 
 **********************************************************************/
 {
@@ -45,6 +46,8 @@ void initialize_veg(veg_var_struct      **veg_var,
         veg_var[i][j].Rgrowth = 0.0;
         veg_var[i][j].Raut = 0.0;
         veg_var[i][j].NPP = 0.0;
+        veg_var[i][j].AnnualNPP = 0.0;
+        veg_var[i][j].AnnualNPPPrev = 0.0;
         for ( k = 0 ; k < options.Ncanopy ; k++ ) {
           veg_var[i][j].NscaleFactor[k] = 0.0;
           veg_var[i][j].aPARLayer[k] = 0.0;

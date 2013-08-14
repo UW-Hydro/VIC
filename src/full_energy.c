@@ -107,6 +107,7 @@ int  full_energy(char                 NEWCELL,
   2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
 	      totals.								TJB
   2013-Jul-25 Added photosynthesis terms.					TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
 
 **********************************************************************/
 {
@@ -407,11 +408,7 @@ int  full_energy(char                 NEWCELL,
               veg_var[dist][iveg][band].rsLayer[cidx] = HUGE_RESIST;
             }
             veg_var[dist][iveg][band].aPAR = 0;
-          }
-        }
-        if (dmy[rec].hour == 0) {
-          for (dist=0; dist<Ndist; dist++) {
-	    for(band=0; band<Nbands; band++) {
+            if (dmy->hour == 0) {
               calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
                                   veg_con[iveg].CanopLayerBnd,
                                   veg_lib[veg_class].LAI[dmy[rec].month-1],
@@ -420,6 +417,10 @@ int  full_energy(char                 NEWCELL,
                                   soil_con->time_zone_lng,
                                   dmy[rec],
                                   veg_var[dist][iveg][band].NscaleFactor);
+            }
+            if (dmy[rec].month == 1 && dmy[rec].day == 1) {
+              veg_var[dist][iveg][band].AnnualNPPPrev = veg_var[dist][iveg][band].AnnualNPP;
+              veg_var[dist][iveg][band].AnnualNPP = 0;
             }
           }
         }

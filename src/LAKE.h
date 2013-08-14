@@ -26,6 +26,7 @@
   2010-Dec-28 Added latitude to alblake() arglist.			TJB
   2011-Mar-01 Added rescale_snow_storage().  Added terms to argument
 	      list of initialize_lake().				TJB
+  2013-Jul-25 Added advect_carbon_storage().				TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -70,6 +71,7 @@
 
 double adjflux(double, double, double ,double, double, double, double,
 	       double, double, double, double *, double *);
+void advect_carbon_storage(double, double, lake_var_struct *, cell_data_struct *);
 void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 

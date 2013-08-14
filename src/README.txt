@@ -145,6 +145,64 @@ Added simulation of photosynthesis.
 
 
 
+Added simulation of soil carbon storage and fluxes.
+
+	Files Affected:
+
+	compute_soil_resp.c (new)
+	full_energy.c
+	initialize_lake.c
+	initialize_soil.c
+	initialize_veg.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	put_data.c
+	read_initial_model_state.c
+	soil_carbon_balance.c (new)
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	Added simulation of soil carbon storage and fluxes.  This formulation was
+	taken mostly from the LPJ model (Sitch, 2003), which in turn used a
+	Lloyd-Taylor model for the dependence of soil respiration on soil
+	temperature.  The dependence of soil respiration on soil moisture was
+	based on the formulation of Yi et al (2012) but modified to allow a small
+	respiration rate under saturated conditions.
+
+	At this point, we do not simulate the storage of carbon in living biomass.
+	Therefore, the flux of carbon into the soil (litterfall) is set equal to
+	the total NPP of the previous calendar year, spread evenly over the current
+	year.  As in the LPJ model, soil carbon is stored in 3 pools: litter (fast),
+	intermediate, and slow; with associated turnover times of 2.86 y, 33.3 y, and
+	1,000 y, respectively.  Litterfall enters the litter pool.  Carbon exits the
+	litter pool through respiration (RhLitter).  A fraction (fAir) of this
+	respired carbon is in the form of CO2 and is vented directly to the atmosphere
+	(RhLitter2Atm).  The remainder is sent to the intermediate and slow pools
+	in the proportions fInter and (1-fInter), respectively.  These pools also
+	respire carbon, which is assumed to be in the form of CO2 and vented directly
+	to the atmosphere.
+
+	There are several new output variables associated with this feature:
+	  OUT_RHET: Total heterotrophic respiration vented to the atmosphere
+	            (= RhLitter2Atm+RhInter+RhSlow)  [g C/m2d]
+	  OUT_NEE:  Net Ecosystem Exchange (= NPP-RHET) [g C/m2d]
+	  OUT_LITTERFALL: Flux of carbon from living biomass into litter pool [g C/m2d]
+	  OUT_CLITTER: Carbon density in the litter pool [g C/m2]
+	  OUT_CINTER: Carbon density in the intermediate pool [g C/m2]
+	  OUT_CSLOW: Carbon density in the slow pool [g C/m2]
+
+	This feature is part of the carbon cycle, controlled by the setting of the
+	CARBON option in the global parameter file.
+
+
+
+
 Bug Fixes:
 ----------
 

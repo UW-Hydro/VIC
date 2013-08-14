@@ -148,7 +148,9 @@ int  put_data(dist_prcp_struct  *prcp,
 	      in the canopy to Tfoliage (canopy snow temperature) instead
 	      of Tcanopy (canopy air temperature).			CL via TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, OUT_APAR.		TJB
+  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, and OUT_APAR.		TJB
+  2013-Jul-25 Added OUT_LITTERFALL, OUT_RHET, OUT_NEE, OUT_CLITTER,
+	      OUT_CINTER, and OUT_CSLOW. 				TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -649,6 +651,12 @@ int  put_data(dist_prcp_struct  *prcp,
   save_data->swe = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0];
   save_data->wdew = out_data[OUT_WDEW].data[0];
 
+  // Carbon Terms
+  if (options.CARBON) {
+    out_data[OUT_RHET].data[0] *= (double)global_param.dt/24.0; // convert to gC/m2d
+    out_data[OUT_NEE].data[0] = out_data[OUT_NPP].data[0]-out_data[OUT_RHET].data[0];
+  }
+
   /********************
     Check Water Balance 
     ********************/
@@ -987,10 +995,15 @@ void collect_wb_terms(cell_data_struct  cell,
   *****************************/
   if (options.CARBON) {
 
+    out_data[OUT_APAR].data[0] += veg_var.aPAR * AreaFactor;
     out_data[OUT_GPP].data[0] += veg_var.GPP * MCg * SEC_PER_DAY * AreaFactor;
     out_data[OUT_RAUT].data[0] += veg_var.Raut * MCg * SEC_PER_DAY * AreaFactor;
     out_data[OUT_NPP].data[0] += veg_var.NPP * MCg * SEC_PER_DAY * AreaFactor;
-    out_data[OUT_APAR].data[0] += veg_var.aPAR * AreaFactor;
+    out_data[OUT_LITTERFALL].data[0] += veg_var.Litterfall * AreaFactor;
+    out_data[OUT_RHET].data[0] += cell.RhTot * AreaFactor;
+    out_data[OUT_CLITTER].data[0] += cell.CLitter * AreaFactor;
+    out_data[OUT_CINTER].data[0] += cell.CInter * AreaFactor;
+    out_data[OUT_CSLOW].data[0] += cell.CSlow * AreaFactor;
 
   }
 

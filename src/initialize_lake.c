@@ -74,6 +74,7 @@ int initialize_lake (lake_var_struct   *lake,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -330,6 +331,16 @@ int initialize_lake (lake_var_struct   *lake,
     for (i=0; i<N_PET_TYPES; i++) {
       lake->soil.pot_evap[i]       = 0.0;
     }
+  }
+  if (options.CARBON) {
+    lake->soil.RhLitter = 0.0;
+    lake->soil.RhLitter2Atm = 0.0;
+    lake->soil.RhInter = 0.0;
+    lake->soil.RhSlow = 0.0;
+    lake->soil.RhTot = 0.0;
+    lake->soil.CLitter = 0.0;
+    lake->soil.CInter = 0.0;
+    lake->soil.CSlow = 0.0;
   }
 
   return(0);

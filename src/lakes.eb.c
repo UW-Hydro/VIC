@@ -1931,6 +1931,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2385,6 +2386,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     }
   }
 
+  if (options.CARBON) {
+    advect_carbon_storage(lakefrac, newfraction, lake, &(cell[WET][iveg][band]));
+  }
+
   free((char*)delta_moist);
   free((char*)moist);
 
@@ -2766,3 +2771,39 @@ void rescale_snow_energy_fluxes(double oldfrac,
 
 }
 
+void advect_carbon_storage(double lakefrac,
+                           double newfraction,
+                           lake_var_struct  *lake,
+                           cell_data_struct *cell)
+/**********************************************************************
+  advect_carbon_storage	Ted Bohn	2013
+
+  Function to update carbon storage in the lake and wetland soil columns
+  to account for changes in wetland area.
+
+  Modifications:
+**********************************************************************/
+{
+
+  extern option_struct options;
+  int i,k;
+
+  if (newfraction > lakefrac) { // lake grew, wetland shrank
+
+    if (newfraction < SMALL) newfraction = SMALL;
+    lake->soil.CLitter = (lakefrac*lake->soil.CLitter + (newfraction-lakefrac)*cell->CLitter)/newfraction;
+    lake->soil.CInter = (lakefrac*lake->soil.CInter + (newfraction-lakefrac)*cell->CInter)/newfraction;
+    lake->soil.CSlow = (lakefrac*lake->soil.CSlow + (newfraction-lakefrac)*cell->CSlow)/newfraction;
+
+  }
+
+  else if (newfraction < lakefrac) { // lake shrank, wetland grew
+
+    if ((1-newfraction) < SMALL) newfraction = 1 - SMALL;
+    cell->CLitter = ((lakefrac-newfraction)*lake->soil.CLitter + (1-lakefrac)*cell->CLitter)/(1-newfraction);
+    cell->CInter = ((lakefrac-newfraction)*lake->soil.CInter + (1-lakefrac)*cell->CInter)/(1-newfraction);
+    cell->CSlow = ((lakefrac-newfraction)*lake->soil.CSlow + (1-lakefrac)*cell->CSlow)/(1-newfraction);
+
+  }
+
+}

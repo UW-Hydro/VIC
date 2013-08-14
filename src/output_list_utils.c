@@ -60,6 +60,7 @@ out_data_struct *create_output_list() {
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -223,10 +224,16 @@ out_data_struct *create_output_list() {
 #endif
 
   // Carbon-cycling Terms
+  strcpy(out_data[OUT_APAR].varname,"OUT_APAR");                       /* absorbed PAR [W/m2] */
   strcpy(out_data[OUT_GPP].varname,"OUT_GPP");                         /* gross primary productivity [g C/m2s] */
   strcpy(out_data[OUT_RAUT].varname,"OUT_RAUT");                       /* autotrophic respiration [g C/m2s] */
   strcpy(out_data[OUT_NPP].varname,"OUT_NPP");                         /* net primary productivity [g C/m2s] */
-  strcpy(out_data[OUT_APAR].varname,"OUT_APAR");                       /* absorbed PAR [W/m2] */
+  strcpy(out_data[OUT_LITTERFALL].varname,"OUT_LITTERFALL");           /* flux of carbon from living biomass into soil [g C/m2d] */
+  strcpy(out_data[OUT_RHET].varname,"OUT_RHET");                       /* heterotrophic respiration [g C/m2d] */
+  strcpy(out_data[OUT_NEE].varname,"OUT_NEE");                         /* net ecosystem exchange [g C/m2d] */
+  strcpy(out_data[OUT_CLITTER].varname,"OUT_CLITTER");                 /* litter pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */

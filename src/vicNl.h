@@ -107,6 +107,7 @@
 	      the parent function.					CL via TJB
   2013-Jul-25 Added fdir to mtclim functions.				TJB
   2013-Jul-25 Added photosynthesis functions.				TJB
+  2013-Jul-25 Added soil carbon functions.				TJB
 ************************************************************************/
 
 #include <math.h>
@@ -238,6 +239,8 @@ void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
 void   compute_runoff_and_asat(soil_con_struct *, double *, double, double *, double *);
+void   compute_soil_resp(int, double *, double, double, double *, double *,
+                         double, double, double, double *, double *, double *);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, double *, 
 					     double *, double *, double *, 
@@ -514,6 +517,8 @@ int    snow_melt(double, double, double, double, double *, double, double *, dou
                  double *, double *, double *, double *, double *, double *, 
                  int, int, int, int, snow_data_struct *, soil_con_struct *);
 double SnowPackEnergyBalance(double, va_list);
+void   soil_carbon_balance(soil_con_struct *, energy_bal_struct *,
+                           cell_data_struct *, veg_var_struct *);
 double soil_conductivity(double, double, double, double, double, double, double, double);
 void   soil_thermal_calc(soil_con_struct *, layer_data_struct *,
 			 energy_bal_struct, double *, double *, double *,

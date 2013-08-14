@@ -27,11 +27,12 @@ void initialize_soil (cell_data_struct **cell,
   2011-Mar-01 Now initializes more cell data structure terms, including
 	      asat and zwt.						TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 **********************************************************************/
 {
   extern option_struct options;
 
-  int veg, band, lindex, frost_area;
+  int veg, band, lindex, frost_area, zwtidx;
   double tmp_moist[MAX_LAYERS];
   double tmp_runoff;
   
@@ -52,11 +53,31 @@ void initialize_soil (cell_data_struct **cell,
         cell[veg][band].layer[lindex].ice = 0;
 #endif
       }
-      compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[veg][band].asat), &tmp_runoff);
+      if (options.CARBON) {
+        cell[veg][band].CLitter = 0;
+        cell[veg][band].CInter = 0;
+        cell[veg][band].CSlow = 0;
+      }
+      compute_runoff_and_asat(soil_con, 0, tmp_moist, 0, &(cell[veg][band].asat), &tmp_runoff);
+      if (options.DIST_ZWT) {
+        for(zwtidx=0;zwtidx<options.Nzwt;zwtidx++) {
+          cell[veg][band].baseflow_dist_zwt[zwtidx] = 0;
+          for(lindex=0;lindex<options.Nlayer;lindex++) {
+	    cell[veg][band].layer[lindex].evap_dist_zwt[zwtidx] = 0;
+            cell[veg][band].layer[lindex].moist_dist_zwt[zwtidx] = cell[veg][band].layer[lindex].moist;
+            tmp_moist[lindex] = cell[veg][band].layer[lindex].moist;
+#if SPATIAL_FROST
+            for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+              cell[veg][band].layer[lindex].ice_dist_zwt[zwtidx][frost_area] = cell[veg][band].layer[lindex].ice[frost_area];
+            }
+#else
+            cell[veg][band].layer[lindex].ice_dist_zwt[zwtidx] = cell[veg][band].layer[lindex].ice;
+#endif
+          }
+          compute_runoff_and_asat(soil_con, 0, tmp_moist, 0, &(cell[veg][band].asat_dist_zwt[zwtidx]), &tmp_runoff);
+        }
+      }
       wrap_compute_zwt(soil_con, &(cell[veg][band]));
-      cell[veg][band].CLitter = 0;
-      cell[veg][band].CInter = 0;
-      cell[veg][band].CSlow = 0;
     }
   }
 

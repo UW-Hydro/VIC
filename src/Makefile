@@ -42,6 +42,7 @@
 # 	      photosynth.c.							TJB
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
 # 2013-Jul-25 Added func_lake_energy_bal.c.					TJB
+# 2013-Jul-25 Added distribute_moist_zwt.c.					TJB
 #
 # $Id$
 #
@@ -89,7 +90,8 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
 	compress_files.o compute_coszen.o compute_dz.o compute_pot_evap.o \
 	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
-	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
+	display_current_settings.o dist_prec.o distribute_moist_zwt.o \
+	estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o func_lake_energy_bal.o \
 	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \

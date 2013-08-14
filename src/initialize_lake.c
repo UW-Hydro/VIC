@@ -75,10 +75,11 @@ int initialize_lake (lake_var_struct   *lake,
 	      option.							TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 **********************************************************************/
 {
   extern option_struct options;
-  int i, k;
+  int i, j, k;
   int status;
   double depth;
   double remain;
@@ -354,6 +355,29 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.CLitter = 0.0;
     lake->soil.CInter = 0.0;
     lake->soil.CSlow = 0.0;
+  }
+  if (options.DIST_ZWT) {
+    for (j=0; j<options.Nzwt; j++) {
+      if (!skip_hydro)
+        lake->soil.baseflow_dist_zwt[j] = 0;
+      for (i=0; i<MAX_LAYERS; i++) {
+        lake->soil.layer[i].evap_dist_zwt[j] = 0;
+        lake->soil.layer[i].moist_dist_zwt[j] = soil_con->max_moist[i];
+#if SPATIAL_FROST
+        for (k=0; k<FROST_SUBAREAS; k++) {
+          lake->soil.layer[i].ice_dist_zwt[j][k]     = cell->layer[i].ice_dist_zwt[j][k];
+        }
+#else
+        lake->soil.layer[i].ice_dist_zwt[j]      = cell->layer[i].ice_dist_zwt[j];
+#endif
+        lake->soil.layer[i].zwt_dist_zwt[j] = 0;
+      }
+      for (j=0; j<options.Nzwt; j++) {
+        lake->soil.asat_dist_zwt[j] = 1.0;
+        lake->soil.zwt_dist_zwt[j] = 0;
+        lake->soil.zwt_lumped_dist_zwt[j] = 0;
+      }
+    }
   }
 
   return(0);

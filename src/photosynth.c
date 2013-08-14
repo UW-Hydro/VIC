@@ -229,6 +229,7 @@ void photosynth(char    Ctype,
       ********************************************************************************/
       JC = K * (*Ci);
 
+//fprintf(stderr,"other mode\nJE %f JC %f\n",JE,JC);
     }
 
   } // End computation of gross photosynthesis components at given Ci
@@ -286,6 +287,7 @@ void photosynth(char    Ctype,
       tmp = B*B/4 - C;
       if (tmp < 0) tmp = 0;
       JE = B/2. - sqrt(tmp);
+//fprintf(stderr,"Rdark %.10f W1 %.10f Catm %.10f K1 %.10f rs %.10f r0 %.10f gamma %.10f B %.10f C %.10f JE %.10f\n",*Rdark,W1,Catm,K1,*rs,r0,gamma,B,C,JE);
       /********************************************************************************
       ! Set Ci in
       !  JC = Vcmax * (Ci - gamma) / (Ci + KC * (1 + OX/KO))
@@ -298,6 +300,7 @@ void photosynth(char    Ctype,
       tmp = B*B/4 - C;
       if (tmp < 0) tmp = 0;
       JC = B/2. - sqrt(tmp);
+//fprintf(stderr,"Rdark %.10f W2 %.10f Catm %.10f K2 %.10f rs %.10f r0 %.10f gamma %.10f B %.10f C %.10f JC %.10f\n",*Rdark,W2,Catm,K2,*rs,r0,gamma,B,C,JC);
 
     }
     else if (Ctype == PHOTO_C4) {
@@ -368,6 +371,7 @@ void photosynth(char    Ctype,
     if (*Ci < 0) *Ci = 0;
 
   }
+//fprintf(stderr,"JE %.10f JC %.10f Agross %.10f Ci %.10f\n",JE*1e12,JC*1e12,*Agross*1e12,*Ci);
 
   /********************************************************************************
   ! Compute photorespiration

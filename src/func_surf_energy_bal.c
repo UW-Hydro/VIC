@@ -109,6 +109,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -765,7 +766,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 #if SPATIAL_FROST
 		         frost_fract,
 #endif // SPATIAL_FROST
-		         root, dryFrac, shortwave, Catm, CanopLayerBnd);
+		         root, soil_con->ZwtAreaFract,
+		         dryFrac, shortwave, Catm, CanopLayerBnd);
     }
     else if(!SNOWING) {
       Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 

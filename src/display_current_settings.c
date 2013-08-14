@@ -316,6 +316,12 @@ void display_current_settings(int                 mode,
   else
     fprintf(stderr,"SHARE_LAYER_MOIST\t\tFALSE\n");
   fprintf(stderr,"Ncanopy\t\t%d\n",options.Ncanopy);
+  if (options.DIST_ZWT) {
+    fprintf(stderr,"DIST_ZWT\t\tTRUE\n");
+    fprintf(stderr,"Nzwt\t\t\t%d\n",options.Nzwt);
+  }
+  else
+    fprintf(stderr,"DIST_ZWT\t\tFALSE\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Forcing Data:\n");

@@ -23,6 +23,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
  ********************************************************************/
 {
 
@@ -72,6 +73,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double *roughness;
 
   float  *root;
+  double *ZwtAreaFract;
+
   double *CanopLayerBnd;
 
   /* Water Flux Terms */
@@ -154,6 +157,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   roughness    = (double *) va_arg(ap, double *);
 
   root = (float *) va_arg(ap, float *);
+  ZwtAreaFract = (double *) va_arg(ap, double *);
+
   CanopLayerBnd= (double *) va_arg(ap, double *);
 
   /* Water Flux Terms */
@@ -257,7 +262,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 #if SPATIAL_FROST
 			frost_fract,
 #endif
-			root, dryFrac, shortwave, Catm, CanopLayerBnd);
+			root, ZwtAreaFract,
+			dryFrac, shortwave, Catm, CanopLayerBnd);
     Wdew[WET] /= 1000.;
 
     *LatentHeat = Le * *Evap * RHO_W;

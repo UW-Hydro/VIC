@@ -109,6 +109,7 @@ int  full_energy(char                 NEWCELL,
   2013-Jul-25 Added photosynthesis terms.					TJB
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Jul-25 Implemented heat flux between lake and soil.			TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.		TJB
 
 **********************************************************************/
 {
@@ -117,6 +118,7 @@ int  full_energy(char                 NEWCELL,
   char                   overstory;
   int                    i, j, p;
   int                    lidx;
+  int                    zwtidx;
   int                    Ndist;
   int                    dist;
   int                    iveg;
@@ -754,7 +756,7 @@ int  full_energy(char                 NEWCELL,
           if ( soil_con->AreaFract[band] > 0 ) {
 	
 	    // Loop through distributed precipitation fractions
-	    for ( dist = 0; dist < 2; dist++ ) {
+	    for ( dist = 0; dist < Ndist; dist++ ) {
 	      
 	      if ( dist == 0 ) 
 		tmp_mu = prcp->mu[iveg]; 
@@ -768,6 +770,12 @@ int  full_energy(char                 NEWCELL,
                             * Cv * soil_con->AreaFract[band] );
                 cell[dist][iveg][band].runoff = 0;
                 cell[dist][iveg][band].baseflow = 0;
+                if (options.DIST_ZWT) {
+                  for(zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+                    cell[dist][iveg][band].runoff_dist_zwt[zwtidx] = 0;
+                    cell[dist][iveg][band].baseflow_dist_zwt[zwtidx] = 0;
+                  }
+                }
               }
               else {
                 sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu
@@ -776,6 +784,12 @@ int  full_energy(char                 NEWCELL,
                                 * Cv * soil_con->AreaFract[band] );
                 cell[dist][iveg][band].runoff *= (1-lake_con->rpercent);
                 cell[dist][iveg][band].baseflow *= (1-lake_con->rpercent);
+                if (options.DIST_ZWT) {
+                  for(zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+                    cell[dist][iveg][band].runoff_dist_zwt[zwtidx] *= (1-lake_con->rpercent);
+                    cell[dist][iveg][band].baseflow_dist_zwt[zwtidx] *= (1-lake_con->rpercent);
+                  }
+                }
               }
 
 	    }

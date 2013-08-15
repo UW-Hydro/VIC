@@ -6,7 +6,7 @@ static char vcid[] = "$Id$";
 
 void display_current_settings(int                 mode,
                               filenames_struct    *names,
-                              global_param_struct *global) 
+                              global_param_struct *global)
 /**********************************************************************
   display_current_settings	Ted Bohn			2003
 
@@ -51,6 +51,7 @@ void display_current_settings(int                 mode,
   2012-Jan-16 Removed LINK_DEBUG code				BN
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.TJB
+  2013-Aug-15 Removed Snow Albedo Parameterization Option       JJH
 **********************************************************************/
 {
 
@@ -275,10 +276,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"QUICK_SOLVE\t\tTRUE\n");
   else
     fprintf(stderr,"QUICK_SOLVE\t\tFALSE\n");
-  if (options.SNOW_ALBEDO == USACE)
-    fprintf(stderr,"SNOW_ALBEDO\t\tUSACE\n");
-  else if (options.SNOW_ALBEDO == SUN1999)
-    fprintf(stderr,"SNOW_ALBEDO\t\tSUN1999\n");
   if (options.SNOW_DENSITY == DENS_BRAS)
     fprintf(stderr,"SNOW_DENSITY\t\tDENS_BRAS\n");
   else if (options.SNOW_DENSITY == DENS_SNTHRM)

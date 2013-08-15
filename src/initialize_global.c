@@ -9,7 +9,7 @@ void initialize_global() {
 /*********************************************************************
   initialize_global              Keith Cherkauer       March 1998
 
-  This subroutine initalizes all global parameters before they are 
+  This subroutine initalizes all global parameters before they are
   called by the model.
 
   option_strudt:           structure containing all global model options
@@ -29,7 +29,7 @@ void initialize_global() {
                            input and output file names
   options.SNOW_BAND      = Number of elevation bands over which to solve the
                            enery balance snow model
- 
+
   debug_struct:            Structure cantains all debugging flags
   debug.DEBUG            = TRUE - turn on all debugging
   debug.PRT_SOIL         = TRUE - print soil parameter debugging files
@@ -39,12 +39,12 @@ void initialize_global() {
   debug.PRT_SNOW         = TRUE - print snow pack debugging files
   debug.PRT_FLUX         = TRUE - print energy flux debugging files
   debug.PRT_VAR          = TRUE - print variable debugging files
-  debug.PRT_TEMP         = TRUE - 
-  debug.PRT_MOIST        = TRUE - 
-  debug.PRT_KAPPA        = TRUE - 
-  debug.PRT_BALANCE      = TRUE - 
-  debug.PRT_GRID         = TRUE - 
-  debug.debug_dir        = 
+  debug.PRT_TEMP         = TRUE -
+  debug.PRT_MOIST        = TRUE -
+  debug.PRT_KAPPA        = TRUE -
+  debug.PRT_BALANCE      = TRUE -
+  debug.PRT_GRID         = TRUE -
+  debug.debug_dir        =
 
   param_set.ALBEDO       = FALSE;
   param_set.AIR_TEMP     = FALSE;
@@ -70,7 +70,7 @@ void initialize_global() {
   param_set.WIND_N       = FALSE;
 
   Modifications:
-  11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file 
+  11-18-02 Added BLOWING_SNOW and PRT_LAKE to global file
            initialization.                                        KAC
   04-22-03 Removed LAKS and LAKE_PROFILE from pre-processor
            statements that removed them is LAKE_MODEL was FALSE.
@@ -124,6 +124,7 @@ void initialize_global() {
 	      for LW_TYPE to LW_PRATA.						TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Jul-25 Added DIST_ZWT.							TJB
+  2013-Aug-15 Removed Snow Albedo Parameterization Option       JJH
 *********************************************************************/
 
   extern option_struct options;
@@ -166,7 +167,6 @@ void initialize_global() {
   options.RC_MODE               = RC_JARVIS;
   options.ROOT_ZONES            = MISSING;
   options.SHARE_LAYER_MOIST     = TRUE;
-  options.SNOW_ALBEDO           = USACE;
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;

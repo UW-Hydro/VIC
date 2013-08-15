@@ -37,7 +37,7 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
       UNITS:
 	new_snow	         mm	new snow
 	air_temp	         C	current air temperature
-	swq		m	snow water equivalent	
+	swq		m	snow water equivalent
 	depth		m	snow pack depth
 	density            kg/m^3   snow density
 
@@ -45,7 +45,7 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
 
   Modified:
   08-19-99 Added check to make sure that the change in snowpack depth
-           due to new snow does not exceed the actual depth of the 
+           due to new snow does not exceed the actual depth of the
 	   pack.							Bart
   06-30-03 Added check to keep compression from aging from exceeding
            the actual depth of the snowpack.				KAC
@@ -255,6 +255,7 @@ double snow_albedo(double new_snow,
 	      albedo algorithm described in Sun, S., J. Jin, and Y. Xue,
 	      A simple snow-atmosphere-soil transfer model, J. Geophys. Res.,
 	      104 (D16), 19,587-19,597, 1999.				KAC via TJB
+  2013-Aug-15 Remove the Sun1999 option                      JJH
 **********************************************************************/
 
   extern option_struct   options;
@@ -265,40 +266,17 @@ double snow_albedo(double new_snow,
   /** Aged Snow **/
   else if(swq > 0.0) {
 
-    if ( options.SNOW_ALBEDO == SUN1999 ) {
-
-      // From Sun et al., JGR, 1999
-      if ( depth > 0.025 ) {
-        // Use deep snow albedo
-        albedo = 0.5 + ( albedo - 0.5 ) * exp( -0.01 * dt / 24);
-      }
-      else if ( cold_content < 0.0 ) {
-        // Use shallow dry snow albedo
-        albedo = albedo - 0.006 * dt / 24;
-      }
-      else
-        // Use shallow melting snow albedo
-        albedo = albedo - 0.071 * dt / 24;
-
-      if ( albedo < 0 ) albedo = 0;
-
-    }
-    else {
-
       /* Accumulation season */
       if ( cold_content < 0.0 && !MELTING )
-        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
+        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A,
 				  pow((double)last_snow * dt / 24.,
 				      SNOW_ALB_ACCUM_B));
 
       /* Melt Season */
       else
-        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A, 
+        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A,
 				  pow((double)last_snow * dt / 24.,
 				      SNOW_ALB_THAW_B));
-
-    }
-
   }
 
   else

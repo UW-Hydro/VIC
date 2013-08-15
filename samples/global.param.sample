@@ -6,7 +6,7 @@
 # Simulation Parameters
 #######################################################################
 NLAYER		3	# number of soil layers
-NODES		10	# number of soil thermal nodes 
+NODES		10	# number of soil thermal nodes
 TIME_STEP 	3	# model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
 SNOW_STEP	3	# time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
 STARTYEAR	2000	# year model simulation starts
@@ -39,7 +39,6 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 # Precip (Rain and Snow) Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
-#SNOW_ALBEDO	USACE	# USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
 #SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
 #BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 #COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)

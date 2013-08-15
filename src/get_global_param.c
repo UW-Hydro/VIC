@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 #include <string.h>
- 
+
 static char vcid[] = "$Id$";
 
 /********************************************************************/
@@ -12,7 +12,7 @@ int NR;		      /* array index for atmos struct that indicates
 			 the model step avarage or sum */
 int NF;		      /* array index loop counter limit for atmos
 			 struct that indicates the SNOW_STEP values */
- 
+
 global_param_struct get_global_param(filenames_struct *names,
                                      FILE             *gp)
 /**********************************************************************
@@ -33,7 +33,7 @@ global_param_struct get_global_param(filenames_struct *names,
            format forcing file rad routines.              KAC
   02-27-01 added reads for lake model parameters          KAC
   04-21-03 added parameters for blowing snow algorithm, printing
-           lake variables during debugging and reading Bart's 
+           lake variables during debugging and reading Bart's
            new Arno parameters.                           KAC
   11-May-04 Modified to display compile-time and run-time options
 	    if VERBOSE is set to TRUE.						TJB
@@ -105,6 +105,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Jul-25 Added DIST_ZWT.							TJB
+  2013-Aug-15 Removed Snow Albedo Parameterization Option       JJH
 **********************************************************************/
 {
   extern option_struct    options;
@@ -272,11 +273,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.EXP_TRANS=TRUE;
         else options.EXP_TRANS = FALSE;
       }
-      else if (strcasecmp("SNOW_ALBEDO", optstr)==0) {
-        sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("SUN1999",flgstr)==0) options.SNOW_ALBEDO=SUN1999;
-        else options.SNOW_ALBEDO = USACE;
-      }
       else if (strcasecmp("SNOW_DENSITY", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;
@@ -443,7 +439,7 @@ global_param_struct get_global_param(filenames_struct *names,
        Define forcing files
       *************************************/
       else if(strcasecmp("FORCING1",optstr)==0) {
-	if ( strcmp( names->f_path_pfx[0], "MISSING" ) != 0 ) 
+	if ( strcmp( names->f_path_pfx[0], "MISSING" ) != 0 )
 	  nrerror("Tried to define FORCING1 twice, if you want to use two forcing files, the second must be defined as FORCING2");
         sscanf(cmdstr,"%*s %s", names->f_path_pfx[0]);
 	file_num = 0;
@@ -570,9 +566,9 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",names->veg);
       }
       else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
-        fprintf(stderr, "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n"); 
+        fprintf(stderr, "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n");
+        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n");
+        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n");
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
 //          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  LAI_FROM_VEGPARAM\"");
@@ -944,7 +940,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if(options.IMPLICIT)  {
-    if ( QUICK_FS ) 
+    if ( QUICK_FS )
       fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
   }
   if( EXCESS_ICE ) {
@@ -954,9 +950,9 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
     if ( options.QUICK_SOLVE ) {
       fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
-      options.QUICK_SOLVE=FALSE;  
-    }    
-    if ( QUICK_FS ) 
+      options.QUICK_SOLVE=FALSE;
+    }
+    if ( QUICK_FS )
       nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
   }
   if(options.Nlayer > MAX_LAYERS) {
@@ -1005,7 +1001,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	  global.startday, global.startmonth, global.startyear);
   if ( global.nrecs > 0 )
     fprintf(stderr,"Number of Records = %d\n\n",global.nrecs);
-  else 
+  else
     fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
 	    global.endday, global.endmonth, global.endyear);
   fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
@@ -1013,12 +1009,12 @@ global_param_struct get_global_param(filenames_struct *names,
   if(options.DIST_PRCP)
     fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
   fprintf(stderr,"Ground heat flux will be estimated ");
-  if ( options.QUICK_FLUX ) 
+  if ( options.QUICK_FLUX )
     fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");
-  else 
+  else
     fprintf(stderr,"using Cherkauer and Lettenmaier (1999).\n");
   fprintf(stderr,"Use Frozen Soil Model.........(%d)\n",options.FROZEN_SOIL);
-  if( options.IMPLICIT ) 
+  if( options.IMPLICIT )
     fprintf(stderr,".... Using the implicit solution for the soil heat equation.\n");
   else
     fprintf(stderr,".... Using the explicit solution for the soil heat equation.\n");
@@ -1031,7 +1027,7 @@ global_param_struct get_global_param(filenames_struct *names,
   if ( QUICK_FS ){
     fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n", QUICK_FS_TEMPS);
   }
-  fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
+  fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n",
 	  options.SNOW_STEP);
   fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);
   fprintf(stderr,"Correct Precipitation.........(%d)\n",options.CORRPREC);
@@ -1041,9 +1037,9 @@ global_param_struct get_global_param(filenames_struct *names,
   if ( options.SAVE_STATE )
     fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
 	    global.stateday, global.statemonth, global.stateyear);
-  if ( options.BINARY_OUTPUT ) 
+  if ( options.BINARY_OUTPUT )
     fprintf(stderr,"Model output is in standard BINARY format.\n");
-  else 
+  else
     fprintf(stderr,"Model output is in standard ASCII format.\n");
 
 #endif // VERBOSE

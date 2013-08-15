@@ -115,7 +115,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
 	      IMPLICIT=FALSE).						TJB
-  2013-Jul-30 Moved computation of tmp_moist argument of
+  2013-Jul-25 Fixed incorrect condition on lake initialization.		TJB
+  2013-Jul-25 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
 **********************************************************************/
@@ -162,6 +163,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   sum_mindepth, sum_depth_pre, sum_depth_post, tmp_mindepth;
 #endif
   double dt_thresh;
+  int tmp_lake_idx;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -219,8 +221,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     Initialize all lake variables 
   ********************************************/
 
-  if ( options.LAKES && lake_con.Cl[0] > 0) {
-    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, &(cell[WET][lake_con.lake_idx][0]), surf_temp, 0);
+  if ( options.LAKES ) {
+    tmp_lake_idx = lake_con.lake_idx;
+    if (tmp_lake_idx < 0) tmp_lake_idx = 0;
+    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, &(cell[WET][tmp_lake_idx][0]), surf_temp, 0);
     if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 

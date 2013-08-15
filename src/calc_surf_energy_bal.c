@@ -54,6 +54,8 @@ double calc_surf_energy_bal(double             Le,
 			    int                overstory,
 			    int                rec,
 			    int                veg_class,
+			    double            *CanopLayerBnd,
+			    double            *dryFrac,
 			    atmos_data_struct *atmos,
 			    dmy_struct        *dmy,
 			    energy_bal_struct *energy,
@@ -169,6 +171,7 @@ double calc_surf_energy_bal(double             Le,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2013-Jul-25 Added photosynthesis.					TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -200,6 +203,8 @@ double calc_surf_energy_bal(double             Le,
   double   albedo;
   double   atmos_density;
   double   atmos_pressure;
+  double   atmos_shortwave;
+  double   atmos_Catm;
   double   bubble;
   double   delta_t;
   double   emissivity;
@@ -276,6 +281,8 @@ double calc_surf_energy_bal(double             Le,
   Cs2                 = energy->Cs[1]; // second layer heat capacity
   atmos_density       = atmos->density[hour]; // atmospheric density
   atmos_pressure      = atmos->pressure[hour]; // atmospheric pressure
+  atmos_shortwave     = atmos->shortwave[hour]; // incoming shortwave radiation
+  atmos_Catm          = atmos->Catm[hour]; // CO2 mixing ratio
   emissivity          = 1.; // longwave emissivity
   delta_t             = (double)dt * 3600.;
   max_moist           = soil_con->max_moist[0] / (soil_con->depth[0]*1000.);
@@ -372,15 +379,17 @@ double calc_surf_energy_bal(double             Le,
     }
 
     Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
-		       rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2,
+		       rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t,
+		       Cs1, Cs2, D1, D2,
 		       T1_old, T2, Ts_old, energy->T, bubble, dp, 
 		       expt, ice0, kappa1, kappa2, 
-		       max_moist, moist, root, 
+		       max_moist, moist, root, CanopLayerBnd,
 		       UnderStory, overstory, NetShortBare, NetShortGrnd, 
 		       TmpNetShortSnow, Tair, atmos_density, 
 		       atmos_pressure,
 		       emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
 		       VPcanopy, VPDcanopy, 
+		       atmos_shortwave, atmos_Catm, dryFrac,
 		       Wdew, displacement, aero_resist, aero_resist_used, 
 		       rainfall, ref_height, roughness, wind, Le, 
 		       energy->advection, OldTSurf, snow->pack_temp, 
@@ -415,13 +424,14 @@ double calc_surf_energy_bal(double             Le,
 					   soil_con->max_infil, max_moist, 
 					   moist, soil_con->Wcr, soil_con->Wpwp, 
 					   soil_con->depth, 
-					   soil_con->resid_moist, root, 
+					   soil_con->resid_moist, root, CanopLayerBnd,
 					   UnderStory, overstory, NetShortBare, 
 					   NetShortGrnd, TmpNetShortSnow, Tair, 
 					   atmos_density, atmos_pressure, 
 					   (double)soil_con->elevation, 
 					   emissivity, LongBareIn, LongSnowIn, 
 					   mu, surf_atten, VPcanopy, VPDcanopy, 
+					   atmos_shortwave, atmos_Catm, dryFrac,
 					   Wdew, displacement, aero_resist, aero_resist_used, 
 					   rainfall, ref_height, roughness, 
 					   wind, Le, energy->advection, 
@@ -469,14 +479,16 @@ double calc_surf_energy_bal(double             Le,
       FIRST_SOLN[0] = TRUE;
       
       Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
-			 rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2, 
+			 rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t,
+			 Cs1, Cs2, D1, D2, 
 			 T1_old, T2, Ts_old, energy->T, bubble, dp, 
 			 expt, ice0, kappa1, kappa2, 
-			 max_moist, moist, root, 
+			 max_moist, moist, root, CanopLayerBnd,
 			 UnderStory, overstory, NetShortBare, NetShortGrnd, 
 			 TmpNetShortSnow, Tair, atmos_density, atmos_pressure, 
 			 emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
 			 VPcanopy, VPDcanopy, 
+		         atmos_shortwave, atmos_Catm, dryFrac,
 			 Wdew, displacement, aero_resist, aero_resist_used, 
 			 rainfall, ref_height, roughness, wind, Le, 
 			 energy->advection, OldTSurf, snow->pack_temp, 
@@ -510,15 +522,16 @@ double calc_surf_energy_bal(double             Le,
 					     soil_con->max_infil, max_moist, 
 					     moist, soil_con->Wcr, 
 					     soil_con->Wpwp, soil_con->depth, 
-					     soil_con->resid_moist, root, 
+					     soil_con->resid_moist, root, CanopLayerBnd,
 					     UnderStory, overstory, 
 					     NetShortBare, NetShortGrnd, 
 					     TmpNetShortSnow, Tair, 
 					     atmos_density, atmos_pressure, 
 					     (double)soil_con->elevation, 
 					     emissivity, LongBareIn, LongSnowIn, 
-					     mu, surf_atten, VPcanopy, 
-					     VPDcanopy, Wdew, displacement, 
+					     mu, surf_atten, VPcanopy, VPDcanopy,
+					     atmos_shortwave, atmos_Catm, dryFrac,
+					     Wdew, displacement, 
 					     aero_resist, aero_resist_used, rainfall, ref_height, 
 					     roughness, wind, Le, 
 					     energy->advection, 
@@ -571,14 +584,16 @@ double calc_surf_energy_bal(double             Le,
     FIRST_SOLN[0] = TRUE;
   
   error = solve_surf_energy_bal(Tsurf, 
-				rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t, Cs1, Cs2, D1, D2, 
+				rec, nrecs, dmy->month, VEG, veg_class, iveg, delta_t,
+			        Cs1, Cs2, D1, D2, 
 				T1_old, T2, Ts_old, energy->T, bubble, dp, 
 				expt, ice0, kappa1, kappa2, 
-				max_moist, moist, root, 
+				max_moist, moist, root, CanopLayerBnd,
 				UnderStory, overstory, NetShortBare, NetShortGrnd, 
 				TmpNetShortSnow, Tair, atmos_density, atmos_pressure,
 				emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
 				VPcanopy, VPDcanopy, 
+				atmos_shortwave, atmos_Catm, dryFrac,
 				Wdew, displacement, aero_resist, aero_resist_used, 
 				rainfall, ref_height, roughness, wind, Le, 
 				energy->advection, OldTSurf, snow->pack_temp, 
@@ -854,6 +869,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *resid_moist;
 
   float *root;
+  double *CanopLayerBnd;
 
   /* meteorological forcing terms */
   int UnderStory;
@@ -873,6 +889,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double surf_atten;
   double vp;
   double vpd;
+  double atmos_shortwave;
+  double atmos_Catm;
+  double dryFrac;
 
   double *Wdew;
   double *displacement;
@@ -969,12 +988,12 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   ***************************/
 
   /* general model terms */
-  year                   = (int) va_arg(ap, int);
+  year                    = (int) va_arg(ap, int);
   month                   = (int) va_arg(ap, int);
-  day                   = (int) va_arg(ap, int);
-  hour                   = (int) va_arg(ap, int);
-  VEG                    = (int) va_arg(ap, int);
-  iveg                     = (int) va_arg(ap, int);
+  day                     = (int) va_arg(ap, int);
+  hour                    = (int) va_arg(ap, int);
+  VEG                     = (int) va_arg(ap, int);
+  iveg                    = (int) va_arg(ap, int);
   veg_class               = (int) va_arg(ap, int);
 
   delta_t                 = (double) va_arg(ap, double);
@@ -1005,6 +1024,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   resid_moist             = (double *) va_arg(ap, double *);
 
   root                    = (float  *) va_arg(ap, float  *);
+  CanopLayerBnd           = (double *) va_arg(ap, double *);
 
   /* meteorological forcing terms */
   UnderStory              = (int) va_arg(ap, int);
@@ -1024,6 +1044,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
+  atmos_shortwave         = (double) va_arg(ap, double);
+  atmos_Catm              = (double) va_arg(ap, double);
+  dryFrac                 = (double) va_arg(ap, double);
 
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
@@ -1171,6 +1194,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "surf_atten = %f\n",  surf_atten);
   fprintf(stderr, "vp = %f\n",  vp);
   fprintf(stderr, "vpd = %f\n",  vpd);
+  fprintf(stderr, "atmos_shortwave = %f\n",  atmos_shortwave);
+  fprintf(stderr, "atmos_Catm = %f\n",  atmos_Catm);
+  fprintf(stderr, "dryFrac = %f\n",  dryFrac);
 
   fprintf(stderr, "*Wdew = %f\n",  *Wdew);
   fprintf(stderr, "*displacement = %f\n",  *displacement);

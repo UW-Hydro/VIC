@@ -106,6 +106,10 @@ int  full_energy(char                 NEWCELL,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
 	      totals.								TJB
+  2013-Jul-25 Added photosynthesis terms.					TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.			TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.		TJB
 
 **********************************************************************/
 {
@@ -114,6 +118,7 @@ int  full_energy(char                 NEWCELL,
   char                   overstory;
   int                    i, j, p;
   int                    lidx;
+  int                    zwtidx;
   int                    Ndist;
   int                    dist;
   int                    iveg;
@@ -164,6 +169,7 @@ int  full_energy(char                 NEWCELL,
   double                 oldsnow;
   double                 snowprec;
   double                 rainprec;
+  int                    cidx;
   lake_var_struct       *lake_var;
   cell_data_struct    ***cell;
   veg_var_struct      ***veg_var;
@@ -314,6 +320,15 @@ int  full_energy(char                 NEWCELL,
       /** Define vegetation class number **/
       veg_class = veg_con[iveg].veg_class;
 
+      /** Initialize other veg vars **/
+      if (iveg < Nveg) {
+        for (dist=0; dist<Ndist; dist++) {
+	  for(band=0; band<Nbands; band++) {
+            veg_var[dist][iveg][band].rc = HUGE_RESIST;
+          }
+        }
+      }
+
       /** Assign wind_h **/
       /** Note: this is ignored below **/
       wind_h = veg_lib[veg_class].wind_h;
@@ -323,7 +338,17 @@ int  full_energy(char                 NEWCELL,
 		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
 
       /* Initialize soil thermal properties for the top two layers */
-      prepare_full_energy(iveg, Nveg, options.Nnode, prcp, soil_con, moist0, ice0);
+      for ( band = 0; band < Nbands; band++ ) {
+        if (soil_con->AreaFract[band] > 0.0) {
+          prepare_full_energy(cell[WET][iveg][band],
+			      cell[DRY][iveg][band],
+			      &(energy[iveg][band]),
+			      soil_con, prcp->mu[iveg],
+			      &(moist0[band]),
+			      &(ice0[band]));
+        }
+      }
+
 
       /** Compute Bare (free of snow) Albedo **/
       bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
@@ -387,6 +412,35 @@ int  full_energy(char                 NEWCELL,
       }
 
       /******************************
+        Compute nitrogen scaling factors and initialize other veg vars
+      ******************************/
+      if (options.CARBON && iveg < Nveg) {
+        for (dist=0; dist<Ndist; dist++) {
+	  for(band=0; band<Nbands; band++) {
+            for (cidx=0; cidx<options.Ncanopy; cidx++) {
+              veg_var[dist][iveg][band].rsLayer[cidx] = HUGE_RESIST;
+            }
+            veg_var[dist][iveg][band].aPAR = 0;
+            if (dmy[rec].hour == 0) {
+              calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
+                                  veg_con[iveg].CanopLayerBnd,
+                                  veg_lib[veg_class].LAI[dmy[rec].month-1],
+                                  soil_con->lat,
+                                  soil_con->lng,
+                                  soil_con->time_zone_lng,
+                                  dmy[rec],
+                                  veg_var[dist][iveg][band].NscaleFactor);
+            }
+            if (dmy[rec].month == 1 && dmy[rec].day == 1) {
+              veg_var[dist][iveg][band].AnnualNPPPrev = veg_var[dist][iveg][band].AnnualNPP;
+              veg_var[dist][iveg][band].AnnualNPP = 0;
+            }
+          }
+        }
+      }
+
+
+      /******************************
         Solve ground surface fluxes 
       ******************************/
   
@@ -422,7 +476,7 @@ int  full_energy(char                 NEWCELL,
 				     &(cell[WET][iveg][band]),
 				     &(snow[iveg][band]), 
 				     soil_con, dry_veg_var, wet_veg_var, 
-				     lag_one, sigma_slope, fetch);
+				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
 	  
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
 	  
@@ -702,7 +756,7 @@ int  full_energy(char                 NEWCELL,
           if ( soil_con->AreaFract[band] > 0 ) {
 	
 	    // Loop through distributed precipitation fractions
-	    for ( dist = 0; dist < 2; dist++ ) {
+	    for ( dist = 0; dist < Ndist; dist++ ) {
 	      
 	      if ( dist == 0 ) 
 		tmp_mu = prcp->mu[iveg]; 
@@ -716,6 +770,12 @@ int  full_energy(char                 NEWCELL,
                             * Cv * soil_con->AreaFract[band] );
                 cell[dist][iveg][band].runoff = 0;
                 cell[dist][iveg][band].baseflow = 0;
+                if (options.DIST_ZWT) {
+                  for(zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+                    cell[dist][iveg][band].runoff_dist_zwt[zwtidx] = 0;
+                    cell[dist][iveg][band].baseflow_dist_zwt[zwtidx] = 0;
+                  }
+                }
               }
               else {
                 sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu
@@ -724,6 +784,12 @@ int  full_energy(char                 NEWCELL,
                                 * Cv * soil_con->AreaFract[band] );
                 cell[dist][iveg][band].runoff *= (1-lake_con->rpercent);
                 cell[dist][iveg][band].baseflow *= (1-lake_con->rpercent);
+                if (options.DIST_ZWT) {
+                  for(zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+                    cell[dist][iveg][band].runoff_dist_zwt[zwtidx] *= (1-lake_con->rpercent);
+                    cell[dist][iveg][band].baseflow_dist_zwt[zwtidx] *= (1-lake_con->rpercent);
+                  }
+                }
               }
 
 	    }
@@ -762,7 +828,7 @@ int  full_energy(char                 NEWCELL,
                            atmos->vpd[NR] / 1000.,
                            atmos->pressure[NR] / 1000.,
                            atmos->density[NR], lake_var, *lake_con,
-                           *soil_con, gp->dt, rec, gp->wind_h, dmy[rec], fraci);
+                           *soil_con, gp->dt, rec, gp->nrecs, gp->wind_h, dmy[rec], fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);
 
     /**********************************************************************

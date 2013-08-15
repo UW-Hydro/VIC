@@ -3,15 +3,16 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: prepare_full_energy.c,v 5.2.2.3 2008/05/05 20:31:15 vicadmin Exp $";
 
-void prepare_full_energy(int               iveg,
-			 int               Nveg,
-			 int               Nnodes,
-			 dist_prcp_struct *prcp,
-			 soil_con_struct  *soil_con,
-			 double           *moist0,
-			 double           *ice0) {
+void prepare_full_energy(cell_data_struct   cell_wet,
+			 cell_data_struct   cell_dry,
+			 energy_bal_struct *energy,
+			 soil_con_struct   *soil_con,
+			 double             mu,
+			 double            *moist0,
+			 double            *ice0)
+{
 /*******************************************************************
   prepare_full_energy.c      Keith Cherkauer       January 20, 2000
 
@@ -38,83 +39,62 @@ void prepare_full_energy(int               iveg,
 	      band had 0 area).						KAC via TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
-
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
 *******************************************************************/
 
   extern option_struct options;
 
-  int                i, band;
+  int                i;
   double            *null_ptr;
   layer_data_struct *layer;
 
-  layer = (layer_data_struct *)calloc(options.Nlayer,
-				      sizeof(layer_data_struct));
+  layer = (layer_data_struct *)calloc(options.Nlayer, sizeof(layer_data_struct));
 
-  for(band=0;band<options.SNOW_BAND;band++) {
-
-    if (soil_con->AreaFract[band] > 0.0) {
-
-      /* Compute average soil moisture values for distributed precipitation */
-
-      for(i=0;i<options.Nlayer;i++) 
-        layer[i] = find_average_layer(&(prcp->cell[WET][iveg][band].layer[i]),
-				      &(prcp->cell[DRY][iveg][band].layer[i]),
-				      soil_con->depth[i], prcp->mu[iveg]);
+  /* Compute average soil moisture values for distributed precipitation */
+  for(i=0;i<options.Nlayer;i++) 
+    layer[i] = find_average_layer(&(cell_wet.layer[i]),
+				  &(cell_dry.layer[i]),
+				  soil_con->depth[i], mu);
     
-      /* Compute top soil layer moisture content (mm/mm) */
+  /* Compute top soil layer moisture content (mm/mm) */
+  *moist0 = layer[0].moist / ( soil_con->depth[0] * 1000. );
 
-      moist0[band] = layer[0].moist / ( soil_con->depth[0] * 1000. );
-
-      /* Compute top soil layer ice content (mm/mm) */
-
-      if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
-        if((prcp->energy[iveg][band].T[0] 
-	    + prcp->energy[iveg][band].T[1])/2.<0.) {
-	  ice0[band] = moist0[band] 
-	    - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
-				      + prcp->energy[iveg][band].T[1]) / 2.,
+  /* Compute top soil layer ice content (mm/mm) */
+  if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
+    if((energy->T[0] + energy->T[1])/2.<0.) {
+      *ice0 = *moist0 
+	  - maximum_unfrozen_water((energy->T[0] + energy->T[1]) / 2.,
 #if EXCESS_ICE
-				     soil_con->porosity[0], soil_con->effective_porosity[0],
+				 soil_con->porosity[0], soil_con->effective_porosity[0],
 #endif 
-				     soil_con->max_moist[0]
-				     / (soil_con->depth[0] * 1000.),
-				     soil_con->bubble[0], soil_con->expt[0]);
-	  if(ice0[band]<0.) ice0[band]=0.;
-        }
-        else ice0[band]=0.;
-      }
-      else {
-        ice0[band] = 0.;
-      }
-
-      /** Compute Soil Thermal Properties **/
-      compute_soil_layer_thermal_properties(layer,soil_con->depth,
-					    soil_con->bulk_dens_min,
-					    soil_con->soil_dens_min,
-					    soil_con->quartz,
-					    soil_con->bulk_density,
-					    soil_con->soil_density,
-					    soil_con->organic,
-#if SPATIAL_FROST
-					    soil_con->frost_fract,
-#endif
-					    options.Nlayer);
-    
-      /** Save Thermal Conductivities for Energy Balance **/
-      prcp->energy[iveg][band].kappa[0] = layer[0].kappa; 
-      prcp->energy[iveg][band].Cs[0]    = layer[0].Cs; 
-      prcp->energy[iveg][band].kappa[1] = layer[1].kappa; 
-      prcp->energy[iveg][band].Cs[1]    = layer[1].Cs; 
-
+				 soil_con->max_moist[0] / (soil_con->depth[0] * 1000.),
+				 soil_con->bubble[0], soil_con->expt[0]);
+      if(*ice0<0.) *ice0=0.;
     }
-
-    else {
-
-      ice0[band] = 0.;
-
-    }
-
+    else *ice0=0.;
   }
+  else {
+    *ice0 = 0.;
+  }
+
+  /** Compute Soil Thermal Properties **/
+  compute_soil_layer_thermal_properties(layer,soil_con->depth,
+					soil_con->bulk_dens_min,
+					soil_con->soil_dens_min,
+					soil_con->quartz,
+					soil_con->bulk_density,
+					soil_con->soil_density,
+					soil_con->organic,
+#if SPATIAL_FROST
+					soil_con->frost_fract,
+#endif
+					options.Nlayer);
+    
+  /** Save Thermal Conductivities for Energy Balance **/
+  energy->kappa[0] = layer[0].kappa; 
+  energy->Cs[0]    = layer[0].Cs; 
+  energy->kappa[1] = layer[1].kappa; 
+  energy->Cs[1]    = layer[1].Cs; 
 
   free((char *)layer);
 

@@ -64,12 +64,18 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   double             elevation,
                    double            *prec,
 		   double            *depth,
+		   double            *Wmax,
 		   double            *Wcr,
 		   double            *Wpwp,
 #if SPATIAL_FROST
 		   double            *frost_fract,
 #endif
-		   float             *root)
+		   float             *root,
+		   double            *ZwtAreaFract,
+		   double            *dryFrac,
+		   double             shortwave,
+		   double             Catm,
+		   double            *CanopLayerBnd)
 /********************************************************************** 
   CANOPY EVAPORATION
 
@@ -98,6 +104,8 @@ double canopy_evap(layer_data_struct *layer_wet,
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
 	      and into separate function calc_rc().			TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Jul-25 Save dryFrac for use elsewhere.				TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 **********************************************************************/ 
 
 {
@@ -118,12 +126,21 @@ double canopy_evap(layer_data_struct *layer_wet,
   double             canopyevap;
   double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
+  double             layerevap_dist_zwt[MAX_LAYERS];
   double             rc;
+  int                lindex;
+  int                cidx;
+  int                zwtidx;
+  double             tmp_area_sum;
+  double gc;
+  double *gsLayer;
   layer_data_struct *tmp_layer;
+  layer_data_struct  tmp_layer_dist_zwt[MAX_LAYERS];
   veg_var_struct    *tmp_veg_var;
 
   if(options.DIST_PRCP) Ndist = 2;
   else Ndist = 1;
+
 
   Evap = 0;
 
@@ -155,7 +172,6 @@ double canopy_evap(layer_data_struct *layer_wet,
         Compute Evaporation from Canopy Intercepted Water
       ****************************************************/
 
-      /** Due to month changes ..... Wdmax based on LAI **/
       tmp_veg_var->Wdew = tmp_Wdew;
       if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
 	throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
@@ -166,8 +182,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   air_temp, vpd, veg_lib[veg_class].LAI[month-1],
 		   (double)1.0, FALSE);
       canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
-		   * penman(air_temp, elevation, rad,
-			    vpd, ra, rc, veg_lib[veg_class].rarc)
+		   * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
 		   * delta_t / SEC_PER_DAY;
 
       if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
@@ -179,7 +194,10 @@ double canopy_evap(layer_data_struct *layer_wet,
       else
 	f = 1.0;
       canopyevap *= f;
-    
+
+      /* compute fraction of canopy that is dry */
+      *dryFrac = 1.0-f*pow((tmp_Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+
       tmp_Wdew += ppt - canopyevap;
       if (tmp_Wdew < 0.0) 
 	tmp_Wdew = 0.0;
@@ -193,16 +211,133 @@ double canopy_evap(layer_data_struct *layer_wet,
       /*******************************************
         Compute Evapotranspiration from Vegetation
       *******************************************/
-      if(CALC_EVAP)
-	transpiration(tmp_layer, veg_class, month, rad, vpd, net_short, 
-		      air_temp, ra, ppt, f, delta_t, tmp_veg_var->Wdew, 
-		      elevation, depth, Wcr, Wpwp, &tmp_Wdew, &canopyevap, 
-		      layerevap, 
-#if SPATIAL_FROST
-		      frost_fract, 
-#endif
-		      root);
+      if(CALC_EVAP) {
 
+        if (options.DIST_ZWT) {
+
+          /** Initialize whole-tile results **/
+          for (lindex=0; lindex<options.Nlayer; lindex++) {
+            layerevap[lindex] = 0;
+          }
+          for (cidx=0; cidx<options.Ncanopy; cidx++) {
+            tmp_veg_var->rsLayer[cidx] = 0;
+          }
+          tmp_veg_var->rc = 0;
+          tmp_veg_var->NPPfactor = 0;
+
+          /* Initialize conductances for aggregation over zwt distrib */
+          gc =  0;
+          gsLayer = (double *)calloc(options.Ncanopy, sizeof(double));
+          for (cidx=0; cidx<options.Ncanopy; cidx++) {
+            gsLayer[cidx] = 0;
+          }
+
+          /** Loop over zwt distrib **/
+          tmp_area_sum = 0;
+          for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+
+            /** Set up tmp data structs **/
+            for (lindex=0; lindex<options.Nlayer; lindex++) {
+              tmp_layer_dist_zwt[lindex].moist = tmp_layer[lindex].moist_dist_zwt[zwtidx];
+#if SPATIAL_FROST
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+                tmp_layer_dist_zwt[lindex].ice[frost_area] = tmp_layer[lindex].ice_dist_zwt[zwtidx][frost_area];
+#else
+              tmp_layer_dist_zwt[lindex].ice = tmp_layer[lindex].ice_dist_zwt[zwtidx];
+#endif
+            }
+
+            /** call transpiration **/
+	    transpiration(tmp_layer_dist_zwt, veg_class, month, rad, vpd, net_short, 
+		          air_temp, ra, ppt, *dryFrac, delta_t, 
+		          elevation, depth, Wmax, Wcr, Wpwp, 
+		          layerevap_dist_zwt, 
+#if SPATIAL_FROST
+		          frost_fract, 
+#endif
+		          root,
+                          tmp_veg_var->NscaleFactor,
+                          shortwave,
+                          tmp_veg_var->aPARLayer,
+                          Catm,
+                          CanopLayerBnd,
+                          tmp_veg_var->rsLayer_dist_zwt[zwtidx],
+                          &(tmp_veg_var->rc_dist_zwt[zwtidx]),
+                          &(tmp_veg_var->NPPfactor_dist_zwt[zwtidx]));
+
+
+            /** Aggregate to whole tile (area fractions account for presence of lake) **/
+            tmp_area_sum += ZwtAreaFract[zwtidx];
+            for (lindex=0; lindex<options.Nlayer; lindex++) {
+              layerevap[lindex] += layerevap_dist_zwt[lindex] * ZwtAreaFract[zwtidx];
+            }
+            tmp_veg_var->NPPfactor += tmp_veg_var->NPPfactor_dist_zwt[zwtidx] * ZwtAreaFract[zwtidx];
+            if (tmp_veg_var->rc_dist_zwt[zwtidx] > 0)
+              gc += 1/(tmp_veg_var->rc_dist_zwt[zwtidx]) * ZwtAreaFract[zwtidx];
+            else
+              gc += HUGE_RESIST;
+            for (cidx=0; cidx<options.Ncanopy; cidx++) {
+              if (tmp_veg_var->rsLayer_dist_zwt[zwtidx][cidx] > 0)
+                gsLayer[cidx] += 1/(tmp_veg_var->rsLayer_dist_zwt[zwtidx][cidx]) * ZwtAreaFract[zwtidx];
+              else
+                gsLayer[cidx] += HUGE_RESIST;
+            }
+
+          } // end loop over zwt distrib
+
+          if (tmp_area_sum > 0) {
+            for (lindex=0; lindex<options.Nlayer; lindex++) {
+              layerevap[lindex] /= tmp_area_sum;
+            }
+            gc /= tmp_area_sum;
+            if (gc > 0)
+              tmp_veg_var->rc = 1/gc;
+            else
+              tmp_veg_var->rc = HUGE_RESIST;
+            for (cidx=0; cidx<options.Nlayer; cidx++) {
+              gsLayer[cidx] /= tmp_area_sum;
+              if (gsLayer[cidx] > 0)
+                tmp_veg_var->rsLayer[cidx] = 1/gsLayer[cidx];
+              else
+                tmp_veg_var->rsLayer[cidx] = HUGE_RESIST;
+            }
+            tmp_veg_var->NPPfactor /= tmp_area_sum;
+          }
+          else {
+            for (lindex=0; lindex<options.Nlayer; lindex++) {
+              layerevap[lindex] = 0;
+            }
+            tmp_veg_var->rc = 0;
+            for (cidx=0; cidx<options.Nlayer; cidx++) {
+              tmp_veg_var->rsLayer[cidx] = HUGE_RESIST;
+            }
+            tmp_veg_var->NPPfactor = 0;
+          }
+
+          free((char *)gsLayer);
+
+        } // end dist_zwt case
+
+        else {
+
+	  transpiration(tmp_layer, veg_class, month, rad, vpd, net_short, 
+		        air_temp, ra, ppt, *dryFrac, delta_t, 
+		        elevation, depth, Wmax, Wcr, Wpwp, 
+		        layerevap, 
+#if SPATIAL_FROST
+		        frost_fract, 
+#endif
+		        root,
+                        tmp_veg_var->NscaleFactor,
+                        shortwave,
+                        tmp_veg_var->aPARLayer,
+                        Catm,
+                        CanopLayerBnd,
+                        tmp_veg_var->rsLayer,
+                        &(tmp_veg_var->rc),
+                        &(tmp_veg_var->NPPfactor));
+        }
+      }
     }
 
     tmp_veg_var->canopyevap = canopyevap;
@@ -235,20 +370,26 @@ void transpiration(layer_data_struct *layer,
 		   double air_temp,
 		   double ra,
 		   double ppt,
-		   double f,
+		   double dryFrac,
 		   double delta_t,
-		   double Wdew,
 		   double elevation,
 		   double *depth,
+		   double *Wmax,
 		   double *Wcr,
 		   double *Wpwp,
-		   double *new_Wdew,
-		   double *canopyevap,
 		   double *layerevap,
 #if SPATIAL_FROST
 		   double *frost_fract,
 #endif
-		   float  *root)
+		   float  *root,
+                   double *NscaleFactor,
+                   double  shortwave,
+                   double *aPARLayer,
+                   double  Catm,
+                   double *CanopLayerBnd,
+                   double *rsLayer,
+                   double *rc,
+                   double *NPPfactor)
 /**********************************************************************
   Computes evapotranspiration for unfrozen soils
   Allows for multiple layers.
@@ -261,7 +402,8 @@ void transpiration(layer_data_struct *layer,
 	      uninitialized values later on).				TJB
   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
 	      and into separate function calc_rc().			TJB
-
+  2013-Jul-25 Save dryFrac for use elsewhere.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -279,7 +421,9 @@ void transpiration(layer_data_struct *layer,
   double spare_evap;                    /* evap for 2nd distribution */
   double avail_moist[MAX_LAYERS];         /* moisture available for trans */
   double ice[MAX_LAYERS];
-  double rc;
+  double gc;
+  double *gsLayer;
+  int    cidx;
 
   /********************************************************************** 
      EVAPOTRANSPIRATION
@@ -344,6 +488,12 @@ void transpiration(layer_data_struct *layer,
 
   avail_moist[i]=moist2;
 
+  /** Set photosynthesis inhibition factor **/
+  if (layer[0].moist > veg_lib[veg_class].Wnpp_inhib*Wmax[0])
+    *NPPfactor = veg_lib[veg_class].NPPfactor_sat + (1 - veg_lib[veg_class].NPPfactor_sat) * (Wmax[0] - layer[0].moist) / (Wmax[0] - veg_lib[veg_class].Wnpp_inhib*Wmax[0]);
+  else
+    *NPPfactor = 1.0;
+
   /******************************************************************
     CASE 1: Moisture in both layers exceeds Wcr, or Moisture in
     layer with more than half of the roots exceeds Wcr.
@@ -354,17 +504,35 @@ void transpiration(layer_data_struct *layer,
     contribute to evapotransipration based on root fraction.
   ******************************************************************/
 
-  if( (moist1>=Wcr1 && moist2>=Wcr[options.Nlayer-1] && Wcr1>0.) ||
-      (moist1>=Wcr1 && (1-root[options.Nlayer-1])>= 0.5) ||
-      (moist2>=Wcr[options.Nlayer-1] &&
-      root[options.Nlayer-1]>=0.5) ){
+  if( options.SHARE_LAYER_MOIST &&
+      ( (moist1>=Wcr1 && moist2>=Wcr[options.Nlayer-1] && Wcr1>0.) ||
+        (moist1>=Wcr1 && (1-root[options.Nlayer-1])>= 0.5) ||
+        (moist2>=Wcr[options.Nlayer-1] && root[options.Nlayer-1]>=0.5) ) ) {
+
     gsm_inv=1.0;
-    rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
-		 air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
-    evap = penman(air_temp, elevation, rad, vpd, ra, rc,
-		  veg_lib[veg_class].rarc)
-	   * delta_t / SEC_PER_DAY
-	   * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0)));
+
+    /* compute whole-canopy stomatal resistance */
+    if (options.RC_MODE == RC_JARVIS) {
+      /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
+      *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
+		   veg_lib[veg_class].RGL, air_temp, vpd,
+		   veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+      for (cidx=0; cidx<options.Ncanopy; cidx++) {
+        rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
+        if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+      }
+    }
+    else {
+      /* Compute rc based on photosynthetic demand from Knorr 1997 */
+      calc_rc_ps(veg_lib[veg_class].Ctype, veg_lib[veg_class].MaxCarboxRate,
+		 veg_lib[veg_class].MaxETransport, veg_lib[veg_class].CO2Specificity,
+		 NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
+		 CanopLayerBnd, veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+    }
+
+    /* compute transpiration */
+    evap = penman(air_temp, elevation, rad, vpd, ra, *rc,
+		  veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac;
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -407,29 +575,86 @@ void transpiration(layer_data_struct *layer,
 
   else {
 
-    for(i=0;i<options.Nlayer;i++){
+    /* Initialize conductances for aggregation over soil layers */
+    gc =  0;
+    gsLayer = (double *)calloc(options.Ncanopy, sizeof(double));
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      gsLayer[cidx] = 0;
+    }
+
+    for (i=0;i<options.Nlayer;i++) {
+
       /** Set evaporation restriction factor **/
       if(avail_moist[i] >= Wcr[i])
-	gsm_inv=1.0;
-      else if(avail_moist[i] >= Wpwp[i])
-	gsm_inv=(avail_moist[i] - Wpwp[i]) /
-	  (Wcr[i] - Wpwp[i]);
+	gsm_inv = 1.0;
+      else if(avail_moist[i] >= Wpwp[i] && avail_moist[i] < Wcr[i])
+	gsm_inv = (avail_moist[i] - Wpwp[i]) / (Wcr[i] - Wpwp[i]);
       else 
-	gsm_inv=0.0;
+	gsm_inv = 0.0;
 
       if(gsm_inv > 0.0){
-	/** Compute potential evapotranspiration **/
-        rc = calc_rc(veg_lib[veg_class].rmin, net_short, veg_lib[veg_class].RGL,
-		     air_temp, vpd, veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
-        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, rc,
-			      veg_lib[veg_class].rarc)
-		       * delta_t / SEC_PER_DAY * (double)root[i]
-		       * (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
-					 (2.0/3.0)));
-      }
-      else layerevap[i] = 0.0;
 
+        /* compute whole-canopy stomatal resistance */
+        if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
+          /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
+          *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
+		       veg_lib[veg_class].RGL, air_temp, vpd,
+		       veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+          if (options.CARBON) {
+            for (cidx=0; cidx<options.Ncanopy; cidx++) {
+              rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
+              if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+            }
+          }
+        }
+        else {
+          /* Compute rc based on photosynthetic demand from Knorr 1997 */
+          calc_rc_ps(veg_lib[veg_class].Ctype, veg_lib[veg_class].MaxCarboxRate,
+		     veg_lib[veg_class].MaxETransport, veg_lib[veg_class].CO2Specificity,
+		     NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
+		     CanopLayerBnd, veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+        }
+
+        /* compute transpiration */
+        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, *rc,
+			      veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
+
+        if (*rc > 0)
+          gc += 1/(*rc);
+        else
+          gc += HUGE_RESIST;
+
+        for (cidx=0; cidx<options.Ncanopy; cidx++) {
+          if (rsLayer[cidx] > 0)
+            gsLayer[cidx] += 1/(rsLayer[cidx]);
+          else
+            gsLayer[cidx] += HUGE_RESIST;
+        }
+
+      }
+      else {
+	layerevap[i] = 0.0;
+        gc += 0;
+        for (cidx=0; cidx<options.Ncanopy; cidx++) {
+          gsLayer[cidx] += 0;
+	}
+      }
+
+    } // end loop over layers
+
+    /* Now, take the inverse of the conductance */
+    if (gc > 0)
+      *rc = 1/gc;
+    else
+      *rc = HUGE_RESIST;
+
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      if (gsLayer[cidx] > 0)
+        rsLayer[cidx] = 1/gsLayer[cidx];
+      else
+        rsLayer[cidx] = HUGE_RESIST;
     }
+
   }
     
   /****************************************************************
@@ -455,5 +680,7 @@ void transpiration(layer_data_struct *layer,
     }
     if ( layerevap[i] < 0.0 ) layerevap[i] = 0.0;
   }
+
+  free((char *)gsLayer);
 
 }

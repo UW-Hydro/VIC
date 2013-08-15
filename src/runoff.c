@@ -20,7 +20,8 @@ int  runoff(cell_data_struct  *cell_wet,
             int                Nnodes,
 	    int                band,
 	    int                rec,
-	    int                iveg)
+	    int                iveg,
+	    double             delta_moist)
 /**********************************************************************
 	runoff.c	Keith Cherkauer		May 18, 1996
 
@@ -471,7 +472,7 @@ int  runoff(cell_data_struct  *cell_wet,
           for(lindex=0;lindex<options.Nlayer;lindex++) {
             tmp_moist_for_runoff[lindex] = (liq[lindex] + ice[lindex]);
           }
-          compute_runoff_and_asat(soil_con, tmp_moist_for_runoff, inflow, &A, &(runoff[frost_area]));
+          compute_runoff_and_asat(soil_con, delta_moist, tmp_moist_for_runoff, inflow, &A, &(runoff[frost_area]));
 
           // save dt_runoff based on initial runoff estimate,
           // since we will modify total runoff below for the case of completely saturated soil
@@ -692,7 +693,7 @@ int  runoff(cell_data_struct  *cell_wet,
         for(lindex=0;lindex<options.Nlayer;lindex++) {
           tmp_moist_for_runoff[lindex] = (liq[lindex] + ice[lindex]);
         }
-        compute_runoff_and_asat(soil_con, tmp_moist_for_runoff, 0, &A, &tmp_runoff);
+        compute_runoff_and_asat(soil_con, delta_moist, tmp_moist_for_runoff, 0, &A, &tmp_runoff);
 
         /** Store tile-wide values **/
 #if SPATIAL_FROST
@@ -714,9 +715,6 @@ int  runoff(cell_data_struct  *cell_wet,
 #endif // SPATIAL_FROST
 
     } /* if mu>0 */
-
-    /** Compute water table depth **/
-    wrap_compute_zwt(soil_con, cell);
 
   } /** Loop over wet and dry fractions **/
 
@@ -764,7 +762,7 @@ int  runoff(cell_data_struct  *cell_wet,
 
 }
 
-void compute_runoff_and_asat(soil_con_struct *soil_con, double *moist, double inflow, double *A, double *runoff)
+void compute_runoff_and_asat(soil_con_struct *soil_con, double delta_moist, double *moist, double inflow, double *A, double *runoff)
 {
 
   extern option_struct options;
@@ -784,27 +782,49 @@ void compute_runoff_and_asat(soil_con_struct *soil_con, double *moist, double in
   }
   if(top_moist>top_max_moist) top_moist = top_max_moist;
 
-  /** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
-  ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
-  *A        = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+  if (options.DIST_ZWT) {
 
-  max_infil = (1.0+soil_con->b_infilt) * top_max_moist;
-  i_0      = max_infil * (1.0 - pow((1.0 - *A),(1.0 / soil_con->b_infilt)));
+    if (top_moist >= top_max_moist) {
+      *A = 1.0;
+      *runoff = inflow;
+    }
+    else if (delta_moist < top_max_moist - top_moist) {
+      *A = 0.0;
+      *runoff = inflow - top_max_moist + top_moist;
+      if (*runoff < 0) *runoff = 0.0;
+    }
+    else {
+      *A = 1 - pow((top_max_moist-top_moist)/delta_moist,0.5);
+      *runoff = (1-(*A))*inflow - (top_max_moist-top_moist);
+      if (*runoff < 0) *runoff = 0.0;
+    }
 
-  /** equation (3a) Wood et al. **/
-
-  if (inflow == 0.0) *runoff = 0.0;
-  else if (max_infil == 0.0) *runoff = inflow;
-  else if ((i_0 + inflow) > max_infil)
-    *runoff = inflow - top_max_moist + top_moist;
-
-  /** equation (3b) Wood et al. (wrong in paper) **/
-  else {
-    basis = 1.0 - (i_0 + inflow) / max_infil;
-    *runoff = (inflow - top_max_moist + top_moist
-               + top_max_moist * pow(basis,1.0*(1.0+soil_con->b_infilt)));
   }
-  if (*runoff < 0.) *runoff = 0.;
+  else {
+
+    /** A as in Wood et al. in JGR 97, D3, 1992 equation (1) **/
+    ex        = soil_con->b_infilt / (1.0 + soil_con->b_infilt);
+    *A        = 1.0 - pow((1.0 - top_moist / top_max_moist),ex);
+
+    max_infil = (1.0+soil_con->b_infilt) * top_max_moist;
+    i_0      = max_infil * (1.0 - pow((1.0 - *A),(1.0 / soil_con->b_infilt)));
+
+    /** equation (3a) Wood et al. **/
+
+    if (inflow == 0.0) *runoff = 0.0;
+    else if (max_infil == 0.0) *runoff = inflow;
+    else if ((i_0 + inflow) > max_infil)
+      *runoff = inflow - top_max_moist + top_moist;
+
+    /** equation (3b) Wood et al. (wrong in paper) **/
+    else {
+      basis = 1.0 - (i_0 + inflow) / max_infil;
+      *runoff = (inflow - top_max_moist + top_moist
+                 + top_max_moist * pow(basis,1.0*(1.0+soil_con->b_infilt)));
+    }
+    if (*runoff < 0.) *runoff = 0.;
+
+  }
 
 }
 

@@ -28,6 +28,7 @@
 	      list of initialize_lake().				TJB
   2013-Jul-25 Added advect_carbon_storage().				TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT.						TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -77,7 +78,7 @@ double adjflux(double, double, double ,double, double, double, double,
 	       double, double, double, double *, double *);
 void advect_carbon_storage(double, double, lake_var_struct *, cell_data_struct *);
 void advect_energy_storage(double, double, lake_var_struct *, energy_bal_struct *);
-void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
+void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct, lake_var_struct *);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
 	     int, int *, double, double, char *, int, double);

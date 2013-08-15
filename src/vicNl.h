@@ -109,6 +109,7 @@
   2013-Jul-25 Added photosynthesis functions.				TJB
   2013-Jul-25 Added soil carbon functions.				TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -215,7 +216,7 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 #if SPATIAL_FROST
                    double *,
 #endif
-                   float *, double *, double, double, double *);
+                   float *, double *, double *, double, double, double *);
 void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
@@ -239,7 +240,7 @@ double compute_coszen(double, double, double, dmy_struct);
 void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
-void   compute_runoff_and_asat(soil_con_struct *, double *, double, double *, double *);
+void   compute_runoff_and_asat(soil_con_struct *, double, double *, double, double *, double *);
 void   compute_soil_resp(int, double *, double, double, double *, double *,
                          double, double, double, double *, double *, double *);
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
@@ -262,6 +263,7 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
 #if QUICK_FS
+int    distribute_moist_zwt(cell_data_struct *, soil_con_struct *);
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *, double ***, 
 					 double *, double *, double *, double *, double *,
@@ -483,7 +485,7 @@ int    runoff(cell_data_struct *, cell_data_struct *,
 #if SPATIAL_FROST
               double *, 
 #endif
-              double, int, int, int, int, int);
+              double, int, int, int, int, int, double);
 
 void set_max_min_hour(double *, int, int *, int *);
 void set_node_parameters(double *, double *, double *, double *, double *, double *,

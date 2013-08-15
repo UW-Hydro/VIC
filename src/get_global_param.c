@@ -104,6 +104,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Jul-25 Added DIST_ZWT.							TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -615,6 +616,20 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.LAKE_PROFILE = TRUE;
 	}
+      }
+      else if(strcasecmp("DIST_ZWT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("TRUE", flgstr) == 0) {
+          options.DIST_ZWT = TRUE;
+	  options.Nzwt = 4;
+        }
+        else {
+	  options.DIST_ZWT = FALSE;
+	  options.Nzwt = 1;
+	}
+      }
+      else if(strcasecmp("NZWT",optstr)==0) {
+        sscanf(cmdstr,"%*s %d", &options.Nzwt);
       }
 
       /*************************************

@@ -149,9 +149,8 @@ int  put_data(dist_prcp_struct  *prcp,
 	      of Tcanopy (canopy air temperature).			CL via TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
   2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, OUT_APAR.		TJB
-  2013-Jul-25 Added OUT_LITTERFALL, OUT_RHET, OUT_NEE, OUT_CLITTER,
-	      OUT_CINTER, and OUT_CSLOW. 				TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -159,6 +158,7 @@ int  put_data(dist_prcp_struct  *prcp,
   extern option_struct    options;
   int                     veg;
   int                     index;
+  int                     zwtidx;
   int                     Ndist;
   int                     dist;
   int                     band;
@@ -381,6 +381,22 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                              out_data);
 
+            if (options.DIST_ZWT) {
+              /** record distributed terms **/
+              for(zwtidx=0;zwtidx<options.Nzwt;zwtidx++) {
+                for(index=0;index<options.Nlayer;index++) {
+                  i = veg*options.SNOW_BAND*options.Nzwt*options.Nlayer
+                      + band*options.Nzwt*options.Nlayer + zwtidx*options.Nlayer + index;
+                  out_data[OUT_DISTZWT_SMOIST].data[i] = cell[dist][veg][band].layer[index].moist_dist_zwt[zwtidx];
+                }
+                i = veg*options.SNOW_BAND*options.Nzwt + band*options.Nzwt + zwtidx;
+                out_data[OUT_DISTZWT_ASAT].data[i] = cell[dist][veg][band].asat_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_ZWT].data[i] = cell[dist][veg][band].zwt_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_ZWT_LUMP].data[i] = cell[dist][veg][band].zwt_lumped_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_BFLOW].data[i] = cell[dist][veg][band].baseflow_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_RUNOFF].data[i] = cell[dist][veg][band].runoff_dist_zwt[zwtidx];
+              }
+            }
 	  } // End wet/dry loop
 
 	  /**********************************
@@ -665,7 +681,7 @@ int  put_data(dist_prcp_struct  *prcp,
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
-  
+ 
   /********************
     Check Energy Balance 
   ********************/
@@ -868,7 +884,7 @@ void collect_wb_terms(cell_data_struct  cell,
     tmp_evap += cell.layer[index].evap;
   if (HasVeg)
     out_data[OUT_TRANSP_VEG].data[0] += tmp_evap * AreaFactor;
-  else 
+  else
     out_data[OUT_EVAP_BARE].data[0] += tmp_evap * AreaFactor;
   tmp_evap += snow.vapor_flux * 1000.;
   out_data[OUT_SUB_SNOW].data[0] += snow.vapor_flux * 1000. * AreaFactor; 

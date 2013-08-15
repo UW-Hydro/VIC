@@ -121,6 +121,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -158,6 +159,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          zwt_prime, zwt_prime_eff;
   double          tmp_moist;
   double          w_avg;
+  double          tmp_depth_range[MAX_NZWT];
   char   latchar[20], lngchar[20], junk[6];
 #if EXCESS_ICE
   double          init_ice_fract[MAX_LAYERS];
@@ -1051,6 +1053,27 @@ soil_con_struct read_soilparam(FILE *soilparam,
           temp.zwtvmoist_moist[options.Nlayer+1][i] = tmp_moist;
         }
         zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
+      }
+
+      /* Compute cumulative fractional areas of bins of zwt distribution */
+      if (options.DIST_ZWT) {
+        temp.ridge_fract = RIDGE_FRACT;
+        if (temp.ridge_fract < 0 || temp.ridge_fract > 1.0) {
+          sprintf(ErrStr,"ERROR: ridge fraction (%f) must be between 0 and 1.0\n",temp.ridge_fract);
+          nrerror(ErrStr);
+        }
+        temp.ZwtAreaFract[0] = 0.3334*temp.ridge_fract;
+        temp.ZwtAreaFract[1] = 0.3334*temp.ridge_fract;
+        temp.ZwtAreaFract[2] = 0.3333*temp.ridge_fract;
+        temp.ZwtAreaFract[3] = 1.0-temp.ridge_fract; // hollow
+        tmp_depth_range[0] = 0; // no change in zwt across this bin (ridgetops)
+        tmp_depth_range[1] = 0.5*RIDGE_HEIGHT; // ridge side (cm)
+        tmp_depth_range[2] = 0.5*RIDGE_HEIGHT; // ridge side (cm)
+        tmp_depth_range[3] = HOLLOW_DEPTH; // hollow (cm)
+        // Translate water table depth range into moisture range
+        for (i=0; i<options.Nzwt; i++) {
+          temp.ZwtDeltaMoist[i] = tmp_depth_range[i]*(temp.zwtvmoist_moist[options.Nlayer+1][MAX_ZWTVMOIST-2] - temp.zwtvmoist_moist[options.Nlayer+1][MAX_ZWTVMOIST-1])/(temp.zwtvmoist_zwt[options.Nlayer+1][MAX_ZWTVMOIST-2] - temp.zwtvmoist_zwt[options.Nlayer+1][MAX_ZWTVMOIST-1]);
+        }
       }
 
       /* Assume flat grid cell for radiation calculations */

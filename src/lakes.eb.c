@@ -2243,6 +2243,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Jul-25 Implemented heat flux between lake and soil.			TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.		TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2279,8 +2280,12 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double *moist;
   double max_newfraction;
   double depth_in_save;
+  int zwtidx;
   double area_sum;
   int flow_to_wetland;
+  double tmp_moist;
+  double tmp_max_moist;
+  int lidx;
 
   cell    = prcp->cell;
   veg_var = prcp->veg_var;
@@ -2301,7 +2306,21 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
  
   flow_to_wetland = 0;
+  if (options.DIST_ZWT) {
+    // Check wetland soil moisture to determine direction of baseflow
+    tmp_moist = 0;
+    tmp_max_moist = 0;
+    for (lidx=0; lidx<options.Nlayer; lidx++) {
+      tmp_moist += cell[WET][iveg][band].layer[lidx].moist_dist_zwt[options.Nzwt-1];
+      tmp_max_moist += soil_con.max_moist[lidx];
+    }
+    if (tmp_moist + 0.5*soil_con.ZwtDeltaMoist[options.Nzwt-1] < tmp_max_moist) {
+      flow_to_wetland = 1;
+    }
+  }
+
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;
+//fprintf(stderr,"runoff_in %f baseflow_in %f\n",lake->runoff_in,lake->baseflow_in);
 #if EXCESS_ICE
   if(SubsidenceUpdate > 0 ) 
     inflow_volume += total_meltwater*lakefrac * 0.001 * soil_con.cell_area*lake_con.Cl[0];
@@ -2642,7 +2661,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
    **********************************************************************/
   // Wetland
   if (newfraction < 1.0) { // wetland exists at end of time step
-    advect_soil_veg_storage(lakefrac, max_newfraction, newfraction, delta_moist, &soil_con, &veg_con, &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]), lake_con);
+    advect_soil_veg_storage(lakefrac, max_newfraction, newfraction, delta_moist, &soil_con, &veg_con, &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]), lake_con, lake);
     rescale_soil_veg_fluxes((1-lakefrac), (1-newfraction), &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]));
     advect_snow_storage(lakefrac, max_newfraction, newfraction, &(snow[iveg][band])); 
     rescale_snow_energy_fluxes((1-lakefrac), (1-newfraction), &(snow[iveg][band]), &(energy[iveg][band])); 
@@ -2809,6 +2828,24 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
     advect_carbon_storage(lakefrac, newfraction, lake, &(cell[WET][iveg][band]));
   }
 
+  // Compute lake->soil distributions
+  if (options.DIST_ZWT) {
+    for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+      lake->soil.asat_dist_zwt[zwtidx] = 1.0;
+      lake->soil.runoff_dist_zwt[zwtidx] = lake->soil.runoff;
+      lake->soil.baseflow_dist_zwt[zwtidx] = lake->soil.baseflow;
+      for (lindex=0; lindex<options.Nlayer; lindex++) {
+        lake->soil.layer[lindex].moist_dist_zwt[zwtidx] = soil_con.max_moist[lidx];
+#if SPATIAL_FROST
+        for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+          lake->soil.layer[lindex].ice_dist_zwt[zwtidx][frost_area] = lake->soil.layer[lindex].ice[frost_area];
+#else
+        lake->soil.layer[lindex].ice_dist_zwt[zwtidx] = lake->soil.layer[lindex].ice;
+#endif
+      }
+    }
+  }
+
   free((char*)delta_moist);
   free((char*)moist);
 
@@ -2824,7 +2861,8 @@ void advect_soil_veg_storage(double lakefrac,
                              veg_con_struct   *veg_con,
                              cell_data_struct *cell,
                              veg_var_struct   *veg_var,
-                             lake_con_struct   lake_con)
+                             lake_con_struct   lake_con,
+                             lake_var_struct  *lake_var)
 /**********************************************************************
   advect_soil_veg_storage	Ted Bohn	2009
 
@@ -2840,6 +2878,7 @@ void advect_soil_veg_storage(double lakefrac,
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added looping over water table depth (zwt) distribution.	TJB
 **********************************************************************/
 {
 
@@ -2854,6 +2893,7 @@ void advect_soil_veg_storage(double lakefrac,
   double slop, slop_per_area, tmp_area;
   int k;
   int iter, max_iter=10;
+  int zwtidx;
 
   if (lakefrac < 1.0 && newfraction < 1.0) { // wetland existed during this step
 
@@ -2885,10 +2925,49 @@ void advect_soil_veg_storage(double lakefrac,
       }
     }
 
-    // Any recharge that cannot be accomodated by wetland goes to baseflow
+    // Any recharge that cannot be accomodated by wetland goes to lake outflow
     if (delta_moist[0] > 0) {
-      cell->baseflow += delta_moist[0]*0.001*(1-lakefrac)*lake_con.basin[0]; // m^3
+//      cell->baseflow += delta_moist[0]*0.001*(1-lakefrac)*lake_con.basin[0]; // m^3
+      lake_var->runoff_out += delta_moist[0]*0.001*(1-lakefrac)*lake_con.basin[0]; // m^3
       delta_moist[0] = 0;
+    }
+
+    // Apportion the new moisture to various parts of the zwt distribution
+    if (options.DIST_ZWT) {
+      for (lidx=0; lidx<options.Nlayer; lidx++) {
+        tmp_delta_moist = (new_moist[lidx]-cell->layer[lidx].moist)*(1-lakefrac); // redefine delta_moist, mm over tile
+        slop = 0;
+        tmp_area = 0;
+        for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+          cell->layer[lidx].moist_dist_zwt[zwtidx] += tmp_delta_moist;
+          if (cell->layer[lidx].moist_dist_zwt[zwtidx] > soil_con->max_moist[lidx]) {
+            slop += (cell->layer[lidx].moist_dist_zwt[zwtidx]-soil_con->max_moist[lidx])*soil_con->ZwtAreaFract[zwtidx]; // mm over tile
+            cell->layer[lidx].moist_dist_zwt[zwtidx]=soil_con->max_moist[lidx];
+          }
+          else {
+            tmp_area += soil_con->ZwtAreaFract[zwtidx];
+          }
+        }
+        iter = 0;
+        while (iter < max_iter && fabs(slop) > 1e-10 && tmp_area > 0) {
+          slop_per_area = slop/tmp_area;
+          for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+            if (slop > 1e-10) {
+                if (slop_per_area < soil_con->max_moist[lidx]-cell->layer[lidx].moist_dist_zwt[zwtidx]) {
+                  cell->layer[lidx].moist_dist_zwt[zwtidx] += slop_per_area;
+                  slop -= slop_per_area*soil_con->ZwtAreaFract[zwtidx];
+                }
+                else if (soil_con->max_moist[lidx] > cell->layer[lidx].moist_dist_zwt[zwtidx]) {
+                  slop -= (soil_con->max_moist[lidx]-cell->layer[lidx].moist_dist_zwt[zwtidx])*soil_con->ZwtAreaFract[zwtidx];
+                cell->layer[lidx].moist_dist_zwt[zwtidx] = soil_con->max_moist[lidx];
+                tmp_area -= soil_con->ZwtAreaFract[zwtidx];
+              }
+            }
+          }
+          iter++;
+        }
+
+      }
     }
 
     // Rescale wetland moisture to wetland's final area (= 1-newfraction)
@@ -2900,10 +2979,22 @@ void advect_soil_veg_storage(double lakefrac,
     }
 
     // Recompute saturated areas
-    for(lidx=0;lidx<options.Nlayer;lidx++) {
-      tmp_moist[lidx] = cell->layer[lidx].moist;
+    if (!options.DIST_ZWT) {
+      for(lidx=0;lidx<options.Nlayer;lidx++) {
+        tmp_moist[lidx] = cell->layer[lidx].moist;
+      }
+      compute_runoff_and_asat(soil_con, 0, tmp_moist, 0, &(cell->asat), &tmp_runoff);
     }
-    compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell->asat), &tmp_runoff);
+    else {
+      cell->asat = 0;
+      for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+        for(lidx=0;lidx<options.Nlayer;lidx++) {
+          tmp_moist[lidx] = cell->layer[lidx].moist_dist_zwt[zwtidx];
+        }
+        compute_runoff_and_asat(soil_con, soil_con->ZwtDeltaMoist[zwtidx], tmp_moist, 0, &(cell->asat_dist_zwt[zwtidx]), &tmp_runoff);
+        cell->asat += cell->asat_dist_zwt[zwtidx]*soil_con->ZwtAreaFract[zwtidx];
+      }
+    }
 
     // Recompute zwt's
     wrap_compute_zwt(soil_con, cell);
@@ -2936,6 +3027,13 @@ void advect_soil_veg_storage(double lakefrac,
     cell->asat = 1.0;
     cell->zwt = 0;
     cell->zwt_lumped = 0;
+    if (options.DIST_ZWT) {
+      for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+        cell->asat_dist_zwt[zwtidx] = 1.0;
+        cell->zwt_dist_zwt[zwtidx] = 0;
+        cell->zwt_lumped_dist_zwt[zwtidx] = 0;
+      }
+    }
 
     if (veg_var != NULL) {
       veg_var->Wdew = 0.0;

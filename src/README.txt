@@ -264,6 +264,78 @@ Implemented heat flux between lake and underlying soil.
 
 
 
+Water table distribution.
+
+	Files Affected:
+
+	canopy_evap.c
+	compute_zwt.c
+	display_current_settings.c
+	distribute_moist_zwt.c (new)
+	free_dist_prcp.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	initialize_veg.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	make_veg_var.c
+	output_list_utils.c
+	put_data.c
+	read_initial_model_state.c
+	read_soil_param.c
+	snow_intercept.c
+	surface_fluxes.c
+	user_def.h
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	Added the ability to account for sub-grid heterogeneity in water table
+	depth.  This is primarily applicable to boreal wetlands; the water
+	table depth distribution is hard-coded to represent typical boreal
+	boreal wetland microtopography.
+
+	The water table depth distribution is controlled by the parameter
+	RIDGE_FRACT (defined in vicNl_def.h), which is the area fraction of
+	the wetland covered by ridges or hummocks, and is set to 0.5.
+	Ridges and hummocks are assumed to be 50cm tall, and hollows and pools
+	are assumed to be 20cm deep, for a total range of 70cm in surface
+	elevation.  This is based on field observations in Eppinga et al
+	(2008).  The water table depth distribution is sampled at 5 locations:
+	1. saturated zone, 2. midpoint of exposed hollow, 3. lowest 1/3 of
+	ridge, 4. middle 1/3 of ridge, 5. highest 1/3 of ridge.
+
+	This feature is optional, controlled by the value of DIST_ZWT in the
+	global parameter file.  By default, DIST_ZWT is FALSE.
+
+	There are several new output variables associated with this feature:
+	  OUT_DISTZWT_ASAT:     Array of saturated fractional areas, one per
+				point on the water table distribution
+	  OUT_DISTZWT_SMOIST:   2-d array of soil moistures (water table
+				distribution node and soil layer)
+	  OUT_DISTZWT_ZWT:      Array of water table depths (assigning water
+				table to lowest unsaturated layer)
+	  OUT_DISTZWT_ZWT_LUMP: Array of water table depths (lumping all
+				layers' water into one column)
+	  OUT_DISTZWT_BFLOW:    Array of baseflows
+	  OUT_DISTZWT_RUNOFF:   Array of runoffs
+
+	When DIST_ZWT is TRUE, the non-distributed versions of these variables
+	(OUT_ASAT, etc) are now computed as the area-weighted averages of the
+	values in the OUT_DISTZWT* arrays.
+
+
+
+
 Bug Fixes:
 ----------
 

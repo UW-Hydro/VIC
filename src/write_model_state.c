@@ -76,6 +76,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      will save lake state data.  If no lake is present, default NULL
 	      values will be stored.						TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.		TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -89,6 +90,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   int    Ndist;
   int    Nbands;
   int    byte, Nbytes;
+  int    zwtidx;
 #if SPATIAL_FROST
   int    frost_area;
 #endif // SPATIAL_FROST
@@ -152,6 +154,15 @@ void write_model_state(dist_prcp_struct    *prcp,
 	       + (Nveg+1) * Nbands * sizeof(char) // MELTING
 	       + (Nveg+1) * Nbands * sizeof(double) * 9 // other snow parameters
 	       + (Nveg+1) * Nbands * options.Nnode * sizeof(double); // soil temperatures
+    if (options.DIST_ZWT) {
+      Nbytes +=  (Nveg+1) * Nbands * Ndist * options.Nlayer * options.Nzwt * sizeof(double) // soil moisture
+#if SPATIAL_FROST
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * options.Nzwt * FROST_SUBAREAS * sizeof(double) // soil ice
+#else
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * options.Nzwt * sizeof(double) // soil ice
+#endif // SPATIAL_FROST
+               ;
+    }
     if ( options.LAKES ) {
       /* Lake/wetland tiles have lake-specific state vars */
       Nbytes += sizeof(int) // activenod
@@ -187,6 +198,15 @@ void write_model_state(dist_prcp_struct    *prcp,
 	+ sizeof(double) * 9 // other snow parameters
 	+ options.Nnode * sizeof(double) // soil temperatures
 	;
+      if (options.DIST_ZWT) {
+        Nbytes +=  Ndist * options.Nlayer * options.Nzwt * sizeof(double) // soil moisture
+#if SPATIAL_FROST
+	         + Ndist * options.Nlayer * options.Nzwt * FROST_SUBAREAS * sizeof(double) // soil ice
+#else
+	         + Ndist * options.Nlayer * options.Nzwt * sizeof(double) // soil ice
+#endif // SPATIAL_FROST
+                 ;
+      }
       if ( options.CARBON ) {
         /* Carbon-specific state vars */
         Nbytes += 3 * sizeof(double); // 3 soil carbon storages
@@ -308,6 +328,46 @@ void write_model_state(dist_prcp_struct    *prcp,
 #endif // SPATIAL_FROST
         }
 
+        if (options.DIST_ZWT) {
+
+          for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+
+	    /* Write total soil moisture */
+	    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	      tmpval = cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
+	      if ( options.BINARY_STATE_FILE )
+	        fwrite( &tmpval, sizeof(double), 1, filep->statefile );
+	      else
+	        fprintf( filep->statefile, " %f", tmpval );
+	    }
+
+            /* Write average ice content */
+            for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	        tmpval = cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx][frost_area];
+	        if ( options.BINARY_STATE_FILE ) {
+	          fwrite( &tmpval, sizeof(double), 1, filep->statefile );
+	        }
+	        else {
+	          fprintf( filep->statefile, " %f", tmpval );
+	        }
+	      }
+#else
+	      tmpval = cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx];
+	      if ( options.BINARY_STATE_FILE ) {
+	        fwrite( &tmpval, sizeof(double), 1, filep->statefile );
+	      }
+	      else {
+	        fprintf( filep->statefile, " %f", tmpval );
+	      }
+#endif // SPATIAL_FROST
+            }
+
+          }
+
+        }
+
 	if ( veg < Nveg ) {
 	  /* Write dew storage */
 	  tmpval = veg_var[dist][veg][band].Wdew;
@@ -345,6 +405,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      fprintf( filep->statefile, " %f", tmpval );
           }
 	}
+
       }
       
       /* Write snow data */
@@ -404,6 +465,30 @@ void write_model_state(dist_prcp_struct    *prcp,
 	  fwrite( &lake_var.soil.layer[lidx].ice, sizeof(double), 1, filep->statefile );
 #endif // SPATIAL_FROST
         }
+        if (options.DIST_ZWT) {
+
+          for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+
+	    /* Write total soil moisture */
+	    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	      fwrite( &lake_var.soil.layer[lidx].moist_dist_zwt[zwtidx], sizeof(double), 1, filep->statefile );
+	    }
+
+            /* Write average ice content */
+            for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	        fwrite( &lake_var.soil.layer[lidx].ice_dist_zwt[zwtidx][frost_area], sizeof(double), 1, filep->statefile );
+	      }
+#else
+	      fwrite( &lake_var.soil.layer[lidx].ice_dist_zwt[zwtidx], sizeof(double), 1, filep->statefile );
+#endif // SPATIAL_FROST
+            }
+
+          }
+
+        }
+
         if (options.CARBON) {
 	  /* Write soil carbon storages */
 	  tmpval = lake_var.soil.CLitter;
@@ -487,6 +572,31 @@ void write_model_state(dist_prcp_struct    *prcp,
 	  fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice );
 #endif // SPATIAL_FROST
         }
+        if (options.DIST_ZWT) {
+
+          for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+
+	    /* Write total soil moisture */
+	    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	      fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].moist_dist_zwt[zwtidx] );
+	    }
+
+            /* Write average ice content */
+            for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+#if SPATIAL_FROST
+	      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	        fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice_dist_zwt[zwtidx][frost_area] );
+	      }
+#else
+	      fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice_dist_zwt[zwtidx] );
+#endif // SPATIAL_FROST
+
+            }
+
+          }
+
+        }
+
       }
 
       /* Write snow data */

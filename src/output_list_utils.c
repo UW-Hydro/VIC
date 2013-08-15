@@ -62,6 +62,7 @@ out_data_struct *create_output_list() {
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -74,6 +75,12 @@ out_data_struct *create_output_list() {
 
   // Water Balance Terms - state variables
   strcpy(out_data[OUT_ASAT].varname,"OUT_ASAT");                       /* saturated area fraction */
+  strcpy(out_data[OUT_DISTZWT_ASAT].varname,"OUT_DISTZWT_ASAT");       /* Array of saturated area fraction values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_BFLOW].varname,"OUT_DISTZWT_BFLOW");     /* Array of baseflow values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_RUNOFF].varname,"OUT_DISTZWT_RUNOFF");   /* Array of runoff values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_SMOIST].varname,"OUT_DISTZWT_SMOIST");   /* Array of soil moisture values [mm] when DIST_ZWT = TRUE; order of values = [veg][band][wt][layer] */
+  strcpy(out_data[OUT_DISTZWT_ZWT].varname,"OUT_DISTZWT_ZWT");         /* Array of water table positions [cm] (lowest unsaturated layer) when DIST_ZWT = TRUE; order of values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_ZWT_LUMP].varname,"OUT_DISTZWT_ZWT_LUMP");       /* Array of water table positions [cm] (across all layers moistures lumped together) when DIST_ZWT = TRUE; order of values = [veg][band][wt] */
   strcpy(out_data[OUT_LAKE_AREA_FRAC].varname,"OUT_LAKE_AREA_FRAC");   /* lake surface area as fraction of grid cell area [fraction] */
   strcpy(out_data[OUT_LAKE_DEPTH].varname,"OUT_LAKE_DEPTH");           /* lake depth [m] */
   strcpy(out_data[OUT_LAKE_ICE].varname,"OUT_LAKE_ICE");               /* moisture stored as lake ice [mm] */
@@ -266,6 +273,12 @@ out_data_struct *create_output_list() {
   for (v=0; v<N_OUTVAR_TYPES; v++) {
     out_data[v].nelem = 1;
   }
+  out_data[OUT_DISTZWT_ASAT].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_BFLOW].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_RUNOFF].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_SMOIST].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt*options.Nlayer;
+  out_data[OUT_DISTZWT_ZWT].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_ZWT_LUMP].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
   if (options.FROZEN_SOIL) {
     out_data[OUT_FDEPTH].nelem = MAX_FRONTS;
     out_data[OUT_TDEPTH].nelem = MAX_FRONTS;
@@ -315,6 +328,10 @@ out_data_struct *create_output_list() {
     out_data[v].aggtype = AGG_TYPE_AVG;
   }
   out_data[OUT_ASAT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ASAT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_SMOIST].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ZWT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ZWT_LUMP].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_AREA_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_DEPTH].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE].aggtype = AGG_TYPE_END;

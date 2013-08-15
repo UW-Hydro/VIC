@@ -123,6 +123,7 @@ void initialize_global() {
   2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
 	      for LW_TYPE to LW_PRATA.						TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Jul-25 Added DIST_ZWT.							TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -141,6 +142,7 @@ void initialize_global() {
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
   options.DIST_PRCP             = FALSE;
+  options.DIST_ZWT              = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.EXP_TRANS             = FALSE;
   options.FROZEN_SOIL           = FALSE;

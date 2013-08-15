@@ -60,6 +60,7 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 ****************************************************************************/
 
 {
@@ -67,6 +68,7 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
 
   int    i;
   int    lindex;
+  int    zwtidx;
   double total_depth;
   double tmp_depth;
   double tmp_moist;
@@ -107,5 +109,45 @@ void wrap_compute_zwt(soil_con_struct  *soil_con,
   }
   cell->zwt_lumped = compute_zwt(soil_con, options.Nlayer+1, tmp_moist);
   if (cell->zwt_lumped == 999) cell->zwt_lumped = -total_depth*100; // in cm;
+
+  if (options.DIST_ZWT) {
+
+    /** Compute distributed water table depth **/
+    for (zwtidx=0; zwtidx<options.Nzwt; zwtidx++) {
+
+      /** Compute each layer's zwt using soil moisture v zwt curve **/
+      for (lindex=0; lindex<options.Nlayer; lindex++) {
+        cell->layer[lindex].zwt_dist_zwt[zwtidx] = compute_zwt(soil_con, lindex, cell->layer[lindex].moist_dist_zwt[zwtidx]);
+      }
+      if (cell->layer[options.Nlayer-1].zwt_dist_zwt[zwtidx] == 999) cell->layer[options.Nlayer-1].zwt_dist_zwt[zwtidx] = -total_depth*100; // in cm
+
+      /** Compute total soil column's zwt; this will be the zwt of the lowest layer that isn't completely saturated **/
+      lindex = options.Nlayer-1;
+      tmp_depth = total_depth;
+      while (lindex>=0 && soil_con->max_moist[lindex]-cell->layer[lindex].moist_dist_zwt[zwtidx]<=SMALL) {
+        tmp_depth -= soil_con->depth[lindex];
+        lindex--;
+      }
+      if (lindex < 0) cell->zwt_dist_zwt[zwtidx] = 0;
+      else if (lindex < options.Nlayer-1) {
+        if (cell->layer[lindex].zwt_dist_zwt[zwtidx] != 999)
+          cell->zwt_dist_zwt[zwtidx] = cell->layer[lindex].zwt_dist_zwt[zwtidx];
+        else
+          cell->zwt_dist_zwt[zwtidx] = -tmp_depth*100;
+      }
+      else
+        cell->zwt_dist_zwt[zwtidx] = cell->layer[lindex].zwt_dist_zwt[zwtidx];
+
+      /** Compute total soil column's zwt_lumped; this will be the zwt of all N layers lumped together. **/
+      tmp_moist = 0;
+      for (lindex=0; lindex<options.Nlayer; lindex++) {
+        tmp_moist += cell->layer[lindex].moist_dist_zwt[zwtidx];
+      }
+      cell->zwt_lumped_dist_zwt[zwtidx] = compute_zwt(soil_con, options.Nlayer+1, tmp_moist);
+      if (cell->zwt_lumped_dist_zwt[zwtidx] == 999) cell->zwt_lumped_dist_zwt[zwtidx] = -total_depth*100; // in cm;
+
+    }
+
+  }
 
 }

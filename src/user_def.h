@@ -20,7 +20,7 @@
   2011-Jan-04 Added MAX_ZWTVMOIST for storing array of soil moisture vs
 	      water table position.					TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -100,7 +100,8 @@
 #define MAX_FRONTS     3       /* maximum number of freezing and thawing 
 				  front depths to store */
 #define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
-#define MAX_ZWTVMOIST  11      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
+#define MAX_ZWTVMOIST  51      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
+#define MAX_NZWT       4       /* maximum number of points in water table distribution */
 
 /***** Number of iterations to use in solving the surface energy balance.
        The original VIC model uses only 1 iteration for speed.  Increasing

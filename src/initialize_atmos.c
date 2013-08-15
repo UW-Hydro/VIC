@@ -128,6 +128,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      sub-daily humidity was supplied, it is converted to sub-daily
 	      VP after the interpolation of MTCLIM VP, so that it overwrites
 	      the MTCLIM VP.							TJB
+  2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.				TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -167,12 +168,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double  shortwave;
   double  svp_tair;
   double *hourlyrad;
+  double *fdir;
   double *prec;
   double *tmax;
   double *tmin;
   double *tair;
   double *tskc;
   double *daily_vp;
+  double *dailyrad;
   double  min, max;
   double  rainonly;
   int     Ndays;
@@ -195,8 +198,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int tmp_nrecs;
   int Ndays_local;
   dmy_struct *dmy_local;
+  dmy_struct dmy_tmp;
   int month_days[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int fstepspday;
+  int tmp_int;
   double tmp_double;
   int save_prec_supplied;
   int save_wind_supplied;
@@ -331,10 +336,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
   tminhour   = (int *)    calloc(Ndays_local, sizeof(double));
   tskc       = (double *) calloc(Ndays_local*24, sizeof(double));
   daily_vp   = (double *) calloc(Ndays_local, sizeof(double));
+  dailyrad   = (double *) calloc(Ndays_local, sizeof(double));
+  fdir       = (double *) calloc(Ndays_local*24, sizeof(double));
   
   if (hourlyrad == NULL || prec == NULL || tair == NULL || tmax == NULL ||
-      tmaxhour == NULL ||  tmin == NULL || tminhour == NULL || tskc == NULL ||
-      daily_vp == NULL)
+      tmaxhour == NULL || tmin == NULL || tminhour == NULL || tskc == NULL ||
+      daily_vp == NULL || dailyrad == NULL || fdir == NULL)
     nrerror("Memory allocation failure in initialize_atmos()");
   
   /*******************************
@@ -905,7 +912,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   **************************************************/
   mtclim_wrapper(have_dewpt, have_shortwave, hour_offset, elevation, slope,
                    aspect, ehoriz, whoriz, annual_prec, phi, Ndays_local,
-                   dmy_local, prec, tmax, tmin, tskc, daily_vp, hourlyrad);
+                   dmy_local, prec, tmax, tmin, tskc, daily_vp, hourlyrad, fdir);
 
   /***********************************************************
     Shortwave, part 2.
@@ -1328,14 +1335,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Longwave
   *************************************************/
 
-  /****************************************************************************
-    calculate the daily and sub-daily longwave.  There is a separate case for
-    the full energy and the water balance modes.  For water balance mode we 
-    need to calculate the net longwave for the daily timestep and the incoming
-    longwave for the SNOW_STEPs, for the full energy balance mode we always
-    want the incoming longwave. 
-  ****************************************************************************/
-
   if ( !param_set.TYPE[LONGWAVE].SUPPLIED ) {
     /** Incoming longwave radiation not supplied **/
     for (rec = 0; rec < global_param.nrecs; rec++) {
@@ -1382,6 +1381,149 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
+  /*************************************************
+    Cosine of Solar Zenith Angle
+  *************************************************/
+
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    dmy_tmp.year = dmy[rec].year;
+    dmy_tmp.month = dmy[rec].month;
+    dmy_tmp.day = dmy[rec].day;
+    dmy_tmp.day_in_year = dmy[rec].day_in_year;
+    for (j = 0; j < NF; j++) {
+      hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+      if (global_param.starthour - hour_offset_int < 0) hour += 24;
+      dmy_tmp.hour = hour+0.5*options.SNOW_STEP;
+      atmos[rec].coszen[j] = compute_coszen(phi,theta_s,theta_l,dmy_tmp);
+    }
+    if (NF>1) {
+      dmy_tmp.hour = dmy[rec].hour + 0.5*global_param.dt;
+      atmos[rec].coszen[NR] = compute_coszen(phi,theta_s,theta_l,dmy_tmp);
+    }
+  }
+
+  /*************************************************
+    Direct Shortwave Fraction (from MTCLIM)
+  *************************************************/
+
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    sum = 0;
+    for (j = 0; j < NF; j++) {
+      hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+      if (global_param.starthour - hour_offset_int < 0) hour += 24;
+      idx = (int)((float)hour/24.0);
+      atmos[rec].fdir[j] = fdir[idx]; // assume constant over the day
+      sum += atmos[rec].fdir[j];
+    }
+    if(NF>1) atmos[rec].fdir[NR] = sum / (float)NF;
+  }
+
+  /*************************************************
+    Photosynthetically Active Radiation
+  *************************************************/
+
+  if ( !param_set.TYPE[PAR].SUPPLIED ) {
+    /** par not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].par[i] = SW2PAR * atmos[rec].shortwave[i];
+        sum += atmos[rec].par[i];
+      }
+      if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[PAR].SUPPLIED-1] == 24) {
+      /* daily par provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          tmp_int = (int)(rec/stepspday)*stepspday;
+          tmp_double = 0;
+          for (i=0; i<stepspday; i++)
+            tmp_double += atmos[tmp_int+i].shortwave[NR];
+          tmp_double /= stepspday;
+          if (tmp_double > 0)
+            atmos[rec].par[j] = local_forcing_data[PAR][idx]*atmos[rec].shortwave[j]/tmp_double;
+          else
+            atmos[rec].par[j] = 0;
+          sum += atmos[rec].par[j];
+        }
+        if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily par provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].par[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].par[i] += local_forcing_data[PAR][idx];
+          }
+          atmos[rec].par[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].par[i];
+        }
+        if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+      }
+    }
+  }
+
+  /*************************************************
+    Atmospheric Carbon Dioxide Mixing Ratio
+  *************************************************/
+
+  if ( !param_set.TYPE[CATM].SUPPLIED ) {
+    /** Atmospheric carbon dioxide concentration not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].Catm[i] = CatmCurrent * 1e-6; // convert ppm to mixing ratio
+        sum += atmos[rec].Catm[i];
+      }
+      if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[CATM].SUPPLIED-1] == 24) {
+      /* daily atmospheric carbon dioxide concentration provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          atmos[rec].Catm[j] = local_forcing_data[CATM][idx]*1e-6; // convert ppm to mixing ratio
+          sum += atmos[rec].Catm[j];
+        }
+        if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily atmospheric carbon dioxide concentration provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].Catm[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].Catm[i] += local_forcing_data[CATM][idx]*1e-6; // convert ppm to mixing ratio
+          }
+          atmos[rec].Catm[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].Catm[i];
+        }
+        if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+      }
+    }
+  }
+
   /****************************************************
     Determine if Snow will Fall During Each Time Step
   ****************************************************/
@@ -1420,6 +1562,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   free(tminhour);
   free(tskc);
   free(daily_vp);
+  free(dailyrad);
+  free(fdir);
 
   for(i=0;i<N_FORCING_TYPES;i++)  {
 //    if (forcing_data[i] != NULL)

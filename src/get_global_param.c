@@ -103,6 +103,8 @@ global_param_struct get_global_param(filenames_struct *names,
 	      TRUE.								TJB
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Jul-25 Added DIST_ZWT.							TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -388,6 +390,24 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("VP_ITER_CONVERGE",flgstr)==0) options.VP_ITER=VP_ITER_CONVERGE;
         else options.VP_INTERP = VP_ITER_ALWAYS;
       }
+      else if(strcasecmp("SHARE_LAYER_MOIST",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.SHARE_LAYER_MOIST=TRUE;
+        else options.SHARE_LAYER_MOIST = FALSE;
+      }
+      else if(strcasecmp("CANOPY_LAYERS",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&options.Ncanopy);
+      }
+      else if(strcasecmp("CARBON",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CARBON=TRUE;
+        else options.CARBON = FALSE;
+      }
+      else if(strcasecmp("RC_MODE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("RC_PHOTO",flgstr)==0) options.RC_MODE=RC_PHOTO;
+        else options.RC_MODE = RC_JARVIS;
+      }
 
       /*************************************
        Define state files
@@ -541,6 +561,11 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("VEGLIB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veglib);
       }
+      else if(strcasecmp("VEGLIB_PHOTO",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_PHOTO=TRUE;
+        else options.VEGLIB_PHOTO = FALSE;
+      }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
       }
@@ -591,6 +616,20 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.LAKE_PROFILE = TRUE;
 	}
+      }
+      else if(strcasecmp("DIST_ZWT",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("TRUE", flgstr) == 0) {
+          options.DIST_ZWT = TRUE;
+	  options.Nzwt = 4;
+        }
+        else {
+	  options.DIST_ZWT = FALSE;
+	  options.Nzwt = 1;
+	}
+      }
+      else if(strcasecmp("NZWT",optstr)==0) {
+        sscanf(cmdstr,"%*s %d", &options.Nzwt);
       }
 
       /*************************************
@@ -811,6 +850,20 @@ global_param_struct get_global_param(filenames_struct *names,
   if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
       sprintf(ErrStr, "\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global parameter file.  If you want VIC to read LAI values from the vegparam file, you MUST make sure the veg param file contains 1 line of 12 monthly LAI values for EACH veg tile in EACH grid cell, and you MUST specify \"VEGPARAM_LAI\" as \"TRUE\" in the global parameter file.  Alternatively, if you want VIC to read LAI values from the veg library file, set \"LAI_SRC\" ro \"LAI_FROM_VEGLIB\" in the global parameter file.  In either case, the setting of \"VEGPARAM_LAI\" must be consistent with the contents of the veg param file (i.e. whether or not it contains LAI values).");
       nrerror(ErrStr);
+  }
+
+  // Carbon-cycling options
+  if( !options.CARBON ) {
+    if (options.RC_MODE == RC_PHOTO) {
+      fprintf(stderr, "WARNING: If CARBON==FALSE, RC_MODE must be set to RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
+      options.RC_MODE = RC_JARVIS;
+    }
+  }
+  else {
+    if (!options.VEGLIB_PHOTO) {
+      sprintf(ErrStr, "Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and carbon-specific veg parameters must be listed in your veg library file.");
+      nrerror(ErrStr);
+    }
   }
 
   // Validate the elevation band file information

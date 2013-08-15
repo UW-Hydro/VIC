@@ -59,6 +59,10 @@ out_data_struct *create_output_list() {
   2011-Nov-04 Added OUT_TSKC.						TJB
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -71,6 +75,12 @@ out_data_struct *create_output_list() {
 
   // Water Balance Terms - state variables
   strcpy(out_data[OUT_ASAT].varname,"OUT_ASAT");                       /* saturated area fraction */
+  strcpy(out_data[OUT_DISTZWT_ASAT].varname,"OUT_DISTZWT_ASAT");       /* Array of saturated area fraction values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_BFLOW].varname,"OUT_DISTZWT_BFLOW");     /* Array of baseflow values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_RUNOFF].varname,"OUT_DISTZWT_RUNOFF");   /* Array of runoff values [mm] when DIST_ZWT = TRUE; orderof values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_SMOIST].varname,"OUT_DISTZWT_SMOIST");   /* Array of soil moisture values [mm] when DIST_ZWT = TRUE; order of values = [veg][band][wt][layer] */
+  strcpy(out_data[OUT_DISTZWT_ZWT].varname,"OUT_DISTZWT_ZWT");         /* Array of water table positions [cm] (lowest unsaturated layer) when DIST_ZWT = TRUE; order of values = [veg][band][wt] */
+  strcpy(out_data[OUT_DISTZWT_ZWT_LUMP].varname,"OUT_DISTZWT_ZWT_LUMP");       /* Array of water table positions [cm] (across all layers moistures lumped together) when DIST_ZWT = TRUE; order of values = [veg][band][wt] */
   strcpy(out_data[OUT_LAKE_AREA_FRAC].varname,"OUT_LAKE_AREA_FRAC");   /* lake surface area as fraction of grid cell area [fraction] */
   strcpy(out_data[OUT_LAKE_DEPTH].varname,"OUT_LAKE_DEPTH");           /* lake depth [m] */
   strcpy(out_data[OUT_LAKE_ICE].varname,"OUT_LAKE_ICE");               /* moisture stored as lake ice [mm] */
@@ -151,15 +161,18 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_ALBEDO].varname,"OUT_ALBEDO");                   /* albedo [fraction] */
   strcpy(out_data[OUT_BARESOILT].varname,"OUT_BARESOILT");             /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_FDEPTH].varname,"OUT_FDEPTH");                   /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
-  strcpy(out_data[OUT_LAKE_ICE_TEMP].varname,"OUT_LAKE_ICE_TEMP");     /* lake ice temperature [K] */
-  strcpy(out_data[OUT_LAKE_SURF_TEMP].varname,"OUT_LAKE_SURF_TEMP");   /* lake surface temperature [K] */
+  strcpy(out_data[OUT_LAKE_ICE_TEMP].varname,"OUT_LAKE_ICE_TEMP");     /* lake ice temperature [C] (ALMA_OUTPUT: [K]) */
+  strcpy(out_data[OUT_LAKE_SURF_TEMP].varname,"OUT_LAKE_SURF_TEMP");   /* lake surface temperature [C] (ALMA_OUTPUT: [K]) */
+  strcpy(out_data[OUT_LAKE_LAYER_TEMP].varname,"OUT_LAKE_LAYER_TEMP"); /* lake water layer temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_RAD_TEMP].varname,"OUT_RAD_TEMP");               /* average radiative surface temperature [K] */
   strcpy(out_data[OUT_SALBEDO].varname,"OUT_SALBEDO");                 /* snow albedo [fraction] */
   strcpy(out_data[OUT_SNOW_PACK_TEMP].varname,"OUT_SNOW_PACK_TEMP");   /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SNOW_SURF_TEMP].varname,"OUT_SNOW_SURF_TEMP");   /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SNOWT_FBFLAG].varname,"OUT_SNOWT_FBFLAG");       /* snow surface temperature flag */
   strcpy(out_data[OUT_SOIL_TEMP].varname,"OUT_SOIL_TEMP");             /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
+  strcpy(out_data[OUT_SOIL_TEMP_LAKE].varname,"OUT_SOIL_TEMP_LAKE");   /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer under the lake */
   strcpy(out_data[OUT_SOIL_TNODE].varname,"OUT_SOIL_TNODE");           /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+  strcpy(out_data[OUT_SOIL_TNODE_LAKE].varname,"OUT_SOIL_TNODE_LAKE"); /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node under the lake */
   strcpy(out_data[OUT_SOIL_TNODE_WL].varname,"OUT_SOIL_TNODE_WL");     /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
   strcpy(out_data[OUT_SOILT_FBFLAG].varname,"OUT_SOILT_FBFLAG");       /* soil temperature flag for each soil thermal node */
   strcpy(out_data[OUT_SURF_TEMP].varname,"OUT_SURF_TEMP");             /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
@@ -197,8 +210,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_AERO_RESIST1].varname,"OUT_AERO_RESIST1");       /* surface aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AERO_RESIST2].varname,"OUT_AERO_RESIST2");       /* overstory aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AIR_TEMP].varname,"OUT_AIR_TEMP");               /* air temperature [C] */
+  strcpy(out_data[OUT_CATM].varname,"OUT_CATM");                       /* atmospheric CO2 concentration [ppm] */
+  strcpy(out_data[OUT_COSZEN].varname,"OUT_COSZEN");                   /* cosine of solar zenith angle [fraction] */
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
+  strcpy(out_data[OUT_FDIR].varname,"OUT_FDIR");                       /* fraction of incoming shortwave that is direct [fraction] */
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */
+  strcpy(out_data[OUT_PAR].varname,"OUT_PAR");                         /* incoming photosynthetically active radiation [W/m2] */
   strcpy(out_data[OUT_PRESSURE].varname,"OUT_PRESSURE");               /* near surface atmospheric pressure [kPa] */
   strcpy(out_data[OUT_QAIR].varname,"OUT_QAIR");                       /* specific humidity [kg/kg] */
   strcpy(out_data[OUT_REL_HUMID].varname,"OUT_REL_HUMID");             /* relative humidity [fraction]*/
@@ -216,6 +233,18 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_POROSITY].varname,"OUT_POROSITY");                 /* porosity [mm/mm] */
   strcpy(out_data[OUT_ZSUM_NODE].varname,"OUT_ZSUM_NODE");               /* depths of thermal nodes [m] */
 #endif
+
+  // Carbon-cycling Terms
+  strcpy(out_data[OUT_APAR].varname,"OUT_APAR");                       /* absorbed PAR [W/m2] */
+  strcpy(out_data[OUT_GPP].varname,"OUT_GPP");                         /* gross primary productivity [g C/m2d] */
+  strcpy(out_data[OUT_RAUT].varname,"OUT_RAUT");                       /* autotrophic respiration [g C/m2d] */
+  strcpy(out_data[OUT_NPP].varname,"OUT_NPP");                         /* net primary productivity [g C/m2d] */
+  strcpy(out_data[OUT_LITTERFALL].varname,"OUT_LITTERFALL");           /* flux of carbon from living biomass into soil [g C/m2d] */
+  strcpy(out_data[OUT_RHET].varname,"OUT_RHET");                       /* heterotrophic respiration [g C/m2d] */
+  strcpy(out_data[OUT_NEE].varname,"OUT_NEE");                         /* net ecosystem exchange [g C/m2d] */
+  strcpy(out_data[OUT_CLITTER].varname,"OUT_CLITTER");                 /* litter pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
@@ -244,6 +273,12 @@ out_data_struct *create_output_list() {
   for (v=0; v<N_OUTVAR_TYPES; v++) {
     out_data[v].nelem = 1;
   }
+  out_data[OUT_DISTZWT_ASAT].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_BFLOW].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_RUNOFF].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_SMOIST].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt*options.Nlayer;
+  out_data[OUT_DISTZWT_ZWT].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_ZWT_LUMP].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
   if (options.FROZEN_SOIL) {
     out_data[OUT_FDEPTH].nelem = MAX_FRONTS;
     out_data[OUT_TDEPTH].nelem = MAX_FRONTS;
@@ -254,13 +289,16 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_LIQ].nelem = options.Nlayer;
   out_data[OUT_SOIL_MOIST].nelem = options.Nlayer;
   out_data[OUT_SOIL_TEMP].nelem = options.Nlayer;
+  out_data[OUT_SOIL_TEMP_LAKE].nelem = options.Nlayer;
 #if EXCESS_ICE
   out_data[OUT_SOIL_DEPTH].nelem = options.Nlayer;
   out_data[OUT_SUBSIDENCE].nelem = options.Nlayer;
   out_data[OUT_POROSITY].nelem = options.Nlayer;
   out_data[OUT_ZSUM_NODE].nelem = options.Nnode;
 #endif
+  out_data[OUT_LAKE_LAYER_TEMP].nelem = MAX_LAKE_NODES;
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
+  out_data[OUT_SOIL_TNODE_LAKE].nelem = options.Nnode;
   out_data[OUT_SOIL_TNODE_WL].nelem = options.Nnode;
   out_data[OUT_SOILT_FBFLAG].nelem = options.Nnode;
   out_data[OUT_ADV_SENS_BAND].nelem = options.SNOW_BAND;
@@ -290,6 +328,10 @@ out_data_struct *create_output_list() {
     out_data[v].aggtype = AGG_TYPE_AVG;
   }
   out_data[OUT_ASAT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ASAT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_SMOIST].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ZWT].aggtype = AGG_TYPE_END;
+  out_data[OUT_DISTZWT_ZWT_LUMP].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_AREA_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_DEPTH].aggtype = AGG_TYPE_END;
   out_data[OUT_LAKE_ICE].aggtype = AGG_TYPE_END;

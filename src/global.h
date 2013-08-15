@@ -20,7 +20,7 @@
 	      characteristics of bare soil.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
 **********************************************************************/
-char *version = "4.1.2.h bug fix update 2013-Aug-01";
+char *version = "4.1.2_wetcarb 2013-Jul-25";
 
 char *optstring = "g:vo";
 

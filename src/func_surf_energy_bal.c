@@ -107,6 +107,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      node distribution to be over the same control volume as for
 	      the linear node distribution and quick flux cases.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -161,6 +164,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *organic;
 
   float *root;
+  double *CanopLayerBnd;
 
   /* meteorological forcing terms */
   int UnderStory;
@@ -180,6 +184,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double surf_atten;
   double vp;
   double vpd;
+  double shortwave;
+  double Catm;
+  double *dryFrac;
 
   double *Wdew;
   double *displacement;
@@ -332,6 +339,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   moist                   = (double) va_arg(ap, double);
 
   root                    = (float  *) va_arg(ap, float  *);
+  CanopLayerBnd           = (double *) va_arg(ap, double *);
 
   /* meteorological forcing terms */
   UnderStory              = (int) va_arg(ap, int);
@@ -350,6 +358,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
+  shortwave               = (double) va_arg(ap, double);
+  Catm                    = (double) va_arg(ap, double);
+  dryFrac                 = (double *) va_arg(ap, double *);
 
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
@@ -581,10 +592,24 @@ double func_surf_energy_bal(double Ts, va_list ap)
     else {
       i=0;
       while (soil_con->Zsum_node[i] < D1) { i++; }
-      D1_minus = soil_con->Zsum_node[i-1];
-      D1_plus = soil_con->Zsum_node[i];
-      T1_minus = Tnew_node[i-1];
-      T1_plus = Tnew_node[i];
+      if (soil_con->Zsum_node[i] < D1) {
+        D1_minus = soil_con->Zsum_node[i-1];
+        D1_plus = soil_con->Zsum_node[i];
+        T1_minus = Tnew_node[i-1];
+        T1_plus = Tnew_node[i];
+      }
+      else {
+        D1_minus = soil_con->Zsum_node[i-1];
+        T1_minus = Tnew_node[i-1];
+        if (i < options.Nnode-1) {
+          D1_plus = soil_con->Zsum_node[i+1];
+          T1_plus = Tnew_node[i+1];
+        }
+        else {
+          D1_plus = soil_con->Zsum_node[i]+(soil_con->Zsum_node[i]-soil_con->Zsum_node[i-1]);
+          T1_plus = Tnew_node[i];
+        }
+      }
       *T1 = T1_minus + (T1_plus - T1_minus)*(D1-D1_minus)/(D1_plus-D1_minus);
     }
       
@@ -688,109 +713,118 @@ double func_surf_energy_bal(double Ts, va_list ap)
     }
 
   }
+
+  if (VEG < 2) {
+
+    /* if thin snowpack, compute the change in energy stored in the pack */
+    if ( INCLUDE_SNOW ) {
+      if ( TMean > 0 )
+        *deltaCC = CH_ICE * (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
+      else
+        *deltaCC = CH_ICE * (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
+      *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
+      *deltaCC *= snow_coverage; // adjust for snow cover fraction
+      *refreeze_energy *= snow_coverage; // adjust for snow cover fraction
+    }
     
-  /* if thin snowpack, compute the change in energy stored in the pack */
-  if ( INCLUDE_SNOW ) {
-    if ( TMean > 0 )
-      *deltaCC = CH_ICE * (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
+    /** Compute net surface radiation of snow-free area for evaporation estimates **/
+    LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+    if ( INCLUDE_SNOW ) { // compute net LW at snow surface
+      (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
+    }
+    (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
+    NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
+    
+    /** Compute atmospheric stability correction **/
+    /** CHECK THAT THIS WORKS FOR ALL SUMMER SITUATIONS **/
+    if ( wind[UnderStory] > 0.0 && overstory && SNOWING )
+      Ra_used[0] = ra[UnderStory] 
+        / StabilityCorrection(ref_height[UnderStory], 0.f, TMean, Tair, 
+			      wind[UnderStory], roughness[UnderStory]);
+    else if ( wind[UnderStory] > 0.0 )
+      Ra_used[0] = ra[UnderStory] 
+        / StabilityCorrection(ref_height[UnderStory], displacement[UnderStory], 
+			      TMean, Tair, wind[UnderStory], roughness[UnderStory]);
     else
-      *deltaCC = CH_ICE * (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
-    *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
-    *deltaCC *= snow_coverage; // adjust for snow cover fraction
-    *refreeze_energy *= snow_coverage; // adjust for snow cover fraction
-  }
-    
-  /** Compute net surface radiation of snow-free area for evaporation estimates **/
-  LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
-  if ( INCLUDE_SNOW ) { // compute net LW at snow surface
-    (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
-  }
-  (*NetLongBare)   = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
-  NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
-    
-  /** Compute atmospheric stability correction **/
-  /** CHECK THAT THIS WORKS FOR ALL SUMMER SITUATIONS **/
-  if ( wind[UnderStory] > 0.0 && overstory && SNOWING )
-    Ra_used[0] = ra[UnderStory] 
-      / StabilityCorrection(ref_height[UnderStory], 0.f, TMean, Tair, 
-			    wind[UnderStory], roughness[UnderStory]);
-  else if ( wind[UnderStory] > 0.0 )
-    Ra_used[0] = ra[UnderStory] 
-      / StabilityCorrection(ref_height[UnderStory], displacement[UnderStory], 
-			    TMean, Tair, wind[UnderStory], roughness[UnderStory]);
-  else
-    Ra_used[0] = HUGE_RESIST;
+      Ra_used[0] = HUGE_RESIST;
   
-  /*************************************************
-    Compute Evapotranspiration if not snow covered
+    /*************************************************
+      Compute Evapotranspiration if not snow covered
 
-    Should evapotranspiration be active when the 
-    ground is only partially covered with snow????
+      Should evapotranspiration be active when the 
+      ground is only partially covered with snow????
 
-    Use Arno Evap if LAI is set to zero (e.g. no
-    winter crop planted).
-  *************************************************/
-  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
-    Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
-		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
-		       NetShortBare, Tair, Ra_used[1], 
-		       displacement[1], roughness[1], ref_height[1], 
-		       elevation, rainfall, depth, Wcr, Wpwp, 
+      Use Arno Evap if LAI is set to zero (e.g. no
+      winter crop planted).
+    *************************************************/
+    if ( VEG == 1 && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
+      Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
+		         veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
+		         NetShortBare, Tair, Ra_used[1], 
+		         displacement[1], roughness[1], ref_height[1], 
+		         elevation, rainfall, depth, soil_con->max_moist, Wcr, Wpwp, 
 #if SPATIAL_FROST
-		       frost_fract,
+		         frost_fract,
 #endif // SPATIAL_FROST
-		       root);
-  }
-  else if(!SNOWING) {
-    Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
-		     depth[0], max_moist * depth[0] * 1000., 
-		     elevation, b_infilt, Ra_used[0], delta_t, mu, 
+		         root, soil_con->ZwtAreaFract,
+		         dryFrac, shortwave, Catm, CanopLayerBnd);
+    }
+    else if(!SNOWING) {
+      Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
+		       depth[0], max_moist * depth[0] * 1000., 
+		       elevation, b_infilt, Ra_used[0], delta_t, mu, 
 #if SPATIAL_FROST
-		     resid_moist[0], frost_fract);
+		       resid_moist[0], frost_fract);
 #else
-                     resid_moist[0]);
+                       resid_moist[0]);
 #endif // SPATIAL_FROST
-  }
-  else Evap = 0.;
+    }
+    else Evap = 0.;
   
-  /**********************************************************************
-    Compute the Latent Heat Flux from the Surface and Covering Vegetation
-  **********************************************************************/
-  *latent_heat  = -RHO_W * Le * Evap;
-  *latent_heat_sub = 0.;
+    /**********************************************************************
+      Compute the Latent Heat Flux from the Surface and Covering Vegetation
+    **********************************************************************/
+    *latent_heat  = -RHO_W * Le * Evap;
+    *latent_heat_sub = 0.;
 
-  /** Compute the latent heat flux from a thin snowpack if present **/
-  if (INCLUDE_SNOW) {
+    /** Compute the latent heat flux from a thin snowpack if present **/
+    if (INCLUDE_SNOW) {
 
-    /* Convert sublimation terms from m/timestep to kg/m2s */
-    VaporMassFlux = *vapor_flux * ice_density / delta_t;
-    BlowingMassFlux = *blowing_flux * ice_density / delta_t;
-    SurfaceMassFlux = *surface_flux * ice_density / delta_t;
+      /* Convert sublimation terms from m/timestep to kg/m2s */
+      VaporMassFlux = *vapor_flux * ice_density / delta_t;
+      BlowingMassFlux = *blowing_flux * ice_density / delta_t;
+      SurfaceMassFlux = *surface_flux * ice_density / delta_t;
 
-    latent_heat_from_snow(atmos_density, vp, Le, atmos_pressure, 
-			  Ra_used[0], TMean, vpd, &temp_latent_heat, 
-			  &temp_latent_heat_sub, &VaporMassFlux,
-                          &BlowingMassFlux, &SurfaceMassFlux);
-    *latent_heat += temp_latent_heat * snow_coverage;
-    *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
+      latent_heat_from_snow(atmos_density, vp, Le, atmos_pressure, 
+			    Ra_used[0], TMean, vpd, &temp_latent_heat, 
+			    &temp_latent_heat_sub, &VaporMassFlux,
+                            &BlowingMassFlux, &SurfaceMassFlux);
+      *latent_heat += temp_latent_heat * snow_coverage;
+      *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
 
-    /* Convert sublimation terms from kg/m2s to m/timestep */
-    *vapor_flux = VaporMassFlux * delta_t / ice_density;
-    *blowing_flux = BlowingMassFlux * delta_t / ice_density;
-    *surface_flux = SurfaceMassFlux * delta_t / ice_density;
+      /* Convert sublimation terms from kg/m2s to m/timestep */
+      *vapor_flux = VaporMassFlux * delta_t / ice_density;
+      *blowing_flux = BlowingMassFlux * delta_t / ice_density;
+      *surface_flux = SurfaceMassFlux * delta_t / ice_density;
+
+    }
+    else *latent_heat *= (1. - snow_coverage);
+
+    /************************************************
+      Compute the Sensible Heat Flux from the Surface
+    ************************************************/
+    if (snow_coverage < 1 || INCLUDE_SNOW) {
+      *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / Ra_used[0];
+      if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
+    }
+    else *sensible_heat = 0.;
 
   }
-  else *latent_heat *= (1. - snow_coverage);
 
-  /************************************************
-    Compute the Sensible Heat Flux from the Surface
-  ************************************************/
-  if ( snow_coverage < 1 || INCLUDE_SNOW ) {
-    *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / Ra_used[0];
-    if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
+  else {
+    *NetLongBare = LongBareIn;
+    NetBareRad = (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
   }
-  else *sensible_heat = 0.;
-
   /*************************************
     Compute Surface Energy Balance Error
   *************************************/
@@ -806,7 +840,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	   /* snow energy terms - values are 0 unless INCLUDE_SNOW */
 	   + Advection - *deltaCC;
     
-  if ( INCLUDE_SNOW ) {
+  if (VEG < 2 && INCLUDE_SNOW ) {
     if (Tsnow_surf == 0.0 && error > -(*refreeze_energy)) {
       *refreeze_energy = -error;
       error = 0.0;

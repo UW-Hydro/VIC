@@ -22,6 +22,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
   2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
  ********************************************************************/
 {
 
@@ -35,6 +37,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double  delta_t;
   double  elevation;
 
+  double *Wmax;
   double *Wcr;
   double *Wpwp;
   double *depth;
@@ -50,6 +53,9 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double  Tcanopy;
   double  Vpd;
   double  mu;
+  double  shortwave;
+  double  Catm;
+  double *dryFrac;
 
   double *Evap;
   double *Ra;
@@ -67,6 +73,9 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double *roughness;
 
   float  *root;
+  double *ZwtAreaFract;
+
+  double *CanopLayerBnd;
 
   /* Water Flux Terms */
   double  IntRain;
@@ -112,6 +121,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   delta_t   = (double) va_arg(ap, double);
   elevation = (double) va_arg(ap, double);
 
+  Wmax        = (double *) va_arg(ap, double *);
   Wcr         = (double *) va_arg(ap, double *);
   Wpwp        = (double *) va_arg(ap, double *);
   depth       = (double *) va_arg(ap, double *);
@@ -127,6 +137,9 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   Tcanopy     = (double) va_arg(ap, double);
   Vpd      = (double) va_arg(ap, double);
   mu       = (double) va_arg(ap, double);
+  shortwave= (double) va_arg(ap, double);
+  Catm     = (double) va_arg(ap, double);
+  dryFrac = (double *) va_arg(ap, double *);
 
   Evap     = (double *) va_arg(ap, double *);
   Ra       = (double *) va_arg(ap, double *);
@@ -144,6 +157,9 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   roughness    = (double *) va_arg(ap, double *);
 
   root = (float *) va_arg(ap, float *);
+  ZwtAreaFract = (double *) va_arg(ap, double *);
+
+  CanopLayerBnd= (double *) va_arg(ap, double *);
 
   /* Water Flux Terms */
   IntRain = (double) va_arg(ap, double);
@@ -242,11 +258,12 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 			veg_class, month, mu, Wdew, delta_t, *NetRadiation, 
 			Vpd, NetShortOver, Tcanopy, Ra_used[1], displacement[1], 
 			roughness[1], ref_height[1], elevation, prec, 
-			depth, Wcr, Wpwp, 
+			depth, Wmax, Wcr, Wpwp, 
 #if SPATIAL_FROST
 			frost_fract,
 #endif
-			root);
+			root, ZwtAreaFract,
+			dryFrac, shortwave, Catm, CanopLayerBnd);
     Wdew[WET] /= 1000.;
 
     *LatentHeat = Le * *Evap * RHO_W;

@@ -97,7 +97,7 @@
   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
 	      OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
 	      to OUT_LAKE_EVAP.  Added other lake water balance terms
-	      to set of output variables.  Added volumetric versions 
+	      to set of output variables.  Added volumetric versions
 	      of these too.						TJB
   2010-Nov-02 Added OUT_LAKE_RO_IN, OUT_LAKE_RO_IN_V, OUT_LAKE_RCHRG,
 	      OUT_LAKE_RCHRG_V, OUT_LAKE_VAPFLX, and OUT_LAKE_VAPFLX_V.	TJB
@@ -133,6 +133,7 @@
   2013-Jul-25 Added SLAB_MOIST.						TJB
   2013-Jul-25 Implemented heat flux between lake and soil.		TJB
   2013-Jul-25 Added DIST_ZWT terms.					TJB
+  2013-Aug-15 Removed Snow Albedo Parameterization Option      JJH
 *********************************************************************/
 
 #include <user_def.h>
@@ -152,10 +153,6 @@
 /***** Met file formats *****/
 #define ASCII 1
 #define BINARY 2
-
-/***** Snow Albedo parametrizations *****/
-#define USACE   0
-#define SUN1999 1
 
 /***** Snow Density parametrizations *****/
 #define DENS_BRAS   0
@@ -245,7 +242,7 @@ extern char ref_veg_ref_crop[];
 #define SEC_PER_DAY 86400.	/* seconds per day */
 
 /***** Physical Constants *****/
-#define RESID_MOIST      0.0        /* define residual moisture content 
+#define RESID_MOIST      0.0        /* define residual moisture content
 				       of soil column */
 #define MAX_ICE_INIT      0.95        /* define maximum volumetric ice fraction
 				       of soil column, for EXCESS_ICE option */
@@ -254,14 +251,14 @@ extern char ref_veg_ref_crop[];
 #define MAX_SUBSIDENCE    1.0        /* maximum depth of subsidence per layer per
 					time-step (mm) */
 #define ice_density      917.	    /* density of ice (kg/m^3) */
-#define T_lapse          6.5        /* temperature lapse rate of US Std 
+#define T_lapse          6.5        /* temperature lapse rate of US Std
 				       Atmos in C/km */
 #define von_K        0.40	/* Von Karman constant for evapotranspiration */
 #define KELVIN       273.15	/* conversion factor C to K */
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
 #define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
 #define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
-#define Cp           1013.0	/* Specific heat at constant pressure of moist air 
+#define Cp           1013.0	/* Specific heat at constant pressure of moist air
 				   (J/deg/K) (H.B.H. p.4.13)*/
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
@@ -373,18 +370,18 @@ extern char ref_veg_ref_crop[];
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
 					work (m) */
-#define STORM_THRES  0.001      /* thresehold at which a new storm is 
+#define STORM_THRES  0.001      /* thresehold at which a new storm is
 				   decalred */
 #define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
-				   while computing the snow surface energy 
+				   while computing the snow surface energy
 				   balance (C) */
-#define SURF_DT       1.0	/* Used to bracket soil surface temperatures 
+#define SURF_DT       1.0	/* Used to bracket soil surface temperatures
                                    while computing energy balance (C) */
 #define SOIL_DT       0.25      /* Used to bracket soil temperatures while
                                    solving the soil thermal flux (C) */
-#define CANOPY_DT    1.0	/* Used to bracket canopy air temperatures 
+#define CANOPY_DT    1.0	/* Used to bracket canopy air temperatures
                                    while computing energy balance (C) */
-#define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
+#define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
 #define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
@@ -685,10 +682,10 @@ typedef struct {
   char  lakeparam[MAXSTRING];   /* lake model constants file */
   char  result_dir[MAXSTRING];  /* directory where results will be written */
   char  snowband[MAXSTRING];    /* snow band parameter file name */
-  char  soil[MAXSTRING];        /* soil parameter file name, or name of 
-				   file that has a list of all aoil 
+  char  soil[MAXSTRING];        /* soil parameter file name, or name of
+				   file that has a list of all aoil
 				   ARC/INFO files */
-  char  soil_dir[MAXSTRING];    /* directory from which to read ARC/INFO 
+  char  soil_dir[MAXSTRING];    /* directory from which to read ARC/INFO
 				   soil files */
   char  statefile[MAXSTRING];   /* name of file in which to store model state */
   char  veg[MAXSTRING];         /* vegetation grid coverage file */
@@ -735,14 +732,14 @@ typedef struct {
   char   DIST_ZWT;       /* TRUE = consider a spatially-distributed water table depth */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
 			    FALSE = RESOLUTION stores grid cell side length in degrees */
-  char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node 
+  char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node
 			    distribution for soil heat flux calculations*/
   char   FROZEN_SOIL;    /* TRUE = Use frozen soils code */
   char   FULL_ENERGY;    /* TRUE = Use full energy code */
   char   GRND_FLUX_TYPE; /* "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
                                         from VIC 4.0.6 and earlier
                             "GF_410"  = use formulas from VIC 4.1.0 */
-  char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
+  char   IMPLICIT;       /* TRUE = Use implicit solution when computing
 			    soil thermal fluxes */
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
@@ -756,7 +753,7 @@ typedef struct {
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   int    Nzwt;           /* Number of bins in the water table distribution */
-  char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
+  char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing
 			    soil thermal fluxes */
   char   PLAPSE;         /* TRUE = If air pressure not supplied as an
 			    input forcing, compute it by lapsing sea-level
@@ -771,15 +768,14 @@ typedef struct {
   char   QUICK_FLUX;     /* TRUE = Use Liang et al., 1999 formulation for
 			    ground heat flux, if FALSE use explicit finite
 			    difference method */
-  char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for 
+  char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for
 			    iteration, but explicit finite difference
 			    method for final step. */
   char   SHARE_LAYER_MOIST; /* TRUE = transpiration in moisture-limited layers can draw from other layers (default) */
-  char   SNOW_ALBEDO;    /* USACE: Use algorithm of US Army Corps of Engineers, 1956; SUN1999: Use algorithm of Sun et al., JGR, 1999 */
   char   SNOW_DENSITY;   /* DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
-  int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
+  int    SNOW_BAND;      /* Number of elevation bands over which to solve the
 			    snow model */
-  int    SNOW_STEP;      /* Time step in hours to use when solving the 
+  int    SNOW_STEP;      /* Time step in hours to use when solving the
 			    snow model */
   float  SW_PREC_THRESH; /* Minimum daily precipitation [mm] that can cause "dimming" of incoming shortwave radiation */
   char   TFALLBACK;      /* TRUE = when any temperature iterations fail to converge,
@@ -800,7 +796,7 @@ typedef struct {
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
-  char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
+  char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil
 			    parameters*/
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
@@ -814,7 +810,7 @@ typedef struct {
   // state options
   char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
-  char   SAVE_STATE;     /* TRUE = save state file */       
+  char   SAVE_STATE;     /* TRUE = save state file */
 
   // output options
   char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
@@ -861,7 +857,7 @@ typedef struct {
   double MAX_SNOW_TEMP; /* maximum temperature at which snow can fall (C) */
   double MIN_RAIN_TEMP; /* minimum temperature at which rain can fall (C) */
   double measure_h;  /* height of measurements (m) */
-  double wind_h;     /* height of wind measurements (m) */ 
+  double wind_h;     /* height of wind measurements (m) */
   float  resolution; /* Model resolution (degrees) */
   int    dt;         /* Time step in hours (24/dt must be an integer) */
   int    out_dt;     /* Output time step in hours (24/out_dt must be an integer) */
@@ -889,28 +885,28 @@ typedef struct {
   This structure stores the soil parameters for a grid cell.
   ***********************************************************/
 typedef struct {
-  int      FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
+  int      FS_ACTIVE;                 /* if TRUE frozen soil algorithm is
 					 active in current grid cell */
-  double   Ds;                        /* fraction of maximum subsurface flow 
+  double   Ds;                        /* fraction of maximum subsurface flow
 					 rate */
-  double   Dsmax;                     /* maximum subsurface flow rate 
+  double   Dsmax;                     /* maximum subsurface flow rate
 					 (mm/day) */
-  double   Ksat[MAX_LAYERS];          /* saturated hydraulic  conductivity 
+  double   Ksat[MAX_LAYERS];          /* saturated hydraulic  conductivity
 					 (mm/day) */
-  double   Wcr[MAX_LAYERS];           /* critical moisture level for soil 
-					 layer, evaporation is no longer 
-					 affected moisture stress in the 
+  double   Wcr[MAX_LAYERS];           /* critical moisture level for soil
+					 layer, evaporation is no longer
+					 affected moisture stress in the
 					 soil (mm) */
-  double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
+  double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent
 					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
 #if EXCESS_ICE
-  double   Ds_orig;                   /* fraction of maximum subsurface flow 
+  double   Ds_orig;                   /* fraction of maximum subsurface flow
 					 rate */
-  double   Dsmax_orig;                /* maximum subsurface flow rate 
+  double   Dsmax_orig;                /* maximum subsurface flow rate
 					 (mm/day) */
   double   Ws_orig;                   /* fraction of maximum soil moisture */
-#endif  
+#endif
   float    AlbedoPar;                 /* soil albedo in PAR range (400-700nm) */
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
@@ -959,7 +955,7 @@ typedef struct {
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
 #if QUICK_FS
   double **ufwc_table_layer[MAX_LAYERS];
-  double **ufwc_table_node[MAX_NODES]; 
+  double **ufwc_table_node[MAX_NODES];
 #endif
   float    elevation;                 /* grid cell elevation (m) */
   float    lat;                       /* grid cell central latitude */
@@ -1005,7 +1001,7 @@ typedef struct {
   the current grid cell.
   *******************************************************************/
 typedef struct {
-  double  Cv;               /* fraction of vegetation coverage */ 
+  double  Cv;               /* fraction of vegetation coverage */
   double  Cv_sum;           /* total fraction of vegetation coverage */
   float   root[MAX_LAYERS]; /* percent of roots in each soil layer (fraction) */
   float  *zone_depth;       /* depth of root zone */
@@ -1023,27 +1019,27 @@ typedef struct {
   This structure stores parameters for individual vegetation types.
   ******************************************************************/
 typedef struct {
-  char   overstory;        /* TRUE = overstory present, important for snow 
+  char   overstory;        /* TRUE = overstory present, important for snow
 			      accumulation in canopy */
   double LAI[12];          /* leaf area index */
   double Wdmax[12];        /* maximum dew holding capacity (mm) */
-  double albedo[12];       /* vegetation albedo (added for full energy) 
+  double albedo[12];       /* vegetation albedo (added for full energy)
 			      (fraction) */
   double displacement[12]; /* vegetation displacement height (m) */
   double emissivity[12];   /* vegetation emissivity (fraction) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
-  double rad_atten;        /* radiation attenuation due to canopy, 
+  double rad_atten;        /* radiation attenuation due to canopy,
 			      default = 0.5 (N/A) */
   double rarc;             /* architectural resistance (s/m) */
   double rmin;             /* minimum stomatal resistance (s/m) */
   double roughness[12];    /* vegetation roughness length (m) */
-  double trunk_ratio;      /* ratio of trunk height to tree height, 
+  double trunk_ratio;      /* ratio of trunk height to tree height,
 			      default = 0.2 (fraction) */
-  double wind_atten;       /* wind attenuation through canopy, 
+  double wind_atten;       /* wind attenuation through canopy,
 			      default = 0.5 (N/A) */
   double wind_h;           /* height at which wind is measured (m) */
-  float  RGL;              /* Value of solar radiation below which there 
-			      will be no transpiration (ranges from 
+  float  RGL;              /* Value of solar radiation below which there
+			      will be no transpiration (ranges from
 			      ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
   int    veg_class;        /* vegetation class reference number */
   char   Ctype;            /* Photosynthetic pathway; can be C3 or C4 */
@@ -1061,11 +1057,11 @@ typedef struct {
 } veg_lib_struct;
 
 /***************************************************************************
-   This structure stores the atmospheric forcing data for each model time 
-   step for a single grid cell.  Each array stores the values for the 
+   This structure stores the atmospheric forcing data for each model time
+   step for a single grid cell.  Each array stores the values for the
    SNOW_STEPs during the current model step and the value for the entire model
    step.  The latter is referred to by array[NR].  Looping over the SNOW_STEPs
-   is done by for (i = 0; i < NF; i++) 
+   is done by for (i = 0; i < NF; i++)
 ***************************************************************************/
 typedef struct {
   double *air_temp;  /* air temperature (C) */
@@ -1109,7 +1105,7 @@ typedef struct {
   soil column.
   ***************************************************************/
 typedef struct {
-  double Cs;                /* average volumetric heat capacity of the 
+  double Cs;                /* average volumetric heat capacity of the
 			       current layer (J/m^3/K) */
   double T;                 /* temperature of the unfrozen sublayer (C) */
   double evap;              /* evapotranspiration from soil layer (mm) */
@@ -1130,7 +1126,7 @@ typedef struct {
 } layer_data_struct;
 
 /******************************************************************
-  This structure stores soil variables for the complete soil column 
+  This structure stores soil variables for the complete soil column
   for each grid cell.
   ******************************************************************/
 typedef struct {
@@ -1142,12 +1138,12 @@ typedef struct {
   double CLitter;                      /* carbon storage in litter pool [gC/m2] */
   double CInter;                       /* carbon storage in intermediate pool [gC/m2] */
   double CSlow;                        /* carbon storage in slow pool [gC/m2] */
-  double inflow;                       /* moisture that reaches the top of 
+  double inflow;                       /* moisture that reaches the top of
 					  the soil column (mm) */
   double pot_evap[N_PET_TYPES];        /* array of different types of potential evaporation (mm) */
   double runoff;                       /* runoff from current cell (mm/TS) */
   double runoff_dist_zwt[MAX_NZWT];   /* array of runoff values when DIST_ZWT = TRUE (mm) */
-  layer_data_struct layer[MAX_LAYERS]; /* structure containing soil variables 
+  layer_data_struct layer[MAX_LAYERS]; /* structure containing soil variables
 					  for each layer (see above) */
   double RhLitter;                     /* soil respiration from litter pool [gC/m2] */
   double RhLitter2Atm;                 /* soil respiration from litter pool [gC/m2] that goes to atmosphere */
@@ -1246,12 +1242,12 @@ typedef struct {
 } energy_bal_struct;
 
 /***********************************************************************
-  This structure stores vegetation variables for each vegetation type in 
+  This structure stores vegetation variables for each vegetation type in
   a grid cell.
   ***********************************************************************/
 typedef struct {
   double canopyevap;		/* evaporation from canopy (mm/TS) */
-  double throughfall;		/* water that reaches the ground through 
+  double throughfall;		/* water that reaches the ground through
                                    the canopy (mm/TS) */
   double Wdew;			/* dew trapped on vegetation (mm) */
   double *NscaleFactor;         /* array of per-layer nitrogen scaling factors */
@@ -1291,7 +1287,7 @@ typedef struct {
   int    last_snow;         /* time steps since last snowfall */
   double max_snow_depth;    /* last maximum snow depth - used to determine coverage
 			       fraction during current melt period (m) */
-  char   MELTING;           /* flag indicating that snowpack melted 
+  char   MELTING;           /* flag indicating that snowpack melted
 			       previously */
   double pack_temp;         /* depth averaged temperature of the snowpack (C) */
   double pack_water;        /* liquid water content of the snow pack (m) */
@@ -1300,7 +1296,7 @@ typedef struct {
   double store_coverage;    /* stores coverage fraction covered by new snow (m) */
   int    store_snow;        /* flag indicating whether or not new accumulation
 			       is stored on top of an existing distribution */
-  double store_swq;         /* stores newly accumulated snow over an 
+  double store_swq;         /* stores newly accumulated snow over an
 			       established snowpack melt distribution (m) */
   double surf_temp;         /* depth averaged temperature of the snow pack surface layer (C) */
   double surf_temp_fbcount; /* running total number of times that previous step's temperature was used */
@@ -1311,14 +1307,14 @@ typedef struct {
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
   // Fluxes
   double blowing_flux;      /* depth of sublimation from blowing snow (m) */
-  double canopy_vapor_flux; /* depth of water evaporation, sublimation, or 
+  double canopy_vapor_flux; /* depth of water evaporation, sublimation, or
 			       condensation from intercepted snow (m) */
   double mass_error;        /* snow mass balance error */
   double melt;              /* snowpack melt (mm) */
   double Qnet;              /* Residual of energy balance at snowpack surface */
   double surface_flux;      /* depth of sublimation from blowing snow (m) */
   double transport;	    /* flux of snow (potentially) transported from veg type */
-  double vapor_flux;        /* depth of water evaporation, sublimation, or 
+  double vapor_flux;        /* depth of water evaporation, sublimation, or
 			       condensation from snow pack (m) */
 } snow_data_struct;
 
@@ -1328,7 +1324,7 @@ typedef struct {
 typedef struct {
   // Lake basin dimensions
   int    numnod;                  /* Maximum number of lake nodes for this grid cell */
-  double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */  
+  double z[MAX_LAKE_NODES+1];     /* Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */
   double basin[MAX_LAKE_NODES+1]; /* Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
   double Cl[MAX_LAKE_NODES+1];    /* Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
   double b;                       /* Exponent in default lake depth-area profile (y=Ax^b) */
@@ -1366,7 +1362,7 @@ typedef struct {
   double areai;                   /* Area of ice coverage (at beginning of time step) (m^2) */
   double new_ice_area;            /* Area of ice coverage (at end of time step) (m^2) */
   double ice_water_eq;            /* Liquid water equivalent volume of lake ice (m^3) */
-  double hice;                    /* Height of lake ice at thickest point (m) */ 
+  double hice;                    /* Height of lake ice at thickest point (m) */
   double tempi;                   /* Lake ice temperature (C) */
   double swe;                     /* Water equivalence of lake snow cover - end of step (m^3) */
   double swe_save;                /* Water equivalence of lake snow cover - beginning of step (m^3) */
@@ -1400,20 +1396,20 @@ typedef struct {
 } lake_var_struct;
 
 /*****************************************************************
-  This structure stores all variables needed to solve, or save 
+  This structure stores all variables needed to solve, or save
   solututions for all versions of this model.  Vegetation and soil
   variables are created for both wet and dry fractions of the grid
   cell (for use with the distributed precipitation model).
 *****************************************************************/
 typedef struct {
-  cell_data_struct  **cell[2];    /* Stores soil layer variables (wet and 
+  cell_data_struct  **cell[2];    /* Stores soil layer variables (wet and
 				     dry) */
-  double             *mu;         /* fraction of grid cell that receives 
+  double             *mu;         /* fraction of grid cell that receives
 				     precipitation */
   energy_bal_struct **energy;     /* Stores energy balance variables */
   lake_var_struct     lake_var;   /* Stores lake/wetland variables */
   snow_data_struct  **snow;       /* Stores snow variables */
-  veg_var_struct    **veg_var[2]; /* Stores vegetation variables (wet and 
+  veg_var_struct    **veg_var[2]; /* Stores vegetation variables (wet and
 				     dry) */
 } dist_prcp_struct;
 

@@ -386,6 +386,15 @@ int distribute_node_moisture_properties(double *moist_node,
 	      organic fraction into account.				TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
+  2013-Jul-25 Modified to add optional a constant slab moisture
+	      content to the soil below the bottom VIC model soil layer.
+	      Currently the only option is to use the bottom soil layer
+	      moisture for that entire region.  This is perhaps
+	      justifiable for shallow damping depths, but makes no sense
+	      for the deeper depths used especially for permafrost
+	      simulations.  SLAB_MOIST_FRACT controls this option, if
+	      set < 0, original option used, otherwise the slab layer is
+	      set using SLAB_MOIST_FRACT * max_moist_node.		KAC via TJB
 
 *********************************************************************/
 
@@ -403,18 +412,25 @@ int distribute_node_moisture_properties(double *moist_node,
   /* node estimates */
   for(nidx=0;nidx<Nnodes;nidx++) {
  
-    if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
-      /* node on layer boundary */
-      moist_node[nidx] = (moist[lidx] / depth[lidx] 
-			      + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
-      soil_fract = (bulk_density[lidx] / soil_density[lidx] 
-		    + bulk_density[lidx+1] / soil_density[lidx+1]) / 2.;
+    if ( !PAST_BOTTOM || SLAB_MOIST_FRACT < 0 ) {
+      if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
+        /* node on layer boundary */
+        moist_node[nidx] = (moist[lidx] / depth[lidx] 
+			    + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
+        soil_fract = (bulk_density[lidx] / soil_density[lidx] 
+		      + bulk_density[lidx+1] / soil_density[lidx+1]) / 2.;
+      }
+      else { 
+        /* node completely in layer */
+        moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+        soil_fract = (bulk_density[lidx] / soil_density[lidx]);
+      }
     }
-    else { 
-      /* node completely in layer */
-      moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+    else {
+      // use constant soil moisture below bottom soil layer
+      moist_node[nidx] = SLAB_MOIST_FRACT * max_moist_node[nidx];
       soil_fract = (bulk_density[lidx] / soil_density[lidx]);
-    }      
+    }
 
 
     // Check that node moisture does not exceed maximum node moisture

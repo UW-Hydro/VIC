@@ -43,6 +43,7 @@
   2008-Mar-01 Added assignments for Tcutk and Le to ensure that they are always
 	      assigned a value before being used.				TJB
   2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.			TJB
 *****************************************************************************/
 int water_energy_balance(int     numnod,
 			 double *surface,
@@ -75,7 +76,12 @@ int water_energy_balance(int     numnod,
 			 double *new_ice_height,
 			 double *energy_out_bottom,
 			 double *new_ice_water_eq,
-			 double  lvolume)
+			 double  lvolume,
+			 double  z_soil,
+			 double  kappa_soil,
+			 double  Tlakebot,
+			 double  Tsoil,
+			 double *heat_cond_to_soil)
 	      
 {
   double Ts;
@@ -163,7 +169,8 @@ int water_energy_balance(int     numnod,
 
     temp_area(shortwave*a1, shortwave*a2, *Qle+*Qh+*LWnet, T, Tnew,
 	      water_density, de, dt, surface, numnod, 
-	      dz, surfdz, &joulenew, cp, energy_out_bottom);
+	      dz, surfdz, &joulenew, cp, energy_out_bottom,
+	      z_soil, kappa_soil, Tlakebot, Tsoil, heat_cond_to_soil);
  
     /* Surface temperature < 0.0, then ice will form. */
     if(Tnew[0] <  Tcutoff) {

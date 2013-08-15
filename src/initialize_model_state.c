@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: initialize_model_state.c,v 5.8.2.22 2010/11/12 02:44:36 vicadmin Exp $";
 
 int initialize_model_state(dist_prcp_struct    *prcp,
 			   dmy_struct           dmy,
@@ -115,6 +115,11 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
 	      IMPLICIT=FALSE).						TJB
+  2013-Jul-25 Fixed incorrect condition on lake initialization.		TJB
+  2013-Jul-25 Moved computation of tmp_moist argument of
+	      compute_runoff_and_asat() so that it would always be
+	      initialized.						TJB
+  2013-Jul-25 Added looping over water table (zwt) distribution.	TJB
   2013-Jul-30 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
@@ -130,6 +135,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   char     FIRST_VEG;
   int      i, j, ii, veg, index, dist;
   int      lidx;
+  int      zwtidx;
   double   tmp_moist[MAX_LAYERS];
   double   tmp_runoff;
   int      dry;
@@ -158,10 +164,19 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   surf_swq;
   double   pack_swq;
   double   TreeAdjustFactor[MAX_BANDS];
+  double   tmp_ZwtDeltaFract[MAX_NZWT];
+  double   tmp_ZwtDeltaMoist[MAX_NZWT];
+  double   exposed_fract[MAX_NZWT];
+  double   area_sum;
+  int      tmp_Nzwt;
+  double   tmp_tmp_moist;
+  double   ratio;
 #if EXCESS_ICE
   double   sum_mindepth, sum_depth_pre, sum_depth_post, tmp_mindepth;
 #endif
   double dt_thresh;
+  int tmp_lake_idx;
+  double   deficit_slope;
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
@@ -219,8 +234,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     Initialize all lake variables 
   ********************************************/
 
-  if ( options.LAKES && lake_con.Cl[0] > 0) {
-    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, &(cell[WET][lake_con.lake_idx][0]), surf_temp, 0);
+  if ( options.LAKES ) {
+    tmp_lake_idx = lake_con.lake_idx;
+    if (tmp_lake_idx < 0) tmp_lake_idx = 0;
+    ErrorFlag = initialize_lake(lake_var, lake_con, soil_con, &(cell[WET][tmp_lake_idx][0]), surf_temp, 0);
     if (ErrorFlag == ERROR) return(ErrorFlag);
   }
 
@@ -372,9 +389,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
 
 	    if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
-              fprintf( stderr, "WARNING: Initial soil moisture (%f mm) exceeds maximum (%f mm) in layer %d for veg tile %d and snow band%d.  Resetting to maximum.\n", cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx], lidx, veg, band );
+              fprintf( stderr, "WARNING: Initial soil moisture (%f mm) exceeds maximum (%f mm) in layer %d for veg tile %d and snow band %d.  Resetting to maximum.\n", cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx], lidx, veg, band );
 #if SPATIAL_FROST
-              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++)
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
                 cell[dist][veg][band].layer[lidx].ice[frost_area] *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
 #else
               cell[dist][veg][band].layer[lidx].ice *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
@@ -391,51 +408,75 @@ int initialize_model_state(dist_prcp_struct    *prcp,
             if (cell[dist][veg][band].layer[lidx].ice > cell[dist][veg][band].layer[lidx].moist)
               cell[dist][veg][band].layer[lidx].ice = cell[dist][veg][band].layer[lidx].moist;
 #endif
+
             tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
 
 	  }
-          compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);
-	}
+          compute_runoff_and_asat(soil_con, 0, tmp_moist, 0, &(cell[dist][veg][band].asat), &tmp_runoff);
 
-        // Override possible bad values of soil moisture under lake coming from state file
-        // (ideally we wouldn't store these in the state file in the first place)
-        if (options.LAKES && veg == lake_con.lake_idx) {
-          for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-            lake_var->soil.layer[lidx].moist = soil_con->max_moist[lidx];
+          if (options.DIST_ZWT) {
+	    for( zwtidx = 0; zwtidx < options.Nzwt; zwtidx++ ) {	  
+	      for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
+
+	        if ( cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx] > soil_con->max_moist[lidx] ) {
 #if SPATIAL_FROST
-            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
-              if (lake_var->soil.layer[lidx].ice[frost_area] > lake_var->soil.layer[lidx].moist)
-                lake_var->soil.layer[lidx].ice[frost_area] = lake_var->soil.layer[lidx].moist;
-            }
+	          for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+		    cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx][frost_area] *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
 #else
-            if (lake_var->soil.layer[lidx].ice > lake_var->soil.layer[lidx].moist)
-              lake_var->soil.layer[lidx].ice = lake_var->soil.layer[lidx].moist;
+	          cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx] *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
 #endif
+	          cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx] = soil_con->max_moist[lidx];
+	        }
+                tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
+
+#if SPATIAL_FROST
+                for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+                  if (cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx][frost_area] > cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx])
+                    cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx][frost_area] = cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
+                }
+#else
+                if (cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx] > cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx])
+                  cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx] = cell[dist][veg][band].layer[lidx].moist_dist_zwt[zwtidx];
+#endif
+
+	      }
+              compute_runoff_and_asat(soil_con, soil_con->ZwtDeltaMoist[zwtidx], tmp_moist, 0, &(cell[dist][veg][band].asat_dist_zwt[zwtidx]), &tmp_runoff);
+
+	    }
           }
-	}
-      }
-    }
-
-
-    /****** initialize moist and ice ************/
-    for ( veg = 0 ; veg <= Nveg ; veg++ ) {
-      // Initialize soil for existing vegetation types
-      Cv = veg_con[veg].Cv;
-      
-      if ( Cv > 0 ) {
-	for( band = 0; band < options.SNOW_BAND; band++ ) {
-	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-
+          if (options.LAKES && veg == lake_con.lake_idx) {
+	    for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
+	      lake_var->soil.layer[lidx].moist = soil_con->max_moist[lidx];
 #if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-	      ice[veg][band][lidx][frost_area] = cell[0][veg][band].layer[lidx].ice[frost_area];
+              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+                if (lake_var->soil.layer[lidx].ice[frost_area] > lake_var->soil.layer[lidx].moist)
+                  lake_var->soil.layer[lidx].ice[frost_area] = lake_var->soil.layer[lidx].moist;
+              }
 #else
-	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
+              if (lake_var->soil.layer[lidx].ice > lake_var->soil.layer[lidx].moist)
+                lake_var->soil.layer[lidx].ice = lake_var->soil.layer[lidx].moist;
 #endif
-	  }
+            }
+
+            if (options.DIST_ZWT) {
+	      for( zwtidx = 0; zwtidx < options.Nzwt; zwtidx++ ) {	  
+	        for( lidx = 0; lidx < options.Nlayer; lidx++ ) {	  
+	          lake_var->soil.layer[lidx].moist_dist_zwt[zwtidx] = soil_con->max_moist[lidx];
+#if SPATIAL_FROST
+	            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+                      lake_var->soil.layer[lidx].ice_dist_zwt[zwtidx][frost_area] = cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx][frost_area];
+#else
+                    lake_var->soil.layer[lidx].ice_dist_zwt[zwtidx] = cell[dist][veg][band].layer[lidx].ice_dist_zwt[zwtidx];
+#endif
+                }
+	      }
+            }
+
+          }
+
 	}
-      }
+
+      }      
     }
 
     /******Check that snow pack terms are self-consistent************/
@@ -488,18 +529,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  /* Initialize soil node temperatures */
 	  energy[veg][band].T[0] = surf_temp;
 	  energy[veg][band].T[1] = surf_temp;
+//	  energy[veg][band].T[2] = soil_con->avg_temp + (surf_temp-soil_con->avg_temp)*exp(-(soil_con->Zsum_node[2]-soil_con->Zsum_node[1])/dp);
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 
-	  /* Initialize soil layer thicknesses */
-	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-	      ice[veg][band][lidx][frost_area] = 0.;
-#else
-	    ice[veg][band][lidx] = 0.;
-#endif
-	  }
 	}
       }
     }
@@ -599,16 +631,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	    energy[veg][band].T[index] = soil_con[0].avg_temp;
 	  }
 	  
-	  //initialize moisture and ice for each soil layer
-	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-	      ice[veg][band][lidx][frost_area] = 0.;
-#else
-	    ice[veg][band][lidx] = 0.;
-#endif
-	  }
 	}
       }
     }
@@ -635,6 +657,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     }
   }
 
+
   /********************************************
     Initialize subsidence 
   ********************************************/
@@ -659,6 +682,17 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	// Initialize soil for existing snow elevation bands
 	if ( soil_con->AreaFract[band] > 0. ) {
 	    
+          /* Store soil moisture and ice content in more convenient arrays  */
+	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
+#if SPATIAL_FROST
+	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      ice[veg][band][lidx][frost_area] = cell[0][veg][band].layer[lidx].ice[frost_area];
+#else
+	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
+#endif
+	  }
+
 	  /** Set soil properties for all soil nodes **/
 	  if(FIRST_VEG) {
 	    FIRST_VEG = FALSE;
@@ -707,7 +741,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						Nnodes, options.Nlayer,
 						soil_con->FS_ACTIVE);
 	  if ( ErrorFlag == ERROR ) return ( ErrorFlag );
-
+	    
           /* Check node spacing v time step */
           /* (note this is only approximate since heat capacity and conductivity can change considerably during the simulation depending on soil moisture and ice content) */
           if ((options.FROZEN_SOIL && !options.QUICK_FLUX) && !options.IMPLICIT) {
@@ -730,7 +764,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      cell[dry][veg][band].layer[lidx].ice = ice[veg][band][lidx];
 #endif
 	    }
-            if (options.QUICK_FLUX) {
+            if (options.QUICK_FLUX || !(options.FULL_ENERGY || (options.FROZEN_SOIL && soil_con->FS_ACTIVE))) {
               ErrorFlag = estimate_layer_ice_content_quick_flux(cell[dry][veg][band].layer,
 					   soil_con->depth, soil_con->dp,
 					   energy[veg][band].T[0], energy[veg][band].T[1],
@@ -787,6 +821,98 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	    find_0_degree_fronts(&energy[veg][band], soil_con->Zsum_node, energy[veg][band].T, Nnodes);
 	}
       }
+
+      if (options.LAKES && veg_con[veg].LAKE) {
+
+        // Compute lake soil properties
+        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+          moist[0][0][lidx] = lake_var->soil.layer[lidx].moist;
+        ErrorFlag = distribute_node_moisture_properties(lake_var->energy.moist,
+						  lake_var->energy.ice,
+						  lake_var->energy.kappa_node,
+						  lake_var->energy.Cs_node,
+						  soil_con->Zsum_node,
+						  lake_var->energy.T,
+						  soil_con->max_moist_node,
+#if QUICK_FS
+						  soil_con->ufwc_table_node,
+#else
+						  soil_con->expt_node,
+						  soil_con->bubble_node,
+#endif // QUICK_FS
+#if EXCESS_ICE
+						  soil_con->porosity_node,
+						  soil_con->effective_porosity_node,
+#endif // EXCESS_ICE
+						  moist[0][0],
+						  soil_con->depth,
+						  soil_con->soil_dens_min,
+						  soil_con->bulk_dens_min,
+						  soil_con->quartz,
+						  soil_con->soil_density,
+						  soil_con->bulk_density,
+						  soil_con->organic,
+						  Nnodes, options.Nlayer,
+						  soil_con->FS_ACTIVE);
+        if ( ErrorFlag == ERROR ) return ( ErrorFlag );
+
+        /* initialize layer moistures and ice contents */
+        if (options.QUICK_FLUX) {
+          ErrorFlag = estimate_layer_ice_content_quick_flux(lake_var->soil.layer,
+					   soil_con->depth, soil_con->dp,
+					   lake_var->energy.T[0], lake_var->energy.T[1],
+					   soil_con->avg_temp, soil_con->max_moist, 
+#if QUICK_FS
+					   soil_con->ufwc_table_layer,
+#else
+					   soil_con->expt, soil_con->bubble, 
+#endif // QUICK_FS
+#if SPATIAL_FROST
+					   soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+					   soil_con->porosity,
+					   soil_con->effective_porosity,
+#endif // EXCESS_ICE
+					   soil_con->FS_ACTIVE);
+        }
+        else {
+          ErrorFlag = estimate_layer_ice_content(lake_var->soil.layer,
+						 soil_con->Zsum_node,
+						 lake_var->energy.T,
+						 soil_con->max_moist_node,
+#if QUICK_FS
+						 soil_con->ufwc_table_node,
+#else
+						 soil_con->expt_node,
+						 soil_con->bubble_node,
+#endif // QUICK_FS
+						 soil_con->depth,
+						 soil_con->max_moist,
+#if QUICK_FS
+						 soil_con->ufwc_table_layer,
+#else
+						 soil_con->expt,
+						 soil_con->bubble,
+#endif // QUICK_FS
+#if SPATIAL_FROST
+						 soil_con->frost_fract, 
+						 soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+						 soil_con->porosity,
+						 soil_con->effective_porosity,
+#endif // EXCESS_ICE
+						 Nnodes, options.Nlayer, 
+						 soil_con->FS_ACTIVE);	      
+        }
+	    
+        /* Find freezing and thawing front depths */
+        if(!options.QUICK_FLUX && soil_con->FS_ACTIVE) 
+          find_0_degree_fronts(&(lake_var->energy), soil_con->Zsum_node, lake_var->energy.T, Nnodes);
+
+      }
+
     }
   }	
 
@@ -892,6 +1018,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 {
   extern option_struct options;
   extern veg_lib_struct *veg_lib;
+
   char     ErrStr[MAXSTRING];
   char     FIRST_VEG;
   int      veg, index, dist;
@@ -906,12 +1033,14 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 
   cell_data_struct     ***cell;
   energy_bal_struct     **energy;
+  lake_var_struct        *lake_var;
 
   double Tnode_prior[MAX_NODES];
   double Zsum_prior[MAX_NODES];
 
   cell    = prcp->cell;
   energy  = prcp->energy;
+  lake_var  = &(prcp->lake_var);
   
   dp = soil_con->dp;
 
@@ -1044,8 +1173,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 
 	  /* set soil moisture properties for all soil thermal nodes */
-	  if ( !( options.LAKES && veg_con->LAKE != 0 ) ) {
-	    ErrorFlag = distribute_node_moisture_properties(energy[veg][band].moist,
+	  ErrorFlag = distribute_node_moisture_properties(energy[veg][band].moist,
 						  energy[veg][band].ice,
 						  energy[veg][band].kappa_node,
 						  energy[veg][band].Cs_node,
@@ -1072,14 +1200,12 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						  soil_con->organic,
 						  Nnodes, options.Nlayer,
 						  soil_con->FS_ACTIVE);
-	    if ( ErrorFlag == ERROR ) return ( ErrorFlag );
-	  }
+	  if ( ErrorFlag == ERROR ) return ( ErrorFlag );
 
 	  /* initialize layer moistures and ice contents */
 	  for ( dry = 0; dry < Ndist; dry++ ) {	      
-	    if ( !( options.LAKES && veg_con->LAKE != 0 ) ) {
-              if (options.QUICK_FLUX) {
-                ErrorFlag = estimate_layer_ice_content_quick_flux(cell[dry][veg][band].layer,
+            if (options.QUICK_FLUX) {
+              ErrorFlag = estimate_layer_ice_content_quick_flux(cell[dry][veg][band].layer,
 					   soil_con->depth, soil_con->dp,
 					   energy[veg][band].T[0], energy[veg][band].T[1],
 					   soil_con->avg_temp, soil_con->max_moist, 
@@ -1096,9 +1222,9 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 					   soil_con->effective_porosity,
 #endif // EXCESS_ICE
 					   soil_con->FS_ACTIVE);
-              }
-              else {
-	        ErrorFlag = estimate_layer_ice_content(cell[dry][veg][band].layer,
+            }
+            else {
+	      ErrorFlag = estimate_layer_ice_content(cell[dry][veg][band].layer,
 						       soil_con->Zsum_node,
 						       energy[veg][band].T,
 						       soil_con->max_moist_node,
@@ -1126,7 +1252,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #endif // EXCESS_ICE
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      
-	      }
 	    }
 	  }
 	    
@@ -1136,6 +1261,100 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 	      find_0_degree_fronts(&energy[veg][band], soil_con->Zsum_node, energy[veg][band].T, Nnodes);
 	}
       }//band
+
+      if (options.LAKES && veg_con[veg].LAKE) {
+
+        // Compute lake soil properties
+        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
+          moist[0][0][lidx] = lake_var->soil.layer[lidx].moist;
+        ErrorFlag = distribute_node_moisture_properties(lake_var->energy.moist,
+						  lake_var->energy.ice,
+						  lake_var->energy.kappa_node,
+						  lake_var->energy.Cs_node,
+						  soil_con->Zsum_node,
+						  lake_var->energy.T,
+						  soil_con->max_moist_node,
+#if QUICK_FS
+						  soil_con->ufwc_table_node,
+#else
+						  soil_con->expt_node,
+						  soil_con->bubble_node,
+#endif // QUICK_FS
+#if EXCESS_ICE
+						  soil_con->porosity_node,
+						  soil_con->effective_porosity_node,
+#endif // EXCESS_ICE
+						  moist[0][0],
+						  soil_con->depth,
+						  soil_con->soil_dens_min,
+						  soil_con->bulk_dens_min,
+						  soil_con->quartz,
+						  soil_con->soil_density,
+						  soil_con->bulk_density,
+						  soil_con->organic,
+						  Nnodes, options.Nlayer,
+						  soil_con->FS_ACTIVE);
+        if ( ErrorFlag == ERROR ) return ( ErrorFlag );
+
+        /* initialize layer moistures and ice contents */
+        for ( dry = 0; dry < Ndist; dry++ ) {	      
+          if (options.QUICK_FLUX) {
+            ErrorFlag = estimate_layer_ice_content_quick_flux(lake_var->soil.layer,
+					   soil_con->depth, soil_con->dp,
+					   lake_var->energy.T[0], lake_var->energy.T[1],
+					   soil_con->avg_temp, soil_con->max_moist, 
+#if QUICK_FS
+					   soil_con->ufwc_table_layer,
+#else
+					   soil_con->expt, soil_con->bubble, 
+#endif // QUICK_FS
+#if SPATIAL_FROST
+					   soil_con->frost_fract, soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+					   soil_con->porosity,
+					   soil_con->effective_porosity,
+#endif // EXCESS_ICE
+					   soil_con->FS_ACTIVE);
+          }
+          else {
+            ErrorFlag = estimate_layer_ice_content(lake_var->soil.layer,
+						   soil_con->Zsum_node,
+						   lake_var->energy.T,
+						   soil_con->max_moist_node,
+#if QUICK_FS
+						   soil_con->ufwc_table_node,
+#else
+						   soil_con->expt_node,
+						   soil_con->bubble_node,
+#endif // QUICK_FS
+						   soil_con->depth,
+						   soil_con->max_moist,
+#if QUICK_FS
+						   soil_con->ufwc_table_layer,
+#else
+						   soil_con->expt,
+						   soil_con->bubble,
+#endif // QUICK_FS
+#if SPATIAL_FROST
+						   soil_con->frost_fract, 
+						   soil_con->frost_slope, 
+#endif // SPATIAL_FROST
+#if EXCESS_ICE
+						   soil_con->porosity,
+						   soil_con->effective_porosity,
+#endif // EXCESS_ICE
+						   Nnodes, options.Nlayer, 
+						   soil_con->FS_ACTIVE);	      
+	  }
+        }
+	    
+        /* Find freezing and thawing front depths */
+        if(!options.QUICK_FLUX && soil_con->FS_ACTIVE) 
+          find_0_degree_fronts(&(lake_var->energy), soil_con->Zsum_node, lake_var->energy.T, Nnodes);
+
+      }
+
     }
   }//veg	
 

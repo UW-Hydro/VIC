@@ -22,12 +22,14 @@
 		if (vpd > 0.0 && evap < 0.0)
 	      to
 		if (vpd >= 0.0 && evap < 0.0)
-	      to correctly handle evap when vpd == 0.0.			TJB
+	      to correctly handle evap when vpd == 0.0.				TJB
   2009-Jun-09 Moved calculation of canopy resistance from penman() into
 	      separate function calc_rc().  Also allowed for reference
-	      crop case in calc_rc().					TJB
+	      crop case in calc_rc().						TJB
   2009-Jun-09 Removed unnecessary functions quick_penman() and
-	      compute_penman_constants().				TJB
+	      compute_penman_constants().					TJB
+  2013-Jul-25 Added calc_rc_ps(), which computes canopy resistance based on
+	      photosynthetic demand.						TJB
 
 ********************************************************************************/
 #include <stdio.h>
@@ -35,7 +37,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: penman.c,v 5.3.2.1 2009/06/09 09:54:11 vicadmin Exp $";
 
 #define CLOSURE 4000		/** Pa **/
 #define RSMAX 5000
@@ -86,6 +88,114 @@ double calc_rc(double rs,
   }
 
   return rc;
+
+}
+
+
+void calc_rc_ps(char    Ctype,
+		double  MaxCarboxRate,
+		double  MaxETransport,
+		double  CO2Specificity,
+		double *NscaleFactor,
+		double  tair, 
+		double  shortwave, 
+		double *aPAR,
+		double  elevation, 
+		double  Catm,
+		double *CanopLayerBnd,
+		double  lai, 
+		double  gsm_inv, 
+		double  vpd, 
+		double *rsLayer,
+		double *rc)
+/********************************************************************************
+  function  : calc_rc_ps
+  purpose   : Calculate canopy resistance rc as a function of photosynthetic
+              activity, soil moisture stress, and vapor pressure deficit
+  interface : - input : - C3/C4 type (W/m2)
+                        - Maximum Carboxlyation Rate 
+                        - Maximum Electron Transport Rate 
+			- CO2 Specificity
+			- Nitrogen scaling factor
+			- air temperature
+			- net shortwave radiation
+			- absorbed photosynthetically active radiation
+			- elevation (m)
+			- Atmospheric CO2 concentration
+			- Array of canopy layer boundaries (fractions of total LAI)
+			- Whole-canopy LAI (m**2/m**2)
+			- Soil moisture limitation factor gsm_inv
+			- Vapor Pressure Deficit (Pa)
+              - output: - Canopy-layer-aggregate stomatal resistance (s/m)
+                        - Whole-canopy aggregate canopy resistance (s/m)
+  programmer: Ted Bohn
+  date      : March 7, 2007
+  changes   :
+
+  references: 
+********************************************************************************/
+{
+  extern option_struct options;
+  double GPP0;                  /* aggregate canopy assimilation (photosynthesis)
+                                   in absence of soil moisture stress */
+  double Rdark0;                /* aggregate canopy dark respiration in absence of
+                                   soil moisture stress */
+  double Rphoto0;               /* aggregate canopy photorespiration in absence of
+                                   soil moisture stress */
+  double Rmaint0;               /* aggregate plant maintenance respiration in absence of
+                                   soil moisture stress */
+  double Rgrowth0;              /* aggregate plant growth respiration in absence of
+                                   soil moisture stress */
+  double Raut0;                 /* aggregate plant respiration in absence of
+                                   soil moisture stress */
+  double NPP0;                  /* aggregate net primary productivity in absence of
+                                   soil moisture stress */
+  double Ci0;                   /* aggregate canopy leaf-internal CO2 mixing ratio
+                                   in absence of soil moisture stress */
+  double rc0;                   /* aggregate canopy resistance in absence of
+                                   soil moisture stress */
+  double rcRatio;
+  int    cidx;
+  double vpdfactor;             /* factor for canopy resistance based on vpd */
+
+  /* Compute canopy resistance and photosynthetic demand in absence of soil moisture stress */
+  canopy_assimilation(Ctype,
+                      MaxCarboxRate,
+                      MaxETransport,
+                      CO2Specificity,
+                      NscaleFactor,
+                      tair,
+                      shortwave,
+                      aPAR,
+                      elevation,
+                      Catm,
+                      CanopLayerBnd,
+                      lai,
+                      "ci",
+                      rsLayer,
+                      &rc0,
+                      &Ci0,
+                      &GPP0,
+                      &Rdark0,
+                      &Rphoto0,
+                      &Rmaint0,
+                      &Rgrowth0,
+                      &Raut0,
+                      &NPP0);
+
+  /* calculate vapor pressure deficit factor */
+  vpdfactor = 1 - vpd/CLOSURE;
+  vpdfactor = (vpdfactor < VPDMINFACTOR) ? VPDMINFACTOR : vpdfactor;
+
+  /* calculate canopy resistance in presence of soil moisture stress */
+  *rc = rc0/(gsm_inv*vpdfactor);
+  *rc = (*rc > RSMAX) ? RSMAX : *rc;
+  rcRatio = *rc/rc0;
+  /* this next calculation assumes canopy layers are of equal size */
+  for (cidx=0; cidx<options.Ncanopy; cidx++) {
+    rsLayer[cidx] *= rcRatio;
+    rsLayer[cidx] = (rsLayer[cidx] > RSMAX) ? RSMAX : rsLayer[cidx];
+  }
 
 }
 

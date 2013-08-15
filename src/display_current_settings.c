@@ -50,6 +50,7 @@ void display_current_settings(int                 mode,
 	      features.						TJB
   2012-Jan-16 Removed LINK_DEBUG code				BN
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.TJB
 **********************************************************************/
 {
 
@@ -306,6 +307,21 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"MIN_RAIN_TEMP\t\t%f\n",global->MIN_RAIN_TEMP);
   fprintf(stderr,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
   fprintf(stderr,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
+  if (options.CARBON == TRUE)
+    fprintf(stderr,"CARBON\t\tTRUE\n");
+  else
+    fprintf(stderr,"CARBON\t\tFALSE\n");
+  if (options.SHARE_LAYER_MOIST == TRUE)
+    fprintf(stderr,"SHARE_LAYER_MOIST\t\tTRUE\n");
+  else
+    fprintf(stderr,"SHARE_LAYER_MOIST\t\tFALSE\n");
+  fprintf(stderr,"Ncanopy\t\t%d\n",options.Ncanopy);
+  if (options.DIST_ZWT) {
+    fprintf(stderr,"DIST_ZWT\t\tTRUE\n");
+    fprintf(stderr,"Nzwt\t\t\t%d\n",options.Nzwt);
+  }
+  else
+    fprintf(stderr,"DIST_ZWT\t\tFALSE\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Forcing Data:\n");
@@ -359,6 +375,10 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Veg Data:\n");
   fprintf(stderr,"Veg library file\t%s\n",names->veglib);
+  if (options.VEGLIB_PHOTO == TRUE)
+    fprintf(stderr,"VEGLIB_PHOTO\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGLIB_PHOTO\t\tFALSE\n");
   fprintf(stderr,"Veg param file\t\t%s\n",names->veg);
   fprintf(stderr,"ROOT_ZONES\t\t%d\n",options.ROOT_ZONES);
   if (options.VEGPARAM_LAI)

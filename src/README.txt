@@ -26,6 +26,361 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes between VIC 4.1.2_wet and VIC 4.1.2.i *****
+--------------------------------------------------------------------------------
+
+New Features:
+-------------
+
+New forcing variables.
+
+	Files Affected:
+
+	alloc_atmos.c
+	compute_coszen.c (new)
+	get_force_type.c
+	initialize_atmos.c
+	Makefile
+	mtclim_constants_vic.h
+	mtclim_vic.c
+	mtclim_wrapper.c
+	output_list_utils.c
+	put_data.c
+	vicNl_def.h
+	vicNl.h
+	write_forcing_file.c
+
+	Description:
+
+	Added the following new input forcing variables (used for simulations
+	of carbon cycle processes):
+	  CATM: Atmospheric CO2 mixing ratio [ppm]
+	  FDIR: Fraction of incoming shortwave that is direct [fraction]
+	  PAR:  Photosynthetically active radiation [W/m2]
+
+	These variables are optional; if not supplied as forcings, VIC will use
+	default values for them, as follows:
+	  CATM: Value of CatmCurrent defined in vicNl_def.h
+	  FDIR: Value computed by MTCLIM module
+	  PAR:  SHORTWAVE*SW2PAR, with SW2PAR defined in vicNl_def.h
+
+	Similarly, added the following new output variables:
+	  OUT_CATM:   (equals CATM)
+	  OUT_COSZEN: Cosine of the solar zenith angle, computed by MTCLIM module
+	  OUT_FDIR:   (equals FDIR)
+	  OUT_PAR:    (equals PAR)
+
+
+
+
+Added simulation of photosynthesis.
+
+	Files Affected:
+
+	calc_Nscale_factors.c (new)
+	calc_surf_energy_bal.c
+	canopy_assimilation.c (new)
+	canopy_evap.c
+	display_current_settings.c
+	faparl.c (new)
+	free_dist_prcp.c
+	free_vegcon.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_veg.c
+	Makefile
+	make_veg_var.c
+	output_list_utils.c
+	penman.c
+	photosynth.c (new)
+	put_data.c
+	read_soilparam.c
+	read_veglib.c
+	read_vegparam.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added simulation of photosynthesis.  The photosynthesis formulation was
+	taken from the BETHY model (Knorr, 2000), which in turn used the Farquhar
+	model for C3 plants and the Collatz model for C4 plants.  In addition,
+	inhibition of photosynthesis under saturated conditions (as described
+	by Frolking et al, 2002) is allowed for.
+
+	This feature requires several new veg parameters to be in the veg
+	library file:
+	  Ctype:          Photosynthetic pathway; can be C3 or C4
+	  MaxCarboxRate:  Maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s)
+	  MaxETransport:  Maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants)
+	  CO2Specificity: CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants)
+	  LightUseEff:    Light-use efficiency (mol(CO2)/mol(photons))
+	  NscaleFlag:     TRUE = nitrogen-scaling factors are applicable to this veg class
+	  Wnpp_inhib:     Moisture level (fraction of maximum moisture) above which photosynthesis experiencing saturation inhibition, i.e. too wet for optimal photosynthesis; only applies to top soil layer
+	  NPPfactor_sat:  Photosynthesis multiplier (fraction of maximum) when top soil layer is saturated
+
+	There are several new output variables associated with this feature:
+	  OUT_GPP:  Gross primary productivity [g C/m2d]
+	  OUT_RAUT: Autotrophic respiration [g C/m2d]
+	  OUT_NPP:  Net primary productivity [g C/m2d]
+	  OUT_APAR: Absorbed PAR [W/m2]
+
+	By default, this feature is turned off.  To turn this feature on, set
+	CARBON to TRUE in the global parameter file.
+
+	When this feature is turned on, you can choose to compute stomatal
+	resistance via the Jarvis formulation (the formulation used by all
+	previous versions of VIC) or as a function of photosynthetic demand.
+	This is determined by the setting of RC_MODE in the global parameter
+	file.  A value of RC_JARVIS (which is the default) selects the Jarvis
+	formulation.  A value of RC_PHOTO selects the photosynthetic demand
+	formulation.
+
+
+
+
+Added simulation of soil carbon storage and fluxes.
+
+	Files Affected:
+
+	compute_soil_resp.c (new)
+	full_energy.c
+	initialize_lake.c
+	initialize_soil.c
+	initialize_veg.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	put_data.c
+	read_initial_model_state.c
+	soil_carbon_balance.c (new)
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	Added simulation of soil carbon storage and fluxes.  This formulation was
+	taken mostly from the LPJ model (Sitch, 2003), which in turn used a
+	Lloyd-Taylor model for the dependence of soil respiration on soil
+	temperature.  The dependence of soil respiration on soil moisture was
+	based on the formulation of Yi et al (2012) but modified to allow a small
+	respiration rate under saturated conditions.
+
+	At this point, we do not simulate the storage of carbon in living biomass.
+	Therefore, the flux of carbon into the soil (litterfall) is set equal to
+	the total NPP of the previous calendar year, spread evenly over the current
+	year.  As in the LPJ model, soil carbon is stored in 3 pools: litter (fast),
+	intermediate, and slow; with associated turnover times of 2.86 y, 33.3 y, and
+	1,000 y, respectively.  Litterfall enters the litter pool.  Carbon exits the
+	litter pool through respiration (RhLitter).  A fraction (fAir) of this
+	respired carbon is in the form of CO2 and is vented directly to the atmosphere
+	(RhLitter2Atm).  The remainder is sent to the intermediate and slow pools
+	in the proportions fInter and (1-fInter), respectively.  These pools also
+	respire carbon, which is assumed to be in the form of CO2 and vented directly
+	to the atmosphere.
+
+	There are several new output variables associated with this feature:
+	  OUT_RHET: Total heterotrophic respiration vented to the atmosphere
+	            (= RhLitter2Atm+RhInter+RhSlow)  [g C/m2d]
+	  OUT_NEE:  Net Ecosystem Exchange (= NPP-RHET) [g C/m2d]
+	  OUT_LITTERFALL: Flux of carbon from living biomass into litter pool [g C/m2d]
+	  OUT_CLITTER: Carbon density in the litter pool [g C/m2]
+	  OUT_CINTER: Carbon density in the intermediate pool [g C/m2]
+	  OUT_CSLOW: Carbon density in the slow pool [g C/m2]
+
+	This feature is part of the carbon cycle, controlled by the setting of the
+	CARBON option in the global parameter file.
+
+
+
+
+Added soil moisture content for half-space below bottom soil layer
+
+	Files Affected:
+
+	soil_conduction.c
+	vicNl_def.h
+
+	Description:
+
+	VIC's soil thermal profile can extend well below its soil hydrologic
+	layers.  Previously, the moisture content of these soil thermal nodes
+	was set to that of the bottom soil layer.  Now, the moisture content can
+	be set to a user-specified value, SLAB_MOIST_FRACT, defined in
+	vicNl_def.h.
+
+
+
+
+Implemented heat flux between lake and underlying soil.
+
+	Files Affected:
+
+	full_energy.c
+	func_surf_energy_bal.c
+	func_lake_energy_bal.c (new)
+	initialize_lake.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	output_list_utils.c
+	prepare_full_energy.c
+	put_data.c
+	vicNl_def.h
+	vicNl.h
+	water_energy_balance.c
+	water_under_ice.c
+
+	Description:
+
+	Implemented heat flux between lake and underlying soil.
+
+	Previously, the lake bottom was treated as a no flux boundary, so
+	that no heat traveled between the lake and the underlying soil.  Soil
+	temperatures in the lake/wetland tile were determined only from the
+	energy fluxes through the wetland surface.  In other words, the soil
+	under the lake had the exact same temperature as the soil in the
+	exposed wetland, as if the lake were not present.
+
+	Now, the soil under the lake has its own temperature profile,
+	independent of that in the exposed wetland.  Heat and any un-absorbed
+	shortwave radiation in the lowest lake layer now can pass into the top
+	of the soil column beneath the lake.
+
+	There are now two new output variableis that track the soil temperature
+	profile under the lake:
+	  OUT_SOIL_TEMP_LAKE:  Average temperature in the hydrologic soil layers beneath the lake
+	  OUT_SOIL_TNODE_LAKE: Soil thermal node temperatures beneath the lake
+
+
+
+
+Water table distribution.
+
+	Files Affected:
+
+	canopy_evap.c
+	compute_zwt.c
+	display_current_settings.c
+	distribute_moist_zwt.c (new)
+	free_dist_prcp.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_lake.c
+	initialize_model_state.c
+	initialize_soil.c
+	initialize_veg.c
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	make_veg_var.c
+	output_list_utils.c
+	put_data.c
+	read_initial_model_state.c
+	read_soil_param.c
+	snow_intercept.c
+	surface_fluxes.c
+	user_def.h
+	vicNl_def.h
+	vicNl.h
+	write_model_state.c
+
+	Description:
+
+	Added the ability to account for sub-grid heterogeneity in water table
+	depth.  This is primarily applicable to boreal wetlands; the water
+	table depth distribution is hard-coded to represent typical boreal
+	boreal wetland microtopography.
+
+	The water table depth distribution is controlled by the parameter
+	RIDGE_FRACT (defined in vicNl_def.h), which is the area fraction of
+	the wetland covered by ridges or hummocks, and is set to 0.5.
+	Ridges and hummocks are assumed to be 50cm tall, and hollows and pools
+	are assumed to be 20cm deep, for a total range of 70cm in surface
+	elevation.  This is based on field observations in Eppinga et al
+	(2008).  The water table depth distribution is sampled at 5 locations:
+	1. saturated zone, 2. midpoint of exposed hollow, 3. lowest 1/3 of
+	ridge, 4. middle 1/3 of ridge, 5. highest 1/3 of ridge.
+
+	This feature is optional, controlled by the value of DIST_ZWT in the
+	global parameter file.  By default, DIST_ZWT is FALSE.
+
+	There are several new output variables associated with this feature:
+	  OUT_DISTZWT_ASAT:     Array of saturated fractional areas, one per
+				point on the water table distribution
+	  OUT_DISTZWT_SMOIST:   2-d array of soil moistures (water table
+				distribution node and soil layer)
+	  OUT_DISTZWT_ZWT:      Array of water table depths (assigning water
+				table to lowest unsaturated layer)
+	  OUT_DISTZWT_ZWT_LUMP: Array of water table depths (lumping all
+				layers' water into one column)
+	  OUT_DISTZWT_BFLOW:    Array of baseflows
+	  OUT_DISTZWT_RUNOFF:   Array of runoffs
+
+	When DIST_ZWT is TRUE, the non-distributed versions of these variables
+	(OUT_ASAT, etc) are now computed as the area-weighted averages of the
+	values in the OUT_DISTZWT* arrays.
+
+
+
+
+Bug Fixes:
+----------
+
+
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.i to VIC 4.1.2.h *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed incorrect handling of case of a mix of cells with and without lakes.
+
+	Files Affected:
+
+	initialize_model_state.c
+	read_lakeparam.c
+
+	Description:
+
+	VIC was neither reading the lake parameter file correctly nor
+	initializing the lake data structures correctly for the case of a
+	mix of cells with and without lakes within a single lake parameter
+	file.  This has been fixed.
+
+
+
+
+Fixed use of tmp_moist array without initialization.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	Fixed use of tmp_moist array without initialization.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.g *****
 --------------------------------------------------------------------------------
 

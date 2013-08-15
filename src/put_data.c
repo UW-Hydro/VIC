@@ -147,6 +147,10 @@ int  put_data(dist_prcp_struct  *prcp,
 	      error.  Corrected the setting of rad_temp when there is snow
 	      in the canopy to Tfoliage (canopy snow temperature) instead
 	      of Tcanopy (canopy air temperature).			CL via TJB
+  2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
+  2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, OUT_APAR.		TJB
+  2013-Jul-25 Implemented heat flux between lake and soil.		TJB
+  2013-Jul-25 Added DIST_ZWT terms.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -154,6 +158,7 @@ int  put_data(dist_prcp_struct  *prcp,
   extern option_struct    options;
   int                     veg;
   int                     index;
+  int                     zwtidx;
   int                     Ndist;
   int                     dist;
   int                     band;
@@ -204,6 +209,12 @@ int  put_data(dist_prcp_struct  *prcp,
   lake_var_struct         lake_var;
   snow_data_struct      **snow;
   veg_var_struct       ***veg_var;
+
+  cell    = prcp->cell;
+  energy  = prcp->energy;
+  lake_var = prcp->lake_var;
+  snow    = prcp->snow;
+  veg_var = prcp->veg_var;
 
   AboveTreeLine = soil_con->AboveTreeLine;
   AreaFract = soil_con->AreaFract;
@@ -267,8 +278,12 @@ int  put_data(dist_prcp_struct  *prcp,
 
   // Set output versions of input forcings
   out_data[OUT_AIR_TEMP].data[0]  = atmos->air_temp[NR];
+  out_data[OUT_CATM].data[0]      = atmos->Catm[NR]*1e6;
+  out_data[OUT_COSZEN].data[0]    = atmos->coszen[NR];
   out_data[OUT_DENSITY].data[0]   = atmos->density[NR];
+  out_data[OUT_FDIR].data[0]      = atmos->fdir[NR];
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
+  out_data[OUT_PAR].data[0]       = atmos->par[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec; // mm over grid cell
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR]/kPa2Pa;
   out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];
@@ -285,12 +300,6 @@ int  put_data(dist_prcp_struct  *prcp,
   out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
  
-  cell    = prcp->cell;
-  energy  = prcp->energy;
-  lake_var = prcp->lake_var;
-  snow    = prcp->snow;
-  veg_var = prcp->veg_var;
-
   /****************************************
     Store Output for all Vegetation Types (except lakes)
   ****************************************/
@@ -372,6 +381,22 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                              out_data);
 
+            if (options.DIST_ZWT) {
+              /** record distributed terms **/
+              for(zwtidx=0;zwtidx<options.Nzwt;zwtidx++) {
+                for(index=0;index<options.Nlayer;index++) {
+                  i = veg*options.SNOW_BAND*options.Nzwt*options.Nlayer
+                      + band*options.Nzwt*options.Nlayer + zwtidx*options.Nlayer + index;
+                  out_data[OUT_DISTZWT_SMOIST].data[i] = cell[dist][veg][band].layer[index].moist_dist_zwt[zwtidx];
+                }
+                i = veg*options.SNOW_BAND*options.Nzwt + band*options.Nzwt + zwtidx;
+                out_data[OUT_DISTZWT_ASAT].data[i] = cell[dist][veg][band].asat_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_ZWT].data[i] = cell[dist][veg][band].zwt_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_ZWT_LUMP].data[i] = cell[dist][veg][band].zwt_lumped_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_BFLOW].data[i] = cell[dist][veg][band].baseflow_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_RUNOFF].data[i] = cell[dist][veg][band].runoff_dist_zwt[zwtidx];
+              }
+            }
 	  } // End wet/dry loop
 
 	  /**********************************
@@ -401,41 +426,10 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                            out_data);
 
-          // Store Wetland-Specific Variables
-
-          if (IsWet) {
-            // Wetland soil temperatures
-            for(i=0;i<options.Nnode;i++) {
-              out_data[OUT_SOIL_TNODE_WL].data[i] = energy[veg][band].T[i];
-            }
-          }
-
           /**********************************
             Record Lake Variables
           **********************************/
           if (IsWet) {
-
-            // Override some variables of soil under lake with those of wetland
-            // This is for those variables whose lake values shouldn't be included
-            // in grid cell average
-            // Note: doing this for eb terms will lead to reporting of eb errors 
-            // this should be fixed when we implement full thermal solution beneath lake
-            for (i=0; i<MAX_FRONTS; i++) {
-              lake_var.energy.fdepth[i]      = energy[veg][band].fdepth[i];
-              lake_var.energy.tdepth[i]      = energy[veg][band].fdepth[i];
-            }
-            for (i=0; i<options.Nnode; i++) {
-              lake_var.energy.ice[i]         = energy[veg][band].ice[i];
-              lake_var.energy.T[i]           = energy[veg][band].T[i];
-            }
-            for (i=0; i<N_PET_TYPES; i++) {
-              lake_var.soil.pot_evap[i]      = cell[WET][veg][band].pot_evap[i];
-            }
-            lake_var.soil.rootmoist          = cell[WET][veg][band].rootmoist;
-            lake_var.energy.deltaH           = energy[veg][band].deltaH;
-            lake_var.energy.fusion           = energy[veg][band].fusion;
-            lake_var.energy.grnd_flux        = energy[veg][band].grnd_flux;
-
 
   	    /*********************************
               Record Water Balance Terms 
@@ -485,7 +479,25 @@ int  put_data(dist_prcp_struct  *prcp,
 #endif // SPATIAL_FROST
                              out_data);
 
+            // Wetland soil temperatures
+            for(i=0;i<options.Nnode;i++) {
+              if (Clake < 1) {
+                out_data[OUT_SOIL_TNODE_WL].data[i] = energy[veg][band].T[i];
+              }
+              else {
+                out_data[OUT_SOIL_TNODE_WL].data[i] = lake_var.energy.T[i];
+              }
+            }
+
             // Store Lake-Specific Variables
+
+            // Lake soil temperatures
+            for(i=0;i<options.Nnode;i++) {
+              out_data[OUT_SOIL_TNODE_LAKE].data[i] = lake_var.energy.T[i];
+            }
+            for(i=0;i<options.Nlayer;i++) {
+              out_data[OUT_SOIL_TEMP_LAKE].data[i] = lake_var.soil.layer[i].T;
+            }
 
             // Lake ice
             if (lake_var.new_ice_area > 0.0) {
@@ -519,6 +531,12 @@ int  put_data(dist_prcp_struct  *prcp,
 
             // Other lake characteristics
             out_data[OUT_LAKE_SURF_TEMP].data[0]  = lake_var.temp[0];
+            for(i=0;i<MAX_LAKE_NODES;i++) {
+              out_data[OUT_LAKE_LAYER_TEMP].data[i] = 0;
+            }
+            for(i=0;i<lake_var.activenod;i++) {
+              out_data[OUT_LAKE_LAYER_TEMP].data[i] = lake_var.temp[i];
+            }
             if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0) {
               out_data[OUT_LAKE_MOIST].data[0]      = (lake_var.volume / soil_con->cell_area) * 1000.; // mm over gridcell
               out_data[OUT_SURFSTOR].data[0]        = (lake_var.volume / soil_con->cell_area) * 1000.; // same as OUT_LAKE_MOIST
@@ -643,6 +661,12 @@ int  put_data(dist_prcp_struct  *prcp,
   save_data->swe = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0];
   save_data->wdew = out_data[OUT_WDEW].data[0];
 
+  // Carbon Terms
+  if (options.CARBON) {
+    out_data[OUT_RHET].data[0] *= (double)global_param.dt/24.0; // convert to gC/m2d
+    out_data[OUT_NEE].data[0] = out_data[OUT_NPP].data[0]-out_data[OUT_RHET].data[0];
+  }
+
   /********************
     Check Water Balance 
     ********************/
@@ -657,7 +681,7 @@ int  put_data(dist_prcp_struct  *prcp,
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
-  
+ 
   /********************
     Check Energy Balance 
   ********************/
@@ -744,6 +768,9 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_LAKE_EVAP].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_EVAP_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += KELVIN;
+      for(index=0;index<MAX_LAKE_NODES;index++) {
+        out_data[OUT_LAKE_LAYER_TEMP].data[index] += KELVIN;
+      }
       out_data[OUT_LAKE_PREC_V].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_RCHRG].aggdata[0] /= out_dt_sec;
       out_data[OUT_LAKE_RCHRG_V].aggdata[0] /= out_dt_sec;
@@ -769,9 +796,11 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += KELVIN;
       for (index=0; index<options.Nlayer; index++) {
         out_data[OUT_SOIL_TEMP].aggdata[index] += KELVIN;
+        out_data[OUT_SOIL_TEMP_LAKE].aggdata[index] += KELVIN;
       }
       for (index=0; index<options.Nnode; index++) {
         out_data[OUT_SOIL_TNODE].aggdata[index] += KELVIN;
+        out_data[OUT_SOIL_TNODE_LAKE].aggdata[index] += KELVIN;
         out_data[OUT_SOIL_TNODE_WL].aggdata[index] += KELVIN;
       }
       out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;
@@ -855,7 +884,7 @@ void collect_wb_terms(cell_data_struct  cell,
     tmp_evap += cell.layer[index].evap;
   if (HasVeg)
     out_data[OUT_TRANSP_VEG].data[0] += tmp_evap * AreaFactor;
-  else 
+  else
     out_data[OUT_EVAP_BARE].data[0] += tmp_evap * AreaFactor;
   tmp_evap += snow.vapor_flux * 1000.;
   out_data[OUT_SUB_SNOW].data[0] += snow.vapor_flux * 1000. * AreaFactor; 
@@ -975,6 +1004,23 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record snow cover fraction **/
   out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
+
+  /*****************************
+    Record Carbon Cycling Variables 
+  *****************************/
+  if (options.CARBON) {
+
+    out_data[OUT_APAR].data[0] += veg_var.aPAR * AreaFactor;
+    out_data[OUT_GPP].data[0] += veg_var.GPP * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_RAUT].data[0] += veg_var.Raut * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_NPP].data[0] += veg_var.NPP * MCg * SEC_PER_DAY * AreaFactor;
+    out_data[OUT_LITTERFALL].data[0] += veg_var.Litterfall * AreaFactor;
+    out_data[OUT_RHET].data[0] += cell.RhTot * AreaFactor;
+    out_data[OUT_CLITTER].data[0] += cell.CLitter * AreaFactor;
+    out_data[OUT_CINTER].data[0] += cell.CInter * AreaFactor;
+    out_data[OUT_CSLOW].data[0] += cell.CSlow * AreaFactor;
+
+  }
 
 }
 

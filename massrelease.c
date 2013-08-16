@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <vicNl.h>
   
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: massrelease.c,v 3.1 1999/02/16 18:02:07 vicadmin Exp $";
 
 /*****************************************************************************
   Function name: MassRelease()

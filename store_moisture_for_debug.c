@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: store_moisture_for_debug.c,v 4.2 2000/05/16 21:57:54 vicadmin Exp $";
 
 #if LINK_DEBUG
 void store_moisture_for_debug(int                 iveg,

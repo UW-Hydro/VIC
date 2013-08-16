@@ -7,7 +7,7 @@
  * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
  * ORIG-DATE:    Apr-1996
  * LAST-MOD: Wed Jan 19 16:20:40 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
- * $Id$
+ * $Id: StabilityCorrection.c,v 4.1.2.1 2004/05/06 00:37:51 tbohn Exp $
  * DESCRIPTION:  Calculate the stability correction for exchange of sensible
  *               heat between the surface and the atmosphere 
  * DESCRIP-END.

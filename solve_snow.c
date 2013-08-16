@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: solve_snow.c,v 4.2.2.5 2006/09/27 16:45:48 vicadmin Exp $";
 
 double solve_snow(snow_data_struct    *snow,
 		  layer_data_struct   *layer_wet,
@@ -51,6 +51,7 @@ double solve_snow(snow_data_struct    *snow,
 		  double              *aero_resist,
 		  double              *aero_resist_used,
 		  double              *tmp_wind,
+                  double              ra_lake,
 		  double              *net_short,
 		  double              *out_short,
 		  double              *rad,
@@ -59,7 +60,8 @@ double solve_snow(snow_data_struct    *snow,
 		  double              *snow_inflow,
 		  double              *ppt,
 		  double              *gauge_correction,
-		  float               *root) {
+		  float               *root,
+		  int                 flag_irr) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -111,6 +113,8 @@ double solve_snow(snow_data_struct    *snow,
   double              surf_long;
   double              store_snowfall;
   int                 curr_snow;
+  double              net_short_lake;
+  double              net_rad_lake;
 
   melt     = 0.;
   ppt[WET] = 0.; 
@@ -146,6 +150,24 @@ double solve_snow(snow_data_struct    *snow,
       fprintf(stderr,"\trec = %i, veg = %i, hour = %i\n",rec,iveg,hour);
     }
   }
+
+
+  /* Compute net radiation over lake */
+  net_short_lake = 0.92 * shortwave; /* ingjerd dec 2008. Assumes albedo_lake=0.08 */
+  if(snow->swq>0) net_rad_lake=0; // why? assumes no evap from lake if snow is present. evap from reservoirs should be combined with the lake model in the future some time. 
+  else {
+    if(options.FULL_ENERGY || options.FROZEN_SOIL) {
+      net_rad_lake = net_short_lake + longwave - STEFAN_B 
+	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN) 
+	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
+    }
+    else { //NB! kanskje det er net longwave du har her!!!! Se initialize_atmos. 
+      net_rad_lake = net_short_lake + longwave - STEFAN_B 
+	* (air_temp+KELVIN) * (air_temp+KELVIN) 
+	* (air_temp+KELVIN) * (air_temp+KELVIN);
+    }
+  }
+
 
   if((snow->swq > 0 || snowfall[WET] > 0.
       || (snow->snow_canopy>0. && overstory)) && mu==1) {
@@ -199,7 +221,7 @@ double solve_snow(snow_data_struct    *snow,
 	  * (air_temp+KELVIN) * (air_temp+KELVIN);
       }
     }
-
+    //printf("solve_snow rad %f netshort %f longwave %f\n",(*rad),(*net_short),longwave);
     if(iveg!=Nveg) {
       
       /****************************************
@@ -255,7 +277,9 @@ double solve_snow(snow_data_struct    *snow,
 				displacement, roughness, ref_height, 
 				(double)soil_con->elevation, rainfall, 
 				soil_con->depth, soil_con->Wcr, 
-				soil_con->Wpwp, root);
+				soil_con->Wpwp, root,
+				net_rad_lake,ra_lake,flag_irr); /* ingjerd added three variables*/
+	  //printf("solve_snow evap %f rad %f netshort %f\n",Evap[0],rad[0],net_short[0]);
 
 	  /* Store throughfall from canopy */
 	  rainfall[WET] = veg_var_wet->throughfall;
@@ -448,7 +472,7 @@ double solve_snow(snow_data_struct    *snow,
     snow->snow         = FALSE;
     tmp_snow_energy[0] = 0;
     energy->albedo     = bare_albedo;
-    energy->longwave   = longwave;
+    energy->longwave   = longwave; //24WB: This is already net longwave
 
     /** Compute Radiation Balance for Bare Surface **/ 
     out_short[0] = energy->albedo * shortwave;
@@ -459,9 +483,10 @@ double solve_snow(snow_data_struct    *snow,
 	* (energy->T[0]+KELVIN) * (energy->T[0]+KELVIN);
     }
     else {
-      rad[0]       = net_short[0] + longwave 
-	- STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
-	* (air_temp+KELVIN) * (air_temp+KELVIN);
+      rad[0]       = net_short[0] + longwave; //ingjerd commented out the next lines. 24Wb, and also 6WB? longwave is already net longwave
+      //	- STEFAN_B * (air_temp+KELVIN) * (air_temp+KELVIN) 
+      //	* (air_temp+KELVIN) * (air_temp+KELVIN); 
+      //printf("solve_snow no snow, rad %f netshort %f longwave %f\n",rad[0],net_short[0],longwave);
     }
     snow->MELTING        = FALSE;
   }

@@ -1,5 +1,5 @@
 /* RCS Id String
- * $Id$
+ * $Id: vicNl.h,v 4.4.2.14 2007/04/23 19:30:26 vicadmin Exp $
  */
 /************************************************************************
   Modifications:
@@ -66,7 +66,7 @@ int    calc_soil_thermal_fluxes(int, double *, double *, double *, double *,
 #endif
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double calc_surf_energy_bal(int, int, int, int, int, int, int, int, int, 
-			    double, double, double, double, double, double, 
+			    double, double, double, double, double, double, double,
 			    double, double, double, double, double, double, 
 			    double, double, double, double, double, double *,
 			    double *, double *, double *, double *, float *,
@@ -74,7 +74,7 @@ double calc_surf_energy_bal(int, int, int, int, int, int, int, int, int,
 			    veg_var_struct *, energy_bal_struct *, 
 			    snow_data_struct *,
 			    layer_data_struct *, layer_data_struct *, 
-			    soil_con_struct *, dmy_struct *);
+			    soil_con_struct *, dmy_struct *,int,double);
 double calc_trans(double, double);
 double calc_veg_displacement(double);
 double calc_veg_height(double);
@@ -84,7 +84,8 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 		   veg_var_struct *, veg_var_struct *, char, int, int, 
 		   double, double *, double, double, double, double, 
 		   double, double,  double, double, double, double, 
-		   double *, double *, double *, double *, float *);
+		   double *, double *, double *, double *, float *,
+                   double, double, int);
 void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
@@ -237,6 +238,10 @@ FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
 double penman(double, double, double, double, double, double, double, 
+	      double, double, float, float, int);
+double penman_lake(double, double, double, double, double, double, double, 
+	      double, double, float, float);
+double penman_potevap(double, double, double, double, double, double, double, 
 	      double, double, float, float);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			   soil_con_struct *, double *, double *);
@@ -244,7 +249,7 @@ double priestley(double, double);
 void   put_data(dist_prcp_struct *, atmos_data_struct *, veg_con_struct *, 
 		out_data_file_struct *, out_data_struct *, save_data_struct *,
 		double *, double *, double, double *, char *, dmy_struct *,
-		int, int, int, int); 
+		int, int, int, int, double, double *, double *, double *,int); 
 
 double quick_penman(double, double, double, double, double, double, 
 		    double, double);
@@ -266,7 +271,7 @@ void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *, int);
 soil_con_struct read_soilparam_arc(FILE *, char *, int *, int *, int);
 veg_lib_struct *read_veglib(FILE *, int *);
-veg_con_struct *read_vegparam(FILE *, int, int);
+veg_con_struct *read_vegparam(FILE *, int, int, int);
 void   redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
 				 int, int, int, double, double, double, 
 				 double *);
@@ -319,9 +324,9 @@ double solve_snow(snow_data_struct *, layer_data_struct *,
 		  double, double, double, double, double, double, double, 
 		  double, double, double, double, double, double, double, 
 		  double, double, double, double, double, double *, double *,
-		  double *, double *, double *, double *, double *, double *,
-		  double *, double *, double *, double *, double *, double *, 
-		  double *, double *, double *, float *);
+                  double *, double *, double *, double *, double *, double *,
+		  double *, double, double *, double *, double *, double *, double *, 
+		  double *, double *, double *, float *,int);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
 #if QUICK_FS
@@ -344,18 +349,18 @@ void   surface_fluxes(char, int, int, int, int, int, int, int, int, int,
 		      double, double, double, double *, double *, double *, 
 		      double *, double *, double *, double *, double *, double *,
 		      double *, double *, double *, double *, double *, double *,
-		      double *, double *, float *, atmos_data_struct *, 
+		      double *, double *, double, float *, double,atmos_data_struct *, 
 		      soil_con_struct *, dmy_struct *, global_param_struct *,
 		      energy_bal_struct *, snow_data_struct *, 
 		      layer_data_struct *, layer_data_struct *, 
-		      veg_var_struct *, veg_var_struct *);
+		      veg_var_struct *, veg_var_struct *,int);
 double svp(double);
 double svp_slope(double);
 
 void transpiration(layer_data_struct *, int, int, double, double, double, 
 		   double, double, double, double, double, double, double, 
 		   double *, double *, double *, double *, double *, 
-		   double *, float *);
+		   double *, float *,int);
 void tridag(double *,double *,double *,double *,double *,int);
 
 void usage(char *);

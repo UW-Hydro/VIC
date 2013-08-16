@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: get_force_type.c,v 4.2.2.6 2007/09/18 16:19:20 vicadmin Exp $";
 
 void get_force_type(char   *cmdstr, 
 		    int     file_num,
@@ -304,6 +304,28 @@ void get_force_type(char   *cmdstr,
     param_set.FORCE_INDEX[file_num][(*field)] = type;
     param_set.TYPE[type].multiplier = 1;
     param_set.TYPE[type].SIGNED=FALSE;
+  }
+
+  /* type 23: runoff used for irrigation ingjerd jul 2007 */
+  else if(strcasecmp("RUNOFF_I",optstr)==0){
+    type = RUNOFF_I;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      param_set.TYPE[type].multiplier = 1;
+      param_set.TYPE[type].SIGNED=FALSE;
+    }
+  }
+
+  /* type 24: water withdrawals ingjerd jul 2007 */
+  else if(strcasecmp("WITH_I",optstr)==0){
+    type = WITH_I;
+    param_set.TYPE[type].SUPPLIED=file_num+1;
+    param_set.FORCE_INDEX[file_num][(*field)] = type;
+    if(BINARY) {
+      param_set.TYPE[type].multiplier = 1;
+      param_set.TYPE[type].SIGNED=FALSE;
+    }
   }
 
   /** Undefined variable type **/

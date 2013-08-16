@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: calc_water_energy_balance_errors.c,v 1.1.2.1 2006/09/26 19:49:17 vicadmin Exp $";
 
 void calc_water_balance_error(int    rec,
 			      double inflow,
@@ -42,6 +42,7 @@ void calc_water_balance_error(int    rec,
       fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4f\n",
 	      cum_error);
     }
+    if(error>0.0001) printf("calc_wb inflow=%f outflow=%f storage=%f last_storage=%f error=%f\n",inflow,outflow,storage,last_storage,inflow - outflow - (storage - last_storage));
     last_storage = storage;
   }
 

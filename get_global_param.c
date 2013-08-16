@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: get_global_param.c,v 4.2.2.27 2008/01/20 05:44:52 vicadmin Exp $";
 
 /********************************************************************/
 /*			GLOBAL VARIABLES                            */
@@ -146,6 +146,13 @@ global_param_struct get_global_param(filenames_struct      *names,
   strcpy(names->result_dir,   "MISSING");
   global.out_dt        = MISSING;
 
+  /**initial pkorr, skorr, ttgrad, tvgrad and delta_h**/
+  options.PKORR=1.;
+  options.SKORR=1.;
+  options.TTGRAD=0.;
+  options.TVGRAD=0.;
+  options.DELTA_H=0.;
+
   /** Read through global control file to find parameters **/
 
   fgets(cmdstr,MAXSTRING,gp);
@@ -265,6 +272,31 @@ global_param_struct get_global_param(filenames_struct      *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.CORRPREC=TRUE;
         else options.CORRPREC = FALSE;
+      }
+      else if(strcasecmp("IRRIGATION",optstr)==0) { //ingjerd dec2008
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.IRRIGATION=TRUE;
+        else options.IRRIGATION = FALSE;
+      }
+      else if(strcasecmp("IRR_FREE",optstr)==0) { //ingjerd dec2008
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.IRR_FREE=TRUE;
+        else options.IRR_FREE = FALSE;
+      }
+      else if(strcasecmp("PKORR",optstr)==0) { //ingjerd aug2009
+        sscanf(cmdstr,"%*s %f",&options.PKORR);
+      }
+      else if(strcasecmp("SKORR",optstr)==0) { //ingjerd aug2009
+        sscanf(cmdstr,"%*s %f",&options.SKORR);
+      }
+      else if(strcasecmp("TTGRAD",optstr)==0) { //ingjerd des2009
+        sscanf(cmdstr,"%*s %f",&options.TTGRAD);
+      }
+      else if(strcasecmp("TVGRAD",optstr)==0) { //ingjerd des2009
+        sscanf(cmdstr,"%*s %f",&options.TVGRAD);
+      }
+      else if(strcasecmp("DELTA_H",optstr)==0) { //ingjerd des2009
+        sscanf(cmdstr,"%*s %f",&options.DELTA_H);
       }
       else if(strcasecmp("PRT_SNOW_BAND",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

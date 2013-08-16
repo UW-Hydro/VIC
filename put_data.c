@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: put_data.c,v 4.2.2.9 2006/09/26 20:24:26 vicadmin Exp $";
 
 void put_data(dist_prcp_struct  *prcp,
 	      atmos_data_struct *atmos,
@@ -19,7 +19,12 @@ void put_data(dist_prcp_struct  *prcp,
               int                rec,
 	      int                dt,
 	      int                Nnodes,
-	      int                skipyear)
+	      int                skipyear,
+	      double             elevation,
+	      double            *Wcr,
+	      double            *Wpwp,
+	      double            *max_moist,
+	      int month)
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996
 
@@ -66,7 +71,10 @@ void put_data(dist_prcp_struct  *prcp,
   double                  Cv;
   double                  mu;
   double                  tmp_evap;
+  double                  tmp_potevap_lake; //ingjerd dec2008
+  double                  tmp_potevap; //ingjerd oct2009
   double                  tmp_moist;
+  double                  tmp_root_moist; //ingjerd dec2008
   double                  tmp_ice;
   double                  cv_baresoil;
   double                  cv_veg;
@@ -77,11 +85,18 @@ void put_data(dist_prcp_struct  *prcp,
   double                  outflow;
   double                  storage;
   double                  TreeAdjustFactor[MAX_BANDS];
+  double                  h; //ingjerd dec 2008
+  double dummy;
+  double dummy_moist;
+  double dummy_depth1;
+  double dummy_depth2;
+
   int                     v;
   int                     i;
   int                     dt_sec;
   int                     out_dt_sec;
   int                     out_step_ratio;
+  int veg_class; //ingjerd jul 2009
   static int              step_count;
 
   cell_data_struct     ***cell;
@@ -127,6 +142,8 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_DENSITY].data[0]   = atmos->density[NR];
   out_data[OUT_LONGWAVE].data[0]  = atmos->longwave[NR];
   out_data[OUT_PREC].data[0]      = atmos->out_prec;
+  out_data[OUT_ORIGPREC].data[0]   = atmos->orig_prec[NR];
+  //if( atmos->orig_prec[NR]>0) printf("put_data outorigprec %f orig_prec %f\n",  out_data[OUT_ORIGPREC].data[0],atmos->orig_prec[NR]);
   out_data[OUT_PRESSURE].data[0]  = atmos->pressure[NR];
   out_data[OUT_QAIR].data[0]      = EPS * atmos->vp[NR]/atmos->pressure[NR];
   out_data[OUT_RAINF].data[0]     = atmos->out_rain;
@@ -135,6 +152,11 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_SNOWF].data[0]     = atmos->out_snow;
   out_data[OUT_VP].data[0]        = atmos->vp[NR];
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
+  out_data[OUT_VPD].data[0]       = atmos->vpd[NR]; //ingjerd feb 2009
+  out_data[OUT_SLOPE].data[0]     = svp_slope(atmos->air_temp[NR])*1000.; //ingjerd feb 2009
+  h = 287/9.81 * ((atmos->air_temp[NR] + 273.15) + 0.5 * (double)elevation * LAPSE_PM);
+  out_data[OUT_GAMMA].data[0]     =  1628.6 * (PS_PM * exp(-(double)elevation/h))/
+      (2501000 - 2361 * atmos->air_temp[NR]); //ingjerd feb 2009
  
   /*************************************************
     Store Output for Precipitation Distribution Type
@@ -154,6 +176,14 @@ void put_data(dist_prcp_struct  *prcp,
       Cv = veg_con[veg].Cv;
     else
       Cv = (1.0 - veg_con[0].Cv_sum);
+
+    /*ingjerd. if irrigated vegetation exist, adjust fractions according to month.
+      do only if irrigation is taken into account. no irrigation: two classes with half the area. */
+    if(veg_con->irrveg==1 && options.IRRIGATION) { 
+      veg_class=veg_con[veg].veg_class;
+      if(veg==veg_con[0].vegetat_type_num-1) Cv=Cv*2*veg_lib[veg_class].irrpercent[month]; //irrigated fraction this month
+      if(veg==veg_con[0].vegetat_type_num-2) Cv=Cv*2*(1-veg_lib[veg_class].irrpercent[month]); //nonirrigated fraction this month
+    }
 
     if ( Cv > 0 ) {
 
@@ -194,6 +224,13 @@ void put_data(dist_prcp_struct  *prcp,
 	      tmp_evap += veg_var[dist][veg][band].canopyevap;
 	      out_data[OUT_EVAP_CANOP].data[0] += veg_var[dist][veg][band].canopyevap 
 		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+	      //** ingjerd record potevap, jun 2009 **/
+	      out_data[OUT_POTEVAP_LAKE].data[0] +=  veg_var[dist][veg][band].potevap_lake 
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	      //  printf("put_data NR=%d veg=%d potevap_lake=%f %f %f %f\n",NR,veg,out_data[OUT_POTEVAP_LAKE].data[0],veg_var[dist][veg][band].potevap,Cv,mu);
+	      out_data[OUT_POTEVAP].data[0] +=  veg_var[dist][veg][band].potevap 
+		* Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+	      //printf("put_data NR=%d veg=%d %f %f %f %f\n",NR,veg,out_data[OUT_POTEVAP].data[0],veg_var[dist][veg][band].potevap,Cv,mu);
 	    }
 	    out_data[OUT_EVAP].data[0] += tmp_evap * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
 
@@ -204,6 +241,32 @@ void put_data(dist_prcp_struct  *prcp,
 	    /** record baseflow **/
 	    out_data[OUT_BASEFLOW].data[0] += cell[dist][veg][band].baseflow 
 	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+
+	    /** record water extracted locally. ingjerd feb 2009, 
+                thereafter subtract this from runoff/baseflow. 
+		Works only for one snowband and distprec=FALSE! 
+                **/
+	    out_data[OUT_EXTRACT_WATER].data[0] += cell[dist][veg][band].extract_water 
+	      * Cv * mu * AreaFract[band] * TreeAdjustFactor[band]; 
+	    //if(rec==155) printf("put_data A rec=%d veg=%d Cv=%f prec=%f origprec=%f extract_water=%f runoff=%f base=%f\n",
+	    //     rec,veg,Cv,out_data[OUT_PREC].data[0],out_data[OUT_ORIGPREC].data[0],out_data[OUT_EXTRACT_WATER].data[0],out_data[OUT_RUNOFF].data[0],out_data[OUT_BASEFLOW].data[0]);
+	    if (veg == veg_con[0].vegetat_type_num-1 && out_data[OUT_EXTRACT_WATER].data[0]>0 ) { 
+	      if(out_data[OUT_RUNOFF].data[0]>=out_data[OUT_EXTRACT_WATER].data[0]) {
+		out_data[OUT_RUNOFF].data[0]-=out_data[OUT_EXTRACT_WATER].data[0];
+	      }
+	      else {
+		dummy=out_data[OUT_EXTRACT_WATER].data[0]-out_data[OUT_RUNOFF].data[0];
+		out_data[OUT_RUNOFF].data[0]=0.;
+		if(out_data[OUT_BASEFLOW].data[0]<dummy) 
+		  out_data[OUT_BASEFLOW].data[0]=0.;
+		else
+		  out_data[OUT_BASEFLOW].data[0]-=dummy;
+	      }
+	      if(out_data[OUT_BASEFLOW].data[0]<0) printf("put_data extractwater uffda! %f\n",out_data[OUT_BASEFLOW].data[0]);
+	    }
+	    //if(rec==155) printf("put_data B rec%d prec=%f extract=%f run=%f base=%f\n",
+	    //     rec,out_data[OUT_PREC].data[0],out_data[OUT_EXTRACT_WATER].data[0],out_data[OUT_RUNOFF].data[0],out_data[OUT_BASEFLOW].data[0]);		    
+	  
 
 	    /** record inflow **/
 	    if ( veg < veg_con[0].vegetat_type_num ) 
@@ -246,6 +309,10 @@ void put_data(dist_prcp_struct  *prcp,
 	    out_data[OUT_SOIL_WET].data[0] += cell[dist][veg][band].wetness
               * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 	    out_data[OUT_ROOTMOIST].data[0] += cell[dist][veg][band].rootmoist
+              * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
+
+            /* ingjerd added rootstress statement */
+	    out_data[OUT_ROOT_STRESS].data[0] += cell[dist][veg][band].rootstress
               * Cv * mu * AreaFract[band] * TreeAdjustFactor[band];
 
 	    /** record layer temperatures **/
@@ -317,7 +384,8 @@ void put_data(dist_prcp_struct  *prcp,
 				  * (rad_temp) * (rad_temp)
 				  * (rad_temp) * (rad_temp))
 				 * Cv * AreaFract[band] * TreeAdjustFactor[band]);
-	  
+	  //printf("put_data rad_temp=%f net=%f lw=%f\n",rad_temp,energy[veg][band].longwave,out_data[OUT_LONGWAVE].data[0]);
+
 	  /** record albedo **/
 	  out_data[OUT_ALBEDO].data[0]    += energy[veg][band].albedo
 	    * Cv * AreaFract[band] * TreeAdjustFactor[band];
@@ -511,6 +579,13 @@ void put_data(dist_prcp_struct  *prcp,
   out_data[OUT_SNOW_MELT].data[0] = out_data[OUT_SNOWF].data[0]-out_data[OUT_DELSWE].data[0]-out_data[OUT_SUB_SNOW].data[0]-out_data[OUT_SUB_CANOP].data[0];
   if (out_data[OUT_SNOW_MELT].data[0] < 0) out_data[OUT_SNOW_MELT].data[0] = 0;
 
+  //ingjerd added 
+  out_data[OUT_ESS_SNOW].data[0] = out_data[OUT_SUB_SNOW].data[0] + out_data[OUT_SUB_CANOP].data[0];  
+
+  out_data[OUT_SOIL_MALL].data[0] = 0;
+  for (index=0; index<options.Nlayer; index++)
+  out_data[OUT_SOIL_MALL].data[0] += out_data[OUT_SOIL_MOIST].data[index];
+
   // Energy terms
   out_data[OUT_REFREEZE].data[0] = (out_data[OUT_REFREEZE_ENERGY].data[0]/Lf)*dt_sec;
   out_data[OUT_MELT_ENERGY].data[0] = out_data[OUT_SNOW_MELT].data[0]*Lf/dt_sec;
@@ -527,8 +602,10 @@ void put_data(dist_prcp_struct  *prcp,
   /********************
     Check Water Balance 
     ********************/
-  inflow  = out_data[OUT_PREC].data[0];
-  outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0];
+  inflow  = out_data[OUT_PREC].data[0]; 
+  outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0] + out_data[OUT_EXTRACT_WATER].data[0]; //ingjerd added extract_water feb 2009
+  //outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0];
+  //if(rec==154 || rec==155 || rec==156) printf("put_data C rec=%d prec=%f extract=%f evap=%f run=%f base=%f in-out: %f snow:%f\n",rec,out_data[OUT_PREC].data[0],out_data[OUT_EXTRACT_WATER].data[0],out_data[OUT_EVAP].data[0],out_data[OUT_RUNOFF].data[0],out_data[OUT_BASEFLOW].data[0],out_data[OUT_PREC].data[0]-out_data[OUT_EXTRACT_WATER].data[0]-out_data[OUT_EVAP].data[0]-out_data[OUT_RUNOFF].data[0]-out_data[OUT_BASEFLOW].data[0],out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0]);
   storage = 0.;
   for(index=0;index<options.Nlayer;index++)
     if(options.MOISTFRACT)
@@ -537,6 +614,10 @@ void put_data(dist_prcp_struct  *prcp,
     else
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0];
+
+  //if(rec<35) 
+  //  printf("put_data D rec=%d storage=%f\n",rec,storage);
+
   calc_water_balance_error(rec,inflow,outflow,storage);
 
   /********************

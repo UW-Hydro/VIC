@@ -3,7 +3,7 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: func_surf_energy_bal.c,v 4.2.2.2 2004/06/23 18:37:22 tbohn Exp $";
 
 double func_surf_energy_bal(double Ts, va_list ap)
 /**********************************************************************
@@ -126,6 +126,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   char              *FIRST_SOLN;
   int                SNOWING;
   int                FS_ACTIVE;
+  int                flag_irr; /* ingjerd jan 2010 */
+  double             net_rad_lake; /* ingjerd dec 2008 */
+  double             ra_lake; /* ingjerd dec 2008 */
 
   double             error;
   double             ice;
@@ -216,7 +219,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
   FIRST_SOLN          = (char *)va_arg(ap, char *);
   SNOWING             = (int) va_arg(ap, int);
   FS_ACTIVE           = (int) va_arg(ap, int);
-
+  flag_irr            = (int) va_arg(ap, int); 
+  net_rad_lake        = (double) va_arg(ap, double); 
+  ra_lake             = (double) va_arg(ap, double); 
+ 
   TMean = Ts;
 
   if(options.GRND_FLUX) {
@@ -311,6 +317,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   }
 
+
+  //  printf("func_surf_energy_balance rad: %f short: %f long:%f %d\n",rad,shortwave,longwave,flag_irr);
+
   /*************************************************
     Compute Evapotranspiration if not snow covered
   *************************************************/
@@ -319,7 +328,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 		       veg_class, month, mu, Wdew, dt, rad, vpd, 
 		       (1.0 - albedo) * shortwave, Tair, ra, displacement, 
 		       roughness, ref_height, elevation, rainfall, depth, 
-		       Wcr, Wpwp, root);
+		       Wcr, Wpwp, root, net_rad_lake, ra_lake, flag_irr);
   else if(!SNOWING)
     Evap = arno_evap(layer_wet, layer_dry, rad, Tair, vpd, 
 		     (1.0 - albedo) * shortwave, D1, 

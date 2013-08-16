@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_atmos_data.c,v 4.2.2.4 2007/02/06 01:02:21 vicadmin Exp $";
 
 void read_atmos_data(FILE                 *infile,
 		     global_param_struct   global_param,
@@ -64,6 +64,7 @@ void read_atmos_data(FILE                 *infile,
   int             rec;
   int             skip_recs;
   int             i;
+  int dummy;
   int             endian;
   int             fields;
   int             Nfields;
@@ -170,12 +171,16 @@ void read_atmos_data(FILE                 *infile,
 	  }
 	  forcing_data[field_index[i]][rec] 
 	    = (double)ustmp / param_set.TYPE[field_index[i]].multiplier;
+	  //if(rec==5908) 
+	    //	    printf("read_forcingA %d dt=%d forcing=%f\n",rec,global_param.dt,forcing_data[PREC][rec]);
 	}
       }
 			
       rec++;
 			
     }
+    //    dummy=5908;
+    //    printf("read_forcing %d dt=%d forcing=%f\n",dummy,global_param.dt,forcing_data[PREC][dummy]);
   }
 
   /**************************

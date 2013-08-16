@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: output_list_utils.c,v 1.1.2.9 2007/04/23 19:30:26 vicadmin Exp $";
 
 out_data_struct *create_output_list() {
 /*************************************************************
@@ -122,6 +122,19 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SNOW_FLUX_BAND].varname,"OUT_SNOW_FLUX_BAND");             /* energy flux through snow pack [W/m2] */
   strcpy(out_data[OUT_SWE_BAND].varname,"OUT_SWE_BAND");                         /* snow water equivalent in snow pack [mm] */
 
+// Ingjerd added variables
+  strcpy(out_data[OUT_ORIGPREC].varname,"OUT_ORIGPREC");                        /* incoming original precipitation [mm]  */
+  strcpy(out_data[OUT_ESS_SNOW].varname,"OUT_ESS_SNOW");                         /* canopy sublimation+snow sublimation [mm] */
+  strcpy(out_data[OUT_ROOT_STRESS].varname,"OUT_ROOT_STRESS");                   /* root zone soil stress [fraction] */
+  strcpy(out_data[OUT_SOIL_MALL].varname,"OUT_SOIL_MALL");                       /* total soil moisture [mm] */
+  strcpy(out_data[OUT_EXTRACT_WATER].varname,"OUT_EXTRACT_WATER");                   /*  */
+  strcpy(out_data[OUT_VPD].varname,"OUT_VPD");                                   /*  */
+  strcpy(out_data[OUT_SLOPE].varname,"OUT_SLOPE");                               /*  */
+  strcpy(out_data[OUT_GAMMA].varname,"OUT_GAMMA");                               /*  */
+  strcpy(out_data[OUT_POTEVAP_LAKE].varname,"OUT_POTEVAP_LAKE");                    /*  */
+  strcpy(out_data[OUT_POTEVAP].varname,"OUT_POTEVAP");                               /*  */
+
+
   // Set number of elements - default is 1
   for (v=0; v<N_OUTVAR_TYPES; v++) {
     out_data[v].nelem = 1;
@@ -190,6 +203,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_ORIGPREC].aggtype = AGG_TYPE_SUM; //ingjerd jun 2009
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

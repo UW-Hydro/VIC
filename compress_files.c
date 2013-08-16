@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: compress_files.c,v 3.2 1999/05/17 23:12:47 vicadmin Exp $";
 
 void compress_files(char string[])
 /**********************************************************************

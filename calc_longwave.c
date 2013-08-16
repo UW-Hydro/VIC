@@ -3,7 +3,7 @@
 #include <math.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: calc_longwave.c,v 4.1.2.1 2004/05/06 00:37:51 tbohn Exp $";
 
 void calc_longwave(double *longwave, double tskc, double air_temp, double vp)
 {

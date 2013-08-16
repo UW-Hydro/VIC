@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: calc_surf_energy_bal.c,v 4.2.2.3 2004/09/29 03:38:48 vicadmin Exp $";
 
 double calc_surf_energy_bal(int                rec,
 			    int                iveg,
@@ -20,6 +20,7 @@ double calc_surf_energy_bal(int                rec,
 			    double             T0,
 			    double             shortwave,
 			    double             longwave,
+			    double             longwave_atmos,
 			    double             air_temp,
 			    double             Le,
 			    double             Ls,
@@ -44,7 +45,9 @@ double calc_surf_energy_bal(int                rec,
 			    layer_data_struct *layer_wet,
 			    layer_data_struct *layer_dry,
 			    soil_con_struct   *soil_con,
-			    dmy_struct        *dmy)
+			    dmy_struct        *dmy,
+			    int               flag_irr,
+			    double            ra_lake)
 /**************************************************************
   calc_surf_energy_bal.c  Greg O'Donnell and Keith Cherkauer  Sept 9 1997
   
@@ -98,6 +101,8 @@ double calc_surf_energy_bal(int                rec,
   double   Tsnow_surf;
   double   snow_cover_fraction;
   double   snow_flux;
+  double   net_rad_lake; /* ingjerd dec 2008 */
+  double   net_short_lake; /* ingjerd dec 2008 */
 
   int      VEG;
   double   Tsurf;
@@ -247,7 +252,7 @@ double calc_surf_energy_bal(int                rec,
 		       soil_con->ufwc_table_node, root, layer_wet, 
 		       layer_dry, veg_var_wet, veg_var_dry, VEG, 
 		       veg_class, dmy->month, Nnodes, 
-		       FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE);
+		       FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE,flag_irr);
 #else
     Tsurf = root_brent(T_upper, T_lower, ErrorString,
 		       func_surf_energy_bal, T2, Ts_old, T1_old, Tair, 
@@ -269,7 +274,7 @@ double calc_surf_energy_bal(int                rec,
 		       gamma, root, layer_wet, layer_dry, veg_var_wet, 
 		       veg_var_dry, VEG, veg_class, 
 		       dmy->month, Nnodes, FIRST_SOLN, snow->snow, 
-		       soil_con->FS_ACTIVE);
+		       soil_con->FS_ACTIVE,flag_irr);
 #endif
 
     if(Tsurf <= -9998) {  
@@ -305,7 +310,8 @@ double calc_surf_energy_bal(int                rec,
 					 veg_var_wet, veg_var_dry, VEG, 
 					 veg_class, 
 					 dmy->month, iveg, Nnodes, FIRST_SOLN,
-					 snow->snow, soil_con->FS_ACTIVE, ErrorString);
+					 snow->snow, soil_con->FS_ACTIVE,flag_irr,
+					 net_rad_lake,ra_lake,ErrorString);
 #else
       error = error_calc_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, 
 					 *aero_resist_used, atmos_density, shortwave, 
@@ -335,7 +341,8 @@ double calc_surf_energy_bal(int                rec,
 					 layer_dry, veg_var_wet, veg_var_dry, 
 					 VEG, veg_class, 
 					 dmy->month, iveg, Nnodes, FIRST_SOLN, 
-					 snow->snow, soil_con->FS_ACTIVE, ErrorString);
+					 snow->snow, soil_con->FS_ACTIVE,flag_irr,
+					 net_rad_lake,ra_lake,ErrorString);
 #endif
     }
   }
@@ -345,6 +352,14 @@ double calc_surf_energy_bal(int                rec,
     Tsurf = Tair;
 
   }
+
+  /* Compute net radiation over lake. Not included in actual energy balance calculations, so 
+     it should be ok to just include it here, for calculation of potential lake evaporation
+    in final solve_surf_energy_bal. ingjerd dec 2008. Assumes lake albedo=0.08.
+    shortwave here is atmospheric incoming_shortwave, and longwave is net longwave when 
+  using daily timesteps (except when using snow step)!!! (see init_atmos.c) */
+  net_short_lake = 0.92 * shortwave; 
+  net_rad_lake = net_short_lake + longwave_atmos;
 
   /**************************************************
     Recalculate Energy Balance Terms for Final Surface Temperature
@@ -374,7 +389,8 @@ double calc_surf_energy_bal(int                rec,
 				soil_con->ufwc_table_node, root, layer_wet, 
 				layer_dry, veg_var_wet, veg_var_dry, VEG, 
 				veg_class, dmy->month, Nnodes, 
-				FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE);
+				FIRST_SOLN, snow->snow, soil_con->FS_ACTIVE,flag_irr,
+				net_rad_lake,ra_lake);
 #else
   error = solve_surf_energy_bal(Tsurf, T2, Ts_old, T1_old, Tair, *aero_resist_used, 
 				atmos_density, shortwave, longwave, albedo, 
@@ -399,7 +415,8 @@ double calc_surf_energy_bal(int                rec,
 				root, layer_wet, layer_dry, veg_var_wet, 
 				veg_var_dry, VEG, 
 				veg_class, dmy->month, Nnodes, FIRST_SOLN, 
-				snow->snow, soil_con->FS_ACTIVE);
+				snow->snow, soil_con->FS_ACTIVE,flag_irr,net_rad_lake,
+				ra_lake);
 #endif
   
   energy->error = error;
@@ -450,11 +467,13 @@ double calc_surf_energy_bal(int                rec,
   }
    
   /** Store net longwave radiation **/
-  if(hour < 24)
+  if(dt<24) //ingjerd: was hour < 24, changed to if dt. should have been if full_energy? 
     energy->longwave = longwave 
       - STEFAN_B * (Tsurf+KELVIN) * (Tsurf+KELVIN) 
 		    * (Tsurf+KELVIN) * (Tsurf+KELVIN);
   else energy->longwave = longwave;
+
+  // printf("calc_surf_energy hour %d longwave %f %f\n",hour,longwave,energy->longwave);
 
   /** Store surface albedo **/
   energy->albedo = bare_albedo;
@@ -585,6 +604,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   char              *FIRST_SOLN;
   int                SNOWING;
   int                FS_ACTIVE;
+  int flag_irr;
+  double net_rad_lake;
+  double ra_lake;
   char              *ErrorString;
 
   int                i;
@@ -675,6 +697,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   FIRST_SOLN          = (char *) va_arg(ap, char *);
   SNOWING             = (int) va_arg(ap, int);
   FS_ACTIVE           = (int) va_arg(ap, int);
+  flag_irr            = (int) va_arg(ap, int);
+  net_rad_lake        = (double) va_arg(ap, double);
+  ra_lake             = (double) va_arg(ap, double);
   ErrorString         = (char *) va_arg(ap, char *);
 
   /* Print Variables */

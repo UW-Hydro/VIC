@@ -5,7 +5,7 @@
 
 #define MAXIT 1000
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: frozen_soil.c,v 4.2.2.3 2004/09/22 00:40:33 vicadmin Exp $";
 
 void setup_frozen_soil(soil_con_struct   *soil_con,
 		       layer_data_struct *layer_wet,

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: snow_utility.c,v 4.2.2.4 2004/05/06 19:57:35 tbohn Exp $";
 
 #define ETA0       (3.6e6)  /* viscosity of snow at T = 0C and density = 0
 			       used in calculation of true viscosity (Ns/m2) */

@@ -68,7 +68,7 @@ OBJS =  CalcAerodynamic.o SnowPackEnergyBalance.o StabilityCorrection.o \
 	make_veg_var.o massrelease.o modify_Ksat.o mtclim42_vic.o \
 	mtclim42_wrapper.o nrerror.o open_debug.o open_file.o \
 	open_state_file.o output_list_utils.o parse_output_info.o \
-	penman.o prepare_full_energy.o put_data.o \
+	penman.o penman_lake.o penman_potevap.o prepare_full_energy.o put_data.o \
 	read_arcinfo_ascii.o read_atmos_data.o read_forcing_data.o \
 	read_initial_model_state.o read_snowband.o \
 	read_soilparam.o read_soilparam_arc.o read_veglib.o read_vegparam.o \

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: free_dist_prcp.c,v 4.1.2.1 2007/04/24 19:38:20 vicadmin Exp $";
 
 void free_dist_prcp(dist_prcp_struct *prcp, 
 		    int               Nveg)

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: check_state_file.c,v 4.2.2.7 2006/10/31 01:09:15 vicadmin Exp $";
 
 FILE *check_state_file(char                *init_state_name,
 		       dmy_struct          *dmy,

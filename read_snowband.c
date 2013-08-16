@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_snowband.c,v 4.2.2.2 2005/11/22 00:02:47 vicadmin Exp $";
 
 void read_snowband(FILE    *snowband,
 		   int      gridcell,

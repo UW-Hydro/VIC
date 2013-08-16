@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: write_header.c,v 1.1.2.2 2007/10/11 22:44:10 vicadmin Exp $";
 
 void write_header(out_data_file_struct *out_data_files,
 		  out_data_struct      *out_data,

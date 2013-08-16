@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: runoff.c,v 4.1.2.11 2007/10/23 01:04:55 vicadmin Exp $";
 
 void runoff(layer_data_struct *layer_wet,
 	    layer_data_struct *layer_dry,

@@ -4,7 +4,7 @@
 #include <vicNl.h>
 #include <global.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: vicNl.c,v 4.2.2.15 2007/10/08 19:14:07 vicadmin Exp $";
 
 /** Main Program **/
 
@@ -97,6 +97,21 @@ int main(int argc, char *argv[])
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
+  int month,month_new,layer,veg_class,veg_class_tmp,iveg; //ingjerd dec 2008
+  double irrig_current;
+  double irrig_new;
+  double noirrig_current;
+  double noirrig_new;
+  double soilmoist_irr_current;
+  double soilmoist_noirr_current;
+  double soilmoist_noirr_new;
+  double soilmoist_irr_new;
+  double cv_tot;
+  double wdew_temp1,wdew_temp2;
+  double snow_temp1,snow_temp2;
+  double dummy1,dummy2;
+  int iha;
+
   dmy_struct              *dmy;
   atmos_data_struct       *atmos;
   veg_con_struct          *veg_con;
@@ -220,7 +235,7 @@ int main(int argc, char *argv[])
 
       /** Read Grid Cell Vegetation Parameters **/
       veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
-                              Nveg_type);
+                              Nveg_type,soil_con.NRoots); /* soil_con.Nroots added ingjerd dec 2008 */ 
       calc_root_fractions(veg_con, &soil_con);
 #if LINK_DEBUG
       if(debug.PRT_VEGE) write_vegparam(veg_con); 
@@ -345,6 +360,118 @@ int main(int argc, char *argv[])
 		   NEWCELL, LASTREC, init_STILL_STORM, init_DRY_TIME );
         NEWCELL=FALSE;
 	init_DRY_TIME = -999;
+
+	/* After time step simulation: adjust vegetation fractions and redistribute soil
+	   moisture in case of irrigation and last day of month. ingjerd dec 2008. 
+	   OBS! Works only for one snow band! Do only? if no snow on ground or in canopy.  */
+	if( dmy[rec+1].day == 1 && dmy[rec+1].hour == 0 && options.IRRIGATION 
+	    && veg_con[0].irrveg==1 && rec>1 && rec<global_param.nrecs-1) {
+	    iveg=veg_con[0].vegetat_type_num;
+	    veg_class_tmp = veg_con[iveg-1].veg_class;
+	    veg_class = veg_lib[veg_class_tmp].veg_class;
+	    cv_tot = veg_con[iveg-1].Cv+veg_con[iveg-2].Cv;
+	    month = dmy[rec].month-1; //month starts at 0
+	    month_new=month+1; if(month_new>11) month_new=0;
+	    irrig_current = veg_lib[veg_class_tmp].irrpercent[month]*cv_tot; //fraction irrigated
+	    irrig_new = veg_lib[veg_class_tmp].irrpercent[month_new]*cv_tot;
+	    noirrig_current = (1-veg_lib[veg_class_tmp].irrpercent[month])*cv_tot; //fraction non irrigated
+	    noirrig_new = (1-veg_lib[veg_class_tmp].irrpercent[month_new])*cv_tot;
+	    //printf("month=%d cv=%f %f irrig_cv%f noirrig_cv%f irrig_new_cv%f noirr_new_cv%f\n",
+	    //	   month,veg_con[iveg-1].Cv,veg_con[iveg-2].Cv,irrig_current,noirrig_current,irrig_new,noirrig_new);
+	    dummy1=dummy2=0.;
+	    for(layer = 0; layer < options.Nlayer; layer++) {
+		soilmoist_noirr_current = prcp.cell[WET][iveg-2][0].layer[layer].moist; 
+		soilmoist_irr_current = prcp.cell[WET][iveg-1][0].layer[layer].moist; 
+		dummy1+=soilmoist_noirr_current*noirrig_current+soilmoist_irr_current*irrig_current;
+		//if(rec==30 || rec==31) 
+		// printf("vicNl_irrig rec%d day%d layer%d soilmoist_noirr:%f soilmoist_irr%f totalmoist:%f totalold(dummy1)%f\n",rec,dmy[rec].day,layer,soilmoist_noirr_current,soilmoist_irr_current,soilmoist_noirr_current*noirrig_current+soilmoist_irr_current*irrig_current,dummy1);
+		
+		if(noirrig_new>noirrig_current) { // irrigated fraction decreases
+		    soilmoist_irr_new = soilmoist_irr_current;
+		    soilmoist_noirr_new = 
+			soilmoist_noirr_current + 
+			(soilmoist_irr_current - soilmoist_noirr_current) * (irrig_current-irrig_new) / (noirrig_new);
+//For some weird reason the next statement can't be commented out. If so, you get nan-values in some cells!
+		    if(rec==30) {
+			printf("vicNl decrease rec=%d layer=%d noirr_curr=%f irr_curr=%f noirr_new:%f irr_new:%f soilmoist_tot_current:%f soilmoist_new:%f\n",
+			  rec,layer,soilmoist_noirr_current,soilmoist_irr_current,soilmoist_noirr_new,soilmoist_irr_new,soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current,soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new);
+			//printf("vicNl_irrig decrease %d %f %f snow:%f snow_canopy:%f\n",rec,atmos[rec].air_temp[0],atmos[rec].prec[0],prcp.snow[iveg-1][0].swq,prcp.snow[iveg-1][0].snow_canopy);  
+			  }
+		}
+		else { // irrigated fraction increases or stays constant
+		    soilmoist_noirr_new = soilmoist_noirr_current;
+		    soilmoist_irr_new = 
+			soilmoist_irr_current + 
+			(soilmoist_noirr_current - soilmoist_irr_current) * (irrig_new-irrig_current) / (irrig_new);
+
+
+		    //     if(rec==30 || rec==31) {
+		    //printf("vicNl_irrig increase/constant %d %d %f %f %f %f soilmoist_current:%f soilmoist_adjusted:%f\n",
+		    //    rec,layer,soilmoist_noirr_current,soilmoist_irr_current,soilmoist_noirr_new,soilmoist_irr_new,soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current,soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new);
+		//   printf("vicNl_irrig increase/constant %d %d %f %f %f %f soilmoist_old:%f soilmoist_new:%f\n",
+		//      rec,layer,soilmoist_noirr_current,soilmoist_irr_current,soilmoist_noirr_new,soilmoist_irr_new,soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current,soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new);
+		//	}
+		}
+	   
+		if(soilmoist_noirr_new<0 || soilmoist_irr_new<0) printf("vicNl_irrig NEGATIVE!!! %d\n",rec);
+		if((soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current+0.0001)<=(soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new) || (soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current-0.0001)>=(soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new))  printf("Hei %d %f %f \n",rec,soilmoist_irr_current*irrig_current+soilmoist_noirr_current*noirrig_current,soilmoist_irr_new*irrig_new+soilmoist_noirr_new*noirrig_new); 
+
+	      prcp.cell[WET][iveg-2][0].layer[layer].moist=soilmoist_noirr_new; 
+	      prcp.cell[WET][iveg-1][0].layer[layer].moist=soilmoist_irr_new; 
+	      dummy2+=prcp.cell[WET][iveg-2][0].layer[layer].moist*noirrig_new+prcp.cell[WET][iveg-1][0].layer[layer].moist*irrig_new;
+	      if(fabs(dummy1-dummy2)>0.001) 
+	          printf("vicNl_irrig soilmoist difference layer%d totalold%f totalnew(dummy2)%f\n",layer,dummy1,dummy2);
+	
+	     } //er det mulig at du kan få negative verdier? 
+
+            //adjust Wdew and snow. assuming wdew on irrigated veg is always higher than on nonirr veg
+	    wdew_temp1=prcp.veg_var[WET][iveg-2][0].Wdew; //nonirrigated
+	    wdew_temp2=prcp.veg_var[WET][iveg-1][0].Wdew; //irrigated
+	    snow_temp1=prcp.snow[iveg-2][0].swq; //nonirrigated
+	    snow_temp2=prcp.snow[iveg-1][0].swq; //irrigated
+
+	    /*if(rec==30 || rec==31) {
+	     printf("vicNl_irrig wdew end of month: rec:%d month:%d day:%d wdew_noirrig:%f wdew_irrig:%f total wdew storage:%f current nonirrfraction: %f current irrfraction:%f\n",
+	    	 rec,dmy[rec].month,dmy[rec].day,wdew_temp1,wdew_temp2,wdew_temp1*noirrig_current+wdew_temp2*irrig_current,noirrig_current,irrig_current);
+	     printf("vicNl_irrig snow end of month: rec:%d month:%d day:%d snow_noirrig:%f snow_irrig:%f snowcanopy:%f %f\n",
+	     rec,dmy[rec].month,dmy[rec].day,snow_temp1,snow_temp2,prcp.snow[iveg-1][0].snow_canopy,prcp.snow[iveg-2][0].snow_canopy);
+	     }*/
+
+	     if(noirrig_new>noirrig_current) { // irrigated fraction decreases
+		 wdew_temp2 = prcp.veg_var[WET][iveg-1][0].Wdew; //irrig
+		 wdew_temp1 = wdew_temp1 + 
+		     (wdew_temp2 - wdew_temp1) * (noirrig_new - noirrig_current) / (noirrig_new);
+		 snow_temp2 = prcp.snow[iveg-1][0].swq; //irrig
+		 snow_temp1 = snow_temp1 + 
+		     (snow_temp2 - snow_temp1) * (noirrig_new - noirrig_current) / (noirrig_new);
+	     }
+	     else { //irrigated fraction increases
+		 wdew_temp1 = prcp.veg_var[WET][iveg-2][0].Wdew; //noirrig
+		 wdew_temp2 =  wdew_temp2 * irrig_current / irrig_new + 
+		     wdew_temp1*(irrig_new-irrig_current)/irrig_new;
+		 snow_temp1 = prcp.snow[iveg-2][0].swq; //noirrig
+		 snow_temp2 =  snow_temp2 * irrig_current / irrig_new + 
+		     snow_temp1*(irrig_new-irrig_current)/irrig_new;
+	     }
+	     prcp.veg_var[WET][iveg-2][0].Wdew=wdew_temp1;
+	     prcp.veg_var[WET][iveg-1][0].Wdew=wdew_temp2;
+	     prcp.snow[iveg-2][0].swq=snow_temp1;
+	     prcp.snow[iveg-1][0].swq=snow_temp2;
+
+	     //if(rec==30 || rec==31) 
+	     //printf("vicNl_irrig wdew start of next month: rec:%d month:%d day:%d wdew_nonirrig:%f wdew_irrig:%f total wdew storage:%f next month's nonirrfraction: %f next month's irrfraction:%f\n",
+	     //	 rec,dmy[rec].month,dmy[rec].day,wdew_temp1,wdew_temp2,wdew_temp1*noirrig_new+wdew_temp2*irrig_new,noirrig_new,irrig_new);
+
+	      //adjust fraction irr/noirr vegetation //
+	      //veg_con[iveg-2].Cv=noirrig_new;
+	      //veg_con[iveg-1].Cv=irrig_new;
+	      //printf("vicNl_irrig rec:%d month:%d cv1:%f cv2:%f \n",
+	      //	     rec,dmy[rec].month,veg_con[iveg-1].Cv,veg_con[iveg-2].Cv);
+
+	      //if(rec==30) 
+	      // printf("vicNl_irrig soilmoist next month: rec:%d month:%d day:%d %f \n",
+	      //	 rec,dmy[rec].month,dmy[rec].day,(prcp.cell[WET][iveg-2][0].layer[0].moist+prcp.cell[WET][iveg-2][0].layer[1].moist+prcp.cell[WET][iveg-2][0].layer[2].moist)*noirrig_new+(prcp.cell[WET][iveg-1][0].layer[0].moist+prcp.cell[WET][iveg-1][0].layer[1].moist+prcp.cell[WET][iveg-2][0].layer[2].moist)*irrig_new);	      
+	} // end adjust veg fractions if irrigation
 
       }	/* End Rec Loop */
 

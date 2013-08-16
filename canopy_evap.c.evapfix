@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: canopy_evap.c.evapfix,v 1.1.2.1 2006/10/18 22:59:15 vicadmin Exp $";
 
 double canopy_evap(layer_data_struct *layer_wet,
                    layer_data_struct *layer_dry,

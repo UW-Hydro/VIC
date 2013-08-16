@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_soilparam.c,v 4.2.2.15 2007/09/18 16:19:20 vicadmin Exp $";
 
 soil_con_struct read_soilparam(FILE *soilparam,
 			       int   RUN_MODEL)
@@ -97,7 +97,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
   double          Wpwp_FRACT[MAX_LAYERS];
   double          off_gmt;
   soil_con_struct temp; 
-
   if ( RUN_MODEL ) {
 
     fscanf(soilparam, "%d", &temp.gridcel);
@@ -237,12 +236,28 @@ soil_con_struct read_soilparam(FILE *soilparam,
     /* read layer residual moisture content */
     for(layer = 0; layer < options.Nlayer; layer++) 
       fscanf(soilparam, "%lf", &temp.resid_moist[layer]);
+    printf("resid_moist: %lf\n",temp.resid_moist[2]);
     
     /* read frozen soil active flag */
     fscanf(soilparam, "%d", &tempint);
     temp.FS_ACTIVE = (char)tempint;
-    
-    if (options.JULY_TAVG_SUPPLIED) {
+    printf("FS_ACTIVE: %d\n",tempint);
+
+   /* read fraction irrigated area, ingjerd dec2008 */
+    fscanf(soilparam, "%lf", &temp.irrigation_fraction);
+    //printf("irr: %f\n",temp.irrigation_fraction);
+
+    /* read ArnoType, ingjerd dec2008 * */
+    fscanf(soilparam, "%d", &temp.ArnoType);
+    if(temp.ArnoType == 1 ) options.BASEFLOW = NIJSSEN2001;
+    else options.BASEFLOW = ARNO;
+
+    /* read number of root zones in veg file for current cell. ingjerd dec 2008 */
+    fscanf(soilparam, "%d", &temp.NRoots);
+    options.ROOT_ZONES = temp.NRoots;
+    //printf("root_zones: %d\n",options.ROOT_ZONES);
+
+   if (options.JULY_TAVG_SUPPLIED) {
       /* read cell average July air temperature */
       fscanf(soilparam, "%lf", &temp.avgJulyAirTemp);
     }
@@ -297,10 +312,16 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }
       if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-        sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-                temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+      sprintf(ErrStr,"wp: %f maxmoist: %f depth: %f porosity: %f Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %i.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
+                 Wpwp_FRACT[layer],temp.max_moist[layer],temp.depth[layer],temp.porosity[layer],temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
         nrerror(ErrStr);
       }
+      temp.Wcr_orig[layer]=temp.Wcr[layer]; //ingjerd jan 2010
+      temp.Wpwp_orig[layer]=temp.Wpwp[layer]; //ingjerd jan 2010
+      //temp.Wcr_irrig[layer]=0.557*temp.max_moist[layer]; //ingjerd jan 2010
+      //temp.Wpwp_irrig[layer]=0.436*temp.max_moist[layer]; //ingjerd jan 2010
+      temp.Wcr_irrig[layer]= temp.Wcr_orig[layer]; //ingjerd jan 2010
+      temp.Wpwp_irrig[layer]= temp.Wpwp_orig[layer]; //ingjerd jan 2010
     }
 
 
@@ -310,6 +331,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       parameters Ds, Dsmax, Ws, and c
     *************************************************/
     if(options.BASEFLOW == NIJSSEN2001) {
+      //fprintf(stderr,"baseflow=nijssen %d bi=%f ds=%f dsmax=%f ws=%f\n",options.BASEFLOW,temp.b_infilt,temp.Ds,temp.Dsmax,temp.Ws);
       layer = options.Nlayer-1;
       temp.Dsmax = temp.Dsmax *
         pow((double)(1./(temp.max_moist[layer]-temp.Ws)), -temp.c) +
@@ -317,6 +339,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
       temp.Ws = temp.Ws/temp.max_moist[layer];
     }
+    //fprintf(stderr,"bi=%f ds=%f dsmax=%f ws=%f\n",temp.b_infilt,temp.Ds,temp.Dsmax,temp.Ws);
 
 #endif /* !OUTPUT_FORCE */
 

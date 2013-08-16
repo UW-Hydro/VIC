@@ -2,7 +2,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: calc_veg_params.c,v 3.1 1999/02/16 18:02:07 vicadmin Exp $";
 
 double calc_veg_displacement(double height) {
 /**********************************************************************

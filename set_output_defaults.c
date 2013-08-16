@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: set_output_defaults.c,v 1.1.2.2 2006/09/26 20:24:27 vicadmin Exp $";
 
 out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 /*************************************************************

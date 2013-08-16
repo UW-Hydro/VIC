@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: check_files.c,v 4.1.2.5 2008/01/20 05:44:52 vicadmin Exp $";
 
 void check_files(filep_struct     *filep, 
 		 filenames_struct *fnames)

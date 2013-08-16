@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_forcing_data.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 double **read_forcing_data(FILE                **infile,
 			   global_param_struct   global_param)
@@ -23,6 +23,7 @@ double **read_forcing_data(FILE                **infile,
 
   char                 errorstr[MAXSTRING];
   int                  i;
+  int dummy;
   double             **forcing_data;
 
   /** Allocate data arrays for input forcing data **/
@@ -41,6 +42,11 @@ double **read_forcing_data(FILE                **infile,
     sprintf(errorstr,"ERROR: File time step must be defined for at least the first forcing file (FILE_DT).\n");
     vicerror(errorstr);
   }
+
+  //  dummy=5908;
+  //  printf("read_forcing %d forcing=%f\n",dummy,forcing_data[PREC][dummy]);
+
+
 
   /** Read Second Forcing Data File **/
   if(param_set.FORCE_DT[1] > 0) {

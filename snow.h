@@ -7,7 +7,7 @@
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 16:03:11
  * LAST-MOD: Tue Jul 14 10:38:32 1998 by Keith Aric Cherkauer <cherkaue@u.washington.edu>
- * $Id$
+ * $Id: snow.h,v 3.1.2.1 2004/05/06 00:37:56 tbohn Exp $
  * DESCRIPTION:  header file for DHSVM snow routines
  * DESCRIP-END.
  * FUNCTIONS:    

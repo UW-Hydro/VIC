@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: initialize_global.c,v 4.1.2.11 2007/09/18 16:19:20 vicadmin Exp $";
 
 void initialize_global() {
 /*********************************************************************
@@ -67,6 +67,8 @@ void initialize_global() {
   param_set.WIND         = FALSE;
   param_set.WIND_E       = FALSE;
   param_set.WIND_N       = FALSE;
+  param_set.RUNOFF_I     = FALSE; ingjerd dec 2008
+  param_set.WITH_I       = FALSE; ingjerd dec 2008
 
   Modifications:
     06-03-2003 modified to handle both ASCII and BINARY state files.  KAC

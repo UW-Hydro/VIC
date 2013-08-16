@@ -3,7 +3,7 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: estimate_T1.c,v 4.2 2000/05/16 21:57:54 vicadmin Exp $";
 
 double estimate_T1(double Ts, 
 		   double T1_old,

@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_arcinfo_ascii.c,v 4.1.2.1 2005/11/22 00:02:47 vicadmin Exp $";
 
 double read_arcinfo_value(char *filename,
 			  double lat,

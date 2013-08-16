@@ -1,5 +1,5 @@
 /* RCS Id String
- * $Id$
+ * $Id: vicNl_def.h,v 4.3.2.20 2007/02/06 01:02:21 vicadmin Exp $
  */
 /********************************************************************
   Modifications:
@@ -45,7 +45,7 @@
 #define BINARY 2		/* met file format flag */
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 23
+#define N_FORCING_TYPES 25 /* ingjerd dec 2008 */
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
 #define CRAINF     2 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
@@ -69,6 +69,9 @@
 #define WIND_E    20 /* zonal component of wind speed [m/s] */
 #define WIND_N    21 /* meridional component of wind speed [m/s] */
 #define SKIP      22 /* place holder for unused data columns */
+#define RUNOFF_I  23 /* place holder for runoff for irrigation. ingjerd dec 2008 */
+#define WITH_I    24 /* place holder for water withdrawals for irrigation. ingjerd dec 2008 */
+
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 100
@@ -158,6 +161,19 @@
 #define OUT_SNOW_FLUX_BAND       77  /* energy flux through snow pack [W/m2] */
 #define OUT_SWE_BAND             78  /* snow water equivalent in snow pack [mm] */
 
+/* Ingjerd's added output variables */
+#define OUT_ESS_SNOW         79  /* OUT_SUB_CANOP + OUT_SUB_SNOW [mm] */
+#define OUT_ROOT_STRESS      80  /* Root zone soil stress (fraction) */
+#define OUT_SOIL_MALL        81  /* Total soil moisture (including ice) [mm] */
+#define OUT_ORIGPREC         82  /* Original precipitation (i.e. before irrigation) [mm] */
+#define OUT_EXTRACT_WATER    83  /* Water extracted from runoff originating in 
+                                    same cell [mm] at same time step */
+#define OUT_VPD              84
+#define OUT_SLOPE            85
+#define OUT_GAMMA            86
+#define OUT_POTEVAP_LAKE     87
+#define OUT_POTEVAP          88
+
 /***** Time Constants *****/
 #define DAYS_PER_YEAR 365.
 #define HOURSPERDAY   24        /* number of hours per day */
@@ -206,7 +222,7 @@
 					work (m) */
 #define STORM_THRES  0.001      /* thresehold at which a new storm is 
 				   decalred */
-#define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
+#define SNOW_DT        5.0	/* Used to bracket snow surface temperatures
 				   while computing the snow surface energy 
 				   balance (C) */
 #define SURF_DT       1.0	/* Used to bracket soil surface temperatures 
@@ -333,6 +349,19 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+
+  // irrigation options, ingjerd dec2008
+  char   IRRIGATION;     /* TRUE = irrigation mode. ingjerd dec 2008 */
+  char   IRR_FREE;       /* TRUE = 'free' irrigation (water assumed avail.) ingjerd dec 2008 */
+
+  // calibration options, ingjerd aug2009
+  float PKORR;
+  float SKORR; 
+  float TTGRAD;
+  float TVGRAD;
+
+  // deltaH, for TTGRAD and TVGRAD, ingjerd des2009
+  float DELTA_H;
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
@@ -468,6 +497,18 @@ typedef struct {
 					 soil (mm) */
   double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
 					 wilting point (mm) */
+  double   Wcr_orig[MAX_LAYERS];      /* critical moisture level for soil 
+					 layer, evaporation is no longer 
+					 affected moisture stress in the 
+					 soil (mm) */
+  double   Wpwp_orig[MAX_LAYERS];     /* soil moisture content at permanent 
+					 wilting point (mm) */
+  double   Wcr_irrig[MAX_LAYERS];     /* critical moisture level for soil 
+					 layer, evaporation is no longer 
+					 affected moisture stress in the 
+					 soil (mm) */
+  double   Wpwp_irrig[MAX_LAYERS];    /* soil moisture content at permanent 
+					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
@@ -488,6 +529,7 @@ typedef struct {
   double   expt_node[MAX_NODES];      /* pore-size distribution per node */
   double   gamma[MAX_NODES];          /* thermal solution constant */
   double   init_moist[MAX_LAYERS];    /* initial layer moisture level (mm) */
+  double   irrigation_fraction;       /* fraction irrigated area in cell. ingjerd dec 2008 */
   double   max_infil;                 /* maximum infiltration rate */
   double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per 
 					 layer */
@@ -521,6 +563,11 @@ typedef struct {
   float  **layer_node_fract;          /* fraction of all nodes within each 
 					 layer */
   int      gridcel;                   /* grid cell number */
+  int      ArnoType;                  /* 0: ARNO_PARAMS = FALSE, 1: ARNO_PARAMS = TRUE, ingjerd dec 2008 (allowed to vary 
+					 from cell to cell, to take into account that you may want to combine soil files 
+                                         from various calibrations) */
+  int      NRoots;                    /* Number of root zones in veg file (allowed to vary 
+					 from cell to cell, ingjerd dec 2008 */
 } soil_con_struct;
 
 /*******************************************************************
@@ -535,6 +582,7 @@ typedef struct {
   float  *zone_fract;       /* fraction of roots within root zone */
   int     veg_class;        /* vegetation class reference number */
   int     vegetat_type_num; /* number of vegetation types in the grid cell */
+  int     irrveg;           /* irrigation vegtype exist in cell. ingjerd dec 2008 */
 } veg_con_struct;
 
 /******************************************************************
@@ -563,6 +611,8 @@ typedef struct {
 			      will be no transpiration (ranges from 
 			      ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
   int    veg_class;        /* vegetation class reference number */
+  float irrpercent[12];    /* percent of total area equipped for irrigation 
+			      that is irrigated this month. ingjerd dec 2008 */ 
 } veg_lib_struct;
 
 /***************************************************************************
@@ -581,6 +631,8 @@ typedef struct {
 			   longwave for water balance model) */
   double out_prec;      /* Total precipitation for time step - accounts
 			   for corrected precipitation totals */
+  double out_orig_prec; /* total precipiation for time step before irrigation water added. ingjerd dec 2008 */
+  double *orig_prec; /* precipitation before irrigation water added. ingjerd dec 2008 */
   double out_rain;      /* Rainfall for time step (mm) */
   double out_snow;      /* Snowfall for time step (mm) */
   double *prec;      /* average precipitation in grid cell (mm) */
@@ -589,6 +641,8 @@ typedef struct {
   double *vp;        /* atmospheric vapor pressure (kPa) */
   double *vpd;       /* atmospheric vapor pressure deficit (kPa) */
   double *wind;      /* wind speed (m/s) */
+  double runirr[25];    /* local runoff available for irrigation purposes (mm) ingjerd dec 2008 */
+  double withirr[25];   /* water available from more distant locations (for irrigation purposes) (mm) ingjerd dec 2008 */
 } atmos_data_struct;
 
 /*************************************************************************
@@ -647,6 +701,11 @@ typedef struct {
   double wetness;                      /* average of
                                           (layer.moist - Wpwp)/(porosity*depth - Wpwp)
                                           over all layers (fraction) */
+  double rootstress;                   /* ingjerd - equals 
+                                          (layer.rootmoist - Wpwp)/(Wcr - Wpwp)
+                                          over all root zone layers (fraction) */
+  double extract_water;                /* ingjerd - is water extracted locally 
+					  for irrigation purposes */  
 } cell_data_struct;
 
 /***********************************************************************
@@ -697,6 +756,8 @@ typedef struct {
   ***********************************************************************/
 typedef struct {
   double canopyevap;		/* evaporation from canopy (mm/TS) */
+  double potevap;              /* potential evapotranspiration ingjerd oct 2009 */ 
+  double potevap_lake;          /* potential evapotranspiration, open water, ingjerd dec 2008 */ 
   double throughfall;		/* water that reaches the ground through 
                                    the canopy (mm/TS) */
   double Wdew;			/* dew trapped on vegetation (mm) */

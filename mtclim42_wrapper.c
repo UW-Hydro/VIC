@@ -26,7 +26,7 @@
 #include <vicNl.h>
 #include <mtclim42_vic.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: mtclim42_wrapper.c,v 4.1.2.1 2004/05/06 00:37:54 tbohn Exp $";
 /******************************************************************************/
 /*			TYPE DEFINITIONS, GLOBALS, ETC.                       */
 /******************************************************************************/

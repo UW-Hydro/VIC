@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: open_file.c,v 3.2.2.2 2006/11/15 19:37:25 vicadmin Exp $";
 
 FILE *open_file(char string[],char type[])
 

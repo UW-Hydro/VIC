@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: initialize_atmos.c,v 4.4.2.13 2008/01/20 05:44:52 vicadmin Exp $";
 
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
@@ -109,9 +109,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int     band;
   int     day;
   int     hour;
+  int hour2;
   int     rec;
   int     step;
   int     idx;
+  int dummy;
+float dummysum=0;
   int    *tmaxhour;
   int    *tminhour;
   double  deltat;
@@ -120,11 +123,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double  svp_tair;
   double *hourlyrad;
   double *prec;
+  double *orig_prec;
   double *tmax;
   double *tmin;
   double *tair;
   double *tskc;
   double *vp;
+  double *runirr; /* runoff, irrigation purposes, ingjerd dec 2008 */
+  double *withirr; /* water withdrawals, irrigation purposes, ingjerd dec 2008 */
   double  min, max;
   double  rainonly;
   int     Ndays;
@@ -132,6 +138,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double  sum;
   double **forcing_data;
   int     type;
+  double corr_factor;
+  double forcing_sum;
 
   /* compute number of simulation days */
   Ndays = ( global_param.nrecs * global_param.dt) / 24;
@@ -158,6 +166,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   hourlyrad  = (double *) calloc(Ndays*24, sizeof(double));
   prec       = (double *) calloc(Ndays*24, sizeof(double));
+  orig_prec  = (double *) calloc(Ndays*24, sizeof(double));
   tair       = (double *) calloc(Ndays*24, sizeof(double));
   tmax       = (double *) calloc(Ndays, sizeof(double));
   tmaxhour   = (int *)    calloc(Ndays, sizeof(double));
@@ -165,6 +174,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   tminhour   = (int *)    calloc(Ndays, sizeof(double));
   tskc       = (double *) calloc(Ndays*24, sizeof(double));
   vp         = (double *) calloc(Ndays*24, sizeof(double));
+  runirr     = (double *) calloc(Ndays*24, sizeof(double)); /* ingjerd dec 2008 */
+  withirr    = (double *) calloc(Ndays*24, sizeof(double)); /* ingjerd dec 2008 */
   
   if (hourlyrad == NULL || prec == NULL || tair == NULL || tmax == NULL ||
       tmaxhour == NULL ||  tmin == NULL || tminhour == NULL || tskc == NULL ||
@@ -177,6 +188,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   forcing_data = read_forcing_data(infile, global_param);
  
+  dummy=0;
+  //printf("initialize_atmosA %d %d %d %d forcing=%f %f\n",dmy[dummy].year,dmy[dummy].month,dmy[dummy].day,dummy,forcing_data[PREC][dummy],forcing_data[SHORTWAVE][dummy]);
+
   fprintf(stderr,"\nRead meteorological forcing file\n");
   
   /*************************************************
@@ -224,75 +238,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /*************************************************
-    Precipitation
-  *************************************************/
-
-  /*************************************************
-    If provided, translate rainfall and snowfall
-    into total precipitation
-    NOTE: this overwrites any PREC data that was supplied
-  *************************************************/
-
-  if(param_set.TYPE[RAINF].SUPPLIED && param_set.TYPE[SNOWF].SUPPLIED) {
-    /* rainfall and snowfall supplied */
-    if (forcing_data[PREC] == NULL) {
-      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
-    }
-    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
-      forcing_data[PREC][idx] = forcing_data[RAINF][idx] + forcing_data[SNOWF][idx];
-    }
-    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[RAINF].SUPPLIED;
-  }
-  else if(param_set.TYPE[CRAINF].SUPPLIED && param_set.TYPE[LSRAINF].SUPPLIED
-    && param_set.TYPE[CSNOWF].SUPPLIED && param_set.TYPE[LSSNOWF].SUPPLIED) {
-    /* convective and large-scale rainfall and snowfall supplied */
-    if (forcing_data[PREC] == NULL) {
-      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
-    }
-    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
-      forcing_data[PREC][idx] = forcing_data[CRAINF][idx] + forcing_data[LSRAINF][idx]
-                               + forcing_data[CSNOWF][idx] + forcing_data[LSSNOWF][idx];
-    }
-    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[LSRAINF].SUPPLIED;
-  }
-
-  /*************************************************
-    Create sub-daily precipitation if not provided
-  *************************************************/
-
-  if(param_set.FORCE_DT[param_set.TYPE[PREC].SUPPLIED-1] == 24) {
-    /* daily prec provided */
-    rec = 0;
-    for (day = 0; day < Ndays; day++) {
-      for (i = 0; i < stepspday; i++) {
-	sum = 0;
-	for (j = 0; j < NF; j++) {
-	  atmos[rec].prec[j] = forcing_data[PREC][day] 
-	    / (float)(NF * stepspday);
-	  sum += atmos[rec].prec[j];
-	}
-	if(NF>1) atmos[rec].prec[NR] = sum;
-	if(global_param.dt == 24) atmos[rec].prec[NR] = forcing_data[PREC][day];
-	rec++;
-      }
-    }
-  }
-  else {
-    /* sub-daily prec provided */
-    idx = 0;
-    for(rec = 0; rec < global_param.nrecs; rec++) {
-      sum = 0;
-      for(i = 0; i < NF; i++) {
-	atmos[rec].prec[i] = forcing_data[PREC][idx];
-	sum += atmos[rec].prec[i];
-	idx++;
-      }
-      if(NF>1) atmos[rec].prec[NR] = sum;
-    }
-  }
-
-  /*************************************************
-    Air Temperature
+    Air Temperature ingjerd dec 2009: swithced order dealing of airtemp and precip
   *************************************************/
 
   /************************************************
@@ -376,6 +322,105 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
 
+
+
+  /*************************************************
+    Precipitation
+  *************************************************/
+
+  /*************************************************
+    If provided, translate rainfall and snowfall
+    into total precipitation
+    NOTE: this overwrites any PREC data that was supplied
+  *************************************************/
+  if(param_set.TYPE[RAINF].SUPPLIED && param_set.TYPE[SNOWF].SUPPLIED) {
+    /* rainfall and snowfall supplied */
+    if (forcing_data[PREC] == NULL) {
+      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) { //ingjerd aug 2009. See below for supplied = prec
+      forcing_data[PREC][idx] = forcing_data[RAINF][idx]*options.PKORR + forcing_data[SNOWF][idx]*options.PKORR*options.SKORR;
+    }
+    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[RAINF].SUPPLIED;
+  }
+  else if(param_set.TYPE[CRAINF].SUPPLIED && param_set.TYPE[LSRAINF].SUPPLIED
+    && param_set.TYPE[CSNOWF].SUPPLIED && param_set.TYPE[LSSNOWF].SUPPLIED) {
+    /* convective and large-scale rainfall and snowfall supplied */
+    if (forcing_data[PREC] == NULL) {
+      forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),sizeof(double));
+    }
+    for (idx=0; idx<(global_param.nrecs*NF); idx++) {
+      forcing_data[PREC][idx] = forcing_data[CRAINF][idx] + forcing_data[LSRAINF][idx]
+                               + forcing_data[CSNOWF][idx] + forcing_data[LSSNOWF][idx];
+    }
+    param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[LSRAINF].SUPPLIED;
+  }
+
+  /*************************************************
+    Create sub-daily precipitation if not provided
+  *************************************************/
+
+  if(param_set.FORCE_DT[param_set.TYPE[PREC].SUPPLIED-1] == 24) {
+    /* daily prec provided */
+    rec = 0;
+    for (day = 0; day < Ndays; day++) {
+      for (i = 0; i < stepspday; i++) {
+	sum = 0;
+	for (j = 0; j < NF; j++) {
+	  if(atmos[rec].air_temp[j]>0) 
+	    atmos[rec].prec[j] = forcing_data[PREC][day]*options.PKORR 
+	      / (float)(NF * stepspday);
+	  else
+	    atmos[rec].prec[j] = forcing_data[PREC][day]*options.PKORR*options.SKORR 
+	      / (float)(NF * stepspday);
+	  atmos[rec].orig_prec[j] = forcing_data[PREC][day] 
+	    / (float)(NF * stepspday);
+	  sum += atmos[rec].prec[j];
+	}
+	if(NF>1) {
+	  atmos[rec].prec[NR] = sum;
+	  atmos[rec].orig_prec[NR] = sum; //ingjerd jun 2009
+	}
+	if(global_param.dt == 24) {
+	  atmos[rec].prec[NR] = forcing_data[PREC][day];
+	  atmos[rec].orig_prec[NR] = forcing_data[PREC][day]; //ingjerd jun 2009
+	  //if(rec<400) printf("initialize_atmos %f %f\n",atmos[rec].prec[NR],atmos[rec].orig_prec[NR]);
+	}
+	rec++;
+      }
+    }
+  }
+
+ /* pkorr and skorr if rainf and snowf not supplied separately */
+  /*  if (param_set.TYPE[PREC].SUPPLIED && !param_set.TYPE[SNOWF].SUPPLIED) { //ingjerd dec 2009
+    for (idx=0; idx<(global_param.nrecs); idx++) {
+      if((tmin[idx/stepspday]/2. + tmax[idx/stepspday]/2.) > 0.) 
+      forcing_data[PREC][idx] = forcing_data[PREC][idx]*options.PKORR;
+      else
+	forcing_data[PREC][idx] = forcing_data[PREC][idx]*options.PKORR*options.SKORR;
+    }
+    } */
+
+  else {
+    /* sub-daily prec provided */
+    idx = 0;
+    for(rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for(i = 0; i < NF; i++) {
+	atmos[rec].prec[i] = forcing_data[PREC][idx];
+	atmos[rec].orig_prec[i] =  forcing_data[PREC][idx];
+	//if(rec<400) printf("initialize_atmos %f %f\n",atmos[rec].prec[i],atmos[rec].orig_prec[i]);
+	sum += atmos[rec].prec[i];
+	idx++;
+      }
+      if(NF>1) {
+	atmos[rec].prec[NR] = sum;
+	atmos[rec].orig_prec[NR] = sum; //ingjerd jun 2009
+      }
+    }
+  }
+
+
   /*************************************************
     Pressures
   *************************************************/
@@ -393,6 +438,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
     for (idx=0; idx<(global_param.nrecs*NF); idx++) {
       forcing_data[VP][idx] = forcing_data[QAIR][idx] * forcing_data[PRESSURE][idx] / 0.622;
+      //if(idx<10) printf("initial_atmos qair supplied idx = %d NF = %d vp = %f\n",idx,NF,forcing_data[VP][idx]);
     }
     param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
   }
@@ -425,7 +471,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
     requires prec, tmax, and tmin
   **************************************************/
-  if(!(param_set.TYPE[VP].SUPPLIED && param_set.TYPE[SHORTWAVE].SUPPLIED)) {
+  if(!(param_set.TYPE[VP].SUPPLIED && param_set.TYPE[SHORTWAVE].SUPPLIED) || global_param.dt==24) { //ingjerd added dt=24. need to calc sub-daily shortwave and vp even if shortwave is provided if dt=24
     /** do not use mtclim estimates if vapor pressure and shortwave
 	radiation are supplied **/
     for (i = 0; i < Ndays; i++)
@@ -439,39 +485,90 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /***********************************************************
-    reaggregate the hourly shortwave to the larger timesteps 
+    reaggregate the hourly shortwave to the larger timesteps for subdaily calculations 
   ***********************************************************/
-
-  if(!param_set.TYPE[SHORTWAVE].SUPPLIED) {
-    for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
-      for (i = 0; i < NF; i++) {
-	atmos[rec].shortwave[i] = 0;
-	for (j = 0; j < options.SNOW_STEP; j++, hour++) {
-	  atmos[rec].shortwave[i] += hourlyrad[hour];
-	}
-	atmos[rec].shortwave[i] /= options.SNOW_STEP;
-      }
-      if (NF > 1) {
-	atmos[rec].shortwave[NR] = 0;
+  if(global_param.dt < 24 ) { // ingjerd added this if statement
+    if(!param_set.TYPE[SHORTWAVE].SUPPLIED) {
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
 	for (i = 0; i < NF; i++) {
-	  atmos[rec].shortwave[NR] += atmos[rec].shortwave[i];
+	  atmos[rec].shortwave[i] = 0;
+	  for (j = 0; j < options.SNOW_STEP; j++, hour++) {
+	    atmos[rec].shortwave[i] += hourlyrad[hour];
+	  }
+	  atmos[rec].shortwave[i] /= options.SNOW_STEP;
 	}
-	atmos[rec].shortwave[NR] /= NF;
+	if (NF > 1) {
+	  atmos[rec].shortwave[NR] = 0;
+	  for (i = 0; i < NF; i++) {
+	    atmos[rec].shortwave[NR] += atmos[rec].shortwave[i];
+	  }
+	  atmos[rec].shortwave[NR] /= NF;
+	}
+      }
+    }
+    else {
+      /* sub-daily shortwave provided, so it will be used instead
+	 of the mtclim estimates */
+      idx = 0;
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
+	sum = 0;
+	for (i = 0; i < NF; i++, step++) {
+	  atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
+	  sum += atmos[rec].shortwave[i];
+	  idx++;
+	}
+	if (NF > 1) atmos[rec].shortwave[NR] = sum / (float)NF;
       }
     }
   }
-  else {
-    /* sub-daily shortwave provided, so it will be used instead
-       of the mtclim estimates */
-    idx = 0;
-    for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
-      sum = 0;
-      for (i = 0; i < NF; i++, step++) {
-	atmos[rec].shortwave[i] = ( forcing_data[SHORTWAVE][idx] < 0 ) ? 0 : forcing_data[SHORTWAVE][idx];
-	sum += atmos[rec].shortwave[i];
+
+  if(global_param.dt == 24 ) { // ingjerd added the entire paragraph
+    if(!param_set.TYPE[SHORTWAVE].SUPPLIED) {
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
+	for (i = 0; i < NF; i++) {
+	  atmos[rec].shortwave[i] = 0;
+	  for (j = 0; j < options.SNOW_STEP; j++, hour++) {
+	    atmos[rec].shortwave[i] += hourlyrad[hour];
+	  }
+	  atmos[rec].shortwave[i] /= options.SNOW_STEP;
+	}
+	if (NF > 1) {
+	  atmos[rec].shortwave[NR] = 0;
+	  for (i = 0; i < NF; i++) {
+	    atmos[rec].shortwave[NR] += atmos[rec].shortwave[i];
+	  }
+	  atmos[rec].shortwave[NR] /= NF;
+	}
+      }
+    }
+    else {
+      /* daily shortwave provided, so it will be used to modify the mtclim estimates */
+      idx = 0;
+      hour2 = 0;
+      for (rec = 0, hour = 0; rec < global_param.nrecs; rec++) {
+	sum = 0;
+	for (i = 0; i < NF; i++) {
+	  for (j = 0; j < options.SNOW_STEP; j++, hour++) {
+	    sum += hourlyrad[hour]/24.;
+	  }
+	}
+	if(sum<=0.000001) corr_factor=0.;
+	else corr_factor=forcing_data[SHORTWAVE][idx]/sum;
+	//if(idx<10) printf("rec=%d idx=%d corrfactor=%f orig_short=%f for_short=%f\n",rec,idx,corr_factor,sum,forcing_data[SHORTWAVE][idx]);
+	sum=0;
+	for (i = 0; i < NF; i++) {
+	  atmos[rec].shortwave[i] = 0;
+	  for (j = 0; j < options.SNOW_STEP; j++, hour2++) { 
+	    atmos[rec].shortwave[i] += hourlyrad[hour2]*corr_factor;
+	    //printf("hour %d rad_orig %f rad_corr %f atmosrec %f\n",hour2,hourlyrad[hour2],hourlyrad[hour2]*corr_factor,atmos[rec].shortwave[i]);
+	  }
+       	  atmos[rec].shortwave[i] /= options.SNOW_STEP;
+	  sum+=atmos[rec].shortwave[i]/NF;
+	}
+	atmos[rec].shortwave[NR]=sum;
+	//printf("rec=%d idx=%d corrfactor=%f correctedshort=%f for_short=%f\n",rec,idx,corr_factor,sum,forcing_data[SHORTWAVE][idx]);
 	idx++;
       }
-      if (NF > 1) atmos[rec].shortwave[NR] = sum / (float)NF;
     }
   }
 
@@ -509,21 +606,19 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0; rec < global_param.nrecs; rec++) {
       atmos[rec].vp[NR] = vp[rec/stepspday];
       atmos[rec].vpd[NR] = svp(atmos[rec].air_temp[NR]) - atmos[rec].vp[NR];
-
-      if(atmos[rec].vpd[NR]<0) {
+       if(atmos[rec].vpd[NR]<0) {
 	atmos[rec].vpd[NR]=0;
 	atmos[rec].vp[NR]=svp(atmos[rec].air_temp[NR]);
       }
-      
+       //if(rec<10) printf("initialize_atmos daily vp not provided rec=%d NR=%d NF=%d vp=%f vpd=%f temp=%f svp=%f\n",rec,NR,NF,atmos[rec].vp[NR],atmos[rec].vpd[NR],atmos[rec].air_temp[NR],svp(atmos[rec].air_temp[NR]));     
       for (i = 0; i < NF; i++) {
 	atmos[rec].vp[i]  = atmos[rec].vp[NR];
 	atmos[rec].vpd[i]  = (svp(atmos[rec].air_temp[i]) - atmos[rec].vp[i]);
-
 	if(atmos[rec].vpd[i]<0) {
 	  atmos[rec].vpd[i]=0;
 	  atmos[rec].vp[i]=svp(atmos[rec].air_temp[i]);
 	}
-      
+	//if(rec<10) printf("initialize_atmos daily vp not provided rec=%d NF=%d vp=%f vpd=%f\n",rec,NF,atmos[rec].vp[i],atmos[rec].vpd[i]);     
       }
     }
   }
@@ -536,16 +631,25 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	  sum = 0;
 	  for (j = 0; j < NF; j++) {
 	    atmos[rec].vp[j] = forcing_data[VP][day];
-	    atmos[rec].vpd[j] = (svp(atmos[rec].air_temp[j]) 
-				 - atmos[rec].vp[j]);
+	    atmos[rec].vpd[j] = svp(atmos[rec].air_temp[j]) - atmos[rec].vp[j];
+	    if(atmos[rec].vpd[j]<0) { //ingjerd added sep 2009. hmm. er det så lurt å bruke gitt qair?
+	      atmos[rec].vpd[j]=0;
+	      //atmos[rec].vp[j]=svp(atmos[rec].air_temp[j]); 
+	      }
 	    sum += atmos[rec].vp[j];
+	    //if(rec<10 && day<10) printf("initialize_atmosA daily vp provided rec=%d j=%d NF=%d vp=%f vpd=%f\n",rec,j,NF,atmos[rec].vp[j],atmos[rec].vpd[j]);
 	  }
-	  if(NF > 1) {
+	  if(NF > 1) { //i.e. model run at daily time step, i think.... 
 	    atmos[rec].vp[NR] = sum / (float)NF;
-	    atmos[rec].vpd[NR] = (svp(atmos[rec].air_temp[NR]) 
-				  - atmos[rec].vp[NR]);
-	    rec++;
+	    atmos[rec].vpd[NR] = svp(atmos[rec].air_temp[NR]) - atmos[rec].vp[NR];
+	    if(atmos[rec].vpd[NR]<0) {
+	      atmos[rec].vpd[NR]=0.; //ingjerd added sep 2009. should also add vp=svp?
+	      //atmos[rec].vp[NR] =  svp(atmos[rec].air_temp[NR]); //no, ingjerd did not add....
+	    }
+	    //if(rec<10) printf("initialize_atmosB daily vp provided rec=%d NR=%d NF=%d vp=%f vpd=%f temp=%f svp=%f\n",rec,NR,NF,atmos[rec].vp[NR],atmos[rec].vpd[NR],atmos[rec].air_temp[NR],svp(atmos[rec].air_temp[NR]));
+	    //rec++;
 	  }
+          rec++;
 	}
       }
     }
@@ -595,11 +699,15 @@ void initialize_atmos(atmos_data_struct        *atmos,
         calc_longwave(&(atmos[rec].longwave[i]), tskc[rec/stepspday],
                         atmos[rec].air_temp[i], atmos[rec].vp[i]);
         sum += atmos[rec].longwave[i];
+	//if(rec<10)  printf("initialize_atmos A longwave_not_supplied rec %d i%d long %.3f\n",rec,i,atmos[rec].longwave[i]);
       }
       if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+      //for(i=0;i<=8;i++) printf("initialize_atmos B longwave_not_supplied rec %d i %d long %.3f\n",rec,i,atmos[rec].longwave[i]);
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
 	calc_netlongwave(&(atmos[rec].longwave[NR]), tskc[rec/stepspday],
 			 atmos[rec].air_temp[NR], atmos[rec].vp[NR]);
+	//for(i=0;i<=8;i++) printf("initialize_atmos C longwave_not_supplied rec %d i %d long %.3f\n",rec,i,atmos[rec].longwave[i]);
+      }
     }
   }
   else if(param_set.FORCE_DT[param_set.TYPE[LONGWAVE].SUPPLIED-1] == 24) {
@@ -609,14 +717,17 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for (i = 0; i < stepspday; i++) {
 	sum = 0;
 	for (j = 0; j < NF; j++) {
-	  atmos[rec].longwave[j] = forcing_data[LONGWAVE][day];
+	  atmos[rec].longwave[j] = forcing_data[LONGWAVE][day]; //i.e. incoming longwave
 	  sum += atmos[rec].longwave[j];
 	}
 	if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-	if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+	//if(rec<10) printf("initialize_atmos daily_longwave_supplied rec %d NR %d long %.3f\n",rec,NR,atmos[rec].longwave[NR]);
+	if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
           atmos[rec].longwave[NR] -= STEFAN_B 
-		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
-		   * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
+	    * (atmos[rec].air_temp[NR]+KELVIN) * (atmos[rec].air_temp[NR]+KELVIN) 
+	    * (atmos[rec].air_temp[NR]+KELVIN) * (atmos[rec].air_temp[NR]+KELVIN); //i.e net longwave stored for timeperiods < NR
+	  //if(rec<10) printf("initialize_atmos B WB daily_longwave_supplied rec %d NR %d netlong %.3f temp%f\n",rec,i,atmos[rec].longwave[NR],atmos[rec].air_temp[NR]);
+	}
 	rec++;
       }
     }
@@ -629,13 +740,17 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for(i = 0; i < NF; i++) {
 	atmos[rec].longwave[i] = forcing_data[LONGWAVE][idx];
 	sum += atmos[rec].longwave[i];
+	//printf("initialize_atmos A subdaily longwave_supplied rec %d i %d long %.3f\n",rec,i,atmos[rec].longwave[i]);
 	idx++;
       }
-      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF; 
-      if(!options.FULL_ENERGY && !options.FROZEN_SOIL)
+      if(NF>1) atmos[rec].longwave[NR] = sum / (float)NF;
+      //printf("initialize_atmos EB subdaily_longwave_supplied rec %d NR %d long %.3f temp%f\n",rec,i,atmos[rec].longwave[NR],atmos[rec].air_temp[NR]);
+      if(!options.FULL_ENERGY && !options.FROZEN_SOIL) {
         atmos[rec].longwave[NR] -= STEFAN_B 
 		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR] 
 		 * atmos[rec].air_temp[NR] * atmos[rec].air_temp[NR];
+	//printf("initialize_atmos C WB subdaily_longwave_supplied rec %d NR %d long %.3f temp%f\n",rec,i,atmos[rec].longwave[NR],atmos[rec].air_temp[NR]);
+      }
     }
   }
 
@@ -818,6 +933,96 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
+/***********************************************************
+    initialize 'input' runoff and water withdrawals
+    (for irrigation. ingjerd, feb2003 and april 2004)
+    ********************************************************/
+
+  if (!param_set.TYPE[RUNOFF_I].SUPPLIED) {
+    /* no runoff data provided, use default constant (=0) */
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      for (i = 0; i < NF; i++) {
+	atmos[rec].runirr[i] = 0.;
+      }
+      atmos[rec].runirr[NR] = 0.;	
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[RUNOFF_I].SUPPLIED-1] == 24) {
+      /* daily runoff data provided */
+      rec = 0;
+      for (day = 0; day < Ndays; day++) {
+	for (i = 0; i < stepspday; i++) {
+	  sum = 0;
+	  for (j = 0; j < NF; j++) {
+            atmos[rec].runirr[j] = forcing_data[RUNOFF_I][day]
+                        / (float)(NF * stepspday);
+	    sum += atmos[rec].runirr[j];
+	  }
+	  if(NF>1) atmos[rec].runirr[NR] = sum;
+	  if(global_param.dt == 24) 
+	      atmos[rec].runirr[NR] = forcing_data[RUNOFF_I][day];
+	  rec++;
+	}
+      }
+    }
+    else {
+      /* sub-daily runoff for irrigation provided */
+      idx = 0;
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+	sum = 0;
+	for(i = 0; i < NF; i++) {
+	    atmos[rec].runirr[i] = forcing_data[RUNOFF_I][idx];
+	  sum += atmos[rec].runirr[i];
+	  idx++;
+	}
+	if(NF>1) atmos[rec].runirr[NR] = sum;
+      }
+    }
+  }
+  if (!param_set.TYPE[WITH_I].SUPPLIED) {
+    /* no water withdrawals data provided, use default constant (=0) */
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      for (i = 0; i < NF; i++) {
+	atmos[rec].withirr[i] = 0.;
+      }
+      atmos[rec].withirr[NR] = 0.;	
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[WITH_I].SUPPLIED-1] == 24) {
+      /* daily water withdrawals data provided */
+      rec = 0;
+      for (day = 0; day < Ndays; day++) {
+	for (i = 0; i < stepspday; i++) {
+	  sum = 0;
+	  for (j = 0; j < NF; j++) {
+            atmos[rec].withirr[j] = forcing_data[WITH_I][day]
+                        / (float)(NF * stepspday);
+	    sum += atmos[rec].withirr[j];
+	  }
+	  if(NF>1) atmos[rec].withirr[NR] = sum;
+	  if(global_param.dt == 24) 
+	      atmos[rec].withirr[NR] = forcing_data[WITH_I][day];
+	  rec++;
+	}
+      }
+    }
+    else {
+      /* sub-daily water withdrawals for irrigation provided */
+      idx = 0;
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+	sum = 0;
+	for(i = 0; i < NF; i++) {
+	    atmos[rec].withirr[i] = forcing_data[WITH_I][idx];
+	  sum += atmos[rec].withirr[i];
+	  idx++;
+	}
+	if(NF>1) atmos[rec].withirr[NR] = sum;
+      }
+    }
+  }
+
   /****************************************************
     Determine if Snow will Fall During Each Time Step
   ****************************************************/
@@ -845,6 +1050,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   // Free temporary parameters
   free(hourlyrad);
   free(prec);
+  free(orig_prec); //ingjerd jun 2009
   free(tair);
   free(tmax);
   free(tmaxhour);
@@ -852,6 +1058,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   free(tminhour);
   free(tskc);
   free(vp);
+  free(runirr); /* ingjerd dec 2008 */
+  free(withirr); /* ingjerd dec 2008 */
 
   for(i=0;i<N_FORCING_TYPES;i++) 
     if (param_set.TYPE[i].SUPPLIED) 

@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: full_energy.c,v 4.2.2.5 2007/10/23 01:07:46 vicadmin Exp $";
 
 void full_energy(int                  rec,
                  atmos_data_struct   *atmos,
@@ -50,6 +50,7 @@ void full_energy(int                  rec,
   char                   SOLVE_SURF_ENERGY;
   int                    i, j, k;
   int                    lidx;
+  int count,totroots; /* ingjerd dec2008*/
   int                    Ndist;
   int                    dist;
   int                    iveg;
@@ -69,6 +70,8 @@ void full_energy(int                  rec,
   double                 dp;
   double                 ice0[MAX_BANDS];
   double                 moist;
+  double                 moistfract; // for irrigation ingjerd dec 2008
+  double                 wcrtemp; // for irrigation ingjerd dec 2008
   double                 surf_atten;
   double                 Tsurf;
   double                 Tgrnd;
@@ -94,6 +97,7 @@ void full_energy(int                  rec,
   double                 tmp_wind[3];
   double                 tmp_melt[MAX_BANDS*2];
   double                 tmp_vapor_flux[MAX_BANDS];
+  double                 tmp_snow_throughfall[MAX_BANDS]; /* ingjerd dec 2008 */
   double                 tmp_canopy_vapor_flux[MAX_BANDS];
   double                 tmp_canopyevap[2][MAX_BANDS];
   double                 tmp_snow_energy;
@@ -103,7 +107,24 @@ void full_energy(int                  rec,
   double                 tmp_Tmin;
   double                 tmp_total_moist_wet;
   double                 tmp_total_moist_dry;
+  double                 tmp_total_rootmoist_wet;
+  double                 tmp_total_rootmoist_dry;
   double                 gauge_correction[2];
+  double                 wind_2m_lake; //ingjerd added for potevap calc over lake surface, dec2008 
+  double                 ra_lake; //ingjerd added for potevap calc over lake surface, dec2008 
+  int month,month2,layer; //ingjerd added the remaining variables dec2008
+  int flag_irr;
+  float fraction_irrveg;
+  double irrig_old;
+  double irrig_new;
+  double noirrig_old;
+  double noirrig_new;
+  double soilmoist_irr_old;
+  double soilmoist_noirr_old;
+  double soilmoist_noirr_new;
+  double soilmoist_irr_new;
+  double local_water; // ingjerd added feb 2009. runoff+baseflow from current cell 
+                      // that can be used for irrigation of the irrigated fraction of the cell
   layer_data_struct     *tmp_layer[2];
   veg_var_struct         tmp_veg_var[2];
   cell_data_struct    ***cell;
@@ -157,19 +178,64 @@ void full_energy(int                  rec,
   atmos->out_prec = 0;
   atmos->out_rain = 0;
   atmos->out_snow = 0;
+  atmos->out_orig_prec = 0; //ingjerd jun 2009
 
+  /* calculate wind at 2 m above lake surface, 
+     assume zveg=0.0137 (following maidment p 4.15) 
+     also calculate aerodynamic resistance over the lake. ingjerd dec 2008 */
+  wind_2m_lake=atmos->wind[NR]*log((2-0.00959)/0.00137)/log((gp->wind_h-0.00959)/0.00137);
+  ra_lake=250.57/(1+0.536*wind_2m_lake); /*Maidment p 4.14 */
+
+  local_water=0.; //ingjerd feb 2009. at beginning of time step, before looping through vegetation: set local water = 0; 
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
   **************************************************/
   for(iveg = 0; iveg <= Nveg; iveg++){
 
+    atmos->prec[NR] = atmos->orig_prec[NR]; //ingjerd dec 2009. Need to do this for bare soil reasons.
+
     /** Solve Veg Type only if Coverage Greater than 0% **/
     if ((iveg <  Nveg && veg_con[iveg].Cv  > 0.) || 
 	(iveg == Nveg && veg_con[0].Cv_sum < 1.)) {
+ 
 
+     /** Define vegetation class number **/
+      if (iveg < Nveg) 
+	veg_class = veg_con[iveg].veg_class;
+      else 
+	veg_class = 0;
+      if ( iveg < Nveg ) wind_h = veg_lib[veg_class].wind_h;
+      else wind_h = gp->wind_h;
+
+      /** Find fraction of vegetation **/
       if ( iveg < Nveg ) Cv = veg_con[iveg].Cv;
       else Cv = 1. - veg_con[0].Cv_sum;
+
+      /** ingjerd jan 2010. Find wcr and wp numbers in irrigated areas **/
+      if(veg_con->irrveg==1 && iveg>=Nveg-2) {
+	for(lidx=0;lidx<options.Nlayer;lidx++) {
+	  soil_con->Wcr[lidx] = soil_con->Wcr_irrig[lidx];
+	  soil_con->Wpwp[lidx] = soil_con->Wpwp_irrig[lidx];
+	}
+	flag_irr=1; //used in penman.c
+      }
+      else {
+	for(lidx=0;lidx<options.Nlayer;lidx++) {
+	  soil_con->Wcr[lidx] = soil_con->Wcr_orig[lidx];
+	  soil_con->Wpwp[lidx] = soil_con->Wpwp_orig[lidx];
+	}
+	flag_irr=0; //used in penman.c
+      }
+      
+      /*ingjerd. if irrigated vegetation exist, adjust fractions according to month.
+	do only if irrigation is taken into account. no irrigation: two classes with half the area. */
+      if(veg_con->irrveg==1 && options.IRRIGATION) { 
+	month = dmy[rec].month-1;
+	if(iveg==Nveg-1) Cv=Cv*2*veg_lib[veg_class].irrpercent[month]; //irrigated fraction this month
+	if(iveg==Nveg-2) Cv=Cv*2*(1-veg_lib[veg_class].irrpercent[month]); //nonirrigated fraction this month
+	//if(rec<20) printf("full_energy iveg%d veg_class%d Cv%f month%d\n",iveg,veg_class,Cv,month);
+      }
 
       /**************************************************
         Initialize Model Parameters
@@ -200,14 +266,6 @@ void full_energy(int                  rec,
         out_snow[j] = 0;
       }
     
-      /** Define vegetation class number **/
-      if (iveg < Nveg) 
-	veg_class = veg_con[iveg].veg_class;
-      else 
-	veg_class = 0;
-      if ( iveg < Nveg ) wind_h = veg_lib[veg_class].wind_h;
-      else wind_h = gp->wind_h;
-
       /** Compute Surface Attenuation due to Vegetation Coverage **/
       if(iveg < Nveg)
 	surf_atten = exp(-veg_lib[veg_class].rad_atten 
@@ -305,6 +363,35 @@ void full_energy(int                  rec,
 	    dry_veg_var = &(empty_veg_var);
 	  }
 
+	  /***************************************
+	    Irrigation. 
+	    Based on upper layer soil moisture. ingjerd dec 2008 
+	  ******************************************/
+          moistfract=0.;
+	  wcrtemp=0.;
+	  //if(rec==272 && iveg>=Nveg-2) printf("full_energy A %d %d %f\n",rec,iveg,atmos->prec[NR]);
+	  if(options.IRRIGATION && iveg==Nveg-1 && veg_con->irrveg==1) { //irrigated vegetation always last one, i.e number Nveg-1
+	                                         // should probably use a more general variable.....and you always have to have at least 
+                                                 // one other veg type in cell! problems when bare soil is included?
+	    if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) { 
+	      moistfract=cell[WET][iveg][band].layer[0].moist;  // soil moisture, in mm
+	      wcrtemp=soil_con->Wcr[0]; // soil moisture (mm) at Wcr
+	      if(wcrtemp>moistfract && atmos->orig_prec[NR]<(wcrtemp-moistfract)) {
+		atmos->prec[NR]=(wcrtemp/0.7)-moistfract; //this is needed precip given freely available water
+		if(!options.IRR_FREE) { /*reduce irrigation amount to what is available if options.IRR_FREE = false.
+                                          irrigation water first taken from current cell (local_water), thereafter local river (runirr),  
+					  and finally a more distant water withdrawal point (withirr). Blir dette rett til slutt???? */
+		  if(atmos->prec[NR]>(atmos->orig_prec[NR]+(atmos->runirr[NR]+atmos->withirr[NR]+local_water)/Cv)) 
+		    atmos->prec[NR]=atmos->orig_prec[NR]+(atmos->runirr[NR]+atmos->withirr[NR]+local_water)/Cv;
+		    if(atmos->prec[NR]<0) atmos->prec[NR]=0.; 
+		}
+		//if(rec<10) printf("full_energy A2 rec%d iveg %d cv%f prec=%f local:%f needed:%f runirr:%f withirr:%f precdiff:%f\n",rec,iveg,Cv,atmos->prec[NR],local_water/Cv,wcrtemp/0.7-moistfract,atmos->runirr[NR]/Cv,atmos->withirr[NR]/Cv,atmos->prec[NR]-atmos->orig_prec[NR]);
+	      }
+	    }
+	  }
+
+	  //	  if(rec<10) printf("full_energy VP rec%d iveg %d cv%f prec=%f vp:%f vpd:%f\n",rec,iveg,Cv,atmos->prec[NR],atmos->vp[NR],atmos->vpd[NR]);
+
 	  surface_fluxes(overstory, rec, band, veg_class, iveg, Nveg, Ndist, 
 			 Nbands, options.Nlayer, dp, prcp->mu[iveg], ice0[band], 
 			 moist, surf_atten, height, displacement, roughness, 
@@ -318,17 +405,24 @@ void full_energy(int                  rec,
 			 tmp_wind, &Le, &Ls, &(Melt[band*2]), 
 			 &(cell[WET][iveg][band].inflow), 
 			 &(cell[DRY][iveg][band].inflow), 
-			 &snow_inflow[band], gauge_correction,
-			 veg_con[iveg].root, atmos, soil_con, dmy, gp, 
+			 &snow_inflow[band], gauge_correction,ra_lake,
+			 veg_con[iveg].root,local_water,atmos, soil_con, dmy, gp, 
 			 &(energy[iveg][band]), &(snow[iveg][band]),
 			 cell[WET][iveg][band].layer, 
 			 cell[DRY][iveg][band].layer, 
-			 wet_veg_var, dry_veg_var);
+			 wet_veg_var, dry_veg_var, flag_irr);
 	  
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
 
+          /* ingjerd added following line feb 2009. Add up available water locally */
+	  if(options.IRRIGATION && iveg<Nveg-1 && veg_con->irrveg==1) {
+	      local_water+=
+		  (cell[WET][iveg][band].baseflow+cell[DRY][iveg][band].baseflow+cell[WET][iveg][band].runoff+cell[DRY][iveg][band].runoff)*Cv*soil_con->AreaFract[band];
+	      //if(rec<5) printf("full_energy A rec=%d local water = %f Cv=%f atmosoutprec=%f outprec=%f\n",rec,local_water,Cv,atmos->out_prec,out_prec[band*2]);
+	  }
+	  //if(rec<5) printf("full_energy A rec=%d local water = %f Cv=%f atmosoutprec=%f outprec=%f\n",rec,local_water,Cv,atmos->out_prec,out_prec[band*2]);
           /********************************************************
             Compute soil wetness and root zone soil moisture
           ********************************************************/
@@ -336,20 +430,54 @@ void full_energy(int                  rec,
           cell[DRY][iveg][band].rootmoist = 0;
           cell[WET][iveg][band].wetness = 0;
           cell[DRY][iveg][band].wetness = 0;
+	  cell[WET][iveg][band].rootstress = 0; // ingjerd
+          cell[DRY][iveg][band].rootstress = 0; // ingjerd
+	  cell[WET][iveg][band].extract_water = 0; // ingjerd
+          cell[DRY][iveg][band].extract_water = 0; // ingjerd
+          if(veg_con->irrveg==1 && options.IRRIGATION && iveg==Nveg-1 && atmos->prec[NR]>atmos->orig_prec[NR]) { //ingjerd
+	    if((local_water/Cv)<=(atmos->prec[NR]-atmos->orig_prec[NR])) {
+	      cell[WET][Nveg-1][band].extract_water = local_water/Cv; // for this fraction of vegetation
+	      cell[DRY][Nveg-1][band].extract_water = local_water/Cv; //for this fraction of vegetation
+	      //if(rec<5) printf("full_energy B2 rec=%d local water = %f extract_water=%f extract_water_avg=%f precdiff=%f\n",
+	      //	       rec,local_water/Cv,cell[WET][Nveg-1][band].extract_water,cell[WET][Nveg-1][band].extract_water*Cv,atmos->prec[NR]-atmos->orig_prec[NR]);
+	    }
+	    else {
+	      cell[WET][Nveg-1][band].extract_water=atmos->prec[NR]-atmos->orig_prec[NR];
+	      cell[DRY][Nveg-1][band].extract_water=atmos->prec[NR]-atmos->orig_prec[NR];
+	      //if(rec<5) printf("full_energy B3 rec=%d local water = %f extract_water=%f extract_water_avg=%f diff=%f\n",
+	      //		       rec,local_water/Cv,cell[WET][Nveg-1][band].extract_water,cell[WET][Nveg-1][band].extract_water*Cv,atmos->prec[NR]-atmos->orig_prec[NR]);
+	    }
+	  }
+	  //if(rec<5) printf("full_energy B4 rec=%d iveg=%d local water=%f Cv=%f wet_extract=%f dryextract=%f prec=%f origprec=%f\n",
+	  //	    rec,iveg,local_water/Cv,Cv,cell[WET][iveg][band].extract_water,cell[DRY][iveg][band].extract_water,atmos->prec[NR],atmos->orig_prec[NR]);
           for(lidx=0;lidx<options.Nlayer;lidx++) {
             tmp_total_moist_wet = cell[WET][iveg][band].layer[lidx].moist + cell[WET][iveg][band].layer[lidx].ice;
             tmp_total_moist_dry = cell[DRY][iveg][band].layer[lidx].moist + cell[DRY][iveg][band].layer[lidx].ice;
+	    tmp_total_rootmoist_wet = cell[WET][iveg][band].layer[lidx].moist;
+ 	    tmp_total_rootmoist_dry = cell[DRY][iveg][band].layer[lidx].moist;
             if (veg_con->root[lidx] > 0) {
-              cell[WET][iveg][band].rootmoist += tmp_total_moist_wet;
-              cell[DRY][iveg][band].rootmoist += tmp_total_moist_dry;
+		/*cell[WET][iveg][band].rootmoist += tmp_total_moist_wet;
+		  cell[DRY][iveg][band].rootmoist += tmp_total_moist_dry;*/
+                /* ingjerd added the next 4 statements */ 
+		cell[WET][iveg][band].rootmoist += tmp_total_rootmoist_wet;
+		cell[DRY][iveg][band].rootmoist += tmp_total_rootmoist_dry;
+		cell[WET][iveg][band].rootstress += (tmp_total_rootmoist_wet - soil_con->Wpwp[lidx])/
+		    (soil_con->Wcr[lidx] - soil_con->Wpwp[lidx])*veg_con->root[lidx];
+		cell[DRY][iveg][band].rootstress += (tmp_total_rootmoist_dry - soil_con->Wpwp[lidx])/
+		    (soil_con->Wcr[lidx] - soil_con->Wpwp[lidx])*veg_con->root[lidx];
             } 
-            cell[WET][iveg][band].wetness += (tmp_total_moist_wet - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-            cell[DRY][iveg][band].wetness += (tmp_total_moist_dry - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+            cell[WET][iveg][band].wetness += (tmp_total_moist_wet - soil_con->Wpwp[lidx])/
+		(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+            cell[DRY][iveg][band].wetness += (tmp_total_moist_dry - soil_con->Wpwp[lidx])/
+		(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
           }
           cell[WET][iveg][band].wetness /= options.Nlayer;
           cell[DRY][iveg][band].wetness /= options.Nlayer;
-
-
+	  if(cell[WET][iveg][band].rootstress>1) cell[WET][iveg][band].rootstress=1.;
+ 	  if(cell[DRY][iveg][band].rootstress>1) cell[DRY][iveg][band].rootstress=1.;
+ 	  if(cell[WET][iveg][band].rootstress<0) cell[WET][iveg][band].rootstress=0.;
+ 	  if(cell[DRY][iveg][band].rootstress<0) cell[DRY][iveg][band].rootstress=0.;
+ 
 	} /** End Loop Through Elevation Bands **/
       } /** End Full Energy Balance Model **/
   

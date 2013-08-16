@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: correct_precip.c,v 4.2 2000/05/30 22:35:57 vicadmin Exp $";
 
 #define GAUGE_HEIGHT 1.0  /* precipitation gauge height (m) */
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: canopy_evap.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 double canopy_evap(layer_data_struct *layer_wet,
                    layer_data_struct *layer_dry,
@@ -27,7 +27,10 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   double            *depth,
 		   double            *Wcr,
 		   double            *Wpwp,
-		   float             *root)
+		   float             *root,
+		   double             net_rad_lake,
+		   double             ra_lake,
+		   int                flag_irr) /* net_rad_lake, ra_lake and flag_irr added. ingjerd */
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 
@@ -161,7 +164,24 @@ double canopy_evap(layer_data_struct *layer_wet,
 					  veg_lib[veg_class].LAI[month-1], 
 					  (double) 1.0, air_temp, 
 					  net_short, elevation, 
-					  veg_lib[veg_class].RGL) * dt / 24.0;
+					  veg_lib[veg_class].RGL,flag_irr) * dt / 24.0;
+
+     /* Potential lake evaporation: ingjerd dec 2008 */
+      tmp_veg_var->potevap_lake = penman_lake(net_rad_lake,vpd * 1000.,ra_lake, 
+					      veg_lib[veg_class].rmin, 
+					      veg_lib[veg_class].rarc,
+					      veg_lib[veg_class].LAI[month-1],  
+					      (double) 1.0, air_temp, 
+					      net_short, elevation, 
+					      veg_lib[veg_class].RGL) * dt / 24.0;
+
+      /* Potential evapotranspiration: ingjerd oct 2009 */
+      tmp_veg_var->potevap = penman_potevap(rad, vpd * 1000., ra, 0.0, 
+					    veg_lib[veg_class].rarc,
+					    veg_lib[veg_class].LAI[month-1], 
+					    1.0, air_temp, 
+					    net_short, elevation, 
+					    veg_lib[veg_class].RGL) * dt / 24.0; 
 
       if (canopyevap > 0.0 && dt==24)
 	/** If daily time step, evap can include current precipitation **/
@@ -172,7 +192,9 @@ double canopy_evap(layer_data_struct *layer_wet,
       else
 	f = 1.0;
       canopyevap *= f;
-    
+
+      //printf("canopy_evap potevap %f potevap_lake %f\n",tmp_veg_var->potevap,tmp_veg_var->potevap_lake);    
+
       tmp_Wdew += ppt - canopyevap;
       if (tmp_Wdew < 0.0) 
 	tmp_Wdew = 0.0;
@@ -183,6 +205,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 	tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
       }
 
+
       /*******************************************
         Compute Evapotranspiration from Vegetation
       *******************************************/
@@ -191,7 +214,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		      vpd, net_short, air_temp, ra,
 		      ppt, f, dt, tmp_veg_var->Wdew, elevation,
 		      depth, Wcr, Wpwp, &tmp_Wdew,
-		      &canopyevap, layerevap, root);
+		      &canopyevap, layerevap, root, flag_irr);
 
     }
 
@@ -206,6 +229,7 @@ double canopy_evap(layer_data_struct *layer_wet,
     
     Evap += tmp_Evap * mu / (1000. * dt * 3600.);
 
+
   }
 
   return (Evap);
@@ -215,7 +239,6 @@ double canopy_evap(layer_data_struct *layer_wet,
 /**********************************************************************
 	EVAPOTRANSPIRATION ROUTINE
 **********************************************************************/
-
 void transpiration(layer_data_struct *layer,
 		   int veg_class, 
 		   int month, 
@@ -235,7 +258,8 @@ void transpiration(layer_data_struct *layer,
 		   double *new_Wdew,
 		   double *canopyevap,
 		   double *layerevap,
-		   float  *root)
+		   float  *root,
+		   int flag_irr)
 /**********************************************************************
   Computes evapotranspiration for unfrozen soils
   Allows for multiple layers.
@@ -295,7 +319,7 @@ void transpiration(layer_data_struct *layer,
     Potential evapotranspiration not hindered by soil dryness.  If
     layer with less than half the roots is dryer than Wcr, extra
     evaporation is taken from the wetter layer.  Otherwise layers
-    contribute to evapotransipration based on root fraction.
+    contribute to evapotranspiration based on root fraction.
   ******************************************************************/
 
   if( (moist1>=Wcr1 && moist2>=Wcr[options.Nlayer-1] && Wcr1>0.) ||
@@ -306,9 +330,12 @@ void transpiration(layer_data_struct *layer,
     evap = penman(rad, vpd * 1000., ra, veg_lib[veg_class].rmin,
 		  veg_lib[veg_class].rarc, veg_lib[veg_class].LAI[month-1], 
 		  gsm_inv, air_temp, net_short, elevation, 
-		  veg_lib[veg_class].RGL) * dt / 24.0 *
+		  veg_lib[veg_class].RGL,flag_irr) * dt / 24.0 *
       (1.0-f*pow((Wdew/veg_lib[veg_class].Wdmax[month-1]),
 		 (2.0/3.0)));
+
+    //    if(month==7) printf("\ncanopy_evap transpiration %f gsm_inv %f rad%f vpd %f net_short %f wdew %f \n",
+    //			evap,gsm_inv,rad,vpd*1000,net_short,Wdew);
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -328,7 +355,7 @@ void transpiration(layer_data_struct *layer,
 	    
         layerevap[i]  = evap*gsm_inv*(double)root[i];
         root_sum     -= root[i];
-        spare_evap    = evap*(double)root[i]*(1.0-gsm_inv);
+        spare_evap   += evap*(double)root[i]*(1.0-gsm_inv); // ingjerd added += 
       }
     }
 
@@ -367,7 +394,7 @@ void transpiration(layer_data_struct *layer,
 			      veg_lib[veg_class].rarc, 
 			      veg_lib[veg_class].LAI[month-1], gsm_inv, 
 			      air_temp, net_short, elevation, 
-			      veg_lib[veg_class].RGL) * dt / 24.0 
+			      veg_lib[veg_class].RGL,flag_irr) * dt / 24.0 
 	  * (double)root[i] * (1.0-f*pow((Wdew/
 					  veg_lib[veg_class].Wdmax[month-1]),
 					 (2.0/3.0)));

@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: compute_dz.c,v 4.2.2.2 2004/05/10 21:46:45 tbohn Exp $";
 
 void compute_dz(double *dz, double *thermdepths, int Nnodes, double dp) {
 /***********************************************************************

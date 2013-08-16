@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: arno_evap.c,v 4.1.2.1 2004/06/14 19:44:53 tbohn Exp $";
 
 /****************************************************************************
 
@@ -95,7 +95,7 @@ double arno_evap(layer_data_struct *layer_wet,
     /* Calculate the potential bare soil evaporation (mm/time step) */
   
     Epot = penman(rad, vpd * 1000., ra, 0.0, 0.0, 1.0, 1.0, 
-		  air_temp, net_short, elevation, 0) * dt / 24.0;
+		  air_temp, net_short, elevation, 0, 0) * dt / 24.0;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */

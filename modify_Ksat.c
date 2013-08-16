@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: modify_Ksat.c,v 3.3 1999/07/07 16:32:11 vicadmin Exp $";
 
 double linear_interp(double x,double lx,double ux,double ly,double uy) {
   return((x-lx)/(ux-lx)*(uy-ly)+ly);

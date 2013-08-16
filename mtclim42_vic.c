@@ -286,7 +286,7 @@ MTCLIM version 3.1 testing
 
 #include <mtclim42_vic.h>   /* physical constants */
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: mtclim42_vic.c,v 4.1.2.4 2007/04/23 19:30:26 vicadmin Exp $";
 
 /****************************
  **                         **

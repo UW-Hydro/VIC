@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: redistribute_during_storm.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 void redistribute_during_storm(cell_data_struct ***cell,
 			       veg_var_struct   ***veg_var,

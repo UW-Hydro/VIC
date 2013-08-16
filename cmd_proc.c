@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: cmd_proc.c,v 4.1.2.3 2006/11/15 19:37:25 vicadmin Exp $";
 
 filenames_struct cmd_proc(int argc, char *argv[]) 
 /**********************************************************************

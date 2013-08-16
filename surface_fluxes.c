@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: surface_fluxes.c,v 4.2.2.6 2006/09/27 16:45:49 vicadmin Exp $";
 
 void surface_fluxes(char                 overstory,
 		    int                  rec,
@@ -41,7 +41,9 @@ void surface_fluxes(char                 overstory,
 		    double              *inflow_dry,
 		    double              *snow_inflow,
 		    double              *gauge_correction,
+		    double              ra_lake,
 		    float               *root,
+		    double              local_water,
 		    atmos_data_struct   *atmos,
 		    soil_con_struct     *soil_con,
 		    dmy_struct          *dmy,
@@ -51,7 +53,8 @@ void surface_fluxes(char                 overstory,
 		    layer_data_struct   *layer_wet,
 		    layer_data_struct   *layer_dry,
 		    veg_var_struct      *veg_var_wet,
-		    veg_var_struct      *veg_var_dry)
+		    veg_var_struct      *veg_var_dry,
+		    int flag_irr)
 /**********************************************************************
 	surface_fluxes	Keith Cherkauer		February 29, 2000
 
@@ -120,6 +123,8 @@ void surface_fluxes(char                 overstory,
   double                 store_canopy_vapor_flux;
   double                 store_canopyevap[2];
   double                 store_layerevap[2][MAX_LAYERS];
+  double                 store_potevap_lake[2]; //ingjerd dec 2008
+  double                 store_potevap[2]; //ingjerd oct 2009
   double                 store_ppt[2];
   double                 store_shortwave;
   double                 store_longwave;
@@ -185,6 +190,8 @@ void surface_fluxes(char                 overstory,
   for(dist = 0; dist < Ndist; dist++) {
     store_throughfall[dist] = 0.;
     store_canopyevap[dist]  = 0.;
+    store_potevap_lake[dist]  = 0.; /* ingjerd dec 2008 */
+    store_potevap[dist]  = 0.; /* ingjerd dec 2008 */
     for(lidx = 0; lidx < options.Nlayer; lidx++) {
       store_layerevap[dist][lidx] = 0.;
     }
@@ -225,6 +232,8 @@ void surface_fluxes(char                 overstory,
     for(dist = 0; dist < Ndist; dist ++) {
       snow_veg_var[dist].canopyevap = 0;
       bare_veg_var[dist].canopyevap = 0;
+      bare_veg_var[dist].potevap_lake = 0.; //ingjerd dec 2008
+      bare_veg_var[dist].potevap = 0.; //ingjerd oct 2009
       for(lidx = 0; lidx < Nlayers; lidx ++) 
 	step_layer[dist][lidx].evap = 0;
     }
@@ -233,7 +242,7 @@ void surface_fluxes(char                 overstory,
 
     if ( options.GRND_FLUX ) T0 = energy->T[0];
     else T0 = air_temp;
-
+    //if(rec<10) printf("surface_fluxes rec%d vp %f vpd %f flag_irr %d\n",rec,atmos->vp[hidx],atmos->vpd[hidx],flag_irr);    
     step_melt = solve_snow( &(step_snow), step_layer[WET], step_layer[DRY],
 			    &(snow_veg_var[WET]), &(snow_veg_var[DRY]), 
 			    dmy[rec].month, dmy[rec].day_in_year,
@@ -250,20 +259,22 @@ void surface_fluxes(char                 overstory,
 			    gp->wind_h, moist, ice0, dp, bare_albedo, 
 			    rainfall, &step_out_prec, &step_out_rain, &step_out_snow,
 			    Le, Ls, aero_resist, aero_resist_used,
-			    wind, &step_net_short, &step_out_short, &step_rad, 
+			    wind, ra_lake, &step_net_short, &step_out_short, &step_rad, 
 			    &step_Evap, &step_snow_energy, snow_inflow, 
-			    step_ppt, gauge_correction, root);
+			    step_ppt, gauge_correction, root, flag_irr);
       
     /**********************************************************
       Solve Energy Balance Components for Ground Free of Snow
     **********************************************************/
-	      
+    //printf("surface_fluxes hidx %d longwave %f\n",hidx,atmos->longwave[hidx]);
+
     Tsurf = calc_surf_energy_bal(rec, iveg, options.Nlayer, Nveg, 
 				 step_dt, 
 				 options.Nnode, veg_class, band, hidx, 
 				 ice0, moist, dp, surf_atten, T0, 
 				 atmos->shortwave[hidx], 
-				 snow_energy.longwave, air_temp, (*Le), 
+				 snow_energy.longwave, atmos->longwave[hidx],
+				 air_temp, (*Le), 
 				 (*Ls), mu, displacement, roughness, 
 				 ref_height, step_snow_energy, 
 				 step_snow.vapor_flux,  bare_albedo, 
@@ -272,9 +283,10 @@ void surface_fluxes(char                 overstory,
 				 atmos, &bare_veg_var[WET], 
 				 &bare_veg_var[DRY], &bare_energy, 
 				 &(step_snow), step_layer[WET], 
-				 step_layer[DRY], soil_con, &(dmy[rec]));  
+				 step_layer[DRY], soil_con, &(dmy[rec]),flag_irr,
+				 ra_lake);  
 	      	      
-
+    //printf("surface_fluxes hidx %d longwave %f bare_energylongwave %f\n",hidx,atmos->longwave[hidx],bare_energy.longwave);
     /**************************************
       Store sub-model time step variables 
     **************************************/
@@ -286,19 +298,26 @@ void surface_fluxes(char                 overstory,
 	  store_throughfall[dist] += snow_veg_var[dist].throughfall;
 	  store_canopyevap[dist]  += snow_veg_var[dist].canopyevap;
 	  bare_veg_var[dist].Wdew  = snow_veg_var[dist].Wdew;
+	  store_potevap_lake[dist]  += 0; //ingjerd jan 2010. assume lake evap = 0 if snow
+	  store_potevap[dist]  += 0; //ingjerd jan 2010. assume potevap=0 if snow
 	}
 	else {
 	  store_throughfall[dist] += bare_veg_var[dist].throughfall;
 	  store_canopyevap[dist]  += bare_veg_var[dist].canopyevap;
 	  snow_veg_var[dist].Wdew  = bare_veg_var[dist].Wdew;
+	  store_potevap_lake[dist] += bare_veg_var[dist].potevap_lake; //ingjerd dec 2008
+	  store_potevap[dist]     += bare_veg_var[dist].potevap; //ingjerd dec 2008
 	}
       }
+
+      //     printf("surface_fluxes veg=%d %f %f %f %f\n",iveg,store_potevap[dist],bare_veg_var[dist].potevap,store_canopyevap[dist],bare_veg_var[dist].canopyevap);
 
       for(lidx = 0; lidx < options.Nlayer; lidx++)
 	store_layerevap[dist][lidx] += step_layer[dist][lidx].evap;
 
       store_ppt[dist] += step_ppt[dist];
     }
+
 
     if(iveg < Nveg) 
       store_canopy_vapor_flux += step_snow.canopy_vapor_flux;
@@ -379,6 +398,11 @@ void surface_fluxes(char                 overstory,
     veg_var_dry->throughfall = store_throughfall[DRY];
     veg_var_wet->canopyevap  = store_canopyevap[WET];
     veg_var_dry->canopyevap  = store_canopyevap[DRY];
+    veg_var_wet->potevap_lake   = store_potevap_lake[WET]; //ingjerd dec 2008
+    veg_var_dry->potevap_lake   = store_potevap_lake[DRY]; //ingjerd dec 2008
+    veg_var_wet->potevap   = store_potevap[WET]; //ingjerd dec 2008
+    veg_var_dry->potevap   = store_potevap[DRY]; //ingjerd dec 2008
+
     if(snow->snow) {
       veg_var_wet->Wdew        = snow_veg_var[WET].Wdew;
       veg_var_dry->Wdew        = snow_veg_var[DRY].Wdew;
@@ -411,6 +435,7 @@ void surface_fluxes(char                 overstory,
 	 baseflow_wet, baseflow_dry, ppt, mu, gp->dt, options.Nnode, 
 	 band, rec, iveg);
 	    
-
+  //printf("surface_fluxes rec%d iveg%d %lf %lf %lf %lf %lf\n",
+//	 rec,iveg,*runoff_wet,*runoff_dry,*baseflow_wet,*baseflow_dry,local_water);
 }
 

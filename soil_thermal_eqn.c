@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: soil_thermal_eqn.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 double soil_thermal_eqn(double T, va_list ap) {
 

@@ -17,7 +17,7 @@
 
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: alloc_atmos.c,v 4.1.2.2 2007/01/11 02:01:04 vicadmin Exp $";
 
 /******************************************************************************/
 /*				 alloc_atmos()                                */
@@ -43,6 +43,9 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
    for (i = 0; i < nrecs; i++) {
      (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
      if ((*atmos)[i].prec == NULL)
+       vicerror("Memory allocation error in alloc_atmos().");
+     (*atmos)[i].orig_prec = (double *) calloc(NR+1, sizeof(double)); //ingjerd jun 2009
+     if ((*atmos)[i].orig_prec == NULL)
        vicerror("Memory allocation error in alloc_atmos().");
      (*atmos)[i].air_temp = (double *) calloc(NR+1, sizeof(double));
      if ((*atmos)[i].air_temp == NULL)

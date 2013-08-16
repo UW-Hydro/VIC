@@ -27,7 +27,7 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: penman.c,v 4.1.2.1 2004/05/10 18:43:37 tbohn Exp $";
 
 #define CLOSURE 4000		/** Pa **/
 #define RSMAX 5000
@@ -43,8 +43,11 @@ double penman(double rad,
 	      double tair, 
               double net_short, 
 	      float  elevation, 
-	      float  RGL)
+	      float  RGL,
+	      int    flag_irr)
 {
+  extern option_struct options;
+
   double evap;                  /* Penman-Monteith evapotranspiration */
   double slope;                 /* slope of saturated vapor pressure curve */
   double rc;                    /* canopy resistance */
@@ -55,8 +58,7 @@ double penman(double rad,
   double gamma;                 /* psychrometric constant (Pa/C) */
   double Tfactor;               /* factor for canopy resistance based on temperature */
   double vpdfactor;             /* factor for canopy resistance based on vpd */
-  double DAYfactor;             /* factor for canopy resistance based on photosy
-nthesis */
+  double DAYfactor;             /* factor for canopy resistance based on photosynthesis */
   double f;
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
@@ -75,6 +77,16 @@ nthesis */
 
   vpdfactor = 1 - vpd/CLOSURE;
   vpdfactor = (vpdfactor < VPDMINFACTOR) ? VPDMINFACTOR : vpdfactor;
+
+  /*Set limitations to 1 if irrigated vegetation (both when irrig=true and when irrig=false). 
+    Not perfect..., but is included because of FAO method used. Meaning T, vpd and Sw do not limit ET 
+    for irrigated crops, to be consistent with FAO method used when preprocessing data. */
+  if(flag_irr==1) {
+    Tfactor=1.;
+    DAYfactor=1.;
+    vpdfactor=1.;
+    if(options.IRRIGATION) gsm_inv=1.; //only when irrig=true
+  }
 
   /* calculate canopy resistance in s/m */
   rc = rs/(lai * gsm_inv * Tfactor * vpdfactor) * DAYfactor;
@@ -107,6 +119,15 @@ nthesis */
 
   if (vpd >= 0.0 && evap < 0.0) 
     evap = 0.0;
+
+  //   printf("penman slope %.3f rad %.3f rair %.3f vpd %.3f ra %.3f rc %.3f teller %.3f nevner %.3f\n",
+  // slope,rad,r_air,vpd,ra,rc,slope * rad + r_air * CP_PM * vpd/ra*SEC_PER_DAY,lv * (slope + gamma * (1 + (rc + rarc)/ra))); 
+  
+  //if(gsm_inv<0.8 || Tfactor<0.8 || vpdfactor<0.8) printf("penman evap %f rc %f lai %f gsm_inv %f Tfactor %f vpdfactor %f DAYfactor %f\n",
+  //evap,rc,lai,gsm_inv,Tfactor,vpdfactor,1/DAYfactor);
+  //if(lai>5.36) printf("penman evap %f rc %f lai %f gsm_inv %f Tfactor %f vpdfactor %f DAYfactor %f\n",
+  //evap,rc,lai,gsm_inv,Tfactor,vpdfactor,1/DAYfactor);
+
 
   return evap;
 }

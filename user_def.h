@@ -3,7 +3,7 @@
   the user to control model performance.  When this file is modified 
   the model needs to be recompiled for the changes to take effect.
 
-  $Id$
+  $Id: user_def.h,v 4.3.2.7 2006/09/26 19:49:23 vicadmin Exp $
 
   Modifications:
   2006-Sep-11 Implemented flexible output configuration; removed the

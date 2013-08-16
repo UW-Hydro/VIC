@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: make_energy_bal.c,v 4.1.2.1 2005/11/10 18:59:37 vicadmin Exp $";
 
 energy_bal_struct **make_energy_bal(int nveg)
 /**********************************************************************

@@ -3,7 +3,7 @@
 #include <strings.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: vicerror.c,v 4.1.2.3 2006/10/31 01:09:19 vicadmin Exp $";
 
 void vicerror(char error_text[])
 /**********************************************************************

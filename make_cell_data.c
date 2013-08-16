@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: make_cell_data.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 cell_data_struct **make_cell_data(int veg_type_num, int Nlayer)
 /**********************************************************************

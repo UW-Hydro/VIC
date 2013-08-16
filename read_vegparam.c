@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: read_vegparam.c,v 4.2.2.4 2004/05/06 19:57:34 tbohn Exp $";
 
 veg_con_struct *read_vegparam(FILE *vegparam,
                               int   gridcel,
-                              int   Nveg_type)
+                              int   Nveg_type,
+                              int   NRoots)
 /**********************************************************************
   read_vegparam.c    Keith Cherkauer and Dag Lohmann       1997
 
@@ -49,26 +50,35 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 #endif
 
   veg_con_struct *temp;
-  int             vegcel, i, j, vegetat_type_num, skip, veg_class;
+  int             vegcel, i, j, vegetat_type_num, irr, skip, veg_class; //irr added ingjerd dec 2008
   int             NoOverstory;
   float           depth_sum;
   float           sum;
+  double          cv_temp1,cv_temp2; //ingjerd dec 2008
   char            str[500];
   char            ErrStr[MAXSTRING];
 
   if(options.GLOBAL_LAI) skip=2;
   else skip=1;
 
+  /* root zones can vary within simulation area - 
+     number of root zones is read in soil file, and
+     passed on to this subroutine. ingjerd dec 2008 */
+  options.ROOT_ZONES = NRoots;
+
   NoOverstory = 0;
 
 #if !NO_REWIND
   rewind(vegparam);
 #endif  
-    
-  while ((fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num)) == 2 &&
+
+// ingjerd added &irr dec2008  
+  while ((fscanf(vegparam, "%d %d %d", &vegcel, &vegetat_type_num, &irr)) == 3 &&
           vegcel != gridcel) {
+    if(irr==1) vegetat_type_num+=1; //irrigated vegetation exist. ingjerd dec 2008
     for (i = 0; i <= vegetat_type_num * skip; i++)
       fgets(str, 500, vegparam);
+    if(irr==1) fgets(str, 500, vegparam); // read also percentages. ingjerd dec2008
   }
   if (vegcel != gridcel) {
     fprintf(stderr, "Error in vegetation file.  Grid cell %d not found\n",
@@ -79,6 +89,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     sprintf(ErrStr,"Vegetation parameter file wants more vegetation types in grid cell %i (%i) than are defined by MAX_VEG (%i) [NOTE: bare soil class is assumed].  Edit vicNl_def.h and recompile.",gridcel,vegetat_type_num+1,MAX_VEG);
     nrerror(ErrStr);
   }
+
+  if(irr==1) vegetat_type_num+=1; /* ingjerd dec2008 */
 
   /** Allocate memory for vegetation grid cell parameters **/
   if(vegetat_type_num>0)
@@ -92,9 +104,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     temp[i].zone_depth = calloc(options.ROOT_ZONES,sizeof(float));
     temp[i].zone_fract = calloc(options.ROOT_ZONES,sizeof(float));
     temp[i].vegetat_type_num = vegetat_type_num;
+    temp[i].irrveg = irr; // ingjerd dec2008
     fscanf(vegparam, "%d",  &temp[i].veg_class);
     fscanf(vegparam, "%lf", &temp[i].Cv);
-    
+    //printf("%d %f\n", temp[i].veg_class, temp[i].Cv);
     depth_sum = 0;
     sum = 0.;
     for(j=0;j<options.ROOT_ZONES;j++) {
@@ -137,6 +150,18 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       // Determine if cell contains non-overstory vegetation
       NoOverstory++;
     
+  }
+
+  if(irr==1) { /* ingjerd dec 2008 */
+      //cv_temp1=temp[vegetat_type_num-1].Cv * 2.;
+      //cv_temp2=temp[vegetat_type_num-2].Cv * 2.;
+      for ( j = 0; j < 12; j++ ) {
+	  fscanf(vegparam,"%f",&veg_lib[temp[vegetat_type_num-1].veg_class].irrpercent[j]);
+	  veg_lib[temp[vegetat_type_num-1].veg_class].irrpercent[j]/=100.;
+	  //temp[vegetat_type_num-1].Cv = cv_temp1 * veg_lib[temp[vegetat_type_num-1].veg_class].irrpercent[j];
+	  //temp[vegetat_type_num-2].Cv = cv_temp2 * (1-veg_lib[temp[vegetat_type_num-1].veg_class].irrpercent[j]);
+	  //printf("read_vegparam %d %d %f\n",i,temp[vegetat_type_num-1].veg_class,veg_lib[temp[vegetat_type_num-1].veg_class].irrpercent[j]);
+      }
   }
 
   if(temp[0].Cv_sum>1.0){

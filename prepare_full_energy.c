@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: prepare_full_energy.c,v 4.2.2.2 2007/10/23 01:07:46 vicadmin Exp $";
 
 void prepare_full_energy(int               iveg,
 			 int               Nveg,

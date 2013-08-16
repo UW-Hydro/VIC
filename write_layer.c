@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: write_layer.c,v 4.1 2000/05/16 21:07:16 vicadmin Exp $";
 
 void write_layer(layer_data_struct *layer,
                  int                veg,

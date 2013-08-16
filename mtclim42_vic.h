@@ -3,7 +3,7 @@
   vic_change * and followed by the comment * end vic_change * */
 
 /* RCS Id String
- * $Id$
+ * $Id: mtclim42_vic.h,v 4.1.2.1 2004/05/06 00:37:54 tbohn Exp $
  */
 
 /* 

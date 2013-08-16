@@ -3,7 +3,7 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
+static char vcid[] = "$Id: dist_prec.c,v 4.2.2.7 2006/10/31 01:09:16 vicadmin Exp $";
 
 void dist_prec(atmos_data_struct   *atmos,
                dist_prcp_struct    *prcp,
@@ -179,6 +179,7 @@ void dist_prec(atmos_data_struct   *atmos,
     /**************************************************
       Controls Grid Cell Averaged Precipitation Model
     **************************************************/
+    //if(rec<10) printf("dist_prec %d NR=%d %f %f %f\n",rec,NR,atmos->vp[NR],atmos->vpd[NR],atmos->longwave[NR]);
 
     full_energy(rec, atmos, soil_con, veg_con, prcp, dmy, global_param, 
 		cellnum, NEWCELL);
@@ -192,8 +193,8 @@ void dist_prec(atmos_data_struct   *atmos,
   put_data(prcp, atmos, veg_con, out_data_files, out_data, save_data,
 	   soil_con->depth, soil_con->dz_node, soil_con->dp, soil_con->AreaFract, 
 	   soil_con->AboveTreeLine, &dmy[rec], rec, global_param->dt, 
-	   options.Nnode, global_param->skipyear);
-
+	   options.Nnode, global_param->skipyear,soil_con->elevation,
+	   soil_con->Wcr,soil_con->Wpwp,soil_con->max_moist,dmy[rec].month-1);
 
   /************************************
     Save model state at assigned date

@@ -1,7 +1,7 @@
 /**********************************************************************
                         Global Variables
 
-  $Id$
+  $Id: global.h,v 4.1.2.7 2008/01/20 05:59:13 vicadmin Exp $
 
   29-Oct-03 Added version string and removed unused options from
 	    optstring.						TJB

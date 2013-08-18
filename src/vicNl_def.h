@@ -630,6 +630,9 @@ extern char ref_veg_ref_crop[];
 #define OUT_CINTER         176  /* Carbon density in intermediate pool [g C/m2d] */
 #define OUT_CSLOW          177  /* Carbon density in slow pool [g C/m2d] */
 
+// Miscellaneous
+#define OUT_DISTZWT_AREA   178  /* area fraction of each point in zwt distribution */
+
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
 #define OUT_TYPE_CHAR    1 /* char */

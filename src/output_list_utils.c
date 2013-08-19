@@ -246,6 +246,9 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
   strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
+  // Miscellaneous
+  strcpy(out_data[OUT_DISTZWT_AREA].varname,"OUT_DISTZWT_AREA");       /* aarray of area fractions of points in zwt distribution */
+
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
   strcpy(out_data[OUT_ADVECTION_BAND].varname,"OUT_ADVECTION_BAND");             /* advected energy [W/m2] */
@@ -279,6 +282,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_DISTZWT_SMOIST].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt*options.Nlayer;
   out_data[OUT_DISTZWT_ZWT].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
   out_data[OUT_DISTZWT_ZWT_LUMP].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
+  out_data[OUT_DISTZWT_AREA].nelem = MAX_VEG*options.SNOW_BAND*options.Nzwt;
   if (options.FROZEN_SOIL) {
     out_data[OUT_FDEPTH].nelem = MAX_FRONTS;
     out_data[OUT_TDEPTH].nelem = MAX_FRONTS;

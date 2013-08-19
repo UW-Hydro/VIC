@@ -395,6 +395,7 @@ int  put_data(dist_prcp_struct  *prcp,
                 out_data[OUT_DISTZWT_ZWT_LUMP].data[i] = cell[dist][veg][band].zwt_lumped_dist_zwt[zwtidx];
                 out_data[OUT_DISTZWT_BFLOW].data[i] = cell[dist][veg][band].baseflow_dist_zwt[zwtidx];
                 out_data[OUT_DISTZWT_RUNOFF].data[i] = cell[dist][veg][band].runoff_dist_zwt[zwtidx];
+                out_data[OUT_DISTZWT_AREA].data[i] = Cv*(1-Clake)*soil_con->ZwtAreaFract[zwtidx];
               }
             }
 	  } // End wet/dry loop

@@ -262,8 +262,8 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 filep_struct *, out_data_file_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
-#if QUICK_FS
 int    distribute_moist_zwt(cell_data_struct *, soil_con_struct *);
+#if QUICK_FS
 int  distribute_node_moisture_properties(double *, double *, double *, double *,
 					 double *, double *, double *, double ***, 
 					 double *, double *, double *, double *, double *,

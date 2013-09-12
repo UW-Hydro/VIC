@@ -1165,10 +1165,11 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     else sc = 0.0;
 
     /* save daily radiation */
-    data->s_potrad[i] = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
+    /* save cloud transmittance when rad is an input */
     if (ctrl->insw) {
+      data->s_potrad[i] = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
       if (data->s_potrad[i]>0 && data->s_srad[i]>0 && daylength[yday]>0) {
-	data->s_tfmax[i] = (data->s_srad[i]*SECPHOUR*HOURSPERDAY/daylength[yday])/(data->s_potrad[i]*t_tmax);
+	data->s_tfmax[i] = (data->s_srad[i])/(data->s_potrad[i]*t_tmax);//both of these are 24hr mean rad. here
 	if (data->s_tfmax[i] > 1.0) data->s_tfmax[i] = 1.0;
       }
       else {

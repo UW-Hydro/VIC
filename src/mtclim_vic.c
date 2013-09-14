@@ -386,10 +386,6 @@ int data_alloc(const control_struct *ctrl, data_struct *data)
     printf("Error allocating for site pet/prcp ratio array\n");
     ok=0;
   }
-  if (ok && !(data->s_potrad = (double*) malloc(ndays * sizeof(double)))) {
-    printf("Error allocating for site pet/prcp ratio array\n");
-    ok=0;
-  }
   if (ok && !(data->s_ttmax = (double*) malloc(ndays * sizeof(double)))) {
     printf("Error allocating for site pet/prcp ratio array\n");
     ok=0;
@@ -1104,6 +1100,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
   double srad1;
   double srad2;
   double sc;
+  double potrad;
   double tmink;
   double ratio;
   double ratio2;
@@ -1167,9 +1164,9 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     /* save daily radiation */
     /* save cloud transmittance when rad is an input */
     if (ctrl->insw) {
-      data->s_potrad[i] = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
-      if (data->s_potrad[i]>0 && data->s_srad[i]>0 && daylength[yday]>0) {
-	data->s_tfmax[i] = (data->s_srad[i])/(data->s_potrad[i]*t_tmax);//both of these are 24hr mean rad. here
+      potrad = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
+      if (potrad>0 && data->s_srad[i]>0 && daylength[yday]>0) {
+	data->s_tfmax[i] = (data->s_srad[i])/(potrad*t_tmax);//both of these are 24hr mean rad. here
 	if (data->s_tfmax[i] > 1.0) data->s_tfmax[i] = 1.0;
       }
       else {
@@ -1237,7 +1234,6 @@ int data_free(const control_struct *ctrl, data_struct *data)
   free(data->s_swe);
   /* start vic_change */
   free(data->s_tskc);
-  free(data->s_potrad);
   free(data->s_ppratio);
   free(data->s_tfmax);
   free(data->s_ttmax);

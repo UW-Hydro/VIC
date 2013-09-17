@@ -104,7 +104,6 @@ typedef struct
   /* start vic_change */
   double *s_tskc;	 /* array of cloudiness values */
   double *s_ppratio; /* array of pet/prcp ratio values */
-  double *s_potrad; /* array of potential rad values */
   double *s_ttmax; /* array of clear sky transmittance values */
   double *s_tfmax; /* array of cloud transmittance factor values */
   /* end vic_change */

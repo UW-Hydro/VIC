@@ -126,6 +126,7 @@
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
+  2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.		TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -323,7 +324,7 @@ extern char ref_veg_ref_crop[];
 #define PRESSURE  10 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
 #define QAIR      11 /* specific humidity [kg/kg] */
 #define RAINF     12 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define REL_HUMID 13 /* relative humidity [fraction] */
+#define REL_HUMID 13 /* relative humidity [%] */
 #define SHORTWAVE 14 /* incoming shortwave [W/m2] */
 #define SNOWF     15 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
 #define TMAX      16 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
@@ -465,7 +466,7 @@ extern char ref_veg_ref_crop[];
 #define OUT_LONGWAVE       120  /* incoming longwave [W/m2] */
 #define OUT_PRESSURE       121  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
 #define OUT_QAIR           122  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID      123  /* relative humidity [fraction]*/
+#define OUT_REL_HUMID      123  /* relative humidity [%]*/
 #define OUT_SHORTWAVE      124  /* incoming shortwave [W/m2] */
 #define OUT_SURF_COND      125  /* surface conductance [m/s] */
 #define OUT_TSKC           126  /* cloud cover fraction [fraction] */

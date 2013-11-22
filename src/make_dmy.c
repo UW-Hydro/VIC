@@ -31,7 +31,8 @@ dmy_struct *make_dmy(global_param_struct *global)
            number of days in February was not reset to 28 after
 	   working out number of records and before working out
 	   the number of forcing file records to skip.      KAC
-  2006-02-07 Changed indexing of line 63 (if(endday...) by 1 GCT 
+  2006-Feb-07 Changed indexing of line 63 (if(endday...) by 1.		GCT 
+  2013-Nov-21 Added check on start hour in computation of forceskip.	TJB
 **********************************************************************/
 {
   extern param_set_struct param_set;
@@ -146,7 +147,8 @@ dmy_struct *make_dmy(global_param_struct *global)
 	
 	step     = (int)(1./((float)global->dt/24.));
 	while(tmpyear < temp[0].year || 
-	      (tmpyear == temp[0].year && tmpjday < temp[0].day_in_year)) {
+	      (tmpyear == temp[0].year && tmpjday < temp[0].day_in_year) ||
+	      (tmpyear == temp[0].year && tmpjday == temp[0].day_in_year && tmphr < temp[0].hour)) {
 	  
 	  get_next_time_step(&tmpyear,&tmpmonth,&tmpday,&tmphr,
 			     &tmpjday,global->dt);

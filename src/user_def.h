@@ -90,29 +90,3 @@
        it does not change.  Initial volumetric ice fraction must be 
        defined in the soil file for each soil layer. *****/
 #define EXCESS_ICE FALSE
-
-/***** Define maximum array sizes for model source code *****/
-#define MAX_VEG        12      /* maximum number of vegetation types per 
-				  cell */
-#define MAX_LAYERS     3       /* maximum number of soil moisture layers */
-#define MAX_NODES      50      /* maximum number of soil thermal nodes */
-#define MAX_BANDS      10      /* maximum number of snow bands */
-#define MAX_FRONTS     3       /* maximum number of freezing and thawing 
-				  front depths to store */
-#define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
-#define MAX_ZWTVMOIST  11      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
-
-/***** Number of iterations to use in solving the surface energy balance.
-       The original VIC model uses only 1 iteration for speed.  Increasing
-       the number of iterations improves precision, and is recommended
-       for single point comparisons with frozen soils *****/
-#define MAXIT_FE        25
- 
-/***** Coefficient multiplied by the LAI to determine the amount of
-       water that can be stored in the canopy *****/
-#define LAI_WATER_FACTOR 0.2
-
-/***** Longwave correction factor, used to correct estimated incoming
-       longwave radiation (use 1, unless measured longwave available for
-       calibration) *****/
-#define LWAVE_COR	1.

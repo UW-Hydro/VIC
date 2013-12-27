@@ -609,6 +609,36 @@ shortwave radiation is supplied as an input forcing.
 
 
 
+Miscellaneous:
+--------------
+
+Cleanup of compile-time options
+
+	Files Affected:
+
+	calc_longwave.c
+	display_current_settings.c
+	user_def.h
+	vicNl_def.h
+
+	Description:
+
+	Cleanup of user_def.h, either by removing options/settings or moving
+	them to vicNl_def.h (becoming run-time options if appropriate).
+	Details are as follows:
+
+	* Removed the LWAVE_COR option; if the user wishes to correct any of the
+	forcing variables, the user can do this externally to VIC.
+
+	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
+	vicNl_def.h.
+
+	* Moved other constants such as MAXIT_FE and LAI_WATER_FACTOR to
+	vicNl_def.h.
+
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2 to VIC 4.1.1 *****
 --------------------------------------------------------------------------------

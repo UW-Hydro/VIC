@@ -147,6 +147,21 @@
 #define BIG 2			/* big-endian flag */
 #define ERROR -999              /* Error Flag returned by subroutines */
 
+/***** Define maximum array sizes for model source code *****/
+#define MAX_VEG        12      /* maximum number of vegetation types per cell */
+#define MAX_LAYERS     3       /* maximum number of soil moisture layers */
+#define MAX_NODES      50      /* maximum number of soil thermal nodes */
+#define MAX_BANDS      10      /* maximum number of snow bands */
+#define MAX_FRONTS     3       /* maximum number of freezing and thawing front depths to store */
+#define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
+#define MAX_ZWTVMOIST  11      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
+
+/***** Number of iterations to use in solving the surface energy balance.
+       The original VIC model uses only 1 iteration for speed.  Increasing
+       the number of iterations improves precision, and is recommended
+       for single point comparisons with frozen soils *****/
+#define MAXIT_FE        25
+ 
 /***** Met file formats *****/
 #define ASCII 1
 #define BINARY 2
@@ -289,6 +304,10 @@ extern char ref_veg_ref_crop[];
 				   (Handbook of Hydrology) */
 #define PS_PM 101300		/* sea level air pressure in Pa */
 #define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
+
+/***** Coefficient multiplied by the LAI to determine the amount of
+       water that can be stored in the canopy *****/
+#define LAI_WATER_FACTOR 0.2
 
 /***** Carbon Cycling constants *****/
 

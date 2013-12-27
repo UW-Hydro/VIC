@@ -16,7 +16,7 @@ Usage:
 	vicNl [-v | -o | -g<global_parameter_file>]
 
 	  v: display version information
-	  o: display compile-time options settings (set in user_def.h)
+	  o: display compile-time options settings (set in .h files)
 	  g: read model parameters from <global_parameter_file>.
 	     <global_parameter_file> is a file that contains all needed model
 	     parameters as well as model option flags, and the names and
@@ -26,7 +26,7 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes between VIC 4.1.2_wet and VIC 4.1.2.h *****
+***** Description of changes between VIC 4.2 and VIC 4.1.2 *****
 --------------------------------------------------------------------------------
 
 New Features:
@@ -224,16 +224,66 @@ Added soil moisture content for half-space below bottom soil layer
 Bug Fixes:
 ----------
 
+Fixed incorrect assignment of input forcing variables that are moisture fluxes (all forms of precipitation and channel inflow) when ALMA_INPUT is TRUE.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	When ALMA_INPUT was TRUE, VIC was not rescaling moisture fluxes such
+	as precipitation to an hourly time step correctly in initialize_atmos.
+	This led to incorrect assignment of these fluxes to the atmos array.
+	This has been fixed.
 
 
 
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.g *****
---------------------------------------------------------------------------------
+
+Fixed selection of starting point in forcing file when starting in the middle of a day
+
+	Files Affected:
+
+	make_dmy.c
+
+	Description:
+
+	For the case of STARTHOUR not equal to 0, VIC was not finding the
+	correct starting record in the forcing file, due to its missing a
+	check on the hour of the forcing record.  This has been fixed.
 
 
-Bug Fixes:
-----------
+
+
+Fixed incorrect handling of case of a mix of cells with and without lakes.
+
+	Files Affected:
+
+	initialize_model_state.c
+	read_lakeparam.c
+
+	Description:
+
+	VIC was neither reading the lake parameter file correctly nor
+	initializing the lake data structures correctly for the case of a
+	mix of cells with and without lakes within a single lake parameter
+	file.  This has been fixed.
+
+
+
+
+Fixed use of tmp_moist array without initialization.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	Fixed use of tmp_moist array without initialization.
+
+
+
 
 Fixed use of uninitialized soil moisture values on first time step.
 
@@ -286,14 +336,6 @@ Fixed bug in root zone calculation.
 
 
 
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.g to VIC 4.1.2.f *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
-
 Fixed error in passing SensibleHeat to func_atmos_energy_bal.
 
 	Files Affected:
@@ -308,14 +350,6 @@ Fixed error in passing SensibleHeat to func_atmos_energy_bal.
 
 
 
-
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.f to VIC 4.1.2.e *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
 
 Fixed use of uninitialized variable in cold nose fix for frozen soil
 
@@ -351,14 +385,6 @@ Fixed bug in converting from ALMA_INPUT moisture flux units
 
 
 
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.e to VIC 4.1.2.d *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
-
 Fixed incorrect reporting of canopy energy balance terms.
 
 	Files Affected:
@@ -382,14 +408,6 @@ Fixed incorrect reporting of canopy energy balance terms.
 
 
 
-
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.d to VIC 4.1.2.c *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
 
 Fixed incorrect summing of rain and snow components of precipitation over grid
 cell
@@ -422,14 +440,6 @@ input forcings instead of vapor pressure.
 
 
 
-
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.c to VIC 4.1.2.b *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
 
 Incorrect handling of user-supplied tskc (cloud fraction) for LW_CLOUD==LW_CLOUD_DEARDORFF
 
@@ -512,14 +522,6 @@ Computed longwave sometimes is extremely large at high latitudes.
 
 
 
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.b to VIC 4.1.2.a *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
-
 VIC was unnecessarily requiring WIND to be supplied as an input forcing.
 
 	Files Affected:
@@ -563,14 +565,6 @@ shortwave is supplied as a forcing.
 
 
 
-
---------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.a to VIC 4.1.2 *****
---------------------------------------------------------------------------------
-
-
-Bug Fixes:
-----------
 
 Incorrect timing of disaggregated radiation and air temperature when daily
 forcings are supplied and off_gmt is 0.

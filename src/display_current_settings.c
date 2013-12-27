@@ -50,7 +50,8 @@ void display_current_settings(int                 mode,
 	      features.						TJB
   2012-Jan-16 Removed LINK_DEBUG code				BN
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
-  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.	TJB
+  2013-Dec-26 Removed LWAVE_COR option.					TJB
 **********************************************************************/
 {
 
@@ -69,7 +70,7 @@ void display_current_settings(int                 mode,
   }
 
   fprintf(stderr,"\n");
-  fprintf(stderr,"COMPILE-TIME OPTIONS (set in user_def.h)\n");
+  fprintf(stderr,"COMPILE-TIME OPTIONS (set in .h files)\n");
   fprintf(stderr,"----------------------------------------\n");
 
   fprintf(stderr,"\n");
@@ -155,7 +156,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Other Constants:\n");
   fprintf(stderr,"LAI_WATER_FACTOR\t%f\n",LAI_WATER_FACTOR);
-  fprintf(stderr,"LWAVE_COR\t\t%f\n",LWAVE_COR);
   fprintf(stderr,"MAXIT_FE\t\t%2d\n",MAXIT_FE);
 
   if (mode == DISP_COMPILE_TIME) {

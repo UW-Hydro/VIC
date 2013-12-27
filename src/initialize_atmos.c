@@ -129,6 +129,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      VP after the interpolation of MTCLIM VP, so that it overwrites
 	      the MTCLIM VP.							TJB
   2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.				TJB
+  2013-Nov-21 Added check on ALMA_INPUT in rescaling of forcing variables to
+	      hourly step for local_forcing_data.				TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -479,15 +481,15 @@ void initialize_atmos(atmos_data_struct        *atmos,
           i = (idx - global_param.starthour + hour_offset_int)/param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1];
           if (i < 0) i += fstepspday;
           if (i >= (Ndays*fstepspday)) i -= fstepspday;
-          if (   type == PREC
-              || type == RAINF
-              || type == CRAINF
-              || type == LSRAINF
-              || type == SNOWF
-              || type == CSNOWF
-              || type == LSSNOWF
-              || type == CHANNEL_IN
-             ) {
+          if ((   type == PREC
+               || type == RAINF
+               || type == CRAINF
+               || type == LSRAINF
+               || type == SNOWF
+               || type == CSNOWF
+               || type == LSSNOWF
+               || type == CHANNEL_IN)
+               && !options.ALMA_INPUT) {
             /* Amounts per step need to be scaled to new step length */
             local_forcing_data[type][idx] = forcing_data[type][i]/param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1];
           }

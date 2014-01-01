@@ -107,6 +107,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-26 Added LOG_MATRIC option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -379,6 +380,11 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.PLAPSE = TRUE;
 	}
+      }
+      else if(strcasecmp("SPATIAL_SNOW",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.SPATIAL_SNOW=TRUE;
+        else options.SPATIAL_SNOW = FALSE;
       }
       else if(strcasecmp("SW_PREC_THRESH",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

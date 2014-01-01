@@ -172,6 +172,7 @@ double calc_surf_energy_bal(double             Le,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added photosynthesis.					TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -745,21 +746,21 @@ double calc_surf_energy_bal(double             Le,
       
       /** Check for Thin Snowpack which only Partially Covers Grid Cell
 	  exists only if not snowing and snowpack has started to melt **/
-#if SPATIAL_SNOW
-      snow->coverage = calc_snow_coverage(&snow->store_snow, 
-					  soil_con->max_snow_distrib_slope, 
-					  snow_coverage, snow->swq,
-					  old_swq, snow->depth, old_depth, 
-					  (*melt) - snow->vapor_flux, 
-					  &snow->max_snow_depth, snowfall, 
-					  &snow->store_swq, 
-					  &snow->snow_distrib_slope,
-					  &snow->store_coverage);
-      
-#else
-      if ( snow->swq > 0 ) snow->coverage = 1.;
-      else snow->coverage = 0.;
-#endif // SPATIAL_SNOW
+      if (options.SPATIAL_SNOW) {
+        snow->coverage = calc_snow_coverage(&snow->store_snow, 
+					    soil_con->max_snow_distrib_slope, 
+					    snow_coverage, snow->swq,
+					    old_swq, snow->depth, old_depth, 
+					    (*melt) - snow->vapor_flux, 
+					    &snow->max_snow_depth, snowfall, 
+					    &snow->store_swq, 
+					    &snow->snow_distrib_slope,
+					    &snow->store_coverage);
+      }
+      else {
+        if ( snow->swq > 0 ) snow->coverage = 1.;
+        else snow->coverage = 0.;
+      }
 
       if ( snow->surf_temp > 0 ) 
 	energy->snow_flux = ( energy->grnd_flux + energy->deltaH 
@@ -775,9 +776,8 @@ double calc_surf_energy_bal(double             Le,
       snow->surf_temp  = 0;
       snow->pack_temp  = 0;
       snow->coverage   = 0;
-#if SPATIAL_SNOW
-      snow->store_swq = 0.;
-#endif // SPATIAL_SNOW
+      if (options.SPATIAL_SNOW)
+        snow->store_swq = 0.;
     }
     snow->vapor_flux *= -1;
   }

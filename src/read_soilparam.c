@@ -122,6 +122,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      option.							TJB
   2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -598,16 +599,19 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.FS_ACTIVE = (char)tempint;
 
       /* read minimum snow depth for full coverage */
-#if SPATIAL_SNOW
-      token = strtok (NULL, delimiters);
-      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
-      if( token == NULL ) {
-        sprintf(ErrStr,"ERROR: Can't find values for SPATIAL SNOW in soil file\n");
-        nrerror(ErrStr);
+      if (options.SPATIAL_SNOW) {
+        token = strtok (NULL, delimiters);
+        while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+        if( token == NULL ) {
+          sprintf(ErrStr,"ERROR: Can't find values for SPATIAL SNOW in soil file\n");
+          nrerror(ErrStr);
+        }
+        sscanf(token, "%lf", &tempdbl);
+        temp.max_snow_distrib_slope = tempdbl;
       }
-      sscanf(token, "%lf", &tempdbl);
-      temp.max_snow_distrib_slope = tempdbl;
-#endif // SPATIAL_SNOW
+      else {
+        temp.max_snow_distrib_slope = 0;
+      }
 
       /* read slope of frozen soil distribution */
 #if SPATIAL_FROST
@@ -716,12 +720,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
       /**********************************************
         Validate Spatial Snow/Frost Params
       **********************************************/
-#if SPATIAL_SNOW
-      if (temp.max_snow_distrib_slope < 0.0) {
-        sprintf(ErrStr,"max_snow_distrib_slope (%f) must be positive.\n", temp.max_snow_distrib_slope);
-        nrerror(ErrStr);
+      if (options.SPATIAL_SNOW) {
+        if (temp.max_snow_distrib_slope < 0.0) {
+          sprintf(ErrStr,"max_snow_distrib_slope (%f) must be positive.\n", temp.max_snow_distrib_slope);
+          nrerror(ErrStr);
+        }
       }
-#endif // SPATIAL_SNOW
 
 #if SPATIAL_FROST
       if (temp.frost_slope < 0.0) {

@@ -125,6 +125,7 @@ void initialize_global() {
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Dec-26 Added LOG_MATRIC option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -172,6 +173,7 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
+  options.SPATIAL_SNOW          = FALSE;
   options.SW_PREC_THRESH        = 0;
   options.TFALLBACK             = TRUE;
   options.VP_INTERP             = TRUE;

@@ -131,6 +131,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.								TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -406,12 +407,15 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 
     /** Minimum Snow Depth of Full Coverage **/
     fscanf(soilparam,"%s",tmpstr);
-#if SPATIAL_SNOW
-    strcpy(namestr,soilparamdir);
-    strcat(namestr,"/");
-    strcat(namestr,tmpstr);
-    temp.max_snow_distrib_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
-#endif // SPATIAL_SNOW
+    if (options.SPATIAL_SNOW) {
+      strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
+      strcat(namestr,tmpstr);
+      temp.max_snow_distrib_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
+    }
+    else {
+      temp.max_snow_distrib_slope = 0;
+    }
 
     /** Slope of Frozen Soil Distribution **/
     fscanf(soilparam,"%s",tmpstr);

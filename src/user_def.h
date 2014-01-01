@@ -27,6 +27,7 @@
 	      LOG_MATRIC run-time option (vicNl_def.h).			TJB
   2013-Dec-26 Removed CLOSE_ENERGY option (moved into options struct).	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct (vicNl_def.h).	TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -60,8 +61,3 @@
 #define SPATIAL_FROST FALSE
 #define FROST_SUBAREAS 10
 
-/***** If TRUE VIC uses a uniform distribution to simulate the partial
-       coverage of the surface by a thin snowpack.  Coverage is 
-       assumed to be uniform after snowfall until the pack begins to 
-       melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
-#define SPATIAL_SNOW FALSE

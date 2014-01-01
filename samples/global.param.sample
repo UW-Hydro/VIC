@@ -16,14 +16,20 @@ STARTHOUR	00	# hour model simulation starts
 ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
+
+#######################################################################
+# Energy Balance Parameters
+#######################################################################
 FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water balance only
-FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
+#CLOSE_ENERGY	FALSE	# TRUE = all energy balance calculations (canopy air, canopy snow, ground snow,
+                        # and ground surface) are iterated to minimize the total column error
 
 #######################################################################
 # Soil Temperature Parameters
 # VIC will choose appropriate values for QUICK_FLUX and IMPLICIT depending on values of FULL_ENERGY and FROZEN_SOIL; the user should only need to override VIC's choices in special cases.
 # The other options in this section are only applicable when FROZEN_SOIL is TRUE and their values depend on the application.
 #######################################################################
+FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
 #IMPLICIT	TRUE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
 #QUICK_SOLVE	FALSE	# TRUE = Use Liang et al., 1999 formulation for iteration, but explicit finite difference method for final step.
@@ -60,8 +66,6 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# Default 	= AR_406_FULL
-#CLOSE_ENERGY	FALSE	# TRUE = all energy balance calculations (canopy air, canopy snow, ground snow,
-                        # and ground surface) are iterated to minimize the total column error
 
 #######################################################################
 # Meteorological Forcing Disaggregation Parameters
@@ -94,6 +98,11 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #LOG_MATRIC	FALSE	# TRUE = use the linear interpolation of the logarithm of the matric potential
                         # from the two surrounding layers to estimate the soil moisture drainage from each
                         # layer (Boone and Wetzel, 1996).
+#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
+                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
+                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
+                        # in the soil paramter file containing the snow distibution slope parameter
+                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # State Files and Parameters

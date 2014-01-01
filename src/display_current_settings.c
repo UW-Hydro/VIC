@@ -57,6 +57,7 @@ void display_current_settings(int                 mode,
 	      run-time option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 **********************************************************************/
 {
 
@@ -115,11 +116,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"FROST_SUBAREAS\t\t%d\n",FROST_SUBAREAS);
 #else
   fprintf(stderr,"SPATIAL_FROST\t\tFALSE\n");
-#endif
-#if SPATIAL_SNOW
-  fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
-#else
-  fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
 #endif
 
   fprintf(stderr,"\n");
@@ -268,6 +264,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"QUICK_SOLVE\t\tTRUE\n");
   else
     fprintf(stderr,"QUICK_SOLVE\t\tFALSE\n");
+  if (options.SPATIAL_SNOW == TRUE)
+    fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
+  else
+    fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
   if (options.SNOW_ALBEDO == USACE)
     fprintf(stderr,"SNOW_ALBEDO\t\tUSACE\n");
   else if (options.SNOW_ALBEDO == SUN1999)

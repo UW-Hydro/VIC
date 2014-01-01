@@ -619,11 +619,13 @@ Cleanup of compile-time options
 	calc_atmos_energy_bal.c
 	calc_forcing_stats.c (removed)
 	calc_longwave.c
+	calc_surf_energy_bal.c
 	display_current_settings.c
 	frozen_soil.c
 	full_energy.c
 	func_surf_energy_bal.c
 	get_global_param.c
+	ice_melt.c
 	initialize_atmos.c
 	initialize_global.c
 	initialize_model_state.c
@@ -638,11 +640,13 @@ Cleanup of compile-time options
 	runoff.c
 	soil_conduction.c
 	soil_thermal_eqn.c
+	SnowPackEnergyBalance.c
+	solve_snow.c
 	surface_fluxes.c
 	user_def.h
 	vicNl_def.h
 	vicNl.h
-	write_model_state.h
+	write_model_state.c
 
 	Description:
 
@@ -661,6 +665,8 @@ Cleanup of compile-time options
 	run-time option.
 
 	* Moved CLOSE_ENERGY from compile-time to run-time options.
+
+	* Moved SPATIAL_SNOW from compile-time to run-time options.
 
 	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
 	vicNl_def.h.

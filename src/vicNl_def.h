@@ -135,6 +135,7 @@
   2013-Dec-26 Added LOG_MATRIC option.					TJB
   2013-Dec-26 Added CLOSE_ENERGY option.				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -759,6 +760,7 @@ typedef struct {
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
   char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
   int    Ncanopy;        /* Number of canopy layers in the model. */
+  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
@@ -786,6 +788,10 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  int    SPATIAL_SNOW;   /* TRUE = use a uniform distribution to simulate the
+                            partial coverage of the surface by a thin snowpack.
+                            Coverage is assumed to be uniform after snowfall
+                            until the pack begins to melt. */
   float  SW_PREC_THRESH; /* Minimum daily precipitation [mm] that can cause "dimming" of incoming shortwave radiation */
   char   TFALLBACK;      /* TRUE = when any temperature iterations fail to converge,
                                    use temperature from previous time step; the number
@@ -801,7 +807,6 @@ typedef struct {
                             VP_ITER_ALWAYS = always iterate with SW
                             VP_ITER_ANNUAL = use annual Epot/PRCP criterion
                             VP_ITER_CONVERGE = always iterate until convergence */
-  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
@@ -936,9 +941,7 @@ typedef struct {
   double   max_infil;                 /* maximum infiltration rate */
   double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per layer */
   double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per node */
-#if SPATIAL_SNOW
-  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1. */
-#endif // SPATIAL_SNOW
+  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1.  Niu and Yang (2007) observations imply 100% cover for depths > 0.2 m during melt season in the continental US, implying a slope of 0.4 m. */
   double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter (mm/mm) */
   double   porosity[MAX_LAYERS];      /* porosity (fraction) */
   double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction of mineral soil volume) */

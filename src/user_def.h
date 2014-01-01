@@ -31,14 +31,9 @@
   2013-Dec-27 Moved SPATIAL_FROST to options_struct (vicNl_def.h).	TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct (vicNl_def.h).	TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
-
-/***** If TRUE VIC does not rewind the vegetation, state, and snow
-       band files before read data for each cell.  This saves time
-       but requires that all grid cells are listed in the same
-       order as the soil parameter file *****/
-#define NO_REWIND FALSE
 

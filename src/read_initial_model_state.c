@@ -89,6 +89,7 @@ void read_initial_model_state(FILE                *init_state,
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -122,19 +123,7 @@ void read_initial_model_state(FILE                *init_state,
   snow    = prcp->snow;
   energy  = prcp->energy;
   lake_var = &prcp->lake_var;
-  
-#if !NO_REWIND 
-  rewind(init_state);
-  
-  /* skip header */
-  if ( options.BINARY_STATE_FILE ) 
-    fread(&tmpstr, sizeof(int)*5, 1, init_state);
-  else {
-    fgets(tmpstr, MAXSTRING, init_state);
-    fgets(tmpstr, MAXSTRING, init_state);
-  }
-#endif
-  
+
   /* read cell information */
   if ( options.BINARY_STATE_FILE ) {
     fread( &tmp_cellnum, sizeof(int), 1, init_state );

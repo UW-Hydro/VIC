@@ -61,6 +61,7 @@ void display_current_settings(int                 mode,
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 {
 
@@ -88,14 +89,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"VERBOSE\t\t\tTRUE\n");
 #else
   fprintf(stderr,"VERBOSE\t\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Input Files:\n");
-#if NO_REWIND
-  fprintf(stderr,"NO_REWIND\t\tTRUE\n");
-#else
-  fprintf(stderr,"NO_REWIND\t\tFALSE\n");
 #endif
 
   fprintf(stderr,"\n");

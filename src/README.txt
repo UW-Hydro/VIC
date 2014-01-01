@@ -643,9 +643,11 @@ Cleanup of compile-time options
 	output_list_utils.c
 	prepare_full_energy.c
 	put_data.c
+	read_lakeparam.c
 	read_initial_model_state.c
 	read_soilparam_arc.c
 	read_soilparam.c
+	read_vegparam.c
 	redistribute_during_storm.c
 	runoff.c
 	snow_intercept.c
@@ -678,6 +680,9 @@ Cleanup of compile-time options
 	* Removed the EXCESS_ICE option.
 
 	* Removed the QUICK_FS option.
+
+	* Removed the NO_REWIND option.  All parameter files must contain the
+	same grid cells in the same order.
 
 	* Replaced the LOW_RES_MOIST compile-time option with LOG_MATRIC
 	run-time option.

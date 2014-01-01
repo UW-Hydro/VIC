@@ -106,6 +106,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Dec-26 Added LOG_MATRIC option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -944,18 +945,6 @@ global_param_struct get_global_param(filenames_struct *names,
     if ( QUICK_FS ) 
       fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
   }
-  if( EXCESS_ICE ) {
-    if ( !options.FULL_ENERGY )
-      nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
-    if ( !options.FROZEN_SOIL )
-      nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
-    if ( options.QUICK_SOLVE ) {
-      fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
-      options.QUICK_SOLVE=FALSE;  
-    }    
-    if ( QUICK_FS ) 
-      nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
-  }
   if(options.Nlayer > MAX_LAYERS) {
     sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
@@ -1027,8 +1016,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,".... Thermal nodes are exponentially distributed with depth.\n");
   else
     fprintf(stderr,".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
-  if( EXCESS_ICE )
-    fprintf(stderr,".... Excess ground ice is being considered.\n\t\tTherefore, ground ice (as a volumetric fraction) must be initialized for each\n\t\t   soil layer in the soil file.\n\t\tCAUTION: When excess ice melts, subsidence occurs.\n\t\t  Therefore, soil layer depths, damping depth, thermal node depths,\n\t\t     bulk densities, porosities, and other properties are now dynamic!\n\t\t  EXERCISE EXTREME CAUTION IN INTERPRETING MODEL OUTPUT.\n\t\t  It is recommended to add OUT_SOIL_DEPTH to your list of output variables.\n");
   if ( QUICK_FS ){
     fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n", QUICK_FS_TEMPS);
   }

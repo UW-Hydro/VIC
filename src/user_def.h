@@ -26,6 +26,7 @@
   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option (user_def.h) with
 	      LOG_MATRIC run-time option (vicNl_def.h).			TJB
   2013-Dec-26 Removed CLOSE_ENERGY option (moved into options struct).	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -64,11 +65,3 @@
        assumed to be uniform after snowfall until the pack begins to 
        melt. SiB uses 0.076, from Rosemount I want 0.155cm depth ~ 0.028mm swq *****/
 #define SPATIAL_SNOW FALSE
-
-/***** If TRUE VIC allows for excess ground ice, i.e. an expanded porosity
-       to account for an initial volumetric ice fraction larger than
-       soil porosity.  The porosity decreases as the excess ice melts.  
-       Once porosity reaches the soil porosity (1-bulk density/soil density), 
-       it does not change.  Initial volumetric ice fraction must be 
-       defined in the soil file for each soil layer. *****/
-#define EXCESS_ICE FALSE

@@ -1869,11 +1869,7 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
 }
 
 int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
-#if EXCESS_ICE
-		    veg_con_struct veg_con, int SubsidenceUpdate, double total_meltwater)
-#endif
-		    veg_con_struct veg_con)
+		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con, veg_con_struct veg_con)
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1932,6 +1928,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1988,10 +1985,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
  
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;
-#if EXCESS_ICE
-  if(SubsidenceUpdate > 0 ) 
-    inflow_volume += total_meltwater*lakefrac * 0.001 * soil_con.cell_area*lake_con.Cl[0];
-#endif
  
   /**********************************************************************
    * 2. calculate change in lake level for lake outflow calculation
@@ -2328,10 +2321,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
                                                     soil_con.expt_node,
                                                     soil_con.bubble_node,
 #endif // QUICK_FS
-#if EXCESS_ICE
-                                                    soil_con.porosity_node,
-                                                    soil_con.effective_porosity_node,
-#endif // EXCESS_ICE
                                                     moist, soil_con.depth,
                                                     soil_con.soil_dens_min,
                                                     soil_con.bulk_dens_min,
@@ -2524,11 +2513,7 @@ void advect_soil_veg_storage(double lakefrac,
   for(lidx=0;lidx<options.Nlayer;lidx++) {
     if (veg_con->root[lidx] > 0)
       cell->rootmoist += cell->layer[lidx].moist;
-#if EXCESS_ICE
-    cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#else
     cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#endif
   }
   cell->wetness /= options.Nlayer;
 

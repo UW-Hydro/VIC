@@ -151,6 +151,7 @@ int  put_data(dist_prcp_struct  *prcp,
   2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, and OUT_APAR.		TJB
   2013-Jul-25 Added OUT_LITTERFALL, OUT_RHET, OUT_NEE, OUT_CLITTER,
 	      OUT_CINTER, and OUT_CSLOW. 				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -564,19 +565,6 @@ int  put_data(dist_prcp_struct  *prcp,
 
   } // End loop over veg
  
-
-  /*****************************************
-    Aggregation of Dynamic Soil Properties      
-   *****************************************/
-#if EXCESS_ICE
-  for(index=0;index<options.Nlayer;index++) {
-    out_data[OUT_SOIL_DEPTH].data[index]  = soil_con->depth[index];
-    out_data[OUT_SUBSIDENCE].data[index]  = soil_con->subsidence[index];
-    out_data[OUT_POROSITY].data[index]    = soil_con->effective_porosity[index];
-  }  
-  for(index=0;index<options.Nnode;index++) 
-    out_data[OUT_ZSUM_NODE].data[index]   = soil_con->Zsum_node[index];
-#endif // EXCESS_ICE
 
   /*****************************************
     Finish aggregation of special-case variables

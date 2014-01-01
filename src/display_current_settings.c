@@ -56,6 +56,7 @@ void display_current_settings(int                 mode,
   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC 
 	      run-time option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
 
@@ -119,11 +120,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
 #else
   fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
-#endif
-#if EXCESS_ICE
-  fprintf(stderr,"EXCESS_ICE\t\tTRUE\n");
-#else
-  fprintf(stderr,"EXCESS_ICE\t\tFALSE\n");
 #endif
 
   fprintf(stderr,"\n");

@@ -76,6 +76,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      will save lake state data.  If no lake is present, default NULL
 	      values will be stored.						TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -128,11 +129,6 @@ void write_model_state(dist_prcp_struct    *prcp,
   if ( options.BINARY_STATE_FILE ) {
     Nbytes =   options.Nnode * sizeof(double) // dz_node
 	       + options.Nnode * sizeof(double) // Zsum_node
-#if EXCESS_ICE
-	       + options.Nlayer * sizeof(double) //soil depth
-	       + options.Nlayer * sizeof(double) //effective porosity
-	       + sizeof(double) //damping depth
-#endif
 	       + (Nveg+1) * sizeof(double) // mu
 	       + (Nveg+1) * sizeof(char) // STILL_STORM
 	       + (Nveg+1) * sizeof(int) // DRY_TIME
@@ -213,35 +209,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( filep->statefile, "\n" );
-  
-  /* Write dynamic soil properties */
-#if EXCESS_ICE
-  /* Write soil depth */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->depth[lidx], sizeof(double), 1,
-	      filep->statefile );
-    else
-      fprintf( filep->statefile, "%f ", soil_con->depth[lidx] );
-  }
-  
-  /* Write effective porosity */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->effective_porosity[lidx], sizeof(double), 1,
-	      filep->statefile );
-    else
-      fprintf( filep->statefile, "%f ", soil_con->effective_porosity[lidx] );
-  }
-  
-  /* Write damping depth */
-  if ( options.BINARY_STATE_FILE )
-    fwrite( &soil_con->dp, sizeof(double), 1,
-	    filep->statefile );
-  else
-    fprintf( filep->statefile, "%f\n", soil_con->dp );
-#endif
-  
+ 
   /* Output for all vegetation types */
   for ( veg = 0; veg <= Nveg; veg++ ) {
     

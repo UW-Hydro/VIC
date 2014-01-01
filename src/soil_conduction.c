@@ -155,12 +155,6 @@ void set_node_parameters(double   *dz_node,
 #if QUICK_FS
 			 double ***ufwc_table_node,
 #endif
-#if EXCESS_ICE
-			 double    *porosity,
-			 double    *effective_porosity,
-			 double    *porosity_node,
-			 double    *effective_porosity_node,
-#endif
 			 int       Nnodes,
 			 int       Nlayers,
 			 char      FS_ACTIVE) {
@@ -210,6 +204,7 @@ void set_node_parameters(double   *dz_node,
 	      beta and gamma.						JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2009-Jul-31 Removed unused layer_node_fract array.			TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -241,20 +236,12 @@ void set_node_parameters(double   *dz_node,
 			      + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
       expt_node[nidx]      = (expt[lidx] + expt[lidx+1]) / 2.;
       bubble_node[nidx]    = (bubble[lidx] + bubble[lidx+1]) / 2.;
-#if EXCESS_ICE
-      porosity_node[nidx]    = (porosity[lidx] + porosity[lidx+1]) / 2.;
-      effective_porosity_node[nidx]    = (effective_porosity[lidx] + effective_porosity[lidx+1]) / 2.;
-#endif
     }
     else { 
       /* node completely in layer */
       max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / 1000;
       expt_node[nidx]      = expt[lidx];
       bubble_node[nidx]    = bubble[lidx];
-#if EXCESS_ICE
-      porosity_node[nidx]  = porosity[lidx];
-      effective_porosity_node[nidx] = effective_porosity[lidx];
-#endif
     }
     if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
@@ -319,10 +306,6 @@ int distribute_node_moisture_properties(double *moist_node,
 #else
 					double *expt_node,
 					double *bubble_node,
-#endif
-#if EXCESS_ICE
-					double *porosity_node,
-					double *effective_porosity_node,
 #endif
 					double *moist,
 					double *depth,
@@ -395,6 +378,7 @@ int distribute_node_moisture_properties(double *moist_node,
 	      simulations.  SLAB_MOIST_FRACT controls this option, if
 	      set < 0, original option used, otherwise the slab layer is
 	      set using SLAB_MOIST_FRACT * max_moist_node.		KAC via TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 
 *********************************************************************/
 
@@ -451,10 +435,6 @@ int distribute_node_moisture_properties(double *moist_node,
 #else
       ice_node[nidx] 
 	= moist_node[nidx] - maximum_unfrozen_water(T_node[nidx],
-#if EXCESS_ICE
-						    porosity_node[nidx],
-						    effective_porosity_node[nidx],
-#endif
 						    max_moist_node[nidx], 
 						    bubble_node[nidx],
 						    expt_node[nidx]);
@@ -518,10 +498,6 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *frost_fract,
 			       double             frost_slope,
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-			       double            *porosity,
-			       double            *effective_porosity,
-#endif // EXCESS_ICE
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -557,6 +533,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 	      the appearance of min_liq.			TJB
   2009-Jul-31 Removed unused layer_node_fract array.		TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 
 **************************************************************/
 
@@ -648,17 +625,9 @@ int estimate_layer_ice_content(layer_data_struct *layer,
         for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = layer[lidx].moist 
 #if QUICK_FS
-	    - maximum_unfrozen_water_quick(tmpT[nidx][frost_area], max_moist[lidx], 
-					   ufwc_table_layer[lidx]);
+	    - maximum_unfrozen_water_quick(tmpT[nidx][frost_area], max_moist[lidx], ufwc_table_layer[lidx]);
 #else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(tmpT[nidx][frost_area], porosity[lidx], 
-				     effective_porosity[lidx], max_moist[lidx], 
-				     bubble[lidx], expt[lidx]);
-#else
-	    - maximum_unfrozen_water(tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx], 
-				     expt[lidx]);
-#endif
+	    - maximum_unfrozen_water(tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx], expt[lidx]);
 #endif
 	  if ( tmp_ice[nidx][frost_area] < 0 ) tmp_ice[nidx][frost_area] = 0.;
         }
@@ -716,10 +685,6 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 			       double            *frost_fract,
 			       double             frost_slope,
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-			       double            *porosity,
-			       double            *effective_porosity,
-#endif // EXCESS_ICE
 			       char               FS_ACTIVE) {
 /**************************************************************
   This subroutine estimates the temperature and ice content of all soil 
@@ -735,6 +700,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   Modifications:
   2011-Jul-19 Fixed bug in how ice content was computed for case of 
 	      SPATIAL_FROST = TRUE.					TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 
 ********************************************************************/
 
@@ -783,11 +749,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 #if QUICK_FS
 	    - maximum_unfrozen_water_quick(tmpT, max_moist[lidx], ufwc_table_layer[lidx]);
 #else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(tmpT, porosity[lidx], effective_porosity[lidx], max_moist[lidx], bubble[lidx], expt[lidx]);
-#else
 	    - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
 #endif
         layer[lidx].ice[frost_area] = frost_fract[frost_area] * tmp_ice;
         if (layer[lidx].ice[frost_area] < 0) {
@@ -805,11 +767,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 #if QUICK_FS
 	    - maximum_unfrozen_water_quick(layer[lidx].T, max_moist[lidx], ufwc_table_layer[lidx]);
 #else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(layer[lidx].T, porosity[lidx], effective_porosity[lidx], max_moist[lidx], bubble[lidx], expt[lidx]);
-#else
 	    - maximum_unfrozen_water(layer[lidx].T, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
 #endif
 
       if (layer[lidx].ice < 0) {
@@ -864,6 +822,7 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 	      organic fraction into account.				TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 
 ********************************************************************/
 
@@ -949,10 +908,6 @@ void find_0_degree_fronts(energy_bal_struct *energy,
 }
 
 double maximum_unfrozen_water(double T,
-#if EXCESS_ICE
-			      double porosity,
-			      double effective_porosity,
-#endif //EXCESS_ICE
                               double max_moist,
                               double bubble,
                               double expt) {
@@ -968,6 +923,7 @@ double maximum_unfrozen_water(double T,
 	      the Cold Region Climate Study".				JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2009-Feb-10 Modified to return max_moist if T > 0C.			KAC via TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 
   double unfrozen;

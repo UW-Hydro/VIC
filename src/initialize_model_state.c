@@ -119,6 +119,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2013-Jul-25 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -159,9 +160,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   surf_swq;
   double   pack_swq;
   double   TreeAdjustFactor[MAX_BANDS];
-#if EXCESS_ICE
-  double   sum_mindepth, sum_depth_pre, sum_depth_post, tmp_mindepth;
-#endif
   double dt_thresh;
   int tmp_lake_idx;
 
@@ -283,90 +281,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 
   if(options.INIT_STATE) {
 
-#if EXCESS_ICE
-    sum_mindepth = 0;
-    sum_depth_pre = 0;
-    for( lidx = 0; lidx < options.Nlayer; lidx++ ){
-      tmp_mindepth = (float)(int)(soil_con->min_depth[lidx] * 1000 + 0.5) / 1000;	
-      sum_mindepth += tmp_mindepth;
-      sum_depth_pre += soil_con->depth[lidx];
-    }
-#endif
-
     read_initial_model_state(filep.init_state, prcp, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
 			     Ndist, *init_STILL_STORM, *init_DRY_TIME, lake_con);
-
-
-
-#if EXCESS_ICE
-    // calculate dynamic soil and veg properties if excess_ice is present
-    sum_depth_post = 0;
-    for( lidx = 0; lidx < options.Nlayer; lidx++ )
-      sum_depth_post += soil_con->depth[lidx];
-    if( sum_depth_post != sum_depth_pre) {
-      /*update soil_con properties*/
-      for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-        soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-        if (soil_con->organic[layer] > 0)
-          soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-	soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; 
-	soil_con->max_moist[lidx] = soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.;	
-      } //loop for each soil layer      
-      
-      /********update remaining soil_con properties**********/
-      /* update Maximum Infiltration for Upper Layers */
-      if(options.Nlayer==2)
-	soil_con->max_infil = (1.0+soil_con->b_infilt)*soil_con->max_moist[0];
-      else
-	soil_con->max_infil = (1.0+soil_con->b_infilt)*(soil_con->max_moist[0]+soil_con->max_moist[1]);
-      
-      /* Soil Layer Critical and Wilting Point Moisture Contents */
-      for(lidx=0;lidx<options.Nlayer;lidx++) {//soil layer
-	soil_con->Wcr[lidx]  = soil_con->Wcr_FRACT[lidx] * soil_con->max_moist[lidx];
-	soil_con->Wpwp[lidx] = soil_con->Wpwp_FRACT[lidx] * soil_con->max_moist[lidx];
-	if(soil_con->Wpwp[lidx] > soil_con->Wcr[lidx]) {
-	  sprintf(ErrStr,"Updated wilting point moisture (%f mm) is greater than updated critical point moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
-		  soil_con->Wpwp[lidx], soil_con->Wcr[lidx], lidx);
-	  nrerror(ErrStr);
-	}
-	if(soil_con->Wpwp[lidx] < soil_con->resid_moist[lidx] * soil_con->depth[lidx] * 1000.) {
-	  sprintf(ErrStr,"Updated wilting point moisture (%f mm) is less than updated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-		  soil_con->Wpwp[lidx], soil_con->resid_moist[lidx] * soil_con->depth[lidx] * 1000., lidx);
-	  nrerror(ErrStr);
-	}
-      }      
-      
-      /* If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
-	 parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c */
-      if(options.BASEFLOW == NIJSSEN2001) {
-	lidx = options.Nlayer-1;
-	soil_con->Dsmax = soil_con->Dsmax_orig * 
-	  pow((double)(1./(soil_con->max_moist[lidx]-soil_con->Ws_orig)), -soil_con->c) +
-	  soil_con->Ds_orig * soil_con->max_moist[lidx];
-	soil_con->Ds = soil_con->Ds_orig * soil_con->Ws_orig / soil_con->Dsmax_orig;
-	soil_con->Ws = soil_con->Ws_orig/soil_con->max_moist[lidx];
-      }
-      
-      /*********** update root fractions ***************/
-      calc_root_fractions(veg_con, soil_con);
-      
-#if VERBOSE
-      /* write changes to screen */
-      fprintf(stderr,"Soil properties initialized from state file:\n");
-      for(lidx=0;lidx<options.Nlayer;lidx++) {//soil layer
-	fprintf(stderr,"\tFor layer %d:\n",lidx+1);
-	fprintf(stderr,"\t\tDepth of soil layer = %.2f m.\n",soil_con->depth[lidx]);
-	fprintf(stderr,"\t\tEffective porosity = %.2f.\n",soil_con->effective_porosity[lidx]);
-	fprintf(stderr,"\t\tBulk density = %.2f kg/m^3.\n",soil_con->bulk_density[lidx]);
-      }
-      fprintf(stderr,"\tDamping depth = %.2f m.\n",soil_con->dp);
-      if(sum_depth_post == sum_mindepth)
-	fprintf(stderr,"\tExcess ice is no longer present in the soil column.\n");
-#endif //VERBOSE
-
-    }//updated initial conditions due to state file
-#endif //EXCESS_ICE
 
     /******Check that soil moisture does not exceed maximum allowed************/
     for ( dist = 0; dist < Ndist; dist ++ ) {
@@ -639,16 +556,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     }
   }
 
-  /********************************************
-    Initialize subsidence 
-  ********************************************/
-
-#if EXCESS_ICE
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) 
-    soil_con->subsidence[lidx] = 0.0;
-    
-#endif // EXCESS_ICE
-
   /******************************************
     Initialize soil thermal node properties 
   ******************************************/
@@ -675,10 +582,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #if QUICK_FS
 				soil_con->ufwc_table_node,
 #endif // QUICK_FS
-#if EXCESS_ICE
-				soil_con->porosity, soil_con->effective_porosity,
-				soil_con->porosity_node, soil_con->effective_porosity_node,
-#endif // EXCESS_ICE
 				Nnodes, options.Nlayer, soil_con->FS_ACTIVE);	  
 	  }
 	
@@ -696,10 +599,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						soil_con->expt_node,
 						soil_con->bubble_node,
 #endif // QUICK_FS
-#if EXCESS_ICE
-						soil_con->porosity_node,
-						soil_con->effective_porosity_node,
-#endif // EXCESS_ICE
 						moist[veg][band], 
 						soil_con->depth,
 						soil_con->soil_dens_min,
@@ -747,10 +646,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
-#endif // EXCESS_ICE
 					   soil_con->FS_ACTIVE);
             }
             else {
@@ -776,10 +671,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-						       soil_con->porosity,
-						       soil_con->effective_porosity,
-#endif // EXCESS_ICE
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);
 		
@@ -892,6 +783,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 	      distribute_node_moisture_properties.			KAC via TJB
   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -925,7 +817,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
     Update soil thermal node depths, thicknesses, and temperatures.
     CASE 3: Initialize Energy Balance Variables if not using quick
     ground heat flux, and no Initial Condition File Given 
-    (Currently this is the only case that works with EXCESS_ICE.)
   *****************************************************************/
 
   /*****************************************************************
@@ -1037,10 +928,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #if QUICK_FS
 				  soil_con->ufwc_table_node,
 #endif // QUICK_FS
-#if EXCESS_ICE
-				  soil_con->porosity, soil_con->effective_porosity,
-				  soil_con->porosity_node, soil_con->effective_porosity_node,
-#endif // EXCESS_ICE
 				  Nnodes, options.Nlayer, soil_con->FS_ACTIVE);	  
 	  }
 
@@ -1062,10 +949,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						  soil_con->expt_node,
 						  soil_con->bubble_node,
 #endif // QUICK_FS
-#if EXCESS_ICE
-						  soil_con->porosity_node,
-						  soil_con->effective_porosity_node,
-#endif // EXCESS_ICE
 						  moist[veg][band],
 						  soil_con->depth,
 						  soil_con->soil_dens_min,
@@ -1095,10 +978,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
-#endif // EXCESS_ICE
 					   soil_con->FS_ACTIVE);
               }
               else {
@@ -1124,10 +1003,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
 #endif // SPATIAL_FROST
-#if EXCESS_ICE
-						       soil_con->porosity,
-						       soil_con->effective_porosity,
-#endif // EXCESS_ICE
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      
 	      }

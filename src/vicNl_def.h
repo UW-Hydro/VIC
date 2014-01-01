@@ -134,6 +134,7 @@
   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
   2013-Dec-26 Added LOG_MATRIC option.					TJB
   2013-Dec-26 Added CLOSE_ENERGY option.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -263,12 +264,6 @@ extern char ref_veg_ref_crop[];
 /***** Physical Constants *****/
 #define RESID_MOIST      0.0        /* define residual moisture content 
 				       of soil column */
-#define MAX_ICE_INIT      0.95        /* define maximum volumetric ice fraction
-				       of soil column, for EXCESS_ICE option */
-#define ICE_AT_SUBSIDENCE 0.8        /* minimum ice/porosity fraction before
-					subsidence occurs, for EXCESS_ICE option */
-#define MAX_SUBSIDENCE    1.0        /* maximum depth of subsidence per layer per
-					time-step (mm) */
 #define ice_density      917.	    /* density of ice (kg/m^3) */
 #define T_lapse          6.5        /* temperature lapse rate of US Std 
 				       Atmos in C/km */
@@ -617,24 +612,17 @@ extern char ref_veg_ref_crop[];
 #define OUT_SNOW_PACKT_BAND     152  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SNOW_SURFT_BAND     153  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
 #define OUT_SWE_BAND            154  /* snow water equivalent in snow pack [mm] */
-// Dynamic Soil Property Terms - EXCESS_ICE option
-#if EXCESS_ICE
-#define OUT_SOIL_DEPTH          155  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          156  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            157  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           158  /* depths of thermal nodes [m] */
-#endif // EXCESS_ICE
 // Carbon-Cycling Terms
-#define OUT_APAR           159  /* absorbed PAR [W/m2] */
-#define OUT_GPP            160  /* gross primary productivity [g C/m2d] */
-#define OUT_RAUT           161  /* autotrophic respiration [g C/m2d] */
-#define OUT_NPP            162  /* net primary productivity [g C/m2d] */
-#define OUT_LITTERFALL     163  /* flux of carbon from living biomass into soil [g C/m2d] */
-#define OUT_RHET           164  /* soil respiration (heterotrophic respiration) [g C/m2d] */
-#define OUT_NEE            165  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
-#define OUT_CLITTER        166  /* Carbon density in litter pool [g C/m2d] */
-#define OUT_CINTER         167  /* Carbon density in intermediate pool [g C/m2d] */
-#define OUT_CSLOW          168  /* Carbon density in slow pool [g C/m2d] */
+#define OUT_APAR           155  /* absorbed PAR [W/m2] */
+#define OUT_GPP            156  /* gross primary productivity [g C/m2d] */
+#define OUT_RAUT           157  /* autotrophic respiration [g C/m2d] */
+#define OUT_NPP            158  /* net primary productivity [g C/m2d] */
+#define OUT_LITTERFALL     159  /* flux of carbon from living biomass into soil [g C/m2d] */
+#define OUT_RHET           160  /* soil respiration (heterotrophic respiration) [g C/m2d] */
+#define OUT_NEE            161  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
+#define OUT_CLITTER        162  /* Carbon density in litter pool [g C/m2d] */
+#define OUT_CINTER         163  /* Carbon density in intermediate pool [g C/m2d] */
+#define OUT_CSLOW          164  /* Carbon density in slow pool [g C/m2d] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -920,13 +908,6 @@ typedef struct {
   double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
 					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
-#if EXCESS_ICE
-  double   Ds_orig;                   /* fraction of maximum subsurface flow 
-					 rate */
-  double   Dsmax_orig;                /* maximum subsurface flow rate 
-					 (mm/day) */
-  double   Ws_orig;                   /* fraction of maximum soil moisture */
-#endif  
   float    AlbedoPar;                 /* soil albedo in PAR range (400-700nm) */
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
@@ -940,7 +921,7 @@ typedef struct {
   double   bulk_dens_min[MAX_LAYERS]; /* bulk density of mineral soil (kg/m^3) */
   double   bulk_dens_org[MAX_LAYERS]; /* bulk density of organic soil (kg/m^3) */
   double   c;                         /* exponent in ARNO baseflow scheme */
-  double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m).  In the case of EXCESS_ICE, this is the effective (dynamic) depth. */
+  double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m) */
   double   dp;                        /* soil thermal damping depth (m) */
   double   dz_node[MAX_NODES];        /* thermal node thickness (m) */
   double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
@@ -990,28 +971,7 @@ typedef struct {
   double   aspect;
   double   ehoriz;
   double   whoriz;
-#if EXCESS_ICE
-  double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m).  The effective depth will always be >= this value. */
-  double   porosity_node[MAX_NODES];  /* porosity for each thermal node */
-  double   effective_porosity[MAX_LAYERS]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
-  double   effective_porosity_node[MAX_NODES]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
-  double   Wcr_FRACT[MAX_LAYERS];
-  double   Wpwp_FRACT[MAX_LAYERS];
-  double   subsidence[MAX_LAYERS];      /* subsidence of soil layer, mm*/
-#endif // EXCESS_ICE
 } soil_con_struct;
-
-/*****************************************************************
-  This structure stores the dynamic soil properties for a grid cell
-  *****************************************************************/
-#if EXCESS_ICE
-typedef struct {
-  double soil_depth[MAX_LAYERS];             /* soil moisture layer depths [m] */
-  double subsidence[MAX_LAYERS];             /* subsidence of soil layer [mm] */
-  double porosity[MAX_LAYERS];               /* porosity [mm/mm] */
-  double zsum_node[MAX_NODES];               /* depths of thermal nodes [m] */
-} dynamic_soil_struct;
-#endif // EXCESS_ICE
 
 /*******************************************************************
   This structure stores information about the vegetation coverage of

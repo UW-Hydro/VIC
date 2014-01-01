@@ -620,15 +620,29 @@ Cleanup of compile-time options
 	calc_forcing_stats.c (removed)
 	calc_longwave.c
 	display_current_settings.c
+	frozen_soil.c
+	full_energy.c
+	func_surf_energy_bal.c
 	get_global_param.c
 	initialize_atmos.c
 	initialize_global.c
+	initialize_model_state.c
+	LAKE.h
 	Makefile
+	output_list_utils.c
+	prepare_full_energy.c
+	put_data.c
+	read_initial_model_state.c
+	read_soilparam_arc.c
+	read_soilparam.c
 	runoff.c
+	soil_conduction.c
+	soil_thermal_eqn.c
 	surface_fluxes.c
 	user_def.h
 	vicNl_def.h
 	vicNl.h
+	write_model_state.h
 
 	Description:
 
@@ -640,6 +654,8 @@ Cleanup of compile-time options
 	forcing variables, the user can do this externally to VIC.
 
 	* Removed the OUTPUT_FORCE_STATS option.
+
+	* Removed the EXCESS_ICE option.
 
 	* Replaced the LOW_RES_MOIST compile-time option with LOG_MATRIC
 	run-time option.

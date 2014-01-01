@@ -27,6 +27,7 @@ void initialize_soil (cell_data_struct **cell,
   2011-Mar-01 Now initializes more cell data structure terms, including
 	      asat and zwt.						TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct options;

@@ -130,6 +130,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.								TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -162,9 +163,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   double          delta;
   double          dist;
   double          tmp_bubble;
-#if EXCESS_ICE
-  double          init_ice_fract[MAX_LAYERS];
-#endif
 
   tmp_bubble = 0;
 
@@ -378,9 +376,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       strcat(namestr,"/");
       strcat(namestr,tmpstr);
       temp.depth[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
-#if !EXCESS_ICE
       temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
-#endif
     }
 
     /** Get Layer Mineral Bulk Density **/
@@ -429,12 +425,6 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     /** Layer Initial Volumetric Ice Fraction **/
     for(layer=0;layer<options.Nlayer;layer++) {
       fscanf(soilparam,"%s",tmpstr);
-#if EXCESS_ICE
-      strcpy(namestr,soilparamdir);
-      strcat(namestr,"/");
-      strcat(namestr,tmpstr);
-      init_ice_fract[layer] = read_arcinfo_value(namestr,temp.lat,temp.lng);
-#endif // EXCESS_ICE
     }
 
     if (options.COMPUTE_TREELINE && options.JULY_TAVG_SUPPLIED && (fscanf(soilparam,"%s",tmpstr)) != EOF) {
@@ -499,9 +489,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       temp.soil_density[layer] = (1-temp.organic[layer])*temp.soil_dens_min[layer] + temp.organic[layer]*temp.soil_dens_org[layer];
       temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
       temp.quartz[layer] = sand[layer] / 100.;
-#if !EXCESS_ICE
       temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
-#endif
       temp.bubble[layer] = exp(5.3396738 + 0.1845038*clay[layer] 
 			 - 2.48394546*temp.porosity[layer] 
 			 - 0.00213853*pow(clay[layer],2.)

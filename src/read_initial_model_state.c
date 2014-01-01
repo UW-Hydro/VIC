@@ -87,6 +87,7 @@ void read_initial_model_state(FILE                *init_state,
 	      will save lake state data.  If no lake is present, default NULL
 	      values will be stored.						TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -159,9 +160,6 @@ void read_initial_model_state(FILE                *init_state,
     else {
       // skip rest of current cells info
       fgets(tmpstr, MAXSTRING, init_state); // skip rest of general cell info
-#if EXCESS_ICE      
-      fgets(tmpstr, MAXSTRING, init_state); //excess ice info
-#endif
       for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
 	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
 	for ( band = 0; band < tmp_Nband; band++ )
@@ -211,32 +209,7 @@ void read_initial_model_state(FILE                *init_state,
     fprintf( stderr, "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n", soil_con->Zsum_node[options.Nnode-1], soil_con->dp );
     soil_con->dp = soil_con->Zsum_node[options.Nnode-1];
   }
-  
-  /* Read dynamic soil properties */
-#if EXCESS_ICE
-  /* Read soil depth */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE ) 
-      fread( &soil_con->depth[lidx], sizeof(double), 1, init_state );
-    else 
-      fscanf( init_state, "%lf", &soil_con->depth[lidx] );
-  }
-  
-  /* Read effective porosity */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE ) 
-      fread( &soil_con->effective_porosity[lidx], sizeof(double), 1, init_state );
-    else 
-      fscanf( init_state, "%lf", &soil_con->effective_porosity[lidx] );
-  }
-  
-  /* Reading damping depth */
-  if ( options.BINARY_STATE_FILE ) 
-    fread( &soil_con->dp, sizeof(double), 1, init_state );
-  else 
-    fscanf( init_state, "%lf", &soil_con->dp );
-#endif //EXCESS_ICE
-  
+
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg; veg++ ) {
     

@@ -108,6 +108,7 @@
   2013-Jul-25 Added fdir to mtclim functions.				TJB
   2013-Jul-25 Added photosynthesis functions.				TJB
   2013-Jul-25 Added soil carbon functions.				TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -132,9 +133,6 @@ int   CalcAerodynamic(char, double, double, double, double, double,
 void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
 				 int, int, double *);
 double calc_energy_balance_error(int, double, double, double, double, double);
-#if OUTPUT_FORCE_STATS
-void   calc_forcing_stats(int, atmos_data_struct *);
-#endif // OUTPUT_FORCE_STATS
 void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);

@@ -52,6 +52,7 @@ void display_current_settings(int                 mode,
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.	TJB
   2013-Dec-26 Removed LWAVE_COR option.					TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
 **********************************************************************/
 {
 
@@ -75,11 +76,6 @@ void display_current_settings(int                 mode,
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Output to Screen:\n");
-#if OUTPUT_FORCE_STATS
-  fprintf(stderr,"OUTPUT_FORCE_STATS\tTRUE\n");
-#else
-  fprintf(stderr,"OUTPUT_FORCE_STATS\tFALSE\n");
-#endif
 #if VERBOSE
   fprintf(stderr,"VERBOSE\t\t\tTRUE\n");
 #else

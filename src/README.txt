@@ -616,10 +616,14 @@ Cleanup of compile-time options
 
 	Files Affected:
 
+	calc_forcing_stats.c (removed)
 	calc_longwave.c
 	display_current_settings.c
+	initialize_atmos.c
+	Makefile
 	user_def.h
 	vicNl_def.h
+	vicNl.h
 
 	Description:
 
@@ -629,6 +633,8 @@ Cleanup of compile-time options
 
 	* Removed the LWAVE_COR option; if the user wishes to correct any of the
 	forcing variables, the user can do this externally to VIC.
+
+	* Removed the OUTPUT_FORCE_STATS option.
 
 	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
 	vicNl_def.h.

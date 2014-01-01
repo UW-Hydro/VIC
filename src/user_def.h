@@ -62,15 +62,6 @@
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
 
-/***** If TRUE VIC computes the mean, standard deviation, and sum
-       and finds the minimum and maximum values of the forcing 
-       variables for each grid cell and outputs the results to 
-       stdout.  These values are meant to be a quick check for
-       obvious errors in the forcing data, more thorough checks 
-       of the data should be conducted outside of the model by the 
-       user. *****/
-#define OUTPUT_FORCE_STATS FALSE
-
 /***** If TRUE VIC uses a uniform distribution function to simulate
        the spatial distribution of soil frost, if FALSE VIC assumes
        that the entire grid cell is frozen uniformly *****/

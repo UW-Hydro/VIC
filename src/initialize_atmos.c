@@ -131,6 +131,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.				TJB
   2013-Nov-21 Added check on ALMA_INPUT in rescaling of forcing variables to
 	      hourly step for local_forcing_data.				TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.				TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -1581,10 +1582,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
 //  free((char *)local_forcing_data);
   free(local_forcing_data);
   free((char *)dmy_local);
-
-#if OUTPUT_FORCE_STATS
-  calc_forcing_stats(global_param.nrecs, atmos);
-#endif // OUTPUT_FORCE_STATS
 
 #if !OUTPUT_FORCE
 

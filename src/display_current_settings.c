@@ -53,6 +53,8 @@ void display_current_settings(int                 mode,
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.	TJB
   2013-Dec-26 Removed LWAVE_COR option.					TJB
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
+  2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC 
+	      run-time option.						TJB
 **********************************************************************/
 {
 
@@ -104,11 +106,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"CLOSE_ENERGY\t\tTRUE\n");
 #else
   fprintf(stderr,"CLOSE_ENERGY\t\tFALSE\n");
-#endif
-#if LOW_RES_MOIST
-  fprintf(stderr,"LOW_RES_MOIST\t\tTRUE\n");
-#else
-  fprintf(stderr,"LOW_RES_MOIST\t\tFALSE\n");
 #endif
 #if QUICK_FS
   fprintf(stderr,"QUICK_FS\t\tTRUE\n");
@@ -231,6 +228,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_410\n");
+  if (options.LOG_MATRIC == TRUE)
+    fprintf(stderr,"LOG_MATRIC\t\tTRUE\n");
+  else
+    fprintf(stderr,"LOG_MATRIC\t\tFALSE\n");
   if (options.LW_TYPE == LW_TVA)
     fprintf(stderr,"LW_TYPE\t\tLW_TVA\n");
   else if (options.LW_TYPE == LW_ANDERSON)

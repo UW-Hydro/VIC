@@ -123,6 +123,7 @@ void initialize_global() {
   2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
 	      for LW_TYPE to LW_PRATA.						TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.						TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -149,6 +150,7 @@ void initialize_global() {
   options.IMPLICIT              = FALSE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
+  options.LOG_MATRIC            = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
   options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;

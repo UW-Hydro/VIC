@@ -132,6 +132,7 @@
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Jul-25 Added SLAB_MOIST.						TJB
   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.					TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -751,6 +752,12 @@ typedef struct {
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
+  char   LOG_MATRIC;     /* TRUE = use the linear interpolation of the
+                            logarithm of the matric potential from the two
+                            surrounding layers to estimate the soil moisture
+                            drainage from each layer (Boone and Wetzel, 1996).
+                            FALSE = drainage is a function of layer's moisture
+                            content and saturated hydraulic conductivity. */
   char   LW_CLOUD;       /* Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
   char   LW_TYPE;        /* Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
@@ -829,7 +836,6 @@ typedef struct {
 				   output files are used (for backwards-compatibility); if outfiles and
 				   variables are explicitly mentioned in global parameter file, this option
 				   is ignored. */
-
 } option_struct;
 
 /*******************************************************

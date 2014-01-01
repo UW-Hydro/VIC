@@ -619,8 +619,11 @@ Cleanup of compile-time options
 	calc_forcing_stats.c (removed)
 	calc_longwave.c
 	display_current_settings.c
+	get_global_param.c
 	initialize_atmos.c
+	initialize_global.c
 	Makefile
+	runoff.c
 	user_def.h
 	vicNl_def.h
 	vicNl.h
@@ -635,6 +638,9 @@ Cleanup of compile-time options
 	forcing variables, the user can do this externally to VIC.
 
 	* Removed the OUTPUT_FORCE_STATS option.
+
+	* Replaced the LOW_RES_MOIST compile-time option with LOG_MATRIC
+	run-time option.
 
 	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
 	vicNl_def.h.

@@ -104,6 +104,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.						TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -340,6 +341,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
+      }
+      else if(strcasecmp("LOG_MATRIC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.LOG_MATRIC=TRUE;
+        else options.LOG_MATRIC = FALSE;
       }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

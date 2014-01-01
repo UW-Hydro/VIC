@@ -20,7 +20,11 @@
   2011-Jan-04 Added MAX_ZWTVMOIST for storing array of soil moisture vs
 	      water table position.					TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-
+  2013-Dec-26 Removed LWAVE_COR option.					TJB
+  2013-Dec-26 Moved MAX_VEG and other array lengths to vicNl_def.h.	TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
+  2013-Dec-26 Replaced LOW_RES_MOIST compile-time option (user_def.h) with
+	      LOG_MATRIC run-time option (vicNl_def.h).			TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -39,13 +43,6 @@
        introduce new errors (STILL UNDER TESTING, ALSO NEEDS DEBUGGING) *****/
 #define QUICK_FS FALSE
 #define QUICK_FS_TEMPS 7
-
-/***** If TRUE VIC uses the linear interpolation of the logarithm of the
-       matric potential from the two surrounding layers to estimate the 
-       soil moisture drainage from each layer (Boone and Wetzel, 1996).
-       This should improve the soil moisture drainage predicted by the
-       low resolution solution computed by VIC. *****/
-#define LOW_RES_MOIST FALSE
 
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow

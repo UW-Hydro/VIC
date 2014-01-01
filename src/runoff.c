@@ -166,6 +166,8 @@ int  runoff(cell_data_struct  *cell_wet,
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC 
+	      run-time option.							TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -228,12 +230,10 @@ int  runoff(cell_data_struct  *cell_wet,
   double             tmp_fract;
   double             Tlayer_spatial[MAX_LAYERS][FROST_SUBAREAS];
   double             Tlayer;
-#if LOW_RES_MOIST
   double             b[MAX_LAYERS];
   double             matric[MAX_LAYERS];
   double             avg_matric;
   double             spatial_fract;
-#endif // LOW_RES_MOIST
 #if EXCESS_ICE
   double             excess_water;
   double             net_excess_water;
@@ -339,10 +339,8 @@ int  runoff(cell_data_struct  *cell_wet,
 	**************************************************/
 	for ( lindex = 0; lindex < options.Nlayer; lindex++ ) {
 	  Ksat[lindex]         = soil_con->Ksat[lindex] / 24.;
-#if LOW_RES_MOIST
 	  b[lindex]            = (soil_con->expt[lindex] - 3.) / 2.;
-#endif // LOW_RES_MOIST
-	  
+
 	  /** Set Layer Liquid Moisture Content **/
 #if SPATIAL_FROST
 	  liq[lindex] = org_moist[lindex] - layer[lindex].ice[frost_area];
@@ -488,21 +486,21 @@ int  runoff(cell_data_struct  *cell_wet,
 	    inflow   = dt_inflow;
 	    last_cnt = 0;
 	    
-#if LOW_RES_MOIST
-	    for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
-	      if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
-		  < resid_moist[lindex] )
-		tmp_liq = resid_moist[lindex];
-	      if(tmp_liq > resid_moist[lindex])
-		matric[lindex] = soil_con->bubble[lindex] 
-		  * pow( (tmp_liq - resid_moist[lindex]) 
-			 / (soil_con->max_moist[lindex] - resid_moist[lindex]), 
-			 -b[lindex]);
-	      else
-		matric[lindex] = HUGE_RESIST;
+            if (options.LOG_MATRIC) {
+	      for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
+	        if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) 
+		    < resid_moist[lindex] )
+		  tmp_liq = resid_moist[lindex];
+	        if(tmp_liq > resid_moist[lindex])
+		  matric[lindex] = soil_con->bubble[lindex] 
+		    * pow( (tmp_liq - resid_moist[lindex]) 
+			   / (soil_con->max_moist[lindex] - resid_moist[lindex]), 
+			   -b[lindex]);
+	        else
+		  matric[lindex] = HUGE_RESIST;
+	      }
 	    }
-#endif // LOW_RES_MOIST
-	    
+
 	    /*************************************
             Compute Drainage between Sublayers 
 	    *************************************/
@@ -516,17 +514,17 @@ int  runoff(cell_data_struct  *cell_wet,
 		tmp_liq = resid_moist[lindex];
 	      
 	      if(liq[lindex] > resid_moist[lindex]) {
-#if LOW_RES_MOIST
-		avg_matric = pow( 10, (soil_con->depth[lindex+1] 
-				       * log10(fabs(matric[lindex]))
-				       + soil_con->depth[lindex]
-				       * log10(fabs(matric[lindex+1])))
-				  / (soil_con->depth[lindex] 
-				     + soil_con->depth[lindex+1]) );
-		tmp_liq = resid_moist[lindex]
-		  + ( soil_con->max_moist[lindex] - resid_moist[lindex] )
-		  * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
-#endif // LOW_RES_MOIST
+                if (options.LOG_MATRIC) {
+		    avg_matric = pow( 10, (soil_con->depth[lindex+1] 
+				           * log10(fabs(matric[lindex]))
+				           + soil_con->depth[lindex]
+				           * log10(fabs(matric[lindex+1])))
+				      / (soil_con->depth[lindex] 
+				         + soil_con->depth[lindex+1]) );
+		    tmp_liq = resid_moist[lindex]
+		      + ( soil_con->max_moist[lindex] - resid_moist[lindex] )
+		      * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
+	        }
 		Q12[lindex] 
 		  = Ksat[lindex] * pow(((tmp_liq - resid_moist[lindex])
 					/ (soil_con->max_moist[lindex]

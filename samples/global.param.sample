@@ -89,6 +89,9 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 # Generally these default values do not need to be overridden
 #######################################################################
 #CONTINUEONERROR	TRUE	# TRUE = if simulation aborts on one grid cell, continue to next grid cell
+#LOG_MATRIC	FALSE	# TRUE = use the linear interpolation of the logarithm of the matric potential
+                        # from the two surrounding layers to estimate the soil moisture drainage from each
+                        # layer (Boone and Wetzel, 1996).
 
 #######################################################################
 # State Files and Parameters

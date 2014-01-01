@@ -111,6 +111,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Removed user_def.h.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -906,7 +907,7 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
     }
     if(options.SNOW_BAND > MAX_BANDS) {
-      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit vicNl_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
       nrerror(ErrStr);
     }
   }
@@ -977,11 +978,11 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit vicNl_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
   if(!options.FULL_ENERGY && options.CLOSE_ENERGY) {

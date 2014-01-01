@@ -139,10 +139,13 @@
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Moved VERBOSE from user_def.h to vicNl_def.h; deleted
+	      user_def.h.						TJB
 *********************************************************************/
-
-#include <user_def.h>
 #include <snow.h>
+
+/***** If TRUE include all model messages to stdout, and stderr *****/
+#define VERBOSE TRUE
 
 /***** Model Constants *****/
 #define MAXSTRING    2048

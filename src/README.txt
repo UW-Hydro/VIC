@@ -656,7 +656,7 @@ Cleanup of compile-time options
 	SnowPackEnergyBalance.c
 	solve_snow.c
 	surface_fluxes.c
-	user_def.h
+	user_def.h (removed)
 	vicNl_def.h
 	vicNl.c
 	vicNl.h
@@ -670,36 +670,32 @@ Cleanup of compile-time options
 
 	Cleanup of user_def.h, either by removing options/settings or moving
 	them to vicNl_def.h (becoming run-time options if appropriate).
-	Details are as follows:
+	user_def.h has been removed.
 
-	* Removed the LWAVE_COR option; if the user wishes to correct any of the
-	forcing variables, the user can do this externally to VIC.
+	The following options were removed:
 
-	* Removed the OUTPUT_FORCE_STATS option.
+	* NO_REWIND.  All parameter files must contain the same grid cells in
+	  the same order.
+	* QUICK_FS.
+	* EXCESS_ICE.
+	* OUTPUT_FORCE_STATS.
+	* LWAVE_COR.  If the user wishes to correct any of the forcing
+	  variables, the user can do this externally to VIC.
 
-	* Removed the EXCESS_ICE option.
+	The following options were moved from compile-time to run-time (in the
+	options_struct in vicNl_def.h):
 
-	* Removed the QUICK_FS option.
+	* LOW_RES_MOIST (renamed to LOG_MATRIC)
+	* OUTPUT_FORCE
+	* CLOSE_ENERGY
+	* SPATIAL_SNOW
+	* SPATIAL_FROST
 
-	* Removed the NO_REWIND option.  All parameter files must contain the
-	same grid cells in the same order.
+	The following terms were moved to vicNl_def.h without modification:
 
-	* Replaced the LOW_RES_MOIST compile-time option with LOG_MATRIC
-	run-time option.
-
-	* Moved CLOSE_ENERGY from compile-time to run-time options.
-
-	* Moved SPATIAL_SNOW from compile-time to run-time options.
-
-	* Moved SPATIAL_FROST from compile-time to run-time options.
-
-	* Moved OUTPUT_FORCE from compile-time to run-time options.
-
-	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
-	vicNl_def.h.
-
-	* Moved other constants such as MAXIT_FE and LAI_WATER_FACTOR to
-	vicNl_def.h.
+	* VERBOSE (still a compile-time option)
+	* Max array dimensions such as MAX_VEG, MAX_LAYERS, etc.
+	* Constants such as MAXIT_FE and LAI_WATER_FACTOR
 
 
 

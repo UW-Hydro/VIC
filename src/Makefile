@@ -77,7 +77,7 @@ CFLAGS  = -I. -g -Wall -Wno-unused
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \

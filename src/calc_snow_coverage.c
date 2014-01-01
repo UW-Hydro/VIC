@@ -23,7 +23,7 @@ double calc_snow_coverage(int    *store_snow,
   This routine computes the current fraction of the vegetation band
   that is covered with snow.  The snow distribution is assumed to 
   be uniform with a slope based on the value of max_snow_distrib_slope
-  set in user_def.h.  The original value was based on field observations
+  set in vicNl_def.h.  The original value was based on field observations
   from the University of Minnesota's Rosemount Agricultural Experiment
   station (see dissertation by Keith Cherkauer, 2001).
 

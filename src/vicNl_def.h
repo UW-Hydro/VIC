@@ -131,6 +131,7 @@
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Jul-25 Added SLAB_MOIST.						TJB
+  2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
 *********************************************************************/
 
 #include <user_def.h>

@@ -165,6 +165,7 @@ int  runoff(cell_data_struct  *cell_wet,
 	      run-time option.							TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -571,12 +572,8 @@ int  runoff(cell_data_struct  *cell_wet,
 						      energy->kappa_node, energy->Cs_node,
 						      soil_con->Zsum_node, energy->T,
 						      soil_con->max_moist_node,
-#if QUICK_FS
-						      soil_con->ufwc_table_node,
-#else
 						      soil_con->expt_node,
 						      soil_con->bubble_node, 
-#endif // QUICK_FS
 						      moist, soil_con->depth, 
 						      soil_con->soil_dens_min,
 						      soil_con->bulk_dens_min,

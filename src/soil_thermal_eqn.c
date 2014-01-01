@@ -20,6 +20,7 @@ double soil_thermal_eqn(double T, va_list ap) {
   2007-Aug-08 Added EXCESS_ICE option.						JCA
   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
   ******************************************************************/
 
 
@@ -30,12 +31,8 @@ double soil_thermal_eqn(double T, va_list ap) {
   double T0;
   double moist;
   double max_moist;
-#if QUICK_FS
-  double **ufwc_table;
-#else
   double bubble;
   double expt;
-#endif
   double ice0;
   double gamma;
   double A;
@@ -54,12 +51,8 @@ double soil_thermal_eqn(double T, va_list ap) {
   T0         = (double) va_arg(ap, double);
   moist      = (double) va_arg(ap, double);
   max_moist  = (double) va_arg(ap, double);
-#if QUICK_FS
-  ufwc_table = (double **) va_arg(ap, double **);
-#else
   bubble     = (double) va_arg(ap, double);
   expt       = (double) va_arg(ap, double);
-#endif
   ice0       = (double) va_arg(ap, double);
   gamma      = (double) va_arg(ap, double);
   A          = (double) va_arg(ap, double);
@@ -71,12 +64,7 @@ double soil_thermal_eqn(double T, va_list ap) {
   node       = (int) va_arg(ap, int);
 
   if(T<0.) {
-#if QUICK_FS
-    ice = moist - maximum_unfrozen_water_quick(T, max_moist,
-					       ufwc_table);
-#else
     ice = moist - maximum_unfrozen_water(T,max_moist,bubble,expt);
-#endif
     if(ice<0.) ice=0.;
     if(ice>max_moist) ice=max_moist;
   }

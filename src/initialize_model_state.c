@@ -121,13 +121,11 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      initialized.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct options;
   extern veg_lib_struct *veg_lib;
-#if QUICK_FS
-  extern double temps[];
-#endif
 
   char     ErrStr[MAXSTRING];
   char     FIRST_VEG;
@@ -147,9 +145,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double  *M;
   double   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
   double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS];
-#if QUICK_FS
-  double   Aufwc, Bufwc;
-#endif
   double   Clake;
   double   mu;
   double   surf_swq;
@@ -239,33 +234,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     Compute grid cell fractions for all subareas used in 
     spatial distribution of soil frost routines.
   ********************************************************/
-
-#if QUICK_FS
-  if(options.FROZEN_SOIL) {
-
-    /***********************************************************
-      Prepare table of maximum unfrozen water content values
-      - This linearizes the equation for maximum unfrozen water
-        content, reducing computation time for the frozen soil
-        model.
-    ***********************************************************/
-
-    for(lidx=0;lidx<options.Nlayer;lidx++) { 
-      for(ii=0;ii<QUICK_FS_TEMPS;ii++) {
-	Aufwc = maximum_unfrozen_water(temps[ii], 1.0, 
-				       soil_con->bubble[lidx], 
-				       soil_con->expt[lidx]);
-	Bufwc = maximum_unfrozen_water(temps[ii+1], 1.0, 
-				       soil_con->bubble[lidx], 
-				       soil_con->expt[lidx]);
-	soil_con->ufwc_table_layer[lidx][ii][0] 
-	  = linear_interp(0., temps[ii], temps[ii+1], Aufwc, Bufwc);
-	soil_con->ufwc_table_layer[lidx][ii][1] 
-	  = (Bufwc - Aufwc) / (temps[ii+1] - temps[ii]);
-      }
-    }
-  }  
-#endif // QUICK_FS
 
   /************************************************************************
     CASE 1: Not using quick ground heat flux, and initial conditions files 
@@ -546,9 +514,6 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 				soil_con->gamma, soil_con->depth,
 				soil_con->max_moist, soil_con->expt, 
 				soil_con->bubble, soil_con->quartz, 
-#if QUICK_FS
-				soil_con->ufwc_table_node,
-#endif // QUICK_FS
 				Nnodes, options.Nlayer, soil_con->FS_ACTIVE);	  
 	  }
 	
@@ -560,12 +525,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						soil_con->Zsum_node,
 						energy[veg][band].T,
 						soil_con->max_moist_node,
-#if QUICK_FS
-						soil_con->ufwc_table_node,
-#else
 						soil_con->expt_node,
 						soil_con->bubble_node,
-#endif // QUICK_FS
 						moist[veg][band], 
 						soil_con->depth,
 						soil_con->soil_dens_min,
@@ -601,11 +562,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 					   soil_con->depth, soil_con->dp,
 					   energy[veg][band].T[0], energy[veg][band].T[1],
 					   soil_con->avg_temp, soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					   soil_con->frost_fract, soil_con->frost_slope, 
 					   soil_con->FS_ACTIVE);
             }
@@ -614,20 +571,12 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						       soil_con->Zsum_node,
 						       energy[veg][band].T,
 						       soil_con->max_moist_node,
-#if QUICK_FS
-						       soil_con->ufwc_table_node,
-#else
 						       soil_con->expt_node,
 						       soil_con->bubble_node,
-#endif // QUICK_FS
 						       soil_con->depth,
 						       soil_con->max_moist,
-#if QUICK_FS
-						       soil_con->ufwc_table_layer,
-#else
 						       soil_con->expt,
 						       soil_con->bubble,
-#endif // QUICK_FS
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
 						       Nnodes, options.Nlayer, 
@@ -884,9 +833,6 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 				  soil_con->gamma, soil_con->depth,
 				  soil_con->max_moist, soil_con->expt, 
 				  soil_con->bubble, soil_con->quartz, 
-#if QUICK_FS
-				  soil_con->ufwc_table_node,
-#endif // QUICK_FS
 				  Nnodes, options.Nlayer, soil_con->FS_ACTIVE);	  
 	  }
 
@@ -902,12 +848,8 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						  soil_con->Zsum_node,
 						  energy[veg][band].T,
 						  soil_con->max_moist_node,
-#if QUICK_FS
-						  soil_con->ufwc_table_node,
-#else
 						  soil_con->expt_node,
 						  soil_con->bubble_node,
-#endif // QUICK_FS
 						  moist[veg][band],
 						  soil_con->depth,
 						  soil_con->soil_dens_min,
@@ -929,11 +871,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 					   soil_con->depth, soil_con->dp,
 					   energy[veg][band].T[0], energy[veg][band].T[1],
 					   soil_con->avg_temp, soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					   soil_con->frost_fract, soil_con->frost_slope, 
 					   soil_con->FS_ACTIVE);
               }
@@ -942,20 +880,12 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						       soil_con->Zsum_node,
 						       energy[veg][band].T,
 						       soil_con->max_moist_node,
-#if QUICK_FS
-						       soil_con->ufwc_table_node,
-#else
 						       soil_con->expt_node,
 						       soil_con->bubble_node,
-#endif // QUICK_FS
 						       soil_con->depth,
 						       soil_con->max_moist,
-#if QUICK_FS
-						       soil_con->ufwc_table_layer,
-#else
 						       soil_con->expt,
 						       soil_con->bubble,
-#endif // QUICK_FS
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
 						       Nnodes, options.Nlayer, 

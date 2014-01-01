@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
   2011-Jan-04 Made read_soilparam_arc() a sub-function of
 	      read_soilparam().						TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
 
@@ -204,23 +205,6 @@ int main(int argc, char *argv[])
     soil_con = read_soilparam(filep.soilparam, filenames.soil_dir, &cell_cnt, &RUN_MODEL, &MODEL_DONE);
 
     if(RUN_MODEL) {
-
-#if QUICK_FS
-      /** Allocate Unfrozen Water Content Table **/
-      if(options.FROZEN_SOIL) {
-	for(i=0;i<MAX_LAYERS;i++) {
-	  soil_con.ufwc_table_layer[i] = (double **)malloc((QUICK_FS_TEMPS+1)*sizeof(double *));
-	  for(j=0;j<QUICK_FS_TEMPS+1;j++) 
-	    soil_con.ufwc_table_layer[i][j] = (double *)malloc(2*sizeof(double));
-	}
-	for(i=0;i<MAX_NODES;i++) {
-	  soil_con.ufwc_table_node[i] = (double **)malloc((QUICK_FS_TEMPS+1)*sizeof(double *));
-
-	  for(j=0;j<QUICK_FS_TEMPS+1;j++) 
-	    soil_con.ufwc_table_node[i][j] = (double *)malloc(2*sizeof(double));
-	}
-      }
-#endif /* QUICK_FS */
 
       NEWCELL=TRUE;
       cellnum++;
@@ -351,20 +335,6 @@ int main(int argc, char *argv[])
 
 #if !OUTPUT_FORCE
 
-#if QUICK_FS
-      if(options.FROZEN_SOIL) {
-	for(i=0;i<MAX_LAYERS;i++) {
-	  for(j=0;j<6;j++) 
-	    free((char *)soil_con.ufwc_table_layer[i][j]);
-	  free((char *)soil_con.ufwc_table_layer[i]);
-	}
-	for(i=0;i<MAX_NODES;i++) {
-	  for(j=0;j<6;j++) 
-	    free((char *)soil_con.ufwc_table_node[i][j]);
-	  free((char *)soil_con.ufwc_table_node[i]);
-	}
-      }
-#endif /* QUICK_FS */
       free_dist_prcp(&prcp,veg_con[0].vegetat_type_num);
       free_vegcon(&veg_con);
       free((char *)soil_con.AreaFract);

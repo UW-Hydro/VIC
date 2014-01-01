@@ -173,6 +173,7 @@ double calc_surf_energy_bal(double             Le,
 	      option.							TJB
   2013-Jul-25 Added photosynthesis.					TJB
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -449,10 +450,6 @@ double calc_surf_energy_bal(double             Le,
 					   gamma, ice_node, kappa_node, 
 					   max_moist_node, moist_node, 
 					   soil_con->frost_fract, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer[0], 
-					   soil_con->ufwc_table_node, 
-#endif // QUICK_FS
 					   layer_wet, layer_dry, veg_var_wet, 
 					   veg_var_dry, 
 					   INCLUDE_SNOW, soil_con->FS_ACTIVE, 
@@ -547,10 +544,6 @@ double calc_surf_energy_bal(double             Le,
 					     gamma, ice_node, kappa_node, 
 					     max_moist_node, moist_node, 
 					     soil_con->frost_fract, 
-#if QUICK_FS
-					     soil_con->ufwc_table_layer[0], 
-					     soil_con->ufwc_table_node, 
-#endif // QUICK_FS
 					     layer_wet, layer_dry, veg_var_wet, 
 					     veg_var_dry, INCLUDE_SNOW, 
 					     soil_con->FS_ACTIVE, NOFLUX, EXP_TRANS,
@@ -937,12 +930,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   /* spatial frost terms */
   double *frost_fract;
 
-  /* quick solution frozen soils terms */
-#if QUICK_FS
-  double **ufwc_table_layer;
-  double ***ufwc_table_node;
-#endif
-
   /* model structures */
   layer_data_struct *layer_wet;
   layer_data_struct *layer_dry;
@@ -1087,11 +1074,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   max_moist_node          = (double *) va_arg(ap, double *);
   moist_node              = (double *) va_arg(ap, double *);
   frost_fract             = (double *) va_arg(ap, double *);
-
-#if QUICK_FS
-  ufwc_table_layer        = (double **) va_arg(ap, double **);
-  ufwc_table_node         = (double ***) va_arg(ap, double ***);
-#endif
 
   /* model structures */
   layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);

@@ -152,9 +152,6 @@ void set_node_parameters(double   *dz_node,
 			 double   *expt,
 			 double   *bubble,
 			 double   *quartz,
-#if QUICK_FS
-			 double ***ufwc_table_node,
-#endif
 			 int       Nnodes,
 			 int       Nlayers,
 			 char      FS_ACTIVE) {
@@ -205,23 +202,16 @@ void set_node_parameters(double   *dz_node,
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2009-Jul-31 Removed unused layer_node_fract array.			TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 
   extern option_struct options;
-#if QUICK_FS
-  extern double temps[];
-#endif
 
   char   PAST_BOTTOM;
   int    nidx, lidx;
   double Lsum; /* cumulative depth of moisture layer */
   double Zsum; /* upper boundary of node thermal layer */
   double deltaL[MAX_LAYERS+1];
-#if QUICK_FS
-  int    ii;
-  double Aufwc;
-  double Bufwc;
-#endif
 
   PAST_BOTTOM = FALSE;
   lidx = 0;
@@ -267,29 +257,6 @@ void set_node_parameters(double   *dz_node,
     gamma[nidx] = Zsum_node[Nnodes-1] - Zsum_node[Nnodes-2];
   }
 
-
-#if QUICK_FS
-
-  /* If quick frozen soil solution activated, prepare a linearized
-     estimation on the maximum unfrozen water content equation */
-
-  if(FS_ACTIVE && options.FROZEN_SOIL) {
-    for(nidx=0;nidx<Nnodes;nidx++) { 
-      for(ii=0;ii<QUICK_FS_TEMPS;ii++) {
-	Aufwc = maximum_unfrozen_water(temps[ii], 1.0, 
-				       bubble_node[nidx], 
-				       expt_node[nidx]);
-	Bufwc = maximum_unfrozen_water(temps[ii+1], 1.0, 
-				       bubble_node[nidx], 
-				       expt_node[nidx]);
-	ufwc_table_node[nidx][ii][0] 
-	  = linear_interp(0., temps[ii], temps[ii+1], Aufwc, Bufwc);
-	ufwc_table_node[nidx][ii][1] 
-	  = (Bufwc - Aufwc) / (temps[ii+1] - temps[ii]);
-      }
-    }
-  }
-#endif
 }
 
 #define N_INTS 5
@@ -301,12 +268,8 @@ int distribute_node_moisture_properties(double *moist_node,
 					double *Zsum_node,
 					double *T_node,
 					double *max_moist_node,
-#if QUICK_FS
-					double ***ufwc_table_node,
-#else
 					double *expt_node,
 					double *bubble_node,
-#endif
 					double *moist,
 					double *depth,
 					double *soil_dens_min,
@@ -379,7 +342,7 @@ int distribute_node_moisture_properties(double *moist_node,
 	      set < 0, original option used, otherwise the slab layer is
 	      set using SLAB_MOIST_FRACT * max_moist_node.		KAC via TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -427,18 +390,11 @@ int distribute_node_moisture_properties(double *moist_node,
 
     if(T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
       /* compute moisture and ice contents */
-#if QUICK_FS
-      ice_node[nidx] 
-	= moist_node[nidx] - maximum_unfrozen_water_quick(T_node[nidx],
-						   max_moist_node[nidx], 
-						   ufwc_table_node[nidx]);
-#else
       ice_node[nidx] 
 	= moist_node[nidx] - maximum_unfrozen_water(T_node[nidx],
 						    max_moist_node[nidx], 
 						    bubble_node[nidx],
 						    expt_node[nidx]);
-#endif
       if(ice_node[nidx]<0) ice_node[nidx]=0;
 
       /* compute thermal conductivity */
@@ -480,20 +436,12 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *Zsum_node,
 			       double            *T,
 			       double            *max_moist_node,
-#if QUICK_FS
-			       double          ***ufwc_table_node,
-#else
 			       double            *expt_node,
 			       double            *bubble_node,
-#endif // QUICK_FS
 			       double            *depth,
 			       double            *max_moist,
-#if QUICK_FS
-			       double          ***ufwc_table_layer,
-#else
 			       double            *expt,
 			       double            *bubble,
-#endif // QUICK_FS
 			       double            *frost_fract,
 			       double             frost_slope,
 			       int                Nnodes, 
@@ -533,6 +481,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **************************************************************/
 
   extern option_struct options;
@@ -602,11 +551,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
       for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
         for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = layer[lidx].moist 
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(tmpT[nidx][frost_area], max_moist[lidx], ufwc_table_layer[lidx]);
-#else
 	    - maximum_unfrozen_water(tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
 	  if ( tmp_ice[nidx][frost_area] < 0 ) tmp_ice[nidx][frost_area] = 0.;
         }
       }
@@ -645,12 +590,8 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 			       double             T1,
 			       double             Tp,
 			       double            *max_moist,
-#if QUICK_FS
-			       double          ***ufwc_table_layer,
-#else
 			       double            *expt,
 			       double            *bubble,
-#endif // QUICK_FS
 			       double            *frost_fract,
 			       double             frost_slope,
 			       char               FS_ACTIVE) {
@@ -670,6 +611,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 	      SPATIAL_FROST = TRUE.					TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ********************************************************************/
 
   extern option_struct options;
@@ -702,11 +644,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
         else tmp_fract += (frost_fract[frost_area-1] / 2. + frost_fract[frost_area] / 2.);
         tmpT = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
         tmp_ice = layer[lidx].moist
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(tmpT, max_moist[lidx], ufwc_table_layer[lidx]);
-#else
 	    - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
         layer[lidx].ice[frost_area] = frost_fract[frost_area] * tmp_ice;
         if (layer[lidx].ice[frost_area] < 0) {
           layer[lidx].ice[frost_area] = 0;
@@ -872,30 +810,6 @@ double maximum_unfrozen_water(double T,
   return (unfrozen);
   
 }
-
-#if QUICK_FS
-double maximum_unfrozen_water_quick(double   T,
-				    double   max_moist,
-				    double **table) {
-/**********************************************************************
-  This subroutine computes the maximum amount of unfrozen water that
-  can exist at the current temperature.
-**********************************************************************/
-
-  extern double temps[];
-
-  int i;
-  double unfrozen;
-
-  i = 1;
-  while(T < temps[i] && i < QUICK_FS_TEMPS) i++;
-  unfrozen = max_moist * (table[i-1][0] + table[i-1][1] * T);
-  if(unfrozen > max_moist) unfrozen = max_moist;
-  if(unfrozen < 0) unfrozen = 0;
-
-  return (unfrozen);
-}
-#endif
 
 layer_data_struct find_average_layer(layer_data_struct *wet,
 				     layer_data_struct *dry,

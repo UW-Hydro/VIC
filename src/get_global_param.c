@@ -109,6 +109,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -969,10 +970,6 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"You must define at least 1 soil moisture layer to run the model.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
-  if(options.IMPLICIT)  {
-    if ( QUICK_FS ) 
-      fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
-  }
   if(options.Nlayer > MAX_LAYERS) {
     sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
@@ -1044,9 +1041,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,".... Thermal nodes are exponentially distributed with depth.\n");
   else
     fprintf(stderr,".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
-  if ( QUICK_FS ){
-    fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n", QUICK_FS_TEMPS);
-  }
   fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);
   fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);

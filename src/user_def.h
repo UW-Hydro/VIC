@@ -29,18 +29,11 @@
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct (vicNl_def.h).	TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct (vicNl_def.h).	TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
-
-/***** If TRUE VIC uses a system of linear equations defined in global.h
-       to estimate the maximum unfrozen water content equation.  This 
-       significantly reduces the run time with frozen soil, but may
-       introduce new errors (STILL UNDER TESTING, ALSO NEEDS DEBUGGING) *****/
-#define QUICK_FS FALSE
-#define QUICK_FS_TEMPS 7
-
 
 /***** If TRUE VIC does not rewind the vegetation, state, and snow
        band files before read data for each cell.  This saves time

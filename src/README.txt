@@ -654,6 +654,7 @@ Cleanup of compile-time options
 	surface_fluxes.c
 	user_def.h
 	vicNl_def.h
+	vicNl.c
 	vicNl.h
 	write_layer.c
 	write_model_state.c
@@ -670,6 +671,8 @@ Cleanup of compile-time options
 	* Removed the OUTPUT_FORCE_STATS option.
 
 	* Removed the EXCESS_ICE option.
+
+	* Removed the QUICK_FS option.
 
 	* Replaced the LOW_RES_MOIST compile-time option with LOG_MATRIC
 	run-time option.

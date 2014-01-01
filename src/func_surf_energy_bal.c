@@ -109,6 +109,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -240,12 +241,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* spatial frost terms */
   double *frost_fract;
-
-  /* quick solution frozen soils terms */
-#if QUICK_FS
-  double ***ufwc_table_layer;
-  double ***ufwc_table_node;
-#endif
 
   /* model structures */
   soil_con_struct *soil_con;
@@ -439,10 +434,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   resid_moist = soil_con->resid_moist;
   elevation = (double)soil_con->elevation;
   frost_fract = soil_con->frost_fract;
-#if QUICK_FS
-  ufwc_table_layer = soil_con->ufwc_table_layer;
-  ufwc_table_node = soil_con->ufwc_table_node;
-#endif // QUICK_FS
   FS_ACTIVE = soil_con->FS_ACTIVE;
   /* more soil layer terms for IMPLICIT option*/
   bulk_dens_min = soil_con->bulk_dens_min;
@@ -543,18 +534,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
     if(!options.IMPLICIT || Error == 1) {
       if(options.IMPLICIT)
         FIRST_SOLN[0] = TRUE;
-#if QUICK_FS
-      Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
-			      moist_node, delta_t, max_moist_node, bubble_node, 
-			      expt_node, ice_node, alpha, beta, gamma, dp,
-			      depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
-			      NOFLUX, EXP_TRANS, veg_class);
-#else
       Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 			      moist_node, delta_t, max_moist_node, bubble_node, 
 			      expt_node, ice_node, alpha, beta, gamma, dp, depth, 
 			      Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
-#endif
     }
       
     if ( (int)Error == ERROR ) {

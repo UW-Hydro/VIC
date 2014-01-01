@@ -55,6 +55,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -76,22 +77,14 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
     ErrorFlag = estimate_layer_ice_content_quick_flux(layer_wet, soil_con->depth, soil_con->dp,
 					   energy->T[0], energy->T[1], soil_con->avg_temp,
 					   soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					   soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     if(options.DIST_PRCP) {
       ErrorFlag = estimate_layer_ice_content_quick_flux(layer_dry, soil_con->depth, soil_con->dp,
 					     energy->T[0], energy->T[1], soil_con->avg_temp,
 					     soil_con->max_moist, 
-#if QUICK_FS
-					     soil_con->ufwc_table_layer,
-#else
 					     soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					     soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
     }
@@ -99,34 +92,18 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
   else {
     ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
-#if QUICK_FS
-					   soil_con->ufwc_table_node,
-#else
 					   soil_con->expt_node, soil_con->bubble_node, 
-#endif // QUICK_FS
 					   soil_con->depth, soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					   soil_con->frost_fract, soil_con->frost_slope, 
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     if(options.DIST_PRCP) {
       ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
 					     soil_con->max_moist_node, 
-#if QUICK_FS
-					     soil_con->ufwc_table_node,
-#else
 					     soil_con->expt_node, soil_con->bubble_node, 
-#endif // QUICK_FS
 					     soil_con->depth, soil_con->max_moist, 
-#if QUICK_FS
-					     soil_con->ufwc_table_layer,
-#else
 					     soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
 					     soil_con->frost_fract, soil_con->frost_slope, 
 					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
@@ -155,9 +132,6 @@ int  solve_T_profile(double *T,
 		     double *gamma,
 		     double Dp,
 		     double *depth,
-#if QUICK_FS
-		     double ***ufwc_table_node,
-#endif
 		     int     Nnodes,
 		     int    *FIRST_SOLN,
 		     int     FS_ACTIVE,
@@ -192,6 +166,7 @@ int  solve_T_profile(double *T,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -268,17 +243,10 @@ int  solve_T_profile(double *T,
   
   for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
-#if QUICK_FS
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
-				   bubble, expt, alpha, gamma, aa, bb, cc, 
-				   dd, ee, ufwc_table_node, FS_ACTIVE, 
-				   NOFLUX, EXP_TRANS, veg_class);
-#else
   Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, 
 				   FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
-#endif 
 
   return ( Error );
   
@@ -392,9 +360,6 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 			     double *C, 
 			     double *D, 
 			     double *E,
-#if QUICK_FS
-			     double ***ufwc_table_node,
-#endif
 			     int    FS_ACTIVE, 
 			     int    NOFLUX,
 			     int EXP_TRANS,
@@ -424,6 +389,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	      is TRUE.								TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -470,22 +436,12 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	  T[j] = (A[j]*T0[j]+B[j]*(T[j+1]-T[j-1])+C[j]*(T[j+1]+T[j-1])-D[j]*(T[j+1]-T[j-1])+E[j]*(0.-ice[j]))/(A[j]+2.*C[j]);
       }
       else {
-#if QUICK_FS
-	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
-			  ErrorString, soil_thermal_eqn, 
-			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
-			  ufwc_table_node[j], ice[j], gamma[j-1], 
-			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#else
 	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
 			  ErrorString, soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  bubble[j], expt[j], 
-
 			  ice[j], gamma[j-1], 
 			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#endif
-	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
             T[j] = T0[j];
@@ -518,16 +474,6 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	  T[j] = (A[j]*T0[j]+B[j]*(T[j]-T[j-1])+C[j]*(T[j]+T[j-1])-D[j]*(T[j]-T[j-1])+E[j]*(0.-ice[j]))/(A[j]+2.*C[j]);
       }
       else {
-#if QUICK_FS
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]+SOIL_DT,
-				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
-				 T[Nnodes-2], T0[Nnodes-1], 
-				 moist[Nnodes-1], max_moist[Nnodes-1], 
-				 ufwc_table_node[Nnodes-1], 
-				 ice[Nnodes-1], 
-				 gamma[Nnodes-2], 
-				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#else
 	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]+SOIL_DT,
 				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
@@ -536,8 +482,6 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 				 ice[Nnodes-1], 
 				 gamma[Nnodes-2], 
 				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#endif
-	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
             T[j] = T0[j];

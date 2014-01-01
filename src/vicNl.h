@@ -111,6 +111,7 @@
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -147,18 +148,11 @@ double calc_snow_ground_flux(int, int, int, int, double, double, double,
 			     double *, energy_bal_struct *, 
 			     snow_data_struct *, layer_data_struct *,
                              layer_data_struct *, soil_con_struct *, char *);
-#if QUICK_FS
-int    calc_soil_thermal_fluxes(int, double *, double *, char *, int *, double *, double *, 
-				double *, double *, double *,double *, 
-				double *, double *, double *, 
-				double *, double *, double *, double ***, int, int, int, int);
-#else
 int    calc_soil_thermal_fluxes(int, double *, double *, char *, int *, double *, double *, 
 				double *, double *, double *,double *, 
 				double *, double *, double *, 
 				double *, double *, double *, 
 				int, int, int, int);
-#endif // QUICK_FS
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double CalcBlowingSnow(double, double, int, double, double, double, double, 
                        double, double, double, double, double, float, 
@@ -241,18 +235,11 @@ int    dist_prec(atmos_data_struct *,dist_prcp_struct *,soil_con_struct *,
 		 filep_struct *, out_data_file_struct *,
 		 out_data_struct *, save_data_struct *,
 		 int, int, char, char, char *, int *);
-#if QUICK_FS
-int  distribute_node_moisture_properties(double *, double *, double *, double *,
-					 double *, double *, double *, double ***, 
-					 double *, double *, double *, double *, double *,
-					 double *, double *, double *, int, int, char);
-#else
 int  distribute_node_moisture_properties(double *, double *, double *, 
 					 double *, double *, double *,
 					 double *, double *, double *,
 					 double *, double *, double *, double *, double *,
 					 double *, double *, double *, int, int, char);
-#endif
 void   distribute_soil_property(double *,double,double,
 				double **l_param,
 				int, int, double *, double *);
@@ -272,25 +259,13 @@ double error_print_solve_T_profile(double, va_list);
 double error_print_surf_energy_bal(double, va_list);
 double error_solve_T_profile(double Tsurf, ...);
 double estimate_dew_point(double, double, double, double, double);
-#if QUICK_FS
-int estimate_layer_ice_content(layer_data_struct *, double *, double *,
-			       double *, double ***, double *,
-			       double *, double ***, 
-			       double *, double, int, int, char);
-#else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 			       double *, double *, double *, double *,
 			       double *, double *, double *, 
 			       double *, double, int, int, char);
-#endif
 int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
 					  double, double, double, double,
-					  double *,
-#if QUICK_FS
-					  double ***,
-#else
-					  double *, double *,
-#endif // QUICK_FS
+					  double *, double *, double *,
 					  double *, double, char);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
@@ -374,9 +349,6 @@ snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
 void   MassRelease(double *,double *,double *,double *);
 double maximum_unfrozen_water(double, double, double, double);
-#if QUICK_FS
-double maximum_unfrozen_water_quick(double, double, double **);
-#endif
 double modify_Ksat(double);
 void mtclim_wrapper(int, int, double, double, double, double,
                       double, double, double, double,
@@ -434,11 +406,7 @@ int    runoff(cell_data_struct *, cell_data_struct *,
 void set_max_min_hour(double *, int, int *, int *);
 void set_node_parameters(double *, double *, double *, double *, double *, double *,
 			 double *, double *, double *, double *, double *,
-			 double *, double *,
-#if QUICK_FS
-			 double ***,
-#endif
-			 int, int, char);
+			 double *, double *, int, int, char);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 double snow_albedo(double, double, double, double, double, double, int, char);
@@ -487,18 +455,11 @@ double solve_atmos_moist_bal(double , ...);
 double solve_canopy_energy_bal(double Tfoliage, ...);
 double solve_snow_ground_flux(double Tsurf, ...);
 double solve_surf_energy_bal(double Tsurf, ...);
-#if QUICK_FS
-int    solve_T_profile(double *, double *, char *, int *, double *, double *,double *, 
-		       double *, double, double *, double *, double *,
-		       double *, double *, double *, double *, double, double *, double ***,
-		       int, int *, int, int, int, int);
-#else
 int    solve_T_profile(double *, double *, char *, int *, double *, double *,double *, 
 		       double *, double, double *, double *, double *,
 		       double *, double *, double *, double *, double, double *,
 		       int, int *, int, int, int, int);
 
-#endif
 int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
 			       double *, double, double *, double *, double *,
 			       double *, double *, double *, double *, double, int, int *,

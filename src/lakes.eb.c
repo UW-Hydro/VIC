@@ -1930,6 +1930,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -2310,12 +2311,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
                                                     energy[iveg][band].kappa_node, energy[iveg][band].Cs_node,
                                                     soil_con.Zsum_node, energy[iveg][band].T,
                                                     soil_con.max_moist_node,
-#if QUICK_FS
-                                                    soil_con.ufwc_table_node,
-#else
                                                     soil_con.expt_node,
                                                     soil_con.bubble_node,
-#endif // QUICK_FS
                                                     moist, soil_con.depth,
                                                     soil_con.soil_dens_min,
                                                     soil_con.bulk_dens_min,

@@ -59,6 +59,7 @@ void display_current_settings(int                 mode,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
 
@@ -102,15 +103,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
 #else
   fprintf(stderr,"OUTPUT_FORCE\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Simulation Parameters:\n");
-#if QUICK_FS
-  fprintf(stderr,"QUICK_FS\t\tTRUE\n");
-  fprintf(stderr,"QUICK_FS_TEMPS\t%d\n",QUICK_FS_TEMPS);
-#else
-  fprintf(stderr,"QUICK_FS\t\tFALSE\n");
 #endif
 
   fprintf(stderr,"\n");

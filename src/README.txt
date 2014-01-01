@@ -622,6 +622,8 @@ Cleanup of compile-time options
 	calc_longwave.c
 	calc_surf_energy_bal.c
 	canopy_evap.c
+	check_files.c
+	close_files.c
 	display_current_settings.c
 	frozen_soil.c
 	full_energy.c
@@ -656,6 +658,9 @@ Cleanup of compile-time options
 	vicNl_def.h
 	vicNl.c
 	vicNl.h
+	write_data.c
+	write_forcing_file.c
+	write_header.c
 	write_layer.c
 	write_model_state.c
 
@@ -682,6 +687,8 @@ Cleanup of compile-time options
 	* Moved SPATIAL_SNOW from compile-time to run-time options.
 
 	* Moved SPATIAL_FROST from compile-time to run-time options.
+
+	* Moved OUTPUT_FORCE from compile-time to run-time options.
 
 	* Moved max array dimensions such as MAX_VEG, MAX_LAYERS, etc. to
 	vicNl_def.h.

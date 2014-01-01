@@ -7,13 +7,9 @@ static char vcid[] = "$Id$";
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,
-#if OUTPUT_FORCE
 		      soil_con_struct          *soil_con,
                       out_data_file_struct     *out_data_files,
                       out_data_struct          *out_data)
-#else /* OUTPUT_FORCE */
-		      soil_con_struct          *soil_con)
-#endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
 
@@ -132,6 +128,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2013-Nov-21 Added check on ALMA_INPUT in rescaling of forcing variables to
 	      hourly step for local_forcing_data.				TJB
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.				TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -1531,25 +1528,25 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Determine if Snow will Fall During Each Time Step
   ****************************************************/
 
-#if !OUTPUT_FORCE
-  min_Tfactor = Tfactor[0];
-  for (band = 1; band < options.SNOW_BAND; band++) {
-    if (Tfactor[band] < min_Tfactor)
-      min_Tfactor = Tfactor[band];
-  }
-  for (rec = 0; rec < global_param.nrecs; rec++) {
-    atmos[rec].snowflag[NR] = FALSE;
-    for (i = 0; i < NF; i++) {
-      if ((atmos[rec].air_temp[i] + min_Tfactor) < global_param.MAX_SNOW_TEMP
-	  &&  atmos[rec].prec[i] > 0) {
-	atmos[rec].snowflag[i] = TRUE;
-	atmos[rec].snowflag[NR] = TRUE;
+  if (!options.OUTPUT_FORCE) {
+    min_Tfactor = Tfactor[0];
+    for (band = 1; band < options.SNOW_BAND; band++) {
+      if (Tfactor[band] < min_Tfactor)
+        min_Tfactor = Tfactor[band];
+    }
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      atmos[rec].snowflag[NR] = FALSE;
+      for (i = 0; i < NF; i++) {
+        if ((atmos[rec].air_temp[i] + min_Tfactor) < global_param.MAX_SNOW_TEMP
+	    &&  atmos[rec].prec[i] > 0) {
+	  atmos[rec].snowflag[i] = TRUE;
+	  atmos[rec].snowflag[NR] = TRUE;
+        }
+        else
+	  atmos[rec].snowflag[i] = FALSE;
       }
-      else
-	atmos[rec].snowflag[i] = FALSE;
     }
   }
-#endif // OUTPUT_FORCE
 
   param_set.TYPE[PREC].SUPPLIED = save_prec_supplied;
   param_set.TYPE[WIND].SUPPLIED = save_wind_supplied;
@@ -1583,24 +1580,25 @@ void initialize_atmos(atmos_data_struct        *atmos,
   free(local_forcing_data);
   free((char *)dmy_local);
 
-#if !OUTPUT_FORCE
+  if (!options.OUTPUT_FORCE) {
 
-  // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
-  // specifically been turned off for this cell (by supplying avgJulyAirTemp
-  // and setting it to -999), calculate which snowbands are above the
-  // treeline, based on average July air temperature.
-  if (options.COMPUTE_TREELINE) {
-    if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
-      compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+    // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
+    // specifically been turned off for this cell (by supplying avgJulyAirTemp
+    // and setting it to -999), calculate which snowbands are above the
+    // treeline, based on average July air temperature.
+    if (options.COMPUTE_TREELINE) {
+      if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
+        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+      }
     }
+
   }
+  else {
 
-#else
+    // If OUTPUT_FORCE is TRUE then the full
+    // forcing data array is dumped into a new set of files.
+    write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
 
-  // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
-  // forcing data array is dumped into a new set of files.
-  write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
-
-#endif // OUTPUT_FORCE 
+  }
 
 }

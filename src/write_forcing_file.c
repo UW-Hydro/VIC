@@ -4,7 +4,6 @@
 
 static char vcid[] = "$Id$";
 
-#if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *atmos,
 			int                nrecs,
 			out_data_file_struct *out_data_files, 
@@ -28,7 +27,7 @@ void write_forcing_file(atmos_data_struct *atmos,
   2009-Feb-22 Added OUT_VPD.						TJB
   2011-Nov-04 Added OUT_TSKC.						TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -103,4 +102,3 @@ void write_forcing_file(atmos_data_struct *atmos,
   }
 
 }
-#endif /* OUTPUT_FORCE */

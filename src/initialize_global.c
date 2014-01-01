@@ -127,6 +127,7 @@ void initialize_global() {
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -200,6 +201,7 @@ void initialize_global() {
   options.COMPRESS              = FALSE;
   options.MOISTFRACT            = FALSE;
   options.Noutfiles             = 2;
+  options.OUTPUT_FORCE          = FALSE;
   options.PRT_HEADER            = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
 

@@ -110,6 +110,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -679,6 +680,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
         else options.MOISTFRACT = FALSE;
       }
+      else if(strcasecmp("OUTPUT_FORCE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.OUTPUT_FORCE=TRUE;
+        else options.OUTPUT_FORCE = FALSE;
+      }
       else if(strcasecmp("PRT_HEADER",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.PRT_HEADER=TRUE;
@@ -853,7 +859,7 @@ global_param_struct get_global_param(filenames_struct *names,
     Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
   *******************************************************************************/
 
-#if !OUTPUT_FORCE
+  if (!options.OUTPUT_FORCE) {
 
   // Validate veg parameter information
   if ( strcmp ( names->veg, "MISSING" ) == 0 )
@@ -1058,7 +1064,7 @@ global_param_struct get_global_param(filenames_struct *names,
 
 #endif // VERBOSE
 
-#endif // !OUTPUT_FORCE
+  } // !OUTPUT_FORCE
 
   return global;
 

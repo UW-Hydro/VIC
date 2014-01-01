@@ -138,6 +138,7 @@
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -839,6 +840,9 @@ typedef struct {
   char   COMPRESS;       /* TRUE = Compress all output files */
   char   MOISTFRACT;     /* TRUE = output soil moisture as fractional moisture content */
   int    Noutfiles;      /* Number of output files (not including state files) */
+  char   OUTPUT_FORCE;   /* TRUE = perform disaggregation of forcings, skip
+                            the simulation, and output the disaggregated
+                            forcings. */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band. This is only used when default
 				   output files are used (for backwards-compatibility); if outfiles and

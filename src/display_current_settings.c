@@ -60,6 +60,7 @@ void display_current_settings(int                 mode,
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
 
@@ -95,14 +96,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"NO_REWIND\t\tTRUE\n");
 #else
   fprintf(stderr,"NO_REWIND\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Output Files:\n");
-#if OUTPUT_FORCE
-  fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
-#else
-  fprintf(stderr,"OUTPUT_FORCE\t\tFALSE\n");
 #endif
 
   fprintf(stderr,"\n");
@@ -440,6 +433,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"MOISTFRACT\t\tTRUE\n");
   else
     fprintf(stderr,"MOISTFRACT\t\tFALSE\n");
+  if (options.OUTPUT_FORCE)
+    fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
+  else
+    fprintf(stderr,"OUTPUT_FORCE\t\tFALSE\n");
   if (options.PRT_HEADER)
     fprintf(stderr,"PRT_HEADER\t\tTRUE\n");
   else

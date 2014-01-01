@@ -112,6 +112,7 @@
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -314,11 +315,7 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
 void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
-#if OUTPUT_FORCE
 			soil_con_struct *, out_data_file_struct *, out_data_struct *);
-#else
-			soil_con_struct *);
-#endif
 void   initialize_global();
 int   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      global_param_struct *, filep_struct, 
@@ -496,9 +493,7 @@ double volumetric_heat_capacity(double,double,double,double);
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
 void write_dist_prcp(dist_prcp_struct *);
-#if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);
-#endif
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, global_param_struct);
 void write_layer(layer_data_struct *, int, int, 
                  double *, double *);

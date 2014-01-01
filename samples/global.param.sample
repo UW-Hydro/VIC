@@ -72,6 +72,7 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 # Meteorological Forcing Disaggregation Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
+#OUTPUT_FORCE	FALSE	# TRUE = perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings.
 #PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 #SW_PREC_THRESH		0	# Minimum daily precip [mm] that can cause dimming of incoming shortwave; default = 0.
 #MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE

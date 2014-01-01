@@ -133,6 +133,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -303,14 +304,14 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     strcat(namestr,"/");
     strcat(namestr,tmpstr);
     temp.rough = read_arcinfo_value(namestr,temp.lat,temp.lng);
-#if !OUTPUT_FORCE
-    /* Overwrite default bare soil aerodynamic resistance parameters
-       with the values taken from the soil parameter file */
-    for (j=0; j<12; j++) {
-      veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
-      veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
+    if (!options.OUTPUT_FORCE) {
+      /* Overwrite default bare soil aerodynamic resistance parameters
+         with the values taken from the soil parameter file */
+      for (j=0; j<12; j++) {
+        veg_lib[veg_lib[0].NVegLibTypes].roughness[j] = temp.rough;
+        veg_lib[veg_lib[0].NVegLibTypes].displacement[j] = temp.rough*0.667/0.123;
+      }
     }
-#endif // !OUTPUT_FORCE
 
     /** Get Snow Surface Roughness **/
     fscanf(soilparam,"%s",tmpstr);
@@ -482,23 +483,24 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
       }
     }
 
-#if !OUTPUT_FORCE
-    /*******************************************
-      Compute Soil Layer Properties
+    if (!options.OUTPUT_FORCE) {
+
+      /*******************************************
+        Compute Soil Layer Properties
       *******************************************/
-    sum_depth   = 0.;
-    for(layer = 0; layer < options.Nlayer; layer++) {
-      sum_depth += temp.depth[layer];
-      temp.bulk_dens_min[layer] *= 1000.;
-      temp.soil_dens_min[layer] = temp.bulk_dens_min[layer] / (1.0 - temp.porosity[layer]);
-      temp.bulk_dens_org[layer] *= 1000.;
-      temp.soil_dens_org[layer] *= 1000.;
-      temp.bulk_density[layer] = (1-temp.organic[layer])*temp.bulk_dens_min[layer] + temp.organic[layer]*temp.bulk_dens_org[layer];
-      temp.soil_density[layer] = (1-temp.organic[layer])*temp.soil_dens_min[layer] + temp.organic[layer]*temp.soil_dens_org[layer];
-      temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
-      temp.quartz[layer] = sand[layer] / 100.;
-      temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
-      temp.bubble[layer] = exp(5.3396738 + 0.1845038*clay[layer] 
+      sum_depth   = 0.;
+      for(layer = 0; layer < options.Nlayer; layer++) {
+        sum_depth += temp.depth[layer];
+        temp.bulk_dens_min[layer] *= 1000.;
+        temp.soil_dens_min[layer] = temp.bulk_dens_min[layer] / (1.0 - temp.porosity[layer]);
+        temp.bulk_dens_org[layer] *= 1000.;
+        temp.soil_dens_org[layer] *= 1000.;
+        temp.bulk_density[layer] = (1-temp.organic[layer])*temp.bulk_dens_min[layer] + temp.organic[layer]*temp.bulk_dens_org[layer];
+        temp.soil_density[layer] = (1-temp.organic[layer])*temp.soil_dens_min[layer] + temp.organic[layer]*temp.soil_dens_org[layer];
+        temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
+        temp.quartz[layer] = sand[layer] / 100.;
+        temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
+        temp.bubble[layer] = exp(5.3396738 + 0.1845038*clay[layer] 
 			 - 2.48394546*temp.porosity[layer] 
 			 - 0.00213853*pow(clay[layer],2.)
 			 - 0.04356349*sand[layer]*temp.porosity[layer]
@@ -512,7 +514,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 			 - 0.00072472*pow(sand[layer],2.)*temp.porosity[layer]
 			 + 0.00000540*pow(clay[layer],2.)*sand[layer]
 			 + 0.50028060*pow(temp.porosity[layer],2.)*clay[layer]);
-      temp.expt[layer] = exp(-0.7842831 + 0.0177544*sand[layer] 
+        temp.expt[layer] = exp(-0.7842831 + 0.0177544*sand[layer] 
 			     - 1.062498*temp.porosity[layer] 
 			     - 0.00005304*pow(sand[layer],2.)
 			     - 0.00273493*pow(clay[layer],2.)
@@ -525,8 +527,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 			     - 0.00000235*pow(sand[layer],2.)*clay[layer]
 			     + 0.00798746*pow(clay[layer],2.)*temp.porosity[layer]
 			     - 0.00674491*pow(temp.porosity[layer],2.)*clay[layer]);
-      temp.expt[layer] = 2. / temp.expt[layer] + 3.;
-      temp.resid_moist[layer] = - 0.0182482 + 0.00087269 * sand[layer]
+        temp.expt[layer] = 2. / temp.expt[layer] + 3.;
+        temp.resid_moist[layer] = - 0.0182482 + 0.00087269 * sand[layer]
 	                      + 0.00513488 * clay[layer] 
 	                      + 0.02939286 * temp.porosity[layer] 
                               - 0.00015395 * pow(clay[layer],2.) 
@@ -538,37 +540,37 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
                               - 0.00235840 * pow(temp.porosity[layer],2.) 
                                            * clay[layer];
 
-      /** Check for valid values of generated parameters **/
-      if(temp.bubble[layer]<1.36) {
-	fprintf(stderr,"WARNING: estimated bubbling pressure too low (%f), resetting to minimum value (%f).\n",temp.bubble[layer],1.36);
-	temp.bubble[layer] = 1.36;
+        /** Check for valid values of generated parameters **/
+        if(temp.bubble[layer]<1.36) {
+	  fprintf(stderr,"WARNING: estimated bubbling pressure too low (%f), resetting to minimum value (%f).\n",temp.bubble[layer],1.36);
+	  temp.bubble[layer] = 1.36;
+        }
+        if(temp.bubble[layer]>187.2) {
+	  fprintf(stderr,"WARNING: estimated bubbling pressure too high (%f), resetting to maximum value (%f).\n",temp.bubble[layer],187.2);
+	  temp.bubble[layer] = 187.2;
+        }
+        if(temp.expt[layer] < 2. / 1.090 + 3.) {
+	  fprintf(stderr,"WARNING: estimated exponential (expt) too low (%f), resetting to minimum value (%f).\n", temp.expt[layer], 2. / 1.090 + 3.);
+	  temp.expt[layer] = 2. / 1.090 + 3.;
+        }
+        if(temp.expt[layer] > 2. / 0.037 + 3.) {
+	  fprintf(stderr,"WARNING: estimated exponential (expt) too high (%f), resetting to maximum value (%f).\n",temp.expt[layer], 2. / 0.037 + 3.);
+	  temp.expt[layer] = 2. / 0.037 + 3.;
+        }
+        if(temp.resid_moist[layer] < -0.038) {
+	  fprintf(stderr,"WARNING: estimated residual soil moisture too low (%f), resetting to minimum value (%f).\n",temp.resid_moist[layer],-0.038);
+	  temp.resid_moist[layer] = -0.038;
+        }
+        if(temp.resid_moist[layer] > 0.205) {
+	  fprintf(stderr,"WARNING: estimated residual soil moisture too high (%f), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
+	  temp.resid_moist[layer] = 0.205;
+        }
+        tmp_bubble += temp.bubble[layer];
       }
-      if(temp.bubble[layer]>187.2) {
-	fprintf(stderr,"WARNING: estimated bubbling pressure too high (%f), resetting to maximum value (%f).\n",temp.bubble[layer],187.2);
-	temp.bubble[layer] = 187.2;
-      }
-      if(temp.expt[layer] < 2. / 1.090 + 3.) {
-	fprintf(stderr,"WARNING: estimated exponential (expt) too low (%f), resetting to minimum value (%f).\n", temp.expt[layer], 2. / 1.090 + 3.);
-	temp.expt[layer] = 2. / 1.090 + 3.;
-      }
-      if(temp.expt[layer] > 2. / 0.037 + 3.) {
-	fprintf(stderr,"WARNING: estimated exponential (expt) too high (%f), resetting to maximum value (%f).\n",temp.expt[layer], 2. / 0.037 + 3.);
-	temp.expt[layer] = 2. / 0.037 + 3.;
-      }
-      if(temp.resid_moist[layer] < -0.038) {
-	fprintf(stderr,"WARNING: estimated residual soil moisture too low (%f), resetting to minimum value (%f).\n",temp.resid_moist[layer],-0.038);
-	temp.resid_moist[layer] = -0.038;
-      }
-      if(temp.resid_moist[layer] > 0.205) {
-	fprintf(stderr,"WARNING: estimated residual soil moisture too high (%f), resetting to maximum value (%f).\n",temp.resid_moist[layer],0.205);
-	temp.resid_moist[layer] = 0.205;
-      }
-      tmp_bubble += temp.bubble[layer];
-    }
-    for(layer=0;layer<options.Nlayer;layer++) temp.bubble[layer] = tmp_bubble/3.;
+      for(layer=0;layer<options.Nlayer;layer++) temp.bubble[layer] = tmp_bubble/3.;
 
-#endif /* !OUTPUT_FORCE */
-    
+    } // !OUTPUT_FORCE
+
   }
   else RUN[0] = 0;
  

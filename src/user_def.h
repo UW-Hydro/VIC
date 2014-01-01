@@ -30,6 +30,7 @@
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct (vicNl_def.h).	TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct (vicNl_def.h).	TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct (vicNl_def.h).	TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -40,12 +41,4 @@
        but requires that all grid cells are listed in the same
        order as the soil parameter file *****/
 #define NO_REWIND FALSE
-
-/***** If TRUE VIC reads the model forcing files, and creates the full
-       internal forcing dataset (longwave, shortwave, humidity, etc.)
-       which is then written to a series of gridded output files for
-       later use.  Gridded forcing files are written to the RESULTS
-       directory defined in the global control file, and are binary
-       or ASCII based on the BINARY_OUTPUT flag. *****/
-#define OUTPUT_FORCE FALSE
 

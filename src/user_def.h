@@ -25,17 +25,11 @@
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option (user_def.h) with
 	      LOG_MATRIC run-time option (vicNl_def.h).			TJB
+  2013-Dec-26 Removed CLOSE_ENERGY option (moved into options struct).	TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
-
-/***** If TRUE all energy balance calculations are iterated to minimize
-       the total column (air, canopy, snow and ground) error.  Otherwise
-       no iteration is used and the model estimates the new fluxes
-       based on those from the previous time step, results should
-       be similar, however, the model will report energy balance errors *****/
-#define CLOSE_ENERGY FALSE
 
 /***** If TRUE VIC uses a system of linear equations defined in global.h
        to estimate the maximum unfrozen water content equation.  This 

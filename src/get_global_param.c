@@ -105,6 +105,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Dec-26 Added LOG_MATRIC option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -308,6 +309,11 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("MAX_SNOW_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&global.MAX_SNOW_TEMP);
+      }
+      else if(strcasecmp("CLOSE_ENERGY",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CLOSE_ENERGY=TRUE;
+        else options.CLOSE_ENERGY = FALSE;
       }
       else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -956,6 +962,10 @@ global_param_struct get_global_param(filenames_struct *names,
   }
   if(options.Nnode > MAX_NODES) {
     sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
+    nrerror(ErrStr);
+  }
+  if(!options.FULL_ENERGY && options.CLOSE_ENERGY) {
+    sprintf(ErrStr,"CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
     nrerror(ErrStr);
   }
 

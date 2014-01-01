@@ -133,6 +133,7 @@
   2013-Jul-25 Added SLAB_MOIST.						TJB
   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
   2013-Dec-26 Added LOG_MATRIC option.					TJB
+  2013-Dec-26 Added CLOSE_ENERGY option.				TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -732,6 +733,13 @@ typedef struct {
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
   char   CARBON;         /* TRUE = simulate carbon cycling processes;
 			    FALSE = no carbon cycling (default) */
+  char   CLOSE_ENERGY;   /* TRUE = all energy balance calculations are
+                            iterated to minimize the total column (air,
+                            canopy, snow and ground) error; FALSE = no
+                            iteration is used and the model estimates the new
+                            fluxes based on those from the previous time step,
+                            results should be similar, however, the model will
+                            report energy balance errors. */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */
   char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */

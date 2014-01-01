@@ -64,6 +64,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
   2013-Jan-11 Replaced (*SensibleHeat) with SensibleHeat in argument lists
 	      of root_brent, error_print_atmos_energy_bal and
 	      solve_atmos_energy_bal.					TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
 ************************************************************************/
 
   extern option_struct options;
@@ -105,7 +106,7 @@ double calc_atmos_energy_bal(double  InOverSensible,
     Find Canopy Air Temperature
   ******************************/
 
-#if CLOSE_ENERGY
+  if (options.CLOSE_ENERGY) {
 
     /* initialize Tcanopy_fbflag */
     *Tcanopy_fbflag = 0;
@@ -137,11 +138,10 @@ double calc_atmos_energy_bal(double  InOverSensible,
       }
     }
 
-#else
-
+  }
+  else {
     Tcanopy = Tair;
-
-#endif
+  }
 
   // compute variables based on final temperature
   (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub), 
@@ -180,7 +180,6 @@ double calc_atmos_energy_bal(double  InOverSensible,
 
   // Bi-pass above computations
   // (*VPcanopy) = vp;
-
 
   return(Tcanopy);
 

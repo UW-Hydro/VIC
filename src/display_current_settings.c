@@ -55,6 +55,7 @@ void display_current_settings(int                 mode,
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC 
 	      run-time option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
 **********************************************************************/
 {
 
@@ -102,11 +103,6 @@ void display_current_settings(int                 mode,
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Simulation Parameters:\n");
-#if CLOSE_ENERGY
-  fprintf(stderr,"CLOSE_ENERGY\t\tTRUE\n");
-#else
-  fprintf(stderr,"CLOSE_ENERGY\t\tFALSE\n");
-#endif
 #if QUICK_FS
   fprintf(stderr,"QUICK_FS\t\tTRUE\n");
   fprintf(stderr,"QUICK_FS_TEMPS\t%d\n",QUICK_FS_TEMPS);
@@ -196,6 +192,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"BLOWING\t\t\tTRUE\n");
   else
     fprintf(stderr,"BLOWING\t\t\tFALSE\n");
+  if (options.CLOSE_ENERGY)
+    fprintf(stderr,"CLOSE_ENERGY\t\t\tTRUE\n");
+  else
+    fprintf(stderr,"CLOSE_ENERGY\t\t\tFALSE\n");
   if (options.COMPUTE_TREELINE)
     fprintf(stderr,"COMPUTE_TREELINE\t\tTRUE\n");
   else

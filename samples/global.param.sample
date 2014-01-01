@@ -60,6 +60,8 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #			# AR_406_FULL 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# AR_410 	= apply stability correction but do NOT multiply by 10 (as in VIC 4.1.0); additionally, always use overstory aero_resist for ET (as in 4.1.0).
 #			# Default 	= AR_406_FULL
+#CLOSE_ENERGY	FALSE	# TRUE = all energy balance calculations (canopy air, canopy snow, ground snow,
+                        # and ground surface) are iterated to minimize the total column error
 
 #######################################################################
 # Meteorological Forcing Disaggregation Parameters

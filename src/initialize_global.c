@@ -124,6 +124,7 @@ void initialize_global() {
 	      for LW_TYPE to LW_PRATA.						TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Dec-26 Added LOG_MATRIC option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -138,6 +139,7 @@ void initialize_global() {
   options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
   options.CARBON                = FALSE;
+  options.CLOSE_ENERGY          = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;

@@ -40,6 +40,7 @@ FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
 #			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
 #			# Default = GF_410
 #TFALLBACK	TRUE	# TRUE = when temperature iteration fails to converge, use previous time step's T value
+#SPATIAL_FROST	FALSE	(Nfrost)	# TRUE = use a uniform distribution to simulate the spatial distribution of soil frost; FALSE = assume that the entire grid cell is frozen uniformly.  If TRUE, then replace (Nfrost) with the number of frost subareas, i.e., number of points on the spatial distribution curve to simulate.
 
 #######################################################################
 # Precip (Rain and Snow) Parameters

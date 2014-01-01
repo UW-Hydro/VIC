@@ -239,9 +239,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *moist_node;
 
   /* spatial frost terms */
-#if SPATIAL_FROST    
   double *frost_fract;
-#endif
 
   /* quick solution frozen soils terms */
 #if QUICK_FS
@@ -440,9 +438,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   depth = soil_con->depth;
   resid_moist = soil_con->resid_moist;
   elevation = (double)soil_con->elevation;
-#if SPATIAL_FROST    
   frost_fract = soil_con->frost_fract;
-#endif // SPATIAL_FROST
 #if QUICK_FS
   ufwc_table_layer = soil_con->ufwc_table_layer;
   ufwc_table_node = soil_con->ufwc_table_node;
@@ -712,21 +708,14 @@ double func_surf_energy_bal(double Ts, va_list ap)
 		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
-		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, 
-#if SPATIAL_FROST
-		       frost_fract,
-#endif // SPATIAL_FROST
+		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, frost_fract,
 		       root, dryFrac, shortwave, Catm, CanopLayerBnd);
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
 		     depth[0], max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, Ra_used[0], delta_t, mu, 
-#if SPATIAL_FROST
 		     resid_moist[0], frost_fract);
-#else
-                     resid_moist[0]);
-#endif // SPATIAL_FROST
   }
   else Evap = 0.;
   

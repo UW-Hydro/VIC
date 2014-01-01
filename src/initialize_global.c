@@ -126,6 +126,7 @@ void initialize_global() {
   2013-Dec-26 Added LOG_MATRIC option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -159,6 +160,7 @@ void initialize_global() {
   options.MIN_WIND_SPEED        = 0.1;
   options.MTCLIM_SWE_CORR       = FALSE;
   options.Ncanopy               = 3;
+  options.Nfrost                = 1;
   options.Nlayer                = 3;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
@@ -173,6 +175,7 @@ void initialize_global() {
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
+  options.SPATIAL_FROST         = FALSE;
   options.SPATIAL_SNOW          = FALSE;
   options.SW_PREC_THRESH        = 0;
   options.TFALLBACK             = TRUE;

@@ -108,6 +108,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -117,6 +118,7 @@ global_param_struct get_global_param(filenames_struct *names,
   char cmdstr[MAXSTRING];
   char optstr[MAXSTRING];
   char flgstr[MAXSTRING];
+  char flgstr2[MAXSTRING];
   char ErrStr[MAXSTRING];
   int  file_num;
   int  field;
@@ -380,6 +382,14 @@ global_param_struct get_global_param(filenames_struct *names,
         else {
 	  options.PLAPSE = TRUE;
 	}
+      }
+      else if(strcasecmp("SPATIAL_FROST",optstr)==0) {
+        sscanf(cmdstr,"%*s %s %s",flgstr,flgstr2);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          options.SPATIAL_FROST=TRUE;
+          options.Nfrost = atoi(flgstr2);
+        }
+        else options.SPATIAL_FROST = FALSE;
       }
       else if(strcasecmp("SPATIAL_SNOW",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -854,6 +864,18 @@ global_param_struct get_global_param(filenames_struct *names,
   if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
       sprintf(ErrStr, "\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global parameter file.  If you want VIC to read LAI values from the vegparam file, you MUST make sure the veg param file contains 1 line of 12 monthly LAI values for EACH veg tile in EACH grid cell, and you MUST specify \"VEGPARAM_LAI\" as \"TRUE\" in the global parameter file.  Alternatively, if you want VIC to read LAI values from the veg library file, set \"LAI_SRC\" ro \"LAI_FROM_VEGLIB\" in the global parameter file.  In either case, the setting of \"VEGPARAM_LAI\" must be consistent with the contents of the veg param file (i.e. whether or not it contains LAI values).");
       nrerror(ErrStr);
+  }
+
+  // Validate SPATIAL_FROST information
+  if(options.SPATIAL_FROST) {
+    if (options.Nfrost > MAX_FROST_AREAS) {
+      sprintf(ErrStr, "\"SPATIAL_FROST\" was specified with %d frost subareas, which is greater than the maximum of %d.", options.Nfrost, MAX_FROST_AREAS);
+      nrerror(ErrStr);
+    }
+    if(options.Nfrost < 1) {
+      sprintf(ErrStr, "\"SPATIAL_FROST\" was specified with %d frost subareas, which is less than the mainmum of 1.", options.Nfrost);
+      nrerror(ErrStr);
+    }
   }
 
   // Carbon-cycling options

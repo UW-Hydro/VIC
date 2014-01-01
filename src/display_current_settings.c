@@ -58,6 +58,7 @@ void display_current_settings(int                 mode,
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
 **********************************************************************/
 {
 
@@ -111,17 +112,12 @@ void display_current_settings(int                 mode,
 #else
   fprintf(stderr,"QUICK_FS\t\tFALSE\n");
 #endif
-#if SPATIAL_FROST
-  fprintf(stderr,"SPATIAL_FROST\t\tTRUE\n");
-  fprintf(stderr,"FROST_SUBAREAS\t\t%d\n",FROST_SUBAREAS);
-#else
-  fprintf(stderr,"SPATIAL_FROST\t\tFALSE\n");
-#endif
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Maximum Array Sizes:\n");
   fprintf(stderr,"MAX_BANDS\t\t%2d\n",MAX_BANDS);
   fprintf(stderr,"MAX_FRONTS\t\t%2d\n",MAX_FRONTS);
+  fprintf(stderr,"MAX_FROST_AREAS\t\t\t%2d\n",MAX_FROST_AREAS);
   fprintf(stderr,"MAX_LAKE_NODES\t\t%2d\n",MAX_LAKE_NODES);
   fprintf(stderr,"MAX_LAYERS\t\t%2d\n",MAX_LAYERS);
   fprintf(stderr,"MAX_NODES\t\t%2d\n",MAX_NODES);
@@ -264,6 +260,12 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"QUICK_SOLVE\t\tTRUE\n");
   else
     fprintf(stderr,"QUICK_SOLVE\t\tFALSE\n");
+  if (options.SPATIAL_FROST == TRUE) {
+    fprintf(stderr,"SPATIAL_FROST\t\tTRUE\n");
+    fprintf(stderr,"Nfrost\t\t%d\n",options.Nfrost);
+  }
+  else
+    fprintf(stderr,"SPATIAL_FROST\t\tFALSE\n");
   if (options.SPATIAL_SNOW == TRUE)
     fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
   else

@@ -70,12 +70,8 @@ double arno_evap(layer_data_struct *layer_wet,
 		 double             ra,
 		 double             delta_t,
 		 double             mu,
-#if SPATIAL_FROST
 		 double             moist_resid,
 		 double            *frost_fract)
-#else
-		 double             moist_resid)
-#endif
 {
   extern option_struct options;
 
@@ -83,9 +79,7 @@ double arno_evap(layer_data_struct *layer_wet,
   int    i;
   int    Ndist;
   int    dist;
-#if SPATIAL_FROST
   int    frost_area;
-#endif
   double tmp,beta_asp,dummy;
   double ratio,as;
   double Epot;		/* potential bare soil evaporation */
@@ -112,15 +106,10 @@ double arno_evap(layer_data_struct *layer_wet,
     }
 
     /* moist = liquid soil moisture */
-#if SPATIAL_FROST
     moist = 0;
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-      moist += (layer[0].moist - layer[0].ice[frost_area])
-	* frost_fract[frost_area];
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+      moist += (layer[0].moist - layer[0].ice[frost_area]) * frost_fract[frost_area];
     }
-#else
-    moist = layer[0].moist - layer[0].ice;
-#endif
     if ( moist > max_moist ) moist = max_moist;
 
     /* Calculate the potential bare soil evaporation (mm/time step) */

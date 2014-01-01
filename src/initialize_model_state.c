@@ -120,6 +120,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -136,9 +137,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   tmp_runoff;
   int      dry;
   int      band;
-#if SPATIAL_FROST
   int      frost_area;
-#endif
   int      ErrorFlag;
   double   Cv;
   double   Zsum, dp;
@@ -147,11 +146,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   double   tmp;
   double  *M;
   double   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-#if SPATIAL_FROST
-  double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][FROST_SUBAREAS];
-#else
-  double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-#endif // SPATIAL_FROST
+  double   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS];
 #if QUICK_FS
   double   Aufwc, Bufwc;
 #endif
@@ -230,17 +225,15 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     Initialize all spatial frost variables 
   ********************************************/
 
-#if SPATIAL_FROST
-  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-    if ( FROST_SUBAREAS == 1 ) soil_con->frost_fract[frost_area] = 1.;
-    else if (FROST_SUBAREAS == 2 ) soil_con->frost_fract[frost_area] = 0.5;
+  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+    if ( options.Nfrost == 1 ) soil_con->frost_fract[frost_area] = 1.;
+    else if (options.Nfrost == 2 ) soil_con->frost_fract[frost_area] = 0.5;
     else {
-      soil_con->frost_fract[frost_area] = 1. / (FROST_SUBAREAS - 1);
-      if ( frost_area == 0 || frost_area == FROST_SUBAREAS-1 ) 
+      soil_con->frost_fract[frost_area] = 1. / (options.Nfrost - 1);
+      if ( frost_area == 0 || frost_area == options.Nfrost-1 ) 
 	soil_con->frost_fract[frost_area] /= 2.;
     }
   }
-#endif // SPATIAL_FROST
 
   /********************************************************
     Compute grid cell fractions for all subareas used in 
@@ -294,24 +287,15 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 
 	    if ( cell[dist][veg][band].layer[lidx].moist > soil_con->max_moist[lidx] ) {
               fprintf( stderr, "WARNING: Initial soil moisture (%f mm) exceeds maximum (%f mm) in layer %d for veg tile %d and snow band%d.  Resetting to maximum.\n", cell[dist][veg][band].layer[lidx].moist, soil_con->max_moist[lidx], lidx, veg, band );
-#if SPATIAL_FROST
-              for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++)
+              for ( frost_area = 0; frost_area < options.Nfrost; frost_area++)
                 cell[dist][veg][band].layer[lidx].ice[frost_area] *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
-#else
-              cell[dist][veg][band].layer[lidx].ice *= soil_con->max_moist[lidx]/cell[dist][veg][band].layer[lidx].moist;
-#endif
               cell[dist][veg][band].layer[lidx].moist = soil_con->max_moist[lidx];
 	    }
 
-#if SPATIAL_FROST
-            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+            for ( frost_area = 0; frost_area < options.Nfrost; frost_area++) {
               if (cell[dist][veg][band].layer[lidx].ice[frost_area] > cell[dist][veg][band].layer[lidx].moist)
                 cell[dist][veg][band].layer[lidx].ice[frost_area] = cell[dist][veg][band].layer[lidx].moist;
             }
-#else
-            if (cell[dist][veg][band].layer[lidx].ice > cell[dist][veg][band].layer[lidx].moist)
-              cell[dist][veg][band].layer[lidx].ice = cell[dist][veg][band].layer[lidx].moist;
-#endif
             tmp_moist[lidx] = cell[dist][veg][band].layer[lidx].moist;
 
 	  }
@@ -323,15 +307,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
         if (options.LAKES && veg == lake_con.lake_idx) {
           for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
             lake_var->soil.layer[lidx].moist = soil_con->max_moist[lidx];
-#if SPATIAL_FROST
-            for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++) {
+            for ( frost_area = 0; frost_area < options.Nfrost; frost_area++) {
               if (lake_var->soil.layer[lidx].ice[frost_area] > lake_var->soil.layer[lidx].moist)
                 lake_var->soil.layer[lidx].ice[frost_area] = lake_var->soil.layer[lidx].moist;
             }
-#else
-            if (lake_var->soil.layer[lidx].ice > lake_var->soil.layer[lidx].moist)
-              lake_var->soil.layer[lidx].ice = lake_var->soil.layer[lidx].moist;
-#endif
           }
 	}
       }
@@ -348,12 +327,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
 	      ice[veg][band][lidx][frost_area] = cell[0][veg][band].layer[lidx].ice[frost_area];
-#else
-	    ice[veg][band][lidx] = cell[0][veg][band].layer[lidx].ice;
-#endif
 	  }
 	}
       }
@@ -414,12 +389,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  /* Initialize soil layer thicknesses */
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
 	      ice[veg][band][lidx][frost_area] = 0.;
-#else
-	    ice[veg][band][lidx] = 0.;
-#endif
 	  }
 	}
       }
@@ -523,12 +494,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  //initialize moisture and ice for each soil layer
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
-#if SPATIAL_FROST
-	    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
 	      ice[veg][band][lidx][frost_area] = 0.;
-#else
-	    ice[veg][band][lidx] = 0.;
-#endif
 	  }
 	}
       }
@@ -625,13 +592,9 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  for ( dry = 0; dry < Ndist; dry++ ) {
 	    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	      cell[dry][veg][band].layer[lidx].moist = moist[veg][band][lidx];
-#if SPATIAL_FROST
-	      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
+	      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
 
 		cell[dry][veg][band].layer[lidx].ice[frost_area] = ice[veg][band][lidx][frost_area];
-#else
-	      cell[dry][veg][band].layer[lidx].ice = ice[veg][band][lidx];
-#endif
 	    }
             if (options.QUICK_FLUX) {
               ErrorFlag = estimate_layer_ice_content_quick_flux(cell[dry][veg][band].layer,
@@ -643,9 +606,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 #else
 					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 					   soil_con->FS_ACTIVE);
             }
             else {
@@ -667,10 +628,8 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 						       soil_con->expt,
 						       soil_con->bubble,
 #endif // QUICK_FS
-#if SPATIAL_FROST
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);
 		
@@ -975,9 +934,7 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 #else
 					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 					   soil_con->FS_ACTIVE);
               }
               else {
@@ -999,10 +956,8 @@ int update_thermal_nodes(dist_prcp_struct    *prcp,
 						       soil_con->expt,
 						       soil_con->bubble,
 #endif // QUICK_FS
-#if SPATIAL_FROST
 						       soil_con->frost_fract, 
 						       soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 						       Nnodes, options.Nlayer, 
 						       soil_con->FS_ACTIVE);	      
 	      }

@@ -28,6 +28,7 @@
   2013-Dec-26 Removed CLOSE_ENERGY option (moved into options struct).	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct (vicNl_def.h).	TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct (vicNl_def.h).	TJB
 **********************************************************************/
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
@@ -54,10 +55,4 @@
        directory defined in the global control file, and are binary
        or ASCII based on the BINARY_OUTPUT flag. *****/
 #define OUTPUT_FORCE FALSE
-
-/***** If TRUE VIC uses a uniform distribution function to simulate
-       the spatial distribution of soil frost, if FALSE VIC assumes
-       that the entire grid cell is frozen uniformly *****/
-#define SPATIAL_FROST FALSE
-#define FROST_SUBAREAS 10
 

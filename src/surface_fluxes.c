@@ -145,6 +145,7 @@ int surface_fluxes(char                 overstory,
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -1227,10 +1228,8 @@ int surface_fluxes(char                 overstory,
   (*inflow_dry) = ppt[DRY];
 
   ErrorFlag = runoff(cell_wet, cell_dry, energy, soil_con, ppt, 
-#if SPATIAL_FROST
-		     soil_con->frost_fract,
-#endif // SPATIAL_FROST
-		     mu, gp->dt, options.Nnode, band, rec, iveg);
+		     soil_con->frost_fract, mu, gp->dt, options.Nnode,
+                     band, rec, iveg);
   
   return( ErrorFlag );
 

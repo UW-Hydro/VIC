@@ -1929,6 +1929,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1971,9 +1972,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   snow    = prcp->snow;
   energy  = prcp->energy;
 
-#if SPATIAL_FROST
   frost_fract = soil_con.frost_fract;
-#endif
 
   delta_moist = (double*)calloc(options.Nlayer,sizeof(double));
   moist = (double*)calloc(options.Nlayer,sizeof(double));
@@ -2112,14 +2111,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   Dsmax = soil_con.Dsmax / 24.;
   lindex = options.Nlayer-1;
-#if SPATIAL_FROST
   liq = 0;
-  for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+  for (frost_area=0; frost_area<options.Nfrost; frost_area++) {
     liq += (soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
   }
-#else
-  liq = soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice;
-#endif
   resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] * 1000.;
 
   /** Compute relative moisture **/
@@ -2489,13 +2484,9 @@ void advect_soil_veg_storage(double lakefrac,
 
     for (lidx=0; lidx<options.Nlayer; lidx++) {
       cell->layer[lidx].moist = soil_con->max_moist[lidx];
-#if SPATIAL_FROST
-      for (k=0; k<FROST_SUBAREAS; k++) {
+      for (k=0; k<options.Nfrost; k++) {
         cell->layer[lidx].ice[k]     = 0.0;
       }
-#else
-      cell->layer[lidx].ice      = 0.0;
-#endif
     }
     cell->asat = 1.0;
     cell->zwt = 0;

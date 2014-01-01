@@ -132,6 +132,7 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
 	      option.								TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -406,8 +407,8 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     temp.FS_ACTIVE = (char)read_arcinfo_value(namestr,temp.lat,temp.lng);
 
     /** Minimum Snow Depth of Full Coverage **/
-    fscanf(soilparam,"%s",tmpstr);
     if (options.SPATIAL_SNOW) {
+      fscanf(soilparam,"%s",tmpstr);
       strcpy(namestr,soilparamdir);
       strcat(namestr,"/");
       strcat(namestr,tmpstr);
@@ -418,13 +419,16 @@ soil_con_struct read_soilparam_arc(FILE *soilparam,
     }
 
     /** Slope of Frozen Soil Distribution **/
-    fscanf(soilparam,"%s",tmpstr);
-#if SPATIAL_FROST
-    strcpy(namestr,soilparamdir);
-    strcat(namestr,"/");
-    strcat(namestr,tmpstr);
-    temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
-#endif // SPATIAL_FROST
+    if (options.SPATIAL_FROST) {
+      fscanf(soilparam,"%s",tmpstr);
+      strcpy(namestr,soilparamdir);
+      strcat(namestr,"/");
+      strcat(namestr,tmpstr);
+      temp.frost_slope = read_arcinfo_value(namestr,temp.lat,temp.lng);
+    }
+    else {
+      temp.frost_slope = 0;
+    }
 
     /** Layer Initial Volumetric Ice Fraction **/
     for(layer=0;layer<options.Nlayer;layer++) {

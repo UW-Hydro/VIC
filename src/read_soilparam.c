@@ -123,6 +123,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -614,16 +615,19 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
 
       /* read slope of frozen soil distribution */
-#if SPATIAL_FROST
-      token = strtok (NULL, delimiters);
-      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
-      if( token == NULL ) {
-        sprintf(ErrStr,"ERROR: Can't find values for SPATIAL FROST in soil file\n");
-        nrerror(ErrStr);
+      if (options.SPATIAL_FROST) {
+        token = strtok (NULL, delimiters);
+        while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+        if( token == NULL ) {
+          sprintf(ErrStr,"ERROR: Can't find values for SPATIAL FROST in soil file\n");
+          nrerror(ErrStr);
+        }
+        sscanf(token, "%lf", &tempdbl);
+        temp.frost_slope = tempdbl;
       }
-      sscanf(token, "%lf", &tempdbl);
-      temp.frost_slope = tempdbl;
-#endif // SPATIAL_FROST
+      else {
+        temp.frost_slope = 0;
+      }
 
       /* If specified, read cell average July air temperature in the final
          column of the soil parameter file */
@@ -727,12 +731,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
         }
       }
 
-#if SPATIAL_FROST
-      if (temp.frost_slope < 0.0) {
-        sprintf(ErrStr,"frost_slope (%f) must be positive.\n", temp.frost_slope);
-        nrerror(ErrStr);
+      if (options.SPATIAL_FROST) {
+        if (temp.frost_slope < 0.0) {
+          sprintf(ErrStr,"frost_slope (%f) must be positive.\n", temp.frost_slope);
+          nrerror(ErrStr);
+        }
       }
-#endif // SPATIAL_FROST
 
 
       /*************************************************

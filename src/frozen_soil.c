@@ -54,6 +54,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 	      of the settings of FROZEN_SOIL, QUICK_FLUX, etc.		TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -80,10 +81,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 #else
 					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
-					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-					   soil_con->FS_ACTIVE);
+					   soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     if(options.DIST_PRCP) {
       ErrorFlag = estimate_layer_ice_content_quick_flux(layer_dry, soil_con->depth, soil_con->dp,
@@ -94,10 +92,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 #else
 					     soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
-					     soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-					     soil_con->FS_ACTIVE);
+					     soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
     }
   }
@@ -115,9 +110,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 #else
 					   soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
     if(options.DIST_PRCP) {
@@ -134,9 +127,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 #else
 					     soil_con->expt, soil_con->bubble, 
 #endif // QUICK_FS
-#if SPATIAL_FROST
 					     soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
 					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
       if ( ErrorFlag == ERROR ) return (ERROR);
     }
@@ -200,6 +191,7 @@ int  solve_T_profile(double *T,
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -431,6 +423,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2010-Apr-24 Added hack to prevent cold nose.  Only active when TFALLBACK
 	      is TRUE.								TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/

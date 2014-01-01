@@ -136,6 +136,7 @@
   2013-Dec-26 Added CLOSE_ENERGY option.				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 *********************************************************************/
 
 #include <user_def.h>
@@ -158,6 +159,7 @@
 #define MAX_NODES      50      /* maximum number of soil thermal nodes */
 #define MAX_BANDS      10      /* maximum number of snow bands */
 #define MAX_FRONTS     3       /* maximum number of freezing and thawing front depths to store */
+#define MAX_FROST_AREAS 10     /* maximum number of frost sub-areas */
 #define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
 #define MAX_ZWTVMOIST  11      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
 
@@ -760,6 +762,7 @@ typedef struct {
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
   char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
   int    Ncanopy;        /* Number of canopy layers in the model. */
+  int    Nfrost;         /* Number of frost subareas in model */
   int    Nlakenode;      /* Number of lake thermal nodes in the model. */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
@@ -788,6 +791,9 @@ typedef struct {
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  int    SPATIAL_FROST;  /* TRUE = use a uniform distribution to simulate the
+                            spatial distribution of soil frost; FALSE = assume
+                            that the entire grid cell is frozen uniformly. */
   int    SPATIAL_SNOW;   /* TRUE = use a uniform distribution to simulate the
                             partial coverage of the surface by a thin snowpack.
                             Coverage is assumed to be uniform after snowfall
@@ -932,10 +938,8 @@ typedef struct {
   double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
   double   expt[MAX_LAYERS];          /* layer-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
   double   expt_node[MAX_NODES];      /* node-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
-#if SPATIAL_FROST
-  double   frost_fract[FROST_SUBAREAS]; /* spatially distributed frost coverage fractions */
-  double   frost_slope;               // slope of frost distribution
-#endif // SPATIAL_FROST
+  double   frost_fract[MAX_FROST_AREAS]; /* spatially distributed frost coverage fractions */
+  double   frost_slope;               /* slope of frost distribution */
   double   gamma[MAX_NODES];          /* thermal solution constant */
   double   init_moist[MAX_LAYERS];    /* initial layer moisture level (mm) */
   double   max_infil;                 /* maximum infiltration rate */
@@ -1089,11 +1093,7 @@ typedef struct {
 			       current layer (J/m^3/K) */
   double T;                 /* temperature of the unfrozen sublayer (C) */
   double evap;              /* evapotranspiration from soil layer (mm) */
-#if SPATIAL_FROST
-  double ice[FROST_SUBAREAS]; /* ice content of the frozen sublayer (mm) */
-#else
-  double ice;               /* ice content of the frozen sublayer (mm) */
-#endif
+  double ice[MAX_FROST_AREAS]; /* ice content of the frozen sublayer (mm) */
   double kappa;             /* average thermal conductivity of the current 
 			       layer (W/m/K) */
   double moist;             /* moisture content of the unfrozen sublayer 

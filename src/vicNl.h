@@ -110,6 +110,7 @@
   2013-Jul-25 Added soil carbon functions.				TJB
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 ************************************************************************/
 
 #include <math.h>
@@ -122,11 +123,7 @@ double advected_sensible_heat(double, double, double, double, double);
 void alloc_atmos(int, atmos_data_struct **);
 double arno_evap(layer_data_struct *, layer_data_struct *, double, double, 
 		 double, double, double, double, double, double, double, double, 
-#if SPATIAL_FROST
 		 double, double *);
-#else
-		 double);
-#endif // SPATIAL_FROST
 unsigned char average_moisture_for_storm(double *, double *, double, double);
 
 int   CalcAerodynamic(char, double, double, double, double, double,
@@ -207,10 +204,7 @@ double canopy_evap(layer_data_struct *, layer_data_struct *,
 		   double, double *, double, double, double, double, 
 		   double, double, double, double, double, double, 
 		   double *, double *, double *, double *, double *, 
-#if SPATIAL_FROST
-                   double *,
-#endif
-                   float *, double *, double, double, double *);
+                   double *, float *, double *, double, double, double *);
 void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
@@ -219,16 +213,10 @@ filenames_struct cmd_proc(int argc, char *argv[]);
 void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                         int *, int *, int *, int *, int *, double, double, double,
                         int, int, double, int, int, double *, double *,
-#if SPATIAL_FROST
-                        double *, double,
-#endif
-                        out_data_struct *);
+                        double *, double, out_data_struct *);
 void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
                         double, double, double, double, int, int, double, int, double *,
-#if SPATIAL_FROST
-                        double *,
-#endif
-                        out_data_struct *);
+                        double *, out_data_struct *);
 void   compress_files(char string[]);
 double compute_coszen(double, double, double, dmy_struct);
 void   compute_dz(double *, double *, int, double);
@@ -240,10 +228,7 @@ void   compute_soil_resp(int, double *, double, double, double *, double *,
 void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
 					     double *, double *, double *, 
 					     double *, double *, double *, 
-#if SPATIAL_FROST
-                                             double *,
-#endif
-					     int);
+                                             double *, int);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
 double compute_zwt(soil_con_struct *, int, double);
 out_data_struct *create_output_list();
@@ -291,18 +276,12 @@ double estimate_dew_point(double, double, double, double, double);
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 			       double *, double ***, double *,
 			       double *, double ***, 
-#if SPATIAL_FROST
-			       double *, double,
-#endif // SPATIAL_FROST
-			       int, int, char);
+			       double *, double, int, int, char);
 #else
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
 			       double *, double *, double *, double *,
 			       double *, double *, double *, 
-#if SPATIAL_FROST
-			       double *, double, 
-#endif // SPATIAL_FROST
-			       int, int, char);
+			       double *, double, int, int, char);
 #endif
 int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
 					  double, double, double, double,
@@ -312,10 +291,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
 #else
 					  double *, double *,
 #endif // QUICK_FS
-#if SPATIAL_FROST
-					  double *, double,
-#endif // SPATIAL_FROST
-					  char);
+					  double *, double, char);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
 double exp_interp(double,double,double,double,double);
@@ -453,10 +429,7 @@ unsigned char redistribute_moisture_for_storm(double *, double *, double,
 double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
 int    runoff(cell_data_struct *, cell_data_struct *,
               energy_bal_struct *, soil_con_struct *, double *,
-#if SPATIAL_FROST
-              double *, 
-#endif
-              double, int, int, int, int, int);
+              double *, double, int, int, int, int, int);
 
 void set_max_min_hour(double *, int, int *, int *);
 void set_node_parameters(double *, double *, double *, double *, double *, double *,
@@ -548,11 +521,8 @@ double svp_slope(double);
 void transpiration(layer_data_struct *, int, int, double, double, double, 
 		   double, double, double, double, double, double, 
 		   double *, double *, double *, double *, double *,
-#if SPATIAL_FROST
-                   double *,
-#endif
-                   float *, double *, double, double *, double, double *, double *,
-		   double *, double *);
+                   double *, float *, double *, double, double *,
+                   double, double *, double *, double *, double *);
 void tridag(double *,double *,double *,double *,double *,int);
 void tridiag(double *, double *, double *, double *, unsigned);
 int update_thermal_nodes(dist_prcp_struct *, 
@@ -570,10 +540,7 @@ void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_da
 #endif
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, global_param_struct);
 void write_layer(layer_data_struct *, int, int, 
-#if SPATIAL_FROST
-                 double *,
-#endif
-                 double *);
+                 double *, double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, filep_struct *, soil_con_struct *, char *,
 		       int *, lake_con_struct);

@@ -108,7 +108,8 @@ int  full_energy(char                 NEWCELL,
 	      totals.								TJB
   2013-Jul-25 Added photosynthesis terms.					TJB
   2013-Jul-25 Added soil carbon terms.						TJB
-  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.					TJB
+  2013-Dec-27 Removed (unused) SPATIAL_FROST code.				TJB
 
 **********************************************************************/
 {
@@ -125,9 +126,6 @@ int  full_energy(char                 NEWCELL,
   int                    band;
   int                    Nbands;
   int                    ErrorFlag;
-#if SPATIAL_FROST
-  int                    frost_area;
-#endif // SPATIAL_FROST
   double                 out_prec[2*MAX_BANDS];
   double                 out_rain[2*MAX_BANDS];
   double                 out_snow[2*MAX_BANDS];

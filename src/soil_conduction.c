@@ -494,10 +494,8 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *expt,
 			       double            *bubble,
 #endif // QUICK_FS
-#if SPATIAL_FROST
 			       double            *frost_fract,
 			       double             frost_slope,
-#endif // SPATIAL_FROST
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -534,30 +532,18 @@ int estimate_layer_ice_content(layer_data_struct *layer,
   2009-Jul-31 Removed unused layer_node_fract array.		TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **************************************************************/
 
   extern option_struct options;
 
   int    nidx, min_nidx, max_nidx;
-  int    lidx, frost_area, Nfrost;
+  int    lidx, frost_area;
   double Lsum[MAX_LAYERS+1];
-#if SPATIAL_FROST
-  double tmp_ice[MAX_NODES][FROST_SUBAREAS];
-  double tmpT[MAX_NODES][FROST_SUBAREAS+1];
-#else
-  double tmp_ice[MAX_NODES][1];
-  double tmpT[MAX_NODES][1+1];
-  double frost_fract[1];
-#endif
+  double tmp_ice[MAX_NODES][MAX_FROST_AREAS];
+  double tmpT[MAX_NODES][MAX_FROST_AREAS+1];
   double tmpZ[MAX_NODES];
   double min_temp, max_temp, tmp_fract;
-
-#if SPATIAL_FROST
-  Nfrost = FROST_SUBAREAS;
-#else
-  Nfrost = 1;
-#endif
 
   // compute cumulative layer depths
   Lsum[0] = 0;
@@ -568,13 +554,9 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Initialize layer variables
     layer[lidx].T = 0.;
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
       layer[lidx].ice[frost_area] = 0.;
     }
-#else
-    layer[lidx].ice = 0.;
-#endif
 
     // Bracket current layer between nodes
     min_nidx = Nnodes-2;
@@ -588,41 +570,37 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Get soil node temperatures for current layer
     if ( Zsum_node[min_nidx] < Lsum[lidx] )
-      tmpT[min_nidx][Nfrost] = linear_interp(Lsum[lidx], Zsum_node[min_nidx], Zsum_node[min_nidx+1], T[min_nidx], T[min_nidx+1]);
-    else tmpT[min_nidx][Nfrost] = T[min_nidx];
+      tmpT[min_nidx][options.Nfrost] = linear_interp(Lsum[lidx], Zsum_node[min_nidx], Zsum_node[min_nidx+1], T[min_nidx], T[min_nidx+1]);
+    else tmpT[min_nidx][options.Nfrost] = T[min_nidx];
     tmpZ[min_nidx] = Lsum[lidx];
     for ( nidx = min_nidx+1; nidx < max_nidx; nidx++ ) {
-      tmpT[nidx][Nfrost] = T[nidx];
+      tmpT[nidx][options.Nfrost] = T[nidx];
       tmpZ[nidx] = Zsum_node[nidx];
     }
     if ( Zsum_node[max_nidx] > Lsum[lidx+1] )
-      tmpT[max_nidx][Nfrost] = linear_interp(Lsum[lidx+1], Zsum_node[max_nidx-1], Zsum_node[max_nidx], T[max_nidx-1], T[max_nidx]);
-    else tmpT[max_nidx][Nfrost] = T[max_nidx];
+      tmpT[max_nidx][options.Nfrost] = linear_interp(Lsum[lidx+1], Zsum_node[max_nidx-1], Zsum_node[max_nidx], T[max_nidx-1], T[max_nidx]);
+    else tmpT[max_nidx][options.Nfrost] = T[max_nidx];
     tmpZ[max_nidx] = Lsum[lidx+1];
 
     // distribute temperatures for sub-areas
     for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-#if SPATIAL_FROST
-      min_temp = tmpT[nidx][Nfrost] - frost_slope / 2.;
+      min_temp = tmpT[nidx][options.Nfrost] - frost_slope / 2.;
       max_temp = min_temp + frost_slope;
-#else
-      min_temp = max_temp = tmpT[nidx][Nfrost];
-#endif
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
-	if ( Nfrost > 1 ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+	if ( options.Nfrost > 1 ) {
 	  if ( frost_area == 0 ) tmp_fract = frost_fract[0] / 2.;
 	  else tmp_fract += (frost_fract[frost_area-1] / 2. 
 			     + frost_fract[frost_area] / 2.);
 	  tmpT[nidx][frost_area] = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
 	}
-	else tmpT[nidx][frost_area] = tmpT[nidx][Nfrost];
+	else tmpT[nidx][frost_area] = tmpT[nidx][options.Nfrost];
       }
     }
 
     // Get soil node ice content for current layer
     if (options.FROZEN_SOIL && FS_ACTIVE) {
       for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-        for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = layer[lidx].moist 
 #if QUICK_FS
 	    - maximum_unfrozen_water_quick(tmpT[nidx][frost_area], max_moist[lidx], ufwc_table_layer[lidx]);
@@ -635,7 +613,7 @@ int estimate_layer_ice_content(layer_data_struct *layer,
     }
     else {
       for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-        for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = 0; 
         }
       }
@@ -643,21 +621,13 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Compute average soil layer values
     for ( nidx = min_nidx; nidx < max_nidx; nidx++ ) {
-#if SPATIAL_FROST
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	layer[lidx].ice[frost_area] += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][frost_area]+tmp_ice[nidx][frost_area])/2.;
       }
-#else
-      layer[lidx].ice += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][0]+tmp_ice[nidx][0])/2.;
-#endif  // SPATIAL_FROST
-      layer[lidx].T += (tmpZ[nidx+1]-tmpZ[nidx])*(tmpT[nidx+1][Nfrost]+tmpT[nidx][Nfrost])/2.;
+      layer[lidx].T += (tmpZ[nidx+1]-tmpZ[nidx])*(tmpT[nidx+1][options.Nfrost]+tmpT[nidx][options.Nfrost])/2.;
     }
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < Nfrost; frost_area++ )
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
       layer[lidx].ice[frost_area] /= depth[lidx];
-#else
-    layer[lidx].ice /= depth[lidx];
-#endif  // SPATIAL_FROST
     layer[lidx].T /= depth[lidx];
 
 
@@ -681,10 +651,8 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 			       double            *expt,
 			       double            *bubble,
 #endif // QUICK_FS
-#if SPATIAL_FROST
 			       double            *frost_fract,
 			       double             frost_slope,
-#endif // SPATIAL_FROST
 			       char               FS_ACTIVE) {
 /**************************************************************
   This subroutine estimates the temperature and ice content of all soil 
@@ -701,20 +669,14 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   2011-Jul-19 Fixed bug in how ice content was computed for case of 
 	      SPATIAL_FROST = TRUE.					TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 ********************************************************************/
 
   extern option_struct options;
-  int    lidx, frost_area, Nfrost;
+  int    lidx, frost_area;
   double Lsum[MAX_LAYERS+1];
   double tmpT, tmp_fract, tmp_ice;
   double min_temp, max_temp;
-
-#if SPATIAL_FROST
-  Nfrost = FROST_SUBAREAS;
-#else
-  Nfrost = 1;
-#endif
 
   // compute cumulative layer depths
   Lsum[0] = 0;
@@ -729,19 +691,13 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   // estimate soil layer ice contents
   for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) layer[lidx].ice[frost_area] = 0;
-#else
-    layer[lidx].ice = 0;
-#endif
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) layer[lidx].ice[frost_area] = 0;
 
     if (options.FROZEN_SOIL && FS_ACTIVE) {
 
-#if SPATIAL_FROST
-
       min_temp = layer[lidx].T - frost_slope / 2.;
       max_temp = min_temp + frost_slope;
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
         if ( frost_area == 0 ) tmp_fract = frost_fract[0] / 2.;
         else tmp_fract += (frost_fract[frost_area-1] / 2. + frost_fract[frost_area] / 2.);
         tmpT = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
@@ -761,24 +717,6 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 
       }
 
-#else
-
-      layer[lidx].ice = layer[lidx].moist
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(layer[lidx].T, max_moist[lidx], ufwc_table_layer[lidx]);
-#else
-	    - maximum_unfrozen_water(layer[lidx].T, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
-
-      if (layer[lidx].ice < 0) {
-        layer[lidx].ice = 0;
-      }
-      if (layer[lidx].ice > layer[lidx].moist) {
-        layer[lidx].ice = layer[lidx].moist;
-      }
-
-#endif
-
     }
 
   }
@@ -796,9 +734,7 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 					   double            *bulk_density,
 					   double            *soil_density,
 					   double            *organic,
-#if SPATIAL_FROST
 					   double            *frost_fract,
-#endif
 					   int                Nlayers) {
 /********************************************************************
   This subroutine computes the thermal conductivity and volumetric
@@ -823,26 +759,20 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 ********************************************************************/
 
+  extern option_struct options;
   int    lidx;
-#if SPATIAL_FROST
   int    frost_area;
-#endif
   double moist, ice;
 
   /* compute layer thermal properties */
   for(lidx=0;lidx<Nlayers;lidx++) {
     moist = layer[lidx].moist / depth[lidx] / 1000;
-#if SPATIAL_FROST
     ice = 0;
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 
-	* frost_fract[frost_area];
-#else
-    ice = layer[lidx].ice / depth[lidx] / 1000;
-#endif
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
+      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 * frost_fract[frost_area];
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, 
 			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
@@ -982,25 +912,19 @@ layer_data_struct find_average_layer(layer_data_struct *wet,
 
   2011-Jun-07 Added condition that wet and dry portions are
 	      only averaged together if DIST_PRCP is TRUE.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **************************************************************/
 
   extern option_struct options;
   layer_data_struct layer;
-#if SPATIAL_FROST
   int frost_area;
-#endif
 
   layer = *wet;
 
   if (options.DIST_PRCP) {
 
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-      layer.ice[frost_area] = ((wet->ice[frost_area] * mu) 
-			       + (dry->ice[frost_area] * (1. - mu)));
-#else
-    layer.ice = ((wet->ice * mu) + (dry->ice * (1. - mu)));
-#endif
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
+      layer.ice[frost_area] = ((wet->ice[frost_area] * mu) + (dry->ice[frost_area] * (1. - mu)));
     layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
 
   }

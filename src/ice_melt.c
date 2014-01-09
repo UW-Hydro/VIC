@@ -115,6 +115,7 @@ static char vcid[] = "$Id$";
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.								TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 *****************************************************************************/
 int ice_melt(double            z2,
 	      double            aero_resist,
@@ -623,21 +624,22 @@ int ice_melt(double            z2,
   if (lake->ice_water_eq <= 0.0) {
     lake->ice_water_eq = 0.0;
   }
-#if SPATIAL_SNOW
+  if (options.SPATIAL_SNOW) {
   /*  snow->coverage = calc_snow_coverage(&snow->store_snow,
-      soil_con->max_snow_distrib_slope,
-      old_coverage, snow->swq,
-      old_swq, snow->depth, old_depth,
-      melt + snow->vapor_flux,
-      &snow->max_snow_depth, snowfall,
-      &snow->store_swq,
-      &snow->snow_distrib_slope,
-      &snow->store_coverage);
-  */
-#else
-  if ( snow->swq > 0 ) snow->coverage = 1.;
-  else snow->coverage = 0.;
-#endif
+    soil_con->max_snow_distrib_slope,
+    old_coverage, snow->swq,
+    old_swq, snow->depth, old_depth,
+    melt + snow->vapor_flux,
+    &snow->max_snow_depth, snowfall,
+    &snow->store_swq,
+    &snow->snow_distrib_slope,
+    &snow->store_coverage);
+    */
+  }
+  else {
+    if ( snow->swq > 0 ) snow->coverage = 1.;
+    else snow->coverage = 0.;
+  }
 
   /* Mass balance test */
   MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce)

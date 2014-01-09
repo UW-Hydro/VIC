@@ -75,6 +75,7 @@ int initialize_lake (lake_var_struct   *lake,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -317,13 +318,9 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.layer[i].kappa    = cell->layer[i].kappa;
     lake->soil.layer[i].moist    = soil_con->porosity[i]*soil_con->depth[i]*1000.;
     lake->soil.layer[i].phi      = cell->layer[i].phi;
-#if SPATIAL_FROST
-    for (k=0; k<FROST_SUBAREAS; k++) {
+    for (k=0; k<options.Nfrost; k++) {
       lake->soil.layer[i].ice[k]     = 0.0;
     }
-#else
-    lake->soil.layer[i].ice      = 0.0;
-#endif
   }
   lake->soil.zwt = 0.0;
   lake->soil.zwt_lumped = 0.0;

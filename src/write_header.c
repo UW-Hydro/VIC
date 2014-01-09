@@ -18,6 +18,7 @@ void write_header(out_data_file_struct *out_data_files,
   2007-Oct-11 Replaced all instances of global.dt with global.out_dt,
 	      since out_dt is the time interval used in the output
 	      files.							TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 
 **********************************************************************/
 {
@@ -104,14 +105,16 @@ void write_header(out_data_file_struct *out_data_files,
       // 1 instance of Nbytes2
       Nbytes2 = sizeof(unsigned short);
 
-#if !OUTPUT_FORCE
-      // Date fields
-      Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // year
-      Nbytes2 += sizeof(char) + 5*sizeof(char) + sizeof(char) + sizeof(float); // month
-      Nbytes2 += sizeof(char) + 3*sizeof(char) + sizeof(char) + sizeof(float); // day
-      if (global.out_dt < 24)
-        Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // hour
-#endif
+      if (!options.OUTPUT_FORCE) {
+
+        // Date fields
+        Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // year
+        Nbytes2 += sizeof(char) + 5*sizeof(char) + sizeof(char) + sizeof(float); // month
+        Nbytes2 += sizeof(char) + 3*sizeof(char) + sizeof(char) + sizeof(float); // day
+        if (global.out_dt < 24)
+          Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // hour
+
+      }
 
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
@@ -159,57 +162,58 @@ void write_header(out_data_file_struct *out_data_files,
 
       // Nvars
       Nvars = out_data_files[file_idx].nvars;
-#if !OUTPUT_FORCE
-      if (global.out_dt < 24)
-        Nvars += 4;
-      else
-        Nvars += 3;
-#endif
+      if (!options.OUTPUT_FORCE) {
+        if (global.out_dt < 24)
+          Nvars += 4;
+        else
+          Nvars += 3;
+      }
       fwrite(&Nvars, sizeof(char), 1, out_data_files[file_idx].fh);
 
       // Nbytes2
       fwrite(&Nbytes2, sizeof(unsigned short), 1, out_data_files[file_idx].fh);
 
-#if !OUTPUT_FORCE
-      // Date fields
-      tmp_type = OUT_TYPE_INT;
-      tmp_mult = 1.;
+      if (!options.OUTPUT_FORCE) {
 
-      // year
-      strcpy(tmp_str,"YEAR");
-      tmp_len = strlen(tmp_str);
-      fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
-      fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
+        // Date fields
+        tmp_type = OUT_TYPE_INT;
+        tmp_mult = 1.;
 
-      // month
-      strcpy(tmp_str,"MONTH");
-      tmp_len = strlen(tmp_str);
-      fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
-      fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
-
-      // day
-      strcpy(tmp_str,"DAY");
-      tmp_len = strlen(tmp_str);
-      fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
-      fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
-      fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
-
-      if (global.out_dt < 24) {
-        // hour
-        strcpy(tmp_str,"HOUR");
+        // year
+        strcpy(tmp_str,"YEAR");
         tmp_len = strlen(tmp_str);
         fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
         fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
         fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
         fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
-      }
 
-#endif
+        // month
+        strcpy(tmp_str,"MONTH");
+        tmp_len = strlen(tmp_str);
+        fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
+        fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
+        fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
+        fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
+
+        // day
+        strcpy(tmp_str,"DAY");
+        tmp_len = strlen(tmp_str);
+        fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
+        fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
+        fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
+        fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
+
+        if (global.out_dt < 24) {
+          // hour
+          strcpy(tmp_str,"HOUR");
+          tmp_len = strlen(tmp_str);
+          fwrite(&tmp_len, sizeof(char), 1, out_data_files[file_idx].fh);
+          fwrite(tmp_str, sizeof(char), tmp_len, out_data_files[file_idx].fh);
+          fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
+          fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
+        }
+
+      }
 
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
@@ -256,12 +260,12 @@ void write_header(out_data_file_struct *out_data_files,
 
       // Header part 1: Global attributes
       Nvars = out_data_files[file_idx].nvars;
-#if !OUTPUT_FORCE
-      if (global.out_dt < 24)
-        Nvars += 4;
-      else
-        Nvars += 3;
-#endif
+      if (!options.OUTPUT_FORCE) {
+        if (global.out_dt < 24)
+          Nvars += 4;
+        else
+          Nvars += 3;
+      }
       fprintf(out_data_files[file_idx].fh, "# NRECS: %d\n", global.nrecs);
       fprintf(out_data_files[file_idx].fh, "# DT: %d\n", global.out_dt);
       fprintf(out_data_files[file_idx].fh, "# STARTDATE: %04d-%02d-%02d %02d:00:00\n",
@@ -272,17 +276,17 @@ void write_header(out_data_file_struct *out_data_files,
       // Header part 2: Variables
       fprintf(out_data_files[file_idx].fh, "# ");
 
-#if !OUTPUT_FORCE
-      // Write the date
-      if (global.out_dt < 24) {
-        // Write year, month, day, and hour
-        fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\tHOUR\t");
+      if (!options.OUTPUT_FORCE) {
+        // Write the date
+        if (global.out_dt < 24) {
+          // Write year, month, day, and hour
+          fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\tHOUR\t");
+        }
+        else {
+          // Only write year, month, and day
+          fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\t");
+        }
       }
-      else {
-        // Only write year, month, and day
-        fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\t");
-      }
-#endif
 
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {

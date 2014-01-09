@@ -5,11 +5,6 @@
 
 static char vcid[] = "$Id$";
 
-#if CLOSE_ENERGY
-#define MAX_ITER 10 /* Max number of iterations for total energy balance */
-#else
-#define MAX_ITER 0   /* No iterations */
-#endif // CLOSE_ENERGY
 #define GRND_TOL 0.001
 #define OVER_TOL 0.001
 
@@ -18,11 +13,6 @@ int surface_fluxes(char                 overstory,
 		   double               height,
 		   double               ice0,
 		   double               moist0,
-#if EXCESS_ICE
-		   int                  SubsidenceUpdate,
-		   double              *evap_prior_dry,
-		   double              *evap_prior_wet,
-#endif
 		   double               mu,
 		   double               surf_atten,
 		   double              *Melt,
@@ -153,13 +143,16 @@ int surface_fluxes(char                 overstory,
 	      with snow, regardless of the setting of CLOSE_ENERGY.	CL via TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
   extern option_struct   options;
   double                 total_store_moist[3];
   double                 step_store_moist[3];
-
+  int                    MAX_ITER_GRND_CANOPY;
   int                    BISECT_OVER;
   int                    BISECT_UNDER;
   int                    ErrorFlag;
@@ -336,6 +329,11 @@ int surface_fluxes(char                 overstory,
   double  store_Rgrowth[2];
   double  store_Raut[2];
   double  store_NPP[2];
+
+  if (options.CLOSE_ENERGY)
+    MAX_ITER_GRND_CANOPY = 10;
+  else
+    MAX_ITER_GRND_CANOPY = 0;
 
   if (options.CARBON) {
     for (dist=0; dist<2; dist++) {
@@ -839,11 +837,11 @@ int surface_fluxes(char                 overstory,
 	}
 		
       } while ( ( fabs( tol_under - last_tol_under ) > GRND_TOL )
-		&& ( tol_under != 0 ) && (under_iter < MAX_ITER) );
+		&& ( tol_under != 0 ) && (under_iter < MAX_ITER_GRND_CANOPY) );
 
     } while ( ( fabs( tol_over - last_tol_over ) > OVER_TOL 
 		&& overstory ) && ( tol_over != 0 ) 
-	      && (over_iter < MAX_ITER) );
+	      && (over_iter < MAX_ITER_GRND_CANOPY) );
  
     /**************************************
       Compute GPP, Raut, and NPP
@@ -1158,10 +1156,6 @@ int surface_fluxes(char                 overstory,
     layer_dry[lidx]      = step_layer[DRY][lidx];
     layer_wet[lidx].evap = store_layerevap[WET][lidx];
     layer_dry[lidx].evap = store_layerevap[DRY][lidx];
-#if EXCESS_ICE
-    evap_prior_wet[lidx] = store_layerevap[WET][lidx];
-    evap_prior_dry[lidx] = store_layerevap[DRY][lidx];
-#endif
   }
   if (store_aero_cond_used[0]>0 && store_aero_cond_used[0]<HUGE_RESIST)
     aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
@@ -1230,29 +1224,16 @@ int surface_fluxes(char                 overstory,
     Compute Runoff, Baseflow, and Soil Moisture Transport
   ********************************************************/
 
-#if EXCESS_ICE
-  if(SubsidenceUpdate != 2){
-#endif
-    (*inflow_wet) = ppt[WET];
-    (*inflow_dry) = ppt[DRY];
+  (*inflow_wet) = ppt[WET];
+  (*inflow_dry) = ppt[DRY];
 
-    ErrorFlag = runoff(cell_wet, cell_dry, energy, soil_con, ppt, 
-#if EXCESS_ICE
-		       SubsidenceUpdate,
-#endif
-#if SPATIAL_FROST
-		       soil_con->frost_fract,
-#endif // SPATIAL_FROST
-		       mu, gp->dt, options.Nnode, band, rec, iveg);
-    
-    return( ErrorFlag );
-#if EXCESS_ICE
-  }
-#endif
+  ErrorFlag = runoff(cell_wet, cell_dry, energy, soil_con, ppt, 
+		     soil_con->frost_fract, mu, gp->dt, options.Nnode,
+                     band, rec, iveg);
+  
+  return( ErrorFlag );
 
-  return(0);
 }
 
-#undef MAX_ITER
 #undef GRND_TOL
 #undef OVER_TOL

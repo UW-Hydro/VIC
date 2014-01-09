@@ -46,6 +46,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Jul-25 Added photosynthesis parameters.				TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 {
 
@@ -73,10 +74,6 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   else skip=1;
 
   NoOverstory = 0;
-
-#if !NO_REWIND
-  rewind(vegparam);
-#endif  
 
   while ( ( fscanf(vegparam, "%d %d", &vegcel, &vegetat_type_num) == 2 ) && vegcel != gridcel ){
     if (vegetat_type_num < 0) {

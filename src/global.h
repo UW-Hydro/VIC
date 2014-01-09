@@ -19,15 +19,10 @@
 	      mainly for pot_evap computations but also defines the
 	      characteristics of bare soil.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
-char *version = "4.1.2_wetcarb 2013-Jul-25";
-
+char *version = "4.2 beta 2013-Dec-26";
 char *optstring = "g:vo";
-
-#if QUICK_FS
-double   temps[] = { -1.e-5, -0.075, -0.20, -0.50, -1.00, -2.50, -5, -10 };
-#endif
-
 int flag;
 
 global_param_struct global_param;

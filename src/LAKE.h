@@ -27,6 +27,7 @@
   2011-Mar-01 Added rescale_snow_storage().  Added terms to argument
 	      list of initialize_lake().				TJB
   2013-Jul-25 Added advect_carbon_storage().				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -112,11 +113,6 @@ double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
-int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct,
-#if EXCESS_ICE
-		    veg_con_struct, int, double);
-#else
-		    veg_con_struct);
-#endif		    
+int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct, veg_con_struct);
 int  water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);

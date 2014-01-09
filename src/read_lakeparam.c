@@ -63,6 +63,9 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2012-Jan-02 Modified to turn off lakes in a grid cell if lake_idx is < 0.
 	      Added validation of parameter values.				TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2013-Jul-25 Fixed bug in parsing lakeparam file in case of no lake
+	      in the cell.							TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 
 {
@@ -78,30 +81,26 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   double tmp_mindepth, tmp_maxdepth;
 
   lake_con_struct temp;
-  
-#if !NO_REWIND
-  rewind(lakeparam);
-#endif // NO_REWIND
-    
+
   /*******************************************************************/
   /* Read in general lake parameters.                           */
   /******************************************************************/
 
-  fscanf(lakeparam, "%d", &lakecel);
+  fscanf(lakeparam, "%d %d", &lakecel, &temp.lake_idx);
   while ( lakecel != soil_con.gridcel && !feof(lakeparam) ) {
     fgets(tmpstr, MAXSTRING, lakeparam); // grid cell number, etc.
-    fgets(tmpstr, MAXSTRING, lakeparam); // lake depth-area relationship
-    fscanf(lakeparam, "%d", &lakecel);
+    if (temp.lake_idx >= 0)
+      fgets(tmpstr, MAXSTRING, lakeparam); // lake depth-area relationship
+    fscanf(lakeparam, "%d %d", &lakecel, &temp.lake_idx);
   }
 
   // cell number not found
   if ( feof(lakeparam) ) {
-    sprintf(tmpstr, "Unable to find cell %i in the lake parameter file, check the file or set NO_REWIND to FALSE", soil_con.gridcel);
+    sprintf(tmpstr, "Unable to find cell %i in the lake parameter file", soil_con.gridcel);
     nrerror(tmpstr);
   }
 
   // read lake parameters from file
-  fscanf(lakeparam, "%d", &temp.lake_idx);
   if (temp.lake_idx >= 0) {
     veg_con[temp.lake_idx].LAKE = 1;
     fscanf(lakeparam, "%d", &temp.numnod);
@@ -140,13 +139,14 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     temp.maxdepth = 0;
     temp.Cl[0] = 0;
     temp.basin[0] = 0;
+    temp.z[0] = 0;
     temp.minvolume = 0;
     temp.maxvolume = 0;
     temp.wfrac = 0;
     temp.depth_in = 0;
     temp.rpercent = 0;
     temp.bpercent = 0;
-    fgets(tmpstr, MAXSTRING, lakeparam); // skip lake depth-area relationship
+    fgets(tmpstr, MAXSTRING, lakeparam); // skip to end of line
     return temp;
   }
   temp.bpercent = temp.rpercent;

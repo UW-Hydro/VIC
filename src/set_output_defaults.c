@@ -29,7 +29,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 	      to OUT_LAKE_EVAP.  Added other lake water balance terms
 	      to set of output variables.  Added volumetric versions
 	      of these too.						TJB
-
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 *************************************************************/
 
   extern option_struct options;
@@ -38,7 +38,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   int filenum;
   int varnum;
 
-#if OUTPUT_FORCE
+if(options.OUTPUT_FORCE) {
 
   // Output files
   options.Noutfiles = 1;
@@ -59,7 +59,8 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_VP", varnum++, "%.4f", OUT_TYPE_SINT, 100);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_WIND", varnum++, "%.4f", OUT_TYPE_USINT, 100);
 
-#else
+}
+else {
 
   // Output files
   options.Noutfiles = 2;
@@ -218,7 +219,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_EVAP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
 
-#endif //OUTPUT_FORCE
+} // !OUTPUT_FORCE
 
   return out_data_files;
 

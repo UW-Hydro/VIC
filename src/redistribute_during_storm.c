@@ -29,7 +29,7 @@ int  redistribute_during_storm(cell_data_struct ***cell,
   6-8-2000 modified to work with spatially distribute frozen soils KAC
   4-6-2007 modified to return errors to calling routine rather than
            ending program.                                         KAC
-
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
  
   extern option_struct   options;
@@ -38,9 +38,7 @@ int  redistribute_during_storm(cell_data_struct ***cell,
   char          ErrorString[MAXSTRING];
   int           layer;
   int           band;
-#if SPATIAL_FROST
   int           frost_area;
-#endif
   double        temp_wet;
   double        temp_dry;
 
@@ -64,39 +62,22 @@ int  redistribute_during_storm(cell_data_struct ***cell,
       cell[WET][veg][band].layer[layer].moist = temp_wet;
       cell[DRY][veg][band].layer[layer].moist = temp_dry;
       
-#if SPATIAL_FROST
-      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	temp_wet = cell[WET][veg][band].layer[layer].ice[frost_area];
 	temp_dry = cell[DRY][veg][band].layer[layer].ice[frost_area];
-#else
-	temp_wet = cell[WET][veg][band].layer[layer].ice;
-	temp_dry = cell[DRY][veg][band].layer[layer].ice;
-#endif
 	error = redistribute_moisture_for_storm(&temp_wet, &temp_dry, 
 						max_moist[layer], old_mu, 
 						new_mu);
 	if(error) {
-#if SPATIAL_FROST
 	  fprintf(stderr,"%s: Error in ice accounting %f -> %f record %i\n",
 		  __FILE__,cell[WET][veg][band].layer[layer].ice[frost_area]
 		  *old_mu + cell[DRY][veg][band].layer[layer].ice[frost_area]
 		  *(1.-old_mu), temp_wet*new_mu+temp_dry*(1.-new_mu),rec);
-#else
-	  fprintf(stderr,"%s: Error in ice accounting %f -> %f record %i\n",
-		  __FILE__,cell[WET][veg][band].layer[layer].ice*old_mu
-		  + cell[DRY][veg][band].layer[layer].ice*(1.-old_mu),
-		  temp_wet*new_mu+temp_dry*(1.-new_mu),rec);
-#endif
 	  return( ERROR );
 	}
-#if SPATIAL_FROST
 	cell[WET][veg][band].layer[layer].ice[frost_area] = temp_wet;
 	cell[DRY][veg][band].layer[layer].ice[frost_area] = temp_dry; 
       }
-#else
-      cell[WET][veg][band].layer[layer].ice = temp_wet;
-      cell[DRY][veg][band].layer[layer].ice = temp_dry; 
-#endif
     }
   }
 

@@ -67,9 +67,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		   double            *Wmax,
 		   double            *Wcr,
 		   double            *Wpwp,
-#if SPATIAL_FROST
 		   double            *frost_fract,
-#endif
 		   float             *root,
 		   double            *dryFrac,
 		   double             shortwave,
@@ -205,9 +203,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 		      air_temp, ra, ppt, *dryFrac, delta_t, 
 		      elevation, depth, Wmax, Wcr, Wpwp, 
 		      layerevap, 
-#if SPATIAL_FROST
 		      frost_fract, 
-#endif
 		      root,
                       tmp_veg_var->NscaleFactor,
                       shortwave,
@@ -258,9 +254,7 @@ void transpiration(layer_data_struct *layer,
 		   double *Wcr,
 		   double *Wpwp,
 		   double *layerevap,
-#if SPATIAL_FROST
 		   double *frost_fract,
-#endif
 		   float  *root,
                    double *NscaleFactor,
                    double  shortwave,
@@ -290,9 +284,7 @@ void transpiration(layer_data_struct *layer,
   extern option_struct options;
 
   int    i;
-#if SPATIAL_FROST
   int    frost_area;
-#endif
   double gsm_inv;               	/* soil moisture stress factor */
   double moist1, moist2;                /* tmp holding of moisture */
   double evap;                          /* tmp holding for evap total */
@@ -321,14 +313,10 @@ void transpiration(layer_data_struct *layer,
     Set ice content in all individual layers
     **************************************************/
   for(i=0;i<options.Nlayer;i++){
-#if SPATIAL_FROST
     ice[i] = 0;
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
       ice[i] += layer[i].ice[frost_area] * frost_fract[frost_area];
     }
-#else
-    ice[i]         = layer[i].ice;
-#endif
   }
 
   /**************************************************
@@ -338,15 +326,10 @@ void transpiration(layer_data_struct *layer,
   Wcr1 = 0.0;  
   for(i=0;i<options.Nlayer-1;i++){
     if(root[i] > 0.) {
-#if SPATIAL_FROST
       avail_moist[i] = 0;
-      for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
-	avail_moist[i] += ((layer[i].moist - layer[i].ice[frost_area]) 
-			   * frost_fract[frost_area]);
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+	avail_moist[i] += ((layer[i].moist - layer[i].ice[frost_area]) * frost_fract[frost_area]);
       }
-#else
-      avail_moist[i] = layer[i].moist - layer[i].ice;
-#endif
       moist1+=avail_moist[i];
       Wcr1 += Wcr[i];
     }
@@ -357,15 +340,9 @@ void transpiration(layer_data_struct *layer,
     Compute moisture content in lowest layer
     *****************************************/
   i = options.Nlayer - 1;
-#if SPATIAL_FROST
   moist2 = 0;
-  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-    moist2 += ((layer[i].moist - layer[i].ice[frost_area]) 
-	       * frost_fract[frost_area]);
-#else
-  moist2 = layer[i].moist - layer[i].ice;
-#endif
-
+  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
+    moist2 += ((layer[i].moist - layer[i].ice[frost_area]) * frost_fract[frost_area]);
   avail_moist[i]=moist2;
 
   /** Set photosynthesis inhibition factor **/

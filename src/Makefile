@@ -41,6 +41,7 @@
 # 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
 # 	      photosynth.c.							TJB
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
+# 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
 #
 # $Id$
 #
@@ -76,13 +77,13 @@ CFLAGS  = -I. -g -Wall -Wno-unused
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
         arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_cloud_cover_fraction.o calc_forcing_stats.o calc_longwave.o \
-	calc_Nscale_factors.o calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
+	calc_cloud_cover_fraction.o calc_longwave.o calc_Nscale_factors.o \
+	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \

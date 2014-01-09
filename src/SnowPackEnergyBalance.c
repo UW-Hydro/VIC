@@ -82,6 +82,7 @@ static char vcid[] = "$Id$";
 	      two elements (surface and overstory); added
 	      options.AERO_RESIST_CANSNOW.				TJB
   2009-Sep-19 Added Added ground flux computation consistent with 4.0.6.	TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 
 *****************************************************************************/
 double SnowPackEnergyBalance(double TSurf, va_list ap)
@@ -253,18 +254,19 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
 
   *SensibleHeat = AirDens * Cp * (Tair - TMean) / Ra_used[0];
 
-#if SPATIAL_SNOW  
-  /* Add in Sensible heat flux turbulent exchange from surrounding 
-     snow free patches - if present */
-  if ( SnowCoverFract > 0 ) {
-    *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract, 
-						     AirDens, Tair, TGrnd, 
-						     Ra_used[0]);
+  if (options.SPATIAL_SNOW) {
+    /* Add in Sensible heat flux turbulent exchange from surrounding 
+       snow free patches - if present */
+    if ( SnowCoverFract > 0 ) {
+      *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract, 
+						       AirDens, Tair, TGrnd, 
+						       Ra_used[0]);
+    }
+    else (*AdvectedSensibleHeat) = 0;
   }
-  else (*AdvectedSensibleHeat) = 0;
-#else
-  (*AdvectedSensibleHeat) = 0;
-#endif // SPATIAL_SNOW
+  else {
+    (*AdvectedSensibleHeat) = 0;
+  }
 
   /* Convert sublimation terms from m/timestep to kg/m2s */
   VaporMassFlux = *vapor_flux * Density / Dt;

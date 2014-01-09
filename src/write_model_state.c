@@ -76,6 +76,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      will save lake state data.  If no lake is present, default NULL
 	      values will be stored.						TJB
   2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -89,9 +91,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   int    Ndist;
   int    Nbands;
   int    byte, Nbytes;
-#if SPATIAL_FROST
   int    frost_area;
-#endif // SPATIAL_FROST
 
   cell_data_struct     ***cell;
   snow_data_struct      **snow;
@@ -128,21 +128,12 @@ void write_model_state(dist_prcp_struct    *prcp,
   if ( options.BINARY_STATE_FILE ) {
     Nbytes =   options.Nnode * sizeof(double) // dz_node
 	       + options.Nnode * sizeof(double) // Zsum_node
-#if EXCESS_ICE
-	       + options.Nlayer * sizeof(double) //soil depth
-	       + options.Nlayer * sizeof(double) //effective porosity
-	       + sizeof(double) //damping depth
-#endif
 	       + (Nveg+1) * sizeof(double) // mu
 	       + (Nveg+1) * sizeof(char) // STILL_STORM
 	       + (Nveg+1) * sizeof(int) // DRY_TIME
 	       + (Nveg+1) * Nbands * 2 * sizeof(int) // veg & band
 	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil moisture
-#if SPATIAL_FROST
-	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // soil ice
-#else
-	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * sizeof(double) // soil ice
-#endif // SPATIAL_FROST
+	       + (Nveg+1) * Nbands * Ndist * options.Nlayer * options.Nfrost * sizeof(double) // soil ice
 	       + Nveg * Nbands * Ndist * sizeof(double); // dew
     if ( options.CARBON ) {
       /* Carbon-specific state vars */
@@ -177,11 +168,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 	+ sizeof(double) // SAlbedo
 	+ sizeof(double) // sdepth
 	+ Ndist * options.Nlayer * sizeof(double) // soil moisture
-#if SPATIAL_FROST
-	+ Ndist * options.Nlayer * FROST_SUBAREAS * sizeof(double) // soil ice
-#else
-	+ Ndist * options.Nlayer * sizeof(double) // soil ice
-#endif // SPATIAL_FROST
+	+ Ndist * options.Nlayer * options.Nfrost * sizeof(double) // soil ice
 	+ sizeof(int) // last_snow
 	+ sizeof(char) // MELTING
 	+ sizeof(double) * 9 // other snow parameters
@@ -213,35 +200,7 @@ void write_model_state(dist_prcp_struct    *prcp,
   }    
   if ( !options.BINARY_STATE_FILE )
     fprintf( filep->statefile, "\n" );
-  
-  /* Write dynamic soil properties */
-#if EXCESS_ICE
-  /* Write soil depth */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->depth[lidx], sizeof(double), 1,
-	      filep->statefile );
-    else
-      fprintf( filep->statefile, "%f ", soil_con->depth[lidx] );
-  }
-  
-  /* Write effective porosity */
-  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-    if ( options.BINARY_STATE_FILE )
-      fwrite( &soil_con->effective_porosity[lidx], sizeof(double), 1,
-	      filep->statefile );
-    else
-      fprintf( filep->statefile, "%f ", soil_con->effective_porosity[lidx] );
-  }
-  
-  /* Write damping depth */
-  if ( options.BINARY_STATE_FILE )
-    fwrite( &soil_con->dp, sizeof(double), 1,
-	    filep->statefile );
-  else
-    fprintf( filep->statefile, "%f\n", soil_con->dp );
-#endif
-  
+ 
   /* Output for all vegetation types */
   for ( veg = 0; veg <= Nveg; veg++ ) {
     
@@ -287,8 +246,7 @@ void write_model_state(dist_prcp_struct    *prcp,
 
         /* Write average ice content */
         for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-#if SPATIAL_FROST
-	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	    tmpval = cell[dist][veg][band].layer[lidx].ice[frost_area];
 	    if ( options.BINARY_STATE_FILE ) {
 	      fwrite( &tmpval, sizeof(double), 1, filep->statefile );
@@ -297,15 +255,6 @@ void write_model_state(dist_prcp_struct    *prcp,
 	      fprintf( filep->statefile, " %f", tmpval );
 	    }
 	  }
-#else
-	  tmpval = cell[dist][veg][band].layer[lidx].ice;
-	  if ( options.BINARY_STATE_FILE ) {
-	    fwrite( &tmpval, sizeof(double), 1, filep->statefile );
-	  }
-	  else {
-	    fprintf( filep->statefile, " %f", tmpval );
-	  }
-#endif // SPATIAL_FROST
         }
 
 	if ( veg < Nveg ) {
@@ -396,13 +345,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 
         /* Write average ice content */
         for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-#if SPATIAL_FROST
-	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	    fwrite( &lake_var.soil.layer[lidx].ice[frost_area], sizeof(double), 1, filep->statefile );
 	  }
-#else
-	  fwrite( &lake_var.soil.layer[lidx].ice, sizeof(double), 1, filep->statefile );
-#endif // SPATIAL_FROST
         }
         if (options.CARBON) {
 	  /* Write soil carbon storages */
@@ -479,13 +424,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 
         /* Write average ice content */
         for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-#if SPATIAL_FROST
-	  for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	    fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice[frost_area] );
 	  }
-#else
-	  fprintf( filep->statefile, " %f", lake_var.soil.layer[lidx].ice );
-#endif // SPATIAL_FROST
         }
       }
 

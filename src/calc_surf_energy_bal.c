@@ -172,6 +172,8 @@ double calc_surf_energy_bal(double             Le,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added photosynthesis.					TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -447,13 +449,7 @@ double calc_surf_energy_bal(double             Le,
 					   bubble_node, Zsum_node, expt_node, 
 					   gamma, ice_node, kappa_node, 
 					   max_moist_node, moist_node, 
-#if SPATIAL_FROST
 					   soil_con->frost_fract, 
-#endif // SPATIAL_FROST
-#if QUICK_FS
-					   soil_con->ufwc_table_layer[0], 
-					   soil_con->ufwc_table_node, 
-#endif // QUICK_FS
 					   layer_wet, layer_dry, veg_var_wet, 
 					   veg_var_dry, 
 					   INCLUDE_SNOW, soil_con->FS_ACTIVE, 
@@ -547,13 +543,7 @@ double calc_surf_energy_bal(double             Le,
 					     bubble_node, Zsum_node, expt_node, 
 					     gamma, ice_node, kappa_node, 
 					     max_moist_node, moist_node, 
-#if SPATIAL_FROST
 					     soil_con->frost_fract, 
-#endif // SPTAIL_FROST
-#if QUICK_FS
-					     soil_con->ufwc_table_layer[0], 
-					     soil_con->ufwc_table_node, 
-#endif // QUICK_FS
 					     layer_wet, layer_dry, veg_var_wet, 
 					     veg_var_dry, INCLUDE_SNOW, 
 					     soil_con->FS_ACTIVE, NOFLUX, EXP_TRANS,
@@ -745,21 +735,21 @@ double calc_surf_energy_bal(double             Le,
       
       /** Check for Thin Snowpack which only Partially Covers Grid Cell
 	  exists only if not snowing and snowpack has started to melt **/
-#if SPATIAL_SNOW
-      snow->coverage = calc_snow_coverage(&snow->store_snow, 
-					  soil_con->max_snow_distrib_slope, 
-					  snow_coverage, snow->swq,
-					  old_swq, snow->depth, old_depth, 
-					  (*melt) - snow->vapor_flux, 
-					  &snow->max_snow_depth, snowfall, 
-					  &snow->store_swq, 
-					  &snow->snow_distrib_slope,
-					  &snow->store_coverage);
-      
-#else
-      if ( snow->swq > 0 ) snow->coverage = 1.;
-      else snow->coverage = 0.;
-#endif // SPATIAL_SNOW
+      if (options.SPATIAL_SNOW) {
+        snow->coverage = calc_snow_coverage(&snow->store_snow, 
+					    soil_con->max_snow_distrib_slope, 
+					    snow_coverage, snow->swq,
+					    old_swq, snow->depth, old_depth, 
+					    (*melt) - snow->vapor_flux, 
+					    &snow->max_snow_depth, snowfall, 
+					    &snow->store_swq, 
+					    &snow->snow_distrib_slope,
+					    &snow->store_coverage);
+      }
+      else {
+        if ( snow->swq > 0 ) snow->coverage = 1.;
+        else snow->coverage = 0.;
+      }
 
       if ( snow->surf_temp > 0 ) 
 	energy->snow_flux = ( energy->grnd_flux + energy->deltaH 
@@ -775,9 +765,8 @@ double calc_surf_energy_bal(double             Le,
       snow->surf_temp  = 0;
       snow->pack_temp  = 0;
       snow->coverage   = 0;
-#if SPATIAL_SNOW
-      snow->store_swq = 0.;
-#endif // SPATIAL_SNOW
+      if (options.SPATIAL_SNOW)
+        snow->store_swq = 0.;
     }
     snow->vapor_flux *= -1;
   }
@@ -939,15 +928,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *moist_node;
 
   /* spatial frost terms */
-#if SPATIAL_FROST    
   double *frost_fract;
-#endif
-
-  /* quick solution frozen soils terms */
-#if QUICK_FS
-  double **ufwc_table_layer;
-  double ***ufwc_table_node;
-#endif
 
   /* model structures */
   layer_data_struct *layer_wet;
@@ -1092,15 +1073,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   kappa_node              = (double *) va_arg(ap, double *);
   max_moist_node          = (double *) va_arg(ap, double *);
   moist_node              = (double *) va_arg(ap, double *);
-
-#if SPATIAL_FROST    
   frost_fract             = (double *) va_arg(ap, double *);
-#endif
-
-#if QUICK_FS
-  ufwc_table_layer        = (double **) va_arg(ap, double **);
-  ufwc_table_node         = (double ***) va_arg(ap, double ***);
-#endif
 
   /* model structures */
   layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
@@ -1230,9 +1203,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "Nnodes = %i\n", Nnodes);
 
   /* spatial frost terms */
-#if SPATIAL_FROST    
   fprintf(stderr, "*frost_fract = %f\n",  *frost_fract);
-#endif
 
   /* control flags */
   fprintf(stderr, "INCLUDE_SNOW = %i\n", INCLUDE_SNOW);
@@ -1256,17 +1227,9 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "*snow_flux = %f\n",  *snow_flux);
   fprintf(stderr, "*store_error = %f\n",  *store_error);
 
-#if SPATIAL_FROST
   write_layer(layer_wet, iveg, options.Nlayer, frost_fract, depth);
-#else
-  write_layer(layer_wet, iveg, options.Nlayer, depth);
-#endif
   if(options.DIST_PRCP) 
-#if SPATIAL_FROST
     write_layer(layer_dry, iveg, options.Nlayer, frost_fract, depth);
-#else
-    write_layer(layer_dry, iveg, options.Nlayer, depth);
-#endif
   write_vegvar(&(veg_var_wet[0]),iveg);
   if(options.DIST_PRCP) 
     write_vegvar(&(veg_var_dry[0]),iveg);

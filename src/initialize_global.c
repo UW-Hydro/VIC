@@ -128,6 +128,7 @@ void initialize_global() {
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -148,11 +149,11 @@ void initialize_global() {
   options.CORRPREC              = FALSE;
   options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
-  options.EXP_TRANS             = FALSE;
+  options.EXP_TRANS             = TRUE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX_TYPE        = GF_410;
-  options.IMPLICIT              = FALSE;
+  options.IMPLICIT              = TRUE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
   options.LOG_MATRIC            = FALSE;

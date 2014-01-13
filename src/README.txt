@@ -612,6 +612,28 @@ shortwave radiation is supplied as an input forcing.
 Miscellaneous:
 --------------
 
+Better out-of-box behavior for soil temperature scheme
+
+	Files Affected:
+
+	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+
+	Description:
+
+	Added constraints to help ensure efficient, physically reasonable
+	simulation of the soil temperature profile:
+
+	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
+	2. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
+	that, for the given soil temperature bottom boundary depth "dp" (also
+	known as the damping depth), there are at least 3 nodes within the top
+	50 cm of the soil column.
+
+
+
+
 Cleanup of compile-time options
 
 	Files Affected:

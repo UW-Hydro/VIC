@@ -445,7 +445,7 @@ extern char ref_veg_ref_crop[];
 #define PRESSURE  13 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
 #define QAIR      14 /* specific humidity [kg/kg] */
 #define RAINF     15 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define REL_HUMID 16 /* relative humidity [fraction] */
+#define REL_HUMID 16 /* relative humidity [%] */
 #define SHORTWAVE 17 /* incoming shortwave [W/m2] */
 #define SNOWF     18 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
 #define TMAX      19 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */

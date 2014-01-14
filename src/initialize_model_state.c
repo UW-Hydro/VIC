@@ -119,6 +119,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2013-Jul-25 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
+  2014-Jan-13 Added validation of Nnodes and dp for EXP_TRANS=TRUE.	TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -572,9 +573,15 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  }
 	  else{ /* exponential grid transformation, EXP_TRANS = TRUE*/
 	    
-	    /*calculate exponential function parameter */
 	    if ( FIRST_VEG ) {
+	      /*calculate exponential function parameter */
 	      Bexp = logf(dp+1.)/(double)(Nnodes-1); //to force Zsum=dp at bottom node
+              /* validate Nnodes by requiring that there be at least 3 nodes in the top 50cm */
+              if (Nnodes < 5*logf(dp+1.)+1) {
+		sprintf(ErrStr,"The number of soil thermal nodes (%d) is too small for the supplied damping depth (%f) with EXP_TRANS set to TRUE, leading to fewer than 3 nodes in the top 50 cm of the soil column.  For EXP_TRANS=TRUE, Nnodes and dp must follow the relationship:\n5*ln(dp+1)<Nnodes-1\nEither set Nnodes to at least %d in the global param file or reduce damping depth to %f in the soil parameter file.  Or set EXP_TRANS to FALSE in the global parameter file.",Nnodes,dp,(int)(5*logf(dp+1.))+2,exp(0.2*(Nnodes-1))+1);
+		nrerror(ErrStr);
+              }
+ 
 	      for ( index = 0; index <= Nnodes-1; index++ )
 		soil_con->Zsum_node[index] = expf(Bexp*index)-1.;
 	      if(soil_con->Zsum_node[0] > soil_con->depth[0]) {

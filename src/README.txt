@@ -26,6 +26,76 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.k to VIC 4.1.2.j *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Better out-of-box behavior for soil temperature scheme
+
+	Files Affected:
+
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+
+	Description:
+
+	Added constraints to help ensure efficient, physically reasonable
+	simulation of the soil temperature profile:
+
+	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
+	2. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
+	that, for the given soil temperature bottom boundary depth "dp" (also
+	known as the damping depth), there are at least 3 nodes within the top
+	50 cm of the soil column.
+
+
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.j to VIC 4.1.2.i *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed incorrect assignment of input forcing variables that are moisture fluxes (all forms of precipitation and channel inflow) when ALMA_INPUT is TRUE.
+
+	Files Affected:
+
+	initialize_atmos.c
+
+	Description:
+
+	When ALMA_INPUT was TRUE, VIC was not rescaling moisture fluxes such
+	as precipitation to an hourly time step correctly in initialize_atmos.
+	This led to incorrect assignment of these fluxes to the atmos array.
+	This has been fixed.
+
+
+
+
+Fixed selection of starting point in forcing file when starting in the middle of a day
+
+	Files Affected:
+
+	make_dmy.c
+
+	Description:
+
+	For the case of STARTHOUR not equal to 0, VIC was not finding the
+	correct starting record in the forcing file, due to its missing a
+	check on the hour of the forcing record.  This has been fixed.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.i to VIC 4.1.2.h *****
 --------------------------------------------------------------------------------
 

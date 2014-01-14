@@ -616,6 +616,7 @@ Better out-of-box behavior for soil temperature scheme
 
 	Files Affected:
 
+	get_global_param.c
 	global.param.sample
 	initialize_global.c
 	initialize_model_state.c

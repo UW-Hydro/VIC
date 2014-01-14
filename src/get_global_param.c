@@ -112,6 +112,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed user_def.h.					TJB
+  2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -251,9 +252,12 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
           options.QUICK_FLUX = FALSE;
-          options.IMPLICIT = TRUE;
 	}
-        else options.FROZEN_SOIL = FALSE;
+        else {
+          options.FROZEN_SOIL = FALSE;
+          options.IMPLICIT = FALSE;
+          options.EXP_TRANS = FALSE;
+        }
       }
       else if(strcasecmp("QUICK_FLUX",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

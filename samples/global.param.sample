@@ -16,19 +16,23 @@ STARTHOUR	00	# hour model simulation starts
 ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
-FULL_ENERGY 	TRUE	# TRUE = calculate full energy balance; FALSE = compute water balance only
-FROZEN_SOIL	TRUE	# TRUE = calculate frozen soils
+
+#######################################################################
+# Energy Balance Parameters
+#######################################################################
+FULL_ENERGY 	FALSE	# TRUE = calculate full energy balance; FALSE = compute water balance only.  Default = FALSE.
 
 #######################################################################
 # Soil Temperature Parameters
-# VIC will choose appropriate values for QUICK_FLUX and IMPLICIT depending on values of FULL_ENERGY and FROZEN_SOIL; the user should only need to override VIC's choices in special cases.
+# VIC will choose appropriate value for QUICK_FLUX depending on values of FULL_ENERGY and FROZEN_SOIL; the user should only need to override VIC's choices in special cases.
 # The other options in this section are only applicable when FROZEN_SOIL is TRUE and their values depend on the application.
 #######################################################################
+FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #QUICK_FLUX	FALSE	# TRUE = use simplified ground heat flux method of Liang et al (1999); FALSE = use finite element method of Cherkauer et al (1999)
-#IMPLICIT	TRUE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.
+#IMPLICIT	TRUE	# TRUE = use implicit solution for soil heat flux equation of Cherkauer et al (1999), otherwise uses original explicit solution.  Default = TRUE.
 #QUICK_SOLVE	FALSE	# TRUE = Use Liang et al., 1999 formulation for iteration, but explicit finite difference method for final step.
-#NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE
-#EXP_TRANS	FALSE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution
+#NO_FLUX		FALSE	# TRUE = use no flux lower boundary for ground heat flux computation; FALSE = use constant flux lower boundary condition.  If NO_FLUX = TRUE, QUICK_FLUX MUST = FALSE.  Default = FALSE.
+#EXP_TRANS	TRUE	# TRUE = exponentially distributes the thermal nodes in the Cherkauer et al. (1999) finite difference algorithm, otherwise uses linear distribution.  Default = TRUE.
 #GRND_FLUX_TYPE	GF_410	# Options for ground flux:
 #			# GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
 #			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);

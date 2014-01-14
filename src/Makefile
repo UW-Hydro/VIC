@@ -52,7 +52,7 @@
 # -----------------------------------------------------------------------
 
 # Set SHELL = your shell here
-SHELL = /bin/csh
+SHELL = /bin/bash
 
 # Set CC = your compiler here
 CC = gcc
@@ -167,8 +167,8 @@ clean::
 # -------------------------------------------------------------
 # depend
 # -------------------------------------------------------------
-depend: .depend
-.depend:	$(SRCS) $(HDRS)
+depend: DEPEND
+DEPEND: $(SRCS) $(HDRS)
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::

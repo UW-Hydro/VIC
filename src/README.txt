@@ -26,7 +26,74 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.j to VIC 4.1.2.i *****
+***** Description of changes from VIC 4.1.2.j to VIC 4.1.2.k *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
+
+	Files Affected:
+
+	frozen_soil.c
+	func_surf_energy_bal.c
+	vicNl.h
+
+	Description:
+
+	Extended the "cold nose" hack to the "warm nose" condition, and also
+	extended to cover the IMPLICIT scheme.
+
+	This will be superceded by a more bug-free soil temperature scheme
+	in the next major release of the model.
+
+
+
+
+Better out-of-box behavior for soil temperature scheme
+
+	Files Affected:
+
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+
+	Description:
+
+	Added constraints to help ensure efficient, physically reasonable
+	simulation of the soil temperature profile:
+
+	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
+
+	2. Made "cold" (no-spinup) initial soil temperatures more consistent
+	with air temperature and bottom boundary temperature.
+
+	3. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
+	that, for the given soil temperature bottom boundary depth "dp" (also
+	known as the damping depth), there are at least 3 nodes within the top
+	50 cm of the soil column.  This is to constrain errors to a reasonable
+	size.  To satisfy this condition, the following relationship must hold:
+		Nnodes >= 5*ln(dp+1)+1
+
+	Some examples:
+	dp(m)	minimum Nnodes
+	  4	       9
+	  7	      12
+	 10	      14
+	 25	      18
+	 50	      21
+
+	VIC will exit with an error message to this effect if Nnodes is too
+	small for the given value of dp.
+
+
+
+
+--------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.i to VIC 4.1.2.j *****
 --------------------------------------------------------------------------------
 
 
@@ -65,7 +132,7 @@ Fixed selection of starting point in forcing file when starting in the middle of
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.i to VIC 4.1.2.h *****
+***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.i *****
 --------------------------------------------------------------------------------
 
 
@@ -103,7 +170,7 @@ Fixed use of tmp_moist array without initialization.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.h to VIC 4.1.2.g *****
+***** Description of changes from VIC 4.1.2.g to VIC 4.1.2.h *****
 --------------------------------------------------------------------------------
 
 
@@ -162,7 +229,7 @@ Fixed bug in root zone calculation.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.g to VIC 4.1.2.f *****
+***** Description of changes from VIC 4.1.2.f to VIC 4.1.2.g *****
 --------------------------------------------------------------------------------
 
 
@@ -185,7 +252,7 @@ Fixed error in passing SensibleHeat to func_atmos_energy_bal.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.f to VIC 4.1.2.e *****
+***** Description of changes from VIC 4.1.2.e to VIC 4.1.2.f *****
 --------------------------------------------------------------------------------
 
 
@@ -227,7 +294,7 @@ Fixed bug in converting from ALMA_INPUT moisture flux units
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.e to VIC 4.1.2.d *****
+***** Description of changes from VIC 4.1.2.d to VIC 4.1.2.e *****
 --------------------------------------------------------------------------------
 
 
@@ -259,7 +326,7 @@ Fixed incorrect reporting of canopy energy balance terms.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.d to VIC 4.1.2.c *****
+***** Description of changes from VIC 4.1.2.c to VIC 4.1.2.d *****
 --------------------------------------------------------------------------------
 
 
@@ -299,7 +366,7 @@ input forcings instead of vapor pressure.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.c to VIC 4.1.2.b *****
+***** Description of changes from VIC 4.1.2.b to VIC 4.1.2.c *****
 --------------------------------------------------------------------------------
 
 
@@ -388,7 +455,7 @@ Computed longwave sometimes is extremely large at high latitudes.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.b to VIC 4.1.2.a *****
+***** Description of changes from VIC 4.1.2.a to VIC 4.1.2.b *****
 --------------------------------------------------------------------------------
 
 
@@ -440,7 +507,7 @@ shortwave is supplied as a forcing.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2.a to VIC 4.1.2 *****
+***** Description of changes from VIC 4.1.2 to VIC 4.1.2.a *****
 --------------------------------------------------------------------------------
 
 
@@ -491,7 +558,7 @@ shortwave radiation is supplied as an input forcing.
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.2 to VIC 4.1.1 *****
+***** Description of changes from VIC 4.1.1 to VIC 4.1.2 *****
 --------------------------------------------------------------------------------
 
 
@@ -1697,7 +1764,7 @@ configuration).
 
 
 --------------------------------------------------------------------------------
-***** Description of changes from VIC 4.1.1 to VIC 4.1.0 beta r5 *****
+***** Description of changes from VIC 4.1.0 beta r5 to VIC 4.1.1 *****
 --------------------------------------------------------------------------------
 
 

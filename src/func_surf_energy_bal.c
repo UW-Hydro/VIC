@@ -525,7 +525,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       
     /* IMPLICIT Solution */
     if(options.IMPLICIT) {
-      Error = solve_T_profile_implicit(Tnew_node, T_node, Zsum_node, kappa_node, Cs_node, 
+      Error = solve_T_profile_implicit(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 				       moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
 #if EXCESS_ICE
 				       porosity_node, effective_porosity_node,

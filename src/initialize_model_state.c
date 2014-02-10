@@ -119,6 +119,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2013-Jul-25 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
+  2014-Jan-13 Added validation of Nnodes and dp for EXP_TRANS=TRUE.	TJB
+  2014-Feb-09 Made non-spinup initial temperatures more consistent with
+	      annual average air temperature and bottom boundary
+	      temperature.						TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -494,7 +498,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  energy[veg][band].T[1] = surf_temp;
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 
-	  /* Initialize soil layer thicknesses */
+	  /* Initialize soil layer moisture and ice contents */
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[0][veg][band].layer[lidx].moist;
 #if SPATIAL_FROST
@@ -529,16 +533,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	       between the damping depth and twice the depth of the
 	       first layer. */
 	    
-	    energy[veg][band].T[0] = surf_temp;
 	    soil_con->dz_node[0] = soil_con->depth[0];
 	    soil_con->dz_node[1] = soil_con->depth[0];
 	    soil_con->dz_node[2] = soil_con->depth[0];
-	    energy[veg][band].T[Nnodes-1] = soil_con->avg_temp;
-	    energy[veg][band].T[1] = exp_interp(soil_con->depth[0], 0., dp, 
-						surf_temp, soil_con->avg_temp);
-	    energy[veg][band].T[2] = exp_interp(2. * soil_con->depth[0], 0., dp, 
-						surf_temp, soil_con->avg_temp);
-	    
+
 	    soil_con->Zsum_node[0] = 0;
 	    soil_con->Zsum_node[1] = soil_con[0].depth[0];
 	    Zsum   = 2. * soil_con[0].depth[0];
@@ -552,9 +550,10 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      Zsum += (soil_con->dz_node[index]
 		       +soil_con->dz_node[index-1])/2.;
 	      soil_con->Zsum_node[index] = Zsum;
-	      energy[veg][band].T[index] = exp_interp(Zsum,0.,soil_con[0].dp,
-						      surf_temp,
-						      soil_con[0].avg_temp);
+	    }
+	    energy[veg][band].T[0] = surf_temp;
+	    for ( index = 1; index < Nnodes; index++ ) {
+	      energy[veg][band].T[index] = soil_con->avg_temp;
 	    }
 	    if ( FIRST_VEG ) {
 	      FIRST_VEG = FALSE;
@@ -572,9 +571,15 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	  }
 	  else{ /* exponential grid transformation, EXP_TRANS = TRUE*/
 	    
-	    /*calculate exponential function parameter */
 	    if ( FIRST_VEG ) {
+	      /*calculate exponential function parameter */
 	      Bexp = logf(dp+1.)/(double)(Nnodes-1); //to force Zsum=dp at bottom node
+              /* validate Nnodes by requiring that there be at least 3 nodes in the top 50cm */
+              if (Nnodes < 5*logf(dp+1.)+1) {
+		sprintf(ErrStr,"The number of soil thermal nodes (%d) is too small for the supplied damping depth (%f) with EXP_TRANS set to TRUE, leading to fewer than 3 nodes in the top 50 cm of the soil column.  For EXP_TRANS=TRUE, Nnodes and dp must follow the relationship:\n5*ln(dp+1)<Nnodes-1\nEither set Nnodes to at least %d in the global param file or reduce damping depth to %f in the soil parameter file.  Or set EXP_TRANS to FALSE in the global parameter file.",Nnodes,dp,(int)(5*logf(dp+1.))+2,exp(0.2*(Nnodes-1))+1);
+		nrerror(ErrStr);
+              }
+ 
 	      for ( index = 0; index <= Nnodes-1; index++ )
 		soil_con->Zsum_node[index] = expf(Bexp*index)-1.;
 	      if(soil_con->Zsum_node[0] > soil_con->depth[0]) {
@@ -593,15 +598,17 @@ int initialize_model_state(dist_prcp_struct    *prcp,
 	      if ( FIRST_VEG ) {
 		soil_con->dz_node[index] = (soil_con->Zsum_node[index+1]-soil_con->Zsum_node[index])/2.+(soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1])/2.;
 	      }
-	      energy[veg][band].T[index] = exp_interp(soil_con->Zsum_node[index],0.,soil_con[0].dp,
-						      surf_temp,soil_con[0].avg_temp);
+//	      energy[veg][band].T[index] = exp_interp(soil_con->Zsum_node[index],0.,soil_con[0].dp,
+//						      surf_temp,soil_con[0].avg_temp);
+              energy[veg][band].T[index] = soil_con->avg_temp;
 	    }
 	    //bottom node
 	    index=Nnodes-1;
 	    if ( FIRST_VEG )
 	      soil_con->dz_node[index] = soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1];
-	    energy[veg][band].T[index] = soil_con[0].avg_temp;
-	  }
+	    energy[veg][band].T[index] = soil_con->avg_temp;
+
+	  } // end if !EXP_TRANS
 	  
 	  //initialize moisture and ice for each soil layer
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {

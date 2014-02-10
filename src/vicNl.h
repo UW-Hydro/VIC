@@ -531,7 +531,7 @@ int    solve_T_profile(double *, double *, char *, int *, double *, double *,dou
 		       int, int *, int, int, int, int);
 
 #endif
-int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
+int   solve_T_profile_implicit(double *, double *, char *, int *, double *, double *, double *,
 			       double *, double, double *, double *, double *,
 #if EXCESS_ICE
 			       double *, double *,

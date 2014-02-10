@@ -103,6 +103,7 @@ global_param_struct get_global_param(filenames_struct *names,
 	      TRUE.								TJB
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
+  2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -241,9 +242,12 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
           options.QUICK_FLUX = FALSE;
-          options.IMPLICIT = TRUE;
 	}
-        else options.FROZEN_SOIL = FALSE;
+        else {
+          options.FROZEN_SOIL = FALSE;
+          options.IMPLICIT = FALSE;
+          options.EXP_TRANS = FALSE;
+        }
       }
       else if(strcasecmp("QUICK_FLUX",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

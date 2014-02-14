@@ -26,6 +26,30 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.k to VIC 4.1.2.l *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Compilation errors when EXCESS_ICE = TRUE
+
+	Files Affected:
+
+	full_energy.c
+	initialize_model_state.c
+	lakes.eb.c
+
+	Description:
+
+	Miscellaneous typos in the EXCESS_ICE code prevented compilation
+	when EXCESS_ICE = TRUE in user_def.h.  These have been fixed.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.j to VIC 4.1.2.k *****
 --------------------------------------------------------------------------------
 

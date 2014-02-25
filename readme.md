@@ -1,4 +1,5 @@
 # Variable Infiltration Capacity (VIC) Model
+[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=master)](https://travis-ci.org/UW-Hydro/VIC)
 
 [![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC)
 

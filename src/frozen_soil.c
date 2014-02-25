@@ -256,6 +256,8 @@ int  solve_T_profile(double *T,
 
 int solve_T_profile_implicit(double *T,                           // update
 			     double *T0,                    // keep
+			     char   *Tfbflag,
+			     int    *Tfbcount,
 			     double *Zsum,                  // soil parameter
 			     double *kappa,                 // update if necessary
 			     double *Cs,                    // update if necessary
@@ -305,12 +307,14 @@ int solve_T_profile_implicit(double *T,                           // update
 	      organic fraction into account.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2014-Jan-14 Modified cold nose hack to also cover warm nose case.
   **********************************************************************/
   
   extern option_struct options;
   int  n, Error;
   double res[MAX_NODES];
   void (*vecfunc)(double *, double *, int, int, ...);
+  int j;
 
   if(FIRST_SOLN[0]) 
     FIRST_SOLN[0] = FALSE;
@@ -335,7 +339,25 @@ int solve_T_profile_implicit(double *T,                           // update
     T[0] = T0[0]; //surface
     if(!NOFLUX)
       T[Nnodes-1] = T0[Nnodes-1]; //bottom boundary
-  }  
+    if (options.TFALLBACK) {
+      // HACK to prevent runaway cold nose
+      // Handle the case in which the a node was colder than both the nodes above and below
+      // in the last time step, and that both differences have increased between the last
+      // time step and the current one.
+      for(j=1;j<Nnodes-1;j++) {
+        if ( ( T0[j-1]-T0[j] > 0 && T0[j+1]-T0[j] > 0
+               && (T[j-1]-T[j]) - (T0[j-1]-T0[j]) > 0
+               && (T[j+1]-T[j]) - (T0[j+1]-T0[j]) > 0 )
+          || ( T0[j-1]-T0[j] < 0 && T0[j+1]-T0[j] < 0
+               && (T[j-1]-T[j]) - (T0[j-1]-T0[j]) < 0
+               && (T[j+1]-T[j]) - (T0[j+1]-T0[j]) < 0 ) ) {
+          T[j] = 0.5*(T[j-1]+T[j+1]); // crude fix for now; just average the T's without taking distance, conductivities into account
+          Tfbflag[j] = 1;
+          Tfbcount[j]++;
+        }
+      }
+    }
+  }
 
   return (Error);
 
@@ -515,9 +537,12 @@ int calc_soil_thermal_fluxes(int     Nnodes,
     // in the last time step, and that both differences have increased between the last
     // time step and the current one.
     for(j=1;j<Nnodes-1;j++) {
-      if ( Tlast[j-1]-Tlast[j] > 0 && Tlast[j+1]-T[j] > 0
-           && (T[j-1]-T[j]) - (Tlast[j-1]-Tlast[j]) > 0
-           && (T[j+1]-T[j]) - (Tlast[j+1]-Tlast[j]) > 0 ) {
+      if ( ( Tlast[j-1]-Tlast[j] > 0 && Tlast[j+1]-Tlast[j] > 0
+             && (T[j-1]-T[j]) - (Tlast[j-1]-Tlast[j]) > 0
+             && (T[j+1]-T[j]) - (Tlast[j+1]-Tlast[j]) > 0 )
+        || ( Tlast[j-1]-Tlast[j] < 0 && Tlast[j+1]-Tlast[j] < 0
+             && (T[j-1]-T[j]) - (Tlast[j-1]-Tlast[j]) < 0
+             && (T[j+1]-T[j]) - (Tlast[j+1]-Tlast[j]) < 0 ) ) {
         T[j] = 0.5*(T[j-1]+T[j+1]); // crude fix for now; just average the T's without taking distance, conductivities into account
         Tfbflag[j] = 1;
         Tfbcount[j]++;
@@ -832,16 +857,16 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-	if (i<n-1) {
-	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
-	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
-	      flux_term1 = 0;
-#if VERBOSE
-	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
-#endif
-	    }
-	  }
-	}
+//	if (i<n-1) {
+//	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
+//	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
+//	      flux_term1 = 0;
+//#if VERBOSE
+//	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
+//#endif
+//	    }
+//	  }
+//	}
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1])/deltat;
         res[i] = flux_term + phase_term - storage_term;
@@ -935,16 +960,15 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	//flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
 	//that node get any colder.  This only seems to happen in the first and
 	//second near-surface nodes.
-	if (i<n-1) {
-	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
-	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
-	      flux_term1 = 0;
-#if VERBOSE
-	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
-#endif
-	    }
-	  }
-	}
+//	if (i<n-1) {
+//	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
+//	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
+//	      flux_term1 = 0;
+//#if VERBOSE
+//	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
+//#endif
+//	    }
+//	  }
 	flux_term = flux_term1+flux_term2;
 	phase_term   = ice_density*Lf * (ice_new[i+1] - ice[i+1]) / deltat;
         res[i] = flux_term + phase_term - storage_term;

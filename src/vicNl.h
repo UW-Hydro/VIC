@@ -457,7 +457,7 @@ int    solve_T_profile(double *, double *, char *, int *, double *, double *,dou
 		       double *, double *, double *, double *, double, double *,
 		       int, int *, int, int, int, int);
 
-int   solve_T_profile_implicit(double *, double *, double *, double *, double *,
+int   solve_T_profile_implicit(double *, double *, char *, int *, double *, double *, double *,
 			       double *, double, double *, double *, double *,
 			       double *, double *, double *, double *, double, int, int *,
 			       int, int, int, int, 

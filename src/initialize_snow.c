@@ -4,7 +4,8 @@
 
 static char vcid[] = "$Id$";
 
-void initialize_snow (snow_data_struct **snow, 
+void initialize_snow (snow_data_struct **snow,
+          soil_con_struct     *soil_con,  
 		      int                veg_num,
 		      int                cellnum)
 /**********************************************************************
@@ -94,6 +95,25 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].swq               = 0.0;
       snow[i][j].snow_distrib_slope= 0.0;
       snow[i][j].tmp_int_storage   = 0.0;
+      snow[i][j].swqold            = 0.0;
+      if(soil_con->glcel == 1){    /* By Bibi */
+        snow[i][j].iwq = (soil_con->BandIceThick[j] * (880.0 / 1000.));
+       //printf("iwq=%f\n", snow[i][j].iwq);
+       snow[i][j].iwqold = snow[i][j].iwq;
+       snow[i][j].bn = 0;
+       snow[i][j].icedepth = soil_con->BandIceThick[j];
+       snow[i][j].glarea = soil_con->GlAreaFract[j];
+       snow[i][j].glmelt = 0.0;
+       snow[i][j].glwater = 0.0;
+       snow[i][j].Qin = 0.0;
+       snow[i][j].Qout = 0.0;
+            }
+            else{
+       snow[i][j].iwq = 0.0;
+       snow[i][j].icedepth = 0.0;
+       snow[i][j].iwqold = 0.0;
+            }
+
       // Fluxes
       snow[i][j].blowing_flux      = 0.0;
       snow[i][j].canopy_vapor_flux = 0.0;

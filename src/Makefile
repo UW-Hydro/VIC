@@ -92,7 +92,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
-	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
+	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o glacier.o \
 	initialize_atmos.o initialize_model_state.o \
 	initialize_global.o initialize_new_storm.o initialize_snow.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \
@@ -145,7 +145,7 @@ full:
 	make disagg
 
 clean::
-	/bin/rm -f *.o core log *~
+	/bin/rm -f *.o core log vicNl DEPEND *~
 
 model: $(OBJS)
 	$(CC) -o vicNl$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)

@@ -200,6 +200,15 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }
       sscanf(token, "%d", &temp.gridcel);
+
+    token = strtok (NULL, delimiters);
+    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+    if( token == NULL ) {
+      sprintf(ErrStr,"ERROR: Can't find values for GLACIER CELL NUMBER in soil file\n");
+      nrerror(ErrStr);
+    }  
+    sscanf(token, "%d", &temp.glcel);
+
       token = strtok (NULL, delimiters);
       while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
       if( token == NULL ) {
@@ -788,7 +797,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
         *************************************************/
         Nbands         = options.SNOW_BAND;
         temp.AreaFract     = (double *)calloc(Nbands,sizeof(double));
+        temp.GlAreaFract   = (double *)calloc(Nbands,sizeof(double));
         temp.BandElev      = (float *)calloc(Nbands,sizeof(float));
+        temp.BandIceThick  = (double *)calloc(Nbands,sizeof(double));   /* By Bibi*/
+        temp.BandSlope     = (double *)calloc(Nbands,sizeof(double));
         temp.Tfactor       = (double *)calloc(Nbands,sizeof(double));
         temp.Pfactor       = (double *)calloc(Nbands,sizeof(double));
         temp.AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
@@ -804,6 +816,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
         /** Set default values for factors to use unmodified forcing data **/
         for (band = 0; band < Nbands; band++) {
           temp.AreaFract[band] = 0.;
+          temp.GlAreaFract[band] = 0.;
+          temp.BandIceThick[band] = 0.;
+          temp.BandSlope[band]    = 0.;
           temp.BandElev[band]  = temp.elevation;
           temp.Tfactor[band]   = 0.;
           temp.Pfactor[band]   = 1.;

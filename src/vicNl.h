@@ -325,7 +325,7 @@ int   initialize_model_state(dist_prcp_struct *, dmy_struct,
 			      char **, int **);
 int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
-void   initialize_snow(snow_data_struct **, int, int);
+void   initialize_snow(snow_data_struct **, soil_con_struct *, int, int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, veg_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *, int);
@@ -507,3 +507,4 @@ void write_vegvar(veg_var_struct *, int);
 
 void zero_output_list(out_data_struct *);
 
+int  gl_flow(soil_con_struct *, veg_con_struct *);

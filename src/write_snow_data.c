@@ -36,6 +36,7 @@ void write_snow_data(snow_data_struct snow,
   printf("surf_temp         = %f C\n", snow.surf_temp);
   printf("surf_water        = %f m\n", snow.surf_water);
   printf("swq               = %f m\n", snow.swq);
+  printf("iwq               = %f m\n", snow.swq);
   printf("tmp_int_storage   = %f m\n", snow.tmp_int_storage);
   printf("vapor_flux        = %f m\n", snow.vapor_flux);
   printf("last_snow         = %i\n", snow.last_snow);

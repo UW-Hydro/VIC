@@ -191,6 +191,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"FULL_ENERGY\t\tTRUE\n");
   else
     fprintf(stderr,"FULL_ENERGY\t\tFALSE\n");
+  if (options.GLACIER)
+    fprintf(stderr,"GLACIER\t\tTRUE\n");
+  else
+    fprintf(stderr,"GLACIER\t\tFALSE\n");
   if (options.GRND_FLUX_TYPE == GF_406)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)

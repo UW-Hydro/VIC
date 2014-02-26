@@ -162,6 +162,14 @@ double solve_snow(char                 overstory,
   double              shortwave;
   double              vp;
   double              vpd;
+  double              snowice;
+  double              snowdepth;
+  double              icedepth;
+  double              maxdens;
+  double              slopedens;
+  double              MassBalanceError;       /* Mass balance error (m) */
+  double              InitialSwq;
+  double              InitialIwq;
 
   month       = dmy[rec].month;
   hour        = dmy[rec].hour;
@@ -390,9 +398,26 @@ double solve_snow(char                 overstory,
       if(snow->swq > 0.) {
 
 	/** Calculate Snow Density **/
-	if ( snow->surf_temp <= 0 )
+	if ( snow->surf_temp <= 0 ){
 	  // snowpack present, compress and age density
 	  snow->density = snow_density(snow, snowfall[WET], old_swq, Tgrnd, air_temp, (double)dt);
+
+    /*****************Snow to ice conversion*******************/
+    maxdens = 910;
+    if(soil_con->glcel == 1 &&  snow->iwq > 0 && snow->density > 700 && snow->density <= 910){
+      maxdens = 2 * snow->density  - (double)NEW_SNOW_DENSITY;
+      if(maxdens > 700){
+        slopedens = (maxdens -  (double)NEW_SNOW_DENSITY)/snow->depth;
+        snowdepth = snow->depth - ((snow->density - (double)NEW_SNOW_DENSITY)/slopedens);
+        snowice = (snow->depth - snowdepth) * ((maxdens - 700)/2)*1000.;
+        if(snowice > 0. && snow->swq > snowice){
+          snow->iwq += snowice;
+          snow->swq -=snowice;
+          snow->density = (snow->density + (double)NEW_SNOW_DENSITY)/2;
+        }
+      }
+    } // end of snow to ice conversion  
+  }
 	else 
 	  // no snowpack present, start with new snow density
 	  if ( snow->last_snow == 0 ) 

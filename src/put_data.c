@@ -611,6 +611,7 @@ int  put_data(dist_prcp_struct  *prcp,
   if (rec >= 0) {
     out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE].data[0] = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] - save_data->swe;
+    out_data[OUT_DELIWE].data[0] = out_data[OUT_IWE].data[0]  - save_data->iwe;
     out_data[OUT_DELINTERCEPT].data[0] = out_data[OUT_WDEW].data[0] - save_data->wdew;
     out_data[OUT_DELSURFSTOR].data[0] = out_data[OUT_SURFSTOR].data[0] - save_data->surfstor;
   }
@@ -626,6 +627,7 @@ int  put_data(dist_prcp_struct  *prcp,
   }
   save_data->surfstor = out_data[OUT_SURFSTOR].data[0];
   save_data->swe = out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0];
+  save_data->iwe = out_data[OUT_IWE].data[0];
   save_data->wdew = out_data[OUT_WDEW].data[0];
 
   // Carbon Terms
@@ -646,7 +648,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	* depth[index] * 1000;
     else
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
-  storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
+  storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0] + out_data[OUT_IWE].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
   
   /********************
@@ -748,6 +750,9 @@ int  put_data(dist_prcp_struct  *prcp,
       out_data[OUT_REFREEZE].aggdata[0] /= out_dt_sec;
       out_data[OUT_RUNOFF].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOW_MELT].aggdata[0] /= out_dt_sec;
+      out_data[OUT_GLACIER_MELT].aggdata[0] /= out_dt_sec;
+      out_data[OUT_GLQIN_BAND].aggdata[0] /= out_dt_sec;
+      out_data[OUT_GLQOUT_BAND].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOWF].aggdata[0] /= out_dt_sec;
       out_data[OUT_SUB_BLOWING].aggdata[0] /= out_dt_sec;
       out_data[OUT_SUB_CANOP].aggdata[0] /= out_dt_sec;
@@ -1169,6 +1174,14 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record band snowpack depth **/
   out_data[OUT_SNOW_DEPTH_BAND].data[band] += snow.depth * Cv * lakefactor * 100.;
+
+  /** record band iwe water equivalent **/
+  out_data[OUT_IWE_BAND].data[band] += snow.iwq * Cv * 1000.;
+  out_data[OUT_BN_BAND].data[band] += snow.bn * Cv * 1000.;
+
+  /** record band glacier flow **/
+  out_data[OUT_GLQOUT_BAND].data[band] += snow.Qout * Cv;
+  out_data[OUT_GLQIN_BAND].data[band] += snow.Qin * Cv;
 
   /** record band canopy intercepted snow **/
   if (HasVeg)

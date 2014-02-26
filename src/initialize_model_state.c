@@ -189,7 +189,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
     - some may be reset if state file present
   ********************************************/
 
-  initialize_snow(snow, Nveg, cellnum);
+  initialize_snow(snow, soil_con, Nveg, cellnum);
 
   /********************************************
     Initialize all soil layer variables 

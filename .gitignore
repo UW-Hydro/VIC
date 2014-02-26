@@ -15,5 +15,9 @@
 *.dylib
 
 vicNl
+VIC.sublime-project
+VIC.sublime-workspace
+*.sublime-project
+*.sublime-workspace
 
 .DS_Store

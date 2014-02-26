@@ -154,6 +154,41 @@ int  full_energy(char                 NEWCELL,
   double                 tmp_mu;
   double                 tmp_total_moist;
   double                 gauge_correction[2];
+
+  // Glacier Terms
+  double                 tau;
+  double                 us;
+  double                 ud;
+  double                 IceThick;
+  double                 BandIceMove;
+  double                 BandIceDepth;
+  double                 radangle;
+  double                 IceThickBL;
+  double                 IceThickBH;
+  double                 BandIceDepthBL;
+  double                 BandIceDepthBH;
+  double                 IWQBH;
+  double                 Initialiwqup;
+  double                 Initialiwqlow;
+  double                 MassBalanceError;
+  double kterminus;
+  double Hhi;
+  double gradhi;
+  double areahi;
+  double Hlo;
+  double gradlo;
+  double arealo;
+  double Qnet;
+  double delH;
+  double divQ;
+  double gamma;
+  double delswe, deliwe;
+  int rhoi=910;
+  int rhow=1000;
+  int Lvert=100;    // m - length scale for surface slopes/ice flux
+  int Glbands;
+  // End glacier terms
+
   float 	         lag_one;
   float 	         sigma_slope;
   float  	         fetch;
@@ -395,7 +430,7 @@ int  full_energy(char                 NEWCELL,
       /******************************
         Solve ground surface fluxes 
       ******************************/
-  
+      /* Bibi: be sure to specify input snowbands from high elevation to low. */
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
@@ -425,9 +460,9 @@ int  full_energy(char                 NEWCELL,
 				     &(snow[iveg][band]), 
 				     soil_con, dry_veg_var, wet_veg_var, 
 				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
-	  
+
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
-	  
+
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
@@ -456,13 +491,143 @@ int  full_energy(char                 NEWCELL,
     } /** end current vegetation type **/
   } /** end of vegetation loop **/
 
+    /******************************* Glacier flow model ***************************/
+          if (options.GLACIER) {
+      if(dmy[rec].day == 1){
+        gamma=1.00e-10;                   // tune this value for the ice dynamics
+      for(iveg = 0; iveg <= Nveg; iveg++){
+   if (veg_con[iveg].Cv > 0.0) {
+     Cv = veg_con[iveg].Cv;
+   Nbands = options.SNOW_BAND;
+   // find the highest ice
+   for (band = 0; band < Nbands; band++) {
+       //printf("gl_area= %f", snow[iveg][band].iwq);
+     if ((soil_con->GlAreaFract[band] > 0) && (soil_con->GlAreaFract[band+1]==0))
+       {
+     Glbands=band;
+   //printf("glbands=%d\n",Glbands);
+       }
+     else
+       Glbands=Nbands;
+   }
+ // look for the first occurence and flag the terminus
+      //for (band = Glbands; band >=0; band--) {
+        for (band = Glbands; band >=0; band--) {
+   if( soil_con->AreaFract[band] > 0 ) {
+     //printf("band= %d\n", band);
+   //printf("iwq=  %f ", snow[iveg][band].iwq);
+   delswe = snow[iveg][band].swq - snow[iveg][band].swqold;  //change in swe in previous time step
+   snow[iveg][band].swqold = snow[iveg][band].swq;
+   deliwe = snow[iveg][band].iwq - snow[iveg][band].iwqold; // change in iwe in previous time step
+   snow[iveg][band].iwqold = snow[iveg][band].iwq;
+   snow[iveg][band].bn = delswe + deliwe; //glacier mass balance
+
+   if (band > 0)
+     {
+         if ((snow[iveg][band].iwq == 0) && (snow[iveg][band-1].iwq > 0))
+   kterminus=band-1;
+     }
+
+   // calculate the flux into the cell
+   if (band < Glbands)   // below the top cell
+     {
+         if(snow[iveg][band+1].iwq > 0) //ice above
+   {
+       Hhi = (snow[iveg][band].iwq + snow[iveg][band+1].iwq)/2.;
+     gradhi = (soil_con->BandElev[band+1]-soil_con->BandElev[band])/Lvert;
+     areahi = (soil_con->GlAreaFract[band]+soil_con->GlAreaFract[band+1])/2;
+   }
+       else
+   {
+       Hhi=0;
+     gradhi=0;
+     areahi=0;
+   }
+     }
+   else // top cell
+     {
+         if(snow[iveg][band].iwq > 0) //ice here
+   {
+       Hhi = snow[iveg][band].iwq;
+     gradhi = 0; // shuts off incoming ice
+     areahi = 0;
+   }
+       else
+   {
+       Hhi=0;
+     gradhi=0;
+     areahi=0;
+   }
+     }
+   // calculate the flux out of the cell
+   if (band > 0)     // above the valley bottom
+     {
+         gradlo=(soil_con->BandElev[band]-soil_con->BandElev[band-1])/Lvert;
+       Hlo = (snow[iveg][band].iwq + snow[iveg][band-1].iwq)/2;
+       //arealo=(hyps_future(k)+hyps_future(k-1))/2;
+
+       arealo=(soil_con->GlAreaFract[band]+soil_con->GlAreaFract[band-1])/2;
+       printf("band=%d glarae[band]=%f glarea[band-1]=%f arealo=%f\n", soil_con->GlAreaFract[band], soil_con->GlAreaFract[band-1],arealo);
+     }
+   else
+     {
+         Hlo=snow[iveg][band].iwq;
+       gradlo=1;
+       arealo=soil_con->GlAreaFract[band];
+     }
+
+   // assign fluxes at the interface
+   snow[iveg][band].Qin = gamma*areahi * pow(Hhi,5)* pow(gradhi,3);
+   snow[iveg][band].Qout = gamma*arealo * pow(Hlo,5) * pow(gradlo,3);
+   Qnet = snow[iveg][band].Qin - snow[iveg][band].Qout;
+   if ((Qnet > 0) && (soil_con->GlAreaFract[band]==0))
+     soil_con->GlAreaFract[band] = soil_con->GlAreaFract[band+1];   // new incoming ice
+
+   if (abs(Qnet) > 0)
+     {
+         if ((Qnet/soil_con->GlAreaFract[band])<5)
+   divQ = Qnet/soil_con->GlAreaFract[band];
+       else
+   divQ = 5;
+
+     }
+
+   else
+     divQ=0;
+
+   //delH = snow[iveg][band].bn + divQ;
+   delH =  divQ;
+   if((snow[iveg][band].iwq + delH) > 0)
+     snow[iveg][band].iwq = snow[iveg][band].iwq + delH;
+   else
+     snow[iveg][band].iwq = 0;
+
+   soil_con->BandElev[band] = soil_con->BandElev[band] + delH;
+   // don't melt into the rock
+   if (snow[iveg][band].iwq < 0){
+       snow[iveg][band].iwq= 0;
+     soil_con->GlAreaFract[band]= 0;
+   }
+   /* Mass balance test */
+   MassBalanceError = snow[iveg][band].Qin - snow[iveg][band].Qout;
+
+ }
+      }// End loop through elevation bands
+    } /** end current vegetation type **/
+  } /** end of vegetation loop **/
+      // ErrorFlag = gl_flow (soil_con, veg_con);
+      // if ( ErrorFlag == ERROR ) return ( ERROR );
+    }
+  } // end of glacier model
+
+
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);
   }
   free((char *)aero_resist);
 
   /****************************
-     Run Lake Model           
+     Run Lake Model
   ****************************/
 
   /** Compute total runoff and baseflow for all vegetation types
@@ -471,10 +636,10 @@ int  full_energy(char                 NEWCELL,
 
     wetland_runoff = wetland_baseflow = 0;
     sum_runoff = sum_baseflow = 0;
-	
+
     // Loop through all vegetation tiles
     for ( iveg = 0; iveg <= Nveg; iveg++ ) {
-	  
+
       /** Solve Veg Tile only if Coverage Greater than 0% **/
       if (veg_con[iveg].Cv  > 0.) {
 
@@ -488,15 +653,15 @@ int  full_energy(char                 NEWCELL,
         // Loop through snow elevation bands
         for ( band = 0; band < Nbands; band++ ) {
           if ( soil_con->AreaFract[band] > 0 ) {
-	
+
 	    // Loop through distributed precipitation fractions
 	    for ( dist = 0; dist < 2; dist++ ) {
-	      
+
 	      if ( dist == 0 ) 
 		tmp_mu = prcp->mu[iveg]; 
 	      else 
 		tmp_mu = 1. - prcp->mu[iveg]; 
-	      
+
               if (veg_con[iveg].LAKE) {
                 wetland_runoff += ( cell[dist][iveg][band].runoff * tmp_mu
                             * Cv * soil_con->AreaFract[band] );

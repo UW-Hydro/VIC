@@ -359,6 +359,11 @@ void read_initial_model_state(FILE                *init_state,
 	  nrerror("End of model state file found unexpectedly");
 	snow[veg][band].MELTING = (char)tmp_char;
       }
+      //   if(soil_con->glcel == 1)    /* By Bibi */
+      // snow[veg][band].iwq = soil_con->BandIceThick[band] * (917.0 / 1000.);
+      // else
+      // snow[veg][band].iwq = 0.0;
+
       if(snow[veg][band].density > 0.) 
 	snow[veg][band].depth = 1000. * snow[veg][band].swq 
 	  / snow[veg][band].density;

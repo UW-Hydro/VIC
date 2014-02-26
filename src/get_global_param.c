@@ -652,6 +652,11 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.LAKE_PROFILE = TRUE;
 	}
       }
+      else if(strcasecmp("GLACIER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if(strcasecmp("TRUE", flgstr) == 0) options.GLACIER = TRUE;
+        else options.GLACIER = FALSE;
+      }
 
       /*************************************
        Define output files

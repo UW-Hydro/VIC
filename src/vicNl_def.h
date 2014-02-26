@@ -632,6 +632,15 @@ extern char ref_veg_ref_crop[];
 #define OUT_CINTER         163  /* Carbon density in intermediate pool [g C/m2d] */
 #define OUT_CSLOW          164  /* Carbon density in slow pool [g C/m2d] */
 
+#define OUT_IWE            165
+#define OUT_IWE_BAND       166
+#define OUT_DELIWE         167  
+#define OUT_GLACIER_MELT   168  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_MELT_BAND   169  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
+#define OUT_GLQOUT_BAND    170
+#define OUT_GLQIN_BAND     171
+#define OUT_BN_BAND        172
+
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
 #define OUT_TYPE_CHAR    1 /* char */
@@ -851,6 +860,8 @@ typedef struct {
 				   output files are used (for backwards-compatibility); if outfiles and
 				   variables are explicitly mentioned in global parameter file, this option
 				   is ignored. */
+  char GLACIER;          /* TRUE = run glacier flow model */
+
 } option_struct;
 
 /*******************************************************
@@ -965,7 +976,11 @@ typedef struct {
   double   soil_dens_min[MAX_LAYERS]; /* particle density of mineral soil (kg/m^3) */
   double   soil_dens_org[MAX_LAYERS]; /* particle density of organic soil (kg/m^3) */
   float   *BandElev;                  /* Elevation of each snow elevation band */
+  double  *BandIwq;                   /* Elevation of each snow elevation band By Bibi*/
+  double  *BandIceThick;              /* Elevation of each snow elevation band */
+  double  *BandSlope;                 /* Elevation of each snow elevation band */
   double  *AreaFract;                 /* Fraction of grid cell included in each snow elevation band */
+  double  *GlAreaFract;               /* Fraction of glacier included in each snow elevation band */
   double  *Pfactor;                   /* Change in Precipitation due to elevation (fract) in each snow elevation band */
   double  *Tfactor;                   /* Change in temperature due to elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
@@ -976,6 +991,7 @@ typedef struct {
   float    time_zone_lng;             /* central meridian of the time zone */
   float  **layer_node_fract;          /* fraction of all nodes within each layer */
   int      gridcel;                   /* grid cell number */
+  int      glcel;                     /* glacier grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
   double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
   double   slope;
@@ -1263,6 +1279,7 @@ typedef struct {
 			       previously */
   double pack_temp;         /* depth averaged temperature of the snowpack (C) */
   double pack_water;        /* liquid water content of the snow pack (m) */
+  double glwater;           /* liquid water content of the glacier pack (m) */
   int    snow;              /* TRUE = snow, FALSE = no snow */
   double snow_canopy;       /* amount of snow on canopy (m) */
   double store_coverage;    /* stores coverage fraction covered by new snow (m) */
@@ -1275,6 +1292,15 @@ typedef struct {
   double surf_temp_fbflag;  /* flag indicating if previous step's temperature was used */
   double surf_water;        /* liquid water content of the surface layer (m) */
   double swq;               /* snow water equivalent of the entire pack (m) */
+  double iwq;
+  double swqold;
+  double iwqold;
+  double icedepth;
+  double glmelt;           /* glacier melt */
+  double glarea;           /* glacier area */
+  double Qin;              /* glacier flow into the cell*/
+  double Qout;             /* glacier flow out of the cell*/
+  double bn;               /* glacier mass balance */
   double snow_distrib_slope;/* current slope of uniform snow distribution (m/fract) */
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
   // Fluxes
@@ -1393,6 +1419,7 @@ typedef struct {
   double	total_soil_moist; /* total column soil moisture [mm] */
   double	surfstor;         /* surface water storage [mm] */
   double	swe;              /* snow water equivalent [mm] */
+  double  iwe;              /* ice water equivalent [mm] */
   double	wdew;             /* canopy interception [mm] */
 } save_data_struct;
 

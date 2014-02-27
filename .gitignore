@@ -15,6 +15,7 @@
 *.dylib
 
 vicNl
+DEPEND
 VIC.sublime-project
 VIC.sublime-workspace
 *.sublime-project

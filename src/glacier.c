@@ -6,8 +6,10 @@
 static char vcid[] = "$Id: gl_flow.c,v 5.12.2.20 2013/10/7 03:45:12 vicadmin Exp $";
 
 
-int gl_flow(soil_con_struct     *soil_con,
-	        veg_con_struct      *veg_con)
+int gl_flow(snow_data_struct    **snow,
+            soil_con_struct     *soil_con,
+	          veg_con_struct      *veg_con,
+            int Nbands)
 
 /**********************************************************************
 	gl_flow      Bibi S. Naz	October 07, 2013
@@ -17,11 +19,6 @@ int gl_flow(soil_con_struct     *soil_con,
  						
 **********************************************************************/
 {
-  extern veg_lib_struct *veg_lib;
-  extern option_struct   options;
-#if LINK_DEBUG
-  extern debug_struct    debug;
-#endif // LINK_DEBUG
   double kterminus;
   double  Hhi;
   double gradhi;
@@ -32,25 +29,18 @@ int gl_flow(soil_con_struct     *soil_con,
   double Qnet;
   double delH;
   double divQ;
-  double gamma;
-  double delswe, deliwe;
+  double gamma=1.0e-8;  // tune this value for the ice dynamics
+  double delswe;
+  double deliwe;
   int rhoi=910;
   int rhow=1000;
   int Lvert=100;    // m - length scale for surface slopes/ice flux
   int                    iveg;
-  int                    Nveg;
-  int                    veg_class;
   int                    band;
-  int                    Nbands, Glbands;
+  int                    Glbands;
   
-  double                 Cv;
-  snow_data_struct     **snow;
-  gamma=1.0e-8;                   // tune this value for the ice dynamics
- 
-  for(iveg = 0; iveg <= Nveg; iveg++){
+  for(iveg = 0; iveg <= veg_con[0].vegetat_type_num; iveg++){
     if (veg_con[iveg].Cv > 0.0) {
-      Cv = veg_con[iveg].Cv;
-      Nbands = options.SNOW_BAND;
       // find the highest ice
       for (band = 0; band <=Nbands; band++) {	
 	printf("gl_area=%f\n", snow[iveg][band].iwq);
@@ -164,4 +154,33 @@ int gl_flow(soil_con_struct     *soil_con,
   return(0);
 }
   
+
+int gl_volume_area(snow_data_struct    **snow,
+                   soil_con_struct     *soil_con,
+                   veg_con_struct      *veg_con,
+                   int Nbands)
+
+/**********************************************************************
+    gl_volume_area      Joe Hamman    February 26, 2014
+
+  this routine solves the volume-area scaling glacier algorithm of 
+    Bahr, D. B., Global Distributions of Glacier Properties: A
+    Stochastic Scaling Paradigm, Water Resour. Res., 33,
+    1669-1679, 1997a.
+                        
+**********************************************************************/
+{
+  int                    iveg;
+  int                    band;
   
+  for(iveg = 0; iveg <= veg_con[0].vegetat_type_num; iveg++){
+    if (veg_con[iveg].Cv > 0.0) {
+      // find the highest ice
+      for (band = 0; band <=Nbands; band++) {   
+        printf("gl_area=%f\n", snow[iveg][band].iwq);
+      }
+
+    } /** end current vegetation type **/
+  } /** end of vegetation loop **/
+  return(0);
+}

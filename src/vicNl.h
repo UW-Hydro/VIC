@@ -507,4 +507,5 @@ void write_vegvar(veg_var_struct *, int);
 
 void zero_output_list(out_data_struct *);
 
-int  gl_flow(soil_con_struct *, veg_con_struct *);
+int  gl_flow(snow_data_struct **, soil_con_struct *, veg_con_struct *, int);
+int  gl_volume_area(snow_data_struct **, soil_con_struct *, veg_con_struct *, int);

@@ -84,9 +84,14 @@ void make_in_and_outfiles(filep_struct         *filep,
     strcat(out_data_files[filenum].filename, latchar);
     strcat(out_data_files[filenum].filename, "_");
     strcat(out_data_files[filenum].filename, lngchar);
-    if(options.BINARY_OUTPUT)
-      out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "wb");
-    else out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "w");
+    if(options.BINARY_OUTPUT) {
+      strcat(out_data_files[filenum].filename, ".bin");
+      out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "wb"); 
+    }
+    else {
+      strcat(out_data_files[filenum].filename, ".txt");
+      out_data_files[filenum].fh = open_file(out_data_files[filenum].filename, "w");
+    }
   }
 
 } 

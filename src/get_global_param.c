@@ -654,8 +654,18 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("GLACIER",optstr)==0) {
         sscanf(cmdstr,"%*s %s", flgstr);
-        if(strcasecmp("TRUE", flgstr) == 0) options.GLACIER = TRUE;
-        else options.GLACIER = FALSE;
+        if(strcasecmp("DYNAMIC", flgstr) == 0) {
+          options.GLACIER = GL_DYNAMIC;
+        }
+        else if(strcasecmp("SCALING", flgstr) == 0) {
+          options.GLACIER = GL_SCALING;
+        }
+        else if(strcasecmp("FALSE", flgstr) == 0) {
+          options.GLACIER = FALSE;
+        }
+        else {
+          nrerror("Unknown value for GLACIER Option, valid values are DYNAMIC, SCALING, or FALSE");
+        }
       }
 
       /*************************************

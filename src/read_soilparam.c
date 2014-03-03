@@ -201,14 +201,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
       sscanf(token, "%d", &temp.gridcel);
 
-    token = strtok (NULL, delimiters);
-    while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
-    if( token == NULL ) {
-      sprintf(ErrStr,"ERROR: Can't find values for GLACIER CELL NUMBER in soil file\n");
-      nrerror(ErrStr);
-    }  
-    sscanf(token, "%d", &temp.glcel);
-
       token = strtok (NULL, delimiters);
       while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
       if( token == NULL ) {
@@ -608,6 +600,16 @@ soil_con_struct read_soilparam(FILE *soilparam,
       }
       sscanf(token, "%d", &tempint);
       temp.FS_ACTIVE = (char)tempint;
+
+    if(options.GLACIER > 0) {
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+        if( token == NULL ) {
+          sprintf(ErrStr,"ERROR: Can't find values for GLACIER CELL NUMBER in soil file\n");
+          nrerror(ErrStr);
+        }  
+      sscanf(token, "%d", &temp.glcel);
+    }
 
       /* read minimum snow depth for full coverage */
       if (options.SPATIAL_SNOW) {

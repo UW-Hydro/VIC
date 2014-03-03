@@ -189,6 +189,11 @@
 /***** Baseflow parametrizations *****/
 #define ARNO        0
 #define NIJSSEN2001 1
+       
+/***** Glacier parametrizations *****/
+// FALSE == 0
+#define GL_DYNAMIC 1
+#define GL_SCALING 2
 
 /***** Aerodynamic Resistance options *****/
 #define AR_406      0
@@ -268,6 +273,10 @@ extern char ref_veg_ref_crop[];
 #define HOURSPERYEAR  24*365    /* number of hours per year */
 #define SECPHOUR     3600	/* seconds per hour */
 #define SEC_PER_DAY 86400.	/* seconds per day */
+
+/***** Length Constants *****/
+#define MMPERMETER 1000.0
+#define MPERKILOMETER 1000.0
 
 /***** Physical Constants *****/
 #define RESID_MOIST      0.0        /* define residual moisture content 
@@ -406,6 +415,11 @@ extern char ref_veg_ref_crop[];
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
 #define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
+
+/***** Glacier Constraints *****/
+#define BAHR_C 0.033            /* V-A Scaling Coeficient */
+#define BAHR_LAMBDA 1.375       /* V-A Scaling Exponent */
+#define BAHR_T 788940000.0      /* Time Scaling Constant ~25yrs (secs) */
 
 /***** Define Boolean Values *****/
 #ifndef FALSE
@@ -860,7 +874,9 @@ typedef struct {
 				   output files are used (for backwards-compatibility); if outfiles and
 				   variables are explicitly mentioned in global parameter file, this option
 				   is ignored. */
-  char GLACIER;          /* TRUE = run glacier flow model */
+  char GLACIER;          /* DYNAMIC = run glacier flow model in DYNAMIC mode,
+                            SCALING = run glacier flow model in Volume-Area scaling mode,
+                            FALSE = do not run glacier model */
 
 } option_struct;
 

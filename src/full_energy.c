@@ -457,13 +457,17 @@ int  full_energy(char                 NEWCELL,
   } /** end of vegetation loop **/
 
   /******************************* Glacier flow model ***************************/
-  if (options.GLACIER) {
+  if(options.GLACIER == GL_DYNAMIC && soil_con->glcel) {
     if(dmy[rec].day == 1){
       ErrorFlag = gl_flow (snow, soil_con, veg_con, options.SNOW_BAND);
       if ( ErrorFlag == ERROR ) return ( ERROR );
       }
-    } // end of glacier model
-
+  }
+  else if(options.GLACIER == GL_SCALING && soil_con->glcel) {
+    ErrorFlag = gl_volume_area (snow, soil_con, veg_con, options.SNOW_BAND, gp->dt);
+    if ( ErrorFlag == ERROR ) return ( ERROR );
+  }
+  /******************************* Glacier flow model ***************************/
 
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);

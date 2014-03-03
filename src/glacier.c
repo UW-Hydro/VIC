@@ -8,8 +8,8 @@ static char vcid[] = "$Id: gl_flow.c,v 5.12.2.20 2013/10/7 03:45:12 vicadmin Exp
 
 int gl_flow(snow_data_struct    **snow,
             soil_con_struct     *soil_con,
-	          veg_con_struct      *veg_con,
-            int Nbands)
+	        veg_con_struct      *veg_con,
+            int                 Nbands)
 
 /**********************************************************************
 	gl_flow      Bibi S. Naz	October 07, 2013
@@ -102,7 +102,7 @@ int gl_flow(snow_data_struct    **snow,
 		}
 	    }
 	  // calculate the flux out of the cell
-	  if (band > 0)     // above the valley bottom
+	  if(band > 0)     // above the valley bottom
 	    {
 	      gradlo=(soil_con->BandElev[band]-soil_con->BandElev[band-1])/Lvert;
 	      Hlo = (snow[iveg][band].iwq + snow[iveg][band-1].iwq)/2;
@@ -158,7 +158,8 @@ int gl_flow(snow_data_struct    **snow,
 int gl_volume_area(snow_data_struct    **snow,
                    soil_con_struct     *soil_con,
                    veg_con_struct      *veg_con,
-                   int Nbands)
+                   int                 Nbands,
+                   int                 dt)  // hours
 
 /**********************************************************************
     gl_volume_area      Joe Hamman    February 26, 2014
@@ -172,14 +173,61 @@ int gl_volume_area(snow_data_struct    **snow,
 {
   int                    iveg;
   int                    band;
-  
+  int                    bot_band;
+  double                 cell_area;         // km2
+  double                 tile_area;         // km2
+  double                 ice_vol;           // km3
+  double                 ice_area_old;      // km2
+  double                 ice_area_temp;     // km2
+  double                 ice_area_new;      // km2
+  double                 cum_area;          // km2
+  double                 iwe_final;         // mm
+  double                 stepsize;          // seconds
+
+  cell_area = soil_con->cell_area / MMPERMETER / MPERKILOMETER; // m2 --> km2
+  stepsize = dt * SECPHOUR;
+
   for(iveg = 0; iveg <= veg_con[0].vegetat_type_num; iveg++){
     if (veg_con[iveg].Cv > 0.0) {
-      // find the highest ice
-      for (band = 0; band <=Nbands; band++) {   
-        printf("gl_area=%f\n", snow[iveg][band].iwq);
+      // find total ice volume in veg tile
+      tile_area = veg_con[iveg].Cv * cell_area;
+      ice_vol = 0.0;
+      ice_area_old = 0.0;
+      for (band = 0; band <=Nbands; band++) {
+        ice_vol += (snow[iveg][band].iwq / MMPERMETER / MPERKILOMETER) * veg_con[iveg].Cv * soil_con->AreaFract[band];
+        ice_area_old += soil_con->AreaFract[band];
       }
+      // ice_vol in km3 and ice_area in km2
+      if (ice_vol > 0) {
+          ice_vol *= cell_area;
+          ice_area_old *= veg_con[iveg].Cv * cell_area;
+        
+        // find new ice area
+        ice_area_temp = pow((ice_vol / BAHR_C), (1 / BAHR_LAMBDA));
 
+        // add time scaling here
+        ice_area_new = ice_area_temp + (ice_area_old - ice_area_temp) * exp(dt/BAHR_T);
+
+        // Make sure the area isn't too big
+        if (ice_area_new > tile_area){
+            printf("Area of Glacier exceeds vegetation tile area.  Setting Glacier area to tile area");
+            ice_area_new = cell_area;
+        }
+
+        // determine where the ice belongs
+        cum_area = 0.0;
+        bot_band = -1;
+        while (cum_area < ice_area_temp){
+            bot_band += 1;
+            cum_area += soil_con->AreaFract[bot_band];
+        }
+
+        // spread ice over bands
+        iwe_final = ice_vol / cum_area * MMPERMETER * MPERKILOMETER;
+        for (band = 0; band <=bot_band; band++) {
+            snow[iveg][band].iwq = iwe_final;
+        }
+      }
     } /** end current vegetation type **/
   } /** end of vegetation loop **/
   return(0);

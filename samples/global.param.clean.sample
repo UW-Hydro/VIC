@@ -41,7 +41,6 @@ FROZEN_SOIL         FALSE
 # Precip (Rain and Snow) Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
-#SNOW_ALBEDO        USACE
 #SNOW_DENSITY       DENS_BRAS
 #BLOWING            FALSE
 #GLACIER            FALSE  

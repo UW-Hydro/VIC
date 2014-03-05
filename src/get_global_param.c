@@ -284,11 +284,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.EXP_TRANS=TRUE;
         else options.EXP_TRANS = FALSE;
       }
-      else if (strcasecmp("SNOW_ALBEDO", optstr)==0) {
-        sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("SUN1999",flgstr)==0) options.SNOW_ALBEDO=SUN1999;
-        else options.SNOW_ALBEDO = USACE;
-      }
       else if (strcasecmp("SNOW_DENSITY", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;

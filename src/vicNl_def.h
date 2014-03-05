@@ -178,10 +178,6 @@
 #define ASCII 1
 #define BINARY 2
 
-/***** Snow Albedo parametrizations *****/
-#define USACE   0
-#define SUN1999 1
-
 /***** Snow Density parametrizations *****/
 #define DENS_BRAS   0
 #define DENS_SNTHRM 1
@@ -813,7 +809,6 @@ typedef struct {
 			    iteration, but explicit finite difference
 			    method for final step. */
   char   SHARE_LAYER_MOIST; /* TRUE = transpiration in moisture-limited layers can draw from other layers (default) */
-  char   SNOW_ALBEDO;    /* USACE: Use algorithm of US Army Corps of Engineers, 1956; SUN1999: Use algorithm of Sun et al., JGR, 1999 */
   char   SNOW_DENSITY;   /* DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
   int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
 			    snow model */

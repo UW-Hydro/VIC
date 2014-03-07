@@ -184,7 +184,7 @@ int gl_volume_area(snow_data_struct    **snow,
   double                 iwe_final;         // mm
   double                 stepsize;          // seconds
 
-  cell_area = soil_con->cell_area / MMPERMETER / MPERKILOMETER; // m2 --> km2
+  cell_area = soil_con->cell_area / MPERKILOMETER / MPERKILOMETER; // m2 --> km2
   stepsize = dt * SECPHOUR;
 
   for(iveg = 0; iveg <= veg_con[0].vegetat_type_num; iveg++){
@@ -195,35 +195,37 @@ int gl_volume_area(snow_data_struct    **snow,
       ice_area_old = 0.0;
       for (band = 0; band <=Nbands; band++) {
         ice_vol += (snow[iveg][band].iwq / MMPERMETER / MPERKILOMETER) * veg_con[iveg].Cv * soil_con->AreaFract[band];
-        ice_area_old += soil_con->AreaFract[band];
+        if (snow[iveg][band].iwq > 0.0){
+            ice_area_old += soil_con->AreaFract[band] * veg_con[iveg].Cv ;
+        }
       }
-      // ice_vol in km3 and ice_area in km2
+      
       if (ice_vol > 0) {
+          // ice_vol in km3 and ice_area in km2
           ice_vol *= cell_area;
           ice_area_old *= veg_con[iveg].Cv * cell_area;
         
         // find new ice area
         ice_area_temp = pow((ice_vol / BAHR_C), (1 / BAHR_LAMBDA));
 
-        // add time scaling here
+        // time scaling
         ice_area_new = ice_area_temp + (ice_area_old - ice_area_temp) * exp(dt/BAHR_T);
 
         // Make sure the area isn't too big
         if (ice_area_new > tile_area){
-            printf("Area of Glacier exceeds vegetation tile area.  Setting Glacier area to tile area");
-            ice_area_new = cell_area;
+            ice_area_new = tile_area;
         }
 
         // determine where the ice belongs
         cum_area = 0.0;
         bot_band = -1;
-        while (cum_area < ice_area_temp){
+        while (cum_area < ice_area_new && bot_band < Nbands){
             bot_band += 1;
-            cum_area += soil_con->AreaFract[bot_band];
-        }
+            cum_area += soil_con->AreaFract[bot_band] * cell_area * veg_con[iveg].Cv;
+        } 
 
         // spread ice over bands
-        iwe_final = ice_vol / cum_area * MMPERMETER * MPERKILOMETER;
+        iwe_final = ice_vol / cum_area * MPERKILOMETER * MPERKILOMETER;
         for (band = 0; band <=bot_band; band++) {
             snow[iveg][band].iwq = iwe_final;
         }

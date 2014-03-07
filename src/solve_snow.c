@@ -403,17 +403,19 @@ double solve_snow(char                 overstory,
 	  snow->density = snow_density(snow, snowfall[WET], old_swq, Tgrnd, air_temp, (double)dt);
 
     /*****************Snow to ice conversion*******************/
-    maxdens = 910;
-    if(soil_con->glcel == 1 &&  snow->iwq > 0 && snow->density > 700 && snow->density <= 910){
+    if(options.GLACIER > 0 && soil_con->glcel == 1 &&  snow->swq > 0.0){
       maxdens = 2 * snow->density  - (double)NEW_SNOW_DENSITY;
-      if(maxdens > 700){
+      if(maxdens > SNOWICE_THRESH){
+        // InitialSwq = snow->swq;
+        // InitialIwq = snow->iwq;
         slopedens = (maxdens -  (double)NEW_SNOW_DENSITY)/snow->depth;
         snowdepth = snow->depth - ((snow->density - (double)NEW_SNOW_DENSITY)/slopedens);
-        snowice = (snow->depth - snowdepth) * ((maxdens - 700)/2)*1000.;
+        snowice = (snow->depth - snowdepth) * ((maxdens - SNOWICE_THRESH)/2)/(double)h20_density;
         if(snowice > 0. && snow->swq > snowice){
           snow->iwq += snowice;
           snow->swq -=snowice;
           snow->density = (snow->density + (double)NEW_SNOW_DENSITY)/2;
+          // MassBalanceError = (InitialSwq + InitialIwq) - (snow->swq + snow->iwq);
         }
       }
     } // end of snow to ice conversion  

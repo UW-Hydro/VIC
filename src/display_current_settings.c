@@ -249,10 +249,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
   else
     fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
-  if (options.SNOW_ALBEDO == USACE)
-    fprintf(stderr,"SNOW_ALBEDO\t\tUSACE\n");
-  else if (options.SNOW_ALBEDO == SUN1999)
-    fprintf(stderr,"SNOW_ALBEDO\t\tSUN1999\n");
   if (options.SNOW_DENSITY == DENS_BRAS)
     fprintf(stderr,"SNOW_DENSITY\t\tDENS_BRAS\n");
   else if (options.SNOW_DENSITY == DENS_SNTHRM)

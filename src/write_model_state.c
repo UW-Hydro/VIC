@@ -301,7 +301,8 @@ void write_model_state(dist_prcp_struct    *prcp,
 	fwrite( &snow[veg][band].last_snow, sizeof(int), 1, filep->statefile );
 	fwrite( &snow[veg][band].MELTING, sizeof(char), 1, filep->statefile );
 	fwrite( &snow[veg][band].coverage, sizeof(double), 1, filep->statefile );
-	fwrite( &snow[veg][band].swq, sizeof(double), 1, filep->statefile );
+  fwrite( &snow[veg][band].swq, sizeof(double), 1, filep->statefile );
+  fwrite( &snow[veg][band].iwq, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].surf_temp, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].surf_water, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].pack_temp, sizeof(double), 1, filep->statefile );
@@ -311,9 +312,9 @@ void write_model_state(dist_prcp_struct    *prcp,
 	fwrite( &snow[veg][band].snow_canopy, sizeof(double), 1, filep->statefile );
       }
       else {
-	fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f", 
+	fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f %f", 
 		 snow[veg][band].last_snow, (int)snow[veg][band].MELTING, 
-		 snow[veg][band].coverage, snow[veg][band].swq, 
+     snow[veg][band].coverage, snow[veg][band].swq, snow[veg][band].iwq, 
 		 snow[veg][band].surf_temp, snow[veg][band].surf_water, 
 		 snow[veg][band].pack_temp, snow[veg][band].pack_water, 
 		 snow[veg][band].density, snow[veg][band].coldcontent, 

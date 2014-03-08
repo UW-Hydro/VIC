@@ -941,8 +941,9 @@ void collect_wb_terms(cell_data_struct  cell,
     Record Snow Pack Variables 
   *****************************/
   
-  /** record snow water equivalence **/
+  /** record snow and ice water equivalence **/
   out_data[OUT_SWE].data[0] += snow.swq * AreaFactor * 1000.;
+  out_data[OUT_IWE].data[0] += snow.iwq * AreaFactor * 1000.;
   
   /** record snowpack depth **/
   out_data[OUT_SNOW_DEPTH].data[0] += snow.depth * AreaFactor * 100.;
@@ -963,6 +964,9 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record snow cover fraction **/
   out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
+
+  /** record snow pack density **/
+  out_data[OUT_SNOW_DENSITY].data[0] += snow.density * AreaFactor;
 
   /*****************************
     Record Carbon Cycling Variables 
@@ -1175,6 +1179,9 @@ void collect_eb_terms(energy_bal_struct energy,
   /** record band snowpack depth **/
   out_data[OUT_SNOW_DEPTH_BAND].data[band] += snow.depth * Cv * lakefactor * 100.;
 
+  /** record band snowpack density **/
+  out_data[OUT_SNOW_DENS_BAND].data[band] += snow.density * Cv * lakefactor;
+  
   /** record band iwe water equivalent **/
   out_data[OUT_IWE_BAND].data[band] += snow.iwq * Cv * 1000.;
   out_data[OUT_BN_BAND].data[band] += snow.bn * Cv * 1000.;

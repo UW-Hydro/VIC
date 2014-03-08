@@ -610,6 +610,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
         }  
       sscanf(token, "%d", &temp.glcel);
     }
+    else {
+      temp.glcel = 0;
+    }
 
       /* read minimum snow depth for full coverage */
       if (options.SPATIAL_SNOW) {

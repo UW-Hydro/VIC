@@ -187,7 +187,6 @@
 #define NIJSSEN2001 1
        
 /***** Glacier parametrizations *****/
-// FALSE == 0
 #define GL_DYNAMIC 1
 #define GL_SCALING 2
 
@@ -277,7 +276,8 @@ extern char ref_veg_ref_crop[];
 /***** Physical Constants *****/
 #define RESID_MOIST      0.0        /* define residual moisture content 
 				       of soil column */
-#define ice_density      917.	    /* density of ice (kg/m^3) */
+#define ice_density      917.     /* density of ice (kg/m^3) */
+#define h20_density      1000.    /* density of water at 4degC (kg/m^3) */
 #define T_lapse          6.5        /* temperature lapse rate of US Std 
 				       Atmos in C/km */
 #define von_K        0.40	/* Von Karman constant for evapotranspiration */
@@ -416,6 +416,7 @@ extern char ref_veg_ref_crop[];
 #define BAHR_C 0.033            /* V-A Scaling Coeficient */
 #define BAHR_LAMBDA 1.375       /* V-A Scaling Exponent */
 #define BAHR_T 788940000.0      /* Time Scaling Constant ~25yrs (secs) */
+#define SNOWICE_THRESH 700.    /* kg/m3 */ 
 
 /***** Define Boolean Values *****/
 #ifndef FALSE
@@ -468,7 +469,7 @@ extern char ref_veg_ref_crop[];
 #define SKIP      26 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 180
+#define N_OUTVAR_TYPES 185
 // Water Balance Terms - state variables
 #define OUT_ASAT             0  /* Saturated Area Fraction */
 #define OUT_LAKE_AREA_FRAC   1  /* lake surface area as fraction of the grid cell area [fraction] */
@@ -650,6 +651,8 @@ extern char ref_veg_ref_crop[];
 #define OUT_GLQOUT_BAND    170
 #define OUT_GLQIN_BAND     171
 #define OUT_BN_BAND        172
+#define OUT_SNOW_DENSITY   173
+#define OUT_SNOW_DENS_BAND 174
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */

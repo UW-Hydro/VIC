@@ -96,7 +96,7 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"Maximum Array Sizes:\n");
   fprintf(stderr,"MAX_BANDS\t\t%2d\n",MAX_BANDS);
   fprintf(stderr,"MAX_FRONTS\t\t%2d\n",MAX_FRONTS);
-  fprintf(stderr,"MAX_FROST_AREAS\t\t\t%2d\n",MAX_FROST_AREAS);
+  fprintf(stderr,"MAX_FROST_AREAS\t\t%2d\n",MAX_FROST_AREAS);
   fprintf(stderr,"MAX_LAKE_NODES\t\t%2d\n",MAX_LAKE_NODES);
   fprintf(stderr,"MAX_LAYERS\t\t%2d\n",MAX_LAYERS);
   fprintf(stderr,"MAX_NODES\t\t%2d\n",MAX_NODES);
@@ -148,25 +148,25 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Simulation Parameters:\n");
   if (options.AERO_RESIST_CANSNOW == AR_406)
-    fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_406\n");
+    fprintf(stderr,"AERO_RESIST_CANSNOW\tAR_406\n");
   else if (options.AERO_RESIST_CANSNOW == AR_406_LS)
-    fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_406_LS\n");
+    fprintf(stderr,"AERO_RESIST_CANSNOW\tAR_406_LS\n");
   else if (options.AERO_RESIST_CANSNOW == AR_406_FULL)
-    fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_406_FULL\n");
+    fprintf(stderr,"AERO_RESIST_CANSNOW\tAR_406_FULL\n");
   else if (options.AERO_RESIST_CANSNOW == AR_410)
-    fprintf(stderr,"AERO_RESIST_CANSNOW\t\tAR_410\n");
+    fprintf(stderr,"AERO_RESIST_CANSNOW\tAR_410\n");
   if (options.BLOWING)
     fprintf(stderr,"BLOWING\t\t\tTRUE\n");
   else
     fprintf(stderr,"BLOWING\t\t\tFALSE\n");
   if (options.CLOSE_ENERGY)
-    fprintf(stderr,"CLOSE_ENERGY\t\t\tTRUE\n");
+    fprintf(stderr,"CLOSE_ENERGY\t\tTRUE\n");
   else
-    fprintf(stderr,"CLOSE_ENERGY\t\t\tFALSE\n");
+    fprintf(stderr,"CLOSE_ENERGY\t\tFALSE\n");
   if (options.COMPUTE_TREELINE)
-    fprintf(stderr,"COMPUTE_TREELINE\t\tTRUE\n");
+    fprintf(stderr,"COMPUTE_TREELINE\tTRUE\n");
   else
-    fprintf(stderr,"COMPUTE_TREELINE\t\tFALSE\n");
+    fprintf(stderr,"COMPUTE_TREELINE\tFALSE\n");
   if (options.CONTINUEONERROR == TRUE)
     fprintf(stderr,"CONTINUEONERROR\t\tTRUE\n");
   else
@@ -191,10 +191,12 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"FULL_ENERGY\t\tTRUE\n");
   else
     fprintf(stderr,"FULL_ENERGY\t\tFALSE\n");
-  if (options.GLACIER)
-    fprintf(stderr,"GLACIER\t\tTRUE\n");
+  if (options.GLACIER == GL_DYNAMIC)
+    fprintf(stderr,"GLACIER\t\t\tDYNAMIC\n");
+  else if (options.GLACIER == GL_SCALING)
+    fprintf(stderr,"GLACIER\t\t\tSCALING\n");
   else
-    fprintf(stderr,"GLACIER\t\tFALSE\n");
+    fprintf(stderr,"GLACIER\t\t\tFALSE\n");
   if (options.GRND_FLUX_TYPE == GF_406)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)
@@ -204,17 +206,17 @@ void display_current_settings(int                 mode,
   else
     fprintf(stderr,"LOG_MATRIC\t\tFALSE\n");
   if (options.LW_TYPE == LW_TVA)
-    fprintf(stderr,"LW_TYPE\t\tLW_TVA\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_TVA\n");
   else if (options.LW_TYPE == LW_ANDERSON)
-    fprintf(stderr,"LW_TYPE\t\tLW_ANDERSON\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_ANDERSON\n");
   else if (options.LW_TYPE == LW_BRUTSAERT)
-    fprintf(stderr,"LW_TYPE\t\tLW_BRUTSAERT\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_BRUTSAERT\n");
   else if (options.LW_TYPE == LW_SATTERLUND)
-    fprintf(stderr,"LW_TYPE\t\tLW_SATTERLUND\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_SATTERLUND\n");
   else if (options.LW_TYPE == LW_IDSO)
-    fprintf(stderr,"LW_TYPE\t\tLW_IDSO\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_IDSO\n");
   else if (options.LW_TYPE == LW_PRATA)
-    fprintf(stderr,"LW_TYPE\t\tLW_PRATA\n");
+    fprintf(stderr,"LW_TYPE\t\t\tLW_PRATA\n");
   if (options.LW_CLOUD == LW_CLOUD_DEARDORFF)
     fprintf(stderr,"LW_CLOUD\t\tLW_CLOUD_DEARDORFF\n");
   else
@@ -232,9 +234,9 @@ void display_current_settings(int                 mode,
   else
     fprintf(stderr,"MTCLIM_SWE_CORR\t\tFALSE\n");
   if (options.PLAPSE)
-    fprintf(stderr,"PLAPSE\t\tTRUE\n");
+    fprintf(stderr,"PLAPSE\t\t\tTRUE\n");
   else
-    fprintf(stderr,"PLAPSE\t\tFALSE\n");
+    fprintf(stderr,"PLAPSE\t\t\tFALSE\n");
   if (options.QUICK_FLUX)
     fprintf(stderr,"QUICK_FLUX\t\tTRUE\n");
   else
@@ -267,13 +269,13 @@ void display_current_settings(int                 mode,
   else
     fprintf(stderr,"VP_INTERP\t\tFALSE\n");
   if (options.VP_ITER == VP_ITER_NONE)
-    fprintf(stderr,"VP_ITER\t\tVP_ITER_NONE\n");
+    fprintf(stderr,"VP_ITER\t\t\tVP_ITER_NONE\n");
   else if (options.VP_ITER == VP_ITER_ALWAYS)
-    fprintf(stderr,"VP_ITER\t\tVP_ITER_ALWAYS\n");
+    fprintf(stderr,"VP_ITER\t\t\tVP_ITER_ALWAYS\n");
   else if (options.VP_ITER == VP_ITER_ANNUAL)
-    fprintf(stderr,"VP_ITER\t\tVP_ITER_ANNUAL\n");
+    fprintf(stderr,"VP_ITER\t\t\tVP_ITER_ANNUAL\n");
   else if (options.VP_ITER == VP_ITER_CONVERGE)
-    fprintf(stderr,"VP_ITER\t\tVP_ITER_CONVERGE\n");
+    fprintf(stderr,"VP_ITER\t\t\tVP_ITER_CONVERGE\n");
   fprintf(stderr,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
   fprintf(stderr,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stderr,"MEASURE_H\t\t%f\n",global->measure_h);
@@ -282,14 +284,14 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
   fprintf(stderr,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
   if (options.CARBON == TRUE)
-    fprintf(stderr,"CARBON\t\tTRUE\n");
+    fprintf(stderr,"CARBON\t\t\tTRUE\n");
   else
-    fprintf(stderr,"CARBON\t\tFALSE\n");
+    fprintf(stderr,"CARBON\t\t\tFALSE\n");
   if (options.SHARE_LAYER_MOIST == TRUE)
-    fprintf(stderr,"SHARE_LAYER_MOIST\t\tTRUE\n");
+    fprintf(stderr,"SHARE_LAYER_MOIST\tTRUE\n");
   else
-    fprintf(stderr,"SHARE_LAYER_MOIST\t\tFALSE\n");
-  fprintf(stderr,"Ncanopy\t\t%d\n",options.Ncanopy);
+    fprintf(stderr,"SHARE_LAYER_MOIST\tFALSE\n");
+  fprintf(stderr,"Ncanopy\t\t\t%d\n",options.Ncanopy);
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Forcing Data:\n");
@@ -332,9 +334,9 @@ void display_current_settings(int                 mode,
   else if (options.BASEFLOW == NIJSSEN2001)
     fprintf(stderr,"BASEFLOW\t\tNIJSSEN2001\n");
   if (options.JULY_TAVG_SUPPLIED)
-    fprintf(stderr,"JULY_TAVG_SUPPLIED\t\tTRUE\n");
+    fprintf(stderr,"JULY_TAVG_SUPPLIED\tTRUE\n");
   else
-    fprintf(stderr,"JULY_TAVG_SUPPLIED\t\tFALSE\n");
+    fprintf(stderr,"JULY_TAVG_SUPPLIED\tFALSE\n");
   if (options.ORGANIC_FRACT)
     fprintf(stderr,"ORGANIC_FRACT\t\tTRUE\n");
   else
@@ -354,9 +356,9 @@ void display_current_settings(int                 mode,
   else
     fprintf(stderr,"VEGPARAM_LAI\t\tFALSE\n");
   if (options.LAI_SRC == LAI_FROM_VEGPARAM)
-    fprintf(stderr,"LAI_SRC\t\tLAI_FROM_VEGPARAM\n");
+    fprintf(stderr,"LAI_SRC\t\t\tLAI_FROM_VEGPARAM\n");
   else if (options.LAI_SRC == LAI_FROM_VEGLIB)
-    fprintf(stderr,"LAI_SRC\t\tLAI_FROM_VEGLIB\n");
+    fprintf(stderr,"LAI_SRC\t\t\tLAI_FROM_VEGLIB\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Elevation Data:\n");
@@ -370,9 +372,9 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Lake Data:\n");
   if (options.LAKES)
-    fprintf(stderr,"LAKES\t\tTRUE\t%s\n",names->lakeparam);
+    fprintf(stderr,"LAKES\t\t\tTRUE\t%s\n",names->lakeparam);
   else
-    fprintf(stderr,"LAKES\t\tFALSE\n");
+    fprintf(stderr,"LAKES\t\t\tFALSE\n");
   if (options.LAKE_PROFILE)
     fprintf(stderr,"LAKE_PROFILE\t\tTRUE\n");
   else

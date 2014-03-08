@@ -325,6 +325,9 @@ void read_initial_model_state(FILE                *init_state,
 	if ( fread( &snow[veg][band].swq, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
+  if ( fread( &snow[veg][band].iwq, sizeof(double), 1, 
+        init_state ) != 1 )
+    nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].surf_temp, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
@@ -348,9 +351,9 @@ void read_initial_model_state(FILE                *init_state,
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+	if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
 		    &snow[veg][band].last_snow, &tmp_char,
-		    &snow[veg][band].coverage, &snow[veg][band].swq, 
+		    &snow[veg][band].coverage, &snow[veg][band].swq, &snow[veg][band].iwq,
 		    &snow[veg][band].surf_temp, &snow[veg][band].surf_water, 
 		    &snow[veg][band].pack_temp, &snow[veg][band].pack_water, 
 		    &snow[veg][band].density, &snow[veg][band].coldcontent, 
@@ -359,10 +362,6 @@ void read_initial_model_state(FILE                *init_state,
 	  nrerror("End of model state file found unexpectedly");
 	snow[veg][band].MELTING = (char)tmp_char;
       }
-      //   if(soil_con->glcel == 1)    /* By Bibi */
-      // snow[veg][band].iwq = soil_con->BandIceThick[band] * (917.0 / 1000.);
-      // else
-      // snow[veg][band].iwq = 0.0;
 
       if(snow[veg][band].density > 0.) 
 	snow[veg][band].depth = 1000. * snow[veg][band].swq 

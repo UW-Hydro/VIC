@@ -97,6 +97,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SURFSTOR].varname,"OUT_SURFSTOR");               /* storage of liquid water on surface (ponding) [mm] */
   strcpy(out_data[OUT_SURF_FROST_FRAC].varname,"OUT_SURF_FROST_FRAC"); /* fraction of soil surface that is frozen [fraction] */
   strcpy(out_data[OUT_SWE].varname,"OUT_SWE");                         /* snow water equivalent in snow pack [mm] */
+  strcpy(out_data[OUT_SNOW_DENSITY].varname,"OUT_SNOW_DENSITY");       /* density of snow pack [kg/m3] */
   strcpy(out_data[OUT_IWE].varname,"OUT_IWE");                         /* ice water equivalent in glacier pack [mm] */
   strcpy(out_data[OUT_WDEW].varname,"OUT_WDEW");                       /* total moisture interception storage in canopy [mm] */
   strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                         /* water table position [cm] (zwt within lowest unsaturated layer) */
@@ -253,6 +254,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SNOW_PACKT_BAND].varname,"OUT_SNOW_PACKT_BAND");           /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SNOW_SURFT_BAND].varname,"OUT_SNOW_SURFT_BAND");           /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SWE_BAND].varname,"OUT_SWE_BAND");                         /* snow water equivalent in snow pack [mm] */
+  strcpy(out_data[OUT_SNOW_DENS_BAND].varname,"OUT_SNOW_DENS_BAND");       /* density of snow pack [kg/m3] */
   strcpy(out_data[OUT_IWE_BAND].varname,"OUT_IWE_BAND");                         /* ice water equivalent in snow pack [mm] */
   strcpy(out_data[OUT_BN_BAND].varname,"OUT_BN_BAND");                           /* glacier mas balance [mm] */
   strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                                   /* depth to water table [m] */
@@ -297,6 +299,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_PACKT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_SURFT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SWE_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_SNOW_DENS_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_IWE_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_BN_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_GLQOUT_BAND].nelem = options.SNOW_BAND;
@@ -331,6 +334,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURFSTOR].aggtype = AGG_TYPE_END;
   out_data[OUT_SURF_FROST_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DENSITY].aggtype = AGG_TYPE_END;
   out_data[OUT_IWE].aggtype = AGG_TYPE_END;
   out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
   out_data[OUT_ZWT].aggtype = AGG_TYPE_END;
@@ -339,6 +343,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DENS_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_IWE_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_BN_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;

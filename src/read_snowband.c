@@ -41,6 +41,7 @@ void read_snowband(FILE    *snowband,
   double  band_slope;
   double  band_thick;
   float   avg_elev;
+  double  last_elev;
 
   Nbands         = options.SNOW_BAND;
 
@@ -83,11 +84,19 @@ void read_snowband(FILE    *snowband,
     for ( band = 0; band < Nbands; band++ ) {
       fscanf(snowband, "%f", &band_elev);
       if ( band_elev < 0 ) {
-	fprintf(stderr,"Negative snow band elevation (%f) read from file\n", 
-		band_elev);
+	      fprintf(stderr,"Negative snow band elevation (%f) read from file\n", 
+		            band_elev);
+      }
+      /* Make sure the bands are ordered from high to low */
+      if(options.GLACIER > 0 && band > 0) {
+        if (band_elev > last_elev && soil_con->AreaFract[band] > 0.0){
+          fprintf(stderr,"Band elevations are not ordered from high to low\n");
+          nrerror(ErrStr);
+        }
       }
       soil_con->BandElev[band] = band_elev;
       avg_elev += soil_con->BandElev[band]*soil_con->AreaFract[band];
+      last_elev = band_elev;
     }
     if (fabs(avg_elev-soil_con->elevation) > 1.0) {
       fprintf(stderr,"Warning: average band elevation %f not equal to grid_cell average elevation %f; setting grid cell elevation to average band elevation.\n", avg_elev, soil_con->elevation);

@@ -601,7 +601,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
       sscanf(token, "%d", &tempint);
       temp.FS_ACTIVE = (char)tempint;
 
-    if(options.GLACIER > 0) {
       token = strtok (NULL, delimiters);
       while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
         if( token == NULL ) {
@@ -609,10 +608,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
           nrerror(ErrStr);
         }  
       sscanf(token, "%d", &temp.glcel);
-    }
-    else {
-      temp.glcel = 0;
-    }
 
       /* read minimum snow depth for full coverage */
       if (options.SPATIAL_SNOW) {

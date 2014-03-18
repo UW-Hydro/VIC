@@ -160,6 +160,7 @@ else {
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_CANOPY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_COVER", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DENSITY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   if (options.FULL_ENERGY || options.FROZEN_SOIL)  {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
@@ -177,6 +178,10 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SURFACE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
+  if (options.GLACIER > 0) {
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GLACIER_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+  }
 
   // Variables in other files
   if (options.FROZEN_SOIL) { 
@@ -193,6 +198,7 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DEPTH_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_CANOPY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SNOW_DENS_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     if (options.FULL_ENERGY) {
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_ADVECTION_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_DELTACC_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
@@ -205,6 +211,11 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LATENT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SENSIBLE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GRND_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    if (options.GLACIER > 0) {
+      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_BN_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+      set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GL_MELT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
+    }
   }
   if (options.LAKES) {
     filenum++;

@@ -260,6 +260,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                                   /* depth to water table [m] */
   strcpy(out_data[OUT_GLQOUT_BAND].varname,"OUT_GLQOUT_BAND");
   strcpy(out_data[OUT_GLQIN_BAND].varname,"OUT_GLQIN_BAND");
+  strcpy(out_data[OUT_GL_MELT_BAND].varname,"OUT_GL_MELT_BAND");
 
   // Set number of elements - default is 1
   for (v=0; v<N_OUTVAR_TYPES; v++) {
@@ -404,6 +405,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_GLQOUT_BAND].aggtype = AGG_TYPE_SUM;
   out_data[OUT_GLQIN_BAND].aggtype = AGG_TYPE_SUM;
   out_data[OUT_GLACIER_MELT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_GL_MELT_BAND].aggtype = AGG_TYPE_SUM;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

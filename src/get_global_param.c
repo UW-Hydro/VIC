@@ -104,6 +104,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
+  2014-Mar-24 Removed ARC_SOIL option         BN
 **********************************************************************/
 {
   extern option_struct    options;
@@ -167,7 +168,6 @@ global_param_struct get_global_param(filenames_struct *names,
   global.stateday      = MISSING;
   strcpy(names->statefile,    "MISSING");
   strcpy(names->soil,         "MISSING");
-  strcpy(names->soil_dir,     "MISSING");
   strcpy(names->veg,          "MISSING");
   strcpy(names->veglib,       "MISSING");
   strcpy(names->snowband,     "MISSING");
@@ -503,11 +503,11 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
-        else options.ARC_SOIL = FALSE;
-      }
-      else if(strcasecmp("SOIL_DIR",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->soil_dir);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          nrerror("\"ARC_SOIL\" is no longer a supported option.\n"
+                  "Please convert your soil parameter file and remove this option\n"
+                  "from your global file");
+        }
       }
       else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -796,8 +796,6 @@ global_param_struct get_global_param(filenames_struct *names,
   // Validate soil parameter file information
   if ( strcmp ( names->soil, "MISSING" ) == 0 )
     nrerror("No soil parameter file has been defined.  Make sure that the global file defines the soil parameter file on the line that begins with \"SOIL\".");
-  if (options.ARC_SOIL && strcmp ( names->soil_dir, "MISSING" ) == 0)
-    nrerror("\"ARC_SOIL\" was specified as TRUE, but no soil parameter directory (\"SOIL_DIR\") has been defined.  Make sure that the global file defines the soil parameter directory on the line that begins with \"SOIL_DIR\".");
 
   /*******************************************************************************
     Validate parameters required for normal simulations but NOT for OUTPUT_FORCE

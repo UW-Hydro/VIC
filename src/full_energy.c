@@ -395,7 +395,6 @@ int  full_energy(char                 NEWCELL,
       /******************************
         Solve ground surface fluxes 
       ******************************/
-      /* Bibi: be sure to specify input snowbands from high elevation to low. */
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
@@ -457,15 +456,15 @@ int  full_energy(char                 NEWCELL,
   } /** end of vegetation loop **/
 
   /******************************* Glacier flow model ***************************/
-  if(options.GLACIER == GL_DYNAMIC && soil_con->glcel) {
-    if(dmy[rec].day == 1){
+  if (options.GLACIER == GL_DYNAMIC && soil_con->glcel) {
+    if (dmy[rec].day == 1) {
       ErrorFlag = gl_flow (snow, soil_con, veg_con, options.SNOW_BAND);
-      if ( ErrorFlag == ERROR ) return ( ERROR );
+      if (ErrorFlag == ERROR) return (ERROR);
       }
   }
-  else if(options.GLACIER == GL_SCALING && soil_con->glcel) {
-    ErrorFlag = gl_volume_area (snow, soil_con, veg_con, options.SNOW_BAND, gp->dt);
-    if ( ErrorFlag == ERROR ) return ( ERROR );
+  else if (options.GLACIER == GL_SCALING && soil_con->glcel) {
+    ErrorFlag = gl_volume_area(snow, soil_con, veg_con, options.SNOW_BAND, gp->dt);
+    if (ErrorFlag == ERROR) return (ERROR);
   }
   /******************************* Glacier flow model ***************************/
 

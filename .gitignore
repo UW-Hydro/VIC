@@ -22,3 +22,5 @@ VIC.sublime-workspace
 *.sublime-workspace
 
 .DS_Store
+
+*.uncrustify

@@ -601,18 +601,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
       sscanf(token, "%d", &tempint);
       temp.FS_ACTIVE = (char)tempint;
 
-    if(options.GLACIER > 0) {
-      token = strtok (NULL, delimiters);
-      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
-        if( token == NULL ) {
+      token = strtok(NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok(NULL, delimiters);
+        if (token == NULL) {
           sprintf(ErrStr,"ERROR: Can't find values for GLACIER CELL NUMBER in soil file\n");
           nrerror(ErrStr);
         }  
-      sscanf(token, "%d", &temp.glcel);
-    }
-    else {
-      temp.glcel = 0;
-    }
+      sscanf(token, "%d", &tempint);
+      temp.glcel = (char)tempint;
 
       /* read minimum snow depth for full coverage */
       if (options.SPATIAL_SNOW) {
@@ -820,13 +816,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
         /** Set default values for factors to use unmodified forcing data **/
         for (band = 0; band < Nbands; band++) {
-          temp.AreaFract[band] = 0.;
-          temp.GlAreaFract[band] = 0.;
+          temp.AreaFract[band]    = 0.;
+          temp.GlAreaFract[band]  = 0.;
           temp.BandIceThick[band] = 0.;
           temp.BandSlope[band]    = 0.;
-          temp.BandElev[band]  = temp.elevation;
-          temp.Tfactor[band]   = 0.;
-          temp.Pfactor[band]   = 1.;
+          temp.BandElev[band]     = temp.elevation;
+          temp.Tfactor[band]      = 0.;
+          temp.Pfactor[band]      = 1.;
         }
         temp.AreaFract[0] = 1.;
 

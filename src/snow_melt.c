@@ -14,6 +14,7 @@
  * COMMENTS:     
  */
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -179,7 +180,6 @@ int  snow_melt(double            Le,
   double SnowMelt;               /* Amount of snow melt during time interval
                                    (m water equivalent) */
   double GLIceMelt;
-  double Glfractarea;
   double SurfaceCC;              /* Cold content of snow pack (J) */
   double SurfaceSwq;             /* Surface layer snow water equivalent (m) */
   double SnowFall;
@@ -191,15 +191,13 @@ int  snow_melt(double            Le,
   double sensible_heat;         
   double advected_sensible_heat;                
   double melt_energy = 0.;
-  double delswe, deliwe;
-  int    Nbands;
+  double delswe; 
+  double deliwe;
   char ErrorString[MAXSTRING];
  
-  Nbands = options.SNOW_BAND;
-  SnowFall = snowfall / 1000.; /* convet to m */
-  RainFall = rainfall / 1000.; /* convet to m */
+  SnowFall = snowfall / MMPERMETER; /* convet to m */
+  RainFall = rainfall / MMPERMETER; /* convet to m */
   GLIceMelt = 0.0;
-  //Glfractarea = snow->glarea;
   InitialIwq  = snow->iwq;
   InitialSwq  = snow->swq;
   (*OldTSurf) = snow->surf_temp;
@@ -228,7 +226,7 @@ int  snow_melt(double            Le,
     SnowFallCC = CH_ICE * SnowFall * air_temp;
   
   /* Distribute fresh snowfall */
-  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq) && (MAX_SURFACE_SWE - SurfaceSwq) > SMALL) {
+  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq)) { //&& (MAX_SURFACE_SWE - SurfaceSwq) > SMALL) {
     DeltaPackSwq = SurfaceSwq + SnowFall - MAX_SURFACE_SWE;
     if (DeltaPackSwq > SurfaceSwq)
       DeltaPackCC = SurfaceCC + (SnowFall - MAX_SURFACE_SWE)/SnowFall * SnowFallCC;
@@ -292,9 +290,8 @@ int  snow_melt(double            Le,
         SnowIce      += RefrozenWater;
         Ice          += RefrozenWater;
         snow->surf_water   -= RefrozenWater;
+        assert(snow->surf_water >= 0.0);
         SnowMelt      = 0.0;
-        if (snow->surf_water < 0.0) 
-          snow->surf_water = 0.0;
       }
       else {
         
@@ -475,7 +472,11 @@ int  snow_melt(double            Le,
         /*No Snowpack present, handle vapor fluxes on glacier surface */
           if(GlacierIce > 0.0){
             if (GlacierIce < -(snow->vapor_flux)) {
+
+              snow->blowing_flux *= -(GlacierIce) / snow->vapor_flux;
               snow->vapor_flux = -GlacierIce;
+              snow->surface_flux  = -GlacierIce - snow->blowing_flux;
+
               GlacierIce = 0.0;
               Ice = 0.0;
             }
@@ -485,42 +486,24 @@ int  snow_melt(double            Le,
             }
           }
         }
-        else{
-        if (SurfaceSwq < -(snow->vapor_flux)) {
-          // if vapor_flux exceeds SurfaceSwq, we not only need to
-          // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-          snow->surface_flux *= -( SurfaceSwq / snow->vapor_flux );
-          if(SurfaceSwq > SnowIce) {
+        else {
+          if (SurfaceSwq < -(snow->vapor_flux)) {
             snow->blowing_flux *= -(SurfaceSwq) / snow->vapor_flux;
             snow->vapor_flux    = -SurfaceSwq;
             snow->surface_flux  = -SurfaceSwq - snow->blowing_flux;
-            GlacierIce         -= SurfaceSwq - SnowIce;
-            Ice                 = GlacierIce;
-            SnowIce             = 0.0;
-          }
-        else {
-          snow->blowing_flux *= -(SurfaceSwq) / snow->vapor_flux;
-          snow->vapor_flux    = -SurfaceSwq;
-          snow->surface_flux  = -SurfaceSwq - snow->blowing_flux;
-          SurfaceSwq          = 0.0;
-          Ice                 = PackSwq + GlacierIce;
-          SnowIce             = PackSwq;
-        }
-        }
-        else {
-          SurfaceSwq += snow->vapor_flux;
-          if(SnowIce > -(snow->vapor_flux)){
-            SnowIce += snow->vapor_flux;
+
+            SurfaceSwq          = 0.0;
+            SnowIce             = PackSwq;
+            Ice                 = PackSwq + GlacierIce;
           }
           else {
-            GlacierIce += (snow->vapor_flux + SnowIce);
-            SnowIce = 0.;
+            SurfaceSwq += snow->vapor_flux;
+            SnowIce += snow->vapor_flux;
+            Ice = PackSwq + GlacierIce;
           }
-          Ice += snow->vapor_flux;
         }
       }
     }
-  }
   }
   else {
     snow->surf_temp = 999;
@@ -528,11 +511,8 @@ int  snow_melt(double            Le,
 
   /* Done with iteration etc, now Update the liquid water content of the
      surface layer */ 
-  if(SnowIce > SurfaceSwq)
-    MaxLiquidWater = LIQUID_WATER_CAPACITY * SurfaceSwq;
-  else
-    MaxLiquidWater = LIQUID_WATER_CAPACITY * SurfaceSwq;
-  if  (snow->surf_water > MaxLiquidWater) {
+  MaxLiquidWater = LIQUID_WATER_CAPACITY * SurfaceSwq;
+  if (snow->surf_water > MaxLiquidWater) {
     melt[0]          = snow->surf_water - MaxLiquidWater;
     snow->surf_water = MaxLiquidWater;
   }
@@ -626,7 +606,7 @@ int  snow_melt(double            Le,
   melt[0] += (GLIceMelt);
 
   snow->glmelt = GLIceMelt;
-  snow->icedepth = snow->iwq * (1000.0 / ice_density);
+  snow->icedepth = snow->iwq * (MMPERMETER / ice_density);
 
   if (snow->swq == 0.0) {
     snow->surf_temp = 0.0;
@@ -638,9 +618,12 @@ int  snow_melt(double            Le,
   
   /* Mass balance test */
   MassBalanceError = (InitialSwq - snow->swq) + (InitialIwq - snow->iwq) + (RainFall + SnowFall) - melt[0] + snow->vapor_flux; 
-  // if(fabs(MassBalanceError) > 1e-6){
-  //   printf(" %f %f %f %f %g\n",InitialIwq,snow->iwq,melt[0],GLIceMelt,MassBalanceError);
-  // }
+  if(fabs(MassBalanceError) > 1e-6){
+    printf("DeltaSnow\tDeltaIwq\tInputs\tmelt\tvapor_flux\tMassBallanceError\n");
+    printf("%g\t%g\t%g\t%g\t%g\t%g\n",(InitialSwq - snow->swq),
+           (InitialIwq - snow->iwq),(RainFall + SnowFall),melt[0],
+           snow->vapor_flux,MassBalanceError);
+  }
   /******* glacier mass balance calculation **************/
   delswe = snow->swq - snow->swqold;  //change in swe in previous time step
   snow->swqold = snow->swq;
@@ -649,7 +632,7 @@ int  snow_melt(double            Le,
   snow->bn = delswe + deliwe; //glacier mass balance  
 
  /**************************************************/
-  melt[0]                 *= 1000.; /* converts back to mm */
+  melt[0]                 *= MMPERMETER; /* converts back to mm */
   snow->mass_error         = MassBalanceError;
   snow->coldcontent        = SurfaceCC;
   snow->vapor_flux        *= -1.;

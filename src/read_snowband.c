@@ -136,34 +136,36 @@ void read_snowband(FILE    *snowband,
 	soil_con->Pfactor[band]  = 0.;
     }
     
-    if(options.GLACIER == GL_DYNAMIC) {
+    if (options.GLACIER == GL_DYNAMIC) {
       /** Read Glacier Area Fraction **/
       total = 0.;
-      for( band = 0; band < Nbands; band++ ) {
+      for (band = 0; band < Nbands; band++) {
         fscanf(snowband, "%lf", &glarea_fract);
-        if(glarea_fract<0) {
+        if (glarea_fract<0) {
           sprintf(ErrStr,"Negative glacier band area fraction (%f) read from file", glarea_fract);
           nrerror(ErrStr);
         }
         soil_con->GlAreaFract[band]  = glarea_fract;
-        total              += glarea_fract;
+        total                       += glarea_fract;
       }
 
       /** Read Band Slope **/
-      for ( band = 0; band < Nbands; band++ ) {
+      for (band = 0; band < Nbands; band++) {
         fscanf(snowband, "%lf", &band_slope);
-        if ( band_slope < 0 ) {
-          fprintf(stderr,"Negative surface slope (%f) read from file\n", band_slope);
+        if (band_slope < 0) {
+          sprintf(ErrStr,"Negative surface slope (%f) read from file\n", band_slope);
+          nrerror(ErrStr);
         }
         soil_con->BandSlope[band] = band_slope;
       }
 
-      /** Read Band initial Ice thicknes in glacier cells **/
+      /** Read Band initial Ice thickness in glacier cells **/
       avg_elev = 0;
-      for ( band = 0; band < Nbands; band++ ) {
+      for (band = 0; band < Nbands; band++) {
         fscanf(snowband, "%lf", &band_thick);
-        if ( band_thick < 0 ) {
-          fprintf(stderr,"Negative Ice thickeness in snow band (%f) read from file\n", band_thick);
+        if (band_thick < 0) {
+          sprintf(ErrStr,"Negative Ice thickeness in snow band (%f) read from file\n", band_thick);
+          nrerror(ErrStr);
         }
         soil_con->BandIceThick[band] = band_thick;
       }

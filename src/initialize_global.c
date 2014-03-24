@@ -123,6 +123,7 @@ void initialize_global() {
   2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
 	      for LW_TYPE to LW_PRATA.						TJB
   2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. TJB
+  2014-Mar-24 Removed ARC_SOIL option         BN
 *********************************************************************/
 
   extern option_struct options;
@@ -169,7 +170,6 @@ void initialize_global() {
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;
   // input options
-  options.ARC_SOIL              = FALSE;
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;

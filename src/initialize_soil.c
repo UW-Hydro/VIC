@@ -26,6 +26,9 @@ void initialize_soil (cell_data_struct **cell,
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
   2011-Mar-01 Now initializes more cell data structure terms, including
 	      asat and zwt.						TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -43,16 +46,15 @@ void initialize_soil (cell_data_struct **cell,
 	cell[veg][band].layer[lindex].moist = soil_con->init_moist[lindex];
         if (cell[veg][band].layer[lindex].moist > soil_con->max_moist[lindex]) cell[veg][band].layer[lindex].moist = soil_con->max_moist[ lindex];
         tmp_moist[lindex] = cell[veg][band].layer[lindex].moist;
-#if SPATIAL_FROST
-        for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+        for (frost_area=0; frost_area<options.Nfrost; frost_area++) {
           cell[veg][band].layer[lindex].ice[frost_area] = 0;
         }
-#else
-        cell[veg][band].layer[lindex].ice = 0;
-#endif
       }
       compute_runoff_and_asat(soil_con, tmp_moist, 0, &(cell[veg][band].asat), &tmp_runoff);
       wrap_compute_zwt(soil_con, &(cell[veg][band]));
+      cell[veg][band].CLitter = 0;
+      cell[veg][band].CInter = 0;
+      cell[veg][band].CSlow = 0;
     }
   }
 

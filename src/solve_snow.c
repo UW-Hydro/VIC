@@ -56,6 +56,8 @@ double solve_snow(char                 overstory,
 		  int                  hidx,
 		  int                  veg_class,
 		  int                 *UnderStory,
+		  double              *CanopLayerBnd,
+		  double              *dryFrac,
 		  dmy_struct          *dmy,
 		  atmos_data_struct   *atmos,
 		  energy_bal_struct   *energy,
@@ -130,6 +132,8 @@ double solve_snow(char                 overstory,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
 *********************************************************************/
 
   extern option_struct   options;
@@ -271,7 +275,8 @@ double solve_snow(char                 overstory,
                        &energy->Tfoliage_fbcount, &snow->tmp_int_storage, 
 		       &snow->canopy_vapor_flux, wind, displacement, 
 		       ref_height, roughness, root, *UnderStory, band, 
-		       hour, iveg, month, rec, hidx, veg_class, atmos, 
+		       hour, iveg, month, rec, hidx, veg_class,
+		       CanopLayerBnd, dryFrac, atmos,
 		       layer_dry, layer_wet, soil_con, veg_var_dry, veg_var_wet);
         if ( ErrorFlag == ERROR ) return ( ERROR );
 
@@ -330,17 +335,17 @@ double solve_snow(char                 overstory,
       (*UnderStory) = 2;         /* ground snow is present of accumulating 
 				    during time step */
       
-#if SPATIAL_SNOW
-      /* make snowpack uniform at mean depth */
-      if ( snowfall[WET] > 0 ) snow->coverage = 1;
-      if (snow->coverage > 0 && snowfall[WET] == 0) {
-	if ( snow->coverage < 1) {
-	  /* rain falls evenly over grid cell */
-	  ppt[WET] = rainfall[WET] * (1.0 - snow->coverage);
-	  rainfall[WET] *= snow->coverage;
-	}
+      if (options.SPATIAL_SNOW) {
+        /* make snowpack uniform at mean depth */
+        if ( snowfall[WET] > 0 ) snow->coverage = 1;
+        if (snow->coverage > 0 && snowfall[WET] == 0) {
+	  if ( snow->coverage < 1) {
+	    /* rain falls evenly over grid cell */
+	    ppt[WET] = rainfall[WET] * (1.0 - snow->coverage);
+	    rainfall[WET] *= snow->coverage;
+	  }
+        }
       }
-#endif
 
       /** compute understory albedo and net shortwave radiation **/
       if ( snow->swq > 0 && store_snowfall == 0 ) {
@@ -410,22 +415,21 @@ double solve_snow(char                 overstory,
 
 	/** Check for Thin Snowpack which only Partially Covers Grid Cell
 	 exists only if not snowing and snowpack has started to melt **/
-#if SPATIAL_SNOW
-	snow->coverage = calc_snow_coverage(&snow->store_snow, 
-					    soil_con->max_snow_distrib_slope, 
-					    old_coverage, snow->swq,
-					    old_swq, snow->depth, old_depth, 
-					    melt*0.001 + snow->vapor_flux, 
-					    &snow->max_snow_depth, snowfall, 
-					    &snow->store_swq, 
-					    &snow->snow_distrib_slope,
-					    &snow->store_coverage);
-
-#else
-
-	if ( snow->swq > 0 ) snow->coverage = 1.;
-	else snow->coverage = 0.;
-#endif
+        if (options.SPATIAL_SNOW) {
+	  snow->coverage = calc_snow_coverage(&snow->store_snow, 
+					      soil_con->max_snow_distrib_slope, 
+					      old_coverage, snow->swq,
+					      old_swq, snow->depth, old_depth, 
+					      melt*0.001 + snow->vapor_flux, 
+					      &snow->max_snow_depth, snowfall, 
+					      &snow->store_swq, 
+					      &snow->snow_distrib_slope,
+					      &snow->store_coverage);
+        }
+        else {
+	  if ( snow->swq > 0 ) snow->coverage = 1.;
+	  else snow->coverage = 0.;
+        }
 
       }
       else {
@@ -456,10 +460,6 @@ double solve_snow(char                 overstory,
 	       + energy->advected_sensible);
 	}
 	else if ( old_coverage < snow->coverage ) {
-#if VERBOSE
-	  if ( snow->coverage != 1. ) 
-	    fprintf(stderr, "WARNING: snow cover fraction has increased, but it is not equal to 1 (%f).\n", snow->coverage);
-#endif // VERBOSE
 	  *coverage       = snow->coverage;
 	  *delta_coverage = 0;
 	}

@@ -11,10 +11,10 @@ void display_current_settings(int                 mode,
   display_current_settings	Ted Bohn			2003
 
   This routine displays the current settings of options defined in
-  user_def.h and the global parameter file.
+  vicNl_def.h and the global parameter file.
 
   NOTE: This file must be kept in sync with any additions, removals,
-  or modifications to names of parameters in user_def.h or get_global_param.c.
+  or modifications to names of parameters in vicNl_def.h or get_global_param.c.
 
   Modifications:
   2005-03-08 Added EQUAL_AREA option.				TJB
@@ -50,6 +50,19 @@ void display_current_settings(int                 mode,
 	      features.						TJB
   2012-Jan-16 Removed LINK_DEBUG code				BN
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.	TJB
+  2013-Dec-26 Removed LWAVE_COR option.					TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
+  2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC 
+	      run-time option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
+  2013-Dec-28 Removed user_def.h.					TJB
 **********************************************************************/
 {
 
@@ -68,16 +81,11 @@ void display_current_settings(int                 mode,
   }
 
   fprintf(stderr,"\n");
-  fprintf(stderr,"COMPILE-TIME OPTIONS (set in user_def.h)\n");
+  fprintf(stderr,"COMPILE-TIME OPTIONS (set in .h files)\n");
   fprintf(stderr,"----------------------------------------\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Output to Screen:\n");
-#if OUTPUT_FORCE_STATS
-  fprintf(stderr,"OUTPUT_FORCE_STATS\tTRUE\n");
-#else
-  fprintf(stderr,"OUTPUT_FORCE_STATS\tFALSE\n");
-#endif
 #if VERBOSE
   fprintf(stderr,"VERBOSE\t\t\tTRUE\n");
 #else
@@ -85,60 +93,10 @@ void display_current_settings(int                 mode,
 #endif
 
   fprintf(stderr,"\n");
-  fprintf(stderr,"Input Files:\n");
-#if NO_REWIND
-  fprintf(stderr,"NO_REWIND\t\tTRUE\n");
-#else
-  fprintf(stderr,"NO_REWIND\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Output Files:\n");
-#if OUTPUT_FORCE
-  fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
-#else
-  fprintf(stderr,"OUTPUT_FORCE\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Simulation Parameters:\n");
-#if CLOSE_ENERGY
-  fprintf(stderr,"CLOSE_ENERGY\t\tTRUE\n");
-#else
-  fprintf(stderr,"CLOSE_ENERGY\t\tFALSE\n");
-#endif
-#if LOW_RES_MOIST
-  fprintf(stderr,"LOW_RES_MOIST\t\tTRUE\n");
-#else
-  fprintf(stderr,"LOW_RES_MOIST\t\tFALSE\n");
-#endif
-#if QUICK_FS
-  fprintf(stderr,"QUICK_FS\t\tTRUE\n");
-  fprintf(stderr,"QUICK_FS_TEMPS\t%d\n",QUICK_FS_TEMPS);
-#else
-  fprintf(stderr,"QUICK_FS\t\tFALSE\n");
-#endif
-#if SPATIAL_FROST
-  fprintf(stderr,"SPATIAL_FROST\t\tTRUE\n");
-  fprintf(stderr,"FROST_SUBAREAS\t\t%d\n",FROST_SUBAREAS);
-#else
-  fprintf(stderr,"SPATIAL_FROST\t\tFALSE\n");
-#endif
-#if SPATIAL_SNOW
-  fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
-#else
-  fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
-#endif
-#if EXCESS_ICE
-  fprintf(stderr,"EXCESS_ICE\t\tTRUE\n");
-#else
-  fprintf(stderr,"EXCESS_ICE\t\tFALSE\n");
-#endif
-
-  fprintf(stderr,"\n");
   fprintf(stderr,"Maximum Array Sizes:\n");
   fprintf(stderr,"MAX_BANDS\t\t%2d\n",MAX_BANDS);
   fprintf(stderr,"MAX_FRONTS\t\t%2d\n",MAX_FRONTS);
+  fprintf(stderr,"MAX_FROST_AREAS\t\t\t%2d\n",MAX_FROST_AREAS);
   fprintf(stderr,"MAX_LAKE_NODES\t\t%2d\n",MAX_LAKE_NODES);
   fprintf(stderr,"MAX_LAYERS\t\t%2d\n",MAX_LAYERS);
   fprintf(stderr,"MAX_NODES\t\t%2d\n",MAX_NODES);
@@ -154,7 +112,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Other Constants:\n");
   fprintf(stderr,"LAI_WATER_FACTOR\t%f\n",LAI_WATER_FACTOR);
-  fprintf(stderr,"LWAVE_COR\t\t%f\n",LWAVE_COR);
   fprintf(stderr,"MAXIT_FE\t\t%2d\n",MAXIT_FE);
 
   if (mode == DISP_COMPILE_TIME) {
@@ -202,6 +159,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"BLOWING\t\t\tTRUE\n");
   else
     fprintf(stderr,"BLOWING\t\t\tFALSE\n");
+  if (options.CLOSE_ENERGY)
+    fprintf(stderr,"CLOSE_ENERGY\t\t\tTRUE\n");
+  else
+    fprintf(stderr,"CLOSE_ENERGY\t\t\tFALSE\n");
   if (options.COMPUTE_TREELINE)
     fprintf(stderr,"COMPUTE_TREELINE\t\tTRUE\n");
   else
@@ -234,6 +195,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_410\n");
+  if (options.LOG_MATRIC == TRUE)
+    fprintf(stderr,"LOG_MATRIC\t\tTRUE\n");
+  else
+    fprintf(stderr,"LOG_MATRIC\t\tFALSE\n");
   if (options.LW_TYPE == LW_TVA)
     fprintf(stderr,"LW_TYPE\t\tLW_TVA\n");
   else if (options.LW_TYPE == LW_ANDERSON)
@@ -274,10 +239,16 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"QUICK_SOLVE\t\tTRUE\n");
   else
     fprintf(stderr,"QUICK_SOLVE\t\tFALSE\n");
-  if (options.SNOW_ALBEDO == USACE)
-    fprintf(stderr,"SNOW_ALBEDO\t\tUSACE\n");
-  else if (options.SNOW_ALBEDO == SUN1999)
-    fprintf(stderr,"SNOW_ALBEDO\t\tSUN1999\n");
+  if (options.SPATIAL_FROST == TRUE) {
+    fprintf(stderr,"SPATIAL_FROST\t\tTRUE\n");
+    fprintf(stderr,"Nfrost\t\t%d\n",options.Nfrost);
+  }
+  else
+    fprintf(stderr,"SPATIAL_FROST\t\tFALSE\n");
+  if (options.SPATIAL_SNOW == TRUE)
+    fprintf(stderr,"SPATIAL_SNOW\t\tTRUE\n");
+  else
+    fprintf(stderr,"SPATIAL_SNOW\t\tFALSE\n");
   if (options.SNOW_DENSITY == DENS_BRAS)
     fprintf(stderr,"SNOW_DENSITY\t\tDENS_BRAS\n");
   else if (options.SNOW_DENSITY == DENS_SNTHRM)
@@ -306,6 +277,15 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"MIN_RAIN_TEMP\t\t%f\n",global->MIN_RAIN_TEMP);
   fprintf(stderr,"MAX_SNOW_TEMP\t\t%f\n",global->MAX_SNOW_TEMP);
   fprintf(stderr,"MIN_WIND_SPEED\t\t%f\n",options.MIN_WIND_SPEED);
+  if (options.CARBON == TRUE)
+    fprintf(stderr,"CARBON\t\tTRUE\n");
+  else
+    fprintf(stderr,"CARBON\t\tFALSE\n");
+  if (options.SHARE_LAYER_MOIST == TRUE)
+    fprintf(stderr,"SHARE_LAYER_MOIST\t\tTRUE\n");
+  else
+    fprintf(stderr,"SHARE_LAYER_MOIST\t\tFALSE\n");
+  fprintf(stderr,"Ncanopy\t\t%d\n",options.Ncanopy);
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Forcing Data:\n");
@@ -359,6 +339,10 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Veg Data:\n");
   fprintf(stderr,"Veg library file\t%s\n",names->veglib);
+  if (options.VEGLIB_PHOTO == TRUE)
+    fprintf(stderr,"VEGLIB_PHOTO\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGLIB_PHOTO\t\tFALSE\n");
   fprintf(stderr,"Veg param file\t\t%s\n",names->veg);
   fprintf(stderr,"ROOT_ZONES\t\t%d\n",options.ROOT_ZONES);
   if (options.VEGPARAM_LAI)
@@ -439,6 +423,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"MOISTFRACT\t\tTRUE\n");
   else
     fprintf(stderr,"MOISTFRACT\t\tFALSE\n");
+  if (options.OUTPUT_FORCE)
+    fprintf(stderr,"OUTPUT_FORCE\t\tTRUE\n");
+  else
+    fprintf(stderr,"OUTPUT_FORCE\t\tFALSE\n");
   if (options.PRT_HEADER)
     fprintf(stderr,"PRT_HEADER\t\tTRUE\n");
   else

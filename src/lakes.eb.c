@@ -1869,11 +1869,7 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
 }
 
 int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
-#if EXCESS_ICE
-		    veg_con_struct veg_con, int SubsidenceUpdate, double total_meltwater)
-#endif
-		    veg_con_struct veg_con)
+		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con, veg_con_struct veg_con)
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1931,6 +1927,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1973,9 +1973,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   snow    = prcp->snow;
   energy  = prcp->energy;
 
-#if SPATIAL_FROST
   frost_fract = soil_con.frost_fract;
-#endif
 
   delta_moist = (double*)calloc(options.Nlayer,sizeof(double));
   moist = (double*)calloc(options.Nlayer,sizeof(double));
@@ -1987,10 +1985,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
  
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;
-#if EXCESS_ICE
-  if(SubsidenceUpdate > 0 ) 
-    inflow_volume += total_meltwater*lakefrac * 0.001 * soil_con.cell_area*lake_con.Cl[0];
-#endif
  
   /**********************************************************************
    * 2. calculate change in lake level for lake outflow calculation
@@ -2118,14 +2112,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   Dsmax = soil_con.Dsmax / 24.;
   lindex = options.Nlayer-1;
-#if SPATIAL_FROST
   liq = 0;
-  for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
+  for (frost_area=0; frost_area<options.Nfrost; frost_area++) {
     liq += (soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
   }
-#else
-  liq = soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice;
-#endif
   resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] * 1000.;
 
   /** Compute relative moisture **/
@@ -2321,16 +2311,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
                                                     energy[iveg][band].kappa_node, energy[iveg][band].Cs_node,
                                                     soil_con.Zsum_node, energy[iveg][band].T,
                                                     soil_con.max_moist_node,
-#if QUICK_FS
-                                                    soil_con.ufwc_table_node,
-#else
                                                     soil_con.expt_node,
                                                     soil_con.bubble_node,
-#endif // QUICK_FS
-#if EXCESS_ICE
-                                                    soil_con.porosity_node,
-                                                    soil_con.effective_porosity_node,
-#endif // EXCESS_ICE
                                                     moist, soil_con.depth,
                                                     soil_con.soil_dens_min,
                                                     soil_con.bulk_dens_min,
@@ -2383,6 +2365,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       cell[WET][iveg][band].baseflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
       cell[WET][iveg][band].inflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
     }
+  }
+
+  if (options.CARBON) {
+    advect_carbon_storage(lakefrac, newfraction, lake, &(cell[WET][iveg][band]));
   }
 
   free((char*)delta_moist);
@@ -2495,13 +2481,9 @@ void advect_soil_veg_storage(double lakefrac,
 
     for (lidx=0; lidx<options.Nlayer; lidx++) {
       cell->layer[lidx].moist = soil_con->max_moist[lidx];
-#if SPATIAL_FROST
-      for (k=0; k<FROST_SUBAREAS; k++) {
+      for (k=0; k<options.Nfrost; k++) {
         cell->layer[lidx].ice[k]     = 0.0;
       }
-#else
-      cell->layer[lidx].ice      = 0.0;
-#endif
     }
     cell->asat = 1.0;
     cell->zwt = 0;
@@ -2519,11 +2501,7 @@ void advect_soil_veg_storage(double lakefrac,
   for(lidx=0;lidx<options.Nlayer;lidx++) {
     if (veg_con->root[lidx] > 0)
       cell->rootmoist += cell->layer[lidx].moist;
-#if EXCESS_ICE
-    cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#else
     cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#endif
   }
   cell->wetness /= options.Nlayer;
 
@@ -2766,3 +2744,39 @@ void rescale_snow_energy_fluxes(double oldfrac,
 
 }
 
+void advect_carbon_storage(double lakefrac,
+                           double newfraction,
+                           lake_var_struct  *lake,
+                           cell_data_struct *cell)
+/**********************************************************************
+  advect_carbon_storage	Ted Bohn	2013
+
+  Function to update carbon storage in the lake and wetland soil columns
+  to account for changes in wetland area.
+
+  Modifications:
+**********************************************************************/
+{
+
+  extern option_struct options;
+  int i,k;
+
+  if (newfraction > lakefrac) { // lake grew, wetland shrank
+
+    if (newfraction < SMALL) newfraction = SMALL;
+    lake->soil.CLitter = (lakefrac*lake->soil.CLitter + (newfraction-lakefrac)*cell->CLitter)/newfraction;
+    lake->soil.CInter = (lakefrac*lake->soil.CInter + (newfraction-lakefrac)*cell->CInter)/newfraction;
+    lake->soil.CSlow = (lakefrac*lake->soil.CSlow + (newfraction-lakefrac)*cell->CSlow)/newfraction;
+
+  }
+
+  else if (newfraction < lakefrac) { // lake shrank, wetland grew
+
+    if ((1-newfraction) < SMALL) newfraction = 1 - SMALL;
+    cell->CLitter = ((lakefrac-newfraction)*lake->soil.CLitter + (1-lakefrac)*cell->CLitter)/(1-newfraction);
+    cell->CInter = ((lakefrac-newfraction)*lake->soil.CInter + (1-lakefrac)*cell->CInter)/(1-newfraction);
+    cell->CSlow = ((lakefrac-newfraction)*lake->soil.CSlow + (1-lakefrac)*cell->CSlow)/(1-newfraction);
+
+  }
+
+}

@@ -38,7 +38,8 @@ void prepare_full_energy(int               iveg,
 	      band had 0 area).						KAC via TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
-
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 *******************************************************************/
 
   extern option_struct options;
@@ -73,9 +74,6 @@ void prepare_full_energy(int               iveg,
 	  ice0[band] = moist0[band] 
 	    - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
 				      + prcp->energy[iveg][band].T[1]) / 2.,
-#if EXCESS_ICE
-				     soil_con->porosity[0], soil_con->effective_porosity[0],
-#endif 
 				     soil_con->max_moist[0]
 				     / (soil_con->depth[0] * 1000.),
 				     soil_con->bubble[0], soil_con->expt[0]);
@@ -95,9 +93,7 @@ void prepare_full_energy(int               iveg,
 					    soil_con->bulk_density,
 					    soil_con->soil_density,
 					    soil_con->organic,
-#if SPATIAL_FROST
 					    soil_con->frost_fract,
-#endif
 					    options.Nlayer);
     
       /** Save Thermal Conductivities for Energy Balance **/

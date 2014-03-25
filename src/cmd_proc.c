@@ -79,11 +79,13 @@ void usage(char *temp)
 
   This routine prints out usage details.
 
+  Modifications:
+  2013-Dec-28 Removed user_def.h.				TJB
 **********************************************************************/
 {
   fprintf(stderr,"Usage: %s [-v | -o | -g<global_parameter_file>]\n",temp);
   fprintf(stderr,"  v: display version information\n");
-  fprintf(stderr,"  o: display compile-time options settings (set in user_def.h)\n");
+  fprintf(stderr,"  o: display compile-time options settings (set in vicNl_def.h)\n");
   fprintf(stderr,"  g: read model parameters from <global_parameter_file>.\n");
   fprintf(stderr,"       <global_parameter_file> is a file that contains all needed model\n");
   fprintf(stderr,"       parameters as well as model option flags, and the names and\n");

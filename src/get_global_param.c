@@ -103,6 +103,15 @@ global_param_struct get_global_param(filenames_struct *names,
 	      TRUE.								TJB
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Removed user_def.h.					TJB
   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
 **********************************************************************/
 {
@@ -113,6 +122,7 @@ global_param_struct get_global_param(filenames_struct *names,
   char cmdstr[MAXSTRING];
   char optstr[MAXSTRING];
   char flgstr[MAXSTRING];
+  char flgstr2[MAXSTRING];
   char ErrStr[MAXSTRING];
   int  file_num;
   int  field;
@@ -274,11 +284,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.EXP_TRANS=TRUE;
         else options.EXP_TRANS = FALSE;
       }
-      else if (strcasecmp("SNOW_ALBEDO", optstr)==0) {
-        sscanf(cmdstr, "%*s %s", flgstr);
-        if(strcasecmp("SUN1999",flgstr)==0) options.SNOW_ALBEDO=SUN1999;
-        else options.SNOW_ALBEDO = USACE;
-      }
       else if (strcasecmp("SNOW_DENSITY", optstr)==0) {
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("DENS_SNTHRM",flgstr)==0) options.SNOW_DENSITY=DENS_SNTHRM;
@@ -310,6 +315,11 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("MAX_SNOW_TEMP",optstr)==0) {
         sscanf(cmdstr,"%*s %lf",&global.MAX_SNOW_TEMP);
+      }
+      else if(strcasecmp("CLOSE_ENERGY",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CLOSE_ENERGY=TRUE;
+        else options.CLOSE_ENERGY = FALSE;
       }
       else if(strcasecmp("CONTINUEONERROR",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -344,6 +354,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
       }
+      else if(strcasecmp("LOG_MATRIC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.LOG_MATRIC=TRUE;
+        else options.LOG_MATRIC = FALSE;
+      }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("LW_TVA",flgstr)==0) options.LW_TYPE=LW_TVA;
@@ -370,6 +385,19 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.PLAPSE = TRUE;
 	}
       }
+      else if(strcasecmp("SPATIAL_FROST",optstr)==0) {
+        sscanf(cmdstr,"%*s %s %s",flgstr,flgstr2);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          options.SPATIAL_FROST=TRUE;
+          options.Nfrost = atoi(flgstr2);
+        }
+        else options.SPATIAL_FROST = FALSE;
+      }
+      else if(strcasecmp("SPATIAL_SNOW",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.SPATIAL_SNOW=TRUE;
+        else options.SPATIAL_SNOW = FALSE;
+      }
       else if(strcasecmp("SW_PREC_THRESH",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         options.SW_PREC_THRESH = atof(flgstr);
@@ -391,6 +419,24 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("VP_ITER_ANNUAL",flgstr)==0) options.VP_ITER=VP_ITER_ANNUAL;
         if(strcasecmp("VP_ITER_CONVERGE",flgstr)==0) options.VP_ITER=VP_ITER_CONVERGE;
         else options.VP_INTERP = VP_ITER_ALWAYS;
+      }
+      else if(strcasecmp("SHARE_LAYER_MOIST",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.SHARE_LAYER_MOIST=TRUE;
+        else options.SHARE_LAYER_MOIST = FALSE;
+      }
+      else if(strcasecmp("CANOPY_LAYERS",optstr)==0) {
+        sscanf(cmdstr,"%*s %d",&options.Ncanopy);
+      }
+      else if(strcasecmp("CARBON",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CARBON=TRUE;
+        else options.CARBON = FALSE;
+      }
+      else if(strcasecmp("RC_MODE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("RC_PHOTO",flgstr)==0) options.RC_MODE=RC_PHOTO;
+        else options.RC_MODE = RC_JARVIS;
       }
 
       /*************************************
@@ -545,6 +591,11 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("VEGLIB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veglib);
       }
+      else if(strcasecmp("VEGLIB_PHOTO",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_PHOTO=TRUE;
+        else options.VEGLIB_PHOTO = FALSE;
+      }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
       }
@@ -628,6 +679,11 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.MOISTFRACT=TRUE;
         else options.MOISTFRACT = FALSE;
+      }
+      else if(strcasecmp("OUTPUT_FORCE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.OUTPUT_FORCE=TRUE;
+        else options.OUTPUT_FORCE = FALSE;
       }
       else if(strcasecmp("PRT_HEADER",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -803,7 +859,7 @@ global_param_struct get_global_param(filenames_struct *names,
     Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
   *******************************************************************************/
 
-#if !OUTPUT_FORCE
+  if (!options.OUTPUT_FORCE) {
 
   // Validate veg parameter information
   if ( strcmp ( names->veg, "MISSING" ) == 0 )
@@ -817,6 +873,32 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
   }
 
+  // Validate SPATIAL_FROST information
+  if(options.SPATIAL_FROST) {
+    if (options.Nfrost > MAX_FROST_AREAS) {
+      sprintf(ErrStr, "\"SPATIAL_FROST\" was specified with %d frost subareas, which is greater than the maximum of %d.", options.Nfrost, MAX_FROST_AREAS);
+      nrerror(ErrStr);
+    }
+    if(options.Nfrost < 1) {
+      sprintf(ErrStr, "\"SPATIAL_FROST\" was specified with %d frost subareas, which is less than the mainmum of 1.", options.Nfrost);
+      nrerror(ErrStr);
+    }
+  }
+
+  // Carbon-cycling options
+  if( !options.CARBON ) {
+    if (options.RC_MODE == RC_PHOTO) {
+      fprintf(stderr, "WARNING: If CARBON==FALSE, RC_MODE must be set to RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
+      options.RC_MODE = RC_JARVIS;
+    }
+  }
+  else {
+    if (!options.VEGLIB_PHOTO) {
+      sprintf(ErrStr, "Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and carbon-specific veg parameters must be listed in your veg library file.");
+      nrerror(ErrStr);
+    }
+  }
+
   // Validate the elevation band file information
   if(options.SNOW_BAND > 1) {
     if ( strcmp ( names->snowband, "MISSING" ) == 0 ) {
@@ -824,7 +906,7 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
     }
     if(options.SNOW_BAND > MAX_BANDS) {
-      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit vicNl_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
       nrerror(ErrStr);
     }
   }
@@ -894,28 +976,16 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"You must define at least 1 soil moisture layer to run the model.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);
   }
-  if(options.IMPLICIT)  {
-    if ( QUICK_FS ) 
-      fprintf(stderr,"WARNING: IMPLICIT and QUICK_FS are both TRUE.\n\tThe QUICK_FS option is ignored when IMPLICIT=TRUE\n");
-  }
-  if( EXCESS_ICE ) {
-    if ( !options.FULL_ENERGY )
-      nrerror("set FULL_ENERGY = TRUE to run EXCESS_ICE option.");
-    if ( !options.FROZEN_SOIL )
-      nrerror("set FROZEN_SOIL = TRUE to run EXCESS_ICE option.");
-    if ( options.QUICK_SOLVE ) {
-      fprintf(stderr,"WARNING: QUICK_SOLVE and EXCESS_ICE are both TRUE.\n\tThis is an incompatible combination.  Setting QUICK_SOLVE to FALSE.\n");
-      options.QUICK_SOLVE=FALSE;  
-    }    
-    if ( QUICK_FS ) 
-      nrerror("QUICK_FS = TRUE and EXCESS_ICE = TRUE are incompatible options.");
-  }
   if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit vicNl_def.h and recompile.",options.Nnode,MAX_NODES);
+    nrerror(ErrStr);
+  }
+  if(!options.FULL_ENERGY && options.CLOSE_ENERGY) {
+    sprintf(ErrStr,"CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
     nrerror(ErrStr);
   }
 
@@ -977,11 +1047,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,".... Thermal nodes are exponentially distributed with depth.\n");
   else
     fprintf(stderr,".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
-  if( EXCESS_ICE )
-    fprintf(stderr,".... Excess ground ice is being considered.\n\t\tTherefore, ground ice (as a volumetric fraction) must be initialized for each\n\t\t   soil layer in the soil file.\n\t\tCAUTION: When excess ice melts, subsidence occurs.\n\t\t  Therefore, soil layer depths, damping depth, thermal node depths,\n\t\t     bulk densities, porosities, and other properties are now dynamic!\n\t\t  EXERCISE EXTREME CAUTION IN INTERPRETING MODEL OUTPUT.\n\t\t  It is recommended to add OUT_SOIL_DEPTH to your list of output variables.\n");
-  if ( QUICK_FS ){
-    fprintf(stderr,".... Using linearized UFWC curve with %d temperatures.\n", QUICK_FS_TEMPS);
-  }
   fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
 	  options.SNOW_STEP);
   fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);
@@ -999,7 +1064,7 @@ global_param_struct get_global_param(filenames_struct *names,
 
 #endif // VERBOSE
 
-#endif // !OUTPUT_FORCE
+  } // !OUTPUT_FORCE
 
   return global;
 

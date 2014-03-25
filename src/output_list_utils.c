@@ -59,6 +59,9 @@ out_data_struct *create_output_list() {
   2011-Nov-04 Added OUT_TSKC.						TJB
   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
 	      OUT_ZWT_LUMPED.						TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 *************************************************************/
 
   extern option_struct options;
@@ -197,8 +200,12 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_AERO_RESIST1].varname,"OUT_AERO_RESIST1");       /* surface aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AERO_RESIST2].varname,"OUT_AERO_RESIST2");       /* overstory aerodynamic resistance [m/s] */
   strcpy(out_data[OUT_AIR_TEMP].varname,"OUT_AIR_TEMP");               /* air temperature [C] */
+  strcpy(out_data[OUT_CATM].varname,"OUT_CATM");                       /* atmospheric CO2 concentration [ppm] */
+  strcpy(out_data[OUT_COSZEN].varname,"OUT_COSZEN");                   /* cosine of solar zenith angle [fraction] */
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
+  strcpy(out_data[OUT_FDIR].varname,"OUT_FDIR");                       /* fraction of incoming shortwave that is direct [fraction] */
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */
+  strcpy(out_data[OUT_PAR].varname,"OUT_PAR");                         /* incoming photosynthetically active radiation [W/m2] */
   strcpy(out_data[OUT_PRESSURE].varname,"OUT_PRESSURE");               /* near surface atmospheric pressure [kPa] */
   strcpy(out_data[OUT_QAIR].varname,"OUT_QAIR");                       /* specific humidity [kg/kg] */
   strcpy(out_data[OUT_REL_HUMID].varname,"OUT_REL_HUMID");             /* relative humidity [fraction]*/
@@ -209,13 +216,17 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_VPD].varname,"OUT_VPD");                         /* near surface vapor pressure deficit [kPa] */
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */
 
-  // Dynamic Soil Layer Terms - EXCESS_ICE option
-#if EXCESS_ICE
-  strcpy(out_data[OUT_SOIL_DEPTH].varname,"OUT_SOIL_DEPTH");             /* soil moisture layer depths [m] */
-  strcpy(out_data[OUT_SUBSIDENCE].varname,"OUT_SUBSIDENCE");             /* subsidence of soil layer [mm] */
-  strcpy(out_data[OUT_POROSITY].varname,"OUT_POROSITY");                 /* porosity [mm/mm] */
-  strcpy(out_data[OUT_ZSUM_NODE].varname,"OUT_ZSUM_NODE");               /* depths of thermal nodes [m] */
-#endif
+  // Carbon-cycling Terms
+  strcpy(out_data[OUT_APAR].varname,"OUT_APAR");                       /* absorbed PAR [W/m2] */
+  strcpy(out_data[OUT_GPP].varname,"OUT_GPP");                         /* gross primary productivity [g C/m2s] */
+  strcpy(out_data[OUT_RAUT].varname,"OUT_RAUT");                       /* autotrophic respiration [g C/m2s] */
+  strcpy(out_data[OUT_NPP].varname,"OUT_NPP");                         /* net primary productivity [g C/m2s] */
+  strcpy(out_data[OUT_LITTERFALL].varname,"OUT_LITTERFALL");           /* flux of carbon from living biomass into soil [g C/m2d] */
+  strcpy(out_data[OUT_RHET].varname,"OUT_RHET");                       /* heterotrophic respiration [g C/m2d] */
+  strcpy(out_data[OUT_NEE].varname,"OUT_NEE");                         /* net ecosystem exchange [g C/m2d] */
+  strcpy(out_data[OUT_CLITTER].varname,"OUT_CLITTER");                 /* litter pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
+  strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
@@ -254,12 +265,6 @@ out_data_struct *create_output_list() {
   out_data[OUT_SOIL_LIQ].nelem = options.Nlayer;
   out_data[OUT_SOIL_MOIST].nelem = options.Nlayer;
   out_data[OUT_SOIL_TEMP].nelem = options.Nlayer;
-#if EXCESS_ICE
-  out_data[OUT_SOIL_DEPTH].nelem = options.Nlayer;
-  out_data[OUT_SUBSIDENCE].nelem = options.Nlayer;
-  out_data[OUT_POROSITY].nelem = options.Nlayer;
-  out_data[OUT_ZSUM_NODE].nelem = options.Nnode;
-#endif
   out_data[OUT_SOIL_TNODE].nelem = options.Nnode;
   out_data[OUT_SOIL_TNODE_WL].nelem = options.Nnode;
   out_data[OUT_SOILT_FBFLAG].nelem = options.Nnode;
@@ -320,12 +325,6 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
-#if EXCESS_ICE
-  out_data[OUT_SOIL_DEPTH].aggtype = AGG_TYPE_END;
-  out_data[OUT_POROSITY].aggtype = AGG_TYPE_END;
-  out_data[OUT_ZSUM_NODE].aggtype = AGG_TYPE_END;
-  out_data[OUT_SUBSIDENCE].aggtype = AGG_TYPE_SUM;
-#endif
   out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELINTERCEPT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;

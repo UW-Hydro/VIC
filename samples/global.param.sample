@@ -21,6 +21,8 @@ ENDDAY		31	# day model simulation ends
 # Energy Balance Parameters
 #######################################################################
 FULL_ENERGY 	FALSE	# TRUE = calculate full energy balance; FALSE = compute water balance only.  Default = FALSE.
+#CLOSE_ENERGY	FALSE	# TRUE = all energy balance calculations (canopy air, canopy snow, ground snow,
+                        # and ground surface) are iterated to minimize the total column error.  Default = FALSE.
 
 #######################################################################
 # Soil Temperature Parameters
@@ -38,12 +40,12 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #			# GF_410 = use formulas from VIC 4.1.0 (ground flux, deltaH, and fusion are correct; deltaH and fusion ignore surf_atten);
 #			# Default = GF_410
 #TFALLBACK	TRUE	# TRUE = when temperature iteration fails to converge, use previous time step's T value
+#SPATIAL_FROST	FALSE	(Nfrost)	# TRUE = use a uniform distribution to simulate the spatial distribution of soil frost; FALSE = assume that the entire grid cell is frozen uniformly.  If TRUE, then replace (Nfrost) with the number of frost subareas, i.e., number of points on the spatial distribution curve to simulate.  Default = FALSE.
 
 #######################################################################
 # Precip (Rain and Snow) Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
-#SNOW_ALBEDO	USACE	# USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
 #SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
 #BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 #COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
@@ -69,6 +71,7 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 # Meteorological Forcing Disaggregation Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
+#OUTPUT_FORCE	FALSE	# TRUE = perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings.
 #PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 #SW_PREC_THRESH		0	# Minimum daily precip [mm] that can cause dimming of incoming shortwave; default = 0.
 #MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
@@ -93,6 +96,14 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 # Generally these default values do not need to be overridden
 #######################################################################
 #CONTINUEONERROR	TRUE	# TRUE = if simulation aborts on one grid cell, continue to next grid cell
+#LOG_MATRIC	FALSE	# TRUE = use the linear interpolation of the logarithm of the matric potential
+                        # from the two surrounding layers to estimate the soil moisture drainage from each
+                        # layer (Boone and Wetzel, 1996).
+#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
+                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
+                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
+                        # in the soil paramter file containing the snow distibution slope parameter
+                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # State Files and Parameters

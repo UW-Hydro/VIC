@@ -24,6 +24,7 @@ Sat Aug 21 16:58:43 1999
   Modified:
   2011-Nov-04 Updated to MTCLIM 4.3				TJB
   2012-Feb-16 Removed calc_srad_humidity().			TJB
+  2013-Jul-25 Added data->s_fdir.				TJB
 
 */
 
@@ -102,6 +103,7 @@ typedef struct
   double *s_dayl;        /* array of site daylength values */
   double *s_swe;         /* array of site snowpack values */
   /* start vic_change */
+  double *s_fdir;	 /* array of site values of direct fraction of shortwave radiation */
   double *s_tskc;	 /* array of cloudiness values */
   double *s_ppratio; /* array of pet/prcp ratio values */
   double *s_ttmax; /* array of clear sky transmittance values */

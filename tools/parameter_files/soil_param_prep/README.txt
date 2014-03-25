@@ -2,27 +2,6 @@ README.txt
 
 The following directories and files are contained in the tarball soil_param_prep.tgz:
 
-arc_info/
-	Directory containing files for preparation of Arc/Info-style soil
-		parameter files
-
-	set_basin_param.c
-		
-		This program sets parameters in grid cells activated in the
-		run mask grid to the given value and outputs a new gridded parameter file
-
-	multiply_basin_param.c
-
-		multiplies parametrs in grid cells activated in the run mask
-		grid by the given value and outputs a new gridded parameter file
-	
-	sum_basin_param.c
-
-		computes the sum and average of parameters in grid cells
-		activated in the run mask grid and output the statistics to the screen.  Note
-		that this program does not account for variations in grid cell size.  
-
-
 standard/
 	Directory containing files for preparation of standard soil parameter files
 

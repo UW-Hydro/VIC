@@ -117,6 +117,8 @@
   2014-Mar-25 Removed unused calc_cloud_cover_fraction() BN
   2014-Mar-26 Removed compute_dz()              BN
   2014-Mar-26 Removed calc_veg_displacement() and calc_veg_roughness() BN
+  2014-Mar-26 Removed  write_snow_data(), write_soilparam(), 
+          write_vegparam()                              BN
 ************************************************************************/
 
 #include <math.h>
@@ -496,9 +498,6 @@ void write_layer(layer_data_struct *, int, int,
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
 		       int, filep_struct *, soil_con_struct *, char *,
 		       int *, lake_con_struct);
-void write_snow_data(snow_data_struct, int, int);
-void write_soilparam(soil_con_struct *);
-void write_vegparam(veg_con_struct *);
 void write_vegvar(veg_var_struct *, int);
 
 void zero_output_list(out_data_struct *);

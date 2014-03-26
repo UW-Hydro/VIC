@@ -37,6 +37,7 @@
 #             store_moisture_for_debug.c
 #             write_atmosdata.c
 #             write_debug.c
+# 2014-Mar-25 Removed calc_cloud_cover_fraction.c       BN
 #
 # $Id$
 #
@@ -77,7 +78,7 @@ HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtc
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
         arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_cloud_cover_fraction.o calc_forcing_stats.o calc_longwave.o \
+	calc_forcing_stats.o calc_longwave.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_evap.o \

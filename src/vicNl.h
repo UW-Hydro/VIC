@@ -115,6 +115,7 @@
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2014-Mar-24 Removed ARC_SOIL option                   BN
   2014-Mar-25 Removed unused calc_cloud_cover_fraction() BN
+  2014-Mar-26 Removed compute_dz()              BN
 ************************************************************************/
 
 #include <math.h>
@@ -214,7 +215,6 @@ void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake
                         double *, out_data_struct *);
 void   compress_files(char string[]);
 double compute_coszen(double, double, double, dmy_struct);
-void   compute_dz(double *, double *, int, double);
 void   correct_precip(double *, double, double, double, double);
 void   compute_pot_evap(int, dmy_struct *, int, int, double, double , double, double, double, double **, double *);
 void   compute_runoff_and_asat(soil_con_struct *, double *, double, double *, double *);

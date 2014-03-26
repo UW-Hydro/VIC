@@ -43,6 +43,7 @@
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
 # 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
 # 2014-Mar-25 Removed calc_cloud_cover_fraction.c       BN
+# 2014-Mar-26 Removed compute_dz.c
 #
 # $Id$
 #
@@ -88,7 +89,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
-	compress_files.o compute_coszen.o compute_dz.o compute_pot_evap.o \
+	compress_files.o compute_coszen.o compute_pot_evap.o \
 	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
 	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \

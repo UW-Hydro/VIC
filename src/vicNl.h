@@ -114,6 +114,7 @@
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2014-Mar-24 Removed ARC_SOIL option                   BN
+  2014-Mar-25 Removed unused calc_cloud_cover_fraction() BN
 ************************************************************************/
 
 #include <math.h>
@@ -131,8 +132,6 @@ unsigned char average_moisture_for_storm(double *, double *, double, double);
 
 int   CalcAerodynamic(char, double, double, double, double, double,
 	  	       double *, double *, double *, double *, double *);
-void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
-				 int, int, double *);
 double calc_energy_balance_error(int, double, double, double, double, double);
 void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);

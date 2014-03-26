@@ -42,6 +42,7 @@
 # 	      photosynth.c.							TJB
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
 # 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
+# 2014-Mar-25 Removed calc_cloud_cover_fraction.c       BN
 #
 # $Id$
 #
@@ -82,7 +83,7 @@ HDRS = vicNl.h vicNl_def.h global.h snow.h mtclim_constants_vic.h mtclim_paramet
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
         arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_cloud_cover_fraction.o calc_longwave.o calc_Nscale_factors.o \
+	calc_longwave.o calc_Nscale_factors.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \

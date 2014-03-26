@@ -113,6 +113,7 @@
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Mar-24 Removed ARC_SOIL option                   BN
 ************************************************************************/
 
 #include <math.h>
@@ -374,8 +375,6 @@ int    put_data(dist_prcp_struct *, atmos_data_struct *,
 		out_data_struct *, save_data_struct *,
  	        dmy_struct *, int); 
 
-double read_arcinfo_value(char *, double, double);
-int    read_arcinfo_info(char *, double **, double **, int **);
 void   read_atmos_data(FILE *, global_param_struct, int, int, double **);
 double **read_forcing_data(FILE **, global_param_struct);
 void   read_initial_model_state(FILE *, dist_prcp_struct *, 
@@ -384,8 +383,7 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
 				int *, lake_con_struct);
 void   read_snowband(FILE *, soil_con_struct *);
 void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
-soil_con_struct read_soilparam(FILE *, char *, int *, char *, char *);
-soil_con_struct read_soilparam_arc(FILE *, char *, int *, char *, int);
+soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);
 int    redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,

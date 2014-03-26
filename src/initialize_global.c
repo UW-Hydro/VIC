@@ -129,6 +129,7 @@ void initialize_global() {
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. TJB
+  2014-Mar-24 Removed ARC_SOIL option         BN
 *********************************************************************/
 
   extern option_struct options;
@@ -183,7 +184,6 @@ void initialize_global() {
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;
   // input options
-  options.ARC_SOIL              = FALSE;
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;

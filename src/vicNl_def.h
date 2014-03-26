@@ -131,6 +131,7 @@
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Jul-25 Added SLAB_MOIST.						TJB
+  2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.    TJB
   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
   2013-Dec-26 Added LOG_MATRIC option.					TJB
   2013-Dec-26 Added CLOSE_ENERGY option.				TJB
@@ -141,6 +142,7 @@
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Moved VERBOSE from user_def.h to vicNl_def.h; deleted
 	      user_def.h.						TJB
+  2014-Mar-24 Removed ARC_SOIL option         BN
 *********************************************************************/
 #include <snow.h>
 
@@ -683,11 +685,7 @@ typedef struct {
   char  lakeparam[MAXSTRING];   /* lake model constants file */
   char  result_dir[MAXSTRING];  /* directory where results will be written */
   char  snowband[MAXSTRING];    /* snow band parameter file name */
-  char  soil[MAXSTRING];        /* soil parameter file name, or name of 
-				   file that has a list of all aoil 
-				   ARC/INFO files */
-  char  soil_dir[MAXSTRING];    /* directory from which to read ARC/INFO 
-				   soil files */
+  char  soil[MAXSTRING];        /* soil parameter file name */
   char  statefile[MAXSTRING];   /* name of file in which to store model state */
   char  veg[MAXSTRING];         /* vegetation grid coverage file */
   char  veglib[MAXSTRING];      /* vegetation parameter library file */
@@ -816,8 +814,6 @@ typedef struct {
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
-  char   ARC_SOIL;       /* TRUE = use ARC/INFO gridded ASCII files for soil 
-			    parameters*/
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
   char   VEGLIB_PHOTO;   /* TRUE = veg library contains photosynthesis parameters */

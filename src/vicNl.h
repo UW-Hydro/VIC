@@ -105,6 +105,7 @@
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Oct-25 Changed calc_energy_balance_error to return the error to
 	      the parent function.					CL via TJB
+  2014-Mar-26 Removed calc_veg_displacement() and calc_veg_roughness() BN
 ************************************************************************/
 
 #include <math.h>
@@ -188,9 +189,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, veg_var_struct *, int);
 double calc_trans(double, double);
-double calc_veg_displacement(double);
 double calc_veg_height(double);
-double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
 double canopy_evap(layer_data_struct *, layer_data_struct *,
 		   veg_var_struct *, veg_var_struct *, char, int, int, 

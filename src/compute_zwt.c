@@ -26,7 +26,7 @@ double compute_zwt(soil_con_struct  *soil_con,
   int    i;
   double zwt;
 
-  zwt = 999.0;
+  zwt = MISSING;
 
   /** Compute zwt using soil moisture v zwt curve **/
   i = MAX_ZWTVMOIST-1;

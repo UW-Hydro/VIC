@@ -105,7 +105,9 @@
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2012-Oct-25 Changed calc_energy_balance_error to return the error to
 	      the parent function.					CL via TJB
+
   2014-Mar-24 Removed ARC_SOIL option                                   BN
+  2014-Mar-25 Removed unused calc_cloud_cover_fraction()                BN
   2014-Mar-26 Removed compute_dz()                                      BN
 ************************************************************************/
 
@@ -128,8 +130,6 @@ unsigned char average_moisture_for_storm(double *, double *, double, double);
 
 int   CalcAerodynamic(char, double, double, double, double, double,
 	  	       double *, double *, double *, double *, double *);
-void   calc_cloud_cover_fraction(atmos_data_struct *, dmy_struct *, int,
-				 int, int, double *);
 double calc_energy_balance_error(int, double, double, double, double, double);
 #if OUTPUT_FORCE_STATS
 void   calc_forcing_stats(int, atmos_data_struct *);

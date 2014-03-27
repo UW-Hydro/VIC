@@ -164,6 +164,7 @@ int solve_lake(double             snowfall,
   lake->evapw=0.0;
   energy_ice_formation = 0.0;
   energy_out_bottom = energy_out_bottom_ice = 0.0;
+  energy_ice_melt_bot = 0.0;
   lake_snow->vapor_flux=0.0;
   lake->vapor_flux=0.0;
   lake_energy->Tsurf = lake->temp[0];

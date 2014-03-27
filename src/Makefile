@@ -37,8 +37,12 @@
 #             store_moisture_for_debug.c
 #             write_atmosdata.c
 #             write_debug.c
-# 2014-Mar-25 Removed calc_cloud_cover_fraction.c                                BN#
+# 2014-Mar-25 Removed calc_cloud_cover_fraction.c                                BN
 # 2014-Mar-26 Removed compute_dz.c                                               BN
+# 2014-Mar-26 Removed files with unused functions:
+#             write_snowparam.c
+#             write_soilparam.c
+#             write_vegparam.c                                                   BN
 
 # $Id$
 #
@@ -107,8 +111,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	soil_thermal_eqn.o solve_snow.o \
 	surface_fluxes.o svp.o vicNl.o vicerror.o \
 	write_data.o write_forcing_file.o write_header.o write_layer.o \
-	write_model_state.o write_snow_data.o write_soilparam.o \
-	write_vegparam.o write_vegvar.o lakes.eb.o initialize_lake.o \
+	write_model_state.o write_vegvar.o lakes.eb.o initialize_lake.o \
 	read_lakeparam.o ice_melt.o IceEnergyBalance.o water_energy_balance.o \
 	water_under_ice.o
 

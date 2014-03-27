@@ -109,6 +109,7 @@
   2014-Mar-24 Removed ARC_SOIL option                                   BN
   2014-Mar-25 Removed unused calc_cloud_cover_fraction()                BN
   2014-Mar-26 Removed compute_dz()                                      BN
+  2014-Mar-26 Removed calc_veg_displacement() and calc_veg_roughness()  BN
 ************************************************************************/
 
 #include <math.h>
@@ -190,9 +191,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, veg_var_struct *, int);
 double calc_trans(double, double);
-double calc_veg_displacement(double);
 double calc_veg_height(double);
-double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
 double canopy_evap(layer_data_struct *, layer_data_struct *,
 		   veg_var_struct *, veg_var_struct *, char, int, int, 

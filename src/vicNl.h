@@ -372,7 +372,6 @@ dmy_struct *make_dmy(global_param_struct *);
 energy_bal_struct **make_energy_bal(int);
 void make_in_and_outfiles(filep_struct *, filenames_struct *, 
 			  soil_con_struct *, out_data_file_struct *);
-out_data_struct *make_out_data(int);
 snow_data_struct **make_snow_data(int);
 veg_var_struct **make_veg_var(int);
 void   MassRelease(double *,double *,double *,double *);
@@ -415,7 +414,6 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
 				soil_con_struct *, int, char *,
 				int *, lake_con_struct);
 void   read_snowband(FILE *, soil_con_struct *);
-void   read_snowmodel(atmos_data_struct *, FILE *, int, int, int, int);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, int *);
 veg_con_struct *read_vegparam(FILE *, int, int);
@@ -543,7 +541,6 @@ double volumetric_heat_capacity(double,double,double,double);
 
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
-void write_dist_prcp(dist_prcp_struct *);
 #if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);
 #endif

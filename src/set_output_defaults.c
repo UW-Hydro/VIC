@@ -85,13 +85,16 @@ else {
   filenum++;
   strcpy(out_data_files[filenum].prefix,"snow");
   if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-    out_data_files[filenum].nvars = 14;
+    out_data_files[filenum].nvars = 15;
   }
   else {
     out_data_files[filenum].nvars = 4;
   }
   if (options.BLOWING) {
     out_data_files[filenum].nvars+= 3;
+  }
+  if (options.GLACIER != FALSE){
+    out_data_files[filenum].nvars+= 2;
   }
   if (options.FROZEN_SOIL) {
     filenum++;
@@ -102,10 +105,13 @@ else {
     filenum++;
     strcpy(out_data_files[filenum].prefix,"snowband");
     if (options.FULL_ENERGY) {
-      out_data_files[filenum].nvars = 13;
+      out_data_files[filenum].nvars = 14;
     }
     else {
-      out_data_files[filenum].nvars = 9;
+      out_data_files[filenum].nvars = 10;
+    }
+    if (options.GLACIER != FALSE){
+      out_data_files[filenum].nvars+= 3;
     }
   }
   if (options.LAKES) {
@@ -178,7 +184,7 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SURFACE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
-  if (options.GLACIER > 0) {
+  if (options.GLACIER != FALSE) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GLACIER_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
@@ -211,7 +217,7 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LATENT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SENSIBLE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GRND_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-    if (options.GLACIER > 0) {
+    if (options.GLACIER != FALSE) {
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_BN_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
       set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GL_MELT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);

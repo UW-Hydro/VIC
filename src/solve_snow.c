@@ -406,16 +406,13 @@ double solve_snow(char                 overstory,
     if(options.GLACIER > 0 && soil_con->glcel == 1 &&  snow->swq > 0.0){
       maxdens = 2 * snow->density  - (double)NEW_SNOW_DENSITY;
       if(maxdens > SNOWICE_THRESH){
-        // InitialSwq = snow->swq;
-        // InitialIwq = snow->iwq;
         slopedens = (maxdens -  (double)NEW_SNOW_DENSITY)/snow->depth;
         snowdepth = snow->depth - ((snow->density - (double)NEW_SNOW_DENSITY)/slopedens);
         snowice = (snow->depth - snowdepth) * ((maxdens - SNOWICE_THRESH)/2)/(double)h20_density;
         if(snowice > 0. && snow->swq > snowice){
           snow->iwq += snowice;
           snow->swq -=snowice;
-          snow->density = (snow->density + (double)NEW_SNOW_DENSITY)/2;
-          // MassBalanceError = (InitialSwq + InitialIwq) - (snow->swq + snow->iwq);
+          snow->density = ((double)SNOWICE_THRESH + (double)NEW_SNOW_DENSITY)/2.0;
         }
       }
     } // end of snow to ice conversion  

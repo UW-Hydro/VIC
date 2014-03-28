@@ -46,7 +46,7 @@
 #define MAX_SURFACE_SWE			0.125
 
 /* density of new fallen snow [100] */
-#define NEW_SNOW_DENSITY        100.
+#define NEW_SNOW_DENSITY        50.
 
 /* Density limit used in calculation of destructive metamorphism */
 #define SNDENS_DMLIMIT			100. // (kg/m^3)

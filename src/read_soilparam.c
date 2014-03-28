@@ -815,13 +815,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
         /** Set default values for factors to use unmodified forcing data **/
         for (band = 0; band < Nbands; band++) {
-          temp.AreaFract[band] = 0.;
-          temp.GlAreaFract[band] = 0.;
+          temp.AreaFract[band]    = 0.;
+          temp.GlAreaFract[band]  = 0.;
           temp.BandIceThick[band] = 0.;
           temp.BandSlope[band]    = 0.;
-          temp.BandElev[band]  = temp.elevation;
-          temp.Tfactor[band]   = 0.;
-          temp.Pfactor[band]   = 1.;
+          temp.BandElev[band]     = temp.elevation;
+          temp.Tfactor[band]      = 0.;
+          temp.Pfactor[band]      = 1.;
         }
         temp.AreaFract[0] = 1.;
 

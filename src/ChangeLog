@@ -274,6 +274,25 @@ Removed the DIST_PRCP option.
 Bug Fixes:
 ----------
 
+Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
+
+	Files Affected:
+
+	frozen_soil.c
+	func_surf_energy_bal.c
+	vicNl.h
+
+	Description:
+
+	Extended the "cold nose" hack to the "warm nose" condition, and also
+	extended to cover the IMPLICIT scheme.
+
+	This will be superceded by a more bug-free soil temperature scheme
+	in the next major release of the model.
+
+
+
+
 Fixed incorrect assignment of input forcing variables that are moisture fluxes (all forms of precipitation and channel inflow) when ALMA_INPUT is TRUE.
 
 	Files Affected:
@@ -661,6 +680,46 @@ shortwave radiation is supplied as an input forcing.
 
 Miscellaneous:
 --------------
+
+Better out-of-box behavior for soil temperature scheme
+
+	Files Affected:
+
+	get_global_param.c
+	global.param.sample
+	initialize_global.c
+	initialize_model_state.c
+
+	Description:
+
+	Added constraints to help ensure efficient, physically reasonable
+	simulation of the soil temperature profile:
+
+	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
+
+	2. Made "cold" (no-spinup) initial soil temperatures more consistent
+	with air temperature and bottom boundary temperature.
+
+	3. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
+	that, for the given soil temperature bottom boundary depth "dp" (also
+	known as the damping depth), there are at least 3 nodes within the top
+	50 cm of the soil column.  This is to constrain errors to a reasonable
+	size.  To satisfy this condition, the following relationship must hold:
+		Nnodes >= 5*ln(dp+1)+1
+
+	Some examples:
+	dp(m)	minimum Nnodes
+	  4	       9
+	  7	      12
+	 10	      14
+	 25	      18
+	 50	      21
+
+	VIC will exit with an error message to this effect if Nnodes is too
+	small for the given value of dp.
+
+
+
 
 Cleanup of compile-time options
 

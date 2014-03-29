@@ -11,10 +11,10 @@ void display_current_settings(int                 mode,
   display_current_settings	Ted Bohn			2003
 
   This routine displays the current settings of options defined in
-  user_def.h and the global parameter file.
+  vicNl_def.h and the global parameter file.
 
   NOTE: This file must be kept in sync with any additions, removals,
-  or modifications to names of parameters in user_def.h or get_global_param.c.
+  or modifications to names of parameters in vicNl_def.h or get_global_param.c.
 
   Modifications:
   2005-03-08 Added EQUAL_AREA option.				TJB

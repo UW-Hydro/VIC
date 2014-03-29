@@ -171,7 +171,6 @@ void initialize_global() {
   options.RC_MODE               = RC_JARVIS;
   options.ROOT_ZONES            = MISSING;
   options.SHARE_LAYER_MOIST     = TRUE;
-  options.SNOW_ALBEDO           = USACE;
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;

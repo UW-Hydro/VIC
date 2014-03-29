@@ -119,6 +119,10 @@ int initialize_model_state(all_vars_struct     *all_vars,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Jan-13 Added validation of Nnodes and dp for EXP_TRANS=TRUE.	TJB
+  2014-Feb-09 Made non-spinup initial temperatures more consistent with
+	      annual average air temperature and bottom boundary
+	      temperature.
   2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
@@ -337,7 +341,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	  energy[veg][band].T[1] = surf_temp;
 	  energy[veg][band].T[2] = soil_con->avg_temp;
 
-	  /* Initialize soil layer thicknesses */
+	  /* Initialize soil layer moisture and ice contents */
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 	    moist[veg][band][lidx] = cell[veg][band].layer[lidx].moist;
 	    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
@@ -368,16 +372,10 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	       between the damping depth and twice the depth of the
 	       first layer. */
 	    
-	    energy[veg][band].T[0] = surf_temp;
 	    soil_con->dz_node[0] = soil_con->depth[0];
 	    soil_con->dz_node[1] = soil_con->depth[0];
 	    soil_con->dz_node[2] = soil_con->depth[0];
-	    energy[veg][band].T[Nnodes-1] = soil_con->avg_temp;
-	    energy[veg][band].T[1] = exp_interp(soil_con->depth[0], 0., dp, 
-						surf_temp, soil_con->avg_temp);
-	    energy[veg][band].T[2] = exp_interp(2. * soil_con->depth[0], 0., dp, 
-						surf_temp, soil_con->avg_temp);
-	    
+
 	    soil_con->Zsum_node[0] = 0;
 	    soil_con->Zsum_node[1] = soil_con[0].depth[0];
 	    Zsum   = 2. * soil_con[0].depth[0];
@@ -391,9 +389,10 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	      Zsum += (soil_con->dz_node[index]
 		       +soil_con->dz_node[index-1])/2.;
 	      soil_con->Zsum_node[index] = Zsum;
-	      energy[veg][band].T[index] = exp_interp(Zsum,0.,soil_con[0].dp,
-						      surf_temp,
-						      soil_con[0].avg_temp);
+	    }
+	    energy[veg][band].T[0] = surf_temp;
+	    for ( index = 1; index < Nnodes; index++ ) {
+	      energy[veg][band].T[index] = soil_con->avg_temp;
 	    }
 	    if ( FIRST_VEG ) {
 	      FIRST_VEG = FALSE;
@@ -432,15 +431,17 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	      if ( FIRST_VEG ) {
 		soil_con->dz_node[index] = (soil_con->Zsum_node[index+1]-soil_con->Zsum_node[index])/2.+(soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1])/2.;
 	      }
-	      energy[veg][band].T[index] = exp_interp(soil_con->Zsum_node[index],0.,soil_con[0].dp,
-						      surf_temp,soil_con[0].avg_temp);
+//	      energy[veg][band].T[index] = exp_interp(soil_con->Zsum_node[index],0.,soil_con[0].dp,
+//						      surf_temp,soil_con[0].avg_temp);
+              energy[veg][band].T[index] = soil_con->avg_temp;
 	    }
 	    //bottom node
 	    index=Nnodes-1;
 	    if ( FIRST_VEG )
 	      soil_con->dz_node[index] = soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1];
-	    energy[veg][band].T[index] = soil_con[0].avg_temp;
-	  }
+	    energy[veg][band].T[index] = soil_con->avg_temp;
+
+	  } // end if !EXP_TRANS
 	  
 	  //initialize moisture and ice for each soil layer
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {

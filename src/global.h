@@ -21,7 +21,7 @@
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
-char *version = "4.2 beta 2013-Dec-26";
+char *version = "4.2 beta 2014-Mar-29";
 char *optstring = "g:vo";
 int flag;
 

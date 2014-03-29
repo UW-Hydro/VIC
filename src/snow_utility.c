@@ -265,40 +265,17 @@ double snow_albedo(double new_snow,
   /** Aged Snow **/
   else if(swq > 0.0) {
 
-    if ( options.SNOW_ALBEDO == SUN1999 ) {
+    /* Accumulation season */
+    if ( cold_content < 0.0 && !MELTING )
+      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
+			  pow((double)last_snow * dt / 24.,
+			      SNOW_ALB_ACCUM_B));
 
-      // From Sun et al., JGR, 1999
-      if ( depth > 0.025 ) {
-        // Use deep snow albedo
-        albedo = 0.5 + ( albedo - 0.5 ) * exp( -0.01 * dt / 24);
-      }
-      else if ( cold_content < 0.0 ) {
-        // Use shallow dry snow albedo
-        albedo = albedo - 0.006 * dt / 24;
-      }
-      else
-        // Use shallow melting snow albedo
-        albedo = albedo - 0.071 * dt / 24;
-
-      if ( albedo < 0 ) albedo = 0;
-
-    }
-    else {
-
-      /* Accumulation season */
-      if ( cold_content < 0.0 && !MELTING )
-        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_ACCUM_A, 
-				  pow((double)last_snow * dt / 24.,
-				      SNOW_ALB_ACCUM_B));
-
-      /* Melt Season */
-      else
-        albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A, 
-				  pow((double)last_snow * dt / 24.,
-				      SNOW_ALB_THAW_B));
-
-    }
-
+    /* Melt Season */
+    else
+      albedo = NEW_SNOW_ALB*pow(SNOW_ALB_THAW_A, 
+			  pow((double)last_snow * dt / 24.,
+			      SNOW_ALB_THAW_B));
   }
 
   else

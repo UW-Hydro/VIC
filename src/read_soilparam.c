@@ -125,6 +125,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -611,9 +612,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
         sscanf(token, "%lf", &tempdbl);
         temp.max_snow_distrib_slope = tempdbl;
       }
-      else {
+      else
         temp.max_snow_distrib_slope = 0;
-      }
 
       /* read slope of frozen soil distribution */
       if (options.SPATIAL_FROST) {
@@ -626,9 +626,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
         sscanf(token, "%lf", &tempdbl);
         temp.frost_slope = tempdbl;
       }
-      else {
+      else
         temp.frost_slope = 0;
-      }
 
       /* If specified, read cell average July air temperature in the final
          column of the soil parameter file */
@@ -659,24 +658,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
               temp.resid_moist[layer] = RESID_MOIST;
           temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
           temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
-        }
-
-        /*******************************************
-          Validate Initial Soil Layer Moisture Content
-        *******************************************/
-        if (!options.INIT_STATE) { // only do this if we're not getting initial moisture from model state file
-          for(layer = 0; layer < options.Nlayer; layer++) {
-            if(temp.init_moist[layer] > temp.max_moist[layer]) {
-              fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %d.\n\tResetting soil moisture to maximum.\n",
-              temp.init_moist[layer], temp.max_moist[layer], layer);
-              temp.init_moist[layer] = temp.max_moist[layer];
-            }
-            if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-              fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tResetting soil moisture to residual moisture.\n",
-              temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
-              temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
-            }
-          }
         }
 
         /**********************************************

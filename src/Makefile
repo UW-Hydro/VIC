@@ -42,6 +42,7 @@
 # 	      photosynth.c.							TJB
 # 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
 # 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
+# 2014-Mar-28 Removed DIST_PRCP option, and the files dist_prec.c, initialize_new_storm.c, and redistribute_during_storm.c.					TJB
 #
 # $Id$
 #
@@ -52,7 +53,7 @@
 # -----------------------------------------------------------------------
 
 # Set SHELL = your shell here
-SHELL = /bin/bash
+SHELL = /bin/csh
 
 # Set CC = your compiler here
 CC = gcc
@@ -89,14 +90,14 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
 	compress_files.o compute_coszen.o compute_dz.o compute_pot_evap.o \
 	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
-	display_current_settings.o dist_prec.o estimate_T1.o faparl.o free_dist_prcp.o \
+	display_current_settings.o estimate_T1.o faparl.o free_all_vars.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
 	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
 	initialize_atmos.o initialize_model_state.o \
-	initialize_global.o initialize_new_storm.o initialize_snow.o \
+	initialize_global.o initialize_snow.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \
-	make_cell_data.o make_dist_prcp.o make_dmy.o make_energy_bal.o \
+	make_cell_data.o make_all_vars.o make_dmy.o make_energy_bal.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
 	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o \
 	nrerror.o open_file.o open_state_file.o \
@@ -104,7 +105,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
 	read_snowband.o read_soilparam.o read_soilparam_arc.o read_veglib.o \
-	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
+	read_vegparam.o root_brent.o runoff.o \
 	set_output_defaults.o snow_intercept.o snow_melt.o \
 	snow_utility.o soil_carbon_balance.o soil_conduction.o \
 	soil_thermal_eqn.o solve_snow.o \
@@ -167,8 +168,8 @@ clean::
 # -------------------------------------------------------------
 # depend
 # -------------------------------------------------------------
-depend: DEPEND
-DEPEND: $(SRCS) $(HDRS)
+depend: .depend
+.depend:	$(SRCS) $(HDRS)
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::

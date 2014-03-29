@@ -13,7 +13,6 @@ double solve_snow(char                 overstory,
 		  double               Tgrnd, // soil surface temperature
 		  double               air_temp, // air temperature
 		  double               dp,
-		  double               mu,
 		  double               prec,
 		  double               snow_grnd_flux,
 		  double               wind_h,
@@ -61,12 +60,10 @@ double solve_snow(char                 overstory,
 		  dmy_struct          *dmy,
 		  atmos_data_struct   *atmos,
 		  energy_bal_struct   *energy,
-		  layer_data_struct   *layer_dry,
-		  layer_data_struct   *layer_wet,
+		  layer_data_struct   *layer,
 		  snow_data_struct    *snow,
 		  soil_con_struct     *soil_con,
-		  veg_var_struct      *veg_var_dry,
-		  veg_var_struct      *veg_var_wet) {
+		  veg_var_struct      *veg_var) {
 /*********************************************************************
   solve_snow.c                Keith Cherkauer       July 2, 1998
 
@@ -134,6 +131,7 @@ double solve_snow(char                 overstory,
 	      option.							TJB
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 *********************************************************************/
 
   extern option_struct   options;
@@ -176,8 +174,7 @@ double solve_snow(char                 overstory,
 
   /* initialize moisture variables */
   melt     = 0.;
-  ppt[WET] = 0.; 
-  ppt[DRY] = 0.; 
+  *ppt = 0.; 
 
   /* initialize storage for energy consumed in changing snowpack
      cover fraction */
@@ -188,39 +185,21 @@ double solve_snow(char                 overstory,
 
   /** Calculate Fraction of Precipitation that falls as Rain **/
   rainonly      = calc_rainonly(air_temp, prec, MAX_SNOW_TEMP, 
-				MIN_RAIN_TEMP, mu); 
-  snowfall[WET] = gauge_correction[SNOW] * (prec - rainonly);
-  rainfall[WET] = gauge_correction[RAIN] * rainonly;
-  snowfall[DRY] = 0.;
-  rainfall[DRY] = 0.;
-  if ( snowfall[WET] < 1e-5 ) snowfall[WET] = 0.;
-  (*out_prec) = snowfall[WET] + rainfall[WET];
-  (*out_rain) = rainfall[WET];
-  (*out_snow) = snowfall[WET];
-  store_snowfall = snowfall[WET];
+				MIN_RAIN_TEMP); 
+  *snowfall = gauge_correction[SNOW] * (prec - rainonly);
+  *rainfall = gauge_correction[RAIN] * rainonly;
+  if ( *snowfall < 1e-5 ) *snowfall = 0.;
+  (*out_prec) = *snowfall + *rainfall;
+  (*out_rain) = *rainfall;
+  (*out_snow) = *snowfall;
+  store_snowfall = *snowfall;
 
   /** Compute latent heats **/
   (*Le) = (2.501e6 - 0.002361e6 * air_temp);
 
-  /** verify that distributed precipitation fraction equals 1 if
-      snow is present or falling **/
-  if ( ( snow->swq > 0 || snowfall[WET] > 0.
-	 || (snow->snow_canopy>0. && overstory) ) ) {
-    if ( mu != 1 && options.FULL_ENERGY ) {
-      fprintf(stderr,"ERROR: Snow model cannot be used if mu (%f) is not equal to 1.\n\tsolve_snow.c: record = %i,\t vegetation type = %i",
-	      mu, rec, iveg);
-      return( ERROR );
-    }
-    else if ( mu != 1 ) {
-      fprintf(stderr,"WARNING: Snow is falling, but mu not equal to 1 (%f)\n",
-	      mu);
-      fprintf(stderr,"\trec = %i, veg = %i, hour = %i\n",rec,iveg,hour);
-    }
-  }
-
   /** If first iteration, set UnderStory index **/
   if ( *UnderStory == 999 ) {
-    if ( snow->swq > 0 || snowfall[WET] > 0 ) *UnderStory = 2; // snow covered
+    if ( snow->swq > 0 || *snowfall > 0 ) *UnderStory = 2; // snow covered
     else *UnderStory = 0; // understory bare
   }
 
@@ -228,8 +207,8 @@ double solve_snow(char                 overstory,
   (*ShortUnderIn) = shortwave;
   (*LongUnderIn)  = longwave;
 
-  if ( (snow->swq > 0 || snowfall[WET] > 0.
-      || (snow->snow_canopy > 0. && overstory)) && mu==1 ) {
+  if ( snow->swq > 0 || *snowfall > 0.
+      || (snow->snow_canopy > 0. && overstory) ) {
     
     /*****************************
       Snow is Present or Falling 
@@ -262,9 +241,9 @@ double solve_snow(char                 overstory,
 		       (*Le), longwave, LongUnderOut, 
 		       veg_lib[veg_class].Wdmax[month-1], 
 		       ShortOverIn, *ShortUnderIn, Tcanopy,
-		       BareAlbedo, mu, &energy->canopy_advection, 
+		       BareAlbedo, &energy->canopy_advection, 
 		       &energy->AlbedoOver, 
-		       &veg_var_wet->Wdew, &snow->snow_canopy, 
+		       &veg_var->Wdew, &snow->snow_canopy, 
 		       &energy->canopy_latent, 
 		       &energy->canopy_latent_sub, LongUnderIn, 
 		       &energy->canopy_refreeze, &energy->NetLongOver, 
@@ -277,23 +256,23 @@ double solve_snow(char                 overstory,
 		       ref_height, roughness, root, *UnderStory, band, 
 		       hour, iveg, month, rec, hidx, veg_class,
 		       CanopLayerBnd, dryFrac, atmos,
-		       layer_dry, layer_wet, soil_con, veg_var_dry, veg_var_wet);
+		       layer, soil_con, veg_var);
         if ( ErrorFlag == ERROR ) return ( ERROR );
 
 	/* Store throughfall from canopy */
-	veg_var_wet->throughfall = rainfall[0] + snowfall[0];
+	veg_var->throughfall = *rainfall + *snowfall;
 
 	energy->LongOverIn = longwave;
 
       }  /* if overstory */
 
-      else if(snowfall[0] > 0. && veg_var_wet->Wdew > 0.) {
+      else if(*snowfall > 0. && veg_var->Wdew > 0.) {
 
 	/** If No Overstory, Empty Vegetation of Stored Water **/
 
-	rainfall[WET]            += veg_var_wet->Wdew;
-	veg_var_wet->throughfall  = rainfall[WET] + snowfall[WET];
-	veg_var_wet->Wdew         = 0.;
+	*rainfall            += veg_var->Wdew;
+	veg_var->throughfall  = *rainfall + *snowfall;
+	veg_var->Wdew         = 0.;
 	energy->NetLongOver       = 0;
 	energy->LongOverIn        = 0;
 	energy->Tfoliage          = air_temp;
@@ -306,8 +285,7 @@ double solve_snow(char                 overstory,
 	/** Precipitation "Passes Through" Vegetation which 
 	    is Under Snow (used only for accounting purposes)**/
 
-	veg_var_wet->throughfall = rainfall[WET] + snowfall[WET];
-	veg_var_dry->throughfall = rainfall[DRY] + snowfall[DRY];
+	veg_var->throughfall = *rainfall + *snowfall;
 	energy->NetLongOver      = 0;
 	energy->LongOverIn       = 0;
 	energy->Tfoliage         = air_temp;
@@ -321,7 +299,7 @@ double solve_snow(char                 overstory,
       energy->LongOverIn  = 0;
     }
     
-    if ( snow->swq > 0.0 || snowfall[0] > 0 ) {
+    if ( snow->swq > 0.0 || *snowfall > 0 ) {
       
       /******************************
 	Snow Pack Present on Ground
@@ -329,7 +307,7 @@ double solve_snow(char                 overstory,
 
       (*NetShortGrnd) = 0.;
    
-      (*snow_inflow) += rainfall[WET] + snowfall[WET];
+      (*snow_inflow) += *rainfall + *snowfall;
 
       old_swq       = snow->swq; /* store swq for density calculations */
       (*UnderStory) = 2;         /* ground snow is present of accumulating 
@@ -337,12 +315,12 @@ double solve_snow(char                 overstory,
       
       if (options.SPATIAL_SNOW) {
         /* make snowpack uniform at mean depth */
-        if ( snowfall[WET] > 0 ) snow->coverage = 1;
-        if (snow->coverage > 0 && snowfall[WET] == 0) {
+        if ( *snowfall > 0 ) snow->coverage = 1;
+        if (snow->coverage > 0 && *snowfall == 0) {
 	  if ( snow->coverage < 1) {
 	    /* rain falls evenly over grid cell */
-	    ppt[WET] = rainfall[WET] * (1.0 - snow->coverage);
-	    rainfall[WET] *= snow->coverage;
+	    *ppt = *rainfall * (1.0 - snow->coverage);
+	    *rainfall *= snow->coverage;
 	  }
         }
       }
@@ -352,7 +330,7 @@ double solve_snow(char                 overstory,
         // age snow albedo if no new snowfall
         // ignore effects of snow dropping from canopy; only consider fresh snow from sky
         snow->last_snow++;
-        snow->albedo = snow_albedo( snowfall[WET], snow->swq, snow->depth,
+        snow->albedo = snow_albedo( *snowfall, snow->swq, snow->depth,
 				    snow->albedo, snow->coldcontent, (double)dt, 
 				    snow->last_snow, snow->MELTING); 
         (*AlbedoUnder) = (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
@@ -370,7 +348,7 @@ double solve_snow(char                 overstory,
 		roughness, aero_resist[*UnderStory], aero_resist_used,
 		air_temp, *coverage, (double)dt * SECPHOUR, density, 
 		displacement[*UnderStory], snow_grnd_flux, 
-		*LongUnderIn, pressure, rainfall[WET], snowfall[WET], 
+		*LongUnderIn, pressure, *rainfall, *snowfall, 
 		vp, vpd, wind[*UnderStory], ref_height[*UnderStory], 
 		NetLongSnow, Torg_snow, &melt, &energy->error, 
 		&energy->advected_sensible, &energy->advection, 
@@ -381,7 +359,7 @@ double solve_snow(char                 overstory,
       if ( ErrorFlag == ERROR ) return ( ERROR );
 
       // store melt water
-      ppt[WET] += melt;
+      *ppt += melt;
 
       // store snow albedo
       energy->AlbedoUnder   = *AlbedoUnder;
@@ -392,7 +370,7 @@ double solve_snow(char                 overstory,
 	/** Calculate Snow Density **/
 	if ( snow->surf_temp <= 0 )
 	  // snowpack present, compress and age density
-	  snow->density = snow_density(snow, snowfall[WET], old_swq, Tgrnd, air_temp, (double)dt);
+	  snow->density = snow_density(snow, *snowfall, old_swq, Tgrnd, air_temp, (double)dt);
 	else 
 	  // no snowpack present, start with new snow density
 	  if ( snow->last_snow == 0 ) 
@@ -409,7 +387,7 @@ double solve_snow(char                 overstory,
              || (soil_con->lat <  0 && (day_in_year < 60 // ~ March 1
                                         || day_in_year > 273)) // ~ October 1
 	     ) ) snow->MELTING = TRUE;
-	else if ( snow->MELTING && snowfall[WET] > TraceSnow )
+	else if ( snow->MELTING && *snowfall > TraceSnow )
 	  snow->MELTING = FALSE;
 
 
@@ -460,6 +438,10 @@ double solve_snow(char                 overstory,
 	       + energy->advected_sensible);
 	}
 	else if ( old_coverage < snow->coverage ) {
+#if VERBOSE
+	  if ( snow->coverage != 1. ) 
+	    fprintf(stderr, "WARNING: snow cover fraction has increased, but it is not equal to 1 (%f).\n", snow->coverage);
+#endif // VERBOSE
 	  *coverage       = snow->coverage;
 	  *delta_coverage = 0;
 	}
@@ -507,8 +489,8 @@ double solve_snow(char                 overstory,
 	
       }
 
-      snowfall[WET] = 0; /* all falling snow has been added to the pack */
-      rainfall[WET] = 0; /* all rain has been added to the pack */
+      *snowfall = 0; /* all falling snow has been added to the pack */
+      *rainfall = 0; /* all rain has been added to the pack */
       
     }
 
@@ -516,7 +498,7 @@ double solve_snow(char                 overstory,
 
       /** Ground Snow not Present, and Falling Snow Does not Reach Ground **/
 
-      ppt[WET] += rainfall[WET];
+      *ppt += *rainfall;
       energy->AlbedoOver      = 0.;
       (*AlbedoUnder)          = BareAlbedo;
       (*NetLongSnow)          = 0.;

@@ -104,15 +104,13 @@ global_param_struct get_global_param(filenames_struct *names,
   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
-  2013-Dec-26 Added LOG_MATRIC option.						TJB
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-  2013-Dec-28 Removed user_def.h.					TJB
-  2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -252,12 +250,9 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) {
 	  options.FROZEN_SOIL=TRUE;
           options.QUICK_FLUX = FALSE;
+          options.IMPLICIT = TRUE;
 	}
-        else {
-          options.FROZEN_SOIL = FALSE;
-          options.IMPLICIT = FALSE;
-          options.EXP_TRANS = FALSE;
-        }
+        else options.FROZEN_SOIL = FALSE;
       }
       else if(strcasecmp("QUICK_FLUX",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -298,14 +293,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
         else options.BLOWING = FALSE;
-      }
-      else if(strcasecmp("DIST_PRCP",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
-        else options.DIST_PRCP = FALSE;
-      }
-      else if(strcasecmp("PREC_EXPT",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
       }
       else if(strcasecmp("CORRPREC",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -358,11 +345,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr, "%*s %s", flgstr);
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
-      }
-      else if(strcasecmp("LOG_MATRIC",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.LOG_MATRIC=TRUE;
-        else options.LOG_MATRIC = FALSE;
       }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -911,7 +893,7 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
     }
     if(options.SNOW_BAND > MAX_BANDS) {
-      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit vicNl_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
+      sprintf(ErrStr,"Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit user_def.h and recompile.",options.SNOW_BAND,MAX_BANDS);
       nrerror(ErrStr);
     }
   }
@@ -982,15 +964,11 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if(options.Nlayer > MAX_LAYERS) {
-    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and recompile.",options.Nlayer,MAX_LAYERS);
+    sprintf(ErrStr,"Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit user_def.h and recompile.",options.Nlayer,MAX_LAYERS);
     nrerror(ErrStr);
   }
   if(options.Nnode > MAX_NODES) {
-    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit vicNl_def.h and recompile.",options.Nnode,MAX_NODES);
-    nrerror(ErrStr);
-  }
-  if(!options.FULL_ENERGY && options.CLOSE_ENERGY) {
-    sprintf(ErrStr,"CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
+    sprintf(ErrStr,"Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit user_def.h and recompile.",options.Nnode,MAX_NODES);
     nrerror(ErrStr);
   }
 
@@ -1035,10 +1013,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
 	    global.endday, global.endmonth, global.endyear);
   fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
-  fprintf(stderr,"Use Distributed Precipitation.(%d)\n",options.DIST_PRCP);
-  if(options.DIST_PRCP)
-    fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
-  fprintf(stderr,"Ground heat flux will be estimated ");
   if ( options.QUICK_FLUX ) 
     fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");
   else 

@@ -221,6 +221,51 @@ Added soil moisture content for half-space below bottom soil layer
 
 
 
+Removed the DIST_PRCP option.
+
+	Files Affected:
+
+	arno_evap.c
+	calc_rainonly.c
+	calc_surf_energy_bal.c
+	canopy_evap.c
+	display_current_settings.c
+	dist_prec.c (removed)
+	frozen_soil.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	initialize_new_storm.c (removed)
+	LAKE.h
+	lakes.eb.c
+	Makefile
+	prepare_full_energy.c
+	put_data.c
+	read_initial_model_state.c
+	read_soilparam.c
+	redistribute_during_storm.c (removed)
+	runoff.c
+	snow_intercept.c
+	soil_conduction.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_forcing_file.c
+	write_model_state.c
+
+	Description:
+
+	When ALMA_INPUT was TRUE, VIC was not rescaling moisture fluxes such
+
+
+
+
 Bug Fixes:
 ----------
 
@@ -611,29 +656,6 @@ shortwave radiation is supplied as an input forcing.
 
 Miscellaneous:
 --------------
-
-Better out-of-box behavior for soil temperature scheme
-
-	Files Affected:
-
-	get_global_param.c
-	global.param.sample
-	initialize_global.c
-	initialize_model_state.c
-
-	Description:
-
-	Added constraints to help ensure efficient, physically reasonable
-	simulation of the soil temperature profile:
-
-	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
-	2. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
-	that, for the given soil temperature bottom boundary depth "dp" (also
-	known as the damping depth), there are at least 3 nodes within the top
-	50 cm of the soil column.
-
-
-
 
 Cleanup of compile-time options
 

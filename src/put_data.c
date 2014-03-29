@@ -4,7 +4,7 @@
 
 static char vcid[] = "$Id$";
 
-int  put_data(dist_prcp_struct  *prcp,
+int  put_data(all_vars_struct   *all_vars,
 	      atmos_data_struct *atmos,
               soil_con_struct   *soil_con,
 	      veg_con_struct    *veg_con,
@@ -153,6 +153,7 @@ int  put_data(dist_prcp_struct  *prcp,
 	      OUT_CINTER, and OUT_CSLOW. 				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -160,8 +161,6 @@ int  put_data(dist_prcp_struct  *prcp,
   extern option_struct    options;
   int                     veg;
   int                     index;
-  int                     Ndist;
-  int                     dist;
   int                     band;
   int                     Nbands;
   int                     overstory;
@@ -178,7 +177,6 @@ int  put_data(dist_prcp_struct  *prcp,
   double                  Cv;
   double                  Clake;
   double                  Cv_save;
-  double                  mu;
   double                  cv_baresoil;
   double                  cv_veg;
   double                  cv_overstory;
@@ -203,17 +201,17 @@ int  put_data(dist_prcp_struct  *prcp,
   static int              Tsurf_fbcount_total;
   static int              Tsoil_fbcount_total;
 
-  cell_data_struct     ***cell;
+  cell_data_struct      **cell;
   energy_bal_struct     **energy;
   lake_var_struct         lake_var;
   snow_data_struct      **snow;
-  veg_var_struct       ***veg_var;
+  veg_var_struct        **veg_var;
 
-  cell    = prcp->cell;
-  energy  = prcp->energy;
-  lake_var = prcp->lake_var;
-  snow    = prcp->snow;
-  veg_var = prcp->veg_var;
+  cell    = all_vars->cell;
+  energy  = all_vars->energy;
+  lake_var = all_vars->lake_var;
+  snow    = all_vars->snow;
+  veg_var = all_vars->veg_var;
 
   AboveTreeLine = soil_con->AboveTreeLine;
   AreaFract = soil_con->AreaFract;
@@ -234,11 +232,6 @@ int  put_data(dist_prcp_struct  *prcp,
     Tcanopy_fbcount_total = 0;
     Tfoliage_fbcount_total = 0;
   }
-
-  if(options.DIST_PRCP) 
-    Ndist = 2;
-  else 
-    Ndist = 1;
 
   // Compute treeline adjustment factors
   for ( band = 0; band < options.SNOW_BAND; band++ ) {
@@ -338,52 +331,40 @@ int  put_data(dist_prcp_struct  *prcp,
         if(ThisAreaFract > 0. && ( veg == veg_con[0].vegetat_type_num
            || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
 
-          /*******************************************************
-            Store Output for Wet and Dry Fractions
-          *******************************************************/
-          for ( dist = 0; dist < Ndist; dist++ ) {
-            if(dist==0) 
-              mu = prcp[0].mu[veg];
-            else 
-              mu = 1. - prcp[0].mu[veg];
+          /** compute running totals of various landcovers **/
+          if (HasVeg)
+            cv_veg += Cv * ThisAreaFract * ThisTreeAdjust;
+          else
+            cv_baresoil += Cv * ThisAreaFract * ThisTreeAdjust;
+          if (overstory)
+            cv_overstory += Cv * ThisAreaFract * ThisTreeAdjust;
+          if (snow[veg][band].swq> 0.0)
+            cv_snow += Cv * ThisAreaFract * ThisTreeAdjust;
 
-            /** compute running totals of various landcovers **/
-            if (HasVeg)
-              cv_veg += Cv * mu * ThisAreaFract * ThisTreeAdjust;
-            else
-              cv_baresoil += Cv * mu * ThisAreaFract * ThisTreeAdjust;
-            if (overstory)
-              cv_overstory += Cv * mu * ThisAreaFract * ThisTreeAdjust;
-            if (snow[veg][band].swq> 0.0)
-              cv_snow += Cv * mu * ThisAreaFract * ThisTreeAdjust;
-
-	    /*********************************
-              Record Water Balance Terms 
-	    *********************************/
-            collect_wb_terms(cell[dist][veg][band],
-                             veg_var[dist][veg][band],
-                             snow[veg][band],
-                             lake_var,
-                             mu,
-                             Cv,
-                             ThisAreaFract,
-                             ThisTreeAdjust,
-                             HasVeg,
-                             0,
-                             (1-Clake),
-                             overstory,
-                             depth,
-                             frost_fract,
-                             out_data);
-
-	  } // End wet/dry loop
+	  /*********************************
+            Record Water Balance Terms 
+	  *********************************/
+          collect_wb_terms(cell[veg][band],
+                           veg_var[veg][band],
+                           snow[veg][band],
+                           lake_var,
+                           Cv,
+                           ThisAreaFract,
+                           ThisTreeAdjust,
+                           HasVeg,
+                           0,
+                           (1-Clake),
+                           overstory,
+                           depth,
+                           frost_fract,
+                           out_data);
 
 	  /**********************************
 	    Record Energy Balance Terms
 	  **********************************/
           collect_eb_terms(energy[veg][band],
                            snow[veg][band],
-                           cell[WET][veg][band],
+                           cell[veg][band],
                            &Tsoil_fbcount_total,
                            &Tsurf_fbcount_total,
                            &Tsnowsurf_fbcount_total,
@@ -431,9 +412,9 @@ int  put_data(dist_prcp_struct  *prcp,
               lake_var.energy.T[i]           = energy[veg][band].T[i];
             }
             for (i=0; i<N_PET_TYPES; i++) {
-              lake_var.soil.pot_evap[i]      = cell[WET][veg][band].pot_evap[i];
+              lake_var.soil.pot_evap[i]      = cell[veg][band].pot_evap[i];
             }
-            lake_var.soil.rootmoist          = cell[WET][veg][band].rootmoist;
+            lake_var.soil.rootmoist          = cell[veg][band].rootmoist;
             lake_var.energy.deltaH           = energy[veg][band].deltaH;
             lake_var.energy.fusion           = energy[veg][band].fusion;
             lake_var.energy.grnd_flux        = energy[veg][band].grnd_flux;
@@ -443,10 +424,9 @@ int  put_data(dist_prcp_struct  *prcp,
               Record Water Balance Terms 
 	    *********************************/
             collect_wb_terms(lake_var.soil,
-                             veg_var[WET][0][0],
+                             veg_var[0][0],
                              lake_var.snow,
                              lake_var,
-                             1.0,
                              Cv,
                              ThisAreaFract,
                              ThisTreeAdjust,
@@ -811,7 +791,6 @@ void collect_wb_terms(cell_data_struct  cell,
                       veg_var_struct    veg_var,
                       snow_data_struct  snow,
                       lake_var_struct   lake_var,
-                      double            mu,
                       double            Cv,
                       double            AreaFract,
                       double            TreeAdjustFactor,
@@ -834,7 +813,7 @@ void collect_wb_terms(cell_data_struct  cell,
   int index;
   int frost_area;
 
-  AreaFactor = Cv * mu * AreaFract * TreeAdjustFactor * lakefactor;
+  AreaFactor = Cv * AreaFract * TreeAdjustFactor * lakefactor;
 
   /** record evaporation components **/
   tmp_evap = 0.0;

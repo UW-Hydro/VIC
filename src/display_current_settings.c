@@ -11,10 +11,10 @@ void display_current_settings(int                 mode,
   display_current_settings	Ted Bohn			2003
 
   This routine displays the current settings of options defined in
-  vicNl_def.h and the global parameter file.
+  user_def.h and the global parameter file.
 
   NOTE: This file must be kept in sync with any additions, removals,
-  or modifications to names of parameters in vicNl_def.h or get_global_param.c.
+  or modifications to names of parameters in user_def.h or get_global_param.c.
 
   Modifications:
   2005-03-08 Added EQUAL_AREA option.				TJB
@@ -62,7 +62,7 @@ void display_current_settings(int                 mode,
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
-  2013-Dec-28 Removed user_def.h.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
 
@@ -175,10 +175,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"CORRPREC\t\tTRUE\n");
   else
     fprintf(stderr,"CORRPREC\t\tFALSE\n");
-  if (options.DIST_PRCP)
-    fprintf(stderr,"DIST_PRCP\t\tTRUE\n");
-  else
-    fprintf(stderr,"DIST_PRCP\t\tFALSE\n");
   if (options.EXP_TRANS)
     fprintf(stderr,"EXP_TRANS\t\tTRUE\n");
   else
@@ -274,7 +270,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"VP_ITER\t\tVP_ITER_ANNUAL\n");
   else if (options.VP_ITER == VP_ITER_CONVERGE)
     fprintf(stderr,"VP_ITER\t\tVP_ITER_CONVERGE\n");
-  fprintf(stderr,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
   fprintf(stderr,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stderr,"MEASURE_H\t\t%f\n",global->measure_h);
   fprintf(stderr,"NODES\t\t\t%d\n",options.Nnode);

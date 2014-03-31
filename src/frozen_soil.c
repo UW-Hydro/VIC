@@ -412,6 +412,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Modified cold nose hack to also cover warm nose case.	TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/

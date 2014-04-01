@@ -18,7 +18,7 @@ The following works for the develop branch in VIC 4.1.2 and with Xcode 5.1.
 
 You now have an Xcode project, but need to add the files and point to the VIC makefile.
 
-* Select `File --> Add Files to "vic_xcode"
+* Select `File --> Add Files` to "vic_xcode"
 
 * Select the VIC directories that contain the source code (note you do not want to add all the `*.o` files, so do a `make clean` first. 
 

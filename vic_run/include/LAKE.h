@@ -70,14 +70,10 @@
 
 /*** Subroutine prototypes ***/
 
-double adjflux(double, double, double ,double, double, double, double,
-	       double, double, double, double *, double *);
-void advect_carbon_storage(double, double, lake_var_struct *, cell_data_struct *);
 void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
 	     int, int *, double, double, char *, int, double);
-void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
 void colavg (double *, double *, double *, float, double *, int, double, double);
@@ -87,12 +83,10 @@ void energycalc(double *, double *, int, double, double,double *, double *, doub
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 int get_depth(lake_con_struct, double, double *);
-int get_depth_from_sarea(lake_con_struct, double, double *);
 int get_sarea(lake_con_struct, double, double *);
 int get_volume(lake_con_struct, double, double *);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
-int ice_depth(lake_con_struct, double, double, double *);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double IceEnergyBalance(double, va_list);
 int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <vicNl.h>
+#include <vic_def.h>
+#include <vic_driver_classic.h>
  
 #ifndef _LEAPYR
 #define LEAPYR(y) (!((y)%400) || (!((y)%4) && ((y)%100)))

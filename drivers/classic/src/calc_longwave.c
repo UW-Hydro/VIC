@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <vicNl.h>
- 
+#include <vic_def.h>
+
 static char vcid[] = "$Id$";
 
 void calc_longwave(double *longwave, 

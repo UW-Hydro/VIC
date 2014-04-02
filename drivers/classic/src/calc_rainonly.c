@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <vicNl.h>
+#include <vic_def.h>
 
 #define MIN_PREC     1.e-5      /* smallest amount of precipitation that
 				   is allowed to fall as snow or rain in

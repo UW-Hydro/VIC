@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <vicNl.h>
+#include <vic_def.h>
  
 static char vcid[] = "$Id: make_veg_var.c,v 3.1 1999/02/16 18:02:07 vicadmin Exp $";
 

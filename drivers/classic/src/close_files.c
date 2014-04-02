@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vicNl.h>
- 
+#include <vic_def.h>
+#include <vic_driver_classic.h>
+
 static char vcid[] = "$Id$";
 
 void close_files(filep_struct         *filep,

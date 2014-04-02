@@ -33,6 +33,22 @@ Usage:
 Bug Fixes:
 ----------
 
+Uninitialized variables in write_forcing_file().
+
+	Files Affected:
+
+	write_forcing_file.c
+
+	Description:
+
+	Placeholder variables (dummy_*) in write_forcing_file() were not
+	initialized, resulting in warnings during compilation.  These are now
+	initialized.  This should not affect any model results, since these
+	variables were never used.
+
+
+
+
 Compilation errors when EXCESS_ICE = TRUE
 
 	Files Affected:

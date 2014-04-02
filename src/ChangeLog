@@ -33,6 +33,21 @@ Usage:
 Bug Fixes:
 ----------
 
+Fixed memory leak in vicNl()
+
+	Files Affected:
+
+	vicNl.c
+
+	Description:
+
+	Several soil_con arrays, allocated in read_soilparam(), were not being
+	freed in vicNl() due to the "free" statements being inside the wrong
+	OUTPUT_FORCE "if" block.  This has been fixed.
+
+
+
+
 Uninitialized variables in write_forcing_file().
 
 	Files Affected:

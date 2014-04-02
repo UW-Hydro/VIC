@@ -5,14 +5,6 @@
  
 static char vcid[] = "$Id$";
 
-/********************************************************************/
-/*			GLOBAL VARIABLES                            */
-/********************************************************************/
-int NR;		      /* array index for atmos struct that indicates
-			 the model step avarage or sum */
-int NF;		      /* array index loop counter limit for atmos
-			 struct that indicates the SNOW_STEP values */
- 
 global_param_struct get_global_param(filenames_struct *names,
                                      FILE             *gp)
 /**********************************************************************

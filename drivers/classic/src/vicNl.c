@@ -10,6 +10,11 @@ static char vcid[] = "$Id$";
 char *version = "4.2 beta 2014-Feb-25";
 char *optstring = "g:vo";
 int flag;
+int NR;         /* array index for atmos struct that indicates
+                   the model step avarage or sum */
+int NF;         /* array index loop counter limit for atmos
+                   struct that indicates the SNOW_STEP values */
+ 
 
 global_param_struct global_param;
 veg_lib_struct *veg_lib;

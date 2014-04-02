@@ -298,6 +298,44 @@ extern char ref_veg_ref_crop[];
 #define PI 3.1415927
 #endif
 
+// lake model related constants
+
+#define TMELT 0.0
+#define EMICE 0.97      /* Ice emissivity */
+#define EMH2O .98
+#define RHOSNOW   250.  /* densities of water and snow */
+#define RHOICE   917.   /* ice density*/
+#define rhosurf 1.275   /* surface air density */
+#define MAX_SURFACE_LAKE   .6  /* max. surface layer thickness for E-B (m) */
+#define BETA 0.001       /* Curve shape parameter for lake profile. */
+#define FRACMIN  0.10   /* min ice thickness in meters */
+#define FRACLIM   0.02  /* lower limit on fractional ice cover */
+#define CPW_ICE   4200. /* specific heat of ice */
+#define DM 1.38889E-07  /* molecular diffusivity of water */
+#define SNOWCRIT   0.05  /* for albedo, in m */
+//#define G 9.80616
+#define ZWATER 0.0045    // 0.004 - original value
+#define ZSNOW 0.005
+#define CONDI 2.3        /* thermal conductivity of ice */
+#define CONDS 0.7       /* thermal conductivity of snow */ 
+
+// attenuation of short and longwave radiation through ice (1/m)
+#define lamisw 1.5 // 1.5 in Patterson & Hamblin
+#define lamilw 20  // 20.0 in Patterson & Hamblin
+// attenuation of short and longwave radiation through snow (1/m)
+#define lamssw 6.0 // 6.0 in Patterson & Hamblin
+#define lamslw 20  // 20.0 in Patterson & Hamblin
+// attenuation of short and longwave radiation through water (1/m)
+#define lamwsw .3  // San Fran Bay data: 0.31 - 29.9 1/m (visible)
+#define lamwlw 1.4 // Hostetler and Bartlein assume 0.85 1/m (total)
+#define  a1 0.7        /* Percent of radiation in visible band. */
+#define  a2 0.3        /* Percent of radiation in infrared band. */
+#define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */
+#define RADIUS 6371.228 /* Earth radius in km. */
+
+
+
+
 /* define constants for saturated vapor pressure curve (kPa) */
 #define A_SVP 0.61078
 #define B_SVP 17.269

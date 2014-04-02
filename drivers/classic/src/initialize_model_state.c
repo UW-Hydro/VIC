@@ -5,7 +5,6 @@
 #include <vic_def.h>
 #include <vic_driver_classic.h>
 #include <vic_run.h>
-#include <vic_run_lake.h>
 
 static char vcid[] = "$Id$";
 

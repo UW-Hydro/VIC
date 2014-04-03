@@ -399,7 +399,7 @@ double solve_snow(char                 overstory,
 					      old_coverage, snow->swq,
 					      old_swq, snow->depth, old_depth, 
 					      melt*0.001 + snow->vapor_flux, 
-					      &snow->max_snow_depth, snowfall, 
+					      &snow->max_snow_depth, *snowfall, 
 					      &snow->store_swq, 
 					      &snow->snow_distrib_slope,
 					      &snow->store_coverage);

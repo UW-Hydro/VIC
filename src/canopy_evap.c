@@ -115,6 +115,7 @@ double canopy_evap(layer_data_struct *layer,
   double             Evap;
   double             tmp_Evap;
   double             canopyevap;
+  double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
   double             rc;
 
@@ -124,45 +125,46 @@ double canopy_evap(layer_data_struct *layer,
   for ( i = 0; i < options.Nlayer; i++ ) layerevap[i] = 0;
   canopyevap = 0;
   throughfall = 0;
+  tmp_Wdew = *Wdew;
 
   /****************************************************
     Compute Evaporation from Canopy Intercepted Water
   ****************************************************/
 
-  veg_var->Wdew = *Wdew;
-  if (*Wdew > veg_lib[veg_class].Wdmax[month-1]) {
-    throughfall = *Wdew - veg_lib[veg_class].Wdmax[month-1];
-    *Wdew    = veg_lib[veg_class].Wdmax[month-1];
+  veg_var->Wdew = tmp_Wdew;
+  if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
+    throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
   }
       
   rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
                air_temp, vpd, veg_lib[veg_class].LAI[month-1],
                (double)1.0, FALSE);
-  canopyevap = pow((*Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
+  canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
                * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
                * delta_t / SEC_PER_DAY;
 
   if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
     /** If daily time step, evap can include current precipitation **/
-    f = min(1.0,((*Wdew + ppt) / canopyevap));
+    f = min(1.0,((tmp_Wdew + ppt) / canopyevap));
   else if (canopyevap > 0.0)
     /** If sub-daily time step, evap can not exceed current storage **/
-    f = min(1.0,((*Wdew) / canopyevap));
+    f = min(1.0,((tmp_Wdew) / canopyevap));
   else
     f = 1.0;
   canopyevap *= f;
 
   /* compute fraction of canopy that is dry */
-  *dryFrac = 1.0-f*pow((*Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+  *dryFrac = 1.0-f*pow((tmp_Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
 
-  *Wdew += ppt - canopyevap;
-  if (*Wdew < 0.0) 
-    *Wdew = 0.0;
-  if (*Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
+  tmp_Wdew += ppt - canopyevap;
+  if (tmp_Wdew < 0.0) 
+    tmp_Wdew = 0.0;
+  if (tmp_Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
     throughfall += 0.0;
   else {
-    throughfall += *Wdew - veg_lib[veg_class].Wdmax[month-1];
-    *Wdew = veg_lib[veg_class].Wdmax[month-1];
+    throughfall += tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
   }
 
   /*******************************************
@@ -186,7 +188,7 @@ double canopy_evap(layer_data_struct *layer,
 
   veg_var->canopyevap = canopyevap;
   veg_var->throughfall = throughfall;
-  veg_var->Wdew = *Wdew;
+  veg_var->Wdew = tmp_Wdew;
   tmp_Evap = canopyevap;
   for(i=0;i<options.Nlayer;i++) {
     layer[i].evap  = layerevap[i];

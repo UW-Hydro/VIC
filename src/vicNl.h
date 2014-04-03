@@ -142,7 +142,7 @@ double calc_rainonly(double,double,double,double);
 double calc_rc(double,double,float,double,double,double,double,char);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct *);
 double calc_snow_coverage(int *, double, double, double, double, double, 
-                          double, double, double *, double *, double *, 
+                          double, double, double *, double, double *, 
                           double *, double *);
 double calc_snow_ground_flux(int, int, int, int, double, double, double, 
 			     double, double, double *, double *, double *, 
@@ -174,7 +174,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double,
                             double *, double *, double *, double *, double *,
-                            double, double *, double *, double *, double *,
+                            double, double *, double *, double, double *,
                             float *, int, int,
                             int, int, int, int, int, int, int, int, int, int,
                             double *, double *,

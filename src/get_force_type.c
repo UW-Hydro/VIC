@@ -46,6 +46,8 @@ void get_force_type(char   *cmdstr,
   char ErrStr[MAXSTRING];
   int  type;
 
+  type = SKIP;
+
   /** Initialize flgstr **/
   strcpy(flgstr,"NULL");
 

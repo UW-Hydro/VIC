@@ -50,6 +50,7 @@ void display_current_settings(int                 mode,
 	      features.						TJB
   2012-Jan-16 Removed LINK_DEBUG code				BN
   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
+  2014-Mar-24 Removed ARC_SOIL option       BN
 **********************************************************************/
 {
 
@@ -337,12 +338,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Soil Data:\n");
   fprintf(stderr,"Soil file\t\t%s\n",names->soil);
-  if (options.ARC_SOIL) {
-    fprintf(stderr,"ARC_SOIL\t\tTRUE\n");
-    fprintf(stderr,"Soil dir\t\t%s\n",names->soil_dir);
-  }
-  else
-    fprintf(stderr,"ARC_SOIL\t\tFALSE\n");
   if (options.BASEFLOW == ARNO)
     fprintf(stderr,"BASEFLOW\t\tARNO\n");
   else if (options.BASEFLOW == NIJSSEN2001)

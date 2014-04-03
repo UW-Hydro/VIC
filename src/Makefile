@@ -37,7 +37,13 @@
 #             store_moisture_for_debug.c
 #             write_atmosdata.c
 #             write_debug.c
-#
+# 2014-Mar-25 Removed calc_cloud_cover_fraction.c                                BN
+# 2014-Mar-26 Removed compute_dz.c                                               BN
+# 2014-Mar-26 Removed files with unused functions:
+#             write_snowparam.c
+#             write_soilparam.c
+#             write_vegparam.c                                                   BN
+
 # $Id$
 #
 # -----------------------------------------------------------------------
@@ -77,12 +83,12 @@ HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtc
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
         arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_cloud_cover_fraction.o calc_forcing_stats.o calc_longwave.o \
+	calc_forcing_stats.o calc_longwave.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
-	compress_files.o compute_dz.o compute_pot_evap.o compute_treeline.o \
+	compress_files.o compute_pot_evap.o compute_treeline.o \
 	compute_zwt.o correct_precip.o display_current_settings.o dist_prec.o \
 	estimate_T1.o free_dist_prcp.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
@@ -96,17 +102,16 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o nrerror.o \
 	open_file.o open_state_file.o \
 	output_list_utils.o parse_output_info.o penman.o \
-	prepare_full_energy.o put_data.o read_arcinfo_ascii.o \
+	prepare_full_energy.o put_data.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
-	read_snowband.o read_soilparam.o read_soilparam_arc.o read_veglib.o \
+	read_snowband.o read_soilparam.o read_veglib.o \
 	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
 	set_output_defaults.o snow_intercept.o snow_melt.o \
 	snow_utility.o soil_conduction.o \
 	soil_thermal_eqn.o solve_snow.o \
 	surface_fluxes.o svp.o vicNl.o vicerror.o \
 	write_data.o write_forcing_file.o write_header.o write_layer.o \
-	write_model_state.o write_snow_data.o write_soilparam.o \
-	write_vegparam.o write_vegvar.o lakes.eb.o initialize_lake.o \
+	write_model_state.o write_vegvar.o lakes.eb.o initialize_lake.o \
 	read_lakeparam.o ice_melt.o IceEnergyBalance.o water_energy_balance.o \
 	water_under_ice.o
 

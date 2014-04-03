@@ -106,6 +106,7 @@ int  full_energy(char                 NEWCELL,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
 	      totals.								TJB
+  2014-Feb-13 Fixed typos in EXCESS_ICE code.					TJB
 
 **********************************************************************/
 {
@@ -549,7 +550,7 @@ int  full_energy(char                 NEWCELL,
 	  fprintf(stderr,"\t\tBulk density increased from %.2f kg/m^3 to %.2f kg/m^3.\n",soil_con->bulk_density[lidx],(1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]);
 #endif
 	  soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-	  if (soil_con->organic[layer] > 0)
+	  if (soil_con->organic[lidx] > 0)
 	    soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
 	  soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; //adjust bulk density
 	  total_meltwater += soil_con->max_moist[lidx] - soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.; //for lake model (uses prior max_moist, 

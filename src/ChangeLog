@@ -26,6 +26,61 @@ Usage:
 
 
 --------------------------------------------------------------------------------
+***** Description of changes from VIC 4.1.2.k to VIC 4.1.2.l *****
+--------------------------------------------------------------------------------
+
+
+Bug Fixes:
+----------
+
+Fixed memory leak in vicNl()
+
+	Files Affected:
+
+	vicNl.c
+
+	Description:
+
+	Several soil_con arrays, allocated in read_soilparam(), were not being
+	freed in vicNl() due to the "free" statements being inside the wrong
+	OUTPUT_FORCE "if" block.  This has been fixed.
+
+
+
+
+Uninitialized variables in write_forcing_file().
+
+	Files Affected:
+
+	write_forcing_file.c
+
+	Description:
+
+	Placeholder variables (dummy_*) in write_forcing_file() were not
+	initialized, resulting in warnings during compilation.  These are now
+	initialized.  This should not affect any model results, since these
+	variables were never used.
+
+
+
+
+Compilation errors when EXCESS_ICE = TRUE
+
+	Files Affected:
+
+	full_energy.c
+	initialize_model_state.c
+	lakes.eb.c
+
+	Description:
+
+	Miscellaneous typos in the EXCESS_ICE code prevented compilation
+	when EXCESS_ICE = TRUE in user_def.h.  These have been fixed.
+
+
+
+
+--------------------------------------------------------------------------------
 ***** Description of changes from VIC 4.1.2.j to VIC 4.1.2.k *****
 --------------------------------------------------------------------------------
 

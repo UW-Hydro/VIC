@@ -6,8 +6,6 @@
 static char vcid[] = "$Id$";
 
 soil_con_struct read_soilparam(FILE *soilparam,
-			       char *soilparamdir,
-			       int  *cell_cnt,
 			       char *RUN_MODEL,
 			       char *MODEL_DONE)
 /**********************************************************************
@@ -120,6 +118,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2014-Mar-24 Removed ARC_SOIL option         BN
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -163,31 +162,24 @@ soil_con_struct read_soilparam(FILE *soilparam,
 #endif
   soil_con_struct temp;
 
-  if(options.ARC_SOIL) {
-
-    /** Read Arc/INFO-style soil parameter files **/
-    temp = read_soilparam_arc(soilparam, soilparamdir, &Ncells, RUN_MODEL, *cell_cnt);
-    *cell_cnt++;
-    if(*cell_cnt==Ncells) *MODEL_DONE = TRUE;
-
-  }
-  else {
-
     /** Read plain ASCII soil parameter file **/
-    if((fscanf(soilparam, "%d", &flag))!=EOF) {
-      if(flag) *RUN_MODEL=TRUE;
-      else     *RUN_MODEL=FALSE;
-
-      if( fgets( line, MAXSTRING, soilparam ) == NULL ){
-        sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
-        nrerror(ErrStr);
-      }
-
+  if ((fscanf(soilparam, "%d", &flag)) != EOF) {
+    if (flag) {
+      *RUN_MODEL = TRUE;
     }
     else {
-      *MODEL_DONE = TRUE;
       *RUN_MODEL = FALSE;
     }
+
+    if (fgets( line, MAXSTRING, soilparam ) == NULL) {
+      sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
+      nrerror(ErrStr);
+    }
+  }
+  else {
+    *MODEL_DONE = TRUE;
+    *RUN_MODEL = FALSE;
+  }
 
     if(!(*MODEL_DONE) && (*RUN_MODEL)) {
 
@@ -1059,8 +1051,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.ehoriz = 0;
 
     } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
-
-  } // end if (options.ARC_SOIL)
 
   return temp;
 

@@ -123,6 +123,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2014-Feb-09 Made non-spinup initial temperatures more consistent with
 	      annual average air temperature and bottom boundary
 	      temperature.						TJB
+  2014-Feb-13 Fixed typos in EXCESS_ICE code.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -312,7 +313,7 @@ int initialize_model_state(dist_prcp_struct    *prcp,
       /*update soil_con properties*/
       for( lidx = 0; lidx < options.Nlayer; lidx++ ) {
         soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-        if (soil_con->organic[layer] > 0)
+        if (soil_con->organic[lidx] > 0)
           soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
 	soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; 
 	soil_con->max_moist[lidx] = soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.;	

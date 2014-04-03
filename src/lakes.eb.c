@@ -164,6 +164,7 @@ int solve_lake(double             snowfall,
   lake->evapw=0.0;
   energy_ice_formation = 0.0;
   energy_out_bottom = energy_out_bottom_ice = 0.0;
+  energy_ice_melt_bot = 0.0;
   lake_snow->vapor_flux=0.0;
   lake->vapor_flux=0.0;
   lake_energy->Tsurf = lake->temp[0];
@@ -1872,8 +1873,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
 #if EXCESS_ICE
 		    veg_con_struct veg_con, int SubsidenceUpdate, double total_meltwater)
-#endif
+#else
 		    veg_con_struct veg_con)
+#endif
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1931,6 +1933,7 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
+  2014-Feb-13 Fixed typos in EXCESS_ICE code.					TJB
 **********************************************************************/
 {
   extern option_struct   options;

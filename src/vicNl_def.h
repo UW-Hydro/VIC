@@ -143,6 +143,7 @@
   2013-Dec-28 Moved VERBOSE from user_def.h to vicNl_def.h; deleted
 	      user_def.h.										TJB
   2014-Mar-24 Removed ARC_SOIL option                       BN
+  2014-Mar-28 Removed DIST_PRCP option.						TJB
 *********************************************************************/
 #include <snow.h>
 
@@ -389,8 +390,6 @@ extern char ref_veg_ref_crop[];
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
 					work (m) */
-#define STORM_THRES  0.001      /* thresehold at which a new storm is 
-				   decalred */
 #define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
 				   while computing the snow surface energy 
 				   balance (C) */
@@ -443,7 +442,7 @@ extern char ref_veg_ref_crop[];
 #define PRESSURE  13 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
 #define QAIR      14 /* specific humidity [kg/kg] */
 #define RAINF     15 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define REL_HUMID 16 /* relative humidity [%] */
+#define REL_HUMID 16 /* relative humidity [fraction] */
 #define SHORTWAVE 17 /* incoming shortwave [W/m2] */
 #define SNOWF     18 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
 #define TMAX      19 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
@@ -734,7 +733,6 @@ typedef struct {
 			      vegetation from higher elevations */
   char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
-  char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
 			    FALSE = RESOLUTION stores grid cell side length in degrees */
   char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node 
@@ -771,9 +769,6 @@ typedef struct {
 			    input forcing, compute it by lapsing sea-level
 			    pressure by grid cell average elevation;
 			    FALSE = air pressure set to constant 95.5 kPa */
-  float  PREC_EXPT;      /* Exponential that controls the fraction of a
-			    grid cell that receives rain during a storm
-			    of given intensity */
   char   RC_MODE;        /* RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                             RC_PHOTO = compute canopy resistance based on photosynthetic activity */
   int    ROOT_ZONES;     /* Number of root zones used in simulation */
@@ -944,7 +939,7 @@ typedef struct {
   double   max_infil;                 /* maximum infiltration rate */
   double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per layer */
   double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per node */
-  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1.  Niu and Yang (2007) observations imply 100% cover for depths > 0.2 m during melt season in the continental US, implying a slope of 0.4 m. */
+  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1.  Comment, ported from user_def.h, with questionable units: SiB uses 0.076; Rosemount data imply 0.155cm depth ~ 0.028mm swq. */
   double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter (mm/mm) */
   double   porosity[MAX_LAYERS];      /* porosity (fraction) */
   double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction of mineral soil volume) */
@@ -1360,21 +1355,15 @@ typedef struct {
 
 /*****************************************************************
   This structure stores all variables needed to solve, or save 
-  solututions for all versions of this model.  Vegetation and soil
-  variables are created for both wet and dry fractions of the grid
-  cell (for use with the distributed precipitation model).
+  solututions for all versions of this model.
 *****************************************************************/
 typedef struct {
-  cell_data_struct  **cell[2];    /* Stores soil layer variables (wet and 
-				     dry) */
-  double             *mu;         /* fraction of grid cell that receives 
-				     precipitation */
+  cell_data_struct  **cell;       /* Stores soil layer variables */
   energy_bal_struct **energy;     /* Stores energy balance variables */
   lake_var_struct     lake_var;   /* Stores lake/wetland variables */
   snow_data_struct  **snow;       /* Stores snow variables */
-  veg_var_struct    **veg_var[2]; /* Stores vegetation variables (wet and 
-				     dry) */
-} dist_prcp_struct;
+  veg_var_struct    **veg_var;    /* Stores vegetation variables */
+} all_vars_struct;
 
 /*******************************************************
   This structure stores moisture state information for

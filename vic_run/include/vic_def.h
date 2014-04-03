@@ -144,7 +144,6 @@
 	      user_def.h.						TJB
   2014-Mar-24 Removed ARC_SOIL option         BN
 *********************************************************************/
-#include <snow.h>
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
@@ -442,6 +441,66 @@ extern char ref_veg_ref_crop[];
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
 #define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
+
+#define SNOW_H
+
+#include <stdarg.h>
+
+/* water holding capacity of snow as a fraction of snow-water-equivalent */ 
+#define LIQUID_WATER_CAPACITY   0.035
+
+/* multiplier to calculate the amount of available snow interception as
+   a function of LAI (m) */
+/* #define LAI_SNOW_MULTIPLIER    0.0005 */
+#define LAI_SNOW_MULTIPLIER   0.0005
+
+/* the amount of snow on the canopy that can only be melted off. (m) */
+#define MIN_INTERCEPTION_STORAGE  0.005
+
+/* maximum depth of the surface layer in water equivalent (m)
+   [default 0.125] */
+#define MAX_SURFACE_SWE     0.125
+
+/* density of new fallen snow [50] */
+#define NEW_SNOW_DENSITY        50.
+
+/* Density limit used in calculation of destructive metamorphism */
+#define SNDENS_DMLIMIT      100. // (kg/m^3)
+
+/* Constants in snow density computation */
+#define SNDENS_ETA0 (3.6e6) /* viscosity of snow at T = 0C and density = 0
+           used in calculation of true viscosity (Ns/m2) */
+#define SNDENS_C1 0.04
+#define SNDENS_C2 (2.778e-6)
+#define SNDENS_C5 0.08  /* constant used in snow viscosity calculation,
+           taken from SNTHRM.89 (/C)*/
+#define SNDENS_C6 0.021 /* constant used in snow viscosity calculation,
+           taken from SNTHRM.89 (kg/m3) */
+#define SNDENS_F  0.6 /* internal compaction rate coefficient */
+
+/* Minimum SWQ for which the snowpack energy balance is computed 
+   independent of the soil surface temperature */
+/* #define MIN_SWQ_EB_THRES 0.0060 */
+#define MIN_SWQ_EB_THRES    0.0010
+ 
+/* Attenuation coefficients for shortwave in a snowpack.  Values and
+   equation taken from Patterson and Hamblin, 1988 */
+#define SNOW_A1 0.7
+#define SNOW_A2 0.3  
+#define SNOW_L1 6    // (1/m)
+#define SNOW_L2 20   // (1/m)
+ 
+/***** Snow albedo curve parameters.  Defaults are from Bras p263.
+       Should not be changed except for serious problems with snow melt *****/
+#define NEW_SNOW_ALB    0.85
+#define SNOW_ALB_ACCUM_A  0.94
+#define SNOW_ALB_ACCUM_B  0.58
+#define SNOW_ALB_THAW_A   0.82
+#define SNOW_ALB_THAW_B   0.46
+
+/***** Defines the minimum amount of new snow (mm) which will reset the
+       snowpack albedo to new snow *****/
+#define TraceSnow 0.03
 
 /***** Define Boolean Values *****/
 #ifndef FALSE

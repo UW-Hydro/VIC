@@ -3,6 +3,8 @@
 #ifndef VIC_DRIVER_CLASSIC_H
 #define VIC_DRIVER_CLASSIC_H
 
+#include <stdio.h>
+
 void alloc_atmos(int, atmos_data_struct **);
 unsigned char average_moisture_for_storm(double *, double *, double, double);
 void   calc_longwave(double *, double, double, double);

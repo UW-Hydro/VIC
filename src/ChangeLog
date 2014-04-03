@@ -227,6 +227,7 @@ Removed the DIST_PRCP option.
 
 	arno_evap.c
 	calc_rainonly.c
+	calc_snow_coverage.c
 	calc_surf_energy_bal.c
 	canopy_evap.c
 	display_current_settings.c

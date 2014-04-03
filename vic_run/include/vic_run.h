@@ -160,7 +160,6 @@ int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_stru
 double IceEnergyBalance(double, va_list);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
 int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
 int lakeice(double *, double, double, double, double, int, 
@@ -191,7 +190,6 @@ int    put_data(dist_prcp_struct *, atmos_data_struct *,
 		out_data_struct *, save_data_struct *,
  	        dmy_struct *, int);
 // CalcBlowingSnow: qromb
-lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 int    redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
 				 int, int, int, double, double, double,
 				 double *);

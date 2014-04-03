@@ -40,6 +40,7 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
                         soil_con_struct *, out_data_file_struct *,
                         out_data_struct *);
 void   initialize_global();
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
 int    initialize_model_state(dist_prcp_struct *, dmy_struct,
                               global_param_struct *, filep_struct, 
                               int, int, int, int, 
@@ -72,6 +73,7 @@ void   read_initial_model_state(FILE *, dist_prcp_struct *,
                                 global_param_struct *, int, int, int, 
                                 soil_con_struct *, int, char *,
                                 int *, lake_con_struct);
+lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void   read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, int *);

@@ -27,6 +27,9 @@ Sat Aug 21 16:58:43 1999
   2011-Nov-04 Updated to MTCLIM 4.3				TJB
 
 */
+  
+#ifndef MTCLIM_PARAMETERS_VIC_H
+#define MTCLIM_PARAMETERS_VIC_H
 
 /* parameters for the Tair algorithm */
 #define TDAYCOEF     0.45  /* (dim) daylight air temperature coefficient (dim) */
@@ -46,4 +49,6 @@ Sat Aug 21 16:58:43 1999
 #define DIF_ALB       0.6  /* (dim) diffuse albedo for horizon correction */
 #define SC_INT       1.32  /* (MJ/m2/day) snow correction intercept */
 #define SC_SLOPE    0.096  /* (MJ/m2/day/cm) snow correction slope */
+  
+#endif
 

@@ -1,5 +1,7 @@
 /* header file for vic_driver_classic routines */
-#include <math.h>
+
+#ifndef VIC_DRIVER_CLASSIC_H
+#define VIC_DRIVER_CLASSIC_H
 
 void alloc_atmos(int, atmos_data_struct **);
 unsigned char average_moisture_for_storm(double *, double *, double, double);
@@ -91,3 +93,5 @@ void write_model_state(dist_prcp_struct *, global_param_struct *, int,
                        int *, lake_con_struct);
 void write_vegvar(veg_var_struct *, int);
 void zero_output_list(out_data_struct *);
+
+#endif

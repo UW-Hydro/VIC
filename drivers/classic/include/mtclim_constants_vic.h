@@ -28,7 +28,8 @@ Sat Aug 21 16:58:43 1999
 
 */
 
-
+#ifndef MTCLIM_CONSTANTS_VIC_H
+#define MTCLIM_CONSTANTS_VIC_H
 
 #define TDAYCOEF 0.45     /* daylight air temperature coefficient (dim) */
 
@@ -133,4 +134,6 @@ int data_free(const control_struct *ctrl, data_struct *data);
 double calc_pet(double rad, double ta, double pa, double dayl);
 double atm_pres(double elev);
 int pulled_boxcar(double *input,double *output,int n,int w,int w_flag);
+
+#endif
 

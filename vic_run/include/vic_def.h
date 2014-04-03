@@ -144,7 +144,9 @@
 	      user_def.h.						TJB
   2014-Mar-24 Removed ARC_SOIL option         BN
 *********************************************************************/
-
+#ifndef VIC_DEF_H
+#define VIC_DEF_H
+  
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE
 
@@ -1542,3 +1544,4 @@ typedef struct {
   veg_var_struct    *veg_var;
 } Error_struct;
 
+#endif

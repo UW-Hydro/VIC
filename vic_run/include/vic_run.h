@@ -1,5 +1,8 @@
 /* header file for vic_run routines */
 
+#ifndef VIC_RUN_H
+#define VIC_RUN_H
+
 void advect_carbon_storage(double, double, lake_var_struct *, cell_data_struct *);
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
@@ -293,3 +296,5 @@ int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, 
 int water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
+
+#endif

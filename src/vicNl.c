@@ -91,8 +91,12 @@ int main(int argc, char *argv[])
   2011-Jan-04 Made read_soilparam_arc() a sub-function of
 	      read_soilparam().						TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-  2013-Dec-27 Removed QUICK_FS option.					TJB
-  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.							TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
+  2014-Mar-24 Removed ARC_SOIL option                           BN
+  2014-Apr-02 Moved "free" statements for soil_con arrays outside the
+	      OUTPUT_FORCE condition to avoid memory leak.			TJB
+
 **********************************************************************/
 {
 
@@ -119,7 +123,6 @@ int main(int argc, char *argv[])
   int                      index;
   int                     *init_DRY_TIME;
   int                      Ncells;
-  int                      cell_cnt;
   int                      startrec;
   int                      ErrorFlag;
   float                    mu;
@@ -199,10 +202,9 @@ int main(int argc, char *argv[])
     Run Model for all Active Grid Cells
     ************************************/
   MODEL_DONE = FALSE;
-  cell_cnt=0;
   while(!MODEL_DONE) {
 
-    soil_con = read_soilparam(filep.soilparam, filenames.soil_dir, &cell_cnt, &RUN_MODEL, &MODEL_DONE);
+    soil_con = read_soilparam(filep.soilparam, &RUN_MODEL, &MODEL_DONE);
 
     if(RUN_MODEL) {
 

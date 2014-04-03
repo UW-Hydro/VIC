@@ -119,13 +119,13 @@ int initialize_model_state(dist_prcp_struct    *prcp,
   2013-Jul-25 Moved computation of tmp_moist argument of
 	      compute_runoff_and_asat() so that it would always be
 	      initialized.						TJB
-  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.						TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Removed QUICK_FS option.							TJB
   2014-Jan-13 Added validation of Nnodes and dp for EXP_TRANS=TRUE.	TJB
   2014-Feb-09 Made non-spinup initial temperatures more consistent with
 	      annual average air temperature and bottom boundary
-	      temperature.
+	      temperature.											TJB
 **********************************************************************/
 {
   extern option_struct options;

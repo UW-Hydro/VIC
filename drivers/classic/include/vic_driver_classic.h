@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 void alloc_atmos(int, atmos_data_struct **);
-unsigned char average_moisture_for_storm(double *, double *, double, double);
 void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
@@ -41,7 +40,6 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
                         soil_con_struct *, out_data_file_struct *,
                         out_data_struct *);
 void   initialize_global();
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
 int    initialize_model_state(dist_prcp_struct *, dmy_struct,
                               global_param_struct *, filep_struct, 
                               int, int, int, int, 

@@ -12,6 +12,7 @@ void alblake(double, double, double *, double *, float *, float *, double, doubl
 double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 		 double, double, double, double, double, double, double, double,
 		 double, double *);
+unsigned char average_moisture_for_storm(double *, double *, double, double);
 double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, double, double,
                              double, double, double, double,
@@ -157,6 +158,7 @@ int get_sarea(lake_con_struct, double, double *);
 // CalcBlowingSnow: get_thresh
 int get_volume(lake_con_struct, double, double *);
 double hiTinhib(double);
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double IceEnergyBalance(double, va_list);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);

@@ -24,6 +24,7 @@ int    calc_layer_average_thermal_props(energy_bal_struct *, layer_data_struct *
           soil_con_struct *, int, int, double *);
 void calc_Nscale_factors(char, double *, double, double, double, double,
                          dmy_struct, double *);
+double calc_rainonly(double,double,double,double,double);
 double calc_rc(double,double,float,double,double,double,double,char);
 void calc_rc_ps(char, double, double, double, double *, double,
                 double, double *, double, double, double *,

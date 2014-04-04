@@ -10,7 +10,6 @@ unsigned char average_moisture_for_storm(double *, double *, double, double);
 void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
-double calc_rainonly(double,double,double,double,double);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct *);
 double calc_veg_height(double);
 void   check_files(filep_struct *, filenames_struct *);

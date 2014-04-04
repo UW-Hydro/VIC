@@ -147,7 +147,10 @@
 #ifndef VIC_DEF_H
 #define VIC_DEF_H
 
+#include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE

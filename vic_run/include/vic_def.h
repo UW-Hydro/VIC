@@ -151,6 +151,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
 #define VERBOSE TRUE

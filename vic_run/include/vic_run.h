@@ -316,6 +316,7 @@ int water_under_ice(int, double,  double, double *, double *, double, int, doubl
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_layer(layer_data_struct *, int, int, double *, double *);
 void write_vegvar(veg_var_struct *, int);
+void zero_output_list(out_data_struct *);
 
 
 #endif

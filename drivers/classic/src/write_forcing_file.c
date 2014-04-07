@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <vic_def.h>
+#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 static char vcid[] = "$Id$";

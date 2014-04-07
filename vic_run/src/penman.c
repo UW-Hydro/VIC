@@ -32,10 +32,8 @@
 	      photosynthetic demand.						TJB
 
 ********************************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vicNl.h>
+#include <vic_def.h>
+#include <vic_run.h>
 
 static char vcid[] = "$Id: penman.c,v 5.3.2.1 2009/06/09 09:54:11 vicadmin Exp $";
 

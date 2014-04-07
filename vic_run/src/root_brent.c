@@ -14,10 +14,8 @@
  * COMMENTS:     
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vicNl.h>
+#include <vic_def.h>
+#include <vic_run.h>
 
 static char vcid[] = "$Id$";
 

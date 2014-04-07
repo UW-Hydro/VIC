@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <vicNl.h>
-#include <math.h>
+#include <vic_def.h>
+#include <vic_run.h>
 
 static char vcid[] = "$Id$";
 int  runoff(cell_data_struct  *cell_wet,

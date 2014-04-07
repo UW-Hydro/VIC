@@ -1,6 +1,3 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <vic_def.h>
 #include <vic_run.h>
 

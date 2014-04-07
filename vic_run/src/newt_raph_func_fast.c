@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <math.h>
-#include <stdarg.h>
-#include <vicNl.h>
+#include <vic_def.h>
+#include <vic_run.h>
 
 #define MAXTRIAL 150
 #define TOLX     1e-4

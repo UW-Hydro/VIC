@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <vicNl.h>
-#include <stdarg.h>
+#include <vic_def.h>
+#include <vic_run.h>
 
 #define MAXIT 1000
 

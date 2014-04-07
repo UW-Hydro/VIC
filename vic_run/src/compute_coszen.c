@@ -1,9 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <vicNl.h>
-#include <math.h>
+#include <vic_def.h>
+#include <vic_run.h>
 #include <mtclim_constants_vic.h>
-#include <mtclim_parameters_vic.h>
 
 static char vcid[] = "$Id: compute_coszen.c,v 5.7 2004/07/07 01:46:14 tbohn Exp $";
 

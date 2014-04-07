@@ -60,7 +60,6 @@ void mtclim_wrapper(int, int, double, double, double, double,
                     double, double, double, double,
                     int, dmy_struct *, double *,
                     double *, double *, double *, double *, double *, double *);
-void   nrerror(char *);
 FILE  *open_file(char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);
@@ -81,12 +80,9 @@ int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, 
 int update_thermal_nodes(dist_prcp_struct *, 
                          int, int, int, soil_con_struct *, veg_con_struct *);
 void usage(char *);
-void vicerror(char *);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *, out_data_struct *);
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, global_param_struct);
-void write_layer(layer_data_struct *, int, int, 
-                 double *, double *);
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
                        int, filep_struct *, soil_con_struct *, char *,
                        int *, lake_con_struct);

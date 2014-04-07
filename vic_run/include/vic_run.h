@@ -7,7 +7,7 @@ void advect_carbon_storage(double, double, lake_var_struct *, cell_data_struct *
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *, veg_con_struct *, cell_data_struct *, veg_var_struct *, lake_con_struct);
 double advected_sensible_heat(double, double, double, double, double);
-void alblake(double, double, double *, double *, float *, float *, double, double, 
+void alblake(double, double, double *, double *, float *, float *, double, double,
          int, int *, double, double, char *, int, double);
 double arno_evap(layer_data_struct *, layer_data_struct *, double, double,
 		 double, double, double, double, double, double, double, double,
@@ -53,6 +53,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             layer_data_struct *,
                             snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, veg_var_struct *, int);
+double calc_veg_height(double);
 double calc_water_balance_error(int, double, double, double);
 int    CalcAerodynamic(char, double, double, double, double, double,
 	  	       double *, double *, double *, double *, double *);
@@ -94,6 +95,7 @@ void   compute_soil_layer_thermal_properties(layer_data_struct *, double *,
                                              double *, int);
 // driver: void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
 double compute_zwt(soil_con_struct *, int, double);
+void   correct_precip(double *, double, double, double, double);
 // driver: out_data_struct *create_output_list();
 double darkinhib(double);
 // driver: void   display_current_settings(int, filenames_struct *, global_param_struct *);
@@ -165,7 +167,7 @@ void iceform (double *,double *,double ,double,double *,int, int, double, double
 void icerad(double,double ,double,double *, double *,double *);
 int    initialize_new_storm(cell_data_struct ***, veg_var_struct ***,
 			    int, int, int, double, double);
-int lakeice(double *, double, double, double, double, int, 
+int lakeice(double *, double, double, double, double, int,
         double, double, double *, double, double, int, dmy_struct, double *, double *, double, double);
 void   latent_heat_from_snow(double, double, double, double, double,
                              double, double, double *, double *,
@@ -240,8 +242,8 @@ double solve_atmos_energy_bal(double Tcanopy, ...);
 double solve_atmos_moist_bal(double , ...);
 double solve_canopy_energy_bal(double Tfoliage, ...);
 // lake: solve_lake
-int solve_lake(double, double, double, double, double, double, double, double, 
-        double, double, lake_var_struct *, lake_con_struct, 
+int solve_lake(double, double, double, double, double, double, double, double,
+        double, double, lake_var_struct *, lake_con_struct,
         soil_con_struct, int, int, double, dmy_struct, double);
 double solve_snow(char, double, double, double, double, double, double,
                   double, double, double, double, double, double,

@@ -10,7 +10,6 @@ void   calc_longwave(double *, double, double, double);
 void   calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct *);
-double calc_veg_height(double);
 void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
@@ -18,7 +17,6 @@ void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 filenames_struct cmd_proc(int argc, char *argv[]);
 void   compress_files(char string[]);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
-void   correct_precip(double *, double, double, double, double);
 out_data_struct *create_output_list();
 void   display_current_settings(int, filenames_struct *, global_param_struct *);
 void   free_atmos(int nrecs, atmos_data_struct **atmos);

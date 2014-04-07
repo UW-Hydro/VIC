@@ -62,7 +62,9 @@ double CalcBlowingSnow(double, double, int, double, double, double, double,
                        float, double, int, int, float, double, double, double *);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
 double CalcSnowPackEnergyBalance(double Tsurf, ...);
-// CalcBlowingSnow: CalcSubFlux
+double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double utshear,
+       double ushear, double fe, double Tsnow, double Tair, double U10,
+       double Zo_salt, double F, double *Transport);
 void canopy_assimilation(char, double, double, double, double *, double,
                          double, double *, double, double, double *,
                          double, char *, double *, double *,
@@ -153,11 +155,14 @@ double func_atmos_energy_bal(double, va_list);
 double func_atmos_moist_bal(double, va_list);
 double func_canopy_energy_bal(double, va_list);
 double func_surf_energy_bal(double, va_list);
+double (*funcd)(double z,double es,  double Wind, double AirDens, double ZO,
+        double EactAir,double F, double hsalt, double phi_r,
+        double ushear, double Zrh);
 int get_depth(lake_con_struct, double, double *);
-// CalcBlowingSnow: get_prob
+double get_prob(double Tair, double Age, double SurfaceLiquidWater, double U10);
 int get_sarea(lake_con_struct, double, double *);
-// CalcBlowingSnow: get_shear
-// CalcBlowingSnow: get_thresh
+void get_shear(double x, double *f, double *df, double Ur, double Zr);
+double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt, int flag);
 int get_volume(lake_con_struct, double, double *);
 double hiTinhib(double);
 int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
@@ -187,7 +192,7 @@ double penman(double, double, double, double, double, double, double);
 void photosynth(char, double, double, double, double, double, double,
                 double, double, double, char *, double *, double *,
                 double *, double *, double *);
-// CalcBlowingSnow: polint
+void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void   prepare_full_energy(int, int, int, dist_prcp_struct *,
 			   soil_con_struct *, double *, double *);
 int    put_data(dist_prcp_struct *, atmos_data_struct *,
@@ -195,7 +200,9 @@ int    put_data(dist_prcp_struct *, atmos_data_struct *,
                 lake_con_struct *, out_data_file_struct *,
 		out_data_struct *, save_data_struct *,
  	        dmy_struct *, int);
-// CalcBlowingSnow: qromb
+double qromb(double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO,
+       double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh,
+       double a, double b);
 int    redistribute_during_storm(cell_data_struct ***, veg_var_struct ***,
 				 int, int, int, double, double, double,
 				 double *);
@@ -206,14 +213,14 @@ void rescale_snow_storage(double, double, snow_data_struct *);
 void rescale_soil_veg_fluxes(double, double, cell_data_struct *, veg_var_struct *);
 void rhoinit(double *, double);
 double root_brent(double, double, char *, double (*Function)(double, va_list), ...);
-// CalcBlowingSnow: rtnewt
+double rtnewt(double x1, double x2, double xacc, double Ur, double Zr);
 int    runoff(cell_data_struct *, cell_data_struct *,
               energy_bal_struct *, soil_con_struct *, double *,
               double *, double, int, int, int, int, int);
 void set_node_parameters(double *, double *, double *, double *, double *, double *,
 			 double *, double *, double *, double *, double *,
 			 double *, double *, int, int, char);
-// CalcBlowingSnow: shear_stress
+void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt, double utshear);
 double snow_albedo(double, double, double, double, double, double, int, char);
 double snow_density(snow_data_struct *, double, double, double, double, double);
 int    snow_intercept(double, double, double, double, double, double,
@@ -271,7 +278,9 @@ int   solve_T_profile_implicit(double *, double *, char *, int *, double *, doub
 			       double *, double *, double *, double *, double *, double *, double *);
 double specheat (double);
 double StabilityCorrection(double, double, double, double, double, double);
-// CalcBlowingSnow: sub_with_height
+double sub_with_height(double z,double es,  double Wind, double AirDens, double ZO,
+        double EactAir,double F, double hsalt, double phi_r,
+        double ushear, double Zrh);
 int    surface_fluxes(char, double, double, double, double,
 		      double, double, double *, double *, double **,
                       double *, double *, double *, double *,
@@ -291,8 +300,12 @@ void transpiration(layer_data_struct *, int, int, double, double, double,
 		   double *, double *, double *, double *, double *,
                    double *, float *, double *, double, double *,
                    double, double *, double *, double *, double *);
-// CalcBlowingSnow: transport_with_height
-// CalcBlowingSnow" trapzd
+double transport_with_height(double z,double es,  double Wind, double AirDens, double ZO,
+        double EactAir,double F, double hsalt, double phi_r,
+        double ushear, double Zrh);
+double trapzd(double (*funcd)(), double es, double Wind, double AirDens,
+    double ZO, double EactAir, double F, double hsalt, double phi_r,
+    double ushear, double Zrh, double a, double b, int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned);
 void vicerror(char *);

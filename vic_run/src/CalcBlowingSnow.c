@@ -24,10 +24,8 @@
  *   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.			TJB
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <vicNl.h>
+#include <vic_def.h>
+#include <vic_run.h>
 #include <mtclim_constants_vic.h>
 
 static char vcid[] = "$Id$";
@@ -53,26 +51,6 @@ static char vcid[] = "$Id$";
 #define FETCH 1               /* Include fetch dependence (1). */
 #define CALC_PROB 1             /* Variable (1) or constant (0) probability of occurence. */
 
-double qromb(double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, 
-	     double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, 
-	     double a, double b);
-double (*funcd)(double z,double es,  double Wind, double AirDens, double ZO,          
-			  double EactAir,double F, double hsalt, double phi_r,         
-			  double ushear, double Zrh);
-double sub_with_height(double z,double es,  double Wind, double AirDens, double ZO,          
-			  double EactAir,double F, double hsalt, double phi_r,         
-			  double ushear, double Zrh);
-double transport_with_height(double z,double es,  double Wind, double AirDens, double ZO,
-				double EactAir,double F, double hsalt, double phi_r,         
-				double ushear, double Zrh);
-double rtnewt(double x1, double x2, double xacc, double Ur, double Zr);
-void get_shear(double x, double *f, double *df, double Ur, double Zr);
-double get_prob(double Tair, double Age, double SurfaceLiquidWater, double U10);
-double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt, int flag);
-void shear_stress(double U10, double ZO,double *ushear, double *Zo_salt, double utshear);
-double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens, double utshear, 
-		   double ushear, double fe, double Tsnow, double Tair, double U10, 
-		   double Zo_salt, double F, double *Transport);
 
 /*****************************************************************************
   Function name: CalcBlowingSnow()
@@ -335,11 +313,6 @@ double qromb(double (*funcd)(), double es, double Wind, double AirDens, double Z
      // Returns the integral of the function func from a to b.  Integration is performed 
      // by Romberg's method:  Numerical Recipes in C Section 4.3
 {
-  void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-  double trapzd(double (*funcd)(), double es, double Wind, double AirDens, 
-		double ZO, double EactAir, double F, double hsalt, double phi_r, 
-		double ushear, double Zrh, double a, double b, int n);
-
   double ss, dss;
   double s[MAX_ITER+1], h[MAX_ITER+2];
   int j;

@@ -86,7 +86,6 @@ void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *, globa
 void write_model_state(dist_prcp_struct *, global_param_struct *, int, 
                        int, filep_struct *, soil_con_struct *, char *,
                        int *, lake_con_struct);
-void write_vegvar(veg_var_struct *, int);
 void zero_output_list(out_data_struct *);
 
 #endif

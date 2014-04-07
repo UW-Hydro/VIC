@@ -299,5 +299,7 @@ int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, 
 int water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
+void write_layer(layer_data_struct *, int, int, double *, double *);
+
 
 #endif

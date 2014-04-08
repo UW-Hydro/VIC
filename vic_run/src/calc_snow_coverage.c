@@ -12,7 +12,7 @@ double calc_snow_coverage(int    *store_snow,
 			  double  old_depth,
 			  double  melt,
 			  double *max_snow_depth, 
-			  double *snowfall, 
+			  double  snowfall, 
 			  double *store_swq,
 			  double *snow_distrib_slope,
 			  double *store_coverage) 
@@ -34,6 +34,7 @@ double calc_snow_coverage(int    *store_snow,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2014-Mar-29 Removed DIST_PRCP option.					TJB
 *************************************************************************/
 {
 
@@ -44,7 +45,7 @@ double calc_snow_coverage(int    *store_snow,
     New snow falls on partial snowpack
   *************************************/
 
-  if ( snowfall[0] > 0 ) {
+  if ( snowfall > 0 ) {
 
     /*************************
       Continued accumulation

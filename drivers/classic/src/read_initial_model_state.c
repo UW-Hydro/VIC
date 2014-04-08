@@ -5,15 +5,12 @@
 static char vcid[] = "$Id$";
 
 void read_initial_model_state(FILE                *init_state,
-			      dist_prcp_struct    *prcp,
+			      all_vars_struct     *all_vars,
 			      global_param_struct *gp,
 			      int                  Nveg,
 			      int                  Nbands,
 			      int                  cellnum,
 			      soil_con_struct     *soil_con,
-			      int                  Ndist,
-			      char                *init_STILL_STORM,
-			      int                 *init_DRY_TIME,
 			      lake_con_struct      lake_con)
 /*********************************************************************
   read_initial_model_state   Keith Cherkauer         April 14, 2000
@@ -89,6 +86,7 @@ void read_initial_model_state(FILE                *init_state,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 *********************************************************************/
 {
   extern option_struct options;
@@ -102,7 +100,6 @@ void read_initial_model_state(FILE                *init_state,
   int    band, iband;
   int    lidx;
   int    nidx;
-  int    dist;
   int    tmp_cellnum;
   int    tmp_Nveg;
   int    tmp_Nband;
@@ -111,17 +108,17 @@ void read_initial_model_state(FILE                *init_state,
   int    tmp_int, node;
   int    frost_area;
 
-  cell_data_struct     ***cell;
+  cell_data_struct      **cell;
   snow_data_struct      **snow;
   energy_bal_struct     **energy;
-  veg_var_struct       ***veg_var;
+  veg_var_struct        **veg_var;
   lake_var_struct        *lake_var;
   
-  cell    = prcp->cell;
-  veg_var = prcp->veg_var;
-  snow    = prcp->snow;
-  energy  = prcp->energy;
-  lake_var = &prcp->lake_var;
+  cell    = all_vars->cell;
+  veg_var = all_vars->veg_var;
+  snow    = all_vars->snow;
+  energy  = all_vars->energy;
+  lake_var = &all_vars->lake_var;
 
   /* read cell information */
   if ( options.BINARY_STATE_FILE ) {
@@ -200,18 +197,6 @@ void read_initial_model_state(FILE                *init_state,
   /* Input for all vegetation types */
   for ( veg = 0; veg <= Nveg; veg++ ) {
     
-    // read distributed precipitation variables
-    if ( options.BINARY_STATE_FILE ) {
-      fread( &prcp->mu[veg], sizeof(double), 1, init_state );
-      fread( &init_STILL_STORM[veg], sizeof(char), 1, init_state );
-      fread( &init_DRY_TIME[veg], sizeof(int), 1, init_state );
-    }
-    else {
-      fscanf( init_state, "%lf %d %d", &prcp->mu[veg], &tmp_char, 
-	      &init_DRY_TIME[veg] );
-      init_STILL_STORM[veg] = (char)tmp_char;
-    }
- 
     /* Input for all snow bands */
     for ( band = 0; band < Nbands; band++ ) {
       /* Read cell identification information */
@@ -230,83 +215,78 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror(ErrStr);
       }
       
-      // Read both wet and dry fractions if using distributed precipitation
-      for ( dist = 0; dist < Ndist; dist ++ ) {
-	
-	/* Read total soil moisture */
-	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &cell[dist][veg][band].layer[lidx].moist,
+      /* Read total soil moisture */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	if ( options.BINARY_STATE_FILE ) {
+	  if ( fread( &cell[veg][band].layer[lidx].moist,
 			sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	}
+	else {
+	  if ( fscanf(init_state," %lf", 
+			&cell[veg][band].layer[lidx].moist) == EOF ) 
+	    nrerror("End of model state file found unexpectedly");
+	}
+      }
+	
+      /* Read average ice content */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+	  if ( options.BINARY_STATE_FILE ) {
+	    if ( fread( &cell[veg][band].layer[lidx].ice[frost_area],
+			  sizeof(double), 1, init_state ) != 1 )
 	      nrerror("End of model state file found unexpectedly");
 	  }
 	  else {
 	    if ( fscanf(init_state," %lf", 
-			&cell[dist][veg][band].layer[lidx].moist) == EOF ) 
+			  &cell[veg][band].layer[lidx].ice[frost_area]) == EOF ) 
 	      nrerror("End of model state file found unexpectedly");
 	  }
 	}
+      }
 	
-        /* Read average ice content */
-        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
-	    if ( options.BINARY_STATE_FILE ) {
-	      if ( fread( &cell[dist][veg][band].layer[lidx].ice[frost_area],
-			  sizeof(double), 1, init_state ) != 1 )
-		nrerror("End of model state file found unexpectedly");
-	    }
-	    else {
-	      if ( fscanf(init_state," %lf", 
-			  &cell[dist][veg][band].layer[lidx].ice[frost_area]) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-	    }
-	  }
-	}
-	
-	if ( veg < Nveg ) {
-	  /* Read dew storage */
-	  if ( options.BINARY_STATE_FILE ) {
-	    if ( fread( &veg_var[dist][veg][band].Wdew, sizeof(double), 1, 
+      if ( veg < Nveg ) {
+	/* Read dew storage */
+	if ( options.BINARY_STATE_FILE ) {
+	  if ( fread( &veg_var[veg][band].Wdew, sizeof(double), 1, 
 			init_state ) != 1 ) 
-	      nrerror("End of model state file found unexpectedly");
-	  }
-	  else {
-	    if ( fscanf(init_state," %lf", &veg_var[dist][veg][band].Wdew) == EOF ) 
-	      nrerror("End of model state file found unexpectedly");
-	  }
-
-          if ( options.CARBON ) {
-            if ( options.BINARY_STATE_FILE ) {
-	      /* Read cumulative annual NPP */
-	      if ( fread( &(veg_var[dist][veg][band].AnnualNPP), sizeof(double), 1, init_state ) != 1 )
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fread( &(veg_var[dist][veg][band].AnnualNPPPrev), sizeof(double), 1, init_state ) != 1 )
-	        nrerror("End of model state file found unexpectedly");
-	      /* Read Soil Carbon Storage */
-	      if ( fread( &(cell[dist][veg][band].CLitter), sizeof(double), 1, init_state ) != 1 )
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fread( &(cell[dist][veg][band].CInter), sizeof(double), 1, init_state ) != 1 )
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fread( &(cell[dist][veg][band].CSlow), sizeof(double), 1, init_state ) != 1 )
-	        nrerror("End of model state file found unexpectedly");
-            }
-            else {
-	      /* Read cumulative annual NPP */
-	      if ( fscanf(init_state," %lf", &veg_var[dist][veg][band].AnnualNPP) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fscanf(init_state," %lf", &veg_var[dist][veg][band].AnnualNPPPrev) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-	      /* Read Soil Carbon Storage */
-	      if ( fscanf(init_state," %lf", &cell[dist][veg][band].CLitter) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fscanf(init_state," %lf", &cell[dist][veg][band].CInter) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-	      if ( fscanf(init_state," %lf", &cell[dist][veg][band].CSlow) == EOF ) 
-	        nrerror("End of model state file found unexpectedly");
-            }
-          }
-
+	    nrerror("End of model state file found unexpectedly");
 	}
+	else {
+	  if ( fscanf(init_state," %lf", &veg_var[veg][band].Wdew) == EOF ) 
+	    nrerror("End of model state file found unexpectedly");
+	}
+
+        if ( options.CARBON ) {
+          if ( options.BINARY_STATE_FILE ) {
+	    /* Read cumulative annual NPP */
+	    if ( fread( &(veg_var[veg][band].AnnualNPP), sizeof(double), 1, init_state ) != 1 )
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fread( &(veg_var[veg][band].AnnualNPPPrev), sizeof(double), 1, init_state ) != 1 )
+	      nrerror("End of model state file found unexpectedly");
+	    /* Read Soil Carbon Storage */
+	    if ( fread( &(cell[veg][band].CLitter), sizeof(double), 1, init_state ) != 1 )
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fread( &(cell[veg][band].CInter), sizeof(double), 1, init_state ) != 1 )
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fread( &(cell[veg][band].CSlow), sizeof(double), 1, init_state ) != 1 )
+	      nrerror("End of model state file found unexpectedly");
+          }
+          else {
+	    /* Read cumulative annual NPP */
+	    if ( fscanf(init_state," %lf", &veg_var[veg][band].AnnualNPP) == EOF ) 
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fscanf(init_state," %lf", &veg_var[veg][band].AnnualNPPPrev) == EOF ) 
+	      nrerror("End of model state file found unexpectedly");
+	    /* Read Soil Carbon Storage */
+	    if ( fscanf(init_state," %lf", &cell[veg][band].CLitter) == EOF ) 
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fscanf(init_state," %lf", &cell[veg][band].CInter) == EOF ) 
+	      nrerror("End of model state file found unexpectedly");
+	    if ( fscanf(init_state," %lf", &cell[veg][band].CSlow) == EOF ) 
+	      nrerror("End of model state file found unexpectedly");
+          }
+        }
 
       }
       
@@ -378,35 +358,31 @@ void read_initial_model_state(FILE                *init_state,
   }
   if ( options.LAKES ) {
     if ( options.BINARY_STATE_FILE ) {
-      // Read both wet and dry fractions if using distributed precipitation
-      for ( dist = 0; dist < Ndist; dist ++ ) {
-	
-	/* Read total soil moisture */
-	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  if ( fread( &lake_var->soil.layer[lidx].moist, sizeof(double), 1, init_state ) != 1 )
-	    nrerror("End of model state file found unexpectedly");
-	}
-	
-        /* Read average ice content */
-        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
-	    if ( fread( &lake_var->soil.layer[lidx].ice[frost_area], sizeof(double), 1, init_state ) != 1 )
-		nrerror("End of model state file found unexpectedly");
-	  }
-	}
 
-        if ( options.CARBON ) {
-	  /* Read Soil Carbon Storage */
-	  if ( fread( &(lake_var->soil.CLitter), sizeof(double), 1, init_state ) != 1 )
-	    nrerror("End of model state file found unexpectedly");
-	  if ( fread( &(lake_var->soil.CInter), sizeof(double), 1, init_state ) != 1 )
-	    nrerror("End of model state file found unexpectedly");
-	  if ( fread( &(lake_var->soil.CSlow), sizeof(double), 1, init_state ) != 1 )
-	    nrerror("End of model state file found unexpectedly");
-        }
-
+      /* Read total soil moisture */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	if ( fread( &lake_var->soil.layer[lidx].moist, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
       }
-      
+	
+      /* Read average ice content */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+          if ( fread( &lake_var->soil.layer[lidx].ice[frost_area], sizeof(double), 1, init_state ) != 1 )
+            nrerror("End of model state file found unexpectedly");
+	}
+      }
+
+      if ( options.CARBON ) {
+        /* Read Soil Carbon Storage */
+        if ( fread( &(lake_var->soil.CLitter), sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+	if ( fread( &(lake_var->soil.CInter), sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+	if ( fread( &(lake_var->soil.CSlow), sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+      }
+
       /* Read snow data */
       if ( fread( &lake_var->snow.last_snow, sizeof(int), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
@@ -491,33 +467,29 @@ void read_initial_model_state(FILE                *init_state,
       
     }
     else {
-      // Read both wet and dry fractions if using distributed precipitation
-      for ( dist = 0; dist < Ndist; dist ++ ) {
+
+      /* Read total soil moisture */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+	if ( fscanf(init_state," %lf", &lake_var->soil.layer[lidx].moist) == EOF ) 
+          nrerror("End of model state file found unexpectedly");
+      }
 	
-	/* Read total soil moisture */
-	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  if ( fscanf(init_state," %lf", &lake_var->soil.layer[lidx].moist) == EOF ) 
-	    nrerror("End of model state file found unexpectedly");
-	}
-	
-        /* Read average ice content */
-        for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
-	    if ( fscanf(init_state," %lf", &lake_var->soil.layer[lidx].ice[frost_area]) == EOF ) 
-	      nrerror("End of model state file found unexpectedly");
-	  }
-	}
-	
-        if (options.CARBON) {
-	  /* Read Soil Carbon Storage */
-	  if ( fscanf(init_state," %lf", &lake_var->soil.CLitter) == EOF ) 
-	    nrerror("End of model state file found unexpectedly");
-	  if ( fscanf(init_state," %lf", &lake_var->soil.CInter) == EOF ) 
-	    nrerror("End of model state file found unexpectedly");
-	  if ( fscanf(init_state," %lf", &lake_var->soil.CSlow) == EOF ) 
+      /* Read average ice content */
+      for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+	  if ( fscanf(init_state," %lf", &lake_var->soil.layer[lidx].ice[frost_area]) == EOF ) 
 	    nrerror("End of model state file found unexpectedly");
         }
-
+      }
+	
+      if (options.CARBON) {
+	/* Read Soil Carbon Storage */
+	if ( fscanf(init_state," %lf", &lake_var->soil.CLitter) == EOF ) 
+	  nrerror("End of model state file found unexpectedly");
+	if ( fscanf(init_state," %lf", &lake_var->soil.CInter) == EOF ) 
+	  nrerror("End of model state file found unexpectedly");
+	if ( fscanf(init_state," %lf", &lake_var->soil.CSlow) == EOF ) 
+	  nrerror("End of model state file found unexpectedly");
       }
 
       /* Read snow data */

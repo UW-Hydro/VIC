@@ -42,15 +42,12 @@ static char vcid[] = "$Id$";
 
 **********************************************************************/
 
-double canopy_evap(layer_data_struct *layer_wet,
-                   layer_data_struct *layer_dry,
-                   veg_var_struct    *veg_var_wet, 
-                   veg_var_struct    *veg_var_dry, 
+double canopy_evap(layer_data_struct *layer,
+                   veg_var_struct    *veg_var, 
 		   char               CALC_EVAP,
                    int                veg_class, 
                    int                month, 
-                   double             mu,
-		   double            *Wdew,
+                   double            *Wdew,
                    double             delta_t,
                    double             rad,
 		   double             vpd,
@@ -61,7 +58,7 @@ double canopy_evap(layer_data_struct *layer_wet,
                    double             roughness,
                    double             ref_height,
 		   double             elevation,
-                   double            *prec,
+                   double             ppt,
 		   double            *depth,
 		   double            *Wmax,
 		   double            *Wcr,
@@ -101,6 +98,7 @@ double canopy_evap(layer_data_struct *layer_wet,
 	      and into separate function calc_rc().			TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Jul-25 Save dryFrac for use elsewhere.				TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/ 
 
 {
@@ -110,10 +108,7 @@ double canopy_evap(layer_data_struct *layer_wet,
   extern option_struct options;
 
   /** declare local variables **/
-  int                Ndist;
-  int                dist;
   int                i;
-  double             ppt;		/* effective precipitation */
   double             f;		/* fraction of time step used to fill canopy */
   double             throughfall;
   double             Evap;
@@ -122,111 +117,84 @@ double canopy_evap(layer_data_struct *layer_wet,
   double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
   double             rc;
-  layer_data_struct *tmp_layer;
-  veg_var_struct    *tmp_veg_var;
-
-  if(options.DIST_PRCP) Ndist = 2;
-  else Ndist = 1;
 
   Evap = 0;
 
-  for ( dist = 0; dist < Ndist; dist++ ) {
+  /* Initialize variables */
+  for ( i = 0; i < options.Nlayer; i++ ) layerevap[i] = 0;
+  canopyevap = 0;
+  throughfall = 0;
+  tmp_Wdew = *Wdew;
 
-    /* Initialize variables */
-    for ( i = 0; i < options.Nlayer; i++ ) layerevap[i] = 0;
-    canopyevap = 0;
-    throughfall = 0;
+  /****************************************************
+    Compute Evaporation from Canopy Intercepted Water
+  ****************************************************/
 
-    /* Set parameters for distributed precipitation */
-    if(dist==0) {
-      tmp_layer   = layer_wet;
-      tmp_veg_var = veg_var_wet;
-      ppt         = prec[WET];
-      tmp_Wdew    = Wdew[WET];
-    }
-    else {
-      tmp_layer   = layer_dry;
-      tmp_veg_var = veg_var_dry;
-      ppt         = prec[DRY];
-      mu          = (1. - mu);
-      tmp_Wdew    = Wdew[DRY];
-    }      
-
-    if(mu > 0) {
-
-      /****************************************************
-        Compute Evaporation from Canopy Intercepted Water
-      ****************************************************/
-
-      tmp_veg_var->Wdew = tmp_Wdew;
-      if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
-	throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
-	tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
-      }
-      
-      rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
-		   air_temp, vpd, veg_lib[veg_class].LAI[month-1],
-		   (double)1.0, FALSE);
-      canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
-		   * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
-		   * delta_t / SEC_PER_DAY;
-
-      if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
-	/** If daily time step, evap can include current precipitation **/
-	f = min(1.0,((tmp_Wdew + ppt) / canopyevap));
-      else if (canopyevap > 0.0)
-	/** If sub-daily time step, evap can not exceed current storage **/
-	f = min(1.0,((tmp_Wdew) / canopyevap));
-      else
-	f = 1.0;
-      canopyevap *= f;
-
-      /* compute fraction of canopy that is dry */
-      *dryFrac = 1.0-f*pow((tmp_Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
-
-      tmp_Wdew += ppt - canopyevap;
-      if (tmp_Wdew < 0.0) 
-	tmp_Wdew = 0.0;
-      if (tmp_Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
-	throughfall += 0.0;
-      else {
-	throughfall += tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
-	tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
-      }
-
-      /*******************************************
-        Compute Evapotranspiration from Vegetation
-      *******************************************/
-      if(CALC_EVAP)
-	transpiration(tmp_layer, veg_class, month, rad, vpd, net_short, 
-		      air_temp, ra, ppt, *dryFrac, delta_t, 
-		      elevation, depth, Wmax, Wcr, Wpwp, 
-		      layerevap, 
-		      frost_fract, 
-		      root,
-                      tmp_veg_var->NscaleFactor,
-                      shortwave,
-                      tmp_veg_var->aPARLayer,
-                      Catm,
-                      CanopLayerBnd,
-                      tmp_veg_var->rsLayer,
-                      &(tmp_veg_var->rc),
-                      &(tmp_veg_var->NPPfactor));
-
-    }
-
-    tmp_veg_var->canopyevap = canopyevap;
-    tmp_veg_var->throughfall = throughfall;
-    tmp_veg_var->Wdew = tmp_Wdew;
-    tmp_Evap = canopyevap;
-    for(i=0;i<options.Nlayer;i++) {
-      tmp_layer[i].evap  = layerevap[i];
-      tmp_Evap          += layerevap[i];
-    }
-    
-    Evap += tmp_Evap * mu / (1000. * delta_t);
-
+  veg_var->Wdew = tmp_Wdew;
+  if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
+    throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
   }
+      
+  rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
+               air_temp, vpd, veg_lib[veg_class].LAI[month-1],
+               (double)1.0, FALSE);
+  canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
+               * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
+               * delta_t / SEC_PER_DAY;
+
+  if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
+    /** If daily time step, evap can include current precipitation **/
+    f = min(1.0,((tmp_Wdew + ppt) / canopyevap));
+  else if (canopyevap > 0.0)
+    /** If sub-daily time step, evap can not exceed current storage **/
+    f = min(1.0,((tmp_Wdew) / canopyevap));
+  else
+    f = 1.0;
+  canopyevap *= f;
+
+  /* compute fraction of canopy that is dry */
+  *dryFrac = 1.0-f*pow((tmp_Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+
+  tmp_Wdew += ppt - canopyevap;
+  if (tmp_Wdew < 0.0) 
+    tmp_Wdew = 0.0;
+  if (tmp_Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
+    throughfall += 0.0;
+  else {
+    throughfall += tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
+  }
+
+  /*******************************************
+    Compute Evapotranspiration from Vegetation
+  *******************************************/
+  if(CALC_EVAP)
+    transpiration(layer, veg_class, month, rad, vpd, net_short, 
+                  air_temp, ra, ppt, *dryFrac, delta_t, 
+                  elevation, depth, Wmax, Wcr, Wpwp, 
+                  layerevap, 
+                  frost_fract, 
+                  root,
+                  veg_var->NscaleFactor,
+                  shortwave,
+                  veg_var->aPARLayer,
+                  Catm,
+                  CanopLayerBnd,
+                  veg_var->rsLayer,
+                  &(veg_var->rc),
+                  &(veg_var->NPPfactor));
+
+  veg_var->canopyevap = canopyevap;
+  veg_var->throughfall = throughfall;
+  veg_var->Wdew = tmp_Wdew;
+  tmp_Evap = canopyevap;
+  for(i=0;i<options.Nlayer;i++) {
+    layer[i].evap  = layerevap[i];
+    tmp_Evap          += layerevap[i];
+  }
+    
+  Evap += tmp_Evap / (1000. * delta_t);
 
   return (Evap);
 

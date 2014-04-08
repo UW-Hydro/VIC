@@ -1,17 +1,12 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MIN_PREC     1.e-5      /* smallest amount of precipitation that
-				   is allowed to fall as snow or rain in
-				   a mixed precipitation event */
-
 static char vcid[] = "$Id$";
 
 double calc_rainonly(double air_temp,
 		     double prec,
 		     double MAX_SNOW_TEMP,
-		     double MIN_RAIN_TEMP,
-		     double mu) {
+		     double MIN_RAIN_TEMP) {
 /**********************************************************************
   calc_rainonly.c	Keith Cherkauer		March 7, 1998
 
@@ -38,6 +33,7 @@ double calc_rainonly(double air_temp,
 	    to 100% of precip, causing function to fail.	TJB
   2007-Apr-04 Modified to handle grid cell errors by returning to the
            main subroutine, rather than ending the simulation.   GCT/KAC
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 
   double rainonly;
@@ -55,10 +51,6 @@ double calc_rainonly(double air_temp,
     rainonly = prec;
   }
 
-  if(mu < 1) rainonly = prec;
-
   return(rainonly);
 
 }
-
-#undef MIN_RAIN

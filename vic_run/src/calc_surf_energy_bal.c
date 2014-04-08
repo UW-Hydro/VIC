@@ -24,7 +24,6 @@ double calc_surf_energy_bal(double             Le,
 			    double             ice0,
 			    double             melt_energy,
 			    double             moist,
-			    double             mu,
 			    double             snow_coverage,
 			    double             snow_depth,
 			    double             BareAlbedo,
@@ -35,10 +34,10 @@ double calc_surf_energy_bal(double             Le,
 			    double            *displacement,
 			    double            *melt,
 			    double            *ppt,
-			    double            *rainfall,
+			    double             rainfall,
 			    double            *ref_height,
 			    double            *roughness,
-			    double            *snowfall,
+			    double             snowfall,
 			    double            *wind,
 			    float             *root,
 			    int                INCLUDE_SNOW,
@@ -58,12 +57,10 @@ double calc_surf_energy_bal(double             Le,
 			    atmos_data_struct *atmos,
 			    dmy_struct        *dmy,
 			    energy_bal_struct *energy,
-			    layer_data_struct *layer_dry,
-			    layer_data_struct *layer_wet,
+			    layer_data_struct *layer,
 			    snow_data_struct  *snow,
 			    soil_con_struct   *soil_con,
-			    veg_var_struct    *veg_var_dry,
-			    veg_var_struct    *veg_var_wet,
+			    veg_var_struct    *veg_var,
 			    int                nrecs)
 /**************************************************************
   calc_surf_energy_bal.c  Greg O'Donnell and Keith Cherkauer  Sept 9 1997
@@ -173,6 +170,7 @@ double calc_surf_energy_bal(double             Le,
   2013-Jul-25 Added photosynthesis.					TJB
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -218,7 +216,7 @@ double calc_surf_energy_bal(double             Le,
   double   ra;
   double   refrozen_water;
 
-  double   Wdew[2];
+  double   Wdew;
   double  *T_node;
   double   Tnew_node[MAX_NODES];
   char     Tnew_fbflag[MAX_NODES];
@@ -234,7 +232,6 @@ double calc_surf_energy_bal(double             Le,
   double  *alpha;
   double  *beta;
   double  *gamma;
-  layer_data_struct layer[MAX_LAYERS];
 
   double   T_lower, T_upper;
   double   LongSnowIn;
@@ -290,8 +287,7 @@ double calc_surf_energy_bal(double             Le,
   bubble              = soil_con->bubble[0];
   expt                = soil_con->expt[0];
   Tsnow_surf          = snow->surf_temp;
-  Wdew[WET]           = veg_var_wet->Wdew;
-  if(options.DIST_PRCP) Wdew[DRY] = veg_var_dry->Wdew;
+  Wdew                = veg_var->Wdew;
   FIRST_SOLN[0] = TRUE;
   FIRST_SOLN[1] = TRUE;
   if ( snow->depth > 0. ) 
@@ -388,10 +384,10 @@ double calc_surf_energy_bal(double             Le,
 		       UnderStory, overstory, NetShortBare, NetShortGrnd, 
 		       TmpNetShortSnow, Tair, atmos_density, 
 		       atmos_pressure,
-		       emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
+		       emissivity, LongBareIn, LongSnowIn, surf_atten, 
 		       VPcanopy, VPDcanopy, 
 		       atmos_shortwave, atmos_Catm, dryFrac,
-		       Wdew, displacement, aero_resist, aero_resist_used, 
+		       &Wdew, displacement, aero_resist, aero_resist_used, 
 		       rainfall, ref_height, roughness, wind, Le, 
 		       energy->advection, OldTSurf, snow->pack_temp, 
 		       Tsnow_surf, kappa_snow, melt_energy, 
@@ -402,7 +398,7 @@ double calc_surf_energy_bal(double             Le,
 		       tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 		       alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
-		       soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
+		       soil_con, layer, veg_var, 
 		       INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
 		       FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
@@ -431,9 +427,9 @@ double calc_surf_energy_bal(double             Le,
 					   atmos_density, atmos_pressure, 
 					   (double)soil_con->elevation, 
 					   emissivity, LongBareIn, LongSnowIn, 
-					   mu, surf_atten, VPcanopy, VPDcanopy, 
+					   surf_atten, VPcanopy, VPDcanopy, 
 					   atmos_shortwave, atmos_Catm, dryFrac,
-					   Wdew, displacement, aero_resist, aero_resist_used, 
+					   &Wdew, displacement, aero_resist, aero_resist_used, 
 					   rainfall, ref_height, roughness, 
 					   wind, Le, energy->advection, 
 					   OldTSurf, snow->pack_temp, 
@@ -449,8 +445,7 @@ double calc_surf_energy_bal(double             Le,
 					   gamma, ice_node, kappa_node, 
 					   max_moist_node, moist_node, 
 					   soil_con->frost_fract, 
-					   layer_wet, layer_dry, veg_var_wet, 
-					   veg_var_dry, 
+					   layer, veg_var, 
 					   INCLUDE_SNOW, soil_con->FS_ACTIVE, 
 					   NOFLUX, EXP_TRANS,
 					   snow->snow, FIRST_SOLN, &NetLongBare, 
@@ -481,10 +476,10 @@ double calc_surf_energy_bal(double             Le,
 			 max_moist, moist, root, CanopLayerBnd,
 			 UnderStory, overstory, NetShortBare, NetShortGrnd, 
 			 TmpNetShortSnow, Tair, atmos_density, atmos_pressure, 
-			 emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
+			 emissivity, LongBareIn, LongSnowIn, surf_atten, 
 			 VPcanopy, VPDcanopy, 
 		         atmos_shortwave, atmos_Catm, dryFrac,
-			 Wdew, displacement, aero_resist, aero_resist_used, 
+			 &Wdew, displacement, aero_resist, aero_resist_used, 
 			 rainfall, ref_height, roughness, wind, Le, 
 			 energy->advection, OldTSurf, snow->pack_temp, 
 			 Tsnow_surf, kappa_snow, melt_energy, 
@@ -495,7 +490,7 @@ double calc_surf_energy_bal(double             Le,
 			 tmpNnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 			 alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 			 ice_node, kappa_node, max_moist_node, moist_node, 
-			 soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
+			 soil_con, layer, veg_var, 
 			 INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
 			 FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 			 &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
@@ -524,9 +519,9 @@ double calc_surf_energy_bal(double             Le,
 					     atmos_density, atmos_pressure, 
 					     (double)soil_con->elevation, 
 					     emissivity, LongBareIn, LongSnowIn, 
-					     mu, surf_atten, VPcanopy, VPDcanopy,
+					     surf_atten, VPcanopy, VPDcanopy,
 					     atmos_shortwave, atmos_Catm, dryFrac,
-					     Wdew, displacement, 
+					     &Wdew, displacement, 
 					     aero_resist, aero_resist_used, rainfall, ref_height, 
 					     roughness, wind, Le, 
 					     energy->advection, 
@@ -543,8 +538,7 @@ double calc_surf_energy_bal(double             Le,
 					     gamma, ice_node, kappa_node, 
 					     max_moist_node, moist_node, 
 					     soil_con->frost_fract, 
-					     layer_wet, layer_dry, veg_var_wet, 
-					     veg_var_dry, INCLUDE_SNOW, 
+					     layer, veg_var, INCLUDE_SNOW, 
 					     soil_con->FS_ACTIVE, NOFLUX, EXP_TRANS,
 					     snow->snow, FIRST_SOLN, &NetLongBare, 
 					     &TmpNetLongSnow, &T1, 
@@ -580,10 +574,10 @@ double calc_surf_energy_bal(double             Le,
 				max_moist, moist, root, CanopLayerBnd,
 				UnderStory, overstory, NetShortBare, NetShortGrnd, 
 				TmpNetShortSnow, Tair, atmos_density, atmos_pressure,
-				emissivity, LongBareIn, LongSnowIn, mu, surf_atten, 
+				emissivity, LongBareIn, LongSnowIn, surf_atten, 
 				VPcanopy, VPDcanopy, 
 				atmos_shortwave, atmos_Catm, dryFrac,
-				Wdew, displacement, aero_resist, aero_resist_used, 
+				&Wdew, displacement, aero_resist, aero_resist_used, 
 				rainfall, ref_height, roughness, wind, Le, 
 				energy->advection, OldTSurf, snow->pack_temp, 
 				Tsnow_surf, kappa_snow, melt_energy, 
@@ -594,7 +588,7 @@ double calc_surf_energy_bal(double             Le,
 				Nnodes, Cs_node, T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
 				alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 				ice_node, kappa_node, max_moist_node, moist_node, 
-				soil_con, layer_wet, layer_dry, veg_var_wet, veg_var_dry, 
+				soil_con, layer, veg_var, 
 				INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
 				FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 				&energy->deltaH, &energy->fusion, &energy->grnd_flux, 
@@ -615,28 +609,21 @@ double calc_surf_energy_bal(double             Le,
       Tnew_node[2] = soil_con->avg_temp + (T1-soil_con->avg_temp)*exp(-(soil_con->Zsum_node[2]-D1)/dp);
 
     }
-    calc_layer_average_thermal_props(energy, layer_wet, layer_dry, layer, soil_con, 
-				     Nnodes, iveg, Tnew_node);
+    calc_layer_average_thermal_props(energy, layer, soil_con, Nnodes, iveg, Tnew_node);
 
   /** Store precipitation that reaches the surface */
   if ( !snow->snow && !INCLUDE_SNOW ) {
     if ( iveg != Nveg ) {
       if ( veg_lib[veg_class].LAI[dmy->month-1] <= 0.0 ) { 
-	veg_var_wet->throughfall = rainfall[WET];
-	ppt[WET] = veg_var_wet->throughfall;
-	if ( options.DIST_PRCP ) {
-	  veg_var_dry->throughfall = rainfall[DRY];
-	  ppt[DRY] = veg_var_dry->throughfall;
-	}
+	veg_var->throughfall = rainfall;
+	*ppt = veg_var->throughfall;
       }
       else {
-	ppt[WET] = veg_var_wet->throughfall;
-	if(options.DIST_PRCP) ppt[DRY] = veg_var_dry->throughfall;
+	*ppt = veg_var->throughfall;
       }
     }
     else {
-      ppt[WET] = rainfall[WET];
-      if ( options.DIST_PRCP ) ppt[DRY] = rainfall[DRY];
+      *ppt = rainfall;
     }
   }
 
@@ -873,7 +860,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double emissivity;
   double LongBareIn; 
   double LongSnowIn; 
-  double mu;
   double surf_atten;
   double vp;
   double vpd;
@@ -885,7 +871,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *displacement;
   double *ra;
   double *ra_used;
-  double *rainfall;
+  double rainfall;
   double *ref_height;
   double *roughness;
   double *wind;
@@ -930,10 +916,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   double *frost_fract;
 
   /* model structures */
-  layer_data_struct *layer_wet;
-  layer_data_struct *layer_dry;
-  veg_var_struct *veg_var_wet;
-  veg_var_struct *veg_var_dry;
+  layer_data_struct *layer;
+  veg_var_struct *veg_var;
 
   /* control flags */
   int INCLUDE_SNOW;
@@ -1020,7 +1004,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   emissivity              = (double) va_arg(ap, double);
   LongBareIn              = (double) va_arg(ap, double);
   LongSnowIn              = (double) va_arg(ap, double);
-  mu                      = (double) va_arg(ap, double);
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
@@ -1032,7 +1015,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   displacement            = (double *) va_arg(ap, double *);
   ra                      = (double *) va_arg(ap, double *);
   ra_used                 = (double *) va_arg(ap, double *);
-  rainfall                = (double *) va_arg(ap, double *);
+  rainfall                = (double) va_arg(ap, double);
   ref_height              = (double *) va_arg(ap, double *);
   roughness               = (double *) va_arg(ap, double *);
   wind                    = (double *) va_arg(ap, double *);
@@ -1075,10 +1058,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   frost_fract             = (double *) va_arg(ap, double *);
 
   /* model structures */
-  layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  layer_dry               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var_wet             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  veg_var_dry             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  layer               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
 
   /* control flags */
   INCLUDE_SNOW            = (int) va_arg(ap, int);
@@ -1162,7 +1143,6 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "emissivity = %f\n",  emissivity);
   fprintf(stderr, "LongBareIn = %f\n",  LongBareIn); 
   fprintf(stderr, "LongSnowIn = %f\n",  LongSnowIn); 
-  fprintf(stderr, "mu = %f\n",  mu);
   fprintf(stderr, "surf_atten = %f\n",  surf_atten);
   fprintf(stderr, "vp = %f\n",  vp);
   fprintf(stderr, "vpd = %f\n",  vpd);
@@ -1174,7 +1154,7 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "*displacement = %f\n",  *displacement);
   fprintf(stderr, "*ra = %f\n",  *ra);
   fprintf(stderr, "*ra_used = %f\n",  *ra_used);
-  fprintf(stderr, "*rainfall = %f\n",  *rainfall);
+  fprintf(stderr, "*rainfall = %f\n",  rainfall);
   fprintf(stderr, "*ref_height = %f\n",  *ref_height);
   fprintf(stderr, "*roughness = %f\n",  *roughness);
   fprintf(stderr, "*wind = %f\n",  *wind);
@@ -1226,12 +1206,8 @@ double error_print_surf_energy_bal(double Ts, va_list ap) {
   fprintf(stderr, "*snow_flux = %f\n",  *snow_flux);
   fprintf(stderr, "*store_error = %f\n",  *store_error);
 
-  write_layer(layer_wet, iveg, options.Nlayer, frost_fract, depth);
-  if(options.DIST_PRCP) 
-    write_layer(layer_dry, iveg, options.Nlayer, frost_fract, depth);
-  write_vegvar(&(veg_var_wet[0]),iveg);
-  if(options.DIST_PRCP) 
-    write_vegvar(&(veg_var_dry[0]),iveg);
+  write_layer(layer, iveg, options.Nlayer, frost_fract, depth);
+  write_vegvar(&(veg_var[0]),iveg);
 
   if(!options.QUICK_FLUX) {
     fprintf(stderr,"Node\tT\tTnew\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tmax_moist\tice\n");

@@ -27,7 +27,8 @@ void write_forcing_file(atmos_data_struct *atmos,
   2009-Feb-22 Added OUT_VPD.						TJB
   2011-Nov-04 Added OUT_TSKC.						TJB
   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.					TJB
+  2014-Apr-02 Fixed uninitialized dummy variables.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -37,10 +38,10 @@ void write_forcing_file(atmos_data_struct *atmos,
   short int          *tmp_siptr;
   unsigned short int *tmp_usiptr;
   dmy_struct         *dummy_dmy;
-  int                 dummy_dt;
   int                 dt_sec;
 
   dt_sec = global_param.dt*SECPHOUR;
+  dummy_dmy = NULL;
 
   for ( rec = 0; rec < nrecs; rec++ ) {
     for ( j = 0; j < NF; j++ ) {
@@ -97,7 +98,7 @@ void write_forcing_file(atmos_data_struct *atmos,
           }
         }
       }
-      write_data(out_data_files, out_data, dummy_dmy, dummy_dt);
+      write_data(out_data_files, out_data, dummy_dmy, global_param.dt);
     }
   }
 

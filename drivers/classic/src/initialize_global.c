@@ -128,7 +128,8 @@ void initialize_global() {
   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. TJB
-  2014-Mar-24 Removed ARC_SOIL option         BN
+  2014-Mar-24 Removed ARC_SOIL option                                   BN
+  2014-Mar-28 Removed DIST_PRCP option.									TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -147,7 +148,6 @@ void initialize_global() {
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
-  options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.EXP_TRANS             = TRUE;
   options.FROZEN_SOIL           = FALSE;
@@ -167,7 +167,6 @@ void initialize_global() {
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
   options.PLAPSE                = TRUE;
-  options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;
   options.RC_MODE               = RC_JARVIS;

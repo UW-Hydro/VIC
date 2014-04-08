@@ -46,6 +46,7 @@ double soil_conductivity(double moist,
 	      organic fraction into account.					TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
   double Ke;
   double Ki = 2.2;      /* thermal conductivity of ice (W/mK) */
@@ -808,41 +809,5 @@ double maximum_unfrozen_water(double T,
 
   return (unfrozen);
   
-}
-
-layer_data_struct find_average_layer(layer_data_struct *wet,
-				     layer_data_struct *dry,
-				     double             depth,
-				     double             mu) {
-/*************************************************************
-  This subroutine computes the average soil layer moistures
-  between the wet and dry fraction for use in computing 
-  energy balance parameters.  Other layer variables are copied 
-  from the wet fraction structure since they are they same for 
-  wet and dry fractions.
-
-  Modifications:
-
-  2011-Jun-07 Added condition that wet and dry portions are
-	      only averaged together if DIST_PRCP is TRUE.	TJB
-  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-**************************************************************/
-
-  extern option_struct options;
-  layer_data_struct layer;
-  int frost_area;
-
-  layer = *wet;
-
-  if (options.DIST_PRCP) {
-
-    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
-      layer.ice[frost_area] = ((wet->ice[frost_area] * mu) + (dry->ice[frost_area] * (1. - mu)));
-    layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
-
-  }
-
-  return(layer);
-
 }
 

@@ -112,7 +112,7 @@ OBJS = \
 	${DRIVERPATH}/src/compute_treeline.o \
 	${DRIVERPATH}/src/correct_precip.o \
 	${DRIVERPATH}/src/display_current_settings.o \
-	${DRIVERPATH}/src/free_dist_prcp.o \
+	${DRIVERPATH}/src/free_all_vars.o \
 	${DRIVERPATH}/src/free_vegcon.o \
 	${DRIVERPATH}/src/get_dist.o \
 	${DRIVERPATH}/src/get_force_type.o \
@@ -123,8 +123,8 @@ OBJS = \
 	${DRIVERPATH}/src/initialize_snow.o \
 	${DRIVERPATH}/src/initialize_soil.o \
 	${DRIVERPATH}/src/initialize_veg.o \
+	${DRIVERPATH}/src/make_all_vars.o \
 	${DRIVERPATH}/src/make_cell_data.o \
-	${DRIVERPATH}/src/make_dist_prcp.o \
 	${DRIVERPATH}/src/make_dmy.o \
 	${DRIVERPATH}/src/make_energy_bal.o \
 	${DRIVERPATH}/src/make_in_and_outfiles.o \
@@ -169,7 +169,6 @@ OBJS = \
 	${VICPATH}/src/compute_pot_evap.o \
 	${VICPATH}/src/compute_soil_resp.o \
 	${VICPATH}/src/compute_zwt.o \
-	${VICPATH}/src/dist_prec.o \
 	${VICPATH}/src/estimate_T1.o \
 	${VICPATH}/src/faparl.o \
 	${VICPATH}/src/frozen_soil.o \
@@ -180,7 +179,6 @@ OBJS = \
 	${VICPATH}/src/func_surf_energy_bal.o \
 	${VICPATH}/src/ice_melt.o \
 	${VICPATH}/src/initialize_lake.o \
-	${VICPATH}/src/initialize_new_storm.o \
 	${VICPATH}/src/lakes.eb.o \
 	${VICPATH}/src/latent_heat_from_snow.o \
 	${VICPATH}/src/massrelease.o \
@@ -191,7 +189,6 @@ OBJS = \
 	${VICPATH}/src/photosynth.o \
 	${VICPATH}/src/prepare_full_energy.o \
 	${VICPATH}/src/put_data.o \
-	${VICPATH}/src/redistribute_during_storm.o \
 	${VICPATH}/src/root_brent.o \
 	${VICPATH}/src/runoff.o \
 	${VICPATH}/src/snow_intercept.o \
@@ -249,9 +246,9 @@ clean::
 # -------------------------------------------------------------
 # depend
 # -------------------------------------------------------------
-depend: DEPEND
-DEPEND: $(SRCS) $(HDRS)
+depend: .depend
+.depend: $(SRCS) $(HDRS)
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
-	\rm -f DEPEND	     
+	\rm -f .depend	     

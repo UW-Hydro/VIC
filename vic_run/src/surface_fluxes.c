@@ -11,7 +11,6 @@ int surface_fluxes(char                 overstory,
 		   double               height,
 		   double               ice0,
 		   double               moist0,
-		   double               mu,
 		   double               surf_atten,
 		   double              *Melt,
 		   double              *Le,
@@ -27,7 +26,6 @@ int surface_fluxes(char                 overstory,
 		   double              *wind,
 		   float               *root,
 		   int                  Nbands,
-		   int                  Ndist,
 		   int                  Nlayers,
 		   int                  Nveg,
 		   int                  band,
@@ -39,12 +37,10 @@ int surface_fluxes(char                 overstory,
 		   dmy_struct          *dmy,
 		   energy_bal_struct   *energy,
 		   global_param_struct *gp,
-		   cell_data_struct    *cell_dry,
-		   cell_data_struct    *cell_wet,
+		   cell_data_struct    *cell,
 		   snow_data_struct    *snow,
 		   soil_con_struct     *soil_con,
-		   veg_var_struct      *veg_var_dry,
-		   veg_var_struct      *veg_var_wet,
+		   veg_var_struct      *veg_var,
 		   float              lag_one,
 		   float              sigma_slope,
 		   float              fetch,
@@ -144,6 +140,7 @@ int surface_fluxes(char                 overstory,
   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -159,7 +156,6 @@ int surface_fluxes(char                 overstory,
   int                    UNSTABLE_SNOW = FALSE;
   int                    N_steps;
   int                    UnderStory;
-  int                    dist;
   int                    hidx;     // index of initial element of atmos array
   int                    step_inc; // number of atmos array elements to skip per surface fluxes step
   int                    endhidx;  // index of final element of atmos array
@@ -195,36 +191,30 @@ int surface_fluxes(char                 overstory,
   double                 last_tol_under; // previous surface iteration tol
   double                 last_tol_over; // previous overstory iteration tol
   double                 latent_ground_heat; // latent heat from understory
-  double                 ppt[2]; // precipitation/melt reaching soil surface
-  double                 rainfall[2]; // rainfall
-  double                 snowfall[2]; // snowfall
+  double                 ppt; // precipitation/melt reaching soil surface
+  double                 rainfall; // rainfall
+  double                 snowfall; // snowfall
   double                 snow_flux; // heat flux through snowpack
   double                 snow_grnd_flux; // ground heat flux into snowpack
   double                 tol_under;
   double                 tol_over;
   double                *aero_resist_used;
-  double                *baseflow_dry;
-  double                *baseflow_wet;
-  double                *asat_dry;
-  double                *asat_wet;
+  double                *baseflow;
+  double                *asat;
   double                *pot_evap;
-  double                *inflow_dry;
-  double                *inflow_wet;
-  double                *runoff_dry;
-  double                *runoff_wet;
-  layer_data_struct     *layer_dry;
-  layer_data_struct     *layer_wet;
+  double                *inflow;
+  layer_data_struct     *layer;
 
   // Step-specific quantities
   double                 step_Evap;
-  double                 step_Wdew[2];
+  double                 step_Wdew;
   double                 step_melt;
   double                 step_melt_energy;  /* energy used to reduce snow coverage */
   double                 step_out_prec;
   double                 step_out_rain;
   double                 step_out_snow;
-  double                 step_ppt[2];
-  double                 step_prec[2];
+  double                 step_ppt;
+  double                 step_prec;
   double               **step_aero_resist;
 
   // Quantities that need to be summed or averaged over multiple snow steps
@@ -270,29 +260,29 @@ int surface_fluxes(char                 overstory,
   double                 store_blowing_flux;
   double                 store_surface_flux;
   // veg_var structure
-  double                 store_canopyevap[2];
-  double                 store_throughfall[2];
+  double                 store_canopyevap;
+  double                 store_throughfall;
   // cell structure
-  double                 store_layerevap[2][MAX_LAYERS];
-  double                 store_ppt[2];
+  double                 store_layerevap[MAX_LAYERS];
+  double                 store_ppt;
   double                 store_aero_cond_used[2];
   double                 store_pot_evap[N_PET_TYPES];
 
   // Structures holding values for current snow step
   energy_bal_struct      snow_energy; // energy fluxes at snowpack surface
   energy_bal_struct      soil_energy; // energy fluxes at soil surface
-  veg_var_struct         snow_veg_var[2]; // veg fluxes/storages in presence of snow
-  veg_var_struct         soil_veg_var[2]; // veg fluxes/storages in soil energy balance
+  veg_var_struct         snow_veg_var; // veg fluxes/storages in presence of snow
+  veg_var_struct         soil_veg_var; // veg fluxes/storages in soil energy balance
   snow_data_struct       step_snow;
-  layer_data_struct      step_layer[2][MAX_LAYERS];
+  layer_data_struct      step_layer[MAX_LAYERS];
 
   // Structures holding values for current iteration
   energy_bal_struct      iter_snow_energy; // energy fluxes at snowpack surface
   energy_bal_struct      iter_soil_energy; // energy fluxes at soil surface
-  veg_var_struct         iter_snow_veg_var[2]; // veg fluxes/storages in presence of snow
-  veg_var_struct         iter_soil_veg_var[2]; // veg fluxes/storages in soil energy balance
+  veg_var_struct         iter_snow_veg_var; // veg fluxes/storages in presence of snow
+  veg_var_struct         iter_soil_veg_var; // veg fluxes/storages in soil energy balance
   snow_data_struct       iter_snow;
-  layer_data_struct      iter_layer[2][MAX_LAYERS];
+  layer_data_struct      iter_layer[MAX_LAYERS];
   double                 iter_aero_resist[3];
   double                 iter_aero_resist_used[2];
   double                 stability_factor[2];
@@ -317,16 +307,16 @@ int surface_fluxes(char                 overstory,
   double *LAIlayer;
   double *faPAR;
   int cidx;
-  double  store_gc[2];
-  double *store_gsLayer[2];
-  double  store_Ci[2];
-  double  store_GPP[2];
-  double  store_Rdark[2];
-  double  store_Rphoto[2];
-  double  store_Rmaint[2];
-  double  store_Rgrowth[2];
-  double  store_Raut[2];
-  double  store_NPP[2];
+  double  store_gc;
+  double *store_gsLayer;
+  double  store_Ci;
+  double  store_GPP;
+  double  store_Rdark;
+  double  store_Rphoto;
+  double  store_Rmaint;
+  double  store_Rgrowth;
+  double  store_Raut;
+  double  store_NPP;
 
   if (options.CLOSE_ENERGY)
     MAX_ITER_GRND_CANOPY = 10;
@@ -334,26 +324,18 @@ int surface_fluxes(char                 overstory,
     MAX_ITER_GRND_CANOPY = 0;
 
   if (options.CARBON) {
-    for (dist=0; dist<2; dist++) {
-      store_gsLayer[dist] = (double*)calloc(options.Ncanopy,sizeof(double));
-    }
+    store_gsLayer = (double*)calloc(options.Ncanopy,sizeof(double));
   }
 
   /***********************************************************************
     Set temporary variables for convenience
   ***********************************************************************/
-  aero_resist_used = cell_wet->aero_resist;
-  baseflow_dry = &(cell_dry->baseflow);
-  baseflow_wet = &(cell_wet->baseflow);
-  asat_dry = &(cell_dry->asat);
-  asat_wet = &(cell_wet->asat);
-  pot_evap = cell_wet->pot_evap;
-  inflow_dry = &(cell_dry->inflow);
-  inflow_wet = &(cell_wet->inflow);
-  runoff_dry = &(cell_dry->runoff);
-  runoff_wet = &(cell_wet->runoff);
-  layer_dry = cell_dry->layer;
-  layer_wet = cell_wet->layer;
+  aero_resist_used = cell->aero_resist;
+  baseflow = &(cell->baseflow);
+  asat = &(cell->asat);
+  pot_evap = cell->pot_evap;
+  inflow = &(cell->inflow);
+  layer = cell->layer;
 
   step_aero_resist = (double**)calloc(N_PET_TYPES,sizeof(double*));
   for (p=0; p<N_PET_TYPES; p++) {
@@ -376,27 +358,19 @@ int surface_fluxes(char                 overstory,
   coverage                = snow->coverage;
   snow_energy             = (*energy);
   soil_energy             = (*energy);
-  snow_veg_var[WET]       = (*veg_var_wet);
-  snow_veg_var[DRY]       = (*veg_var_dry);
-  soil_veg_var[WET]       = (*veg_var_wet);
-  soil_veg_var[DRY]       = (*veg_var_dry);
+  snow_veg_var       = (*veg_var);
+  soil_veg_var       = (*veg_var);
   step_snow               = (*snow);
   for ( lidx = 0; lidx < Nlayers; lidx++ ) {
-    step_layer[WET][lidx] = layer_wet[lidx];
-    step_layer[DRY][lidx] = layer_dry[lidx];
+    step_layer[lidx] = layer[lidx];
   }
   for ( lidx = 0; lidx < Nlayers; lidx++ ) {
-    step_layer[WET][lidx].evap = 0;
-    step_layer[DRY][lidx].evap = 0;
+    step_layer[lidx].evap = 0;
   }
-  soil_veg_var[WET].canopyevap = 0;
-  soil_veg_var[DRY].canopyevap = 0;
-  snow_veg_var[WET].canopyevap = 0;
-  snow_veg_var[DRY].canopyevap = 0;
-  soil_veg_var[WET].throughfall = 0;
-  soil_veg_var[DRY].throughfall = 0;
-  snow_veg_var[WET].throughfall = 0;
-  snow_veg_var[DRY].throughfall = 0;
+  soil_veg_var.canopyevap = 0;
+  snow_veg_var.canopyevap = 0;
+  soil_veg_var.throughfall = 0;
+  snow_veg_var.throughfall = 0;
 
   /********************************
     Set-up sub-time step controls
@@ -464,19 +438,14 @@ int surface_fluxes(char                 overstory,
   store_surface_flux      = 0;
   store_blowing_flux      = 0;
   // veg_var and cell structures
-  for ( dist = 0; dist < Ndist; dist++ ) {
-    store_throughfall[dist] = 0.;
-    store_canopyevap[dist]  = 0.;
-    for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
-      store_layerevap[dist][lidx] = 0.;
-    }
+  store_throughfall = 0.;
+  store_canopyevap  = 0.;
+  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+    store_layerevap[lidx] = 0.;
   }
-  step_Wdew[WET]          = veg_var_wet->Wdew;
-  step_Wdew[DRY]          = veg_var_wet->Wdew;
+  step_Wdew          = veg_var->Wdew;
   // misc
-  store_ppt[WET]          = 0;
-  store_ppt[DRY]          = 0;
-  step_prec[DRY]          = 0;
+  store_ppt          = 0;
   store_aero_cond_used[0] = 0;
   store_aero_cond_used[1] = 0;
   (*snow_inflow)          = 0;
@@ -486,20 +455,18 @@ int surface_fluxes(char                 overstory,
 
   // Carbon cycling
   if (options.CARBON) {
-    for (dist=0; dist<2; dist++) {
-      store_gc[dist]        = 0;
-      for (cidx=0; cidx<options.Ncanopy; cidx++) {
-        store_gsLayer[dist][cidx] = 0;
-      }
-      store_Ci[dist]        = 0;
-      store_GPP[dist]       = 0;
-      store_Rdark[dist]     = 0;
-      store_Rphoto[dist]    = 0;
-      store_Rmaint[dist]    = 0;
-      store_Rgrowth[dist]   = 0;
-      store_Raut[dist]      = 0;
-      store_NPP[dist]       = 0;
+    store_gc        = 0;
+    for (cidx=0; cidx<options.Ncanopy; cidx++) {
+      store_gsLayer[cidx] = 0;
     }
+    store_Ci        = 0;
+    store_GPP       = 0;
+    store_Rdark     = 0;
+    store_Rphoto    = 0;
+    store_Rmaint    = 0;
+    store_Rgrowth   = 0;
+    store_Raut      = 0;
+    store_NPP       = 0;
   }
 
   /*************************
@@ -513,7 +480,7 @@ int surface_fluxes(char                 overstory,
 
     /* set air temperature and precipitation for this snow band */
     Tair = atmos->air_temp[hidx] + soil_con->Tfactor[band];
-    step_prec[WET] = atmos->prec[hidx] / mu * soil_con->Pfactor[band];
+    step_prec = atmos->prec[hidx] * soil_con->Pfactor[band];
     
     // initialize ground surface temperaure
     Tgrnd = energy->T[0];
@@ -545,18 +512,16 @@ int surface_fluxes(char                 overstory,
              faPAR);
       /* Convert to absolute (unnormalized) absorbed PAR per leaf area per canopy layer
          (umol(photons)/m2 leaf area / s); dividing by Epar converts PAR from W to umol(photons)/s */
-      veg_var_wet->aPAR = 0;
+      veg_var->aPAR = 0;
       for (cidx=0; cidx<options.Ncanopy; cidx++) {
         if (LAIlayer[cidx] > 1e-10) {
-          veg_var_wet->aPARLayer[cidx] = (atmos->par[hidx]/Epar) * faPAR[cidx] / LAIlayer[cidx];
-          veg_var_wet->aPAR += atmos->par[hidx] * faPAR[cidx] / LAIlayer[cidx];
+          veg_var->aPARLayer[cidx] = (atmos->par[hidx]/Epar) * faPAR[cidx] / LAIlayer[cidx];
+          veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] / LAIlayer[cidx];
         }
         else {
-          veg_var_wet->aPARLayer[cidx] = atmos->par[hidx]/Epar * faPAR[cidx] / 1e-10;
-          veg_var_wet->aPAR += atmos->par[hidx] * faPAR[cidx] / 1e-10;
+          veg_var->aPARLayer[cidx] = atmos->par[hidx]/Epar * faPAR[cidx] / 1e-10;
+          veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] / 1e-10;
         }
-        veg_var_dry->aPARLayer[cidx] = veg_var_wet->aPARLayer[cidx];
-        veg_var_dry->aPAR = veg_var_wet->aPAR;
       }
       free((char*)LAIlayer);
       free((char*)faPAR);
@@ -646,25 +611,18 @@ int surface_fluxes(char                 overstory,
 	// Initialize structures for new iteration
 	iter_snow_energy    = snow_energy;
 	iter_soil_energy    = soil_energy;
-	iter_snow_veg_var[WET] = snow_veg_var[WET];
-	iter_snow_veg_var[DRY] = snow_veg_var[DRY];
-	iter_soil_veg_var[WET] = soil_veg_var[WET];
-	iter_soil_veg_var[DRY] = soil_veg_var[DRY];
+	iter_snow_veg_var = snow_veg_var;
+	iter_soil_veg_var = soil_veg_var;
 	iter_snow           = step_snow;
 	for ( lidx = 0; lidx < Nlayers; lidx++ ) {
-	  iter_layer[WET][lidx] = step_layer[WET][lidx];
-	  iter_layer[DRY][lidx] = step_layer[DRY][lidx];
+	  iter_layer[lidx] = step_layer[lidx];
 	}
-	iter_snow_veg_var[WET].Wdew = step_Wdew[WET];
-	iter_snow_veg_var[DRY].Wdew = step_Wdew[DRY];
-	iter_soil_veg_var[WET].Wdew = step_Wdew[WET];
-	iter_soil_veg_var[DRY].Wdew = step_Wdew[DRY];
-	for ( dist = 0; dist < Ndist; dist ++ ) {
-	  iter_snow_veg_var[dist].canopyevap = 0;
-	  iter_soil_veg_var[dist].canopyevap = 0;
-	  for ( lidx = 0; lidx < Nlayers; lidx ++ ) 
-	    iter_layer[dist][lidx].evap = 0;
-        }
+	iter_snow_veg_var.Wdew = step_Wdew;
+	iter_soil_veg_var.Wdew = step_Wdew;
+	iter_snow_veg_var.canopyevap = 0;
+	iter_soil_veg_var.canopyevap = 0;
+	for ( lidx = 0; lidx < Nlayers; lidx ++ ) 
+	  iter_layer[lidx].evap = 0;
 	for (q=0; q<3; q++) {
 	  iter_aero_resist[q] = aero_resist[N_PET_TYPES][q];
 	}
@@ -680,8 +638,8 @@ int surface_fluxes(char                 overstory,
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
-			       Tcanopy, Tgrnd, Tair, dp, mu, 
-			       step_prec[WET], snow_grnd_flux, gp->wind_h, 
+			       Tcanopy, Tgrnd, Tair, dp,
+			       step_prec, snow_grnd_flux, gp->wind_h, 
 			       &energy->AlbedoUnder, &step_Evap, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
@@ -690,15 +648,15 @@ int surface_fluxes(char                 overstory,
 			       &delta_snow_heat, displacement, 
 			       gauge_correction, &step_melt_energy, 
 			       &step_out_prec, &step_out_rain, &step_out_snow,
-			       step_ppt, rainfall, ref_height, 
-			       roughness, snow_inflow, snowfall, &surf_atten, 
+			       &step_ppt, &rainfall, ref_height, 
+			       roughness, snow_inflow, &snowfall, &surf_atten, 
 			       wind, root, UNSTABLE_SNOW, options.Nnode, 
 			       Nveg, iveg, band, step_dt, rec, hidx, veg_class,
 			       &UnderStory, CanopLayerBnd, &dryFrac, 
 			       dmy, atmos, &(iter_snow_energy), 
-			       iter_layer[DRY], iter_layer[WET], &(iter_snow), 
-			       soil_con, &(iter_snow_veg_var[DRY]), 
-			       &(iter_snow_veg_var[WET]));
+			       iter_layer, &(iter_snow), 
+			       soil_con, 
+			       &(iter_snow_veg_var));
       
 // iter_snow_energy.sensible + iter_snow_energy.latent + iter_snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + iter_snow_energy.advection - iter_snow_energy.deltaCC + iter_snow_energy.refreeze_energy + iter_snow_energy.advected_sensible ) * step_snow.coverage
         if ( step_melt == ERROR ) return (ERROR);
@@ -730,13 +688,13 @@ int surface_fluxes(char                 overstory,
 				     Tcanopy, VPDcanopy, 
 				     VPcanopy, iter_snow_energy.advection, 
 				     step_snow.coldcontent, delta_coverage, dp, 
-				     ice0, step_melt_energy, moist0, mu, 
+				     ice0, step_melt_energy, moist0,
 				     iter_snow.coverage, 
 				     (step_snow.depth + iter_snow.depth) / 2., 
 				     BareAlbedo, surf_atten, 
 				     iter_snow.vapor_flux,
 				     iter_aero_resist, iter_aero_resist_used,
-				     displacement, &step_melt, step_ppt, 
+				     displacement, &step_melt, &step_ppt, 
 				     rainfall, ref_height, roughness, 
 				     snowfall, wind, root, INCLUDE_SNOW, 
 				     UnderStory, options.Nnode, Nveg, band, 
@@ -744,9 +702,9 @@ int surface_fluxes(char                 overstory,
 				     (int)overstory, rec, veg_class, 
 				     CanopLayerBnd, &dryFrac, atmos, 
 				     &(dmy[rec]), &iter_soil_energy, 
-				     iter_layer[DRY], iter_layer[WET], 
+				     iter_layer, 
 				     &(iter_snow), soil_con, 
-				     &iter_soil_veg_var[DRY], &iter_soil_veg_var[WET], gp->nrecs); 
+				     &iter_soil_veg_var, gp->nrecs); 
 
         if ( (int)Tsurf == ERROR ) {
           // Return error flag to skip rest of grid cell
@@ -755,7 +713,7 @@ int surface_fluxes(char                 overstory,
 
 	if ( INCLUDE_SNOW ) {
 	  /* store melt from thin snowpack */
-	  step_ppt[WET] += step_melt;
+	  step_ppt += step_melt;
 	}
 	
 	/*****************************************
@@ -846,55 +804,51 @@ int surface_fluxes(char                 overstory,
     **************************************/
     if (options.CARBON) {
       if (iveg < Nveg && !step_snow.snow && dryFrac > 0) {
-        for (dist=0; dist<Ndist; dist++) {
-          canopy_assimilation(veg_lib[veg_class].Ctype,
-                              veg_lib[veg_class].MaxCarboxRate,
-                              veg_lib[veg_class].MaxETransport,
-                              veg_lib[veg_class].CO2Specificity,
-                              iter_soil_veg_var[dist].NscaleFactor,
-                              Tair,
-                              atmos->shortwave[hidx],
-                              iter_soil_veg_var[dist].aPARLayer,
-                              soil_con->elevation,
-                              atmos->Catm[hidx],
-                              CanopLayerBnd,
-                              veg_lib[veg_class].LAI[dmy[rec].month-1],
-                              "rs",
-                              iter_soil_veg_var[dist].rsLayer,
-                              &(iter_soil_veg_var[dist].rc),
-                              &(iter_soil_veg_var[dist].Ci),
-                              &(iter_soil_veg_var[dist].GPP),
-                              &(iter_soil_veg_var[dist].Rdark),
-                              &(iter_soil_veg_var[dist].Rphoto),
-                              &(iter_soil_veg_var[dist].Rmaint),
-                              &(iter_soil_veg_var[dist].Rgrowth),
-                              &(iter_soil_veg_var[dist].Raut),
-                              &(iter_soil_veg_var[dist].NPP));
-          /* Adjust by fraction of canopy that was dry and account for any other inhibition`*/
-          dryFrac *= iter_soil_veg_var[dist].NPPfactor;
-          iter_soil_veg_var[dist].GPP *= dryFrac;
-          iter_soil_veg_var[dist].Rdark *= dryFrac;
-          iter_soil_veg_var[dist].Rphoto *= dryFrac;
-          iter_soil_veg_var[dist].Rmaint *= dryFrac;
-          iter_soil_veg_var[dist].Rgrowth *= dryFrac;
-          iter_soil_veg_var[dist].Raut *= dryFrac;
-          iter_soil_veg_var[dist].NPP *= dryFrac;
-        }
+        canopy_assimilation(veg_lib[veg_class].Ctype,
+                            veg_lib[veg_class].MaxCarboxRate,
+                            veg_lib[veg_class].MaxETransport,
+                            veg_lib[veg_class].CO2Specificity,
+                            iter_soil_veg_var.NscaleFactor,
+                            Tair,
+                            atmos->shortwave[hidx],
+                            iter_soil_veg_var.aPARLayer,
+                            soil_con->elevation,
+                            atmos->Catm[hidx],
+                            CanopLayerBnd,
+                            veg_lib[veg_class].LAI[dmy[rec].month-1],
+                            "rs",
+                            iter_soil_veg_var.rsLayer,
+                            &(iter_soil_veg_var.rc),
+                            &(iter_soil_veg_var.Ci),
+                            &(iter_soil_veg_var.GPP),
+                            &(iter_soil_veg_var.Rdark),
+                            &(iter_soil_veg_var.Rphoto),
+                            &(iter_soil_veg_var.Rmaint),
+                            &(iter_soil_veg_var.Rgrowth),
+                            &(iter_soil_veg_var.Raut),
+                            &(iter_soil_veg_var.NPP));
+        /* Adjust by fraction of canopy that was dry and account for any other inhibition`*/
+        dryFrac *= iter_soil_veg_var.NPPfactor;
+        iter_soil_veg_var.GPP *= dryFrac;
+        iter_soil_veg_var.Rdark *= dryFrac;
+        iter_soil_veg_var.Rphoto *= dryFrac;
+        iter_soil_veg_var.Rmaint *= dryFrac;
+        iter_soil_veg_var.Rgrowth *= dryFrac;
+        iter_soil_veg_var.Raut *= dryFrac;
+        iter_soil_veg_var.NPP *= dryFrac;
       }
       else {
-        for (dist=0; dist<Ndist; dist++) {
-          iter_soil_veg_var[dist].rc = HUGE_RESIST;
-          for (cidx=0; cidx<options.Ncanopy; cidx++)
-            iter_soil_veg_var[dist].rsLayer[cidx] = HUGE_RESIST;
-          iter_soil_veg_var[dist].Ci = 0;
-          iter_soil_veg_var[dist].GPP = 0;
-          iter_soil_veg_var[dist].Rdark = 0;
-          iter_soil_veg_var[dist].Rphoto = 0;
-          iter_soil_veg_var[dist].Rmaint = 0;
-          iter_soil_veg_var[dist].Rgrowth = 0;
-          iter_soil_veg_var[dist].Raut = 0;
-          iter_soil_veg_var[dist].NPP = 0;
-        }
+        iter_soil_veg_var.rc = HUGE_RESIST;
+        for (cidx=0; cidx<options.Ncanopy; cidx++)
+          iter_soil_veg_var.rsLayer[cidx] = HUGE_RESIST;
+        iter_soil_veg_var.Ci = 0;
+        iter_soil_veg_var.GPP = 0;
+        iter_soil_veg_var.Rdark = 0;
+        iter_soil_veg_var.Rphoto = 0;
+        iter_soil_veg_var.Rmaint = 0;
+        iter_soil_veg_var.Rgrowth = 0;
+        iter_soil_veg_var.Raut = 0;
+        iter_soil_veg_var.NPP = 0;
       }
     }
 
@@ -936,51 +890,43 @@ int surface_fluxes(char                 overstory,
 
     snow_energy = iter_snow_energy;
     soil_energy = iter_soil_energy;
-    snow_veg_var[WET] = iter_snow_veg_var[WET];
-    snow_veg_var[DRY] = iter_snow_veg_var[DRY];
-    soil_veg_var[WET] = iter_soil_veg_var[WET];
-    soil_veg_var[DRY] = iter_soil_veg_var[DRY];
+    snow_veg_var = iter_snow_veg_var;
+    soil_veg_var = iter_soil_veg_var;
     step_snow = iter_snow;
     for(lidx = 0; lidx < options.Nlayer; lidx++) {
-      step_layer[WET][lidx] = iter_layer[WET][lidx];
-      step_layer[DRY][lidx] = iter_layer[DRY][lidx];
+      step_layer[lidx] = iter_layer[lidx];
     }
 
-    for(dist = 0; dist < Ndist; dist++) {
-
-      if(iveg != Nveg) {
-	if(step_snow.snow) {
-	  store_throughfall[dist] += snow_veg_var[dist].throughfall;
-	  store_canopyevap[dist]  += snow_veg_var[dist].canopyevap;
-	  soil_veg_var[dist].Wdew  = snow_veg_var[dist].Wdew;
-	}
-	else {
-	  store_throughfall[dist] += soil_veg_var[dist].throughfall;
-	  store_canopyevap[dist]  += soil_veg_var[dist].canopyevap;
-	  snow_veg_var[dist].Wdew  = soil_veg_var[dist].Wdew;
-	}
-        step_Wdew[dist] = soil_veg_var[dist].Wdew;
-        if (options.CARBON) {
-          store_gc[dist]  += 1/soil_veg_var[dist].rc;
-          for (cidx=0; cidx<options.Ncanopy; cidx++) {
-            store_gsLayer[dist][cidx]  += 1/soil_veg_var[dist].rsLayer[cidx];
-          }
-          store_Ci[dist]  += soil_veg_var[dist].Ci;
-          store_GPP[dist]  += soil_veg_var[dist].GPP;
-          store_Rdark[dist]  += soil_veg_var[dist].Rdark;
-          store_Rphoto[dist]  += soil_veg_var[dist].Rphoto;
-          store_Rmaint[dist]  += soil_veg_var[dist].Rmaint;
-          store_Rgrowth[dist]  += soil_veg_var[dist].Rgrowth;
-          store_Raut[dist]  += soil_veg_var[dist].Raut;
-          store_NPP[dist]  += soil_veg_var[dist].NPP;
-        }
+    if(iveg != Nveg) {
+      if(step_snow.snow) {
+        store_throughfall += snow_veg_var.throughfall;
+        store_canopyevap  += snow_veg_var.canopyevap;
+        soil_veg_var.Wdew  = snow_veg_var.Wdew;
       }
-
-      for(lidx = 0; lidx < options.Nlayer; lidx++)
-	store_layerevap[dist][lidx] += step_layer[dist][lidx].evap;
-
-      store_ppt[dist] += step_ppt[dist];
+      else {
+        store_throughfall += soil_veg_var.throughfall;
+        store_canopyevap  += soil_veg_var.canopyevap;
+        snow_veg_var.Wdew  = soil_veg_var.Wdew;
+      }
+      step_Wdew = soil_veg_var.Wdew;
+      if (options.CARBON) {
+        store_gc  += 1/soil_veg_var.rc;
+        for (cidx=0; cidx<options.Ncanopy; cidx++) {
+          store_gsLayer[cidx]  += 1/soil_veg_var.rsLayer[cidx];
+        }
+        store_Ci  += soil_veg_var.Ci;
+        store_GPP  += soil_veg_var.GPP;
+        store_Rdark  += soil_veg_var.Rdark;
+        store_Rphoto  += soil_veg_var.Rphoto;
+        store_Rmaint  += soil_veg_var.Rmaint;
+        store_Rgrowth  += soil_veg_var.Rgrowth;
+        store_Raut  += soil_veg_var.Raut;
+        store_NPP  += soil_veg_var.NPP;
+      }
     }
+    for(lidx = 0; lidx < options.Nlayer; lidx++)
+      store_layerevap[lidx] += step_layer[lidx].evap;
+    store_ppt += step_ppt;
     if (iter_aero_resist_used[0]>0)
       store_aero_cond_used[0] += 1/iter_aero_resist_used[0];
     else
@@ -997,9 +943,9 @@ int surface_fluxes(char                 overstory,
     store_surface_flux += step_snow.surface_flux;
     store_blowing_flux += step_snow.blowing_flux;
       
-    out_prec[0] += step_out_prec * mu;
-    out_rain[0] += step_out_rain * mu;
-    out_snow[0] += step_out_snow * mu;
+    out_prec[0] += step_out_prec;
+    out_rain[0] += step_out_rain;
+    out_snow[0] += step_out_snow;
 
     if ( INCLUDE_SNOW ) {
       /* copy needed flux terms to the snowpack */
@@ -1077,7 +1023,7 @@ int surface_fluxes(char                 overstory,
   snow->canopy_vapor_flux = store_canopy_vapor_flux;
   (*Melt) = store_melt;
   snow->melt = store_melt;
-  for(dist = 0; dist < 2; dist++) ppt[dist] = store_ppt[dist];
+  ppt = store_ppt;
 
   /******************************************************
     Store energy flux averages for sub-model time steps 
@@ -1131,17 +1077,13 @@ int surface_fluxes(char                 overstory,
   **********************************************************/
 
   if(iveg != Nveg) {
-    veg_var_wet->throughfall = store_throughfall[WET];
-    veg_var_dry->throughfall = store_throughfall[DRY];
-    veg_var_wet->canopyevap  = store_canopyevap[WET];
-    veg_var_dry->canopyevap  = store_canopyevap[DRY];
+    veg_var->throughfall = store_throughfall;
+    veg_var->canopyevap  = store_canopyevap;
     if(snow->snow) {
-      veg_var_wet->Wdew        = snow_veg_var[WET].Wdew;
-      veg_var_dry->Wdew        = snow_veg_var[DRY].Wdew;
+      veg_var->Wdew        = snow_veg_var.Wdew;
     }
     else {
-      veg_var_wet->Wdew        = soil_veg_var[WET].Wdew;
-      veg_var_dry->Wdew        = soil_veg_var[DRY].Wdew;
+      veg_var->Wdew        = soil_veg_var.Wdew;
     }
   }
 
@@ -1150,10 +1092,8 @@ int surface_fluxes(char                 overstory,
   **********************************************************/
 
   for(lidx=0;lidx<Nlayers;lidx++) {
-    layer_wet[lidx]      = step_layer[WET][lidx];
-    layer_dry[lidx]      = step_layer[DRY][lidx];
-    layer_wet[lidx].evap = store_layerevap[WET][lidx];
-    layer_dry[lidx].evap = store_layerevap[DRY][lidx];
+    layer[lidx]      = step_layer[lidx];
+    layer[lidx].evap = store_layerevap[lidx];
   }
   if (store_aero_cond_used[0]>0 && store_aero_cond_used[0]<HUGE_RESIST)
     aero_resist_used[0] = 1/(store_aero_cond_used[0]/(double)N_steps);
@@ -1180,41 +1120,25 @@ int surface_fluxes(char                 overstory,
   **********************************************************/
 
   if(options.CARBON && iveg != Nveg) {
-    veg_var_wet->rc       = 1/store_gc[WET]/(double)N_steps;
+    veg_var->rc       = 1/store_gc/(double)N_steps;
     for (cidx=0; cidx<options.Ncanopy; cidx++) {
-      veg_var_wet->rsLayer[cidx] = 1/store_gsLayer[WET][cidx]/(double)N_steps;
+      veg_var->rsLayer[cidx] = 1/store_gsLayer[cidx]/(double)N_steps;
     }
-    veg_var_wet->Ci       = store_Ci[WET]/(double)N_steps;
-    veg_var_wet->GPP      = store_GPP[WET]/(double)N_steps;
-    veg_var_wet->Rdark    = store_Rdark[WET]/(double)N_steps;
-    veg_var_wet->Rphoto   = store_Rphoto[WET]/(double)N_steps;
-    veg_var_wet->Rmaint   = store_Rmaint[WET]/(double)N_steps;
-    veg_var_wet->Rgrowth  = store_Rgrowth[WET]/(double)N_steps;
-    veg_var_wet->Raut     = store_Raut[WET]/(double)N_steps;
-    veg_var_wet->NPP      = store_NPP[WET]/(double)N_steps;
-    veg_var_dry->rc       = 1/store_gc[DRY]/(double)N_steps;
-    for (cidx=0; cidx<options.Ncanopy; cidx++) {
-      veg_var_dry->rsLayer[cidx] = 1/store_gsLayer[DRY][cidx]/(double)N_steps;
-    }
-    veg_var_dry->Ci       = store_Ci[DRY]/(double)N_steps;
-    veg_var_dry->GPP      = store_GPP[DRY]/(double)N_steps;
-    veg_var_dry->Rdark    = store_Rdark[DRY]/(double)N_steps;
-    veg_var_dry->Rphoto   = store_Rphoto[DRY]/(double)N_steps;
-    veg_var_dry->Rmaint   = store_Rmaint[DRY]/(double)N_steps;
-    veg_var_dry->Rgrowth  = store_Rgrowth[DRY]/(double)N_steps;
-    veg_var_dry->Raut     = store_Raut[DRY]/(double)N_steps;
-    veg_var_dry->NPP      = store_NPP[DRY]/(double)N_steps;
+    veg_var->Ci       = store_Ci/(double)N_steps;
+    veg_var->GPP      = store_GPP/(double)N_steps;
+    veg_var->Rdark    = store_Rdark/(double)N_steps;
+    veg_var->Rphoto   = store_Rphoto/(double)N_steps;
+    veg_var->Rmaint   = store_Rmaint/(double)N_steps;
+    veg_var->Rgrowth  = store_Rgrowth/(double)N_steps;
+    veg_var->Raut     = store_Raut/(double)N_steps;
+    veg_var->NPP      = store_NPP/(double)N_steps;
 
-    for (dist=0; dist<2; dist++) {
-      free((char *)(store_gsLayer[dist]));
-    }
+    free((char *)(store_gsLayer));
 
-    soil_carbon_balance(soil_con,energy,cell_wet,veg_var_wet);
-    soil_carbon_balance(soil_con,energy,cell_dry,veg_var_dry);
+    soil_carbon_balance(soil_con,energy,cell,veg_var);
 
     // Update running total annual NPP
-    if (veg_var_wet->NPP > 0) veg_var_wet->AnnualNPP += veg_var_wet->NPP*MCg*3600*gp->dt;
-    if (veg_var_dry->NPP > 0) veg_var_dry->AnnualNPP += veg_var_dry->NPP*MCg*3600*gp->dt;
+    if (veg_var->NPP > 0) veg_var->AnnualNPP += veg_var->NPP*MCg*3600*gp->dt;
 
   }
 
@@ -1222,13 +1146,11 @@ int surface_fluxes(char                 overstory,
     Compute Runoff, Baseflow, and Soil Moisture Transport
   ********************************************************/
 
-  (*inflow_wet) = ppt[WET];
-  (*inflow_dry) = ppt[DRY];
+  (*inflow) = ppt;
 
-  ErrorFlag = runoff(cell_wet, cell_dry, energy, soil_con, ppt, 
-		     soil_con->frost_fract, mu, gp->dt, options.Nnode,
-                     band, rec, iveg);
-  
+  ErrorFlag = runoff(cell, energy, soil_con, ppt, soil_con->frost_fract,
+                     gp->dt, options.Nnode, band, rec, iveg);
+
   return( ErrorFlag );
 
 }

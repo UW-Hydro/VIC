@@ -103,14 +103,12 @@ OBJS = \
 	${DRIVERPATH}/src/calc_air_temperature.o \
 	${DRIVERPATH}/src/calc_longwave.o \
 	${DRIVERPATH}/src/calc_root_fraction.o \
-	${DRIVERPATH}/src/calc_veg_params.o \
 	${DRIVERPATH}/src/check_files.o \
 	${DRIVERPATH}/src/check_state_file.o \
 	${DRIVERPATH}/src/close_files.o \
 	${DRIVERPATH}/src/cmd_proc.o \
 	${DRIVERPATH}/src/compress_files.o \
 	${DRIVERPATH}/src/compute_treeline.o \
-	${DRIVERPATH}/src/correct_precip.o \
 	${DRIVERPATH}/src/display_current_settings.o \
 	${DRIVERPATH}/src/free_all_vars.o \
 	${DRIVERPATH}/src/free_vegcon.o \
@@ -162,6 +160,7 @@ OBJS = \
 	${VICPATH}/src/calc_rainonly.o \
 	${VICPATH}/src/calc_snow_coverage.o \
 	${VICPATH}/src/calc_surf_energy_bal.o \
+	${VICPATH}/src/calc_veg_params.o \
 	${VICPATH}/src/calc_water_energy_balance_errors.o \
 	${VICPATH}/src/canopy_assimilation.o \
 	${VICPATH}/src/canopy_evap.o \
@@ -169,6 +168,7 @@ OBJS = \
 	${VICPATH}/src/compute_pot_evap.o \
 	${VICPATH}/src/compute_soil_resp.o \
 	${VICPATH}/src/compute_zwt.o \
+	${VICPATH}/src/correct_precip.o \
 	${VICPATH}/src/estimate_T1.o \
 	${VICPATH}/src/faparl.o \
 	${VICPATH}/src/frozen_soil.o \

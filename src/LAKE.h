@@ -28,6 +28,7 @@
 	      list of initialize_lake().				TJB
   2013-Jul-25 Added advect_carbon_storage().				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 ******************************************************************************/
 
 //#ifndef LAKE_SET
@@ -77,7 +78,6 @@ void advect_soil_veg_storage(double, double, double, double *, soil_con_struct *
 void advect_snow_storage(double, double, double, snow_data_struct *);
 void alblake(double, double, double *, double *, float *, float *, double, double, 
 	     int, int *, double, double, char *, int, double);
-void alloc_atmos(int, atmos_data_struct **);
 double calc_density(double);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
 void colavg (double *, double *, double *, float, double *, int, double, double);
@@ -87,12 +87,10 @@ void energycalc(double *, double *, int, double, double,double *, double *, doub
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 int get_depth(lake_con_struct, double, double *);
-int get_depth_from_sarea(lake_con_struct, double, double *);
 int get_sarea(lake_con_struct, double, double *);
 int get_volume(lake_con_struct, double, double *);
 void iceform (double *,double *,double ,double,double *,int, int, double, double, double *, double *, double *, double *, double *, double);
 void icerad(double,double ,double,double *, double *,double *);
-int ice_depth(lake_con_struct, double, double, double *);
 int ice_melt(double, double, double *, double, snow_data_struct *, lake_var_struct *, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double *, double *, double *, double *, double *, double *, double);
 double IceEnergyBalance(double, va_list);
 int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *, cell_data_struct *, double, int);
@@ -113,6 +111,6 @@ double specheat (double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
 void tridia(int, double *, double *, double *, double *, double *);
-int water_balance (lake_var_struct *, lake_con_struct, int, dist_prcp_struct *, int, int, int, double, soil_con_struct, veg_con_struct);
+int water_balance (lake_var_struct *, lake_con_struct, int, all_vars_struct *, int, int, int, double, soil_con_struct, veg_con_struct);
 int  water_energy_balance(int, double*, double*, int, int, double, double, double, double, double, double, double, double, double, double, double, double, double, double *, double *, double *, double*, double *, double *, double *, double, double *, double *, double *, double *, double *, double);
 int water_under_ice(int, double,  double, double *, double *, double, int, double, double, double, double *, double *, double *, double *, int, double, double, double, double *);

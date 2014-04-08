@@ -26,7 +26,7 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes between VIC 4.2 and VIC 4.1.2 *****
+***** Description of changes between VIC 4.1.2 and VIC 4.2 *****
 --------------------------------------------------------------------------------
 
 New Features:
@@ -217,6 +217,57 @@ Added soil moisture content for half-space below bottom soil layer
 	was set to that of the bottom soil layer.  Now, the moisture content can
 	be set to a user-specified value, SLAB_MOIST_FRACT, defined in
 	vicNl_def.h.
+
+
+
+
+Removed the DIST_PRCP option.
+
+	Files Affected:
+
+	arno_evap.c
+	calc_rainonly.c
+	calc_snow_coverage.c
+	calc_surf_energy_bal.c
+	canopy_evap.c
+	display_current_settings.c
+	dist_prec.c (removed)
+	free_all_vars.c (renamed from free_dist_prcp.c)
+	frozen_soil.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	initialize_new_storm.c (removed)
+	LAKE.h
+	lakes.eb.c
+	make_all_vars.c (renamed from make_dist_prcp.c)
+	Makefile
+	prepare_full_energy.c
+	put_data.c
+	read_initial_model_state.c
+	read_soilparam.c
+	redistribute_during_storm.c (removed)
+	runoff.c
+	snow_intercept.c
+	soil_conduction.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_forcing_file.c
+	write_model_state.c
+
+	Description:
+
+	Removed the DIST_PRCP option and all functions and variables associated
+	with it.  Removed the "dist" array dimension from the cell and veg_var
+	data structures.  Renamed the "dist_prcp" data structure to
+	"all_vars".
 
 
 

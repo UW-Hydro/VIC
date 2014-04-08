@@ -113,7 +113,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed user_def.h.					TJB
   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
-  2014-Mar-24 Removed ARC_SOIL option         BN
+  2014-Mar-24 Removed ARC_SOIL option                                   BN
+  2014-Mar-28 Removed DIST_PRCP option.					                TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -293,14 +294,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
         else options.BLOWING = FALSE;
-      }
-      else if(strcasecmp("DIST_PRCP",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
-        else options.DIST_PRCP = FALSE;
-      }
-      else if(strcasecmp("PREC_EXPT",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
       }
       else if(strcasecmp("CORRPREC",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -1028,9 +1021,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
 	    global.endday, global.endmonth, global.endyear);
   fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
-  fprintf(stderr,"Use Distributed Precipitation.(%d)\n",options.DIST_PRCP);
-  if(options.DIST_PRCP)
-    fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
   fprintf(stderr,"Ground heat flux will be estimated ");
   if ( options.QUICK_FLUX ) 
     fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");

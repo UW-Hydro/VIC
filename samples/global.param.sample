@@ -49,8 +49,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
 #BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
 #COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
-#DIST_PRCP	FALSE	# TRUE = use distributed precipitation
-#PREC_EXPT	0.6	# exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
 #CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 #MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 #MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall

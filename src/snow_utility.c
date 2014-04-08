@@ -82,6 +82,8 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
   double delta_depth;
   double depth_new;
 
+  density = 0.0;
+
   /* Estimate density of new snow based on air temperature */
   if (new_snow > 0.)
     density_new = new_snow_density(Tair);
@@ -213,6 +215,8 @@ double new_snow_density(double air_temp) {
 **********************************************************************/
   extern option_struct   options;
   double density_new;
+
+  density_new = 0.0;
 
   if (options.SNOW_DENSITY == DENS_SNTHRM) {
     density_new = 67.9 + 51.3 * exp(air_temp/2.6);

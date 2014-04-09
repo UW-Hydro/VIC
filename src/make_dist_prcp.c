@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
-
 dist_prcp_struct make_dist_prcp(int  nveg)
 /**********************************************************************
 	read_dist_prcp	Keith Cherkauer		May 21, 1996

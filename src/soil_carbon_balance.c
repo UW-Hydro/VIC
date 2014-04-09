@@ -46,8 +46,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id: $";
-
 void soil_carbon_balance(soil_con_struct *soil_con,
                          energy_bal_struct *energy,
                          cell_data_struct *cell,

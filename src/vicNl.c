@@ -4,8 +4,6 @@
 #include <vicNl.h>
 #include <global.h>
 
-static char vcid[] = "$Id$";
-
 /** Main Program **/
 
 int main(int argc, char *argv[])

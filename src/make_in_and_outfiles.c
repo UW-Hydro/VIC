@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void make_in_and_outfiles(filep_struct         *filep, 
 			  filenames_struct     *filenames,
 			  soil_con_struct      *soil,

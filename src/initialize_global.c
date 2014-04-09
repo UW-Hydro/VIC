@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_global() {
 /*********************************************************************
   initialize_global              Keith Cherkauer       March 1998

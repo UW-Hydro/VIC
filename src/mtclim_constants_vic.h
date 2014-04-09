@@ -2,10 +2,6 @@
   Changes for the VIC implementation are preceded by the comment * start
   vic_change * and followed by the comment * end vic_change * */
 
-/* RCS Id String
- * $Id$
- */
-
 /* 
 mtclim_constants_vic.h
 constants typedefs, and function prototypes for MTCLIM 4.3

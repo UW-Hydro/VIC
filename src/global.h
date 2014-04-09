@@ -11,8 +11,6 @@
         statements and typedef statements, which is what vicNl_def.h
         is primarily composed of.
 
-  $Id$
-
   2003-Oct-29 Added version string and removed unused options from
 	      optstring.						TJB
   2009-Jun-09 Added definitions of reference landcover types, used

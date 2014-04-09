@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 /**********************************************************************
 	canopy_evap.c	Dag Lohmann		September 1995
 

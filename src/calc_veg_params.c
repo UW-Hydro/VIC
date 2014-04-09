@@ -2,8 +2,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
-
 double calc_veg_height(double displacement) {
 /**********************************************************************
   calc_veg_height		Keith Cherkauer		March 3, 1997

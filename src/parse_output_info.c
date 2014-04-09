@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <string.h>
  
-static char vcid[] = "$Id$";
-
 void parse_output_info(filenames_struct      *names,
                        FILE                  *gp,
                        out_data_file_struct  **out_data_files,

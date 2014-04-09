@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void display_current_settings(int                 mode,
                               filenames_struct    *names,
                               global_param_struct *global) 

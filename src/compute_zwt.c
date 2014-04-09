@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double compute_zwt(soil_con_struct  *soil_con,
                    int               lindex,
                    double            moist)

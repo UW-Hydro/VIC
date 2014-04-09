@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
-
 int  initialize_new_storm(cell_data_struct ***cell,
 			  veg_var_struct   ***veg_var,
 			  int                 veg,

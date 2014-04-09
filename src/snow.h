@@ -7,7 +7,6 @@
  * E-MAIL:              nijssen@u.washington.edu
  * ORIG-DATE:    29-Aug-1996 at 16:03:11
  * LAST-MOD: Thu Feb 22 14:28:53 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
- * $Id$
  * DESCRIPTION:  header file for DHSVM snow routines
  * DESCRIP-END.
  * FUNCTIONS:    

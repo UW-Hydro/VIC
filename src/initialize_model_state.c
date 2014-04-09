@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
-
 int initialize_model_state(all_vars_struct     *all_vars,
 			   dmy_struct           dmy,
 			   global_param_struct *global_param,

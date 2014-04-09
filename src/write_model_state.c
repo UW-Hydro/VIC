@@ -3,9 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
-
 void write_model_state(all_vars_struct    *all_vars,
 		       global_param_struct *gp,
 		       int                  Nveg,

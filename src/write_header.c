@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void write_header(out_data_file_struct *out_data_files,
 		  out_data_struct      *out_data,
                   dmy_struct           *dmy,

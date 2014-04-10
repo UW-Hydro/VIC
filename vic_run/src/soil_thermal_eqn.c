@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double soil_thermal_eqn(double T, va_list ap) {
 
  /******************************************************************

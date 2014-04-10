@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 /*************************************************************
   set_output_defaults.c      Ted Bohn     September 08, 2006

@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 int  redistribute_during_storm(cell_data_struct ***cell,
 			       veg_var_struct   ***veg_var,
 			       int                 veg,

@@ -300,8 +300,6 @@ MTCLIM version 3.1 testing
 #include <mtclim_constants_vic.h>   /* physical constants */
 #include <mtclim_parameters_vic.h>  /* model parameters */
 
-static char vcid[] = "$Id$";
-
 /****************************
  **                         **
  **    START OF FUNCTION    **

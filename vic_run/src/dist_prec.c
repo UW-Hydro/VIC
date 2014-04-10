@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 int  dist_prec(atmos_data_struct   *atmos,
                dist_prcp_struct    *prcp,
                soil_con_struct     *soil_con,

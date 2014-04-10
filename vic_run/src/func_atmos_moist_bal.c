@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double func_atmos_moist_bal(double VPcanopy, va_list ap) {
 /**********************************************************************
   func_atmos_moist_bal.c      Keith Cherkauer        March 2, 2001

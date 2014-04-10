@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 FILE *open_file(char string[],char type[])
 
 /******************************************************************/

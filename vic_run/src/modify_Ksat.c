@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double linear_interp(double x,double lx,double ux,double ly,double uy) {
   return((x-lx)/(ux-lx)*(uy-ly)+ly);
 }

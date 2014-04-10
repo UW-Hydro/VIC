@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 int solve_lake(double             snowfall,
 	       double             rainfall,
 	       double             tair, 

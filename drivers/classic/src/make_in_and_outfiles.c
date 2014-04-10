@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void make_in_and_outfiles(filep_struct         *filep, 
 			  filenames_struct     *filenames,
 			  soil_con_struct      *soil,

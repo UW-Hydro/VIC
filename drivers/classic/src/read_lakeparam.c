@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 lake_con_struct read_lakeparam(FILE            *lakeparam, 
 			       soil_con_struct  soil_con, 
 			       veg_con_struct  *veg_con)

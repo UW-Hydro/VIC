@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 double get_dist(double lat1, double long1, double lat2, double long2)
 /*******************************************************************************
   Function: double get_dist(double lat1, double long1, double lat2, double long2)

@@ -2,10 +2,6 @@
   Changes for the VIC implementation are preceded by the comment * start
   vic_change * and followed by the comment * end vic_change * */
 
-/* RCS Id String
- * $Id$
- */
-
 /* 
 mtclim_parameters_vic.h
 model parameters for MTCLIM 4.3

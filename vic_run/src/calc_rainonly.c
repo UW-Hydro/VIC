@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double calc_rainonly(double air_temp,
 		     double prec,
 		     double MAX_SNOW_TEMP,

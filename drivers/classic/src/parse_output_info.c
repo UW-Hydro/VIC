@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 void parse_output_info(filenames_struct      *names,
                        FILE                  *gp,
                        out_data_file_struct  **out_data_files,

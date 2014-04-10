@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_snow (snow_data_struct **snow, 
 		      int                veg_num,
 		      int                cellnum)

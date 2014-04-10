@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void vicerror(char error_text[])
 /**********************************************************************
 	vicerror.c	Keith Cherkauer		April 23, 1997

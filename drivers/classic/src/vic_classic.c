@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 // global variables
 
 char *version = "4.2 beta 2014-Feb-25";

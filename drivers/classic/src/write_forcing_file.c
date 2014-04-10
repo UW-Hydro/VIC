@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void write_forcing_file(atmos_data_struct *atmos,
 			int                nrecs,
 			out_data_file_struct *out_data_files, 

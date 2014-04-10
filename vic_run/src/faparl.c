@@ -25,8 +25,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id: $";
-
 void faparl(double  *CanopLayerBnd,
             double   LAItotal,
             double   AlbSoilPAR,

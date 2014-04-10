@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 void free_vegcon(veg_con_struct **veg_con)
 /**********************************************************************
   free_vegcon.c	            Keith Cherkauer	  September 25, 1998

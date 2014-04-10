@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 void latent_heat_from_snow(double  AirDens,
 			   double  EactAir,
 			   double  Lv,

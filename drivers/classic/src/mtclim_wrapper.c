@@ -43,8 +43,6 @@
 #include <mtclim_constants_vic.h>
 #include <mtclim_parameters_vic.h>
 
-static char vcid[] = "$Id$";
-
 /******************************************************************************/
 /*			TYPE DEFINITIONS, GLOBALS, ETC.                       */
 /******************************************************************************/

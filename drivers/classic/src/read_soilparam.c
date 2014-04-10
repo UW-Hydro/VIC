@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 soil_con_struct read_soilparam(FILE *soilparam,
 			       char *RUN_MODEL,
 			       char *MODEL_DONE)

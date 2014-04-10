@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_veg(veg_var_struct      **veg_var,
 		    veg_con_struct       *veg_con,
 		    global_param_struct   *gp,

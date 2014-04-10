@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 double **read_forcing_data(FILE                **infile,
 			   global_param_struct   global_param)
 /**********************************************************************

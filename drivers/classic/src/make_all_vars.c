@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 all_vars_struct make_all_vars(int  nveg)
 /**********************************************************************
 	read_all_vars	Keith Cherkauer		May 21, 1996

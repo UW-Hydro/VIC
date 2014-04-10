@@ -2,9 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-
-static char vcid[] = "$Id$";
-
 void calc_longwave(double *longwave, 
 		   double  tskc, 
 		   double  air_temp, 

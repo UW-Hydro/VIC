@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void get_force_type(char   *cmdstr, 
 		    int     file_num,
 		    int    *field) {

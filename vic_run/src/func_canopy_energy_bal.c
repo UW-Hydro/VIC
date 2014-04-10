@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double func_canopy_energy_bal(double Tfoliage, va_list ap)
 /*********************************************************************
   func_canopy_energy_bal    Keith Cherkauer         January 27, 2001

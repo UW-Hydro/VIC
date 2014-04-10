@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 FILE *check_state_file(char                *init_state_name,
 		       dmy_struct          *dmy,
 		       global_param_struct *global,

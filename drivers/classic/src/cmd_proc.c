@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 filenames_struct cmd_proc(int argc, char *argv[]) 
 /**********************************************************************
   cmd_proc                  Keith Cherkauer                1997

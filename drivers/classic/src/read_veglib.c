@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 /**********************************************************************
   read_veglib.c               Keith Cherkauer                 1997

@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double svp(double temp)
 /**********************************************************************
   This routine computes the saturated vapor pressure using Handbook

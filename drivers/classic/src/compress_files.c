@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void compress_files(char string[])
 /**********************************************************************
   compress_files.c	Keith Cherkauer		September 10, 1997

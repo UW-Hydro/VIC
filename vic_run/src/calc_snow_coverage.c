@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double calc_snow_coverage(int    *store_snow,
 			  double  max_snow_distrib_slope,
 			  double  old_coverage, 

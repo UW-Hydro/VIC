@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 global_param_struct get_global_param(filenames_struct *names,
                                      FILE             *gp)
 /**********************************************************************

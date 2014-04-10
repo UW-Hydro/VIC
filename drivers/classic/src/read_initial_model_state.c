@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void read_initial_model_state(FILE                *init_state,
 			      all_vars_struct     *all_vars,
 			      global_param_struct *gp,

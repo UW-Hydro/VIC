@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void close_files(filep_struct         *filep,
                  out_data_file_struct *out_data_files,
                  filenames_struct     *fnames)

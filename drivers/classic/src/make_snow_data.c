@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 snow_data_struct **make_snow_data(int nveg)
 /**********************************************************************
 	make_snow_data	Keith Cherkauer		January 22, 1997

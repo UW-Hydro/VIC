@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void display_current_settings(int                 mode,
                               filenames_struct    *names,
                               global_param_struct *global) 

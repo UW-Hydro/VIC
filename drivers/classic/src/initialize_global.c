@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_global() {
 /*********************************************************************
   initialize_global              Keith Cherkauer       March 1998

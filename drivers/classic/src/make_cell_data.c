@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
  
-static char vcid[] = "$Id$";
-
 cell_data_struct **make_cell_data(int veg_type_num, int Nlayer)
 /**********************************************************************
 	make_cell_data	Keith Cherkauer		July 9, 1997

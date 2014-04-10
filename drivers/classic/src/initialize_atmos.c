@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,

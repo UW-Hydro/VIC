@@ -1,8 +1,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-static char vcid[] = "$Id$";
-
 double advected_sensible_heat(double SnowCoverFract, 
 			      double AirDens, 
 			      double Tair, 

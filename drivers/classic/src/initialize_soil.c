@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-static char vcid[] = "$Id$";
-
 void initialize_soil (cell_data_struct **cell, 
                       soil_con_struct   *soil_con,
                       veg_con_struct    *veg_con,

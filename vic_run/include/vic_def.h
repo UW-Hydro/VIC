@@ -1,4 +1,3 @@
-// $Id$
 /**********************************************************************
   This file contains "#define" statements and "typedef" statements.
   It also contains "extern" declarations for global variables.  For such

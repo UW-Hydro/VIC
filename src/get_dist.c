@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double get_dist(double lat1, double long1, double lat2, double long2)
 /*******************************************************************************
   Function: double get_dist(double lat1, double long1, double lat2, double long2)

@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void read_initial_model_state(FILE                *init_state,
 			      all_vars_struct     *all_vars,
 			      global_param_struct *gp,

@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
-
 #define GRND_TOL 0.001
 #define OVER_TOL 0.001
 

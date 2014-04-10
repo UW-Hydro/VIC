@@ -19,9 +19,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
-
-  
 /*****************************************************************************
   Function name: CalcAerodynamic()
 

@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
-static char vcid[] = "$Id$";
-
 double calc_surf_energy_bal(double             Le,
 			    double             LongUnderIn,
 			    double             NetLongSnow, // net LW at snow surface

@@ -4,8 +4,6 @@
 #include <vicNl.h>
 #include <global.h>
 
-static char vcid[] = "$Id$";
-
 /** Main Program **/
 
 int main(int argc, char *argv[])
@@ -94,9 +92,9 @@ int main(int argc, char *argv[])
   2013-Dec-27 Removed QUICK_FS option.							TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
   2014-Mar-24 Removed ARC_SOIL option                           BN
+  2014-Mar-28 Removed DIST_PRCP option.             TJB
   2014-Apr-02 Moved "free" statements for soil_con arrays outside the
 	      OUTPUT_FORCE condition to avoid memory leak.			TJB
-  2014-Mar-28 Removed DIST_PRCP option.							TJB
 **********************************************************************/
 {
 

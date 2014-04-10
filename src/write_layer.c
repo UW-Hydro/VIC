@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void write_layer(layer_data_struct *layer,
                  int                veg,
                  int                Nlayer,

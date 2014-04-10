@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 int initialize_lake (lake_var_struct   *lake, 
 		      lake_con_struct   lake_con,
 		      soil_con_struct  *soil_con,

@@ -3,8 +3,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void calc_root_fractions(veg_con_struct  *veg_con,
 			 soil_con_struct  *soil_con)
 /**********************************************************************

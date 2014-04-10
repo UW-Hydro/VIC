@@ -20,8 +20,6 @@
 
 #define MAX_ITER 50
 
-//static char vcid[] = "$Id$";
-
 /*****************************************************************************
   Function name: water_energy_balance()
 

@@ -44,8 +44,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id: $";
-
 void compute_soil_resp(int Nnodes,
                        double *dZ,
                        double dZTot,

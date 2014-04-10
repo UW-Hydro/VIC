@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void display_current_settings(int                 mode,
                               filenames_struct    *names,
                               global_param_struct *global) 
@@ -65,7 +63,6 @@ void display_current_settings(int                 mode,
   2013-Dec-28 Removed user_def.h.						TJB
   2014-Mar-24 Removed ARC_SOIL option                   BN
   2014-Mar-28 Removed DIST_PRCP option.					TJB
-
 **********************************************************************/
 {
 

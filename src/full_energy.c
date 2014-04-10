@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
-
 int  full_energy(int                  gridcell,
                  int                  rec,
                  atmos_data_struct   *atmos,

@@ -14,7 +14,7 @@ void   check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, dmy_struct *, global_param_struct *, int, int, 
                         int *);
 void   close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
-filenames_struct cmd_proc(int argc, char *argv[]);
+void   cmd_proc(int argc, char **argv, char *globalfilename);
 void   compress_files(char string[]);
 void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
 out_data_struct *create_output_list();

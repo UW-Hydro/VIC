@@ -5,7 +5,7 @@
 // global variables
 
 char *version = "4.2 beta 2014-Feb-25";
-char *optstring = "g:vo";
+
 int flag;
 int NR;         /* array index for atmos struct that indicates
                    the model step avarage or sum */
@@ -177,8 +177,8 @@ int main(int argc, char *argv[])
   save_data_struct         save_data;
   
   /** Read Model Options **/
+  cmd_proc(argc, argv, filenames.global);
   initialize_global();
-  filenames = cmd_proc(argc, argv);
 
 #if VERBOSE
   display_current_settings(DISP_VERSION,(filenames_struct*)NULL,(global_param_struct*)NULL);

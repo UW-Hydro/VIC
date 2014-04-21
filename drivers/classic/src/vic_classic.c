@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Compute cell physics for 1 timestep
 	  **************************************************/
-	  ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con);
+	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con);
 
 	  /**************************************************
 	    Write cell average values for current time step

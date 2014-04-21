@@ -139,9 +139,6 @@ void   fdjac3(double *, double *, double *, double *, double *,
 void   find_0_degree_fronts(energy_bal_struct *, double *, double *, int);
 layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
 				     double, double);
-int    full_energy(int, int, atmos_data_struct *, all_vars_struct *,
-		   dmy_struct *, global_param_struct *, lake_con_struct *,
-                   soil_con_struct *, veg_con_struct *);
 double func_atmos_energy_bal(double, va_list);
 double func_atmos_moist_bal(double, va_list);
 double func_canopy_energy_bal(double, va_list);
@@ -290,6 +287,9 @@ double trapzd(double (*funcd)(), double es, double Wind, double AirDens,
     double ushear, double Zrh, double a, double b, int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned);
+int vic_run(int, int, atmos_data_struct *, all_vars_struct *,
+            dmy_struct *, global_param_struct *, lake_con_struct *,
+            soil_con_struct *, veg_con_struct *);
 void vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);
 int water_balance (lake_var_struct *, lake_con_struct, int, all_vars_struct *, int, int, int, double, soil_con_struct, veg_con_struct);

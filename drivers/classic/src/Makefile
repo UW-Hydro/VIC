@@ -170,7 +170,6 @@ OBJS = \
 	${VICPATH}/src/estimate_T1.o \
 	${VICPATH}/src/faparl.o \
 	${VICPATH}/src/frozen_soil.o \
-	${VICPATH}/src/full_energy.o \
 	${VICPATH}/src/func_atmos_energy_bal.o \
 	${VICPATH}/src/func_atmos_moist_bal.o \
 	${VICPATH}/src/func_canopy_energy_bal.o \
@@ -198,6 +197,7 @@ OBJS = \
 	${VICPATH}/src/solve_snow.o \
 	${VICPATH}/src/surface_fluxes.o \
 	${VICPATH}/src/svp.o \
+	${VICPATH}/src/vic_run.o \
 	${VICPATH}/src/vicerror.o \
 	${VICPATH}/src/water_energy_balance.o \
 	${VICPATH}/src/water_under_ice.o \

@@ -1,112 +1,20 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-int  full_energy(int                  gridcell,
-                 int                  rec,
-                 atmos_data_struct   *atmos,
-                 all_vars_struct     *all_vars,
-                 dmy_struct          *dmy,
-                 global_param_struct *gp,
-		 lake_con_struct     *lake_con,
-                 soil_con_struct     *soil_con,
-                 veg_con_struct      *veg_con)
+int  vic_run(int                  gridcell,
+             int                  rec,
+             atmos_data_struct   *atmos,
+             all_vars_struct     *all_vars,
+             dmy_struct          *dmy,
+             global_param_struct *gp,
+             lake_con_struct     *lake_con,
+             soil_con_struct     *soil_con,
+             veg_con_struct      *veg_con)
 /**********************************************************************
-	full_energy	Keith Cherkauer		January 8, 1997
+	vic_run
 
   This subroutine controls the model core, it solves both the energy
   and water balance models, as well as frozen soils.  
-
-  modifications:
-  07-98 restructured to fix problems with distributed precipitation, 
-        and to add the ability to solve the snow model at different 
-	elevation bands within a single grid cell.                 KAC
-  01-19-00 modified to work with the new atmosphere data structure 
-           implemented when the radiation forcing routines were 
-	   updated.  Also modified to use the new simplified
-	   soil moisture storage for the frozen soil algorithm.    KAC
-  12-01-00 modified to include the lakes and wetlands algorithm.   KAC
-  11-18-02 Modified to handle blowing snow.  Also added debugging
-           output for lake model.                                  LCB
-  05-27-03 Updated passing of veg_con parameters for blowing snow
-           to surface_fluxes.  Original did not account for the fact
-           that veg_con is not allocated for veg = Nveg (bare soil)
-           case.  This eliminates a memory error.                  KAC
-  28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-	    used in flux calculations.				TJB
-  2006-Sep-23 Implemented flexible output configuration; now computation
-	      of soil wetness and root zone soil moisture happens here.		TJB
-  2006-Nov-07 Removed LAKE_MODEL option.					TJB
-  2007-Apr-04 Modified to handle grid cell errors by returning to the
-	      main subroutine, rather than ending the simulation.		GCT/KAC
-  2007-May-01 Added case of SPATIAL_FROST = TRUE in modifications
-	      from 2006-Sep-23.							GCT
-  2007-Aug-10 Added features for EXCESS_ICE option.
-	      Including calculating subsidence for each layer and
-	      updating soil depth, effective porosity,
-	      bulk density, and soil moisture and fluxes by calling
-	      runoff function if subsidence occurs.				JCA
-  2007-Sep-07 No longer resets ice content to previous time-step ice content if
-	      subsidence has occurred.						JCA
-  2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.		JCA
-  2007-Sep-19 Fixed bug in subsidence calculation.				JCA
-  2007-Nov-06 Added veg_con to parameter list of lakemain().  Replaced
-	      lake.fraci with lake.areai.					LCB via TJB
-  2008-Jan-23 Changed ice0 from a scalar to an array.  Previously,
-	      when options.SNOW_BAND > 1, the value of ice0 computed
-	      for earlier bands was always overwritten by the value
-	      of ice0 computed for the final band (even if the final
-	      band had 0 area).							JS via TJB
-  2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
-	      when options.SNOW_BAND > 1, the value of moist computed
-	      for earlier bands was always overwritten by the value
-	      of moist computed for the final band (even if the final
-	      band had 0 area).							KAC via TJB
-  2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-	      two elements (surface and overstory); added
-	      options.AERO_RESIST_CANSNOW.					TJB
-  2009-May-17 Added asat to cell_data.						TJB
-  2009-Jun-09 Modified to use extension of veg_lib structure to contain
-	      bare soil information.						TJB
-  2009-Jun-09 Modified to compute aero_resist for all potential evap
-	      landcover types.							TJB
-  2009-Jun-09 Cell_data structure now only stores final aero_resist
-	      values (called "aero_resist").  Preliminary uncorrected
-	      aerodynamic resistances for current vegetation and various
-	      reference land cover types for use in potential evap
-	      calculations is stored in temporary array aero_resist.		TJB
-  2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
-	      variables via a single reference to the cell data structure.	TJB
-  2009-Jul-22 Fixed error in assignment of cell.aero_resist.			TJB
-  2009-Jul-31 Wetland portion of lake/wetland tile is now processed in
-	      full_energy() instead of wetland_energy().  Lake funcions are
-	      now called directly from full_energy instead of lakemain().	TJB
-  2009-Sep-28 Moved lake_snow and lake_energy into lake_var structure.
-	      Removed calls to initialize_prcp and update_prcp.			TJB
-  2009-Sep-30 Miscellaneous fixes for lake model.				TJB
-  2009-Oct-05 Miscellaneous fixes for lake model, including updating/
-	      rescaling of lake and wetland storages and fluxes to account
-	      for changes in lake area.						TJB
-  2009-Nov-09 Changed definition of lake->sarea to include ice extent; other
-	      changes to handle case when lake fraction goes to 0.		LCB via TJB
-  2010-Mar-31 Added runoff_in.							TJB
-  2010-Sep-24 Changed atmos.runoff_in to atmos.channel_in.  Added
-	      lake_var.channel_in to store it.					TJB
-  2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
-  2010-Nov-26 Changed argument list of water_balance().				TJB
-  2011-May-31 Prepare_full_energy() is now always called.			TJB
-  2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-	      organic fraction into account.					TJB
-  2012-Jan-01 Modified condition for determining whether to simulate lakes
-	      to check whether lake_idx >= 0.					TJB
-  2012-Jan-16 Removed LINK_DEBUG code						BN
-  2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
-	      totals.								TJB
-  2013-Jul-25 Added photosynthesis terms.					TJB
-  2013-Jul-25 Added soil carbon terms.						TJB
-  2013-Dec-26 Removed EXCESS_ICE option.					TJB
-  2013-Dec-27 Removed (unused) SPATIAL_FROST code.				TJB
-  2014-Mar-28 Removed DIST_PRCP option.					TJB
-
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;

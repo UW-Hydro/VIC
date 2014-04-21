@@ -6,13 +6,14 @@ void
 display_current_settings(int                  mode,
                          filenames_struct    *names,
                          global_param_struct *global)
+
 /**********************************************************************
- s  display_current_settings	Ted Bohn			2003
+   display_current_settings	Ted Bohn			2003
 
    This routine displays the current settings of options defined in
    the header files and the global parameter file.
 
- **********************************************************************/
+**********************************************************************/
 {
     extern char            *version;
     extern option_struct    options;

@@ -5,6 +5,7 @@
 global_param_struct
 get_global_param(filenames_struct *names,
                  FILE             *gp)
+
 /**********************************************************************
    get_global_param	Keith Cherkauer	            March 1998
 
@@ -452,6 +453,7 @@ get_global_param(filenames_struct *names,
                     options.RC_MODE = RC_JARVIS;
                 }
             }
+
             /*************************************
                Define state files
             *************************************/
@@ -487,6 +489,7 @@ get_global_param(filenames_struct *names,
                     options.BINARY_STATE_FILE = TRUE;
                 }
             }
+
             /*************************************
                Define forcing files
             *************************************/
@@ -567,6 +570,7 @@ get_global_param(filenames_struct *names,
                     options.ALMA_INPUT = FALSE;
                 }
             }
+
             /*************************************
                Define parameter files
             *************************************/
@@ -708,6 +712,7 @@ get_global_param(filenames_struct *names,
                     options.LAKE_PROFILE = TRUE;
                 }
             }
+
             /*************************************
                Define output files
             *************************************/
@@ -783,6 +788,7 @@ get_global_param(filenames_struct *names,
                     options.PRT_SNOW_BAND = FALSE;
                 }
             }
+
             /*************************************
                Define output file contents
             *************************************/
@@ -795,6 +801,7 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

@@ -8,8 +8,8 @@ int                 NF, NR;
 filenames_struct    filenames;
 filep_struct        filep;
 global_param_struct global_param;
-option_struct options;
-param_set_struct param_set;
+option_struct       options;
+param_set_struct    param_set;
 
 int
 main(int    argc,
@@ -18,7 +18,7 @@ main(int    argc,
     cmd_proc(argc, argv, filenames.global);
 
     vic_start();
-    // vic_alloc()
+    vic_alloc();
     // vic_init()
     // vic_restore()
     // foreach timestep:

@@ -77,6 +77,7 @@ get_global_param(filenames_struct *names,
     global.statemonth = MISSING;
     global.stateday = MISSING;
     strcpy(names->statefile, "MISSING");
+    strcpy(names->domain, "MISSING");
     strcpy(names->soil, "MISSING");
     strcpy(names->veg, "MISSING");
     strcpy(names->veglib, "MISSING");
@@ -575,6 +576,9 @@ get_global_param(filenames_struct *names,
                Define parameter files
             *************************************/
 
+            else if (strcasecmp("DOMAIN", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", names->domain);
+            }
             else if (strcasecmp("SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", names->soil);
             }

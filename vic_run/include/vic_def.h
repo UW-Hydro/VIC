@@ -771,6 +771,7 @@ extern int NF;			/* array index loop counter limit for atmos
 typedef struct {
   FILE *forcing[2];     /* atmospheric forcing data files */
   FILE *globalparam;    /* global parameters file */
+  FILE *domain;         /* domain file */
   FILE *init_state;     /* initial model state file */
   FILE *lakeparam;      /* lake parameter file */
   FILE *snowband;       /* snow elevation band data file */
@@ -784,6 +785,7 @@ typedef struct {
   char  forcing[2][MAXSTRING];  /* atmospheric forcing data file names */
   char  f_path_pfx[2][MAXSTRING];  /* path and prefix for atmospheric forcing data file names */
   char  global[MAXSTRING];      /* global control file name */
+  char  domain[MAXSTRING];      /* domain file name */
   char  init_state[MAXSTRING];  /* initial model state file name */
   char  lakeparam[MAXSTRING];   /* lake model constants file */
   char  result_dir[MAXSTRING];  /* directory where results will be written */

@@ -964,34 +964,34 @@ get_global_param(filenames_struct *names,
         nrerror(
             "No forcing file has been defined.  Make sure that the global file defines FORCING1.");
     }
-    for (i = 0; i < 2; i++) {
-        if (i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING)) {
-            if (param_set.N_TYPES[i] == MISSING) {
-                sprintf(ErrStr,
-                        "Need to specify the number forcing variables types in forcing file %d.",
-                        i);
-                nrerror(ErrStr);
-            }
-            if (param_set.FORCE_FORMAT[i] == MISSING) {
-                sprintf(ErrStr,
-                        "Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",
-                        i);
-                nrerror(ErrStr);
-            }
-            if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] == MISSING) {
-                sprintf(ErrStr,
-                        "Did not define enough forcing variables in forcing file %d.",
-                        i);
-                nrerror(ErrStr);
-            }
-            if (param_set.FORCE_DT[i] == MISSING) {
-                sprintf(ErrStr,
-                        "Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",
-                        file_num);
-                nrerror(ErrStr);
-            }
-        }
-    }
+    // for (i = 0; i < 2; i++) {
+    //     if (i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING)) {
+    //         if (param_set.N_TYPES[i] == MISSING) {
+    //             sprintf(ErrStr,
+    //                     "Need to specify the number forcing variables types in forcing file %d.",
+    //                     i);
+    //             nrerror(ErrStr);
+    //         }
+    //         if (param_set.FORCE_FORMAT[i] == MISSING) {
+    //             sprintf(ErrStr,
+    //                     "Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",
+    //                     i);
+    //             nrerror(ErrStr);
+    //         }
+    //         if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] == MISSING) {
+    //             sprintf(ErrStr,
+    //                     "Did not define enough forcing variables in forcing file %d.",
+    //                     i);
+    //             nrerror(ErrStr);
+    //         }
+    //         if (param_set.FORCE_DT[i] == MISSING) {
+    //             sprintf(ErrStr,
+    //                     "Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",
+    //                     file_num);
+    //             nrerror(ErrStr);
+    //         }
+    //     }
+    // }
     if (param_set.N_TYPES[1] != MISSING && global.forceyear[1] == MISSING) {
         global.forceyear[1] = global.forceyear[0];
         global.forcemonth[1] = global.forcemonth[0];

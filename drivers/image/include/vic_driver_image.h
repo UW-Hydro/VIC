@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 
+
 /*******************************************************
    Stores forcing file input information.
 *******************************************************/
@@ -28,6 +29,51 @@ typedef struct {
     int FORCE_INDEX[2][N_FORCING_TYPES];
     int N_TYPES[2];
 } param_set_struct;
+
+/*
+   Structure to store location information for individual grid cells.
+
+   The global and local indices show the position of the grid cell within the
+   global and local (processor) domains. When the model is run on a single
+   processor, the glonal and local domains are identical. The model is run over a
+   list of cells.
+
+   cellidx - varies from 0 to total number of cells (-1)
+
+   latidx - index of latitude of grid cell in 2-D image
+
+   lonidx - index of longitude of grid cell in 2-D image.
+
+ */
+typedef struct {
+    float latitude; // latitude of grid cell center
+    float longitude; // longitude of grid cell center
+    long int global_cellidx; // index of grid cell in global list of grid cells
+    long int global_latidx; // index of latitude in global domain
+    long int global_lonidx; // index of longitude in global domain
+    long int local_cellidx; // index of grid cell in local list of grid cells
+    long int local_latidx; // index of latitude in local domain
+    long int local_lonidx; // index of longitude in local domain
+} location_struct;
+
+
+/*
+   Structure to store local and global domain information. If the model is run on
+   a single processor, then the two are identical.
+ */
+typedef struct {
+    long int ncells_global; // number of active grid cell on global domain
+    float global_ul_lat; // lat of upper left grid cell center of global domain
+    float global_ul_lon; // lon of upper left grid cell center of global domain
+    float global_lr_lat; // lat of lower right grid cell center of global domain
+    float global_lr_lon; // lon of lower right grid cell center of global domain
+    long int ncells_local; // number of active grid cell on local domain
+    float local_ul_lat; // lat of upper left grid cell center of local domain
+    float local_ul_lon; // lon of upper left grid cell center of local domain
+    float local_lr_lat; // lat of lower right grid cell center of local domain
+    float local_lr_lon; // lon of lower right grid cell center of local domain
+} domain_struct;
+
 
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);

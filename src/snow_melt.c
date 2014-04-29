@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <vicNl.h>
+#include "vicNl.h"
 
 static char vcid[] = "$Id$";
 
@@ -158,7 +158,6 @@ int  snow_melt(double            Le,
                soil_con_struct  *soil_con)
 {
   extern option_struct   options;
-  int    Twidth;
   double error;
   double DeltaPackCC;            /* Change in cold content of the pack */
   double DeltaPackSwq;           /* Change in snow water equivalent of the
@@ -167,7 +166,7 @@ int  snow_melt(double            Le,
   double Ice;
   double GlacierIce;  
   double InitialSwq;             /* Initial snow water equivalent (m) */
-  double InitialIwq;
+  double InitialIwq;             /* Initial ice water equivalent (m) */
   double MassBalanceError;       /* Mass balance error (m) */
   double MaxLiquidWater;         /* Maximum liquid water content of pack (m) */
   double PackCC;                 /* Cold content of snow pack (J) */
@@ -226,7 +225,7 @@ int  snow_melt(double            Le,
     SnowFallCC = CH_ICE * SnowFall * air_temp;
   
   /* Distribute fresh snowfall */
-  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq)) { //&& (MAX_SURFACE_SWE - SurfaceSwq) > SMALL) {
+  if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq)) {
     DeltaPackSwq = SurfaceSwq + SnowFall - MAX_SURFACE_SWE;
     if (DeltaPackSwq > SurfaceSwq)
       DeltaPackCC = SurfaceCC + (SnowFall - MAX_SURFACE_SWE)/SnowFall * SnowFallCC;
@@ -275,7 +274,6 @@ int  snow_melt(double            Le,
                                    &snow->surface_flux);
 
   if ( !UNSTABLE_SNOW ) {
-
     /* If Qnet == 0.0, then set the surface temperature to 0.0 */
     if (Qnet == 0.0) {
       snow->surf_temp = 0.0;
@@ -499,7 +497,6 @@ int  snow_melt(double            Le,
           else {
             SurfaceSwq += snow->vapor_flux;
             SnowIce += snow->vapor_flux;
-            Ice = PackSwq + GlacierIce;
           }
         }
       }

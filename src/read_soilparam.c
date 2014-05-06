@@ -6,8 +6,6 @@
 static char vcid[] = "$Id$";
 
 soil_con_struct read_soilparam(FILE *soilparam,
-			       char *soilparamdir,
-			       int  *cell_cnt,
 			       char *RUN_MODEL,
 			       char *MODEL_DONE)
 /**********************************************************************
@@ -121,10 +119,12 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
-  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.							TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Mar-24 Removed ARC_SOIL option                               BN
+  2014-Mar-28 Removed DIST_PRCP option.								TJB
 **********************************************************************/
 {
   void ttrim( char *string );
@@ -165,31 +165,24 @@ soil_con_struct read_soilparam(FILE *soilparam,
   char   latchar[20], lngchar[20], junk[6];
   soil_con_struct temp;
 
-  if(options.ARC_SOIL) {
-
-    /** Read Arc/INFO-style soil parameter files **/
-    temp = read_soilparam_arc(soilparam, soilparamdir, &Ncells, RUN_MODEL, *cell_cnt);
-    *cell_cnt++;
-    if(*cell_cnt==Ncells) *MODEL_DONE = TRUE;
-
-  }
-  else {
-
     /** Read plain ASCII soil parameter file **/
-    if((fscanf(soilparam, "%d", &flag))!=EOF) {
-      if(flag) *RUN_MODEL=TRUE;
-      else     *RUN_MODEL=FALSE;
-
-      if( fgets( line, MAXSTRING, soilparam ) == NULL ){
-        sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
-        nrerror(ErrStr);
-      }
-
+  if ((fscanf(soilparam, "%d", &flag)) != EOF) {
+    if (flag) {
+      *RUN_MODEL = TRUE;
     }
     else {
-      *MODEL_DONE = TRUE;
       *RUN_MODEL = FALSE;
     }
+
+    if (fgets( line, MAXSTRING, soilparam ) == NULL) {
+      sprintf(ErrStr,"ERROR: Unexpected EOF while reading soil file\n");
+      nrerror(ErrStr);
+    }
+  }
+  else {
+    *MODEL_DONE = TRUE;
+    *RUN_MODEL = FALSE;
+  }
 
     if(!(*MODEL_DONE) && (*RUN_MODEL)) {
 
@@ -620,9 +613,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
         sscanf(token, "%lf", &tempdbl);
         temp.max_snow_distrib_slope = tempdbl;
       }
-      else {
+      else
         temp.max_snow_distrib_slope = 0;
-      }
 
       /* read slope of frozen soil distribution */
       if (options.SPATIAL_FROST) {
@@ -635,9 +627,8 @@ soil_con_struct read_soilparam(FILE *soilparam,
         sscanf(token, "%lf", &tempdbl);
         temp.frost_slope = tempdbl;
       }
-      else {
+      else
         temp.frost_slope = 0;
-      }
 
       /* If specified, read cell average July air temperature in the final
          column of the soil parameter file */
@@ -668,24 +659,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
               temp.resid_moist[layer] = RESID_MOIST;
           temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
           temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
-        }
-
-        /*******************************************
-          Validate Initial Soil Layer Moisture Content
-        *******************************************/
-        if (!options.INIT_STATE) { // only do this if we're not getting initial moisture from model state file
-          for(layer = 0; layer < options.Nlayer; layer++) {
-            if(temp.init_moist[layer] > temp.max_moist[layer]) {
-              fprintf(stderr,"Initial soil moisture (%f mm) is greater than the maximum moisture (%f mm) for layer %d.\n\tResetting soil moisture to maximum.\n",
-              temp.init_moist[layer], temp.max_moist[layer], layer);
-              temp.init_moist[layer] = temp.max_moist[layer];
-            }
-            if(temp.init_moist[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
-              fprintf(stderr,"Initial soil moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tResetting soil moisture to residual moisture.\n",
-              temp.init_moist[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
-              temp.init_moist[layer] = temp.resid_moist[layer] * temp.depth[layer] * 1000.;
-            }
-          }
         }
 
         /**********************************************
@@ -981,8 +954,6 @@ soil_con_struct read_soilparam(FILE *soilparam,
       temp.ehoriz = 0;
 
     } // end if(!(*MODEL_DONE) && (*RUN_MODEL))
-
-  } // end if (options.ARC_SOIL)
 
   return temp;
 

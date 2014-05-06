@@ -9,8 +9,6 @@
 static char vcid[] = "$Id$";
 
 int calc_layer_average_thermal_props(energy_bal_struct *energy,
-				     layer_data_struct *layer_wet,
-				     layer_data_struct *layer_dry,
 				     layer_data_struct *layer,
 				     soil_con_struct   *soil_con,
 				     int                Nnodes,
@@ -56,6 +54,7 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -74,23 +73,15 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 
   /** Compute Soil Layer average  properties **/
   if (options.QUICK_FLUX) {
-    ErrorFlag = estimate_layer_ice_content_quick_flux(layer_wet, soil_con->depth, soil_con->dp,
+    ErrorFlag = estimate_layer_ice_content_quick_flux(layer, soil_con->depth, soil_con->dp,
 					   energy->T[0], energy->T[1], soil_con->avg_temp,
 					   soil_con->max_moist, 
 					   soil_con->expt, soil_con->bubble, 
 					   soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
-    if(options.DIST_PRCP) {
-      ErrorFlag = estimate_layer_ice_content_quick_flux(layer_dry, soil_con->depth, soil_con->dp,
-					     energy->T[0], energy->T[1], soil_con->avg_temp,
-					     soil_con->max_moist, 
-					     soil_con->expt, soil_con->bubble, 
-					     soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
-      if ( ErrorFlag == ERROR ) return (ERROR);
-    }
   }
   else {
-    ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
+    ErrorFlag = estimate_layer_ice_content(layer, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
 					   soil_con->expt_node, soil_con->bubble_node, 
 					   soil_con->depth, soil_con->max_moist, 
@@ -98,16 +89,6 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 					   soil_con->frost_fract, soil_con->frost_slope, 
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
-    if(options.DIST_PRCP) {
-      ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
-					     soil_con->max_moist_node, 
-					     soil_con->expt_node, soil_con->bubble_node, 
-					     soil_con->depth, soil_con->max_moist, 
-					     soil_con->expt, soil_con->bubble, 
-					     soil_con->frost_fract, soil_con->frost_slope, 
-					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
-      if ( ErrorFlag == ERROR ) return (ERROR);
-    }
   }
   
   return (0);
@@ -412,6 +393,7 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Modified cold nose hack to also cover warm nose case.	TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/

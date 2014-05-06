@@ -83,6 +83,7 @@ double calc_energy_balance_error(int    rec,
     cum_error = 0;
     Nrecs     = -rec;
     max_error = 0;
+    error = 0.0;
   }
   else {
     error = net_rad - latent - sensible - grnd_flux + snow_fluxes;

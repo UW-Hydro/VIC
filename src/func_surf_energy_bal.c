@@ -110,6 +110,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -181,7 +182,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double emissivity;
   double LongBareIn; // incoming LW to snow-free surface
   double LongSnowIn; // incoming LW to snow surface - if INCLUDE_SNOW
-  double mu;
   double surf_atten;
   double vp;
   double vpd;
@@ -193,7 +193,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *displacement;
   double *ra;
   double *Ra_used;
-  double *rainfall;
+  double rainfall;
   double *ref_height;
   double *roughness;
   double *wind;
@@ -244,10 +244,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* model structures */
   soil_con_struct *soil_con;
-  layer_data_struct *layer_wet;
-  layer_data_struct *layer_dry;
-  veg_var_struct *veg_var_wet;
-  veg_var_struct *veg_var_dry;
+  layer_data_struct *layer;
+  veg_var_struct *veg_var;
 
   /* control flags */
   int INCLUDE_SNOW;
@@ -339,7 +337,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
   emissivity              = (double) va_arg(ap, double);
   LongBareIn              = (double) va_arg(ap, double);
   LongSnowIn              = (double) va_arg(ap, double);
-  mu                      = (double) va_arg(ap, double);
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
@@ -351,7 +348,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   displacement            = (double *) va_arg(ap, double *);
   ra                      = (double *) va_arg(ap, double *);
   Ra_used                 = (double *) va_arg(ap, double *);
-  rainfall                = (double *) va_arg(ap, double *);
+  rainfall                = (double) va_arg(ap, double);
   ref_height              = (double *) va_arg(ap, double *);
   roughness               = (double *) va_arg(ap, double *);
   wind                    = (double *) va_arg(ap, double *);
@@ -398,10 +395,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* model structures */
   soil_con                = (soil_con_struct *) va_arg(ap, soil_con_struct *);
-  layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  layer_dry               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var_wet             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  veg_var_dry             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  layer               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
 
   /* control flags */
   INCLUDE_SNOW            = (int) va_arg(ap, int);
@@ -687,17 +682,17 @@ double func_surf_energy_bal(double Ts, va_list ap)
     winter crop planted).
   *************************************************/
   if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
-    Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
-		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
+    Evap = canopy_evap(layer, veg_var, TRUE, 
+		       veg_class, month, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
 		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, frost_fract,
 		       root, dryFrac, shortwave, Catm, CanopLayerBnd);
   }
   else if(!SNOWING) {
-    Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
+    Evap = arno_evap(layer, NetBareRad, Tair, vpd, 
 		     depth[0], max_moist * depth[0] * 1000., 
-		     elevation, b_infilt, Ra_used[0], delta_t, mu, 
+		     elevation, b_infilt, Ra_used[0], delta_t, 
 		     resid_moist[0], frost_fract);
   }
   else Evap = 0.;

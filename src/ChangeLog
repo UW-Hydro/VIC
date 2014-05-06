@@ -26,7 +26,7 @@ Usage:
 
 
 --------------------------------------------------------------------------------
-***** Description of changes between VIC 4.2 and VIC 4.1.2 *****
+***** Description of changes between VIC 4.1.2 and VIC 4.2 *****
 --------------------------------------------------------------------------------
 
 New Features:
@@ -221,8 +221,78 @@ Added soil moisture content for half-space below bottom soil layer
 
 
 
+Removed the DIST_PRCP option.
+
+	Files Affected:
+
+	arno_evap.c
+	calc_rainonly.c
+	calc_snow_coverage.c
+	calc_surf_energy_bal.c
+	canopy_evap.c
+	display_current_settings.c
+	dist_prec.c (removed)
+	free_all_vars.c (renamed from free_dist_prcp.c)
+	frozen_soil.c
+	full_energy.c
+	func_canopy_energy_bal.c
+	func_surf_energy_bal.c
+	get_global_param.c
+	initialize_global.c
+	initialize_model_state.c
+	initialize_new_storm.c (removed)
+	LAKE.h
+	lakes.eb.c
+	make_all_vars.c (renamed from make_dist_prcp.c)
+	Makefile
+	prepare_full_energy.c
+	put_data.c
+	read_initial_model_state.c
+	read_soilparam.c
+	redistribute_during_storm.c (removed)
+	runoff.c
+	snow_intercept.c
+	soil_conduction.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+	write_forcing_file.c
+	write_model_state.c
+
+	Description:
+
+	Removed the DIST_PRCP option and all functions and variables associated
+	with it.  Removed the "dist" array dimension from the cell and veg_var
+	data structures.  Renamed the "dist_prcp" data structure to
+	"all_vars".
+
+
+
+
 Bug Fixes:
 ----------
+
+Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
+
+	Files Affected:
+
+	frozen_soil.c
+	func_surf_energy_bal.c
+	vicNl.h
+
+	Description:
+
+	Extended the "cold nose" hack to the "warm nose" condition, and also
+	extended to cover the IMPLICIT scheme.
+
+	This will be superceded by a more bug-free soil temperature scheme
+	in the next major release of the model.
+
+
+
 
 Fixed incorrect assignment of input forcing variables that are moisture fluxes (all forms of precipitation and channel inflow) when ALMA_INPUT is TRUE.
 
@@ -627,10 +697,27 @@ Better out-of-box behavior for soil temperature scheme
 	simulation of the soil temperature profile:
 
 	1. Set default values of IMPLICIT and EXP_TRANS to TRUE.
-	2. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
+
+	2. Made "cold" (no-spinup) initial soil temperatures more consistent
+	with air temperature and bottom boundary temperature.
+
+	3. Added validation of option.Nnodes for EXP_TRANS=TRUE to guarantee
 	that, for the given soil temperature bottom boundary depth "dp" (also
 	known as the damping depth), there are at least 3 nodes within the top
-	50 cm of the soil column.
+	50 cm of the soil column.  This is to constrain errors to a reasonable
+	size.  To satisfy this condition, the following relationship must hold:
+		Nnodes >= 5*ln(dp+1)+1
+
+	Some examples:
+	dp(m)	minimum Nnodes
+	  4	       9
+	  7	      12
+	 10	      14
+	 25	      18
+	 50	      21
+
+	VIC will exit with an error message to this effect if Nnodes is too
+	small for the given value of dp.
 
 
 

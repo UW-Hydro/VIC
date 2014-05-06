@@ -113,6 +113,8 @@ global_param_struct get_global_param(filenames_struct *names,
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed user_def.h.					TJB
   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
+  2014-Mar-24 Removed ARC_SOIL option                                   BN
+  2014-Mar-28 Removed DIST_PRCP option.					                TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -177,7 +179,6 @@ global_param_struct get_global_param(filenames_struct *names,
   global.stateday      = MISSING;
   strcpy(names->statefile,    "MISSING");
   strcpy(names->soil,         "MISSING");
-  strcpy(names->soil_dir,     "MISSING");
   strcpy(names->veg,          "MISSING");
   strcpy(names->veglib,       "MISSING");
   strcpy(names->snowband,     "MISSING");
@@ -293,14 +294,6 @@ global_param_struct get_global_param(filenames_struct *names,
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.BLOWING=TRUE;
         else options.BLOWING = FALSE;
-      }
-      else if(strcasecmp("DIST_PRCP",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.DIST_PRCP=TRUE;
-        else options.DIST_PRCP = FALSE;
-      }
-      else if(strcasecmp("PREC_EXPT",optstr)==0) {
-	sscanf(cmdstr,"%*s %f",&options.PREC_EXPT);
       }
       else if(strcasecmp("CORRPREC",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -549,11 +542,11 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("ARC_SOIL",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.ARC_SOIL=TRUE;
-        else options.ARC_SOIL = FALSE;
-      }
-      else if(strcasecmp("SOIL_DIR",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",names->soil_dir);
+        if(strcasecmp("TRUE",flgstr)==0) {
+          nrerror("\"ARC_SOIL\" is no longer a supported option.\n"
+                  "Please convert your soil parameter file and remove this option\n"
+                  "from your global file");
+        }
       }
       else if (strcasecmp("ARNO_PARAMS", optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -867,8 +860,6 @@ global_param_struct get_global_param(filenames_struct *names,
   // Validate soil parameter file information
   if ( strcmp ( names->soil, "MISSING" ) == 0 )
     nrerror("No soil parameter file has been defined.  Make sure that the global file defines the soil parameter file on the line that begins with \"SOIL\".");
-  if (options.ARC_SOIL && strcmp ( names->soil_dir, "MISSING" ) == 0)
-    nrerror("\"ARC_SOIL\" was specified as TRUE, but no soil parameter directory (\"SOIL_DIR\") has been defined.  Make sure that the global file defines the soil parameter directory on the line that begins with \"SOIL_DIR\".");
 
   /*******************************************************************************
     Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
@@ -1045,9 +1036,6 @@ global_param_struct get_global_param(filenames_struct *names,
     fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
 	    global.endday, global.endmonth, global.endyear);
   fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
-  fprintf(stderr,"Use Distributed Precipitation.(%d)\n",options.DIST_PRCP);
-  if(options.DIST_PRCP)
-    fprintf(stderr,"..Using Precipitation Exponent of %f\n",options.PREC_EXPT);
   fprintf(stderr,"Ground heat flux will be estimated ");
   if ( options.QUICK_FLUX ) 
     fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");

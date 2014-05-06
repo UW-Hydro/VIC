@@ -62,7 +62,10 @@ void display_current_settings(int                 mode,
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
-  2013-Dec-28 Removed user_def.h.					TJB
+  2013-Dec-28 Removed user_def.h.						TJB
+  2014-Mar-24 Removed ARC_SOIL option                   BN
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
+
 **********************************************************************/
 {
 
@@ -175,10 +178,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"CORRPREC\t\tTRUE\n");
   else
     fprintf(stderr,"CORRPREC\t\tFALSE\n");
-  if (options.DIST_PRCP)
-    fprintf(stderr,"DIST_PRCP\t\tTRUE\n");
-  else
-    fprintf(stderr,"DIST_PRCP\t\tFALSE\n");
   if (options.EXP_TRANS)
     fprintf(stderr,"EXP_TRANS\t\tTRUE\n");
   else
@@ -275,8 +274,7 @@ void display_current_settings(int                 mode,
   else if (options.VP_ITER == VP_ITER_ANNUAL)
     fprintf(stderr,"VP_ITER\t\t\tVP_ITER_ANNUAL\n");
   else if (options.VP_ITER == VP_ITER_CONVERGE)
-    fprintf(stderr,"VP_ITER\t\t\tVP_ITER_CONVERGE\n");
-  fprintf(stderr,"PREC_EXPT\t\t%f\n",options.PREC_EXPT);
+    fprintf(stderr,"VP_ITER\t\tVP_ITER_CONVERGE\n");
   fprintf(stderr,"WIND_H\t\t\t%f\n",global->wind_h);
   fprintf(stderr,"MEASURE_H\t\t%f\n",global->measure_h);
   fprintf(stderr,"NODES\t\t\t%d\n",options.Nnode);
@@ -323,12 +321,6 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Soil Data:\n");
   fprintf(stderr,"Soil file\t\t%s\n",names->soil);
-  if (options.ARC_SOIL) {
-    fprintf(stderr,"ARC_SOIL\t\tTRUE\n");
-    fprintf(stderr,"Soil dir\t\t%s\n",names->soil_dir);
-  }
-  else
-    fprintf(stderr,"ARC_SOIL\t\tFALSE\n");
   if (options.BASEFLOW == ARNO)
     fprintf(stderr,"BASEFLOW\t\tARNO\n");
   else if (options.BASEFLOW == NIJSSEN2001)

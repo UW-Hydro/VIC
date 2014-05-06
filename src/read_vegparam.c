@@ -374,9 +374,11 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
 void ttrim( char *c ) 
 {
-  while( (*c++ != END) );
-    --c;
-  for( ; *--c == NEW; *c = END );
-
+  while  ((*c++ != END)) {
+      ;
+  }
+  for (--c; *--c == NEW; *c = END) {
+      ;
+  }
 }
 

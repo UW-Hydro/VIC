@@ -10,6 +10,7 @@ filep_struct        filep;
 global_param_struct global_param;
 option_struct       options;
 param_set_struct    param_set;
+domain_struct       global_domain;
 
 int
 main(int    argc,

@@ -11,6 +11,9 @@ DRIVERPATH = ..
 # VIC RUN PATH
 VICPATH = ../../../vic_run
 
+# NETCDF include
+NETCDFPATH = /opt/local/include
+
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
@@ -18,11 +21,11 @@ SHELL = /bin/bash
 CC = gcc
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${DRIVERPATH}/../classic/include
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${DRIVERPATH}/../classic/include -I ${NETCDFPATH}
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
-LIBRARY = -lm
+LIBRARY = -lm -L/opt/local/lib -lnetcdf
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -g -Wall -Wno-unused
@@ -49,13 +52,14 @@ HDRS = ${VICPATH}/include/vic_def.h \
 OBJS = \
 	${DRIVERPATH}/src/cmd_proc.o \
 	${DRIVERPATH}/src/display_current_settings.o \
+	${DRIVERPATH}/src/get_global_domain.o \
 	${DRIVERPATH}/src/get_global_param.o \
 	${DRIVERPATH}/src/initialize_global.o \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_image.o \
 	${DRIVERPATH}/src/vic_start.o \
-	${VICPATH}/src/nrerror.o \
+	${VICPATH}/src/nrerror.o
 
 	# ${VICPATH}/src/CalcAerodynamic.o \
 	# ${VICPATH}/src/CalcBlowingSnow.o \

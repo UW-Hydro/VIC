@@ -3,6 +3,8 @@
 #ifndef VIC_DRIVER_IMAGE_H
 #define VIC_DRIVER_IMAGE_H
 
+#include <stdbool.h>
+#include <netcdf.h>
 #include <stdio.h>
 
 
@@ -46,40 +48,42 @@ typedef struct {
 
  */
 typedef struct {
-    float latitude; // latitude of grid cell center
-    float longitude; // longitude of grid cell center
-    long int global_cellidx; // index of grid cell in global list of grid cells
-    long int global_latidx; // index of latitude in global domain
-    long int global_lonidx; // index of longitude in global domain
-    long int local_cellidx; // index of grid cell in local list of grid cells
-    long int local_latidx; // index of latitude in local domain
-    long int local_lonidx; // index of longitude in local domain
+    double latitude; // latitude of grid cell center
+    double longitude; // longitude of grid cell center
+    double area; // area of grid cell
+    double frac; // fraction of grid cell that is active
+    long int global_cell_idx; // index of grid cell in global list of grid cells
+    long int global_x_idx; // index of x-dimension in global domain
+    long int global_y_idx; // index of y-dimension in global domain
+    long int local_cell_idx; // index of grid cell in local list of grid cells
+    long int local_x_idx; // index of x-dimension in local domain
+    long int local_y_idx; // index of y-dimension in local domain
 } location_struct;
 
 
 /*
    Structure to store local and global domain information. If the model is run on
-   a single processor, then the two are identical.
+   a single processor, then the two are identical. Note that this
  */
 typedef struct {
     long int ncells_global; // number of active grid cell on global domain
-    float global_ul_lat; // lat of upper left grid cell center of global domain
-    float global_ul_lon; // lon of upper left grid cell center of global domain
-    float global_lr_lat; // lat of lower right grid cell center of global domain
-    float global_lr_lon; // lon of lower right grid cell center of global domain
+    size_t n_nx; // size of x-index;
+    size_t n_ny; // size of y-index
     long int ncells_local; // number of active grid cell on local domain
-    float local_ul_lat; // lat of upper left grid cell center of local domain
-    float local_ul_lon; // lon of upper left grid cell center of local domain
-    float local_lr_lat; // lat of lower right grid cell center of local domain
-    float local_lr_lon; // lon of lower right grid cell center of local domain
+    location_struct *locations; // locations structs for local domain
 } domain_struct;
 
 
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
+long int get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
+void initialize_domain(domain_struct *domain);
+void initialize_location(location_struct *location);
 void initialize_global();
 FILE *open_file(char *string, char *type);
+void print_domain(domain_struct *domain, bool print_loc);
+void print_location(location_struct *location);
 void vic_alloc(void);
 void vic_start(void);
 void usage(char *);

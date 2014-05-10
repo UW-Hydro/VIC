@@ -166,6 +166,7 @@ int  runoff(cell_data_struct  *cell_wet,
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.					TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2014-May-09 Added check on liquid soil moisture to ensure always >= 0.	TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -593,6 +594,11 @@ int  runoff(cell_data_struct  *cell_wet,
 	      firstlayer=FALSE;
 	      
 	      /** verify that current layer moisture is greater than minimum **/
+	      if (liq[lindex] < 0) {
+		/** liquid cannot fall below 0 **/
+		Q12[lindex] += liq[lindex];
+		liq[lindex] = 0;
+	      }
 	      if ((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
 		/** moisture cannot fall below minimum **/
 		Q12[lindex] += (liq[lindex]+ice[lindex]) - resid_moist[lindex];

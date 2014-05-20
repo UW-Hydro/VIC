@@ -54,9 +54,11 @@ OBJS = \
 	${DRIVERPATH}/src/display_current_settings.o \
 	${DRIVERPATH}/src/get_global_domain.o \
 	${DRIVERPATH}/src/get_global_param.o \
+	${DRIVERPATH}/src/get_nc_dimension.o \
 	${DRIVERPATH}/src/initialize_global.o \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/vic_alloc.o \
+	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_image.o \
 	${DRIVERPATH}/src/vic_start.o \
 	${VICPATH}/src/nrerror.o

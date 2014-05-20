@@ -11,6 +11,9 @@ global_param_struct global_param;
 option_struct       options;
 param_set_struct    param_set;
 domain_struct       global_domain;
+soil_con_struct    *soil_con = NULL;
+veg_con_struct    **veg_con = NULL;
+veg_lib_struct    **veg_lib = NULL;
 
 int
 main(int    argc,
@@ -20,7 +23,7 @@ main(int    argc,
 
     vic_start();
     vic_alloc();
-    // vic_init()
+    vic_init();
     // vic_restore()
     // foreach timestep:
     // foreach gridcell:
@@ -29,7 +32,7 @@ main(int    argc,
     // vic_write()
     // if save:
     // vic_save()
-    // vic_finalize()
+    vic_finalize();
 
     return EXIT_SUCCESS;
 }

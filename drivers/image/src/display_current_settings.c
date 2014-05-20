@@ -332,7 +332,7 @@ display_current_settings(int                  mode,
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Domain Data:\n");
     fprintf(stderr, "Domain file\t\t%s\n", names->domain);
-    
+
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Soil Data:\n");
     fprintf(stderr, "Soil file\t\t%s\n", names->soil);

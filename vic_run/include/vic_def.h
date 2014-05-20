@@ -871,6 +871,7 @@ typedef struct {
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
 			    soil thermal fluxes */
+  int    NVEGTYPES;      /* number of vegetation types (used by image driver) */
   char   PLAPSE;         /* TRUE = If air pressure not supplied as an
 			    input forcing, compute it by lapsing sea-level
 			    pressure by grid cell average elevation;

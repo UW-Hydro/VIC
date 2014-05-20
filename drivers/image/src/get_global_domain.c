@@ -5,72 +5,47 @@
 #define ERR(e) {fprintf(stderr, "\nError(get_global_domain): %s\n", \
                         nc_strerror(e)); }
 
-long int
-get_global_domain(char          *ncName,
+size_t
+get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
 {
     double          *var;
-    int              i;
-    int              j;
+    size_t           i;
+    size_t           j;
+    size_t           x;
+    size_t           y;
     int             *mask = NULL;
-    int              ncid;
-    int              nx_dimid;
-    int              ny_dimid;
+    int              nc_id;
     int              status;
-    int              varid;
-    int              x;
-    int              y;
+    int              var_id;
     location_struct *location;
 
     initialize_domain(global_domain);
 
-    // open the netcdf file
-    status = nc_open(ncName, NC_NOWRITE, &ncid);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    // get netcdf id for x dimension
-    // TBD: read dimension id from file
-    status = nc_inq_dimid(ncid, "ni", &nx_dimid);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    // get size of x dimension
-    status = nc_inq_dimlen(ncid, nx_dimid, &(global_domain->n_nx));
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    // get netcdf id for y dimension
-    // TBD: read dimension id from file
-    status = nc_inq_dimid(ncid, "nj", &ny_dimid);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    // get size of y dimension
-    status = nc_inq_dimlen(ncid, ny_dimid, &(global_domain->n_ny));
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    global_domain->n_nx = get_nc_dimension(nc_name, "ni");
+    global_domain->n_ny = get_nc_dimension(nc_name, "nj");
 
     // allocate memory for mask
-    mask = (int *) malloc((size_t) (global_domain->n_ny * global_domain->n_nx) *
+    mask = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
                           sizeof(int));
     if (mask == NULL) {
         nrerror("Memory allocation error in get_global_domain().");
     }
 
-    /* get NetCDF variable */
-    // TBD: read var id from file
-    status = nc_inq_varid(ncid, "mask", &varid);
+    // open the netcdf file
+    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
 
-    status = nc_get_var_int(ncid, varid, mask);
+    /* get NetCDF variable */
+    // TBD: read var id from file
+    status = nc_inq_varid(nc_id, "mask", &var_id);
+    if (status != NC_NOERR) {
+        ERR(status);
+    }
+
+    status = nc_get_var_int(nc_id, var_id, mask);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -85,7 +60,7 @@ get_global_domain(char          *ncName,
 
     // if MASTER_PROC
     global_domain->locations = (location_struct *)
-                               malloc((size_t) global_domain->ncells_global *
+                               malloc(global_domain->ncells_global *
                                       sizeof(location_struct));
     if (global_domain->locations == NULL) {
         nrerror("Memory allocation error in get_global_domain().");
@@ -95,8 +70,7 @@ get_global_domain(char          *ncName,
     }
 
     // allocate memory for variables
-    var = (double *) malloc((size_t) (global_domain->n_ny *
-                                      global_domain->n_nx) *
+    var = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
                             sizeof(double));
     if (var == NULL) {
         nrerror("Memory allocation error in get_global_domain().");
@@ -104,12 +78,12 @@ get_global_domain(char          *ncName,
 
     // get longitude
     // TBD: read var id from file
-    status = nc_inq_varid(ncid, "xc", &varid);
+    status = nc_inq_varid(nc_id, "xc", &var_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
 
-    status = nc_get_var_double(ncid, varid, var);
+    status = nc_get_var_double(nc_id, var_id, var);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -130,12 +104,12 @@ get_global_domain(char          *ncName,
 
     // get latitude
     // TBD: read var id from file
-    status = nc_inq_varid(ncid, "yc", &varid);
+    status = nc_inq_varid(nc_id, "yc", &var_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
 
-    status = nc_get_var_double(ncid, varid, var);
+    status = nc_get_var_double(nc_id, var_id, var);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -152,12 +126,12 @@ get_global_domain(char          *ncName,
 
     // get area
     // TBD: read var id from file
-    status = nc_inq_varid(ncid, "area", &varid);
+    status = nc_inq_varid(nc_id, "area", &var_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
 
-    status = nc_get_var_double(ncid, varid, var);
+    status = nc_get_var_double(nc_id, var_id, var);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -174,12 +148,12 @@ get_global_domain(char          *ncName,
 
     // get fraction
     // TBD: read var id from file
-    status = nc_inq_varid(ncid, "frac", &varid);
+    status = nc_inq_varid(nc_id, "frac", &var_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
 
-    status = nc_get_var_double(ncid, varid, var);
+    status = nc_get_var_double(nc_id, var_id, var);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -195,7 +169,7 @@ get_global_domain(char          *ncName,
     }
 
     // close the netcdf file
-    status = nc_close(ncid);
+    status = nc_close(nc_id);
     if (status != NC_NOERR) {
         ERR(status);
     }
@@ -222,16 +196,16 @@ initialize_domain(domain_struct *domain)
 void
 initialize_location(location_struct *location)
 {
-    location->latitude = -1;
-    location->longitude = -1;
-    location->area = -1;
-    location->frac = -1;
-    location->global_cell_idx = -1;
-    location->global_x_idx = -1;
-    location->global_y_idx = -1;
-    location->local_cell_idx = -1;
-    location->local_x_idx = -1;
-    location->local_y_idx = -1;
+    location->latitude = 0;
+    location->longitude = 0;
+    location->area = 0;
+    location->frac = 0;
+    location->global_cell_idx = 0;
+    location->global_x_idx = 0;
+    location->global_y_idx = 0;
+    location->local_cell_idx = 0;
+    location->local_x_idx = 0;
+    location->local_y_idx = 0;
 }
 
 void
@@ -241,10 +215,10 @@ print_domain(domain_struct *domain,
     int i;
 
     printf("domain:\n");
-    printf("\tncells_global: %ld\n", domain->ncells_global);
+    printf("\tncells_global: %zd\n", domain->ncells_global);
     printf("\tn_nx: %zd\n", domain->n_nx);
     printf("\tn_ny: %zd\n", domain->n_ny);
-    printf("\tncells_local: %ld\n", domain->ncells_local);
+    printf("\tncells_local: %zd\n", domain->ncells_local);
     printf("\tlocations: %p\n", domain->locations);
     if (print_loc) {
         for (i = 0; i < domain->ncells_global; i++) {
@@ -256,7 +230,7 @@ print_domain(domain_struct *domain,
 void
 print_location(location_struct *location)
 {
-    printf("%ld: (%ld, %ld) {%ld: (%ld, %ld)}\n",
+    printf("%zd: (%zd, %zd) {%zd: (%zd, %zd)}\n",
            location->global_cell_idx, location->global_x_idx,
            location->global_y_idx, location->local_cell_idx,
            location->local_x_idx, location->local_y_idx);

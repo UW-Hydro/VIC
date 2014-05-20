@@ -52,12 +52,12 @@ typedef struct {
     double longitude; // longitude of grid cell center
     double area; // area of grid cell
     double frac; // fraction of grid cell that is active
-    long int global_cell_idx; // index of grid cell in global list of grid cells
-    long int global_x_idx; // index of x-dimension in global domain
-    long int global_y_idx; // index of y-dimension in global domain
-    long int local_cell_idx; // index of grid cell in local list of grid cells
-    long int local_x_idx; // index of x-dimension in local domain
-    long int local_y_idx; // index of y-dimension in local domain
+    size_t global_cell_idx; // index of grid cell in global list of grid cells
+    size_t global_x_idx; // index of x-dimension in global domain
+    size_t global_y_idx; // index of y-dimension in global domain
+    size_t local_cell_idx; // index of grid cell in local list of grid cells
+    size_t local_x_idx; // index of x-dimension in local domain
+    size_t local_y_idx; // index of y-dimension in local domain
 } location_struct;
 
 
@@ -66,18 +66,19 @@ typedef struct {
    a single processor, then the two are identical. Note that this
  */
 typedef struct {
-    long int ncells_global; // number of active grid cell on global domain
+    size_t ncells_global; // number of active grid cell on global domain
     size_t n_nx; // size of x-index;
     size_t n_ny; // size of y-index
-    long int ncells_local; // number of active grid cell on local domain
+    size_t ncells_local; // number of active grid cell on local domain
     location_struct *locations; // locations structs for local domain
 } domain_struct;
 
 
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
-long int get_global_domain(char *fname, domain_struct *global_domain);
+size_t get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
+size_t get_nc_dimension(char *nc_name, char *dim_name);
 void initialize_domain(domain_struct *domain);
 void initialize_location(location_struct *location);
 void initialize_global();
@@ -85,6 +86,7 @@ FILE *open_file(char *string, char *type);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
 void vic_alloc(void);
+void vic_finalize(void);
 void vic_start(void);
 void usage(char *);
 

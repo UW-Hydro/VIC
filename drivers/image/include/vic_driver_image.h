@@ -79,14 +79,20 @@ void display_current_settings(int, filenames_struct *, global_param_struct *);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
+int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
+                        size_t *count, double *var);
+int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
+                     size_t *count, int *var);
 void initialize_domain(domain_struct *domain);
 void initialize_location(location_struct *location);
-void initialize_global();
+void initialize_global(void);
+dmy_struct *make_dmy(global_param_struct *);
 FILE *open_file(char *string, char *type);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
 void vic_alloc(void);
 void vic_finalize(void);
+void vic_init(void);
 void vic_start(void);
 void usage(char *);
 

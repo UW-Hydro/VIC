@@ -9,12 +9,14 @@ size_t
 get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
 {
-    double          *var;
+    int             *run = NULL;
+    double          *var = NULL;
     size_t           i;
     size_t           j;
     size_t           x;
     size_t           y;
-    int             *mask = NULL;
+    size_t           d2count[2];
+    size_t           d2start[2];
     int              nc_id;
     int              status;
     int              var_id;
@@ -25,34 +27,24 @@ get_global_domain(char          *nc_name,
     global_domain->n_nx = get_nc_dimension(nc_name, "ni");
     global_domain->n_ny = get_nc_dimension(nc_name, "nj");
 
-    // allocate memory for mask
-    mask = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
-                          sizeof(int));
-    if (mask == NULL) {
+    d2start[0] = 0;
+    d2start[1] = 0;
+    d2count[0] = global_domain->n_ny;
+    d2count[1] = global_domain->n_nx;
+
+    // allocate memory for cells to be run
+    run = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
+                         sizeof(int));
+    if (run == NULL) {
         nrerror("Memory allocation error in get_global_domain().");
     }
 
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    /* get NetCDF variable */
-    // TBD: read var id from file
-    status = nc_inq_varid(nc_id, "mask", &var_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    status = nc_get_var_int(nc_id, var_id, mask);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
 
     for (x = 0, i = 0; x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (mask[i]) {
+            if (run[i]) {
+                printf("%zd: %d\n", i, run[i]);
                 global_domain->ncells_global++;
             }
         }
@@ -78,20 +70,12 @@ get_global_domain(char          *nc_name,
 
     // get longitude
     // TBD: read var id from file
-    status = nc_inq_varid(nc_id, "xc", &var_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    status = nc_get_var_double(nc_id, var_id, var);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    get_nc_field_double(nc_name, "xc", d2start, d2count, var);
 
     for (x = 0, i = 0, j = 0, location = global_domain->locations;
          x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (mask[i]) {
+            if (run[i]) {
                 location->longitude = var[i];
                 location->global_cell_idx = j;
                 location->global_x_idx = x;
@@ -104,20 +88,12 @@ get_global_domain(char          *nc_name,
 
     // get latitude
     // TBD: read var id from file
-    status = nc_inq_varid(nc_id, "yc", &var_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    status = nc_get_var_double(nc_id, var_id, var);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    get_nc_field_double(nc_name, "yc", d2start, d2count, var);
 
     for (x = 0, i = 0, location = global_domain->locations;
          x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (mask[i]) {
+            if (run[i]) {
                 location->latitude = var[i];
                 location++;
             }
@@ -126,20 +102,12 @@ get_global_domain(char          *nc_name,
 
     // get area
     // TBD: read var id from file
-    status = nc_inq_varid(nc_id, "area", &var_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    status = nc_get_var_double(nc_id, var_id, var);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    get_nc_field_double(nc_name, "area", d2start, d2count, var);
 
     for (x = 0, i = 0, location = global_domain->locations;
          x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (mask[i]) {
+            if (run[i]) {
                 location->area = var[i];
                 location++;
             }
@@ -148,35 +116,21 @@ get_global_domain(char          *nc_name,
 
     // get fraction
     // TBD: read var id from file
-    status = nc_inq_varid(nc_id, "frac", &var_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
-    status = nc_get_var_double(nc_id, var_id, var);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
+    get_nc_field_double(nc_name, "frac", d2start, d2count, var);
 
     for (x = 0, i = 0, location = global_domain->locations;
          x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (mask[i]) {
+            if (run[i]) {
                 location->frac = var[i];
                 location++;
             }
         }
     }
 
-    // close the netcdf file
-    status = nc_close(nc_id);
-    if (status != NC_NOERR) {
-        ERR(status);
-    }
-
     // free memory
     free(var);
-    free(mask);
+    free(run);
 
     // print_domain(global_domain, true);
 

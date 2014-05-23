@@ -44,7 +44,6 @@ get_global_domain(char          *nc_name,
     for (x = 0, i = 0; x < global_domain->n_nx; x++) {
         for (y = 0; y < global_domain->n_ny; y++, i++) {
             if (run[i]) {
-                printf("%zd: %d\n", i, run[i]);
                 global_domain->ncells_global++;
             }
         }

@@ -6,16 +6,40 @@ void
 vic_alloc()
 {
     extern domain_struct    global_domain;
+    extern filenames_struct filenames;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
     extern veg_con_struct **veg_con;
     extern veg_lib_struct **veg_lib;
 
+    double                 *dvar = NULL;
+
     size_t                  i;
     size_t                  j;
-
+    size_t                  idx;
+    size_t                  nveg;
+    size_t                  d2count[2];
+    size_t                  d2start[2];
 
     // TBD: handle decomposed domain
+
+    // allocate memory for number of veg types to be read
+    // this is to maintain consistency with the VIC data structures, so that
+    // the call to vic_run() is not affected
+    dvar = (double *) malloc(global_domain.n_ny * global_domain.n_nx *
+                             sizeof(double));
+    if (dvar == NULL) {
+        nrerror("Memory allocation error in vic_init().");
+    }
+    // read the number of vegetation types for each grid cell. This result is
+    // not stored at this time, but will be read again in vic_init(). Clunky,
+    // but so it is
+    // overstory
+    d2start[0] = 0;
+    d2start[1] = 0;
+    d2count[0] = global_domain.n_ny;
+    d2count[1] = global_domain.n_nx;
+    get_nc_field_double(filenames.veglib, "Nveg", d2start, d2count, dvar);
 
     // allocate memory for soil structure
     soil_con = (soil_con_struct *)
@@ -72,14 +96,16 @@ vic_alloc()
 
         // vegetation tile allocation
 
+        idx = global_domain.locations[i].global_y_idx * global_domain.n_nx +
+              global_domain.locations[i].global_x_idx;
+        nveg = (size_t) dvar[idx];
         veg_con[i] = (veg_con_struct *)
-                     malloc((size_t) options.NVEGTYPES *
-                            sizeof(veg_con_struct));
+                     malloc((size_t) (nveg + 1) * sizeof(veg_con_struct));
         if (veg_con[i] == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
 
-        for (j = 0; j < options.NVEGTYPES; j++) {
+        for (j = 0; j < nveg + 1; j++) {
             veg_con[i][j].zone_depth = calloc(options.ROOT_ZONES,
                                               sizeof(float));
             if (veg_con[i][j].zone_depth == NULL) {
@@ -108,4 +134,6 @@ vic_alloc()
             nrerror("Memory allocation error in vic_alloc().");
         }
     }
+    // cleanup
+    free(dvar);
 }

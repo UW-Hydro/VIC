@@ -5,6 +5,7 @@
 void
 vic_finalize()
 {
+    extern dmy_struct      *dmy;
     extern domain_struct    global_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
@@ -13,15 +14,16 @@ vic_finalize()
 
     size_t                  i;
     size_t                  j;
+    size_t                  nveg;
 
     for (i = 0; i < global_domain.ncells_global; i++) {
-        printf("%zd\n", i);
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);
         free(soil_con[i].Tfactor);
         free(soil_con[i].Pfactor);
         free(soil_con[i].AboveTreeLine);
-        for (j = 0; j < options.NVEGTYPES; j++) {
+        nveg = veg_con[i][0].vegetat_type_num;
+        for (j = 0; j < nveg + 1; j++) {
             free(veg_con[i][j].zone_depth);
             free(veg_con[i][j].zone_fract);
             if (options.CARBON) {
@@ -35,4 +37,5 @@ vic_finalize()
     free(veg_con);
     free(veg_lib);
     free(global_domain.locations);
+    free(dmy);
 }

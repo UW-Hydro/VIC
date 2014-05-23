@@ -531,15 +531,15 @@ snow_melt(double            Le,
                 SnowIce = SurfaceSwq + PackSwq;
                 Ice = SurfaceSwq + PackSwq + GlacierIce;
             }
-            else {
-              printf("exited 0");
-            }
+//            else {
+//              printf("exited 0");
+//            }
         }
-        printf("exited 1");
+//        printf("exited 1");
 
     }
     else {
-        printf("exited 2");
+//        printf("exited 2");
         snow->surf_temp = 999;
     }
 
@@ -657,14 +657,15 @@ snow_melt(double            Le,
      snow->swq) +
         (InitialIwq -
      snow->iwq) +
-        (RainFall + SnowFall) - melt[0] + snow->vapor_flux + snow->blowing_flux;
+        (RainFall + SnowFall) - melt[0] + snow->vapor_flux;
     if (fabs(MassBalanceError) > 1e-6) {
         printf(
             "DeltaSnow\tDeltaIwq\tInputs\t\tmelt\t\tvapor_flux\tblowing_flux\tMassBallanceError\n");
         printf("%4f\t%4f\t%4f\t%4f\t%4f\t%4f\t%4f\n", (InitialSwq - snow->swq),
                (InitialIwq - snow->iwq), (RainFall + SnowFall), melt[0],
                snow->vapor_flux, snow->blowing_flux, MassBalanceError);
-        vicerror("failed to close the water budget");
+        
+//        vicerror("failed to close the water budget");
     }
     /******* glacier mass balance calculation **************/
     delswe = snow->swq - snow->swqold; // change in swe in previous time step

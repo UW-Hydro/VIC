@@ -73,6 +73,19 @@ typedef struct {
     location_struct *locations; // locations structs for local domain
 } domain_struct;
 
+/* Structure for mapping the vegetation types for each grid cell as stored
+   in VIC's veg_con_struct to a regular array. This is convoluted, but will
+   allow us to keep using VIC's existing memory layout */
+typedef struct {
+    size_t nv_types; // total number of vegetation types
+                     // size of vidx and Cv arrays
+    size_t nv_active; // number of active vegetation types. Because of the
+                      // way that VIC defines nveg, this is nveg+1
+                      // (for bare soil) or nveg+2 (if the treeline option
+                      // is active as well)
+    int *vidx;      // array of indices for active vegetation types
+    double *Cv;     // array of fractional coverage for nc_types
+} veg_con_map_struct;
 
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);

@@ -5,21 +5,21 @@
 void
 vic_alloc()
 {
-    extern domain_struct    global_domain;
-    extern filenames_struct filenames;
-    extern option_struct    options;
-    extern soil_con_struct *soil_con;
-    extern veg_con_struct **veg_con;
-    extern veg_lib_struct **veg_lib;
+    extern domain_struct       global_domain;
+    extern filenames_struct    filenames;
+    extern option_struct       options;
+    extern soil_con_struct    *soil_con;
+    extern veg_con_map_struct *veg_con_map;
+    extern veg_con_struct    **veg_con;
+    extern veg_lib_struct    **veg_lib;
 
-    double                 *dvar = NULL;
+    double                    *dvar = NULL;
 
-    size_t                  i;
-    size_t                  j;
-    size_t                  idx;
-    size_t                  nveg;
-    size_t                  d2count[2];
-    size_t                  d2start[2];
+    size_t                     i;
+    size_t                     j;
+    size_t                     idx;
+    size_t                     d2count[2];
+    size_t                     d2start[2];
 
     // TBD: handle decomposed domain
 
@@ -46,6 +46,14 @@ vic_alloc()
                malloc((size_t) global_domain.ncells_global *
                       sizeof(soil_con_struct));
     if (soil_con == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
+
+    // allocate memory for vegetation mapping structure
+    veg_con_map = (veg_con_map_struct *)
+                  malloc((size_t) global_domain.ncells_global *
+                         sizeof(veg_con_map_struct));
+    if (veg_con_map == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
 
@@ -96,16 +104,34 @@ vic_alloc()
 
         // vegetation tile allocation
 
+        veg_con_map[i].nv_types = options.NVEGTYPES;
+
+        veg_con_map[i].vidx = (int *) malloc((size_t) veg_con_map[i].nv_types *
+                                             sizeof(int));
+        if (veg_con_map[i].vidx == NULL) {
+            nrerror("Memory allocation error in vic_alloc().");
+        }
+        veg_con_map[i].Cv = (double *) malloc((size_t) veg_con_map[i].nv_types *
+                                              sizeof(double));
+        if (veg_con_map[i].Cv == NULL) {
+            nrerror("Memory allocation error in vic_alloc().");
+        }
+
         idx = global_domain.locations[i].global_y_idx * global_domain.n_nx +
               global_domain.locations[i].global_x_idx;
-        nveg = (size_t) dvar[idx];
+        veg_con_map[i].nv_active = (size_t) dvar[idx] + 1;
+        if (options.AboveTreelineVeg >= 0) {
+            veg_con_map[i].nv_active += 1;
+        }
+
         veg_con[i] = (veg_con_struct *)
-                     malloc((size_t) (nveg + 1) * sizeof(veg_con_struct));
+                     malloc((size_t) (veg_con_map[i].nv_active) *
+                            sizeof(veg_con_struct));
         if (veg_con[i] == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
 
-        for (j = 0; j < nveg + 1; j++) {
+        for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].zone_depth = calloc(options.ROOT_ZONES,
                                               sizeof(float));
             if (veg_con[i][j].zone_depth == NULL) {

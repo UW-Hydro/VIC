@@ -87,8 +87,10 @@ typedef struct {
     double *Cv;     // array of fractional coverage for nc_types
 } veg_con_map_struct;
 
+void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
+void free_dmy(dmy_struct **dmy);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);

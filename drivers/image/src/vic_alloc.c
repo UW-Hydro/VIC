@@ -106,19 +106,19 @@ vic_alloc()
 
         veg_con_map[i].nv_types = options.NVEGTYPES;
 
-        veg_con_map[i].vidx = (int *) malloc((size_t) veg_con_map[i].nv_types *
+        veg_con_map[i].vidx = (int *) calloc(veg_con_map[i].nv_types,
                                              sizeof(int));
         if (veg_con_map[i].vidx == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
-        veg_con_map[i].Cv = (double *) malloc((size_t) veg_con_map[i].nv_types *
+        veg_con_map[i].Cv = (double *) calloc(veg_con_map[i].nv_types,
                                               sizeof(double));
         if (veg_con_map[i].Cv == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
 
-        idx = global_domain.locations[i].global_y_idx * global_domain.n_nx +
-              global_domain.locations[i].global_x_idx;
+        idx = global_domain.locations[i].global_x_idx * global_domain.n_ny +
+              global_domain.locations[i].global_y_idx;
         veg_con_map[i].nv_active = (size_t) dvar[idx] + 1;
         if (options.AboveTreelineVeg >= 0) {
             veg_con_map[i].nv_active += 1;

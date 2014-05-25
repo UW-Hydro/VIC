@@ -26,5 +26,11 @@ vic_start()
     options.ROOT_ZONES = get_nc_dimension(filenames.soil, "root_zone");
     options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
     options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
-    options.SNOW_BAND = get_nc_dimension(filenames.snowband, "snow_band");
+    if (options.SNOW_BAND > 1) {
+        if (options.SNOW_BAND !=
+            get_nc_dimension(filenames.snowband, "snow_band")) {
+            nrerror("Number of snow bands in global file does not "
+                    "match parameter file");
+        }
+    }
 }

@@ -50,6 +50,7 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${DRIVERPATH}/../classic/include/mtclim_constants_vic.h
 
 OBJS = \
+	${DRIVERPATH}/src/calc_root_fraction.o \
 	${DRIVERPATH}/src/cmd_proc.o \
 	${DRIVERPATH}/src/display_current_settings.o \
 	${DRIVERPATH}/src/get_global_domain.o \
@@ -64,6 +65,7 @@ OBJS = \
 	${DRIVERPATH}/src/vic_image.o \
 	${DRIVERPATH}/src/vic_init.o \
 	${DRIVERPATH}/src/vic_start.o \
+	${VICPATH}/src/modify_Ksat.o \
 	${VICPATH}/src/nrerror.o
 
 	# ${VICPATH}/src/CalcAerodynamic.o \

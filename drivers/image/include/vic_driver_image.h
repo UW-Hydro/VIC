@@ -102,8 +102,15 @@ int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
 void get_next_time_step(int *year, int *month, int *day, int *hr, int *jday,
                         int dt);
 void initialize_domain(domain_struct *domain);
+void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
+                       int nveg);
 void initialize_location(location_struct *location);
 void initialize_global(void);
+void initialize_snow(snow_data_struct **snow, int veg_num);
+void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
+                     veg_con_struct *veg_con, int veg_num);
+void initialize_veg(veg_var_struct **veg_var, veg_con_struct *veg_con,
+                    int nveg);
 all_vars_struct make_all_vars(int nveg);
 cell_data_struct **make_cell_data(int veg_type_num, int Nlayer);
 dmy_struct *make_dmy(global_param_struct *);

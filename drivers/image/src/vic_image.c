@@ -28,7 +28,7 @@ main(int    argc,
     vic_start();
     vic_alloc();
     vic_init();
-    // vic_restore()
+    vic_restore();
     // foreach timestep:
     // foreach gridcell:
     // vic_run()

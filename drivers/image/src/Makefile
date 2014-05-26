@@ -70,6 +70,7 @@ OBJS = \
 	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_image.o \
 	${DRIVERPATH}/src/vic_init.o \
+	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
 	${VICPATH}/src/modify_Ksat.o \
 	${VICPATH}/src/nrerror.o

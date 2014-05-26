@@ -116,6 +116,7 @@ void print_location(location_struct *location);
 void vic_alloc(void);
 void vic_finalize(void);
 void vic_init(void);
+void vic_restore(void);
 void vic_start(void);
 void usage(char *);
 

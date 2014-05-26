@@ -5,6 +5,7 @@
 void
 vic_alloc()
 {
+    extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
     extern filenames_struct    filenames;
     extern option_struct       options;
@@ -70,6 +71,14 @@ vic_alloc()
               malloc((size_t) global_domain.ncells_global *
                      sizeof(veg_lib_struct *));
     if (veg_lib == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
+
+    // all_vars allocation
+    all_vars = (all_vars_struct *)
+               malloc((size_t) global_domain.ncells_global *
+                      sizeof(all_vars_struct));
+    if (all_vars == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
 
@@ -159,7 +168,10 @@ vic_alloc()
         if (veg_lib[i] == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
+
+        all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
     }
+
     // cleanup
     free(dvar);
 }

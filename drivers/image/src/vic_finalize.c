@@ -5,6 +5,7 @@
 void
 vic_finalize()
 {
+    extern all_vars_struct    *all_vars;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern option_struct       options;
@@ -33,11 +34,13 @@ vic_finalize()
         free(veg_con_map[i].Cv);
         free(veg_con[i]);
         free(veg_lib[i]);
+        free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
     }
     free(soil_con);
     free(veg_con_map);
     free(veg_con);
     free(veg_lib);
+    free(all_vars);
     free(global_domain.locations);
     free(dmy);
 }

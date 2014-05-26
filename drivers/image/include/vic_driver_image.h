@@ -90,6 +90,7 @@ typedef struct {
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
+void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
@@ -98,10 +99,17 @@ int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
+void get_next_time_step(int *year, int *month, int *day, int *hr, int *jday,
+                        int dt);
 void initialize_domain(domain_struct *domain);
 void initialize_location(location_struct *location);
 void initialize_global(void);
+all_vars_struct make_all_vars(int nveg);
+cell_data_struct **make_cell_data(int veg_type_num, int Nlayer);
 dmy_struct *make_dmy(global_param_struct *);
+energy_bal_struct **make_energy_bal(int nveg);
+snow_data_struct **make_snow_data(int nveg);
+veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);

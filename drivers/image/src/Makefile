@@ -53,12 +53,18 @@ OBJS = \
 	${DRIVERPATH}/src/calc_root_fraction.o \
 	${DRIVERPATH}/src/cmd_proc.o \
 	${DRIVERPATH}/src/display_current_settings.o \
+	${DRIVERPATH}/src/free_all_vars.o \
 	${DRIVERPATH}/src/get_global_domain.o \
 	${DRIVERPATH}/src/get_global_param.o \
 	${DRIVERPATH}/src/get_nc_dimension.o \
 	${DRIVERPATH}/src/get_nc_field.o \
 	${DRIVERPATH}/src/initialize_global.o \
+	${DRIVERPATH}/src/make_all_vars.o \
+	${DRIVERPATH}/src/make_cell_data.o \
 	${DRIVERPATH}/src/make_dmy.o \
+	${DRIVERPATH}/src/make_energy_bal.o \
+	${DRIVERPATH}/src/make_snow_data.o \
+	${DRIVERPATH}/src/make_veg_var.o \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \

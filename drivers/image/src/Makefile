@@ -58,7 +58,11 @@ OBJS = \
 	${DRIVERPATH}/src/get_global_param.o \
 	${DRIVERPATH}/src/get_nc_dimension.o \
 	${DRIVERPATH}/src/get_nc_field.o \
+	${DRIVERPATH}/src/initialize_energy.o \
 	${DRIVERPATH}/src/initialize_global.o \
+	${DRIVERPATH}/src/initialize_snow.o \
+	${DRIVERPATH}/src/initialize_soil.o \
+	${DRIVERPATH}/src/initialize_veg.o \
 	${DRIVERPATH}/src/make_all_vars.o \
 	${DRIVERPATH}/src/make_cell_data.o \
 	${DRIVERPATH}/src/make_dmy.o \
@@ -72,8 +76,11 @@ OBJS = \
 	${DRIVERPATH}/src/vic_init.o \
 	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
+	${VICPATH}/src/compute_zwt.o \
 	${VICPATH}/src/modify_Ksat.o \
-	${VICPATH}/src/nrerror.o
+	${VICPATH}/src/nrerror.o \
+	${VICPATH}/src/runoff.o \
+	${VICPATH}/src/soil_conduction.o
 
 	# ${VICPATH}/src/CalcAerodynamic.o \
 	# ${VICPATH}/src/CalcBlowingSnow.o \

@@ -7,6 +7,7 @@
 void
 vic_init()
 {
+    extern all_vars_struct    *all_vars;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern option_struct       options;
@@ -598,6 +599,18 @@ vic_init()
     // TBD: read snow parameters
     if (options.SNOW_BAND > 1) {
         nrerror("Snow bands not yet implemented in vic_init()");
+    }
+
+    // initialize structures with default values
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        nveg = veg_con[i][0].vegetat_type_num;
+        initialize_snow(all_vars[i].snow, nveg);
+        initialize_soil(all_vars[i].cell, &(soil_con[i]), veg_con[i], nveg);
+        initialize_veg(all_vars[i].veg_var, veg_con[i], nveg);
+        if (options.LAKES) {
+            nrerror("LAKES option not yet implemented in vic_init()");
+        }
+        initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
     }
 
     // TBD: handle decomposed domain

@@ -6,7 +6,7 @@ void
 vic_finalize()
 {
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct **atmos;
+    extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern option_struct       options;
@@ -19,7 +19,7 @@ vic_finalize()
     size_t                     j;
 
     for (i = 0; i < global_domain.ncells_global; i++) {
-        free_atmos(1, &(atmos[i]));
+        free_atmos(&(atmos[i]));
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);
         free(soil_con[i].Tfactor);

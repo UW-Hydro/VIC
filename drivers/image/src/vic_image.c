@@ -5,9 +5,9 @@
 char               *version = "VIC 5.0 image";
 
 int                 NF, NR;
-
+size_t              current;
 all_vars_struct    *all_vars = NULL;
-atmos_data_struct **atmos = NULL;
+atmos_data_struct  *atmos = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
@@ -24,19 +24,25 @@ int
 main(int    argc,
      char **argv)
 {
+    size_t i;
+    
     cmd_proc(argc, argv, filenames.global);
 
     vic_start();
     vic_alloc();
     vic_init();
+    // vic_force();
     vic_restore();
-    // foreach timestep:
-    // foreach gridcell:
-    // vic_run()
-    // if output:
-    // vic_write()
-    // if save:
-    // vic_save()
+    for (current = 0;  current < global_param.nrecs; current++) {
+        // vic_force();
+        for (i = 0; i < global_domain.ncells_global; i++) {
+            // vic_run()
+        }
+        // if output:
+        // vic_write()
+        // if save:
+        // vic_save()
+    }
     vic_finalize();
 
     return EXIT_SUCCESS;

@@ -8,6 +8,7 @@ void
 vic_init()
 {
     extern all_vars_struct    *all_vars;
+    extern size_t              current;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern option_struct       options;
@@ -66,6 +67,9 @@ vic_init()
     d4count[1] = 1;
     d4count[2] = global_domain.n_ny;
     d4count[3] = global_domain.n_nx;
+    
+    // start the clock
+    current = 0;
 
     // get 1D indices used in mapping the netcdf fields to the locations
     idx = (size_t *) malloc(global_domain.ncells_global *
@@ -611,7 +615,7 @@ vic_init()
         }
         initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
     }
-
+    
     // TBD: handle decomposed domain
 
     // cleanup

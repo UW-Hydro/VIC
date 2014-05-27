@@ -6,7 +6,7 @@ void
 vic_alloc()
 {
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct **atmos;
+    extern atmos_data_struct  *atmos;
     extern domain_struct       global_domain;
     extern filenames_struct    filenames;
     extern option_struct       options;
@@ -44,7 +44,7 @@ vic_alloc()
     get_nc_field_double(filenames.veglib, "Nveg", d2start, d2count, dvar);
 
     // allocate memory for atmos structure
-    atmos = (atmos_data_struct **)
+    atmos = (atmos_data_struct *)
                malloc((size_t) global_domain.ncells_global *
                       sizeof(atmos_data_struct));
     if (atmos == NULL) {
@@ -95,7 +95,7 @@ vic_alloc()
     for (i = 0; i < global_domain.ncells_global; i++) {
 
         // atmos allocation - allocate enough memory for NR+1 steps
-        alloc_atmos(1, &(atmos[i]));
+        alloc_atmos(&(atmos[i]));
         
         // snow band allocation
         soil_con[i].AreaFract = (double *) calloc(options.SNOW_BAND,

@@ -74,6 +74,7 @@ OBJS = \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \
+	${DRIVERPATH}/src/vic_force.o \
 	${DRIVERPATH}/src/vic_image.o \
 	${DRIVERPATH}/src/vic_init.o \
 	${DRIVERPATH}/src/vic_restore.o \
@@ -82,7 +83,8 @@ OBJS = \
 	${VICPATH}/src/modify_Ksat.o \
 	${VICPATH}/src/nrerror.o \
 	${VICPATH}/src/runoff.o \
-	${VICPATH}/src/soil_conduction.o
+	${VICPATH}/src/soil_conduction.o \
+	${VICPATH}/src/svp.o
 
 	# ${VICPATH}/src/CalcAerodynamic.o \
 	# ${VICPATH}/src/CalcBlowingSnow.o \

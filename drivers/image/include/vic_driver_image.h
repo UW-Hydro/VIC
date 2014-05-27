@@ -88,6 +88,8 @@ typedef struct {
 } veg_con_map_struct;
 
 void alloc_atmos(atmos_data_struct *atmos);
+double air_density(double t, double p, double vp);
+double average(double *ar, size_t n);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
@@ -127,6 +129,7 @@ veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
+double q_to_vp(double q, double p);
 int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,
                          veg_lib_struct *veg_lib);
@@ -136,6 +139,8 @@ void vic_force(void);
 void vic_init(void);
 void vic_restore(void);
 void vic_start(void);
+char will_it_snow(double *t, double t_offset, double max_snow_temp,
+                  double *prcp, int n);
 void usage(char *);
 
 #endif

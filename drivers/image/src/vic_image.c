@@ -31,10 +31,10 @@ main(int    argc,
     vic_start();
     vic_alloc();
     vic_init();
-    // vic_force();
+    vic_force();
     vic_restore();
     for (current = 0;  current < global_param.nrecs; current++) {
-        // vic_force();
+        vic_force();
         for (i = 0; i < global_domain.ncells_global; i++) {
             // vic_run()
         }

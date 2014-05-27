@@ -7,6 +7,7 @@ char               *version = "VIC 5.0 image";
 int                 NF, NR;
 
 all_vars_struct    *all_vars = NULL;
+atmos_data_struct **atmos = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;

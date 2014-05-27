@@ -6,6 +6,7 @@ void
 vic_alloc()
 {
     extern all_vars_struct    *all_vars;
+    extern atmos_data_struct **atmos;
     extern domain_struct       global_domain;
     extern filenames_struct    filenames;
     extern option_struct       options;
@@ -41,6 +42,14 @@ vic_alloc()
     d2count[0] = global_domain.n_ny;
     d2count[1] = global_domain.n_nx;
     get_nc_field_double(filenames.veglib, "Nveg", d2start, d2count, dvar);
+
+    // allocate memory for atmos structure
+    atmos = (atmos_data_struct **)
+               malloc((size_t) global_domain.ncells_global *
+                      sizeof(atmos_data_struct));
+    if (atmos == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
 
     // allocate memory for soil structure
     soil_con = (soil_con_struct *)
@@ -84,6 +93,10 @@ vic_alloc()
 
     // allocate memory for individual grid cells
     for (i = 0; i < global_domain.ncells_global; i++) {
+
+        // atmos allocation - allocate enough memory for NR+1 steps
+        alloc_atmos(1, &(atmos[i]));
+        
         // snow band allocation
         soil_con[i].AreaFract = (double *) calloc(options.SNOW_BAND,
                                                   sizeof(double));

@@ -116,6 +116,7 @@ global_param_struct get_global_param(filenames_struct *names,
   2014-Mar-24 Removed ARC_SOIL option.						BN
   2014-Mar-28 Removed DIST_PRCP option.				                TJB
   2014-Apr-25 Changed LAI_FROM_* to FROM_*; added ALB_SRC.			TJB
+  2014-Apr-25 Added VEGCOVER_SRC.						TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -590,6 +591,11 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_PHOTO=TRUE;
         else options.VEGLIB_PHOTO = FALSE;
       }
+      else if(strcasecmp("VEGLIB_VEGCOVER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_VEGCOVER=TRUE;
+        else options.VEGLIB_VEGCOVER = FALSE;
+      }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
       }
@@ -619,6 +625,18 @@ global_param_struct get_global_param(filenames_struct *names,
           options.LAI_SRC=FROM_VEGPARAM;
         else
           options.LAI_SRC=FROM_VEGLIB;
+      }
+      else if(strcasecmp("VEGPARAM_VEGCOVER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_VEGCOVER=TRUE;
+        else options.VEGPARAM_VEGCOVER = FALSE;
+      }
+      else if(strcasecmp("VEGCOVER_SRC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0)
+          options.VEGCOVER_SRC=FROM_VEGPARAM;
+        else
+          options.VEGCOVER_SRC=FROM_VEGLIB;
       }
       else if(strcasecmp("VEGPARAM_ALB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);

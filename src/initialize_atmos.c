@@ -133,6 +133,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.				TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
   2014-Apr-25 Added LAI and albedo.						TJB
+  2014-Apr-25 Added partial vegcover fraction.					TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -255,6 +256,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   /* Assign N_ELEM for veg-dependent forcings */
   param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
+  param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
   param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
 
   /* compute number of simulation days */
@@ -469,7 +471,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   local_veg_hist_data = (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
   for (type=0; type<N_FORCING_TYPES; type++) {
     // Allocate enough space for hourly data
-    if (type != ALBEDO && type != LAI_IN) {
+    if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
       if ( ( local_forcing_data[type] = (double *)calloc(Ndays_local*24, sizeof(double)) ) == NULL ) {
         nrerror("Memory allocation failure in initialize_atmos()");
       }
@@ -492,7 +494,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
           if (hour_offset_int > 0) i--; // W. Hemisphere, in GMT time
           if (i < 0) i = 0; // W. Hemisphere, in GMT time; pad extra day in front
           if (i >= Ndays) i = Ndays-1; // E. Hemisphere, in GMT time; pad extra day at end
-          if (type != ALBEDO && type != LAI_IN) {
+          if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
             local_forcing_data[type][idx] = forcing_data[type][i];
           }
           else {
@@ -524,7 +526,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
           }
           else {
             /* All other forcings are assumed constant over hourly substeps */
-            if (type != ALBEDO && type != LAI_IN) {
+            if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
               local_forcing_data[type][idx] = forcing_data[type][i];
             }
             else {
@@ -1527,6 +1529,64 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
+  /****************************************************
+    Fractional Vegetation Cover
+  ****************************************************/
+
+  /* First, assign default climatology */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      for (j = 0; j < NF; j++) {
+        veg_hist[rec][v].vegcover[j] = veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month-1];
+      }
+    }
+  }
+
+  if(param_set.TYPE[VEGCOVER].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED-1] == 24) {
+      /* daily vegcover provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for (j = 0; j < NF; j++) {
+            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            if (global_param.starthour - hour_offset_int < 0) hour += 24;
+            idx = (int)((float)hour/24.0);
+            if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+	      veg_hist[rec][v].vegcover[j] = local_veg_hist_data[VEGCOVER][v][idx]; // assume constant over the day
+              if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
+            }
+            sum += veg_hist[rec][v].vegcover[j];
+          }
+          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+        }
+      }
+    }
+    else {
+      /* sub-daily vegcover provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for(i = 0; i < NF; i++) {
+            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            veg_hist[rec][v].vegcover[i] = 0;
+            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+              idx = hour;
+              if (idx < 0) idx += 24;
+              if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+	        veg_hist[rec][v].vegcover[i] = local_veg_hist_data[VEGCOVER][v][idx];
+                if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+              }
+              hour++;
+            }
+	    sum += veg_hist[rec][v].vegcover[i];
+          }
+          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+        }
+      }
+    }
+  }
+
   /*************************************************
     Cosine of Solar Zenith Angle
   *************************************************/
@@ -1713,7 +1773,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   for(i=0;i<N_FORCING_TYPES;i++)  {
     if (param_set.TYPE[i].SUPPLIED) {
-      if (i != ALBEDO && i != LAI_IN) {
+      if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
         free(forcing_data[i]);
       }
       else {
@@ -1721,7 +1781,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
         free(veg_hist_data[i]);
       }
     }
-    if (i != ALBEDO && i != LAI_IN) {
+    if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
       free(local_forcing_data[i]);
     }
     else {

@@ -19,6 +19,7 @@ double **read_forcing_data(FILE                **infile,
   Modifications:
   2014-Apr-25 Added non-climatological veg parameters (as forcing
 	      variables).						TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -34,7 +35,7 @@ double **read_forcing_data(FILE                **infile,
   (*veg_hist_data) = (double ***)calloc(N_FORCING_TYPES,sizeof(double**));
   for(i=0;i<N_FORCING_TYPES;i++) {
     if (param_set.TYPE[i].SUPPLIED) {
-      if (i != ALBEDO && i != LAI_IN) {
+      if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
         forcing_data[i] = (double *)calloc((global_param.nrecs * NF), sizeof(double));
       }
       else {

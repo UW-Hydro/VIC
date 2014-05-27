@@ -122,6 +122,8 @@
   2014-Mar-27 Removed unused function declarations                      BN
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameter functions.		TJB
+  2014-Apr-25 Resurrected calc_veg_displacement() and
+	      calc_veg_roughness().					TJB
 ************************************************************************/
 
 #include <math.h>
@@ -189,7 +191,9 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             energy_bal_struct *, layer_data_struct *,
                             snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, int);
+double calc_veg_displacement(double);
 double calc_veg_height(double);
+double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
 void canopy_assimilation(char, double, double, double, double *, double,
                          double, double *, double, double, double *,

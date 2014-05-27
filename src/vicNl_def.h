@@ -145,6 +145,7 @@
   2014-Mar-24 Removed ARC_SOIL option                       		BN
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameter functions.		TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
   2014-May-05 Moved constants CLOSURE, RSMAX, and VPDMINFACTOR from
 	      penman.c to here.						TJB
 *********************************************************************/
@@ -160,7 +161,7 @@
 #define SPVAL        1.e20	/* largest allowable double number - used to signify missing data */
 #define SMALL        1.e-12	/* smallest allowable double number */
 #define MISSING      -99999.	/* missing value for multipliers in BINARY format */
-#define NODATA_VH    -1	        /* missing value for veg_hist inputs */
+#define NODATA_VH    -1		/* missing value for veg_hist inputs */
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
 #define ERROR -999              /* Error Flag returned by subroutines */
@@ -259,6 +260,7 @@ extern double ref_veg_rarc[];
 extern double ref_veg_rmin[];
 extern double ref_veg_lai[];
 extern double ref_veg_albedo[];
+extern double ref_veg_vegcover[];
 extern double ref_veg_rough[];
 extern double ref_veg_displ[];
 extern double ref_veg_wind_h[];
@@ -325,6 +327,9 @@ extern char ref_veg_ref_crop[];
 /***** Coefficient multiplied by the LAI to determine the amount of
        water that can be stored in the canopy *****/
 #define LAI_WATER_FACTOR 0.1
+
+/***** Minimum allowable vegcover fraction *****/
+#define MIN_VEGCOVER 0.0001
 
 /***** Carbon Cycling constants *****/
 
@@ -437,7 +442,7 @@ extern char ref_veg_ref_crop[];
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 28
+#define N_FORCING_TYPES 29
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
 #define CATM       2 /* atmospheric CO2 concentration [ppm] */
@@ -461,11 +466,12 @@ extern char ref_veg_ref_crop[];
 #define TMAX      20 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
 #define TMIN      21 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
 #define TSKC      22 /* cloud cover fraction [fraction] */
-#define VP        23 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
-#define WIND      24 /* wind speed [m/s] */
-#define WIND_E    25 /* zonal component of wind speed [m/s] */
-#define WIND_N    26 /* meridional component of wind speed [m/s] */
-#define SKIP      27 /* place holder for unused data columns */
+#define VEGCOVER  23 /* fraction of each veg tile covered by plants [fraction] */
+#define VP        24 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define WIND      25 /* wind speed [m/s] */
+#define WIND_E    26 /* zonal component of wind speed [m/s] */
+#define WIND_N    27 /* meridional component of wind speed [m/s] */
+#define SKIP      28 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 180
@@ -606,42 +612,43 @@ extern char ref_veg_ref_crop[];
 #define OUT_SHORTWAVE      129  /* incoming shortwave [W/m2] */
 #define OUT_SURF_COND      130  /* surface conductance [m/s] */
 #define OUT_TSKC           131  /* cloud cover fraction [fraction] */
-#define OUT_VP             132  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            133  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           134  /* near surface wind speed [m/s] */
+#define OUT_VEGCOVER       132  /* fractional area of plants [fraction] */
+#define OUT_VP             133  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            134  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           135  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       135  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      136  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         137  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        138  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      139  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        140  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         141  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     142  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    143  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       144  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      145  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    146  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       147  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    148  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     149  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     150  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      151  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      152  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     153  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     154  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            155  /* snow water equivalent in snow pack [mm] */
+#define OUT_ADV_SENS_BAND       136  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      137  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         138  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        139  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      140  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        141  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         142  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     143  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    144  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       145  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      146  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    147  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       148  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    149  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     150  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     151  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      152  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      153  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     154  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     155  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            156  /* snow water equivalent in snow pack [mm] */
 // Carbon-Cycling Terms
-#define OUT_APAR           156  /* absorbed PAR [W/m2] */
-#define OUT_GPP            157  /* gross primary productivity [g C/m2d] */
-#define OUT_RAUT           158  /* autotrophic respiration [g C/m2d] */
-#define OUT_NPP            159  /* net primary productivity [g C/m2d] */
-#define OUT_LITTERFALL     160  /* flux of carbon from living biomass into soil [g C/m2d] */
-#define OUT_RHET           161  /* soil respiration (heterotrophic respiration) [g C/m2d] */
-#define OUT_NEE            162  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
-#define OUT_CLITTER        163  /* Carbon density in litter pool [g C/m2d] */
-#define OUT_CINTER         164  /* Carbon density in intermediate pool [g C/m2d] */
-#define OUT_CSLOW          165  /* Carbon density in slow pool [g C/m2d] */
+#define OUT_APAR           157  /* absorbed PAR [W/m2] */
+#define OUT_GPP            158  /* gross primary productivity [g C/m2d] */
+#define OUT_RAUT           159  /* autotrophic respiration [g C/m2d] */
+#define OUT_NPP            160  /* net primary productivity [g C/m2d] */
+#define OUT_LITTERFALL     161  /* flux of carbon from living biomass into soil [g C/m2d] */
+#define OUT_RHET           162  /* soil respiration (heterotrophic respiration) [g C/m2d] */
+#define OUT_NEE            163  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
+#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2d] */
+#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2d] */
+#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2d] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -826,12 +833,16 @@ typedef struct {
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
   char   VEGLIB_PHOTO;   /* TRUE = veg library contains photosynthesis parameters */
+  char   VEGLIB_VEGCOVER;/* TRUE = veg library file contains monthly vegcover values */
   char   VEGPARAM_ALB;   /* TRUE = veg param file contains monthly albedo values */
   char   VEGPARAM_LAI;   /* TRUE = veg param file contains monthly LAI values */
+  char   VEGPARAM_VEGCOVER; /* TRUE = veg param file contains monthly vegcover values */
   char   ALB_SRC;        /* FROM_VEGLIB = use albedo values from veg library file
                             FROM_VEGPARAM = use albedo values from the veg param file */
   char   LAI_SRC;        /* FROM_VEGLIB = use LAI values from veg library file
                             FROM_VEGPARAM = use LAI values from the veg param file */
+  char   VEGCOVER_SRC;   /* FROM_VEGLIB = use vegcover values from veg library file
+                            FROM_VEGPARAM = use vegcover values from the veg param file */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   ORGANIC_FRACT;  /* TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
@@ -1013,9 +1024,10 @@ typedef struct {
 typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow 
 			      accumulation in canopy */
-  double LAI[12];          /* leaf area index */
+  double albedo[12];       /* vegetation albedo (fraction) */
+  double LAI[12];          /* leaf area index (m2/m2) */
+  double vegcover[12];     /* fractional area covered by plants within the tile (fraction) */
   double Wdmax[12];        /* maximum dew holding capacity (mm) */
-  double albedo[12];       /* vegetation albedo (added for full energy) (fraction) */
   double displacement[12]; /* vegetation displacement height (m) */
   double emissivity[12];   /* vegetation emissivity (fraction) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
@@ -1051,8 +1063,9 @@ typedef struct {
   This structure stores historical timeseries of vegetation parameters for a given vegetation tile.  Structure is similar to atmos_data_struct.
   ******************************************************************/
 typedef struct {
-  double *LAI;       /* timeseries of leaf area index (m2/m2) */
   double *albedo;    /* timeseries of vegetation albedo (fraction) */
+  double *LAI;       /* timeseries of leaf area index (m2/m2) */
+  double *vegcover;  /* timeseries of fractional area of plants within veg tile (fraction) */
 } veg_hist_struct;
 
 /***************************************************************************
@@ -1107,6 +1120,7 @@ typedef struct {
   double Cs;                /* average volumetric heat capacity of the 
 			       current layer (J/m^3/K) */
   double T;                 /* temperature of the unfrozen sublayer (C) */
+  double bare_evap_frac;    /* fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
   double evap;              /* evapotranspiration from soil layer (mm) */
   double ice[MAX_FROST_AREAS]; /* ice content of the frozen sublayer (mm) */
   double kappa;             /* average thermal conductivity of the current 
@@ -1235,8 +1249,8 @@ typedef struct {
   double albedo;                /* current vegetation albedo (fraction) */
   double canopyevap;		/* evaporation from canopy (mm/TS) */
   double LAI;                   /* current leaf area index (m2/m2) */
-  double throughfall;		/* water that reaches the ground through 
-                                   the canopy (mm/TS) */
+  double throughfall;		/* water that reaches the ground through the canopy (mm/TS) */
+  double vegcover;              /* current fractional area of plants within veg tile (fraction) */
   double Wdew;			/* dew trapped on vegetation (mm) */
   double Wdmax;                 /* current maximum dew holding capacity (mm) */
   double *NscaleFactor;         /* array of per-layer nitrogen scaling factors */

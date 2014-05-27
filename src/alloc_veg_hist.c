@@ -25,6 +25,7 @@ void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
   alloc_veg_hist    
 
   Modifications:
+  2014-Apr-25 Added veg cover fraction.					TJB
 *******************************************************************/
 {
   int i,j;
@@ -44,6 +45,9 @@ void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
       (*veg_hist)[i][j].LAI = (double *) calloc(NR+1, sizeof(double));
       if ((*veg_hist)[i][j].LAI == NULL)
         vicerror("Memory allocation error in alloc_veg_hist().");
+      (*veg_hist)[i][j].vegcover = (double *) calloc(NR+1, sizeof(double));
+      if ((*veg_hist)[i][j].vegcover == NULL)
+        vicerror("Memory allocation error in alloc_veg_hist().");
     }
   }
 
@@ -55,6 +59,7 @@ void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
 /***************************************************************************
   Modifications:
+  2014-Apr-25 Added veg cover fraction.					TJB
 ***************************************************************************/
 {
   int i,j;
@@ -66,6 +71,7 @@ void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
     for (j = 0; j < nveg; j++) {
       free((*veg_hist)[i][j].albedo);
       free((*veg_hist)[i][j].LAI);
+      free((*veg_hist)[i][j].vegcover);
     }
     free((*veg_hist)[i]);
   }

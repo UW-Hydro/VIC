@@ -106,6 +106,11 @@ void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
                        int nveg);
 void initialize_location(location_struct *location);
 void initialize_global(void);
+int initialize_model_state(all_vars_struct *all_vars, int Nveg,
+                           int Nnodes, double surf_temp,
+                           soil_con_struct *soil_con,
+                           veg_con_struct *veg_con,
+                           veg_lib_struct *veg_lib);
 void initialize_snow(snow_data_struct **snow, int veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      veg_con_struct *veg_con, int veg_num);
@@ -120,6 +125,9 @@ veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
+int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
+                         soil_con_struct *soil_con, veg_con_struct  *veg_con,
+                         veg_lib_struct *veg_lib);
 void vic_alloc(void);
 void vic_finalize(void);
 void vic_init(void);

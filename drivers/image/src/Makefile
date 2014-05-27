@@ -60,6 +60,7 @@ OBJS = \
 	${DRIVERPATH}/src/get_nc_field.o \
 	${DRIVERPATH}/src/initialize_energy.o \
 	${DRIVERPATH}/src/initialize_global.o \
+	${DRIVERPATH}/src/initialize_model_state.o \
 	${DRIVERPATH}/src/initialize_snow.o \
 	${DRIVERPATH}/src/initialize_soil.o \
 	${DRIVERPATH}/src/initialize_veg.o \

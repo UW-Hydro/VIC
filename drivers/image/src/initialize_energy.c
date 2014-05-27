@@ -9,7 +9,6 @@ initialize_energy(energy_bal_struct **energy,
 {
     extern option_struct options;
 
-    double               tmp;
     size_t               band;
     size_t               index;
     size_t               veg;

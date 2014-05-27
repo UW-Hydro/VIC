@@ -26,7 +26,6 @@ get_global_param(filenames_struct *names,
     char                    flgstr2[MAXSTRING];
     char                    ErrStr[MAXSTRING];
     int                     file_num;
-    int                     field;
     int                     i;
     int                     tmpstartdate;
     int                     tmpenddate;
@@ -501,7 +500,6 @@ get_global_param(filenames_struct *names,
                 }
                 sscanf(cmdstr, "%*s %s", names->f_path_pfx[0]);
                 file_num = 0;
-                field = 0;
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", names->f_path_pfx[1]);
@@ -509,7 +507,6 @@ get_global_param(filenames_struct *names,
                     strcpy(names->f_path_pfx[1], "MISSING");
                 }
                 file_num = 1;
-                field = 0;
             }
             else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

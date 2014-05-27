@@ -8,11 +8,7 @@ vic_restore()
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
     extern option_struct       options;
-    extern filenames_struct    filenames;
-    extern global_param_struct global_param;
-    extern option_struct options;
     extern soil_con_struct    *soil_con;
-    extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
 

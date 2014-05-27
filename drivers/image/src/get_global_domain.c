@@ -17,9 +17,6 @@ get_global_domain(char          *nc_name,
     size_t           y;
     size_t           d2count[2];
     size_t           d2start[2];
-    int              nc_id;
-    int              status;
-    int              var_id;
     location_struct *location;
 
     initialize_domain(global_domain);

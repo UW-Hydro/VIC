@@ -21,8 +21,6 @@ get_nc_field_double(char   *nc_name,
     int    status;
     int    var_id;
 
-    size_t i;
-
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
@@ -59,8 +57,6 @@ get_nc_field_int(char   *nc_name,
     int    nc_id;
     int    status;
     int    var_id;
-
-    size_t i;
 
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);

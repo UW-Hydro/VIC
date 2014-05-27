@@ -295,7 +295,10 @@ extern char ref_veg_ref_crop[];
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
-#define Rd           287        /* Gas constant of dry air (J/degC*kg) */
+#define Rd           287.        /* Gas constant of dry air (J/degC*kg) */
+#define Rv           461.495    /* Specific gas constant for water vapor (J/degC*kg) */
+#define Md           0.028954   /* molar mass of dry air (kg/mol) */
+#define Mv           0.018016   /* model mass of water vapor (kg/mol) */
 #define Rgas         8.3143     /* [m3 Pa mol-1 K-1] universal gas law constant */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */

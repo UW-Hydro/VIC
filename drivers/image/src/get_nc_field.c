@@ -17,9 +17,9 @@ get_nc_field_double(char   *nc_name,
                     size_t *count,
                     double *var)
 {
-    int    nc_id;
-    int    status;
-    int    var_id;
+    int nc_id;
+    int status;
+    int var_id;
 
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
@@ -48,15 +48,52 @@ get_nc_field_double(char   *nc_name,
 }
 
 int
+get_nc_field_float(char   *nc_name,
+                   char   *var_name,
+                   size_t *start,
+                   size_t *count,
+                   float  *var)
+{
+    int nc_id;
+    int status;
+    int var_id;
+
+    // open the netcdf file
+    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
+    if (status != NC_NOERR) {
+        ERR(status);
+    }
+
+    /* get NetCDF variable */
+    status = nc_inq_varid(nc_id, var_name, &var_id);
+    if (status != NC_NOERR) {
+        ERR(status);
+    }
+
+    status = nc_get_vara_float(nc_id, var_id, start, count, var);
+    if (status != NC_NOERR) {
+        ERR(status);
+    }
+
+    // close the netcdf file
+    status = nc_close(nc_id);
+    if (status != NC_NOERR) {
+        ERR(status);
+    }
+
+    return status;
+}
+
+int
 get_nc_field_int(char   *nc_name,
                  char   *var_name,
                  size_t *start,
                  size_t *count,
                  int    *var)
 {
-    int    nc_id;
-    int    status;
-    int    var_id;
+    int nc_id;
+    int status;
+    int var_id;
 
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);

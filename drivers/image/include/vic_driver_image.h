@@ -99,6 +99,8 @@ global_param_struct get_global_param(filenames_struct *, FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
+int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
+                       size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
 void get_next_time_step(int *year, int *month, int *day, int *hr, int *jday,
@@ -108,11 +110,9 @@ void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
                        int nveg);
 void initialize_location(location_struct *location);
 void initialize_global(void);
-int initialize_model_state(all_vars_struct *all_vars, int Nveg,
-                           int Nnodes, double surf_temp,
-                           soil_con_struct *soil_con,
-                           veg_con_struct *veg_con,
-                           veg_lib_struct *veg_lib);
+int initialize_model_state(all_vars_struct *all_vars, int Nveg, int Nnodes,
+                           double surf_temp, soil_con_struct *soil_con,
+                           veg_con_struct *veg_con, veg_lib_struct *veg_lib);
 void initialize_snow(snow_data_struct **snow, int veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      veg_con_struct *veg_con, int veg_num);
@@ -132,6 +132,7 @@ int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          veg_lib_struct *veg_lib);
 void vic_alloc(void);
 void vic_finalize(void);
+void vic_force(void);
 void vic_init(void);
 void vic_restore(void);
 void vic_start(void);

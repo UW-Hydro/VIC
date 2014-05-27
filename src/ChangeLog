@@ -32,7 +32,69 @@ Usage:
 New Features:
 -------------
 
-New forcing variables.
+Added non-climatological time-varying veg parameters.
+
+	Files Affected:
+
+	alloc_veg_hist.c (new)
+	calc_surf_energy_bal.c
+	canopy_evap.c
+	display_current_settings.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_force_type.c
+	get_global_param.c
+	initialize_atmos.c
+	initialize_global.c
+	initialize_veg.c
+	Makefile
+	output_list_utils.c
+	penman.c
+	put_data.c
+	read_atmos_data.c
+	read_forcing_data.c
+	read_veglib.c
+	read_vegparam.c
+	solve_snow.c
+	snow_intercept.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added ability to read timeseries of LAI and albedo as forcing
+	variables.  In addition, climatological albedo values can now be
+	given in the veg parameter file in a similar manner to LAI.
+
+	These changes involved adding a new veg_hist data structure to
+	contain the timeseries of LAI, Wdmax, and albedo, as well as
+	adding LAI, Wdmax, and albedo variables to the veg_var structure
+	to store the current values of these variables.
+
+	To allow for climatological albedo values to be specified in the
+	veg parameter file (similar to LAI), a new option has been introduced:
+	ALB_SRC.  The constants LAI_FROM_VEGPARAM and LAI_FROM_VEGLIB have
+	changed name to FROM_VEGPARAM and FROM_VEGLIB so that they can be
+	used to specify the source of either variable.
+
+	VIC now handles LAI and albedo as follows:
+	1. If specified as a variable in one of the forcing files, the
+	values from the forcing file will be used in the simulation instead
+	of the values in the veg parameter or veg library files.
+	2. If not specified as a variable in one of the forcing files,
+	values will be taken from the veg parameter file if a) they are listed
+	there and b) LAI_SRC (for LAI) and/or ALB_SRC(for albedo) are set to
+	FROM_VEGPARAM.
+	3. If not supplied as a forcing and [EITHER not listed in the veg
+	parameter file OR listed there but LAI_SRC or ALB_SRC is set to
+	FROM_VEGLIB], values will be taken from the veg library.
+
+
+
+
+New forcing variables for carbon cycle.
 
 	Files Affected:
 
@@ -274,6 +336,53 @@ Removed the DIST_PRCP option.
 
 Bug Fixes:
 ----------
+
+Fixed negative liquid soil moisture for bare soil conditions
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Previously, runoff() only checked whether total (liquid+ice) soil
+	moisture was > residual moisture, but not whether liquid soil moisture
+	was positive.  In some cases, in the bare soil tile, liquid soil
+	moisture could occasionally go negative.  This has been fixed by adding
+	a check on liquid soil moisture to runoff().
+
+
+
+
+Fixed incorrect handling of case of a mix of cells with and without lakes.
+
+	Files Affected:
+
+	initialize_model_state.c
+	read_lakeparam.c
+
+	Description:
+
+	VIC was neither reading the lake parameter file correctly nor
+	initializing the lake data structures correctly for the case of a
+	mix of cells with and without lakes within a single lake parameter
+	file.  This has been fixed.
+
+
+
+
+Fixed use of tmp_moist array without initialization.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	Fixed use of tmp_moist array without initialization.
+
+
+
 
 Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
 

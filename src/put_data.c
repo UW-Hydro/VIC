@@ -154,6 +154,7 @@ int  put_data(all_vars_struct   *all_vars,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added OUT_LAI.						TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -860,6 +861,9 @@ void collect_wb_terms(cell_data_struct  cell,
   /** record canopy interception **/
   if (HasVeg) 
     out_data[OUT_WDEW].data[0] += veg_var.Wdew * AreaFactor;
+
+  /** record LAI **/
+  out_data[OUT_LAI].data[0] += veg_var.LAI * AreaFactor;
 
   /** record aerodynamic conductance and resistance **/
   if (cell.aero_resist[0] > SMALL) {

@@ -9,7 +9,8 @@ void read_atmos_data(FILE                 *infile,
 		     global_param_struct   global_param,
 		     int                   file_num,
 		     int                   forceskip,
-		     double              **forcing_data)
+		     double              **forcing_data,
+		     double             ***veg_hist_data)
 /**********************************************************************
   read_atmos_data
   
@@ -50,12 +51,14 @@ void read_atmos_data(FILE                 *infile,
 	    whether forcing file contains enough records to cover
 	    the time range of the simulation.	(documented by TJB)
   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... 				GCT
-  2006-Sep-23 Fixed RCS ID string.				TJB
+             to ...sizeof, 1,... 					GCT
+  2006-Sep-23 Fixed RCS ID string.					TJB
   2007-Jan-15 Added PRT_HEADER option; now binary forcing files
-	      might have headers, and these need to be skipped.	TJB
+	      might have headers, and these need to be skipped.		TJB
   2011-Nov-04 Fixed warning message dealing with insufficient
-	      records.						TJB
+	      records.							TJB
+  2014-Apr-25 Added non-climatological veg parameters (as forcing
+	      variables).						TJB
 
   **********************************************************************/
 {
@@ -65,7 +68,7 @@ void read_atmos_data(FILE                 *infile,
   
   int             rec;
   int             skip_recs;
-  int             i;
+  int             i,j;
   int             endian;
   int             fields;
   int             Nfields;
@@ -157,21 +160,43 @@ void read_atmos_data(FILE                 *infile,
 			      < global_param.nrecs * global_param.dt) ) {
 
       for(i=0;i<Nfields;i++) {
-	if(param_set.TYPE[field_index[i]].SIGNED) {
-	  fread(&stmp,sizeof(short int),1,infile);
-	  if (endian != param_set.FORCE_ENDIAN[file_num]) {
-	    stmp = ((stmp & 0xFF) << 8) | ((stmp >> 8) & 0xFF);
+        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN) {
+	  if(param_set.TYPE[field_index[i]].SIGNED) {
+	    fread(&stmp,sizeof(short int),1,infile);
+	    if (endian != param_set.FORCE_ENDIAN[file_num]) {
+	      stmp = ((stmp & 0xFF) << 8) | ((stmp >> 8) & 0xFF);
+	    }
+	    forcing_data[field_index[i]][rec] 
+	      = (double)stmp / param_set.TYPE[field_index[i]].multiplier;
 	  }
-	  forcing_data[field_index[i]][rec] 
-	    = (double)stmp / param_set.TYPE[field_index[i]].multiplier;
+	  else {
+	    fread(&ustmp,sizeof(unsigned short int),1,infile);
+	    if (endian != param_set.FORCE_ENDIAN[file_num]) {
+	      ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
+	    }
+	    forcing_data[field_index[i]][rec] 
+	      = (double)ustmp / param_set.TYPE[field_index[i]].multiplier;
+	  }
 	}
 	else {
-	  fread(&ustmp,sizeof(unsigned short int),1,infile);
-	  if (endian != param_set.FORCE_ENDIAN[file_num]) {
-	    ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
-	  }
-	  forcing_data[field_index[i]][rec] 
-	    = (double)ustmp / param_set.TYPE[field_index[i]].multiplier;
+          for(j=0;j<param_set.TYPE[field_index[i]].N_ELEM;j++) {
+	    if(param_set.TYPE[field_index[i]].SIGNED) {
+	      fread(&stmp,sizeof(short int),1,infile);
+	      if (endian != param_set.FORCE_ENDIAN[file_num]) {
+	        stmp = ((stmp & 0xFF) << 8) | ((stmp >> 8) & 0xFF);
+	      }
+	      veg_hist_data[field_index[i]][j][rec] 
+	        = (double)stmp / param_set.TYPE[field_index[i]].multiplier;
+	    }
+	    else {
+	      fread(&ustmp,sizeof(unsigned short int),1,infile);
+	      if (endian != param_set.FORCE_ENDIAN[file_num]) {
+	        ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
+	      }
+	      veg_hist_data[field_index[i]][j][rec] 
+	        = (double)ustmp / param_set.TYPE[field_index[i]].multiplier;
+	    }
+          }
 	}
       }
 			
@@ -204,8 +229,16 @@ void read_atmos_data(FILE                 *infile,
 
     while( !feof(infile) && (rec * param_set.FORCE_DT[file_num] 
 			      < global_param.nrecs * global_param.dt ) ) {
-      for(i=0;i<Nfields;i++) 
-	fscanf(infile,"%lf", &forcing_data[field_index[i]][rec]);
+      for(i=0;i<Nfields;i++) {
+        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN) {
+	  fscanf(infile,"%lf", &forcing_data[field_index[i]][rec]);
+        }
+        else {
+          for(j=0;j<param_set.TYPE[field_index[i]].N_ELEM;j++) {
+	    fscanf(infile,"%lf", &veg_hist_data[field_index[i]][j][rec]);
+          }
+        }
+      }
       fgets(str, MAXSTRING, infile);
       rec++;
     }

@@ -159,8 +159,10 @@ ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
-VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
-LAI_SRC 	LAI_FROM_VEGLIB    # LAI_FROM_VEGPARAM = read LAI from veg param file; LAI_FROM_VEGLIB = read LAI from veg library file
+#VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
+#VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
+#LAI_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
+#ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

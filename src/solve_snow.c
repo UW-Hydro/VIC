@@ -132,6 +132,7 @@ double solve_snow(char                 overstory,
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg params.			TJB
 *********************************************************************/
 
   extern option_struct   options;
@@ -237,9 +238,9 @@ double solve_snow(char                 overstory,
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
 	ErrorFlag = snow_intercept((double)dt * SECPHOUR, 1., 
-		       veg_lib[veg_class].LAI[month-1], 
+		       veg_var->LAI, 
 		       (*Le), longwave, LongUnderOut, 
-		       veg_lib[veg_class].Wdmax[month-1], 
+		       veg_var->Wdmax, 
 		       ShortOverIn, *ShortUnderIn, Tcanopy,
 		       BareAlbedo, &energy->canopy_advection, 
 		       &energy->AlbedoOver, 

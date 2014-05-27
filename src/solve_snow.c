@@ -215,7 +215,7 @@ double solve_snow(char                 overstory,
   (*ShortUnderIn) = shortwave;
   (*LongUnderIn)  = longwave;
 
-  if ( snow->swq > 0 || *snowfall > 0.
+  if ( snow->swq > 0. || snow->iwq > 0. || *snowfall > 0.
       || (snow->snow_canopy > 0. && overstory) ) {
     
     /*****************************
@@ -307,7 +307,7 @@ double solve_snow(char                 overstory,
       energy->LongOverIn  = 0;
     }
     
-    if ( snow->swq > 0.0 || *snowfall > 0 ) {
+    if ( snow->swq > 0.0 || *snowfall > 0 || snow->iwq > 0.0) {
       
       /******************************
 	Snow Pack Present on Ground

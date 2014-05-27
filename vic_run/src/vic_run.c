@@ -9,7 +9,8 @@ int  vic_run(int                  gridcell,
              global_param_struct *gp,
              lake_con_struct     *lake_con,
              soil_con_struct     *soil_con,
-             veg_con_struct      *veg_con)
+             veg_con_struct      *veg_con,
+             veg_lib_struct      *veg_lib)
 /**********************************************************************
 	vic_run
 
@@ -17,7 +18,6 @@ int  vic_run(int                  gridcell,
   and water balance models, as well as frozen soils.  
 **********************************************************************/
 {
-  extern veg_lib_struct *veg_lib;
   extern option_struct   options;
   char                   overstory;
   int                    i, j, p;

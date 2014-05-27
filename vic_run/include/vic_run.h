@@ -289,7 +289,7 @@ void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned);
 int vic_run(int, int, atmos_data_struct *, all_vars_struct *,
             dmy_struct *, global_param_struct *, lake_con_struct *,
-            soil_con_struct *, veg_con_struct *);
+            soil_con_struct *, veg_con_struct *, veg_lib_struct *);
 void vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);
 int water_balance (lake_var_struct *, lake_con_struct, int, all_vars_struct *, int, int, int, double, soil_con_struct, veg_con_struct);

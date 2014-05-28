@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 	  } else {
 	    // Else exit program on cell solution error as in previous versions
 	    sprintf(ErrStr, "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
-	    vicerror(ErrStr);
+	    nrerror(ErrStr);
 	  }
         }
       
@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
             } else {
 	      // Else exit program on cell solution error as in previous versions
               sprintf(ErrStr, "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
-              vicerror(ErrStr);
+              nrerror(ErrStr);
 	    }
           }
 

@@ -311,7 +311,7 @@ double error_print_atmos_moist_bal(double VPcanopy, va_list ap) {
   fprintf(stderr, "vp = %f\n", vp);
   fprintf(stderr, "AtmosLatent = %f\n", *AtmosLatent);
  
-  vicerror("Finished writing calc_atmos_moist_bal variables.\nTry increasing CANOPY_VP to get model to complete cell.\nThen check output for instabilities.");
+  nrerror("Finished writing calc_atmos_moist_bal variables.\nTry increasing CANOPY_VP to get model to complete cell.\nThen check output for instabilities.");
 
   return(0.0);
     

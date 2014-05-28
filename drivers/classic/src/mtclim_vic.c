@@ -448,7 +448,7 @@ int calc_prcp(const control_struct *ctrl, const parameter_struct *p,
     ratio = 1.;
   }
   else if (p->base_isoh == 0) {
-    vicerror("Error in calc_prcp(): base_isoh == 0 and site_isoh/base_isoh == NaN.");
+    nrerror("Error in calc_prcp(): base_isoh == 0 and site_isoh/base_isoh == NaN.");
   }
   else {
     ratio = p->site_isoh / p->base_isoh;

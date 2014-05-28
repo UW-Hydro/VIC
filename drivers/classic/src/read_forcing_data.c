@@ -36,7 +36,7 @@ double **read_forcing_data(FILE                **infile,
   }
   else {
     sprintf(errorstr,"ERROR: File time step must be defined for at least the first forcing file (FILE_DT).\n");
-    vicerror(errorstr);
+    nrerror(errorstr);
   }
 
   /** Read Second Forcing Data File **/

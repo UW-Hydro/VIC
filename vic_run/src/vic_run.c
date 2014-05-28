@@ -1,6 +1,8 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
+veg_lib_struct *vic_run_veg_lib;
+
 int  vic_run(int                  gridcell,
              int                  rec,
              atmos_data_struct   *atmos,
@@ -71,6 +73,11 @@ int  vic_run(int                  gridcell,
   veg_var_struct       **veg_var;
   energy_bal_struct    **energy;
   snow_data_struct     **snow;
+  
+  // assign vic_run_veg_lib to veg_lib, so that the veg_lib for the correct
+  // grid cell is used within vic_run. For simplicity sake, use vic_run_veg_lib
+  // everywhere within vic_run
+  vic_run_veg_lib = veg_lib;
 
   /* Allocate aero_resist array */
   aero_resist = (double**)calloc(N_PET_TYPES+1,sizeof(double*));
@@ -181,17 +188,17 @@ int  vic_run(int                  gridcell,
 
       /** Assign wind_h **/
       /** Note: this is ignored below **/
-      wind_h = veg_lib[veg_class].wind_h;
+      wind_h = vic_run_veg_lib[veg_class].wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      surf_atten = exp(-veg_lib[veg_class].rad_atten 
-		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
+      surf_atten = exp(-vic_run_veg_lib[veg_class].rad_atten 
+		   * vic_run_veg_lib[veg_class].LAI[dmy[rec].month-1]);
 
       /* Initialize soil thermal properties for the top two layers */
       prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
-      bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+      bare_albedo = vic_run_veg_lib[veg_class].albedo[dmy[rec].month-1];
 
       /*************************************
 	Compute the aerodynamic resistance 
@@ -210,14 +217,14 @@ int  vic_run(int                  gridcell,
  
         /* Set surface descriptive variables */
         if (p < N_PET_TYPES_NON_NAT) {
-	  pet_veg_class = veg_lib[0].NVegLibTypes+p;
+	  pet_veg_class = vic_run_veg_lib[0].NVegLibTypes+p;
         }
         else {
 	  pet_veg_class = veg_class;
         }
-        displacement[0] = veg_lib[pet_veg_class].displacement[dmy[rec].month-1];
-        roughness[0]    = veg_lib[pet_veg_class].roughness[dmy[rec].month-1];
-        overstory       = veg_lib[pet_veg_class].overstory;
+        displacement[0] = vic_run_veg_lib[pet_veg_class].displacement[dmy[rec].month-1];
+        roughness[0]    = vic_run_veg_lib[pet_veg_class].roughness[dmy[rec].month-1];
+        overstory       = vic_run_veg_lib[pet_veg_class].overstory;
 	if (p >= N_PET_TYPES_NON_NAT)
           if ( roughness[0] == 0 ) roughness[0] = soil_con->rough;
 
@@ -233,9 +240,9 @@ int  vic_run(int                  gridcell,
         /* Compute aerodynamic resistance over various surface types */
         /* Do this not only for current veg but also all types of PET */
         ErrorFlag = CalcAerodynamic(overstory, height,
-		        veg_lib[pet_veg_class].trunk_ratio, 
+		        vic_run_veg_lib[pet_veg_class].trunk_ratio, 
                         soil_con->snow_rough, soil_con->rough, 
-		        veg_lib[pet_veg_class].wind_atten,
+		        vic_run_veg_lib[pet_veg_class].wind_atten,
 			aero_resist[p], tmp_wind,
 		        displacement, ref_height,
 		        roughness);
@@ -261,9 +268,9 @@ int  vic_run(int                  gridcell,
           }
           veg_var[iveg][band].aPAR = 0;
           if (dmy->hour == 0) {
-            calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
+            calc_Nscale_factors(vic_run_veg_lib[veg_class].NscaleFlag,
                                 veg_con[iveg].CanopLayerBnd,
-                                veg_lib[veg_class].LAI[dmy[rec].month-1],
+                                vic_run_veg_lib[veg_class].LAI[dmy[rec].month-1],
                                 soil_con->lat,
                                 soil_con->lng,
                                 soil_con->time_zone_lng,

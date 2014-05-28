@@ -132,7 +132,7 @@ double solve_snow(char                 overstory,
 *********************************************************************/
 
   extern option_struct   options;
-  extern veg_lib_struct *veg_lib;
+  extern veg_lib_struct *vic_run_veg_lib;
 
   char                ErrStr[MAXSTRING];
   char                FIRST_SOLN[1];
@@ -234,9 +234,9 @@ double solve_snow(char                 overstory,
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
 	ErrorFlag = snow_intercept((double)dt * SECPHOUR, 1., 
-		       veg_lib[veg_class].LAI[month-1], 
+		       vic_run_veg_lib[veg_class].LAI[month-1], 
 		       (*Le), longwave, LongUnderOut, 
-		       veg_lib[veg_class].Wdmax[month-1], 
+		       vic_run_veg_lib[veg_class].Wdmax[month-1], 
 		       ShortOverIn, *ShortUnderIn, Tcanopy,
 		       BareAlbedo, &energy->canopy_advection, 
 		       &energy->AlbedoOver, 

@@ -102,7 +102,7 @@ double canopy_evap(layer_data_struct *layer,
 {
 
   /** declare global variables **/
-  extern veg_lib_struct *veg_lib; 
+  extern veg_lib_struct *vic_run_veg_lib; 
   extern option_struct options;
 
   /** declare local variables **/
@@ -129,16 +129,16 @@ double canopy_evap(layer_data_struct *layer,
   ****************************************************/
 
   veg_var->Wdew = tmp_Wdew;
-  if (tmp_Wdew > veg_lib[veg_class].Wdmax[month-1]) {
-    throughfall = tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
-    tmp_Wdew    = veg_lib[veg_class].Wdmax[month-1];
+  if (tmp_Wdew > vic_run_veg_lib[veg_class].Wdmax[month-1]) {
+    throughfall = tmp_Wdew - vic_run_veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew    = vic_run_veg_lib[veg_class].Wdmax[month-1];
   }
       
-  rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
-               air_temp, vpd, veg_lib[veg_class].LAI[month-1],
+  rc = calc_rc((double)0.0, net_short, vic_run_veg_lib[veg_class].RGL,
+               air_temp, vpd, vic_run_veg_lib[veg_class].LAI[month-1],
                (double)1.0, FALSE);
-  canopyevap = pow((tmp_Wdew / veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
-               * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
+  canopyevap = pow((tmp_Wdew / vic_run_veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
+               * penman(air_temp, elevation, rad, vpd, ra, rc, vic_run_veg_lib[veg_class].rarc)
                * delta_t / SEC_PER_DAY;
 
   if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
@@ -152,16 +152,16 @@ double canopy_evap(layer_data_struct *layer,
   canopyevap *= f;
 
   /* compute fraction of canopy that is dry */
-  *dryFrac = 1.0-f*pow((tmp_Wdew/veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+  *dryFrac = 1.0-f*pow((tmp_Wdew/vic_run_veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
 
   tmp_Wdew += ppt - canopyevap;
   if (tmp_Wdew < 0.0) 
     tmp_Wdew = 0.0;
-  if (tmp_Wdew <= veg_lib[veg_class].Wdmax[month-1]) 
+  if (tmp_Wdew <= vic_run_veg_lib[veg_class].Wdmax[month-1]) 
     throughfall += 0.0;
   else {
-    throughfall += tmp_Wdew - veg_lib[veg_class].Wdmax[month-1];
-    tmp_Wdew = veg_lib[veg_class].Wdmax[month-1];
+    throughfall += tmp_Wdew - vic_run_veg_lib[veg_class].Wdmax[month-1];
+    tmp_Wdew = vic_run_veg_lib[veg_class].Wdmax[month-1];
   }
 
   /*******************************************
@@ -245,7 +245,7 @@ void transpiration(layer_data_struct *layer,
   2013-Jul-25 Added photosynthesis terms.				TJB
 **********************************************************************/
 {
-  extern veg_lib_struct *veg_lib;
+  extern veg_lib_struct *vic_run_veg_lib;
   extern option_struct options;
 
   int    i;
@@ -311,8 +311,8 @@ void transpiration(layer_data_struct *layer,
   avail_moist[i]=moist2;
 
   /** Set photosynthesis inhibition factor **/
-  if (layer[0].moist > veg_lib[veg_class].Wnpp_inhib*Wmax[0])
-    *NPPfactor = veg_lib[veg_class].NPPfactor_sat + (1 - veg_lib[veg_class].NPPfactor_sat) * (Wmax[0] - layer[0].moist) / (Wmax[0] - veg_lib[veg_class].Wnpp_inhib*Wmax[0]);
+  if (layer[0].moist > vic_run_veg_lib[veg_class].Wnpp_inhib*Wmax[0])
+    *NPPfactor = vic_run_veg_lib[veg_class].NPPfactor_sat + (1 - vic_run_veg_lib[veg_class].NPPfactor_sat) * (Wmax[0] - layer[0].moist) / (Wmax[0] - vic_run_veg_lib[veg_class].Wnpp_inhib*Wmax[0]);
   else
     *NPPfactor = 1.0;
 
@@ -336,27 +336,27 @@ void transpiration(layer_data_struct *layer,
     /* compute whole-canopy stomatal resistance */
     if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
       /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
-      *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
-		   veg_lib[veg_class].RGL, air_temp, vpd,
-		   veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+      *rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
+		   vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
+		   vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
       if (options.CARBON) {
         for (cidx=0; cidx<options.Ncanopy; cidx++) {
-          rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
+          rsLayer[cidx] = *rc * vic_run_veg_lib[veg_class].LAI[month-1];
           if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
         }
       }
     }
     else {
       /* Compute rc based on photosynthetic demand from Knorr 1997 */
-      calc_rc_ps(veg_lib[veg_class].Ctype, veg_lib[veg_class].MaxCarboxRate,
-		 veg_lib[veg_class].MaxETransport, veg_lib[veg_class].CO2Specificity,
+      calc_rc_ps(vic_run_veg_lib[veg_class].Ctype, vic_run_veg_lib[veg_class].MaxCarboxRate,
+		 vic_run_veg_lib[veg_class].MaxETransport, vic_run_veg_lib[veg_class].CO2Specificity,
 		 NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
-		 CanopLayerBnd, veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+		 CanopLayerBnd, vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
     }
 
     /* compute transpiration */
     evap = penman(air_temp, elevation, rad, vpd, ra, *rc,
-		  veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac;
+		  vic_run_veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac;
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -423,27 +423,27 @@ void transpiration(layer_data_struct *layer,
         /* compute whole-canopy stomatal resistance */
         if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
           /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
-          *rc = calc_rc(veg_lib[veg_class].rmin, net_short,
-		       veg_lib[veg_class].RGL, air_temp, vpd,
-		       veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+          *rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
+		       vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
+		       vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
           if (options.CARBON) {
             for (cidx=0; cidx<options.Ncanopy; cidx++) {
-              rsLayer[cidx] = *rc * veg_lib[veg_class].LAI[month-1];
+              rsLayer[cidx] = *rc * vic_run_veg_lib[veg_class].LAI[month-1];
               if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
             }
           }
         }
         else {
           /* Compute rc based on photosynthetic demand from Knorr 1997 */
-          calc_rc_ps(veg_lib[veg_class].Ctype, veg_lib[veg_class].MaxCarboxRate,
-		     veg_lib[veg_class].MaxETransport, veg_lib[veg_class].CO2Specificity,
+          calc_rc_ps(vic_run_veg_lib[veg_class].Ctype, vic_run_veg_lib[veg_class].MaxCarboxRate,
+		     vic_run_veg_lib[veg_class].MaxETransport, vic_run_veg_lib[veg_class].CO2Specificity,
 		     NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
-		     CanopLayerBnd, veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+		     CanopLayerBnd, vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
         }
 
         /* compute transpiration */
         layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, *rc,
-			      veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
+			      vic_run_veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
 
         if (*rc > 0)
           gc += 1/(*rc);

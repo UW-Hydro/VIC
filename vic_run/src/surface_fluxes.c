@@ -141,7 +141,7 @@ int surface_fluxes(char                 overstory,
   2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 {
-  extern veg_lib_struct *veg_lib;
+  extern veg_lib_struct *vic_run_veg_lib;
   extern option_struct   options;
   double                 total_store_moist[3];
   double                 step_store_moist[3];
@@ -502,7 +502,7 @@ int surface_fluxes(char                 overstory,
          normalized to PAR = 1 W, i.e. the canopy albedo in the PAR
          range (alb_total ~ 0.45*alb_par + 0.55*alb_other) */
       faparl(CanopLayerBnd,
-             veg_lib[veg_class].LAI[dmy[rec].month-1],
+             vic_run_veg_lib[veg_class].LAI[dmy[rec].month-1],
              soil_con->AlbedoPar,
              atmos->coszen[hidx],
              atmos->fdir[hidx],
@@ -802,10 +802,10 @@ int surface_fluxes(char                 overstory,
     **************************************/
     if (options.CARBON) {
       if (iveg < Nveg && !step_snow.snow && dryFrac > 0) {
-        canopy_assimilation(veg_lib[veg_class].Ctype,
-                            veg_lib[veg_class].MaxCarboxRate,
-                            veg_lib[veg_class].MaxETransport,
-                            veg_lib[veg_class].CO2Specificity,
+        canopy_assimilation(vic_run_veg_lib[veg_class].Ctype,
+                            vic_run_veg_lib[veg_class].MaxCarboxRate,
+                            vic_run_veg_lib[veg_class].MaxETransport,
+                            vic_run_veg_lib[veg_class].CO2Specificity,
                             iter_soil_veg_var.NscaleFactor,
                             Tair,
                             atmos->shortwave[hidx],
@@ -813,7 +813,7 @@ int surface_fluxes(char                 overstory,
                             soil_con->elevation,
                             atmos->Catm[hidx],
                             CanopLayerBnd,
-                            veg_lib[veg_class].LAI[dmy[rec].month-1],
+                            vic_run_veg_lib[veg_class].LAI[dmy[rec].month-1],
                             "rs",
                             iter_soil_veg_var.rsLayer,
                             &(iter_soil_veg_var.rc),

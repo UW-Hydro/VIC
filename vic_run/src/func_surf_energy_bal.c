@@ -110,7 +110,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 **********************************************************************/
 {
   extern option_struct options;
-  extern veg_lib_struct *veg_lib;
+  extern veg_lib_struct *vic_run_veg_lib;
 
   /* define routine input variables */
 
@@ -677,7 +677,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Use Arno Evap if LAI is set to zero (e.g. no
     winter crop planted).
   *************************************************/
-  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
+  if ( VEG && !SNOWING && vic_run_veg_lib[veg_class].LAI[month-1] > 0 ) {
     Evap = canopy_evap(layer, veg_var, TRUE, 
 		       veg_class, month, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 

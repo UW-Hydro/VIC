@@ -80,70 +80,63 @@ OBJS = \
 	${DRIVERPATH}/src/vic_init.o \
 	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
+	${VICPATH}/src/CalcAerodynamic.o \
+	${VICPATH}/src/CalcBlowingSnow.o \
+	${VICPATH}/src/IceEnergyBalance.o \
+	${VICPATH}/src/SnowPackEnergyBalance.o \
+	${VICPATH}/src/StabilityCorrection.o \
+	${VICPATH}/src/advected_sensible_heat.o \
+	${VICPATH}/src/arno_evap.o \
+	${VICPATH}/src/calc_Nscale_factors.o \
+	${VICPATH}/src/calc_atmos_energy_bal.o \
+	${VICPATH}/src/calc_rainonly.o \
+	${VICPATH}/src/calc_snow_coverage.o \
+	${VICPATH}/src/calc_surf_energy_bal.o \
+	${VICPATH}/src/calc_veg_params.o \
+	${VICPATH}/src/calc_water_energy_balance_errors.o \
+	${VICPATH}/src/canopy_assimilation.o \
+	${VICPATH}/src/canopy_evap.o \
+	${VICPATH}/src/compute_coszen.o \
+	${VICPATH}/src/compute_pot_evap.o \
+	${VICPATH}/src/compute_soil_resp.o \
 	${VICPATH}/src/compute_zwt.o \
+	${VICPATH}/src/correct_precip.o \
+	${VICPATH}/src/estimate_T1.o \
+	${VICPATH}/src/faparl.o \
+	${VICPATH}/src/frozen_soil.o \
+	${VICPATH}/src/func_atmos_energy_bal.o \
+	${VICPATH}/src/func_atmos_moist_bal.o \
+	${VICPATH}/src/func_canopy_energy_bal.o \
+	${VICPATH}/src/func_surf_energy_bal.o \
+	${VICPATH}/src/ice_melt.o \
+	${VICPATH}/src/initialize_lake.o \
+	${VICPATH}/src/lakes.eb.o \
+	${VICPATH}/src/latent_heat_from_snow.o \
+	${VICPATH}/src/massrelease.o \
 	${VICPATH}/src/modify_Ksat.o \
+	${VICPATH}/src/newt_raph_func_fast.o \
 	${VICPATH}/src/nrerror.o \
+	${VICPATH}/src/penman.o \
+	${VICPATH}/src/photosynth.o \
+	${VICPATH}/src/prepare_full_energy.o \
+	${VICPATH}/src/put_data.o \
+	${VICPATH}/src/root_brent.o \
 	${VICPATH}/src/runoff.o \
+	${VICPATH}/src/snow_intercept.o \
+	${VICPATH}/src/snow_melt.o \
+	${VICPATH}/src/snow_utility.o \
+	${VICPATH}/src/soil_carbon_balance.o \
 	${VICPATH}/src/soil_conduction.o \
-	${VICPATH}/src/svp.o
-
-	# ${VICPATH}/src/CalcAerodynamic.o \
-	# ${VICPATH}/src/CalcBlowingSnow.o \
-	# ${VICPATH}/src/IceEnergyBalance.o \
-	# ${VICPATH}/src/SnowPackEnergyBalance.o \
-	# ${VICPATH}/src/StabilityCorrection.o \
-	# ${VICPATH}/src/advected_sensible_heat.o \
-	# ${VICPATH}/src/arno_evap.o \
-	# ${VICPATH}/src/calc_Nscale_factors.o \
-	# ${VICPATH}/src/calc_atmos_energy_bal.o \
-	# ${VICPATH}/src/calc_rainonly.o \
-	# ${VICPATH}/src/calc_snow_coverage.o \
-	# ${VICPATH}/src/calc_surf_energy_bal.o \
-	# ${VICPATH}/src/calc_veg_params.o \
-	# ${VICPATH}/src/calc_water_energy_balance_errors.o \
-	# ${VICPATH}/src/canopy_assimilation.o \
-	# ${VICPATH}/src/canopy_evap.o \
-	# ${VICPATH}/src/compute_coszen.o \
-	# ${VICPATH}/src/compute_pot_evap.o \
-	# ${VICPATH}/src/compute_soil_resp.o \
-	# ${VICPATH}/src/compute_zwt.o \
-	# ${VICPATH}/src/correct_precip.o \
-	# ${VICPATH}/src/estimate_T1.o \
-	# ${VICPATH}/src/faparl.o \
-	# ${VICPATH}/src/frozen_soil.o \
-	# ${VICPATH}/src/full_energy.o \
-	# ${VICPATH}/src/func_atmos_energy_bal.o \
-	# ${VICPATH}/src/func_atmos_moist_bal.o \
-	# ${VICPATH}/src/func_canopy_energy_bal.o \
-	# ${VICPATH}/src/func_surf_energy_bal.o \
-	# ${VICPATH}/src/ice_melt.o \
-	# ${VICPATH}/src/initialize_lake.o \
-	# ${VICPATH}/src/lakes.eb.o \
-	# ${VICPATH}/src/latent_heat_from_snow.o \
-	# ${VICPATH}/src/massrelease.o \
-	# ${VICPATH}/src/modify_Ksat.o \
-	# ${VICPATH}/src/newt_raph_func_fast.o \
-	# ${VICPATH}/src/penman.o \
-	# ${VICPATH}/src/photosynth.o \
-	# ${VICPATH}/src/prepare_full_energy.o \
-	# ${VICPATH}/src/put_data.o \
-	# ${VICPATH}/src/root_brent.o \
-	# ${VICPATH}/src/runoff.o \
-	# ${VICPATH}/src/snow_intercept.o \
-	# ${VICPATH}/src/snow_melt.o \
-	# ${VICPATH}/src/snow_utility.o \
-	# ${VICPATH}/src/soil_carbon_balance.o \
-	# ${VICPATH}/src/soil_conduction.o \
-	# ${VICPATH}/src/soil_thermal_eqn.o \
-	# ${VICPATH}/src/solve_snow.o \
-	# ${VICPATH}/src/surface_fluxes.o \
-	# ${VICPATH}/src/svp.o \
-	# ${VICPATH}/src/vicerror.o \
-	# ${VICPATH}/src/water_energy_balance.o \
-	# ${VICPATH}/src/water_under_ice.o \
-	# ${VICPATH}/src/write_layer.o \
-	# ${VICPATH}/src/write_vegvar.o \
-	# ${VICPATH}/src/zero_output_list.o	 
+	${VICPATH}/src/soil_thermal_eqn.o \
+	${VICPATH}/src/solve_snow.o \
+	${VICPATH}/src/surface_fluxes.o \
+	${VICPATH}/src/svp.o \
+	${VICPATH}/src/vic_run.o \
+	${VICPATH}/src/water_energy_balance.o \
+	${VICPATH}/src/water_under_ice.o \
+	${VICPATH}/src/write_layer.o \
+	${VICPATH}/src/write_vegvar.o \
+	${VICPATH}/src/zero_output_list.o	 
 
 SRCS = $(OBJS:%.o=%.c) 
 

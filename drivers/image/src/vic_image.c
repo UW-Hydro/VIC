@@ -12,6 +12,7 @@ dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
 global_param_struct global_param;
+lake_con_struct     lake_con;
 option_struct       options;
 param_set_struct    param_set;
 domain_struct       global_domain;
@@ -36,7 +37,8 @@ main(int    argc,
     for (current = 0;  current < global_param.nrecs; current++) {
         vic_force();
         for (i = 0; i < global_domain.ncells_global; i++) {
-            // vic_run()
+            vic_run(i, current, &(atmos[i]), &(all_vars[i]), dmy, &global_param, 
+                    &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
         }
         // if output:
         // vic_write()

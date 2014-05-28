@@ -42,57 +42,57 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
 
   *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct)); 
   if (*atmos == NULL)
-    vicerror("Memory allocation error in alloc_atmos().");
+    nrerror("Memory allocation error in alloc_atmos().");
 
   for (i = 0; i < nrecs; i++) {
     (*atmos)[i].air_temp = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].air_temp == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].Catm = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].Catm == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].channel_in = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].channel_in == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].coszen = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].coszen == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].density = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].density == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].fdir = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].fdir == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].longwave = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].longwave == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].par = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].par == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].prec == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");      
+      nrerror("Memory allocation error in alloc_atmos().");      
     (*atmos)[i].pressure = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].pressure == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].shortwave = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].shortwave == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].snowflag = (char *) calloc(NR+1, sizeof(char));	
     if ((*atmos)[i].snowflag == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].tskc = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].tskc == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].vp = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].vp == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].vpd = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].vpd == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].wind = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].wind == NULL)
-      vicerror("Memory allocation error in alloc_atmos().");
+      nrerror("Memory allocation error in alloc_atmos().");
   }    			
 
 }

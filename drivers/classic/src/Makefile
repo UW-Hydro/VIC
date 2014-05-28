@@ -198,7 +198,6 @@ OBJS = \
 	${VICPATH}/src/surface_fluxes.o \
 	${VICPATH}/src/svp.o \
 	${VICPATH}/src/vic_run.o \
-	${VICPATH}/src/vicerror.o \
 	${VICPATH}/src/water_energy_balance.o \
 	${VICPATH}/src/water_under_ice.o \
 	${VICPATH}/src/write_layer.o \

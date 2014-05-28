@@ -146,6 +146,7 @@ OBJS = \
 	${DRIVERPATH}/src/write_forcing_file.o \
 	${DRIVERPATH}/src/write_header.o \
 	${DRIVERPATH}/src/write_model_state.o \
+	${DRIVERPATH}/src/write_output.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
   char                     MODEL_DONE;
   char                     RUN_MODEL;
   char                     ErrStr[MAXSTRING];
+  char                     write_flag;
   int                      rec, i, j;
   int                      veg;
   int                      band;
@@ -320,9 +321,14 @@ int main(int argc, char *argv[])
 	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_lib);
 
 	  /**************************************************
-	    Write cell average values for current time step
+	    Calculate cell average values for current time step
 	  **************************************************/
-	  ErrorFlag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, &lake_con, out_data_files, out_data, &save_data, &dmy[rec], rec);
+	  write_flag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, &lake_con, out_data_files, out_data, &save_data, &dmy[rec], rec);
+
+    // Write cell average values for current time step
+    if (write_flag) {
+        write_output(out_data, out_data_files, &dmy[rec], rec);
+    }
 
 	  /************************************
 	    Save model state at assigned date

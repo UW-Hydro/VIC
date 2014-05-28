@@ -157,34 +157,3 @@ initialize_location(location_struct *location)
     location->local_x_idx = 0;
     location->local_y_idx = 0;
 }
-
-void
-print_domain(domain_struct *domain,
-             bool           print_loc)
-{
-    int i;
-
-    printf("domain:\n");
-    printf("\tncells_global: %zd\n", domain->ncells_global);
-    printf("\tn_nx: %zd\n", domain->n_nx);
-    printf("\tn_ny: %zd\n", domain->n_ny);
-    printf("\tncells_local: %zd\n", domain->ncells_local);
-    printf("\tlocations: %p\n", domain->locations);
-    if (print_loc) {
-        for (i = 0; i < domain->ncells_global; i++) {
-            print_location(&(domain->locations[i]));
-        }
-    }
-}
-
-void
-print_location(location_struct *location)
-{
-    printf("%zd: (%zd, %zd) {%zd: (%zd, %zd)}\n",
-           location->global_cell_idx, location->global_x_idx,
-           location->global_y_idx, location->local_cell_idx,
-           location->local_x_idx, location->local_y_idx);
-    printf("\t(%lf, %lf): %lf %lf\n",
-           location->longitude, location->latitude,
-           location->area, location->frac);
-}

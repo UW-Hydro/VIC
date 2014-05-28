@@ -72,6 +72,7 @@ OBJS = \
 	${DRIVERPATH}/src/make_snow_data.o \
 	${DRIVERPATH}/src/make_veg_var.o \
 	${DRIVERPATH}/src/open_file.o \
+	${DRIVERPATH}/src/print_library.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_force.o \

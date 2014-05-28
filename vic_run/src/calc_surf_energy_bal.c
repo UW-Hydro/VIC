@@ -171,7 +171,7 @@ double calc_surf_energy_bal(double             Le,
   2014-Mar-28 Removed DIST_PRCP option.					TJB
 ***************************************************************/
 {
-  extern veg_lib_struct *veg_lib;
+  extern veg_lib_struct *vic_run_veg_lib;
   extern option_struct   options;
 
   int      FIRST_SOLN[2];
@@ -250,7 +250,7 @@ double calc_surf_energy_bal(double             Le,
   }
 
   if(iveg!=Nveg) {
-    if(veg_lib[veg_class].LAI[dmy->month-1] > 0.0) VEG = TRUE;
+    if(vic_run_veg_lib[veg_class].LAI[dmy->month-1] > 0.0) VEG = TRUE;
     else VEG = FALSE;
   }
   else VEG = FALSE;
@@ -612,7 +612,7 @@ double calc_surf_energy_bal(double             Le,
   /** Store precipitation that reaches the surface */
   if ( !snow->snow && !INCLUDE_SNOW ) {
     if ( iveg != Nveg ) {
-      if ( veg_lib[veg_class].LAI[dmy->month-1] <= 0.0 ) { 
+      if ( vic_run_veg_lib[veg_class].LAI[dmy->month-1] <= 0.0 ) { 
 	veg_var->throughfall = rainfall;
 	*ppt = veg_var->throughfall;
       }

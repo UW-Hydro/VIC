@@ -11,6 +11,7 @@ vic_alloc()
     extern filenames_struct    filenames;
     extern option_struct       options;
     extern out_data_struct   **out_data;
+    extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -46,8 +47,8 @@ vic_alloc()
 
     // allocate memory for atmos structure
     atmos = (atmos_data_struct *)
-               malloc((size_t) global_domain.ncells_global *
-                      sizeof(atmos_data_struct));
+            malloc((size_t) global_domain.ncells_global *
+                   sizeof(atmos_data_struct));
     if (atmos == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
@@ -94,19 +95,25 @@ vic_alloc()
 
     // out_data allocation
     out_data = (out_data_struct **)
-        malloc((size_t) global_domain.ncells_global *
-               sizeof(out_data_struct *));
+               malloc((size_t) global_domain.ncells_global *
+                      sizeof(out_data_struct *));
     if (out_data == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
-                
+
+    // save_data allocation
+    save_data = (save_data_struct *)
+                malloc((size_t) global_domain.ncells_global *
+                       sizeof(save_data_struct));
+    if (save_data == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
 
     // allocate memory for individual grid cells
     for (i = 0; i < global_domain.ncells_global; i++) {
-
         // atmos allocation - allocate enough memory for NR+1 steps
         alloc_atmos(&(atmos[i]));
-        
+
         // snow band allocation
         soil_con[i].AreaFract = (double *) calloc(options.SNOW_BAND,
                                                   sizeof(double));
@@ -193,7 +200,7 @@ vic_alloc()
         }
 
         all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
-        
+
         out_data[i] = create_output_list();
     }
 

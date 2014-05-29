@@ -11,6 +11,7 @@ vic_finalize()
     extern domain_struct       global_domain;
     extern option_struct       options;
     extern out_data_struct   **out_data;
+    extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -47,6 +48,7 @@ vic_finalize()
     free(veg_lib);
     free(all_vars);
     free(out_data);
+    free(save_data);
     free(global_domain.locations);
     free(dmy);
 }

@@ -92,10 +92,12 @@ double air_density(double t, double p, double vp);
 double average(double *ar, size_t n);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 void cmd_proc(int argc, char **argv, char *globalfilename);
+out_data_struct *create_output_list(void);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_atmos(atmos_data_struct *atmos);
 void free_dmy(dmy_struct **dmy);
+void free_out_data(out_data_struct **out_data);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 global_param_struct get_global_param(filenames_struct *, FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
@@ -107,6 +109,8 @@ int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
 void get_next_time_step(int *year, int *month, int *day, int *hr, int *jday,
                         int dt);
+void init_output_list(out_data_struct *out_data, int write, char *format,
+                      int type, float mult);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
                        int nveg);

@@ -10,6 +10,7 @@ vic_alloc()
     extern domain_struct       global_domain;
     extern filenames_struct    filenames;
     extern option_struct       options;
+    extern out_data_struct   **out_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -90,6 +91,15 @@ vic_alloc()
     if (all_vars == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
+
+    // out_data allocation
+    out_data = (out_data_struct **)
+        malloc((size_t) global_domain.ncells_global *
+               sizeof(out_data_struct *));
+    if (out_data == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
+                
 
     // allocate memory for individual grid cells
     for (i = 0; i < global_domain.ncells_global; i++) {
@@ -183,6 +193,8 @@ vic_alloc()
         }
 
         all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
+        
+        out_data[i] = create_output_list();
     }
 
     // cleanup

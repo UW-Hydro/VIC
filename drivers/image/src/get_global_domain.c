@@ -9,15 +9,15 @@ size_t
 get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
 {
-    int             *run = NULL;
-    double          *var = NULL;
-    size_t           i;
-    size_t           j;
-    size_t           x;
-    size_t           y;
-    size_t           d2count[2];
-    size_t           d2start[2];
-    location_struct *location;
+    int    *run = NULL;
+    double *var = NULL;
+    size_t  i;
+    size_t  j;
+    size_t  x;
+    size_t  y;
+    size_t *idx;
+    size_t  d2count[2];
+    size_t  d2start[2];
 
     initialize_domain(global_domain);
 
@@ -38,8 +38,8 @@ get_global_domain(char          *nc_name,
 
     get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
 
-    for (x = 0, i = 0; x < global_domain->n_nx; x++) {
-        for (y = 0; y < global_domain->n_ny; y++, i++) {
+    for (y = 0, i = 0; y < global_domain->n_ny; y++) {
+        for (x = 0; x < global_domain->n_nx; x++, i++) {
             if (run[i]) {
                 global_domain->ncells_global++;
             }
@@ -64,67 +64,61 @@ get_global_domain(char          *nc_name,
         nrerror("Memory allocation error in get_global_domain().");
     }
 
-    // get longitude
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, "xc", d2start, d2count, var);
-
-    for (x = 0, i = 0, j = 0, location = global_domain->locations;
-         x < global_domain->n_nx; x++) {
-        for (y = 0; y < global_domain->n_ny; y++, i++) {
+    for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
+        for (x = 0; x < global_domain->n_nx; x++, i++) {
             if (run[i]) {
-                location->longitude = var[i];
-                location->global_cell_idx = j;
-                location->global_x_idx = x;
-                location->global_y_idx = y;
+                global_domain->locations[j].global_cell_idx = j;
+                global_domain->locations[j].global_x_idx = x;
+                global_domain->locations[j].global_y_idx = y;
                 j++;
-                location++;
             }
         }
+    }
+
+    // get 1D indices used in mapping the netcdf fields to the locations
+    idx = (size_t *) malloc(global_domain->ncells_global *
+                            sizeof(size_t));
+    if (idx == NULL) {
+        nrerror("Memory allocation error in vic_init().");
+    }
+    for (i = 0; i < global_domain->ncells_global; i++) {
+        idx[i] = get_global_idx(global_domain, i);
+    }
+
+    // get longitude
+    // TBD: read var id from file
+    get_nc_field_double(nc_name, "xc",
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_global; i++) {
+        global_domain->locations[i].longitude = (double) var[idx[i]];
     }
 
     // get latitude
     // TBD: read var id from file
-    get_nc_field_double(nc_name, "yc", d2start, d2count, var);
-
-    for (x = 0, i = 0, location = global_domain->locations;
-         x < global_domain->n_nx; x++) {
-        for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (run[i]) {
-                location->latitude = var[i];
-                location++;
-            }
-        }
+    get_nc_field_double(nc_name, "yc",
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_global; i++) {
+        global_domain->locations[i].latitude = (double) var[idx[i]];
     }
 
     // get area
     // TBD: read var id from file
-    get_nc_field_double(nc_name, "area", d2start, d2count, var);
-
-    for (x = 0, i = 0, location = global_domain->locations;
-         x < global_domain->n_nx; x++) {
-        for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (run[i]) {
-                location->area = var[i];
-                location++;
-            }
-        }
+    get_nc_field_double(nc_name, "area",
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_global; i++) {
+        global_domain->locations[i].area = (double) var[idx[i]];
     }
 
     // get fraction
     // TBD: read var id from file
-    get_nc_field_double(nc_name, "frac", d2start, d2count, var);
-
-    for (x = 0, i = 0, location = global_domain->locations;
-         x < global_domain->n_nx; x++) {
-        for (y = 0; y < global_domain->n_ny; y++, i++) {
-            if (run[i]) {
-                location->frac = var[i];
-                location++;
-            }
-        }
+    get_nc_field_double(nc_name, "frac",
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_global; i++) {
+        global_domain->locations[i].frac = (double) var[idx[i]];
     }
 
     // free memory
+    free(idx);
     free(var);
     free(run);
 
@@ -156,4 +150,18 @@ initialize_location(location_struct *location)
     location->local_cell_idx = 0;
     location->local_x_idx = 0;
     location->local_y_idx = 0;
+}
+
+size_t
+get_global_idx(domain_struct *domain,
+               size_t         i)
+{
+    size_t idx = -1;
+
+    if (i < domain->ncells_global) {
+        idx = domain->locations[i].global_y_idx * domain->n_nx +
+              domain->locations[i].global_x_idx;
+    }
+
+    return idx;
 }

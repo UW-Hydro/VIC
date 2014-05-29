@@ -141,6 +141,8 @@ vic_alloc()
             nrerror("Memory allocation error in vic_alloc().");
         }
 
+        initialize_soil_con(&(soil_con[i]));
+        
         // vegetation tile allocation
 
         veg_con_map[i].nv_types = options.NVEGTYPES;
@@ -156,8 +158,7 @@ vic_alloc()
             nrerror("Memory allocation error in vic_alloc().");
         }
 
-        idx = global_domain.locations[i].global_x_idx * global_domain.n_ny +
-              global_domain.locations[i].global_y_idx;
+        idx = get_global_idx(&global_domain, i);
         veg_con_map[i].nv_active = (size_t) dvar[idx] + 1;
         if (options.AboveTreelineVeg >= 0) {
             veg_con_map[i].nv_active += 1;
@@ -188,6 +189,7 @@ vic_alloc()
                     nrerror("Memory allocation error in vic_alloc().");
                 }
             }
+            initialize_veg_con(&(veg_con[i][j]));
         }
 
         // vegetation library allocation - there is a veg library for each

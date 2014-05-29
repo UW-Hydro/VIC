@@ -59,6 +59,7 @@ OBJS = \
 	${DRIVERPATH}/src/get_global_param.o \
 	${DRIVERPATH}/src/get_nc_dimension.o \
 	${DRIVERPATH}/src/get_nc_field.o \
+	${DRIVERPATH}/src/init_library.o \
 	${DRIVERPATH}/src/initialize_energy.o \
 	${DRIVERPATH}/src/initialize_global.o \
 	${DRIVERPATH}/src/initialize_model_state.o \

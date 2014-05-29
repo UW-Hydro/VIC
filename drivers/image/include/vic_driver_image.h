@@ -99,6 +99,7 @@ void free_atmos(atmos_data_struct *atmos);
 void free_dmy(dmy_struct **dmy);
 void free_out_data(out_data_struct **out_data);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
+size_t get_global_idx(domain_struct *domain, size_t i);
 global_param_struct get_global_param(filenames_struct *, FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
@@ -122,8 +123,10 @@ int initialize_model_state(all_vars_struct *all_vars, int Nveg, int Nnodes,
 void initialize_snow(snow_data_struct **snow, int veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      veg_con_struct *veg_con, int veg_num);
+void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg(veg_var_struct **veg_var, veg_con_struct *veg_con,
                     int nveg);
+void initialize_veg_con(veg_con_struct *veg_con);
 all_vars_struct make_all_vars(int nveg);
 cell_data_struct **make_cell_data(int veg_type_num, int Nlayer);
 dmy_struct *make_dmy(global_param_struct *);

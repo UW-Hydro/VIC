@@ -37,8 +37,7 @@ vic_force()
         nrerror("Memory allocation error in vic_force().");
     }
     for (i = 0; i < global_domain.ncells_global; i++) {
-        idx[i] = global_domain.locations[i].global_x_idx * global_domain.n_ny +
-                 global_domain.locations[i].global_y_idx;
+        idx[i] = get_global_idx(&global_domain, i);
     }
 
     printf("%04d-%02d-%02d\n", dmy[current].year, dmy[current].month,

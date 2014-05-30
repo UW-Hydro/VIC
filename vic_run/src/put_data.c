@@ -6,6 +6,7 @@ int  put_data(all_vars_struct   *all_vars,
 	            atmos_data_struct *atmos,
               soil_con_struct   *soil_con,
 	            veg_con_struct    *veg_con,
+              veg_lib_struct    *veg_lib,
               lake_con_struct   *lake_con,
               out_data_struct   *out_data,
               save_data_struct  *save_data,
@@ -154,7 +155,6 @@ int  put_data(all_vars_struct   *all_vars,
 **********************************************************************/
 {
   extern global_param_struct global_param;
-  extern veg_lib_struct  *vic_run_veg_lib;
   extern option_struct    options;
   int                     veg;
   int                     index;
@@ -235,7 +235,7 @@ int  put_data(all_vars_struct   *all_vars,
     if ( AboveTreeLine[band] ) {
       Cv = 0;
       for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++ ) {
-	if ( vic_run_veg_lib[veg_con[veg].veg_class].overstory ) {
+	if ( veg_lib[veg_con[veg].veg_class].overstory ) {
           if (options.LAKES && veg_con[veg].LAKE) {
             if (band == 0) {
               // Fraction of tile that is flooded
@@ -311,7 +311,7 @@ int  put_data(all_vars_struct   *all_vars,
         IsWet = 1;
       }
 
-      overstory = vic_run_veg_lib[veg_con[veg].veg_class].overstory;
+      overstory = veg_lib[veg_con[veg].veg_class].overstory;
 
       /*********************************
         Store Output for all Bands 

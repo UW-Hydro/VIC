@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 
         /** Initialize the storage terms in the water and energy balances **/
         /** Sending a negative record number (-global_param.nrecs) to put_data() will accomplish this **/
-	ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con, &lake_con, out_data, &save_data, &dmy[0], -global_param.nrecs);
+	ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib, &lake_con, out_data, &save_data, &dmy[0], -global_param.nrecs);
 
         /******************************************
 	  Run Model in Grid Cell for all Time Steps
@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Calculate cell average values for current time step
 	  **************************************************/
-	  write_flag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, &lake_con, out_data, &save_data, &dmy[rec], rec);
+	  write_flag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib, &lake_con, out_data, &save_data, &dmy[rec], rec);
 
     // Write cell average values for current time step
     if (write_flag) {

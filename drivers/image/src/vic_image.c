@@ -29,22 +29,43 @@ main(int    argc,
 {
     size_t i;
     
+    // process command line arguments
     cmd_proc(argc, argv, filenames.global);
 
+    // read global parameters
     vic_start();
+    
+    // allocate memory
     vic_alloc();
+    
+    // initialize model parameters from parameter files
     vic_init();
+    
+    // read first forcing timestep (used in restoring model state)
     vic_force();
+    
+    // restore model state, either using a cold start or from a restart file
     vic_restore();
+    
+    // initialize output structures
     vic_init_output();
+    
+    // loop over all timesteps
     for (current = 0;  current < global_param.nrecs; current++) {
+
+        // read forcing data
         vic_force();
+        
+        // run vic over the domain
         vic_image_run();
+        
         // if output:
         // vic_write()
         // if save:
         // vic_save()
     }
+    
+    // clean up
     vic_finalize();
 
     return EXIT_SUCCESS;

@@ -62,6 +62,7 @@ out_data_struct *create_output_list() {
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2014-Apr-25 Added OUT_LAI.						TJB
 *************************************************************/
 
   extern option_struct options;
@@ -204,6 +205,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_COSZEN].varname,"OUT_COSZEN");                   /* cosine of solar zenith angle [fraction] */
   strcpy(out_data[OUT_DENSITY].varname,"OUT_DENSITY");                 /* near-surface atmospheric density [kg/m3] */
   strcpy(out_data[OUT_FDIR].varname,"OUT_FDIR");                       /* fraction of incoming shortwave that is direct [fraction] */
+  strcpy(out_data[OUT_LAI].varname,"OUT_LAI");                         /* leaf area index [m2/m2] */
   strcpy(out_data[OUT_LONGWAVE].varname,"OUT_LONGWAVE");               /* incoming longwave [W/m2] */
   strcpy(out_data[OUT_PAR].varname,"OUT_PAR");                         /* incoming photosynthetically active radiation [W/m2] */
   strcpy(out_data[OUT_PRESSURE].varname,"OUT_PRESSURE");               /* near surface atmospheric pressure [kPa] */

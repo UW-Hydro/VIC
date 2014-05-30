@@ -105,16 +105,17 @@ global_param_struct get_global_param(filenames_struct *names,
 	      and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
   2013-Dec-26 Added LOG_MATRIC option.						TJB
-  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
-  2013-Dec-26 Removed EXCESS_ICE option.				TJB
-  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
-  2013-Dec-27 Removed QUICK_FS option.					TJB
-  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-  2013-Dec-28 Removed user_def.h.					TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.		TJB
+  2013-Dec-26 Removed EXCESS_ICE option.					TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.		TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.	TJB
+  2013-Dec-27 Removed QUICK_FS option.						TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
+  2013-Dec-28 Removed user_def.h.						TJB
   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
-  2014-Mar-24 Removed ARC_SOIL option                                   BN
-  2014-Mar-28 Removed DIST_PRCP option.					                TJB
+  2014-Mar-24 Removed ARC_SOIL option.						BN
+  2014-Mar-28 Removed DIST_PRCP option.				                TJB
+  2014-Apr-25 Changed LAI_FROM_* to FROM_*; added ALB_SRC.			TJB
 **********************************************************************/
 {
   extern option_struct    options;
@@ -594,17 +595,17 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
         fprintf(stderr, "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  FROM_VEGPARAM\".\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  FROM_VEGLIB\".\n"); 
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
-//          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  LAI_FROM_VEGPARAM\"");
+//          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  FROM_VEGPARAM\"");
           options.VEGPARAM_LAI=TRUE;
-          options.LAI_SRC=LAI_FROM_VEGPARAM;
+          options.LAI_SRC=FROM_VEGPARAM;
         }
         else {
-//          nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  LAI_FROM_VEGLIB\"");
-          options.LAI_SRC=LAI_FROM_VEGLIB;
+//          nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  FROM_VEGLIB\"");
+          options.LAI_SRC=FROM_VEGLIB;
         }
       }
       else if(strcasecmp("VEGPARAM_LAI",optstr)==0) {
@@ -614,10 +615,22 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("LAI_SRC",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("LAI_FROM_VEGPARAM",flgstr)==0)
-          options.LAI_SRC=LAI_FROM_VEGPARAM;
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0 || strcasecmp("LAI_FROM_VEGPARAM",flgstr)==0)
+          options.LAI_SRC=FROM_VEGPARAM;
         else
-          options.LAI_SRC=LAI_FROM_VEGLIB;
+          options.LAI_SRC=FROM_VEGLIB;
+      }
+      else if(strcasecmp("VEGPARAM_ALB",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_ALB=TRUE;
+        else options.VEGPARAM_ALB = FALSE;
+      }
+      else if(strcasecmp("ALB_SRC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0)
+          options.ALB_SRC=FROM_VEGPARAM;
+        else
+          options.ALB_SRC=FROM_VEGLIB;
       }
       else if(strcasecmp("ROOT_ZONES",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);

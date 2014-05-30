@@ -172,6 +172,7 @@ double calc_surf_energy_bal(double             Le,
   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological LAI.				TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -252,10 +253,7 @@ double calc_surf_energy_bal(double             Le,
     Tnew_fbcount[nidx] = 0;
   }
 
-  if(iveg!=Nveg) {
-    if(veg_lib[veg_class].LAI[dmy->month-1] > 0.0) VEG = TRUE;
-    else VEG = FALSE;
-  }
+  if(iveg!=Nveg) VEG = TRUE;
   else VEG = FALSE;
 
   // Define control volume for ground flux etc calculations to be first soil layer
@@ -615,13 +613,7 @@ double calc_surf_energy_bal(double             Le,
   /** Store precipitation that reaches the surface */
   if ( !snow->snow && !INCLUDE_SNOW ) {
     if ( iveg != Nveg ) {
-      if ( veg_lib[veg_class].LAI[dmy->month-1] <= 0.0 ) { 
-	veg_var->throughfall = rainfall;
-	*ppt = veg_var->throughfall;
-      }
-      else {
-	*ppt = veg_var->throughfall;
-      }
+      *ppt = veg_var->throughfall;
     }
     else {
       *ppt = rainfall;

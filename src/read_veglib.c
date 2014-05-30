@@ -24,6 +24,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Jul-25 Added photosynthesis parameters.				TJB
+  2014-Apr-25 Improved validation for LAI and albedo values.		TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -68,6 +69,10 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].albedo[j]);
+        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
+          sprintf(str,"Albedo must be between 0 and 1 (%f)", temp[i].albedo[j]);
+          nrerror(str);
+        }
       }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].roughness[j]);
@@ -80,11 +85,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         if(temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
           sprintf(str,"Vegetation has leaves (LAI = %f), but no displacement (%f)",
 	          temp[i].LAI[j], temp[i].displacement[j]);
-          nrerror(str);
-        }
-        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
-          sprintf(str,"Albedo must be between 0 and 1 (%f)",
-	          temp[i].albedo[j]);
           nrerror(str);
         }
       }

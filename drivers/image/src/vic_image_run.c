@@ -24,8 +24,8 @@ vic_image_run()
         vic_run(i, current, &(atmos[i]), &(all_vars[i]), dmy, &global_param, 
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);        
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i], 
-                 &lake_con, out_data[i], &(save_data[i]), &dmy[current], 
-                 current);
+                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]), 
+                 &dmy[current], current);
     }
 
 }

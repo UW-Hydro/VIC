@@ -3,14 +3,13 @@
 #include <vic_driver_classic.h>
 
 int  put_data(all_vars_struct   *all_vars,
-	      atmos_data_struct *atmos,
+	            atmos_data_struct *atmos,
               soil_con_struct   *soil_con,
-	      veg_con_struct    *veg_con,
+	            veg_con_struct    *veg_con,
               lake_con_struct   *lake_con,
-              out_data_file_struct   *out_data_files,
               out_data_struct   *out_data,
               save_data_struct  *save_data,
-	      dmy_struct        *dmy,
+	            dmy_struct        *dmy,
               int                rec)
 /**********************************************************************
 	put_data.c	Dag Lohmann		January 1996

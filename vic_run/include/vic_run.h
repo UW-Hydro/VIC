@@ -182,10 +182,9 @@ void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void   prepare_full_energy(int, int, int, all_vars_struct *,
 			   soil_con_struct *, double *, double *);
 int    put_data(all_vars_struct *, atmos_data_struct *,
-		soil_con_struct *, veg_con_struct *,
-                lake_con_struct *, out_data_file_struct *,
-		out_data_struct *, save_data_struct *,
- 	        dmy_struct *, int);
+		            soil_con_struct *, veg_con_struct *,
+                lake_con_struct *, out_data_struct *, 
+                save_data_struct *, dmy_struct *, int);
 double qromb(double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO,
        double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh,
        double a, double b);

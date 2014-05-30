@@ -111,6 +111,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg params.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -289,6 +290,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double T1_plus;
   double D1_minus;
   double D1_plus;
+  double Ra_bare[3];
+  double tmp_wind[3];
+  double tmp_height;
+  double tmp_displacement[3];
+  double tmp_roughness[3];
+  double tmp_ref_height[3];
 
   /************************************
     Read variables from variable list 
@@ -681,7 +688,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Use Arno Evap if LAI is set to zero (e.g. no
     winter crop planted).
   *************************************************/
-  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
+  if ( VEG && !SNOWING ) {
     Evap = canopy_evap(layer, veg_var, TRUE, 
 		       veg_class, month, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
@@ -696,7 +703,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
 		     resid_moist[0], frost_fract);
   }
   else Evap = 0.;
-  
+
   /**********************************************************************
     Compute the Latent Heat Flux from the Surface and Covering Vegetation
   **********************************************************************/

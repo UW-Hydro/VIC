@@ -275,6 +275,21 @@ Removed the DIST_PRCP option.
 Bug Fixes:
 ----------
 
+Fixed negative liquid soil moisture for bare soil conditions
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Previously, runoff() only checked whether total (liquid+ice) soil
+	moisture was > residual moisture, but not whether liquid soil moisture
+	was positive.  In some cases, in the bare soil tile, liquid soil moisture
+	could occasionally go negative.  This has been fixed by adding a check on
+	liquid soil moisture to runoff().
+
+
 Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
 
 	Files Affected:

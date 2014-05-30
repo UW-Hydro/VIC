@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_image_run()
+vic_image_run(void)
 {
     extern size_t              current;
     extern all_vars_struct    *all_vars;

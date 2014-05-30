@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_alloc()
+vic_alloc(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
@@ -142,7 +142,7 @@ vic_alloc()
         }
 
         initialize_soil_con(&(soil_con[i]));
-        
+
         // vegetation tile allocation
 
         veg_con_map[i].nv_types = options.NVEGTYPES;

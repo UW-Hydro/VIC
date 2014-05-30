@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_finalize()
+vic_finalize(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;

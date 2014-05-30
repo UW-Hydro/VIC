@@ -5,7 +5,7 @@
 #define NMONTHS 12
 
 void
-vic_init()
+vic_init(void)
 {
     extern all_vars_struct    *all_vars;
     extern size_t              current;

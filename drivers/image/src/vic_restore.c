@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_restore()
+vic_restore(void)
 {
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;

@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_start()
+vic_start(void)
 {
     extern filenames_struct    filenames;
     extern filep_struct        filep;

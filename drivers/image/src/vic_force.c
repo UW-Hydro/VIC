@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 void
-vic_force()
+vic_force(void)
 {
     extern int                 NF;
     extern int                 NR;

@@ -151,6 +151,8 @@ void vic_init(void);
 void vic_init_output(void);
 void vic_restore(void);
 void vic_start(void);
+void vic_store(void);
+void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, int n);
 void usage(char *);

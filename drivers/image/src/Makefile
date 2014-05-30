@@ -84,6 +84,8 @@ OBJS = \
 	${DRIVERPATH}/src/vic_init_output.o \
 	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
+	${DRIVERPATH}/src/vic_store.o \
+	${DRIVERPATH}/src/vic_write.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

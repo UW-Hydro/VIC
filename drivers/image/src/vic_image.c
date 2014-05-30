@@ -60,9 +60,12 @@ main(int    argc,
         vic_image_run();
         
         // if output:
-        // vic_write()
+        vic_write();
+
         // if save:
-        // vic_save()
+        if (current == global_param.nrecs - 1) {
+            vic_store();
+        }
     }
     
     // clean up

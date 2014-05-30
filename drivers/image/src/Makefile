@@ -79,7 +79,9 @@ OBJS = \
 	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_force.o \
 	${DRIVERPATH}/src/vic_image.o \
+	${DRIVERPATH}/src/vic_image_run.o \
 	${DRIVERPATH}/src/vic_init.o \
+	${DRIVERPATH}/src/vic_init_output.o \
 	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
 	${VICPATH}/src/CalcAerodynamic.o \

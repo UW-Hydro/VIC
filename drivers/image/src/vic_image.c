@@ -36,12 +36,10 @@ main(int    argc,
     vic_init();
     vic_force();
     vic_restore();
+    vic_init_output();
     for (current = 0;  current < global_param.nrecs; current++) {
         vic_force();
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            vic_run(i, current, &(atmos[i]), &(all_vars[i]), dmy, &global_param, 
-                    &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
-        }
+        vic_image_run();
         // if output:
         // vic_write()
         // if save:

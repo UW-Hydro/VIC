@@ -146,7 +146,9 @@ int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
 void vic_alloc(void);
 void vic_finalize(void);
 void vic_force(void);
+void vic_image_run(void);
 void vic_init(void);
+void vic_init_output(void);
 void vic_restore(void);
 void vic_start(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,

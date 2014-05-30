@@ -25,6 +25,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Jul-25 Added photosynthesis parameters.				TJB
   2014-Apr-25 Improved validation for LAI and albedo values.		TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -66,6 +67,21 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
           nrerror(ErrStr);
         }
         temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
+      }
+      if (options.VEGLIB_VEGCOVER) {
+        for (j = 0; j < 12; j++) {
+          fscanf(veglib, "%lf", &temp[i].vegcover[j]);
+          if(temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
+            sprintf(str,"Veg cover fraction must be between 0 and 1 (%f)", temp[i].vegcover[j]);
+            nrerror(str);
+          }
+          if (temp[i].vegcover[j] < 0.01) temp[i].vegcover[j] = 0.01;
+        }
+      }
+      else {
+        for (j = 0; j < 12; j++) {
+          temp[i].vegcover[j] = 1.00;
+        }
       }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].albedo[j]);
@@ -161,6 +177,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       temp[Nveg_type+i].albedo[j] = ref_veg_albedo[i];
       temp[Nveg_type+i].roughness[j] = ref_veg_rough[i];
       temp[Nveg_type+i].displacement[j] = ref_veg_displ[i];
+      temp[Nveg_type+i].vegcover[j] = ref_veg_vegcover[i];
     }
     temp[Nveg_type+i].wind_h = ref_veg_wind_h[i];
     temp[Nveg_type+i].RGL = ref_veg_RGL[i];

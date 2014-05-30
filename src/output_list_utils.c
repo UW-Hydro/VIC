@@ -63,6 +63,7 @@ out_data_struct *create_output_list() {
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2014-Apr-25 Added OUT_LAI.						TJB
+  2014-Apr-25 Added OUT_VEGCOVER.					TJB
 *************************************************************/
 
   extern option_struct options;
@@ -214,6 +215,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SHORTWAVE].varname,"OUT_SHORTWAVE");             /* incoming shortwave [W/m2] */
   strcpy(out_data[OUT_SURF_COND].varname,"OUT_SURF_COND");             /* surface conductance [m/s] */
   strcpy(out_data[OUT_TSKC].varname,"OUT_TSKC");                       /* cloud cover fraction [fraction] */
+  strcpy(out_data[OUT_VEGCOVER].varname,"OUT_VEGCOVER");               /* fractional area of plants within veg tile [fraction] */
   strcpy(out_data[OUT_VP].varname,"OUT_VP");                           /* near surface vapor pressure [kPa] */
   strcpy(out_data[OUT_VPD].varname,"OUT_VPD");                         /* near surface vapor pressure deficit [kPa] */
   strcpy(out_data[OUT_WIND].varname,"OUT_WIND");                       /* near surface wind speed [m/s] */

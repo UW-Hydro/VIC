@@ -49,6 +49,8 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2013-Dec-28 Removed NO_REWIND option.					TJB
   2014-Apr-25 Added optional albedo values; added VEGPARAM_ALB and
 	      ALB_SRC.							TJB
+  2014-Apr-25 Added optional vegcover values; added VEGPARAM_VEGCOVER
+	      and VEGCOVER_SRC.						TJB
 **********************************************************************/
 {
 
@@ -75,6 +77,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
 
   skip = 1;
   if(options.VEGPARAM_LAI) skip++;
+  if(options.VEGPARAM_VEGCOVER) skip++;
   if(options.VEGPARAM_ALB) skip++;
 
   NoOverstory = 0;
@@ -246,6 +249,42 @@ veg_con_struct *read_vegparam(FILE *vegparam,
             nrerror(ErrStr);
           }
           veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
+        }
+      }
+      for(k=0; k<Nfields; k++)
+        free(vegarr[k]);
+    }
+
+    if ( options.VEGPARAM_VEGCOVER ) {
+      // Read the vegcover line
+      if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
+        sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading vegcover for vegetat_type_num %d\n",vegcel,vegetat_type_num);
+        nrerror(ErrStr);
+      }      
+      Nfields = 0;
+      vegarr[Nfields] = calloc( 500, sizeof(char));      
+      strcpy(tmpline, line);
+      ttrim( tmpline );
+      token = strtok (tmpline, delimiters); 
+      strcpy(vegarr[Nfields],token);
+      Nfields++;
+ 
+      while( ( token = strtok (NULL, delimiters)) != NULL ){
+        vegarr[Nfields] = calloc( 500, sizeof(char));      
+        strcpy(vegarr[Nfields],token);
+        Nfields++;
+      }
+      NfieldsMax = 12; /* For vegcover */
+      if ( Nfields != NfieldsMax ) {
+        sprintf(ErrStr,"ERROR - cell %d - expecting %d vegcover values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
+        nrerror(ErrStr);
+      }
+
+      if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
+        for ( j = 0; j < 12; j++ ) {
+          tmp = atof( vegarr[j] );
+          if (tmp != NODATA_VH)
+            veg_lib[temp[i].veg_class].vegcover[j] = tmp;
         }
       }
       for(k=0; k<Nfields; k++)

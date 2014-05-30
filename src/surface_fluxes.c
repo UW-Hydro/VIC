@@ -144,6 +144,7 @@ int surface_fluxes(char                 overstory,
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameters.			TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -839,6 +840,14 @@ int surface_fluxes(char                 overstory,
         iter_soil_veg_var.Rgrowth *= dryFrac;
         iter_soil_veg_var.Raut *= dryFrac;
         iter_soil_veg_var.NPP *= dryFrac;
+        /* Adjust by veg cover fraction */
+        iter_soil_veg_var.GPP *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rdark *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rphoto *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rmaint *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rgrowth *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Raut *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.NPP *= iter_soil_veg_var.vegcover;
       }
       else {
         iter_soil_veg_var.rc = HUGE_RESIST;

@@ -32,6 +32,70 @@ Usage:
 New Features:
 -------------
 
+Added partial vegetation cover (within each tile).
+
+	Files Affected:
+
+	alloc_veg_hist.c
+	calc_veg_params.c
+	display_current_settings.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_force_type.c
+	get_global_param.c
+	global.h
+	initialize_atmos.c
+	initialize_global.c
+	initialize_veg.c
+	output_list_utils.c
+	put_data.c
+	read_atmos_data.c
+	read_forcing_data.c
+	read_veglib.c
+	read_vegparam.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added a time-varying (non-climatological) partial vegcover fraction
+	within vegetated tiles.  Previously, vegetation was assumed to
+	cover 100% of the land surface in a vegetated tile (i.e., "big
+	leaf" scheme).  This assumption is not valid in general, and in
+	particular becomes very inaccurate in arid environments (e.g., open
+	shrublands), or as LAI decreases to near 0.  In such cases,
+	evaporation from bare soil between the plants becomes a major (or
+	dominant) component of total evapotranspiration.
+
+	This partial veg cover fraction ("vegcover") is treated the same way
+	as LAI and albedo: new options (VEGCOVER_SRC and VEGPARAM_VEGCOVER)
+	tell VIC whether the veg param file contains 12 climatological
+	vegcover values and whether to use those or the ones in the veg
+	library.  A new forcing variable ("VEGCOVER") can be included in
+	forcing files along with LAI and albedo, and must be specified in the
+	global parameter file in the same way.  There is an additional option
+	controlling whether VEGCOVER values appear in the veg library file:
+	VEGLIB_VEGCOVER.  FALSE by default, if TRUE it tells VIC to expect 12
+	monthly VEGCOVER values in each veg class, after the 12 LAI and before
+	the 12 albedo values.
+
+	Internally, VIC uses the partial vegcover fraction to divide each veg
+	tile into the area covered by plants and the area in between the
+	plants.  LAI and canopy moisture and snow storage are rescaled by
+	1/vegcover to get plant-specific values before canopy evap,
+	transpiration, and canopy snow dynamics are computed (vegcover is not
+	allowed to go below the value MIN_VEGCOVER in vicNl_def.h).  Bare soil
+	evap is computed for the bare soil component of the tile.  Total
+	evapotranspiration is computed as the area-weighted sum of canopy evap
+	and transpiration from the vegetated fraction and bare soil evap from
+	the bare soil fraction.  Finally, LAI and canopy moisture storage are
+	rescaled back to the tile-area-average values before output.
+
+
+
+
 Added non-climatological time-varying veg parameters.
 
 	Files Affected:
@@ -55,8 +119,8 @@ Added non-climatological time-varying veg parameters.
 	read_forcing_data.c
 	read_veglib.c
 	read_vegparam.c
-	solve_snow.c
 	snow_intercept.c
+	solve_snow.c
 	surface_fluxes.c
 	vicNl.c
 	vicNl_def.h

@@ -173,6 +173,7 @@ double calc_surf_energy_bal(double             Le,
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological LAI.				TJB
+  2014-May-05 Added non-climatological vegcover fraction.		TJB
 ***************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -253,7 +254,10 @@ double calc_surf_energy_bal(double             Le,
     Tnew_fbcount[nidx] = 0;
   }
 
-  if(iveg!=Nveg) VEG = TRUE;
+  if(iveg!=Nveg) {
+    if(veg_var->vegcover > 0.0) VEG = TRUE;
+    else VEG = FALSE;
+  }
   else VEG = FALSE;
 
   // Define control volume for ground flux etc calculations to be first soil layer

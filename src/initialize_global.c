@@ -132,6 +132,7 @@ void initialize_global() {
   2014-Mar-24 Removed ARC_SOIL option                                   	BN
   2014-Mar-28 Removed DIST_PRCP option.						TJB
   2014-Apr-25 Added LAI_SRC, VEGPARAM_ALB, and ALB_SRC options.			TJB
+  2014-Apr-25 Added VEGPARAM_VEGCOVER and VEGCOVER_SRC options.			TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -188,11 +189,14 @@ void initialize_global() {
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;
+  options.LAI_SRC               = FROM_VEGLIB;
   options.ORGANIC_FRACT         = FALSE;
+  options.VEGCOVER_SRC          = FROM_VEGLIB;
   options.VEGLIB_PHOTO          = FALSE;
+  options.VEGLIB_VEGCOVER       = FALSE;
   options.VEGPARAM_ALB          = FALSE;
   options.VEGPARAM_LAI          = FALSE;
-  options.LAI_SRC               = FROM_VEGLIB;
+  options.VEGPARAM_VEGCOVER     = FALSE;
   // state options
   options.BINARY_STATE_FILE     = FALSE;
   options.INIT_STATE            = FALSE;

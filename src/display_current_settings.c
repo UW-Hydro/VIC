@@ -66,6 +66,7 @@ void display_current_settings(int                 mode,
   2014-Mar-24 Removed ARC_SOIL option                  			 BN
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added LAI_SRC, VEGPARAM_ALB, and ALB_SRC options.		TJB
+  2014-Apr-25 Added VEGPARAM_VEGCOVER and VEGCOVER_SRC options.		TJB
 
 **********************************************************************/
 {
@@ -336,6 +337,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"VEGLIB_PHOTO\t\tTRUE\n");
   else
     fprintf(stderr,"VEGLIB_PHOTO\t\tFALSE\n");
+  if (options.VEGLIB_VEGCOVER == TRUE)
+    fprintf(stderr,"VEGLIB_VEGCOVER\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGLIB_VEGCOVER\t\tFALSE\n");
   fprintf(stderr,"Veg param file\t\t%s\n",names->veg);
   fprintf(stderr,"ROOT_ZONES\t\t%d\n",options.ROOT_ZONES);
   if (options.VEGPARAM_LAI)
@@ -346,6 +351,14 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"LAI_SRC\t\tFROM_VEGPARAM\n");
   else if (options.LAI_SRC == FROM_VEGLIB)
     fprintf(stderr,"LAI_SRC\t\tFROM_VEGLIB\n");
+  if (options.VEGPARAM_VEGCOVER)
+    fprintf(stderr,"VEGPARAM_VEGCOVER\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGPARAM_VEGCOVER\t\tFALSE\n");
+  if (options.VEGCOVER_SRC == FROM_VEGPARAM)
+    fprintf(stderr,"VEGCOVER_SRC\t\tFROM_VEGPARAM\n");
+  else if (options.VEGCOVER_SRC == FROM_VEGLIB)
+    fprintf(stderr,"VEGCOVER_SRC\t\tFROM_VEGLIB\n");
   if (options.VEGPARAM_ALB)
     fprintf(stderr,"VEGPARAM_ALB\t\tTRUE\n");
   else

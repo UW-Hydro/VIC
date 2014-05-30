@@ -38,6 +38,7 @@ void get_force_type(char   *cmdstr,
   2011-Nov-04 Fixed comment describing TSKC.				TJB
   2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.			TJB
   2014-Apr-25 Added LAI_IN.						TJB
+  2014-Apr-25 Added VEGCOVER.						TJB
 
 *************************************************************/
 
@@ -179,27 +180,32 @@ void get_force_type(char   *cmdstr,
     type = TSKC;
   }
 
-  /* type 23: vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+  /* type 23: vegetation cover fraction */
+  else if(strcasecmp("VEGCOVER",optstr)==0){
+    type = VEGCOVER;
+  }
+
+  /* type 24: vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
   else if(strcasecmp("VP",optstr)==0){
     type = VP;
   }
 
-  /* type 24: wind speed [m/s] */
+  /* type 25: wind speed [m/s] */
   else if(strcasecmp("WIND",optstr)==0){
     type = WIND;
   }
 
-  /* type 25: zonal component of wind speed [m/s] */
+  /* type 26: zonal component of wind speed [m/s] */
   else if(strcasecmp("WIND_E",optstr)==0){
     type = WIND_E;
   }
 
-  /* type 26: meridional component of wind speed [m/s] */
+  /* type 27: meridional component of wind speed [m/s] */
   else if(strcasecmp("WIND_N",optstr)==0){
     type = WIND_N;
   }
 
-  /* type 27: unused (blank) data */
+  /* type 28: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
   }

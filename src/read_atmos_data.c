@@ -59,6 +59,7 @@ void read_atmos_data(FILE                 *infile,
 	      records.							TJB
   2014-Apr-25 Added non-climatological veg parameters (as forcing
 	      variables).						TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 
   **********************************************************************/
 {
@@ -160,7 +161,7 @@ void read_atmos_data(FILE                 *infile,
 			      < global_param.nrecs * global_param.dt) ) {
 
       for(i=0;i<Nfields;i++) {
-        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN) {
+        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN && field_index[i] != VEGCOVER) {
 	  if(param_set.TYPE[field_index[i]].SIGNED) {
 	    fread(&stmp,sizeof(short int),1,infile);
 	    if (endian != param_set.FORCE_ENDIAN[file_num]) {
@@ -230,7 +231,7 @@ void read_atmos_data(FILE                 *infile,
     while( !feof(infile) && (rec * param_set.FORCE_DT[file_num] 
 			      < global_param.nrecs * global_param.dt ) ) {
       for(i=0;i<Nfields;i++) {
-        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN) {
+        if (field_index[i] != ALBEDO && field_index[i] != LAI_IN && field_index[i] != VEGCOVER) {
 	  fscanf(infile,"%lf", &forcing_data[field_index[i]][rec]);
         }
         else {

@@ -84,6 +84,7 @@ typedef struct {
     float f_fillvalue;
     int nc_id;
     int band_dimid;
+    int frost_dimid;
     int layer_dimid;
     int ni_dimid;
     int nj_dimid;
@@ -91,6 +92,7 @@ typedef struct {
     int root_zone_dimid;
     int veg_dimid;
     size_t band_size;
+    size_t frost_size;
     size_t layer_size;
     size_t ni_size;
     size_t nj_size;

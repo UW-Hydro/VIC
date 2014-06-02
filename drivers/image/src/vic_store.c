@@ -249,6 +249,7 @@ initialize_state_file(nc_file_struct *nc)
     nc->f_fillvalue = NC_FILL_FLOAT;
 
     nc->band_size = options.SNOW_BAND;
+    nc->frost_size = options.Nfrost;
     nc->layer_size = options.Nlayer;
     nc->ni_size = global_domain.n_nx;
     nc->nj_size = global_domain.n_ny;
@@ -277,6 +278,13 @@ initialize_state_file(nc_file_struct *nc)
         ERR(status);
     }
 
+    status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
+                        &(nc->frost_dimid));
+    if (status != NC_NOERR) {
+        fprintf(stderr, "nc_def_dim frost_area\n");
+        ERR(status);
+    }
+    
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
     if (status != NC_NOERR) {

@@ -73,6 +73,33 @@ typedef struct {
     location_struct *locations; // locations structs for local domain
 } domain_struct;
 
+/*
+   Structure for netcdf file information. Initially to store information for the
+   output files (state and history) */
+typedef struct {
+    char fname[MAXSTRING + 1];
+    char c_fillvalue;
+    int i_fillvalue;
+    double d_fillvalue;
+    float f_fillvalue;
+    int nc_id;
+    int band_dimid;
+    int layer_dimid;
+    int ni_dimid;
+    int nj_dimid;
+    int node_dimid;
+    int root_zone_dimid;
+    int veg_dimid;
+    size_t band_size;
+    size_t layer_size;
+    size_t ni_size;
+    size_t nj_size;
+    size_t node_size;
+    size_t root_zone_size;
+    size_t veg_size;
+    bool open;
+} nc_file_struct;
+
 /* Structure for mapping the vegetation types for each grid cell as stored
    in VIC's veg_con_struct to a regular array. This is convoluted, but will
    allow us to keep using VIC's existing memory layout */
@@ -124,6 +151,7 @@ void initialize_snow(snow_data_struct **snow, int veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      veg_con_struct *veg_con, int veg_num);
 void initialize_soil_con(soil_con_struct *soil_con);
+void initialize_state_file(nc_file_struct *nc);
 void initialize_veg(veg_var_struct **veg_var, veg_con_struct *veg_con,
                     int nveg);
 void initialize_veg_con(veg_con_struct *veg_con);
@@ -139,6 +167,10 @@ void print_force_type(force_type_struct *force_type);
 void print_location(location_struct *location);
 void print_param_set(param_set_struct *param_set);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
+int put_nc_field_double(char *nc_name, bool   *open, int    *nc_id,
+                        double fillval, int    *dimids, int ndims,
+                        char   *var_name, size_t *start, size_t *count,
+                        double *var);
 double q_to_vp(double q, double p);
 int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,

@@ -75,6 +75,7 @@ OBJS = \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/print_library.o \
+	${DRIVERPATH}/src/put_nc_field.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_force.o \

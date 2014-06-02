@@ -169,10 +169,13 @@ void print_force_type(force_type_struct *force_type);
 void print_location(location_struct *location);
 void print_param_set(param_set_struct *param_set);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
-int put_nc_field_double(char *nc_name, bool   *open, int    *nc_id,
-                        double fillval, int    *dimids, int ndims,
-                        char   *var_name, size_t *start, size_t *count,
+int put_nc_field_double(char *nc_name, bool *open, int *nc_id,
+                        double fillval, int *dimids, int ndims,
+                        char *var_name, size_t *start, size_t *count,
                         double *var);
+int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
+                     int *dimids, int ndims, char *var_name, size_t *start,
+                     size_t *count, int *var);
 double q_to_vp(double q, double p);
 int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,

@@ -819,12 +819,15 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record evaporation components **/
   tmp_evap = 0.0;
-  for(index=0;index<options.Nlayer;index++)
+  for(index=0;index<options.Nlayer;index++) {
     tmp_evap += cell.layer[index].evap;
-  if (HasVeg)
-    out_data[OUT_TRANSP_VEG].data[0] += tmp_evap * AreaFactor;
-  else 
-    out_data[OUT_EVAP_BARE].data[0] += tmp_evap * AreaFactor;
+    if (HasVeg) {
+      out_data[OUT_EVAP_BARE].data[0] += cell.layer[index].evap * cell.layer[index].bare_evap_frac * AreaFactor;
+      out_data[OUT_TRANSP_VEG].data[0] += cell.layer[index].evap * (1-cell.layer[index].bare_evap_frac) * AreaFactor;
+    }
+    else 
+      out_data[OUT_EVAP_BARE].data[0] += cell.layer[index].evap * AreaFactor;
+  }
   tmp_evap += snow.vapor_flux * 1000.;
   out_data[OUT_SUB_SNOW].data[0] += snow.vapor_flux * 1000. * AreaFactor; 
   out_data[OUT_SUB_SURFACE].data[0] += snow.surface_flux * 1000. * AreaFactor; 

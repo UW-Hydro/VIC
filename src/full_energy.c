@@ -5,16 +5,16 @@
 
 static char vcid[] = "$Id$";
 
-int  full_energy(char                 NEWCELL,
-		 int                  gridcell,
+int  full_energy(int                  gridcell,
                  int                  rec,
                  atmos_data_struct   *atmos,
-                 dist_prcp_struct    *prcp,
+                 all_vars_struct     *all_vars,
                  dmy_struct          *dmy,
                  global_param_struct *gp,
 		 lake_con_struct     *lake_con,
                  soil_con_struct     *soil_con,
-                 veg_con_struct      *veg_con)
+                 veg_con_struct      *veg_con,
+                 veg_hist_struct    **veg_hist)
 /**********************************************************************
 	full_energy	Keith Cherkauer		January 8, 1997
 
@@ -106,7 +106,13 @@ int  full_energy(char                 NEWCELL,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2012-Aug-28 Added accumulation of rain and snow over lake to grid cell
 	      totals.								TJB
-  2014-Feb-13 Fixed typos in EXCESS_ICE code.					TJB
+  2013-Jul-25 Added photosynthesis terms.					TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.					TJB
+  2013-Dec-27 Removed (unused) SPATIAL_FROST code.				TJB
+  2014-Mar-28 Removed DIST_PRCP option.						TJB
+  2014-Apr-25 Added non-climatological veg params.				TJB
+  2014-Apr-25 Added partial vegcover fraction.					TJB
 
 **********************************************************************/
 {
@@ -115,17 +121,12 @@ int  full_energy(char                 NEWCELL,
   char                   overstory;
   int                    i, j, p;
   int                    lidx;
-  int                    Ndist;
-  int                    dist;
   int                    iveg;
   int                    Nveg;
   int                    veg_class;
   int                    band;
   int                    Nbands;
   int                    ErrorFlag;
-#if SPATIAL_FROST
-  int                    frost_area;
-#endif // SPATIAL_FROST
   double                 out_prec[2*MAX_BANDS];
   double                 out_rain[2*MAX_BANDS];
   double                 out_snow[2*MAX_BANDS];
@@ -151,8 +152,6 @@ int  full_energy(char                 NEWCELL,
   double                 sum_runoff;
   double                 sum_baseflow;
   double                 tmp_wind[3];
-  double                 tmp_mu;
-  double                 tmp_total_moist;
   double                 gauge_correction[2];
   float 	         lag_one;
   float 	         sigma_slope;
@@ -165,34 +164,12 @@ int  full_energy(char                 NEWCELL,
   double                 oldsnow;
   double                 snowprec;
   double                 rainprec;
+  int                    cidx;
   lake_var_struct       *lake_var;
-  cell_data_struct    ***cell;
-  veg_var_struct      ***veg_var;
+  cell_data_struct     **cell;
+  veg_var_struct       **veg_var;
   energy_bal_struct    **energy;
-  energy_bal_struct     *ptr_energy;
   snow_data_struct     **snow;
-  snow_data_struct      *tmp_snow;
-  veg_var_struct        *tmp_veg[2];
-  veg_var_struct        *wet_veg_var;
-  veg_var_struct        *dry_veg_var;
-  veg_var_struct         empty_veg_var;
-#if EXCESS_ICE
-  int                    SubsidenceUpdate = 0;
-  int                    index;
-  char                   ErrStr[MAXSTRING];
-  double                 max_ice_layer; //mm/mm
-  double                 ave_ice_fract; //mm/mm
-  double                 ave_ice, tmp_ice; //mm
-  double                 ice_layer; //mm
-  double                 subsidence[MAX_LAYERS]; //mm
-  double                 total_subsidence; //m
-  double                 tmp_subsidence; //mm
-  double                 total_meltwater; //mm
-  double                 tmp_depth, tmp_depth_prior; //m
-  double                 ppt[2]; 
-  double                 moist_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
-  double                 evap_prior[2][MAX_VEG][MAX_BANDS][MAX_LAYERS]; //mm
-#endif //EXCESS_ICE
 
   /* Allocate aero_resist array */
   aero_resist = (double**)calloc(N_PET_TYPES+1,sizeof(double*));
@@ -201,17 +178,12 @@ int  full_energy(char                 NEWCELL,
   }
 
   /* set local pointers */
-  cell    = prcp->cell;
-  energy  = prcp->energy;
-  lake_var = &prcp->lake_var;
-  snow    = prcp->snow;
-  veg_var = prcp->veg_var;
+  cell    = all_vars->cell;
+  energy  = all_vars->energy;
+  lake_var = &all_vars->lake_var;
+  snow    = all_vars->snow;
+  veg_var = all_vars->veg_var;
 
-  /* set variables for distributed precipitation */
-  if(options.DIST_PRCP) 
-    Ndist = 2;
-  else 
-    Ndist = 1;
   Nbands = options.SNOW_BAND;
 
   /* Set number of vegetation types */
@@ -234,21 +206,25 @@ int  full_energy(char                 NEWCELL,
   atmos->out_rain = 0;
   atmos->out_snow = 0;
 
-
-  /* initialize prior moist and ice for subsidence calculations */
-#if EXCESS_ICE
-  for(iveg = 0; iveg <= Nveg; iveg++){
-    for ( band = 0; band < Nbands; band++ ) {
-      for ( dist = 0; dist < Ndist; dist++ ) {
-	for(lidx=0;lidx<options.Nlayer;lidx++) {
-	  moist_prior[dist][iveg][band][lidx] = cell[dist][iveg][band].layer[lidx].moist;
-	  evap_prior[dist][iveg][band][lidx] = 0; //initialize
-	}
+  /* Assign current veg albedo and LAI */
+  if (rec >= 0) {
+    // Loop over vegetated tiles
+    for(iveg = 0; iveg < Nveg; iveg++){
+      veg_class = veg_con[iveg].veg_class;
+      if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
+        veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].vegcover = veg_hist[rec][iveg].vegcover[0];
+        veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
+        veg_var[iveg][band].LAI = veg_hist[rec][iveg].LAI[0];
+        // Convert LAI from global to local
+        veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
+        snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
       }
     }
   }
-#endif //EXCESS_ICE
-
 
   /**************************************************
     Solve Energy and/or Water Balance for Each
@@ -315,19 +291,27 @@ int  full_energy(char                 NEWCELL,
       /** Define vegetation class number **/
       veg_class = veg_con[iveg].veg_class;
 
+      /** Initialize other veg vars **/
+      if (iveg < Nveg) {
+	for(band=0; band<Nbands; band++) {
+          veg_var[iveg][band].rc = HUGE_RESIST;
+        }
+      }
+
       /** Assign wind_h **/
       /** Note: this is ignored below **/
       wind_h = veg_lib[veg_class].wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      surf_atten = exp(-veg_lib[veg_class].rad_atten 
-		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
+      surf_atten = (1-veg_var[iveg][0].vegcover)*1.0
+                   + veg_var[iveg][0].vegcover
+                   * exp(-veg_lib[veg_class].rad_atten * veg_var[iveg][0].LAI);
 
       /* Initialize soil thermal properties for the top two layers */
-      prepare_full_energy(iveg, Nveg, options.Nnode, prcp, soil_con, moist0, ice0);
+      prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
-      bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+      bare_albedo = veg_var[iveg][0].albedo;
 
       /*************************************
 	Compute the aerodynamic resistance 
@@ -382,8 +366,34 @@ int  full_energy(char                 NEWCELL,
       /* Initialize final aerodynamic resistance values */
       for ( band = 0; band < Nbands; band++ ) {
         if( soil_con->AreaFract[band] > 0 ) {
-          cell[WET][iveg][band].aero_resist[0] = aero_resist[N_PET_TYPES][0];
-          cell[WET][iveg][band].aero_resist[1] = aero_resist[N_PET_TYPES][1];
+          cell[iveg][band].aero_resist[0] = aero_resist[N_PET_TYPES][0];
+          cell[iveg][band].aero_resist[1] = aero_resist[N_PET_TYPES][1];
+        }
+      }
+
+      /******************************
+        Compute nitrogen scaling factors and initialize other veg vars
+      ******************************/
+      if (options.CARBON && iveg < Nveg) {
+	for(band=0; band<Nbands; band++) {
+          for (cidx=0; cidx<options.Ncanopy; cidx++) {
+            veg_var[iveg][band].rsLayer[cidx] = HUGE_RESIST;
+          }
+          veg_var[iveg][band].aPAR = 0;
+          if (dmy->hour == 0) {
+            calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
+                                veg_con[iveg].CanopLayerBnd,
+                                veg_lib[veg_class].LAI[dmy[rec].month-1],
+                                soil_con->lat,
+                                soil_con->lng,
+                                soil_con->time_zone_lng,
+                                dmy[rec],
+                                veg_var[iveg][band].NscaleFactor);
+          }
+          if (dmy[rec].month == 1 && dmy[rec].day == 1) {
+            veg_var[iveg][band].AnnualNPPPrev = veg_var[iveg][band].AnnualNPP;
+            veg_var[iveg][band].AnnualNPP = 0;
+          }
         }
       }
 
@@ -394,36 +404,29 @@ int  full_energy(char                 NEWCELL,
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
-	  wet_veg_var = &(veg_var[WET][iveg][band]);
-	  dry_veg_var = &(veg_var[DRY][iveg][band]);
 	  lag_one     = veg_con[iveg].lag_one;
 	  sigma_slope = veg_con[iveg].sigma_slope;
 	  fetch       = veg_con[iveg].fetch;
 
 	  /* Initialize pot_evap */
 	  for (p=0; p<N_PET_TYPES; p++)
-	    cell[WET][iveg][band].pot_evap[p] = 0;
+	    cell[iveg][band].pot_evap[p] = 0;
 
 	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band], 
-#if EXCESS_ICE
-				     SubsidenceUpdate, evap_prior[DRY][iveg][band],
-				     evap_prior[WET][iveg][band],
-#endif
-				     prcp->mu[iveg], surf_atten, &(Melt[band*2]), &Le, 
+				     surf_atten, &(Melt[band*2]), &Le, 
 				     aero_resist,
 				     displacement, gauge_correction,
 				     &out_prec[band*2], 
 				     &out_rain[band*2], &out_snow[band*2],
 				     ref_height, roughness, 
 				     &snow_inflow[band], 
-				     tmp_wind, veg_con[iveg].root, Nbands, Ndist, 
+				     tmp_wind, veg_con[iveg].root, Nbands, 
 				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
 				     atmos, dmy, &(energy[iveg][band]), gp, 
-				     &(cell[DRY][iveg][band]),
-				     &(cell[WET][iveg][band]),
+				     &(cell[iveg][band]),
 				     &(snow[iveg][band]), 
-				     soil_con, dry_veg_var, wet_veg_var, 
-				     lag_one, sigma_slope, fetch);
+				     soil_con, &(veg_var[iveg][band]), 
+				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
 	  
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
 	  
@@ -434,245 +437,36 @@ int  full_energy(char                 NEWCELL,
           /********************************************************
             Compute soil wetness and root zone soil moisture
           ********************************************************/
-          // Loop through distributed precipitation fractions
-          for ( dist = 0; dist < Ndist; dist++ ) {
-            cell[dist][iveg][band].rootmoist = 0;
-            cell[dist][iveg][band].wetness = 0;
-            for(lidx=0;lidx<options.Nlayer;lidx++) {
-              if (veg_con->root[lidx] > 0) {
-                cell[dist][iveg][band].rootmoist += cell[dist][iveg][band].layer[lidx].moist;
-              }
-#if EXCESS_ICE
-	      cell[dist][iveg][band].wetness += (cell[dist][iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#else
-	      cell[dist][iveg][band].wetness += (cell[dist][iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#endif
+          cell[iveg][band].rootmoist = 0;
+          cell[iveg][band].wetness = 0;
+          for(lidx=0;lidx<options.Nlayer;lidx++) {
+            if (veg_con->root[lidx] > 0) {
+              cell[iveg][band].rootmoist += cell[iveg][band].layer[lidx].moist;
             }
-            cell[dist][iveg][band].wetness /= options.Nlayer;
-
+	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
           }
+          cell[iveg][band].wetness /= options.Nlayer;
 
-	} /** End Loop Through Elevation Bands **/
-      } /** End Full Energy Balance Model **/
+	} /** End non-zero area band **/
+      } /** End Loop Through Elevation Bands **/
 
-
-    } /** end current vegetation type **/
+    } /** end non-zero area veg tile **/
   } /** end of vegetation loop **/
+
+  /* Convert LAI back to global */
+  if (rec >= 0) {
+    for(iveg = 0; iveg < Nveg; iveg++){
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+      }
+    }
+  }
 
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);
   }
   free((char *)aero_resist);
-
-  /****************************
-     Calculate Subsidence
-  ****************************/
-#if EXCESS_ICE
-  total_subsidence = 0;
-  total_meltwater = 0; //for lake model only
-  for(lidx=0;lidx<options.Nlayer;lidx++) {//soil layer
-    subsidence[lidx] = 0;
-    if(soil_con->effective_porosity[lidx]>soil_con->porosity[lidx]){
-      
-      /* find average ice/porosity fraction and sub-grid with greatest ice/porosity fraction */
-      ave_ice = 0;
-      max_ice_layer = 0;
-      for(iveg = 0; iveg <= Nveg; iveg++){ //iveg  
-        if (veg_con[iveg].Cv  > 0.) {
-	  Cv = veg_con[iveg].Cv;
-          Nbands = options.SNOW_BAND;
-          if (veg_con[iveg].LAKE) {
-            Cv *= (1-lakefrac);
-            Nbands = 1;
-          }
-          for(band = 0; band < Nbands; band++) {//band
-	    if(soil_con->AreaFract[band] > 0) {
-	      for ( dist = 0; dist < Ndist; dist++ ) {// wet/dry
-		if(dist==0) 
-		  tmp_mu = prcp->mu[iveg];
-		else 
-		  tmp_mu = 1. - prcp->mu[iveg];
-#if SPATIAL_FROST
-		tmp_ice = 0;
-		for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {//frost area
-		  tmp_ice += (cell[dist][iveg][band].layer[lidx].ice[frost_area]
-			      * soil_con->frost_fract[frost_area]);
-		  ice_layer = cell[dist][iveg][band].layer[lidx].ice[frost_area];
-		  if(ice_layer>=max_ice_layer)
-		    max_ice_layer = ice_layer;
-		} // frost area
-#else //SPATIAL_FROST
-		tmp_ice = cell[dist][iveg][band].layer[lidx].ice;
-		ice_layer = cell[dist][iveg][band].layer[lidx].ice;
-		if(ice_layer>=max_ice_layer)
-		  max_ice_layer = ice_layer;	
-#endif //SPATIAL_FROST
-		ave_ice += tmp_ice * Cv * tmp_mu * soil_con->AreaFract[band];
-	      }// wet/dry
-	    }
-	  }//band
-	}
-      } //iveg
-      ave_ice_fract = ave_ice/soil_con->max_moist[lidx];
-
-      /*check to see if threshold is exceeded by average ice/porosity fraction*/
-      if(ave_ice_fract <= ICE_AT_SUBSIDENCE) {
-	SubsidenceUpdate = 1;
-
-	/*calculate subsidence based on maximum ice content in layer*/
-	/*constrain subsidence by MAX_SUBSIDENCE*/
-	tmp_depth_prior = soil_con->depth[lidx];//m
-	tmp_subsidence = (1000.*tmp_depth_prior - max_ice_layer);//mm
-	if(tmp_subsidence > MAX_SUBSIDENCE) 
-	  tmp_subsidence = MAX_SUBSIDENCE;
-	tmp_depth = tmp_depth_prior - tmp_subsidence/1000.;//m
-	if(tmp_depth <= soil_con->min_depth[lidx])
-	  tmp_depth = soil_con->min_depth[lidx];
-	soil_con->depth[lidx] = (float)(int)(tmp_depth * 1000 + 0.5) / 1000;//m
-	subsidence[lidx] = (tmp_depth_prior - soil_con->depth[lidx])*1000.;//mm
-	total_subsidence += (tmp_depth_prior - soil_con->depth[lidx]);//m
-
-	if(subsidence[lidx] > 0 ){
-#if VERBOSE
-	  fprintf(stderr,"Subsidence of %.3f m in layer %d:\n",subsidence[lidx]/1000.,lidx+1);
-	  fprintf(stderr,"\t\tOccurred for record=%d: year=%d, month=%d, day=%d, hour=%d\n",rec,dmy[rec].year,dmy[rec].month,dmy[rec].day, dmy[rec].hour);
-	  fprintf(stderr,"\t\tDepth of soil layer decreased from %.3f m to %.3f m.\n",tmp_depth_prior,soil_con->depth[lidx]);
-#endif	  
-
-	  /*update soil_con properties*/
-#if VERBOSE
-	  fprintf(stderr,"\t\tEffective porosity decreased from %.3f to %.3f.\n",soil_con->effective_porosity[lidx],1.0-(1.0-soil_con->effective_porosity[lidx])*tmp_depth_prior/soil_con->depth[lidx]);
-#endif
-	  soil_con->effective_porosity[lidx]=1.0-(1.0-soil_con->effective_porosity[lidx])*tmp_depth_prior/soil_con->depth[lidx];
-	  if(tmp_depth <= soil_con->min_depth[lidx])
-	    soil_con->effective_porosity[lidx]=soil_con->porosity[lidx];
-#if VERBOSE
-	  fprintf(stderr,"\t\tBulk density increased from %.2f kg/m^3 to %.2f kg/m^3.\n",soil_con->bulk_density[lidx],(1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]);
-#endif
-	  soil_con->bulk_dens_min[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-	  if (soil_con->organic[lidx] > 0)
-	    soil_con->bulk_dens_org[lidx] *= (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]/soil_con->bulk_density[lidx];
-	  soil_con->bulk_density[lidx] = (1.0-soil_con->effective_porosity[lidx])*soil_con->soil_density[lidx]; //adjust bulk density
-	  total_meltwater += soil_con->max_moist[lidx] - soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.; //for lake model (uses prior max_moist, 
-	                                                                                                                     //so must come before new max_moist calculation
-	  soil_con->max_moist[lidx] = soil_con->depth[lidx] * soil_con->effective_porosity[lidx] * 1000.;
-	  
-	}//subsidence occurs
-      }//threshold exceeded
-      
-    }//excess ice exists
-  } //loop for each soil layer
-  if(total_subsidence>0){
-
-    /********update remaining soil_con properties**********/
-#if VERBOSE
-    fprintf(stderr,"Damping depth decreased from %.3f m to %.3f m.\n",soil_con->dp,soil_con->dp-total_subsidence);
-#endif
-    soil_con->dp -= total_subsidence;  //adjust damping depth
-
-#if VERBOSE
-    fprintf(stderr,"More updated parameters in soil_con: max_infil, Wcr, and Wpwp\n");
-#endif  
-    /* update Maximum Infiltration for Upper Layers */
-    if(options.Nlayer==2)
-      soil_con->max_infil = (1.0+soil_con->b_infilt)*soil_con->max_moist[0];
-    else
-      soil_con->max_infil = (1.0+soil_con->b_infilt)*(soil_con->max_moist[0]+soil_con->max_moist[1]);
-    
-    /* Soil Layer Critical and Wilting Point Moisture Contents */
-    for(lidx=0;lidx<options.Nlayer;lidx++) {//soil layer
-      soil_con->Wcr[lidx]  = soil_con->Wcr_FRACT[lidx] * soil_con->max_moist[lidx];
-      soil_con->Wpwp[lidx] = soil_con->Wpwp_FRACT[lidx] * soil_con->max_moist[lidx];
-      if(soil_con->Wpwp[lidx] > soil_con->Wcr[lidx]) {
-	sprintf(ErrStr,"Updated wilting point moisture (%f mm) is greater than updated critical point moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
-		soil_con->Wpwp[lidx], soil_con->Wcr[lidx], lidx);
-	nrerror(ErrStr);
-      }
-      if(soil_con->Wpwp[lidx] < soil_con->resid_moist[lidx] * soil_con->depth[lidx] * 1000.) {
-	sprintf(ErrStr,"Updated wilting point moisture (%f mm) is less than updated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-		soil_con->Wpwp[lidx], soil_con->resid_moist[lidx] * soil_con->depth[lidx] * 1000., lidx);
-	nrerror(ErrStr);
-      }
-    }      
-
-    /* If BASEFLOW = NIJSSEN2001 then convert ARNO baseflow
-       parameters d1, d2, d3, and d4 to Ds, Dsmax, Ws, and c */
-    if(options.BASEFLOW == NIJSSEN2001) {
-      lidx = options.Nlayer-1;
-      soil_con->Dsmax = soil_con->Dsmax_orig * 
-	pow((double)(1./(soil_con->max_moist[lidx]-soil_con->Ws_orig)), -soil_con->c) +
-	soil_con->Ds_orig * soil_con->max_moist[lidx];
-      soil_con->Ds = soil_con->Ds_orig * soil_con->Ws_orig / soil_con->Dsmax_orig;
-      soil_con->Ws = soil_con->Ws_orig/soil_con->max_moist[lidx];
-#if VERBOSE
-      fprintf(stderr,"More updated parameters in soil_con: Dsmax, Ds, Ws\n");
-#endif    
-    }
-    
-    /*********** update root fractions ***************/
-    fprintf(stderr,"Updated parameter in veg_con: root\n");
-    calc_root_fractions(veg_con, soil_con);
-
-    /**********redistribute soil moisture (call runoff function)*************/
-    /* If subsidence occurs, recalculate runoff, baseflow, and soil moisture
-       using soil moisture values from previous time-step; i.e.
-       as if prior runoff call did not occur.*/
-    for(iveg = 0; iveg <= Nveg; iveg++){
-      if (veg_con[iveg].Cv  > 0.) {
-        Nbands = options.SNOW_BAND;
-        if (veg_con[iveg].LAKE) {
-          Nbands = 1;
-        }
-        for ( band = 0; band < Nbands; band++ ) {
-	  for ( dist = 0; dist < Ndist; dist++ ) {
-	    for(lidx=0;lidx<options.Nlayer;lidx++) {
-	      cell[dist][iveg][band].layer[lidx].moist = moist_prior[dist][iveg][band][lidx];
-	      cell[dist][iveg][band].layer[lidx].evap = evap_prior[dist][iveg][band][lidx];
-	    }
-	  }
-        }
-      }
-    }
-    for(iveg = 0; iveg <= Nveg; iveg++){
-      if (veg_con[iveg].Cv  > 0.) {
-        Nbands = options.SNOW_BAND;
-        if (veg_con[iveg].LAKE) {
-          Nbands = 1;
-        }
-	for ( band = 0; band < Nbands; band++ ) {
-	  if( soil_con->AreaFract[band] > 0 ) { 
-
-	    //set inflow for runoff call 
-	    ppt[WET]=cell[WET][iveg][band].inflow;
-	    ppt[DRY]=cell[DRY][iveg][band].inflow;
-	    
-	    ErrorFlag = runoff(&(cell[WET][iveg][band]), &(cell[DRY][iveg][band]), &(energy[iveg][band]), 
-			       soil_con, ppt, 
-			       SubsidenceUpdate,
-#if SPATIAL_FROST
-			       soil_con->frost_fract,
-#endif // SPATIAL_FROST
-			       prcp->mu[iveg], gp->dt, options.Nnode, band, rec, iveg);
-	    if ( ErrorFlag == ERROR ) return ( ERROR );
-
-	  }
-	}//band
-      }
-    }//veg
-  
-    /**********interpolate nodal temperatures to new depths and recalculate thermal properties***********/
-    ErrorFlag = update_thermal_nodes(prcp, Nveg, options.Nnode, Ndist, soil_con, veg_con);
-    if ( ErrorFlag == ERROR ) return ( ERROR );
-
-  }//subsidence occurs
-
-  /********************************************
-    Save subsidence for output
-  ********************************************/
-  for(lidx=0;lidx<options.Nlayer;lidx++)
-    soil_con->subsidence[lidx] = subsidence[lidx];
-  
-#endif //EXCESS_ICE
 
   /****************************
      Run Lake Model           
@@ -702,34 +496,25 @@ int  full_energy(char                 NEWCELL,
         for ( band = 0; band < Nbands; band++ ) {
           if ( soil_con->AreaFract[band] > 0 ) {
 	
-	    // Loop through distributed precipitation fractions
-	    for ( dist = 0; dist < 2; dist++ ) {
-	      
-	      if ( dist == 0 ) 
-		tmp_mu = prcp->mu[iveg]; 
-	      else 
-		tmp_mu = 1. - prcp->mu[iveg]; 
-	      
-              if (veg_con[iveg].LAKE) {
-                wetland_runoff += ( cell[dist][iveg][band].runoff * tmp_mu
+            if (veg_con[iveg].LAKE) {
+              wetland_runoff += ( cell[iveg][band].runoff
+                          * Cv * soil_con->AreaFract[band] );
+              wetland_baseflow += ( cell[iveg][band].baseflow
+                          * Cv * soil_con->AreaFract[band] );
+              cell[iveg][band].runoff = 0;
+              cell[iveg][band].baseflow = 0;
+            }
+            else {
+              sum_runoff += ( cell[iveg][band].runoff
                             * Cv * soil_con->AreaFract[band] );
-                wetland_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu
-                            * Cv * soil_con->AreaFract[band] );
-                cell[dist][iveg][band].runoff = 0;
-                cell[dist][iveg][band].baseflow = 0;
-              }
-              else {
-                sum_runoff += ( cell[dist][iveg][band].runoff * tmp_mu
+              sum_baseflow += ( cell[iveg][band].baseflow
                               * Cv * soil_con->AreaFract[band] );
-                sum_baseflow += ( cell[dist][iveg][band].baseflow * tmp_mu
-                                * Cv * soil_con->AreaFract[band] );
-                cell[dist][iveg][band].runoff *= (1-lake_con->rpercent);
-                cell[dist][iveg][band].baseflow *= (1-lake_con->rpercent);
-              }
+              cell[iveg][band].runoff *= (1-lake_con->rpercent);
+              cell[iveg][band].baseflow *= (1-lake_con->rpercent);
+            }
 
-	    }
 	  }
-	}
+        }
       }
     }
 
@@ -741,7 +526,7 @@ int  full_energy(char                 NEWCELL,
     lake_var->channel_in  = atmos->channel_in[NR]*soil_con->cell_area*0.001; // m3
     lake_var->prec        = atmos->prec[NR]*lake_var->sarea*0.001; // m3
     rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
-			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP, 1);
+			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP);
     if ( (int)rainonly == ERROR ) {
       return( ERROR );
     }
@@ -770,13 +555,7 @@ int  full_energy(char                 NEWCELL,
        Solve the water budget for the lake.
      **********************************************************************/
 
-    ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, prcp, rec, iveg, band,
-                              lakefrac, *soil_con,
-#if EXCESS_ICE
-                              *veg_con, SubsidenceUpdate, total_meltwater);
-#else
-                              *veg_con);
-#endif
+    ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, all_vars, rec, iveg, band, lakefrac, *soil_con, *veg_con);
     if ( ErrorFlag == ERROR ) return (ERROR);
 
   } // end if (options.LAKES && lake_con->lake_idx >= 0)

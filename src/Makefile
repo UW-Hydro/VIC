@@ -37,13 +37,25 @@
 #             store_moisture_for_debug.c
 #             write_atmosdata.c
 #             write_debug.c
+# 2013-Jul-25 Added compute_coszen.c.						TJB
+# 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
+# 	      photosynth.c.							TJB
+# 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
+# 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
 # 2014-Mar-25 Removed calc_cloud_cover_fraction.c                                BN
 # 2014-Mar-26 Removed compute_dz.c                                               BN
 # 2014-Mar-26 Removed files with unused functions:
 #             write_snowparam.c
 #             write_soilparam.c
 #             write_vegparam.c                                                   BN
-
+# 2014-Mar-28 Removed DIST_PRCP option, and the files:
+#             dist_prec.c
+#             free_dist_prcp.c
+#             make_dist_prcp.c
+#             initialize_new_storm.c
+#             redistribute_during_storm.c					TJB
+# 2014-Apr-25 Added alloc_veg_hist.c.						TJB
+#
 # $Id$
 #
 # -----------------------------------------------------------------------
@@ -78,36 +90,36 @@ CFLAGS  = -I. -g -Wall -Wno-unused
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
-HDRS = vicNl.h vicNl_def.h global.h snow.h user_def.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
+HDRS = vicNl.h vicNl_def.h global.h snow.h mtclim_constants_vic.h mtclim_parameters_vic.h LAKE.h
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
-        arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_forcing_stats.o calc_longwave.o \
+        alloc_veg_hist.o arno_evap.o calc_air_temperature.o \
+	calc_atmos_energy_bal.o calc_longwave.o calc_Nscale_factors.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
-	calc_water_energy_balance_errors.o canopy_evap.o \
+	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \
 	check_files.o check_state_file.o close_files.o cmd_proc.o \
-	compress_files.o compute_pot_evap.o compute_treeline.o \
-	compute_zwt.o correct_precip.o display_current_settings.o dist_prec.o \
-	estimate_T1.o free_dist_prcp.o \
+	compress_files.o compute_coszen.o compute_pot_evap.o \
+	compute_soil_resp.o compute_treeline.o compute_zwt.o correct_precip.o \
+	display_current_settings.o estimate_T1.o faparl.o free_all_vars.o \
 	free_vegcon.o frozen_soil.o full_energy.o func_atmos_energy_bal.o \
 	func_atmos_moist_bal.o func_canopy_energy_bal.o \
 	func_surf_energy_bal.o get_dist.o get_force_type.o get_global_param.o \
 	initialize_atmos.o initialize_model_state.o \
-	initialize_global.o initialize_new_storm.o initialize_snow.o \
+	initialize_global.o initialize_snow.o \
 	initialize_soil.o initialize_veg.o latent_heat_from_snow.o \
-	make_cell_data.o make_dist_prcp.o make_dmy.o make_energy_bal.o \
+	make_cell_data.o make_all_vars.o make_dmy.o make_energy_bal.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
-	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o nrerror.o \
-	open_file.o open_state_file.o \
-	output_list_utils.o parse_output_info.o penman.o \
+	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o \
+	nrerror.o open_file.o open_state_file.o \
+	output_list_utils.o parse_output_info.o penman.o photosynth.o \
 	prepare_full_energy.o put_data.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
 	read_snowband.o read_soilparam.o read_veglib.o \
-	read_vegparam.o redistribute_during_storm.o root_brent.o runoff.o \
+	read_vegparam.o root_brent.o runoff.o \
 	set_output_defaults.o snow_intercept.o snow_melt.o \
-	snow_utility.o soil_conduction.o \
+	snow_utility.o soil_carbon_balance.o soil_conduction.o \
 	soil_thermal_eqn.o solve_snow.o \
 	surface_fluxes.o svp.o vicNl.o vicerror.o \
 	write_data.o write_forcing_file.o write_header.o write_layer.o \
@@ -167,8 +179,8 @@ clean::
 # -------------------------------------------------------------
 # depend
 # -------------------------------------------------------------
-depend: DEPEND
-DEPEND: $(SRCS) $(HDRS)
+depend: .depend
+.depend:	$(SRCS) $(HDRS)
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::

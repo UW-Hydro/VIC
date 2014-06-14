@@ -27,7 +27,6 @@ void close_files(filep_struct         *filep,
 	      out_data_files structure.					TJB
   2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-
 **********************************************************************/
 {
   extern option_struct options;

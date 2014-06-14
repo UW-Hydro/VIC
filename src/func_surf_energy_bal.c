@@ -107,6 +107,14 @@ double func_surf_energy_bal(double Ts, va_list ap)
 	      node distribution to be over the same control volume as for
 	      the linear node distribution and quick flux cases.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg params.			TJB
+  2014-Apr-25 Added partial veg cover fraction, bare soil evap between
+	      the plants, and re-scaling of LAI & plant fluxes from
+	      global to local and back.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -149,6 +157,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double max_moist;
   double moist;
 
+  double *Wmax;
   double *Wcr;
   double *Wpwp;
   double *depth;
@@ -161,6 +170,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *organic;
 
   float *root;
+  double *CanopLayerBnd;
 
   /* meteorological forcing terms */
   int UnderStory;
@@ -176,16 +186,18 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double emissivity;
   double LongBareIn; // incoming LW to snow-free surface
   double LongSnowIn; // incoming LW to snow surface - if INCLUDE_SNOW
-  double mu;
   double surf_atten;
   double vp;
   double vpd;
+  double shortwave;
+  double Catm;
+  double *dryFrac;
 
   double *Wdew;
   double *displacement;
   double *ra;
   double *Ra_used;
-  double *rainfall;
+  double rainfall;
   double *ref_height;
   double *roughness;
   double *wind;
@@ -232,30 +244,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double *moist_node;
 
   /* spatial frost terms */
-#if SPATIAL_FROST    
   double *frost_fract;
-#endif
-
-  /* quick solution frozen soils terms */
-#if QUICK_FS
-  double ***ufwc_table_layer;
-  double ***ufwc_table_node;
-#endif
-
-  /* excess ice terms */
-#if EXCESS_ICE
-  double porosity; //top layer
-  double effective_porosity; //top layer
-  double *porosity_node;
-  double *effective_porosity_node;
-#endif
 
   /* model structures */
   soil_con_struct *soil_con;
-  layer_data_struct *layer_wet;
-  layer_data_struct *layer_dry;
-  veg_var_struct *veg_var_wet;
-  veg_var_struct *veg_var_dry;
+  layer_data_struct *layer;
+  veg_var_struct *veg_var;
 
   /* control flags */
   int INCLUDE_SNOW;
@@ -299,6 +293,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double T1_plus;
   double D1_minus;
   double D1_plus;
+  double *transp;
+  double Ra_bare[3];
+  double tmp_wind[3];
+  double tmp_height;
+  double tmp_displacement[3];
+  double tmp_roughness[3];
+  double tmp_ref_height[3];
 
   /************************************
     Read variables from variable list 
@@ -332,6 +333,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   moist                   = (double) va_arg(ap, double);
 
   root                    = (float  *) va_arg(ap, float  *);
+  CanopLayerBnd           = (double *) va_arg(ap, double *);
 
   /* meteorological forcing terms */
   UnderStory              = (int) va_arg(ap, int);
@@ -346,16 +348,18 @@ double func_surf_energy_bal(double Ts, va_list ap)
   emissivity              = (double) va_arg(ap, double);
   LongBareIn              = (double) va_arg(ap, double);
   LongSnowIn              = (double) va_arg(ap, double);
-  mu                      = (double) va_arg(ap, double);
   surf_atten              = (double) va_arg(ap, double);
   vp                      = (double) va_arg(ap, double);
   vpd                     = (double) va_arg(ap, double);
+  shortwave               = (double) va_arg(ap, double);
+  Catm                    = (double) va_arg(ap, double);
+  dryFrac                 = (double *) va_arg(ap, double *);
 
   Wdew                    = (double *) va_arg(ap, double *);
   displacement            = (double *) va_arg(ap, double *);
   ra                      = (double *) va_arg(ap, double *);
   Ra_used                 = (double *) va_arg(ap, double *);
-  rainfall                = (double *) va_arg(ap, double *);
+  rainfall                = (double) va_arg(ap, double);
   ref_height              = (double *) va_arg(ap, double *);
   roughness               = (double *) va_arg(ap, double *);
   wind                    = (double *) va_arg(ap, double *);
@@ -402,10 +406,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   /* model structures */
   soil_con                = (soil_con_struct *) va_arg(ap, soil_con_struct *);
-  layer_wet               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  layer_dry               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var_wet             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  veg_var_dry             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  layer               = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var             = (veg_var_struct *) va_arg(ap, veg_var_struct *);
 
   /* control flags */
   INCLUDE_SNOW            = (int) va_arg(ap, int);
@@ -431,24 +433,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /* take additional variables from soil_con structure */
   b_infilt = soil_con->b_infilt;
   max_infil = soil_con->max_infil;
+  Wmax = soil_con->max_moist;
   Wcr = soil_con->Wcr;
   Wpwp = soil_con->Wpwp;
   depth = soil_con->depth;
   resid_moist = soil_con->resid_moist;
   elevation = (double)soil_con->elevation;
-#if SPATIAL_FROST    
   frost_fract = soil_con->frost_fract;
-#endif // SPATIAL_FROST
-#if QUICK_FS
-  ufwc_table_layer = soil_con->ufwc_table_layer;
-  ufwc_table_node = soil_con->ufwc_table_node;
-#endif // QUICK_FS
-#if EXCESS_ICE
-  porosity = soil_con->porosity[0];
-  effective_porosity = soil_con->effective_porosity[0];
-  porosity_node = soil_con->porosity_node;
-  effective_porosity_node = soil_con->effective_porosity_node;
-#endif
   FS_ACTIVE = soil_con->FS_ACTIVE;
   /* more soil layer terms for IMPLICIT option*/
   bulk_dens_min = soil_con->bulk_dens_min;
@@ -471,6 +462,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   TMean = Ts;
   Tmp = TMean + KELVIN;
+
+  transp = (double *) calloc(options.Nlayer,sizeof(double));
+  for (i=0; i<options.Nlayer; i++) {
+    transp[i] = 0;
+  }
 
   /**********************************************
     Compute Surface Temperature at Half Time Step
@@ -527,9 +523,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
     if(options.IMPLICIT) {
       Error = solve_T_profile_implicit(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 				       moist_node, delta_t, max_moist_node, bubble_node, expt_node, 
-#if EXCESS_ICE
-				       porosity_node, effective_porosity_node,
-#endif
 				       ice_node, alpha, beta, gamma, dp, Nnodes, 
 				       FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class,
 				       bulk_dens_min, soil_dens_min, quartz, bulk_density, soil_density, organic, depth);
@@ -552,21 +545,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
     if(!options.IMPLICIT || Error == 1) {
       if(options.IMPLICIT)
         FIRST_SOLN[0] = TRUE;
-#if QUICK_FS
-      Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
-			      moist_node, delta_t, max_moist_node, bubble_node, 
-			      expt_node, ice_node, alpha, beta, gamma, dp,
-			      depth, ufwc_table_node, Nnodes, FIRST_SOLN, FS_ACTIVE, 
-			      NOFLUX, EXP_TRANS, veg_class);
-#else
       Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag, Tnew_fbcount, Zsum_node, kappa_node, Cs_node, 
 			      moist_node, delta_t, max_moist_node, bubble_node, 
 			      expt_node, ice_node, alpha, beta, gamma, dp, depth, 
-#if EXCESS_ICE
-			      porosity_node, effective_porosity_node,
-#endif
 			      Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
-#endif
     }
       
     if ( (int)Error == ERROR ) {
@@ -632,9 +614,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
     if (!options.EXP_TRANS) {
       if((TMean+ *T1)/2.<0.) {
         ice = moist - maximum_unfrozen_water((TMean+ *T1)/2.,
-#if EXCESS_ICE
-					     porosity,effective_porosity,
-#endif
 					     max_moist,bubble,expt);
         if(ice<0.) ice=0.;
       }
@@ -647,18 +626,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
       while (soil_con->Zsum_node[i+1] < D1) {
         if((Told_node[i]+Told_node[i+1])/2.<0.) {
           ice0 = moist - maximum_unfrozen_water((Told_node[i]+Told_node[i+1])/2.,
-#if EXCESS_ICE
-					       porosity,effective_porosity,
-#endif
 					       max_moist,bubble,expt);
           if(ice0<0.) ice0=0.;
         }
         else ice0=0.;
         if((Tnew_node[i]+Tnew_node[i+1])/2.<0.) {
           ice = moist - maximum_unfrozen_water((Tnew_node[i]+Tnew_node[i+1])/2.,
-#if EXCESS_ICE
-					       porosity,effective_porosity,
-#endif
 					       max_moist,bubble,expt);
           if(ice<0.) ice=0.;
         }
@@ -668,18 +641,12 @@ double func_surf_energy_bal(double Ts, va_list ap)
       }
       if((Told_node[i]+T1_old)/2.<0.) {
         ice0 = moist - maximum_unfrozen_water((Told_node[i]+T1_old)/2.,
-#if EXCESS_ICE
-					     porosity,effective_porosity,
-#endif
 					     max_moist,bubble,expt);
         if(ice0<0.) ice0=0.;
       }
       else ice0=0.;
       if((Tnew_node[i]+ *T1)/2.<0.) {
         ice = moist - maximum_unfrozen_water((Tnew_node[i]+ *T1)/2.,
-#if EXCESS_ICE
-					     porosity,effective_porosity,
-#endif
 					     max_moist,bubble,expt);
         if(ice<0.) ice=0.;
       }
@@ -730,28 +697,62 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Use Arno Evap if LAI is set to zero (e.g. no
     winter crop planted).
   *************************************************/
-  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
-    Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, TRUE, 
-		       veg_class, month, mu, Wdew, delta_t, NetBareRad, vpd, 
+  if ( VEG && !SNOWING && veg_var->vegcover > 0 ) {
+    Evap = canopy_evap(layer, veg_var, TRUE, 
+		       veg_class, month, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
-		       elevation, rainfall, depth, Wcr, Wpwp, 
-#if SPATIAL_FROST
-		       frost_fract,
-#endif // SPATIAL_FROST
-		       root);
+		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, frost_fract,
+		       root, dryFrac, shortwave, Catm, CanopLayerBnd);
+    if (veg_var->vegcover < 1) {
+      for (i=0; i<options.Nlayer; i++) {
+        transp[i] = layer[i].evap;
+        layer[i].evap = 0;
+      }
+      tmp_wind[0] = wind[0];
+      tmp_wind[1] = -999.;
+      tmp_wind[2] = -999.;
+      tmp_height = soil_con->rough/0.123;
+      tmp_displacement[0] = calc_veg_displacement(tmp_height);
+      tmp_roughness[0] = soil_con->rough;
+      tmp_ref_height[0] = 10;
+      Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
+      Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
+      Evap *= veg_var->vegcover;
+      Evap += (1-veg_var->vegcover)
+	       * arno_evap(layer, surf_atten*NetBareRad, Tair, vpd, 
+		       depth[0], max_moist * depth[0] * 1000., 
+		       elevation, b_infilt, Ra_bare[0], delta_t, 
+		       resid_moist[0], frost_fract);
+      for (i=0; i<options.Nlayer; i++) {
+        layer[i].evap = veg_var->vegcover*transp[i] + (1-veg_var->vegcover)*layer[i].evap;
+        if (layer[i].evap > 0)
+          layer[i].bare_evap_frac = 1 - (veg_var->vegcover*transp[i])/layer[i].evap;
+        else
+          layer[i].bare_evap_frac = 0;
+      }
+      veg_var->throughfall = (1-veg_var->vegcover)*rainfall + veg_var->vegcover*veg_var->throughfall;
+      veg_var->canopyevap *= veg_var->vegcover;
+      veg_var->Wdew *= veg_var->vegcover;
+    }
+    else {
+      for (i=0; i<options.Nlayer; i++) {
+        layer[i].bare_evap_frac = 0;
+      }
+    }
   }
   else if(!SNOWING) {
-    Evap = arno_evap(layer_wet, layer_dry, NetBareRad, Tair, vpd, 
+    Evap = arno_evap(layer, NetBareRad, Tair, vpd, 
 		     depth[0], max_moist * depth[0] * 1000., 
-		     elevation, b_infilt, Ra_used[0], delta_t, mu, 
-#if SPATIAL_FROST
+		     elevation, b_infilt, Ra_used[0], delta_t, 
 		     resid_moist[0], frost_fract);
-#else
-                     resid_moist[0]);
-#endif // SPATIAL_FROST
+    for (i=0; i<options.Nlayer; i++) {
+      layer[i].bare_evap_frac = 1;
+    }
   }
   else Evap = 0.;
+
+  free(transp);
   
   /**********************************************************************
     Compute the Latent Heat Flux from the Surface and Covering Vegetation

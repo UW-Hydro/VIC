@@ -22,6 +22,9 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
   2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
  ********************************************************************/
 {
 
@@ -35,12 +38,11 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double  delta_t;
   double  elevation;
 
+  double *Wmax;
   double *Wcr;
   double *Wpwp;
   double *depth;
-#if SPATIAL_FROST
   double *frost_fract;
-#endif
 
   /* Atmopheric Condition and Forcings */
   double  AirDens;
@@ -49,12 +51,14 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double  Le;
   double  Tcanopy;
   double  Vpd;
-  double  mu;
+  double  shortwave;
+  double  Catm;
+  double *dryFrac;
 
   double *Evap;
   double *Ra;
   double *Ra_used;
-  double *Rainfall;
+  double Rainfall;
   double *Wind;
 
   /* Vegetation Terms */
@@ -67,6 +71,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double *roughness;
 
   float  *root;
+  double *CanopLayerBnd;
 
   /* Water Flux Terms */
   double  IntRain;
@@ -74,10 +79,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   double *Wdew;
 
-  layer_data_struct *layer_wet;
-  layer_data_struct *layer_dry;
-  veg_var_struct    *veg_var_wet;
-  veg_var_struct    *veg_var_dry;
+  layer_data_struct *layer;
+  veg_var_struct    *veg_var;
 
   /* Energy Flux Terms */
   double  LongOverIn;
@@ -100,7 +103,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   double  Ls;
   double  RestTerm;
   double  Tmp;
-  double  prec[2];
+  double  prec;
 
   /** Read variables from variable length argument list **/
 
@@ -112,12 +115,11 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   delta_t   = (double) va_arg(ap, double);
   elevation = (double) va_arg(ap, double);
 
+  Wmax        = (double *) va_arg(ap, double *);
   Wcr         = (double *) va_arg(ap, double *);
   Wpwp        = (double *) va_arg(ap, double *);
   depth       = (double *) va_arg(ap, double *);
-#if SPATIAL_FROST
   frost_fract = (double *) va_arg(ap, double *);
-#endif
 
   /* Atmopheric Condition and Forcings */
   AirDens  = (double) va_arg(ap, double);
@@ -126,12 +128,14 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   Le       = (double) va_arg(ap, double);
   Tcanopy     = (double) va_arg(ap, double);
   Vpd      = (double) va_arg(ap, double);
-  mu       = (double) va_arg(ap, double);
+  shortwave= (double) va_arg(ap, double);
+  Catm     = (double) va_arg(ap, double);
+  dryFrac = (double *) va_arg(ap, double *);
 
   Evap     = (double *) va_arg(ap, double *);
   Ra       = (double *) va_arg(ap, double *);
   Ra_used  = (double *) va_arg(ap, double *);
-  Rainfall = (double *) va_arg(ap, double *);
+  Rainfall = (double) va_arg(ap, double);
   Wind     = (double *) va_arg(ap, double *);
 
   /* Vegetation Terms */
@@ -144,6 +148,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
   roughness    = (double *) va_arg(ap, double *);
 
   root = (float *) va_arg(ap, float *);
+  CanopLayerBnd= (double *) va_arg(ap, double *);
 
   /* Water Flux Terms */
   IntRain = (double) va_arg(ap, double);
@@ -151,10 +156,8 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   Wdew    = (double *) va_arg(ap, double *);
 
-  layer_wet   = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  layer_dry   = (layer_data_struct *) va_arg(ap, layer_data_struct *);
-  veg_var_wet = (veg_var_struct *) va_arg(ap, veg_var_struct *);
-  veg_var_dry = (veg_var_struct *) va_arg(ap, veg_var_struct *);
+  layer   = (layer_data_struct *) va_arg(ap, layer_data_struct *);
+  veg_var = (veg_var_struct *) va_arg(ap, veg_var_struct *);
 
   /* Energy Flux Terms */
   LongOverIn         = (double) va_arg(ap, double);
@@ -219,7 +222,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
     *LatentHeatSub = Ls * *VaporMassFlux * RHO_W;
     *LatentHeat = 0;
     *Evap = 0;
-    veg_var_wet->throughfall = 0;
+    veg_var->throughfall = 0;
 
     if (options.AERO_RESIST_CANSNOW == AR_406)
       Ra_used[1] /= 10;
@@ -235,19 +238,15 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
       Ra_used[1] = Ra[0];
     }
 
-    Wdew[WET] = IntRain * 1000.;
-    prec[WET] = *Rainfall * 1000;
-    prec[DRY] = 0;
-    *Evap = canopy_evap(layer_wet, layer_dry, veg_var_wet, veg_var_dry, FALSE, 
-			veg_class, month, mu, Wdew, delta_t, *NetRadiation, 
+    *Wdew = IntRain * 1000.;
+    prec = Rainfall * 1000;
+    *Evap = canopy_evap(layer, veg_var, FALSE, 
+			veg_class, month, Wdew, delta_t, *NetRadiation, 
 			Vpd, NetShortOver, Tcanopy, Ra_used[1], displacement[1], 
 			roughness[1], ref_height[1], elevation, prec, 
-			depth, Wcr, Wpwp, 
-#if SPATIAL_FROST
-			frost_fract,
-#endif
-			root);
-    Wdew[WET] /= 1000.;
+			depth, Wmax, Wcr, Wpwp, frost_fract,
+			root, dryFrac, shortwave, Catm, CanopLayerBnd);
+    *Wdew /= 1000.;
 
     *LatentHeat = Le * *Evap * RHO_W;
     *LatentHeatSub = 0;
@@ -260,7 +259,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   /* Calculate the advected energy */
 
-  *AdvectedEnergy = (4186.8 * Tcanopy * Rainfall[0]) / (delta_t);
+  *AdvectedEnergy = (4186.8 * Tcanopy * Rainfall) / (delta_t);
 
   /* Calculate the amount of energy available for refreezing */
   

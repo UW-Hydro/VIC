@@ -34,6 +34,7 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
   2010-Mar-31 Added runoff_in.						TJB
   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
   2011-Nov-04 Added tskc.						TJB
+  2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
 
 *******************************************************************/
 {
@@ -49,14 +50,26 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     (*atmos)[i].air_temp = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].air_temp == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].Catm = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].Catm == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].channel_in = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].channel_in == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].coszen = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].coszen == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].density = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].density == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].fdir = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].fdir == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].longwave = (double *) calloc(NR+1, sizeof(double));	
     if ((*atmos)[i].longwave == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].par = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].par == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
     (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].prec == NULL)
@@ -102,6 +115,7 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
   2010-Mar-31 Added runoff_in.						TJB
   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
   2011-Nov-04 Added tskc.						TJB
+  2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
 ***************************************************************************/
 {
   int i;
@@ -111,9 +125,13 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
 
   for (i = 0; i < nrecs; i++) {
     free((*atmos)[i].air_temp);
+    free((*atmos)[i].Catm);
     free((*atmos)[i].channel_in);
+    free((*atmos)[i].coszen);
     free((*atmos)[i].density);
+    free((*atmos)[i].fdir);
     free((*atmos)[i].longwave);
+    free((*atmos)[i].par);
     free((*atmos)[i].prec);
     free((*atmos)[i].pressure);
     free((*atmos)[i].shortwave);

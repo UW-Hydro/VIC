@@ -77,6 +77,7 @@ void write_data(out_data_file_struct *out_data_files,
               the file calc_water_energy_balance_errors.c; implemented
 	      aggregation of output variables.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -118,17 +119,19 @@ void write_data(out_data_file_struct *out_data_files,
     // Loop over output files
     for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
 
-#if !OUTPUT_FORCE
-      // Write the date
-      if (dt < 24) {
-        // Write year, month, day, and hour
-        fwrite(tmp_iptr, sizeof(int), 4, out_data_files[file_idx].fh);
+      if (!options.OUTPUT_FORCE) {
+
+        // Write the date
+        if (dt < 24) {
+          // Write year, month, day, and hour
+          fwrite(tmp_iptr, sizeof(int), 4, out_data_files[file_idx].fh);
+        }
+        else {
+          // Only write year, month, and day
+          fwrite(tmp_iptr, sizeof(int), 3, out_data_files[file_idx].fh);
+        }
+
       }
-      else {
-        // Only write year, month, and day
-        fwrite(tmp_iptr, sizeof(int), 3, out_data_files[file_idx].fh);
-      }
-#endif
 
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
@@ -189,19 +192,21 @@ void write_data(out_data_file_struct *out_data_files,
     // Loop over output files
     for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
 
-#if !OUTPUT_FORCE
-      // Write the date
-      if (dt < 24) {
-        // Write year, month, day, and hour
-        fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t%02i\t",
-                dmy->year, dmy->month, dmy->day, dmy->hour);
+      if (!options.OUTPUT_FORCE) {
+
+        // Write the date
+        if (dt < 24) {
+          // Write year, month, day, and hour
+          fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t%02i\t",
+                  dmy->year, dmy->month, dmy->day, dmy->hour);
+        }
+        else {
+          // Only write year, month, and day
+          fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t",
+                  dmy->year, dmy->month, dmy->day);
+        }
+
       }
-      else {
-        // Only write year, month, and day
-        fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t",
-                dmy->year, dmy->month, dmy->day);
-      }
-#endif
 
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {

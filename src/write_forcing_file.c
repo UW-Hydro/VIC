@@ -4,7 +4,6 @@
 
 static char vcid[] = "$Id$";
 
-#if OUTPUT_FORCE
 void write_forcing_file(atmos_data_struct *atmos,
 			int                nrecs,
 			out_data_file_struct *out_data_files, 
@@ -27,8 +26,9 @@ void write_forcing_file(atmos_data_struct *atmos,
   2008-Jun-10 Fixed typo in QAIR and REL_HUMID eqns.			TJB
   2009-Feb-22 Added OUT_VPD.						TJB
   2011-Nov-04 Added OUT_TSKC.						TJB
-  2014-Apr-02 Fixed uninitialized dummy variables.			TJB
-
+  2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.					TJB
+  2014-Apr-02 Fixed uninitialized dummy variables.					TJB
 **********************************************************************/
 {
   extern global_param_struct global_param;
@@ -47,8 +47,12 @@ void write_forcing_file(atmos_data_struct *atmos,
     for ( j = 0; j < NF; j++ ) {
 
       out_data[OUT_AIR_TEMP].data[0]  = atmos[rec].air_temp[j];
+      out_data[OUT_CATM].data[0]      = atmos[rec].Catm[j]*1e6;
+      out_data[OUT_COSZEN].data[0]    = atmos[rec].coszen[j];
       out_data[OUT_DENSITY].data[0]   = atmos[rec].density[j];
+      out_data[OUT_FDIR].data[0]      = atmos[rec].fdir[j];
       out_data[OUT_LONGWAVE].data[0]  = atmos[rec].longwave[j];
+      out_data[OUT_PAR].data[0]       = atmos[rec].par[j];
       out_data[OUT_PREC].data[0]      = atmos[rec].prec[j];
       out_data[OUT_PRESSURE].data[0]  = atmos[rec].pressure[j]/kPa2Pa;
       out_data[OUT_QAIR].data[0]      = EPS * atmos[rec].vp[j]/atmos[rec].pressure[j];
@@ -99,4 +103,3 @@ void write_forcing_file(atmos_data_struct *atmos,
   }
 
 }
-#endif /* OUTPUT_FORCE */

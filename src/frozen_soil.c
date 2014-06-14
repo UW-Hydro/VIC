@@ -9,8 +9,6 @@
 static char vcid[] = "$Id$";
 
 int calc_layer_average_thermal_props(energy_bal_struct *energy,
-				     layer_data_struct *layer_wet,
-				     layer_data_struct *layer_dry,
 				     layer_data_struct *layer,
 				     soil_con_struct   *soil_con,
 				     int                Nnodes,
@@ -53,6 +51,10 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 	      be used to compute soil layer average T and ice, regardless
 	      of the settings of FROZEN_SOIL, QUICK_FLUX, etc.		TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 ******************************************************************/
 
   extern option_struct options;
@@ -71,89 +73,22 @@ int calc_layer_average_thermal_props(energy_bal_struct *energy,
 
   /** Compute Soil Layer average  properties **/
   if (options.QUICK_FLUX) {
-    ErrorFlag = estimate_layer_ice_content_quick_flux(layer_wet, soil_con->depth, soil_con->dp,
+    ErrorFlag = estimate_layer_ice_content_quick_flux(layer, soil_con->depth, soil_con->dp,
 					   energy->T[0], energy->T[1], soil_con->avg_temp,
 					   soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
-#if SPATIAL_FROST
-					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
-#endif // EXCESS_ICE
-					   soil_con->FS_ACTIVE);
+					   soil_con->frost_fract, soil_con->frost_slope, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
-    if(options.DIST_PRCP) {
-      ErrorFlag = estimate_layer_ice_content_quick_flux(layer_dry, soil_con->depth, soil_con->dp,
-					     energy->T[0], energy->T[1], soil_con->avg_temp,
-					     soil_con->max_moist, 
-#if QUICK_FS
-					     soil_con->ufwc_table_layer,
-#else
-					     soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
-#if SPATIAL_FROST
-					     soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-					     soil_con->porosity,
-					     soil_con->effective_porosity,
-#endif // EXCESS_ICE
-					     soil_con->FS_ACTIVE);
-      if ( ErrorFlag == ERROR ) return (ERROR);
-    }
   }
   else {
-    ErrorFlag = estimate_layer_ice_content(layer_wet, soil_con->Zsum_node, energy->T,
+    ErrorFlag = estimate_layer_ice_content(layer, soil_con->Zsum_node, energy->T,
 					   soil_con->max_moist_node, 
-#if QUICK_FS
-					   soil_con->ufwc_table_node,
-#else
 					   soil_con->expt_node, soil_con->bubble_node, 
-#endif // QUICK_FS
 					   soil_con->depth, soil_con->max_moist, 
-#if QUICK_FS
-					   soil_con->ufwc_table_layer,
-#else
 					   soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
-#if SPATIAL_FROST
 					   soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-					   soil_con->porosity,
-					   soil_con->effective_porosity,
-#endif // EXCESS_ICE
 					   Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
     if ( ErrorFlag == ERROR ) return (ERROR);
-    if(options.DIST_PRCP) {
-      ErrorFlag = estimate_layer_ice_content(layer_dry, soil_con->Zsum_node, energy->T,
-					     soil_con->max_moist_node, 
-#if QUICK_FS
-					     soil_con->ufwc_table_node,
-#else
-					     soil_con->expt_node, soil_con->bubble_node, 
-#endif // QUICK_FS
-					     soil_con->depth, soil_con->max_moist, 
-#if QUICK_FS
-					     soil_con->ufwc_table_layer,
-#else
-					     soil_con->expt, soil_con->bubble, 
-#endif // QUICK_FS
-#if SPATIAL_FROST
-					     soil_con->frost_fract, soil_con->frost_slope, 
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-					     soil_con->porosity, soil_con->effective_porosity,
-#endif // EXCESS_ICE
-					     Nnodes, options.Nlayer, soil_con->FS_ACTIVE);
-      if ( ErrorFlag == ERROR ) return (ERROR);
-    }
   }
   
   return (0);
@@ -178,13 +113,6 @@ int  solve_T_profile(double *T,
 		     double *gamma,
 		     double Dp,
 		     double *depth,
-#if QUICK_FS
-		     double ***ufwc_table_node,
-#endif
-#if EXCESS_ICE
-		     double *porosity,
-		     double *effective_porosity,
-#endif		     
 		     int     Nnodes,
 		     int    *FIRST_SOLN,
 		     int     FS_ACTIVE,
@@ -217,6 +145,9 @@ int  solve_T_profile(double *T,
   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
   2012-Jan-16 Removed LINK_DEBUG code						BN
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 
   extern option_struct options;
@@ -293,20 +224,10 @@ int  solve_T_profile(double *T,
   
   for(j=0;j<Nnodes;j++) T[j]=T0[j];
 
-#if QUICK_FS
-  Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
-				   bubble, expt, alpha, gamma, aa, bb, cc, 
-				   dd, ee, ufwc_table_node, FS_ACTIVE, 
-				   NOFLUX, EXP_TRANS, veg_class);
-#else
   Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist, max_moist, ice, 
 				   bubble, expt, alpha, gamma, aa, bb, cc, 
 				   dd, ee, 
-#if EXCESS_ICE
-				   porosity, effective_porosity,
-#endif				   
 				   FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
-#endif 
 
   return ( Error );
   
@@ -326,10 +247,6 @@ int solve_T_profile_implicit(double *T,                           // update
 			     double *max_moist,             // soil parameter
 			     double *bubble,                // soil parameter
 			     double *expt,                  // soil parameter
-#if EXCESS_ICE
-			     double *porosity,              // soil parameter
-			     double *effective_porosity,     // soil parameter
-#endif			     
 			     double *ice,                   // update if necessary
 			     double *alpha,                 // soil parameter
 			     double *beta,                  // soil parameter
@@ -370,7 +287,8 @@ int solve_T_profile_implicit(double *T,                           // update
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-  2014-Jan-14 Modified cold nose hack to also cover warm nose case.	TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2014-Jan-14 Modified cold nose hack to also cover warm nose case.
   **********************************************************************/
   
   extern option_struct options;
@@ -391,9 +309,6 @@ int solve_T_profile_implicit(double *T,                           // update
     n = Nnodes-1;
   
   fda_heat_eqn(&T[1], res, n, 1, deltat, FS_ACTIVE, NOFLUX, EXP_TRANS, T0, moist, ice, kappa, Cs, max_moist, bubble, expt, 
-#if EXCESS_ICE
-	       porosity, effective_porosity,
-#endif
 	       alpha, beta, gamma, Zsum, Dp, bulk_dens_min, soil_dens_min, quartz, bulk_density, soil_density, organic, depth, options.Nlayer);
   
   // modified Newton-Raphson to solve for new T
@@ -448,13 +363,6 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 			     double *C, 
 			     double *D, 
 			     double *E,
-#if QUICK_FS
-			     double ***ufwc_table_node,
-#endif
-#if EXCESS_ICE
-			     double *porosity,
-			     double *effective_porosity,
-#endif
 			     int    FS_ACTIVE, 
 			     int    NOFLUX,
 			     int EXP_TRANS,
@@ -482,7 +390,10 @@ int calc_soil_thermal_fluxes(int     Nnodes,
   2010-Apr-24 Added initialization of Tfbcount.					TJB
   2010-Apr-24 Added hack to prevent cold nose.  Only active when TFALLBACK
 	      is TRUE.								TJB
-  2014-Jan-14 Modified cold nose hack to also cover warm nose case.		TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Modified cold nose hack to also cover warm nose case.	TJB
   **********************************************************************/
 
   /** Eventually the nodal ice contents will also have to be updated **/
@@ -529,25 +440,12 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	  T[j] = (A[j]*T0[j]+B[j]*(T[j+1]-T[j-1])+C[j]*(T[j+1]+T[j-1])-D[j]*(T[j+1]-T[j-1])+E[j]*(0.-ice[j]))/(A[j]+2.*C[j]);
       }
       else {
-#if QUICK_FS
-	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
-			  ErrorString, soil_thermal_eqn, 
-			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
-			  ufwc_table_node[j], ice[j], gamma[j-1], 
-			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#else
 	T[j] = root_brent(T0[j]-(SOIL_DT), T0[j]+(SOIL_DT),
 			  ErrorString, soil_thermal_eqn, 
 			  T[j+1], T[j-1], T0[j], moist[j], max_moist[j], 
 			  bubble[j], expt[j], 
-#if EXCESS_ICE
-			  porosity[j], effective_porosity[j],
-#endif
-
 			  ice[j], gamma[j-1], 
 			  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#endif
-	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
             T[j] = T0[j];
@@ -580,29 +478,14 @@ int calc_soil_thermal_fluxes(int     Nnodes,
 	  T[j] = (A[j]*T0[j]+B[j]*(T[j]-T[j-1])+C[j]*(T[j]+T[j-1])-D[j]*(T[j]-T[j-1])+E[j]*(0.-ice[j]))/(A[j]+2.*C[j]);
       }
       else {
-#if QUICK_FS
-	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]+SOIL_DT,
-				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
-				 T[Nnodes-2], T0[Nnodes-1], 
-				 moist[Nnodes-1], max_moist[Nnodes-1], 
-				 ufwc_table_node[Nnodes-1], 
-				 ice[Nnodes-1], 
-				 gamma[Nnodes-2], 
-				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#else
 	T[Nnodes-1] = root_brent(T0[Nnodes-1]-SOIL_DT, T0[Nnodes-1]+SOIL_DT,
 				 ErrorString, soil_thermal_eqn, T[Nnodes-1],
 				 T[Nnodes-2], T0[Nnodes-1], 
 				 moist[Nnodes-1], max_moist[Nnodes-1], 
 				 bubble[j], expt[Nnodes-1], 
-#if EXCESS_ICE
-				 porosity[Nnodes-1], effective_porosity[Nnodes-1],
-#endif
 				 ice[Nnodes-1], 
 				 gamma[Nnodes-2], 
 				 A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
-#endif
-	
 	if(T[j] <= -998 ) {
           if (options.TFALLBACK) {
             T[j] = T0[j];
@@ -773,6 +656,7 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   2012-Jan-28 Removed restriction of cold nose fix to just top two nodes;
 	      now all nodes are checked and corrected if necessary.		TJB
   2013-Jan-08 Excluded bottom node from check in cold nose fix.			TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
   **********************************************************************/
     
   static double  deltat;
@@ -787,10 +671,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
   static double *max_moist;
   static double *bubble;
   static double *expt;
-#if EXCESS_ICE
-  static double *porosity;
-  static double *effective_porosity;
-#endif
   static double *alpha;
   static double *beta;
   static double *gamma;
@@ -839,10 +719,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
     max_moist  = va_arg(arg_addr, double *);
     bubble     = va_arg(arg_addr, double *);
     expt       = va_arg(arg_addr, double *);
-#if EXCESS_ICE
-    porosity   = va_arg(arg_addr, double *);
-    effective_porosity = va_arg(arg_addr, double *);
-#endif
     alpha      = va_arg(arg_addr, double *);
     beta       = va_arg(arg_addr, double *);
     gamma      = va_arg(arg_addr, double *);
@@ -892,9 +768,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 	  // update ice contents
 	  if (T_2[i-1]<0) {
 	    ice_new[i] = moist[i] - maximum_unfrozen_water(T_2[i-1], 
-#if EXCESS_ICE
-							   porosity[i], effective_porosity[i],
-#endif							   
 							   max_moist[i], bubble[i], expt[i]);
 	    if (ice_new[i]<0) ice_new[i]=0;
 	  }
@@ -991,9 +864,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
       for (i=left; i<=right; i++) {
 	if (T_2[i]<0) {
 	  ice_new[i+1] = moist[i+1] - maximum_unfrozen_water(T_2[i], 
-#if EXCESS_ICE
-							     porosity[i+1], effective_porosity[i+1],
-#endif							     
 							     max_moist[i+1], bubble[i+1], expt[i+1]);
 	  if (ice_new[i+1]<0) ice_new[i+1]=0;
 	}

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <vicNl.h>
 #include <math.h>
+#include <assert.h>
 
 static char vcid[] =
     "$Id: gl_flow.c,v 5.12.2.20 2013/10/7 03:45:12 vicadmin Exp $";
@@ -47,6 +48,8 @@ gl_volume_area(snow_data_struct **snow,
     double cell_area;                       // km2
     double tile_area;                       // km2
     double ice_vol;                         // km3
+    double ice_vol_old;                     // km3
+    double ice_vol_new;                     // km3
     double ice_area_old;                    // km2
     double ice_area_temp;                   // km2
     double ice_area_new;                    // km2
@@ -71,8 +74,8 @@ gl_volume_area(snow_data_struct **snow,
                                     veg_con[iveg].Cv;
                 }
             }
-
-            if (ice_vol > 0) {
+            ice_vol_old = ice_vol;
+            if (ice_vol > 0.0) {
                 // ice_vol in km3 and ice_area in km2
                 ice_vol *= cell_area / MMPERMETER / MPERKILOMETER;
                 ice_area_old *= veg_con[iveg].Cv * cell_area;
@@ -81,9 +84,10 @@ gl_volume_area(snow_data_struct **snow,
                 ice_area_temp = pow((ice_vol / BAHR_C), (1 / BAHR_LAMBDA));
 
                 // time scaling
-                ice_area_new = ice_area_temp +
-                               (ice_area_old - ice_area_temp) * exp(
-                    stepsize / BAHR_T);
+                ice_area_new = ice_area_temp;
+                // ice_area_new = ice_area_old -
+                //                (ice_area_temp - ice_area_old) * exp(
+                //     stepsize / BAHR_T);
 
                 // Make sure the area isn't too big
                 if (ice_area_new > tile_area) {
@@ -93,16 +97,23 @@ gl_volume_area(snow_data_struct **snow,
                 // determine where the ice belongs
                 cum_area = 0.0;
                 bot_band = -1;
-                while (cum_area < ice_area_new && bot_band < Nbands) {
+                while ((cum_area < ice_area_new) && (bot_band < Nbands)) {
                     bot_band += 1;
                     cum_area += soil_con->AreaFract[bot_band] * cell_area *
                                 veg_con[iveg].Cv;
                 }
 
                 // spread ice over bands
-                iwe_final = ice_vol / cum_area * MPERKILOMETER * MPERKILOMETER;
+                iwe_final = ice_vol / (cum_area * MPERKILOMETER * MPERKILOMETER);
                 for (band = 0; band < bot_band; band++) {
                     snow[iveg][band].iwq = iwe_final;
+                }
+            }
+            ice_vol_new = 0.0;
+            for (band = 0; band < Nbands; band++) {
+                if (snow[iveg][band].iwq > 0.0) {
+                    ice_vol_new += snow[iveg][band].iwq * veg_con[iveg].Cv *
+                                   soil_con->AreaFract[band];
                 }
             }
         } /** end current vegetation type **/

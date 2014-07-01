@@ -313,7 +313,7 @@ snow_melt(double            Le,
         /* Else, SnowPackEnergyBalance(T=0.0) <= 0.0 */
         else { 
             /* Calculate surface layer temperature using "Brent method" */
-            if (SurfaceSwq > MIN_SWQ_EB_THRES) || (Ice > MIN_SWQ_EB_THRES) {
+            if (SurfaceSwq > MIN_SWQ_EB_THRES) {
                 snow->surf_temp = root_brent(
                     (double)(snow->surf_temp - SNOW_DT),
                     (double)(snow->surf_temp + SNOW_DT),
@@ -418,17 +418,14 @@ snow_melt(double            Le,
         Ice = SurfaceSwq + PackSwq + GlacierIce;
 
         if ((SnowIce == 0.0) && (Ice > 0.0)) {
-            printf("(SnowIce == 0.0) && (Ice > 0.0)\n");
             /*No Snowpack present, handle vapor fluxes on glacier surface */
             if (GlacierIce < -(snow->vapor_flux)) {
-                printf("(GlacierIce < -(snow->vapor_flux))\n");
                 snow->blowing_flux *= -(GlacierIce) / snow->vapor_flux;
                 snow->vapor_flux = -GlacierIce;
                 snow->surface_flux *= -(GlacierIce) - snow->vapor_flux;
                 GlacierIce = 0.0;
             }
             else {
-                printf("else\n");
                 GlacierIce += snow->vapor_flux;
             }
         }

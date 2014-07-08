@@ -1073,11 +1073,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* Estimate pressure */
       if (options.PLAPSE) {
         /* Assume average virtual temperature in air column
-           between ground and sea level = KELVIN+atmos[rec].air_temp[NR] + 0.5*elevation*LAPSE_PM */
+           between ground and sea level = KELVIN+atmos[rec].air_temp[NR] + 0.5*elevation*T_LAPSE */
         for (rec = 0; rec < global_param.nrecs; rec++) {
-          atmos[rec].pressure[NR] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[NR]+0.5*elevation*LAPSE_PM)));
+          atmos[rec].pressure[NR] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[NR]+0.5*elevation*T_LAPSE)));
           for (i = 0; i < NF; i++) {
-            atmos[rec].pressure[i] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[i]+0.5*elevation*LAPSE_PM)));
+            atmos[rec].pressure[i] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[i]+0.5*elevation*T_LAPSE)));
           }
         }
       }

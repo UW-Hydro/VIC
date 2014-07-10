@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vicNl.h>
+#include <math.h>
 
 static char vcid[] = "$Id$";
 
@@ -215,6 +216,10 @@ double solve_snow(char                 overstory,
   (*ShortUnderIn) = shortwave;
   (*LongUnderIn)  = longwave;
 
+    if (isnan(snow->swq)){
+        printf("woops, nan found as swe value\n");
+    }
+    
   if ( snow->swq > 0. || snow->iwq > 0. || *snowfall > 0.
       || (snow->snow_canopy > 0. && overstory) ) {
     

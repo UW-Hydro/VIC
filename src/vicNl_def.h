@@ -981,7 +981,7 @@ typedef struct {
   double   soil_dens_min[MAX_LAYERS]; /* particle density of mineral soil (kg/m^3) */
   double   soil_dens_org[MAX_LAYERS]; /* particle density of organic soil (kg/m^3) */
   float   *BandElev;                  /* Elevation of each snow elevation band */
-  double  *BandIwq;                   /* Elevation of each snow elevation band By Bibi*/
+  double  *BandIwq;                   /* Elevation of each snow elevation band */
   double  *BandIceThick;              /* Elevation of each snow elevation band */
   double  *BandSlope;                 /* Elevation of each snow elevation band */
   double  *AreaFract;                 /* Fraction of grid cell included in each snow elevation band */
@@ -1301,6 +1301,7 @@ typedef struct {
   double swqold;
   double iwqold;
   double icedepth;
+  double snowmelt;         /* snow melt */
   double glmelt;           /* glacier melt */
   double glarea;           /* glacier area */
   double Qin;              /* glacier flow into the cell*/

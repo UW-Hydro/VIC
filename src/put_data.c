@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <vicNl.h>
 
 static char vcid[] = "$Id$";
@@ -631,8 +632,21 @@ int  put_data(all_vars_struct   *all_vars,
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0] + out_data[OUT_IWE].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
   
+    if isnan(out_data[OUT_ADVECTION].data[0]) {
+        printf("Advection is nan\n");
+    }
+    if isnan(out_data[OUT_DELTACC].data[0]) {
+        printf("deltacc is nan\n");
+    }
+    if isnan(out_data[OUT_SNOW_FLUX].data[0]) {
+        printf("snow flux is nan\n");
+    }
+    if isnan(out_data[OUT_RFRZ_ENERGY].data[0]) {
+        printf("refreeze_energy is nan\n");
+    }
+      
   /********************
-    Check Energy Balance 
+    Check Energy Balance
   ********************/
   if(options.FULL_ENERGY)
     out_data[OUT_ENERGY_ERROR].data[0] = calc_energy_balance_error(rec, 
@@ -941,6 +955,9 @@ void collect_wb_terms(cell_data_struct  cell,
   /** record snowpack melt **/
   out_data[OUT_SNOW_MELT].data[0] += snow.melt * AreaFactor;
 
+  /** record glacier melt **/
+  out_data[OUT_GLACIER_MELT].data[0] += snow.glmelt * AreaFactor;
+  
   /** record snow cover fraction **/
   out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
 
@@ -1132,6 +1149,7 @@ void collect_eb_terms(energy_bal_struct energy,
   if (snow.snow && overstory)
     out_data[OUT_ADVECTION].data[0] += energy.canopy_advection * AreaFactor;
   out_data[OUT_ADVECTION].data[0] += energy.advection * AreaFactor;
+
   
   /** record snow energy flux **/
   out_data[OUT_SNOW_FLUX].data[0] += energy.snow_flux * AreaFactor;
@@ -1175,6 +1193,9 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record band snow melt **/
   out_data[OUT_SNOW_MELT_BAND].data[band] += snow.melt * Cv * lakefactor;
+
+  /** record band snow melt **/
+  out_data[OUT_GL_MELT_BAND].data[band] += snow.glmelt * Cv * lakefactor;
 
   /** record band snow coverage **/
   out_data[OUT_SNOW_COVER_BAND].data[band] += snow.coverage * Cv * lakefactor;

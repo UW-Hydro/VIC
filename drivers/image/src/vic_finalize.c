@@ -2,6 +2,8 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
+#define ERR(e) {fprintf(stderr, "\nError(vic_finalize): %s\n", nc_strerror(e)); }
+
 void
 vic_finalize(void)
 {
@@ -9,6 +11,7 @@ vic_finalize(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern nc_file_struct      nc_hist_file;    
     extern option_struct       options;
     extern out_data_struct   **out_data;
     extern save_data_struct   *save_data;
@@ -19,6 +22,15 @@ vic_finalize(void)
 
     size_t                     i;
     size_t                     j;
+    int                        status;
+
+    // close the netcdf history file if it is still open
+    if (nc_hist_file.open == true) {
+        status = nc_close(nc_hist_file.nc_id);
+        if (status != NC_NOERR) {
+            ERR(status);
+        }
+    }
 
     for (i = 0; i < global_domain.ncells_global; i++) {
         free_atmos(&(atmos[i]));

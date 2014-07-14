@@ -4,8 +4,6 @@
 
 #define ERR(e) {fprintf(stderr, "\nError(vic_store): %s\n", nc_strerror(e)); }
 
-#define MAXDIMS 5
-
 void
 vic_store(void)
 {
@@ -1015,5 +1013,3 @@ initialize_state_file(nc_file_struct *nc)
         ERR(status);
     }
 }
-
-#undef MAXDIMS

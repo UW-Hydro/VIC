@@ -14,6 +14,8 @@ filep_struct        filep;
 domain_struct       global_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+nc_file_struct      nc_hist_file;
+nc_var_struct nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
 out_data_struct   **out_data;
 save_data_struct   *save_data;

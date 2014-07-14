@@ -7,6 +7,7 @@
 #include <netcdf.h>
 #include <stdio.h>
 
+#define MAXDIMS 10
 
 /*******************************************************
    Stores forcing file input information.
@@ -73,8 +74,7 @@ typedef struct {
     location_struct *locations; // locations structs for local domain
 } domain_struct;
 
-/*
-   Structure for netcdf file information. Initially to store information for the
+/* Structure for netcdf file information. Initially to store information for the
    output files (state and history) */
 typedef struct {
     char fname[MAXSTRING + 1];
@@ -84,23 +84,38 @@ typedef struct {
     float f_fillvalue;
     int nc_id;
     int band_dimid;
+    int front_dimid;
     int frost_dimid;
     int layer_dimid;
     int ni_dimid;
     int nj_dimid;
     int node_dimid;
     int root_zone_dimid;
+    int time_dimid;
     int veg_dimid;
     size_t band_size;
+    size_t front_size;
     size_t frost_size;
     size_t layer_size;
     size_t ni_size;
     size_t nj_size;
     size_t node_size;
     size_t root_zone_size;
+    size_t time_size;
     size_t veg_size;
     bool open;
 } nc_file_struct;
+
+/* Structure for netcdf variable information */
+typedef struct {
+    char nc_var_name[MAXSTRING]; // variable name
+    char nc_units[MAXSTRING]; // variable name
+    int nc_dimids[MAXDIMS]; // ids of dimensions
+    int nc_counts[MAXDIMS]; // size of dimid
+    int nc_type; // netcdf type
+    int nc_aggtype; // aggregation type as defined in vic_def.h
+    int nc_dims; // number of dimensions
+} nc_var_struct;
 
 /* Structure for mapping the vegetation types for each grid cell as stored
    in VIC's veg_con_struct to a regular array. This is convoluted, but will
@@ -144,6 +159,7 @@ void init_output_list(out_data_struct *out_data, int write, char *format,
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
                        int nveg);
+void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
 void initialize_global(void);
 int initialize_model_state(all_vars_struct *all_vars, int Nveg, int Nnodes,
@@ -181,6 +197,9 @@ int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,
                          veg_lib_struct *veg_lib);
 void vic_alloc(void);
+void
+vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
+            nc_var_struct *nc_vars); 
 void vic_finalize(void);
 void vic_force(void);
 void vic_image_run(void);

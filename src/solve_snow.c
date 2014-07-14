@@ -215,10 +215,6 @@ double solve_snow(char                 overstory,
   /* initialize understory radiation inputs */
   (*ShortUnderIn) = shortwave;
   (*LongUnderIn)  = longwave;
-
-    if (isnan(snow->swq)){
-        printf("woops, nan found as swe value\n");
-    }
     
   if ( snow->swq > 0. || snow->iwq > 0. || *snowfall > 0.
       || (snow->snow_canopy > 0. && overstory) ) {
@@ -348,6 +344,10 @@ double solve_snow(char                 overstory,
 				    snow->last_snow, snow->MELTING); 
         (*AlbedoUnder) = (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
       }
+      // else if (snow->swq == 0.0 && snow->iwq > 0.0) {
+      //   snow->albedo = BARE_ICE_ALBEDO;
+      //   (*AlbedoUnder) = snow->albedo;
+      // } // Note:  This is not working.
       else {
         // set snow albedo to new snow albedo
         snow->last_snow = 0;
@@ -378,37 +378,40 @@ double solve_snow(char                 overstory,
       energy->AlbedoUnder   = *AlbedoUnder;
       
       /** Compute Snow Parameters **/
-      if(snow->swq > 0.) {
+      if(snow->swq > 0. || snow->iwq > 0.) {
 
 	/** Calculate Snow Density **/
-	if ( snow->surf_temp <= 0 ){
+	if ( snow->surf_temp <= 0 && (old_swq > 0. || *snowfall > 0.)) {
 	  // snowpack present, compress and age density
 	  snow->density = snow_density(snow, *snowfall, old_swq, Tgrnd, air_temp, (double)dt);
-
-    /*****************Snow to ice conversion*******************/
-    if(options.GLACIER > 0 && soil_con->glcel == 1 &&  snow->swq > 0.0){
-      maxdens = 2 * snow->density  - (double)NEW_SNOW_DENSITY;
-      if(maxdens > SNOWICE_THRESH){
-        slopedens = (maxdens -  (double)NEW_SNOW_DENSITY)/snow->depth;
-        snowdepth = snow->depth - ((snow->density - (double)NEW_SNOW_DENSITY)/slopedens);
-        snowice = (snow->depth - snowdepth) * ((maxdens - SNOWICE_THRESH)/2)/(double)h20_density;
-        if(snowice > 0. && snow->swq > snowice){
-          snow->iwq += snowice;
-          snow->swq -=snowice;
-          snow->density = ((double)SNOWICE_THRESH + (double)NEW_SNOW_DENSITY)/2.0;
-        }
-      }
-    } // end of snow to ice conversion  
   }
 	else 
 	  // no snowpack present, start with new snow density
 	  if ( snow->last_snow == 0 ) 
 	    snow->density = new_snow_density(air_temp);
+  /*****************Snow to ice conversion*******************/
+  if(options.GLACIER > 0 && soil_con->glcel == 1 &&  snow->swq > 0.0){
+    maxdens = 2 * snow->density  - (double)NEW_SNOW_DENSITY;
+    if(maxdens > SNOWICE_THRESH){
+      slopedens = (maxdens -  (double)NEW_SNOW_DENSITY)/snow->depth;
+      snowdepth = snow->depth - ((snow->density - (double)NEW_SNOW_DENSITY)/slopedens);
+      snowice = (snow->depth - snowdepth) * ((maxdens - SNOWICE_THRESH)/2)/(double)h20_density;
+      if(snowice > 0. && snow->swq > snowice){
+        snow->iwq += snowice;
+        snow->swq -=snowice;
+        snow->density = ((double)SNOWICE_THRESH + (double)NEW_SNOW_DENSITY)/2.0;
+      }
+    }
+  } // end of snow to ice conversion  
 	
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	old_depth   = snow->depth;
-	snow->depth = 1000. * snow->swq / snow->density; 
-
+	if (snow->swq > 0.) {
+    snow->depth = 1000. * snow->swq / snow->density; 
+  }
+  else {
+    snow->depth = 0.0;
+  }
 	/** Record if snowpack is melting this time step **/
 	if ( snow->coldcontent >= 0 && (
              (soil_con->lat >= 0 && (day_in_year > 60 // ~ March 1

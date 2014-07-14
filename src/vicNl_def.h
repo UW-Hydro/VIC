@@ -249,7 +249,8 @@
 #define PHOTO_C4 1
 
 /***** Hard-coded veg class parameters (mainly for pot_evap) *****/
-#define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
+#define BARE_SOIL_ALBEDO 0.2      /* albedo for bare soil */
+#define BARE_ICE_ALBEDO 0.4       /* albedo for bare ice */
 #define H2O_SURF_ALBEDO 0.08	    /* albedo for deep water surface */
 extern char   ref_veg_over[];
 extern double ref_veg_rarc[];

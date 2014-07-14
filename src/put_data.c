@@ -632,19 +632,6 @@ int  put_data(all_vars_struct   *all_vars,
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0] + out_data[OUT_IWE].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
   
-    if isnan(out_data[OUT_ADVECTION].data[0]) {
-        printf("Advection is nan\n");
-    }
-    if isnan(out_data[OUT_DELTACC].data[0]) {
-        printf("deltacc is nan\n");
-    }
-    if isnan(out_data[OUT_SNOW_FLUX].data[0]) {
-        printf("snow flux is nan\n");
-    }
-    if isnan(out_data[OUT_RFRZ_ENERGY].data[0]) {
-        printf("refreeze_energy is nan\n");
-    }
-      
   /********************
     Check Energy Balance
   ********************/

@@ -575,11 +575,6 @@ snow_melt(double            Le,
         vicerror("Error in snow_melt.c: should not ever make it here.\n");
     }
     
-    if (snow->glmelt < 0.0) {
-        printf("snow->glmelt: %f\n", snow->glmelt);
-
-    }
-    
     if (Ice > MAX_SURFACE_SWE) {
         if (SurfaceSwq > MAX_SURFACE_SWE) {
             PackCC += SurfaceCC * (SurfaceSwq - MAX_SURFACE_SWE) / SurfaceSwq;
@@ -613,10 +608,11 @@ snow_melt(double            Le,
     }
 
     if (snow->surf_temp == 999) {
-      // Not considering cc change from adding iwq to swq
-      // small energy leak here
         snow->swq += snow->iwq;
         snow->iwq = 0.0;
+        snow->depth = PackDepth;
+        snow->icedepth = 0.0;
+        snow->density = PackDensity;
     }
     
     /* Mass balance test */

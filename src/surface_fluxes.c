@@ -659,8 +659,7 @@ int surface_fluxes(char                 overstory,
 			       iter_layer, &(iter_snow), 
 			       soil_con, 
 			       &(iter_snow_veg_var));
-      
-// iter_snow_energy.sensible + iter_snow_energy.latent + iter_snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + iter_snow_energy.advection - iter_snow_energy.deltaCC + iter_snow_energy.refreeze_energy + iter_snow_energy.advected_sensible ) * step_snow.coverage
+  
         if ( step_melt == ERROR ) return (ERROR);
 
 	/* Check that the snow surface temperature was estimated, if not
@@ -779,7 +778,7 @@ int surface_fluxes(char                 overstory,
 	}
 	else {
 	  store_tol_under = snow_flux - iter_soil_energy.snow_flux;
-	  tol_under       = fabs(store_tol_under);
+    tol_under       = fabs(store_tol_under);
 	}
 	if ( fabs( tol_under - last_tol_under ) < GRND_TOL && tol_under > 1. )
 	  tol_under = -999;

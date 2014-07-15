@@ -88,6 +88,7 @@ get_global_param(filenames_struct *names,
 
     /** Read through global control file to find parameters **/
 
+    rewind(gp);
     fgets(cmdstr, MAXSTRING, gp);
 
     while (!feof(gp)) {

@@ -11,6 +11,7 @@ vic_finalize(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern filep_struct        filep;
     extern nc_file_struct      nc_hist_file;    
     extern option_struct       options;
     extern out_data_struct   **out_data;
@@ -24,6 +25,9 @@ vic_finalize(void)
     size_t                     j;
     int                        status;
 
+    // close the global parameter file
+    fclose(filep.globalparam);
+    
     // close the netcdf history file if it is still open
     if (nc_hist_file.open == true) {
         status = nc_close(nc_hist_file.nc_id);

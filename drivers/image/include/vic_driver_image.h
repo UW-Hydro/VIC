@@ -115,6 +115,7 @@ typedef struct {
     int nc_type; // netcdf type
     int nc_aggtype; // aggregation type as defined in vic_def.h
     int nc_dims; // number of dimensions
+    int nc_write; // TRUE: write to file; FALSE: don't
 } nc_var_struct;
 
 /* Structure for mapping the vegetation types for each grid cell as stored
@@ -180,6 +181,7 @@ energy_bal_struct **make_energy_bal(int nveg);
 snow_data_struct **make_snow_data(int nveg);
 veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
+int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_force_type(force_type_struct *force_type);
 void print_location(location_struct *location);
@@ -197,9 +199,8 @@ int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,
                          veg_lib_struct *veg_lib);
 void vic_alloc(void);
-void
-vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
-            nc_var_struct *nc_vars); 
+void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
+                 nc_var_struct *nc_vars); 
 void vic_finalize(void);
 void vic_force(void);
 void vic_image_run(void);

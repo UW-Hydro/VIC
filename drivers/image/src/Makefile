@@ -74,6 +74,7 @@ OBJS = \
 	${DRIVERPATH}/src/make_veg_var.o \
 	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
+	${DRIVERPATH}/src/parse_output_info.o \
 	${DRIVERPATH}/src/print_library.o \
 	${DRIVERPATH}/src/put_nc_field.o \
 	${DRIVERPATH}/src/vic_alloc.o \

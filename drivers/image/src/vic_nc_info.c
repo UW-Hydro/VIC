@@ -26,6 +26,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
     for (i = 0; i < N_OUTVAR_TYPES; i++) {
         strncpy(nc_vars[i].nc_var_name,
                 out_data[0][i].varname, MAXSTRING);
+        nc_vars[i].nc_write = out_data[0][i].write;
         nc_vars[i].nc_aggtype = out_data[0][i].aggtype;
         nc_vars[i].nc_type = NC_DOUBLE;
         for (j = 0; j < MAXDIMS; j++) {
@@ -61,6 +62,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_SOIL_LIQ:
         case OUT_SOIL_MOIST:
         case OUT_SOIL_TEMP:
+            nc_vars[i].nc_dims = 4;
             nc_vars[i].nc_dimids[0] = nc_hist_file->time_dimid;
             nc_vars[i].nc_dimids[1] = nc_hist_file->layer_dimid;
             nc_vars[i].nc_counts[1] = nc_hist_file->layer_size;
@@ -72,6 +74,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_SOIL_TNODE:
         case OUT_SOIL_TNODE_WL:
         case OUT_SOILT_FBFLAG:
+            nc_vars[i].nc_dims = 4;
             nc_vars[i].nc_dimids[0] = nc_hist_file->time_dimid;
             nc_vars[i].nc_dimids[1] = nc_hist_file->node_dimid;
             nc_vars[i].nc_counts[1] = nc_hist_file->node_size;
@@ -101,6 +104,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_SNOW_PACKT_BAND:
         case OUT_SNOW_SURFT_BAND:
         case OUT_SWE_BAND:
+            nc_vars[i].nc_dims = 4;
             nc_vars[i].nc_dimids[0] = nc_hist_file->time_dimid;
             nc_vars[i].nc_dimids[1] = nc_hist_file->band_dimid;
             nc_vars[i].nc_counts[1] = nc_hist_file->band_size;

@@ -5,117 +5,58 @@
 void
 vic_write(void)
 {
-    extern all_vars_struct    *all_vars;
-    extern domain_struct       global_domain;
-    extern nc_file_struct      nc_hist_file;
-    extern option_struct       options;
-    extern soil_con_struct    *soil_con;
-    extern veg_con_map_struct *veg_con_map;
+    extern out_data_struct **out_data;
+    extern domain_struct     global_domain;
+    extern nc_file_struct    nc_hist_file;
+    extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
+    extern size_t            current;
 
-    int                        status;
-    int                        dimids[MAXDIMS];
-    int                        v;
-    size_t                     i;
-    size_t                     j;
-    size_t                     k;
-    size_t                     m;
-    size_t                     p;
-    size_t                     grid_size;
-    size_t                     ndims;
-    char                      *cvar = NULL;
-    int                       *ivar = NULL;
-    double                    *dvar = NULL;
-    float                     *fvar = NULL;
-    size_t                    *idx = NULL;
-    size_t                     d2count[2];
-    size_t                     d2start[2];
-    size_t                     d3count[3];
-    size_t                     d3start[3];
-    size_t                     d4count[4];
-    size_t                     d4start[4];
-    size_t                     d5count[5];
-    size_t                     d5start[5];
-    size_t                     d6count[6];
-    size_t                     d6start[6];
+    int                      dimids[MAXDIMS];
+    size_t                   i;
+    size_t                   j;
+    size_t                   k;
+    size_t                   grid_size;
+    size_t                   ndims;
+    char                    *cvar = NULL;
+    int                     *ivar = NULL;
+    double                  *dvar = NULL;
+    float                   *fvar = NULL;
+    size_t                  *idx = NULL;
+    size_t                   dcount[MAXDIMS];
+    size_t                   dstart[MAXDIMS];
 
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
     cvar = (char *) malloc(grid_size * sizeof(char));
     if (cvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        nrerror("Memory allocation error in vic_write().");
     }
 
     ivar = (int *) malloc(grid_size * sizeof(int));
     if (ivar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        nrerror("Memory allocation error in vic_write().");
     }
 
     dvar = (double *) malloc(grid_size * sizeof(double));
     if (dvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        nrerror("Memory allocation error in vic_write().");
     }
 
     fvar = (float *) malloc(grid_size * sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        nrerror("Memory allocation error in vic_write().");
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
     idx = (size_t *) malloc(global_domain.ncells_global *
                             sizeof(size_t));
     if (idx == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        nrerror("Memory allocation error in vic_write().");
     }
     for (i = 0; i < global_domain.ncells_global; i++) {
         idx[i] = get_global_idx(&global_domain, i);
     }
-
-    // initialize starts and counts
-    d2start[0] = 0;
-    d2start[1] = 0;
-    d2count[0] = global_domain.n_ny;
-    d2count[1] = global_domain.n_nx;
-
-    d3start[0] = 0;
-    d3start[1] = 0;
-    d3start[2] = 0;
-    d3count[0] = 1;
-    d3count[1] = global_domain.n_ny;
-    d3count[2] = global_domain.n_nx;
-
-    d4start[0] = 0;
-    d4start[1] = 0;
-    d4start[2] = 0;
-    d4start[3] = 0;
-    d4count[0] = 1;
-    d4count[1] = 1;
-    d4count[2] = global_domain.n_ny;
-    d4count[3] = global_domain.n_nx;
-
-    d5start[0] = 0;
-    d5start[1] = 0;
-    d5start[2] = 0;
-    d5start[3] = 0;
-    d5start[4] = 0;
-    d5count[0] = 1;
-    d5count[1] = 1;
-    d5count[2] = 1;
-    d5count[3] = global_domain.n_ny;
-    d5count[4] = global_domain.n_nx;
-
-    d6start[0] = 0;
-    d6start[1] = 0;
-    d6start[2] = 0;
-    d6start[3] = 0;
-    d6start[4] = 0;
-    d6start[5] = 0;
-    d6count[0] = 1;
-    d6count[1] = 1;
-    d6count[2] = 1;
-    d6count[3] = 1;
-    d6count[4] = global_domain.n_ny;
-    d6count[5] = global_domain.n_nx;
 
     // set missing values
     for (i = 0; i < grid_size; i++) {
@@ -125,8 +66,57 @@ vic_write(void)
         fvar[i] = nc_hist_file.f_fillvalue;
     }
 
-    // initialize dimids to invalid values
+    // initialize dimids to invalid values - helps debugging
     for (i = 0; i < MAXDIMS; i++) {
         dimids[i] = -1;
-    }    
+        dstart[i] = -1;
+        dcount[i] = -1;
+    }
+
+    for (k = 0; k < N_OUTVAR_TYPES; k++) {
+        if (!nc_vars[k].nc_write) {
+            continue;
+        }
+        ndims = nc_vars[k].nc_dims;
+        for (j = 0; j < ndims; j++) {
+            dimids[j] = nc_vars[k].nc_dimids[j];
+            dstart[j] = 0;
+            dcount[j] = 1;
+        }
+        // The size of the last two dimensions are the grid size; files are
+        // written one slice at a time, so all counts are 1, except the last 
+        // two
+        for (j = ndims-2; j < ndims; j++) {
+            dcount[j] = nc_vars[k].nc_counts[j];   
+        }
+        dstart[0] = current;
+        for (j = 0; j < out_data[0][k].nelem; j++) {
+            // if there is more than one layer, then dstart needs to advance
+            dstart[1] = j;
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                dvar[idx[i]] = (double) out_data[i][k].aggdata[j];
+            }
+            put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                                &(nc_hist_file.nc_id),
+                                nc_hist_file.d_fillvalue,
+                                dimids, ndims, nc_vars[k].nc_var_name,
+                                dstart, dcount, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                    dvar[idx[i]] = nc_hist_file.d_fillvalue;
+            }
+        }
+
+        // reset dimids to invalid values - helps debugging
+        for (j = 0; j < MAXDIMS; j++) {
+            dimids[j] = -1;
+            dstart[j] = -1;
+            dcount[j] = -1;
+        }
+    }
+
+    free(idx);
+    free(cvar);
+    free(ivar);
+    free(dvar);
+    free(fvar);
 }

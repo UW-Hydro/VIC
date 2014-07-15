@@ -13,6 +13,7 @@ vic_init_output(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern filep_struct        filep;
     extern global_param_struct global_param;
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
@@ -31,6 +32,9 @@ vic_init_output(void)
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]), 
                  &dmy[current], -global_param.nrecs);
     }
+    
+    // determine which variables will be written to the history file
+    parse_output_info(filep.globalparam, out_data);
     
     // open the netcdf history file
     initialize_history_file(&nc_hist_file);

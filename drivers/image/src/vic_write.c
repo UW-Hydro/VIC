@@ -113,7 +113,17 @@ vic_write(void)
             dcount[j] = -1;
         }
     }
+    
+    // reset the agg data
+    for (k = 0; k < N_OUTVAR_TYPES; k++) {
+        for (j = 0; j < out_data[0][k].nelem; j++) {
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                out_data[i][k].aggdata[j] = 0;
+            }
+        }
+    }
 
+    // free memory
     free(idx);
     free(cvar);
     free(ivar);

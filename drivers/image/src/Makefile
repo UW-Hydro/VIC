@@ -28,7 +28,7 @@ INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${DRIVERPATH}/../cl
 LIBRARY = -lm -L/opt/local/lib -lnetcdf
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -g -Wall -Wno-unused
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wno-unused
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information

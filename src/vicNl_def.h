@@ -277,11 +277,12 @@ extern char ref_veg_ref_crop[];
 #define SECPHOUR     3600	/* seconds per hour */
 #define SEC_PER_DAY 86400.	/* seconds per day */
 
+#define METERS_PER_KM 1000.
+
 /***** Physical Constants *****/
-#define RESID_MOIST      0.0        /* define residual moisture content 
-				       of soil column */
-#define ice_density      917.	    /* density of ice (kg/m^3) */
-#define T_lapse          6.5        /* temperature lapse rate of US Std 
+#define RESID_MOIST  0.0       /* define residual moisture content of soil column */
+#define ice_density  917.	    /* density of ice (kg/m^3) */
+#define T_LAPSE      -0.0065   /* temperature lapse rate of US Std 
 				       Atmos in C/km */
 #define von_K        0.40	/* Von Karman constant for evapotranspiration */
 #define KELVIN       273.15	/* conversion factor C to K */
@@ -322,7 +323,6 @@ extern char ref_veg_ref_crop[];
 #define CP_PM 1013		/* specific heat of moist air at constant pressure (J/kg/C)
 				   (Handbook of Hydrology) */
 #define PS_PM 101300		/* sea level air pressure in Pa */
-#define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
 
 /***** Coefficient multiplied by the LAI to determine the amount of
        water that can be stored in the canopy *****/

@@ -20,6 +20,8 @@ vic_init(void)
     extern veg_lib_struct    **veg_lib;
 
     char                       ErrStr[MAXSTRING];
+    double                     mean;
+    double                     sum;
     double                    *dvar = NULL;
     size_t                     i;
     size_t                     j;
@@ -608,7 +610,7 @@ vic_init(void)
             soil_con[i].AlbedoPar = AlbSoiParMin;
         }
     }
-    
+
     // read_vegparam()
 
     // reading the vegetation parameters is slightly more complicated because
@@ -694,6 +696,136 @@ vic_init(void)
         calc_root_fractions(veg_con[i], &(soil_con[i]));
     }
 
+    // read_snowband()
+    if (options.SNOW_BAND == 1) {
+        for (i = 0; i < global_domain.ncells_global; i++) {
+            soil_con[i].AreaFract[0] = 1.;
+            soil_con[i].BandElev[0] = soil_con[i].elevation;
+            soil_con[i].Pfactor[0] = 1.;
+            soil_con[i].Tfactor[0] = 0.;
+        }
+    }
+    else {
+        // AreaFract: fraction of grid cell in each snow band
+        for (j = 0; j < options.SNOW_BAND; j++) {
+            d3start[0] = j;
+            get_nc_field_double(filenames.snowband, "AreaFract",
+                                d3start, d3count, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                soil_con[i].AreaFract[j] = (double) dvar[idx[i]];
+            }
+        }
+        // elevation: elevation of each snow band
+        for (j = 0; j < options.SNOW_BAND; j++) {
+            d3start[0] = j;
+            get_nc_field_double(filenames.snowband, "elevation",
+                                d3start, d3count, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                soil_con[i].BandElev[j] = (double) dvar[idx[i]];
+            }
+        }
+        // Pfactor: precipitation multiplier for each snow band
+        for (j = 0; j < options.SNOW_BAND; j++) {
+            d3start[0] = j;
+            get_nc_field_double(filenames.snowband, "Pfactor",
+                                d3start, d3count, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                soil_con[i].BandElev[j] = (double) dvar[idx[i]];
+            }
+        }
+        // Run some checks and corrections
+        for (i = 0; i < global_domain.ncells_global; i++) {
+            // Make sure area fractions are positive and add to 1
+            sum = 0.;
+            for (j = 0; j < options.SNOW_BAND; j++) {
+                if (soil_con[i].AreaFract[j] < 0) {
+                    // TBD: Add location info
+                    sprintf(ErrStr, "Negative snow band area fraction "
+                            "(%f) read from file\n",
+                            soil_con[i].AreaFract[j]);
+                    nrerror(ErrStr);
+                }
+                sum += soil_con[i].AreaFract[j];
+            }
+            // TBD: Need better check for equal to 1.
+            if (sum != 1.) {
+                // TBD: Add location info
+                fprintf(stderr, "WARNING: Sum of the snow band area "
+                        "fractions does not equal 1 (%f), dividing "
+                        "each fraction by the sum\n", sum);
+                for (j = 0; j < options.SNOW_BAND; j++) {
+                    soil_con[i].AreaFract[j] /= sum;
+                }
+            }
+            // check that the mean elevation from the snow bands matches the
+            // grid cell mean elevation. If not reset mean
+            mean = 0.;
+            for (j = 0; j < options.SNOW_BAND; j++) {
+                mean += soil_con[i].BandElev[j];
+            }
+            mean /= options.SNOW_BAND;
+            if (fabs(soil_con[i].elevation - soil_con[i].BandElev[j]) > 1.0) {
+                // TBD: Add location info
+                fprintf(stderr, "WARNING: average band elevation %f not "
+                        "equal to grid_cell average elevation %f; "
+                        "setting grid cell elevation to average "
+                        "band elevation.\n",
+                        mean, soil_con[i].elevation);
+                soil_con[i].elevation = (float) mean;
+            }
+            // Tfactor: calculate the temperature factor
+            for (j = 0; j < options.SNOW_BAND; j++) {
+                // TBD: Ensure that Tlapse is implemented consistently
+                soil_con[i].Tfactor[j] = (soil_con[i].elevation -
+                                          soil_con[i].BandElev[j]) * T_lapse;
+            }
+            // Pfactor: calculate Pfactor from the precipitation fraction read
+            // from file
+            // TBD: Ensure that netCDF variable is appropriately named
+            sum = 0.;
+            for (j = 0; j < options.SNOW_BAND; j++) {
+                if (soil_con[i].Pfactor[j] < 0.) {
+                    // TBD: Add location info
+                    sprintf(ErrStr, "Snow band precipitation fraction (%lf) "
+                            "must be between 0 and 1.\n",
+                            soil_con[i].Pfactor[j]);
+                    nrerror(ErrStr);
+                }
+                if (soil_con[i].Pfactor[j] > 0. &&
+                    soil_con[i].AreaFract[j] == 0) {
+                    // TBD: Add location info
+                    // TBD: Check to make sure whether this check is actually
+                    // needed
+                    sprintf(ErrStr, "Snow band precipitation fraction (%lf) "
+                            "should be 0 when the area fraction is "
+                            "0. (band = %zd).\n",
+                            soil_con[i].AreaFract[j], j);
+                    nrerror(ErrStr);
+                }
+                sum += soil_con[i].Pfactor[j];
+            }
+            // TBD: Need better check for equal to 1.
+            if (sum != 1.) {
+                // TBD: Add location info
+                fprintf(stderr, "WARNING: Sum of the snow band precipitation "
+                        "fractions does not equal 1 (%f), dividing "
+                        "each fraction by the sum\n", sum);
+                for (j = 0; j < options.SNOW_BAND; j++) {
+                    soil_con[i].Pfactor[j] /= sum;
+                }
+            }
+            // Pfactor: convert precipitation fraction to Pfactor
+            for (j = 0; j < options.SNOW_BAND; j++) {
+                if (soil_con[i].AreaFract[j] > 0) {
+                    soil_con[i].Pfactor[j] /= soil_con[i].AreaFract[j];
+                }
+                else {
+                    soil_con[i].Pfactor[j] = 0.;
+                }
+            }
+        }
+    }
+
     // TBD: Handle the treeline option correctly
     if (options.COMPUTE_TREELINE) {
         nrerror("COMPUTE_TREELINE option not yet implemented in vic_init()");
@@ -708,12 +840,6 @@ vic_init(void)
     // TBD: read lake parameters
     if (options.LAKES) {
         nrerror("LAKES option not yet implemented in vic_init()");
-    }
-
-    // read_snowband()
-    // TBD: read snow parameters
-    if (options.SNOW_BAND > 1) {
-        nrerror("Snow bands not yet implemented in vic_init()");
     }
 
     // initialize structures with default values

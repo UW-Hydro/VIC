@@ -77,6 +77,7 @@ OBJS = \
 	${DRIVERPATH}/src/parse_output_info.o \
 	${DRIVERPATH}/src/print_library.o \
 	${DRIVERPATH}/src/put_nc_field.o \
+	${DRIVERPATH}/src/soil_moisture_from_water_table.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \
 	${DRIVERPATH}/src/vic_force.o \

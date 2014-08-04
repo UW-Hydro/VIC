@@ -19,6 +19,7 @@ vic_init(void)
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
 
+    char                       ErrStr[MAXSTRING];
     double                    *dvar = NULL;
     size_t                     i;
     size_t                     j;
@@ -67,7 +68,7 @@ vic_init(void)
     d4count[1] = 1;
     d4count[2] = global_domain.n_ny;
     d4count[3] = global_domain.n_nx;
-    
+
     // start the clock
     current = 0;
 
@@ -495,7 +496,119 @@ vic_init(void)
     }
 
     // TBD: implement some more processing of the soil variables
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        for (j = 0; j < options.Nlayer; j++) {
+            // compute layer properties
+            soil_con[i].bulk_density[j] =
+                (1 - soil_con[i].organic[j]) * soil_con[i].bulk_dens_min[j] +
+                soil_con[i].organic[j] * soil_con[i].bulk_dens_org[j];
+            soil_con[i].soil_density[j] =
+                (1 - soil_con[i].organic[j]) * soil_con[i].soil_dens_min[j] +
+                soil_con[i].organic[j] * soil_con[i].soil_dens_org[j];
+            if (soil_con[i].resid_moist[j] == MISSING) {
+                soil_con[i].resid_moist[j] = RESID_MOIST;
+            }
+            soil_con[i].porosity[j] = 1 - soil_con[i].bulk_density[j] /
+                                      soil_con[i].soil_density[j];
+            soil_con[i].max_moist[j] = soil_con[i].depth[j] *
+                                       soil_con[i].porosity[j] * 1000.;
+            // TBD: include location info for error
+            // check layer thicknesses
+            if (soil_con[i].depth[j] < MINSOILDEPTH) {
+                sprintf(ErrStr, "ERROR: Model will not function with layer "
+                        "%zd depth %f < %f m.\n", j, soil_con[i].depth[j],
+                        MINSOILDEPTH);
+                nrerror(ErrStr);
+            }
+        }
+        // check relative thickness of top two layers
+        if (soil_con[i].depth[0] > soil_con[i].depth[1]) {
+            sprintf(ErrStr, "ERROR: Model will not function with layer 0 "
+                    "thicker than layer 1 (%f m > %f m).\n",
+                    soil_con[i].depth[0], soil_con[i].depth[1]);
+            nrerror(ErrStr);
+        }
+        // compute maximum infiltration for upper layers
+        if (options.Nlayer == 2) {
+            soil_con[i].max_infil = (1.0 + soil_con[i].b_infilt) *
+                                    soil_con[i].max_moist[0];
+        }
+        else {
+            soil_con[i].max_infil = (1.0 + soil_con[i].b_infilt) *
+                                    (soil_con[i].max_moist[0] +
+                                     soil_con[i].max_moist[1]);
+        }
 
+        // compute soil layer critical and wilting point moisture contents
+        for (j = 0; j < options.Nlayer; j++) {
+            soil_con[i].Wcr[j] *= soil_con[i].max_moist[j];
+            soil_con[i].Wpwp[j] *= soil_con[i].max_moist[j];
+            if (soil_con[i].Wpwp[j] > soil_con[i].Wcr[j]) {
+                sprintf(ErrStr, "Calculated wilting point moisture (%f mm) is "
+                        "greater than calculated critical point moisture "
+                        "(%f mm) for layer %zd."
+                        "\n\tIn the soil parameter file, "
+                        "Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
+                        soil_con[i].Wpwp[j], soil_con[i].Wcr[j], j);
+                nrerror(ErrStr);
+            }
+            if (soil_con[i].Wpwp[j] < soil_con[i].resid_moist[j] *
+                soil_con[i].depth[j] * 1000.) {
+                sprintf(ErrStr, "Calculated wilting point moisture (%f mm) is "
+                        "less than calculated residual moisture (%f mm) for "
+                        "layer %zd.\n\tIn the soil parameter file, "
+                        "Wpwp_FRACT MUST be >= resid_moist / "
+                        "(1.0 - bulk_density/soil_density).\n",
+                        soil_con[i].Wpwp[j], soil_con[i].resid_moist[j] *
+                        soil_con[i].depth[j] * 1000., j);
+                nrerror(ErrStr);
+            }
+        }
+
+        // validate spatial snow/frost params
+        if (options.SPATIAL_SNOW) {
+            if (soil_con[i].max_snow_distrib_slope < 0.0) {
+                sprintf(ErrStr, "max_snow_distrib_slope (%f) must be "
+                        "positive.\n", soil_con[i].max_snow_distrib_slope);
+                nrerror(ErrStr);
+            }
+        }
+
+        if (options.SPATIAL_FROST) {
+            if (soil_con[i].frost_slope < 0.0) {
+                sprintf(ErrStr, "frost_slope (%f) must be positive.\n",
+                        soil_con[i].frost_slope);
+                nrerror(ErrStr);
+            }
+        }
+
+        // If BASEFLOW = NIJSSEN2001 then convert NIJSSEN2001
+        // parameters d1, d2, d3, and d4 to ARNO baseflow
+        // parameters Ds, Dsmax, Ws, and c
+        if (options.BASEFLOW == NIJSSEN2001) {
+            j = options.Nlayer - 1;
+            soil_con[i].Dsmax = soil_con[i].Dsmax *
+                                pow((double)(1. /
+                                             (soil_con[i].max_moist[j] -
+                                              soil_con[i].Ws)),
+                                    -soil_con[i].c) +
+                                soil_con[i].Ds * soil_con[i].max_moist[j];
+            soil_con[i].Ds = soil_con[i].Ds *
+                             soil_con[i].Ws / soil_con[i].Dsmax;
+            soil_con[i].Ws = soil_con[i].Ws / soil_con[i].max_moist[j];
+        }
+    }
+
+    soil_moisture_from_water_table(&(soil_con[i]), options.Nlayer);
+
+    if (options.CARBON) {
+        // TBD Remove hardcoded parameter values
+        soil_con[i].AlbedoPar = 0.92 * BARE_SOIL_ALBEDO - 0.015;
+        if (soil_con[i].AlbedoPar < AlbSoiParMin) {
+            soil_con[i].AlbedoPar = AlbSoiParMin;
+        }
+    }
+    
     // read_vegparam()
 
     // reading the vegetation parameters is slightly more complicated because
@@ -614,7 +727,7 @@ vic_init(void)
         }
         initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
     }
-    
+
     // TBD: handle decomposed domain
 
     // cleanup

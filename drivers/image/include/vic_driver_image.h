@@ -195,6 +195,7 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
 double q_to_vp(double q, double p);
+void soil_moisture_from_water_table(soil_con_struct *soil_con, int nlayers);
 int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          soil_con_struct *soil_con, veg_con_struct  *veg_con,
                          veg_lib_struct *veg_lib);

@@ -19,6 +19,7 @@ vic_init(void)
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
 
+    bool                       found;
     char                       ErrStr[MAXSTRING];
     double                     mean;
     double                     sum;
@@ -647,7 +648,7 @@ vic_init(void)
                 soil_con[i].BandElev[j] = (double) dvar[idx[i]];
             }
         }
-        // Run some checks and corrections
+        // Run some checks and corrections for soil
         for (i = 0; i < global_domain.ncells_global; i++) {
             // Make sure area fractions are positive and add to 1
             sum = 0.;
@@ -838,6 +839,85 @@ vic_init(void)
     // calculate root fractions
     for (i = 0; i < global_domain.ncells_global; i++) {
         calc_root_fractions(veg_con[i], &(soil_con[i]));
+    }
+
+    // Run some checks and corrections for vegetation
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            vidx = veg_con_map[i].vidx[j];
+            if (vidx != -1) {
+                sum = 0;
+                for (k = 0; k < options.ROOT_ZONES; k++) {
+                    sum += veg_con[i][vidx].zone_depth[k];
+                }
+                if (sum <= 0) {
+                    // TBD: Add location info
+                    sprintf(ErrStr,
+                            "Root zone depths must sum to a value greater "
+                            "than 0.");
+                    nrerror(ErrStr);
+                }
+                sum = 0;
+                for (k = 0; k < options.ROOT_ZONES; k++) {
+                    sum += veg_con[i][vidx].zone_fract[k];
+                }
+                // TBD: Need better test for not equal to 1.
+                if (sum != 1.) {
+                    // TBD: Add location info
+                    fprintf(stderr,
+                            "WARNING: Root zone fractions sum to more than 1 "
+                            "(%f), normalizing fractions.  If the sum is "
+                            "large, check your vegetation parameter file,",
+                            sum);
+                    for (k = 0; k < options.ROOT_ZONES; k++) {
+                        veg_con[i][vidx].zone_fract[k] /= sum;
+                    }
+                }
+                // check that the vegetation type is defined in the vegetation
+                // library
+                found = FALSE;
+                for (k = 0; k < options.NVEGTYPES; k++) {
+                    if (veg_con[i][vidx].veg_class == veg_lib[i][k].veg_class) {
+                        found = TRUE;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // TBD: add location info
+                    sprintf(ErrStr,
+                            "The vegetation class id %i in vegetation tile %i "
+                            "from cell %zd is not defined in the vegetation "
+                            "library", veg_con[i][vidx].veg_class, vidx, i);
+                    nrerror(ErrStr);
+                }
+                // bad use of indexing -- Cv_sum should not be part of the
+                // structure. Simply maintained for backward compatibility with
+                // classic mode
+                veg_con[i][0].Cv_sum += veg_con[i][vidx].Cv;
+            }
+        }
+        
+        // Bare soil is now read in as the "last" (highest index) vegetation
+        // class
+        // rescale vegetation classes to 1.0 if their sum is greater than 0.99
+        // otherwise throw an error
+        if (veg_con[i][0].Cv_sum > 0.99) {
+            // TBD: add location info
+            fprintf(stderr, "Cv > 0.99 (%f) at grid cell %zd. Rescaling ...\n",
+                    veg_con[i][0].Cv_sum, i);
+            for (j = 0; j < options.NVEGTYPES; j++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
+                }
+            }
+            veg_con[i][0].Cv_sum = 1.;
+        }
+        else {
+            sprintf(ErrStr, "Cv < 0.99 (%f) at grid cell %zd.\n",
+                    veg_con[i][0].Cv_sum, i);
+            nrerror(ErrStr);
+        }        
     }
 
     // TBD: implement the blowing snow option

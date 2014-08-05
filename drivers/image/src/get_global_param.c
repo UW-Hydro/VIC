@@ -1199,6 +1199,15 @@ get_global_param(filenames_struct *names,
             nrerror(ErrStr);
         }
 
+        // Validate treeline option
+        if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
+            sprintf(ErrStr,
+                    "COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
+                    "FALSE.\n You must supply July average temperature if"
+                    "you want to use the treeline option.\n");
+            nrerror(ErrStr);
+        }
+
         // Validate lake parameter information
         if (options.LAKES) {
             if (!options.FULL_ENERGY) {

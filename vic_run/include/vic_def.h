@@ -453,8 +453,6 @@ extern char ref_veg_ref_crop[];
 
 #define SNOW_H
 
-#include <stdarg.h>
-
 /* water holding capacity of snow as a fraction of snow-water-equivalent */
 #define LIQUID_WATER_CAPACITY   0.035
 

@@ -833,13 +833,17 @@ vic_init(void)
 
     // TBD: implement the blowing snow option
     if (options.BLOWING) {
-        nrerror("BLOWING option not yet implemented in vic_init()");
+        sprintf(ErrStr,
+                "BLOWING option not yet implemented in vic_init()");
+        nrerror(ErrStr);
     }
 
     // read_lakeparam()
     // TBD: read lake parameters
     if (options.LAKES) {
-        nrerror("LAKES option not yet implemented in vic_init()");
+        sprintf(ErrStr,
+                "LAKES option not yet implemented in vic_init()");
+        nrerror(ErrStr);
     }
 
     // initialize structures with default values
@@ -849,7 +853,9 @@ vic_init(void)
         initialize_soil(all_vars[i].cell, &(soil_con[i]), veg_con[i], nveg);
         initialize_veg(all_vars[i].veg_var, veg_con[i], nveg);
         if (options.LAKES) {
-            nrerror("LAKES option not yet implemented in vic_init()");
+            sprintf(ErrStr,
+                    "LAKES option not yet implemented in vic_init()");
+            nrerror(ErrStr);
         }
         initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
     }

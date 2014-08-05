@@ -46,7 +46,7 @@ get_global_param(filenames_struct *names,
     };
     global_param_struct     global;
 
-    /** Initialize global parameters (that aren't part of the options struct) **/
+    // Initialize global parameters (that aren't part of the options struct)
     global.dt = MISSING;
     global.nrecs = MISSING;
     global.startyear = MISSING;
@@ -496,8 +496,11 @@ get_global_param(filenames_struct *names,
             *************************************/
             else if (strcasecmp("FORCING1", optstr) == 0) {
                 if (strcmp(names->f_path_pfx[0], "MISSING") != 0) {
-                    nrerror(
-                        "Tried to define FORCING1 twice, if you want to use two forcing files, the second must be defined as FORCING2");
+                    sprintf(ErrStr,
+                            "Tried to define FORCING1 twice, if you want to "
+                            "use two forcing files, the second must be "
+                            "defined as FORCING2");
+                    nrerror(ErrStr);
                 }
                 sscanf(cmdstr, "%*s %s", names->f_path_pfx[0]);
                 file_num = 0;
@@ -518,7 +521,9 @@ get_global_param(filenames_struct *names,
                     param_set.FORCE_FORMAT[file_num] = ASCII;
                 }
                 else {
-                    nrerror("FORCE_FORMAT must be either ASCII or BINARY.");
+                    sprintf(ErrStr,
+                            "FORCE_FORMAT must be either ASCII or BINARY.");
+                    nrerror(ErrStr);
                 }
             }
             else if (strcasecmp("FORCE_ENDIAN", optstr) == 0) {
@@ -530,7 +535,9 @@ get_global_param(filenames_struct *names,
                     param_set.FORCE_ENDIAN[file_num] = BIG;
                 }
                 else {
-                    nrerror("FORCE_ENDIAN must be either BIG or LITTLE.");
+                    sprintf(ErrStr,
+                            "FORCE_ENDIAN must be either BIG or LITTLE.");
+                    nrerror(ErrStr);
                 }
             }
             else if (strcasecmp("N_TYPES", optstr) == 0) {
@@ -583,31 +590,42 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("ARC_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    nrerror("\"ARC_SOIL\" is no longer a supported option.\n"
-                            "Please convert your soil parameter file and remove this option\n"
-                            "from your global file");
+                    sprintf(ErrStr,
+                            "\"ARC_SOIL\" is no longer a supported option.\n"
+                            "Please convert your soil parameter file and "
+                            "remove this option from your global file.");
+                    nrerror(ErrStr);
                 }
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    nrerror(
-                        "Please change \"ARNO_PARAMS  TRUE\" to \"BASEFLOW  NIJSSEN2001\" in your global parameter file.");
+                    sprintf(ErrStr,
+                            "Please change \"ARNO_PARAMS TRUE\" to \"BASEFLOW "
+                            "NIJSSEN2001\" in your global parameter file.");
+                    nrerror(ErrStr);
                 }
                 else {
-                    nrerror(
-                        "Please change \"ARNO_PARAMS  FALSE\" to \"BASEFLOW  ARNO\" in your global parameter file.");
+                    sprintf(ErrStr,
+                            "Please change \"ARNO_PARAMS FALSE\" to \"BASEFLOW "
+                            "ARNO\" in your global parameter file.");
+                    nrerror(ErrStr);
                 }
             }
             else if (strcasecmp("NIJSSEN2001_BASEFLOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    nrerror(
-                        "Please change \"NIJSSEN2001_BASEFLOW  TRUE\" to \"BASEFLOW  NIJSSEN2001\" in your global parameter file.");
+                    sprintf(ErrStr,
+                            "Please change \"NIJSSEN2001_BASEFLOW TRUE\" to "
+                            "\"BASEFLOW NIJSSEN2001\" in your global "
+                            "parameter file.");
+                    nrerror(ErrStr);
                 }
                 else {
-                    nrerror(
-                        "Please change \"NIJSSEN2001_BASEFLOW  FALSE\" to \"BASEFLOW  ARNO\" in your global parameter file.");
+                    sprintf(ErrStr,
+                            "Please change \"NIJSSEN2001_BASEFLOW FALSE\" to "
+                            "\"BASEFLOW ARNO\" in your global parameter file.");
+                    nrerror(ErrStr);
                 }
             }
             else if (strcasecmp("BASEFLOW", optstr) == 0) {
@@ -654,19 +672,22 @@ get_global_param(filenames_struct *names,
             }
             else if (strcasecmp("GLOBAL_LAI", optstr) == 0) {
                 fprintf(stderr,
-                        "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n");
+                        "WARNING: GLOBAL_LAI has been replaced by 2 new "
+                        "options: VEGPARAM_LAI (whether the vegparam file "
+                        "contains LAI values) and LAI_SRC (where to get LAI "
+                        "values).\n");
                 fprintf(stderr,
-                        "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n");
+                        "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI "
+                        "TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n");
                 fprintf(stderr,
-                        "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n");
+                        "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC "
+                        "LAI_FROM_VEGLIB\".\n");
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-// nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  LAI_FROM_VEGPARAM\"");
                     options.VEGPARAM_LAI = TRUE;
                     options.LAI_SRC = LAI_FROM_VEGPARAM;
                 }
                 else {
-// nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  LAI_FROM_VEGLIB\"");
                     options.LAI_SRC = LAI_FROM_VEGLIB;
                 }
             }
@@ -809,7 +830,8 @@ get_global_param(filenames_struct *names,
             ***********************************/
             else {
                 fprintf(stderr,
-                        "WARNING: Unrecognized option in the global parameter file:\n\t%s is unknown - check your spelling\n",
+                        "WARNING: Unrecognized option in the global parameter "
+                        "file:\n\t%s is unknown - check your spelling\n",
                         optstr);
             }
         }
@@ -822,12 +844,16 @@ get_global_param(filenames_struct *names,
 
     // Validate model time step
     if (global.dt == MISSING) {
-        nrerror(
-            "Model time step has not been defined.  Make sure that the global file defines TIME_STEP.");
+        sprintf(ErrStr,
+                "Model time step has not been defined.  Make sure that the "
+                "global file defines TIME_STEP.");
+        nrerror(ErrStr);
     }
     else if (global.dt < 1) {
         sprintf(ErrStr,
-                "The specified model time step (%d) < 1 hour.  Make sure that the global file defines a positive number of hours for TIME_STEP.",
+                "The specified model time step (%d) < 1 hour.  Make sure that "
+                "the global file defines a positive number of hours "
+                "for TIME_STEP.",
                 global.dt);
         nrerror(ErrStr);
     }
@@ -839,17 +865,25 @@ get_global_param(filenames_struct *names,
     else if (global.out_dt < global.dt || global.out_dt > 24 ||
              (float)global.out_dt / (float)global.dt !=
              (float)(global.out_dt / global.dt)) {
-        nrerror(
-            "Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
+        sprintf(ErrStr,
+                "Invalid output step specified. Output step must be an "
+                "integer multiple of the model time step; >= model time step "
+                "and <= 24");
+        nrerror(ErrStr);
     }
 
     // Validate SNOW_STEP and set NR and NF
     if (global.dt < 24 && global.dt != options.SNOW_STEP) {
-        nrerror(
-            "If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
+        sprintf(ErrStr,
+                "If the model step is smaller than daily, the snow model "
+                "should run\nat the same time step as the rest of the model.");
+        nrerror(ErrStr);
     }
     if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt) {
-        nrerror("SNOW_STEP should be <= TIME_STEP and divide TIME_STEP evenly ");
+        sprintf(ErrStr,
+                "SNOW_STEP should be <= TIME_STEP and divide TIME_STEP "
+                "evenly.");
+        nrerror(ErrStr);
     }
     NF = global.dt / options.SNOW_STEP;
     if (NF == 1) {
@@ -861,32 +895,41 @@ get_global_param(filenames_struct *names,
 
     // Validate simulation start date
     if (global.startyear == MISSING) {
-        nrerror(
-            "Simulation start year has not been defined.  Make sure that the global file defines STARTYEAR.");
+        sprintf(ErrStr,
+                "Simulation start year has not been defined.  Make sure that "
+                "the global file defines STARTYEAR.");
+        nrerror(ErrStr);
     }
     else if (global.startyear < 0) {
         sprintf(ErrStr,
-                "The specified simulation start year (%d) < 0.  Make sure that the global file defines a positive integer for STARTYEAR.",
+                "The specified simulation start year (%d) < 0.  Make sure that "
+                "the global file defines a positive integer for STARTYEAR.",
                 global.startyear);
         nrerror(ErrStr);
     }
     if (global.startmonth == MISSING) {
-        nrerror(
-            "Simulation start month has not been defined.  Make sure that the global file defines STARTMONTH.");
+        sprintf(ErrStr,
+                "Simulation start month has not been defined.  Make sure that "
+                "the global file defines STARTMONTH.");
+        nrerror(ErrStr);
     }
     else if (global.startmonth < 0) {
         sprintf(ErrStr,
-                "The specified simulation start month (%d) < 0.  Make sure that the global file defines a positive integer for STARTMONTH.",
-                global.startmonth);
+                "The specified simulation start month (%d) < 0.  Make sure "
+                "that the global file defines a positive integer for "
+                "STARTMONTH.", global.startmonth);
         nrerror(ErrStr);
     }
     if (global.startday == MISSING) {
-        nrerror(
-            "Simulation start day has not been defined.  Make sure that the global file defines STARTDAY.");
+        sprintf(ErrStr,
+                "Simulation start day has not been defined.  Make sure that "
+                "the global file defines STARTDAY.");
+        nrerror(ErrStr);
     }
     else if (global.startday < 0) {
         sprintf(ErrStr,
-                "The specified simulation start day (%d) < 0.  Make sure that the global file defines a positive integer for STARTDAY.",
+                "The specified simulation start day (%d) < 0.  Make sure that "
+                "the global file defines a positive integer for STARTDAY.",
                 global.startday);
         nrerror(ErrStr);
     }
@@ -895,52 +938,68 @@ get_global_param(filenames_struct *names,
             global.starthour = 0;
         }
         else {
-            nrerror(
-                "Simulation start hour has not been defined, yet model time step is less than 24 hours.  Make sure that the global file defines STARTHOUR.");
+            sprintf(ErrStr,
+                    "Simulation start hour has not been defined, yet model "
+                    "time step is less than 24 hours.  Make sure that the "
+                    "global file defines STARTHOUR.");
+            nrerror(ErrStr);
         }
     }
     else if (global.starthour < 0) {
         sprintf(ErrStr,
-                "The specified simulation start hour (%d) < 0.  Make sure that the global file defines a positive integer for STARTHOUR.",
-                global.starthour);
+                "The specified simulation start hour (%d) < 0.  Make sure "
+                "that the global file defines a positive integer "
+                "for STARTHOUR.", global.starthour);
         nrerror(ErrStr);
     }
 
     // Validate simulation end date and/or number of timesteps
     if (global.nrecs == MISSING && global.endyear == MISSING &&
         global.endmonth == MISSING && global.endday == MISSING) {
-        nrerror(
-            "The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
+        sprintf(ErrStr,
+                "The model global file MUST define EITHER the number of "
+                "records to simulate (NRECS), or the year (ENDYEAR), month "
+                "(ENDMONTH), and day (ENDDAY) of the last full simulation day");
+        nrerror(ErrStr);
     }
     else if (global.nrecs == MISSING) {
         if (global.endyear == MISSING) {
-            nrerror(
-                "Simulation end year has not been defined.  Make sure that the global file defines ENDYEAR.");
+            sprintf(ErrStr,
+                    "Simulation end year has not been defined.  Make sure "
+                    "that the global file defines ENDYEAR.");
+            nrerror(ErrStr);
         }
         else if (global.endyear < 0) {
             sprintf(ErrStr,
-                    "The specified simulation end year (%d) < 0.  Make sure that the global file defines a positive integer for ENDYEAR.",
-                    global.endyear);
+                    "The specified simulation end year (%d) < 0.  Make sure "
+                    "that the global file defines a positive integer for "
+                    "ENDYEAR.", global.endyear);
             nrerror(ErrStr);
         }
         if (global.endmonth == MISSING) {
-            nrerror(
-                "Simulation end month has not been defined.  Make sure that the global file defines ENDMONTH.");
+            sprintf(ErrStr,
+                    "Simulation end month has not been defined.  Make sure "
+                    "that the global file defines ENDMONTH.");
+            nrerror(ErrStr);
         }
         else if (global.endmonth < 0) {
             sprintf(ErrStr,
-                    "The specified simulation end month (%d) < 0.  Make sure that the global file defines a positive integer for ENDMONTH.",
-                    global.endmonth);
+                    "The specified simulation end month (%d) < 0.  Make sure "
+                    "that the global file defines a positive integer for "
+                    "ENDMONTH.", global.endmonth);
             nrerror(ErrStr);
         }
         if (global.endday == MISSING) {
-            nrerror(
-                "Simulation end day has not been defined.  Make sure that the global file defines ENDDAY.");
+            sprintf(ErrStr,
+                    "Simulation end day has not been defined.  Make sure "
+                    "that the global file defines ENDDAY.");
+            nrerror(ErrStr);
         }
         else if (global.endday < 0) {
             sprintf(ErrStr,
-                    "The specified simulation end day (%d) < 0.  Make sure that the global file defines a positive integer for ENDDAY.",
-                    global.endday);
+                    "The specified simulation end day (%d) < 0.  Make sure "
+                    "that the global file defines a positive integer for "
+                    "ENDDAY.", global.endday);
             nrerror(ErrStr);
         }
         tmpstartdate = global.startyear * 10000 + global.startmonth * 100 +
@@ -949,51 +1008,28 @@ get_global_param(filenames_struct *names,
                      global.endday;
         if (tmpenddate < tmpstartdate) {
             sprintf(ErrStr,
-                    "The specified simulation end date (%04d-%02d-%02d) is EARLIER than the specified start date (%04d-%02d-%02d).", global.endyear, global.endmonth, global.endday, global.startyear, global.startmonth,
-                    global.startday);
+                    "The specified simulation end date (%04d-%02d-%02d) is "
+                    "EARLIER than the specified start date (%04d-%02d-%02d).",
+                    global.endyear, global.endmonth, global.endday,
+                    global.startyear, global.startmonth, global.startday);
             nrerror(ErrStr);
         }
     }
     else if (global.nrecs < 1) {
         sprintf(ErrStr,
-                "The specified duration of simulation (%d) < 1 time step.  Make sure that the global file defines a positive integer for NRECS.",
-                global.nrecs);
+                "The specified duration of simulation (%d) < 1 time step. "
+                "Make sure that the global file defines a positive integer "
+                "for NRECS.", global.nrecs);
         nrerror(ErrStr);
     }
 
     // Validate forcing files and variables
     if (strcmp(names->f_path_pfx[0], "MISSING") == 0) {
-        nrerror(
-            "No forcing file has been defined.  Make sure that the global file defines FORCING1.");
+        sprintf(ErrStr,
+                "No forcing file has been defined.  Make sure that the global "
+                "file defines FORCING1.");
+        nrerror(ErrStr);
     }
-    // for (i = 0; i < 2; i++) {
-    // if (i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING)) {
-    // if (param_set.N_TYPES[i] == MISSING) {
-    // sprintf(ErrStr,
-    // "Need to specify the number forcing variables types in forcing file %d.",
-    // i);
-    // nrerror(ErrStr);
-    // }
-    // if (param_set.FORCE_FORMAT[i] == MISSING) {
-    // sprintf(ErrStr,
-    // "Need to specify the INPUT_FORMAT (ASCII or BINARY) for forcing file %d.",
-    // i);
-    // nrerror(ErrStr);
-    // }
-    // if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] == MISSING) {
-    // sprintf(ErrStr,
-    // "Did not define enough forcing variables in forcing file %d.",
-    // i);
-    // nrerror(ErrStr);
-    // }
-    // if (param_set.FORCE_DT[i] == MISSING) {
-    // sprintf(ErrStr,
-    // "Must define time steps (FORCE_DT <dt>) in control file for focing file %d.",
-    // file_num);
-    // nrerror(ErrStr);
-    // }
-    // }
-    // }
     if (param_set.N_TYPES[1] != MISSING && global.forceyear[1] == MISSING) {
         global.forceyear[1] = global.forceyear[0];
         global.forcemonth[1] = global.forcemonth[0];
@@ -1004,37 +1040,62 @@ get_global_param(filenames_struct *names,
 
     // Validate result directory
     if (strcmp(names->result_dir, "MISSING") == 0) {
-        nrerror(
-            "No results directory has been defined.  Make sure that the global file defines the result directory on the line that begins with \"RESULT_DIR\".");
+        sprintf(ErrStr,
+                "No results directory has been defined.  Make sure that the "
+                "global file defines the result directory on the line that "
+                "begins with \"RESULT_DIR\".");
+        nrerror(ErrStr);
     }
 
     // Validate soil parameter file information
     if (strcmp(names->soil, "MISSING") == 0) {
-        nrerror(
-            "No soil parameter file has been defined.  Make sure that the global file defines the soil parameter file on the line that begins with \"SOIL\".");
+        sprintf(ErrStr,
+                "No soil parameter file has been defined.  Make sure that the "
+                "global file defines the soil parameter file on the line that "
+                "begins with \"SOIL\".");
+        nrerror(ErrStr);
     }
 
-    /*******************************************************************************
-       Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
-    *******************************************************************************/
+    // Validate parameters required for normal simulations but NOT for
+    // OUTPUT_FORCE
 
     if (!options.OUTPUT_FORCE) {
         // Validate veg parameter information
         if (strcmp(names->veg, "MISSING") == 0) {
-            nrerror(
-                "No vegetation parameter file has been defined.  Make sure that the global file defines the vegetation parameter file on the line that begins with \"VEGPARAM\".");
+            sprintf(ErrStr,
+                    "No vegetation parameter file has been defined.  Make sure "
+                    "that the global file defines the vegetation parameter "
+                    "file on the line that begins with \"VEGPARAM\".");
+            nrerror(ErrStr);
         }
         if (strcmp(names->veglib, "MISSING") == 0) {
-            nrerror(
-                "No vegetation library file has been defined.  Make sure that the global file defines the vegetation library file on the line that begins with \"VEGLIB\".");
+            sprintf(ErrStr,
+                    "No vegetation library file has been defined.  Make sure "
+                    "that the global file defines the vegetation library file "
+                    "on the line that begins with \"VEGLIB\".");
+            nrerror(ErrStr);
         }
         if (options.ROOT_ZONES < 0) {
-            nrerror(
-                "ROOT_ZONES must be defined to a positive integer greater than 0, in the global control file.");
+            sprintf(ErrStr,
+                    "ROOT_ZONES must be defined to a positive integer greater "
+                    "than 0, in the global control file.");
+            nrerror(ErrStr);
         }
         if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
             sprintf(ErrStr,
-                    "\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global parameter file.  If you want VIC to read LAI values from the vegparam file, you MUST make sure the veg param file contains 1 line of 12 monthly LAI values for EACH veg tile in EACH grid cell, and you MUST specify \"VEGPARAM_LAI\" as \"TRUE\" in the global parameter file.  Alternatively, if you want VIC to read LAI values from the veg library file, set \"LAI_SRC\" ro \"LAI_FROM_VEGLIB\" in the global parameter file.  In either case, the setting of \"VEGPARAM_LAI\" must be consistent with the contents of the veg param file (i.e. whether or not it contains LAI values).");
+                    "\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", "
+                    "but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
+                    "parameter file.  If you want VIC to read LAI values from "
+                    "the vegparam file, you MUST make sure the veg param file "
+                    "contains 1 line of 12 monthly LAI values for EACH veg "
+                    "tile in EACH grid cell, and you MUST specify "
+                    "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
+                    "file.  Alternatively, if you want VIC to read LAI values "
+                    "from the veg library file, set \"LAI_SRC\" to "
+                    "\"LAI_FROM_VEGLIB\" in the global parameter file.  "
+                    "In either case, the setting of \"VEGPARAM_LAI\" must be "
+                    "consistent with the contents of the veg param file "
+                    "(i.e. whether or not it contains LAI values).");
             nrerror(ErrStr);
         }
 
@@ -1042,13 +1103,15 @@ get_global_param(filenames_struct *names,
         if (options.SPATIAL_FROST) {
             if (options.Nfrost > MAX_FROST_AREAS) {
                 sprintf(ErrStr,
-                        "\"SPATIAL_FROST\" was specified with %d frost subareas, which is greater than the maximum of %d.", options.Nfrost,
-                        MAX_FROST_AREAS);
+                        "\"SPATIAL_FROST\" was specified with %d frost "
+                        "subareas, which is greater than the maximum of %d.",
+                        options.Nfrost, MAX_FROST_AREAS);
                 nrerror(ErrStr);
             }
             if (options.Nfrost < 1) {
                 sprintf(ErrStr,
-                        "\"SPATIAL_FROST\" was specified with %d frost subareas, which is less than the mainmum of 1.",
+                        "\"SPATIAL_FROST\" was specified with %d frost "
+                        "subareas, which is less than the mainmum of 1.",
                         options.Nfrost);
                 nrerror(ErrStr);
             }
@@ -1058,14 +1121,18 @@ get_global_param(filenames_struct *names,
         if (!options.CARBON) {
             if (options.RC_MODE == RC_PHOTO) {
                 fprintf(stderr,
-                        "WARNING: If CARBON==FALSE, RC_MODE must be set to RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
+                        "WARNING: If CARBON==FALSE, RC_MODE must be set to "
+                        "RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
                 options.RC_MODE = RC_JARVIS;
             }
         }
         else {
             if (!options.VEGLIB_PHOTO) {
                 sprintf(ErrStr,
-                        "Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and carbon-specific veg parameters must be listed in your veg library file.");
+                        "Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  "
+                        "If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and "
+                        "carbon-specific veg parameters must be listed in your "
+                        "veg library file.");
                 nrerror(ErrStr);
             }
         }
@@ -1074,20 +1141,25 @@ get_global_param(filenames_struct *names,
         if (options.SNOW_BAND > 1) {
             if (strcmp(names->snowband, "MISSING") == 0) {
                 sprintf(ErrStr,
-                        "\"SNOW_BAND\" was specified with %d elevation bands, but no elevation band file has been defined.  Make sure that the global file defines the elevation band file on the line that begins with \"SNOW_BAND\" (after the number of bands).",
-                        options.SNOW_BAND);
+                        "\"SNOW_BAND\" was specified with %d elevation bands, "
+                        "but no elevation band file has been defined.  "
+                        "Make sure that the global file defines the elevation "
+                        "band file on the line that begins with \"SNOW_BAND\" "
+                        "(after the number of bands).", options.SNOW_BAND);
                 nrerror(ErrStr);
             }
             if (options.SNOW_BAND > MAX_BANDS) {
                 sprintf(ErrStr,
-                        "Global file wants more snow bands (%d) than are defined by MAX_BANDS (%d).  Edit vicNl_def.h and recompile.", options.SNOW_BAND,
-                        MAX_BANDS);
+                        "Global file wants more snow bands (%d) than are "
+                        "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
+                        "recompile.", options.SNOW_BAND, MAX_BANDS);
                 nrerror(ErrStr);
             }
         }
         else if (options.SNOW_BAND <= 0) {
             sprintf(ErrStr,
-                    "Invalid number of elevation bands specified in global file (%d).  Number of bands must be >= 1.",
+                    "Invalid number of elevation bands specified in global "
+                    "file (%d).  Number of bands must be >= 1.",
                     options.SNOW_BAND);
             nrerror(ErrStr);
         }
@@ -1095,22 +1167,34 @@ get_global_param(filenames_struct *names,
         // Validate the input state file information
         if (options.INIT_STATE) {
             if (strcmp(names->init_state, "MISSING") == 0) {
-                nrerror(
-                    "\"INIT_STATE\" was specified, but no input state file has been defined.  Make sure that the global file defines the inputstate file on the line that begins with \"INIT_STATE\".");
+                sprintf(ErrStr,
+                        "\"INIT_STATE\" was specified, but no input state file "
+                        "has been defined.  Make sure that the global file "
+                        "defines the inputstate file on the line that begins "
+                        "with \"INIT_STATE\".");
+                nrerror(ErrStr);
             }
         }
 
         // Validate the output state file information
         if (options.SAVE_STATE) {
             if (strcmp(names->statefile, "MISSING") == 0) {
-                nrerror(
-                    "\"SAVE_STATE\" was specified, but no output state file has been defined.  Make sure that the global file defines the output state file on the line that begins with \"SAVE_STATE\".");
+                sprintf(ErrStr,
+                        "\"SAVE_STATE\" was specified, but no output state "
+                        "file has been defined.  Make sure that the global "
+                        "file defines the output state file on the line that "
+                        "begins with \"SAVE_STATE\".");
+                nrerror(ErrStr);
             }
             if (global.stateyear == MISSING || global.statemonth == MISSING ||
                 global.stateday == MISSING) {
                 sprintf(ErrStr,
-                        "Incomplete specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth,
-                        global.stateday);
+                        "Incomplete specification of the date to save state "
+                        "for state file (%s).\nSpecified date (yyyy-mm-dd): "
+                        "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
+                        "STATEDAY are set correctly in your global parameter "
+                        "file.\n", names->statefile, global.stateyear,
+                        global.statemonth, global.stateday);
                 nrerror(ErrStr);
             }
             // Check for month, day in range
@@ -1118,18 +1202,20 @@ get_global_param(filenames_struct *names,
             if (global.statemonth == 2) {
                 if ((global.stateyear % 4) == 0 &&
                     ((global.stateyear % 100) != 0 ||
-                     (global.stateyear % 400) ==
-                     0)) {
+                     (global.stateyear % 400) == 0)) {
                     lastvalidday = 29;
                 }
             }
             if (global.stateday > lastvalidday || global.statemonth > 12 ||
                 global.statemonth < 1 || global.stateday > 31 ||
-                global.stateday <
-                1) {
+                global.stateday < 1) {
                 sprintf(ErrStr,
-                        "Unusual specification of the date to save state for state file (%s).\nSpecified date (yyyy-mm-dd): %04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and STATEDAY are set correctly in your global parameter file.\n", names->statefile, global.stateyear, global.statemonth,
-                        global.stateday);
+                        "Unusual specification of the date to save state for "
+                        "state file (%s).\nSpecified date (yyyy-mm-dd): "
+                        "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
+                        "STATEDAY are set correctly in your global parameter "
+                        "file.\n", names->statefile, global.stateyear,
+                        global.statemonth, global.stateday);
                 nrerror(ErrStr);
             }
         }
@@ -1141,8 +1227,10 @@ get_global_param(filenames_struct *names,
         if (options.INIT_STATE && options.SAVE_STATE &&
             (strcmp(names->init_state, names->statefile) == 0)) {
             sprintf(ErrStr,
-                    "The save state file (%s) has the same name as the initialize state file (%s).  The initialize state file will be destroyed when the save state file is opened.", names->statefile,
-                    names->init_state);
+                    "The save state file (%s) has the same name as the "
+                    "initialize state file (%s).  The initialize state file "
+                    "will be destroyed when the save state file is opened.",
+                    names->statefile, names->init_state);
             nrerror(ErrStr);
         }
 
@@ -1150,52 +1238,64 @@ get_global_param(filenames_struct *names,
         if (options.QUICK_FLUX) {
             if (options.Nnode != 3) {
                 fprintf(stderr,
-                        "WARNING: To run the model QUICK_FLUX=TRUE, you must define exactly 3 soil thermal nodes.  Currently Nnodes is set to %d.  Setting Nnodes to 3.\n",
+                        "WARNING: To run the model QUICK_FLUX=TRUE, you must "
+                        "define exactly 3 soil thermal nodes.  Currently "
+                        "Nnodes is set to %d.  Setting Nnodes to 3.\n",
                         options.Nnode);
                 options.Nnode = 3;
             }
             if (options.IMPLICIT || options.EXP_TRANS) {
                 sprintf(ErrStr,
-                        "To run the model with QUICK_FLUX=TRUE, you cannot have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
+                        "To run the model with QUICK_FLUX=TRUE, you cannot "
+                        "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
                 nrerror(ErrStr);
             }
         }
         else {
             if (!options.FULL_ENERGY && !options.FROZEN_SOIL) {
                 sprintf(ErrStr,
-                        "To run the model in water balance mode (both FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your global parameter file).");
+                        "To run the model in water balance mode (both "
+                        "FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set "
+                        "QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your "
+                        "global parameter file).");
                 nrerror(ErrStr);
             }
         }
         if ((options.FULL_ENERGY ||
              options.FROZEN_SOIL) && options.Nlayer < 3) {
             sprintf(ErrStr,
-                    "You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",
-                    options.Nlayer);
+                    "You must define at least 3 soil moisture layers to run "
+                    "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
+                    "Currently Nlayers is set to  %d.", options.Nlayer);
             nrerror(ErrStr);
         }
         if ((!options.FULL_ENERGY &&
              !options.FROZEN_SOIL) && options.Nlayer < 1) {
             sprintf(ErrStr,
-                    "You must define at least 1 soil moisture layer to run the model.  Currently Nlayers is set to  %d.",
+                    "You must define at least 1 soil moisture layer to run "
+                    "the model.  Currently Nlayers is set to  %d.",
                     options.Nlayer);
             nrerror(ErrStr);
         }
         if (options.Nlayer > MAX_LAYERS) {
             sprintf(ErrStr,
-                    "Global file wants more soil moisture layers (%d) than are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and recompile.", options.Nlayer,
-                    MAX_LAYERS);
+                    "Global file wants more soil moisture layers (%d) than "
+                    "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
+                    "recompile.", options.Nlayer, MAX_LAYERS);
             nrerror(ErrStr);
         }
         if (options.Nnode > MAX_NODES) {
             sprintf(ErrStr,
-                    "Global file wants more soil thermal nodes (%d) than are defined by MAX_NODES (%d).  Edit vicNl_def.h and recompile.", options.Nnode,
-                    MAX_NODES);
+                    "Global file wants more soil thermal nodes (%d) than "
+                    "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
+                    "recompile.", options.Nnode, MAX_NODES);
             nrerror(ErrStr);
         }
         if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
             sprintf(ErrStr,
-                    "CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
+                    "CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set "
+                    "FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set "
+                    "CLOSE_ENERGY to FALSE.");
             nrerror(ErrStr);
         }
 
@@ -1212,26 +1312,35 @@ get_global_param(filenames_struct *names,
         if (options.LAKES) {
             if (!options.FULL_ENERGY) {
                 sprintf(ErrStr,
-                        "FULL_ENERGY must be TRUE if the lake model is to be run.");
+                        "FULL_ENERGY must be TRUE if the lake model is to "
+                        "be run.");
                 nrerror(ErrStr);
             }
             if (strcmp(names->lakeparam, "MISSING") == 0) {
-                nrerror(
-                    "\"LAKES\" was specified, but no lake parameter file has been defined.  Make sure that the global file defines the lake parameter file on the line that begins with \"LAKES\".");
+                sprintf(ErrStr,
+                        "\"LAKES\" was specified, but no lake parameter "
+                        "file has been defined.  Make sure that the global "
+                        "file defines the lake parameter file on the line that "
+                        "begins with \"LAKES\".");
             }
             if (global.resolution == 0) {
                 sprintf(ErrStr,
-                        "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
+                        "The model grid cell resolution (RESOLUTION) must be "
+                        "defined in the global control file when the lake "
+                        "model is active.");
                 nrerror(ErrStr);
             }
             if (global.resolution > 360 && !options.EQUAL_AREA) {
                 sprintf(ErrStr,
-                        "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
+                        "For EQUAL_AREA=FALSE, the model grid cell resolution "
+                        "(RESOLUTION) must be set to the number of lat or lon "
+                        "degrees per grid cell.  This cannot exceed 360.");
                 nrerror(ErrStr);
             }
             if (options.COMPUTE_TREELINE) {
                 sprintf(ErrStr,
-                        "LAKES = TRUE and COMPUTE_TREELINE = TRUE are incompatible options.");
+                        "LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
+                        "incompatible options.");
                 nrerror(ErrStr);
             }
         }
@@ -1269,19 +1378,23 @@ get_global_param(filenames_struct *names,
                 options.FROZEN_SOIL);
         if (options.IMPLICIT) {
             fprintf(stderr,
-                    ".... Using the implicit solution for the soil heat equation.\n");
+                    ".... Using the implicit solution for the soil heat "
+                    "equation.\n");
         }
         else {
             fprintf(stderr,
-                    ".... Using the explicit solution for the soil heat equation.\n");
+                    ".... Using the explicit solution for the soil heat "
+                    "equation.\n");
         }
         if (options.EXP_TRANS) {
             fprintf(stderr,
-                    ".... Thermal nodes are exponentially distributed with depth.\n");
+                    ".... Thermal nodes are exponentially distributed with "
+                    "depth.\n");
         }
         else {
             fprintf(stderr,
-                    ".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
+                    ".... Thermal nodes are linearly distributed with depth "
+                    "(except top two nodes).\n");
         }
         fprintf(stderr, "Run Snow Model Using a Time Step of %d hours\n",
                 options.SNOW_STEP);

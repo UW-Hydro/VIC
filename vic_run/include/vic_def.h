@@ -343,8 +343,8 @@ extern char ref_veg_ref_crop[];
 #define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */
 #define RADIUS 6371.228 /* Earth radius in km. */
 
-
-
+// July average temperature for tree line
+#define TREELINE_TEMPERATURE 10.
 
 /* define constants for saturated vapor pressure curve (kPa) */
 #define A_SVP 0.61078

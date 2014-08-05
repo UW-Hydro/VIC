@@ -488,7 +488,7 @@ vic_init(void)
         }
     }
 
-    if (options.JULY_TAVG_SUPPLIED) {
+    if (options.COMPUTE_TREELINE) {
         // avgJulyAirTemp: average July air temperature
         get_nc_field_double(filenames.soil, "avgJulyAirTemp",
                             d2start, d2count, dvar);
@@ -497,7 +497,7 @@ vic_init(void)
         }
     }
 
-    // TBD: implement some more processing of the soil variables
+    // Additional processing of the soil variables
     for (i = 0; i < global_domain.ncells_global; i++) {
         for (j = 0; j < options.Nlayer; j++) {
             // compute layer properties
@@ -610,92 +610,6 @@ vic_init(void)
             soil_con[i].AlbedoPar = AlbSoiParMin;
         }
     }
-
-    // read_vegparam()
-
-    // reading the vegetation parameters is slightly more complicated because
-    // VIC allocates memory for veg_con only if the vegetation type exists in
-    // the grid cell. The veg_con_map_struct is used to provide some of this
-    // mapping
-
-    // number of vegetation types - in vic this is defined without the bare soil
-    // and the vegetation above the treeline
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        nveg = veg_con_map[i].nv_active - 1;
-        if (options.AboveTreelineVeg >= 0) {
-            nveg -= 1;
-        }
-        for (j = 0; j < veg_con_map[i].nv_active; j++) {
-            veg_con[i][j].vegetat_type_num = (int) nveg;
-        }
-    }
-
-    // Cv: for each vegetation type, read the cover fraction into the mapping
-    // structure. Then assign only the ones with a fraction greater than 0 to
-    // the veg_con structure
-
-    for (j = 0; j < options.NVEGTYPES; j++) {
-        d3start[0] = j;
-        get_nc_field_double(filenames.veg, "Cv",
-                            d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            veg_con_map[i].Cv[j] = (double) dvar[idx[i]];
-        }
-    }
-
-    // do the mapping
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        k = 0;
-        for (j = 0; j < options.NVEGTYPES; j++) {
-            if (veg_con_map[i].Cv[j] > 0) {
-                veg_con_map[i].vidx[j] = k;
-                veg_con[i][k].Cv = veg_con_map[i].Cv[j];
-                veg_con[i][k].veg_class = j;
-                k++;
-            }
-            else {
-                veg_con_map[i].vidx[j] = -1;
-            }
-        }
-    }
-
-    // zone_depth: root zone depths
-    for (j = 0; j < options.NVEGTYPES; j++) {
-        d4start[0] = j;
-        for (k = 0; k < options.ROOT_ZONES; k++) {
-            d4start[1] = k;
-            get_nc_field_double(filenames.veg, "root_depth",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
-                    veg_con[i][vidx].zone_depth[k] = (double) dvar[idx[i]];
-                }
-            }
-        }
-    }
-
-    // zone_fract: root fractions
-    for (j = 0; j < options.NVEGTYPES; j++) {
-        d4start[0] = j;
-        for (k = 0; k < options.ROOT_ZONES; k++) {
-            d4start[1] = k;
-            get_nc_field_double(filenames.veg, "root_fract",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
-                    veg_con[i][vidx].zone_fract[k] = (double) dvar[idx[i]];
-                }
-            }
-        }
-    }
-
-    // calculate root fractions
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        calc_root_fractions(veg_con[i], &(soil_con[i]));
-    }
-
     // read_snowband()
     if (options.SNOW_BAND == 1) {
         for (i = 0; i < global_domain.ncells_global; i++) {
@@ -826,9 +740,104 @@ vic_init(void)
         }
     }
 
-    // TBD: Handle the treeline option correctly
-    if (options.COMPUTE_TREELINE) {
-        nrerror("COMPUTE_TREELINE option not yet implemented in vic_init()");
+    // logic from compute_treeline()
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        for (j = 0; j < options.SNOW_BAND; j++) {
+            // Lapse average annual July air temperature
+            if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
+                TREELINE_TEMPERATURE) {
+                // Snow band is above treeline
+                soil_con[i].AboveTreeLine[j] = TRUE;
+            }
+            else {
+                soil_con[i].AboveTreeLine[j] = FALSE;
+            }
+        }
+    }
+
+    // read_vegparam()
+
+    // reading the vegetation parameters is slightly more complicated because
+    // VIC allocates memory for veg_con only if the vegetation type exists in
+    // the grid cell. The veg_con_map_struct is used to provide some of this
+    // mapping
+
+    // number of vegetation types - in vic this is defined without the bare soil
+    // and the vegetation above the treeline
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        nveg = veg_con_map[i].nv_active - 1;
+        if (options.AboveTreelineVeg >= 0) {
+            nveg -= 1;
+        }
+        for (j = 0; j < veg_con_map[i].nv_active; j++) {
+            veg_con[i][j].vegetat_type_num = (int) nveg;
+        }
+    }
+
+    // Cv: for each vegetation type, read the cover fraction into the mapping
+    // structure. Then assign only the ones with a fraction greater than 0 to
+    // the veg_con structure
+
+    for (j = 0; j < options.NVEGTYPES; j++) {
+        d3start[0] = j;
+        get_nc_field_double(filenames.veg, "Cv",
+                            d3start, d3count, dvar);
+        for (i = 0; i < global_domain.ncells_global; i++) {
+            veg_con_map[i].Cv[j] = (double) dvar[idx[i]];
+        }
+    }
+
+    // do the mapping
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        k = 0;
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            if (veg_con_map[i].Cv[j] > 0) {
+                veg_con_map[i].vidx[j] = k;
+                veg_con[i][k].Cv = veg_con_map[i].Cv[j];
+                veg_con[i][k].veg_class = j;
+                k++;
+            }
+            else {
+                veg_con_map[i].vidx[j] = -1;
+            }
+        }
+    }
+
+    // zone_depth: root zone depths
+    for (j = 0; j < options.NVEGTYPES; j++) {
+        d4start[0] = j;
+        for (k = 0; k < options.ROOT_ZONES; k++) {
+            d4start[1] = k;
+            get_nc_field_double(filenames.veg, "root_depth",
+                                d4start, d4count, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].zone_depth[k] = (double) dvar[idx[i]];
+                }
+            }
+        }
+    }
+
+    // zone_fract: root fractions
+    for (j = 0; j < options.NVEGTYPES; j++) {
+        d4start[0] = j;
+        for (k = 0; k < options.ROOT_ZONES; k++) {
+            d4start[1] = k;
+            get_nc_field_double(filenames.veg, "root_fract",
+                                d4start, d4count, dvar);
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].zone_fract[k] = (double) dvar[idx[i]];
+                }
+            }
+        }
+    }
+
+    // calculate root fractions
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        calc_root_fractions(veg_con[i], &(soil_con[i]));
     }
 
     // TBD: implement the blowing snow option

@@ -66,6 +66,52 @@ print_param_set(param_set_struct *param_set)
 }
 
 void
+print_veg_con(veg_con_struct *vcon,
+              size_t          nroots,
+              char            blowing,
+              char            lake,
+              char            carbon,
+              size_t          ncanopy)
+{
+    size_t i;
+
+    printf("veg_con:\n");
+    printf("\tCv: %.4lf\n", vcon->Cv);
+    printf("\tCv_sum: %.4lf\n", vcon->Cv_sum);
+    printf("\troot:");
+    for (i = 0; i < nroots; i++) {
+        printf("\t%.2lf", vcon->root[i]);
+    }
+    printf("\n");
+    printf("\tzone_depth:");
+    for (i = 0; i < nroots; i++) {
+        printf("\t%.2lf", vcon->zone_depth[i]);
+    }
+    printf("\n");
+    printf("\tzone_fract:");
+    for (i = 0; i < nroots; i++) {
+        printf("\t%.2lf", vcon->zone_fract[i]);
+    }
+    printf("\n");
+    printf("\tveg_class: %d\n", vcon->veg_class);
+    printf("\tvegetat_type_num: %d\n", vcon->vegetat_type_num);
+    if (blowing) {
+        printf("\tsigma_slope: %.4f\n", vcon->sigma_slope);
+        printf("\tlag_one: %.4f\n", vcon->lag_one);
+        printf("\tfetch: %.4f\n", vcon->fetch);
+    }
+    if (lake) {
+        printf("\tLAKE: %d\n", vcon->LAKE);
+    }
+    if (carbon) {
+        printf("\tCanopLayerBnd:");
+        for (i = 0; i < nroots; i++) {
+            printf("\t%.2lf", vcon->CanopLayerBnd[i]);
+        }
+    }
+}
+
+void
 print_veg_con_map(veg_con_map_struct *veg_con_map)
 {
     size_t i;
@@ -76,5 +122,64 @@ print_veg_con_map(veg_con_map_struct *veg_con_map)
     for (i = 0; i < veg_con_map->nv_types; i++) {
         printf("\t%zd: %d (vidx) %lf (Cv)\n", i, veg_con_map->vidx[i],
                veg_con_map->Cv[i]);
+    }
+}
+
+void
+print_veg_lib(veg_lib_struct *vlib,
+              char            carbon)
+{
+    size_t i;
+
+    printf("veg_lib:\n");
+    printf("\toverstory: %d\n", vlib->overstory);
+    printf("\tLAI:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2lf", vlib->LAI[i]);
+    }
+    printf("\n");
+    printf("\tWdmax:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2lf", vlib->Wdmax[i]);
+    }
+    printf("\n");
+    printf("\talbedo:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2lf", vlib->albedo[i]);
+    }
+    printf("\n");
+    printf("\tdisplacement:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2lf", vlib->displacement[i]);
+    }
+    printf("\n");
+    printf("\temissivity:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2lf", vlib->emissivity[i]);
+    }
+    printf("\n");
+    printf("\tNVegLibTypes: %d\n", vlib->NVegLibTypes);
+    printf("\trad_atten: %.4lf\n", vlib->rad_atten);
+    printf("\trarc: %.4lf\n", vlib->rarc);
+    printf("\trmin: %.4f\n", vlib->rmin);
+    printf("\troughness:");
+    for (i = 0; i < MONTHSPERYEAR; i++) {
+        printf("\t%.2f", vlib->roughness[i]);
+    }
+    printf("\n");
+    printf("\ttrunk_ratio: %.4lf\n", vlib->trunk_ratio);
+    printf("\twind_atten: %.4lf\n", vlib->wind_atten);
+    printf("\twind_h: %.4lf\n", vlib->wind_h);
+    printf("\tRGL: %.4f\n", vlib->RGL);
+    printf("\tveg_class: %d\n", vlib->veg_class);
+    if (carbon) {
+        printf("\tCtype: %d\n", vlib->Ctype);
+        printf("\tMaxCarboxRate: %.4lf\n", vlib->MaxCarboxRate);
+        printf("\tMaxETransport: %.4lf\n", vlib->MaxETransport);
+        printf("\tCO2Specificity: %.4lf\n", vlib->CO2Specificity);
+        printf("\tLightUseEff: %.4lf\n", vlib->LightUseEff);
+        printf("\tNscaleFlag: %d\n", vlib->NscaleFlag);
+        printf("\tWnpp_inhib: %.4lf\n", vlib->Wnpp_inhib);
+        printf("\tNPPfactor_sat: %.4lf\n", vlib->NPPfactor_sat);
     }
 }

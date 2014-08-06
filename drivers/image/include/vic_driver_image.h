@@ -186,7 +186,10 @@ void print_domain(domain_struct *domain, bool print_loc);
 void print_force_type(force_type_struct *force_type);
 void print_location(location_struct *location);
 void print_param_set(param_set_struct *param_set);
+void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
+                   char carbon, size_t ncanopy);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
+void print_veg_lib(veg_lib_struct *vlib, char carbon);
 int put_nc_field_double(char *nc_name, bool *open, int *nc_id,
                         double fillval, int *dimids, int ndims,
                         char *var_name, size_t *start, size_t *count,

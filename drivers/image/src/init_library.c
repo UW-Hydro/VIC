@@ -90,8 +90,6 @@ initialize_soil_con(soil_con_struct *soil_con)
             soil_con->zwtvmoist_moist[i][j] = 0.;
         }
     }
-
-    soil_con->layer_node_fract = NULL;
 }
 
 void

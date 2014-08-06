@@ -1046,7 +1046,6 @@ typedef struct {
   float    lng;                       /* grid cell central longitude */
   double   cell_area;                 /* Area of grid cell (m^2) */
   float    time_zone_lng;             /* central meridian of the time zone */
-  float  **layer_node_fract;          /* fraction of all nodes within each layer */
   int      gridcel;                   /* grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
   double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */

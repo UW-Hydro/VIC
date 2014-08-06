@@ -22,6 +22,23 @@ print_domain(domain_struct *domain,
 }
 
 void
+print_filep(filep_struct *fp)
+{
+    printf("filep:\n");
+    printf("\tforcing[0]: %p\n", fp->forcing[0]);
+    printf("\tforcing[1]: %p\n", fp->forcing[1]);
+    printf("\tglobalparam: %p\n", fp->globalparam);
+    printf("\tdomain: %p\n", fp->domain);
+    printf("\tinit_state: %p\n", fp->init_state);
+    printf("\tlakeparam: %p\n", fp->lakeparam);
+    printf("\tsnowband: %p\n", fp->snowband);
+    printf("\tsoilparam: %p\n", fp->soilparam);
+    printf("\tstatefile: %p\n", fp->statefile);
+    printf("\tveglib: %p\n", fp->veglib);
+    printf("\tvegparam: %p\n", fp->vegparam);
+}
+
+void
 print_force_type(force_type_struct *force_type)
 {
     printf("force_type:\n");

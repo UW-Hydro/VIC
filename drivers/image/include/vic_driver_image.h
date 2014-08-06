@@ -183,6 +183,7 @@ veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_domain(domain_struct *domain, bool print_loc);
+void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
 void print_location(location_struct *location);
 void print_param_set(param_set_struct *param_set);

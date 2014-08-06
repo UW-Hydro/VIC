@@ -271,6 +271,7 @@ extern char ref_veg_ref_crop[];
 #define DAYS_PER_YEAR 365.
 #define HOURSPERDAY   24        /* number of hours per day */
 #define HOURSPERYEAR  24*365    /* number of hours per year */
+#define MONTHSPERYEAR 12 /* number of months per year */
 #define SECPHOUR     3600	/* seconds per hour */
 #define SEC_PER_DAY 86400.	/* seconds per day */
 
@@ -1080,18 +1081,18 @@ typedef struct {
 typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow
 			      accumulation in canopy */
-  double LAI[12];          /* leaf area index */
-  double Wdmax[12];        /* maximum dew holding capacity (mm) */
-  double albedo[12];       /* vegetation albedo (added for full energy)
+  double LAI[MONTHSPERYEAR];          /* leaf area index */
+  double Wdmax[MONTHSPERYEAR];        /* maximum dew holding capacity (mm) */
+  double albedo[MONTHSPERYEAR];       /* vegetation albedo (added for full energy)
 			      (fraction) */
-  double displacement[12]; /* vegetation displacement height (m) */
-  double emissivity[12];   /* vegetation emissivity (fraction) */
+  double displacement[MONTHSPERYEAR]; /* vegetation displacement height (m) */
+  double emissivity[MONTHSPERYEAR];   /* vegetation emissivity (fraction) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
   double rad_atten;        /* radiation attenuation due to canopy,
 			      default = 0.5 (N/A) */
   double rarc;             /* architectural resistance (s/m) */
   double rmin;             /* minimum stomatal resistance (s/m) */
-  double roughness[12];    /* vegetation roughness length (m) */
+  double roughness[MONTHSPERYEAR];    /* vegetation roughness length (m) */
   double trunk_ratio;      /* ratio of trunk height to tree height,
 			      default = 0.2 (fraction) */
   double wind_atten;       /* wind attenuation through canopy,

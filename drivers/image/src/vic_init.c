@@ -2,8 +2,6 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-#define NMONTHS 12
-
 void
 vic_init(void)
 {
@@ -181,7 +179,7 @@ vic_init(void)
     // LAI and Wdmax
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < 12; k++) {
+        for (k = 0; k < MONTHSPERYEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "LAI",
                                 d4start, d4count, dvar);
@@ -196,7 +194,7 @@ vic_init(void)
     // albedo
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < 12; k++) {
+        for (k = 0; k < MONTHSPERYEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "albedo",
                                 d4start, d4count, dvar);
@@ -209,7 +207,7 @@ vic_init(void)
     // veg_rough
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < 12; k++) {
+        for (k = 0; k < MONTHSPERYEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "veg_rough",
                                 d4start, d4count, dvar);
@@ -222,7 +220,7 @@ vic_init(void)
     // displacement
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < 12; k++) {
+        for (k = 0; k < MONTHSPERYEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "displacement",
                                 d4start, d4count, dvar);
@@ -1085,4 +1083,3 @@ vic_init(void)
     free(idx);
 }
 
-#undef NMONTHS

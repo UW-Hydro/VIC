@@ -182,19 +182,41 @@ snow_data_struct **make_snow_data(int nveg);
 veg_var_struct **make_veg_var(int veg_type_num);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
+void print_all_vars(all_vars_struct *all);
+void print_atmos_data(atmos_data_struct *atmos);
+void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
+                     size_t npet);
+void print_dmy(dmy_struct *dmy);
 void print_domain(domain_struct *domain, bool print_loc);
+void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
+void print_Error(Error_struct *error);
+void print_filenames(filenames_struct *fnames);
 void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
+void print_global_param(global_param_struct *gp);
+void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
+void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
+                    size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
+void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_location(location_struct *location);
+void print_nc_file(nc_file_struct *nc);
+void print_nc_var(nc_var_struct *nc_var, size_t ndims);
+void print_option(option_struct *option);
+void print_out_data(out_data_struct *out, size_t nelem);
+void print_out_data_file(out_data_file_struct *outf);
 void print_param_set(param_set_struct *param_set);
+void print_save_data(save_data_struct *save);
+void print_snow_data(snow_data_struct *snow);
+void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
+                    size_t nfrost, size_t nbands, size_t nzwt);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
+void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
-int put_nc_field_double(char *nc_name, bool *open, int *nc_id,
-                        double fillval, int *dimids, int ndims,
-                        char *var_name, size_t *start, size_t *count,
-                        double *var);
+int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
+                        int *dimids, int ndims, char *var_name, size_t *start,
+                        size_t *count, double *var);
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
@@ -205,7 +227,7 @@ int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
                          veg_lib_struct *veg_lib);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
-                 nc_var_struct *nc_vars); 
+                 nc_var_struct *nc_vars);
 void vic_finalize(void);
 void vic_force(void);
 void vic_image_run(void);

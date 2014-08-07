@@ -132,6 +132,7 @@ OBJS = \
 	${DRIVERPATH}/src/open_state_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/parse_output_info.o \
+	${DRIVERPATH}/src/print_library.o\
 	${DRIVERPATH}/src/read_atmos_data.o \
 	${DRIVERPATH}/src/read_forcing_data.o \
 	${DRIVERPATH}/src/read_initial_model_state.o \

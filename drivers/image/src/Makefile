@@ -11,8 +11,12 @@ DRIVERPATH = ..
 # VIC RUN PATH
 VICPATH = ../../../vic_run
 
-# NETCDF include
-NETCDFPATH = /opt/local/include
+# NETCDF include .. change the path depending on travis or other location
+ifeq (1, ${TRAVIS})
+NETCDFPATH = /usr
+else
+NETCDFPATH = /opt/local
+endif
 
 # Set SHELL = your shell here
 SHELL = /bin/bash
@@ -21,11 +25,11 @@ SHELL = /bin/bash
 CC = gcc
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${DRIVERPATH}/../classic/include -I ${NETCDFPATH}
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${DRIVERPATH}/../classic/include -I ${NETCDFPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
-LIBRARY = -lm -L/opt/local/lib -lnetcdf
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wno-unused

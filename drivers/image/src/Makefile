@@ -12,7 +12,7 @@ DRIVERPATH = ..
 VICPATH = ../../../vic_run
 
 # NETCDF include .. change the path depending on travis or other location
-ifeq (1, ${TRAVIS})
+ifeq (true, ${TRAVIS})
 NETCDFPATH = /usr
 else
 NETCDFPATH = /opt/local

@@ -2,7 +2,7 @@ language: c
 compiler: gcc
 before_install:
     - sudo apt-get update -qq
-    - sudo apt-get install -qq libnetcdf6
+    - sudo apt-get install -y libnetcdf6
 script: 
     - make -C drivers/classic/src/
     - make -C drivers/image/src 

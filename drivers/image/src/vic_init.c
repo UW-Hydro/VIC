@@ -844,7 +844,8 @@ vic_init(void)
     // Run some checks and corrections for vegetation
     for (i = 0; i < global_domain.ncells_global; i++) {
         no_overstory = FALSE;
-        for (j = 0; j < options.NVEGTYPES; j++) {
+        // Only run to options.NVEGTYPES - 1, since bare soil is the last type
+        for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
             if (vidx != -1) {
                 sum = 0;

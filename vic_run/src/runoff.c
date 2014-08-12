@@ -162,6 +162,7 @@ int  runoff(cell_data_struct  *cell,
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-May-09 Added check on liquid soil moisture to ensure always >= 0.	TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -422,6 +423,11 @@ int  runoff(cell_data_struct  *cell,
 	firstlayer=FALSE;
 	      
 	/** verify that current layer moisture is greater than minimum **/
+  if (liq[lindex] < 0) {
+    /** liquid cannot fall below 0 **/
+    Q12[lindex] += liq[lindex];
+    liq[lindex] = 0;
+  }
 	if ((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
 	  /** moisture cannot fall below minimum **/
 	  Q12[lindex] += (liq[lindex]+ice[lindex]) - resid_moist[lindex];

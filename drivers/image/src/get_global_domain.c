@@ -85,11 +85,16 @@ get_global_domain(char          *nc_name,
         idx[i] = get_global_idx(global_domain, i);
     }
 
-    // get longitude
+    // get longitude - 
     // TBD: read var id from file
     get_nc_field_double(nc_name, "xc",
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells_global; i++) {
+        // rescale to [-180., 180]. Note that the if statement is not strictly
+        // needed, but it prevents -180 from turning into 180 and vice versa
+        if (var[idx[i]] < -180.f || var[idx[i]] > -180.f) {
+            var[idx[i]] -= round(var[idx[i]]/360.f) * 360.f;
+        }
         global_domain->locations[i].longitude = (double) var[idx[i]];
     }
 

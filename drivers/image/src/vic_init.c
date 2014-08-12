@@ -855,7 +855,7 @@ vic_init(void)
                     // TBD: Add location info
                     sprintf(ErrStr,
                             "Root zone depths must sum to a value greater "
-                            "than 0.");
+                            "than 0 (sum = %.2lf) - Type: %zd.", sum, j);
                     nrerror(ErrStr);
                 }
                 sum = 0;
@@ -868,7 +868,7 @@ vic_init(void)
                     fprintf(stderr,
                             "WARNING: Root zone fractions sum to more than 1 "
                             "(%f), normalizing fractions.  If the sum is "
-                            "large, check your vegetation parameter file",
+                            "large, check your vegetation parameter file.\n",
                             sum);
                     for (k = 0; k < options.ROOT_ZONES; k++) {
                         veg_con[i][vidx].zone_fract[k] /= sum;

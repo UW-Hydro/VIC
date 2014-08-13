@@ -14,6 +14,8 @@ VICPATH = ../../../vic_run
 # NETCDF include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
 NETCDFPATH = /usr
+else ifeq (hydro-c1, $(shell hostname))
+NETCDFPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
 else
 NETCDFPATH = /opt/local
 endif
@@ -150,9 +152,9 @@ OBJS = \
 	${VICPATH}/src/water_under_ice.o \
 	${VICPATH}/src/write_layer.o \
 	${VICPATH}/src/write_vegvar.o \
-	${VICPATH}/src/zero_output_list.o	 
+	${VICPATH}/src/zero_output_list.o
 
-SRCS = $(OBJS:%.o=%.c) 
+SRCS = $(OBJS:%.o=%.c)
 
 #$(SRCS):
 #	co $@
@@ -185,7 +187,7 @@ tags:	TAGS
 TAGS:	$(SRCS) $(HDRS)
 	etags $(SRCS) $(HDRS)
 clean::
-	\rm -f TAGS	       
+	\rm -f TAGS
 
 
 # -------------------------------------------------------------
@@ -196,4 +198,4 @@ depend: .depend
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
-	\rm -f .depend	     
+	\rm -f .depend

@@ -19,7 +19,8 @@ vic_init(void)
 
     bool                       found;
     bool                       no_overstory;
-    char                       ErrStr[MAXSTRING];
+    char                       errstr[MAXSTRING];
+    char                       locstr[MAXSTRING];
     double                     mean;
     double                     sum;
     double                    *dvar = NULL;
@@ -515,21 +516,22 @@ vic_init(void)
                                       soil_con[i].soil_density[j];
             soil_con[i].max_moist[j] = soil_con[i].depth[j] *
                                        soil_con[i].porosity[j] * 1000.;
-            // TBD: include location info for error
             // check layer thicknesses
             if (soil_con[i].depth[j] < MINSOILDEPTH) {
-                sprintf(ErrStr, "ERROR: Model will not function with layer "
-                        "%zd depth %f < %f m.\n", j, soil_con[i].depth[j],
-                        MINSOILDEPTH);
-                nrerror(ErrStr);
+                sprint_location(locstr, &(global_domain.locations[i]));
+                sprintf(errstr, "ERROR: Model will not function with layer "
+                        "%zd depth %f < %f m.\n%s", j, soil_con[i].depth[j],
+                        MINSOILDEPTH, locstr);
+                nrerror(errstr);
             }
         }
         // check relative thickness of top two layers
         if (soil_con[i].depth[0] > soil_con[i].depth[1]) {
-            sprintf(ErrStr, "ERROR: Model will not function with layer 0 "
-                    "thicker than layer 1 (%f m > %f m).\n",
-                    soil_con[i].depth[0], soil_con[i].depth[1]);
-            nrerror(ErrStr);
+            sprint_location(locstr, &(global_domain.locations[i]));
+            sprintf(errstr, "ERROR: Model will not function with layer 0 "
+                    "thicker than layer 1 (%f m > %f m).\n%s",
+                    soil_con[i].depth[0], soil_con[i].depth[1], locstr);
+            nrerror(errstr);
         }
         // compute maximum infiltration for upper layers
         if (options.Nlayer == 2) {
@@ -547,41 +549,46 @@ vic_init(void)
             soil_con[i].Wcr[j] *= soil_con[i].max_moist[j];
             soil_con[i].Wpwp[j] *= soil_con[i].max_moist[j];
             if (soil_con[i].Wpwp[j] > soil_con[i].Wcr[j]) {
-                sprintf(ErrStr, "Calculated wilting point moisture (%f mm) is "
+                sprint_location(locstr, &(global_domain.locations[i]));
+                sprintf(errstr, "Calculated wilting point moisture (%f mm) is "
                         "greater than calculated critical point moisture "
                         "(%f mm) for layer %zd."
                         "\n\tIn the soil parameter file, "
-                        "Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
-                        soil_con[i].Wpwp[j], soil_con[i].Wcr[j], j);
-                nrerror(ErrStr);
+                        "Wpwp_FRACT MUST be <= Wcr_FRACT.\n%s",
+                        soil_con[i].Wpwp[j], soil_con[i].Wcr[j], j, locstr);
+                nrerror(errstr);
             }
             if (soil_con[i].Wpwp[j] < soil_con[i].resid_moist[j] *
                 soil_con[i].depth[j] * 1000.) {
-                sprintf(ErrStr, "Calculated wilting point moisture (%f mm) is "
+                sprint_location(locstr, &(global_domain.locations[i]));
+                sprintf(errstr, "Calculated wilting point moisture (%f mm) is "
                         "less than calculated residual moisture (%f mm) for "
                         "layer %zd.\n\tIn the soil parameter file, "
                         "Wpwp_FRACT MUST be >= resid_moist / "
-                        "(1.0 - bulk_density/soil_density).\n",
+                        "(1.0 - bulk_density/soil_density).\n%s",
                         soil_con[i].Wpwp[j], soil_con[i].resid_moist[j] *
-                        soil_con[i].depth[j] * 1000., j);
-                nrerror(ErrStr);
+                        soil_con[i].depth[j] * 1000., j, locstr);
+                nrerror(errstr);
             }
         }
 
         // validate spatial snow/frost params
         if (options.SPATIAL_SNOW) {
             if (soil_con[i].max_snow_distrib_slope < 0.0) {
-                sprintf(ErrStr, "max_snow_distrib_slope (%f) must be "
-                        "positive.\n", soil_con[i].max_snow_distrib_slope);
-                nrerror(ErrStr);
+                sprint_location(locstr, &(global_domain.locations[i]));
+                sprintf(errstr, "max_snow_distrib_slope (%f) must be "
+                        "positive.\n%s", soil_con[i].max_snow_distrib_slope,
+                        locstr);
+                nrerror(errstr);
             }
         }
 
         if (options.SPATIAL_FROST) {
             if (soil_con[i].frost_slope < 0.0) {
-                sprintf(ErrStr, "frost_slope (%f) must be positive.\n",
-                        soil_con[i].frost_slope);
-                nrerror(ErrStr);
+                sprint_location(locstr, &(global_domain.locations[i]));
+                sprintf(errstr, "frost_slope (%f) must be positive.\n%s",
+                        soil_con[i].frost_slope, locstr);
+                nrerror(errstr);
             }
         }
 
@@ -655,20 +662,20 @@ vic_init(void)
             sum = 0.;
             for (j = 0; j < options.SNOW_BAND; j++) {
                 if (soil_con[i].AreaFract[j] < 0) {
-                    // TBD: Add location info
-                    sprintf(ErrStr, "Negative snow band area fraction "
-                            "(%f) read from file\n",
-                            soil_con[i].AreaFract[j]);
-                    nrerror(ErrStr);
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr, "Negative snow band area fraction "
+                            "(%f) read from file\n%s",
+                            soil_con[i].AreaFract[j], locstr);
+                    nrerror(errstr);
                 }
                 sum += soil_con[i].AreaFract[j];
             }
             // TBD: Need better check for equal to 1.
             if (sum != 1.) {
-                // TBD: Add location info
+                sprint_location(locstr, &(global_domain.locations[i]));
                 fprintf(stderr, "WARNING: Sum of the snow band area "
                         "fractions does not equal 1 (%f), dividing "
-                        "each fraction by the sum\n", sum);
+                        "each fraction by the sum\n%s", sum, locstr);
                 for (j = 0; j < options.SNOW_BAND; j++) {
                     soil_con[i].AreaFract[j] /= sum;
                 }
@@ -681,12 +688,12 @@ vic_init(void)
             }
             mean /= options.SNOW_BAND;
             if (fabs(soil_con[i].elevation - soil_con[i].BandElev[j]) > 1.0) {
-                // TBD: Add location info
+                sprint_location(locstr, &(global_domain.locations[i]));
                 fprintf(stderr, "WARNING: average band elevation %f not "
                         "equal to grid_cell average elevation %f; "
                         "setting grid cell elevation to average "
-                        "band elevation.\n",
-                        mean, soil_con[i].elevation);
+                        "band elevation.\n%s",
+                        mean, soil_con[i].elevation, locstr);
                 soil_con[i].elevation = (float) mean;
             }
             // Tfactor: calculate the temperature factor
@@ -701,31 +708,31 @@ vic_init(void)
             sum = 0.;
             for (j = 0; j < options.SNOW_BAND; j++) {
                 if (soil_con[i].Pfactor[j] < 0.) {
-                    // TBD: Add location info
-                    sprintf(ErrStr, "Snow band precipitation fraction (%lf) "
-                            "must be between 0 and 1.\n",
-                            soil_con[i].Pfactor[j]);
-                    nrerror(ErrStr);
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr, "Snow band precipitation fraction (%lf) "
+                            "must be between 0 and 1.\n%s",
+                            soil_con[i].Pfactor[j], locstr);
+                    nrerror(errstr);
                 }
                 if (soil_con[i].Pfactor[j] > 0. &&
                     soil_con[i].AreaFract[j] == 0) {
-                    // TBD: Add location info
                     // TBD: Check to make sure whether this check is actually
                     // needed
-                    sprintf(ErrStr, "Snow band precipitation fraction (%lf) "
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr, "Snow band precipitation fraction (%lf) "
                             "should be 0 when the area fraction is "
-                            "0. (band = %zd).\n",
-                            soil_con[i].AreaFract[j], j);
-                    nrerror(ErrStr);
+                            "0. (band = %zd).\n%s",
+                            soil_con[i].AreaFract[j], j, locstr);
+                    nrerror(errstr);
                 }
                 sum += soil_con[i].Pfactor[j];
             }
             // TBD: Need better check for equal to 1.
             if (sum != 1.) {
-                // TBD: Add location info
+                sprint_location(locstr, &(global_domain.locations[i]));
                 fprintf(stderr, "WARNING: Sum of the snow band precipitation "
                         "fractions does not equal 1 (%f), dividing "
-                        "each fraction by the sum\n", sum);
+                        "each fraction by the sum\n%s", sum, locstr);
                 for (j = 0; j < options.SNOW_BAND; j++) {
                     soil_con[i].Pfactor[j] /= sum;
                 }
@@ -854,11 +861,12 @@ vic_init(void)
                     sum += veg_con[i][vidx].zone_depth[k];
                 }
                 if (sum <= 0) {
-                    // TBD: Add location info
-                    sprintf(ErrStr,
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr,
                             "Root zone depths must sum to a value greater "
-                            "than 0 (sum = %.2lf) - Type: %zd.", sum, j);
-                    nrerror(ErrStr);
+                            "than 0 (sum = %.2lf) - Type: %zd.\n%s", sum, j, 
+                            locstr);
+                    nrerror(errstr);
                 }
                 sum = 0;
                 for (k = 0; k < options.ROOT_ZONES; k++) {
@@ -866,12 +874,12 @@ vic_init(void)
                 }
                 // TBD: Need better test for not equal to 1.
                 if (sum != 1.) {
-                    // TBD: Add location info
+                    sprint_location(locstr, &(global_domain.locations[i]));
                     fprintf(stderr,
                             "WARNING: Root zone fractions sum to more than 1 "
                             "(%f), normalizing fractions.  If the sum is "
-                            "large, check your vegetation parameter file.\n",
-                            sum);
+                            "large, check your vegetation parameter file.\n%s",
+                            sum, locstr);
                     for (k = 0; k < options.ROOT_ZONES; k++) {
                         veg_con[i][vidx].zone_fract[k] /= sum;
                     }
@@ -886,12 +894,13 @@ vic_init(void)
                     }
                 }
                 if (!found) {
-                    // TBD: add location info
-                    sprintf(ErrStr,
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr,
                             "The vegetation class id %i in vegetation tile %i "
                             "from cell %zd is not defined in the vegetation "
-                            "library", veg_con[i][vidx].veg_class, vidx, i);
-                    nrerror(ErrStr);
+                            "library\n%s", veg_con[i][vidx].veg_class, vidx, i,
+                            locstr);
+                    nrerror(errstr);
                 }
                 // bad use of indexing -- Cv_sum should not be part of the
                 // structure. Simply maintained for backward compatibility with
@@ -1009,22 +1018,24 @@ vic_init(void)
                     }
                 }
                 if (!found) {
-                    // TBD: add location info
-                    sprintf(ErrStr,
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr,
                             "The vegetation class id %i in vegetation tile %i "
                             "from cell %zd is not defined in the vegetation "
-                            "library", veg_con[i][vidx].veg_class, vidx, i);
-                    nrerror(ErrStr);
+                            "library\n%s", veg_con[i][vidx].veg_class, vidx, i,
+                            locstr);
+                    nrerror(errstr);
                 }
                 // make sure it has no overstory
                 veg_class = veg_con[i][options.NVEGTYPES-1].veg_class;
                 if (veg_lib[i][veg_class].overstory) {
-                    // TBD: add location info
-                    sprintf(ErrStr,
+                    sprint_location(locstr, &(global_domain.locations[i]));
+                    sprintf(errstr,
                             "Vegetation class %i is defined to have overstory, "
                             "so it cannot be used as the default vegetation "
-                            "type for above canopy snow bands.", veg_class);
-                    nrerror(ErrStr);
+                            "type for above canopy snow bands.\n%s", veg_class,
+                            locstr);
+                    nrerror(errstr);
                 }
             }
             
@@ -1036,9 +1047,10 @@ vic_init(void)
         // otherwise throw an error
         // TBD: Need better check for equal to 1.
         if (veg_con[i][0].Cv_sum != 1.) {
-            // TBD: add location info
-            fprintf(stderr, "Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n",
-                    veg_con[i][0].Cv_sum, i);
+            sprint_location(locstr, &(global_domain.locations[i]));
+            fprintf(stderr, 
+                    "Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n%s",
+                    veg_con[i][0].Cv_sum, i, locstr);
             for (j = 0; j < options.NVEGTYPES; j++) {
                 vidx = veg_con_map[i].vidx[j];
                 if (vidx != -1) {
@@ -1051,17 +1063,17 @@ vic_init(void)
 
     // TBD: implement the blowing snow option
     if (options.BLOWING) {
-        sprintf(ErrStr,
+        sprintf(errstr,
                 "BLOWING option not yet implemented in vic_init()");
-        nrerror(ErrStr);
+        nrerror(errstr);
     }
 
     // read_lakeparam()
     // TBD: read lake parameters
     if (options.LAKES) {
-        sprintf(ErrStr,
+        sprintf(errstr,
                 "LAKES option not yet implemented in vic_init()");
-        nrerror(ErrStr);
+        nrerror(errstr);
     }
 
     // initialize structures with default values
@@ -1071,9 +1083,9 @@ vic_init(void)
         initialize_soil(all_vars[i].cell, &(soil_con[i]), veg_con[i], nveg);
         initialize_veg(all_vars[i].veg_var, veg_con[i], nveg);
         if (options.LAKES) {
-            sprintf(ErrStr,
+            sprintf(errstr,
                     "LAKES option not yet implemented in vic_init()");
-            nrerror(ErrStr);
+            nrerror(errstr);
         }
         initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
     }

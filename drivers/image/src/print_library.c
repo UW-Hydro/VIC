@@ -282,7 +282,7 @@ void
 print_global_param(global_param_struct *gp)
 {
     size_t i;
-    
+
     printf("global_param:\n");
     printf("\tMAX_SNOW_TEMP: %.4lf\n", gp->MAX_SNOW_TEMP);
     printf("\tMIN_RAIN_TEMP: %.4lf\n", gp->MIN_RAIN_TEMP);
@@ -451,6 +451,27 @@ print_location(location_struct *loc)
     printf("\tlocal_cell_idx : %zd\n", loc->local_cell_idx);
     printf("\tlocal_x_idx    : %zd\n", loc->local_x_idx);
     printf("\tlocal_y_idx    : %zd\n", loc->local_y_idx);
+}
+
+void
+sprint_location(char            *str,
+                location_struct *loc)
+{
+    sprintf(str,
+            "location:\n"
+            "\tlatitude       : %.4lf\n"
+            "\tlongitude      : %.4lf\n"
+            "\tarea           : %.4lf\n"
+            "\tfrac           : %.4lf\n"
+            "\tglobal_cell_idx: %zd\n"
+            "\tglobal_x_idx   : %zd\n"
+            "\tglobal_y_idx   : %zd\n"
+            "\tlocal_cell_idx : %zd\n"
+            "\tlocal_x_idx    : %zd\n"
+            "\tlocal_y_idx    : %zd\n",
+            loc->latitude, loc->longitude, loc->area, loc->frac,
+            loc->global_cell_idx, loc->global_x_idx, loc->global_y_idx,
+            loc->local_cell_idx, loc->local_x_idx, loc->local_y_idx);
 }
 
 void

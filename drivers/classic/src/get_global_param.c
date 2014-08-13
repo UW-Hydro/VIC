@@ -153,11 +153,12 @@ global_param_struct get_global_param(filenames_struct *names,
   global.measure_h     = 2.0;
   global.wind_h        = 10.0;
   for(i = 0; i < 2; i++) {
-    global.forceyear[i]  = MISSING;
-    global.forcemonth[i] = 1;
-    global.forceday[i]   = 1;
-    global.forcehour[i]  = 0;
-    global.forceskip[i]  = 0;
+    global.forceyear[i]   = MISSING;
+    global.forcemonth[i]  = 1;
+    global.forceday[i]    = 1;
+    global.forcehour[i]   = 0;
+    global.forceskip[i]   = 0;
+    global.forceoffset[i] = 0;
     strcpy(names->f_path_pfx[i],"MISSING");
   }
   file_num             = 0;
@@ -825,6 +826,7 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceday[1] = global.forceday[0];
     global.forcehour[1] = global.forcehour[0];
     global.forceskip[1] = 0;
+    global.forceoffset[1] = global.forceskip[1];
   }
 
   // Validate result directory

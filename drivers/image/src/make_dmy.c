@@ -164,6 +164,7 @@ make_dmy(global_param_struct *global)
 
                     global->forceskip[i]++;
                 }
+                global->forceoffset[i] = global->forceskip[i];
             }
         }
     }

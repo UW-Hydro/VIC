@@ -47,7 +47,15 @@ vic_force(void)
     sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
             dmy[current].year);
 
-    // TBD: implement the correct offset for the data (d3start[0])
+    // global_param.forceoffset[0] resets every year since the met file restarts
+    // every year
+    if (current > 1 && (dmy[current].year != dmy[current-1].year)) {
+        fprintf(stderr, "Current: %zd\n", i);
+        fflush(stderr);
+        global_param.forceoffset[0] = 0;
+    } 
+    
+    // only the time slice changes for the met file reads. The rest is constant
     d3start[1] = 0;
     d3start[2] = 0;
     d3count[0] = 1;
@@ -56,7 +64,7 @@ vic_force(void)
 
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "tas",
                                d3start, d3count, fvar);
@@ -66,7 +74,7 @@ vic_force(void)
 
     // Precipitation: prcp
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "prcp",
                                d3start, d3count, fvar);
@@ -76,7 +84,7 @@ vic_force(void)
 
     // Downward solar radiation: dswrf
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "dswrf",
                                d3start, d3count, fvar);
@@ -86,7 +94,7 @@ vic_force(void)
 
     // Downward longwave radiation: dlwrf
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "dlwrf",
                                d3start, d3count, fvar);
@@ -96,7 +104,7 @@ vic_force(void)
 
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "wind",
                                d3start, d3count, fvar);
@@ -106,7 +114,7 @@ vic_force(void)
 
     // Specific humidity: shum
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "shum",
                                d3start, d3count, fvar);
@@ -116,13 +124,16 @@ vic_force(void)
 
     // Pressure: pressure
     for (j = 0; j < NF; j++) {
-        d3start[0] = current * NF + j;
+        d3start[0] = global_param.forceoffset[0] + j;
         for (i = 0; i < global_domain.ncells_global; i++) {
             get_nc_field_float(filenames.forcing[0], "pres",
                                d3start, d3count, fvar);
             atmos[i].pressure[j] = (double) fvar[idx[i]];
         }
     }
+
+    // Update the offset counter
+    global_param.forceoffset[0] += NF;
 
     if (options.SNOW_BAND > 1) {
         nrerror("SNOW_BAND not implemented in vic_force()");

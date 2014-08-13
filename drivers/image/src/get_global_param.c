@@ -67,6 +67,7 @@ get_global_param(filenames_struct *names,
         global.forceday[i] = 1;
         global.forcehour[i] = 0;
         global.forceskip[i] = 0;
+        global.forceoffset[i] = 0;
         strcpy(names->f_path_pfx[i], "MISSING");
     }
     file_num = 0;
@@ -1036,6 +1037,7 @@ get_global_param(filenames_struct *names,
         global.forceday[1] = global.forceday[0];
         global.forcehour[1] = global.forcehour[0];
         global.forceskip[1] = 0;
+        global.forceoffset[1] = global.forceskip[1];
     }
 
     // Validate result directory

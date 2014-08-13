@@ -281,6 +281,8 @@ print_force_type(force_type_struct *force_type)
 void
 print_global_param(global_param_struct *gp)
 {
+    size_t i;
+    
     printf("global_param:\n");
     printf("\tMAX_SNOW_TEMP: %.4lf\n", gp->MAX_SNOW_TEMP);
     printf("\tMIN_RAIN_TEMP: %.4lf\n", gp->MIN_RAIN_TEMP);
@@ -292,16 +294,14 @@ print_global_param(global_param_struct *gp)
     printf("\tendday       : %d\n", gp->endday);
     printf("\tendmonth     : %d\n", gp->endmonth);
     printf("\tendyear      : %d\n", gp->endyear);
-    printf("\tforceday[0]  : %d\n", gp->forceday[0]);
-    printf("\tforceday[1]  : %d\n", gp->forceday[1]);
-    printf("\tforcehour[0] : %d\n", gp->forcehour[0]);
-    printf("\tforcehour[1] : %d\n", gp->forcehour[1]);
-    printf("\tforcemonth[0]: %d\n", gp->forcemonth[0]);
-    printf("\tforcemonth[1]: %d\n", gp->forcemonth[1]);
-    printf("\tforceskip[0] : %d\n", gp->forceskip[0]);
-    printf("\tforceskip[1] : %d\n", gp->forceskip[1]);
-    printf("\tforceyear[0] : %d\n", gp->forceyear[0]);
-    printf("\tforceyear[1] : %d\n", gp->forceyear[1]);
+    for (i = 0; i < 2; i++) {
+        printf("\tforceday[%zd]   : %d\n", i, gp->forceday[i]);
+        printf("\tforcehour[%zd]  : %d\n", i, gp->forcehour[i]);
+        printf("\tforcemonth[%zd] : %d\n", i, gp->forcemonth[i]);
+        printf("\tforceoffset[%zd]: %d\n", i, gp->forceoffset[i]);
+        printf("\tforceskip[%zd]  : %d\n", i, gp->forceskip[i]);
+        printf("\tforceyear[%zd]  : %d\n", i, gp->forceyear[i]);
+    }
     printf("\tnrecs        : %d\n", gp->nrecs);
     printf("\tskipyear     : %d\n", gp->skipyear);
     printf("\tstartday     : %d\n", gp->startday);

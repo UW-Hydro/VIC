@@ -966,6 +966,8 @@ typedef struct {
   int    forceday[2];   /* day forcing files starts */
   int    forcehour[2];  /* hour forcing files starts */
   int    forcemonth[2]; /* month forcing files starts */
+  int    forceoffset[2]; /* counter to keep track of offset in reading forcing 
+                            files; updated after every read */
   int    forceskip[2];  /* number of model time steps to skip at the start of
 			the forcing file */
   int    forceyear[2];  /* year forcing files start */

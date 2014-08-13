@@ -42,10 +42,7 @@ main(int    argc,
     
     // initialize model parameters from parameter files
     vic_init();
-    
-    // read first forcing timestep (used in restoring model state)
-    vic_force();
-    
+        
     // restore model state, either using a cold start or from a restart file
     vic_restore();
     

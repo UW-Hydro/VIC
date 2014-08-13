@@ -7,14 +7,22 @@ vic_restore(void)
 {
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
+    extern global_param_struct global_param;
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
 
     double surf_temp;
-    size_t                     i;
-    size_t        nveg;
+    int    store_offset;
+    size_t i;
+    size_t nveg;
+
+    // read first forcing timestep (used in restoring model state)
+    // reset the forcing offset to what it was before
+    store_offset = global_param.forceoffset[0];
+    vic_force();
+    global_param.forceoffset[0] = store_offset;
 
     // read the model state from the netcdf file if there is one
     if (options.INIT_STATE) {

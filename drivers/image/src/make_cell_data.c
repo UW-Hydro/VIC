@@ -17,13 +17,21 @@ make_cell_data(int veg_type_num,
     extern option_struct options;
 
     int                  i;
-    cell_data_struct   **temp;
+    cell_data_struct   **temp = NULL;
 
     temp = (cell_data_struct**) calloc(veg_type_num,
                                        sizeof(cell_data_struct*));
+    if (temp == NULL) {
+        nrerror("Memory allocation error in make_cell_data().");
+    }
+
     for (i = 0; i < veg_type_num; i++) {
         temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND,
                                              sizeof(cell_data_struct));
+        if (temp[i] == NULL) {
+            nrerror("Memory allocation error in make_cell_data().");
+        }
+
     }
     return temp;
 }

@@ -600,17 +600,18 @@ vic_init(void)
                              soil_con[i].Ws / soil_con[i].Dsmax;
             soil_con[i].Ws = soil_con[i].Ws / soil_con[i].max_moist[j];
         }
-    }
 
-    soil_moisture_from_water_table(&(soil_con[i]), options.Nlayer);
+        soil_moisture_from_water_table(&(soil_con[i]), options.Nlayer);
 
-    if (options.CARBON) {
-        // TBD Remove hardcoded parameter values
-        soil_con[i].AlbedoPar = 0.92 * BARE_SOIL_ALBEDO - 0.015;
-        if (soil_con[i].AlbedoPar < AlbSoiParMin) {
-            soil_con[i].AlbedoPar = AlbSoiParMin;
+        if (options.CARBON) {
+            // TBD Remove hardcoded parameter values
+            soil_con[i].AlbedoPar = 0.92 * BARE_SOIL_ALBEDO - 0.015;
+            if (soil_con[i].AlbedoPar < AlbSoiParMin) {
+                soil_con[i].AlbedoPar = AlbSoiParMin;
+            }
         }
     }
+    
     // read_snowband()
     if (options.SNOW_BAND == 1) {
         for (i = 0; i < global_domain.ncells_global; i++) {

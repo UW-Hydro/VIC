@@ -16,14 +16,21 @@ make_snow_data(int nveg)
     extern option_struct options;
 
     int                  i;
-    snow_data_struct   **temp;
+    snow_data_struct   **temp = NULL;
 
     temp = (snow_data_struct **) calloc(nveg,
                                         sizeof(snow_data_struct *));
+    if (temp == NULL) {
+        nrerror("Memory allocation error in make_snow_data().");
+    }
+
 
     for (i = 0; i < nveg; i++) {
         temp[i] = (snow_data_struct *) calloc(options.SNOW_BAND,
                                               sizeof(snow_data_struct));
+        if (temp[i] == NULL) {
+            nrerror("Memory allocation error in make_snow_data().");
+        }
     }
 
     return temp;

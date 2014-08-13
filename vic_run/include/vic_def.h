@@ -1085,7 +1085,7 @@ typedef struct {
   double LAI[MONTHSPERYEAR];          /* leaf area index */
   double Wdmax[MONTHSPERYEAR];        /* maximum dew holding capacity (mm) */
   double albedo[MONTHSPERYEAR];       /* vegetation albedo (added for full energy)
-			      (fraction) */
+			                                   (fraction) */
   double displacement[MONTHSPERYEAR]; /* vegetation displacement height (m) */
   double emissivity[MONTHSPERYEAR];   /* vegetation emissivity (fraction) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
@@ -1095,7 +1095,7 @@ typedef struct {
   double rmin;             /* minimum stomatal resistance (s/m) */
   double roughness[MONTHSPERYEAR];    /* vegetation roughness length (m) */
   double trunk_ratio;      /* ratio of trunk height to tree height,
-			      default = 0.2 (fraction) */
+                  			      default = 0.2 (fraction) */
   double wind_atten;       /* wind attenuation through canopy,
 			      default = 0.5 (N/A) */
   double wind_h;           /* height at which wind is measured (m) */

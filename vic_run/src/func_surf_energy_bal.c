@@ -514,10 +514,6 @@ double func_surf_energy_bal(double Ts, va_list ap)
         error_cnt1++;
       if(FIRST_SOLN[1]){
         FIRST_SOLN[1] = FALSE;
-#if VERBOSE
-        if ( iveg == 0 && rec == nrecs - 1) 
-          fprintf(stderr,"The implicit scheme failed %d instances (%.1f%c of attempts).\n",error_cnt1,100.0*(float)error_cnt1/((float)error_cnt0+(float)error_cnt1),'%');
-#endif
       }
     }
 

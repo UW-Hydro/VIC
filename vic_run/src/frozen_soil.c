@@ -838,9 +838,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 //	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 //	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 //	      flux_term1 = 0;
-//#if VERBOSE
-//	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
-//#endif
 //	    }
 //	  }
 //	}
@@ -941,9 +938,6 @@ void fda_heat_eqn(double T_2[], double res[], int n, int init, ...)
 //	  if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
 //	    if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
 //	      flux_term1 = 0;
-//#if VERBOSE
-//	      fprintf(stderr,"WARNING: resetting thermal flux term in soil heat solution to zero for node %d.\nT[i]=%.2f T[i-1]=%.2f T[i+1]=%.2f flux_term1=%.2f flux_term2=%.2f\n",i+1,T_2[i],T_up[i],T_2[i+1],flux_term1,flux_term2);
-//#endif
 //	    }
 //	  }
 	flux_term = flux_term1+flux_term2;

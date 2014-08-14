@@ -435,10 +435,6 @@ double solve_snow(char                 overstory,
 	       + energy->advected_sensible);
 	}
 	else if ( old_coverage < snow->coverage ) {
-#if VERBOSE
-	  if ( snow->coverage != 1. ) 
-	    fprintf(stderr, "WARNING: snow cover fraction has increased, but it is not equal to 1 (%f).\n", snow->coverage);
-#endif // VERBOSE
 	  *coverage       = snow->coverage;
 	  *delta_coverage = 0;
 	}

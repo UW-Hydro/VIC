@@ -76,13 +76,6 @@ int newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
     }
   }
   Error = 1;
-#if VERBOSE
-  //fprintf(stderr, "WARNING: Maximum number of trials %d reached in Newton-Raphson search for solution (with F error = %g).\n", MAXTRIAL, errf);
-  //for (i=0; i<n; i++) 
-  //fprintf(stderr,"%d %.2f %.2f %.2f\n",i+1,x[i],fvec[i],p[i]);  
-  //fprintf(stderr,"Explicit method with root_brent will be used to solve soil thermal fluxes\n");
-#endif
-  //vicerror("");
 
   return (Error);
 }

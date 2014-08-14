@@ -996,52 +996,8 @@ global_param_struct get_global_param(filenames_struct *names,
   /*********************************
     Output major options to stderr
   *********************************/
-#if VERBOSE
-  display_current_settings(DISP_ALL,names,&global);
-#else
   display_current_settings(DISP_VERSION,names,&global);
-#endif
 
-#if VERBOSE
-  fprintf(stderr,"Time Step = %d hour(s)\n",global.dt);
-  fprintf(stderr,"Simulation start date = %02i/%02i/%04i\n",
-	  global.startday, global.startmonth, global.startyear);
-  if ( global.nrecs > 0 )
-    fprintf(stderr,"Number of Records = %d\n\n",global.nrecs);
-  else 
-    fprintf(stderr,"Simulation end date = %02i/%02i/%04i\n\n",
-	    global.endday, global.endmonth, global.endyear);
-  fprintf(stderr,"Full Energy...................(%d)\n",options.FULL_ENERGY);
-  fprintf(stderr,"Ground heat flux will be estimated ");
-  if ( options.QUICK_FLUX ) 
-    fprintf(stderr,"using Liang, Wood and Lettenmaier (1999).\n");
-  else 
-    fprintf(stderr,"using Cherkauer and Lettenmaier (1999).\n");
-  fprintf(stderr,"Use Frozen Soil Model.........(%d)\n",options.FROZEN_SOIL);
-  if( options.IMPLICIT ) 
-    fprintf(stderr,".... Using the implicit solution for the soil heat equation.\n");
-  else
-    fprintf(stderr,".... Using the explicit solution for the soil heat equation.\n");
-  if( options.EXP_TRANS )
-    fprintf(stderr,".... Thermal nodes are exponentially distributed with depth.\n");
-  else
-    fprintf(stderr,".... Thermal nodes are linearly distributed with depth (except top two nodes).\n");
-  fprintf(stderr,"Run Snow Model Using a Time Step of %d hours\n", 
-	  options.SNOW_STEP);
-  fprintf(stderr,"Compress Output Files.........(%d)\n",options.COMPRESS);
-  fprintf(stderr,"Correct Precipitation.........(%d)\n",options.CORRPREC);
-  fprintf(stderr,"\n");
-  fprintf(stderr,"Using %d Snow Bands\n",options.SNOW_BAND);
-  fprintf(stderr,"Using %d Root Zones\n",options.ROOT_ZONES);
-  if ( options.SAVE_STATE )
-    fprintf(stderr,"Model state will be saved on = %02i/%02i/%04i\n\n",
-	    global.stateday, global.statemonth, global.stateyear);
-  if ( options.BINARY_OUTPUT ) 
-    fprintf(stderr,"Model output is in standard BINARY format.\n");
-  else 
-    fprintf(stderr,"Model output is in standard ASCII format.\n");
-
-#endif // VERBOSE
 
   } // !OUTPUT_FORCE
 

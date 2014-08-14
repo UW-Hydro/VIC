@@ -765,9 +765,6 @@ int update_thermal_nodes(all_vars_struct     *all_vars,
     index=Nnodes-1;
     soil_con->dz_node[index] = soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1];
   }
-#if VERBOSE
-  fprintf(stderr,"More updated parameters in soil_con: dz_node and Zsum_node.\n");
-#endif
 
   /******************************************
     Update soil thermal node temperatures via linear interpolation.

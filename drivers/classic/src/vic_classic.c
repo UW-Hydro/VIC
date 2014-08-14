@@ -165,10 +165,6 @@ int main(int argc, char *argv[])
   cmd_proc(argc, argv, filenames.global);
   initialize_global();
 
-#if VERBOSE
-  display_current_settings(DISP_VERSION,(filenames_struct*)NULL,(global_param_struct*)NULL);
-#endif
-
   /** Read Global Control File **/
   filep.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, filep.globalparam);
@@ -262,10 +258,6 @@ int main(int argc, char *argv[])
          Have not Been Specifically Set
        **************************************************/
 
-#if VERBOSE
-      fprintf(stderr,"Initializing Forcing Data\n");
-#endif /* VERBOSE */
-
       initialize_atmos(atmos, dmy, filep.forcing, &soil_con, out_data_files, out_data); 
 
       if (!options.OUTPUT_FORCE) {
@@ -274,9 +266,6 @@ int main(int argc, char *argv[])
           Initialize Energy Balance and Snow Variables 
         **************************************************/
 
-#if VERBOSE
-        fprintf(stderr,"Model State Initialization\n");
-#endif /* VERBOSE */
         ErrorFlag = initialize_model_state(&all_vars, dmy[0], &global_param, filep, 
 			       soil_con.gridcel, veg_con[0].vegetat_type_num,
 			       options.Nnode, 
@@ -294,10 +283,6 @@ int main(int argc, char *argv[])
 	  }
         }
       
-#if VERBOSE
-        fprintf(stderr,"Running Model\n");
-#endif /* VERBOSE */
-
         /** Update Error Handling Structure **/
         Error.filep = filep;
         Error.out_data_files = out_data_files;

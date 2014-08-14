@@ -37,12 +37,6 @@ display_current_settings(int                  mode,
 
     fprintf(stderr, "\n");
     fprintf(stderr, "Output to Screen:\n");
-#if VERBOSE
-    fprintf(stderr, "VERBOSE\t\t\tTRUE\n");
-#else
-    fprintf(stderr, "VERBOSE\t\t\tFALSE\n");
-#endif
-
     fprintf(stderr, "\n");
     fprintf(stderr, "Maximum Array Sizes:\n");
     fprintf(stderr, "MAX_BANDS\t\t%2d\n", MAX_BANDS);

@@ -153,9 +153,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE TRUE
-
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MINSTRING    20

@@ -49,8 +49,7 @@ open_file(char string[],
         strcat(zipname, ".gz");
         stream = fopen(zipname, type);
         if (stream == NULL) {
-            fprintf(stderr, "\n Error opening \"%s\".", string);
-            fprintf(stderr, "\n");
+            fprintf(stderr, "\n Error opening \"%s\".\n", string);
             nrerror("Unable to open File");
         }
         fclose(stream);
@@ -64,8 +63,7 @@ open_file(char string[],
         system(command);
         stream = fopen(string, type);
         if (stream == NULL) {
-            fprintf(stderr, "\n Error opening \"%s\".", string);
-            fprintf(stderr, "\n");
+            fprintf(stderr, "\n Error opening \"%s\".\n", string);
             nrerror("Unable to Open File");
         }
     }

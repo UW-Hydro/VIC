@@ -40,9 +40,6 @@ vic_force(void)
         idx[i] = get_global_idx(&global_domain, i);
     }
 
-    printf("%04d-%02d-%02d\n", dmy[current].year, dmy[current].month,
-           dmy[current].day);
-
     // for now forcing file is determined by the year
     sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
             dmy[current].year);
@@ -50,8 +47,6 @@ vic_force(void)
     // global_param.forceoffset[0] resets every year since the met file restarts
     // every year
     if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
-        fprintf(stderr, "Current: %zd\n", i);
-        fflush(stderr);
         global_param.forceoffset[0] = 0;
     }
 

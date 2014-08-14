@@ -14,9 +14,6 @@ get_nc_dimension(char *nc_name,
     size_t dim_size;
     int    status;
 
-    printf("%s: %s\n", nc_name, dim_name);
-    fflush(stdout);
-
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {

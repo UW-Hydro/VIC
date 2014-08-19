@@ -453,10 +453,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
   *************************************************/
 
   local_forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
+  if (local_forcing_data == NULL) {
+    nrerror("Memory allocation failure in initialize_atmos() for local_forcing_data");
+  }
   for (type=0; type<N_FORCING_TYPES; type++) {
     // Allocate enough space for hourly data
-    if ( ( local_forcing_data[type] = (double *)calloc(Ndays_local*24, sizeof(double)) ) == NULL ) {
-      nrerror("Memory allocation failure in initialize_atmos()");
+    local_forcing_data[type] = (double *) calloc(Ndays_local*24, sizeof(double));
+    if (local_forcing_data[type] == NULL) {
+      nrerror("Memory allocation failure in initialize_atmos() for local_forcing_data[type]");
     }
     if (param_set.TYPE[type].SUPPLIED) {
       if (param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1] == 24) {

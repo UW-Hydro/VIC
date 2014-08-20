@@ -344,9 +344,9 @@ void initialize_atmos(atmos_data_struct        *atmos,
   prec       = (double *) calloc(Ndays_local*24, sizeof(double));
   tair       = (double *) calloc(Ndays_local*24, sizeof(double));
   tmax       = (double *) calloc(Ndays_local, sizeof(double));
-  tmaxhour   = (int *)    calloc(Ndays_local, sizeof(double));
+  tmaxhour   = (int *)    calloc(Ndays_local, sizeof(int));
   tmin       = (double *) calloc(Ndays_local, sizeof(double));
-  tminhour   = (int *)    calloc(Ndays_local, sizeof(double));
+  tminhour   = (int *)    calloc(Ndays_local, sizeof(int));
   tskc       = (double *) calloc(Ndays_local*24, sizeof(double));
   daily_vp   = (double *) calloc(Ndays_local, sizeof(double));
   dailyrad   = (double *) calloc(Ndays_local, sizeof(double));

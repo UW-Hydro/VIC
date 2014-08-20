@@ -42,7 +42,9 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   }
   rewind(veglib);
       
-  temp = (veg_lib_struct *)calloc(Nveg_type+N_PET_TYPES_NON_NAT,sizeof(veg_lib_struct));
+  // +1 for bare soil
+  temp = (veg_lib_struct *) calloc(Nveg_type+1+N_PET_TYPES_NON_NAT,
+                                   sizeof(veg_lib_struct));
 
   fscanf(veglib, "%s", str);
   i=0;

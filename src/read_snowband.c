@@ -103,7 +103,7 @@ void read_snowband(FILE    *snowband,
       soil_con->elevation = (float)avg_elev;
     }
     for ( band = 0; band < Nbands; band++ ) {
-      soil_con->Tfactor[band] = ( soil_con->elevation - soil_con->BandElev[band] ) / 1000. * T_lapse;
+      soil_con->Tfactor[band] = ( soil_con->elevation - soil_con->BandElev[band] ) * -1 * T_LAPSE;
     }
 
     /** Read Precipitation Fraction **/

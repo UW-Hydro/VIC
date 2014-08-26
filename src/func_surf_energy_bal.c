@@ -111,6 +111,10 @@ double func_surf_energy_bal(double Ts, va_list ap)
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg params.			TJB
+  2014-Apr-25 Added partial veg cover fraction, bare soil evap between
+	      the plants, and re-scaling of LAI & plant fluxes from
+	      global to local and back.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -289,6 +293,13 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double T1_plus;
   double D1_minus;
   double D1_plus;
+  double *transp;
+  double Ra_bare[3];
+  double tmp_wind[3];
+  double tmp_height;
+  double tmp_displacement[3];
+  double tmp_roughness[3];
+  double tmp_ref_height[3];
 
   /************************************
     Read variables from variable list 
@@ -451,6 +462,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
 
   TMean = Ts;
   Tmp = TMean + KELVIN;
+
+  transp = (double *) calloc(options.Nlayer,sizeof(double));
+  for (i=0; i<options.Nlayer; i++) {
+    transp[i] = 0;
+  }
 
   /**********************************************
     Compute Surface Temperature at Half Time Step
@@ -681,21 +697,62 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Use Arno Evap if LAI is set to zero (e.g. no
     winter crop planted).
   *************************************************/
-  if ( VEG && !SNOWING && veg_lib[veg_class].LAI[month-1] > 0 ) {
+  if ( VEG && !SNOWING && veg_var->vegcover > 0 ) {
     Evap = canopy_evap(layer, veg_var, TRUE, 
 		       veg_class, month, Wdew, delta_t, NetBareRad, vpd, 
 		       NetShortBare, Tair, Ra_used[1], 
 		       displacement[1], roughness[1], ref_height[1], 
 		       elevation, rainfall, depth, Wmax, Wcr, Wpwp, frost_fract,
 		       root, dryFrac, shortwave, Catm, CanopLayerBnd);
+    if (veg_var->vegcover < 1) {
+      for (i=0; i<options.Nlayer; i++) {
+        transp[i] = layer[i].evap;
+        layer[i].evap = 0;
+      }
+      tmp_wind[0] = wind[0];
+      tmp_wind[1] = -999.;
+      tmp_wind[2] = -999.;
+      tmp_height = soil_con->rough/0.123;
+      tmp_displacement[0] = calc_veg_displacement(tmp_height);
+      tmp_roughness[0] = soil_con->rough;
+      tmp_ref_height[0] = 10;
+      Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
+      Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
+      Evap *= veg_var->vegcover;
+      Evap += (1-veg_var->vegcover)
+	       * arno_evap(layer, surf_atten*NetBareRad, Tair, vpd, 
+		       depth[0], max_moist * depth[0] * 1000., 
+		       elevation, b_infilt, Ra_bare[0], delta_t, 
+		       resid_moist[0], frost_fract);
+      for (i=0; i<options.Nlayer; i++) {
+        layer[i].evap = veg_var->vegcover*transp[i] + (1-veg_var->vegcover)*layer[i].evap;
+        if (layer[i].evap > 0)
+          layer[i].bare_evap_frac = 1 - (veg_var->vegcover*transp[i])/layer[i].evap;
+        else
+          layer[i].bare_evap_frac = 0;
+      }
+      veg_var->throughfall = (1-veg_var->vegcover)*rainfall + veg_var->vegcover*veg_var->throughfall;
+      veg_var->canopyevap *= veg_var->vegcover;
+      veg_var->Wdew *= veg_var->vegcover;
+    }
+    else {
+      for (i=0; i<options.Nlayer; i++) {
+        layer[i].bare_evap_frac = 0;
+      }
+    }
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer, NetBareRad, Tair, vpd, 
 		     depth[0], max_moist * depth[0] * 1000., 
 		     elevation, b_infilt, Ra_used[0], delta_t, 
 		     resid_moist[0], frost_fract);
+    for (i=0; i<options.Nlayer; i++) {
+      layer[i].bare_evap_frac = 1;
+    }
   }
   else Evap = 0.;
+
+  free(transp);
   
   /**********************************************************************
     Compute the Latent Heat Flux from the Surface and Covering Vegetation

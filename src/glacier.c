@@ -57,7 +57,7 @@ gl_volume_area(snow_data_struct **snow,
     double iwe_final;                       // mm
     double stepsize;                        // seconds
 
-    cell_area = soil_con->cell_area / MPERKILOMETER / MPERKILOMETER; // m2 --> km2
+    cell_area = soil_con->cell_area / METERS_PER_KM / METERS_PER_KM; // m2 --> km2
     stepsize = dt * SECPHOUR;
 
     for (iveg = 0; iveg <= veg_con[0].vegetat_type_num; iveg++) {
@@ -77,7 +77,7 @@ gl_volume_area(snow_data_struct **snow,
             ice_vol_old = ice_vol;  // debuging remove when done
             if (ice_vol > 0.0) {
                 // ice_vol in km3 and ice_area in km2
-                ice_vol *= cell_area / MMPERMETER / MPERKILOMETER;
+                ice_vol *= cell_area / MMPERMETER / METERS_PER_KM;
                 ice_area_old *= veg_con[iveg].Cv * cell_area;
 
                 // find new ice area
@@ -103,7 +103,7 @@ gl_volume_area(snow_data_struct **snow,
                 }
 
                 // spread ice over bands
-                iwe_final = ice_vol / (cum_area * MPERKILOMETER * MPERKILOMETER);
+                iwe_final = ice_vol / (cum_area * METERS_PER_KM * METERS_PER_KM);
                 for (band = 0; band < bot_band; band++) {
                     snow[iveg][band].iwq = iwe_final;
                 }

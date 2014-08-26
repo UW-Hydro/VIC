@@ -143,6 +143,8 @@ int surface_fluxes(char                 overstory,
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg parameters.			TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
   extern veg_lib_struct *veg_lib;
@@ -506,7 +508,7 @@ int surface_fluxes(char                 overstory,
          normalized to PAR = 1 W, i.e. the canopy albedo in the PAR
          range (alb_total ~ 0.45*alb_par + 0.55*alb_other) */
       faparl(CanopLayerBnd,
-             veg_lib[veg_class].LAI[dmy[rec].month-1],
+             veg_var->LAI,
              soil_con->AlbedoPar,
              atmos->coszen[hidx],
              atmos->fdir[hidx],
@@ -816,7 +818,7 @@ int surface_fluxes(char                 overstory,
                             soil_con->elevation,
                             atmos->Catm[hidx],
                             CanopLayerBnd,
-                            veg_lib[veg_class].LAI[dmy[rec].month-1],
+                            veg_var->LAI,
                             "rs",
                             iter_soil_veg_var.rsLayer,
                             &(iter_soil_veg_var.rc),
@@ -837,6 +839,14 @@ int surface_fluxes(char                 overstory,
         iter_soil_veg_var.Rgrowth *= dryFrac;
         iter_soil_veg_var.Raut *= dryFrac;
         iter_soil_veg_var.NPP *= dryFrac;
+        /* Adjust by veg cover fraction */
+        iter_soil_veg_var.GPP *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rdark *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rphoto *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rmaint *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Rgrowth *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.Raut *= iter_soil_veg_var.vegcover;
+        iter_soil_veg_var.NPP *= iter_soil_veg_var.vegcover;
       }
       else {
         iter_soil_veg_var.rc = HUGE_RESIST;

@@ -112,69 +112,71 @@ calc_surf_energy_bal(double             Le,
     21-Sep-04 Added ErrorString to store error messages from
               root_brent.						TJB
     28-Sep-04 Added aero_resist_used to store the aerodynamic
-              resistance used in flux calculations.			TJB
-   2007-Apr-06 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	GCT/KAC
-   2007-Apr-24 Changed the read-in order of iveg, and VEG in
-              error_print_surf_energy_bal to be consistent with the
-              call order, also added year, day, and hour to the
-              argument list.						JCA
-   2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA
-              including:
-                passing in nrecs
-                passing nrec, nrecs, and iveg to func_surf_energy_bal
-                passing bulk_density, soil_density, and quartz to
-                  func_surf_energy_bal
-   2007-Apr-24 Features included for EXP_TRANS option for frozen soils
-              algorithm.						JCA
-   2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
-   2007-Aug-08 Features included for EXCESS_ICE option for frozen soils
-              algorithm.						JCA
-              including:
-                passing in entire soil_con structure.
-   2007-Aug-31 Checked root_brent return value against -998 rather
-              than -9998.						JCA
-   2007-Sep-01 Checked for return value of ERROR from
-              solve_surf_energy_bal.					JCA
-   2007-Nov-09 Modified code to reset NOFLUX boundary to global option
-              value before computing final soil column temperatures.
-              Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
-              estimates, but never reset to reflect actual bottom
-              boundary conditions for final pass through solver.	KAC
-   2009-Feb-09 Removed dz_node from variables passed to
-              func_surf_energy_bal.					KAC via TJB
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
-              allows simulation to continue when energy balance fails
-              to converge by using previous T value.			TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Nov-15 Fixed initialization of Tsurf_fbcount.			TJB
-   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
-              node spacing.						TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
-   2011-May-24 Replaced call to finish_frozen_soil_calcs() with a call
-              to calc_layer_average_thermal_props(); expanded the set of
-              cases for which this function is called to include
-              FROZEN_SOIL FALSE and QUICK_FLUX TRUE, so that a soil T
-              profile can be estimated and output in these cases.	TJB
-   2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
-              ground flux are always computed.				TJB
-   2011-Aug-09 Now initialize soil thermal properties for all modes of
-              operation.						TJB
-   2012-Jan-28 Changed the calculations of ground flux etc for the
-              exponential node distribution case to be over the same
-              control volume (first soil layer) as for the linear node
-              distribution and quick flux cases.  Now we need to pass
-              entire array of node temperatures to
-              func_surf_energy_bal().					TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2013-Jul-25 Added photosynthesis.					TJB
-   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
- ***************************************************************/
+	      resistance used in flux calculations.			TJB
+  2007-Apr-06 Modified to handle grid cell errors by returning to the
+	      main subroutine, rather than ending the simulation.	GCT/KAC
+  2007-Apr-24 Changed the read-in order of iveg, and VEG in
+	      error_print_surf_energy_bal to be consistent with the
+	      call order, also added year, day, and hour to the
+	      argument list.						JCA
+  2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA 
+	      including:
+	        passing in nrecs
+	        passing nrec, nrecs, and iveg to func_surf_energy_bal
+	        passing bulk_density, soil_density, and quartz to
+	          func_surf_energy_bal
+  2007-Apr-24 Features included for EXP_TRANS option for frozen soils
+	      algorithm.						JCA
+  2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
+  2007-Aug-08 Features included for EXCESS_ICE option for frozen soils
+	      algorithm.						JCA
+	      including:
+	        passing in entire soil_con structure.
+  2007-Aug-31 Checked root_brent return value against -998 rather
+	      than -9998.						JCA
+  2007-Sep-01 Checked for return value of ERROR from
+	      solve_surf_energy_bal.					JCA
+  2007-Nov-09 Modified code to reset NOFLUX boundary to global option
+	      value before computing final soil column temperatures.
+	      Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
+	      estimates, but never reset to reflect actual bottom
+	      boundary conditions for final pass through solver.	KAC
+  2009-Feb-09 Removed dz_node from variables passed to
+	      func_surf_energy_bal.					KAC via TJB
+  2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
+	      allows simulation to continue when energy balance fails
+	      to converge by using previous T value.			TJB
+  2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
+  2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
+  2009-Nov-15 Fixed initialization of Tsurf_fbcount.			TJB
+  2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
+	      node spacing.						TJB
+  2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
+  2011-May-24 Replaced call to finish_frozen_soil_calcs() with a call
+	      to calc_layer_average_thermal_props(); expanded the set of
+	      cases for which this function is called to include
+	      FROZEN_SOIL FALSE and QUICK_FLUX TRUE, so that a soil T
+	      profile can be estimated and output in these cases.	TJB
+  2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
+	      ground flux are always computed.				TJB
+  2011-Aug-09 Now initialize soil thermal properties for all modes of
+	      operation.						TJB
+  2012-Jan-28 Changed the calculations of ground flux etc for the 
+	      exponential node distribution case to be over the same
+	      control volume (first soil layer) as for the linear node
+	      distribution and quick flux cases.  Now we need to pass
+	      entire array of node temperatures to
+	      func_surf_energy_bal().					TJB
+  2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
+	      and clarified the descriptions of the SPATIAL_SNOW
+	      option.							TJB
+  2013-Jul-25 Added photosynthesis.					TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological LAI.				TJB
+  2014-May-05 Added non-climatological vegcover fraction.		TJB
+***************************************************************/
 {
     extern veg_lib_struct *veg_lib;
     extern option_struct   options;
@@ -254,17 +256,11 @@ calc_surf_energy_bal(double             Le,
         Tnew_fbcount[nidx] = 0;
     }
 
-    if (iveg != Nveg) {
-        if (veg_lib[veg_class].LAI[dmy->month - 1] > 0.0) {
-            VEG = TRUE;
-        }
-        else {
-            VEG = FALSE;
-        }
-    }
-    else {
-        VEG = FALSE;
-    }
+  if(iveg!=Nveg) {
+    if(veg_var->vegcover > 0.0) VEG = TRUE;
+    else VEG = FALSE;
+  }
+  else VEG = FALSE;
 
     // Define control volume for ground flux etc calculations to be first soil layer
     T2 = soil_con->avg_temp;                // soil temperature at very deep depth (>> dp; *NOT* at depth D2)
@@ -697,21 +693,15 @@ calc_surf_energy_bal(double             Le,
     calc_layer_average_thermal_props(energy, layer, soil_con, Nnodes, iveg,
                                      Tnew_node);
 
-    /** Store precipitation that reaches the surface */
-    if (!snow->snow && !INCLUDE_SNOW) {
-        if (iveg != Nveg) {
-            if (veg_lib[veg_class].LAI[dmy->month - 1] <= 0.0) {
-                veg_var->throughfall = rainfall;
-                *ppt = veg_var->throughfall;
-            }
-            else {
-                *ppt = veg_var->throughfall;
-            }
-        }
-        else {
-            *ppt = rainfall;
-        }
+  /** Store precipitation that reaches the surface */
+  if ( !snow->snow && !INCLUDE_SNOW ) {
+    if ( iveg != Nveg ) {
+      *ppt = veg_var->throughfall;
     }
+    else {
+      *ppt = rainfall;
+    }
+  }
 
     /****************************************
        Store understory energy balance terms

@@ -53,7 +53,8 @@
 #             free_dist_prcp.c
 #             make_dist_prcp.c
 #             initialize_new_storm.c
-#             redistribute_during_storm.c										 TJB
+#             redistribute_during_storm.c					TJB
+# 2014-Apr-25 Added alloc_veg_hist.c.						TJB
 #
 # $Id$
 #
@@ -93,8 +94,8 @@ HDRS = vicNl.h vicNl_def.h global.h snow.h mtclim_constants_vic.h mtclim_paramet
 
 OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
         StabilityCorrection.o advected_sensible_heat.o alloc_atmos.o \
-        arno_evap.o calc_air_temperature.o calc_atmos_energy_bal.o \
-	calc_longwave.o calc_Nscale_factors.o \
+        alloc_veg_hist.o arno_evap.o calc_air_temperature.o \
+	calc_atmos_energy_bal.o calc_longwave.o calc_Nscale_factors.o \
 	calc_rainonly.o calc_root_fraction.o calc_snow_coverage.o \
 	calc_surf_energy_bal.o calc_veg_params.o \
 	calc_water_energy_balance_errors.o canopy_assimilation.o canopy_evap.o \

@@ -62,9 +62,11 @@ void display_current_settings(int                 mode,
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
-  2013-Dec-28 Removed user_def.h.						TJB
-  2014-Mar-24 Removed ARC_SOIL option                   BN
+  2013-Dec-28 Removed user_def.h.					TJB
+  2014-Mar-24 Removed ARC_SOIL option                  			 BN
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added LAI_SRC, VEGPARAM_ALB, and ALB_SRC options.		TJB
+  2014-Apr-25 Added VEGPARAM_VEGCOVER and VEGCOVER_SRC options.		TJB
 
 **********************************************************************/
 {
@@ -341,16 +343,36 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"VEGLIB_PHOTO\t\tTRUE\n");
   else
     fprintf(stderr,"VEGLIB_PHOTO\t\tFALSE\n");
+  if (options.VEGLIB_VEGCOVER == TRUE)
+    fprintf(stderr,"VEGLIB_VEGCOVER\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGLIB_VEGCOVER\t\tFALSE\n");
   fprintf(stderr,"Veg param file\t\t%s\n",names->veg);
   fprintf(stderr,"ROOT_ZONES\t\t%d\n",options.ROOT_ZONES);
   if (options.VEGPARAM_LAI)
     fprintf(stderr,"VEGPARAM_LAI\t\tTRUE\n");
   else
     fprintf(stderr,"VEGPARAM_LAI\t\tFALSE\n");
-  if (options.LAI_SRC == LAI_FROM_VEGPARAM)
-    fprintf(stderr,"LAI_SRC\t\t\tLAI_FROM_VEGPARAM\n");
-  else if (options.LAI_SRC == LAI_FROM_VEGLIB)
-    fprintf(stderr,"LAI_SRC\t\t\tLAI_FROM_VEGLIB\n");
+  if (options.LAI_SRC == FROM_VEGPARAM)
+    fprintf(stderr,"LAI_SRC\t\tFROM_VEGPARAM\n");
+  else if (options.LAI_SRC == FROM_VEGLIB)
+    fprintf(stderr,"LAI_SRC\t\tFROM_VEGLIB\n");
+  if (options.VEGPARAM_VEGCOVER)
+    fprintf(stderr,"VEGPARAM_VEGCOVER\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGPARAM_VEGCOVER\t\tFALSE\n");
+  if (options.VEGCOVER_SRC == FROM_VEGPARAM)
+    fprintf(stderr,"VEGCOVER_SRC\t\tFROM_VEGPARAM\n");
+  else if (options.VEGCOVER_SRC == FROM_VEGLIB)
+    fprintf(stderr,"VEGCOVER_SRC\t\tFROM_VEGLIB\n");
+  if (options.VEGPARAM_ALB)
+    fprintf(stderr,"VEGPARAM_ALB\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGPARAM_ALB\t\tFALSE\n");
+  if (options.ALB_SRC == FROM_VEGPARAM)
+    fprintf(stderr,"ALB_SRC\t\tFROM_VEGPARAM\n");
+  else if (options.ALB_SRC == FROM_VEGLIB)
+    fprintf(stderr,"ALB_SRC\t\tFROM_VEGLIB\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Elevation Data:\n");

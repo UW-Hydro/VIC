@@ -414,7 +414,7 @@ double solve_snow(char                 overstory,
 	/** Calculate Snow Depth (H.B.H. 7.2.1) **/
 	old_depth   = snow->depth;
 	if (snow->swq > 0.) {
-    snow->depth = 1000. * snow->swq / snow->density; 
+    snow->depth = h20_density * snow->swq / snow->density; 
   }
   else {
     snow->depth = 0.0;

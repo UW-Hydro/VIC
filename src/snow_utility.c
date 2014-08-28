@@ -131,7 +131,7 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
     // swq in this context is the amount of snow whose weight contributes to compaction
 //    f = sswq/80. * exp(-sswq/100.);
     f = SNDENS_F;
-    swq = new_snow/1000. + f*sswq; /* Currently VIC essentially has only one layer of snow, so compaction due to overburden will come mostly from new snowfall. */
+    swq = new_snow/MMPERMETER + f*sswq; /* Currently VIC essentially has only one layer of snow, so compaction due to overburden will come mostly from new snowfall. */
 
     if (new_snow > 0.0) {
       Ps = 0.5*G*RHO_W*swq;
@@ -165,21 +165,21 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
         if (delta_depth > MAX_CHANGE * depth) delta_depth = MAX_CHANGE * depth;
         depth_new = new_snow / density_new;
         depth = depth - delta_depth + depth_new;
-        swq += new_snow / 1000.;
-        density = 1000. * swq / depth;
+        swq += new_snow / MMPERMETER;
+        density = h20_density * swq / depth;
 
       }
       else {
 
         /* no snowpack present, so snow density equals that of new snow */
         density  = density_new;
-        swq     += new_snow / 1000.;
-        depth    = 1000. * swq / density;
+        swq     += new_snow / MMPERMETER;
+        depth    = h20_density * swq / density;
 
       }
 
     }
-    else density = 1000. * swq / snow->depth;
+    else density = h20_density * swq / snow->depth;
 
     /** Densification of the snow pack due to aging **/
     /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
@@ -190,7 +190,7 @@ double snow_density(snow_data_struct *snow, double new_snow, double sswq, double
       delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
       if (delta_depth > MAX_CHANGE * depth) delta_depth = MAX_CHANGE * depth;
       depth      -= delta_depth;
-      density     = 1000. * swq / depth;
+      density     = h20_density * swq / depth;
 
     }
 
@@ -223,7 +223,7 @@ double new_snow_density(double air_temp) {
   }
   else if (options.SNOW_DENSITY == DENS_BRAS) {
     air_temp = air_temp * 9. / 5. + 32.;
-    if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + 1000.
+    if(air_temp > 0) density_new = (double)NEW_SNOW_DENSITY + h20_density
 		     * (air_temp / 100.) * (air_temp / 100.);
     else density_new = (double)NEW_SNOW_DENSITY;
   }

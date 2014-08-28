@@ -193,8 +193,8 @@ snow_melt(double            Le,
     double               deliwe;
     char                 ErrorString[MAXSTRING];
 
-    SnowFall = snowfall / 1000.; /* convet to m */
-    RainFall = rainfall / 1000.; /* convet to m */
+    SnowFall = snowfall / MMPERMETER; /* convet to m */
+    RainFall = rainfall / MMPERMETER; /* convet to m */
 
     InitialSwq = snow->swq;
     InitialIwq = snow->iwq;
@@ -638,7 +638,7 @@ snow_melt(double            Le,
     snow->iwqold = snow->iwq;
     snow->bn = delswe + deliwe; // glacier mass balance
 
-    melt[0] *= 1000.;               /* converts back to mm */
+    // melt[0] *= MMPERMETER.;               /* converts back to mm */
     snow->mass_error = MassBalanceError;
     snow->coldcontent = SurfaceCC;
     snow->vapor_flux *= -1.;

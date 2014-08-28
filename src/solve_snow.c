@@ -13,12 +13,9 @@ double solve_snow(char                 overstory,
 		  double               Tcanopy, // canopy air temperature
 		  double               Tgrnd, // soil surface temperature
 		  double               air_temp, // air temperature
-		  double               dp,
 		  double               prec,
 		  double               snow_grnd_flux,
-		  double               wind_h,
 		  double              *AlbedoUnder,
-		  double              *Evap,
 		  double              *Le,
 		  double              *LongUnderIn, // surface incomgin LW
 		  double              *NetLongSnow, // net LW at snow surface
@@ -47,7 +44,6 @@ double solve_snow(char                 overstory,
 		  double              *wind,
 		  float               *root,
 		  int                  INCLUDE_SNOW,
-		  int                  Nnodes,
 		  int                  Nveg,
 		  int                  iveg,
 		  int                  band,
@@ -140,22 +136,16 @@ double solve_snow(char                 overstory,
 *********************************************************************/
 
   extern option_struct   options;
-  extern veg_lib_struct *veg_lib;
 
-  char                ErrStr[MAXSTRING];
-  char                FIRST_SOLN[1];
   int                 ErrorFlag;
-  float               tempstep;
   double              ShortOverIn;
   double              melt;
   double              old_coverage;
   double              old_depth;
   double              old_swq;
   double              rainonly;
-  double              tmp_Wdew[2];
   double              tmp_grnd_flux;
   double              store_snowfall;
-  double              tmp_ref_height;
   int                 month;
   int                 hour;
   int                 day_in_year;
@@ -167,12 +157,8 @@ double solve_snow(char                 overstory,
   double              vpd;
   double              snowice;
   double              snowdepth;
-  double              icedepth;
   double              maxdens;
   double              slopedens;
-  double              MassBalanceError;       /* Mass balance error (m) */
-  double              InitialSwq;
-  double              InitialIwq;
 
   month       = dmy[rec].month;
   hour        = dmy[rec].hour;
@@ -451,7 +437,7 @@ double solve_snow(char                 overstory,
 					      soil_con->max_snow_distrib_slope, 
 					      old_coverage, snow->swq,
 					      old_swq, snow->depth, old_depth, 
-					      melt*0.001 + snow->vapor_flux, 
+					      melt/MMPERMETER + snow->vapor_flux, 
 					      &snow->max_snow_depth, *snowfall, 
 					      &snow->store_swq, 
 					      &snow->snow_distrib_slope,

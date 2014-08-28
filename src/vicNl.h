@@ -408,14 +408,13 @@ void   soil_carbon_balance(soil_con_struct *, energy_bal_struct *,
                            cell_data_struct *, veg_var_struct *);
 double soil_conductivity(double, double, double, double, double, double, double, double);
 double soil_thermal_eqn(double, va_list);
-double solve_snow(char, double, double, double, double, double,
-                  double, double, double, double, double, double,
+double solve_snow(char, double, double, double, double, double, double, double, 
+                  double, double, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *,
-                  double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
-                  float *, int, int, int, int, int, int, int, int, int, int *,
+                  float *, int, int, int, int, int, int, int, int, int *,
                   double *, double *,
                   dmy_struct *, atmos_data_struct *, energy_bal_struct *,
                   layer_data_struct *,

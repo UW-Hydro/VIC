@@ -1048,6 +1048,26 @@ global_param_struct get_global_param(filenames_struct *names,
     }
   }
 
+  // Validate glacier parameter information
+  if (options.GLACIER != FALSE) {
+    if (options.COMPUTE_TREELINE) {
+      sprintf(ErrStr, "GLACIER = TRUE and COMPUTE_TREELINE = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.SPATIAL_SNOW) {
+      sprintf(ErrStr, "GLACIER = TRUE and SPATIAL_SNOW = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.BLOWING) {
+      sprintf(ErrStr, "GLACIER = TRUE and BLOWING = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (!options.FULL_ENERGY) {
+      sprintf(ErrStr, "GLACIER = TRUE and FULL_ENERGY = FALSE are incompatible options.");
+      nrerror(ErrStr);
+    }
+  }
+
   /*********************************
     Output major options to stderr
   *********************************/

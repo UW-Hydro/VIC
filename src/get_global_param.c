@@ -1048,6 +1048,34 @@ global_param_struct get_global_param(filenames_struct *names,
     }
   }
 
+  // Validate glacier parameter information
+  if (options.GLACIER != FALSE) {
+    if (options.COMPUTE_TREELINE) {
+      sprintf(ErrStr, "GLACIER = TRUE and COMPUTE_TREELINE = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.SPATIAL_SNOW) {
+      sprintf(ErrStr, "GLACIER = TRUE and SPATIAL_SNOW = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.BLOWING) {
+      sprintf(ErrStr, "GLACIER = TRUE and BLOWING = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (!options.FULL_ENERGY) {
+      sprintf(ErrStr, "GLACIER = TRUE and FULL_ENERGY = FALSE are incompatible options.");
+      nrerror(ErrStr);
+    }
+    if (global.resolution == MISSING || global.resolution <= 0) {
+      sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
+      nrerror(ErrStr);
+    }
+    if (global.resolution > 360 && !options.EQUAL_AREA) {
+      sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
+      nrerror(ErrStr);
+    }
+  }
+
   /*********************************
     Output major options to stderr
   *********************************/

@@ -16,6 +16,7 @@
 
 vicNl
 DEPEND
+.depend
 VIC.sublime-project
 VIC.sublime-workspace
 *.sublime-project

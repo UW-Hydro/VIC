@@ -201,9 +201,7 @@ double IceEnergyBalance(double TSurf, va_list ap)
     *Ra_used = HUGE_RESIST;
 
   /* Calculate longwave exchange and net radiation */
- 
-  *LongRadOut = LongRadIn - STEFAN_B * (TMean+273.15) * (TMean+273.15) 
-    * (TMean+273.15) * (TMean+273.15);
+  *LongRadOut = LongRadIn - calc_outgoing_longwave(TMean+KELVIN, EMISS); 
   NetRad = ShortRad + *LongRadOut;
   
   /* Calculate the sensible heat flux */

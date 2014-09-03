@@ -245,7 +245,7 @@ int solve_lake(double             snowfall,
      * -------------------------------------------------------------------- */
 
     alblake(Tcutoff, tair, &lake->SAlbedo, &tempalbs, &albi, &albw, snowfall,
-	    lake_snow->coldcontent, dt, &lake_snow->last_snow, 
+	    lake_snow->surf_coldcontent, dt, &lake_snow->last_snow, 
 	    lake_snow->swq, lake_snow->depth, &lake_snow->MELTING,
 	    dmy.day_in_year, (double)soil_con.lat);
 
@@ -480,7 +480,7 @@ int solve_lake(double             snowfall,
     lake_snow->surf_water   *= fracprv;
     lake_snow->pack_water   *= fracprv;
     lake_snow->depth = lake_snow->swq * RHO_W / RHOSNOW;
-    lake_snow->coldcontent  *= fracprv;
+    lake_snow->surf_coldcontent *= fracprv;
     lake_snow->vapor_flux   *= fracprv;
     lake_snow->blowing_flux *= fracprv;
     lake_snow->surface_flux *= fracprv;

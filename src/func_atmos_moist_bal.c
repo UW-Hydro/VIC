@@ -36,7 +36,7 @@ double func_atmos_moist_bal(double VPcanopy, va_list ap) {
   LatentHeat    = (double *)va_arg(ap, double *);
 
   // compute sensible heat flux between canopy and atmosphere
-  (*LatentHeat) = Lv * atmos_density * Cp * (vp - VPcanopy) / ( gamma * Ra );
+  (*LatentHeat) = Lv * calc_sensible_heat(atmos_density, vp, VPcanopy, gamma*Ra);
 
   // compute energy balance error
   Error = InLatentHeat - (*LatentHeat);

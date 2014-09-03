@@ -179,7 +179,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
      canopy radiates in two directions */
 
   Tmp = Tfoliage + KELVIN;
-  *LongOverOut = STEFAN_B * (Tmp * Tmp * Tmp * Tmp);
+  *LongOverOut = calc_outgoing_longwave(Tmp, EMISS);
   *NetRadiation = NetShortOver + LongOverIn + LongUnderOut 
     - 2 * (*LongOverOut);
 
@@ -255,7 +255,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tcanopy - Tfoliage) / Ra_used[1];
+  *SensibleHeat = calc_sensible_heat(AirDens, Tcanopy, Tfoliage, Ra_used[1]);
 
   /* Calculate the advected energy */
 

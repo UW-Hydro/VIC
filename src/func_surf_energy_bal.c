@@ -659,7 +659,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   /* if thin snowpack, compute the change in energy stored in the pack */
   if ( INCLUDE_SNOW ) {
     if ( TMean > 0 )
-      *deltaCC = CH_ICE * (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
+      *deltaCC = CH_ICE * (snow_swq - snow_water) * (0. - OldTSurf) / delta_t;
     else
       *deltaCC = CH_ICE * (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
     *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
@@ -668,7 +668,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
     
   /** Compute net surface radiation of snow-free area for evaporation estimates **/
-  LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+  LongBareOut = calc_outgoing_longwave(Tmp, EMISS);
   if ( INCLUDE_SNOW ) { // compute net LW at snow surface
     (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
   }
@@ -787,7 +787,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Compute the Sensible Heat Flux from the Surface
   ************************************************/
   if ( snow_coverage < 1 || INCLUDE_SNOW ) {
-    *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / Ra_used[0];
+    *sensible_heat = calc_sensible_heat(atmos_density, Tair, TMean, Ra_used[0]);
     if ( !INCLUDE_SNOW ) (*sensible_heat) *= (1. - snow_coverage);
   }
   else *sensible_heat = 0.;

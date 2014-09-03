@@ -31,7 +31,8 @@ void initialize_snow(snow_data_struct **snow,
     snow[i][j].canopy_vapor_flux; depth of water evaporation, sublimation, or 
                                   condensation from intercepted snow (m) 
     snow[i][j].albedo;            snow surface albedo (fraction) 
-    snow[i][j].coldcontent;       cold content of snow pack 
+    snow[i][j].surf_coldcontent;  cold content of snow surface layer 
+    snow[i][j].pack_coldcontent;  cold content of snow pack layer 
     snow[i][j].mass_error;        snow mass balance error 
     snow[i][j].density;	          snow density (kg/m^3) 
     snow[i][j].depth;	          snow depth (m) 
@@ -74,7 +75,8 @@ void initialize_snow(snow_data_struct **snow,
       // State vars
       snow[i][j].albedo            = 0.0;
       snow[i][j].canopy_albedo     = 0.0;
-      snow[i][j].coldcontent       = 0.0;
+      snow[i][j].surf_coldcontent  = 0.0;
+      snow[i][j].pack_coldcontent  = 0.0;
       snow[i][j].coverage          = 0.0;
       snow[i][j].density           = 0.0;
       snow[i][j].depth             = 0.0;

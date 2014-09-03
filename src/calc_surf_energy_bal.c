@@ -778,7 +778,7 @@ calc_surf_energy_bal(double             Le,
         if (snow->swq > 0) {
             // set snow energy terms
             snow->surf_temp = (Tsurf > 0) ? 0 : Tsurf;
-            snow->coldcontent = CH_ICE * snow->surf_temp * snow->swq;
+            snow->surf_coldcontent = calc_cold_content(snow->swq, snow->surf_temp);
 
             // recompute snow depth
             old_depth = snow->depth;

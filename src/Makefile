@@ -113,7 +113,7 @@ OBJS =  CalcAerodynamic.o CalcBlowingSnow.o SnowPackEnergyBalance.o \
 	make_in_and_outfiles.o make_snow_data.o make_veg_var.o massrelease.o \
 	modify_Ksat.o mtclim_vic.o mtclim_wrapper.o newt_raph_func_fast.o \
 	nrerror.o open_file.o open_state_file.o \
-	output_list_utils.o parse_output_info.o penman.o photosynth.o \
+	output_list_utils.o parse_output_info.o penman.o photosynth.o physics.o\
 	prepare_full_energy.o put_data.o \
 	read_atmos_data.o read_forcing_data.o read_initial_model_state.o \
 	read_snowband.o read_soilparam.o read_veglib.o \

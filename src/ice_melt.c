@@ -649,7 +649,7 @@ int ice_melt(double            z2,
 
   melt[0] *= 1000.; /* converts back to mm */
   snow->mass_error = MassBalanceError;
-  snow->coldcontent        = SurfaceCC;
+  snow->surf_coldcontent        = SurfaceCC;
   snow->vapor_flux *= -1.;
   *save_LWnet = LWnet;
   *save_advection = advection;

@@ -146,7 +146,7 @@ double CalcBlowingSnow( double Dt,
   double Transport;
   int count=0;
 
-  Lv = (2.501e6 - 0.002361e6 * Tsnow);
+  Lv = calc_latent_heat_of_vaporization(Tsnow);
   /*******************************************************************/
   /* Calculate some general variables, that don't depend on wind speed. */
 
@@ -156,7 +156,7 @@ double CalcBlowingSnow( double Dt,
   /* Saturation density of water vapor, Liston A-8 */
   es = svp(Tair);
 
-  Tk = Tair  + KELVIN;
+  Tk = Tair + KELVIN;
     
   Ros = 0.622*es/(287*Tk);
   

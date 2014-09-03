@@ -195,7 +195,7 @@ int initialize_lake (lake_var_struct   *lake,
   // Snow state vars
   lake->snow.albedo            = 0.0;
   lake->snow.canopy_albedo     = 0.0;
-  lake->snow.coldcontent       = 0.0;
+  lake->snow.surf_coldcontent  = 0.0;
   lake->snow.coverage          = 0.0;
   lake->snow.density           = 0.0;
   lake->snow.depth             = 0.0;

@@ -294,6 +294,7 @@ extern char ref_veg_ref_crop[];
 #define von_K        0.40	/* Von Karman constant for evapotranspiration */
 #define KELVIN       273.15	/* conversion factor C to K */
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
+#define EMISS        1.0        /* emissivity */
 #define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
 #define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
 #define Cp           1013.0	/* Specific heat at constant pressure of moist air 
@@ -1313,7 +1314,8 @@ typedef struct {
   // State variables
   double albedo;            /* snow surface albedo (fraction) */
   double canopy_albedo;     /* albedo of the canopy (fract) */
-  double coldcontent;       /* cold content of snow pack */
+  double surf_coldcontent;  /* cold content of snow pack */
+  double pack_coldcontent;  /* cold content of snow pack */
   double coverage;          /* fraction of snow band that is covered with snow */
   double density;           /* snow density (kg/m^3) */
   double depth;             /* snow depth (m) */

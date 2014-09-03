@@ -622,7 +622,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
       energy[veg][band].snow_flux         = 0.0;
       /* Initial estimate of LongUnderOut for use by snow_intercept() */
       tmp = energy[veg][band].T[0] + KELVIN;
-      energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
+      energy[veg][band].LongUnderOut = calc_outgoing_longwave(tmp, EMISS);
       energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
     }
   }

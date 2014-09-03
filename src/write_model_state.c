@@ -152,7 +152,8 @@ void write_model_state(all_vars_struct    *all_vars,
 	+ sizeof(double) // swe
 	+ sizeof(double) // surf_temp
 	+ sizeof(double) // pack_temp
-	+ sizeof(double) // coldcontent
+  + sizeof(double) // surf_coldcontent
+  + sizeof(double) // pack_coldcontent
 	+ sizeof(double) // surf_water
 	+ sizeof(double) // pack_water
 	+ sizeof(double) // SAlbedo
@@ -277,16 +278,18 @@ void write_model_state(all_vars_struct    *all_vars,
 	fwrite( &snow[veg][band].pack_temp, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].pack_water, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].density, sizeof(double), 1, filep->statefile );
-	fwrite( &snow[veg][band].coldcontent, sizeof(double), 1, filep->statefile );
+  fwrite( &snow[veg][band].surf_coldcontent, sizeof(double), 1, filep->statefile );
+  fwrite( &snow[veg][band].pack_coldcontent, sizeof(double), 1, filep->statefile );
 	fwrite( &snow[veg][band].snow_canopy, sizeof(double), 1, filep->statefile );
       }
       else {
-	fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f %f", 
+	fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f %f %f", 
 		 snow[veg][band].last_snow, (int)snow[veg][band].MELTING, 
      snow[veg][band].coverage, snow[veg][band].swq, snow[veg][band].iwq, 
 		 snow[veg][band].surf_temp, snow[veg][band].surf_water, 
 		 snow[veg][band].pack_temp, snow[veg][band].pack_water, 
-		 snow[veg][band].density, snow[veg][band].coldcontent, 
+		 snow[veg][band].density, snow[veg][band].surf_coldcontent,
+     snow[veg][band].pack_coldcontent, 
 		 snow[veg][band].snow_canopy );
       }
       
@@ -346,7 +349,8 @@ void write_model_state(all_vars_struct    *all_vars,
       fwrite( &lake_var.snow.pack_temp, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.snow.pack_water, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.snow.density, sizeof(double), 1, filep->statefile );
-      fwrite( &lake_var.snow.coldcontent, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.surf_coldcontent, sizeof(double), 1, filep->statefile );
+      fwrite( &lake_var.snow.pack_coldcontent, sizeof(double), 1, filep->statefile );
       fwrite( &lake_var.snow.snow_canopy, sizeof(double), 1, filep->statefile );
       
       /* Write soil thermal node temperatures */
@@ -396,12 +400,13 @@ void write_model_state(all_vars_struct    *all_vars,
       }
 
       /* Write snow data */
-      fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f", 
+      fprintf( filep->statefile, " %i %i %f %f %f %f %f %f %f %f %f %f", 
 		 lake_var.snow.last_snow, (int)lake_var.snow.MELTING, 
 		 lake_var.snow.coverage, lake_var.snow.swq, 
 		 lake_var.snow.surf_temp, lake_var.snow.surf_water, 
 		 lake_var.snow.pack_temp, lake_var.snow.pack_water, 
-		 lake_var.snow.density, lake_var.snow.coldcontent, 
+		 lake_var.snow.density, lake_var.snow.surf_coldcontent,
+     lake_var.snow.pack_coldcontent, 
 		 lake_var.snow.snow_canopy );
       
       /* Write soil thermal node temperatures */

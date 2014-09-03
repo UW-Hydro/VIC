@@ -384,6 +384,10 @@ void set_node_parameters(double *, double *, double *, double *, double *, doubl
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 double snow_albedo(double, double, double, double, double, double, int, char);
+double calc_snow_depth(double, double);
+double calc_cold_content(double, double);
+double calc_temp_from_cc(double, double);
+void snow_to_ice(double *, double *, double *, double *);
 double snow_density(snow_data_struct *, double, double, double, double, double);
 int    snow_intercept(double, double, double, double, double, double,
                       double, double, double, double, double, 
@@ -477,3 +481,6 @@ void zero_output_list(out_data_struct *);
 int  gl_flow(snow_data_struct **, soil_con_struct *, veg_con_struct *, int);
 int  gl_volume_area(snow_data_struct **, soil_con_struct *, veg_con_struct *, 
                     int, int);
+double calc_latent_heat_of_vaporization(double);
+double calc_outgoing_longwave(double, double);
+double calc_sensible_heat(double, double, double, double);

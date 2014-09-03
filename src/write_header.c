@@ -274,8 +274,6 @@ void write_header(out_data_file_struct *out_data_files,
       fprintf(out_data_files[file_idx].fh, "# NVARS: %d\n", Nvars);
 
       // Header part 2: Variables
-      fprintf(out_data_files[file_idx].fh, "# ");
-
       if (!options.OUTPUT_FORCE) {
         // Write the date
         if (global.out_dt < 24) {

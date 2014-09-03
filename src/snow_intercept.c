@@ -467,7 +467,7 @@ int snow_intercept(double  Dt,
   }
 
   if ( *IntSnow <= 0 )
-    RainThroughFall = veg_var->throughfall / MMPERMETER;
+    RainThroughFall = veg_var->throughfall / (double)MMPERMETER;
 
   RefreezeEnergy *= Dt;
 

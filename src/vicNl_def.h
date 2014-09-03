@@ -276,43 +276,54 @@ extern double ref_veg_trunk_ratio[];
 extern char ref_veg_ref_crop[];
 
 /***** Time Constants *****/
-#define DAYS_PER_YEAR 365.
+#define DAYS_PER_YEAR 365.25
 #define HOURSPERDAY   24        /* number of hours per day */
-#define HOURSPERYEAR  24*365    /* number of hours per year */
-#define SECPHOUR     3600	/* seconds per hour */
-#define SEC_PER_DAY 86400.	/* seconds per day */
+#define HOURSPERYEAR  HOURSPERDAY*DAYS_PER_YEAR    /* number of hours per year */
+#define SECPHOUR      3600.	/* seconds per hour */
+#define SEC_PER_DAY   86400.	/* seconds per day */
 
 /***** Length Constants *****/
 #define MMPERMETER 1000.0
+#define CMPERMETER 100.0
+#define MMPERCM    10.0
 #define METERS_PER_KM 1000.
 
 /***** Physical Constants *****/
-#define RESID_MOIST  0.0       /* define residual moisture content of soil column */
-#define ice_density  917.	    /* density of ice (kg/m^3) */
-#define h20_density  1000.    /* density of water at 4degC (kg/m^3) */
-#define T_LAPSE      -0.0065   /* temperature lapse rate of US Std Atmos in C/m */
-#define von_K        0.40	/* Von Karman constant for evapotranspiration */
-#define KELVIN       273.15	/* conversion factor C to K */
+#define RESID_MOIST  0.0        /* define residual moisture content of soil column */
+#define ice_density  917.	      /* density of ice (kg/m^3) */
+#define h20_density  1000.      /* density of water at 4degC (kg/m^3) */
+#define RHOSNOW      250.       /* densities of water and snow */
+#define RHOICE       917.       /* ice density*/
+#define rhosurf      1.275      /* surface air density */
+#define T_LAPSE      -0.0065    /* temperature lapse rate of US Std Atmos in C/m */
+#define von_K        0.40	      /* Von Karman constant for evapotranspiration */
+#define Ka           0.0245187  /* thermal conductivity of air (W/mK) */
+#define KIN_VIS      1.3e-5     /* Kinemativ viscosity of air (m2/s) */
+#define CSALT        0.68       /* saltation constant m/s */
+#define KELVIN       273.15	    /* conversion factor C to K */
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
 #define EMISS        1.0        /* emissivity */
-#define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
+#define EMICE        0.97       /* Ice emissivity */
+#define EMH2O        0.98
+#define Lf           3.337e5	  /* Latent heat of freezing (J/kg) at 0C */
 #define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
-#define Cp           1013.0	/* Specific heat at constant pressure of moist air 
-				   (J/deg/K) (H.B.H. p.4.13)*/
-#define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
+#define Cp           1013.0	    /* Specific heat at constant pressure of moist 
+				                           air (J/deg/K) (H.B.H. p.4.13)*/
+#define CH_ICE       2100.0e3	  /* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
 #define K_AIR        2.32e-2    /* conductivity of air (W/mK) */
 #define K_ICE        2.29       /* conductivity of ice (W/mK) */
-#define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
+#define SOLAR_CONSTANT 1400.0	  /* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
 #define Rd           287        /* Gas constant of dry air (J/degC*kg) */
 #define Rgas         8.3143     /* [m3 Pa mol-1 K-1] universal gas law constant */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */
+#define RADIUS 6371.228 /* Earth radius in km. */
 #define kPa2Pa 1000.            /* converts kPa to Pa */
-#define DtoR 0.017453293	/* degrees to radians */
+#define DtoR 0.017453293	      /* degrees to radians */
 #ifndef PI
 #define PI 3.1415927
 #endif

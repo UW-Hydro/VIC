@@ -347,7 +347,7 @@ void read_initial_model_state(FILE                *init_state,
       }
 
       if(snow[veg][band].density > 0.) 
-	snow[veg][band].depth = 1000. * snow[veg][band].swq 
+	snow[veg][band].depth = MMPERMETER * snow[veg][band].swq 
 	  / snow[veg][band].density;
       
       /* Read soil thermal node temperatures */
@@ -417,7 +417,7 @@ void read_initial_model_state(FILE                *init_state,
       if ( fread( &lake_var->snow.snow_canopy, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
       if(lake_var->snow.density > 0.) 
-	lake_var->snow.depth = 1000. * lake_var->snow.swq / lake_var->snow.density;
+	lake_var->snow.depth = MMPERMETER * lake_var->snow.swq / lake_var->snow.density;
       
       /* Read soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
@@ -515,7 +515,7 @@ void read_initial_model_state(FILE                *init_state,
         nrerror("End of model state file found unexpectedly");
       lake_var->snow.MELTING = (char)tmp_char;
       if(lake_var->snow.density > 0.) 
-	lake_var->snow.depth = 1000. * lake_var->snow.swq / lake_var->snow.density;
+	lake_var->snow.depth = MMPERMETER * lake_var->snow.swq / lake_var->snow.density;
       
       /* Read soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) {

@@ -288,13 +288,13 @@ snow_albedo(double new_snow,
         /* Accumulation season */
         if (cold_content < 0.0 && !MELTING) {
             albedo = NEW_SNOW_ALB * pow(SNOW_ALB_ACCUM_A,
-                                        pow((double)last_snow * dt / 24.,
+                                        pow((double)last_snow * dt / HOURSPERDAY,
                                             SNOW_ALB_ACCUM_B));
         }
         /* Melt Season */
         else {
             albedo = NEW_SNOW_ALB * pow(SNOW_ALB_THAW_A,
-                                        pow((double)last_snow * dt / 24.,
+                                        pow((double)last_snow * dt / HOURSPERDAY,
                                             SNOW_ALB_THAW_B));
         }
     }

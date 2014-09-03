@@ -183,10 +183,10 @@ double arno_evap(layer_data_struct *layer,
 
   /* only consider positive evaporation; we won't put limits on condensation */
   if (evap > 0.0) {
-    if (moist > moist_resid * depth1 * 1000.) {
+    if (moist > moist_resid * depth1 * MMPERMETER) {
       /* there is liquid moisture available; cap evap at available liquid moisture */
-      if (evap > moist -  moist_resid * depth1 * 1000.) {
-        evap = moist -  moist_resid * depth1 * 1000.;
+      if (evap > moist -  moist_resid * depth1 * MMPERMETER) {
+        evap = moist -  moist_resid * depth1 * MMPERMETER;
       }
     }
     else {
@@ -196,7 +196,7 @@ double arno_evap(layer_data_struct *layer,
   }
 
   layer[0].evap = evap;
-  Evap += evap / 1000. / delta_t;
+  Evap += evap / MMPERMETER / delta_t;
 
   return(Evap);
 

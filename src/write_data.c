@@ -122,7 +122,7 @@ void write_data(out_data_file_struct *out_data_files,
       if (!options.OUTPUT_FORCE) {
 
         // Write the date
-        if (dt < 24) {
+        if (dt < HOURSPERDAY) {
           // Write year, month, day, and hour
           fwrite(tmp_iptr, sizeof(int), 4, out_data_files[file_idx].fh);
         }
@@ -195,7 +195,7 @@ void write_data(out_data_file_struct *out_data_files,
       if (!options.OUTPUT_FORCE) {
 
         // Write the date
-        if (dt < 24) {
+        if (dt < HOURSPERDAY) {
           // Write year, month, day, and hour
           fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t%02i\t",
                   dmy->year, dmy->month, dmy->day, dmy->hour);

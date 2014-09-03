@@ -23,6 +23,26 @@ calc_latent_heat_of_vaporization(double tair)
 }
 
 double
+calc_latent_heat_of_sublimation(double temp)
+{
+/**********************************************************************
+   calc_latent_heat_of_vaporization      Joe Hamman        September 2, 2014
+
+   This subroutine computes the latent heat of sublimation.  The simple 
+   calculation is performed in a number of places within VIC and has been 
+   moved to a function to improve consitancy and reusability.
+   
+   Eq. 3.19, Bras 1990
+**********************************************************************/
+
+    double ls;
+
+    ls = (677. - 0.07 * temp)  * JOULESPCAL * GRAMSPKG;
+
+    return(ls);
+}
+
+double
 calc_outgoing_longwave(double temp, double emiss)
 {
 /**********************************************************************

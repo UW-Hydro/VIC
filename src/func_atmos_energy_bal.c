@@ -39,7 +39,6 @@ double func_atmos_energy_bal(double Tcanopy, va_list ap) {
   (*SensibleHeat) = calc_sensible_heat(atmos_density, Tair, Tcanopy, Ra);
 
   // compute energy balance error
-  //Error = NetRadiation + LatentHeat + (*SensibleHeat);
   Error = InSensible - (*SensibleHeat);
 
   return ( Error );

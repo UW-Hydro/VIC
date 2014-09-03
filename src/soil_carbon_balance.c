@@ -90,7 +90,7 @@ void soil_carbon_balance(soil_con_struct *soil_con,
   // Assign node thicknesses and temperatures for subset
   dZTot = 0;
   for (i=0; i<Nnodes; i++) {
-    dZ[i] = soil_con->dz_node[i]*1000; // mm
+    dZ[i] = soil_con->dz_node[i]*MMPERMETER; // mm
     dZTot += dZ[i];
     dZCum[i] = dZTot;
     T[i] = energy->T[i];
@@ -133,7 +133,7 @@ void soil_carbon_balance(soil_con_struct *soil_con,
   cell->RhTot = cell->RhLitter2Atm + cell->RhInter + cell->RhSlow;
 
   // Compute balances of soil carbon pools
-  veg_var->Litterfall = veg_var->AnnualNPPPrev/(365.25*24/global_param.dt); // Assume previous year's NPP enters soil evenly throughout current year
+  veg_var->Litterfall = veg_var->AnnualNPPPrev/(HOURSPERYEAR/global_param.dt); // Assume previous year's NPP enters soil evenly throughout current year
   cell->CLitter += veg_var->Litterfall - cell->RhLitter;
   cell->CInter += (1-fAir)*cell->RhLitter*fInter - cell->RhInter;
   cell->CSlow += (1-fAir)*cell->RhLitter*(1-fInter) - cell->RhSlow;

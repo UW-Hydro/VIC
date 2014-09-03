@@ -721,7 +721,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
       Evap *= veg_var->vegcover;
       Evap += (1-veg_var->vegcover)
 	       * arno_evap(layer, surf_atten*NetBareRad, Tair, vpd, 
-		       depth[0], max_moist * depth[0] * 1000., 
+		       depth[0], max_moist * depth[0] * MMPERMETER, 
 		       elevation, b_infilt, Ra_bare[0], delta_t, 
 		       resid_moist[0], frost_fract);
       for (i=0; i<options.Nlayer; i++) {
@@ -743,7 +743,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   }
   else if(!SNOWING) {
     Evap = arno_evap(layer, NetBareRad, Tair, vpd, 
-		     depth[0], max_moist * depth[0] * 1000., 
+		     depth[0], max_moist * depth[0] * MMPERMETER, 
 		     elevation, b_infilt, Ra_used[0], delta_t, 
 		     resid_moist[0], frost_fract);
     for (i=0; i<options.Nlayer; i++) {

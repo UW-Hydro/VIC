@@ -482,5 +482,6 @@ int  gl_flow(snow_data_struct **, soil_con_struct *, veg_con_struct *, int);
 int  gl_volume_area(snow_data_struct **, soil_con_struct *, veg_con_struct *, 
                     int, int);
 double calc_latent_heat_of_vaporization(double);
+double calc_latent_heat_of_sublimation(double);
 double calc_outgoing_longwave(double, double);
 double calc_sensible_heat(double, double, double, double);

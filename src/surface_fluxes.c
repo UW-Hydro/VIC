@@ -538,7 +538,7 @@ int surface_fluxes(char                 overstory,
 
     // Compute mass flux of blowing snow
     if( !overstory && options.BLOWING && step_snow.swq > 0.) {
-      Ls = (677. - 0.07 * step_snow.surf_temp) * JOULESPCAL * GRAMSPKG;
+      Ls = calc_latent_heat_of_sublimation(step_snow.surf_temp);
       step_snow.blowing_flux = CalcBlowingSnow((double) step_dt, Tair,
 						step_snow.last_snow, step_snow.surf_water,
 						wind[2], Ls, atmos->density[hidx],

@@ -60,7 +60,7 @@ void latent_heat_from_snow(double  AirDens,
   }
   else {
     /* Accumulation: use latent heat of sublimation (Eq. 3.19, Bras 1990 */
-    Ls = (677. - 0.07 * TMean) * JOULESPCAL * GRAMSPKG;
+    Ls = calc_latent_heat_of_sublimation(TMean);
     *LatentHeatSublimation = Ls * (*VaporMassFlux);
     *LatentHeat = 0;
   }

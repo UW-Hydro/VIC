@@ -111,7 +111,7 @@ void write_header(out_data_file_struct *out_data_files,
         Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // year
         Nbytes2 += sizeof(char) + 5*sizeof(char) + sizeof(char) + sizeof(float); // month
         Nbytes2 += sizeof(char) + 3*sizeof(char) + sizeof(char) + sizeof(float); // day
-        if (global.out_dt < 24)
+        if (global.out_dt < HOURSPERDAY)
           Nbytes2 += sizeof(char) + 4*sizeof(char) + sizeof(char) + sizeof(float); // hour
 
       }
@@ -163,7 +163,7 @@ void write_header(out_data_file_struct *out_data_files,
       // Nvars
       Nvars = out_data_files[file_idx].nvars;
       if (!options.OUTPUT_FORCE) {
-        if (global.out_dt < 24)
+        if (global.out_dt < HOURSPERDAY)
           Nvars += 4;
         else
           Nvars += 3;
@@ -203,7 +203,7 @@ void write_header(out_data_file_struct *out_data_files,
         fwrite(&tmp_type, sizeof(char), 1, out_data_files[file_idx].fh);
         fwrite(&tmp_mult, sizeof(float), 1, out_data_files[file_idx].fh);
 
-        if (global.out_dt < 24) {
+        if (global.out_dt < HOURSPERDAY) {
           // hour
           strcpy(tmp_str,"HOUR");
           tmp_len = strlen(tmp_str);
@@ -261,7 +261,7 @@ void write_header(out_data_file_struct *out_data_files,
       // Header part 1: Global attributes
       Nvars = out_data_files[file_idx].nvars;
       if (!options.OUTPUT_FORCE) {
-        if (global.out_dt < 24)
+        if (global.out_dt < HOURSPERDAY)
           Nvars += 4;
         else
           Nvars += 3;
@@ -276,7 +276,7 @@ void write_header(out_data_file_struct *out_data_files,
       // Header part 2: Variables
       if (!options.OUTPUT_FORCE) {
         // Write the date
-        if (global.out_dt < 24) {
+        if (global.out_dt < HOURSPERDAY) {
           // Write year, month, day, and hour
           fprintf(out_data_files[file_idx].fh, "YEAR\tMONTH\tDAY\tHOUR\t");
         }

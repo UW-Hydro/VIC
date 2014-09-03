@@ -412,7 +412,7 @@ int calc_tair(const control_struct *ctrl, const parameter_struct *p,
   
   ndays = ctrl->ndays;
   /* calculate elevation difference in kilometers */
-  dz = (p->site_elev - p->base_elev)/1000.0;
+  dz = (p->site_elev - p->base_elev)/METERS_PER_KM;
   
   /* apply lapse rate corrections to tmax and tmin */
   /* Since tmax lapse rate usually has a larger absolute value than tmin
@@ -782,7 +782,7 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
   dt = SRADDT;                /* set timestep */ 
   dh = dt / SECPERRAD;        /* calculate hour-angle step */
   /* start vic_change */
-  tinystepspday = 86400/SRADDT;
+  tinystepspday = SEC_PER_DAY/SRADDT;
   /* end vic_change */
 
   /* begin loop through yeardays */
@@ -810,8 +810,8 @@ int calc_srad_humidity_iterative(const control_struct *ctrl,
     daylength[i] = 2.0 * hss * SECPERRAD;
     
     /* start vic_change */
-    if (daylength[i] > 86400)
-      daylength[i] = 86400;
+    if (daylength[i] > SEC_PER_DAY)
+      daylength[i] = SEC_PER_DAY;
     /* end vic_change */
     
     /* solar constant as a function of yearday (W/m^2) */
@@ -1171,7 +1171,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     /* save daily radiation */
     /* save cloud transmittance when rad is an input */
     if (ctrl->insw) {
-      potrad = (srad1+srad2+sc)*daylength[yday]/t_final/86400;
+      potrad = (srad1+srad2+sc)*daylength[yday]/t_final/SEC_PER_DAY;
       if (potrad>0 && data->s_srad[i]>0 && daylength[yday]>0) {
 	data->s_tfmax[i] = (data->s_srad[i])/(potrad*t_tmax);//both of these are 24hr mean rad. here
 	if (data->s_tfmax[i] > 1.0) data->s_tfmax[i] = 1.0;

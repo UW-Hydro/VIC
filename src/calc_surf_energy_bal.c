@@ -299,8 +299,8 @@ calc_surf_energy_bal(double             Le,
     atmos_shortwave = atmos->shortwave[hour];   // incoming shortwave radiation
     atmos_Catm = atmos->Catm[hour];        // CO2 mixing ratio
     emissivity = 1.;        // longwave emissivity
-    delta_t = (double)dt * 3600.;
-    max_moist = soil_con->max_moist[0] / (soil_con->depth[0] * 1000.);
+    delta_t = (double)dt * SECPHOUR;
+    max_moist = soil_con->max_moist[0] / (soil_con->depth[0] * MMPERMETER);
     bubble = soil_con->bubble[0];
     expt = soil_con->expt[0];
     Tsnow_surf = snow->surf_temp;
@@ -782,7 +782,7 @@ calc_surf_energy_bal(double             Le,
 
             // recompute snow depth
             old_depth = snow->depth;
-            snow->depth = 1000. * snow->swq / snow->density;
+            snow->depth = MMPERMETER * snow->swq / snow->density;
 
             /** Check for Thin Snowpack which only Partially Covers Grid Cell
                 exists only if not snowing and snowpack has started to melt **/

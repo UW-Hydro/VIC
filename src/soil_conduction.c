@@ -224,13 +224,13 @@ void set_node_parameters(double   *dz_node,
     if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
       /* node on layer boundary */
       max_moist_node[nidx] = (max_moist[lidx] / depth[lidx] 
-			      + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
+			      + max_moist[lidx+1] / depth[lidx+1]) / MMPERMETER / 2.;
       expt_node[nidx]      = (expt[lidx] + expt[lidx+1]) / 2.;
       bubble_node[nidx]    = (bubble[lidx] + bubble[lidx+1]) / 2.;
     }
     else { 
       /* node completely in layer */
-      max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / 1000;
+      max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / MMPERMETER;
       expt_node[nidx]      = expt[lidx];
       bubble_node[nidx]    = bubble[lidx];
     }
@@ -364,13 +364,13 @@ int distribute_node_moisture_properties(double *moist_node,
       if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
         /* node on layer boundary */
         moist_node[nidx] = (moist[lidx] / depth[lidx] 
-			    + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
+			    + moist[lidx+1] / depth[lidx+1]) / MMPERMETER / 2.;
         soil_fract = (bulk_density[lidx] / soil_density[lidx] 
 		      + bulk_density[lidx+1] / soil_density[lidx+1]) / 2.;
       }
       else { 
         /* node completely in layer */
-        moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+        moist_node[nidx] = moist[lidx] / depth[lidx] / MMPERMETER;
         soil_fract = (bulk_density[lidx] / soil_density[lidx]);
       }
     }
@@ -708,10 +708,10 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 
   /* compute layer thermal properties */
   for(lidx=0;lidx<Nlayers;lidx++) {
-    moist = layer[lidx].moist / depth[lidx] / 1000;
+    moist = layer[lidx].moist / depth[lidx] / MMPERMETER;
     ice = 0;
     for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
-      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 * frost_fract[frost_area];
+      ice += layer[lidx].ice[frost_area] / depth[lidx] / MMPERMETER * frost_fract[frost_area];
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, 
 			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],

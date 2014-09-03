@@ -244,7 +244,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
     temp.depth_in = 0;
   }
 
-  fprintf(stderr, "Lake plus wetland area = %e km2\n",temp.basin[0]/(1000.*1000.));
+  fprintf(stderr, "Lake plus wetland area = %e km2\n",temp.basin[0]/(METERS_PER_KM*METERS_PER_KM));
   return temp;
 }
 

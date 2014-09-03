@@ -774,12 +774,12 @@ global_param_struct get_global_param(filenames_struct *names,
   if (global.out_dt == 0 || global.out_dt == MISSING) {
     global.out_dt = global.dt;
   }
-  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)){
+  else if (global.out_dt < global.dt || global.out_dt > HOURSPERDAY || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)){
     nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
   }
 
   // Validate SNOW_STEP and set NR and NF
-  if (global.dt < 24 && global.dt != options.SNOW_STEP)
+  if (global.dt < HOURSPERDAY && global.dt != options.SNOW_STEP)
     nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
   if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
     nrerror("SNOW_STEP should be <= TIME_STEP and divide TIME_STEP evenly ");
@@ -809,7 +809,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if (global.starthour == MISSING) {
-    if (global.dt == 24)
+    if (global.dt == HOURSPERDAY)
       global.starthour = 0;
     else
       nrerror("Simulation start hour has not been defined, yet model time step is less than 24 hours.  Make sure that the global file defines STARTHOUR.");

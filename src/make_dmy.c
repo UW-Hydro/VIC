@@ -96,10 +96,10 @@ dmy_struct *make_dmy(global_param_struct *global)
     while (tmphr != 0) {
       tmphr += global->dt;
       offset++;
-      if(tmphr >= 24) tmphr = 0;
+      if(tmphr >= HOURSPERDAY) tmphr = 0;
     }
-    if( ((global->dt * (global->nrecs - offset)) % 24) != 0 ) {
-      sprintf(ErrStr,"Nrecs must be defined such that the model ends after completing a full day.  Currently Nrecs is set to %i, while %i and %i are allowable values.", global->nrecs, ((global->dt * (global->nrecs - offset)) / 24) * 24, ((global->dt * (global->nrecs - offset)) / 24) * 24 + 24);
+    if( ((global->dt * (global->nrecs - offset)) % HOURSPERDAY) != 0 ) {
+      sprintf(ErrStr,"Nrecs must be defined such that the model ends after completing a full day.  Currently Nrecs is set to %i, while %i and %i are allowable values.", global->nrecs, ((global->dt * (global->nrecs - offset)) / HOURSPERDAY) * HOURSPERDAY, ((global->dt * (global->nrecs - offset)) / HOURSPERDAY) * HOURSPERDAY + HOURSPERDAY);
       nrerror(ErrStr);
     }
   }
@@ -145,7 +145,7 @@ dmy_struct *make_dmy(global_param_struct *global)
 	for ( ii = 0; ii < tmpmonth-1; ii++) 
 	  tmpjday += days[ii];
 	
-	step     = (int)(1./((float)global->dt/24.));
+	step     = (int)(1./((float)global->dt/HOURSPERDAY));
 	while(tmpyear < temp[0].year || 
 	      (tmpyear == temp[0].year && tmpjday < temp[0].day_in_year) ||
 	      (tmpyear == temp[0].year && tmpjday == temp[0].day_in_year && tmphr < temp[0].hour)) {
@@ -163,8 +163,8 @@ dmy_struct *make_dmy(global_param_struct *global)
   /** Determine the number of records to skip before starting output files **/
   skiprec = 0;
   for ( i = 0; i < global->skipyear; i++ ) {
-    if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
-    else skiprec += 365 * 24 / global->dt;
+    if(LEAPYR(temp[skiprec].year)) skiprec += 366 * HOURSPERDAY / global->dt;
+    else skiprec += 365 * HOURSPERDAY / global->dt;
   }
   global->skipyear = skiprec;
 
@@ -182,7 +182,7 @@ void get_next_time_step(int *year,
   int daymax;
   
   *hr += dt;
-  if(*hr >= 24) {
+  if(*hr >= HOURSPERDAY) {
     *hr=0;
     *day += 1;
     *jday += 1;

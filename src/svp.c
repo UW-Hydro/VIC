@@ -19,7 +19,7 @@ double svp(double temp)
 
   if(temp<0) SVP *= 1.0 + .00972 * temp + .000042 * temp * temp;
 
-  return (SVP*1000.);
+  return (SVP*kPa2Pa);
 }
 
 double svp_slope(double temp)

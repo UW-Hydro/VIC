@@ -442,7 +442,7 @@ int  full_energy(int                  gridcell,
             if (veg_con->root[lidx] > 0) {
               cell[iveg][band].rootmoist += cell[iveg][band].layer[lidx].moist;
             }
-	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*MMPERMETER - soil_con->Wpwp[lidx]);
           }
           cell[iveg][band].wetness /= options.Nlayer;
 
@@ -555,10 +555,10 @@ int  full_energy(int                  gridcell,
     atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
 
     ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
-                           atmos->wind[NR], atmos->vp[NR] / 1000.,
+                           atmos->wind[NR], atmos->vp[NR] / kPa2Pa,
                            atmos->shortwave[NR], atmos->longwave[NR],
-                           atmos->vpd[NR] / 1000.,
-                           atmos->pressure[NR] / 1000.,
+                           atmos->vpd[NR] / kPa2Pa,
+                           atmos->pressure[NR] / kPa2Pa,
                            atmos->density[NR], lake_var, *lake_con,
                            *soil_con, gp->dt, rec, gp->wind_h, dmy[rec], fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);

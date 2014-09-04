@@ -48,7 +48,6 @@ gl_volume_area(snow_data_struct **snow,
     double cell_area;                       // km2
     double tile_area;                       // km2
     double ice_vol;                         // km3
-    double ice_vol_old;                     // km3
     double ice_vol_new;                     // km3
     double ice_area_old;                    // km2
     double ice_area_temp;                   // km2
@@ -74,7 +73,6 @@ gl_volume_area(snow_data_struct **snow,
                                     veg_con[iveg].Cv;
                 }
             }
-            ice_vol_old = ice_vol;  // debuging remove when done
             if (ice_vol > 0.0) {
                 // ice_vol in km3 and ice_area in km2
                 ice_vol *= cell_area / MMPERMETER / METERS_PER_KM;
@@ -84,7 +82,6 @@ gl_volume_area(snow_data_struct **snow,
                 ice_area_temp = pow((ice_vol / BAHR_C), (1 / BAHR_LAMBDA));
 
                 // time scaling
-                // ice_area_new = ice_area_temp;
                 ice_area_new = ice_area_old +
                                (ice_area_temp - ice_area_old) * exp(stepsize / BAHR_T);
 
@@ -107,16 +104,6 @@ gl_volume_area(snow_data_struct **snow,
                 for (band = 0; band < bot_band; band++) {
                     snow[iveg][band].iwq = iwe_final;
                 }
-            }
-            ice_vol_new = 0.0;  // debuging remove when done
-            for (band = 0; band < Nbands; band++) {  // debuging remove when done
-                if (snow[iveg][band].iwq > 0.0) {  // debuging remove when done
-                    ice_vol_new += snow[iveg][band].iwq * veg_con[iveg].Cv *
-                                   soil_con->AreaFract[band];
-                }
-            }
-            if (ice_vol_new != ice_vol_old) {  // debuging remove when done
-                printf("shouldn't be here\n");  // debuging remove when done
             }
         } /** end current vegetation type **/
     } /** end of vegetation loop **/

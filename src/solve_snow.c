@@ -421,10 +421,10 @@ solve_snow(char               overstory,
                 }
 
                 // Snow to ice conversion
-                if (options.GLACIER > 0 && soil_con->glcel == 1 && snow->swq >
-                    0.0) {
+                if (options.GLACIER && (soil_con->glcel == 1) && (
+                    snow->swq > MAX_SURFACE_SWE)) {
                     snow_to_ice(&snow->swq, &snow->iwq, &snow->density,
-                                &snow->depth);
+                                &snow->pack_temp);
                 }
 
                 /** Calculate Snow Depth (H.B.H. 7.2.1) **/
@@ -536,11 +536,13 @@ solve_snow(char               overstory,
 
                 snow->density = 0.;
                 snow->depth = 0.;
-                snow->surf_water = 0;
-                snow->pack_water = 0;
-                snow->surf_temp = 0;
-                snow->pack_temp = 0;
-                snow->coverage = 0;
+                snow->surf_water = 0.;
+                snow->pack_water = 0.;
+                snow->surf_temp = 0.;
+                snow->pack_temp = 0.;
+                snow->surf_coldcontent = 0.;
+                snow->pack_coldcontent = 0.;
+                snow->coverage = 0.;
                 snow->snow_distrib_slope = 0.;
                 snow->store_snow = TRUE;
                 snow->MELTING = FALSE;

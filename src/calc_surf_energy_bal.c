@@ -815,10 +815,12 @@ calc_surf_energy_bal(double             Le,
             /* snowpack melts completely */
             snow->density = 0.;
             snow->depth = 0.;
-            snow->surf_water = 0;
-            snow->pack_water = 0;
-            snow->surf_temp = 0;
-            snow->pack_temp = 0;
+            snow->surf_water = 0.;
+            snow->pack_water = 0.;
+            snow->surf_temp = 0.;
+            snow->pack_temp = 0.;
+            snow->surf_coldcontent = 0.;
+            snow->pack_coldcontent = 0.;
             snow->coverage = 0;
             if (options.SPATIAL_SNOW) {
                 snow->store_swq = 0.;

@@ -456,7 +456,6 @@ snow_melt(double            Le,
                 if (SurfaceSwq < -(snow->vapor_flux)) {
                     // if vapor_flux exceeds SurfaceSwq, we not only need to
                     // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-                    // snow->surface_flux *= -( SurfaceSwq / snow->vapor_flux );
                     snow->blowing_flux *= -(SurfaceSwq / snow->vapor_flux);
                     snow->vapor_flux = -SurfaceSwq;
                     snow->surface_flux = -SurfaceSwq - snow->blowing_flux;
@@ -526,7 +525,6 @@ snow_melt(double            Le,
         snow->pack_water -= DeltaPackSwq;
         PackSwq += DeltaPackSwq;
         Ice += DeltaPackSwq;
-        PackCC = 0.0;
     }
 
     /* Update the liquid water content of the pack */
@@ -549,22 +547,21 @@ snow_melt(double            Le,
         Ice -= InitialIwq;
         snow->glmelt = 0.0;
     }
-    else if (Ice == 0.0) {
-        // Total melting of pack
-        snow->iwq = 0.0;
-        snow->glmelt = InitialIwq;
-    }
-    else if (Ice - InitialIwq < 0) {
+    else if (Ice - InitialIwq < 0.0) {
         // Complete melting of snow and some glacier
         snow->iwq = Ice;
         Ice = 0.0;
         snow->glmelt = InitialIwq;
     }
     else {
-        vicerror("Error in snow_melt.c: should not ever make it here.\n");
+        // Total melting of pack
+        snow->iwq = 0.0;
+        snow->glmelt = InitialIwq;
     }
 
     if (Ice > MAX_SURFACE_SWE) {
+        SurfaceCC = calc_cold_content(SurfaceSwq, snow->surf_temp);
+        PackCC = calc_cold_content(PackSwq, snow->pack_temp);
         if (SurfaceSwq > MAX_SURFACE_SWE) {
             PackCC += SurfaceCC * (SurfaceSwq - MAX_SURFACE_SWE) / SurfaceSwq;
             SurfaceCC -= SurfaceCC *

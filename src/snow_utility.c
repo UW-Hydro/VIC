@@ -372,7 +372,7 @@ void
 snow_to_ice(double *swq,
             double *iwq,
             double *density,
-            double *depth)
+            double *packtemp)
 {
 /**********************************************************************
    snow_to_ice       Joe Hamman        August 28, 2014
@@ -380,26 +380,33 @@ snow_to_ice(double *swq,
    This subroutine converts snow (swe) into glacier ice (iwe).
 **********************************************************************/
 
+    double packswq;
+    double packcc;
+    double packdepth; 
     double snow2ice;
     double snowdepth;
     double maxdens;
     double slopedens;
-
+    
+    packswq = *swq - MAX_SURFACE_SWE;
+    packcc = calc_cold_content(packswq, *packtemp);
+    packdepth = calc_snow_depth(packswq, *density);
+    
     maxdens = 2. * (*density) - (double)NEW_SNOW_DENSITY;
-    if (maxdens > SNOWICE_THRESH && *swq > 0.) {
-        slopedens = (maxdens - (double)NEW_SNOW_DENSITY) / (*depth);
-        snowdepth = (*depth) -
+    if (maxdens > SNOWICE_THRESH) {
+        slopedens = (maxdens - (double)NEW_SNOW_DENSITY) / (packdepth);
+        snowdepth = (packdepth) -
                     (((*density) - (double)NEW_SNOW_DENSITY) / slopedens);
-        snow2ice = ((*depth) - snowdepth) *
+        snow2ice = ((packdepth) - snowdepth) *
                    ((maxdens - SNOWICE_THRESH) / 2.) / (double)h20_density;
 
-        // Move snow from snowlayer to ice layer.
-        if (snow2ice > 0. && *swq > snow2ice) {
-            *iwq += snow2ice;
-            *swq -= snow2ice;
-            *density = ((double)SNOWICE_THRESH + (double)NEW_SNOW_DENSITY) / 2.;
+        // Move snow from snowpack to ice layer.
+        *iwq += snow2ice;
+        packswq -= snow2ice;
+        *density = ((double)SNOWICE_THRESH + (double)NEW_SNOW_DENSITY) / 2.;
 
-            // Need to adjust temperature here, cold content of pack doesn't change
-        }
+        // Need to adjust temperature here, cold content of pack doesn't change
+        *packtemp = calc_temp_from_cc(packswq, packcc);
+        *swq = packswq + MAX_SURFACE_SWE;
     }
 }

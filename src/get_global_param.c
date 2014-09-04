@@ -1049,7 +1049,7 @@ global_param_struct get_global_param(filenames_struct *names,
   }
 
   // Validate glacier parameter information
-  if (options.GLACIER != FALSE) {
+  if (options.GLACIER) {
     if (options.COMPUTE_TREELINE) {
       sprintf(ErrStr, "GLACIER = TRUE and COMPUTE_TREELINE = TRUE are incompatible (untested) options.");
       nrerror(ErrStr);

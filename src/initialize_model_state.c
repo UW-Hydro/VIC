@@ -299,7 +299,8 @@ int initialize_model_state(all_vars_struct     *all_vars,
         else {
           pack_swq = 0;
           surf_swq = snow[veg][band].swq;
-          snow[veg][band].pack_temp = 0;
+          snow[veg][band].pack_temp = 0.;
+          snow[veg][band].pack_coldcontent = 0.;
         }
         if (snow[veg][band].surf_water > LIQUID_WATER_CAPACITY*surf_swq) {
           snow[veg][band].pack_water += snow[veg][band].surf_water - (LIQUID_WATER_CAPACITY*surf_swq);

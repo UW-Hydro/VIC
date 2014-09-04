@@ -674,17 +674,17 @@ extern char ref_veg_ref_crop[];
 #define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2d] */
 #define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2d] */
 #define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2d] */
-
-#define OUT_IWE            165
-#define OUT_IWE_BAND       166
-#define OUT_DELIWE         167  
-#define OUT_GLACIER_MELT   168  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_GL_MELT_BAND   169  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
-#define OUT_GLQOUT_BAND    170
-#define OUT_GLQIN_BAND     171
-#define OUT_BN_BAND        172
-#define OUT_SNOW_DENSITY   173
-#define OUT_SNOW_DENS_BAND 174
+// Glacier terms
+#define OUT_IWE            167
+#define OUT_IWE_BAND       168
+#define OUT_DELIWE         169 
+#define OUT_GLACIER_MELT   170  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_MELT_BAND   171  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
+#define OUT_GLQOUT_BAND    172
+#define OUT_GLQIN_BAND     173
+#define OUT_BN_BAND        174
+#define OUT_SNOW_DENSITY   175
+#define OUT_SNOW_DENS_BAND 176
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */

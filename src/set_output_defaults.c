@@ -184,7 +184,7 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SURFACE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
-  if (options.GLACIER != FALSE) {
+  if (options.GLACIER) {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_IWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GLACIER_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }

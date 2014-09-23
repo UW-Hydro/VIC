@@ -876,27 +876,27 @@ print_soil_con(soil_con_struct *scon,
     }
     printf("\n");
     printf("BandElev                :");
-    for (i = 0; i < nnodes; i++) {
+    for (i = 0; i < nbands; i++) {
         printf("\t%.4lf", scon->BandElev[i]);
     }
     printf("\n");
     printf("AreaFract               :");
-    for (i = 0; i < nnodes; i++) {
+    for (i = 0; i < nbands; i++) {
         printf("\t%.4lf", scon->AreaFract[i]);
     }
     printf("\n");
     printf("Pfactor               :");
-    for (i = 0; i < nnodes; i++) {
+    for (i = 0; i < nbands; i++) {
         printf("\t%.4lf", scon->Pfactor[i]);
     }
     printf("\n");
     printf("Tfactor               :");
-    for (i = 0; i < nnodes; i++) {
+    for (i = 0; i < nbands; i++) {
         printf("\t%.4lf", scon->Tfactor[i]);
     }
     printf("\n");
     printf("AboveTreeLine         :");
-    for (i = 0; i < nnodes; i++) {
+    for (i = 0; i < nbands; i++) {
         printf("\t%d", scon->AboveTreeLine[i]);
     }
     printf("\n");

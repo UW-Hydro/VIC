@@ -76,7 +76,7 @@
  
 /***** Snow albedo curve parameters.  Defaults are from Bras p263.
        Should not be changed except for serious problems with snow melt *****/
-#define NEW_SNOW_ALB		0.85
+#define NEW_SNOW_ALB		0.75
 #define SNOW_ALB_ACCUM_A	0.94
 #define SNOW_ALB_ACCUM_B	0.58
 #define SNOW_ALB_THAW_A		0.82

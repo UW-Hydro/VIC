@@ -281,6 +281,7 @@ extern char ref_veg_ref_crop[];
 #define HOURSPERYEAR  HOURSPERDAY*DAYS_PER_YEAR    /* number of hours per year */
 #define SECPHOUR      3600.	/* seconds per hour */
 #define SEC_PER_DAY   86400.	/* seconds per day */
+#define MONTHSPERYEAR 12
 
 /***** Length Constants *****/
 #define MMPERMETER 1000.0

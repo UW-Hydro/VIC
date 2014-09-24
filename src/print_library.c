@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include <vicNl_def.h>
 #include <vicNl.h>
 
 void
@@ -301,7 +300,6 @@ print_filenames(filenames_struct *fnames)
     printf("\tf_path_pfx[0]: %s\n", fnames->f_path_pfx[0]);
     printf("\tf_path_pfx[1]: %s\n", fnames->f_path_pfx[1]);
     printf("\tglobal       : %s\n", fnames->global);
-    // printf("\tdomain       : %s\n", fnames->domain);
     printf("\tinit_state   : %s\n", fnames->init_state);
     printf("\tlakeparam    : %s\n", fnames->lakeparam);
     printf("\tresult_dir   : %s\n", fnames->result_dir);
@@ -319,7 +317,6 @@ print_filep(filep_struct *fp)
     printf("\tforcing[0] : %p\n", fp->forcing[0]);
     printf("\tforcing[1] : %p\n", fp->forcing[1]);
     printf("\tglobalparam: %p\n", fp->globalparam);
-    // printf("\tdomain     : %p\n", fp->domain);
     printf("\tinit_state : %p\n", fp->init_state);
     printf("\tlakeparam  : %p\n", fp->lakeparam);
     printf("\tsnowband   : %p\n", fp->snowband);

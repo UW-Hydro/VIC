@@ -968,7 +968,7 @@ print_veg_con(veg_con_struct *vcon,
     }
     if (carbon) {
         printf("\tCanopLayerBnd   :");
-        for (i = 0; i < nroots; i++) {
+        for (i = 0; i < ncanopy; i++) {
             printf("\t%.2lf", vcon->CanopLayerBnd[i]);
         }
     }

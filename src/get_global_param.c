@@ -686,7 +686,16 @@ global_param_struct get_global_param(filenames_struct *names,
           nrerror("Unknown value for GLACIER Option, valid values are DYNAMIC, SCALING, or FALSE");
         }
       }
+      else if (strcasecmp("GLACIER_OVERFLOW", optstr) == 0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if (strcasecmp("FALSE", flgstr) == 0) {
+          options.GLACIER_OVERFLOW = FALSE;
+        }
+        else {
+          options.GLACIER_OVERFLOW = TRUE;
+        }
 
+      }
       /*************************************
        Define output files
       *************************************/

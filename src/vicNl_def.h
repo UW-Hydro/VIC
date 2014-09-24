@@ -680,12 +680,14 @@ extern char ref_veg_ref_crop[];
 #define OUT_IWE_BAND       168
 #define OUT_DELIWE         169 
 #define OUT_GLACIER_MELT   170  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_GL_MELT_BAND   171  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
-#define OUT_GLQOUT_BAND    172
-#define OUT_GLQIN_BAND     173
-#define OUT_BN_BAND        174
-#define OUT_SNOW_DENSITY   175
-#define OUT_SNOW_DENS_BAND 176
+#define OUT_GLACIER_OVER   171  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_MELT_BAND   172  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
+#define OUT_GL_OVER_BAND   173  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */ 
+#define OUT_GLQOUT_BAND    174
+#define OUT_GLQIN_BAND     175
+#define OUT_BN_BAND        176
+#define OUT_SNOW_DENSITY   177
+#define OUT_SNOW_DENS_BAND 178
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -905,6 +907,8 @@ typedef struct {
   char GLACIER;          /* DYNAMIC = run glacier flow model in DYNAMIC mode,
                             SCALING = run glacier flow model in Volume-Area scaling mode,
                             FALSE = do not run glacier model */
+  char GLACIER_OVERFLOW; /* TRUE = glacier flow out of grid cell is converted to runoff
+                            FALSE = glacier flow is confined to veg tile */
 
 } option_struct;
 
@@ -1358,6 +1362,7 @@ typedef struct {
   double snowmelt;         /* snow melt */
   double glmelt;           /* glacier melt */
   double glarea;           /* glacier area */
+  double gl_overflow;      /* glacier overflow depth */
   double Qin;              /* glacier flow into the cell*/
   double Qout;             /* glacier flow out of the cell*/
   double bn;               /* glacier mass balance */

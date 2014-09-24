@@ -615,6 +615,12 @@ snow_melt(double            Le,
     snow->bn = delswe + deliwe; // glacier mass balance
 
     melt[0] *= MMPERMETER;               /* converts back to mm */
+    
+    // add glacier outflow to melt and glmelt
+    melt[0] += snow->gl_overflow;
+    snow->glmelt += snow->gl_overflow;
+    
+    // store final values
     snow->mass_error = MassBalanceError;
     snow->surf_coldcontent = SurfaceCC;
     snow->pack_coldcontent = PackCC;

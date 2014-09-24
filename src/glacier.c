@@ -42,6 +42,8 @@ gl_volume_area(snow_data_struct **snow,
 
 **********************************************************************/
 {
+    extern option_struct options;
+
     int    iveg;
     int    band;
     int    bot_band;
@@ -49,6 +51,8 @@ gl_volume_area(snow_data_struct **snow,
     double tile_area;                       // km2
     double ice_vol;                         // km3
     double ice_vol_new;                     // km3
+    double max_vol;                         // km3
+    double overflow_vol;                    // km3
     double ice_area_old;                    // km2
     double ice_area_temp;                   // km2
     double ice_area_new;                    // km2
@@ -66,6 +70,7 @@ gl_volume_area(snow_data_struct **snow,
             ice_vol = 0.0;
             ice_area_old = 0.0;
             for (band = 0; band < Nbands; band++) {
+                snow[iveg][band].gl_overflow = 0.;
                 if (snow[iveg][band].iwq > 0.0) {
                     ice_vol += snow[iveg][band].iwq * veg_con[iveg].Cv *
                                soil_con->AreaFract[band];
@@ -88,6 +93,11 @@ gl_volume_area(snow_data_struct **snow,
                 // Make sure the area isn't too big
                 if (ice_area_new > tile_area) {
                     ice_area_new = tile_area;
+                    if (options.GLACIER_OVERFLOW) {
+                        max_vol =  BAHR_C * pow(tile_area, BAHR_LAMBDA);
+                        overflow_vol = ice_vol - max_vol;
+                        ice_vol = max_vol;
+                    }
                 }
 
                 // determine where the ice belongs
@@ -103,6 +113,19 @@ gl_volume_area(snow_data_struct **snow,
                 iwe_final = ice_vol / (cum_area * METERS_PER_KM * METERS_PER_KM);
                 for (band = 0; band < bot_band; band++) {
                     snow[iveg][band].iwq = iwe_final;
+                }
+
+                // add gl_runoff to snow structure (lowest band)
+                if (options.GLACIER_OVERFLOW) {
+                    snow[iveg][bot_band].gl_overflow = overflow_vol / 
+                                                       (soil_con->AreaFract[bot_band] * 
+                                                       veg_con[iveg].Cv * 
+                                                       cell_area * 
+                                                       METERS_PER_KM * 
+                                                       METERS_PER_KM);
+                }
+                else {
+                    snow[iveg][bot_band].gl_overflow = 0.;
                 }
             }
         } /** end current vegetation type **/

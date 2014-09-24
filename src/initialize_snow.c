@@ -103,7 +103,6 @@ void initialize_snow(snow_data_struct **snow,
       snow[i][j].bn                = 0.0;
       snow[i][j].icedepth          = 0.0;
       snow[i][j].glarea            = 0.0;
-      snow[i][j].glmelt            = 0.0;
       snow[i][j].glwater           = 0.0;
       snow[i][j].Qin               = 0.0;
       snow[i][j].Qout              = 0.0;
@@ -117,6 +116,8 @@ void initialize_snow(snow_data_struct **snow,
       snow[i][j].surface_flux      = 0.0;
       snow[i][j].transport         = 0.0;
       snow[i][j].vapor_flux        = 0.0;
+      snow[i][j].glmelt            = 0.0;
+      snow[i][j].gl_overflow       = 0.0;
     }
   }
 }

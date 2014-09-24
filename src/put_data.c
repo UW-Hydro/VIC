@@ -734,6 +734,7 @@ int  put_data(all_vars_struct   *all_vars,
       out_data[OUT_RUNOFF].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOW_MELT].aggdata[0] /= out_dt_sec;
       out_data[OUT_GLACIER_MELT].aggdata[0] /= out_dt_sec;
+      out_data[OUT_GLACIER_OVER].aggdata[0] /= out_dt_sec;
       out_data[OUT_GLQIN_BAND].aggdata[0] /= out_dt_sec;
       out_data[OUT_GLQOUT_BAND].aggdata[0] /= out_dt_sec;
       out_data[OUT_SNOWF].aggdata[0] /= out_dt_sec;
@@ -955,6 +956,9 @@ void collect_wb_terms(cell_data_struct  cell,
 
   /** record glacier melt **/
   out_data[OUT_GLACIER_MELT].data[0] += snow.glmelt * AreaFactor;
+  
+  /** record glacier overflow **/
+  out_data[OUT_GLACIER_OVER].data[0] += snow.gl_overflow * AreaFactor;
   
   /** record snow cover fraction **/
   out_data[OUT_SNOW_COVER].data[0] += snow.coverage * AreaFactor;
@@ -1194,6 +1198,9 @@ void collect_eb_terms(energy_bal_struct energy,
 
   /** record band snow melt **/
   out_data[OUT_GL_MELT_BAND].data[band] += snow.glmelt * Cv * lakefactor;
+
+  /** record band overflow **/
+  out_data[OUT_GL_OVER_BAND].data[band] += snow.gl_overflow * Cv * lakefactor;
 
   /** record band snow coverage **/
   out_data[OUT_SNOW_COVER_BAND].data[band] += snow.coverage * Cv * lakefactor;

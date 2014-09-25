@@ -340,17 +340,6 @@ int  runoff(cell_data_struct  *cell,
       inflow   = dt_inflow;
       last_cnt = 0;
 	    
-      if (options.LOG_MATRIC) {
-        for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
-	  if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) < resid_moist[lindex] )
-	    tmp_liq = resid_moist[lindex];
-	  if(tmp_liq > resid_moist[lindex])
-	    matric[lindex] = soil_con->bubble[lindex] * pow( (tmp_liq - resid_moist[lindex]) / (soil_con->max_moist[lindex] - resid_moist[lindex]), -b[lindex]);
-	  else
-	  matric[lindex] = HUGE_RESIST;
-	}
-      }
-
       /*************************************
         Compute Drainage between Sublayers 
       *************************************/
@@ -363,10 +352,6 @@ int  runoff(cell_data_struct  *cell,
 	  tmp_liq = resid_moist[lindex];
 	      
 	if(liq[lindex] > resid_moist[lindex]) {
-          if (options.LOG_MATRIC) {
-	    avg_matric = pow( 10, (soil_con->depth[lindex+1] * log10(fabs(matric[lindex])) + soil_con->depth[lindex] * log10(fabs(matric[lindex+1]))) / (soil_con->depth[lindex] + soil_con->depth[lindex+1]) );
-	    tmp_liq = resid_moist[lindex] + ( soil_con->max_moist[lindex] - resid_moist[lindex] ) * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
-	  }
 	  Q12[lindex] = Ksat[lindex] * pow(((tmp_liq - resid_moist[lindex]) / (soil_con->max_moist[lindex] - resid_moist[lindex])), soil_con->expt[lindex]); 
 	}
 	else Q12[lindex] = 0.;

@@ -575,8 +575,8 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("JULY_TAVG_SUPPLIED",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
-	else options.JULY_TAVG_SUPPLIED=TRUE;
+        if(strcasecmp("TRUE",flgstr)==0) options.JULY_TAVG_SUPPLIED=TRUE;
+	else options.JULY_TAVG_SUPPLIED=FALSE;
       }
       else if(strcasecmp("ORGANIC_FRACT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -1010,7 +1010,10 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
     nrerror(ErrStr);
   }
-
+  if(options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
+    sprintf(ErrStr,"COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is FALSE. \nSet JULY_TAVG_SUPPLIED to TRUE and include July Average Temperature in the soil parameter file to run COMPUTE_TREELINE, or set both to FALSE.");
+    nrerror(ErrStr);
+  }
   // Validate lake parameter information
   if (options.LAKES) {
     if (!options.FULL_ENERGY) {

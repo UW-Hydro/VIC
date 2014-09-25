@@ -349,11 +349,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
       }
-      else if(strcasecmp("LOG_MATRIC",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.LOG_MATRIC=TRUE;
-        else options.LOG_MATRIC = FALSE;
-      }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("LW_TVA",flgstr)==0) options.LW_TYPE=LW_TVA;

@@ -166,6 +166,11 @@ int  runoff(cell_data_struct  *cell,
   2013-Dec-27 Removed QUICK_FS option.						TJB
   2014-Mar-28 Removed DIST_PRCP option.						TJB
   2014-May-09 Added check on liquid soil moisture to ensure always >= 0.	TJB
+  2014-Sep-27 Added check to handle case when sum_liq = 0.			TJB
+  2014-Sep-27 Removed print of warning when evap_sum != 0 (this in itself is
+	      not an error) and added update of layer[lindex].evap to equal the
+	      sum of evap[lindex][frost_area] over all frost_areas after
+	      adjustment for avail_liq to ensure consistency.			TJB
 **********************************************************************/
 {  
   extern option_struct options;
@@ -250,7 +255,7 @@ int  runoff(cell_data_struct  *cell,
     evap[lindex][0] = layer[lindex].evap/(double)dt;
     org_moist[lindex] = layer[lindex].moist;
     layer[lindex].moist = 0;
-    if ( evap[lindex][0] != 0 ) { // if there is evaporation
+    if ( evap[lindex][0] > 0 ) { // if there is positive evaporation
       sum_liq = 0;
       // compute available soil moisture for each frost sub area.
       for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
@@ -259,15 +264,22 @@ int  runoff(cell_data_struct  *cell,
         sum_liq += avail_liq[lindex][frost_area]*frost_fract[frost_area];
       }
       // compute fraction of available soil moisture that is evaporated
-      evap_percent = evap[lindex][0] / sum_liq;
+      if (sum_liq > 0) {
+        evap_percent = evap[lindex][0] / sum_liq;
+      }
+      else {
+        evap_percent = 1.0;
+      }
       // distribute evaporation between frost sub areas by percentage
       evap_sum = evap[lindex][0];
       for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
         evap[lindex][frost_area] = avail_liq[lindex][frost_area] * evap_percent;
+        avail_liq[lindex][frost_area] -= evap[lindex][frost_area];
         evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
       }
-      if ( evap_sum > SMALL || evap_sum < -SMALL ) {
-        fprintf(stderr,"Evap_sum = %f\n", evap_sum);
+      layer[lindex].evap = 0;
+      for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
+        layer[lindex].evap += evap[lindex][frost_area] * frost_fract[frost_area];
       }
     }
     else {

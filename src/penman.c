@@ -22,14 +22,16 @@
 		if (vpd > 0.0 && evap < 0.0)
 	      to
 		if (vpd >= 0.0 && evap < 0.0)
-	      to correctly handle evap when vpd == 0.0.				TJB
+	      to correctly handle evap when vpd == 0.0.			TJB
   2009-Jun-09 Moved calculation of canopy resistance from penman() into
 	      separate function calc_rc().  Also allowed for reference
-	      crop case in calc_rc().						TJB
+	      crop case in calc_rc().					TJB
   2009-Jun-09 Removed unnecessary functions quick_penman() and
-	      compute_penman_constants().					TJB
-  2013-Jul-25 Added calc_rc_ps(), which computes canopy resistance based on
-	      photosynthetic demand.						TJB
+	      compute_penman_constants().				TJB
+  2013-Jul-25 Added calc_rc_ps(), which computes canopy resistance
+	      based on photosynthetic demand.				TJB
+  2014-May-05 Moved pre-compile constants CLOSURE, RSMAX, and
+	      VPDMINFACTOR to vicNl_def.h.				TJB
 
 ********************************************************************************/
 #include <stdio.h>
@@ -60,11 +62,12 @@ double calc_rc(double rs,
     rc = 0;
   }
   else if (lai == 0) {
-    rc = HUGE_RESIST;
+    rc = RSMAX;
   }
   else if (ref_crop) {
     /* calculate simple reference canopy resistance in s/m */
     rc = rs/(lai * 0.5);
+    rc = (rc > RSMAX) ? RSMAX : rc;
   }
   else {
     /* calculate resistance factors (Wigmosta et al., 1994) */
@@ -197,10 +200,6 @@ void calc_rc_ps(char    Ctype,
 
 }
 
-#undef CLOSURE
-#undef RSMAX
-#undef VPDMINFACTOR
-
 double penman(double tair,
 	      double elevation,
 	      double rad,
@@ -221,7 +220,7 @@ double penman(double tair,
   slope = svp_slope(tair);
 
   /* calculate scale height based on average temperature in the column */
-  h  = 287/9.81 * ((tair + 273.15) + 0.5 * (double)elevation * LAPSE_PM);
+  h  = 287/9.81 * ((tair + 273.15) + 0.5 * (double)elevation * T_LAPSE);
 
   /* use hypsometric equation to calculate p_z, assume that virtual
      temperature is equal air_temp */

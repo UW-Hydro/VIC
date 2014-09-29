@@ -151,16 +151,18 @@ ALMA_INPUT	FALSE	# TRUE = ALMA-compliant input variable units; FALSE = standard 
 # Land Surface Files and Parameters
 #######################################################################
 SOIL            (put the soil parameter path/file here)	# Soil parameter path/file
-ARC_SOIL        FALSE   # TRUE = read soil parameters from ARC/INFO ASCII grids
-#SOIL_DIR        (soil param directory)   # Directory containing ARC/INFO ASCII grids of soil parameters - only valid if ARC_SOIL is TRUE
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED	FALSE	# TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
 ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*Nlayer extra columns, listing for each layer the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer; FALSE = soil param file does not contain any information about organic soil, and organic fraction should be assumed to be 0
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
-VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
-LAI_SRC 	LAI_FROM_VEGLIB    # LAI_FROM_VEGPARAM = read LAI from veg param file; LAI_FROM_VEGLIB = read LAI from veg library file
+#VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
+#VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
+#VEGPARAM_VEGCOVER 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
+#LAI_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
+#ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
+#VEGCOVER_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

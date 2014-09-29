@@ -45,6 +45,10 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Jul-25 Added photosynthesis parameters.				TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
+  2014-Apr-25 Added optional albedo values; added VEGPARAM_ALB and
+	      ALB_SRC.							TJB
+  2014-Apr-25 Added optional vegcover values; added VEGPARAM_VEGCOVER
+	      and VEGCOVER_SRC.						TJB
 **********************************************************************/
 {
 
@@ -67,9 +71,12 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   char            *vegarr[500];
   size_t	  length;
   int             cidx;
+  double          tmp;
 
-  if(options.VEGPARAM_LAI) skip=2;
-  else skip=1;
+  skip = 1;
+  if(options.VEGPARAM_LAI) skip++;
+  if(options.VEGPARAM_VEGCOVER) skip++;
+  if(options.VEGPARAM_ALB) skip++;
 
   NoOverstory = 0;
 
@@ -230,15 +237,89 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         nrerror(ErrStr);
       }
 
-      for ( j = 0; j < 12; j++ ) {
-        if (options.LAI_SRC == LAI_FROM_VEGPARAM) {
-          veg_lib[temp[i].veg_class].LAI[j] = atof( vegarr[j] );
+      if (options.LAI_SRC == FROM_VEGPARAM) {
+        for ( j = 0; j < 12; j++ ) {
+          tmp = atof( vegarr[j] );
+          if (tmp != NODATA_VH)
+            veg_lib[temp[i].veg_class].LAI[j] = tmp;
           if (veg_lib[temp[i].veg_class].overstory && veg_lib[temp[i].veg_class].LAI[j] == 0) {
             sprintf(ErrStr,"ERROR: cell %d, veg tile %d: the specified veg class (%d) is listed as an overstory class in the veg LIBRARY, but the LAI given in the veg PARAM FILE for this tile for month %d is 0.\n",gridcel, i+1, temp[i].veg_class+1, j+1);
             nrerror(ErrStr);
           }
+          veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
         }
-        veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
+      }
+      for(k=0; k<Nfields; k++)
+        free(vegarr[k]);
+    }
+
+    if ( options.VEGPARAM_VEGCOVER ) {
+      // Read the vegcover line
+      if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
+        sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading vegcover for vegetat_type_num %d\n",vegcel,vegetat_type_num);
+        nrerror(ErrStr);
+      }      
+      Nfields = 0;
+      vegarr[Nfields] = calloc( 500, sizeof(char));      
+      strcpy(tmpline, line);
+      ttrim( tmpline );
+      token = strtok (tmpline, delimiters); 
+      strcpy(vegarr[Nfields],token);
+      Nfields++;
+ 
+      while( ( token = strtok (NULL, delimiters)) != NULL ){
+        vegarr[Nfields] = calloc( 500, sizeof(char));      
+        strcpy(vegarr[Nfields],token);
+        Nfields++;
+      }
+      NfieldsMax = 12; /* For vegcover */
+      if ( Nfields != NfieldsMax ) {
+        sprintf(ErrStr,"ERROR - cell %d - expecting %d vegcover values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
+        nrerror(ErrStr);
+      }
+
+      if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
+        for ( j = 0; j < 12; j++ ) {
+          tmp = atof( vegarr[j] );
+          if (tmp != NODATA_VH)
+            veg_lib[temp[i].veg_class].vegcover[j] = tmp;
+        }
+      }
+      for(k=0; k<Nfields; k++)
+        free(vegarr[k]);
+    }
+
+    if ( options.VEGPARAM_ALB ) {
+      // Read the albedo line
+      if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
+        sprintf(ErrStr,"ERROR unexpected EOF for cell %i while reading albedo for vegetat_type_num %d\n",vegcel,vegetat_type_num);
+        nrerror(ErrStr);
+      }      
+      Nfields = 0;
+      vegarr[Nfields] = calloc( 500, sizeof(char));      
+      strcpy(tmpline, line);
+      ttrim( tmpline );
+      token = strtok (tmpline, delimiters); 
+      strcpy(vegarr[Nfields],token);
+      Nfields++;
+ 
+      while( ( token = strtok (NULL, delimiters)) != NULL ){
+        vegarr[Nfields] = calloc( 500, sizeof(char));      
+        strcpy(vegarr[Nfields],token);
+        Nfields++;
+      }
+      NfieldsMax = 12; /* For albedo */
+      if ( Nfields != NfieldsMax ) {
+        sprintf(ErrStr,"ERROR - cell %d - expecting %d albedo values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
+        nrerror(ErrStr);
+      }
+
+      if (options.ALB_SRC == FROM_VEGPARAM) {
+        for ( j = 0; j < 12; j++ ) {
+          tmp = atof( vegarr[j] );
+          if (tmp != NODATA_VH)
+            veg_lib[temp[i].veg_class].albedo[j] = tmp;
+        }
       }
       for(k=0; k<Nfields; k++)
         free(vegarr[k]);

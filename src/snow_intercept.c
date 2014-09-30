@@ -78,6 +78,7 @@
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-May-05 Added logic to handle LAI = 0.				TJB
 *****************************************************************************/
 int snow_intercept(double  Dt,
 		   double  F,  
@@ -238,11 +239,16 @@ int snow_intercept(double  Dt,
   
   /* Calculate snow interception. */  
   
-  DeltaSnowInt = (1-*IntSnow/MaxSnowInt) * *SnowFall; 
-  if (DeltaSnowInt + *IntSnow > MaxSnowInt) 
-    DeltaSnowInt = MaxSnowInt - *IntSnow;
-  if (DeltaSnowInt < 0.0)  
+  if (MaxSnowInt > 0) {
+    DeltaSnowInt = (1-*IntSnow/MaxSnowInt) * *SnowFall; 
+    if (DeltaSnowInt + *IntSnow > MaxSnowInt) 
+      DeltaSnowInt = MaxSnowInt - *IntSnow;
+    if (DeltaSnowInt < 0.0)  
+      DeltaSnowInt = 0.0;
+  }
+  else {
     DeltaSnowInt = 0.0;
+  }
   
   /* Reduce the amount of intercepted snow if windy and cold.         
      Ringyo Shikenjo Tokyo, #54, 1952.                                

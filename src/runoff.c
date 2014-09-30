@@ -249,7 +249,7 @@ int  runoff(cell_data_struct  *cell,
     evap[lindex][0] = layer[lindex].evap/(double)dt;
     org_moist[lindex] = layer[lindex].moist;
     layer[lindex].moist = 0;
-    if ( evap[lindex][0] != 0 ) { // if there is evaporation
+    if ( evap[lindex][0] > 0 ) { // if there is positive evaporation
       sum_liq = 0;
       // compute available soil moisture for each frost sub area.
       for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
@@ -258,15 +258,22 @@ int  runoff(cell_data_struct  *cell,
         sum_liq += avail_liq[lindex][frost_area]*frost_fract[frost_area];
       }
       // compute fraction of available soil moisture that is evaporated
-      evap_percent = evap[lindex][0] / sum_liq;
+      if (sum_liq > 0) {
+        evap_percent = evap[lindex][0] / sum_liq;
+      }
+      else {
+        evap_percent = 1.0;
+      }
       // distribute evaporation between frost sub areas by percentage
       evap_sum = evap[lindex][0];
       for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
         evap[lindex][frost_area] = avail_liq[lindex][frost_area] * evap_percent;
+        avail_liq[lindex][frost_area] -= evap[lindex][frost_area];
         evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
       }
-      if ( evap_sum > SMALL || evap_sum < -SMALL ) {
-        fprintf(stderr,"Evap_sum = %f\n", evap_sum);
+      layer[lindex].evap = 0;
+      for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
+        layer[lindex].evap += evap[lindex][frost_area] * frost_fract[frost_area];
       }
     }
     else {
@@ -339,17 +346,6 @@ int  runoff(cell_data_struct  *cell,
       inflow   = dt_inflow;
       last_cnt = 0;
 	    
-      if (options.LOG_MATRIC) {
-        for( lindex = 0; lindex < options.Nlayer; lindex++ ) {
-	  if( (tmp_liq = liq[lindex] - evap[lindex][frost_area]) < resid_moist[lindex] )
-	    tmp_liq = resid_moist[lindex];
-	  if(tmp_liq > resid_moist[lindex])
-	    matric[lindex] = soil_con->bubble[lindex] * pow( (tmp_liq - resid_moist[lindex]) / (soil_con->max_moist[lindex] - resid_moist[lindex]), -b[lindex]);
-	  else
-	  matric[lindex] = HUGE_RESIST;
-	}
-      }
-
       /*************************************
         Compute Drainage between Sublayers 
       *************************************/
@@ -362,10 +358,6 @@ int  runoff(cell_data_struct  *cell,
 	  tmp_liq = resid_moist[lindex];
 	      
 	if(liq[lindex] > resid_moist[lindex]) {
-          if (options.LOG_MATRIC) {
-	    avg_matric = pow( 10, (soil_con->depth[lindex+1] * log10(fabs(matric[lindex])) + soil_con->depth[lindex] * log10(fabs(matric[lindex+1]))) / (soil_con->depth[lindex] + soil_con->depth[lindex+1]) );
-	    tmp_liq = resid_moist[lindex] + ( soil_con->max_moist[lindex] - resid_moist[lindex] ) * pow( ( avg_matric / soil_con->bubble[lindex] ), -1/b[lindex] );
-	  }
 	  Q12[lindex] = Ksat[lindex] * pow(((tmp_liq - resid_moist[lindex]) / (soil_con->max_moist[lindex] - resid_moist[lindex])), soil_con->expt[lindex]); 
 	}
 	else Q12[lindex] = 0.;
@@ -424,12 +416,17 @@ int  runoff(cell_data_struct  *cell,
 	      
 	firstlayer=FALSE;
 	      
-	      /** verify that current layer moisture is greater than minimum **/
-	      if ((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
-		/** moisture cannot fall below minimum **/
-		Q12[lindex] += (liq[lindex]+ice[lindex]) - resid_moist[lindex];
-		liq[lindex] = resid_moist[lindex] - ice[lindex];
-	      }
+	/** verify that current layer moisture is greater than minimum **/
+	if (liq[lindex] < 0) {
+	  /** liquid cannot fall below 0 **/
+	  Q12[lindex] += liq[lindex];
+	  liq[lindex] = 0;
+	}
+	if ((liq[lindex]+ice[lindex]) < resid_moist[lindex]) {
+	  /** moisture cannot fall below minimum **/
+	  Q12[lindex] += (liq[lindex]+ice[lindex]) - resid_moist[lindex];
+	  liq[lindex] = resid_moist[lindex] - ice[lindex];
+	}
 	      
 	inflow = (Q12[lindex]+tmp_inflow);
 	Q12[lindex] += tmp_inflow;

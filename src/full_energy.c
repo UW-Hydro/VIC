@@ -11,7 +11,8 @@ int  full_energy(int                  gridcell,
                  global_param_struct *gp,
 		 lake_con_struct     *lake_con,
                  soil_con_struct     *soil_con,
-                 veg_con_struct      *veg_con)
+                 veg_con_struct      *veg_con,
+                 veg_hist_struct    **veg_hist)
 /**********************************************************************
 	full_energy	Keith Cherkauer		January 8, 1997
 
@@ -107,7 +108,9 @@ int  full_energy(int                  gridcell,
   2013-Jul-25 Added soil carbon terms.						TJB
   2013-Dec-26 Removed EXCESS_ICE option.					TJB
   2013-Dec-27 Removed (unused) SPATIAL_FROST code.				TJB
-  2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Mar-28 Removed DIST_PRCP option.						TJB
+  2014-Apr-25 Added non-climatological veg params.				TJB
+  2014-Apr-25 Added partial vegcover fraction.					TJB
 
 **********************************************************************/
 {
@@ -201,6 +204,26 @@ int  full_energy(int                  gridcell,
   atmos->out_rain = 0;
   atmos->out_snow = 0;
 
+  /* Assign current veg albedo and LAI */
+  if (rec >= 0) {
+    // Loop over vegetated tiles
+    for(iveg = 0; iveg < Nveg; iveg++){
+      veg_class = veg_con[iveg].veg_class;
+      if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
+        veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].vegcover = veg_hist[rec][iveg].vegcover[0];
+        veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
+        veg_var[iveg][band].LAI = veg_hist[rec][iveg].LAI[0];
+        // Convert LAI from global to local
+        veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
+        snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
+      }
+    }
+  }
+
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
@@ -278,14 +301,15 @@ int  full_energy(int                  gridcell,
       wind_h = veg_lib[veg_class].wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      surf_atten = exp(-veg_lib[veg_class].rad_atten 
-		   * veg_lib[veg_class].LAI[dmy[rec].month-1]);
+      surf_atten = (1-veg_var[iveg][0].vegcover)*1.0
+                   + veg_var[iveg][0].vegcover
+                   * exp(-veg_lib[veg_class].rad_atten * veg_var[iveg][0].LAI);
 
       /* Initialize soil thermal properties for the top two layers */
       prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
-      bare_albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+      bare_albedo = veg_var[iveg][0].albedo;
 
       /*************************************
 	Compute the aerodynamic resistance 
@@ -426,6 +450,16 @@ int  full_energy(int                  gridcell,
 
     } /** end non-zero area veg tile **/
   } /** end of vegetation loop **/
+
+  /* Convert LAI back to global */
+  if (rec >= 0) {
+    for(iveg = 0; iveg < Nveg; iveg++){
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+      }
+    }
+  }
 
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);

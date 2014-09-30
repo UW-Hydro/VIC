@@ -202,10 +202,6 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_406\n");
   else if (options.GRND_FLUX_TYPE == GF_410)
     fprintf(stderr,"GRND_FLUX_TYPE\t\tGF_410\n");
-  if (options.LOG_MATRIC == TRUE)
-    fprintf(stderr,"LOG_MATRIC\t\tTRUE\n");
-  else
-    fprintf(stderr,"LOG_MATRIC\t\tFALSE\n");
   if (options.LW_TYPE == LW_TVA)
     fprintf(stderr,"LW_TYPE\t\t\tLW_TVA\n");
   else if (options.LW_TYPE == LW_ANDERSON)

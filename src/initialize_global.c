@@ -159,7 +159,6 @@ void initialize_global() {
   options.IMPLICIT              = TRUE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
-  options.LOG_MATRIC            = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
   options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;

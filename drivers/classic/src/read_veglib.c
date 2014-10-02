@@ -65,8 +65,27 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         }
         temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
       }
+      if (options.VEGLIB_VEGCOVER) {
+        for (j = 0; j < 12; j++) {
+          fscanf(veglib, "%lf", &temp[i].vegcover[j]);
+          if(temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
+            sprintf(str,"Veg cover fraction must be between 0 and 1 (%f)", temp[i].vegcover[j]);
+            nrerror(str);
+          }
+          if (temp[i].vegcover[j] < 0.01) temp[i].vegcover[j] = 0.01;
+        }
+      }
+      else {
+        for (j = 0; j < 12; j++) {
+          temp[i].vegcover[j] = 1.00;
+        }
+      }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].albedo[j]);
+        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
+          sprintf(str,"Albedo must be between 0 and 1 (%f)", temp[i].albedo[j]);
+          nrerror(str);
+        }
       }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].roughness[j]);
@@ -79,11 +98,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         if(temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
           sprintf(str,"Vegetation has leaves (LAI = %f), but no displacement (%f)",
 	          temp[i].LAI[j], temp[i].displacement[j]);
-          nrerror(str);
-        }
-        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
-          sprintf(str,"Albedo must be between 0 and 1 (%f)",
-	          temp[i].albedo[j]);
           nrerror(str);
         }
       }
@@ -160,6 +174,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       temp[Nveg_type+i].albedo[j] = ref_veg_albedo[i];
       temp[Nveg_type+i].roughness[j] = ref_veg_rough[i];
       temp[Nveg_type+i].displacement[j] = ref_veg_displ[i];
+      temp[Nveg_type+i].vegcover[j] = ref_veg_vegcover[i];
     }
     temp[Nveg_type+i].wind_h = ref_veg_wind_h[i];
     temp[Nveg_type+i].RGL = ref_veg_RGL[i];

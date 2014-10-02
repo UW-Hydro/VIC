@@ -233,10 +233,11 @@ double solve_snow(char                 overstory,
 
 	(*ShortUnderIn) *= (*surf_atten);  // SW transmitted through canopy
 	ShortOverIn      = (1. - (*surf_atten)) * shortwave; // canopy incident SW
+        ShortOverIn /= veg_var->vegcover;
 	ErrorFlag = snow_intercept((double)dt * SECPHOUR, 1., 
-		       vic_run_veg_lib[veg_class].LAI[month-1], 
+		       veg_var->LAI, 
 		       (*Le), longwave, LongUnderOut, 
-		       vic_run_veg_lib[veg_class].Wdmax[month-1], 
+		       veg_var->Wdmax, 
 		       ShortOverIn, *ShortUnderIn, Tcanopy,
 		       BareAlbedo, &energy->canopy_advection, 
 		       &energy->AlbedoOver, 
@@ -289,6 +290,22 @@ double solve_snow(char                 overstory,
 	energy->Tfoliage_fbflag    = 0;
 
       } /* vegetation already covered by snow */
+
+      /* Rescale veg terms back to whole tile (as opposed to just over plants) */
+      veg_var->throughfall = (1-veg_var->vegcover)*(*out_prec) + veg_var->vegcover*veg_var->throughfall;
+      *rainfall = (1-veg_var->vegcover)*(*out_rain) + veg_var->vegcover*(*rainfall);
+      *snowfall = (1-veg_var->vegcover)*(*out_snow) + veg_var->vegcover*(*snowfall);
+      snow->canopy_vapor_flux *= veg_var->vegcover;
+      snow->snow_canopy *= veg_var->vegcover;
+      veg_var->Wdew *= veg_var->vegcover;
+      veg_var->canopyevap *= veg_var->vegcover;
+      energy->canopy_advection *= veg_var->vegcover;
+      energy->canopy_latent *= veg_var->vegcover;
+      energy->canopy_latent_sub *= veg_var->vegcover;
+      energy->canopy_sensible *= veg_var->vegcover;
+      energy->canopy_refreeze *= veg_var->vegcover;
+      energy->NetShortOver *= veg_var->vegcover;
+      energy->NetLongOver *= veg_var->vegcover;
 
     }
     else { /* no vegetation present */

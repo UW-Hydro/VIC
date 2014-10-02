@@ -82,7 +82,7 @@ void canopy_assimilation(char    Ctype,
   double  gc;                  /* 1/rs */
 
   /* calculate scale height based on average temperature in the column */
-  h  = 287/9.81 * ((Tfoliage + 273.15) + 0.5 * (double)elevation * LAPSE_PM);
+  h  = 287/9.81 * ((Tfoliage + 273.15) + 0.5 * (double)elevation * T_LAPSE);
 
   /* use hypsometric equation to calculate p_z, assume that virtual
      temperature is equal air_temp */

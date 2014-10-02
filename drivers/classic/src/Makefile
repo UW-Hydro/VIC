@@ -98,6 +98,7 @@ HDRS = ${VICPATH}/include/vic_def.h \
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
+	${DRIVERPATH}/src/alloc_veg_hist.o \
 	${DRIVERPATH}/src/calc_air_temperature.o \
 	${DRIVERPATH}/src/calc_longwave.o \
 	${DRIVERPATH}/src/calc_root_fraction.o \

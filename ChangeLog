@@ -31,7 +31,132 @@ Usage:
 New Features:
 -------------
 
-New forcing variables.
+Added partial vegetation cover (within each tile).
+
+	Files Affected:
+
+	alloc_veg_hist.c
+	calc_veg_params.c
+	display_current_settings.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_force_type.c
+	get_global_param.c
+	global.h
+	initialize_atmos.c
+	initialize_global.c
+	initialize_veg.c
+	output_list_utils.c
+	put_data.c
+	read_atmos_data.c
+	read_forcing_data.c
+	read_veglib.c
+	read_vegparam.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added a time-varying (non-climatological) partial vegcover fraction
+	within vegetated tiles.  Previously, vegetation was assumed to
+	cover 100% of the land surface in a vegetated tile (i.e., "big
+	leaf" scheme).  This assumption is not valid in general, and in
+	particular becomes very inaccurate in arid environments (e.g., open
+	shrublands), or as LAI decreases to near 0.  In such cases,
+	evaporation from bare soil between the plants becomes a major (or
+	dominant) component of total evapotranspiration.
+
+	This partial veg cover fraction ("vegcover") is treated the same way
+	as LAI and albedo: new options (VEGCOVER_SRC and VEGPARAM_VEGCOVER)
+	tell VIC whether the veg param file contains 12 climatological
+	vegcover values and whether to use those or the ones in the veg
+	library.  A new forcing variable ("VEGCOVER") can be included in
+	forcing files along with LAI and albedo, and must be specified in the
+	global parameter file in the same way.  There is an additional option
+	controlling whether VEGCOVER values appear in the veg library file:
+	VEGLIB_VEGCOVER.  FALSE by default, if TRUE it tells VIC to expect 12
+	monthly VEGCOVER values in each veg class, after the 12 LAI and before
+	the 12 albedo values.
+
+	Internally, VIC uses the partial vegcover fraction to divide each veg
+	tile into the area covered by plants and the area in between the
+	plants.  LAI and canopy moisture and snow storage are rescaled by
+	1/vegcover to get plant-specific values before canopy evap,
+	transpiration, and canopy snow dynamics are computed (vegcover is not
+	allowed to go below the value MIN_VEGCOVER in vicNl_def.h).  Bare soil
+	evap is computed for the bare soil component of the tile.  Total
+	evapotranspiration is computed as the area-weighted sum of canopy evap
+	and transpiration from the vegetated fraction and bare soil evap from
+	the bare soil fraction.  Finally, LAI and canopy moisture storage are
+	rescaled back to the tile-area-average values before output.
+
+
+
+
+Added non-climatological time-varying veg parameters.
+
+	Files Affected:
+
+	alloc_veg_hist.c (new)
+	calc_surf_energy_bal.c
+	canopy_evap.c
+	display_current_settings.c
+	full_energy.c
+	func_surf_energy_bal.c
+	get_force_type.c
+	get_global_param.c
+	initialize_atmos.c
+	initialize_global.c
+	initialize_veg.c
+	Makefile
+	output_list_utils.c
+	penman.c
+	put_data.c
+	read_atmos_data.c
+	read_forcing_data.c
+	read_veglib.c
+	read_vegparam.c
+	snow_intercept.c
+	solve_snow.c
+	surface_fluxes.c
+	vicNl.c
+	vicNl_def.h
+	vicNl.h
+
+	Description:
+
+	Added ability to read timeseries of LAI and albedo as forcing
+	variables.  In addition, climatological albedo values can now be
+	given in the veg parameter file in a similar manner to LAI.
+
+	These changes involved adding a new veg_hist data structure to
+	contain the timeseries of LAI, Wdmax, and albedo, as well as
+	adding LAI, Wdmax, and albedo variables to the veg_var structure
+	to store the current values of these variables.
+
+	To allow for climatological albedo values to be specified in the
+	veg parameter file (similar to LAI), a new option has been introduced:
+	ALB_SRC.  The constants LAI_FROM_VEGPARAM and LAI_FROM_VEGLIB have
+	changed name to FROM_VEGPARAM and FROM_VEGLIB so that they can be
+	used to specify the source of either variable.
+
+	VIC now handles LAI and albedo as follows:
+	1. If specified as a variable in one of the forcing files, the
+	values from the forcing file will be used in the simulation instead
+	of the values in the veg parameter or veg library files.
+	2. If not specified as a variable in one of the forcing files,
+	values will be taken from the veg parameter file if a) they are listed
+	there and b) LAI_SRC (for LAI) and/or ALB_SRC(for albedo) are set to
+	FROM_VEGPARAM.
+	3. If not supplied as a forcing and [EITHER not listed in the veg
+	parameter file OR listed there but LAI_SRC or ALB_SRC is set to
+	FROM_VEGLIB], values will be taken from the veg library.
+
+
+
+New forcing variables for carbon cycle.
 
 	Files Affected:
 
@@ -274,6 +399,31 @@ Removed the DIST_PRCP option.
 Bug Fixes:
 ----------
 
+Fixed division by 0 and nans in output when there is no liquid water available
+to satisfy evaporative demand
+
+	Files Affected:
+
+	runoff.c
+
+	Description:
+
+	Previously, runoff() scaled estimated evaporation for each frost subarea
+	by that subarea's portion of available liquid moisture, via summing
+	available liquid moisture over all subareas and computing the ratio of
+	each subarea's moisture to the sum.  There was no check on whether the
+	sum > 0, resulting in the possibility of division by 0 when no liquid
+	moisture is available.  This has been fixed (a check was added).  In
+	addition, the apportionment of evaporation to subareas originally
+	included a check on whether all of the evaporative demand was met,
+	with a warning statement if not.  This check and warning have been
+	removed, since the evaporation values are subsequently modified to
+	reflect what actually evaporated (i.e. it's ok for the initial
+	estimate to exceed available moisture without affecting the water
+	balance).
+
+
+
 Fixed negative liquid soil moisture for bare soil conditions
 
 	Files Affected:
@@ -284,9 +434,42 @@ Fixed negative liquid soil moisture for bare soil conditions
 
 	Previously, runoff() only checked whether total (liquid+ice) soil
 	moisture was > residual moisture, but not whether liquid soil moisture
-	was positive.  In some cases, in the bare soil tile, liquid soil moisture
-	could occasionally go negative.  This has been fixed by adding a check on
-	liquid soil moisture to runoff().
+	was positive.  In some cases, in the bare soil tile, liquid soil
+	moisture could occasionally go negative.  This has been fixed by adding
+	a check on liquid soil moisture to runoff().
+
+
+
+Fixed incorrect handling of case of a mix of cells with and without lakes.
+
+	Files Affected:
+
+	initialize_model_state.c
+	read_lakeparam.c
+
+	Description:
+
+	VIC was neither reading the lake parameter file correctly nor
+	initializing the lake data structures correctly for the case of a
+	mix of cells with and without lakes within a single lake parameter
+	file.  This has been fixed.
+
+
+
+
+Fixed use of tmp_moist array without initialization.
+
+	Files Affected:
+
+	initialize_model_state.c
+
+	Description:
+
+	Fixed use of tmp_moist array without initialization.
+
+
+
+>>>>>>> develop
 
 Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
 

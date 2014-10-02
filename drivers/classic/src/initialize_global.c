@@ -154,7 +154,6 @@ void initialize_global() {
   options.IMPLICIT              = TRUE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
-  options.LOG_MATRIC            = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
   options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;
@@ -180,13 +179,18 @@ void initialize_global() {
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;
   // input options
+  options.ALB_SRC               = FROM_VEGLIB;
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;
+  options.LAI_SRC               = FROM_VEGLIB;
   options.ORGANIC_FRACT         = FALSE;
+  options.VEGCOVER_SRC          = FROM_VEGLIB;
   options.VEGLIB_PHOTO          = FALSE;
+  options.VEGLIB_VEGCOVER       = FALSE;
+  options.VEGPARAM_ALB          = FALSE;
   options.VEGPARAM_LAI          = FALSE;
-  options.LAI_SRC               = LAI_FROM_VEGLIB;
+  options.VEGPARAM_VEGCOVER     = FALSE;
   // state options
   options.BINARY_STATE_FILE     = FALSE;
   options.INIT_STATE            = FALSE;

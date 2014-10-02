@@ -35,10 +35,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define CLOSURE 4000		/** Pa **/
-#define RSMAX 5000
-#define VPDMINFACTOR 0.1
-
 double calc_rc(double rs, 
 	       double net_short, 
 	       float  RGL, 
@@ -58,11 +54,12 @@ double calc_rc(double rs,
     rc = 0;
   }
   else if (lai == 0) {
-    rc = HUGE_RESIST;
+    rc = RSMAX;
   }
   else if (ref_crop) {
     /* calculate simple reference canopy resistance in s/m */
     rc = rs/(lai * 0.5);
+    rc = (rc > RSMAX) ? RSMAX : rc;
   }
   else {
     /* calculate resistance factors (Wigmosta et al., 1994) */
@@ -195,10 +192,6 @@ void calc_rc_ps(char    Ctype,
 
 }
 
-#undef CLOSURE
-#undef RSMAX
-#undef VPDMINFACTOR
-
 double penman(double tair,
 	      double elevation,
 	      double rad,
@@ -219,7 +212,7 @@ double penman(double tair,
   slope = svp_slope(tair);
 
   /* calculate scale height based on average temperature in the column */
-  h  = 287/9.81 * ((tair + 273.15) + 0.5 * (double)elevation * LAPSE_PM);
+  h  = 287/9.81 * ((tair + 273.15) + 0.5 * (double)elevation * T_LAPSE);
 
   /* use hypsometric equation to calculate p_z, assume that virtual
      temperature is equal air_temp */

@@ -179,8 +179,8 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
   p->site_isoh   = annual_prcp/10.; /* MTCLIM prcp in cm */
   p->site_ehoriz = ehoriz;
   p->site_whoriz = whoriz;
-  p->tmax_lr     = T_lapse;	    /* not used since site_elev == base_elev */
-  p->tmin_lr     = T_lapse;	    /* not used since site_elev == base_elev */
+  p->tmax_lr     = -1*T_LAPSE*METERS_PER_KM;	/* not used since site_elev == base_elev */
+  p->tmin_lr     = -1*T_LAPSE*METERS_PER_KM;	/* not used since site_elev == base_elev */
 
   /* allocate space in the data arrays for input and output data */
   if (data_alloc(ctrl, mtclim_data)) {

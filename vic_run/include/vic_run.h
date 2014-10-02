@@ -50,7 +50,9 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             energy_bal_struct *, layer_data_struct *,
                             snow_data_struct *, soil_con_struct *,
                             veg_var_struct *, int);
+double calc_veg_displacement(double);
 double calc_veg_height(double);
+double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
 int    CalcAerodynamic(char, double, double, double, double, double,
 	  	       double *, double *, double *, double *, double *);
@@ -274,11 +276,10 @@ double svp(double);
 double svp_slope(double);
 void temp_area(double, double, double, double *, double *, double *, double *, int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, int, double*, int, double, double, double *);
-void transpiration(layer_data_struct *, int, int, double, double, double,
-		   double, double, double, double, double, double,
-		   double *, double *, double *, double *, double *,
-                   double *, float *, double *, double, double *,
-                   double, double *, double *, double *, double *);
+void transpiration(layer_data_struct *, veg_var_struct *, int, int, double,
+                   double, double, double, double, double, double, double,
+                   double, double *, double *, double *, double *, double *,
+                   double *, float *, double, double, double *);
 double transport_with_height(double z,double es,  double Wind, double AirDens, double ZO,
         double EactAir,double F, double hsalt, double phi_r,
         double ushear, double Zrh);
@@ -289,7 +290,8 @@ void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned);
 int vic_run(int, int, atmos_data_struct *, all_vars_struct *,
             dmy_struct *, global_param_struct *, lake_con_struct *,
-            soil_con_struct *, veg_con_struct *, veg_lib_struct *);
+            soil_con_struct *, veg_con_struct *, veg_lib_struct *,
+            veg_hist_struct **veg_hist);
 void vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);
 int water_balance (lake_var_struct *, lake_con_struct, int, all_vars_struct *, int, int, int, double, soil_con_struct, veg_con_struct);

@@ -129,17 +129,20 @@ double canopy_evap(layer_data_struct *layer,
   ****************************************************/
 
   veg_var->Wdew = tmp_Wdew;
-  if (tmp_Wdew > vic_run_veg_lib[veg_class].Wdmax[month-1]) {
-    throughfall = tmp_Wdew - vic_run_veg_lib[veg_class].Wdmax[month-1];
-    tmp_Wdew    = vic_run_veg_lib[veg_class].Wdmax[month-1];
+  if (tmp_Wdew > veg_var->Wdmax) {
+    throughfall = tmp_Wdew - veg_var->Wdmax;
+    tmp_Wdew    = veg_var->Wdmax;
   }
-      
+
   rc = calc_rc((double)0.0, net_short, vic_run_veg_lib[veg_class].RGL,
-               air_temp, vpd, vic_run_veg_lib[veg_class].LAI[month-1],
-               (double)1.0, FALSE);
-  canopyevap = pow((tmp_Wdew / vic_run_veg_lib[veg_class].Wdmax[month-1]),(2.0/3.0))
-               * penman(air_temp, elevation, rad, vpd, ra, rc, vic_run_veg_lib[veg_class].rarc)
-               * delta_t / SEC_PER_DAY;
+               air_temp, vpd, veg_var->LAI, (double)1.0, FALSE);
+  if (veg_var->LAI > 0)
+    canopyevap = pow((tmp_Wdew/veg_var->Wdmax),(2.0/3.0))
+                 * penman(air_temp, elevation, rad, vpd, ra, rc, 
+                  vic_run_veg_lib[veg_class].rarc)
+                 * delta_t / SEC_PER_DAY;
+  else
+    canopyevap = 0;
 
   if (canopyevap > 0.0 && delta_t == SEC_PER_DAY)
     /** If daily time step, evap can include current precipitation **/
@@ -152,36 +155,34 @@ double canopy_evap(layer_data_struct *layer,
   canopyevap *= f;
 
   /* compute fraction of canopy that is dry */
-  *dryFrac = 1.0-f*pow((tmp_Wdew/vic_run_veg_lib[veg_class].Wdmax[month-1]), (2.0/3.0));
+  if (veg_var->Wdmax > 0)
+    *dryFrac = 1.0-f*pow((tmp_Wdew/veg_var->Wdmax),(2.0/3.0));
+  else
+    *dryFrac = 0;
 
   tmp_Wdew += ppt - canopyevap;
   if (tmp_Wdew < 0.0) 
     tmp_Wdew = 0.0;
-  if (tmp_Wdew <= vic_run_veg_lib[veg_class].Wdmax[month-1]) 
+  if (tmp_Wdew <= veg_var->Wdmax) 
     throughfall += 0.0;
   else {
-    throughfall += tmp_Wdew - vic_run_veg_lib[veg_class].Wdmax[month-1];
-    tmp_Wdew = vic_run_veg_lib[veg_class].Wdmax[month-1];
+    throughfall += tmp_Wdew - veg_var->Wdmax;
+    tmp_Wdew = veg_var->Wdmax;
   }
 
   /*******************************************
     Compute Evapotranspiration from Vegetation
   *******************************************/
   if(CALC_EVAP)
-    transpiration(layer, veg_class, month, rad, vpd, net_short, 
+    transpiration(layer, veg_var, veg_class, month, rad, vpd, net_short, 
                   air_temp, ra, ppt, *dryFrac, delta_t, 
                   elevation, depth, Wmax, Wcr, Wpwp, 
                   layerevap, 
                   frost_fract, 
                   root,
-                  veg_var->NscaleFactor,
                   shortwave,
-                  veg_var->aPARLayer,
                   Catm,
-                  CanopLayerBnd,
-                  veg_var->rsLayer,
-                  &(veg_var->rc),
-                  &(veg_var->NPPfactor));
+                  CanopLayerBnd);
 
   veg_var->canopyevap = canopyevap;
   veg_var->throughfall = throughfall;
@@ -203,6 +204,7 @@ double canopy_evap(layer_data_struct *layer,
 **********************************************************************/
 
 void transpiration(layer_data_struct *layer,
+		   veg_var_struct *veg_var,
 		   int veg_class, 
 		   int month, 
 		   double rad,
@@ -221,14 +223,9 @@ void transpiration(layer_data_struct *layer,
 		   double *layerevap,
 		   double *frost_fract,
 		   float  *root,
-                   double *NscaleFactor,
                    double  shortwave,
-                   double *aPARLayer,
                    double  Catm,
-                   double *CanopLayerBnd,
-                   double *rsLayer,
-                   double *rc,
-                   double *NPPfactor)
+                   double *CanopLayerBnd)
 /**********************************************************************
   Computes evapotranspiration for unfrozen soils
   Allows for multiple layers.
@@ -312,9 +309,12 @@ void transpiration(layer_data_struct *layer,
 
   /** Set photosynthesis inhibition factor **/
   if (layer[0].moist > vic_run_veg_lib[veg_class].Wnpp_inhib*Wmax[0])
-    *NPPfactor = vic_run_veg_lib[veg_class].NPPfactor_sat + (1 - vic_run_veg_lib[veg_class].NPPfactor_sat) * (Wmax[0] - layer[0].moist) / (Wmax[0] - vic_run_veg_lib[veg_class].Wnpp_inhib*Wmax[0]);
+    veg_var->NPPfactor = vic_run_veg_lib[veg_class].NPPfactor_sat +
+                         (1 - vic_run_veg_lib[veg_class].NPPfactor_sat) *
+                         (Wmax[0] - layer[0].moist) / (Wmax[0] -
+                          vic_run_veg_lib[veg_class].Wnpp_inhib*Wmax[0]);
   else
-    *NPPfactor = 1.0;
+    veg_var->NPPfactor = 1.0;
 
   /******************************************************************
     CASE 1: Moisture in both layers exceeds Wcr, or Moisture in
@@ -336,27 +336,35 @@ void transpiration(layer_data_struct *layer,
     /* compute whole-canopy stomatal resistance */
     if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
       /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
-      *rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
-		   vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
-		   vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+      veg_var->rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
+		                        vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
+		                        veg_var->LAI, gsm_inv, FALSE);
       if (options.CARBON) {
         for (cidx=0; cidx<options.Ncanopy; cidx++) {
-          rsLayer[cidx] = *rc * vic_run_veg_lib[veg_class].LAI[month-1];
-          if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+          if (veg_var->LAI > 0)
+            veg_var->rsLayer[cidx] = veg_var->rc / veg_var->LAI;
+          else
+            veg_var->rsLayer[cidx] = HUGE_RESIST;
+          if (veg_var->rsLayer[cidx] > RSMAX) veg_var->rsLayer[cidx] = RSMAX;
         }
       }
     }
     else {
       /* Compute rc based on photosynthetic demand from Knorr 1997 */
-      calc_rc_ps(vic_run_veg_lib[veg_class].Ctype, vic_run_veg_lib[veg_class].MaxCarboxRate,
-		 vic_run_veg_lib[veg_class].MaxETransport, vic_run_veg_lib[veg_class].CO2Specificity,
-		 NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
-		 CanopLayerBnd, vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+      calc_rc_ps(vic_run_veg_lib[veg_class].Ctype,
+                 vic_run_veg_lib[veg_class].MaxCarboxRate,
+		             vic_run_veg_lib[veg_class].MaxETransport,
+                 vic_run_veg_lib[veg_class].CO2Specificity,
+		             veg_var->NscaleFactor, air_temp, shortwave, 
+                 veg_var->aPARLayer, elevation, Catm,
+		             CanopLayerBnd, veg_var->LAI, gsm_inv, vpd, 
+                 veg_var->rsLayer, &(veg_var->rc));
     }
 
     /* compute transpiration */
-    evap = penman(air_temp, elevation, rad, vpd, ra, *rc,
-		  vic_run_veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac;
+    evap = penman(air_temp, elevation, rad, vpd, ra, veg_var->rc,
+		              vic_run_veg_lib[veg_class].rarc) * 
+           delta_t / SEC_PER_DAY * dryFrac;
 
     /** divide up evap based on root distribution **/
     /** Note the indexing of the roots **/
@@ -423,37 +431,45 @@ void transpiration(layer_data_struct *layer,
         /* compute whole-canopy stomatal resistance */
         if (!options.CARBON || options.RC_MODE == RC_JARVIS) {
           /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
-          *rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
-		       vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
-		       vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, FALSE);
+          veg_var->rc = calc_rc(vic_run_veg_lib[veg_class].rmin, net_short,
+		                            vic_run_veg_lib[veg_class].RGL, air_temp, vpd,
+		                            veg_var->LAI, gsm_inv, FALSE);
           if (options.CARBON) {
             for (cidx=0; cidx<options.Ncanopy; cidx++) {
-              rsLayer[cidx] = *rc * vic_run_veg_lib[veg_class].LAI[month-1];
-              if (rsLayer[cidx] > HUGE_RESIST) rsLayer[cidx] = HUGE_RESIST;
+              if (veg_var->LAI > 0)
+                veg_var->rsLayer[cidx] = veg_var->rc / veg_var->LAI;
+              else
+                veg_var->rsLayer[cidx] = HUGE_RESIST;
+              if (veg_var->rsLayer[cidx] > RSMAX) veg_var->rsLayer[cidx] = RSMAX;
             }
           }
         }
         else {
           /* Compute rc based on photosynthetic demand from Knorr 1997 */
-          calc_rc_ps(vic_run_veg_lib[veg_class].Ctype, vic_run_veg_lib[veg_class].MaxCarboxRate,
-		     vic_run_veg_lib[veg_class].MaxETransport, vic_run_veg_lib[veg_class].CO2Specificity,
-		     NscaleFactor, air_temp, shortwave, aPARLayer, elevation, Catm,
-		     CanopLayerBnd, vic_run_veg_lib[veg_class].LAI[month-1], gsm_inv, vpd, rsLayer, rc);
+          calc_rc_ps(vic_run_veg_lib[veg_class].Ctype,
+                     vic_run_veg_lib[veg_class].MaxCarboxRate,
+            		     vic_run_veg_lib[veg_class].MaxETransport,
+                     vic_run_veg_lib[veg_class].CO2Specificity,
+		                 veg_var->NscaleFactor, air_temp, shortwave,
+                     veg_var->aPARLayer, elevation, Catm,
+		                 CanopLayerBnd, veg_var->LAI, gsm_inv, vpd,
+                     veg_var->rsLayer, &(veg_var->rc));
         }
 
         /* compute transpiration */
-        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, *rc,
-			      vic_run_veg_lib[veg_class].rarc) * delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
+        layerevap[i] = penman(air_temp, elevation, rad, vpd, ra, veg_var->rc,
+			                        vic_run_veg_lib[veg_class].rarc) *
+                       delta_t / SEC_PER_DAY * dryFrac * (double)root[i];
 
-        if (*rc > 0)
-          gc += 1/(*rc);
+        if (veg_var->rc > 0)
+          gc += 1/(veg_var->rc);
         else
           gc += HUGE_RESIST;
 
         if (options.CARBON) {
           for (cidx=0; cidx<options.Ncanopy; cidx++) {
-            if (rsLayer[cidx] > 0)
-              gsLayer[cidx] += 1/(rsLayer[cidx]);
+            if (veg_var->rsLayer[cidx] > 0)
+              gsLayer[cidx] += 1/(veg_var->rsLayer[cidx]);
             else
               gsLayer[cidx] += HUGE_RESIST;
           }
@@ -474,16 +490,18 @@ void transpiration(layer_data_struct *layer,
 
     /* Now, take the inverse of the conductance */
     if (gc > 0)
-      *rc = 1/gc;
+      veg_var->rc = 1/gc;
     else
-      *rc = HUGE_RESIST;
+      veg_var->rc = HUGE_RESIST;
+    if (veg_var->rc > RSMAX) veg_var->rc = RSMAX;
 
     if (options.CARBON) {
       for (cidx=0; cidx<options.Ncanopy; cidx++) {
         if (gsLayer[cidx] > 0)
-          rsLayer[cidx] = 1/gsLayer[cidx];
+          veg_var->rsLayer[cidx] = 1/gsLayer[cidx];
         else
-          rsLayer[cidx] = HUGE_RESIST;
+          veg_var->rsLayer[cidx] = HUGE_RESIST;
+        if (veg_var->rsLayer[cidx] > RSMAX) veg_var->rsLayer[cidx] = RSMAX;
       }
     }
 

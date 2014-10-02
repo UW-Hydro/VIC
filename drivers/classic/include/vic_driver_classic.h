@@ -9,6 +9,8 @@
    Stores forcing file input information.
 *******************************************************/
 typedef struct {
+    int N_ELEM; // number of elements per record; for LAI and ALBEDO,
+                // 1 element per veg tile; for others N_ELEM = 1;
     char SIGNED;
     int SUPPLIED;
     double multiplier;
@@ -30,6 +32,7 @@ typedef struct {
 } param_set_struct;
 
 void alloc_atmos(int, atmos_data_struct **);
+void alloc_veg_hist(int, int, veg_hist_struct ***);
 void calc_longwave(double *, double, double, double);
 void calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
@@ -51,6 +54,7 @@ void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **);
 void free_veglib(veg_lib_struct **);
+void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 double get_dist(double, double, double, double);
 void get_force_type(char *, int, int *);
 global_param_struct get_global_param(filenames_struct *, FILE *);
@@ -60,6 +64,7 @@ void hermite(int, double *, double *, double *, double *, double *);
 void HourlyT(int, int, int *, double *, int *, double *, double *);
 void init_output_list(out_data_struct *, int, char *, int, float);
 void initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
+                      veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
                       soil_con_struct *, out_data_file_struct *,
                       out_data_struct *);
 void initialize_global();
@@ -116,8 +121,8 @@ void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);                              
-void read_atmos_data(FILE *, global_param_struct, int, int, double **);
-double **read_forcing_data(FILE * *, global_param_struct);
+void read_atmos_data(FILE *, global_param_struct, int, int, double **, double ***);
+double **read_forcing_data(FILE **, global_param_struct, double ****);
 void read_initial_model_state(FILE *, all_vars_struct *,
                                          global_param_struct *, int, int, int,
                                          soil_con_struct *, lake_con_struct);

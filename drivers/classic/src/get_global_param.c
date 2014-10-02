@@ -337,11 +337,6 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("GF_406",flgstr)==0) options.GRND_FLUX_TYPE=GF_406;
         else if(strcasecmp("GF_410",flgstr)==0) options.GRND_FLUX_TYPE=GF_410;
       }
-      else if(strcasecmp("LOG_MATRIC",optstr)==0) {
-        sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.LOG_MATRIC=TRUE;
-        else options.LOG_MATRIC = FALSE;
-      }
       else if(strcasecmp("LW_TYPE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("LW_TVA",flgstr)==0) options.LW_TYPE=LW_TVA;
@@ -563,8 +558,8 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("JULY_TAVG_SUPPLIED",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("FALSE",flgstr)==0) options.JULY_TAVG_SUPPLIED=FALSE;
-	else options.JULY_TAVG_SUPPLIED=TRUE;
+        if(strcasecmp("TRUE",flgstr)==0) options.JULY_TAVG_SUPPLIED=TRUE;
+	else options.JULY_TAVG_SUPPLIED=FALSE;
       }
       else if(strcasecmp("ORGANIC_FRACT",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -579,22 +574,27 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_PHOTO=TRUE;
         else options.VEGLIB_PHOTO = FALSE;
       }
+      else if(strcasecmp("VEGLIB_VEGCOVER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_VEGCOVER=TRUE;
+        else options.VEGLIB_VEGCOVER = FALSE;
+      }
       else if(strcasecmp("VEGPARAM",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veg);
       }
       else if(strcasecmp("GLOBAL_LAI",optstr)==0) {
         fprintf(stderr, "WARNING: GLOBAL_LAI has been replaced by 2 new options: VEGPARAM_LAI (whether the vegparam file contains LAI values) and LAI_SRC (where to get LAI values).\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".\n"); 
-        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  LAI_FROM_VEGLIB\".\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  TRUE\" and \"LAI_SRC  FROM_VEGPARAM\".\n"); 
+        fprintf(stderr, "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  FROM_VEGLIB\".\n"); 
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) {
-//          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  LAI_FROM_VEGPARAM\"");
+//          nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  FROM_VEGPARAM\"");
           options.VEGPARAM_LAI=TRUE;
-          options.LAI_SRC=LAI_FROM_VEGPARAM;
+          options.LAI_SRC=FROM_VEGPARAM;
         }
         else {
-//          nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  LAI_FROM_VEGLIB\"");
-          options.LAI_SRC=LAI_FROM_VEGLIB;
+//          nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  FROM_VEGLIB\"");
+          options.LAI_SRC=FROM_VEGLIB;
         }
       }
       else if(strcasecmp("VEGPARAM_LAI",optstr)==0) {
@@ -604,10 +604,34 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("LAI_SRC",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("LAI_FROM_VEGPARAM",flgstr)==0)
-          options.LAI_SRC=LAI_FROM_VEGPARAM;
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0 || strcasecmp("LAI_FROM_VEGPARAM",flgstr)==0)
+          options.LAI_SRC=FROM_VEGPARAM;
         else
-          options.LAI_SRC=LAI_FROM_VEGLIB;
+          options.LAI_SRC=FROM_VEGLIB;
+      }
+      else if(strcasecmp("VEGPARAM_VEGCOVER",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_VEGCOVER=TRUE;
+        else options.VEGPARAM_VEGCOVER = FALSE;
+      }
+      else if(strcasecmp("VEGCOVER_SRC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0)
+          options.VEGCOVER_SRC=FROM_VEGPARAM;
+        else
+          options.VEGCOVER_SRC=FROM_VEGLIB;
+      }
+      else if(strcasecmp("VEGPARAM_ALB",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_ALB=TRUE;
+        else options.VEGPARAM_ALB = FALSE;
+      }
+      else if(strcasecmp("ALB_SRC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("FROM_VEGPARAM",flgstr)==0)
+          options.ALB_SRC=FROM_VEGPARAM;
+        else
+          options.ALB_SRC=FROM_VEGLIB;
       }
       else if(strcasecmp("ROOT_ZONES",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
@@ -970,7 +994,10 @@ global_param_struct get_global_param(filenames_struct *names,
     sprintf(ErrStr,"CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set CLOSE_ENERGY to FALSE.");
     nrerror(ErrStr);
   }
-
+  if(options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
+    sprintf(ErrStr,"COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is FALSE. \nSet JULY_TAVG_SUPPLIED to TRUE and include July Average Temperature in the soil parameter file to run COMPUTE_TREELINE, or set both to FALSE.");
+    nrerror(ErrStr);
+  }
   // Validate lake parameter information
   if (options.LAKES) {
     if (!options.FULL_ENERGY) {

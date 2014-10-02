@@ -250,10 +250,16 @@ double calc_surf_energy_bal(double             Le,
   }
 
   if(iveg!=Nveg) {
-    if(vic_run_veg_lib[veg_class].LAI[dmy->month-1] > 0.0) VEG = TRUE;
-    else VEG = FALSE;
+    if(veg_var->vegcover > 0.0) {
+      VEG = TRUE;
+    }
+    else {
+      VEG = FALSE;
+    }
   }
-  else VEG = FALSE;
+  else {
+    VEG = FALSE;
+  }
 
   // Define control volume for ground flux etc calculations to be first soil layer
   T2                  = soil_con->avg_temp; // soil temperature at very deep depth (>> dp; *NOT* at depth D2)
@@ -612,13 +618,7 @@ double calc_surf_energy_bal(double             Le,
   /** Store precipitation that reaches the surface */
   if ( !snow->snow && !INCLUDE_SNOW ) {
     if ( iveg != Nveg ) {
-      if ( vic_run_veg_lib[veg_class].LAI[dmy->month-1] <= 0.0 ) { 
-	veg_var->throughfall = rainfall;
-	*ppt = veg_var->throughfall;
-      }
-      else {
-	*ppt = veg_var->throughfall;
-      }
+      *ppt = veg_var->throughfall;
     }
     else {
       *ppt = rainfall;

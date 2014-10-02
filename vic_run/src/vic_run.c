@@ -12,12 +12,13 @@ int  vic_run(int                  gridcell,
              lake_con_struct     *lake_con,
              soil_con_struct     *soil_con,
              veg_con_struct      *veg_con,
-             veg_lib_struct      *veg_lib)
+             veg_lib_struct      *veg_lib,
+             veg_hist_struct    **veg_hist)
 /**********************************************************************
 	vic_run
 
   This subroutine controls the model core, it solves both the energy
-  and water balance models, as well as frozen soils.  
+  and water balance models, as well as frozen soils.
 **********************************************************************/
 {
   extern option_struct   options;
@@ -114,6 +115,26 @@ int  vic_run(int                  gridcell,
   atmos->out_rain = 0;
   atmos->out_snow = 0;
 
+  /* Assign current veg albedo and LAI */
+  if (rec >= 0) {
+    // Loop over vegetated tiles
+    for(iveg = 0; iveg < Nveg; iveg++){
+      veg_class = veg_con[iveg].veg_class;
+      if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
+        veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].vegcover = veg_hist[rec][iveg].vegcover[0];
+        veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
+        veg_var[iveg][band].LAI = veg_hist[rec][iveg].LAI[0];
+        // Convert LAI from global to local
+        veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
+        snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
+      }
+    }
+  }
+
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
@@ -191,14 +212,15 @@ int  vic_run(int                  gridcell,
       wind_h = vic_run_veg_lib[veg_class].wind_h;
 
       /** Compute Surface Attenuation due to Vegetation Coverage **/
-      surf_atten = exp(-vic_run_veg_lib[veg_class].rad_atten 
-		   * vic_run_veg_lib[veg_class].LAI[dmy[rec].month-1]);
+      surf_atten = (1-veg_var[iveg][0].vegcover)*1.0
+                   + veg_var[iveg][0].vegcover
+                   * exp(-vic_run_veg_lib[veg_class].rad_atten * veg_var[iveg][0].LAI);
 
       /* Initialize soil thermal properties for the top two layers */
       prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
-      bare_albedo = vic_run_veg_lib[veg_class].albedo[dmy[rec].month-1];
+      bare_albedo = veg_var[iveg][0].albedo;
 
       /*************************************
 	Compute the aerodynamic resistance 
@@ -339,6 +361,16 @@ int  vic_run(int                  gridcell,
 
     } /** end non-zero area veg tile **/
   } /** end of vegetation loop **/
+
+  /* Convert LAI back to global */
+  if (rec >= 0) {
+    for(iveg = 0; iveg < Nveg; iveg++){
+      for ( band = 0; band < Nbands; band++ ) {
+        veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
+        veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+      }
+    }
+  }
 
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);

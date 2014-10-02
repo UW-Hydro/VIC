@@ -794,13 +794,10 @@ double maximum_unfrozen_water(double T,
 
   double unfrozen;
 
-  if ( T <= 0 ) {
-    unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
-    //INCORRECT: unfrozen = max_moist * pow((-Lf * T) / (T + 273.16) / (9.81 *
-    //bubble / 100.), -(2.0 / (expt - 3.0)));
-    
+  if ( T < 0. ) {
+    unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));  
     if(unfrozen > max_moist) unfrozen = max_moist;
-    if(unfrozen < 0) unfrozen = 0;
+    if(unfrozen < 0.) unfrozen = 0.;
     
   }
   else unfrozen = max_moist;

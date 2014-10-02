@@ -235,11 +235,16 @@ int snow_intercept(double  Dt,
   
   /* Calculate snow interception. */  
   
-  DeltaSnowInt = (1-*IntSnow/MaxSnowInt) * *SnowFall; 
-  if (DeltaSnowInt + *IntSnow > MaxSnowInt) 
-    DeltaSnowInt = MaxSnowInt - *IntSnow;
-  if (DeltaSnowInt < 0.0)  
+  if (MaxSnowInt > 0) {
+    DeltaSnowInt = (1-*IntSnow/MaxSnowInt) * *SnowFall; 
+    if (DeltaSnowInt + *IntSnow > MaxSnowInt) 
+      DeltaSnowInt = MaxSnowInt - *IntSnow;
+    if (DeltaSnowInt < 0.0)  
+      DeltaSnowInt = 0.0;
+  }
+  else {
     DeltaSnowInt = 0.0;
+  }
   
   /* Reduce the amount of intercepted snow if windy and cold.         
      Ringyo Shikenjo Tokyo, #54, 1952.                                

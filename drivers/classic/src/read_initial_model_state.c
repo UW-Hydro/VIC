@@ -143,7 +143,6 @@ void read_initial_model_state(FILE                *init_state,
       // skip rest of current cells info
       fgets(tmpstr, MAXSTRING, init_state); // skip rest of general cell info
       for ( veg = 0; veg <= tmp_Nveg; veg++ ) {
-	fgets(tmpstr, MAXSTRING, init_state); // skip dist precip info
 	for ( band = 0; band < tmp_Nband; band++ )
 	  fgets(tmpstr, MAXSTRING, init_state); // skip snowband info
       }

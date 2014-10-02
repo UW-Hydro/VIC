@@ -4,7 +4,7 @@
 
 // global variables
 
-char *version = "4.2 beta 2014-Feb-25";
+char *version = "5.0 beta 2014-Sep-29";
 
 int flag;
 int NR;         /* array index for atmos struct that indicates
@@ -120,12 +120,13 @@ int main(int argc, char *argv[])
   2011-Jan-04 Made read_soilparam_arc() a sub-function of
 	      read_soilparam().						TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
-  2013-Dec-27 Removed QUICK_FS option.							TJB
-  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
-  2014-Mar-24 Removed ARC_SOIL option                           BN
-  2014-Mar-28 Removed DIST_PRCP option.             TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Mar-24 Removed ARC_SOIL option                           	BN
   2014-Apr-02 Moved "free" statements for soil_con arrays outside the
-	      OUTPUT_FORCE condition to avoid memory leak.			TJB
+	      OUTPUT_FORCE condition to avoid memory leak.		TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg parameters.			TJB
 **********************************************************************/
 {
  /** Variable Declarations **/
@@ -151,6 +152,7 @@ int main(int argc, char *argv[])
   double                   Clake;
   dmy_struct              *dmy;
   atmos_data_struct       *atmos;
+  veg_hist_struct        **veg_hist;
   veg_con_struct          *veg_con;
   soil_con_struct          soil_con;
   all_vars_struct          all_vars;
@@ -251,6 +253,9 @@ int main(int argc, char *argv[])
         /** Make Top-level Control Structure **/
         all_vars     = make_all_vars(veg_con[0].vegetat_type_num);
 
+        /** allocate memory for the veg_hist_struct **/
+        alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
+
       } /* !OUTPUT_FORCE */
 
       /**************************************************
@@ -258,7 +263,8 @@ int main(int argc, char *argv[])
          Have not Been Specifically Set
        **************************************************/
 
-      initialize_atmos(atmos, dmy, filep.forcing, &soil_con, out_data_files, out_data); 
+      initialize_atmos(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
+		       &soil_con, out_data_files, out_data);
 
       if (!options.OUTPUT_FORCE) {
 
@@ -303,7 +309,7 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Compute cell physics for 1 timestep
 	  **************************************************/
-	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_lib);
+	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_lib, veg_hist);
 
 	  /**************************************************
 	    Calculate cell average values for current time step
@@ -350,6 +356,7 @@ int main(int argc, char *argv[])
 
       if (!options.OUTPUT_FORCE) {
 
+        free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
         free_all_vars(&all_vars,veg_con[0].vegetat_type_num);
         free_vegcon(&veg_con);
         free((char *)soil_con.AreaFract);

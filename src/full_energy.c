@@ -149,6 +149,7 @@ int  full_energy(int                  gridcell,
   double                 bare_albedo;
   double                 snow_inflow[MAX_BANDS];
   double                 rainonly;
+  double                 depth_sum;
   double                 sum_runoff;
   double                 sum_baseflow;
   double                 tmp_wind[3];
@@ -439,9 +440,14 @@ int  full_energy(int                  gridcell,
           ********************************************************/
           cell[iveg][band].rootmoist = 0;
           cell[iveg][band].wetness = 0;
+          depth_sum = 0;
           for(lidx=0;lidx<options.Nlayer;lidx++) {
-            if (veg_con->root[lidx] > 0) {
+            depth_sum += soil_con->depth[lidx];
+            if (depth_sum <= veg_con[iveg].root_depth) {
               cell[iveg][band].rootmoist += cell[iveg][band].layer[lidx].moist;
+            }
+            else if (depth_sum - soil_con->depth[lidx] <= veg_con[iveg].root_depth) {
+              cell[iveg][band].rootmoist += (veg_con[iveg].root_depth-(depth_sum-soil_con->depth[lidx]))/soil_con->depth[lidx] * cell[iveg][band].layer[lidx].moist;
             }
 	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
           }

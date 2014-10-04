@@ -1007,8 +1007,9 @@ typedef struct {
   double  Cv;               /* fraction of vegetation coverage */ 
   double  Cv_sum;           /* total fraction of vegetation coverage */
   float   root[MAX_LAYERS]; /* percent of roots in each soil layer (fraction) */
-  float  *zone_depth;       /* depth of root zone */
-  float  *zone_fract;       /* fraction of roots within root zone */
+  float   root_depth;       /* depth of bottom of total root zone */
+  float  *zone_depth;       /* thickness of individual root sub-zones */
+  float  *zone_fract;       /* fractions of roots within each root sub-zone */
   int     veg_class;        /* vegetation class reference number */
   int     vegetat_type_num; /* number of vegetation types in the grid cell */
   float   sigma_slope;      /* Std. deviation of terrain slope for each vegetation class. */

@@ -62,7 +62,6 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   int             MaxVeg;
   int             Nfields, NfieldsMax;
   int             NoOverstory;
-  float           depth_sum;
   float           sum;
   char            str[500];
   char            ErrStr[MAXSTRING];
@@ -164,15 +163,15 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     temp[i].LAKE = 0;
     temp[i].veg_class = atoi( vegarr[0] );
     temp[i].Cv = atof( vegarr[1] );
-    depth_sum = 0;
+    temp[i].root_depth = 0;
     sum = 0.;
     for(j=0;j<options.ROOT_ZONES;j++) {
       temp[i].zone_depth[j] = atof( vegarr[2 + j*2] );
       temp[i].zone_fract[j] = atof( vegarr[3 + j*2] );
-      depth_sum += temp[i].zone_depth[j];
+      temp[i].root_depth += temp[i].zone_depth[j];
       sum += temp[i].zone_fract[j];
     }
-    if(depth_sum <= 0) {
+    if(temp[i].root_depth <= 0) {
       sprintf(str,"Root zone depths must sum to a value greater than 0.");
       nrerror(str);
     }

@@ -419,7 +419,7 @@ extern char ref_veg_ref_crop[];
 #define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
-#define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
+#define SLAB_MOIST_FRACT 1.0    /* Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
 
 /***** Define Boolean Values *****/
 #ifndef FALSE

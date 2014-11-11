@@ -646,9 +646,9 @@ extern char ref_veg_ref_crop[];
 #define OUT_LITTERFALL     161  /* flux of carbon from living biomass into soil [g C/m2d] */
 #define OUT_RHET           162  /* soil respiration (heterotrophic respiration) [g C/m2d] */
 #define OUT_NEE            163  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
-#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2d] */
-#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2d] */
-#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2d] */
+#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2] */
+#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2] */
+#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */

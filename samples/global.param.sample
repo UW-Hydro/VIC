@@ -90,6 +90,14 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #			# default = LW_CLOUD_DEARDORFF
 
 #######################################################################
+# Carbon Cycle Parameters
+#######################################################################
+#CARBON 		FALSE		# TRUE = simulate carbon cycle; FALSE = do not simulate carbon cycle.  Default = FALSE.
+#VEGLIB_PHOTO	FALSE		# TRUE = photosynthesis parameters are included in the veg library file.  Default = FALSE.
+#RC_MODE	RC_JARVIS	# RC_JARVIS = canopy resistance computed by applying resistance factors to the veg class's minimum resistance, listed in the veg library
+                        	# RC_PHOTO = canopy resistance computed by applying resistance factors to the minimum resistance required by current photosynthetic demand.  Default = RC_JARVIS.
+
+#######################################################################
 # Miscellaneous Simulation Parameters
 # Generally these default values do not need to be overridden
 #######################################################################

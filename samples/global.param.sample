@@ -52,6 +52,11 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 #MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 #MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
+#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
+                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
+                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
+                        # in the soil paramter file containing the snow distibution slope parameter
+                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # Turbulent Flux Parameters
@@ -105,11 +110,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #LOG_MATRIC	FALSE	# TRUE = use the linear interpolation of the logarithm of the matric potential
                         # from the two surrounding layers to estimate the soil moisture drainage from each
                         # layer (Boone and Wetzel, 1996).
-#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
-                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
-                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
-                        # in the soil paramter file containing the snow distibution slope parameter
-                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # State Files and Parameters

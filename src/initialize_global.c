@@ -122,8 +122,17 @@ void initialize_global() {
 	      used value.							TJB
   2012-Apr-13 Changed default for MTCLIM_SWE_CORR to FALSE.  Changed default
 	      for LW_TYPE to LW_PRATA.						TJB
-  2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. TJB
-  2014-Mar-24 Removed ARC_SOIL option         BN
+  2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.						TJB
+  2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.		TJB
+  2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.		TJB
+  2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.	TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
+  2014-Jan-13 Set the default values of IMPLICIT and EXP_TRANS to TRUE. 	TJB
+  2014-Mar-24 Removed ARC_SOIL option                                   	BN
+  2014-Mar-28 Removed DIST_PRCP option.						TJB
+  2014-Apr-25 Added LAI_SRC, VEGPARAM_ALB, and ALB_SRC options.			TJB
+  2014-Apr-25 Added VEGPARAM_VEGCOVER and VEGCOVER_SRC options.			TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -137,10 +146,11 @@ void initialize_global() {
   options.AboveTreelineVeg      = -1;
   options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
+  options.CARBON                = FALSE;
+  options.CLOSE_ENERGY          = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
-  options.DIST_PRCP             = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.EXP_TRANS             = TRUE;
   options.FROZEN_SOIL           = FALSE;
@@ -153,29 +163,39 @@ void initialize_global() {
   options.LW_TYPE               = LW_PRATA;
   options.MIN_WIND_SPEED        = 0.1;
   options.MTCLIM_SWE_CORR       = FALSE;
+  options.Ncanopy               = 3;
+  options.Nfrost                = 1;
   options.Nlayer                = 3;
   options.Nnode                 = 3;
   options.NOFLUX                = FALSE;
   options.PLAPSE                = TRUE;
-  options.PREC_EXPT             = 0.6;
   options.QUICK_FLUX            = TRUE;
   options.QUICK_SOLVE           = FALSE;
+  options.RC_MODE               = RC_JARVIS;
   options.ROOT_ZONES            = MISSING;
-  options.SNOW_ALBEDO           = USACE;
+  options.SHARE_LAYER_MOIST     = TRUE;
   options.SNOW_BAND             = 1;
   options.SNOW_DENSITY          = DENS_BRAS;
   options.SNOW_STEP             = 1;
+  options.SPATIAL_FROST         = FALSE;
+  options.SPATIAL_SNOW          = FALSE;
   options.SW_PREC_THRESH        = 0;
   options.TFALLBACK             = TRUE;
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;
   // input options
+  options.ALB_SRC               = FROM_VEGLIB;
   options.BASEFLOW              = ARNO;
   options.GRID_DECIMAL          = 2;
   options.JULY_TAVG_SUPPLIED    = FALSE;
+  options.LAI_SRC               = FROM_VEGLIB;
   options.ORGANIC_FRACT         = FALSE;
+  options.VEGCOVER_SRC          = FROM_VEGLIB;
+  options.VEGLIB_PHOTO          = FALSE;
+  options.VEGLIB_VEGCOVER       = FALSE;
+  options.VEGPARAM_ALB          = FALSE;
   options.VEGPARAM_LAI          = FALSE;
-  options.LAI_SRC               = LAI_FROM_VEGLIB;
+  options.VEGPARAM_VEGCOVER     = FALSE;
   // state options
   options.BINARY_STATE_FILE     = FALSE;
   options.INIT_STATE            = FALSE;
@@ -186,6 +206,7 @@ void initialize_global() {
   options.COMPRESS              = FALSE;
   options.MOISTFRACT            = FALSE;
   options.Noutfiles             = 2;
+  options.OUTPUT_FORCE          = FALSE;
   options.PRT_HEADER            = FALSE;
   options.PRT_SNOW_BAND         = FALSE;
 

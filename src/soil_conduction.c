@@ -47,6 +47,7 @@ double soil_conductivity(double moist,
 	      organic fraction into account.					TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
   double Ke;
   double Ki = 2.2;      /* thermal conductivity of ice (W/mK) */
@@ -152,15 +153,6 @@ void set_node_parameters(double   *dz_node,
 			 double   *expt,
 			 double   *bubble,
 			 double   *quartz,
-#if QUICK_FS
-			 double ***ufwc_table_node,
-#endif
-#if EXCESS_ICE
-			 double    *porosity,
-			 double    *effective_porosity,
-			 double    *porosity_node,
-			 double    *effective_porosity_node,
-#endif
 			 int       Nnodes,
 			 int       Nlayers,
 			 char      FS_ACTIVE) {
@@ -210,23 +202,17 @@ void set_node_parameters(double   *dz_node,
 	      beta and gamma.						JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2009-Jul-31 Removed unused layer_node_fract array.			TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 
   extern option_struct options;
-#if QUICK_FS
-  extern double temps[];
-#endif
 
   char   PAST_BOTTOM;
   int    nidx, lidx;
   double Lsum; /* cumulative depth of moisture layer */
   double Zsum; /* upper boundary of node thermal layer */
   double deltaL[MAX_LAYERS+1];
-#if QUICK_FS
-  int    ii;
-  double Aufwc;
-  double Bufwc;
-#endif
 
   PAST_BOTTOM = FALSE;
   lidx = 0;
@@ -241,20 +227,12 @@ void set_node_parameters(double   *dz_node,
 			      + max_moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
       expt_node[nidx]      = (expt[lidx] + expt[lidx+1]) / 2.;
       bubble_node[nidx]    = (bubble[lidx] + bubble[lidx+1]) / 2.;
-#if EXCESS_ICE
-      porosity_node[nidx]    = (porosity[lidx] + porosity[lidx+1]) / 2.;
-      effective_porosity_node[nidx]    = (effective_porosity[lidx] + effective_porosity[lidx+1]) / 2.;
-#endif
     }
     else { 
       /* node completely in layer */
       max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / 1000;
       expt_node[nidx]      = expt[lidx];
       bubble_node[nidx]    = bubble[lidx];
-#if EXCESS_ICE
-      porosity_node[nidx]  = porosity[lidx];
-      effective_porosity_node[nidx] = effective_porosity[lidx];
-#endif
     }
     if(Zsum_node[nidx] > Lsum + depth[lidx] && !PAST_BOTTOM) {
       Lsum += depth[lidx];
@@ -280,29 +258,6 @@ void set_node_parameters(double   *dz_node,
     gamma[nidx] = Zsum_node[Nnodes-1] - Zsum_node[Nnodes-2];
   }
 
-
-#if QUICK_FS
-
-  /* If quick frozen soil solution activated, prepare a linearized
-     estimation on the maximum unfrozen water content equation */
-
-  if(FS_ACTIVE && options.FROZEN_SOIL) {
-    for(nidx=0;nidx<Nnodes;nidx++) { 
-      for(ii=0;ii<QUICK_FS_TEMPS;ii++) {
-	Aufwc = maximum_unfrozen_water(temps[ii], 1.0, 
-				       bubble_node[nidx], 
-				       expt_node[nidx]);
-	Bufwc = maximum_unfrozen_water(temps[ii+1], 1.0, 
-				       bubble_node[nidx], 
-				       expt_node[nidx]);
-	ufwc_table_node[nidx][ii][0] 
-	  = linear_interp(0., temps[ii], temps[ii+1], Aufwc, Bufwc);
-	ufwc_table_node[nidx][ii][1] 
-	  = (Bufwc - Aufwc) / (temps[ii+1] - temps[ii]);
-      }
-    }
-  }
-#endif
 }
 
 #define N_INTS 5
@@ -314,16 +269,8 @@ int distribute_node_moisture_properties(double *moist_node,
 					double *Zsum_node,
 					double *T_node,
 					double *max_moist_node,
-#if QUICK_FS
-					double ***ufwc_table_node,
-#else
 					double *expt_node,
 					double *bubble_node,
-#endif
-#if EXCESS_ICE
-					double *porosity_node,
-					double *effective_porosity_node,
-#endif
 					double *moist,
 					double *depth,
 					double *soil_dens_min,
@@ -386,7 +333,17 @@ int distribute_node_moisture_properties(double *moist_node,
 	      organic fraction into account.				TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.		TJB
-
+  2013-Jul-25 Modified to add optional a constant slab moisture
+	      content to the soil below the bottom VIC model soil layer.
+	      Currently the only option is to use the bottom soil layer
+	      moisture for that entire region.  This is perhaps
+	      justifiable for shallow damping depths, but makes no sense
+	      for the deeper depths used especially for permafrost
+	      simulations.  SLAB_MOIST_FRACT controls this option, if
+	      set < 0, original option used, otherwise the slab layer is
+	      set using SLAB_MOIST_FRACT * max_moist_node.		KAC via TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 *********************************************************************/
 
   extern option_struct options;
@@ -403,18 +360,25 @@ int distribute_node_moisture_properties(double *moist_node,
   /* node estimates */
   for(nidx=0;nidx<Nnodes;nidx++) {
  
-    if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
-      /* node on layer boundary */
-      moist_node[nidx] = (moist[lidx] / depth[lidx] 
-			      + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
-      soil_fract = (bulk_density[lidx] / soil_density[lidx] 
-		    + bulk_density[lidx+1] / soil_density[lidx+1]) / 2.;
+    if ( !PAST_BOTTOM || SLAB_MOIST_FRACT < 0 ) {
+      if(Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx != Nlayers-1) {
+        /* node on layer boundary */
+        moist_node[nidx] = (moist[lidx] / depth[lidx] 
+			    + moist[lidx+1] / depth[lidx+1]) / 1000 / 2.;
+        soil_fract = (bulk_density[lidx] / soil_density[lidx] 
+		      + bulk_density[lidx+1] / soil_density[lidx+1]) / 2.;
+      }
+      else { 
+        /* node completely in layer */
+        moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+        soil_fract = (bulk_density[lidx] / soil_density[lidx]);
+      }
     }
-    else { 
-      /* node completely in layer */
-      moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+    else {
+      // use constant soil moisture below bottom soil layer
+      moist_node[nidx] = SLAB_MOIST_FRACT * max_moist_node[nidx];
       soil_fract = (bulk_density[lidx] / soil_density[lidx]);
-    }      
+    }
 
 
     // Check that node moisture does not exceed maximum node moisture
@@ -427,22 +391,11 @@ int distribute_node_moisture_properties(double *moist_node,
 
     if(T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
       /* compute moisture and ice contents */
-#if QUICK_FS
-      ice_node[nidx] 
-	= moist_node[nidx] - maximum_unfrozen_water_quick(T_node[nidx],
-						   max_moist_node[nidx], 
-						   ufwc_table_node[nidx]);
-#else
       ice_node[nidx] 
 	= moist_node[nidx] - maximum_unfrozen_water(T_node[nidx],
-#if EXCESS_ICE
-						    porosity_node[nidx],
-						    effective_porosity_node[nidx],
-#endif
 						    max_moist_node[nidx], 
 						    bubble_node[nidx],
 						    expt_node[nidx]);
-#endif
       if(ice_node[nidx]<0) ice_node[nidx]=0;
 
       /* compute thermal conductivity */
@@ -484,28 +437,14 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 			       double            *Zsum_node,
 			       double            *T,
 			       double            *max_moist_node,
-#if QUICK_FS
-			       double          ***ufwc_table_node,
-#else
 			       double            *expt_node,
 			       double            *bubble_node,
-#endif // QUICK_FS
 			       double            *depth,
 			       double            *max_moist,
-#if QUICK_FS
-			       double          ***ufwc_table_layer,
-#else
 			       double            *expt,
 			       double            *bubble,
-#endif // QUICK_FS
-#if SPATIAL_FROST
 			       double            *frost_fract,
 			       double             frost_slope,
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-			       double            *porosity,
-			       double            *effective_porosity,
-#endif // EXCESS_ICE
 			       int                Nnodes, 
 			       int                Nlayers,
 			       char               FS_ACTIVE) {
@@ -541,30 +480,20 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 	      the appearance of min_liq.			TJB
   2009-Jul-31 Removed unused layer_node_fract array.		TJB
   2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
-
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **************************************************************/
 
   extern option_struct options;
 
   int    nidx, min_nidx, max_nidx;
-  int    lidx, frost_area, Nfrost;
+  int    lidx, frost_area;
   double Lsum[MAX_LAYERS+1];
-#if SPATIAL_FROST
-  double tmp_ice[MAX_NODES][FROST_SUBAREAS];
-  double tmpT[MAX_NODES][FROST_SUBAREAS+1];
-#else
-  double tmp_ice[MAX_NODES][1];
-  double tmpT[MAX_NODES][1+1];
-  double frost_fract[1];
-#endif
+  double tmp_ice[MAX_NODES][MAX_FROST_AREAS];
+  double tmpT[MAX_NODES][MAX_FROST_AREAS+1];
   double tmpZ[MAX_NODES];
   double min_temp, max_temp, tmp_fract;
-
-#if SPATIAL_FROST
-  Nfrost = FROST_SUBAREAS;
-#else
-  Nfrost = 1;
-#endif
 
   // compute cumulative layer depths
   Lsum[0] = 0;
@@ -575,13 +504,9 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Initialize layer variables
     layer[lidx].T = 0.;
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ ) {
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
       layer[lidx].ice[frost_area] = 0.;
     }
-#else
-    layer[lidx].ice = 0.;
-#endif
 
     // Bracket current layer between nodes
     min_nidx = Nnodes-2;
@@ -595,62 +520,46 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Get soil node temperatures for current layer
     if ( Zsum_node[min_nidx] < Lsum[lidx] )
-      tmpT[min_nidx][Nfrost] = linear_interp(Lsum[lidx], Zsum_node[min_nidx], Zsum_node[min_nidx+1], T[min_nidx], T[min_nidx+1]);
-    else tmpT[min_nidx][Nfrost] = T[min_nidx];
+      tmpT[min_nidx][options.Nfrost] = linear_interp(Lsum[lidx], Zsum_node[min_nidx], Zsum_node[min_nidx+1], T[min_nidx], T[min_nidx+1]);
+    else tmpT[min_nidx][options.Nfrost] = T[min_nidx];
     tmpZ[min_nidx] = Lsum[lidx];
     for ( nidx = min_nidx+1; nidx < max_nidx; nidx++ ) {
-      tmpT[nidx][Nfrost] = T[nidx];
+      tmpT[nidx][options.Nfrost] = T[nidx];
       tmpZ[nidx] = Zsum_node[nidx];
     }
     if ( Zsum_node[max_nidx] > Lsum[lidx+1] )
-      tmpT[max_nidx][Nfrost] = linear_interp(Lsum[lidx+1], Zsum_node[max_nidx-1], Zsum_node[max_nidx], T[max_nidx-1], T[max_nidx]);
-    else tmpT[max_nidx][Nfrost] = T[max_nidx];
+      tmpT[max_nidx][options.Nfrost] = linear_interp(Lsum[lidx+1], Zsum_node[max_nidx-1], Zsum_node[max_nidx], T[max_nidx-1], T[max_nidx]);
+    else tmpT[max_nidx][options.Nfrost] = T[max_nidx];
     tmpZ[max_nidx] = Lsum[lidx+1];
 
     // distribute temperatures for sub-areas
     for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-#if SPATIAL_FROST
-      min_temp = tmpT[nidx][Nfrost] - frost_slope / 2.;
+      min_temp = tmpT[nidx][options.Nfrost] - frost_slope / 2.;
       max_temp = min_temp + frost_slope;
-#else
-      min_temp = max_temp = tmpT[nidx][Nfrost];
-#endif
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
-	if ( Nfrost > 1 ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
+	if ( options.Nfrost > 1 ) {
 	  if ( frost_area == 0 ) tmp_fract = frost_fract[0] / 2.;
 	  else tmp_fract += (frost_fract[frost_area-1] / 2. 
 			     + frost_fract[frost_area] / 2.);
 	  tmpT[nidx][frost_area] = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
 	}
-	else tmpT[nidx][frost_area] = tmpT[nidx][Nfrost];
+	else tmpT[nidx][frost_area] = tmpT[nidx][options.Nfrost];
       }
     }
 
     // Get soil node ice content for current layer
     if (options.FROZEN_SOIL && FS_ACTIVE) {
       for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-        for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = layer[lidx].moist 
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(tmpT[nidx][frost_area], max_moist[lidx], 
-					   ufwc_table_layer[lidx]);
-#else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(tmpT[nidx][frost_area], porosity[lidx], 
-				     effective_porosity[lidx], max_moist[lidx], 
-				     bubble[lidx], expt[lidx]);
-#else
-	    - maximum_unfrozen_water(tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx], 
-				     expt[lidx]);
-#endif
-#endif
+	    - maximum_unfrozen_water(tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx], expt[lidx]);
 	  if ( tmp_ice[nidx][frost_area] < 0 ) tmp_ice[nidx][frost_area] = 0.;
         }
       }
     }
     else {
       for ( nidx = min_nidx; nidx <= max_nidx; nidx++ ) {
-        for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+        for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	  tmp_ice[nidx][frost_area] = 0; 
         }
       }
@@ -658,21 +567,13 @@ int estimate_layer_ice_content(layer_data_struct *layer,
 
     // Compute average soil layer values
     for ( nidx = min_nidx; nidx < max_nidx; nidx++ ) {
-#if SPATIAL_FROST
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
 	layer[lidx].ice[frost_area] += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][frost_area]+tmp_ice[nidx][frost_area])/2.;
       }
-#else
-      layer[lidx].ice += (tmpZ[nidx+1]-tmpZ[nidx])*(tmp_ice[nidx+1][0]+tmp_ice[nidx][0])/2.;
-#endif  // SPATIAL_FROST
-      layer[lidx].T += (tmpZ[nidx+1]-tmpZ[nidx])*(tmpT[nidx+1][Nfrost]+tmpT[nidx][Nfrost])/2.;
+      layer[lidx].T += (tmpZ[nidx+1]-tmpZ[nidx])*(tmpT[nidx+1][options.Nfrost]+tmpT[nidx][options.Nfrost])/2.;
     }
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < Nfrost; frost_area++ )
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
       layer[lidx].ice[frost_area] /= depth[lidx];
-#else
-    layer[lidx].ice /= depth[lidx];
-#endif  // SPATIAL_FROST
     layer[lidx].T /= depth[lidx];
 
 
@@ -690,20 +591,10 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
 			       double             T1,
 			       double             Tp,
 			       double            *max_moist,
-#if QUICK_FS
-			       double          ***ufwc_table_layer,
-#else
 			       double            *expt,
 			       double            *bubble,
-#endif // QUICK_FS
-#if SPATIAL_FROST
 			       double            *frost_fract,
 			       double             frost_slope,
-#endif // SPATIAL_FROST
-#if EXCESS_ICE
-			       double            *porosity,
-			       double            *effective_porosity,
-#endif // EXCESS_ICE
 			       char               FS_ACTIVE) {
 /**************************************************************
   This subroutine estimates the temperature and ice content of all soil 
@@ -719,20 +610,16 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   Modifications:
   2011-Jul-19 Fixed bug in how ice content was computed for case of 
 	      SPATIAL_FROST = TRUE.					TJB
-
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 ********************************************************************/
 
   extern option_struct options;
-  int    lidx, frost_area, Nfrost;
+  int    lidx, frost_area;
   double Lsum[MAX_LAYERS+1];
   double tmpT, tmp_fract, tmp_ice;
   double min_temp, max_temp;
-
-#if SPATIAL_FROST
-  Nfrost = FROST_SUBAREAS;
-#else
-  Nfrost = 1;
-#endif
 
   // compute cumulative layer depths
   Lsum[0] = 0;
@@ -747,32 +634,18 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
   // estimate soil layer ice contents
   for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
 
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) layer[lidx].ice[frost_area] = 0;
-#else
-    layer[lidx].ice = 0;
-#endif
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) layer[lidx].ice[frost_area] = 0;
 
     if (options.FROZEN_SOIL && FS_ACTIVE) {
 
-#if SPATIAL_FROST
-
       min_temp = layer[lidx].T - frost_slope / 2.;
       max_temp = min_temp + frost_slope;
-      for ( frost_area = 0; frost_area < Nfrost; frost_area++ ) {
+      for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ ) {
         if ( frost_area == 0 ) tmp_fract = frost_fract[0] / 2.;
         else tmp_fract += (frost_fract[frost_area-1] / 2. + frost_fract[frost_area] / 2.);
         tmpT = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
         tmp_ice = layer[lidx].moist
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(tmpT, max_moist[lidx], ufwc_table_layer[lidx]);
-#else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(tmpT, porosity[lidx], effective_porosity[lidx], max_moist[lidx], bubble[lidx], expt[lidx]);
-#else
 	    - maximum_unfrozen_water(tmpT, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
-#endif
         layer[lidx].ice[frost_area] = frost_fract[frost_area] * tmp_ice;
         if (layer[lidx].ice[frost_area] < 0) {
           layer[lidx].ice[frost_area] = 0;
@@ -782,28 +655,6 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
         }
 
       }
-
-#else
-
-      layer[lidx].ice = layer[lidx].moist
-#if QUICK_FS
-	    - maximum_unfrozen_water_quick(layer[lidx].T, max_moist[lidx], ufwc_table_layer[lidx]);
-#else
-#if EXCESS_ICE
-            - maximum_unfrozen_water(layer[lidx].T, porosity[lidx], effective_porosity[lidx], max_moist[lidx], bubble[lidx], expt[lidx]);
-#else
-	    - maximum_unfrozen_water(layer[lidx].T, max_moist[lidx], bubble[lidx], expt[lidx]);
-#endif
-#endif
-
-      if (layer[lidx].ice < 0) {
-        layer[lidx].ice = 0;
-      }
-      if (layer[lidx].ice > layer[lidx].moist) {
-        layer[lidx].ice = layer[lidx].moist;
-      }
-
-#endif
 
     }
 
@@ -822,9 +673,7 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 					   double            *bulk_density,
 					   double            *soil_density,
 					   double            *organic,
-#if SPATIAL_FROST
 					   double            *frost_fract,
-#endif
 					   int                Nlayers) {
 /********************************************************************
   This subroutine computes the thermal conductivity and volumetric
@@ -848,26 +697,21 @@ void compute_soil_layer_thermal_properties(layer_data_struct *layer,
 	      organic fraction into account.				TJB
   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
 	      soil_conductivity() to fix bug in commputation of kappa.	TJB
-
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
 ********************************************************************/
 
+  extern option_struct options;
   int    lidx;
-#if SPATIAL_FROST
   int    frost_area;
-#endif
   double moist, ice;
 
   /* compute layer thermal properties */
   for(lidx=0;lidx<Nlayers;lidx++) {
     moist = layer[lidx].moist / depth[lidx] / 1000;
-#if SPATIAL_FROST
     ice = 0;
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 
-	* frost_fract[frost_area];
-#else
-    ice = layer[lidx].ice / depth[lidx] / 1000;
-#endif
+    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
+      ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 * frost_fract[frost_area];
     layer[lidx].kappa 
       = soil_conductivity(moist, moist - ice, 
 			  soil_dens_min[lidx], bulk_dens_min[lidx], quartz[lidx],
@@ -933,10 +777,6 @@ void find_0_degree_fronts(energy_bal_struct *energy,
 }
 
 double maximum_unfrozen_water(double T,
-#if EXCESS_ICE
-			      double porosity,
-			      double effective_porosity,
-#endif //EXCESS_ICE
                               double max_moist,
                               double bubble,
                               double expt) {
@@ -952,88 +792,20 @@ double maximum_unfrozen_water(double T,
 	      the Cold Region Climate Study".				JCA
   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
   2009-Feb-10 Modified to return max_moist if T > 0C.			KAC via TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
 **********************************************************************/
 
   double unfrozen;
 
-  if ( T <= 0 ) {
-    unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));
-    //INCORRECT: unfrozen = max_moist * pow((-Lf * T) / (T + 273.16) / (9.81 *
-    //bubble / 100.), -(2.0 / (expt - 3.0)));
-    
+  if ( T < 0. ) {
+    unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.), -(2.0 / (expt - 3.0)));  
     if(unfrozen > max_moist) unfrozen = max_moist;
-    if(unfrozen < 0) unfrozen = 0;
+    if(unfrozen < 0.) unfrozen = 0.;
     
   }
   else unfrozen = max_moist;
 
   return (unfrozen);
   
-}
-
-#if QUICK_FS
-double maximum_unfrozen_water_quick(double   T,
-				    double   max_moist,
-				    double **table) {
-/**********************************************************************
-  This subroutine computes the maximum amount of unfrozen water that
-  can exist at the current temperature.
-**********************************************************************/
-
-  extern double temps[];
-
-  int i;
-  double unfrozen;
-
-  i = 1;
-  while(T < temps[i] && i < QUICK_FS_TEMPS) i++;
-  unfrozen = max_moist * (table[i-1][0] + table[i-1][1] * T);
-  if(unfrozen > max_moist) unfrozen = max_moist;
-  if(unfrozen < 0) unfrozen = 0;
-
-  return (unfrozen);
-}
-#endif
-
-layer_data_struct find_average_layer(layer_data_struct *wet,
-				     layer_data_struct *dry,
-				     double             depth,
-				     double             mu) {
-/*************************************************************
-  This subroutine computes the average soil layer moistures
-  between the wet and dry fraction for use in computing 
-  energy balance parameters.  Other layer variables are copied 
-  from the wet fraction structure since they are they same for 
-  wet and dry fractions.
-
-  Modifications:
-
-  2011-Jun-07 Added condition that wet and dry portions are
-	      only averaged together if DIST_PRCP is TRUE.	TJB
-**************************************************************/
-
-  extern option_struct options;
-  layer_data_struct layer;
-#if SPATIAL_FROST
-  int frost_area;
-#endif
-
-  layer = *wet;
-
-  if (options.DIST_PRCP) {
-
-#if SPATIAL_FROST
-    for ( frost_area = 0; frost_area < FROST_SUBAREAS; frost_area++ )
-      layer.ice[frost_area] = ((wet->ice[frost_area] * mu) 
-			       + (dry->ice[frost_area] * (1. - mu)));
-#else
-    layer.ice = ((wet->ice * mu) + (dry->ice * (1. - mu)));
-#endif
-    layer.moist = ((wet->moist * mu) + (dry->moist * (1. - mu)));
-
-  }
-
-  return(layer);
-
 }
 

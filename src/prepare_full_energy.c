@@ -8,7 +8,7 @@ static char vcid[] = "$Id$";
 void prepare_full_energy(int               iveg,
 			 int               Nveg,
 			 int               Nnodes,
-			 dist_prcp_struct *prcp,
+			 all_vars_struct  *all_vars,
 			 soil_con_struct  *soil_con,
 			 double           *moist0,
 			 double           *ice0) {
@@ -38,7 +38,9 @@ void prepare_full_energy(int               iveg,
 	      band had 0 area).						KAC via TJB
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
-
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 *******************************************************************/
 
   extern option_struct options;
@@ -54,12 +56,8 @@ void prepare_full_energy(int               iveg,
 
     if (soil_con->AreaFract[band] > 0.0) {
 
-      /* Compute average soil moisture values for distributed precipitation */
-
       for(i=0;i<options.Nlayer;i++) 
-        layer[i] = find_average_layer(&(prcp->cell[WET][iveg][band].layer[i]),
-				      &(prcp->cell[DRY][iveg][band].layer[i]),
-				      soil_con->depth[i], prcp->mu[iveg]);
+        layer[i] = all_vars->cell[iveg][band].layer[i];
     
       /* Compute top soil layer moisture content (mm/mm) */
 
@@ -68,14 +66,11 @@ void prepare_full_energy(int               iveg,
       /* Compute top soil layer ice content (mm/mm) */
 
       if(options.FROZEN_SOIL && soil_con->FS_ACTIVE){
-        if((prcp->energy[iveg][band].T[0] 
-	    + prcp->energy[iveg][band].T[1])/2.<0.) {
+        if((all_vars->energy[iveg][band].T[0] 
+	    + all_vars->energy[iveg][band].T[1])/2.<0.) {
 	  ice0[band] = moist0[band] 
-	    - maximum_unfrozen_water((prcp->energy[iveg][band].T[0]
-				      + prcp->energy[iveg][band].T[1]) / 2.,
-#if EXCESS_ICE
-				     soil_con->porosity[0], soil_con->effective_porosity[0],
-#endif 
+	    - maximum_unfrozen_water((all_vars->energy[iveg][band].T[0]
+				      + all_vars->energy[iveg][band].T[1]) / 2.,
 				     soil_con->max_moist[0]
 				     / (soil_con->depth[0] * 1000.),
 				     soil_con->bubble[0], soil_con->expt[0]);
@@ -95,16 +90,14 @@ void prepare_full_energy(int               iveg,
 					    soil_con->bulk_density,
 					    soil_con->soil_density,
 					    soil_con->organic,
-#if SPATIAL_FROST
 					    soil_con->frost_fract,
-#endif
 					    options.Nlayer);
     
       /** Save Thermal Conductivities for Energy Balance **/
-      prcp->energy[iveg][band].kappa[0] = layer[0].kappa; 
-      prcp->energy[iveg][band].Cs[0]    = layer[0].Cs; 
-      prcp->energy[iveg][band].kappa[1] = layer[1].kappa; 
-      prcp->energy[iveg][band].Cs[1]    = layer[1].Cs; 
+      all_vars->energy[iveg][band].kappa[0] = layer[0].kappa; 
+      all_vars->energy[iveg][band].Cs[0]    = layer[0].Cs; 
+      all_vars->energy[iveg][band].kappa[1] = layer[1].kappa; 
+      all_vars->energy[iveg][band].Cs[1]    = layer[1].Cs; 
 
     }
 

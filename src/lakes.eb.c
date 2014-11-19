@@ -89,6 +89,7 @@ int solve_lake(double             snowfall,
   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
 	      organic fraction into account.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
 **********************************************************************/
 
   double LWnetw,LWneti;
@@ -1869,13 +1870,8 @@ void energycalc (double *finaltemp, double *sumjoule, int numnod, double dz, dou
     }
 }
 
-int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist_prcp_struct *prcp,
-		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con,
-#if EXCESS_ICE
-		    veg_con_struct veg_con, int SubsidenceUpdate, double total_meltwater)
-#else
-		    veg_con_struct veg_con)
-#endif
+int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, all_vars_struct *all_vars,
+		    int rec, int iveg,int band, double lakefrac, soil_con_struct soil_con, veg_con_struct veg_con)
 /**********************************************************************
  * This routine calculates the water balance of the lake
  
@@ -1933,7 +1929,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
-  2014-Feb-13 Fixed typos in EXCESS_ICE code.					TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -1957,8 +1956,8 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double newfraction, Recharge;
   double abovegrnd_storage;
   int ErrorFlag;
-  cell_data_struct    ***cell;
-  veg_var_struct      ***veg_var;
+  cell_data_struct     **cell;
+  veg_var_struct       **veg_var;
   snow_data_struct     **snow;
   energy_bal_struct    **energy;
   int lindex;
@@ -1971,14 +1970,12 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   double max_newfraction;
   double depth_in_save;
 
-  cell    = prcp->cell;
-  veg_var = prcp->veg_var;
-  snow    = prcp->snow;
-  energy  = prcp->energy;
+  cell    = all_vars->cell;
+  veg_var = all_vars->veg_var;
+  snow    = all_vars->snow;
+  energy  = all_vars->energy;
 
-#if SPATIAL_FROST
   frost_fract = soil_con.frost_fract;
-#endif
 
   delta_moist = (double*)calloc(options.Nlayer,sizeof(double));
   moist = (double*)calloc(options.Nlayer,sizeof(double));
@@ -1990,10 +1987,6 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   isave_n = lake->activenod;   /* save initial no. of nodes for later */
  
   inflow_volume = lake->runoff_in + lake->baseflow_in + lake->channel_in;
-#if EXCESS_ICE
-  if(SubsidenceUpdate > 0 ) 
-    inflow_volume += total_meltwater*lakefrac * 0.001 * soil_con.cell_area*lake_con.Cl[0];
-#endif
  
   /**********************************************************************
    * 2. calculate change in lake level for lake outflow calculation
@@ -2072,14 +2065,14 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
     // Lake must fill soil to saturation in the newly-flooded area
     for(j=0; j<options.Nlayer; j++) {
-      delta_moist[j] += (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist)*(max_newfraction-lakefrac)/(1-lakefrac); // mm over (1-lakefrac)
+      delta_moist[j] += (soil_con.max_moist[j]-cell[iveg][band].layer[j].moist)*(max_newfraction-lakefrac)/(1-lakefrac); // mm over (1-lakefrac)
     }
     for(j=0; j<options.Nlayer; j++) {
       lake->recharge += (delta_moist[j]) / 1000. * (1-lakefrac) * lake_con.basin[0]; // m^3
     }
 
     // Above-ground storage in newly-flooded area is liberated and goes to lake
-    abovegrnd_storage = (veg_var[WET][iveg][band].Wdew/1000. + snow[iveg][band].snow_canopy + snow[iveg][band].swq) * (max_newfraction-lakefrac) * lake_con.basin[0];
+    abovegrnd_storage = (veg_var[iveg][band].Wdew/1000. + snow[iveg][band].snow_canopy + snow[iveg][band].swq) * (max_newfraction-lakefrac) * lake_con.basin[0];
     lake->recharge -= abovegrnd_storage;
 
     // Fill the soil to saturation if possible in inundated area
@@ -2094,13 +2087,13 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       lake->recharge = lake->volume-lake->ice_water_eq;
       lake->volume = lake->ice_water_eq;
 
-      Recharge = 1000.*lake->recharge/((max_newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[WET][iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
+      Recharge = 1000.*lake->recharge/((max_newfraction-lakefrac)*lake_con.basin[0]) + (veg_var[iveg][band].Wdew + snow[iveg][band].snow_canopy*1000. + snow[iveg][band].swq*1000.); // mm over area that has been flooded
 
       for(j=0; j<options.Nlayer; j++) {
 
-        if(Recharge > (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist)) {
-          Recharge -= (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist);
-          delta_moist[j] = (soil_con.max_moist[j]-cell[WET][iveg][band].layer[j].moist)*(max_newfraction-lakefrac)/(1-lakefrac); // mm over (1-lakefrac)
+        if(Recharge > (soil_con.max_moist[j]-cell[iveg][band].layer[j].moist)) {
+          Recharge -= (soil_con.max_moist[j]-cell[iveg][band].layer[j].moist);
+          delta_moist[j] = (soil_con.max_moist[j]-cell[iveg][band].layer[j].moist)*(max_newfraction-lakefrac)/(1-lakefrac); // mm over (1-lakefrac)
         }
         else {
           delta_moist[j] = Recharge*(max_newfraction-lakefrac)/(1-lakefrac); // mm over (1-lakefrac)
@@ -2121,14 +2114,10 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
 
   Dsmax = soil_con.Dsmax / 24.;
   lindex = options.Nlayer-1;
-#if SPATIAL_FROST
   liq = 0;
-  for (frost_area=0; frost_area<FROST_SUBAREAS; frost_area++) {
-    liq += (soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
+  for (frost_area=0; frost_area<options.Nfrost; frost_area++) {
+    liq += (soil_con.max_moist[lindex] - cell[iveg][band].layer[lindex].ice[frost_area])*frost_fract[frost_area];
   }
-#else
-  liq = soil_con.max_moist[lindex] - cell[WET][iveg][band].layer[lindex].ice;
-#endif
   resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] * 1000.;
 
   /** Compute relative moisture **/
@@ -2301,12 +2290,12 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
       if(isave_n > 0)
 	lake->temp[k] = Tnew[k]/isave_n;
       else
-	lake->temp[k] = prcp->energy[iveg][band].Tsurf;
+	lake->temp[k] = all_vars->energy[iveg][band].Tsurf;
     }	
   }
  
   if(lake->activenod == isave_n && isave_n == 0)
-    lake->temp[k] = prcp->energy[iveg][band].Tsurf;	
+    lake->temp[k] = all_vars->energy[iveg][band].Tsurf;	
 
   /**********************************************************************
       5. Rescale the fluxes in the lake and the wetland by the change in lake area;
@@ -2315,25 +2304,17 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
    **********************************************************************/
   // Wetland
   if (newfraction < 1.0) { // wetland exists at end of time step
-    advect_soil_veg_storage(lakefrac, max_newfraction, newfraction, delta_moist, &soil_con, &veg_con, &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]), lake_con);
-    rescale_soil_veg_fluxes((1-lakefrac), (1-newfraction), &(cell[WET][iveg][band]), &(veg_var[WET][iveg][band]));
+    advect_soil_veg_storage(lakefrac, max_newfraction, newfraction, delta_moist, &soil_con, &veg_con, &(cell[iveg][band]), &(veg_var[iveg][band]), lake_con);
+    rescale_soil_veg_fluxes((1-lakefrac), (1-newfraction), &(cell[iveg][band]), &(veg_var[iveg][band]));
     advect_snow_storage(lakefrac, max_newfraction, newfraction, &(snow[iveg][band])); 
     rescale_snow_energy_fluxes((1-lakefrac), (1-newfraction), &(snow[iveg][band]), &(energy[iveg][band])); 
-    for (j=0; j<options.Nlayer; j++) moist[j] = cell[0][iveg][band].layer[j].moist;
+    for (j=0; j<options.Nlayer; j++) moist[j] = cell[iveg][band].layer[j].moist;
     ErrorFlag = distribute_node_moisture_properties(energy[iveg][band].moist, energy[iveg][band].ice,
                                                     energy[iveg][band].kappa_node, energy[iveg][band].Cs_node,
                                                     soil_con.Zsum_node, energy[iveg][band].T,
                                                     soil_con.max_moist_node,
-#if QUICK_FS
-                                                    soil_con.ufwc_table_node,
-#else
                                                     soil_con.expt_node,
                                                     soil_con.bubble_node,
-#endif // QUICK_FS
-#if EXCESS_ICE
-                                                    soil_con.porosity_node,
-                                                    soil_con.effective_porosity_node,
-#endif // EXCESS_ICE
                                                     moist, soil_con.depth,
                                                     soil_con.soil_dens_min,
                                                     soil_con.bulk_dens_min,
@@ -2347,9 +2328,9 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
   else if (lakefrac < 1.0) { // wetland is gone at end of time step, but existed at beginning of step
     if (lakefrac > 0.0) { // lake also existed at beginning of step
       for (j=0; j<options.Nlayer; j++) {
-        lake->evapw += cell[WET][iveg][band].layer[j].evap*0.001*(1.-lakefrac)*lake_con.basin[0];
+        lake->evapw += cell[iveg][band].layer[j].evap*0.001*(1.-lakefrac)*lake_con.basin[0];
       }
-      lake->evapw +=veg_var[WET][iveg][band].canopyevap*0.001*(1.-lakefrac)*lake_con.basin[0];
+      lake->evapw +=veg_var[iveg][band].canopyevap*0.001*(1.-lakefrac)*lake_con.basin[0];
       lake->evapw +=snow[iveg][band].canopy_vapor_flux*(1.-lakefrac)*lake_con.basin[0];
       lake->evapw +=snow[iveg][band].vapor_flux*(1.-lakefrac)*lake_con.basin[0];
     }
@@ -2376,16 +2357,20 @@ int water_balance (lake_var_struct *lake, lake_con_struct lake_con, int dt, dist
         lake->snow.coverage = 0;
     }
     else { // lake didn't exist at beginning of time step; create new lake
-      initialize_lake(lake, lake_con, &soil_con, &(cell[WET][iveg][band]), energy[iveg][band].T[0], 1);
+      initialize_lake(lake, lake_con, &soil_con, &(cell[iveg][band]), energy[iveg][band].T[0], 1);
     }
   }
   else if (lakefrac > 0.0) { // lake is gone at end of time step, but existed at beginning of step
     if (lakefrac < 1.0) { // wetland also existed at beginning of step
-      cell[WET][iveg][band].layer[0].evap += 1000.*lake->evapw/((1.-newfraction)*lake_con.basin[0]);
-      cell[WET][iveg][band].runoff += 1000.*lake->runoff_out/((1.-newfraction)*lake_con.basin[0]);
-      cell[WET][iveg][band].baseflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
-      cell[WET][iveg][band].inflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
+      cell[iveg][band].layer[0].evap += 1000.*lake->evapw/((1.-newfraction)*lake_con.basin[0]);
+      cell[iveg][band].runoff += 1000.*lake->runoff_out/((1.-newfraction)*lake_con.basin[0]);
+      cell[iveg][band].baseflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
+      cell[iveg][band].inflow += 1000.*lake->baseflow_out/((1.-newfraction)*lake_con.basin[0]);
     }
+  }
+
+  if (options.CARBON) {
+    advect_carbon_storage(lakefrac, newfraction, lake, &(cell[iveg][band]));
   }
 
   free((char*)delta_moist);
@@ -2498,13 +2483,9 @@ void advect_soil_veg_storage(double lakefrac,
 
     for (lidx=0; lidx<options.Nlayer; lidx++) {
       cell->layer[lidx].moist = soil_con->max_moist[lidx];
-#if SPATIAL_FROST
-      for (k=0; k<FROST_SUBAREAS; k++) {
+      for (k=0; k<options.Nfrost; k++) {
         cell->layer[lidx].ice[k]     = 0.0;
       }
-#else
-      cell->layer[lidx].ice      = 0.0;
-#endif
     }
     cell->asat = 1.0;
     cell->zwt = 0;
@@ -2522,11 +2503,7 @@ void advect_soil_veg_storage(double lakefrac,
   for(lidx=0;lidx<options.Nlayer;lidx++) {
     if (veg_con->root[lidx] > 0)
       cell->rootmoist += cell->layer[lidx].moist;
-#if EXCESS_ICE
-    cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->effective_porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#else
     cell->wetness += (cell->layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
-#endif
   }
   cell->wetness /= options.Nlayer;
 
@@ -2769,3 +2746,39 @@ void rescale_snow_energy_fluxes(double oldfrac,
 
 }
 
+void advect_carbon_storage(double lakefrac,
+                           double newfraction,
+                           lake_var_struct  *lake,
+                           cell_data_struct *cell)
+/**********************************************************************
+  advect_carbon_storage	Ted Bohn	2013
+
+  Function to update carbon storage in the lake and wetland soil columns
+  to account for changes in wetland area.
+
+  Modifications:
+**********************************************************************/
+{
+
+  extern option_struct options;
+  int i,k;
+
+  if (newfraction > lakefrac) { // lake grew, wetland shrank
+
+    if (newfraction < SMALL) newfraction = SMALL;
+    lake->soil.CLitter = (lakefrac*lake->soil.CLitter + (newfraction-lakefrac)*cell->CLitter)/newfraction;
+    lake->soil.CInter = (lakefrac*lake->soil.CInter + (newfraction-lakefrac)*cell->CInter)/newfraction;
+    lake->soil.CSlow = (lakefrac*lake->soil.CSlow + (newfraction-lakefrac)*cell->CSlow)/newfraction;
+
+  }
+
+  else if (newfraction < lakefrac) { // lake shrank, wetland grew
+
+    if ((1-newfraction) < SMALL) newfraction = 1 - SMALL;
+    cell->CLitter = ((lakefrac-newfraction)*lake->soil.CLitter + (1-lakefrac)*cell->CLitter)/(1-newfraction);
+    cell->CInter = ((lakefrac-newfraction)*lake->soil.CInter + (1-lakefrac)*cell->CInter)/(1-newfraction);
+    cell->CSlow = ((lakefrac-newfraction)*lake->soil.CSlow + (1-lakefrac)*cell->CSlow)/(1-newfraction);
+
+  }
+
+}

@@ -24,6 +24,7 @@ void read_snowband(FILE    *snowband,
 	      the average of the band elevations.			TJB
   2009-Sep-28 Moved initialization of snow band parameters to the
 	      read_soilparam* functions.				TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -43,10 +44,6 @@ void read_snowband(FILE    *snowband,
   if ( Nbands > 1 ) {
 
     /** Find Current Grid Cell in SnowBand File **/
-#if !NO_REWIND
-    rewind(snowband);
-#endif
-
     fscanf(snowband, "%d", &cell);
     while ( cell != soil_con->gridcel && !feof(snowband) ) {
       fgets(ErrStr,MAXSTRING,snowband);
@@ -94,7 +91,7 @@ void read_snowband(FILE    *snowband,
       soil_con->elevation = (float)avg_elev;
     }
     for ( band = 0; band < Nbands; band++ ) {
-      soil_con->Tfactor[band] = ( soil_con->elevation - soil_con->BandElev[band] ) / 1000. * T_lapse;
+      soil_con->Tfactor[band] = ( soil_con->elevation - soil_con->BandElev[band] ) * -1 * T_LAPSE;
     }
 
     /** Read Precipitation Fraction **/

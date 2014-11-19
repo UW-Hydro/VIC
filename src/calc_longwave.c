@@ -21,7 +21,7 @@ void calc_longwave(double *longwave,
   2012-Apr-13 Changed relationship between cloud_fraction and tskc for
 	      LW_CLOUD==LW_CLOUD_DEARDORFF, to account for new, simplified
 	      meaning of tskc.						TJB
-  
+  2013-Dec-26 Removed LWAVE_COR.					TJB
 ***************************************************************************/
 {
   extern option_struct options;
@@ -70,8 +70,7 @@ void calc_longwave(double *longwave,
     emissivity = cloudfactor*emissivity_clear;
   }
 
-  *longwave = emissivity * STEFAN_B * air_temp * air_temp *
-    air_temp * air_temp / LWAVE_COR; 
+  *longwave = emissivity * STEFAN_B * air_temp * air_temp * air_temp * air_temp; 
 
 }
 

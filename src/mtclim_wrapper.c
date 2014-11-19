@@ -30,6 +30,7 @@
 	      of simulation.  This has been fixed.			TJB
   2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
 	      is supplied by the user.					HFC via TJB
+  2013-Jul-25 Added data->s_fdir.					TJB
 
 *******************************************************************************/
 /******************************************************************************/
@@ -63,7 +64,7 @@ void mtclim_to_vic(double hour_offset,
 		     int Ndays, dmy_struct *dmy, 
 		     double **tiny_radfract, control_struct *ctrl, 
 		     data_struct *mtclim_data, double *tskc, double *vp, 
-		     double *hourlyrad);
+		     double *hourlyrad, double *fdir);
 
 void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
 		      double elevation, double slope, double aspect,
@@ -71,7 +72,7 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
                       double annual_prcp, double lat, 
 		      int Ndays, dmy_struct *dmy, 
 		      double *prec, double *tmax, double *tmin, double *tskc,
-		      double *vp, double *hourlyrad) 
+		      double *vp, double *hourlyrad, double *fdir) 
 /******************************************************************************
   mtclim_wrapper: interface between VIC and MTCLIM.
 
@@ -126,7 +127,7 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
   /* translate the mtclim structures back to the VIC data structures */
   mtclim_to_vic(hour_offset, Ndays,
 		  dmy, tiny_radfract, &ctrl,&mtclim_data, tskc, vp,
-		  hourlyrad);
+		  hourlyrad, fdir);
 
   /* clean up */
   if (data_free(&ctrl, &mtclim_data)) {
@@ -181,8 +182,8 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
   p->site_isoh   = annual_prcp/10.; /* MTCLIM prcp in cm */
   p->site_ehoriz = ehoriz;
   p->site_whoriz = whoriz;
-  p->tmax_lr     = T_lapse;	    /* not used since site_elev == base_elev */
-  p->tmin_lr     = T_lapse;	    /* not used since site_elev == base_elev */
+  p->tmax_lr     = -1*T_LAPSE*METERS_PER_KM;	/* not used since site_elev == base_elev */
+  p->tmin_lr     = -1*T_LAPSE*METERS_PER_KM;	/* not used since site_elev == base_elev */
 
   /* allocate space in the data arrays for input and output data */
   if (data_alloc(ctrl, mtclim_data)) {
@@ -219,7 +220,7 @@ void mtclim_to_vic(double hour_offset,
 		     int Ndays, dmy_struct *dmy, 
 		     double **tiny_radfract, control_struct *ctrl, 
 		     data_struct *mtclim_data, double *tskc, double *vp, 
-		     double *hourlyrad)
+		     double *hourlyrad, double *fdir)
 /******************************************************************************
   mtclim_to_vic: Store MTCLIM variables in VIC arrays.
 
@@ -270,6 +271,7 @@ void mtclim_to_vic(double hour_offset,
   }
   
   for (i = 0; i < ctrl->ndays; i++) {
+    fdir[i] = mtclim_data->s_fdir[i];
     tskc[i] = mtclim_data->s_tskc[i];
     vp[i] = mtclim_data->s_hum[i];
   }

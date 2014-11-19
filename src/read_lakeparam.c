@@ -65,6 +65,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   2012-Jan-16 Removed LINK_DEBUG code						BN
   2013-Jul-25 Fixed bug in parsing lakeparam file in case of no lake
 	      in the cell.							TJB
+  2013-Dec-28 Removed NO_REWIND option.					TJB
 **********************************************************************/
 
 {
@@ -80,11 +81,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
   double tmp_mindepth, tmp_maxdepth;
 
   lake_con_struct temp;
-  
-#if !NO_REWIND
-  rewind(lakeparam);
-#endif // NO_REWIND
-    
+
   /*******************************************************************/
   /* Read in general lake parameters.                           */
   /******************************************************************/
@@ -99,7 +96,7 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
 
   // cell number not found
   if ( feof(lakeparam) ) {
-    sprintf(tmpstr, "Unable to find cell %i in the lake parameter file, check the file or set NO_REWIND to FALSE", soil_con.gridcel);
+    sprintf(tmpstr, "Unable to find cell %i in the lake parameter file", soil_con.gridcel);
     nrerror(tmpstr);
   }
 

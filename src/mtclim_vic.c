@@ -48,6 +48,7 @@
 	      == LW_CLOUD_DEARDORFF.						TJB
   2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
 	      is supplied by the user.						HFC via TJB
+  2013-Jul-25 Added data->s_fdir.						TJB
 */
 
 /*
@@ -376,6 +377,10 @@ int data_alloc(const control_struct *ctrl, data_struct *data)
     ok=0;
   }
   /* start vic_change */
+  if (ok && !(data->s_fdir = (double*) malloc(ndays * sizeof(double)))) {
+    printf("Error allocating for direct fraction array\n");
+    ok=0;
+  }
   if (ok && !(data->s_tskc = (double*) malloc(ndays * sizeof(double)))) {
     printf("Error allocating for site cloudiness array\n");
     ok=0;
@@ -1186,6 +1191,7 @@ void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_s
     else {
       data->s_tskc[i] = sqrt((1.-data->s_tfmax[i])/0.65);
     }
+    data->s_fdir[i] = pdir;
     /* end vic_change */
 
   }
@@ -1235,6 +1241,7 @@ int data_free(const control_struct *ctrl, data_struct *data)
   free(data->s_dayl);
   free(data->s_swe);
   /* start vic_change */
+  free(data->s_fdir);
   free(data->s_tskc);
   free(data->s_ppratio);
   free(data->s_tfmax);

@@ -7,13 +7,12 @@ static char vcid[] = "$Id$";
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,
-#if OUTPUT_FORCE
+		      veg_lib_struct           *veg_lib,
+		      veg_con_struct           *veg_con,
+                      veg_hist_struct         **veg_hist,
 		      soil_con_struct          *soil_con,
                       out_data_file_struct     *out_data_files,
                       out_data_struct          *out_data)
-#else /* OUTPUT_FORCE */
-		      soil_con_struct          *soil_con)
-#endif /* OUTPUT_FORCE */
 /**********************************************************************
   initialize_atmos	Keith Cherkauer		February 3, 1997
 
@@ -128,8 +127,13 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	      sub-daily humidity was supplied, it is converted to sub-daily
 	      VP after the interpolation of MTCLIM VP, so that it overwrites
 	      the MTCLIM VP.							TJB
+  2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.				TJB
   2013-Nov-21 Added check on ALMA_INPUT in rescaling of forcing variables to
 	      hourly step for local_forcing_data.				TJB
+  2013-Dec-26 Removed OUTPUT_FORCE_STATS option.				TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.				TJB
+  2014-Apr-25 Added LAI and albedo.						TJB
+  2014-Apr-25 Added partial vegcover fraction.					TJB
 **********************************************************************/
 {
   extern option_struct       options;
@@ -140,6 +144,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int     i;
   int     j;
   int     k;
+  int     v;
   int     band;
   int     day;
   int     hour;
@@ -169,17 +174,21 @@ void initialize_atmos(atmos_data_struct        *atmos,
   double  shortwave;
   double  svp_tair;
   double *hourlyrad;
+  double *fdir;
   double *prec;
   double *tmax;
   double *tmin;
   double *tair;
   double *tskc;
   double *daily_vp;
+  double *dailyrad;
   double  min, max;
   double  rainonly;
   int     Ndays;
   int     stepspday;
   double  sum, sum2;
+  double ***veg_hist_data;
+  double ***local_veg_hist_data;
   double **forcing_data;
   double **local_forcing_data;
   int     type;
@@ -197,8 +206,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
   int tmp_nrecs;
   int Ndays_local;
   dmy_struct *dmy_local;
+  dmy_struct dmy_tmp;
   int month_days[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int fstepspday;
+  int tmp_int;
   double tmp_double;
   int save_prec_supplied;
   int save_wind_supplied;
@@ -242,6 +253,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
 //  if ( !param_set.TYPE[WIND].SUPPLIED && !(param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED) )
 //    nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
+
+  /* Assign N_ELEM for veg-dependent forcings */
+  param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
+  param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
+  param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
 
   /* compute number of simulation days */
   tmp_starthour = 0;
@@ -328,22 +344,24 @@ void initialize_atmos(atmos_data_struct        *atmos,
   prec       = (double *) calloc(Ndays_local*24, sizeof(double));
   tair       = (double *) calloc(Ndays_local*24, sizeof(double));
   tmax       = (double *) calloc(Ndays_local, sizeof(double));
-  tmaxhour   = (int *)    calloc(Ndays_local, sizeof(double));
+  tmaxhour   = (int *)    calloc(Ndays_local, sizeof(int));
   tmin       = (double *) calloc(Ndays_local, sizeof(double));
-  tminhour   = (int *)    calloc(Ndays_local, sizeof(double));
+  tminhour   = (int *)    calloc(Ndays_local, sizeof(int));
   tskc       = (double *) calloc(Ndays_local*24, sizeof(double));
   daily_vp   = (double *) calloc(Ndays_local, sizeof(double));
+  dailyrad   = (double *) calloc(Ndays_local, sizeof(double));
+  fdir       = (double *) calloc(Ndays_local*24, sizeof(double));
   
   if (hourlyrad == NULL || prec == NULL || tair == NULL || tmax == NULL ||
-      tmaxhour == NULL ||  tmin == NULL || tminhour == NULL || tskc == NULL ||
-      daily_vp == NULL)
+      tmaxhour == NULL || tmin == NULL || tminhour == NULL || tskc == NULL ||
+      daily_vp == NULL || dailyrad == NULL || fdir == NULL)
     nrerror("Memory allocation failure in initialize_atmos()");
   
   /*******************************
     read in meteorological data 
   *******************************/
 
-  forcing_data = read_forcing_data(infile, global_param);
+  forcing_data = read_forcing_data(infile, global_param, &veg_hist_data);
   
   fprintf(stderr,"\nRead meteorological forcing file\n");
 
@@ -450,10 +468,23 @@ void initialize_atmos(atmos_data_struct        *atmos,
   *************************************************/
 
   local_forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
+  local_veg_hist_data = (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
   for (type=0; type<N_FORCING_TYPES; type++) {
     // Allocate enough space for hourly data
-    if ( ( local_forcing_data[type] = (double *)calloc(Ndays_local*24, sizeof(double)) ) == NULL ) {
-      nrerror("Memory allocation failure in initialize_atmos()");
+    if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
+      if ( ( local_forcing_data[type] = (double *)calloc(Ndays_local*24, sizeof(double)) ) == NULL ) {
+        nrerror("Memory allocation failure in initialize_atmos()");
+      }
+    }
+    else {
+      if ( ( local_veg_hist_data[type] = (double **)calloc(param_set.TYPE[type].N_ELEM, sizeof(double*)) ) == NULL ) {
+        nrerror("Memory allocation failure in initialize_atmos()");
+      }
+      for (v=0; v<param_set.TYPE[type].N_ELEM; v++) {
+        if ( ( local_veg_hist_data[type][v] = (double *)calloc(Ndays_local*24, sizeof(double)) ) == NULL ) {
+          nrerror("Memory allocation failure in initialize_atmos()");
+        }
+      }
     }
     if (param_set.TYPE[type].SUPPLIED) {
       if (param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1] == 24) {
@@ -463,7 +494,14 @@ void initialize_atmos(atmos_data_struct        *atmos,
           if (hour_offset_int > 0) i--; // W. Hemisphere, in GMT time
           if (i < 0) i = 0; // W. Hemisphere, in GMT time; pad extra day in front
           if (i >= Ndays) i = Ndays-1; // E. Hemisphere, in GMT time; pad extra day at end
-          local_forcing_data[type][idx] = forcing_data[type][i];
+          if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
+            local_forcing_data[type][idx] = forcing_data[type][i];
+          }
+          else {
+            for (v=0; v<param_set.TYPE[type].N_ELEM; v++) {
+              local_veg_hist_data[type][v][idx] = veg_hist_data[type][v][i];
+            }
+          }
         }
       }
       else {
@@ -474,21 +512,28 @@ void initialize_atmos(atmos_data_struct        *atmos,
           i = (idx - global_param.starthour + hour_offset_int)/param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1];
           if (i < 0) i += fstepspday;
           if (i >= (Ndays*fstepspday)) i -= fstepspday;
-          if ((   type == PREC
-               || type == RAINF
-               || type == CRAINF
-               || type == LSRAINF
-               || type == SNOWF
-               || type == CSNOWF
-               || type == LSSNOWF
-               || type == CHANNEL_IN)
-               && !options.ALMA_INPUT) {
+          if (   type == PREC
+              || type == RAINF
+              || type == CRAINF
+              || type == LSRAINF
+              || type == SNOWF
+              || type == CSNOWF
+              || type == LSSNOWF
+              || type == CHANNEL_IN
+             ) {
             /* Amounts per step need to be scaled to new step length */
             local_forcing_data[type][idx] = forcing_data[type][i]/param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1];
           }
           else {
             /* All other forcings are assumed constant over hourly substeps */
-            local_forcing_data[type][idx] = forcing_data[type][i];
+            if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
+              local_forcing_data[type][idx] = forcing_data[type][i];
+            }
+            else {
+              for (v=0; v<param_set.TYPE[type].N_ELEM; v++) {
+                local_veg_hist_data[type][v][idx] = veg_hist_data[type][v][i];
+              }
+            }
           }
         }
       }
@@ -907,7 +952,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   **************************************************/
   mtclim_wrapper(have_dewpt, have_shortwave, hour_offset, elevation, slope,
                    aspect, ehoriz, whoriz, annual_prec, phi, Ndays_local,
-                   dmy_local, prec, tmax, tmin, tskc, daily_vp, hourlyrad);
+                   dmy_local, prec, tmax, tmin, tskc, daily_vp, hourlyrad, fdir);
 
   /***********************************************************
     Shortwave, part 2.
@@ -1028,11 +1073,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
       /* Estimate pressure */
       if (options.PLAPSE) {
         /* Assume average virtual temperature in air column
-           between ground and sea level = KELVIN+atmos[rec].air_temp[NR] + 0.5*elevation*LAPSE_PM */
+           between ground and sea level = KELVIN+atmos[rec].air_temp[NR] + 0.5*elevation*T_LAPSE */
         for (rec = 0; rec < global_param.nrecs; rec++) {
-          atmos[rec].pressure[NR] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[NR]+0.5*elevation*LAPSE_PM)));
+          atmos[rec].pressure[NR] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[NR]+0.5*elevation*T_LAPSE)));
           for (i = 0; i < NF; i++) {
-            atmos[rec].pressure[i] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[i]+0.5*elevation*LAPSE_PM)));
+            atmos[rec].pressure[i] = PS_PM*exp(-elevation*G/(Rd*(KELVIN+atmos[rec].air_temp[i]+0.5*elevation*T_LAPSE)));
           }
         }
       }
@@ -1330,14 +1375,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Longwave
   *************************************************/
 
-  /****************************************************************************
-    calculate the daily and sub-daily longwave.  There is a separate case for
-    the full energy and the water balance modes.  For water balance mode we 
-    need to calculate the net longwave for the daily timestep and the incoming
-    longwave for the SNOW_STEPs, for the full energy balance mode we always
-    want the incoming longwave. 
-  ****************************************************************************/
-
   if ( !param_set.TYPE[LONGWAVE].SUPPLIED ) {
     /** Incoming longwave radiation not supplied **/
     for (rec = 0; rec < global_param.nrecs; rec++) {
@@ -1385,28 +1422,337 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /****************************************************
+    Albedo
+  ****************************************************/
+
+  /* First, assign default climatology */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      for (j = 0; j < NF; j++) {
+        veg_hist[rec][v].albedo[j] = veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month-1];
+      }
+    }
+  }
+
+  if(param_set.TYPE[ALBEDO].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED-1] == 24) {
+      /* daily albedo provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for (j = 0; j < NF; j++) {
+            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            if (global_param.starthour - hour_offset_int < 0) hour += 24;
+            idx = (int)((float)hour/24.0);
+            if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH)
+	      veg_hist[rec][v].albedo[j] = local_veg_hist_data[ALBEDO][v][idx]; // assume constant over the day
+            sum += veg_hist[rec][v].albedo[j];
+          }
+          if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
+        }
+      }
+    }
+    else {
+      /* sub-daily albedo provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for(i = 0; i < NF; i++) {
+            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            veg_hist[rec][v].albedo[i] = 0;
+            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+              idx = hour;
+              if (idx < 0) idx += 24;
+              if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH)
+	        veg_hist[rec][v].albedo[i] = local_veg_hist_data[ALBEDO][v][idx];
+              hour++;
+            }
+	    sum += veg_hist[rec][v].albedo[i];
+          }
+          if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
+        }
+      }
+    }
+  }
+
+  /****************************************************
+    Leaf Area Index (LAI)
+  ****************************************************/
+
+  /* First, assign default climatology */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      for (j = 0; j < NF; j++) {
+        veg_hist[rec][v].LAI[j] = veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month-1];
+      }
+    }
+  }
+
+  if(param_set.TYPE[LAI_IN].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED-1] == 24) {
+      /* daily LAI provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for (j = 0; j < NF; j++) {
+            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            if (global_param.starthour - hour_offset_int < 0) hour += 24;
+            idx = (int)((float)hour/24.0);
+            if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
+	      veg_hist[rec][v].LAI[j] = local_veg_hist_data[LAI_IN][v][idx]; // assume constant over the day
+            sum += veg_hist[rec][v].LAI[j];
+          }
+          if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+        }
+      }
+    }
+    else {
+      /* sub-daily LAI provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for(i = 0; i < NF; i++) {
+            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            veg_hist[rec][v].LAI[i] = 0;
+            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+              idx = hour;
+              if (idx < 0) idx += 24;
+              if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
+	        veg_hist[rec][v].LAI[i] = local_veg_hist_data[LAI_IN][v][idx];
+              hour++;
+            }
+	    sum += veg_hist[rec][v].LAI[i];
+          }
+          if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+        }
+      }
+    }
+  }
+
+  /****************************************************
+    Fractional Vegetation Cover
+  ****************************************************/
+
+  /* First, assign default climatology */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      for (j = 0; j < NF; j++) {
+        veg_hist[rec][v].vegcover[j] = veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month-1];
+      }
+    }
+  }
+
+  if(param_set.TYPE[VEGCOVER].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED-1] == 24) {
+      /* daily vegcover provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for (j = 0; j < NF; j++) {
+            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            if (global_param.starthour - hour_offset_int < 0) hour += 24;
+            idx = (int)((float)hour/24.0);
+            if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+	      veg_hist[rec][v].vegcover[j] = local_veg_hist_data[VEGCOVER][v][idx]; // assume constant over the day
+              if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
+            }
+            sum += veg_hist[rec][v].vegcover[j];
+          }
+          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+        }
+      }
+    }
+    else {
+      /* sub-daily vegcover provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          sum = 0;
+          for(i = 0; i < NF; i++) {
+            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+            veg_hist[rec][v].vegcover[i] = 0;
+            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+              idx = hour;
+              if (idx < 0) idx += 24;
+              if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+	        veg_hist[rec][v].vegcover[i] = local_veg_hist_data[VEGCOVER][v][idx];
+                if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+              }
+              hour++;
+            }
+	    sum += veg_hist[rec][v].vegcover[i];
+          }
+          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+        }
+      }
+    }
+  }
+
+  /*************************************************
+    Cosine of Solar Zenith Angle
+  *************************************************/
+
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    dmy_tmp.year = dmy[rec].year;
+    dmy_tmp.month = dmy[rec].month;
+    dmy_tmp.day = dmy[rec].day;
+    dmy_tmp.day_in_year = dmy[rec].day_in_year;
+    for (j = 0; j < NF; j++) {
+      hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+      if (global_param.starthour - hour_offset_int < 0) hour += 24;
+      dmy_tmp.hour = hour+0.5*options.SNOW_STEP;
+      atmos[rec].coszen[j] = compute_coszen(phi,theta_s,theta_l,dmy_tmp);
+    }
+    if (NF>1) {
+      dmy_tmp.hour = dmy[rec].hour + 0.5*global_param.dt;
+      atmos[rec].coszen[NR] = compute_coszen(phi,theta_s,theta_l,dmy_tmp);
+    }
+  }
+
+  /*************************************************
+    Direct Shortwave Fraction (from MTCLIM)
+  *************************************************/
+
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    sum = 0;
+    for (j = 0; j < NF; j++) {
+      hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+      if (global_param.starthour - hour_offset_int < 0) hour += 24;
+      idx = (int)((float)hour/24.0);
+      atmos[rec].fdir[j] = fdir[idx]; // assume constant over the day
+      sum += atmos[rec].fdir[j];
+    }
+    if(NF>1) atmos[rec].fdir[NR] = sum / (float)NF;
+  }
+
+  /*************************************************
+    Photosynthetically Active Radiation
+  *************************************************/
+
+  if ( !param_set.TYPE[PAR].SUPPLIED ) {
+    /** par not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].par[i] = SW2PAR * atmos[rec].shortwave[i];
+        sum += atmos[rec].par[i];
+      }
+      if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[PAR].SUPPLIED-1] == 24) {
+      /* daily par provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          tmp_int = (int)(rec/stepspday)*stepspday;
+          tmp_double = 0;
+          for (i=0; i<stepspday; i++)
+            tmp_double += atmos[tmp_int+i].shortwave[NR];
+          tmp_double /= stepspday;
+          if (tmp_double > 0)
+            atmos[rec].par[j] = local_forcing_data[PAR][idx]*atmos[rec].shortwave[j]/tmp_double;
+          else
+            atmos[rec].par[j] = 0;
+          sum += atmos[rec].par[j];
+        }
+        if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily par provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].par[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].par[i] += local_forcing_data[PAR][idx];
+          }
+          atmos[rec].par[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].par[i];
+        }
+        if(NF>1) atmos[rec].par[NR] = sum / (float)NF;
+      }
+    }
+  }
+
+  /*************************************************
+    Atmospheric Carbon Dioxide Mixing Ratio
+  *************************************************/
+
+  if ( !param_set.TYPE[CATM].SUPPLIED ) {
+    /** Atmospheric carbon dioxide concentration not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].Catm[i] = CatmCurrent * 1e-6; // convert ppm to mixing ratio
+        sum += atmos[rec].Catm[i];
+      }
+      if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[CATM].SUPPLIED-1] == 24) {
+      /* daily atmospheric carbon dioxide concentration provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          atmos[rec].Catm[j] = local_forcing_data[CATM][idx]*1e-6; // convert ppm to mixing ratio
+          sum += atmos[rec].Catm[j];
+        }
+        if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily atmospheric carbon dioxide concentration provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].Catm[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].Catm[i] += local_forcing_data[CATM][idx]*1e-6; // convert ppm to mixing ratio
+          }
+          atmos[rec].Catm[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].Catm[i];
+        }
+        if(NF>1) atmos[rec].Catm[NR] = sum / (float)NF;
+      }
+    }
+  }
+
+  /****************************************************
     Determine if Snow will Fall During Each Time Step
   ****************************************************/
 
-#if !OUTPUT_FORCE
-  min_Tfactor = Tfactor[0];
-  for (band = 1; band < options.SNOW_BAND; band++) {
-    if (Tfactor[band] < min_Tfactor)
-      min_Tfactor = Tfactor[band];
-  }
-  for (rec = 0; rec < global_param.nrecs; rec++) {
-    atmos[rec].snowflag[NR] = FALSE;
-    for (i = 0; i < NF; i++) {
-      if ((atmos[rec].air_temp[i] + min_Tfactor) < global_param.MAX_SNOW_TEMP
-	  &&  atmos[rec].prec[i] > 0) {
-	atmos[rec].snowflag[i] = TRUE;
-	atmos[rec].snowflag[NR] = TRUE;
+  if (!options.OUTPUT_FORCE) {
+    min_Tfactor = Tfactor[0];
+    for (band = 1; band < options.SNOW_BAND; band++) {
+      if (Tfactor[band] < min_Tfactor)
+        min_Tfactor = Tfactor[band];
+    }
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      atmos[rec].snowflag[NR] = FALSE;
+      for (i = 0; i < NF; i++) {
+        if ((atmos[rec].air_temp[i] + min_Tfactor) < global_param.MAX_SNOW_TEMP
+	    &&  atmos[rec].prec[i] > 0) {
+	  atmos[rec].snowflag[i] = TRUE;
+	  atmos[rec].snowflag[NR] = TRUE;
+        }
+        else
+	  atmos[rec].snowflag[i] = FALSE;
       }
-      else
-	atmos[rec].snowflag[i] = FALSE;
     }
   }
-#endif // OUTPUT_FORCE
 
   param_set.TYPE[PREC].SUPPLIED = save_prec_supplied;
   param_set.TYPE[WIND].SUPPLIED = save_wind_supplied;
@@ -1422,44 +1768,52 @@ void initialize_atmos(atmos_data_struct        *atmos,
   free(tminhour);
   free(tskc);
   free(daily_vp);
+  free(dailyrad);
+  free(fdir);
 
   for(i=0;i<N_FORCING_TYPES;i++)  {
-//    if (forcing_data[i] != NULL)
-//      free((char *)forcing_data[i]);
-      free(forcing_data[i]);
-//    if (local_forcing_data[i] != NULL)
-//      free((char *)local_forcing_data[i]);
+    if (param_set.TYPE[i].SUPPLIED) {
+      if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
+        free(forcing_data[i]);
+      }
+      else {
+        for (j=0;j<param_set.TYPE[i].N_ELEM;j++) free(veg_hist_data[i][j]);
+        free(veg_hist_data[i]);
+      }
+    }
+    if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
       free(local_forcing_data[i]);
-//fprintf(stderr,"freed type %d\n",i);
-  }
-//  free((char *)forcing_data);
-  free(forcing_data);
-//  free((char *)local_forcing_data);
-  free(local_forcing_data);
-  free((char *)dmy_local);
-
-#if OUTPUT_FORCE_STATS
-  calc_forcing_stats(global_param.nrecs, atmos);
-#endif // OUTPUT_FORCE_STATS
-
-#if !OUTPUT_FORCE
-
-  // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
-  // specifically been turned off for this cell (by supplying avgJulyAirTemp
-  // and setting it to -999), calculate which snowbands are above the
-  // treeline, based on average July air temperature.
-  if (options.COMPUTE_TREELINE) {
-    if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
-      compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+    }
+    else {
+      for (j=0;j<param_set.TYPE[i].N_ELEM;j++) free(local_veg_hist_data[i][j]);
+      free(local_veg_hist_data[i]);
     }
   }
+  free(forcing_data);
+  free(local_forcing_data);
+  free(veg_hist_data);
+  free(local_veg_hist_data);
+  free((char *)dmy_local);
 
-#else
+  if (!options.OUTPUT_FORCE) {
 
-  // If OUTPUT_FORCE is set to TRUE in user_def.h then the full
-  // forcing data array is dumped into a new set of files.
-  write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+    // If COMPUTE_TREELINE is TRUE and the treeline computation hasn't
+    // specifically been turned off for this cell (by supplying avgJulyAirTemp
+    // and setting it to -999), calculate which snowbands are above the
+    // treeline, based on average July air temperature.
+    if (options.COMPUTE_TREELINE) {
+      if ( !(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999) ) {
+        compute_treeline( atmos, dmy, avgJulyAirTemp, Tfactor, AboveTreeLine );
+      }
+    }
 
-#endif // OUTPUT_FORCE 
+  }
+  else {
+
+    // If OUTPUT_FORCE is TRUE then the full
+    // forcing data array is dumped into a new set of files.
+    write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+
+  }
 
 }

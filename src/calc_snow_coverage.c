@@ -13,7 +13,7 @@ double calc_snow_coverage(int    *store_snow,
 			  double  old_depth,
 			  double  melt,
 			  double *max_snow_depth, 
-			  double *snowfall, 
+			  double  snowfall, 
 			  double *store_swq,
 			  double *snow_distrib_slope,
 			  double *store_coverage) 
@@ -23,7 +23,7 @@ double calc_snow_coverage(int    *store_snow,
   This routine computes the current fraction of the vegetation band
   that is covered with snow.  The snow distribution is assumed to 
   be uniform with a slope based on the value of max_snow_distrib_slope
-  set in user_def.h.  The original value was based on field observations
+  set in vicNl_def.h.  The original value was based on field observations
   from the University of Minnesota's Rosemount Agricultural Experiment
   station (see dissertation by Keith Cherkauer, 2001).
 
@@ -35,6 +35,7 @@ double calc_snow_coverage(int    *store_snow,
   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
+  2014-Mar-29 Removed DIST_PRCP option.					TJB
 *************************************************************************/
 {
 
@@ -45,7 +46,7 @@ double calc_snow_coverage(int    *store_snow,
     New snow falls on partial snowpack
   *************************************/
 
-  if ( snowfall[0] > 0 ) {
+  if ( snowfall > 0 ) {
 
     /*************************
       Continued accumulation

@@ -126,12 +126,33 @@
 	      and clarified the descriptions of the SPATIAL_SNOW
 	      option.							TJB
   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
+  2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
+	      OUT_FDIR, and OUT_PAR.					TJB
+  2013-Jul-25 Added photosynthesis terms.				TJB
+  2013-Jul-25 Added soil carbon terms.					TJB
+  2013-Jul-25 Added SLAB_MOIST.						TJB
   2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.		TJB
-  2014-Mar-24 Removed ARC_SOIL option         BN
+  2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
+  2013-Dec-26 Added LOG_MATRIC option.					TJB
+  2013-Dec-26 Added CLOSE_ENERGY option.				TJB
+  2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
+  2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
+  2013-Dec-27 Removed QUICK_FS option.					TJB
+  2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2013-Dec-28 Moved VERBOSE from user_def.h to vicNl_def.h; deleted
+	      user_def.h.						TJB
+  2014-Mar-24 Removed ARC_SOIL option                       		BN
+  2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Apr-25 Added non-climatological veg parameter functions.		TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
+  2014-May-05 Moved constants CLOSURE, RSMAX, and VPDMINFACTOR from
+	      penman.c to here.						TJB
 *********************************************************************/
-
-#include <user_def.h>
 #include <snow.h>
+
+/***** If TRUE include all model messages to stdout, and stderr *****/
+#define VERBOSE TRUE
 
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -140,17 +161,30 @@
 #define SPVAL        1.e20	/* largest allowable double number - used to signify missing data */
 #define SMALL        1.e-12	/* smallest allowable double number */
 #define MISSING      -99999.	/* missing value for multipliers in BINARY format */
+#define NODATA_VH    -1		/* missing value for veg_hist inputs */
 #define LITTLE 1		/* little-endian flag */
 #define BIG 2			/* big-endian flag */
 #define ERROR -999              /* Error Flag returned by subroutines */
 
+/***** Define maximum array sizes for model source code *****/
+#define MAX_VEG        12      /* maximum number of vegetation types per cell */
+#define MAX_LAYERS     3       /* maximum number of soil moisture layers */
+#define MAX_NODES      50      /* maximum number of soil thermal nodes */
+#define MAX_BANDS      10      /* maximum number of snow bands */
+#define MAX_FRONTS     3       /* maximum number of freezing and thawing front depths to store */
+#define MAX_FROST_AREAS 10     /* maximum number of frost sub-areas */
+#define MAX_LAKE_NODES 20      /* maximum number of lake thermal nodes */
+#define MAX_ZWTVMOIST  11      /* maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
+
+/***** Number of iterations to use in solving the surface energy balance.
+       The original VIC model uses only 1 iteration for speed.  Increasing
+       the number of iterations improves precision, and is recommended
+       for single point comparisons with frozen soils *****/
+#define MAXIT_FE        25
+ 
 /***** Met file formats *****/
 #define ASCII 1
 #define BINARY 2
-
-/***** Snow Albedo parametrizations *****/
-#define USACE   0
-#define SUN1999 1
 
 /***** Snow Density parametrizations *****/
 #define DENS_BRAS   0
@@ -199,9 +233,24 @@
 #define PET_NATVEG  4
 #define PET_VEGNOCR 5
 
-/***** LAI source types *****/
+/***** Veg param sources *****/
+#define FROM_VEGLIB     0
+#define FROM_VEGPARAM   1
+/***** LAI sources (for backwards compatibility) *****/
 #define LAI_FROM_VEGLIB     0
 #define LAI_FROM_VEGPARAM   1
+
+/***** Canopy resistance parametrizations *****/
+#define RC_JARVIS 0
+#define RC_PHOTO  1
+
+/***** Photosynthesis parametrizations *****/
+#define PS_FARQUHAR 1
+#define PS_MONTEITH 2
+
+/***** Photosynthetic pathways  *****/
+#define PHOTO_C3 0
+#define PHOTO_C4 1
 
 /***** Hard-coded veg class parameters (mainly for pot_evap) *****/
 #define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
@@ -211,6 +260,7 @@ extern double ref_veg_rarc[];
 extern double ref_veg_rmin[];
 extern double ref_veg_lai[];
 extern double ref_veg_albedo[];
+extern double ref_veg_vegcover[];
 extern double ref_veg_rough[];
 extern double ref_veg_displ[];
 extern double ref_veg_wind_h[];
@@ -226,18 +276,13 @@ extern char ref_veg_ref_crop[];
 #define HOURSPERYEAR  24*365    /* number of hours per year */
 #define SECPHOUR     3600	/* seconds per hour */
 #define SEC_PER_DAY 86400.	/* seconds per day */
+#define MONTHSPERYEAR 12
+#define METERS_PER_KM 1000.
 
 /***** Physical Constants *****/
-#define RESID_MOIST      0.0        /* define residual moisture content 
-				       of soil column */
-#define MAX_ICE_INIT      0.95        /* define maximum volumetric ice fraction
-				       of soil column, for EXCESS_ICE option */
-#define ICE_AT_SUBSIDENCE 0.8        /* minimum ice/porosity fraction before
-					subsidence occurs, for EXCESS_ICE option */
-#define MAX_SUBSIDENCE    1.0        /* maximum depth of subsidence per layer per
-					time-step (mm) */
-#define ice_density      917.	    /* density of ice (kg/m^3) */
-#define T_lapse          6.5        /* temperature lapse rate of US Std 
+#define RESID_MOIST  0.0       /* define residual moisture content of soil column */
+#define ice_density  917.	    /* density of ice (kg/m^3) */
+#define T_LAPSE      -0.0065   /* temperature lapse rate of US Std 
 				       Atmos in C/km */
 #define von_K        0.40	/* Von Karman constant for evapotranspiration */
 #define KELVIN       273.15	/* conversion factor C to K */
@@ -249,10 +294,13 @@ extern char ref_veg_ref_crop[];
 #define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
+#define K_AIR        2.32e-2    /* conductivity of air (W/mK) */
+#define K_ICE        2.29       /* conductivity of ice (W/mK) */
 #define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
 #define Rd           287        /* Gas constant of dry air (J/degC*kg) */
+#define Rgas         8.3143     /* [m3 Pa mol-1 K-1] universal gas law constant */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */
 #define kPa2Pa 1000.            /* converts kPa to Pa */
@@ -266,17 +314,99 @@ extern char ref_veg_ref_crop[];
 #define B_SVP 17.269
 #define C_SVP 237.3
 
+/* define constants for canopy resistance */
+#define CLOSURE 4000		/* Threshold vapor pressure deficit for stomatal closure (Pa) */
+#define RSMAX 5000              /* Maximum allowable resistance (s/m) */
+#define VPDMINFACTOR 0.1        /* Minimum allowable vapor pressure deficit factor */
+
 /* define constants for penman evaporation */
 #define CP_PM 1013		/* specific heat of moist air at constant pressure (J/kg/C)
 				   (Handbook of Hydrology) */
 #define PS_PM 101300		/* sea level air pressure in Pa */
-#define LAPSE_PM -0.006		/* environmental lapse rate in C/m */
+
+/***** Coefficient multiplied by the LAI to determine the amount of
+       water that can be stored in the canopy *****/
+#define LAI_WATER_FACTOR 0.1
+
+/***** Minimum allowable vegcover fraction *****/
+#define MIN_VEGCOVER 0.0001
+
+/***** Carbon Cycling constants *****/
+
+#define CatmCurrent  383       /* Current global atmospheric CO2 mixing ratio (ppm) */
+#define SW2PAR       0.45      /* Empirical ratio of PAR [W/m2] to SHORTWAVE
+                                 [W/m2] from Lopez et al., 2001 */
+
+/* Photosynthesis Parameters */
+#define OMEGA        0.12      /* single leaf scattering albedo */
+#define LaiMax       8         /* Maximum LAI in nitrogen scaling */
+#define LaiLimit     3         /* Minimum LAI in nitrogen scaling and
+                                  maximum LAI in PAR computation */
+#define LaiMin       1e-9      /* Minimum LAI in PAR computation */
+#define Epar         2.2e5     /* Energy content of PAR [J/mol photons]
+                                  = (4.6 mol/MJ PAR)^-1 */
+#define FcMax        0.9       /* Maximum fractional veg cover;
+                                  (1-FcMax) = min amount of ground visible */
+#define FcMin        1e-3      /* Minimum fractional veg cover;
+                                  (1-FcMin) = max amount of ground visible */
+#define ZenithMin    0.0174524 /* Check for solar zenith angle > 89 deg */
+#define ZenithMinPar 1e-3      /* Cosine of the minimum solar zenith
+                                  angle for photosynthesis to take place */
+#define AlbSoiParMin 0.0       /* Minimum soil reflectivity in PAR range */
+#define minMaxETrans 1e-12     /* Minimum of maximum electron transport
+                                  rate [10e-12 mol/(m^2 s)] */
+#define minStomCond  0.0       /* Minimum stomatal conductance [mol H2O/m2s] */
+#define MCO2kg       44.011e-3 /* Molar mass of CO2 (kg/mol) */
+#define MAIRkg       28.97e-3  /* Molar mass of air (kg/mol) */
+#define MCg          12.01     /* Molar mass of C (g/mol) */
+/* Factors that relate leaf internal CO2 concentration to ambient CO2 concentration */
+#define FCI1C3       0.87      /* C3 Plants */
+#define FCI1C4       0.67      /* C4 Plants */
+
+/* C3 PLANTS: FARQUHAR, G.D., S. VON CAEMMERER AND J.A. BERRY, 1980.
+              A BIOCHEMICAL MODEL OF PHOTOYNTHESIS IN LEAVES OF C3 SPECIES.
+              PLANTA 149, 78-90. */
+
+#define OX     0.21    /* OXYGEN CONCENTRATION [MOL(O2) / MOL(AIR)] */
+#define KC0    460.e-6 /* MICHAELIS-MENTEN CONSTANT FOR CO2 AT 25C [MOL(CO2) / MOL(AIR)] */
+#define KO0    330.e-3 /* MICHAELIS-MENTEN CONSTANT FOR O2 AT 25C [MOL(O2) / MOL(AIR)] */
+#define EC     59356.  /* ACTIVATION ENERGY FOR KC [J / MOL] */
+#define EO     35948.  /* ACTIVATION ENERGY FOR KO [J / MOL] */
+#define EV     58520.  /* ACTIVATION ENERGY FOR VCMAX [J / MOL] */
+#define ER     45000.  /* ACTIVATION ENERGY FOR DARK RESPIRATION [J / MOL] */
+#define ALC3   0.28    /* EFFICIENCY OF OF PHOTON CAPTURE */
+#define FRDC3  0.011   /* RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C3 */
+
+/* C4 PLANTS: COLLATZ, G.J., M. RIBAS-CARBO AND J.A. BERRY, 1992.
+              COUPLED PHOTOSYNTHESIS-STOMATAL CONDUCTANCE MODEL FOR LEAVES
+              OF C4 PLANTS. AUST. J. PLANT PHYSIOL. 19, 519-538. */
+
+#define EK     50967.  /*  = Q10=2 (Collatz et al. 1992) */
+#define ALC4   0.04    /* EFFECTIVE QUANTUM EFFICIENCY */
+#define FRDC4  0.042   /* RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C4 */
+#define THETA  0.83    /* CURVATURE PARAMETER */
+
+/* Plant Maintenance and Growth Respiration Parameters */
+#define FRLeaf   0.4   /* Ratio of canopy leaf respiration to whole plant maintenance respiration */
+#define FRGrowth 0.25  /* Ratio of plant growth respiration to NPP */
+
+/* Soil Respiration Parameters */
+#define E0_LT	308.56 /* Lloyd-Taylor E0 parameter [K] */
+#define T0_LT	227.13 /* Lloyd-Taylor T0 parameter [K] */
+#define wminFM  0.0    /* minimum soil moisture (fraction) at which soil respiration can occur */
+#define wmaxFM  1.0    /* maximum soil moisture (fraction) at which soil respiration can occur */
+#define woptFM  0.5    /* soil moisture (fraction) at which maximum soil respiration occurs */
+#define Rhsat   0.15   /* ratio of soil respiration rate under saturated conditions (w=wmaxFM) to that under optimal conditions (w=woptFM) */
+#define Rfactor 0.5    /* scaling factor to account for other (non-moisture) sources of inhibition of respiration */
+#define tauLitter 2.86 /* Litter pool turnover time [y] */
+#define tauInter  33.3 /* Intermediate pool turnover time [y] */
+#define tauSlow   1000 /* Slow pool turnover time [y] */
+#define fAir    0.7    /* Fraction of respired carbon from litter pool that is lost to atmosphere */
+#define fInter  0.985  /* Fraction of [respired carbon from litter pool that goes to soil] that goes to intermediate pool */
 
 /***** Physical Constraints *****/
 #define MINSOILDEPTH 0.001	/* minimum layer depth with which model can
 					work (m) */
-#define STORM_THRES  0.001      /* thresehold at which a new storm is 
-				   decalred */
 #define SNOW_DT       5.0	/* Used to bracket snow surface temperatures
 				   while computing the snow surface energy 
 				   balance (C) */
@@ -289,6 +419,7 @@ extern char ref_veg_ref_crop[];
 #define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
+#define SLAB_MOIST_FRACT 1.0    /* Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
 
 /***** Define Boolean Values *****/
 #ifndef FALSE
@@ -311,34 +442,39 @@ extern char ref_veg_ref_crop[];
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 24
+#define N_FORCING_TYPES 29
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
-#define CHANNEL_IN 2 /* incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
-#define CRAINF     3 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
-#define CSNOWF     4 /* convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
-#define DENSITY    5 /* atmospheric density [kg/m3] */
-#define LONGWAVE   6 /* incoming longwave radiation [W/m2] */
-#define LSRAINF    7 /* large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
-#define LSSNOWF    8 /* large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
-#define PREC       9 /* total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
-#define PRESSURE  10 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
-#define QAIR      11 /* specific humidity [kg/kg] */
-#define RAINF     12 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define REL_HUMID 13 /* relative humidity [%] */
-#define SHORTWAVE 14 /* incoming shortwave [W/m2] */
-#define SNOWF     15 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-#define TMAX      16 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
-#define TMIN      17 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
-#define TSKC      18 /* cloud cover fraction [fraction] */
-#define VP        19 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
-#define WIND      20 /* wind speed [m/s] */
-#define WIND_E    21 /* zonal component of wind speed [m/s] */
-#define WIND_N    22 /* meridional component of wind speed [m/s] */
-#define SKIP      23 /* place holder for unused data columns */
+#define CATM       2 /* atmospheric CO2 concentration [ppm] */
+#define CHANNEL_IN 3 /* incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
+#define CRAINF     4 /* convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define CSNOWF     5 /* convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define DENSITY    6 /* atmospheric density [kg/m3] */
+#define FDIR       7 /* fraction of incoming shortwave that is direct [fraction] */
+#define LAI_IN     8 /* leaf area index [m2/m2] */
+#define LONGWAVE   9 /* incoming longwave radiation [W/m2] */
+#define LSRAINF   10 /* large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
+#define LSSNOWF   11 /* large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
+#define PAR       12 /* incoming photosynthetically active radiation [W/m2] */
+#define PREC      13 /* total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
+#define PRESSURE  14 /* atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define QAIR      15 /* specific humidity [kg/kg] */
+#define RAINF     16 /* rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define REL_HUMID 17 /* relative humidity [%] */
+#define SHORTWAVE 18 /* incoming shortwave [W/m2] */
+#define SNOWF     19 /* snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
+#define TMAX      20 /* maximum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TMIN      21 /* minimum daily temperature [C] (ALMA_INPUT: [K]) */
+#define TSKC      22 /* cloud cover fraction [fraction] */
+#define VEGCOVER  23 /* fraction of each veg tile covered by plants [fraction] */
+#define VP        24 /* vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
+#define WIND      25 /* wind speed [m/s] */
+#define WIND_E    26 /* zonal component of wind speed [m/s] */
+#define WIND_N    27 /* meridional component of wind speed [m/s] */
+#define SKIP      28 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 160
+#define N_OUTVAR_TYPES 180
 // Water Balance Terms - state variables
 #define OUT_ASAT             0  /* Saturated Area Fraction */
 #define OUT_LAKE_AREA_FRAC   1  /* lake surface area as fraction of the grid cell area [fraction] */
@@ -463,46 +599,56 @@ extern char ref_veg_ref_crop[];
 #define OUT_AERO_RESIST1   116  /* surface aerodynamic resistance [s/m] */
 #define OUT_AERO_RESIST2   117  /* overstory aerodynamic resistance [s/m] */
 #define OUT_AIR_TEMP       118  /* air temperature [C] (ALMA_OUTPUT: [K])*/
-#define OUT_DENSITY        119  /* near-surface atmospheric density [kg/m3]*/
-#define OUT_LONGWAVE       120  /* incoming longwave [W/m2] */
-#define OUT_PRESSURE       121  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
-#define OUT_QAIR           122  /* specific humidity [kg/kg] */
-#define OUT_REL_HUMID      123  /* relative humidity [%]*/
-#define OUT_SHORTWAVE      124  /* incoming shortwave [W/m2] */
-#define OUT_SURF_COND      125  /* surface conductance [m/s] */
-#define OUT_TSKC           126  /* cloud cover fraction [fraction] */
-#define OUT_VP             127  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_VPD            128  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
-#define OUT_WIND           129  /* near surface wind speed [m/s] */
+#define OUT_CATM           119  /* atmospheric CO2 concentrtaion [ppm]*/
+#define OUT_COSZEN         120  /* cosine of solar zenith angle [fraction]*/
+#define OUT_DENSITY        121  /* near-surface atmospheric density [kg/m3]*/
+#define OUT_FDIR           122  /* fraction of incoming shortwave that is direct [fraction]*/
+#define OUT_LAI            123  /* leaf area index [m2/m2] */
+#define OUT_LONGWAVE       124  /* incoming longwave [W/m2] */
+#define OUT_PAR            125  /* incoming photosynthetically active radiation [W/m2] */
+#define OUT_PRESSURE       126  /* near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+#define OUT_QAIR           127  /* specific humidity [kg/kg] */
+#define OUT_REL_HUMID      128  /* relative humidity [%]*/
+#define OUT_SHORTWAVE      129  /* incoming shortwave [W/m2] */
+#define OUT_SURF_COND      130  /* surface conductance [m/s] */
+#define OUT_TSKC           131  /* cloud cover fraction [fraction] */
+#define OUT_VEGCOVER       132  /* fractional area of plants [fraction] */
+#define OUT_VP             133  /* near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_VPD            134  /* near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+#define OUT_WIND           135  /* near surface wind speed [m/s] */
 // Band-specific quantities
-#define OUT_ADV_SENS_BAND       130  /* net sensible heat flux advected to snow pack [W/m2] */
-#define OUT_ADVECTION_BAND      131  /* advected energy [W/m2] */
-#define OUT_ALBEDO_BAND         132  /* average surface albedo [fraction] */
-#define OUT_DELTACC_BAND        133  /* change in cold content in snow pack [W/m2] */
-#define OUT_GRND_FLUX_BAND      134  /* net heat flux into ground [W/m2] */
-#define OUT_IN_LONG_BAND        135  /* incoming longwave at ground surface (under veg) [W/m2] */
-#define OUT_LATENT_BAND         136  /* net upward latent heat flux [W/m2] */
-#define OUT_LATENT_SUB_BAND     137  /* net upward latent heat flux due to sublimation [W/m2] */
-#define OUT_MELT_ENERGY_BAND    138  /* energy of fusion (melting) in snowpack [W/m2] */
-#define OUT_NET_LONG_BAND       139  /* net downward longwave flux [W/m2] */
-#define OUT_NET_SHORT_BAND      140  /* net downward shortwave flux [W/m2] */
-#define OUT_RFRZ_ENERGY_BAND    141  /* net energy used to refreeze liquid water in snowpack [W/m2] */
-#define OUT_SENSIBLE_BAND       142  /* net upward sensible heat flux [W/m2] */
-#define OUT_SNOW_CANOPY_BAND    143  /* snow interception storage in canopy [mm] */
-#define OUT_SNOW_COVER_BAND     144  /* fractional area of snow cover [fraction] */
-#define OUT_SNOW_DEPTH_BAND     145  /* depth of snow pack [cm] */
-#define OUT_SNOW_FLUX_BAND      146  /* energy flux through snow pack [W/m2] */
-#define OUT_SNOW_MELT_BAND      147  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_SNOW_PACKT_BAND     148  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SNOW_SURFT_BAND     149  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
-#define OUT_SWE_BAND            150  /* snow water equivalent in snow pack [mm] */
-// Dynamic Soil Property Terms - EXCESS_ICE option
-#if EXCESS_ICE
-#define OUT_SOIL_DEPTH          151  /* soil moisture layer depths [m] */
-#define OUT_SUBSIDENCE          152  /* subsidence of soil layer [mm] */
-#define OUT_POROSITY            153  /* porosity [mm/mm] */
-#define OUT_ZSUM_NODE           154  /* depths of thermal nodes [m] */
-#endif // EXCESS_ICE
+#define OUT_ADV_SENS_BAND       136  /* net sensible heat flux advected to snow pack [W/m2] */
+#define OUT_ADVECTION_BAND      137  /* advected energy [W/m2] */
+#define OUT_ALBEDO_BAND         138  /* average surface albedo [fraction] */
+#define OUT_DELTACC_BAND        139  /* change in cold content in snow pack [W/m2] */
+#define OUT_GRND_FLUX_BAND      140  /* net heat flux into ground [W/m2] */
+#define OUT_IN_LONG_BAND        141  /* incoming longwave at ground surface (under veg) [W/m2] */
+#define OUT_LATENT_BAND         142  /* net upward latent heat flux [W/m2] */
+#define OUT_LATENT_SUB_BAND     143  /* net upward latent heat flux due to sublimation [W/m2] */
+#define OUT_MELT_ENERGY_BAND    144  /* energy of fusion (melting) in snowpack [W/m2] */
+#define OUT_NET_LONG_BAND       145  /* net downward longwave flux [W/m2] */
+#define OUT_NET_SHORT_BAND      146  /* net downward shortwave flux [W/m2] */
+#define OUT_RFRZ_ENERGY_BAND    147  /* net energy used to refreeze liquid water in snowpack [W/m2] */
+#define OUT_SENSIBLE_BAND       148  /* net upward sensible heat flux [W/m2] */
+#define OUT_SNOW_CANOPY_BAND    149  /* snow interception storage in canopy [mm] */
+#define OUT_SNOW_COVER_BAND     150  /* fractional area of snow cover [fraction] */
+#define OUT_SNOW_DEPTH_BAND     151  /* depth of snow pack [cm] */
+#define OUT_SNOW_FLUX_BAND      152  /* energy flux through snow pack [W/m2] */
+#define OUT_SNOW_MELT_BAND      153  /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_SNOW_PACKT_BAND     154  /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SNOW_SURFT_BAND     155  /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+#define OUT_SWE_BAND            156  /* snow water equivalent in snow pack [mm] */
+// Carbon-Cycling Terms
+#define OUT_APAR           157  /* absorbed PAR [W/m2] */
+#define OUT_GPP            158  /* gross primary productivity [g C/m2d] */
+#define OUT_RAUT           159  /* autotrophic respiration [g C/m2d] */
+#define OUT_NPP            160  /* net primary productivity [g C/m2d] */
+#define OUT_LITTERFALL     161  /* flux of carbon from living biomass into soil [g C/m2d] */
+#define OUT_RHET           162  /* soil respiration (heterotrophic respiration) [g C/m2d] */
+#define OUT_NEE            163  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
+#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2] */
+#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2] */
+#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -595,11 +741,19 @@ typedef struct {
 					    always use canopy aero_resist
 					    for ET. */
   char   BLOWING;        /* TRUE = calculate sublimation from blowing snow */
+  char   CARBON;         /* TRUE = simulate carbon cycling processes;
+			    FALSE = no carbon cycling (default) */
+  char   CLOSE_ENERGY;   /* TRUE = all energy balance calculations are
+                            iterated to minimize the total column (air,
+                            canopy, snow and ground) error; FALSE = no
+                            iteration is used and the model estimates the new
+                            fluxes based on those from the previous time step,
+                            results should be similar, however, the model will
+                            report energy balance errors. */
   char   COMPUTE_TREELINE; /* TRUE = Determine treeline and exclude overstory
 			      vegetation from higher elevations */
   char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
-  char   DIST_PRCP;      /* TRUE = Use distributed precipitation model */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
 			    FALSE = RESOLUTION stores grid cell side length in degrees */
   char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node 
@@ -615,10 +769,19 @@ typedef struct {
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
   char   LAKES;          /* TRUE = use lake energy code */
+  char   LOG_MATRIC;     /* TRUE = use the linear interpolation of the
+                            logarithm of the matric potential from the two
+                            surrounding layers to estimate the soil moisture
+                            drainage from each layer (Boone and Wetzel, 1996).
+                            FALSE = drainage is a function of layer's moisture
+                            content and saturated hydraulic conductivity. */
   char   LW_CLOUD;       /* Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
   char   LW_TYPE;        /* Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
   float  MIN_WIND_SPEED; /* Minimum wind speed in m/s that can be used by the model. **/
   char   MTCLIM_SWE_CORR;/* TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
+  int    Ncanopy;        /* Number of canopy layers in the model. */
+  int    Nfrost;         /* Number of frost subareas in model */
+  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
   int    Nlayer;         /* Number of layers in model */
   int    Nnode;          /* Number of soil thermal nodes in the model */
   char   NOFLUX;         /* TRUE = Use no flux lower bondary when computing 
@@ -627,9 +790,8 @@ typedef struct {
 			    input forcing, compute it by lapsing sea-level
 			    pressure by grid cell average elevation;
 			    FALSE = air pressure set to constant 95.5 kPa */
-  float  PREC_EXPT;      /* Exponential that controls the fraction of a
-			    grid cell that receives rain during a storm
-			    of given intensity */
+  char   RC_MODE;        /* RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
+                            RC_PHOTO = compute canopy resistance based on photosynthetic activity */
   int    ROOT_ZONES;     /* Number of root zones used in simulation */
   char   QUICK_FLUX;     /* TRUE = Use Liang et al., 1999 formulation for
 			    ground heat flux, if FALSE use explicit finite
@@ -637,12 +799,19 @@ typedef struct {
   char   QUICK_SOLVE;    /* TRUE = Use Liang et al., 1999 formulation for 
 			    iteration, but explicit finite difference
 			    method for final step. */
-  char   SNOW_ALBEDO;    /* USACE: Use algorithm of US Army Corps of Engineers, 1956; SUN1999: Use algorithm of Sun et al., JGR, 1999 */
+  char   SHARE_LAYER_MOIST; /* TRUE = transpiration in moisture-limited layers can draw from other layers (default) */
   char   SNOW_DENSITY;   /* DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
   int    SNOW_BAND;      /* Number of elevation bands over which to solve the 
 			    snow model */
   int    SNOW_STEP;      /* Time step in hours to use when solving the 
 			    snow model */
+  int    SPATIAL_FROST;  /* TRUE = use a uniform distribution to simulate the
+                            spatial distribution of soil frost; FALSE = assume
+                            that the entire grid cell is frozen uniformly. */
+  int    SPATIAL_SNOW;   /* TRUE = use a uniform distribution to simulate the
+                            partial coverage of the surface by a thin snowpack.
+                            Coverage is assumed to be uniform after snowfall
+                            until the pack begins to melt. */
   float  SW_PREC_THRESH; /* Minimum daily precipitation [mm] that can cause "dimming" of incoming shortwave radiation */
   char   TFALLBACK;      /* TRUE = when any temperature iterations fail to converge,
                                    use temperature from previous time step; the number
@@ -658,15 +827,22 @@ typedef struct {
                             VP_ITER_ALWAYS = always iterate with SW
                             VP_ITER_ANNUAL = use annual Epot/PRCP criterion
                             VP_ITER_CONVERGE = always iterate until convergence */
-  int    Nlakenode;      /* Number of lake thermal nodes in the model. */
 
   // input options
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
+  char   VEGLIB_PHOTO;   /* TRUE = veg library contains photosynthesis parameters */
+  char   VEGLIB_VEGCOVER;/* TRUE = veg library file contains monthly vegcover values */
+  char   VEGPARAM_ALB;   /* TRUE = veg param file contains monthly albedo values */
   char   VEGPARAM_LAI;   /* TRUE = veg param file contains monthly LAI values */
-  char   LAI_SRC;        /* LAI_FROM_VEGLIB = read LAI values from veg library file
-                            LAI_FROM_VEGPARAM = read LAI values from the veg param file */
+  char   VEGPARAM_VEGCOVER; /* TRUE = veg param file contains monthly vegcover values */
+  char   ALB_SRC;        /* FROM_VEGLIB = use albedo values from veg library file
+                            FROM_VEGPARAM = use albedo values from the veg param file */
+  char   LAI_SRC;        /* FROM_VEGLIB = use LAI values from veg library file
+                            FROM_VEGPARAM = use LAI values from the veg param file */
+  char   VEGCOVER_SRC;   /* FROM_VEGLIB = use vegcover values from veg library file
+                            FROM_VEGPARAM = use vegcover values from the veg param file */
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   ORGANIC_FRACT;  /* TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
@@ -681,18 +857,21 @@ typedef struct {
   char   COMPRESS;       /* TRUE = Compress all output files */
   char   MOISTFRACT;     /* TRUE = output soil moisture as fractional moisture content */
   int    Noutfiles;      /* Number of output files (not including state files) */
+  char   OUTPUT_FORCE;   /* TRUE = perform disaggregation of forcings, skip
+                            the simulation, and output the disaggregated
+                            forcings. */
   char   PRT_HEADER;     /* TRUE = insert header at beginning of output file; FALSE = no header */
   char   PRT_SNOW_BAND;  /* TRUE = print snow parameters for each snow band. This is only used when default
 				   output files are used (for backwards-compatibility); if outfiles and
 				   variables are explicitly mentioned in global parameter file, this option
 				   is ignored. */
-
 } option_struct;
 
 /*******************************************************
   Stores forcing file input information.
 *******************************************************/
 typedef struct {
+  int     N_ELEM; // number of elements per record; for LAI and ALBEDO, 1 element per veg tile; for others N_ELEM = 1;
   char    SIGNED;
   int     SUPPLIED;
   double  multiplier;
@@ -763,13 +942,7 @@ typedef struct {
   double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
 					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
-#if EXCESS_ICE
-  double   Ds_orig;                   /* fraction of maximum subsurface flow 
-					 rate */
-  double   Dsmax_orig;                /* maximum subsurface flow rate 
-					 (mm/day) */
-  double   Ws_orig;                   /* fraction of maximum soil moisture */
-#endif  
+  float    AlbedoPar;                 /* soil albedo in PAR range (400-700nm) */
   double   alpha[MAX_NODES];          /* thermal solution constant */
   double   annual_prec;               /* annual average precipitation (mm) */
   double   avg_temp;                  /* average soil temperature (C) */
@@ -782,24 +955,20 @@ typedef struct {
   double   bulk_dens_min[MAX_LAYERS]; /* bulk density of mineral soil (kg/m^3) */
   double   bulk_dens_org[MAX_LAYERS]; /* bulk density of organic soil (kg/m^3) */
   double   c;                         /* exponent in ARNO baseflow scheme */
-  double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m).  In the case of EXCESS_ICE, this is the effective (dynamic) depth. */
+  double   depth[MAX_LAYERS];         /* thickness of each soil moisture layer (m) */
   double   dp;                        /* soil thermal damping depth (m) */
   double   dz_node[MAX_NODES];        /* thermal node thickness (m) */
   double   Zsum_node[MAX_NODES];      /* thermal node depth (m) */
   double   expt[MAX_LAYERS];          /* layer-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
   double   expt_node[MAX_NODES];      /* node-specific exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6 */
-#if SPATIAL_FROST
-  double   frost_fract[FROST_SUBAREAS]; /* spatially distributed frost coverage fractions */
-  double   frost_slope;               // slope of frost distribution
-#endif // SPATIAL_FROST
+  double   frost_fract[MAX_FROST_AREAS]; /* spatially distributed frost coverage fractions */
+  double   frost_slope;               /* slope of frost distribution */
   double   gamma[MAX_NODES];          /* thermal solution constant */
   double   init_moist[MAX_LAYERS];    /* initial layer moisture level (mm) */
   double   max_infil;                 /* maximum infiltration rate */
   double   max_moist[MAX_LAYERS];     /* maximum moisture content (mm) per layer */
   double   max_moist_node[MAX_NODES]; /* maximum moisture content (mm/mm) per node */
-#if SPATIAL_SNOW
-  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1. */
-#endif // SPATIAL_SNOW
+  double   max_snow_distrib_slope;    /* Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1.  Comment, ported from user_def.h, with questionable units: SiB uses 0.076; Rosemount data imply 0.155cm depth ~ 0.028mm swq. */
   double   phi_s[MAX_LAYERS];         /* soil moisture diffusion parameter (mm/mm) */
   double   porosity[MAX_LAYERS];      /* porosity (fraction) */
   double   quartz[MAX_LAYERS];        /* quartz content of soil (fraction of mineral soil volume) */
@@ -815,10 +984,6 @@ typedef struct {
   double  *Pfactor;                   /* Change in Precipitation due to elevation (fract) in each snow elevation band */
   double  *Tfactor;                   /* Change in temperature due to elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
-#if QUICK_FS
-  double **ufwc_table_layer[MAX_LAYERS];
-  double **ufwc_table_node[MAX_NODES]; 
-#endif
   float    elevation;                 /* grid cell elevation (m) */
   float    lat;                       /* grid cell central latitude */
   float    lng;                       /* grid cell central longitude */
@@ -832,28 +997,7 @@ typedef struct {
   double   aspect;
   double   ehoriz;
   double   whoriz;
-#if EXCESS_ICE
-  double   min_depth[MAX_LAYERS];     /* soil layer depth as given in the soil file (m).  The effective depth will always be >= this value. */
-  double   porosity_node[MAX_NODES];  /* porosity for each thermal node */
-  double   effective_porosity[MAX_LAYERS]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
-  double   effective_porosity_node[MAX_NODES]; /* effective soil porosity (fraction) when soil pores are expanded due to excess ground ice */
-  double   Wcr_FRACT[MAX_LAYERS];
-  double   Wpwp_FRACT[MAX_LAYERS];
-  double   subsidence[MAX_LAYERS];      /* subsidence of soil layer, mm*/
-#endif // EXCESS_ICE
 } soil_con_struct;
-
-/*****************************************************************
-  This structure stores the dynamic soil properties for a grid cell
-  *****************************************************************/
-#if EXCESS_ICE
-typedef struct {
-  double soil_depth[MAX_LAYERS];             /* soil moisture layer depths [m] */
-  double subsidence[MAX_LAYERS];             /* subsidence of soil layer [mm] */
-  double porosity[MAX_LAYERS];               /* porosity [mm/mm] */
-  double zsum_node[MAX_NODES];               /* depths of thermal nodes [m] */
-} dynamic_soil_struct;
-#endif // EXCESS_ICE
 
 /*******************************************************************
   This structure stores information about the vegetation coverage of
@@ -871,6 +1015,7 @@ typedef struct {
   float   lag_one;          /* Lag one gradient autocorrelation of terrain slope */
   float   fetch;            /* Average fetch length for each vegetation class. */
   int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
+  double *CanopLayerBnd;    /* Upper boundary of each canopy layer, expressed as fraction of total LAI */
 } veg_con_struct;
 
 /******************************************************************
@@ -879,10 +1024,10 @@ typedef struct {
 typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow 
 			      accumulation in canopy */
-  double LAI[12];          /* monthly leaf area index */
-  double Wdmax[12];        /* maximum monthly dew holding capacity (mm) */
-  double albedo[12];       /* vegetation albedo (added for full energy) 
-			      (fraction) */
+  double albedo[12];       /* vegetation albedo (fraction) */
+  double LAI[12];          /* leaf area index (m2/m2) */
+  double vegcover[12];     /* fractional area covered by plants within the tile (fraction) */
+  double Wdmax[12];        /* maximum dew holding capacity (mm) */
   double displacement[12]; /* vegetation displacement height (m) */
   double emissivity[12];   /* vegetation emissivity (fraction) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
@@ -900,7 +1045,28 @@ typedef struct {
 			      will be no transpiration (ranges from 
 			      ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
   int    veg_class;        /* vegetation class reference number */
+  char   Ctype;            /* Photosynthetic pathway; can be C3 or C4 */
+  double MaxCarboxRate;    /* maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
+  double MaxETransport;    /* maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
+  double CO2Specificity;   /* CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants) */
+  double LightUseEff;      /* Light-use efficiency (mol(CO2)/mol(photons)) */
+  char   NscaleFlag;       /* TRUE = nitrogen-scaling factors are applicable
+                              to this veg class */
+  double Wnpp_inhib;       /* moisture level (fraction of maximum moisture) above which photosynthesis
+                              experiencing saturation inhibition, i.e. too wet for optimal photosynthesis;
+                              only applies to top soil layer */
+  double NPPfactor_sat;    /* photosynthesis multiplier (fraction of maximum) when top soil
+                              layer is saturated */
 } veg_lib_struct;
+
+/******************************************************************
+  This structure stores historical timeseries of vegetation parameters for a given vegetation tile.  Structure is similar to atmos_data_struct.
+  ******************************************************************/
+typedef struct {
+  double *albedo;    /* timeseries of vegetation albedo (fraction) */
+  double *LAI;       /* timeseries of leaf area index (m2/m2) */
+  double *vegcover;  /* timeseries of fractional area of plants within veg tile (fraction) */
+} veg_hist_struct;
 
 /***************************************************************************
    This structure stores the atmospheric forcing data for each model time 
@@ -911,14 +1077,18 @@ typedef struct {
 ***************************************************************************/
 typedef struct {
   double *air_temp;  /* air temperature (C) */
+  double *Catm;      /* atmospheric CO2 mixing ratio (mol CO2/ mol air) */
   double *channel_in;/* incoming channel inflow for time step (mm) */
+  double *coszen;    /* cosine of solar zenith angle (fraction) */
   double *density;   /* atmospheric density (kg/m^3) */
+  double *fdir;      /* fraction of incoming shortwave that is direct (fraction) */
   double *longwave;  /* incoming longwave radiation (W/m^2) (net incoming
                         longwave for water balance model) */
   double out_prec;   /* Total precipitation for time step - accounts
                         for corrected precipitation totals */
   double out_rain;   /* Rainfall for time step (mm) */
   double out_snow;   /* Snowfall for time step (mm) */
+  double *par;       /* incoming photosynthetically active radiation () */
   double *prec;      /* average precipitation in grid cell (mm) */
   double *pressure;  /* atmospheric pressure (kPa) */
   double *shortwave; /* incoming shortwave radiation (W/m^2) */
@@ -950,12 +1120,9 @@ typedef struct {
   double Cs;                /* average volumetric heat capacity of the 
 			       current layer (J/m^3/K) */
   double T;                 /* temperature of the unfrozen sublayer (C) */
+  double bare_evap_frac;    /* fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
   double evap;              /* evapotranspiration from soil layer (mm) */
-#if SPATIAL_FROST
-  double ice[FROST_SUBAREAS]; /* ice content of the frozen sublayer (mm) */
-#else
-  double ice;               /* ice content of the frozen sublayer (mm) */
-#endif
+  double ice[MAX_FROST_AREAS]; /* ice content of the frozen sublayer (mm) */
   double kappa;             /* average thermal conductivity of the current 
 			       layer (W/m/K) */
   double moist;             /* moisture content of the unfrozen sublayer 
@@ -976,12 +1143,20 @@ typedef struct {
 					  [1] = overstory */
   double asat;                         /* saturated area fraction */
   double baseflow;                     /* baseflow from current cell (mm/TS) */
+  double CLitter;                      /* carbon storage in litter pool [gC/m2] */
+  double CInter;                       /* carbon storage in intermediate pool [gC/m2] */
+  double CSlow;                        /* carbon storage in slow pool [gC/m2] */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */
   double pot_evap[N_PET_TYPES];        /* array of different types of potential evaporation (mm) */
   double runoff;                       /* runoff from current cell (mm/TS) */
   layer_data_struct layer[MAX_LAYERS]; /* structure containing soil variables 
 					  for each layer (see above) */
+  double RhLitter;                     /* soil respiration from litter pool [gC/m2] */
+  double RhLitter2Atm;                 /* soil respiration from litter pool [gC/m2] that goes to atmosphere */
+  double RhInter;                      /* soil respiration from intermediate pool [gC/m2] */
+  double RhSlow;                       /* soil respiration from slow pool [gC/m2] */
+  double RhTot;                        /* total soil respiration over all pools [gC/m2] (=RhLitter2Atm+RhInter+RhSlow) */
   double rootmoist;                    /* total of layer.moist over all layers
                                           in the root zone (mm) */
   double wetness;                      /* average of
@@ -1071,10 +1246,31 @@ typedef struct {
   a grid cell.
   ***********************************************************************/
 typedef struct {
+  double albedo;                /* current vegetation albedo (fraction) */
   double canopyevap;		/* evaporation from canopy (mm/TS) */
-  double throughfall;		/* water that reaches the ground through 
-                                   the canopy (mm/TS) */
+  double LAI;                   /* current leaf area index (m2/m2) */
+  double throughfall;		/* water that reaches the ground through the canopy (mm/TS) */
+  double vegcover;              /* current fractional area of plants within veg tile (fraction) */
   double Wdew;			/* dew trapped on vegetation (mm) */
+  double Wdmax;                 /* current maximum dew holding capacity (mm) */
+  double *NscaleFactor;         /* array of per-layer nitrogen scaling factors */
+  double *aPARLayer;            /* array of per-layer absorbed PAR (mol(photons)/m2 leaf area s) */
+  double *CiLayer;              /* array of per-layer leaf-internal CO2 mixing ratio (mol CO2/mol air) */
+  double *rsLayer;              /* array of per-layer stomatal resistance (s/m) */
+  double aPAR;                  /* whole-canopy absorbed PAR (mol(photons)/m2 leaf area s) */
+  double Ci;                    /* whole-canopy leaf-internal CO2 mixing ratio (mol CO2/mol air) */
+  double rc;                    /* whole-canopy stomatal resistance (s/m) */
+  double NPPfactor;             /* whole-canopy photosynthesis multiplier to account for inhibition separate from stomatal resistance */
+  double GPP;                   /* whole-canopy gross assimilation (photosynthesis) (umol(CO2)/m2s) */
+  double Rphoto;                /* whole-canopy photorespiration (umol(CO2)/m2s) */
+  double Rdark;                 /* whole-canopy 'dark' respiration (umol(CO2)/m2s) */
+  double Rmaint;                /* plant maintenance respiration (= Rdark/FRLeaf) (umol(CO2)/m2s) */
+  double Rgrowth;               /* growth respiration ( = (GPP-Rmaint)*FRGrowth/(1+FRGrowth) ) (umol(CO2)/m2s) */
+  double Raut;                  /* total plant respiration (= Rmaint + Rgrowth) (umol(CO2)/m2s) */
+  double NPP;                   /* net primary productivity (= GPP - Raut) (umol(CO2)/m2s) */
+  double Litterfall;            /* flux of carbon from living biomass to litter pool [gC/m2] */
+  double AnnualNPP;             /* running total annual NPP [gC/m2] */
+  double AnnualNPPPrev;         /* total annual NPP from previous year [gC/m2] */
 } veg_var_struct;
 
 /************************************************************************
@@ -1201,21 +1397,15 @@ typedef struct {
 
 /*****************************************************************
   This structure stores all variables needed to solve, or save 
-  solututions for all versions of this model.  Vegetation and soil
-  variables are created for both wet and dry fractions of the grid
-  cell (for use with the distributed precipitation model).
+  solututions for all versions of this model.
 *****************************************************************/
 typedef struct {
-  cell_data_struct  **cell[2];    /* Stores soil layer variables (wet and 
-				     dry) */
-  double             *mu;         /* fraction of grid cell that receives 
-				     precipitation */
+  cell_data_struct  **cell;       /* Stores soil layer variables */
+  veg_var_struct    **veg_var;    /* Stores vegetation variables */
   energy_bal_struct **energy;     /* Stores energy balance variables */
   lake_var_struct     lake_var;   /* Stores lake/wetland variables */
   snow_data_struct  **snow;       /* Stores snow variables */
-  veg_var_struct    **veg_var[2]; /* Stores vegetation variables (wet and 
-				     dry) */
-} dist_prcp_struct;
+} all_vars_struct;
 
 /*******************************************************
   This structure stores moisture state information for

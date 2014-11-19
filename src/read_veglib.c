@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vicNl.h>
 
 static char vcid[] = "$Id$";
@@ -22,6 +23,9 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
+  2013-Jul-25 Added photosynthesis parameters.				TJB
+  2014-Apr-25 Improved validation for LAI and albedo values.		TJB
+  2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
   extern option_struct options;
@@ -32,6 +36,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
   char   str[MAXSTRING];
   char   ErrStr[MAXSTRING];
   double maxd;
+  char   tmpstr[MAXSTRING];
 
   rewind(veglib);
   fgets(str,MAXSTRING,veglib);
@@ -63,8 +68,27 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         }
         temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
       }
+      if (options.VEGLIB_VEGCOVER) {
+        for (j = 0; j < 12; j++) {
+          fscanf(veglib, "%lf", &temp[i].vegcover[j]);
+          if(temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
+            sprintf(str,"Veg cover fraction must be between 0 and 1 (%f)", temp[i].vegcover[j]);
+            nrerror(str);
+          }
+          if (temp[i].vegcover[j] < 0.01) temp[i].vegcover[j] = 0.01;
+        }
+      }
+      else {
+        for (j = 0; j < 12; j++) {
+          temp[i].vegcover[j] = 1.00;
+        }
+      }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].albedo[j]);
+        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
+          sprintf(str,"Albedo must be between 0 and 1 (%f)", temp[i].albedo[j]);
+          nrerror(str);
+        }
       }
       for (j = 0; j < 12; j++) {
         fscanf(veglib, "%lf", &temp[i].roughness[j]);
@@ -77,11 +101,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         if(temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
           sprintf(str,"Vegetation has leaves (LAI = %f), but no displacement (%f)",
 	          temp[i].LAI[j], temp[i].displacement[j]);
-          nrerror(str);
-        }
-        if(temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
-          sprintf(str,"Albedo must be between 0 and 1 (%f)",
-	          temp[i].albedo[j]);
           nrerror(str);
         }
       }
@@ -110,6 +129,31 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 						      attenuation factor */
       fscanf(veglib, "%lf", &temp[i].trunk_ratio); /* ratio of tree height that
 						      is trunk */
+      /* Carbon-cycling parameters */
+      if (options.VEGLIB_PHOTO) {
+        fscanf(veglib, "%s", tmpstr); /* photosynthetic pathway */
+        if (!strcmp(tmpstr,"C3")) temp[i].Ctype = PHOTO_C3;
+        else if (!strcmp(tmpstr,"C4")) temp[i].Ctype = PHOTO_C4;
+        fscanf(veglib, "%lf", &temp[i].MaxCarboxRate); /* Maximum carboxylation rate at 25 deg C */
+        if (temp[i].Ctype == PHOTO_C3) {
+          fscanf(veglib, "%lf", &temp[i].MaxETransport); /* Maximum electron transport rate at 25 deg C */
+          temp[i].CO2Specificity = 0;
+        }
+        else if (temp[i].Ctype == PHOTO_C4) {
+          fscanf(veglib, "%lf", &temp[i].CO2Specificity); /* CO2 Specificity */
+          temp[i].MaxETransport = 0;
+        }
+        fscanf(veglib, "%lf", &temp[i].LightUseEff); /* Light-use efficiency */
+        fscanf(veglib, "%s", tmpstr); /* Nitrogen-scaling flag */
+        temp[i].NscaleFlag = atoi(tmpstr); /* Nitrogen-scaling flag */
+        fscanf(veglib, "%lf", &temp[i].Wnpp_inhib); /* Moisture level in top soil layer above which photosynthesis begins experiencing inhibition due to saturation */
+        fscanf(veglib, "%lf", &temp[i].NPPfactor_sat); /* photosynthesis multiplier when top soil layer is saturated */
+      }
+      else {
+        temp[i].Wnpp_inhib = 1.0;
+        temp[i].NPPfactor_sat = 1.0;
+      }
+
       fgets(str, MAXSTRING, veglib);	/* skip over end of line comments */
       i++;
     }
@@ -133,6 +177,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       temp[Nveg_type+i].albedo[j] = ref_veg_albedo[i];
       temp[Nveg_type+i].roughness[j] = ref_veg_rough[i];
       temp[Nveg_type+i].displacement[j] = ref_veg_displ[i];
+      temp[Nveg_type+i].vegcover[j] = ref_veg_vegcover[i];
     }
     temp[Nveg_type+i].wind_h = ref_veg_wind_h[i];
     temp[Nveg_type+i].RGL = ref_veg_RGL[i];

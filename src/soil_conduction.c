@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double soil_conductivity(double moist, 
 			 double Wu, 
 			 double soil_dens_min, 

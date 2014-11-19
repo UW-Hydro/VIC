@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double solve_snow(char                 overstory,
 		  double               BareAlbedo,
 		  double               LongUnderOut, // LW from understory

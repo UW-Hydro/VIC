@@ -19,8 +19,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 /*****
 #include <stdarg.h>
 #include "settings.h"

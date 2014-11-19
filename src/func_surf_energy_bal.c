@@ -3,8 +3,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double func_surf_energy_bal(double Ts, va_list ap)
 /**********************************************************************
 	func_surf_energy_bal	Keith Cherkauer		January 3, 1996

@@ -53,10 +53,8 @@
 #             free_dist_prcp.c
 #             make_dist_prcp.c
 #             initialize_new_storm.c
-#             redistribute_during_storm.c					TJB
+#             redistribute_during_storm.c										 TJB
 # 2014-Apr-25 Added alloc_veg_hist.c.						TJB
-#
-# $Id$
 #
 # -----------------------------------------------------------------------
 

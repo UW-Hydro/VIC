@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
 /**********************************************************************
   read_veglib.c               Keith Cherkauer                 1997

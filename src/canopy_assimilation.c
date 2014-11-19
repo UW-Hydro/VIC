@@ -48,8 +48,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id: $";
-
 void canopy_assimilation(char    Ctype,
                          double  MaxCarboxRate,
                          double  MaxETransport,

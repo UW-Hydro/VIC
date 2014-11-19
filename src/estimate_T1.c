@@ -3,8 +3,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double estimate_T1(double Ts, 
 		   double T1_old,
 		   double T2,

@@ -36,8 +36,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id: $";
-
 void photosynth(char    Ctype,
                 double  MaxCarboxRate,
                 double  MaxETransport,

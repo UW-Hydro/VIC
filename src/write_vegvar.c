@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void write_vegvar(veg_var_struct *veg, 
 		  int             n)
 /**********************************************************************

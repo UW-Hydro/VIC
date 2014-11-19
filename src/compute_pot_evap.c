@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void compute_pot_evap(int veg_class, 
 		      dmy_struct *dmy, 
 		      int rec, 

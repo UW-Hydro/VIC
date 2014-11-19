@@ -3,8 +3,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 int solve_lake(double             snowfall,
 	       double             rainfall,
 	       double             tair, 

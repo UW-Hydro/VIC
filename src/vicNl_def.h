@@ -1,4 +1,3 @@
-// $Id$
 /**********************************************************************
   This file contains "#define" statements and "typedef" statements.
   It also contains "extern" declarations for global variables.  For such
@@ -127,11 +126,11 @@
 	      option.							TJB
   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
   2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
-	      OUT_FDIR, and OUT_PAR.					TJB
-  2013-Jul-25 Added photosynthesis terms.				TJB
-  2013-Jul-25 Added soil carbon terms.					TJB
-  2013-Jul-25 Added SLAB_MOIST.						TJB
-  2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.		TJB
+	      OUT_FDIR, and OUT_PAR.							TJB
+  2013-Jul-25 Added photosynthesis terms.					TJB
+  2013-Jul-25 Added soil carbon terms.						TJB
+  2013-Jul-25 Added SLAB_MOIST.								TJB
+  2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.	TJB
   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
   2013-Dec-26 Added LOG_MATRIC option.					TJB
   2013-Dec-26 Added CLOSE_ENERGY option.				TJB

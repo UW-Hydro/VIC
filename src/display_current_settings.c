@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 void display_current_settings(int                 mode,
                               filenames_struct    *names,
                               global_param_struct *global) 
@@ -67,7 +65,6 @@ void display_current_settings(int                 mode,
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added LAI_SRC, VEGPARAM_ALB, and ALB_SRC options.		TJB
   2014-Apr-25 Added VEGPARAM_VEGCOVER and VEGCOVER_SRC options.		TJB
-
 **********************************************************************/
 {
 

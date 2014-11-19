@@ -3,7 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
 int  runoff(cell_data_struct  *cell,
             energy_bal_struct *energy,
             soil_con_struct   *soil_con,

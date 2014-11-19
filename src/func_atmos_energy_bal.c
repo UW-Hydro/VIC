@@ -3,8 +3,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double func_atmos_energy_bal(double Tcanopy, va_list ap) {
 /**********************************************************************
   func_atmos_energy_bal.c      Keith Cherkauer        February 6, 2001

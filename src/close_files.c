@@ -3,8 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
-
 void close_files(filep_struct         *filep,
                  out_data_file_struct *out_data_files,
                  filenames_struct     *fnames)

@@ -1,6 +1,3 @@
-/* RCS Id String
- * $Id$
- */
 /************************************************************************
   Modifications:
   2006-Sep-23 Implemented flexible output configuration; uses the new

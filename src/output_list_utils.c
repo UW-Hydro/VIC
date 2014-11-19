@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
-
 out_data_struct *create_output_list() {
 /*************************************************************
   create_output_list()      Ted Bohn     September 08, 2006

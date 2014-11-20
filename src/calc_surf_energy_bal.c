@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
-static char vcid[] = "$Id$";
-
 double calc_surf_energy_bal(double             Le,
 			    double             LongUnderIn,
 			    double             NetLongSnow, // net LW at snow surface
@@ -180,8 +178,6 @@ double calc_surf_energy_bal(double             Le,
   extern option_struct   options;
 
   int      FIRST_SOLN[2];
-  int      NOFLUX;
-  int      EXP_TRANS;
   int      VEG;
   int      i;
   int      nidx;
@@ -356,26 +352,9 @@ double calc_surf_energy_bal(double             Le,
 	else tmpNnodes = 3;
       }
       else tmpNnodes += 4;
-      NOFLUX = FALSE;
-
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-      EXP_TRANS = FALSE;  // Why would we do this???
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-/***********************************************************************/
-
     }
     else { 
       tmpNnodes = Nnodes;
-      NOFLUX = options.NOFLUX;
-      EXP_TRANS = options.EXP_TRANS;
     }
 
     Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
@@ -402,7 +381,7 @@ double calc_surf_energy_bal(double             Le,
 		       alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 		       ice_node, kappa_node, max_moist_node, moist_node, 
 		       soil_con, layer, veg_var, 
-		       INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
+		       INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow, 
 		       FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 		       &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 		       &energy->latent, &energy->latent_sub, 
@@ -450,7 +429,7 @@ double calc_surf_energy_bal(double             Le,
 					   soil_con->frost_fract, 
 					   layer, veg_var, 
 					   INCLUDE_SNOW, soil_con->FS_ACTIVE, 
-					   NOFLUX, EXP_TRANS,
+					   options.NOFLUX, options.EXP_TRANS,
 					   snow->snow, FIRST_SOLN, &NetLongBare, 
 					   &TmpNetLongSnow, &T1, &energy->deltaH, 
 					   &energy->fusion, &energy->grnd_flux, 
@@ -468,7 +447,6 @@ double calc_surf_energy_bal(double             Le,
 
     if ( Ts_old * Tsurf < 0 && options.QUICK_SOLVE ) {
       tmpNnodes = Nnodes;
-      NOFLUX = options.NOFLUX;
       FIRST_SOLN[0] = TRUE;
       
       Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
@@ -494,7 +472,7 @@ double calc_surf_energy_bal(double             Le,
 			 alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 			 ice_node, kappa_node, max_moist_node, moist_node, 
 			 soil_con, layer, veg_var, 
-			 INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
+			 INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow, 
 			 FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 			 &energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 			 &energy->latent, &energy->latent_sub, 
@@ -542,7 +520,7 @@ double calc_surf_energy_bal(double             Le,
 					     max_moist_node, moist_node, 
 					     soil_con->frost_fract, 
 					     layer, veg_var, INCLUDE_SNOW, 
-					     soil_con->FS_ACTIVE, NOFLUX, EXP_TRANS,
+					     soil_con->FS_ACTIVE, options.NOFLUX, options.EXP_TRANS,
 					     snow->snow, FIRST_SOLN, &NetLongBare, 
 					     &TmpNetLongSnow, &T1, 
 					     &energy->deltaH, &energy->fusion, 
@@ -560,8 +538,6 @@ double calc_surf_energy_bal(double             Le,
 
     /** Frozen soil model run with no surface energy balance **/
     Tsurf  = Tair;
-    NOFLUX = options.NOFLUX;
-    EXP_TRANS = options.EXP_TRANS;
 
   }
   
@@ -592,7 +568,7 @@ double calc_surf_energy_bal(double             Le,
 				alpha, beta, bubble_node, Zsum_node, expt_node, gamma, 
 				ice_node, kappa_node, max_moist_node, moist_node, 
 				soil_con, layer, veg_var, 
-				INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow, 
+				INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow, 
 				FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1, 
 				&energy->deltaH, &energy->fusion, &energy->grnd_flux, 
 				&energy->latent, &energy->latent_sub, 

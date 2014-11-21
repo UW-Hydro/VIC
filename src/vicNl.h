@@ -481,6 +481,7 @@ void tridiag(double *, double *, double *, double *, unsigned);
 int update_thermal_nodes(all_vars_struct *, 
 			 int, int, soil_con_struct *, veg_con_struct *);
 void usage(char *);
+void license();
 
 void   vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);

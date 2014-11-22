@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include "vicNl.h"
 
-static char vcid[] = "$Id$";
-
 double calc_atmos_energy_bal(double  InOverSensible,
 			     double  InUnderSensible,
 			     double  LatentHeatOver,

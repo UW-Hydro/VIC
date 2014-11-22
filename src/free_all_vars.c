@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
  
-static char vcid[] = "$Id$";
-
 void free_all_vars(all_vars_struct *all_vars, 
 		   int              Nveg)
 /**********************************************************************

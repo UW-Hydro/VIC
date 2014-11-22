@@ -1,6 +1,5 @@
 # README.txt - VIC Model Release Notes
 #
-# $Id$
 #------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
@@ -154,7 +153,6 @@ Added non-climatological time-varying veg parameters.
 	3. If not supplied as a forcing and [EITHER not listed in the veg
 	parameter file OR listed there but LAI_SRC or ALB_SRC is set to
 	FROM_VEGLIB], values will be taken from the veg library.
-
 
 
 
@@ -426,7 +424,6 @@ to satisfy evaporative demand
 
 
 
-
 Fixed negative liquid soil moisture for bare soil conditions
 
 	Files Affected:
@@ -440,7 +437,6 @@ Fixed negative liquid soil moisture for bare soil conditions
 	was positive.  In some cases, in the bare soil tile, liquid soil
 	moisture could occasionally go negative.  This has been fixed by adding
 	a check on liquid soil moisture to runoff().
-
 
 
 
@@ -473,6 +469,7 @@ Fixed use of tmp_moist array without initialization.
 
 
 
+>>>>>>> develop
 
 Fix for crash when FROZEN_SOIL, EXP_TRANS and IMPLICIT all == TRUE
 

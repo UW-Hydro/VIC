@@ -3,8 +3,6 @@
 #include <vicNl.h>
 #include <string.h>
 
-static char vcid[] = "$Id$";
-
 veg_con_struct *read_vegparam(FILE *vegparam,
                               int   gridcel,
                               int   Nveg_type)

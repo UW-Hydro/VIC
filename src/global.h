@@ -11,8 +11,6 @@
         statements and typedef statements, which is what vicNl_def.h
         is primarily composed of.
 
-  $Id$
-
   2003-Oct-29 Added version string and removed unused options from
 	      optstring.						TJB
   2009-Jun-09 Added definitions of reference landcover types, used
@@ -22,7 +20,7 @@
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-May-20 Added ref_veg_vegcover.					TJB
 **********************************************************************/
-char *version = "4.2 beta 2014-May-30";
+char *version = "5.0.dev 2014-November-19 ";
 char *optstring = "g:vo";
 int flag;
 

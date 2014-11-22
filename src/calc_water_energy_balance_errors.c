@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
 double calc_water_balance_error(int    rec,
 				double inflow,
 				double outflow,

@@ -3,7 +3,6 @@
 #include <vicNl.h>
 #include <math.h>
 
-static char vcid[] = "$Id$";
 int  runoff(cell_data_struct  *cell,
             energy_bal_struct *energy,
             soil_con_struct   *soil_con,
@@ -169,25 +168,18 @@ int  runoff(cell_data_struct  *cell,
 **********************************************************************/
 {  
   extern option_struct options;
-  char               ErrStr[MAXSTRING];
-  int                firstlayer, lindex, sub;
+  int                firstlayer, lindex;
   int                i;
   int                last_layer[MAX_LAYERS*3];
-  int                last_sub[MAX_LAYERS*3];
-  int                froz_solid[MAX_LAYERS*3];
   int                last_index;
   int                last_cnt;
-  int                tmp_index;
   int                time_step;
-  int                storesub;
-  int                tmpsub;
   int                tmplayer;
   int                frost_area;
   int                ErrorFlag;
   double             A, frac;
   double             tmp_runoff;
   double             inflow;
-  double             last_liq;
   double             resid_moist[MAX_LAYERS]; // residual moisture (mm)
   double             org_moist[MAX_LAYERS];   // total soil moisture (liquid and frozen) at beginning of this function (mm)
   double             avail_liq[MAX_LAYERS][MAX_FROST_AREAS]; // liquid soil moisture available for evap/drainage (mm)
@@ -195,40 +187,29 @@ int  runoff(cell_data_struct  *cell,
   double             ice[MAX_LAYERS];         // current frozen soil moisture (mm)
   double             moist[MAX_LAYERS];       // current total soil moisture (liquid and frozen) (mm)
   double             max_moist[MAX_LAYERS];   // maximum storable moisture (liquid and frozen) (mm)
-  double             max_infil;
   double             Ksat[MAX_LAYERS];
   double             Q12[MAX_LAYERS-1];
-  double            *kappa;
-  double            *Cs;
-  double            *M;
   double             Dsmax;
-  double             top_moist;     // total moisture (liquid and frozen) in topmost soil layers (mm)
-  double             top_max_moist; // maximum storable moisture (liquid and frozen) in topmost soil layers (mm)
   double             tmp_inflow;
   double             tmp_moist;
   double             tmp_moist_for_runoff[MAX_LAYERS];
   double             tmp_liq;
-  double             dt_inflow, dt_outflow;
+  double             dt_inflow;
   double             dt_runoff;
   double             runoff[MAX_FROST_AREAS];
   double             tmp_dt_runoff[MAX_FROST_AREAS];
   double             baseflow[MAX_FROST_AREAS];
-  double             actual_frost_fract[MAX_FROST_AREAS];
   double             dt_baseflow;
   double             rel_moist;
   double             evap[MAX_LAYERS][MAX_FROST_AREAS];
   double             sum_liq;
-  double             evap_percent;
+  double             evap_fraction;
   double             evap_sum;
   double             min_temp;
   double             max_temp;
   double             tmp_fract;
   double             Tlayer_spatial[MAX_LAYERS][MAX_FROST_AREAS];
-  double             Tlayer;
   double             b[MAX_LAYERS];
-  double             matric[MAX_LAYERS];
-  double             avg_matric;
-  double             spatial_fract;
   layer_data_struct *layer;
   layer_data_struct  tmp_layer;
 
@@ -260,21 +241,17 @@ int  runoff(cell_data_struct  *cell,
       }
       // compute fraction of available soil moisture that is evaporated
       if (sum_liq > 0) {
-        evap_percent = evap[lindex][0] / sum_liq;
+        evap_fraction = evap[lindex][0] / sum_liq;
       }
       else {
-        evap_percent = 1.0;
+        evap_fraction = 1.0;
       }
       // distribute evaporation between frost sub areas by percentage
       evap_sum = evap[lindex][0];
       for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
-        evap[lindex][frost_area] = avail_liq[lindex][frost_area] * evap_percent;
+        evap[lindex][frost_area] = avail_liq[lindex][frost_area] * evap_fraction;
         avail_liq[lindex][frost_area] -= evap[lindex][frost_area];
         evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
-      }
-      layer[lindex].evap = 0;
-      for ( frost_area = options.Nfrost - 1; frost_area >= 0; frost_area-- ) {
-        layer[lindex].evap += evap[lindex][frost_area] * frost_fract[frost_area];
       }
     }
     else {
@@ -318,9 +295,6 @@ int  runoff(cell_data_struct  *cell,
       /** Set Layer Maximum Moisture Content **/
       max_moist[lindex] = soil_con->max_moist[lindex];
 
-      /** Set Layer Temperature **/
-       Tlayer = Tlayer_spatial[lindex][frost_area];
-
     } // initialize variables for each layer
 
     /******************************************************
@@ -341,7 +315,6 @@ int  runoff(cell_data_struct  *cell,
     **************************************************/
 	  
     dt_inflow  =  inflow / (double) dt;
-    dt_outflow =  0.0;
 	  
     for (time_step = 0; time_step < dt; time_step++) {
       inflow   = dt_inflow;
@@ -560,8 +533,8 @@ void compute_runoff_and_asat(soil_con_struct *soil_con, double *moist, double in
 {
 
   extern option_struct options;
-  double top_moist;
-  double top_max_moist;
+  double top_moist;  // total moisture (liquid and frozen) in topmost soil layers (mm)
+  double top_max_moist;  // maximum storable moisture (liquid and frozen) in topmost soil layers (mm)
   int lindex;
   double ex;
   double max_infil;

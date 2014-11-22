@@ -28,8 +28,6 @@
 #include <math.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id: $";
-
 void faparl(double  *CanopLayerBnd,
             double   LAItotal,
             double   AlbSoilPAR,

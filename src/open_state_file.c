@@ -3,9 +3,6 @@
 #include <string.h>
 #include <vicNl.h>
 
-static char vcid[] = "$Id$";
-
-
 FILE *open_state_file(global_param_struct *global,
 		      filenames_struct     filenames,
 		      int                  Nlayer,

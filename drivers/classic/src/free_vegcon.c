@@ -1,29 +1,29 @@
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
- 
-void free_vegcon(veg_con_struct **veg_con)
+
+void
+free_vegcon(veg_con_struct **veg_con)
+
 /**********************************************************************
-  free_vegcon.c	            Keith Cherkauer	  September 25, 1998
+   free_vegcon.c	            Keith Cherkauer	  September 25, 1998
 
-  This subroutine frees all components of the veg_con structure.
+   This subroutine frees all components of the veg_con structure.
 
-  Modifications:
-  2013-Jul-29 Added freeing of canopy layer bounds array.		TJB
+   Modifications:
+   2013-Jul-29 Added freeing of canopy layer bounds array.		TJB
 
 **********************************************************************/
 {
- 
-  extern option_struct   options;
-  int i;
-  
-  for(i=0;i<veg_con[0][0].vegetat_type_num;i++) { 
-    free((char *)veg_con[0][i].zone_depth);
-    free((char *)veg_con[0][i].zone_fract);
-    if (options.CARBON) {
-      free((char *)veg_con[0][i].CanopLayerBnd);
-    }
-  }
-  free((char *)veg_con[0]);
+    extern option_struct options;
+    int                  i;
 
+    for (i = 0; i < veg_con[0][0].vegetat_type_num; i++) {
+        free((char *)veg_con[0][i].zone_depth);
+        free((char *)veg_con[0][i].zone_fract);
+        if (options.CARBON) {
+            free((char *)veg_con[0][i].CanopLayerBnd);
+        }
+    }
+    free((char *)veg_con[0]);
 }

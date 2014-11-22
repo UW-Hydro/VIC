@@ -19,126 +19,149 @@
 /****************************************************************************/
 /*			       alloc_atmos()                                */
 /****************************************************************************/
-void alloc_atmos(int nrecs, atmos_data_struct **atmos)
-/*******************************************************************
-  alloc_atmos    
+void
+alloc_atmos(int                 nrecs,
+            atmos_data_struct **atmos)
 
-  Modifications:
-  01-11-00 Fixed allocation bug                             KAC
-  2006-Sep-23 Implemented flexible output configuration; removed
-	      LDAS_OUTPUT and OPTIMIZE compile-time options.		TJB
-  2006-Dec-20 All atmos_data arrays are always dynamically allocated
-	      now.							TJB
-  2010-Mar-31 Added runoff_in.						TJB
-  2010-Sep-24 Renamed runoff_in to channel_in.				TJB
-  2011-Nov-04 Added tskc.						TJB
-  2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
+/*******************************************************************
+   alloc_atmos
+
+   Modifications:
+   01-11-00 Fixed allocation bug                             KAC
+   2006-Sep-23 Implemented flexible output configuration; removed
+              LDAS_OUTPUT and OPTIMIZE compile-time options.		TJB
+   2006-Dec-20 All atmos_data arrays are always dynamically allocated
+              now.							TJB
+   2010-Mar-31 Added runoff_in.						TJB
+   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
+   2011-Nov-04 Added tskc.						TJB
+   2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
 
 *******************************************************************/
 {
-  extern param_set_struct param_set;
+    extern param_set_struct param_set;
 
-  int i;
+    int                     i;
 
-  *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct)); 
-  if (*atmos == NULL)
-    nrerror("Memory allocation error in alloc_atmos().");
+    *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
+    if (*atmos == NULL) {
+        nrerror("Memory allocation error in alloc_atmos().");
+    }
 
-  for (i = 0; i < nrecs; i++) {
-    (*atmos)[i].air_temp = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].air_temp == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].Catm = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].Catm == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].channel_in = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].channel_in == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].coszen = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].coszen == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].density = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].density == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].fdir = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].fdir == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].longwave = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].longwave == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].par = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].par == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].prec = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].prec == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");      
-    (*atmos)[i].pressure = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].pressure == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].shortwave = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].shortwave == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].snowflag = (char *) calloc(NR+1, sizeof(char));	
-    if ((*atmos)[i].snowflag == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].tskc = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].tskc == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].vp = (double *) calloc(NR+1, sizeof(double));	
-    if ((*atmos)[i].vp == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].vpd = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].vpd == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-    (*atmos)[i].wind = (double *) calloc(NR+1, sizeof(double));
-    if ((*atmos)[i].wind == NULL)
-      nrerror("Memory allocation error in alloc_atmos().");
-  }    			
-
+    for (i = 0; i < nrecs; i++) {
+        (*atmos)[i].air_temp = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].air_temp == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].Catm = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].Catm == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].channel_in = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].channel_in == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].coszen = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].coszen == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].density = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].density == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].fdir = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].fdir == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].longwave = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].longwave == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].par = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].par == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].prec = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].prec == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].pressure = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].pressure == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].shortwave = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].shortwave == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].snowflag = (char *) calloc(NR + 1, sizeof(char));
+        if ((*atmos)[i].snowflag == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].tskc = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].tskc == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].vp = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].vp == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].vpd = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].vpd == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].wind = (double *) calloc(NR + 1, sizeof(double));
+        if ((*atmos)[i].wind == NULL) {
+            nrerror("Memory allocation error in alloc_atmos().");
+        }
+    }
 }
 
 /****************************************************************************/
-/*	      		  free_atmos()                                      */
+/*	                  free_atmos()                                      */
 /****************************************************************************/
-void free_atmos(int nrecs, atmos_data_struct **atmos)
+void
+free_atmos(int                 nrecs,
+           atmos_data_struct **atmos)
+
 /***************************************************************************
-  Modifications:
-  09-02-2003 Added check for LINK_DEBUG global option.  If LINK_DEBUG is
+   Modifications:
+   09-02-2003 Added check for LINK_DEBUG global option.  If LINK_DEBUG is
              TRUE atmospheric data is not dynamically allocated, so it
              should not be freed.                                   KAC
-  2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
-	      removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
-  2006-Dec-20 All atmos_data arrays are always dynamically allocated
-	      now.							TJB
-  2010-Mar-31 Added runoff_in.						TJB
-  2010-Sep-24 Renamed runoff_in to channel_in.				TJB
-  2011-Nov-04 Added tskc.						TJB
-  2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
+   2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
+              removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
+   2006-Dec-20 All atmos_data arrays are always dynamically allocated
+              now.							TJB
+   2010-Mar-31 Added runoff_in.						TJB
+   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
+   2011-Nov-04 Added tskc.						TJB
+   2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
 ***************************************************************************/
 {
-  int i;
+    int i;
 
-  if (*atmos == NULL)
-    return;
+    if (*atmos == NULL) {
+        return;
+    }
 
-  for (i = 0; i < nrecs; i++) {
-    free((*atmos)[i].air_temp);
-    free((*atmos)[i].Catm);
-    free((*atmos)[i].channel_in);
-    free((*atmos)[i].coszen);
-    free((*atmos)[i].density);
-    free((*atmos)[i].fdir);
-    free((*atmos)[i].longwave);
-    free((*atmos)[i].par);
-    free((*atmos)[i].prec);
-    free((*atmos)[i].pressure);
-    free((*atmos)[i].shortwave);
-    free((*atmos)[i].snowflag);
-    free((*atmos)[i].tskc);
-    free((*atmos)[i].vp);
-    free((*atmos)[i].vpd);
-    free((*atmos)[i].wind);
-  }
+    for (i = 0; i < nrecs; i++) {
+        free((*atmos)[i].air_temp);
+        free((*atmos)[i].Catm);
+        free((*atmos)[i].channel_in);
+        free((*atmos)[i].coszen);
+        free((*atmos)[i].density);
+        free((*atmos)[i].fdir);
+        free((*atmos)[i].longwave);
+        free((*atmos)[i].par);
+        free((*atmos)[i].prec);
+        free((*atmos)[i].pressure);
+        free((*atmos)[i].shortwave);
+        free((*atmos)[i].snowflag);
+        free((*atmos)[i].tskc);
+        free((*atmos)[i].vp);
+        free((*atmos)[i].vpd);
+        free((*atmos)[i].wind);
+    }
 
-  free(*atmos);
+    free(*atmos);
 }

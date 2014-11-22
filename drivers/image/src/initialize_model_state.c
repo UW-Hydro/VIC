@@ -3,14 +3,13 @@
 #include <vic_driver_image.h>
 
 int
-initialize_model_state(all_vars_struct     *all_vars,
-                       int                  Nveg,
-                       int                  Nnodes,
-                       double               surf_temp,
-                       soil_con_struct     *soil_con,
-                       veg_con_struct      *veg_con,
-                       veg_lib_struct      *veg_lib)
-
+initialize_model_state(all_vars_struct *all_vars,
+                       int              Nveg,
+                       int              Nnodes,
+                       double           surf_temp,
+                       soil_con_struct *soil_con,
+                       veg_con_struct  *veg_con,
+                       veg_lib_struct  *veg_lib)
 /**********************************************************************
    initialize_model_state      Keith Cherkauer	    April 17, 2000
 
@@ -27,24 +26,25 @@ initialize_model_state(all_vars_struct     *all_vars,
 **********************************************************************/
 {
     extern global_param_struct global_param;
-    extern option_struct options;
+    extern option_struct       options;
 
-    char                 ErrStr[MAXSTRING];
-    char                 FIRST_VEG;
-    int                  veg, index;
-    int                  lidx;
-    int                  band;
-    int                  frost_area;
-    int                  ErrorFlag;
-    double               Cv;
-    double               Zsum, dp;
-    double               tmpdp, tmpadj, Bexp;
-    double               moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-    double               ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS];
-    double               dt_thresh;
+    char                       ErrStr[MAXSTRING];
+    char                       FIRST_VEG;
+    int                        veg, index;
+    int                        lidx;
+    int                        band;
+    int                        frost_area;
+    int                        ErrorFlag;
+    double                     Cv;
+    double                     Zsum, dp;
+    double                     tmpdp, tmpadj, Bexp;
+    double                     moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
+    double                     ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][
+        MAX_FROST_AREAS];
+    double                     dt_thresh;
 
-    cell_data_struct   **cell;
-    energy_bal_struct  **energy;
+    cell_data_struct         **cell;
+    energy_bal_struct        **energy;
 
     cell = all_vars->cell;
     energy = all_vars->energy;
@@ -104,7 +104,6 @@ initialize_model_state(all_vars_struct     *all_vars,
             }
         }
     }
-
     /*****************************************************************
        CASE 3: Initialize Energy Balance Variables if not using quick
        ground heat flux, and no Initial Condition File Given
@@ -258,7 +257,6 @@ initialize_model_state(all_vars_struct     *all_vars,
             }
         }
     }
-
     /*********************************
        CASE 4: Unknown option
     *********************************/
@@ -429,7 +427,6 @@ update_thermal_nodes(all_vars_struct *all_vars,
                      soil_con_struct *soil_con,
                      veg_con_struct  *veg_con,
                      veg_lib_struct  *veg_lib)
-
 /**********************************************************************
    update_thermal_nodes           Jennifer Adam        August 16, 2007
 

@@ -1,23 +1,24 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-void write_vegvar(veg_var_struct *veg, 
-		  int             n)
+void
+write_vegvar(veg_var_struct *veg,
+             int             n)
+
 /**********************************************************************
-  write_vegvar		Keith Cherkauer		May 29, 1996
+   write_vegvar		Keith Cherkauer		May 29, 1996
 
-  This routine writes vegetation variables to stdout.  Used primarily
-  for debugging purposes.
+   This routine writes vegetation variables to stdout.  Used primarily
+   for debugging purposes.
 
-  Modifications:
-  5/21/96	Routine was modified to allow for variable
-		number of layers				KAC
+   Modifications:
+   5/21/96	Routine was modified to allow for variable
+                number of layers				KAC
 
 **********************************************************************/
 {
-  printf("Vegetation Variables: vegtype %i\n",n);
-  printf("\tcanopyevap  = %f\n", veg->canopyevap);
-  printf("\tWdew        = %f\n", veg->Wdew);
-  printf("\tthroughfall = %f\n", veg->throughfall);
+    printf("Vegetation Variables: vegtype %i\n", n);
+    printf("\tcanopyevap  = %f\n", veg->canopyevap);
+    printf("\tWdew        = %f\n", veg->Wdew);
+    printf("\tthroughfall = %f\n", veg->throughfall);
 }
-

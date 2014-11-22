@@ -1,34 +1,37 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-double svp(double temp)
-/**********************************************************************
-  This routine computes the saturated vapor pressure using Handbook
-  of Hydrology eqn 4.2.2
+double
+svp(double temp)
 
-  Pressure in Pa
+/**********************************************************************
+   This routine computes the saturated vapor pressure using Handbook
+   of Hydrology eqn 4.2.2
+
+   Pressure in Pa
 
 **********************************************************************/
 {
-  double SVP;
-  
-  SVP = A_SVP * exp((B_SVP * temp)/(C_SVP+temp));
+    double SVP;
 
-  if(temp<0) SVP *= 1.0 + .00972 * temp + .000042 * temp * temp;
+    SVP = A_SVP * exp((B_SVP * temp) / (C_SVP + temp));
 
-  return (SVP*1000.);
+    if (temp < 0) {
+        SVP *= 1.0 + .00972 * temp + .000042 * temp * temp;
+    }
+
+    return (SVP * 1000.);
 }
 
-double svp_slope(double temp)
-/**********************************************************************
-  This routine computes the gradient of d(svp)/dT using Handbook
-  of Hydrology eqn 4.2.3
+double
+svp_slope(double temp)
 
-  returned value in Pa
+/**********************************************************************
+   This routine computes the gradient of d(svp)/dT using Handbook
+   of Hydrology eqn 4.2.3
+
+   returned value in Pa
 **********************************************************************/
 {
-  return (B_SVP * C_SVP) / ((C_SVP + temp) * (C_SVP + temp)) * svp(temp);
+    return (B_SVP * C_SVP) / ((C_SVP + temp) * (C_SVP + temp)) * svp(temp);
 }
-
-
- 

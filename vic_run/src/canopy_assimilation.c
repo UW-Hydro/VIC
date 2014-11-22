@@ -1,7 +1,7 @@
 /********************************************************************************
-  filename  : canopy_assimilation.c
-  purpose   : Calculate GPP, Raut, and NPP for veg cover with multi-layer canopy
-  interface : - input :
+   filename  : canopy_assimilation.c
+   purpose   : Calculate GPP, Raut, and NPP for veg cover with multi-layer canopy
+   interface : - input :
                 - Ctype:          photosynthesis pathway (PHOTO_C3 or PHOTO_C4)
                 - MaxCarboxRate:  maximum carboxlyation rate at 25 deg C       (mol(CO2)/m2 leaf area s)
                 - MaxETransport:  maximum electron transport rate at 25 deg C  (mol(CO2)/m2 leaf area s) (C3 plants)
@@ -37,166 +37,171 @@
                 - Raut:           whole-forest plant respiration                   (mol(CO2)/m2 ground area s)
                 - NPP:            net primary productivity                         (mol(CO2)/m2 ground area s)
 
-  programmer: Ted Bohn
-  date      : October 20, 2006
-  changes   :
-  references: 
+   programmer: Ted Bohn
+   date      : October 20, 2006
+   changes   :
+   references:
 ********************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-void canopy_assimilation(char    Ctype,
-                         double  MaxCarboxRate,
-                         double  MaxETransport,
-                         double  CO2Specificity,
-                         double *NscaleFactor,
-                         double  Tfoliage,
-                         double  SWdown,
-                         double *aPAR,
-                         double  elevation,
-                         double  Catm,
-                         double *CanopLayerBnd,
-                         double  LAItotal,
-                         char   *mode,
-                         double *rsLayer,
-                         double *rc,
-                         double *Ci,
-                         double *GPP,
-                         double *Rdark,
-                         double *Rphoto,
-                         double *Rmaint,
-                         double *Rgrowth,
-                         double *Raut,
-                         double *NPP)
+void
+canopy_assimilation(char    Ctype,
+                    double  MaxCarboxRate,
+                    double  MaxETransport,
+                    double  CO2Specificity,
+                    double *NscaleFactor,
+                    double  Tfoliage,
+                    double  SWdown,
+                    double *aPAR,
+                    double  elevation,
+                    double  Catm,
+                    double *CanopLayerBnd,
+                    double  LAItotal,
+                    char   *mode,
+                    double *rsLayer,
+                    double *rc,
+                    double *Ci,
+                    double *GPP,
+                    double *Rdark,
+                    double *Rphoto,
+                    double *Rmaint,
+                    double *Rgrowth,
+                    double *Raut,
+                    double *NPP)
 {
-  extern option_struct options;
-  double  h;
-  double  pz;
-  int     cidx;
-  double  dLAI;
-  double *CiLayer;
-  double  AgrossLayer;
-  double  RdarkLayer;
-  double  RphotoLayer;
-  double  gc;                  /* 1/rs */
+    extern option_struct options;
+    double               h;
+    double               pz;
+    int                  cidx;
+    double               dLAI;
+    double              *CiLayer;
+    double               AgrossLayer;
+    double               RdarkLayer;
+    double               RphotoLayer;
+    double               gc;   /* 1/rs */
 
-  /* calculate scale height based on average temperature in the column */
-  h  = 287/9.81 * ((Tfoliage + 273.15) + 0.5 * (double)elevation * T_LAPSE);
+    /* calculate scale height based on average temperature in the column */
+    h = 287 / 9.81 * ((Tfoliage + 273.15) + 0.5 * (double)elevation * T_LAPSE);
 
-  /* use hypsometric equation to calculate p_z, assume that virtual
-     temperature is equal air_temp */
-  pz = PS_PM * exp(-(double)elevation/h);
+    /* use hypsometric equation to calculate p_z, assume that virtual
+       temperature is equal air_temp */
+    pz = PS_PM * exp(-(double)elevation / h);
 
-  CiLayer = (double*)calloc(options.Ncanopy,sizeof(double));
+    CiLayer = (double*)calloc(options.Ncanopy, sizeof(double));
 
-  if (!strcasecmp(mode,"ci")) {
+    if (!strcasecmp(mode, "ci")) {
+        /* Assume a default leaf-internal CO2; compute assimilation, respiration, and stomatal resistance */
 
-    /* Assume a default leaf-internal CO2; compute assimilation, respiration, and stomatal resistance */
+        /* Default leaf-internal CO2 */
+        for (cidx = 0; cidx < options.Ncanopy; cidx++) {
+            if (Ctype == PHOTO_C3) {
+                CiLayer[cidx] = FCI1C3 * Catm;
+            }
+            else if (Ctype == PHOTO_C4) {
+                CiLayer[cidx] = FCI1C4 * Catm;
+            }
+        }
+        if (Ctype == PHOTO_C3) {
+            *Ci = FCI1C3 * Catm;
+        }
+        else if (Ctype == PHOTO_C4) {
+            *Ci = FCI1C4 * Catm;
+        }
 
-    /* Default leaf-internal CO2 */
-    for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-      if (Ctype == PHOTO_C3)
-        CiLayer[cidx] = FCI1C3 * Catm;
-      else if (Ctype == PHOTO_C4)
-        CiLayer[cidx] = FCI1C4 * Catm;
+        /* Sum over canopy layers */
+        *GPP = 0.0;
+        *Rdark = 0.0;
+        *Rphoto = 0.0;
+        gc = 0.0;
+        for (cidx = 0; cidx < options.Ncanopy; cidx++) {
+            photosynth(Ctype,
+                       MaxCarboxRate,
+                       MaxETransport,
+                       CO2Specificity,
+                       NscaleFactor[cidx],
+                       Tfoliage,
+                       SWdown / Epar, /* note: divide by Epar to convert from W/m2 to mol(photons)/m2s */
+                       aPAR[cidx],
+                       pz,
+                       Catm,
+                       mode,
+                       &(rsLayer[cidx]),
+                       &(CiLayer[cidx]),
+                       &RdarkLayer,
+                       &RphotoLayer,
+                       &AgrossLayer);
+
+            if (cidx > 0) {
+                dLAI = LAItotal *
+                       (CanopLayerBnd[cidx] - CanopLayerBnd[cidx - 1]);
+            }
+            else {
+                dLAI = LAItotal * CanopLayerBnd[cidx];
+            }
+
+            *GPP += AgrossLayer * dLAI;
+            *Rdark += RdarkLayer * dLAI;
+            *Rphoto += RphotoLayer * dLAI;
+            gc += (1 / rsLayer[cidx]) * dLAI;
+        }
+
+        if (gc < SMALL) {
+            gc = SMALL;
+        }
+        *rc = 1 / gc;
+        if (*rc > HUGE_RESIST) {
+            *rc = HUGE_RESIST;
+        }
     }
-    if (Ctype == PHOTO_C3)
-      *Ci = FCI1C3 * Catm;
-    else if (Ctype == PHOTO_C4)
-      *Ci = FCI1C4 * Catm;
+    else {
+        /* Stomatal resistance given; compute assimilation, respiration, and leaf-internal CO2 */
 
-    /* Sum over canopy layers */
-    *GPP    = 0.0;
-    *Rdark  = 0.0;
-    *Rphoto = 0.0;
-    gc      = 0.0;
-    for (cidx = 0; cidx < options.Ncanopy; cidx++) {
+        /* Sum over canopy layers */
+        *GPP = 0.0;
+        *Rdark = 0.0;
+        *Rphoto = 0.0;
+        *Ci = 0.0;
+        for (cidx = 0; cidx < options.Ncanopy; cidx++) {
+            photosynth(Ctype,
+                       MaxCarboxRate,
+                       MaxETransport,
+                       CO2Specificity,
+                       NscaleFactor[cidx],
+                       Tfoliage,
+                       SWdown / Epar,
+                       aPAR[cidx],
+                       pz,
+                       Catm,
+                       mode,
+                       &(rsLayer[cidx]),
+                       &(CiLayer[cidx]),
+                       &RdarkLayer,
+                       &RphotoLayer,
+                       &AgrossLayer);
 
-      photosynth(Ctype,
-                 MaxCarboxRate,
-                 MaxETransport,
-                 CO2Specificity,
-                 NscaleFactor[cidx],
-                 Tfoliage,
-                 SWdown/Epar, /* note: divide by Epar to convert from W/m2 to mol(photons)/m2s */
-                 aPAR[cidx],
-                 pz,
-                 Catm,
-                 mode,
-                 &(rsLayer[cidx]),
-                 &(CiLayer[cidx]),
-                 &RdarkLayer,
-                 &RphotoLayer,
-                 &AgrossLayer);
+            if (cidx > 0) {
+                dLAI = LAItotal *
+                       (CanopLayerBnd[cidx] - CanopLayerBnd[cidx - 1]);
+            }
+            else {
+                dLAI = LAItotal * CanopLayerBnd[cidx];
+            }
 
-      if (cidx > 0)
-        dLAI = LAItotal * (CanopLayerBnd[cidx] - CanopLayerBnd[cidx-1]);
-      else
-        dLAI = LAItotal * CanopLayerBnd[cidx];
-
-      *GPP    += AgrossLayer * dLAI;
-      *Rdark  += RdarkLayer * dLAI;
-      *Rphoto += RphotoLayer * dLAI;
-      gc      += (1/rsLayer[cidx]) * dLAI;
-
+            *GPP += AgrossLayer * dLAI;
+            *Rdark += RdarkLayer * dLAI;
+            *Rphoto += RphotoLayer * dLAI;
+            *Ci += CiLayer[cidx] * dLAI;
+        }
     }
 
-    if (gc < SMALL) gc = SMALL;
-    *rc = 1/gc;
-    if (*rc > HUGE_RESIST) *rc = HUGE_RESIST;
+    /* Compute whole-plant respiration terms and NPP */
+    *Rmaint = *Rdark / FRLeaf;
+    *Rgrowth = (FRGrowth / (1 + FRGrowth)) * ((*GPP) - (*Rmaint));
+// if (*Rgrowth < 0) *Rgrowth = 0;
+    *Raut = *Rmaint + *Rgrowth;
+    *NPP = *GPP - *Raut;
 
-  }
-  else {
-
-    /* Stomatal resistance given; compute assimilation, respiration, and leaf-internal CO2 */
-
-    /* Sum over canopy layers */
-    *GPP    = 0.0;
-    *Rdark  = 0.0;
-    *Rphoto = 0.0;
-    *Ci     = 0.0;
-    for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-
-      photosynth(Ctype,
-                 MaxCarboxRate,
-                 MaxETransport,
-                 CO2Specificity,
-                 NscaleFactor[cidx],
-                 Tfoliage,
-                 SWdown/Epar,
-                 aPAR[cidx],
-                 pz,
-                 Catm,
-                 mode,
-                 &(rsLayer[cidx]),
-                 &(CiLayer[cidx]),
-                 &RdarkLayer,
-                 &RphotoLayer,
-                 &AgrossLayer);
-
-      if (cidx > 0)
-        dLAI = LAItotal * (CanopLayerBnd[cidx] - CanopLayerBnd[cidx-1]);
-      else
-        dLAI = LAItotal * CanopLayerBnd[cidx];
-
-      *GPP    += AgrossLayer * dLAI;
-      *Rdark  += RdarkLayer * dLAI;
-      *Rphoto += RphotoLayer * dLAI;
-      *Ci     += CiLayer[cidx] * dLAI;
-
-    }
-
-  }
-
-  /* Compute whole-plant respiration terms and NPP */
-  *Rmaint = *Rdark/FRLeaf;
-  *Rgrowth = (FRGrowth/(1+FRGrowth))*((*GPP)-(*Rmaint));
-//  if (*Rgrowth < 0) *Rgrowth = 0;
-  *Raut = *Rmaint + *Rgrowth;
-  *NPP = *GPP - *Raut;
-
-  free((char*)CiLayer);
-
+    free((char*)CiLayer);
 }
-

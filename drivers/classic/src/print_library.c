@@ -10,10 +10,11 @@ print_all_vars(all_vars_struct *all)
 }
 
 void
-print_atmos_data(atmos_data_struct *atmos, size_t nr)
+print_atmos_data(atmos_data_struct *atmos,
+                 size_t             nr)
 {
     size_t i;
-    
+
     printf("atmos_data  :\n");
     printf("\tair_temp  :");
     for (i = 0; i <= nr; i++) {

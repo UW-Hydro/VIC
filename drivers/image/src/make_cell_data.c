@@ -31,7 +31,6 @@ make_cell_data(int veg_type_num,
         if (temp[i] == NULL) {
             nrerror("Memory allocation error in make_cell_data().");
         }
-
     }
     return temp;
 }

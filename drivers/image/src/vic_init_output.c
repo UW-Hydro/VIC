@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 #define ERR(e) {fprintf(stderr, "\nError(vic_init_output): %s\n", \
-                        nc_strerror(e));}
+                        nc_strerror(e)); }
 
 void
 vic_init_output(void)
@@ -29,16 +29,16 @@ vic_init_output(void)
     // initialize the output data structures
     for (i = 0; i < global_domain.ncells_global; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
-                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]), 
+                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  &dmy[current], -global_param.nrecs);
     }
-    
+
     // determine which variables will be written to the history file
     parse_output_info(filep.globalparam, out_data);
-    
+
     // open the netcdf history file
     initialize_history_file(&nc_hist_file);
-    
+
     // initialize netcdf info for output variables
     vic_nc_info(&nc_hist_file, out_data, nc_vars);
 }
@@ -146,14 +146,14 @@ initialize_history_file(nc_file_struct *nc)
         fprintf(stderr, "nc_def_dim veg_class\n");
         ERR(status);
     }
-    
+
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
                         &(nc->time_dimid));
     if (status != NC_NOERR) {
         fprintf(stderr, "nc_def_dim time\n");
         ERR(status);
     }
-    
+
 
     // leave define mode
     status = nc_enddef(nc->nc_id);

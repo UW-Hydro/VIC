@@ -2,8 +2,9 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-FILE *open_file(char string[],char type[])
-
+FILE *
+open_file(char string[],
+          char type[])
 /******************************************************************/
 /*  Open a file named by string and associate a stream with it.   */
 /*  Type has one of the associated values with it:                */
@@ -24,64 +25,69 @@ FILE *open_file(char string[],char type[])
 /*  Open_file returns a pointer to the file structure associated  */
 /*  with the stream.                                              */
 /******************************************************************/
+
 /* 30-Oct-03 Added message announcing the opening of files when type
-	     is "rb".						TJB
+             is "rb".						TJB
  ******************************************************************/
 
 {
+    FILE *stream;
+    char  zipname[MAXSTRING],
+          command[MAXSTRING],
+          jnkstr[MAXSTRING];
+    int   temp, headcnt, i;
 
-  FILE *stream;
-  char zipname[MAXSTRING],
-       command[MAXSTRING],
-       jnkstr[MAXSTRING];
-  int  temp, headcnt, i;
+    stream = fopen(string, type);
 
-  stream = fopen(string,type);
-
-  if (stream == NULL) {
-
-    /** Check if file is compressed **/
-    strcpy(zipname,string);
-    strcat(zipname,".gz");
-    stream = fopen(zipname,type);
     if (stream == NULL) {
-      fprintf(stderr,"\n Error opening \"%s\".",string);
-      fprintf(stderr,"\n");
-      nrerror("Unable to open File");
+        /** Check if file is compressed **/
+        strcpy(zipname, string);
+        strcat(zipname, ".gz");
+        stream = fopen(zipname, type);
+        if (stream == NULL) {
+            fprintf(stderr, "\n Error opening \"%s\".", string);
+            fprintf(stderr, "\n");
+            nrerror("Unable to open File");
+        }
+        fclose(stream);
+
+        /** uncompress and open zipped file **/
+        sprintf(command, "gzip -d %s", zipname);
+        system(command);
+        stream = fopen(string, type);
+        if (stream == NULL) {
+            fprintf(stderr, "\n Error opening \"%s\".", string);
+            fprintf(stderr, "\n");
+            nrerror("Unable to Open File");
+        }
     }
-    fclose(stream);
 
-    /** uncompress and open zipped file **/
-    sprintf(command,"gzip -d %s",zipname);
-    system(command);
-    stream = fopen(string,type);
-    if (stream == NULL) {
-      fprintf(stderr,"\n Error opening \"%s\".",string);
-      fprintf(stderr,"\n");
-      nrerror("Unable to Open File");
+    if (strcmp(type, "r") == 0) {
+        temp = fgetc(stream);
+        while (temp == 32) {
+            temp = fgetc(stream);
+        }
+        if (temp == 35) {
+            headcnt = 0;
+            while (temp == 35) {
+                fgets(jnkstr, MAXSTRING, stream);
+                temp = fgetc(stream);
+                while (temp == 32) {
+                    temp = fgetc(stream);
+                }
+                headcnt++;
+            }
+            rewind(stream);
+            for (i = 0; i < headcnt; i++) {
+                fgets(jnkstr, MAXSTRING, stream);
+            }
+        }
+        else {
+            rewind(stream);
+        }
     }
-  }
 
-  if(strcmp(type,"r") == 0) {
+    fflush(stderr);
 
-    temp=fgetc(stream);
-    while(temp==32) temp=fgetc(stream);
-    if(temp==35) {
-
-      headcnt = 0;
-      while(temp==35) {
-	fgets(jnkstr,MAXSTRING,stream);
-	temp=fgetc(stream);
-	while(temp==32) temp=fgetc(stream);
-        headcnt++;
-      }
-      rewind(stream);
-      for(i=0;i<headcnt;i++) fgets(jnkstr,MAXSTRING,stream);
-    }
-    else rewind(stream);
-  }
-
-  fflush(stderr);
-
-  return stream;
+    return stream;
 }

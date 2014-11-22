@@ -84,10 +84,10 @@ vic_write(void)
             dcount[j] = 1;
         }
         // The size of the last two dimensions are the grid size; files are
-        // written one slice at a time, so all counts are 1, except the last 
+        // written one slice at a time, so all counts are 1, except the last
         // two
-        for (j = ndims-2; j < ndims; j++) {
-            dcount[j] = nc_vars[k].nc_counts[j];   
+        for (j = ndims - 2; j < ndims; j++) {
+            dcount[j] = nc_vars[k].nc_counts[j];
         }
         dstart[0] = current;
         for (j = 0; j < out_data[0][k].nelem; j++) {
@@ -102,7 +102,7 @@ vic_write(void)
                                 dimids, ndims, nc_vars[k].nc_var_name,
                                 dstart, dcount, dvar);
             for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_hist_file.d_fillvalue;
+                dvar[idx[i]] = nc_hist_file.d_fillvalue;
             }
         }
 
@@ -113,7 +113,7 @@ vic_write(void)
             dcount[j] = -1;
         }
     }
-    
+
     // reset the agg data
     for (k = 0; k < N_OUTVAR_TYPES; k++) {
         for (j = 0; j < out_data[0][k].nelem; j++) {

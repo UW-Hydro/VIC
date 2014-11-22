@@ -28,17 +28,17 @@ put_nc_field_double(char   *nc_name,
 
     if (!(*open)) {
         // open the netcdf file
-        status = nc_open(nc_name, 
-                         NC_WRITE|NC_NOCLOBBER|NC_NETCDF4|NC_CLASSIC_MODEL,
+        status = nc_open(nc_name,
+                         NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
             ERR(status);
-        } 
+        }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
-            if (status != NC_NOERR) {
+        if (status != NC_NOERR) {
             ERR(status);
         }
     }
@@ -52,7 +52,7 @@ put_nc_field_double(char   *nc_name,
             ERR(status);
         }
         // define the variable
-        status = nc_def_var(*nc_id, var_name, NC_DOUBLE, ndims, dimids, 
+        status = nc_def_var(*nc_id, var_name, NC_DOUBLE, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
             ERR(status);
@@ -64,12 +64,13 @@ put_nc_field_double(char   *nc_name,
             fprintf(stderr, "nc_att_double %s\n", var_name);
             ERR(status);
         }
-        // leave define mode        
+        // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
             ERR(status);
         }
-    } else if (status != NC_NOERR) {
+    }
+    else if (status != NC_NOERR) {
         ERR(status);
     }
 
@@ -79,7 +80,7 @@ put_nc_field_double(char   *nc_name,
     }
 
     // keep the file open
-    
+
     return status;
 }
 
@@ -101,17 +102,17 @@ put_nc_field_int(char   *nc_name,
 
     if (!(*open)) {
         // open the netcdf file
-        status = nc_open(nc_name, 
-                         NC_WRITE|NC_NOCLOBBER|NC_NETCDF4|NC_CLASSIC_MODEL,
+        status = nc_open(nc_name,
+                         NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
             ERR(status);
-        } 
+        }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
-            if (status != NC_NOERR) {
+        if (status != NC_NOERR) {
             ERR(status);
         }
     }
@@ -125,7 +126,7 @@ put_nc_field_int(char   *nc_name,
             ERR(status);
         }
         // define the variable
-        status = nc_def_var(*nc_id, var_name, NC_INT, ndims, dimids, 
+        status = nc_def_var(*nc_id, var_name, NC_INT, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
             ERR(status);
@@ -137,12 +138,13 @@ put_nc_field_int(char   *nc_name,
             fprintf(stderr, "nc_att_int %s\n", var_name);
             ERR(status);
         }
-        // leave define mode        
+        // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
             ERR(status);
         }
-    } else if (status != NC_NOERR) {
+    }
+    else if (status != NC_NOERR) {
         ERR(status);
     }
 
@@ -152,6 +154,6 @@ put_nc_field_int(char   *nc_name,
     }
 
     // keep the file open
-    
+
     return status;
 }

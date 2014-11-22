@@ -2,7 +2,8 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-#define ERR(e) {fprintf(stderr, "\nError(vic_finalize): %s\n", nc_strerror(e)); }
+#define ERR(e) {fprintf(stderr, "\nError(vic_finalize): %s\n", nc_strerror(e)); \
+}
 
 void
 vic_finalize(void)
@@ -12,13 +13,14 @@ vic_finalize(void)
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern filep_struct        filep;
-    extern nc_file_struct      nc_hist_file;    
+    extern nc_file_struct      nc_hist_file;
     extern option_struct       options;
     extern out_data_struct   **out_data;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
+    extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
 
     size_t                     i;
@@ -27,7 +29,7 @@ vic_finalize(void)
 
     // close the global parameter file
     fclose(filep.globalparam);
-    
+
     // close the netcdf history file if it is still open
     if (nc_hist_file.open == true) {
         status = nc_close(nc_hist_file.nc_id);
@@ -49,10 +51,12 @@ vic_finalize(void)
             if (options.CARBON) {
                 free(veg_con[i][j].CanopLayerBnd);
             }
+            free_veg_hist(&(veg_hist[i][j]));
         }
         free(veg_con_map[i].vidx);
         free(veg_con_map[i].Cv);
         free(veg_con[i]);
+        free(veg_hist[i]);
         free(veg_lib[i]);
         free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
         free_out_data(&(out_data[i]));
@@ -61,6 +65,7 @@ vic_finalize(void)
     free(soil_con);
     free(veg_con_map);
     free(veg_con);
+    free(veg_hist);
     free(veg_lib);
     free(all_vars);
     free(out_data);

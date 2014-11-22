@@ -57,6 +57,7 @@ HDRS = ${VICPATH}/include/vic_def.h \
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
+	${DRIVERPATH}/src/alloc_veg_hist.o \
 	${DRIVERPATH}/src/calc_root_fraction.o \
 	${DRIVERPATH}/src/cmd_proc.o \
 	${DRIVERPATH}/src/display_current_settings.o \

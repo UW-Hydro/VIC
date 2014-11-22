@@ -21,6 +21,10 @@ initialize_veg(veg_var_struct **veg_var,
         for (j = 0; j < options.SNOW_BAND; j++) {
             veg_var[i][j].Wdew = 0.0;
             veg_var[i][j].throughfall = 0.0;
+            veg_var[i][j].LAI = 0.0;
+            veg_var[i][j].Wdmax = 0.0;
+            veg_var[i][j].vegcover = 0.0;
+            veg_var[i][j].albedo = 0.0;
         }
         if (options.CARBON) {
             for (j = 0; j < options.SNOW_BAND; j++) {

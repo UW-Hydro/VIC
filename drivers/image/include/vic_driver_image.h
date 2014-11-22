@@ -133,6 +133,7 @@ typedef struct {
 } veg_con_map_struct;
 
 void alloc_atmos(atmos_data_struct *atmos);
+void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p, double vp);
 double average(double *ar, size_t n);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
@@ -143,6 +144,7 @@ void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_atmos(atmos_data_struct *atmos);
 void free_dmy(dmy_struct **dmy);
 void free_out_data(out_data_struct **out_data);
+void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 size_t get_global_idx(domain_struct *domain, size_t i);
 global_param_struct get_global_param(filenames_struct *, FILE *);

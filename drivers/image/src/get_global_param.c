@@ -825,6 +825,15 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
+            // vegetation history not yet implemented in image mode
+            // TBD: feature in VIC 4.2 that has been ported to classic
+            // mode, but that does not exist in image mode (yet)
+            else if (strcasecmp("ALBEDO", optstr) == 0 ||
+                     strcasecmp("LAI_IN", optstr) == 0 ||
+                     strcasecmp("VEGCOVER", optstr) == 0) {
+                nrerror("Time-varying vegetation parameters not implemented "
+                        "in image mode\n");
+            }
 
             /***********************************
                Unrecognized Global Parameter Flag

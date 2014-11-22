@@ -14,11 +14,18 @@ vic_force(void)
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
+    extern veg_con_struct    **veg_con;
+    extern veg_con_map_struct *veg_con_map;
+    extern veg_hist_struct   **veg_hist;
+    extern veg_lib_struct    **veg_lib;
+
 
     double                     t_offset;
     float                     *fvar = NULL;
     size_t                     i;
     size_t                     j;
+    size_t                     v;
+    size_t                     vidx;
     size_t                    *idx = NULL;
     size_t                     d3count[3];
     size_t                     d3start[3];
@@ -185,6 +192,30 @@ vic_force(void)
 
     // TBD: coszen (used for some of the carbon functions), fdir (if needed)
     // Catm, fdir (not used as far as I can tell)
+
+    // Update the veg_hist structure with the current vegetation parameters.
+    // Currently only implemented for climatological values in image mode
+    for (i = 0; i < global_domain.ncells_global; i++) {
+        for (v = 0; v < options.NVEGTYPES; v++) {
+            vidx = veg_con_map[i].vidx[v];
+            if (vidx != -1) {
+                for (j = 0; j < NF; j++) {
+                    veg_hist[i][vidx].albedo[j] =
+                        veg_lib[i][v].albedo[dmy[current].month - 1];
+                    veg_hist[i][vidx].LAI[j] =
+                        veg_lib[i][v].LAI[dmy[current].month - 1];
+                    veg_hist[i][vidx].vegcover[j] =
+                        veg_lib[i][v].vegcover[dmy[current].month - 1];
+                }
+            }
+            // not the correct way to calculate average albedo, but leave
+            // for now
+            veg_hist[i][v].albedo[NR] = average(veg_hist[i][v].albedo, NF);
+            veg_hist[i][v].LAI[NR] = average(veg_hist[i][v].LAI, NF);
+            veg_hist[i][v].vegcover[NR] = average(veg_hist[i][v].vegcover, NF);
+        }
+    }
+
 
     // cleanup
     free(fvar);

@@ -15,6 +15,7 @@ vic_init(void)
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
+    extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
 
     bool                       found;
@@ -227,6 +228,15 @@ vic_init(void)
                                 d4start, d4count, dvar);
             for (i = 0; i < global_domain.ncells_global; i++) {
                 veg_lib[i][j].displacement[k] = (double) dvar[idx[i]];
+            }
+        }
+    }
+
+    // vegcover not implemented in image model
+    for (j = 0; j < options.NVEGTYPES; j++) {
+        for (k = 0; k < MONTHSPERYEAR; k++) {
+            for (i = 0; i < global_domain.ncells_global; i++) {
+                veg_lib[i][j].vegcover[k] = 1.0;
             }
         }
     }
@@ -618,7 +628,7 @@ vic_init(void)
             }
         }
     }
-    
+
     // read_snowband()
     if (options.SNOW_BAND == 1) {
         for (i = 0; i < global_domain.ncells_global; i++) {
@@ -700,7 +710,7 @@ vic_init(void)
             for (j = 0; j < options.SNOW_BAND; j++) {
                 // TBD: Ensure that Tlapse is implemented consistently
                 soil_con[i].Tfactor[j] = (soil_con[i].elevation -
-                                          soil_con[i].BandElev[j]) * T_lapse;
+                                          soil_con[i].BandElev[j]) * T_LAPSE;
             }
             // Pfactor: calculate Pfactor from the precipitation fraction read
             // from file
@@ -864,7 +874,7 @@ vic_init(void)
                     sprint_location(locstr, &(global_domain.locations[i]));
                     sprintf(errstr,
                             "Root zone depths must sum to a value greater "
-                            "than 0 (sum = %.2lf) - Type: %zd.\n%s", sum, j, 
+                            "than 0 (sum = %.2lf) - Type: %zd.\n%s", sum, j,
                             locstr);
                     nrerror(errstr);
                 }
@@ -913,63 +923,61 @@ vic_init(void)
                 }
             }
         }
-        
+
         // handle the vegetation for the treeline option. This is somewhat
         // confusingly handled in VIC. If I am not mistaken, in VIC classic
         // this is handled in the following way:
         //
         // The treeline option is only active if there is more than one snow
-        // band and options.COMPUTE_TREELINE is explicitly set in the global 
+        // band and options.COMPUTE_TREELINE is explicitly set in the global
         // file. If the treeline option is active, then there a few cases:
-        // 
+        //
         // 1. The grid cell contains one or more vegetation types that
-        // do not have an overstory (either bare soil or vegetation). Nothing 
+        // do not have an overstory (either bare soil or vegetation). Nothing
         // further needs to be done to the input. For the elevation bands above
-        // the treeline, the values from vegetation with an overstory are simply 
+        // the treeline, the values from vegetation with an overstory are simply
         // ignored and the understory and bare ground values are scaled so they
         // cover the entire band. This scaling is done in put_data()
         //
-        // 2. The grid cell contains only vegetation with an overstory. 
-        // In that case a small area of bare soil or vegetation without an 
+        // 2. The grid cell contains only vegetation with an overstory.
+        // In that case a small area of bare soil or vegetation without an
         // overstory must be created.  This will have almost no effect
         // on the results for most elevation bands, but above the treeline, the
-        // elevation band will consists entirely of bare soil or the understory 
-        // vegetation (because of the scaling in put_data(). There are two 
+        // elevation band will consists entirely of bare soil or the understory
+        // vegetation (because of the scaling in put_data(). There are two
         // cases:
         //
-        // 2.a. options.AboveTreelineVeg < 0. In that case a small amount of 
-        // bare soil is created (fraction is 0.001). 
+        // 2.a. options.AboveTreelineVeg < 0. In that case a small amount of
+        // bare soil is created (fraction is 0.001).
         //
-        // 2.b. options.AboveTreelineVeg > 0. In that case a small amount of 
-        // the new vegetation is created (fraction is 0.001). This vegetation 
+        // 2.b. options.AboveTreelineVeg > 0. In that case a small amount of
+        // the new vegetation is created (fraction is 0.001). This vegetation
         // should not have an overstory.
         //
-        // The tricky parts are: 
+        // The tricky parts are:
         //
-        // Ensure that the correct number of vegetation types are reflected 
+        // Ensure that the correct number of vegetation types are reflected
         // for each cell.
         //
-        // Ensure that bare soil remains the last vegetation type (the one with 
-        // the highest number). This will seem odd, but that is how it is 
+        // Ensure that bare soil remains the last vegetation type (the one with
+        // the highest number). This will seem odd, but that is how it is
         // handled within VIC.
         //
         // Only case 2 needs to be handled explicitly
-        
+
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
             !no_overstory && veg_con[i][0].Cv_sum == 1.) {
-            
             // Use bare soil above treeline
             if (options.AboveTreelineVeg < 0) {
                 for (j = 0; j < options.NVEGTYPES; j++) {
                     vidx = veg_con_map[i].vidx[j];
                     if (vidx != -1) {
-                        veg_con[i][vidx].Cv -= 
+                        veg_con[i][vidx].Cv -=
                             0.001 / veg_con[i][vidx].vegetat_type_num;
                     }
                 }
                 veg_con[i][0].Cv_sum -= 0.001;
             }
-            
             // Use defined vegetation type above treeline
             else {
                 for (j = 0; j < options.NVEGTYPES; j++) {
@@ -980,19 +988,19 @@ vic_init(void)
                         veg_con[i][vidx].vegetat_type_num += 1;
                     }
                 }
-                veg_con[i][options.NVEGTYPES-1].Cv = 0.001;
-                veg_con[i][options.NVEGTYPES-1].veg_class = 
+                veg_con[i][options.NVEGTYPES - 1].Cv = 0.001;
+                veg_con[i][options.NVEGTYPES - 1].veg_class =
                     options.AboveTreelineVeg;
-                veg_con[i][options.NVEGTYPES-1].Cv_sum = 
+                veg_con[i][options.NVEGTYPES - 1].Cv_sum =
                     veg_con[i][0].Cv_sum;
-                veg_con[i][options.NVEGTYPES-1].vegetat_type_num = 
+                veg_con[i][options.NVEGTYPES - 1].vegetat_type_num =
                     veg_con[i][0].vegetat_type_num;
                 // Since root zones are not defined they are copied from another
                 // vegetation type.
                 for (j = 0; j < options.ROOT_ZONES; j++) {
-                    veg_con[i][options.NVEGTYPES-1].zone_depth[j] =
+                    veg_con[i][options.NVEGTYPES - 1].zone_depth[j] =
                         veg_con[i][0].zone_depth[j];
-                    veg_con[i][options.NVEGTYPES-1].zone_fract[j] =
+                    veg_con[i][options.NVEGTYPES - 1].zone_fract[j] =
                         veg_con[i][0].zone_fract[j];
                 }
                 // redo the mapping to ensure that the veg type is active
@@ -1027,7 +1035,7 @@ vic_init(void)
                     nrerror(errstr);
                 }
                 // make sure it has no overstory
-                veg_class = veg_con[i][options.NVEGTYPES-1].veg_class;
+                veg_class = veg_con[i][options.NVEGTYPES - 1].veg_class;
                 if (veg_lib[i][veg_class].overstory) {
                     sprint_location(locstr, &(global_domain.locations[i]));
                     sprintf(errstr,
@@ -1038,9 +1046,8 @@ vic_init(void)
                     nrerror(errstr);
                 }
             }
-            
         }
-        
+
         // Bare soil is now read in as the "last" (highest index) vegetation
         // class
         // rescale vegetation classes to 1.0 if their sum is greater than 0.99
@@ -1048,7 +1055,7 @@ vic_init(void)
         // TBD: Need better check for equal to 1.
         if (veg_con[i][0].Cv_sum != 1.) {
             sprint_location(locstr, &(global_domain.locations[i]));
-            fprintf(stderr, 
+            fprintf(stderr,
                     "Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n%s",
                     veg_con[i][0].Cv_sum, i, locstr);
             for (j = 0; j < options.NVEGTYPES; j++) {
@@ -1096,4 +1103,3 @@ vic_init(void)
     free(dvar);
     free(idx);
 }
-

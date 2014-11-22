@@ -15,6 +15,7 @@ vic_alloc(void)
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
+    extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
 
     double                    *dvar = NULL;
@@ -50,6 +51,14 @@ vic_alloc(void)
             malloc((size_t) global_domain.ncells_global *
                    sizeof(atmos_data_struct));
     if (atmos == NULL) {
+        nrerror("Memory allocation error in vic_alloc().");
+    }
+
+    // allocate memory for veg_hist structure
+    veg_hist = (veg_hist_struct **)
+               malloc((size_t) global_domain.ncells_global *
+                      sizeof(veg_hist_struct *));
+    if (veg_hist == NULL) {
         nrerror("Memory allocation error in vic_alloc().");
     }
 
@@ -204,6 +213,13 @@ vic_alloc(void)
         all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
 
         out_data[i] = create_output_list();
+
+        // allocate memory for veg_hist
+        veg_hist[i] = (veg_hist_struct *) calloc(veg_con_map[i].nv_active,
+                                                 sizeof(veg_hist_struct));
+        for (j = 0; j < veg_con_map[i].nv_active; j++) {
+            alloc_veg_hist(&(veg_hist[i][j]));
+        }
     }
 
     // cleanup

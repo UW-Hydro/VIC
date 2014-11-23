@@ -553,7 +553,7 @@ snow_intercept(double             Dt,
             *IntRain = MaxWaterInt;
         }
     }
-    else { /* else (RefreezeEnergy <= 0.0) */
+    else {
           /* Reset *TempIntStorage to 0.0 when energy balance is negative */
 
         *TempIntStorage = 0.0;
@@ -572,11 +572,6 @@ snow_intercept(double             Dt,
             /* All of the water in the surface layer has been frozen. */
 
             *IntSnow += *IntRain;
-
-            /* Added on April 8 as a test */
-            /*       RefreezeEnergy += *IntRain*Lf; */
-            /*       *VaporMassFlux = MAX(*VaporMassFlux,  */
-            /*                            RefreezeEnergy/(Ls * RHO_W)); */
 
             /* Energy released by freezing of intercepted water is added to the
                MeltEnergy */
@@ -814,9 +809,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     printf("*Wcr = %f\n", *Wcr);
     printf("*Wpwp = %f\n", *Wpwp);
     printf("*depth = %f\n", *depth);
-#if SPATIAL_FRoST
     printf(" = %f\n", *frost_fract);
-#endif
 
     /* Atmopheric Condition and Forcings */
     printf("AirDens = %f\n", AirDens);

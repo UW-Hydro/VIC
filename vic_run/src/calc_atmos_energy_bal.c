@@ -138,40 +138,6 @@ calc_atmos_energy_bal(double  InOverSensible,
     (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub),
                                       NetRadiation, Ra, Tair, atmos_density,
                                       InSensible, SensibleHeat);
-
-    /*****************************
-       Find Canopy Vapor Pressure
-    *****************************/
-
-    /* set initial bounds for root brent **/
-/*   VP_lower = (vp) - CANOPY_VP; */
-/*   VP_upper = (vp) + CANOPY_VP; */
-
-/*   gamma = svp_slope(Tair); */
-
-    // iterate for canopy vapor pressure
-/*   (*VPcanopy) = root_brent(VP_lower, VP_upper, ErrorString, func_atmos_moist_bal,  */
-/*                         InLatent, Lv, Ra, atmos_density, gamma, vp,  */
-/*                         &AtmosLatent); */
-
-/*   if ( (*VPcanopy) <= -998 )  */
-    // handle error flag from root brent
-/*     (*Error) = error_calc_atmos_moist_bal((*VPcanopy), InLatent,  */
-/*                                        Lv, Ra, atmos_density, gamma, vp,  */
-/*                                        &AtmosLatent, ErrorString); */
-
-    // compute varaibles based on final vapor pressure
-/*   (*Error) = solve_atmos_moist_bal( (*VPcanopy), InLatent,  */
-/*                                  Lv, Ra, atmos_density, gamma, vp,  */
-/*                                  &AtmosLatent); */
-
-    // compute vapor pressure deficit in canopy
-/*   (*VPDcanopy) = vpd + (*VPcanopy - vp); */
-
-
-    // Bi-pass above computations
-    // (*VPcanopy) = vp;
-
     return(Tcanopy);
 }
 

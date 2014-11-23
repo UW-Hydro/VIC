@@ -249,7 +249,7 @@ solve_lake(double           snowfall,
             sw_ice = shortin * (1. - albi);
             lake_energy->AlbedoLake = (fracprv) * albi + (1. - fracprv) * albw;
         }
-        else { /* lake->fraci = 0 */
+        else {
             sw_ice = 0.0;
             lake_energy->AlbedoLake = albw;
         }
@@ -412,7 +412,6 @@ solve_lake(double           snowfall,
             lake_energy->NetShortAtmos += fracprv * sw_ice;
             lake_energy->deltaH += fracprv * temphi;
             lake_energy->grnd_flux += -1. * (energy_out_bottom_ice * fracprv);
-// lake_energy->refreeze_energy += energy_ice_melt_bot;
             lake_energy->refreeze_energy += energy_ice_melt_bot * fracprv;
             lake_energy->Tsurf += fracprv * lake_snow->surf_temp;
         }
@@ -798,7 +797,6 @@ colavg(double *finaltemp,
     double temp;
     float  z;
 
-    // fprintf(stdout, "%d\t",numnod);
     for (j = 0; j < numnod; j++) {
 /* --------------------------------------------------------------------
  * Calculate the densities of the ice and water fractions.
@@ -823,10 +821,6 @@ colavg(double *finaltemp,
  * temperatures.
  * -------------------------------------------------------------------- */
 
-        /*       temp=((1.-lakeprv)*T[j]*z*water_densityw*sh_water+
-             lakeprv*Ti[j]*z*water_densityi*sh_ice)/
-             ((z*water_densityw*sh_water+z*water_densityi*sh_ice)*0.5);
-         */
         temp = ((1. - lakeprv) * T[j] * z * water_densityw +
                 lakeprv * Ti[j] * z * water_densityi) /
                ((1. -
@@ -1120,7 +1114,6 @@ iceform(double *qfusion,
         *qfusion =
             (*new_ice_water_eq * RHO_W /
              RHOICE) / (dt * SECPHOUR * surface[0] * (1.0 - fracprv));                    /*W/m2*/
-        // *deltaCC=(sum - *new_ice_water_eq*RHO_W/RHOICE)/(dt*SECPHOUR*surface[0]*(1.0-fracprv)); /*W/m2*/
     }
     else {
         *new_ice_water_eq = 0.0;
@@ -1624,9 +1617,6 @@ temp_area(double  sw_visible,
         top = (surfdz + (k - 1) * dz);
         bot = (surfdz + (k) * dz);
 
-        // T1 = (sw_visible*(exp(-lamwsw*top)) +
-        // sw_nir*(exp(-lamwlw*top)))*surface_1/surface_avg;
-
         T1 =
             (sw_visible *
              (surface_1 * exp(-lamwsw * top) - surface_2 * exp(-lamwsw * bot)) +
@@ -1967,8 +1957,6 @@ energycalc(double *finaltemp,
     *sumjoule = 0.0;
 
     for (k = 0; k < numnod; k++) {
-        // density = calc_density(finaltemp[k]);
-
         if (k == 0) {
             energy =
                 (finaltemp[k] +

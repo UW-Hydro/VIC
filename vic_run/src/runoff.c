@@ -298,7 +298,7 @@ runoff(cell_data_struct  *cell,
 
             /** Set Layer Maximum Moisture Content **/
             max_moist[lindex] = soil_con->max_moist[lindex];
-        } // initialize variables for each layer
+        }
 
         /******************************************************
            Runoff Based on Soil Moisture Level of Upper Layers

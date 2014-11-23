@@ -47,7 +47,6 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
             errf += fabs(fvec[i]);
         }
         if (errf <= TOLF) {
-            // fprintf(stderr, "Number of Newton-Raphson trials (F criterium with F error = %g): %d\n", errf, k);
             return (Error);
         }
 
@@ -82,7 +81,6 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
 
         // stop if TOLX is satisfied
         if (errx <= TOLX) {
-            // fprintf(stderr, "Number of Newton-Raphson trials (x criterium with F error = %g): %d\n", errf, k);
             return (Error);
         }
     }
@@ -193,7 +191,6 @@ tridiag(double   a[],
         r[j] = r[j] - r[j + 1] * factor;
 
         factor = b[j];
-        // b[j]=1.0;
         r[j] = r[j] / factor;
     }
 }

@@ -96,12 +96,9 @@ void compute_soil_layer_thermal_properties(layer_data_struct *, double *,
                                            double *, double *, double *,
                                            double *, double *, double *,
                                            double *, int);
-// driver: void   compute_treeline(atmos_data_struct *, dmy_struct *, double, double *, char *);
 double compute_zwt(soil_con_struct *, int, double);
 void correct_precip(double *, double, double, double, double);
-// driver: out_data_struct *create_output_list();
 double darkinhib(double);
-// driver: void   display_current_settings(int, filenames_struct *, global_param_struct *);
 int distribute_node_moisture_properties(double *, double *, double *, double *,
                                         double *, double *, double *, double *,
                                         double *, double *, double *, double *,
@@ -242,7 +239,6 @@ double soil_thermal_eqn(double, va_list);
 double solve_atmos_energy_bal(double Tcanopy, ...);
 double solve_atmos_moist_bal(double, ...);
 double solve_canopy_energy_bal(double Tfoliage, ...);
-// lake: solve_lake
 int solve_lake(double, double, double, double, double, double, double, double,
                double, double, lake_var_struct *, lake_con_struct,
                soil_con_struct, int, int, double, dmy_struct, double);

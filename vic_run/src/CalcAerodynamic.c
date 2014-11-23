@@ -113,14 +113,10 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
         U[0] = log((2. + Z0_Lower) / Z0_Lower) / log(
             (ref_height[0] - d_Lower) / Z0_Lower);
 
-        /****** DHSVM ******
-           Ra[0] = log((2. + Z0_Lower)/Z0_Lower) * log((ref_height[0] - d_Lower)/Z0_Lower)
-                /K2;
-        ***** Old VIC *****/
+        /* Old VIC, may not match DHSVM */
         Ra[0] = log((2. + (1.0 / 0.63 - 1.0) * d_Lower) / Z0_Lower) *
                 log((2. +
                      (1.0 / 0.63 - 1.0) * d_Lower) / (0.1 * Z0_Lower)) / K2;
-        /******************/
 
         /* Copy bare parameters into canopy top parameters */
         U[1] = U[0];
@@ -174,16 +170,11 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
         Ut = Uh * exp(n * (Zt / Height - 1.));
 
         /* resistance at the lower boundary */
-
-
-        /***** Old VIC *****/
         U[0] = log((2. + Z0_Upper) / Z0_Upper) / log(
             (ref_height[0] - d_Upper) / Z0_Upper);
         Ra[0] = log((2. + (1.0 / 0.63 - 1.0) * d_Upper) / Z0_Upper) *
                 log((2. +
                      (1.0 / 0.63 - 1.0) * d_Upper) / (0.1 * Z0_Upper)) / K2;
-        /******************/
-
 
         /* Snow */
 

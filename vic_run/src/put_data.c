@@ -1160,9 +1160,6 @@ collect_eb_terms(energy_bal_struct energy,
     /** record heat of fusion **/
     out_data[OUT_FUSION].data[0] -= energy.fusion * AreaFactor;
 
-///** record energy balance error **/
-// out_data[OUT_ENERGY_ERROR].data[0] += energy.error * AreaFactor;
-
     /** record radiative effective temperature [K],
         emissivities set = 1.0  **/
     out_data[OUT_RAD_TEMP].data[0] +=

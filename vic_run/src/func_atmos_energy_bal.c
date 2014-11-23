@@ -33,7 +33,6 @@ func_atmos_energy_bal(double  Tcanopy,
     (*SensibleHeat) = atmos_density * Cp * (Tair - Tcanopy) / Ra;
 
     // compute energy balance error
-    // Error = NetRadiation + LatentHeat + (*SensibleHeat);
     Error = InSensible - (*SensibleHeat);
 
     return (Error);

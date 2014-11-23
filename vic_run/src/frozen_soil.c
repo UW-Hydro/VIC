@@ -185,8 +185,6 @@ solve_T_profile(double *T,
     int                  j;
 
     if (FIRST_SOLN[0]) {
-        // fprintf(stderr,"*************EXPLICIT SOLUTION***********\n");
-
         if (EXP_TRANS) {
             Bexp = logf(Dp + 1.) / (double)(Nnodes - 1);
         }
@@ -196,27 +194,16 @@ solve_T_profile(double *T,
             for (j = 1; j < Nnodes - 1; j++) {
                 A[j] = Cs[j] * alpha[j - 1] * alpha[j - 1];
                 B[j] = (kappa[j + 1] - kappa[j - 1]) * deltat;
-
-                // C[j] = 2*deltat*kappa[j]*powf(alpha[j-1],2.)/(powf(gamma[j-1],2.)+powf(beta[j-1],2.)); // old formulation
-                // D[j] = 2*deltat*kappa[j]*(gamma[j-1]-beta[j-1])/(powf(gamma[j-1],2.)+powf(beta[j-1],2.));  // old formulation
-
-                C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1]; // new formulation
-                D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1]; // new formulation
-
+                C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1];
+                D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1];
                 E[j] = ice_density * Lf * alpha[j - 1] * alpha[j - 1];
             }
             if (NOFLUX) {
                 j = Nnodes - 1;
                 A[j] = Cs[j] * alpha[j - 1] * alpha[j - 1];
                 B[j] = (kappa[j] - kappa[j - 1]) * deltat;
-
-
-                // C[j] = 2*deltat*kappa[j]*powf(alpha[j-1],2.)/(powf(gamma[j-1],2.)+powf(beta[j-1],2.)); // old formulation
-                // D[j] = 2*deltat*kappa[j]*(gamma[j-1]-beta[j-1])/(powf(gamma[j-1],2.)+powf(beta[j-1],2.));  // old formulation
-
-                C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1]; // new formulation
-                D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1]; // new formulation
-
+                C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1];
+                D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1];
                 E[j] = ice_density * Lf * alpha[j - 1] * alpha[j - 1];
             }
         }
@@ -976,13 +963,6 @@ fda_heat_eqn(double T_2[],
                 // flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
                 // that node get any colder.  This only seems to happen in the first and
                 // second near-surface nodes.
-// if (i<n-1) {
-// if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
-// if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
-// flux_term1 = 0;
-// }
-// }
-// }
                 flux_term = flux_term1 + flux_term2;
                 phase_term = ice_density * Lf *
                              (ice_new[i + 1] - ice[i + 1]) / deltat;
@@ -1124,12 +1104,6 @@ fda_heat_eqn(double T_2[],
                 // flux_term1 exceeds flux_term2 in absolute magnitude) - therefore, don't let
                 // that node get any colder.  This only seems to happen in the first and
                 // second near-surface nodes.
-// if (i<n-1) {
-// if(fabs(DT[i])>5. && (T_2[i]<T_2[i+1] && T_2[i]<T_up[i])){//cold nose
-// if((flux_term1<0 && flux_term2>0) && fabs(flux_term1)>fabs(flux_term2)){
-// flux_term1 = 0;
-// }
-// }
                 flux_term = flux_term1 + flux_term2;
                 phase_term = ice_density * Lf *
                              (ice_new[i + 1] - ice[i + 1]) / deltat;

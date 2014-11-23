@@ -89,8 +89,7 @@ soil_thermal_eqn(double  T,
         value = -A *
                 (T -
                  T0) + B *
-                (TL - TU) + C * (TL - T) - D * (T - TU) + E * (ice - ice0); // new formulation
-        // value = -A*(T-T0) + B*(TL-TU) + C*(TL+TU-2*T) - D*(TL-TU) + E*(ice-ice0);  //old formulation
+                (TL - TU) + C * (TL - T) - D * (T - TU) + E * (ice - ice0);
 
         // inelegant fix for "cold nose" problem - when a very cold node skates off to
         // much colder and breaks the second law of thermodynamics (because

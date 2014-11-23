@@ -112,7 +112,6 @@ arno_evap(layer_data_struct *layer,
     }
     else {
         ratio = 1.0 - (moist) / (max_moist);
-        /*****if(ratio < SMALL && ratio > -SMALL) ratio = 0.;*****/
         if (ratio > 1.0) {
             printf("\n  ERROR: SOIL RATIO GREATER THAN 1.0\n");
             printf("moisture %f   max_moisture %f -> ratio = %f\n", moist,

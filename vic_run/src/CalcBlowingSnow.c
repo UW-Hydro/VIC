@@ -140,7 +140,6 @@ CalcBlowingSnow(double  Dt,
     /* Wind speed at 2 m above snow was passed to this function. */
 
     wind10 = Wind * log(10. / ZO) / log((2 + ZO) / ZO);
-    // fprintf(stderr,"wind=%f, Uo=%f\n",Wind, Uo);
 
     /* Check for bare soil case. */
     if (iveg == Nveg) {
@@ -149,8 +148,6 @@ CalcBlowingSnow(double  Dt,
     }
     // sigma_w/uo:
     ratio = (2.44 - (0.43) * lag_one) * sigma_slope;
-    // sigma_w = wind10/(.69+(1/ratio));
-    // Uo = sigma_w/ratio;
 
     sigma_w = wind10 * ratio;
     Uo = wind10;
@@ -240,11 +237,8 @@ CalcBlowingSnow(double  Dt,
                     Uveg = U10;
                 }
 
-                // fprintf(stderr, "Uveg = %f, U10 = %f\n",Uveg, U10);
 
                 prob_occurence = get_prob(Tair, Age, SurfaceLiquidWater, Uveg);
-
-                // printf("prob=%f\n",prob_occurence);
 
                 /*******************************************************************/
                 /* Calculate threshold shear stress. Send 0 for constant or  */
@@ -604,7 +598,6 @@ sub_with_height(double z,
     Nu = 1.79 + 0.606 * pow(Re, 0.5);
 
     // LCB: found error in rh calc, 1/20/04, check impact
-    // sigz = ((EactAir/es) - 1.) * (1 + .027*log(z) - .027*log(Zrh));
     sigz = ((EactAir / es) - 1.) * (1.019 + .027 * log(z));
 
     dMdt = 2 * PI * Rmean * sigz * Nu / F;
@@ -729,9 +722,6 @@ shear_stress(double  U10,
     }
 
     if (fl > 0.0 && fh > 0.0) {
-        // fprintf(stderr, "No solution possible that exceeds utshear.\n");
-        // fprintf(stderr, "utshear=%f, u10=%f\n",utshear, U10);
-
         *Zo_salt = ZO;
         *ushear = von_K * U10 / log(10. / ZO);
     }
@@ -778,7 +768,6 @@ CalcSubFlux(double  EactAir,
             undersat_2 =
                 ((EactAir / es) - 1.) * (1. - .027 * log(Zrh) + 0.027 * log(2));
         }
-        // fprintf(stderr,"RH=%f\n",EactAir/es);
         SubFlux = b * undersat_2 * pow(U10, 5.) / F;
     }
     else {
@@ -795,9 +784,6 @@ CalcSubFlux(double  EactAir,
         if (FETCH) {
             Qsalt *= (1. + (500. / (3. * fe)) * (exp(-3. * fe / 500.) - 1.));
         }
-
-        // Liston and Sturm (1998)
-        // hsalt = 1.6 * ushear * ushear / ( 2. * G_STD );
 
         // Pomeroy and Male (1992)
         hsalt = 0.08436 * pow(ushear, 1.27);

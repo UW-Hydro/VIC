@@ -84,43 +84,4 @@ StabilityCorrection(double Z,
     }
 
     return Correction;
-
-    /*  double Eta;*/			/* intermediate product */
-
-    /* calculate the effect of atmospheric stability on aerodynamic resistance
-       using the method of Choudhury et al., Agric. For. Met., 37, 75-88,
-       1986 */
-
-    /* Eq. A4, Choudhury et al [1986] */
-
-    /*    Eta = 5.0 * (Z - d) * G * (TSurf - Tair)/
-          ((Tair + 273.15) * Wind*Wind);
-
-          if (TSurf < Tair) { */
-
-    /* stable conditions */
-
-    /* If Eta smaller or equal than -1, the correction increases again
-       because of the quadratic form of the equation.  However, the
-       correction should monnotonically decrease for increasing
-       differences between the surface and air temperature.  Therefore a
-       lower bound of -.8 is imposed on Eta (The lower bound of Eta is
-       not put at -1, because this would result in no sensible heat
-       exchange at all at the soil surface, which is unrealistic.  A lower
-       bound of -.8 results in a correction of 25, i.e. an increase in the
-       resistance of 25 times) */
-
-    /*    if (Eta < -0.8)
-          Eta = -0.8;
-          Correction = (1 + Eta)*(1 + Eta);
-          }
-
-          else */
-
-    /* unstable conditions */
-
-    /*      Correction = pow((double) (1 + Eta), (double) 0.75);
-            }*/
-
-    /*   return Correction; */
 }

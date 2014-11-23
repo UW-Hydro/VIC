@@ -199,7 +199,6 @@ canopy_assimilation(char    Ctype,
     /* Compute whole-plant respiration terms and NPP */
     *Rmaint = *Rdark / FRLeaf;
     *Rgrowth = (FRGrowth / (1 + FRGrowth)) * ((*GPP) - (*Rmaint));
-// if (*Rgrowth < 0) *Rgrowth = 0;
     *Raut = *Rmaint + *Rgrowth;
     *NPP = *GPP - *Raut;
 

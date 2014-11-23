@@ -17,14 +17,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****
-  #include <stdarg.h>
-  #include "settings.h"
-  #include "brent.h"
-  #include "massenergy.h"
-  #include "DHSVMerror.h"
-*****/
-
 #define MAXTRIES 5
 #define MAXITER 1000
 #define MACHEPS 3e-8

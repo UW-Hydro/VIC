@@ -231,7 +231,6 @@ ice_melt(double            z2,
 
     /* Distribute fresh snowfall */
     /* Surface layer was not already full, snow will exceed space.  What happens to snow if SurfaceSwq = MAX_SURFACE_SWE?*/
-    // if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq) && (MAX_SURFACE_SWE - SurfaceSwq) > SMALL) {
     if (SnowFall > (MAX_SURFACE_SWE - SurfaceSwq)) {
         DeltaPackSwq = SurfaceSwq + SnowFall - MAX_SURFACE_SWE;
         if (DeltaPackSwq > SurfaceSwq) {
@@ -322,7 +321,6 @@ ice_melt(double            z2,
     save_refreeze_energy[0] = RefreezeEnergy;
 
     /* Check that snow swq exceeds minimum value for model stability */
-    // if ( !UNSTABLE_SNOW ) {
 
     /* If Qnet == 0.0, then set the surface temperature to 0.0 */
     if (Qnet == 0.0) {
@@ -481,7 +479,6 @@ ice_melt(double            z2,
             }
         }
         else {
-// fprintf(stderr,"Snow/Ice layer is too thin to solve separately \n");
             snow->surf_temp = 999;
         }
         if (snow->surf_temp > -998 && snow->surf_temp < 999) {
@@ -665,19 +662,7 @@ ice_melt(double            z2,
     if (lake->ice_water_eq <= 0.0) {
         lake->ice_water_eq = 0.0;
     }
-    if (options.SPATIAL_SNOW) {
-        /*  snow->coverage = calc_snow_coverage(&snow->store_snow,
-           soil_con->max_snow_distrib_slope,
-           old_coverage, snow->swq,
-           old_swq, snow->depth, old_depth,
-           melt + snow->vapor_flux,
-           &snow->max_snow_depth, snowfall,
-           &snow->store_swq,
-           &snow->snow_distrib_slope,
-           &snow->store_coverage);
-         */
-    }
-    else {
+    if (!options.SPATIAL_SNOW) {
         if (snow->swq > 0) {
             snow->coverage = 1.;
         }
@@ -690,8 +675,6 @@ ice_melt(double            z2,
     MassBalanceError = (InitialSwq - snow->swq) + (InitialIce - LakeIce) +
                        (RainFall +
                         SnowFall) - IceMelt - melt[0] + snow->vapor_flux;
-    // if(fabs(MassBalanceError) > SMALL)
-    // fprintf(stderr, "MassBalanceError = %g %e %e %e, %e, \n", MassBalanceError, InitialIce - LakeIce, IceMelt, InitialSwq, snow->swq);
 
     melt[0] *= 1000.; /* converts back to mm */
     snow->mass_error = MassBalanceError;

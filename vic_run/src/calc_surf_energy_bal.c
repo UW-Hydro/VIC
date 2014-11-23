@@ -710,9 +710,6 @@ calc_surf_energy_bal(double             Le,
     /****************************************
        Store understory energy balance terms
     ****************************************/
-
-// energy->sensible + energy->latent + energy->latent_sub + NetShortBare + NetLongBare + energy->grnd_flux + energy->deltaH + energy->fusion + energy->snow_flux
-
     energy->NetShortGrnd = NetShortGrnd;
     if (INCLUDE_SNOW) {
         energy->NetLongUnder = NetLongBare + TmpNetLongSnow;
@@ -724,12 +721,6 @@ calc_surf_energy_bal(double             Le,
     else {
         energy->NetLongUnder = NetLongBare + NetLongSnow;
         energy->NetShortUnder = NetShortBare + NetShortSnow + NetShortGrnd;
-/*     energy->latent        = (SnowLatent + (1. - snow_coverage)  */
-/*                           * energy->latent); */
-/*     energy->latent_sub    = (SnowLatentSub  */
-/*                           + (1. - snow_coverage) * energy->latent_sub); */
-/*     energy->sensible      = (SnowSensible  */
-/*                           + (1. - snow_coverage) * energy->sensible); */
         energy->latent = (SnowLatent + energy->latent);
         energy->latent_sub = (SnowLatentSub + energy->latent_sub);
         energy->sensible = (SnowSensible + energy->sensible);
@@ -754,7 +745,6 @@ calc_surf_energy_bal(double             Le,
             // if vapor_flux exceeds snow pack, we not only need to
             // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
             snow->blowing_flux *= -(snow->swq / snow->vapor_flux);
-// snow->surface_flux *= -( snow->swq / snow->vapor_flux );
             snow->vapor_flux = -(snow->swq);
             snow->surface_flux = snow->vapor_flux - snow->blowing_flux;
         }

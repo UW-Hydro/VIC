@@ -129,7 +129,8 @@ calc_snow_coverage(int    *store_snow,
                 coverage = old_coverage;
             }
 
-/** NOTE if (swq - old_swq) > 0, but there was no snowfall, there was rain so the coverage fraction should not change */
+            /** NOTE if (swq - old_swq) > 0, but there was no snowfall,
+              there was rain so the coverage fraction should not change */
         }
         else {
             coverage = old_coverage;

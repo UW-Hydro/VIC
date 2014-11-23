@@ -203,7 +203,6 @@ func_surf_energy_bal(double  Ts,
     double             melt_energy; // energy consumed in reducing the snowpack coverage
     double             snow_coverage; // snowpack coverage fraction
     double             snow_density;
-/*   double snow_depth; */
     double             snow_swq;
     double             snow_water;
 

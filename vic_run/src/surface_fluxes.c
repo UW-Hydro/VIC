@@ -651,7 +651,6 @@ surface_fluxes(char                 overstory,
                                        soil_con,
                                        &(iter_snow_veg_var));
 
-// iter_snow_energy.sensible + iter_snow_energy.latent + iter_snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + iter_snow_energy.advection - iter_snow_energy.deltaCC + iter_snow_energy.refreeze_energy + iter_snow_energy.advected_sensible ) * step_snow.coverage
                 if (step_melt == ERROR) {
                     return (ERROR);
                 }
@@ -1116,8 +1115,6 @@ surface_fluxes(char                 overstory,
     energy->Tfoliage = snow_energy.Tfoliage;
     energy->Tfoliage_fbflag = snow_energy.Tfoliage_fbflag;
     energy->Tfoliage_fbcount = snow_energy.Tfoliage_fbcount;
-
-// energy->AtmosSensible + energy->AtmosLatent + energy->AtmosLatentSub + energy->NetShortAtmos + energy->NetLongAtmos + energy->grnd_flux + energy->deltaH + energy->fusion + energy->advection - energy->deltaCC + energy->refreeze_energy + energy->advected_sensible
 
     /**********************************************************
        Store vegetation variable sums for sub-model time steps

@@ -96,7 +96,6 @@ snow_density(snow_data_struct *snow,
     }
 
     /* Estimate average snowpack temperature */
-// Tavg = (snow->surf_temp+Tgrnd)/2.0+KELVIN;
     Tavg = snow->surf_temp + KELVIN;
 
     if (options.SNOW_DENSITY == DENS_SNTHRM) {
@@ -139,9 +138,9 @@ snow_density(snow_data_struct *snow,
 
         /* Compaction due to overburden */
         // swq in this context is the amount of snow whose weight contributes to compaction
-// f = sswq/80. * exp(-sswq/100.);
         f = SNDENS_F;
-        swq = new_snow / 1000. + f * sswq; /* Currently VIC essentially has only one layer of snow, so compaction due to overburden will come mostly from new snowfall. */
+        /* Currently VIC essentially has only one layer of snow, so compaction due to overburden will come mostly from new snowfall. */
+        swq = new_snow / 1000. + f * sswq;
 
         if (new_snow > 0.0) {
             Ps = 0.5 * G * RHO_W * swq;

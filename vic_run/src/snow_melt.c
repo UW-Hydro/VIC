@@ -268,7 +268,6 @@ snow_melt(double            Le,
                                      &snow->surface_flux);
 
     /* Check that snow swq exceeds minimum value for model stability */
-// if ( SurfaceSwq > MIN_SWQ_EB_THRES && !UNSTABLE_SNOW ) {
     if (!UNSTABLE_SNOW) {
         /* If Qnet == 0.0, then set the surface temperature to 0.0 */
         if (Qnet == 0.0) {
@@ -298,7 +297,6 @@ snow_melt(double            Le,
             if (snow->surf_water < -(snow->vapor_flux)) {
                 // if vapor_flux exceeds surf_water, we not only need to
                 // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-// snow->surface_flux *= -( snow->surf_water / snow->vapor_flux );
                 snow->blowing_flux *= -(snow->surf_water / snow->vapor_flux);
                 snow->vapor_flux = -(snow->surf_water);
                 snow->surface_flux = -(snow->surf_water) - snow->blowing_flux;
@@ -401,7 +399,6 @@ snow_melt(double            Le,
             }
             else {
                 /* Thin snowpack must be solved in conjunction with ground surface energy balance */
-// fprintf(stderr,"Snowpack is too thin to solve separately; it will be solved in conjunction with ground surface energy balance\n");
                 snow->surf_temp = 999;
             }
             if (snow->surf_temp > -998 && snow->surf_temp < 999) {
@@ -442,7 +439,6 @@ snow_melt(double            Le,
                 if (SurfaceSwq < -(snow->vapor_flux)) {
                     // if vapor_flux exceeds SurfaceSwq, we not only need to
                     // re-scale vapor_flux, we need to re-scale surface_flux and blowing_flux
-// snow->surface_flux *= -( SurfaceSwq / snow->vapor_flux );
                     snow->blowing_flux *= -(SurfaceSwq / snow->vapor_flux);
                     snow->vapor_flux = -SurfaceSwq;
                     snow->surface_flux = -SurfaceSwq - snow->blowing_flux;
@@ -458,19 +454,6 @@ snow_melt(double            Le,
     }
     else {
         /* Snow solution is unstable as independent layer */
-/*     RefreezeEnergy     = -Ice * Lf * RHO_W / delta_t; */
-/*     melt_energy        = -RefreezeEnergy; */
-/*     SnowMelt           = Ice; */
-/*     snow->surf_water  += Ice; */
-/*     SurfaceSwq         = 0.0; */
-/*     snow->surf_temp    = 0.0; */
-/*     PackSwq            = 0.0; */
-/*     snow->pack_temp    = 0.0; */
-/*     Ice                = 0.0; */
-/*     latent_heat        = 0.0; */
-/*     latent_heat_sub    = 0.0; */
-/*     sensible_heat      = 0.0; */
-/*     snow->vapor_flux   = 0.0; */
         snow->surf_temp = 999;
     }
 
@@ -582,8 +565,6 @@ snow_melt(double            Le,
 
     MassBalanceError = (InitialSwq - snow->swq) + (RainFall + SnowFall) -
                        melt[0] + snow->vapor_flux;
-
-/*  printf("%d %d %g\n", y, x, MassBalanceError);*/
 
     melt[0] *= 1000.;               /* converts back to mm */
     snow->mass_error = MassBalanceError;

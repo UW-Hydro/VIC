@@ -381,13 +381,9 @@ distribute_node_moisture_properties(double *moist_node,
 
 
         // Check that node moisture does not exceed maximum node moisture
-// if (moist_node[nidx]-max_moist_node[nidx] > 0.0001) {
-// fprintf( stderr, "Node soil moisture, %f, exceeds maximum node soil moisture, %f.\n",
-// moist_node[nidx], max_moist_node[nidx] );
-// return( ERROR );
-// }
         if (moist_node[nidx] - max_moist_node[nidx] > 0) {
-            moist_node[nidx] = max_moist_node[nidx];                                        // HACK!!!!!!!!!!!
+            // HACK!!!!!!!!!!!
+            moist_node[nidx] = max_moist_node[nidx];
         }
         if (T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
             /* compute moisture and ice contents */

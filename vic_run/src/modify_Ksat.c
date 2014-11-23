@@ -80,6 +80,5 @@ modify_Ksat(double Temp)
         Factor = 2.;
     }
 
-    /*return (Factor);*/
     return (1.0);
 }

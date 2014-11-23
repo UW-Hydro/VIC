@@ -189,7 +189,6 @@ water_energy_balance(int     numnod,
         return(0);
     }
     else {
-        // fprintf(stderr, "Lake temperatures in open water fraction failed to converge; temporary work around used.\n");
         Tskin = T[0] + KELVIN;
         Tcutk = Tcutoff + KELVIN;
         latsens(Tskin, Tcutk, 0.0, Tair, wind, pressure, vp, air_density,
@@ -211,7 +210,6 @@ water_energy_balance(int     numnod,
         }
 
         *deltaH = 0.0;
-        // return (ERROR);
         return(0);
     }
 }

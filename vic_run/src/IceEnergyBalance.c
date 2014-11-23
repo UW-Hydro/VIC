@@ -153,7 +153,6 @@ IceEnergyBalance(double  TSurf,
 
     /* Calculate active temp for energy balance as average of old and new  */
 
-/*   TMean = 0.5 * (OldTSurf + TSurf); */
     TMean = TSurf;
     Density = RHO_W;
 
@@ -170,7 +169,6 @@ IceEnergyBalance(double  TSurf,
     if (Wind > 0.0) {
         *Ra_used = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0);
     }
-    /* *Ra_used = Ra / StabilityCorrection(2.f, 0.f, TMean, Tair, Wind, Z0);*/
     else {
         *Ra_used = HUGE_RESIST;
     }
@@ -201,12 +199,10 @@ IceEnergyBalance(double  TSurf,
     *vapor_flux = VaporMassFlux * Dt * SECPHOUR / Density;
     *surface_flux = SurfaceMassFlux * Dt * SECPHOUR / Density;
 
-    /* Calculate advected heat flux from rain
-       WORK IN PROGRESS:  Should the following read (Tair - Tsurf) ?? */
+    /* Calculate advected heat flux from rain */
 
     // Temporary fix for lake model.
     *AdvectedEnergy = (CH_WATER * Tair * Rain) / (Dt * SECPHOUR);
-    // *AdvectedEnergy = 0.0;
 
     /* Calculate change in cold content */
     /* No change in cold content in lake model */

@@ -75,7 +75,8 @@ INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include
 LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -g -Wall -Wno-unused 
+CFLAGS  =  ${INCLUDES} -g -Wall
+#-Wno-unused
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information

@@ -33,7 +33,6 @@ soil_thermal_eqn(double  T,
     double bubble;
     double expt;
     double ice0;
-    double gamma;
     double A;
     double B;
     double C;
@@ -53,7 +52,6 @@ soil_thermal_eqn(double  T,
     bubble = (double) va_arg(ap, double);
     expt = (double) va_arg(ap, double);
     ice0 = (double) va_arg(ap, double);
-    gamma = (double) va_arg(ap, double);
     A = (double) va_arg(ap, double);
     B = (double) va_arg(ap, double);
     C = (double) va_arg(ap, double);

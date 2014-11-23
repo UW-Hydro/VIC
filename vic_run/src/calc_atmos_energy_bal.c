@@ -108,10 +108,8 @@ calc_atmos_energy_bal(double  InOverSensible,
 
         // iterate for canopy air temperature
         Tcanopy = root_brent(T_lower, T_upper, ErrorString,
-                             func_atmos_energy_bal,
-                             (*LatentHeat) + (*LatentHeatSub),
-                             NetRadiation, Ra, Tair, atmos_density, InSensible,
-                             SensibleHeat);
+                             func_atmos_energy_bal, Ra, Tair, atmos_density,
+                             InSensible, SensibleHeat);
 
         if (Tcanopy <= -998) {
             if (options.TFALLBACK) {

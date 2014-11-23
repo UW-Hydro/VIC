@@ -26,7 +26,6 @@
    Required     :
     double delta_t               - Model timestep (secs)
     double z2           - Reference height (m)
-    double displacement          - Displacement height (m)
     double aero_resist           - Aerodynamic resistance (uncorrected for
                                    stability) (s/m)
     double *aero_resist_used     - Aerodynamic resistance (corrected for
@@ -124,7 +123,6 @@ snow_melt(double            Le,
           double            coverage,      // snowpack cover fraction
           double            delta_t,       // time step in secs
           double            density,       // atmospheric density
-          double            displacement,       // surface displacement
           double            grnd_flux,       // ground heat flux
           double            LongSnowIn,       // incoming longwave radiation
           double            pressure,
@@ -254,8 +252,7 @@ snow_melt(double            Le,
     /* Calculate the surface energy balance for snow_temp = 0.0 */
 
     Qnet = CalcSnowPackEnergyBalance((double)0.0, delta_t, aero_resist,
-                                     aero_resist_used,
-                                     displacement, z2, Z0,
+                                     aero_resist_used, z2, Z0,
                                      density, vp, LongSnowIn, Le, pressure,
                                      RainFall, NetShortSnow, vpd,
                                      wind, (*OldTSurf), coverage,
@@ -351,8 +348,7 @@ snow_melt(double            Le,
                     (double)(snow->surf_temp - SNOW_DT),
                     (double)(snow->surf_temp + SNOW_DT),
                     ErrorString, SnowPackEnergyBalance,
-                    delta_t, aero_resist, aero_resist_used,
-                    displacement, z2, Z0,
+                    delta_t, aero_resist, aero_resist_used, z2, Z0,
                     density, vp, LongSnowIn, Le, pressure,
                     RainFall, NetShortSnow, vpd,
                     wind, (*OldTSurf), coverage,
@@ -378,8 +374,7 @@ snow_melt(double            Le,
                                                            iveg, band,
                                                            delta_t, aero_resist,
                                                            aero_resist_used,
-                                                           displacement, z2, Z0,
-                                                           density, vp,
+                                                           z2, Z0, density, vp,
                                                            LongSnowIn, Le,
                                                            pressure,
                                                            RainFall,
@@ -412,8 +407,7 @@ snow_melt(double            Le,
             if (snow->surf_temp > -998 && snow->surf_temp < 999) {
                 Qnet = CalcSnowPackEnergyBalance(snow->surf_temp,
                                                  delta_t, aero_resist,
-                                                 aero_resist_used,
-                                                 displacement, z2, Z0,
+                                                 aero_resist_used, z2, Z0,
                                                  density, vp, LongSnowIn, Le,
                                                  pressure,
                                                  RainFall, NetShortSnow, vpd,
@@ -668,7 +662,6 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
 
     /* Vegetation Parameters */
     double Ra;                    /* Aerodynamic resistance (s/m) */
-    double Displacement;          /* Displacement height (m) */
     double Z;                     /* Reference height (m) */
     double Z0;                    /* surface roughness height (m) */
 
@@ -732,7 +725,6 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
 
     /* Vegetation Parameters */
     Ra = (double) va_arg(ap, double);
-    Displacement = (double) va_arg(ap, double);
     Z = (double) va_arg(ap, double);
     Z0 = (double) va_arg(ap, double);
 
@@ -786,7 +778,6 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
 
     /* land surface parameters */
     fprintf(stderr, "Ra = %f\n", Ra);
-    fprintf(stderr, "Displacement = %f\n", Displacement);
     fprintf(stderr, "Z = %f\n", Z);
     fprintf(stderr, "Z0 = %f\n", Z0);
 

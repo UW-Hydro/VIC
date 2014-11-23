@@ -95,7 +95,6 @@ SnowPackEnergyBalance(double  TSurf,
     double *Ra_used;              /* Aerodynamic resistance (s/m) after stability correction */
 
     /* Vegetation Parameters */
-    double  Displacement;         /* Displacement height (m) */
     double  Z;                    /* Reference height (m) */
     double *Z0;                    /* surface roughness height (m) */
 
@@ -180,7 +179,6 @@ SnowPackEnergyBalance(double  TSurf,
     Ra_used = (double *) va_arg(ap, double *);
 
     /* Vegetation Parameters */
-    Displacement = (double) va_arg(ap, double);
     Z = (double) va_arg(ap, double);
     Z0 = (double *) va_arg(ap, double *);
 

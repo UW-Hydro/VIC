@@ -28,9 +28,7 @@ func_canopy_energy_bal(double  Tfoliage,
     extern option_struct options;
 
     /* General Model Parameters */
-    int                  band;
     int                  month;
-    int                  rec;
 
     double               delta_t;
     double               elevation;
@@ -59,8 +57,6 @@ func_canopy_energy_bal(double  Tfoliage,
     double              *Wind;
 
     /* Vegetation Terms */
-    int                  UnderStory;
-    int                  iveg;
     int                  veg_class;
 
     double              *displacement;
@@ -104,9 +100,7 @@ func_canopy_energy_bal(double  Tfoliage,
     /** Read variables from variable length argument list **/
 
     /* General Model Parameters */
-    band = (int) va_arg(ap, int);
     month = (int) va_arg(ap, int);
-    rec = (int) va_arg(ap, int);
 
     delta_t = (double) va_arg(ap, double);
     elevation = (double) va_arg(ap, double);
@@ -135,8 +129,6 @@ func_canopy_energy_bal(double  Tfoliage,
     Wind = (double *) va_arg(ap, double *);
 
     /* Vegetation Terms */
-    UnderStory = (int) va_arg(ap, int);
-    iveg = (int) va_arg(ap, int);
     veg_class = (int) va_arg(ap, int);
 
     displacement = (double *) va_arg(ap, double *);

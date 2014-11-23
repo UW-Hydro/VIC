@@ -4,7 +4,7 @@
 
 // global variables
 
-char *version = "5.0 beta 2014-Sep-29";
+char *version = "5.0 beta 2014-Nov-22";
 
 int   flag;
 int   NR;       /* array index for atmos struct that indicates

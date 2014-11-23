@@ -398,10 +398,8 @@ calc_surf_energy_bal(double             Le,
         }
 
         Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
-                           rec, nrecs, dmy->month, VEG, veg_class, iveg,
-                           delta_t,
-                           Cs1, Cs2, D1, D2,
-                           T1_old, T2, Ts_old, energy->T, bubble, dp,
+                           rec, dmy->month, VEG, veg_class, delta_t, Cs1, Cs2,
+                           D1, D2, T1_old, T2, Ts_old, energy->T, bubble, dp,
                            expt, ice0, kappa1, kappa2,
                            max_moist, moist, root, CanopLayerBnd,
                            UnderStory, overstory, NetShortBare, NetShortGrnd,
@@ -412,9 +410,8 @@ calc_surf_energy_bal(double             Le,
                            atmos_shortwave, atmos_Catm, dryFrac,
                            &Wdew, displacement, aero_resist, aero_resist_used,
                            rainfall, ref_height, roughness, wind, Le,
-                           energy->advection, OldTSurf, snow->pack_temp,
-                           Tsnow_surf, kappa_snow, melt_energy,
-                           snow_coverage,
+                           energy->advection, OldTSurf, Tsnow_surf, kappa_snow,
+                           melt_energy, snow_coverage,
                            snow->density, snow->swq, snow->surf_water,
                            &energy->deltaCC, &energy->refreeze_energy,
                            &snow->vapor_flux, &snow->blowing_flux,
@@ -1219,6 +1216,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(stderr, "*resid_moist = %f\n", *resid_moist);
 
     fprintf(stderr, "*root = %f\n", *root);
+    fprintf(stderr, "*CanopLayerBnd = %f\n", *CanopLayerBnd);
 
     /* meteorological forcing terms */
     fprintf(stderr, "UnderStory = %i\n", UnderStory);
@@ -1302,13 +1300,14 @@ error_print_surf_energy_bal(double  Ts,
 
     if (!options.QUICK_FLUX) {
         fprintf(stderr,
-                "Node\tT\tTnew\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tmax_moist\tice\n");
+                "Node\tT\tTnew\tTold\talpha\tbeta\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tgamma\tmax_moist\tice\n");
         for (i = 0; i < Nnodes; i++) {
             fprintf(stderr,
-                    "%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
-                    i, T_node[i], Tnew_node[i], Zsum_node[i], kappa_node[i],
-                    Cs_node[i], moist_node[i], bubble_node[i], expt_node[i],
-                    max_moist_node[i], ice_node[i]);
+                    "%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
+                    i, T_node[i], Told_node[i], alpha[i], beta[i], Tnew_node[i],
+                    Zsum_node[i], kappa_node[i], Cs_node[i], moist_node[i],
+                    bubble_node[i], expt_node[i], gamma[i], max_moist_node[i],
+                    ice_node[i]);
         }
     }
 

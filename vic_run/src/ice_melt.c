@@ -308,17 +308,13 @@ ice_melt(double            z2,
     /* Calculate the surface energy balance for snow_temp = 0.0 */
 
     Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
-                                    aero_resist_used, z2, displacement, Z0,
-                                    wind, net_short,
+                                    aero_resist_used, z2, Z0, wind, net_short,
                                     longwave, density, Le, air_temp,
                                     pressure * 1000., vpd * 1000., vp * 1000.,
-                                    RainFall, SurfaceSwq,
-                                    snow->surf_water, OldTSurf, &RefreezeEnergy,
+                                    RainFall, snow->surf_water, &RefreezeEnergy,
                                     &vapor_flux, &blowing_flux, &surface_flux,
-                                    &advection, deltaCC, Tcutoff, avgcond,
-                                    SWconducted, snow->swq * RHO_W / RHOSNOW,
-                                    RHOSNOW, surf_atten, &SnowFlux,
-                                    &latent_heat, &latent_heat_sub,
+                                    &advection, Tcutoff, avgcond, SWconducted,
+                                    &SnowFlux, &latent_heat, &latent_heat_sub,
                                     &sensible_heat, &LWnet);
 
     snow->vapor_flux = vapor_flux;

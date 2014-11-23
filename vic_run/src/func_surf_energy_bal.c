@@ -118,11 +118,9 @@ func_surf_energy_bal(double  Ts,
     /* general model terms */
     int                i;
     int                rec;
-    int                nrecs;
     int                month;
     int                VEG;
     int                veg_class;
-    int                iveg;
     int                Error;
 
     // error counting variables for IMPLICIT option
@@ -146,7 +144,6 @@ func_surf_energy_bal(double  Ts,
     double             ice0;
     double             kappa1;
     double             kappa2;
-    double             max_infil;
     double             max_moist;
     double             moist;
 
@@ -201,7 +198,6 @@ func_surf_energy_bal(double  Ts,
     /* snowpack terms */
     double             Advection;
     double             OldTSurf;
-    double             TPack;
     double             Tsnow_surf;
     double             kappa_snow; // snow conductance / depth
     double             melt_energy; // energy consumed in reducing the snowpack coverage
@@ -299,11 +295,9 @@ func_surf_energy_bal(double  Ts,
 
     /* general model terms */
     rec = (int) va_arg(ap, int);
-    nrecs = (int) va_arg(ap, int);
     month = (int) va_arg(ap, int);
     VEG = (int) va_arg(ap, int);
     veg_class = (int) va_arg(ap, int);
-    iveg = (int) va_arg(ap, int);
     delta_t = (double) va_arg(ap, double);
 
     /* soil layer terms */
@@ -362,7 +356,6 @@ func_surf_energy_bal(double  Ts,
     /* snowpack terms */
     Advection = (double) va_arg(ap, double);
     OldTSurf = (double) va_arg(ap, double);
-    TPack = (double) va_arg(ap, double);
     Tsnow_surf = (double) va_arg(ap, double);
     kappa_snow = (double) va_arg(ap, double);
     melt_energy = (double) va_arg(ap, double);
@@ -424,7 +417,6 @@ func_surf_energy_bal(double  Ts,
 
     /* take additional variables from soil_con structure */
     b_infilt = soil_con->b_infilt;
-    max_infil = soil_con->max_infil;
     Wmax = soil_con->max_moist;
     Wcr = soil_con->Wcr;
     Wpwp = soil_con->Wpwp;

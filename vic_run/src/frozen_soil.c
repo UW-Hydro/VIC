@@ -337,7 +337,7 @@ solve_T_profile_implicit(double *T,                               // update
         n = Nnodes - 1;
     }
 
-    fda_heat_eqn(&T[1], res, n, 1, deltat, FS_ACTIVE, NOFLUX, EXP_TRANS, T0,
+    fda_heat_eqn(&T[1], res, n, 1, deltat, NOFLUX, EXP_TRANS, T0,
                  moist, ice, kappa, Cs, max_moist, bubble, expt,
                  alpha, beta, gamma, Zsum, Dp, bulk_dens_min, soil_dens_min,
                  quartz, bulk_density, soil_density, organic, depth,
@@ -499,9 +499,7 @@ calc_soil_thermal_fluxes(int     Nnodes,
                 T[j] = root_brent(T0[j] - (SOIL_DT), T0[j] + (SOIL_DT),
                                   ErrorString, soil_thermal_eqn,
                                   T[j + 1], T[j - 1], T0[j], moist[j],
-                                  max_moist[j],
-                                  bubble[j], expt[j],
-                                  ice[j], gamma[j - 1],
+                                  max_moist[j], bubble[j], expt[j], ice[j],
                                   A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
                 if (T[j] <= -998) {
                     if (options.TFALLBACK) {
@@ -568,7 +566,6 @@ calc_soil_thermal_fluxes(int     Nnodes,
                                   max_moist[Nnodes - 1],
                                   bubble[j], expt[Nnodes - 1],
                                   ice[Nnodes - 1],
-                                  gamma[Nnodes - 2],
                                   A[j], B[j], C[j], D[j], E[j],
                                   EXP_TRANS, j);
                 if (T[j] <= -998) {
@@ -761,7 +758,6 @@ fda_heat_eqn(double T_2[],
     **********************************************************************/
 
     static double  deltat;
-    static int     FS_ACTIVE;
     static int     NOFLUX;
     static int     EXP_TRANS;
     static double *T0;
@@ -809,7 +805,6 @@ fda_heat_eqn(double T_2[],
     if (init == 1) {
         va_start(arg_addr, init);
         deltat = va_arg(arg_addr, double);
-        FS_ACTIVE = va_arg(arg_addr, int);
         NOFLUX = va_arg(arg_addr, int);
         EXP_TRANS = va_arg(arg_addr, int);
         T0 = va_arg(arg_addr, double *);

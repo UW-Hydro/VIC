@@ -15,7 +15,7 @@ vic_init(void)
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
-    extern veg_hist_struct   **veg_hist;
+    // extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
 
     bool                       found;

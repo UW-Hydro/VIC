@@ -228,7 +228,7 @@ int snow_intercept(double, double, double, double, double, double, double,
                    int, int, int, int, double *, double *, atmos_data_struct *,
                    layer_data_struct *, soil_con_struct *, veg_var_struct *);
 int snow_melt(double, double, double, double, double *, double, double *,
-              double, double, double, double, double, double, double, double,
+              double, double, double, double, double, double, double,
               double, double, double, double, double, double, double *,
               double *, double *, double *, double *, double *, double *,
               double *, double *, double *, double *, double *, int, int, int,

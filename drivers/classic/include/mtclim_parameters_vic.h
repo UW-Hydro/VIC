@@ -2,7 +2,7 @@
   Changes for the VIC implementation are preceded by the comment * start
   vic_change * and followed by the comment * end vic_change * */
 
-/* 
+/*
 mtclim_parameters_vic.h
 model parameters for MTCLIM 4.3
 
@@ -23,7 +23,7 @@ Sat Aug 21 16:58:43 1999
   2011-Nov-04 Updated to MTCLIM 4.3				TJB
 
 */
-  
+
 #ifndef MTCLIM_PARAMETERS_VIC_H
 #define MTCLIM_PARAMETERS_VIC_H
 
@@ -31,7 +31,7 @@ Sat Aug 21 16:58:43 1999
 #define TDAYCOEF     0.45  /* (dim) daylight air temperature coefficient (dim) */
 
 /* parameters for the snowpack algorithm */
-#define SNOW_TCRIT   -6.0  /* (deg C) critical temperature for snowmelt */   
+#define SNOW_TCRIT   -6.0  /* (deg C) critical temperature for snowmelt */
 #define SNOW_TRATE  0.042  /* (cm/degC/day) snowmelt rate */
 
 /* parameters for the radiation algorithm */
@@ -45,6 +45,6 @@ Sat Aug 21 16:58:43 1999
 #define DIF_ALB       0.6  /* (dim) diffuse albedo for horizon correction */
 #define SC_INT       1.32  /* (MJ/m2/day) snow correction intercept */
 #define SC_SLOPE    0.096  /* (MJ/m2/day/cm) snow correction slope */
-  
+
 #endif
 

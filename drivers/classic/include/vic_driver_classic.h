@@ -96,7 +96,7 @@ void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **,
                        out_data_struct *);
 void print_all_vars(all_vars_struct *all);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
-void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost, 
+void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
                      size_t npet);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -106,7 +106,7 @@ void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
-void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts, 
+void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
                     size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
 void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_option(option_struct *option);
@@ -115,12 +115,12 @@ void print_out_data_file(out_data_file_struct *outf);
 void print_param_set(param_set_struct *param_set);
 void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
-void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes, 
+void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
                     size_t nfrost, size_t nbands, size_t nzwt);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
-void print_veg_var(veg_var_struct *vvar, size_t ncanopy);                              
+void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **, double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
 void read_initial_model_state(FILE *, all_vars_struct *,

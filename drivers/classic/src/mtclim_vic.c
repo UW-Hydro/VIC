@@ -1125,7 +1125,6 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         for (i = 0; i < ndays; i++) {
             /* calculate saturated VP at tday */
             /* start vic_change */
-            /* pvs = 610.7 * exp(17.38 * data->s_tday[i]/(239.0+data->s_tday[i])); */
             pvs = svp(data->s_tday[i]);
             /* end vic_change */
             vpd = pvs - pva[i];
@@ -1301,7 +1300,6 @@ compute_srad_humidity_onetime(int                   ndays,
         tdew[i] = tdewk - KELVIN;
 
         /* start vic_change */
-        /* pva[i] = 610.7 * exp(17.38 * tdew[i] / (239.0 + tdew[i])); */
         pva[i] = svp(tdew[i]);
         /* end vic_change */
     }
@@ -1391,9 +1389,7 @@ calc_pet(double rad,
        Meteorol. Mag., 114:49-56.
      */
     /* start vic_change */
-    /* pvs1 = 610.7 * exp(17.38 * t1 / (239.0 + t1)); */
     pvs1 = svp(t1);
-    /* pvs2 = 610.7 * exp(17.38 * t2 / (239.0 + t2)); */
     pvs2 = svp(t2);
     /* end vic_change */
 

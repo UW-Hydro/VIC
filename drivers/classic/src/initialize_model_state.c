@@ -495,8 +495,6 @@ initialize_model_state(all_vars_struct     *all_vars,
                                     (soil_con->Zsum_node[index] -
                                      soil_con->Zsum_node[index - 1]) / 2.;
                             }
-// energy[veg][band].T[index] = exp_interp(soil_con->Zsum_node[index],0.,soil_con[0].dp,
-// surf_temp,soil_con[0].avg_temp);
                             energy[veg][band].T[index] = soil_con->avg_temp;
                         }
                         // bottom node

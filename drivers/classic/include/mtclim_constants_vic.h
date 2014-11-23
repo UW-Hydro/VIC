@@ -2,14 +2,14 @@
   Changes for the VIC implementation are preceded by the comment * start
   vic_change * and followed by the comment * end vic_change * */
 
-/* 
+/*
 mtclim_constants_vic.h
 constants typedefs, and function prototypes for MTCLIM 4.3
 
 Peter Thornton
 NTSG, School of Forestry
 University of Montana
-5/10/98 
+5/10/98
 
 (dim) stands for dimensionless values
 
@@ -42,9 +42,9 @@ Sat Aug 21 16:58:43 1999
 #define MA       28.9644e-3      /* (kg mol-1) molecular weight of air */
 #define MW       18.0148e-3      /* (kg mol-1) molecular weight of water */
 #define R        8.3143          /* (m3 Pa mol-1 K-1) gas law constant */
-#define G_STD    9.80665         /* (m s-2) standard gravitational accel. */ 
+#define G_STD    9.80665         /* (m s-2) standard gravitational accel. */
 #define P_STD    101325.0        /* (Pa) standard pressure at 0.0 m elevation */
-#define T_STD    288.15          /* (K) standard temp at 0.0 m elevation  */ 
+#define T_STD    288.15          /* (K) standard temp at 0.0 m elevation  */
 #define CP       1010.0          /* (J kg-1 K-1) specific heat of air */
 #define LR_STD   0.0065          /* (-K m-1) standard temperature lapse rate */
 /* start vic_change */
@@ -54,7 +54,7 @@ Sat Aug 21 16:58:43 1999
 /* end vic_change */
 
 /****************************
- **                         ** 
+ **                         **
  **  STRUCTURE DEFINITIONS  **
  **                         **
  ****************************/
@@ -113,17 +113,22 @@ typedef struct
  **    FUNCTION PROTOTYPES      **
  **                             **
  ********************************/
-int calc_tair(const control_struct *ctrl, const parameter_struct *p, 
+int calc_tair(const control_struct *ctrl, const parameter_struct *p,
 	      data_struct *data);
-int calc_prcp(const control_struct *ctrl, const parameter_struct *p, 
+int calc_prcp(const control_struct *ctrl, const parameter_struct *p,
 	      data_struct *data);
 /* start vic_change */
 int calc_srad_humidity_iterative(const control_struct *ctrl,
 				 const parameter_struct *p, data_struct *data,
 				 double **tiny_radfract);
-int snowpack(const control_struct *ctrl, const parameter_struct *p, 
+int snowpack(const control_struct *ctrl, const parameter_struct *p,
 	      data_struct *data);
-void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl, data_struct *data, double *tdew, double *pva, double *ttmax0, double *flat_potrad, double *slope_potrad, double sky_prop, double *daylength, double *pet, double *parray, double pa, double *dtr);
+void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl,
+                                   data_struct *data, double *tdew, double *pva,
+                                   double *ttmax0, double *flat_potrad,
+                                   double *slope_potrad, double sky_prop,
+                                   double *daylength, double *pet, double *parray,
+                                   double pa, double *dtr);
 /* end vic_change */
 int data_alloc(const control_struct *ctrl, data_struct *data);
 int data_free(const control_struct *ctrl, data_struct *data);

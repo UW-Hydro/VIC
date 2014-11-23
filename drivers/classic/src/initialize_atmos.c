@@ -251,9 +251,6 @@ initialize_atmos(atmos_data_struct    *atmos,
             "Input meteorological forcing files must contain either: a. Daily TMAX and TMIN (maximum and minimum air temperature) or b. sub-daily AIR_TEMP (air temperature); check input files\n");
     }
 
-// if ( !param_set.TYPE[WIND].SUPPLIED && !(param_set.TYPE[WIND_N].SUPPLIED && param_set.TYPE[WIND_E].SUPPLIED) )
-// nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
-
     /* Assign N_ELEM for veg-dependent forcings */
     param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
     param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;

@@ -751,12 +751,10 @@ get_global_param(filenames_struct *names,
                         "\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  FROM_VEGLIB\".\n");
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-// nrerror("Please replace \"GLOBAL_LAI  TRUE\" with the following in your global parameter file:\n\"VEGPARAM_LAI  TRUE\"\n\"LAI_SRC  FROM_VEGPARAM\"");
                     options.VEGPARAM_LAI = TRUE;
                     options.LAI_SRC = FROM_VEGPARAM;
                 }
                 else {
-// nrerror("Please replace \"GLOBAL_LAI  FALSE\" with the following in your global parameter file:\n\"LAI_SRC  FROM_VEGLIB\"");
                     options.LAI_SRC = FROM_VEGLIB;
                 }
             }

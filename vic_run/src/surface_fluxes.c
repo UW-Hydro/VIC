@@ -144,11 +144,7 @@ surface_fluxes(char                 overstory,
 {
     extern veg_lib_struct *vic_run_veg_lib;
     extern option_struct   options;
-    double                 total_store_moist[3];
-    double                 step_store_moist[3];
     int                    MAX_ITER_GRND_CANOPY;
-    int                    BISECT_OVER;
-    int                    BISECT_UNDER;
     int                    ErrorFlag;
     int                    INCLUDE_SNOW = FALSE;
     int                    UNSTABLE_CNT;
@@ -163,7 +159,6 @@ surface_fluxes(char                 overstory,
     int                    over_iter;
     int                    under_iter;
     int                    p, q;
-    double                 Evap;
     double                 Ls;
     double                 LongUnderIn; // inmoing LW to ground surface
     double                 LongUnderOut; // outgoing LW from ground surface
@@ -182,14 +177,10 @@ surface_fluxes(char                 overstory,
     double                 delta_coverage; // change in snow cover fraction
     double                 delta_snow_heat; // change in snowpack heat storage
     double                 last_Tcanopy;
-    double                 last_Tgrnd;
-    double                 last_Tsurf;
-    double                 last_latent_ground_heat;
     double                 last_snow_coverage; // previous snow covered area
     double                 last_snow_flux;
     double                 last_tol_under; // previous surface iteration tol
     double                 last_tol_over; // previous overstory iteration tol
-    double                 latent_ground_heat; // latent heat from understory
     double                 ppt; // precipitation/melt reaching soil surface
     double                 rainfall; // rainfall
     double                 snowfall; // snowfall
@@ -198,8 +189,6 @@ surface_fluxes(char                 overstory,
     double                 tol_under;
     double                 tol_over;
     double                *aero_resist_used;
-    double                *baseflow;
-    double                *asat;
     double                *pot_evap;
     double                *inflow;
     layer_data_struct     *layer;
@@ -290,16 +279,9 @@ surface_fluxes(char                 overstory,
     // handle bisection of understory solution
     double            store_tol_under;
     double            A_tol_under;
-    double            B_tol_under;
-    double            A_snow_flux;
-    double            B_snow_flux;
 
     // handle bisection of overstory solution
     double            store_tol_over;
-    double            A_tol_over;
-    double            B_tol_over;
-    double            A_Tcanopy;
-    double            B_Tcanopy;
 
     // Carbon cycling
     double            dryFrac;
@@ -332,8 +314,6 @@ surface_fluxes(char                 overstory,
        Set temporary variables for convenience
     ***********************************************************************/
     aero_resist_used = cell->aero_resist;
-    baseflow = &(cell->baseflow);
-    asat = &(cell->asat);
     pot_evap = cell->pot_evap;
     inflow = &(cell->inflow);
     layer = cell->layer;
@@ -536,11 +516,6 @@ surface_fluxes(char                 overstory,
             free((char*)faPAR);
         }
 
-        // initialize bisection startup
-        BISECT_OVER = FALSE;
-        A_tol_over = 999;
-        B_tol_over = 999;
-
         // Compute mass flux of blowing snow
         if (!overstory && options.BLOWING && step_snow.swq > 0.) {
             Ls = (677. - 0.07 * step_snow.surf_temp) * JOULESPCAL * GRAMSPKG;
@@ -583,13 +558,9 @@ surface_fluxes(char                 overstory,
             UNSTABLE_CNT = 0;
 
             // bisect understory
-            BISECT_UNDER = FALSE;
             A_tol_under = 999;
-            B_tol_under = 999;
             store_tol_under = 999;
 
-            A_tol_over = 999;
-            B_tol_over = 999;
             store_tol_over = 999;
 
             do
@@ -603,8 +574,6 @@ surface_fluxes(char                 overstory,
                     Tcanopy = (last_Tcanopy + Tcanopy) / 2.;
                 }
                 last_Tcanopy = Tcanopy;
-                A_tol_over = store_tol_over;
-                A_Tcanopy = Tcanopy;
 
                 // update understory energy balance terms for iteration
                 if (last_snow_flux != 999) {
@@ -624,7 +593,6 @@ surface_fluxes(char                 overstory,
                 }
                 last_snow_flux = snow_flux;
                 A_tol_under = store_tol_under;
-                A_snow_flux = snow_flux;
 
                 snow_grnd_flux = -snow_flux;
 

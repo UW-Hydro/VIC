@@ -86,9 +86,7 @@ water_energy_balance(int     numnod,
     double Le;
     double jouleold;
     double joulenew;
-    double error;
-    double Told;
-    double Tupper, Tlower;
+
 
     double de[MAX_LAKE_NODES];
     double epsilon = 0.0001;
@@ -96,7 +94,6 @@ water_energy_balance(int     numnod,
     /* Calculate the surface energy balance for water surface temp = 0.0 */
 
     Tmean = -999.;
-    error = -999.;
     Ts = T[0];
     iterations = 0;
     for (k = 0; k < numnod; k++) {
@@ -181,8 +178,6 @@ water_energy_balance(int     numnod,
 
         Tmean = (Tnew[0] + T[0]) / 2.;
 
-        error = *LWnet + shortwave - *energy_out_bottom + *Qh + *Qle - *deltaH +
-                *energy_ice_formation;
         iterations += 1;
     }
 

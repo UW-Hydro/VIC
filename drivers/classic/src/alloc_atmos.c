@@ -39,7 +39,6 @@ alloc_atmos(int                 nrecs,
 
 *******************************************************************/
 {
-    extern param_set_struct param_set;
 
     int                     i;
 

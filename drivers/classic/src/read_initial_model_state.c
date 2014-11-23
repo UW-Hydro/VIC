@@ -93,8 +93,6 @@ read_initial_model_state(FILE                *init_state,
     char                 tmpstr[MAXSTRING];
     char                 ErrStr[MAXSTRING];
     char                 tmpchar;
-    double               tmpval;
-    double               depth_node[MAX_NODES];
     int                  veg, iveg;
     int                  band, iband;
     int                  lidx;
@@ -104,7 +102,7 @@ read_initial_model_state(FILE                *init_state,
     int                  tmp_Nband;
     int                  tmp_char;
     int                  byte, Nbytes;
-    int                  tmp_int, node;
+    int                  node;
     int                  frost_area;
 
     cell_data_struct   **cell;

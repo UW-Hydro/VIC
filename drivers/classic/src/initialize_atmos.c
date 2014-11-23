@@ -140,17 +140,14 @@ initialize_atmos(atmos_data_struct    *atmos,
 
     int                        i;
     int                        j;
-    int                        k;
     int                        v;
     int                        band;
     int                        day;
     int                        hour;
     int                        rec;
-    int                        step;
     int                        idx;
     int                       *tmaxhour;
     int                       *tminhour;
-    double                     deltat;
     double                     cell_area;
     double                     theta_l;
     double                     theta_s;
@@ -162,14 +159,10 @@ initialize_atmos(atmos_data_struct    *atmos,
     double                     ehoriz;
     double                     whoriz;
     double                     annual_prec;
-    double                     wind_h;
-    double                     roughness;
     double                     avgJulyAirTemp;
     double                    *Tfactor;
     char                      *AboveTreeLine;
     double                     min_Tfactor;
-    double                     shortwave;
-    double                     svp_tair;
     double                    *hourlyrad;
     double                    *fdir;
     double                    *prec;
@@ -179,8 +172,6 @@ initialize_atmos(atmos_data_struct    *atmos,
     double                    *tskc;
     double                    *daily_vp;
     double                    *dailyrad;
-    double                     min, max;
-    double                     rainonly;
     int                        Ndays;
     int                        stepspday;
     double                     sum, sum2;
@@ -189,8 +180,6 @@ initialize_atmos(atmos_data_struct    *atmos,
     double                   **forcing_data;
     double                   **local_forcing_data;
     int                        type;
-    double                     air_temp;
-    double                     factor;
     double                     delta_t_minus;
     double                     delta_t_plus;
     int                        have_dewpt;
@@ -199,7 +188,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     int                        tmp_starthour, tmp_endhour;
     int                        local_startyear, local_startmonth,
                                local_startday;
-    int                        local_starthour, local_endhour;
+    int                        local_starthour;
     int                        day_in_year, year, month, days_in_month;
     int                        tmp_nrecs;
     int                        Ndays_local;
@@ -215,7 +204,6 @@ initialize_atmos(atmos_data_struct    *atmos,
     int                        save_wind_supplied;
     int                        save_vp_supplied;
 
-    wind_h = global_param.wind_h;
     theta_l = (double)soil_con->time_zone_lng;
     theta_s = (double)soil_con->lng;
     hour_offset = (theta_l - theta_s) * 24 / 360;
@@ -233,7 +221,6 @@ initialize_atmos(atmos_data_struct    *atmos,
     ehoriz = soil_con->ehoriz;
     whoriz = soil_con->whoriz;
     annual_prec = soil_con->annual_prec;
-    roughness = soil_con->rough;
     cell_area = soil_con->cell_area;
     avgJulyAirTemp = soil_con->avgJulyAirTemp;
     Tfactor = soil_con->Tfactor;

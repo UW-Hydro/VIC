@@ -87,8 +87,6 @@ SnowPackEnergyBalance(double  TSurf,
 {
     extern option_struct options;
 
-    const char          *Routine = "SnowPackEnergyBalance";
-
     /* Define Variable Argument List */
 
     /* General Model Parameters */

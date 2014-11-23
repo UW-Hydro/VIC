@@ -10,7 +10,6 @@ parse_output_info(FILE             *gp,
     char   cmdstr[MAXSTRING];
     char   optstr[MAXSTRING];
     char   varname[MAXSTRING];
-    char   ErrStr[MAXSTRING];
     bool   found;
     int    outvarnum;
     size_t i;

@@ -37,12 +37,12 @@ make_dmy(global_param_struct *global)
     extern param_set_struct param_set;
 
     dmy_struct             *temp;
-    int                     hr, year, day, month, jday, ii, daymax;
+    int                     hr, year, day, month, jday, ii;
     int                     days[12] = {
         31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
     int                     endmonth, endday, endyear, skiprec, i, offset;
-    int                     tmpmonth, tmpday, tmpyear, tmphr, tmpjday, step;
+    int                     tmpmonth, tmpday, tmpyear, tmphr, tmpjday;
     char                    DONE;
     char                    ErrStr[MAXSTRING];
 
@@ -171,7 +171,6 @@ make_dmy(global_param_struct *global)
                     tmpjday += days[ii];
                 }
 
-                step = (int)(1. / ((float)global->dt / 24.));
                 while (tmpyear < temp[0].year ||
                        (tmpyear == temp[0].year && tmpjday <
                         temp[0].day_in_year) ||
@@ -213,7 +212,6 @@ get_next_time_step(int *year,
     int days[12] = {
         31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     };
-    int daymax;
 
     *hr += dt;
     if (*hr >= 24) {

@@ -28,7 +28,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
     int                  layer;
     int                  zone;
     int                  i;
-    float                sum_depth;
     float                sum_fract;
     float                dum;
     double               Zstep;
@@ -42,7 +41,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
     Nveg = veg_con[0].vegetat_type_num;
 
     for (veg = 0; veg < Nveg; veg++) {
-        sum_depth = 0;
         sum_fract = 0;
         layer = 0;
         Lstep = soil_con->depth[layer];

@@ -29,7 +29,6 @@ open_state_file(global_param_struct *global,
 
     FILE                *statefile;
     char                 filename[MAXSTRING];
-    double               Nsum;
 
     /* open state file */
     sprintf(filename, "%s", filenames.statefile);

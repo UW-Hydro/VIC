@@ -125,11 +125,10 @@ initialize_model_state(all_vars_struct     *all_vars,
 **********************************************************************/
 {
     extern option_struct   options;
-    extern veg_lib_struct *veg_lib;
 
     char                   ErrStr[MAXSTRING];
     char                   FIRST_VEG;
-    int                    i, j, ii, veg, index;
+    int                    veg, index;
     int                    lidx;
     double                 tmp_moist[MAX_LAYERS];
     double                 tmp_runoff;
@@ -141,13 +140,10 @@ initialize_model_state(all_vars_struct     *all_vars,
     double                 tmpdp, tmpadj, Bexp;
     double                 Tair;
     double                 tmp;
-    double                *M;
     double                 moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
     double                 ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS];
-    double                 Clake;
     double                 surf_swq;
     double                 pack_swq;
-    double                 TreeAdjustFactor[MAX_BANDS];
     double                 dt_thresh;
     int                    tmp_lake_idx;
 
@@ -738,22 +734,6 @@ initialize_model_state(all_vars_struct     *all_vars,
         }
     }
 
-    // Compute treeline adjustment factors
-    for (band = 0; band < options.SNOW_BAND; band++) {
-        if (soil_con->AboveTreeLine[band]) {
-            Cv = 0;
-            for (veg = 0; veg < veg_con[0].vegetat_type_num; veg++) {
-                if (veg_lib[veg_con[veg].veg_class].overstory) {
-                    Cv += veg_con[veg].Cv;
-                }
-            }
-            TreeAdjustFactor[band] = 1. / (1. - Cv);
-        }
-        else {
-            TreeAdjustFactor[band] = 1.;
-        }
-    }
-
     return(0);
 }
 
@@ -781,7 +761,6 @@ update_thermal_nodes(all_vars_struct *all_vars,
 **********************************************************************/
 {
     extern option_struct   options;
-    extern veg_lib_struct *veg_lib;
     char                   ErrStr[MAXSTRING];
     char                   FIRST_VEG;
     int                    veg, index;

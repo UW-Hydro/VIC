@@ -53,7 +53,6 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     extern option_struct       options;
     extern global_param_struct global_param;
     int                        i;
-    int                        lidx;
     int                        Nnodes;
     double                    *dZ;
     double                    *dZCum;

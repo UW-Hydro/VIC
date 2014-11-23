@@ -30,8 +30,6 @@ int
 main(int    argc,
      char **argv)
 {
-    size_t i;
-
     // process command line arguments
     cmd_proc(argc, argv, filenames.global);
 

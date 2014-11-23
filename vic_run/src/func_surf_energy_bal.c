@@ -275,7 +275,6 @@ func_surf_energy_bal(double  Ts,
     double             error;
     double             ice;
 /*   double             kappa_snow; */
-    double             out_long;
     double             temp_latent_heat;
     double             temp_latent_heat_sub;
     double             VaporMassFlux;

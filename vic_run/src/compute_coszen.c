@@ -16,7 +16,6 @@ compute_coszen(double     lat,
 
 **********************************************************************/
 {
-    extern option_struct options;
     double               coslat;
     double               sinlat;
     double               decl;
@@ -25,7 +24,6 @@ compute_coszen(double     lat,
     double               cosegeom;
     double               sinegeom;
     double               coshss;
-    double               hss;
     double               hour_offset;
     double               cosh;
     double               coszen;
@@ -49,9 +47,6 @@ compute_coszen(double     lat,
     if (coshss > 1.0) {
         coshss = 1.0; /* 0-hr daylight */
     }
-    hss = acos(coshss);              /* hour angle at sunset (radians) */
-///* daylength (seconds) */
-// daylength[i] = 2.0 * hss * SECPERRAD;
 
     /* calculate cos of hour angle */
     hour_offset = (time_zone_lng - lng) * 24 / 360;

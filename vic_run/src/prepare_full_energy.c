@@ -44,7 +44,6 @@ prepare_full_energy(int              iveg,
     extern option_struct options;
 
     int                  i, band;
-    double              *null_ptr;
     layer_data_struct   *layer;
 
     layer = (layer_data_struct *)calloc(options.Nlayer,

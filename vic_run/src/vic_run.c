@@ -24,7 +24,7 @@ vic_run(int                  gridcell,
 {
     extern option_struct options;
     char                 overstory;
-    int                  i, j, p;
+    int                  j, p;
     int                  lidx;
     int                  iveg;
     int                  Nveg;
@@ -35,13 +35,10 @@ vic_run(int                  gridcell,
     double               out_prec[2 * MAX_BANDS];
     double               out_rain[2 * MAX_BANDS];
     double               out_snow[2 * MAX_BANDS];
-    double               out_short = 0;
     double               dp;
     double               ice0[MAX_BANDS];
     double               moist0[MAX_BANDS];
     double               surf_atten;
-    double               Tend_surf;
-    double               Tend_grnd;
     double               wind_h;
     double               height;
     double               displacement[3];
@@ -66,7 +63,6 @@ vic_run(int                  gridcell,
     double               fraci;
     double               wetland_runoff;
     double               wetland_baseflow;
-    double               oldsnow;
     double               snowprec;
     double               rainprec;
     int                  cidx;
@@ -480,7 +476,6 @@ vic_run(int                  gridcell,
            Solve the energy budget for the lake.
         **********************************************************************/
 
-        oldsnow = lake_var->snow.swq;
         snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
         rainprec = gauge_correction[SNOW] * rainonly;
         atmos->out_prec += (snowprec + rainprec) * lake_con->Cl[0] * lakefrac;

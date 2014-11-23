@@ -34,8 +34,6 @@ write_forcing_file(atmos_data_struct    *atmos,
     extern option_struct       options;
 
     int                        rec, i, j, v;
-    short int                 *tmp_siptr;
-    unsigned short int        *tmp_usiptr;
     dmy_struct                *dummy_dmy;
     int                        dt_sec;
 

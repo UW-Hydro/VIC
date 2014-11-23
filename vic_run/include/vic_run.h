@@ -124,8 +124,8 @@ double error_print_surf_energy_bal(double, va_list);
 double error_solve_T_profile(double Tsurf, ...);
 double ErrorIcePackEnergyBalance(double Tsurf, ...);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
-double ErrorPrintSnowPackEnergyBalance(double, va_list);
-double ErrorSnowPackEnergyBalance(double Tsurf, ...);
+int ErrorPrintSnowPackEnergyBalance(double, va_list);
+int ErrorSnowPackEnergyBalance(double Tsurf, ...);
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
                                double *, double *, double *, double *, double *,
                                double *, double *, double *, double, int, int,

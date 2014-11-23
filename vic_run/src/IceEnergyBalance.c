@@ -59,10 +59,6 @@ double
 IceEnergyBalance(double  TSurf,
                  va_list ap)
 {
-    extern option_struct options;
-
-    const char          *Routine = "IceEnergyBalance";
-
     /* start of list of arguments in variable argument list */
 
     double  Dt;                  /* Model time step (hours) */
@@ -110,10 +106,6 @@ IceEnergyBalance(double  TSurf,
     /* end of list of arguments in variable argument list */
 
     double Density;              /* Density of water/ice at TMean (kg/m3) */
-    double EsSnow;               /* saturated vapor pressure in the snow pack
-                                    (Pa)  */
-
-    double Ls;                   /* Latent heat of sublimation (J/kg) */
     double NetRad;                      /* Net radiation exchange at surface (W/m2) */
     double RestTerm;            /* Rest term in surface energy balance
                                    (W/m2) */
@@ -210,16 +202,6 @@ IceEnergyBalance(double  TSurf,
     *SensibleHeat = AirDens * CP_PM * (Tair - TMean) / *Ra_used;
 
     /* Calculate the mass flux of ice to or from the surface layer */
-
-    /* Calculate the saturated vapor pressure in the snow pack,
-       (Equation 3.32, Bras 1990) */
-
-    EsSnow = svp(TMean) /* * 1000. */;
-
-/*   EsSnow = 610.78 * exp((double)((17.269 * TMean) / (237.3 + TMean))); */
-
-/*   if (TMean < 0.0) */
-/*     EsSnow *= 1.0 + .00972 * TMean + .000042 * pow((double)TMean,(double)2.0); */
 
     /* Calculate sublimation terms and latent heat flux */
 

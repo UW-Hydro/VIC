@@ -51,7 +51,6 @@ photosynth(char    Ctype,
            double *Rphoto,
            double *Agross)
 {
-    extern option_struct options;
     double               T;
     double               T1;
     double               T0;

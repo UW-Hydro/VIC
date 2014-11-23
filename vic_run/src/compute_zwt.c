@@ -19,8 +19,6 @@ compute_zwt(soil_con_struct *soil_con,
 ****************************************************************************/
 
 {
-    extern option_struct options;
-
     int                  i;
     double               zwt;
 
@@ -76,7 +74,6 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
 {
     extern option_struct options;
 
-    int                  i;
     int                  lindex;
     double               total_depth;
     double               tmp_depth;

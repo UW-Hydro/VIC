@@ -70,13 +70,10 @@ read_lakeparam(FILE           *lakeparam,
     extern option_struct options;
     int                  i;
     int                  lakecel;
-    int                  junk, flag;
     double               tempdz;
-    double               radius, A, x, y;
-    char                 instr[251];
+    double               radius, x;
     char                 tmpstr[MAXSTRING + 1];
     int                  ErrFlag;
-    double               tmp_mindepth, tmp_maxdepth;
 
     lake_con_struct      temp;
 

@@ -134,22 +134,16 @@ solve_snow(char               overstory,
 *********************************************************************/
 
     extern option_struct   options;
-    extern veg_lib_struct *vic_run_veg_lib;
 
-    char                   ErrStr[MAXSTRING];
-    char                   FIRST_SOLN[1];
     int                    ErrorFlag;
-    float                  tempstep;
     double                 ShortOverIn;
     double                 melt;
     double                 old_coverage;
     double                 old_depth;
     double                 old_swq;
     double                 rainonly;
-    double                 tmp_Wdew[2];
     double                 tmp_grnd_flux;
     double                 store_snowfall;
-    double                 tmp_ref_height;
     int                    month;
     int                    hour;
     int                    day_in_year;

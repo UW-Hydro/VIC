@@ -793,8 +793,7 @@ fda_heat_eqn(double T_2[],
 
     // locally used variables
     static double ice_new[MAX_NODES], Cs_new[MAX_NODES], kappa_new[MAX_NODES];
-    static double DT[MAX_NODES], DT_down[MAX_NODES], DT_up[MAX_NODES],
-                  T_up[MAX_NODES];
+    static double DT[MAX_NODES], DT_down[MAX_NODES], DT_up[MAX_NODES];
     static double Dkappa[MAX_NODES];
     static double Bexp;
     char          PAST_BOTTOM;
@@ -919,19 +918,16 @@ fda_heat_eqn(double T_2[],
                     DT[i] = T_2[i + 1] - Ts;
                     DT_up[i] = T_2[i] - Ts;
                     DT_down[i] = T_2[i + 1] - T_2[i];
-                    T_up[i] = Ts;
                 }
                 else if (i == n - 1) {
                     DT[i] = Tb - T_2[i - 1];
                     DT_up[i] = T_2[i] - T_2[i - 1];
                     DT_down[i] = Tb - T_2[i];
-                    T_up[i] = T_2[i - 1];
                 }
                 else {
                     DT[i] = T_2[i + 1] - T_2[i - 1];
                     DT_up[i] = T_2[i] - T_2[i - 1];
                     DT_down[i] = T_2[i + 1] - T_2[i];
-                    T_up[i] = T_2[i - 1];
                 }
                 if (i < n - 1) {
                     Dkappa[i] = kappa_new[i + 2] - kappa_new[i];
@@ -1067,19 +1063,16 @@ fda_heat_eqn(double T_2[],
                     DT[i] = T_2[i + 1] - Ts;
                     DT_up[i] = T_2[i] - Ts;
                     DT_down[i] = T_2[i + 1] - T_2[i];
-                    T_up[i] = Ts;
                 }
                 else if (i == n - 1) {
                     DT[i] = Tb - T_2[i - 1];
                     DT_up[i] = T_2[i] - T_2[i - 1];
                     DT_down[i] = Tb - T_2[i];
-                    T_up[i] = T_2[i - 1];
                 }
                 else {
                     DT[i] = T_2[i + 1] - T_2[i - 1];
                     DT_up[i] = T_2[i] - T_2[i - 1];
                     DT_down[i] = T_2[i + 1] - T_2[i];
-                    T_up[i] = T_2[i - 1];
                 }
                 // update Dkappa due to ice content change
                 /*******************************************/

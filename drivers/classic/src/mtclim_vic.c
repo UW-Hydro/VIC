@@ -586,16 +586,13 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     double               cosh, sinh;
     double               cza, cbsa, coszeh, coszwh;
     double               dir_flat_topa, am;
-    double               t_tmax, b;
-    double               tmink, ratio, ratio2, ratio3, tdewk;
+    double               b;
     double               pvs, vpd;
     double               trans1, trans2;
-    double               t_final, pdif, pdir, srad1, srad2;
     double               pa;
     double               sky_prop;
     double               avg_horizon, slope_excess;
     double               horizon_scalar, slope_scalar;
-    int                  update_pva;
 
     /* optical airmass by degrees */
     double               optam[21] = {
@@ -607,7 +604,6 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     int                  tinystep;
     int                  tinystepspday;
     extern option_struct options;
-    double               tfmax_tmp;
     /* end vic_change */
 
     int                  iter;
@@ -1101,7 +1097,6 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     iter = 1;
     rmse_tdew = tol + 1;
     while (rmse_tdew > tol && iter < max_iter) {
-        update_pva = 1;
         for (i = 0; i < ndays; i++) {
             tdew_save[i] = tdew[i];
         }
@@ -1426,7 +1421,6 @@ atm_pres(double elev)
        (p. 168)
      */
 
-    int    ok = 1;
     double t1, t2;
     double pa;
 
@@ -1447,7 +1441,7 @@ pulled_boxcar(double *input,
               int     w_flag)
 {
     int     ok = 1;
-    int     tail, i, j;
+    int     i, j;
     double *wt;
     double  total, sum_wt;
 

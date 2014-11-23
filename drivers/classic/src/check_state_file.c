@@ -35,9 +35,7 @@ check_state_file(char                *init_state_name,
     extern option_struct options;
 
     FILE                *init_state;
-    char                 filename[MAXSTRING];
     char                 ErrStr[MAXSTRING];
-    double               Nsum;
     int                  tmp_Nlayer;
     int                  tmp_Nnodes;
     int                  startday, startmonth, startyear;

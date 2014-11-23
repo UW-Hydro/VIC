@@ -32,9 +32,7 @@ parse_output_info(filenames_struct      *names,
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
-    int                  i;
     int                  outfilenum;
-    int                  fn;
     char                 varname[20];
     int                  outvarnum;
     char                 format[10];

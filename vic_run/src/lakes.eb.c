@@ -91,48 +91,28 @@ solve_lake(double           snowfall,
     double             LWnetw, LWneti;
     double             sw_water, sw_ice;
     double             T[MAX_LAKE_NODES]; /* temp of the water column, open fraction. */
-    double             Tnew[MAX_LAKE_NODES];
     double             Ti[MAX_LAKE_NODES]; /* temp of the water column, ice fraction. */
     double             water_density[MAX_LAKE_NODES], water_cp[MAX_LAKE_NODES];
     float              albi, albw;
-    double             Ts, tempalbs;
-    double             Tcutoff, Tcutk; /* Lake freezing temperature (K). */
+    double             tempalbs;
+    double             Tcutoff; /* Lake freezing temperature (K). */
     double             Qhw, Qhi;
-    double             Qgw, Qgi;
     double             Qew, Qei;
-    double             eflux, eadd;
-    double             Tki, Tkw; /* Surface temp. of ice and water in Kelvin. */
-    double             qbot, qw;
+    double             qw;
     int                freezeflag;
     int                mixdepth;
     double             new_ice_area; /* Ice area formed by freezing in the open water portion. */
     int                k, i, ErrorFlag;
-    double             tw1, tw2, r1, r2, rtu, rnet;
-    double             Ls, Le;
-    double             sumjoula, sumjoulb, sumjouli;
-    double             temp;
-    double             water_energy;
-    double             temphw, temphi;
-    double             SW_under_ice;
-    int                last_snow;
-    double             cc;
-    double             ice_energy;
-    double             error_over_water;
-    double             sw_underice_visible;
-    double             sw_underice_nir;
-    double             T_lower, T_upper;
-    double             Tsurf;
+    double             Le;
+    double             sumjoulb;
+    double             temphi;
     double             new_ice_height;
     double             windw, windi;
     double             energy_ice_formation;
     double             energy_ice_melt_bot;
-    double             melt, deltaCC_ice, Qnet_ice;
-    double             joule_intermediate;
+    double             Qnet_ice;
     double             energy_out_bottom;
     double             energy_out_bottom_ice;
-    double             sw_out;
-    int                index;
-    double             tempdepth, in;
     double             qf;
     double             inputs, outputs, internal, phasechange;
     double             new_ice_water_eq;
@@ -156,7 +136,7 @@ solve_lake(double           snowfall,
     lake_energy->grnd_flux = 0.0;
     lake_energy->snow_flux = 0.0;
     lake->snowmlt = 0.0;
-    qbot = qw = 0.0;
+    qw = 0.0;
     new_ice_height = new_ice_area = new_ice_water_eq = 0.0;
     lake->evapw = 0.0;
     energy_ice_formation = 0.0;
@@ -506,7 +486,7 @@ solve_lake(double           snowfall,
                               lake_energy->refreeze_energy +
                               lake_energy->advection);
 
-        temphw = temphi = 0.0;
+        temphi = 0.0;
 
         /**********************************************************************
         * 11. Final accounting for passing variables back to VIC.
@@ -1079,7 +1059,7 @@ iceform(double *qfusion,
 **********************************************************************/
     double sum, extra;
     int    j;
-    double xfrac, di;
+    double di;
 
 /**********************************************************************
 * Calculate the newly added ice to the ice layer.
@@ -1272,14 +1252,7 @@ lakeice(double    *tempi,
 *             the ice pack.						LCB via TJB
 **********************************************************************/
 {
-    double condqw, evapl;
-    double qmelts;         /* Energy available to melt ice. ? */
     double dibot;          /* change in ice surface at the bottom of the pack. */
-    double delta_ice_frac; /* Change in ice covered fraction. */
-    double delta_ice_depth;
-    double xfrac;
-    double tprev;
-    double RefrozenWater;
     double new_water_eq;
 
     /**********************************************************************
@@ -1505,15 +1478,12 @@ temp_area(double  sw_visible,
     double a[MAX_LAKE_NODES], b[MAX_LAKE_NODES], c[MAX_LAKE_NODES];
     double d[MAX_LAKE_NODES];
 
-    double dist12;
     int    k;
     double surface_1, surface_2, surface_avg, T1;
     double cnextra;
-    double swtop; /* The solar radiation at the top of the water column. */
     double top, bot; /* The depth of the top and the bottom of the current water layer. */
-    double water_density_new;
-    double jouleold, joulenew;
     double energyinput;
+    double joulenew;
     double energymixed;
     double term1, term2;
 
@@ -1775,7 +1745,6 @@ tracer_mixer(double *T,
     int    k, j, m;         /* Counter variables. */
     int    mixprev;
     double avet, avev;
-    double vol; /* Volume of the surface layer (formerly vol_tr). */
     double heatcon; /*( Heat content of the surface layer (formerly vol). */
     double Tav, densnew;
     double rho_max;
@@ -1824,14 +1793,12 @@ tracer_mixer(double *T,
                     /* Calculate the heat content and volume of the surface layer. */
                     heatcon = surfdz *
                               (1.e3 + water_density[m]) * cp[m] * surface[m];
-                    vol = surfdz * surface[m];
                 }
                 else {
                     /* Calculate the heat content and volume of all layers but
                        the surface layer. */
                     heatcon = dz *
                               (1.e3 + water_density[m]) * cp[m] * surface[m];
-                    vol = dz * surface[m];
                 }
 
                 /* Calculate the volumetric weighed average lake temperature. */
@@ -1941,7 +1908,7 @@ tridia(int     ne,
 
     double alpha[MAX_LAKE_NODES], gamma[MAX_LAKE_NODES];  /* Work arrays dimensioned (nd,ne).*/
 
-    int    nm1, i, ib;
+    int    nm1, i;
 
     nm1 = ne - 1;
 
@@ -2102,20 +2069,12 @@ water_balance(lake_var_struct *lake,
 {
     extern option_struct options;
     int                  isave_n;
-    double               d_area, d_level, d_volume;
     double               inflow_volume;
-    double               tempvolume, surfacearea, ldepth;
-    double               remain;
+    double               surfacearea, ldepth;
     double               i;
-    double               m;
     float                index;
-    double               newdepth;
     int                  j, k, frost_area;
-    double               in;
     double               Tnew[MAX_LAKE_NODES];
-    double               tempdepth;
-    double               wetland_runoff;
-    double               inflec, midrate;
     double               circum;
     double               baseflow_out_mm;
     double               newfraction, Recharge;
@@ -2133,7 +2092,6 @@ water_balance(lake_var_struct *lake,
     double              *delta_moist;
     double              *moist;
     double               max_newfraction;
-    double               depth_in_save;
 
     cell = all_vars->cell;
     veg_var = all_vars->veg_var;
@@ -2906,7 +2864,6 @@ rescale_snow_energy_fluxes(double             oldfrac,
    2009-Nov-30 Removed rescaling of snow->swq.				TJB
 **********************************************************************/
 {
-    int nidx;
 
     if (newfrac < SMALL) {
         newfrac = SMALL;
@@ -3016,8 +2973,6 @@ advect_carbon_storage(double            lakefrac,
    Modifications:
 **********************************************************************/
 {
-    extern option_struct options;
-    int                  i, k;
 
     if (newfraction > lakefrac) { // lake grew, wetland shrank
         if (newfraction < SMALL) {

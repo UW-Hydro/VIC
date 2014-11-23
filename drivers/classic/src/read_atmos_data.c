@@ -61,16 +61,13 @@ read_atmos_data(FILE               *infile,
 
 **********************************************************************/
 {
-    extern option_struct    options;
     extern param_set_struct param_set;
 
     int                     rec;
     int                     skip_recs;
     int                     i, j;
     int                     endian;
-    int                     fields;
     int                     Nfields;
-    int                     day = 0;
     int                    *field_index;
     unsigned short          ustmp;
     signed short            stmp;

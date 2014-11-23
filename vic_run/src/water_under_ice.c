@@ -64,7 +64,6 @@ water_under_ice(int     freezeflag,
     int    iterations;
     double jouleold;
     double joulenew;
-    double error;
     double de[MAX_LAKE_NODES];
     double epsilon = 0.0001;
     double qw_init, qw_mean, qw_final;

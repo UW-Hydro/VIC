@@ -33,7 +33,6 @@ set_output_defaults(out_data_struct *out_data)
 
     extern option_struct  options;
     out_data_file_struct *out_data_files;
-    int                   v, i;
     int                   filenum;
     int                   varnum;
 

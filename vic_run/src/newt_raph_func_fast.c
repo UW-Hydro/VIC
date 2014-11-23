@@ -31,9 +31,8 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
               with array lengths in the rest of VIC.			TJB
 ******************************************************************/
 
-    int    k, i, index[MAX_NODES], Error;
-    double errx, errf, d, fvec[MAX_NODES], fjac[MAX_NODES * MAX_NODES],
-           p[MAX_NODES];
+    int    k, i, Error;
+    double errx, errf, fvec[MAX_NODES], p[MAX_NODES];
     double a[MAX_NODES], b[MAX_NODES], c[MAX_NODES];
 
     Error = 0;
@@ -121,7 +120,7 @@ fdjac3(double x[],
 
 ******************************************************************/
 
-    int    i, j;
+    int    j;
     double h, temp, f[MAX_NODES];
 
     for (j = 0; j < n; j++) {

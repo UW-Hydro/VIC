@@ -104,25 +104,18 @@ CalcBlowingSnow(double  Dt,
     double es, Ros, F;
     double SubFlux;
     double Diffusivity;
-    double ushear, Qsalt, hsalt, phi_s, psi_s;
+    double ushear;
     double Tk;
-    double Lv;
-    double T, ztop;
-    double ut10, utshear;
+    double utshear;
     int    p;
     double upper, lower, Total;
     double area;
     double sigma_w;
-    double undersat_2;
-    double b, temp2; /* SBSM scaling parameter. */
-    double temp, temp3;
     double Zo_salt;
     double ratio, wind10;
     double Uveg, hv, Nd;
     double Transport;
-    int    count = 0;
 
-    Lv = (2.501e6 - 0.002361e6 * Tsnow);
     /*******************************************************************/
     /* Calculate some general variables, that don't depend on wind speed. */
 

@@ -172,7 +172,6 @@ calc_surf_energy_bal(double             Le,
    2014-Mar-28 Removed DIST_PRCP option.					TJB
  ***************************************************************/
 {
-    extern veg_lib_struct *vic_run_veg_lib;
     extern option_struct   options;
 
     int                    FIRST_SOLN[2];
@@ -198,7 +197,6 @@ calc_surf_energy_bal(double             Le,
     double                 Tsurf;
     char                   Tsurf_fbflag;
     int                    Tsurf_fbcount;
-    double                 albedo;
     double                 atmos_density;
     double                 atmos_pressure;
     double                 atmos_shortwave;
@@ -212,7 +210,6 @@ calc_surf_energy_bal(double             Le,
     double                 kappa2;
     double                 kappa_snow;
     double                 max_moist;
-    double                 ra;
     double                 refrozen_water;
 
     double                 Wdew;

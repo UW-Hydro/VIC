@@ -20,9 +20,8 @@ read_forcing_data(FILE              **infile,
    2014-Apr-25 Added partial vegcover fraction.				TJB
 **********************************************************************/
 {
-    extern option_struct    options;
     extern param_set_struct param_set;
-    extern int              NR, NF;
+    extern int              NF;
 
     char                    errorstr[MAXSTRING];
     int                     i, j;

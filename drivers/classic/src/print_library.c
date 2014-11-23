@@ -592,7 +592,6 @@ print_out_data(out_data_struct *out,
 void
 print_out_data_file(out_data_file_struct *outf)
 {
-    size_t i;
 
     printf("\tprefix: %s\n", outf->prefix);
     printf("\tfilename: %s\n", outf->filename);

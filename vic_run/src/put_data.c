@@ -170,11 +170,8 @@ put_data(all_vars_struct   *all_vars,
     double                    *dz;
     double                    *frost_fract;
     double                     frost_slope;
-    double                     dp;
-    int                        skipyear;
     double                     Cv;
     double                     Clake;
-    double                     Cv_save;
     double                     cv_baresoil;
     double                     cv_veg;
     double                     cv_overstory;
@@ -185,14 +182,12 @@ put_data(all_vars_struct   *all_vars,
     double                     TreeAdjustFactor[MAX_BANDS];
     double                     ThisAreaFract;
     double                     ThisTreeAdjust;
-    int                        n;
     int                        v;
     int                        i;
     int                        dt_sec;
     int                        out_dt_sec;
     int                        out_step_ratio;
     static int                 step_count;
-    int                        ErrorFlag;
     static int                 Tfoliage_fbcount_total;
     static int                 Tcanopy_fbcount_total;
     static int                 Tsnowsurf_fbcount_total;
@@ -217,8 +212,6 @@ put_data(all_vars_struct   *all_vars,
     dz = soil_con->dz_node;
     frost_fract = soil_con->frost_fract;
     frost_slope = soil_con->frost_slope;
-    dp = soil_con->dp;
-    skipyear = global_param.skipyear;
     dt_sec = global_param.dt * SECPHOUR;
     out_dt_sec = global_param.out_dt * SECPHOUR;
     out_step_ratio = (int)(out_dt_sec / dt_sec);

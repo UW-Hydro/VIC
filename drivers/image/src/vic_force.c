@@ -14,7 +14,6 @@ vic_force(void)
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
-    extern veg_con_struct    **veg_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;

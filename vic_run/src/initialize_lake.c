@@ -79,8 +79,6 @@ initialize_lake(lake_var_struct  *lake,
     int                  i, k;
     int                  status;
     double               depth;
-    double               remain;
-    double               in;
     double               tmp_volume;
 
     /*  Assume no ice present, lake completely equilibrated with atmosphere. */
@@ -414,7 +412,7 @@ get_volume(lake_con_struct lake_con,
 {
     int    i;
     int    status;
-    double m, b;
+    double m;
 
     status = 0;
     *volume = 0.0;

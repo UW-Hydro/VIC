@@ -154,7 +154,6 @@ snow_melt(double            Le,
           soil_con_struct  *soil_con)
 {
     extern option_struct options;
-    int                  Twidth;
     double               error;
     double               DeltaPackCC; /* Change in cold content of the pack */
     double               DeltaPackSwq; /* Change in snow water equivalent of the
@@ -401,7 +400,7 @@ snow_melt(double            Le,
                                                            &sensible_heat, &snow->vapor_flux,
                                                            &snow->blowing_flux,
                                                            &snow->surface_flux);
-                        return(ERROR);
+                        return(error);
                     }
                 }
             }
@@ -642,23 +641,22 @@ CalcSnowPackEnergyBalance(double Tsurf,
     return Qnet;
 }
 
-double
+int
 ErrorSnowPackEnergyBalance(double Tsurf,
                            ...)
 {
     va_list ap;                 /* Used in traversing variable argument list
                                  */
-    double  Qnet;                /* Net energy exchange at the SnowPack snow
-                                    surface (W/m^2) */
+    int  error;                /* error from ErrorPrintSnowPackEnergyBalance */
 
     va_start(ap, Tsurf);
-    Qnet = ErrorPrintSnowPackEnergyBalance(Tsurf, ap);
+    error = ErrorPrintSnowPackEnergyBalance(Tsurf, ap);
     va_end(ap);
 
-    return Qnet;
+    return (error);
 }
 
-double
+int
 ErrorPrintSnowPackEnergyBalance(double  TSurf,
                                 va_list ap)
 {

@@ -32,7 +32,7 @@ compute_treeline(atmos_data_struct *atmos,
 {
     extern option_struct       options;
     extern global_param_struct global_param;
-    extern int                 NR, NF;
+    extern int                 NF;
 
     double                     MonthSum;
     double                     AnnualSum;

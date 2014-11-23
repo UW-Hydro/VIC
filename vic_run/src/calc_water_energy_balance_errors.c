@@ -20,7 +20,6 @@ calc_water_balance_error(int    rec,
     static double last_storage;
     static double cum_error;
     static double max_error;
-    static int    error_cnt;
     static int    Nrecs;
 
     double        error;
@@ -29,7 +28,6 @@ calc_water_balance_error(int    rec,
         last_storage = storage;
         cum_error = 0.;
         max_error = 0.;
-        error_cnt = 0;
         Nrecs = -rec;
 
         return(0.0);

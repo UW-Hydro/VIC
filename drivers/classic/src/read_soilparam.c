@@ -139,7 +139,6 @@ read_soilparam(FILE *soilparam,
     double                     Wpwp_FRACT[MAX_LAYERS];
     double                     off_gmt;
     double                     tempdbl;
-    double                     extra_depth;
     double                     lat;
     double                     lng;
     double                     start_lat;
@@ -149,7 +148,6 @@ read_soilparam(FILE *soilparam,
     double                     dist;
     size_t                     length;
     int                        Nbands, band;
-    int                        Ncells;
     int                        flag;
     double                     tmp_depth;
     double                     tmp_depth2, tmp_depth2_save;
@@ -160,7 +158,6 @@ read_soilparam(FILE *soilparam,
     double                     zwt_prime, zwt_prime_eff;
     double                     tmp_moist;
     double                     w_avg;
-    char                       latchar[20], lngchar[20], junk[6];
     soil_con_struct            temp;
 
     /** Read plain ASCII soil parameter file **/

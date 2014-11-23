@@ -56,7 +56,6 @@ compute_soil_resp(int     Nnodes,
                   double *RhInterTot,
                   double *RhSlowTot)
 {
-    extern option_struct options;
     int                  i;
     double               Tref;
     double              *TK;

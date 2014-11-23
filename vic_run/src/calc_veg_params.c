@@ -3,8 +3,6 @@
 #include <vic_driver_classic.h>
 
 
-static char vcid[] = "$Id$";
-
 double
 calc_veg_displacement(double height)
 {

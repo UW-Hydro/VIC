@@ -148,8 +148,6 @@ ice_melt(double            z2,
 {
     extern option_struct options;
 
-    int                  Twidth;
-
     double               DeltaPackCC; /* Change in cold content of the pack */
     double               DeltaPackSwq; /* Change in snow water equivalent of the pack (m) */
     double               InitialSwq; /* Initial snow water equivalent (m) */
@@ -801,7 +799,6 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     double  Tfreeze;
     double  AvgCond;
     double  SWconducted;
-    double  SWabsorbed;
     double  SnowDepth;
     double  SnowDensity;
     double  SurfAttenuation;

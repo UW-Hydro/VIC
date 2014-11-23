@@ -63,14 +63,6 @@ initialize_snow(snow_data_struct **snow,
 {
     extern option_struct options;
     int                  i, j;
-    int                  startlayer;
-
-    if (options.FROZEN_SOIL) {
-        startlayer = 2;
-    }
-    else {
-        startlayer = 0;
-    }
 
     for (i = 0; i <= veg_num; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {

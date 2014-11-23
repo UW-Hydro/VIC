@@ -167,11 +167,9 @@ runoff(cell_data_struct  *cell,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  firstlayer, lindex;
+    int                  lindex;
     int                  i;
-    int                  last_layer[MAX_LAYERS * 3];
     int                  last_index;
-    int                  last_cnt;
     int                  time_step;
     int                  tmplayer;
     int                  frost_area;
@@ -204,11 +202,7 @@ runoff(cell_data_struct  *cell,
     double               sum_liq;
     double               evap_fraction;
     double               evap_sum;
-    double               min_temp;
-    double               max_temp;
     double               tmp_fract;
-    double               Tlayer_spatial[MAX_LAYERS][MAX_FROST_AREAS];
-    double               b[MAX_LAYERS];
     layer_data_struct   *layer;
     layer_data_struct    tmp_layer;
 
@@ -272,8 +266,6 @@ runoff(cell_data_struct  *cell,
 
     // compute temperatures of frost subareas
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        min_temp = layer[lindex].T - soil_con->frost_slope / 2.;
-        max_temp = min_temp + soil_con->frost_slope;
         for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
             if (options.Nfrost > 1) {
                 if (frost_area == 0) {
@@ -284,12 +276,6 @@ runoff(cell_data_struct  *cell,
                         (frost_fract[frost_area -
                                      1] + frost_fract[frost_area]) / 2.;
                 }
-                Tlayer_spatial[lindex][frost_area] = linear_interp(tmp_fract, 0,
-                                                                   1, min_temp,
-                                                                   max_temp);
-            }
-            else {
-                Tlayer_spatial[lindex][frost_area] = layer[lindex].T;
             }
         }
     }
@@ -303,7 +289,6 @@ runoff(cell_data_struct  *cell,
         **************************************************/
         for (lindex = 0; lindex < options.Nlayer; lindex++) {
             Ksat[lindex] = soil_con->Ksat[lindex] / 24.;
-            b[lindex] = (soil_con->expt[lindex] - 3.) / 2.;
 
             /** Set Layer Liquid Moisture Content **/
             liq[lindex] = org_moist[lindex] - layer[lindex].ice[frost_area];
@@ -337,7 +322,6 @@ runoff(cell_data_struct  *cell,
 
         for (time_step = 0; time_step < dt; time_step++) {
             inflow = dt_inflow;
-            last_cnt = 0;
 
             /*************************************
                Compute Drainage between Sublayers
@@ -362,7 +346,6 @@ runoff(cell_data_struct  *cell,
                 else {
                     Q12[lindex] = 0.;
                 }
-                last_layer[last_cnt] = lindex;
             }
 
             /**************************************************
@@ -370,7 +353,6 @@ runoff(cell_data_struct  *cell,
                Check Versus Maximum and Minimum Moisture Contents.
             **************************************************/
 
-            firstlayer = TRUE;
             last_index = 0;
             for (lindex = 0; lindex < options.Nlayer - 1; lindex++) {
                 if (lindex == 0) {
@@ -427,8 +409,6 @@ runoff(cell_data_struct  *cell,
                         }
                     } /** end trapped excess moisture **/
                 } /** end check if excess moisture in top layer **/
-
-                firstlayer = FALSE;
 
                 /** verify that current layer moisture is greater than minimum **/
                 if (liq[lindex] < 0) {

@@ -214,8 +214,6 @@ set_node_parameters(double *dz_node,
     char                 PAST_BOTTOM;
     int                  nidx, lidx;
     double               Lsum; /* cumulative depth of moisture layer */
-    double               Zsum; /* upper boundary of node thermal layer */
-    double               deltaL[MAX_LAYERS + 1];
 
     PAST_BOTTOM = FALSE;
     lidx = 0;
@@ -356,7 +354,6 @@ distribute_node_moisture_properties(double *moist_node,
     char                 PAST_BOTTOM;
     int                  nidx, lidx;
     double               Lsum; /* cumulative depth of moisture layer */
-    double               soil_fract;
 
     lidx = 0;
     Lsum = 0.;
@@ -371,20 +368,15 @@ distribute_node_moisture_properties(double *moist_node,
                 moist_node[nidx] = (moist[lidx] / depth[lidx] +
                                     moist[lidx +
                                           1] / depth[lidx + 1]) / 1000 / 2.;
-                soil_fract = (bulk_density[lidx] / soil_density[lidx] +
-                              bulk_density[lidx +
-                                           1] / soil_density[lidx + 1]) / 2.;
             }
             else {
                 /* node completely in layer */
                 moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
-                soil_fract = (bulk_density[lidx] / soil_density[lidx]);
             }
         }
         else {
             // use constant soil moisture below bottom soil layer
             moist_node[nidx] = SLAB_MOIST_FRACT * max_moist_node[nidx];
-            soil_fract = (bulk_density[lidx] / soil_density[lidx]);
         }
 
 
@@ -826,7 +818,6 @@ find_0_degree_fronts(energy_bal_struct *energy,
     int    Nfrost; /* number of frost fronts found */
     double tdepth[MAX_FRONTS]; /* thawing frost depths */
     double fdepth[MAX_FRONTS]; /* freezing front depths */
-    double deltaz;
 
     /* Initialize parameters */
     Nthaw = Nfrost = 0;

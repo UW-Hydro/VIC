@@ -84,7 +84,7 @@ write_model_state(all_vars_struct     *all_vars,
     int                  lidx;
     int                  nidx;
     int                  Nbands;
-    int                  byte, Nbytes;
+    int                  Nbytes;
     int                  frost_area;
 
     cell_data_struct   **cell;

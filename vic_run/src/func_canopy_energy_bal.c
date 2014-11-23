@@ -96,7 +96,6 @@ func_canopy_energy_bal(double  Tfoliage,
 
     /* Internal Variables */
     double               EsSnow;
-    double               LongOut;
     double               Ls;
     double               RestTerm;
     double               Tmp;

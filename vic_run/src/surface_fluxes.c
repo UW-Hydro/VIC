@@ -7,7 +7,7 @@
 int
 surface_fluxes(char                 overstory,
                double               BareAlbedo,
-               double               height,
+               // double               height,
                double               ice0,
                double               moist0,
                double               surf_atten,
@@ -23,15 +23,14 @@ surface_fluxes(char                 overstory,
                double              *roughness,
                double              *snow_inflow,
                double              *wind,
-               float               *root,
-               int                  Nbands,
-               int                  Nlayers,
-               int                  Nveg,
-               int                  band,
-               int                  dp,
-               int                  iveg,
+               double              *root,
+               size_t               Nlayers,
+               size_t               Nveg,
+               unsigned short       band,
+               double               dp,
+               unsigned short       iveg,
                int                  rec,
-               int                  veg_class,
+               unsigned short       veg_class,
                atmos_data_struct   *atmos,
                dmy_struct          *dmy,
                energy_bal_struct   *energy,
@@ -40,9 +39,9 @@ surface_fluxes(char                 overstory,
                snow_data_struct    *snow,
                soil_con_struct     *soil_con,
                veg_var_struct      *veg_var,
-               float                lag_one,
-               float                sigma_slope,
-               float                fetch,
+               double               lag_one,
+               double               sigma_slope,
+               double               fetch,
                double              *CanopLayerBnd)
 /**********************************************************************
         surface_fluxes	Keith Cherkauer		February 29, 2000
@@ -155,7 +154,7 @@ surface_fluxes(char                 overstory,
     int                    step_inc; // number of atmos array elements to skip per surface fluxes step
     int                    endhidx; // index of final element of atmos array
     int                    step_dt; // time length of surface fluxes step
-    int                    lidx;
+    size_t                 lidx;
     int                    over_iter;
     int                    under_iter;
     int                    p, q;
@@ -194,7 +193,6 @@ surface_fluxes(char                 overstory,
     layer_data_struct     *layer;
 
     // Step-specific quantities
-    double                 step_Evap;
     double                 step_Wdew;
     double                 step_melt;
     double                 step_melt_energy; /* energy used to reduce snow coverage */
@@ -287,7 +285,7 @@ surface_fluxes(char                 overstory,
     double            dryFrac;
     double           *LAIlayer;
     double           *faPAR;
-    int               cidx;
+    size_t            cidx;
     double            store_gc;
     double           *store_gsLayer;
     double            store_Ci;
@@ -524,7 +522,6 @@ surface_fluxes(char                 overstory,
                                                      step_snow.surf_water,
                                                      wind[2], Ls,
                                                      atmos->density[hidx],
-                                                     atmos->pressure[hidx],
                                                      atmos->vp[hidx],
                                                      roughness[2],
                                                      ref_height[2],
@@ -627,9 +624,9 @@ surface_fluxes(char                 overstory,
                 /** Solve snow accumulation, ablation and interception **/
                 step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut,
                                        gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP,
-                                       Tcanopy, Tgrnd, Tair, dp,
-                                       step_prec, snow_grnd_flux, gp->wind_h,
-                                       &energy->AlbedoUnder, &step_Evap, Le,
+                                       Tcanopy, Tgrnd, Tair,
+                                       step_prec, snow_grnd_flux,
+                                       &energy->AlbedoUnder, Le,
                                        &LongUnderIn, &NetLongSnow,
                                        &NetShortGrnd,
                                        &NetShortSnow, &ShortUnderIn, &OldTSurf,
@@ -642,7 +639,7 @@ surface_fluxes(char                 overstory,
                                        &step_ppt, &rainfall, ref_height,
                                        roughness, snow_inflow, &snowfall,
                                        &surf_atten,
-                                       wind, root, UNSTABLE_SNOW, options.Nnode,
+                                       wind, root, UNSTABLE_SNOW,
                                        Nveg, iveg, band, step_dt, rec, hidx,
                                        veg_class,
                                        &UnderStory, CanopLayerBnd, &dryFrac,
@@ -682,20 +679,17 @@ surface_fluxes(char                 overstory,
                                              iter_snow_energy.sensible,
                                              Tcanopy, VPDcanopy,
                                              VPcanopy,
-                                             iter_snow_energy.advection,
-                                             step_snow.coldcontent,
                                              delta_coverage, dp,
                                              ice0, step_melt_energy, moist0,
                                              iter_snow.coverage,
                                              (step_snow.depth + iter_snow.depth) / 2.,
                                              BareAlbedo, surf_atten,
-                                             iter_snow.vapor_flux,
                                              iter_aero_resist, iter_aero_resist_used,
                                              displacement, &step_melt, &step_ppt,
                                              rainfall, ref_height, roughness,
                                              snowfall, wind, root, INCLUDE_SNOW,
-                                             UnderStory, options.Nnode, Nveg, band,
-                                             step_dt, hidx, iveg, options.Nlayer,
+                                             UnderStory, options.Nnode, Nveg,
+                                             step_dt, hidx, iveg,
                                              (int)overstory, rec, veg_class,
                                              CanopLayerBnd, &dryFrac, atmos,
                                              &(dmy[rec]), &iter_soil_energy,
@@ -725,22 +719,18 @@ surface_fluxes(char                 overstory,
                         iter_soil_energy.latent,
                         iter_snow_energy.canopy_latent_sub,
                         iter_soil_energy.latent_sub,
-                        (*Le),
                         iter_snow_energy.NetLongOver,
                         iter_soil_energy.NetLongUnder,
                         iter_snow_energy.NetShortOver,
                         iter_soil_energy.NetShortUnder,
                         iter_aero_resist_used[1], Tair,
                         atmos->density[hidx],
-                        atmos->vp[hidx],
-                        atmos->vpd[hidx],
                         &iter_soil_energy.AtmosError,
                         &iter_soil_energy.AtmosLatent,
                         &iter_soil_energy.AtmosLatentSub,
                         &iter_soil_energy.NetLongAtmos,
                         &iter_soil_energy.NetShortAtmos,
                         &iter_soil_energy.AtmosSensible,
-                        &VPcanopy, &VPDcanopy,
                         &iter_soil_energy.Tcanopy_fbflag,
                         &iter_soil_energy.Tcanopy_fbcount);
 
@@ -1201,7 +1191,7 @@ surface_fluxes(char                 overstory,
     (*inflow) = ppt;
 
     ErrorFlag = runoff(cell, energy, soil_con, ppt, soil_con->frost_fract,
-                       gp->dt, options.Nnode, band, rec, iveg);
+                       gp->dt, options.Nnode);
 
     return(ErrorFlag);
 }

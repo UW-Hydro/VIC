@@ -16,7 +16,7 @@ free_vegcon(veg_con_struct **veg_con)
 **********************************************************************/
 {
     extern option_struct options;
-    int                  i;
+    size_t               i;
 
     for (i = 0; i < veg_con[0][0].vegetat_type_num; i++) {
         free((char *)veg_con[0][i].zone_depth);

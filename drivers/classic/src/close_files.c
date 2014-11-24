@@ -29,7 +29,7 @@ close_files(filep_struct         *filep,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  filenum;
+    size_t               filenum;
 
     /**********************
        Close All Input Files

@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 energy_bal_struct **
-make_energy_bal(int nveg)
+make_energy_bal(size_t nveg)
 
 /**********************************************************************
         make_energy_bal	Keith Cherkauer		May 26, 1996
@@ -20,7 +20,7 @@ make_energy_bal(int nveg)
 {
     extern option_struct options;
 
-    int                  i, j;
+    size_t               i, j;
     energy_bal_struct  **temp = NULL;
 
     temp = (energy_bal_struct**) calloc(nveg,
@@ -28,7 +28,6 @@ make_energy_bal(int nveg)
     if (temp == NULL) {
         nrerror("Memory allocation error in make_energy_bal().");
     }
-
 
     /** Initialize all records to unfrozen conditions */
     for (i = 0; i < nveg; i++) {

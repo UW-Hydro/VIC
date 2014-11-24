@@ -76,7 +76,7 @@ water_under_ice(int     freezeflag,
     }
 
     // compute the eddy diffusivity
-    eddy(freezeflag, wind, Ti, water_density, de, lat, numnod, dz, surfdz);
+    eddy(freezeflag, wind, water_density, de, lat, numnod, dz, surfdz);
 
     // estimate the flux out of the water
     qw_init = 0.57 * (Ti[0] - Tcutoff) / (surfdz / 2.);
@@ -116,8 +116,7 @@ water_under_ice(int     freezeflag,
          * Do the convective mixing of the lake water.
          * -------------------------------------------------------------------- */
 
-        tracer_mixer(Tnew, &mixdepth, freezeflag,
-                     surface, numnod, dz, surfdz, water_cp);
+        tracer_mixer(Tnew, &mixdepth, surface, numnod, dz, surfdz, water_cp);
 
         qw_final = 0.57 * (Tnew[0] - Tcutoff) / (surfdz / 2.);
 

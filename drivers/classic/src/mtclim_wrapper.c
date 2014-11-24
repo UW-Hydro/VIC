@@ -58,7 +58,7 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation,
                  control_struct *ctrl, parameter_struct *p,
                  data_struct *mtclim_data);
 
-void mtclim_to_vic(double hour_offset, int Ndays, dmy_struct *dmy,
+void mtclim_to_vic(double hour_offset, dmy_struct *dmy,
                    double **tiny_radfract, control_struct *ctrl,
                    data_struct *mtclim_data, double *tskc, double *vp,
                    double *hourlyrad, double *fdir);
@@ -74,7 +74,7 @@ mtclim_wrapper(int         have_dewpt,
                double      whoriz,
                double      annual_prcp,
                double      lat,
-               int         Ndays,
+               size_t      Ndays,
                dmy_struct *dmy,
                double     *prec,
                double     *tmax,
@@ -126,7 +126,7 @@ mtclim_wrapper(int         have_dewpt,
     }
 
     /* calculate daily snowpack using simple model (this is only for radiation correction, *not* the same as the VIC snowpack estimate) */
-    if (snowpack(&ctrl, &p, &mtclim_data)) {
+    if (snowpack(&ctrl, &mtclim_data)) {
         nrerror("Error in snowpack()... exiting\n");
     }
 
@@ -136,9 +136,8 @@ mtclim_wrapper(int         have_dewpt,
     }
 
     /* translate the mtclim structures back to the VIC data structures */
-    mtclim_to_vic(hour_offset, Ndays,
-                  dmy, tiny_radfract, &ctrl, &mtclim_data, tskc, vp,
-                  hourlyrad, fdir);
+    mtclim_to_vic(hour_offset, dmy, tiny_radfract, &ctrl, &mtclim_data, tskc,
+                  vp, hourlyrad, fdir);
 
     /* clean up */
     if (data_free(&ctrl, &mtclim_data)) {
@@ -252,7 +251,6 @@ mtclim_init(int               have_dewpt,
 
 void
 mtclim_to_vic(double          hour_offset,
-              int             Ndays,
               dmy_struct     *dmy,
               double        **tiny_radfract,
               control_struct *ctrl,
@@ -277,7 +275,7 @@ mtclim_to_vic(double          hour_offset,
 
     tinystepsphour = 3600 / SRADDT;
 
-    tiny_offset = (int)((float)tinystepsphour * hour_offset);
+    tiny_offset = (int)((double)tinystepsphour * hour_offset);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
             tmp_rad = mtclim_data->s_srad[i] * 24.;

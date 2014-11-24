@@ -3,13 +3,6 @@
 #include <vic_driver_classic.h>
 
 void
-print_all_vars(all_vars_struct *all)
-{
-    printf("all_vars:\n");
-    printf("\tNot implemented: Print individual structures.\n");
-}
-
-void
 print_atmos_data(atmos_data_struct *atmos,
                  size_t             nr)
 {
@@ -212,8 +205,8 @@ print_energy_bal(energy_bal_struct *eb,
         printf("\t%.4lf", eb->moist[i]);
     }
     printf("\n");
-    printf("\tNfrost           : %d\n", eb->Nfrost);
-    printf("\tNthaw            : %d\n", eb->Nthaw);
+    printf("\tNfrost           : %zu\n", eb->Nfrost);
+    printf("\tNthaw            : %zu\n", eb->Nthaw);
     printf("\tT                :");
     for (i = 0; i < nnodes; i++) {
         printf("\t%.4lf", eb->T[i]);
@@ -283,13 +276,6 @@ print_energy_bal(energy_bal_struct *eb,
     printf("\tShortOverIn      : %.4lf\n", eb->ShortOverIn);
     printf("\tShortUnderIn     : %.4lf\n", eb->ShortUnderIn);
     printf("\tsnow_flux        : %.4lf\n", eb->snow_flux);
-}
-
-void
-print_Error(Error_struct *error)
-{
-    printf("Error:\n");
-    printf("\tNot implemented: Print individual structures.\n");
 }
 
 void
@@ -380,7 +366,7 @@ print_lake_con(lake_con_struct *lcon,
     size_t i;
 
     printf("lake_con:\n");
-    printf("\tnumnod   : %d\n", lcon->numnod);
+    printf("\tnumnod   : %zu\n", lcon->numnod);
     printf("\tz        :");
     for (i = 0; i < nlnodes; i++) {
         printf("\t%.4lf", lcon->z[i]);
@@ -521,21 +507,21 @@ print_option(option_struct *option)
     printf("\tLW_TYPE            : %d\n", option->LW_TYPE);
     printf("\tMIN_WIND_SPEED     : %.4f\n", option->MIN_WIND_SPEED);
     printf("\tMTCLIM_SWE_CORR    : %d\n", option->MTCLIM_SWE_CORR);
-    printf("\tNcanopy            : %d\n", option->Ncanopy);
-    printf("\tNfrost             : %d\n", option->Nfrost);
-    printf("\tNlakenode          : %d\n", option->Nlakenode);
-    printf("\tNlayer             : %d\n", option->Nlayer);
-    printf("\tNnode              : %d\n", option->Nnode);
+    printf("\tNcanopy            : %zu\n", option->Ncanopy);
+    printf("\tNfrost             : %zu\n", option->Nfrost);
+    printf("\tNlakenode          : %zu\n", option->Nlakenode);
+    printf("\tNlayer             : %zu\n", option->Nlayer);
+    printf("\tNnode              : %zu\n", option->Nnode);
     printf("\tNOFLUX             : %d\n", option->NOFLUX);
-    printf("\tNVEGTYPES          : %d\n", option->NVEGTYPES);
+    printf("\tNVEGTYPES          : %zu\n", option->NVEGTYPES);
     printf("\tPLAPSE             : %d\n", option->PLAPSE);
     printf("\tRC_MODE            : %d\n", option->RC_MODE);
-    printf("\tROOT_ZONES         : %d\n", option->ROOT_ZONES);
+    printf("\tROOT_ZONES         : %zu\n", option->ROOT_ZONES);
     printf("\tQUICK_FLUX         : %d\n", option->QUICK_FLUX);
     printf("\tQUICK_SOLVE        : %d\n", option->QUICK_SOLVE);
     printf("\tSHARE_LAYER_MOIST  : %d\n", option->SHARE_LAYER_MOIST);
     printf("\tSNOW_DENSITY       : %d\n", option->SNOW_DENSITY);
-    printf("\tSNOW_BAND          : %d\n", option->SNOW_BAND);
+    printf("\tSNOW_BAND          : %zu\n", option->SNOW_BAND);
     printf("\tSNOW_STEP          : %d\n", option->SNOW_STEP);
     printf("\tSPATIAL_FROST      : %d\n", option->SPATIAL_FROST);
     printf("\tSPATIAL_SNOW       : %d\n", option->SPATIAL_SNOW);
@@ -558,7 +544,7 @@ print_option(option_struct *option)
     printf("\tBINARY_OUTPUT      : %d\n", option->BINARY_OUTPUT);
     printf("\tCOMPRESS           : %d\n", option->COMPRESS);
     printf("\tMOISTFRACT         : %d\n", option->MOISTFRACT);
-    printf("\tNoutfiles          : %d\n", option->Noutfiles);
+    printf("\tNoutfiles          : %zu\n", option->Noutfiles);
     printf("\tOUTPUT_FORCE       : %d\n", option->OUTPUT_FORCE);
     printf("\tPRT_HEADER         : %d\n", option->PRT_HEADER);
     printf("\tPRT_SNOW_BAND      : %d\n", option->PRT_SNOW_BAND);
@@ -596,7 +582,7 @@ print_out_data_file(out_data_file_struct *outf)
     printf("\tprefix: %s\n", outf->prefix);
     printf("\tfilename: %s\n", outf->filename);
     printf("\tfh: %p\n", outf->fh);
-    printf("\tnvars: %d\n", outf->nvars);
+    printf("\tnvars: %zu\n", outf->nvars);
     printf("\tvarid: %p\n", outf->varid);
 }
 
@@ -655,8 +641,8 @@ print_snow_data(snow_data_struct *snow)
     printf("\tstore_snow        : %d\n", snow->store_snow);
     printf("\tstore_swq         : %.4lf\n", snow->store_swq);
     printf("\tsurf_temp         : %.4lf\n", snow->surf_temp);
-    printf("\tsurf_temp_fbcount : %.4lf\n", snow->surf_temp_fbcount);
-    printf("\tsurf_temp_fbflag  : %.4lf\n", snow->surf_temp_fbflag);
+    printf("\tsurf_temp_fbcount : %hu\n", snow->surf_temp_fbcount);
+    printf("\tsurf_temp_fbflag  : %d\n", snow->surf_temp_fbflag);
     printf("\tsurf_water        : %.4lf\n", snow->surf_water);
     printf("\tswq               : %.4lf\n", snow->swq);
     printf("\tsnow_distrib_slope: %.4lf\n", snow->snow_distrib_slope);
@@ -921,7 +907,7 @@ print_veg_con(veg_con_struct *vcon,
     }
     printf("\n");
     printf("\tveg_class       : %d\n", vcon->veg_class);
-    printf("\tvegetat_type_num: %d\n", vcon->vegetat_type_num);
+    printf("\tvegetat_type_num: %zu\n", vcon->vegetat_type_num);
     if (blowing) {
         printf("\tsigma_slope     : %.4f\n", vcon->sigma_slope);
         printf("\tlag_one         : %.4f\n", vcon->lag_one);
@@ -971,7 +957,7 @@ print_veg_lib(veg_lib_struct *vlib,
         printf("\t%.2lf", vlib->emissivity[i]);
     }
     printf("\n");
-    printf("\tNVegLibTypes  : %d\n", vlib->NVegLibTypes);
+    printf("\tNVegLibTypes  : %zu\n", vlib->NVegLibTypes);
     printf("\trad_atten     : %.4lf\n", vlib->rad_atten);
     printf("\trarc          : %.4lf\n", vlib->rarc);
     printf("\trmin          : %.4f\n", vlib->rmin);

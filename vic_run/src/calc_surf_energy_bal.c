@@ -16,8 +16,6 @@ calc_surf_energy_bal(double             Le,
                      double             Tair,        // T of canopy or air
                      double             VPDcanopy,
                      double             VPcanopy,
-                     double             advection,
-                     double             coldcontent,
                      double             delta_coverage,        // change in coverage fraction
                      double             dp,
                      double             ice0,
@@ -27,7 +25,6 @@ calc_surf_energy_bal(double             Le,
                      double             snow_depth,
                      double             BareAlbedo,
                      double             surf_atten,
-                     double             vapor_flux,
                      double            *aero_resist,
                      double            *aero_resist_used,
                      double            *displacement,
@@ -38,19 +35,17 @@ calc_surf_energy_bal(double             Le,
                      double            *roughness,
                      double             snowfall,
                      double            *wind,
-                     float             *root,
+                     double            *root,
                      int                INCLUDE_SNOW,
                      int                UnderStory,
-                     int                Nnodes,
-                     int                Nveg,
-                     int                band,
-                     int                dt,
-                     int                hour,
-                     int                iveg,
-                     int                nlayer,
+                     size_t             Nnodes,
+                     size_t             Nveg,
+                     unsigned short     dt,
+                     unsigned short     hour,
+                     unsigned short     iveg,
                      int                overstory,
                      int                rec,
-                     int                veg_class,
+                     unsigned short     veg_class,
                      double            *CanopLayerBnd,
                      double            *dryFrac,
                      atmos_data_struct *atmos,
@@ -179,7 +174,8 @@ calc_surf_energy_bal(double             Le,
     int                    EXP_TRANS;
     int                    VEG;
     int                    i;
-    int                    nidx;
+    size_t                 nidx;
+    int                    inidx;
     int                    tmpNnodes;
 
     double                 Cs1;
@@ -196,7 +192,7 @@ calc_surf_energy_bal(double             Le,
     double                 Tsnow_surf;
     double                 Tsurf;
     char                   Tsurf_fbflag;
-    int                    Tsurf_fbcount;
+    unsigned               Tsurf_fbcount;
     double                 atmos_density;
     double                 atmos_pressure;
     double                 atmos_shortwave;
@@ -216,7 +212,7 @@ calc_surf_energy_bal(double             Le,
     double                *T_node;
     double                 Tnew_node[MAX_NODES];
     char                   Tnew_fbflag[MAX_NODES];
-    int                    Tnew_fbcount[MAX_NODES];
+    unsigned               Tnew_fbcount[MAX_NODES];
     double                *Zsum_node;
     double                *kappa_node;
     double                *Cs_node;
@@ -360,9 +356,9 @@ calc_surf_energy_bal(double             Le,
         if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
             // Set iterative Nnodes using the depth of the thaw layer
             tmpNnodes = 0;
-            for (nidx = Nnodes - 5; nidx >= 0; nidx--) {
-                if (T_node[nidx] >= 0 && T_node[nidx + 1] < 0) {
-                    tmpNnodes = nidx + 1;
+            for (inidx = Nnodes - 5; inidx >= 0; inidx--) {
+                if (T_node[inidx] >= 0 && T_node[inidx + 1] < 0) {
+                    tmpNnodes = inidx + 1;
                 }
             }
             if (tmpNnodes == 0) {
@@ -398,7 +394,7 @@ calc_surf_energy_bal(double             Le,
         }
 
         Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
-                           rec, dmy->month, VEG, veg_class, delta_t, Cs1, Cs2,
+                           rec, VEG, veg_class, delta_t, Cs1, Cs2,
                            D1, D2, T1_old, T2, Ts_old, energy->T, bubble, dp,
                            expt, ice0, kappa1, kappa2,
                            max_moist, moist, root, CanopLayerBnd,
@@ -460,7 +456,7 @@ calc_surf_energy_bal(double             Le,
                                                    TmpNetShortSnow, Tair,
                                                    atmos_density,
                                                    atmos_pressure,
-                                                   (double)soil_con->elevation,
+                                                   soil_con->elevation,
                                                    emissivity, LongBareIn,
                                                    LongSnowIn,
                                                    surf_atten, VPcanopy,
@@ -518,10 +514,8 @@ calc_surf_energy_bal(double             Le,
             FIRST_SOLN[0] = TRUE;
 
             Tsurf = root_brent(T_lower, T_upper, ErrorString,
-                               func_surf_energy_bal,
-                               rec, nrecs, dmy->month, VEG, veg_class, iveg,
-                               delta_t,
-                               Cs1, Cs2, D1, D2,
+                               func_surf_energy_bal, rec, nrecs, VEG,
+                               veg_class, iveg, delta_t, Cs1, Cs2, D1, D2,
                                T1_old, T2, Ts_old, energy->T, bubble, dp,
                                expt, ice0, kappa1, kappa2,
                                max_moist, moist, root, CanopLayerBnd,
@@ -587,7 +581,7 @@ calc_surf_energy_bal(double             Le,
                                                        TmpNetShortSnow, Tair,
                                                        atmos_density,
                                                        atmos_pressure,
-                                                       (double)soil_con->elevation,
+                                                       soil_con->elevation,
                                                        emissivity, LongBareIn, LongSnowIn,
                                                        surf_atten, VPcanopy, VPDcanopy,
                                                        atmos_shortwave, atmos_Catm, dryFrac,
@@ -694,7 +688,7 @@ calc_surf_energy_bal(double             Le,
                         soil_con->avg_temp) * exp(
             -(soil_con->Zsum_node[2] - D1) / dp);
     }
-    calc_layer_average_thermal_props(energy, layer, soil_con, Nnodes, iveg,
+    calc_layer_average_thermal_props(energy, layer, soil_con, Nnodes,
                                      Tnew_node);
 
     /** Store precipitation that reaches the surface */
@@ -920,7 +914,7 @@ error_print_surf_energy_bal(double  Ts,
     double            *depth;
     double            *resid_moist;
 
-    float             *root;
+    double            *root;
     double            *CanopLayerBnd;
 
     /* meteorological forcing terms */
@@ -1064,7 +1058,7 @@ error_print_surf_energy_bal(double  Ts,
     depth = (double *) va_arg(ap, double *);
     resid_moist = (double *) va_arg(ap, double *);
 
-    root = (float  *) va_arg(ap, float  *);
+    root = (double  *) va_arg(ap, double  *);
     CanopLayerBnd = (double *) va_arg(ap, double *);
 
     /* meteorological forcing terms */
@@ -1242,6 +1236,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(stderr, "Le = %f\n", Le);
 
     /* snowpack terms */
+    fprintf(stderr, "Ts = %f\n", Ts);
     fprintf(stderr, "Advection = %f\n", Advection);
     fprintf(stderr, "OldTSurf = %f\n", OldTSurf);
     fprintf(stderr, "TPack = %f\n", TPack);
@@ -1285,7 +1280,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(stderr, "*snow_flux = %f\n", *snow_flux);
     fprintf(stderr, "*store_error = %f\n", *store_error);
 
-    write_layer(layer, iveg, options.Nlayer, frost_fract, depth);
+    write_layer(layer, iveg, frost_fract);
     write_vegvar(&(veg_var[0]), iveg);
 
     if (!options.QUICK_FLUX) {

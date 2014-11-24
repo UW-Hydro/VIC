@@ -27,7 +27,7 @@ calc_Nscale_factors(char       NscaleFlag,
     dmy_struct           dmy_tmp;
     double               coszen_noon;
     double               k12;
-    int                  cidx; // canopy layer index
+    size_t               cidx; // canopy layer index
 
     /* Compute solar zenith angle at local noon */
     dmy_tmp.year = dmy.year;

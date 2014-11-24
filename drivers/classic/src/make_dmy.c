@@ -37,12 +37,11 @@ make_dmy(global_param_struct *global)
     extern param_set_struct param_set;
 
     dmy_struct             *temp;
-    int                     hr, year, day, month, jday, ii;
-    int                     days[12] = {
-        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    };
-    int                     endmonth, endday, endyear, skiprec, i, offset;
-    int                     tmpmonth, tmpday, tmpyear, tmphr, tmpjday;
+    unsigned short          hr, year, day, month, jday, ii;
+    unsigned short          days[12] = {31, 28, 31, 30, 31, 30,
+                                        31, 31, 30, 31, 30, 31};
+    unsigned short          endmonth, endday, endyear, skiprec, i, offset;
+    unsigned short          tmpmonth, tmpday, tmpyear, tmphr, tmpjday;
     char                    DONE;
     char                    ErrStr[MAXSTRING];
 
@@ -52,11 +51,13 @@ make_dmy(global_param_struct *global)
     month = global->startmonth;
 
     /** Check if user defined end date instead of number of records **/
-    if (global->nrecs < 0) {
-        if ((global->endyear < 0) || (global->endmonth < 0) ||
-            (global->endday < 0)) {
-            nrerror(
-                "The model global file MUST define EITHER the number of records to simulate (NRECS), or the year (ENDYEAR), month (ENDMONTH), and day (ENDDAY) of the last full simulation day");
+    if (global->nrecs == 0) {
+        if ((global->endyear == 0) || (global->endmonth == 0) ||
+            (global->endday == 0)) {
+            nrerror("The model global file MUST define EITHER the number of "
+                    "records to simulate (NRECS), or the year (ENDYEAR), "
+                    "month (ENDMONTH), and day (ENDDAY) of the last full "
+                    "simulation day");
         }
         endday = global->endday;
         endmonth = global->endmonth;
@@ -112,7 +113,9 @@ make_dmy(global_param_struct *global)
         }
         if (((global->dt * (global->nrecs - offset)) % 24) != 0) {
             sprintf(ErrStr,
-                    "Nrecs must be defined such that the model ends after completing a full day.  Currently Nrecs is set to %i, while %i and %i are allowable values.", global->nrecs,
+                    "Nrecs must be defined such that the model ends after "
+                    "completing a full day.  Currently Nrecs is set to %i, "
+                    "while %i and %i are allowable values.", global->nrecs,
                     ((global->dt * (global->nrecs - offset)) / 24) * 24,
                     ((global->dt * (global->nrecs - offset)) / 24) * 24 + 24);
             nrerror(ErrStr);
@@ -202,16 +205,14 @@ make_dmy(global_param_struct *global)
 }
 
 void
-get_next_time_step(int *year,
-                   int *month,
-                   int *day,
-                   int *hr,
-                   int *jday,
-                   int  dt)
+get_next_time_step(unsigned short *year,
+                   unsigned short *month,
+                   unsigned short *day,
+                   unsigned short *hr,
+                   unsigned short *jday,
+                   unsigned short  dt)
 {
-    int days[12] = {
-        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    };
+    unsigned short days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     *hr += dt;
     if (*hr >= 24) {

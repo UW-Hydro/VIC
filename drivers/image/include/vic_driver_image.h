@@ -134,7 +134,7 @@ typedef struct {
 
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
-double air_density(double t, double p, double vp);
+double air_density(double t, double p);
 double average(double *ar, size_t n);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -155,43 +155,39 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
-void get_next_time_step(int *year, int *month, int *day, int *hr, int *jday,
-                        int dt);
+void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
+                        unsigned short *, unsigned short *, unsigned short);
 void init_output_list(out_data_struct *out_data, int write, char *format,
-                      int type, float mult);
+                      int type, double mult);
 void initialize_domain(domain_struct *domain);
-void initialize_energy(energy_bal_struct **energy, soil_con_struct *soil_con,
-                       int nveg);
+void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
 void initialize_global(void);
-int initialize_model_state(all_vars_struct *all_vars, int Nveg, int Nnodes,
-                           double surf_temp, soil_con_struct *soil_con,
-                           veg_con_struct *veg_con, veg_lib_struct *veg_lib);
-void initialize_snow(snow_data_struct **snow, int veg_num);
+int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
+                           size_t Nnodes, double surf_temp,
+                           soil_con_struct *soil_con, veg_con_struct *veg_con);
+void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
-                     veg_con_struct *veg_con, int veg_num);
+                     size_t veg_num);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_state_file(nc_file_struct *nc);
-void initialize_veg(veg_var_struct **veg_var, veg_con_struct *veg_con,
-                    int nveg);
+void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 void initialize_veg_con(veg_con_struct *veg_con);
-all_vars_struct make_all_vars(int nveg);
-cell_data_struct **make_cell_data(int veg_type_num, int Nlayer);
+all_vars_struct make_all_vars(size_t nveg);
+cell_data_struct **make_cell_data(size_t veg_type_num);
 dmy_struct *make_dmy(global_param_struct *);
-energy_bal_struct **make_energy_bal(int nveg);
-snow_data_struct **make_snow_data(int nveg);
-veg_var_struct **make_veg_var(int veg_type_num);
+energy_bal_struct **make_energy_bal(size_t nveg);
+snow_data_struct **make_snow_data(size_t nveg);
+veg_var_struct **make_veg_var(size_t veg_type_num);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
-void print_all_vars(all_vars_struct *all);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
                      size_t npet);
 void print_dmy(dmy_struct *dmy);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
-void print_Error(Error_struct *error);
 void print_filenames(filenames_struct *fnames);
 void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
@@ -223,11 +219,8 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
 double q_to_vp(double q, double p);
-void soil_moisture_from_water_table(soil_con_struct *soil_con, int nlayers);
+void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_location(char *str, location_struct *loc);
-int update_thermal_nodes(all_vars_struct *all_vars, int Nveg, int Nnodes,
-                         soil_con_struct *soil_con, veg_con_struct  *veg_con,
-                         veg_lib_struct *veg_lib);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
@@ -241,7 +234,7 @@ void vic_start(void);
 void vic_store(void);
 void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
-                  double *prcp, int n);
+                  double *prcp, size_t n);
 void usage(char *);
 
 #endif

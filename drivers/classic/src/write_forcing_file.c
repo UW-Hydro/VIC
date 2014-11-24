@@ -33,7 +33,9 @@ write_forcing_file(atmos_data_struct    *atmos,
     extern global_param_struct global_param;
     extern option_struct       options;
 
-    int                        rec, i, j, v;
+    int                        rec, v;
+    unsigned                   i;
+    size_t                     j;
     dmy_struct                *dummy_dmy;
     int                        dt_sec;
 

@@ -11,8 +11,8 @@ write_output(out_data_struct      *out_data,
     extern global_param_struct global_param;
     extern option_struct       options;
 
-    int                        i;
-    int                        index;
+    unsigned                   i;
+    size_t                     index;
     int                        out_dt_sec;
     int                        v;
 

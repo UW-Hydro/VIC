@@ -39,7 +39,7 @@
 
 void
 soil_moisture_from_water_table(soil_con_struct *soil_con,
-                               int              nlayers)
+                               size_t           nlayers)
 {
     size_t i;
     size_t j;

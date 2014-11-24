@@ -45,7 +45,6 @@ canopy_evap(layer_data_struct *layer,
             veg_var_struct    *veg_var,
             char               CALC_EVAP,
             int                veg_class,
-            int                month,
             double            *Wdew,
             double             delta_t,
             double             rad,
@@ -53,17 +52,13 @@ canopy_evap(layer_data_struct *layer,
             double             net_short,
             double             air_temp,
             double             ra,
-            double             displacement,
-            double             roughness,
-            double             ref_height,
             double             elevation,
             double             ppt,
-            double            *depth,
             double            *Wmax,
             double            *Wcr,
             double            *Wpwp,
             double            *frost_fract,
-            float             *root,
+            double            *root,
             double            *dryFrac,
             double             shortwave,
             double             Catm,
@@ -106,7 +101,7 @@ canopy_evap(layer_data_struct *layer,
     extern option_struct   options;
 
     /** declare local variables **/
-    int                    i;
+    size_t                 i;
     double                 f;   /* fraction of time step used to fill canopy */
     double                 throughfall;
     double                 Evap;
@@ -185,14 +180,9 @@ canopy_evap(layer_data_struct *layer,
        Compute Evapotranspiration from Vegetation
     *******************************************/
     if (CALC_EVAP) {
-        transpiration(layer, veg_var, veg_class, month, rad, vpd, net_short,
-                      air_temp, ra, ppt, *dryFrac, delta_t,
-                      elevation, depth, Wmax, Wcr, Wpwp,
-                      layerevap,
-                      frost_fract,
-                      root,
-                      shortwave,
-                      Catm,
+        transpiration(layer, veg_var, veg_class, rad, vpd, net_short,
+                      air_temp, ra, *dryFrac, delta_t, elevation, Wmax, Wcr,
+                      Wpwp, layerevap, frost_fract, root, shortwave, Catm,
                       CanopLayerBnd);
     }
 
@@ -218,23 +208,20 @@ void
 transpiration(layer_data_struct *layer,
               veg_var_struct    *veg_var,
               int                veg_class,
-              int                month,
               double             rad,
               double             vpd,
               double             net_short,
               double             air_temp,
               double             ra,
-              double             ppt,
               double             dryFrac,
               double             delta_t,
               double             elevation,
-              double            *depth,
               double            *Wmax,
               double            *Wcr,
               double            *Wpwp,
               double            *layerevap,
               double            *frost_fract,
-              float             *root,
+              double            *root,
               double             shortwave,
               double             Catm,
               double            *CanopLayerBnd)
@@ -257,8 +244,8 @@ transpiration(layer_data_struct *layer,
     extern veg_lib_struct *vic_run_veg_lib;
     extern option_struct   options;
 
-    int                    i;
-    int                    frost_area;
+    size_t                 i;
+    size_t                 frost_area;
     double                 gsm_inv;     /* soil moisture stress factor */
     double                 moist1, moist2; /* tmp holding of moisture */
     double                 evap;        /* tmp holding for evap total */
@@ -269,7 +256,7 @@ transpiration(layer_data_struct *layer,
     double                 ice[MAX_LAYERS];
     double                 gc;
     double                *gsLayer;
-    int                    cidx;
+    size_t                 cidx;
 
     /**********************************************************************
        EVAPOTRANSPIRATION

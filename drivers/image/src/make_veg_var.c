@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 veg_var_struct **
-make_veg_var(int veg_type_num)
+make_veg_var(size_t veg_type_num)
 
 /**********************************************************************
         make_veg_var	Dag Lohman		January 1996
@@ -15,7 +15,7 @@ make_veg_var(int veg_type_num)
 {
     extern option_struct options;
 
-    int                  i, j;
+    size_t               i, j;
     veg_var_struct     **temp = NULL;
 
     temp = (veg_var_struct **) calloc(veg_type_num, sizeof(veg_var_struct *));

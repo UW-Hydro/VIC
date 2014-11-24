@@ -21,10 +21,10 @@ read_forcing_data(FILE              **infile,
 **********************************************************************/
 {
     extern param_set_struct param_set;
-    extern int              NF;
+    extern size_t           NF;
 
     char                    errorstr[MAXSTRING];
-    int                     i, j;
+    size_t                  i, j;
     double                **forcing_data;
 
     /** Allocate data arrays for input forcing data **/
@@ -55,7 +55,8 @@ read_forcing_data(FILE              **infile,
     }
     else {
         sprintf(errorstr,
-                "ERROR: File time step must be defined for at least the first forcing file (FILE_DT).\n");
+                "ERROR: File time step must be defined for at least the first "
+                "forcing file (FILE_DT).\n");
         nrerror(errorstr);
     }
 

@@ -39,7 +39,7 @@ make_in_and_outfiles(filep_struct         *filep,
     extern FILE *open_file(char string[], char type[]);
 
     char                    latchar[20], lngchar[20], junk[6];
-    int                     filenum;
+    size_t                  filenum;
 
     sprintf(junk, "%%.%if", options.GRID_DECIMAL);
     sprintf(latchar, junk, soil->lat);

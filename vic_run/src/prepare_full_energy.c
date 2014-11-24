@@ -3,8 +3,6 @@
 
 void
 prepare_full_energy(int              iveg,
-                    int              Nveg,
-                    int              Nnodes,
                     all_vars_struct *all_vars,
                     soil_con_struct *soil_con,
                     double          *moist0,
@@ -43,7 +41,7 @@ prepare_full_energy(int              iveg,
 
     extern option_struct options;
 
-    int                  i, band;
+    size_t               i, band;
     layer_data_struct   *layer;
 
     layer = (layer_data_struct *)calloc(options.Nlayer,

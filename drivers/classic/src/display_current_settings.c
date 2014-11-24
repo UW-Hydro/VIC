@@ -119,7 +119,7 @@ display_current_settings(int                  mode,
     fprintf(stderr, "-----------------------------------------------\n");
 
     fprintf(stderr, "Simulation Dimensions:\n");
-    fprintf(stderr, "NLAYER\t\t\t%d\n", options.Nlayer);
+    fprintf(stderr, "NLAYER\t\t\t%zu\n", options.Nlayer);
     if (options.EQUAL_AREA) {
         fprintf(stderr, "EQUAL_AREA\t\tTRUE\n");
     }
@@ -272,7 +272,7 @@ display_current_settings(int                  mode,
     }
     if (options.SPATIAL_FROST == TRUE) {
         fprintf(stderr, "SPATIAL_FROST\t\tTRUE\n");
-        fprintf(stderr, "Nfrost\t\t%d\n", options.Nfrost);
+        fprintf(stderr, "Nfrost\t\t%zu\n", options.Nfrost);
     }
     else {
         fprintf(stderr, "SPATIAL_FROST\t\tFALSE\n");
@@ -316,7 +316,7 @@ display_current_settings(int                  mode,
     }
     fprintf(stderr, "WIND_H\t\t\t%f\n", global->wind_h);
     fprintf(stderr, "MEASURE_H\t\t%f\n", global->measure_h);
-    fprintf(stderr, "NODES\t\t\t%d\n", options.Nnode);
+    fprintf(stderr, "NODES\t\t\t%zu\n", options.Nnode);
     fprintf(stderr, "MIN_RAIN_TEMP\t\t%f\n", global->MIN_RAIN_TEMP);
     fprintf(stderr, "MAX_SNOW_TEMP\t\t%f\n", global->MAX_SNOW_TEMP);
     fprintf(stderr, "MIN_WIND_SPEED\t\t%f\n", options.MIN_WIND_SPEED);
@@ -332,7 +332,7 @@ display_current_settings(int                  mode,
     else {
         fprintf(stderr, "SHARE_LAYER_MOIST\t\tFALSE\n");
     }
-    fprintf(stderr, "Ncanopy\t\t%d\n", options.Ncanopy);
+    fprintf(stderr, "Ncanopy\t\t%zu\n", options.Ncanopy);
 
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Forcing Data:\n");
@@ -406,7 +406,7 @@ display_current_settings(int                  mode,
         fprintf(stderr, "VEGLIB_VEGCOVER\t\tFALSE\n");
     }
     fprintf(stderr, "Veg param file\t\t%s\n", names->veg);
-    fprintf(stderr, "ROOT_ZONES\t\t%d\n", options.ROOT_ZONES);
+    fprintf(stderr, "ROOT_ZONES\t\t%zu\n", options.ROOT_ZONES);
     if (options.VEGPARAM_LAI) {
         fprintf(stderr, "VEGPARAM_LAI\t\tTRUE\n");
     }
@@ -447,16 +447,16 @@ display_current_settings(int                  mode,
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Elevation Data:\n");
     if (options.SNOW_BAND > 1) {
-        fprintf(stderr, "SNOW_BAND\t\t%d\t%s\n", options.SNOW_BAND,
+        fprintf(stderr, "SNOW_BAND\t\t%zu\t%s\n", options.SNOW_BAND,
                 names->snowband);
     }
     else if (options.SNOW_BAND == 1) {
         fprintf(stderr,
-                "SNOW_BAND\t\t%d\t(no input file needed for SNOW_BAND=1)\n",
+                "SNOW_BAND\t\t%zu\t(no input file needed for SNOW_BAND=1)\n",
                 options.SNOW_BAND);
     }
     else {
-        fprintf(stderr, "SNOW_BAND\t\t%d\n", options.SNOW_BAND);
+        fprintf(stderr, "SNOW_BAND\t\t%zu\n", options.SNOW_BAND);
     }
 
     fprintf(stderr, "\n");

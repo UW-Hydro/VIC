@@ -4,7 +4,7 @@
 
 char               *version = "VIC 5.0 image";
 
-int                 NF, NR;
+size_t              NF, NR;
 size_t              current;
 all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;

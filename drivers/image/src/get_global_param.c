@@ -18,7 +18,7 @@ get_global_param(filenames_struct *names,
 {
     extern option_struct    options;
     extern param_set_struct param_set;
-    extern int              NF, NR;
+    extern size_t           NF, NR;
 
     char                    cmdstr[MAXSTRING];
     char                    optstr[MAXSTRING];
@@ -47,22 +47,22 @@ get_global_param(filenames_struct *names,
     global_param_struct     global;
 
     // Initialize global parameters (that aren't part of the options struct)
-    global.dt = MISSING;
-    global.nrecs = MISSING;
-    global.startyear = MISSING;
-    global.startmonth = MISSING;
-    global.startday = MISSING;
-    global.starthour = MISSING;
-    global.endyear = MISSING;
-    global.endmonth = MISSING;
-    global.endday = MISSING;
-    global.resolution = MISSING;
+    global.dt = HOURSPERDAY+1;
+    global.nrecs = 0;
+    global.startyear = 0;
+    global.startmonth = 0;
+    global.startday = 0;
+    global.starthour = HOURSPERDAY+1;
+    global.endyear = 0;
+    global.endmonth = 0;
+    global.endday = 0;
+    global.resolution = 0;
     global.MAX_SNOW_TEMP = 0.5;
     global.MIN_RAIN_TEMP = -0.5;
     global.measure_h = 2.0;
     global.wind_h = 10.0;
     for (i = 0; i < 2; i++) {
-        global.forceyear[i] = MISSING;
+        global.forceyear[i] = 0;
         global.forcemonth[i] = 1;
         global.forceday[i] = 1;
         global.forcehour[i] = 0;
@@ -73,9 +73,9 @@ get_global_param(filenames_struct *names,
     file_num = 0;
     global.skipyear = 0;
     strcpy(names->init_state, "MISSING");
-    global.stateyear = MISSING;
-    global.statemonth = MISSING;
-    global.stateday = MISSING;
+    global.stateyear = 0;
+    global.statemonth = 0;
+    global.stateday = 0;
     strcpy(names->statefile, "MISSING");
     strcpy(names->domain, "MISSING");
     strcpy(names->soil, "MISSING");
@@ -84,7 +84,7 @@ get_global_param(filenames_struct *names,
     strcpy(names->snowband, "MISSING");
     strcpy(names->lakeparam, "MISSING");
     strcpy(names->result_dir, "MISSING");
-    global.out_dt = MISSING;
+    global.out_dt = 0;
 
 
     /** Read through global control file to find parameters **/
@@ -106,40 +106,40 @@ get_global_param(filenames_struct *names,
                Get Model Global Parameters
             *************************************/
             if (strcasecmp("NLAYER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.Nlayer);
+                sscanf(cmdstr, "%*s %zu", &options.Nlayer);
             }
             else if (strcasecmp("NODES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.Nnode);
+                sscanf(cmdstr, "%*s %zu", &options.Nnode);
             }
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.dt);
+                sscanf(cmdstr, "%*s %hu", &global.dt);
             }
             else if (strcasecmp("SNOW_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.SNOW_STEP);
+                sscanf(cmdstr, "%*s %hu", &options.SNOW_STEP);
             }
             else if (strcasecmp("STARTYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.startyear);
+                sscanf(cmdstr, "%*s %hu", &global.startyear);
             }
             else if (strcasecmp("STARTMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.startmonth);
+                sscanf(cmdstr, "%*s %hu", &global.startmonth);
             }
             else if (strcasecmp("STARTDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.startday);
+                sscanf(cmdstr, "%*s %hu", &global.startday);
             }
             else if (strcasecmp("STARTHOUR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.starthour);
+                sscanf(cmdstr, "%*s %hu", &global.starthour);
             }
             else if (strcasecmp("NRECS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.nrecs);
+                sscanf(cmdstr, "%*s %u", &global.nrecs);
             }
             else if (strcasecmp("ENDYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.endyear);
+                sscanf(cmdstr, "%*s %hu", &global.endyear);
             }
             else if (strcasecmp("ENDMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.endmonth);
+                sscanf(cmdstr, "%*s %hu", &global.endmonth);
             }
             else if (strcasecmp("ENDDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.endday);
+                sscanf(cmdstr, "%*s %hu", &global.endday);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -237,7 +237,7 @@ get_global_param(filenames_struct *names,
                 }
             }
             else if (strcasecmp("MIN_WIND_SPEED", optstr) == 0) {
-                sscanf(cmdstr, "%*s %f", &options.MIN_WIND_SPEED);
+                sscanf(cmdstr, "%*s %lf", &options.MIN_WIND_SPEED);
             }
             else if (strcasecmp("MIN_RAIN_TEMP", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global.MIN_RAIN_TEMP);
@@ -283,7 +283,7 @@ get_global_param(filenames_struct *names,
                 }
             }
             else if (strcasecmp("RESOLUTION", optstr) == 0) {
-                sscanf(cmdstr, "%*s %f", &global.resolution);
+                sscanf(cmdstr, "%*s %lf", &global.resolution);
             }
             else if (strcasecmp("AERO_RESIST_CANSNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -435,7 +435,7 @@ get_global_param(filenames_struct *names,
                 }
             }
             else if (strcasecmp("CANOPY_LAYERS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.Ncanopy);
+                sscanf(cmdstr, "%*s %zu", &options.Ncanopy);
             }
             else if (strcasecmp("CARBON", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -474,13 +474,13 @@ get_global_param(filenames_struct *names,
                 options.SAVE_STATE = TRUE;
             }
             else if (strcasecmp("STATEYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.stateyear);
+                sscanf(cmdstr, "%*s %hu", &global.stateyear);
             }
             else if (strcasecmp("STATEMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.statemonth);
+                sscanf(cmdstr, "%*s %hu", &global.statemonth);
             }
             else if (strcasecmp("STATEDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.stateday);
+                sscanf(cmdstr, "%*s %hu", &global.stateday);
             }
             else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -548,19 +548,19 @@ get_global_param(filenames_struct *names,
                 sscanf(cmdstr, "%*s %d ", &param_set.FORCE_DT[file_num]);
             }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.forceyear[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global.forceyear[file_num]);
             }
             else if (strcasecmp("FORCEMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.forcemonth[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global.forcemonth[file_num]);
             }
             else if (strcasecmp("FORCEDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.forceday[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global.forceday[file_num]);
             }
             else if (strcasecmp("FORCEHOUR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.forcehour[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global.forcehour[file_num]);
             }
             else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.GRID_DECIMAL);
+                sscanf(cmdstr, "%*s %hu", &options.GRID_DECIMAL);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global.wind_h);
@@ -711,10 +711,10 @@ get_global_param(filenames_struct *names,
                 }
             }
             else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &options.ROOT_ZONES);
+                sscanf(cmdstr, "%*s %zu", &options.ROOT_ZONES);
             }
             else if (strcasecmp("SNOW_BAND", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d %s", &options.SNOW_BAND,
+                sscanf(cmdstr, "%*s %zu %s", &options.SNOW_BAND,
                        names->snowband);
             }
             else if (strcasecmp("LAKES", optstr) == 0) {
@@ -744,10 +744,10 @@ get_global_param(filenames_struct *names,
                 sscanf(cmdstr, "%*s %s", names->result_dir);
             }
             else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.out_dt);
+                sscanf(cmdstr, "%*s %hu", &global.out_dt);
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &global.skipyear);
+                sscanf(cmdstr, "%*s %hu", &global.skipyear);
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -853,7 +853,7 @@ get_global_param(filenames_struct *names,
     ******************************************/
 
     // Validate model time step
-    if (global.dt == MISSING) {
+    if (global.dt == HOURSPERDAY+1) {
         sprintf(ErrStr,
                 "Model time step has not been defined.  Make sure that the "
                 "global file defines TIME_STEP.");
@@ -869,12 +869,12 @@ get_global_param(filenames_struct *names,
     }
 
     // Validate the output step
-    if (global.out_dt == 0 || global.out_dt == MISSING) {
+    if (global.out_dt == 0) {
         global.out_dt = global.dt;
     }
-    else if (global.out_dt < global.dt || global.out_dt > 24 ||
-             (float)global.out_dt / (float)global.dt !=
-             (float)(global.out_dt / global.dt)) {
+    else if (global.out_dt < global.dt || global.out_dt > HOURSPERDAY ||
+             (double)global.out_dt / (double)global.dt !=
+             (double)(global.out_dt / global.dt)) {
         sprintf(ErrStr,
                 "Invalid output step specified. Output step must be an "
                 "integer multiple of the model time step; >= model time step "
@@ -883,7 +883,7 @@ get_global_param(filenames_struct *names,
     }
 
     // Validate SNOW_STEP and set NR and NF
-    if (global.dt < 24 && global.dt != options.SNOW_STEP) {
+    if (global.dt < HOURSPERDAY && global.dt != options.SNOW_STEP) {
         sprintf(ErrStr,
                 "If the model step is smaller than daily, the snow model "
                 "should run\nat the same time step as the rest of the model.");
@@ -904,112 +904,89 @@ get_global_param(filenames_struct *names,
     }
 
     // Validate simulation start date
-    if (global.startyear == MISSING) {
+    if (global.startyear == 0) {
         sprintf(ErrStr,
                 "Simulation start year has not been defined.  Make sure that "
                 "the global file defines STARTYEAR.");
         nrerror(ErrStr);
     }
-    else if (global.startyear < 0) {
-        sprintf(ErrStr,
-                "The specified simulation start year (%d) < 0.  Make sure that "
-                "the global file defines a positive integer for STARTYEAR.",
-                global.startyear);
-        nrerror(ErrStr);
-    }
-    if (global.startmonth == MISSING) {
+    if (global.startmonth == 0) {
         sprintf(ErrStr,
                 "Simulation start month has not been defined.  Make sure that "
                 "the global file defines STARTMONTH.");
         nrerror(ErrStr);
     }
-    else if (global.startmonth < 0) {
-        sprintf(ErrStr,
-                "The specified simulation start month (%d) < 0.  Make sure "
-                "that the global file defines a positive integer for "
-                "STARTMONTH.", global.startmonth);
+    else if (global.startmonth > 12) {
+        sprintf(ErrStr,"The specified simulation start month (%hu) > 12. Make "
+                "sure that the global file defines a positive integer for "
+                "STARTMONTH.",global.startmonth);
         nrerror(ErrStr);
-    }
-    if (global.startday == MISSING) {
+        }
+    if (global.startday == 0) {
         sprintf(ErrStr,
                 "Simulation start day has not been defined.  Make sure that "
                 "the global file defines STARTDAY.");
         nrerror(ErrStr);
     }
-    else if (global.startday < 0) {
+    if (global.dt == HOURSPERDAY) {
+        global.starthour = 0;
+    }
+    else if (global.starthour == HOURSPERDAY+1) {
         sprintf(ErrStr,
-                "The specified simulation start day (%d) < 0.  Make sure that "
-                "the global file defines a positive integer for STARTDAY.",
-                global.startday);
+                "Simulation start hour has not been defined, yet model "
+                "time step is less than HOURSPERDAY hours.  Make sure that the "
+                "global file defines STARTHOUR.");
         nrerror(ErrStr);
     }
-    if (global.starthour == MISSING) {
-        if (global.dt == 24) {
-            global.starthour = 0;
-        }
-        else {
-            sprintf(ErrStr,
-                    "Simulation start hour has not been defined, yet model "
-                    "time step is less than 24 hours.  Make sure that the "
-                    "global file defines STARTHOUR.");
-            nrerror(ErrStr);
-        }
-    }
-    else if (global.starthour < 0) {
+    else if (global.starthour > HOURSPERDAY) {
         sprintf(ErrStr,
-                "The specified simulation start hour (%d) < 0.  Make sure "
+                "The specified simulation start hour (%hu) > 24.  Make sure "
                 "that the global file defines a positive integer "
                 "for STARTHOUR.", global.starthour);
         nrerror(ErrStr);
     }
 
     // Validate simulation end date and/or number of timesteps
-    if (global.nrecs == MISSING && global.endyear == MISSING &&
-        global.endmonth == MISSING && global.endday == MISSING) {
+    if (global.nrecs == 0 && global.endyear == 0 &&
+        global.endmonth == 0 && global.endday == 0) {
         sprintf(ErrStr,
                 "The model global file MUST define EITHER the number of "
                 "records to simulate (NRECS), or the year (ENDYEAR), month "
                 "(ENDMONTH), and day (ENDDAY) of the last full simulation day");
         nrerror(ErrStr);
     }
-    else if (global.nrecs == MISSING) {
-        if (global.endyear == MISSING) {
+    else if (global.nrecs == 0) {
+        if (global.endyear == 0) {
             sprintf(ErrStr,
                     "Simulation end year has not been defined.  Make sure "
                     "that the global file defines ENDYEAR.");
             nrerror(ErrStr);
         }
-        else if (global.endyear < 0) {
-            sprintf(ErrStr,
-                    "The specified simulation end year (%d) < 0.  Make sure "
-                    "that the global file defines a positive integer for "
-                    "ENDYEAR.", global.endyear);
-            nrerror(ErrStr);
-        }
-        if (global.endmonth == MISSING) {
+        if (global.endmonth == 0) {
             sprintf(ErrStr,
                     "Simulation end month has not been defined.  Make sure "
                     "that the global file defines ENDMONTH.");
             nrerror(ErrStr);
         }
-        else if (global.endmonth < 0) {
+        else if (global.endmonth > 12) {
             sprintf(ErrStr,
-                    "The specified simulation end month (%d) < 0.  Make sure "
+                    "The specified simulation end month (%hu) < 0.  Make sure "
                     "that the global file defines a positive integer for "
                     "ENDMONTH.", global.endmonth);
             nrerror(ErrStr);
         }
-        if (global.endday == MISSING) {
+        if (global.endday == 0) {
             sprintf(ErrStr,
                     "Simulation end day has not been defined.  Make sure "
                     "that the global file defines ENDDAY.");
             nrerror(ErrStr);
         }
-        else if (global.endday < 0) {
+        else if (global.endday > lastday[global.endmonth]) {
             sprintf(ErrStr,
-                    "The specified simulation end day (%d) < 0.  Make sure "
-                    "that the global file defines a positive integer for "
-                    "ENDDAY.", global.endday);
+                    "The specified simulation end day (%hu) > the number of "
+                    "days in the ENDMONTH (%hu).  Make sure that the global "
+                    "file defines a positive integer for ENDDAY.",
+                    global.endday, global.endmonth);
             nrerror(ErrStr);
         }
         tmpstartdate = global.startyear * 10000 + global.startmonth * 100 +
@@ -1040,7 +1017,7 @@ get_global_param(filenames_struct *names,
                 "file defines FORCING1.");
         nrerror(ErrStr);
     }
-    if (param_set.N_TYPES[1] != MISSING && global.forceyear[1] == MISSING) {
+    if (param_set.N_TYPES[1] != MISSING && global.forceyear[1] == 0) {
         global.forceyear[1] = global.forceyear[0];
         global.forcemonth[1] = global.forcemonth[0];
         global.forceday[1] = global.forceday[0];
@@ -1086,7 +1063,7 @@ get_global_param(filenames_struct *names,
                     "on the line that begins with \"VEGLIB\".");
             nrerror(ErrStr);
         }
-        if (options.ROOT_ZONES < 0) {
+        if (options.ROOT_ZONES == 0) {
             sprintf(ErrStr,
                     "ROOT_ZONES must be defined to a positive integer greater "
                     "than 0, in the global control file.");
@@ -1114,14 +1091,14 @@ get_global_param(filenames_struct *names,
         if (options.SPATIAL_FROST) {
             if (options.Nfrost > MAX_FROST_AREAS) {
                 sprintf(ErrStr,
-                        "\"SPATIAL_FROST\" was specified with %d frost "
+                        "\"SPATIAL_FROST\" was specified with %zu frost "
                         "subareas, which is greater than the maximum of %d.",
                         options.Nfrost, MAX_FROST_AREAS);
                 nrerror(ErrStr);
             }
             if (options.Nfrost < 1) {
                 sprintf(ErrStr,
-                        "\"SPATIAL_FROST\" was specified with %d frost "
+                        "\"SPATIAL_FROST\" was specified with %zu frost "
                         "subareas, which is less than the mainmum of 1.",
                         options.Nfrost);
                 nrerror(ErrStr);
@@ -1152,7 +1129,7 @@ get_global_param(filenames_struct *names,
         if (options.SNOW_BAND > 1) {
             if (strcmp(names->snowband, "MISSING") == 0) {
                 sprintf(ErrStr,
-                        "\"SNOW_BAND\" was specified with %d elevation bands, "
+                        "\"SNOW_BAND\" was specified with %zu elevation bands, "
                         "but no elevation band file has been defined.  "
                         "Make sure that the global file defines the elevation "
                         "band file on the line that begins with \"SNOW_BAND\" "
@@ -1161,7 +1138,7 @@ get_global_param(filenames_struct *names,
             }
             if (options.SNOW_BAND > MAX_BANDS) {
                 sprintf(ErrStr,
-                        "Global file wants more snow bands (%d) than are "
+                        "Global file wants more snow bands (%zu) than are "
                         "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
                         "recompile.", options.SNOW_BAND, MAX_BANDS);
                 nrerror(ErrStr);
@@ -1170,7 +1147,7 @@ get_global_param(filenames_struct *names,
         else if (options.SNOW_BAND <= 0) {
             sprintf(ErrStr,
                     "Invalid number of elevation bands specified in global "
-                    "file (%d).  Number of bands must be >= 1.",
+                    "file (%zu).  Number of bands must be >= 1.",
                     options.SNOW_BAND);
             nrerror(ErrStr);
         }
@@ -1197,8 +1174,8 @@ get_global_param(filenames_struct *names,
                         "begins with \"SAVE_STATE\".");
                 nrerror(ErrStr);
             }
-            if (global.stateyear == MISSING || global.statemonth == MISSING ||
-                global.stateday == MISSING) {
+            if (global.stateyear == 0 || global.statemonth == 0 ||
+                global.stateday == 0) {
                 sprintf(ErrStr,
                         "Incomplete specification of the date to save state "
                         "for state file (%s).\nSpecified date (yyyy-mm-dd): "
@@ -1251,7 +1228,7 @@ get_global_param(filenames_struct *names,
                 fprintf(stderr,
                         "WARNING: To run the model QUICK_FLUX=TRUE, you must "
                         "define exactly 3 soil thermal nodes.  Currently "
-                        "Nnodes is set to %d.  Setting Nnodes to 3.\n",
+                        "Nnodes is set to %zu.  Setting Nnodes to 3.\n",
                         options.Nnode);
                 options.Nnode = 3;
             }
@@ -1277,27 +1254,27 @@ get_global_param(filenames_struct *names,
             sprintf(ErrStr,
                     "You must define at least 3 soil moisture layers to run "
                     "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                    "Currently Nlayers is set to  %d.", options.Nlayer);
+                    "Currently Nlayers is set to  %zu.", options.Nlayer);
             nrerror(ErrStr);
         }
         if ((!options.FULL_ENERGY &&
              !options.FROZEN_SOIL) && options.Nlayer < 1) {
             sprintf(ErrStr,
                     "You must define at least 1 soil moisture layer to run "
-                    "the model.  Currently Nlayers is set to  %d.",
+                    "the model.  Currently Nlayers is set to  %zu.",
                     options.Nlayer);
             nrerror(ErrStr);
         }
         if (options.Nlayer > MAX_LAYERS) {
             sprintf(ErrStr,
-                    "Global file wants more soil moisture layers (%d) than "
+                    "Global file wants more soil moisture layers (%zu) than "
                     "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
                     "recompile.", options.Nlayer, MAX_LAYERS);
             nrerror(ErrStr);
         }
         if (options.Nnode > MAX_NODES) {
             sprintf(ErrStr,
-                    "Global file wants more soil thermal nodes (%d) than "
+                    "Global file wants more soil thermal nodes (%zu) than "
                     "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
                     "recompile.", options.Nnode, MAX_NODES);
             nrerror(ErrStr);

@@ -74,7 +74,7 @@ arno_evap(layer_data_struct *layer,
 
     int                  num_term;
     int                  i;
-    int                  frost_area;
+    size_t               frost_area;
     double               tmp, beta_asp, dummy;
     double               ratio, as;
     double               Epot; /* potential bare soil evaporation */

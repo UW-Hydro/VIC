@@ -148,8 +148,7 @@ snow_melt(double            Le,
           int               rec,
           int               iveg,
           int               band,
-          snow_data_struct *snow,
-          soil_con_struct  *soil_con)
+          snow_data_struct *snow)
 {
     extern option_struct options;
     double               error;
@@ -774,6 +773,7 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     fprintf(stderr, "Wind = %f\n", Wind);
 
     /* snow pack terms */
+    fprintf(stderr, "TSurf = %f\n", TSurf);
     fprintf(stderr, "OldTSurf = %f\n", OldTSurf);
     fprintf(stderr, "SnowCoverFract = %f\n", SnowCoverFract);
     fprintf(stderr, "SnowDensity = %f\n", SnowDensity);

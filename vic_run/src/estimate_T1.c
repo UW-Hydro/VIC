@@ -9,7 +9,6 @@ estimate_T1(double Ts,
             double D2,
             double kappa1,
             double kappa2,
-            double Cs1,
             double Cs2,
             double dp,
             double delta_t)

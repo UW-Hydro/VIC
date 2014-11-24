@@ -116,9 +116,8 @@ func_surf_energy_bal(double  Ts,
     /* define routine input variables */
 
     /* general model terms */
-    int                i;
+    size_t             i;
     int                rec;
-    int                month;
     int                VEG;
     int                veg_class;
     int                Error;
@@ -159,7 +158,7 @@ func_surf_energy_bal(double  Ts,
     double            *soil_density;
     double            *organic;
 
-    float             *root;
+    double            *root;
     double            *CanopLayerBnd;
 
     /* meteorological forcing terms */
@@ -294,7 +293,6 @@ func_surf_energy_bal(double  Ts,
 
     /* general model terms */
     rec = (int) va_arg(ap, int);
-    month = (int) va_arg(ap, int);
     VEG = (int) va_arg(ap, int);
     veg_class = (int) va_arg(ap, int);
     delta_t = (double) va_arg(ap, double);
@@ -317,7 +315,7 @@ func_surf_energy_bal(double  Ts,
     max_moist = (double) va_arg(ap, double);
     moist = (double) va_arg(ap, double);
 
-    root = (float  *) va_arg(ap, float  *);
+    root = (double  *) va_arg(ap, double  *);
     CanopLayerBnd = (double *) va_arg(ap, double *);
 
     /* meteorological forcing terms */
@@ -481,7 +479,7 @@ func_surf_energy_bal(double  Ts,
            T2 is the constant temperature at depths much greater than dp to which
            the soil temperature profile is asymptotic.
         **************************************************************/
-        *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs1, Cs2,
+        *T1 = estimate_T1(TMean, T1_old, T2, D1, D2, kappa1, kappa2, Cs2,
                           dp, delta_t);
 
         /*****************************************************
@@ -518,17 +516,14 @@ func_surf_energy_bal(double  Ts,
         if (options.IMPLICIT) {
             Error = solve_T_profile_implicit(Tnew_node, T_node, Tnew_fbflag,
                                              Tnew_fbcount, Zsum_node,
-                                             kappa_node, Cs_node,
-                                             moist_node, delta_t,
-                                             max_moist_node, bubble_node,
-                                             expt_node,
-                                             ice_node, alpha, beta, gamma, dp,
-                                             Nnodes,
-                                             FIRST_SOLN, FS_ACTIVE, NOFLUX,
-                                             EXP_TRANS, veg_class,
+                                             kappa_node, Cs_node, moist_node,
+                                             delta_t, max_moist_node,
+                                             bubble_node, expt_node, ice_node,
+                                             alpha, beta, gamma, dp, Nnodes,
+                                             FIRST_SOLN, NOFLUX, EXP_TRANS,
                                              bulk_dens_min, soil_dens_min,
-                                             quartz, bulk_density, soil_density,
-                                             organic, depth);
+                                             quartz, bulk_density,
+                                             soil_density, organic, depth);
 
             /* print out error information for IMPLICIT solution */
             if (Error == 0) {
@@ -549,13 +544,11 @@ func_surf_energy_bal(double  Ts,
             }
             Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag,
                                     Tnew_fbcount, Zsum_node, kappa_node,
-                                    Cs_node,
-                                    moist_node, delta_t, max_moist_node,
-                                    bubble_node,
+                                    Cs_node, moist_node, delta_t,
+                                    max_moist_node, bubble_node,
                                     expt_node, ice_node, alpha, beta, gamma, dp,
-                                    depth,
                                     Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX,
-                                    EXP_TRANS, veg_class);
+                                    EXP_TRANS);
         }
 
         if ((int)Error == ERROR) {
@@ -786,12 +779,10 @@ func_surf_energy_bal(double  Ts,
     *************************************************/
     if (VEG && !SNOWING && veg_var->vegcover > 0) {
         Evap = canopy_evap(layer, veg_var, TRUE,
-                           veg_class, month, Wdew, delta_t, NetBareRad, vpd,
-                           NetShortBare, Tair, Ra_used[1],
-                           displacement[1], roughness[1], ref_height[1],
-                           elevation, rainfall, depth, Wmax, Wcr, Wpwp,
-                           frost_fract,
-                           root, dryFrac, shortwave, Catm, CanopLayerBnd);
+                           veg_class, Wdew, delta_t, NetBareRad, vpd,
+                           NetShortBare, Tair, Ra_used[1], elevation, rainfall,
+                           Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
+                           shortwave, Catm, CanopLayerBnd);
         if (veg_var->vegcover < 1) {
             for (i = 0; i < options.Nlayer; i++) {
                 transp[i] = layer[i].evap;

@@ -2,7 +2,7 @@
 #include <vic_run.h>
 
 double
-calc_snow_coverage(int    *store_snow,
+calc_snow_coverage(char    *store_snow,
                    double  max_snow_distrib_slope,
                    double  old_coverage,
                    double  swq,

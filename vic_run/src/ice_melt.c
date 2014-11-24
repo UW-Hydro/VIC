@@ -143,8 +143,7 @@ ice_melt(double            z2,
          double           *save_sensible,
          double           *save_Qnet,
          double           *save_refreeze_energy,
-         double           *save_LWnet,
-         double            fracprv)
+         double           *save_LWnet)
 {
     extern option_struct options;
 
@@ -282,13 +281,14 @@ ice_melt(double            z2,
         snow->blowing_flux = CalcBlowingSnow((double) delta_t, air_temp,
                                              snow->last_snow, snow->surf_water,
                                              wind, Ls, density,
-                                             pressure, vp, Z0,
+                                             vp, Z0,
                                              z2, snow->depth, .95, 0.005,
                                              snow->surf_temp, 0, 1, 100.,
                                              .067, .0123, &snow->transport);
         if ((int)snow->blowing_flux == ERROR) {
             fprintf(stderr,
-                    "ERROR: ice_melt.c has an error from the call to CalcBlowingSnow\n");
+                    "ERROR: ice_melt.c has an error from the call to "
+                    "CalcBlowingSnow\n");
             fprintf(stderr, "Exiting module\n");
             return (ERROR);
         }
@@ -853,6 +853,7 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     fprintf(stderr, "Rain = %f\n", Rain);
     fprintf(stderr, "SweSurfaceLayer = %f\n", SweSurfaceLayer);
     fprintf(stderr, "SurfaceLiquidWater = %f\n", SurfaceLiquidWater);
+    fprintf(stderr, "TSurf = %f\n", TSurf);
     fprintf(stderr, "OldTSurf = %f\n", OldTSurf);
     fprintf(stderr, "RefreezeEnergy = %f\n", RefreezeEnergy[0]);
     fprintf(stderr, "vapor_flux = %f\n", *vapor_flux);

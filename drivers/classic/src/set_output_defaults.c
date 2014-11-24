@@ -33,8 +33,8 @@ set_output_defaults(out_data_struct *out_data)
 
     extern option_struct  options;
     out_data_file_struct *out_data_files;
-    int                   filenum;
-    int                   varnum;
+    unsigned              filenum;
+    unsigned              varnum;
 
     if (options.OUTPUT_FORCE) {
         // Output files
@@ -45,7 +45,7 @@ set_output_defaults(out_data_struct *out_data)
         strcpy(out_data_files[0].prefix, "full_data");
         out_data_files[0].nvars = 8;
         out_data_files[0].varid =
-            (int *)calloc(out_data_files[0].nvars, sizeof(int));
+            (unsigned *)calloc(out_data_files[0].nvars, sizeof(unsigned));
 
         // Variables in first file
         filenum = 0;
@@ -122,8 +122,8 @@ set_output_defaults(out_data_struct *out_data)
             out_data_files[filenum].nvars = 8;
         }
         for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-            out_data_files[filenum].varid = (int *)calloc(
-                out_data_files[filenum].nvars, sizeof(int));
+            out_data_files[filenum].varid = (unsigned *)calloc(
+                out_data_files[filenum].nvars, sizeof(unsigned));
         }
 
         // Variables in first file

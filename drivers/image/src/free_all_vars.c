@@ -17,7 +17,8 @@ free_all_vars(all_vars_struct *all_vars,
 {
     extern option_struct options;
 
-    int                  i, j, k, Nitems;
+    int                  i, j, Nitems;
+    size_t               k;
 
     Nitems = Nveg + 1;
 

@@ -51,7 +51,7 @@ get_force_type(char *cmdstr,
     /** Initialize flgstr **/
     strcpy(flgstr, "NULL");
 
-    if ((*field) >= param_set.N_TYPES[file_num]) {
+    if ((*field) >= (int)param_set.N_TYPES[file_num]) {
         sprintf(ErrStr, "Too many variables defined for forcing file %i.",
                 file_num);
         nrerror(ErrStr);

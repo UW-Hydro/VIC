@@ -21,11 +21,11 @@ calc_root_fractions(veg_con_struct  *veg_con,
     char                 ErrStr[MAXSTRING];
     int                  Nveg;
     int                  veg;
-    int                  layer;
-    int                  zone;
-    int                  i;
-    float                sum_fract;
-    float                dum;
+    size_t               layer;
+    size_t               zone;
+    size_t               i;
+    double               sum_fract;
+    double               dum;
     double               Zstep;
     double               Zsum;
     double               Lstep;

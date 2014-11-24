@@ -4,8 +4,7 @@
 
 void
 initialize_energy(energy_bal_struct **energy,
-                  soil_con_struct    *soil_con,
-                  int                 Nveg)
+                  size_t              Nveg)
 {
     extern option_struct options;
 

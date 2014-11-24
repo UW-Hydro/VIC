@@ -32,15 +32,15 @@ compute_treeline(atmos_data_struct *atmos,
 {
     extern option_struct       options;
     extern global_param_struct global_param;
-    extern int                 NF;
+    extern size_t              NF;
 
     double                     MonthSum;
     double                     AnnualSum;
     int                        MonthCnt;
     int                        AnnualCnt;
-    int                        rec;
-    int                        band;
-    int                        i;
+    unsigned                   rec;
+    size_t                     band;
+    size_t                     i;
 
     if (options.JULY_TAVG_SUPPLIED) {
         // use supplied average annual July air temperature

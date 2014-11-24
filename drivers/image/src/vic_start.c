@@ -18,7 +18,6 @@ vic_start(void)
 
     // read domain info
     get_global_domain(filenames.domain, &global_domain);
-    // print_domain(&global_domain, true);
 
     // decompose the mask
 

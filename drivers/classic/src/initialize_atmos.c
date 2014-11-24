@@ -136,16 +136,17 @@ initialize_atmos(atmos_data_struct    *atmos,
     extern option_struct       options;
     extern param_set_struct    param_set;
     extern global_param_struct global_param;
-    extern int                 NR, NF;
+    extern size_t              NR, NF;
 
-    int                        i;
-    int                        j;
-    int                        v;
-    int                        band;
-    int                        day;
-    int                        hour;
-    int                        rec;
+    size_t                     i;
+    size_t                     j;
+    size_t                     v;
+    size_t                     band;
+    unsigned short             day;
+    unsigned short             hour;
+    size_t                     rec;
     int                        idx;
+    int                        k;
     int                       *tmaxhour;
     int                       *tminhour;
     double                     cell_area;
@@ -172,8 +173,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     double                    *tskc;
     double                    *daily_vp;
     double                    *dailyrad;
-    int                        Ndays;
-    int                        stepspday;
+    size_t                     Ndays;
+    size_t                     stepspday;
     double                     sum, sum2;
     double                  ***veg_hist_data;
     double                  ***local_veg_hist_data;
@@ -186,12 +187,13 @@ initialize_atmos(atmos_data_struct    *atmos,
     int                        have_shortwave;
     int                        hour_offset_int;
     int                        tmp_starthour, tmp_endhour;
-    int                        local_startyear, local_startmonth,
-                               local_startday;
-    int                        local_starthour;
-    int                        day_in_year, year, month, days_in_month;
-    int                        tmp_nrecs;
-    int                        Ndays_local;
+    short                      local_startyear;
+    short                      local_startmonth;
+    short                      local_startday;
+    short                      local_starthour;
+    unsigned short             day_in_year, year, month, days_in_month;
+    size_t                     tmp_nrecs;
+    size_t                     Ndays_local;
     dmy_struct                *dmy_local;
     dmy_struct                 dmy_tmp;
     int                        month_days[12] = {
@@ -213,7 +215,9 @@ initialize_atmos(atmos_data_struct    *atmos,
     else {
         hour_offset_int = (int)(hour_offset + 0.5);
     }
-    hour_offset -= hour_offset_int; // hour_offset is now the distance from the center of local time zone
+
+    // hour_offset is now the distance from the center of local time zone
+    hour_offset -= hour_offset_int;
     phi = soil_con->lat;
     elevation = soil_con->elevation;
     slope = soil_con->slope;
@@ -237,8 +241,9 @@ initialize_atmos(atmos_data_struct    *atmos,
          ((!param_set.TYPE[SNOWF].SUPPLIED &&
            (!param_set.TYPE[LSSNOWF].SUPPLIED ||
             !param_set.TYPE[CSNOWF].SUPPLIED))))) {
-        nrerror(
-            "Input meteorological forcing files must contain some form of precipitation (PREC, or { {RAINF or {LSRAINF and CRAINF}} and {SNOWF or {LSSNOWF and CSNOWF}} }); check input files\n");
+        nrerror("Input meteorological forcing files must contain some form of "
+                "precipitation (PREC, or { {RAINF or {LSRAINF and CRAINF}} "
+                "and {SNOWF or {LSSNOWF and CSNOWF}} }); check input files\n");
     }
 
     if (!(param_set.TYPE[TMAX].SUPPLIED &&
@@ -247,8 +252,9 @@ initialize_atmos(atmos_data_struct    *atmos,
           param_set.FORCE_DT[param_set.TYPE[TMIN].SUPPLIED - 1] == 24) &&
         !(param_set.TYPE[AIR_TEMP].SUPPLIED &&
           param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED - 1] < 24)) {
-        nrerror(
-            "Input meteorological forcing files must contain either: a. Daily TMAX and TMIN (maximum and minimum air temperature) or b. sub-daily AIR_TEMP (air temperature); check input files\n");
+        nrerror("Input meteorological forcing files must contain either: a. "
+                "Daily TMAX and TMIN (maximum and minimum air temperature) or "
+                "b. sub-daily AIR_TEMP (air temperature); check input files\n");
     }
 
     /* Assign N_ELEM for veg-dependent forcings */
@@ -266,7 +272,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     /* compute number of full model time steps per day */
     stepspday = 24 / global_param.dt;
 
-    /* Compute number of days for MTCLIM (in local time); for sub-daily, we must pad start and end with dummy records */
+    /* Compute number of days for MTCLIM (in local time); for sub-daily, we
+       must pad start and end with dummy records */
     Ndays_local = Ndays;
     if (hour_offset_int != 0) {
         Ndays_local = Ndays + 1;
@@ -376,7 +383,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     if (options.ALMA_INPUT) {
         for (type = 0; type < N_FORCING_TYPES; type++) {
             if (param_set.TYPE[type].SUPPLIED) {
-                /* Convert moisture flux rates to accumulated moisture flux per time step */
+                /* Convert moisture flux rates to accumulated moisture flux 
+                   per time step */
                 if (type == PREC ||
                     type == RAINF ||
                     type == CRAINF ||
@@ -386,19 +394,16 @@ initialize_atmos(atmos_data_struct    *atmos,
                     type == LSSNOWF ||
                     type == CHANNEL_IN
                     ) {
-                    for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-                        forcing_data[type][idx] *=
+                    for (i = 0; i < (global_param.nrecs * NF); i++) {
+                        forcing_data[type][i] *=
                             param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED -
                                                1] * 3600;
                     }
                 }
                 /* Convert temperatures from K to C */
-                else if (type == AIR_TEMP ||
-                         type == TMIN ||
-                         type == TMAX
-                         ) {
-                    for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-                        forcing_data[type][idx] -= KELVIN;
+                else if (type == AIR_TEMP || type == TMIN || type == TMAX) {
+                    for (i = 0; i < (global_param.nrecs * NF); i++) {
+                        forcing_data[type][i] -= KELVIN;
                     }
                 }
             }
@@ -408,11 +413,9 @@ initialize_atmos(atmos_data_struct    *atmos,
         for (type = 0; type < N_FORCING_TYPES; type++) {
             if (param_set.TYPE[type].SUPPLIED) {
                 /* Convert pressures from kPa to Pa */
-                if (type == PRESSURE ||
-                    type == VP
-                    ) {
-                    for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-                        forcing_data[type][idx] *= kPa2Pa;
+                if (type == PRESSURE || type == VP) {
+                    for (i = 0; i < (global_param.nrecs * NF); i++) {
+                        forcing_data[type][i] *= kPa2Pa;
                     }
                 }
             }
@@ -431,9 +434,9 @@ initialize_atmos(atmos_data_struct    *atmos,
             forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),
                                                   sizeof(double));
         }
-        for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-            forcing_data[PREC][idx] = forcing_data[RAINF][idx] +
-                                      forcing_data[SNOWF][idx];
+        for (i = 0; i < (global_param.nrecs * NF); i++) {
+            forcing_data[PREC][i] = forcing_data[RAINF][i] +
+                                      forcing_data[SNOWF][i];
         }
         param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[RAINF].SUPPLIED;
     }
@@ -446,11 +449,11 @@ initialize_atmos(atmos_data_struct    *atmos,
             forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),
                                                   sizeof(double));
         }
-        for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-            forcing_data[PREC][idx] = forcing_data[CRAINF][idx] +
-                                      forcing_data[LSRAINF][idx] +
-                                      forcing_data[CSNOWF][idx] +
-                                      forcing_data[LSSNOWF][idx];
+        for (i = 0; i < (global_param.nrecs * NF); i++) {
+            forcing_data[PREC][i] = forcing_data[CRAINF][i] +
+                                      forcing_data[LSRAINF][i] +
+                                      forcing_data[CSNOWF][i] +
+                                      forcing_data[LSSNOWF][i];
         }
         param_set.TYPE[PREC].SUPPLIED = param_set.TYPE[LSRAINF].SUPPLIED;
     }
@@ -466,11 +469,11 @@ initialize_atmos(atmos_data_struct    *atmos,
             forcing_data[WIND] = (double *)calloc((global_param.nrecs * NF),
                                                   sizeof(double));
         }
-        for (idx = 0; idx < (global_param.nrecs * NF); idx++) {
-            forcing_data[WIND][idx] =
-                sqrt(forcing_data[WIND_E][idx] * forcing_data[WIND_E][idx] +
-                     forcing_data[WIND_N][idx] *
-                     forcing_data[WIND_N][idx]);
+        for (i = 0; i < (global_param.nrecs * NF); i++) {
+            forcing_data[WIND][i] = sqrt(forcing_data[WIND_E][i] *
+                                         forcing_data[WIND_E][i] +
+                                         forcing_data[WIND_N][i] *
+                                         forcing_data[WIND_N][i]);
         }
         param_set.TYPE[WIND].SUPPLIED = param_set.TYPE[WIND_E].SUPPLIED;
     }
@@ -482,14 +485,15 @@ initialize_atmos(atmos_data_struct    *atmos,
 
     local_forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
     if (local_forcing_data == NULL) {
-        nrerror(
-            "Memory allocation failure in initialize_atmos() for local_forcing_data");
+        nrerror("Memory allocation failure in initialize_atmos() for "
+                "local_forcing_data");
     }
     local_veg_hist_data =
         (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
     if (local_veg_hist_data == NULL) {
         nrerror(
-            "Memory allocation failure in initialize_atmos() for local_fveg_hist_data");
+            "Memory allocation failure in initialize_atmos() for "
+            "local_fveg_hist_data");
     }
     for (type = 0; type < N_FORCING_TYPES; type++) {
         // Allocate enough space for hourly data
@@ -516,45 +520,47 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
         if (param_set.TYPE[type].SUPPLIED) {
             if (param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED - 1] == 24) {
-                // Daily forcings in non-local time will straddle local day boundaries and need to be padded with an extra day at start or end
-                for (idx = 0; idx < Ndays_local; idx++) {
-                    i = idx;
+                /* Daily forcings in non-local time will straddle local day
+                   boundaries and need to be padded with an extra day at
+                   start or end */
+                for (idx = 0; idx < (int)Ndays_local; idx++) {
+                    k = idx;
                     if (hour_offset_int > 0) {
-                        i--;            // W. Hemisphere, in GMT time
+                        k--;            // W. Hemisphere, in GMT time
                     }
-                    if (i < 0) {
-                        i = 0; // W. Hemisphere, in GMT time; pad extra day in front
+                    if (k < 0) {
+                        k = 0; // W. Hemisphere, in GMT time; pad extra day in front
                     }
-                    if (i >= Ndays) {
-                        i = Ndays - 1; // E. Hemisphere, in GMT time; pad extra day at end
+                    if (k >= (int)Ndays) {
+                        k = (int)Ndays - 1; // E. Hemisphere, in GMT time; pad extra day at end
                     }
                     if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
-                        local_forcing_data[type][idx] = forcing_data[type][i];
+                        local_forcing_data[type][idx] = forcing_data[type][k];
                     }
                     else {
                         for (v = 0; v < param_set.TYPE[type].N_ELEM; v++) {
                             local_veg_hist_data[type][v][idx] =
-                                veg_hist_data[type][v][i];
+                                veg_hist_data[type][v][k];
                         }
                     }
                 }
             }
             else {
-                // Local sub-daily forcings will be hourly for coding convenience
-                // Sub-daily forcings need to a) start at hour 0, local time and b) draw from the correct element of the supplied forcings (if the supplied forcings are not in local time)
+                /* Local sub-daily forcings will be hourly for coding convenience
+                   Sub-daily forcings need to a) start at hour 0, local time
+                   and b) draw from the correct element of the supplied
+                   forcings (if the supplied forcings are not in local time) */
                 fstepspday = 24 /
                              param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED -
                                                 1];
-                for (idx = 0; idx < (Ndays_local * 24); idx++) {
-                    i =
-                        (idx - global_param.starthour +
-                         hour_offset_int) /
+                for (idx = 0; idx < ((int)Ndays_local * 24); idx++) {
+                    k = (idx - global_param.starthour + hour_offset_int) /
                         param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED - 1];
-                    if (i < 0) {
-                        i += fstepspday;
+                    if (k < 0) {
+                        k += fstepspday;
                     }
-                    if (i >= (Ndays * fstepspday)) {
-                        i -= fstepspday;
+                    if (k >= (int)(Ndays * fstepspday)) {
+                        k -= fstepspday;
                     }
                     if (type == PREC ||
                         type == RAINF ||
@@ -566,21 +572,22 @@ initialize_atmos(atmos_data_struct    *atmos,
                         type == CHANNEL_IN
                         ) {
                         /* Amounts per step need to be scaled to new step length */
-                        local_forcing_data[type][idx] = forcing_data[type][i] /
+                        local_forcing_data[type][idx] = forcing_data[type][k] /
                                                         param_set.FORCE_DT[
                             param_set.TYPE[type].SUPPLIED - 1];
                     }
                     else {
-                        /* All other forcings are assumed constant over hourly substeps */
+                        /* All other forcings are assumed constant over hourly
+                           substeps */
                         if (type != ALBEDO && type != LAI_IN && type !=
                             VEGCOVER) {
                             local_forcing_data[type][idx] =
-                                forcing_data[type][i];
+                                forcing_data[type][k];
                         }
                         else {
                             for (v = 0; v < param_set.TYPE[type].N_ELEM; v++) {
                                 local_veg_hist_data[type][v][idx] =
-                                    veg_hist_data[type][v][i];
+                                    veg_hist_data[type][v][k];
                             }
                         }
                     }
@@ -604,10 +611,10 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].channel_in[j] =
                         local_forcing_data[CHANNEL_IN][idx] /
-                        (float)(NF * stepspday);                                                  // divide evenly over the day
+                        (double)(NF * stepspday);                                                  // divide evenly over the day
                     atmos[rec].channel_in[j] *= 1000 / cell_area; // convert to mm over grid cell
                     sum += atmos[rec].channel_in[j];
                 }
@@ -672,9 +679,9 @@ initialize_atmos(atmos_data_struct    *atmos,
                 if (global_param.starthour - hour_offset_int < 0) {
                     hour += 24;
                 }
-                idx = (int)((float)hour / 24.0);
+                idx = (int)((double)hour / 24.0);
                 atmos[rec].prec[j] = local_forcing_data[PREC][idx] /
-                                     (float)(NF * stepspday);                       // divide evenly over the day
+                                     (double)(NF * stepspday);  // divide evenly over the day
                 sum += atmos[rec].prec[j];
             }
             if (NF > 1) {
@@ -728,12 +735,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].wind[j] = local_forcing_data[WIND][idx]; // assume constant over the day
                     sum += atmos[rec].wind[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].wind[NR] = sum / (float)NF;
+                    atmos[rec].wind[NR] = sum / (double)NF;
                 }
                 if (global_param.dt == 24) {
                     if (atmos[rec].wind[j] < options.MIN_WIND_SPEED) {
@@ -766,7 +773,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].wind[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].wind[NR] = sum / (float)NF;
+                    atmos[rec].wind[NR] = sum / (double)NF;
                 }
             }
         }
@@ -844,7 +851,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].air_temp[i];
             }
             if (NF > 1) {
-                atmos[rec].air_temp[NR] = sum / (float)NF;
+                atmos[rec].air_temp[NR] = sum / (double)NF;
             }
         }
     }
@@ -1011,12 +1018,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].vp[j] = local_forcing_data[VP][idx]; // assume constant over the day
                     sum += atmos[rec].vp[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (float)NF;
+                    atmos[rec].vp[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1045,7 +1052,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (float)NF;
+                    atmos[rec].vp[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1132,7 +1139,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             sum += atmos[rec].shortwave[i];
         }
         if (NF > 1) {
-            atmos[rec].shortwave[NR] = sum / (float)NF;
+            atmos[rec].shortwave[NR] = sum / (double)NF;
         }
     }
 
@@ -1168,7 +1175,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].air_temp[i];
             }
             if (NF > 1) {
-                atmos[rec].air_temp[NR] = sum / (float)NF;
+                atmos[rec].air_temp[NR] = sum / (double)NF;
             }
         }
     }
@@ -1193,12 +1200,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].density[j] = local_forcing_data[DENSITY][idx]; // assume constant over the day
                     sum += atmos[rec].density[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].density[NR] = sum / (float)NF;
+                    atmos[rec].density[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1221,7 +1228,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].density[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].density[NR] = sum / (float)NF;
+                    atmos[rec].density[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1309,12 +1316,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].pressure[j] = local_forcing_data[PRESSURE][idx]; // assume constant over the day
                     sum += atmos[rec].pressure[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].pressure[NR] = sum / (float)NF;
+                    atmos[rec].pressure[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1337,7 +1344,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].pressure[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].pressure[NR] = sum / (float)NF;
+                    atmos[rec].pressure[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1395,7 +1402,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     daily_vp[idx] = local_forcing_data[QAIR][idx] *
                                     atmos[rec].pressure[j] / EPS;
                 }
@@ -1417,7 +1424,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     daily_vp[idx] = local_forcing_data[REL_HUMID][idx] * svp(
                         atmos[rec].air_temp[j]) / 100;
                 }
@@ -1435,7 +1442,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         **************************************************/
 
         if (options.VP_INTERP) {
-            /* Linearly interpolate between daily VP values, assuming they occurred at time of tmin */
+            /* Linearly interpolate between daily VP values, assuming they
+               occurred at time of tmin */
 
             for (day = 0; day < Ndays_local; day++) {
                 if (day == 0 && Ndays_local == 1) {
@@ -1517,12 +1525,13 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].vp[i];
             }
             if (NF > 1) {
-                atmos[rec].vp[NR] = sum / (float)NF;
+                atmos[rec].vp[NR] = sum / (double)NF;
             }
         }
 
         /**************************************************
-           If sub-daily specific or relative humidity were supplied without pressure or temperature,
+           If sub-daily specific or relative humidity were supplied without
+           pressure or temperature,
            overwrite the sub-daily VP from MTCLIM here.
         **************************************************/
         if (param_set.TYPE[QAIR].SUPPLIED &&
@@ -1544,7 +1553,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (float)NF;
+                    atmos[rec].vp[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1568,7 +1577,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (float)NF;
+                    atmos[rec].vp[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1592,10 +1601,10 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
         if (param_set.TYPE[VP].SUPPLIED || options.VP_INTERP) { // ensure that vp[NR] and vpd[NR] are accurate averages of vp[i] and vpd[i]
             if (NF > 1) {
-                atmos[rec].vpd[NR] = sum / (float)NF;
+                atmos[rec].vpd[NR] = sum / (double)NF;
             }
             if (NF > 1) {
-                atmos[rec].vp[NR] = sum2 / (float)NF;
+                atmos[rec].vp[NR] = sum2 / (double)NF;
             }
         }
         else { // do not recompute vp[NR]; vpd[NR] is computed relative to vp[NR] and air_temp[NR]
@@ -1616,12 +1625,12 @@ initialize_atmos(atmos_data_struct    *atmos,
             if (global_param.starthour - hour_offset_int < 0) {
                 hour += 24;
             }
-            idx = (int)((float)hour / 24.0);
+            idx = (int)((double)hour / 24.0);
             atmos[rec].tskc[j] = tskc[idx]; // assume constant over the day
             sum += atmos[rec].tskc[j];
         }
         if (NF > 1) {
-            atmos[rec].tskc[NR] = sum / (float)NF;
+            atmos[rec].tskc[NR] = sum / (double)NF;
         }
     }
 
@@ -1639,7 +1648,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].longwave[i];
             }
             if (NF > 1) {
-                atmos[rec].longwave[NR] = sum / (float)NF;
+                atmos[rec].longwave[NR] = sum / (double)NF;
             }
         }
     }
@@ -1654,12 +1663,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].longwave[j] = local_forcing_data[LONGWAVE][idx]; // assume constant over the day
                     sum += atmos[rec].longwave[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].longwave[NR] = sum / (float)NF;
+                    atmos[rec].longwave[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1682,7 +1691,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].longwave[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].longwave[NR] = sum / (float)NF;
+                    atmos[rec].longwave[NR] = sum / (double)NF;
                 }
             }
         }
@@ -1714,7 +1723,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         if (global_param.starthour - hour_offset_int < 0) {
                             hour += 24;
                         }
-                        idx = (int)((float)hour / 24.0);
+                        idx = (int)((double)hour / 24.0);
                         if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH) {
                             veg_hist[rec][v].albedo[j] =
                                 local_veg_hist_data[ALBEDO][v][idx];            // assume constant over the day
@@ -1722,7 +1731,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].albedo[j];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].albedo[NR] = sum / (float)NF;
+                        veg_hist[rec][v].albedo[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1755,7 +1764,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].albedo[i];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].albedo[NR] = sum / (float)NF;
+                        veg_hist[rec][v].albedo[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1788,7 +1797,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         if (global_param.starthour - hour_offset_int < 0) {
                             hour += 24;
                         }
-                        idx = (int)((float)hour / 24.0);
+                        idx = (int)((double)hour / 24.0);
                         if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH) {
                             veg_hist[rec][v].LAI[j] =
                                 local_veg_hist_data[LAI_IN][v][idx];         // assume constant over the day
@@ -1796,7 +1805,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].LAI[j];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+                        veg_hist[rec][v].LAI[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1829,7 +1838,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].LAI[i];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+                        veg_hist[rec][v].LAI[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1862,7 +1871,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         if (global_param.starthour - hour_offset_int < 0) {
                             hour += 24;
                         }
-                        idx = (int)((float)hour / 24.0);
+                        idx = (int)((double)hour / 24.0);
                         if (local_veg_hist_data[VEGCOVER][v][idx] !=
                             NODATA_VH) {
                             veg_hist[rec][v].vegcover[j] =
@@ -1874,7 +1883,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].vegcover[j];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+                        veg_hist[rec][v].vegcover[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1911,7 +1920,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                         sum += veg_hist[rec][v].vegcover[i];
                     }
                     if (NF > 1) {
-                        veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+                        veg_hist[rec][v].vegcover[NR] = sum / (double)NF;
                     }
                 }
             }
@@ -1956,12 +1965,12 @@ initialize_atmos(atmos_data_struct    *atmos,
             if (global_param.starthour - hour_offset_int < 0) {
                 hour += 24;
             }
-            idx = (int)((float)hour / 24.0);
+            idx = (int)((double)hour / 24.0);
             atmos[rec].fdir[j] = fdir[idx]; // assume constant over the day
             sum += atmos[rec].fdir[j];
         }
         if (NF > 1) {
-            atmos[rec].fdir[NR] = sum / (float)NF;
+            atmos[rec].fdir[NR] = sum / (double)NF;
         }
     }
 
@@ -1978,7 +1987,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].par[i];
             }
             if (NF > 1) {
-                atmos[rec].par[NR] = sum / (float)NF;
+                atmos[rec].par[NR] = sum / (double)NF;
             }
         }
     }
@@ -1993,7 +2002,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     tmp_int = (int)(rec / stepspday) * stepspday;
                     tmp_double = 0;
                     for (i = 0; i < stepspday; i++) {
@@ -2011,7 +2020,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].par[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].par[NR] = sum / (float)NF;
+                    atmos[rec].par[NR] = sum / (double)NF;
                 }
             }
         }
@@ -2033,7 +2042,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].par[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].par[NR] = sum / (float)NF;
+                    atmos[rec].par[NR] = sum / (double)NF;
                 }
             }
         }
@@ -2052,7 +2061,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].Catm[i];
             }
             if (NF > 1) {
-                atmos[rec].Catm[NR] = sum / (float)NF;
+                atmos[rec].Catm[NR] = sum / (double)NF;
             }
         }
     }
@@ -2067,12 +2076,12 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (global_param.starthour - hour_offset_int < 0) {
                         hour += 24;
                     }
-                    idx = (int)((float)hour / 24.0);
+                    idx = (int)((double)hour / 24.0);
                     atmos[rec].Catm[j] = local_forcing_data[CATM][idx] * 1e-6; // convert ppm to mixing ratio
                     sum += atmos[rec].Catm[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].Catm[NR] = sum / (float)NF;
+                    atmos[rec].Catm[NR] = sum / (double)NF;
                 }
             }
         }
@@ -2095,7 +2104,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].Catm[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].Catm[NR] = sum / (float)NF;
+                    atmos[rec].Catm[NR] = sum / (double)NF;
                 }
             }
         }

@@ -11,7 +11,6 @@ put_data(all_vars_struct   *all_vars,
          lake_con_struct   *lake_con,
          out_data_struct   *out_data,
          save_data_struct  *save_data,
-         dmy_struct        *dmy,
          int                rec)
 /**********************************************************************
         put_data.c	Dag Lohmann		January 1996
@@ -157,17 +156,16 @@ put_data(all_vars_struct   *all_vars,
 {
     extern global_param_struct global_param;
     extern option_struct       options;
-    int                        veg;
-    int                        index;
-    int                        band;
-    int                        Nbands;
+    size_t                     veg;
+    size_t                     index;
+    size_t                     band;
+    size_t                     Nbands;
     int                        overstory;
     int                        HasVeg;
     int                        IsWet;
     char                      *AboveTreeLine;
     double                    *AreaFract;
     double                    *depth;
-    double                    *dz;
     double                    *frost_fract;
     double                     frost_slope;
     double                     Cv;
@@ -183,7 +181,8 @@ put_data(all_vars_struct   *all_vars,
     double                     ThisAreaFract;
     double                     ThisTreeAdjust;
     int                        v;
-    int                        i;
+    size_t                     i;
+    short                      j;
     int                        dt_sec;
     int                        out_dt_sec;
     int                        out_step_ratio;
@@ -209,7 +208,6 @@ put_data(all_vars_struct   *all_vars,
     AboveTreeLine = soil_con->AboveTreeLine;
     AreaFract = soil_con->AreaFract;
     depth = soil_con->depth;
-    dz = soil_con->dz_node;
     frost_fract = soil_con->frost_fract;
     frost_slope = soil_con->frost_slope;
     dt_sec = global_param.dt * SECPHOUR;
@@ -251,7 +249,7 @@ put_data(all_vars_struct   *all_vars,
         }
         if (TreeAdjustFactor[band] != 1 && rec == 0) {
             fprintf(stderr,
-                    "WARNING: Tree adjust factor for band %i is equal to %f.\n",
+                    "WARNING: Tree adjust factor for band %zu is equal to %f.\n",
                     band, TreeAdjustFactor[band]);
         }
     }
@@ -352,12 +350,10 @@ put_data(all_vars_struct   *all_vars,
                     collect_wb_terms(cell[veg][band],
                                      veg_var[veg][band],
                                      snow[veg][band],
-                                     lake_var,
                                      Cv,
                                      ThisAreaFract,
                                      ThisTreeAdjust,
                                      HasVeg,
-                                     0,
                                      (1 - Clake),
                                      overstory,
                                      depth,
@@ -383,8 +379,6 @@ put_data(all_vars_struct   *all_vars,
                                      (1 - Clake),
                                      overstory,
                                      band,
-                                     depth,
-                                     dz,
                                      frost_fract,
                                      frost_slope,
                                      out_data);
@@ -418,9 +412,9 @@ put_data(all_vars_struct   *all_vars,
                             lake_var.energy.ice[i] = energy[veg][band].ice[i];
                             lake_var.energy.T[i] = energy[veg][band].T[i];
                         }
-                        for (i = 0; i < N_PET_TYPES; i++) {
-                            lake_var.soil.pot_evap[i] =
-                                cell[veg][band].pot_evap[i];
+                        for (j = 0; j < N_PET_TYPES; j++) {
+                            lake_var.soil.pot_evap[j] =
+                                cell[veg][band].pot_evap[j];
                         }
                         lake_var.soil.rootmoist = cell[veg][band].rootmoist;
                         lake_var.energy.deltaH = energy[veg][band].deltaH;
@@ -434,12 +428,10 @@ put_data(all_vars_struct   *all_vars,
                         collect_wb_terms(lake_var.soil,
                                          veg_var[0][0],
                                          lake_var.snow,
-                                         lake_var,
                                          Cv,
                                          ThisAreaFract,
                                          ThisTreeAdjust,
                                          0,
-                                         1,
                                          Clake,
                                          overstory,
                                          depth,
@@ -465,8 +457,6 @@ put_data(all_vars_struct   *all_vars,
                                          Clake,
                                          overstory,
                                          band,
-                                         depth,
-                                         dz,
                                          frost_fract,
                                          frost_slope,
                                          out_data);
@@ -697,38 +687,19 @@ put_data(all_vars_struct   *all_vars,
     ********************/
     if (options.FULL_ENERGY) {
         out_data[OUT_ENERGY_ERROR].data[0] = calc_energy_balance_error(rec,
-                                                                       out_data[
-                                                                           OUT_NET_SHORT].data[
-                                                                           0] +
-                                                                       out_data[
-        OUT_NET_LONG].data[0],
-                                                                       out_data[
-                                                                           OUT_LATENT].data[
-                                                                           0] +
-                                                                       out_data[
-        OUT_LATENT_SUB].data[0],
-                                                                       out_data[
-                                                                           OUT_SENSIBLE].data[
-                                                                           0] +
-                                                                       out_data[
-        OUT_ADV_SENS].data[0],
-                                                                       out_data[
-                                                                           OUT_GRND_FLUX].data[
-                                                                           0] +
-                                                                       out_data[
-        OUT_DELTAH].data[0] +
-                                                                       out_data[
-                                                                           OUT_FUSION].data[
-                                                                           0],
-                                                                       out_data[
-                                                                           OUT_ADVECTION].data[
-                                                                           0] -
-                                                                       out_data[
-        OUT_DELTACC].data[0] +
-                                                                       out_data[
-                                                                           OUT_SNOW_FLUX].data[
-                                                                           0] +
-        out_data[OUT_RFRZ_ENERGY].data[0]);
+                                           out_data[OUT_NET_SHORT].data[0] +
+                                           out_data[OUT_NET_LONG].data[0],
+                                           out_data[OUT_LATENT].data[0] +
+                                           out_data[OUT_LATENT_SUB].data[0],
+                                           out_data[OUT_SENSIBLE].data[0] +
+                                           out_data[OUT_ADV_SENS].data[0],
+                                           out_data[OUT_GRND_FLUX].data[0] +
+                                           out_data[OUT_DELTAH].data[0] +
+                                           out_data[OUT_FUSION].data[0],
+                                           out_data[OUT_ADVECTION].data[0] -
+                                           out_data[OUT_DELTACC].data[0] +
+                                           out_data[OUT_SNOW_FLUX].data[0] +
+                                           out_data[OUT_RFRZ_ENERGY].data[0]);
     }
     else {
         out_data[OUT_ENERGY_ERROR].data[0] = 0; // Perhaps this should be replaced with a NODATA value in this case
@@ -745,7 +716,7 @@ put_data(all_vars_struct   *all_vars,
     /********************
        Report T Fallback Occurrences
     ********************/
-    if (rec == global_param.nrecs - 1) {
+    if (rec == (int)global_param.nrecs - 1) {
         fprintf(stderr, "Total number of fallbacks in Tfoliage: %d\n",
                 Tfoliage_fbcount_total);
         fprintf(stderr, "Total number of fallbacks in Tcanopy: %d\n",
@@ -801,12 +772,10 @@ void
 collect_wb_terms(cell_data_struct cell,
                  veg_var_struct   veg_var,
                  snow_data_struct snow,
-                 lake_var_struct  lake_var,
                  double           Cv,
                  double           AreaFract,
                  double           TreeAdjustFactor,
                  int              HasVeg,
-                 int              IsWet,
                  double           lakefactor,
                  int              overstory,
                  double          *depth,
@@ -820,8 +789,8 @@ collect_wb_terms(cell_data_struct cell,
     double               tmp_cond2;
     double               tmp_moist;
     double               tmp_ice;
-    int                  index;
-    int                  frost_area;
+    size_t               index;
+    size_t               frost_area;
 
     AreaFactor = Cv * AreaFract * TreeAdjustFactor * lakefactor;
 
@@ -1006,8 +975,6 @@ collect_eb_terms(energy_bal_struct energy,
                  double            lakefactor,
                  int               overstory,
                  int               band,
-                 double           *depth,
-                 double           *dz,
                  double           *frost_fract,
                  double            frost_slope,
                  out_data_struct  *out_data)
@@ -1017,8 +984,8 @@ collect_eb_terms(energy_bal_struct energy,
     double               tmp_fract;
     double               rad_temp;
     double               surf_temp;
-    int                  index;
-    int                  frost_area;
+    size_t               index;
+    size_t               frost_area;
 
     AreaFactor = Cv * AreaFract * TreeAdjustFactor * lakefactor;
 

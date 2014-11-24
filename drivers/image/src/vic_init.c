@@ -144,7 +144,7 @@ vic_init(void)
         get_nc_field_double(filenames.veglib, "RGL",
                             d3start, d3count, dvar);
         for (i = 0; i < global_domain.ncells_global; i++) {
-            veg_lib[i][j].RGL = (float) dvar[idx[i]];
+            veg_lib[i][j].RGL = (double)dvar[idx[i]];
         }
     }
 
@@ -704,7 +704,7 @@ vic_init(void)
                         "setting grid cell elevation to average "
                         "band elevation.\n%s",
                         mean, soil_con[i].elevation, locstr);
-                soil_con[i].elevation = (float) mean;
+                soil_con[i].elevation = (double)mean;
             }
             // Tfactor: calculate the temperature factor
             for (j = 0; j < options.SNOW_BAND; j++) {
@@ -1087,14 +1087,14 @@ vic_init(void)
     for (i = 0; i < global_domain.ncells_global; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
-        initialize_soil(all_vars[i].cell, &(soil_con[i]), veg_con[i], nveg);
-        initialize_veg(all_vars[i].veg_var, veg_con[i], nveg);
+        initialize_soil(all_vars[i].cell, &(soil_con[i]), nveg);
+        initialize_veg(all_vars[i].veg_var, nveg);
         if (options.LAKES) {
             sprintf(errstr,
                     "LAKES option not yet implemented in vic_init()");
             nrerror(errstr);
         }
-        initialize_energy(all_vars[i].energy, &(soil_con[i]), nveg);
+        initialize_energy(all_vars[i].energy, nveg);
     }
 
     // TBD: handle decomposed domain

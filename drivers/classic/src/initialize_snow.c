@@ -4,8 +4,7 @@
 
 void
 initialize_snow(snow_data_struct **snow,
-                int                veg_num,
-                int                cellnum)
+                size_t             veg_num)
 
 /**********************************************************************
         initialize_snow		Keith Cherkauer		January 22, 1997
@@ -62,7 +61,7 @@ initialize_snow(snow_data_struct **snow,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  i, j;
+    size_t               i, j;
 
     for (i = 0; i <= veg_num; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
@@ -73,7 +72,7 @@ initialize_snow(snow_data_struct **snow,
             snow[i][j].coverage = 0.0;
             snow[i][j].density = 0.0;
             snow[i][j].depth = 0.0;
-            snow[i][j].last_snow = MISSING;
+            snow[i][j].last_snow = 0;
             snow[i][j].max_snow_depth = 0.0;
             snow[i][j].MELTING = FALSE;
             snow[i][j].pack_temp = 0.0;
@@ -85,7 +84,7 @@ initialize_snow(snow_data_struct **snow,
             snow[i][j].store_swq = 0.0;
             snow[i][j].surf_temp = 0.0;
             snow[i][j].surf_temp_fbflag = 0;
-            snow[i][j].surf_temp_fbcount = 0;
+            snow[i][j].surf_temp_fbcount = FALSE;
             snow[i][j].surf_water = 0.0;
             snow[i][j].swq = 0.0;
             snow[i][j].snow_distrib_slope = 0.0;

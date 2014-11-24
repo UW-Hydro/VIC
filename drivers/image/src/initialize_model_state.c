@@ -4,12 +4,11 @@
 
 int
 initialize_model_state(all_vars_struct *all_vars,
-                       int              Nveg,
-                       int              Nnodes,
+                       size_t           Nveg,
+                       size_t           Nnodes,
                        double           surf_temp,
                        soil_con_struct *soil_con,
-                       veg_con_struct  *veg_con,
-                       veg_lib_struct  *veg_lib)
+                       veg_con_struct  *veg_con)
 /**********************************************************************
    initialize_model_state      Keith Cherkauer	    April 17, 2000
 
@@ -30,10 +29,11 @@ initialize_model_state(all_vars_struct *all_vars,
 
     char                       ErrStr[MAXSTRING];
     char                       FIRST_VEG;
-    int                        veg, index;
-    int                        lidx;
-    int                        band;
-    int                        frost_area;
+    size_t                     veg;
+    size_t                     index;
+    size_t                     lidx;
+    size_t                     band;
+    size_t                     frost_area;
     int                        ErrorFlag;
     double                     Cv;
     double                     Zsum, dp;
@@ -176,7 +176,7 @@ initialize_model_state(all_vars_struct *all_vars,
                             // least 3 nodes in the top 50cm
                             if (Nnodes < 5 * logf(dp + 1.) + 1) {
                                 sprintf(ErrStr,
-                                        "The number of soil thermal nodes (%d) "
+                                        "The number of soil thermal nodes (%zu) "
                                         "is too small for the supplied damping "
                                         "depth (%f) with EXP_TRANS set to "
                                         "TRUE, leading to fewer than 3 nodes "
@@ -294,17 +294,15 @@ initialize_model_state(all_vars_struct *all_vars,
                     /** Set soil properties for all soil nodes **/
                     if (FIRST_VEG) {
                         FIRST_VEG = FALSE;
-                        set_node_parameters(soil_con->dz_node,
-                                            soil_con->Zsum_node,
+                        set_node_parameters(soil_con->Zsum_node,
                                             soil_con->max_moist_node,
                                             soil_con->expt_node,
                                             soil_con->bubble_node,
                                             soil_con->alpha, soil_con->beta,
                                             soil_con->gamma, soil_con->depth,
                                             soil_con->max_moist, soil_con->expt,
-                                            soil_con->bubble, soil_con->quartz,
-                                            Nnodes, options.Nlayer,
-                                            soil_con->FS_ACTIVE);
+                                            soil_con->bubble,
+                                            Nnodes, options.Nlayer);
                     }
 
                     // set soil moisture properties for all soil thermal nodes
@@ -393,9 +391,6 @@ initialize_model_state(all_vars_struct *all_vars,
                             cell[veg][band].layer,
                             soil_con->Zsum_node,
                             energy[veg][band].T,
-                            soil_con->max_moist_node,
-                            soil_con->expt_node,
-                            soil_con->bubble_node,
                             soil_con->depth,
                             soil_con->max_moist,
                             soil_con->expt,
@@ -416,270 +411,6 @@ initialize_model_state(all_vars_struct *all_vars,
             }
         }
     }
-
-    return(0);
-}
-
-int
-update_thermal_nodes(all_vars_struct *all_vars,
-                     int              Nveg,
-                     int              Nnodes,
-                     soil_con_struct *soil_con,
-                     veg_con_struct  *veg_con,
-                     veg_lib_struct  *veg_lib)
-/**********************************************************************
-   update_thermal_nodes           Jennifer Adam        August 16, 2007
-
-   This routine is run after subsidence occurs (used only for EXCESS_ICE option).
-   This routine updates the node depths and interpolates the current
-   node temperatures to the new depths, then recalculates the nodal
-   thermal properties.  Much of this routine is taken directly from
-   initialize_model_state.
-
-   Modifications:
-   2009-Feb-09 Removed dz_node from call to
-              distribute_node_moisture_properties.			KAC via TJB
-   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-**********************************************************************/
-{
-    extern option_struct options;
-    char                 ErrStr[MAXSTRING];
-    char                 FIRST_VEG;
-    int                  veg, index;
-    int                  lidx;
-    int                  band;
-    int                  ErrorFlag;
-    double               Cv;
-    double               Zsum, dp;
-    double               tmpdp, tmpadj, Bexp;
-    double               moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-
-    cell_data_struct   **cell;
-    energy_bal_struct  **energy;
-
-    double               Tnode_prior[MAX_NODES];
-    double               Zsum_prior[MAX_NODES];
-
-    cell = all_vars->cell;
-    energy = all_vars->energy;
-
-    dp = soil_con->dp;
-
-    FIRST_VEG = TRUE;
-
-    /*****************************************************************
-       Update soil thermal node depths, thicknesses, and temperatures.
-       CASE 3: Initialize Energy Balance Variables if not using quick
-       ground heat flux, and no Initial Condition File Given
-    *****************************************************************/
-
-    /*****************************************************************
-       Update soil thermal node depths and thicknesses.
-    *****************************************************************/
-    // set previous Zsum
-    for (index = 0; index < Nnodes; index++) {
-        Zsum_prior[index] = soil_con->Zsum_node[index];
-    }
-
-    if (!options.EXP_TRANS) {
-        /* Nodes set at surface, the depth of the first layer,
-           twice the depth of the first layer, and at the
-           damping depth.  Extra nodes are placed equal distance
-           between the damping depth and twice the depth of the
-           first layer. */
-
-        soil_con->dz_node[0] = soil_con->depth[0];
-        soil_con->dz_node[1] = soil_con->depth[0];
-        soil_con->dz_node[2] = soil_con->depth[0];
-        soil_con->Zsum_node[0] = 0;
-        soil_con->Zsum_node[1] = soil_con[0].depth[0];
-        Zsum = 2. * soil_con[0].depth[0];
-        soil_con->Zsum_node[2] = Zsum;
-        tmpdp = dp - soil_con[0].depth[0] * 2.5;
-        tmpadj = 3.5;
-        for (index = 3; index < Nnodes - 1; index++) {
-            soil_con->dz_node[index] = tmpdp / (((double)Nnodes - tmpadj));
-            Zsum += (soil_con->dz_node[index] +
-                     soil_con->dz_node[index - 1]) / 2.;
-            soil_con->Zsum_node[index] = Zsum;
-        }
-        soil_con->dz_node[Nnodes - 1] = (dp - Zsum -
-                                         soil_con->dz_node[Nnodes - 2] /
-                                         2.) * 2.;
-        Zsum += (soil_con->dz_node[Nnodes - 2] +
-                 soil_con->dz_node[Nnodes - 1]) / 2.;
-        soil_con->Zsum_node[Nnodes - 1] = Zsum;
-        if ((int)(Zsum * 1000 + 0.5) != (int)(dp * 1000 + 0.5)) {
-            sprintf(ErrStr,
-                    "Sum of thermal node thicknesses (%f) in "
-                    "initialize_model_state do not equal dp (%f), "
-                    "check initialization procedure", Zsum,
-                    dp);
-            nrerror(ErrStr);
-        }
-    }
-    else { // exponential grid transformation, EXP_TRANS = TRUE
-           // calculate exponential function parameter
-           // to force Zsum=dp at bottom node
-        Bexp = logf(dp + 1.) / (double)(Nnodes - 1);
-        for (index = 0; index <= Nnodes - 1; index++) {
-            soil_con->Zsum_node[index] = expf(Bexp * index) - 1.;
-        }
-
-        // top node
-        index = 0;
-        soil_con->dz_node[index] =
-            soil_con->Zsum_node[index + 1] - soil_con->Zsum_node[index];
-        // middle nodes
-        for (index = 1; index < Nnodes - 1; index++) {
-            soil_con->dz_node[index] =
-                (soil_con->Zsum_node[index +
-                                     1] -
-                 soil_con->Zsum_node[index]) / 2. +
-                (soil_con->Zsum_node[index] -
-                 soil_con->Zsum_node[index - 1]) / 2.;
-        }
-        // bottom node
-        index = Nnodes - 1;
-        soil_con->dz_node[index] = soil_con->Zsum_node[index] -
-                                   soil_con->Zsum_node[index - 1];
-    }
-
-    /******************************************
-       Update soil thermal node temperatures via linear interpolation.
-    ******************************************/
-    for (veg = 0; veg <= Nveg; veg++) {
-        // Initialize soil for existing vegetation types
-        Cv = veg_con[veg].Cv;
-
-        if (Cv > 0) {
-            for (band = 0; band < options.SNOW_BAND; band++) {
-                if (soil_con->AreaFract[band] > 0.) {
-                    // set previous temperatures
-                    for (index = 0; index < Nnodes; index++) {
-                        Tnode_prior[index] = energy[veg][band].T[index];
-                    }
-                    // top node: no need to update surface temperature
-                    // remaining nodes
-                    for (index = 1; index < Nnodes; index++) {
-                        energy[veg][band].T[index] = linear_interp(
-                            soil_con->Zsum_node[index], Zsum_prior[index - 1],
-                            Zsum_prior[index], Tnode_prior[index - 1],
-                            Tnode_prior[index]);
-                    } // node
-                }
-            } // band
-        }
-    } // veg
-
-    /******************************************
-       Update soil thermal node properties
-    ******************************************/
-    FIRST_VEG = TRUE;
-    for (veg = 0; veg <= Nveg; veg++) {
-        // Initialize soil for existing vegetation types
-        Cv = veg_con[veg].Cv;
-
-        if (Cv > 0) {
-            for (band = 0; band < options.SNOW_BAND; band++) {
-                // Initialize soil for existing snow elevation bands
-                if (soil_con->AreaFract[band] > 0.) {
-                    /** Set soil properties for all soil nodes **/
-                    if (FIRST_VEG) {
-                        FIRST_VEG = FALSE;
-                        set_node_parameters(soil_con->dz_node,
-                                            soil_con->Zsum_node,
-                                            soil_con->max_moist_node,
-                                            soil_con->expt_node,
-                                            soil_con->bubble_node,
-                                            soil_con->alpha, soil_con->beta,
-                                            soil_con->gamma, soil_con->depth,
-                                            soil_con->max_moist, soil_con->expt,
-                                            soil_con->bubble, soil_con->quartz,
-                                            Nnodes, options.Nlayer,
-                                            soil_con->FS_ACTIVE);
-                    }
-
-                    for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                        moist[veg][band][lidx] =
-                            cell[veg][band].layer[lidx].moist;
-                    }
-
-                    // set soil moisture properties for all soil thermal nodes
-                    if (!(options.LAKES && veg_con->LAKE != 0)) {
-                        ErrorFlag =
-                            distribute_node_moisture_properties(
-                                energy[veg][band].moist,
-                                energy[veg][band].ice,
-                                energy[veg][band].kappa_node,
-                                energy[veg][band].Cs_node,
-                                soil_con->Zsum_node,
-                                energy[veg][band].T,
-                                soil_con->max_moist_node,
-                                soil_con->expt_node,
-                                soil_con->bubble_node,
-                                moist[veg][band],
-                                soil_con->depth,
-                                soil_con->soil_dens_min,
-                                soil_con->bulk_dens_min,
-                                soil_con->quartz,
-                                soil_con->soil_density,
-                                soil_con->bulk_density,
-                                soil_con->organic,
-                                Nnodes, options.Nlayer,
-                                soil_con->FS_ACTIVE);
-                        if (ErrorFlag == ERROR) {
-                            return (ErrorFlag);
-                        }
-                    }
-
-                    /* initialize layer moistures and ice contents */
-                    if (!(options.LAKES && veg_con->LAKE != 0)) {
-                        if (options.QUICK_FLUX) {
-                            ErrorFlag = estimate_layer_ice_content_quick_flux(
-                                cell[veg][band].layer,
-                                soil_con->depth, soil_con->dp,
-                                energy[
-                                    veg][band].T[0], energy[veg][band].T[1],
-                                soil_con->avg_temp, soil_con->max_moist,
-                                soil_con->expt, soil_con->bubble,
-                                soil_con->frost_fract, soil_con->frost_slope,
-                                soil_con->FS_ACTIVE);
-                        }
-                        else {
-                            ErrorFlag =
-                                estimate_layer_ice_content(
-                                    cell[veg][band].layer,
-                                    soil_con->Zsum_node,
-                                    energy[veg][band].T,
-                                    soil_con->max_moist_node,
-                                    soil_con->expt_node,
-                                    soil_con->bubble_node,
-                                    soil_con->depth,
-                                    soil_con->max_moist,
-                                    soil_con->expt,
-                                    soil_con->bubble,
-                                    soil_con->frost_fract,
-                                    soil_con->frost_slope,
-                                    Nnodes, options.Nlayer,
-                                    soil_con->FS_ACTIVE);
-                        }
-                    }
-
-                    /* Find freezing and thawing front depths */
-                    if (!options.QUICK_FLUX && soil_con->FS_ACTIVE) {
-                        if (!(options.LAKES && veg_con->LAKE != 0)) {
-                            find_0_degree_fronts(&energy[veg][band],
-                                                 soil_con->Zsum_node,
-                                                 energy[veg][band].T, Nnodes);
-                        }
-                    }
-                }
-            } // band
-        }
-    } // veg
 
     return(0);
 }

@@ -3,8 +3,7 @@
 #include <vic_driver_classic.h>
 
 cell_data_struct **
-make_cell_data(int veg_type_num,
-               int Nlayer)
+make_cell_data(size_t veg_type_num)
 
 /**********************************************************************
         make_cell_data	Keith Cherkauer		July 9, 1997
@@ -16,7 +15,7 @@ make_cell_data(int veg_type_num,
 {
     extern option_struct options;
 
-    int                  i;
+    size_t               i;
     cell_data_struct   **temp;
 
     temp = (cell_data_struct**) calloc(veg_type_num,

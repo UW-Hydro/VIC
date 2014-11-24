@@ -10,12 +10,9 @@ solve_snow(char               overstory,
            double             Tcanopy,          // canopy air temperature
            double             Tgrnd,          // soil surface temperature
            double             air_temp,          // air temperature
-           double             dp,
            double             prec,
            double             snow_grnd_flux,
-           double             wind_h,
            double            *AlbedoUnder,
-           double            *Evap,
            double            *Le,
            double            *LongUnderIn,          // surface incomgin LW
            double            *NetLongSnow,          // net LW at snow surface
@@ -42,13 +39,12 @@ solve_snow(char               overstory,
            double            *snowfall,
            double            *surf_atten,
            double            *wind,
-           float             *root,
+           double            *root,
            int                INCLUDE_SNOW,
-           int                Nnodes,
-           int                Nveg,
-           int                iveg,
-           int                band,
-           int                dt,
+           size_t             Nveg,
+           unsigned short     iveg,
+           unsigned short     band,
+           unsigned short     dt,
            int                rec,
            int                hidx,
            int                veg_class,
@@ -145,7 +141,6 @@ solve_snow(char               overstory,
     double                 tmp_grnd_flux;
     double                 store_snowfall;
     int                    month;
-    int                    hour;
     int                    day_in_year;
     double                 density;
     double                 longwave;
@@ -155,7 +150,6 @@ solve_snow(char               overstory,
     double                 vpd;
 
     month = dmy[rec].month;
-    hour = dmy[rec].hour;
     day_in_year = dmy[rec].day_in_year;
 
     density = atmos->density[hidx];
@@ -238,8 +232,7 @@ solve_snow(char               overstory,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
                                            veg_var->Wdmax,
-                                           ShortOverIn, *ShortUnderIn, Tcanopy,
-                                           BareAlbedo,
+                                           ShortOverIn, Tcanopy, BareAlbedo,
                                            &energy->canopy_advection,
                                            &energy->AlbedoOver,
                                            &veg_var->Wdew, &snow->snow_canopy,
@@ -260,7 +253,7 @@ solve_snow(char               overstory,
                                            displacement,
                                            ref_height, roughness, root,
                                            *UnderStory, band,
-                                           hour, iveg, month, rec, hidx,
+                                           iveg, month, rec, hidx,
                                            veg_class,
                                            CanopLayerBnd, dryFrac, atmos,
                                            layer, soil_con, veg_var);
@@ -355,9 +348,8 @@ solve_snow(char               overstory,
                 // age snow albedo if no new snowfall
                 // ignore effects of snow dropping from canopy; only consider fresh snow from sky
                 snow->last_snow++;
-                snow->albedo = snow_albedo(*snowfall, snow->swq, snow->depth,
-                                           snow->albedo, snow->coldcontent,
-                                           (double)dt,
+                snow->albedo = snow_albedo(*snowfall, snow->swq, snow->albedo,
+                                           snow->coldcontent, (double)dt,
                                            snow->last_snow, snow->MELTING);
                 (*AlbedoUnder) =
                     (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
@@ -386,7 +378,7 @@ solve_snow(char               overstory,
                                   &energy->latent,
                                   &energy->latent_sub, &energy->refreeze_energy,
                                   &energy->sensible, INCLUDE_SNOW,
-                                  rec, iveg, band, snow, soil_con);
+                                  rec, iveg, band, snow);
             if (ErrorFlag == ERROR) {
                 return (ERROR);
             }
@@ -403,7 +395,7 @@ solve_snow(char               overstory,
                 if (snow->surf_temp <= 0) {
                     // snowpack present, compress and age density
                     snow->density = snow_density(snow, *snowfall, old_swq,
-                                                 Tgrnd, air_temp, (double)dt);
+                                                 air_temp, (double)dt);
                 }
                 else
                 // no snowpack present, start with new snow density
@@ -540,7 +532,7 @@ solve_snow(char               overstory,
             energy->latent = 0.;
             energy->latent_sub = 0.;
             energy->sensible = 0.;
-            snow->last_snow = MISSING;
+            snow->last_snow = 0;
             snow->store_swq = 0;
             snow->store_coverage = 1;
             snow->MELTING = FALSE;
@@ -574,7 +566,7 @@ solve_snow(char               overstory,
         snow->store_swq = 0;
         snow->store_coverage = 1;
         snow->MELTING = FALSE;
-        snow->last_snow = MISSING;
+        snow->last_snow = 0;
         snow->albedo = NEW_SNOW_ALB;
     }
 

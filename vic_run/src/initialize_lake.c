@@ -76,7 +76,8 @@ initialize_lake(lake_var_struct  *lake,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  i, k;
+    size_t               i, j;
+    int                  k;
     int                  status;
     double               depth;
     double               tmp_volume;
@@ -124,7 +125,7 @@ initialize_lake(lake_var_struct  *lake,
                 lake->activenod = MAX_LAKE_NODES;
             }
             lake->dz =
-                (lake->ldepth - lake->surfdz) / ((float)(lake->activenod - 1));
+                (lake->ldepth - lake->surfdz) / ((double)(lake->activenod - 1));
         }
         else if (lake->ldepth > 0.0) {
             lake->surfdz = lake->ldepth;
@@ -203,7 +204,7 @@ initialize_lake(lake_var_struct  *lake,
     lake->snow.coverage = 0.0;
     lake->snow.density = 0.0;
     lake->snow.depth = 0.0;
-    lake->snow.last_snow = MISSING;
+    lake->snow.last_snow = 0;
     lake->snow.max_snow_depth = 0.0;
     lake->snow.MELTING = FALSE;
     lake->snow.pack_temp = 0.0;
@@ -323,15 +324,15 @@ initialize_lake(lake_var_struct  *lake,
         lake->soil.layer[i].moist = soil_con->porosity[i] * soil_con->depth[i] *
                                     1000.;
         lake->soil.layer[i].phi = cell->layer[i].phi;
-        for (k = 0; k < options.Nfrost; k++) {
-            lake->soil.layer[i].ice[k] = 0.0;
+        for (j = 0; j < options.Nfrost; j++) {
+            lake->soil.layer[i].ice[j] = 0.0;
         }
     }
     lake->soil.zwt = 0.0;
     lake->soil.zwt_lumped = 0.0;
     if (!skip_hydro) {
-        for (i = 0; i < N_PET_TYPES; i++) {
-            lake->soil.pot_evap[i] = 0.0;
+        for (k = 0; k < N_PET_TYPES; k++) {
+            lake->soil.pot_evap[k] = 0.0;
         }
     }
     if (options.CARBON) {
@@ -363,8 +364,8 @@ get_sarea(lake_con_struct lake_con,
       ERROR: Error: area cannot be reconciled with given lake depth and nodes
 ******************************************************************************/
 {
-    int i;
-    int status;
+    size_t i;
+    int    status;
 
     status = 0;
     *sarea = 0.0;

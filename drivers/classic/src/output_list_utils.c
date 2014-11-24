@@ -400,7 +400,7 @@ init_output_list(out_data_struct *out_data,
                  int              write,
                  char            *format,
                  int              type,
-                 float            mult)
+                 double           mult)
 {
 /*************************************************************
    init_output_list()      Ted Bohn     September 08, 2006
@@ -408,7 +408,8 @@ init_output_list(out_data_struct *out_data,
    This routine initializes the output information for all output variables.
 
 *************************************************************/
-    int varid, i;
+    int     varid;
+    size_t  i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         out_data[varid].write = write;
@@ -430,7 +431,7 @@ set_output_var(out_data_file_struct *out_data_files,
                int                   varnum,
                char                 *format,
                int                   type,
-               float                 mult)
+               double                mult)
 {
 /*************************************************************
    set_output_var()      Ted Bohn     September 08, 2006
@@ -477,7 +478,7 @@ free_out_data_files(out_data_file_struct **out_data_files)
 
 *************************************************************/
     extern option_struct options;
-    int                  filenum;
+    size_t               filenum;
 
     for (filenum = 0; filenum < options.Noutfiles; filenum++) {
         free((char*)(*out_data_files)[filenum].varid);

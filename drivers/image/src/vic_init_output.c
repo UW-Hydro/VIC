@@ -8,10 +8,8 @@
 void
 vic_init_output(void)
 {
-    extern size_t              current;
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern filep_struct        filep;
     extern global_param_struct global_param;
@@ -30,7 +28,7 @@ vic_init_output(void)
     for (i = 0; i < global_domain.ncells_global; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                 &dmy[current], -global_param.nrecs);
+                -global_param.nrecs);
     }
 
     // determine which variables will be written to the history file
@@ -46,8 +44,6 @@ vic_init_output(void)
 void
 initialize_history_file(nc_file_struct *nc)
 {
-    extern size_t           current;
-    extern dmy_struct      *dmy;
     extern filenames_struct filenames;
     extern domain_struct    global_domain;
     extern option_struct    options;

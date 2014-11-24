@@ -480,7 +480,6 @@ calc_prcp(const control_struct   *ctrl,
    algorithm corrections */
 int
 snowpack(const control_struct   *ctrl,
-         const parameter_struct *p,
          data_struct            *data)
 {
     int    ok = 1;

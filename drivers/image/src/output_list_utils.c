@@ -347,7 +347,7 @@ init_output_list(out_data_struct *out_data,
                  int              write,
                  char            *format,
                  int              type,
-                 float            mult)
+                 double           mult)
 {
 /*************************************************************
    init_output_list()      Ted Bohn     September 08, 2006
@@ -355,7 +355,7 @@ init_output_list(out_data_struct *out_data,
    This routine initializes the output information for all output variables.
 
 *************************************************************/
-    int varid, i;
+    size_t varid, i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         out_data[varid].write = write;

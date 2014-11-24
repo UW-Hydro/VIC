@@ -7,7 +7,6 @@ double
 snow_density(snow_data_struct *snow,
              double            new_snow,
              double            sswq,
-             double            Tgrnd,
              double            Tair,
              double            dt)
 {
@@ -245,7 +244,6 @@ new_snow_density(double air_temp)
 double
 snow_albedo(double new_snow,
             double swq,
-            double depth,
             double albedo,
             double cold_content,
             double dt,

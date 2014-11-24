@@ -6,11 +6,11 @@
 
 char *version = "5.0 beta 2014-Nov-22";
 
-int   flag;
-int   NR;       /* array index for atmos struct that indicates
-                   the model step avarage or sum */
-int   NF;       /* array index loop counter limit for atmos
-                   struct that indicates the SNOW_STEP values */
+int      flag;
+size_t   NR;       /* array index for atmos struct that indicates
+                      the model step avarage or sum */
+size_t   NF;       /* array index loop counter limit for atmos
+                      struct that indicates the SNOW_STEP values */
 
 
 global_param_struct global_param;
@@ -137,8 +137,8 @@ main(int   argc,
     char                  RUN_MODEL;
     char                  ErrStr[MAXSTRING];
     char                  write_flag;
-    int                   rec;
-    int                   Nveg_type;
+    size_t                rec;
+    size_t                Nveg_type;
     int                   cellnum;
     int                   startrec;
     int                   ErrorFlag;
@@ -168,7 +168,7 @@ main(int   argc,
     out_data_files = set_output_defaults(out_data);
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
-    parse_output_info(&filenames, filep.globalparam, &out_data_files, out_data);
+    parse_output_info(filep.globalparam, &out_data_files, out_data);
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);
@@ -191,9 +191,9 @@ main(int   argc,
     startrec = 0;
     if (!options.OUTPUT_FORCE) {
         if (options.INIT_STATE) {
-            filep.init_state = check_state_file(filenames.init_state, dmy,
-                                                &global_param, options.Nlayer,
-                                                options.Nnode, &startrec);
+            filep.init_state = check_state_file(filenames.init_state,
+                                                options.Nlayer, options.Nnode,
+                                                &startrec);
         }
 
         /** open state file if model state is to be saved **/
@@ -263,9 +263,8 @@ main(int   argc,
                    Initialize Energy Balance and Snow Variables
                 **************************************************/
 
-                ErrorFlag = initialize_model_state(&all_vars, dmy[0],
-                                                   &global_param, filep,
-                                                   soil_con.gridcel,
+                ErrorFlag = initialize_model_state(&all_vars, &global_param,
+                                                   filep, soil_con.gridcel,
                                                    veg_con[0].vegetat_type_num,
                                                    options.Nnode,
                                                    atmos[0].air_temp[NR],
@@ -275,15 +274,20 @@ main(int   argc,
                     if (options.CONTINUEONERROR == TRUE) {
                         // Handle grid cell solution error
                         fprintf(stderr,
-                                "ERROR: Grid cell %i failed in record %i so the simulation has not finished.  An incomplete output file has been generated, check your inputs before rerunning the simulation.\n", soil_con.gridcel,
-                                rec);
+                                "ERROR: Grid cell %i failed in record %zu so "
+                                "the simulation has not finished.  An "
+                                "incomplete output file has been generated, "
+                                "check your inputs before rerunning the "
+                                "simulation.\n", soil_con.gridcel, rec);
                         break;
                     }
                     else {
                         // Else exit program on cell solution error as in previous versions
                         sprintf(ErrStr,
-                                "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel,
-                                rec);
+                                "ERROR: Grid cell %i failed in record %zu so "
+                                "the simulation has ended. Check your inputs "
+                                "before rerunning the simulation.\n",
+                                soil_con.gridcel, rec);
                         nrerror(ErrStr);
                     }
                 }
@@ -293,10 +297,11 @@ main(int   argc,
                 Error.out_data_files = out_data_files;
 
                 /** Initialize the storage terms in the water and energy balances **/
-                /** Sending a negative record number (-global_param.nrecs) to put_data() will accomplish this **/
+                /** Sending a negative record number (-global_param.nrecs) to 
+                    put_data() will accomplish this **/
                 ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con,
                                      veg_lib, &lake_con, out_data, &save_data,
-                                     &dmy[0], -global_param.nrecs);
+                                     -global_param.nrecs);
 
                 /******************************************
                    Run Model in Grid Cell for all Time Steps
@@ -307,7 +312,7 @@ main(int   argc,
                     /**************************************************
                        Compute cell physics for 1 timestep
                     **************************************************/
-                    ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars,
+                    ErrorFlag = vic_run(rec, &atmos[rec], &all_vars,
                                         dmy, &global_param, &lake_con,
                                         &soil_con, veg_con, veg_lib,
                                         veg_hist[rec]);
@@ -317,7 +322,7 @@ main(int   argc,
                     **************************************************/
                     write_flag = put_data(&all_vars, &atmos[rec], &soil_con,
                                           veg_con, veg_lib, &lake_con, out_data,
-                                          &save_data, &dmy[rec], rec);
+                                          &save_data, rec);
 
                     // Write cell average values for current time step
                     if (write_flag) {
@@ -334,10 +339,8 @@ main(int   argc,
                          dmy[rec].day == global_param.stateday &&
                          (rec + 1 == global_param.nrecs ||
                           dmy[rec + 1].day != global_param.stateday))) {
-                        write_model_state(&all_vars, &global_param,
-                                          veg_con->vegetat_type_num,
-                                          soil_con.gridcel, &filep, &soil_con,
-                                          lake_con);
+                        write_model_state(&all_vars, veg_con->vegetat_type_num,
+                                          soil_con.gridcel, &filep, &soil_con);
                     }
 
 
@@ -345,15 +348,21 @@ main(int   argc,
                         if (options.CONTINUEONERROR == TRUE) {
                             // Handle grid cell solution error
                             fprintf(stderr,
-                                    "ERROR: Grid cell %i failed in record %i so the simulation has not finished.  An incomplete output file has been generated, check your inputs before rerunning the simulation.\n", soil_con.gridcel,
-                                    rec);
+                                    "ERROR: Grid cell %i failed in record %zu "
+                                    "so the simulation has not finished.  An "
+                                    "incomplete output file has been "
+                                    "generated, check your inputs before "
+                                    "rerunning the simulation.\n",
+                                    soil_con.gridcel, rec);
                             break;
                         }
                         else {
                             // Else exit program on cell solution error as in previous versions
                             sprintf(ErrStr,
-                                    "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel,
-                                    rec);
+                                    "ERROR: Grid cell %i failed in record %zu "
+                                    "so the simulation has ended. Check your "
+                                    "inputs before rerunning the simulation.\n",
+                                    soil_con.gridcel, rec);
                             nrerror(ErrStr);
                         }
                     }

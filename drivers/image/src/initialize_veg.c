@@ -4,8 +4,7 @@
 
 void
 initialize_veg(veg_var_struct **veg_var,
-               veg_con_struct  *veg_con,
-               int              Nveg)
+               size_t           Nveg)
 
 /**********************************************************************
    initialize_veg		Dag Lohmann	 January 1996
@@ -15,7 +14,7 @@ initialize_veg(veg_var_struct **veg_var,
 {
     extern option_struct options;
 
-    int                  i, j, k;
+    size_t               i, j, k;
 
     for (i = 0; i < Nveg; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {

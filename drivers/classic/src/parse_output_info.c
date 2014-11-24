@@ -3,8 +3,7 @@
 #include <vic_driver_classic.h>
 
 void
-parse_output_info(filenames_struct      *names,
-                  FILE                  *gp,
+parse_output_info(FILE                  *gp,
                   out_data_file_struct **out_data_files,
                   out_data_struct       *out_data)
 /**********************************************************************
@@ -32,14 +31,14 @@ parse_output_info(filenames_struct      *names,
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
-    int                  outfilenum;
+    short                outfilenum;
     char                 varname[20];
     int                  outvarnum;
     char                 format[10];
     char                 typestr[20];
     int                  type;
     char                 multstr[20];
-    float                mult;
+    double               mult;
     int                  tmp_noutfiles;
     char                 ErrStr[MAXSTRING];
 
@@ -72,18 +71,20 @@ parse_output_info(filenames_struct      *names,
                     nrerror(
                         "Error in global param file: \"N_OUTFILES\" must be specified before you can specify \"OUTFILE\".");
                 }
-                if (outfilenum >= options.Noutfiles) {
+                if (outfilenum >= (short)options.Noutfiles) {
                     sprintf(ErrStr,
-                            "Error in global param file: number of output files specified in N_OUTFILES (%d) is less than actual number of output files defined in the global param file.",
-                            options.Noutfiles);
+                            "Error in global param file: number of output "
+                            "files specified in N_OUTFILES (%zu) is less than "
+                            "actual number of output files defined in the "
+                            "global param file.", options.Noutfiles);
                     nrerror(ErrStr);
                 }
-                sscanf(cmdstr, "%*s %s %d",
+                sscanf(cmdstr, "%*s %s %zu",
                        (*out_data_files)[outfilenum].prefix,
                        &((*out_data_files)[outfilenum].nvars));
                 (*out_data_files)[outfilenum].varid =
-                    (int *)calloc((*out_data_files)[outfilenum].nvars,
-                                  sizeof(int));
+                    (unsigned *)calloc((*out_data_files)[outfilenum].nvars,
+                                  sizeof(unsigned));
                 outvarnum = 0;
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -121,7 +122,7 @@ parse_output_info(filenames_struct      *names,
                         mult = 0; // 0 means use default multiplier
                     }
                     else {
-                        mult = (float)atof(multstr);
+                        mult = (double)atof(multstr);
                     }
                 }
                 if (set_output_var((*out_data_files), TRUE, outfilenum,

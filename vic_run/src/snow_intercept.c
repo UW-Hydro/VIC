@@ -85,7 +85,6 @@ snow_intercept(double             Dt,
                double             LongUnderOut, // incoming LW from understroy
                double             MaxInt, // maximum interception capacity
                double             ShortOverIn, // incoming SW to overstory
-               double             ShortUnderIn, // incoming SW to understory
                double             Tcanopy, // canopy air temperature
                double             bare_albedo, // albedo of snow-free ground
                double            *AdvectedEnergy,
@@ -105,17 +104,16 @@ snow_intercept(double             Dt,
                double            *SnowFall,
                double            *Tfoliage,
                char              *Tfoliage_fbflag,
-               int               *Tfoliage_fbcount,
+               unsigned          *Tfoliage_fbcount,
                double            *TempIntStorage,
                double            *VaporMassFlux,
                double            *Wind,
                double            *displacement,
                double            *ref_height,
                double            *roughness,
-               float             *root,
+               double            *root,
                int                UnderStory,
                int                band,
-               int                hour,
                int                iveg,
                int                month,
                int                rec,
@@ -390,9 +388,9 @@ snow_intercept(double             Dt,
 
     if (Tupper != MISSING && Tlower != MISSING) {
         *Tfoliage = root_brent(Tlower, Tupper, ErrorString,
-                               func_canopy_energy_bal, month, Dt,
+                               func_canopy_energy_bal, Dt,
                                soil_con->elevation, soil_con->max_moist,
-                               soil_con->Wcr, soil_con->Wpwp, soil_con->depth,
+                               soil_con->Wcr, soil_con->Wpwp,
                                soil_con->frost_fract,
                                AirDens, EactAir, Press, Le,
                                Tcanopy, Vpd, shortwave, Catm, dryFrac,
@@ -692,7 +690,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     double              *ref_height;
     double              *roughness;
 
-    float               *root;
+    double              *root;
     double              *CanopLayerBnd;
 
     /* Water Flux Terms */
@@ -720,7 +718,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     double              *VaporMassFlux;
 
     char                *ErrorString;
-    int                  cidx;
+    size_t               cidx;
 
     /** Read variables from variable length argument list **/
 
@@ -764,7 +762,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     ref_height = (double *) va_arg(ap, double *);
     roughness = (double *) va_arg(ap, double *);
 
-    root = (float *) va_arg(ap, float *);
+    root = (double *) va_arg(ap, double *);
     CanopLayerBnd = (double *) va_arg(ap, double *);
 
     /* Water Flux Terms */
@@ -809,7 +807,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     printf("*Wcr = %f\n", *Wcr);
     printf("*Wpwp = %f\n", *Wpwp);
     printf("*depth = %f\n", *depth);
-    printf(" = %f\n", *frost_fract);
+    printf("frost_fract = %f\n", *frost_fract);
 
     /* Atmopheric Condition and Forcings */
     printf("AirDens = %f\n", AirDens);
@@ -854,8 +852,10 @@ error_print_canopy_energy_bal(double  Tfoliage,
 
     printf("Wdew = %f\n", *Wdew);
 
-    write_layer(layer, iveg, options.Nlayer, frost_fract, depth);
+    write_layer(layer, iveg, frost_fract);
     write_vegvar(&(veg_var[0]), iveg);
+
+    fprintf(stderr, "Tfoliage = %f\n", Tfoliage);
 
     /* Energy Flux Terms */
     fprintf(stderr, "LongOverIn = %f\n", LongOverIn);

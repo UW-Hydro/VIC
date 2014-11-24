@@ -10,7 +10,7 @@ zero_output_list(out_data_struct *out_data)
    This routine resets the values of all output variables to 0.
 
 *************************************************************/
-    int varid, i;
+    size_t varid, i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         for (i = 0; i < out_data[varid].nelem; i++) {

@@ -38,7 +38,7 @@
 double
 calc_rc(double rs,
         double net_short,
-        float  RGL,
+        double RGL,
         double tair,
         double vpd,
         double lai,
@@ -151,8 +151,8 @@ calc_rc_ps(char    Ctype,
     double               rc0;   /* aggregate canopy resistance in absence of
                                    soil moisture stress */
     double               rcRatio;
-    int                  cidx;
     double               vpdfactor; /* factor for canopy resistance based on vpd */
+    size_t               cidx;
 
     /* Compute canopy resistance and photosynthetic demand in absence of soil moisture stress */
     canopy_assimilation(Ctype,

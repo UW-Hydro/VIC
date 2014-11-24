@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 snow_data_struct **
-make_snow_data(int nveg)
+make_snow_data(size_t nveg)
 
 /**********************************************************************
         make_snow_data	Keith Cherkauer		January 22, 1997
@@ -15,7 +15,7 @@ make_snow_data(int nveg)
 {
     extern option_struct options;
 
-    int                  i;
+    size_t               i;
     snow_data_struct   **temp = NULL;
 
     temp = (snow_data_struct **) calloc(nveg,

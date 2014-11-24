@@ -74,7 +74,7 @@ canopy_assimilation(char    Ctype,
     extern option_struct options;
     double               h;
     double               pz;
-    int                  cidx;
+    size_t               cidx;
     double               dLAI;
     double              *CiLayer;
     double               AgrossLayer;

@@ -50,7 +50,7 @@ initialize_global()
     options.QUICK_FLUX = TRUE;
     options.QUICK_SOLVE = FALSE;
     options.RC_MODE = RC_JARVIS;
-    options.ROOT_ZONES = MISSING;
+    options.ROOT_ZONES = 0;
     options.SHARE_LAYER_MOIST = TRUE;
     options.SNOW_BAND = 1;
     options.SNOW_DENSITY = DENS_BRAS;

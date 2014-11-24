@@ -28,15 +28,12 @@ func_canopy_energy_bal(double  Tfoliage,
     extern option_struct options;
 
     /* General Model Parameters */
-    int                  month;
-
     double               delta_t;
     double               elevation;
 
     double              *Wmax;
     double              *Wcr;
     double              *Wpwp;
-    double              *depth;
     double              *frost_fract;
 
     /* Atmopheric Condition and Forcings */
@@ -63,7 +60,7 @@ func_canopy_energy_bal(double  Tfoliage,
     double              *ref_height;
     double              *roughness;
 
-    float               *root;
+    double               *root;
     double              *CanopLayerBnd;
 
     /* Water Flux Terms */
@@ -100,15 +97,12 @@ func_canopy_energy_bal(double  Tfoliage,
     /** Read variables from variable length argument list **/
 
     /* General Model Parameters */
-    month = (int) va_arg(ap, int);
-
     delta_t = (double) va_arg(ap, double);
     elevation = (double) va_arg(ap, double);
 
     Wmax = (double *) va_arg(ap, double *);
     Wcr = (double *) va_arg(ap, double *);
     Wpwp = (double *) va_arg(ap, double *);
-    depth = (double *) va_arg(ap, double *);
     frost_fract = (double *) va_arg(ap, double *);
 
     /* Atmopheric Condition and Forcings */
@@ -135,7 +129,7 @@ func_canopy_energy_bal(double  Tfoliage,
     ref_height = (double *) va_arg(ap, double *);
     roughness = (double *) va_arg(ap, double *);
 
-    root = (float *) va_arg(ap, float *);
+    root = (double *) va_arg(ap, double *);
     CanopLayerBnd = (double *) va_arg(ap, double *);
 
     /* Water Flux Terms */
@@ -236,11 +230,9 @@ func_canopy_energy_bal(double  Tfoliage,
         *Wdew = IntRain * 1000.;
         prec = Rainfall * 1000;
         *Evap = canopy_evap(layer, veg_var, FALSE,
-                            veg_class, month, Wdew, delta_t, *NetRadiation,
+                            veg_class, Wdew, delta_t, *NetRadiation,
                             Vpd, NetShortOver, Tcanopy, Ra_used[1],
-                            displacement[1],
-                            roughness[1], ref_height[1], elevation, prec,
-                            depth, Wmax, Wcr, Wpwp, frost_fract,
+                            elevation, prec, Wmax, Wcr, Wpwp, frost_fract,
                             root, dryFrac, shortwave, Catm, CanopLayerBnd);
         *Wdew /= 1000.;
 

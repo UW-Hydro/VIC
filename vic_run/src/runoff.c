@@ -8,10 +8,7 @@ runoff(cell_data_struct  *cell,
        double             ppt,
        double            *frost_fract,
        int                dt,
-       int                Nnodes,
-       int                band,
-       int                rec,
-       int                iveg)
+       int                Nnodes)
 /**********************************************************************
         runoff.c	Keith Cherkauer		May 18, 1996
 
@@ -167,12 +164,12 @@ runoff(cell_data_struct  *cell,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  lindex;
-    int                  i;
+    size_t               lindex;
     int                  last_index;
     int                  time_step;
     int                  tmplayer;
-    int                  frost_area;
+    size_t               frost_area;
+    int                  fidx;
     int                  ErrorFlag;
     double               A, frac;
     double               tmp_runoff;
@@ -207,8 +204,9 @@ runoff(cell_data_struct  *cell,
     layer_data_struct    tmp_layer;
 
     /** Set Residual Moisture **/
-    for (i = 0; i < options.Nlayer; i++) {
-        resid_moist[i] = soil_con->resid_moist[i] * soil_con->depth[i] * 1000.;
+    for (lindex = 0; lindex < options.Nlayer; lindex++) {
+        resid_moist[lindex] = soil_con->resid_moist[lindex] *
+                              soil_con->depth[lindex] * 1000.;
     }
 
     /** Allocate and Set Values for Soil Sublayers **/
@@ -248,18 +246,15 @@ runoff(cell_data_struct  *cell,
             }
             // distribute evaporation between frost sub areas by percentage
             evap_sum = evap[lindex][0];
-            for (frost_area = options.Nfrost - 1; frost_area >= 0;
-                 frost_area--) {
-                evap[lindex][frost_area] = avail_liq[lindex][frost_area] *
-                                           evap_fraction;
-                avail_liq[lindex][frost_area] -= evap[lindex][frost_area];
-                evap_sum -= evap[lindex][frost_area] * frost_fract[frost_area];
+            for (fidx = options.Nfrost - 1; fidx >= 0; fidx--) {
+                evap[lindex][fidx] = avail_liq[lindex][fidx] * evap_fraction;
+                avail_liq[lindex][fidx] -= evap[lindex][fidx];
+                evap_sum -= evap[lindex][fidx] * frost_fract[fidx];
             }
         }
         else {
-            for (frost_area = options.Nfrost - 1; frost_area > 0;
-                 frost_area--) {
-                evap[lindex][frost_area] = evap[lindex][0];
+            for (fidx = options.Nfrost - 1; fidx > 0; fidx--) {
+                evap[lindex][fidx] = evap[lindex][0];
             }
         }
     }
@@ -577,7 +572,7 @@ compute_runoff_and_asat(soil_con_struct *soil_con,
     extern option_struct options;
     double               top_moist; // total moisture (liquid and frozen) in topmost soil layers (mm)
     double               top_max_moist; // maximum storable moisture (liquid and frozen) in topmost soil layers (mm)
-    int                  lindex;
+    size_t               lindex;
     double               ex;
     double               max_infil;
     double               i_0;

@@ -5,12 +5,10 @@
 void
 read_initial_model_state(FILE                *init_state,
                          all_vars_struct     *all_vars,
-                         global_param_struct *gp,
                          int                  Nveg,
                          int                  Nbands,
                          int                  cellnum,
-                         soil_con_struct     *soil_con,
-                         lake_con_struct      lake_con)
+                         soil_con_struct     *soil_con)
 /*********************************************************************
    read_initial_model_state   Keith Cherkauer         April 14, 2000
 
@@ -95,15 +93,15 @@ read_initial_model_state(FILE                *init_state,
     char                 tmpchar;
     int                  veg, iveg;
     int                  band, iband;
-    int                  lidx;
-    int                  nidx;
+    size_t               lidx;
+    size_t               nidx;
     int                  tmp_cellnum;
     int                  tmp_Nveg;
     int                  tmp_Nband;
     int                  tmp_char;
     int                  byte, Nbytes;
     int                  node;
-    int                  frost_area;
+    size_t               frost_area;
 
     cell_data_struct   **cell;
     snow_data_struct   **snow;
@@ -659,7 +657,7 @@ read_initial_model_state(FILE                *init_state,
             }
 
             /* Read lake-specific variables */
-            if (fscanf(init_state, " %d", &lake_var->activenod) == EOF) {
+            if (fscanf(init_state, " %hu", &lake_var->activenod) == EOF) {
                 nrerror("End of model state file found unexpectedly");
             }
             if (fscanf(init_state, " %lf", &lake_var->dz) == EOF) {

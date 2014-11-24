@@ -169,7 +169,7 @@ initialize_global()
     options.QUICK_FLUX = TRUE;
     options.QUICK_SOLVE = FALSE;
     options.RC_MODE = RC_JARVIS;
-    options.ROOT_ZONES = MISSING;
+    options.ROOT_ZONES = 0;
     options.SHARE_LAYER_MOIST = TRUE;
     options.SNOW_BAND = 1;
     options.SNOW_DENSITY = DENS_BRAS;
@@ -215,8 +215,8 @@ initialize_global()
         param_set.TYPE[j].multiplier = 1;
     }
     for (i = 0; i < 2; i++) {
-        param_set.FORCE_DT[i] = MISSING;
-        param_set.N_TYPES[i] = MISSING;
+        param_set.FORCE_DT[i] = 0;
+        param_set.N_TYPES[i] = 0;
         param_set.FORCE_FORMAT[i] = MISSING;
         for (j = 0; j < N_FORCING_TYPES; j++) {
             param_set.FORCE_INDEX[i][j] = MISSING;

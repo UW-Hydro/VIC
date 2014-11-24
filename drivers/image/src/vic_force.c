@@ -5,8 +5,8 @@
 void
 vic_force(void)
 {
-    extern int                 NF;
-    extern int                 NR;
+    extern size_t              NF;
+    extern size_t              NR;
     extern size_t              current;
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
@@ -24,7 +24,7 @@ vic_force(void)
     size_t                     i;
     size_t                     j;
     size_t                     v;
-    size_t                     vidx;
+    int                        vidx;
     size_t                    *idx = NULL;
     size_t                     d3count[3];
     size_t                     d3start[3];
@@ -159,8 +159,7 @@ vic_force(void)
             atmos[i].par[j] = SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
-                                              atmos[i].pressure[j],
-                                              atmos[i].vp[j]);
+                                              atmos[i].pressure[j]);
             // snow flag
             atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
                                                 t_offset,
@@ -182,8 +181,7 @@ vic_force(void)
         atmos[i].vp[NR] = average(atmos[i].vp, NF);
         atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
         atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
-                                           atmos[i].pressure[NR],
-                                           atmos[i].vp[NR]);
+                                           atmos[i].pressure[NR]);
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
                                              global_param.MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
@@ -264,8 +262,7 @@ q_to_vp(double q,
 // vapor pressure (vp), and temperature
 double
 air_density(double t,
-            double p,
-            double vp)
+            double p)
 {
     double rho;
 
@@ -283,7 +280,7 @@ will_it_snow(double *t,
              double  t_offset,
              double  max_snow_temp,
              double *prcp,
-             int     n)
+             size_t  n)
 {
     size_t i;
 

@@ -28,14 +28,14 @@ read_snowband(FILE            *snowband,
     extern option_struct options;
 
     char                 ErrStr[MAXSTRING];
-    int                  band;
-    int                  Nbands;
-    int                  cell;
+    size_t               band;
+    size_t               Nbands;
+    unsigned             cell;
     double               total;
     double               area_fract;
     double               prec_frac;
-    float                band_elev;
-    float                avg_elev;
+    double               band_elev;
+    double               avg_elev;
 
     Nbands = options.SNOW_BAND;
 
@@ -80,7 +80,7 @@ read_snowband(FILE            *snowband,
         /** Read Band Elevation **/
         avg_elev = 0;
         for (band = 0; band < Nbands; band++) {
-            fscanf(snowband, "%f", &band_elev);
+            fscanf(snowband, "%lf", &band_elev);
             if (band_elev < 0) {
                 fprintf(stderr,
                         "Negative snow band elevation (%f) read from file\n",
@@ -93,7 +93,7 @@ read_snowband(FILE            *snowband,
             fprintf(stderr,
                     "Warning: average band elevation %f not equal to grid_cell average elevation %f; setting grid cell elevation to average band elevation.\n", avg_elev,
                     soil_con->elevation);
-            soil_con->elevation = (float)avg_elev;
+            soil_con->elevation = (double)avg_elev;
         }
         for (band = 0; band < Nbands; band++) {
             soil_con->Tfactor[band] =
@@ -106,13 +106,14 @@ read_snowband(FILE            *snowband,
             fscanf(snowband, "%lf", &prec_frac);
             if (prec_frac < 0) {
                 sprintf(ErrStr,
-                        "Snow band precipitation fraction (%f) must be between 0 and 1",
-                        prec_frac);
+                        "Snow band precipitation fraction (%f) must be "
+                        "between 0 and 1", prec_frac);
                 nrerror(ErrStr);
             }
             if (prec_frac > 0 && soil_con->AreaFract[band] == 0) {
                 sprintf(ErrStr,
-                        "Snow band precipitation fraction (%f) should be 0 when the area fraction is 0. (band = %d)",
+                        "Snow band precipitation fraction (%f) should be 0 "
+                        "when the area fraction is 0. (band = %zu)",
                         prec_frac, band);
                 nrerror(ErrStr);
             }

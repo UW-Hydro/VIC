@@ -2,32 +2,27 @@
 #include <vic_run.h>
 
 double
-calc_atmos_energy_bal(double  InOverSensible,
-                      double  InUnderSensible,
-                      double  LatentHeatOver,
-                      double  LatentHeatUnder,
-                      double  LatentHeatSubOver,
-                      double  LatentHeatSubUnder,
-                      double  Lv,
-                      double  NetLongOver,
-                      double  NetLongUnder,
-                      double  NetShortOver,
-                      double  NetShortUnder,
-                      double  Ra,
-                      double  Tair,
-                      double  atmos_density,
-                      double  vp,
-                      double  vpd,
-                      double *Error,
-                      double *LatentHeat,
-                      double *LatentHeatSub,
-                      double *NetLongAtmos,
-                      double *NetShortAtmos,
-                      double *SensibleHeat,
-                      double *VPcanopy,
-                      double *VPDcanopy,
-                      char   *Tcanopy_fbflag,
-                      int    *Tcanopy_fbcount)
+calc_atmos_energy_bal(double    InOverSensible,
+                      double    InUnderSensible,
+                      double    LatentHeatOver,
+                      double    LatentHeatUnder,
+                      double    LatentHeatSubOver,
+                      double    LatentHeatSubUnder,
+                      double    NetLongOver,
+                      double    NetLongUnder,
+                      double    NetShortOver,
+                      double    NetShortUnder,
+                      double    Ra,
+                      double    Tair,
+                      double    atmos_density,
+                      double   *Error,
+                      double   *LatentHeat,
+                      double   *LatentHeatSub,
+                      double   *NetLongAtmos,
+                      double   *NetShortAtmos,
+                      double   *SensibleHeat,
+                      char     *Tcanopy_fbflag,
+                      unsigned *Tcanopy_fbcount)
 {
 /************************************************************************
    calc_atmos_energy_bal.c        Keith Cherkauer       February 6, 2001
@@ -200,6 +195,7 @@ error_print_atmos_energy_bal(double  Tcanopy,
     fprintf(stderr, "%s", ErrorString);
     fprintf(stderr,
             "ERROR: calc_atmos_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(stderr, "Tcanopy = %f\n", Tcanopy);
     fprintf(stderr, "LatentHeat = %f\n", LatentHeat);
     fprintf(stderr, "NetRadiation = %f\n", NetRadiation);
     fprintf(stderr, "Ra = %f\n", Ra);
@@ -270,6 +266,7 @@ error_print_atmos_moist_bal(double  VPcanopy,
 
     // print variable values
     fprintf(stderr, "%s", ErrorString);
+    fprintf(stderr, "VPcanopy = %f\n", VPcanopy);
     fprintf(stderr, "InLatent = %f\n", InLatent);
     fprintf(stderr, "Lv = %f\n", Lv);
     fprintf(stderr, "Ra = %f\n", Ra);

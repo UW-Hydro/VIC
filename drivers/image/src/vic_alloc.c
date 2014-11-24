@@ -129,8 +129,8 @@ vic_alloc(void)
         if (soil_con[i].AreaFract == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
-        soil_con[i].BandElev = (float *) calloc(options.SNOW_BAND,
-                                                sizeof(float));
+        soil_con[i].BandElev = (double *) calloc(options.SNOW_BAND,
+                                                sizeof(double));
         if (soil_con[i].BandElev == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }

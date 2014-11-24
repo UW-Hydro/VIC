@@ -4,10 +4,8 @@
 
 FILE *
 check_state_file(char                *init_state_name,
-                 dmy_struct          *dmy,
-                 global_param_struct *global,
-                 int                  Nlayer,
-                 int                  Nnodes,
+                 size_t               Nlayer,
+                 size_t               Nnodes,
                  int                 *startrec)
 /*********************************************************************
    check_state_file      Keith Cherkauer           April 17, 2000
@@ -36,9 +34,9 @@ check_state_file(char                *init_state_name,
 
     FILE                *init_state;
     char                 ErrStr[MAXSTRING];
-    int                  tmp_Nlayer;
-    int                  tmp_Nnodes;
-    int                  startday, startmonth, startyear;
+    size_t               tmp_Nlayer;
+    size_t               tmp_Nnodes;
+    unsigned short       startday, startmonth, startyear;
 
     /* open state file */
     if (options.BINARY_STATE_FILE) {
@@ -58,7 +56,7 @@ check_state_file(char                *init_state_name,
         fread(&startday, sizeof(int), 1, init_state);
     }
     else {
-        fscanf(init_state, "%d %d %d\n", &startyear, &startmonth, &startday);
+        fscanf(init_state, "%hu %hu %hu\n", &startyear, &startmonth, &startday);
     }
 
     /* Check simulation options */
@@ -67,18 +65,20 @@ check_state_file(char                *init_state_name,
         fread(&tmp_Nnodes, sizeof(int), 1, init_state);
     }
     else {
-        fscanf(init_state, "%d %d\n", &tmp_Nlayer, &tmp_Nnodes);
+        fscanf(init_state, "%zu %zu\n", &tmp_Nlayer, &tmp_Nnodes);
     }
     if (tmp_Nlayer != Nlayer) {
         sprintf(ErrStr,
-                "The number of soil moisture layers in the model state file (%d) does not equal that defined in the global control file (%d).  Check your input files.", tmp_Nlayer,
-                Nlayer);
+                "The number of soil moisture layers in the model state file "
+                "(%zu) does not equal that defined in the global control file "
+                "(%zu).  Check your input files.", tmp_Nlayer, Nlayer);
         nrerror(ErrStr);
     }
     if (tmp_Nnodes != Nnodes) {
         sprintf(ErrStr,
-                "The number of soil thermal nodes in the model state file (%d) does not equal that defined in the global control file (%d).  Check your input files.", tmp_Nnodes,
-                Nnodes);
+                "The number of soil thermal nodes in the model state file "
+                "(%zu) does not equal that defined in the global control file "
+                "(%zu).  Check your input files.", tmp_Nnodes, Nnodes);
         nrerror(ErrStr);
     }
 

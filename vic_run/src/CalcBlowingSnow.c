@@ -77,22 +77,21 @@
 double
 CalcBlowingSnow(double  Dt,
                 double  Tair,
-                int     LastSnow,
+                unsigned LastSnow,
                 double  SurfaceLiquidWater,
                 double  Wind,
                 double  Ls,
                 double  AirDens,
-                double  Press,
                 double  EactAir,
                 double  ZO,
                 double  Zrh,
                 double  snowdepth,
-                float   lag_one,
-                float   sigma_slope,
+                double   lag_one,
+                double   sigma_slope,
                 double  Tsnow,
                 int     iveg,
                 int     Nveg,
-                float   fe,
+                double   fe,
                 double  displacement,
                 double  roughness,
                 double *TotalTransport)
@@ -747,7 +746,7 @@ CalcSubFlux(double  EactAir,
             double  F,
             double *Transport)
 {
-    float  b, undersat_2;
+    double b, undersat_2;
     double SubFlux;
     double Qsalt, hsalt;
     double phi_s, psi_s;

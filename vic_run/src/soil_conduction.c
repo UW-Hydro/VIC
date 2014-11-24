@@ -142,8 +142,7 @@ volumetric_heat_capacity(double soil_fract,
 }
 
 void
-set_node_parameters(double *dz_node,
-                    double *Zsum_node,
+set_node_parameters(double *Zsum_node,
                     double *max_moist_node,
                     double *expt_node,
                     double *bubble_node,
@@ -154,10 +153,8 @@ set_node_parameters(double *dz_node,
                     double *max_moist,
                     double *expt,
                     double *bubble,
-                    double *quartz,
                     int     Nnodes,
-                    int     Nlayers,
-                    char    FS_ACTIVE)
+                    int     Nlayers)
 {
 /**********************************************************************
    This subroutine sets the thermal node soil parameters to constant
@@ -440,17 +437,14 @@ int
 estimate_layer_ice_content(layer_data_struct *layer,
                            double            *Zsum_node,
                            double            *T,
-                           double            *max_moist_node,
-                           double            *expt_node,
-                           double            *bubble_node,
                            double            *depth,
                            double            *max_moist,
                            double            *expt,
                            double            *bubble,
                            double            *frost_fract,
                            double             frost_slope,
-                           int                Nnodes,
-                           int                Nlayers,
+                           size_t             Nnodes,
+                           size_t             Nlayers,
                            char               FS_ACTIVE)
 {
 /**************************************************************
@@ -492,8 +486,8 @@ estimate_layer_ice_content(layer_data_struct *layer,
 
     extern option_struct options;
 
-    int                  nidx, min_nidx, max_nidx;
-    int                  lidx, frost_area;
+    size_t               nidx, min_nidx;
+    size_t               lidx, frost_area, max_nidx;
     double               Lsum[MAX_LAYERS + 1];
     double               tmp_ice[MAX_NODES][MAX_FROST_AREAS];
     double               tmpT[MAX_NODES][MAX_FROST_AREAS + 1];
@@ -525,7 +519,8 @@ estimate_layer_ice_content(layer_data_struct *layer,
         }
         if (max_nidx >= Nnodes) {
             fprintf(stderr,
-                    "ERROR: Soil thermal nodes do not extend below bottom soil layer, currently unable to handle this condition.\n");
+                    "ERROR: Soil thermal nodes do not extend below bottom "
+                    "soil layer, currently unable to handle this condition.\n");
             return(ERROR);
         }
 
@@ -665,7 +660,8 @@ estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
  ********************************************************************/
 
     extern option_struct options;
-    int                  lidx, frost_area;
+
+    size_t               lidx, frost_area;
     double               Lsum[MAX_LAYERS + 1];
     double               tmpT, tmp_fract, tmp_ice;
     double               min_temp, max_temp;
@@ -734,7 +730,7 @@ compute_soil_layer_thermal_properties(layer_data_struct *layer,
                                       double            *soil_density,
                                       double            *organic,
                                       double            *frost_fract,
-                                      int                Nlayers)
+                                      size_t             Nlayers)
 {
 /********************************************************************
    This subroutine computes the thermal conductivity and volumetric
@@ -763,8 +759,8 @@ compute_soil_layer_thermal_properties(layer_data_struct *layer,
 ********************************************************************/
 
     extern option_struct options;
-    int                  lidx;
-    int                  frost_area;
+    size_t               lidx;
+    size_t               frost_area;
     double               moist, ice;
 
     /* compute layer thermal properties */

@@ -45,7 +45,6 @@ water_energy_balance(int     numnod,
                      double *surface,
                      double *evapw,
                      int     dt,
-                     int     freezeflag,
                      double  dz,
                      double  surfdz,
                      double  lat,
@@ -57,7 +56,6 @@ water_energy_balance(int     numnod,
                      double  air_density,
                      double  longwave,
                      double  shortwave,
-                     double  sumjoulb,
                      double  wind_h,
                      double *Qh,
                      double *Qle,
@@ -149,7 +147,7 @@ water_energy_balance(int     numnod,
          * Calculate the eddy diffusivity.
          * -------------------------------------------------------------------- */
 
-        eddy(1, wind, T, water_density, de, lat, numnod, dz, surfdz);
+        eddy(1, wind, water_density, de, lat, numnod, dz, surfdz);
 
         /* --------------------------------------------------------------------
          * Calculate the lake temperatures at different levels for the
@@ -164,7 +162,6 @@ water_energy_balance(int     numnod,
         if (Tnew[0] < Tcutoff) {
             iceform(energy_ice_formation, Tnew, Tcutoff, fracprv, new_ice_area,
                     numnod, dt, dz, surfdz, cp, surface, new_ice_height,
-                    water_density,
                     new_ice_water_eq, lvolume);
 
             energycalc(Tnew, &sumjouli, numnod, dz, surfdz, surface, cp,
@@ -202,7 +199,6 @@ water_energy_balance(int     numnod,
         if (T[0] < Tcutoff) {
             iceform(energy_ice_formation, T, Tcutoff, fracprv, new_ice_area,
                     numnod, dt, dz, surfdz, cp, surface, new_ice_height,
-                    water_density,
                     new_ice_water_eq, lvolume);
         }
         else {

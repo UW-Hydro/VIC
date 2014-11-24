@@ -121,8 +121,7 @@ int calc_prcp(const control_struct *ctrl, const parameter_struct *p,
 int calc_srad_humidity_iterative(const control_struct *ctrl,
 				 const parameter_struct *p, data_struct *data,
 				 double **tiny_radfract);
-int snowpack(const control_struct *ctrl, const parameter_struct *p,
-	      data_struct *data);
+int snowpack(const control_struct *ctrl, data_struct *data);
 void compute_srad_humidity_onetime(int ndays, const control_struct *ctrl,
                                    data_struct *data, double *tdew, double *pva,
                                    double *ttmax0, double *flat_potrad,

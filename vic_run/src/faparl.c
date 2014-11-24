@@ -36,7 +36,7 @@ faparl(double *CanopLayerBnd,
 {
     extern option_struct options;
     double               FC;
-    int                  cidx;
+    size_t               cidx;
     double               ZH;
     double               ZP1;
     double               ZP0;

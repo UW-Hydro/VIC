@@ -74,7 +74,8 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
 {
     extern option_struct options;
 
-    int                  lindex;
+    size_t               lindex;
+    short                idx;
     double               total_depth;
     double               tmp_depth;
     double               tmp_moist;
@@ -94,26 +95,26 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
         cell->layer[options.Nlayer - 1].zwt = -total_depth * 100;                                     // in cm
     }
     /** Compute total soil column's zwt; this will be the zwt of the lowest layer that isn't completely saturated **/
-    lindex = options.Nlayer - 1;
+    idx = options.Nlayer - 1;
     tmp_depth = total_depth;
-    while (lindex >= 0 && soil_con->max_moist[lindex] -
-           cell->layer[lindex].moist <= SMALL) {
-        tmp_depth -= soil_con->depth[lindex];
-        lindex--;
+    while (idx >= 0 && soil_con->max_moist[idx] -
+           cell->layer[idx].moist <= SMALL) {
+        tmp_depth -= soil_con->depth[idx];
+        idx--;
     }
-    if (lindex < 0) {
+    if (idx < 0) {
         cell->zwt = 0;
     }
-    else if (lindex < options.Nlayer - 1) {
-        if (cell->layer[lindex].zwt != 999) {
-            cell->zwt = cell->layer[lindex].zwt;
+    else if (idx < (short)(options.Nlayer - 1)) {
+        if (cell->layer[idx].zwt != 999) {
+            cell->zwt = cell->layer[idx].zwt;
         }
         else {
             cell->zwt = -tmp_depth * 100;
         }
     }
     else {
-        cell->zwt = cell->layer[lindex].zwt;
+        cell->zwt = cell->layer[idx].zwt;
     }
 
     /** Compute total soil column's zwt_lumped; this will be the zwt of all N layers lumped together. **/

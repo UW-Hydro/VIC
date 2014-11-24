@@ -7,8 +7,7 @@ int
 calc_layer_average_thermal_props(energy_bal_struct *energy,
                                  layer_data_struct *layer,
                                  soil_con_struct   *soil_con,
-                                 int                Nnodes,
-                                 int                veg,
+                                 size_t             Nnodes,
                                  double            *T)
 {
     /******************************************************************
@@ -55,7 +54,9 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
     ******************************************************************/
 
     extern option_struct options;
-    int                  i, ErrorFlag;
+
+    size_t               i;
+    int                  ErrorFlag;
 
     if (options.FROZEN_SOIL && soil_con->FS_ACTIVE) {
         find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
@@ -95,17 +96,17 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         }
     }
     else {
-        ErrorFlag = estimate_layer_ice_content(layer, soil_con->Zsum_node,
+        ErrorFlag = estimate_layer_ice_content(layer,
+                                               soil_con->Zsum_node,
                                                energy->T,
-                                               soil_con->max_moist_node,
-                                               soil_con->expt_node,
-                                               soil_con->bubble_node,
                                                soil_con->depth,
                                                soil_con->max_moist,
-                                               soil_con->expt, soil_con->bubble,
+                                               soil_con->expt,
+                                               soil_con->bubble,
                                                soil_con->frost_fract,
                                                soil_con->frost_slope,
-                                               Nnodes, options.Nlayer,
+                                               Nnodes,
+                                               options.Nlayer,
                                                soil_con->FS_ACTIVE);
         if (ErrorFlag == ERROR) {
             return (ERROR);
@@ -133,13 +134,11 @@ solve_T_profile(double *T,
                 double *beta,
                 double *gamma,
                 double  Dp,
-                double *depth,
                 int     Nnodes,
                 int    *FIRST_SOLN,
                 int     FS_ACTIVE,
                 int     NOFLUX,
-                int     EXP_TRANS,
-                int     veg_class)
+                int     EXP_TRANS)
 {
 /**********************************************************************
    This subroutine was written to iteratively solve the soil temperature
@@ -239,10 +238,9 @@ solve_T_profile(double *T,
     }
 
     Error = calc_soil_thermal_fluxes(Nnodes, T, T0, Tfbflag, Tfbcount, moist,
-                                     max_moist, ice,
-                                     bubble, expt, alpha, gamma, aa, bb, cc,
-                                     dd, ee,
-                                     FS_ACTIVE, NOFLUX, EXP_TRANS, veg_class);
+                                     max_moist, ice, bubble, expt, gamma, aa,
+                                     bb, cc, dd, ee, FS_ACTIVE, NOFLUX,
+                                     EXP_TRANS);
 
     return (Error);
 }
@@ -267,10 +265,10 @@ solve_T_profile_implicit(double *T,                               // update
                          double  Dp,                        // soil parameter
                          int     Nnodes,                   // model parameter
                          int    *FIRST_SOLN,               // update
-                         int     FS_ACTIVE,
+                         // int     FS_ACTIVE,
                          int     NOFLUX,
                          int     EXP_TRANS,
-                         int     veg_class,                // model parameter
+                         // int     veg_class,                // model parameter
                          double *bulk_dens_min,              // soil parameter
                          double *soil_dens_min,              // soil parameter
                          double *quartz,                    // soil parameter
@@ -374,7 +372,6 @@ calc_soil_thermal_fluxes(int     Nnodes,
                          double *ice,
                          double *bubble,
                          double *expt,
-                         double *alpha,
                          double *gamma,
                          double *A,
                          double *B,
@@ -383,8 +380,7 @@ calc_soil_thermal_fluxes(int     Nnodes,
                          double *E,
                          int     FS_ACTIVE,
                          int     NOFLUX,
-                         int     EXP_TRANS,
-                         int     veg_class)
+                         int     EXP_TRANS)
 {
     /**********************************************************************
        Modifications:
@@ -685,6 +681,7 @@ error_print_solve_T_profile(double  T,
     fprintf(stderr,
             "ERROR: solve_T_profile failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
 
+    fprintf(stderr, "T\t%f\n", T);
     fprintf(stderr, "TL\t%f\n", TL);
     fprintf(stderr, "TU\t%f\n", TU);
     fprintf(stderr, "T0\t%f\n", T0);

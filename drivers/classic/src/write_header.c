@@ -21,10 +21,10 @@ write_header(out_data_file_struct *out_data_files,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  file_idx;
-    int                  var_idx;
-    int                  elem_idx;
-    int                  i;
+    size_t               file_idx;
+    size_t               var_idx;
+    unsigned             elem_idx;
+    size_t               i;
     unsigned short       Identifier;
     unsigned short       Nbytes;
     unsigned short       Nbytes1;

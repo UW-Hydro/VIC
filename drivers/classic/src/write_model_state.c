@@ -4,12 +4,10 @@
 
 void
 write_model_state(all_vars_struct     *all_vars,
-                  global_param_struct *gp,
                   int                  Nveg,
                   int                  cellnum,
                   filep_struct        *filep,
-                  soil_con_struct     *soil_con,
-                  lake_con_struct      lake_con)
+                  soil_con_struct     *soil_con)
 /*********************************************************************
    write_model_state      Keith Cherkauer           April 14, 2000
 
@@ -81,11 +79,11 @@ write_model_state(all_vars_struct     *all_vars,
     double               tmpval;
     int                  veg;
     int                  band;
-    int                  lidx;
-    int                  nidx;
+    size_t               lidx;
+    size_t               nidx;
     int                  Nbands;
     int                  Nbytes;
-    int                  frost_area;
+    size_t               frost_area;
 
     cell_data_struct   **cell;
     snow_data_struct   **snow;

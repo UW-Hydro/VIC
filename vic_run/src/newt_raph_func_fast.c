@@ -163,8 +163,9 @@ tridiag(double   a[],
 
 ******************************************************************/
 
-    int    j;
-    double factor;
+    unsigned i;
+    int      j;
+    double   factor;
 
     /* forward substitution */
     factor = b[0];
@@ -172,16 +173,16 @@ tridiag(double   a[],
     c[0] = c[0] / factor;
     r[0] = r[0] / factor;
 
-    for (j = 1; j < n; j++) {
-        factor = a[j];
-        a[j] = a[j] - b[j - 1] * factor;
-        b[j] = b[j] - c[j - 1] * factor;
-        r[j] = r[j] - r[j - 1] * factor;
+    for (i = 1; i < n; i++) {
+        factor = a[i];
+        a[i] = a[i] - b[i - 1] * factor;
+        b[i] = b[i] - c[i - 1] * factor;
+        r[i] = r[i] - r[i - 1] * factor;
 
-        factor = b[j];
-        b[j] = 1.0;
-        c[j] = c[j] / factor;
-        r[j] = r[j] / factor;
+        factor = b[i];
+        b[i] = 1.0;
+        c[i] = c[i] / factor;
+        r[i] = r[i] / factor;
     }
 
     /* backward substitution */

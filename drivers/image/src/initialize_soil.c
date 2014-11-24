@@ -5,8 +5,7 @@
 void
 initialize_soil(cell_data_struct **cell,
                 soil_con_struct   *soil_con,
-                veg_con_struct    *veg_con,
-                int                veg_num)
+                size_t             veg_num)
 
 /**********************************************************************
         initialize_soil		Keith Cherkauer		July 31, 1996
@@ -17,7 +16,7 @@ initialize_soil(cell_data_struct **cell,
 {
     extern option_struct options;
 
-    int                  veg, band, lindex, frost_area;
+    size_t               veg, band, lindex, frost_area;
     double               tmp_moist[MAX_LAYERS];
     double               tmp_runoff;
 

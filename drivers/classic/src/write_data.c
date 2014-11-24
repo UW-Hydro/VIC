@@ -80,10 +80,10 @@ write_data(out_data_file_struct *out_data_files,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  file_idx;
-    int                  var_idx;
-    int                  elem_idx;
-    int                  ptr_idx;
+    size_t               file_idx;
+    size_t               var_idx;
+    size_t               elem_idx;
+    size_t               ptr_idx;
     char                *tmp_cptr;
     short int           *tmp_siptr;
     unsigned short int  *tmp_usiptr;

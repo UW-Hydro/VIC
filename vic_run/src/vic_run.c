@@ -4,8 +4,7 @@
 veg_lib_struct *vic_run_veg_lib;
 
 int
-vic_run(int                  gridcell,
-        int                  rec,
+vic_run(int                  rec,
         atmos_data_struct   *atmos,
         all_vars_struct     *all_vars,
         dmy_struct          *dmy,
@@ -25,12 +24,12 @@ vic_run(int                  gridcell,
     extern option_struct options;
     char                 overstory;
     int                  j, p;
-    int                  lidx;
-    int                  iveg;
-    int                  Nveg;
-    int                  veg_class;
-    int                  band;
-    int                  Nbands;
+    size_t               lidx;
+    unsigned short       iveg;
+    size_t               Nveg;
+    unsigned short       veg_class;
+    unsigned short       band;
+    size_t               Nbands;
     int                  ErrorFlag;
     double               out_prec[2 * MAX_BANDS];
     double               out_rain[2 * MAX_BANDS];
@@ -55,9 +54,9 @@ vic_run(int                  gridcell,
     double               sum_baseflow;
     double               tmp_wind[3];
     double               gauge_correction[2];
-    float                lag_one;
-    float                sigma_slope;
-    float                fetch;
+    double               lag_one;
+    double               sigma_slope;
+    double               fetch;
     int                  pet_veg_class;
     double               lakefrac;
     double               fraci;
@@ -65,7 +64,7 @@ vic_run(int                  gridcell,
     double               wetland_baseflow;
     double               snowprec;
     double               rainprec;
-    int                  cidx;
+    size_t               cidx;
     lake_var_struct     *lake_var;
     cell_data_struct   **cell;
     veg_var_struct     **veg_var;
@@ -217,8 +216,7 @@ vic_run(int                  gridcell,
                              veg_var[iveg][0].LAI);
 
             /* Initialize soil thermal properties for the top two layers */
-            prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con,
-                                moist0, ice0);
+            prepare_full_energy(iveg, all_vars, soil_con, moist0, ice0);
 
             /** Compute Bare (free of snow) Albedo **/
             bare_albedo = veg_var[iveg][0].albedo;
@@ -336,7 +334,7 @@ vic_run(int                  gridcell,
                         cell[iveg][band].pot_evap[p] = 0;
                     }
 
-                    ErrorFlag = surface_fluxes(overstory, bare_albedo, height,
+                    ErrorFlag = surface_fluxes(overstory, bare_albedo,
                                                ice0[band], moist0[band],
                                                surf_atten, &(Melt[band * 2]),
                                                &Le,
@@ -348,7 +346,6 @@ vic_run(int                  gridcell,
                                                ref_height, roughness,
                                                &snow_inflow[band],
                                                tmp_wind, veg_con[iveg].root,
-                                               Nbands,
                                                options.Nlayer, Nveg, band, dp,
                                                iveg, rec, veg_class,
                                                atmos, dmy,
@@ -487,8 +484,8 @@ vic_run(int                  gridcell,
                                atmos->shortwave[NR], atmos->longwave[NR],
                                atmos->vpd[NR] / 1000.,
                                atmos->pressure[NR] / 1000.,
-                               atmos->density[NR], lake_var, *lake_con,
-                               *soil_con, gp->dt, rec, gp->wind_h, dmy[rec],
+                               atmos->density[NR], lake_var,
+                               *soil_con, gp->dt, gp->wind_h, dmy[rec],
                                fraci);
         if (ErrorFlag == ERROR) {
             return (ERROR);

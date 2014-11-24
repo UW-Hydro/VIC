@@ -3,7 +3,7 @@
 #include <vic_driver_image.h>
 
 all_vars_struct
-make_all_vars(int nveg)
+make_all_vars(size_t nveg)
 
 /**********************************************************************
         read_all_vars	Keith Cherkauer		May 21, 1996
@@ -13,17 +13,15 @@ make_all_vars(int nveg)
 
 **********************************************************************/
 {
-    extern option_struct options;
-
     all_vars_struct      temp;
-    int                  Nitems;
+    size_t               Nitems;
 
     Nitems = nveg + 1;
 
     temp.snow = make_snow_data(Nitems);
     temp.energy = make_energy_bal(Nitems);
     temp.veg_var = make_veg_var(Nitems);
-    temp.cell = make_cell_data(Nitems, options.Nlayer);
+    temp.cell = make_cell_data(Nitems);
 
     return (temp);
 }

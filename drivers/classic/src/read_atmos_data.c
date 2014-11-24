@@ -63,11 +63,11 @@ read_atmos_data(FILE               *infile,
 {
     extern param_set_struct param_set;
 
-    int                     rec;
-    int                     skip_recs;
-    int                     i, j;
+    unsigned                rec;
+    unsigned                skip_recs;
+    unsigned                i, j;
     int                     endian;
-    int                     Nfields;
+    unsigned                Nfields;
     int                    *field_index;
     unsigned short          ustmp;
     signed short            stmp;
@@ -83,8 +83,8 @@ read_atmos_data(FILE               *infile,
 
     /* if ascii then the following refers to the number of lines to skip,
        if binary the following needs multiplying by the number of input fields */
-    skip_recs = (int)((float)(global_param.dt * forceskip)) /
-                (float)param_set.FORCE_DT[file_num];
+    skip_recs = (unsigned)((double)(global_param.dt * forceskip)) /
+                (double)param_set.FORCE_DT[file_num];
     if ((((global_param.dt < 24 && (param_set.FORCE_DT[file_num] * forceskip) %
            global_param.dt) > 0)) ||
         (global_param.dt == 24 && (global_param.dt %

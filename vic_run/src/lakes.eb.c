@@ -13,10 +13,8 @@ solve_lake(double           snowfall,
            double           pressure,
            double           air_density,
            lake_var_struct *lake,
-           lake_con_struct  lake_con,
            soil_con_struct  soil_con,
            int              dt,
-           int              rec,
            double           wind_h,
            dmy_struct       dmy,
            double           fracprv)
@@ -93,7 +91,7 @@ solve_lake(double           snowfall,
     double             T[MAX_LAKE_NODES]; /* temp of the water column, open fraction. */
     double             Ti[MAX_LAKE_NODES]; /* temp of the water column, ice fraction. */
     double             water_density[MAX_LAKE_NODES], water_cp[MAX_LAKE_NODES];
-    float              albi, albw;
+    double             albi, albw;
     double             tempalbs;
     double             Tcutoff; /* Lake freezing temperature (K). */
     double             Qhw, Qhi;
@@ -223,10 +221,9 @@ solve_lake(double           snowfall,
          * -------------------------------------------------------------------- */
 
         alblake(Tcutoff, tair, &lake->SAlbedo, &tempalbs, &albi, &albw,
-                snowfall,
-                lake_snow->coldcontent, dt, &lake_snow->last_snow,
-                lake_snow->swq, lake_snow->depth, &lake_snow->MELTING,
-                dmy.day_in_year, (double)soil_con.lat);
+                snowfall, lake_snow->coldcontent, dt, &lake_snow->last_snow,
+                lake_snow->swq, &lake_snow->MELTING, dmy.day_in_year,
+                (double)soil_con.lat);
 
         /* --------------------------------------------------------------------
          * Calculate the incoming solar radiaton for both the ice fraction
@@ -266,13 +263,12 @@ solve_lake(double           snowfall,
 
             ErrorFlag = water_energy_balance(lake->activenod, lake->surface,
                                              &lake->evapw,
-                                             dt, freezeflag, lake->dz,
+                                             dt, lake->dz,
                                              lake->surfdz,
-                                             (double)soil_con.lat, Tcutoff,
+                                             soil_con.lat, Tcutoff,
                                              tair, windw,
                                              pressure, vp, air_density, longin,
-                                             sw_water,
-                                             sumjoulb, wind_h, &Qhw, &Qew,
+                                             sw_water, wind_h, &Qhw, &Qew,
                                              &LWnetw, T,
                                              water_density,
                                              &lake_energy->deltaH,
@@ -291,7 +287,7 @@ solve_lake(double           snowfall,
              * -------------------------------------------------------------------- */
 
             mixdepth = 0;  /* Set to zero for this time step. */
-            tracer_mixer(T, &mixdepth, freezeflag, lake->surface,
+            tracer_mixer(T, &mixdepth, lake->surface,
                          lake->activenod, lake->dz, lake->surfdz, water_cp);
 
             lake_energy->AtmosLatent = (1. - fracprv) * Qew;
@@ -351,7 +347,7 @@ solve_lake(double           snowfall,
                                  &lake->snowmlt,
                                  &lake_energy->advection, &lake_energy->deltaCC,
                                  &lake_energy->snow_flux, &Qei, &Qhi, &Qnet_ice,
-                                 &temp_refreeze_energy, &LWneti, fracprv);
+                                 &temp_refreeze_energy, &LWneti);
             if (ErrorFlag == ERROR) {
                 return (ERROR);
             }
@@ -392,11 +388,10 @@ solve_lake(double           snowfall,
             **********************************************************************/
             /* Check to see if ice has already melted (from the top) in this time step. */
             if (lake->ice_water_eq > 0.0) {
-                ErrorFlag = lakeice(&lake->tempi, Tcutoff, sw_ice, Ti[0],
+                ErrorFlag = lakeice(sw_ice,
                                     fracprv, dt, lake_energy->snow_flux, qw,
                                     &energy_ice_melt_bot,
-                                    lake_snow->swq * RHO_W / RHOSNOW,
-                                    lake_energy->deltaCC, rec, dmy, &qf,
+                                    lake_energy->deltaCC, &qf,
                                     &lake->ice_water_eq,
                                     lake->volume - new_ice_water_eq,
                                     lake->surface[0]);
@@ -593,7 +588,7 @@ latsens(double  Tsurf,
 * eog		Vapor pressure at lake level (kPa).
 **********************************************************************/
 
-    float  dragcoeff;
+    double dragcoeff;
     double eog, delT;
     double qair, qlake;  /* Specific humidity of the atmosphere and lake, respectively. */
     double delq;                /* Difference in absolute humidity between the lake */
@@ -660,21 +655,20 @@ latsens(double  Tsurf,
 }
 
 void
-alblake(double  Tcutoff,
-        double  Tair,
-        double *snowalbedo,
-        double *albs,
-        float  *albi,
-        float  *albw,
-        double  newsnow,
-        double  coldcontent,
-        int     dt,
-        int    *last_snow,
-        double  swq,
-        double  depth,
-        char   *MELTING,
-        int     day_in_year,
-        double  latitude)
+alblake(double    Tcutoff,
+        double    Tair,
+        double   *snowalbedo,
+        double   *albs,
+        double   *albi,
+        double   *albw,
+        double    newsnow,
+        double    coldcontent,
+        int       dt,
+        unsigned *last_snow,
+        double    swq,
+        char     *MELTING,
+        int       day_in_year,
+        double    latitude)
 {
 /**********************************************************************
 * Calculate the albedo of snow, ice and water of the lake.
@@ -747,7 +741,7 @@ alblake(double  Tcutoff,
 
     // compute snow surface albedo
     if (swq > 0.0) {
-        *snowalbedo = snow_albedo(newsnow, swq, depth, *snowalbedo, coldcontent,
+        *snowalbedo = snow_albedo(newsnow, swq, *snowalbedo, coldcontent,
                                   dt, *last_snow, *MELTING);
     }
     else if (swq == 0.0 && newsnow > 0.0) {
@@ -771,7 +765,7 @@ void
 colavg(double *finaltemp,
        double *T,
        double *Ti,
-       float   lakeprv,
+       double  lakeprv,
        double *density,
        int     numnod,
        double  dz,
@@ -795,7 +789,7 @@ colavg(double *finaltemp,
     int    j;
     double water_densityw, water_densityi;
     double temp;
-    float  z;
+    double z;
 
     for (j = 0; j < numnod; j++) {
 /* --------------------------------------------------------------------
@@ -876,7 +870,6 @@ calc_density(double ts)
 void
 eddy(int     freezeflag,
      double  wind,
-     double *T,
      double *water_density,
      double *de,
      double  lat,
@@ -968,7 +961,7 @@ eddy(int     freezeflag,
 
             dpdz = (water_density[k + 1] - water_density[k]) / zhalf[k];
             N2 = (dpdz / (1.e3 + water_density[k])) * 9.8;
-            z = surfdz + ((float)k) * dz;
+            z = surfdz + ((double)k) * dz;
 
             /* --------------------------------------------------------------------
              * Calculate the second term in the calculation of the Richardson
@@ -1025,7 +1018,6 @@ iceform(double *qfusion,
         double *cp,
         double *surface,
         double *new_ice_height,
-        double *water_density,
         double *new_ice_water_eq,
         double  lvolume)
 {
@@ -1199,19 +1191,20 @@ icerad(double  sw,
 }
 
 int
-lakeice(double    *tempi,
-        double     Tcutoff,
+lakeice(
+        // double    *tempi,
+        // double     Tcutoff,
         double     sw_ice,
-        double     twater,
+        // double     twater,
         double     fracice,
         int        dt,
         double     snowflux,
         double     qw,
         double    *energy_ice_melt_bot,
-        double     sdepth,
+        // double     sdepth,
         double     SWabsorbed,
-        int        rec,
-        dmy_struct dmy,
+        // int        rec,
+        // dmy_struct dmy,
         double    *qf,
         double    *ice_water_eq,
         double     volume,
@@ -1312,8 +1305,8 @@ lakeice(double    *tempi,
     return (0);
 }
 
-float
-lkdrag(float  Tsurf,
+double
+lkdrag(double Tsurf,
        double Tair,
        double wind,
        double roughness,
@@ -1712,7 +1705,7 @@ temp_area(double  sw_visible,
 void
 tracer_mixer(double *T,
              int    *mixdepth,
-             int     freezeflag,
+             // int     freezeflag,
              double *surface,
              int     numnod,
              double  dz,
@@ -2060,8 +2053,8 @@ water_balance(lake_var_struct *lake,
     double               inflow_volume;
     double               surfacearea, ldepth;
     double               i;
-    float                index;
-    int                  j, k, frost_area;
+    double               index;
+    size_t               j, k, frost_area;
     double               Tnew[MAX_LAKE_NODES];
     double               circum;
     double               baseflow_out_mm;
@@ -2072,7 +2065,7 @@ water_balance(lake_var_struct *lake,
     veg_var_struct     **veg_var;
     snow_data_struct   **snow;
     energy_bal_struct  **energy;
-    int                  lindex;
+    size_t               lindex;
     double               frac;
     double               Dsmax, resid_moist, liq, rel_moist;
     double              *frost_fract;
@@ -2282,8 +2275,8 @@ water_balance(lake_var_struct *lake,
     ErrorFlag = get_depth(lake_con, lake->volume - lake->ice_water_eq, &ldepth);
     if (ErrorFlag == ERROR) {
         fprintf(stderr,
-                "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n", rec, lake->volume,
-                ldepth);
+                "Something went wrong in get_depth; record = %d, volume = %f, "
+                "depth = %e\n", rec, lake->volume, ldepth);
         return (ErrorFlag);
     }
     ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
@@ -2306,8 +2299,8 @@ water_balance(lake_var_struct *lake,
     ErrorFlag = get_depth(lake_con, lake->volume - lake->ice_water_eq, &ldepth);
     if (ErrorFlag == ERROR) {
         fprintf(stderr,
-                "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n", rec, lake->volume,
-                ldepth);
+                "Something went wrong in get_depth; record = %d, volume = %f, "
+                "depth = %e\n", rec, lake->volume, ldepth);
         return (ErrorFlag);
     }
 
@@ -2369,8 +2362,8 @@ water_balance(lake_var_struct *lake,
         get_depth(lake_con, lake->volume - lake->ice_water_eq, &(lake->ldepth));
     if (ErrorFlag == ERROR) {
         fprintf(stderr,
-                "Something went wrong in get_depth; record = %d, volume = %f, depth = %e\n", rec, lake->volume,
-                lake->ldepth);
+                "Something went wrong in get_depth; record = %d, volume = %f, "
+                "depth = %e\n", rec, lake->volume, lake->ldepth);
         return (ErrorFlag);
     }
 
@@ -2393,7 +2386,7 @@ water_balance(lake_var_struct *lake,
             lake->activenod = MAX_LAKE_NODES;
         }
         lake->dz =
-            (lake->ldepth - lake->surfdz) / ((float)(lake->activenod - 1));
+            (lake->ldepth - lake->surfdz) / ((double)(lake->activenod - 1));
     }
     else if (lake->ldepth > SMALL) {
         lake->surfdz = lake->ldepth;
@@ -2425,8 +2418,8 @@ water_balance(lake_var_struct *lake,
         ErrorFlag = get_sarea(lake_con, ldepth, &(lake->surface[k]));
         if (ErrorFlag == ERROR) {
             fprintf(stderr,
-                    "Something went wrong in get_sarea; record = %d, depth = %f, sarea = %e\n", rec, ldepth,
-                    lake->surface[k]);
+                    "Something went wrong in get_sarea; record = %d, depth = "
+                    "%f, sarea = %e\n", rec, ldepth, lake->surface[k]);
             return (ErrorFlag);
         }
     }
@@ -2610,11 +2603,12 @@ advect_soil_veg_storage(double            lakefrac,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  lidx;
+    int                  ilidx;
+    size_t               lidx;
+    size_t               fidx;
     double               new_moist[MAX_LAYERS];
     double               tmp_moist[MAX_LAYERS];
     double               tmp_runoff;
-    int                  k;
 
     if (lakefrac < 1.0) { // wetland existed during this step
         // Add delta_moist to wetland, using wetland's initial area (1-lakefrac)
@@ -2634,20 +2628,20 @@ advect_soil_veg_storage(double            lakefrac,
                 new_moist[lidx] = soil_con->max_moist[lidx];
             }
         }
-        for (lidx = options.Nlayer - 1; lidx >= 0; lidx--) {
-            new_moist[lidx] += delta_moist[lidx]; // mm over (1-lakefrac)
-            delta_moist[lidx] = 0;
-            if (new_moist[lidx] > soil_con->max_moist[lidx]) {
-                if (lidx > 0) {
-                    delta_moist[lidx -
-                                1] += new_moist[lidx] -
-                                      soil_con->max_moist[lidx];
+        for (ilidx = (int)options.Nlayer - 1; ilidx >= 0; ilidx--) {
+            new_moist[ilidx] += delta_moist[ilidx]; // mm over (1-lakefrac)
+            delta_moist[ilidx] = 0;
+            if (new_moist[ilidx] > soil_con->max_moist[ilidx]) {
+                if (ilidx > 0) {
+                    delta_moist[ilidx -
+                                1] += new_moist[ilidx] -
+                                      soil_con->max_moist[ilidx];
                 }
                 else {
-                    delta_moist[lidx] += new_moist[lidx] -
-                                         soil_con->max_moist[lidx];
+                    delta_moist[ilidx] += new_moist[ilidx] -
+                                         soil_con->max_moist[ilidx];
                 }
-                new_moist[lidx] = soil_con->max_moist[lidx];
+                new_moist[ilidx] = soil_con->max_moist[ilidx];
             }
         }
 
@@ -2692,8 +2686,8 @@ advect_soil_veg_storage(double            lakefrac,
     else { // Wetland didn't exist until now; create new wetland
         for (lidx = 0; lidx < options.Nlayer; lidx++) {
             cell->layer[lidx].moist = soil_con->max_moist[lidx];
-            for (k = 0; k < options.Nfrost; k++) {
-                cell->layer[lidx].ice[k] = 0.0;
+            for (fidx = 0; fidx < options.Nfrost; fidx++) {
+                cell->layer[lidx].ice[fidx] = 0.0;
             }
         }
         cell->asat = 1.0;
@@ -2737,7 +2731,7 @@ rescale_soil_veg_fluxes(double            oldfrac,
 **********************************************************************/
 {
     extern option_struct options;
-    int                  lidx;
+    size_t               lidx;
 
     if (newfrac < SMALL) {
         newfrac = SMALL;

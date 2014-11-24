@@ -33,7 +33,7 @@
 # 2010-Dec-01 Added compute_zwt.c.						TJB
 # 2011-Nov-04 Renamed mtclim* files to remove version number from filenames.	TJB
 # 2012-Jan-16 Removed files associated with LINK_DEBUG code:
-#             open_debug.c 
+#             open_debug.c
 #             store_moisture_for_debug.c
 #             write_atmosdata.c
 #             write_debug.c
@@ -75,8 +75,7 @@ INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include
 LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -g -Wall
-#-Wno-unused
+CFLAGS  =  ${INCLUDES} -g -Wall -Wextra
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information

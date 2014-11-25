@@ -218,7 +218,7 @@ func_surf_energy_bal(double  Ts,
     double            *T_node;
     double            *Tnew_node;
     char              *Tnew_fbflag;
-    int               *Tnew_fbcount;
+    unsigned          *Tnew_fbcount;
     double            *alpha;
     double            *beta;
     double            *bubble_node;
@@ -268,7 +268,6 @@ func_surf_energy_bal(double  Ts,
     double             Tmp;
     double             error;
     double             ice;
-/*   double             kappa_snow; */
     double             temp_latent_heat;
     double             temp_latent_heat_sub;
     double             VaporMassFlux;
@@ -374,7 +373,7 @@ func_surf_energy_bal(double  Ts,
     T_node = (double *) va_arg(ap, double *);
     Tnew_node = (double *) va_arg(ap, double *);
     Tnew_fbflag = (char *) va_arg(ap, char *);
-    Tnew_fbcount = (int *) va_arg(ap, int *);
+    Tnew_fbcount = (unsigned *) va_arg(ap, unsigned *);
     alpha = (double *) va_arg(ap, double *);
     beta = (double *) va_arg(ap, double *);
     bubble_node = (double *) va_arg(ap, double *);

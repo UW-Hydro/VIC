@@ -130,8 +130,7 @@ calc_atmos_energy_bal(double    InOverSensible,
     }
 
     // compute variables based on final temperature
-    (*Error) = solve_atmos_energy_bal(Tcanopy, (*LatentHeat) + (*LatentHeatSub),
-                                      NetRadiation, Ra, Tair, atmos_density,
+    (*Error) = solve_atmos_energy_bal(Tcanopy, Ra, Tair, atmos_density,
                                       InSensible, SensibleHeat);
     return(Tcanopy);
 }

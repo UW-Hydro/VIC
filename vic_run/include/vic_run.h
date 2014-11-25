@@ -33,10 +33,10 @@ void calc_rc_ps(char, double, double, double, double *, double, double,
 double calc_snow_coverage(char *, double, double, double, double, double, double,
                           double, double *, double, double *, double *,
                           double *);
-int calc_soil_thermal_fluxes(int, double *, double *, char *, int *, double *,
+int calc_soil_thermal_fluxes(int, double *, double *, char *, unsigned *,
                              double *, double *, double *, double *, double *,
                              double *, double *, double *, double *, double *,
-                             int, int, int);
+                             double *, int, int, int);
 double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
@@ -49,7 +49,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             atmos_data_struct *, dmy_struct *,
                             energy_bal_struct *, layer_data_struct *,
                             snow_data_struct *, soil_con_struct *,
-                            veg_var_struct *, int);
+                            veg_var_struct *);
 double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
@@ -69,10 +69,10 @@ void canopy_assimilation(char, double, double, double, double *, double, double,
                          double *, double, double, double *, double, char *,
                          double *, double *, double *, double *, double *,
                          double *, double *, double *, double *, double *);
-double canopy_evap(layer_data_struct *, veg_var_struct *, char, int, double *,
-                   double, double, double, double, double, double, double,
-                   double, double *, double *, double *, double *, double *,
-                   double *, double, double, double *);
+double canopy_evap(layer_data_struct *, veg_var_struct *, char, unsigned short,
+                   double *, double, double, double, double, double, double,
+                   double, double, double *, double *, double *, double *,
+                   double *, double *, double, double, double *);
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
@@ -216,8 +216,9 @@ int snow_intercept(double, double, double, double, double, double, double,
                    double *, double *, double *, double *, double *, double *,
                    double *, char *, unsigned *, double *, double *, double *,
                    double *, double *, double *, double *, int, int, int, int,
-                   int, int, int, double *, double *, atmos_data_struct *,
-                   layer_data_struct *, soil_con_struct *, veg_var_struct *);
+                   int, int, unsigned short, double *, double *,
+                   atmos_data_struct *, layer_data_struct *, soil_con_struct *,
+                   veg_var_struct *);
 int snow_melt(double, double, double, double, double *, double, double *,
               double, double, double, double, double, double, double,
               double, double, double, double, double, double, double *,
@@ -248,11 +249,11 @@ double solve_snow(char, double, double, double, double, double, double, double,
                   energy_bal_struct *, layer_data_struct *, snow_data_struct *,
                   soil_con_struct *, veg_var_struct *);
 double solve_surf_energy_bal(double Tsurf, ...);
-int solve_T_profile(double *, double *, char *, int *, double *, double *,
+int solve_T_profile(double *, double *, char *, unsigned *, double *, double *,
                     double *, double *, double, double *, double *, double *,
                     double *, double *, double *, double *, double, int, int *,
                     int, int, int);
-int solve_T_profile_implicit(double *, double *, char *, int *, double *,
+int solve_T_profile_implicit(double *, double *, char *, unsigned *, double *,
                              double *, double *, double *, double, double *,
                              double *, double *, double *, double *, double *,
                              double *, double, int, int *, int, int,
@@ -276,10 +277,10 @@ double svp_slope(double);
 void temp_area(double, double, double, double *, double *, double *, double *,
                int, double *, int, double, double, double*, double *, double *);
 void tracer_mixer(double *, int *, double*, int, double, double, double *);
-void transpiration(layer_data_struct *, veg_var_struct *, int, double, double,
-                   double, double, double, double, double, double, double *,
-                   double *, double *, double *, double *, double *, double,
-                   double, double *);
+void transpiration(layer_data_struct *, veg_var_struct *, unsigned short,
+                   double, double, double, double, double, double, double,
+                   double, double *, double *, double *, double *, double *,
+                   double *, double, double, double *);
 double transport_with_height(double z, double es, double Wind, double AirDens,
                              double ZO, double EactAir, double F, double hsalt,
                              double phi_r, double ushear, double Zrh);

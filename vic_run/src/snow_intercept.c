@@ -118,7 +118,7 @@ snow_intercept(double             Dt,
                int                month,
                int                rec,
                int                hidx,
-               int                veg_class,
+               unsigned short     veg_class,
                double            *CanopLayerBnd,
                double            *dryFrac,
                atmos_data_struct *atmos,
@@ -341,27 +341,20 @@ snow_intercept(double             Dt,
         *AlbedoOver = NEW_SNOW_ALB; // albedo of intercepted snow in canopy
         *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
 
-        Qnet = solve_canopy_energy_bal(0., band, month, rec, Dt,
-                                       soil_con->elevation, soil_con->max_moist,
-                                       soil_con->Wcr, soil_con->Wpwp,
-                                       soil_con->depth,
-                                       soil_con->frost_fract,
-                                       AirDens, EactAir, Press, Le,
-                                       Tcanopy, Vpd,
-                                       shortwave, Catm, dryFrac,
-                                       &Evap, Ra, Ra_used,
-                                       *RainFall, Wind, UnderStory, iveg,
-                                       veg_class, displacement, ref_height,
-                                       roughness, root, CanopLayerBnd,
-                                       IntRainOrg, *IntSnow,
-                                       IntRain, layer, veg_var,
-                                       LongOverIn, LongUnderOut,
-                                       *NetShortOver,
-                                       AdvectedEnergy,
-                                       LatentHeat, LatentHeatSub,
-                                       LongOverOut, NetLongOver, &NetRadiation,
-                                       &RefreezeEnergy, SensibleHeat,
-                                       VaporMassFlux);
+        Qnet = solve_canopy_energy_bal(0., Dt, soil_con->elevation, 
+                                       soil_con->max_moist, soil_con->Wcr,
+                                       soil_con->Wpwp, soil_con->frost_fract,
+                                       AirDens, EactAir, Press, Le, Tcanopy,
+                                       Vpd, shortwave, Catm, dryFrac, &Evap,
+                                       Ra, Ra_used, *RainFall, Wind, veg_class,
+                                       displacement, ref_height, roughness,
+                                       root, CanopLayerBnd, IntRainOrg,
+                                       *IntSnow, IntRain, layer, veg_var,
+                                       LongOverIn, LongUnderOut, *NetShortOver,
+                                       AdvectedEnergy, LatentHeat,
+                                       LatentHeatSub, LongOverOut, NetLongOver,
+                                       &NetRadiation, &RefreezeEnergy,
+                                       SensibleHeat, VaporMassFlux);
 
         if (Qnet != 0) {
             /* Intercepted snow not melting - need to find temperature */
@@ -447,26 +440,20 @@ snow_intercept(double             Dt,
             }
         }
 
-        Qnet = solve_canopy_energy_bal(*Tfoliage, band, month, rec, Dt,
-                                       soil_con->elevation, soil_con->max_moist,
-                                       soil_con->Wcr,
-                                       soil_con->Wpwp, soil_con->depth,
-                                       soil_con->frost_fract,
-                                       AirDens, EactAir, Press, Le,
-                                       Tcanopy, Vpd, shortwave, Catm, dryFrac,
-                                       &Evap, Ra, Ra_used,
-                                       *RainFall, Wind, UnderStory, iveg,
-                                       veg_class, displacement, ref_height,
-                                       roughness, root, CanopLayerBnd,
-                                       IntRainOrg, *IntSnow,
-                                       IntRain, layer, veg_var,
-                                       LongOverIn, LongUnderOut,
-                                       *NetShortOver,
-                                       AdvectedEnergy,
-                                       LatentHeat, LatentHeatSub,
-                                       LongOverOut, NetLongOver, &NetRadiation,
-                                       &RefreezeEnergy, SensibleHeat,
-                                       VaporMassFlux);
+        Qnet = solve_canopy_energy_bal(*Tfoliage, Dt, soil_con->elevation,
+                                       soil_con->max_moist, soil_con->Wcr,
+                                       soil_con->Wpwp, soil_con->frost_fract,
+                                       AirDens, EactAir, Press, Le, Tcanopy,
+                                       Vpd, shortwave, Catm, dryFrac, &Evap,
+                                       Ra, Ra_used, *RainFall, Wind, veg_class,
+                                       displacement, ref_height, roughness,
+                                       root, CanopLayerBnd, IntRainOrg,
+                                       *IntSnow, IntRain, layer, veg_var,
+                                       LongOverIn, LongUnderOut, *NetShortOver,
+                                       AdvectedEnergy, LatentHeat,
+                                       LatentHeatSub, LongOverOut, NetLongOver,
+                                       &NetRadiation, &RefreezeEnergy,
+                                       SensibleHeat, VaporMassFlux);
     }
 
     if (*IntSnow <= 0) {
@@ -684,7 +671,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     /* Vegetation Terms */
     int                  UnderStory;
     int                  iveg;
-    int                  veg_class;
+    unsigned int         veg_class;
 
     double              *displacement;
     double              *ref_height;
@@ -756,7 +743,7 @@ error_print_canopy_energy_bal(double  Tfoliage,
     /* Vegetation Terms */
     UnderStory = (int) va_arg(ap, int);
     iveg = (int) va_arg(ap, int);
-    veg_class = (int) va_arg(ap, int);
+    veg_class = (unsigned int) va_arg(ap, unsigned int);
 
     displacement = (double *) va_arg(ap, double *);
     ref_height = (double *) va_arg(ap, double *);

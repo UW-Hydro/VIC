@@ -117,28 +117,28 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 }
 
 int
-solve_T_profile(double *T,
-                double *T0,
-                char   *Tfbflag,
-                int    *Tfbcount,
-                double *Zsum,
-                double *kappa,
-                double *Cs,
-                double *moist,
-                double  deltat,
-                double *max_moist,
-                double *bubble,
-                double *expt,
-                double *ice,
-                double *alpha,
-                double *beta,
-                double *gamma,
-                double  Dp,
-                int     Nnodes,
-                int    *FIRST_SOLN,
-                int     FS_ACTIVE,
-                int     NOFLUX,
-                int     EXP_TRANS)
+solve_T_profile(double   *T,
+                double   *T0,
+                char     *Tfbflag,
+                unsigned *Tfbcount,
+                double   *Zsum,
+                double   *kappa,
+                double   *Cs,
+                double   *moist,
+                double    deltat,
+                double   *max_moist,
+                double   *bubble,
+                double   *expt,
+                double   *ice,
+                double   *alpha,
+                double   *beta,
+                double   *gamma,
+                double    Dp,
+                int       Nnodes,
+                int      *FIRST_SOLN,
+                int       FS_ACTIVE,
+                int       NOFLUX,
+                int       EXP_TRANS)
 {
 /**********************************************************************
    This subroutine was written to iteratively solve the soil temperature
@@ -246,36 +246,34 @@ solve_T_profile(double *T,
 }
 
 int
-solve_T_profile_implicit(double *T,                               // update
-                         double *T0,                        // keep
-                         char   *Tfbflag,
-                         int    *Tfbcount,
-                         double *Zsum,                      // soil parameter
-                         double *kappa,                     // update if necessary
-                         double *Cs,                        // update if necessary
-                         double *moist,                     // keep
-                         double  deltat,                    // model parameter
-                         double *max_moist,                 // soil parameter
-                         double *bubble,                    // soil parameter
-                         double *expt,                      // soil parameter
-                         double *ice,                       // update if necessary
-                         double *alpha,                     // soil parameter
-                         double *beta,                      // soil parameter
-                         double *gamma,                     // soil parameter
-                         double  Dp,                        // soil parameter
-                         int     Nnodes,                   // model parameter
-                         int    *FIRST_SOLN,               // update
-                         // int     FS_ACTIVE,
-                         int     NOFLUX,
-                         int     EXP_TRANS,
-                         // int     veg_class,                // model parameter
-                         double *bulk_dens_min,              // soil parameter
-                         double *soil_dens_min,              // soil parameter
-                         double *quartz,                    // soil parameter
-                         double *bulk_density,              // soil parameter
-                         double *soil_density,              // soil parameter
-                         double *organic,                    // soil parameter
-                         double *depth)                     // soil parameter
+solve_T_profile_implicit(double   *T,                               // update
+                         double   *T0,                        // keep
+                         char     *Tfbflag,
+                         unsigned *Tfbcount,
+                         double   *Zsum,                      // soil parameter
+                         double   *kappa,                     // update if necessary
+                         double   *Cs,                        // update if necessary
+                         double   *moist,                     // keep
+                         double    deltat,                    // model parameter
+                         double   *max_moist,                 // soil parameter
+                         double   *bubble,                    // soil parameter
+                         double   *expt,                      // soil parameter
+                         double   *ice,                       // update if necessary
+                         double   *alpha,                     // soil parameter
+                         double   *beta,                      // soil parameter
+                         double   *gamma,                     // soil parameter
+                         double    Dp,                        // soil parameter
+                         int       Nnodes,                   // model parameter
+                         int      *FIRST_SOLN,               // update
+                         int       NOFLUX,
+                         int       EXP_TRANS,
+                         double   *bulk_dens_min,              // soil parameter
+                         double   *soil_dens_min,              // soil parameter
+                         double   *quartz,                    // soil parameter
+                         double   *bulk_density,              // soil parameter
+                         double   *soil_density,              // soil parameter
+                         double   *organic,                    // soil parameter
+                         double   *depth)                     // soil parameter
 {
     /**********************************************************************
        This subroutine was written to iteratively solve the soil temperature
@@ -362,25 +360,25 @@ solve_T_profile_implicit(double *T,                               // update
 }
 
 int
-calc_soil_thermal_fluxes(int     Nnodes,
-                         double *T,
-                         double *T0,
-                         char   *Tfbflag,
-                         int    *Tfbcount,
-                         double *moist,
-                         double *max_moist,
-                         double *ice,
-                         double *bubble,
-                         double *expt,
-                         double *gamma,
-                         double *A,
-                         double *B,
-                         double *C,
-                         double *D,
-                         double *E,
-                         int     FS_ACTIVE,
-                         int     NOFLUX,
-                         int     EXP_TRANS)
+calc_soil_thermal_fluxes(int       Nnodes,
+                         double   *T,
+                         double   *T0,
+                         char     *Tfbflag,
+                         unsigned *Tfbcount,
+                         double   *moist,
+                         double   *max_moist,
+                         double   *ice,
+                         double   *bubble,
+                         double   *expt,
+                         double   *gamma,
+                         double   *A,
+                         double   *B,
+                         double   *C,
+                         double   *D,
+                         double   *E,
+                         int       FS_ACTIVE,
+                         int       NOFLUX,
+                         int       EXP_TRANS)
 {
     /**********************************************************************
        Modifications:
@@ -450,32 +448,18 @@ calc_soil_thermal_fluxes(int     Nnodes,
 
             if (T[j] >= 0 || !FS_ACTIVE || !options.FROZEN_SOIL) {
                 if (!EXP_TRANS) {
-                    T[j] =
-                        (A[j] * T0[j] + B[j] *
-                         (T[j +
-                            1] -
-                          T[j -
-                            1]) + C[j] *
-                         T[j +
-                           1] + D[j] *
-                         T[j -
-                           1] + E[j] * (0. - ice[j])) / (A[j] + C[j] + D[j]);
+                    T[j] = (A[j] * T0[j] +
+                            B[j] * (T[j + 1] - T[j - 1]) +
+                            C[j] * T[j + 1] +
+                            D[j] * T[j - 1] +
+                            E[j] * (0. - ice[j])) / (A[j] + C[j] + D[j]);
                 }
                 else {
-                    T[j] =
-                        (A[j] * T0[j] + B[j] *
-                         (T[j +
-                            1] -
-                          T[j -
-                            1]) + C[j] *
-                         (T[j +
-                            1] +
-                          T[j -
-                            1]) - D[j] *
-                         (T[j +
-                            1] -
-                          T[j -
-                    1]) + E[j] * (0. - ice[j])) / (A[j] + 2. * C[j]);
+                    T[j] = (A[j] * T0[j] +
+                            B[j] * (T[j + 1] - T[j - 1]) +
+                            C[j] * (T[j + 1] + T[j - 1]) -
+                            D[j] * (T[j + 1] - T[j - 1]) +
+                            E[j] * (0. - ice[j])) / (A[j] + 2. * C[j]);
                 }
             }
             else {
@@ -517,40 +501,30 @@ calc_soil_thermal_fluxes(int     Nnodes,
             if (T[j] >= 0 || !FS_ACTIVE || !options.FROZEN_SOIL) {
                 if (!EXP_TRANS) {
                     T[j] =
-                        (A[j] * T0[j] + B[j] *
-                         (T[j] -
-                          T[j -
-                            1]) + C[j] * T[j] + D[j] *
-                         T[j -
-                           1] + E[j] * (0. - ice[j])) / (A[j] + C[j] + D[j]);
+                        (A[j] * T0[j] + B[j] * (T[j] - T[j - 1]) +
+                         C[j] * T[j] + D[j] * T[j - 1] +
+                         E[j] * (0. - ice[j])) / (A[j] + C[j] + D[j]);
                 }
                 else {
-                    T[j] =
-                        (A[j] * T0[j] + B[j] *
-                         (T[j] -
-                          T[j -
-                            1]) + C[j] *
-                         (T[j] +
-                          T[j -
-                            1]) - D[j] *
-                         (T[j] -
-                          T[j -
-                    1]) + E[j] * (0. - ice[j])) / (A[j] + 2. * C[j]);
+                    T[j] = (A[j] * T0[j] +
+                            B[j] * (T[j] - T[j - 1]) +
+                            C[j] * (T[j] + T[j - 1]) -
+                            D[j] * (T[j] - T[j - 1]) +
+                            E[j] * (0. - ice[j])) / (A[j] + 2. * C[j]);
                 }
             }
             else {
-                T[Nnodes -
-                  1] = root_brent(T0[Nnodes - 1] - SOIL_DT,
-                                  T0[Nnodes - 1] + SOIL_DT,
-                                  ErrorString, soil_thermal_eqn,
-                                  T[Nnodes - 1],
-                                  T[Nnodes - 2], T0[Nnodes - 1],
-                                  moist[Nnodes - 1],
-                                  max_moist[Nnodes - 1],
-                                  bubble[j], expt[Nnodes - 1],
-                                  ice[Nnodes - 1],
-                                  A[j], B[j], C[j], D[j], E[j],
-                                  EXP_TRANS, j);
+                T[Nnodes - 1] = root_brent(T0[Nnodes - 1] - SOIL_DT,
+                                           T0[Nnodes - 1] + SOIL_DT,
+                                           ErrorString, soil_thermal_eqn,
+                                           T[Nnodes - 1],
+                                           T[Nnodes - 2], T0[Nnodes - 1],
+                                           moist[Nnodes - 1],
+                                           max_moist[Nnodes - 1],
+                                           bubble[j], expt[Nnodes - 1],
+                                           ice[Nnodes - 1],
+                                           A[j], B[j], C[j], D[j], E[j],
+                                           EXP_TRANS, j);
                 if (T[j] <= -998) {
                     if (options.TFALLBACK) {
                         T[j] = T0[j];
@@ -764,7 +738,7 @@ fda_heat_eqn(double T_2[],
     static double *soil_density;
     static double *organic;
     static double *depth;
-    static int     Nlayers;
+    static size_t  Nlayers;
 
     // variables used to calculate residual of the heat equation
     // defined here
@@ -779,7 +753,8 @@ fda_heat_eqn(double T_2[],
     char          PAST_BOTTOM;
     double        storage_term, flux_term, phase_term, flux_term1, flux_term2;
     double        Lsum;
-    int           i, lidx;
+    int           i;
+    size_t        lidx;
     int           focus, left, right;
 
     // argument list handling
@@ -811,7 +786,7 @@ fda_heat_eqn(double T_2[],
         soil_density = va_arg(arg_addr, double *);
         organic = va_arg(arg_addr, double *);
         depth = va_arg(arg_addr, double *);
-        Nlayers = va_arg(arg_addr, int);
+        Nlayers = va_arg(arg_addr, size_t);
 
         if (EXP_TRANS) {
             if (!NOFLUX) {

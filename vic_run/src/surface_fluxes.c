@@ -695,7 +695,7 @@ surface_fluxes(char                 overstory,
                                              &(dmy[rec]), &iter_soil_energy,
                                              iter_layer,
                                              &(iter_snow), soil_con,
-                                             &iter_soil_veg_var, gp->nrecs);
+                                             &iter_soil_veg_var);
 
                 if ((int)Tsurf == ERROR) {
                     // Return error flag to skip rest of grid cell

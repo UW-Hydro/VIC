@@ -123,7 +123,7 @@ func_canopy_energy_bal(double  Tfoliage,
     Wind = (double *) va_arg(ap, double *);
 
     /* Vegetation Terms */
-    veg_class = (int) va_arg(ap, int);
+    veg_class = (unsigned int) va_arg(ap, unsigned int);
 
     displacement = (double *) va_arg(ap, double *);
     ref_height = (double *) va_arg(ap, double *);

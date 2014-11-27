@@ -1,83 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine writes all output variables to output files.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    write all variables to output files.
+ *****************************************************************************/
 void
 write_data(out_data_file_struct *out_data_files,
            out_data_struct      *out_data,
            dmy_struct           *dmy,
            int                   dt)
-/**********************************************************************
-        write_data	Dag Lohmann		Janurary 1996
-
-   This subroutine writes all energy and moisture balance parameters to
-   output files.
-
-   OUTPUT:
-        evaporation and vapor fluxes in mm/time step
-        layer moisture in mm/time step
-        runoff in mm/time step
-        baseflow in mm/time step
-        freezing and thawing depths in cm
-        snow depth in cm
-        snow water equivlence in mm
-        all energy fluxes are in W/m^2
-
-   Modifications:
-   5/20/96	Program was modified to account for a variable
-                number of soil layers.  It was also modified to
-                write out frozen soils data per time step.	KAC
-   1/15/97	Program modified to output daily sums, or values
-                independant of selected time step.  This aids in
-                comparisons between model versions.		KAC
-   3/98          Routine modified to output fluxes in PILPS2c
-                ASCII column format                             Dag
-   4/30/98       Routine modified to add binary output options for
-                improved file speed, and less disk usage for large
-                model basins                                    KAC
-   7/19/99       modified to output a single binary file containing
-                the data selected for the LDAS project         KAC
-   8/3/99        modified again to reduce the storage space needed
-                for the LDAS output files.
-   1/4/2000      modified to allow both standard and LDAS formatted
-                output using a compiler flag                    KAC
-   3/20/2001     made hour a variable in all output data file formats
-                even if the model is run at a daily time step.  Also
-                modified all output files to account for new
-                variables introduced by the spatial frost and snow
-                algorithms, the lake algorithm and the PILPS 2e
-                study.                                          KAC
-   3-12-03       added energy fluxes to snow band output files   KAC
-   04-22-03      Updated output of model for lakes and wetlands algorithm.
-                Added output of blowing snow sublimation to LDAS and
-                standard snow output files.  ** No Lake Variables are
-                included in the LDAS output format. **         KAC
-   04-23-2003    modified LDAS SWQ output, so that it is multiplied by
-                10 instead of 100 before being converted to a short
-                integer.  This reduces stored value precision to 0.1,
-                but increases the maximum storable SWQ, which was
-                exceeded in previous LDAS simulations.          KAC
-   2003-Jul-07 Corrected output of sub_snow variable to item [0]
-              rather than a point - will need to decide what
-              parts of this array are important to output.		KAC
-   2003-Oct-30 Replaced output of sub_snow[0] in fluxes file with
-              sub_total.						TJB
-   2005-Mar-24 Added support for ALMA variables.				TJB
-   2005-Nov-08 Corrected outfiles from fluxes to snow for blowing snow
-              sublimation. Corrected outfiles from snow to snowband
-              for options.PRT_SNOW_BAND. Removed the following from
-              snowband output: net sw radiation, net lw, albedo,
-              latent heat flux, sensible heat flux, ground heat flux.	GCT
-   2006-Aug-23 Changed order of fread/fwrite statements from ...1, sizeof...
-              to ...sizeof, 1,...					GCT
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures; moved the functions
-              calc_energy_balance_error and calc_water_balance_error to
-              the file calc_water_energy_balance_errors.c; implemented
-              aggregation of output variables.				TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-**********************************************************************/
 {
     extern option_struct options;
     size_t               file_idx;
@@ -90,14 +48,6 @@ write_data(out_data_file_struct *out_data_files,
     int                 *tmp_iptr;
     float               *tmp_fptr;
     double              *tmp_dptr;
-
-    /***************************************************************
-       Write output files using default VIC ASCII or BINARY formats
-       - multiple files, all variables, no truncation
-
-       see VIC web page for format details:
-        www.hydro.washington.edu/Lettenmaier/Models/VIC/VIChome.html
-    ***************************************************************/
 
     if (options.BINARY_OUTPUT) { // BINARY
         // Initialize pointers

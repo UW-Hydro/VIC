@@ -1,28 +1,39 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+*
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+* @brief
+******************************************************************************/
 double
 soil_thermal_eqn(double  T,
                  va_list ap)
 {
-    /******************************************************************
-       Modifications:
-
-       2007-Apr-24 Added EXP_TRANS option.						JCA
-                 (therefore fprime removed)
-       2007-Apr-24 Rearranged terms in finite-difference heat equation (equation 8
-                 of Cherkauer et al. (1999)).  see note in solve_T_profile.
-                 This affects the equation for value.  (also see below for
-                 the physical meaning of each of the terms).			JCA
-       2007-Apr-24 Added patch for the "cold nose" problem using the EXPLICIT
-                 option. (see comments on this in fda_heat_eqn in frozen_soil.c)	JCA
-       2007-Aug-08 Added EXCESS_ICE option.						JCA
-       2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-       2013-Dec-27 Removed QUICK_FS option.					TJB
-    ******************************************************************/
-
-
     double value;
 
     double TL;

@@ -1,22 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine computes the overall model energy and water balance errors.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    This subroutine computes the overall model water balance, and
+ *           warns the model user if large errors are found.
+ *****************************************************************************/
 double
 calc_water_balance_error(int    rec,
                          double inflow,
                          double outflow,
                          double storage)
 {
-    /***************************************************************
-       calc_water_balance_error  Keith Cherkauer        April 1998
-
-       This subroutine computes the overall model water balance, and
-       warns the model user if large errors are found.
-
-       Modifications:
-       2007-Aug-22 Added error as return value.  JCA
-    ***************************************************************/
-
     static double last_storage;
     static double cum_error;
     static double max_error;
@@ -51,6 +71,12 @@ calc_water_balance_error(int    rec,
     }
 }
 
+/******************************************************************************
+ * @brief    This subroutine computes the overall model energy balance, and
+ *           reports the maximum time step error above a thresehold to the
+ *           user.  The total cumulative error for the grid cell is also
+ *           computed and reported at the end of the model run.
+ *****************************************************************************/
 double
 calc_energy_balance_error(int    rec,
                           double net_rad,
@@ -59,19 +85,6 @@ calc_energy_balance_error(int    rec,
                           double grnd_flux,
                           double snow_fluxes)
 {
-/***************************************************************
-   calc_energy_balance_error   Keith Cherkauer     April 1998
-
-   This subroutine computes the overall model energy balance, and
-   reports the maximum time step error above a thresehold to the
-   user.  The total cumulative error for the grid cell is also
-   computed and reported at the end of the model run.
-
-   Modifications:
-   2012-Oct-25 Changed to return the energy balance error to the
-              parent function for tracking purposes.		CL via TJB
-***************************************************************/
-
     static double cum_error;
     static double max_error;
     static int    Nrecs;

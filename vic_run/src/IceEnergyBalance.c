@@ -1,60 +1,35 @@
-/*
- * SUMMARY:      IceEnergyBalance.c - Calculate lake ice energy balance
- * USAGE:        Part of the lake algorithm
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Laura Bowling
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:              nijssen@u.washington.edu
- * ORIG-DATE:     March 16, 2001
- * LAST-MOD: Mon Apr 21 15:51:12 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate ice energy balance
- * DESCRIP-END.
- * FUNCTIONS:    IceEnergyBalance()
- * COMMENTS:
- */
+ * Calculate lake ice energy balance
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: IceEnergyBalance()
-
-   Purpose      : Calculate the surface energy balance for the snow pack
-
-   Required     :
-    double TSurf           - new estimate of effective surface temperature
-    va_list ap            - Argument list initialized by va_start().  For
-                            elements of list and order, see beginning of
-                            routine
-
-   Returns      :
-    double RestTerm        - Rest term in the energy balance
-
-   Modifies     :
-    double *RefreezeEnergy - Refreeze energy (W/m2)
-    double *VaporMassFlux  - Mass flux of water vapor to or from the
-                            intercepted snow (m/s)
-
-   Comments     :
-    Reference:  Bras, R. A., Hydrology, an introduction to hydrologic
-                science, Addisson Wesley, Inc., Reading, etc., 1990.
-
-   Modifications:
-   16-Jul-04 Renamed VaporMassFlux to vapor_flux to denote fact that its
-            units are m/timestep rather than kg/m2s.  Created new variable
-            VaporMassFlux with units of kg/m2s.  After VaporMassFlux is
-            computed, vapor_flux is derived from it by unit conversion.
-            vapor_flux is the variable that is passed in/out of this
-            function.							TJB
-   24-Aug-04 Added logic to handle blowing_flux and vapor_flux.		TJB
-   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
-            calculations.						TJB
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
-            blowing snow sublimation is calculated for lakes.		TJB
-   2006-Sep-23 Replaced redundant STEFAN constant with STEFAN_B.  TJB
-   2006-Nov-07 Removed LAKE_MODEL option. TJB
-
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate the surface energy balance for the snow pack.
+ *****************************************************************************/
 double
 IceEnergyBalance(double  TSurf,
                  va_list ap)

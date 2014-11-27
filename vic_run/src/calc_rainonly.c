@@ -1,41 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Determines from the air temperature what fraction of incoming precipitation
+ * is frozen and unfrozen (snow and rain).
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Determines from the air temperature what fraction of incoming
+ *           precipitation is frozen and unfrozen (snow and rain).
+ *****************************************************************************/
 double
 calc_rainonly(double air_temp,
               double prec,
               double MAX_SNOW_TEMP,
               double MIN_RAIN_TEMP)
 {
-/**********************************************************************
-   calc_rainonly.c	Keith Cherkauer		March 7, 1998
-
-   Determines from the air temperature what fraction of incoming
-   precipitation is frozen and unfrozen (snow and rain).
-
-   Modifications:
-   09-22-98 Modified to filter out very small fractions of snow
-           or rain in mixed precipitation.  Minimum value MIN_PREC
-           is adjusted to account for the size of mu (minimum
-           is based of fractional precipitation with mu=1, since
-           snow cannot be solved for when mu<1).                  KAC
-   10-May-04 Changed test
-                if ( MAX_SNOW_TEMP < MIN_RAIN_TEMP )
-            to
-                if ( MAX_SNOW_TEMP <= MIN_RAIN_TEMP )
-            to avoid possibility of dividing by zero.		TJB
-   10-May-04 Changed test
-                else if(air_temp > MAX_SNOW_TEMP)
-            to
-                else if(air_temp >= MAX_SNOW_TEMP)
-            to fix situation in which, if air_temp = MAX_SNOW_TEMP,
-            rainfall (rainonly) was set to 0 and snowfall was set
-            to 100% of precip, causing function to fail.	TJB
-   2007-Apr-04 Modified to handle grid cell errors by returning to the
-           main subroutine, rather than ending the simulation.   GCT/KAC
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
-
     double rainonly;
 
     rainonly = 0.;

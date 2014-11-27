@@ -1,51 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads in vegetation parameters for the current grid cell.
+ *
+ * It also relates each vegetation class in the cell to the appropriate
+ * parameters in the vegetation library.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Read vegetation parameters.
+ *****************************************************************************/
 veg_con_struct *
 read_vegparam(FILE  *vegparam,
               int    gridcel,
               size_t Nveg_type)
-/**********************************************************************
-   read_vegparam.c    Keith Cherkauer and Dag Lohmann       1997
-
-   This routine reads in vegetation parameters for the current grid cell.
-   It also relates each vegetation class in the cell to the appropriate
-   parameters in the vegetation library.
-
-   Modifications:
-   09-24-98  Modified to read root zone distribution information so
-           that soil layer root fractions can be computed for new
-           soil layer depths - see calc_root_fractions.c           KAC
-   07-15-99 Modified to read LAI values from a new line in the vegetation
-           parameter file.  Added specifically to work with the new
-           global LAI files.
-   11-18-02 Added code to read in blowing snow parameters.          LCB
-   03-27-03 Modified code to update Wdmax based on LAI values read in
-           for the current grid cell.  If LAI is not obtained from this
-           function, then the values cacluated in read_veglib.c are
-           left unchanged.						DP & KAC
-   2006-Nov-07 Allocates MaxVeg+1 veg tiles.				TJB
-   2007-May-11 Changed some 'fscanf' statements to 'fgets' and 'sscanf'
-              to count rootzone and BLOWING fields. Also tests for
-              fetch < 1.						GCT
-   2007-Oct-31 Added missing brackets in if(options.GLOBAL_LAI) block.	TJB
-   2008-Oct-23 Added blocks to free vegarr[].				LCB via TJB
-   2009-Jan-16 Added logic for COMPUTE_TREELINE option.			TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
-   2009-Jun-17 Fixed incorrect placement of free vegarr[] for case of
-              GLOBAL_LAI==FALSE.					TJB
-   2009-Jul-26 Allocate extra veg tile for COMPUTE_TREELINE case.	TJB
-   2009-Jul-31 Removed extra veg tile for lake/wetland case.		TJB
-   2009-Sep-14 Made error messages clearer.				TJB
-   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
-   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Jul-25 Added photosynthesis parameters.				TJB
-   2013-Dec-28 Removed NO_REWIND option.					TJB
-**********************************************************************/
 {
     void ttrim(char *string);
     extern veg_lib_struct *veg_lib;
@@ -529,6 +521,9 @@ read_vegparam(FILE  *vegparam,
 #define END '\0'
 #define NEW '\n'
 
+/******************************************************************************
+ * @brief    trim trailing newlines
+ *****************************************************************************/
 void
 ttrim(char *c)
 {

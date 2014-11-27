@@ -1,34 +1,53 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Compute treeline.
+ *
+ * This routine computes the annual average July temperature for the current
+ * gridcell.  The temperature is than lapsed to determine the elevation at
+ * which the annual average temperature is equal to 10C. Snow elevation bands
+ * above this elevation are considered to be above the treeline.  When gridcell
+ * data is output at the end of each time step, vegetation types with overstory
+ * will be excluded from the variable averages of snow bands higher than the
+ * treeline (e.g. decidous trees will be removed from high elevation snow bands,
+ * while grass and shrubs will remain).  This is to serve as a preliminary fix
+ * for high elevation "glaciers", a more permanent version would actually allow
+ * for vegetation types to be excluded from various snow bands.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Compute treeline.
+ *****************************************************************************/
 void
 compute_treeline(atmos_data_struct *atmos,
                  dmy_struct        *dmy,
                  double             avgJulyAirTemp,
                  double            *Tfactor,
                  char              *AboveTreeLine)
-
-/**********************************************************************
-   compute_treeline.c        Keith Cherkauer          March 12, 2003
-
-   This routine computes the annual average July temperature for the
-   current gridcell.  The temperature is than lapsed to determine the
-   elevation at which the annual average temperature is equal to 10C.
-   Snow elevation bands above this elevation are considered to be above
-   the treeline.  When gridcell data is output at the end of each time
-   step, vegetation types with overstory will be excluded from the
-   variable averages of snow bands higher than the treeline (e.g. decidous
-   trees will be removed from high elevation snow bands, while grass
-   and shrubs will remain).  This is to serve as a preliminary fix for
-   high elevation "glaciers", a more permanent version would actually
-   allow for vegetation types to be excluded from various snow bands.
-
-   Modifications:
-   2009-Jan-12 Added extra input parameter (avgJulyAirTemp) and logic to
-              handle it in the event JULY_TAVG_SUPPLIED is TRUE.		TJB
-
- ************************************************************************/
 {
     extern option_struct       options;
     extern global_param_struct global_param;

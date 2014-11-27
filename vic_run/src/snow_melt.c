@@ -1,116 +1,36 @@
-/*
- * SUMMARY:      SnowMelt.c - Calculate snow accumulation and melt
- * USAGE:
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Mark Wigmosta and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu
- * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Tue Apr 22 09:48:43 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
- *               approach for a two layer snow model
- * DESCRIP-END.
- * FUNCTIONS:    SnowMelt()
- * COMMENTS:
- */
+ * Calculate snow accumulation and melt
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: SnowMelt()
-
-   Purpose      : Calculate snow accumulation and melt using an energy balance
-                 approach for a two layer snow model
-
-   Required     :
-    double delta_t               - Model timestep (secs)
-    double z2           - Reference height (m)
-    double aero_resist           - Aerodynamic resistance (uncorrected for
-                                   stability) (s/m)
-    double *aero_resist_used     - Aerodynamic resistance (corrected for
-                                   stability) (s/m)
-    double atmos->density        - Density of air (kg/m3)
-    double atmos->vp             - Actual vapor pressure of air (Pa)
-    double Le           - Latent heat of vaporization (J/kg3)
-    double atmos->net_short      - Net exchange of shortwave radiation (W/m2)
-    double atmos->longwave       - Incoming long wave radiation (W/m2)
-    double atmos->pressure       - Air pressure (Pa)
-    double RainFall              - Amount of rain (m)
-    double Snowfall              - Amount of snow (m)
-    double atmos->air_temp       - Air temperature (C)
-    double atmos->vpd            - Vapor pressure deficit (Pa)
-    double wind                  - Wind speed (m/s)
-    double snow->pack_water      - Liquid water content of snow pack
-    double snow->surf_water	 - Liquid water content of surface layer
-    double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m/time step)
-    double snow->pack_temp       - Temperature of snow pack (C)
-    double snow->surf_temp       - Temperature of snow pack surface layer (C)
-    double snow->melt_energy     - Energy used for melting and heating of
-                                   snow pack (W/m2)
-
-   Modifies     :
-    double *melt                 - Amount of snowpack outflow (initially is m, but converted to mm for output)
-    double snow->pack_water      - Liquid water content of snow pack
-    double snow->surf_water	 - Liquid water content of surface layer
-    double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Mass flux of water vapor to or from the
-                                   intercepted snow (m/time step)
-    double snow->pack_temp       - Temperature of snow pack (C)
-    double snow->surf_temp       - Temperature of snow pack surface layer (C)
-    double snow->melt_energy     - Energy used for melting and heating of
-                                   snow pack (W/m2)
-
-   Comments     :
-
-   Modifications:
-   10-06-00 modified to handle partial snow cover                KAC
-   10-31-00 modified to assure that ground heat flux is used
-           properly in the snow surface energy balance as well
-           as imporving the handling of energy fluxes for
-           partial snow cover.                                  KAC
-   11-18-02 modified to handle blowing snow.                     LCB
-   04-Jun-04 For the case in which snowpack is too thin to solve
-            separately, added message explaining that root_brent's
-            error is not fatal and that snow pack will be solved in
-            conjunction with surface energy balance.			TJB
-   16-Jul-04 Added "month" to parameter list to allow this function to
-            pass month to latent_heat_from_snow().  Changed calculations
-            involving vapor_flux to make it consistent with convention
-            that vapor_flux has units of m/timestep.			TJB
-   16-Jul-04 Changed the type of the last few variables (lag_one, iveg,
-            etc) to be double in the parameter lists of root_brent
-            and CalcSnowPackEnergyBalance.  For some reason, passing
-            them as float or int caused them to become garbage.  This may
-            have to do with the fact that they followed variables of type
-            (double *) in va_list, which may have caused memory alignment
-            problems.							TJB
-   16-Jul-04 Modified cap on vapor_flux to re-scale values of blowing_flux
-            and surface_flux so that blowing_flux and surface_flux still
-            add up to the new value of vapor_flux.			TJB
-   05-Aug-04 Removed overstory, lag_one, sigma_slope, fetch, iveg, Nveg,
-            and month from argument list, since these were only used in
-            call to SnowPackEnergyBalance (and ErrorSnowPackEnergyBalance),
-            which no longer needs them.					TJB
-   25-Aug-04 Modified re-scaling of surface_flux to reduce round-off
-            error.							TJB
-   21-Sep-04 Added ErrorString to store error messages from
-            root_brent.							TJB
-            Removed message explaining non-fatal root_brent warning.
-            These warnings were not a sign of any failures, and served
-            only to confuse users and take up valuable space in the
-            output display.						TJB
-   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-            used in flux calculations.					TJB
-   2007-Apr-11 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	KAC via TJB
-   2007-Jul-03 Corrected the units of melt in the comment section.	TJB
-   2007-Aug-31 Checked root_brent return value against -998 rather than -9998.    JCA
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate snow accumulation and melt using an energy balance
+ *           approach for a two layer snow model
+ *****************************************************************************/
 int
 snow_melt(double            Le,
           double            NetShortSnow,       // net SW at absorbed by snow
@@ -582,23 +502,10 @@ snow_melt(double            Le,
     return (0);
 }
 
-/*****************************************************************************
-   Function name: CalcSnowPackEnergyBalance()
-
-   Purpose      : Dummy function to make a direct call to
-                 SnowEnergyBalance() possible.
-
-   Required     :
-    double TSurf - SnowPack surface temperature (C)
-    other arguments required by SnowPackEnergyBalance()
-
-   Returns      :
-    double Qnet - Net energy exchange at the SnowPack snow surface (W/m^2)
-
-   Modifies     : none
-
-   Comments     : function is local to this module
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Dummy function to make a direct call to SnowEnergyBalance()
+ *           possible.
+ *****************************************************************************/
 double
 CalcSnowPackEnergyBalance(double Tsurf,
                           ...)
@@ -615,6 +522,10 @@ CalcSnowPackEnergyBalance(double Tsurf,
     return Qnet;
 }
 
+/******************************************************************************
+ * @brief    Pass snow pack energy balance terms to
+ *           ErrorPrintSnowPackEnergyBalance
+ *****************************************************************************/
 int
 ErrorSnowPackEnergyBalance(double Tsurf,
                            ...)
@@ -630,6 +541,9 @@ ErrorSnowPackEnergyBalance(double Tsurf,
     return (error);
 }
 
+/******************************************************************************
+ * @brief    Print snow pack energy balance terms
+ *****************************************************************************/
 int
 ErrorPrintSnowPackEnergyBalance(double  TSurf,
                                 va_list ap)

@@ -1,49 +1,42 @@
-/********************************************************************************
-   filename  : soil_carbon_balance.c
-   purpose   : Calculate soil carbon balance
-   interface : - input :
-#                - Nnodes:  number of points (vertically) at which to evaluate soil respiration
-#                - dZ[]:    array of layer thicknesses [m] pertaining to nodes
-#                - dZTot:   total depth [m] of all layers (total depth of soil containing carbon)
-#                - T[]:     array of node temperatures [K]
-#                - w[]:     array of node moisture fractions [fraction]
-#                - CLitter: carbon storage in litter pool [gC/m2]
-#                - CInter:  carbon storage in intermediate pool [gC/m2]
-#                - CSlow:   carbon storage in slow pool [gC/m2]
-#              Note: the litter pool is concentrated at the soil surface, while the intermediate and
-#                    slow pools are both assumed to be distributed uniformly throughout soil column.
-#
-#              - constants:
-#                - fAir:      Fraction of respired carbon from litter pool that is lost to atmosphere
-#                - fInter:    Fraction of [respired carbon from litter pool that goes to soil] that goes
-#                             to intermediate pool
-#
-#              - output:
-#                - RhLitter:     Soil respiration from litter pool [gC/m2]
-#                - RhLitter2Atm: Soil respiration from litter pool that is lost to atmosphere [gC/m2]
-#                - RhInter:      Soil respiration from intermediate pool [gC/m2]
-#                - RhSlow:       Soil respiration from slow pool [gC/m2]
-#                - RhTot:        Total soil respiration from all pools [gC/m2]
-#                - Litterfall:   Flux of carbon from living biomass into soil [gC/m2]
-#                - CLitter:      Updated carbon storage in litter pool [gC/m2]
-#                - CInter:       Updated carbon storage in intermediate pool [gC/m2]
-#                - CSlow:        Updated carbon storage in slow pool [gC/m2]
-#              Note: We assume that respiration in the litter pool results in a mix of end products: CO2,
-#                    which is lost to the atmosphere, and larger molecules, which become part of the soil
-#                    carbon pools (intermediate and slow).  The fraction of respired carbon (by mass) that
-#                    ends up as CO2 is given by fAir.  All respiration from the intermediate and slow pools
-#                    is assumed to go to the atmosphere.
-
-
-   programmer: Ted Bohn
-   date      : July 25, 2013
-   changes   :
-   references:
-********************************************************************************/
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Calculate soil carbon balance
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+* @brief    Calculate soil carbon balance.
+*
+* @Note     We assume that respiration in the litter pool results in a mix of
+*           end products: CO2, which is lost to the atmosphere, and larger
+*           molecules, which become part of the soil carbon pools (intermediate
+*           and slow).  The fraction of respired carbon (by mass) that ends up
+*           as CO2 is given by fAir.  All respiration from the intermediate and
+*           slow pools is assumed to go to the atmosphere.
+******************************************************************************/
 void
 soil_carbon_balance(soil_con_struct   *soil_con,
                     energy_bal_struct *energy,

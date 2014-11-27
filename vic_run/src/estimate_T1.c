@@ -1,6 +1,38 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine uses Xu Liangs 3-layer energy balance formulation to estimate
+ * the temperature between the first and second layers.  Formerly calculated
+ * independently in each of the surface energy balance equation routines.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    3-layer energy balance formulation to estimate the temperature
+ *           between the first and second layers.
+ *****************************************************************************/
 double
 estimate_T1(double Ts,
             double T1_old,
@@ -13,19 +45,6 @@ estimate_T1(double Ts,
             double dp,
             double delta_t)
 {
-/**********************************************************************
-   estimate_T1                Keith Cherkauer          July 15, 1998
-
-   uses Xu Liangs 3-layer energy balance formulation to estimate the
-   temperature between the first and second layers.  Formerly calculated
-   independently in each of the surface energy balance equation routines.
-
-   Modifications:
-   01-20-00 removed from end of func_surf_energy_bal.c and put into a
-           separate file                                           KAC
-
-**********************************************************************/
-
     double C1;
     double C2;
     double C3;

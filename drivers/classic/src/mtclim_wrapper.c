@@ -1,38 +1,29 @@
-/*******************************************************************************
-* Purpose: Initialize and call mtclim routines to estimate meteorological
-*          variables
-* Usage  :
-* Author : Bart Nijssen
-* E-mail : nijssen@u.washington.edu
-* Created:
-* Last Changed: Fri Apr 25 11:51:24 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
-* Notes  : Acts as interface between mtclim and vic
-* Disclaimer: Feel free to use or adapt any part of this program for your own
-*             convenience.  However, this only applies with the understanding
-*             that YOU ARE RESPONSIBLE TO ENSURE THAT THE PROGRAM DOES WHAT YOU
-*             THINK IT SHOULD DO.  The author of this program does not in any
-*             way, shape or form accept responsibility for problems caused by
-*             the use of this code.  At any time, please feel free to discard
-*             this code and WRITE YOUR OWN, it's what I would do.
-   Modifications:
-   2003-Apr-25 Change calls to vicerror into calls to nrerror.
-              Vicerror may cause errors as all variables are not yet
-              defined.							KAC
-   2003-Apr-25 Compute pressures in Pa, rather than kPa.			KAC
-   2011-Nov-04 Updated to mtclim 4.3.                                   TJB
-   2011-Nov-04 Modified to handle user-supplied observed SW and/or VP.	TJB
-   2011-Nov-04 Fixed bug in tinyradfract array indexing and transfer to
-              hourlyrad array.  Previously the code looped over all 366
-              days' worth of the tinyradfract array, causing the diurnal
-              cycle of radiation to be shifted 1 day later in the year
-              every non-leap year.  At high latitudes this resulted in
-              substantial errors in the diurnal cycle after 20-30 years
-              of simulation.  This has been fixed.			TJB
-   2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
-              is supplied by the user.					HFC via TJB
-   2013-Jul-25 Added data->s_fdir.					TJB
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Initialize and call mtclim routines to estimate meteorological variables
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
-*******************************************************************************/
 /******************************************************************************/
 /*			    PREPROCESSOR DIRECTIVES                           */
 /******************************************************************************/
@@ -63,6 +54,9 @@ void mtclim_to_vic(double hour_offset, dmy_struct *dmy,
                    data_struct *mtclim_data, double *tskc, double *vp,
                    double *hourlyrad, double *fdir);
 
+/******************************************************************************
+ * @brief    interface between VIC and MTCLIM.
+ *****************************************************************************/
 void
 mtclim_wrapper(int         have_dewpt,
                int         have_shortwave,
@@ -83,12 +77,6 @@ mtclim_wrapper(int         have_dewpt,
                double     *vp,
                double     *hourlyrad,
                double     *fdir)
-/******************************************************************************
-   mtclim_wrapper: interface between VIC and MTCLIM.
-
-   Modifications:
-   2012-Feb-16 Cleaned up commented code.					TJB
-******************************************************************************/
 {
     control_struct   ctrl;
     parameter_struct p;
@@ -125,7 +113,8 @@ mtclim_wrapper(int         have_dewpt,
         nrerror("Error in calc_prcp()... exiting\n");
     }
 
-    /* calculate daily snowpack using simple model (this is only for radiation correction, *not* the same as the VIC snowpack estimate) */
+    /* calculate daily snowpack using simple model (this is only for radiation
+       correction, *not* the same as the VIC snowpack estimate) */
     if (snowpack(&ctrl, &mtclim_data)) {
         nrerror("Error in snowpack()... exiting\n");
     }
@@ -149,6 +138,9 @@ mtclim_wrapper(int         have_dewpt,
     free(tiny_radfract);
 }
 
+/******************************************************************************
+ * @brief    Initialize mtclim control structures
+ *****************************************************************************/
 void
 mtclim_init(int               have_dewpt,
             int               have_shortwave,
@@ -183,7 +175,8 @@ mtclim_init(int               have_dewpt,
     if (have_dewpt) {
         if (have_dewpt == 1) {
             nrerror(
-                "have_dewpt not yet implemented for tdew; however you can supply observed vapor pressure and set have_dewpt to 2\n");
+                "have_dewpt not yet implemented for tdew; however you can "
+                "supply observed vapor pressure and set have_dewpt to 2\n");
         }
         else if (have_dewpt == 2) {
             ctrl->invp = 1;
@@ -249,6 +242,9 @@ mtclim_init(int               have_dewpt,
     }
 }
 
+/******************************************************************************
+ * @brief    Store MTCLIM variables in VIC arrays.
+ *****************************************************************************/
 void
 mtclim_to_vic(double          hour_offset,
               dmy_struct     *dmy,
@@ -259,13 +255,6 @@ mtclim_to_vic(double          hour_offset,
               double         *vp,
               double         *hourlyrad,
               double         *fdir)
-/******************************************************************************
-   mtclim_to_vic: Store MTCLIM variables in VIC arrays.
-
-   Modifications:
-   2012-Feb-16 Removed check on mtclim_data->insw for storing tinyradfract data
-              in hourlyrad array.						TJB
-******************************************************************************/
 {
     int    i, j, k;
     int    tinystepsphour;

@@ -1,51 +1,35 @@
-/********************************************************************************
-   filename  : canopy_assimilation.c
-   purpose   : Calculate GPP, Raut, and NPP for veg cover with multi-layer canopy
-   interface : - input :
-                - Ctype:          photosynthesis pathway (PHOTO_C3 or PHOTO_C4)
-                - MaxCarboxRate:  maximum carboxlyation rate at 25 deg C       (mol(CO2)/m2 leaf area s)
-                - MaxETransport:  maximum electron transport rate at 25 deg C  (mol(CO2)/m2 leaf area s) (C3 plants)
-                - CO2Specificity: CO2 specificity at 25 deg C                  (mol(CO2)/m2 leaf area s) (C4 plants)
-                - NscaleFactor[]: array of layer-specific nitrogen scaling
-                                  factors at max carbox rate (Vm) and max
-                                  electron transport rate (Jm)
-                - Tfoliage:       vegetation temperature                       (deg C)
-                - SWdown:         incoming shortwave radiation                 (W/m2)
-                - aPAR[]:         array of layer-specific absorbed
-                                  photosynthetically active radiation (mol
-                                  photons/m2 leaf area s)
-                - pz:          near-surface atmospheric pressure            (Pa)
-                - Catm:           CO2 mixing ratio in the atmosphere           (mol(CO2)/mol(air))
-                - CanopLayerBnd[]:array of canopy layer upper boundaries,
-                                  expressed in terms of fraction of total LAI
-                - LAItotal:       Total LAI of the entire canopy
-                - mode:           'ci': assume a default Ci, and compute photosynthesis and rs
-                                  'rs': take rs as an input, and compute photosynthesis and Ci
-
-              - input or output, depending on value of mode:
-                - rsLayer[]:      array of layer-specific stomatal resistance  (s/m) (mode = 'rs': input; mode = 'ci': output)
-                                  NOTE: this is per layer leaf area
-                - rc:             whole-canopy stomatal resistance             (s/m) (mode = 'rs': ignored; mode = 'ci': output)
-
-              - output:
-                - Ci:             whole-canopy leaf-internal CO2 mixing ratio      (mol(CO2)/mol(air))
-                - GPP:            whole-canopy gross assimilation (photosynthesis) (mol(CO2)/m2 ground area s)
-                - Rdark:          whole-canopy 'dark' of leaf respiration          (mol(CO2)/m2 ground area s)
-                - Rphoto:         whole-canopy photorespiration                    (mol(CO2)/m2 ground area s)
-                - Rmaint:         whole-forest maintenance respiration             (mol(CO2)/m2 ground area s)
-                - Rgrowth:        whole-forest plant growth respiration            (mol(CO2)/m2 ground area s)
-                - Raut:           whole-forest plant respiration                   (mol(CO2)/m2 ground area s)
-                - NPP:            net primary productivity                         (mol(CO2)/m2 ground area s)
-
-   programmer: Ted Bohn
-   date      : October 20, 2006
-   changes   :
-   references:
-********************************************************************************/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Calculate GPP, Raut, and NPP for veg cover with multi-layer canopy.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Calculate GPP, Raut, and NPP for veg cover with multi-layer canopy
+ *****************************************************************************/
 void
 canopy_assimilation(char    Ctype,
                     double  MaxCarboxRate,

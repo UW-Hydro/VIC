@@ -1,19 +1,38 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine frees all components of the veg_con structure.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This subroutine frees all components of the veg_con structure.
+ *****************************************************************************/
 void
 free_vegcon(veg_con_struct **veg_con)
-
-/**********************************************************************
-   free_vegcon.c	            Keith Cherkauer	  September 25, 1998
-
-   This subroutine frees all components of the veg_con structure.
-
-   Modifications:
-   2013-Jul-29 Added freeing of canopy layer bounds array.		TJB
-
-**********************************************************************/
 {
     extern option_struct options;
     size_t               i;

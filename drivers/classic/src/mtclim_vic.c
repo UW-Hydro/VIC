@@ -1,296 +1,28 @@
-/*
-   Note:  The following code is largely taken from mtclim4.3, a weather
-         preprocessor developed by the NTSG group in the School of Forestry at
-         the University of Montana.  The code has been left intact as much as
-         possible, but small adaptations have been made to allow integration
-         with VIC.  Adaptations have been made so the functions, etc. are local
-         to this routine, which should allow easier updating.
-         The original comments have largely been left intact
-         typedefs and function definitions have been moved to mtclim42_vic.h
-         functions are called from mtclim42_wrapper.c
-   Changes:  The only changes to the original MTCLIM code are
-            - cloudiness is returned for each day as well through the variable
-            tskc (calculated using equation 2.29 in Bras, R. L., "Hydrology, an
-            introduction to hydrologic science", Addison-Wesley, Reading,
-            Massachusetts, 1990).
-            - For each day of the year the fraction of the total daily potential
-            radiation that occurs during each radiation time step is also
-            returned through the variable tiny_radfract
-            - SRADDT has been changed to be 300 sec
-            Changes are preceded by the comment * start vic_change *  and
-            followed by the comment * end vic_change *
-   Author: Most of the code was written by Peter E. Thornton at the Univeristy of
-          Montana (see below).
-          Adapted by: Bart Nijssen
-          Adaptation started on Sat Aug 21 using the mtclim4.2 code from 5/7/1999
-   Modifications:
-   2004-Jun-04 If data->s_srad becomes negative, we set it to 0.0.		TJB
-   2005-Jun-15 If p->base_isoh and p->site_isoh are both small, set ratio = 1.
-              This handles the case in which annual precip for the grid cell
-              is 0, resulting in both p->base_isoh and p->site_isoh being 0,
-              and their ratio being undefined.					TJB
-   2007-Apr-21 Initialize ratio to -1.						TJB
-   2011-Nov-05 MTCLIM code updated to MTCLIM v. 4.3.				TJB
-   2011-Nov-05 Modified tiny_radfract array to fix a bug in VIC's looping over
-              the array outside of MTCLIM.					TJB
-   2011-Nov-05 Added SW_PREC_THRESH, the minimum daily precip necessary to
-              trigger dimming of shortwave.  The purpose of this is to handle
-              situations where gridded forcings are used for input, and trace
-              amounts of precip from neighboring cells are "leaking" into the
-              current cell due to the regridding scheme.			TJB
-   2012-Feb-16 Removed function calc_srad_humidity(), which is no longer called.
-              Cleaned up unneeded comment statements.				TJB
-   2012-Mar-28 Moved computation of data->s_tskc to after conditional overwriting of
-              data->s_tfmax, so that data->s_tskc reflects observed SW if observed
-              SW is provided.							TJB
-   2012-Apr-03 Added check to make sure t_tmax is always positive.		TJB
-   2012-Apr-13 Simplified the relationship between tskc and tfmax for LW_CLOUD
-              == LW_CLOUD_DEARDORFF.						TJB
-   2013-Jul-19 Fixed bug in shortwave computation for case when daily shortwave
-              is supplied by the user.						HFC via TJB
-   2013-Jul-25 Added data->s_fdir.						TJB
- */
-
-/*
-   mtclim43.c
-
-   MTCLIM
-   VERSION 4.3
-
-   Peter Thornton
-   NTSG, School of Forestry
-   University of Montana
-   1/20/00
-
- ***************************************
- ** Questions or comments? Contact... **
- ** Dr. Peter E. Thornton             **
- ** NTSG, School of Forestry          **
- ** University of Montana             **
- ** Missoula, MT 59812                **
- ** email: peter@ntsg.umt.edu         **
- ** phone: 406-243-4326               **
- ***************************************
-
-   --------------------------------------------------------------------------
-   Code History
-   ------------
-   Original code written by R.R. Nemani
-   Updated   4/1/1989 by J.C. Coughlan
-   Updated 12/23/1989 by Joe Glassy
-   Updated   1/4/1993 by Raymond Hunt (version 2.1)
-   Updated  3/26/1997 by Peter Thornton (version 3.0)
-   Updated  7/28/1997 by Peter Thornton (version 3.1)
-   Updated   5/7/1998 by Peter Thornton (version 4.0)
-   Updated   8/1/1998 by Peter Thornton (version 4.1)
-   Updated  4/20/1999 by Peter Thornton (version 4.2)
-   Updated  1/20/2000 by Peter Thornton (version 4.3)
-
-   CHANGES FROM VERSION 4.2 TO VERSION 4.3
-   These changes based on the results of:
-   Thornton, P.E., H. Hasenauer, and M.A. White, 2000. Simultaneous
-   estimation of daily solar radiation and humidity from observed temperature
-   and precipitation: an application over complex terrain in Austria.
-   For submission to Ag For Met.
-   1) ADDED THE SNOW ACCUMULATION/MELT MODEL FOR CORRECTING RADIATION
-   FOR INFLUENCE OF SNOWPACK.
-   2) ADDED ALBEDO CORRECTION TO HORIZON OBSTRUCTION CALCULATIONS.
-   3) HUMIDITY ALGORITHM NOW DEPENDS ON THE ANNUAL RATION PET/PRCP:
-   FOR VALUES < 2.5, USING THE TMIN=TDEW ALGORITHM, FOR VALUES > 2.5,
-   USING THE ARID CORRECTION FROM:
-   Kimball, J.S., S.W. Running, and R. Nemani, 1997. An improved method for
-   estimating surface humidity from daily minimum temperature. Ag For Met
-   85:87-98.
-   4) MOVED ALL MODEL PARAMETERS INTO THE PARAMETERS.H FILE
-
-   CHANGES FROM VERSION 4.1 TO VERSION 4.2
-   1) PUT THE SLOPE AND ASPECT CORRECTIONS TO RADIATION BACK IN. THEY
-   HAD BEEN REMOVED DURING THE DEVELOPMENT OF THE NEW RADIATION CODE.
-   This includes the estimation for diffuse radiation on sloping surfaces
-   during periods when the sun is above a flat horizon, but not providing
-   direct illumination to the slope.  Site east and west horizon corrections
-   have also been reintroduced.
-
-   CHANGES FROM VERSION 4.0 TO VERSION 4.1
-   1) ADDITIONAL REVISION OF RADIATION CODE, FOLLOWING SUBMISSION OF AG FOR MET
-   MANUSCRIPT DESCRIBING ANALYSIS OF SAMSON DATA.  The current code
-   follows exactly the algorithm detailed in
-   Thornton, P.E. and S.W. Running, 1999. An improved algorithm for estimating
-   incident daily solar radiation from measurements of temperature, humidity,
-   and precipitation. Ag For Met 93:211-228.
-
-   changes from version 3.1 to version 4.0:
-   1) radiation code completely revamped, following analysis of samson
-   observations for the vemap2 project.
-   2) includes an iterative algorithm for estimating vapor pressure and
-   radiation
-   3) par output no longer an option, since the old par algorithm is suspect
-   4) 2-day tmin smoothing no longer an option
-   5) solar constant now calculated as an analytical function of yearday,
-   instead of the monthly array of values in earlier versions. removes the
-   discontinuities between months.
-   6) boxcar function now uses the previous n days of data, making it a
-   "pulled boxcar" instead of a "centered boxcar"
-
-   Changes from version 2.0 to version 3.1
-   Modified to include the following improvements to the original MTCLIM logic:
-   1) Improved vapor pressure calculation
-   2) Improved transmissivity calculation
-   3) Improved daylength calculation
-
-   Some other differences between version 3.1 and previous versions of MTCLIM:
-   1) No english units option
-   2) No total or average radiation option
-   3) No threshold radiation option
-   5) No pre-rainy days correction for transmissivity
-   6) No radiation correction to air temperatures
-   7) No LAI corrections to air temperatures
-   8) Only one precipitation station allowed
-   9) Some parameters formerly in initialization file are now in mtclim_const.h
-
-   --------------------------------------------------------------------------
-   UNITS
-   -----
-   Temperatures           degrees C
-   Temp. lapse rates      degrees C / 1000 m
-   Precipitation          cm / day
-   Vapor pressure         Pa
-   Vapor pressure deficit Pa
-   Radiation              W/m2, average over daylight period
-   Daylength              s (sunrise to sunset, flat horizons)
-   Elevation              m
-   Latitude               decimal degrees
-   Aspect                 decimal degrees
-   Slope                  decimal degrees
-   E/W horizons           decimal degrees
-
-   --------------------------------------------------------------------------
-   Files
-   -----
-
-   Parameter initialization file
-   Input meteorological data file
-   Output meteorological data file  (*.mtcout)
-
-   Example initialization file:
-
-   ---top of init file-------------------------------------------------------
-   sample               (this entire line written to outfiles)
-   other comments       (this entire line discarded)
-
-   IOFILES                    Keyword, don't edit this line
-   test.mtcin                 Name of input meteorological data file
-   test                       Prefix for output file
-
-   CONTROL                    Keyword, don't edit this line
-   3                          (int) Number of header lines in input file
-   365                        (int) Number of days of data in input file
-   0                          (int) Dewpoint temperature input? (0=NO, 1=YES)
-   1                          (int) Humidity output flag        (0=VPD, 1=VP)
-   1                          (int) Year field in input file?   (0=NO, 1=YES)
-
-   PARAMETERS                 Keyword, don't edit this line
-   500.0                      (double) Base station elevation, meters
-   50.0                       (double) Base station annual precip isohyet, cm
-   48.0                       (double) Site latitude, degrees (- for south)
-   1500.0                     (double) Site elevation, meters
-   15.0                       (double) Site slope, degrees
-   180.0                      (double) Site aspect, degrees (0=N,90=E,180=S,270=W)
-   75.0                       (double) Site annual precip isohyet, cm
-   2.0                        (double) Site east horizon, degrees
-   5.0                        (double) Site west horizon, degrees
-   -6.0                       (double) Lapse rate for max temperature, deg C/1000m
-   -3.0                       (double) Lapse rate for min temperature, deg C/1000m
-
-   END                        Keyword, don't edit this line
-   ---end of init file-------------------------------------------------------
-
- *.init FILE INFO
-   For all lines, except the header and comment lines, the  parameter value on the
-   left can be followed by comments on the right, as long as there is whitespace
-   separating the value on the left from the following comment. Blank lines can be
-   inserted or deleted, but all keyword lines and parameter lines must be
-   included.  The order and number of non-blank lines in this file is crucial. The
-   keywords are there as a rudimentary quality check on the format of the
-   initialization file, and they ensure that the proper number of lines are read.
-   They DON'T ensure that the parameters are in the proper order.
-
-   NOTE: The dashed lines at the top and bottom of the example file shown above
-   are NOT part of the file.
-
-
-   INPUT FILE INFO
-   All input temperatures are in degrees Celcius, and precipitation is in
-   centimeters.
-   Input data file format:
-   <some number of header lines (can be zero)>
-   <year (optional)> <yearday> <Tmax> <Tmin> <Tdew (optional)> <precipitation>
-   .
-   .
-   .
-
-   Example input data file... without year field, and without dewpoint temperature
-   ---start of input data file --------------
-   This is a header line, which is discarded
-   101 16.0 2.0 1.2
-   102 17.0 3.0  0.1
-   103 16.5 5.2  0.0
-   104 20.1 6.4  0.0
-   ---end of input data file ----------------
-
-
-
-   OUTPUT FILE INFO
-   The output file is created by appending ".mtcout" to the output filename
-   prefix specified in the initialization file. Existing files are overwritten,
-   so be careful to rename files between runs if you want to save the results,
-   and for safety, don't use ".mtcout" as the extension for the input data file.
-
- ******************************
-   Input and Output CONTROL FLAGS
- ******************************
-   There is a flag in the initialization file that controls the input of dewpoint
-   temperature information. If your input file does not contain dewpoint data,
-   set this flag to 0. Otherwise, if you have dewpoint temperature information
-   in your input file, set this flag to 1, and be sure that the dewpoint
-   temperature field is between the tmin and prcp fields, as specified under
-   the heading "INPUT FILE INFO", above.
-
-   There is another flag in the initialization file that controls the output of
-   humidity information. When set to 0, humidity output is the vapor pressure
-   deficit from the saturated vapor pressure at the daylight average temperature
-   to the ambient vapor pressure, in Pa. When the flag is set to 1, the output is
-   simply the  ambient vapor pressure in Pa.  By using the ambient vapor pressure
-   (flag  set to 1), you can avoid possible errors related to a difference between
-   the temperature chosen for saturation calculations (in this case tday) and the
-   actual temperature at any given time of day.
-
-   Another flag controls the treatment of a year-field in the input and output
-   files. When the flag is set (1), it is assumed that the first field in the
-   input file contains the year, which can be any integer between -32000 and
-   32000 (approx). This field is simply copied line-for-line into the output
-   file, where it preceeds the standard yearday output field.
-
-   Example output data file... (using VPD output, no PAR, no year field)
-   ---start of output data file -----------------------------------
-   MTCLIM v3.1 OUTPUT FILE : Mon Mar 24 14:50:51 1997
-   MTCLIM version 3.1 testing
-   yday    Tmax    Tmin    Tday    prcp      VPD     srad  daylen
-       (deg C) (deg C) (deg C)    (cm)     (Pa)  (W m-2)     (s)
-   101   10.00   -0.50    7.39    1.80   439.51   379.95   47672
-   102   11.00    1.10    7.67    0.15   387.27   364.95   47880
-   103   10.50    2.80    6.84    0.00   243.78   302.15   48087
-   104   14.10    3.40    9.29    0.00   390.67   390.22   48293
-   ---end of output data file -------------------------------------
-
-
- */
-
-/*********************
-**                  **
-**  START OF CODE   **
-**                  **
-*********************/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * VIC version of MTCLIM 4.3
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <time.h>
 #include <vic_def.h>
@@ -300,14 +32,9 @@
 #include <mtclim_constants_vic.h>   /* physical constants */
 #include <mtclim_parameters_vic.h>  /* model parameters */
 
-/****************************
-**                         **
-**    START OF FUNCTION    **
-**       DEFINITIONS       **
-**                         **
-****************************/
-
-/* data_alloc() allocates space for input and output data arrays */
+/******************************************************************************
+ * @brief    allocates space for input and output data arrays
+ *****************************************************************************/
 int
 data_alloc(const control_struct *ctrl,
            data_struct          *data)
@@ -400,7 +127,9 @@ data_alloc(const control_struct *ctrl,
     return (!ok);
 } /* end of data_alloc() */
 
-/* calc_tair() calculates daily air temperatures */
+/******************************************************************************
+ * @brief    calculates daily air temperatures
+ *****************************************************************************/
 int
 calc_tair(const control_struct   *ctrl,
           const parameter_struct *p,
@@ -434,9 +163,9 @@ calc_tair(const control_struct   *ctrl,
     return (!ok);
 }
 
-/* end of calc_tair() */
-
-/* calc_prcp() calculates daily total precipitation */
+/******************************************************************************
+ * @brief    calculates daily total precipitation
+ *****************************************************************************/
 int
 calc_prcp(const control_struct   *ctrl,
           const parameter_struct *p,
@@ -474,10 +203,10 @@ calc_prcp(const control_struct   *ctrl,
     return (!ok);
 }
 
-/* end of calc_prcp() */
-
-/* snowpack() estimates the accumulation and melt of snow for radiation
-   algorithm corrections */
+/******************************************************************************
+ * @brief    estimates the accumulation and melt of snow for radiation
+ *           algorithm corrections
+ *****************************************************************************/
 int
 snowpack(const control_struct   *ctrl,
          data_struct            *data)
@@ -549,10 +278,11 @@ snowpack(const control_struct   *ctrl,
     return (!ok);
 }
 
-/* end of snowpack() */
-
-/* iterative estimation of shortwave radiation and humidity */
-/* Note: too many changes to maintain the start/end vic change comments */
+/******************************************************************************
+ * @brief    iterative estimation of shortwave radiation and humidity
+ * @note     Note: too many changes to maintain the start/end vic change
+ *           comments
+ *****************************************************************************/
 int
 calc_srad_humidity_iterative(const control_struct   *ctrl,
                              const parameter_struct *p,
@@ -1147,9 +877,11 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     free(pva_save);
 
     return (!ok);
-} /* end of calc_srad_humidity_iterative() */
+}
 
-/* New function, not originally part of MTCLIM code */
+/******************************************************************************
+ * @brief    calculate solar radiation and humidity without iterating.
+ *****************************************************************************/
 void
 compute_srad_humidity_onetime(int                   ndays,
                               const control_struct *ctrl,
@@ -1306,7 +1038,9 @@ compute_srad_humidity_onetime(int                   ndays,
     return;
 }
 
-/* data_free frees the memory previously allocated by data_alloc() */
+/******************************************************************************
+ * @brief    frees the memory previously allocated by data_alloc()
+ *****************************************************************************/
 int
 data_free(const control_struct *ctrl,
           data_struct          *data)
@@ -1340,8 +1074,10 @@ data_free(const control_struct *ctrl,
     return (!ok);
 }
 
-/* calc_pet() calculates the potential evapotranspiration for aridity
-   corrections in calc_vpd(), according to Kimball et al., 1997 */
+/******************************************************************************
+ * @brief    calculates the potential evapotranspiration for aridity
+ *           corrections in calc_vpd(), according to Kimball et al., 1997
+ *****************************************************************************/
 double
 calc_pet(double rad,
          double ta,
@@ -1404,7 +1140,9 @@ calc_pet(double rad,
     return (pet / 10.0);
 }
 
-/* atm_pres() calculates the atmospheric pressure as a function of elevation */
+/******************************************************************************
+ * @brief    calculates the atmospheric pressure as a function of elevation
+ *****************************************************************************/
 double
 atm_pres(double elev)
 {
@@ -1426,8 +1164,10 @@ atm_pres(double elev)
     return(pa);
 }
 
-/* pulled_boxcar() calculates a moving average of antecedent values in an
-   array, using either a ramped (w_flag=1) or a flat (w_flag=0) weighting */
+/******************************************************************************
+ * @brief    calculates a moving average of antecedent values in an array,
+ *           using either a ramped (w_flag=1) or a flat (w_flag=0) weighting
+ *****************************************************************************/
 int
 pulled_boxcar(double *input,
               double *output,
@@ -1489,5 +1229,3 @@ pulled_boxcar(double *input,
 
     return (!ok);
 }
-
-/* end of pulled_boxcar() */

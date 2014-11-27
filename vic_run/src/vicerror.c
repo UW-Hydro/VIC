@@ -1,23 +1,41 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* This subroutine was written to handle numerical errors within the VIC model.
+*
+* This will flush all file buffers so that all records that have been run will
+* be written to disk before the model is exited.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+* @brief        This subroutine handles numerical errors within the model.
+******************************************************************************/
 void
 vicerror(char error_text[])
-
-/**********************************************************************
-        vicerror.c	Keith Cherkauer		April 23, 1997
-
-   This subroutine was written to handle numerical errors within the
-   VIC model.  This will flush all file buffers so that all records
-   that have been run will be written to disk before the model is exited.
-
-   Modifications:
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures.xi			TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-**********************************************************************/
 {
     extern option_struct options;
     extern Error_struct  Error;

@@ -1,25 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine creates an array of structures that contain information about a
+ * cell's states and fluxes.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Creates an array of structures that contain information about a
+ *           cell's states and fluxes.
+ *****************************************************************************/
 all_vars_struct
 make_all_vars(size_t nveg)
-
-/**********************************************************************
-        read_all_vars	Keith Cherkauer		May 21, 1996
-
-   This routine creates an array of structures that contain information
-   about a cell's states and fluxes.
-
-   modifications:
-   11-18-02 Modified to allocate vegetation variables for the
-           wetland vegetation class.                             LCB
-   01-Nov-04 Updated arglist to make_energy_bal() as part of fix for
-            QUICK_FLUX state file compatibility.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.  TJB
-   2009-Jul-31 Removed extra lake/wetland tile.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
 {
     all_vars_struct      temp;
     size_t               Nitems;

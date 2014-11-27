@@ -1,55 +1,28 @@
-# VIC Makefile
-# Modifications:
-# 27-May-2003 Replaced read_vegparam by read_vegparam_LAI			KAC
-# 12-Nov-2003 Added "make depend" to the "all" and "default" options.
-#             This way, if a user always types "make", the user is
-#             guaranteed to have a .depend file and therefore *.o will
-#             always be recompiled whenever a .h file is updated.  The
-#             user can override this behavior by typing "make model",
-#             which doesn't invoke "make depend".
-# 24-Mar-2005 Added 2 new files: conv_force_vic2alma.c and
-#	      conv_results_vic2alma.c.						TJB
-# 17-Apr-2005 Added vicInterp target.						TJB
-# 2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration.	TJB
-#	      Removed 2 files:
-#		conv_force_vic2alma.c
-#		conv_results_vic2alma.c
-#	      Added the following files:
-#		calc_water_energy_balance_errors.c
-#		output_list_utils.c
-#		parse_output_info.c
-#		set_output_defaults.c
-# 2006-Nov-30 Changed ".c" to ".o" for:
-#               output_list_utils.o
-#               parse_output_info.o
-#               set_output_defaults.o
-# 2007-Jan-15 Added PRT_HEADER option; added write_header.c.			TJB
-# 2007-Apr-24 Added newt_raph_func_fast.c for IMPLICIT option.			JCA
-# 2007-Nov-06 Added get_dist.c.							TJB
-# 2008-Feb-14 Removed -g from normal compiling option.  Changed "vicInterp"
-#	      to "vicDisagg".							TJB
-# 2009-Jun-09 Added compute_pot_evap.c.						TJB
-# 2009-Jul-31 Removed wetland_energy.c.						TJB
-# 2010-Dec-01 Added compute_zwt.c.						TJB
-# 2011-Nov-04 Renamed mtclim* files to remove version number from filenames.	TJB
-# 2012-Jan-16 Removed files associated with LINK_DEBUG code:
-#             open_debug.c
-#             store_moisture_for_debug.c
-#             write_atmosdata.c
-#             write_debug.c
-# 2013-Jul-25 Added compute_coszen.c.						TJB
-# 2013-Jul-25 Added calc_Nscale_factors.c, canopy_assimilation.c, faparl.c,
-# 	      photosynth.c.							TJB
-# 2013-Jul-25 Added compute_soil_resp.c and soil_carbon_balance.c.		TJB
-# 2013-Dec-26 Removed calc_forcing_stats.c.					TJB
-# 2014-Mar-25 Removed calc_cloud_cover_fraction.c       BN
-# 2014-Mar-26 Removed compute_dz.c
-# 2014-Mar-26 Removed files with unused functions:
-#             write_snowparam.c
-#             write_soilparam.c
-#             write_vegparam.c
-#
-# -----------------------------------------------------------------------
+ ##############################################################################
+ # @section DESCRIPTION
+ #
+ # VIC image Makefile
+ #
+ # @section LICENSE
+ #
+ # The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ # Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ # and Environmental Engineering, University of Washington.
+ #
+ # The VIC model is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License
+ # as published by the Free Software Foundation; either version 2
+ # of the License, or (at your option) any later version.
+ #
+ # This program is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ # GNU General Public License for more details.
+ #
+ # You should have received a copy of the GNU General Public License along with
+ # this program; if not, write to the Free Software Foundation, Inc.,
+ # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ##############################################################################
 
 # -----------------------------------------------------------------------
 # SET ENVIRONMENT-SPECIFIC OPTIONS HERE
@@ -205,7 +178,7 @@ OBJS = \
 	${VICPATH}/src/water_under_ice.o \
 	${VICPATH}/src/write_layer.o \
 	${VICPATH}/src/write_vegvar.o \
-	${VICPATH}/src/zero_output_list.o	 
+	${VICPATH}/src/zero_output_list.o
 
 SRCS = $(OBJS:%.o=%.c) 
 

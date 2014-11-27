@@ -1,3 +1,30 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine creates an array of structures that contain information
+ * about the day, month and year of each time step.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
@@ -6,33 +33,12 @@
 #define LEAPYR(y) (!((y) % 400) || (!((y) % 4) && ((y) % 100)))
 #endif
 
+/******************************************************************************
+ * @brief    This subroutine creates an array of structures that contain
+ *           information about the day, month and year of each time step.
+ *****************************************************************************/
 dmy_struct *
 make_dmy(global_param_struct *global)
-/**********************************************************************
-        make_dmy	Dag Lohmann		January 1996
-
-   This subroutine creates an array of structures that contain
-   information about the day, month and year of each time step.
-
-   modifications:
-   7-25-96  Added hour count, so that model can run on less than
-           a daily time step.					KAC
-   5-17-99  Modified routine to use LEAPYR function, make use of
-           simulation ending dates, and to skip over initial
-          forcing data records so that the model can be run on
-          subsets of more complete data records.            KAC
-   8-19-99  Modified routine to estimate the number of records
-           that should be skipped before starting to write
-           model output, based on the number of years defined
-           with the SKIPYEAR global variable.               KAC
-   3-14-00  Fixed problem with accounting for number of days in
-           February.  If last simulation year was a leap year,
-           number of days in February was not reset to 28 after
-           working out number of records and before working out
-           the number of forcing file records to skip.      KAC
-   2006-Feb-07 Changed indexing of line 63 (if(endday...) by 1.		GCT
-   2013-Nov-21 Added check on start hour in computation of forceskip.	TJB
-**********************************************************************/
 {
     extern param_set_struct param_set;
 
@@ -204,6 +210,9 @@ make_dmy(global_param_struct *global)
     return temp;
 }
 
+/******************************************************************************
+ * @brief    Get the next timestep.
+ *****************************************************************************/
 void
 get_next_time_step(unsigned short *year,
                    unsigned short *month,
@@ -239,13 +248,9 @@ get_next_time_step(unsigned short *year,
     }
 }
 
-/**********************************************************************
-        free_dmy	Ted Bohn		April 2007
-
-   This subroutine frees the dmy array.
-
-   modifications:
-**********************************************************************/
+/******************************************************************************
+ * @brief    Free the dmy array.
+ *****************************************************************************/
 void
 free_dmy(dmy_struct **dmy)
 {

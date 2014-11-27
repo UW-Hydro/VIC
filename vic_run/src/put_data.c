@@ -1,8 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine converts data units, and stores finalized values in an array
+ * for later output to the output files.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-int
+/******************************************************************************
+ * @brief    This routine converts data units, and stores finalized values in
+ *           an array for later output to the output files.
+ *****************************************************************************/
+ int
 put_data(all_vars_struct   *all_vars,
          atmos_data_struct *atmos,
          soil_con_struct   *soil_con,
@@ -12,147 +43,6 @@ put_data(all_vars_struct   *all_vars,
          out_data_struct   *out_data,
          save_data_struct  *save_data,
          int                rec)
-/**********************************************************************
-        put_data.c	Dag Lohmann		January 1996
-
-   This routine converts data units, and stores finalized values
-   in an array for later output to the output files.
-
-   modifications:
-   06-24-98  modified for new distributed presipitation data structures KAC
-   01-20-00 modified to deal with simplified frozen soil moisture layers
-           and frost depth / thaw depth accounting                 KAC
-   03-08-00 modified to eliminate extra lines for storing bare
-           soil variables.                                         KAC
-   6-8-2000 modified to handle spatially distribute frozen soil     KAC
-   10-6-2000 modified to handle partial snow cover                  KAC
-   02-27-01 modified to output lake model variables                 KAC
-   11-18-02 updated output of lake variables to reflect algorithm
-           changes.  Also added output variables for blowing snow
-           algorithm.                                              LCB
-   03-12-03 modified to add additional energy balance variable storage
-           when output of snow bands is selected.                  KAC
-   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
-           the model can make use of the computed treeline.     KAC
-   30-Oct-03 Snow_flux was incorrectly set to Tcanopy.  Fixed.   TJB
-   25-Aug-04 Sub_snow was incorrectly set to blowing_flux.  Now it is
-            set to vapor_flux.                                  TJB
-   28-Sep-04 Now out_data->aero_resist stores the aerodynamic resistance
-            used in flux calculations.                          TJB
-   2005-Mar-24 Modified to compute ALMA output variables.        TJB
-   2005-Apr-23 Now aero_cond is aggregated instead of aero_resist.       TJB
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures; removed the
-              OPTIMIZE and LDAS_OUTPUT options; uses the
-              new save_data structure; implemented aggregation.		TJB
-   2006-Oct-10 Shortened the names of output variables whose names were
-              too long; fixed typos in others; created new OUT_IN_LONG
-              variable.							TJB
-   2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
-   2006-Nov-07 Assigned value to overstory.				TJB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2006-Nov-30 Added OUT_DELSURFSTOR.					TJB
-   2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
-   2006-Dec-20 Changed OUT_SURF_TEMP from average of T[0] and T[1] to
-              direct assignment of T[0].				TJB
-   2007-Apr-21 Moved initialization of tmp_fract to immediately before the
-              SPATIAL_FROST block, so that it would be initialized in all
-              cases.							TJB
-   2007-Aug-17 Added EXCESS_ICE output variables.			JCA
-   2007-Aug-22 Added OUT_WATER_ERROR as output variable.			JCA
-   2007-Nov-06 Lake area is now the larger of lake.areai and lake.sarea.
-              Added wetland canopyevap and canopy_vapor_flux to grid
-              cell flux aggregation.					LCB via TJB
-   2008-Apr-21 Made computation of out_data[OUT_SURFSTOR] more robust.	TJB
-   2008-Sep-09 Calculate sarea in order to output lake surface area at
-              the end of the time step.  The stored variable
-              lake->sarea represents the sarea from the beginning of
-              the time step, not the updated value from the end of the
-              time step.						LCB via TJB
-   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the soil
-              temperature in the wetland fraction of the grid cell.	LCB via TJB
-   2008-Sep-09 Allow output of wetland frost/thaw depths even if Clake
-              is 1.0 since wetland energy balance is always computed.	LCB via TJB
-   2008-Sep-09 Lake depth assignment moved up to precede sarea
-              assignment.						LCB via TJB
-   2008-Sep-09 Check to make sure that area > 0.0 when checking to see
-              if ice area > sarea.					LCB via TJB
-   2008-Oct-23 Changed data type of put_data() to be int so that it
-              can return ErrorFlag.					TJB
-   2009-Jan-12 Added a final return of (0) since the data type of put_data()
-              is int rather than void.					TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.				TJB
-   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
-              surface and overstory values; changed AERO_COND
-              and AERO_RESIST to track "scene" values.			TJB
-   2009-Feb-09 Removed checks on PRT_SNOW_BAND option.			TJB
-   2009-Feb-22 Added OUT_VPD.						TJB
-   2009-May-17 Added OUT_ASAT.						TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jun-09 Added OUT_PET_*, potential evap computed for various
-              reference land cover types.				TJB
-   2009-Jun-09 Cell_data structure now only stores final aero_resist
-              values (called "aero_resist").  Preliminary uncorrected
-              aerodynamic resistances for current vegetation and various
-              reference land cover types for use in potential evap
-              calculations is stored in temporary array aero_resist.	TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Jul-31 Modified so that wetland veg is now included in main loop
-              over veg tiles and aggregated the same way as all other
-              veg tiles.						TJB
-   2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Sep-28 Created collect_wb_terms and collect_eb_terms to handle
-              summing of storages and fluxes from upland veg tiles,
-              wetland veg tile, and lake.  Added logic to handle an
-              initial (pre-simulation) call for purpose of initializing
-              water and energy balance checks.				TJB
-   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
-   2009-Oct-05 Modifications for taking changes in lake area into account.	TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
-   2009-Nov-15 Redirected T fallback messages to stderr.			TJB
-   2009-Dec-11 Added logic for initialization of save_data structure.	TJB
-   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
-   2010-Mar-31 Added OUT_RUNOFF_IN.					TJB
-   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
-              OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
-              to OUT_LAKE_EVAP.  Added other lake water balance terms
-              to set of output variables.  Added volumetric versions
-              of these too.						TJB
-   2010-Nov-02 Added OUT_LAKE_RCHRG, OUT_LAKE_RCHRG_V, OUT_RO_IN,
-              OUT_LAKE_RO_IN_V, OUT_LAKE_VAPFLX, and OUT_LAKE_VAPFLX_V.	TJB
-   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).	TJB
-   2010-Nov-11 Moved assignment of all OUT_LAKE* variables outside
-              collect_wb_terms().  Added lakefactor to collect_wb_terms()
-              arg list.							TJB
-   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
-              OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
-   2010-Nov-26 Changed += to = in assignment of OUT_LAKE_* variables.	TJB
-   2010-Dec-01 Added OUT_ZWT.						TJB
-   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
-   2011-Mar-31 Added frost_fract to collect_wb_terms() arglist.		TJB
-   2011-Nov-04 Added OUT_TSKC.						TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-   2012-Oct-25 Fixed sign errors in flux summations in call to calc_energy_balance_error().
-              Changed calc_energy_balance_error() to return the error, and
-              now out_data[OUT_ENERGY_ERROR].data[0] is assigned to this
-              error.  Corrected the setting of rad_temp when there is snow
-              in the canopy to Tfoliage (canopy snow temperature) instead
-              of Tcanopy (canopy air temperature).			CL via TJB
-   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-   2013-Jul-25 Added OUT_GPP, OUT_RAUT, OUT_NPP, and OUT_APAR.		TJB
-   2013-Jul-25 Added OUT_LITTERFALL, OUT_RHET, OUT_NEE, OUT_CLITTER,
-              OUT_CINTER, and OUT_CSLOW.                                TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
 {
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -768,6 +658,9 @@ put_data(all_vars_struct   *all_vars,
     return 0;
 }
 
+/******************************************************************************
+ * @brief    This routine collects water balance terms.
+ *****************************************************************************/
 void
 collect_wb_terms(cell_data_struct cell,
                  veg_var_struct   veg_var,
@@ -958,6 +851,9 @@ collect_wb_terms(cell_data_struct cell,
     }
 }
 
+/******************************************************************************
+ * @brief    This routine collects energy balance terms.
+ *****************************************************************************/
 void
 collect_eb_terms(energy_bal_struct energy,
                  snow_data_struct  snow,

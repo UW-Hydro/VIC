@@ -1,34 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine writes the complete forcing data files for use in future
+ * simulations.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Write forcing data files for use in future simulations.
+ *****************************************************************************/
 void
 write_forcing_file(atmos_data_struct    *atmos,
                    int                   nrecs,
                    out_data_file_struct *out_data_files,
                    out_data_struct      *out_data)
-/**********************************************************************
-   write_forcing_file          Keith Cherkauer           July 19, 2000
-
-   This routine writes the complete forcing data files for use in
-   future simulations.
-
-   Modifications:
-   xx-xx-01 Modified to output pressures, which are handled internally
-           in kPa, as Pa for backward compatability.			KAC
-   2005-Mar-24 Added support for ALMA variables.				TJB
-   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,...					GCT
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures.			TJB
-   2006-Nov-30 Convert pressure and vapor pressure to kPa for output.	TJB
-   2008-Jun-10 Fixed typo in QAIR and REL_HUMID eqns.			TJB
-   2009-Feb-22 Added OUT_VPD.						TJB
-   2011-Nov-04 Added OUT_TSKC.						TJB
-   2013-Jul-25 Added OUT_CATM, OUT_COSZEN, OUT_FDIR, and OUT_PAR.	TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.					TJB
-   2014-Apr-02 Fixed uninitialized dummy variables.					TJB
-**********************************************************************/
 {
     extern global_param_struct global_param;
     extern option_struct       options;

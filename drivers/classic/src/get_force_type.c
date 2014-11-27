@@ -1,44 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine determines the current forcing file data type and stores its
+ * location in the description of the current forcing file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine determines the current forcing file data type and
+ *           stores its location in the description of the current forcing file.
+ *****************************************************************************/
 void
 get_force_type(char *cmdstr,
                int   file_num,
                int  *field)
 {
-/*************************************************************
-   get_force_type.c      Keith Cherkauer     January 20, 2000
-
-   This routine determines the current forcing file data type
-   and stores its location in the description of the current
-   forcing file.
-
-   Modifications:
-   2005-Mar-24 Modified to accept ALMA forcing variables.	TJB
-   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
-   2005-May-02 Added the ALMA vars Wind_E and Wind_N.			TJB
-   2006-Dec-29 Added REL_HUMID to the list of supported met input variables. TJB
-   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
-              of supported met input variables.				TJB
-   2007-Jan-05 Bugfix: replaced if(BINARY) with
-              if(param_set.FORCE_FORMAT[file_num]==BINARY).		TJB
-   2007-Feb-25 Removed all of the if statements
-                if(param_set.FORCE_FORMAT[file_num]==BINARY)
-              since this ended up requiring that the FORCE_FORMAT BINARY line
-              appear in the global parameter file before the list of forcing
-              variables in order to work.  Since the sscanf() performs
-              proper parsing regardless of ASCII (which doesn't have SIGNED
-              or MULTIPLIER fields) vs. BINARY, I removed the if() statements
-              altogether.                                               TJB
-   2007-Sep-14 Initialize flgstr to "NULL".				TJB
-   2010-Mar-31 Added RUNOFF_IN.						TJB
-   2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.				TJB
-   2011-Nov-04 Fixed comment describing TSKC.				TJB
-   2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.			TJB
-
-*************************************************************/
-
     extern param_set_struct param_set;
 
     char                    optstr[50];

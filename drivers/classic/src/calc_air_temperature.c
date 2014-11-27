@@ -1,20 +1,37 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Estimate the daily temperature cycle from maximum and minimum daily
+ * temperature measurements.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-
-/****************************************************************************
-   Subroutines developed by Bart Nijssen to estimate the daily temperature
-   cycle from maximum and minimum daily temperature measurements.
-
-   Modifications:
-   June 23, 1998 by Keith Cherkauer to be run within the VIC-NL model.
+/******************************************************************************
+ * @brief    calculate the coefficients for the Hermite polynomials
  *****************************************************************************/
-
-/****************************************************************************/
-/*				    hermite                                 */
-/****************************************************************************/
-/* calculate the coefficients for the Hermite polynomials */
 void
 hermite(int     n,
         double *x,
@@ -37,12 +54,10 @@ hermite(int     n,
     }
 }
 
-/**************************************************************************/
-/*				    hermint                               */
-/**************************************************************************/
-
-/* use the Hermite polynomials, to find the interpolation function value at
-   xbar */
+/******************************************************************************
+ * @brief    use the Hermite polynomials, to find the interpolation function
+ *           value at xbar
+ *****************************************************************************/
 double
 hermint(double  xbar,
         int     n,
@@ -76,6 +91,9 @@ hermint(double  xbar,
 /****************************************************************************/
 /*				    HourlyT                                 */
 /****************************************************************************/
+/******************************************************************************
+ * @brief    calculate hourly temperature.
+ *****************************************************************************/
 void
 HourlyT(int     Dt,
         int     ndays,
@@ -155,34 +173,16 @@ HourlyT(int     Dt,
     return;
 }
 
+/******************************************************************************
+ * @brief    This function estimates the times of minimum and maximum
+ *           temperature for each day of the simulation, based on the hourly
+ *           cycle of incoming solar radiation.
+ *****************************************************************************/
 void
 set_max_min_hour(double *hourlyrad,
                  int     ndays,
                  int    *tmaxhour,
                  int    *tminhour)
-/****************************************************************************
-                             set_max_min_hour
-
-   This function estimates the times of minimum and maximum temperature for
-   each day of the simulation, based on the hourly cycle of incoming solar
-   radiation.
-
-   Modifications
-
-   1999-Aug-19 Modified to function in polar regions where daylight or
-              darkness may last for 24 hours.				BN
-   2006-Oct-26 Shift tminhour and tmaxhour if necessary to remain within
-              the current day.						TJB
-   2011-Nov-04 Changed algorithm because previous algorithm had bugs in
-              identifying the times of sunrise and sunset in some cases.
-              The new algorithm relies on the assumption that the
-              hourlyrad array is referenced to local time, i.e. hour 0 is
-              halfway between the previous day's sunset and the current
-              day's sunrise.  Another assumption is that the hourlyrad
-              array begins on hour 0 of the first day.			TJB
-   2012-Jan-28 Added logic to prevent overstepping bounds of hourlyrad
-              array.							TJB
-****************************************************************************/
 {
     int risehour;
     int sethour;

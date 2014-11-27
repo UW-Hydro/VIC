@@ -1,28 +1,28 @@
-/*
-  Changes for the VIC implementation are preceded by the comment * start
-  vic_change * and followed by the comment * end vic_change * */
-
-/*
-mtclim_parameters_vic.h
-model parameters for MTCLIM 4.3
-
-Some model parameters are set in the *.ini file. Others are set here.
-
-Peter Thornton
-NTSG, School of Forestry
-University of Montana
-1/20/2000
-
-(dim) stands for dimensionless values
-
-Adapted for inclusion in VIC-code:
-Bart Nijssen
-Sat Aug 21 16:58:43 1999
-
-  Modified:
-  2011-Nov-04 Updated to MTCLIM 4.3				TJB
-
-*/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * MTCLIM Parameters header file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #ifndef MTCLIM_PARAMETERS_VIC_H
 #define MTCLIM_PARAMETERS_VIC_H

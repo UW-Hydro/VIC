@@ -1,61 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * ARNO Model of Evaporation
+ *
+ * Routine to compute evaporation based on the assumption that evaporation is
+ * at the potential for the area which is saturated, and at some percentage of
+ * the potential for the area which is partial saturated.
+ *
+ * Evaporation from bare soil calculated only from uppermost layer.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
-/****************************************************************************
-
-   ARNO/ARNO Model of Evaporation
-
-   Routine to compute evaporation based on the assumption that
-   evaporation is at the potential for the area which is saturated,
-   and at some percentage of the potential for the area which is partial
-   saturated.
-
-   Evaporation from bare soil calculated only from uppermost layer.
-
-   Evaporation is in mm/(time step)  --> usually 1 day or 1 hour
-
-   modifications:
-   6-8-2000  modified to make use of spatially distributed frost   KAC
-   2-24-03   moved unit conversion of moist_resid outside of distributed
-            precipitation loop.  Moist_resid was being multiplied by
-            D1 * 1000 twice for the dry fraction.                 KAC
-   04-Jun-04 Moved unit conversion of moist_resid back inside distributed
-            precipitation loop in such a way that it does not get multiplied
-            by D1 * 1000 twice.					TJB
-   04-Jun-04 Changed logic of evap limit check to avoid creating spurious
-            condensation.  Previously, when liquid moisture < residual
-            moisture, (liquid moisture - residual moisture) would be
-            negative.  Any non-negative evap would be greater than this,
-            resulting in evap getting set to (liquid moisture - residual
-            moisture), which would be negative (i.e. condensation).
-            This artificially created condensation in whatever amount
-            necessary to bring liquid moisture up to residual, causing
-            1) large latent heat flux, 2) incorrect surface temperatures,
-            3) occasional inability for calc_surf_energy_bal to converge
-            in root_brent, and 4) spuriously high runoff and baseflow.
-            Now there is an added condition that liquid moisture > residual
-            moisture for evap to be capped at (liquid moisture - residual
-            moisture).	In addition, the previous logic for capping evap
-            involved an incorrect calculation of the soil's ice content.
-            Since the new logic doesn't require calculation of ice content,
-            this calculation has been removed altogether.		TJB
-   2007-Apr-06 Modified to handle grid cell errors by returning ERROR
-              status that can be trapped by calling routines.			GCT/KAC
-   2009-Mar-16 Modified to use min_liq (minimum allowable liquid water
-              content) instead of resid_moist.  For unfrozen soil,
-              min_liq = resid_moist.						TJB
-   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
-              and into separate function calc_rc().				TJB
-   2009-Nov-15 Changed D1 to depth1 to avoid confusion with the D1 used in
-              func_surf_energy_bal() (the parent function), which refers
-              to the depth of the 1st soil thermal node in some cases.		TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
-   2010-Apr-28 Removed net_short, displacement, roughness, and ref_height from
-              arg list as they are no longer used.				TJB
-   2012-Jan-16 Removed LINK_DEBUG code						BN
-   2014-Mar-28 Removed DIST_PRCP option.						TJB
-****************************************************************************/
-
+/******************************************************************************
+ * @brief    Calculate Evaporation using ARNO model.
+ *****************************************************************************/
 double
 arno_evap(layer_data_struct *layer,
           double             rad,

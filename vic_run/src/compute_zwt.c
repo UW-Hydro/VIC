@@ -1,23 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Compute spatial average water table position (zwt).
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Compute spatial average water table position (zwt).  Water table
+ *           position is measured in cm and is negative below the soil surface.
+ *****************************************************************************/
 double
 compute_zwt(soil_con_struct *soil_con,
             int              lindex,
             double           moist)
-/****************************************************************************
-
-   compute_zwt			Ted Bohn		2010-Dec-1
-
-   Function to compute spatial average water table position (zwt).  Water
-   table position is measured in cm and is negative below the soil surface.
-
-   modifications:
-   2011-Mar-01 Simplified this function and added wrap_compute_zwt() to
-              call it.							TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-****************************************************************************/
-
 {
     int                  i;
     double               zwt;
@@ -54,23 +71,15 @@ compute_zwt(soil_con_struct *soil_con,
     return(zwt);
 }
 
+/******************************************************************************
+ * @brief    Function to compute spatial average water table position (zwt) for
+ *           individual layers as well as various total-column versions of zwt.
+ *           Water table position is measured in cm and is negative below the
+ *           soil surface.
+ *****************************************************************************/
 void
 wrap_compute_zwt(soil_con_struct  *soil_con,
                  cell_data_struct *cell)
-/****************************************************************************
-
-   wrap_compute_zwt			Ted Bohn		2011-Mar-1
-
-   Function to compute spatial average water table position (zwt) for
-   individual layers as well as various total-column versions of zwt.  Water
-   table position is measured in cm and is negative below the soil surface.
-
-   modifications:
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-****************************************************************************/
-
 {
     extern option_struct options;
 

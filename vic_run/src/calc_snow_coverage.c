@@ -1,6 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine computes the current fraction of the vegetation band that is
+ * covered with snow.  The snow distribution is assumed to be uniform with a
+ * slope based on the value of max_snow_distrib_slope.  The
+ * original value was based on field observations from the University of Minnesota's
+ * Rosemount Agricultural Experiment station (see dissertation by Keith
+ * Cherkauer, 2001).
+
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Compute the current fraction of the vegetation band that is
+ *           covered with snow.
+ *****************************************************************************/
 double
 calc_snow_coverage(char    *store_snow,
                    double  max_snow_distrib_slope,
@@ -15,26 +51,6 @@ calc_snow_coverage(char    *store_snow,
                    double *store_swq,
                    double *snow_distrib_slope,
                    double *store_coverage)
-/**********************************************************************
-   calc_snow_coverage.c      Keith Cherkauer          November 1, 2000
-
-   This routine computes the current fraction of the vegetation band
-   that is covered with snow.  The snow distribution is assumed to
-   be uniform with a slope based on the value of max_snow_distrib_slope
-   set in vicNl_def.h.  The original value was based on field observations
-   from the University of Minnesota's Rosemount Agricultural Experiment
-   station (see dissertation by Keith Cherkauer, 2001).
-
-   Modifications:
-
-   030701 Modified to accept minimum snow depth for full coverage as
-         a passed variable instead of a globally defined value.   KAC
-
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2014-Mar-29 Removed DIST_PRCP option.					TJB
- *************************************************************************/
 {
     double old_max_snow_depth;
     double coverage;

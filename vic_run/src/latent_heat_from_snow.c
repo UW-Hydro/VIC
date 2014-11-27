@@ -1,6 +1,35 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Computes the latent heat from the snowpack.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Computes the latent heat from the snowpack.
+ *****************************************************************************/
 void
 latent_heat_from_snow(double  AirDens,
                       double  EactAir,
@@ -15,26 +44,6 @@ latent_heat_from_snow(double  AirDens,
                       double *BlowingMassFlux,
                       double *SurfaceMassFlux)
 {
-/**********************************************************************
-   latent_heat_from_snow.c       Laura Bowling
-
-   Split out of the snowpack energy balance, this subroutine computes
-   the latent heat from the snowpack.
-
-   Modifications:
-   11-18-02 Modified to handle the effects of blowing snow.       LCB
-   16-Jul-04 Moved the calculation of BlowingMassFlux back into this
-            function.  Added "month" to the parameter list and added
-            declaration of *veg_lib, to enable this calculation to
-            occur.  Modified calculations of all sublimation terms
-            to ensure that VaporMassFlux, BlowingMassFlux, and
-            SurfaceMassFlux consistently have units of kg/m2s.	TJB
-   05-Aug-04 Moved the calculation of BlowingMassFlux back out of this
-            function into surface_fluxes(), as part of merge with
-            Laura Bowling's latest code.			TJB
-
- ***********************************************************************/
-
     double EsSnow;
     double Ls;
 

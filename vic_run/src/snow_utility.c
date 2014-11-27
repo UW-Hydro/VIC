@@ -1,8 +1,45 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Collection of snow utilities.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
 #define MAX_CHANGE 0.9
 
+/******************************************************************************
+* @brief    Compute the snow density based on swe and snow metamorphism.
+*
+* @note     DENS_SNTHRM = Algorithm is taken from SNTHERM89, adjusted for an
+*               essentially single-layer model.
+*           DENS_BRAS   = Original algorithm, originally based on a plot of
+*               seasonal variation of typical snow densities found in Bras
+*               (figure 6.10, p 258).  Because this equation was developed by
+*               regression against data from Southern Manitoba, it therefore is
+*               limited in applicability to other regions.
+******************************************************************************/
 double
 snow_density(snow_data_struct *snow,
              double            new_snow,
@@ -10,61 +47,6 @@ snow_density(snow_data_struct *snow,
              double            Tair,
              double            dt)
 {
-/**********************************************************************
-   snow_density		Keith Cherkauer		May 28, 1997
-
-   This subroutine computes the snow density based on swe and snow metamorphism.
-
-   One of two algorithms may be used, depending on the value of options.SNOW_DENSITY:
-
-    DENS_SNTHRM = Algorithm is taken from SNTHERM89, adjusted for an essentially
-                  single-layer model.
-
-      UNITS:
-        new_snow	mm	new snow
-        sswq		m	initial snow pack snow water equivalent (before adding new snowfall)
-        Tgrnd		C	ground temperature
-        Tair		C	air temperature
-        dt		h	time step length
-        density		kg/m^3	snow density
-
-
-
-    DENS_BRAS   = Original algorithm, originally based on a plot of seasonal
-                  variation of typical snow densities found in Bras (figure 6.10,
-                  p 258).  Because this equation was developed by regression
-                  against data from Southern Manitoba, it therefore is limited
-                  in applicability to other regions.
-
-      UNITS:
-        new_snow	         mm	new snow
-        air_temp	         C	current air temperature
-        swq		m	snow water equivalent
-        depth		m	snow pack depth
-        density            kg/m^3   snow density
-
-
-
-   Modified:
-   08-19-99 Added check to make sure that the change in snowpack depth
-           due to new snow does not exceed the actual depth of the
-           pack.							Bart
-   06-30-03 Added check to keep compression from aging from exceeding
-           the actual depth of the snowpack.				KAC
-   08-Oct-03 Modified the checks on delta_depth (mentioned above)
-            so that the condition is delta_depth > MAX_CHANGE*depth.	TJB
-   08-Oct-03 Modified compression due to aging to only be calculated
-            if depth > 0.						TJB
-   2008-Feb-17 Moved parameters related to snow densification to
-              snow.h.							TJB
-   2008-Feb-17 Replaced previous algorithm with one based on SNTHERM89
-              adjusted for an essentially single-layer model.		KMA via TJB
-   2008-Apr-21 Added option to use previous algorithm for backwards
-              compatibility.  DENS_BRAS = original algorithm; DENS_SNTHRM
-              = SNTHERM89.						TJB
-
-**********************************************************************/
-
     extern option_struct options;
     double               density_new;
     double               density;
@@ -204,21 +186,12 @@ snow_density(snow_data_struct *snow,
     return (density);
 }
 
+/******************************************************************************
+* @brief    Estimate the density of new snow
+******************************************************************************/
 double
 new_snow_density(double air_temp)
 {
-/**********************************************************************
-   new_snow_density		Keith Cherkauer		May 28, 1997
-
-   This routine estimates the density of new snow.
-
-   Modified:
-   2008-Feb-17 Modified to use the algorithm of Lundberg and
-              Pomeroy (1998).						KMA via TJB
-   2008-Apr-21 Added option to use previous algorithm for backwards
-              compatibility.  DENS_BRAS = original algorithm; DENS_SNTHRM
-              = Lundberg and Pomeroy (1998).				TJB
-**********************************************************************/
     extern option_struct options;
     double               density_new;
 
@@ -241,6 +214,12 @@ new_snow_density(double air_temp)
     return (density_new);
 }
 
+/******************************************************************************
+* @brief    This subroutine computes the snow pack surface albedo.'
+*
+* @note     Computes albedo as a function of snow age and season, based on the
+*           algorithm of the US Army Corps of Engineers.
+******************************************************************************/
 double
 snow_albedo(double new_snow,
             double swq,
@@ -250,28 +229,6 @@ snow_albedo(double new_snow,
             int    last_snow,
             char   MELTING)
 {
-/**********************************************************************
-   snow_albedo		Keith Cherkauer		June 10, 1997
-
-   This subroutine computes the snow pack surface albedo.  Original version
-   computed albedo as a function of snow age and season, based on the algorithm
-   of the US Army Corps of Engineers.  More recently, added the option to
-   use the algorithm of Sun et al., 1999, which depends only on snow age and
-   cold content (independent of time of year).
-
-   Modified:
-   06-15-02 Added MELTING flag which tells the algorithm whether or not
-           the pack was melting previously.  This locks the albedo
-           onto the lower ablation albedo curve until a sufficiently
-           large new snow event resets the surface albedo.       KAC
-   2008-Apr-21 Added flag to include new albedo calculation based on
-              albedo algorithm described in Sun, S., J. Jin, and Y. Xue,
-              A simple snow-atmosphere-soil transfer model, J. Geophys. Res.,
-              104 (D16), 19,587-19,597, 1999.				KAC via TJB
-**********************************************************************/
-
-    extern option_struct options;
-
     /** New Snow **/
     if (new_snow > TraceSnow && cold_content < 0.0) {
         albedo = NEW_SNOW_ALB;

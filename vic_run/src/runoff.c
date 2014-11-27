@@ -1,6 +1,38 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Calculate infiltration and runoff from the surface, gravity driven drainage
+* between all soil layers, and generates baseflow from the bottom layer.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+* @brief    Calculate infiltration and runoff from the surface, gravity driven
+*           drainage between all soil layers, and generates baseflow from the
+*           bottom layer.
+******************************************************************************/
 int
 runoff(cell_data_struct  *cell,
        energy_bal_struct *energy,
@@ -9,159 +41,6 @@ runoff(cell_data_struct  *cell,
        double            *frost_fract,
        int                dt,
        int                Nnodes)
-/**********************************************************************
-        runoff.c	Keith Cherkauer		May 18, 1996
-
-   This subroutine calculates infiltration and runoff from the surface,
-   gravity driven drainage between all soil layers, and generates
-   baseflow from the bottom layer..
-
-   sublayer indecies are always [layer number][sublayer number]
-   [layer number] is the current VIC model moisture layer
-   [sublayer number] is the current sublayer number where:
-         0 = thawed sublayer, 1 = frozen sublayer, and 2 = unfrozen sublayer.
-         when the model is run withoputfrozen soils, the sublayer number
-         is always = 2 (unfrozen).
-
-   UNITS:	Ksat (mm/day)
-                Q12  (mm/time step)
-                liq, ice (mm)
-                inflow (mm)
-                runoff (mm)
-
-   Variables:
-        ppt	incoming precipitation and snow melt
-        mu	fraction of area that receives precipitation
-        inflow	incoming water corrected for fractional area of precip (mu)
-
-   MODIFICATIONS:
-   5/22/96 Routine modified to account for spatially varying
-          precipitation, and it's effects on runoff.	KAC
-   11/96	  Code modified to account for extra model layers
-          needed for frozen soils modeling.		KAC
-   1/9/97  Infiltration and other rate parameters modified
-          for time scales of less than 1 day.		KAC
-   4-1-98  Soil moisture transport is now done on an hourly time
-          step, irregardless to the model time step, to prevent
-          numerical stabilities in the solution	Dag and KAC
-   01-24-00 simplified handling of soil moisture for the
-           frozen soil algorithm.  all option selection
-           now use the same soil moisture transport method   KAC
-   6-8-2000 modified to handle spatially distributed soil frost  KAC
-   06-07-03 modified so that infiltration is computed using only the
-           top two soil moisture layers, rather than all but the
-           bottom most layer.  This preserves the functionality
-           of the original model design, but is more realistic for
-           handling multiple soil moisture layers
-   06-Sep-03   Changed calculation of dt_baseflow to go to zero when
-              soil liquid moisture <= residual moisture.  Changed
-              block that handles case of total soil moisture < residual
-              moisture to not allow dt_baseflow to go negative.		TJB
-   17-May-04   Changed block that handles baseflow when soil moisture
-              drops below residual moisture.  Now, the block is only
-              entered if baseflow > 0 and soil moisture < residual,
-              and the amount of water taken out of baseflow and given
-              to the soil cannot exceed baseflow.  In addition, error
-              messages are no longer printed, since it isn't an error
-              to be in that block.					TJB
-   2007-Apr-04 Modified to return Error status from
-              distribute_node_moisture_properties			GCT/KAC
-   2007-Apr-24 Passes soil_con->Zsum_node to distribute_node_moisture_properties.  JCA
-   2007-Jun-13 Fixed bug arising from earlier fix to dt_baseflow
-              calculation.  Earlier fix took residual moisture
-              into account in the linear part of the baseflow eqn,
-              but not in the non-linear part.  Now we take residual
-              moisture into account correctly throughout the whole
-              equation.  Also re-wrote equation in simpler form.	TJB
-   2007-Aug-15 Changed SPATIAL_FROST if statement to enclose the correct
-              end-bracket for the frost_area loop.			JCA
-   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-              Including adding SubsidenceUpdate flag for parts
-              of the routine that will be used if redistributing
-              soil moisture after subsidence.
-   2007-Sep-18 Modified to correctly handle evaporation from spatially
-              distributed soil frost.  Original version could produce
-              negative soil moisture in fractions with high ice content
-              since only total evaporation was checked versus total
-              liquid water content, not versus available liquid water
-              in each frost subsection.					KAC via TJB
-   2007-Sep-20 Removed logic that reset resid_moist[i].  Previously,
-              resid_moist[i] was reset to 0 for i > 0 when
-              resid_moist[0] == 0.  Such resetting of soil properties
-              was deemed unnecessary and confusing, since VIC would end
-              up using different residual moisture values than those
-              specified by the user.  If a user truly wants to specify
-              residual moisture in all layers to be 0, the user should
-              set these explicitly in the soil parameter file.  Also
-              fixed typo in fprintf() on line 289.			TJB
-   2007-Oct-13 Fixed the checks on the lower bound of soil moisture.
-              Previously, the condition was
-                (moist[lindex]+ice[lindex]) < resid_moist[lindex]
-              which led to liquid soil moisture falling below residual
-              during winter conditions.  This has been changed to
-                moist[lindex] < resid_moist[lindex]
-              to eliminate these errors and make the logic consistent
-              with the rest of the code.				TJB
-   2007-Oct-13 Renamed all *moist* variables to *liq* if they only refer
-              to liquid soil moisture.  This makes the logic much easier
-              to understand.						TJB
-   2007-Oct-13 Modified the caps on Q12 and baseflow for the case of
-              frozen soil.  Now, the lower bound on liquid soil moisture
-              is the maximum unfrozen component of residual moisture at
-              current soil temperature, i.e.  liquid soil moisture may
-              be less than residual moisture as long as the total
-              (liq + ice) moisture is >= residual moisture AND the
-              liquid fraction of the total is appropriate for the
-              temperature.  Without this condition, we could have an
-              apparent loss of liquid moisture due to conversion to ice
-              and the resulting adjustments of Q12 and baseflow could
-              pull water out of the air to bring liquid moisture up to
-              residual.  This fix should set a reasonable lower bound
-              and still ensure that no extra water is condensed out
-              of the air simply to bring liquid water up to residual.	TJB
-   2008-Oct-23 Added check to make sure top_moist never exceeds
-              top_max_moist; otherwise rounding errors could cause it
-              to exceed top_max_moist and produce NaN's.		LCB via TJB
-   2009-Feb-09 Removed dz_node from call to
-              distribute_node_moisture_properties.			KAC via TJB
-   2009=Feb-10 Replaced all occurrences of resid_moist with min_liq, after
-              min_liq was defined.  This makes the use of min_liq consistent
-              with its documented role in the subroutine.		KAC via TJB
-   2009-Feb-10 Removed Tlayer from selection criteria to include ice in
-              min_liq calculation.  Soil layers can be above 0C with
-              ice present, as ice content is set from soil nodes.	KAC via TJB
-   2009-Mar-16 Made min_liq an element of the layer_data_struct, so that
-              its value can be computed earlier in the model code, in a
-              more efficient manner (in initialize_soil() and
-              estimate_layer_ice_content()).				TJB
-   2009-May-17 Added asat to cell_data.					TJB
-   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
-              variables via a single reference to the cell data structure.	TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.  Constraints on
-              liq[lindex] have been removed and/or replaced by
-              constraints on (liq[lindex]+ice[lindex]).  Thus, it is
-              possible to freeze all of the soil moisture, as long as
-              total moisture > residual moisture.				TJB
-   2010-Feb-07 Fixed bug in runoff computation for case when soil column
-              is completely saturated.						TJB
-   2010-Nov-29 Moved computation of saturated area to correct place in
-              code for handling SPATIAL_FROST.					TJB
-   2010-Dec-01 Added call to compute_zwt().					TJB
-   2011-Mar-01 Replaced compute_zwt() with wrap_compute_zwt().  Moved
-              computation of runoff and saturated area to a separate
-              function compute_runoff_and_asat(), which can be called
-              elsewhere.							TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.					TJB
-   2012-Jan-16 Removed LINK_DEBUG code						BN
-   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC
-              run-time option.							TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-   2014-May-09 Added check on liquid soil moisture to ensure always >= 0.	TJB
-**********************************************************************/
 {
     extern option_struct options;
     size_t               lindex;
@@ -562,6 +441,9 @@ runoff(cell_data_struct  *cell,
     return (0);
 }
 
+/******************************************************************************
+* @brief    Calculate the saturated area and runoff
+******************************************************************************/
 void
 compute_runoff_and_asat(soil_con_struct *soil_con,
                         double          *moist,

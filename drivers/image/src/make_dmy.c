@@ -1,3 +1,30 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine creates an array of structures that contain information
+ * about the day, month and year of each time step.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
@@ -6,16 +33,12 @@
 #define LEAPYR(y) (!((y) % 400) || (!((y) % 4) && ((y) % 100)))
 #endif
 
+/******************************************************************************
+ * @brief    This subroutine creates an array of structures that contain
+ *           information about the day, month and year of each time step.
+ *****************************************************************************/
 dmy_struct *
 make_dmy(global_param_struct *global)
-
-/**********************************************************************
-        make_dmy	Dag Lohmann		January 1996
-
-   This subroutine creates an array of structures that contain
-   information about the day, month and year of each time step.
-
-**********************************************************************/
 {
     extern param_set_struct param_set;
 
@@ -185,6 +208,9 @@ make_dmy(global_param_struct *global)
     return temp;
 }
 
+/******************************************************************************
+ * @brief    Get the next timestep.
+ *****************************************************************************/
 void
 get_next_time_step(unsigned short *year,
                    unsigned short *month,
@@ -220,13 +246,9 @@ get_next_time_step(unsigned short *year,
     }
 }
 
-/**********************************************************************
-        free_dmy	Ted Bohn		April 2007
-
-   This subroutine frees the dmy array.
-
-   modifications:
-**********************************************************************/
+/******************************************************************************
+ * @brief    Free the dmy array.
+ *****************************************************************************/
 void
 free_dmy(dmy_struct **dmy)
 {

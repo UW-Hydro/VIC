@@ -1,47 +1,35 @@
-/********************************************************************************
-   filename  : compute_soil_resp.c
-   purpose   : Calculate soil respiration (heterotrophic respiration, or Rh)
-   interface : - input :
-                - Nnodes:  number of points (vertically) at which to evaluate soil respiration
-                - dZ[]:    array of layer thicknesses [m] pertaining to nodes
-                - dZTot:   total depth [m] of all layers (total depth of soil containing carbon)
-                - dt:      timestep length [h]
-                - T[]:     array of node temperatures [K]
-                - w[]:     array of node moisture fractions [fraction]
-                - CLitter: carbon storage in litter pool [gC/m2]
-                - CInter:  carbon storage in intermediate pool [gC/m2]
-                - CSlow:   carbon storage in slow pool [gC/m2]
-              Note: the litter pool is concentrated at the soil surface, while the intermediate and
-                    slow pools are both assumed to be distributed uniformly throughout soil column.
-
-              - constants:
-                - E0_LT:     Lloyd-Taylor E0 parameter [K]
-                - T0_LT:     Lloyd-Taylor E0 parameter [K]
-                - wminFM:    minimum soil moisture (fraction) at which soil respiration can occur
-                - wmaxFM:    maximum soil moisture (fraction) at which soil respiration can occur
-                - woptFM:    soil moisture (fraction) at which maximum soil respiration occurs
-                - Rhsat:     ratio of soil respiration rate under saturated conditions (w=wmaxFM) to
-                             that under optimal conditions (w=woptFM)
-                - Rfactor:   scaling factor to account for other (non-moisture) sources of inhibition
-                             of respiration
-                - tauLitter: Litter pool turnover time [y]
-                - tauInter:  Intermediate pool turnover time [y]
-                - tauSlow:   Slow pool turnover time [y]
-
-              - output:
-                - RhLitter:     Soil respiration from litter pool [gC/m2]
-                - RhInterTot:   Soil respiration from intermediate pool [gC/m2]
-                - RhSlowTot:    Soil respiration from slow pool [gC/m2]
-
-   programmer: Ted Bohn
-   date      : July 25, 2013
-   changes   :
-   references:
-********************************************************************************/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Calculate soil respiration (heterotrophic respiration, or Rh).
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Calculate soil respiration (heterotrophic respiration, or Rh).
+ *****************************************************************************/
 void
 compute_soil_resp(int     Nnodes,
                   double *dZ,

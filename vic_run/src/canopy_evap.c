@@ -1,45 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine computes the evaporation, traspiration and throughfall of the
+ * vegetation types for multi-layered model.
+ *
+ * The value of x, the fraction of precipitation that exceeds the canopy
+ * storage capacity, is returned by the subroutine.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
-/**********************************************************************
-        canopy_evap.c	Dag Lohmann		September 1995
-
-   This routine computes the evaporation, traspiration and throughfall
-   of the vegetation types for multi-layered model.
-
-   The value of x, the fraction of precipitation that exceeds the
-   canopy storage capacity, is returned by the subroutine.
-
-   UNITS:	moist (mm)
-                evap (mm)
-                prec (mm)
-                melt (mm)
-
-   VARIABLE TYPE        NAME          UNITS DESCRIPTION
-   atmos_data_struct    atmos         N/A   atmospheric forcing data structure
-   layer_data_struct   *layer         N/A   soil layer variable structure
-   veg_var_struct      *veg_var       N/A   vegetation variable structure
-   char                 CALC_EVAP     N/A   TRUE = calculate evapotranspiration
-   int                  veg_class     N/A   vegetation class index number
-   int                  month         N/A   current month
-   global_param_struct  global        N/A   global parameter structure
-   double               mu            fract wet (or dry) fraction of grid cell
-   double               ra            s/m   aerodynamic resistance
-   double               prec          mm    precipitation
-   double               displacement  m     displacement height of surface cover
-   double               roughness     m     roughness height of surface cover
-   double               ref_height    m     measurement reference height
-
-   Modifications:
-   9/1/97	Greg O'Donnell
-   4-12-98  Code cleaned and final version prepared, KAC
-   06-25-98 modified for new distributed precipitation data structure KAC
-   01-19-00 modified to function with new simplified soil moisture
-           scheme                                                  KAC
-   5-8-2001 Modified to close the canopy energy balance.       KAC
-
-**********************************************************************/
-
+/******************************************************************************
+ * @brief    Calculation of evaporation from the canopy, including the
+ *           possibility of potential evaporation exhausting ppt+canopy storage
+ *****************************************************************************/
 double
 canopy_evap(layer_data_struct *layer,
             veg_var_struct    *veg_var,
@@ -63,38 +58,6 @@ canopy_evap(layer_data_struct *layer,
             double             shortwave,
             double             Catm,
             double            *CanopLayerBnd)
-/**********************************************************************
-   CANOPY EVAPORATION
-
-   Calculation of evaporation from the canopy, including the
-   possibility of potential evaporation exhausting ppt+canopy storage
-   2.16 + 2.17
-   Index [0] refers to current time step, index [1] to next one
-   If f < 1.0 then veg_var->canopyevap = veg_var->Wdew + ppt
-   and Wdew = 0.0
-
-   DEFINITIONS:
-   Wdmax - max monthly dew holding capacity
-   Wdew - dew trapped on vegetation
-
-   Modified
-     04-14-98 to work within calc_surf_energy_balance.c  KAC
-     07-24-98 fixed problem that caused hourly precipitation
-              to evaporate from the canopy during the same
-              time step that it falls (OK for daily time step,
-              but causes oscilations in surface temperature
-              for hourly time step)                      KAC, Dag
-                modifications:
-     6-8-2000 Modified to use spatially distributed soil frost if
-              present.                                           KAC
-     5-8-2001 Modified to close the canopy energy balance.       KAC
-   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
-              and into separate function calc_rc().			TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Jul-25 Save dryFrac for use elsewhere.				TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
-
 {
     /** declare global variables **/
     extern veg_lib_struct *vic_run_veg_lib;
@@ -200,10 +163,9 @@ canopy_evap(layer_data_struct *layer,
     return (Evap);
 }
 
-/**********************************************************************
-        EVAPOTRANSPIRATION ROUTINE
-**********************************************************************/
-
+/******************************************************************************
+ * @brief    Calculate the transpiration from the canopy.
+ *****************************************************************************/
 void
 transpiration(layer_data_struct *layer,
               veg_var_struct    *veg_var,
@@ -225,21 +187,6 @@ transpiration(layer_data_struct *layer,
               double             shortwave,
               double             Catm,
               double            *CanopLayerBnd)
-/**********************************************************************
-   Computes evapotranspiration for unfrozen soils
-   Allows for multiple layers.
-
-   modifications:
-   6-8-2000 Modified to use spatially distributed soil frost if
-           present.                                               KAC
-   2006-Oct-16 Modified to initialize ice[] for all soil layers
-              before computing available moisture (to avoid using
-              uninitialized values later on).				TJB
-   2009-Jun-09 Moved computation of canopy resistance rc out of penman()
-              and into separate function calc_rc().			TJB
-   2013-Jul-25 Save dryFrac for use elsewhere.				TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-**********************************************************************/
 {
     extern veg_lib_struct *vic_run_veg_lib;
     extern option_struct   options;

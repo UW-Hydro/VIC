@@ -1,115 +1,44 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine computes the surface energy balance for bare soil and
+ * vegetation uncovered by snow.  It computes outgoing longwave, sensible heat
+ * flux, ground heat flux, and storage of heat in the thin upper layer, based
+ * on the given surface temperature.
+ *
+ * The Energy Balance Equation used comes from Xu Liang's Paper "Insights of
+ * the Ground Heat Flux in Land Surface Parameterization Schemes."
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Calculate the surface energy balance.
+ *****************************************************************************/
 double
 func_surf_energy_bal(double  Ts,
                      va_list ap)
-/**********************************************************************
-        func_surf_energy_bal	Keith Cherkauer		January 3, 1996
-
-   This subroutine computes the surface energy balance for bare soil
-   and vegetation uncovered by snow.  It computes outgoing longwave,
-   sensible heat flux, ground heat flux, and storage of heat in the thin
-   upper layer, based on the given surface temperature.
-
-   The Energy Balance Equation used comes from Xu Liang's Paper
-   "Insights of the Ground Heat Flux in Land Surface Parameterization
-   Schemes."
-
-   Modifications:
-   04-14-98 modified to compute evapotranspiration within this routine
-           in the hopes of reducing the number of iteration
-          needed to find a solution surface temperature.       KAC
-   07-13-98 modified to include elevation bands for vegetation
-           and snow                                             KAC
-   01-20-00 modified to work with the updated radiation estimation
-           routines, as well as the simplified frozen soil moisture
-           storage                                              KAC
-   01-08-01 sensible heat is now set to 0 W/m^2 when the ground is
-           fully covered by snow.                                KAC
-   04-12-01 fixed error where sensible heat flux for partial bare
-           ground was not multiplied by the snow cover fraction. KAC
-   04-29-02 moved calculation of sensible heat so that it is computed
-           even in water balance mode.  This assures that it is set
-           to 0 in water balance mode and does not yield the
-           cumulative sum of sensible heat from the snowpack.    KAC
-   11-18-02 modified to compute the effects of blowing snow on the
-           surface energy balance.                               LCB
-   10-May-04 Added check that both FS_ACTIVE and FROZEN_SOIL are true
-            before computing *fusion.  This is just a safety measure;
-            ice and ice0 should both be 0 if FS_ACTIVE is FALSE.TJB
-   16-Jul-04 Renamed VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
-            to vapor_flux, blowing_flux, and surface_flux, respectively,
-            to denote fact that their units are m/timestep rather than
-            kg/m2s.  Created new variables VaporMassFlux, BlowingMassFlux,
-            and SurfaceMassFlux with units of kg/m2s.  The addresses of
-            the *MassFlux variables are passed to latent_heat_from_snow()
-            where values for the variables are computed.  After these
-            values are computed, vapor_flux, blowing_flux and surface_flux
-            are derived from them by unit conversion.  vapor_flux,
-            blowing_flux, and surface_flux are the variables that are
-            passed in/out of this function.			TJB
-   16-Jul-04 Changed the type of the last few variables (lag_one, Nveg,
-            etc) in the va_list to be double.  For some reason, passing
-            them as float or int caused them to become garbage.  This may
-            have to do with the fact that they followed variables of type
-            (double *) in va_list, which may have caused memory alignment
-            problems.						TJB
-   05-Aug-04 Removed iveg, LastSnow, dt, SnowDepth, lag_one, sigma_slope,
-            fetch, and Nveg from the this function's argument list,
-            since these variables were only used in the call to
-            latent_heat_from_snow() which no longer needs them.	TJB
-   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
-            flux calculations.					TJB
-   2007-Apr-11 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	GCT
-   2007-Apr-24 Removed (1.-snow_coverage) from three equations where it did not
-              belong: for calculating LongBareOut in the second two cases and for
-              calculating NetBareRad in the third case.			JCA
-   2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA
-              (including passing in nrec, nrecs, and iveg)
-              (including passing in bulk_density, soil_density, and quartz)
-              (including counting cases when IMPLICIT fails and involes EXPLICIT)
-   2007-Apr-24 Features included for EXP_TRANS frozen soils option.	JCA
-   2007-Apr-24 Passing in Zsum_node.					JCA
-   2007-Aug-07 Moved Implicit error counting above call for
-              solve_T_profile.						JCA
-   2008-Aug-08 Added option for EXCESS_ICE.				JCA
-              including: passing entire soil_con structure to
-              calc_surf_energy_bal
-   2007-Aug-24 Modified to use arno_evap rather than canopy_evap if LAI
-              is 0, e.g. winter cropland.				KAC via TJB
-   2008-Mar-01 Fixed typo in declaration of ufwc_table_layer.		TJB
-   2009-Feb-09 Modified to remove dz_node.				KAC via TJB
-   2009-May-20 Corrected the deltaH and fusion terms to account for
-              surf_atten, as in Liang et al, 1999.
-              Added options.GRND_FLUX_TYPE to allow backwards-compatibility
-              with versions 4.0.6 and 4.1.0.				TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Jul-26 Removed the special logic for the water balance mode, in
-              which net longwave is stored in the "longwave" variable.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
-              node spacing.						TJB
-   2010-Apr-24 Replaced ra_under with Ra_used[0].			TJB
-   2010-Apr-28 Removed net_short, displacement, roughness, and ref_height
-              from arg list of arno_evap() as they are no longer used.	TJB
-   2011-May-31 Removed options.GRND_FLUX.  Soil temperatures and ground
-              flux are now always computed.				TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2011-Aug-09 Now method used for estimating soil temperatures depends only
-              on QUICK_FLUX setting.					TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Jan-28 Changed ground flux etc calculations for case of exponential
-              node distribution to be over the same control volume as for
-              the linear node distribution and quick flux cases.	TJB
-   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
 {
     extern option_struct options;
 

@@ -1,29 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads snow band median elevaton, and precipitation fraction for
+ * use with the snow model.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine reads snow band median elevaton, and precipitation
+ *           fraction for use with the snow model.
+ *****************************************************************************/
 void
 read_snowband(FILE            *snowband,
               soil_con_struct *soil_con)
-/**********************************************************************
-   read_snowband		Keith Cherkauer		July 9, 1998
-
-   This routine reads snow band median elevaton, and
-   precipitation fraction for use with the snow model.
-
-   04-25-03 Modified to allocate treeline variable.            KAC
-   2007-Sep-18 Modified to output a warning and set snow bands to 1
-              if no snowband information is present in the snowband
-              file for the current grid cell.				KAC via TJB
-   2009-Jan-12 Changed wording of error messages from "snow elevation band"
-              to "snow band".						TJB
-   2009-Jul-07 Added code to store band elevations in soil_con.BandElev[].
-              Added logic to make sure grid cell average elevation equals
-              the average of the band elevations.			TJB
-   2009-Sep-28 Moved initialization of snow band parameters to the
-              read_soilparam* functions.				TJB
-   2013-Dec-28 Removed NO_REWIND option.					TJB
-**********************************************************************/
 {
     extern option_struct options;
 
@@ -49,7 +61,8 @@ read_snowband(FILE            *snowband,
 
         if (feof(snowband)) {
             fprintf(stderr,
-                    "WARNING: Cannot find current gridcell (%i) in snow band file; setting cell to have one elevation band.\n",
+                    "WARNING: Cannot find current gridcell (%i) in snow band"
+                    "file; setting cell to have one elevation band.\n",
                     soil_con->gridcel);
             /** 1 band is the default; no action necessary **/
             return;
@@ -70,7 +83,8 @@ read_snowband(FILE            *snowband,
         }
         if (total != 1.) {
             fprintf(stderr,
-                    "WARNING: Sum of the snow band area fractions does not equal 1 (%f), dividing each fraction by the sum\n",
+                    "WARNING: Sum of the snow band area fractions does not "
+                    "equal 1 (%f), dividing each fraction by the sum\n",
                     total);
             for (band = 0; band < options.SNOW_BAND; band++) {
                 soil_con->AreaFract[band] /= total;
@@ -91,7 +105,9 @@ read_snowband(FILE            *snowband,
         }
         if (fabs(avg_elev - soil_con->elevation) > 1.0) {
             fprintf(stderr,
-                    "Warning: average band elevation %f not equal to grid_cell average elevation %f; setting grid cell elevation to average band elevation.\n", avg_elev,
+                    "Warning: average band elevation %f not equal to grid_cell"
+                    "average elevation %f; setting grid cell elevation to "
+                    "average band elevation.\n", avg_elev,
                     soil_con->elevation);
             soil_con->elevation = (double)avg_elev;
         }
@@ -122,8 +138,9 @@ read_snowband(FILE            *snowband,
         }
         if (total != 1.) {
             fprintf(stderr,
-                    "WARNING: Sum of the snow band precipitation fractions does not equal %d (%f), dividing each fraction by the sum\n",
-                    1, total);
+                    "WARNING: Sum of the snow band precipitation fractions "
+                    "does not equal %d (%f), dividing each fraction by the "
+                    "sum\n", 1, total);
             for (band = 0; band < options.SNOW_BAND; band++) {
                 soil_con->Pfactor[band] /= total;
             }

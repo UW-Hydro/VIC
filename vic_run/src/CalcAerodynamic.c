@@ -1,69 +1,41 @@
-/*
- * SUMMARY:      CalcAerodynamic.c - Calculate the aerodynamic resistances
- * USAGE:        Part of DHSVM
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Bart Nijssen and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
- * ORIG-DATE:    Thu Mar 27 18:00:10 1997
- * LAST-MOD: Thu Mar  8 13:24:10 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate the aerodynamic resistances
- * DESCRIP-END.
- * FUNCTIONS:    CalcAerodynamic()
- * COMMENTS:     Modified for use with the vicNl model 3-12-98
- *		 by Keith Cherkauer
- */
+ * Calculate the aerodynamic resistances.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: CalcAerodynamic()
-
-   Purpose      : Calculate the aerodynamic resistance for each vegetation
-                 layer, and the wind 2m above the layer boundary.  In case of
-                 an overstory, also calculate the wind in the overstory.
-                 The values are normalized based on a reference height wind
-                 speed, Uref, of 1 m/s.  To get wind speeds and aerodynamic
-                 resistances for other values of Uref, you need to multiply
-                 the here calculated wind speeds by Uref and divide the
-                 here calculated aerodynamic resistances by Uref
-
-   Required     :
-    int NVegLayers - Number of vegetation layers
-    char OverStory - flag for presence of overstory.  Only used if NVegLayers
-                     is equal to 1
-    double Zref[0]     - Reference height for windspeed
-    double n        - Attenuation coefficient for wind in the overstory
-    double Height  - Height of the vegetation layers (top layer first)
-    double Trunk    - Multiplier for Height[0] that indictaes the top of the
-                     trunk space
-    double *U      - Vector of length 3, contains wind for vegetation
-                     conditions listed below:
-                     [0] is always wind speed for the snow-free case,
-                     [2] is always wind speed for the snow covered case,
-                     [1] will contain the wind speed in the canopy if
-                     OverStory is TRUE, otherwise it is unused.
-    double *Ra     - Vector of length 3, contains aerodynamic resistance
-                     values for the conditions outlined for *U.
-    double *Zref   - Vector of length 3, contains reference height
-                     values for the conditions outlined for *U.
-    double *Z0     - Vector of length 3, contains roughness length
-                     values for the conditions outlined for *U.
-    double *d      - Vector of length 3, contains displacement height
-                     values for the conditions outlined for *U.
-
-   Returns      : int
-
-   Modifies     :
-    double *U
-    double *Ra
-    double *Zref
-    double *Z0
-    double *d
-
-   Comments     :
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate the aerodynamic resistance for each vegetation layer,
+ *           and the wind 2m above the layer boundary.  In case of an overstory,
+ *           also calculate the wind in the overstory. The values are
+ *           normalized based on a reference height wind speed, Uref, of 1 m/s.
+ *           To get wind speeds and aerodynamic resistances for other values of
+ *           Uref, you need to multiply the here calculated wind speeds by Uref
+ *           and divide the here calculated aerodynamic resistances by Uref.
+ *****************************************************************************/
 int
 CalcAerodynamic(char    OverStory,          /* overstory flag */
                 double  Height,             /* vegetation height */
@@ -77,15 +49,6 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
                 double *ref_height,         /* vegetation reference height */
                 double *roughness)          /* vegetation roughness */
 {
-    /******************************************************************
-       Modifications:
-       2007-Apr-04 Modified to catch and return error flags from surface_fluxes
-                subroutine.                                      GCT/KAC
-       2009-Jun-09 Modified to use extension of veg_lib structure to contain
-                bare soil information.				TJB
-     *******************************************************************/
-
-
     double d_Lower;
     double d_Upper;
     double K2;

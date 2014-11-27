@@ -1,6 +1,39 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* This routine was written to handle the various calls and data
+* handling needed to solve the various components of the new VIC
+* snow code for both the full_energy and water_balance models.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+* @brief        This routine was written to handle the various calls and data
+*               handling needed to solve the various components of the new VIC
+*               snow code for both the full_energy and water_balance models.
+******************************************************************************/
 double
 solve_snow(char               overstory,
            double             BareAlbedo,
@@ -59,76 +92,6 @@ solve_snow(char               overstory,
            soil_con_struct   *soil_con,
            veg_var_struct    *veg_var)
 {
-/*********************************************************************
-   solve_snow.c                Keith Cherkauer       July 2, 1998
-
-   This routine was written to handle the various calls and data
-   handling needed to solve the various components of the new VIC
-   snow code for both the full_energy and water_balance models.
-
-   Returns snow, veg_var, and energy variables for each elevation
-   band.  Variable ppt[] is defined for elevation bands with snow.
-
-   07-13-98 modified to use elevation bands when solving the
-           snow model                                        KAC
-   11-30-98 reworked the way the snow/rain fraction is computed
-           and added to check to assure that very small amounts
-           of snow do not fall, causing snow sublimation to
-           be calculated.  (found by Greg)                   KAC
-   02-29-00 removed ground heat flux computations, will now
-           make those outside of this routine, in the same function
-           that is used to compute the ground heat flux when
-           there is no snow cover.                           KAC
-   10-06-00 added partial snow cover and advection of sensible
-           heat from local bare patches.                     KAC
-   03-06-01 Modified to pass the minimum depth of full snow cover
-           as a variable in soil_con rather than a globally defined
-           constant.                                         KAC
-   06-15-02 Fixed check of new snow accumulation for setting
-           understory flag to use snowfall[WET] not snowfall.  KAC
-   06-15-02 Set MELTING flag to maintain melting albedo curve
-           even during brief periods of refreezing, until a
-           snowfall exceeds SnowThres.           .           KAC
-   11-18-02 Modified to handle the effects of blowing snow.    LCB
-   xx-xx-01 Modified to handle closed canopy energy balance.   KAC
-   06-04-03 Added check so that MELTING flag is only TRUE if melt
-           occurs in the melt season - currently this is defined
-           between March 1 and October 1.  Otherwise the MELTING
-           flag can trigger rapid very early season melt		KAC
-   05-Aug-04 Removed lag_one, sigma_slope, and fetch from argument
-            list since they were only used in call to snow_melt(),
-            which no longer needs them.					TJB
-   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-            used in flux calculations.					TJB
-   2006-Sep-26 Added tracking of out_rain and out_snow.                 TJB
-   2007-Apr-06 Modified to handle grid cell errors by returning to the
-           main subroutine, rather than ending the simulation.          GCT/KAC
-   2007-Apr-21 Added initialization of TmpAlbedoUnder[0] for the case
-              in which snow->swq == 0.					TJB
-   2007-Jul-03 Units of melt are in mm, not m, so inserted *0.001 into
-              call to calc_snow_coverage().				TJB
-   2008-Feb-17 Modified call to snow_density to match new version
-              that is based on SNTHERM89.				KMA via TJB
-   2008-Apr-21 Modified to pass snow depth to snow_albedo().		KAC via TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Sep-19 Fixed snow albedo aging logic.				TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-   2009-Nov-15 Removed ice0 and moist0 from argument list, since they
-              are never used.						TJB
-   2010-Apr-26 Replaced individual forcing variables with atmos_data
-              in argument list.  Replaced individual time variables
-              with dmy_struct in argument list.				TJB
-   2010-Dec-28 Fixed MELTING date condition to be correct in southern
-              hemisphere.						TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-*********************************************************************/
-
     extern option_struct   options;
 
     int                    ErrorFlag;

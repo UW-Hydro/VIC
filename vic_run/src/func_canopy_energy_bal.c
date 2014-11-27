@@ -1,29 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine iterates to determine the temperature of the canopy, and solve
+ * the resulting fluxes between the canopy and the atmosphere and the canopy
+ * and the ground.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Calculate the canopy energy balance.
+ *****************************************************************************/
 double
 func_canopy_energy_bal(double  Tfoliage,
                        va_list ap)
-/*********************************************************************
-   func_canopy_energy_bal    Keith Cherkauer         January 27, 2001
-
-   This routine iterates to determine the temperature of the canopy,
-   and solve the resulting fluxes between the canopy and the atmosphere
-   and the canopy and the ground.
-
-   Modifications:
-   2004-Sep-28 Added Ra_used to store the aerodynamic resistance used in
-              flux calculations.					TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.				TJB
-   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
-   2009-Sep-14 Replaced 0.622 with EPS in equation for vapor flux.	TJB
-   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
- ********************************************************************/
 {
     extern option_struct options;
 

@@ -1,78 +1,76 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ *
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine saves the model state at hour 0 of the date defined in the
+ * global control file using STATEDAY, STATEMONTH, and STATEYEAR.  The saved
+ * files can then be used to initialize the model to the same state as when the
+ * files were created.
+ *
+ * Soil moisture, soil thermal, and snowpack variables  are stored for each
+ * vegetation type and snow band.  However moisture variables from the
+ * distributed precipitation model are averaged so that the model is restarted
+ * with mu = 1.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+ /******************************************************************************
+ * @brief    Saves the model state.
+ *****************************************************************************/
 void
 write_model_state(all_vars_struct     *all_vars,
                   int                  Nveg,
                   int                  cellnum,
                   filep_struct        *filep,
                   soil_con_struct     *soil_con)
-/*********************************************************************
-   write_model_state      Keith Cherkauer           April 14, 2000
-
-   This subroutine saves the model state at hour 0 of the date
-   defined in the global control file using STATEDAY, STATEMONTH,
-   and STATEYEAR.  The saved files can then be used to initialize
-   the model to the same state as when the files were created.
-
-   Soil moisture, soil thermal, and snowpack variables  are stored
-   for each vegetation type and snow band.  However moisture variables
-   from the distributed precipitation model are averaged so that the
-   model is restarted with mu = 1.
-
-   Modifications:
-   04-10-03 Rewritten to handle updates to vicNl_def.h and to write
-           the file as binary to minimize write time and differences
-           with simulations started with the state file.         KAC
-   04-10-03 Model is now restarted with the correct values for mu
-           and LAST_STORM
-   06-03-03 Modified to create ASCII as well as BINARY state file.  KAC
-   06-06-03 It is not necessary to store the current ice content as
-           it is recomputed in initialize_model_state.         KAC
-   09-Oct-03 Removed initial space on veg/band info line in ASCII file.		TJB
-   26-Oct-04 Changed calculation of Nbytes in binary state file to
-            account for bare soil values (extra veg class per grid
-            cell).  Without this fix, attempts to skip grid cells
-            fail.								TJB
-   01-Nov-04 Added storage of state variables for SPATIAL_FROST and
-            LAKE_MODEL.								TJB
-   02-Nov-04 Added a few more lake state variables.				TJB
-   03-Nov-04 Now outputs extra_veg to aid other programs in parsing
-            state files.							TJB
-   2005-Dec-07 STATE_FILE option is set in global file.				GCT
-   2005-Jan-10 writes temp[0] instead of tp_in for lake skin surface
-              temperature.							JCA
-   2005-Jan-10 modified to write lake nodal variables for each of the
-              active nodes.							JCA
-   2006-Jun-16 Skip writing snow band if areafract < 0.				GCT
-   2006-Aug-23 Changed order of fread/fwrite statements from ...1, sizeof...
-              to ...sizeof, 1,...						GCT
-   2006-Sep-07 Changed "Skip writing snow band if areafract < 0" to "<=0".	GCT
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Apr-24 Modified to write Zsum_node.					JCA
-   2007-Apr-25 Removed variable Nsum.						JCA
-   2007-Aug-24 Added features for EXCESS_ICE option.				JCA
-   2007-Nov-06 New list of lake state variables.					LCB via TJB
-   2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
-              variables.							TJB
-   2009-Aug-27 Now once again writes data for all bands, regardless of
-              whether they have area > 0.  This makes it much easier to ensure
-              that the value of Nbands stored in the state file matches the number
-              of bands actually stored in the state file.			TJB
-   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
-              from wetland.							TJB
-   2010-Mar-05 Fixed typo in writing of number of lake active nodes.		TJB
-   2012-Jan-01 Removed lake area condition from logic determining whether to write
-              lake state data.  Now, if options.LAKES is TRUE, every grid cell
-              will save lake state data.  If no lake is present, default NULL
-              values will be stored.						TJB
-   2013-Jul-25 Added soil carbon terms.						TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-*********************************************************************/
 {
     extern option_struct options;
 

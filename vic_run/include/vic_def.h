@@ -1,149 +1,29 @@
-/**********************************************************************
-   This file contains "#define" statements and "typedef" statements.
-   It also contains "extern" declarations for global variables.  For such
-   variables, a single declaration/definition of the global variable, not
-   containing the word "extern", must exist in global.h.  This is because
-   global.h is only included by one file (vicNl.c), while vicNl_def.h is
-   included multiple times (all *.c files) via vicNl.h.
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Definition header file
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
-   Modifications:
-   2005-Mar-24 Added data structures to accomodate ALMA variables.	TJB
-   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
-   2005-Apr-23 Added out_data.aero_cond.					TJB
-   2005-May-01 Added the ALMA vars CRainf, CSnowf, LSRainf, and LSSnowf.	TJB
-   2005-May-02 Added the ALMA vars Wind_E, Wind_N.			TJB
-   2005-Dec-21 Removed Trad.                                             GCT
-   2006-Sep-23 Implemented flexible output configuration.
-              Added output variable types.  Added binary output format
-              types.  Removed all output files except the state file from
-              the outfiles_struct and the filenames_struct.  Added
-              Noutfiles to the option_struct.  Created new out_data_struct
-              and out_data_files_struct.  Added new save_data structure.
-              Organized the physical constants into one section; got rid
-              of redundant Stefan-Boltzmann constant.  Implemented
-              aggregation of output variables; added AGG_TYPE definitions.  TJB
-   2006-Oct-10 Shortened the names of output variables whose names were
-              too long; fixed typos in others; created new OUT_IN_LONG
-              variable.							TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included merging global->statename to filenames->statefile. TJB
-   2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2006-Nov-07 Organized model constants a bit more.			TJB
-   2006-Dec-20 All atmos_data arrays are always dynamically allocated now.	TJB
-   2006-Dec-29 Added REL_HUMID to list of supported met input variables.	TJB
-   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list
-              of supported met input variables.				TJB
-   2007-Jan-15 Added PRT_HEADER option.					TJB
-   2007-Apr-03 Added CONTINUEONERROR option.				GCT
-   2007-Apr-03 Added ERROR value						KAC
-   2007-Apr-24 Added IMPLICIT option.					JCA
-   2007-Apr-24 Added EXP_TRANS option.					JCA
-   2007-Apr-24 Added Zsum_node to soil_con structure.			JCA
-   2007-Aug-08 Added features for EXCESS_ICE option.			JCA
-   2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.		JCA
-   2007-Sep-19 Added MAX_SUBSIDENCE parameter to EXCESS_ICE option.	JCA
-   2007-Oct-24 Added surf_water to lake_var structure.			KAC via TJB
-   2007-Nov-06 Updated lake_var structure with new variables.		LCB via TJB
-   2008-Apr-21 Added snow surf_temp, pack_temp, and coldcontent to lake_var
-              structure.						LCB via TJB
-   2008-Apr-21 Added SNOW_ALBEDO option.					KAC via TJB
-   2008-Apr-21 Added SNOW_DENSITY option.				TJB
-   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the soil
-              temperature in the wetland fraction of the grid cell.	LCB via TJB
-   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.				TJB
-   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
-              surface and overstory values; changed AERO_COND
-              and AERO_RESIST to track "scene" values.			TJB
-   2009-Feb-09 Updated description of PRT_SNOW_BAND option.		TJB
-   2009-Feb-22 Added OUT_VPD.						TJB
-   2009-Mar-16 Added min_liq to the layer_data_struct.			TJB
-   2009-May-17 Added OUT_ASAT.						TJB
-   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.		TJB
-   2009-May-17 Added options.MIN_LIQ.					TJB
-   2009-May-18 Added options.PLAPSE and Rd, the gas constant for dry
-              air.							TJB
-   2009-May-20 Added options.GRND_FLUX_TYPE.				TJB
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.		TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jun-09 Added OUT_PET_*, potential evap for various reference
-              land cover types.						TJB
-   2009-Jun-09 Cell_data structure now only stores final aero_resist
-              values (called "aero_resist").  Preliminary uncorrected
-              aerodynamic resistances for current vegetation and various
-              reference land cover types for use in potential evap
-              calculations is stored in temporary array aero_resist.	TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Jul-07 Added BandElev[] to soil_con_struct.			TJB
-   2009-Jul-31 Added lake_idx to lake_con struct and LAKE to veg_con
-              struct.							TJB
-   2009-Aug-28 OUT_LAKE_ICE_TEMP and OUT_LAKE_SURF_TEMP are [C].		TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Sep-19 Changed Cp to be 1013, the value for moist air.		TJB
-   2009-Sep-19 Made TFALLBACK a separate option from CONTINUEONERROR.	TJB
-   2009-Sep-28 Added snow and energy structures to lake_var_struct.	TJB
-   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-   2009-Nov-09 Changed definition of sarea to include ice extent.	LCB via TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
-   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
-   2010-Mar-31 Added RUNOFF_IN and OUT_RUNOFF_IN.			TJB
-   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
-   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
-              OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
-              to OUT_LAKE_EVAP.  Added other lake water balance terms
-              to set of output variables.  Added volumetric versions
-              of these too.						TJB
-   2010-Nov-02 Added OUT_LAKE_RO_IN, OUT_LAKE_RO_IN_V, OUT_LAKE_RCHRG,
-              OUT_LAKE_RCHRG_V, OUT_LAKE_VAPFLX, and OUT_LAKE_VAPFLX_V.	TJB
-   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).	TJB
-   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
-              OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
-   2010-Nov-26 Added lake->ice_throughfall, lake->swe_save, and
-              lake->volume_save.					TJB
-   2010-Dec-01 Added cell->zwt and OUT_ZWT.				TJB
-   2011-Jan-04 Added zwtvmoist_zwt and zwtvmoist_moist to soil_con_struct
-              for storing relationship between soil moisture and water
-              water table position based on soil water retention curve.	TJB
-   2011-Mar-01 Added cell->zwt2, cell->zwt3, OUT_ZWT2, OUT_ZWT3, and
-              OUT_ZWTL.							TJB
-   2011-May-31 Removed options.GRND_FLUX.				TJB
-   2011-May-31 Increased length of zwtvmoist_* arrays.			TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2011-Nov-04 Added options to handle new forcing estimation features.	TJB
-   2012-Jan-02 Removed wetland_veg_class from lake_con_struct.		TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Jan-28 Removed AR_COMBO and GF_FULL.				TJB
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2012-Mar-30 Created constant DEFAULT_WIND_SPEED.			TJB
-   2013-Jul-25 Added CATM, COSZEN, FDIR, PAR, OUT_CATM, OUT_COSZEN,
-              OUT_FDIR, and OUT_PAR.							TJB
-   2013-Jul-25 Added photosynthesis terms.					TJB
-   2013-Jul-25 Added soil carbon terms.						TJB
-   2013-Jul-25 Added SLAB_MOIST.								TJB
-   2013-Sep-17 Fixed incorrect units in comments for REL_HUMID.	TJB
-   2013-Dec-26 Added array lengths MAX_VEG, MAX_LAYERS, etc.		TJB
-   2013-Dec-26 Added LOG_MATRIC option.						TJB
-   2013-Dec-26 Added CLOSE_ENERGY option.					TJB
-   2013-Dec-26 Removed EXCESS_ICE option.					TJB
-   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.		TJB
-   2013-Dec-27 Removed QUICK_FS option.						TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-   2013-Dec-28 Moved VERBOSE from user_def.h to vicNl_def.h; deleted
-              user_def.h.										TJB
-   2014-Mar-24 Removed ARC_SOIL option                       BN
-   2014-Mar-28 Removed DIST_PRCP option.						TJB
- *********************************************************************/
 #ifndef VIC_DEF_H
 #define VIC_DEF_H
 

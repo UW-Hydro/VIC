@@ -1,13 +1,42 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* This routine computes all surface fluxes, and solves the snow accumulation
+* and ablation algorithm. Solutions are for the current snow band and
+* vegetation type.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
 #include <vic_def.h>
 #include <vic_run.h>
 
 #define GRND_TOL 0.001
 #define OVER_TOL 0.001
 
+/******************************************************************************
+* @brief        This routine computes all surface fluxes
+******************************************************************************/
 int
 surface_fluxes(char                 overstory,
                double               BareAlbedo,
-               // double               height,
                double               ice0,
                double               moist0,
                double               surf_atten,
@@ -43,103 +72,6 @@ surface_fluxes(char                 overstory,
                double               sigma_slope,
                double               fetch,
                double              *CanopLayerBnd)
-/**********************************************************************
-        surface_fluxes	Keith Cherkauer		February 29, 2000
-
-   Formerly a part of full_energy.c this routine computes all surface
-   fluxes, and solves the snow accumulation and ablation algorithm.
-   Solutions are for the current snow band and vegetation type (these
-   are defined in full_energy before the routine is called).
-
-   modifications:
-   10-06-00 modified to handle partial snow cover                KAC
-   10-31-00 modified to iterate a solution for the exchange of
-           energy between the snowpack and the ground surface.  KAC
-   11-18-02 modified to add the effects of blowing snow.         LCB
-   02-07-03 fixed indexing problem for sub-daily snow model within
-           daily water balance VIC: hour (now hidx) is incremented
-           by 1 rather than the sub-daily time step, so the atmospheric
-           forcing data is now properly indexed.                KAC
-   04-23-03 Indexing fix sent SNOW_STEP to calc_surf_energy_bal rather
-           than the model time step, meaning that without snow the
-           evaporation was computed for SNOW_STEP hours rather than a
-           full day.  This was fixed by introducing step_inc to
-           index the arrays, while step_dt keeps track of the correct
-           time step.                                                   KAC
-   10-May-04 Fixed initialization of canopyevap to initialize for every
-            value of dist, rather than just dist 0.			TJB
-   16-Jul-04 Added variables store_blowing_flux and store_surface_flux
-            so that surface_flux and blowing_flux are calculated
-            correctly over a model time step.				TJB
-   16-Jul-04 Moved calculation of blowing_flux from this function
-            into latent_heat_from_snow().				TJB
-   05-Aug-04 Moved calculation of blowing_flux back into this function
-            from latent_heat_from_snow().  Updated arg lists to
-            calc_surf_energy_bal() and solve_snow() accordingly.	TJB
-   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance
-            used in flux calculations.					TJB
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
-   2006-Sep-23 Implemented flexible output configuration; moved tracking
-              of rain and snow for output to this function.		TJB
-   2006-Sep-26 Moved tracking of out_rain and out_snow to solve_snow.c.	TJB
-   2006-Dec-20 Modified iteration loop variables to be more intuitive.	TJB
-   2007-Apr-04 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	GCT/KAC
-   24-Apr-07 Features included for IMPLICIT frozen soils option.		JCA
-            (passing nrecs to  calc_surf_energy_bal)
-   2007-Jul-03 Added iter_snow, iter_bare_energy, and iter_snow_energy
-              structures so that canopy/understory iterations don't
-              reset step_snow, etc.  This fixes a bug involving large
-              water balance errors when model step = daily and snow
-              step = sub-daily.						TJB
-   2007-Aug-17 Added features for EXCESS_ICE option.                     JCA
-   2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
-              when options.SNOW_BAND > 1, the value of moist computed
-              for earlier bands was always overwritten by the value
-              of moist computed for the final band (even if the final
-              band had 0 area).						KAC via TJB
-   2008-Oct-23 In call to CalcBlowing(), replaced
-                veg_lib[iveg].displacement[dmy[rec].month-1] and
-                veg_lib[iveg].roughness[dmy[rec].month-1] with
-* displacement and *roughness.				LCB via TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.				TJB
-   2009-May-17 Added asat to cell_data.					TJB
-   2009-May-20 Changed "bare_*" to "soil_*", to make it clearer that
-              these data structures refer to the energy balance at the
-              soil surface, regardless of whether the surface is covered
-              by snow or some veg or is totally bare.			TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jun-09 Added call to compute_pot_evap() to compute potential
-              evaporation for various land cover types.			TJB
-   2009-Jun-09 Cell_data structure now only stores final aero_resist
-              values (called "aero_resist").  Preliminary uncorrected
-              aerodynamic resistances for current vegetation and various
-              reference land cover types for use in potential evap
-              calculations is stored in temporary array aero_resist.	TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Jun-26 Simplified argument list of runoff() by passing all cell_data
-              variables via a single reference to the cell data structure.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Nov-15 Removed ice0 and moist0 from argument list of solve_snow,
-              since they are never used.				TJB
-   2010-Apr-24 Added logic to handle case when aero_cond or aero_resist
-              are very large or 0.					TJB
-   2010-Apr-26 Simplified argument lists for solve_snow() and
-              snow_intercept().						TJB
-   2011-May-31 Removed options.GRND_FLUX.				TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Oct-25 Now call calc_atmos_energy_bal() whenever there is a canopy
-              with snow, regardless of the setting of CLOSE_ENERGY.	CL via TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Jul-25 Added soil carbon terms.					TJB
-   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
 {
     extern veg_lib_struct *vic_run_veg_lib;
     extern option_struct   options;

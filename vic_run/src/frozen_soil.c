@@ -1,8 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine redistributes soil properties based on the thermal solutions
+ * found for the current time step.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
 #define MAXIT 1000
 
+/******************************************************************************
+ * @brief    This subroutine redistributes soil properties based on the thermal
+ *           solutions found for the current time step.
+ *****************************************************************************/
 int
 calc_layer_average_thermal_props(energy_bal_struct *energy,
                                  layer_data_struct *layer,
@@ -10,49 +41,6 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
                                  size_t             Nnodes,
                                  double            *T)
 {
-    /******************************************************************
-       calc_layer_average_thermal_props      Keith Cherkauer      July 27, 1998
-
-       This subroutine redistributes soil properties based on the
-       thermal solutions found for the current time step.
-
-       Modifications:
-       3-12-03 Modified so that soil layer ice content is only
-            calculated if the frozen soil algorithm is implemented
-            and active in the current grid cell.               KAC
-       2007-Apr-24 Removed setup_frozen_soil function (was above this one).	JCA
-       2007-Apr-24 Added functionality for EXP_TRANS option.			JCA
-                (including passing Zsum_node to find_0_degree_fronts)
-       2007-Apr-24 For IMPLICIT option, added Ming Pan's new functions
-                (solve_T_profile_implicit and fda_heat_eqn).		JCA
-       2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-       2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
-       2009-Feb-09 Modified to handle error flags and pass Zsum_node instead
-                of dz_node to esimate_layer_ice_content.			KAC via TJB
-       2009-Mar-16 Added resid_moist to argument list of
-                estimate_layer_ice_content().  This allows computation
-                of min_liq, the minimum allowable liquid water content
-                in each layer as a function of temperature.		TJB
-       2009-Jun-10 Fixed incorrect placement of checks on ErrorFlag.		TJB
-       2009-Jul-31 Removed unused layer_node_fract array from call to
-                estimate_layer_ice_content().				TJB
-       2009-Dec-11 Removed min_liq and options.MIN_LIQ.  As a result, no
-                longer need to include resid_moist in the arg list for
-                estimate_layer_ice_content().				TJB
-       2011-May-24 Added calls to estimate_layer_ice_content_quick_flux to
-                handle the cases for QUICK_FLUX = TRUE (or any other case
-                in which the full finite-element T profile is not used).
-                Changed name from finish_frozen_soil_calcs to
-                calc_layer_average_thermal_props.  This function now can
-                be used to compute soil layer average T and ice, regardless
-                of the settings of FROZEN_SOIL, QUICK_FLUX, etc.		TJB
-       2012-Jan-16 Removed LINK_DEBUG code					BN
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-       2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-       2013-Dec-27 Removed QUICK_FS option.					TJB
-       2014-Mar-28 Removed DIST_PRCP option.					TJB
-    ******************************************************************/
-
     extern option_struct options;
 
     size_t               i;
@@ -116,6 +104,11 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
     return (0);
 }
 
+/******************************************************************************
+ * @brief    Iteratively solve the soil temperature profile using a numerical
+ *           difference equation.  The solution equation is second order in
+ *           space, and first order in time.
+ *****************************************************************************/
 int
 solve_T_profile(double   *T,
                 double   *T0,
@@ -140,38 +133,6 @@ solve_T_profile(double   *T,
                 int       NOFLUX,
                 int       EXP_TRANS)
 {
-/**********************************************************************
-   This subroutine was written to iteratively solve the soil temperature
-   profile using a numerical difference equation.  The solution equation
-   is second order in space, and first order in time.
-
-   Modifications:
-   2007-Apr-11 Changed type of Error from char to int.				GCT
-   2007-Apr-24 Added option for EXP_TRANS.					JCA
-              (including passing in dz_node, Zsum, Dp, depth, EXP_TRANS,
-              veg_class; and removing FIRST_TIME and fprime)
-   2007-Apr-24 Rearranged terms in finite-difference heat equation (equation 8
-              of Cherkauer et al. (1999)); Therefore the constants (A-E)
-              are calculated in a new way.  These constants are equal to the
-              constants in each of the terms in equation 8 multiplied by
-              alpha^2*deltat.  This was done to make EXP_TRANS option
-              easier to code.							JCA
-   2007-Apr-24 Replaced second term of heat flux with alternate derivative
-              approximation (a form found in most text books).			JCA
-   2007-Aug-08 Added option for EXCESS_ICE.					JCA
-   2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
-   2007-Oct-11 Fixed error in EXP_TRANS formulation.				JCA
-   2009-Feb-09 Removed dz_node from call to solve_T_profile and
-              solve_T_profile_implicit.                                         KAC
-   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
-   2012-Jan-16 Removed LINK_DEBUG code						BN
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-**********************************************************************/
-
-    extern option_struct options;
     static double        A[MAX_NODES];
     static double        B[MAX_NODES];
     static double        C[MAX_NODES];
@@ -245,6 +206,11 @@ solve_T_profile(double   *T,
     return (Error);
 }
 
+/******************************************************************************
+ * @brief    Iteratively solve the soil temperature profile using a numerical
+ *           difference equation.  The solution equation is second order in
+ *           space, and first order in time.
+ *****************************************************************************/
 int
 solve_T_profile_implicit(double   *T,                               // update
                          double   *T0,                        // keep
@@ -275,31 +241,6 @@ solve_T_profile_implicit(double   *T,                               // update
                          double   *organic,                    // soil parameter
                          double   *depth)                     // soil parameter
 {
-    /**********************************************************************
-       This subroutine was written to iteratively solve the soil temperature
-       profile using a numerical difference equation.  The solution equation
-       is second order in space, and first order in time.
-       By Ming Pan, mpan@Princeton.EDU
-
-       Modifications:
-       2006-Aug-08 Integrated with 4.1.0 (from 4.0.3).			JCA
-       2006-Aug-08 Added NOFLUX option.					JCA
-       2006-Aug-08 Added EXP_TRANS option - this allows the heat flux equations
-                to be solved on a transformed grid using an exponential
-                distribution.						JCA
-       2006-Aug-09 Included terms needed for Cs and kappa nodal updating for
-                new ice.							JCA
-       2007-Aug-08 Added EXCESS_ICE OPTION.					JCA
-       2009-Feb-09 Removed dz_node from call to solve_T_profile and
-                solve_T_profile_implicit.					KAC
-       2011-Jun-03 Added ORGANIC_FRACT option.				TJB
-       2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-                organic fraction into account.				TJB
-       2012-Jan-16 Removed LINK_DEBUG code					BN
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-       2014-Jan-14 Modified cold nose hack to also cover warm nose case.
-    **********************************************************************/
-
     extern option_struct options;
     int                  n, Error;
     double               res[MAX_NODES];
@@ -359,6 +300,9 @@ solve_T_profile_implicit(double   *T,                               // update
     return (Error);
 }
 
+/******************************************************************************
+ * @brief    Calculate soil thermal fluxes
+ *****************************************************************************/
 int
 calc_soil_thermal_fluxes(int       Nnodes,
                          double   *T,
@@ -380,36 +324,6 @@ calc_soil_thermal_fluxes(int       Nnodes,
                          int       NOFLUX,
                          int       EXP_TRANS)
 {
-    /**********************************************************************
-       Modifications:
-       2007-Apr-24 Added EXP_TRANS option.						JCA
-                (including passing in EXP_TRANS and veg_class; and removing fprime)
-       2007-Apr-24 Rearranged terms in finite-difference heat equation (equation 8
-                of Cherkauer et al. (1999)).  see note in solve_T_profile.
-                This affects the equation for T[j].				JCA
-       2007-Apr-24 Passed j to soil_thermal_eqn for "cold nose" problem in
-                explicit solution.						JCA
-       2007-Aug-08 Added EXCESS_ICE option.						JCA
-       2007-Aug-31 Checked root_brent return value against -998 rather than -9998.	JCA
-       2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
-                allows simulation to continue when energy balance fails
-                to converge by using previous T value.				TJB
-       2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.		TJB
-       2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.			TJB
-       2009-Nov-11 Changed the value of T for TFALLBACK from oldT to T0.		TJB
-       2010-Feb-03 Corrected typo in initialization of Tfbflag.			TJB
-       2010-Mar-08 Added TFallback logic for case in which max iterations exceeded.	TJB
-       2010-Apr-24 Added initialization of Tfbcount.					TJB
-       2010-Apr-24 Added hack to prevent cold nose.  Only active when TFALLBACK
-                is TRUE.								TJB
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-       2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-       2013-Dec-27 Removed QUICK_FS option.					TJB
-       2014-Mar-28 Modified cold nose hack to also cover warm nose case.	TJB
-    **********************************************************************/
-
-    /** Eventually the nodal ice contents will also have to be updated **/
-
     extern option_struct options;
 
     int                  Error;
@@ -600,6 +514,9 @@ calc_soil_thermal_fluxes(int       Nnodes,
     return (Error);
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling of error_print_solve_T_profile()
+ *****************************************************************************/
 double
 error_solve_T_profile(double Tj,
                       ...)
@@ -615,6 +532,9 @@ error_solve_T_profile(double Tj,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Print soil temperature terms.
+ *****************************************************************************/
 double
 error_print_solve_T_profile(double  T,
                             va_list ap)
@@ -680,6 +600,10 @@ error_print_solve_T_profile(double  T,
 #undef MAXIT
 
 
+/******************************************************************************
+ * @brief    Heat Equation for implicit scheme (used to calculate residual of
+ *           the heat equation) passed from solve_T_profile_implicit
+ *****************************************************************************/
 void
 fda_heat_eqn(double T_2[],
              double res[],
@@ -687,34 +611,6 @@ fda_heat_eqn(double T_2[],
              int    init,
              ...)
 {
-    /**********************************************************************
-       Heat Equation for implicit scheme (used to calculate residual of the heat equation)
-       passed from solve_T_profile_implicit
-       By Ming Pan, mpan@Princeton.EDU
-
-       Modifications:
-       2006-Aug-08 Integrated with 4.1.0 (from 4.0.3).				JCA
-       2006-Aug-08 replaced second term of heat flux with an alternate form.		JCA
-       2006-Aug-08 Added NOFLUX option.						JCA
-       2006-Aug-08 Added EXP_TRANS option - this allows the heat flux equations
-                to be solved on a transformed grid using an exponential
-                distribution of node depths.					JCA
-       2006-Aug-09 Included terms needed for Cs and kappa nodal updating for new
-                ice.								JCA
-       2006-Aug-11 Included additional term in the storage term to account for
-                time-varying changes in Cs.					JCA
-       2007-Aug-08 Added EXCESS_ICE option.						JCA
-       2007-Oct-08 Fixed error in EXP_TRANS formulation.				JCA
-       2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-                organic fraction into account.					TJB
-       2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
-                soil_conductivity() to fix bug in commputation of kappa.		TJB
-       2012-Jan-28 Removed restriction of cold nose fix to just top two nodes;
-                now all nodes are checked and corrected if necessary.		TJB
-       2013-Jan-08 Excluded bottom node from check in cold nose fix.			TJB
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-    **********************************************************************/
-
     static double  deltat;
     static int     NOFLUX;
     static int     EXP_TRANS;

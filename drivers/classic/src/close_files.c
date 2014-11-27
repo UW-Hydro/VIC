@@ -1,32 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine closes all forcing data files, and output files.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine closes all forcing data files, and output files.
+ *****************************************************************************/
 void
 close_files(filep_struct         *filep,
             out_data_file_struct *out_data_files,
             filenames_struct     *fnames)
-
-/**********************************************************************
-        close_files	Dag Lohmann		January 1996
-
-   This routine closes all forcing data files, and output files.
-
-   Modifications:
-   7-19-96  Files are now gzipped when they are closed.  This
-           was added to save space when using large volumes
-           of data.						KAC
-   02-27-01 Now closes files opened for lake model applications  KAC
-   11-18-02 Now closes lake debugging file.                      LCB
-   2003-Oct-29 Distinguishing between input lakeparam file and output
-              lake file.						TJB
-   2005-Mar-24 Added support for ALMA output files.			TJB
-   2005-Apr-10 Added logic for OUTPUT_FORCE option.			TJB
-   2006-Sep-23 Implemented flexible output configuration; uses new
-              out_data_files structure.					TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-**********************************************************************/
 {
     extern option_struct options;
     size_t               filenum;

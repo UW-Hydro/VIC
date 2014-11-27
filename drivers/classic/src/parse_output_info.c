@@ -1,31 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads the VIC model global control file, getting information
+ * for output variables list (if any).
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Get output info from global parameter file.
+ *****************************************************************************/
 void
 parse_output_info(FILE                  *gp,
                   out_data_file_struct **out_data_files,
                   out_data_struct       *out_data)
-/**********************************************************************
-   parse_output_info	Ted Bohn	            September 10 2006
-
-   This routine reads the VIC model global control file, getting
-   information for output variables list (if any).
-
-   Modifications:
-   2006-Nov-07 Changed default precision from %.1f to %.4f.	TJB
-   2007-Jan-15 Modified to expect "OUT_TYPE_" at beginning of
-              output data type strings.				TJB
-   2007-Apr-21 Added initialization for format, outfilenum, and
-              outvarnum.					TJB
-   2008-Feb-15 Added check on number of output files defined vs.
-              N_OUTFILES.					TJB
-   2009-Feb-09 Sets PRT_SNOW_BAND to FALSE if N_OUTFILES has been
-              specified.					TJB
-   2009-Mar-15 Added default values for format, typestr, and
-              multstr, so that they can be omitted from global
-              param file.					TJB
-**********************************************************************/
 {
     extern option_struct options;
 
@@ -69,7 +79,8 @@ parse_output_info(FILE                  *gp,
                 outfilenum++;
                 if (!options.Noutfiles) {
                     nrerror(
-                        "Error in global param file: \"N_OUTFILES\" must be specified before you can specify \"OUTFILE\".");
+                        "Error in global param file: \"N_OUTFILES\" must be "
+                        "specified before you can specify \"OUTFILE\".");
                 }
                 if (outfilenum >= (short)options.Noutfiles) {
                     sprintf(ErrStr,
@@ -90,7 +101,8 @@ parse_output_info(FILE                  *gp,
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 if (outfilenum < 0) {
                     nrerror(
-                        "Error in global param file: \"OUTFILE\" must be specified before you can specify \"OUTVAR\".");
+                        "Error in global param file: \"OUTFILE\" must be "
+                        "specified before you can specify \"OUTVAR\".");
                 }
                 strcpy(format, "");
                 strcpy(typestr, "");
@@ -129,7 +141,8 @@ parse_output_info(FILE                  *gp,
                                    out_data, varname, outvarnum, format, type,
                                    mult) != 0) {
                     nrerror(
-                        "Error in global param file: Invalid output variable specification.");
+                        "Error in global param file: Invalid output variable "
+                        "specification.");
                 }
                 strcpy(format, "");
                 outvarnum++;

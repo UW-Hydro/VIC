@@ -1,71 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads in lake parameters for the current grid cell.
+ *
+ * It will either calculate the lake area v. depth profile from a parabolic
+ * curve or read in constant values depending on the LAKE_PROFILE flag.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine reads in lake parameters for the current grid cell.
+ *****************************************************************************/
 lake_con_struct
 read_lakeparam(FILE           *lakeparam,
                soil_con_struct soil_con,
                veg_con_struct *veg_con)
-/**********************************************************************
-        read_lakeparam		Laura Bowling		2000
-
-   This routine reads in lake parameters for the current grid cell.  It
-   will either calculate the lake area v. depth profile from a parabolic
-   curve or read in constant values depending on the LAKE_PROFILE flag.
-
-   Parameters Read from File:
-   TYPE   NAME                    UNITS   DESCRIPTION
-   double  maxdepth                 m      Maximum lake depth
-   int     numnod                   -      Number of lake profile nodes.
-   double *surface                  m^2    Area of lake at each node.
-   double  b                        -      Exponent controlling lake depth
-                                          profile (y=Ax^b)
-   float rpercent;                  -      Fraction of the grid cell runoff
-                                          routed through the lake.
-   float bpercent;                  -      Fraction of the grid cell baseflow
-                                          routed through the lake.
-
-   Parameters Computed from those in the File:
-   TYPE   NAME                    UNITS   DESCRIPTION
-   double  dz                       m      Thickness of each solution layer.
-   double *surface                  m^2    Area of the lake at each node.
-
-   Modifications:
-   03-11-01 Modified Cv_sum so that it includes the lake fraction,
-           thus 1 - Cv_sum is once again the bare soil fraction.  KAC
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
-   02-Nov-04 Modified the adjustment of Cv_sum so that veg fractions
-            share in area reduction along with the lake fraction.		TJB
-   22-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
-   2005-03-08 Added EQUAL_AREA option.  When TRUE, res variable is interpreted
-             to be the grid cell area in km^2.  When FALSE, res is interpreted
-             to be the length of a grid cell side, in degrees (as before).	TJB
-   2005-03-17 Laura Bowling's update had included what appeared to be temporary
-             code that expected to read the lake node depths from the lake param
-             file.  This has code has been removed.				TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Oct-24 Modified to handle grid cells with empty or very shallow starting
-              lake depths.							KAC via TJB
-   2007-Nov-06 Updated to read new set of lake parameters (broad-crested wier)	LCB via TJB
-   2008-Feb-16 Added !feof(lakeparam) condition to loop over lakeparam file.	TJB
-   2008-Mar-01 Moved assignment of tempdz so that it is always assigned a value.	TJB
-   2008-Jun-16 Added a second fgets to loop over grid cells, to correctly parse
-              file.								LCB via TJB
-   2008-Sep-09 Deleted the fprintf statement for maxiumum lake volume.		LCB via TJB
-   2009-Jul-31 Added new parameter: index of veg tile (from veg param file) that
-              contains the lake/wetland.					TJB
-   2010-Sep-24 Clarified the fprintf statement describing lake basin area as
-              lake plus wetland area.						TJB
-   2010-Oct-10 Corrected the check on initial depth to allow initial depth <
-              mindepth.								TJB
-   2012-Jan-02 Modified to turn off lakes in a grid cell if lake_idx is < 0.
-              Added validation of parameter values.				TJB
-   2012-Jan-16 Removed LINK_DEBUG code						BN
-   2013-Jul-25 Fixed bug in parsing lakeparam file in case of no lake
-              in the cell.							TJB
-   2013-Dec-28 Removed NO_REWIND option.					TJB
-**********************************************************************/
-
 {
     extern option_struct options;
     size_t               i;

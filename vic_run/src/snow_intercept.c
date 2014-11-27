@@ -1,81 +1,36 @@
-/*
- * SUMMARY:      SnowInterception.c - simulates snow interception and release
- * USAGE:
- *
- * AUTHOR:       Brian Connelly and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       pstorck@u.washington.edu
- * ORIG-DATE:    29-Aug-1996 at 13:42:17
- * LAST-MOD: Fri Apr 25 14:58:10 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculates the interception and subsequent release of
- *               by the forest canopy using an energy balance approach
- * DESCRIP-END.
- * FUNCTIONS:    SnowInterception()
- * COMMENTS:     Modified for use with VIC-NL code by Keith Cherkauer
- *               on 4-9-98
- */
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Calculates the interception and subsequent release of by the forest canopy
+* using an energy balance approach.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: SnowInterception()
-
-   Purpose      : Calculate snow interception and release by the canopy
-
-   Comments     : Only the top canopy layer is taken into account for snow
-                 interception.  Snow interception by lower canopy is
-                 disregarded.  Rain water CAN be intercepted by lower canopy
-                 layers (similar to InterceptionStorage()).
-                 Of course:  NO vegetation -> NO interception
-
-   Modifications:
-   06-98 included maximum structural loading to prevent the model
-        from loading the canopy with more snow than it can handle
-        structurally.                                             PXS
-   09-98 aerodynamic resistances in the canopy when snow has been
-        intercepted is increased by a factor of 10:  include REF
-        Journal of Hydrology, 1998                            KAC, GO'D
-   11-00 energy balance components are now returned to the VIC model
-        so that they can be reported as energy balance components
-        in model output.                                           KAC
-   xx-xx-02 Modified to handle new variables required to close the
-        canopy energy balance.                                     KAC
-   2-20-03 Added check of intercepted before mass balance error
-        calculation.  Since interception quantity can be greater
-        than Wd_max when snow is present, the routine could return
-        dew values higher than maximum in a time step when intercepted
-        snow melted.  If there is no other snow, and distributed
-        precipitation is active this could cause the model to crash
-        in redistribute_during_storm as it will be unable to conserve
-        water when too much water is in the canopy.                 KAC
-   04-Jun-04 Fixed typo in line 730.  Changed SPATIAL_FRoST to
-            SPATIAL_FROST.					TJB
-   04-Jun-04 Added descriptive error message to beginning of screen dump
-            in error_print_canopy_energy_bal.			TJB
-   21-Sep-04 Added ErrorString to store error messages from
-            root_brent.						TJB
-   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in
-            flux calculations.					TJB
-   2007-Apr-11 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	KAC
-   2007-Aug-27 Modified to drop canopy snow if it is especially thin, which
-              should improve the numeric stability of the canopy energy
-              balance solution.						KAC via TJB
-   2007-Aug-31 Checked root_brent return value against -998 rather than
-              -9998.							JCA
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
-              allows simulation to continue when energy balance fails
-              to converge by using previous T value.			TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
-   2010-Apr-26 Replaced individual forcing variables with atmos_data
-              in argument list.						TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-*****************************************************************************/
+/******************************************************************************
+* @brief    Calculate snow interception and release by the canopy
+******************************************************************************/
 int
 snow_intercept(double             Dt,
                double             F,
@@ -603,6 +558,10 @@ snow_intercept(double             Dt,
     return(0);
 }
 
+/******************************************************************************
+* @brief    Dummy function to make a direct call to func_canopy_energy_bal()
+*           possible.
+******************************************************************************/
 double
 solve_canopy_energy_bal(double Tfoliage,
                         ...)
@@ -617,6 +576,10 @@ solve_canopy_energy_bal(double Tfoliage,
     return Qnet;
 }
 
+/******************************************************************************
+* @brief    Dummy function to make a direct call to
+*           error_print_canopy_energy_bal() possible.
+******************************************************************************/
 double
 error_calc_canopy_energy_bal(double Tfoliage,
                              ...)
@@ -631,6 +594,9 @@ error_calc_canopy_energy_bal(double Tfoliage,
     return Qnet;
 }
 
+/******************************************************************************
+* @brief    Print snow pack energy balance terms
+******************************************************************************/
 double
 error_print_canopy_energy_bal(double  Tfoliage,
                               va_list ap)

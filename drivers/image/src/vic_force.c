@@ -1,7 +1,36 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Read atmospheric forcing data.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
+/******************************************************************************
+ * @brief    Read atmospheric forcing data.
+ *****************************************************************************/
 void
 vic_force(void)
 {
@@ -219,6 +248,9 @@ vic_force(void)
     free(idx);
 }
 
+/******************************************************************************
+ * @brief    calculate 1d average
+ *****************************************************************************/
 double
 average(double *ar,
         size_t  n)
@@ -241,8 +273,15 @@ average(double *ar,
     return sum / n;
 }
 
-// convert specific humidity (q) to vapor pressure (vp) based on pressure (p)
-// returned units are those of p
+/******************************************************************************
+ * @brief   convert specific humidity (q) to vapor pressure (vp) based on
+ *          pressure (p)
+ *
+ * @param q specific humidity
+ * @param p pressure
+ *
+ * @return vp vapor pressure (units are the same as p)
+ *****************************************************************************/
 double
 q_to_vp(double q,
         double p)
@@ -258,8 +297,15 @@ q_to_vp(double q,
     return vp;
 }
 
-// convert surface pressure (kPa) to density (kg/m3) based on pressure (p),
-// vapor pressure (vp), and temperature
+/******************************************************************************
+ * @brief   convert surface pressure (kPa) to density (kg/m3) based on
+ *          pressure (p), vapor pressure (vp), and temperature
+ *
+ * @param t temperature
+ * @param p pressure
+ *
+ * @return rho surface pressure
+ *****************************************************************************/
 double
 air_density(double t,
             double p)
@@ -275,6 +321,9 @@ air_density(double t,
     return rho;
 }
 
+/******************************************************************************
+ * @brief   return 1 if it will snow, otherwise return 0
+ *****************************************************************************/
 char
 will_it_snow(double *t,
              double  t_offset,

@@ -1,6 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Calculate the surface energy balance.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    This function calculates the surface temperature, in the case of
+ *           no snow cover.  Evaporation is computed using the previous ground
+ *           heat flux, and then used to comput latent heat in the energy
+ *           balance routine.  Surface temperature is found using the Root
+ *           Brent method.
+ *****************************************************************************/
 double
 calc_surf_energy_bal(double             Le,
                      double             LongUnderIn,
@@ -55,116 +88,6 @@ calc_surf_energy_bal(double             Le,
                      snow_data_struct  *snow,
                      soil_con_struct   *soil_con,
                      veg_var_struct    *veg_var)
-/**************************************************************
-   calc_surf_energy_bal.c  Greg O'Donnell and Keith Cherkauer  Sept 9 1997
-
-   This function calculates the surface temperature, in the
-   case of no snow cover.  Evaporation is computed using the
-   previous ground heat flux, and then used to comput latent heat
-   in the energy balance routine.  Surface temperature is found
-   using the Root Brent method (Numerical Recipies).
-
-
-   modifications:
-    02-29-00  Included variables needed to compute energy flux
-              through the snow pack.  The ground surface energy
-              balance will now be a mixture of snow covered
-              and bare ground, controlled by the snow cover
-              fraction set in solve_snow.c                 KAC
-    6-8-2000  Modified to make use of spatially distributed
-              soil frost                                   KAC
-    03-09-01  Added QUICK_SOLVE options for finite difference
-              soil thermal solution.  By iterating on only a
-              few choice nodes near the soil surface the
-              simulation time can be significantly reduced
-              with minimal additional energy balance errors.  KAC
-    11-18-02  Modified to include the effects of blowing snow
-              on the surface energy balance.                 LCB
-    07-30-03  Made sure that local NOFLUX variable is always set
-              to the options flag value.                      KAC
-    04-Jun-04 Placed "ERROR" at beginning of screen dump in
-              error_print_surf_energy_bal.				TJB
-    16-Jul-04 Cast the last 6 variables in the parameter list
-              passed to root_brent, error_calc_surf_energy_bal
-              and solve_surf_energy_bal as double, since for
-              some reason letting them remain ints or floats
-              caused them to become garbage in the child
-              functions.						TJB
-    16-Jul-04 Modified the cap on vapor_flux to re-scale
-              blowing_flux and surface_flux proportionally
-              so that vapor_flux still = their sum.			TJB
-    05-Aug-04 Removed lag_one, sigma_slope, and fetch from
-              parameter list, since these were only used in
-              the call to root_brent/func_surf_energy_bal(),
-              which no longer needs them.				TJB
-    24-Aug-04 Modified the re-scaling of surface_flux to reduce
-              round-off errors.						TJB
-    21-Sep-04 Added ErrorString to store error messages from
-              root_brent.						TJB
-    28-Sep-04 Added aero_resist_used to store the aerodynamic
-              resistance used in flux calculations.			TJB
-   2007-Apr-06 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	GCT/KAC
-   2007-Apr-24 Changed the read-in order of iveg, and VEG in
-              error_print_surf_energy_bal to be consistent with the
-              call order, also added year, day, and hour to the
-              argument list.						JCA
-   2007-Apr-24 Features included for IMPLICIT frozen soils option.	JCA
-              including:
-                passing in nrecs
-                passing nrec, nrecs, and iveg to func_surf_energy_bal
-                passing bulk_density, soil_density, and quartz to
-                  func_surf_energy_bal
-   2007-Apr-24 Features included for EXP_TRANS option for frozen soils
-              algorithm.						JCA
-   2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
-   2007-Aug-08 Features included for EXCESS_ICE option for frozen soils
-              algorithm.						JCA
-              including:
-                passing in entire soil_con structure.
-   2007-Aug-31 Checked root_brent return value against -998 rather
-              than -9998.						JCA
-   2007-Sep-01 Checked for return value of ERROR from
-              solve_surf_energy_bal.					JCA
-   2007-Nov-09 Modified code to reset NOFLUX boundary to global option
-              value before computing final soil column temperatures.
-              Previously NOFLUX was set to FALSE for initial QUICK_SOLVE
-              estimates, but never reset to reflect actual bottom
-              boundary conditions for final pass through solver.	KAC
-   2009-Feb-09 Removed dz_node from variables passed to
-              func_surf_energy_bal.					KAC via TJB
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
-              allows simulation to continue when energy balance fails
-              to converge by using previous T value.			TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Nov-15 Fixed initialization of Tsurf_fbcount.			TJB
-   2009-Nov-15 Changed definitions of D1 and D2 to work for arbitrary
-              node spacing.						TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
-   2011-May-24 Replaced call to finish_frozen_soil_calcs() with a call
-              to calc_layer_average_thermal_props(); expanded the set of
-              cases for which this function is called to include
-              FROZEN_SOIL FALSE and QUICK_FLUX TRUE, so that a soil T
-              profile can be estimated and output in these cases.	TJB
-   2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
-              ground flux are always computed.				TJB
-   2011-Aug-09 Now initialize soil thermal properties for all modes of
-              operation.						TJB
-   2012-Jan-28 Changed the calculations of ground flux etc for the
-              exponential node distribution case to be over the same
-              control volume (first soil layer) as for the linear node
-              distribution and quick flux cases.  Now we need to pass
-              entire array of node temperatures to
-              func_surf_energy_bal().					TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2013-Jul-25 Added photosynthesis.					TJB
-   2013-Dec-27 Moved SPATIAL_SNOW to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
- ***************************************************************/
 {
     extern option_struct   options;
 
@@ -811,6 +734,9 @@ calc_surf_energy_bal(double             Le,
     return (Tsurf);
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling func_surf_energy_bal() directly.
+ *****************************************************************************/
 double
 solve_surf_energy_bal(double Tsurf,
                       ...)
@@ -826,6 +752,10 @@ solve_surf_energy_bal(double Tsurf,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling error_print_surf_energy_bal()
+ *           directly.
+ *****************************************************************************/
 double
 error_calc_surf_energy_bal(double Tsurf,
                            ...)
@@ -841,17 +771,13 @@ error_calc_surf_energy_bal(double Tsurf,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Print energy balance terms.
+ *****************************************************************************/
 double
 error_print_surf_energy_bal(double  Ts,
                             va_list ap)
 {
-/**********************************************************************
-   Modifications:
-   2009-Mar-03 Fixed format string for print statement, eliminates
-              compiler WARNING.						KAC via TJB
-   2012-Jan-28 Added Told_node array.					TJB
-**********************************************************************/
-
     extern option_struct options;
 
     /* Define imported variables */

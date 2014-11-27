@@ -1,43 +1,36 @@
-/*
- * SUMMARY:      StabilityCorrection.c - Calculate the stability correction
- * USAGE:        Part of DHSVM
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Bart Nijssen and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu, pstorck@u.washington.edu
- * ORIG-DATE:    Apr-1996
- * LAST-MOD: Fri Mar  2 18:42:20 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate the stability correction for exchange of sensible
- *               heat between the surface and the atmosphere
- * DESCRIP-END.
- * FUNCTIONS:    StabilityCorrection()
- * COMMENTS:
- */
+ * Stability correction
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: StabilityCorrection()
-
-   Purpose      : Calculate atmospheric stability correction for non-neutral
-                 conditions
-
-   Required     :
-    double Z          - Reference height (m)
-    double d          - Displacement height (m)
-    double TSurf      - Surface temperature (C)
-    double Tair       - Air temperature (C)
-    double Wind       - Wind speed (m/s)
-    double Z0         - Roughness length (m)
-
-   Returns      :
-    double Correction - Multiplier for aerodynamic resistance
-
-   Modifies     : None
-
-   Comments     :
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate atmospheric stability correction for non-neutral
+ *           conditions
+ *****************************************************************************/
 double
 StabilityCorrection(double Z,
                     double d,

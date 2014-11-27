@@ -1,18 +1,28 @@
-/*
- * SUMMARY:      RootBrent.c - Determine surface temperature iteratively
- * USAGE:        Part of DHSVM
- *
- * AUTHOR:       Bart Nijssen
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu
- * ORIG-DATE:    Apr-96
- * LAST-MOD: Mon Jan 24 12:06:38 2000 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Determine surface temperature iteratively using the Brent
- *               method.
- * DESCRIP-END.
- * FUNCTIONS:    RootBrent()
- * COMMENTS:
- */
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Brent (1973) root finding algorithm
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
@@ -23,73 +33,43 @@
 #define TSTEP   10
 #define T       1e-7
 
-/*****************************************************************************
-   GENERAL DOCUMENTATION FOR THIS MODULE
-   -------------------------------------
-
-   Source: Brent, R. P., 1973, Algorithms for minimization without derivatives,
-                        Prentice Hall, Inc., Englewood Cliffs, New Jersey
-                        Chapter 4
-   This source includes an implementation of the algorithm in ALGOL-60, which
-   was translated into C for this application.
-
-   The method is also discussed in:
-   Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, 1992,
-                Numerical Recipes in FORTRAN, The art of scientific computing,
-                Second edition, Cambridge University Press
-   (Be aware that this book discusses a Brent method for minimization (brent),
-   and one for root finding (zbrent).  The latter one is similar to the one
-   implemented here and is also copied from Brent [1973].)
-
-   The function returns the surface temperature, TSurf, for which the sum
-   of the energy balance terms is zero, with TSurf in the interval
-   [MinTSurf, MaxTSurf].  The surface temperature is calculated to within
-   a tolerance (6 * MACHEPS * |TSurf| + 2 * T), where MACHEPS is the relative
-   machine precision and T is a positive tolerance, as specified in brent.h.
-
-   The function assures that f(MinTSurf) and f(MaxTSurf) have opposite signs.
-   If this is not the case the program will abort.  In addition the program
-   will perform not more than a certain number of iterations, as specified
-   in brent.h, and will abort if more iterations are needed.
- ******************************************************************************/
-
-/*****************************************************************************
-   Function name: RootBrent()
-
-   Purpose      : Calculate the surface temperature
-
-   Required     :
-    double LowerBound     - Lower bound for root
-    double UpperBound     - Upper bound for root
-    char *ErrorString     - For storing description of errors (if any)
-    double (*Function)(double Estimate, va_list ap)
-    ...                   - Variable arguments
-                            The number and order of arguments has to be
-                            appropriate for the Function pointed to, since
-                            the list of arguments after Nargs will be passed
-                            on to Function.
-                            See the appropriate Function for the correct
-                            arguments.
-
-   Returns      :
-    double b              - Effective surface temperature (C)
-
-   Modifies     :
-    char *ErrorString     - Stores description of errors
-
-   Comments     :
-    04-Jun-04 Removed message announcing the dumping of variables,
-              since that doesn't always happen when root_brent fails.
-              Changed remaining message from ERROR to WARNING for
-              the same reason.						TJB
-    21-Sep-04 No longer print warning to stderr from this routine;
-              instead store warning messages in parameter ErrorString.	TJB
-   2007-Aug-31 Corrected handling of Function return value if Function returns
-              ERROR.  This can happen if Function is func_surf_energy_bal.	JCA
-   2007-Sep-01 Removed the integer "eval" since it is never used for anything.	JCA
-   2009-May-22 Modified root-bracketing scheme to handle case when one bound
-              yields garbage output from the target function.			TJB
-*****************************************************************************/
+/**
+ * @brief [brief description]
+ * @details
+ *
+ * Source: Brent, R. P., 1973, Algorithms for minimization without derivatives,
+ *         Prentice Hall, Inc., Englewood Cliffs, New Jersey, Chapter 4
+ *
+ * This source includes an implementation of the algorithm in ALGOL-60, which
+ * was translated into C for this application.
+ *
+ * The method is also discussed in:
+ * Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, 1992,
+ *              Numerical Recipes in FORTRAN, The art of scientific computing,
+ *              Second edition, Cambridge University Press
+ *
+ * (Be aware that this book discusses a Brent method for minimization (brent),
+ * and one for root finding (zbrent).  The latter one is similar to the one
+ * implemented here and is also copied from Brent [1973].)
+ *
+ * The function returns the surface temperature, TSurf, for which the sum
+ * of the energy balance terms is zero, with TSurf in the interval
+ * [MinTSurf, MaxTSurf].  The surface temperature is calculated to within
+ * a tolerance (6 * MACHEPS * |TSurf| + 2 * T), where MACHEPS is the relative
+ * machine precision and T is a positive tolerance, as specified in brent.h.
+ *
+ * The function assures that f(MinTSurf) and f(MaxTSurf) have opposite signs.
+ * If this is not the case the program will abort.  In addition the program
+ * will perform not more than a certain number of iterations, as specified
+ * in brent.h, and will abort if more iterations are needed.
+ *
+ * @param LowerBound Lower bound for root
+ * @param UpperBound Upper bound for root
+ * @param ErrorString For storing description of errors (if any)
+ * @param Function
+ * @param ap Variable arguments
+ * @return b
+ */
 double
 root_brent(double LowerBound,
            double UpperBound,

@@ -1,7 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initializes atmospheric variables for both the model time step,
+ * and the time step used by the snow algorithm (if different). Air temperature
+ * is estimated using MTCLIM (see routine for reference), atmospheric moisture
+ * is estimated using Kimball's algorithm (see routine for reference), and
+ * radiation is estimated using Bras's algorithms (see routines for reference).
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Initialize atmospheric variables for both the model time step.
+ *****************************************************************************/
 void
 initialize_atmos(atmos_data_struct    *atmos,
                  dmy_struct           *dmy,
@@ -12,126 +45,6 @@ initialize_atmos(atmos_data_struct    *atmos,
                  soil_con_struct      *soil_con,
                  out_data_file_struct *out_data_files,
                  out_data_struct      *out_data)
-/**********************************************************************
-   initialize_atmos	Keith Cherkauer		February 3, 1997
-
-   This routine initializes atmospheric variables for both the model
-   time step, and the time step used by the snow algorithm (if different).
-   Air temperature is estimated using MTCLIM (see routine for reference),
-   atmospheric moisture is estimated using Kimball's algorithm (see
-   routine for reference), and radiation is estimated using Bras's algorithms
-   (see routines for reference).
-
-   WARNING: This subroutine is site specific.  Location parameters
-    must be changed before compilation.
-
-   UNITS: mks
-        energy - W/m^2
-
-   Modifications:
-   11-18-98  Removed variable array yearly_epot, since yearly potential
-            evaporation is no longer used for estimating the dew
-            point temperature from daily minimum temperature.   KAC
-   11-25-98  Added second check to make sure that the difference
-            between tmax and tmin is positive, after being reset
-            when it was equal to 0.                        DAG, EFW
-   12-1-98   Changed relative humidity computations so that they
-            use air temperature for the time step, instead of average
-            daily temperature.  This allows relative humidity to
-            change during the day, when the time step is less than
-            daily.                                              KAC
-   8-19-99   MIN_TDEW was added to prevent the dew point temperature
-            estimated by Kimball's equations from becoming so low
-            that svp() fails.							Bart
-   9-4-99    Code was largely rewritten to change make use of the MTCLIM
-            meteorological preprocessor which estimates sub-daily
-            met forcings for all time steps.  The atmos_data_struct was
-            also reconfigured so that it has a new record for each
-            model time step, but stores sub-time step forcing data
-            (that might be needed for the snow model) within each
-            record, eliminating the on the fly estimations used in
-            previous versions of the model.					Bart and Greg
-   01-17-01  Pressure and vapor pressure read from a forcing file are
-            converted from kPa to Pa.  This preserves the original
-            format of the forcing files (where pressure was supposed
-            to be in kPa, but allows VIC to use Pa internally, eliminating
-            the need to convert to Pa every time it is used.			KAC
-   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
-           the model can make use of the computed treeline.			KAC
-   04-Oct-04 Changed logic to allow VP to be supplied without
-            SHORTWAVE.								TJB
-   2005-Mar-24 Modified to handle ALMA forcing variables.			TJB
-   2005-Apr-30 Fixed typo in QAIR calculation.					TJB
-   2005-May-01 Added logic for CSNOWF and LSSNOWF.				TJB
-   2005-May-02 Added logic for WIND_E and WIND_N.				TJB
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures.				TJB
-   2006-Dec-20 Replaced 1000.0 with kPa2Pa in pressure conversion.		TJB
-   2006-Dec-29 Added REL_HUMID to the list of supported met input variables.	TJB
-   2007-Jan-02 Added ALMA_INPUT option; removed TAIR and PSURF from list of
-              supported met input variables.					TJB
-   2008-Jan-25 Fixed conditions under which net longwave replaces incoming
-              longwave in atmos[rec].longwave[NR].  Previously, net longwave
-              was stored if SNOW_STEP != global.dt.  Now, net longwave is
-              stored if options.FULL_ENERGY and options.FROZEN_SOIL are both
-              FALSE, i.e. for a water balance mode run.				TJB
-   2009-Jan-12 Modified to pass avgJulyAirTemp argument to
-              compute_treeline().                                               TJB
-   2009-May-18 Added options.PLAPSE, which when TRUE changes pressure
-              calculation to be a function of elevation and air temperature
-              (as opposed to a constant 95.5 kPa, as it was previously).
-              Made similar change to density calculation.			TJB
-   2009-Jun-10 Fixed incorrect handling of cases when incoming longwave and
-              shortwave radiation are supplied.					TJB
-   2009-Jul-26 Removed the special logic for the water balance mode, in
-              which net longwave is stored in the "longwave" variable.		TJB
-   2009-Oct-13 Removed condition if(options.SNOW_BAND) for call to
-              compute_treeline(), since options.SNOW_BAND is always > 0.	TJB
-   2010-Mar-31 Added RUNOFF_IN.							TJB
-   2010-Apr-28 Removed individual soil_con variables from argument list and
-              replaced with *soil_con.						TJB
-   2010-Sep-24 Renamed RUNOFF_IN to CHANNEL_IN.					TJB
-   2011-Jun-30 Removed unnecessary requirement that VP and SHORTWAVE be
-              supplied together.  Improved checks on input forcings.		TJB
-   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.				TJB
-   2011-Nov-04 Overhauled logic to fix several inconsistencies in timing of
-              sub-daily data, and to correctly handle user-supplied observed
-              shortwave and/or vapor pressure.					TJB
-   2012-Feb-16 Changed definition of hour_offset to prevent double-shifting of
-              of hourlyrad timeseries when off_gmt is 0 (i.e. VIC times are
-              referenced to GTM instead of local time).  Added recomputing of
-              hourlyrad after call to mtclim_wrapper() in the case of sub-daily
-              shortwave supplied as a forcing so that it overwrites MTCLIM's
-              estimated hourly shortwave.  Meanwhile, now MTCLIM always stores
-              its estimated hourly shortwave in hourlyrad, so that if daily
-              shortwave is supplied as a forcing, MTCLIM can disaggregate it to
-              sub-daily.							TJB
-   2012-Apr-03 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
-              which the computed vapor pressure arrays were never transferred
-              to the atmos structure.						TJB
-   2012-Aug-07 Fixed bug in handling (QAIR or REL_HUMID) + PRESSURE supplied, in
-              which the cases for daily and sub-daily supplied pressure were
-              switched.								TJB
-   2012-Dec-20 Fixed bug in converting from ALMA_INPUT moisture flux units
-              to traditional units (was multiplying by number of seconds in
-              model step when should have been multiplying by number of seconds
-              in forcing step).							TJB
-   2013-Jul-19 Fixed bug in the case of user-supplied daily specific or relative
-              humidity without accompanying average daily temperature (with which
-              to convert these into daily vapor pressure); in this case, the
-              interpolated sub-daily vapor pressure from MTCLIM was being used
-              instead of vapor pressure computed from the supplied humidity.  Now,
-              daily specific or relative humidity are converted to daily VP
-              right before the interpolation of daily VP to sub-daily.  If
-              sub-daily humidity was supplied, it is converted to sub-daily
-              VP after the interpolation of MTCLIM VP, so that it overwrites
-              the MTCLIM VP.							TJB
-   2013-Jul-25 Added CATM, COSZEN, FDIR, and PAR.				TJB
-   2013-Nov-21 Added check on ALMA_INPUT in rescaling of forcing variables to
-              hourly step for local_forcing_data.				TJB
-   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.				TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-**********************************************************************/
 {
     extern option_struct       options;
     extern param_set_struct    param_set;

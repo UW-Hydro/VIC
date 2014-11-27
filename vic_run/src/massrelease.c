@@ -1,38 +1,35 @@
-/*
- * SUMMARY:      MassRelease.c - Calculates mass release of snow from canopy
- * USAGE:        Part of DHSVM
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Brian Connelly and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu
- * ORIG-DATE:     6-Oct-1996 at 15:42:13
- * LAST-MOD: Mon Sep 28 16:21:39 1998 by VIC Administrator <vicadmin@u.washington.edu>
- * DESCRIPTION:  Calculates mass release of snow from canopy
- * DESCRIP-END.
- * FUNCTIONS:    MassRelease()
- * COMMENTS:
- */
+ * Calculates mass release of snow from canopy.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: MassRelease()
-
-   Purpose      : Calculates mass release of snow from canopy
-
-   Required     :
-    float *InterceptedSnow
-    float *TempInterceptionStorage
-    float *ReleasedMass
-    float *Drip
-
-   Returns      : none
-
-   Modifies     : see under required (i.e. all variables are modified)
-
-   Comments     :
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculates mass release of snow from canopy.
+ *****************************************************************************/
 void
 MassRelease(double *InterceptedSnow,
             double *TempInterceptionStorage,

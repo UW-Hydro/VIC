@@ -1,68 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine creates the list of output variables.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine creates the list of output variables.
+ *****************************************************************************/
 out_data_struct *
 create_output_list()
 {
-/*************************************************************
-   create_output_list()      Ted Bohn     September 08, 2006
-
-   This routine creates the list of output variables.
-
-   Modifications:
-   2006-Sep-14 Implemented ALMA-compliant input and output;
-              now more variables are tracked.				TJB
-   2006-Sep-18 Implemented aggregation of output variables.		TJB
-   2006-Oct-10 Shortened the names of variables whose names were
-              too long; fixed typos in other names; added
-              OUT_IN_LONG.						TJB
-   2006-Nov-07 Changed default precision from %.1f to %.4f.		TJB
-   2006-Nov-07 Added OUT_SOIL_TNODE.					TJB
-   2006-Nov-30 Added OUT_DELSURFSTOR.					TJB
-   2007-Feb-28 Corrected AGG_TYPE definitions for miscellaneous
-              output variables; re-organized the code to make
-              it easier to debug.					TJB
-   2007-Aug-17 Added EXCESS_ICE variables to output list.               JCA
-   2007-Aug-22 Added OUTPUT_WATER_ERROR as output variable.             JCA
-   2008-Sep-09 Added SOIL_TNODE_WL as an output variable, the
-              soil temperature in the wetland fraction of the
-              grid cell.						LCB via TJB
-   2009-Jan-16 Added AERO_COND1&2 and AERO_RESIST1&2 to track
-              surface and overstory values; changed AERO_COND
-              and AERO_RESIST to track "scene" values.			TJB
-   2009-Feb-22 Added OUT_VPD.						TJB
-   2009-May-17 Added OUT_ASAT.						TJB
-   2009-Jun-09 Added OUT_PET_*, potential evap computed for
-              various landcover types.					TJB
-   2009-Jun-19 Added T flag to indicate whether TFALLBACK occurred.	TJB
-   2009-Jul-07 Fixed nelem assignments for some band-specific vars.	TJB
-   2009-Sep-19 Changed "*_FLAG" to "*_FBFLAG".				TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-   2010-Feb-14 Added OUT_LAKE_AREA_FRAC.					TJB
-   2010-Mar-31 Added OUT_RUNOFF_IN.					TJB
-   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
-              OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
-              to OUT_LAKE_EVAP.  Added other lake water balance terms
-              to set of output variables.  Added volumetric versions
-              of these too.						TJB
-   2010-Nov-02 Added OUT_LAKE_RO_IN and OUT_LAKE_RO_IN_V for reporting
-              overland runoff input to lake.  Added OUT_LAKE_RCHRG and
-              OUT_LAKE_RCHRG_V for reporting lake recharge of
-              surrounding wetland.  Added OUT_LAKE_VAPFLX and
-              OUT_LAKE_VAPFLX_V.					TJB
-   2010-Nov-21 Added OUT_LAKE_DSTOR, OUT_LAKE_DSTOR_V, OUT_LAKE_DSWE,
-              OUT_LAKE_DSWE_V, OUT_LAKE_SWE, and OUT_LAKE_SWE_V.	TJB
-   2010-Dec-01 Added OUT_ZWT.						TJB
-   2011-Mar-01 Added OUT_ZWT2, OUT_ZWT3, and OUT_ZWTL.			TJB
-   2011-Nov-04 Added OUT_TSKC.						TJB
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Jul-25 Added soil carbon terms.					TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-*************************************************************/
-
     extern option_struct options;
     int                  v;
     out_data_struct     *out_data;
@@ -395,6 +366,10 @@ create_output_list()
     return out_data;
 }
 
+/******************************************************************************
+ * @brief    This routine initializes the output information for all output
+ *           variables.
+ *****************************************************************************/
 void
 init_output_list(out_data_struct *out_data,
                  int              write,
@@ -402,12 +377,6 @@ init_output_list(out_data_struct *out_data,
                  int              type,
                  double           mult)
 {
-/*************************************************************
-   init_output_list()      Ted Bohn     September 08, 2006
-
-   This routine initializes the output information for all output variables.
-
-*************************************************************/
     int     varid;
     size_t  i;
 
@@ -422,6 +391,10 @@ init_output_list(out_data_struct *out_data,
     }
 }
 
+/******************************************************************************
+ * @brief    This routine updates the output information for a given output
+ *           variable.
+ *****************************************************************************/
 int
 set_output_var(out_data_file_struct *out_data_files,
                int                   write,
@@ -433,12 +406,6 @@ set_output_var(out_data_file_struct *out_data_files,
                int                   type,
                double                mult)
 {
-/*************************************************************
-   set_output_var()      Ted Bohn     September 08, 2006
-
-   This routine updates the output information for a given output variable.
-
-*************************************************************/
     int varid;
     int found = FALSE;
     int status = 0;
@@ -462,21 +429,19 @@ set_output_var(out_data_file_struct *out_data_files,
     if (!found) {
         status = -1;
         fprintf(stderr,
-                "Error: set_output_var: \"%s\" was not found in the list of supported output variable names.  Please use the exact name listed in vicNl_def.h.\n",
-                varname);
+                "Error: set_output_var: \"%s\" was not found in the list of "
+                "supported output variable names.  Please use the exact name "
+                "listed in vicNl_def.h.\n", varname);
     }
     return status;
 }
 
+/******************************************************************************
+ * @brief    This routine frees the memory in the out_data_files array.
+ *****************************************************************************/
 void
 free_out_data_files(out_data_file_struct **out_data_files)
 {
-/*************************************************************
-   free_out_data_files()      Ted Bohn     September 08, 2006
-
-   This routine frees the memory in the out_data_files array.
-
-*************************************************************/
     extern option_struct options;
     size_t               filenum;
 
@@ -486,16 +451,12 @@ free_out_data_files(out_data_file_struct **out_data_files)
     free((char*)(*out_data_files));
 }
 
+/******************************************************************************
+ * @brief    This routine frees the memory in the out_data array.
+ *****************************************************************************/
 void
 free_out_data(out_data_struct **out_data)
 {
-/*************************************************************
-   free_out_data()      Ted Bohn     April 19, 2007
-
-   This routine frees the memory in the out_data array.
-
-*************************************************************/
-
     int varid;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {

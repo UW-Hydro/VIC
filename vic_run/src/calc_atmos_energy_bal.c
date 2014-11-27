@@ -1,6 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Iteratively solve the atmospheric energy balance equation to estimate the
+ * canopy air temperature.
+ *
+ * Basic concept for this was taken from:
+ *    Sellers et al., J. Clim., v.9, April 1996, pp. 676-705.
+ *    Dickinsen, BATS manual, NCAR Tech. Note (NCAR/TN-387+STR), August 1993.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Iteratively solve the atmospheric energy balance equation to
+ *           estimate the canopy air temperature.
+ *****************************************************************************/
 double
 calc_atmos_energy_bal(double    InOverSensible,
                       double    InUnderSensible,
@@ -24,43 +59,6 @@ calc_atmos_energy_bal(double    InOverSensible,
                       char     *Tcanopy_fbflag,
                       unsigned *Tcanopy_fbcount)
 {
-/************************************************************************
-   calc_atmos_energy_bal.c        Keith Cherkauer       February 6, 2001
-
-   This routine was written to iteratively solve the atmospheric energy
-   balance equation to estimate the canopy air temperature.
-
-   Basic concept for this was taken from:
-   Sellers et al., J. Clim., v.9, April 1996, pp. 676-705.
-   Dickinsen, BATS manual, NCAR Tech. Note (NCAR/TN-387+STR), August 1993.
-
-   Modifications:
-   04-Jun-04 Added more descriptive error message to beginning of screen
-            dump in error_print_atmos_moist_bal.		TJB
-   21-Sep-04 Added ErrorString to store error messages from
-            root_brent.						TJB
-   2007-Apr-06 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.	GCT/KAC
-   2007-Aug-31 Checked root_brent return value against -998 rather
-              than -9998.						JCA
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.  This
-              allows simulation to continue when energy balance fails
-              to converge by using previous T value.			TJB
-   2009-Jun-19 Added T fbflag to indicate whether TFALLBACK occurred.	TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.	TJB
-   2012-Oct-25 Now this function is called whenever there is a canopy with snow.
-              This way, all canopy energy balance terms are computed the same
-              way (except Tcanopy) regardless of the setting of CLOSE_ENERGY.
-              Tcanopy iteration is only performed if CLOSE_ENERGY is TRUE; else
-              Tcanopy is set to Tair.  Also fixed bug in passing SensibleHeat
-              between this function and root_brent, etc.		CL via TJB
-   2013-Jan-11 Replaced (*SensibleHeat) with SensibleHeat in argument lists
-              of root_brent, error_print_atmos_energy_bal and
-              solve_atmos_energy_bal.					TJB
-   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
-************************************************************************/
-
     extern option_struct options;
 
     double               F; // canopy closure fraction, not currently used by VIC
@@ -135,6 +133,9 @@ calc_atmos_energy_bal(double    InOverSensible,
     return(Tcanopy);
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling func_atmos_energy_bal() directly.
+ *****************************************************************************/
 double
 solve_atmos_energy_bal(double Tcanopy,
                        ...)
@@ -150,6 +151,10 @@ solve_atmos_energy_bal(double Tcanopy,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling error_calc_atmos_energy_bal()
+ *           directly.
+ *****************************************************************************/
 double
 error_calc_atmos_energy_bal(double Tcanopy,
                             ...)
@@ -165,6 +170,9 @@ error_calc_atmos_energy_bal(double Tcanopy,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Print atmos energy balance terms.
+ *****************************************************************************/
 double
 error_print_atmos_energy_bal(double  Tcanopy,
                              va_list ap)
@@ -210,6 +218,9 @@ error_print_atmos_energy_bal(double  Tcanopy,
     return(ERROR);
 }
 
+/******************************************************************************
+ * @brief   Dummy function to allow calling func_atmos_moist_bal() directly.
+ *****************************************************************************/
 double
 solve_atmos_moist_bal(double VPcanopy,
                       ...)
@@ -225,6 +236,10 @@ solve_atmos_moist_bal(double VPcanopy,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Dummy function to allow calling error_print_atmos_moist_bal()
+ *           directly.
+ *****************************************************************************/
 double
 error_calc_atmos_moist_bal(double VPcanopy,
                            ...)
@@ -240,6 +255,9 @@ error_calc_atmos_moist_bal(double VPcanopy,
     return error;
 }
 
+/******************************************************************************
+ * @brief    Print atmos moist energy balance terms.
+ *****************************************************************************/
 double
 error_print_atmos_moist_bal(double  VPcanopy,
                             va_list ap)

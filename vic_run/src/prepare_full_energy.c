@@ -1,6 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine returns the soil thermal properties, moisture and ice
+ * contents for the top two layers for use with the QUICK_FLUX ground heat flux
+ * solution.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    This subroutine returns the soil thermal properties, moisture and
+ *           ice contents for the top two layers for use with the QUICK_FLUX
+ *           ground heat flux solution.
+ *****************************************************************************/
 void
 prepare_full_energy(int              iveg,
                     all_vars_struct *all_vars,
@@ -8,37 +41,6 @@ prepare_full_energy(int              iveg,
                     double          *moist0,
                     double          *ice0)
 {
-/*******************************************************************
-   prepare_full_energy.c      Keith Cherkauer       January 20, 2000
-
-   This subroutine returns the soil thermal properties, moisture
-   and ice contents for the top two layers for use with the QUICK_FLUX
-   ground heat flux solution.
-
-   Modifications:
-   01-20-00 split into separate file, formerly at the end of
-           full_energy.c                                      KAC
-   03-12-03 modified so that ice content is set to zero unless
-           the frozen soil algorithm is implemented and active
-           in the current grid cell.                          KAC
-   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-   2008-Jan-23 Changed ice0 from a scalar to an array.  Previously,
-              when options.SNOW_BAND > 1, the value of ice0 computed
-              for earlier bands was always overwritten by the value
-              of ice0 computed for the final band (even if the final
-              band had 0 area).						JS via TJB
-   2008-May-05 Changed moist from a scalar to an array (moist0).  Previously,
-              when options.SNOW_BAND > 1, the value of moist computed
-              for earlier bands was always overwritten by the value
-              of moist computed for the final band (even if the final
-              band had 0 area).						KAC via TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-*******************************************************************/
-
     extern option_struct options;
 
     size_t               i, band;

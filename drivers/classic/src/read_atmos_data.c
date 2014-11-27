@@ -1,7 +1,36 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads in atmospheric data values from a binary/ascii file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Read in atmospheric data values from a binary/ascii file.
+ *****************************************************************************/
 void
 read_atmos_data(FILE               *infile,
                 global_param_struct global_param,
@@ -9,57 +38,6 @@ read_atmos_data(FILE               *infile,
                 int                 forceskip,
                 double            **forcing_data,
                 double           ***veg_hist_data)
-/**********************************************************************
-   read_atmos_data
-
-   This routine reads in atmospheric data values from a binary/ascii file.
-
-   BINARY
-   Binary data are always specified as unsigned or signed ints, and a
-   multiplier is used to convert to float.
-
-   atmos variable: type:            model units:
-
-   precipitation   unsigned short   mm per file_dt
-   temperature       signed short   C
-   wind              signed short   m/s
-
-   swap bytes code from Kernighan, Brian W. and Rob Pike, "The practice of
-   programming", Addison-Wesley, Reading, Massachusetts, 1999, 267 pp,
-   page 206.
-
-   ASCII
-   ASCII data should have the same units as given in the table above.
-
-
-   Supported Input Field Combinations, options in parenthesis optional:
-
-   Daily met data and daily model timestep - prec, tmax, tmin, (wind)
-   Daily met data and subdaily model timestep - prec, tmax, tmin, (wind)
-
-   If the code is modified check;
-* for BINARY, the number of fields is correct
-* get_global flags are implemented
-
-   Modifications:
-   01/10/00 Modified to read a generic Binary, or ASCII column
-           data file and read the contents into the provided
-           data arrays.                                    KAC
-   ??-???-?? Replaced NF with global_param.dt in condition checking
-            whether forcing file contains enough records to cover
-            the time range of the simulation.	(documented by TJB)
-   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,...                                        GCT
-   2006-Sep-23 Fixed RCS ID string.					TJB
-   2007-Jan-15 Added PRT_HEADER option; now binary forcing files
-              might have headers, and these need to be skipped.		TJB
-   2011-Nov-04 Fixed warning message dealing with insufficient
-              records.							TJB
-   2014-Apr-25 Added non-climatological veg parameters (as forcing
-              variables).						TJB
-   2014-Apr-25 Added partial vegcover fraction.				TJB
-
-**********************************************************************/
 {
     extern param_set_struct param_set;
 
@@ -90,7 +68,8 @@ read_atmos_data(FILE               *infile,
         (global_param.dt == 24 && (global_param.dt %
                                    param_set.FORCE_DT[file_num] > 0))) {
         nrerror(
-            "Currently unable to handle a model starting date that does not correspond to a line in the forcing file.");
+            "Currently unable to handle a model starting date that does not"
+            "correspond to a line in the forcing file.");
     }
 
     /** Error checking - Model can be run at any time step using daily forcing
@@ -100,7 +79,10 @@ read_atmos_data(FILE               *infile,
     if (param_set.FORCE_DT[file_num] < 24 &&
         global_param.dt != param_set.FORCE_DT[file_num]) {
         sprintf(ErrStr,
-                "When forcing the model with sub-daily data, the model must be run at the same time step as the forcing data.  Currently the model time step is %i hours, while forcing file %i has a time step of %i hours.", global_param.dt, file_num,
+                "When forcing the model with sub-daily data, the model must be "
+                "run at the same time step as the forcing data.  Currently the "
+                "model time step is %i hours, while forcing file %i has a time "
+                "step of %i hours.", global_param.dt, file_num,
                 param_set.FORCE_DT[file_num]);
         nrerror(ErrStr);
     }
@@ -157,7 +139,8 @@ read_atmos_data(FILE               *infile,
         fseek(infile, skip_recs * Nfields * sizeof(short), SEEK_CUR);
         if (feof(infile)) {
             nrerror(
-                "No data for the specified time period in the forcing file.  Model stopping...");
+                "No data for the specified time period in the forcing file.  "
+                "Model stopping...");
         }
 
         /** Read BINARY forcing data **/
@@ -235,8 +218,8 @@ read_atmos_data(FILE               *infile,
         /* skip to the beginning of the required met data */
         for (i = 0; i < skip_recs; i++) {
             if (fgets(str, MAXSTRING, infile) == NULL) {
-                nrerror(
-                    "No data for the specified time period in the forcing file.  Model stopping...");
+                nrerror("No data for the specified time period in the forcing "
+                        "file.  Model stopping...");
             }
         }
 
@@ -266,8 +249,10 @@ read_atmos_data(FILE               *infile,
     if (rec * param_set.FORCE_DT[file_num] <
         global_param.nrecs * global_param.dt) {
         sprintf(ErrStr,
-                "Not enough records in forcing file %i (%i * %i = %i) to run the number of records defined in the global file (%i * %i = %i).  Check forcing file time step, and global file", file_num + 1, rec,
-                param_set.FORCE_DT[file_num],
+                "Not enough records in forcing file %i (%i * %i = %i) to run "
+                "the number of records defined in the global file "
+                "(%i * %i = %i).  Check forcing file time step, and global "
+                "file", file_num + 1, rec, param_set.FORCE_DT[file_num],
                 rec * param_set.FORCE_DT[file_num], global_param.nrecs,
                 global_param.dt, global_param.nrecs * global_param.dt);
         nrerror(ErrStr);

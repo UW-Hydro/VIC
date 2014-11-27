@@ -1,33 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+  * This routine initializes the soil variable arrays for each new grid cell.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine initializes the soil variable arrays for each new
+ *           grid cell.
+ *****************************************************************************/
 void
 initialize_soil(cell_data_struct **cell,
                 soil_con_struct   *soil_con,
                 size_t             veg_num)
-/**********************************************************************
-        initialize_soil		Keith Cherkauer		July 31, 1996
-
-   This routine initializes the soil variable arrays for each new
-   grid cell.
-
-   modifications:
-   11-18-02 Modified to initialize wetland soil moisture.          LCB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2007-Aug-10 Added features for EXCESS_ICE option.			JCA
-   2009-Mar-16 Modified to use min_liq (minimum allowable liquid water
-              content) instead of resid_moist.  For unfrozen soil,
-              min_liq = resid_moist.					TJB
-   2009-Jul-31 Replaced extra lake/wetland veg tile with reference to
-              veg_con[j].LAKE.						TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
-   2011-Mar-01 Now initializes more cell data structure terms, including
-              asat and zwt.						TJB
-   2013-Jul-25 Added soil carbon terms.					TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-**********************************************************************/
 {
     extern option_struct options;
 

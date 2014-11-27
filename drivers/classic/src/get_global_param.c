@@ -1,111 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads the VIC model global control file, getting values for
+ * global parameters, model options, and debugging controls.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Read the VIC model global control file, getting values for
+ *           global parameters, model options, and debugging controls.
+ *****************************************************************************/
 global_param_struct
 get_global_param(filenames_struct *names,
                  FILE             *gp)
-/**********************************************************************
-   get_global_param	Keith Cherkauer	            March 1998
-
-   This routine reads the VIC model global control file, getting
-   values for global parameters, model options, and debugging controls.
-
-   NOTE: any additions or removals of parameters in this file must also
-   be made in display_current_settings.c.
-
-   Modifications:
-   7-19-96 Modified to read time step		        KAC
-   4-5-98  Modified to read model options and debugging
-          controls from a single file                   KAC
-   01-20-00 modified to work with new radiation estimation routines,
-           new simplified frozen soil moisture, and new new open
-           format forcing file rad routines.              KAC
-   02-27-01 added reads for lake model parameters          KAC
-   04-21-03 added parameters for blowing snow algorithm, printing
-           lake variables during debugging and reading Bart's
-           new Arno parameters.                           KAC
-   11-May-04 Modified to display compile-time and run-time options
-            if VERBOSE is set to TRUE.						TJB
-   13-Oct-04 Added validation for GRND_FLUX option.                             TJB
-   01-Nov-04 Added validation for Nnodes with QUICK_FLUX option, as
-            part of fix for QUICK_FLUX state file compatibility.		TJB
-   2005-03-08 Added EQUAL_AREA option.						TJB
-   2005-03-24 Added ALMA_OUTPUT option.						TJB
-   2005-04-07 Fixed state file warning check.					TJB
-   2005-Apr-13 Added logic for OUTPUT_FORCE option.				TJB
-   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW			TJB
-   2005-11-29 SAVE_STATE is set in global_param (not at compile time)		GCT
-   2005-12-06 Moved setting of statename from open_state_file to here.		GCT
-   2005-12-07 Added checks for range of STATEMONTH and STATEDAY			GCT
-   2005-12-07 Allow user to use NO_FLUX in addition to NOFLUX for NOFLUX in
-             global.param.file							GCT
-   2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.		TJB/GCT
-   2006-Sep-23 Implemented flexible output configuration; removed the
-              OPTIMIZE and LDAS_OUTPUT options; implemented aggregation of
-              output variables.							TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included moving global->statename to filenames->statefile;
-              also added f_path_pfx to store forcing file path and prefix.	TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Jan-03 Added ALMA_INPUT option.						TJB
-   2007-Jan-15 Added PRT_HEADER option.						TJB
-   2007-Apr-03 Added CONTINUEONERROR option.					GCT
-   2007-Apr-24 Added EXP_TRANS option.						JCA
-   2007-Apr-24 Added IMPLICIT option.						JCA
-   2007-Apr-23 Added initialization of global parameters.			TJB
-   2007-Apr-23 Added check for FULL_ENERGY if lake model is run.			TJB
-   2007-Aug-08 Added EXCESS_ICE option.						JCA
-   2007-Sep-14 Added initialization of names->soil_dir.				TJB
-   2007-Oct-10 Added validation of dt, start date, end date, and nrecs.		TJB
-   2007-Oct-31 Added validation of input/output files.				TJB
-   2008-Jan-25 Removed setting of SNOW_STEP = global.dt for
-              OUTPUT_FORCE == TRUE.						TJB
-   2008-Jan-28 Added check that end date falls AFTER start date.			TJB
-   2008-Mar-12 Relocated code validating IMPLICIT and EXCESS_ICE options.	TJB
-   2008-Apr-21 Added SNOW_ALBEDO option.						KAC via TJB
-   2008-Apr-21 Added SNOW_DENSITY option.					TJB
-   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.		TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.					TJB
-   2009-May-17 Added AR_406_LS to options.AERO_RESIST_CANSNOW.			TJB
-   2009-May-17 Added options.MIN_LIQ.						TJB
-   2009-May-18 Added options.PLAPSE.						TJB
-   2009-May-20 Added options.GRND_FLUX_TYPE.					TJB
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.			TJB
-   2009-Jun-15 Changed order of options to match global parameter file.		TJB
-   2009-Aug-29 Now handles commented lines that are indented.			TJB
-   2009-Sep-19 Moved TFALLBACK to its own separate option.			TJB
-   2009-Nov-15 Added prohibition of QUICK_FLUX=TRUE when IMPLICIT=TRUE or
-              EXP_TRANS=TRUE.							TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
-   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.		TJB
-   2011-May-31 Removed options.GRND_FLUX.					TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.					TJB
-   2011-Jul-05 Now QUICK_FLUX=FALSE is prohibited in water balance mode
-              (when both FULL_ENERGY and FROZEN_SOIL are FALSE).		TJB
-   2011-Nov-04 Added options to access new forcing estimation features.		TJB
-   2012-Jan-16 Removed LINK_DEBUG code						BN
-   2012-Jan-28 Removed AR_COMBO and GF_FULL.					TJB
-   2012-Jan-28 IMPLICIT is now set to TRUE by default if FROZEN_SOIL is
-              TRUE.								TJB
-   2012-Jan-28 Changed default values of MIN_WIND_SPEED, MIN_RAIN_TEMP,
-              and MAX_SNOW_TEMP to reflect the most commonly-used values.	TJB
-   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.		TJB
-   2013-Dec-26 Added LOG_MATRIC option.						TJB
-   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-   2013-Dec-28 Removed user_def.h.					TJB
-   2014-Jan-13 Set default values of IMPLICIT and EXP_TRANS to TRUE.		TJB
-   2014-Mar-24 Removed ARC_SOIL option                                   BN
-   2014-Mar-28 Removed DIST_PRCP option.					                TJB
-**********************************************************************/
 {
     extern option_struct    options;
     extern param_set_struct param_set;

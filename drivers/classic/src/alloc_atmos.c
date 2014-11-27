@@ -1,43 +1,39 @@
-/*
- * Purpose: allocate and free memory for the atmos data struct
- * Usage  : Part of VIC
- * Author : Bart Nijssen
- * E-mail : nijssen@u.washington.edu
- * Created: Fri Aug 27 18:22:42 1999
- * Last Changed: Tue Sep  2 15:11:02 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * Notes  :
- */
-
-/****************************************************************************/
-/*			  PREPROCESSOR DIRECTIVES                           */
-/****************************************************************************/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Allocate and free memory for the atmos data struct
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-/****************************************************************************/
-/*			       alloc_atmos()                                */
-/****************************************************************************/
+/******************************************************************************
+ * @brief    Allocate memory for the atmos data structure.
+ *****************************************************************************/
 void
 alloc_atmos(int                 nrecs,
             atmos_data_struct **atmos)
-
-/*******************************************************************
-   alloc_atmos
-
-   Modifications:
-   01-11-00 Fixed allocation bug                             KAC
-   2006-Sep-23 Implemented flexible output configuration; removed
-              LDAS_OUTPUT and OPTIMIZE compile-time options.		TJB
-   2006-Dec-20 All atmos_data arrays are always dynamically allocated
-              now.							TJB
-   2010-Mar-31 Added runoff_in.						TJB
-   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
-   2011-Nov-04 Added tskc.						TJB
-   2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
-
-*******************************************************************/
 {
 
     int                     i;
@@ -115,27 +111,12 @@ alloc_atmos(int                 nrecs,
     }
 }
 
-/****************************************************************************/
-/*	                  free_atmos()                                      */
-/****************************************************************************/
+/******************************************************************************
+ * @brief    Free memory for the atmos data structure.
+ *****************************************************************************/
 void
 free_atmos(int                 nrecs,
            atmos_data_struct **atmos)
-
-/***************************************************************************
-   Modifications:
-   09-02-2003 Added check for LINK_DEBUG global option.  If LINK_DEBUG is
-             TRUE atmospheric data is not dynamically allocated, so it
-             should not be freed.                                   KAC
-   2006-Sep-23 (Port from 4.0.6) Implemented flexible output configuration;
-              removed LDAS_OUTPUT and OPTIMIZE compile-time options.	TJB
-   2006-Dec-20 All atmos_data arrays are always dynamically allocated
-              now.							TJB
-   2010-Mar-31 Added runoff_in.						TJB
-   2010-Sep-24 Renamed runoff_in to channel_in.				TJB
-   2011-Nov-04 Added tskc.						TJB
-   2013-Jul-25 Added Catm, coszen, fdir, and par.			TJB
-***************************************************************************/
 {
     int i;
 

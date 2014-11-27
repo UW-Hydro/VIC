@@ -1,27 +1,39 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initailizes the vegetation variable array.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine initailizes the vegetation variable array.
+ *****************************************************************************/
 void
 initialize_veg(veg_var_struct     **veg_var,
                size_t               Nveg)
-
-/**********************************************************************
-   initialize_veg		Dag Lohmann	 January 1996
-
-   This routine initailizes the vegetation variable array.
-
-   Modifications:
-   07-13-98 modified to initialize vegetation structure for all
-           defined elevation bands                                 KAC
-   11-18-02 modified to get the maximum number of vegetation types
-           passed to it.  This allows the maximum number of vegetation
-           types to include the wetland vegetation fraction when the
-           lake model is active.                                  LCB
-   2013-Jul-25 Added photosynthesis terms.				TJB
-   2013-Jul-25 Added AnnualNPP.						TJB
-
-**********************************************************************/
 {
     extern option_struct options;
 

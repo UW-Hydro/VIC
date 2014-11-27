@@ -1,26 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine estimates long wave radiation.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine estimates long wave radiation based on the fractional
+ *           cloud cover (tskc), the current air temperature (C), and the
+ *           atmospheric vapor pressure (Pa).
+ *****************************************************************************/
 void
 calc_longwave(double *longwave,
               double  tskc,
               double  air_temp,
               double  vp)
-/***************************************************************************
-   This routine estimates long wave radiation based on the fractional cloud
-   cover (tskc), the current air temperature (C), and the atmospheric vapor
-   pressure (Pa).
-
-   Modifications:
-   2000-Oct-27 Modified to use vapor pressure in Pa instead of kPa.	KAC
-   2011-Nov-04 Added new option for handling the effect of clouds.	TJB
-   2011-Nov-04 Added alternative clear-sky longwave algorithm.		TJB
-   2012-Apr-13 Changed relationship between cloud_fraction and tskc for
-              LW_CLOUD==LW_CLOUD_DEARDORFF, to account for new, simplified
-              meaning of tskc.						TJB
-   2013-Dec-26 Removed LWAVE_COR.					TJB
-***************************************************************************/
 {
     extern option_struct options;
     double               emissivity;

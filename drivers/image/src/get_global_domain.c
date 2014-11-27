@@ -1,3 +1,29 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Get global domain data from file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
@@ -5,6 +31,9 @@
 #define ERR(e) {fprintf(stderr, "\nError(get_global_domain): %s\n", \
                         nc_strerror(e)); }
 
+/******************************************************************************
+ * @brief    Get global domain information.
+ *****************************************************************************/
 size_t
 get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
@@ -132,6 +161,9 @@ get_global_domain(char          *nc_name,
     return global_domain->ncells_global;
 }
 
+/******************************************************************************
+ * @brief    Initialize domain structure.
+ *****************************************************************************/
 void
 initialize_domain(domain_struct *domain)
 {
@@ -142,6 +174,9 @@ initialize_domain(domain_struct *domain)
     domain->locations = NULL;
 }
 
+/******************************************************************************
+ * @brief    Initialize location structure.
+ *****************************************************************************/
 void
 initialize_location(location_struct *location)
 {
@@ -157,6 +192,9 @@ initialize_location(location_struct *location)
     location->local_y_idx = 0;
 }
 
+/******************************************************************************
+ * @brief    Get global index,
+ *****************************************************************************/
 size_t
 get_global_idx(domain_struct *domain,
                size_t         i)

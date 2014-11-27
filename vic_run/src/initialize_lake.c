@@ -1,6 +1,35 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initializes the lake variables for each new grid cell.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    This routine initializes the lake variables for each new grid cell
+ *****************************************************************************/
 int
 initialize_lake(lake_var_struct  *lake,
                 lake_con_struct   lake_con,
@@ -8,72 +37,6 @@ initialize_lake(lake_var_struct  *lake,
                 cell_data_struct *cell,
                 double            airtemp,
                 int               skip_hydro)
-/**********************************************************************
-        initialize_lake		Laura Bowling		March 8, 2000
-
-   This routine initializes the lake variables for each new
-   grid cell.
-
-   VARIABLES INITIALIZED:
-   lake.temp[MAXNOD]        Water temperature at each node.
-   lake.tempi[MAXNOD]       Water temperature under ice at each node.
-   lake.hice                Depth of lake ice.
-   lake.areai               Area of lake ice.
-   lake.volume
-   lake.sarea
-
-   modifications:
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.	TJB
-   23-Feb-05 Merged with Laura Bowling's second update to lake model code.	TJB
-   2005-03-24 Added check for negative lake volumes.			TJB
-   2006-Oct-16 Added RCS ID string.					TJB
-   2006-Nov-07 Initialized aero_resist, aero_resist_used, and MELTING.	TJB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2007-Apr-23 Added initialization of lake->surface, lake->swe, and
-              lake->sdepth.						TJB
-   2007-Oct-24 Changed get_sarea, get_volume, and get_depth to return exit
-              status so that errors can be trapped and communicated up the
-              chain of function calls.					KAC via TJB
-   2007-Oct-24 Changed the error conditions so that get_depth does not
-              exit when depth == 0.0 (as long as volume == 0.0 when
-              depth == 0.0).						KAC via TJB
-   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added ice_depth()
-              function.							LCB via TJB
-   2008-Jan-23 Added initialization of lake_snow->surf_temp, pack_water,
-              and pack_temp in conjunction with 2-layer snow pack over
-              lake ice.							LCB via TJB
-   2008-Sep-09 Deleted initial volume print statement.			LCB via TJB
-   2009-Jun-09 Lake_var data structure now only stores final (corrected)
-              values of aero_resist.					TJB
-   2009-Jul-31 Removed references to lake_snow structure, which doesn't
-              exist outside of full_energy().				TJB
-   2009-Sep-28 Added initialization of the new lake->snow, lake->soil,
-              and lake->energy structures.				TJB
-   2009-Sep-30 Miscellaneous fixes for lake model.			TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.		TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
-   2010-Sep-24 Added channel_in to store channel inflow separately from
-              incoming runoff from the catchment.			TJB
-   2010-Nov-02 Added initialization of several lake_var variables that
-              hadn't been initialized.					TJB
-   2010-Nov-11 Added conditional skipping of initialization of moisture
-              fluxes, so that this function can be used to initialize
-              a lake that appears mid-timestep but whose moisture fluxes
-              have already been calculated.				TJB
-   2010-Nov-21 Added lake->swe_save and lake->volume_save.		TJB
-   2010-Nov-26 Added initialization of snow-related terms that are stored
-              in the lake_var structure.				TJB
-   2011-Mar-01 Lake->soil state terms are now initialized to match those
-              of the cell data structure for the lake/wetland tile.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2013-Jul-25 Added soil carbon terms.					TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-**********************************************************************/
 {
     extern option_struct options;
     size_t               i, j;
@@ -349,20 +312,14 @@ initialize_lake(lake_var_struct  *lake,
     return(0);
 }
 
+/******************************************************************************
+ * @brief    Function to compute surface area of liquid water in the lake,
+ *           given the current depth of liquid water.
+ *****************************************************************************/
 int
 get_sarea(lake_con_struct lake_con,
           double          depth,
           double         *sarea)
-/******************************************************************************
-   Function to compute surface area of liquid water in the lake, given the
-   current depth of liquid water.
-
-   Modifications:
-   2007-Oct-24 Added exit status.						TJB
-    Exit status values:
-          0: No errors
-      ERROR: Error: area cannot be reconciled with given lake depth and nodes
-******************************************************************************/
 {
     size_t i;
     int    status;
@@ -395,21 +352,14 @@ get_sarea(lake_con_struct lake_con,
     return status;
 }
 
+/******************************************************************************
+ * @brief    Function to compute liquid water volume stored within the lake
+ *           basin, given the current depth of liquid water.
+ *****************************************************************************/
 int
 get_volume(lake_con_struct lake_con,
            double          depth,
            double         *volume)
-/******************************************************************************
-   Function to compute liquid water volume stored within the lake basin, given
-   the current depth of liquid water.
-
-   Modifications:
-   2007-Oct-24 Added exit status.						TJB
-    Exit status values:
-          0: No errors
-          1: Warning: lake depth exceeds maximum; setting to maximum
-      ERROR: Error: volume cannot be reconciled with given lake depth and nodes
-******************************************************************************/
 {
     int    i;
     int    status;
@@ -449,23 +399,15 @@ get_volume(lake_con_struct lake_con,
     return status;
 }
 
+/******************************************************************************
+ * @brief    Function to compute the depth of liquid water in the lake
+ *           (distance between surface and deepest point), given volume of
+ *           liquid water currently stored in lake.
+ *****************************************************************************/
 int
 get_depth(lake_con_struct lake_con,
           double          volume,
           double         *depth)
-/******************************************************************************
-   Function to compute the depth of liquid water in the lake (distance between
-   surface and deepest point), given volume of liquid water currently stored in
-   lake.
-
-   Modifications:
-   2007-Oct-24 Added exit status.						TJB
-    Exit status values:
-          0: No errors
-          1: Warning: lake volume negative; setting to 0
-      ERROR: Error: depth cannot be reconciled with given lake volume and nodes
-   2007-Oct-30 Initialized surface area for lake bottom.				LCB via TJB
-******************************************************************************/
 {
     int    k;
     int    status;

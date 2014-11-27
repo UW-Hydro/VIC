@@ -1,3 +1,29 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Classic driver of the VIC model
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
@@ -19,117 +45,17 @@ option_struct       options;
 Error_struct        Error;
 param_set_struct    param_set;
 
-/**************************************************************************
-   Define some reference landcover types that always exist regardless
-   of the contents of the library (mainly for potential evap calculations):
-   Non-natural:
-      satsoil = saturated bare soil
-      h2osurf = open water surface (deep enough to have albedo of 0.08)
-      short   = short reference crop (grass)
-      tall    = tall reference crop (alfalfa)
-   Natural:
-      natveg  = current vegetation
-      vegnocr = current vegetation with canopy resistance set to 0
-   NOTE: bare soil roughness and displacement will be overwritten by the
-        values found in the soil parameter file; bare soil wind_h will
-        be overwritten by the value specified in the global param file.
-**************************************************************************/
-
-/** Main Program **/
-
+/******************************************************************************
+ * @brief   Classic driver of the VIC model
+ * @details The classic driver runs VIC for a single grid cell for all
+ *          timesteps before moving on to the next grid cell.
+ *
+ * @param argc Argument count
+ * @param argv Argument vector
+ *****************************************************************************/
 int
 main(int   argc,
      char *argv[])
-/**********************************************************************
-        vicNl.c		Dag Lohmann		January 1996
-
-   This program controls file I/O and variable initialization as well as
-   being the primary driver for the model.
-
-   For details about variables, input files and subroutines check:
-        http://ce.washington.edu/~hydro/Lettenmaier/Models/VIC/VIC_home.html
-
-   UNITS: unless otherwise marked:
-         all water balance components are in mm
-         all energy balance components are in mks
-         depths, and lengths are in m
-
-   modifications:
-   1997-98 Model was updated from simple 2 layer water balance to
-          an extension of the full energy and water balance 3 layer
-          model.                                                  KAC
-   02-27-01 added controls for lake model                          KAC
-   11-18-02 Updated storage of lake water for water balance
-           calculations.                                          LCB
-   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
-           the model can make use of the computed treeline.     KAC
-   04-10-03 Modified to initialize storm parameters using the state
-           file.                                                KAC
-   04-10-03 Modified to start the model by skipping records until the
-           state file date is found.  This replaces the previous method
-           of modifying the global file start date, which can change
-           the interpolation of atmospheric forcing data.        KAC
-   04-15-03 Modified to store wet and dry fractions when intializing
-           water balance storage.  This accounts for changes in model
-           state initialization, which now stores wet and dry fractions
-           rather than just averagedvalues.                      KAC
-   29-Oct-03 Modified the version display banner to print the version
-            string defined in global.h.					TJB
-   01-Nov-04 Updated arglist for make_all_vars(), as part of fix for
-            QUICK_FLUX state file compatibility.			TJB
-   02-Nov-04 Updated arglist for read_lakeparam(), as part of fix for
-            lake fraction readjustment.					TJB
-   2005-Apr-13 OUTPUT_FORCE option now calls close_files().		TJB
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data, out_data_files, and save_data structures.	TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included merging builtnames into filenames.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2006-Nov-07 Changed statefile to init_state in call to
-              check_state_file().					TJB
-   2007-Jan-15 Added PRT_HEADER option; added call to
-              write_header().						TJB
-   2007-Apr-04 Added option to continue run after a cell fails.                 GCT/KAC
-   2007-Apr-21 Added calls to free_dmy(), free_out_data_files(),
-              free_out_data(), and free_veglib().  Added closing of
-              all parameter files.					TJB
-   2007-Aug-21 Return ErrorFlag from initialize_model_state.		JCA
-   2007-Sep-14 Excluded calls to free_veglib() and closing of parameter
-              files other than the soil param file for the case
-              when OUTPUT_FORCE=TRUE.					TJB
-   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
-              read_soilparam() and read_soilparam_arc().		TJB
-   2008-May-05 Added all_vars fraction (mu) to initial water storage
-              computation.  This solves water balance errors for the
-              case where DIST_PRCP is TRUE.				TJB
-   2009-Jan-16 Added soil_con.avgJulyAirTemp to argument list of
-              initialize_atmos().					TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jul-07 Added soil_con.BandElev[] to read_snowband() arg list.	TJB
-   2009-Jul-31 Replaced references to N+1st veg tile with references
-              to index of lake/wetland tile.				TJB
-   2009-Sep-28 Replaced initial water/energy storage computations and
-              calls to calc_water_balance_error/calc_energy_balance_error
-              with an initial call to put_data.  Modified the call to
-              read_snowband().						TJB
-   2009-Dec-11 Removed save_data structure from argument list of
-              initialize_model_state().					TJB
-   2010-Mar-31 Added cell_area to initialize_atmos().			TJB
-   2010-Apr-28 Removed individual soil_con variables from argument list
-              of initialize_atmos() and replaced with *soil_con.	TJB
-   2010-Nov-10 Added closing of state files.				TJB
-   2011-Jan-04 Made read_soilparam_arc() a sub-function of
-              read_soilparam().						TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-   2014-Mar-24 Removed ARC_SOIL option                                  BN
-   2014-Apr-02 Moved "free" statements for soil_con arrays outside the
-              OUTPUT_FORCE condition to avoid memory leak.		TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-   2014-Apr-25 Added non-climatological veg parameters.			TJB
-**********************************************************************/
 {
     /** Variable Declarations **/
 

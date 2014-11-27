@@ -1,7 +1,43 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine initializes the model state at hour 0 of the date defined in
+ * the given state file.
+ *
+ * Soil moisture, soil thermal, and snowpack variables  are stored for each
+ * vegetation type and snow band.  However moisture variables from the
+ * distributed precipitation model are averaged so that the model is restarted
+ * with mu = 1.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This subroutine initializes the model state at hour 0 of the date
+ *           defined in the given state file.
+ *****************************************************************************/
 void
 read_initial_model_state(FILE                *init_state,
                          all_vars_struct     *all_vars,
@@ -9,82 +45,6 @@ read_initial_model_state(FILE                *init_state,
                          int                  Nbands,
                          int                  cellnum,
                          soil_con_struct     *soil_con)
-/*********************************************************************
-   read_initial_model_state   Keith Cherkauer         April 14, 2000
-
-   This subroutine initializes the model state at hour 0 of the date
-   defined in the given state file.
-
-   Soil moisture, soil thermal, and snowpack variables  are stored
-   for each vegetation type and snow band.  However moisture variables
-   from the distributed precipitation model are averaged so that the
-   model is restarted with mu = 1.
-
-   Modifications:
-   04-10-03 Rewritten to handle updates to vicNl_def.h and to write
-           the file as binary to minimize write time and differences
-           with simulations started with the state file.         KAC
-   04-10-03 Modified to read storm parameters from the state file.  KAC
-   06-03-03 Modified to read ASCII as well as BINARY state file.  KAC
-   06-06-03 It is not necessary to initialize ice content from the
-           model state file as the model recomutes it in subsequent
-           steps.                                               KAC
-   06-06-03 Added check to make sure that soil moisture obtained from
-           the state file does not exceed the maximum moisture
-           content.                                             KAC
-   06-07-03 Added check to verify that the sum of the defined nodes
-           equals the damping depth.                            KAC
-   03-Oct-03 Modified to loop over tmp_Nveg and tmp_Nband when searching
-            for desired cellnum in ASCII file, rather than over Nveg
-            and Nbands.  As we skip over other records in the state
-            file while searching for the desired record, the loop
-            must parse each undesired record differently, according
-            to how many veg classes and snow bands exist in the
-            record (tmp_Nveg and tmp_Nband, respectively), rather
-            than the number of veg classes and snow bands in the
-            desired record (Nveg and Nbands, respectively).			TJB
-   01-Nov-04 Modified to read state files containing SPATIAL_FROST
-            and LAKE_MODEL state variables.					TJB
-   02-Nov-04 Added a few more lake state variables.				TJB
-   03-Nov-04 Now reads extra_veg from state file.				TJB
-   2005-Apr-10 Fixed incorrect check on soil node depths.			TJB
-   2005-Jan-10 modified to read lake nodal variables for each of the
-              active nodes.							JCA
-   2006-Jun-16 Skip reading if areafract < 0.					GCT
-   2006-Aug-23 Changed order of fread/fwrite statements from ...1, sizeof...
-              to ...sizeof, 1,...						GCT
-   2006-Sep-07 Changed "Skip reading if areafract < 0" to "<=0".			GCT
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included moving infiles.statefile to filep.init_state.	TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Apr-28 modified to read Zsum_node.					JCA
-   2007-May-07 Fixed fread checks to make sure correct number of items were
-              read in rather than the size of the item read in.			JCA
-   2007-May-07 Nsum and sum removed from declaration.				JCA
-   2007-Aug-24 Added features for EXCESS_ICE option.				JCA
-   2007-Sep-14 Fixed bug for read-in during EXCESS_ICE option.			JCA
-   2007-Sep-18 Check for soil moist exceeding max moist moved from
-              here to initialize_model_state.					JCA
-   2007-Nov-06 New list of lake state variables.					LCB via TJB
-   2009-Jul-31 Removed extra lake/wetland veg tile; updated set of lake state
-              variables.							TJB
-   2009-Aug-27 Now once again expects to read data for all bands, regardless of
-              whether they have area > 0.  This makes it much easier to ensure
-              that the value of Nbands stored in the state file matches the number
-              of bands actually stored in the state file.			TJB
-   2009-Sep-28 Now stores soil, snow, and energy states from lake separately
-              from wetland.							TJB
-   2010-Jan-10 Corrected typo in condition for checking Wdew.			TJB
-   2012-Jan-01 Removed lake area condition from logic determining whether to read
-              lake state data.  Now, if options.LAKES is TRUE, every grid cell
-              will save lake state data.  If no lake is present, default NULL
-              values will be stored.						TJB
-   2013-Jul-25 Added soil carbon terms.						TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-28 Removed NO_REWIND option.					TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-*********************************************************************/
 {
     extern option_struct options;
 
@@ -163,14 +123,16 @@ read_initial_model_state(FILE                *init_state,
 
     if (tmp_Nveg != Nveg) {
         sprintf(ErrStr,
-                "The number of vegetation types in cell %d (%d) does not equal that defined in vegetation parameter file (%d).  Check your input files.", cellnum, tmp_Nveg,
-                Nveg);
+                "The number of vegetation types in cell %d (%d) does not equal"
+                "that defined in vegetation parameter file (%d).  Check your "
+                "input files.", cellnum, tmp_Nveg, Nveg);
         nrerror(ErrStr);
     }
     if (tmp_Nband != Nbands) {
         sprintf(ErrStr,
-                "The number of snow bands in cell %d (%d) does not equal that defined in the snow band file (%d).  Check your input files.", cellnum, tmp_Nband,
-                Nbands);
+                "The number of snow bands in cell %d (%d) does not equal that"
+                "defined in the snow band file (%d).  Check your input files.",
+                cellnum, tmp_Nband, Nbands);
         nrerror(ErrStr);
     }
 
@@ -201,7 +163,8 @@ read_initial_model_state(FILE                *init_state,
     }
     if (soil_con->Zsum_node[options.Nnode - 1] - soil_con->dp > SMALL) {
         fprintf(stderr,
-                "WARNING: Sum of soil nodes (%f) exceeds defined damping depth (%f).  Resetting damping depth.\n",
+                "WARNING: Sum of soil nodes (%f) exceeds defined damping depth"
+                "(%f).  Resetting damping depth.\n",
                 soil_con->Zsum_node[options.Nnode - 1], soil_con->dp);
         soil_con->dp = soil_con->Zsum_node[options.Nnode - 1];
     }
@@ -226,8 +189,12 @@ read_initial_model_state(FILE                *init_state,
             }
             if (iveg != veg || iband != band) {
                 fprintf(stderr,
-                        "The vegetation and snow band indices in the model state file (veg = %d, band = %d) do not match those currently requested (veg = %d , band = %d).  Model state file must be stored with variables for all vegetation indexed by variables for all snow bands.\n", iveg, iband, veg,
-                        band);
+                        "The vegetation and snow band indices in the model "
+                        "state file (veg = %d, band = %d) do not match those "
+                        "currently requested (veg = %d , band = %d).  Model "
+                        "state file must be stored with variables for all "
+                        "vegetation indexed by variables for all snow bands.\n",
+                        iveg, iband, veg, band);
                 nrerror(ErrStr);
             }
 
@@ -254,14 +221,16 @@ read_initial_model_state(FILE                *init_state,
                     if (options.BINARY_STATE_FILE) {
                         if (fread(&cell[veg][band].layer[lidx].ice[frost_area],
                                   sizeof(double), 1, init_state) != 1) {
-                            nrerror("End of model state file found unexpectedly");
+                            nrerror("End of model state file found"
+                                    "unexpectedly");
                         }
                     }
                     else {
                         if (fscanf(init_state, " %lf",
                                    &cell[veg][band].layer[lidx].ice[frost_area])
                             == EOF) {
-                            nrerror("End of model state file found unexpectedly");
+                            nrerror("End of model state file found"
+                                    "unexpectedly");
                         }
                     }
                 }

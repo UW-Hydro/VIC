@@ -1,3 +1,29 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Put data to netCDF.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
@@ -5,11 +31,9 @@
 #define ERR(e) {fprintf(stderr, "\nError(put_nc_field): %s\n", \
                         nc_strerror(e)); }
 
-// TBD: note that in this implementation the assumption is that all NetCDF files
-// are organized in the same way. This is a bad assumption and should be made
-// more robust by actually checking the mapping from the lat lon to the cell
-// indices
-
+/******************************************************************************
+ * @brief    Put double precision data field to netCDF.
+ *****************************************************************************/
 int
 put_nc_field_double(char   *nc_name,
                     bool   *open,
@@ -84,6 +108,9 @@ put_nc_field_double(char   *nc_name,
     return status;
 }
 
+/******************************************************************************
+ * @brief    Put interger data field to netCDF.
+ *****************************************************************************/
 int
 put_nc_field_int(char   *nc_name,
                  bool   *open,

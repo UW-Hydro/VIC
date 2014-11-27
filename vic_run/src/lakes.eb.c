@@ -1,6 +1,35 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This set of routines handel the energy balance of lakes
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    This subroutine solves the energy budget for open water bodies.
+ *****************************************************************************/
 int
 solve_lake(double           snowfall,
            double           rainfall,
@@ -19,73 +48,6 @@ solve_lake(double           snowfall,
            dmy_struct       dmy,
            double           fracprv)
 {
-/**********************************************************************
-* This subroutine solves the energy budget for open water bodies.
-*
-* Parameter description :
-*
-   lat          Latitiude of the lake (degrees).
-   lng  Longitude of the lake (degrees).
-   tair	Air temperature (C).
-   vp	Air vapor pressure (kPa).
-   pressure             Air pressure (kPa).
-   wind		Wind speed (m/s).
-   longwave		Downwelling long wave radiation (W/m2).
-   shortwave		Incoming short wave radiation (W/m2).
-   prec	         Precipitation (mm).
-   lake_energy.latent	 Latent heat flux (W/m2).
-   lake_energy.sensible	 Sensible heat flux (W/m2).
-   lake_con.eta_a	 Decline of solar radiation input with depth (m-1).
-   lake_con.surface[numnod]	Area of the lake (m2).
-   lake.temp[numnod]	Temperature of the lake water (C).
-   lake.tempi                Temperature of the lake ice (C).
-   lake.hice                     Height of the lake ice (m).
-   lake.fraci	         Fractional coverage of ice (-).
-   lake_snow.depth	         Height of the snow on top of the lake (m).
-   lake.numnod          Number of nodes in the lake (-).
-   dt		         Time step size (hrs).
-
-   Modifications:
-   2006-Oct-16 Now set mixdepth=0 for case of complete ice cover; this
-              guarantees that it is initialized for all cases.		TJB
-   2006-Nov-15 Convert swq and surf_water from mm over lake to mm over ice
-              fraction at beginning of function; this was needed to avoid
-              a water budget error since swq and surf_water were being
-              converted to mm over lake at end of the function.		TJB
-   2007-Apr-21 Added initialization of energy_ice_melt_bot and qf for case
-              in which fracprv >= FRACLIM but hice == 0.0.		TJB
-   2007-Apr-23 Added initialization of lake_energy->Tsurf.		TJB
-   2007-Nov-06 Lake snow physics now consistent with land snow pack.
-              Lake ice now limited by available lake water.		LCB via TJB
-   2008-Apr-21 Corrected omissions in previous mods.  Also added code to
-              handle previously-unhandled case in deltaH computation.	TJB
-   2008-Oct-23 Fixed problems with usage of uninitialized variables.	LCB via TJB
-   2008-Oct-23 Deleted call to ice_depth() in section 11, since it
-              wasn't working correctly and wasn't necessary.  Now,
-              the reported ice depth is the average over the lake.	LCB via TJB
-   2009-Jul-31 Removed lakemain().					TJB
-   2009-Sep-28 Removed initialize_prcp() and update_prcp().  Changed
-              final units of runoff_out, baseflow_out, and evapw to
-              mm over lake (to be consistent with changes in put_data).	TJB
-   2009-Nov-09 Handle lake snow when lake ice disappears.		LCB via TJB
-   2010-Nov-02 Add condition of ice area > 0 to calculation of hice.	TJB
-   2010-Nov-21 Added lake->volume_save and lake->swe_save.  Added storing
-              of lake snow variables over lake ice area in the lake_var
-              structure.						TJB
-   2010-Nov-26 Added lake->ice_throughfall to store rainfall (over ice
-              and open water) and snowfall, so that we can wait to add
-              these to the lake volume until water_balance().		TJB
-   2010-Nov-26 Added storing of lake snow variables (in depth over lake
-              ice area) to the lake_var structure.			TJB
-   2010-Dec-28 Added latitude to arglist of alblake().			TJB
-   2011-Mar-01 Changed units of snow and energy fluxes to be over entire
-              lake; this fixes several water/energy balance errors.	TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
-
     double             LWnetw, LWneti;
     double             sw_water, sw_ice;
     double             T[MAX_LAKE_NODES]; /* temp of the water column, open fraction. */
@@ -556,6 +518,10 @@ solve_lake(double           snowfall,
     return (0);
 }   /* End of solve_lake function. */
 
+/******************************************************************************
+ * @brief    Calculate the partitioning of the energy balance into latent and
+ *           sensible heat fluxes.
+ *****************************************************************************/
 void
 latsens(double  Tsurf,
         double  Tcutk,
@@ -569,25 +535,6 @@ latsens(double  Tsurf,
         double *qsen,
         double  wind_h)
 {
-/**********************************************************************
-* Calculate the partitioning of the energy balance into latent and
-* sensible heat fluxes.
-*
-* Parameters :
-*
-* Tsurf	Lake surface temperature (K).
-* Tcutk        Melting temperature (K)
-* hice		Ice height (m).
-* tair		Air temperature (C).
-* wind		Wind speed (m/s).
-* pressure	Air pressure (kPa).
-* density	Air density (kg/m3).
-* vp           Vapor pressure (kPa).
-* evap		Evaporation rate (m/s).
-* qsen		Sensible heat flux (W/m2).
-* eog		Vapor pressure at lake level (kPa).
-**********************************************************************/
-
     double dragcoeff;
     double eog, delT;
     double qair, qlake;  /* Specific humidity of the atmosphere and lake, respectively. */
@@ -654,6 +601,9 @@ latsens(double  Tsurf,
     *qsen = *qsen * delT;
 }
 
+/******************************************************************************
+ * @brief    Calculate the albedo of snow, ice and water of the lake.
+ *****************************************************************************/
 void
 alblake(double    Tcutoff,
         double    Tair,
@@ -670,23 +620,6 @@ alblake(double    Tcutoff,
         int       day_in_year,
         double    latitude)
 {
-/**********************************************************************
-* Calculate the albedo of snow, ice and water of the lake.
-*
-* Parameters :
-*
-* tair		Air temperature (C).
-* albs		Snow albedo (-).
-* albi		Ice albedo (-).
-* albw		Water albedo (-).
-*
-* Modifications:
-* 2007-Nov-06 Lake snow physics now consistent with land snow pack.	LCB via TJB
-* 2008-Apr-21 Corrected some omissions from the previous mods.		LCB via TJB
-* 2008-Apr-21 Updated to be compatible with new snow_albedo().		KAC via TJB
-* 2010-Dec-28 Fixed MELTING date condition to be correct in southern
-*             hemisphere.						TJB
-**********************************************************************/
     double albgl, albgs;
 
     if ((Tair - Tcutoff) > 0.0) {
@@ -761,6 +694,10 @@ alblake(double    Tcutoff,
     *albw = 0.15;
 }
 
+/******************************************************************************
+ * @brief    Calculate the temperature of the lake water at the different node
+ *           levels and calculate the water density.
+ *****************************************************************************/
 void
 colavg(double *finaltemp,
        double *T,
@@ -771,21 +708,6 @@ colavg(double *finaltemp,
        double  dz,
        double  surfdz)
 {
-/**********************************************************************
-* Calculate the temperature of the lake water at the different node
-* levels and calculate the water density.
-*
-* Parameters :
-*
-* finaltemp    Averaged water column temperature (C).
-* T		Water temperature for water fraction(C).
-* Ti		Water temperature for ice fraction(C).
-* lakeprv	Fraction of lake covered with ice (-).
-* density       Water density at each node (kg/m3).
-* numnod	Number of nodes in the lake (-).
-* dz           Thickness of each water layer (m).
-* surfdz       Thickness of the surface water layer.
-**********************************************************************/
     int    j;
     double water_densityw, water_densityi;
     double temp;
@@ -830,21 +752,12 @@ colavg(double *finaltemp,
     }
 }
 
+/******************************************************************************
+ * @brief    Calculate the water density.
+ *****************************************************************************/
 double
 calc_density(double ts)
 {
-/**********************************************************************
-* Calculate the water density.
-*
-* Parameters :
-*
-* ts		Temperature at the node (C).
-*
-* Returns:
-*
-* rhostps	Water density at the node (kg/m3).
-**********************************************************************/
-
     double rhow, t, rhostps;
 
     t = ts;
@@ -867,6 +780,9 @@ calc_density(double ts)
     return (rhostps);
 }
 
+/******************************************************************************
+ * @brief    Calculate the eddy diffusivity.
+ *****************************************************************************/
 void
 eddy(int     freezeflag,
      double  wind,
@@ -877,20 +793,6 @@ eddy(int     freezeflag,
      double  dz,
      double  surfdz)
 {
-/**********************************************************************
-* Calculate the eddy diffusivity.
-*
-* Parameters :
-*
-* freezeflag	= 1 if liquid water, 0 if ice.
-* wind		Wind speed at 2 meter (m/s).
-* T		Water temperature at the different nodes (C).
-* density		Water density at the different nodes (C).
-* de		Eddy diffusivity at each node (m2/d).
-* lat	         Latitude of the pixel (degrees).
-* numnod	         Number of nodes in the lake (-).
-**********************************************************************/
-
     double ks, N2, ws, radmax, Po;
     double dpdz, rad;
     double zhalf[MAX_LAKE_NODES];
@@ -1005,6 +907,10 @@ eddy(int     freezeflag,
     }
 }
 
+/******************************************************************************
+ * @brief    Calculate the form of new ice in the lake as long as the
+ *           fractional coverage of the ice is not 1 yet.
+ *****************************************************************************/
 void
 iceform(double *qfusion,
         double *T,
@@ -1021,28 +927,6 @@ iceform(double *qfusion,
         double *new_ice_water_eq,
         double  lvolume)
 {
-/**********************************************************************
-* Calculate the form of new ice in the lake as long as the fractional
-* coverage of the ice is not 1 yet.
-*
-* Parameters :
-*
-* T		Water temperatures for all the nodes (C).
-* Tcutoff	Temperature at which water freezes (C).
-* fracprv	Fractional coverage of ice before this calculation (-).
-* fracadd	Added fractional ice coverage (-).
-* lake.fraci	New fractional ice coverage (-).
-* qfusion      Heat flux absorbed into the ice (W/m2).
-* hice		Ice height (m).
-* dt		Time step (s).
-* numnod	Number of nodes in the lake (-).
-* cp           Specific heat (J/Kg K)
-*
-* Modifications:
-* 2007-Nov-06 Ice formation is now limited by available liquid water.
-*             ice_water_eq is now the state variable for lake ice water
-*             storage (used to be hice).				LCB via TJB
-**********************************************************************/
     double sum, extra;
     int    j;
     double di;
@@ -1129,6 +1013,9 @@ iceform(double *qfusion,
     }
 }
 
+/******************************************************************************
+ * @brief    Calculate the radiation balance over ice.
+ *****************************************************************************/
 void
 icerad(double  sw,
        double  hi,
@@ -1137,21 +1024,6 @@ icerad(double  sw,
        double *SWnet,
        double *SW_under_ice)
 {
-/**********************************************************************
-* Calculate the radiation balance over ice.
-*
-* Paramterers :
-*
-* sw		Net solar radiation at top of snowpack (W/m2).
-* hi		Ice depth (m).
-* hs		Snow depth (m).
-* avgcond	Thermal conductivity of the ice and snow pack
-*		combined (W/mK).
-* SWnet	Net short wave radiation at the top of the lake ice.
-* SW_under_ice	Incoming short wave radiation at the bottom of
-*		the snow-ice layer.
-**********************************************************************/
-
     double a, b, c, d;
 
 /**********************************************************************
@@ -1190,53 +1062,22 @@ icerad(double  sw,
                      a2 * sw * (1 - exp(-(lamslw * hs + lamilw * hi))));
 }
 
+/******************************************************************************
+ * @brief    Calculate the growth and decrease in the lake ice cover.
+ *****************************************************************************/
 int
 lakeice(
-        // double    *tempi,
-        // double     Tcutoff,
         double     sw_ice,
-        // double     twater,
         double     fracice,
         int        dt,
         double     snowflux,
         double     qw,
         double    *energy_ice_melt_bot,
-        // double     sdepth,
         double     SWabsorbed,
-        // int        rec,
-        // dmy_struct dmy,
         double    *qf,
         double    *ice_water_eq,
         double     volume,
         double     sarea)
-/**********************************************************************
-* Calculate the growth and decrease in the lake ice cover.
-* Changed from original model since ice_melt() (based on VIC/DHSVM snow_melt())
-* now handles melt of snow and ice from the surface, for consistency with
-* the rest of VIC.  This routine now handles melt/freeze at the
-* bottom of the ice pack.
-*
-* Parameters :
-*
-* tempi      Temperature of the ice (K).
-* Tcutoff    Temperature at which water freezes (K).
-* sw_ice     Net short wave radiation over ice (W/m2).
-* hice               Ice height (m).
-* twater       Temperature of the top water layer (K).
-* *fracice   Revised fraction of the lake covered by ice due to growth/decrease of exisitng cover (-).
-* dt         Time step (s).
-* *qbot      Incoming short wave radiation at bottom of the ice (W/m2).
-* *qw                Heat storage in the lake ice (J/m3).
-* ds           Amount of snowmelt (m)
-* qnetice;   Heat flux absorbed into the ice (W/m2).
-*
-* Modifications:
-* 2007-Nov-06 Changed from original model since ice_melt() (based on
-*             VIC/DHSVM snow_melt()) now handles melt of snow and ice
-*             from the surface, for consistency with the rest of VIC.
-*             This routine now handles melt/freeze at the bottom of
-*             the ice pack.						LCB via TJB
-**********************************************************************/
 {
     double dibot;          /* change in ice surface at the bottom of the pack. */
     double new_water_eq;
@@ -1305,6 +1146,9 @@ lakeice(
     return (0);
 }
 
+/******************************************************************************
+ * @brief    Calculate the lake drag coefficient.
+ *****************************************************************************/
 double
 lkdrag(double Tsurf,
        double Tair,
@@ -1312,17 +1156,6 @@ lkdrag(double Tsurf,
        double roughness,
        double Z1)
 {
-    /**********************************************************************
-    * Calculate the lake drag coefficient.
-    *
-    * Parameter :
-    *
-    * Tsurf     Lake surface temperature (K).
-    * Tair		Air temperature (K).
-    * wind		Wind speed (m/s).
-    * dragcoeff	Drag coefficient (-).
-    **********************************************************************/
-
     double cdrn, ribn, ribd, rib;
     double cdr, cdrmin;
 
@@ -1368,20 +1201,14 @@ lkdrag(double Tsurf,
     return(cdr);
 }
 
+/******************************************************************************
+ * @brief    Calculate the temperature at which water freezes depending on
+ *           salinity and air pressure.
+ *****************************************************************************/
 void
 rhoinit(double *tfsp,
         double  pressure)
 {
-/**********************************************************************
-* Calculate the temperature at which water
-* freezes depending on salinity and air pressure.
-*
-* Paramters :
-*
-* tfsp		Lake freezing point (C).
-* pressure     Air pressure (Pa)
-**********************************************************************/
-
     double salinity;
 
 /**********************************************************************
@@ -1398,18 +1225,13 @@ rhoinit(double *tfsp,
              2.154996e-4 * salinity * salinity - 7.53e-3 * (pressure) / 100.);
 }
 
+/******************************************************************************
+ * @brief    Calculate the specific heat of the water depending on water
+ *           temperature.  Salinity is assumed to be zero.
+ *****************************************************************************/
 double
 specheat(double t)
 {
-/**********************************************************************
-* Calculate the specific heat of the water depending on water
-* temperature.  Salinity is assumed to be zero.
-*
-* Paramterers :
-*
-* t	Water temperature (C).
-**********************************************************************/
-
     double cpt;                 /* Specific heat (J/Kg K) */
 
     cpt = 4217.4 - 3.720283 * t + 0.1412855 * t * t - 2.654387e-3 * t * t * t +
@@ -1418,6 +1240,9 @@ specheat(double t)
     return cpt;
 }
 
+/******************************************************************************
+ * @brief    Calculate the water temperature for different levels in the lake.
+ *****************************************************************************/
 void
 temp_area(double  sw_visible,
           double  sw_nir,
@@ -1435,31 +1260,6 @@ temp_area(double  sw_visible,
           double *cp,
           double *energy_out_bottom)
 {
-/**********************************************************************
-   Calculate the water temperature for different levels in the lake.
-
-   Parameters :
-
-   sw_visible   Shortwave rad in visible band entering top of water column
-   sw_nir       Shortwave rad in near infrared band entering top of water column
-   surface_force The remaining rerms i nthe top layer energy balance
-   T		Lake water temperature at different levels (K).
-   water_density		Water density at different levels (kg/m3).
-   de		Diffusivity of water (or ice) (m2/d).
-   dt		Time step size (s).
-   surface	Area of the lake at different levels (m2).
-   numnod	Number of nodes in the lake (-).
-   dz        Thickness of the lake layers.
-
-   Modifications:
-   2007-Apr-23 Added initialization of temph.				TJB
-   2007-Oct-24 Modified by moving closing bracket for if ( numnod==1 ) up
-              so that the code actually calls energycalc() even if the
-              lake is represented by only one node.			KAC via TJB
-   2010-Nov-21 Fixed bug in definition of zhalf.				TJB
-
-**********************************************************************/
-
     double z[MAX_LAKE_NODES], zhalf[MAX_LAKE_NODES];
     double a[MAX_LAKE_NODES], b[MAX_LAKE_NODES], c[MAX_LAKE_NODES];
     double d[MAX_LAKE_NODES];
@@ -1702,33 +1502,22 @@ temp_area(double  sw_visible,
     *temph = joulenew;
 }
 
+/******************************************************************************
+ * @brief    Simulate the convective mixing in the lake.
+ *****************************************************************************/
 void
 tracer_mixer(double *T,
              int    *mixdepth,
-             // int     freezeflag,
              double *surface,
              int     numnod,
              double  dz,
              double  surfdz,
              double *cp)
 {
-/**********************************************************************
-* Simulate the convective mixing in the lake.
-*
-* Paramters :
-*
-* T		Water temperatures (K).
-* water_density		Water densities (kg/m3).
-* mixdepth	         Top depth of local instability (node number, -).
-* freezeflag	         0 for ice, 1 for liquid water.
-* surface	Area of the lake per node number (m2).
-* numnod	         Number of nodes in the lake (-).
-**********************************************************************/
-
     int    k, j, m;         /* Counter variables. */
     int    mixprev;
     double avet, avev;
-    double heatcon; /*( Heat content of the surface layer (formerly vol). */
+    double heatcon; /* Heat content of the surface layer (formerly vol). */
     double Tav, densnew;
     double rho_max;
     double water_density[MAX_LAKE_NODES];
@@ -1848,6 +1637,23 @@ tracer_mixer(double *T,
     }
 }
 
+/******************************************************************************
+ * @brief    Solve a tridiagonal system of equations.
+ *
+ * @note     History : Based on a streamlined version of the old NCAR ULIB
+ *               subroutine TRDI used in the PHOENIX climate model of Schneider
+ *               and Thompson (J.G.R., 1981). Revised by Starley Thompson to
+ *               solve multiple systems and vectorize well on the CRAY-1. Later
+ *               revised to include a PARAMETER statement to define loop limits
+ *               and thus enable Cray short vector loops.
+ *           Algorithm:  LU decomposition followed by solution.  NOTE: This
+ *               subroutine executes satisfactorily if the input matrix is
+ *               diagonally dominant and non-singular.  The diagonal elements
+ *               are used to pivot, and no tests are made to determine
+ *               singularity. If a singular or numerically singular matrix is
+ *               used as input a divide by zero or floating point overflow will
+ *               result.
+ *****************************************************************************/
 void
 tridia(int     ne,
        double *a,
@@ -1856,39 +1662,6 @@ tridia(int     ne,
        double *y,
        double *x)
 {
-/**********************************************************************
-* Solve a tridiagonal system of equations.
-* Parameters :
-* ns		The number of systems to be solved.
-* nd		First dimension of arrays (larger than or equal to ns).
-* ne		The number of unknowns in each system. This must
-*		be larger than or equal to 2.
-* a		The sub diagonals of the matrices are stored in locations
-*		a(j,2) through a(j,ne).
-* b		The main diagonals of the matrices are stored in
-*		locations b(j,1) through b(j,ne).
-* c		The super diagonals of the matrices are stored in
-*		locations c(j,1) through c(j,ne-1).
-* y		The right hand side of the equations is stored in
-*		y(j,1) through y(j,ne).
-* x		The solutions of the systems are returned in
-*		locations x(j,1) through x(j,ne).
-*
-* History : Based on a streamlined version of the old NCAR ULIB subroutine
-* TRDI used in the PHOENIX climate model of Schneider and Thompson
-* (J.G.R., 1981). Revised by Starley Thompson to solve multiple systems
-* and vectorize well on the CRAY-1. Later revised to include a PARAMETER
-* statement to define loop limits and thus enable Cray short vector
-* loops.
-*
-* Algorithm:  LU decomposition followed by solution.  NOTE: This
-* subroutine executes satisfactorily if the input matrix is diagonally
-* dominant and non-singular.  The diagonal elements are used to pivot, and
-* no tests are made to determine singularity. If a singular or numerically
-* singular matrix is used as input a divide by zero or floating point
-* overflow will result.
-**********************************************************************/
-
     double alpha[MAX_LAKE_NODES], gamma[MAX_LAKE_NODES];  /* Work arrays dimensioned (nd,ne).*/
 
     int    nm1, i;
@@ -1927,6 +1700,9 @@ tridia(int     ne,
     }
 }
 
+/******************************************************************************
+ * @brief    Calculate the thermal energy in the column.
+ *****************************************************************************/
 void
 energycalc(double *finaltemp,
            double *sumjoule,
@@ -1937,13 +1713,6 @@ energycalc(double *finaltemp,
            double *cp,
            double *density)
 {
-    /**********************************************************************
-    * Calculate the thermal energy in the column.
-    * finaltemp[numnodes]   Average temp for each node of the water column.
-    * sumjoule              Thermal energy of water column, in joules
-    * numnod
-    **********************************************************************/
-
     double energy;
     int    k;
 
@@ -1974,6 +1743,9 @@ energycalc(double *finaltemp,
     }
 }
 
+/******************************************************************************
+ * @brief    This routine calculates the water balance of the lake.
+ *****************************************************************************/
 int
 water_balance(lake_var_struct *lake,
               lake_con_struct  lake_con,
@@ -1985,68 +1757,6 @@ water_balance(lake_var_struct *lake,
               double           lakefrac,
               soil_con_struct  soil_con,
               veg_con_struct   veg_con)
-/**********************************************************************
-* This routine calculates the water balance of the lake
-
-   Modifications:
-   2007-Aug-09 Added features for EXCESS_ICE option.				JCA
-   2007-Oct-24 Added rec to call for water_balance so that error and warning
-              messages can report the model record number.			KAC via TJB
-   2007-Oct-24 Modified loop for get_sarea to include the active node.		KAC via TJB
-   2007-Nov-06 Ice water content now tracked via ice_water_eq.  Lake area is
-              now the larger of lake->areai and lake->sarea.  Drainage is now
-              modeled as flow over a broad-crested wier.			LCB via TJB
-   2008-Apr-21 Corrected some omissions from the previous mods.			LCB via TJB
-   2009-Mar-16 Inserted missing logic for SPATIAL_FROST and replaced resid_moist
-              with min_liq.							TJB
-   2009-Sep-30 Miscellaneous fixes for lake model.				TJB
-   2009-Oct-05 Modified to update/rescale lake and wetland storages and fluxes
-              to account for changes in lake area.				TJB
-   2009-Nov-09 Modified to fix wb errors and case when lake fraction goes to 0.	LCB via TJB
-   2009-Nov-30 Removed loops over dist in delta_moist assignments and elsewhere.
-              Clarified conditions for rescaling/advecting.			TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.				TJB
-   2010-Sep-24 Added channel_in to store channel inflow separately from
-              incoming runoff from the catchment.				TJB
-   2010-Nov-02 Changed units of lake_var moisture fluxes to volume (m3).		TJB
-   2010-Nov-09 Added conditional check on lake area before dividing by it.	TJB
-   2010-Nov-11 Fixed incorrect computation of lake->recharge for case in which
-              lake does not contain enough water to saturate the soil.  Changed
-              the units of lake and wetland cell (or soil) moisture fluxes
-              (layer.evap, baseflow, runoff, inflow) and energy & snow fluxes
-              to be in mm / (lake-wetland tile area) instead of mm / lake or
-              mm / wetland area.  This fixed bugs in reporting of grid-cell
-              average fluxes to output files.  Removed rescale_lake_fluxes().	TJB
-   2010-Nov-21 Removed rescaling of lake->snow.swq to tile area.			TJB
-   2010-Nov-26 Changed argument list to remove unneeded terms.  Now all precip
-              that didn't get added to the snowpack in solve_lake() is added
-              to lake volume here.						TJB
-   2011-Mar-01 All calls to get_depth() now use *liquid* volume instead of
-              total volume, and lake ice area is not allowed to increase if
-              ice area > liquid area.  Ice cover is now treated like a "skin"
-              on top of the liquid (regardless of its thickness).  Ice is
-              assumed to be completely buoyant, i.e. none of the ice is below
-              the water line.  If ice completely covers the lake and the
-              liquid part of the lake shrinks, the ice is assumed to bend
-              like a blanket, so that the outer edges now rest on land but
-              the center rests on top of the liquid.  The lake "area" is still
-              considered to be the ice cover in this case.  Baseflow out of the
-              lake is only allowed in the area of the lake containing liquid.
-              The edges of the ice sheet are assumed to be vertical, i.e. the
-              surface area of the top of the ice sheet is equal to the surface
-              area of the bottom of the ice sheet.  This fixes water balance
-              errors arising from inconsistent estimates of lake ice area.	TJB
-   2011-Mar-01 Fixed bugs in computation of lake->recharge.			TJB
-   2011-Mar-01 Changed units of lake.snow and lake.energy fluxes/storages to be
-              over lake area (rather than just ice or over entire tile).	TJB
-   2011-Mar-07 Fixed bug in computation of lake->soil.runoff, baseflow, etc .	TJB
-   2011-Mar-31 Fixed typo in declaration of frost_fract.				TJB
-   2011-Sep-22 Added logic to handle lake snow cover extent.			TJB
-   2013-Jul-25 Added soil carbon terms.						TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-**********************************************************************/
 {
     extern option_struct options;
     int                  isave_n;
@@ -2576,6 +2286,10 @@ water_balance(lake_var_struct *lake,
     return(0);
 }
 
+/******************************************************************************
+ * @brief    Function to update moisture storage in the wetland soil and veg to
+ *           account for changes in wetland area.
+ *****************************************************************************/
 void
 advect_soil_veg_storage(double            lakefrac,
                         double            max_newfraction,
@@ -2586,21 +2300,6 @@ advect_soil_veg_storage(double            lakefrac,
                         cell_data_struct *cell,
                         veg_var_struct   *veg_var,
                         lake_con_struct   lake_con)
-/**********************************************************************
-   advect_soil_veg_storage	Ted Bohn	2009
-
-   Function to update moisture storage in the wetland soil and veg
-   to account for changes in wetland area.
-
-   Modifications:
-   2009-Nov-09 Removed advection of ice from lake to wetland.		LCB via TJB
-   2009-Nov-22 Corrected calculation of asat.				TJB
-   2010-Dec-01 Added calculation of zwt.					TJB
-   2011-Mar-01 Corrected the addition of delta_moist to soil moisture.
-              Added calculation of zwt2, zwt3.				TJB
-   2012-Feb-07 Removed OUT_ZWT2 and OUT_ZWTL; renamed OUT_ZWT3 to
-              OUT_ZWT_LUMPED.						TJB
-**********************************************************************/
 {
     extern option_struct options;
     int                  ilidx;
@@ -2715,20 +2414,15 @@ advect_soil_veg_storage(double            lakefrac,
     cell->wetness /= options.Nlayer;
 }
 
+/******************************************************************************
+ * @brief    Function to update wetland soil and veg moisture fluxes to account
+ *           for changes in wetland area.
+ *****************************************************************************/
 void
 rescale_soil_veg_fluxes(double            oldfrac,
                         double            newfrac,
                         cell_data_struct *cell,
                         veg_var_struct   *veg_var)
-/**********************************************************************
-   rescale_soil_veg_fluxes	Ted Bohn	2009
-
-   Function to update wetland soil and veg moisture fluxes
-   to account for changes in wetland area.
-
-   Modifications:
-
-**********************************************************************/
 {
     extern option_struct options;
     size_t               lidx;
@@ -2763,19 +2457,15 @@ rescale_soil_veg_fluxes(double            oldfrac,
     }
 }
 
+/******************************************************************************
+ * @brief    Function to update moisture storage in the wetland snow pack to
+ *           account for changes in wetland area.
+ *****************************************************************************/
 void
 advect_snow_storage(double            lakefrac,
                     double            max_newfraction,
                     double            newfraction,
                     snow_data_struct *snow)
-/**********************************************************************
-   advect_snow_storage	Ted Bohn	2009
-
-   Function to update moisture storage in the wetland snow pack
-   to account for changes in wetland area.
-
-   Modifications:
-**********************************************************************/
 {
     if ((1 - newfraction) < SMALL) {
         newfraction = 1 - SMALL;
@@ -2806,18 +2496,14 @@ advect_snow_storage(double            lakefrac,
     }
 }
 
+/******************************************************************************
+ * @brief    Function to update moisture storage in the lake ice snowpack to
+ *           account for changes in lake area.
+ *****************************************************************************/
 void
 rescale_snow_storage(double            oldfrac,
                      double            newfrac,
                      snow_data_struct *snow)
-/**********************************************************************
-   rescale_snow_storage	Ted Bohn	2011
-
-   Function to update moisture storage in the lake ice snowpack
-   to account for changes in lake area.
-
-   Modifications:
-**********************************************************************/
 {
     if (newfrac < SMALL) {
         newfrac = SMALL;
@@ -2830,21 +2516,15 @@ rescale_snow_storage(double            oldfrac,
     snow->swq *= oldfrac / newfrac;
 }
 
+/******************************************************************************
+ * @brief    Function to update the wetland snow and energy fluxes to account
+ *           for changes in wetland area.
+ *****************************************************************************/
 void
 rescale_snow_energy_fluxes(double             oldfrac,
                            double             newfrac,
                            snow_data_struct  *snow,
                            energy_bal_struct *energy)
-/**********************************************************************
-   rescale_snow_energy_fluxes	Ted Bohn	2009
-
-   Function to update the wetland snow and energy fluxes
-   to account for changes in wetland area.
-
-   Modifications:
-   2009-Nov-09 Added rescaling of snow->swq.				TJB
-   2009-Nov-30 Removed rescaling of snow->swq.				TJB
-**********************************************************************/
 {
 
     if (newfrac < SMALL) {
@@ -2941,19 +2621,15 @@ rescale_snow_energy_fluxes(double             oldfrac,
     }
 }
 
+/******************************************************************************
+ * @brief    Function to update carbon storage in the lake and wetland soil
+ *           columns to account for changes in wetland area.
+ *****************************************************************************/
 void
 advect_carbon_storage(double            lakefrac,
                       double            newfraction,
                       lake_var_struct  *lake,
                       cell_data_struct *cell)
-/**********************************************************************
-   advect_carbon_storage	Ted Bohn	2013
-
-   Function to update carbon storage in the lake and wetland soil columns
-   to account for changes in wetland area.
-
-   Modifications:
-**********************************************************************/
 {
 
     if (newfraction > lakefrac) { // lake grew, wetland shrank

@@ -1,7 +1,45 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initializes the model state (energy balance, water balance, and
+ * snow components).
+ *
+ * If a state file is provided to the model than its
+ * contents are checked to see if it agrees with the current simulation set-up,
+ * if so it is used to initialize the model state.  If no state file is
+ * provided the model initializes all variables with defaults and the user
+ * should expect to throw out the beginning of the simulation period as model
+ * start-up.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Initialize the model state (energy balance, water balance, and
+ * snow components).
+ *****************************************************************************/
 int
 initialize_model_state(all_vars_struct     *all_vars,
                        global_param_struct *global_param,
@@ -13,115 +51,6 @@ initialize_model_state(all_vars_struct     *all_vars,
                        soil_con_struct     *soil_con,
                        veg_con_struct      *veg_con,
                        lake_con_struct      lake_con)
-/**********************************************************************
-   initialize_model_state      Keith Cherkauer	    April 17, 2000
-
-   This routine initializes the model state (energy balance, water balance,
-   and snow components).  If a state file is provided to the model than its
-   contents are checked to see if it agrees with the current simulation
-   set-up, if so it is used to initialize the model state.  If no state
-   file is provided the model initializes all variables with defaults and
-   the user should expect to throw out the beginning of the simulation
-   period as model start-up.
-
-   UNITS: (m, s, kg, C, moisture in mm) unless otherwise specified
-
-   Modifications:
-   4-17-00 Modified from initialize_energy_bal.c and initialize_snow.c
-          to provide a single controlling routine for initializing the
-          model state.
-   9-00    Fixed bug where initialization of soil node temperatures
-          and moitures was within two vegetation loops, thus only
-          the first vegetation type was properly initialized.     KAC
-   2-19-03 Modified to initialize soil and vegetation parameters for
-          the dry grid cell fraction, if distributed precipitation
-          is activated.                                           KAC
-   11-18-02 Modified to initialize lake and wetland algorithms
-          variables.                                              LCB
-   2-10-03 Fixed looping problem with initialization of soil moisture. KAC
-   3-12-03 Modified so that soil layer ice content is only calculated
-          when frozen soil is implemented and active in the current
-          grid cell.                                                KAC
-   04-10-03 Modified to read storm parameters from model state file.  KAC
-   04-25-03 Modified to work with vegetation type specific storm
-           parameters.                                              KAC
-   07-May-04 Initialize soil_con->dz_node[Nnodes] to 0.0, since it is
-            accessed in set_node_parameters().				TJB
-   01-Nov-04 Added support for state files containing SPATIAL_FROST
-            and LAKE_MODEL state variables.				TJB
-   2006-Apr-21 Replaced Cv (uninitialized) with lake_con.Cl[0] in
-              surfstor calculation.					TJB
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              save_data structure to track changes in moisture storage
-              over each time step; this needs initialization here.	TJB
-   2006-Oct-10 Added snow[veg][band].snow_canopy to save_data.swe.	TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included removing the unused init_snow file.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.				TJB
-   2007-Apr-24 Added EXP_TRANS option.					JCA
-   2007-Apr-24 Zsum_node loaded into soil_con structure for later use
-              without having to recalculate.				JCA
-   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-   2007-Aug-21 Return value of ErrorFlag if error in
-              distribute_node_moisture_properties.			JCA
-   2007-Sep-18 Check for soil moist exceeding max moist moved from
-              read_initial_model_state to here.				JCA
-   2007-Oct-24 Modified initialize_lake() to return ErrorFlag.		TJB
-   2008-Mar-01 Reinserted missing logic for QUICK_FS in calls to
-              distribute_node_moisture_properties() and
-              estimate_layer_ice_content().				TJB
-   2009-Feb-09 Removed dz_node from call to
-              distribute_node_moisture_properties.			KAC via TJB
-   2009-Feb-09 Removed dz_node from call to find_0_degree_front.		KAC via TJB
-   2009-Mar-15 Modified to not call estimate_layer_ice_content() if
-              not modeling frozen soil.					KAC via TJB
-   2009-Mar-16 Added resid_moist to argument list of
-              estimate_layer_ice_content().  This allows computation
-              of min_liq, the minimum allowable liquid water content
-              in each layer as a function of temperature.		TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jul-26 Added initial estimate of incoming longwave at surface
-              (LongUnderOut) for use in canopy snow T iteration.	TJB
-   2009-Jul-31 Removed extra lake/wetland veg tile.			TJB
-   2009-Sep-19 Added T fbcount to count TFALLBACK occurrences.		TJB
-   2009-Sep-19 Made initialization of Tfoliage more accurate for snow bands.	TJB
-   2009-Sep-28 Added initialization of energy structure.			TJB
-   2009-Nov-15 Added check to ensure that depth of first thermal node
-              is <= depth of first soil layer.				TJB
-   2009-Dec-11 Removed initialization of save_data structure, since this
-              is now performed by the initial call to put_data().	TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.			TJB
-   2010-Nov-11 Updated call to initialize_lake() to accommodate new
-              skip_hydro flag.						TJB
-   2011-Mar-01 Updated calls to initialize_soil() and initialize_lake()
-              to accommodate new arguments.  Added more detailed validation
-              of soil moisture.						TJB
-   2011-Mar-05 Added validation of initial soil moisture, ice, and snow
-              variables to make sure they are self-consistent.		TJB
-   2011-May-31 Removed options.GRND_FLUX.  Now soil temperatures and
-              ground flux are always computed.				TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2011-Jul-05 Changed logic initializing soil temperatures so that
-              type of initialization depends solely on options.QUICK_FLUX;
-              options.Nnodes is no longer automatically reset here.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Jan-28 Added stability check for case of (FROZEN_SOIL=TRUE &&
-              IMPLICIT=FALSE).						TJB
-   2013-Jul-25 Fixed incorrect condition on lake initialization.		TJB
-   2013-Jul-25 Moved computation of tmp_moist argument of
-              compute_runoff_and_asat() so that it would always be
-              initialized.						TJB
-   2013-Dec-26 Removed EXCESS_ICE option.						TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.							TJB
-   2014-Jan-13 Added validation of Nnodes and dp for EXP_TRANS=TRUE.	TJB
-   2014-Feb-09 Made non-spinup initial temperatures more consistent with
-              annual average air temperature and bottom boundary
-              temperature.											TJB
-   2014-Mar-28 Removed DIST_PRCP option.							TJB
-**********************************************************************/
 {
     extern option_struct   options;
 

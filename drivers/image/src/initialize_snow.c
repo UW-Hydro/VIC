@@ -1,46 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initializes the snow variable arrays for each new grid cell.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
+/******************************************************************************
+ * @brief    This routine initializes the snow variable arrays for each new
+ *           grid cell.
+ *****************************************************************************/
 void
 initialize_snow(snow_data_struct **snow,
                 size_t             veg_num)
-
-/**********************************************************************
-        initialize_snow		Keith Cherkauer		January 22, 1997
-
-   This routine initializes the snow variable arrays for each new
-   grid cell.
-
-   VARIABLES INITIALIZED:
-    snow[i][j].snow;	          TRUE = snow, FALSE = no snow
-    snow[i][j].last_snow;         time steps since last snowfall
-    snow[i][j].snow_canopy;       amount of snow on canopy (m)
-    snow[i][j].swq;               snow water equivalent of the entire pack (m)
-    snow[i][j].surf_water;        liquid water content of the surface
-                                  layer (m)
-    snow[i][j].pack_water;        liquid water content of the snow pack (m)
-    snow[i][j].surf_temp;         depth averaged temperature of the snow pack
-                                  surface layer (C)
-    snow[i][j].pack_temp;         depth averaged temperature of the snow pack
-                                  (C)
-    snow[i][j].vapor_flux;        depth of water evaporation, sublimation, or
-                                  condensation from snow pack (m)
-    snow[i][j].canopy_vapor_flux; depth of water evaporation, sublimation, or
-                                  condensation from intercepted snow (m)
-    snow[i][j].albedo;            snow surface albedo (fraction)
-    snow[i][j].coldcontent;       cold content of snow pack
-    snow[i][j].mass_error;        snow mass balance error
-    snow[i][j].density;	          snow density (kg/m^3)
-    snow[i][j].depth;	          snow depth (m)
-    snow[i][j].tmp_int_storage;   temporary canopy storage, used in
-                                  snow_canopy
-    snow[i][j].Qnet;              Net energy error in snow model
-    snow[i][j].band_elev;         median elevation of the current snow band
-    snow[i][j].prec_frac;         fracton of precipitation that falls in the
-                                                  current snow band
-
- *********************************************************************/
 {
     extern option_struct options;
     size_t               i, j;

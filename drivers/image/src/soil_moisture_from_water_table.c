@@ -1,42 +1,70 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Compute soil moistures for various values of water table depth.
+ *
+ * Here we use the relationship (e.g., Letts et al., 2000)
+ * w(z) = { ((zwt-z)/bubble)**(-1/b), z <  zwt-bubble
+ * { 1.0,                      z >= zwt-bubble
+ * where
+ * z      = depth below surface [cm]
+ * w(z)   = relative moisture at depth z given by
+ * (moist(z) - resid_moist) / (max_moist - resid_moist)
+ * zwt    = depth of water table below surface [cm]
+ * bubble = bubbling pressure [cm]
+ * b      = 0.5*(expt-3)
+ * Note that zwt-bubble = depth of the free water surface, i.e.
+ * position below which soil is completely saturated.
+ *
+ * This assumes water in unsaturated zone above water table
+ * is always in equilibrium between gravitational and matric
+ * tension (e.g., Frolking et al, 2002).
+ *
+ * So, to find the soil moisture value in a layer corresponding
+ * to a given water table depth zwt, we integrate w(z) over the
+ * whole layer:
+ *
+ * w_avg = average w over whole layer = (integral of w*dz) / layer depth
+ *
+ * Then,
+ * layer moisture = w_avg * (max_moist - resid_moist) + resid_moist
+ *
+ * Instead of the zwt defined above, will actually report free
+ * water surface elevation zwt' = -(zwt-bubble).  I.e. zwt' < 0
+ * below the soil surface, and marks the point of saturation
+ * rather than pressure = 1 atm.
+ *
+ * Do this for each layer individually and also for a) the top N-1 layers
+ * lumped together, and b) the entire soil column lumped together.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-// Compute soil moistures for various values of water table depth
-// Here we use the relationship (e.g., Letts et al., 2000)
-// w(z) = { ((zwt-z)/bubble)**(-1/b), z <  zwt-bubble
-// { 1.0,                      z >= zwt-bubble
-// where
-// z      = depth below surface [cm]
-// w(z)   = relative moisture at depth z given by
-// (moist(z) - resid_moist) / (max_moist - resid_moist)
-// zwt    = depth of water table below surface [cm]
-// bubble = bubbling pressure [cm]
-// b      = 0.5*(expt-3)
-// Note that zwt-bubble = depth of the free water surface, i.e.
-// position below which soil is completely saturated.
-//
-// This assumes water in unsaturated zone above water table
-// is always in equilibrium between gravitational and matric
-// tension (e.g., Frolking et al, 2002).
-//
-// So, to find the soil moisture value in a layer corresponding
-// to a given water table depth zwt, we integrate w(z) over the
-// whole layer:
-//
-// w_avg = average w over whole layer = (integral of w*dz) / layer depth
-//
-// Then,
-// layer moisture = w_avg * (max_moist - resid_moist) + resid_moist
-//
-// Instead of the zwt defined above, will actually report free
-// water surface elevation zwt' = -(zwt-bubble).  I.e. zwt' < 0
-// below the soil surface, and marks the point of saturation
-// rather than pressure = 1 atm.
-//
-// Do this for each layer individually and also for a) the top N-1 layers
-// lumped together, and b) the entire soil column lumped together.
-
+/******************************************************************************
+ * @brief    Compute soil moistures for various values of water table depth
+ *****************************************************************************/
 void
 soil_moisture_from_water_table(soil_con_struct *soil_con,
                                size_t           nlayers)

@@ -1,7 +1,36 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Print library.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
+/******************************************************************************
+ * @brief    Print atmos data structure.
+ *****************************************************************************/
 void
 print_atmos_data(atmos_data_struct *atmos)
 {
@@ -27,6 +56,9 @@ print_atmos_data(atmos_data_struct *atmos)
     printf("\twind      : %.4lf\n", atmos->wind[0]);
 }
 
+/******************************************************************************
+ * @brief    Print dell data structure.
+ *****************************************************************************/
 void
 print_cell_data(cell_data_struct *cell,
                 size_t            nlayers,
@@ -68,6 +100,9 @@ print_cell_data(cell_data_struct *cell,
     printf("\tzwt_lumped  : %.4lf\n", cell->zwt_lumped);
 }
 
+/******************************************************************************
+ * @brief    Print day-month-year structure.
+ *****************************************************************************/
 void
 print_dmy(dmy_struct *dmy)
 {
@@ -79,6 +114,9 @@ print_dmy(dmy_struct *dmy)
     printf("\tyear       : %d\n", dmy->year);
 }
 
+/******************************************************************************
+ * @brief    Print energy balance structure.
+ *****************************************************************************/
 void
 print_domain(domain_struct *domain,
              bool           print_loc)
@@ -98,6 +136,9 @@ print_domain(domain_struct *domain,
     }
 }
 
+/******************************************************************************
+ * @brief    Print filenames structure.
+ *****************************************************************************/
 void
 print_energy_bal(energy_bal_struct *eb,
                  size_t             nnodes,
@@ -238,6 +279,9 @@ print_filenames(filenames_struct *fnames)
     printf("\tveglib       : %s\n", fnames->veglib);
 }
 
+/******************************************************************************
+ * @brief    Print file path structure.
+ *****************************************************************************/
 void
 print_filep(filep_struct *fp)
 {
@@ -255,6 +299,9 @@ print_filep(filep_struct *fp)
     printf("\tvegparam   : %p\n", fp->vegparam);
 }
 
+/******************************************************************************
+ * @brief    Print forcing type structure.
+ *****************************************************************************/
 void
 print_force_type(force_type_struct *force_type)
 {
@@ -264,6 +311,9 @@ print_force_type(force_type_struct *force_type)
     printf("\tmultiplier: %lf\n", force_type->multiplier);
 }
 
+/******************************************************************************
+ * @brief    Print global parameters structure.
+ *****************************************************************************/
 void
 print_global_param(global_param_struct *gp)
 {
@@ -299,6 +349,9 @@ print_global_param(global_param_struct *gp)
     printf("\tstateyear    : %d\n", gp->stateyear);
 }
 
+/******************************************************************************
+ * @brief    Print lake_con_structure.
+ *****************************************************************************/
 void
 print_lake_con(lake_con_struct *lcon,
                size_t           nlnodes)
@@ -335,6 +388,9 @@ print_lake_con(lake_con_struct *lcon,
     printf("\tlake_idx : %d\n", lcon->lake_idx);
 }
 
+/******************************************************************************
+ * @brief    Print lake variables structure.
+ *****************************************************************************/
 void
 print_lake_var(lake_var_struct *lvar,
                size_t           nlnodes,
@@ -402,6 +458,9 @@ print_lake_var(lake_var_struct *lvar,
     print_cell_data(&(lvar->soil), nlayers, nfrost, npet);
 }
 
+/******************************************************************************
+ * @brief    Print layer data structure.
+ *****************************************************************************/
 void
 print_layer_data(layer_data_struct *ldata,
                  size_t             nfrost)
@@ -423,6 +482,9 @@ print_layer_data(layer_data_struct *ldata,
     printf("\tzwt  : %.4lf\n", ldata->zwt);
 }
 
+/******************************************************************************
+ * @brief    Print location structure.
+ *****************************************************************************/
 void
 print_location(location_struct *loc)
 {
@@ -439,6 +501,9 @@ print_location(location_struct *loc)
     printf("\tlocal_y_idx    : %zd\n", loc->local_y_idx);
 }
 
+/******************************************************************************
+ * @brief    Print location structure as one string.
+ *****************************************************************************/
 void
 sprint_location(char            *str,
                 location_struct *loc)
@@ -460,6 +525,9 @@ sprint_location(char            *str,
             loc->local_cell_idx, loc->local_x_idx, loc->local_y_idx);
 }
 
+/******************************************************************************
+ * @brief    Print netCDF file structure.
+ *****************************************************************************/
 void
 print_nc_file(nc_file_struct *nc)
 {
@@ -493,6 +561,9 @@ print_nc_file(nc_file_struct *nc)
     printf("\topen           : %d\n", nc->open);
 }
 
+/******************************************************************************
+ * @brief    Print netCDF variable structure.
+ *****************************************************************************/
 void
 print_nc_var(nc_var_struct *nc_var,
              size_t         ndims)
@@ -518,6 +589,9 @@ print_nc_var(nc_var_struct *nc_var,
     printf("\tnc_write: %d\n", nc_var->nc_write);
 }
 
+/******************************************************************************
+ * @brief    Print options structure.
+ *****************************************************************************/
 void
 print_option(option_struct *option)
 {
@@ -585,6 +659,9 @@ print_option(option_struct *option)
     printf("\tPRT_SNOW_BAND      : %d\n", option->PRT_SNOW_BAND);
 }
 
+/******************************************************************************
+ * @brief    Print out data structure.
+ *****************************************************************************/
 void
 print_out_data(out_data_struct *out,
                size_t           nelem)
@@ -610,6 +687,9 @@ print_out_data(out_data_struct *out,
     printf("\n");
 }
 
+/******************************************************************************
+ * @brief    Print out data file structure.
+ *****************************************************************************/
 void
 print_out_data_file(out_data_file_struct *outf)
 {
@@ -620,6 +700,9 @@ print_out_data_file(out_data_file_struct *outf)
     printf("\tvarid: %p\n", outf->varid);
 }
 
+/******************************************************************************
+ * @brief    print param set structure.
+ *****************************************************************************/
 void
 print_param_set(param_set_struct *param_set)
 {
@@ -644,6 +727,9 @@ print_param_set(param_set_struct *param_set)
            param_set->N_TYPES[1]);
 }
 
+/******************************************************************************
+ * @brief    Print save data structure.
+ *****************************************************************************/
 void
 print_save_data(save_data_struct *save)
 {
@@ -654,6 +740,9 @@ print_save_data(save_data_struct *save)
     printf("\twdew: %.4lf\n", save->wdew);
 }
 
+/******************************************************************************
+ * @brief     Print snow data structure.
+ *****************************************************************************/
 void
 print_snow_data(snow_data_struct *snow)
 {
@@ -691,6 +780,9 @@ print_snow_data(snow_data_struct *snow)
     printf("\tvapor_flux        : %.4lf\n", snow->vapor_flux);
 }
 
+/******************************************************************************
+ * @brief    Print soil_con_struct.
+ *****************************************************************************/
 void
 print_soil_con(soil_con_struct *scon,
                size_t           nlayers,
@@ -912,6 +1004,9 @@ print_soil_con(soil_con_struct *scon,
     printf("\twhoriz                : %.4lf\n", scon->whoriz);
 }
 
+/******************************************************************************
+ * @brief    Print veg_con structure.
+ *****************************************************************************/
 void
 print_veg_con(veg_con_struct *vcon,
               size_t          nroots,
@@ -958,6 +1053,9 @@ print_veg_con(veg_con_struct *vcon,
     }
 }
 
+/******************************************************************************
+ * @brief    Print veg_con_map structure.
+ *****************************************************************************/
 void
 print_veg_con_map(veg_con_map_struct *veg_con_map)
 {
@@ -972,6 +1070,9 @@ print_veg_con_map(veg_con_map_struct *veg_con_map)
     }
 }
 
+/******************************************************************************
+ * @brief    Print vegetation library variables.
+ *****************************************************************************/
 void
 print_veg_lib(veg_lib_struct *vlib,
               char            carbon)
@@ -1031,6 +1132,9 @@ print_veg_lib(veg_lib_struct *vlib,
     }
 }
 
+/******************************************************************************
+ * @brief    Print vegetation variables.
+ *****************************************************************************/
 void
 print_veg_var(veg_var_struct *vvar,
               size_t          ncanopy)

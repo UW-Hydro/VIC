@@ -1,38 +1,37 @@
-/********************************************************************************
-   filename  : photosynth.c (imported from BETHY model)
-   purpose   : Calculate photosynthesis, based on Farquhar (C3) and Collatz (C4)
-              formulations
-   interface : - input :
-                        - Ctype:          photosynthesis pathway (PHOTO_C3 or PHOTO_C4)
-                        - MaxCarboxRate:  maximum carboxlyation rate at 25 deg C       (mol(CO2)/m2 leaf area s)
-                        - MaxETransport:  maximum electron transport rate at 25 deg C  (mol(CO2)/m2 leaf area s) (C3 plants)
-                        - CO2Specificity: CO2 specificity at 25 deg C                  (mol(CO2)/m2 leaf area s) (C4 plants)
-                        - NscaleFactor:   nitrogen scaling factor at max carbox rate (Vm) and max electron transport rate (Jm)
-                        - Tfoliage:       vegetation temperature                       (deg C)
-                        - PIRRIN:         total irradiance at the surface              (mol photons/m2s)
-                        - aPAR:           absorbed photosynthetically active radiation (mol photons/m2 leaf area s)
-                        - Psurf:          near-surface atmospheric pressure            (Pa)
-                        - Catm:           CO2 mixing ratio in the atmosphere           (mol(CO2)/mol(air))
-                        - mode:           'ci': take Ci as an input, and compute photosynthesis and rs
-                                          'rs': take rs as an input, and compute photosynthesis and Ci
-
-              - input or output, depending on mode:
-                        - rs:             stomatal resistance (per leaf area) (s/m)               (mode = 'rs': input; mode = 'ci': output)
-                        - Ci:             leaf-internal CO2 mixing ratio      (mol(CO2)/mol(air)) (mode = 'ci': input; mode = 'rs': output)
-
-              - output:
-                        - Rdark:          'dark' respiration                  (mol(CO2)/m2 leaf area s)
-                        - Rphoto:         photorespiration                    (mol(CO2)/m2 leaf area s)
-                        - Agross:         gross assimilation (photosynthesis) (mol(CO2)/m2 leaf area s)
-   programmer: Ted Bohn
-   date      : October 20, 2006
-   changes   :
-   references:
-********************************************************************************/
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Calculate photosynthesis, based on Farquhar (C3) and Collatz (C4)
+ * formulations.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+ * @brief    Calculate photosynthesis, based on Farquhar (C3) and Collatz (C4)
+ *           formulations
+ *****************************************************************************/
 void
 photosynth(char    Ctype,
            double  MaxCarboxRate,
@@ -436,18 +435,16 @@ photosynth(char    Ctype,
     }
 }
 
-/********************************************************************************
-   ! High temperature inhibition
-********************************************************************************/
-
-/********************************************************************************
-   ! FUNCTION which inhibits Assimilation and Respiration at temperatures above
-   ! 55 Celsius from Collatz et al., Physiological and environmental regulation
-   ! of stomatal conductance, photosynthesis and transpiration: a model that
-   ! includes a laminar boundary layer,
-   ! Agricultural and Forest Meteorology, 54, pp. 107-136, 1991
-********************************************************************************/
-
+/******************************************************************************
+ * @brief    High temperature inhibition
+ *
+ * @note     FUNCTION which inhibits Assimilation and Respiration at
+ *           temperatures above 55 Celsius from Collatz et al., Physiological
+ *           and environmental regulation of stomatal conductance,
+ *           photosynthesis and transpiration: a model that includes a laminar
+ *           boundary layer, Agricultural and Forest Meteorology, 54, pp.
+ *           107-136, 1991
+ *****************************************************************************/
 double
 hiTinhib(double T)
 {
@@ -459,19 +456,17 @@ hiTinhib(double T)
     return hiTinhib;
 }
 
-/********************************************************************************
-   ! Dark inhibition
-********************************************************************************/
-
-/********************************************************************************
-   ! FUNCTION which inhibits Dark-Respiration in light
-   ! after Brooks and Farquhar, Effect of temperature on the CO2/O2 specifity on RuBisCO
-   ! and the rate of respiration in the light, Planta 165, 397-406, 1985
-   !
-   ! It is fitted to inhibit the dark-respiration to 50% of its uninhibited value
-   ! up from 50 umol/m^2s.
-********************************************************************************/
-
+/******************************************************************************
+ * @brief    Dark inhibition
+ *
+ * @note     FUNCTION which inhibits Dark-Respiration in light after Brooks and
+ *           Farquhar, Effect of temperature on the CO2/O2 specifity on RuBisCO
+ *           and the rate of respiration in the light, Planta 165, 397-406,
+ *           1985
+ *
+ *           It is fitted to inhibit the dark-respiration to 50% of its
+ *           uninhibited valueup from 50 umol/m^2s.
+ *****************************************************************************/
 double
 darkinhib(double IRR)
 {

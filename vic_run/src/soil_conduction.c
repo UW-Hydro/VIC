@@ -1,6 +1,39 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* Calculate soil thermal conduction.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
+/******************************************************************************
+* @brief    Soil thermal conductivity calculated using Johansen's method.
+*
+* @note     Reference: Farouki, O.T., "Thermal Properties of Soils" 1986
+*               Chapter 7: Methods for Calculating the Thermal Conductivity
+*               of Soils
+******************************************************************************/
 double
 soil_conductivity(double moist,
                   double Wu,
@@ -11,43 +44,6 @@ soil_conductivity(double moist,
                   double bulk_density,
                   double organic)
 {
-/**********************************************************************
-   Soil thermal conductivity calculated using Johansen's method.
-
-   Reference: Farouki, O.T., "Thermal Properties of Soils" 1986
-        Chapter 7: Methods for Calculating the Thermal Conductivity
-                of Soils
-
-   H.B.H. - refers to the handbook of hydrology.
-
-   porosity = n = porosity
-   ratio = Sr = fractionaldegree of saturation
-   All K values are conductivity in W/mK
-   Wu is the fractional volume of unfrozen water
-
-   UNITS: input in m, kg, s
-
-   Returns K in W/m/K
-
-   double moist         total moisture content (mm/mm)
-   double Wu            liquid water content (mm/mm)
-   double soil_dens_min mineral soil particle density (kg m-3)
-   double bulk_dens_min mineral soil bulk density (kg m-3)
-   double quartz        mineral soil quartz content (fraction of mineral soil volume)
-   double soil_density  soil particle density (kg m-3)
-   double bulk_density  soil bulk density (kg m-3)
-   double organic       total soil organic content (fraction of total solid soil volume)
-                         i.e., organic fraction of solid soil = organic*(1-porosity)
-                               mineral fraction of solid soil = (1-organic)*(1-porosity)
-
-   Modifications:
-
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.					TJB
-   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
-              soil_conductivity() to fix bug in commputation of kappa.		TJB
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
     double Ke;
     double Ki = 2.2;    /* thermal conductivity of ice (W/mK) */
     double Kw = 0.57;   /* thermal conductivity of water (W/mK) */
@@ -107,31 +103,19 @@ soil_conductivity(double moist,
     return (K);
 }
 
+/******************************************************************************
+* @brief    This subroutine calculates the soil volumetric heat capacity
+            based on the fractional volume of its component parts.
+******************************************************************************/
 double
 volumetric_heat_capacity(double soil_fract,
                          double water_fract,
                          double ice_fract,
                          double organic_fract)
 {
-/**********************************************************************
-   This subroutine calculates the soil volumetric heat capacity based
-   on the fractional volume of its component parts.
-
-   Constant values are volumetric heat capacities in J/m^3/K
-
-   double soil_fract    fraction of soil volume composed of solid soil (fract)
-   double organic_fract fraction of solid soil volume composed of organic matter (fract)
-   double water_fract   fraction of soil volume composed of liquid water (fract)
-   double ice_fract     fraction of soil volume composed of ice (fract)
-
-   Modifications:
-
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.					TJB
-**********************************************************************/
-
     double Cs;
 
+    // Constant values are volumetric heat capacities in J/m^3/K
     Cs = 2.0e6 * soil_fract * (1 - organic_fract);
     Cs += 2.7e6 * soil_fract * organic_fract;
     Cs += 4.2e6 * water_fract;
@@ -141,6 +125,13 @@ volumetric_heat_capacity(double soil_fract,
     return (Cs);
 }
 
+/******************************************************************************
+* @brief    This subroutine sets the thermal node soil parameters to constant
+*           values based on those defined for the current grid cells soil type.
+*           Thermal node propertiers for the energy balance solution are also
+*           set (these constants are used to reduce the solution time required
+*           within each iteration).
+******************************************************************************/
 void
 set_node_parameters(double *Zsum_node,
                     double *max_moist_node,
@@ -156,56 +147,6 @@ set_node_parameters(double *Zsum_node,
                     int     Nnodes,
                     int     Nlayers)
 {
-/**********************************************************************
-   This subroutine sets the thermal node soil parameters to constant
-   values based on those defined for the current grid cells soil type.
-   Thermal node propertiers for the energy balance solution are also
-   set (these constants are used to reduce the solution time required
-   within each iteration).
-
-   double   *dz_node          thermal node thicknes (m)
-   double   *Zsum_node        thermal node depth (m)
-   double   *max_moist_node   maximum moisture content at thermal node (mm/mm)
-   double   *expt_node        exponential at thermal node ()
-   double   *bubble_node      bubbling pressure at thermal node (cm)
-   double   *alpha            first thermal eqn term ()
-   double   *beta             second thermal eqn term ()
-   double   *gamma            third thermal eqn term ()
-   double   *depth            soil moisture layer thickness (m)
-   double   *max_moist        soil moisture layer maximum moisture content (mm)
-   double   *bubble           soil moisture layer bubbling pressure (cm)
-   double    quartz           soil quartz content (fract)
-   double ***ufwc_table_node  table of unfrozen water contents ()
-   double   *porosity         soil layer porosity
-   double   *effective_porosity   effective soil layer porosity
-   double   *porosity_node       thermal node porosity
-   double   *effective_porosity_node  effective thermal node porosity
-   int       Nnodes           number of soil thermal nodes
-   int       Nlayers          number of soil moisture layers
-   char      FS_ACTIVE        TRUE if frozen soils are active in grid cell
-
-   Modifications:
-
-   02-11-00 Modified to remove node zone averages, node parameters
-           are now set based on the parameter value of the layer
-           in which they fall.  Averaging of layer properties
-           only occurs if the node falls directly on a layer
-           boundary.                                        KAC
-   11-20-02 Modified to correct differences between calculations
-           to determine maximum node moisture and node moisture,
-           so that nodes on the boundary between soil layers are
-           computed the same way for both.                  KAC
-   2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
-   2007-Apr-24 Rearranged terms in finite-difference heat equation
-              (equation 8 of Cherkauer et al. (1999)).  See note
-              in solve_T_profile.  This affects the equations for
-              beta and gamma.						JCA
-   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-   2009-Jul-31 Removed unused layer_node_fract array.			TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-**********************************************************************/
-
     extern option_struct options;
 
     char                 PAST_BOTTOM;
@@ -258,8 +199,13 @@ set_node_parameters(double *Zsum_node,
     }
 }
 
-#define N_INTS 5
-
+/******************************************************************************
+* @brief    This subroutine determines the moisture and ice contents of each
+*           soil thermal node based on the current node temperature and layer
+*           moisture content.  Thermal conductivity and volumetric heat
+*           capacity are then estimated for each node based on the division of
+*           moisture contents.
+******************************************************************************/
 int
 distribute_node_moisture_properties(double *moist_node,
                                     double *ice_node,
@@ -282,70 +228,6 @@ distribute_node_moisture_properties(double *moist_node,
                                     int     Nlayers,
                                     char    FS_ACTIVE)
 {
-    /*********************************************************************
-       This subroutine determines the moisture and ice contents of each
-       soil thermal node based on the current node temperature and layer
-       moisture content.  Thermal conductivity and volumetric heat capacity
-       are then estimated for each node based on the division of moisture
-       contents..
-
-       double *moist_node      thermal node moisture content (mm/mm)
-       double *ice_node        thermal node ice content (mm/mm)
-       double *kappa_node      thermal node thermal conductivity (W m-1 K-1)
-       double *Cs_node         thermal node heat capacity (J m-3 K-1)
-       double *Zsum_node       thermal node depth (m)
-       double *T_node          thermal node temperature (C)
-       double *max_moist_node  thermal node maximum moisture content (mm/mm)
-       double *expt_node       thermal node exponential
-       double *bubble_node     thermal node bubbling pressure (cm)
-       double *moist           soil layer moisture (mm)
-       double *depth           soil layer thickness (m)
-       double *soil_dens_min   mineral soil particle density (kg m-3)
-       double *bulk_dens_min   mineral soil bulk density (kg m-3)
-       double  quartz          mineral soil quartz content (fract)
-       double *soil_density    soil particle density (kg m-3)
-       double *bulk_density    soil bulk density (kg m-3)
-       double  organic         soil organic content (fract)
-       int     Nnodes          number of soil thermal nodes
-       int     Nlayers         number of soil moisture layers
-
-       Modifications:
-
-       02-11-00 Modified to remove node zone averages, node parameters
-             are now set based on the parameter value of the layer
-             in which they fall.  Averaging of layer properties
-             only occurs if the node falls directly on a layer
-             boundary.                                        KAC
-       11-20-02 Modified to check that node soil moisture is less than
-             or equal to maximum node soil moisture, otherwise an
-             error is printed to the screen and the model exits.  KAC
-       2005-Mar-24 Removed abs() from check on soil moisture.		TJB
-       2007-Apr-04 Modified to handle grid cell errors by returning to
-                the main subroutine, rather than ending the simulation.	GCT/KAC
-       2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
-       2007-Aug-09 Added features for EXCESS_ICE.				JCA
-       2009-Feb-09 Removed dz_node from call to
-                distribute_node_moisture_properties.			KAC via TJB
-       2010-Nov-02 Turned off error reporting for when node moisture exceeds
-                maximum; now node moisture greater than maximum is simply
-                reset to maximum.						TJB
-       2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-                organic fraction into account.				TJB
-       2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
-                soil_conductivity() to fix bug in commputation of kappa.		TJB
-       2013-Jul-25 Modified to add optional a constant slab moisture
-                content to the soil below the bottom VIC model soil layer.
-                Currently the only option is to use the bottom soil layer
-                moisture for that entire region.  This is perhaps
-                justifiable for shallow damping depths, but makes no sense
-                for the deeper depths used especially for permafrost
-                simulations.  SLAB_MOIST_FRACT controls this option, if
-                set < 0, original option used, otherwise the slab layer is
-                set using SLAB_MOIST_FRACT * max_moist_node.		KAC via TJB
-       2013-Dec-26 Removed EXCESS_ICE option.				TJB
-       2013-Dec-27 Removed QUICK_FS option.					TJB
-    *********************************************************************/
-
     extern option_struct options;
 
     char                 PAST_BOTTOM;
@@ -431,8 +313,10 @@ distribute_node_moisture_properties(double *moist_node,
     return (0);
 }
 
-#undef N_INTS
-
+/******************************************************************************
+* @brief    This subroutine estimates the ice content of all soil moisture
+*           layers based on the distribution of soil thermal node temperatures.
+******************************************************************************/
 int
 estimate_layer_ice_content(layer_data_struct *layer,
                            double            *Zsum_node,
@@ -447,43 +331,6 @@ estimate_layer_ice_content(layer_data_struct *layer,
                            size_t             Nlayers,
                            char               FS_ACTIVE)
 {
-/**************************************************************
-   This subroutine estimates the ice content of all soil
-   moisture layers based on the distribution of soil thermal
-   node temperatures.
-
-   layer_struct *layer           structure with all soil moisture layer info
-   double       *Zsum_node       soil thermal node cumulative thicknesses (m)
-   double       *T               soil thermal node temperatures (C)
-   double       *max_moist_node  soil thermal node max moisture content (mm/mm)
-   double       *expt_node       soil thermal node exponential ()
-   double       *bubble_node     soil thermal node bubbling pressure (cm)
-   double       *depth           soil moisture layer thickness (m)
-   double       *max_moist       soil layer maximum soil moisture (mm)
-   double       *expt            soil layer exponential ()
-   double       *bubble          soil layer bubling pressure (cm)
-   int           Nnodes          number of soil thermal nodes
-   int           Nlayer          number of soil moisture layers
-
-   Modifications:
-   11-00 Modified to find ice content in spatial frost bands  KAC
-   2007-Apr-24 Zsum removed from declaration.			JCA
-   2007-Aug-09 Added features for EXCESS_ICE.			JCA
-   2009-Mar-15 Fixed missing else condition for SPATIAL_FROST.	KAC via TJB
-   2009-Mar-16 Added resid_moist to argument list, so that
-              min_liq (minimum allowable liquid water content)
-              can be computed here for greater efficiency.	TJB
-   2009-May-17 Added options.MIN_LIQ.  Now use of min_liq is
-              optional; if MIN_LIQ is FALSE, min_liq = residual
-              residual moisture and model behaves as before
-              the appearance of min_liq.			TJB
-   2009-Jul-31 Removed unused layer_node_fract array.		TJB
-   2009-Dec-11 Removed min_liq and options.MIN_LIQ.		TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-**************************************************************/
-
     extern option_struct options;
 
     size_t               nidx, min_nidx;
@@ -626,6 +473,18 @@ estimate_layer_ice_content(layer_data_struct *layer,
     return (0);
 }
 
+/******************************************************************************
+* @brief    This subroutine estimates the temperature and ice content of all
+*           soil moisture layers based on the simplified soil T profile
+*           described in Liang et al. (1999), and used when QUICK_FLUX is TRUE.
+*
+* @note     These temperature estimates are much less accurate than those of
+*           the finite element method (Cherkauer et al. (1999);
+*           QUICK_FLUX FALSE). Since the Liang et al. (1999) approximation does
+*           not account for the latent heat fluxes associated with freezing and
+*           melting of ice, this function should not be called when FROZEN_SOIL
+*           is TRUE.
+******************************************************************************/
 int
 estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
                                       double            *depth,
@@ -640,25 +499,6 @@ estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
                                       double             frost_slope,
                                       char               FS_ACTIVE)
 {
-/**************************************************************
-   This subroutine estimates the temperature and ice content of all soil
-   moisture layers based on the simplified soil T profile described in
-   Liang et al. (1999), and used when QUICK_FLUX is TRUE.
-
-   NOTE: these temperature estimates are much less accurate than those
-   of the finite element method (Cherkauer et al. (1999); QUICK_FLUX FALSE).
-   Since the Liang et al. (1999) approximation does not account for the
-   latent heat fluxes associated with freezing and melting of ice, this
-   function should not be called when FROZEN_SOIL is TRUE.
-
-   Modifications:
-   2011-Jul-19 Fixed bug in how ice content was computed for case of
-              SPATIAL_FROST = TRUE.					TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
- ********************************************************************/
-
     extern option_struct options;
 
     size_t               lidx, frost_area;
@@ -720,6 +560,12 @@ estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
     return (0);
 }
 
+/******************************************************************************
+* @brief    This subroutine computes the thermal conductivity and volumetric
+*           heat capacity of each soil layer based on its current moisture and
+*           ice contents.  Ice is only present if the frozen soil algorithm is
+*           activated.
+******************************************************************************/
 void
 compute_soil_layer_thermal_properties(layer_data_struct *layer,
                                       double            *depth,
@@ -732,32 +578,6 @@ compute_soil_layer_thermal_properties(layer_data_struct *layer,
                                       double            *frost_fract,
                                       size_t             Nlayers)
 {
-/********************************************************************
-   This subroutine computes the thermal conductivity and volumetric
-   heat capacity of each soil layer based on its current moisture
-   and ice contents.  Ice is only present if the frozen soil
-   algorithm is activated.
-
-   layer_data_struct *layer          structure with all soil layer variables
-   double            *depth          soil layer depths (m)
-   double            *bulk_dens_min  mineral soil bulk density (kg/m^3)
-   double            *soil_dens_min  mineral soil particle density (kg/m^3)
-   double             quartz         mineral soil quartz content (fract)
-   double            *bulk_density   soil bulk density (kg/m^3)
-   double            *soil_density   soil particle density (kg/m^3)
-   double             organic        soil organic content (fract)
-   int                Nlayers        number of soil layers
-
-   MODIFICATIONS:
-   2007-Aug-10 Added features for EXCESS_ICE option.			JCA
-   2011-Jun-03 Added options.ORGANIC_FRACT.  Soil properties now take
-              organic fraction into account.				TJB
-   2011-Jun-10 Added bulk_dens_min and soil_dens_min to arglist of
-              soil_conductivity() to fix bug in commputation of kappa.	TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-********************************************************************/
-
     extern option_struct options;
     size_t               lidx;
     size_t               frost_area;
@@ -783,28 +603,16 @@ compute_soil_layer_thermal_properties(layer_data_struct *layer,
     }
 }
 
+/******************************************************************************
+* @brief    This subroutine reads through the soil thermal nodes and determines
+*           the depths of all thawing and freezing fronts that are present.
+******************************************************************************/
 void
 find_0_degree_fronts(energy_bal_struct *energy,
                      double            *Zsum_node,
                      double            *T,
                      int                Nnodes)
 {
-/***********************************************************************
-   This subroutine reads through the soil thermal nodes and determines
-   the depths of all thawing and freezing fronts that are present.
-
-   energy_bal_struct *energy  energy balance variable structure
-   double            *Zsum_node      thermal node depth (m)
-   double            *T       thermal node temperatures (C)
-   int                Nnodes  number of defined thermal nodes
-
-   Modifications:
-   2007-Apr-24 Passing in Zsum_node rather than recalculating.		JCA
-   2007-Oct-10 Fixed reference to Zsum_node.				JCA
-   2009-Feb-09 Removed dz_node from calculation, now uses Zsum_node for
-              consistency.                                              KAC
-***********************************************************************/
-
     int    nidx, fidx;
     int    Nthaw; /* number of thawing fronts found */
     int    Nfrost; /* number of frost fronts found */
@@ -846,27 +654,16 @@ find_0_degree_fronts(energy_bal_struct *energy,
     energy->Nfrost = Nfrost;
 }
 
+/******************************************************************************
+* @brief    This subroutine computes the maximum amount of unfrozen water that
+*           can exist at the current temperature.
+******************************************************************************/
 double
 maximum_unfrozen_water(double T,
                        double max_moist,
                        double bubble,
                        double expt)
 {
-/**********************************************************************
-   This subroutine computes the maximum amount of unfrozen water that
-   can exist at the current temperature.
-
-   Modifications:
-
-   2007-Apr-24 Removed T from denominator in equation -
-              according to the proof in Zhang et al. (2007),
-              "Development and Testing of a Frozen Soil Model for
-              the Cold Region Climate Study".				JCA
-   2007-Aug-09 Added features for EXCESS_ICE option.			JCA
-   2009-Feb-10 Modified to return max_moist if T > 0C.			KAC via TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-**********************************************************************/
-
     double unfrozen;
 
     if (T < 0.) {

@@ -1,24 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine computes the fraction of roots in each soil layer based on the
+ * root zone distribution defined in the vegetation parameter file.  Roots are
+ * assumed to be linearly distributed within each root zone.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-
+/******************************************************************************
+ * @brief    This routine computes the fraction of roots in each soil layer.
+ *****************************************************************************/
 void
 calc_root_fractions(veg_con_struct  *veg_con,
                     soil_con_struct *soil_con)
-/**********************************************************************
-   calc_root_fraction.c    Keith Cherkauer      September 24, 1998
-
-   This routine computes the fraction of roots in each soil layer based
-   on the root zone distribution defined in the vegetation parameter
-   file.  Roots are assumed to be linearly distributed within each
-   root zone.
-
-   Modifications:
-   2013-Jul-19 Fix for infinite loop that occurs when the total of root zone depths exceeds the total
-              soil depth and one of the root zone boundaries coincides with a soil layer boundary.	HFC via TJB
-   2013-Jul-26 Fix to previous fix, avoids overstepping bounds of zone_depth[] array.			TJB
-**********************************************************************/
 {
     extern option_struct options;
 

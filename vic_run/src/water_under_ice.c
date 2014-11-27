@@ -1,43 +1,37 @@
-/*
- * SUMMARY:      water_under_ice.c
- * USAGE:
- *
- * AUTHOR:       Laura Bowling
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu
- * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Mon Nov 12 16:38:32 2001 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:
- * DESCRIP-END.
- * FUNCTIONS:
- * COMMENTS:
- */
+/******************************************************************************
+* \section DESCRIPTION
+*
+* Calculates temperatures of water column under ice.
+*
+* \section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
 #define MAX_ITER 50
 
-/*****************************************************************************
-   Function name: water_under_ice()
-
-   Purpose      :
-
-   Required     :
-
-
-   Comments     :
-
-   Modifications:
-   15-Jun-04 Initialize mixmax to 0.						TJB
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Apr-03 Modified to handle grid cell errors by returning to the
-              main subroutine, rather than ending the simulation.		KAC via GCT
-   2007-Nov-06 Replaced lake.fraci with lake.areai.  Added workaround for
-              non-convergence of temperatures.					LCB via TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
-*****************************************************************************/
+/******************************************************************************
+* \brief        Calculates temperatures of water column under ice.
+******************************************************************************/
 int
 water_under_ice(int     freezeflag,
                 double  sw_ice,

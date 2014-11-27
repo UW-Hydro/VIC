@@ -1,118 +1,36 @@
-/*
- * SUMMARY:      IceMelt.c - Calculate snow accumulation and melt for the lake model
- * USAGE:
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Mark Wigmosta and Pascal Storck
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:       nijssen@u.washington.edu
- * ORIG-DATE:     8-Oct-1996 at 08:50:06
- * LAST-MOD: Mon Apr 21 17:07:05 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate snow accumulation and melt using an energy balance
- *               approach for a two layer snow model
- * DESCRIP-END.
- * FUNCTIONS:    SnowMelt()
- * COMMENTS:
- */
+ * Calculate snow accumulation and melt for the lake model
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: IceMelt()
-
-   Purpose      : Calculate snow accumulation and melt using an energy balance
-                 approach for a two layer snow model
-
-   Required     :
-    double delta_t               - Model timestep (hours)
-    double z2           - Reference height (m)
-    double displacement          - Displacement height (m)
-    double aero_resist           - Aerodynamic resistance (uncorrected for
-                                   stability) (s/m)
-    double *aero_resist_used     - Aerodynamic resistance (corrected for
-                                   stability) (s/m)
-    double atmos->density        - Density of air (kg/m3)
-    double atmos->vp             - Actual vapor pressure of air (Pa)
-    double Le           - Latent heat of vaporization (J/kg3)
-    double atmos->net_short      - Net exchange of shortwave radiation (W/m2)
-    double atmos->longwave       - Incoming long wave radiation (W/m2)
-    double atmos->pressure       - Air pressure (Pa)
-    double RainFall              - Amount of rain (m)
-    double Snowfall              - Amount of snow (m)
-    double atmos->air_temp       - Air temperature (C)
-    double atmos->vpd            - Vapor pressure deficit (Pa)
-    double wind                  - Wind speed (m/s)
-    double snow->pack_water      - Liquid water content of snow pack
-    double snow->surf_water	 - Liquid water content of surface layer
-    double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Total mass flux of water vapor to or from
-                                   snow (m/time step)
-    double snow->blowing_flux;   - Mass flux of water vapor to or from
-                                   blowing snow (m/time step)
-    double snow->surface_flux;   - Mass flux of water vapor to or from
-                                   snow pack (m/time step)
-    double snow->pack_temp       - Temperature of snow pack (C)
-    double snow->surf_temp       - Temperature of snow pack surface layer (C)
-    double snow->melt_energy     - Energy used for melting and heating of
-                                   snow pack (W/m2)
-
-   Modifies     :
-    double atmos->melt           - Amount of snowpack outflow (m)
-    double snow->pack_water      - Liquid water content of snow pack
-    double snow->surf_water	 - Liquid water content of surface layer
-    double snow->swq             - Snow water equivalent at current pixel (m)
-    double snow->vapor_flux;     - Total mass flux of water vapor to or from
-                                   snow (m/timestep)
-    double snow->surface_flux;   - Mass flux of water vapor to or from
-                                   snow pack (m/timestep)
-    double snow->pack_temp       - Temperature of snow pack (C)
-    double snow->surf_temp       - Temperature of snow pack surface layer (C)
-    double snow->melt_energy     - Energy used for melting and heating of
-                                   snow pack (W/m2)
-
-   Comments     :
-
-   Modifications:
-   11-18-02 Modified method by which lake coverage fraction and ice height
-           are updated.                                                         LCB
-   04-Jun-04 Added descriptive error message to beginning of screen dump in
-            ErrorPrintIcePackEnergyBalance.					TJB
-   16-Jul-04 Changed VaporMassFlux to vapor_flux, to make it consistent with
-            IceEnergyBalance(), in which VaporMassFlux is in (kg/m2s) and
-            vapor_flux is in (m/timestep).  Changed calculations involving
-            vapor_flux to reflect these new units.				TJB
-   25-Aug-04 Added calculations for surface_flux and blowing_flux.  Note that
-            blowing_flux is currently set to 0.  This can be replaced in the
-            future with a call to CalcBlowingSnow().				TJB
-   27-Aug-04 Replaced *DeltaColdContent with DeltaColdContent in parameter
-            list for ErrorIcePackEnergyBalance() and
-            ErrorPrintIcePackEnergyBalance() so that types match in the caller
-            and callee.								TJB
-   21-Sep-04 Added ErrorString to store error messages from
-            root_brent.								TJB
-   28-Sep-04 Added aero_resist_used to store the aerodynamic resistance used
-            in flux calculations.						TJB
-   04-Oct-04 Merged with Laura Bowling's updated lake model code.  Now
-            sublimation from blowing snow is calculated for lakes.		TJB
-   2006-Nov-07 Removed LAKE_MODEL option.					TJB
-   2007-Apr-03 Return ERROR value on error from CalcBlowingSnow and root_brent.	GCT/KAC.
-   2007-Aug-31 Checked root_brent return value against -998 rather than -9998.	JCA
-   2007-Sep-25 Return ERROR instead of exiting, if ice_melt could not converge to
-              a solution in root_brent.						JCA
-   2007-Nov-06 New parameters for CalcBlowingSnow().  Replaced lake.fraci,
-              lake.hice with lake.areai and lake.ice_water_eq.  More accurate
-              accounting of lake_snow->surf_water.				LCB via TJB
-   2008-Jan-23 Modified lake snow pack to have 2 layers, similar to the modeling
-              of snow pack on uplands.						LCB via TJB
-   2008-Sep-09 Reduced the fetch used with blowing snow calculations over lakes
-              from 2000 m to 100 m.						LCB via TJB
-   2009-Oct-08 Extended T fallback scheme to snow and ice T.			TJB
-   2009-Dec-11 Replaced "assert" statements with "if" statements.		TJB
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.								TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate snow accumulation and melt using an energy balance
+ *           approach for a two layer snow model
+ *****************************************************************************/
 int
 ice_melt(double            z2,
          double            aero_resist,
@@ -679,23 +597,10 @@ ice_melt(double            z2,
     return (0);
 }
 
-/*****************************************************************************
-   Function name: CalcIcePackEnergyBalance()
-
-   Purpose      : Dummy function to make a direct call to
-                 IceEnergyBalance() possible.
-
-   Required     :
-    double TSurf - IcePack surface temperature (C)
-    other arguments required by IcePackEnergyBalance()
-
-   Returns      :
-    double Qnet - Net energy exchange at the IcePack snow surface (W/m^2)
-
-   Modifies     : none
-
-   Comments     : function is local to this module
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Dummy function to make a direct call to IceEnergyBalance()
+ *           possible.
+ *****************************************************************************/
 double
 CalcIcePackEnergyBalance(double Tsurf,
                          ...)
@@ -712,6 +617,10 @@ CalcIcePackEnergyBalance(double Tsurf,
     return Qnet;
 }
 
+/******************************************************************************
+ * @brief    Dummy function to make a direct call to
+ *           ErrorPrintIcePackEnergyBalance() possible.
+ *****************************************************************************/
 double
 ErrorIcePackEnergyBalance(double Tsurf,
                           ...)
@@ -728,6 +637,9 @@ ErrorIcePackEnergyBalance(double Tsurf,
     return Qnet;
 }
 
+/******************************************************************************
+ * @brief    Print ice pack energy balance terms
+ *****************************************************************************/
 double
 ErrorPrintIcePackEnergyBalance(double  TSurf,
                                va_list ap)

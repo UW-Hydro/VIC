@@ -1,8 +1,39 @@
+/******************************************************************************
+* @section DESCRIPTION
+*
+* This subroutine controls the model core, it solves both the energy and water
+* balance models, as well as frozen soils.
+*
+* @section LICENSE
+*
+* The Variable Infiltration Capacity (VIC) macroscale hydrological model
+* Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+* and Environmental Engineering, University of Washington.
+*
+* The VIC model is free software; you can redistribute it and/or
+* modify it under the terms of the GNU General Public License
+* as published by the Free Software Foundation; either version 2
+* of the License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with
+* this program; if not, write to the Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+******************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
 veg_lib_struct *vic_run_veg_lib;
 
+/******************************************************************************
+* @brief        This subroutine controls the model core, it solves both the
+*               energy and water balance models, as well as frozen soils.
+******************************************************************************/
 int
 vic_run(int                  rec,
         atmos_data_struct   *atmos,
@@ -14,12 +45,6 @@ vic_run(int                  rec,
         veg_con_struct      *veg_con,
         veg_lib_struct      *veg_lib,
         veg_hist_struct     *veg_hist)
-/**********************************************************************
-        vic_run
-
-   This subroutine controls the model core, it solves both the energy
-   and water balance models, as well as frozen soils.
-**********************************************************************/
 {
     extern option_struct options;
     char                 overstory;

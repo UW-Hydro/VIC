@@ -1,38 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This program builds the files names for input and output of grided data
+ * files.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Build files names for input and output of grided data files.
+ *****************************************************************************/
 void
 make_in_and_outfiles(filep_struct         *filep,
                      filenames_struct     *filenames,
                      soil_con_struct      *soil,
                      out_data_file_struct *out_data_files)
-/**********************************************************************
-        make_in_and_outfile	Dag Lohman	January 1996
-
-   This program builds the files names for input and output of grided
-   data files.
-
-   Modifications:
-   5/20/96	The routine was modified to accept a variable
-                number of layers, as well as to work with
-                frozen soils					KAC
-   11-18-02 Modified to print notification that the output fluxes file
-           will be in a binary format.                          LCB
-   29-Oct-03 Distinguishing between input lakeparam file and output
-            lake file.							TJB
-   2005-Mar-24 Modified to handle ALMA output files.			TJB
-   2006-Sep-23 Implemented flexible output configuration; uses the new
-              out_data and out_data_files structures; removed the
-              OPTIMIZE and LDAS_OUTPUT options.				TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              Merged builtnames into filenames->			TJB
-   2007-Oct-31 Append "/" to result_dir so that this need not be done
-              in global parameter file.					TJB
-   2011-May-25 Expanded latchar, lngchar, and junk allocations to handle
-              GRID_DECIMAL > 4.						TJB
-
-**********************************************************************/
 {
     extern option_struct    options;
     extern param_set_struct param_set;

@@ -1,7 +1,45 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine initializes the model state (energy balance, water balance, and
+ * snow components).
+ *
+ * If a state file is provided to the model than its
+ * contents are checked to see if it agrees with the current simulation set-up,
+ * if so it is used to initialize the model state.  If no state file is
+ * provided the model initializes all variables with defaults and the user
+ * should expect to throw out the beginning of the simulation period as model
+ * start-up.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
+/******************************************************************************
+ * @brief    Initialize the model state (energy balance, water balance, and
+ * snow components).
+ *****************************************************************************/
 int
 initialize_model_state(all_vars_struct *all_vars,
                        size_t           Nveg,
@@ -9,20 +47,6 @@ initialize_model_state(all_vars_struct *all_vars,
                        double           surf_temp,
                        soil_con_struct *soil_con,
                        veg_con_struct  *veg_con)
-/**********************************************************************
-   initialize_model_state      Keith Cherkauer	    April 17, 2000
-
-   This routine initializes the model state (energy balance, water balance,
-   and snow components).  If a state file is provided to the model than its
-   contents are checked to see if it agrees with the current simulation
-   set-up, if so it is used to initialize the model state.  If no state
-   file is provided the model initializes all variables with defaults and
-   the user should expect to throw out the beginning of the simulation
-   period as model start-up.
-
-   UNITS: (m, s, kg, C, moisture in mm) unless otherwise specified
-
-**********************************************************************/
 {
     extern global_param_struct global_param;
     extern option_struct       options;

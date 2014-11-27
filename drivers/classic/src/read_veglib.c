@@ -1,29 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads in a library of vegetation parameters for all vegetation
+ * classes used in the model.  The veg class number is used to reference the
+ * information in this library.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Read in a library of vegetation parameters for all vegetation
+ *           classes used in the model.
+ *****************************************************************************/
 veg_lib_struct *
 read_veglib(FILE   *veglib,
             size_t *Ntype)
-/**********************************************************************
-   read_veglib.c               Keith Cherkauer                 1997
-
-   This routine reads in a library of vegetation parameters for all
-   vegetation classes used in the model.  The veg class number is used
-   to reference the information in this library.
-
-   Modifications:
-   09-24-98 Modified to remove root fractions from the library file.
-           See read_vegparam.c and calc_root_fraction.c for new
-           root fraction distribution information.                      KAC
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information, as well as other land cover types
-              used in potential evap calcualtions.			TJB
-   2009-Oct-01 Added error message for case of LAI==0 and overstory==1.	TJB
-   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2013-Jul-25 Added photosynthesis parameters.				TJB
-**********************************************************************/
 {
     extern option_struct options;
     veg_lib_struct      *temp;
@@ -228,14 +241,9 @@ read_veglib(FILE   *veglib,
     return temp;
 }
 
-/**********************************************************************
-   free_veglib              Ted Bohn		April 2007
-
-   This routine frees the veglib structure.
-
-   Modifications:
-
-**********************************************************************/
+/******************************************************************************
+ * @brief    This routine frees the veglib structure.
+ *****************************************************************************/
 void
 free_veglib(veg_lib_struct **veg_lib)
 {

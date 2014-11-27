@@ -1,3 +1,34 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Newton-Raphson method to solve non-linear system adapted from "Numerical
+ * Recipes"
+ *
+ * A relaxation factor "RELAX#" is added to help the Newton-Raphson trials to
+ * converge during the initial formation of ice, where the shape of the
+ * residual function becomes very difficult.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 
@@ -10,27 +41,15 @@
 #define RELAX2   0.7
 #define RELAX3   0.2
 
+/******************************************************************************
+ * @brief    Newton-Raphson method to solve non-linear system adapted from
+ *           "Numerical Recipes"
+ *****************************************************************************/
 int
 newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
           double x[],
           int n)
 {
-/******************************************************************
-   newt_raph    2006    Ming Pan      mpan@princeton.EDU
-
-   Newton-Raphson method to solve non-linear system
-   adapted from "Numerical Recipes"
-
-   A relaxation factor "RELAX#" is added to help the Newton-Raphson trials
-   to converge during the initial formation of ice, where the shape
-   of the residual function becomes very difficult
-
-   Modifications:
-   2012-Jan-28 Replaced local precompile variable MAXSIZE with VIC's
-              MAX_NODES so that array lengths here are always in sync
-              with array lengths in the rest of VIC.			TJB
-******************************************************************/
-
     int    k, i, Error;
     double errx, errf, fvec[MAX_NODES], p[MAX_NODES];
     double a[MAX_NODES], b[MAX_NODES], c[MAX_NODES];
@@ -101,6 +120,10 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
 
 #define EPS2     1e-4
 
+/******************************************************************************
+ * @brief    Forward difference approx to Jacobian, adapted from "Numerical
+ *           Recipes"
+ *****************************************************************************/
 void
 fdjac3(double x[],
        double fvec[],
@@ -110,14 +133,6 @@ fdjac3(double x[],
        void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
        int n)
 {
-/******************************************************************
-   fdjac3    2006    Ming Pan      mpan@princeton.EDU
-
-   forward difference approx to Jacobian,
-   adapted from "Numerical Recipes"
-
-******************************************************************/
-
     int    j;
     double h, temp, f[MAX_NODES];
 
@@ -147,7 +162,10 @@ fdjac3(double x[],
 
 #undef EPS2
 
-
+/******************************************************************************
+ * @brief    function to solve tridiagonal linear system adapted from
+ *           "Numerical Recipes"
+ *****************************************************************************/
 void
 tridiag(double   a[],
         double   b[],
@@ -155,14 +173,6 @@ tridiag(double   a[],
         double   r[],
         unsigned n)
 {
-/******************************************************************
-   tridiag    2006    Ming Pan      mpan@princeton.EDU
-
-   function to solve tridiagonal linear system
-   adapted from "Numerical Recipes"
-
-******************************************************************/
-
     unsigned i;
     int      j;
     double   factor;

@@ -1,129 +1,40 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine reads soil parameters for each grid cell.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This routine reads soil parameters for each grid cell.
+ *****************************************************************************/
 soil_con_struct
 read_soilparam(FILE *soilparam,
                char *RUN_MODEL,
                char *MODEL_DONE)
-/**********************************************************************
-        read_soilparam		Dag Lohmann		January 1996
-
-   This routine reads soil parameters for each grid cell.
-
-   Parameters Read from File:
-   TYPE   NAME                    UNITS   DESCRIPTION
-   int    gridcel;                N/A     grid cell number
-   float  lat;		         degrees grid cell central latitude
-   float  lng;		         degrees grid cell central longitude
-   double b_infilt;              N/A     infiltration parameter
-   double Ds;		         fract   fraction of maximum subsurface
-                                         flow rate
-   double Dsmax;                 mm/day  maximum subsurface flow rate
-   double Ws;		         fract   fraction of maximum soil moisture
-   double c;                      N/A     exponent in ARNO baseflow curve
-   double expt[MAX_LAYERS];         N/A     exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6
-   double Ksat[MAX_LAYERS];         mm/day  saturated hydraulic conductivity
-   double phi_s[MAX_LAYERS];        mm/mm   saturated matrix potential
-   double init_moist[MAX_LAYERS];   mm      initial layer moisture level
-   float  elevation;	         m       grid cell elevation
-   double depth[MAX_LAYERS];        m       thickness of each layer
-   double avg_temp;	         C       average soil temperature
-   double dp;		         m       soil thermal damping depth
-   double bubble;	         cm      bubbling pressure, HBH 5.15
-   double quartz;	         fract   quartz content of soil
-   double organic;	         fract   organic content of soil
-   double bulk_density[MAX_LAYERS]; kg/m^3  soil bulk density
-   double soil_density;		 kg/m^3  soil partical density
-   double rough;		         m       soil surface roughness
-   double snow_rough;             m       snow surface roughness
-
-   Parameters Computed from those in the File:
-   TYPE   NAME                    UNITS   DESCRIPTION
-   double max_moist[MAX_LAYERS];    mm      maximum moisture content per layer
-   double max_infil;	         N/A     maximum infiltration rate
-   double Wcr[MAX_LAYERS];	         mm      critical moisture level for soil
-                                         layer, evaporation is no longer
-                                         affected moisture stress in the soil
-   double Wpwp[MAX_LAYERS];         mm      soil moisture content at permanent
-                                         wilting point
-   float  time_zone_lng;	         degrees central meridian of the time zone
-
-
-   Modifications:
-   7-19-96	Modified to read through variable layers, and
-                read soil depth and average temperature for
-                full energy and frozen soil versions of the
-                model.						KAC
-   4-12-98       Modified to read all parameters from a single
-                standard input file.                            KAC
-   3-13-00       Modified to read more parameters as separate
-                layer values                                    KAC
-   6-6-2000      Modified to skip individual parameter reads
-                if model grid cell is not read.                 KAC
-   xx-xx-01      Modified to read in spatial snow and frost
-                parameters.                                     KAC
-   11-18-02      Modified to read Bart's new Arno parameters.    IHA
-   10-May-04     Replaced rint(something) with (float)(int)(something + 0.5)
-                to handle rounding without resorting to rint().		TJB
-   11-May-04	(fix by Chunmei Zhu and Alan Hamlet)
-                Added check to make sure that wilting point is
-                greater than residual moisture.				TJB
-   07-Jul-04	Changed lower limit on initial soil moisture to be
-                residual moisture instead of wilting point.  Also
-                cleaned up validation statements.			TJB
-   07-Jul-04	Removed extraneous tmp variable.			TJB
-   07-Jul-04	Only validate initial soil moisture if INIT_STATE
-                is FALSE.						TJB
-   26-Oct-04	Added validation of depth_full_snow_cover and
-                frost_slope.						TJB
-   2005-Apr-13 Added logic for OUTPUT_FORCE option.			TJB
-   2005-Apr-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.		TJB
-   2006-Sep-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option.	TJB/GCT
-   2007-May-23 Replaced 'fscanf' statements with 'sscanf' statements
-              to trap missing fields.					GCT
-   2007-Aug-08 Added EXCESS_ICE option.					JCA
-   2007-Sep-14 Clarified description in comment before BASEFLOW check.	TJB
-   2007-Nov-06 Moved computation of cell_area from read_lakeparam() to
-              here.							TJB
-   2009-Jan-12 Added logic for JULY_TAVG_SUPPLIED.			TJB
-   2009-May-22 Added validation of expt and bubble.			TJB
-   2009-Jun-09 Modified to use extension of veg_lib structure to contain
-              bare soil information.					TJB
-   2009-Jun-17 Modified to understand both tabs and spaces as delimiters.TJB
-   2009-Jul-31 Removed unused layer_node_fract array.			TJB
-   2009-Sep-11 Added correct OUTPUT_FORCE logic around the new bare
-              soil/veg lib code.					TJB
-   2009-Sep-28 Added initialization of snowband parameters.		TJB
-   2011-Jan-04 Made read_soilparam_arc() a sub-function of
-              read_soilparam().						TJB
-   2011-Jan-04 Added computation of relationship between soil moisture
-              and water table depth given by soil water retention curve.TJB
-   2011-Mar-01 Updated soil water retention curve relationship.		TJB
-   2011-Mar-05 Now does fgets whether or not RUN_MODEL is true - this
-              fixes bug introduced when read_soilparam_arc() was moved
-              to a sub-function of read_soilparam().			TJB
-   2011-May-25 Expanded latchar, lngchar, and junk allocations to handle
-              GRID_DECIMAL > 4.						TJB
-   2011-May-25 Moved fgets() so that it always gets called, even when
-              cells are skipped.					TJB
-   2011-Jun-03 Added options.ORGANIC_FRACT.  If TRUE, VIC expects organic
-              fraction and organic bulk and soil densities to be supplied
-              for each grid cell.					TJB
-   2011-Sep-28 Added validation of b_infilt.				TJB
-   2011-Nov-04 Added hard-coding of slope, aspect, and horizons to 0.	TJB
-   2012-Jan-16 Removed LINK_DEBUG code					BN
-   2012-Feb-08 Renamed depth_full_snow_cover to max_snow_distrib_slope
-              and clarified the descriptions of the SPATIAL_SNOW
-              option.							TJB
-   2013-Jul-25 Added calculation of soil albedo in PAR range.		TJB
-   2013-Dec-26 Removed EXCESS_ICE option.							TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-   2014-Mar-24 Removed ARC_SOIL option                               BN
-   2014-Mar-28 Removed DIST_PRCP option.								TJB
-**********************************************************************/
 {
     void ttrim(char *string);
     extern option_struct       options;

@@ -1,28 +1,28 @@
-/*
- * SUMMARY:      CalcBlowingSnow.c - Calculate energy of sublimation from blowing snow
- * USAGE:        Part of VIC
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Laura Bowling
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:              lbowling@u.washington.edu
- * ORIG-DATE:     3-Feb-2002
- * LAST-MOD:
- * DESCRIPTION:  Calculate blowing snow
- * DESCRIP-END.
- * FUNCTIONS:    CalcBlowingSnow()
- * COMMENTS:
- * Modifications:
- *   2005-Aug-05 Merged with Laura Bowling's updated code to fix the following problems:
- *	         - Error in array declaration line 373 and 375
- *	         - Added calculation of blowing snow transport.  This is not really used
- *	           currently, but it is something Laura is experimenting with.
- *	         - Fixed RH profile.
- *	         - Fixed vertical integration functions.
- *										TJB
- *   2004-Oct-04 Merged with Laura Bowling's updated lake model code.		TJB
- *   2007-Apr-03 Module returns an ERROR value that can be trapped in main      GCT
- *   2011-Nov-04 Updated mtclim functions to MTCLIM 4.3.			TJB
- */
+ * Calculate energy of sublimation from blowing snow.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
@@ -49,31 +49,9 @@
 #define FETCH 1               /* Include fetch dependence (1). */
 #define CALC_PROB 1             /* Variable (1) or constant (0) probability of occurence. */
 
-
-/*****************************************************************************
-   Function name: CalcBlowingSnow()
-
-   Purpose      : Calculate sublimation from blowing snow
-
-   Required     :  double Dt;                     Model time step (hours)
-   double Tair;                    Air temperature (C)
-   int LastSnow;                   Time steps since last snowfall.
-   double SurfaceLiquidWater;      Liquid water in the surface layer (m)
-   double Wind;                    Wind speed (m/s), 2 m above snow
-   double Ls;                      Latent heat of sublimation (J/kg)
-   double AirDens;                 Density of air (kg/m3)
-   double Lv;                      Latent heat of vaporization (J/kg3)
-   double Press;                   Air pressure (Pa)
-   double EactAir;                 Actual vapor pressure of air (Pa)
-   double ZO;                      Snow roughness height (m)
-   Returns      : BlowingMassFlux
-
-   Modifies     :
-
-   Comments     : Called from SnowPackEnergyBalance
-    Reference:
-
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate sublimation from blowing snow
+ *****************************************************************************/
 double
 CalcBlowingSnow(double  Dt,
                 double  Tair,
@@ -310,6 +288,11 @@ CalcBlowingSnow(double  Dt,
     return Total;
 }
 
+
+/******************************************************************************
+ * @brief    Integration is performed by Romberg's method:  Numerical Recipes
+ *           in C Section 4.3
+ *****************************************************************************/
 double
 qromb(double (*funcd)(),
       double es,
@@ -324,8 +307,6 @@ qromb(double (*funcd)(),
       double Zrh,
       double a,
       double b)
-// Returns the integral of the function func from a to b.  Integration is performed
-// by Romberg's method:  Numerical Recipes in C Section 4.3
 {
     double ss, dss;
     double s[MAX_ITER + 1], h[MAX_ITER + 2];
@@ -347,6 +328,9 @@ qromb(double (*funcd)(),
     return 0.0;
 }
 
+/******************************************************************************
+ * @brief    Interpolate a set of N points by fitting a polynomial of degree N-1
+ *****************************************************************************/
 void
 polint(double  xa[],
        double  ya[],
@@ -397,6 +381,9 @@ polint(double  xa[],
     free(c);
 }
 
+/******************************************************************************
+ * @brief    Compute the nth stage of refinement of an extended trapezoidal rule.
+ *****************************************************************************/
 double
 trapzd(double (*funcd)(),
        double es,
@@ -444,6 +431,9 @@ trapzd(double (*funcd)(),
     }
 }
 
+/******************************************************************************
+ * @brief    Newton-Raphson method.
+ *****************************************************************************/
 double
 rtnewt(double x1,
        double x2,
@@ -516,6 +506,9 @@ rtnewt(double x1,
     return 0.0;
 }
 
+/******************************************************************************
+ * @brief    This routine resets the values of all output variables to 0.
+ *****************************************************************************/
 void
 get_shear(double  x,
           double *f,
@@ -527,31 +520,10 @@ get_shear(double  x,
     *df = von_K * Ur / (x * x) - 2. / x;
 }
 
-/*****************************************************************************
-   Function name: sub_with_height()
-
-   Purpose      : Calculate the sublimation rate for a given height above the boundary layer.
-
-   Required     :
-    double z               - Height of solution (m)
-    double Tair;           - Air temperature (C)
-    double Wind;           - Wind speed (m/s), 2 m above snow
-    double AirDens;        - Density of air (kg/m3)
-    double ZO;             - Snow roughness height (m)
-    double EactAir;        - Actual vapor pressure of air (Pa)
-    double F;              - Denominator of dm/dt
-    double hsalt;          - Height of the saltation layer (m)
-    double phi_r;          - Saltation layer mass concentration (kg/m3)
-    double ushear;         - shear velocity (m/s)
-    double Zrh;            - Reference height of humidity measurements
-
-   Returns      :
-   double f(z)             - Sublimation rate in kg/m^3*s
-
-   Modifies     : none
-
-   Comments     :  Currently neglects radiation absorption of snow particles.
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate the sublimation rate for a given height above the
+ *           boundary layer.
+ *****************************************************************************/
 double
 sub_with_height(double z,
                 double es,
@@ -615,11 +587,11 @@ sub_with_height(double z,
     return psi_t * phi_t;
 }
 
-/*******************************************************************/
-/* Calculate parameters for probability of blowing snow occurence. */
-/* ( Li and Pomeroy 1997) */
-/*******************************************************************/
-
+/******************************************************************************
+ * @brief    Calculate parameters for probability of blowing snow occurence.
+ *
+ * @note     see Li and Pomeroy 1997
+ *****************************************************************************/
 double
 get_prob(double Tair,
          double Age,
@@ -665,6 +637,9 @@ get_prob(double Tair,
     return prob_occurence;
 }
 
+/******************************************************************************
+ * @brief    Calculate threshold shear stress.
+ *****************************************************************************/
 double
 get_thresh(double Tair,
            double SurfaceLiquidWater,
@@ -695,6 +670,9 @@ get_thresh(double Tair,
     return utshear;
 }
 
+/******************************************************************************
+ * @brief    Iterate to find actual shear stress during saltation.
+ *****************************************************************************/
 void
 shear_stress(double  U10,
              double  ZO,
@@ -731,6 +709,9 @@ shear_stress(double  U10,
     }
 }
 
+/******************************************************************************
+ * @brief    Calculate the sublimation flux.
+ *****************************************************************************/
 double
 CalcSubFlux(double  EactAir,
             double  es,
@@ -830,30 +811,10 @@ CalcSubFlux(double  EactAir,
     return SubFlux;
 }
 
-/*****************************************************************************
-   Function name: transport_with_height()
-
-   Purpose      : Calculate the transport rate for a given height above the boundary layer.
-
-   Required     :
-    double z               - Height of solution (m)
-    double Tair;           - Air temperature (C)
-    double Wind;           - Wind speed (m/s), 2 m above snow
-    double AirDens;        - Density of air (kg/m3)
-    double ZO;             - Snow roughness height (m)
-    double EactAir;        - Actual vapor pressure of air (Pa)
-    double F;              - Denominator of dm/dt
-    double hsalt;          - Height of the saltation layer (m)
-    double phi_r;          - Saltation layer mass concentration (kg/m3)
-    double ushear;         - shear velocity (m/s)
-    double Zrh;            - Reference height of humidity measurements
-
-   Returns      :
-   double f(z)             - Transport rate in kg/m^2*s
-
-   Modifies     : none
-
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate the transport rate for a given height above the boundary
+ *           layer.
+ *****************************************************************************/
 double
 transport_with_height(double z,
                       double es,

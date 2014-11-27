@@ -1,70 +1,42 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This routine displays the current settings of options defined in the header
+ * files and the global parameter file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Display the current settings of options defined in the header
+ *           files and the global parameter file.
+ *****************************************************************************/
 void
 display_current_settings(int                  mode,
                          filenames_struct    *names,
                          global_param_struct *global)
-/**********************************************************************
-   display_current_settings	Ted Bohn			2003
-
-   This routine displays the current settings of options defined in
-   vicNl_def.h and the global parameter file.
-
-   NOTE: This file must be kept in sync with any additions, removals,
-   or modifications to names of parameters in vicNl_def.h or get_global_param.c.
-
-   Modifications:
-   2005-03-08 Added EQUAL_AREA option.				TJB
-   2005-03-24 Added ALMA_OUTPUT option.				TJB
-   2005-04-23 Changed ARNO_PARAMS to NIJSSEN2001_BASEFLOW.	TJB
-   2005-11-29 SAVE_STATE is now set in global param file         GCT
-   2006-09-13 Replaced NIJSSEN2001_BASEFLOW with BASEFLOW option. TJB/GCT
-   2006-Sep-23 Implemented flexible output configuration
-              and aggregation of output variables.		TJB
-   2006-Oct-10 Moved printing of soil_dir inside if{} block.	TJB
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct;
-              This included moving global->statename to names->statefile. TJB
-   2006-Nov-07 Removed LAKE_MODEL option.			TJB
-   2007-Jan-03 Added ALMA_INPUT option.				TJB
-   2007-Jan-15 Added PRT_HEADER option.				TJB
-   2007-Apr-24 Added IMPLICIT option.				JCA
-   2007-Apr-24 Added EXP_TRANS option.				JCA
-   2007-Aug-08 Added EXCESS_ICE option.				JCA
-   2008-Apr-21 Added SNOW_ALBEDO option.				KAC via TJB
-   2008-Apr-21 Added SNOW_DENSITY option.			TJB
-   2009-Jan-12 Added COMPUTE_TREELINE and JULY_TAVG_SUPPLIED options.	TJB
-   2009-Jan-16 Added AERO_RESIST_CANSNOW option.			TJB
-   2009-May-17 Added AR_406_LS to AERO_RESIST_CANSNOW.		TJB
-   2009-May-18 Added PLAPSE option.				TJB
-   2009-May-20 Added GRND_FLUX_TYPE option.			TJB
-   2009-May-22 Added TFALLBACK value to options.CONTINUEONERROR.	TJB
-   2009-Sep-19 Moved TFALLBACK to its own separate option.	TJB
-   2009-Nov-15 Redirected output to stderr.			TJB
-   2010-Apr-28 Replaced GLOBAL_LAI with VEGPARAM_LAI and LAI_SRC.TJB
-   2011-May-31 Removed GRND_FLUX option.				TJB
-   2011-Jun-03 Added ORGANIC_FRACT option.			TJB
-   2011-Nov-04 Added options for accessing new forcing estimation
-              features.						TJB
-   2012-Jan-16 Removed LINK_DEBUG code				BN
-   2012-Jan-28 Removed AR_COMBO and GF_FULL.			TJB
-   2013-Jul-25 Added CARBON, SHARE_LAYER_MOIST, and VEGLIB_PHOTO.	TJB
-   2013-Dec-26 Removed LWAVE_COR option.					TJB
-   2013-Dec-26 Removed OUTPUT_FORCE_STATS option.			TJB
-   2013-Dec-26 Replaced LOW_RES_MOIST compile-time option with LOG_MATRIC
-              run-time option.						TJB
-   2013-Dec-26 Moved CLOSE_ENERGY from compile-time to run-time options.	TJB
-   2013-Dec-26 Removed EXCESS_ICE option.				TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-   2013-Dec-27 Moved SPATIAL_FROST from compile-time to run-time options.TJB
-   2013-Dec-27 Removed QUICK_FS option.					TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-   2013-Dec-28 Removed NO_REWIND option.					TJB
-   2013-Dec-28 Removed user_def.h.						TJB
-   2014-Mar-24 Removed ARC_SOIL option                   BN
-   2014-Mar-28 Removed DIST_PRCP option.					TJB
-**********************************************************************/
 {
     extern char            *version;
     extern option_struct    options;

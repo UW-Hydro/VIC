@@ -1,86 +1,35 @@
-/*
- * SUMMARY:      SnowPackEnergyBalance.c - Calculate snow pack energy balance
- * USAGE:        Part of DHSVM
+/******************************************************************************
+ * @section DESCRIPTION
  *
- * AUTHOR:       Bart Nijssen
- * ORG:          University of Washington, Department of Civil Engineering
- * E-MAIL:              nijssen@u.washington.edu
- * ORIG-DATE:     8-Oct-1996 at 09:09:29
- * LAST-MOD: Mon Apr 21 16:39:04 2003 by Keith Cherkauer <cherkaue@u.washington.edu>
- * DESCRIPTION:  Calculate snow pack energy balance
- * DESCRIP-END.
- * FUNCTIONS:    SnowPackEnergyBalance()
- * COMMENTS:
- */
+ * Calculate snow pack energy balance
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
 
 #include <vic_def.h>
 #include <vic_run.h>
 
-/*****************************************************************************
-   Function name: SnowPackEnergyBalance()
-
-   Purpose      : Calculate the surface energy balance for the snow pack
-
-   Required     :
-    double TSurf           - new estimate of effective surface temperature
-    va_list ap            - Argument list initialized by va_start().  For
-                            elements of list and order, see beginning of
-                            routine
-
-   Returns      :
-    double RestTerm        - Rest term in the energy balance
-
-   Modifies     :
-    double *RefreezeEnergy - Refreeze energy (W/m2)
-    double *vapor_flux     - Mass flux of water vapor to or from the
-                             intercepted snow (m/timestep)
-    double *blowing_flux   - Mass flux of water vapor from blowing snow (m/timestep)
-    double *surface_flux   - Mass flux of water vapor from pack snow (m/timestep)
-
-   Comments     :
-    Reference:  Bras, R. A., Hydrology, an introduction to hydrologic
-                science, Addisson Wesley, Inc., Reading, etc., 1990.
-
-   Modifications:
-   10-6-2000 modified to handle partial snow cover including the
-    advection of sensible heat from bare patches to the edges
-    of the remaining snow cover.                               KAC
-   11-18-02 Modified to include the effects of blowing snow on the
-           accumulation and ablation of the snowpack.          LCB
-   04-21-03 Removed constant variable declarations.  Those still
-           required by the VIC model are now defined in
-           vicNl_def.h.                                        KAC
-   16-Jul-04 Renamed VaporMassFlux, BlowingMassFlux, and SurfaceMassFlux
-            to vapor_flux, blowing_flux, and surface_flux, respectively,
-            to denote fact that their units are m/timestep rather than
-            kg/m2s.  Created new variables VaporMassFlux, BlowingMassFlux,
-            and SurfaceMassFlux with units of kg/m2s.  The addresses of
-            the *MassFlux variables are passed to latent_heat_from_snow()
-            where values for the variables are computed.  After these
-            values are computed, vapor_flux, blowing_flux and surface_flux
-            are derived from them by unit conversion.  vapor_flux,
-            blowing_flux, and surface_flux are the variables that are
-            passed in/out of this function.				TJB
-   16-Jul-04 Changed the type of the last few variables (lag_one, iveg,
-            etc) in the va_list to be double.  For some reason, passing
-            them as float or int caused them to become garbage.  This may
-            have to do with the fact that they followed variables of type
-            (double *) in va_list, which may have caused memory alignment
-            problems.							TJB
-   05-Aug-04 Removed lag_one, sigma_slope, fetch, iveg, Nveg, month, overstory,
-            LastSnow, and SnowDepth from argument list, since they were only
-            needed to pass to latent_heat_from_snow(), which no longer needs
-            them.							TJB
-   28-Sep-04 Added Ra_used to store the aerodynamic resistance used in flux
-            calculations.						TJB
-   2006-Sep-23 Replaced redundant STEFAN_B constant with STEFAN_B_B.	TJB
-   2009-Jan-16 Modified aero_resist_used and Ra_used to become arrays of
-              two elements (surface and overstory); added
-              options.AERO_RESIST_CANSNOW.				TJB
-   2009-Sep-19 Added Added ground flux computation consistent with 4.0.6.	TJB
-   2013-Dec-27 Moved SPATIAL_SNOW from compile-time to run-time options.	TJB
-
-*****************************************************************************/
+/******************************************************************************
+ * @brief    Calculate the surface energy balance for the snow pack.
+ *****************************************************************************/
 double
 SnowPackEnergyBalance(double  TSurf,
                       va_list ap)

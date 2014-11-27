@@ -1,34 +1,45 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * This subroutine opens a model state file and verifys that the starting date,
+ * number of layers and number of thermal nodes in the file agrees with what
+ * was defined in the model global control file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    This subroutine opens a model state file and verifys that the
+             starting date, number of layers and number of thermal nodes in the
+             file agrees with what was defined in the model global control file.
+ *****************************************************************************/
 FILE *
 check_state_file(char                *init_state_name,
                  size_t               Nlayer,
                  size_t               Nnodes,
                  int                 *startrec)
-/*********************************************************************
-   check_state_file      Keith Cherkauer           April 17, 2000
-
-   This subroutine opens a model state file and verifys that the
-   starting date, number of layers and number of thermal nodes in the
-   file agrees with what was defined in the model global control file.
-
-   Modifications:
-   04-10-03 modified to open and read from a binary state file.    KAC
-   04-10-03 modified to compute record where state file starts,
-           this allows VIC to read in the full array of atmospheric
-           forcing data but start the simulation at the same time
-           step as the state file.  This should eliminate the
-           problems associated with restarting the model with an
-           incomplete record of forcing data, which can lead to
-           differences in the interpolated sub-daily forcings.    KAC
-   06-03-03 modified to handle both ASCII and BINARY state files.  KAC
-   2006-08-23 Changed order of fread/fwrite statements from ...1, sizeof...
-             to ...sizeof, 1,... GCT
-   2006-Oct-16 Merged infiles and outfiles structs into filep_struct. TJB
-
-*********************************************************************/
 {
     extern option_struct options;
 

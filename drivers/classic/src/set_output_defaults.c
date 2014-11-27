@@ -1,36 +1,41 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Set the out_data_files and out_data structures to default values. These can
+ * be overridden by the user in the global control file.
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
+/******************************************************************************
+ * @brief    Set the out_data_files and out_data structures to default values.
+             These can be overridden by the user in the global control file.
+ *****************************************************************************/
 out_data_file_struct *
 set_output_defaults(out_data_struct *out_data)
 {
-/*************************************************************
-   set_output_defaults.c      Ted Bohn     September 08, 2006
-
-   This routine sets the out_data_files and out_data structures to default values.
-   These can be overridden by the user in the global control file.
-
-   Modifications:
-   2006-Oct-10 Shortened the names of output variables whose names were
-              too long.							TJB
-   2007-Oct-09 Updated to reflect variables present in traditional 4.1.0
-              output files.  Previously the defaults matched the traditional
-              4.0.6 output files.					TJB
-   2008-Apr-11 Added OUT_SUB_BLOWING, OUT_SUB_SURFACE, and OUT_SUB_SNOW to
-              default snow output file for case of options.BLOWING == TRUE.
-              This makes it almost the same as previous versions of 4.1.0,
-              (r3 and earlier) with the exception that previous versions
-              of 4.1.0 multiplied these terms by 100 when saving to the
-              snow file.						TJB
-   2010-Sep-24 Renamed RUNOFF_IN and OUT_RUNOFF_IN to CHANNEL_IN and
-              OUT_LAKE_CHAN_IN, respectively.  Renamed OUT_EVAP_LAKE
-              to OUT_LAKE_EVAP.  Added other lake water balance terms
-              to set of output variables.  Added volumetric versions
-              of these too.						TJB
-   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
-*************************************************************/
-
     extern option_struct  options;
     out_data_file_struct *out_data_files;
     unsigned              filenum;

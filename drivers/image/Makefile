@@ -1,7 +1,7 @@
  ##############################################################################
  # @section DESCRIPTION
  #
- # VIC image Makefile
+ # VIC Image Driver Makefile
  #
  # @section LICENSE
  #
@@ -29,10 +29,10 @@
 # -----------------------------------------------------------------------
 
 # VIC DRIVER PATH (include and src are subdirs of this)
-DRIVERPATH = ..
+DRIVERPATH = .
 
 # VIC RUN PATH
-VICPATH = ../../../vic_run
+VICPATH = ../../vic_run
 
 # NETCDF include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
@@ -179,9 +179,6 @@ OBJS = \
 	${VICPATH}/src/zero_output_list.o
 
 SRCS = $(OBJS:%.o=%.c)
-
-#$(SRCS):
-#	co $@
 
 all:
 	make depend

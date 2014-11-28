@@ -1,7 +1,7 @@
  ##############################################################################
  # @section DESCRIPTION
  #
- # VIC image Makefile
+ # VIC Classic Driver Makefile
  #
  # @section LICENSE
  #
@@ -29,18 +29,17 @@
 # -----------------------------------------------------------------------
 
 # VIC DRIVER PATH (include and src are subdirs of this)
-DRIVERPATH = ..
+DRIVERPATH = .
 
 # VIC RUN PATH
-VICPATH = ../../../vic_run
+VICPATH = ../../vic_run
 
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
 # Set CC = your compiler here
 CC = gcc
-
-# set includes
+# set include
 INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
@@ -180,10 +179,7 @@ OBJS = \
 	${VICPATH}/src/write_vegvar.o \
 	${VICPATH}/src/zero_output_list.o
 
-SRCS = $(OBJS:%.o=%.c) 
-
-#$(SRCS):
-#	co $@
+SRCS = $(OBJS:%.o=%.c)
 
 all:
 	make depend
@@ -213,7 +209,7 @@ tags:	TAGS
 TAGS:	$(SRCS) $(HDRS)
 	etags $(SRCS) $(HDRS)
 clean::
-	\rm -f TAGS	       
+	\rm -f TAGS
 
 
 # -------------------------------------------------------------
@@ -224,4 +220,4 @@ depend: .depend
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
-	\rm -f .depend	     
+	\rm -f .depend

@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Open a file named by string and associate a stream with it.
@@ -60,7 +60,8 @@ open_file(char string[],
         strcat(zipname, ".gz");
         stream = fopen(zipname, type);
         if (stream == NULL) {
-            fprintf(stderr, "\n Error opening \"%s\".\n", string);
+            fprintf(stderr, "\n Error opening \"%s\".", string);
+            fprintf(stderr, "\n");
             nrerror("Unable to open File");
         }
         fclose(stream);
@@ -70,7 +71,8 @@ open_file(char string[],
         system(command);
         stream = fopen(string, type);
         if (stream == NULL) {
-            fprintf(stderr, "\n Error opening \"%s\".\n", string);
+            fprintf(stderr, "\n Error opening \"%s\".", string);
+            fprintf(stderr, "\n");
             nrerror("Unable to Open File");
         }
     }

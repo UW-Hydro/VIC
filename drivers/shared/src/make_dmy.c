@@ -27,7 +27,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 #ifndef _LEAPYR
 #define LEAPYR(y) (!((y) % 400) || (!((y) % 4) && ((y) % 100)))
@@ -60,10 +60,10 @@ make_dmy(global_param_struct *global)
     if (global->nrecs == 0) {
         if ((global->endyear == 0) || (global->endmonth == 0) ||
             (global->endday == 0)) {
-            nrerror(
-                "The model global file MUST define EITHER the number of "
-                "records to simulate (NRECS), or the year (ENDYEAR), month "
-                "(ENDMONTH), and day (ENDDAY) of the last full simulation day");
+            nrerror("The model global file MUST define EITHER the number of "
+                    "records to simulate (NRECS), or the year (ENDYEAR), "
+                    "month (ENDMONTH), and day (ENDDAY) of the last full "
+                    "simulation day");
         }
         endday = global->endday;
         endmonth = global->endmonth;
@@ -119,7 +119,9 @@ make_dmy(global_param_struct *global)
         }
         if (((global->dt * (global->nrecs - offset)) % 24) != 0) {
             sprintf(ErrStr,
-                    "Nrecs must be defined such that the model ends after completing a full day.  Currently Nrecs is set to %i, while %i and %i are allowable values.", global->nrecs,
+                    "Nrecs must be defined such that the model ends after "
+                    "completing a full day.  Currently Nrecs is set to %i, "
+                    "while %i and %i are allowable values.", global->nrecs,
                     ((global->dt * (global->nrecs - offset)) / 24) * 24,
                     ((global->dt * (global->nrecs - offset)) / 24) * 24 + 24);
             nrerror(ErrStr);

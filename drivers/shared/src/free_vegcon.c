@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Calculate distance between two locations.
+ * This subroutine frees all components of the veg_con structure.
  *
  * @section LICENSE
  *
@@ -26,39 +26,23 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Get distance between two locations.
+ * @brief    This subroutine frees all components of the veg_con structure.
  *****************************************************************************/
-double
-get_dist(double lat1,
-         double long1,
-         double lat2,
-         double long2)
+void
+free_vegcon(veg_con_struct **veg_con)
 {
-    double theta1;
-    double phi1;
-    double theta2;
-    double phi2;
-    double dtor;
-    double term1;
-    double term2;
-    double term3;
-    double temp;
-    double distance;
+    extern option_struct options;
+    size_t               i;
 
-    dtor = 2.0 * PI / 360.0;
-    theta1 = dtor * long1;
-    phi1 = dtor * lat1;
-    theta2 = dtor * long2;
-    phi2 = dtor * lat2;
-    term1 = cos(phi1) * cos(theta1) * cos(phi2) * cos(theta2);
-    term2 = cos(phi1) * sin(theta1) * cos(phi2) * sin(theta2);
-    term3 = sin(phi1) * sin(phi2);
-    temp = term1 + term2 + term3;
-    temp = (double) (1.0 < temp) ? 1.0 : temp;
-    distance = RADIUS * acos(temp);
-
-    return distance;
+    for (i = 0; i < veg_con[0][0].vegetat_type_num; i++) {
+        free((char *)veg_con[0][i].zone_depth);
+        free((char *)veg_con[0][i].zone_fract);
+        if (options.CARBON) {
+            free((char *)veg_con[0][i].CanopLayerBnd);
+        }
+    }
+    free((char *)veg_con[0]);
 }

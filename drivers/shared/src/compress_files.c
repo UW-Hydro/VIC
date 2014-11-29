@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine makes an array of type cell, which contains soil column
- * variables for a single grid cell.
+ * This subroutine compresses the file "string" using a system call.
  *
  * @section LICENSE
  *
@@ -27,25 +26,17 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Make an array of type cell, which contains soil column variables
- *           for a single grid cell.
+ * @brief    This subroutine compresses the file "string" using a system call.
  *****************************************************************************/
-cell_data_struct **
-make_cell_data(size_t veg_type_num)
+void
+compress_files(char string[])
 {
-    extern option_struct options;
+    char command[MAXSTRING];
 
-    size_t               i;
-    cell_data_struct   **temp;
-
-    temp = (cell_data_struct**) calloc(veg_type_num,
-                                       sizeof(cell_data_struct*));
-    for (i = 0; i < veg_type_num; i++) {
-        temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND,
-                                             sizeof(cell_data_struct));
-    }
-    return temp;
+    /** uncompress and open zipped file **/
+    sprintf(command, "nice gzip -f %s &", string);
+    system(command);
 }

@@ -32,6 +32,9 @@
 DRIVERPATH = .
 
 # VIC RUN PATH
+SHAREDPATH = ../shared
+
+# VIC RUN PATH
 VICPATH = ../../vic_run
 
 # Set SHELL = your shell here
@@ -40,7 +43,7 @@ SHELL = /bin/bash
 # Set CC = your compiler here
 CC = gcc
 # set include
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include -I $(SHAREDPATH)/include -I ${VICPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
@@ -65,6 +68,7 @@ CFLAGS  =  ${INCLUDES} -g -Wall -Wextra
 HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_classic.h \
+	${SHAREDPATH}/include/vic_driver_shared.h \
 	${DRIVERPATH}/include/mtclim_constants_vic.h \
 	${DRIVERPATH}/include/mtclim_parameters_vic.h
 
@@ -73,35 +77,18 @@ OBJS = \
 	${DRIVERPATH}/src/alloc_veg_hist.o \
 	${DRIVERPATH}/src/calc_air_temperature.o \
 	${DRIVERPATH}/src/calc_longwave.o \
-	${DRIVERPATH}/src/calc_root_fraction.o \
 	${DRIVERPATH}/src/check_files.o \
 	${DRIVERPATH}/src/check_state_file.o \
 	${DRIVERPATH}/src/close_files.o \
-	${DRIVERPATH}/src/cmd_proc.o \
-	${DRIVERPATH}/src/compress_files.o \
-	${DRIVERPATH}/src/compute_treeline.o \
 	${DRIVERPATH}/src/display_current_settings.o \
-	${DRIVERPATH}/src/free_all_vars.o \
-	${DRIVERPATH}/src/free_vegcon.o \
-	${DRIVERPATH}/src/get_dist.o \
 	${DRIVERPATH}/src/get_force_type.o \
 	${DRIVERPATH}/src/get_global_param.o \
 	${DRIVERPATH}/src/initialize_atmos.o \
-	${DRIVERPATH}/src/initialize_global.o \
+	${DRIVERPATH}/src/initialize_forcing_files.o \
 	${DRIVERPATH}/src/initialize_model_state.o \
-	${DRIVERPATH}/src/initialize_snow.o \
-	${DRIVERPATH}/src/initialize_soil.o \
-	${DRIVERPATH}/src/initialize_veg.o \
-	${DRIVERPATH}/src/make_all_vars.o \
-	${DRIVERPATH}/src/make_cell_data.o \
-	${DRIVERPATH}/src/make_dmy.o \
-	${DRIVERPATH}/src/make_energy_bal.o \
 	${DRIVERPATH}/src/make_in_and_outfiles.o \
-	${DRIVERPATH}/src/make_snow_data.o \
-	${DRIVERPATH}/src/make_veg_var.o \
 	${DRIVERPATH}/src/mtclim_vic.o \
 	${DRIVERPATH}/src/mtclim_wrapper.o \
-	${DRIVERPATH}/src/open_file.o \
 	${DRIVERPATH}/src/open_state_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/parse_output_info.o \
@@ -121,6 +108,24 @@ OBJS = \
 	${DRIVERPATH}/src/write_header.o \
 	${DRIVERPATH}/src/write_model_state.o \
 	${DRIVERPATH}/src/write_output.o \
+	${SHAREDPATH}/src/calc_root_fraction.o \
+	${SHAREDPATH}/src/cmd_proc.o \
+	${SHAREDPATH}/src/compress_files.o \
+	${SHAREDPATH}/src/compute_treeline.o \
+	${SHAREDPATH}/src/free_all_vars.o \
+	${SHAREDPATH}/src/free_vegcon.o \
+	${SHAREDPATH}/src/get_dist.o \
+	${SHAREDPATH}/src/initialize_global.o \
+	${SHAREDPATH}/src/initialize_snow.o \
+	${SHAREDPATH}/src/initialize_soil.o \
+	${SHAREDPATH}/src/initialize_veg.o \
+	${SHAREDPATH}/src/make_all_vars.o \
+	${SHAREDPATH}/src/make_cell_data.o \
+	${SHAREDPATH}/src/make_dmy.o \
+	${SHAREDPATH}/src/make_energy_bal.o \
+	${SHAREDPATH}/src/make_snow_data.o \
+	${SHAREDPATH}/src/make_veg_var.o \
+	${SHAREDPATH}/src/open_file.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

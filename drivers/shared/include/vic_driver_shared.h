@@ -1,0 +1,87 @@
+/******************************************************************************
+ * @section DESCRIPTION
+ *
+ * Header file for vic_driver_shared routines
+ *
+ * @section LICENSE
+ *
+ * The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * and Environmental Engineering, University of Washington.
+ *
+ * The VIC model is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *****************************************************************************/
+
+#ifndef VIC_DRIVER_SHARED_H
+#define VIC_DRIVER_SHARED_H
+
+#include <stdio.h>
+
+/******************************************************************************
+ * @brief    Stores forcing file input information.
+*****************************************************************************/
+ typedef struct {
+    size_t N_ELEM; // number of elements per record; for LAI and ALBEDO,
+                   // 1 element per veg tile; for others N_ELEM = 1;
+    char   SIGNED;
+    int    SUPPLIED;
+    double multiplier;
+} force_type_struct;
+
+/******************************************************************************
+ * @brief    This structure records the parameters set by the forcing file
+             input routines.  Those filled, are used to estimate the paramters
+             needed for the model run in initialize_atmos.c.
+*****************************************************************************/
+typedef struct {
+    force_type_struct TYPE[N_FORCING_TYPES];
+    unsigned short FORCE_DT[2];    /* forcing file time step */
+    int            FORCE_ENDIAN[2]; /* endian-ness of input file, used for
+                            DAILY_BINARY format */
+    int            FORCE_FORMAT[2]; /* ASCII or BINARY */
+    int            FORCE_INDEX[2][N_FORCING_TYPES];
+    unsigned       N_TYPES[2];
+} param_set_struct;
+
+void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
+                      char *);
+void cmd_proc(int argc, char **argv, char *globalfilename);
+void compress_files(char string[]);
+void display_current_settings(int, filenames_struct *, global_param_struct *);
+void free_all_vars(all_vars_struct *all_vars, int Nveg);
+void free_dmy(dmy_struct **dmy);
+void free_vegcon(veg_con_struct **veg_con);
+double get_dist(double lat1, double long1, double lat2, double long2);
+void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
+                        unsigned short *, unsigned short *, unsigned short);
+void initialize_forcing_files(void);
+void initialize_global(void);
+void initialize_snow(snow_data_struct **snow, size_t veg_num);
+void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
+                     size_t veg_num);
+void initialize_veg(veg_var_struct **veg_var, size_t nveg);
+all_vars_struct make_all_vars(size_t nveg);
+cell_data_struct **make_cell_data(size_t veg_type_num);
+dmy_struct *make_dmy(global_param_struct *global);
+energy_bal_struct **make_energy_bal(size_t nveg);
+snow_data_struct **make_snow_data(size_t nveg);
+veg_var_struct **make_veg_var(size_t veg_type_num);
+FILE  *open_file(char string[], char type[]);
+void usage(char *);
+void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+
+#endif
+

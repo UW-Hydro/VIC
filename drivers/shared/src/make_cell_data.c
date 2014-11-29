@@ -1,8 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine creates an array of structures that contain information about a
- * cell's states and fluxes.
+ * This subroutine makes an array of type cell, which contains soil column
+ * variables for a single grid cell.
  *
  * @section LICENSE
  *
@@ -27,24 +27,25 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Creates an array of structures that contain information about a
- *           cell's states and fluxes.
+ * @brief    Make an array of type cell, which contains soil column variables
+ *           for a single grid cell.
  *****************************************************************************/
-all_vars_struct
-make_all_vars(size_t nveg)
+cell_data_struct **
+make_cell_data(size_t veg_type_num)
 {
-    all_vars_struct      temp;
-    size_t               Nitems;
+    extern option_struct options;
 
-    Nitems = nveg + 1;
+    size_t               i;
+    cell_data_struct   **temp;
 
-    temp.snow = make_snow_data(Nitems);
-    temp.energy = make_energy_bal(Nitems);
-    temp.veg_var = make_veg_var(Nitems);
-    temp.cell = make_cell_data(Nitems);
-
-    return (temp);
+    temp = (cell_data_struct**) calloc(veg_type_num,
+                                       sizeof(cell_data_struct*));
+    for (i = 0; i < veg_type_num; i++) {
+        temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND,
+                                             sizeof(cell_data_struct));
+    }
+    return temp;
 }

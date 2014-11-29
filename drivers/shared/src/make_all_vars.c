@@ -1,10 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine frees all memory allocated down the all_vars data structure.
- *
- * This include all grid cell specific variables (soil, vegetation, energy,
- * snow).
+ * This routine creates an array of structures that contain information about a
+ * cell's states and fluxes.
  *
  * @section LICENSE
  *
@@ -29,44 +27,24 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Free all variables.
+ * @brief    Creates an array of structures that contain information about a
+ *           cell's states and fluxes.
  *****************************************************************************/
-void
-free_all_vars(all_vars_struct *all_vars,
-              int              Nveg)
+all_vars_struct
+make_all_vars(size_t nveg)
 {
-    extern option_struct options;
+    all_vars_struct      temp;
+    size_t               Nitems;
 
-    int                  i, j, Nitems;
-    size_t               k;
+    Nitems = nveg + 1;
 
-    Nitems = Nveg + 1;
+    temp.snow = make_snow_data(Nitems);
+    temp.energy = make_energy_bal(Nitems);
+    temp.veg_var = make_veg_var(Nitems);
+    temp.cell = make_cell_data(Nitems);
 
-    for (j = 0; j < Nitems; j++) {
-        free((char *)all_vars[0].cell[j]);
-    }
-    free((char *)all_vars[0].cell);
-    for (j = 0; j < Nitems; j++) {
-        if (options.CARBON) {
-            for (k = 0; k < options.SNOW_BAND; k++) {
-                free((char *)all_vars[0].veg_var[j][k].NscaleFactor);
-                free((char *)all_vars[0].veg_var[j][k].aPARLayer);
-                free((char *)all_vars[0].veg_var[j][k].CiLayer);
-                free((char *)all_vars[0].veg_var[j][k].rsLayer);
-            }
-        }
-        free((char *)(*all_vars).veg_var[j]);
-    }
-    free((char *)(*all_vars).veg_var);
-    for (j = 0; j < Nitems; j++) {
-        free((char *)all_vars[0].energy[j]);
-    }
-    free((char *)all_vars[0].energy);
-    for (i = 0; i < Nitems; i++) {
-        free((char *)all_vars[0].snow[i]);
-    }
-    free((char *)all_vars[0].snow);
+    return (temp);
 }

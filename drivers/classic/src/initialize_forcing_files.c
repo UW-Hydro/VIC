@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- *
+ * This subroutine initalizes the forcing file parameters
  *
  * @section LICENSE
  *
@@ -26,34 +26,31 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_classic.h>
 
 /******************************************************************************
- * @brief    Make an array of snow cover data structures, one for each
- *           vegetation type plus bare soil.
+ * @brief    Initialize Forcing File Parameters
  *****************************************************************************/
-snow_data_struct **
-make_snow_data(size_t nveg)
+void
+initialize_forcing_files()
 {
-    extern option_struct options;
+    extern param_set_struct param_set;
 
-    size_t               i;
-    snow_data_struct   **temp = NULL;
+    int                     i, j;
 
-    temp = (snow_data_struct **) calloc(nveg,
-                                        sizeof(snow_data_struct *));
-    if (temp == NULL) {
-        nrerror("Memory allocation error in make_snow_data().");
+    /** Initialize forcing file input controls **/
+
+    for (j = 0; j < N_FORCING_TYPES; j++) {
+        param_set.TYPE[j].SUPPLIED = FALSE;
+        param_set.TYPE[j].SIGNED = 1;
+        param_set.TYPE[j].multiplier = 1;
     }
-
-
-    for (i = 0; i < nveg; i++) {
-        temp[i] = (snow_data_struct *) calloc(options.SNOW_BAND,
-                                              sizeof(snow_data_struct));
-        if (temp[i] == NULL) {
-            nrerror("Memory allocation error in make_snow_data().");
+    for (i = 0; i < 2; i++) {
+        param_set.FORCE_DT[i] = 0;
+        param_set.N_TYPES[i] = 0;
+        param_set.FORCE_FORMAT[i] = MISSING;
+        for (j = 0; j < N_FORCING_TYPES; j++) {
+            param_set.FORCE_INDEX[i][j] = MISSING;
         }
     }
-
-    return temp;
 }

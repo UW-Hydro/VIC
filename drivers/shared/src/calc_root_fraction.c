@@ -28,7 +28,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine computes the fraction of roots in each soil layer.

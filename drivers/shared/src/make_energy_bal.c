@@ -27,7 +27,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine makes an array of frozen soil data structures, one

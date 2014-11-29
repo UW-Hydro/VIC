@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine initializes the soil variable arrays for each new grid cell.
+  * This routine initializes the soil variable arrays for each new grid cell.
  *
  * @section LICENSE
  *
@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine initializes the soil variable arrays for each new

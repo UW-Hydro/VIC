@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Make an array of vegitation variables for each vegitation type.

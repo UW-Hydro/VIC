@@ -30,48 +30,17 @@
 #include <stdbool.h>
 #include <netcdf.h>
 #include <stdio.h>
+#include <vic_driver_shared.h>
 
 #define MAXDIMS 10
 
-/*******************************************************
-   Stores forcing file input information.
-*******************************************************/
-typedef struct {
-    char SIGNED;
-    int SUPPLIED;
-    double multiplier;
-} force_type_struct;
-
-/******************************************************************
-   This structure records the parameters set by the forcing file
-   input routines.  Those filled, are used to estimate the paramters
-   needed for the model run in initialize_atmos.c.
-******************************************************************/
-typedef struct {
-    force_type_struct TYPE[N_FORCING_TYPES];
-    int FORCE_DT[2];    /* forcing file time step */
-    int FORCE_ENDIAN[2]; /* endian-ness of input file, used for
-                            DAILY_BINARY format */
-    int FORCE_FORMAT[2]; /* ASCII or BINARY */
-    int FORCE_INDEX[2][N_FORCING_TYPES];
-    int N_TYPES[2];
-} param_set_struct;
-
-/*
-   Structure to store location information for individual grid cells.
-
-   The global and local indices show the position of the grid cell within the
-   global and local (processor) domains. When the model is run on a single
-   processor, the glonal and local domains are identical. The model is run over a
-   list of cells.
-
-   cellidx - varies from 0 to total number of cells (-1)
-
-   latidx - index of latitude of grid cell in 2-D image
-
-   lonidx - index of longitude of grid cell in 2-D image.
-
- */
+/******************************************************************************
+ * @brief    Structure to store location information for individual grid cells.
+ * @details  The global and local indices show the position of the grid cell
+ *           within the global and local (processor) domains. When the model is
+ *           run on a single processor, the glonal and local domains are
+ *           identical. The model is run over a list of cells.
+ *****************************************************************************/
 typedef struct {
     double latitude; // latitude of grid cell center
     double longitude; // longitude of grid cell center
@@ -86,10 +55,10 @@ typedef struct {
 } location_struct;
 
 
-/*
-   Structure to store local and global domain information. If the model is run on
-   a single processor, then the two are identical. Note that this
- */
+/******************************************************************************
+ * @brief    Structure to store local and global domain information. If the
+ *           model is run on a single processor, then the two are identical.
+ *****************************************************************************/
 typedef struct {
     size_t ncells_global; // number of active grid cell on global domain
     size_t n_nx; // size of x-index;
@@ -98,8 +67,10 @@ typedef struct {
     location_struct *locations; // locations structs for local domain
 } domain_struct;
 
-/* Structure for netcdf file information. Initially to store information for the
-   output files (state and history) */
+/******************************************************************************
+ * @brief    Structure for netcdf file information. Initially to store
+ *           information for the output files (state and history)
+ *****************************************************************************/
 typedef struct {
     char fname[MAXSTRING + 1];
     char c_fillvalue;
@@ -130,7 +101,9 @@ typedef struct {
     bool open;
 } nc_file_struct;
 
-/* Structure for netcdf variable information */
+/******************************************************************************
+ * @brief    Structure for netcdf variable information
+ *****************************************************************************/
 typedef struct {
     char nc_var_name[MAXSTRING]; // variable name
     char nc_units[MAXSTRING]; // variable name
@@ -142,9 +115,10 @@ typedef struct {
     int nc_write; // TRUE: write to file; FALSE: don't
 } nc_var_struct;
 
-/* Structure for mapping the vegetation types for each grid cell as stored
-   in VIC's veg_con_struct to a regular array. This is convoluted, but will
-   allow us to keep using VIC's existing memory layout */
+/******************************************************************************
+ * @brief    Structure for mapping the vegetation types for each grid cell as
+ *           stored in VIC's veg_con_struct to a regular array.
+ *****************************************************************************/
 typedef struct {
     size_t nv_types; // total number of vegetation types
                      // size of vidx and Cv arrays
@@ -160,13 +134,8 @@ void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
-void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
-void cmd_proc(int argc, char **argv, char *globalfilename);
 out_data_struct *create_output_list(void);
-void display_current_settings(int, filenames_struct *, global_param_struct *);
-void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_atmos(atmos_data_struct *atmos);
-void free_dmy(dmy_struct **dmy);
 void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
@@ -179,31 +148,18 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
-void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
-                        unsigned short *, unsigned short *, unsigned short);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
-void initialize_global(void);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
-void initialize_snow(snow_data_struct **snow, size_t veg_num);
-void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
-                     size_t veg_num);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_state_file(nc_file_struct *nc);
-void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 void initialize_veg_con(veg_con_struct *veg_con);
-all_vars_struct make_all_vars(size_t nveg);
-cell_data_struct **make_cell_data(size_t veg_type_num);
-dmy_struct *make_dmy(global_param_struct *);
-energy_bal_struct **make_energy_bal(size_t nveg);
-snow_data_struct **make_snow_data(size_t nveg);
-veg_var_struct **make_veg_var(size_t veg_type_num);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
@@ -243,7 +199,6 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
 double q_to_vp(double q, double p);
-void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
@@ -259,6 +214,5 @@ void vic_store(void);
 void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
-void usage(char *);
 
 #endif

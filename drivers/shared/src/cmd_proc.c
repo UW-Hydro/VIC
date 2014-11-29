@@ -3,10 +3,6 @@
  *
  * This routine checks the command line for valid program options.
  *
- * If no options are found, or an invalid combination of them appear, the
- * routine calls usage() to print the model usage to the screen, before exiting
- * execution.
- *
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
@@ -31,13 +27,18 @@
 #include <unistd.h>
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 char *optstring = "g:vo";
 
-/******************************************************************************
- * @brief    This routine checks the command line for valid program options.
- *****************************************************************************/
+/**********************************************************************
+   cmd_proc                  Keith Cherkauer                1997
+
+   This routine checks the command line for valid program options.  If
+   no options are found, or an invalid combination of them appear, the
+   routine calls usage() to print the model usage to the screen, before
+   exiting execution.
+**********************************************************************/
 void
 cmd_proc(int    argc,
          char **argv,

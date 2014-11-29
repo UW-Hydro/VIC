@@ -85,6 +85,9 @@ main(int   argc,
     cmd_proc(argc, argv, filenames.global);
     initialize_global();
 
+    /* Initilize forcing file param structure */
+    initialize_forcing_files();
+
     /** Read Global Control File **/
     filep.globalparam = open_file(filenames.global, "r");
     global_param = get_global_param(&filenames, filep.globalparam);

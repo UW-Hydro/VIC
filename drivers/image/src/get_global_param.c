@@ -566,7 +566,7 @@ get_global_param(filenames_struct *names,
                 sscanf(cmdstr, "%*s %d", &param_set.N_TYPES[file_num]);
             }
             else if (strcasecmp("FORCE_DT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d ", &param_set.FORCE_DT[file_num]);
+                sscanf(cmdstr, "%*s %hu ", &param_set.FORCE_DT[file_num]);
             }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global.forceyear[file_num]);

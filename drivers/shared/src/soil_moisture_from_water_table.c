@@ -60,7 +60,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Compute soil moistures for various values of water table depth

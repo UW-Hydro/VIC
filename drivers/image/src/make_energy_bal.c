@@ -1,8 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine makes an array of snow cover data structures, one for each
- * vegetation type plus bare soil.
+ * This routine makes an array of frozen soil data structures, one for each
+ * vegetation type and bare soil.
  *
  * @section LICENSE
  *
@@ -30,8 +30,8 @@
 #include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    Make an array of snow cover data structures, one for each
- *           vegetation type plus bare soil.
+ * @brief    This routine makes an array of frozen soil data structures, one
+ *           for each vegetation type and bare soil.
  *****************************************************************************/
 energy_bal_struct **
 make_energy_bal(size_t nveg)

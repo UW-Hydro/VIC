@@ -26,14 +26,14 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine initailizes the vegetation variable array.
  *****************************************************************************/
 void
-initialize_veg(veg_var_struct **veg_var,
-               size_t           Nveg)
+initialize_veg(veg_var_struct     **veg_var,
+               size_t               Nveg)
 {
     extern option_struct options;
 

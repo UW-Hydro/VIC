@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine makes an array of type cell, which contains soil column
- * variables for a single grid cell.
+ * Calculate distance between two locations.
  *
  * @section LICENSE
  *
@@ -27,32 +26,39 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Make an array of type cell, which contains soil column variables
- *           for a single grid cell.
+ * @brief    Get distance between two locations.
  *****************************************************************************/
-cell_data_struct **
-make_cell_data(size_t veg_type_num)
+double
+get_dist(double lat1,
+         double long1,
+         double lat2,
+         double long2)
 {
-    extern option_struct options;
+    double theta1;
+    double phi1;
+    double theta2;
+    double phi2;
+    double dtor;
+    double term1;
+    double term2;
+    double term3;
+    double temp;
+    double distance;
 
-    size_t               i;
-    cell_data_struct   **temp = NULL;
+    dtor = 2.0 * PI / 360.0;
+    theta1 = dtor * long1;
+    phi1 = dtor * lat1;
+    theta2 = dtor * long2;
+    phi2 = dtor * lat2;
+    term1 = cos(phi1) * cos(theta1) * cos(phi2) * cos(theta2);
+    term2 = cos(phi1) * sin(theta1) * cos(phi2) * sin(theta2);
+    term3 = sin(phi1) * sin(phi2);
+    temp = term1 + term2 + term3;
+    temp = (double) (1.0 < temp) ? 1.0 : temp;
+    distance = RADIUS * acos(temp);
 
-    temp = (cell_data_struct**) calloc(veg_type_num,
-                                       sizeof(cell_data_struct*));
-    if (temp == NULL) {
-        nrerror("Memory allocation error in make_cell_data().");
-    }
-
-    for (i = 0; i < veg_type_num; i++) {
-        temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND,
-                                             sizeof(cell_data_struct));
-        if (temp[i] == NULL) {
-            nrerror("Memory allocation error in make_cell_data().");
-        }
-    }
-    return temp;
+    return distance;
 }

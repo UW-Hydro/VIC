@@ -27,7 +27,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Initialize all global parameters before they are called by the
@@ -37,9 +37,6 @@ void
 initialize_global()
 {
     extern option_struct    options;
-    extern param_set_struct param_set;
-
-    int                     i, j;
 
     /** Initialize model option flags **/
 
@@ -60,7 +57,6 @@ initialize_global()
     options.IMPLICIT = TRUE;
     options.LAKES = FALSE;
     options.LAKE_PROFILE = FALSE;
-    options.LOG_MATRIC = FALSE;
     options.LW_CLOUD = LW_CLOUD_DEARDORFF;
     options.LW_TYPE = LW_PRATA;
     options.MIN_WIND_SPEED = 0.1;
@@ -86,13 +82,18 @@ initialize_global()
     options.VP_INTERP = TRUE;
     options.VP_ITER = VP_ITER_ALWAYS;
     // input options
+    options.ALB_SRC = FROM_VEGLIB;
     options.BASEFLOW = ARNO;
     options.GRID_DECIMAL = 2;
     options.JULY_TAVG_SUPPLIED = FALSE;
+    options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = FALSE;
+    options.VEGCOVER_SRC = FROM_VEGLIB;
     options.VEGLIB_PHOTO = FALSE;
+    options.VEGLIB_VEGCOVER = FALSE;
+    options.VEGPARAM_ALB = FALSE;
     options.VEGPARAM_LAI = FALSE;
-    options.LAI_SRC = LAI_FROM_VEGLIB;
+    options.VEGPARAM_VEGCOVER = FALSE;
     // state options
     options.BINARY_STATE_FILE = FALSE;
     options.INIT_STATE = FALSE;
@@ -106,20 +107,4 @@ initialize_global()
     options.OUTPUT_FORCE = FALSE;
     options.PRT_HEADER = FALSE;
     options.PRT_SNOW_BAND = FALSE;
-
-    /** Initialize forcing file input controls **/
-
-    for (j = 0; j < N_FORCING_TYPES; j++) {
-        param_set.TYPE[j].SUPPLIED = FALSE;
-        param_set.TYPE[j].SIGNED = 1;
-        param_set.TYPE[j].multiplier = 1;
-    }
-    for (i = 0; i < 2; i++) {
-        param_set.FORCE_DT[i] = MISSING;
-        param_set.N_TYPES[i] = MISSING;
-        param_set.FORCE_FORMAT[i] = MISSING;
-        for (j = 0; j < N_FORCING_TYPES; j++) {
-            param_set.FORCE_INDEX[i][j] = MISSING;
-        }
-    }
 }

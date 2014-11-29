@@ -1,10 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine frees all memory allocated down the all_vars data structure.
- *
- * This include all grid cell specific variables (soil, vegetation, energy,
- * snow).
+ * This routine makes an array of snow cover data structures, one for each
+ * vegetation type plus bare soil.
  *
  * @section LICENSE
  *
@@ -29,44 +27,35 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Free all variables.
+ * @brief    Make an array of snow cover data structures, one for each
+ *           vegetation type plus bare soil.
  *****************************************************************************/
-void
-free_all_vars(all_vars_struct *all_vars,
-              int              Nveg)
+snow_data_struct **
+make_snow_data(size_t nveg)
+
 {
     extern option_struct options;
 
-    int                  i, j, Nitems;
-    size_t               k;
+    size_t               i;
+    snow_data_struct   **temp = NULL;
 
-    Nitems = Nveg + 1;
-
-    for (j = 0; j < Nitems; j++) {
-        free((char *) all_vars[0].cell[j]);
+    temp = (snow_data_struct **) calloc(nveg,
+                                        sizeof(snow_data_struct *));
+    if (temp == NULL) {
+        nrerror("Memory allocation error in make_snow_data().");
     }
-    free((char *) all_vars[0].cell);
-    for (j = 0; j < Nitems; j++) {
-        if (options.CARBON) {
-            for (k = 0; k < options.SNOW_BAND; k++) {
-                free((char *) all_vars[0].veg_var[j][k].NscaleFactor);
-                free((char *) all_vars[0].veg_var[j][k].aPARLayer);
-                free((char *) all_vars[0].veg_var[j][k].CiLayer);
-                free((char *) all_vars[0].veg_var[j][k].rsLayer);
-            }
+
+
+    for (i = 0; i < nveg; i++) {
+        temp[i] = (snow_data_struct *) calloc(options.SNOW_BAND,
+                                              sizeof(snow_data_struct));
+        if (temp[i] == NULL) {
+            nrerror("Memory allocation error in make_snow_data().");
         }
-        free((char *) (*all_vars).veg_var[j]);
     }
-    free((char *) (*all_vars).veg_var);
-    for (j = 0; j < Nitems; j++) {
-        free((char *) all_vars[0].energy[j]);
-    }
-    free((char *) all_vars[0].energy);
-    for (i = 0; i < Nitems; i++) {
-        free((char *) all_vars[0].snow[i]);
-    }
-    free((char *) all_vars[0].snow);
+
+    return temp;
 }

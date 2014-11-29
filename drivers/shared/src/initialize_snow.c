@@ -26,15 +26,15 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    This routine initializes the snow variable arrays for each new
- *           grid cell.
+ * @brief    Initialize the snow variable arrays for each new grid cell.
  *****************************************************************************/
 void
 initialize_snow(snow_data_struct **snow,
                 size_t             veg_num)
+
 {
     extern option_struct options;
     size_t               i, j;

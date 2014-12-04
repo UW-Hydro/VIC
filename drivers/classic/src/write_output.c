@@ -6,7 +6,8 @@ void
 write_output(out_data_struct      *out_data,
              out_data_file_struct *out_data_files,
              dmy_struct           *dmy,
-             int                   rec)
+             int                   rec,
+             int                   nveg)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -95,7 +96,7 @@ write_output(out_data_struct      *out_data,
                 }
             }
         }
-        write_data(out_data_files, out_data, dmy, global_param.out_dt);
+        write_data(out_data_files, out_data, dmy, global_param.out_dt, nveg);
     }
 
     // Reset the agg data

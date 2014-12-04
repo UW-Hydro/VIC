@@ -5,7 +5,8 @@
 void write_data(out_data_file_struct *out_data_files,
 		out_data_struct *out_data,
 		dmy_struct      *dmy,
-		int              dt)
+		int              dt,
+                int              nveg)
 /**********************************************************************
 	write_data	Dag Lohmann		Janurary 1996
 
@@ -76,6 +77,8 @@ void write_data(out_data_file_struct *out_data_files,
 	      aggregation of output variables.				TJB
   2012-Jan-16 Removed LINK_DEBUG code					BN
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Dec-02 Added nelements so that < veg_con[0].vegetat_type_num elements
+              outputted for OUT_CN_LAIVEG                               MAB
 **********************************************************************/
 {
   extern option_struct options;
@@ -89,6 +92,7 @@ void write_data(out_data_file_struct *out_data_files,
   int                *tmp_iptr;
   float              *tmp_fptr;
   double             *tmp_dptr;
+  int                 nelements;
 
   /***************************************************************
     Write output files using default VIC ASCII or BINARY formats
@@ -209,7 +213,11 @@ void write_data(out_data_file_struct *out_data_files,
       // Loop over this output file's data variables
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
         // Loop over this variable's elements
-        for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
+	if(out_data_files[file_idx].varid[var_idx] == OUT_CN_LAIVEG)
+	  nelements = nveg;
+	else
+	  nelements = out_data[out_data_files[file_idx].varid[var_idx]].nelem;
+         for (elem_idx = 0; elem_idx < nelements; elem_idx++) {
           if (!(var_idx == 0 && elem_idx == 0)) {
             fprintf(out_data_files[file_idx].fh, "\t ");
           }

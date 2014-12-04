@@ -12,7 +12,8 @@ int initialize_model_state(all_vars_struct     *all_vars,
 			   double               surf_temp, 
 			   soil_con_struct     *soil_con,
 			   veg_con_struct      *veg_con,
-			   lake_con_struct      lake_con)
+			   lake_con_struct      lake_con,
+			   cn_data_struct      *cn)
 /**********************************************************************
   initialize_model_state      Keith Cherkauer	    April 17, 2000
 
@@ -121,6 +122,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	      annual average air temperature and bottom boundary
 	      temperature.											TJB
   2014-Mar-28 Removed DIST_PRCP option.							TJB
+  2014-Nov-25 Added getting CN data structure values from inital model state.           MAB
 **********************************************************************/
 {
   extern option_struct options;
@@ -231,7 +233,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
 
     read_initial_model_state(filep.init_state, all_vars, global_param,  
 			     Nveg, options.SNOW_BAND, cellnum, soil_con,
-			     lake_con);
+			     lake_con, cn);
 
     /******Check that soil moisture does not exceed maximum allowed************/
     for ( veg = 0 ; veg <= Nveg ; veg++ ) {
@@ -765,6 +767,9 @@ int update_thermal_nodes(all_vars_struct     *all_vars,
     index=Nnodes-1;
     soil_con->dz_node[index] = soil_con->Zsum_node[index]-soil_con->Zsum_node[index-1];
   }
+#if VERBOSE
+  fprintf(stderr,"More updated parameters in soil_con: dz_node and Zsum_node.\n");
+#endif
 
   /******************************************
     Update soil thermal node temperatures via linear interpolation.

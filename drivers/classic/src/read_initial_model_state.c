@@ -1,6 +1,7 @@
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
+#define MAX_PFT 20
 
 void read_initial_model_state(FILE                *init_state,
 			      all_vars_struct     *all_vars,
@@ -9,7 +10,8 @@ void read_initial_model_state(FILE                *init_state,
 			      int                  Nbands,
 			      int                  cellnum,
 			      soil_con_struct     *soil_con,
-			      lake_con_struct      lake_con)
+			      lake_con_struct      lake_con,
+			      cn_data_struct      *cn)
 /*********************************************************************
   read_initial_model_state   Keith Cherkauer         April 14, 2000
 
@@ -85,6 +87,7 @@ void read_initial_model_state(FILE                *init_state,
   2013-Dec-27 Moved SPATIAL_FROST to options_struct.			TJB
   2013-Dec-28 Removed NO_REWIND option.					TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
+  2014-Nov-24 Added retrieval of CN quantities.                         MAB
 *********************************************************************/
 {
   extern option_struct options;
@@ -560,6 +563,418 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror("End of model state file found unexpectedly");
       
     }
+  }
+
+  if ( options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP ) {
+    if ( options.BINARY_STATE_FILE ) {
+      // Read both wet and dry fractions if using distributed precipitation
+      for ( band = 0; band < Nbands; band ++ ) {
+	
+	for ( iveg = 0; iveg < MAX_PFT + 1; iveg++ ) {
+	  /* Read dormancy flag */
+	  if ( fread( &cn[band].dormant_flag[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read number of days active */
+	  if ( fread( &cn[band].days_active[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset flag */
+	  if ( fread( &cn[band].onset_flag[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset counter */
+	  if ( fread( &cn[band].onset_counter[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset growing degree days flag */
+	  if ( fread( &cn[band].onset_gddflag[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset freezing degree days */
+	  if ( fread( &cn[band].onset_fdd[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset growing degree days */
+	  if ( fread( &cn[band].onset_gdd[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read onset soil water index */
+	  if ( fread( &cn[band].onset_swi[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read offset flag */
+	  if ( fread( &cn[band].offset_flag[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read offset counter */
+	  if ( fread( &cn[band].offset_counter[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read offset freezing degree days */
+	  if ( fread( &cn[band].offset_fdd[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read offset soil water index */
+	  if ( fread( &cn[band].offset_swi[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read long growing season factor */
+	  if ( fread( &cn[band].lgsf[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read background litterfall rate */
+	  if ( fread( &cn[band].bglfr[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read background transfer growth rate */
+	  if ( fread( &cn[band].bgtr[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read daylength */
+	  if ( fread( &cn[band].dayl[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read daylength of the previous timestep */
+	  if ( fread( &cn[band].prev_dayl[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read annual average 2-m air temperature */
+	  if ( fread( &cn[band].annavg_t2m[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary average 2-m air temperature */
+	  if ( fread( &cn[band].tempavg_t2m[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read GPP */
+	  if ( fread( &cn[band].gpp[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read C flux available for allocation */
+	  if ( fread( &cn[band].availc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read C flux assigned to recovery */
+	  if ( fread( &cn[band].xsmrpool_recover[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fraction of current allocation as new growth */
+	  if ( fread( &cn[band].alloc_pnow[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read C allocation index */
+	  if ( fread( &cn[band].c_allometry[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read N allocation index */
+	  if ( fread( &cn[band].n_allometry[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read N flux required to support GPP */
+	  if ( fread( &cn[band].plant_ndemand[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary annual sum of potential GPP */
+	  if ( fread( &cn[band].tempsum_potential_gpp[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read annual sum of potential GPP */
+	  if ( fread( &cn[band].annsum_potential_gpp[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary annual max of retranslocated N pool */
+	  if ( fread( &cn[band].tempmax_retransn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read annual max of retranslocated N pool */
+	  if ( fread( &cn[band].annmax_retransn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read available N flux for retranslocated N pool */
+	  if ( fread( &cn[band].avail_retransn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read allocated N flux */
+	  if ( fread( &cn[band].plant_nalloc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read allocated C flux */
+	  if ( fread( &cn[band].plant_calloc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read C flux not allocated */
+	  if ( fread( &cn[band].excess_cflux[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fraction reduction in GPP due to N limit */
+	  if ( fread( &cn[band].downreg[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read previous leaf C litterfall */
+	  if ( fread( &cn[band].prev_leafc_to_litter[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read previous fine root C litterfall */
+	  if ( fread( &cn[band].prev_frootc_to_litter[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary annual sum of NPP */
+	  if ( fread( &cn[band].tempsum_npp[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read annual sum of NPP */
+	  if ( fread( &cn[band].annsum_npp[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf C */
+	  if ( fread( &cn[band].leafc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf C storage */
+	  if ( fread( &cn[band].leafc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf C transfer */
+	  if ( fread( &cn[band].leafc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root C */
+	  if ( fread( &cn[band].frootc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root C storage */
+	  if ( fread( &cn[band].frootc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root C transfer */
+	  if ( fread( &cn[band].frootc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem C */
+	  if ( fread( &cn[band].livestemc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem C storage */
+	  if ( fread( &cn[band].livestemc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem C transfer */
+	  if ( fread( &cn[band].livestemc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem C */
+	  if ( fread( &cn[band].deadstemc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem C storage */
+	  if ( fread( &cn[band].deadstemc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem C transfer */
+	  if ( fread( &cn[band].deadstemc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root C */
+	  if ( fread( &cn[band].livecrootc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root C storage */
+	  if ( fread( &cn[band].livecrootc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root C transfer */
+	  if ( fread( &cn[band].livecrootc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root C */
+	  if ( fread( &cn[band].deadcrootc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root C storage */
+	  if ( fread( &cn[band].deadcrootc_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root C transfer */
+	  if ( fread( &cn[band].deadcrootc_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read growth respiration storage */
+	  if ( fread( &cn[band].gresp_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read growth respiration transfer */
+	  if ( fread( &cn[band].gresp_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary photosynthate C pool */
+	  if ( fread( &cn[band].cpool[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read abstract C pool to meet excess MR demand */
+	  if ( fread( &cn[band].xsmrpool[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read PFT-level sink for C truncation */
+	  if ( fread( &cn[band].pft_ctrunc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read total vegetation C */
+	  if ( fread( &cn[band].totvegc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf N */
+	  if ( fread( &cn[band].leafn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf N storage */
+	  if ( fread( &cn[band].leafn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read leaf N transfer */
+	  if ( fread( &cn[band].leafn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root N */
+	  if ( fread( &cn[band].frootn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root N storage */
+	  if ( fread( &cn[band].frootn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read fine root N transfer */
+	  if ( fread( &cn[band].frootn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem N */
+	  if ( fread( &cn[band].livestemn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem N storage */
+	  if ( fread( &cn[band].livestemn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live stem N transfer */
+	  if ( fread( &cn[band].livestemn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem N */
+	  if ( fread( &cn[band].deadstemn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem N storage */
+	  if ( fread( &cn[band].deadstemn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead stem N transfer */
+	  if ( fread( &cn[band].deadstemn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root N */
+	  if ( fread( &cn[band].livecrootn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root N storage */
+	  if ( fread( &cn[band].livecrootn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read live coarse root N transfer */
+	  if ( fread( &cn[band].livecrootn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root N */
+	  if ( fread( &cn[band].deadcrootn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root N storage */
+	  if ( fread( &cn[band].deadcrootn_storage[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read dead coarse root N transfer */
+	  if ( fread( &cn[band].deadcrootn_xfer[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read retranslocated N pool */
+	  if ( fread( &cn[band].retransn[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read temporary photosynthate N pool */
+	  if ( fread( &cn[band].npool[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	  /* Read PFT-level sink for N truncation */
+	  if ( fread( &cn[band].pft_ntrunc[iveg], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	}
+        /* Read solar declination angle */
+	if ( fread( &cn[band].decl, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read fraction of potential immobilization */
+	if ( fread( &cn[band].fpi, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read fraction of potential GPP */
+	if ( fread( &cn[band].fpg, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read seconds since last annual accumulation */
+	if ( fread( &cn[band].annsum_counter, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column annual sum of NPP */
+	if ( fread( &cn[band].cannsum_npp, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column 2-m temperature annual average */
+	if ( fread( &cn[band].cannavg_t2m, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read volumetric soil water at field capacity */
+	for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
+	  if ( fread( &cn[band].watfc[nidx], sizeof(double), 1, init_state ) != 1 )
+	    nrerror("End of model state file found unexpectedly");
+	}
+        /* Read moisture of extinction */
+	if ( fread( &cn[band].me, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read daily fire probability */
+	if ( fread( &cn[band].fire_prob, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read mean of daily fire probability */
+	if ( fread( &cn[band].mean_fire_prob, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read annual fire season length */
+	if ( fread( &cn[band].fireseasonl, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read fractional area burned */
+	if ( fread( &cn[band].farea_burned, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read annual fractional area burned */
+	if ( fread( &cn[band].ann_farea_burned, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read coarse woody debris C */
+	if ( fread( &cn[band].cwdc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter labile C */
+	if ( fread( &cn[band].litr1c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter cellulose C */
+	if ( fread( &cn[band].litr2c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter lignin C */
+	if ( fread( &cn[band].litr3c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read fastest soil organic C */
+	if ( fread( &cn[band].soil1c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read medium soil organic C */
+	if ( fread( &cn[band].soil2c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read slow soil organic C */
+	if ( fread( &cn[band].soil3c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read slowest soil organic C */
+	if ( fread( &cn[band].soil4c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column-level C pool for seeding new PFTs */
+	if ( fread( &cn[band].seedc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column-level sink for C truncation */
+	if ( fread( &cn[band].col_ctrunc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read total litter C */
+	if ( fread( &cn[band].totlitc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read total column C */
+	if ( fread( &cn[band].totcolc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read 10-yr lifespan wood product C pool */
+	if ( fread( &cn[band].prod10c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read 100-yr lifespan wood product C pool */
+	if ( fread( &cn[band].prod100c, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read coarse woody debris N */
+	if ( fread( &cn[band].cwdn, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter labile N */
+	if ( fread( &cn[band].litr1n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter cellulose N */
+	if ( fread( &cn[band].litr2n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read litter lignin N */
+	if ( fread( &cn[band].litr3n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read fastest soil organic N */
+	if ( fread( &cn[band].soil1n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read medium soil organic N */
+	if ( fread( &cn[band].soil2n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read slow soil organic N */
+	if ( fread( &cn[band].soil3n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read slowest soil organic N */
+	if ( fread( &cn[band].soil4n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+         /* Read soil mineral N */
+	if ( fread( &cn[band].sminn, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column-level N pool for seeding new PFTs */
+	if ( fread( &cn[band].seedn, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read column-level sink for N truncation */
+	if ( fread( &cn[band].col_ntrunc, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read total column N */
+	if ( fread( &cn[band].totcoln, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read 10-yr lifespan wood product N pool */
+	if ( fread( &cn[band].prod10n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+        /* Read 100-yr lifespan wood product N pool */
+	if ( fread( &cn[band].prod100n, sizeof(double), 1, init_state ) != 1 )
+	  nrerror("End of model state file found unexpectedly");
+      }
+    }
+    else
+      {
+	// Read both wet and dry fractions if using distributed precipitation
+	for ( band = 0; band < Nbands; band ++ ) {
+	  /* Read PFT-level variables */
+	  for(iveg = 0; iveg < MAX_PFT + 1; iveg++)
+	    {
+	      if(fscanf(init_state, "%d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &veg, &cn[band].dormant_flag[iveg], &cn[band].days_active[iveg], &cn[band].onset_flag[iveg], &cn[band].onset_counter[iveg], &cn[band].onset_gddflag[iveg], &cn[band].onset_fdd[iveg], &cn[band].onset_gdd[iveg], &cn[band].onset_swi[iveg], &cn[band].offset_flag[iveg], &cn[band].offset_counter[iveg], &cn[band].offset_fdd[iveg], &cn[band].offset_swi[iveg], &cn[band].lgsf[iveg], &cn[band].bglfr[iveg], &cn[band].bgtr[iveg], &cn[band].dayl[iveg], &cn[band].prev_dayl[iveg], &cn[band].annavg_t2m[iveg], &cn[band].tempavg_t2m[iveg], &cn[band].gpp[iveg], &cn[band].availc[iveg], &cn[band].xsmrpool_recover[iveg], &cn[band].alloc_pnow[iveg], &cn[band].c_allometry[iveg], &cn[band].n_allometry[iveg], &cn[band].plant_ndemand[iveg], &cn[band].tempsum_potential_gpp[iveg], &cn[band].annsum_potential_gpp[iveg], &cn[band].tempmax_retransn[iveg], &cn[band].annmax_retransn[iveg], &cn[band].avail_retransn[iveg], &cn[band].plant_nalloc[iveg], &cn[band].plant_calloc[iveg], &cn[band].excess_cflux[iveg], &cn[band].downreg[iveg], &cn[band].prev_leafc_to_litter[iveg], &cn[band].prev_frootc_to_litter[iveg], &cn[band].tempsum_npp[iveg], &cn[band].annsum_npp[iveg], &cn[band].leafc[iveg], &cn[band].leafc_storage[iveg], &cn[band].leafc_xfer[iveg], &cn[band].frootc[iveg], &cn[band].frootc_storage[iveg], &cn[band].frootc_xfer[iveg], &cn[band].livestemc[iveg], &cn[band].livestemc_storage[iveg], &cn[band].livestemc_xfer[iveg], &cn[band].deadstemc[iveg], &cn[band].deadstemc_storage[iveg], &cn[band].deadstemc_xfer[iveg], &cn[band].livecrootc[iveg], &cn[band].livecrootc_storage[iveg], &cn[band].livecrootc_xfer[iveg], &cn[band].deadcrootc[iveg], &cn[band].deadcrootc_storage[iveg], &cn[band].deadcrootc_xfer[iveg], &cn[band].gresp_storage[iveg], &cn[band].gresp_xfer[iveg], &cn[band].cpool[iveg], &cn[band].xsmrpool[iveg], &cn[band].pft_ctrunc[iveg], &cn[band].totvegc[iveg], &cn[band].leafn[iveg], &cn[band].leafn_storage[iveg], &cn[band].leafn_xfer[iveg], &cn[band].frootn[iveg], &cn[band].frootn_storage[iveg], &cn[band].frootn_xfer[iveg], &cn[band].livestemn[iveg], &cn[band].livestemn_storage[iveg], &cn[band].livestemn_xfer[iveg], &cn[band].deadstemn[iveg], &cn[band].deadstemn_storage[iveg], &cn[band].deadstemn_xfer[iveg], &cn[band].livecrootn[iveg], &cn[band].livecrootn_storage[iveg], &cn[band].livecrootn_xfer[iveg], &cn[band].deadcrootn[iveg], &cn[band].deadcrootn_storage[iveg], &cn[band].deadcrootn_xfer[iveg], &cn[band].retransn[iveg], &cn[band].npool[iveg], &cn[band].pft_ntrunc[iveg]) == EOF )
+	    nrerror("End of model state file found unexpectedly");
+	    }
+	  /* Read column-level variables */
+	  if(fscanf(init_state, "%lf %lf %lf %lf %lf %lf", &cn[band].decl, \
+		    &cn[band].fpi, &cn[band].fpg, \
+		    &cn[band].annsum_counter, &cn[band].cannsum_npp, \
+		    &cn[band].cannavg_t2m) == EOF)
+	      nrerror("End of model state file found unexpectedly");
+	  for(nidx = 0; nidx < options.Nnode; nidx++ ) {
+	    if(fscanf(init_state, " %lf", &cn[band].watfc[nidx]) == EOF)
+	      nrerror("End of model state file found unexpectedly");
+	  }
+	  if(fscanf(init_state, " %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &cn[band].me, &cn[band].fire_prob, &cn[band].mean_fire_prob, &cn[band].fireseasonl, &cn[band].ann_farea_burned, &cn[band].cwdc, &cn[band].litr1c, &cn[band].litr2c, &cn[band].litr3c, &cn[band].soil1c, &cn[band].soil2c, &cn[band].soil3c, &cn[band].soil4c, &cn[band].seedc, &cn[band].col_ctrunc, &cn[band].totlitc, &cn[band].totcolc, &cn[band].prod10c, &cn[band].prod100c, &cn[band].cwdn, &cn[band].litr1n, &cn[band].litr2n, &cn[band].litr3n, &cn[band].soil1n, &cn[band].soil2n, &cn[band].soil3n, &cn[band].soil4n, &cn[band].sminn, &cn[band].col_ntrunc, &cn[band].seedn, &cn[band].totcoln, &cn[band].prod10n, &cn[band].prod100n) == EOF)
+	    nrerror("End of model state file found unexpectedly");
+	}
+      }
   }
 
 }

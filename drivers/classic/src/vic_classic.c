@@ -6,6 +6,9 @@
 
 char *version = "5.0 beta 2014-Sep-29";
 
+extern void clm_initialize2_(double *, int *, int *, int *, int *, int *, \
+			     int *, int *, int *, int *, double *, int *);
+
 int flag;
 int NR;         /* array index for atmos struct that indicates
                    the model step avarage or sum */
@@ -127,6 +130,7 @@ int main(int argc, char *argv[])
 	      OUTPUT_FORCE condition to avoid memory leak.		TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameters.			TJB
+  2014-Nov-10 Added CN option.                                          MAB
 **********************************************************************/
 {
  /** Variable Declarations **/
@@ -145,7 +149,14 @@ int main(int argc, char *argv[])
   int                      index;
   int                      Ncells;
   int                      startrec;
+  int                      begg, endg, begc, endc, begp, endp;
+  int                      nveg;
+  int                      npfts;
+  int                      nlevgrnd;
+  int                     *vegclass;
+  double                  *vegfract;
   int                      ErrorFlag;
+  double                   dt;
   double                   storage;
   double                   veg_fract;
   double                   band_fract;
@@ -155,6 +166,7 @@ int main(int argc, char *argv[])
   veg_hist_struct        **veg_hist;
   veg_con_struct          *veg_con;
   soil_con_struct          soil_con;
+  cn_data_struct          *cn;   /* Added by MAB, 11/5/14 */
   all_vars_struct          all_vars;
   filenames_struct         filenames;
   filep_struct             filep;
@@ -171,13 +183,6 @@ int main(int argc, char *argv[])
   filep.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, filep.globalparam);
 
-  /** Set up output data structures **/
-  out_data = create_output_list();
-  out_data_files = set_output_defaults(out_data);
-  fclose(filep.globalparam);
-  filep.globalparam = open_file(filenames.global,"r");
-  parse_output_info(&filenames, filep.globalparam, &out_data_files, out_data);
-
   /** Check and Open Files **/
   check_files(&filep, &filenames);
 
@@ -185,6 +190,13 @@ int main(int argc, char *argv[])
     /** Read Vegetation Library File **/
     veg_lib = read_veglib(filep.veglib,&Nveg_type);
   } /* !OUTPUT_FORCE */
+
+  /** Set up output data structures, moved here by MAB 11/18/14 **/
+  out_data = create_output_list(Nveg_type);
+  out_data_files = set_output_defaults(out_data);
+  fclose(filep.globalparam);
+  filep.globalparam = open_file(filenames.global,"r");
+  parse_output_info(&filenames, filep.globalparam, &out_data_files, out_data);
 
   /** Initialize Parameters **/
   cellnum = -1;
@@ -194,6 +206,9 @@ int main(int argc, char *argv[])
 
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
+
+  /* allocate memory for cn_data_struct if needed */
+  alloc_cn(options.SNOW_BAND, options.Nnode, &cn);
 
   /** Initial state **/
   startrec = 0;
@@ -276,7 +291,7 @@ int main(int argc, char *argv[])
 			       soil_con.gridcel, veg_con[0].vegetat_type_num,
 			       options.Nnode, 
 			       atmos[0].air_temp[NR],
-			       &soil_con, veg_con, lake_con);
+					   &soil_con, veg_con, lake_con, cn);
         if ( ErrorFlag == ERROR ) {
 	  if ( options.CONTINUEONERROR == TRUE ) {
 	    // Handle grid cell solution error
@@ -289,13 +304,39 @@ int main(int argc, char *argv[])
 	  }
         }
       
+	/** Initialize CN state **/
+	vegclass = calloc(MAX_VEG + 1, sizeof(int));
+	vegfract = calloc(MAX_VEG + 1, sizeof(double));
+	if(options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP) {
+	  begg = 1;
+	  endg = 1;
+	  begc = 1;
+	  endc = options.SNOW_BAND;
+	  begp = 1;
+	  endp = options.SNOW_BAND * veg_con[0].vegetat_type_num;
+	  nveg = veg_con[0].vegetat_type_num;
+	  npfts = 0;
+          nlevgrnd = options.Nnode;
+
+	  for(i = 0; i <= veg_con[0].vegetat_type_num; i++)
+	    {
+	      vegclass[i] = veg_con[i].veg_class;
+	      vegfract[i] = veg_con[i].Cv;
+	    }
+
+	    dt = global_param.dt * 3600.0;
+
+	  clm_initialize2_(&dt, &nlevgrnd, &begg, &endg, &begc, &endc, &begp, \
+	     &endp, &nveg, vegclass, vegfract, &npfts);
+        }
+
         /** Update Error Handling Structure **/
         Error.filep = filep;
         Error.out_data_files = out_data_files;
 
         /** Initialize the storage terms in the water and energy balances **/
         /** Sending a negative record number (-global_param.nrecs) to put_data() will accomplish this **/
-	ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib, &lake_con, out_data, &save_data, &dmy[0], -global_param.nrecs);
+	ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib, cn, &lake_con, out_data, &save_data, &dmy[0], -global_param.nrecs);
 
         /******************************************
 	  Run Model in Grid Cell for all Time Steps
@@ -309,16 +350,16 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Compute cell physics for 1 timestep
 	  **************************************************/
-	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_lib, veg_hist[rec]);
+	  ErrorFlag = vic_run(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_lib, veg_hist[rec], npfts, cn);
 
 	  /**************************************************
 	    Calculate cell average values for current time step
 	  **************************************************/
-	  write_flag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib, &lake_con, out_data, &save_data, &dmy[rec], rec);
+	  write_flag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib, cn, &lake_con, out_data, &save_data, &dmy[rec], rec);
 
     // Write cell average values for current time step
     if (write_flag) {
-        write_output(out_data, out_data_files, &dmy[rec], rec);
+        write_output(out_data, out_data_files, &dmy[rec], rec, veg_con[0].vegetat_type_num);
     }
 
 	  /************************************
@@ -331,7 +372,7 @@ int main(int argc, char *argv[])
 		     && dmy[rec].day == global_param.stateday
 		     && ( rec+1 == global_param.nrecs
 			  || dmy[rec+1].day != global_param.stateday ) ) )
-	    write_model_state(&all_vars, &global_param, veg_con->vegetat_type_num, soil_con.gridcel, &filep, &soil_con, lake_con);
+	    write_model_state(&all_vars, &global_param, veg_con->vegetat_type_num, soil_con.gridcel, &filep, &soil_con, lake_con, cn);
 
 
           if ( ErrorFlag == ERROR ) {
@@ -372,6 +413,7 @@ int main(int argc, char *argv[])
 
   /** cleanup **/
   free_atmos(global_param.nrecs, &atmos);
+  free_cn(&cn);
   free_dmy(&dmy);
   free_out_data_files(&out_data_files);
   free_out_data(&out_data);

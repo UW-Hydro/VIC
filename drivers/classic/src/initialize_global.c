@@ -141,7 +141,7 @@ void initialize_global() {
   options.AboveTreelineVeg      = -1;
   options.AERO_RESIST_CANSNOW   = AR_406_FULL;
   options.BLOWING               = FALSE;
-  options.CARBON                = FALSE;
+  options.CARBON                = NO_CARBON;
   options.CLOSE_ENERGY          = FALSE;
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;

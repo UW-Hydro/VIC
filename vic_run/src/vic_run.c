@@ -13,12 +13,17 @@ int  vic_run(int                  gridcell,
              soil_con_struct     *soil_con,
              veg_con_struct      *veg_con,
              veg_lib_struct      *veg_lib,
-             veg_hist_struct     *veg_hist)
+             veg_hist_struct     *veg_hist,
+	     int                 npfts,
+	     cn_data_struct      *cn)
 /**********************************************************************
 	vic_run
 
   This subroutine controls the model core, it solves both the energy
   and water balance models, as well as frozen soils.
+
+  modifications:
+  12-Nov-14 Added VICCNInterface call for running CN.              MAB
 **********************************************************************/
 {
   extern option_struct   options;
@@ -359,6 +364,14 @@ int  vic_run(int                  gridcell,
 
     } /** end non-zero area veg tile **/
   } /** end of vegetation loop **/
+
+  /* Run CN, added by MAB 11/12/14 */
+
+  if(options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP)
+    {
+    ErrorFlag = VICCNInterface(rec, Nveg, npfts, dmy, gp, atmos, \
+			       all_vars, soil_con, veg_con, veg_lib, cn);
+    }
 
   /* Convert LAI back to global */
   if (rec >= 0) {

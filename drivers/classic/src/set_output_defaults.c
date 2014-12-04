@@ -27,6 +27,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *out_data) {
 	      to set of output variables.  Added volumetric versions
 	      of these too.						TJB
   2013-Dec-27 Moved OUTPUT_FORCE to options_struct.			TJB
+  2014-Nov-18 Added CN output.                                          MAB
 *************************************************************/
 
   extern option_struct options;
@@ -70,6 +71,9 @@ else {
   if (options.LAKES) {
     options.Noutfiles++;
   }
+  if (options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP) {
+    options.Noutfiles++;
+  }
   out_data_files = (out_data_file_struct *)calloc(options.Noutfiles,sizeof(out_data_file_struct));
   filenum = 0;
   strcpy(out_data_files[filenum].prefix,"fluxes");
@@ -110,6 +114,11 @@ else {
     strcpy(out_data_files[filenum].prefix,"lake");
     out_data_files[filenum].nvars = 8;
   }
+  if (options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP) {
+    filenum++;
+    strcpy(out_data_files[filenum].prefix,"cn");
+    out_data_files[filenum].nvars = 41;
+    }
   for (filenum=0; filenum<options.Noutfiles; filenum++) {
     out_data_files[filenum].varid = (int *)calloc(out_data_files[filenum].nvars, sizeof(int));
   }
@@ -215,6 +224,51 @@ else {
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAKE_EVAP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
   }
+  if(options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP) {
+    filenum++;
+    varnum = 0;
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CFAST", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CINTER", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CSLOW", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CSLOWEST", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLITTERLAB", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLITTERCELL", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLITTERLIG", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CCWD", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLEAF", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CFROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLIVESTEM", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CDEADSTEM", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLIVECROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CDEADCROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CWOOD", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NFAST", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NINTER", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NSLOW", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NSLOWEST", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NSOILMIN", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLITTERLAB", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLITTERCELL", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLITTERLIG", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NCWD", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLEAF", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NFROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLIVESTEM", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NDEADSTEM", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NLIVECROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NDEADCROOT", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_LAI", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CVEG", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CLITTER", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CSOIL", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_GPP", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NPP", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_AUTORESP", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_RHET", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NEE", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_NEP", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    set_output_var(out_data_files, TRUE, filenum, out_data, "OUT_CN_LAIVEG", varnum++, "%.4e", OUT_TYPE_FLOAT, 1);
+    }
 
 } // !OUTPUT_FORCE
 

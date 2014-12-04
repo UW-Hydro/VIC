@@ -80,7 +80,7 @@ void   collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                         int *, int *, int *, int *, int *, double, double, double,
                         int, int, double, int, int, double *, double *,
                         double *, double, out_data_struct *);
-void   collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct, lake_var_struct,
+void   collect_wb_terms(cell_data_struct, veg_var_struct, cn_data_struct, snow_data_struct, lake_var_struct, int,
                         double, double, double, int, int, double, int, double *,
                         double *, out_data_struct *);
 // driver: void   compress_files(char string[]);
@@ -177,6 +177,7 @@ int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...),
                double *, int);
 void   nrerror(char *);
 double penman(double, double, double, double, double, double, double);
+double pft2cov(double pft_vals[], int);
 void photosynth(char, double, double, double, double, double, double,
                 double, double, double, char *, double *, double *,
                 double *, double *, double *);
@@ -185,7 +186,7 @@ void   prepare_full_energy(int, int, int, all_vars_struct *,
 			   soil_con_struct *, double *, double *);
 int    put_data(all_vars_struct *, atmos_data_struct *,
 		            soil_con_struct *, veg_con_struct *,
-                veg_lib_struct *veg_lib,
+                veg_lib_struct *veg_lib, cn_data_struct *,
                 lake_con_struct *, out_data_struct *, 
                 save_data_struct *, dmy_struct *, int);
 double qromb(double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO,
@@ -291,7 +292,7 @@ void tridiag(double *, double *, double *, double *, unsigned);
 int vic_run(int, int, atmos_data_struct *, all_vars_struct *,
             dmy_struct *, global_param_struct *, lake_con_struct *,
             soil_con_struct *, veg_con_struct *, veg_lib_struct *,
-            veg_hist_struct *veg_hist);
+            veg_hist_struct *veg_hist, int, cn_data_struct *);
 void vicerror(char *);
 double volumetric_heat_capacity(double,double,double,double);
 int water_balance (lake_var_struct *, lake_con_struct, int, all_vars_struct *, int, int, int, double, soil_con_struct, veg_con_struct);
@@ -302,5 +303,6 @@ void write_layer(layer_data_struct *, int, int, double *, double *);
 void write_vegvar(veg_var_struct *, int);
 void zero_output_list(out_data_struct *);
 
+int VICCNInterface(int, int, int, dmy_struct *, global_param_struct *, atmos_data_struct *, all_vars_struct *, soil_con_struct *, veg_con_struct *, veg_lib_struct *, cn_data_struct *);
 
 #endif

@@ -408,8 +408,10 @@ global_param_struct get_global_param(filenames_struct *names,
       }
       else if(strcasecmp("CARBON",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
-        if(strcasecmp("TRUE",flgstr)==0) options.CARBON=TRUE;
-        else options.CARBON = FALSE;
+        if(strcasecmp("NO_CARBON",flgstr)==0) options.CARBON=NO_CARBON;
+        else if(strcasecmp("VIC_CARBON",flgstr)==0) options.CARBON = VIC_CARBON;
+        else if(strcasecmp("CN_NORMAL",flgstr)==0) options.CARBON = CN_NORMAL;
+        else if(strcasecmp("CN_ADECOMP",flgstr)==0) options.CARBON = CN_ADECOMP;
       }
       else if(strcasecmp("RC_MODE",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
@@ -892,15 +894,17 @@ global_param_struct get_global_param(filenames_struct *names,
   }
 
   // Carbon-cycling options
-  if( !options.CARBON ) {
+  /* if( options.CARBON == NO_CARBON ) { */
+  if( options.CARBON != VIC_CARBON ) { /* Allow VEGLIB_PHOTO=FALSE for all but
+                                          VIC_CARBON for now. */
     if (options.RC_MODE == RC_PHOTO) {
-      fprintf(stderr, "WARNING: If CARBON==FALSE, RC_MODE must be set to RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
+      fprintf(stderr, "WARNING: If CARBON==NO_CARBON, RC_MODE must be set to RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.\n");
       options.RC_MODE = RC_JARVIS;
     }
   }
   else {
     if (!options.VEGLIB_PHOTO) {
-      sprintf(ErrStr, "Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and carbon-specific veg parameters must be listed in your veg library file.");
+      sprintf(ErrStr, "Currently, CARBON!=NO_CARBON and VEGLIB_PHOTO==FALSE.  If CARBON!=NO_CARBON, VEGLIB_PHOTO must be set to TRUE and carbon-specific veg parameters must be listed in your veg library file.");
       nrerror(ErrStr);
     }
   }

@@ -48,6 +48,7 @@
 #             write_snowparam.c
 #             write_soilparam.c
 #             write_vegparam.c
+# 2014-Sep-03 Added CN (ability to compile CN F90 code).              MAB
 #
 # -----------------------------------------------------------------------
 
@@ -56,16 +57,22 @@
 # -----------------------------------------------------------------------
 
 # VIC DRIVER PATH (include and src are subdirs of this)
-DRIVERPATH = ..
+DRIVERPATH = /home/brunke/VICCN5/drivers/classic
 
 # VIC RUN PATH
-VICPATH = ../../../vic_run
+VICPATH = /home/brunke/VICCN5/vic_run
+
+# CN PATH
+CNPATH = /home/brunke/VICCN5/cn
 
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
 # Set CC = your compiler here
 CC = gcc
+
+# Set F90 = your Fortran compiler here
+F90 = ifort
 
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include
@@ -76,6 +83,7 @@ LIBRARY = -lm
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -g -Wall -Wno-unused 
+FFLAGS  =  -fp-model precise -convert big_endian -assume byterecl -ftz
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information
@@ -90,6 +98,14 @@ CFLAGS  =  ${INCLUDES} -g -Wall -Wno-unused
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
+.SUFFIXES: .c .F90 .o
+
+.c.o:
+	$(CC) -c $(CFLAGS) $<
+
+.F90.o:
+	$(F90) -c $(FFLAGS) $<
+
 HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_classic.h \
@@ -98,6 +114,7 @@ HDRS = ${VICPATH}/include/vic_def.h \
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
+	${DRIVERPATH}/src/alloc_cn.o \
 	${DRIVERPATH}/src/alloc_veg_hist.o \
 	${DRIVERPATH}/src/calc_air_temperature.o \
 	${DRIVERPATH}/src/calc_longwave.o \
@@ -133,7 +150,7 @@ OBJS = \
 	${DRIVERPATH}/src/open_state_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/parse_output_info.o \
-	${DRIVERPATH}/src/print_library.o\
+	${DRIVERPATH}/src/print_library.o \
 	${DRIVERPATH}/src/read_atmos_data.o \
 	${DRIVERPATH}/src/read_forcing_data.o \
 	${DRIVERPATH}/src/read_initial_model_state.o \
@@ -205,50 +222,254 @@ OBJS = \
 	${VICPATH}/src/water_under_ice.o \
 	${VICPATH}/src/write_layer.o \
 	${VICPATH}/src/write_vegvar.o \
-	${VICPATH}/src/zero_output_list.o	 
+	${VICPATH}/src/zero_output_list.o \
+	${CNPATH}/src/VICCNInterface.o \
+	${CNPATH}/src/pft2cov.o \
+	${CNPATH}/src/shr_kind_mod.o \
+	${CNPATH}/src/shr_const_mod.o \
+	${CNPATH}/src/shr_orb_mod.o \
+	${CNPATH}/src/clm_varpar.o \
+	${CNPATH}/src/clm_varcon.o \
+	${CNPATH}/src/nanMod.o \
+	${CNPATH}/src/clmtype.o \
+	${CNPATH}/src/clm_time_manager.o \
+	${CNPATH}/src/pftvarcon.o \
+	${CNPATH}/src/ndepStreamMod.o \
+	${CNPATH}/src/SurfaceAlbedoMod.o \
+	${CNPATH}/src/SurfaceRadiationMod.o \
+	${CNPATH}/src/QSatMod.o \
+	${CNPATH}/src/CanopyFluxesMod.o \
+	${CNPATH}/src/subgridAveMod.o \
+	${CNPATH}/src/CNAllocationMod.o \
+	${CNPATH}/src/CNAnnualUpdateMod.o \
+	${CNPATH}/src/CNBalanceCheckMod.o \
+	${CNPATH}/src/CNCStateUpdate1Mod.o \
+	${CNPATH}/src/CNCStateUpdate2Mod.o \
+	${CNPATH}/src/CNCStateUpdate3Mod.o \
+	${CNPATH}/src/CNDecompMod.o \
+	${CNPATH}/src/CNFireMod.o \
+	${CNPATH}/src/CNGRespMod.o \
+	${CNPATH}/src/CNGapMortalityMod.o \
+	${CNPATH}/src/CNMRespMod.o \
+	${CNPATH}/src/CNNDynamicsMod.o \
+	${CNPATH}/src/CNNStateUpdate1Mod.o \
+	${CNPATH}/src/CNNStateUpdate2Mod.o \
+	${CNPATH}/src/CNNStateUpdate3Mod.o \
+	${CNPATH}/src/CNPhenologyMod.o \
+	${CNPATH}/src/CNPrecisionControlMod.o \
+	${CNPATH}/src/CNVegStructUpdateMod.o \
+	${CNPATH}/src/CNSetValueMod.o \
+	${CNPATH}/src/CNSummaryMod.o \
+	${CNPATH}/src/CNWoodProductsMod.o \
+	${CNPATH}/src/CNiniSpecial.o \
+	${CNPATH}/src/clmtypeInitMod.o \
+	${CNPATH}/src/iniTimeConst.o \
+	${CNPATH}/src/CNEcosystemDynMod.o \
+	${CNPATH}/src/CNiniTimeVar.o \
+	${CNPATH}/src/clm_initializeMod.o \
+	${CNPATH}/src/vic2clmtypeMod.o
+
+OBJS2 = \
+	alloc_atmos.o \
+	alloc_cn.o \
+	alloc_veg_hist.o \
+	calc_air_temperature.o \
+	calc_longwave.o \
+	calc_root_fraction.o \
+	check_files.o \
+	check_state_file.o \
+	close_files.o \
+	cmd_proc.o \
+	compress_files.o \
+	compute_treeline.o \
+	display_current_settings.o \
+	free_all_vars.o \
+	free_vegcon.o \
+	get_dist.o \
+	get_force_type.o \
+	get_global_param.o \
+	initialize_atmos.o \
+	initialize_global.o \
+	initialize_model_state.o \
+	initialize_snow.o \
+	initialize_soil.o \
+	initialize_veg.o \
+	make_all_vars.o \
+	make_cell_data.o \
+	make_dmy.o \
+	make_energy_bal.o \
+	make_in_and_outfiles.o \
+	make_snow_data.o \
+	make_veg_var.o \
+	mtclim_vic.o \
+	mtclim_wrapper.o \
+	open_file.o \
+	open_state_file.o \
+	output_list_utils.o \
+	parse_output_info.o \
+	print_library.o \
+	read_atmos_data.o \
+	read_forcing_data.o \
+	read_initial_model_state.o \
+	read_lakeparam.o \
+	read_snowband.o \
+	read_soilparam.o \
+	read_veglib.o \
+	read_vegparam.o \
+	set_output_defaults.o \
+	vic_classic.o \
+	write_data.o \
+	write_forcing_file.o \
+	write_header.o \
+	write_model_state.o \
+	write_output.o \
+	CalcAerodynamic.o \
+	CalcBlowingSnow.o \
+	IceEnergyBalance.o \
+	SnowPackEnergyBalance.o \
+	StabilityCorrection.o \
+	advected_sensible_heat.o \
+	arno_evap.o \
+	calc_Nscale_factors.o \
+	calc_atmos_energy_bal.o \
+	calc_rainonly.o \
+	calc_snow_coverage.o \
+	calc_surf_energy_bal.o \
+	calc_veg_params.o \
+	calc_water_energy_balance_errors.o \
+	canopy_assimilation.o \
+	canopy_evap.o \
+	compute_coszen.o \
+	compute_pot_evap.o \
+	compute_soil_resp.o \
+	compute_zwt.o \
+	correct_precip.o \
+	estimate_T1.o \
+	faparl.o \
+	frozen_soil.o \
+	func_atmos_energy_bal.o \
+	func_atmos_moist_bal.o \
+	func_canopy_energy_bal.o \
+	func_surf_energy_bal.o \
+	ice_melt.o \
+	initialize_lake.o \
+	lakes.eb.o \
+	latent_heat_from_snow.o \
+	massrelease.o \
+	modify_Ksat.o \
+	newt_raph_func_fast.o \
+	nrerror.o \
+	penman.o \
+	photosynth.o \
+	prepare_full_energy.o \
+	put_data.o \
+	root_brent.o \
+	runoff.o \
+	snow_intercept.o \
+	snow_melt.o \
+	snow_utility.o \
+	soil_carbon_balance.o \
+	soil_conduction.o \
+	soil_thermal_eqn.o \
+	solve_snow.o \
+	surface_fluxes.o \
+	svp.o \
+	vic_run.o \
+	water_energy_balance.o \
+	water_under_ice.o \
+	write_layer.o \
+	write_vegvar.o \
+	zero_output_list.o \
+	VICCNInterface.o \
+	pft2cov.o \
+	shr_kind_mod.o \
+	shr_const_mod.o \
+	shr_orb_mod.o \
+	clm_varpar.o \
+	clm_varcon.o \
+	nanMod.o \
+	clmtype.o \
+	clm_time_manager.o \
+	pftvarcon.o \
+	ndepStreamMod.o \
+	SurfaceAlbedoMod.o \
+	SurfaceRadiationMod.o \
+	QSatMod.o \
+	CanopyFluxesMod.o \
+	subgridAveMod.o \
+	CNAllocationMod.o \
+	CNAnnualUpdateMod.o \
+	CNBalanceCheckMod.o \
+	CNCStateUpdate1Mod.o \
+	CNCStateUpdate2Mod.o \
+	CNCStateUpdate3Mod.o \
+	CNDecompMod.o \
+	CNFireMod.o \
+	CNGRespMod.o \
+	CNGapMortalityMod.o \
+	CNMRespMod.o \
+	CNNDynamicsMod.o \
+	CNNStateUpdate1Mod.o \
+	CNNStateUpdate2Mod.o \
+	CNNStateUpdate3Mod.o \
+	CNPhenologyMod.o \
+	CNPrecisionControlMod.o \
+	CNVegStructUpdateMod.o \
+	CNSetValueMod.o \
+	CNSummaryMod.o \
+	CNWoodProductsMod.o \
+	CNiniSpecial.o \
+	clmtypeInitMod.o \
+	iniTimeConst.o \
+	CNEcosystemDynMod.o \
+	CNiniTimeVar.o \
+	clm_initializeMod.o \
+	vic2clmtypeMod.o
 
 SRCS = $(OBJS:%.o=%.c) 
 
 #$(SRCS):
 #	co $@
 
-all:
-	make depend
-	make model
+#all:
+#	make depend
+#	make model
 
-default:
-	make depend
-	make model
+#default:
+#	make depend
+#	make model
 
-full:
-	make clean
-	make depend
-	make tags
-	make model
+#full:
+#	make clean
+#	make depend
+#	make tags
+#	make model
 
-clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${VICPATH}/src/*~ vic_classic
+#clean::
+#	/bin/rm -f ${DRIVERPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${VICPATH}/src/*~ vic_classic
 
-model: $(OBJS)
-	$(CC) -o vic_classic$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
+#model: $(OBJS)
+#	$(CC) -o vic_classic$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
+model:  $(OBJS)
+	$(F90) -o vic_classic -nofor_main vic_classic$(EXT) $(OBJS2)
 
 # -------------------------------------------------------------
 # tags
 # so we can find our way around
 # -------------------------------------------------------------
-tags:	TAGS
-TAGS:	$(SRCS) $(HDRS)
-	etags $(SRCS) $(HDRS)
-clean::
-	\rm -f TAGS	       
+#tags:	TAGS
+#TAGS:	$(SRCS) $(HDRS)
+#	etags $(SRCS) $(HDRS)
+#clean::
+#	\rm -f TAGS	       
 
 
 # -------------------------------------------------------------
 # depend
 # -------------------------------------------------------------
-depend: .depend
-.depend: $(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -M $(SRCS) > $@
+#depend: .depend
+#.depend: $(SRCS) $(HDRS)
+#	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
-clean::
-	\rm -f .depend	     
+#clean::
+#	\rm -f .depend	     

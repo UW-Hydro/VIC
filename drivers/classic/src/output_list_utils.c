@@ -2,7 +2,7 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
-out_data_struct *create_output_list() {
+out_data_struct *create_output_list(int nveg) {
 /*************************************************************
   create_output_list()      Ted Bohn     September 08, 2006
 
@@ -59,6 +59,7 @@ out_data_struct *create_output_list() {
   2013-Jul-25 Added photosynthesis terms.				TJB
   2013-Jul-25 Added soil carbon terms.					TJB
   2013-Dec-26 Removed EXCESS_ICE option.				TJB
+  2014-Nov-18 Added CN data types.                                      MAB
 *************************************************************/
 
   extern option_struct options;
@@ -227,6 +228,41 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
   strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
+  // CN variables
+  strcpy(out_data[OUT_CFAST].varname,"OUT_CFAST");                  /* fast soil C pool (g C/m^2) */
+  strcpy(out_data[OUT_CSLOWEST].varname,"OUT_CSLOWEST");                 /* slowest soil C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLITTERLAB].varname,"OUT_CLITTERLAB");                   /* litter labile C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLITTERCELL].varname,"OUT_CLITTERCELL");                 /* litter cellulose C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLITTERLIG].varname,"OUT_CLITTERLIG");                   /* litter lignin C pool (g C/m^2) */
+  strcpy(out_data[OUT_CCWD].varname,"OUT_CCWD");                           /* coarse woody debris C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLEAF].varname,"OUT_CLEAF");                           /* leaf C pool (g C/m^2) */
+  strcpy(out_data[OUT_CFROOT].varname,"OUT_CFROOT");                       /* fine root C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLIVESTEM].varname,"OUT_CLIVESTEM");                 /* live stem C pool (g C/m^2) */
+  strcpy(out_data[OUT_CDEADSTEM].varname,"OUT_CDEADSTEM");                 /* dead stem C pool (g C/m^2) */
+  strcpy(out_data[OUT_CLIVECROOT].varname,"OUT_CLIVECROOT");                 /* live coarse C pool (g C/m^2) */
+  strcpy(out_data[OUT_CDEADCROOT].varname,"OUT_CDEADCROOT");                 /* dead coarse C pool (g C/m^2) */
+  strcpy(out_data[OUT_CWOOD].varname,"OUT_CWOOD");                           /* wood C pool (g C/m^2) */
+  strcpy(out_data[OUT_NFAST].varname,"OUT_NFAST");                 /* fast soil N pool (g N/m^2) */
+  strcpy(out_data[OUT_NINTER].varname,"OUT_NINTER");                   /* medium soil N pool (g N/m^2) */
+  strcpy(out_data[OUT_NSLOW].varname,"OUT_NSLOW");                 /* slow soil N pool (g N/m^2) */
+  strcpy(out_data[OUT_NSLOWEST].varname,"OUT_NSLOWEST");                 /* slowest soil N pool (g N/m^2) */
+  strcpy(out_data[OUT_NSOILMIN].varname,"OUT_NSOILMIN");                 /* soil mineral N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLITTERLAB].varname,"OUT_NLITTERLAB");                   /* litter labile N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLITTERCELL].varname,"OUT_NLITTERCELL");                 /* litter cellulose N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLITTERLIG].varname,"OUT_NLITTERLIG");                   /* litter lignin N pool (g N/m^2) */
+  strcpy(out_data[OUT_NCWD].varname,"OUT_NCWD");                           /* coarse woody debris N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLEAF].varname,"OUT_NLEAF");                           /* leaf N pool (g N/m^2) */
+  strcpy(out_data[OUT_NFROOT].varname,"OUT_NFROOT");                       /* fine root N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLIVESTEM].varname,"OUT_NLIVESTEM");                 /* live stem N pool (g N/m^2) */
+  strcpy(out_data[OUT_NDEADSTEM].varname,"OUT_NDEADSTEM");                 /* dead stem N pool (g N/m^2) */
+  strcpy(out_data[OUT_NLIVECROOT].varname,"OUT_NLIVECROOT");                 /* live coarse N pool (g N/m^2) */
+  strcpy(out_data[OUT_NDEADCROOT].varname,"OUT_NDEADCROOT");                 /* dead coarse N pool (g N/m^2) */
+  strcpy(out_data[OUT_CN_LAIVEG].varname,"OUT_CN_LAIVEG");                       /* leaf area index of each vegetation cover */
+  strcpy(out_data[OUT_CVEG].varname,"OUT_CVEG");                      /* total vegetation C (g C/m^2) */
+  strcpy(out_data[OUT_CSOIL].varname,"OUT_CSOIL");                      /* total soil organic C (g C/m^2) */
+  strcpy(out_data[OUT_AUTORESP].varname,"OUT_AUTORESP");                                /* autotrophic respiration (g C/m^2/s) */
+  strcpy(out_data[OUT_NEP].varname,"OUT_NEP");                             /* net ecosystem production (g C/m^2/s) */
+
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
   strcpy(out_data[OUT_ADVECTION_BAND].varname,"OUT_ADVECTION_BAND");             /* advected energy [W/m2] */
@@ -288,6 +324,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_PACKT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_SURFT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SWE_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_CN_LAIVEG].nelem = nveg;
 
   // Set aggregation method - default is to average over the interval
   for (v=0; v<N_OUTVAR_TYPES; v++) {
@@ -378,6 +415,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURFT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TCAN_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TFOL_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_CN_LAIVEG].aggtype = AGG_TYPE_END;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

@@ -7,6 +7,7 @@ int  put_data(all_vars_struct   *all_vars,
               soil_con_struct   *soil_con,
 	            veg_con_struct    *veg_con,
               veg_lib_struct    *veg_lib,
+	      cn_data_struct    *cn,
               lake_con_struct   *lake_con,
               out_data_struct   *out_data,
               save_data_struct  *save_data,
@@ -343,8 +344,10 @@ int  put_data(all_vars_struct   *all_vars,
 	  *********************************/
           collect_wb_terms(cell[veg][band],
                            veg_var[veg][band],
+			   cn[band],
                            snow[veg][band],
                            lake_var,
+			   veg_con[veg].veg_class,
                            Cv,
                            ThisAreaFract,
                            ThisTreeAdjust,
@@ -380,6 +383,10 @@ int  put_data(all_vars_struct   *all_vars,
                            frost_fract,
                            frost_slope,
                            out_data);
+
+	  if(options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP)
+	    out_data[OUT_CN_LAIVEG].data[veg] += veg_var[veg][band].LAI \
+	    * ThisAreaFract * ThisTreeAdjust * (1.0 - Clake);
 
           // Store Wetland-Specific Variables
 
@@ -422,8 +429,10 @@ int  put_data(all_vars_struct   *all_vars,
 	    *********************************/
             collect_wb_terms(lake_var.soil,
                              veg_var[0][0],
+			     cn[0],
                              lake_var.snow,
                              lake_var,
+			     11,
                              Cv,
                              ThisAreaFract,
                              ThisTreeAdjust,
@@ -696,8 +705,10 @@ int  put_data(all_vars_struct   *all_vars,
 
 void collect_wb_terms(cell_data_struct  cell,
                       veg_var_struct    veg_var,
+		      cn_data_struct    cn,
                       snow_data_struct  snow,
                       lake_var_struct   lake_var,
+		      int               class,
                       double            Cv,
                       double            AreaFract,
                       double            TreeAdjustFactor,
@@ -868,6 +879,51 @@ void collect_wb_terms(cell_data_struct  cell,
     out_data[OUT_CLITTER].data[0] += cell.CLitter * AreaFactor;
     out_data[OUT_CINTER].data[0] += cell.CInter * AreaFactor;
     out_data[OUT_CSLOW].data[0] += cell.CSlow * AreaFactor;
+
+    if(options.CARBON == CN_NORMAL || options.CARBON == CN_ADECOMP) {
+      out_data[OUT_CFAST].data[0] += cn.soil1c * AreaFactor;
+      out_data[OUT_CSLOWEST].data[0] += cn.soil4c * AreaFactor;
+      out_data[OUT_CLITTERLAB].data[0] += cn.litr1c * AreaFactor;
+      out_data[OUT_CLITTERCELL].data[0] += cn.litr2c * AreaFactor;
+      out_data[OUT_CLITTERLIG].data[0] += cn.litr3c * AreaFactor;
+      out_data[OUT_CCWD].data[0] += cn.cwdc * AreaFactor;
+      out_data[OUT_CLEAF].data[0] += pft2cov(cn.leafc, class) * AreaFactor;
+      out_data[OUT_CFROOT].data[0] += pft2cov(cn.frootc, class) * \
+	AreaFactor;
+      out_data[OUT_CLIVESTEM].data[0] += pft2cov(cn.livestemc, class) * \
+	AreaFactor;
+      out_data[OUT_CDEADSTEM].data[0] += pft2cov(cn.deadstemc, class) * \
+	AreaFactor;
+      out_data[OUT_CLIVECROOT].data[0] += pft2cov(cn.livecrootc, class) * \
+	AreaFactor;
+      out_data[OUT_CDEADCROOT].data[0] += pft2cov(cn.deadcrootc, class) * \
+	AreaFactor;
+      out_data[OUT_CWOOD].data[0] += pft2cov(cn.woodc, class) * AreaFactor;
+      out_data[OUT_NINTER].data[0] += cn.soil2n * AreaFactor;
+      out_data[OUT_NSLOW].data[0] += cn.soil3n * AreaFactor;
+      out_data[OUT_NFAST].data[0] += cn.soil1n * AreaFactor;
+      out_data[OUT_NSLOWEST].data[0] += cn.soil4n * AreaFactor;
+      out_data[OUT_NSOILMIN].data[0] += cn.sminn * AreaFactor;
+      out_data[OUT_NLITTERLAB].data[0] += cn.litr1n * AreaFactor;
+      out_data[OUT_NLITTERCELL].data[0] += cn.litr2n * AreaFactor;
+      out_data[OUT_NLITTERLIG].data[0] += cn.litr3n * AreaFactor;
+      out_data[OUT_NCWD].data[0] += cn.cwdn * AreaFactor;
+      out_data[OUT_NLEAF].data[0] += pft2cov(cn.leafn, class) * AreaFactor;
+      out_data[OUT_NFROOT].data[0] += pft2cov(cn.frootn, class) * \
+	AreaFactor;
+      out_data[OUT_NLIVESTEM].data[0] += pft2cov(cn.livestemn, class) * \
+	AreaFactor;
+      out_data[OUT_NDEADSTEM].data[0] += pft2cov(cn.deadstemn, class) * \
+	AreaFactor;
+      out_data[OUT_NLIVECROOT].data[0] += pft2cov(cn.livecrootn, class) * \
+	AreaFactor;
+      out_data[OUT_NDEADCROOT].data[0] += pft2cov(cn.deadcrootn, class) * \
+	AreaFactor;
+      out_data[OUT_CVEG].data[0] += pft2cov(cn.totvegc, class) * AreaFactor;
+      out_data[OUT_CSOIL].data[0] += cn.totsomc * AreaFactor;
+      out_data[OUT_AUTORESP].data[0] += pft2cov(cn.ar, class) * AreaFactor;
+      out_data[OUT_NEP].data[0] += cn.nep * AreaFactor;
+      }
 
   }
 

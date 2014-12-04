@@ -33,6 +33,7 @@ typedef struct {
 
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int, int, veg_hist_struct ***);
+void alloc_cn(int, int, cn_data_struct **);
 void calc_longwave(double *, double, double, double);
 void calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
@@ -45,10 +46,11 @@ void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       char *);
-out_data_struct *create_output_list();
+out_data_struct *create_output_list(int);
 void display_current_settings(int, filenames_struct *, global_param_struct *);
 void free_atmos(int nrecs, atmos_data_struct **atmos);
 void free_all_vars(all_vars_struct *, int);
+void   free_cn(cn_data_struct **cn);
 void free_dmy(dmy_struct **dmy);
 void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
@@ -72,7 +74,7 @@ int initialize_model_state(all_vars_struct *, dmy_struct,
                            global_param_struct *, filep_struct,
                            int, int, int,
                            double, soil_con_struct *,
-                           veg_con_struct *, lake_con_struct);
+                           veg_con_struct *, lake_con_struct, cn_data_struct *);
 void initialize_snow(snow_data_struct **, int, int);
 void initialize_soil(cell_data_struct **, soil_con_struct *, veg_con_struct *,
                      int);
@@ -96,8 +98,8 @@ void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **,
                        out_data_struct *);
 void print_all_vars(all_vars_struct *all);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
-void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost, 
-                     size_t npet);
+void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
+size_t npet);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
 void print_Error(Error_struct *error);
@@ -106,8 +108,8 @@ void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
-void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts, 
-                    size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
+void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
+size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
 void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_option(option_struct *option);
 void print_out_data(out_data_struct *out, size_t nelem);
@@ -115,17 +117,18 @@ void print_out_data_file(out_data_file_struct *outf);
 void print_param_set(param_set_struct *param_set);
 void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
-void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes, 
-                    size_t nfrost, size_t nbands, size_t nzwt);
+void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
+size_t nfrost, size_t nbands, size_t nzwt);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
-                   char carbon, size_t ncanopy);
+char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
-void print_veg_var(veg_var_struct *vvar, size_t ncanopy);                              
+void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **, double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
-void read_initial_model_state(FILE *, all_vars_struct *,
+void            read_initial_model_state(FILE *, all_vars_struct *,
                                          global_param_struct *, int, int, int,
-                                         soil_con_struct *, lake_con_struct);
+                                         soil_con_struct *, lake_con_struct,
+					 cn_data_struct *);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
@@ -138,14 +141,15 @@ int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
 int update_thermal_nodes(all_vars_struct *, int, int, soil_con_struct *,
                          veg_con_struct *);
 void usage(char *);
-void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
+void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int, int);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,
                         out_data_struct *);
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *,
                   global_param_struct);
 void write_model_state(all_vars_struct *, global_param_struct *, int,
-                       int, filep_struct *, soil_con_struct *, lake_con_struct);
+                       int, filep_struct *, soil_con_struct *, lake_con_struct,
+		       cn_data_struct *);
 void write_output(out_data_struct *out_data,
                   out_data_file_struct *out_data_files, dmy_struct *dmy,
-                  int rec);
+                  int rec, int nveg);
 #endif

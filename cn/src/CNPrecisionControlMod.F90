@@ -1,0 +1,533 @@
+module CNPrecisionControlMod
+
+!----------------------------------------------------------------------- 
+!BOP
+!
+! !MODULE: CNPrecisionControlMod
+! 
+! !DESCRIPTION:
+! controls on very low values in critical state variables 
+! 
+! !USES:
+    use shr_kind_mod, only: r8 => shr_kind_r8
+    implicit none
+    save
+    private
+! !PUBLIC MEMBER FUNCTIONS:
+    public:: CNPrecisionControl
+!
+! !REVISION HISTORY:
+! 4/23/2004: Created by Peter Thornton
+! 10/15/12: Adapted for use in VIC by Michael Brunke
+!
+!EOP
+!----------------------------------------------------------------------- 
+
+contains
+
+!-----------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: CNPrecisionControl
+!
+! !INTERFACE:
+subroutine CNPrecisionControl(num_soilc, num_soilp)
+!
+! !DESCRIPTION: 
+! On the radiation time step, force leaf and deadstem c and n to 0 if
+! they get too small.
+!
+! !USES:
+   use clmtype
+   use pftvarcon,    only: nc3crop, npcropmin
+!   use surfrdMod,    only: crop_prog
+!
+! !ARGUMENTS:
+   implicit none
+   integer, intent(in) :: num_soilc       ! number of soil columns in filter
+   integer, intent(in) :: num_soilp       ! number of soil pfts in filter
+!
+! !CALLED FROM:
+! subroutine CNEcosystemDyn
+!
+! !REVISION HISTORY:
+! 8/1/03: Created by Peter Thornton
+! 10/15/12: Adapted for use in VIC by Michael Brunke
+! 02/07/14: Added ignoring crops in PFT loops (Michael Brunke).
+!
+! !LOCAL VARIABLES:
+! local pointers to implicit in scalars
+   real(r8), pointer :: col_ctrunc(:)         ! (gC/m2) column-level sink for C truncation
+   real(r8), pointer :: cwdc(:)               ! (gC/m2) coarse woody debris C
+   real(r8), pointer :: litr1c(:)             ! (gC/m2) litter labile C
+   real(r8), pointer :: litr2c(:)             ! (gC/m2) litter cellulose C
+   real(r8), pointer :: litr3c(:)             ! (gC/m2) litter lignin C
+   real(r8), pointer :: soil1c(:)             ! (gC/m2) soil organic matter C (fast pool)
+   real(r8), pointer :: soil2c(:)             ! (gC/m2) soil organic matter C (medium pool)
+   real(r8), pointer :: soil3c(:)             ! (gC/m2) soil organic matter C (slow pool)
+   real(r8), pointer :: soil4c(:)             ! (gC/m2) soil organic matter C (slowest pool)
+   real(r8), pointer :: col_ntrunc(:)         ! (gN/m2) column-level sink for N truncation
+   real(r8), pointer :: cwdn(:)               ! (gN/m2) coarse woody debris N
+   real(r8), pointer :: litr1n(:)             ! (gN/m2) litter labile N
+   real(r8), pointer :: litr2n(:)             ! (gN/m2) litter cellulose N
+   real(r8), pointer :: litr3n(:)             ! (gN/m2) litter lignin N
+   real(r8), pointer :: soil1n(:)             ! (gN/m2) soil organic matter N (fast pool)
+   real(r8), pointer :: soil2n(:)             ! (gN/m2) soil organic matter N (medium pool)
+   real(r8), pointer :: soil3n(:)             ! (gN/m2) soil orgainc matter N (slow pool)
+   real(r8), pointer :: soil4n(:)             ! (gN/m2) soil orgainc matter N (slowest pool)
+   real(r8), pointer :: cpool(:)              ! (gC/m2) temporary photosynthate C pool
+   real(r8), pointer :: deadcrootc(:)         ! (gC/m2) dead coarse root C
+   real(r8), pointer :: deadcrootc_storage(:) ! (gC/m2) dead coarse root C storage
+   real(r8), pointer :: deadcrootc_xfer(:)    ! (gC/m2) dead coarse root C transfer
+   real(r8), pointer :: deadstemc(:)          ! (gC/m2) dead stem C
+   real(r8), pointer :: deadstemc_storage(:)  ! (gC/m2) dead stem C storage
+   real(r8), pointer :: deadstemc_xfer(:)     ! (gC/m2) dead stem C transfer
+   real(r8), pointer :: frootc(:)             ! (gC/m2) fine root C
+   real(r8), pointer :: frootc_storage(:)     ! (gC/m2) fine root C storage
+   real(r8), pointer :: frootc_xfer(:)        ! (gC/m2) fine root C transfer
+   real(r8), pointer :: gresp_storage(:)      ! (gC/m2) growth respiration storage
+   real(r8), pointer :: gresp_xfer(:)         ! (gC/m2) growth respiration transfer
+   real(r8), pointer :: leafc(:)              ! (gC/m2) leaf C
+   real(r8), pointer :: leafc_storage(:)      ! (gC/m2) leaf C storage
+   real(r8), pointer :: leafc_xfer(:)         ! (gC/m2) leaf C transfer
+   real(r8), pointer :: livecrootc(:)         ! (gC/m2) live coarse root C
+   real(r8), pointer :: livecrootc_storage(:) ! (gC/m2) live coarse root C storage
+   real(r8), pointer :: livecrootc_xfer(:)    ! (gC/m2) live coarse root C transfer
+   real(r8), pointer :: livestemc(:)          ! (gC/m2) live stem C
+   real(r8), pointer :: livestemc_storage(:)  ! (gC/m2) live stem C storage
+   real(r8), pointer :: livestemc_xfer(:)     ! (gC/m2) live stem C transfer
+   real(r8), pointer :: pft_ctrunc(:)         ! (gC/m2) pft-level sink for C truncation
+   real(r8), pointer :: xsmrpool(:)           ! (gC/m2) execss maint resp C pool
+   real(r8), pointer :: grainc(:)             ! (gC/m2) grain C
+   real(r8), pointer :: grainc_storage(:)     ! (gC/m2) grain C storage
+   real(r8), pointer :: grainc_xfer(:)        ! (gC/m2) grain C transfer
+   real(r8), pointer :: deadcrootn(:)         ! (gN/m2) dead coarse root N
+   real(r8), pointer :: deadcrootn_storage(:) ! (gN/m2) dead coarse root N storage
+   real(r8), pointer :: deadcrootn_xfer(:)    ! (gN/m2) dead coarse root N transfer
+   real(r8), pointer :: deadstemn(:)          ! (gN/m2) dead stem N
+   real(r8), pointer :: deadstemn_storage(:)  ! (gN/m2) dead stem N storage
+   real(r8), pointer :: deadstemn_xfer(:)     ! (gN/m2) dead stem N transfer
+   real(r8), pointer :: frootn(:)             ! (gN/m2) fine root N
+   real(r8), pointer :: frootn_storage(:)     ! (gN/m2) fine root N storage
+   real(r8), pointer :: frootn_xfer(:)        ! (gN/m2) fine root N transfer
+   real(r8), pointer :: leafn(:)              ! (gN/m2) leaf N 
+   real(r8), pointer :: leafn_storage(:)      ! (gN/m2) leaf N storage
+   real(r8), pointer :: leafn_xfer(:)         ! (gN/m2) leaf N transfer
+   real(r8), pointer :: livecrootn(:)         ! (gN/m2) live coarse root N
+   real(r8), pointer :: livecrootn_storage(:) ! (gN/m2) live coarse root N storage
+   real(r8), pointer :: livecrootn_xfer(:)    ! (gN/m2) live coarse root N transfer
+   real(r8), pointer :: grainn(:)             ! (gC/m2) grain N
+   real(r8), pointer :: grainn_storage(:)     ! (gC/m2) grain N storage
+   real(r8), pointer :: grainn_xfer(:)        ! (gC/m2) grain N transfer
+   real(r8), pointer :: livestemn(:)          ! (gN/m2) live stem N
+   real(r8), pointer :: livestemn_storage(:)  ! (gN/m2) live stem N storage
+   real(r8), pointer :: livestemn_xfer(:)     ! (gN/m2) live stem N transfer
+   real(r8), pointer :: npool(:)              ! (gN/m2) temporary plant N pool
+   real(r8), pointer :: pft_ntrunc(:)         ! (gN/m2) pft-level sink for N truncation
+   real(r8), pointer :: retransn(:)           ! (gN/m2) plant pool of retranslocated N
+   integer , pointer :: ivt(:)                ! pft vegetation type
+!
+! local pointers to implicit in/out scalars
+!
+! local pointers to implicit out scalars
+!
+! !OTHER LOCAL VARIABLES:
+   integer :: c,p      ! indices
+   real(r8):: pc,pn    ! truncation terms for pft-level corrections
+   real(r8):: cc,cn    ! truncation terms for column-level corrections
+   real(r8):: ccrit    ! critical carbon state value for truncation
+   real(r8):: ncrit    ! critical nitrogen state value for truncation
+    
+!EOP
+!-----------------------------------------------------------------------
+    ! assign local pointers at the column level
+    col_ctrunc                     => clm3%g%c%ccs%col_ctrunc
+    cwdc                           => clm3%g%c%ccs%cwdc
+    litr1c                         => clm3%g%c%ccs%litr1c
+    litr2c                         => clm3%g%c%ccs%litr2c
+    litr3c                         => clm3%g%c%ccs%litr3c
+    soil1c                         => clm3%g%c%ccs%soil1c
+    soil2c                         => clm3%g%c%ccs%soil2c
+    soil3c                         => clm3%g%c%ccs%soil3c
+    soil4c                         => clm3%g%c%ccs%soil4c
+    col_ntrunc                     => clm3%g%c%cns%col_ntrunc
+    cwdn                           => clm3%g%c%cns%cwdn
+    litr1n                         => clm3%g%c%cns%litr1n
+    litr2n                         => clm3%g%c%cns%litr2n
+    litr3n                         => clm3%g%c%cns%litr3n
+    soil1n                         => clm3%g%c%cns%soil1n
+    soil2n                         => clm3%g%c%cns%soil2n
+    soil3n                         => clm3%g%c%cns%soil3n
+    soil4n                         => clm3%g%c%cns%soil4n
+
+    ! assign local pointers at the pft level
+    ivt                            => clm3%g%c%p%itype
+    cpool                          => clm3%g%c%p%pcs%cpool
+    deadcrootc                     => clm3%g%c%p%pcs%deadcrootc
+    deadcrootc_storage             => clm3%g%c%p%pcs%deadcrootc_storage
+    deadcrootc_xfer                => clm3%g%c%p%pcs%deadcrootc_xfer
+    deadstemc                      => clm3%g%c%p%pcs%deadstemc
+    deadstemc_storage              => clm3%g%c%p%pcs%deadstemc_storage
+    deadstemc_xfer                 => clm3%g%c%p%pcs%deadstemc_xfer
+    frootc                         => clm3%g%c%p%pcs%frootc
+    frootc_storage                 => clm3%g%c%p%pcs%frootc_storage
+    frootc_xfer                    => clm3%g%c%p%pcs%frootc_xfer
+    gresp_storage                  => clm3%g%c%p%pcs%gresp_storage
+    gresp_xfer                     => clm3%g%c%p%pcs%gresp_xfer
+    leafc                          => clm3%g%c%p%pcs%leafc
+    leafc_storage                  => clm3%g%c%p%pcs%leafc_storage
+    leafc_xfer                     => clm3%g%c%p%pcs%leafc_xfer
+    livecrootc                     => clm3%g%c%p%pcs%livecrootc
+    livecrootc_storage             => clm3%g%c%p%pcs%livecrootc_storage
+    livecrootc_xfer                => clm3%g%c%p%pcs%livecrootc_xfer
+    livestemc                      => clm3%g%c%p%pcs%livestemc
+    livestemc_storage              => clm3%g%c%p%pcs%livestemc_storage
+    livestemc_xfer                 => clm3%g%c%p%pcs%livestemc_xfer
+    pft_ctrunc                     => clm3%g%c%p%pcs%pft_ctrunc
+    xsmrpool                       => clm3%g%c%p%pcs%xsmrpool
+    grainc                         => clm3%g%c%p%pcs%grainc
+    grainc_storage                 => clm3%g%c%p%pcs%grainc_storage
+    grainc_xfer                    => clm3%g%c%p%pcs%grainc_xfer
+    deadcrootn                     => clm3%g%c%p%pns%deadcrootn
+    deadcrootn_storage             => clm3%g%c%p%pns%deadcrootn_storage
+    deadcrootn_xfer                => clm3%g%c%p%pns%deadcrootn_xfer
+    deadstemn                      => clm3%g%c%p%pns%deadstemn
+    deadstemn_storage              => clm3%g%c%p%pns%deadstemn_storage
+    deadstemn_xfer                 => clm3%g%c%p%pns%deadstemn_xfer
+    frootn                         => clm3%g%c%p%pns%frootn
+    frootn_storage                 => clm3%g%c%p%pns%frootn_storage
+    frootn_xfer                    => clm3%g%c%p%pns%frootn_xfer
+    leafn                          => clm3%g%c%p%pns%leafn
+    leafn_storage                  => clm3%g%c%p%pns%leafn_storage
+    leafn_xfer                     => clm3%g%c%p%pns%leafn_xfer
+    livecrootn                     => clm3%g%c%p%pns%livecrootn
+    livecrootn_storage             => clm3%g%c%p%pns%livecrootn_storage
+    livecrootn_xfer                => clm3%g%c%p%pns%livecrootn_xfer
+    grainn                         => clm3%g%c%p%pns%grainn
+    grainn_storage                 => clm3%g%c%p%pns%grainn_storage
+    grainn_xfer                    => clm3%g%c%p%pns%grainn_xfer
+    livestemn                      => clm3%g%c%p%pns%livestemn
+    livestemn_storage              => clm3%g%c%p%pns%livestemn_storage
+    livestemn_xfer                 => clm3%g%c%p%pns%livestemn_xfer
+    npool                          => clm3%g%c%p%pns%npool
+    pft_ntrunc                     => clm3%g%c%p%pns%pft_ntrunc
+    retransn                       => clm3%g%c%p%pns%retransn
+   
+   ! set the critical carbon state value for truncation (gC/m2)
+   ccrit = 1.e-8_r8
+   ! set the critical nitrogen state value for truncation (gN/m2)
+   ncrit = 1.e-8_r8
+   
+   ! pft loop
+   do p = 1,num_soilp
+     if(ivt(p) < npcropmin) then
+      
+      ! initialize the pft-level C and N truncation terms
+      pc = 0._r8
+      pn = 0._r8
+      
+      ! do tests on state variables for precision control
+      ! for linked C-N state variables, perform precision test on
+      ! the C component, but truncate C, C13, and N components
+      
+      ! leaf C and N
+      if (abs(leafc(p)) < ccrit) then
+          pc = pc + leafc(p)
+          leafc(p) = 0._r8
+          pn = pn + leafn(p)
+          leafn(p) = 0._r8
+      end if
+
+      ! leaf storage C and N
+      if (abs(leafc_storage(p)) < ccrit) then
+          pc = pc + leafc_storage(p)
+          leafc_storage(p) = 0._r8
+          pn = pn + leafn_storage(p)
+          leafn_storage(p) = 0._r8
+      end if
+          
+      ! leaf transfer C and N
+      if (abs(leafc_xfer(p)) < ccrit) then
+          pc = pc + leafc_xfer(p)
+          leafc_xfer(p) = 0._r8
+          pn = pn + leafn_xfer(p)
+          leafn_xfer(p) = 0._r8
+      end if
+          
+      ! froot C and N
+      if (abs(frootc(p)) < ccrit) then
+          pc = pc + frootc(p)
+          frootc(p) = 0._r8
+          pn = pn + frootn(p)
+          frootn(p) = 0._r8
+      end if
+
+      ! froot storage C and N
+      if (abs(frootc_storage(p)) < ccrit) then
+          pc = pc + frootc_storage(p)
+          frootc_storage(p) = 0._r8
+          pn = pn + frootn_storage(p)
+          frootn_storage(p) = 0._r8
+      end if
+          
+      ! froot transfer C and N
+      if (abs(frootc_xfer(p)) < ccrit) then
+          pc = pc + frootc_xfer(p)
+          frootc_xfer(p) = 0._r8
+          pn = pn + frootn_xfer(p)
+          frootn_xfer(p) = 0._r8
+      end if
+          
+!      if ( crop_prog .and. ivt(p) >= nc3crop )then
+         ! grain C and N
+!         if (abs(grainc(p)) < ccrit) then
+!             pc = pc + grainc(p)
+!             grainc(p) = 0._r8
+!             pn = pn + grainn(p)
+!             grainn(p) = 0._r8
+!         end if
+   
+         ! grain storage C and N
+!         if (abs(grainc_storage(p)) < ccrit) then
+!             pc = pc + grainc_storage(p)
+!             grainc_storage(p) = 0._r8
+!             pn = pn + grainn_storage(p)
+!             grainn_storage(p) = 0._r8
+!         end if
+             
+         ! grain transfer C and N
+!         if (abs(grainc_xfer(p)) < ccrit) then
+!             pc = pc + grainc_xfer(p)
+!             grainc_xfer(p) = 0._r8
+!             pn = pn + grainn_xfer(p)
+!             grainn_xfer(p) = 0._r8
+!         end if
+!      end if
+          
+      ! livestem C and N
+      if (abs(livestemc(p)) < ccrit) then
+          pc = pc + livestemc(p)
+          livestemc(p) = 0._r8
+          pn = pn + livestemn(p)
+          livestemn(p) = 0._r8
+      end if
+
+      ! livestem storage C and N
+      if (abs(livestemc_storage(p)) < ccrit) then
+          pc = pc + livestemc_storage(p)
+          livestemc_storage(p) = 0._r8
+          pn = pn + livestemn_storage(p)
+          livestemn_storage(p) = 0._r8
+      end if
+          
+      ! livestem transfer C and N
+      if (abs(livestemc_xfer(p)) < ccrit) then
+          pc = pc + livestemc_xfer(p)
+          livestemc_xfer(p) = 0._r8
+          pn = pn + livestemn_xfer(p)
+          livestemn_xfer(p) = 0._r8
+      end if
+          
+      ! deadstem C and N
+      if (abs(deadstemc(p)) < ccrit) then
+          pc = pc + deadstemc(p)
+          deadstemc(p) = 0._r8
+          pn = pn + deadstemn(p)
+          deadstemn(p) = 0._r8
+      end if
+
+      ! deadstem storage C and N
+      if (abs(deadstemc_storage(p)) < ccrit) then
+          pc = pc + deadstemc_storage(p)
+          deadstemc_storage(p) = 0._r8
+          pn = pn + deadstemn_storage(p)
+          deadstemn_storage(p) = 0._r8
+      end if
+          
+      ! deadstem transfer C and N
+      if (abs(deadstemc_xfer(p)) < ccrit) then
+          pc = pc + deadstemc_xfer(p)
+          deadstemc_xfer(p) = 0._r8
+          pn = pn + deadstemn_xfer(p)
+          deadstemn_xfer(p) = 0._r8
+      end if
+          
+      ! livecroot C and N
+      if (abs(livecrootc(p)) < ccrit) then
+          pc = pc + livecrootc(p)
+          livecrootc(p) = 0._r8
+          pn = pn + livecrootn(p)
+          livecrootn(p) = 0._r8
+      end if
+
+      ! livecroot storage C and N
+      if (abs(livecrootc_storage(p)) < ccrit) then
+          pc = pc + livecrootc_storage(p)
+          livecrootc_storage(p) = 0._r8
+          pn = pn + livecrootn_storage(p)
+          livecrootn_storage(p) = 0._r8
+      end if
+          
+      ! livecroot transfer C and N
+      if (abs(livecrootc_xfer(p)) < ccrit) then
+          pc = pc + livecrootc_xfer(p)
+          livecrootc_xfer(p) = 0._r8
+          pn = pn + livecrootn_xfer(p)
+          livecrootn_xfer(p) = 0._r8
+      end if
+          
+      ! deadcroot C and N
+      if (abs(deadcrootc(p)) < ccrit) then
+          pc = pc + deadcrootc(p)
+          deadcrootc(p) = 0._r8
+          pn = pn + deadcrootn(p)
+          deadcrootn(p) = 0._r8
+      end if
+
+      ! deadcroot storage C and N
+      if (abs(deadcrootc_storage(p)) < ccrit) then
+          pc = pc + deadcrootc_storage(p)
+          deadcrootc_storage(p) = 0._r8
+          pn = pn + deadcrootn_storage(p)
+          deadcrootn_storage(p) = 0._r8
+      end if
+          
+      ! deadcroot transfer C and N
+      if (abs(deadcrootc_xfer(p)) < ccrit) then
+          pc = pc + deadcrootc_xfer(p)
+          deadcrootc_xfer(p) = 0._r8
+          pn = pn + deadcrootn_xfer(p)
+          deadcrootn_xfer(p) = 0._r8
+      end if
+          
+      ! gresp_storage (C only)
+      if (abs(gresp_storage(p)) < ccrit) then
+          pc = pc + gresp_storage(p)
+          gresp_storage(p) = 0._r8
+      end if
+
+      ! gresp_xfer (C only)
+      if (abs(gresp_xfer(p)) < ccrit) then
+          pc = pc + gresp_xfer(p)
+          gresp_xfer(p) = 0._r8
+      end if
+          
+      ! cpool (C only)
+      if (abs(cpool(p)) < ccrit) then
+          pc = pc + cpool(p)
+          cpool(p) = 0._r8
+      end if
+          
+!      if ( crop_prog .and. ivt(p) >= nc3crop )then
+         ! xsmrpool (C only)
+!         if (abs(xsmrpool(p)) < ccrit) then
+!             pc = pc + xsmrpool(p)
+!             xsmrpool(p) = 0._r8
+!         end if
+!      end if
+          
+      ! retransn (N only)
+      if (abs(retransn(p)) < ncrit) then
+          pn = pn + retransn(p)
+          retransn(p) = 0._r8
+      end if
+          
+      ! npool (N only)
+      if (abs(npool(p)) < ncrit) then
+          pn = pn + npool(p)
+          npool(p) = 0._r8
+      end if
+      
+      pft_ctrunc(p) = pft_ctrunc(p) + pc
+      pft_ntrunc(p) = pft_ntrunc(p) + pn
+          
+     end if
+   end do ! end of pft loop
+
+   ! column loop
+   do c = 1,num_soilc
+      
+      ! initialize the column-level C and N truncation terms
+      cc = 0._r8
+      cn = 0._r8
+      
+      ! do tests on state variables for precision control
+      ! for linked C-N state variables, perform precision test on
+      ! the C component, but truncate both C and N components
+      
+      ! coarse woody debris C and N
+      if (abs(cwdc(c)) < ccrit) then
+          cc = cc + cwdc(c)
+          cwdc(c) = 0._r8
+          cn = cn + cwdn(c)
+          cwdn(c) = 0._r8
+      end if
+
+      ! litr1 C and N
+      if (abs(litr1c(c)) < ccrit) then
+          cc = cc + litr1c(c)
+          litr1c(c) = 0._r8
+          cn = cn + litr1n(c)
+          litr1n(c) = 0._r8
+      end if
+
+      ! litr2 C and N
+      if (abs(litr2c(c)) < ccrit) then
+          cc = cc + litr2c(c)
+          litr2c(c) = 0._r8
+          cn = cn + litr2n(c)
+          litr2n(c) = 0._r8
+      end if
+
+      ! litr3 C and N
+      if (abs(litr3c(c)) < ccrit) then
+          cc = cc + litr3c(c)
+          litr3c(c) = 0._r8
+          cn = cn + litr3n(c)
+          litr3n(c) = 0._r8
+      end if
+
+      ! soil1 C and N
+      if (abs(soil1c(c)) < ccrit) then
+          cc = cc + soil1c(c)
+          soil1c(c) = 0._r8
+          cn = cn + soil1n(c)
+          soil1n(c) = 0._r8
+      end if
+
+      ! soil2 C and N
+      if (abs(soil2c(c)) < ccrit) then
+          cc = cc + soil2c(c)
+          soil2c(c) = 0._r8
+          cn = cn + soil2n(c)
+          soil2n(c) = 0._r8
+      end if
+
+      ! soil3 C and N
+      if (abs(soil3c(c)) < ccrit) then
+          cc = cc + soil3c(c)
+          soil3c(c) = 0._r8
+          cn = cn + soil3n(c)
+          soil3n(c) = 0._r8
+      end if
+      
+      ! soil4 C and N
+      if (abs(soil4c(c)) < ccrit) then
+          cc = cc + soil4c(c)
+          soil4c(c) = 0._r8
+          cn = cn + soil4n(c)
+          soil4n(c) = 0._r8
+      end if
+      
+      ! not doing precision control on soil mineral N, since it will
+      ! be getting the N truncation flux anyway.
+      
+      col_ctrunc(c) = col_ctrunc(c) + cc
+      col_ntrunc(c) = col_ntrunc(c) + cn
+      
+   end do   ! end of column loop
+
+end subroutine CNPrecisionControl
+!-----------------------------------------------------------------------
+
+end module CNPrecisionControlMod

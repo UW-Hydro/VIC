@@ -6,7 +6,7 @@
 # Simulation Parameters
 #######################################################################
 NLAYER		3	# number of soil layers
-NODES		10	# number of soil thermal nodes 
+NODES		10	# number of soil thermal nodes
 TIME_STEP 	3	# model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
 SNOW_STEP	3	# time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
 STARTYEAR	2000	# year model simulation starts
@@ -16,6 +16,11 @@ STARTHOUR	00	# hour model simulation starts
 ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
+
+#######################################################################
+# Simulation Parameters Namelist
+#######################################################################
+# CONSTANTS     (put the parameter namelist path here) # Update default model paramters.  Format is "PARAM VAL".
 
 #######################################################################
 # Energy Balance Parameters
@@ -48,10 +53,13 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 #SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
 #BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
+#BLOWING_VAR_THRESHOLD = TRUE
+#BLOWING_CALC_PROB = TRUE
+#BLOWING_SIMPLE = FALSE
+#BLOWING_FETCH = TRUE
+#BLOWING_SPATIAL_WIND = TRUE
 #COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
 #CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
-#MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
-#MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
 #SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
                         # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
                         # until the pack begins to melt.  If TRUE, VIC will expect an additional column
@@ -62,7 +70,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 # Turbulent Flux Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
-#MIN_WIND_SPEED	0.1	# minimum allowable wind speed (m/s)
 #AERO_RESIST_CANSNOW	AR_406_FULL	# Options for aerodynamic resistance in snow-filled canopy:
 #			# AR_406 	= multiply by 10 for latent heat but do NOT multiply by 10 for sensible heat and do NOT apply stability correction (as in VIC 4.0.6); when no snow in canopy, use surface aero_resist for ET.
 #			# AR_406_LS 	= multiply by 10 for latent heat AND sensible heat and do NOT apply stability correction; when no snow in canopy, use surface aero_resist for ET.
@@ -76,7 +83,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 #OUTPUT_FORCE	FALSE	# TRUE = perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings.
 #PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
-#SW_PREC_THRESH		0	# Minimum daily precip [mm] that can cause dimming of incoming shortwave; default = 0.
 #MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
 #VP_ITER		VP_ITER_ANNUAL	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
 #			# VP_ITER_NEVER = never iterate; make estimates separately

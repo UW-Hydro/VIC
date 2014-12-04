@@ -52,7 +52,7 @@ StabilityCorrection(double Z,
     if (TSurf != Tair) {
         /* Non-neutral conditions */
 
-        Ri = G * (Tair - TSurf) * (Z - d) /
+        Ri = CONST_G * (Tair - TSurf) * (Z - d) /
              (((Tair + 273.15) + (TSurf + 273.15)) / 2.0 * Wind * Wind);
 
         RiLimit = (Tair + 273.15) /

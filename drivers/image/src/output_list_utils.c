@@ -359,7 +359,7 @@ create_output_list()
     }
 
     // Initialize data values
-    init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
+    init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
 
     return out_data;
 }

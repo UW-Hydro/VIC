@@ -58,7 +58,7 @@ snow_intercept(double             Dt,
                double            *SensibleHeat,
                double            *SnowFall,
                double            *Tfoliage,
-               char              *Tfoliage_fbflag,
+               bool              *Tfoliage_fbflag,
                unsigned          *Tfoliage_fbcount,
                double            *TempIntStorage,
                double            *VaporMassFlux,
@@ -81,52 +81,53 @@ snow_intercept(double             Dt,
                soil_con_struct   *soil_con,
                veg_var_struct    *veg_var)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
     /* double AdvectedEnergy; */         /* Energy advected by the rain (W/m2) */
-    double               BlownSnow; /* Depth of snow blown of the canopy (m) */
-    double               DeltaSnowInt; /* Change in the physical swe of snow
-                                          interceped on the branches. (m) */
-    double               Drip;   /* Amount of drip from intercepted snow as a
-                                    result of snowmelt (m) */
-    double               ExcessSnowMelt; /* Snowmelt in excess of the water holding
-                                            capacity of the tree (m) */
-    double               InitialSnowInt; /* Initial intercepted snow (m) */
-    double               IntRainOrg;
-    double               MaxWaterInt; /* Water interception capacity (m) */
-    double               MaxSnowInt; /* Snow interception capacity (m) */
-    double               NetRadiation;
-    double               PotSnowMelt; /* Potential snow melt (m) */
-    double               RainThroughFall; /* Amount of rain reaching to the ground (m)
-                                           */
-    double               RefreezeEnergy; /* Energy available for refreezing or melt */
-    double               ReleasedMass; /* Amount of mass release of intercepted snow
-                                          (m) */
+    double                   BlownSnow; /* Depth of snow blown of the canopy (m) */
+    double                   DeltaSnowInt; /* Change in the physical swe of snow
+                                              interceped on the branches. (m) */
+    double                   Drip; /* Amount of drip from intercepted snow as a
+                                      result of snowmelt (m) */
+    double                   ExcessSnowMelt; /* Snowmelt in excess of the water holding
+                                                capacity of the tree (m) */
+    double                   InitialSnowInt; /* Initial intercepted snow (m) */
+    double                   IntRainOrg;
+    double                   MaxWaterInt; /* Water interception capacity (m) */
+    double                   MaxSnowInt; /* Snow interception capacity (m) */
+    double                   NetRadiation;
+    double                   PotSnowMelt; /* Potential snow melt (m) */
+    double                   RainThroughFall; /* Amount of rain reaching to the ground (m)
+                                               */
+    double                   RefreezeEnergy; /* Energy available for refreezing or melt */
+    double                   ReleasedMass; /* Amount of mass release of intercepted snow
+                                              (m) */
     /* double SensibleHeat; */           /* Sensible heat flux (W/m2) */
-    double               SnowThroughFall; /* Amount of snow reaching to the ground (m)
-                                           */
-    double               Imax1;  /* maxium water intecept regardless of temp */
-    double               IntRainFract; /* Fraction of intercpeted water which is
-                                          liquid */
-    double               IntSnowFract; /* Fraction of intercepted water which is
-                                          solid */
-    double               Overload; /* temp variable to calculated structural
-                                      overloading */
-    double               Qnet;   /* temporary storage of energy balance
-                                    error */
-    double               Tupper;
-    double               Tlower;
-    double               Evap;
-    double               OldTfoliage;
+    double                   SnowThroughFall; /* Amount of snow reaching to the ground (m)
+                                               */
+    double                   Imax1; /* maxium water intecept regardless of temp */
+    double                   IntRainFract; /* Fraction of intercpeted water which is
+                                              liquid */
+    double                   IntSnowFract; /* Fraction of intercepted water which is
+                                              solid */
+    double                   Overload; /* temp variable to calculated structural
+                                          overloading */
+    double                   Qnet; /* temporary storage of energy balance
+                                      error */
+    double                   Tupper;
+    double                   Tlower;
+    double                   Evap;
+    double                   OldTfoliage;
 
-    double               AirDens;
-    double               EactAir;
-    double               Press; // atmospheric pressure
-    double               Vpd; // vapor pressure defficit
-    double               shortwave; //
-    double               Catm; //
+    double                   AirDens;
+    double                   EactAir;
+    double                   Press; // atmospheric pressure
+    double                   Vpd; // vapor pressure defficit
+    double                   shortwave; //
+    double                   Catm; //
 
-    char                 ErrorString[MAXSTRING];
+    char                     ErrorString[MAXSTRING];
 
     AirDens = atmos->density[hidx];
     EactAir = atmos->vp[hidx];
@@ -139,10 +140,10 @@ snow_intercept(double             Dt,
     *Tfoliage_fbflag = 0;
 
     /* Convert Units from VIC (mm -> m) */
-    *RainFall /= 1000.;
-    *SnowFall /= 1000.;
-    *IntRain /= 1000.;
-    MaxInt /= 1000.;
+    *RainFall /= MM_PER_M;
+    *SnowFall /= MM_PER_M;
+    *IntRain /= MM_PER_M;
+    MaxInt /= MM_PER_M;
     IntRainOrg = *IntRain;
 
     /* Initialize Drip, H2O balance, and mass release variables. */
@@ -161,7 +162,7 @@ snow_intercept(double             Dt,
        Cold Regions Science and Technology, (13), pp. 239-245.
        Figure 4. */
 
-    Imax1 = 4.0 * LAI_SNOW_MULTIPLIER * LAI;
+    Imax1 = 4.0 * param.VEG_LAI_SNOW_MULTIPLIER * LAI;
 
     if ((*Tfoliage) < -1.0 && (*Tfoliage) > -3.0) {
         MaxSnowInt = ((*Tfoliage) * 3.0 / 2.0) + (11.0 / 2.0);
@@ -175,7 +176,7 @@ snow_intercept(double             Dt,
 
     /* therefore LAI_ratio decreases as temp decreases */
 
-    MaxSnowInt *= LAI_SNOW_MULTIPLIER * LAI;
+    MaxSnowInt *= param.VEG_LAI_SNOW_MULTIPLIER * LAI;
 
     /* Calculate snow interception. */
 
@@ -221,14 +222,14 @@ snow_intercept(double             Dt,
     SnowThroughFall = (*SnowFall - DeltaSnowInt) * F + (*SnowFall) * (1 - F);
 
     // Snow in canopy too thin for EB calculations; let it fall through
-    if (*SnowFall == 0 && *IntSnow < MIN_SWQ_EB_THRES) {
+    if (*SnowFall == 0 && *IntSnow < param.SNOW_MIN_SWQ_EB_THRES) {
         SnowThroughFall += *IntSnow;
         DeltaSnowInt -= *IntSnow;
     }
 
     /* physical depth */
     *IntSnow += DeltaSnowInt;
-    if (*IntSnow < SMALL) {
+    if (*IntSnow < DBL_EPSILON) {
         *IntSnow = 0.0;
     }
 
@@ -236,7 +237,7 @@ snow_intercept(double             Dt,
        intercepted snow. */
 
     /* physical depth */
-    MaxWaterInt = LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
+    MaxWaterInt = param.SNOW_LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
 
     if ((*IntRain + *RainFall) <= MaxWaterInt) {
         /* physical depth */
@@ -253,7 +254,7 @@ snow_intercept(double             Dt,
     }
 
     // Liquid water in canopy too thin for EB calculations; let it fall through
-    if (*RainFall == 0 && *IntRain < MIN_SWQ_EB_THRES) {
+    if (*RainFall == 0 && *IntRain < param.SNOW_MIN_SWQ_EB_THRES) {
         RainThroughFall += *IntRain;
         *IntRain = 0.0;
     }
@@ -280,7 +281,7 @@ snow_intercept(double             Dt,
 
     // If we've lost all intercepted moisture, we've essentially lost the thermal
     // mass of the canopy and Tfoliage should be equal to Tcanopy
-    if (*IntRain + *IntSnow < SMALL) {
+    if (*IntRain + *IntSnow < DBL_EPSILON) {
         *Tfoliage = Tcanopy;
     }
 
@@ -293,10 +294,10 @@ snow_intercept(double             Dt,
     if (*IntSnow > 0 || *SnowFall > 0) {
         /* Snow present or accumulating in the canopy */
 
-        *AlbedoOver = NEW_SNOW_ALB; // albedo of intercepted snow in canopy
+        *AlbedoOver = param.SNOW_NEW_SNOW_ALB; // albedo of intercepted snow in canopy
         *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
 
-        Qnet = solve_canopy_energy_bal(0., Dt, soil_con->elevation, 
+        Qnet = solve_canopy_energy_bal(0., Dt, soil_con->elevation,
                                        soil_con->max_moist, soil_con->Wcr,
                                        soil_con->Wpwp, soil_con->frost_fract,
                                        AirDens, EactAir, Press, Le, Tcanopy,
@@ -315,10 +316,10 @@ snow_intercept(double             Dt,
             /* Intercepted snow not melting - need to find temperature */
             Tupper = 0;
             if ((*Tfoliage) <= 0.) {
-                Tlower = (*Tfoliage) - SNOW_DT;
+                Tlower = (*Tfoliage) - param.SNOW_DT;
             }
             else {
-                Tlower = -SNOW_DT;
+                Tlower = -param.SNOW_DT;
             }
         }
         else {
@@ -330,8 +331,8 @@ snow_intercept(double             Dt,
         *AlbedoOver = bare_albedo;
         *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
         Qnet = -9999;
-        Tupper = (*Tfoliage) + SNOW_DT;
-        Tlower = (*Tfoliage) - SNOW_DT;
+        Tupper = (*Tfoliage) + param.SNOW_DT;
+        Tlower = (*Tfoliage) - param.SNOW_DT;
     }
 
     if (Tupper != MISSING && Tlower != MISSING) {
@@ -412,7 +413,7 @@ snow_intercept(double             Dt,
     }
 
     if (*IntSnow <= 0) {
-        RainThroughFall = veg_var->throughfall / 1000.;
+        RainThroughFall = veg_var->throughfall / MM_PER_M;
     }
 
     RefreezeEnergy *= Dt;
@@ -423,7 +424,7 @@ snow_intercept(double             Dt,
 
     /* Update maximum water interception storage */
 
-    MaxWaterInt = LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
+    MaxWaterInt = param.SNOW_LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
 
     /* Convert the vapor mass flux from a flux to a depth per interval */
     *VaporMassFlux *= Dt;
@@ -439,13 +440,14 @@ snow_intercept(double             Dt,
 
         if (RefreezeEnergy < 0) {
             /* intercepted snow is ripe, melt can occur */
-            PotSnowMelt = min((-RefreezeEnergy / Lf / RHO_W), *IntSnow);
-            *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt);
+            PotSnowMelt = min((-RefreezeEnergy / CONST_LATICE / CONST_RHOFW),
+                              *IntSnow);
+            *MeltEnergy -= (CONST_LATICE * PotSnowMelt * CONST_RHOFW) / (Dt);
         }
         else {
             /* snow temperature is below freezing, no melt occurs */
             PotSnowMelt = 0;
-            *MeltEnergy -= (Lf * PotSnowMelt * RHO_W) / (Dt);
+            *MeltEnergy -= (CONST_LATICE * PotSnowMelt * CONST_RHOFW) / (Dt);
         }
 
         if ((*IntRain + PotSnowMelt) <= MaxWaterInt) {
@@ -463,7 +465,7 @@ snow_intercept(double             Dt,
             }
 
             if (SnowThroughFall > 0.0 &&
-                InitialSnowInt <= MIN_INTERCEPTION_STORAGE) {
+                InitialSnowInt <= param.VEG_MIN_INTERCEPTION_STORAGE) {
                 /* Water in excess of MaxWaterInt has been generated.  If it is
                    snowing and there was little intercepted snow at the beginning
                    of the time step ( <= MIN_INTERCEPTION_STORAGE), then allow the
@@ -487,24 +489,24 @@ snow_intercept(double             Dt,
 
         /* If intercepted snow has melted, add the water it held to drip */
 
-        MaxWaterInt = LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
+        MaxWaterInt = param.SNOW_LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
         if (*IntRain > MaxWaterInt) {
             Drip += *IntRain - MaxWaterInt;
             *IntRain = MaxWaterInt;
         }
     }
     else {
-          /* Reset *TempIntStorage to 0.0 when energy balance is negative */
+        /* Reset *TempIntStorage to 0.0 when energy balance is negative */
 
         *TempIntStorage = 0.0;
 
         /* Refreeze as much surface water as you can */
 
-        if (-RefreezeEnergy > -(*IntRain) * Lf) {
-            *IntSnow += fabs(RefreezeEnergy) / Lf;
-            *IntRain -= fabs(RefreezeEnergy) / Lf;
+        if (-RefreezeEnergy > -(*IntRain) * CONST_LATICE) {
+            *IntSnow += fabs(RefreezeEnergy) / CONST_LATICE;
+            *IntRain -= fabs(RefreezeEnergy) / CONST_LATICE;
 
-            *MeltEnergy += (fabs(RefreezeEnergy) * RHO_W) / (Dt);
+            *MeltEnergy += (fabs(RefreezeEnergy) * CONST_RHOFW) / (Dt);
 
             RefreezeEnergy = 0.0;
         }
@@ -516,7 +518,7 @@ snow_intercept(double             Dt,
             /* Energy released by freezing of intercepted water is added to the
                MeltEnergy */
 
-            *MeltEnergy += (Lf * *IntRain * RHO_W) / (Dt);
+            *MeltEnergy += (CONST_LATICE * *IntRain * CONST_RHOFW) / (Dt);
             *IntRain = 0.0;
         }
 
@@ -548,9 +550,9 @@ snow_intercept(double             Dt,
 
     /* Convert Units to VIC (m -> mm) */
     *VaporMassFlux *= -1.;
-    *RainFall *= 1000.;
-    *SnowFall *= 1000.;
-    *IntRain *= 1000.;
+    *RainFall *= MM_PER_M;
+    *SnowFall *= MM_PER_M;
+    *IntRain *= MM_PER_M;
 
     /*** FIX THIS ***/
     *MeltEnergy = RefreezeEnergy / Dt;
@@ -826,8 +828,11 @@ error_print_canopy_energy_bal(double  Tfoliage,
     fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
     /* call error handling routine */
-    fprintf(stderr,
-            "**********\n**********\nFinished dumping snow_intercept variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n**********\n**********\n");
+    fprintf(stderr, "**********\n**********\n"
+            "Finished dumping snow_intercept "
+            "variables.\nTry increasing SNOW_DT to get model to "
+            "complete cell.\nThen check output for instabilities."
+            "\n**********\n**********\n");
 
     return(ERROR);
 }

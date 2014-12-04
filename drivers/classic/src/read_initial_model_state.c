@@ -39,12 +39,12 @@
  *           defined in the given state file.
  *****************************************************************************/
 void
-read_initial_model_state(FILE                *init_state,
-                         all_vars_struct     *all_vars,
-                         int                  Nveg,
-                         int                  Nbands,
-                         int                  cellnum,
-                         soil_con_struct     *soil_con)
+read_initial_model_state(FILE            *init_state,
+                         all_vars_struct *all_vars,
+                         int              Nveg,
+                         int              Nbands,
+                         int              cellnum,
+                         soil_con_struct *soil_con)
 {
     extern option_struct options;
 
@@ -161,7 +161,7 @@ read_initial_model_state(FILE                *init_state,
     if (options.Nnode == 1) {
         soil_con->Zsum_node[0] = 0;
     }
-    if (soil_con->Zsum_node[options.Nnode - 1] - soil_con->dp > SMALL) {
+    if (soil_con->Zsum_node[options.Nnode - 1] - soil_con->dp > DBL_EPSILON) {
         fprintf(stderr,
                 "WARNING: Sum of soil nodes (%f) exceeds defined damping depth"
                 "(%f).  Resetting damping depth.\n",
@@ -228,7 +228,8 @@ read_initial_model_state(FILE                *init_state,
                     else {
                         if (fscanf(init_state, " %lf",
                                    &cell[veg][band].layer[lidx].ice[frost_area])
-                            == EOF) {
+                            ==
+                            EOF) {
                             nrerror("End of model state file found"
                                     "unexpectedly");
                         }
@@ -368,7 +369,7 @@ read_initial_model_state(FILE                *init_state,
                 snow[veg][band].MELTING = (char)tmp_char;
             }
             if (snow[veg][band].density > 0.) {
-                snow[veg][band].depth = 1000. * snow[veg][band].swq /
+                snow[veg][band].depth = MM_PER_M * snow[veg][band].swq /
                                         snow[veg][band].density;
             }
 
@@ -472,7 +473,7 @@ read_initial_model_state(FILE                *init_state,
                 nrerror("End of model state file found unexpectedly");
             }
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = 1000. * lake_var->snow.swq /
+                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 
@@ -613,7 +614,7 @@ read_initial_model_state(FILE                *init_state,
             }
             lake_var->snow.MELTING = (char)tmp_char;
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = 1000. * lake_var->snow.swq /
+                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 

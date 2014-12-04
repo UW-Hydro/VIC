@@ -36,74 +36,74 @@ double
 func_canopy_energy_bal(double  Tfoliage,
                        va_list ap)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
     /* General Model Parameters */
-    double               delta_t;
-    double               elevation;
+    double                   delta_t;
+    double                   elevation;
 
-    double              *Wmax;
-    double              *Wcr;
-    double              *Wpwp;
-    double              *frost_fract;
+    double                  *Wmax;
+    double                  *Wcr;
+    double                  *Wpwp;
+    double                  *frost_fract;
 
     /* Atmopheric Condition and Forcings */
-    double               AirDens;
-    double               EactAir;
-    double               Press;
-    double               Le;
-    double               Tcanopy;
-    double               Vpd;
-    double               shortwave;
-    double               Catm;
-    double              *dryFrac;
+    double                   AirDens;
+    double                   EactAir;
+    double                   Press;
+    double                   Le;
+    double                   Tcanopy;
+    double                   Vpd;
+    double                   shortwave;
+    double                   Catm;
+    double                  *dryFrac;
 
-    double              *Evap;
-    double              *Ra;
-    double              *Ra_used;
-    double               Rainfall;
-    double              *Wind;
+    double                  *Evap;
+    double                  *Ra;
+    double                  *Ra_used;
+    double                   Rainfall;
+    double                  *Wind;
 
     /* Vegetation Terms */
-    int                  veg_class;
+    int                      veg_class;
 
-    double              *displacement;
-    double              *ref_height;
-    double              *roughness;
+    double                  *displacement;
+    double                  *ref_height;
+    double                  *roughness;
 
-    double               *root;
-    double              *CanopLayerBnd;
+    double                  *root;
+    double                  *CanopLayerBnd;
 
     /* Water Flux Terms */
-    double               IntRain;
-    double               IntSnow;
+    double                   IntRain;
+    double                   IntSnow;
 
-    double              *Wdew;
+    double                  *Wdew;
 
-    layer_data_struct   *layer;
-    veg_var_struct      *veg_var;
+    layer_data_struct       *layer;
+    veg_var_struct          *veg_var;
 
     /* Energy Flux Terms */
-    double               LongOverIn;
-    double               LongUnderOut;
-    double               NetShortOver;
+    double                   LongOverIn;
+    double                   LongUnderOut;
+    double                   NetShortOver;
 
-    double              *AdvectedEnergy;
-    double              *LatentHeat;
-    double              *LatentHeatSub;
-    double              *LongOverOut;
-    double              *NetLongOver;
-    double              *NetRadiation;
-    double              *RefreezeEnergy;
-    double              *SensibleHeat;
-    double              *VaporMassFlux;
+    double                  *AdvectedEnergy;
+    double                  *LatentHeat;
+    double                  *LatentHeatSub;
+    double                  *LongOverOut;
+    double                  *NetLongOver;
+    double                  *NetRadiation;
+    double                  *RefreezeEnergy;
+    double                  *SensibleHeat;
+    double                  *VaporMassFlux;
 
     /* Internal Variables */
-    double               EsSnow;
-    double               Ls;
-    double               RestTerm;
-    double               Tmp;
-    double               prec;
+    double                   EsSnow;
+    double                   Ls;
+    double                   RestTerm;
+    double                   prec;
 
     /** Read variables from variable length argument list **/
 
@@ -171,8 +171,8 @@ func_canopy_energy_bal(double  Tfoliage,
        temperature.  The outgoing longwave is subtracted twice, because the
        canopy radiates in two directions */
 
-    Tmp = Tfoliage + KELVIN;
-    *LongOverOut = STEFAN_B * (Tmp * Tmp * Tmp * Tmp);
+    *LongOverOut = calc_outgoing_longwave(Tfoliage + CONST_TKFRZ,
+                                          param.EMISS_VEG);
     *NetRadiation = NetShortOver + LongOverIn + LongUnderOut -
                     2 * (*LongOverOut);
 
@@ -204,12 +204,12 @@ func_canopy_energy_bal(double  Tfoliage,
                                                   roughness[1]);
             }
             else {
-                Ra_used[1] = HUGE_RESIST;
+                Ra_used[1] = param.HUGE_RESIST;
             }
         }
 
-        *VaporMassFlux = AirDens * (EPS / Press) * (EactAir - EsSnow) /
-                         Ra_used[1] / RHO_W;
+        *VaporMassFlux = AirDens * (CONST_EPS / Press) * (EactAir - EsSnow) /
+                         Ra_used[1] / CONST_RHOFW;
 
         if (Vpd == 0.0 && *VaporMassFlux < 0.0) {
             *VaporMassFlux = 0.0;
@@ -217,8 +217,8 @@ func_canopy_energy_bal(double  Tfoliage,
 
         /* Calculate the latent heat flux */
 
-        Ls = (677. - 0.07 * Tfoliage) * JOULESPCAL * GRAMSPKG;
-        *LatentHeatSub = Ls * *VaporMassFlux * RHO_W;
+        Ls = calc_latent_heat_of_sublimation(Tfoliage);
+        *LatentHeatSub = Ls * *VaporMassFlux * CONST_RHOFW;
         *LatentHeat = 0;
         *Evap = 0;
         veg_var->throughfall = 0;
@@ -238,26 +238,26 @@ func_canopy_energy_bal(double  Tfoliage,
             Ra_used[1] = Ra[0];
         }
 
-        *Wdew = IntRain * 1000.;
-        prec = Rainfall * 1000;
-        *Evap = canopy_evap(layer, veg_var, FALSE,
+        *Wdew = IntRain * MM_PER_M;
+        prec = Rainfall * MM_PER_M;
+        *Evap = canopy_evap(layer, veg_var, false,
                             veg_class, Wdew, delta_t, *NetRadiation,
                             Vpd, NetShortOver, Tcanopy, Ra_used[1],
                             elevation, prec, Wmax, Wcr, Wpwp, frost_fract,
                             root, dryFrac, shortwave, Catm, CanopLayerBnd);
-        *Wdew /= 1000.;
+        *Wdew /= MM_PER_M;
 
-        *LatentHeat = Le * *Evap * RHO_W;
+        *LatentHeat = Le * *Evap * CONST_RHOFW;
         *LatentHeatSub = 0;
     }
 
     /* Calculate the sensible heat flux */
 
-    *SensibleHeat = AirDens * Cp * (Tcanopy - Tfoliage) / Ra_used[1];
+    *SensibleHeat = calc_sensible_heat(AirDens, Tcanopy, Tfoliage, Ra_used[1]);
 
     /* Calculate the advected energy */
 
-    *AdvectedEnergy = (4186.8 * Tcanopy * Rainfall) / (delta_t);
+    *AdvectedEnergy = (CONST_CPFW * Tcanopy * Rainfall) / (delta_t);
 
     /* Calculate the amount of energy available for refreezing */
 
@@ -268,7 +268,7 @@ func_canopy_energy_bal(double  Tfoliage,
         /* Intercepted snow present, check if excess energy can be used to
            melt or refreeze it */
 
-        *RefreezeEnergy = (IntRain * Lf * RHO_W) / (delta_t);
+        *RefreezeEnergy = (IntRain * CONST_LATICE * CONST_RHOFW) / (delta_t);
 
         if (Tfoliage == 0.0 && RestTerm > -(*RefreezeEnergy)) {
             *RefreezeEnergy = -RestTerm; /* available energy input over cold content

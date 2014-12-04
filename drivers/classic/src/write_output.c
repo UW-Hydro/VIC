@@ -54,7 +54,7 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
- /******************************************************************************
+/******************************************************************************
  * @brief    Write output data and convert units if necessary.
  *****************************************************************************/
 void
@@ -71,7 +71,7 @@ write_output(out_data_struct      *out_data,
     int                        out_dt_sec;
     int                        v;
 
-    out_dt_sec = global_param.out_dt * SECPHOUR;
+    out_dt_sec = global_param.out_dt * SEC_PER_HOUR;
 
     /***********************************************
        Change of units for ALMA-compliant output
@@ -96,7 +96,7 @@ write_output(out_data_struct      *out_data,
         out_data[OUT_LAKE_DSWE_V].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_EVAP].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_EVAP_V].aggdata[0] /= out_dt_sec;
-        out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += KELVIN;
+        out_data[OUT_LAKE_ICE_TEMP].aggdata[0] += CONST_TKFRZ;
         out_data[OUT_LAKE_PREC_V].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_RCHRG].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_RCHRG_V].aggdata[0] /= out_dt_sec;
@@ -104,7 +104,7 @@ write_output(out_data_struct      *out_data,
         out_data[OUT_LAKE_RO_IN_V].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_VAPFLX].aggdata[0] /= out_dt_sec;
         out_data[OUT_LAKE_VAPFLX_V].aggdata[0] /= out_dt_sec;
-        out_data[OUT_LAKE_SURF_TEMP].aggdata[0] += KELVIN;
+        out_data[OUT_LAKE_SURF_TEMP].aggdata[0] += CONST_TKFRZ;
         out_data[OUT_PREC].aggdata[0] /= out_dt_sec;
         out_data[OUT_RAINF].aggdata[0] /= out_dt_sec;
         out_data[OUT_REFREEZE].aggdata[0] /= out_dt_sec;
@@ -117,26 +117,26 @@ write_output(out_data_struct      *out_data,
         out_data[OUT_SUB_SNOW].aggdata[0] += out_data[OUT_SUB_CANOP].aggdata[0];
         out_data[OUT_SUB_SURFACE].aggdata[0] /= out_dt_sec;
         out_data[OUT_TRANSP_VEG].aggdata[0] /= out_dt_sec;
-        out_data[OUT_BARESOILT].aggdata[0] += KELVIN;
-        out_data[OUT_SNOW_PACK_TEMP].aggdata[0] += KELVIN;
-        out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += KELVIN;
+        out_data[OUT_BARESOILT].aggdata[0] += CONST_TKFRZ;
+        out_data[OUT_SNOW_PACK_TEMP].aggdata[0] += CONST_TKFRZ;
+        out_data[OUT_SNOW_SURF_TEMP].aggdata[0] += CONST_TKFRZ;
         for (index = 0; index < options.Nlayer; index++) {
-            out_data[OUT_SOIL_TEMP].aggdata[index] += KELVIN;
+            out_data[OUT_SOIL_TEMP].aggdata[index] += CONST_TKFRZ;
         }
         for (index = 0; index < options.Nnode; index++) {
-            out_data[OUT_SOIL_TNODE].aggdata[index] += KELVIN;
-            out_data[OUT_SOIL_TNODE_WL].aggdata[index] += KELVIN;
+            out_data[OUT_SOIL_TNODE].aggdata[index] += CONST_TKFRZ;
+            out_data[OUT_SOIL_TNODE_WL].aggdata[index] += CONST_TKFRZ;
         }
-        out_data[OUT_SURF_TEMP].aggdata[0] += KELVIN;
-        out_data[OUT_VEGT].aggdata[0] += KELVIN;
-        out_data[OUT_FDEPTH].aggdata[0] /= 100;
-        out_data[OUT_TDEPTH].aggdata[0] /= 100;
+        out_data[OUT_SURF_TEMP].aggdata[0] += CONST_TKFRZ;
+        out_data[OUT_VEGT].aggdata[0] += CONST_TKFRZ;
+        out_data[OUT_FDEPTH].aggdata[0] /= CM_PER_M;
+        out_data[OUT_TDEPTH].aggdata[0] /= CM_PER_M;
         out_data[OUT_DELTACC].aggdata[0] *= out_dt_sec;
         out_data[OUT_DELTAH].aggdata[0] *= out_dt_sec;
-        out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
-        out_data[OUT_PRESSURE].aggdata[0] *= 1000;
-        out_data[OUT_VP].aggdata[0] *= 1000;
-        out_data[OUT_VPD].aggdata[0] *= 1000;
+        out_data[OUT_AIR_TEMP].aggdata[0] += CONST_TKFRZ;
+        out_data[OUT_PRESSURE].aggdata[0] *= PA_PER_KPA;
+        out_data[OUT_VP].aggdata[0] *= PA_PER_KPA;
+        out_data[OUT_VPD].aggdata[0] *= PA_PER_KPA;
     }
 
     /*************

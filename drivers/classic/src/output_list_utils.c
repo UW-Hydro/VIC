@@ -361,7 +361,7 @@ create_output_list()
     }
 
     // Initialize data values
-    init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
+    init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
 
     return out_data;
 }
@@ -377,8 +377,8 @@ init_output_list(out_data_struct *out_data,
                  int              type,
                  double           mult)
 {
-    int     varid;
-    size_t  i;
+    int    varid;
+    size_t i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         out_data[varid].write = write;
@@ -407,12 +407,12 @@ set_output_var(out_data_file_struct *out_data_files,
                double                mult)
 {
     int varid;
-    int found = FALSE;
+    int found = false;
     int status = 0;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         if (strcmp(out_data[varid].varname, varname) == 0) {
-            found = TRUE;
+            found = true;
             out_data[varid].write = write;
             if (strcmp(format, "*") != 0) {
                 strcpy(out_data[varid].format, format);

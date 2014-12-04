@@ -27,8 +27,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAX_ITER 50
-
 /******************************************************************************
 * @brief        Calculate snow accumulation and melt for the lake model.
 ******************************************************************************/
@@ -64,26 +62,28 @@ water_energy_balance(int     numnod,
                      double *new_ice_water_eq,
                      double  lvolume)
 {
-    double Ts;
-    double Tcutk;
-    double Tskin;
-    double Tnew[MAX_LAKE_NODES];
-    int    k;
-    double sumjouli;
+    extern parameters_struct param;
 
-    double Tmean;
-    int    iterations;
-    double Le;
-    double jouleold;
-    double joulenew;
+    double                   Ts;
+    double                   Tcutk;
+    double                   Tskin;
+    double                   Tnew[MAX_LAKE_NODES];
+    int                      k;
+    double                   sumjouli;
+
+    double                   Tmean;
+    int                      iterations;
+    double                   Le;
+    double                   jouleold;
+    double                   joulenew;
 
 
-    double de[MAX_LAKE_NODES];
-    double epsilon = 0.0001;
+    double                   de[MAX_LAKE_NODES];
+    double                   epsilon = 0.0001;
 
     /* Calculate the surface energy balance for water surface temp = 0.0 */
 
-    Tmean = -999.;
+    Tmean = MISSING;
     Ts = T[0];
     iterations = 0;
     for (k = 0; k < numnod; k++) {
@@ -92,7 +92,7 @@ water_energy_balance(int     numnod,
 
     energycalc(T, &jouleold, numnod, dz, surfdz, surface, cp, water_density);
 
-    while ((fabs(Tmean - Ts) > epsilon) && iterations < MAX_ITER) {
+    while ((fabs(Tmean - Ts) > epsilon) && iterations < param.LAKE_MAX_ITER) {
         if (iterations == 0) {
             Ts = T[0];
         }
@@ -105,8 +105,8 @@ water_energy_balance(int     numnod,
          * Stefan-Boltzmann formula uses K.
          * ....................................................................*/
 
-        Tskin = Ts + KELVIN;
-        Tcutk = Tcutoff + KELVIN;
+        Tskin = Ts + CONST_TKFRZ;
+        Tcutk = Tcutoff + CONST_TKFRZ;
 
         /* ....................................................................
          * Send an ice height of 0 meters to latsens for the calculation
@@ -120,7 +120,7 @@ water_energy_balance(int     numnod,
            Compute the Latent Heat Flux
         **********************************************************************/
 
-        Le = (2.501 - 0.002361 * Tair) * 1.0e6; /*J/kg  */
+        Le = calc_latent_heat_of_vaporization(Tair); /*J/kg */
 
         *Qle = -1. * (*evapw) * Le;                  /* W/m^2 */
 
@@ -128,7 +128,7 @@ water_energy_balance(int     numnod,
          * Calculate the outgoing long wave fluxes, positive downwards.
          * -------------------------------------------------------------------- */
 
-        *LWnet = longwave - EMH2O * STEFAN_B * Tskin * Tskin * Tskin * Tskin;
+        *LWnet = longwave - calc_outgoing_longwave(Tskin, param.EMISS_H2O);
 
         /*************************************************************
            Use a Triadiagonal Matric to Explicitly Solve for
@@ -146,7 +146,8 @@ water_energy_balance(int     numnod,
          * new timestep.
          * -------------------------------------------------------------------- */
 
-        temp_area(shortwave * a1, shortwave * a2, *Qle + *Qh + *LWnet, T, Tnew,
+        temp_area(shortwave * param.LAKE_A1, shortwave * param.LAKE_A2,
+                  *Qle + *Qh + *LWnet, T, Tnew,
                   water_density, de, dt, surface, numnod,
                   dz, surfdz, &joulenew, cp, energy_out_bottom);
 
@@ -158,10 +159,12 @@ water_energy_balance(int     numnod,
 
             energycalc(Tnew, &sumjouli, numnod, dz, surfdz, surface, cp,
                        water_density);
-            *deltaH = (sumjouli - jouleold) / (surface[0] * dt * SECPHOUR);
+            *deltaH = (sumjouli - jouleold) /
+                      (surface[0] * dt * SEC_PER_HOUR);
         }
         else {
-            *deltaH = (joulenew - jouleold) / (surface[0] * dt * SECPHOUR);
+            *deltaH = (joulenew - jouleold) /
+                      (surface[0] * dt * SEC_PER_HOUR);
             *energy_ice_formation = 0.0;
         }
 
@@ -178,15 +181,15 @@ water_energy_balance(int     numnod,
         return(0);
     }
     else {
-        Tskin = T[0] + KELVIN;
-        Tcutk = Tcutoff + KELVIN;
+        Tskin = T[0] + CONST_TKFRZ;
+        Tcutk = Tcutoff + CONST_TKFRZ;
         latsens(Tskin, Tcutk, 0.0, Tair, wind, pressure, vp, air_density,
                 evapw, Qh, wind_h);
 
-        Le = (2.501 - 0.002361 * Tair) * 1.0e6; /*J/kg  */
+        Le = calc_latent_heat_of_vaporization(Tair); /*J/kg */
         *Qle = -1. * (*evapw) * Le;                  /* W/m^2 */
 
-        *LWnet = longwave - EMH2O * STEFAN_B * Tskin * Tskin * Tskin * Tskin;
+        *LWnet = longwave - calc_outgoing_longwave(Tskin, param.EMISS_H2O);
 
         if (T[0] < Tcutoff) {
             iceform(energy_ice_formation, T, Tcutoff, fracprv, new_ice_area,

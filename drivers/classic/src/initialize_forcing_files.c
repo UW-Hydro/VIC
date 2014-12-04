@@ -41,7 +41,7 @@ initialize_forcing_files()
     /** Initialize forcing file input controls **/
 
     for (j = 0; j < N_FORCING_TYPES; j++) {
-        param_set.TYPE[j].SUPPLIED = FALSE;
+        param_set.TYPE[j].SUPPLIED = false;
         param_set.TYPE[j].SIGNED = 1;
         param_set.TYPE[j].multiplier = 1;
     }

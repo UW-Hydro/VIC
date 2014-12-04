@@ -34,15 +34,14 @@
  *           files and the global parameter file.
  *****************************************************************************/
 void
-display_current_settings(int                  mode,
-                         filenames_struct    *names,
-                         global_param_struct *global)
+display_current_settings(int mode)
 {
-    extern char            *version;
-    extern option_struct    options;
-    extern param_set_struct param_set;
+    extern option_struct       options;
+    extern param_set_struct    param_set;
+    extern global_param_struct global_param;
+    extern filenames_struct    filenames;
 
-    int                     file_num;
+    int                        file_num;
 
     if (mode == DISP_VERSION) {
         fprintf(stderr, "***** VIC Version %s *****\n", version);
@@ -64,24 +63,12 @@ display_current_settings(int                  mode,
     fprintf(stderr, "Maximum Array Sizes:\n");
     fprintf(stderr, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(stderr, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
-    fprintf(stderr, "MAX_FROST_AREAS\t\t\t%2d\n", MAX_FROST_AREAS);
+    fprintf(stderr, "MAX_FROST_AREAS\t\t%2d\n", MAX_FROST_AREAS);
     fprintf(stderr, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);
     fprintf(stderr, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);
     fprintf(stderr, "MAX_NODES\t\t%2d\n", MAX_NODES);
     fprintf(stderr, "MAX_VEG\t\t\t%2d\n", MAX_VEG);
     fprintf(stderr, "\n");
-    fprintf(stderr, "Snow Constants:\n");
-    fprintf(stderr, "NEW_SNOW_ALB\t\t%f\n", NEW_SNOW_ALB);
-    fprintf(stderr, "SNOW_ALB_ACCUM_A\t%f\n", SNOW_ALB_ACCUM_A);
-    fprintf(stderr, "SNOW_ALB_ACCUM_B\t%f\n", SNOW_ALB_ACCUM_B);
-    fprintf(stderr, "SNOW_ALB_THAW_A\t\t%f\n", SNOW_ALB_THAW_A);
-    fprintf(stderr, "SNOW_ALB_THAW_B\t\t%f\n", SNOW_ALB_THAW_B);
-    fprintf(stderr, "TraceSnow\t\t%f\n", TraceSnow);
-    fprintf(stderr, "\n");
-    fprintf(stderr, "Other Constants:\n");
-    fprintf(stderr, "LAI_WATER_FACTOR\t%f\n", LAI_WATER_FACTOR);
-    fprintf(stderr, "MAXIT_FE\t\t%2d\n", MAXIT_FE);
-
     if (mode == DISP_COMPILE_TIME) {
         return;
     }
@@ -98,20 +85,20 @@ display_current_settings(int                  mode,
     else {
         fprintf(stderr, "EQUAL_AREA\t\tFALSE\n");
     }
-    fprintf(stderr, "RESOLUTION\t\t%f\n", global->resolution);
-    fprintf(stderr, "TIME_STEP\t\t%d\n", global->dt);
+    fprintf(stderr, "RESOLUTION\t\t%f\n", global_param.resolution);
+    fprintf(stderr, "TIME_STEP\t\t%d\n", global_param.dt);
     fprintf(stderr, "SNOW_STEP\t\t%d\n", options.SNOW_STEP);
-    fprintf(stderr, "STARTYEAR\t\t%d\n", global->startyear);
-    fprintf(stderr, "STARTMONTH\t\t%d\n", global->startmonth);
-    fprintf(stderr, "STARTDAY\t\t%d\n", global->startday);
-    fprintf(stderr, "STARTHOUR\t\t%d\n", global->starthour);
-    if (global->nrecs > 0) {
-        fprintf(stderr, "NRECS\t\t%d\n", global->nrecs);
+    fprintf(stderr, "STARTYEAR\t\t%d\n", global_param.startyear);
+    fprintf(stderr, "STARTMONTH\t\t%d\n", global_param.startmonth);
+    fprintf(stderr, "STARTDAY\t\t%d\n", global_param.startday);
+    fprintf(stderr, "STARTHOUR\t\t%d\n", global_param.starthour);
+    if (global_param.nrecs > 0) {
+        fprintf(stderr, "NRECS\t\t%d\n", global_param.nrecs);
     }
     else {
-        fprintf(stderr, "ENDYEAR\t\t\t%d\n", global->endyear);
-        fprintf(stderr, "ENDMONTH\t\t%d\n", global->endmonth);
-        fprintf(stderr, "ENDDAY\t\t\t%d\n", global->endday);
+        fprintf(stderr, "ENDYEAR\t\t\t%d\n", global_param.endyear);
+        fprintf(stderr, "ENDMONTH\t\t%d\n", global_param.endmonth);
+        fprintf(stderr, "ENDDAY\t\t\t%d\n", global_param.endday);
     }
 
     fprintf(stderr, "\n");
@@ -146,7 +133,7 @@ display_current_settings(int                  mode,
     else {
         fprintf(stderr, "COMPUTE_TREELINE\t\tFALSE\n");
     }
-    if (options.CONTINUEONERROR == TRUE) {
+    if (options.CONTINUEONERROR) {
         fprintf(stderr, "CONTINUEONERROR\t\tTRUE\n");
     }
     else {
@@ -242,14 +229,14 @@ display_current_settings(int                  mode,
     else {
         fprintf(stderr, "QUICK_SOLVE\t\tFALSE\n");
     }
-    if (options.SPATIAL_FROST == TRUE) {
+    if (options.SPATIAL_FROST) {
         fprintf(stderr, "SPATIAL_FROST\t\tTRUE\n");
         fprintf(stderr, "Nfrost\t\t%zu\n", options.Nfrost);
     }
     else {
         fprintf(stderr, "SPATIAL_FROST\t\tFALSE\n");
     }
-    if (options.SPATIAL_SNOW == TRUE) {
+    if (options.SPATIAL_SNOW) {
         fprintf(stderr, "SPATIAL_SNOW\t\tTRUE\n");
     }
     else {
@@ -261,14 +248,13 @@ display_current_settings(int                  mode,
     else if (options.SNOW_DENSITY == DENS_SNTHRM) {
         fprintf(stderr, "SNOW_DENSITY\t\tDENS_SNTHRM\n");
     }
-    fprintf(stderr, "SW_PREC_THRESH\t\t%f\n", options.SW_PREC_THRESH);
-    if (options.TFALLBACK == TRUE) {
+    if (options.TFALLBACK) {
         fprintf(stderr, "TFALLBACK\t\tTRUE\n");
     }
     else {
         fprintf(stderr, "TFALLBACK\t\tFALSE\n");
     }
-    if (options.VP_INTERP == TRUE) {
+    if (options.VP_INTERP) {
         fprintf(stderr, "VP_INTERP\t\tTRUE\n");
     }
     else {
@@ -286,19 +272,16 @@ display_current_settings(int                  mode,
     else if (options.VP_ITER == VP_ITER_CONVERGE) {
         fprintf(stderr, "VP_ITER\t\tVP_ITER_CONVERGE\n");
     }
-    fprintf(stderr, "WIND_H\t\t\t%f\n", global->wind_h);
-    fprintf(stderr, "MEASURE_H\t\t%f\n", global->measure_h);
+    fprintf(stderr, "WIND_H\t\t\t%f\n", global_param.wind_h);
+    fprintf(stderr, "MEASURE_H\t\t%f\n", global_param.measure_h);
     fprintf(stderr, "NODES\t\t\t%zu\n", options.Nnode);
-    fprintf(stderr, "MIN_RAIN_TEMP\t\t%f\n", global->MIN_RAIN_TEMP);
-    fprintf(stderr, "MAX_SNOW_TEMP\t\t%f\n", global->MAX_SNOW_TEMP);
-    fprintf(stderr, "MIN_WIND_SPEED\t\t%f\n", options.MIN_WIND_SPEED);
-    if (options.CARBON == TRUE) {
+    if (options.CARBON) {
         fprintf(stderr, "CARBON\t\tTRUE\n");
     }
     else {
         fprintf(stderr, "CARBON\t\tFALSE\n");
     }
-    if (options.SHARE_LAYER_MOIST == TRUE) {
+    if (options.SHARE_LAYER_MOIST) {
         fprintf(stderr, "SHARE_LAYER_MOIST\t\tTRUE\n");
     }
     else {
@@ -309,13 +292,17 @@ display_current_settings(int                  mode,
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Forcing Data:\n");
     for (file_num = 0; file_num < 2; file_num++) {
-        if (global->forceyear[file_num] > 0) {
+        if (global_param.forceyear[file_num] > 0) {
             fprintf(stderr, "Forcing File %d:\t\t%s*\n", file_num + 1,
-                    names->f_path_pfx[file_num]);
-            fprintf(stderr, "FORCEYEAR\t\t%d\n", global->forceyear[file_num]);
-            fprintf(stderr, "FORCEMONTH\t\t%d\n", global->forcemonth[file_num]);
-            fprintf(stderr, "FORCEDAY\t\t%d\n", global->forceday[file_num]);
-            fprintf(stderr, "FORCEHOUR\t\t%d\n", global->forcehour[file_num]);
+                    filenames.f_path_pfx[file_num]);
+            fprintf(stderr, "FORCEYEAR\t\t%d\n",
+                    global_param.forceyear[file_num]);
+            fprintf(stderr, "FORCEMONTH\t\t%d\n",
+                    global_param.forcemonth[file_num]);
+            fprintf(stderr, "FORCEDAY\t\t%d\n",
+                    global_param.forceday[file_num]);
+            fprintf(stderr, "FORCEHOUR\t\t%d\n",
+                    global_param.forcehour[file_num]);
             fprintf(stderr, "N_TYPES\t\t\t%d\n", param_set.N_TYPES[file_num]);
             fprintf(stderr, "FORCE_DT\t\t%d\n", param_set.FORCE_DT[file_num]);
             if (param_set.FORCE_ENDIAN[file_num] == LITTLE) {
@@ -341,8 +328,9 @@ display_current_settings(int                  mode,
     }
 
     fprintf(stderr, "\n");
+    fprintf(stderr, "Constants File\t\t%s\n", filenames.constants);
     fprintf(stderr, "Input Soil Data:\n");
-    fprintf(stderr, "Soil file\t\t%s\n", names->soil);
+    fprintf(stderr, "Soil file\t\t%s\n", filenames.soil);
     if (options.BASEFLOW == ARNO) {
         fprintf(stderr, "BASEFLOW\t\tARNO\n");
     }
@@ -364,20 +352,20 @@ display_current_settings(int                  mode,
 
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Veg Data:\n");
-    fprintf(stderr, "Veg library file\t%s\n", names->veglib);
-    if (options.VEGLIB_PHOTO == TRUE) {
+    fprintf(stderr, "Veg library file\t%s\n", filenames.veglib);
+    if (options.VEGLIB_PHOTO) {
         fprintf(stderr, "VEGLIB_PHOTO\t\tTRUE\n");
     }
     else {
         fprintf(stderr, "VEGLIB_PHOTO\t\tFALSE\n");
     }
-    if (options.VEGLIB_VEGCOVER == TRUE) {
+    if (options.VEGLIB_VEGCOVER) {
         fprintf(stderr, "VEGLIB_VEGCOVER\t\tTRUE\n");
     }
     else {
         fprintf(stderr, "VEGLIB_VEGCOVER\t\tFALSE\n");
     }
-    fprintf(stderr, "Veg param file\t\t%s\n", names->veg);
+    fprintf(stderr, "Veg param file\t\t%s\n", filenames.veg);
     fprintf(stderr, "ROOT_ZONES\t\t%zu\n", options.ROOT_ZONES);
     if (options.VEGPARAM_LAI) {
         fprintf(stderr, "VEGPARAM_LAI\t\tTRUE\n");
@@ -420,7 +408,7 @@ display_current_settings(int                  mode,
     fprintf(stderr, "Input Elevation Data:\n");
     if (options.SNOW_BAND > 1) {
         fprintf(stderr, "SNOW_BAND\t\t%zu\t%s\n", options.SNOW_BAND,
-                names->snowband);
+                filenames.snowband);
     }
     else if (options.SNOW_BAND == 1) {
         fprintf(stderr,
@@ -434,7 +422,7 @@ display_current_settings(int                  mode,
     fprintf(stderr, "\n");
     fprintf(stderr, "Input Lake Data:\n");
     if (options.LAKES) {
-        fprintf(stderr, "LAKES\t\tTRUE\t%s\n", names->lakeparam);
+        fprintf(stderr, "LAKES\t\tTRUE\t%s\n", filenames.lakeparam);
     }
     else {
         fprintf(stderr, "LAKES\t\tFALSE\n");
@@ -449,7 +437,7 @@ display_current_settings(int                  mode,
     fprintf(stderr, "\n");
     fprintf(stderr, "Input State File:\n");
     if (options.INIT_STATE) {
-        fprintf(stderr, "INIT_STATE\t\tTRUE\t%s\n", names->init_state);
+        fprintf(stderr, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state);
         if (options.BINARY_STATE_FILE) {
             fprintf(stderr, "BINARY_STATE_FILE\tTRUE\n");
         }
@@ -465,10 +453,10 @@ display_current_settings(int                  mode,
     fprintf(stderr, "Output State File:\n");
     if (options.SAVE_STATE) {
         fprintf(stderr, "SAVE_STATE\t\tTRUE\n");
-        fprintf(stderr, "STATENAME\t\t%s\n", names->statefile);
-        fprintf(stderr, "STATEYEAR\t\t%d\n", global->stateyear);
-        fprintf(stderr, "STATEMONTH\t\t%d\n", global->statemonth);
-        fprintf(stderr, "STATEDAY\t\t%d\n", global->stateday);
+        fprintf(stderr, "STATENAME\t\t%s\n", filenames.statefile);
+        fprintf(stderr, "STATEYEAR\t\t%d\n", global_param.stateyear);
+        fprintf(stderr, "STATEMONTH\t\t%d\n", global_param.statemonth);
+        fprintf(stderr, "STATEDAY\t\t%d\n", global_param.stateday);
         if (options.BINARY_STATE_FILE) {
             fprintf(stderr, "BINARY_STATE_FILE\tTRUE\n");
         }
@@ -482,8 +470,8 @@ display_current_settings(int                  mode,
 
     fprintf(stderr, "\n");
     fprintf(stderr, "Output Data:\n");
-    fprintf(stderr, "Result dir:\t\t%s\n", names->result_dir);
-    fprintf(stderr, "OUT_STEP\t\t%d\n", global->out_dt);
+    fprintf(stderr, "Result dir:\t\t%s\n", filenames.result_dir);
+    fprintf(stderr, "OUT_STEP\t\t%d\n", global_param.out_dt);
     if (options.ALMA_OUTPUT) {
         fprintf(stderr, "ALMA_OUTPUT\t\tTRUE\n");
     }
@@ -526,6 +514,6 @@ display_current_settings(int                  mode,
     else {
         fprintf(stderr, "PRT_SNOW_BAND\t\tFALSE\n");
     }
-    fprintf(stderr, "SKIPYEAR\t\t%d\n", global->skipyear);
+    fprintf(stderr, "SKIPYEAR\t\t%d\n", global_param.skipyear);
     fprintf(stderr, "\n");
 }

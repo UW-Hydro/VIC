@@ -91,6 +91,7 @@ hermint(double  xbar,
 /****************************************************************************/
 /*				    HourlyT                                 */
 /****************************************************************************/
+
 /******************************************************************************
  * @brief    calculate hourly temperature.
  *****************************************************************************/
@@ -114,7 +115,7 @@ HourlyT(int     Dt,
     int     hour;
     int     nsteps;
 
-    nsteps = HOURSPERDAY / Dt * ndays;
+    nsteps = HOURS_PER_DAY / Dt * ndays;
 
     n = ndays * 2 + 2;
     x = (double *) calloc(n, sizeof(double));
@@ -129,7 +130,7 @@ HourlyT(int     Dt,
 
     /* First fill the x vector with the times for Tmin and Tmax, and fill the
        Tyc1 with the corresponding temperature and humidity values */
-    for (i = 0, j = 1, hour = 0; i < ndays; i++, hour += HOURSPERDAY) {
+    for (i = 0, j = 1, hour = 0; i < ndays; i++, hour += HOURS_PER_DAY) {
         if (TminHour[i] < TmaxHour[i]) {
             x[j] = TminHour[i] + hour;
             Tyc1[j++] = Tmin[i];
@@ -145,9 +146,9 @@ HourlyT(int     Dt,
     }
 
     /* To "tie" down the first and last values, repeat those */
-    x[0] = x[2] - HOURSPERDAY;
+    x[0] = x[2] - HOURS_PER_DAY;
     Tyc1[0] = Tyc1[2];
-    x[n - 1] = x[n - 3] + HOURSPERDAY;
+    x[n - 1] = x[n - 3] + HOURS_PER_DAY;
     Tyc1[n - 1] = Tyc1[n - 3];
 
     /* we want to preserve maxima and minima, so we require that the first
@@ -190,21 +191,23 @@ set_max_min_hour(double *hourlyrad,
     int i;
 
     for (i = 0; i < ndays; i++) {
-        risehour = -999;
-        sethour = -999;
+        risehour = MISSING;
+        sethour = MISSING;
         for (hour = 0; hour < 12; hour++) {
-            if (hourlyrad[i * 24 + hour] > 0 &&
-                (i * 24 + hour == 0 || hourlyrad[i * 24 + hour - 1] <= 0)) {
+            if (hourlyrad[i * HOURS_PER_DAY + hour] > 0 &&
+                (i * HOURS_PER_DAY + hour == 0 ||
+                 hourlyrad[i * HOURS_PER_DAY + hour - 1] <= 0)) {
                 risehour = hour;
             }
         }
-        for (hour = 12; hour < 24; hour++) {
-            if (hourlyrad[i * 24 + hour] <= 0 && hourlyrad[i * 24 + hour - 1] >
+        for (hour = 12; hour < HOURS_PER_DAY; hour++) {
+            if (hourlyrad[i * HOURS_PER_DAY + hour] <= 0 &&
+                hourlyrad[i * HOURS_PER_DAY + hour - 1] >
                 0) {
                 sethour = hour;
             }
         }
-        if (i == ndays - 1 && sethour == -999) {
+        if (i == ndays - 1 && sethour == MISSING) {
             sethour = 23;
         }
         if (risehour >= 0 && sethour >= 0) {

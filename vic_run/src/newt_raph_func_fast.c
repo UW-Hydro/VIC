@@ -32,15 +32,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAXTRIAL 150
-#define TOLX     1e-4
-#define TOLF     1e-1
-#define R_MAX    2.0
-#define R_MIN    -5.0
-#define RELAX1   0.9
-#define RELAX2   0.7
-#define RELAX3   0.2
-
 /******************************************************************************
  * @brief    Newton-Raphson method to solve non-linear system adapted from
  *           "Numerical Recipes"
@@ -50,13 +41,15 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
           double x[],
           int n)
 {
-    int    k, i, Error;
-    double errx, errf, fvec[MAX_NODES], p[MAX_NODES];
-    double a[MAX_NODES], b[MAX_NODES], c[MAX_NODES];
+    extern parameters_struct param;
+
+    int                      k, i, Error;
+    double                   errx, errf, fvec[MAX_NODES], p[MAX_NODES];
+    double                   a[MAX_NODES], b[MAX_NODES], c[MAX_NODES];
 
     Error = 0;
 
-    for (k = 0; k < MAXTRIAL; k++) {
+    for (k = 0; k < param.NEWT_RAPH_MAXTRIAL; k++) {
         // calculate function value for all nodes, i.e. focus = -1
         (*vecfunc)(x, fvec, n, 0, -1);
 
@@ -65,7 +58,7 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
         for (i = 0; i < n; i++) {
             errf += fabs(fvec[i]);
         }
-        if (errf <= TOLF) {
+        if (errf <= param.NEWT_RAPH_TOLF) {
             return (Error);
         }
 
@@ -84,14 +77,17 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
         for (i = 0; i < n; i++) {
             errx += fabs(p[i]);
 
-            if (k > 10 && k <= 20 && x[i] < R_MAX && x[i] > R_MIN) {
-                x[i] += p[i] * RELAX1;
+            if (k > 10 && k <= 20 && x[i] < param.NEWT_RAPH_R_MAX && x[i] >
+                param.NEWT_RAPH_R_MIN) {
+                x[i] += p[i] * param.NEWT_RAPH_RELAX1;
             }
-            else if (k > 20 && k <= 60 && x[i] < R_MAX && x[i] > R_MIN) {
-                x[i] += p[i] * RELAX2;
+            else if (k > 20 && k <= 60 && x[i] < param.NEWT_RAPH_R_MAX && x[i] >
+                     param.NEWT_RAPH_R_MIN) {
+                x[i] += p[i] * param.NEWT_RAPH_RELAX2;
             }
-            else if (k > 60 && x[i] < R_MAX && x[i] > R_MIN) {
-                x[i] += p[i] * RELAX3;
+            else if (k > 60 && x[i] < param.NEWT_RAPH_R_MAX && x[i] >
+                     param.NEWT_RAPH_R_MIN) {
+                x[i] += p[i] * param.NEWT_RAPH_RELAX3;
             }
             else {
                 x[i] += p[i];
@@ -99,7 +95,7 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
         }
 
         // stop if TOLX is satisfied
-        if (errx <= TOLX) {
+        if (errx <= param.NEWT_RAPH_TOLX) {
             return (Error);
         }
     }
@@ -107,18 +103,6 @@ newt_raph(void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
 
     return (Error);
 }
-
-#undef MAXTRIAL
-#undef TOLX
-#undef TOLF
-#undef R_MAX
-#undef R_MIN
-#undef RELAX1
-#undef RELAX2
-#undef RELAX3
-
-
-#define EPS2     1e-4
 
 /******************************************************************************
  * @brief    Forward difference approx to Jacobian, adapted from "Numerical
@@ -133,14 +117,16 @@ fdjac3(double x[],
        void (*vecfunc)(double x[], double fvec[], int n, int init, ...),
        int n)
 {
-    int    j;
-    double h, temp, f[MAX_NODES];
+    extern parameters_struct param;
+
+    int                      j;
+    double                   h, temp, f[MAX_NODES];
 
     for (j = 0; j < n; j++) {
         temp = x[j];
-        h = EPS2 * fabs(temp);
+        h = param.NEWT_RAPH_EPS2 * fabs(temp);
         if (h == 0) {
-            h = EPS2;
+            h = param.NEWT_RAPH_EPS2;
         }
         x[j] = temp + h;
         h = x[j] - temp;
@@ -159,8 +145,6 @@ fdjac3(double x[],
         }
     }
 }
-
-#undef EPS2
 
 /******************************************************************************
  * @brief    function to solve tridiagonal linear system adapted from

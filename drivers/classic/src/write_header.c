@@ -128,7 +128,7 @@ write_header(out_data_file_struct *out_data_files,
                            sizeof(float);                                        // month
                 Nbytes2 += sizeof(char) + 3 * sizeof(char) + sizeof(char) +
                            sizeof(float);                                        // day
-                if (global.out_dt < 24) {
+                if (global.out_dt < HOURS_PER_DAY) {
                     Nbytes2 += sizeof(char) + 4 * sizeof(char) + sizeof(char) +
                                sizeof(float);                                      // hour
                 }
@@ -144,7 +144,8 @@ write_header(out_data_file_struct *out_data_files,
                      out_data[out_data_files[file_idx].varid[var_idx]].nelem;
                      elem_idx++) {
                     if (out_data[out_data_files[file_idx].varid[var_idx]].nelem
-                        > 1) {
+                        >
+                        1) {
                         sprintf(tmp_str, "%s_%d",
                                 out_data[out_data_files[file_idx].varid[var_idx]].varname,
                                 elem_idx);
@@ -201,7 +202,7 @@ write_header(out_data_file_struct *out_data_files,
             // Nvars
             Nvars = out_data_files[file_idx].nvars;
             if (!options.OUTPUT_FORCE) {
-                if (global.out_dt < 24) {
+                if (global.out_dt < HOURS_PER_DAY) {
                     Nvars += 4;
                 }
                 else {
@@ -249,7 +250,7 @@ write_header(out_data_file_struct *out_data_files,
                 fwrite(&tmp_mult, sizeof(float), 1,
                        out_data_files[file_idx].fh);
 
-                if (global.out_dt < 24) {
+                if (global.out_dt < HOURS_PER_DAY) {
                     // hour
                     strcpy(tmp_str, "HOUR");
                     tmp_len = strlen(tmp_str);
@@ -274,7 +275,8 @@ write_header(out_data_file_struct *out_data_files,
                      out_data[out_data_files[file_idx].varid[var_idx]].nelem;
                      elem_idx++) {
                     if (out_data[out_data_files[file_idx].varid[var_idx]].nelem
-                        > 1) {
+                        >
+                        1) {
                         sprintf(tmp_str, "%s_%d",
                                 out_data[out_data_files[file_idx].varid[var_idx]].varname,
                                 elem_idx);
@@ -301,28 +303,28 @@ write_header(out_data_file_struct *out_data_files,
         }
     }
     else { // ASCII
-        // ASCII header format:
-        //
-        // # NRECS: (nrecs)
-        // # DT: (dt)
-        // # STARTDATE: yyyy-mm-dd hh:00:00
-        // # ALMA_OUTPUT: (0 or 1)
-        // # NVARS: (Nvars)
-        // # VARNAME    VARNAME   VARNAME   ...
-        //
-        // where
-        // nrecs       = Number of records in the file
-        // dt          = Output time step length in hours
-        // start date  = Date and time of first record of file
-        // ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
-        // Nvars       = Number of variables in the file, including date fields
+           // ASCII header format:
+           //
+           // # NRECS: (nrecs)
+           // # DT: (dt)
+           // # STARTDATE: yyyy-mm-dd hh:00:00
+           // # ALMA_OUTPUT: (0 or 1)
+           // # NVARS: (Nvars)
+           // # VARNAME    VARNAME   VARNAME   ...
+           //
+           // where
+           // nrecs       = Number of records in the file
+           // dt          = Output time step length in hours
+           // start date  = Date and time of first record of file
+           // ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
+           // Nvars       = Number of variables in the file, including date fields
 
         // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             // Header part 1: Global attributes
             Nvars = out_data_files[file_idx].nvars;
             if (!options.OUTPUT_FORCE) {
-                if (global.out_dt < 24) {
+                if (global.out_dt < HOURS_PER_DAY) {
                     Nvars += 4;
                 }
                 else {
@@ -343,7 +345,7 @@ write_header(out_data_file_struct *out_data_files,
 
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (global.out_dt < 24) {
+                if (global.out_dt < HOURS_PER_DAY) {
                     // Write year, month, day, and hour
                     fprintf(out_data_files[file_idx].fh,
                             "YEAR\tMONTH\tDAY\tHOUR\t");
@@ -369,7 +371,8 @@ write_header(out_data_file_struct *out_data_files,
                     fprintf(out_data_files[file_idx].fh, "%s",
                             out_data[out_data_files[file_idx].varid[var_idx]].varname);
                     if (out_data[out_data_files[file_idx].varid[var_idx]].nelem
-                        > 1) {
+                        >
+                        1) {
                         fprintf(out_data_files[file_idx].fh, "_%d", elem_idx);
                     }
                 }

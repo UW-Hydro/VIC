@@ -35,8 +35,7 @@ void
 alloc_atmos(int                 nrecs,
             atmos_data_struct **atmos)
 {
-
-    int                     i;
+    int i;
 
     *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
     if (*atmos == NULL) {
@@ -88,7 +87,7 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].shortwave == NULL) {
             nrerror("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].snowflag = (char *) calloc(NR + 1, sizeof(char));
+        (*atmos)[i].snowflag = (bool *) calloc(NR + 1, sizeof(bool));
         if ((*atmos)[i].snowflag == NULL) {
             nrerror("Memory allocation error in alloc_atmos().");
         }

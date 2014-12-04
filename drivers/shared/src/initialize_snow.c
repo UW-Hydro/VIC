@@ -34,7 +34,6 @@
 void
 initialize_snow(snow_data_struct **snow,
                 size_t             veg_num)
-
 {
     extern option_struct options;
     size_t               i, j;
@@ -50,16 +49,16 @@ initialize_snow(snow_data_struct **snow,
             snow[i][j].depth = 0.0;
             snow[i][j].last_snow = 0;
             snow[i][j].max_snow_depth = 0.0;
-            snow[i][j].MELTING = FALSE;
+            snow[i][j].MELTING = false;
             snow[i][j].pack_temp = 0.0;
             snow[i][j].pack_water = 0.0;
-            snow[i][j].snow = FALSE;
+            snow[i][j].snow = false;
             snow[i][j].snow_canopy = 0.0;
             snow[i][j].store_coverage = 0.0;
-            snow[i][j].store_snow = FALSE;
+            snow[i][j].store_snow = false;
             snow[i][j].store_swq = 0.0;
             snow[i][j].surf_temp = 0.0;
-            snow[i][j].surf_temp_fbflag = FALSE;
+            snow[i][j].surf_temp_fbflag = false;
             snow[i][j].surf_temp_fbcount = 0;
             snow[i][j].surf_water = 0.0;
             snow[i][j].swq = 0.0;

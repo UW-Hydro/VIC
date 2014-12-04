@@ -55,43 +55,46 @@ canopy_assimilation(char    Ctype,
                     double *Raut,
                     double *NPP)
 {
-    extern option_struct options;
-    double               h;
-    double               pz;
-    size_t               cidx;
-    double               dLAI;
-    double              *CiLayer;
-    double               AgrossLayer;
-    double               RdarkLayer;
-    double               RphotoLayer;
-    double               gc;   /* 1/rs */
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    double                   h;
+    double                   pz;
+    size_t                   cidx;
+    double                   dLAI;
+    double                  *CiLayer;
+    double                   AgrossLayer;
+    double                   RdarkLayer;
+    double                   RphotoLayer;
+    double                   gc; /* 1/rs */
 
     /* calculate scale height based on average temperature in the column */
-    h = 287 / 9.81 * ((Tfoliage + 273.15) + 0.5 * (double)elevation * T_LAPSE);
+    h = calc_scale_height(Tfoliage, elevation);
 
     /* use hypsometric equation to calculate p_z, assume that virtual
        temperature is equal air_temp */
-    pz = PS_PM * exp(-(double)elevation / h);
+    pz = CONST_PSTD * exp(-(double)elevation / h);
 
     CiLayer = (double*)calloc(options.Ncanopy, sizeof(double));
 
     if (!strcasecmp(mode, "ci")) {
-        /* Assume a default leaf-internal CO2; compute assimilation, respiration, and stomatal resistance */
+        /* Assume a default leaf-internal CO2; compute assimilation,
+           respiration, and stomatal resistance */
 
         /* Default leaf-internal CO2 */
         for (cidx = 0; cidx < options.Ncanopy; cidx++) {
             if (Ctype == PHOTO_C3) {
-                CiLayer[cidx] = FCI1C3 * Catm;
+                CiLayer[cidx] = param.PHOTO_FCI1C3 * Catm;
             }
             else if (Ctype == PHOTO_C4) {
-                CiLayer[cidx] = FCI1C4 * Catm;
+                CiLayer[cidx] = param.PHOTO_FCI1C4 * Catm;
             }
         }
         if (Ctype == PHOTO_C3) {
-            *Ci = FCI1C3 * Catm;
+            *Ci = param.PHOTO_FCI1C3 * Catm;
         }
         else if (Ctype == PHOTO_C4) {
-            *Ci = FCI1C4 * Catm;
+            *Ci = param.PHOTO_FCI1C4 * Catm;
         }
 
         /* Sum over canopy layers */
@@ -106,7 +109,7 @@ canopy_assimilation(char    Ctype,
                        CO2Specificity,
                        NscaleFactor[cidx],
                        Tfoliage,
-                       SWdown / Epar, /* note: divide by Epar to convert from W/m2 to mol(photons)/m2s */
+                       SWdown / param.PHOTO_EPAR, /* note: divide by Epar to convert from W/m2 to mol(photons)/m2s */
                        aPAR[cidx],
                        pz,
                        Catm,
@@ -131,12 +134,12 @@ canopy_assimilation(char    Ctype,
             gc += (1 / rsLayer[cidx]) * dLAI;
         }
 
-        if (gc < SMALL) {
-            gc = SMALL;
+        if (gc < DBL_EPSILON) {
+            gc = DBL_EPSILON;
         }
         *rc = 1 / gc;
-        if (*rc > HUGE_RESIST) {
-            *rc = HUGE_RESIST;
+        if (*rc > param.HUGE_RESIST) {
+            *rc = param.HUGE_RESIST;
         }
     }
     else {
@@ -154,7 +157,7 @@ canopy_assimilation(char    Ctype,
                        CO2Specificity,
                        NscaleFactor[cidx],
                        Tfoliage,
-                       SWdown / Epar,
+                       SWdown / param.PHOTO_EPAR,
                        aPAR[cidx],
                        pz,
                        Catm,
@@ -181,8 +184,9 @@ canopy_assimilation(char    Ctype,
     }
 
     /* Compute whole-plant respiration terms and NPP */
-    *Rmaint = *Rdark / FRLeaf;
-    *Rgrowth = (FRGrowth / (1 + FRGrowth)) * ((*GPP) - (*Rmaint));
+    *Rmaint = *Rdark / param.PHOTO_FRLEAF;
+    *Rgrowth = (param.PHOTO_FRGROWTH / (1 + param.PHOTO_FRGROWTH)) *
+               ((*GPP) - (*Rmaint));
     *Raut = *Rmaint + *Rgrowth;
     *NPP = *GPP - *Raut;
 

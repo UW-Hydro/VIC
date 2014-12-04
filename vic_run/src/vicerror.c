@@ -29,7 +29,6 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
 
 /******************************************************************************
 * @brief        This subroutine handles numerical errors within the model.
@@ -42,7 +41,7 @@ vicerror(char error_text[])
     filenames_struct     fnames;
     void _exit();
 
-    options.COMPRESS = FALSE;   /* turn off compression of last set of files */
+    options.COMPRESS = false;   /* turn off compression of last set of files */
 
     fprintf(stderr, "VIC model run-time error...\n");
     fprintf(stderr, "%s\n", error_text);

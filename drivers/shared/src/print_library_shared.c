@@ -26,114 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
-
-/******************************************************************************
- * @brief    Print atmos data structure.
- *****************************************************************************/
-void
-print_atmos_data(atmos_data_struct *atmos,
-                 size_t             nr)
-{
-    size_t i;
-
-    printf("atmos_data  :\n");
-    printf("\tair_temp  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->air_temp[i]);
-    }
-    printf("\n");
-    printf("\tCatm      :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->Catm[i]);
-    }
-    printf("\n");
-    printf("\tchannel_in:");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->channel_in[i]);
-    }
-    printf("\n");
-    printf("\tcoszen    :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->coszen[i]);
-    }
-    printf("\n");
-    printf("\tdensity   :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->density[i]);
-    }
-    printf("\n");
-    printf("\tfdir      :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->fdir[i]);
-    }
-    printf("\n");
-    printf("\tlongwave  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->longwave[i]);
-    }
-    printf("\n");
-    printf("\tout_prec  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_prec);
-    }
-    printf("\n");
-    printf("\tout_rain  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_rain);
-    }
-    printf("\n");
-    printf("\tout_snow  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_snow);
-    }
-    printf("\n");
-    printf("\tpar       :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->par[i]);
-    }
-    printf("\n");
-    printf("\tprec      :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->prec[i]);
-    }
-    printf("\n");
-    printf("\tpressure  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->pressure[i]);
-    }
-    printf("\n");
-    printf("\tshortwave :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->shortwave[i]);
-    }
-    printf("\n");
-    printf("\tsnowflag  :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%d\n", atmos->snowflag[i]);
-    }
-    printf("\n");
-    printf("\ttskc      :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->tskc[i]);
-    }
-    printf("\n");
-    printf("\tvp        :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->vp[i]);
-    }
-    printf("\n");
-    printf("\tvpd       :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->vpd[i]);
-    }
-    printf("\n");
-    printf("\twind      :");
-    for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->wind[i]);
-    }
-    printf("\n");
-}
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Print dell data structure.
@@ -194,7 +87,7 @@ print_dmy(dmy_struct *dmy)
 }
 
 /******************************************************************************
- * @brief    Print energy balance structure.
+ * @brief    Print filenames structure.
  *****************************************************************************/
 void
 print_energy_bal(energy_bal_struct *eb,
@@ -316,9 +209,6 @@ print_energy_bal(energy_bal_struct *eb,
     printf("\tsnow_flux        : %.4lf\n", eb->snow_flux);
 }
 
-/******************************************************************************
- * @brief    Print filenames structure.
- *****************************************************************************/
 void
 print_filenames(filenames_struct *fnames)
 {
@@ -328,6 +218,7 @@ print_filenames(filenames_struct *fnames)
     printf("\tf_path_pfx[0]: %s\n", fnames->f_path_pfx[0]);
     printf("\tf_path_pfx[1]: %s\n", fnames->f_path_pfx[1]);
     printf("\tglobal       : %s\n", fnames->global);
+    printf("\tconstants    : %s\n", fnames->constants);
     printf("\tdomain       : %s\n", fnames->domain);
     printf("\tinit_state   : %s\n", fnames->init_state);
     printf("\tlakeparam    : %s\n", fnames->lakeparam);
@@ -349,6 +240,7 @@ print_filep(filep_struct *fp)
     printf("\tforcing[0] : %p\n", fp->forcing[0]);
     printf("\tforcing[1] : %p\n", fp->forcing[1]);
     printf("\tglobalparam: %p\n", fp->globalparam);
+    printf("\tconstants  : %p\n", fp->constants);
     printf("\tdomain     : %p\n", fp->domain);
     printf("\tinit_state : %p\n", fp->init_state);
     printf("\tlakeparam  : %p\n", fp->lakeparam);
@@ -377,9 +269,9 @@ print_force_type(force_type_struct *force_type)
 void
 print_global_param(global_param_struct *gp)
 {
+    size_t i;
+
     printf("global_param:\n");
-    printf("\tMAX_SNOW_TEMP: %.4lf\n", gp->MAX_SNOW_TEMP);
-    printf("\tMIN_RAIN_TEMP: %.4lf\n", gp->MIN_RAIN_TEMP);
     printf("\tmeasure_h    : %.4lf\n", gp->measure_h);
     printf("\twind_h       : %.4lf\n", gp->wind_h);
     printf("\tresolution   : %.4f\n", gp->resolution);
@@ -388,16 +280,14 @@ print_global_param(global_param_struct *gp)
     printf("\tendday       : %d\n", gp->endday);
     printf("\tendmonth     : %d\n", gp->endmonth);
     printf("\tendyear      : %d\n", gp->endyear);
-    printf("\tforceday[0]  : %d\n", gp->forceday[0]);
-    printf("\tforceday[1]  : %d\n", gp->forceday[1]);
-    printf("\tforcehour[0] : %d\n", gp->forcehour[0]);
-    printf("\tforcehour[1] : %d\n", gp->forcehour[1]);
-    printf("\tforcemonth[0]: %d\n", gp->forcemonth[0]);
-    printf("\tforcemonth[1]: %d\n", gp->forcemonth[1]);
-    printf("\tforceskip[0] : %d\n", gp->forceskip[0]);
-    printf("\tforceskip[1] : %d\n", gp->forceskip[1]);
-    printf("\tforceyear[0] : %d\n", gp->forceyear[0]);
-    printf("\tforceyear[1] : %d\n", gp->forceyear[1]);
+    for (i = 0; i < 2; i++) {
+        printf("\tforceday[%zd]   : %d\n", i, gp->forceday[i]);
+        printf("\tforcehour[%zd]  : %d\n", i, gp->forcehour[i]);
+        printf("\tforcemonth[%zd] : %d\n", i, gp->forcemonth[i]);
+        printf("\tforceoffset[%zd]: %d\n", i, gp->forceoffset[i]);
+        printf("\tforceskip[%zd]  : %d\n", i, gp->forceskip[i]);
+        printf("\tforceyear[%zd]  : %d\n", i, gp->forceyear[i]);
+    }
     printf("\tnrecs        : %d\n", gp->nrecs);
     printf("\tskipyear     : %d\n", gp->skipyear);
     printf("\tstartday     : %d\n", gp->startday);
@@ -442,7 +332,6 @@ print_lake_con(lake_con_struct *lcon,
     printf("\tminvolume: %.4lf\n", lcon->minvolume);
     printf("\tbpercent : %.4f\n", lcon->bpercent);
     printf("\trpercent : %.4f\n", lcon->rpercent);
-    printf("\teta_a    : %.4lf\n", lcon->eta_a);
     printf("\twfrac    : %.4lf\n", lcon->wfrac);
     printf("\tdepth_in : %.4lf\n", lcon->depth_in);
     printf("\tlake_idx : %d\n", lcon->lake_idx);
@@ -549,67 +438,70 @@ void
 print_option(option_struct *option)
 {
     printf("option:\n");
-    printf("\tAboveTreelineVeg   : %d\n", option->AboveTreelineVeg);
-    printf("\tAERO_RESIST_CANSNOW: %d\n", option->AERO_RESIST_CANSNOW);
-    printf("\tBLOWING            : %d\n", option->BLOWING);
-    printf("\tCARBON             : %d\n", option->CARBON);
-    printf("\tCLOSE_ENERGY       : %d\n", option->CLOSE_ENERGY);
-    printf("\tCOMPUTE_TREELINE   : %d\n", option->COMPUTE_TREELINE);
-    printf("\tCONTINUEONERROR    : %d\n", option->CONTINUEONERROR);
-    printf("\tCORRPREC           : %d\n", option->CORRPREC);
-    printf("\tEQUAL_AREA         : %d\n", option->EQUAL_AREA);
-    printf("\tEXP_TRANS          : %d\n", option->EXP_TRANS);
-    printf("\tFROZEN_SOIL        : %d\n", option->FROZEN_SOIL);
-    printf("\tFULL_ENERGY        : %d\n", option->FULL_ENERGY);
-    printf("\tGRND_FLUX_TYPE     : %d\n", option->GRND_FLUX_TYPE);
-    printf("\tIMPLICIT           : %d\n", option->IMPLICIT);
-    printf("\tJULY_TAVG_SUPPLIED : %d\n", option->JULY_TAVG_SUPPLIED);
-    printf("\tLAKES              : %d\n", option->LAKES);
-    printf("\tLW_CLOUD           : %d\n", option->LW_CLOUD);
-    printf("\tLW_TYPE            : %d\n", option->LW_TYPE);
-    printf("\tMIN_WIND_SPEED     : %.4f\n", option->MIN_WIND_SPEED);
-    printf("\tMTCLIM_SWE_CORR    : %d\n", option->MTCLIM_SWE_CORR);
-    printf("\tNcanopy            : %zu\n", option->Ncanopy);
-    printf("\tNfrost             : %zu\n", option->Nfrost);
-    printf("\tNlakenode          : %zu\n", option->Nlakenode);
-    printf("\tNlayer             : %zu\n", option->Nlayer);
-    printf("\tNnode              : %zu\n", option->Nnode);
-    printf("\tNOFLUX             : %d\n", option->NOFLUX);
-    printf("\tNVEGTYPES          : %zu\n", option->NVEGTYPES);
-    printf("\tPLAPSE             : %d\n", option->PLAPSE);
-    printf("\tRC_MODE            : %d\n", option->RC_MODE);
-    printf("\tROOT_ZONES         : %zu\n", option->ROOT_ZONES);
-    printf("\tQUICK_FLUX         : %d\n", option->QUICK_FLUX);
-    printf("\tQUICK_SOLVE        : %d\n", option->QUICK_SOLVE);
-    printf("\tSHARE_LAYER_MOIST  : %d\n", option->SHARE_LAYER_MOIST);
-    printf("\tSNOW_DENSITY       : %d\n", option->SNOW_DENSITY);
-    printf("\tSNOW_BAND          : %zu\n", option->SNOW_BAND);
-    printf("\tSNOW_STEP          : %d\n", option->SNOW_STEP);
-    printf("\tSPATIAL_FROST      : %d\n", option->SPATIAL_FROST);
-    printf("\tSPATIAL_SNOW       : %d\n", option->SPATIAL_SNOW);
-    printf("\tSW_PREC_THRESH     : %.4f\n", option->SW_PREC_THRESH);
-    printf("\tTFALLBACK          : %d\n", option->TFALLBACK);
-    printf("\tVP_INTERP          : %d\n", option->VP_INTERP);
-    printf("\tVP_ITER            : %d\n", option->VP_ITER);
-    printf("\tALMA_INPUT         : %d\n", option->ALMA_INPUT);
-    printf("\tBASEFLOW           : %d\n", option->BASEFLOW);
-    printf("\tGRID_DECIMAL       : %d\n", option->GRID_DECIMAL);
-    printf("\tVEGLIB_PHOTO       : %d\n", option->VEGLIB_PHOTO);
-    printf("\tVEGPARAM_LAI       : %d\n", option->VEGPARAM_LAI);
-    printf("\tLAI_SRC            : %d\n", option->LAI_SRC);
-    printf("\tLAKE_PROFILE       : %d\n", option->LAKE_PROFILE);
-    printf("\tORGANIC_FRACT      : %d\n", option->ORGANIC_FRACT);
-    printf("\tBINARY_STATE_FILE  : %d\n", option->BINARY_STATE_FILE);
-    printf("\tINIT_STATE         : %d\n", option->INIT_STATE);
-    printf("\tSAVE_STATE         : %d\n", option->SAVE_STATE);
-    printf("\tALMA_OUTPUT        : %d\n", option->ALMA_OUTPUT);
-    printf("\tBINARY_OUTPUT      : %d\n", option->BINARY_OUTPUT);
-    printf("\tCOMPRESS           : %d\n", option->COMPRESS);
-    printf("\tMOISTFRACT         : %d\n", option->MOISTFRACT);
-    printf("\tNoutfiles          : %zu\n", option->Noutfiles);
-    printf("\tOUTPUT_FORCE       : %d\n", option->OUTPUT_FORCE);
-    printf("\tPRT_HEADER         : %d\n", option->PRT_HEADER);
-    printf("\tPRT_SNOW_BAND      : %d\n", option->PRT_SNOW_BAND);
+    printf("\tAboveTreelineVeg     : %d\n", option->AboveTreelineVeg);
+    printf("\tAERO_RESIST_CANSNOW  : %d\n", option->AERO_RESIST_CANSNOW);
+    printf("\tBLOWING              : %d\n", option->BLOWING);
+    printf("\tBLOWING_VAR_THRESHOLD: %d\n", option->BLOWING_VAR_THRESHOLD);
+    printf("\tBLOWING_CALC_PROB    : %d\n", option->BLOWING_CALC_PROB);
+    printf("\tBLOWING_SIMPLE       : %d\n", option->BLOWING_SIMPLE);
+    printf("\tBLOWING_FETCH        : %d\n", option->BLOWING_FETCH);
+    printf("\tBLOWING_SPATIAL_WIND : %d\n", option->BLOWING_SPATIAL_WIND);
+    printf("\tCARBON               : %d\n", option->CARBON);
+    printf("\tCLOSE_ENERGY         : %d\n", option->CLOSE_ENERGY);
+    printf("\tCOMPUTE_TREELINE     : %d\n", option->COMPUTE_TREELINE);
+    printf("\tCONTINUEONERROR      : %d\n", option->CONTINUEONERROR);
+    printf("\tCORRPREC             : %d\n", option->CORRPREC);
+    printf("\tEQUAL_AREA           : %d\n", option->EQUAL_AREA);
+    printf("\tEXP_TRANS            : %d\n", option->EXP_TRANS);
+    printf("\tFROZEN_SOIL          : %d\n", option->FROZEN_SOIL);
+    printf("\tFULL_ENERGY          : %d\n", option->FULL_ENERGY);
+    printf("\tGRND_FLUX_TYPE       : %d\n", option->GRND_FLUX_TYPE);
+    printf("\tIMPLICIT             : %d\n", option->IMPLICIT);
+    printf("\tJULY_TAVG_SUPPLIED   : %d\n", option->JULY_TAVG_SUPPLIED);
+    printf("\tLAKES                : %d\n", option->LAKES);
+    printf("\tLW_CLOUD             : %d\n", option->LW_CLOUD);
+    printf("\tLW_TYPE              : %d\n", option->LW_TYPE);
+    printf("\tMTCLIM_SWE_CORR      : %d\n", option->MTCLIM_SWE_CORR);
+    printf("\tNcanopy              : %zu\n", option->Ncanopy);
+    printf("\tNfrost               : %zu\n", option->Nfrost);
+    printf("\tNlakenode            : %zu\n", option->Nlakenode);
+    printf("\tNlayer               : %zu\n", option->Nlayer);
+    printf("\tNnode                : %zu\n", option->Nnode);
+    printf("\tNOFLUX               : %d\n", option->NOFLUX);
+    printf("\tNVEGTYPES            : %zu\n", option->NVEGTYPES);
+    printf("\tPLAPSE               : %d\n", option->PLAPSE);
+    printf("\tRC_MODE              : %d\n", option->RC_MODE);
+    printf("\tROOT_ZONES           : %zu\n", option->ROOT_ZONES);
+    printf("\tQUICK_FLUX           : %d\n", option->QUICK_FLUX);
+    printf("\tQUICK_SOLVE          : %d\n", option->QUICK_SOLVE);
+    printf("\tSHARE_LAYER_MOIST    : %d\n", option->SHARE_LAYER_MOIST);
+    printf("\tSNOW_DENSITY         : %d\n", option->SNOW_DENSITY);
+    printf("\tSNOW_BAND            : %zu\n", option->SNOW_BAND);
+    printf("\tSNOW_STEP            : %d\n", option->SNOW_STEP);
+    printf("\tSPATIAL_FROST        : %d\n", option->SPATIAL_FROST);
+    printf("\tSPATIAL_SNOW         : %d\n", option->SPATIAL_SNOW);
+    printf("\tTFALLBACK            : %d\n", option->TFALLBACK);
+    printf("\tVP_INTERP            : %d\n", option->VP_INTERP);
+    printf("\tVP_ITER              : %d\n", option->VP_ITER);
+    printf("\tALMA_INPUT           : %d\n", option->ALMA_INPUT);
+    printf("\tBASEFLOW             : %d\n", option->BASEFLOW);
+    printf("\tGRID_DECIMAL         : %d\n", option->GRID_DECIMAL);
+    printf("\tVEGLIB_PHOTO         : %d\n", option->VEGLIB_PHOTO);
+    printf("\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
+    printf("\tLAI_SRC              : %d\n", option->LAI_SRC);
+    printf("\tLAKE_PROFILE         : %d\n", option->LAKE_PROFILE);
+    printf("\tORGANIC_FRACT        : %d\n", option->ORGANIC_FRACT);
+    printf("\tBINARY_STATE_FILE    : %d\n", option->BINARY_STATE_FILE);
+    printf("\tINIT_STATE           : %d\n", option->INIT_STATE);
+    printf("\tSAVE_STATE           : %d\n", option->SAVE_STATE);
+    printf("\tALMA_OUTPUT          : %d\n", option->ALMA_OUTPUT);
+    printf("\tBINARY_OUTPUT        : %d\n", option->BINARY_OUTPUT);
+    printf("\tCOMPRESS             : %d\n", option->COMPRESS);
+    printf("\tMOISTFRACT           : %d\n", option->MOISTFRACT);
+    printf("\tNoutfiles            : %zu\n", option->Noutfiles);
+    printf("\tOUTPUT_FORCE         : %d\n", option->OUTPUT_FORCE);
+    printf("\tPRT_HEADER           : %d\n", option->PRT_HEADER);
+    printf("\tPRT_SNOW_BAND        : %d\n", option->PRT_SNOW_BAND);
 }
 
 /******************************************************************************
@@ -646,7 +538,6 @@ print_out_data(out_data_struct *out,
 void
 print_out_data_file(out_data_file_struct *outf)
 {
-
     printf("\tprefix: %s\n", outf->prefix);
     printf("\tfilename: %s\n", outf->filename);
     printf("\tfh: %p\n", outf->fh);
@@ -679,6 +570,178 @@ print_param_set(param_set_struct *param_set)
     }
     printf("\tN_TYPES     : %d %d\n", param_set->N_TYPES[0],
            param_set->N_TYPES[1]);
+}
+
+/******************************************************************************
+ * @brief    Print model parameters.
+ *****************************************************************************/
+void
+print_parameters(parameters_struct *param)
+{
+    printf("parameters:\n");
+    printf("\tLAPSE_RATE: %.4lf\n", param->LAPSE_RATE);
+    printf("\tGAUGE_HEIGHT: %.4lf\n", param->GAUGE_HEIGHT);
+    printf("\tWIND_SPEED_DEFAULT: %.4lf\n", param->WIND_SPEED_DEFAULT);
+    printf("\tWIND_SPEED_MIN: %.4lf\n", param->WIND_SPEED_MIN);
+    printf("\tHUGE_RESIST: %.4lf\n", param->HUGE_RESIST);
+    printf("\tALBEDO_BARE_SOIL: %.4lf\n", param->ALBEDO_BARE_SOIL);
+    printf("\tALBEDO_H20_SURF: %.4lf\n", param->ALBEDO_H20_SURF);
+    printf("\tEMISS_GRND: %.4lf\n", param->EMISS_GRND);
+    printf("\tEMISS_VEG: %.4lf\n", param->EMISS_VEG);
+    printf("\tEMISS_ICE: %.4lf\n", param->EMISS_ICE);
+    printf("\tEMISS_SNOW: %.4lf\n", param->EMISS_SNOW);
+    printf("\tEMISS_H2O: %.4lf\n", param->EMISS_H2O);
+    printf("\tSOIL_RESID_MOIST: %.4lf\n", param->SOIL_RESID_MOIST);
+    printf("\tSOIL_SLAB_MOIST_FRACT: %.4lf\n", param->SOIL_SLAB_MOIST_FRACT);
+    printf("\tVEG_LAI_SNOW_MULTIPLIER: %.4lf\n",
+           param->VEG_LAI_SNOW_MULTIPLIER);
+    printf("\tVEG_MIN_INTERCEPTION_STORAGE: %.4lf\n",
+           param->VEG_MIN_INTERCEPTION_STORAGE);
+    printf("\tVEG_LAI_WATER_FACTOR: %.4lf\n", param->VEG_LAI_WATER_FACTOR);
+    printf("\tCANOPY_CLOSURE: %.4lf\n", param->CANOPY_CLOSURE);
+    printf("\tCANOPY_RSMAX: %.4lf\n", param->CANOPY_RSMAX);
+    printf("\tCANOPY_VPDMINFACTOR: %.4lf\n", param->CANOPY_VPDMINFACTOR);
+    printf("\tMTCLIM_SOLAR_CONSTANT: %.4lf\n", param->MTCLIM_SOLAR_CONSTANT);
+    printf("\tMTCLIM_TDAYCOEF: %.4lf\n", param->MTCLIM_TDAYCOEF);
+    printf("\tMTCLIM_SNOW_TCRIT: %.4lf\n", param->MTCLIM_SNOW_TCRIT);
+    printf("\tMTCLIM_SNOW_TRATE: %.4lf\n", param->MTCLIM_SNOW_TRATE);
+    printf("\tMTCLIM_TBASE: %.4lf\n", param->MTCLIM_TBASE);
+    printf("\tMTCLIM_ABASE: %.4lf\n", param->MTCLIM_ABASE);
+    printf("\tMTCLIM_C: %.4lf\n", param->MTCLIM_C);
+    printf("\tMTCLIM_B0: %.4lf\n", param->MTCLIM_B0);
+    printf("\tMTCLIM_B1: %.4lf\n", param->MTCLIM_B1);
+    printf("\tMTCLIM_B2: %.4lf\n", param->MTCLIM_B2);
+    printf("\tMTCLIM_RAIN_SCALAR: %.4lf\n", param->MTCLIM_RAIN_SCALAR);
+    printf("\tMTCLIM_DIF_ALB: %.4lf\n", param->MTCLIM_DIF_ALB);
+    printf("\tMTCLIM_SC_INT: %.4lf\n", param->MTCLIM_SC_INT);
+    printf("\tMTCLIM_SC_SLOPE: %.4lf\n", param->MTCLIM_SC_SLOPE);
+    printf("\tMTCLIM_SRADDT: %.4lf\n", param->MTCLIM_SRADDT);
+    printf("\tMTCLIM_SW_PREC_THRESH: %.4lf\n", param->MTCLIM_SW_PREC_THRESH);
+    printf("\tLAKE_TMELT: %.4lf\n", param->LAKE_TMELT);
+    printf("\tLAKE_MAX_SURFACE: %.4lf\n", param->LAKE_MAX_SURFACE);
+    printf("\tLAKE_BETA: %.4lf\n", param->LAKE_BETA);
+    printf("\tLAKE_FRACMIN: %.4lf\n", param->LAKE_FRACMIN);
+    printf("\tLAKE_FRACLIM: %.4lf\n", param->LAKE_FRACLIM);
+    printf("\tLAKE_DM: %.4lf\n", param->LAKE_DM);
+    printf("\tLAKE_SNOWCRIT: %.4lf\n", param->LAKE_SNOWCRIT);
+    printf("\tLAKE_ZWATER: %.4lf\n", param->LAKE_ZWATER);
+    printf("\tLAKE_ZSNOW: %.4lf\n", param->LAKE_ZSNOW);
+    printf("\tLAKE_RHOSNOW: %.4lf\n", param->LAKE_RHOSNOW);
+    printf("\tLAKE_CONDI: %.4lf\n", param->LAKE_CONDI);
+    printf("\tLAKE_CONDS: %.4lf\n", param->LAKE_CONDS);
+    printf("\tLAKE_LAMISW: %.4lf\n", param->LAKE_LAMISW);
+    printf("\tLAKE_LAMILW: %.4lf\n", param->LAKE_LAMILW);
+    printf("\tLAKE_LAMSSW: %.4lf\n", param->LAKE_LAMSSW);
+    printf("\tLAKE_LAMSLW: %.4lf\n", param->LAKE_LAMSLW);
+    printf("\tLAKE_LAMWSW: %.4lf\n", param->LAKE_LAMWSW);
+    printf("\tLAKE_LAMWLW: %.4lf\n", param->LAKE_LAMWLW);
+    printf("\tLAKE_A1: %.4lf\n", param->LAKE_A1);
+    printf("\tLAKE_A2: %.4lf\n", param->LAKE_A2);
+    printf("\tLAKE_QWTAU: %.4lf\n", param->LAKE_QWTAU);
+    printf("\tLAKE_MAX_ITER: %d\n", param->LAKE_MAX_ITER);
+    printf("\tSVP_A: %.4lf\n", param->SVP_A);
+    printf("\tSVP_B: %.4lf\n", param->SVP_B);
+    printf("\tSVP_C: %.4lf\n", param->SVP_C);
+    printf("\tCARBON_CATMCURRENT: %.4lf\n", param->CARBON_CATMCURRENT);
+    printf("\tCARBON_SW2PAR: %.4lf\n", param->CARBON_SW2PAR);
+    printf("\tPHOTO_OMEGA: %.4lf\n", param->PHOTO_OMEGA);
+    printf("\tPHOTO_LAIMAX: %.4lf\n", param->PHOTO_LAIMAX);
+    printf("\tPHOTO_LAILIMIT: %.4lf\n", param->PHOTO_LAILIMIT);
+    printf("\tPHOTO_LAIMIN: %.4lf\n", param->PHOTO_LAIMIN);
+    printf("\tPHOTO_EPAR: %.4lf\n", param->PHOTO_EPAR);
+    printf("\tPHOTO_FCMAX: %.4lf\n", param->PHOTO_FCMAX);
+    printf("\tPHOTO_FCMIN: %.4lf\n", param->PHOTO_FCMIN);
+    printf("\tPHOTO_ZENITHMIN: %.4lf\n", param->PHOTO_ZENITHMIN);
+    printf("\tPHOTO_ZENITHMINPAR: %.4lf\n", param->PHOTO_ZENITHMINPAR);
+    printf("\tPHOTO_ALBSOIPARMIN: %.4lf\n", param->PHOTO_ALBSOIPARMIN);
+    printf("\tPHOTO_MINMAXETRANS: %.4lf\n", param->PHOTO_MINMAXETRANS);
+    printf("\tPHOTO_MINSTOMCOND: %.4lf\n", param->PHOTO_MINSTOMCOND);
+    printf("\tPHOTO_FCI1C3: %.4lf\n", param->PHOTO_FCI1C3);
+    printf("\tPHOTO_FCI1C4: %.4lf\n", param->PHOTO_FCI1C4);
+    printf("\tPHOTO_OX: %.4lf\n", param->PHOTO_OX);
+    printf("\tPHOTO_KC: %.4lf\n", param->PHOTO_KC);
+    printf("\tPHOTO_KO: %.4lf\n", param->PHOTO_KO);
+    printf("\tPHOTO_EC: %.4lf\n", param->PHOTO_EC);
+    printf("\tPHOTO_EO: %.4lf\n", param->PHOTO_EO);
+    printf("\tPHOTO_EV: %.4lf\n", param->PHOTO_EV);
+    printf("\tPHOTO_ER: %.4lf\n", param->PHOTO_ER);
+    printf("\tPHOTO_ALC3: %.4lf\n", param->PHOTO_ALC3);
+    printf("\tPHOTO_FRDC3: %.4lf\n", param->PHOTO_FRDC3);
+    printf("\tPHOTO_EK: %.4lf\n", param->PHOTO_EK);
+    printf("\tPHOTO_ALC4: %.4lf\n", param->PHOTO_ALC4);
+    printf("\tPHOTO_FRDC4: %.4lf\n", param->PHOTO_FRDC4);
+    printf("\tPHOTO_THETA: %.4lf\n", param->PHOTO_THETA);
+    printf("\tPHOTO_FRLEAF: %.4lf\n", param->PHOTO_FRLEAF);
+    printf("\tPHOTO_FRGROWTH: %.4lf\n", param->PHOTO_FRGROWTH);
+    printf("\tSRESP_E0_LT: %.4lf\n", param->SRESP_E0_LT);
+    printf("\tSRESP_T0_LT: %.4lf\n", param->SRESP_T0_LT);
+    printf("\tSRESP_WMINFM: %.4lf\n", param->SRESP_WMINFM);
+    printf("\tSRESP_WMAXFM: %.4lf\n", param->SRESP_WMAXFM);
+    printf("\tSRESP_WOPTFM: %.4lf\n", param->SRESP_WOPTFM);
+    printf("\tSRESP_RHSAT: %.4lf\n", param->SRESP_RHSAT);
+    printf("\tSRESP_RFACTOR: %.4lf\n", param->SRESP_RFACTOR);
+    printf("\tSRESP_TAULITTER: %.4lf\n", param->SRESP_TAULITTER);
+    printf("\tSRESP_TAUINTER: %.4lf\n", param->SRESP_TAUINTER);
+    printf("\tSRESP_TAUSLOW: %.4lf\n", param->SRESP_TAUSLOW);
+    printf("\tSRESP_FAIR: %.4lf\n", param->SRESP_FAIR);
+    printf("\tSRESP_FINTER: %.4lf\n", param->SRESP_FINTER);
+    printf("\tSNOW_MAX_SURFACE_SWE: %.4lf\n", param->SNOW_MAX_SURFACE_SWE);
+    printf("\tSNOW_LIQUID_WATER_CAPACITY: %.4lf\n",
+           param->SNOW_LIQUID_WATER_CAPACITY);
+    printf("\tSNOW_NEW_SNOW_DENSITY: %.4lf\n", param->SNOW_NEW_SNOW_DENSITY);
+    printf("\tSNOW_DENS_DMLIMIT: %.4lf\n", param->SNOW_DENS_DMLIMIT);
+    printf("\tSNOW_DENS_MAX_CHANGE: %.4lf\n", param->SNOW_DENS_MAX_CHANGE);
+    printf("\tSNOW_DENS_ETA0: %.4lf\n", param->SNOW_DENS_ETA0);
+    printf("\tSNOW_DENS_C1: %.4lf\n", param->SNOW_DENS_C1);
+    printf("\tSNOW_DENS_C2: %.4lf\n", param->SNOW_DENS_C2);
+    printf("\tSNOW_DENS_C5: %.4lf\n", param->SNOW_DENS_C5);
+    printf("\tSNOW_DENS_C6: %.4lf\n", param->SNOW_DENS_C6);
+    printf("\tSNOW_DENS_F: %.4lf\n", param->SNOW_DENS_F);
+    printf("\tSNOW_MIN_SWQ_EB_THRES: %.4lf\n", param->SNOW_MIN_SWQ_EB_THRES);
+    printf("\tSNOW_A1: %.4lf\n", param->SNOW_A1);
+    printf("\tSNOW_A2: %.4lf\n", param->SNOW_A2);
+    printf("\tSNOW_L1: %.4lf\n", param->SNOW_L1);
+    printf("\tSNOW_L2: %.4lf\n", param->SNOW_L2);
+    printf("\tSNOW_NEW_SNOW_ALB: %.4lf\n", param->SNOW_NEW_SNOW_ALB);
+    printf("\tSNOW_ALB_ACCUM_A: %.4lf\n", param->SNOW_ALB_ACCUM_A);
+    printf("\tSNOW_ALB_ACCUM_B: %.4lf\n", param->SNOW_ALB_ACCUM_B);
+    printf("\tSNOW_ALB_THAW_A: %.4lf\n", param->SNOW_ALB_THAW_A);
+    printf("\tSNOW_ALB_THAW_B: %.4lf\n", param->SNOW_ALB_THAW_B);
+    printf("\tSNOW_TRACESNOW: %.4lf\n", param->SNOW_TRACESNOW);
+    printf("\tSNOW_CONDUCT: %.4lf\n", param->SNOW_CONDUCT);
+    printf("\tSNOW_MAX_SNOW_TEMP: %.4lf\n", param->SNOW_MAX_SNOW_TEMP);
+    printf("\tSNOW_MIN_RAIN_TEMP: %.4lf\n", param->SNOW_MIN_RAIN_TEMP);
+    printf("\tBLOWING_KA: %.4lf\n", param->BLOWING_KA);
+    printf("\tBLOWING_CSALT: %.4lf\n", param->BLOWING_CSALT);
+    printf("\tBLOWING_UTHRESH: %.4lf\n", param->BLOWING_UTHRESH);
+    printf("\tBLOWING_KIN_VIS: %.4lf\n", param->BLOWING_KIN_VIS);
+    printf("\tBLOWING_MAX_ITER: %d\n", param->BLOWING_MAX_ITER);
+    printf("\tBLOWING_K: %d\n", param->BLOWING_K);
+    printf("\tBLOWING_SETTLING: %.4lf\n", param->BLOWING_SETTLING);
+    printf("\tBLOWING_NUMINCS: %d\n", param->BLOWING_NUMINCS);
+    printf("\tTREELINE_TEMPERATURE: %.4lf\n", param->TREELINE_TEMPERATURE);
+    printf("\tSNOW_DT: %.4lf\n", param->SNOW_DT);
+    printf("\tSURF_DT: %.4lf\n", param->SURF_DT);
+    printf("\tSOIL_DT: %.4lf\n", param->SOIL_DT);
+    printf("\tCANOPY_DT: %.4lf\n", param->CANOPY_DT);
+    printf("\tCANOPY_VP: %.4lf\n", param->CANOPY_VP);
+    printf("\tTOL_GRND: %.4lf\n", param->TOL_GRND);
+    printf("\tTOL_OVER: %.4lf\n", param->TOL_OVER);
+    printf("\tFROZEN_MAXITER: %d\n", param->FROZEN_MAXITER);
+    printf("\tNEWT_RAPH_MAXTRIAL: %d\n", param->NEWT_RAPH_MAXTRIAL);
+    printf("\tNEWT_RAPH_TOLX: %.4lf\n", param->NEWT_RAPH_TOLX);
+    printf("\tNEWT_RAPH_TOLF: %.4lf\n", param->NEWT_RAPH_TOLF);
+    printf("\tNEWT_RAPH_R_MAX: %.4lf\n", param->NEWT_RAPH_R_MAX);
+    printf("\tNEWT_RAPH_R_MIN: %.4lf\n", param->NEWT_RAPH_R_MIN);
+    printf("\tNEWT_RAPH_RELAX1: %.4lf\n", param->NEWT_RAPH_RELAX1);
+    printf("\tNEWT_RAPH_RELAX2: %.4lf\n", param->NEWT_RAPH_RELAX2);
+    printf("\tNEWT_RAPH_RELAX3: %.4lf\n", param->NEWT_RAPH_RELAX3);
+    printf("\tNEWT_RAPH_EPS2: %.4lf\n", param->NEWT_RAPH_EPS2);
+    printf("\tROOT_BRENT_MAXTRIES: %d\n", param->ROOT_BRENT_MAXTRIES);
+    printf("\tROOT_BRENT_MAXITER: %d\n", param->ROOT_BRENT_MAXITER);
+    printf("\tROOT_BRENT_TSTEP: %.4lf\n", param->ROOT_BRENT_TSTEP);
+    printf("\tROOT_BRENT_T: %.4lf\n", param->ROOT_BRENT_T);
+    printf("\tFROZEN_MAXITER: %d\n", param->FROZEN_MAXITER);
 }
 
 /******************************************************************************
@@ -718,7 +781,7 @@ print_snow_data(snow_data_struct *snow)
     printf("\tstore_snow        : %d\n", snow->store_snow);
     printf("\tstore_swq         : %.4lf\n", snow->store_swq);
     printf("\tsurf_temp         : %.4lf\n", snow->surf_temp);
-    printf("\tsurf_temp_fbcount : %hu\n", snow->surf_temp_fbcount);
+    printf("\tsurf_temp_fbcount : %u\n", snow->surf_temp_fbcount);
     printf("\tsurf_temp_fbflag  : %d\n", snow->surf_temp_fbflag);
     printf("\tsurf_water        : %.4lf\n", snow->surf_water);
     printf("\tswq               : %.4lf\n", snow->swq);
@@ -1019,27 +1082,27 @@ print_veg_lib(veg_lib_struct *vlib,
     printf("veg_lib:\n");
     printf("\toverstory     : %d\n", vlib->overstory);
     printf("\tLAI           :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2lf", vlib->LAI[i]);
     }
     printf("\n");
     printf("\tWdmax         :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2lf", vlib->Wdmax[i]);
     }
     printf("\n");
     printf("\talbedo        :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2lf", vlib->albedo[i]);
     }
     printf("\n");
     printf("\tdisplacement  :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2lf", vlib->displacement[i]);
     }
     printf("\n");
     printf("\temissivity    :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2lf", vlib->emissivity[i]);
     }
     printf("\n");
@@ -1048,7 +1111,7 @@ print_veg_lib(veg_lib_struct *vlib,
     printf("\trarc          : %.4lf\n", vlib->rarc);
     printf("\trmin          : %.4f\n", vlib->rmin);
     printf("\troughness     :");
-    for (i = 0; i < MONTHSPERYEAR; i++) {
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
         printf("\t%.2f", vlib->roughness[i]);
     }
     printf("\n");

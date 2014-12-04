@@ -28,8 +28,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAXIT 1000
-
 /******************************************************************************
  * @brief    This subroutine redistributes soil properties based on the thermal
  *           solutions found for the current time step.
@@ -59,10 +57,10 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
     }
 
     if (energy->Nfrost > 0) {
-        energy->frozen = TRUE;
+        energy->frozen = true;
     }
     else {
-        energy->frozen = FALSE;
+        energy->frozen = false;
     }
 
     /** Compute Soil Layer average  properties **/
@@ -133,30 +131,31 @@ solve_T_profile(double   *T,
                 int       NOFLUX,
                 int       EXP_TRANS)
 {
-    static double        A[MAX_NODES];
-    static double        B[MAX_NODES];
-    static double        C[MAX_NODES];
-    static double        D[MAX_NODES];
-    static double        E[MAX_NODES];
+    static double A[MAX_NODES];
+    static double B[MAX_NODES];
+    static double C[MAX_NODES];
+    static double D[MAX_NODES];
+    static double E[MAX_NODES];
 
-    double              *aa, *bb, *cc, *dd, *ee, Bexp;
+    double       *aa, *bb, *cc, *dd, *ee, Bexp;
 
-    int                  Error;
-    int                  j;
+    int           Error;
+    int           j;
 
     if (FIRST_SOLN[0]) {
         if (EXP_TRANS) {
             Bexp = logf(Dp + 1.) / (double)(Nnodes - 1);
         }
 
-        FIRST_SOLN[0] = FALSE;
+        FIRST_SOLN[0] = false;
         if (!EXP_TRANS) {
             for (j = 1; j < Nnodes - 1; j++) {
                 A[j] = Cs[j] * alpha[j - 1] * alpha[j - 1];
                 B[j] = (kappa[j + 1] - kappa[j - 1]) * deltat;
                 C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1];
                 D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1];
-                E[j] = ice_density * Lf * alpha[j - 1] * alpha[j - 1];
+                E[j] = CONST_RHOICE * CONST_LATICE *
+                       alpha[j - 1] * alpha[j - 1];
             }
             if (NOFLUX) {
                 j = Nnodes - 1;
@@ -164,7 +163,8 @@ solve_T_profile(double   *T,
                 B[j] = (kappa[j] - kappa[j - 1]) * deltat;
                 C[j] = 2 * deltat * kappa[j] * alpha[j - 1] / gamma[j - 1];
                 D[j] = 2 * deltat * kappa[j] * alpha[j - 1] / beta[j - 1];
-                E[j] = ice_density * Lf * alpha[j - 1] * alpha[j - 1];
+                E[j] = CONST_RHOICE * CONST_LATICE *
+                       alpha[j - 1] * alpha[j - 1];
             }
         }
         else { // grid transformation terms
@@ -173,7 +173,7 @@ solve_T_profile(double   *T,
                 B[j] = (kappa[j + 1] - kappa[j - 1]) * deltat;
                 C[j] = 4 * deltat * kappa[j];
                 D[j] = 2 * deltat * kappa[j] * Bexp;
-                E[j] = 4 * Bexp * Bexp * ice_density * Lf *
+                E[j] = 4 * Bexp * Bexp * CONST_RHOICE * CONST_LATICE *
                        (Zsum[j] + 1) * (Zsum[j] + 1);
             }
             if (NOFLUX) {
@@ -182,7 +182,7 @@ solve_T_profile(double   *T,
                 B[j] = (kappa[j] - kappa[j - 1]) * deltat;
                 C[j] = 4 * deltat * kappa[j];
                 D[j] = 2 * deltat * kappa[j] * Bexp;
-                E[j] = 4 * Bexp * Bexp * ice_density * Lf *
+                E[j] = 4 * Bexp * Bexp * CONST_RHOICE * CONST_LATICE *
                        (Zsum[j] + 1) * (Zsum[j] + 1);
             }
         }
@@ -248,7 +248,7 @@ solve_T_profile_implicit(double   *T,                               // update
     int                  j;
 
     if (FIRST_SOLN[0]) {
-        FIRST_SOLN[0] = FALSE;
+        FIRST_SOLN[0] = false;
     }
 
     // initialize fda_heat_eqn:
@@ -324,21 +324,22 @@ calc_soil_thermal_fluxes(int       Nnodes,
                          int       NOFLUX,
                          int       EXP_TRANS)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    int                  Error;
-    char                 Done;
-    int                  j;
-    int                  ItCount;
-    double               threshold = 1.e-2; /* temperature profile iteration threshold */
-    double               maxdiff;
-    double               diff;
-    double               oldT;
-    char                 ErrorString[MAXSTRING];
-    double               Tlast[MAX_NODES];
+    int                      Error;
+    char                     Done;
+    int                      j;
+    int                      ItCount;
+    double                   threshold = 1.e-2; /* temperature profile iteration threshold */
+    double                   maxdiff;
+    double                   diff;
+    double                   oldT;
+    char                     ErrorString[MAXSTRING];
+    double                   Tlast[MAX_NODES];
 
     Error = 0;
-    Done = FALSE;
+    Done = false;
     ItCount = 0;
 
     /* initialize Tlast */
@@ -352,7 +353,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
         Tfbcount[j] = 0;
     }
 
-    while (!Done && Error == 0 && ItCount < MAXIT) {
+    while (!Done && Error == 0 && ItCount < param.FROZEN_MAXITER) {
         ItCount++;
         maxdiff = threshold;
         for (j = 1; j < Nnodes - 1; j++) {
@@ -377,11 +378,12 @@ calc_soil_thermal_fluxes(int       Nnodes,
                 }
             }
             else {
-                T[j] = root_brent(T0[j] - (SOIL_DT), T0[j] + (SOIL_DT),
-                                  ErrorString, soil_thermal_eqn,
-                                  T[j + 1], T[j - 1], T0[j], moist[j],
-                                  max_moist[j], bubble[j], expt[j], ice[j],
-                                  A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
+                T[j] =
+                    root_brent(T0[j] - (param.SOIL_DT), T0[j] + (param.SOIL_DT),
+                               ErrorString, soil_thermal_eqn,
+                               T[j + 1], T[j - 1], T0[j], moist[j],
+                               max_moist[j], bubble[j], expt[j], ice[j],
+                               A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
                 if (T[j] <= -998) {
                     if (options.TFALLBACK) {
                         T[j] = T0[j];
@@ -428,8 +430,8 @@ calc_soil_thermal_fluxes(int       Nnodes,
                 }
             }
             else {
-                T[Nnodes - 1] = root_brent(T0[Nnodes - 1] - SOIL_DT,
-                                           T0[Nnodes - 1] + SOIL_DT,
+                T[Nnodes - 1] = root_brent(T0[Nnodes - 1] - param.SOIL_DT,
+                                           T0[Nnodes - 1] + param.SOIL_DT,
                                            ErrorString, soil_thermal_eqn,
                                            T[Nnodes - 1],
                                            T[Nnodes - 2], T0[Nnodes - 1],
@@ -467,7 +469,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
         }
 
         if (maxdiff <= threshold) {
-            Done = TRUE;
+            Done = true;
         }
     }
 
@@ -572,8 +574,9 @@ error_print_solve_T_profile(double  T,
     ErrorString = (char *) va_arg(ap, char *);
 
     fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr,
-            "ERROR: solve_T_profile failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(stderr, "ERROR: solve_T_profile failed to converge to a solution "
+            "in root_brent.  Variable values will be dumped to the "
+            "screen, check for invalid values.\n");
 
     fprintf(stderr, "T\t%f\n", T);
     fprintf(stderr, "TL\t%f\n", TL);
@@ -591,14 +594,12 @@ error_print_solve_T_profile(double  T,
     fprintf(stderr, "D\t%f\n", D);
     fprintf(stderr, "E\t%f\n", E);
 
-    fprintf(stderr,
-            "Finished dumping values for solve_T_profile.\nTry increasing SOIL_DT to get model to complete cell.\nThen check output for instabilities.\n");
+    fprintf(stderr, "Finished dumping values for solve_T_profile.\n"
+            "Try increasing SOIL_DT to get model to complete cell.\n"
+            "Then check output for instabilities.\n");
 
     return(ERROR);
 }
-
-#undef MAXIT
-
 
 /******************************************************************************
  * @brief    Heat Equation for implicit scheme (used to calculate residual of
@@ -714,7 +715,7 @@ fda_heat_eqn(double T_2[],
         if (focus == -1) {
             lidx = 0;
             Lsum = 0.;
-            PAST_BOTTOM = FALSE;
+            PAST_BOTTOM = false;
 
             for (i = 0; i < n + 1; i++) {
                 kappa_new[i] = kappa[i];
@@ -756,7 +757,7 @@ fda_heat_eqn(double T_2[],
                     Lsum += depth[lidx];
                     lidx++;
                     if (lidx == Nlayers) {
-                        PAST_BOTTOM = TRUE;
+                        PAST_BOTTOM = true;
                         lidx = Nlayers - 1;
                     }
                 }
@@ -819,11 +820,11 @@ fda_heat_eqn(double T_2[],
                          (Bexp *
                           (Zsum[i +
                                 1] +
-                       1.)) /
+                           1.)) /
                          (Bexp *
                           (Zsum[i +
                                 1] +
-                       1.)) - DT[i] / 2. /
+                           1.)) - DT[i] / 2. /
                          (Bexp * (Zsum[i + 1] + 1.) * (Zsum[i + 1] + 1.)));
                 }
                 // inelegant fix for "cold nose" problem - when a very cold node skates off to
@@ -832,7 +833,7 @@ fda_heat_eqn(double T_2[],
                 // that node get any colder.  This only seems to happen in the first and
                 // second near-surface nodes.
                 flux_term = flux_term1 + flux_term2;
-                phase_term = ice_density * Lf *
+                phase_term = CONST_RHOICE * CONST_LATICE *
                              (ice_new[i + 1] - ice[i + 1]) / deltat;
                 res[i] = flux_term + phase_term - storage_term;
             }
@@ -872,7 +873,7 @@ fda_heat_eqn(double T_2[],
             /********************************************************/
             lidx = 0;
             Lsum = 0.;
-            PAST_BOTTOM = FALSE;
+            PAST_BOTTOM = false;
             for (i = 0; i <= right + 1; i++) {
                 if (i >= left + 1) {
                     if (ice_new[i] != ice[i]) {
@@ -893,7 +894,7 @@ fda_heat_eqn(double T_2[],
                     Lsum += depth[lidx];
                     lidx++;
                     if (lidx == Nlayers) {
-                        PAST_BOTTOM = TRUE;
+                        PAST_BOTTOM = true;
                         lidx = Nlayers - 1;
                     }
                 }
@@ -960,11 +961,11 @@ fda_heat_eqn(double T_2[],
                          (Bexp *
                           (Zsum[i +
                                 1] +
-                       1.)) /
+                           1.)) /
                          (Bexp *
                           (Zsum[i +
                                 1] +
-                       1.)) - DT[i] / 2. /
+                           1.)) - DT[i] / 2. /
                          (Bexp * (Zsum[i + 1] + 1.) * (Zsum[i + 1] + 1.)));
                 }
                 // inelegant fix for "cold nose" problem - when a very cold node skates off to
@@ -973,7 +974,7 @@ fda_heat_eqn(double T_2[],
                 // that node get any colder.  This only seems to happen in the first and
                 // second near-surface nodes.
                 flux_term = flux_term1 + flux_term2;
-                phase_term = ice_density * Lf *
+                phase_term = CONST_RHOICE * CONST_LATICE *
                              (ice_new[i + 1] - ice[i + 1]) / deltat;
                 res[i] = flux_term + phase_term - storage_term;
             }

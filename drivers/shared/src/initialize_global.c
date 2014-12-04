@@ -36,75 +36,33 @@
 void
 initialize_global()
 {
-    extern option_struct    options;
+    extern global_param_struct global_param;
 
-    /** Initialize model option flags **/
+    size_t                     i;
 
-    // simulation modes
-    options.AboveTreelineVeg = -1;
-    options.AERO_RESIST_CANSNOW = AR_406_FULL;
-    options.BLOWING = FALSE;
-    options.CARBON = FALSE;
-    options.CLOSE_ENERGY = FALSE;
-    options.COMPUTE_TREELINE = FALSE;
-    options.CONTINUEONERROR = TRUE;
-    options.CORRPREC = FALSE;
-    options.EQUAL_AREA = FALSE;
-    options.EXP_TRANS = TRUE;
-    options.FROZEN_SOIL = FALSE;
-    options.FULL_ENERGY = FALSE;
-    options.GRND_FLUX_TYPE = GF_410;
-    options.IMPLICIT = TRUE;
-    options.LAKES = FALSE;
-    options.LAKE_PROFILE = FALSE;
-    options.LW_CLOUD = LW_CLOUD_DEARDORFF;
-    options.LW_TYPE = LW_PRATA;
-    options.MIN_WIND_SPEED = 0.1;
-    options.MTCLIM_SWE_CORR = FALSE;
-    options.Ncanopy = 3;
-    options.Nfrost = 1;
-    options.Nlayer = 3;
-    options.Nnode = 3;
-    options.NOFLUX = FALSE;
-    options.PLAPSE = TRUE;
-    options.QUICK_FLUX = TRUE;
-    options.QUICK_SOLVE = FALSE;
-    options.RC_MODE = RC_JARVIS;
-    options.ROOT_ZONES = 0;
-    options.SHARE_LAYER_MOIST = TRUE;
-    options.SNOW_BAND = 1;
-    options.SNOW_DENSITY = DENS_BRAS;
-    options.SNOW_STEP = 1;
-    options.SPATIAL_FROST = FALSE;
-    options.SPATIAL_SNOW = FALSE;
-    options.SW_PREC_THRESH = 0;
-    options.TFALLBACK = TRUE;
-    options.VP_INTERP = TRUE;
-    options.VP_ITER = VP_ITER_ALWAYS;
-    // input options
-    options.ALB_SRC = FROM_VEGLIB;
-    options.BASEFLOW = ARNO;
-    options.GRID_DECIMAL = 2;
-    options.JULY_TAVG_SUPPLIED = FALSE;
-    options.LAI_SRC = FROM_VEGLIB;
-    options.ORGANIC_FRACT = FALSE;
-    options.VEGCOVER_SRC = FROM_VEGLIB;
-    options.VEGLIB_PHOTO = FALSE;
-    options.VEGLIB_VEGCOVER = FALSE;
-    options.VEGPARAM_ALB = FALSE;
-    options.VEGPARAM_LAI = FALSE;
-    options.VEGPARAM_VEGCOVER = FALSE;
-    // state options
-    options.BINARY_STATE_FILE = FALSE;
-    options.INIT_STATE = FALSE;
-    options.SAVE_STATE = FALSE;
-    // output options
-    options.ALMA_OUTPUT = FALSE;
-    options.BINARY_OUTPUT = FALSE;
-    options.COMPRESS = FALSE;
-    options.MOISTFRACT = FALSE;
-    options.Noutfiles = 2;
-    options.OUTPUT_FORCE = FALSE;
-    options.PRT_HEADER = FALSE;
-    options.PRT_SNOW_BAND = FALSE;
+    global_param.dt = HOURS_PER_DAY + 1;
+    global_param.nrecs = 0;
+    global_param.startyear = 0;
+    global_param.startmonth = 0;
+    global_param.startday = 0;
+    global_param.starthour = HOURS_PER_DAY + 1;
+    global_param.endyear = 0;
+    global_param.endmonth = 0;
+    global_param.endday = 0;
+    global_param.resolution = 0;
+    global_param.measure_h = 2.0;
+    global_param.wind_h = 10.0;
+    for (i = 0; i < 2; i++) {
+        global_param.forceyear[i] = 0;
+        global_param.forcemonth[i] = 1;
+        global_param.forceday[i] = 1;
+        global_param.forcehour[i] = 0;
+        global_param.forceskip[i] = 0;
+        global_param.forceoffset[i] = 0;
+    }
+    global_param.skipyear = 0;
+    global_param.stateyear = 0;
+    global_param.statemonth = 0;
+    global_param.stateday = 0;
+    global_param.out_dt = 0;
 }

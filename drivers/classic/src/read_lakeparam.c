@@ -39,15 +39,17 @@ read_lakeparam(FILE           *lakeparam,
                soil_con_struct soil_con,
                veg_con_struct *veg_con)
 {
-    extern option_struct options;
-    size_t               i;
-    unsigned             lakecel;
-    double               tempdz;
-    double               radius, x;
-    char                 tmpstr[MAXSTRING + 1];
-    int                  ErrFlag;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    lake_con_struct      temp;
+    size_t                   i;
+    unsigned                 lakecel;
+    double                   tempdz;
+    double                   radius, x;
+    char                     tmpstr[MAXSTRING + 1];
+    int                      ErrFlag;
+
+    lake_con_struct          temp;
 
     /*******************************************************************/
     /* Read in general lake parameters.                           */
@@ -168,7 +170,7 @@ read_lakeparam(FILE           *lakeparam,
            Compute depth area relationship.
         **********************************************/
 
-        radius = sqrt(temp.basin[0] / PI);
+        radius = sqrt(temp.basin[0] / CONST_PI);
 
         temp.maxvolume = 0.0;
         for (i = 1; i <= temp.numnod; i++) {
@@ -176,8 +178,8 @@ read_lakeparam(FILE           *lakeparam,
             if (temp.z[i] < 0.0) {
                 temp.z[i] = 0.0;
             }
-            x = pow(temp.z[i] / temp.maxdepth, BETA) * radius;
-            temp.basin[i] = PI * x * x;
+            x = pow(temp.z[i] / temp.maxdepth, param.LAKE_BETA) * radius;
+            temp.basin[i] = CONST_PI * x * x;
             temp.maxvolume += (temp.basin[i] + temp.basin[i - 1]) * tempdz / 2.;
         }
     }
@@ -212,7 +214,7 @@ read_lakeparam(FILE           *lakeparam,
         for (i = 1; i <= temp.numnod; i++) {
             temp.maxvolume +=
                 (temp.basin[i] +
-             temp.basin[i - 1]) * (temp.z[i - 1] - temp.z[i]) / 2.;
+                 temp.basin[i - 1]) * (temp.z[i - 1] - temp.z[i]) / 2.;
         }
     }
 
@@ -248,6 +250,6 @@ read_lakeparam(FILE           *lakeparam,
     }
 
     fprintf(stderr, "Lake plus wetland area = %e km2\n", temp.basin[0] /
-            (1000. * 1000.));
+            (M_PER_KM * M_PER_KM));
     return temp;
 }

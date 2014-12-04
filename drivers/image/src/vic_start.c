@@ -34,16 +34,27 @@
 void
 vic_start(void)
 {
-    extern filenames_struct    filenames;
-    extern filep_struct        filep;
-    extern global_param_struct global_param;
-    extern domain_struct       global_domain;
-    extern option_struct       options;
+    extern filenames_struct filenames;
+    extern filep_struct     filep;
+    extern domain_struct    global_domain;
+    extern option_struct    options;
+
+    // Initialize global structures
+    initialize_options();
+    initialize_global();
+    initialize_parameters();
+    initialize_filenames();
 
     // read global settings
-    initialize_global();
     filep.globalparam = open_file(filenames.global, "r");
-    global_param = get_global_param(&filenames, filep.globalparam);
+    get_global_param(filep.globalparam);
+
+    // set model constants
+    if (!strcasecmp(filenames.constants, "MISSING")) {
+        filep.constants = open_file(filenames.constants, "r");
+        get_parameters(filep.constants);
+    }
+    ;
 
     // read domain info
     get_global_domain(filenames.domain, &global_domain);

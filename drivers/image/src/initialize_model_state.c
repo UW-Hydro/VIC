@@ -76,7 +76,7 @@ initialize_model_state(all_vars_struct *all_vars,
     // Initialize soil depths
     dp = soil_con->dp;
 
-    FIRST_VEG = TRUE;
+    FIRST_VEG = true;
 
     // increase initial soil surface temperature if air is very cold
     if (surf_temp < -1.) {
@@ -172,7 +172,7 @@ initialize_model_state(all_vars_struct *all_vars,
                             energy[veg][band].T[index] = soil_con->avg_temp;
                         }
                         if (FIRST_VEG) {
-                            FIRST_VEG = FALSE;
+                            FIRST_VEG = false;
                             soil_con->dz_node[Nnodes - 1] = (dp - Zsum -
                                                              soil_con->dz_node[
                                                                  Nnodes - 2] /
@@ -180,8 +180,8 @@ initialize_model_state(all_vars_struct *all_vars,
                             Zsum += (soil_con->dz_node[Nnodes - 2] +
                                      soil_con->dz_node[Nnodes - 1]) / 2.;
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
-                            if ((int)(Zsum * 1000 + 0.5) !=
-                                (int)(dp * 1000 + 0.5)) {
+                            if ((int)(Zsum * MM_PER_M + 0.5) !=
+                                (int)(dp * MM_PER_M + 0.5)) {
                                 sprintf(ErrStr,
                                         "Sum of thermal node thicknesses (%f) "
                                         "in initialize_model_state do not "
@@ -214,7 +214,8 @@ initialize_model_state(all_vars_struct *all_vars,
                                         "parameter file.  Or set EXP_TRANS to "
                                         "FALSE in the global parameter file.",
                                         Nnodes, dp,
-                                        (int)(5 * logf(dp + 1.)) + 2,
+                                        (int)(5 * logf(
+                                                  dp + 1.)) + 2,
                                         exp(0.2 * (Nnodes - 1)) + 1);
                                 nrerror(ErrStr);
                             }
@@ -306,7 +307,7 @@ initialize_model_state(all_vars_struct *all_vars,
        Initialize soil thermal node properties
     ******************************************/
 
-    FIRST_VEG = TRUE;
+    FIRST_VEG = true;
     for (veg = 0; veg <= Nveg; veg++) {
         // Initialize soil for existing vegetation types
         Cv = veg_con[veg].Cv;
@@ -317,7 +318,7 @@ initialize_model_state(all_vars_struct *all_vars,
                 if (soil_con->AreaFract[band] > 0.) {
                     /** Set soil properties for all soil nodes **/
                     if (FIRST_VEG) {
-                        FIRST_VEG = FALSE;
+                        FIRST_VEG = false;
                         set_node_parameters(soil_con->Zsum_node,
                                             soil_con->max_moist_node,
                                             soil_con->expt_node,

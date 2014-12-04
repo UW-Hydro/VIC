@@ -36,8 +36,8 @@ compute_zwt(soil_con_struct *soil_con,
             int              lindex,
             double           moist)
 {
-    int                  i;
-    double               zwt;
+    int    i;
+    double zwt;
 
     zwt = MISSING;
 
@@ -59,13 +59,13 @@ compute_zwt(soil_con_struct *soil_con,
             soil_con->zwtvmoist_zwt[lindex][i +
                                             1] +
             (soil_con->zwtvmoist_zwt[lindex][i] -
-         soil_con->zwtvmoist_zwt[lindex][i +
-                                         1]) *
+             soil_con->zwtvmoist_zwt[lindex][i +
+                                             1]) *
             (moist -
-         soil_con->zwtvmoist_moist[lindex][i +
-                                           1]) /
+             soil_con->zwtvmoist_moist[lindex][i +
+                                               1]) /
             (soil_con->zwtvmoist_moist[lindex][i] -
-         soil_con->zwtvmoist_moist[lindex][i + 1]);                                                                                                                                                                                                        // interpolate to find water table level
+             soil_con->zwtvmoist_moist[lindex][i + 1]);                                                                                                                                                                                                    // interpolate to find water table level
     }
 
     return(zwt);
@@ -101,13 +101,13 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
             compute_zwt(soil_con, lindex, cell->layer[lindex].moist);
     }
     if (cell->layer[options.Nlayer - 1].zwt == 999) {
-        cell->layer[options.Nlayer - 1].zwt = -total_depth * 100;                                     // in cm
+        cell->layer[options.Nlayer - 1].zwt = -total_depth * CM_PER_M;                                     // in cm
     }
     /** Compute total soil column's zwt; this will be the zwt of the lowest layer that isn't completely saturated **/
     idx = options.Nlayer - 1;
     tmp_depth = total_depth;
     while (idx >= 0 && soil_con->max_moist[idx] -
-           cell->layer[idx].moist <= SMALL) {
+           cell->layer[idx].moist <= DBL_EPSILON) {
         tmp_depth -= soil_con->depth[idx];
         idx--;
     }
@@ -119,7 +119,7 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
             cell->zwt = cell->layer[idx].zwt;
         }
         else {
-            cell->zwt = -tmp_depth * 100;
+            cell->zwt = -tmp_depth * CM_PER_M;
         }
     }
     else {
@@ -133,6 +133,6 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
     }
     cell->zwt_lumped = compute_zwt(soil_con, options.Nlayer + 1, tmp_moist);
     if (cell->zwt_lumped == 999) {
-        cell->zwt_lumped = -total_depth * 100;                      // in cm;
+        cell->zwt_lumped = -total_depth * CM_PER_M;                      // in cm;
     }
 }

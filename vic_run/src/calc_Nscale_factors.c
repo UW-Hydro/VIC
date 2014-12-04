@@ -44,12 +44,13 @@ calc_Nscale_factors(char       NscaleFlag,
                     dmy_struct dmy,
                     double    *NscaleFactor)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    dmy_struct           dmy_tmp;
-    double               coszen_noon;
-    double               k12;
-    size_t               cidx; // canopy layer index
+    dmy_struct               dmy_tmp;
+    double                   coszen_noon;
+    double                   k12;
+    size_t                   cidx; // canopy layer index
 
     /* Compute solar zenith angle at local noon */
     dmy_tmp.year = dmy.year;
@@ -58,8 +59,8 @@ calc_Nscale_factors(char       NscaleFlag,
     dmy_tmp.day_in_year = dmy.day_in_year;
     dmy_tmp.hour = 12;
     coszen_noon = compute_coszen(lat, lng, time_zone_lng, dmy_tmp);
-    if (coszen_noon < ZenithMinPar) {
-        coszen_noon = ZenithMinPar;
+    if (coszen_noon < param.PHOTO_ZENITHMINPAR) {
+        coszen_noon = param.PHOTO_ZENITHMINPAR;
     }
 
     /* Extinction factor; eqn 119c in Knorr 1997 */
@@ -67,7 +68,7 @@ calc_Nscale_factors(char       NscaleFlag,
 
     /* Condition: LAI > LaiLimit; eqns 107 and 108 in Knorr 1997 */
     for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-        if (NscaleFlag && LAItotal > LaiLimit && cidx > 0) {
+        if (NscaleFlag && LAItotal > param.PHOTO_LAILIMIT && cidx > 0) {
             NscaleFactor[cidx] = exp(-k12 * CanopLayerBnd[cidx - 1] * LAItotal);
             if (NscaleFactor[cidx] < 1e-10) {
                 NscaleFactor[cidx] = 1e-10;

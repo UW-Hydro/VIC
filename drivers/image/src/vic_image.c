@@ -28,8 +28,6 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-char               *version = "VIC 5.0 image";
-
 size_t              NF, NR;
 size_t              current;
 all_vars_struct    *all_vars = NULL;
@@ -43,6 +41,7 @@ lake_con_struct     lake_con;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
+parameters_struct   param;
 out_data_struct   **out_data;
 save_data_struct   *save_data;
 param_set_struct    param_set;

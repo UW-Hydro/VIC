@@ -36,10 +36,10 @@
              file agrees with what was defined in the model global control file.
  *****************************************************************************/
 FILE *
-check_state_file(char                *init_state_name,
-                 size_t               Nlayer,
-                 size_t               Nnodes,
-                 int                 *startrec)
+check_state_file(char  *init_state_name,
+                 size_t Nlayer,
+                 size_t Nnodes,
+                 int   *startrec)
 {
     extern option_struct options;
 

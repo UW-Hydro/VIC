@@ -31,8 +31,7 @@
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_classic.h>
-#include <mtclim_constants_vic.h>
-#include <mtclim_parameters_vic.h>
+#include <mtclim.h>
 
 /******************************************************************************/
 /*			TYPE DEFINITIONS, GLOBALS, ETC.                       */
@@ -49,10 +48,9 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation,
                  control_struct *ctrl, parameter_struct *p,
                  data_struct *mtclim_data);
 
-void mtclim_to_vic(double hour_offset, dmy_struct *dmy,
-                   double **tiny_radfract, control_struct *ctrl,
-                   data_struct *mtclim_data, double *tskc, double *vp,
-                   double *hourlyrad, double *fdir);
+void mtclim_to_vic(double hour_offset, dmy_struct *dmy, double **tiny_radfract,
+                   control_struct *ctrl, data_struct *mtclim_data, double *tskc,
+                   double *vp, double *hourlyrad, double *fdir);
 
 /******************************************************************************
  * @brief    interface between VIC and MTCLIM.
@@ -85,12 +83,12 @@ mtclim_wrapper(int         have_dewpt,
     int              i;
 
     /* allocate space for the tiny_radfract array */
-    tiny_radfract = (double **) calloc(366, sizeof(double*));
+    tiny_radfract = (double **) calloc(DAYS_PER_LYEAR, sizeof(double*));
     if (tiny_radfract == NULL) {
         nrerror("Memory allocation error in mtclim_init() ...\n");
     }
-    for (i = 0; i < 366; i++) {
-        tiny_radfract[i] = (double *) calloc(86400, sizeof(double));
+    for (i = 0; i < DAYS_PER_LYEAR; i++) {
+        tiny_radfract[i] = (double *) calloc(CONST_CDAY, sizeof(double));
         if (tiny_radfract[i] == NULL) {
             nrerror("Memory allocation error in mtclim_init() ...\n");
         }
@@ -132,7 +130,7 @@ mtclim_wrapper(int         have_dewpt,
     if (data_free(&ctrl, &mtclim_data)) {
         nrerror("Error in data_free()... exiting\n");
     }
-    for (i = 0; i < 366; i++) {
+    for (i = 0; i < DAYS_PER_LYEAR; i++) {
         free(tiny_radfract[i]);
     }
     free(tiny_radfract);
@@ -163,8 +161,10 @@ mtclim_init(int               have_dewpt,
             parameter_struct *p,
             data_struct      *mtclim_data)
 {
-    int i, j;
-    int tinystepspday;
+    int                      i, j;
+    int                      tinystepspday;
+
+    extern parameters_struct param;
 
     /* initialize the control structure */
 
@@ -197,16 +197,16 @@ mtclim_init(int               have_dewpt,
        set to the same value.  The same is true for p->base_isoh and
        p->site_isoh. */
     p->base_elev = elevation;
-    p->base_isoh = annual_prcp / 10.; /* MTCLIM prcp in cm */
+    p->base_isoh = annual_prcp / MM_PER_CM; /* MTCLIM prcp in cm */
     p->site_lat = lat;
     p->site_elev = elevation;
     p->site_slp = slope;
     p->site_asp = aspect;
-    p->site_isoh = annual_prcp / 10.; /* MTCLIM prcp in cm */
+    p->site_isoh = annual_prcp / MM_PER_CM; /* MTCLIM prcp in cm */
     p->site_ehoriz = ehoriz;
     p->site_whoriz = whoriz;
-    p->tmax_lr = -1 * T_LAPSE * METERS_PER_KM;  /* not used since site_elev == base_elev */
-    p->tmin_lr = -1 * T_LAPSE * METERS_PER_KM;  /* not used since site_elev == base_elev */
+    p->tmax_lr = -1 * param.LAPSE_RATE * M_PER_KM;  /* not used since site_elev == base_elev */
+    p->tmin_lr = -1 * param.LAPSE_RATE * M_PER_KM;  /* not used since site_elev == base_elev */
 
     /* allocate space in the data arrays for input and output data */
     if (data_alloc(ctrl, mtclim_data)) {
@@ -215,27 +215,27 @@ mtclim_init(int               have_dewpt,
 
     /* initialize the data arrays with the vic input data */
     for (i = 0; i < ctrl->ndays; i++) {
-        mtclim_data->yday[i] = dmy[i * 24].day_in_year;
+        mtclim_data->yday[i] = dmy[i * HOURS_PER_DAY].day_in_year;
         mtclim_data->tmax[i] = tmax[i];
         mtclim_data->tmin[i] = tmin[i];
         if (ctrl->insw) {
             mtclim_data->s_srad[i] = 0;
-            for (j = 0; j < 24; j++) {
-                mtclim_data->s_srad[i] += hourlyrad[i * 24 + j];
+            for (j = 0; j < HOURS_PER_DAY; j++) {
+                mtclim_data->s_srad[i] += hourlyrad[i * HOURS_PER_DAY + j];
             }
-            mtclim_data->s_srad[i] /= 24;
+            mtclim_data->s_srad[i] /= HOURS_PER_DAY;
         }
         if (ctrl->invp) {
             mtclim_data->s_hum[i] = vp[i];
         }
         /* MTCLIM prcp in cm */
-        mtclim_data->prcp[i] = prec[i] / 10.;
+        mtclim_data->prcp[i] = prec[i] / MM_PER_CM;
         if (have_dewpt == 1) {
             nrerror("have_dewpt not yet implemented ...\n");
         }
     }
-    tinystepspday = 86400 / SRADDT;
-    for (i = 0; i < 366; i++) {
+    tinystepspday = CONST_CDAY / param.MTCLIM_SRADDT;
+    for (i = 0; i < DAYS_PER_LYEAR; i++) {
         for (j = 0; j < tinystepspday; j++) {
             tiny_radfract[i][j] = 0;
         }
@@ -256,37 +256,41 @@ mtclim_to_vic(double          hour_offset,
               double         *hourlyrad,
               double         *fdir)
 {
-    int    i, j, k;
-    int    tinystepsphour;
-    int    tinystep;
-    int    tiny_offset;
-    double tmp_rad;
+    int                      i, j, k;
+    int                      tinystepsphour;
+    int                      tinystep;
+    int                      tiny_offset;
+    double                   tmp_rad;
 
-    tinystepsphour = 3600 / SRADDT;
+    extern parameters_struct param;
+
+    tinystepsphour = SEC_PER_HOUR / param.MTCLIM_SRADDT;
 
     tiny_offset = (int)((double)tinystepsphour * hour_offset);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
-            tmp_rad = mtclim_data->s_srad[i] * 24.;
+            tmp_rad = mtclim_data->s_srad[i] * HOURS_PER_DAY;
         }
         else {
-            tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
+            tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] /
+                      SEC_PER_HOUR;
         }
-        for (j = 0; j < 24; j++) {
-            hourlyrad[i * 24 + j] = 0;
+        for (j = 0; j < HOURS_PER_DAY; j++) {
+            hourlyrad[i * HOURS_PER_DAY + j] = 0;
             for (k = 0; k < tinystepsphour; k++) {
                 tinystep = j * tinystepsphour + k - tiny_offset;
                 if (tinystep < 0) {
-                    tinystep += 24 * tinystepsphour;
+                    tinystep += HOURS_PER_DAY * tinystepsphour;
                 }
-                if (tinystep > 24 * tinystepsphour - 1) {
-                    tinystep -= 24 * tinystepsphour;
+                if (tinystep > HOURS_PER_DAY * tinystepsphour - 1) {
+                    tinystep -= HOURS_PER_DAY * tinystepsphour;
                 }
-                hourlyrad[i * 24 +
+                hourlyrad[i * HOURS_PER_DAY +
                           j] +=
-                    tiny_radfract[dmy[i * 24 + j].day_in_year - 1][tinystep];
+                    tiny_radfract[dmy[i * HOURS_PER_DAY +
+                                      j].day_in_year - 1][tinystep];
             }
-            hourlyrad[i * 24 + j] *= tmp_rad;
+            hourlyrad[i * HOURS_PER_DAY + j] *= tmp_rad;
         }
     }
 

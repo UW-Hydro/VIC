@@ -40,6 +40,7 @@ write_forcing_file(atmos_data_struct    *atmos,
 {
     extern global_param_struct global_param;
     extern option_struct       options;
+    extern parameters_struct   param;
 
     int                        rec, v;
     unsigned                   i;
@@ -47,7 +48,7 @@ write_forcing_file(atmos_data_struct    *atmos,
     dmy_struct                *dummy_dmy;
     int                        dt_sec;
 
-    dt_sec = global_param.dt * SECPHOUR;
+    dt_sec = global_param.dt * SEC_PER_HOUR;
     dummy_dmy = NULL;
 
     for (rec = 0; rec < nrecs; rec++) {
@@ -60,32 +61,34 @@ write_forcing_file(atmos_data_struct    *atmos,
             out_data[OUT_LONGWAVE].data[0] = atmos[rec].longwave[j];
             out_data[OUT_PAR].data[0] = atmos[rec].par[j];
             out_data[OUT_PREC].data[0] = atmos[rec].prec[j];
-            out_data[OUT_PRESSURE].data[0] = atmos[rec].pressure[j] / kPa2Pa;
-            out_data[OUT_QAIR].data[0] = EPS * atmos[rec].vp[j] /
+            out_data[OUT_PRESSURE].data[0] = atmos[rec].pressure[j] /
+                                             PA_PER_KPA;
+            out_data[OUT_QAIR].data[0] = CONST_EPS * atmos[rec].vp[j] /
                                          atmos[rec].pressure[j];
-            out_data[OUT_REL_HUMID].data[0] = 100. * atmos[rec].vp[j] /
+            out_data[OUT_REL_HUMID].data[0] = FRACT_TO_PERCENT *
+                                              atmos[rec].vp[j] /
                                               (atmos[rec].vp[j] +
                                                atmos[rec].vpd[j]);
             out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
             out_data[OUT_TSKC].data[0] = atmos[rec].tskc[j];
-            out_data[OUT_VP].data[0] = atmos[rec].vp[j] / kPa2Pa;
-            out_data[OUT_VPD].data[0] = atmos[rec].vpd[j] / kPa2Pa;
+            out_data[OUT_VP].data[0] = atmos[rec].vp[j] / PA_PER_KPA;
+            out_data[OUT_VPD].data[0] = atmos[rec].vpd[j] / PA_PER_KPA;
             out_data[OUT_WIND].data[0] = atmos[rec].wind[j];
-            if (out_data[OUT_AIR_TEMP].data[0] >= global_param.MAX_SNOW_TEMP) {
+            if (out_data[OUT_AIR_TEMP].data[0] >= param.SNOW_MAX_SNOW_TEMP) {
                 out_data[OUT_RAINF].data[0] = out_data[OUT_PREC].data[0];
                 out_data[OUT_SNOWF].data[0] = 0;
             }
             else if (out_data[OUT_AIR_TEMP].data[0] <=
-                     global_param.MIN_RAIN_TEMP) {
+                     param.SNOW_MIN_RAIN_TEMP) {
                 out_data[OUT_RAINF].data[0] = 0;
                 out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0];
             }
             else {
                 out_data[OUT_RAINF].data[0] =
                     ((out_data[OUT_AIR_TEMP].data[0] -
-                      global_param.MIN_RAIN_TEMP) /
-                     (global_param.MAX_SNOW_TEMP -
-                  global_param.MIN_RAIN_TEMP)) * out_data[OUT_PREC].data[0];
+                      param.SNOW_MIN_RAIN_TEMP) /
+                     (param.SNOW_MAX_SNOW_TEMP -
+                      param.SNOW_MIN_RAIN_TEMP)) * out_data[OUT_PREC].data[0];
                 out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0] -
                                               out_data[OUT_RAINF].data[0];
             }
@@ -100,10 +103,10 @@ write_forcing_file(atmos_data_struct    *atmos,
                 out_data[OUT_PREC].aggdata[0] /= dt_sec;
                 out_data[OUT_RAINF].aggdata[0] /= dt_sec;
                 out_data[OUT_SNOWF].aggdata[0] /= dt_sec;
-                out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
-                out_data[OUT_PRESSURE].aggdata[0] *= 1000;
-                out_data[OUT_VP].aggdata[0] *= 1000;
-                out_data[OUT_VPD].aggdata[0] *= 1000;
+                out_data[OUT_AIR_TEMP].aggdata[0] += CONST_TKFRZ;
+                out_data[OUT_PRESSURE].aggdata[0] *= PA_PER_KPA;
+                out_data[OUT_VP].aggdata[0] *= PA_PER_KPA;
+                out_data[OUT_VPD].aggdata[0] *= PA_PER_KPA;
             }
 
             if (options.BINARY_OUTPUT) {

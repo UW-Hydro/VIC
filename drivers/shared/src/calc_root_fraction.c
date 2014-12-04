@@ -66,7 +66,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
         zone = 0;
 
         while (zone < options.ROOT_ZONES) {
-            Zstep = (double)veg_con[veg].zone_depth[zone];
+            Zstep = veg_con[veg].zone_depth[zone];
             if ((Zsum + Zstep) <= Lsum && Zsum >= Lsum - Lstep) {
                 /** CASE 1: Root Zone Completely in Soil Layer **/
                 sum_fract += veg_con[veg].zone_fract[zone];

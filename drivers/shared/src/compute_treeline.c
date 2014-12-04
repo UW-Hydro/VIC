@@ -47,7 +47,7 @@ compute_treeline(atmos_data_struct *atmos,
                  dmy_struct        *dmy,
                  double             avgJulyAirTemp,
                  double            *Tfactor,
-                 char              *AboveTreeLine)
+                 bool              *AboveTreeLine)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
@@ -100,10 +100,10 @@ compute_treeline(atmos_data_struct *atmos,
     for (band = 0; band < options.SNOW_BAND; band++) {
         if (AnnualSum + Tfactor[band] <= 10.) {
             // Band is above treeline
-            AboveTreeLine[band] = TRUE;
+            AboveTreeLine[band] = true;
         }
         else {
-            AboveTreeLine[band] = FALSE;
+            AboveTreeLine[band] = false;
         }
     }
 }

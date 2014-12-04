@@ -36,8 +36,8 @@
 all_vars_struct
 make_all_vars(size_t nveg)
 {
-    all_vars_struct      temp;
-    size_t               Nitems;
+    all_vars_struct temp;
+    size_t          Nitems;
 
     Nitems = nveg + 1;
 

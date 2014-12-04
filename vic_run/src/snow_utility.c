@@ -27,8 +27,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAX_CHANGE 0.9
-
 /******************************************************************************
 * @brief    Compute the snow density based on swe and snow metamorphism.
 *
@@ -47,24 +45,26 @@ snow_density(snow_data_struct *snow,
              double            Tair,
              double            dt)
 {
-    extern option_struct options;
-    double               density_new;
-    double               density;
-    double               depth;
-    double               swq;
-    double               CR; /* compaction rate */
-    double               dexpf;
-    double               ddz1; /* rate of settling of snowpack due to destructive metamorphism */
-    double               ddz2; /* rate of compaction of snowpack due to overburden */
-    double               Tavg; /* average snowpack temperature */
-    double               c3, c4; /* snow densification factors */
-    double               dm; /* upper snow density limit for the settling process */
-    double               Ps; /* snow load pressure (N/m^2) */
-    double               f; /* effective compaction coefficient */
-    double               overburden;
-    double               viscosity;
-    double               delta_depth;
-    double               depth_new;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    double                   density_new;
+    double                   density;
+    double                   depth;
+    double                   swq;
+    double                   CR; /* compaction rate */
+    double                   dexpf;
+    double                   ddz1; /* rate of settling of snowpack due to destructive metamorphism */
+    double                   ddz2; /* rate of compaction of snowpack due to overburden */
+    double                   Tavg; /* average snowpack temperature */
+    double                   c3, c4; /* snow densification factors */
+    double                   dm; /* upper snow density limit for the settling process */
+    double                   Ps; /* snow load pressure (N/m^2) */
+    double                   f; /* effective compaction coefficient */
+    double                   overburden;
+    double                   viscosity;
+    double                   delta_depth;
+    double                   depth_new;
 
     density = 0.0;
 
@@ -77,7 +77,7 @@ snow_density(snow_data_struct *snow,
     }
 
     /* Estimate average snowpack temperature */
-    Tavg = snow->surf_temp + KELVIN;
+    Tavg = snow->surf_temp + CONST_TKFRZ;
 
     if (options.SNOW_DENSITY == DENS_SNTHRM) {
         if (new_snow > 0.) {
@@ -92,16 +92,16 @@ snow_density(snow_data_struct *snow,
             density = snow->density;
         }
 
-        dexpf = exp(-SNDENS_C1 * (KELVIN - Tavg));
+        dexpf = exp(-param.SNOW_DENS_C1 * (CONST_TKFRZ - Tavg));
 
         /* Settling due to destructive metamorphism */
         if (new_snow > 0.0 && density_new > 0.0) {
             dm =
-                (SNDENS_DMLIMIT > 1.15 *
-             density_new) ? SNDENS_DMLIMIT : 1.15 * density_new;
+                (param.SNOW_DENS_DMLIMIT > 1.15 *
+                 density_new) ? param.SNOW_DENS_DMLIMIT : 1.15 * density_new;
         }
         else {
-            dm = SNDENS_DMLIMIT;
+            dm = param.SNOW_DENS_DMLIMIT;
         }
 
         if (density <= dm) {
@@ -115,18 +115,22 @@ snow_density(snow_data_struct *snow,
         if ((snow->surf_water + snow->pack_water) / snow->depth > 0.01) {
             c4 = 2.0; /* presence of wet snow */
         }
-        ddz1 = -SNDENS_C2 * c3 * c4 * dexpf;
+        ddz1 = -param.SNOW_DENS_C2 * c3 * c4 * dexpf;
 
         /* Compaction due to overburden */
-        // swq in this context is the amount of snow whose weight contributes to compaction
-        f = SNDENS_F;
-        /* Currently VIC essentially has only one layer of snow, so compaction due to overburden will come mostly from new snowfall. */
-        swq = new_snow / 1000. + f * sswq;
+        // swq in this context is the amount of snow whose weight contributes
+        // to compaction
+        f = param.SNOW_DENS_F;
+
+        /* Currently VIC essentially has only one layer of snow, so compaction
+           due to overburden will come mostly from new snowfall. */
+        swq = new_snow / MM_PER_M + f * sswq;
 
         if (new_snow > 0.0) {
-            Ps = 0.5 * G * RHO_W * swq;
-            ddz2 = -Ps / SNDENS_ETA0 *
-                   exp(-(-SNDENS_C5 * (Tavg - KELVIN) + SNDENS_C6 * density));
+            Ps = 0.5 * CONST_G * CONST_RHOFW * swq;
+            ddz2 = -Ps / param.SNOW_DENS_ETA0 *
+                   exp(-(-param.SNOW_DENS_C5 *
+                         (Tavg - CONST_TKFRZ) + param.SNOW_DENS_C6 * density));
         }
         else {
             ddz2 = 0.0;
@@ -134,7 +138,7 @@ snow_density(snow_data_struct *snow,
 
         /* Calculate compaction rate and new snow density */
         CR = -ddz1 - ddz2;
-        density = density * (1 + CR * dt * SECPHOUR);
+        density = density * (1 + CR * dt * SEC_PER_HOUR);
     }
     else if (options.SNOW_DENSITY == DENS_BRAS) {
         depth = snow->depth;
@@ -148,38 +152,39 @@ snow_density(snow_data_struct *snow,
                 /* Compact current snowpack by weight of new snowfall */
                 delta_depth =
                     (((new_snow / 25.4) * (depth / 0.0254)) / (swq / 0.0254) *
-                 pow((depth / 0.0254) / 10., 0.35)) * 0.0254;
-                if (delta_depth > MAX_CHANGE * depth) {
-                    delta_depth = MAX_CHANGE * depth;
+                     pow((depth / 0.0254) / 10., 0.35)) * 0.0254;
+                if (delta_depth > param.SNOW_DENS_MAX_CHANGE * depth) {
+                    delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
                 }
                 depth_new = new_snow / density_new;
                 depth = depth - delta_depth + depth_new;
-                swq += new_snow / 1000.;
-                density = 1000. * swq / depth;
+                swq += new_snow / MM_PER_M;
+                density = MM_PER_M * swq / depth;
             }
             else {
                 /* no snowpack present, so snow density equals that of new snow */
                 density = density_new;
-                swq += new_snow / 1000.;
-                depth = 1000. * swq / density;
+                swq += new_snow / MM_PER_M;
+                depth = MM_PER_M * swq / density;
             }
         }
         else {
-            density = 1000. * swq / snow->depth;
+            density = MM_PER_M * swq / snow->depth;
         }
 
         /** Densification of the snow pack due to aging **/
         /** based on SNTHRM89 R. Jordan 1991 - used in Bart's DHSVM code **/
         if (depth > 0.) {
-            overburden = 0.5 * G * RHO_W * swq;
-            viscosity = SNDENS_ETA0 * exp(
-                -SNDENS_C5 * (Tavg - KELVIN) + SNDENS_C6 * density);
-            delta_depth = overburden / viscosity * depth * dt * SECPHOUR;
-            if (delta_depth > MAX_CHANGE * depth) {
-                delta_depth = MAX_CHANGE * depth;
+            overburden = 0.5 * CONST_G * CONST_RHOFW * swq;
+            viscosity = param.SNOW_DENS_ETA0 * exp(
+                -param.SNOW_DENS_C5 *
+                (Tavg - CONST_TKFRZ) + param.SNOW_DENS_C6 * density);
+            delta_depth = overburden / viscosity * depth * dt * SEC_PER_HOUR;
+            if (delta_depth > param.SNOW_DENS_MAX_CHANGE * depth) {
+                delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
             }
             depth -= delta_depth;
-            density = 1000. * swq / depth;
+            density = MM_PER_M * swq / depth;
         }
     }
 
@@ -192,8 +197,10 @@ snow_density(snow_data_struct *snow,
 double
 new_snow_density(double air_temp)
 {
-    extern option_struct options;
-    double               density_new;
+    extern parameters_struct param;
+    extern option_struct     options;
+
+    double                   density_new;
 
     density_new = 0.0;
 
@@ -203,11 +210,11 @@ new_snow_density(double air_temp)
     else if (options.SNOW_DENSITY == DENS_BRAS) {
         air_temp = air_temp * 9. / 5. + 32.;
         if (air_temp > 0) {
-            density_new = (double)NEW_SNOW_DENSITY + 1000. *
+            density_new = param.SNOW_NEW_SNOW_DENSITY + 1000. *
                           (air_temp / 100.) * (air_temp / 100.);
         }
         else {
-            density_new = (double)NEW_SNOW_DENSITY;
+            density_new = param.SNOW_NEW_SNOW_DENSITY;
         }
     }
 
@@ -229,23 +236,27 @@ snow_albedo(double new_snow,
             int    last_snow,
             char   MELTING)
 {
+    extern parameters_struct param;
+
     /** New Snow **/
-    if (new_snow > TraceSnow && cold_content < 0.0) {
-        albedo = NEW_SNOW_ALB;
+    if (new_snow > param.SNOW_TRACESNOW && cold_content < 0.0) {
+        albedo = param.SNOW_NEW_SNOW_ALB;
     }
     /** Aged Snow **/
     else if (swq > 0.0) {
         /* Accumulation season */
         if (cold_content < 0.0 && !MELTING) {
-            albedo = NEW_SNOW_ALB * pow(SNOW_ALB_ACCUM_A,
-                                        pow((double)last_snow * dt / 24.,
-                                            SNOW_ALB_ACCUM_B));
+            albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_ACCUM_A,
+                                                   pow((double)last_snow * dt /
+                                                       HOURS_PER_DAY,
+                                                       param.SNOW_ALB_ACCUM_B));
         }
         /* Melt Season */
         else {
-            albedo = NEW_SNOW_ALB * pow(SNOW_ALB_THAW_A,
-                                        pow((double)last_snow * dt / 24.,
-                                            SNOW_ALB_THAW_B));
+            albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_THAW_A,
+                                                   pow((double)last_snow * dt /
+                                                       HOURS_PER_DAY,
+                                                       param.SNOW_ALB_THAW_B));
         }
     }
     else {

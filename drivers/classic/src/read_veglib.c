@@ -38,16 +38,18 @@ veg_lib_struct *
 read_veglib(FILE   *veglib,
             size_t *Ntype)
 {
-    extern option_struct options;
-    veg_lib_struct      *temp;
-    size_t               i, j;
-    int                  k;
-    int                  tmpflag;
-    size_t               Nveg_type;
-    char                 str[MAXSTRING];
-    char                 ErrStr[MAXSTRING];
-    double               maxd;
-    char                 tmpstr[MAXSTRING];
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    veg_lib_struct          *temp;
+    size_t                   i, j;
+    int                      k;
+    int                      tmpflag;
+    size_t                   Nveg_type;
+    char                     str[MAXSTRING];
+    char                     ErrStr[MAXSTRING];
+    double                   maxd;
+    char                     tmpstr[MAXSTRING];
 
     rewind(veglib);
     fgets(str, MAXSTRING, veglib);
@@ -72,14 +74,14 @@ read_veglib(FILE   *veglib,
             temp[i].veg_class = atoi(str);
             fscanf(veglib, "%d", &tmpflag);
             if (tmpflag == 0) {
-                temp[i].overstory = FALSE;
+                temp[i].overstory = false;
             }
             else {
-                temp[i].overstory = TRUE;
+                temp[i].overstory = true;
             }
             fscanf(veglib, "%lf", &temp[i].rarc);
             fscanf(veglib, "%lf", &temp[i].rmin);
-            for (j = 0; j < 12; j++) {
+            for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].LAI[j]);
                 if (options.LAI_SRC == LAI_FROM_VEGLIB && temp[i].overstory &&
                     temp[i].LAI[j] == 0) {
@@ -90,10 +92,10 @@ read_veglib(FILE   *veglib,
                             temp[i].veg_class, j);
                     nrerror(ErrStr);
                 }
-                temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
+                temp[i].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * temp[i].LAI[j];
             }
             if (options.VEGLIB_VEGCOVER) {
-                for (j = 0; j < 12; j++) {
+                for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     fscanf(veglib, "%lf", &temp[i].vegcover[j]);
                     if (temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
                         sprintf(str,
@@ -108,11 +110,11 @@ read_veglib(FILE   *veglib,
                 }
             }
             else {
-                for (j = 0; j < 12; j++) {
+                for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     temp[i].vegcover[j] = 1.00;
                 }
             }
-            for (j = 0; j < 12; j++) {
+            for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].albedo[j]);
                 if (temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
                     sprintf(str, "Albedo must be between 0 and 1 (%f)",
@@ -120,12 +122,12 @@ read_veglib(FILE   *veglib,
                     nrerror(str);
                 }
             }
-            for (j = 0; j < 12; j++) {
+            for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].roughness[j]);
             }
             temp[i].wind_h = 0.;
             maxd = 0;
-            for (j = 0; j < 12; j++) {
+            for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].displacement[j]);
                 if (temp[i].displacement[j] > maxd) {
                     maxd = temp[i].displacement[j];
@@ -144,12 +146,12 @@ read_veglib(FILE   *veglib,
                         "Vegetation reference height (%f) for vegetation "
                         "class %d, must be greater than the maximum "
                         "displacement height (%f) when OVERSTORY has been set "
-                        "TRUE.", temp[i].wind_h, temp[i].veg_class, maxd);
+                        "true.", temp[i].wind_h, temp[i].veg_class, maxd);
                 nrerror(str);
             }
             fscanf(veglib, "%lf", &temp[i].RGL);    /* minimum value of incoming
-                                                      solar radiation at which there
-                                                      will still be transpiration */
+                                                       solar radiation at which there
+                                                       will still be transpiration */
             if (temp[i].RGL < 0) {
                 sprintf(str,
                         "Minimum value of incoming solar radiation at which "
@@ -223,9 +225,10 @@ read_veglib(FILE   *veglib,
         temp[Nveg_type + k].overstory = ref_veg_over[k];
         temp[Nveg_type + k].rarc = ref_veg_rarc[k];
         temp[Nveg_type + k].rmin = ref_veg_rmin[k];
-        for (j = 0; j < 12; j++) {
+        for (j = 0; j < MONTHS_PER_YEAR; j++) {
             temp[Nveg_type + k].LAI[j] = ref_veg_lai[k];
-            temp[Nveg_type + k].Wdmax[j] = LAI_WATER_FACTOR * ref_veg_lai[k];
+            temp[Nveg_type +
+                 k].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * ref_veg_lai[k];
             temp[Nveg_type + k].albedo[j] = ref_veg_albedo[k];
             temp[Nveg_type + k].roughness[j] = ref_veg_rough[k];
             temp[Nveg_type + k].displacement[j] = ref_veg_displ[k];

@@ -38,7 +38,7 @@
  *           covered with snow.
  *****************************************************************************/
 double
-calc_snow_coverage(char    *store_snow,
+calc_snow_coverage(bool   *store_snow,
                    double  max_snow_distrib_slope,
                    double  old_coverage,
                    double  swq,
@@ -81,7 +81,7 @@ calc_snow_coverage(char    *store_snow,
             if (depth >= max_snow_distrib_slope / 2.) {
                 /* snow accumulation deep enough to remove memory of previous
                    melt distribution */
-                *store_snow = FALSE;
+                *store_snow = false;
                 *store_swq = 0;
                 *snow_distrib_slope = 0;
                 *store_coverage = 1;
@@ -89,7 +89,7 @@ calc_snow_coverage(char    *store_snow,
         }
         else if (old_coverage < 1) {
             /* store new snow fall over old distribution */
-            *store_snow = TRUE;
+            *store_snow = true;
             *store_swq = swq - old_swq;
         }
     }
@@ -123,7 +123,7 @@ calc_snow_coverage(char    *store_snow,
                     *snow_distrib_slope = -2. * old_depth;
                 }
                 *max_snow_depth = -(*snow_distrib_slope);
-                *store_snow = TRUE;
+                *store_snow = true;
             }
 
             /* if currently raining, new swq may be higher than previous
@@ -146,7 +146,7 @@ calc_snow_coverage(char    *store_snow,
             }
 
             /** NOTE if (swq - old_swq) > 0, but there was no snowfall,
-              there was rain so the coverage fraction should not change */
+               there was rain so the coverage fraction should not change */
         }
         else {
             coverage = old_coverage;

@@ -40,7 +40,8 @@ double
 func_surf_energy_bal(double  Ts,
                      va_list ap)
 {
-    extern option_struct options;
+    extern parameters_struct param;
+    extern option_struct     options;
 
     /* define routine input variables */
 
@@ -194,7 +195,6 @@ func_surf_energy_bal(double  Ts,
     double             LongBareOut; // outgoing LW from snow-free ground
     double             NetBareRad;
     double             TMean;
-    double             Tmp;
     double             error;
     double             ice;
     double             temp_latent_heat;
@@ -370,11 +370,10 @@ func_surf_energy_bal(double  Ts,
     }
 
     TMean = Ts;
-    Tmp = TMean + KELVIN;
 
     transp = (double *) calloc(options.Nlayer, sizeof(double));
     for (i = 0; i < options.Nlayer; i++) {
-        transp[i] = 0;
+        transp[i] = 0.;
     }
 
     /**********************************************
@@ -389,11 +388,11 @@ func_surf_energy_bal(double  Ts,
         *snow_flux = (kappa_snow * (Tsnow_surf - TMean));
     }
     else if (INCLUDE_SNOW) {
-        *snow_flux = 0;
+        *snow_flux = 0.;
         Tsnow_surf = TMean;
     }
     else {
-        *snow_flux = 0;
+        *snow_flux = 0.;
     }
 
     /***************************************************************
@@ -418,19 +417,19 @@ func_surf_energy_bal(double  Ts,
                 (snow_coverage +
                  (1. -
                   snow_coverage) *
-            surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
+                 surf_atten) * (kappa1 / D1 * ((*T1) - TMean));
         }
         else {
             *grnd_flux =
                 (snow_coverage +
                  (1. -
                   snow_coverage) *
-            surf_atten) * (kappa1 / D1 * ((*T1) - TMean) +
-                                                  (
-                                                      kappa2 / D2 *
-                                                      (1. -
-                                                   exp(-D1 /
-            dp)) * (T2 - (*T1)))) / 2.;
+                 surf_atten) * (kappa1 / D1 * ((*T1) - TMean) +
+                                (
+                                    kappa2 / D2 *
+                                    (1. -
+                                     exp(-D1 /
+                                         dp)) * (T2 - (*T1)))) / 2.;
         }
     }
     else {
@@ -461,14 +460,14 @@ func_surf_energy_bal(double  Ts,
                 error_cnt1++;
             }
             if (FIRST_SOLN[1]) {
-                FIRST_SOLN[1] = FALSE;
+                FIRST_SOLN[1] = false;
             }
         }
 
         /* EXPLICIT Solution, or if IMPLICIT Solution Failed */
         if (!options.IMPLICIT || Error == 1) {
             if (options.IMPLICIT) {
-                FIRST_SOLN[0] = TRUE;
+                FIRST_SOLN[0] = true;
             }
             Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag,
                                     Tnew_fbcount, Zsum_node, kappa_node,
@@ -554,8 +553,8 @@ func_surf_energy_bal(double  Ts,
                    Told_node[i +
                              1]) -
                   (Tnew_node[i] +
-               Tnew_node[i +
-                         1])) *
+                   Tnew_node[i +
+                             1])) *
                  (soil_con->Zsum_node[i +
                                       1] -
                   soil_con->Zsum_node[i]) / delta_t / 2.);
@@ -566,7 +565,7 @@ func_surf_energy_bal(double  Ts,
              ((Told_node[i] +
                T1_old) -
               (Tnew_node[i] +
-        *T1)) * (D1 - soil_con->Zsum_node[i]) / delta_t / 2.);
+               *T1)) * (D1 - soil_con->Zsum_node[i]) / delta_t / 2.);
     }
 
     /******************************************************
@@ -584,7 +583,8 @@ func_surf_energy_bal(double  Ts,
             else {
                 ice = 0.;
             }
-            *fusion = (-ice_density * Lf * (ice0 - ice) * D1 / delta_t);
+            *fusion =
+                (-CONST_RHOICE * CONST_LATICE * (ice0 - ice) * D1 / delta_t);
         }
         else {
             *fusion = 0;
@@ -617,7 +617,7 @@ func_surf_energy_bal(double  Ts,
                     ice = 0.;
                 }
                 *fusion +=
-                    (-ice_density * Lf *
+                    (-CONST_RHOICE * CONST_LATICE *
                      (ice0 -
                       ice) *
                      (soil_con->Zsum_node[i +
@@ -647,28 +647,28 @@ func_surf_energy_bal(double  Ts,
                 ice = 0.;
             }
             *fusion +=
-                (-ice_density * Lf *
+                (-CONST_RHOICE * CONST_LATICE *
                  (ice0 - ice) * (D1 - soil_con->Zsum_node[i]) / delta_t);
         }
     }
 
     /* if thin snowpack, compute the change in energy stored in the pack */
     if (INCLUDE_SNOW) {
-        if (TMean > 0) {
-            *deltaCC = CH_ICE *
-                       (snow_swq - snow_water) * (0 - OldTSurf) / delta_t;
+        if (TMean > 0.) {
+            *deltaCC = CONST_CPICE *
+                       (snow_swq - snow_water) * (0. - OldTSurf) / delta_t;
         }
         else {
-            *deltaCC = CH_ICE *
+            *deltaCC = CONST_CPICE *
                        (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
         }
-        *refreeze_energy = (snow_water * Lf * snow_density) / delta_t;
+        *refreeze_energy = (snow_water * CONST_LATICE * snow_density) / delta_t;
         *deltaCC *= snow_coverage; // adjust for snow cover fraction
         *refreeze_energy *= snow_coverage; // adjust for snow cover fraction
     }
 
     /** Compute net surface radiation of snow-free area for evaporation estimates **/
-    LongBareOut = STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+    LongBareOut = calc_outgoing_longwave(TMean + CONST_TKFRZ, param.EMISS_GRND);
     if (INCLUDE_SNOW) { // compute net LW at snow surface
         (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
     }
@@ -677,10 +677,9 @@ func_surf_energy_bal(double  Ts,
         (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
 
     /** Compute atmospheric stability correction **/
-    /** CHECK THAT THIS WORKS FOR ALL SUMMER SITUATIONS **/
     if (wind[UnderStory] > 0.0 && overstory && SNOWING) {
         Ra_used[0] = ra[UnderStory] /
-                     StabilityCorrection(ref_height[UnderStory], 0.f, TMean,
+                     StabilityCorrection(ref_height[UnderStory], 0., TMean,
                                          Tair,
                                          wind[UnderStory],
                                          roughness[UnderStory]);
@@ -693,7 +692,7 @@ func_surf_energy_bal(double  Ts,
                                          roughness[UnderStory]);
     }
     else {
-        Ra_used[0] = HUGE_RESIST;
+        Ra_used[0] = param.HUGE_RESIST;
     }
 
     /*************************************************
@@ -706,7 +705,7 @@ func_surf_energy_bal(double  Ts,
        winter crop planted).
     *************************************************/
     if (VEG && !SNOWING && veg_var->vegcover > 0) {
-        Evap = canopy_evap(layer, veg_var, TRUE,
+        Evap = canopy_evap(layer, veg_var, true,
                            veg_class, Wdew, delta_t, NetBareRad, vpd,
                            NetShortBare, Tair, Ra_used[1], elevation, rainfall,
                            Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
@@ -714,7 +713,7 @@ func_surf_energy_bal(double  Ts,
         if (veg_var->vegcover < 1) {
             for (i = 0; i < options.Nlayer; i++) {
                 transp[i] = layer[i].evap;
-                layer[i].evap = 0;
+                layer[i].evap = 0.;
             }
             tmp_wind[0] = wind[0];
             tmp_wind[1] = -999.;
@@ -722,8 +721,8 @@ func_surf_energy_bal(double  Ts,
             tmp_height = soil_con->rough / 0.123;
             tmp_displacement[0] = calc_veg_displacement(tmp_height);
             tmp_roughness[0] = soil_con->rough;
-            tmp_ref_height[0] = 10;
-            Error = CalcAerodynamic(0, 0, 0, soil_con->snow_rough,
+            tmp_ref_height[0] = 10.;
+            Error = CalcAerodynamic(0, 0., 0., soil_con->snow_rough,
                                     soil_con->rough, 0, Ra_bare, tmp_wind,
                                     tmp_displacement, tmp_ref_height,
                                     tmp_roughness);
@@ -733,19 +732,19 @@ func_surf_energy_bal(double  Ts,
             Evap *= veg_var->vegcover;
             Evap += (1 - veg_var->vegcover) *
                     arno_evap(layer, surf_atten * NetBareRad, Tair, vpd,
-                              depth[0], max_moist * depth[0] * 1000.,
+                              depth[0], max_moist * depth[0] * MM_PER_M,
                               elevation, b_infilt, Ra_bare[0], delta_t,
                               resid_moist[0], frost_fract);
             for (i = 0; i < options.Nlayer; i++) {
                 layer[i].evap = veg_var->vegcover * transp[i] +
                                 (1 - veg_var->vegcover) * layer[i].evap;
-                if (layer[i].evap > 0) {
+                if (layer[i].evap > 0.) {
                     layer[i].bare_evap_frac = 1 -
                                               (veg_var->vegcover *
                                                transp[i]) / layer[i].evap;
                 }
                 else {
-                    layer[i].bare_evap_frac = 0;
+                    layer[i].bare_evap_frac = 0.;
                 }
             }
             veg_var->throughfall =
@@ -757,13 +756,13 @@ func_surf_energy_bal(double  Ts,
         }
         else {
             for (i = 0; i < options.Nlayer; i++) {
-                layer[i].bare_evap_frac = 0;
+                layer[i].bare_evap_frac = 0.;
             }
         }
     }
     else if (!SNOWING) {
         Evap = arno_evap(layer, NetBareRad, Tair, vpd,
-                         depth[0], max_moist * depth[0] * 1000.,
+                         depth[0], max_moist * depth[0] * MM_PER_M,
                          elevation, b_infilt, Ra_used[0], delta_t,
                          resid_moist[0], frost_fract);
         for (i = 0; i < options.Nlayer; i++) {
@@ -779,15 +778,15 @@ func_surf_energy_bal(double  Ts,
     /**********************************************************************
        Compute the Latent Heat Flux from the Surface and Covering Vegetation
     **********************************************************************/
-    *latent_heat = -RHO_W * Le * Evap;
+    *latent_heat = -CONST_RHOFW * Le * Evap;
     *latent_heat_sub = 0.;
 
     /** Compute the latent heat flux from a thin snowpack if present **/
     if (INCLUDE_SNOW) {
         /* Convert sublimation terms from m/timestep to kg/m2s */
-        VaporMassFlux = *vapor_flux * ice_density / delta_t;
-        BlowingMassFlux = *blowing_flux * ice_density / delta_t;
-        SurfaceMassFlux = *surface_flux * ice_density / delta_t;
+        VaporMassFlux = *vapor_flux * CONST_RHOICE / delta_t;
+        BlowingMassFlux = *blowing_flux * CONST_RHOICE / delta_t;
+        SurfaceMassFlux = *surface_flux * CONST_RHOICE / delta_t;
 
         latent_heat_from_snow(atmos_density, vp, Le, atmos_pressure,
                               Ra_used[0], TMean, vpd, &temp_latent_heat,
@@ -797,9 +796,9 @@ func_surf_energy_bal(double  Ts,
         *latent_heat_sub = temp_latent_heat_sub * snow_coverage;
 
         /* Convert sublimation terms from kg/m2s to m/timestep */
-        *vapor_flux = VaporMassFlux * delta_t / ice_density;
-        *blowing_flux = BlowingMassFlux * delta_t / ice_density;
-        *surface_flux = SurfaceMassFlux * delta_t / ice_density;
+        *vapor_flux = VaporMassFlux * delta_t / CONST_RHOICE;
+        *blowing_flux = BlowingMassFlux * delta_t / CONST_RHOICE;
+        *surface_flux = SurfaceMassFlux * delta_t / CONST_RHOICE;
     }
     else {
         *latent_heat *= (1. - snow_coverage);
@@ -809,7 +808,8 @@ func_surf_energy_bal(double  Ts,
        Compute the Sensible Heat Flux from the Surface
     ************************************************/
     if (snow_coverage < 1 || INCLUDE_SNOW) {
-        *sensible_heat = atmos_density * Cp * (Tair - (TMean)) / Ra_used[0];
+        *sensible_heat =
+            calc_sensible_heat(atmos_density, Tair, TMean, Ra_used[0]);
         if (!INCLUDE_SNOW) {
             (*sensible_heat) *= (1. - snow_coverage);
         }

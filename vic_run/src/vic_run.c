@@ -46,55 +46,57 @@ vic_run(int                  rec,
         veg_lib_struct      *veg_lib,
         veg_hist_struct     *veg_hist)
 {
-    extern option_struct options;
-    char                 overstory;
-    int                  j, p;
-    size_t               lidx;
-    unsigned short       iveg;
-    size_t               Nveg;
-    unsigned short       veg_class;
-    unsigned short       band;
-    size_t               Nbands;
-    int                  ErrorFlag;
-    double               out_prec[2 * MAX_BANDS];
-    double               out_rain[2 * MAX_BANDS];
-    double               out_snow[2 * MAX_BANDS];
-    double               dp;
-    double               ice0[MAX_BANDS];
-    double               moist0[MAX_BANDS];
-    double               surf_atten;
-    double               wind_h;
-    double               height;
-    double               displacement[3];
-    double               roughness[3];
-    double               ref_height[3];
-    double             **aero_resist;
-    double               Cv;
-    double               Le;
-    double               Melt[2 * MAX_BANDS];
-    double               bare_albedo;
-    double               snow_inflow[MAX_BANDS];
-    double               rainonly;
-    double               sum_runoff;
-    double               sum_baseflow;
-    double               tmp_wind[3];
-    double               gauge_correction[2];
-    double               lag_one;
-    double               sigma_slope;
-    double               fetch;
-    int                  pet_veg_class;
-    double               lakefrac;
-    double               fraci;
-    double               wetland_runoff;
-    double               wetland_baseflow;
-    double               snowprec;
-    double               rainprec;
-    size_t               cidx;
-    lake_var_struct     *lake_var;
-    cell_data_struct   **cell;
-    veg_var_struct     **veg_var;
-    energy_bal_struct  **energy;
-    snow_data_struct   **snow;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    char                     overstory;
+    int                      j, p;
+    size_t                   lidx;
+    unsigned short           iveg;
+    size_t                   Nveg;
+    unsigned short           veg_class;
+    unsigned short           band;
+    size_t                   Nbands;
+    int                      ErrorFlag;
+    double                   out_prec[2 * MAX_BANDS];
+    double                   out_rain[2 * MAX_BANDS];
+    double                   out_snow[2 * MAX_BANDS];
+    double                   dp;
+    double                   ice0[MAX_BANDS];
+    double                   moist0[MAX_BANDS];
+    double                   surf_atten;
+    double                   wind_h;
+    double                   height;
+    double                   displacement[3];
+    double                   roughness[3];
+    double                   ref_height[3];
+    double                 **aero_resist;
+    double                   Cv;
+    double                   Le;
+    double                   Melt[2 * MAX_BANDS];
+    double                   bare_albedo;
+    double                   snow_inflow[MAX_BANDS];
+    double                   rainonly;
+    double                   sum_runoff;
+    double                   sum_baseflow;
+    double                   tmp_wind[3];
+    double                   gauge_correction[2];
+    double                   lag_one;
+    double                   sigma_slope;
+    double                   fetch;
+    int                      pet_veg_class;
+    double                   lakefrac;
+    double                   fraci;
+    double                   wetland_runoff;
+    double                   wetland_baseflow;
+    double                   snowprec;
+    double                   rainprec;
+    size_t                   cidx;
+    lake_var_struct         *lake_var;
+    cell_data_struct       **cell;
+    veg_var_struct         **veg_var;
+    energy_bal_struct      **energy;
+    snow_data_struct       **snow;
 
     // assign vic_run_veg_lib to veg_lib, so that the veg_lib for the correct
     // grid cell is used within vic_run. For simplicity sake, use vic_run_veg_lib
@@ -152,7 +154,7 @@ vic_run(int                  rec,
             veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
             veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
             veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
-                                        LAI_WATER_FACTOR;
+                                        param.VEG_LAI_WATER_FACTOR;
             snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
         }
     }
@@ -226,7 +228,7 @@ vic_run(int                  rec,
             /** Initialize other veg vars **/
             if (iveg < Nveg) {
                 for (band = 0; band < Nbands; band++) {
-                    veg_var[iveg][band].rc = HUGE_RESIST;
+                    veg_var[iveg][band].rc = param.HUGE_RESIST;
                 }
             }
 
@@ -257,8 +259,8 @@ vic_run(int                  rec,
             for (p = 0; p < N_PET_TYPES + 1; p++) {
                 /* Initialize wind speeds */
                 tmp_wind[0] = atmos->wind[NR];
-                tmp_wind[1] = -999.;
-                tmp_wind[2] = -999.;
+                tmp_wind[1] = MISSING;
+                tmp_wind[2] = MISSING;
 
                 /* Set surface descriptive variables */
                 if (p < N_PET_TYPES_NON_NAT) {
@@ -321,7 +323,7 @@ vic_run(int                  rec,
             if (options.CARBON && iveg < Nveg) {
                 for (band = 0; band < Nbands; band++) {
                     for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-                        veg_var[iveg][band].rsLayer[cidx] = HUGE_RESIST;
+                        veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
                     }
                     veg_var[iveg][band].aPAR = 0;
                     if (dmy->hour == 0) {
@@ -406,7 +408,7 @@ vic_run(int                  rec,
                             (cell[iveg][band].layer[lidx].moist -
                              soil_con->Wpwp[lidx]) /
                             (soil_con->porosity[lidx] * soil_con->depth[lidx] *
-                             1000 - soil_con->Wpwp[lidx]);
+                             MM_PER_M - soil_con->Wpwp[lidx]);
                     }
                     cell[iveg][band].wetness /= options.Nlayer;
                 } /** End non-zero area band **/
@@ -481,15 +483,16 @@ vic_run(int                  rec,
         band = 0;
         lake_var->runoff_in =
             (sum_runoff * lake_con->rpercent +
-             wetland_runoff) * soil_con->cell_area * 0.001;                                               // m3
+             wetland_runoff) * soil_con->cell_area / MM_PER_M;                                               // m3
         lake_var->baseflow_in =
             (sum_baseflow * lake_con->rpercent +
-             wetland_baseflow) * soil_con->cell_area * 0.001;                                                 // m3
-        lake_var->channel_in = atmos->channel_in[NR] * soil_con->cell_area *
-                               0.001;                                        // m3
-        lake_var->prec = atmos->prec[NR] * lake_var->sarea * 0.001; // m3
+             wetland_baseflow) * soil_con->cell_area / MM_PER_M;                                                 // m3
+        lake_var->channel_in = atmos->channel_in[NR] * soil_con->cell_area /
+                               MM_PER_M;                                        // m3
+        lake_var->prec = atmos->prec[NR] * lake_var->sarea / MM_PER_M; // m3
         rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR],
-                                 gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP);
+                                 param.SNOW_MAX_SNOW_TEMP,
+                                 param.SNOW_MIN_RAIN_TEMP);
         if ((int)rainonly == ERROR) {
             return(ERROR);
         }
@@ -505,10 +508,10 @@ vic_run(int                  rec,
         atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
 
         ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
-                               atmos->wind[NR], atmos->vp[NR] / 1000.,
+                               atmos->wind[NR], atmos->vp[NR] / PA_PER_KPA,
                                atmos->shortwave[NR], atmos->longwave[NR],
-                               atmos->vpd[NR] / 1000.,
-                               atmos->pressure[NR] / 1000.,
+                               atmos->vpd[NR] / PA_PER_KPA,
+                               atmos->pressure[NR] / PA_PER_KPA,
                                atmos->density[NR], lake_var,
                                *soil_con, gp->dt, gp->wind_h, dmy[rec],
                                fraci);

@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
-  * This routine initializes the soil variable arrays for each new grid cell.
+ * This routine initializes the soil variable arrays for each new grid cell.
  *
  * @section LICENSE
  *

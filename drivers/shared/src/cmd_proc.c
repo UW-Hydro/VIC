@@ -52,24 +52,24 @@ cmd_proc(int    argc,
         exit(1);
     }
 
-    GLOBAL_SET = FALSE;
+    GLOBAL_SET = false;
 
     while ((optchar = getopt(argc, argv, optstring)) != EOF) {
         switch ((char)optchar) {
         case 'v':
             /** Version information **/
-            display_current_settings(DISP_VERSION, NULL, NULL);
+            display_current_settings(DISP_VERSION);
             exit(0);
             break;
         case 'o':
             /** Compile-time options information **/
-            display_current_settings(DISP_COMPILE_TIME, NULL, NULL);
+            display_current_settings(DISP_COMPILE_TIME);
             exit(0);
             break;
         case 'g':
             /** Global Parameters File **/
             strncpy(globalfilename, optarg, MAXSTRING);
-            GLOBAL_SET = TRUE;
+            GLOBAL_SET = true;
             break;
         default:
             /** Print Usage if Invalid Command Line Arguments **/
@@ -94,7 +94,7 @@ void
 usage(char *executable)
 {
     fprintf(stderr,
-            "Usage: %s [-v | -o | -g<global_parameter_file>]\n", executable);
+            "Usage: %s [-v | -o | -g <global_parameter_file>]\n", executable);
     fprintf(stderr, "  v: display version information\n");
     fprintf(stderr,
             "  o: display compile-time options settings"

@@ -63,10 +63,12 @@ read_atmos_data(FILE               *infile,
        if binary the following needs multiplying by the number of input fields */
     skip_recs = (unsigned)((double)(global_param.dt * forceskip)) /
                 (double)param_set.FORCE_DT[file_num];
-    if ((((global_param.dt < 24 && (param_set.FORCE_DT[file_num] * forceskip) %
+    if ((((global_param.dt < HOURS_PER_DAY &&
+           (param_set.FORCE_DT[file_num] * forceskip) %
            global_param.dt) > 0)) ||
-        (global_param.dt == 24 && (global_param.dt %
-                                   param_set.FORCE_DT[file_num] > 0))) {
+        (global_param.dt == HOURS_PER_DAY && (global_param.dt %
+                                              param_set.FORCE_DT[file_num] >
+                                              0))) {
         nrerror(
             "Currently unable to handle a model starting date that does not"
             "correspond to a line in the forcing file.");
@@ -76,7 +78,7 @@ read_atmos_data(FILE               *infile,
         data, but if sub-daily data is used, the model must be run at the
         same time step as the data.  That way aggregation and disaggragation
         techniques are left to the user. **/
-    if (param_set.FORCE_DT[file_num] < 24 &&
+    if (param_set.FORCE_DT[file_num] < HOURS_PER_DAY &&
         global_param.dt != param_set.FORCE_DT[file_num]) {
         sprintf(ErrStr,
                 "When forcing the model with sub-daily data, the model must be "

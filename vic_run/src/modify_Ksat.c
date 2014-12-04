@@ -64,7 +64,7 @@ exp_interp(double x,
 /******************************************************************************
  * @brief    This subroutine returns a parameter to multiply with Ksat to
  *           modify it for the effects of temperature on the viscosity and
- *           density of water.  It is assumed that the given Ksat value was 
+ *           density of water.  It is assumed that the given Ksat value was
  *           measured at 20C (68F).
  *
  * @note     Viscosity and density taken from Linsley, "Hydrology for Engineers",

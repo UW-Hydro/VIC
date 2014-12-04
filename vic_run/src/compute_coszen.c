@@ -27,7 +27,6 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <mtclim_constants_vic.h>
 
 /******************************************************************************
  * @brief    This subroutine computes the cosine of the solar zenith angle.
@@ -38,24 +37,25 @@ compute_coszen(double     lat,
                double     time_zone_lng,
                dmy_struct dmy)
 {
-    double               coslat;
-    double               sinlat;
-    double               decl;
-    double               cosdecl;
-    double               sindecl;
-    double               cosegeom;
-    double               sinegeom;
-    double               coshss;
-    double               hour_offset;
-    double               cosh;
-    double               coszen;
+    double coslat;
+    double sinlat;
+    double decl;
+    double cosdecl;
+    double sindecl;
+    double cosegeom;
+    double sinegeom;
+    double coshss;
+    double hour_offset;
+    double cosh;
+    double coszen;
 
     /* calculate cos and sin of latitude */
-    coslat = cos(lat * PI / 180);
-    sinlat = sin(lat * PI / 180);
+    coslat = cos(lat * CONST_PI / 180);
+    sinlat = sin(lat * CONST_PI / 180);
 
     /* calculate cos and sin of declination */
-    decl = MINDECL * cos(((double)dmy.day_in_year + DAYSOFF) * RADPERDAY);
+    decl = CONST_MINDECL * cos(((double)dmy.day_in_year + CONST_DAYSOFF) *
+                               CONST_RADPERDAY);
     cosdecl = cos(decl);
     sindecl = sin(decl);
 
@@ -71,8 +71,8 @@ compute_coszen(double     lat,
     }
 
     /* calculate cos of hour angle */
-    hour_offset = (time_zone_lng - lng) * 24 / 360;
-    cosh = cos(((double)dmy.hour + hour_offset - 12) * PI / 12);
+    hour_offset = (time_zone_lng - lng) * HOURS_PER_DAY / 360;
+    cosh = cos(((double)dmy.hour + hour_offset - 12) * CONST_PI / 12);
 
     /* calculate cosine of solar zenith angle */
     coszen = cosegeom * cosh + sinegeom;

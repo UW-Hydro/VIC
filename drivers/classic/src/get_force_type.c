@@ -191,16 +191,16 @@ get_force_type(char *cmdstr,
     param_set.FORCE_INDEX[file_num][(*field)] = type;
     if (type == SKIP) {
         param_set.TYPE[type].multiplier = 1;
-        param_set.TYPE[type].SIGNED = FALSE;
+        param_set.TYPE[type].SIGNED = false;
     }
     else {
         sscanf(cmdstr, "%*s %*s %s %lf", flgstr,
                &param_set.TYPE[type].multiplier);
         if (strcasecmp("SIGNED", flgstr) == 0) {
-            param_set.TYPE[type].SIGNED = TRUE;
+            param_set.TYPE[type].SIGNED = true;
         }
         else {
-            param_set.TYPE[type].SIGNED = FALSE;
+            param_set.TYPE[type].SIGNED = false;
         }
     }
     param_set.TYPE[type].N_ELEM = 1;

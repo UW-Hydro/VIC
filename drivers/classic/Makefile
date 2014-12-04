@@ -68,9 +68,9 @@ CFLAGS  =  ${INCLUDES} -g -Wall -Wextra
 HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_classic.h \
+	${DRIVERPATH}/include/mtclim.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
-	${DRIVERPATH}/include/mtclim_constants_vic.h \
-	${DRIVERPATH}/include/mtclim_parameters_vic.h
+	${VICPATH}/include/vic_physical_constants.h
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -92,7 +92,7 @@ OBJS = \
 	${DRIVERPATH}/src/open_state_file.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/parse_output_info.o \
-	${DRIVERPATH}/src/print_library.o\
+	${DRIVERPATH}/src/print_library_classic.o\
 	${DRIVERPATH}/src/read_atmos_data.o \
 	${DRIVERPATH}/src/read_forcing_data.o \
 	${DRIVERPATH}/src/read_initial_model_state.o \
@@ -115,7 +115,11 @@ OBJS = \
 	${SHAREDPATH}/src/free_all_vars.o \
 	${SHAREDPATH}/src/free_vegcon.o \
 	${SHAREDPATH}/src/get_dist.o \
+	${SHAREDPATH}/src/get_parameters.o \
+	${SHAREDPATH}/src/initialize_filenames.o \
 	${SHAREDPATH}/src/initialize_global.o \
+	${SHAREDPATH}/src/initialize_options.o \
+	${SHAREDPATH}/src/initialize_parameters.o \
 	${SHAREDPATH}/src/initialize_snow.o \
 	${SHAREDPATH}/src/initialize_soil.o \
 	${SHAREDPATH}/src/initialize_veg.o \
@@ -126,6 +130,7 @@ OBJS = \
 	${SHAREDPATH}/src/make_snow_data.o \
 	${SHAREDPATH}/src/make_veg_var.o \
 	${SHAREDPATH}/src/open_file.o \
+	${SHAREDPATH}/src/print_library_shared.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \
@@ -164,6 +169,7 @@ OBJS = \
 	${VICPATH}/src/nrerror.o \
 	${VICPATH}/src/penman.o \
 	${VICPATH}/src/photosynth.o \
+	${VICPATH}/src/physics.o \
 	${VICPATH}/src/prepare_full_energy.o \
 	${VICPATH}/src/put_data.o \
 	${VICPATH}/src/root_brent.o \

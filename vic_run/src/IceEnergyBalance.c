@@ -34,6 +34,8 @@ double
 IceEnergyBalance(double  TSurf,
                  va_list ap)
 {
+    extern parameters_struct param;
+
     /* start of list of arguments in variable argument list */
 
     double  Dt;                  /* Model time step (hours) */
@@ -129,7 +131,7 @@ IceEnergyBalance(double  TSurf,
     /* Calculate active temp for energy balance as average of old and new  */
 
     TMean = TSurf;
-    Density = RHO_W;
+    Density = CONST_RHOFW;
 
     /* Correct aerodynamic conductance for stable conditions
        Note: If air temp >> snow temp then aero_cond -> 0 (i.e. very stable)
@@ -145,25 +147,25 @@ IceEnergyBalance(double  TSurf,
         *Ra_used = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0);
     }
     else {
-        *Ra_used = HUGE_RESIST;
+        *Ra_used = param.HUGE_RESIST;
     }
 
     /* Calculate longwave exchange and net radiation */
 
-    *LongRadOut = LongRadIn - STEFAN_B * (TMean + 273.15) * (TMean + 273.15) *
-                  (TMean + 273.15) * (TMean + 273.15);
+    *LongRadOut = LongRadIn - calc_outgoing_longwave(TMean + CONST_TKFRZ,
+                                                     param.EMISS_SNOW);
     NetRad = ShortRad + *LongRadOut;
 
     /* Calculate the sensible heat flux */
 
-    *SensibleHeat = AirDens * CP_PM * (Tair - TMean) / *Ra_used;
+    *SensibleHeat = calc_sensible_heat(AirDens, Tair, TMean, *Ra_used);
 
     /* Calculate the mass flux of ice to or from the surface layer */
 
     /* Calculate sublimation terms and latent heat flux */
 
     /* blowing_flux was calculated outside of the root_brent iteration */
-    BlowingMassFlux = *blowing_flux * Density / (Dt * SECPHOUR);
+    BlowingMassFlux = *blowing_flux * Density / (Dt * SEC_PER_HOUR);
 
     latent_heat_from_snow(AirDens, EactAir, Lv, Press, Ra, TMean, Vpd,
                           LatentHeat, LatentHeatSub, &VaporMassFlux,
@@ -171,13 +173,13 @@ IceEnergyBalance(double  TSurf,
                           &SurfaceMassFlux);
 
     /* Convert sublimation terms from kg/m2s to m/timestep */
-    *vapor_flux = VaporMassFlux * Dt * SECPHOUR / Density;
-    *surface_flux = SurfaceMassFlux * Dt * SECPHOUR / Density;
+    *vapor_flux = VaporMassFlux * Dt * SEC_PER_HOUR / Density;
+    *surface_flux = SurfaceMassFlux * Dt * SEC_PER_HOUR / Density;
 
     /* Calculate advected heat flux from rain */
 
     // Temporary fix for lake model.
-    *AdvectedEnergy = (CH_WATER * Tair * Rain) / (Dt * SECPHOUR);
+    *AdvectedEnergy = (CONST_CPFW * Tair * Rain) / (Dt * SEC_PER_HOUR);
 
     /* Calculate change in cold content */
     /* No change in cold content in lake model */
@@ -196,7 +198,8 @@ IceEnergyBalance(double  TSurf,
          *AdvectedEnergy +
          qnull);
 
-    *RefreezeEnergy = (SurfaceLiquidWater * Lf * Density) / (Dt * SECPHOUR);
+    *RefreezeEnergy = (SurfaceLiquidWater * CONST_LATICE * Density) /
+                      (Dt * SEC_PER_HOUR);
 
     /* Melting, or partially refreeze surface water. */
     if (TSurf == 0.0 && RestTerm > -(*RefreezeEnergy)) {

@@ -44,8 +44,8 @@ vic_init(void)
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
-    // extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
+    extern parameters_struct   param;
 
     bool                       found;
     bool                       no_overstory;
@@ -210,13 +210,13 @@ vic_init(void)
     // LAI and Wdmax
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < MONTHSPERYEAR; k++) {
+        for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "LAI",
                                 d4start, d4count, dvar);
             for (i = 0; i < global_domain.ncells_global; i++) {
                 veg_lib[i][j].LAI[k] = (double) dvar[idx[i]];
-                veg_lib[i][j].Wdmax[k] = LAI_WATER_FACTOR *
+                veg_lib[i][j].Wdmax[k] = param.VEG_LAI_WATER_FACTOR *
                                          veg_lib[i][j].LAI[k];
             }
         }
@@ -225,7 +225,7 @@ vic_init(void)
     // albedo
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < MONTHSPERYEAR; k++) {
+        for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "albedo",
                                 d4start, d4count, dvar);
@@ -238,7 +238,7 @@ vic_init(void)
     // veg_rough
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < MONTHSPERYEAR; k++) {
+        for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "veg_rough",
                                 d4start, d4count, dvar);
@@ -251,7 +251,7 @@ vic_init(void)
     // displacement
     for (j = 0; j < options.NVEGTYPES; j++) {
         d4start[0] = j;
-        for (k = 0; k < MONTHSPERYEAR; k++) {
+        for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "displacement",
                                 d4start, d4count, dvar);
@@ -263,7 +263,7 @@ vic_init(void)
 
     // vegcover not implemented in image model
     for (j = 0; j < options.NVEGTYPES; j++) {
-        for (k = 0; k < MONTHSPERYEAR; k++) {
+        for (k = 0; k < MONTHS_PER_YEAR; k++) {
             for (i = 0; i < global_domain.ncells_global; i++) {
                 veg_lib[i][j].vegcover[k] = 1.0;
             }
@@ -549,12 +549,12 @@ vic_init(void)
                 (1 - soil_con[i].organic[j]) * soil_con[i].soil_dens_min[j] +
                 soil_con[i].organic[j] * soil_con[i].soil_dens_org[j];
             if (soil_con[i].resid_moist[j] == MISSING) {
-                soil_con[i].resid_moist[j] = RESID_MOIST;
+                soil_con[i].resid_moist[j] = param.SOIL_RESID_MOIST;
             }
             soil_con[i].porosity[j] = 1 - soil_con[i].bulk_density[j] /
                                       soil_con[i].soil_density[j];
             soil_con[i].max_moist[j] = soil_con[i].depth[j] *
-                                       soil_con[i].porosity[j] * 1000.;
+                                       soil_con[i].porosity[j] * MM_PER_M;
             // check layer thicknesses
             if (soil_con[i].depth[j] < MINSOILDEPTH) {
                 sprint_location(locstr, &(global_domain.locations[i]));
@@ -598,7 +598,7 @@ vic_init(void)
                 nrerror(errstr);
             }
             if (soil_con[i].Wpwp[j] < soil_con[i].resid_moist[j] *
-                soil_con[i].depth[j] * 1000.) {
+                soil_con[i].depth[j] * MM_PER_M) {
                 sprint_location(locstr, &(global_domain.locations[i]));
                 sprintf(errstr, "Calculated wilting point moisture (%f mm) is "
                         "less than calculated residual moisture (%f mm) for "
@@ -606,7 +606,7 @@ vic_init(void)
                         "Wpwp_FRACT MUST be >= resid_moist / "
                         "(1.0 - bulk_density/soil_density).\n%s",
                         soil_con[i].Wpwp[j], soil_con[i].resid_moist[j] *
-                        soil_con[i].depth[j] * 1000., j, locstr);
+                        soil_con[i].depth[j] * MM_PER_M, j, locstr);
                 nrerror(errstr);
             }
         }
@@ -651,9 +651,9 @@ vic_init(void)
 
         if (options.CARBON) {
             // TBD Remove hardcoded parameter values
-            soil_con[i].AlbedoPar = 0.92 * BARE_SOIL_ALBEDO - 0.015;
-            if (soil_con[i].AlbedoPar < AlbSoiParMin) {
-                soil_con[i].AlbedoPar = AlbSoiParMin;
+            soil_con[i].AlbedoPar = 0.92 * param.ALBEDO_BARE_SOIL - 0.015;
+            if (soil_con[i].AlbedoPar < param.PHOTO_ALBSOIPARMIN) {
+                soil_con[i].AlbedoPar = param.PHOTO_ALBSOIPARMIN;
             }
         }
     }
@@ -738,8 +738,9 @@ vic_init(void)
             // Tfactor: calculate the temperature factor
             for (j = 0; j < options.SNOW_BAND; j++) {
                 // TBD: Ensure that Tlapse is implemented consistently
-                soil_con[i].Tfactor[j] = (soil_con[i].elevation -
-                                          soil_con[i].BandElev[j]) * T_LAPSE;
+                soil_con[i].Tfactor[j] = (soil_con[i].BandElev[j] -
+                                          soil_con[i].elevation) *
+                                         param.LAPSE_RATE;
             }
             // Pfactor: calculate Pfactor from the precipitation fraction read
             // from file
@@ -793,12 +794,12 @@ vic_init(void)
         for (j = 0; j < options.SNOW_BAND; j++) {
             // Lapse average annual July air temperature
             if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
-                TREELINE_TEMPERATURE) {
+                param.TREELINE_TEMPERATURE) {
                 // Snow band is above treeline
-                soil_con[i].AboveTreeLine[j] = TRUE;
+                soil_con[i].AboveTreeLine[j] = true;
             }
             else {
-                soil_con[i].AboveTreeLine[j] = FALSE;
+                soil_con[i].AboveTreeLine[j] = false;
             }
         }
     }
@@ -890,7 +891,7 @@ vic_init(void)
 
     // Run some checks and corrections for vegetation
     for (i = 0; i < global_domain.ncells_global; i++) {
-        no_overstory = FALSE;
+        no_overstory = false;
         // Only run to options.NVEGTYPES - 1, since bare soil is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
@@ -925,10 +926,10 @@ vic_init(void)
                 }
                 // check that the vegetation type is defined in the vegetation
                 // library
-                found = FALSE;
+                found = false;
                 for (k = 0; k < options.NVEGTYPES; k++) {
                     if (veg_con[i][vidx].veg_class == veg_lib[i][k].veg_class) {
-                        found = TRUE;
+                        found = true;
                         break;
                     }
                 }
@@ -948,7 +949,7 @@ vic_init(void)
 
                 // check for overstory
                 if (!veg_lib[i][j].overstory) {
-                    no_overstory = TRUE;
+                    no_overstory = true;
                 }
             }
         }
@@ -1047,10 +1048,10 @@ vic_init(void)
                 }
                 // check that the vegetation type is defined in the vegetation
                 // library
-                found = FALSE;
+                found = false;
                 for (k = 0; k < options.NVEGTYPES; k++) {
                     if (veg_con[i][vidx].veg_class == veg_lib[i][k].veg_class) {
-                        found = TRUE;
+                        found = true;
                         break;
                     }
                 }

@@ -92,25 +92,26 @@ solve_snow(char               overstory,
            soil_con_struct   *soil_con,
            veg_var_struct    *veg_var)
 {
-    extern option_struct   options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    int                    ErrorFlag;
-    double                 ShortOverIn;
-    double                 melt;
-    double                 old_coverage;
-    double                 old_depth;
-    double                 old_swq;
-    double                 rainonly;
-    double                 tmp_grnd_flux;
-    double                 store_snowfall;
-    int                    month;
-    int                    day_in_year;
-    double                 density;
-    double                 longwave;
-    double                 pressure;
-    double                 shortwave;
-    double                 vp;
-    double                 vpd;
+    int                      ErrorFlag;
+    double                   ShortOverIn;
+    double                   melt;
+    double                   old_coverage;
+    double                   old_depth;
+    double                   old_swq;
+    double                   rainonly;
+    double                   tmp_grnd_flux;
+    double                   store_snowfall;
+    int                      month;
+    int                      day_in_year;
+    double                   density;
+    double                   longwave;
+    double                   pressure;
+    double                   shortwave;
+    double                   vp;
+    double                   vpd;
 
     month = dmy[rec].month;
     day_in_year = dmy[rec].day_in_year;
@@ -147,7 +148,7 @@ solve_snow(char               overstory,
     store_snowfall = *snowfall;
 
     /** Compute latent heats **/
-    (*Le) = (2.501e6 - 0.002361e6 * air_temp);
+    (*Le) = calc_latent_heat_of_vaporization(air_temp);
 
     /** If first iteration, set UnderStory index **/
     if (*UnderStory == 999) {
@@ -169,7 +170,7 @@ solve_snow(char               overstory,
            Snow is Present or Falling
         *****************************/
 
-        snow->snow = TRUE; // snow is present during time step
+        snow->snow = true; // snow is present during time step
 
         if (!overstory) {
             (*surf_atten) = 1.;            // understory covered by snow
@@ -191,7 +192,7 @@ solve_snow(char               overstory,
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
                 ShortOverIn /= veg_var->vegcover;
-                ErrorFlag = snow_intercept((double)dt * SECPHOUR, 1.,
+                ErrorFlag = snow_intercept((double)dt * SEC_PER_HOUR, 1.,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
                                            veg_var->Wdmax,
@@ -254,14 +255,16 @@ solve_snow(char               overstory,
             /* Rescale veg terms back to whole tile (as opposed to just over plants) */
             veg_var->throughfall =
                 (1 -
-             veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
+                 veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
                 veg_var->throughfall;
             *rainfall =
                 (1 -
-             veg_var->vegcover) * (*out_rain) + veg_var->vegcover * (*rainfall);
+                 veg_var->vegcover) * (*out_rain) + veg_var->vegcover *
+                (*rainfall);
             *snowfall =
                 (1 -
-             veg_var->vegcover) * (*out_snow) + veg_var->vegcover * (*snowfall);
+                 veg_var->vegcover) * (*out_snow) + veg_var->vegcover *
+                (*snowfall);
             snow->canopy_vapor_flux *= veg_var->vegcover;
             snow->snow_canopy *= veg_var->vegcover;
             veg_var->Wdew *= veg_var->vegcover;
@@ -320,7 +323,7 @@ solve_snow(char               overstory,
             else {
                 // set snow albedo to new snow albedo
                 snow->last_snow = 0;
-                snow->albedo = NEW_SNOW_ALB;
+                snow->albedo = param.SNOW_NEW_SNOW_ALB;
                 (*AlbedoUnder) = snow->albedo;
             }
             (*NetShortSnow) = (1.0 - *AlbedoUnder) * (*ShortUnderIn);
@@ -329,7 +332,8 @@ solve_snow(char               overstory,
             ErrorFlag = snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd,
                                   roughness, aero_resist[*UnderStory],
                                   aero_resist_used,
-                                  air_temp, *coverage, (double)dt * SECPHOUR,
+                                  air_temp, *coverage,
+                                  (double)dt * SEC_PER_HOUR,
                                   density, snow_grnd_flux,
                                   *LongUnderIn, pressure, *rainfall, *snowfall,
                                   vp, vpd, wind[*UnderStory],
@@ -368,7 +372,7 @@ solve_snow(char               overstory,
 
                 /** Calculate Snow Depth (H.B.H. 7.2.1) **/
                 old_depth = snow->depth;
-                snow->depth = 1000. * snow->swq / snow->density;
+                snow->depth = MM_PER_M * snow->swq / snow->density;
 
                 /** Record if snowpack is melting this time step **/
                 if (snow->coldcontent >= 0 && (
@@ -377,10 +381,10 @@ solve_snow(char               overstory,
                         (soil_con->lat < 0 && (day_in_year < 60 || // ~ March 1
                                                day_in_year > 273)) // ~ October 1
                         )) {
-                    snow->MELTING = TRUE;
+                    snow->MELTING = true;
                 }
-                else if (snow->MELTING && *snowfall > TraceSnow) {
-                    snow->MELTING = FALSE;
+                else if (snow->MELTING && *snowfall > param.SNOW_TRACESNOW) {
+                    snow->MELTING = false;
                 }
 
 
@@ -391,7 +395,7 @@ solve_snow(char               overstory,
                                                         soil_con->max_snow_distrib_slope,
                                                         old_coverage, snow->swq,
                                                         old_swq, snow->depth, old_depth,
-                                                        melt * 0.001 + snow->vapor_flux,
+                                                        melt / MM_PER_M + snow->vapor_flux,
                                                         &snow->max_snow_depth, *snowfall,
                                                         &snow->store_swq,
                                                         &snow->snow_distrib_slope,
@@ -475,8 +479,8 @@ solve_snow(char               overstory,
                 snow->pack_temp = 0;
                 snow->coverage = 0;
                 snow->snow_distrib_slope = 0;
-                snow->store_snow = TRUE;
-                snow->MELTING = FALSE;
+                snow->store_snow = true;
+                snow->MELTING = false;
             }
 
             *snowfall = 0; /* all falling snow has been added to the pack */
@@ -498,7 +502,7 @@ solve_snow(char               overstory,
             snow->last_snow = 0;
             snow->store_swq = 0;
             snow->store_coverage = 1;
-            snow->MELTING = FALSE;
+            snow->MELTING = false;
         }
     }
     else {
@@ -508,7 +512,7 @@ solve_snow(char               overstory,
 
         /** Initialize variables **/
         *UnderStory = 0;
-        snow->snow = FALSE;
+        snow->snow = false;
         energy->Tfoliage = air_temp;
 
         /** Compute Radiation Balance for Bare Surface **/
@@ -528,9 +532,9 @@ solve_snow(char               overstory,
         energy->Tfoliage = Tcanopy;
         snow->store_swq = 0;
         snow->store_coverage = 1;
-        snow->MELTING = FALSE;
+        snow->MELTING = false;
         snow->last_snow = 0;
-        snow->albedo = NEW_SNOW_ALB;
+        snow->albedo = param.SNOW_NEW_SNOW_ALB;
     }
 
     energy->melt_energy *= -1.;

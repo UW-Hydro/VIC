@@ -38,12 +38,14 @@ initialize_lake(lake_var_struct  *lake,
                 double            airtemp,
                 int               skip_hydro)
 {
-    extern option_struct options;
-    size_t               i, j;
-    int                  k;
-    int                  status;
-    double               depth;
-    double               tmp_volume;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    size_t                   i, j;
+    int                      k;
+    int                      status;
+    double                   depth;
+    double                   tmp_volume;
 
     /*  Assume no ice present, lake completely equilibrated with atmosphere. */
 
@@ -73,17 +75,17 @@ initialize_lake(lake_var_struct  *lake,
     if (!skip_hydro) {
         lake->ldepth = lake_con.depth_in;
 
-        if (lake->ldepth > MAX_SURFACE_LAKE && lake->ldepth < 2 *
-            MAX_SURFACE_LAKE) {
+        if (lake->ldepth > param.LAKE_MAX_SURFACE && lake->ldepth < 2 *
+            param.LAKE_MAX_SURFACE) {
             /* Not quite enough for two full layers. */
             lake->surfdz = lake->ldepth / 2.;
             lake->dz = lake->ldepth / 2.;
             lake->activenod = 2;
         }
-        else if (lake->ldepth >= 2 * MAX_SURFACE_LAKE) {
+        else if (lake->ldepth >= 2 * param.LAKE_MAX_SURFACE) {
             /* More than two layers. */
-            lake->surfdz = MAX_SURFACE_LAKE;
-            lake->activenod = (int) (lake->ldepth / MAX_SURFACE_LAKE);
+            lake->surfdz = param.LAKE_MAX_SURFACE;
+            lake->activenod = (int) (lake->ldepth / param.LAKE_MAX_SURFACE);
             if (lake->activenod > MAX_LAKE_NODES) {
                 lake->activenod = MAX_LAKE_NODES;
             }
@@ -155,7 +157,7 @@ initialize_lake(lake_var_struct  *lake,
     // Initialize other miscellaneous lake properties
     lake->aero_resist = 0;
     for (k = 0; k < lake->activenod; k++) {
-        lake->density[k] = RHO_W;
+        lake->density[k] = CONST_RHOFW;
     }
 
     // Initialize the snow, energy, and soil components of lake structure
@@ -169,13 +171,13 @@ initialize_lake(lake_var_struct  *lake,
     lake->snow.depth = 0.0;
     lake->snow.last_snow = 0;
     lake->snow.max_snow_depth = 0.0;
-    lake->snow.MELTING = FALSE;
+    lake->snow.MELTING = false;
     lake->snow.pack_temp = 0.0;
     lake->snow.pack_water = 0.0;
-    lake->snow.snow = FALSE;
+    lake->snow.snow = false;
     lake->snow.snow_canopy = 0.0;
     lake->snow.store_coverage = 0.0;
-    lake->snow.store_snow = FALSE;
+    lake->snow.store_snow = false;
     lake->snow.store_swq = 0.0;
     lake->snow.surf_temp = 0.0;
     lake->snow.surf_temp_fbflag = 0;
@@ -285,7 +287,7 @@ initialize_lake(lake_var_struct  *lake,
         lake->soil.layer[i].evap = 0.0;
         lake->soil.layer[i].kappa = cell->layer[i].kappa;
         lake->soil.layer[i].moist = soil_con->porosity[i] * soil_con->depth[i] *
-                                    1000.;
+                                    MM_PER_M;
         lake->soil.layer[i].phi = cell->layer[i].phi;
         for (j = 0; j < options.Nfrost; j++) {
             lake->soil.layer[i].ice[j] = 0.0;
@@ -416,7 +418,7 @@ get_depth(lake_con_struct lake_con,
 
     status = 0;
 
-    if (volume < -1 * SMALL) {
+    if (volume < -1 * DBL_EPSILON) {
         volume = 0.0;
         status = 1;
     }
@@ -425,7 +427,7 @@ get_depth(lake_con_struct lake_con,
         *depth = lake_con.maxdepth;
         *depth += (volume - lake_con.maxvolume) / lake_con.basin[0];
     }
-    else if (volume < SMALL) {
+    else if (volume < DBL_EPSILON) {
         *depth = 0.0;
     }
     else {
@@ -466,12 +468,12 @@ get_depth(lake_con_struct lake_con,
                 }
             }
         }
-        if (tempvolume / lake_con.basin[0] > SMALL) {
+        if (tempvolume / lake_con.basin[0] > DBL_EPSILON) {
             status = ERROR;
         }
     }
 
-    if (*depth < 0.0 || (*depth == 0.0 && volume >= SMALL)) {
+    if (*depth < 0.0 || (*depth == 0.0 && volume >= DBL_EPSILON)) {
         status = ERROR;
     }
 

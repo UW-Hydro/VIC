@@ -58,7 +58,7 @@ vic_init_output(void)
     for (i = 0; i < global_domain.ncells_global; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                -global_param.nrecs);
+                 -global_param.nrecs);
     }
 
     // determine which variables will be written to the history file

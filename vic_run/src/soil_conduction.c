@@ -153,7 +153,7 @@ set_node_parameters(double *Zsum_node,
     int                  nidx, lidx;
     double               Lsum; /* cumulative depth of moisture layer */
 
-    PAST_BOTTOM = FALSE;
+    PAST_BOTTOM = false;
     lidx = 0;
     Lsum = 0.;
 
@@ -164,13 +164,14 @@ set_node_parameters(double *Zsum_node,
             /* node on layer boundary */
             max_moist_node[nidx] = (max_moist[lidx] / depth[lidx] +
                                     max_moist[lidx +
-                                              1] / depth[lidx + 1]) / 1000 / 2.;
+                                              1] /
+                                    depth[lidx + 1]) / MM_PER_M / 2.;
             expt_node[nidx] = (expt[lidx] + expt[lidx + 1]) / 2.;
             bubble_node[nidx] = (bubble[lidx] + bubble[lidx + 1]) / 2.;
         }
         else {
             /* node completely in layer */
-            max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / 1000;
+            max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / MM_PER_M;
             expt_node[nidx] = expt[lidx];
             bubble_node[nidx] = bubble[lidx];
         }
@@ -178,7 +179,7 @@ set_node_parameters(double *Zsum_node,
             Lsum += depth[lidx];
             lidx++;
             if (lidx == Nlayers) {
-                PAST_BOTTOM = TRUE;
+                PAST_BOTTOM = true;
                 lidx = Nlayers - 1;
             }
         }
@@ -228,34 +229,36 @@ distribute_node_moisture_properties(double *moist_node,
                                     int     Nlayers,
                                     char    FS_ACTIVE)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    char                 PAST_BOTTOM;
-    int                  nidx, lidx;
-    double               Lsum; /* cumulative depth of moisture layer */
+    char                     PAST_BOTTOM;
+    int                      nidx, lidx;
+    double                   Lsum; /* cumulative depth of moisture layer */
 
     lidx = 0;
     Lsum = 0.;
-    PAST_BOTTOM = FALSE;
+    PAST_BOTTOM = false;
 
     /* node estimates */
     for (nidx = 0; nidx < Nnodes; nidx++) {
-        if (!PAST_BOTTOM || SLAB_MOIST_FRACT < 0) {
+        if (!PAST_BOTTOM || param.SOIL_SLAB_MOIST_FRACT < 0) {
             if (Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx !=
                 Nlayers - 1) {
                 /* node on layer boundary */
                 moist_node[nidx] = (moist[lidx] / depth[lidx] +
                                     moist[lidx +
-                                          1] / depth[lidx + 1]) / 1000 / 2.;
+                                          1] / depth[lidx + 1]) / MM_PER_M / 2.;
             }
             else {
                 /* node completely in layer */
-                moist_node[nidx] = moist[lidx] / depth[lidx] / 1000;
+                moist_node[nidx] = moist[lidx] / depth[lidx] / MM_PER_M;
             }
         }
         else {
             // use constant soil moisture below bottom soil layer
-            moist_node[nidx] = SLAB_MOIST_FRACT * max_moist_node[nidx];
+            moist_node[nidx] = param.SOIL_SLAB_MOIST_FRACT *
+                               max_moist_node[nidx];
         }
 
 
@@ -305,7 +308,7 @@ distribute_node_moisture_properties(double *moist_node,
             Lsum += depth[lidx];
             lidx++;
             if (lidx == Nlayers) {
-                PAST_BOTTOM = TRUE;
+                PAST_BOTTOM = true;
                 lidx = Nlayers - 1;
             }
         }
@@ -585,10 +588,10 @@ compute_soil_layer_thermal_properties(layer_data_struct *layer,
 
     /* compute layer thermal properties */
     for (lidx = 0; lidx < Nlayers; lidx++) {
-        moist = layer[lidx].moist / depth[lidx] / 1000;
+        moist = layer[lidx].moist / depth[lidx] / MM_PER_M;
         ice = 0;
         for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-            ice += layer[lidx].ice[frost_area] / depth[lidx] / 1000 *
+            ice += layer[lidx].ice[frost_area] / depth[lidx] / MM_PER_M *
                    frost_fract[frost_area];
         }
         layer[lidx].kappa =
@@ -667,8 +670,10 @@ maximum_unfrozen_water(double T,
     double unfrozen;
 
     if (T < 0.) {
-        unfrozen = max_moist * pow((-Lf * T) / 273.16 / (9.81 * bubble / 100.),
-                                   -(2.0 / (expt - 3.0)));
+        unfrozen = max_moist *
+                   pow((-CONST_LATICE *
+                        T) / 273.16 / (CONST_G * bubble / CM_PER_M),
+                       -(2.0 / (expt - 3.0)));
         if (unfrozen > max_moist) {
             unfrozen = max_moist;
         }

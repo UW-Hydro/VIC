@@ -37,7 +37,7 @@
  *           and divide the here calculated aerodynamic resistances by Uref.
  *****************************************************************************/
 int
-CalcAerodynamic(char    OverStory,          /* overstory flag */
+CalcAerodynamic(bool    OverStory,          /* overstory flag */
                 double  Height,             /* vegetation height */
                 double  Trunk,              /* trunk ratio parameter */
                 double  Z0_SNOW,            /* snow roughness */
@@ -49,25 +49,27 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
                 double *ref_height,         /* vegetation reference height */
                 double *roughness)          /* vegetation roughness */
 {
-    double d_Lower;
-    double d_Upper;
-    double K2;
-    double Uh;
-    double Ut;
-    double Uw;
-    double Z0_Lower;
-    double Z0_Upper;
-    double Zt;
-    double Zw;
-    double tmp_wind;
+    extern parameters_struct param;
+
+    double                   d_Lower;
+    double                   d_Upper;
+    double                   K2;
+    double                   Uh;
+    double                   Ut;
+    double                   Uw;
+    double                   Z0_Lower;
+    double                   Z0_Upper;
+    double                   Zt;
+    double                   Zw;
+    double                   tmp_wind;
 
     tmp_wind = U[0];
 
-    K2 = von_K * von_K;
+    K2 = CONST_KARMAN * CONST_KARMAN;
 
     /* No OverStory, thus maximum one soil layer */
 
-    if (OverStory == FALSE) {
+    if (!OverStory) {
         /* vegetation cover */
         Z0_Lower = roughness[0];
         d_Lower = displacement[0];
@@ -112,8 +114,8 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
         Zt = Trunk * Height;
 
         if (Zt < (Z0_Lower + d_Lower)) {
-            fprintf(stderr,
-                    "ERROR: CalcAerodynamic - Trunk space height below \"center\" of lower boundary");
+            fprintf(stderr, "ERROR: CalcAerodynamic - Trunk space height "
+                    "below \"center\" of lower boundary");
             return(ERROR);
         }
 
@@ -148,6 +150,7 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
             Ra[2] =
                 log((2. + Z0_SNOW) / Z0_SNOW) * log(Zt / Z0_SNOW) / (K2 * Ut);
         }
+
         /* case 2: the wind profile to a height of 2m above the lower boundary
            is part logarithmic and part exponential, but the top of the overstory
            is more than 2 m above the lower boundary */
@@ -162,6 +165,7 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
                          (1 - Zt /
                           Height)) - exp(n * (1 - (Z0_SNOW + 2.) / Height)));
         }
+
         /* case 3: the top of the overstory is less than 2 m above the lower
            boundary.  The wind profile above the lower boundary is part
            logarithmic and part exponential, but only extends to the top of the
@@ -174,8 +178,8 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
                     log((ref_height[0] -
                          d_Upper) / Z0_Upper) / (n * K2 * (Zw - d_Upper)) *
                     (exp(n * (1 - Zt / Height)) - 1);
-            fprintf(stderr,
-                    "WARNING:  Top of overstory is less than 2 meters above the lower boundary\n");
+            fprintf(stderr, "WARNING:  Top of overstory is less than 2 meters "
+                    "above the lower boundary\n");
         }
 
         /** Set aerodynamic resistance terms for canopy */
@@ -207,15 +211,15 @@ CalcAerodynamic(char    OverStory,          /* overstory flag */
     }
     else {
         U[0] *= tmp_wind;
-        Ra[0] = HUGE_RESIST;
+        Ra[0] = param.HUGE_RESIST;
         if (U[1] != -999) {
             U[1] *= tmp_wind;
         }
-        Ra[1] = HUGE_RESIST;
+        Ra[1] = param.HUGE_RESIST;
         if (U[2] != -999) {
             U[2] *= tmp_wind;
         }
-        Ra[2] = HUGE_RESIST;
+        Ra[2] = param.HUGE_RESIST;
     }
     return (0);
 }

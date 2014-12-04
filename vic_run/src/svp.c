@@ -35,15 +35,17 @@
 double
 svp(double temp)
 {
-    double SVP;
+    extern parameters_struct param;
 
-    SVP = A_SVP * exp((B_SVP * temp) / (C_SVP + temp));
+    double                   SVP;
+
+    SVP = param.SVP_A * exp((param.SVP_B * temp) / (param.SVP_C + temp));
 
     if (temp < 0) {
         SVP *= 1.0 + .00972 * temp + .000042 * temp * temp;
     }
 
-    return (SVP * 1000.);
+    return (SVP * PA_PER_KPA);
 }
 
 /******************************************************************************
@@ -54,5 +56,8 @@ svp(double temp)
 double
 svp_slope(double temp)
 {
-    return (B_SVP * C_SVP) / ((C_SVP + temp) * (C_SVP + temp)) * svp(temp);
+    extern parameters_struct param;
+
+    return (param.SVP_B * param.SVP_C) / ((param.SVP_C + temp) *
+                                          (param.SVP_C + temp)) * svp(temp);
 }

@@ -52,34 +52,36 @@ initialize_model_state(all_vars_struct     *all_vars,
                        veg_con_struct      *veg_con,
                        lake_con_struct      lake_con)
 {
-    extern option_struct   options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    char                   ErrStr[MAXSTRING];
-    char                   FIRST_VEG;
-    size_t                 veg, index;
-    size_t                 lidx;
-    double                 tmp_moist[MAX_LAYERS];
-    double                 tmp_runoff;
-    size_t                 band;
-    size_t                 frost_area;
-    int                    ErrorFlag;
-    double                 Cv;
-    double                 Zsum, dp;
-    double                 tmpdp, tmpadj, Bexp;
-    double                 Tair;
-    double                 tmp;
-    double                 moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-    double                 ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS];
-    double                 surf_swq;
-    double                 pack_swq;
-    double                 dt_thresh;
-    int                    tmp_lake_idx;
+    char                     ErrStr[MAXSTRING];
+    char                     FIRST_VEG;
+    size_t                   veg, index;
+    size_t                   lidx;
+    double                   tmp_moist[MAX_LAYERS];
+    double                   tmp_runoff;
+    size_t                   band;
+    size_t                   frost_area;
+    int                      ErrorFlag;
+    double                   Cv;
+    double                   Zsum, dp;
+    double                   tmpdp, tmpadj, Bexp;
+    double                   Tair;
+    double                   tmp;
+    double                   moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
+    double                   ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][MAX_FROST_AREAS
+    ];
+    double                   surf_swq;
+    double                   pack_swq;
+    double                   dt_thresh;
+    int                      tmp_lake_idx;
 
-    cell_data_struct     **cell;
-    energy_bal_struct    **energy;
-    lake_var_struct       *lake_var;
-    snow_data_struct     **snow;
-    veg_var_struct       **veg_var;
+    cell_data_struct       **cell;
+    energy_bal_struct      **energy;
+    lake_var_struct         *lake_var;
+    snow_data_struct       **snow;
+    veg_var_struct         **veg_var;
 
     cell = all_vars->cell;
     energy = all_vars->energy;
@@ -90,7 +92,7 @@ initialize_model_state(all_vars_struct     *all_vars,
     // Initialize soil depths
     dp = soil_con->dp;
 
-    FIRST_VEG = TRUE;
+    FIRST_VEG = true;
 
     // increase initial soil surface temperature if air is very cold
     Tair = surf_temp;
@@ -253,27 +255,32 @@ initialize_model_state(all_vars_struct     *all_vars,
         /******Check that snow pack terms are self-consistent************/
         for (veg = 0; veg <= Nveg; veg++) {
             for (band = 0; band < options.SNOW_BAND; band++) {
-                if (snow[veg][band].swq > MAX_SURFACE_SWE) {
-                    pack_swq = snow[veg][band].swq - MAX_SURFACE_SWE;
-                    surf_swq = MAX_SURFACE_SWE;
+                if (snow[veg][band].swq > param.SNOW_MAX_SURFACE_SWE) {
+                    pack_swq = snow[veg][band].swq - param.SNOW_MAX_SURFACE_SWE;
+                    surf_swq = param.SNOW_MAX_SURFACE_SWE;
                 }
                 else {
                     pack_swq = 0;
                     surf_swq = snow[veg][band].swq;
                     snow[veg][band].pack_temp = 0;
                 }
-                if (snow[veg][band].surf_water > LIQUID_WATER_CAPACITY *
+                if (snow[veg][band].surf_water >
+                    param.SNOW_LIQUID_WATER_CAPACITY *
                     surf_swq) {
                     snow[veg][band].pack_water += snow[veg][band].surf_water -
-                                                  (LIQUID_WATER_CAPACITY *
+                                                  (param.
+                                                   SNOW_LIQUID_WATER_CAPACITY *
                                                    surf_swq);
-                    snow[veg][band].surf_water = LIQUID_WATER_CAPACITY *
-                                                 surf_swq;
+                    snow[veg][band].surf_water =
+                        param.SNOW_LIQUID_WATER_CAPACITY *
+                        surf_swq;
                 }
-                if (snow[veg][band].pack_water > LIQUID_WATER_CAPACITY *
+                if (snow[veg][band].pack_water >
+                    param.SNOW_LIQUID_WATER_CAPACITY *
                     pack_swq) {
-                    snow[veg][band].pack_water = LIQUID_WATER_CAPACITY *
-                                                 pack_swq;
+                    snow[veg][band].pack_water =
+                        param.SNOW_LIQUID_WATER_CAPACITY *
+                        pack_swq;
                 }
             }
         }
@@ -363,7 +370,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                             energy[veg][band].T[index] = soil_con->avg_temp;
                         }
                         if (FIRST_VEG) {
-                            FIRST_VEG = FALSE;
+                            FIRST_VEG = false;
                             soil_con->dz_node[Nnodes - 1] = (dp - Zsum -
                                                              soil_con->dz_node[
                                                                  Nnodes - 2] /
@@ -371,8 +378,8 @@ initialize_model_state(all_vars_struct     *all_vars,
                             Zsum += (soil_con->dz_node[Nnodes - 2] +
                                      soil_con->dz_node[Nnodes - 1]) / 2.;
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
-                            if ((int)(Zsum * 1000 + 0.5) !=
-                                (int)(dp * 1000 + 0.5)) {
+                            if ((int)(Zsum * MM_PER_M + 0.5) !=
+                                (int)(dp * MM_PER_M + 0.5)) {
                                 sprintf(ErrStr,
                                         "Sum of thermal node thicknesses (%f) "
                                         "in initialize_model_state do not "
@@ -383,10 +390,11 @@ initialize_model_state(all_vars_struct     *all_vars,
                         }
                     }
                     else { /* exponential grid transformation, EXP_TRANS = TRUE*/
-                        /*calculate exponential function parameter */
+                           /*calculate exponential function parameter */
                         if (FIRST_VEG) {
                             Bexp = logf(dp + 1.) / (double)(Nnodes - 1); // to force Zsum=dp at bottom node
-                            /* validate Nnodes by requiring that there be at 
+
+                            /* validate Nnodes by requiring that there be at
                                least 3 nodes in the top 50cm */
                             if (Nnodes < 5 * logf(dp + 1.) + 1) {
                                 sprintf(ErrStr,
@@ -494,7 +502,7 @@ initialize_model_state(all_vars_struct     *all_vars,
        Initialize soil thermal node properties
     ******************************************/
 
-    FIRST_VEG = TRUE;
+    FIRST_VEG = true;
     for (veg = 0; veg <= Nveg; veg++) {
         // Initialize soil for existing vegetation types
         Cv = veg_con[veg].Cv;
@@ -505,7 +513,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                 if (soil_con->AreaFract[band] > 0.) {
                     /** Set soil properties for all soil nodes **/
                     if (FIRST_VEG) {
-                        FIRST_VEG = FALSE;
+                        FIRST_VEG = false;
                         set_node_parameters(soil_con->Zsum_node,
                                             soil_con->max_moist_node,
                                             soil_con->expt_node,
@@ -549,6 +557,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                     }
 
                     /* Check node spacing v time step */
+
                     /* (note this is only approximate since heat capacity and
                        conductivity can change considerably during the
                        simulation depending on soil moisture and ice content) */
@@ -556,7 +565,8 @@ initialize_model_state(all_vars_struct     *all_vars,
                          !options.QUICK_FLUX) && !options.IMPLICIT) {
                         dt_thresh = 0.5 * energy[veg][band].Cs_node[1] /
                                     energy[veg][band].kappa_node[1] *
-                                    pow((soil_con->dz_node[1]), 2) / 3600;                                                   // in hours
+                                    pow((soil_con->dz_node[1]),
+                                        2) / SEC_PER_HOUR;                                                                           // in hours
                         if (global_param->dt > dt_thresh) {
                             sprintf(ErrStr, "ERROR: You are currently running "
                                     "FROZEN SOIL with an explicit method "
@@ -670,8 +680,9 @@ initialize_model_state(all_vars_struct     *all_vars,
             energy[veg][band].ShortUnderIn = 0.0;
             energy[veg][band].snow_flux = 0.0;
             /* Initial estimate of LongUnderOut for use by snow_intercept() */
-            tmp = energy[veg][band].T[0] + KELVIN;
-            energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
+            tmp = energy[veg][band].T[0] + CONST_TKFRZ;
+            energy[veg][band].LongUnderOut = calc_outgoing_longwave(tmp,
+                                                                    param.EMISS_SNOW);
             energy[veg][band].Tfoliage = Tair + soil_con->Tfactor[band];
         }
     }

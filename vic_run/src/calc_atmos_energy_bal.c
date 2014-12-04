@@ -56,18 +56,19 @@ calc_atmos_energy_bal(double    InOverSensible,
                       double   *NetLongAtmos,
                       double   *NetShortAtmos,
                       double   *SensibleHeat,
-                      char     *Tcanopy_fbflag,
+                      bool     *Tcanopy_fbflag,
                       unsigned *Tcanopy_fbcount)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    double               F; // canopy closure fraction, not currently used by VIC
-    double               InSensible;
-    double               NetRadiation;
-    double               T_lower;
-    double               T_upper;
-    double               Tcanopy;
-    char                 ErrorString[MAXSTRING];
+    double                   F; // canopy closure fraction, not currently used by VIC
+    double                   InSensible;
+    double                   NetRadiation;
+    double                   T_lower;
+    double                   T_upper;
+    double                   Tcanopy;
+    char                     ErrorString[MAXSTRING];
 
     F = 1;
 
@@ -96,8 +97,8 @@ calc_atmos_energy_bal(double    InOverSensible,
         *Tcanopy_fbflag = 0;
 
         /* set initial bounds for root brent **/
-        T_lower = (Tair) - CANOPY_DT;
-        T_upper = (Tair) + CANOPY_DT;
+        T_lower = (Tair) - param.CANOPY_DT;
+        T_upper = (Tair) + param.CANOPY_DT;
 
         // iterate for canopy air temperature
         Tcanopy = root_brent(T_lower, T_upper, ErrorString,
@@ -200,8 +201,9 @@ error_print_atmos_energy_bal(double  Tcanopy,
 
     // print variable values
     fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr,
-            "ERROR: calc_atmos_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(stderr, "ERROR: calc_atmos_energy_bal failed to converge to a "
+            "solution in root_brent.  Variable values will be dumped "
+            "to the screen, check for invalid values.\n");
     fprintf(stderr, "Tcanopy = %f\n", Tcanopy);
     fprintf(stderr, "LatentHeat = %f\n", LatentHeat);
     fprintf(stderr, "NetRadiation = %f\n", NetRadiation);
@@ -212,8 +214,9 @@ error_print_atmos_energy_bal(double  Tcanopy,
 
     fprintf(stderr, "*SensibleHeat = %f\n", *SensibleHeat);
 
-    fprintf(stderr,
-            "Finished writing calc_atmos_energy_bal variables.\nTry increasing CANOPY_DT to get model to complete cell.\nThen check output for instabilities.\n");
+    fprintf(stderr, "Finished writing calc_atmos_energy_bal variables.\n"
+            "Try increasing CANOPY_DT to get model to complete cell.\n"
+            "Then check output for instabilities.\n");
 
     return(ERROR);
 }

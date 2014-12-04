@@ -32,6 +32,8 @@
 #include <stdio.h>
 #include <vic_driver_shared.h>
 
+#define DRIVER "Image"
+
 #define MAXDIMS 10
 
 /******************************************************************************
@@ -42,16 +44,16 @@
  *           identical. The model is run over a list of cells.
  *****************************************************************************/
 typedef struct {
-    double latitude; // latitude of grid cell center
-    double longitude; // longitude of grid cell center
-    double area; // area of grid cell
-    double frac; // fraction of grid cell that is active
-    size_t global_cell_idx; // index of grid cell in global list of grid cells
-    size_t global_x_idx; // index of x-dimension in global domain
-    size_t global_y_idx; // index of y-dimension in global domain
-    size_t local_cell_idx; // index of grid cell in local list of grid cells
-    size_t local_x_idx; // index of x-dimension in local domain
-    size_t local_y_idx; // index of y-dimension in local domain
+    double latitude; /**< latitude of grid cell center */
+    double longitude; /**< longitude of grid cell center */
+    double area; /**< area of grid cell */
+    double frac; /**< fraction of grid cell that is active */
+    size_t global_cell_idx; /**< index of grid cell in global list of grid cells */
+    size_t global_x_idx; /**< index of x-dimension in global domain */
+    size_t global_y_idx; /**< index of y-dimension in global domain */
+    size_t local_cell_idx; /**< index of grid cell in local list of grid cells */
+    size_t local_x_idx; /**< index of x-dimension in local domain */
+    size_t local_y_idx; /**< index of y-dimension in local domain */
 } location_struct;
 
 
@@ -60,11 +62,11 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells_global; // number of active grid cell on global domain
-    size_t n_nx; // size of x-index;
-    size_t n_ny; // size of y-index
-    size_t ncells_local; // number of active grid cell on local domain
-    location_struct *locations; // locations structs for local domain
+    size_t ncells_global; /**< number of active grid cell on global domain */
+    size_t n_nx; /**< size of x-index; */
+    size_t n_ny; /**< size of y-index */
+    size_t ncells_local; /**< number of active grid cell on local domain */
+    location_struct *locations; /**< locations structs for local domain */
 } domain_struct;
 
 /******************************************************************************
@@ -105,14 +107,14 @@ typedef struct {
  * @brief    Structure for netcdf variable information
  *****************************************************************************/
 typedef struct {
-    char nc_var_name[MAXSTRING]; // variable name
-    char nc_units[MAXSTRING]; // variable name
-    int nc_dimids[MAXDIMS]; // ids of dimensions
-    int nc_counts[MAXDIMS]; // size of dimid
-    int nc_type; // netcdf type
-    int nc_aggtype; // aggregation type as defined in vic_def.h
-    int nc_dims; // number of dimensions
-    int nc_write; // TRUE: write to file; FALSE: don't
+    char nc_var_name[MAXSTRING]; /**< variable name */
+    char nc_units[MAXSTRING]; /**< variable name */
+    int nc_dimids[MAXDIMS]; /**< ids of dimensions */
+    int nc_counts[MAXDIMS]; /**< size of dimid */
+    int nc_type; /**< netcdf type */
+    int nc_aggtype; /**< aggregation type as defined in vic_def.h */
+    int nc_dims; /**< number of dimensions */
+    int nc_write; /**< TRUE: write to file; FALSE: don't */
 } nc_var_struct;
 
 /******************************************************************************
@@ -120,14 +122,14 @@ typedef struct {
  *           stored in VIC's veg_con_struct to a regular array.
  *****************************************************************************/
 typedef struct {
-    size_t nv_types; // total number of vegetation types
-                     // size of vidx and Cv arrays
-    size_t nv_active; // number of active vegetation types. Because of the
-                      // way that VIC defines nveg, this is nveg+1
-                      // (for bare soil) or nveg+2 (if the treeline option
-                      // is active as well)
-    int *vidx;      // array of indices for active vegetation types
-    double *Cv;     // array of fractional coverage for nc_types
+    size_t nv_types; /**< total number of vegetation types */
+                     /**< size of vidx and Cv arrays */
+    size_t nv_active; /**< number of active vegetation types. Because of the */
+                      /**< way that VIC defines nveg, this is nveg+1 */
+                      /**< (for bare soil) or nveg+2 (if the treeline option */
+                      /**< is active as well) */
+    int *vidx;      /**< array of indices for active vegetation types */
+    double *Cv;     /**< array of fractional coverage for nc_types */
 } veg_con_map_struct;
 
 void alloc_atmos(atmos_data_struct *atmos);
@@ -140,7 +142,7 @@ void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 size_t get_global_idx(domain_struct *domain, size_t i);
-global_param_struct get_global_param(filenames_struct *, FILE *);
+void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
@@ -163,35 +165,11 @@ void initialize_veg_con(veg_con_struct *veg_con);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
-void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
-                     size_t npet);
-void print_dmy(dmy_struct *dmy);
 void print_domain(domain_struct *domain, bool print_loc);
-void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
-void print_filenames(filenames_struct *fnames);
-void print_filep(filep_struct *fp);
-void print_force_type(force_type_struct *force_type);
-void print_global_param(global_param_struct *gp);
-void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
-void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
-                    size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
-void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_location(location_struct *location);
 void print_nc_file(nc_file_struct *nc);
 void print_nc_var(nc_var_struct *nc_var, size_t ndims);
-void print_option(option_struct *option);
-void print_out_data(out_data_struct *out, size_t nelem);
-void print_out_data_file(out_data_file_struct *outf);
-void print_param_set(param_set_struct *param_set);
-void print_save_data(save_data_struct *save);
-void print_snow_data(snow_data_struct *snow);
-void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
-                    size_t nfrost, size_t nbands, size_t nzwt);
-void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
-                   char carbon, size_t ncanopy);
-void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
-void print_veg_lib(veg_lib_struct *vlib, char carbon);
 int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
                         int *dimids, int ndims, char *var_name, size_t *start,
                         size_t *count, double *var);

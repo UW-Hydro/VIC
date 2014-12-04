@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
-  * Allocate and free memory for the veg_hist data struct
+ * Allocate and free memory for the veg_hist data struct
  *
  * @section LICENSE
  *
@@ -29,7 +29,7 @@
 #include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    
+ * @brief
  *****************************************************************************/
 void
 alloc_veg_hist(veg_hist_struct *veg_hist)

@@ -78,7 +78,7 @@ alloc_atmos(atmos_data_struct *atmos)
     if (atmos->shortwave == NULL) {
         nrerror("Memory allocation error in alloc_atmos().");
     }
-    atmos->snowflag = (char *) calloc(NR + 1, sizeof(char));
+    atmos->snowflag = (bool *) calloc(NR + 1, sizeof(bool));
     if (atmos->snowflag == NULL) {
         nrerror("Memory allocation error in alloc_atmos().");
     }

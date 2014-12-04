@@ -28,14 +28,11 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define GRND_TOL 0.001
-#define OVER_TOL 0.001
-
 /******************************************************************************
 * @brief        This routine computes all surface fluxes
 ******************************************************************************/
 int
-surface_fluxes(char                 overstory,
+surface_fluxes(bool                 overstory,
                double               BareAlbedo,
                double               ice0,
                double               moist0,
@@ -73,67 +70,69 @@ surface_fluxes(char                 overstory,
                double               fetch,
                double              *CanopLayerBnd)
 {
-    extern veg_lib_struct *vic_run_veg_lib;
-    extern option_struct   options;
-    int                    MAX_ITER_GRND_CANOPY;
-    int                    ErrorFlag;
-    int                    INCLUDE_SNOW = FALSE;
-    int                    UNSTABLE_CNT;
-    int                    UNSTABLE_SNOW = FALSE;
-    int                    N_steps;
-    int                    UnderStory;
-    int                    hidx;   // index of initial element of atmos array
-    int                    step_inc; // number of atmos array elements to skip per surface fluxes step
-    int                    endhidx; // index of final element of atmos array
-    int                    step_dt; // time length of surface fluxes step
-    size_t                 lidx;
-    int                    over_iter;
-    int                    under_iter;
-    int                    p, q;
-    double                 Ls;
-    double                 LongUnderIn; // inmoing LW to ground surface
-    double                 LongUnderOut; // outgoing LW from ground surface
-    double                 NetLongSnow; // net LW over snowpack
-    double                 NetShortSnow; // net SW over understory
-    double                 NetShortGrnd; // net SW over snow-free surface
-    double                 OldTSurf; // previous snow surface temperature
-    double                 ShortUnderIn; // incoming SW to understory
-    double                 Tair; // air temperature
-    double                 Tcanopy; // canopy air temperature
-    double                 Tgrnd; // soil surface temperature
-    double                 Tsurf; // ground surface temperature
-    double                 VPDcanopy; // vapor pressure deficit in canopy/atmos
-    double                 VPcanopy; // vapor pressure in canopy/atmos
-    double                 coverage; // mid-step snow cover fraction
-    double                 delta_coverage; // change in snow cover fraction
-    double                 delta_snow_heat; // change in snowpack heat storage
-    double                 last_Tcanopy;
-    double                 last_snow_coverage; // previous snow covered area
-    double                 last_snow_flux;
-    double                 last_tol_under; // previous surface iteration tol
-    double                 last_tol_over; // previous overstory iteration tol
-    double                 ppt; // precipitation/melt reaching soil surface
-    double                 rainfall; // rainfall
-    double                 snowfall; // snowfall
-    double                 snow_flux; // heat flux through snowpack
-    double                 snow_grnd_flux; // ground heat flux into snowpack
-    double                 tol_under;
-    double                 tol_over;
-    double                *aero_resist_used;
-    double                *pot_evap;
-    double                *inflow;
-    layer_data_struct     *layer;
+    extern veg_lib_struct   *vic_run_veg_lib;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    int                      MAX_ITER_GRND_CANOPY;
+    int                      ErrorFlag;
+    int                      INCLUDE_SNOW = false;
+    int                      UNSTABLE_CNT;
+    int                      UNSTABLE_SNOW = false;
+    int                      N_steps;
+    int                      UnderStory;
+    int                      hidx; // index of initial element of atmos array
+    int                      step_inc; // number of atmos array elements to skip per surface fluxes step
+    int                      endhidx; // index of final element of atmos array
+    int                      step_dt; // time length of surface fluxes step
+    size_t                   lidx;
+    int                      over_iter;
+    int                      under_iter;
+    int                      p, q;
+    double                   Ls;
+    double                   LongUnderIn; // inmoing LW to ground surface
+    double                   LongUnderOut; // outgoing LW from ground surface
+    double                   NetLongSnow; // net LW over snowpack
+    double                   NetShortSnow; // net SW over understory
+    double                   NetShortGrnd; // net SW over snow-free surface
+    double                   OldTSurf; // previous snow surface temperature
+    double                   ShortUnderIn; // incoming SW to understory
+    double                   Tair; // air temperature
+    double                   Tcanopy; // canopy air temperature
+    double                   Tgrnd; // soil surface temperature
+    double                   Tsurf; // ground surface temperature
+    double                   VPDcanopy; // vapor pressure deficit in canopy/atmos
+    double                   VPcanopy; // vapor pressure in canopy/atmos
+    double                   coverage; // mid-step snow cover fraction
+    double                   delta_coverage; // change in snow cover fraction
+    double                   delta_snow_heat; // change in snowpack heat storage
+    double                   last_Tcanopy;
+    double                   last_snow_coverage; // previous snow covered area
+    double                   last_snow_flux;
+    double                   last_tol_under; // previous surface iteration tol
+    double                   last_tol_over; // previous overstory iteration tol
+    double                   ppt; // precipitation/melt reaching soil surface
+    double                   rainfall; // rainfall
+    double                   snowfall; // snowfall
+    double                   snow_flux; // heat flux through snowpack
+    double                   snow_grnd_flux; // ground heat flux into snowpack
+    double                   tol_under;
+    double                   tol_over;
+    double                  *aero_resist_used;
+    double                  *pot_evap;
+    double                  *inflow;
+    layer_data_struct       *layer;
 
     // Step-specific quantities
-    double                 step_Wdew;
-    double                 step_melt;
-    double                 step_melt_energy; /* energy used to reduce snow coverage */
-    double                 step_out_prec;
-    double                 step_out_rain;
-    double                 step_out_snow;
-    double                 step_ppt;
-    double                 step_prec;
-    double               **step_aero_resist;
+    double                   step_Wdew;
+    double                   step_melt;
+    double                   step_melt_energy; /* energy used to reduce snow coverage */
+    double                   step_out_prec;
+    double                   step_out_rain;
+    double                   step_out_snow;
+    double                   step_ppt;
+    double                   step_prec;
+    double                 **step_aero_resist;
 
     // Quantities that need to be summed or averaged over multiple snow steps
     // energy structure
@@ -432,12 +431,13 @@ surface_fluxes(char                 overstory,
                 if (LAIlayer[cidx] > 1e-10) {
                     veg_var->aPARLayer[cidx] =
                         (atmos->par[hidx] /
-                         Epar) * faPAR[cidx] / LAIlayer[cidx];
+                         param.PHOTO_EPAR) * faPAR[cidx] / LAIlayer[cidx];
                     veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] /
                                      LAIlayer[cidx];
                 }
                 else {
-                    veg_var->aPARLayer[cidx] = atmos->par[hidx] / Epar *
+                    veg_var->aPARLayer[cidx] = atmos->par[hidx] /
+                                               param.PHOTO_EPAR *
                                                faPAR[cidx] / 1e-10;
                     veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] / 1e-10;
                 }
@@ -448,7 +448,7 @@ surface_fluxes(char                 overstory,
 
         // Compute mass flux of blowing snow
         if (!overstory && options.BLOWING && step_snow.swq > 0.) {
-            Ls = (677. - 0.07 * step_snow.surf_temp) * JOULESPCAL * GRAMSPKG;
+            Ls = calc_latent_heat_of_sublimation(step_snow.surf_temp);
             step_snow.blowing_flux = CalcBlowingSnow((double) step_dt, Tair,
                                                      step_snow.last_snow,
                                                      step_snow.surf_water,
@@ -467,7 +467,7 @@ surface_fluxes(char                 overstory,
             if ((int)step_snow.blowing_flux == ERROR) {
                 return (ERROR);
             }
-            step_snow.blowing_flux *= step_dt * SECPHOUR / RHO_W; /* m/time step */
+            step_snow.blowing_flux *= step_dt * SEC_PER_HOUR / CONST_RHOFW; /* m/time step */
         }
         else {
             step_snow.blowing_flux = 0.0;
@@ -512,7 +512,7 @@ surface_fluxes(char                 overstory,
                         tol_under < 0) { // stepped the correct way
                         UNSTABLE_CNT++;
                         if (UNSTABLE_CNT > 3 || tol_under < 0) {
-                            UNSTABLE_SNOW = TRUE;
+                            UNSTABLE_SNOW = true;
                         }
                     }
                     else if (!INCLUDE_SNOW) { // stepped the wrong way
@@ -555,7 +555,8 @@ surface_fluxes(char                 overstory,
 
                 /** Solve snow accumulation, ablation and interception **/
                 step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut,
-                                       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP,
+                                       param.SNOW_MIN_RAIN_TEMP,
+                                       param.SNOW_MAX_SNOW_TEMP,
                                        Tcanopy, Tgrnd, Tair,
                                        step_prec, snow_grnd_flux,
                                        &energy->AlbedoUnder, Le,
@@ -595,7 +596,7 @@ surface_fluxes(char                 overstory,
                     step_melt_energy = 0;
                 }
                 else {
-                    INCLUDE_SNOW = FALSE;
+                    INCLUDE_SNOW = false;
                 }
 
                 /**************************************************
@@ -705,7 +706,8 @@ surface_fluxes(char                 overstory,
                     store_tol_under = snow_flux - iter_soil_energy.snow_flux;
                     tol_under = fabs(store_tol_under);
                 }
-                if (fabs(tol_under - last_tol_under) < GRND_TOL && tol_under >
+                if (fabs(tol_under - last_tol_under) < param.TOL_GRND &&
+                    tol_under >
                     1.) {
                     tol_under = -999;
                 }
@@ -720,10 +722,10 @@ surface_fluxes(char                 overstory,
                     tol_over = 0;
                 }
             }
-            while ((fabs(tol_under - last_tol_under) > GRND_TOL) &&
+            while ((fabs(tol_under - last_tol_under) > param.TOL_GRND) &&
                    (tol_under != 0) && (under_iter < MAX_ITER_GRND_CANOPY));
         }
-        while ((fabs(tol_over - last_tol_over) > OVER_TOL &&
+        while ((fabs(tol_over - last_tol_over) > param.TOL_OVER &&
                 overstory) && (tol_over != 0) &&
                (over_iter < MAX_ITER_GRND_CANOPY));
 
@@ -774,9 +776,9 @@ surface_fluxes(char                 overstory,
                 iter_soil_veg_var.NPP *= iter_soil_veg_var.vegcover;
             }
             else {
-                iter_soil_veg_var.rc = HUGE_RESIST;
+                iter_soil_veg_var.rc = param.HUGE_RESIST;
                 for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-                    iter_soil_veg_var.rsLayer[cidx] = HUGE_RESIST;
+                    iter_soil_veg_var.rsLayer[cidx] = param.HUGE_RESIST;
                 }
                 iter_soil_veg_var.Ci = 0;
                 iter_soil_veg_var.GPP = 0;
@@ -793,8 +795,8 @@ surface_fluxes(char                 overstory,
            Compute Potential Evap
         **************************************/
         // First, determine the stability correction used in the iteration
-        if (iter_aero_resist_used[0] == HUGE_RESIST) {
-            stability_factor[0] = HUGE_RESIST;
+        if (iter_aero_resist_used[0] == param.HUGE_RESIST) {
+            stability_factor[0] = param.HUGE_RESIST;
         }
         else {
             stability_factor[0] = iter_aero_resist_used[0] /
@@ -804,8 +806,8 @@ surface_fluxes(char                 overstory,
             stability_factor[1] = stability_factor[0];
         }
         else {
-            if (iter_aero_resist_used[1] == HUGE_RESIST) {
-                stability_factor[1] = HUGE_RESIST;
+            if (iter_aero_resist_used[1] == param.HUGE_RESIST) {
+                stability_factor[1] = param.HUGE_RESIST;
             }
             else {
                 stability_factor[1] = iter_aero_resist_used[1] /
@@ -815,15 +817,15 @@ surface_fluxes(char                 overstory,
 
         // Next, loop over pot_evap types and apply the correction to the relevant aerodynamic resistance
         for (p = 0; p < N_PET_TYPES; p++) {
-            if (stability_factor[0] == HUGE_RESIST) {
-                step_aero_resist[p][0] = HUGE_RESIST;
+            if (stability_factor[0] == param.HUGE_RESIST) {
+                step_aero_resist[p][0] = param.HUGE_RESIST;
             }
             else {
                 step_aero_resist[p][0] = aero_resist[p][UnderStory] *
                                          stability_factor[0];
             }
-            if (stability_factor[1] == HUGE_RESIST) {
-                step_aero_resist[p][1] = HUGE_RESIST;
+            if (stability_factor[1] == param.HUGE_RESIST) {
+                step_aero_resist[p][1] = param.HUGE_RESIST;
             }
             else {
                 step_aero_resist[p][1] = aero_resist[p][1] *
@@ -884,13 +886,13 @@ surface_fluxes(char                 overstory,
             store_aero_cond_used[0] += 1 / iter_aero_resist_used[0];
         }
         else {
-            store_aero_cond_used[0] += HUGE_RESIST;
+            store_aero_cond_used[0] += param.HUGE_RESIST;
         }
         if (iter_aero_resist_used[1] > 0) {
             store_aero_cond_used[1] += 1 / iter_aero_resist_used[1];
         }
         else {
-            store_aero_cond_used[1] += HUGE_RESIST;
+            store_aero_cond_used[1] += param.HUGE_RESIST;
         }
 
         if (iveg != Nveg) {
@@ -1061,23 +1063,25 @@ surface_fluxes(char                 overstory,
         layer[lidx] = step_layer[lidx];
         layer[lidx].evap = store_layerevap[lidx];
     }
-    if (store_aero_cond_used[0] > 0 && store_aero_cond_used[0] < HUGE_RESIST) {
+    if (store_aero_cond_used[0] > 0 && store_aero_cond_used[0] <
+        param.HUGE_RESIST) {
         aero_resist_used[0] = 1 / (store_aero_cond_used[0] / (double)N_steps);
     }
-    else if (store_aero_cond_used[0] >= HUGE_RESIST) {
+    else if (store_aero_cond_used[0] >= param.HUGE_RESIST) {
         aero_resist_used[0] = 0;
     }
     else {
-        aero_resist_used[0] = HUGE_RESIST;
+        aero_resist_used[0] = param.HUGE_RESIST;
     }
-    if (store_aero_cond_used[1] > 0 && store_aero_cond_used[1] < HUGE_RESIST) {
+    if (store_aero_cond_used[1] > 0 && store_aero_cond_used[1] <
+        param.HUGE_RESIST) {
         aero_resist_used[1] = 1 / (store_aero_cond_used[1] / (double)N_steps);
     }
-    else if (store_aero_cond_used[1] >= HUGE_RESIST) {
+    else if (store_aero_cond_used[1] >= param.HUGE_RESIST) {
         aero_resist_used[1] = 0;
     }
     else {
-        aero_resist_used[1] = HUGE_RESIST;
+        aero_resist_used[1] = param.HUGE_RESIST;
     }
     for (p = 0; p < N_PET_TYPES; p++) {
         pot_evap[p] = store_pot_evap[p] / (double)N_steps;
@@ -1112,7 +1116,8 @@ surface_fluxes(char                 overstory,
 
         // Update running total annual NPP
         if (veg_var->NPP > 0) {
-            veg_var->AnnualNPP += veg_var->NPP * MCg * 3600 * gp->dt;
+            veg_var->AnnualNPP += veg_var->NPP * CONST_MWC / MOLE_PER_KMOLE *
+                                  SEC_PER_HOUR * gp->dt;
         }
     }
 
@@ -1127,6 +1132,3 @@ surface_fluxes(char                 overstory,
 
     return(ErrorFlag);
 }
-
-#undef GRND_TOL
-#undef OVER_TOL

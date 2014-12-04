@@ -77,7 +77,7 @@ write_data(out_data_file_struct *out_data_files,
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (dt < 24) {
+                if (dt < HOURS_PER_DAY) {
                     // Write year, month, day, and hour
                     fwrite(tmp_iptr, sizeof(int), 4,
                            out_data_files[file_idx].fh);
@@ -110,7 +110,8 @@ write_data(out_data_file_struct *out_data_files,
                            out_data_files[file_idx].fh);
                 }
                 else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         == OUT_TYPE_SINT) {
+                         ==
+                         OUT_TYPE_SINT) {
                     for (elem_idx = 0;
                          elem_idx <
                          out_data[out_data_files[file_idx].varid[var_idx]].nelem;
@@ -123,7 +124,8 @@ write_data(out_data_file_struct *out_data_files,
                            out_data_files[file_idx].fh);
                 }
                 else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         == OUT_TYPE_USINT) {
+                         ==
+                         OUT_TYPE_USINT) {
                     for (elem_idx = 0;
                          elem_idx <
                          out_data[out_data_files[file_idx].varid[var_idx]].nelem;
@@ -138,7 +140,8 @@ write_data(out_data_file_struct *out_data_files,
                            out_data_files[file_idx].fh);
                 }
                 else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         == OUT_TYPE_INT) {
+                         ==
+                         OUT_TYPE_INT) {
                     for (elem_idx = 0;
                          elem_idx <
                          out_data[out_data_files[file_idx].varid[var_idx]].nelem;
@@ -152,7 +155,8 @@ write_data(out_data_file_struct *out_data_files,
                            out_data_files[file_idx].fh);
                 }
                 else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         == OUT_TYPE_FLOAT) {
+                         ==
+                         OUT_TYPE_FLOAT) {
                     for (elem_idx = 0;
                          elem_idx <
                          out_data[out_data_files[file_idx].varid[var_idx]].nelem;
@@ -166,7 +170,8 @@ write_data(out_data_file_struct *out_data_files,
                            out_data_files[file_idx].fh);
                 }
                 else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         == OUT_TYPE_DOUBLE) {
+                         ==
+                         OUT_TYPE_DOUBLE) {
                     for (elem_idx = 0;
                          elem_idx <
                          out_data[out_data_files[file_idx].varid[var_idx]].nelem;
@@ -191,11 +196,11 @@ write_data(out_data_file_struct *out_data_files,
         free((char *)tmp_dptr);
     }
     else { // ASCII
-        // Loop over output files
+           // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (dt < 24) {
+                if (dt < HOURS_PER_DAY) {
                     // Write year, month, day, and hour
                     fprintf(out_data_files[file_idx].fh,
                             "%04i\t%02i\t%02i\t%02i\t",

@@ -159,7 +159,7 @@ vic_alloc(void)
             nrerror("Memory allocation error in vic_alloc().");
         }
         soil_con[i].BandElev = (double *) calloc(options.SNOW_BAND,
-                                                sizeof(double));
+                                                 sizeof(double));
         if (soil_con[i].BandElev == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
@@ -173,8 +173,8 @@ vic_alloc(void)
         if (soil_con[i].Pfactor == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }
-        soil_con[i].AboveTreeLine = (char *) calloc(options.SNOW_BAND,
-                                                    sizeof(char));
+        soil_con[i].AboveTreeLine = (bool *) calloc(options.SNOW_BAND,
+                                                    sizeof(bool));
         if (soil_con[i].AboveTreeLine == NULL) {
             nrerror("Memory allocation error in vic_alloc().");
         }

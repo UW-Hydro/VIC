@@ -46,8 +46,8 @@ calc_longwave(double *longwave,
     double               cloudfrac;
     double               x;
 
-    air_temp += KELVIN; // convert to Kelvin
-    vp /= 100; // convert to mbar
+    air_temp += CONST_TKFRZ; // convert to Kelvin
+    vp /= BAR_PER_KPA; // convert to mbar
 
     /* See Bras, R. F. , "Hydrology, an introduction to hydrologic science",
        Addison-Wesley, 1990, p. 42-45 */
@@ -85,6 +85,5 @@ calc_longwave(double *longwave,
         emissivity = cloudfactor * emissivity_clear;
     }
 
-    *longwave = emissivity * STEFAN_B * air_temp * air_temp * air_temp *
-                air_temp;
+    *longwave = calc_outgoing_longwave(air_temp, emissivity);
 }

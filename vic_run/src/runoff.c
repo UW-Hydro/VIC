@@ -85,7 +85,7 @@ runoff(cell_data_struct  *cell,
     /** Set Residual Moisture **/
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
         resid_moist[lindex] = soil_con->resid_moist[lindex] *
-                              soil_con->depth[lindex] * 1000.;
+                              soil_con->depth[lindex] * MM_PER_M;
     }
 
     /** Allocate and Set Values for Soil Sublayers **/
@@ -162,7 +162,7 @@ runoff(cell_data_struct  *cell,
            Initialize Variables
         **************************************************/
         for (lindex = 0; lindex < options.Nlayer; lindex++) {
-            Ksat[lindex] = soil_con->Ksat[lindex] / 24.;
+            Ksat[lindex] = soil_con->Ksat[lindex] / HOURS_PER_DAY;
 
             /** Set Layer Liquid Moisture Content **/
             liq[lindex] = org_moist[lindex] - layer[lindex].ice[frost_area];
@@ -311,7 +311,7 @@ runoff(cell_data_struct  *cell,
                 soil layer moisture from previous time step) **/
 
             lindex = options.Nlayer - 1;
-            Dsmax = soil_con->Dsmax / 24.;
+            Dsmax = soil_con->Dsmax / HOURS_PER_DAY;
 
             /** Compute relative moisture **/
             rel_moist =

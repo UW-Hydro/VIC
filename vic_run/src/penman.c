@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine calculates evapotranspiration using the Penman-Monteith 
+ * This routine calculates evapotranspiration using the Penman-Monteith
  * approach.
  *
  * @section LICENSE
@@ -41,28 +41,30 @@ calc_rc(double rs,
         double gsm_inv,
         char   ref_crop)
 {
-    double f;
-    double DAYfactor;           /* factor for canopy resistance based on photosynthesis */
-    double Tfactor;             /* factor for canopy resistance based on temperature */
-    double vpdfactor;           /* factor for canopy resistance based on vpd */
-    double rc;
+    extern parameters_struct param;
+
+    double                   f;
+    double                   DAYfactor; /* factor for canopy resistance based on photosynthesis */
+    double                   Tfactor; /* factor for canopy resistance based on temperature */
+    double                   vpdfactor; /* factor for canopy resistance based on vpd */
+    double                   rc;
 
     if (rs == 0) {
         rc = 0;
     }
     else if (lai == 0) {
-        rc = RSMAX;
+        rc = param.CANOPY_RSMAX;
     }
     else if (ref_crop) {
         /* calculate simple reference canopy resistance in s/m */
         rc = rs / (lai * 0.5);
-        rc = (rc > RSMAX) ? RSMAX : rc;
+        rc = (rc > param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : rc;
     }
     else {
         /* calculate resistance factors (Wigmosta et al., 1994) */
         if (rs > 0.) {
             f = net_short / RGL;
-            DAYfactor = (1. + f) / (f + rs / RSMAX);
+            DAYfactor = (1. + f) / (f + rs / param.CANOPY_RSMAX);
         }
         else {
             DAYfactor = 1.;
@@ -71,12 +73,14 @@ calc_rc(double rs,
         Tfactor = .08 * tair - 0.0016 * tair * tair;
         Tfactor = (Tfactor <= 0.0) ? 1e-10 : Tfactor;
 
-        vpdfactor = 1 - vpd / CLOSURE;
-        vpdfactor = (vpdfactor < VPDMINFACTOR) ? VPDMINFACTOR : vpdfactor;
+        vpdfactor = 1 - vpd / param.CANOPY_CLOSURE;
+        vpdfactor =
+            (vpdfactor <
+         param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
 
         /* calculate canopy resistance in s/m */
         rc = rs / (lai * gsm_inv * Tfactor * vpdfactor) * DAYfactor;
-        rc = (rc > RSMAX) ? RSMAX : rc;
+        rc = (rc > param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : rc;
     }
 
     return rc;
@@ -103,28 +107,30 @@ calc_rc_ps(char    Ctype,
            double *rsLayer,
            double *rc)
 {
-    extern option_struct options;
-    double               GPP0;  /* aggregate canopy assimilation (photosynthesis)
-                                   in absence of soil moisture stress */
-    double               Rdark0; /* aggregate canopy dark respiration in absence of
-                                    soil moisture stress */
-    double               Rphoto0; /* aggregate canopy photorespiration in absence of
-                                     soil moisture stress */
-    double               Rmaint0; /* aggregate plant maintenance respiration in absence of
-                                     soil moisture stress */
-    double               Rgrowth0; /* aggregate plant growth respiration in absence of
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    double                   GPP0; /* aggregate canopy assimilation (photosynthesis)
+                                      in absence of soil moisture stress */
+    double                   Rdark0; /* aggregate canopy dark respiration in absence of
+                                        soil moisture stress */
+    double                   Rphoto0; /* aggregate canopy photorespiration in absence of
+                                         soil moisture stress */
+    double                   Rmaint0; /* aggregate plant maintenance respiration in absence of
+                                         soil moisture stress */
+    double                   Rgrowth0; /* aggregate plant growth respiration in absence of
+                                          soil moisture stress */
+    double                   Raut0; /* aggregate plant respiration in absence of
+                                       soil moisture stress */
+    double                   NPP0; /* aggregate net primary productivity in absence of
                                       soil moisture stress */
-    double               Raut0; /* aggregate plant respiration in absence of
-                                   soil moisture stress */
-    double               NPP0;  /* aggregate net primary productivity in absence of
-                                   soil moisture stress */
-    double               Ci0;   /* aggregate canopy leaf-internal CO2 mixing ratio
-                                   in absence of soil moisture stress */
-    double               rc0;   /* aggregate canopy resistance in absence of
-                                   soil moisture stress */
-    double               rcRatio;
-    double               vpdfactor; /* factor for canopy resistance based on vpd */
-    size_t               cidx;
+    double                   Ci0; /* aggregate canopy leaf-internal CO2 mixing ratio
+                                     in absence of soil moisture stress */
+    double                   rc0; /* aggregate canopy resistance in absence of
+                                     soil moisture stress */
+    double                   rcRatio;
+    double                   vpdfactor; /* factor for canopy resistance based on vpd */
+    size_t                   cidx;
 
     /* Compute canopy resistance and photosynthetic demand in absence of soil moisture stress */
     canopy_assimilation(Ctype,
@@ -152,17 +158,21 @@ calc_rc_ps(char    Ctype,
                         &NPP0);
 
     /* calculate vapor pressure deficit factor */
-    vpdfactor = 1 - vpd / CLOSURE;
-    vpdfactor = (vpdfactor < VPDMINFACTOR) ? VPDMINFACTOR : vpdfactor;
+    vpdfactor = 1 - vpd / param.CANOPY_CLOSURE;
+    vpdfactor =
+        (vpdfactor <
+     param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
 
     /* calculate canopy resistance in presence of soil moisture stress */
     *rc = rc0 / (gsm_inv * vpdfactor);
-    *rc = (*rc > RSMAX) ? RSMAX : *rc;
+    *rc = (*rc > param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : *rc;
     rcRatio = *rc / rc0;
     /* this next calculation assumes canopy layers are of equal size */
     for (cidx = 0; cidx < options.Ncanopy; cidx++) {
         rsLayer[cidx] *= rcRatio;
-        rsLayer[cidx] = (rsLayer[cidx] > RSMAX) ? RSMAX : rsLayer[cidx];
+        rsLayer[cidx] =
+            (rsLayer[cidx] >
+         param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : rsLayer[cidx];
     }
 }
 
@@ -190,15 +200,15 @@ penman(double tair,
     slope = svp_slope(tair);
 
     /* calculate scale height based on average temperature in the column */
-    h = 287 / 9.81 * ((tair + 273.15) + 0.5 * (double)elevation * T_LAPSE);
+    h = calc_scale_height(tair, elevation);
 
     /* use hypsometric equation to calculate p_z, assume that virtual
        temperature is equal air_temp */
-    pz = PS_PM * exp(-(double)elevation / h);
+    pz = CONST_PSTD * exp(-(double)elevation / h);
 
     /* calculate latent heat of vaporization. Eq. 4.2.1 in Handbook of
        Hydrology, assume Ts is Tair */
-    lv = 2501000 - 2361 * tair;
+    lv = calc_latent_heat_of_vaporization(tair);
 
     /* calculate gamma. Eq. 4.2.28. Handbook of Hydrology */
     gamma = 1628.6 * pz / lv;
@@ -211,8 +221,8 @@ penman(double tair,
     /* calculate the evaporation in mm/day (by not dividing by the density
        of water (~1000 kg/m3)), the result ends up being in mm instead of m */
 
-    evap = (slope * rad + r_air * CP_PM * vpd / ra) /
-           (lv * (slope + gamma * (1 + (rc + rarc) / ra))) * SEC_PER_DAY;
+    evap = (slope * rad + r_air * CONST_CPMAIR * vpd / ra) /
+           (lv * (slope + gamma * (1 + (rc + rarc) / ra))) * CONST_CDAY;
 
     if (vpd >= 0.0 && evap < 0.0) {
         evap = 0.0;

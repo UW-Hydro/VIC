@@ -29,21 +29,19 @@
 #include <vic_driver_classic.h>
 
 // global variables
-
-char *version = "5.0 beta 2014-Nov-22";
-
-int      flag;
-size_t   NR;       /* array index for atmos struct that indicates
-                      the model step avarage or sum */
-size_t   NF;       /* array index loop counter limit for atmos
-                      struct that indicates the SNOW_STEP values */
-
+int                 flag;
+size_t              NR; /* array index for atmos struct that indicates
+                           the model step avarage or sum */
+size_t              NF; /* array index loop counter limit for atmos
+                           struct that indicates the SNOW_STEP values */
 
 global_param_struct global_param;
 veg_lib_struct     *veg_lib;
 option_struct       options;
 Error_struct        Error;
 param_set_struct    param_set;
+parameters_struct   param;
+filenames_struct    filenames;
 
 /******************************************************************************
  * @brief   Classic driver of the VIC model
@@ -74,7 +72,6 @@ main(int   argc,
     veg_con_struct       *veg_con;
     soil_con_struct       soil_con;
     all_vars_struct       all_vars;
-    filenames_struct      filenames;
     filep_struct          filep;
     lake_con_struct       lake_con;
     out_data_file_struct *out_data_files;
@@ -83,14 +80,26 @@ main(int   argc,
 
     /** Read Model Options **/
     cmd_proc(argc, argv, filenames.global);
+
+    // Initialize global structures
+    initialize_options();
     initialize_global();
+    initialize_parameters();
+    initialize_filenames();
 
     /* Initilize forcing file param structure */
     initialize_forcing_files();
 
     /** Read Global Control File **/
     filep.globalparam = open_file(filenames.global, "r");
-    global_param = get_global_param(&filenames, filep.globalparam);
+    get_global_param(filep.globalparam);
+
+    /** Set model constants **/
+    if (strcmp(filenames.constants, "MISSING") != 0) {
+        fprintf(stderr, "reading constants for some reason\n");
+        filep.constants = open_file(filenames.constants, "r");
+        get_parameters(filep.constants);
+    }
 
     /** Set up output data structures **/
     out_data = create_output_list();
@@ -139,7 +148,7 @@ main(int   argc,
     /************************************
        Run Model for all Active Grid Cells
     ************************************/
-    MODEL_DONE = FALSE;
+    MODEL_DONE = false;
     while (!MODEL_DONE) {
         soil_con = read_soilparam(filep.soilparam, &RUN_MODEL, &MODEL_DONE);
 
@@ -200,7 +209,7 @@ main(int   argc,
                                                    &soil_con, veg_con,
                                                    lake_con);
                 if (ErrorFlag == ERROR) {
-                    if (options.CONTINUEONERROR == TRUE) {
+                    if (options.CONTINUEONERROR) {
                         // Handle grid cell solution error
                         fprintf(stderr,
                                 "ERROR: Grid cell %i failed in record %zu so "
@@ -226,7 +235,8 @@ main(int   argc,
                 Error.out_data_files = out_data_files;
 
                 /** Initialize the storage terms in the water and energy balances **/
-                /** Sending a negative record number (-global_param.nrecs) to 
+
+                /** Sending a negative record number (-global_param.nrecs) to
                     put_data() will accomplish this **/
                 ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con,
                                      veg_lib, &lake_con, out_data, &save_data,
@@ -237,7 +247,6 @@ main(int   argc,
                 ******************************************/
 
                 for (rec = startrec; rec < global_param.nrecs; rec++) {
-
                     /**************************************************
                        Compute cell physics for 1 timestep
                     **************************************************/
@@ -274,7 +283,7 @@ main(int   argc,
 
 
                     if (ErrorFlag == ERROR) {
-                        if (options.CONTINUEONERROR == TRUE) {
+                        if (options.CONTINUEONERROR) {
                             // Handle grid cell solution error
                             fprintf(stderr,
                                     "ERROR: Grid cell %i failed in record %zu "
@@ -295,7 +304,6 @@ main(int   argc,
                             nrerror(ErrStr);
                         }
                     }
-
                 } /* End Rec Loop */
             } /* !OUTPUT_FORCE */
 

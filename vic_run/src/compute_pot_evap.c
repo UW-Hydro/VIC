@@ -28,8 +28,8 @@
 #include <vic_run.h>
 
 /* One element for each non-natural PET type */
-char   ref_veg_over[] = {
-    0, 0, 0, 0
+bool   ref_veg_over[] = {
+    false, false, false, false
 };
 double ref_veg_rarc[] = {
     0.0, 0.0, 25, 25
@@ -41,7 +41,7 @@ double ref_veg_lai[] = {
     1.0, 1.0, 2.88, 4.45
 };
 double ref_veg_albedo[] = {
-    BARE_SOIL_ALBEDO, H2O_SURF_ALBEDO, 0.23, 0.23
+    0.2, 0.08, 0.23, 0.23
 };
 double ref_veg_vegcover[] = {
     MIN_VEGCOVER, MIN_VEGCOVER, 1.00, 1.00
@@ -68,8 +68,8 @@ double ref_veg_trunk_ratio[] = {
     0.0, 0.0, 0.0, 0.0
 };
 /* One element for each PET type (non-natural or natural) */
-char   ref_veg_ref_crop[] = {
-    FALSE, FALSE, TRUE, TRUE, FALSE, FALSE
+bool   ref_veg_ref_crop[] = {
+    false, false, true, true, false, false
 };
 
 /******************************************************************************
@@ -141,6 +141,7 @@ compute_pot_evap(int         veg_class,
         net_short = (1.0 - albedo) * shortwave;
         net_rad = net_short + net_longwave;
         pot_evap[i] =
-            penman(tair, elevation, net_rad, vpd, ra, rc, rarc) * dt / 24.0;
+            penman(tair, elevation, net_rad, vpd, ra, rc, rarc) *
+            dt / HOURS_PER_DAY;
     }
 }

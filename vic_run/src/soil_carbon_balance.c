@@ -45,6 +45,8 @@ soil_carbon_balance(soil_con_struct   *soil_con,
 {
     extern option_struct       options;
     extern global_param_struct global_param;
+    extern parameters_struct   param;
+
     size_t                     i;
     size_t                     Nnodes;
     double                    *dZ;
@@ -79,7 +81,7 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     // Assign node thicknesses and temperatures for subset
     dZTot = 0;
     for (i = 0; i < Nnodes; i++) {
-        dZ[i] = soil_con->dz_node[i] * 1000; // mm
+        dZ[i] = soil_con->dz_node[i] * MM_PER_M; // mm
         dZTot += dZ[i];
         dZCum[i] = dZTot;
         T[i] = energy->T[i];
@@ -116,16 +118,16 @@ soil_carbon_balance(soil_con_struct   *soil_con,
                      tmp_double) / soil_con->bubble_node[i], -1 / b);
                 w[i] =
                     (0.5 *
-                 (w0 +
-                 w1) *
-                 (tmp_double -
-                 dZCum[i -
-                       1]) + 0.5 *
-                 (w1 +
-                 1.0) *
-                 (wtd -
-                 tmp_double) + 1.0 *
-                 (dZCum[i] - wtd)) / (dZCum[i] - dZCum[i - 1]);
+                     (w0 +
+                      w1) *
+                     (tmp_double -
+                      dZCum[i -
+                            1]) + 0.5 *
+                     (w1 +
+                      1.0) *
+                     (wtd -
+                      tmp_double) + 1.0 *
+                     (dZCum[i] - wtd)) / (dZCum[i] - dZCum[i - 1]);
             }
             else {
                 w0 = pow(
@@ -137,13 +139,14 @@ soil_carbon_balance(soil_con_struct   *soil_con,
                      tmp_double) / soil_con->bubble_node[i], -1 / b);
                 w[i] =
                     (0.5 *
-                 (w0 +
-                 w1) *
-                 (tmp_double -
-                 0) + 0.5 *
-                 (w1 +
-                 1.0) *
-                 (wtd - tmp_double) + 1.0 * (dZCum[i] - wtd)) / (dZCum[i] - 0);
+                     (w0 +
+                      w1) *
+                     (tmp_double -
+                      0) + 0.5 *
+                     (w1 +
+                      1.0) *
+                     (wtd -
+                      tmp_double) + 1.0 * (dZCum[i] - wtd)) / (dZCum[i] - 0);
             }
         }
         else {
@@ -155,16 +158,22 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     compute_soil_resp(Nnodes, dZ, dZTot, global_param.dt, T, w, cell->CLitter,
                       cell->CInter, cell->CSlow, &(cell->RhLitter),
                       &(cell->RhInter), &(cell->RhSlow));
-    cell->RhLitter2Atm = fAir * cell->RhLitter;
+    cell->RhLitter2Atm = param.SRESP_FAIR * cell->RhLitter;
     cell->RhTot = cell->RhLitter2Atm + cell->RhInter + cell->RhSlow;
 
     // Compute balances of soil carbon pools
     // Assume previous year's NPP enters soil evenly throughout current year
     veg_var->Litterfall = veg_var->AnnualNPPPrev /
-                          (365.25 * 24 / global_param.dt);
+                          (CONST_DDAYS_PER_YEAR * HOURS_PER_DAY /
+                           global_param.dt);
     cell->CLitter += veg_var->Litterfall - cell->RhLitter;
-    cell->CInter += (1 - fAir) * cell->RhLitter * fInter - cell->RhInter;
-    cell->CSlow += (1 - fAir) * cell->RhLitter * (1 - fInter) - cell->RhSlow;
+    cell->CInter +=
+        (1 -
+     param.SRESP_FAIR) * cell->RhLitter * param.SRESP_FINTER - cell->RhInter;
+    cell->CSlow +=
+        (1 -
+     param.SRESP_FAIR) * cell->RhLitter *
+        (1 - param.SRESP_FINTER) - cell->RhSlow;
 
     // Free temporary dynamic arrays
     free((char *)dZ);

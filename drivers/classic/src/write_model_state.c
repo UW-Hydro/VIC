@@ -62,15 +62,15 @@
 #include <vic_run.h>
 #include <vic_driver_classic.h>
 
- /******************************************************************************
+/******************************************************************************
  * @brief    Saves the model state.
  *****************************************************************************/
 void
-write_model_state(all_vars_struct     *all_vars,
-                  int                  Nveg,
-                  int                  cellnum,
-                  filep_struct        *filep,
-                  soil_con_struct     *soil_con)
+write_model_state(all_vars_struct *all_vars,
+                  int              Nveg,
+                  int              cellnum,
+                  filep_struct    *filep,
+                  soil_con_struct *soil_con)
 {
     extern option_struct options;
 

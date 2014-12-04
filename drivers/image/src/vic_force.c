@@ -46,7 +46,7 @@ vic_force(void)
     extern veg_con_map_struct *veg_con_map;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
-
+    extern parameters_struct   param;
 
     double                     t_offset;
     float                     *fvar = NULL;
@@ -174,25 +174,25 @@ vic_force(void)
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < global_domain.ncells_global; i++) {
         for (j = 0; j < NF; j++) {
-            // temperature in Kelvin
-            atmos[i].air_temp[j] -= KELVIN;
+            // temperature in CONST_TKFRZ
+            atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
-            atmos[i].prec[j] *= (double) (options.SNOW_STEP * SECPHOUR);
+            atmos[i].prec[j] *= (double) (options.SNOW_STEP * SEC_PER_HOUR);
             // pressure in kPa
-            atmos[i].pressure[j] /= 1000.;
+            atmos[i].pressure[j] /= PA_PER_KPA;
             // vapor pressure in kPa (we read specific humidity in kg/kg)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
             // photosynthetically active radiation
-            atmos[i].par[j] = SW2PAR * atmos[i].shortwave[j];
+            atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
                                               atmos[i].pressure[j]);
             // snow flag
             atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
                                                 t_offset,
-                                                global_param.MAX_SNOW_TEMP,
+                                                param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[i].prec[j]), 1);
         }
     }
@@ -212,7 +212,7 @@ vic_force(void)
         atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
                                            atmos[i].pressure[NR]);
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
-                                             global_param.MAX_SNOW_TEMP,
+                                             param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
     }
 
@@ -289,10 +289,10 @@ q_to_vp(double q,
     double vp;
 
     // full equation
-    // vp = q/(q+EPS*(1-q))*p;
+    // vp = q/(q+CONST_EPS*(1-q))*p;
 
     // approximation used in VIC
-    vp = q * p / EPS;
+    vp = q * p / CONST_EPS;
 
     return vp;
 }
@@ -313,7 +313,7 @@ air_density(double t,
     double rho;
 
     // full equation
-    // rho = (p*1000)/(Rd * *t+KELVIN) + (pv*1000)/(Rv * *t+KELVIN);
+    // rho = (p*1000)/(Rd * *t+CONST_TKFRZ) + (pv*1000)/(Rv * *t+CONST_TKFRZ);
 
     // approximation used in VIC
     rho = 0.003486 * p / (275.0 + t);

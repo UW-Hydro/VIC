@@ -52,7 +52,7 @@ func_atmos_energy_bal(double  Tcanopy,
     SensibleHeat = (double *)va_arg(ap, double *);
 
     // compute sensible heat flux between canopy and atmosphere
-    (*SensibleHeat) = atmos_density * Cp * (Tair - Tcanopy) / Ra;
+    (*SensibleHeat) = calc_sensible_heat(atmos_density, Tair, Tcanopy, Ra);
 
     // compute energy balance error
     Error = InSensible - (*SensibleHeat);

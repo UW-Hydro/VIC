@@ -1,7 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * MTCLIM Parameters header file.
+ * This subroutine initalizes all filefilenames before they are called by
+ * the model.
  *
  * @section LICENSE
  *
@@ -24,27 +25,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef MTCLIM_PARAMETERS_VIC_H
-#define MTCLIM_PARAMETERS_VIC_H
+#include <vic_def.h>
+#include <vic_run.h>
+#include <vic_driver_shared.h>
 
-/* parameters for the Tair algorithm */
-#define TDAYCOEF     0.45  /* (dim) daylight air temperature coefficient (dim) */
+/******************************************************************************
+ * @brief    Initialize all filenames before they are called by the
+ *           model.
+ *****************************************************************************/
+void
+initialize_filenames()
+{
+    extern filenames_struct filenames;
 
-/* parameters for the snowpack algorithm */
-#define SNOW_TCRIT   -6.0  /* (deg C) critical temperature for snowmelt */
-#define SNOW_TRATE  0.042  /* (cm/degC/day) snowmelt rate */
+    size_t                  i;
 
-/* parameters for the radiation algorithm */
-#define TBASE       0.870  /* (dim) max inst. trans., 0m, nadir, dry atm */
-#define ABASE     -6.1e-5  /* (1/Pa) vapor pressure effect on transmittance */
-#define C             1.5  /* (dim) radiation parameter */
-#define B0          0.031  /* (dim) radiation parameter */
-#define B1          0.201  /* (dim) radiation parameter */
-#define B2          0.185  /* (dim) radiation parameter */
-#define RAIN_SCALAR  0.75  /* (dim) correction to trans. for rain day */
-#define DIF_ALB       0.6  /* (dim) diffuse albedo for horizon correction */
-#define SC_INT       1.32  /* (MJ/m2/day) snow correction intercept */
-#define SC_SLOPE    0.096  /* (MJ/m2/day/cm) snow correction slope */
-
-#endif
-
+    strcpy(filenames.init_state, "MISSING");
+    strcpy(filenames.statefile, "MISSING");
+    strcpy(filenames.constants, "MISSING");
+    strcpy(filenames.soil, "MISSING");
+    strcpy(filenames.veg, "MISSING");
+    strcpy(filenames.veglib, "MISSING");
+    strcpy(filenames.snowband, "MISSING");
+    strcpy(filenames.lakeparam, "MISSING");
+    strcpy(filenames.result_dir, "MISSING");
+    for (i = 0; i < 2; i++) {
+        strcpy(filenames.f_path_pfx[i], "MISSING");
+    }
+}

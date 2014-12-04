@@ -32,9 +32,6 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
-
-#define GAUGE_HEIGHT 1.0  /* precipitation gauge height (m) */
 
 /******************************************************************************
  * @brief    Correct preciptation measurements for gauge catch deficiencies.
@@ -46,20 +43,20 @@ correct_precip(double *gauge_correction,
                double  roughness,
                double  snow_roughness)
 {
-    double gauge_wind;
+    extern parameters_struct param;
 
-    gauge_wind = wind * (log((GAUGE_HEIGHT + roughness) / roughness) /
+    double                   gauge_wind;
+
+    gauge_wind = wind * (log((param.GAUGE_HEIGHT + roughness) / roughness) /
                          log(wind_h / roughness));
 
     gauge_correction[RAIN] = 100. / exp(4.606 - 0.041 *
                                         pow(gauge_wind, 0.69));
 
-    gauge_wind = wind * (log((GAUGE_HEIGHT + snow_roughness) /
+    gauge_wind = wind * (log((param.GAUGE_HEIGHT + snow_roughness) /
                              snow_roughness) /
                          log(wind_h / snow_roughness));
 
     gauge_correction[SNOW] = 100. / exp(4.606 - 0.036 *
                                         pow(gauge_wind, 1.75));
 }
-
-#undef GAUGE_HEIGHT

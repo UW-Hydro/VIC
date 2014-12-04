@@ -27,8 +27,6 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAX_ITER 50
-
 /******************************************************************************
 * \brief        Calculates temperatures of water column under ice.
 ******************************************************************************/
@@ -53,15 +51,17 @@ water_under_ice(int     freezeflag,
                 double  dt,
                 double *energy_out_bottom)
 {
-    double Tnew[MAX_LAKE_NODES];
-    int    k;
-    int    iterations;
-    double jouleold;
-    double joulenew;
-    double de[MAX_LAKE_NODES];
-    double epsilon = 0.0001;
-    double qw_init, qw_mean, qw_final;
-    double sw_underice_visible, sw_underice_nir;
+    extern parameters_struct param;
+
+    double                   Tnew[MAX_LAKE_NODES];
+    int                      k;
+    int                      iterations;
+    double                   jouleold;
+    double                   joulenew;
+    double                   de[MAX_LAKE_NODES];
+    double                   epsilon = 0.0001;
+    double                   qw_init, qw_mean, qw_final;
+    double                   sw_underice_visible, sw_underice_nir;
 
     iterations = 0;
 
@@ -75,12 +75,13 @@ water_under_ice(int     freezeflag,
     // estimate the flux out of the water
     qw_init = 0.57 * (Ti[0] - Tcutoff) / (surfdz / 2.);
     *qw = qw_init;
-    qw_mean = -999.;
+    qw_mean = MISSING;
 
     energycalc(Ti, &jouleold, numnod, dz, surfdz, surface, water_cp,
                water_density);
 
-    while ((fabs(qw_mean - *qw) > epsilon) && iterations < MAX_ITER) {
+    while ((fabs(qw_mean - *qw) >
+            epsilon) && iterations < param.LAKE_MAX_ITER) {
         if (iterations == 0) {
             *qw = qw_init;
         }
@@ -89,10 +90,12 @@ water_under_ice(int     freezeflag,
         }
 
         // compute shortwave that transmitted through the lake ice
-        sw_underice_visible = a1 * sw_ice *
-                              exp(-1. * (lamisw * hice + lamssw * sdepth));
-        sw_underice_nir = a2 * sw_ice *
-                          exp(-1. * (lamilw * hice + lamslw * sdepth));
+        sw_underice_visible = param.LAKE_A1 * sw_ice *
+                              exp(-1. * (param.LAKE_LAMISW * hice +
+                                         param.LAKE_LAMSSW * sdepth));
+        sw_underice_nir = param.LAKE_A2 * sw_ice *
+                          exp(-1. * (param.LAKE_LAMILW * hice +
+                                     param.LAKE_LAMSLW * sdepth));
 
         /* --------------------------------------------------------------------
          * Calculate the lake temperatures at different levels for the
@@ -104,7 +107,7 @@ water_under_ice(int     freezeflag,
                   dz, surfdz, &joulenew, water_cp, energy_out_bottom);
 
         // recompute storage of heat in the lake
-        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SECPHOUR);
+        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SEC_PER_HOUR);
 
         /* --------------------------------------------------------------------
          * Do the convective mixing of the lake water.
@@ -134,7 +137,7 @@ water_under_ice(int     freezeflag,
         }
         energycalc(Ti, &joulenew, numnod, dz, surfdz, surface, water_cp,
                    water_density);
-        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SECPHOUR);
+        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SEC_PER_HOUR);
         return(0);
     }
 }

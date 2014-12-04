@@ -36,15 +36,17 @@ MassRelease(double *InterceptedSnow,
             double *ReleasedMass,
             double *Drip)
 {
-    double TempDrip;
-    double TempReleasedMass;
-    double Threshold;
-    double MaxRelease;
+    extern parameters_struct param;
+
+    double                   TempDrip;
+    double                   TempReleasedMass;
+    double                   Threshold;
+    double                   MaxRelease;
 
     /* If the amount of snow in the canopy is greater than some minimum
        value, MIN_INTERCEPTION_STORAGE, then calculte mass release and Drip */
 
-    if (*InterceptedSnow > MIN_INTERCEPTION_STORAGE) {
+    if (*InterceptedSnow > param.VEG_MIN_INTERCEPTION_STORAGE) {
         Threshold = 0.10 * *InterceptedSnow;
         MaxRelease = 0.17 * *InterceptedSnow;
 
@@ -58,12 +60,12 @@ MassRelease(double *InterceptedSnow,
             *Drip += Threshold;
             *InterceptedSnow -= Threshold;
             *TempInterceptionStorage -= Threshold;
-            if (*InterceptedSnow < MIN_INTERCEPTION_STORAGE) {
+            if (*InterceptedSnow < param.VEG_MIN_INTERCEPTION_STORAGE) {
                 TempReleasedMass = 0.0;
             }
             else {
                 TempReleasedMass =
-                    min((*InterceptedSnow - MIN_INTERCEPTION_STORAGE),
+                    min((*InterceptedSnow - param.VEG_MIN_INTERCEPTION_STORAGE),
                         MaxRelease);
             }
             *ReleasedMass += TempReleasedMass;
@@ -77,6 +79,7 @@ MassRelease(double *InterceptedSnow,
             *InterceptedSnow -= TempDrip;
         }
     }
+
     /* (*InterceptedSnow < MIN_INTERCEPTION_STORAGE) If the amount of snow in
        the canopy is less than some minimum value, MIN_INTERCEPTION_STORAGE,
        then only melt can occur and there is no mass release. */

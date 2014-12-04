@@ -71,9 +71,9 @@ parse_output_info(FILE                  *gp,
                 *out_data_files = (out_data_file_struct *)calloc(
                     options.Noutfiles, sizeof(out_data_file_struct));
                 outfilenum = -1;
-                init_output_list(out_data, FALSE, "%.4f", OUT_TYPE_FLOAT, 1);
+                init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
                 // PRT_SNOW_BAND is ignored if N_OUTFILES has been specified
-                options.PRT_SNOW_BAND = FALSE;
+                options.PRT_SNOW_BAND = false;
             }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 outfilenum++;
@@ -95,7 +95,7 @@ parse_output_info(FILE                  *gp,
                        &((*out_data_files)[outfilenum].nvars));
                 (*out_data_files)[outfilenum].varid =
                     (unsigned *)calloc((*out_data_files)[outfilenum].nvars,
-                                  sizeof(unsigned));
+                                       sizeof(unsigned));
                 outvarnum = 0;
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -137,7 +137,7 @@ parse_output_info(FILE                  *gp,
                         mult = (double)atof(multstr);
                     }
                 }
-                if (set_output_var((*out_data_files), TRUE, outfilenum,
+                if (set_output_var((*out_data_files), true, outfilenum,
                                    out_data, varname, outvarnum, format, type,
                                    mult) != 0) {
                     nrerror(

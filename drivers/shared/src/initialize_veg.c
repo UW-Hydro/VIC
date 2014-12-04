@@ -32,8 +32,8 @@
  * @brief    This routine initailizes the vegetation variable array.
  *****************************************************************************/
 void
-initialize_veg(veg_var_struct     **veg_var,
-               size_t               Nveg)
+initialize_veg(veg_var_struct **veg_var,
+               size_t           Nveg)
 {
     extern option_struct options;
 

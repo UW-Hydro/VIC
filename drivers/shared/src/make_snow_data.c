@@ -35,15 +35,15 @@
  *****************************************************************************/
 snow_data_struct **
 make_snow_data(size_t nveg)
-
 {
     extern option_struct options;
 
     size_t               i;
     snow_data_struct   **temp = NULL;
 
-    temp = (snow_data_struct **) calloc(nveg,
-                                        sizeof(snow_data_struct *));
+    temp =
+        (snow_data_struct **) calloc(nveg, sizeof(struct snow_data_struct *));
+
     if (temp == NULL) {
         nrerror("Memory allocation error in make_snow_data().");
     }

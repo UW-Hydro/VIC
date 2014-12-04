@@ -27,49 +27,44 @@
 #include <vic_def.h>
 #include <vic_run.h>
 
-#define MAXTRIES 5
-#define MAXITER 1000
-#define MACHEPS 3e-8
-#define TSTEP   10
-#define T       1e-7
-
-/**
- * @brief [brief description]
- * @details
- *
- * Source: Brent, R. P., 1973, Algorithms for minimization without derivatives,
- *         Prentice Hall, Inc., Englewood Cliffs, New Jersey, Chapter 4
- *
- * This source includes an implementation of the algorithm in ALGOL-60, which
- * was translated into C for this application.
- *
- * The method is also discussed in:
- * Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, 1992,
- *              Numerical Recipes in FORTRAN, The art of scientific computing,
- *              Second edition, Cambridge University Press
- *
- * (Be aware that this book discusses a Brent method for minimization (brent),
- * and one for root finding (zbrent).  The latter one is similar to the one
- * implemented here and is also copied from Brent [1973].)
- *
- * The function returns the surface temperature, TSurf, for which the sum
- * of the energy balance terms is zero, with TSurf in the interval
- * [MinTSurf, MaxTSurf].  The surface temperature is calculated to within
- * a tolerance (6 * MACHEPS * |TSurf| + 2 * T), where MACHEPS is the relative
- * machine precision and T is a positive tolerance, as specified in brent.h.
- *
- * The function assures that f(MinTSurf) and f(MaxTSurf) have opposite signs.
- * If this is not the case the program will abort.  In addition the program
- * will perform not more than a certain number of iterations, as specified
- * in brent.h, and will abort if more iterations are needed.
- *
- * @param LowerBound Lower bound for root
- * @param UpperBound Upper bound for root
- * @param ErrorString For storing description of errors (if any)
- * @param Function
- * @param ap Variable arguments
- * @return b
- */
+/******************************************************************************
+* @brief Brent (1973) root finding algorithm
+*
+* @details
+*
+* Source: Brent, R. P., 1973, Algorithms for minimization without derivatives,
+*         Prentice Hall, Inc., Englewood Cliffs, New Jersey, Chapter 4
+*
+* This source includes an implementation of the algorithm in ALGOL-60, which
+* was translated into C for this application.
+*
+* The method is also discussed in:
+* Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, 1992,
+*              Numerical Recipes in FORTRAN, The art of scientific computing,
+*              Second edition, Cambridge University Press
+*
+* (Be aware that this book discusses a Brent method for minimization (brent),
+* and one for root finding (zbrent).  The latter one is similar to the one
+* implemented here and is also copied from Brent [1973].)
+*
+* The function returns the surface temperature, TSurf, for which the sum
+* of the energy balance terms is zero, with TSurf in the interval
+* [MinTSurf, MaxTSurf].  The surface temperature is calculated to within
+* a tolerance (6 * MACHEPS * |TSurf| + 2 * T), where MACHEPS is the relative
+* machine precision and T is a positive tolerance, as specified in brent.h.
+*
+* The function assures that f(MinTSurf) and f(MaxTSurf) have opposite signs.
+* If this is not the case the program will abort.  In addition the program
+* will perform not more than a certain number of iterations, as specified
+* in brent.h, and will abort if more iterations are needed.
+*
+* @param LowerBound Lower bound for root
+* @param UpperBound Upper bound for root
+* @param ErrorString For storing description of errors (if any)
+* @param Function
+* @param ap Variable arguments
+* @return b
+******************************************************************************/
 double
 root_brent(double LowerBound,
            double UpperBound,
@@ -77,27 +72,29 @@ root_brent(double LowerBound,
            double (*Function)(double Estimate, va_list ap),
            ...)
 {
-    const char *Routine = "RootBrent";
-    va_list     ap;             /* Used in traversing variable argument list */
-    double      a;
-    double      b;
-    double      c;
-    double      d;
-    double      e;
-    double      fa;
-    double      fb;
-    double      fc;
-    double      m;
-    double      p;
-    double      q;
-    double      r;
-    double      s;
-    double      tol;
-    double      last_bad;
-    double      last_good;
-    int         which_err;
-    int         i;
-    int         j;
+    extern parameters_struct param;
+
+    const char              *Routine = "RootBrent";
+    va_list                  ap; /* Used in traversing variable argument list */
+    double                   a;
+    double                   b;
+    double                   c;
+    double                   d;
+    double                   e;
+    double                   fa;
+    double                   fb;
+    double                   fc;
+    double                   m;
+    double                   p;
+    double                   q;
+    double                   r;
+    double                   s;
+    double                   tol;
+    double                   last_bad;
+    double                   last_good;
+    int                      which_err;
+    int                      i;
+    int                      j;
 
     /* initialize variable argument list */
     a = LowerBound;
@@ -111,9 +108,10 @@ root_brent(double LowerBound,
 
     // If Function returns values of ERROR for both bounds, give up
     if (fa == ERROR && fb == ERROR) {
-        sprintf(ErrorString,
-                "ERROR: %s: lower and upper bounds %f and %f failed to bracket the root because the given function was not defined at either point.\n", Routine, a,
-                b);
+        sprintf(ErrorString, "ERROR: %s: lower and upper bounds %f and %f "
+                "failed to bracket the root because the given "
+                "function was not defined at either point.\n",
+                Routine, a, b);
         va_end(ap);
         return(ERROR);
     }
@@ -138,7 +136,7 @@ root_brent(double LowerBound,
 
         /* search for valid point via bisection */
         j = 0;
-        while (fc == ERROR && j < MAXITER) {
+        while (fc == ERROR && j < param.ROOT_BRENT_MAXITER) {
             last_bad = c;
             c = 0.5 * (last_bad + last_good);
             va_start(ap, Function);
@@ -147,10 +145,12 @@ root_brent(double LowerBound,
         }
 
         if (fc == ERROR) {
-            /* if we get here, we could not find a bound for which the function returns a valid value */
-            sprintf(ErrorString,
-                    "ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n", Routine, LowerBound,
-                    UpperBound);
+            /* if we get here, we could not find a bound for which the function
+               returns a valid value */
+            sprintf(ErrorString, "ERROR: %s: the given function produced "
+                    "undefined values while attempting to "
+                    "bracket the root between %f and %f.\n",
+                    Routine, LowerBound, UpperBound);
             va_end(ap);
             return(ERROR);
         }
@@ -166,15 +166,17 @@ root_brent(double LowerBound,
         }
     }
 
-    // At this point, we have two bounds that yield valid values of the target function
+    // At this point, we have two bounds that yield valid values of the target
+    // function
 
     /*  if root not bracketed attempt to bracket the root */
     j = 0;
-    while ((fa * fb) >= 0 && j < MAXTRIES) {
-        /* Expansion of bounds depends on whether initial bounds encountered undefined function values */
+    while ((fa * fb) >= 0 && j < param.ROOT_BRENT_MAXTRIES) {
+        /* Expansion of bounds depends on whether initial bounds encountered
+           undefined function values */
         if (which_err == 0) { // No undefined values were encountered
-            a -= TSTEP;
-            b += TSTEP;
+            a -= param.ROOT_BRENT_TSTEP;
+            b += param.ROOT_BRENT_TSTEP;
             va_start(ap, Function);
             fa = Function(a, ap);
             va_start(ap, Function);
@@ -182,21 +184,23 @@ root_brent(double LowerBound,
         }
         else { // Undefined values were encountered
             if (which_err == -1) { // Undefined values encountered in the lower direction
-                b += TSTEP;
+                b += param.ROOT_BRENT_TSTEP;
                 va_start(ap, Function);
                 fb = Function(b, ap);
                 if (fb == ERROR) {
                     /* Undefined function values in both directions - give up */
-                    sprintf(ErrorString,
-                            "ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n", Routine, LowerBound,
-                            UpperBound);
+                    sprintf(ErrorString, "ERROR: %s: the given function "
+                            "produced undefined values while "
+                            "attempting to bracket the root "
+                            "between %f and %f.\n",
+                            Routine, LowerBound, UpperBound);
                     va_end(ap);
                     return(ERROR);
                 }
                 last_good = a;
             }
             else { // Undefined values encountered in the upper direction
-                a -= TSTEP;
+                a -= param.ROOT_BRENT_TSTEP;
                 va_start(ap, Function);
                 fa = Function(a, ap);
                 if (fa == ERROR) {
@@ -215,7 +219,7 @@ root_brent(double LowerBound,
             va_start(ap, Function);
             fc = Function(c, ap);
             i = 0;
-            while (fc == ERROR && i < MAXITER) {
+            while (fc == ERROR && i < param.ROOT_BRENT_MAXITER) {
                 last_bad = c;
                 c = 0.5 * (last_bad + last_good);
                 va_start(ap, Function);
@@ -260,7 +264,7 @@ root_brent(double LowerBound,
 
     fc = fb;
 
-    for (i = 0; i < MAXITER; i++) {
+    for (i = 0; i < param.ROOT_BRENT_MAXITER; i++) {
         if (fb * fc > 0) {
             c = a;
             fc = fa;
@@ -277,7 +281,7 @@ root_brent(double LowerBound,
             fc = fa;
         }
 
-        tol = 2 *MACHEPS *fabs(b) + T;
+        tol = 2 *DBL_EPSILON *fabs(b) + param.ROOT_BRENT_T;
         m = 0.5 * (c - b);
 
         if (fabs(m) <= tol || fb == 0) {
@@ -332,9 +336,9 @@ root_brent(double LowerBound,
 
             // Catch ERROR values returned from Function
             if (fb == ERROR) {
-                sprintf(ErrorString,
-                        "ERROR returned to root_brent on iteration %d: temperature = %.4f\n", i + 1,
-                        b);
+                sprintf(ErrorString, "ERROR returned to root_brent on "
+                        "iteration %d: temperature = %.4f\n",
+                        i + 1, b);
                 va_end(ap);
                 return(ERROR);
             }
@@ -345,9 +349,3 @@ root_brent(double LowerBound,
     va_end(ap);
     return(ERROR);
 }
-
-#undef MAXTRIES
-#undef MAXITER
-#undef MACHEPS
-#undef TSTEP
-#undef T

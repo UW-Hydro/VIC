@@ -81,7 +81,7 @@ arno_evap(layer_data_struct *layer,
 
     Epot =
         penman(air_temp, elevation, rad, vpd, ra, 0.0,
-               0.0) * delta_t / SEC_PER_DAY;
+               0.0) * delta_t / CONST_CDAY;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */
@@ -173,10 +173,10 @@ arno_evap(layer_data_struct *layer,
 
     /* only consider positive evaporation; we won't put limits on condensation */
     if (evap > 0.0) {
-        if (moist > moist_resid * depth1 * 1000.) {
+        if (moist > moist_resid * depth1 * MM_PER_M) {
             /* there is liquid moisture available; cap evap at available liquid moisture */
-            if (evap > moist - moist_resid * depth1 * 1000.) {
-                evap = moist - moist_resid * depth1 * 1000.;
+            if (evap > moist - moist_resid * depth1 * MM_PER_M) {
+                evap = moist - moist_resid * depth1 * MM_PER_M;
             }
         }
         else {
@@ -186,7 +186,7 @@ arno_evap(layer_data_struct *layer,
     }
 
     layer[0].evap = evap;
-    Evap += evap / 1000. / delta_t;
+    Evap += evap / MM_PER_M / delta_t;
 
     return(Evap);
 }

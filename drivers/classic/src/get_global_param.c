@@ -33,26 +33,27 @@
  * @brief    Read the VIC model global control file, getting values for
  *           global parameters, model options, and debugging controls.
  *****************************************************************************/
-global_param_struct
-get_global_param(filenames_struct *names,
-                 FILE             *gp)
+void
+get_global_param(FILE *gp)
 {
-    extern option_struct    options;
-    extern param_set_struct param_set;
-    extern size_t           NF, NR;
+    extern option_struct       options;
+    extern global_param_struct global_param;
+    extern param_set_struct    param_set;
+    extern filenames_struct    filenames;
+    extern size_t              NF, NR;
 
-    char                    cmdstr[MAXSTRING];
-    char                    optstr[MAXSTRING];
-    char                    flgstr[MAXSTRING];
-    char                    flgstr2[MAXSTRING];
-    char                    ErrStr[MAXSTRING];
-    int                     file_num;
-    int                     field;
-    int                     i;
-    int                     tmpstartdate;
-    int                     tmpenddate;
-    int                     lastvalidday;
-    int                     lastday[] = {
+    char                       cmdstr[MAXSTRING];
+    char                       optstr[MAXSTRING];
+    char                       flgstr[MAXSTRING];
+    char                       flgstr2[MAXSTRING];
+    char                       ErrStr[MAXSTRING];
+    int                        file_num;
+    int                        field;
+    int                        i;
+    int                        tmpstartdate;
+    int                        tmpenddate;
+    int                        lastvalidday;
+    int                        lastday[] = {
         31,     /* JANUARY */
         28,     /* FEBRUARY */
         31,     /* MARCH */
@@ -66,47 +67,8 @@ get_global_param(filenames_struct *names,
         30,     /* NOVEMBER */
         31,     /* DECEMBER */
     };
-    global_param_struct     global;
 
-    /** Initialize global parameters (that aren't part of the options struct) **/
-    global.dt = HOURSPERDAY+1;
-    global.nrecs = 0;
-    global.startyear = 0;
-    global.startmonth = 0;
-    global.startday = 0;
-    global.starthour = HOURSPERDAY+1;
-    global.endyear = 0;
-    global.endmonth = 0;
-    global.endday = 0;
-    global.resolution = 0;
-    global.MAX_SNOW_TEMP = 0.5;
-    global.MIN_RAIN_TEMP = -0.5;
-    global.measure_h = 2.0;
-    global.wind_h = 10.0;
-    for (i = 0; i < 2; i++) {
-        global.forceyear[i] = 0;
-        global.forcemonth[i] = 1;
-        global.forceday[i] = 1;
-        global.forcehour[i] = 0;
-        global.forceskip[i] = 0;
-        global.forceoffset[i] = 0;
-        strcpy(names->f_path_pfx[i], "MISSING");
-    }
     file_num = 0;
-    global.skipyear = 0;
-    strcpy(names->init_state, "MISSING");
-    global.stateyear = 0;
-    global.statemonth = 0;
-    global.stateday = 0;
-    strcpy(names->statefile, "MISSING");
-    strcpy(names->soil, "MISSING");
-    strcpy(names->veg, "MISSING");
-    strcpy(names->veglib, "MISSING");
-    strcpy(names->snowband, "MISSING");
-    strcpy(names->lakeparam, "MISSING");
-    strcpy(names->result_dir, "MISSING");
-    global.out_dt = 0;
-
 
     /** Read through global control file to find parameters **/
 
@@ -132,72 +94,72 @@ get_global_param(filenames_struct *names,
                 sscanf(cmdstr, "%*s %zu", &options.Nnode);
             }
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.dt);
+                sscanf(cmdstr, "%*s %u", &global_param.dt);
             }
             else if (strcasecmp("SNOW_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &options.SNOW_STEP);
+                sscanf(cmdstr, "%*s %u", &options.SNOW_STEP);
             }
             else if (strcasecmp("STARTYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.startyear);
+                sscanf(cmdstr, "%*s %hu", &global_param.startyear);
             }
             else if (strcasecmp("STARTMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.startmonth);
+                sscanf(cmdstr, "%*s %hu", &global_param.startmonth);
             }
             else if (strcasecmp("STARTDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.startday);
+                sscanf(cmdstr, "%*s %hu", &global_param.startday);
             }
             else if (strcasecmp("STARTHOUR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.starthour);
+                sscanf(cmdstr, "%*s %hu", &global_param.starthour);
             }
             else if (strcasecmp("NRECS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %u", &global.nrecs);
+                sscanf(cmdstr, "%*s %u", &global_param.nrecs);
             }
             else if (strcasecmp("ENDYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.endyear);
+                sscanf(cmdstr, "%*s %hu", &global_param.endyear);
             }
             else if (strcasecmp("ENDMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.endmonth);
+                sscanf(cmdstr, "%*s %hu", &global_param.endmonth);
             }
             else if (strcasecmp("ENDDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.endday);
+                sscanf(cmdstr, "%*s %hu", &global_param.endday);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.FULL_ENERGY = TRUE;
+                    options.FULL_ENERGY = true;
                 }
                 else {
-                    options.FULL_ENERGY = FALSE;
+                    options.FULL_ENERGY = false;
                 }
             }
             else if (strcasecmp("FROZEN_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.FROZEN_SOIL = TRUE;
-                    options.QUICK_FLUX = FALSE;
+                    options.FROZEN_SOIL = true;
+                    options.QUICK_FLUX = false;
                 }
                 else {
-                    options.FROZEN_SOIL = FALSE;
-                    options.IMPLICIT = FALSE;
-                    options.EXP_TRANS = FALSE;
+                    options.FROZEN_SOIL = false;
+                    options.IMPLICIT = false;
+                    options.EXP_TRANS = false;
                 }
             }
             else if (strcasecmp("QUICK_FLUX", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.QUICK_FLUX = TRUE;
+                    options.QUICK_FLUX = true;
                 }
                 else {
-                    options.QUICK_FLUX = FALSE;
+                    options.QUICK_FLUX = false;
                 }
             }
             else if (strcasecmp("QUICK_SOLVE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.QUICK_SOLVE = TRUE;
+                    options.QUICK_SOLVE = true;
                 }
                 else {
-                    options.QUICK_SOLVE = FALSE;
+                    options.QUICK_SOLVE = false;
                 }
             }
             else if ((strcasecmp("NOFLUX",
@@ -205,28 +167,28 @@ get_global_param(filenames_struct *names,
                      (strcasecmp("NO_FLUX", optstr) == 0)) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.NOFLUX = TRUE;
+                    options.NOFLUX = true;
                 }
                 else {
-                    options.NOFLUX = FALSE;
+                    options.NOFLUX = false;
                 }
             }
             else if (strcasecmp("IMPLICIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.IMPLICIT = TRUE;
+                    options.IMPLICIT = true;
                 }
                 else {
-                    options.IMPLICIT = FALSE;
+                    options.IMPLICIT = false;
                 }
             }
             else if (strcasecmp("EXP_TRANS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.EXP_TRANS = TRUE;
+                    options.EXP_TRANS = true;
                 }
                 else {
-                    options.EXP_TRANS = FALSE;
+                    options.EXP_TRANS = false;
                 }
             }
             else if (strcasecmp("SNOW_DENSITY", optstr) == 0) {
@@ -241,69 +203,105 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("BLOWING", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING = TRUE;
+                    options.BLOWING = true;
                 }
                 else {
-                    options.BLOWING = FALSE;
+                    options.BLOWING = false;
+                }
+            }
+            else if (strcasecmp("BLOWING_VAR_THRESHOLD", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    options.BLOWING_VAR_THRESHOLD = true;
+                }
+                else {
+                    options.BLOWING_VAR_THRESHOLD = false;
+                }
+            }
+            else if (strcasecmp("BLOWING_CALC_PROB", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    options.BLOWING_CALC_PROB = true;
+                }
+                else {
+                    options.BLOWING_CALC_PROB = false;
+                }
+            }
+            else if (strcasecmp("BLOWING_SIMPLE", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    options.BLOWING_SIMPLE = true;
+                }
+                else {
+                    options.BLOWING_SIMPLE = false;
+                }
+            }
+            else if (strcasecmp("BLOWING_FETCH", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    options.BLOWING_FETCH = true;
+                }
+                else {
+                    options.BLOWING_FETCH = false;
+                }
+            }
+            else if (strcasecmp("BLOWING_SPATIAL_WIND", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    options.BLOWING_SPATIAL_WIND = true;
+                }
+                else {
+                    options.BLOWING_SPATIAL_WIND = false;
                 }
             }
             else if (strcasecmp("CORRPREC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CORRPREC = TRUE;
+                    options.CORRPREC = true;
                 }
                 else {
-                    options.CORRPREC = FALSE;
+                    options.CORRPREC = false;
                 }
-            }
-            else if (strcasecmp("MIN_WIND_SPEED", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &options.MIN_WIND_SPEED);
-            }
-            else if (strcasecmp("MIN_RAIN_TEMP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global.MIN_RAIN_TEMP);
-            }
-            else if (strcasecmp("MAX_SNOW_TEMP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global.MAX_SNOW_TEMP);
             }
             else if (strcasecmp("CLOSE_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CLOSE_ENERGY = TRUE;
+                    options.CLOSE_ENERGY = true;
                 }
                 else {
-                    options.CLOSE_ENERGY = FALSE;
+                    options.CLOSE_ENERGY = false;
                 }
             }
             else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CONTINUEONERROR = TRUE;
+                    options.CONTINUEONERROR = true;
                 }
                 else {
-                    options.CONTINUEONERROR = FALSE;
+                    options.CONTINUEONERROR = false;
                 }
             }
             else if (strcasecmp("COMPUTE_TREELINE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.COMPUTE_TREELINE = FALSE;
+                    options.COMPUTE_TREELINE = false;
                 }
                 else {
-                    options.COMPUTE_TREELINE = TRUE;
+                    options.COMPUTE_TREELINE = true;
                     options.AboveTreelineVeg = atoi(flgstr);
                 }
             }
             else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.EQUAL_AREA = TRUE;
+                    options.EQUAL_AREA = true;
                 }
                 else {
-                    options.EQUAL_AREA = FALSE;
+                    options.EQUAL_AREA = false;
                 }
             }
             else if (strcasecmp("RESOLUTION", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global.resolution);
+                sscanf(cmdstr, "%*s %lf", &global_param.resolution);
             }
             else if (strcasecmp("AERO_RESIST_CANSNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -362,60 +360,56 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("MTCLIM_SWE_CORR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MTCLIM_SWE_CORR = TRUE;
+                    options.MTCLIM_SWE_CORR = true;
                 }
                 else {
-                    options.MTCLIM_SWE_CORR = FALSE;
+                    options.MTCLIM_SWE_CORR = false;
                 }
             }
             else if (strcasecmp("PLAPSE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.PLAPSE = FALSE;
+                    options.PLAPSE = false;
                 }
                 else {
-                    options.PLAPSE = TRUE;
+                    options.PLAPSE = true;
                 }
             }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s %s", flgstr, flgstr2);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.SPATIAL_FROST = TRUE;
+                    options.SPATIAL_FROST = true;
                     options.Nfrost = atoi(flgstr2);
                 }
                 else {
-                    options.SPATIAL_FROST = FALSE;
+                    options.SPATIAL_FROST = false;
                 }
             }
             else if (strcasecmp("SPATIAL_SNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.SPATIAL_SNOW = TRUE;
+                    options.SPATIAL_SNOW = true;
                 }
                 else {
-                    options.SPATIAL_SNOW = FALSE;
+                    options.SPATIAL_SNOW = false;
                 }
-            }
-            else if (strcasecmp("SW_PREC_THRESH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                options.SW_PREC_THRESH = atof(flgstr);
             }
             else if (strcasecmp("TFALLBACK", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.TFALLBACK = TRUE;
+                    options.TFALLBACK = true;
                 }
                 else {
-                    options.TFALLBACK = FALSE;
+                    options.TFALLBACK = false;
                 }
             }
             else if (strcasecmp("VP_INTERP", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VP_INTERP = TRUE;
+                    options.VP_INTERP = true;
                 }
                 else {
-                    options.VP_INTERP = FALSE;
+                    options.VP_INTERP = false;
                 }
             }
             else if (strcasecmp("VP_ITER", optstr) == 0) {
@@ -439,10 +433,10 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.SHARE_LAYER_MOIST = TRUE;
+                    options.SHARE_LAYER_MOIST = true;
                 }
                 else {
-                    options.SHARE_LAYER_MOIST = FALSE;
+                    options.SHARE_LAYER_MOIST = false;
                 }
             }
             else if (strcasecmp("CANOPY_LAYERS", optstr) == 0) {
@@ -451,10 +445,10 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("CARBON", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CARBON = TRUE;
+                    options.CARBON = true;
                 }
                 else {
-                    options.CARBON = FALSE;
+                    options.CARBON = false;
                 }
             }
             else if (strcasecmp("RC_MODE", optstr) == 0) {
@@ -472,53 +466,53 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("INIT_STATE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.INIT_STATE = FALSE;
+                    options.INIT_STATE = false;
                 }
                 else {
-                    options.INIT_STATE = TRUE;
-                    strcpy(names->init_state, flgstr);
+                    options.INIT_STATE = true;
+                    strcpy(filenames.init_state, flgstr);
                 }
             }
             else if (strcasecmp("STATENAME", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->statefile);
-                options.SAVE_STATE = TRUE;
+                sscanf(cmdstr, "%*s %s", filenames.statefile);
+                options.SAVE_STATE = true;
             }
             else if (strcasecmp("STATEYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.stateyear);
+                sscanf(cmdstr, "%*s %hu", &global_param.stateyear);
             }
             else if (strcasecmp("STATEMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.statemonth);
+                sscanf(cmdstr, "%*s %hu", &global_param.statemonth);
             }
             else if (strcasecmp("STATEDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.stateday);
+                sscanf(cmdstr, "%*s %hu", &global_param.stateday);
             }
             else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.BINARY_STATE_FILE = FALSE;
+                    options.BINARY_STATE_FILE = false;
                 }
                 else {
-                    options.BINARY_STATE_FILE = TRUE;
+                    options.BINARY_STATE_FILE = true;
                 }
             }
             /*************************************
                Define forcing files
             *************************************/
             else if (strcasecmp("FORCING1", optstr) == 0) {
-                if (strcmp(names->f_path_pfx[0], "MISSING") != 0) {
+                if (strcmp(filenames.f_path_pfx[0], "MISSING") != 0) {
                     nrerror(
                         "Tried to define FORCING1 twice, if you want to use "
                         "two forcing files, the second must be defined as "
                         "FORCING2");
                 }
-                sscanf(cmdstr, "%*s %s", names->f_path_pfx[0]);
+                sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[0]);
                 file_num = 0;
                 field = 0;
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->f_path_pfx[1]);
-                if (strcasecmp("FALSE", names->f_path_pfx[1]) == 0) {
-                    strcpy(names->f_path_pfx[1], "MISSING");
+                sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[1]);
+                if (strcasecmp("FALSE", filenames.f_path_pfx[1]) == 0) {
+                    strcpy(filenames.f_path_pfx[1], "MISSING");
                 }
                 file_num = 1;
                 field = 0;
@@ -557,41 +551,41 @@ get_global_param(filenames_struct *names,
                 sscanf(cmdstr, "%*s %hu ", &param_set.FORCE_DT[file_num]);
             }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.forceyear[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global_param.forceyear[file_num]);
             }
             else if (strcasecmp("FORCEMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.forcemonth[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global_param.forcemonth[file_num]);
             }
             else if (strcasecmp("FORCEDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.forceday[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global_param.forceday[file_num]);
             }
             else if (strcasecmp("FORCEHOUR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.forcehour[file_num]);
+                sscanf(cmdstr, "%*s %hu", &global_param.forcehour[file_num]);
             }
             else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &options.GRID_DECIMAL);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global.wind_h);
+                sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
             }
             else if (strcasecmp("MEASURE_H", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global.measure_h);
+                sscanf(cmdstr, "%*s %lf", &global_param.measure_h);
             }
             else if (strcasecmp("ALMA_INPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_INPUT = TRUE;
-                }
-                else {
-                    options.ALMA_INPUT = FALSE;
+                    options.ALMA_INPUT = true;
                 }
             }
             /*************************************
                Define parameter files
             *************************************/
 
+            else if (strcasecmp("CONSTANTS", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.constants);
+            }
             else if (strcasecmp("SOIL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->soil);
+                sscanf(cmdstr, "%*s %s", filenames.soil);
             }
             else if (strcasecmp("ARC_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -640,44 +634,44 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("JULY_TAVG_SUPPLIED", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.JULY_TAVG_SUPPLIED = TRUE;
+                    options.JULY_TAVG_SUPPLIED = true;
                 }
                 else {
-                    options.JULY_TAVG_SUPPLIED = FALSE;
+                    options.JULY_TAVG_SUPPLIED = false;
                 }
             }
             else if (strcasecmp("ORGANIC_FRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.ORGANIC_FRACT = FALSE;
+                    options.ORGANIC_FRACT = false;
                 }
                 else {
-                    options.ORGANIC_FRACT = TRUE;
+                    options.ORGANIC_FRACT = true;
                 }
             }
             else if (strcasecmp("VEGLIB", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->veglib);
+                sscanf(cmdstr, "%*s %s", filenames.veglib);
             }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGLIB_PHOTO = TRUE;
+                    options.VEGLIB_PHOTO = true;
                 }
                 else {
-                    options.VEGLIB_PHOTO = FALSE;
+                    options.VEGLIB_PHOTO = false;
                 }
             }
             else if (strcasecmp("VEGLIB_VEGCOVER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGLIB_VEGCOVER = TRUE;
+                    options.VEGLIB_VEGCOVER = true;
                 }
                 else {
-                    options.VEGLIB_VEGCOVER = FALSE;
+                    options.VEGLIB_VEGCOVER = false;
                 }
             }
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->veg);
+                sscanf(cmdstr, "%*s %s", filenames.veg);
             }
             else if (strcasecmp("GLOBAL_LAI", optstr) == 0) {
                 fprintf(stderr,
@@ -693,7 +687,7 @@ get_global_param(filenames_struct *names,
                         "FROM_VEGLIB\".\n");
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_LAI = TRUE;
+                    options.VEGPARAM_LAI = true;
                     options.LAI_SRC = FROM_VEGPARAM;
                 }
                 else {
@@ -703,10 +697,10 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("VEGPARAM_LAI", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_LAI = TRUE;
+                    options.VEGPARAM_LAI = true;
                 }
                 else {
-                    options.VEGPARAM_LAI = FALSE;
+                    options.VEGPARAM_LAI = false;
                 }
             }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
@@ -723,10 +717,10 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("VEGPARAM_VEGCOVER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_VEGCOVER = TRUE;
+                    options.VEGPARAM_VEGCOVER = true;
                 }
                 else {
-                    options.VEGPARAM_VEGCOVER = FALSE;
+                    options.VEGPARAM_VEGCOVER = false;
                 }
             }
             else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
@@ -741,10 +735,10 @@ get_global_param(filenames_struct *names,
             else if (strcasecmp("VEGPARAM_ALB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_ALB = TRUE;
+                    options.VEGPARAM_ALB = true;
                 }
                 else {
-                    options.VEGPARAM_ALB = FALSE;
+                    options.VEGPARAM_ALB = false;
                 }
             }
             else if (strcasecmp("ALB_SRC", optstr) == 0) {
@@ -761,100 +755,100 @@ get_global_param(filenames_struct *names,
             }
             else if (strcasecmp("SNOW_BAND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu %s", &options.SNOW_BAND,
-                       names->snowband);
+                       filenames.snowband);
             }
             else if (strcasecmp("LAKES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.LAKES = FALSE;
+                    options.LAKES = false;
                 }
                 else {
-                    options.LAKES = TRUE;
-                    strcpy(names->lakeparam, flgstr);
+                    options.LAKES = true;
+                    strcpy(filenames.lakeparam, flgstr);
                 }
             }
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.LAKE_PROFILE = FALSE;
+                    options.LAKE_PROFILE = false;
                 }
                 else {
-                    options.LAKE_PROFILE = TRUE;
+                    options.LAKE_PROFILE = true;
                 }
             }
             /*************************************
                Define output files
             *************************************/
             else if (strcasecmp("RESULT_DIR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", names->result_dir);
+                sscanf(cmdstr, "%*s %s", filenames.result_dir);
             }
             else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.out_dt);
+                sscanf(cmdstr, "%*s %u", &global_param.out_dt);
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global.skipyear);
+                sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.COMPRESS = TRUE;
+                    options.COMPRESS = true;
                 }
                 else {
-                    options.COMPRESS = FALSE;
+                    options.COMPRESS = false;
                 }
             }
             else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BINARY_OUTPUT = TRUE;
+                    options.BINARY_OUTPUT = true;
                 }
                 else {
-                    options.BINARY_OUTPUT = FALSE;
+                    options.BINARY_OUTPUT = false;
                 }
             }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_OUTPUT = TRUE;
+                    options.ALMA_OUTPUT = true;
                 }
                 else {
-                    options.ALMA_OUTPUT = FALSE;
+                    options.ALMA_OUTPUT = false;
                 }
             }
             else if (strcasecmp("MOISTFRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MOISTFRACT = TRUE;
+                    options.MOISTFRACT = true;
                 }
                 else {
-                    options.MOISTFRACT = FALSE;
+                    options.MOISTFRACT = false;
                 }
             }
             else if (strcasecmp("OUTPUT_FORCE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.OUTPUT_FORCE = TRUE;
+                    options.OUTPUT_FORCE = true;
                 }
                 else {
-                    options.OUTPUT_FORCE = FALSE;
+                    options.OUTPUT_FORCE = false;
                 }
             }
             else if (strcasecmp("PRT_HEADER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.PRT_HEADER = TRUE;
+                    options.PRT_HEADER = true;
                 }
                 else {
-                    options.PRT_HEADER = FALSE;
+                    options.PRT_HEADER = false;
                 }
             }
             else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.PRT_SNOW_BAND = TRUE;
+                    options.PRT_SNOW_BAND = true;
                 }
                 else {
-                    options.PRT_SNOW_BAND = FALSE;
+                    options.PRT_SNOW_BAND = false;
                 }
             }
             /*************************************
@@ -887,25 +881,26 @@ get_global_param(filenames_struct *names,
     ******************************************/
 
     // Validate model time step
-    if (global.dt == HOURSPERDAY+1) {
+    if (global_param.dt == HOURS_PER_DAY + 1) {
         nrerror("Model time step has not been defined.  Make sure that the "
                 "global file defines TIME_STEP.");
     }
-    else if (global.dt < 1) {
+    else if (global_param.dt < 1) {
         sprintf(ErrStr,
                 "The specified model time step (%d) < 1 hour.  Make sure that "
                 "the global file defines a positive number of hours for "
-                "TIME_STEP.", global.dt);
+                "TIME_STEP.", global_param.dt);
         nrerror(ErrStr);
     }
 
     // Validate the output step
-    if (global.out_dt == 0) {
-        global.out_dt = global.dt;
+    if (global_param.out_dt == 0) {
+        global_param.out_dt = global_param.dt;
     }
-    else if (global.out_dt < global.dt || global.out_dt > HOURSPERDAY ||
-             (double)global.out_dt / (double)global.dt !=
-             (double)(global.out_dt / global.dt)) {
+    else if (global_param.out_dt < global_param.dt || global_param.out_dt >
+             HOURS_PER_DAY ||
+             (double)global_param.out_dt / (double)global_param.dt !=
+             (double)(global_param.out_dt / global_param.dt)) {
         sprintf(ErrStr,
                 "Invalid output step specified. Output step must be an "
                 "integer multiple of the model time step; >= model time step "
@@ -914,19 +909,21 @@ get_global_param(filenames_struct *names,
     }
 
     // Validate SNOW_STEP and set NR and NF
-    if (global.dt < HOURSPERDAY && global.dt != options.SNOW_STEP) {
+    if (global_param.dt < HOURS_PER_DAY && global_param.dt !=
+        options.SNOW_STEP) {
         sprintf(ErrStr,
                 "If the model step is smaller than daily, the snow model "
                 "should run\nat the same time step as the rest of the model.");
         nrerror(ErrStr);
     }
-    if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt) {
+    if (global_param.dt % options.SNOW_STEP != 0 || options.SNOW_STEP >
+        global_param.dt) {
         sprintf(ErrStr,
                 "SNOW_STEP should be <= TIME_STEP and divide TIME_STEP "
                 "evenly.");
         nrerror(ErrStr);
     }
-    NF = global.dt / options.SNOW_STEP;
+    NF = global_param.dt / options.SNOW_STEP;
     if (NF == 1) {
         NR = 0;
     }
@@ -935,120 +932,124 @@ get_global_param(filenames_struct *names,
     }
 
     // Validate simulation start date
-    if (global.startyear == 0) {
+    if (global_param.startyear == 0) {
         sprintf(ErrStr,
                 "Simulation start year has not been defined.  Make sure that "
                 "the global file defines STARTYEAR.");
         nrerror(ErrStr);
     }
-    if (global.startmonth == 0) {
+    if (global_param.startmonth == 0) {
         sprintf(ErrStr,
                 "Simulation start month has not been defined.  Make sure that "
                 "the global file defines STARTMONTH.");
         nrerror(ErrStr);
     }
-    else if (global.startmonth > 12) {
-        sprintf(ErrStr,"The specified simulation start month (%hu) > 12. Make "
+    else if (global_param.startmonth > MONTHS_PER_YEAR) {
+        sprintf(ErrStr, "The specified simulation start month (%hu) > 12. Make "
                 "sure that the global file defines a positive integer for "
-                "STARTMONTH.",global.startmonth);
+                "STARTMONTH.", global_param.startmonth);
         nrerror(ErrStr);
-        }
-    if (global.startday == 0) {
+    }
+    if (global_param.startday == 0) {
         sprintf(ErrStr,
                 "Simulation start day has not been defined.  Make sure that "
                 "the global file defines STARTDAY.");
         nrerror(ErrStr);
     }
-    if (global.dt == HOURSPERDAY) {
-        global.starthour = 0;
+    if (global_param.dt == HOURS_PER_DAY) {
+        global_param.starthour = 0;
     }
-    else if (global.starthour == HOURSPERDAY+1) {
+    else if (global_param.starthour == HOURS_PER_DAY + 1) {
         sprintf(ErrStr,
                 "Simulation start hour has not been defined, yet model "
-                "time step is less than HOURSPERDAY hours.  Make sure that the "
+                "time step is less than 24 hours.  Make sure that the "
                 "global file defines STARTHOUR.");
         nrerror(ErrStr);
     }
-    else if (global.starthour > HOURSPERDAY) {
+    else if (global_param.starthour > HOURS_PER_DAY) {
         sprintf(ErrStr,
                 "The specified simulation start hour (%hu) > 24.  Make sure "
                 "that the global file defines a positive integer "
-                "for STARTHOUR.", global.starthour);
+                "for STARTHOUR.", global_param.starthour);
         nrerror(ErrStr);
     }
 
 
     // Validate simulation end date and/or number of timesteps
-    if (global.nrecs == 0 && global.endyear == 0 &&
-        global.endmonth == 0 && global.endday == 0) {
+    if (global_param.nrecs == 0 && global_param.endyear == 0 &&
+        global_param.endmonth == 0 && global_param.endday == 0) {
         sprintf(ErrStr,
                 "The model global file MUST define EITHER the number of "
                 "records to simulate (NRECS), or the year (ENDYEAR), month "
                 "(ENDMONTH), and day (ENDDAY) of the last full simulation day");
         nrerror(ErrStr);
     }
-    else if (global.nrecs == 0) {
-        if (global.endyear == 0) {
+    else if (global_param.nrecs == 0) {
+        if (global_param.endyear == 0) {
             sprintf(ErrStr,
                     "Simulation end year has not been defined.  Make sure "
                     "that the global file defines ENDYEAR.");
             nrerror(ErrStr);
         }
-        if (global.endmonth == 0) {
+        if (global_param.endmonth == 0) {
             sprintf(ErrStr,
                     "Simulation end month has not been defined.  Make sure "
                     "that the global file defines ENDMONTH.");
             nrerror(ErrStr);
         }
-        else if (global.endmonth > 12) {
+        else if (global_param.endmonth > MONTHS_PER_YEAR) {
             sprintf(ErrStr,
                     "The specified simulation end month (%hu) < 0.  Make sure "
                     "that the global file defines a positive integer for "
-                    "ENDMONTH.", global.endmonth);
+                    "ENDMONTH.", global_param.endmonth);
             nrerror(ErrStr);
         }
-        if (global.endday == 0) {
+        if (global_param.endday == 0) {
             sprintf(ErrStr,
                     "Simulation end day has not been defined.  Make sure "
                     "that the global file defines ENDDAY.");
             nrerror(ErrStr);
         }
-        else if (global.endday > lastday[global.endmonth]) {
+        else if (global_param.endday > lastday[global_param.endmonth]) {
             sprintf(ErrStr,
                     "The specified simulation end day (%hu) > the number of "
                     "days in the ENDMONTH (%hu).  Make sure that the global "
                     "file defines a positive integer for ENDDAY.",
-                    global.endday, global.endmonth);
+                    global_param.endday, global_param.endmonth);
             nrerror(ErrStr);
         }
-        tmpstartdate = global.startyear * 10000 + global.startmonth * 100 +
-                       global.startday;
-        tmpenddate = global.endyear * 10000 + global.endmonth * 100 +
-                     global.endday;
+        tmpstartdate = global_param.startyear * 10000 +
+                       global_param.startmonth * 100 +
+                       global_param.startday;
+        tmpenddate = global_param.endyear * 10000 + global_param.endmonth *
+                     100 +
+                     global_param.endday;
         if (tmpenddate < tmpstartdate) {
             sprintf(ErrStr,
                     "The specified simulation end date (%04d-%02d-%02d) is "
                     "EARLIER than the specified start date (%04d-%02d-%02d).",
-                    global.endyear, global.endmonth, global.endday,
-                    global.startyear, global.startmonth, global.startday);
+                    global_param.endyear, global_param.endmonth,
+                    global_param.endday,
+                    global_param.startyear, global_param.startmonth,
+                    global_param.startday);
             nrerror(ErrStr);
         }
     }
-    else if (global.nrecs < 1) {
+    else if (global_param.nrecs < 1) {
         sprintf(ErrStr,
                 "The specified duration of simulation (%d) < 1 time step. "
                 "Make sure that the global file defines a positive integer "
-                "for NRECS.", global.nrecs);
+                "for NRECS.", global_param.nrecs);
         nrerror(ErrStr);
     }
 
     // Validate forcing files and variables
-    if (strcmp(names->f_path_pfx[0], "MISSING") == 0) {
+    if (strcmp(filenames.f_path_pfx[0], "MISSING") == 0) {
         nrerror("No forcing file has been defined.  Make sure that the global "
                 "file defines FORCING1.");
     }
     for (i = 0; i < 2; i++) {
-        if (i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING)) {
+        if (i == 0 || (i == 1 && param_set.N_TYPES[i] != 0)) {
             if (param_set.N_TYPES[i] == MISSING) {
                 sprintf(ErrStr,
                         "Need to specify the number forcing variables types "
@@ -1057,10 +1058,10 @@ get_global_param(filenames_struct *names,
                 nrerror(ErrStr);
             }
             if (param_set.FORCE_FORMAT[i] == MISSING) {
-                sprintf(ErrStr,
-                        "Need to specify the INPUT_FORMAT (ASCII or BINARY) "
-                        "for forcing file %d.",
-                        i);
+                fprintf(stderr, "FORCE_FORMAT%d: %d\n", i,
+                        param_set.FORCE_FORMAT[i]);
+                sprintf(ErrStr, "Need to specify the FORCE_FORMAT "
+                        "(ASCII or BINARY) for forcing file %d.", i);
                 nrerror(ErrStr);
             }
             if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] == MISSING) {
@@ -1079,24 +1080,24 @@ get_global_param(filenames_struct *names,
             }
         }
     }
-    if (param_set.N_TYPES[1] != MISSING && global.forceyear[1] == 0) {
-        global.forceyear[1] = global.forceyear[0];
-        global.forcemonth[1] = global.forcemonth[0];
-        global.forceday[1] = global.forceday[0];
-        global.forcehour[1] = global.forcehour[0];
-        global.forceskip[1] = 0;
-        global.forceoffset[1] = global.forceskip[1];
+    if (param_set.N_TYPES[1] != MISSING && global_param.forceyear[1] == 0) {
+        global_param.forceyear[1] = global_param.forceyear[0];
+        global_param.forcemonth[1] = global_param.forcemonth[0];
+        global_param.forceday[1] = global_param.forceday[0];
+        global_param.forcehour[1] = global_param.forcehour[0];
+        global_param.forceskip[1] = 0;
+        global_param.forceoffset[1] = global_param.forceskip[1];
     }
 
     // Validate result directory
-    if (strcmp(names->result_dir, "MISSING") == 0) {
+    if (strcmp(filenames.result_dir, "MISSING") == 0) {
         nrerror("No results directory has been defined.  Make sure that the "
                 "global file defines the result directory on the line that "
                 "begins with \"RESULT_DIR\".");
     }
 
     // Validate soil parameter file information
-    if (strcmp(names->soil, "MISSING") == 0) {
+    if (strcmp(filenames.soil, "MISSING") == 0) {
         nrerror("No soil parameter file has been defined.  Make sure that the "
                 "global file defines the soil parameter file on the line that "
                 "begins with \"SOIL\".");
@@ -1108,13 +1109,13 @@ get_global_param(filenames_struct *names,
 
     if (!options.OUTPUT_FORCE) {
         // Validate veg parameter information
-        if (strcmp(names->veg, "MISSING") == 0) {
+        if (strcmp(filenames.veg, "MISSING") == 0) {
             nrerror("No vegetation parameter file has been defined.  Make "
                     "sure that the global file defines the vegetation "
                     "parameter file on the line that begins with "
                     "\"VEGPARAM\".");
         }
-        if (strcmp(names->veglib, "MISSING") == 0) {
+        if (strcmp(filenames.veglib, "MISSING") == 0) {
             nrerror(
                 "No vegetation library file has been defined.  Make sure that "
                 "the global file defines the vegetation library file on the "
@@ -1182,7 +1183,7 @@ get_global_param(filenames_struct *names,
 
         // Validate the elevation band file information
         if (options.SNOW_BAND > 1) {
-            if (strcmp(names->snowband, "MISSING") == 0) {
+            if (strcmp(filenames.snowband, "MISSING") == 0) {
                 sprintf(ErrStr,
                         "\"SNOW_BAND\" was specified with %zu elevation bands, "
                         "but no elevation band file has been defined.  Make "
@@ -1195,7 +1196,8 @@ get_global_param(filenames_struct *names,
                 sprintf(ErrStr,
                         "Global file wants more snow bands (%zu) than are "
                         "defined by MAX_BANDS (%d).  Edit vic_run/include/vic_def.h "
-                        "and recompile.", options.SNOW_BAND, MAX_BANDS);
+                        "and recompile.", options.SNOW_BAND,
+                        MAX_BANDS);
                 nrerror(ErrStr);
             }
         }
@@ -1209,7 +1211,7 @@ get_global_param(filenames_struct *names,
 
         // Validate the input state file information
         if (options.INIT_STATE) {
-            if (strcmp(names->init_state, "MISSING") == 0) {
+            if (strcmp(filenames.init_state, "MISSING") == 0) {
                 nrerror(
                     "\"INIT_STATE\" was specified, but no input state file "
                     "has been defined.  Make sure that the global file "
@@ -1220,60 +1222,62 @@ get_global_param(filenames_struct *names,
 
         // Validate the output state file information
         if (options.SAVE_STATE) {
-            if (strcmp(names->statefile, "MISSING") == 0) {
+            if (strcmp(filenames.statefile, "MISSING") == 0) {
                 nrerror(
                     "\"SAVE_STATE\" was specified, but no output state file "
                     "has been defined.  Make sure that the global file "
                     "defines the output state file on the line that begins "
                     "with \"SAVE_STATE\".");
             }
-            if (global.stateyear == 0 || global.statemonth == 0 ||
-                global.stateday == 0) {
+            if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
+                global_param.stateday == 0) {
                 sprintf(ErrStr,
                         "Incomplete specification of the date to save state "
                         "for state file (%s).\nSpecified date (yyyy-mm-dd): "
                         "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
                         "STATEDAY are set correctly in your global parameter "
-                        "file.\n", names->statefile, global.stateyear,
-                        global.statemonth, global.stateday);
+                        "file.\n", filenames.statefile, global_param.stateyear,
+                        global_param.statemonth, global_param.stateday);
                 nrerror(ErrStr);
             }
             // Check for month, day in range
-            lastvalidday = lastday[global.statemonth - 1];
-            if (global.statemonth == 2) {
-                if ((global.stateyear % 4) == 0 &&
-                    ((global.stateyear % 100) != 0 ||
-                     (global.stateyear % 400) ==
+            lastvalidday = lastday[global_param.statemonth - 1];
+            if (global_param.statemonth == 2) {
+                if ((global_param.stateyear % 4) == 0 &&
+                    ((global_param.stateyear % 100) != 0 ||
+                     (global_param.stateyear % 400) ==
                      0)) {
                     lastvalidday = 29;
                 }
             }
-            if (global.stateday > lastvalidday || global.statemonth > 12 ||
-                global.statemonth < 1 || global.stateday > 31 ||
-                global.stateday <
+            if (global_param.stateday > lastvalidday ||
+                global_param.statemonth > MONTHS_PER_YEAR ||
+                global_param.statemonth < 1 || global_param.stateday > 31 ||
+                global_param.stateday <
                 1) {
                 sprintf(ErrStr,
                         "Unusual specification of the date to save state for "
                         "state file (%s).\nSpecified date (yyyy-mm-dd): "
                         "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
                         "STATEDAY are set correctly in your global parameter "
-                        "file.\n", names->statefile, global.stateyear,
-                        global.statemonth, global.stateday);
+                        "file.\n", filenames.statefile, global_param.stateyear,
+                        global_param.statemonth, global_param.stateday);
                 nrerror(ErrStr);
             }
         }
         // Set the statename here to be able to compare with INIT_STATE name
         if (options.SAVE_STATE) {
-            sprintf(names->statefile, "%s_%04i%02i%02i", names->statefile,
-                    global.stateyear, global.statemonth, global.stateday);
+            sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
+                    global_param.stateyear, global_param.statemonth,
+                    global_param.stateday);
         }
         if (options.INIT_STATE && options.SAVE_STATE &&
-            (strcmp(names->init_state, names->statefile) == 0)) {
+            (strcmp(filenames.init_state, filenames.statefile) == 0)) {
             sprintf(ErrStr,
                     "The save state file (%s) has the same name as the "
                     "initialize state file (%s).  The initialize state file "
                     "will be destroyed when the save state file is opened.",
-                    names->statefile, names->init_state);
+                    filenames.statefile, filenames.init_state);
             nrerror(ErrStr);
         }
 
@@ -1324,14 +1328,16 @@ get_global_param(filenames_struct *names,
             sprintf(ErrStr,
                     "Global file wants more soil moisture layers (%zu) than "
                     "are defined by MAX_LAYERS (%d).  Edit vic_run/include/vic_def.h "
-                    "and recompile.", options.Nlayer, MAX_LAYERS);
+                    "and recompile.", options.Nlayer,
+                    MAX_LAYERS);
             nrerror(ErrStr);
         }
         if (options.Nnode > MAX_NODES) {
             sprintf(ErrStr,
                     "Global file wants more soil thermal nodes (%zu) than are "
                     "defined by MAX_NODES (%d).  Edit vic_run/include/vic_def.h and "
-                    "recompile.", options.Nnode, MAX_NODES);
+                    "recompile.", options.Nnode,
+                    MAX_NODES);
             nrerror(ErrStr);
         }
         if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
@@ -1357,21 +1363,21 @@ get_global_param(filenames_struct *names,
                         "run.");
                 nrerror(ErrStr);
             }
-            if (strcmp(names->lakeparam, "MISSING") == 0) {
+            if (strcmp(filenames.lakeparam, "MISSING") == 0) {
                 nrerror(
                     "\"LAKES\" was specified, but no lake parameter file has "
                     "been defined.  Make sure that the global file defines "
                     "the lake parameter file on the line that begins with "
                     "\"LAKES\".");
             }
-            if (global.resolution == 0) {
+            if (global_param.resolution == 0) {
                 sprintf(ErrStr,
                         "The model grid cell resolution (RESOLUTION) must be "
                         "defined in the global control file when the lake "
                         "model is active.");
                 nrerror(ErrStr);
             }
-            if (global.resolution > 360 && !options.EQUAL_AREA) {
+            if (global_param.resolution > 360 && !options.EQUAL_AREA) {
                 sprintf(ErrStr,
                         "For EQUAL_AREA=FALSE, the model grid cell resolution "
                         "(RESOLUTION) must be set to the number of lat or lon "
@@ -1389,8 +1395,6 @@ get_global_param(filenames_struct *names,
         /*********************************
            Output major options to stderr
         *********************************/
-        display_current_settings(DISP_VERSION, names, &global);
+        display_current_settings(DISP_VERSION);
     } // !OUTPUT_FORCE
-
-    return global;
 }

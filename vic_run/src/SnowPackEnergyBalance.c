@@ -34,7 +34,8 @@ double
 SnowPackEnergyBalance(double  TSurf,
                       va_list ap)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
     /* Define Variable Argument List */
 
@@ -167,7 +168,7 @@ SnowPackEnergyBalance(double  TSurf,
     /* Calculate active temp for energy balance as average of old and new  */
 
     TMean = TSurf;
-    Density = RHO_W;
+    Density = CONST_RHOFW;
 
     /* Correct aerodynamic conductance for stable conditions
        Note: If air temp >> snow temp then aero_cond -> 0 (i.e. very stable)
@@ -183,34 +184,35 @@ SnowPackEnergyBalance(double  TSurf,
         Ra_used[0] = Ra / StabilityCorrection(Z, 0.f, TMean, Tair, Wind, Z0[2]);
     }
     else {
-        Ra_used[0] = HUGE_RESIST;
+        Ra_used[0] = param.HUGE_RESIST;
     }
 
     /* Calculate longwave exchange and net radiation */
 
-    Tmp = TMean + KELVIN;
-    (*NetLongUnder) = LongSnowIn - STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+    Tmp = TMean + CONST_TKFRZ;
+    (*NetLongUnder) = LongSnowIn - calc_outgoing_longwave(Tmp,
+                                                          param.EMISS_SNOW);
     NetRad = NetShortUnder + (*NetLongUnder);
 
     /* Calculate the sensible heat flux */
 
-    *SensibleHeat = AirDens * Cp * (Tair - TMean) / Ra_used[0];
+    *SensibleHeat = calc_sensible_heat(AirDens, Tair, TMean, Ra_used[0]);
 
     if (options.SPATIAL_SNOW) {
         /* Add in Sensible heat flux turbulent exchange from surrounding
            snow free patches - if present */
-        if (SnowCoverFract > 0) {
+        if (SnowCoverFract > 0.) {
             *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract,
                                                              AirDens, Tair,
                                                              TGrnd,
                                                              Ra_used[0]);
         }
         else {
-            (*AdvectedSensibleHeat) = 0;
+            (*AdvectedSensibleHeat) = 0.;
         }
     }
     else {
-        (*AdvectedSensibleHeat) = 0;
+        (*AdvectedSensibleHeat) = 0.;
     }
 
     /* Convert sublimation terms from m/timestep to kg/m2s */
@@ -236,15 +238,15 @@ SnowPackEnergyBalance(double  TSurf,
     /* Calculate advected heat flux from rain
        Equation 7.3.12 from H.B.H. for rain falling on melting snowpack */
 
-    if (TMean == 0) {
-        *AdvectedEnergy = (CH_WATER * (Tair) * Rain) / (Dt);
+    if (TMean == 0.) {
+        *AdvectedEnergy = (CONST_CPFW * (Tair) * Rain) / (Dt);
     }
     else {
         *AdvectedEnergy = 0.;
     }
 
     /* Calculate change in cold content */
-    *DeltaColdContent = CH_ICE * SweSurfaceLayer * (TSurf - OldTSurf) /
+    *DeltaColdContent = CONST_CPICE * SweSurfaceLayer * (TSurf - OldTSurf) /
                         (Dt);
 
     /* Calculate Ground Heat Flux */
@@ -262,7 +264,7 @@ SnowPackEnergyBalance(double  TSurf,
                *AdvectedEnergy + *GroundFlux - *DeltaColdContent +
                *AdvectedSensibleHeat;
 
-    *RefreezeEnergy = (SurfaceLiquidWater * Lf * Density) / (Dt);
+    *RefreezeEnergy = (SurfaceLiquidWater * CONST_LATICE * Density) / (Dt);
 
     if (TSurf == 0.0 && RestTerm > -(*RefreezeEnergy)) {
         *RefreezeEnergy = -RestTerm; /* available energy input over cold content

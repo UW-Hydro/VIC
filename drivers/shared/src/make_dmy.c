@@ -44,8 +44,10 @@ make_dmy(global_param_struct *global)
 
     dmy_struct             *temp;
     unsigned short          hr, year, day, month, jday, ii;
-    unsigned short          days[12] = {31, 28, 31, 30, 31, 30,
-                                        31, 31, 30, 31, 30, 31};
+    unsigned short          days[MONTHS_PER_YEAR] = {
+        31, 28, 31, 30, 31, 30,
+        31, 31, 30, 31, 30, 31
+    };
     unsigned short          endmonth, endday, endyear, skiprec, i, offset;
     unsigned short          tmpmonth, tmpday, tmpyear, tmphr, tmpjday;
     char                    DONE;
@@ -80,13 +82,13 @@ make_dmy(global_param_struct *global)
         else {
             endday = 1;
             endmonth++;
-            if (endmonth > 12) {
+            if (endmonth > MONTHS_PER_YEAR) {
                 endmonth = 1;
                 endyear++;
             }
         }
 
-        DONE = FALSE;
+        DONE = false;
         ii = 0;
 
         tmpyear = year;
@@ -100,7 +102,7 @@ make_dmy(global_param_struct *global)
             if (tmpyear == endyear) {
                 if (tmpmonth == endmonth) {
                     if (tmpday == endday) {
-                        DONE = TRUE;
+                        DONE = true;
                     }
                 }
             }
@@ -113,17 +115,19 @@ make_dmy(global_param_struct *global)
         while (tmphr != 0) {
             tmphr += global->dt;
             offset++;
-            if (tmphr >= 24) {
+            if (tmphr >= HOURS_PER_DAY) {
                 tmphr = 0;
             }
         }
-        if (((global->dt * (global->nrecs - offset)) % 24) != 0) {
+        if (((global->dt * (global->nrecs - offset)) % HOURS_PER_DAY) != 0) {
             sprintf(ErrStr,
                     "Nrecs must be defined such that the model ends after "
                     "completing a full day.  Currently Nrecs is set to %i, "
                     "while %i and %i are allowable values.", global->nrecs,
-                    ((global->dt * (global->nrecs - offset)) / 24) * 24,
-                    ((global->dt * (global->nrecs - offset)) / 24) * 24 + 24);
+                    ((global->dt * (global->nrecs - offset)) / HOURS_PER_DAY) * HOURS_PER_DAY,
+                    ((global->dt *
+                      (global->nrecs -
+             offset)) / HOURS_PER_DAY) * HOURS_PER_DAY + HOURS_PER_DAY);
             nrerror(ErrStr);
         }
     }
@@ -143,7 +147,7 @@ make_dmy(global_param_struct *global)
         jday += days[ii];
     }
 
-    DONE = FALSE;
+    DONE = false;
     ii = 0;
 
     while (!DONE) {
@@ -157,7 +161,7 @@ make_dmy(global_param_struct *global)
 
         ii++;
         if (ii == global->nrecs) {
-            DONE = TRUE;
+            DONE = true;
         }
     }
 
@@ -199,10 +203,10 @@ make_dmy(global_param_struct *global)
     skiprec = 0;
     for (i = 0; i < global->skipyear; i++) {
         if (LEAPYR(temp[skiprec].year)) {
-            skiprec += 366 * 24 / global->dt;
+            skiprec += DAYS_PER_LYEAR * HOURS_PER_DAY / global->dt;
         }
         else {
-            skiprec += 365 * 24 / global->dt;
+            skiprec += DAYS_PER_YEAR * HOURS_PER_DAY / global->dt;
         }
     }
     global->skipyear = skiprec;
@@ -221,10 +225,12 @@ get_next_time_step(unsigned short *year,
                    unsigned short *jday,
                    unsigned short  dt)
 {
-    unsigned short days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    unsigned short days[MONTHS_PER_YEAR] = {
+        31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
 
     *hr += dt;
-    if (*hr >= 24) {
+    if (*hr >= HOURS_PER_DAY) {
         *hr = 0;
         *day += 1;
         *jday += 1;

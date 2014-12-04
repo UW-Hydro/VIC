@@ -50,30 +50,32 @@ photosynth(char    Ctype,
            double *Rphoto,
            double *Agross)
 {
-    double               T;
-    double               T1;
-    double               T0;
-    double               Vcmax;
-    double               KC;
-    double               KO;
-    double               gamma;
-    double               Jmax;
-    double               K;
-    double               JE;
-    double               JC;
-    double               J0;
-    double               J1;
-    double               K1;
-    double               K2;
-    double               W1;
-    double               W2;
-    double               r0;
-    double               B;
-    double               C;
-    double               tmp;
+    extern parameters_struct param;
 
-    T1 = 25 + KELVIN;
-    T = Tfoliage + KELVIN;     // Canopy or Vegetation Temperature in Kelvin
+    double                   T;
+    double                   T1;
+    double                   T0;
+    double                   Vcmax;
+    double                   KC;
+    double                   KO;
+    double                   gamma;
+    double                   Jmax;
+    double                   K;
+    double                   JE = 0.;
+    double                   JC = 0.;
+    double                   J0;
+    double                   J1;
+    double                   K1;
+    double                   K2;
+    double                   W1;
+    double                   W2;
+    double                   r0;
+    double                   B;
+    double                   C;
+    double                   tmp;
+
+    T1 = 25 + CONST_TKFRZ;
+    T = Tfoliage + CONST_TKFRZ;     // Canopy or Vegetation Temperature in Kelvin
     T0 = T - T1;               // T relative to 25 degree Celsius, means T - 25
 
     /********************************************************************************
@@ -84,7 +86,8 @@ photosynth(char    Ctype,
        ! exponentially inside the canopy. This is reflected directly in the values of Vcmax
        ! and Jmax at 25 Celsius (Vcmax * nscl),  Knorr (107/108)
     ********************************************************************************/
-    Vcmax = MaxCarboxRate * NscaleFactor * exp(EV * (T0 / T1) / (Rgas * T));
+    Vcmax = MaxCarboxRate * NscaleFactor *
+            exp(param.PHOTO_EV * (T0 / T1) / (CONST_RGAS * T));
 
     /********************************************************************************
        ! Determine temperature-dependent rates, compensation point, and 'dark' respiration
@@ -106,8 +109,10 @@ photosynth(char    Ctype,
            !    Rdark-Dark respiration, K-PEPcase CO2 specivity
            !    Knorr (106)
         ********************************************************************************/
-        KC = KC0 * exp(EC * (T0 / T1) / (Rgas * T));
-        KO = KO0 * exp(EO * (T0 / T1) / (Rgas * T));
+        KC = param.PHOTO_KC *
+             exp(param.PHOTO_EC * (T0 / T1) / (CONST_RGAS * T));
+        KO = param.PHOTO_KO *
+             exp(param.PHOTO_EO * (T0 / T1) / (CONST_RGAS * T));
 
         /********************************************************************************
            ! CO2 compensation point without leaf respiration, gamma* is assumed to be linearly
@@ -127,12 +132,13 @@ photosynth(char    Ctype,
            ! minMaxETransport=1E-12
         ********************************************************************************/
         Jmax = MaxETransport * NscaleFactor * Tfoliage / 25.;
-        if (Jmax < minMaxETrans) {
-            Jmax = minMaxETrans;
+        if (Jmax < param.PHOTO_MINMAXETRANS) {
+            Jmax = param.PHOTO_MINMAXETRANS;
         }
-        if (Jmax > minMaxETrans) {
-            J1 = ALC3 * aPAR * Jmax /
-                 sqrt(Jmax * Jmax + (ALC3 * aPAR) * (ALC3 * aPAR));
+        if (Jmax > param.PHOTO_MINMAXETRANS) {
+            J1 = param.PHOTO_ALC3 * aPAR * Jmax /
+                 sqrt(Jmax * Jmax +
+                      (param.PHOTO_ALC3 * aPAR) * (param.PHOTO_ALC3 * aPAR));
         }
         else {
             J1 = 0.;
@@ -144,9 +150,10 @@ photosynth(char    Ctype,
            ! to Vcmax at 25C, therefore Rdark = const * Vcmax, but the temperature dependence
            ! goes with ER (for respiration) and not with EV (for Vcmax)
         ********************************************************************************/
-        *Rdark = FRDC3 * MaxCarboxRate * NscaleFactor *
-                 exp(ER *
-                     (T0 / T1) / (Rgas * T)) * hiTinhib(Tfoliage) * darkinhib(
+        *Rdark = param.PHOTO_FRDC3 * MaxCarboxRate * NscaleFactor *
+                 exp(param.PHOTO_ER *
+                     (T0 /
+                      T1) / (CONST_RGAS * T)) * hiTinhib(Tfoliage) * darkinhib(
             PIRRIN);
     }
     else if (Ctype == PHOTO_C4) {
@@ -177,16 +184,18 @@ photosynth(char    Ctype,
            !   which is not considered in INITVEGDATA
            ! K scales of course with EK
         ********************************************************************************/
-        K = CO2Specificity * 1.E3 *NscaleFactor *exp(EK*(T0 / T1) / (Rgas * T));
+        K = CO2Specificity * 1.E3 *NscaleFactor *exp(
+            param.PHOTO_EK*(T0 / T1) / (CONST_RGAS * T));
 
         /********************************************************************************
            !  Compute 'dark' respiration
            !  same as C3, just the 25 degree Celsius proportional factor is different
            !    0.011 for C3,  0.0042 for C4
         ********************************************************************************/
-        *Rdark = FRDC4 * MaxCarboxRate * NscaleFactor *
-                 exp(ER *
-                     (T0 / T1) / (Rgas * T)) * hiTinhib(Tfoliage) * darkinhib(
+        *Rdark = param.PHOTO_FRDC4 * MaxCarboxRate * NscaleFactor *
+                 exp(param.PHOTO_ER *
+                     (T0 /
+                      T1) / (CONST_RGAS * T)) * hiTinhib(Tfoliage) * darkinhib(
             PIRRIN);
     } // End computation of T-dependent rates and dark respiration
 
@@ -210,7 +219,8 @@ photosynth(char    Ctype,
                !          respiratory part Rdark
             ********************************************************************************/
             JE = J1 * ((*Ci) - gamma) / 4. / ((*Ci) + 2. * gamma);
-            JC = Vcmax * ((*Ci) - gamma) / ((*Ci) + KC * (1. + OX / KO));
+            JC = Vcmax *
+                 ((*Ci) - gamma) / ((*Ci) + KC * (1. + param.PHOTO_OX / KO));
         }
         else if (Ctype == PHOTO_C4) {
             /********************************************************************************
@@ -222,20 +232,20 @@ photosynth(char    Ctype,
                !    Ji = ALC4 * aPAR
                !  J0 is the sum of the first two terms in JE
             ********************************************************************************/
-            J0 = (ALC4 * aPAR + Vcmax) / 2. / THETA;
+            J0 = (param.PHOTO_ALC4 * aPAR + Vcmax) / 2. / param.PHOTO_THETA;
 
             /********************************************************************************
                !  last 2 terms:  with J0^2 = 1/4/Theta^2*(Vcmax+Ji)^2
                !       sqrt(1/4/Theta^2)*sqrt((Vcmax+Ji)^2 - 4*Theta*Vcmax*Ji))
                !   = sqrt (J0^2 - Vcmax*Ji/Theta)
             ********************************************************************************/
-            JE = J0 - sqrt(J0 * J0 - Vcmax * ALC4 * aPAR / THETA);
+            JE = J0 - sqrt(
+                J0 * J0 - Vcmax * param.PHOTO_ALC4 * aPAR / param.PHOTO_THETA);
 
             /********************************************************************************
                !         see above
             ********************************************************************************/
             JC = K * (*Ci);
-
         }
     } // End computation of gross photosynthesis components at given Ci
     else {
@@ -263,7 +273,7 @@ photosynth(char    Ctype,
             K1 = 2. * gamma;
             W1 = J1 / 4.;
             W2 = Vcmax;
-            K2 = KC * (1. + OX / KO);
+            K2 = KC * (1. + param.PHOTO_OX / KO);
 
             /********************************************************************************
                ! A = gs / 1.6 * (Catm - Ci) * Psurf / Rgas / T
@@ -272,7 +282,7 @@ photosynth(char    Ctype,
                ! and r0 = 1/G0
                ! So Ci = Catm - 1.6*(Rgas*T/Psurf)*rs * A = Catm - A * r0
             ********************************************************************************/
-            r0 = (*rs) * 1.6 * Rgas * T / Psurf;
+            r0 = (*rs) * 1.6 * CONST_RGAS * T / Psurf;
 
             /********************************************************************************
                ! A = min{JC, JE} - Rdark
@@ -331,17 +341,18 @@ photosynth(char    Ctype,
                ! and r0 = 1/G0
                ! So Ci = Catm - 1.6*(Rgas*T/Psurf)*rs * A = Catm - A * r0
             ********************************************************************************/
-            r0 = (*rs) * 1.6 * Rgas * T / Psurf;
+            r0 = (*rs) * 1.6 * CONST_RGAS * T / Psurf;
 
             /********************************************************************************
                !  J0=1/2/Theta *(Vcmax + Ji) = (alphai * aPAR + Vcmax) / 2 / Theta
             ********************************************************************************/
-            J0 = (ALC4 * aPAR + Vcmax) / 2. / THETA;
+            J0 = (param.PHOTO_ALC4 * aPAR + Vcmax) / 2. / param.PHOTO_THETA;
 
             /********************************************************************************
                !  JE = J0 - sqrt( J0^2 - Vcmax*alphai*aPAR/Theta)
             ********************************************************************************/
-            JE = J0 - sqrt(J0 * J0 - Vcmax * ALC4 * aPAR / THETA);
+            JE = J0 - sqrt(
+                J0 * J0 - Vcmax * param.PHOTO_ALC4 * aPAR / param.PHOTO_THETA);
 
             /********************************************************************************
                !  JC = (Catm/r0 + Rdark) / (1 + 1/(K*r0))
@@ -394,7 +405,8 @@ photosynth(char    Ctype,
            ! JC = Vcmax * (Ci - gamma) / (Ci + K2)
            ! Photorespiration = Vcmax * gamma / (Ci + K2)
         ********************************************************************************/
-        *Rphoto = Vcmax * gamma / ((*Ci) + KC * (1. + OX / KO)) * hiTinhib(
+        *Rphoto = Vcmax * gamma /
+                  ((*Ci) + KC * (1. + param.PHOTO_OX / KO)) * hiTinhib(
             Tfoliage);
     }
     else {
@@ -421,16 +433,16 @@ photosynth(char    Ctype,
            !   => A (net) = gs/1.6 * (Catm-CI) * p/RgasT
            !   => gs = A(net)*1.6*RgasT/p/(Catm-CI)
         ********************************************************************************/
-        if ((*Agross) - (*Rdark) < SMALL) {
-            *rs = HUGE_RESIST;
+        if ((*Agross) - (*Rdark) < DBL_EPSILON) {
+            *rs = param.HUGE_RESIST;
         }
         else {
             *rs = 0.625 *
                   (Catm -
-                   (*Ci)) / ((*Agross) - (*Rdark)) * (Psurf / (Rgas * T));
+                   (*Ci)) / ((*Agross) - (*Rdark)) * (Psurf / (CONST_RGAS * T));
         }
-        if (*rs > HUGE_RESIST) {
-            *rs = HUGE_RESIST;
+        if (*rs > param.HUGE_RESIST) {
+            *rs = param.HUGE_RESIST;
         }
     }
 }

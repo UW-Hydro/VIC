@@ -53,7 +53,7 @@ SHELL = /bin/bash
 CC = gcc
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${DRIVERPATH}/../classic/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
@@ -79,8 +79,7 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_image.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
-	${DRIVERPATH}/../classic/include/vic_driver_classic.h \
-	${DRIVERPATH}/../classic/include/mtclim_constants_vic.h
+	${VICPATH}/include/vic_physical_constants.h
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -95,7 +94,7 @@ OBJS = \
 	${DRIVERPATH}/src/initialize_model_state.o \
 	${DRIVERPATH}/src/output_list_utils.o \
 	${DRIVERPATH}/src/parse_output_info.o \
-	${DRIVERPATH}/src/print_library.o \
+	${DRIVERPATH}/src/print_library_image.o \
 	${DRIVERPATH}/src/put_nc_field.o \
 	${DRIVERPATH}/src/vic_alloc.o \
 	${DRIVERPATH}/src/vic_finalize.o \
@@ -116,7 +115,11 @@ OBJS = \
 	${SHAREDPATH}/src/free_all_vars.o \
 	${SHAREDPATH}/src/free_vegcon.o \
 	${SHAREDPATH}/src/get_dist.o \
+	${SHAREDPATH}/src/get_parameters.o \
+	${SHAREDPATH}/src/initialize_filenames.o \
 	${SHAREDPATH}/src/initialize_global.o \
+	${SHAREDPATH}/src/initialize_options.o \
+	${SHAREDPATH}/src/initialize_parameters.o \
 	${SHAREDPATH}/src/initialize_snow.o \
 	${SHAREDPATH}/src/initialize_soil.o \
 	${SHAREDPATH}/src/initialize_veg.o \
@@ -127,6 +130,7 @@ OBJS = \
 	${SHAREDPATH}/src/make_snow_data.o \
 	${SHAREDPATH}/src/make_veg_var.o \
 	${SHAREDPATH}/src/open_file.o \
+	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/soil_moisture_from_water_table.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
@@ -166,6 +170,7 @@ OBJS = \
 	${VICPATH}/src/nrerror.o \
 	${VICPATH}/src/penman.o \
 	${VICPATH}/src/photosynth.o \
+	${VICPATH}/src/physics.o \
 	${VICPATH}/src/prepare_full_energy.o \
 	${VICPATH}/src/put_data.o \
 	${VICPATH}/src/root_brent.o \

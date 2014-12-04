@@ -48,7 +48,7 @@ get_dist(double lat1,
     double temp;
     double distance;
 
-    dtor = 2.0 * PI / 360.0;
+    dtor = 2.0 * CONST_PI / 360.0;
     theta1 = dtor * long1;
     phi1 = dtor * lat1;
     theta2 = dtor * long2;
@@ -58,7 +58,7 @@ get_dist(double lat1,
     term3 = sin(phi1) * sin(phi2);
     temp = term1 + term2 + term3;
     temp = (double) (1.0 < temp) ? 1.0 : temp;
-    distance = RADIUS * acos(temp);
+    distance = CONST_REARTH * acos(temp);
 
     return distance;
 }

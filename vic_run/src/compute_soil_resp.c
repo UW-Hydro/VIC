@@ -44,17 +44,19 @@ compute_soil_resp(int     Nnodes,
                   double *RhInterTot,
                   double *RhSlowTot)
 {
-    int                  i;
-    double               Tref;
-    double              *TK;
-    double               fTLitter;
-    double              *fTSoil;
-    double               fMLitter;
-    double              *fMSoil;
-    double              *CInterNode;
-    double              *CSlowNode;
-    double              *RhInter;
-    double              *RhSlow;
+    extern parameters_struct param;
+
+    int                      i;
+    double                   Tref;
+    double                  *TK;
+    double                   fTLitter;
+    double                  *fTSoil;
+    double                   fMLitter;
+    double                  *fMSoil;
+    double                  *CInterNode;
+    double                  *CSlowNode;
+    double                  *RhInter;
+    double                  *RhSlow;
 
     /* Allocate temp arrays */
     TK = (double*)calloc(Nnodes, sizeof(double));
@@ -66,47 +68,57 @@ compute_soil_resp(int     Nnodes,
     RhSlow = (double*)calloc(Nnodes, sizeof(double));
 
     /* Compute Lloyd-Taylor temperature dependence */
-    Tref = 10 + KELVIN; /* reference temperature of 10 C */
+    Tref = 10. + CONST_TKFRZ; /* reference temperature of 10 C */
     for (i = 0; i < Nnodes; i++) {
-        TK[i] = T[i] + KELVIN;
-        if (TK[i] < T0_LT) {
-            TK[i] = T0_LT;
+        TK[i] = T[i] + CONST_TKFRZ;
+        if (TK[i] < param.SRESP_T0_LT) {
+            TK[i] = param.SRESP_T0_LT;
         }
     }
-    fTLitter = exp(E0_LT * (1 / (Tref - T0_LT) - 1 / (TK[0] - T0_LT)));
+    fTLitter =
+        exp(param.SRESP_E0_LT *
+            (1 / (Tref - param.SRESP_T0_LT) - 1 / (TK[0] - param.SRESP_T0_LT)));
     for (i = 0; i < Nnodes; i++) {
-        fTSoil[i] = exp(E0_LT * (1 / (Tref - T0_LT) - 1 / (TK[i] - T0_LT)));
+        fTSoil[i] =
+            exp(param.SRESP_E0_LT *
+                (1 /
+                 (Tref - param.SRESP_T0_LT) - 1 / (TK[i] - param.SRESP_T0_LT)));
     }
 
     /* Compute moisture dependence */
     for (i = 0; i < Nnodes; i++) {
-        if (w[i] < wminFM) {
-            w[i] = wminFM;
+        if (w[i] < param.SRESP_WMINFM) {
+            w[i] = param.SRESP_WMINFM;
         }
-        if (w[i] > wmaxFM) {
-            w[i] = wmaxFM;
+        if (w[i] > param.SRESP_WMAXFM) {
+            w[i] = param.SRESP_WMAXFM;
         }
     }
-    if (w[0] <= woptFM) {
+    if (w[0] <= param.SRESP_WOPTFM) {
         fMLitter =
             (w[0] -
-             wminFM) *
+             param.SRESP_WMINFM) *
             (w[0] -
-             wmaxFM) /
+             param.SRESP_WMAXFM) /
             ((w[0] -
-              wminFM) * (w[0] - wmaxFM) - (w[0] - woptFM) * (w[0] - woptFM));
+              param.SRESP_WMINFM) *
+             (w[0] -
+              param.SRESP_WMAXFM) -
+             (w[0] - param.SRESP_WOPTFM) * (w[0] - param.SRESP_WOPTFM));
     }
     else {
-        fMLitter = Rhsat +
+        fMLitter = param.SRESP_RHSAT +
                    (1 -
-                    Rhsat) *
+                    param.SRESP_RHSAT) *
                    (w[0] -
-                    wminFM) *
+                    param.SRESP_WMINFM) *
                    (w[0] -
-                    wmaxFM) /
+                    param.SRESP_WMAXFM) /
                    ((w[0] -
-                     wminFM) *
-                    (w[0] - wmaxFM) - (w[0] - woptFM) * (w[0] - woptFM));
+                     param.SRESP_WMINFM) *
+                    (w[0] -
+                     param.SRESP_WMAXFM) -
+                    (w[0] - param.SRESP_WOPTFM) * (w[0] - param.SRESP_WOPTFM));
     }
     if (fMLitter > 1.0) {
         fMLitter = 1.0;
@@ -115,27 +127,32 @@ compute_soil_resp(int     Nnodes,
         fMLitter = 0.0;
     }
     for (i = 0; i < Nnodes; i++) {
-        if (w[i] <= woptFM) {
+        if (w[i] <= param.SRESP_WOPTFM) {
             fMSoil[i] =
                 (w[i] -
-                 wminFM) *
+                 param.SRESP_WMINFM) *
                 (w[i] -
-                 wmaxFM) /
+                 param.SRESP_WMAXFM) /
                 ((w[i] -
-                  wminFM) *
-                 (w[i] - wmaxFM) - (w[i] - woptFM) * (w[i] - woptFM));
+                  param.SRESP_WMINFM) *
+                 (w[i] -
+                  param.SRESP_WMAXFM) -
+                 (w[i] - param.SRESP_WOPTFM) * (w[i] - param.SRESP_WOPTFM));
         }
         else {
-            fMSoil[i] = Rhsat +
+            fMSoil[i] = param.SRESP_RHSAT +
                         (1 -
-                         Rhsat) *
+                         param.SRESP_RHSAT) *
                         (w[i] -
-                         wminFM) *
+                         param.SRESP_WMINFM) *
                         (w[i] -
-                         wmaxFM) /
+                         param.SRESP_WMAXFM) /
                         ((w[i] -
-                          wminFM) *
-                         (w[i] - wmaxFM) - (w[i] - woptFM) * (w[i] - woptFM));
+                          param.SRESP_WMINFM) *
+                         (w[i] -
+                          param.SRESP_WMAXFM) -
+                         (w[i] -
+                          param.SRESP_WOPTFM) * (w[i] - param.SRESP_WOPTFM));
         }
         if (fMSoil[i] > 1.0) {
             fMSoil[i] = 1.0;
@@ -152,18 +169,21 @@ compute_soil_resp(int     Nnodes,
     }
 
     /* Compute Rh for various pools, nodes; C fluxes in [gC/m2d] */
-    *RhLitter = Rfactor *
+    *RhLitter = param.SRESP_RFACTOR *
                 (fTLitter * fMLitter /
-                 (tauLitter * 365.25 * 24 / dt)) * CLitter;
+                 (param.SRESP_TAULITTER * CONST_DDAYS_PER_YEAR * HOURS_PER_DAY /
+                  dt)) * CLitter;
     *RhInterTot = 0;
     *RhSlowTot = 0;
     for (i = 0; i < Nnodes; i++) {
-        RhInter[i] = Rfactor *
+        RhInter[i] = param.SRESP_RFACTOR *
                      (fTSoil[i] * fMSoil[i] /
-                      (tauInter * 365.25 * 24 / dt)) * CInterNode[i];
-        RhSlow[i] = Rfactor *
+                      (param.SRESP_TAUINTER * CONST_DDAYS_PER_YEAR *
+                       HOURS_PER_DAY / dt)) * CInterNode[i];
+        RhSlow[i] = param.SRESP_RFACTOR *
                     (fTSoil[i] * fMSoil[i] /
-                     (tauSlow * 365.25 * 24 / dt)) * CSlowNode[i];
+                     (param.SRESP_TAUSLOW * CONST_DDAYS_PER_YEAR *
+                      HOURS_PER_DAY / dt)) * CSlowNode[i];
         *RhInterTot += RhInter[i];
         *RhSlowTot += RhSlow[i];
     }

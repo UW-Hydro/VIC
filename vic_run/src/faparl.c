@@ -42,26 +42,28 @@ faparl(double *CanopLayerBnd,
        double *LAIlayer,
        double *aPAR)
 {
-    extern option_struct options;
-    double               FC;
-    size_t               cidx;
-    double               ZH;
-    double               ZP1;
-    double               ZP0;
-    double               K0;
-    double               X0;
-    double               X1;
-    double               X2;
-    double               Q0;
-    double               Q1;
-    double               F;
-    double               B0;
-    double               B1;
-    double               B4;
-    double               EKL0;
-    double               EHL0;
-    double               EKL;
-    double               EHL;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    double                   FC;
+    size_t                   cidx;
+    double                   ZH;
+    double                   ZP1;
+    double                   ZP0;
+    double                   K0;
+    double                   X0;
+    double                   X1;
+    double                   X2;
+    double                   Q0;
+    double                   Q1;
+    double                   F;
+    double                   B0;
+    double                   B1;
+    double                   B4;
+    double                   EKL0;
+    double                   EHL0;
+    double                   EKL;
+    double                   EHL;
 
     /*---------------------------------------------------------------------------
        ! Compute fractional vegetation cover per PFT
@@ -70,14 +72,14 @@ faparl(double *CanopLayerBnd,
        ! how much bare ground is visible between the plants.
        ! This will be used to relate fluxes per leaf area to fluxes per ground area.
        !---------------------------------------------------------------------------*/
-    if (LAItotal < LaiLimit) {
-        FC = LAItotal / LaiLimit * FcMax;
+    if (LAItotal < param.PHOTO_LAILIMIT) {
+        FC = LAItotal / param.PHOTO_LAILIMIT * param.PHOTO_FCMAX;
     }
     else {
-        FC = FcMax;
+        FC = param.PHOTO_FCMAX;
     }
-    if (FC < FcMin) {
-        FC = FcMin;
+    if (FC < param.PHOTO_FCMIN) {
+        FC = param.PHOTO_FCMIN;
     }
 
     /*---------------------------------------------------------------------------
@@ -93,15 +95,15 @@ faparl(double *CanopLayerBnd,
         else {
             LAIlayer[cidx] = LAItotal * CanopLayerBnd[cidx];
         }
-        if (LAIlayer[cidx] < LaiMin) {
-            LAIlayer[cidx] = LaiMin;
+        if (LAIlayer[cidx] < param.PHOTO_LAIMIN) {
+            LAIlayer[cidx] = param.PHOTO_LAIMIN;
         }
     }
 
     /*---------------------------------------------------------------------------
        !     COMPUTE ABSORBED PAR PER LEAF AREA
        !---------------------------------------------------------------------------*/
-    if (CosZen >= ZenithMinPar) {
+    if (CosZen >= param.PHOTO_ZENITHMINPAR) {
         /*-------------------------------------------------------------------
            ! The Absorbed Par per leaf Area which is used later for the Net Assimilation,
            ! is calculated via the two stream approximation of Sellers (1985):
@@ -189,12 +191,12 @@ faparl(double *CanopLayerBnd,
         /*---------------------------------
            !  h = sqrt( 1 - omega )
            !---------------------------------*/
-        ZH = sqrt(1. - OMEGA);
+        ZH = sqrt(1. - param.PHOTO_OMEGA);
 
         /*---------------------------------
            !  p1 = ( 1-omega/2 + h )/omega/
            !---------------------------------*/
-        ZP1 = (1. - OMEGA / 2. + ZH) / OMEGA * 2.;
+        ZP1 = (1. - param.PHOTO_OMEGA / 2. + ZH) / param.PHOTO_OMEGA * 2.;
 
         /*---------------------------------------
            ! p2 = ( 1-omega/2 - h )/omega/2 = 1 / p1
@@ -221,13 +223,13 @@ faparl(double *CanopLayerBnd,
            ! q1 = ( (1 + 2*mu)*omega/2 )/(1-4*mu^2*(1-omega))
            !    = ( k*(k + 1)*omega/2 )/(k^2-1-omega)
            !-------------------------------------------------------------*/
-        Q1 = ((1. + 2. * CosZen) * OMEGA / 2.) / X0;
+        Q1 = ((1. + 2. * CosZen) * param.PHOTO_OMEGA / 2.) / X0;
 
         /*-------------------------------------------------------------
            ! q2 = ( (1 - 2*mu)*omega/2 )/(1-4*mu^2*(1-omega))
            !    = ( k*(k - 1)*omega/2 )/(k^2-1-omega)
            !-------------------------------------------------------------*/
-        Q0 = ((1. - 2. * CosZen) * OMEGA / 2.) / X0;
+        Q0 = ((1. - 2. * CosZen) * param.PHOTO_OMEGA / 2.) / X0;
 
         /*----------------------------------------------------------
            ! EXP(-k*LAI/fc)
@@ -348,5 +350,5 @@ faparl(double *CanopLayerBnd,
         for (cidx = 0; cidx < options.Ncanopy; cidx++) {
             aPAR[cidx] = aPAR[cidx] * FC;
         }
-    } // CosZen >= ZenithMinPar
+    }
 }

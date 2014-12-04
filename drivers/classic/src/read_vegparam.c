@@ -40,27 +40,29 @@ read_vegparam(FILE  *vegparam,
               size_t Nveg_type)
 {
     void ttrim(char *string);
-    extern veg_lib_struct *veg_lib;
-    extern option_struct   options;
-    veg_con_struct        *temp;
-    size_t                 j;
-    int                    vegetat_type_num;
-    int                    vegcel, i, k, skip, veg_class;
-    int                    MaxVeg;
-    int                    Nfields, NfieldsMax;
-    int                    NoOverstory;
-    double                 depth_sum;
-    double                 sum;
-    char                   str[500];
-    char                   ErrStr[MAXSTRING];
-    char                   line[MAXSTRING];
-    char                   tmpline[MAXSTRING];
-    const char             delimiters[] = " \t";
-    char                  *token;
-    char                  *vegarr[500];
-    size_t                 length;
-    size_t                 cidx;
-    double                 tmp;
+    extern veg_lib_struct   *veg_lib;
+    extern option_struct     options;
+    extern parameters_struct param;
+
+    veg_con_struct          *temp;
+    size_t                   j;
+    int                      vegetat_type_num;
+    int                      vegcel, i, k, skip, veg_class;
+    int                      MaxVeg;
+    int                      Nfields, NfieldsMax;
+    int                      NoOverstory;
+    double                   depth_sum;
+    double                   sum;
+    char                     str[500];
+    char                     ErrStr[MAXSTRING];
+    char                     line[MAXSTRING];
+    char                     tmpline[MAXSTRING];
+    const char               delimiters[] = " \t";
+    char                    *token;
+    char                    *vegarr[500];
+    size_t                   length;
+    size_t                   cidx;
+    double                   tmp;
 
     skip = 1;
     if (options.VEGPARAM_LAI) {
@@ -264,7 +266,7 @@ read_vegparam(FILE  *vegparam,
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
-            NfieldsMax = 12; /* For LAI */
+            NfieldsMax = MONTHS_PER_YEAR; /* For LAI */
             if (Nfields != NfieldsMax) {
                 sprintf(ErrStr,
                         "ERROR - cell %d - expecting %d LAI values but found "
@@ -274,7 +276,7 @@ read_vegparam(FILE  *vegparam,
             }
 
             if (options.LAI_SRC == FROM_VEGPARAM) {
-                for (j = 0; j < 12; j++) {
+                for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
                         veg_lib[temp[i].veg_class].LAI[j] = tmp;
@@ -290,10 +292,11 @@ read_vegparam(FILE  *vegparam,
                                 temp[i].veg_class + 1, j + 1);
                         nrerror(ErrStr);
                     }
-                    veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR *
-                                                          veg_lib[temp[i].
-                                                                  veg_class].LAI
-                                                          [j];
+                    veg_lib[temp[i].veg_class].Wdmax[j] =
+                        param.VEG_LAI_WATER_FACTOR *
+                        veg_lib[temp[i].
+                                veg_class].LAI
+                        [j];
                 }
             }
             for (k = 0; k < Nfields; k++) {
@@ -323,7 +326,7 @@ read_vegparam(FILE  *vegparam,
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
-            NfieldsMax = 12; /* For vegcover */
+            NfieldsMax = MONTHS_PER_YEAR; /* For vegcover */
             if (Nfields != NfieldsMax) {
                 sprintf(ErrStr,
                         "ERROR - cell %d - expecting %d vegcover values but "
@@ -333,7 +336,7 @@ read_vegparam(FILE  *vegparam,
             }
 
             if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
-                for (j = 0; j < 12; j++) {
+                for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
                         veg_lib[temp[i].veg_class].vegcover[j] = tmp;
@@ -367,7 +370,7 @@ read_vegparam(FILE  *vegparam,
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
-            NfieldsMax = 12; /* For albedo */
+            NfieldsMax = MONTHS_PER_YEAR; /* For albedo */
             if (Nfields != NfieldsMax) {
                 sprintf(ErrStr,
                         "ERROR - cell %d - expecting %d albedo values but "
@@ -377,7 +380,7 @@ read_vegparam(FILE  *vegparam,
             }
 
             if (options.ALB_SRC == FROM_VEGPARAM) {
-                for (j = 0; j < 12; j++) {
+                for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
                         veg_lib[temp[i].veg_class].albedo[j] = tmp;

@@ -37,17 +37,18 @@ void
 read_snowband(FILE            *snowband,
               soil_con_struct *soil_con)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    char                 ErrStr[MAXSTRING];
-    size_t               band;
-    size_t               Nbands;
-    unsigned             cell;
-    double               total;
-    double               area_fract;
-    double               prec_frac;
-    double               band_elev;
-    double               avg_elev;
+    char                     ErrStr[MAXSTRING];
+    size_t                   band;
+    size_t                   Nbands;
+    unsigned                 cell;
+    double                   total;
+    double                   area_fract;
+    double                   prec_frac;
+    double                   band_elev;
+    double                   avg_elev;
 
     Nbands = options.SNOW_BAND;
 
@@ -113,7 +114,8 @@ read_snowband(FILE            *snowband,
         }
         for (band = 0; band < Nbands; band++) {
             soil_con->Tfactor[band] =
-                (soil_con->elevation - soil_con->BandElev[band]) * -1 * T_LAPSE;
+                (soil_con->BandElev[band] -
+                 soil_con->elevation) * param.LAPSE_RATE;
         }
 
         /** Read Precipitation Fraction **/

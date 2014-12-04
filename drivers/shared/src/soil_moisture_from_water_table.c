@@ -91,16 +91,17 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
         b = 0.5 * (soil_con->expt[j] - 3);
         bubble = soil_con->bubble[j];
         tmp_resid_moist = soil_con->resid_moist[j] *
-                          soil_con->depth[j] * 1000; // mm
+                          soil_con->depth[j] * MM_PER_M; // mm
         // depth of free water surface below top of layer (not yet elevation)
         zwt_prime = 0;
         for (i = 0; i < MAX_ZWTVMOIST; i++) {
             // elevation (cm) relative to soil surface
-            soil_con->zwtvmoist_zwt[j][i] = -tmp_depth * 100 - zwt_prime;
+            soil_con->zwtvmoist_zwt[j][i] = -tmp_depth * CM_PER_M - zwt_prime;
             w_avg =
-                (soil_con->depth[j] * 100 - zwt_prime - (b / (b - 1)) * bubble *
+                (soil_con->depth[j] * CM_PER_M - zwt_prime -
+                 (b / (b - 1)) * bubble *
                  (1 - pow((zwt_prime + bubble) / bubble, (b - 1) / b))) /
-                (soil_con->depth[j] * 100); // cm
+                (soil_con->depth[j] * CM_PER_M); // cm
             if (w_avg < 0) {
                 w_avg = 0;
             }
@@ -111,7 +112,7 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
                                               (soil_con->max_moist[j] -
                                                tmp_resid_moist) +
                                               tmp_resid_moist;
-            zwt_prime += soil_con->depth[j] * 100 / (MAX_ZWTVMOIST - 1); // cm
+            zwt_prime += soil_con->depth[j] * CM_PER_M / (MAX_ZWTVMOIST - 1); // cm
         }
         tmp_depth += soil_con->depth[j];
     }
@@ -127,7 +128,8 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
         bubble += soil_con->bubble[j] * soil_con->depth[j];
         tmp_max_moist += soil_con->max_moist[j];   // total max_moist
         // total resid_moist in mm
-        tmp_resid_moist += soil_con->resid_moist[j] * soil_con->depth[j] * 1000;
+        tmp_resid_moist += soil_con->resid_moist[j] * soil_con->depth[j] *
+                           MM_PER_M;
         tmp_depth += soil_con->depth[j];
     }
     b /= tmp_depth;     // average b
@@ -138,9 +140,9 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
         // elevation (cm) relative to soil surface
         soil_con->zwtvmoist_zwt[nlayers][i] = -zwt_prime;
         w_avg =
-            (tmp_depth * 100 - zwt_prime - (b / (b - 1)) * bubble *
+            (tmp_depth * CM_PER_M - zwt_prime - (b / (b - 1)) * bubble *
              (1 - pow((zwt_prime + bubble) / bubble, (b - 1) / b))) /
-            (tmp_depth * 100); // cm
+            (tmp_depth * CM_PER_M); // cm
         if (w_avg < 0) {
             w_avg = 0;
         }
@@ -149,7 +151,7 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
         }
         soil_con->zwtvmoist_moist[nlayers][i] =
             w_avg * (tmp_max_moist - tmp_resid_moist) + tmp_resid_moist;
-        zwt_prime += tmp_depth * 100 / (MAX_ZWTVMOIST - 1); // in cm
+        zwt_prime += tmp_depth * CM_PER_M / (MAX_ZWTVMOIST - 1); // in cm
     }
 
     // Compute zwt by taking total column soil moisture and filling column
@@ -175,21 +177,22 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
             tmp_moist = 0;
             j = nlayers - 1;
             tmp_depth2 = tmp_depth - soil_con->depth[j];
-            while (j > 0 && zwt_prime <= tmp_depth2 * 100) {
+            while (j > 0 && zwt_prime <= tmp_depth2 * CM_PER_M) {
                 tmp_moist += soil_con->max_moist[j];
                 j--;
                 tmp_depth2 -= soil_con->depth[j];
             }
             w_avg =
-                (tmp_depth2 * 100 + soil_con->depth[j] * 100 -
-                 zwt_prime) / (soil_con->depth[j] * 100);
+                (tmp_depth2 * CM_PER_M + soil_con->depth[j] * CM_PER_M -
+                 zwt_prime) / (soil_con->depth[j] * CM_PER_M);
             b = 0.5 * (soil_con->expt[j] - 3);
             bubble = soil_con->bubble[j];
             tmp_resid_moist = soil_con->resid_moist[j] * soil_con->depth[j] *
-                              1000;
+                              MM_PER_M;
             w_avg += -(b / (b - 1)) * bubble *
-                     (1 - pow((zwt_prime + bubble - tmp_depth2 * 100) / bubble,
-                              (b - 1) / b)) / (soil_con->depth[j] * 100);
+                     (1 -
+                      pow((zwt_prime + bubble - tmp_depth2 * CM_PER_M) / bubble,
+                          (b - 1) / b)) / (soil_con->depth[j] * CM_PER_M);
             tmp_moist += w_avg * (soil_con->max_moist[j] - tmp_resid_moist) +
                          tmp_resid_moist;
             b_save = b;
@@ -201,16 +204,16 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
                 b = 0.5 * (soil_con->expt[j] - 3);
                 bubble = soil_con->bubble[j];
                 tmp_resid_moist =
-                    soil_con->resid_moist[j] * soil_con->depth[j] * 1000;
-                zwt_prime_eff = tmp_depth2_save * 100 - bubble + bubble *
+                    soil_con->resid_moist[j] * soil_con->depth[j] * MM_PER_M;
+                zwt_prime_eff = tmp_depth2_save * CM_PER_M - bubble + bubble *
                                 pow((zwt_prime + bub_save - tmp_depth2_save *
-                                     100) / bub_save,
+                                     CM_PER_M) / bub_save,
                                     b / b_save);
                 w_avg = -(b / (b - 1)) * bubble *
                         (1 -
                          pow((zwt_prime_eff + bubble - tmp_depth2 *
-                              100) / bubble,
-                             (b - 1) / b)) / (soil_con->depth[j] * 100);
+                              CM_PER_M) / bubble,
+                             (b - 1) / b)) / (soil_con->depth[j] * CM_PER_M);
                 tmp_moist += w_avg *
                              (soil_con->max_moist[j] -
                               tmp_resid_moist) + tmp_resid_moist;
@@ -220,6 +223,6 @@ soil_moisture_from_water_table(soil_con_struct *soil_con,
             }
             soil_con->zwtvmoist_moist[nlayers + 1][i] = tmp_moist;
         }
-        zwt_prime += tmp_depth * 100 / (MAX_ZWTVMOIST - 1); // in cm
+        zwt_prime += tmp_depth * CM_PER_M / (MAX_ZWTVMOIST - 1); // in cm
     }
 }

@@ -17,6 +17,8 @@ ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
 
+# LOG_DIR (put the log directory path here)    # Log directory.  Default log output to stderr
+
 #######################################################################
 # Simulation Parameters Namelist
 #######################################################################

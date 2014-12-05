@@ -49,6 +49,7 @@ initialize_filenames()
     strcpy(filenames.snowband, "MISSING");
     strcpy(filenames.lakeparam, "MISSING");
     strcpy(filenames.result_dir, "MISSING");
+    strcpy(filenames.log_path, "MISSING");
     for (i = 0; i < 2; i++) {
         strcpy(filenames.f_path_pfx[i], "MISSING");
     }

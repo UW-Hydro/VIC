@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <vic_driver_shared.h>
 
-#define DRIVER "Image"
+#define VIC_DRIVER "Image"
 
 #define MAXDIMS 10
 

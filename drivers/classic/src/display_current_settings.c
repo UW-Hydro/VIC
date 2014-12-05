@@ -27,6 +27,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
+#include <vic_driver_classic.h>
 #include <vic_driver_shared.h>
 
 /******************************************************************************
@@ -43,15 +44,13 @@ display_current_settings(int mode)
 
     int                        file_num;
 
+    print_version(VIC_DRIVER);
+
     if (mode == DISP_VERSION) {
-        fprintf(stderr, "***** VIC Version %s *****\n", version);
         return;
     }
-    else {
-        fprintf(stderr,
-                "\n***** VIC Version %s - Current Model Settings *****\n",
-                version);
-    }
+
+    fprintf(stderr, "\nCurrent Model Settings\n");
 
     fprintf(stderr, "\n");
     fprintf(stderr, "COMPILE-TIME OPTIONS (set in .h files)\n");

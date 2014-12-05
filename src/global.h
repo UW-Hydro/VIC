@@ -20,8 +20,7 @@
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-May-20 Added ref_veg_vegcover.					TJB
 **********************************************************************/
-char *version = "5.0.dev, November 20, 2014";
-char *short_version = "5.0.dev";
+char *version = "5.0.dev 2014-November-19 ";
 char *optstring = "g:vo";
 int flag;
 

@@ -75,13 +75,11 @@ void display_current_settings(int                 mode,
   int file_num;
 
   if (mode == DISP_VERSION) {
-    fprintf(stderr,"VIC %s\n",version);
-    license();
+    fprintf(stderr,"***** VIC Version %s *****\n",version);
     return;
   }
   else {
     fprintf(stderr,"\n***** VIC Version %s - Current Model Settings *****\n",version);
-    license();
   }
 
   fprintf(stderr,"\n");

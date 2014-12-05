@@ -89,20 +89,3 @@ void usage(char *temp)
   fprintf(stderr,"       parameters as well as model option flags, and the names and\n");
   fprintf(stderr,"       locations of all other files.\n");
 }
-
-
-void license()
-/**********************************************************************
-  license   Joe Hamman   November 20, 2014
-
-  This routine prints out license information
-**********************************************************************/
-{
-  extern char *short_version;
-
-  fprintf(stderr,"\nVariable Infiltration Capacity (VIC) macroscale hydrological model\n");
-  fprintf(stderr,"version %s, Copyright (C) 2014  Land Surface Hydrology Group,\n", short_version);
-  fprintf(stderr,"Dept. of Civil and Environmental Engineering, University of Washington.\n");
-  fprintf(stderr,"VIC comes with ABSOLUTELY NO WARRANTY.  This is free software, you may\n");
-  fprintf(stderr,"redistribute it under certain conditions; see LICENSE.txt for details.\n\n");
-}

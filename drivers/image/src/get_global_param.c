@@ -467,6 +467,12 @@ get_global_param(FILE *gp)
                 }
             }
             /*************************************
+               Define log directory
+            *************************************/
+            else if (strcasecmp("LOG_DIR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.log_path_pfx);
+            }
+            /*************************************
                Define state files
             *************************************/
             else if (strcasecmp("INIT_STATE", optstr) == 0) {

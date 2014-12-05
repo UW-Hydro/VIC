@@ -70,7 +70,8 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${DRIVERPATH}/include/vic_driver_classic.h \
 	${DRIVERPATH}/include/mtclim.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
-	${VICPATH}/include/vic_physical_constants.h
+	${VICPATH}/include/vic_physical_constants.h \
+	${VICPATH}/include/vic_log.h
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -131,6 +132,7 @@ OBJS = \
 	${SHAREDPATH}/src/make_veg_var.o \
 	${SHAREDPATH}/src/open_file.o \
 	${SHAREDPATH}/src/print_library_shared.o \
+	${SHAREDPATH}/src/vic_log.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

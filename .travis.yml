@@ -1,3 +1,8 @@
 language: c
 compiler: gcc
-script: make -C src/ 
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y libnetcdf-dev
+script: 
+    - make -C drivers/classic/
+    - make -C drivers/image/

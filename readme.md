@@ -1,5 +1,5 @@
 # Variable Infiltration Capacity (VIC) Model
-[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC)
+[![Build Status](https://travis-ci.org/UW-Hydro/VIC.svg)](https://travis-ci.org/UW-Hydro/VIC)
 
 This repository serves as the public source code repository of the **Variable Infiltration Capacity Model**, better known as **VIC**. The [official VIC website](http://www.hydro.washington.edu/Lettenmaier/Models/VIC/index.shtml) it still maintained at the [University of Washington Land Surface Hydrology Group](http://www.hydro.washington.edu) headed by [Dennis P. Lettenmaier](http://www.ce.washington.edu/people/faculty/faculty.php?id=25).
 

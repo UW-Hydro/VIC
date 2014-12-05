@@ -56,11 +56,13 @@ main(int   argc,
      char *argv[])
 {
     /** Variable Declarations **/
+    extern FILE          *LOG_DEST;
 
     char                  MODEL_DONE;
     char                  RUN_MODEL;
     char                  ErrStr[MAXSTRING];
     char                  write_flag;
+    char                 *logfilename;
     size_t                rec;
     size_t                Nveg_type;
     int                   cellnum;
@@ -94,9 +96,27 @@ main(int   argc,
     filep.globalparam = open_file(filenames.global, "r");
     get_global_param(filep.globalparam);
 
+    // Initialize Log Destination
+    if (strcmp(filenames.log_path, "MISSING") != 0) {
+        // Create logfile name
+        logfilename = get_logname(filenames.log_path);
+
+        // Open Logfile
+        filep.logfile = open_file(logfilename, "w");
+
+        LOG_DEST = filep.logfile;
+
+        log_info("Initialized Log File: %s", logfilename);
+    }
+    else {
+        // Set global log destination
+        LOG_DEST = stderr;
+
+        log_info("Logging to stderr");
+    }
+
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {
-        fprintf(stderr, "reading constants for some reason\n");
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }

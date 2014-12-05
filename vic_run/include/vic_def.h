@@ -36,6 +36,7 @@
 #include <stdbool.h>
 
 #include <vic_physical_constants.h>
+#include <vic_log.h>
 
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -416,6 +417,7 @@ typedef struct {
     FILE *statefile;    /**< output model state file */
     FILE *veglib;       /**< vegetation parameters for all vege types */
     FILE *vegparam;     /**< fractional coverage info for grid cell */
+    FILE *logfile;      /**< log file */
 } filep_struct;
 
 /******************************************************************************
@@ -435,6 +437,7 @@ typedef struct {
     char statefile[MAXSTRING];     /**< name of file in which to store model state */
     char veg[MAXSTRING];           /**< vegetation grid coverage file */
     char veglib[MAXSTRING];        /**< vegetation parameter library file */
+    char log_path[MAXSTRING];      /**< Location to write log file to*/
 } filenames_struct;
 
 /******************************************************************************

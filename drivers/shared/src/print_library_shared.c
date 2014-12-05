@@ -87,7 +87,7 @@ print_dmy(dmy_struct *dmy)
 }
 
 /******************************************************************************
- * @brief    Print filenames structure.
+ * @brief    Print energy balance structure.
  *****************************************************************************/
 void
 print_energy_bal(energy_bal_struct *eb,
@@ -209,6 +209,9 @@ print_energy_bal(energy_bal_struct *eb,
     printf("\tsnow_flux        : %.4lf\n", eb->snow_flux);
 }
 
+/******************************************************************************
+ * @brief    Print filenames structure.
+ *****************************************************************************/
 void
 print_filenames(filenames_struct *fnames)
 {
@@ -228,6 +231,7 @@ print_filenames(filenames_struct *fnames)
     printf("\tstatefile    : %s\n", fnames->statefile);
     printf("\tveg          : %s\n", fnames->veg);
     printf("\tveglib       : %s\n", fnames->veglib);
+    printf("\tlog_path     : %s\n", fnames->log_path);
 }
 
 /******************************************************************************
@@ -249,6 +253,7 @@ print_filep(filep_struct *fp)
     printf("\tstatefile  : %p\n", fp->statefile);
     printf("\tveglib     : %p\n", fp->veglib);
     printf("\tvegparam   : %p\n", fp->vegparam);
+    printf("\tlogfile    : %p\n", fp->logfile);
 }
 
 /******************************************************************************

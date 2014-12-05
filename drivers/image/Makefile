@@ -79,7 +79,8 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_image.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
-	${VICPATH}/include/vic_physical_constants.h
+	${VICPATH}/include/vic_physical_constants.h \
+	${VICPATH}/include/vic_log.h
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -132,6 +133,7 @@ OBJS = \
 	${SHAREDPATH}/src/open_file.o \
 	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/soil_moisture_from_water_table.o \
+	${SHAREDPATH}/src/vic_log.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

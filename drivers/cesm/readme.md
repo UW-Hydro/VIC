@@ -4,7 +4,8 @@ CESM Driver for VIC Model
 This driver was developmed for coupling VIC within the Regional Arctic System
 Model (RASM).
 
-    # Directory Structure
+# Directory Structure
+    
     | - cesm
     | --- bld
     | --- cpl_esmf

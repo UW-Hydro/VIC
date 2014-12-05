@@ -48,7 +48,7 @@ cmd_proc(int    argc,
     int  optchar;
 
     if (argc == 1) {
-        usage(argv[0]);
+        print_usage(argv[0]);
         exit(1);
     }
 
@@ -73,7 +73,7 @@ cmd_proc(int    argc,
             break;
         default:
             /** Print Usage if Invalid Command Line Arguments **/
-            usage(argv[0]);
+            print_usage(argv[0]);
             exit(1);
             break;
         }
@@ -82,7 +82,7 @@ cmd_proc(int    argc,
     if (!GLOBAL_SET) {
         fprintf(stderr,
                 "ERROR: Must set global control file using the '-g' flag\n");
-        usage(argv[0]);
+        print_usage(argv[0]);
         exit(1);
     }
 }
@@ -91,7 +91,7 @@ cmd_proc(int    argc,
  * @brief    This routine prints out usage details.
  *****************************************************************************/
 void
-usage(char *executable)
+print_usage(char *executable)
 {
     fprintf(stderr,
             "Usage: %s [-v | -o | -g <global_parameter_file>]\n", executable);
@@ -108,4 +108,42 @@ usage(char *executable)
             "       parameters as well as model option flags, and the names"
             " and\n");
     fprintf(stderr, "       locations of all other files.\n");
+}
+
+/******************************************************************************
+ * @brief    This routine prints out the model Version
+ *****************************************************************************/
+void print_version(char *driver)
+{
+    fprintf(stderr, "  VIC Version : %s\n", SHORT_VERSION);
+    fprintf(stderr, "  VIC Driver  : %s\n", driver);
+
+    print_license();
+
+}
+
+/******************************************************************************
+ * @brief    This routine prints out license information
+ *****************************************************************************/
+void print_license()
+{
+
+ fprintf(stderr,
+         "\n  Variable Infiltration Capacity (VIC) macroscale hydrologic\n");
+ fprintf(stderr,
+         "  model version %s, Copyright (C) 2014 Land Surface\n",
+         SHORT_VERSION);
+ fprintf(stderr,
+         "  HydrologyGroup, Dept. of Civil and Environmental Engineering,\n");
+ fprintf(stderr,
+         "  University of Washington.  VIC comes with ABSOLUTELY NO\n");
+ fprintf(stderr,
+         "  WARRANTY. This is free software, you may redistribute it\n");
+ fprintf(stderr,
+         "  under certain conditions; see LICENSE.txt for details.\n\n");
+
+ fprintf(stderr,
+         "  Report Bugs to: https://github.com/UW-Hydro/VIC/issues\n");
+ fprintf(stderr,
+         "  VIC Users Email List:  vicadmin@hydro.washington.edu\n\n");
 }

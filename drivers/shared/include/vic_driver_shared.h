@@ -31,7 +31,8 @@
 #include <vic_def.h>
 #include <vic_physical_constants.h>
 
-#define version "5.0 beta 2014-Dec-03"
+#define VERSION "5.0 beta 2014-Dec-03"
+#define SHORT_VERSION "5.0.beta"
 
 /******************************************************************************
  * @brief    Stores forcing file input information.
@@ -100,6 +101,7 @@ void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
                     size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
 void print_layer_data(layer_data_struct *ldata, size_t nfrost);
+void print_license(void);
 void print_option(option_struct *option);
 void print_out_data(out_data_struct *out, size_t nelem);
 void print_out_data_file(out_data_file_struct *outf);
@@ -113,7 +115,8 @@ void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
-void usage(char *);
+void print_version(char *);
+void print_usage(char *);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 
 #endif

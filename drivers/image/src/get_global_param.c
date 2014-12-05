@@ -324,15 +324,6 @@ get_global_param(FILE *gp)
                     options.GRND_FLUX_TYPE = GF_410;
                 }
             }
-            else if (strcasecmp("LOG_MATRIC", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.LOG_MATRIC = true;
-                }
-                else {
-                    options.LOG_MATRIC = false;
-                }
-            }
             else if (strcasecmp("LW_TYPE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("LW_TVA", flgstr) == 0) {

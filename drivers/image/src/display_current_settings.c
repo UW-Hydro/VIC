@@ -169,12 +169,6 @@ display_current_settings(int mode)
     else if (options.GRND_FLUX_TYPE == GF_410) {
         fprintf(stderr, "GRND_FLUX_TYPE\t\tGF_410\n");
     }
-    if (options.LOG_MATRIC) {
-        fprintf(stderr, "LOG_MATRIC\t\tTRUE\n");
-    }
-    else {
-        fprintf(stderr, "LOG_MATRIC\t\tFALSE\n");
-    }
     if (options.LW_TYPE == LW_TVA) {
         fprintf(stderr, "LW_TYPE\t\tLW_TVA\n");
     }

@@ -502,12 +502,6 @@ typedef struct {
                                 then average July air temperature will be read
                                 from soil file and used in calculating treeline */
     bool LAKES;          /**< TRUE = use lake energy code */
-    bool LOG_MATRIC;     /**< TRUE = use the linear interpolation of the
-                            logarithm of the matric potential from the two
-                            surrounding layers to estimate the soil moisture
-                            drainage from each layer (Boone and Wetzel, 1996).
-                            FALSE = drainage is a function of layer's moisture
-                            content and saturated hydraulic conductivity. */
     unsigned short LW_CLOUD;       /**< Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
     unsigned short LW_TYPE;        /**< Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
     bool MTCLIM_SWE_CORR; /**< TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */

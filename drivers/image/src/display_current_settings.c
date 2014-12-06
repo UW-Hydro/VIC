@@ -43,15 +43,14 @@ display_current_settings(int mode)
 
     int                        file_num;
 
+
+    print_version(VIC_DRIVER);
+
     if (mode == DISP_VERSION) {
-        fprintf(stderr, "***** VIC Version %s *****\n", version);
         return;
     }
-    else {
-        fprintf(stderr,
-                "\n***** VIC Version %s - Current Model Settings *****\n",
-                version);
-    }
+
+    fprintf(stderr, "\nCurrent Model Settings\n");
 
     fprintf(stderr, "\n");
     fprintf(stderr, "COMPILE-TIME OPTIONS (set in .h files)\n");
@@ -169,12 +168,6 @@ display_current_settings(int mode)
     }
     else if (options.GRND_FLUX_TYPE == GF_410) {
         fprintf(stderr, "GRND_FLUX_TYPE\t\tGF_410\n");
-    }
-    if (options.LOG_MATRIC) {
-        fprintf(stderr, "LOG_MATRIC\t\tTRUE\n");
-    }
-    else {
-        fprintf(stderr, "LOG_MATRIC\t\tFALSE\n");
     }
     if (options.LW_TYPE == LW_TVA) {
         fprintf(stderr, "LW_TYPE\t\tLW_TVA\n");

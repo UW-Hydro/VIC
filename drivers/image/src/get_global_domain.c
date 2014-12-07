@@ -28,9 +28,6 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-#define ERR(e) {fprintf(stderr, "\nError(get_global_domain): %s\n", \
-                        nc_strerror(e)); }
-
 /******************************************************************************
  * @brief    Get global domain information.
  *****************************************************************************/
@@ -62,7 +59,7 @@ get_global_domain(char          *nc_name,
     run = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
                          sizeof(int));
     if (run == NULL) {
-        nrerror("Memory allocation error in get_global_domain().");
+        log_err("Memory allocation error in get_global_domain().");
     }
 
     get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
@@ -80,7 +77,7 @@ get_global_domain(char          *nc_name,
                                malloc(global_domain->ncells_global *
                                       sizeof(location_struct));
     if (global_domain->locations == NULL) {
-        nrerror("Memory allocation error in get_global_domain().");
+        log_err("Memory allocation error in get_global_domain().");
     }
     for (i = 0; i < global_domain->ncells_global; i++) {
         initialize_location(&(global_domain->locations[i]));
@@ -90,7 +87,7 @@ get_global_domain(char          *nc_name,
     var = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
                             sizeof(double));
     if (var == NULL) {
-        nrerror("Memory allocation error in get_global_domain().");
+        log_err("Memory allocation error in get_global_domain().");
     }
 
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
@@ -108,7 +105,7 @@ get_global_domain(char          *nc_name,
     idx = (size_t *) malloc(global_domain->ncells_global *
                             sizeof(size_t));
     if (idx == NULL) {
-        nrerror("Memory allocation error in vic_init().");
+        log_err("Memory allocation error in vic_init().");
     }
     for (i = 0; i < global_domain->ncells_global; i++) {
         idx[i] = get_global_idx(global_domain, i);

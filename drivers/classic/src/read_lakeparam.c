@@ -66,9 +66,8 @@ read_lakeparam(FILE           *lakeparam,
 
     // cell number not found
     if (feof(lakeparam)) {
-        sprintf(tmpstr, "Unable to find cell %d in the lake parameter file",
+        log_err("Unable to find cell %d in the lake parameter file",
                 soil_con.gridcel);
-        nrerror(tmpstr);
     }
 
     // read lake parameters from file
@@ -76,53 +75,41 @@ read_lakeparam(FILE           *lakeparam,
         veg_con[temp.lake_idx].LAKE = 1;
         fscanf(lakeparam, "%zu", &temp.numnod);
         if (temp.numnod < 1) {
-            sprintf(tmpstr,
-                    "Number of vertical lake nodes (%zu) for cell %d specified "
+            log_err("Number of vertical lake nodes (%zu) for cell %d specified "
                     "in the lake parameter file is < 1; increase this number "
                     "to at least 1.", temp.numnod, soil_con.gridcel);
-            nrerror(tmpstr);
         }
         if (temp.numnod > MAX_LAKE_NODES) {
-            sprintf(tmpstr,
-                    "Number of lake nodes (%zu) in cell %d specified in the "
+            log_err("Number of lake nodes (%zu) in cell %d specified in the "
                     "lake parameter file exceeds the maximum allowable (%d), "
                     "edit MAX_LAKE_NODES in user_def.h.", temp.numnod,
                     soil_con.gridcel, MAX_LAKE_NODES);
-            nrerror(tmpstr);
         }
         fscanf(lakeparam, "%lf", &temp.mindepth);
         if (temp.mindepth < 0) {
-            sprintf(tmpstr,
-                    "Minimum lake depth (%f) for cell %d specified in the "
+            log_err("Minimum lake depth (%f) for cell %d specified in the "
                     "lake parameter file is < 0; increase this number to at "
                     "least 0.", temp.mindepth, soil_con.gridcel);
-            nrerror(tmpstr);
         }
         fscanf(lakeparam, "%lf", &temp.wfrac);
         if (temp.wfrac < 0 || temp.wfrac > 1) {
-            sprintf(tmpstr,
-                    "Lake outlet width fraction (%f) for cell %d specified in "
+            log_err("Lake outlet width fraction (%f) for cell %d specified in "
                     "the lake parameter file falls outside the range 0 to 1.  "
                     "Change wfrac to be between 0 and 1.", temp.wfrac,
                     soil_con.gridcel);
-            nrerror(tmpstr);
         }
         fscanf(lakeparam, "%lf", &temp.depth_in);
         if (temp.depth_in < 0) {
-            sprintf(tmpstr,
-                    "Initial lake depth (%f) for cell %d specified in the "
+            log_err("Initial lake depth (%f) for cell %d specified in the "
                     "lake parameter file is < 0; increase this number to at "
                     "least 1.", temp.depth_in, soil_con.gridcel);
-            nrerror(tmpstr);
         }
         fscanf(lakeparam, "%lf", &temp.rpercent);
         if (temp.rpercent < 0 || temp.rpercent > 1) {
-            sprintf(tmpstr,
-                    "Fraction of runoff entering lake catchment (%f) for cell "
+            log_err("Fraction of runoff entering lake catchment (%f) for cell "
                     "%d specified in the lake parameter file falls outside the"
                     " range 0 to 1.  Change rpercent to be between 0 and 1.",
                     temp.rpercent, soil_con.gridcel);
-            nrerror(tmpstr);
         }
     }
     else { // no lake exists anywhere in this grid cell
@@ -149,17 +136,15 @@ read_lakeparam(FILE           *lakeparam,
 
     /* Read in parameters to calculate lake profile. */
     if (!options.LAKE_PROFILE) {
-        fprintf(stderr, "LAKE PROFILE being computed. \n");
+        log_info("LAKE PROFILE being computed.");
 
         fscanf(lakeparam, "%lf %lf", &temp.z[0], &temp.Cl[0]);
         temp.maxdepth = temp.z[0];
         tempdz = (temp.maxdepth) / ((double)temp.numnod);
         if (temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0) {
-            sprintf(tmpstr,
-                    "Lake area fraction (%f) for cell (%d) specified in the "
+            log_err("Lake area fraction (%f) for cell (%d) specified in the "
                     "lake parameter file must be a fraction between 0 and 1.",
                     temp.Cl[0], soil_con.gridcel);
-            nrerror(tmpstr);
         }
 
         fgets(tmpstr, MAXSTRING, lakeparam);
@@ -187,7 +172,7 @@ read_lakeparam(FILE           *lakeparam,
     /* Assumes that the lake bottom area is zero. */
 
     else {
-        fprintf(stderr, "Reading in the specified lake profile.\n");
+        log_info("Reading in the specified lake profile.");
         temp.maxvolume = 0.0;
         temp.Cl[0] = 0; // initialize to 0 in case no lake is defined
         for (i = 0; i < temp.numnod; i++) {
@@ -200,11 +185,9 @@ read_lakeparam(FILE           *lakeparam,
             }
 
             if (temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0) {
-                sprintf(tmpstr,
-                        "Lake area fraction (%f) for cell (%d) specified in "
+                log_err("Lake area fraction (%f) for cell (%d) specified in "
                         "the lake parameter file must be a fraction between 0 "
                         "and 1.", temp.Cl[0], soil_con.gridcel);
-                nrerror(tmpstr);
             }
         }
         temp.z[temp.numnod] = 0.0;
@@ -221,35 +204,29 @@ read_lakeparam(FILE           *lakeparam,
     // Compute volume corresponding to mindepth
     ErrFlag = get_volume(temp, temp.mindepth, &(temp.minvolume));
     if (ErrFlag == ERROR) {
-        sprintf(tmpstr,
-                "ERROR: problem in get_volume(): depth %f volume %f rec %d\n",
+        log_err("problem in get_volume(): depth %f volume %f rec %d",
                 temp.mindepth, temp.minvolume, 0);
-        nrerror(tmpstr);
     }
 
     // Make sure min < max
     if (temp.mindepth > temp.maxdepth) {
-        sprintf(tmpstr,
-                "Adjusted minimum lake depth %f exceeds the adjusted maximum "
+        log_err("Adjusted minimum lake depth %f exceeds the adjusted maximum "
                 "lake depth %f.", temp.mindepth, temp.maxdepth);
-        nrerror(tmpstr);
     }
 
     // Validate initial conditions
     if (temp.depth_in > temp.maxdepth) {
-        fprintf(stderr,
-                "WARNING: Initial lake depth %f exceeds the maximum lake "
-                "depth %f; setting initial lake depth equal to max lake "
-                "depth.\n", temp.depth_in, temp.maxdepth);
+        log_warn("Initial lake depth %f exceeds the maximum lake depth %f; "
+                 "setting initial lake depth equal to max lake depth.",
+                 temp.depth_in, temp.maxdepth);
         temp.depth_in = temp.maxdepth;
     }
     else if (temp.depth_in < 0) {
-        fprintf(stderr, "WARNING: Initial lake depth %f < 0; setting to 0.\n",
-                temp.depth_in);
+        log_warn("Initial lake depth %f < 0; setting to 0.", temp.depth_in);
         temp.depth_in = 0;
     }
 
-    fprintf(stderr, "Lake plus wetland area = %e km2\n", temp.basin[0] /
-            (M_PER_KM * M_PER_KM));
+    log_info("Lake plus wetland area = %e km2", temp.basin[0] /
+             (M_PER_KM * M_PER_KM));
     return temp;
 }

@@ -109,9 +109,9 @@ root_brent(double LowerBound,
     // If Function returns values of ERROR for both bounds, give up
     if (fa == ERROR && fb == ERROR) {
         sprintf(ErrorString, "ERROR: %s: lower and upper bounds %f and %f "
-                "failed to bracket the root because the given "
-                "function was not defined at either point.\n",
-                Routine, a, b);
+                "failed to bracket the root because the given function was "
+                "not defined at either point.\n", Routine, a, b);
+        log_warn("Root Brent is returning an error: %s", ErrorString);
         va_end(ap);
         return(ERROR);
     }
@@ -151,6 +151,7 @@ root_brent(double LowerBound,
                     "undefined values while attempting to "
                     "bracket the root between %f and %f.\n",
                     Routine, LowerBound, UpperBound);
+            log_warn("Root Brent is returning an error: %s", ErrorString);
             va_end(ap);
             return(ERROR);
         }
@@ -194,6 +195,8 @@ root_brent(double LowerBound,
                             "attempting to bracket the root "
                             "between %f and %f.\n",
                             Routine, LowerBound, UpperBound);
+                    log_warn("Root Brent is returning an error: %s",
+                             ErrorString);
                     va_end(ap);
                     return(ERROR);
                 }
@@ -206,8 +209,12 @@ root_brent(double LowerBound,
                 if (fa == ERROR) {
                     /* Undefined function values in both directions - give up */
                     sprintf(ErrorString,
-                            "ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n", Routine, LowerBound,
+                            "ERROR: %s: the given function produced undefined "
+                            "values while attempting to bracket the root "
+                            "between %f and %f.\n", Routine, LowerBound,
                             UpperBound);
+                    log_warn("Root Brent is returning an error: %s",
+                             ErrorString);
                     va_end(ap);
                     return(ERROR);
                 }
@@ -230,8 +237,10 @@ root_brent(double LowerBound,
             if (fc == ERROR) {
                 /* if we get here, we could not find a bound for which the function returns a valid value */
                 sprintf(ErrorString,
-                        "ERROR: %s: the given function produced undefined values while attempting to bracket the root between %f and %f.\n", Routine, LowerBound,
-                        UpperBound);
+                        "ERROR: %s: the given function produced undefined "
+                        "values while attempting to bracket the root between "
+                        "%f and %f.\n", Routine, LowerBound, UpperBound);
+                log_warn("Root Brent is returning an error: %s", ErrorString);
                 va_end(ap);
                 return(ERROR);
             }
@@ -252,8 +261,9 @@ root_brent(double LowerBound,
     if ((fa * fb) >= 0) {
         /* if we get here, the lower and upper bounds did not bracket the root */
         sprintf(ErrorString,
-                "WARNING: %s: lower and upper bounds %f and %f failed to bracket the root.\n", Routine, a,
-                b);
+                "WARNING: %s: lower and upper bounds %f and %f failed to "
+                "bracket the root.\n", Routine, a, b);
+        log_warn("Root Brent is returning an error: %s", ErrorString);
         va_end(ap);
         return(ERROR);
     }
@@ -339,6 +349,7 @@ root_brent(double LowerBound,
                 sprintf(ErrorString, "ERROR returned to root_brent on "
                         "iteration %d: temperature = %.4f\n",
                         i + 1, b);
+                log_warn("Root Brent is returning an error: %s", ErrorString);
                 va_end(ap);
                 return(ERROR);
             }
@@ -346,6 +357,7 @@ root_brent(double LowerBound,
     }
     /* If we get here, there were too many iterations */
     sprintf(ErrorString, "WARNING: %s: too many iterations.\n", Routine);
+    log_warn("Root Brent is returning an error: %s", ErrorString);
     va_end(ap);
     return(ERROR);
 }

@@ -42,7 +42,6 @@ get_force_type(char *cmdstr,
 
     char                    optstr[50];
     char                    flgstr[10];
-    char                    ErrStr[MAXSTRING];
     int                     type;
 
     type = SKIP;
@@ -51,9 +50,7 @@ get_force_type(char *cmdstr,
     strcpy(flgstr, "NULL");
 
     if ((*field) >= (int)param_set.N_TYPES[file_num]) {
-        sprintf(ErrStr, "Too many variables defined for forcing file %i.",
-                file_num);
-        nrerror(ErrStr);
+        log_err("Too many variables defined for forcing file %i.", file_num);
     }
 
     sscanf(cmdstr, "%*s %s", optstr);
@@ -182,9 +179,8 @@ get_force_type(char *cmdstr,
     }
     /** Undefined variable type **/
     else {
-        sprintf(ErrStr, "Undefined forcing variable type %s in file %i.",
+        log_err("Undefined forcing variable type %s in file %i.",
                 optstr, file_num);
-        nrerror(ErrStr);
     }
 
     param_set.TYPE[type].SUPPLIED = file_num + 1;

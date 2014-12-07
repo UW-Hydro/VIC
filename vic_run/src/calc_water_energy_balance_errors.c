@@ -57,11 +57,11 @@ calc_water_balance_error(int    rec,
         cum_error += error;
         if (fabs(error) > fabs(max_error) && fabs(error) > 1e-5) {
             max_error = error;
-            fprintf(stderr, "Maximum Moist Error:\t%i\t%.5f\t%.5f\n",
+            fprintf(LOG_DEST, "Maximum Moist Error:\t%i\t%.5f\t%.5f\n",
                     rec, error, cum_error);
         }
         if (rec == Nrecs - 1) {
-            fprintf(stderr,
+            fprintf(LOG_DEST,
                     "Total Cumulative Water Error for Grid Cell = %.4f\n",
                     cum_error);
         }
@@ -103,16 +103,16 @@ calc_energy_balance_error(int    rec,
         if (fabs(error) > fabs(max_error) && fabs(error) > 0.001) {
             max_error = error;
             if (rec > 0) {
-                fprintf(stderr, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
+                fprintf(LOG_DEST, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
                         rec, error, cum_error / (double)rec);
             }
             else {
-                fprintf(stderr, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
+                fprintf(LOG_DEST, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
                         rec, error, cum_error);
             }
         }
         if (rec == Nrecs - 1) {
-            fprintf(stderr,
+            fprintf(LOG_DEST,
                     "Total Cumulative Energy Error for Grid Cell = %.4f\n",
                     cum_error / (double)rec);
         }

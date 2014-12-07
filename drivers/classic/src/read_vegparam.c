@@ -54,7 +54,6 @@ read_vegparam(FILE  *vegparam,
     double                   depth_sum;
     double                   sum;
     char                     str[500];
-    char                     ErrStr[MAXSTRING];
     char                     line[MAXSTRING];
     char                     tmpline[MAXSTRING];
     const char               delimiters[] = " \t";
@@ -80,33 +79,25 @@ read_vegparam(FILE  *vegparam,
     while ((fscanf(vegparam, "%d %d", &vegcel,
                    &vegetat_type_num) == 2) && vegcel != gridcel) {
         if (vegetat_type_num < 0) {
-            sprintf(ErrStr,
-                    "ERROR number of vegetation tiles (%i) given for cell %i "
-                    "is < 0.\n", vegetat_type_num, vegcel);
-            nrerror(ErrStr);
+            log_err("number of vegetation tiles (%i) given for cell %i "
+                    "is < 0.", vegetat_type_num, vegcel);
         }
         for (i = 0; i <= vegetat_type_num * skip; i++) {
             if (fgets(str, 500, vegparam) == NULL) {
-                sprintf(ErrStr,
-                        "ERROR unexpected EOF for cell %i while reading root "
-                        "zones and LAI\n", vegcel);
-                nrerror(ErrStr);
+                log_err("unexpected EOF for cell %i while reading root zones "
+                        "and LAI", vegcel);
             }
         }
     }
     fgets(str, 500, vegparam); // read newline at end of veg class line to advance to next line
     if (vegcel != gridcel) {
-        fprintf(stderr, "Error in vegetation file.  Grid cell %d not found\n",
-                gridcel);
-        exit(99);
+        log_err("Grid cell %d not found", gridcel);
     }
     if (vegetat_type_num >= MAX_VEG) {
-        sprintf(ErrStr,
-                "Vegetation parameter file wants more vegetation tiles in "
+        log_err("Vegetation parameter file wants more vegetation tiles in "
                 "grid cell %i (%i) than are allowed by MAX_VEG (%i) [NOTE: "
                 "bare soil class is assumed].  Edit vic_run/vic_def.h and "
                 "recompile.", gridcel, vegetat_type_num + 1, MAX_VEG);
-        nrerror(ErrStr);
     }
 
     // Make sure to allocate extra memory for bare soil tile
@@ -137,10 +128,8 @@ read_vegparam(FILE  *vegparam,
 
         // Read the root zones line
         if (fgets(line, MAXSTRING, vegparam) == NULL) {
-            sprintf(ErrStr,
-                    "ERROR unexpected EOF for cell %i while reading "
-                    "vegetat_type_num %d\n", vegcel, vegetat_type_num);
-            nrerror(ErrStr);
+            log_err("unexpected EOF for cell %i while reading "
+                    "vegetat_type_num %d", vegcel, vegetat_type_num);
         }
         strcpy(tmpline, line);
         ttrim(tmpline);
@@ -169,10 +158,8 @@ read_vegparam(FILE  *vegparam,
             NfieldsMax += 3;
         }
         if (Nfields != NfieldsMax) {
-            sprintf(ErrStr,
-                    "ERROR - cell %d - expecting %d fields but found %d in "
-                    "veg line %s\n", gridcel, NfieldsMax, Nfields, line);
-            nrerror(ErrStr);
+            log_err("Cell %d - expecting %d fields but found %d in veg line %s",
+                    gridcel, NfieldsMax, Nfields, line);
         }
 
         temp[i].LAKE = 0;
@@ -187,17 +174,14 @@ read_vegparam(FILE  *vegparam,
             sum += temp[i].zone_fract[j];
         }
         if (depth_sum <= 0) {
-            sprintf(str,
-                    "Root zone depths must sum to a value greater than 0.");
-            nrerror(str);
+            log_err("Root zone depths must sum to a value greater than 0.");
         }
         if (sum != 1.) {
-            fprintf(stderr,
-                    "WARNING: Root zone fractions sum to more than 1 ( = %f), "
-                    "normalizing fractions.  If the sum is large, check that "
-                    "your vegetation parameter file is in the form - <zone 1 "
-                    "depth> <zone 1 fract> <zone 2 depth> <zone 2 fract>...\n",
-                    sum);
+            log_warn("Root zone fractions sum to more than 1 ( = %f), "
+                     "normalizing fractions.  If the sum is large, check that "
+                     "your vegetation parameter file is in the form - <zone 1 "
+                     "depth> <zone 1 fract> <zone 2 depth> <zone 2 fract>...",
+                     sum);
             for (j = 0; j < options.ROOT_ZONES; j++) {
                 temp[i].zone_fract[j] /= sum;
             }
@@ -209,15 +193,11 @@ read_vegparam(FILE  *vegparam,
             temp[i].lag_one = atof(vegarr[3 + j]);
             temp[i].fetch = atof(vegarr[4 + j]);
             if (temp[i].sigma_slope <= 0. || temp[i].lag_one <= 0.) {
-                sprintf(str,
-                        "Deviation of terrain slope must be greater than 0.");
-                nrerror(str);
+                log_err("Deviation of terrain slope must be greater than 0.");
             }
             if (temp[i].fetch < 1.0) {
-                sprintf(str,
-                        "ERROR - BLOWING parameter fetch should be >> 1 but "
-                        "cell %i has fetch = %.2f\n", gridcel, temp[i].fetch);
-                nrerror(str);
+                log_err("BLOWING parameter fetch should be >> 1 but "
+                        "cell %i has fetch = %.2f", gridcel, temp[i].fetch);
             }
         }
 
@@ -228,11 +208,9 @@ read_vegparam(FILE  *vegparam,
             }
         }
         if (veg_class == MISSING) {
-            sprintf(ErrStr,
-                    "The vegetation class id %i in vegetation tile %i from "
+            log_err("The vegetation class id %i in vegetation tile %i from "
                     "cell %i is not defined in the vegetation library file.",
                     temp[i].veg_class, i, gridcel);
-            nrerror(ErrStr);
         }
         else {
             temp[i].veg_class = veg_class;
@@ -247,11 +225,8 @@ read_vegparam(FILE  *vegparam,
         if (options.VEGPARAM_LAI) {
             // Read the LAI line
             if (fgets(line, MAXSTRING, vegparam) == NULL) {
-                sprintf(ErrStr,
-                        "ERROR unexpected EOF for cell %i while reading LAI "
-                        "for vegetat_type_num %d\n", vegcel,
-                        vegetat_type_num);
-                nrerror(ErrStr);
+                log_err("Unexpected EOF for cell %i while reading LAI for "
+                        "vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
             vegarr[Nfields] = calloc(500, sizeof(char));
@@ -268,11 +243,8 @@ read_vegparam(FILE  *vegparam,
             }
             NfieldsMax = MONTHS_PER_YEAR; /* For LAI */
             if (Nfields != NfieldsMax) {
-                sprintf(ErrStr,
-                        "ERROR - cell %d - expecting %d LAI values but found "
-                        "%d in line %s\n", gridcel, NfieldsMax, Nfields,
-                        line);
-                nrerror(ErrStr);
+                log_err("cell %d - expecting %d LAI values but found "
+                        "%d in line %s", gridcel, NfieldsMax, Nfields, line);
             }
 
             if (options.LAI_SRC == FROM_VEGPARAM) {
@@ -283,14 +255,12 @@ read_vegparam(FILE  *vegparam,
                     }
                     if (veg_lib[temp[i].veg_class].overstory &&
                         veg_lib[temp[i].veg_class].LAI[j] == 0) {
-                        sprintf(ErrStr,
-                                "ERROR: cell %d, veg tile %d: the specified "
+                        log_err("cell %d, veg tile %d: the specified "
                                 "veg class (%d) is listed as an overstory "
                                 "class in the veg LIBRARY, but the LAI given "
                                 "in the veg PARAM FILE for this tile for "
-                                "month %zu is 0.\n", gridcel, i + 1,
+                                "month %zu is 0.", gridcel, i + 1,
                                 temp[i].veg_class + 1, j + 1);
-                        nrerror(ErrStr);
                     }
                     veg_lib[temp[i].veg_class].Wdmax[j] =
                         param.VEG_LAI_WATER_FACTOR *
@@ -307,11 +277,8 @@ read_vegparam(FILE  *vegparam,
         if (options.VEGPARAM_VEGCOVER) {
             // Read the vegcover line
             if (fgets(line, MAXSTRING, vegparam) == NULL) {
-                sprintf(ErrStr,
-                        "ERROR unexpected EOF for cell %i while reading "
-                        "vegcover for vegetat_type_num %d\n", vegcel,
-                        vegetat_type_num);
-                nrerror(ErrStr);
+                log_err("unexpected EOF for cell %i while reading vegcover "
+                        "for vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
             vegarr[Nfields] = calloc(500, sizeof(char));
@@ -328,11 +295,8 @@ read_vegparam(FILE  *vegparam,
             }
             NfieldsMax = MONTHS_PER_YEAR; /* For vegcover */
             if (Nfields != NfieldsMax) {
-                sprintf(ErrStr,
-                        "ERROR - cell %d - expecting %d vegcover values but "
-                        "found %d in line %s\n", gridcel, NfieldsMax, Nfields,
-                        line);
-                nrerror(ErrStr);
+                log_err("cell %d - expecting %d vegcover values but found %d "
+                        "in line %s", gridcel, NfieldsMax, Nfields, line);
             }
 
             if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
@@ -351,11 +315,8 @@ read_vegparam(FILE  *vegparam,
         if (options.VEGPARAM_ALB) {
             // Read the albedo line
             if (fgets(line, MAXSTRING, vegparam) == NULL) {
-                sprintf(ErrStr,
-                        "ERROR unexpected EOF for cell %i while reading "
-                        "albedo for vegetat_type_num %d\n", vegcel,
-                        vegetat_type_num);
-                nrerror(ErrStr);
+                log_err("unexpected EOF for cell %i while reading albedo for "
+                        "vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
             vegarr[Nfields] = calloc(500, sizeof(char));
@@ -372,11 +333,8 @@ read_vegparam(FILE  *vegparam,
             }
             NfieldsMax = MONTHS_PER_YEAR; /* For albedo */
             if (Nfields != NfieldsMax) {
-                sprintf(ErrStr,
-                        "ERROR - cell %d - expecting %d albedo values but "
-                        "found %d in line %s\n", gridcel, NfieldsMax, Nfields,
-                        line);
-                nrerror(ErrStr);
+                log_err("cell %d - expecting %d albedo values but found %d in "
+                        "line %s", gridcel, NfieldsMax, Nfields, line);
             }
 
             if (options.ALB_SRC == FROM_VEGPARAM) {
@@ -400,21 +358,18 @@ read_vegparam(FILE  *vegparam,
 
     // Determine if we have bare soil
     if (temp[0].Cv_sum > 1.0) {
-        fprintf(stderr,
-                "WARNING: Cv exceeds 1.0 at grid cell %d, fractions being "
-                "adjusted to equal 1\n",
-                gridcel);
+        log_warn("Cv exceeds 1.0 at grid cell %d, fractions being "
+                 "adjusted to equal 1", gridcel);
         for (j = 0; j < (size_t)vegetat_type_num; j++) {
             temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
         }
         temp[0].Cv_sum = 1.;
     }
     else if (temp[0].Cv_sum > 0.99 && temp[0].Cv_sum < 1.0) {
-        fprintf(stderr,
-                "WARNING: Cv > 0.99 and Cv < 1.0 at grid cell %d, model "
-                "assuming that bare soil is not to be run - fractions being "
-                "adjusted to equal 1\n",
-                gridcel);
+        log_warn("Cv > 0.99 and Cv < 1.0 at grid cell %d, model "
+                 "assuming that bare soil is not to be run - fractions being "
+                 "adjusted to equal 1",
+                 gridcel);
         for (j = 0; j < (size_t)vegetat_type_num; j++) {
             temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
         }
@@ -474,24 +429,20 @@ read_vegparam(FILE  *vegparam,
                 }
             }
             if (veg_class == MISSING) {
-                sprintf(ErrStr,
-                        "The vegetation class id %i defined for "
+                log_err("The vegetation class id %i defined for "
                         "above-treeline from cell %i is not defined in the "
                         "vegetation library file.",
                         temp[vegetat_type_num].veg_class, gridcel);
-                nrerror(ErrStr);
             }
             else {
                 temp[vegetat_type_num].veg_class = veg_class;
             }
 
             if (veg_lib[veg_class].overstory) {
-                sprintf(ErrStr,
-                        "Vegetation class %i is defined to have overstory, so "
+                log_err("Vegetation class %i is defined to have overstory, so "
                         "it cannot be used as the default vegetation type for "
                         "above canopy snow bands.",
                         veg_lib[veg_class].veg_class);
-                nrerror(ErrStr);
             }
         }
     }

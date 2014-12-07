@@ -50,7 +50,6 @@ parse_output_info(FILE                  *gp,
     char                 multstr[20];
     double               mult;
     int                  tmp_noutfiles;
-    char                 ErrStr[MAXSTRING];
 
     strcpy(format, "*");
 
@@ -78,17 +77,14 @@ parse_output_info(FILE                  *gp,
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 outfilenum++;
                 if (!options.Noutfiles) {
-                    nrerror(
-                        "Error in global param file: \"N_OUTFILES\" must be "
-                        "specified before you can specify \"OUTFILE\".");
+                    log_err("in global param file: \"N_OUTFILES\" must be "
+                            "specified before you can specify \"OUTFILE\".");
                 }
                 if (outfilenum >= (short)options.Noutfiles) {
-                    sprintf(ErrStr,
-                            "Error in global param file: number of output "
-                            "files specified in N_OUTFILES (%zu) is less than "
-                            "actual number of output files defined in the "
-                            "global param file.", options.Noutfiles);
-                    nrerror(ErrStr);
+                    log_err("number of output files specified in N_OUTFILES "
+                            "(%zu) is less than actual number of output files "
+                            "defined in the global param file.",
+                            options.Noutfiles);
                 }
                 sscanf(cmdstr, "%*s %s %zu",
                        (*out_data_files)[outfilenum].prefix,
@@ -100,9 +96,8 @@ parse_output_info(FILE                  *gp,
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 if (outfilenum < 0) {
-                    nrerror(
-                        "Error in global param file: \"OUTFILE\" must be "
-                        "specified before you can specify \"OUTVAR\".");
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"OUTVAR\".");
                 }
                 strcpy(format, "");
                 strcpy(typestr, "");
@@ -140,9 +135,7 @@ parse_output_info(FILE                  *gp,
                 if (set_output_var((*out_data_files), true, outfilenum,
                                    out_data, varname, outvarnum, format, type,
                                    mult) != 0) {
-                    nrerror(
-                        "Error in global param file: Invalid output variable "
-                        "specification.");
+                    log_err("Invalid output variable specification.");
                 }
                 strcpy(format, "");
                 outvarnum++;

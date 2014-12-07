@@ -50,7 +50,6 @@ read_atmos_data(FILE               *infile,
     unsigned short          ustmp;
     signed short            stmp;
     char                    str[MAXSTRING + 1];
-    char                    ErrStr[MAXSTRING + 1];
     unsigned short          Identifier[4];
     int                     Nbytes;
 
@@ -69,9 +68,8 @@ read_atmos_data(FILE               *infile,
         (global_param.dt == HOURS_PER_DAY && (global_param.dt %
                                               param_set.FORCE_DT[file_num] >
                                               0))) {
-        nrerror(
-            "Currently unable to handle a model starting date that does not"
-            "correspond to a line in the forcing file.");
+        log_err("Currently unable to handle a model starting date that does "
+                "not correspond to a line in the forcing file.");
     }
 
     /** Error checking - Model can be run at any time step using daily forcing
@@ -80,17 +78,15 @@ read_atmos_data(FILE               *infile,
         techniques are left to the user. **/
     if (param_set.FORCE_DT[file_num] < HOURS_PER_DAY &&
         global_param.dt != param_set.FORCE_DT[file_num]) {
-        sprintf(ErrStr,
-                "When forcing the model with sub-daily data, the model must be "
+        log_err("When forcing the model with sub-daily data, the model must be "
                 "run at the same time step as the forcing data.  Currently the "
                 "model time step is %i hours, while forcing file %i has a time "
                 "step of %i hours.", global_param.dt, file_num,
                 param_set.FORCE_DT[file_num]);
-        nrerror(ErrStr);
     }
 
     if (infile == NULL) {
-        fprintf(stderr, "NULL file\n");
+        log_info("NULL file");
     }
 
     /***************************
@@ -113,7 +109,7 @@ read_atmos_data(FILE               *infile,
         // Nbytes is assumed to be the byte offset at which the data records start.
         fseek(infile, 0, SEEK_SET);
         if (feof(infile)) {
-            nrerror("No data in the forcing file.  Model stopping...");
+            log_err("No data in the forcing file.  Model stopping...");
         }
         for (i = 0; i < 4; i++) {
             fread(&ustmp, sizeof(unsigned short), 1, infile);
@@ -140,9 +136,8 @@ read_atmos_data(FILE               *infile,
             skip over its starting records **/
         fseek(infile, skip_recs * Nfields * sizeof(short), SEEK_CUR);
         if (feof(infile)) {
-            nrerror(
-                "No data for the specified time period in the forcing file.  "
-                "Model stopping...");
+            log_err("No data for the specified time period in the forcing "
+                    "file.  Model stopping...");
         }
 
         /** Read BINARY forcing data **/
@@ -205,6 +200,7 @@ read_atmos_data(FILE               *infile,
             rec++;
         }
     }
+
     /**************************
        Read ASCII Forcing Data
     **************************/
@@ -220,7 +216,7 @@ read_atmos_data(FILE               *infile,
         /* skip to the beginning of the required met data */
         for (i = 0; i < skip_recs; i++) {
             if (fgets(str, MAXSTRING, infile) == NULL) {
-                nrerror("No data for the specified time period in the forcing "
+                log_err("No data for the specified time period in the forcing "
                         "file.  Model stopping...");
             }
         }
@@ -250,13 +246,11 @@ read_atmos_data(FILE               *infile,
 
     if (rec * param_set.FORCE_DT[file_num] <
         global_param.nrecs * global_param.dt) {
-        sprintf(ErrStr,
-                "Not enough records in forcing file %i (%i * %i = %i) to run "
+        log_err("Not enough records in forcing file %i (%i * %i = %i) to run "
                 "the number of records defined in the global file "
                 "(%i * %i = %i).  Check forcing file time step, and global "
                 "file", file_num + 1, rec, param_set.FORCE_DT[file_num],
                 rec * param_set.FORCE_DT[file_num], global_param.nrecs,
                 global_param.dt, global_param.nrecs * global_param.dt);
-        nrerror(ErrStr);
     }
 }

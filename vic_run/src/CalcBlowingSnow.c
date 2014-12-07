@@ -145,8 +145,7 @@ CalcBlowingSnow(double   Dt,
 
                 if (lower > upper) { /* Could happen if lower > Uo*2 */
                     lower = upper;
-                    fprintf(stderr, "Warning: Error with probability "
-                            "boundaries in " "CalcBlowingSnow()\n");
+                    log_err("Error with probability boundaries");
                 }
 
 
@@ -169,12 +168,8 @@ CalcBlowingSnow(double   Dt,
                            exp((1. / sigma_w) * (lower - Uo))) / area;
                 }
                 else {
-                    fprintf(stderr, "ERROR in CalcBlowingSnow.c: Problem with "
-                            "probability ranges\n");
-                    fprintf(stderr,
-                            "  Increment = %d, integration limits = %f - %f\n",
-                            p, upper, lower);
-                    return (ERROR);
+                    log_err("Problem with probability ranges: Increment = %d, "
+                            "integration limits = %f - %f", p, upper, lower);
                 }
 
                 if (U10 < 0.4) {
@@ -313,8 +308,7 @@ qromb(double (*funcd)(),
         }
         h[j + 1] = 0.25 * h[j];
     }
-    nrerror("Too many steps in routine qromb");
-    return 0.0;
+    log_err("Too many steps in routine qromb");
 }
 
 /******************************************************************************
@@ -336,11 +330,11 @@ polint(double  xa[],
     dif = fabs(x - xa[1]);
     c = (double *)malloc((size_t) ((n + 1) * sizeof(double)));
     if (!c) {
-        nrerror("allocation failure in vector()");
+        log_err("allocation failure in vector()");
     }
     d = (double *)malloc((size_t) ((n + 1) * sizeof(double)));
     if (!d) {
-        nrerror("allocation failure in vector()");
+        log_err("allocation failure in vector()");
     }
 
     for (i = 1; i <= n; i++) {
@@ -358,7 +352,7 @@ polint(double  xa[],
             hp = xa[i + m] - x;
             w = c[i + 1] - d[i];
             if ((den = ho - hp) == 0.0) {
-                nrerror("Error in routine polint");
+                log_err("Error in routine polint");
             }
             den = w / den;
             d[i] = hp * den;
@@ -439,8 +433,7 @@ rtnewt(double x1,
     get_shear(x2, &fh, &df, Ur, Zr);
 
     if ((fl > 0.0 && fh > 0.0) || (fl < 0.0 && fh < 0.0)) {
-        fprintf(stderr, "Root must be bracketed in rtnewt.\n");
-        exit(0);
+        log_err("Root must be bracketed in rtnewt.");
     }
 
     if (fl == 0.0) {
@@ -492,8 +485,7 @@ rtnewt(double x1,
             xh = rts;
         }
     }
-    fprintf(stderr, "Maximum number of iterations exceeded in rtnewt.\n");
-    return 0.0;
+    log_err("Maximum number of iterations exceeded in rtnewt.");
 }
 
 /******************************************************************************
@@ -692,9 +684,8 @@ shear_stress(double  U10,
     get_shear(umax, &fh, &df, U10, 10.);
 
     if (fl < 0.0 && fh < 0.0) {
-        fprintf(stderr, "Solution in rtnewt surpasses upper boundary.\n");
-        fprintf(stderr, "fl(%f)=%f, fh(%f)=%f\n", umin, fl, umax, fh);
-        exit(0);
+        log_err("Solution in rtnewt surpasses upper boundary."
+                "fl(%f)=%f, fh(%f)=%f", umin, fl, umax, fh);
     }
 
     if (fl > 0.0 && fh > 0.0) {

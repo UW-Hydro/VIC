@@ -85,12 +85,12 @@ mtclim_wrapper(int         have_dewpt,
     /* allocate space for the tiny_radfract array */
     tiny_radfract = (double **) calloc(DAYS_PER_LYEAR, sizeof(double*));
     if (tiny_radfract == NULL) {
-        nrerror("Memory allocation error in mtclim_init() ...\n");
+        log_err("Memory allocation error in mtclim_init() ...");
     }
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
         tiny_radfract[i] = (double *) calloc(CONST_CDAY, sizeof(double));
         if (tiny_radfract[i] == NULL) {
-            nrerror("Memory allocation error in mtclim_init() ...\n");
+            log_err("Memory allocation error in mtclim_init() ...");
         }
     }
 
@@ -103,23 +103,23 @@ mtclim_wrapper(int         have_dewpt,
 
     /* calculate daily air temperatures */
     if (calc_tair(&ctrl, &p, &mtclim_data)) {
-        nrerror("Error in calc_tair()... exiting\n");
+        log_err("Error in calc_tair()... exiting");
     }
 
     /* calculate daily precipitation */
     if (calc_prcp(&ctrl, &p, &mtclim_data)) {
-        nrerror("Error in calc_prcp()... exiting\n");
+        log_err("Error in calc_prcp()... exiting");
     }
 
     /* calculate daily snowpack using simple model (this is only for radiation
        correction, *not* the same as the VIC snowpack estimate) */
     if (snowpack(&ctrl, &mtclim_data)) {
-        nrerror("Error in snowpack()... exiting\n");
+        log_err("Error in snowpack()... exiting");
     }
 
     /* calculate srad and humidity with iterative algorithm */
     if (calc_srad_humidity_iterative(&ctrl, &p, &mtclim_data, tiny_radfract)) {
-        nrerror("Error in calc_srad_humidity_iterative()... exiting\n");
+        log_err("Error in calc_srad_humidity_iterative()... exiting");
     }
 
     /* translate the mtclim structures back to the VIC data structures */
@@ -128,7 +128,7 @@ mtclim_wrapper(int         have_dewpt,
 
     /* clean up */
     if (data_free(&ctrl, &mtclim_data)) {
-        nrerror("Error in data_free()... exiting\n");
+        log_err("Error in data_free()... exiting");
     }
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
         free(tiny_radfract[i]);
@@ -174,9 +174,8 @@ mtclim_init(int               have_dewpt,
     ctrl->invp = 0;
     if (have_dewpt) {
         if (have_dewpt == 1) {
-            nrerror(
-                "have_dewpt not yet implemented for tdew; however you can "
-                "supply observed vapor pressure and set have_dewpt to 2\n");
+            log_err("have_dewpt not yet implemented for tdew; however you can "
+                    "supply observed vapor pressure and set have_dewpt to 2");
         }
         else if (have_dewpt == 2) {
             ctrl->invp = 1;
@@ -210,7 +209,7 @@ mtclim_init(int               have_dewpt,
 
     /* allocate space in the data arrays for input and output data */
     if (data_alloc(ctrl, mtclim_data)) {
-        nrerror("Error in data_alloc()... exiting\n");
+        log_err("Error in data_alloc()... exiting");
     }
 
     /* initialize the data arrays with the vic input data */
@@ -231,7 +230,7 @@ mtclim_init(int               have_dewpt,
         /* MTCLIM prcp in cm */
         mtclim_data->prcp[i] = prec[i] / MM_PER_CM;
         if (have_dewpt == 1) {
-            nrerror("have_dewpt not yet implemented ...\n");
+            log_err("have_dewpt not yet implemented ...");
         }
     }
     tinystepspday = CONST_CDAY / param.MTCLIM_SRADDT;

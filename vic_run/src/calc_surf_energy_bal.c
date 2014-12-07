@@ -351,7 +351,7 @@ calc_surf_energy_bal(double             Le,
                 Tsurf_fbcount++;
             }
             else {
-                fprintf(stderr, "SURF_DT = %.2f\n", param.SURF_DT);
+                log_info("SURF_DT = %.2f", param.SURF_DT);
                 error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month,
                                                    dmy->day, dmy->hour, VEG,
                                                    iveg,
@@ -1085,135 +1085,139 @@ error_print_surf_energy_bal(double  Ts,
        Main Routine
     ***************/
 
-    fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr,
-            "ERROR: calc_surf_energy_bal failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(LOG_DEST, "%s", ErrorString);
+    fprintf(LOG_DEST,
+            "ERROR: calc_surf_energy_bal failed to converge to a solution in "
+            "root_brent.  Variable values will be dumped to the screen, check "
+            "for invalid values.\n");
 
     /* Print Variables */
     /* general model terms */
-    fprintf(stderr, "iveg = %i\n", iveg);
-    fprintf(stderr, "year = %i\n", year);
-    fprintf(stderr, "month = %i\n", month);
-    fprintf(stderr, "day = %i\n", day);
-    fprintf(stderr, "hour = %i\n", hour);
-    fprintf(stderr, "VEG = %i\n", VEG);
-    fprintf(stderr, "veg_class = %i\n", veg_class);
-    fprintf(stderr, "delta_t = %f\n", delta_t);
+    fprintf(LOG_DEST, "iveg = %i\n", iveg);
+    fprintf(LOG_DEST, "year = %i\n", year);
+    fprintf(LOG_DEST, "month = %i\n", month);
+    fprintf(LOG_DEST, "day = %i\n", day);
+    fprintf(LOG_DEST, "hour = %i\n", hour);
+    fprintf(LOG_DEST, "VEG = %i\n", VEG);
+    fprintf(LOG_DEST, "veg_class = %i\n", veg_class);
+    fprintf(LOG_DEST, "delta_t = %f\n", delta_t);
 
     /* soil layer terms */
-    fprintf(stderr, "Cs1 = %f\n", Cs1);
-    fprintf(stderr, "Cs2 = %f\n", Cs2);
-    fprintf(stderr, "D1 = %f\n", D1);
-    fprintf(stderr, "D2 = %f\n", D2);
-    fprintf(stderr, "T1_old = %f\n", T1_old);
-    fprintf(stderr, "T2 = %f\n", T2);
-    fprintf(stderr, "Ts_old = %f\n", Ts_old);
-    fprintf(stderr, "b_infilt = %f\n", b_infilt);
-    fprintf(stderr, "bubble = %f\n", bubble);
-    fprintf(stderr, "dp = %f\n", dp);
-    fprintf(stderr, "expt = %f\n", expt);
-    fprintf(stderr, "ice0 = %f\n", ice0);
-    fprintf(stderr, "kappa1 = %f\n", kappa1);
-    fprintf(stderr, "kappa2 = %f\n", kappa2);
-    fprintf(stderr, "max_infil = %f\n", max_infil);
-    fprintf(stderr, "max_moist = %f\n", max_moist);
-    fprintf(stderr, "moist = %f\n", moist);
+    fprintf(LOG_DEST, "Cs1 = %f\n", Cs1);
+    fprintf(LOG_DEST, "Cs2 = %f\n", Cs2);
+    fprintf(LOG_DEST, "D1 = %f\n", D1);
+    fprintf(LOG_DEST, "D2 = %f\n", D2);
+    fprintf(LOG_DEST, "T1_old = %f\n", T1_old);
+    fprintf(LOG_DEST, "T2 = %f\n", T2);
+    fprintf(LOG_DEST, "Ts_old = %f\n", Ts_old);
+    fprintf(LOG_DEST, "b_infilt = %f\n", b_infilt);
+    fprintf(LOG_DEST, "bubble = %f\n", bubble);
+    fprintf(LOG_DEST, "dp = %f\n", dp);
+    fprintf(LOG_DEST, "expt = %f\n", expt);
+    fprintf(LOG_DEST, "ice0 = %f\n", ice0);
+    fprintf(LOG_DEST, "kappa1 = %f\n", kappa1);
+    fprintf(LOG_DEST, "kappa2 = %f\n", kappa2);
+    fprintf(LOG_DEST, "max_infil = %f\n", max_infil);
+    fprintf(LOG_DEST, "max_moist = %f\n", max_moist);
+    fprintf(LOG_DEST, "moist = %f\n", moist);
 
-    fprintf(stderr, "*Wcr = %f\n", *Wcr);
-    fprintf(stderr, "*Wpwp = %f\n", *Wpwp);
-    fprintf(stderr, "*depth = %f\n", *depth);
-    fprintf(stderr, "*resid_moist = %f\n", *resid_moist);
+    fprintf(LOG_DEST, "*Wcr = %f\n", *Wcr);
+    fprintf(LOG_DEST, "*Wpwp = %f\n", *Wpwp);
+    fprintf(LOG_DEST, "*depth = %f\n", *depth);
+    fprintf(LOG_DEST, "*resid_moist = %f\n", *resid_moist);
 
-    fprintf(stderr, "*root = %f\n", *root);
-    fprintf(stderr, "*CanopLayerBnd = %f\n", *CanopLayerBnd);
+    fprintf(LOG_DEST, "*root = %f\n", *root);
+    fprintf(LOG_DEST, "*CanopLayerBnd = %f\n", *CanopLayerBnd);
 
     /* meteorological forcing terms */
-    fprintf(stderr, "UnderStory = %i\n", UnderStory);
-    fprintf(stderr, "overstory = %i\n", overstory);
+    fprintf(LOG_DEST, "UnderStory = %i\n", UnderStory);
+    fprintf(LOG_DEST, "overstory = %i\n", overstory);
 
-    fprintf(stderr, "NetShortBare = %f\n", NetShortBare);
-    fprintf(stderr, "NetShortGrnd = %f\n", NetShortGrnd);
-    fprintf(stderr, "NetShortSnow = %f\n", NetShortSnow);
-    fprintf(stderr, "Tair = %f\n", Tair);
-    fprintf(stderr, "atmos_density = %f\n", atmos_density);
-    fprintf(stderr, "atmos_pressure = %f\n", atmos_pressure);
-    fprintf(stderr, "elevation = %f\n", elevation);
-    fprintf(stderr, "emissivity = %f\n", emissivity);
-    fprintf(stderr, "LongBareIn = %f\n", LongBareIn);
-    fprintf(stderr, "LongSnowIn = %f\n", LongSnowIn);
-    fprintf(stderr, "surf_atten = %f\n", surf_atten);
-    fprintf(stderr, "vp = %f\n", vp);
-    fprintf(stderr, "vpd = %f\n", vpd);
-    fprintf(stderr, "atmos_shortwave = %f\n", atmos_shortwave);
-    fprintf(stderr, "atmos_Catm = %f\n", atmos_Catm);
-    fprintf(stderr, "dryFrac = %f\n", dryFrac);
+    fprintf(LOG_DEST, "NetShortBare = %f\n", NetShortBare);
+    fprintf(LOG_DEST, "NetShortGrnd = %f\n", NetShortGrnd);
+    fprintf(LOG_DEST, "NetShortSnow = %f\n", NetShortSnow);
+    fprintf(LOG_DEST, "Tair = %f\n", Tair);
+    fprintf(LOG_DEST, "atmos_density = %f\n", atmos_density);
+    fprintf(LOG_DEST, "atmos_pressure = %f\n", atmos_pressure);
+    fprintf(LOG_DEST, "elevation = %f\n", elevation);
+    fprintf(LOG_DEST, "emissivity = %f\n", emissivity);
+    fprintf(LOG_DEST, "LongBareIn = %f\n", LongBareIn);
+    fprintf(LOG_DEST, "LongSnowIn = %f\n", LongSnowIn);
+    fprintf(LOG_DEST, "surf_atten = %f\n", surf_atten);
+    fprintf(LOG_DEST, "vp = %f\n", vp);
+    fprintf(LOG_DEST, "vpd = %f\n", vpd);
+    fprintf(LOG_DEST, "atmos_shortwave = %f\n", atmos_shortwave);
+    fprintf(LOG_DEST, "atmos_Catm = %f\n", atmos_Catm);
+    fprintf(LOG_DEST, "dryFrac = %f\n", dryFrac);
 
-    fprintf(stderr, "*Wdew = %f\n", *Wdew);
-    fprintf(stderr, "*displacement = %f\n", *displacement);
-    fprintf(stderr, "*ra = %f\n", *ra);
-    fprintf(stderr, "*ra_used = %f\n", *ra_used);
-    fprintf(stderr, "*rainfall = %f\n", rainfall);
-    fprintf(stderr, "*ref_height = %f\n", *ref_height);
-    fprintf(stderr, "*roughness = %f\n", *roughness);
-    fprintf(stderr, "*wind = %f\n", *wind);
+    fprintf(LOG_DEST, "*Wdew = %f\n", *Wdew);
+    fprintf(LOG_DEST, "*displacement = %f\n", *displacement);
+    fprintf(LOG_DEST, "*ra = %f\n", *ra);
+    fprintf(LOG_DEST, "*ra_used = %f\n", *ra_used);
+    fprintf(LOG_DEST, "*rainfall = %f\n", rainfall);
+    fprintf(LOG_DEST, "*ref_height = %f\n", *ref_height);
+    fprintf(LOG_DEST, "*roughness = %f\n", *roughness);
+    fprintf(LOG_DEST, "*wind = %f\n", *wind);
 
     /* latent heat terms */
-    fprintf(stderr, "Le = %f\n", Le);
+    fprintf(LOG_DEST, "Le = %f\n", Le);
 
     /* snowpack terms */
-    fprintf(stderr, "Ts = %f\n", Ts);
-    fprintf(stderr, "Advection = %f\n", Advection);
-    fprintf(stderr, "OldTSurf = %f\n", OldTSurf);
-    fprintf(stderr, "TPack = %f\n", TPack);
-    fprintf(stderr, "Tsnow_surf = %f\n", Tsnow_surf);
-    fprintf(stderr, "kappa_snow = %f\n", kappa_snow);
-    fprintf(stderr, "melt_energy = %f\n", melt_energy);
-    fprintf(stderr, "snow_coverage = %f\n", snow_coverage);
-    fprintf(stderr, "snow_density = %f\n", snow_density);
-    fprintf(stderr, "snow_swq = %f\n", snow_swq);
-    fprintf(stderr, "snow_water = %f\n", snow_water);
+    fprintf(LOG_DEST, "Ts = %f\n", Ts);
+    fprintf(LOG_DEST, "Advection = %f\n", Advection);
+    fprintf(LOG_DEST, "OldTSurf = %f\n", OldTSurf);
+    fprintf(LOG_DEST, "TPack = %f\n", TPack);
+    fprintf(LOG_DEST, "Tsnow_surf = %f\n", Tsnow_surf);
+    fprintf(LOG_DEST, "kappa_snow = %f\n", kappa_snow);
+    fprintf(LOG_DEST, "melt_energy = %f\n", melt_energy);
+    fprintf(LOG_DEST, "snow_coverage = %f\n", snow_coverage);
+    fprintf(LOG_DEST, "snow_density = %f\n", snow_density);
+    fprintf(LOG_DEST, "snow_swq = %f\n", snow_swq);
+    fprintf(LOG_DEST, "snow_water = %f\n", snow_water);
 
-    fprintf(stderr, "*deltaCC = %f\n", *deltaCC);
-    fprintf(stderr, "*refreeze_energy = %f\n", *refreeze_energy);
-    fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
+    fprintf(LOG_DEST, "*deltaCC = %f\n", *deltaCC);
+    fprintf(LOG_DEST, "*refreeze_energy = %f\n", *refreeze_energy);
+    fprintf(LOG_DEST, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
     /* soil node terms */
-    fprintf(stderr, "Nnodes = %i\n", Nnodes);
+    fprintf(LOG_DEST, "Nnodes = %i\n", Nnodes);
 
     /* spatial frost terms */
-    fprintf(stderr, "*frost_fract = %f\n", *frost_fract);
+    fprintf(LOG_DEST, "*frost_fract = %f\n", *frost_fract);
 
     /* control flags */
-    fprintf(stderr, "INCLUDE_SNOW = %i\n", INCLUDE_SNOW);
-    fprintf(stderr, "FS_ACTIVE = %i\n", FS_ACTIVE);
-    fprintf(stderr, "NOFLUX = %i\n", NOFLUX);
-    fprintf(stderr, "EXP_TRANS = %i\n", EXP_TRANS);
-    fprintf(stderr, "SNOWING = %i\n", SNOWING);
+    fprintf(LOG_DEST, "INCLUDE_SNOW = %i\n", INCLUDE_SNOW);
+    fprintf(LOG_DEST, "FS_ACTIVE = %i\n", FS_ACTIVE);
+    fprintf(LOG_DEST, "NOFLUX = %i\n", NOFLUX);
+    fprintf(LOG_DEST, "EXP_TRANS = %i\n", EXP_TRANS);
+    fprintf(LOG_DEST, "SNOWING = %i\n", SNOWING);
 
-    fprintf(stderr, "*FIRST_SOLN = %i\n", *FIRST_SOLN);
+    fprintf(LOG_DEST, "*FIRST_SOLN = %i\n", *FIRST_SOLN);
 
     /* returned energy balance terms */
-    fprintf(stderr, "*NetLongBare = %f\n", *NetLongBare);
-    fprintf(stderr, "*NetLongSnow = %f\n", *NetLongSnow);
-    fprintf(stderr, "*T1 = %f\n", *T1);
-    fprintf(stderr, "*deltaH = %f\n", *deltaH);
-    fprintf(stderr, "*fusion = %f\n", *fusion);
-    fprintf(stderr, "*grnd_flux = %f\n", *grnd_flux);
-    fprintf(stderr, "*latent_heat = %f\n", *latent_heat);
-    fprintf(stderr, "*latent_heat_sub = %f\n", *latent_heat_sub);
-    fprintf(stderr, "*sensible_heat = %f\n", *sensible_heat);
-    fprintf(stderr, "*snow_flux = %f\n", *snow_flux);
-    fprintf(stderr, "*store_error = %f\n", *store_error);
+    fprintf(LOG_DEST, "*NetLongBare = %f\n", *NetLongBare);
+    fprintf(LOG_DEST, "*NetLongSnow = %f\n", *NetLongSnow);
+    fprintf(LOG_DEST, "*T1 = %f\n", *T1);
+    fprintf(LOG_DEST, "*deltaH = %f\n", *deltaH);
+    fprintf(LOG_DEST, "*fusion = %f\n", *fusion);
+    fprintf(LOG_DEST, "*grnd_flux = %f\n", *grnd_flux);
+    fprintf(LOG_DEST, "*latent_heat = %f\n", *latent_heat);
+    fprintf(LOG_DEST, "*latent_heat_sub = %f\n", *latent_heat_sub);
+    fprintf(LOG_DEST, "*sensible_heat = %f\n", *sensible_heat);
+    fprintf(LOG_DEST, "*snow_flux = %f\n", *snow_flux);
+    fprintf(LOG_DEST, "*store_error = %f\n", *store_error);
 
     write_layer(layer, iveg, frost_fract);
     write_vegvar(&(veg_var[0]), iveg);
 
     if (!options.QUICK_FLUX) {
-        fprintf(stderr,
-                "Node\tT\tTnew\tTold\talpha\tbeta\tZsum\tkappa\tCs\tmoist\tbubble\texpt\tgamma\tmax_moist\tice\n");
+        fprintf(LOG_DEST,
+                "Node\tT\tTnew\tTold\talpha\tbeta\tZsum\tkappa\tCs\tmoist\t"
+                "bubble\texpt\tgamma\tmax_moist\tice\n");
         for (i = 0; i < Nnodes; i++) {
-            fprintf(stderr,
-                    "%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
+            fprintf(LOG_DEST,
+                    "%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f"
+                    "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
                     i, T_node[i], Told_node[i], alpha[i], beta[i], Tnew_node[i],
                     Zsum_node[i], kappa_node[i], Cs_node[i], moist_node[i],
                     bubble_node[i], expt_node[i], gamma[i], max_moist_node[i],
@@ -1221,8 +1225,12 @@ error_print_surf_energy_bal(double  Ts,
         }
     }
 
-    fprintf(stderr,
-            "**********\n**********\nFinished writing calc_surf_energy_bal variables.\nTry increasing param.SURF_DT to get model to complete cell.\nThen check output for instabilities.\n**********\n**********\n");
+    fprintf(LOG_DEST,
+            "**********\n**********\n"
+            "Finished writing calc_surf_energy_bal variables.\n"
+            "Try increasing param.SURF_DT to get model to complete cell.\n"
+            "Then check output for instabilities."
+            "\n**********\n**********\n");
 
     return (ERROR);
 }

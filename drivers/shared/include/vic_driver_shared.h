@@ -65,13 +65,13 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
-char* get_current_datetime(void);
+char*get_current_datetime(void);
 void display_current_settings(int);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
-char* get_logname(const char *pathtofile);
+char*get_logname(const char *pathtofile);
 void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
                         unsigned short *, unsigned short *, unsigned short);
 void get_parameters(FILE *paramfile);

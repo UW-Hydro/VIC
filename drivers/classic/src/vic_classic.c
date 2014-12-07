@@ -60,7 +60,6 @@ main(int   argc,
 
     char                  MODEL_DONE;
     char                  RUN_MODEL;
-    char                  ErrStr[MAXSTRING];
     char                  write_flag;
     char                 *logfilename;
     size_t                rec;
@@ -80,6 +79,9 @@ main(int   argc,
     out_data_struct      *out_data;
     save_data_struct      save_data;
 
+    // Initialize Log Destination
+    LOG_DEST = stderr;
+
     /** Read Model Options **/
     cmd_proc(argc, argv, filenames.global);
 
@@ -96,7 +98,7 @@ main(int   argc,
     filep.globalparam = open_file(filenames.global, "r");
     get_global_param(filep.globalparam);
 
-    // Initialize Log Destination
+    // Set Log Destination
     if (strcmp(filenames.log_path, "MISSING") != 0) {
         // Create logfile name
         logfilename = get_logname(filenames.log_path);
@@ -110,8 +112,6 @@ main(int   argc,
     }
     else {
         // Set global log destination
-        LOG_DEST = stderr;
-
         log_info("Logging to stderr");
     }
 
@@ -231,22 +231,19 @@ main(int   argc,
                 if (ErrorFlag == ERROR) {
                     if (options.CONTINUEONERROR) {
                         // Handle grid cell solution error
-                        fprintf(stderr,
-                                "ERROR: Grid cell %i failed in record %zu so "
-                                "the simulation has not finished.  An "
-                                "incomplete output file has been generated, "
-                                "check your inputs before rerunning the "
-                                "simulation.\n", soil_con.gridcel, rec);
+                        log_warn("ERROR: Grid cell %i failed in record %zu so "
+                                 "the simulation has not finished.  An "
+                                 "incomplete output file has been generated, "
+                                 "check your inputs before rerunning the "
+                                 "simulation.\n", soil_con.gridcel, rec);
                         break;
                     }
                     else {
                         // Else exit program on cell solution error as in previous versions
-                        sprintf(ErrStr,
-                                "ERROR: Grid cell %i failed in record %zu so "
+                        log_err("ERROR: Grid cell %i failed in record %zu so "
                                 "the simulation has ended. Check your inputs "
                                 "before rerunning the simulation.\n",
                                 soil_con.gridcel, rec);
-                        nrerror(ErrStr);
                     }
                 }
 
@@ -305,23 +302,20 @@ main(int   argc,
                     if (ErrorFlag == ERROR) {
                         if (options.CONTINUEONERROR) {
                             // Handle grid cell solution error
-                            fprintf(stderr,
-                                    "ERROR: Grid cell %i failed in record %zu "
-                                    "so the simulation has not finished.  An "
-                                    "incomplete output file has been "
-                                    "generated, check your inputs before "
-                                    "rerunning the simulation.\n",
-                                    soil_con.gridcel, rec);
+                            log_warn("ERROR: Grid cell %i failed in record %zu "
+                                     "so the simulation has not finished.  An "
+                                     "incomplete output file has been "
+                                     "generated, check your inputs before "
+                                     "rerunning the simulation.\n",
+                                     soil_con.gridcel, rec);
                             break;
                         }
                         else {
                             // Else exit program on cell solution error as in previous versions
-                            sprintf(ErrStr,
-                                    "ERROR: Grid cell %i failed in record %zu "
+                            log_err("ERROR: Grid cell %i failed in record %zu "
                                     "so the simulation has ended. Check your "
                                     "inputs before rerunning the simulation.\n",
                                     soil_con.gridcel, rec);
-                            nrerror(ErrStr);
                         }
                     }
                 } /* End Rec Loop */

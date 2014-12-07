@@ -62,14 +62,14 @@ vic_force(void)
     fvar = (float *) malloc(global_domain.n_ny * global_domain.n_nx *
                             sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_force().");
+        log_err("Memory allocation error in vic_force().");
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
     idx = (size_t *) malloc(global_domain.ncells_global *
                             sizeof(size_t));
     if (idx == NULL) {
-        nrerror("Memory allocation error in vic_force().");
+        log_err("Memory allocation error in vic_force().");
     }
     for (i = 0; i < global_domain.ncells_global; i++) {
         idx[i] = get_global_idx(&global_domain, i);
@@ -166,7 +166,7 @@ vic_force(void)
     global_param.forceoffset[0] += NF;
 
     if (options.SNOW_BAND > 1) {
-        nrerror("SNOW_BAND not implemented in vic_force()");
+        log_err("SNOW_BAND not implemented in vic_force()");
     }
     else {
         t_offset = 0;
@@ -259,7 +259,7 @@ average(double *ar,
     double sum = 0.;
 
     if (n <= 0) {
-        nrerror("Error in calc_average: divide by zero or negative");
+        log_err("Error in calc_average: divide by zero or negative");
     }
     else if (n == 1) {
         return ar[0];

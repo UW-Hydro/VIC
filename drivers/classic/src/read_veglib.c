@@ -47,7 +47,6 @@ read_veglib(FILE   *veglib,
     int                      tmpflag;
     size_t                   Nveg_type;
     char                     str[MAXSTRING];
-    char                     ErrStr[MAXSTRING];
     double                   maxd;
     char                     tmpstr[MAXSTRING];
 
@@ -85,12 +84,10 @@ read_veglib(FILE   *veglib,
                 fscanf(veglib, "%lf", &temp[i].LAI[j]);
                 if (options.LAI_SRC == LAI_FROM_VEGLIB && temp[i].overstory &&
                     temp[i].LAI[j] == 0) {
-                    sprintf(ErrStr,
-                            "ERROR: veg library: the specified veg class (%d) "
+                    log_err("veg library: the specified veg class (%d) "
                             "is listed as an overstory class, but the LAI "
-                            "given for this class for month %zu is 0\n",
+                            "given for this class for month %zu is 0",
                             temp[i].veg_class, j);
-                    nrerror(ErrStr);
                 }
                 temp[i].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * temp[i].LAI[j];
             }
@@ -98,11 +95,9 @@ read_veglib(FILE   *veglib,
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     fscanf(veglib, "%lf", &temp[i].vegcover[j]);
                     if (temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
-                        sprintf(str,
-                                "Veg cover fraction must be between 0 and 1 "
+                        log_err("Veg cover fraction must be between 0 and 1 "
                                 "(%f)",
                                 temp[i].vegcover[j]);
-                        nrerror(str);
                     }
                     if (temp[i].vegcover[j] < 0.01) {
                         temp[i].vegcover[j] = 0.01;
@@ -117,9 +112,8 @@ read_veglib(FILE   *veglib,
             for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].albedo[j]);
                 if (temp[i].albedo[j] < 0 || temp[i].albedo[j] > 1) {
-                    sprintf(str, "Albedo must be between 0 and 1 (%f)",
+                    log_err("Albedo must be between 0 and 1 (%f)",
                             temp[i].albedo[j]);
-                    nrerror(str);
                 }
             }
             for (j = 0; j < MONTHS_PER_YEAR; j++) {
@@ -133,43 +127,35 @@ read_veglib(FILE   *veglib,
                     maxd = temp[i].displacement[j];
                 }
                 if (temp[i].LAI[j] > 0 && temp[i].displacement[j] <= 0) {
-                    sprintf(str,
-                            "Vegetation has leaves (LAI = %f), but no "
+                    log_err("Vegetation has leaves (LAI = %f), but no "
                             "displacement (%f)",
                             temp[i].LAI[j], temp[i].displacement[j]);
-                    nrerror(str);
                 }
             }
             fscanf(veglib, "%lf", &temp[i].wind_h);
             if (temp[i].wind_h < maxd && temp[i].overstory) {
-                sprintf(str,
-                        "Vegetation reference height (%f) for vegetation "
+                log_err("Vegetation reference height (%f) for vegetation "
                         "class %d, must be greater than the maximum "
                         "displacement height (%f) when OVERSTORY has been set "
                         "true.", temp[i].wind_h, temp[i].veg_class, maxd);
-                nrerror(str);
             }
             fscanf(veglib, "%lf", &temp[i].RGL);    /* minimum value of incoming
                                                        solar radiation at which there
                                                        will still be transpiration */
             if (temp[i].RGL < 0) {
-                sprintf(str,
-                        "Minimum value of incoming solar radiation at which "
+                log_err("Minimum value of incoming solar radiation at which "
                         "there is transpiration (RGL) must be greater than 0 "
                         "for vegetation class %d.  Check that the vegetation "
                         "library has the correct number of columns.",
                         temp[i].veg_class);
-                nrerror(str);
             }
             fscanf(veglib, "%lf", &temp[i].rad_atten); /* vegetation radiation
                                                           attenuation factor */
             if (temp[i].rad_atten < 0 || temp[i].rad_atten > 1) {
-                sprintf(str,
-                        "The vegetation radiation attenuation factor must be "
+                log_err("The vegetation radiation attenuation factor must be "
                         "greater than 0, and less than 1 for vegetation class "
                         "%d.  Check that the vegetation library has the "
                         "correct number of columns.", temp[i].veg_class);
-                nrerror(str);
             }
             fscanf(veglib, "%lf", &temp[i].wind_atten); /* canopy wind speed
                                                            attenuation factor */
@@ -213,10 +199,8 @@ read_veglib(FILE   *veglib,
         fscanf(veglib, "%s", str);
     }
     if (i != Nveg_type) {
-        sprintf(ErrStr,
-                "ERROR: Problem reading vegetation library file - make sure "
-                "the file has the right number of columns.\n");
-        nrerror(ErrStr);
+        log_err("Problem reading vegetation library file - make sure "
+                "the file has the right number of columns.");
     }
     *Ntype = Nveg_type;
     for (k = 0; k < N_PET_TYPES_NON_NAT; k++) {

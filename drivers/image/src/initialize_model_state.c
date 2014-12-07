@@ -51,7 +51,6 @@ initialize_model_state(all_vars_struct *all_vars,
     extern global_param_struct global_param;
     extern option_struct       options;
 
-    char                       ErrStr[MAXSTRING];
     char                       FIRST_VEG;
     size_t                     veg;
     size_t                     index;
@@ -182,12 +181,10 @@ initialize_model_state(all_vars_struct *all_vars,
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
                             if ((int)(Zsum * MM_PER_M + 0.5) !=
                                 (int)(dp * MM_PER_M + 0.5)) {
-                                sprintf(ErrStr,
-                                        "Sum of thermal node thicknesses (%f) "
+                                log_err("Sum of thermal node thicknesses (%f) "
                                         "in initialize_model_state do not "
                                         "equal dp (%f), check initialization "
                                         "procedure", Zsum, dp);
-                                nrerror(ErrStr);
                             }
                         }
                     }
@@ -199,8 +196,7 @@ initialize_model_state(all_vars_struct *all_vars,
                             // validate Nnodes by requiring that there be at
                             // least 3 nodes in the top 50cm
                             if (Nnodes < 5 * logf(dp + 1.) + 1) {
-                                sprintf(ErrStr,
-                                        "The number of soil thermal nodes (%zu) "
+                                log_err("The number of soil thermal nodes (%zu) "
                                         "is too small for the supplied damping "
                                         "depth (%f) with EXP_TRANS set to "
                                         "TRUE, leading to fewer than 3 nodes "
@@ -217,15 +213,13 @@ initialize_model_state(all_vars_struct *all_vars,
                                         (int)(5 * logf(
                                                   dp + 1.)) + 2,
                                         exp(0.2 * (Nnodes - 1)) + 1);
-                                nrerror(ErrStr);
                             }
                             for (index = 0; index <= Nnodes - 1; index++) {
                                 soil_con->Zsum_node[index] =
                                     expf(Bexp * index) - 1.;
                             }
                             if (soil_con->Zsum_node[0] > soil_con->depth[0]) {
-                                sprintf(ErrStr,
-                                        "Depth of first thermal node (%f) in "
+                                log_err("Depth of first thermal node (%f) in "
                                         "initialize_model_state is greater "
                                         "than depth of first soil layer (%f); "
                                         "increase the number of nodes or "
@@ -233,7 +227,6 @@ initialize_model_state(all_vars_struct *all_vars,
                                         "dp (%f)",
                                         soil_con->Zsum_node[0],
                                         soil_con->depth[0], dp);
-                                nrerror(ErrStr);
                             }
                         }
 
@@ -365,11 +358,11 @@ initialize_model_state(all_vars_struct *all_vars,
                         // in hours
                         dt_thresh = 0.5 * energy[veg][band].Cs_node[1] /
                                     energy[veg][band].kappa_node[1] *
-                                    pow((soil_con->dz_node[1]), 2) / 3600;
+                                    pow((soil_con->dz_node[1]),
+                                        2) / SEC_PER_HOUR;
                         if (global_param.dt > dt_thresh) {
-                            sprintf(ErrStr,
-                                    "ERROR: You are currently running FROZEN "
-                                    "SOIL with an explicit method (IMPLICIT is "
+                            log_err("You are currently running FROZEN SOIL "
+                                    "with an explicit method (IMPLICIT is "
                                     "set to FALSE).  For the explicit method "
                                     "to be stable, time step %d hours is too "
                                     "large for the given thermal node spacing "
@@ -384,7 +377,6 @@ initialize_model_state(all_vars_struct *all_vars,
                                     soil_con->dz_node[1],
                                     energy[veg][band].Cs_node[1],
                                     energy[veg][band].kappa_node[1], dt_thresh);
-                            nrerror(ErrStr);
                         }
                     }
 

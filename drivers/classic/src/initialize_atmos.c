@@ -157,9 +157,9 @@ initialize_atmos(atmos_data_struct    *atmos,
          ((!param_set.TYPE[SNOWF].SUPPLIED &&
            (!param_set.TYPE[LSSNOWF].SUPPLIED ||
             !param_set.TYPE[CSNOWF].SUPPLIED))))) {
-        nrerror("Input meteorological forcing files must contain some form of "
+        log_err("Input meteorological forcing files must contain some form of "
                 "precipitation (PREC, or { {RAINF or {LSRAINF and CRAINF}} "
-                "and {SNOWF or {LSSNOWF and CSNOWF}} }); check input files\n");
+                "and {SNOWF or {LSSNOWF and CSNOWF}} }); check input files.");
     }
 
     if (!(param_set.TYPE[TMAX].SUPPLIED &&
@@ -171,9 +171,9 @@ initialize_atmos(atmos_data_struct    *atmos,
         !(param_set.TYPE[AIR_TEMP].SUPPLIED &&
           param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED - 1] <
           HOURS_PER_DAY)) {
-        nrerror("Input meteorological forcing files must contain either: a. "
+        log_err("Input meteorological forcing files must contain either: a. "
                 "Daily TMAX and TMIN (maximum and minimum air temperature) or "
-                "b. sub-daily AIR_TEMP (air temperature); check input files\n");
+                "b. sub-daily AIR_TEMP (air temperature); check input files.");
     }
 
     /* Assign N_ELEM for veg-dependent forcings */
@@ -222,7 +222,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     dmy_local =
         (dmy_struct *) calloc(Ndays_local * HOURS_PER_DAY, sizeof(dmy_struct));
     if (dmy_local == NULL) {
-        nrerror("Memory allocation failure in initialize_atmos()");
+        log_err("Memory allocation failure in initialize_atmos()");
     }
     day_in_year = local_startday;
     for (month = 1; month < local_startmonth; month++) {
@@ -282,7 +282,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     if (hourlyrad == NULL || prec == NULL || tair == NULL || tmax == NULL ||
         tmaxhour == NULL || tmin == NULL || tminhour == NULL || tskc == NULL ||
         daily_vp == NULL || dailyrad == NULL || fdir == NULL) {
-        nrerror("Memory allocation failure in initialize_atmos()");
+        log_err("Memory allocation failure in initialize_atmos()");
     }
 
     /*******************************
@@ -291,7 +291,7 @@ initialize_atmos(atmos_data_struct    *atmos,
 
     forcing_data = read_forcing_data(infile, global_param, &veg_hist_data);
 
-    fprintf(stderr, "\nRead meteorological forcing file\n");
+    log_info("Read meteorological forcing file");
 
     /*************************************************
        Pre-processing
@@ -405,15 +405,14 @@ initialize_atmos(atmos_data_struct    *atmos,
 
     local_forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
     if (local_forcing_data == NULL) {
-        nrerror("Memory allocation failure in initialize_atmos() for "
+        log_err("Memory allocation failure in initialize_atmos() for "
                 "local_forcing_data");
     }
     local_veg_hist_data =
         (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
     if (local_veg_hist_data == NULL) {
-        nrerror(
-            "Memory allocation failure in initialize_atmos() for "
-            "local_fveg_hist_data");
+        log_err("Memory allocation failure in initialize_atmos() for "
+                "local_fveg_hist_data");
     }
     for (type = 0; type < N_FORCING_TYPES; type++) {
         // Allocate enough space for hourly data
@@ -421,20 +420,20 @@ initialize_atmos(atmos_data_struct    *atmos,
             if ((local_forcing_data[type] =
                      (double *)calloc(Ndays_local * HOURS_PER_DAY,
                                       sizeof(double))) == NULL) {
-                nrerror("Memory allocation failure in initialize_atmos()");
+                log_err("Memory allocation failure in initialize_atmos()");
             }
         }
         else {
             if ((local_veg_hist_data[type] =
                      (double **)calloc(param_set.TYPE[type].N_ELEM,
                                        sizeof(double*))) == NULL) {
-                nrerror("Memory allocation failure in initialize_atmos()");
+                log_err("Memory allocation failure in initialize_atmos()");
             }
             for (v = 0; v < param_set.TYPE[type].N_ELEM; v++) {
                 if ((local_veg_hist_data[type][v] =
                          (double *)calloc(Ndays_local * HOURS_PER_DAY,
                                           sizeof(double))) == NULL) {
-                    nrerror("Memory allocation failure in initialize_atmos()");
+                    log_err("Memory allocation failure in initialize_atmos()");
                 }
             }
         }
@@ -875,6 +874,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
             param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
         }
+
         /*************************************************
            If provided, translate relative humidity and air temperature
            into vapor pressure

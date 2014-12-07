@@ -42,6 +42,8 @@ vic_start(void)
 
     char                   *logfilename;
 
+    LOG_DEST = stderr;
+
     // Initialize global structures
     initialize_options();
     initialize_global();
@@ -89,7 +91,7 @@ vic_start(void)
     if (options.SNOW_BAND > 1) {
         if (options.SNOW_BAND !=
             get_nc_dimension(filenames.snowband, "snow_band")) {
-            nrerror("Number of snow bands in global file does not "
+            log_err("Number of snow bands in global file does not "
                     "match parameter file");
         }
     }

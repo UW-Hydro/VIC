@@ -41,31 +41,28 @@ char*
 get_current_datetime()
 {
     const int size = 20;
-    char     *cdt = (char*)malloc(sizeof(char)*size);
+    char     *cdt = (char*)malloc(sizeof(char) * size);
     char      ymd[8];
     unsigned  seconds_since_midnight;
 
-    if(cdt == NULL)
-    {
+    if (cdt == NULL) {
         return NULL;
     }
 
-    memset (cdt, 0, size);
+    memset(cdt, 0, size);
 
     time_t currDateTime;
     currDateTime = time(NULL);
 
-    if(currDateTime == -1)
-    {
+    if (currDateTime == -1) {
         return NULL;
     }
 
-    struct tm  *timeinfo = localtime (&currDateTime);
+    struct tm *timeinfo = localtime(&currDateTime);
 
     seconds_since_midnight = (unsigned)currDateTime % 86400;
 
-    if(strftime(ymd, 7, "%y%m%d", timeinfo) == 0)
-    {
+    if (strftime(ymd, 7, "%y%m%d", timeinfo) == 0) {
         return NULL;
     }
 
@@ -85,14 +82,13 @@ get_logname(const char *path)
     char *ext = ".txt";
     int   size = (strlen(path) + strlen(prefix) + strlen(ext) +
                   strlen(timestamp) + 1);
-    char *filename = (char*)malloc(sizeof(char)*size);
+    char *filename = (char*)malloc(sizeof(char) * size);
 
-    if(filename == NULL)
-    {
+    if (filename == NULL) {
         return NULL;
     }
 
-    memset (filename, 0, size);
+    memset(filename, 0, size);
     strcpy(filename, path);
     strcpy(filename + strlen(path), prefix);
     strcpy(filename + strlen(path) + strlen(prefix), timestamp);

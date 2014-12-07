@@ -209,11 +209,8 @@ ice_melt(double            z2,
                                              snow->surf_temp, 0, 1, 100.,
                                              .067, .0123, &snow->transport);
         if ((int)snow->blowing_flux == ERROR) {
-            fprintf(stderr,
-                    "ERROR: ice_melt.c has an error from the call to "
-                    "CalcBlowingSnow\n");
-            fprintf(stderr, "Exiting module\n");
-            return (ERROR);
+            log_err("ice_melt.c has an error from the call to "
+                    "CalcBlowingSnow.  Exiting module.");
         }
 
         snow->blowing_flux *= delta_t * SEC_PER_HOUR / CONST_RHOFW;
@@ -748,50 +745,54 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     ErrorString = (char *) va_arg(ap, double *);
 
     /* print variables */
-    fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr,
-            "ERROR: ice_melt failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(LOG_DEST, "%s", ErrorString);
+    fprintf(LOG_DEST,
+            "ERROR: ice_melt failed to converge to a solution in root_brent.  "
+            "Variable values will be dumped to the screen, check for invalid "
+            "values.\n");
 
-    fprintf(stderr, "Dt = %f\n", Dt);
-    fprintf(stderr, "Ra = %f\n", Ra);
-    fprintf(stderr, "Ra_used = %f\n", *Ra_used);
-    fprintf(stderr, "Z = %f\n", Z);
-    fprintf(stderr, "Displacement = %f\n", Displacement);
-    fprintf(stderr, "Z0 = %f\n", Z0);
-    fprintf(stderr, "Wind = %f\n", Wind);
-    fprintf(stderr, "ShortRad = %f\n", ShortRad);
-    fprintf(stderr, "LongRadIn = %f\n", LongRadIn);
-    fprintf(stderr, "AirDens = %f\n", AirDens);
-    fprintf(stderr, "Lv = %f\n", Lv);
-    fprintf(stderr, "Tair = %f\n", Tair);
-    fprintf(stderr, "Press = %f\n", Press);
-    fprintf(stderr, "Vpd = %f\n", Vpd);
-    fprintf(stderr, "EactAir = %f\n", EactAir);
-    fprintf(stderr, "Rain = %f\n", Rain);
-    fprintf(stderr, "SweSurfaceLayer = %f\n", SweSurfaceLayer);
-    fprintf(stderr, "SurfaceLiquidWater = %f\n", SurfaceLiquidWater);
-    fprintf(stderr, "TSurf = %f\n", TSurf);
-    fprintf(stderr, "OldTSurf = %f\n", OldTSurf);
-    fprintf(stderr, "RefreezeEnergy = %f\n", RefreezeEnergy[0]);
-    fprintf(stderr, "vapor_flux = %f\n", *vapor_flux);
-    fprintf(stderr, "blowing_flux = %f\n", *blowing_flux);
-    fprintf(stderr, "surface_flux = %f\n", *surface_flux);
-    fprintf(stderr, "AdvectedEnergy = %f\n", AdvectedEnergy[0]);
-    fprintf(stderr, "DeltaColdContent = %f\n", DeltaColdContent);
-    fprintf(stderr, "Tfreeze = %f\n", Tfreeze);
-    fprintf(stderr, "AvgCond = %f\n", AvgCond);
-    fprintf(stderr, "SWconducted = %f\n", SWconducted);
-    fprintf(stderr, "SnowDepth = %f\n", SnowDepth);
-    fprintf(stderr, "SnowDensity = %f\n", SnowDensity);
-    fprintf(stderr, "SurfAttenuation = %f\n", SurfAttenuation);
-    fprintf(stderr, "GroundFlux = %f\n", GroundFlux[0]);
-    fprintf(stderr, "LatentHeat = %f\n", LatentHeat[0]);
-    fprintf(stderr, "LatentHeatSub = %f\n", LatentHeatSub[0]);
-    fprintf(stderr, "SensibleHeat = %f\n", SensibleHeat[0]);
-    fprintf(stderr, "LWnet = %f\n", *LWnet);
+    fprintf(LOG_DEST, "Dt = %f\n", Dt);
+    fprintf(LOG_DEST, "Ra = %f\n", Ra);
+    fprintf(LOG_DEST, "Ra_used = %f\n", *Ra_used);
+    fprintf(LOG_DEST, "Z = %f\n", Z);
+    fprintf(LOG_DEST, "Displacement = %f\n", Displacement);
+    fprintf(LOG_DEST, "Z0 = %f\n", Z0);
+    fprintf(LOG_DEST, "Wind = %f\n", Wind);
+    fprintf(LOG_DEST, "ShortRad = %f\n", ShortRad);
+    fprintf(LOG_DEST, "LongRadIn = %f\n", LongRadIn);
+    fprintf(LOG_DEST, "AirDens = %f\n", AirDens);
+    fprintf(LOG_DEST, "Lv = %f\n", Lv);
+    fprintf(LOG_DEST, "Tair = %f\n", Tair);
+    fprintf(LOG_DEST, "Press = %f\n", Press);
+    fprintf(LOG_DEST, "Vpd = %f\n", Vpd);
+    fprintf(LOG_DEST, "EactAir = %f\n", EactAir);
+    fprintf(LOG_DEST, "Rain = %f\n", Rain);
+    fprintf(LOG_DEST, "SweSurfaceLayer = %f\n", SweSurfaceLayer);
+    fprintf(LOG_DEST, "SurfaceLiquidWater = %f\n", SurfaceLiquidWater);
+    fprintf(LOG_DEST, "TSurf = %f\n", TSurf);
+    fprintf(LOG_DEST, "OldTSurf = %f\n", OldTSurf);
+    fprintf(LOG_DEST, "RefreezeEnergy = %f\n", RefreezeEnergy[0]);
+    fprintf(LOG_DEST, "vapor_flux = %f\n", *vapor_flux);
+    fprintf(LOG_DEST, "blowing_flux = %f\n", *blowing_flux);
+    fprintf(LOG_DEST, "surface_flux = %f\n", *surface_flux);
+    fprintf(LOG_DEST, "AdvectedEnergy = %f\n", AdvectedEnergy[0]);
+    fprintf(LOG_DEST, "DeltaColdContent = %f\n", DeltaColdContent);
+    fprintf(LOG_DEST, "Tfreeze = %f\n", Tfreeze);
+    fprintf(LOG_DEST, "AvgCond = %f\n", AvgCond);
+    fprintf(LOG_DEST, "SWconducted = %f\n", SWconducted);
+    fprintf(LOG_DEST, "SnowDepth = %f\n", SnowDepth);
+    fprintf(LOG_DEST, "SnowDensity = %f\n", SnowDensity);
+    fprintf(LOG_DEST, "SurfAttenuation = %f\n", SurfAttenuation);
+    fprintf(LOG_DEST, "GroundFlux = %f\n", GroundFlux[0]);
+    fprintf(LOG_DEST, "LatentHeat = %f\n", LatentHeat[0]);
+    fprintf(LOG_DEST, "LatentHeatSub = %f\n", LatentHeatSub[0]);
+    fprintf(LOG_DEST, "SensibleHeat = %f\n", SensibleHeat[0]);
+    fprintf(LOG_DEST, "LWnet = %f\n", *LWnet);
 
-    fprintf(stderr,
-            "Finished dumping snow_melt variables.\nTry increasing SNOW_DT to get model to complete cell.\nThen check output for instabilities.\n");
+    fprintf(LOG_DEST,
+            "Finished dumping snow_melt variables.\n"
+            "Try increasing SNOW_DT to get model to complete cell.\n"
+            "Then check output for instabilities.\n");
 
     return(ERROR);
 }

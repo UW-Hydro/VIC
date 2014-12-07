@@ -37,100 +37,100 @@ print_atmos_data(atmos_data_struct *atmos,
 {
     size_t i;
 
-    printf("atmos_data  :\n");
-    printf("\tair_temp  :");
+    fprintf(LOG_DEST, "atmos_data  :\n");
+    fprintf(LOG_DEST, "\tair_temp  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->air_temp[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->air_temp[i]);
     }
-    printf("\n");
-    printf("\tCatm      :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tCatm      :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->Catm[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->Catm[i]);
     }
-    printf("\n");
-    printf("\tchannel_in:");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tchannel_in:");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->channel_in[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->channel_in[i]);
     }
-    printf("\n");
-    printf("\tcoszen    :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tcoszen    :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->coszen[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->coszen[i]);
     }
-    printf("\n");
-    printf("\tdensity   :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tdensity   :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->density[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->density[i]);
     }
-    printf("\n");
-    printf("\tfdir      :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tfdir      :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->fdir[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->fdir[i]);
     }
-    printf("\n");
-    printf("\tlongwave  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tlongwave  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->longwave[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->longwave[i]);
     }
-    printf("\n");
-    printf("\tout_prec  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tout_prec  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_prec);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->out_prec);
     }
-    printf("\n");
-    printf("\tout_rain  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tout_rain  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_rain);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->out_rain);
     }
-    printf("\n");
-    printf("\tout_snow  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tout_snow  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->out_snow);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->out_snow);
     }
-    printf("\n");
-    printf("\tpar       :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tpar       :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->par[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->par[i]);
     }
-    printf("\n");
-    printf("\tprec      :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tprec      :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->prec[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->prec[i]);
     }
-    printf("\n");
-    printf("\tpressure  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tpressure  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->pressure[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->pressure[i]);
     }
-    printf("\n");
-    printf("\tshortwave :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tshortwave :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->shortwave[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->shortwave[i]);
     }
-    printf("\n");
-    printf("\tsnowflag  :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tsnowflag  :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%d\n", atmos->snowflag[i]);
+        fprintf(LOG_DEST, "\t%d\n", atmos->snowflag[i]);
     }
-    printf("\n");
-    printf("\ttskc      :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\ttskc      :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->tskc[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->tskc[i]);
     }
-    printf("\n");
-    printf("\tvp        :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tvp        :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->vp[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->vp[i]);
     }
-    printf("\n");
-    printf("\tvpd       :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tvpd       :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->vpd[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->vpd[i]);
     }
-    printf("\n");
-    printf("\twind      :");
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\twind      :");
     for (i = 0; i <= nr; i++) {
-        printf("\t%.4lf", atmos->wind[i]);
+        fprintf(LOG_DEST, "\t%.4lf", atmos->wind[i]);
     }
-    printf("\n");
+    fprintf(LOG_DEST, "\n");
 }

@@ -169,7 +169,6 @@ OBJS = \
 	${VICPATH}/src/massrelease.o \
 	${VICPATH}/src/modify_Ksat.o \
 	${VICPATH}/src/newt_raph_func_fast.o \
-	${VICPATH}/src/nrerror.o \
 	${VICPATH}/src/penman.o \
 	${VICPATH}/src/photosynth.o \
 	${VICPATH}/src/physics.o \

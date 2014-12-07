@@ -50,37 +50,55 @@ FILE *LOG_DEST;
 #ifdef NDEBUG
 #define debug(M, ...)
 #else
-#define debug(M, ...) fprintf(LOG_DEST, "[DEBUG] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define debug(M, ...) fprintf(LOG_DEST, "[DEBUG] %s:%d: " M "\n", __FILE__, \
+                              __LINE__, ## __VA_ARGS__)
 #endif
 
 // do not try to be smart and make this go away on NDEBUG, the _debug
 // here means that it just doesn't print a message, it still does the
 // check.  MKAY?
-#define check_debug(A, M, ...) if(!(A)) { debug(M, ##__VA_ARGS__); errno=0; goto error; }
+#define check_debug(A, M, ...) if (!(A)) {debug(M, ## __VA_ARGS__); errno = 0; \
+                                          exit(1); }
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
+#define clean_ncerrno(e) (errno == 0 ? "None" : nc_strerror(e))
 
 #ifdef NO_LINENOS
 // versions that don't feature line numbers
-#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] errno: %s: " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] errno: %s: " M "\n", clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(LOG_DEST, "[INFO] " M "\n", ##__VA_ARGS__)
+#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] errno: %s: " M "\n", \
+                                clean_errno(), ## __VA_ARGS__); exit(1);
+#define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] errno: %s \n", \
+                             clean_ncerrno(e)); exit(1);
+#define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] errno: %s: " M "\n", \
+                                 clean_errno(), ## __VA_ARGS__)
+#define log_info(M, ...) fprintf(LOG_DEST, "[INFO] " M "\n", ## __VA_ARGS__)
 #else
-#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s: " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] %s:%d: errno: %s: " M "\n", __FILE__, __LINE__, clean_errno(), ##__VA_ARGS__)
-#define log_info(M, ...) fprintf(LOG_DEST, "[INFO] %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s: " M "\n", \
+                                __FILE__, __LINE__, \
+                                clean_errno(), ## __VA_ARGS__); exit(1);
+#define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s \n", __FILE__, \
+                             __LINE__, clean_ncerrno(e)); exit(1);
+#define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] %s:%d: errno: %s: " M "\n", \
+                                 __FILE__, __LINE__, \
+                                 clean_errno(), ## __VA_ARGS__)
+#define log_info(M, ...) fprintf(LOG_DEST, "[INFO] %s:%d: " M "\n", __FILE__, \
+                                 __LINE__, ## __VA_ARGS__)
 #endif
 
-#define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
+#define check(A, M, ...) if (!(A)) {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
+                                        1); }
 
-#define sentinel(M, ...)  { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
+#define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit(1); }
 
 #define check_mem(A) check((A), "Out of memory.")
 
-#define TRACE(C,E) debug("--> %s(%s:%d) %s:%d ", "" #C, State_event_name(E), E, __FUNCTION__, __LINE__)
+#define TRACE(C, E) debug("--> %s(%s:%d) %s:%d ", "" # C, State_event_name( \
+                              E), E, __FUNCTION__, __LINE__)
 
-#define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_##C); sentinel(M, ##__VA_ARGS__);}
+#define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_ ## C); \
+                                       sentinel(M, ## __VA_ARGS__); }
 
-#define error_unless(T, F, C, M, ...) if(!(T)) error_response(F, C, M, ##__VA_ARGS__)
+#define error_unless(T, F, C, M, ...) if (!(T)) \
+        error_response(F, C, M, ## __VA_ARGS__)
 
 #endif

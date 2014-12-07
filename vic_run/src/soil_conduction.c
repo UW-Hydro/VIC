@@ -368,10 +368,8 @@ estimate_layer_ice_content(layer_data_struct *layer,
             max_nidx++;
         }
         if (max_nidx >= Nnodes) {
-            fprintf(stderr,
-                    "ERROR: Soil thermal nodes do not extend below bottom "
-                    "soil layer, currently unable to handle this condition.\n");
-            return(ERROR);
+            log_err("Soil thermal nodes do not extend below bottom "
+                    "soil layer, currently unable to handle this condition.");
         }
 
         // Get soil node temperatures for current layer

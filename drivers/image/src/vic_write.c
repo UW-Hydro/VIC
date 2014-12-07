@@ -59,29 +59,29 @@ vic_write(void)
     // allocate memory for variables to be stored
     cvar = (char *) malloc(grid_size * sizeof(char));
     if (cvar == NULL) {
-        nrerror("Memory allocation error in vic_write().");
+        log_err("Memory allocation error in vic_write().");
     }
 
     ivar = (int *) malloc(grid_size * sizeof(int));
     if (ivar == NULL) {
-        nrerror("Memory allocation error in vic_write().");
+        log_err("Memory allocation error in vic_write().");
     }
 
     dvar = (double *) malloc(grid_size * sizeof(double));
     if (dvar == NULL) {
-        nrerror("Memory allocation error in vic_write().");
+        log_err("Memory allocation error in vic_write().");
     }
 
     fvar = (float *) malloc(grid_size * sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_write().");
+        log_err("Memory allocation error in vic_write().");
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
     idx = (size_t *) malloc(global_domain.ncells_global *
                             sizeof(size_t));
     if (idx == NULL) {
-        nrerror("Memory allocation error in vic_write().");
+        log_err("Memory allocation error in vic_write().");
     }
     for (i = 0; i < global_domain.ncells_global; i++) {
         idx[i] = get_global_idx(&global_domain, i);

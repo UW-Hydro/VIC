@@ -428,10 +428,9 @@ set_output_var(out_data_file_struct *out_data_files,
     }
     if (!found) {
         status = -1;
-        fprintf(stderr,
-                "Error: set_output_var: \"%s\" was not found in the list of "
+        log_err("set_output_var: \"%s\" was not found in the list of "
                 "supported output variable names.  Please use the exact name "
-                "listed in vicNl_def.h.\n", varname);
+                "listed in vicNl_def.h.", varname);
     }
     return status;
 }

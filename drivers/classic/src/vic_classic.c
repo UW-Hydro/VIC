@@ -42,6 +42,7 @@ Error_struct        Error;
 param_set_struct    param_set;
 parameters_struct   param;
 filenames_struct    filenames;
+filep_struct        filep;
 
 /******************************************************************************
  * @brief   Classic driver of the VIC model
@@ -61,7 +62,6 @@ main(int   argc,
     char                  MODEL_DONE;
     char                  RUN_MODEL;
     char                  write_flag;
-    char                 *logfilename;
     size_t                rec;
     size_t                Nveg_type;
     int                   cellnum;
@@ -73,17 +73,16 @@ main(int   argc,
     veg_con_struct       *veg_con;
     soil_con_struct       soil_con;
     all_vars_struct       all_vars;
-    filep_struct          filep;
     lake_con_struct       lake_con;
     out_data_file_struct *out_data_files;
     out_data_struct      *out_data;
     save_data_struct      save_data;
 
-    // Initialize Log Destination
-    LOG_DEST = stderr;
-
     /** Read Model Options **/
     cmd_proc(argc, argv, filenames.global);
+
+    // Initialize Log Destination
+    initialize_log();
 
     // Initialize global structures
     initialize_options();
@@ -99,21 +98,7 @@ main(int   argc,
     get_global_param(filep.globalparam);
 
     // Set Log Destination
-    if (strcmp(filenames.log_path, "MISSING") != 0) {
-        // Create logfile name
-        logfilename = get_logname(filenames.log_path);
-
-        // Open Logfile
-        filep.logfile = open_file(logfilename, "w");
-
-        LOG_DEST = filep.logfile;
-
-        log_info("Initialized Log File: %s", logfilename);
-    }
-    else {
-        // Set global log destination
-        log_info("Logging to stderr");
-    }
+    setup_logging();
 
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {

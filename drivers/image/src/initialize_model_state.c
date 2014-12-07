@@ -127,6 +127,7 @@ initialize_model_state(all_vars_struct *all_vars,
             }
         }
     }
+
     /*****************************************************************
        CASE 3: Initialize Energy Balance Variables if not using quick
        ground heat flux, and no Initial Condition File Given
@@ -275,6 +276,7 @@ initialize_model_state(all_vars_struct *all_vars,
             }
         }
     }
+
     /*********************************
        CASE 4: Unknown option
     *********************************/

@@ -875,8 +875,8 @@ get_global_param(FILE *gp)
                Unrecognized Global Parameter Flag
             ***********************************/
             else {
-                log_warn("Unrecognized option in the global parameter file: %s"
-                         "is unknown - check your spelling", optstr);
+                log_warn("Unrecognized option in the global parameter file: "
+                         "%s is unknown - check your spelling", optstr);
             }
         }
         fgets(cmdstr, MAXSTRING, gp);

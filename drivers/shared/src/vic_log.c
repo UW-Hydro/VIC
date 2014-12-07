@@ -97,3 +97,47 @@ get_logname(const char *path)
 
     return filename;
 }
+
+/******************************************************************************
+ * @brief    Set global log destination
+ *****************************************************************************/
+void
+initialize_log()
+{
+    extern FILE *LOG_DEST;
+
+    LOG_DEST = stderr;
+}
+
+/******************************************************************************
+ * @brief    Set global log destination
+ *****************************************************************************/
+void
+setup_logging()
+{
+    extern filenames_struct filenames;
+    extern filep_struct     filep;
+    extern FILE            *LOG_DEST;
+
+    char                   *logfilename;
+
+    if (strcmp(filenames.log_path, "MISSING") != 0) {
+        // Create logfile name
+        logfilename = get_logname(filenames.log_path);
+
+        // Open Logfile
+        filep.logfile = open_file(logfilename, "w");
+
+        // Print log file name to stderr
+        log_info("Initialized Log File: %s", logfilename);
+
+        // Set Log Destination
+        LOG_DEST = filep.logfile;
+
+        // Write first line of log file
+        log_info("Initialized Log File: %s", logfilename);
+    }
+    else {
+        log_info("Logging to stderr");
+    }
+}

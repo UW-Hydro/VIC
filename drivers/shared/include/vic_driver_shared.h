@@ -77,7 +77,9 @@ void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
 void get_parameters(FILE *paramfile);
 void initialize_forcing_files(void);
 void initialize_filenames(void);
+void initialize_fileps(void);
 void initialize_global(void);
+void initialize_log(void);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
@@ -119,5 +121,6 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+void setup_logging(void);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 #endif

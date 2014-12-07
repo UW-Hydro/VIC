@@ -38,11 +38,9 @@ vic_start(void)
     extern filep_struct     filep;
     extern domain_struct    global_domain;
     extern option_struct    options;
-    extern FILE            *LOG_DEST;
 
-    char                   *logfilename;
-
-    LOG_DEST = stderr;
+    // Initialize Log Destination
+    initialize_log();
 
     // Initialize global structures
     initialize_options();
@@ -54,24 +52,8 @@ vic_start(void)
     filep.globalparam = open_file(filenames.global, "r");
     get_global_param(filep.globalparam);
 
-    // Initialize Log Destination
-    if (strcmp(filenames.log_path, "MISSING") != 0) {
-        // Create logfile name
-        logfilename = get_logname(filenames.log_path);
-
-        // Open Logfile
-        filep.logfile = open_file(logfilename, "w");
-
-        LOG_DEST = filep.logfile;
-
-        log_info("Initialized Log File: %s", logfilename);
-    }
-    else {
-        // Set global log destination
-        LOG_DEST = stderr;
-
-        log_info("Logging to stderr");
-    }
+    // Set Log Destination
+    setup_logging();
 
     // set model constants
     if (!strcasecmp(filenames.constants, "MISSING")) {

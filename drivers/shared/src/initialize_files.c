@@ -54,3 +54,29 @@ initialize_filenames()
         strcpy(filenames.f_path_pfx[i], "MISSING");
     }
 }
+
+/******************************************************************************
+ * @brief    Initialize all file pointers
+ *****************************************************************************/
+void
+initialize_fileps()
+{
+    extern filep_struct filep;
+
+    size_t              i;
+
+    filep.globalparam = NULL;
+    filep.constants = NULL;
+    filep.domain = NULL;
+    filep.init_state = NULL;
+    filep.lakeparam = NULL;
+    filep.snowband = NULL;
+    filep.soilparam = NULL;
+    filep.statefile = NULL;
+    filep.veglib = NULL;
+    filep.vegparam = NULL;
+    filep.logfile = NULL;
+    for (i = 0; i < 2; i++) {
+        filep.forcing[i] = NULL;
+    }
+}

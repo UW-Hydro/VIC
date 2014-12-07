@@ -117,7 +117,7 @@ OBJS = \
 	${SHAREDPATH}/src/free_vegcon.o \
 	${SHAREDPATH}/src/get_dist.o \
 	${SHAREDPATH}/src/get_parameters.o \
-	${SHAREDPATH}/src/initialize_filenames.o \
+	${SHAREDPATH}/src/initialize_files.o \
 	${SHAREDPATH}/src/initialize_global.o \
 	${SHAREDPATH}/src/initialize_options.o \
 	${SHAREDPATH}/src/initialize_parameters.o \

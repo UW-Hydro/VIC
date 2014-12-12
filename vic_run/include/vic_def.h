@@ -271,7 +271,8 @@ enum
     WIND_E,      /**< zonal component of wind speed [m/s] */
     WIND_N,      /**< meridional component of wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
-    N_FORCING_TYPES
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    N_FORCING_TYPES  /**< Number of forcing types */
 };
 
 /******************************************************************************
@@ -453,6 +454,7 @@ enum
     OUT_CLITTER,          /**< Carbon density in litter pool [g C/m2] */
     OUT_CINTER,           /**< Carbon density in intermediate pool [g C/m2] */
     OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     N_OUTVAR_TYPES        /**< used as a loop counter*/
 };
 

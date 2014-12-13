@@ -173,7 +173,7 @@ enum
 /******************************************************************************
  * @brief   Longwave Clear-Sky Algorithm options
  *****************************************************************************/
- enum
+enum
 {
     LW_TVA,
     LW_ANDERSON,
@@ -272,6 +272,7 @@ enum
     WIND_N,      /**< meridional component of wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
     N_FORCING_TYPES  /**< Number of forcing types */
 };
 
@@ -455,6 +456,7 @@ enum
     OUT_CINTER,           /**< Carbon density in intermediate pool [g C/m2] */
     OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
     N_OUTVAR_TYPES        /**< used as a loop counter*/
 };
 

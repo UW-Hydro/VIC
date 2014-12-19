@@ -311,7 +311,14 @@ int  full_energy(int                  gridcell,
       prepare_full_energy(iveg, Nveg, options.Nnode, all_vars, soil_con, moist0, ice0);
 
       /** Compute Bare (free of snow) Albedo **/
-      bare_albedo = veg_var[iveg][0].albedo;
+      if (iveg!=Nveg){
+        bare_albedo = veg_var[iveg][0].albedo;
+      }
+      else {
+        bare_albedo = BARE_SOIL_ALBEDO;
+      }
+      fprintf(stderr, "Bare Albedo: %.4lf\n", bare_albedo);
+      fprintf(stderr, "Bare Soil Albedo: %.4lf\n", BARE_SOIL_ALBEDO);
 
       /*************************************
 	Compute the aerodynamic resistance 

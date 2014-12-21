@@ -985,6 +985,17 @@ global_param_struct get_global_param(filenames_struct *names,
       nrerror(ErrStr);
     }
   }
+  if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
+    if (options.NOFLUX) {
+      sprintf(ErrStr,"NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE and QUICK_FLUX=FALSE");
+      nrerror(ErrStr);
+    }
+    if (options.EXP_TRANS) {
+      sprintf(ErrStr,"EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE and QUICK_FLUX=FALSE");
+      nrerror(ErrStr);
+    }
+  }
+
   if((options.FULL_ENERGY || options.FROZEN_SOIL) && options.Nlayer<3) {
     sprintf(ErrStr,"You must define at least 3 soil moisture layers to run the model in FULL_ENERGY or FROZEN_SOIL modes.  Currently Nlayers is set to  %d.",options.Nlayer);
     nrerror(ErrStr);

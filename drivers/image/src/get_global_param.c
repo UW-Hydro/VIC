@@ -1166,6 +1166,16 @@ get_global_param(FILE *gp)
                         "global parameter file).");
             }
         }
+        if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
+            if (options.NOFLUX) {
+                log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
+                        "and QUICK_FLUX=FALSE");
+            }
+            if (options.EXP_TRANS) {
+                log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
+                        "and QUICK_FLUX=FALSE");
+            }
+        }
         if ((options.FULL_ENERGY ||
              options.FROZEN_SOIL) && options.Nlayer < 3) {
             log_err("You must define at least 3 soil moisture layers to run "

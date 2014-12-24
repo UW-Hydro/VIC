@@ -78,11 +78,11 @@ main(int   argc,
     out_data_struct      *out_data;
     save_data_struct      save_data;
 
-    /** Read Model Options **/
-    cmd_proc(argc, argv, filenames.global);
-
     // Initialize Log Destination
     initialize_log();
+
+    /** Read Model Options **/
+    cmd_proc(argc, argv, filenames.global);
 
     // Initialize global structures
     initialize_options();

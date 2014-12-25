@@ -46,18 +46,31 @@ else
 NETCDFPATH = /opt/local
 endif
 
+# MPI include .. change the path depending on travis or other location
+ifeq (true, ${TRAVIS})
+MPIPATH = /usr
+else ifeq (hydro-c1, $(shell hostname))
+MPIPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
+else
+MPIPATH = /opt/local
+endif
+
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
 # Set CC = your compiler here
-CC = gcc
+ifeq (true, ${TRAVIS})
+CC = mpicc
+else
+CC = mpicc-mpich-mp
+endif
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra

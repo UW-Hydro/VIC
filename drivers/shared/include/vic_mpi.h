@@ -30,7 +30,9 @@
 #include <stddef.h> // used for offsetof() macro
 #include <mpi.h>
 
-void create_MPI_option_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
+void create_MPI_option_struct_type(MPI_Datatype *mpi_type);
+void create_MPI_param_struct_type(MPI_Datatype *mpi_type);
+void initialize_mpi(void);
 
 #endif

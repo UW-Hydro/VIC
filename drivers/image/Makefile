@@ -222,7 +222,7 @@ full:
 	make model
 
 clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${VICPATH}/src/*~ vic_image
+	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ vic_image
 
 model: $(OBJS)
 	$(CC) -o vic_image$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)

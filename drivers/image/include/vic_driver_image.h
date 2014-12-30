@@ -27,8 +27,8 @@
 #ifndef VIC_DRIVER_IMAGE_H
 #define VIC_DRIVER_IMAGE_H
 
-#include <mpi.h>
 #include <netcdf.h>
+#include <vic_mpi.h>
 #include <vic_driver_shared.h>
 
 #define VIC_DRIVER "Image"

@@ -66,12 +66,12 @@ vic_force(void)
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
+    idx = (size_t *) malloc(global_domain.ncells *
                             sizeof(size_t));
     if (idx == NULL) {
         log_err("Memory allocation error in vic_force().");
     }
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         idx[i] = get_global_idx(&global_domain, i);
     }
 
@@ -97,7 +97,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "tas",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].air_temp[j] = (double) fvar[idx[i]];
         }
     }
@@ -107,7 +107,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "prcp",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].prec[j] = (double) fvar[idx[i]];
         }
     }
@@ -117,7 +117,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "dswrf",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].shortwave[j] = (double) fvar[idx[i]];
         }
     }
@@ -127,7 +127,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "dlwrf",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].longwave[j] = (double) fvar[idx[i]];
         }
     }
@@ -137,7 +137,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "wind",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].wind[j] = (double) fvar[idx[i]];
         }
     }
@@ -147,7 +147,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "shum",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].vp[j] = (double) fvar[idx[i]];
         }
     }
@@ -157,7 +157,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "pres",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             atmos[i].pressure[j] = (double) fvar[idx[i]];
         }
     }
@@ -172,7 +172,7 @@ vic_force(void)
         t_offset = 0;
     }
     // Convert forcings into what we need and calculate missing ones
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         for (j = 0; j < NF; j++) {
             // temperature in CONST_TKFRZ
             atmos[i].air_temp[j] -= CONST_TKFRZ;
@@ -199,7 +199,7 @@ vic_force(void)
 
 
     // Put average value in NR field
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
         // For precipitation put total
         atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
@@ -221,7 +221,7 @@ vic_force(void)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {

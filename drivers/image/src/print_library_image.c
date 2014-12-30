@@ -66,13 +66,12 @@ print_domain(domain_struct *domain,
     size_t i;
 
     fprintf(LOG_DEST, "domain:\n");
-    fprintf(LOG_DEST, "\tncells_global: %zd\n", domain->ncells_global);
-    fprintf(LOG_DEST, "\tn_nx         : %zd\n", domain->n_nx);
-    fprintf(LOG_DEST, "\tn_ny         : %zd\n", domain->n_ny);
-    fprintf(LOG_DEST, "\tncells_local : %zd\n", domain->ncells_local);
-    fprintf(LOG_DEST, "\tlocations    : %p\n", domain->locations);
+    fprintf(LOG_DEST, "\tncells   : %zd\n", domain->ncells);
+    fprintf(LOG_DEST, "\tn_nx     : %zd\n", domain->n_nx);
+    fprintf(LOG_DEST, "\tn_ny     : %zd\n", domain->n_ny);
+    fprintf(LOG_DEST, "\tlocations: %p\n", domain->locations);
     if (print_loc) {
-        for (i = 0; i < domain->ncells_global; i++) {
+        for (i = 0; i < domain->ncells; i++) {
             print_location(&(domain->locations[i]));
         }
     }

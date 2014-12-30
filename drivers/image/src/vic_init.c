@@ -106,12 +106,12 @@ vic_init(void)
     current = 0;
 
     // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
+    idx = (size_t *) malloc(global_domain.ncells *
                             sizeof(size_t));
     if (idx == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         idx[i] = get_global_idx(&global_domain, i);
     }
 
@@ -119,7 +119,7 @@ vic_init(void)
 
     // TBD: Check that options.NVEGTYPES is the right number. Bare soil is
     // the complicating factor here
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         for (j = 0; j < options.NVEGTYPES; j++) {
             veg_lib[i][j].NVegLibTypes = options.NVEGTYPES;
             veg_lib[i][j].veg_class = (int) j;
@@ -131,7 +131,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "overstory",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].overstory = (int) dvar[idx[i]];
         }
     }
@@ -141,7 +141,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "rarc",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].rarc = (double) dvar[idx[i]];
         }
     }
@@ -151,7 +151,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "rmin",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].rmin = (double) dvar[idx[i]];
         }
     }
@@ -161,7 +161,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "wind_h",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].wind_h = (double) dvar[idx[i]];
         }
     }
@@ -171,7 +171,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "RGL",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].RGL = (double)dvar[idx[i]];
         }
     }
@@ -181,7 +181,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "rad_atten",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].rad_atten = (double) dvar[idx[i]];
         }
     }
@@ -191,7 +191,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "wind_atten",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].wind_atten = (double) dvar[idx[i]];
         }
     }
@@ -201,7 +201,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veglib, "trunk_ratio",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_lib[i][j].trunk_ratio = (double) dvar[idx[i]];
         }
     }
@@ -213,7 +213,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "LAI",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 veg_lib[i][j].LAI[k] = (double) dvar[idx[i]];
                 veg_lib[i][j].Wdmax[k] = param.VEG_LAI_WATER_FACTOR *
                                          veg_lib[i][j].LAI[k];
@@ -228,7 +228,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "albedo",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 veg_lib[i][j].albedo[k] = (double) dvar[idx[i]];
             }
         }
@@ -241,7 +241,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "veg_rough",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 veg_lib[i][j].roughness[k] = (double) dvar[idx[i]];
             }
         }
@@ -254,7 +254,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veglib, "displacement",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 veg_lib[i][j].displacement[k] = (double) dvar[idx[i]];
             }
         }
@@ -263,7 +263,7 @@ vic_init(void)
     // vegcover not implemented in image model
     for (j = 0; j < options.NVEGTYPES; j++) {
         for (k = 0; k < MONTHS_PER_YEAR; k++) {
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 veg_lib[i][j].vegcover[k] = 1.0;
             }
         }
@@ -274,35 +274,35 @@ vic_init(void)
     // b_infilt
     get_nc_field_double(filenames.soil, "infilt",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].b_infilt = (double) dvar[idx[i]];
     }
 
     // Ds
     get_nc_field_double(filenames.soil, "Ds",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].Ds = (double) dvar[idx[i]];
     }
 
     // Dsmax
     get_nc_field_double(filenames.soil, "Dsmax",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].Dsmax = (double) dvar[idx[i]];
     }
 
     // Ws
     get_nc_field_double(filenames.soil, "Ws",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].Ws = (double) dvar[idx[i]];
     }
 
     // c
     get_nc_field_double(filenames.soil, "c",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].c = (double) dvar[idx[i]];
     }
 
@@ -311,7 +311,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "expt",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].expt[j] = (double) dvar[idx[i]];
         }
     }
@@ -321,7 +321,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "Ksat",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].Ksat[j] = (double) dvar[idx[i]];
         }
     }
@@ -331,7 +331,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "init_moist",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].init_moist[j] = (double) dvar[idx[i]];
         }
     }
@@ -341,7 +341,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "phi_s",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].phi_s[j] = (double) dvar[idx[i]];
         }
     }
@@ -349,7 +349,7 @@ vic_init(void)
     // elevation: mean grid cell elevation
     get_nc_field_double(filenames.soil, "elev",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].elevation = (double) dvar[idx[i]];
     }
 
@@ -358,7 +358,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "depth",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].depth[j] = (double) dvar[idx[i]];
         }
     }
@@ -366,14 +366,14 @@ vic_init(void)
     // avg_temp: mean grid temperature
     get_nc_field_double(filenames.soil, "avg_T",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].avg_temp = (double) dvar[idx[i]];
     }
 
     // dp: damping depth
     get_nc_field_double(filenames.soil, "dp",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].dp = (double) dvar[idx[i]];
     }
 
@@ -382,7 +382,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "bubble",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].bubble[j] = (double) dvar[idx[i]];
         }
     }
@@ -392,7 +392,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "quartz",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].quartz[j] = (double) dvar[idx[i]];
         }
     }
@@ -402,7 +402,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "bulk_density",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].bulk_dens_min[j] = (double) dvar[idx[i]];
         }
     }
@@ -412,7 +412,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "soil_density",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].soil_dens_min[j] = (double) dvar[idx[i]];
         }
     }
@@ -425,7 +425,7 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.soil, "organic",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].organic[j] = (double) dvar[idx[i]];
             }
         }
@@ -435,7 +435,7 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.soil, "bulk_density_org",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].bulk_dens_org[j] = (double) dvar[idx[i]];
             }
         }
@@ -445,7 +445,7 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.soil, "soil_density_org",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].soil_dens_org[j] = (double) dvar[idx[i]];
             }
         }
@@ -457,7 +457,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "Wcr_FRACT",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].Wcr[j] = (double) dvar[idx[i]];
         }
     }
@@ -468,7 +468,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "Wpwp_FRACT",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].Wpwp[j] = (double) dvar[idx[i]];
         }
     }
@@ -476,21 +476,21 @@ vic_init(void)
     // rough: soil roughness
     get_nc_field_double(filenames.soil, "rough",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].rough = (double) dvar[idx[i]];
     }
 
     // snow_rough: snow roughness
     get_nc_field_double(filenames.soil, "snow_rough",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].snow_rough = (double) dvar[idx[i]];
     }
 
     // annual_prec: annual precipitation
     get_nc_field_double(filenames.soil, "annual_prec",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].annual_prec = (double) dvar[idx[i]];
     }
 
@@ -499,7 +499,7 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.soil, "resid_moist",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].resid_moist[j] = (double) dvar[idx[i]];
         }
     }
@@ -507,7 +507,7 @@ vic_init(void)
     // fs_active: frozen soil active flag
     get_nc_field_double(filenames.soil, "fs_active",
                         d2start, d2count, dvar);
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         soil_con[i].FS_ACTIVE = (char) dvar[idx[i]];
     }
 
@@ -516,14 +516,14 @@ vic_init(void)
         // max_snow_distrib_slope
         get_nc_field_double(filenames.soil, "max_snow_distrib_slope",
                             d2start, d2count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].max_snow_distrib_slope = (double) dvar[idx[i]];
         }
 
         // frost_slope: slope of frozen soil distribution
         get_nc_field_double(filenames.soil, "frost_slope",
                             d2start, d2count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].frost_slope = (double) dvar[idx[i]];
         }
     }
@@ -532,13 +532,13 @@ vic_init(void)
         // avgJulyAirTemp: average July air temperature
         get_nc_field_double(filenames.soil, "avgJulyAirTemp",
                             d2start, d2count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].avgJulyAirTemp = (double) dvar[idx[i]];
         }
     }
 
     // Additional processing of the soil variables
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         for (j = 0; j < options.Nlayer; j++) {
             // compute layer properties
             soil_con[i].bulk_density[j] =
@@ -653,7 +653,7 @@ vic_init(void)
 
     // read_snowband()
     if (options.SNOW_BAND == 1) {
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             soil_con[i].AreaFract[0] = 1.;
             soil_con[i].BandElev[0] = soil_con[i].elevation;
             soil_con[i].Pfactor[0] = 1.;
@@ -666,7 +666,7 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.snowband, "AreaFract",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].AreaFract[j] = (double) dvar[idx[i]];
             }
         }
@@ -675,7 +675,7 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.snowband, "elevation",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].BandElev[j] = (double) dvar[idx[i]];
             }
         }
@@ -684,12 +684,12 @@ vic_init(void)
             d3start[0] = j;
             get_nc_field_double(filenames.snowband, "Pfactor",
                                 d3start, d3count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 soil_con[i].BandElev[j] = (double) dvar[idx[i]];
             }
         }
         // Run some checks and corrections for soil
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             // Make sure area fractions are positive and add to 1
             sum = 0.;
             for (j = 0; j < options.SNOW_BAND; j++) {
@@ -778,7 +778,7 @@ vic_init(void)
     }
 
     // logic from compute_treeline()
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
             // Lapse average annual July air temperature
             if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
@@ -801,7 +801,7 @@ vic_init(void)
 
     // number of vegetation types - in vic this is defined without the bare soil
     // and the vegetation above the treeline
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         nveg = veg_con_map[i].nv_active - 1;
         if (options.AboveTreelineVeg >= 0) {
             nveg -= 1;
@@ -819,13 +819,13 @@ vic_init(void)
         d3start[0] = j;
         get_nc_field_double(filenames.veg, "Cv",
                             d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
+        for (i = 0; i < global_domain.ncells; i++) {
             veg_con_map[i].Cv[j] = (double) dvar[idx[i]];
         }
     }
 
     // do the mapping
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         k = 0;
         for (j = 0; j < options.NVEGTYPES; j++) {
             if (veg_con_map[i].Cv[j] > 0) {
@@ -847,7 +847,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veg, "root_depth",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 vidx = veg_con_map[i].vidx[j];
                 if (vidx != -1) {
                     veg_con[i][vidx].zone_depth[k] = (double) dvar[idx[i]];
@@ -863,7 +863,7 @@ vic_init(void)
             d4start[1] = k;
             get_nc_field_double(filenames.veg, "root_fract",
                                 d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 vidx = veg_con_map[i].vidx[j];
                 if (vidx != -1) {
                     veg_con[i][vidx].zone_fract[k] = (double) dvar[idx[i]];
@@ -873,12 +873,12 @@ vic_init(void)
     }
 
     // calculate root fractions
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         calc_root_fractions(veg_con[i], &(soil_con[i]));
     }
 
     // Run some checks and corrections for vegetation
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         no_overstory = false;
         // Only run to options.NVEGTYPES - 1, since bare soil is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
@@ -1088,7 +1088,7 @@ vic_init(void)
     }
 
     // initialize structures with default values
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
         initialize_soil(all_vars[i].cell, &(soil_con[i]), nveg);

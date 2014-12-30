@@ -61,10 +61,9 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells_global; /**< number of active grid cell on global domain */
+    size_t ncells; /**< number of active grid cells on domain */
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
-    size_t ncells_local; /**< number of active grid cell on local domain */
     location_struct *locations; /**< locations structs for local domain */
 } domain_struct;
 

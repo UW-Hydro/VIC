@@ -78,12 +78,12 @@ vic_write(void)
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
+    idx = (size_t *) malloc(global_domain.ncells *
                             sizeof(size_t));
     if (idx == NULL) {
         log_err("Memory allocation error in vic_write().");
     }
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         idx[i] = get_global_idx(&global_domain, i);
     }
 
@@ -122,7 +122,7 @@ vic_write(void)
         for (j = 0; j < out_data[0][k].nelem; j++) {
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 dvar[idx[i]] = (double) out_data[i][k].aggdata[j];
             }
             put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
@@ -130,7 +130,7 @@ vic_write(void)
                                 nc_hist_file.d_fillvalue,
                                 dimids, ndims, nc_vars[k].nc_var_name,
                                 dstart, dcount, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 dvar[idx[i]] = nc_hist_file.d_fillvalue;
             }
         }
@@ -146,7 +146,7 @@ vic_write(void)
     // reset the agg data
     for (k = 0; k < N_OUTVAR_TYPES; k++) {
         for (j = 0; j < out_data[0][k].nelem; j++) {
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < global_domain.ncells; i++) {
                 out_data[i][k].aggdata[j] = 0;
             }
         }

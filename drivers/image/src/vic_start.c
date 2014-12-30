@@ -34,13 +34,18 @@
 void
 vic_start(void)
 {
-    extern filenames_struct filenames;
-    extern filep_struct     filep;
-    extern domain_struct    global_domain;
-    extern option_struct    options;
+    int                        status;
+    extern filenames_struct    filenames;
+    extern filep_struct        filep;
+    extern domain_struct       global_domain;
+    extern global_param_struct global_param;
+    extern MPI_Datatype        mpi_global_struct_type;
+    extern MPI_Datatype        mpi_option_struct_type;
+    extern MPI_Datatype        mpi_param_struct_type;
+    extern int                 mpi_rank;
+    extern option_struct       options;
+    extern parameters_struct   param;
 
-    // Initialize Log Destination
-    initialize_log();
 
     // Initialize global structures
     initialize_options();
@@ -48,33 +53,57 @@ vic_start(void)
     initialize_parameters();
     initialize_filenames();
 
-    // read global settings
-    filep.globalparam = open_file(filenames.global, "r");
-    get_global_param(filep.globalparam);
-
-    // Set Log Destination
-    setup_logging();
-
-    // set model constants
-    if (!strcasecmp(filenames.constants, "MISSING")) {
-        filep.constants = open_file(filenames.constants, "r");
-        get_parameters(filep.constants);
+    if (mpi_rank == 0) {
+        // read global settings
+        filep.globalparam = open_file(filenames.global, "r");
+        get_global_param(filep.globalparam);
     }
 
-    // read domain info
-    get_global_domain(filenames.domain, &global_domain);
+    // Set Log Destination
+    // TBD: Add MPI support to logging: every process should log to its own file
+    setup_logging();
 
-    // decompose the mask
-
-    // get dimensions (number of vegetation types, soil zones, etc)
-    options.ROOT_ZONES = get_nc_dimension(filenames.soil, "root_zone");
-    options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
-    options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
-    if (options.SNOW_BAND > 1) {
-        if (options.SNOW_BAND !=
-            get_nc_dimension(filenames.snowband, "snow_band")) {
-            log_err("Number of snow bands in global file does not "
-                    "match parameter file");
+    if (mpi_rank == 0) {
+        // set model constants
+        if (!strcasecmp(filenames.constants, "MISSING")) {
+            filep.constants = open_file(filenames.constants, "r");
+            get_parameters(filep.constants);
         }
+
+        // read domain info
+        get_global_domain(filenames.domain, &global_domain);
+
+        // decompose the mask
+
+        // get dimensions (number of vegetation types, soil zones, etc)
+        options.ROOT_ZONES = get_nc_dimension(filenames.soil, "root_zone");
+        options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
+        options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
+        if (options.SNOW_BAND > 1) {
+            if (options.SNOW_BAND !=
+                get_nc_dimension(filenames.snowband, "snow_band")) {
+                log_err("Number of snow bands in global file does not "
+                        "match parameter file");
+            }
+        }
+    }
+
+    // broadcast global, option, param structures
+    status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in main(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&options, 1, mpi_option_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in main(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&param, 1, mpi_param_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in main(): %d\n", status);
     }
 }

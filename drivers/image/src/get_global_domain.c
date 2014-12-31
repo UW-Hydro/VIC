@@ -93,9 +93,8 @@ get_global_domain(char          *nc_name,
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
             if (run[i]) {
+                global_domain->locations[j].io_idx = i;
                 global_domain->locations[j].global_cell_idx = j;
-                global_domain->locations[j].global_x_idx = x;
-                global_domain->locations[j].global_y_idx = y;
                 j++;
             }
         }
@@ -181,11 +180,8 @@ initialize_location(location_struct *location)
     location->area = 0;
     location->frac = 0;
     location->global_cell_idx = 0;
-    location->global_x_idx = 0;
-    location->global_y_idx = 0;
+    location->io_idx = 0;
     location->local_cell_idx = 0;
-    location->local_x_idx = 0;
-    location->local_y_idx = 0;
 }
 
 /******************************************************************************
@@ -198,8 +194,7 @@ get_global_idx(domain_struct *domain,
     size_t idx = -1;
 
     if (i < domain->ncells) {
-        idx = domain->locations[i].global_y_idx * domain->n_nx +
-              domain->locations[i].global_x_idx;
+        idx = domain->locations[i].io_idx;
     }
 
     return idx;

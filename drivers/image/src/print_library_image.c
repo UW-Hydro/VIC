@@ -89,11 +89,8 @@ print_location(location_struct *loc)
     fprintf(LOG_DEST, "\tarea           : %.4lf\n", loc->area);
     fprintf(LOG_DEST, "\tfrac           : %.4lf\n", loc->frac);
     fprintf(LOG_DEST, "\tglobal_cell_idx: %zd\n", loc->global_cell_idx);
-    fprintf(LOG_DEST, "\tglobal_x_idx   : %zd\n", loc->global_x_idx);
-    fprintf(LOG_DEST, "\tglobal_y_idx   : %zd\n", loc->global_y_idx);
+    fprintf(LOG_DEST, "\tio_idx         : %zd\n", loc->io_idx);
     fprintf(LOG_DEST, "\tlocal_cell_idx : %zd\n", loc->local_cell_idx);
-    fprintf(LOG_DEST, "\tlocal_x_idx    : %zd\n", loc->local_x_idx);
-    fprintf(LOG_DEST, "\tlocal_y_idx    : %zd\n", loc->local_y_idx);
 }
 
 /******************************************************************************
@@ -110,14 +107,10 @@ sprint_location(char            *str,
             "\tarea           : %.4lf\n"
             "\tfrac           : %.4lf\n"
             "\tglobal_cell_idx: %zd\n"
-            "\tglobal_x_idx   : %zd\n"
-            "\tglobal_y_idx   : %zd\n"
-            "\tlocal_cell_idx : %zd\n"
-            "\tlocal_x_idx    : %zd\n"
-            "\tlocal_y_idx    : %zd\n",
+            "\tio_idx         : %zd\n"
+            "\tlocal_cell_idx : %zd\n",
             loc->latitude, loc->longitude, loc->area, loc->frac,
-            loc->global_cell_idx, loc->global_x_idx, loc->global_y_idx,
-            loc->local_cell_idx, loc->local_x_idx, loc->local_y_idx);
+            loc->global_cell_idx, loc->io_idx, loc->local_cell_idx);
 }
 
 /******************************************************************************

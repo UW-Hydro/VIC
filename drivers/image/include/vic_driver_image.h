@@ -48,11 +48,8 @@ typedef struct {
     double area; /**< area of grid cell */
     double frac; /**< fraction of grid cell that is active */
     size_t global_cell_idx; /**< index of grid cell in global list of grid cells */
-    size_t global_x_idx; /**< index of x-dimension in global domain */
-    size_t global_y_idx; /**< index of y-dimension in global domain */
+    size_t io_idx; /**< index of cell in 1-D I/O arrays */
     size_t local_cell_idx; /**< index of grid cell in local list of grid cells */
-    size_t local_x_idx; /**< index of x-dimension in local domain */
-    size_t local_y_idx; /**< index of y-dimension in local domain */
 } location_struct;
 
 

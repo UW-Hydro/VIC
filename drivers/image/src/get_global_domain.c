@@ -66,7 +66,7 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
+            if (run[i] == 1) {
                 global_domain->ncells++;
             }
         }
@@ -92,7 +92,7 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
+            if (run[i] == 1) {
                 global_domain->locations[j].io_idx = i;
                 global_domain->locations[j].global_cell_idx = j;
                 j++;

@@ -94,7 +94,7 @@ get_global_domain(char          *nc_name,
         for (x = 0; x < global_domain->n_nx; x++, i++) {
             if (run[i] == 1) {
                 global_domain->locations[j].io_idx = i;
-                global_domain->locations[j].global_cell_idx = j;
+                global_domain->locations[j].global_idx = j;
                 j++;
             }
         }
@@ -179,9 +179,9 @@ initialize_location(location_struct *location)
     location->longitude = 0;
     location->area = 0;
     location->frac = 0;
-    location->global_cell_idx = 0;
+    location->global_idx = 0;
     location->io_idx = 0;
-    location->local_cell_idx = 0;
+    location->local_idx = 0;
 }
 
 /******************************************************************************

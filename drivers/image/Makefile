@@ -117,6 +117,7 @@ OBJS = \
 	${DRIVERPATH}/src/vic_image_run.o \
 	${DRIVERPATH}/src/vic_init.o \
 	${DRIVERPATH}/src/vic_init_output.o \
+	${DRIVERPATH}/src/vic_mpi_support.o \
 	${DRIVERPATH}/src/vic_nc_info.o \
 	${DRIVERPATH}/src/vic_restore.o \
 	${DRIVERPATH}/src/vic_start.o \
@@ -147,7 +148,6 @@ OBJS = \
 	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/soil_moisture_from_water_table.o \
 	${SHAREDPATH}/src/vic_log.o \
-	${SHAREDPATH}/src/vic_mpi_support.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

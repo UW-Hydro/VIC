@@ -31,8 +31,15 @@
 #include <mpi.h>
 
 void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
+void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_option_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_param_struct_type(MPI_Datatype *mpi_type);
 void initialize_mpi(void);
+void map(size_t size, size_t n, size_t *map, void *from, void *to);
+void mpi_map_decomp_domain(size_t ncells, size_t mpi_size, 
+                           int **mpi_map_local_array_sizes, 
+                           int **mpi_map_global_array_offsets, 
+                           size_t **mpi_map_mapping_array, 
+                           size_t **mpi_map_remapping_array);
 
 #endif

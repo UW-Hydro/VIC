@@ -1364,6 +1364,9 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
  * @brief   Type-agnostic mapping function
  * @details Reorders the elements in 'from' to 'to' according to the ordering 
  *          specified in 'map'. 
+ *          Note that this function can also be used for filtering, i.e. you
+ *          can use a smaller number of elements in 'map' and 'to' than in 
+ *          'from' to get only a subset of the elements.
  *
  * @param size size of the datatype of 'from' and 'to', e.g. sizeof(int)
  * @param n number of elements in 'map', 'from' and 'to'
@@ -1396,8 +1399,8 @@ map(size_t  size,
  *          For example, if all I/O happens from the master process, then 
  *          pseudo-code for communicating with all processes is
  *          if (master) {
- *              // read data into a temporary array
- *              read in_array from infile
+ *              // read data into a temporary array and select active cells
+ *              read in_array from infile and select active cells
  *              // map the array, so that the first mpi_map_local_array_sizes[0]
  *              // elements in sendbuf match those that will be send to the 
  *              // process with rank 0, the next mpi_map_local_array_sizes[1] 
@@ -1421,8 +1424,8 @@ map(size_t  size,
  *              // I/O process uses
  *              map(sizeof(type), global_domain.ncells, mpi_map_remapping_array,
  *                  recvbuf, out_array);
- *              // write the data to file
- *              write out_array to out_file
+ *              // map to full domain and write the data to file
+ *              map to full domain and write out_array to out_file
  *          }
  *
  *          Note that in this implementation, domain decomposition is 

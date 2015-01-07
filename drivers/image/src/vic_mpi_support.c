@@ -1362,101 +1362,84 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
 /******************************************************************************
  * @brief   Type-agnostic mapping function
- * @details Reorders the elements in 'from' to 'to' according to the ordering 
- *          specified in 'map'. 
+ * @details Reorders the elements in 'from' to 'to' according to the ordering
+ *          specified in 'map'.
  *          Note that this function can also be used for filtering, i.e. you
- *          can use a smaller number of elements in 'map' and 'to' than in 
+ *          can use a smaller number of elements in 'map' and 'to' than in
  *          'from' to get only a subset of the elements.
  *
+ *          to[to_map[i]] = from[from_map[i]]
+ *
  * @param size size of the datatype of 'from' and 'to', e.g. sizeof(int)
- * @param n number of elements in 'map', 'from' and 'to'
- * @param map array of length n with indices for reordering 'from' into 'to', 
- *        that is, to[i] = from[map[i]]
- * @param from array of length n with entries of size 'size' (unchanged)
- * @param to array of length n with entries of size 'size' (changed)
+ * @param n number of elements in 'from_map' and 'to_map'
+ * @param from_map array of length n with 'from' indices, if from_map == NULL,
+ *        then the 'from' indices are sequential
+ * @param to_map array of length n with 'to' indices, if to_map == NULL, then
+ *        the 'to' indices are sequential
+ * @param from array of with entries of size 'size' (unchanged)
+ * @param to array of with entries of size 'size' (changed)
  *****************************************************************************/
 void
 map(size_t  size,
     size_t  n,
-    size_t *map,
+    size_t *from_map,
+    size_t *to_map,
     void   *from,
     void   *to)
 {
     size_t i;
 
-    for (i = 0; i < n; i++) {
-        // type-agnostic version of to[i] = from[map[i]];
-        memcpy(to + i * size, from + map[i] * size, size);
+    if (to_map == NULL && from_map == NULL) {
+        for (i = 0; i < n; i++) {
+            // type-agnostic version of to[i] = from[i];
+            memcpy(to + i * size, from + i * size, size);
+        }
+    }
+    if (to_map == NULL) {
+        for (i = 0; i < n; i++) {
+            // type-agnostic version of to[i] = from[from_map[i]];
+            memcpy(to + i * size, from + from_map[i] * size, size);
+        }
+    }
+    else if (from_map == NULL) {
+        for (i = 0; i < n; i++) {
+            // type-agnostic version of to[to_map[i]] = from[i];
+            memcpy(to + to_map[i] * size, from + i * size, size);
+        }
+    }
+    else {
+        for (i = 0; i < n; i++) {
+            // type-agnostic version of to[to_map[i]] = from[from_map[i]];
+            memcpy(to + to_map[i] * size, from + from_map[i] * size, size);
+        }
     }
 }
 
 /******************************************************************************
  * @brief   Decompose the domain for MPI operations
- * @details This function sets up the arrays needed to scatter and gather 
- *          data from and to the master process to the individual mpi 
+ * @details This function sets up the arrays needed to scatter and gather
+ *          data from and to the master process to the individual mpi
  *          processes.
  *
- *          For example, if all I/O happens from the master process, then 
- *          pseudo-code for communicating with all processes is
- *          if (master) {
- *              // read data into a temporary array and select active cells
- *              read in_array from infile and select active cells
- *              // map the array, so that the first mpi_map_local_array_sizes[0]
- *              // elements in sendbuf match those that will be send to the 
- *              // process with rank 0, the next mpi_map_local_array_sizes[1] 
- *              // to the process with rank 1, etc.
- *              map(sizeof(type), global_domain.ncells, mpi_map_mapping_array,
- *                  in_array, sendbuf);
- *          }
- *          // scatter the array to the processes
- *          MPI_Scatterv(sendbuf, mpi_map_local_array_sizes,
- *                       mpi_map_global_array_offsets, MPI_Datatype,
- *                       localbuf, localsize, MPI_Datatype, root, MPI_Comm)
- *          // do some local stuff
- *          do something on each of the nodes
- *          // gather the local arrays into a receiving buffer
- *          MPI_Gatherv(localbuf, localsize, MPI_Datatype, 
- *                      recvbuf, mpi_map_local_array_sizes,
- *                      mpi_map_global_array_offsets, MPI_Datatype,
- *                      root, MPI_Comm)
- *          if (master) {
- *              // map the receiving buffer back into the order that the 
- *              // I/O process uses
- *              map(sizeof(type), global_domain.ncells, mpi_map_remapping_array,
- *                  recvbuf, out_array);
- *              // map to full domain and write the data to file
- *              map to full domain and write out_array to out_file
- *          }
- *
- *          Note that in this implementation, domain decomposition is 
- *          accomplished through a simple round-robin process:
- *          process i is assigned cell i, i+mpi_size, i+2*mpi_size, etc.
- *          Note that all processes will consequently handle almost the same 
- *          number of cells (no more than 1 different)
- *
  * @param ncells total number of cells
- * @param mpi_size number of nodes
- * @param mpi_map_local_array_sizes address of integer array with number of 
- *        cells assigned to each node (MPI_Scatterv:sendcounts and 
+ * @param mpi_size number of mpi processes
+ * @param mpi_map_local_array_sizes address of integer array with number of
+ *        cells assigned to each node (MPI_Scatterv:sendcounts and
  *        MPI_Gatherv:recvcounts)
- * @param mpi_map_global_array_offsets address of integer array with offsets 
- *        for sending and receiving data (MPI_Scatterv:displs and 
+ * @param mpi_map_global_array_offsets address of integer array with offsets
+ *        for sending and receiving data (MPI_Scatterv:displs and
  *        MPI_Gatherv:displs)
  * @param mpi_map_mapping_array address of size_t array with indices to prepare
- *        an array on the master process for MPI_Scatterv
- * @param mpi_map_remapping_array address of size_t array with indices to 
- *        remap an array on the master process after MPI_Gatherv
+ *        an array on the master process for MPI_Scatterv or map back after
+ *        MPI_Gatherv
  *****************************************************************************/
 void
 mpi_map_decomp_domain(size_t   ncells,
                       size_t   mpi_size,
                       int    **mpi_map_local_array_sizes,
                       int    **mpi_map_global_array_offsets,
-                      size_t **mpi_map_mapping_array,
-                      size_t **mpi_map_remapping_array)
+                      size_t **mpi_map_mapping_array)
 {
-    size_t global;
-    size_t local;
     size_t i;
     size_t j;
     size_t k;
@@ -1465,7 +1448,6 @@ mpi_map_decomp_domain(size_t   ncells,
     *mpi_map_local_array_sizes = (int *) calloc(mpi_size, sizeof(int));
     *mpi_map_global_array_offsets = (int *) calloc(mpi_size, sizeof(int));
     *mpi_map_mapping_array = (size_t *) calloc(ncells, sizeof(size_t));
-    *mpi_map_remapping_array = (size_t *) calloc(ncells, sizeof(size_t));
 
     // determine number of cells per node
     for (n = ncells, i = 0; n > 0; n--, i++) {
@@ -1483,13 +1465,13 @@ mpi_map_decomp_domain(size_t   ncells,
         }
     }
 
-    // set mapping and remapping array
+    // set mapping array
     for (i = 0, k = 0; i < (size_t) mpi_size; i++) {
         for (j = 0; j < (size_t) (*mpi_map_local_array_sizes)[i]; j++) {
-            global = (size_t) (i + j * mpi_size);
-            local = k++;
-            (*mpi_map_mapping_array)[local] = global;
-            (*mpi_map_remapping_array)[global] = local;
+            (*mpi_map_mapping_array)[k++] = (size_t) (i + j * mpi_size);
+        }
+    }
+}
         }
     }
 }

@@ -107,7 +107,7 @@ get_global_domain(char          *nc_name,
         log_err("Memory allocation error in vic_init().");
     }
     for (i = 0; i < global_domain->ncells; i++) {
-        idx[i] = get_global_idx(global_domain, i);
+        idx[i] = global_domain->locations[i].io_idx;
     }
 
     // get longitude -
@@ -179,23 +179,40 @@ initialize_location(location_struct *location)
     location->longitude = 0;
     location->area = 0;
     location->frac = 0;
+    location->nveg = 0;
     location->global_idx = 0;
     location->io_idx = 0;
     location->local_idx = 0;
 }
 
 /******************************************************************************
- * @brief    Get global index,
+ * @brief    Read the number of vegetation type per grid cell from file
  *****************************************************************************/
-size_t
-get_global_idx(domain_struct *domain,
-               size_t         i)
+void
+add_nveg_to_global_domain(char          *nc_name,
+                          domain_struct *global_domain)
 {
-    size_t idx = -1;
+    size_t  d2count[2];
+    size_t  d2start[2];
+    size_t  i;
+    double *dvar = NULL;
 
-    if (i < domain->ncells) {
-        idx = domain->locations[i].io_idx;
+    dvar = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
+                             sizeof(double));
+    if (dvar == NULL) {
+        log_err("Memory allocation error in add_nveg_to_global_domain().");
     }
 
-    return idx;
+    d2start[0] = 0;
+    d2start[1] = 0;
+    d2count[0] = global_domain->n_ny;
+    d2count[1] = global_domain->n_nx;
+    get_nc_field_double(nc_name, "Nveg", d2start, d2count, dvar);
+
+    for (i = 0; i < global_domain->ncells; i++) {
+        global_domain->locations[i].nveg =
+            (size_t) dvar[global_domain->locations[i].io_idx];
+    }
+
+    free(dvar);
 }

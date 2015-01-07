@@ -88,6 +88,7 @@ print_location(location_struct *loc)
     fprintf(LOG_DEST, "\tlongitude      : %.4lf\n", loc->longitude);
     fprintf(LOG_DEST, "\tarea           : %.4lf\n", loc->area);
     fprintf(LOG_DEST, "\tfrac           : %.4lf\n", loc->frac);
+    fprintf(LOG_DEST, "\tnveg           : %zd\n", loc->nveg);
     fprintf(LOG_DEST, "\tglobal_idx     : %zd\n", loc->global_idx);
     fprintf(LOG_DEST, "\tio_idx         : %zd\n", loc->io_idx);
     fprintf(LOG_DEST, "\tlocal_idx      : %zd\n", loc->local_idx);
@@ -106,11 +107,12 @@ sprint_location(char            *str,
             "\tlongitude      : %.4lf\n"
             "\tarea           : %.4lf\n"
             "\tfrac           : %.4lf\n"
+            "\nveg            : %zd\n"
             "\tglobal_idx     : %zd\n"
             "\tio_idx         : %zd\n"
             "\tlocal_idx      : %zd\n",
             loc->latitude, loc->longitude, loc->area, loc->frac,
-            loc->global_idx, loc->io_idx, loc->local_idx);
+            loc->nveg, loc->global_idx, loc->io_idx, loc->local_idx);
 }
 
 /******************************************************************************

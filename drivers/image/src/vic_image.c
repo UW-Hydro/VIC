@@ -30,6 +30,8 @@
 
 size_t              NF, NR;
 size_t              current;
+size_t             *filter_active_cells = NULL;
+size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
 dmy_struct         *dmy = NULL;
@@ -43,6 +45,8 @@ MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_location_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
+int                *mpi_map_local_array_sizes = NULL;
+int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
 int                 mpi_size;
 nc_file_struct      nc_hist_file;

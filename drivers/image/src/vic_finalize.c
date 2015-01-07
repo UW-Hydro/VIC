@@ -41,6 +41,7 @@ vic_finalize(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern filep_struct        filep;
     extern nc_file_struct      nc_hist_file;
     extern option_struct       options;
@@ -67,7 +68,7 @@ vic_finalize(void)
         }
     }
 
-    for (i = 0; i < global_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         free_atmos(&(atmos[i]));
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);
@@ -99,6 +100,9 @@ vic_finalize(void)
     free(all_vars);
     free(out_data);
     free(save_data);
-    free(global_domain.locations);
+    free(local_domain.locations);
     free(dmy);
+    if (mpi_rank == 0) {
+        free(global_domain.locations);
+    }
 }

@@ -35,6 +35,7 @@ void
 initialize_mpi(void)
 {
     extern MPI_Datatype mpi_global_struct_type;
+    extern MPI_Datatype mpi_location_struct_type;
     extern MPI_Datatype mpi_option_struct_type;
     extern MPI_Datatype mpi_param_struct_type;
     extern int          mpi_rank;
@@ -54,6 +55,7 @@ initialize_mpi(void)
 
     // initialize MPI data structures
     create_MPI_global_struct_type(&mpi_global_struct_type);
+    create_MPI_location_struct_type(&mpi_location_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 }
@@ -227,7 +229,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
  * @brief   Create an MPI_Datatype that represents the location_struct
  * @details This allows MPI operations in which the entire location_struct
  *          can be treated as an MPI_Datatype. NOTE: This function needs to be
- *          kept in-sync with the location_struct data type in 
+ *          kept in-sync with the location_struct data type in
  *          vic_image_driver.h.
  *
  * @param mpi_type MPI_Datatype that can be used in MPI operations
@@ -243,7 +245,7 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 7;
+    nitems = 8;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_location_struct_type().")
@@ -279,9 +281,13 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(location_struct, area);
     mpi_types[i++] = MPI_DOUBLE;
 
-    // unsigned frac;
+    // double frac;
     offsets[i] = offsetof(location_struct, frac);
-    mpi_types[i++] = MPI_UNSIGNED;
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // size_t nveg;
+    offsets[i] = offsetof(location_struct, nveg);
+    mpi_types[i++] = MPI_AINT;
 
     // size_t global_idx;
     offsets[i] = offsetof(location_struct, global_idx);
@@ -300,7 +306,7 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
         log_err("Miscount in create_MPI_location_struct_type(): "
                 "%zd not equal to %d\n", i, nitems);
     }
-    
+
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
                                     mpi_type);
     if (status != MPI_SUCCESS) {

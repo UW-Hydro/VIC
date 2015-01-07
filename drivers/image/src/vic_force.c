@@ -40,6 +40,7 @@ vic_force(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -54,25 +55,13 @@ vic_force(void)
     size_t                     j;
     size_t                     v;
     int                        vidx;
-    size_t                    *idx = NULL;
     size_t                     d3count[3];
     size_t                     d3start[3];
 
     // allocate memory for variables to be read
-    fvar = (float *) malloc(global_domain.n_ny * global_domain.n_nx *
-                            sizeof(float));
+    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
     if (fvar == NULL) {
         log_err("Memory allocation error in vic_force().");
-    }
-
-    // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells *
-                            sizeof(size_t));
-    if (idx == NULL) {
-        log_err("Memory allocation error in vic_force().");
-    }
-    for (i = 0; i < global_domain.ncells; i++) {
-        idx[i] = get_global_idx(&global_domain, i);
     }
 
     // for now forcing file is determined by the year
@@ -97,8 +86,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "tas",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].air_temp[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].air_temp[j] = (double) fvar[i];
         }
     }
 
@@ -107,8 +96,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "prcp",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].prec[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].prec[j] = (double) fvar[i];
         }
     }
 
@@ -117,8 +106,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "dswrf",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].shortwave[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].shortwave[j] = (double) fvar[i];
         }
     }
 
@@ -127,8 +116,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "dlwrf",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].longwave[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].longwave[j] = (double) fvar[i];
         }
     }
 
@@ -137,8 +126,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "wind",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].wind[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].wind[j] = (double) fvar[i];
         }
     }
 
@@ -147,8 +136,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "shum",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].vp[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].vp[j] = (double) fvar[i];
         }
     }
 
@@ -157,8 +146,8 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_nc_field_float(filenames.forcing[0], "pres",
                            d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells; i++) {
-            atmos[i].pressure[j] = (double) fvar[idx[i]];
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].pressure[j] = (double) fvar[i];
         }
     }
 
@@ -172,7 +161,7 @@ vic_force(void)
         t_offset = 0;
     }
     // Convert forcings into what we need and calculate missing ones
-    for (i = 0; i < global_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         for (j = 0; j < NF; j++) {
             // temperature in CONST_TKFRZ
             atmos[i].air_temp[j] -= CONST_TKFRZ;
@@ -199,7 +188,7 @@ vic_force(void)
 
 
     // Put average value in NR field
-    for (i = 0; i < global_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
         // For precipitation put total
         atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
@@ -221,7 +210,7 @@ vic_force(void)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
-    for (i = 0; i < global_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
@@ -245,7 +234,6 @@ vic_force(void)
 
     // cleanup
     free(fvar);
-    free(idx);
 }
 
 /******************************************************************************

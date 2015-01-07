@@ -37,7 +37,7 @@ vic_init_output(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern filep_struct        filep;
     extern global_param_struct global_param;
     extern nc_file_struct      nc_hist_file;
@@ -52,7 +52,7 @@ vic_init_output(void)
     size_t                     i;
 
     // initialize the output data structures
-    for (i = 0; i < global_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  -global_param.nrecs);

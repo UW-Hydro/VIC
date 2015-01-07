@@ -156,7 +156,7 @@ vic_store(void)
         for (i = 0; i < local_domain.ncells; i++) {
             dvar[i] = (double) soil_con[i].dz_node[j];
         }
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+        gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
                             &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                             dimids, ndims, "dz_node", d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells; i++) {
@@ -178,7 +178,7 @@ vic_store(void)
         for (i = 0; i < local_domain.ncells; i++) {
             dvar[i] = (double) soil_con[i].Zsum_node[j];
         }
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+        gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
                             &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                             dimids, ndims, "Zsum_node", d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells; i++) {
@@ -212,7 +212,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -255,7 +255,7 @@ vic_store(void)
                             dvar[i] = nc_state_file.d_fillvalue;
                         }
                     }
-                    put_nc_field_double(nc_state_file.fname,
+                    gather_put_nc_field_double(nc_state_file.fname,
                                         &(nc_state_file.open),
                                         &(nc_state_file.nc_id),
                                         nc_state_file.d_fillvalue,
@@ -292,7 +292,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -328,7 +328,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -363,7 +363,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -398,7 +398,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -433,7 +433,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -468,7 +468,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,
@@ -504,7 +504,7 @@ vic_store(void)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            put_nc_field_int(nc_state_file.fname,
+            gather_put_nc_field_int(nc_state_file.fname,
                              &(nc_state_file.open),
                              &(nc_state_file.nc_id),
                              nc_state_file.i_fillvalue,
@@ -539,7 +539,7 @@ vic_store(void)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            put_nc_field_int(nc_state_file.fname,
+            gather_put_nc_field_int(nc_state_file.fname,
                              &(nc_state_file.open),
                              &(nc_state_file.nc_id),
                              nc_state_file.i_fillvalue,
@@ -574,7 +574,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -609,7 +609,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -644,7 +644,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -679,7 +679,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -714,7 +714,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -749,7 +749,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -784,7 +784,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -819,7 +819,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -854,7 +854,7 @@ vic_store(void)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(nc_state_file.fname,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.d_fillvalue,
@@ -892,7 +892,7 @@ vic_store(void)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(nc_state_file.fname,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.d_fillvalue,

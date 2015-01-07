@@ -26,7 +26,6 @@
 
 #include <vic_def.h>
 #include <vic_driver_image.h>
-#include <vic_mpi.h>
 
 /******************************************************************************
  * @brief   Initialize MPI functionality
@@ -1478,7 +1477,366 @@ mpi_map_decomp_domain(size_t   ncells,
         }
     }
 }
+
+/******************************************************************************
+ * @brief   Gather and write double precision NetCDF field
+ * @details Values are gathered to the master node and then written from the
+ *          master node
+ *****************************************************************************/
+void
+gather_put_nc_field_double(char   *nc_name,
+                           bool   *open,
+                           int    *nc_id,
+                           double  fillval,
+                           int    *dimids,
+                           int     ndims,
+                           char   *var_name,
+                           size_t *start,
+                           size_t *count,
+                           double *var)
+{
+    int                  status;
+    double              *dvar = NULL;
+    double              *dvar_gathered = NULL;
+    double              *dvar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+
+    if (mpi_rank == 0) {
+        grid_size = global_domain.n_nx * global_domain.n_ny;
+        dvar = (double *) malloc(sizeof(double) * grid_size);
+        if (dvar == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_double().");
         }
+        for (i = 0; i < grid_size; i++) {
+            dvar[i] = fillval;
+        }
+
+        dvar_gathered = (double *) malloc(sizeof(double) *
+                                          global_domain.ncells);
+        if (dvar_gathered == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_double().");
+        }
+
+        dvar_remapped = (double *) malloc(sizeof(double) *
+                                          global_domain.ncells);
+        if (dvar_remapped == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_double().");
+        }
+    }
+    // Gather the results from the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Gatherv(var, local_domain.ncells, MPI_DOUBLE,
+                         dvar_gathered, mpi_map_local_array_sizes,
+                         mpi_map_global_array_offsets, MPI_DOUBLE,
+                         0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        fprintf(stderr, "MPI error in main(): %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+    if (mpi_rank == 0) {
+        // remap the array
+        map(sizeof(double), global_domain.ncells, NULL, mpi_map_mapping_array,
+            dvar_gathered, dvar_remapped);
+        // expand to full grid size
+        map(sizeof(double), global_domain.ncells, NULL, filter_active_cells,
+            dvar_remapped, dvar);
+        // write to file
+        put_nc_field_double(nc_name, open, nc_id, fillval, dimids, ndims,
+                            var_name, start, count, dvar);
+        // cleanup
+        free(dvar);
+        free(dvar_gathered);
+        free(dvar_remapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Gather and write integer NetCDF field
+ * @details Values are gathered to the master node and then written from the
+ *          master node
+ *****************************************************************************/
+void
+gather_put_nc_field_int(char   *nc_name,
+                        bool   *open,
+                        int    *nc_id,
+                        int     fillval,
+                        int    *dimids,
+                        int     ndims,
+                        char   *var_name,
+                        size_t *start,
+                        size_t *count,
+                        int    *var)
+{
+    int                  status;
+    int                 *ivar = NULL;
+    int                 *ivar_gathered = NULL;
+    int                 *ivar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+
+    if (mpi_rank == 0) {
+        grid_size = global_domain.n_nx * global_domain.n_ny;
+        ivar = (int *) malloc(sizeof(int) * grid_size);
+        if (ivar == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_int().");
+        }
+        for (i = 0; i < grid_size; i++) {
+            ivar[i] = fillval;
+        }
+
+        ivar_gathered = (int *) malloc(sizeof(int) *
+                                       global_domain.ncells);
+        if (ivar_gathered == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_int().");
+        }
+
+        ivar_remapped = (int *) malloc(sizeof(int) *
+                                       global_domain.ncells);
+        if (ivar_remapped == NULL) {
+            log_err("Memory allocation error in gather_put_nc_field_int().");
+        }
+    }
+    // Gather the results from the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Gatherv(var, local_domain.ncells, MPI_INT,
+                         ivar_gathered, mpi_map_local_array_sizes,
+                         mpi_map_global_array_offsets, MPI_INT,
+                         0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        fprintf(stderr, "MPI error in main(): %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+
+    if (mpi_rank == 0) {
+        // remap the array
+        map(sizeof(int), global_domain.ncells, NULL, mpi_map_mapping_array,
+            ivar_gathered, ivar_remapped);
+        // expand to full grid size
+        map(sizeof(int), global_domain.ncells, NULL, filter_active_cells,
+            ivar_remapped, ivar);
+        // write to file
+        put_nc_field_int(nc_name, open, nc_id, fillval, dimids, ndims,
+                         var_name, start, count, ivar);
+        // cleanup
+        free(ivar);
+        free(ivar_gathered);
+        free(ivar_remapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Read double precision NetCDF field from file and scatter
+ * @details Read happens on the master node and is then scattered to the local
+ *          nodes
+ *****************************************************************************/
+void
+get_scatter_nc_field_double(char   *nc_name,
+                            char   *var_name,
+                            size_t *start,
+                            size_t *count,
+                            double *var)
+{
+    int                  status;
+    double              *dvar = NULL;
+    double              *dvar_filtered = NULL;
+    double              *dvar_mapped = NULL;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+
+    if (mpi_rank == 0) {
+        dvar = (double *) malloc(sizeof(double) *
+                                 global_domain.n_nx * global_domain.n_ny);
+        if (dvar == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_double().");
+        }
+        dvar_filtered = (double *) malloc(sizeof(double) *
+                                          global_domain.ncells);
+        if (dvar_filtered == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_double().");
+        }
+        dvar_mapped = (double *) malloc(sizeof(double) *
+                                        global_domain.ncells);
+        if (dvar_mapped == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_double().");
+        }
+        get_nc_field_double(nc_name, var_name, start, count, dvar);
+        // filter the active cells only
+        map(sizeof(double), global_domain.ncells, filter_active_cells, NULL,
+            dvar, dvar_filtered);
+        // map to prepare for MPI_Scatterv
+        map(sizeof(double), global_domain.ncells, mpi_map_mapping_array, NULL,
+            dvar_filtered, dvar_mapped);
+        free(dvar);
+        free(dvar_filtered);
+    }
+
+    // Scatter the results to the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Scatterv(dvar_mapped, mpi_map_local_array_sizes,
+                          mpi_map_global_array_offsets, MPI_DOUBLE,
+                          var, local_domain.ncells, MPI_DOUBLE,
+                          0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        fprintf(stderr, "MPI error in main(): %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+
+    if (mpi_rank == 0) {
+        free(dvar_mapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Read single precision NetCDF field from file and scatter
+ * @details Read happens on the master node and is then scattered to the local
+ *          nodes
+ *****************************************************************************/
+void
+get_scatter_nc_field_float(char   *nc_name,
+                           char   *var_name,
+                           size_t *start,
+                           size_t *count,
+                           float  *var)
+{
+    int                  status;
+    float               *fvar = NULL;
+    float               *fvar_filtered = NULL;
+    float               *fvar_mapped = NULL;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+
+    if (mpi_rank == 0) {
+        fvar = (float *) malloc(sizeof(float) *
+                                global_domain.n_nx * global_domain.n_ny);
+        if (fvar == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_float().");
+        }
+        fvar_filtered = (float *) malloc(sizeof(float) *
+                                         global_domain.ncells);
+        if (fvar_filtered == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_float().");
+        }
+        fvar_mapped = (float *) malloc(sizeof(float) *
+                                       global_domain.ncells);
+        if (fvar_mapped == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_float().");
+        }
+        get_nc_field_float(nc_name, var_name, start, count, fvar);
+        // filter the active cells only
+        map(sizeof(float), global_domain.ncells, filter_active_cells, NULL,
+            fvar, fvar_filtered);
+        // map to prepare for MPI_Scatterv
+        map(sizeof(float), global_domain.ncells, mpi_map_mapping_array, NULL,
+            fvar_filtered, fvar_mapped);
+        free(fvar);
+        free(fvar_filtered);
+    }
+
+    // Scatter the results to the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Scatterv(fvar_mapped, mpi_map_local_array_sizes,
+                          mpi_map_global_array_offsets, MPI_FLOAT,
+                          var, local_domain.ncells, MPI_FLOAT,
+                          0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        fprintf(stderr, "MPI error in main(): %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+
+    if (mpi_rank == 0) {
+        free(fvar_mapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Read integer NetCDF field from file and scatter
+ * @details Read happens on the master node and is then scattered to the local
+ *          nodes
+ *****************************************************************************/
+void
+get_scatter_nc_field_int(char   *nc_name,
+                         char   *var_name,
+                         size_t *start,
+                         size_t *count,
+                         int    *var)
+{
+    int                  status;
+    int                 *ivar = NULL;
+    int                 *ivar_filtered = NULL;
+    int                 *ivar_mapped = NULL;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+
+    if (mpi_rank == 0) {
+        ivar = (int *) malloc(sizeof(int) *
+                              global_domain.n_nx * global_domain.n_ny);
+        if (ivar == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_int().");
+        }
+        ivar_filtered = (int *) malloc(sizeof(int) *
+                                       global_domain.ncells);
+        if (ivar_filtered == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_int().");
+        }
+        ivar_mapped = (int *) malloc(sizeof(int) *
+                                     global_domain.ncells);
+        if (ivar_mapped == NULL) {
+            log_err("Memory allocation error in get_scatter_nc_field_int().");
+        }
+        get_nc_field_int(nc_name, var_name, start, count, ivar);
+        // filter the active cells only
+        map(sizeof(int), global_domain.ncells, filter_active_cells, NULL,
+            ivar, ivar_filtered);
+        // map to prepare for MPI_Scatterv
+        map(sizeof(int), global_domain.ncells, mpi_map_mapping_array, NULL,
+            ivar_filtered, ivar_mapped);
+        free(ivar);
+        free(ivar_filtered);
+    }
+
+    // Scatter the results to the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Scatterv(ivar_mapped, mpi_map_local_array_sizes,
+                          mpi_map_global_array_offsets, MPI_INT,
+                          var, local_domain.ncells, MPI_INT,
+                          0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        fprintf(stderr, "MPI error in main(): %d\n", status);
+        exit(EXIT_FAILURE);
+    }
+
+    if (mpi_rank == 0) {
+        free(ivar_mapped);
     }
 }
 

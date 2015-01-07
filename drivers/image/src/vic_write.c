@@ -94,11 +94,11 @@ vic_write(void)
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = (double) out_data[i][k].aggdata[j];
             }
-            put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-                                &(nc_hist_file.nc_id),
-                                nc_hist_file.d_fillvalue,
-                                dimids, ndims, nc_vars[k].nc_var_name,
-                                dstart, dcount, dvar);
+            gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                                       &(nc_hist_file.nc_id),
+                                       nc_hist_file.d_fillvalue,
+                                       dimids, ndims, nc_vars[k].nc_var_name,
+                                       dstart, dcount, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_hist_file.d_fillvalue;
             }

@@ -84,8 +84,8 @@ vic_force(void)
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "tas",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "tas",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].air_temp[j] = (double) fvar[i];
         }
@@ -94,8 +94,8 @@ vic_force(void)
     // Precipitation: prcp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "prcp",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "prcp",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].prec[j] = (double) fvar[i];
         }
@@ -104,8 +104,8 @@ vic_force(void)
     // Downward solar radiation: dswrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "dswrf",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "dswrf",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].shortwave[j] = (double) fvar[i];
         }
@@ -114,8 +114,8 @@ vic_force(void)
     // Downward longwave radiation: dlwrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "dlwrf",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "dlwrf",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].longwave[j] = (double) fvar[i];
         }
@@ -124,8 +124,8 @@ vic_force(void)
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "wind",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "wind",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].wind[j] = (double) fvar[i];
         }
@@ -134,8 +134,8 @@ vic_force(void)
     // Specific humidity: shum
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "shum",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "shum",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].vp[j] = (double) fvar[i];
         }
@@ -144,8 +144,8 @@ vic_force(void)
     // Pressure: pressure
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "pres",
-                           d3start, d3count, fvar);
+        get_scatter_nc_field_float(filenames.forcing[0], "pres",
+                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
             atmos[i].pressure[j] = (double) fvar[i];
         }

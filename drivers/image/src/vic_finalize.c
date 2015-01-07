@@ -62,14 +62,16 @@ vic_finalize(void)
     size_t                     j;
     int                        status;
 
-    // close the global parameter file
-    fclose(filep.globalparam);
+    if (mpi_rank == 0) {
+        // close the global parameter file
+        fclose(filep.globalparam);
 
-    // close the netcdf history file if it is still open
-    if (nc_hist_file.open == true) {
-        status = nc_close(nc_hist_file.nc_id);
-        if (status != NC_NOERR) {
-            ERR(status);
+        // close the netcdf history file if it is still open
+        if (nc_hist_file.open == true) {
+            status = nc_close(nc_hist_file.nc_id);
+            if (status != NC_NOERR) {
+                ERR(status);
+            }
         }
     }
 

@@ -40,6 +40,7 @@ vic_init_output(void)
     extern domain_struct       local_domain;
     extern filep_struct        filep;
     extern global_param_struct global_param;
+    extern int                 mpi_rank;
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
     extern lake_con_struct     lake_con;
@@ -58,14 +59,16 @@ vic_init_output(void)
                  -global_param.nrecs);
     }
 
-    // determine which variables will be written to the history file
-    parse_output_info(filep.globalparam, out_data);
+    if (mpi_rank == 0) {
+        // determine which variables will be written to the history file
+        parse_output_info(filep.globalparam, out_data);
 
-    // open the netcdf history file
-    initialize_history_file(&nc_hist_file);
+        // open the netcdf history file
+        initialize_history_file(&nc_hist_file);
 
-    // initialize netcdf info for output variables
-    vic_nc_info(&nc_hist_file, out_data, nc_vars);
+        // initialize netcdf info for output variables
+        vic_nc_info(&nc_hist_file, out_data, nc_vars);
+    }
 }
 
 /******************************************************************************

@@ -69,8 +69,7 @@ vic_start(void)
     }
 
     // Set Log Destination
-    // TBD: Add MPI support to logging: every process should log to its own file
-    setup_logging();
+    setup_logging(mpi_rank);
 
     if (mpi_rank == 0) {
         // set model constants

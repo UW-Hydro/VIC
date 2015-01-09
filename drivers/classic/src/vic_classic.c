@@ -98,7 +98,7 @@ main(int   argc,
     get_global_param(filep.globalparam);
 
     // Set Log Destination
-    setup_logging();
+    setup_logging(MISSING);
 
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {
@@ -345,6 +345,7 @@ main(int   argc,
             fclose(filep.statefile);
         }
     } /* !OUTPUT_FORCE */
+    finalize_logging();
 
     return EXIT_SUCCESS;
 }       /* End Main Program */

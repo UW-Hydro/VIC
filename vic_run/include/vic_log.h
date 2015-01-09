@@ -54,6 +54,12 @@ FILE *LOG_DEST;
                               __LINE__, ## __VA_ARGS__)
 #endif
 
+void finalize_logging(void);
+void get_current_datetime(char *cdt);
+void get_logname(const char *path, int id, char *filename);
+void initialize_log(void);
+void setup_logging(int id);
+
 // do not try to be smart and make this go away on NDEBUG, the _debug
 // here means that it just doesn't print a message, it still does the
 // check.  MKAY?

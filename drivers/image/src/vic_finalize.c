@@ -116,4 +116,5 @@ vic_finalize(void)
         free(mpi_map_global_array_offsets);
         free(mpi_map_mapping_array);
     }
+    finalize_logging();
 }

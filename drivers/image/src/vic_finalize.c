@@ -101,4 +101,5 @@ vic_finalize(void)
     free(save_data);
     free(global_domain.locations);
     free(dmy);
+    finalize_logging();
 }

@@ -34,7 +34,7 @@
 #include <vic_driver_shared.h>
 
 /******************************************************************************
- * @brief    Finalize logging
+ * @brief    Finalize logging - called after all logging is completed
  *****************************************************************************/
 void
 finalize_logging(void)
@@ -43,6 +43,7 @@ finalize_logging(void)
 
     if (!(LOG_DEST == stdout || LOG_DEST == stderr)) {
         fclose(LOG_DEST);
+        LOG_DEST = stderr;
     }
 }
 

@@ -53,7 +53,7 @@ vic_start(void)
     get_global_param(filep.globalparam);
 
     // Set Log Destination
-    setup_logging();
+    setup_logging(MISSING);
 
     // set model constants
     if (!strcasecmp(filenames.constants, "MISSING")) {

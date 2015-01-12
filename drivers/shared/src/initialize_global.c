@@ -40,12 +40,17 @@ initialize_global()
 
     size_t                     i;
 
-    global_param.dt = HOURS_PER_DAY + 1;
+    global_param.dt = MISSING;
+    global_param.snow_dt = MISSING;
+    global_param.runoff_dt = MISSING;
+    global_param.model_steps_per_day = 0;
+    global_param.snow_steps_per_day = 0;
+    global_param.runoff_steps_per_day = 0;
     global_param.nrecs = 0;
     global_param.startyear = 0;
     global_param.startmonth = 0;
     global_param.startday = 0;
-    global_param.starthour = HOURS_PER_DAY + 1;
+    global_param.startsec = 0;
     global_param.endyear = 0;
     global_param.endmonth = 0;
     global_param.endday = 0;
@@ -56,7 +61,7 @@ initialize_global()
         global_param.forceyear[i] = 0;
         global_param.forcemonth[i] = 1;
         global_param.forceday[i] = 1;
-        global_param.forcehour[i] = 0;
+        global_param.forcesec[i] = 0;
         global_param.forceskip[i] = 0;
         global_param.forceoffset[i] = 0;
     }
@@ -65,4 +70,7 @@ initialize_global()
     global_param.statemonth = 0;
     global_param.stateday = 0;
     global_param.out_dt = 0;
+    global_param.calendar = CALENDAR_STANDARD;
+    global_param.time_units = TIME_UNITS_DAYS;
+    global_param.time_origin_num = MISSING;
 }

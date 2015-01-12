@@ -164,7 +164,7 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     // Compute balances of soil carbon pools
     // Assume previous year's NPP enters soil evenly throughout current year
     veg_var->Litterfall = veg_var->AnnualNPPPrev /
-                          (CONST_DDAYS_PER_YEAR * HOURS_PER_DAY /
+                          (CONST_DDAYS_PER_YEAR * SEC_PER_DAY /
                            global_param.dt);
     cell->CLitter += veg_var->Litterfall - cell->RhLitter;
     cell->CInter +=

@@ -77,17 +77,17 @@ bool   ref_veg_ref_crop[] = {
  *           cover types.
  *****************************************************************************/
 void
-compute_pot_evap(int         veg_class,
-                 dmy_struct *dmy,
-                 int         rec,
-                 int         dt,
-                 double      shortwave,
-                 double      net_longwave,
-                 double      tair,
-                 double      vpd,
-                 double      elevation,
-                 double    **aero_resist,
-                 double     *pot_evap)
+compute_pot_evap(unsigned short veg_class,
+                 dmy_struct    *dmy,
+                 size_t         rec,
+                 double         dt,
+                 double         shortwave,
+                 double         net_longwave,
+                 double         tair,
+                 double         vpd,
+                 double         elevation,
+                 double       **aero_resist,
+                 double        *pot_evap)
 {
     extern veg_lib_struct *vic_run_veg_lib;
 
@@ -142,6 +142,6 @@ compute_pot_evap(int         veg_class,
         net_rad = net_short + net_longwave;
         pot_evap[i] =
             penman(tair, elevation, net_rad, vpd, ra, rc, rarc) *
-            dt / HOURS_PER_DAY;
+            dt / SEC_PER_DAY;
     }
 }

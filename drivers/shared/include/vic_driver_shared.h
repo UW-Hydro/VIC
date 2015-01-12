@@ -40,8 +40,8 @@
 typedef struct {
     size_t N_ELEM; /**< number of elements per record; for LAI and ALBEDO,
                         1 element per veg tile; for others N_ELEM = 1; */
-    char SIGNED;
-    int SUPPLIED;
+    bool SIGNED;
+    bool SUPPLIED;
     double multiplier;
 } force_type_struct;
 
@@ -52,19 +52,23 @@ typedef struct {
  *****************************************************************************/
 typedef struct {
     force_type_struct TYPE[N_FORCING_TYPES];
-    unsigned short FORCE_DT[2];    /**< forcing file time step */
-    int FORCE_ENDIAN[2];            /**< endian-ness of input file, used for
-                                       DAILY_BINARY format */
+    double FORCE_DT[2];    /**< forcing file time step */
+    size_t force_steps_per_day[2];    /**< forcing file timesteps per day */
+    unsigned short FORCE_ENDIAN[2];  /**< endian-ness of input file, used for
+                                        DAILY_BINARY format */
     int FORCE_FORMAT[2];            /**< ASCII or BINARY */
     int FORCE_INDEX[2][N_FORCING_TYPES];
     unsigned N_TYPES[2];
 } param_set_struct;
 
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+int check_date(unsigned short calendar, dmy_struct *dmy);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
+double date2num(double origin, dmy_struct *date, double tzoffset,
+                unsigned short calendar, unsigned short time_units);
 char*get_current_datetime(void);
 void display_current_settings(int);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
@@ -85,14 +89,20 @@ void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      size_t veg_num);
+void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 all_vars_struct make_all_vars(size_t nveg);
 cell_data_struct **make_cell_data(size_t veg_type_num);
 dmy_struct *make_dmy(global_param_struct *global);
 energy_bal_struct **make_energy_bal(size_t nveg);
+void make_lastday(unsigned short calendar, unsigned short year,
+                  unsigned short lastday[]);
 snow_data_struct **make_snow_data(size_t nveg);
 veg_var_struct **make_veg_var(size_t veg_type_num);
-FILE  *open_file(char string[], char type[]);
+void num2date(double origin, double time_value, double tzoffset,
+              unsigned short calendar, unsigned short time_units,
+              dmy_struct *date);
+FILE *open_file(char string[], char type[]);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
                      size_t npet);
 void print_dmy(dmy_struct *dmy);
@@ -123,4 +133,5 @@ void print_version(char *);
 void print_usage(char *);
 void setup_logging(void);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+int valid_date(unsigned short calendar, dmy_struct *dmy);
 #endif

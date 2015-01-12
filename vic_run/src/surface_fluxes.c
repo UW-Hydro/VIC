@@ -55,7 +55,7 @@ surface_fluxes(bool                 overstory,
                unsigned short       band,
                double               dp,
                unsigned short       iveg,
-               int                  rec,
+               size_t               rec,
                unsigned short       veg_class,
                atmos_data_struct   *atmos,
                dmy_struct          *dmy,
@@ -81,10 +81,10 @@ surface_fluxes(bool                 overstory,
     int                      UNSTABLE_SNOW = false;
     int                      N_steps;
     int                      UnderStory;
-    int                      hidx; // index of initial element of atmos array
-    int                      step_inc; // number of atmos array elements to skip per surface fluxes step
-    int                      endhidx; // index of final element of atmos array
-    int                      step_dt; // time length of surface fluxes step
+    size_t                   hidx; // index of initial element of atmos array
+    size_t                   step_inc; // number of atmos array elements to skip per surface fluxes step
+    size_t                   endhidx; // index of final element of atmos array
+    double                   step_dt; // time length of surface fluxes step (in seconds)
     size_t                   lidx;
     int                      over_iter;
     int                      under_iter;
@@ -293,7 +293,7 @@ surface_fluxes(bool                 overstory,
         hidx = 0;
         step_inc = 1;
         endhidx = hidx + NF;
-        step_dt = options.SNOW_STEP;
+        step_dt = gp->snow_dt;
     }
     else {
         hidx = NR;
@@ -449,7 +449,7 @@ surface_fluxes(bool                 overstory,
         // Compute mass flux of blowing snow
         if (!overstory && options.BLOWING && step_snow.swq > 0.) {
             Ls = calc_latent_heat_of_sublimation(step_snow.surf_temp);
-            step_snow.blowing_flux = CalcBlowingSnow((double) step_dt, Tair,
+            step_snow.blowing_flux = CalcBlowingSnow(step_dt, Tair,
                                                      step_snow.last_snow,
                                                      step_snow.surf_water,
                                                      wind[2], Ls,
@@ -467,7 +467,7 @@ surface_fluxes(bool                 overstory,
             if ((int)step_snow.blowing_flux == ERROR) {
                 return (ERROR);
             }
-            step_snow.blowing_flux *= step_dt * SEC_PER_HOUR / CONST_RHOFW; /* m/time step */
+            step_snow.blowing_flux *= step_dt / CONST_RHOFW; /* m/time step */
         }
         else {
             step_snow.blowing_flux = 0.0;
@@ -1117,7 +1117,7 @@ surface_fluxes(bool                 overstory,
         // Update running total annual NPP
         if (veg_var->NPP > 0) {
             veg_var->AnnualNPP += veg_var->NPP * CONST_MWC / MOLE_PER_KMOLE *
-                                  SEC_PER_HOUR * gp->dt;
+                                  gp->dt;
         }
     }
 

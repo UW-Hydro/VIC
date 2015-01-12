@@ -171,7 +171,7 @@ compute_soil_resp(int     Nnodes,
     /* Compute Rh for various pools, nodes; C fluxes in [gC/m2d] */
     *RhLitter = param.SRESP_RFACTOR *
                 (fTLitter * fMLitter /
-                 (param.SRESP_TAULITTER * CONST_DDAYS_PER_YEAR * HOURS_PER_DAY /
+                 (param.SRESP_TAULITTER * CONST_DDAYS_PER_YEAR * SEC_PER_DAY /
                   dt)) * CLitter;
     *RhInterTot = 0;
     *RhSlowTot = 0;

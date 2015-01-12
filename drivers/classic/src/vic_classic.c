@@ -125,6 +125,7 @@ main(int   argc,
     cellnum = -1;
 
     /** Make Date Data Structure **/
+    initialize_time();
     dmy = make_dmy(&global_param);
 
     /** allocate memory for the atmos_data_struct **/

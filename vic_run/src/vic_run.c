@@ -331,16 +331,15 @@ vic_run(int                  rec,
                         veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
                     }
                     veg_var[iveg][band].aPAR = 0;
-                    if (dmy->hour == 0) {
+                    if (dmy->dayseconds == 0) {
                         calc_Nscale_factors(
                             vic_run_veg_lib[veg_class].NscaleFlag,
                             veg_con[iveg].CanopLayerBnd,
-                            vic_run_veg_lib[veg_class].LAI[dmy[
-                                                               rec].month - 1],
+                            vic_run_veg_lib[veg_class].LAI[dmy[rec].month - 1],
                             soil_con->lat,
                             soil_con->lng,
                             soil_con->time_zone_lng,
-                            dmy[rec],
+                            dmy[rec].day_in_year,
                             veg_var[iveg][band].NscaleFactor);
                     }
                     if (dmy[rec].month == 1 && dmy[rec].day == 1) {

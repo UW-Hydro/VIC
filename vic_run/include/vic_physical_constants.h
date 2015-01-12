@@ -30,9 +30,13 @@
 /***** Time Conversions *****/
 #define DAYS_PER_YEAR 365  /**< days in nonleap year */
 #define DAYS_PER_LYEAR 366  /**< days in leap year */
+#define DAYS_PER_JYEAR 365.25  /** days in Julian year */
 #define HOURS_PER_DAY 24  /**< hours per day */
 #define MONTHS_PER_YEAR 12  /**< months per year */
-#define SEC_PER_HOUR 3600  /**< seconds per hour */
+#define MIN_PER_HOUR 60  /**< minutes per hour */
+#define MIN_PER_DAY MIN_PER_HOUR * HOURS_PER_DAY  /**< hours per day */
+#define SEC_PER_MIN 60  /**< seconds per minutes */
+#define SEC_PER_HOUR SEC_PER_MIN * MIN_PER_HOUR  /**< seconds per hour */
 #define SEC_PER_DAY SEC_PER_HOUR * HOURS_PER_DAY  /**< hours per day */
 
 /***** Unit Conversions *****/

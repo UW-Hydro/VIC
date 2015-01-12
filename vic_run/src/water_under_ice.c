@@ -107,7 +107,7 @@ water_under_ice(int     freezeflag,
                   dz, surfdz, &joulenew, water_cp, energy_out_bottom);
 
         // recompute storage of heat in the lake
-        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SEC_PER_HOUR);
+        *deltaH = (joulenew - jouleold) / (surface[0] * dt);
 
         /* --------------------------------------------------------------------
          * Do the convective mixing of the lake water.
@@ -137,7 +137,7 @@ water_under_ice(int     freezeflag,
         }
         energycalc(Ti, &joulenew, numnod, dz, surfdz, surface, water_cp,
                    water_density);
-        *deltaH = (joulenew - jouleold) / (surface[0] * dt * SEC_PER_HOUR);
+        *deltaH = (joulenew - jouleold) / (surface[0] * dt);
         return(0);
     }
 }

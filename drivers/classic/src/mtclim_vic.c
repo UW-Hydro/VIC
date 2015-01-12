@@ -38,16 +38,11 @@ int
 data_alloc(const control_struct *ctrl,
            data_struct          *data)
 {
-    int ok = 1;
-    int ndays;
+    int    ok = 1;
+    size_t ndays;
 
     ndays = ctrl->ndays;
 
-    if (ok && ctrl->inyear &&
-        !(data->year = (int*) malloc(ndays * sizeof(int)))) {
-        log_err("Error allocating for year array");
-        ok = 0;
-    }
     if (ok && !(data->yday = (int*) malloc(ndays * sizeof(int)))) {
         log_err("Error allocating for yearday array");
         ok = 0;
@@ -135,7 +130,7 @@ calc_tair(const control_struct   *ctrl,
           data_struct            *data)
 {
     int                      ok = 1;
-    int                      i, ndays;
+    size_t                   i, ndays;
     double                   dz;
     double                   tmean, tmax, tmin;
 
@@ -173,7 +168,7 @@ calc_prcp(const control_struct   *ctrl,
           data_struct            *data)
 {
     int    ok = 1;
-    int    i, ndays;
+    size_t i, ndays;
     double ratio;
 
     ndays = ctrl->ndays;
@@ -213,7 +208,7 @@ snowpack(const control_struct *ctrl,
          data_struct          *data)
 {
     int                      ok = 1;
-    int                      i, ndays, count;
+    size_t                   i, ndays, count;
     int                      start_yday, prev_yday;
     double                   snowpack, newsnow, snowmelt, sum;
 
@@ -298,7 +293,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     extern parameters_struct param;
 
     int                      ok = 1;
-    int                      i, j, ndays;
+    size_t                   i, j, ndays;
     int                      start_yday, end_yday, isloop;
     int                      ami, yday;
     double                   ttmax0[DAYS_PER_LYEAR];
@@ -339,7 +334,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
     /* start vic_change */
     int                      tinystep;
-    int                      tinystepspday;
+    size_t                   tinystepspday;
     /* end vic_change */
 
     int                      iter;
@@ -554,7 +549,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     dt = param.MTCLIM_SRADDT;              /* set timestep */
     dh = dt / CONST_SECPERRAD;      /* calculate hour-angle step */
     /* start vic_change */
-    tinystepspday = CONST_CDAY / param.MTCLIM_SRADDT;
+    tinystepspday = (size_t)(CONST_CDAY / param.MTCLIM_SRADDT);
     /* end vic_change */
 
     /* begin loop through yeardays */
@@ -671,7 +666,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             if (tinystep < 0) {
                 tinystep = 0;
             }
-            if (tinystep > tinystepspday - 1) {
+            if (tinystep > (int)tinystepspday - 1) {
                 tinystep = tinystepspday - 1;
             }
             if (dir_flat_topa > 0) {
@@ -1061,9 +1056,7 @@ data_free(const control_struct *ctrl,
           data_struct          *data)
 {
     int ok = 1;
-    if (ctrl->inyear) {
-        free(data->year);
-    }
+
     free(data->yday);
     free(data->tmax);
     free(data->tmin);

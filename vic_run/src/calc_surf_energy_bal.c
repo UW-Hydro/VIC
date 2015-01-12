@@ -73,8 +73,8 @@ calc_surf_energy_bal(double             Le,
                      int                UnderStory,
                      size_t             Nnodes,
                      size_t             Nveg,
-                     unsigned short     dt,
-                     unsigned short     hour,
+                     double             dt,
+                     size_t             hidx,
                      unsigned short     iveg,
                      int                overstory,
                      int                rec,
@@ -192,16 +192,12 @@ calc_surf_energy_bal(double             Le,
         while (soil_con->Zsum_node[i] < soil_con->depth[0]) {
             i++;
         }
-        T1_old =
-            energy->T[i -
-                      1] +
-            (energy->T[i] -
-             energy->T[i -
-                       1]) *
-            (soil_con->depth[0] -
-             soil_con->Zsum_node[i -
-                                 1]) /
-            (soil_con->Zsum_node[i] - soil_con->Zsum_node[i - 1]);                                                                                                        // i should be greater than 0, else code would have aborted in initialize_model_state()
+        T1_old = energy->T[i - 1] +
+                 (energy->T[i] - energy->T[i - 1]) *
+                 (soil_con->depth[0] -
+                  soil_con->Zsum_node[i -
+                                      1]) /
+                 (soil_con->Zsum_node[i] - soil_con->Zsum_node[i - 1]);                                                     // i should be greater than 0, else code would have aborted in initialize_model_state()
     }
     D1 = soil_con->depth[0];                // top layer thickness
     D2 = soil_con->depth[0];                // Distance below layer boundary to consider (= top layer thickness)
@@ -209,12 +205,12 @@ calc_surf_energy_bal(double             Le,
     kappa2 = energy->kappa[1];            // second layer conductivity
     Cs1 = energy->Cs[0];               // top layer heat capacity
     Cs2 = energy->Cs[1];               // second layer heat capacity
-    atmos_density = atmos->density[hour];     // atmospheric density
-    atmos_pressure = atmos->pressure[hour];    // atmospheric pressure
-    atmos_shortwave = atmos->shortwave[hour];   // incoming shortwave radiation
-    atmos_Catm = atmos->Catm[hour];        // CO2 mixing ratio
+    atmos_density = atmos->density[hidx];     // atmospheric density
+    atmos_pressure = atmos->pressure[hidx];    // atmospheric pressure
+    atmos_shortwave = atmos->shortwave[hidx];   // incoming shortwave radiation
+    atmos_Catm = atmos->Catm[hidx];        // CO2 mixing ratio
     emissivity = 1.;        // longwave emissivity
-    delta_t = (double)dt * SEC_PER_HOUR;
+    delta_t = dt;
     max_moist = soil_con->max_moist[0] / (soil_con->depth[0] * MM_PER_M);
     bubble = soil_con->bubble[0];
     expt = soil_con->expt[0];
@@ -352,9 +348,11 @@ calc_surf_energy_bal(double             Le,
             }
             else {
                 log_info("SURF_DT = %.2f", param.SURF_DT);
-                error = error_calc_surf_energy_bal(Tsurf, dmy->year, dmy->month,
-                                                   dmy->day, dmy->hour, VEG,
-                                                   iveg,
+                error = error_calc_surf_energy_bal(Tsurf, (int)dmy->year,
+                                                   (int)dmy->month,
+                                                   (int)dmy->day,
+                                                   (int)dmy->dayseconds,
+                                                   VEG, iveg,
                                                    veg_class, delta_t, Cs1, Cs2,
                                                    D1, D2,
                                                    T1_old, T2, Ts_old,
@@ -469,9 +467,11 @@ calc_surf_energy_bal(double             Le,
                     Tsurf_fbcount++;
                 }
                 else {
-                    error = error_calc_surf_energy_bal(Tsurf, dmy->year,
-                                                       dmy->month, dmy->day,
-                                                       dmy->hour, VEG, iveg,
+                    error = error_calc_surf_energy_bal(Tsurf, (int)dmy->year,
+                                                       (int)dmy->month,
+                                                       (int)dmy->day,
+                                                       (int)dmy->dayseconds,
+                                                       VEG, iveg,
                                                        veg_class, delta_t, Cs1,
                                                        Cs2, D1,
                                                        D2, T1_old, T2, Ts_old,
@@ -807,7 +807,8 @@ error_print_surf_energy_bal(double  Ts,
     /* Define imported variables */
 
     /* general model terms */
-    int                year, month, day, hour;
+    int                year, month, day;
+    int                sec;
     int                iveg;
     int                VEG;
     int                veg_class;
@@ -951,7 +952,7 @@ error_print_surf_energy_bal(double  Ts,
     year = (int) va_arg(ap, int);
     month = (int) va_arg(ap, int);
     day = (int) va_arg(ap, int);
-    hour = (int) va_arg(ap, int);
+    sec = (int) va_arg(ap, int);
     VEG = (int) va_arg(ap, int);
     iveg = (int) va_arg(ap, int);
     veg_class = (int) va_arg(ap, int);
@@ -1097,7 +1098,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(LOG_DEST, "year = %i\n", year);
     fprintf(LOG_DEST, "month = %i\n", month);
     fprintf(LOG_DEST, "day = %i\n", day);
-    fprintf(LOG_DEST, "hour = %i\n", hour);
+    fprintf(LOG_DEST, "second = %i\n", sec);
     fprintf(LOG_DEST, "VEG = %i\n", VEG);
     fprintf(LOG_DEST, "veg_class = %i\n", veg_class);
     fprintf(LOG_DEST, "delta_t = %f\n", delta_t);

@@ -74,11 +74,11 @@ write_header(out_data_file_struct *out_data_files,
         // Part 1: Global Attributes
         // Nbytes1     (unsigned short)*1  Number of bytes in part 1
         // nrecs       (int)*1             Number of records in the file
-        // dt          (int)*1             Output time step length in hours
+        // dt          (int)*1             Output time step length in seconds
         // startyear   (int)*1             Year of first record
         // startmonth  (int)*1             Month of first record
         // startday    (int)*1             Day of first record
-        // starthour   (int)*1             Hour of first record
+        // startsec    (int)*1             Second of first record
         // ALMA_OUTPUT (char)*1            0 = standard VIC units; 1 = ALMA units
         // Nvars       (char)*1            Number of variables in the file, including date fields
         //
@@ -106,7 +106,7 @@ write_header(out_data_file_struct *out_data_files,
             // dt
             Nbytes1 += sizeof(int);
 
-            // start date (year, month, day, hour)
+            // start date (year, month, day, sec)
             Nbytes1 += 4 * sizeof(int);
 
             // ALMA_OUTPUT
@@ -128,9 +128,9 @@ write_header(out_data_file_struct *out_data_files,
                            sizeof(float);                                        // month
                 Nbytes2 += sizeof(char) + 3 * sizeof(char) + sizeof(char) +
                            sizeof(float);                                        // day
-                if (global.out_dt < HOURS_PER_DAY) {
+                if (global.out_dt < SEC_PER_DAY) {
                     Nbytes2 += sizeof(char) + 4 * sizeof(char) + sizeof(char) +
-                               sizeof(float);                                      // hour
+                               sizeof(float);                                      // sec
                 }
             }
 
@@ -189,11 +189,12 @@ write_header(out_data_file_struct *out_data_files,
             fwrite(&(global.out_dt), sizeof(int), 1,
                    out_data_files[file_idx].fh);
 
-            // start date (year, month, day, hour)
+            // start date (year, month, day, sec)
             fwrite(&(dmy->year), sizeof(int), 1, out_data_files[file_idx].fh);
             fwrite(&(dmy->month), sizeof(int), 1, out_data_files[file_idx].fh);
             fwrite(&(dmy->day), sizeof(int), 1, out_data_files[file_idx].fh);
-            fwrite(&(dmy->hour), sizeof(int), 1, out_data_files[file_idx].fh);
+            fwrite(&(dmy->dayseconds), sizeof(int), 1,
+                   out_data_files[file_idx].fh);
 
             // ALMA_OUTPUT
             fwrite(&tmp_ALMA_OUTPUT, sizeof(char), 1,
@@ -202,7 +203,7 @@ write_header(out_data_file_struct *out_data_files,
             // Nvars
             Nvars = out_data_files[file_idx].nvars;
             if (!options.OUTPUT_FORCE) {
-                if (global.out_dt < HOURS_PER_DAY) {
+                if (global.out_dt < SEC_PER_DAY) {
                     Nvars += 4;
                 }
                 else {
@@ -250,9 +251,9 @@ write_header(out_data_file_struct *out_data_files,
                 fwrite(&tmp_mult, sizeof(float), 1,
                        out_data_files[file_idx].fh);
 
-                if (global.out_dt < HOURS_PER_DAY) {
-                    // hour
-                    strcpy(tmp_str, "HOUR");
+                if (global.out_dt < SEC_PER_DAY) {
+                    // sec
+                    strcpy(tmp_str, "SEC");
                     tmp_len = strlen(tmp_str);
                     fwrite(&tmp_len, sizeof(char), 1,
                            out_data_files[file_idx].fh);
@@ -314,7 +315,7 @@ write_header(out_data_file_struct *out_data_files,
            //
            // where
            // nrecs       = Number of records in the file
-           // dt          = Output time step length in hours
+           // dt          = Output time step length in seconds
            // start date  = Date and time of first record of file
            // ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
            // Nvars       = Number of variables in the file, including date fields
@@ -324,7 +325,7 @@ write_header(out_data_file_struct *out_data_files,
             // Header part 1: Global attributes
             Nvars = out_data_files[file_idx].nvars;
             if (!options.OUTPUT_FORCE) {
-                if (global.out_dt < HOURS_PER_DAY) {
+                if (global.out_dt < SEC_PER_DAY) {
                     Nvars += 4;
                 }
                 else {
@@ -332,10 +333,10 @@ write_header(out_data_file_struct *out_data_files,
                 }
             }
             fprintf(out_data_files[file_idx].fh, "# NRECS: %d\n", global.nrecs);
-            fprintf(out_data_files[file_idx].fh, "# DT: %d\n", global.out_dt);
+            fprintf(out_data_files[file_idx].fh, "# DT: %f\n", global.out_dt);
             fprintf(out_data_files[file_idx].fh,
-                    "# STARTDATE: %04d-%02d-%02d %02d:00:00\n",
-                    dmy->year, dmy->month, dmy->day, dmy->hour);
+                    "# STARTDATE: %04u-%02u-%02u %05u:00:00\n",
+                    dmy->year, dmy->month, dmy->day, dmy->dayseconds);
             fprintf(out_data_files[file_idx].fh, "# ALMA_OUTPUT: %d\n",
                     tmp_ALMA_OUTPUT);
             fprintf(out_data_files[file_idx].fh, "# NVARS: %d\n", Nvars);
@@ -345,10 +346,10 @@ write_header(out_data_file_struct *out_data_files,
 
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (global.out_dt < HOURS_PER_DAY) {
-                    // Write year, month, day, and hour
+                if (global.out_dt < SEC_PER_DAY) {
+                    // Write year, month, day, and sec
                     fprintf(out_data_files[file_idx].fh,
-                            "YEAR\tMONTH\tDAY\tHOUR\t");
+                            "YEAR\tMONTH\tDAY\tSEC\t");
                 }
                 else {
                     // Only write year, month, and day

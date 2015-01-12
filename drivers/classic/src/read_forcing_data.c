@@ -73,7 +73,7 @@ read_forcing_data(FILE              **infile,
     }
     else {
         log_err("File time step must be defined for at least the first "
-                "forcing file (FILE_DT).\n");
+                "forcing file (FILE_DT).");
     }
 
     /** Read Second Forcing Data File **/

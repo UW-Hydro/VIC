@@ -85,12 +85,12 @@ display_current_settings(int mode)
         fprintf(LOG_DEST, "EQUAL_AREA\t\tFALSE\n");
     }
     fprintf(LOG_DEST, "RESOLUTION\t\t%f\n", global_param.resolution);
-    fprintf(LOG_DEST, "TIME_STEP\t\t%d\n", global_param.dt);
-    fprintf(LOG_DEST, "SNOW_STEP\t\t%d\n", options.SNOW_STEP);
+    fprintf(LOG_DEST, "TIME_STEP\t\t%f\n", global_param.dt);
+    fprintf(LOG_DEST, "SNOW_STEP\t\t%f\n", global_param.snow_dt);
     fprintf(LOG_DEST, "STARTYEAR\t\t%d\n", global_param.startyear);
     fprintf(LOG_DEST, "STARTMONTH\t\t%d\n", global_param.startmonth);
     fprintf(LOG_DEST, "STARTDAY\t\t%d\n", global_param.startday);
-    fprintf(LOG_DEST, "STARTHOUR\t\t%d\n", global_param.starthour);
+    fprintf(LOG_DEST, "STARTSEC\t\t%u\n", global_param.startsec);
     if (global_param.nrecs > 0) {
         fprintf(LOG_DEST, "NRECS\t\t%d\n", global_param.nrecs);
     }
@@ -300,10 +300,10 @@ display_current_settings(int mode)
                     global_param.forcemonth[file_num]);
             fprintf(LOG_DEST, "FORCEDAY\t\t%d\n",
                     global_param.forceday[file_num]);
-            fprintf(LOG_DEST, "FORCEHOUR\t\t%d\n",
-                    global_param.forcehour[file_num]);
+            fprintf(LOG_DEST, "FORCESEC\t\t%u\n",
+                    global_param.forcesec[file_num]);
             fprintf(LOG_DEST, "N_TYPES\t\t\t%d\n", param_set.N_TYPES[file_num]);
-            fprintf(LOG_DEST, "FORCE_DT\t\t%d\n", param_set.FORCE_DT[file_num]);
+            fprintf(LOG_DEST, "FORCE_DT\t\t%f\n", param_set.FORCE_DT[file_num]);
             if (param_set.FORCE_ENDIAN[file_num] == LITTLE) {
                 fprintf(LOG_DEST, "FORCE_ENDIAN\t\tLITTLE\n");
             }
@@ -470,7 +470,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Output Data:\n");
     fprintf(LOG_DEST, "Result dir:\t\t%s\n", filenames.result_dir);
-    fprintf(LOG_DEST, "OUT_STEP\t\t%d\n", global_param.out_dt);
+    fprintf(LOG_DEST, "OUT_STEP\t\t%f\n", global_param.out_dt);
     if (options.ALMA_OUTPUT) {
         fprintf(LOG_DEST, "ALMA_OUTPUT\t\tTRUE\n");
     }

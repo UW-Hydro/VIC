@@ -46,9 +46,9 @@ write_forcing_file(atmos_data_struct    *atmos,
     unsigned                   i;
     size_t                     j;
     dmy_struct                *dummy_dmy;
-    int                        dt_sec;
+    double                     dt_sec;
 
-    dt_sec = global_param.dt * SEC_PER_HOUR;
+    dt_sec = global_param.dt;
     dummy_dmy = NULL;
 
     for (rec = 0; rec < nrecs; rec++) {

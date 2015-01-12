@@ -133,6 +133,7 @@ OBJS = \
 	${SHAREDPATH}/src/open_file.o \
 	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/vic_log.o \
+	${SHAREDPATH}/src/vic_time.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

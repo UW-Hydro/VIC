@@ -34,7 +34,7 @@ int
 water_energy_balance(int     numnod,
                      double *surface,
                      double *evapw,
-                     int     dt,
+                     double  dt,
                      double  dz,
                      double  surfdz,
                      double  lat,
@@ -160,11 +160,11 @@ water_energy_balance(int     numnod,
             energycalc(Tnew, &sumjouli, numnod, dz, surfdz, surface, cp,
                        water_density);
             *deltaH = (sumjouli - jouleold) /
-                      (surface[0] * dt * SEC_PER_HOUR);
+                      (surface[0] * dt);
         }
         else {
             *deltaH = (joulenew - jouleold) /
-                      (surface[0] * dt * SEC_PER_HOUR);
+                      (surface[0] * dt);
             *energy_ice_formation = 0.0;
         }
 

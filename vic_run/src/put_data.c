@@ -74,10 +74,10 @@ put_data(all_vars_struct   *all_vars,
     int                        v;
     size_t                     i;
     short                      j;
-    int                        dt_sec;
-    int                        out_dt_sec;
-    int                        out_step_ratio;
-    static int                 step_count;
+    double                     dt_sec;
+    double                     out_dt_sec;
+    unsigned                   out_step_ratio;
+    static unsigned            step_count;
     static int                 Tfoliage_fbcount_total;
     static int                 Tcanopy_fbcount_total;
     static int                 Tsnowsurf_fbcount_total;
@@ -101,9 +101,9 @@ put_data(all_vars_struct   *all_vars,
     depth = soil_con->depth;
     frost_fract = soil_con->frost_fract;
     frost_slope = soil_con->frost_slope;
-    dt_sec = global_param.dt * SEC_PER_HOUR;
-    out_dt_sec = global_param.out_dt * SEC_PER_HOUR;
-    out_step_ratio = (int)(out_dt_sec / dt_sec);
+    dt_sec = global_param.dt;
+    out_dt_sec = global_param.out_dt;
+    out_step_ratio = (unsigned)(out_dt_sec / dt_sec);
     if (rec >= 0) {
         step_count++;
     }
@@ -552,7 +552,7 @@ put_data(all_vars_struct   *all_vars,
 
     // Carbon Terms
     if (options.CARBON) {
-        out_data[OUT_RHET].data[0] *= (double)global_param.dt / HOURS_PER_DAY; // convert to gC/m2d
+        out_data[OUT_RHET].data[0] *= dt_sec / SEC_PER_DAY; // convert to gC/m2d
         out_data[OUT_NEE].data[0] = out_data[OUT_NPP].data[0] -
                                     out_data[OUT_RHET].data[0];
     }
@@ -671,7 +671,8 @@ put_data(all_vars_struct   *all_vars,
         }
         else if (out_data[v].aggtype == AGG_TYPE_AVG) {
             for (i = 0; i < out_data[v].nelem; i++) {
-                out_data[v].aggdata[i] += out_data[v].data[i] / out_step_ratio;
+                out_data[v].aggdata[i] += out_data[v].data[i] /
+                                          (double)out_step_ratio;
             }
         }
     }

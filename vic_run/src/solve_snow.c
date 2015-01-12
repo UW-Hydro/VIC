@@ -77,9 +77,9 @@ solve_snow(char               overstory,
            size_t             Nveg,
            unsigned short     iveg,
            unsigned short     band,
-           unsigned short     dt,
-           int                rec,
-           int                hidx,
+           double             dt,
+           size_t             rec,
+           size_t             hidx,
            int                veg_class,
            int               *UnderStory,
            double            *CanopLayerBnd,
@@ -192,7 +192,7 @@ solve_snow(char               overstory,
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
                 ShortOverIn /= veg_var->vegcover;
-                ErrorFlag = snow_intercept((double)dt * SEC_PER_HOUR, 1.,
+                ErrorFlag = snow_intercept(dt, 1.,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
                                            veg_var->Wdmax,
@@ -315,7 +315,7 @@ solve_snow(char               overstory,
                 // ignore effects of snow dropping from canopy; only consider fresh snow from sky
                 snow->last_snow++;
                 snow->albedo = snow_albedo(*snowfall, snow->swq, snow->albedo,
-                                           snow->coldcontent, (double)dt,
+                                           snow->coldcontent, dt,
                                            snow->last_snow, snow->MELTING);
                 (*AlbedoUnder) =
                     (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
@@ -332,8 +332,7 @@ solve_snow(char               overstory,
             ErrorFlag = snow_melt((*Le), (*NetShortSnow), Tcanopy, Tgrnd,
                                   roughness, aero_resist[*UnderStory],
                                   aero_resist_used,
-                                  air_temp, *coverage,
-                                  (double)dt * SEC_PER_HOUR,
+                                  air_temp, *coverage, dt,
                                   density, snow_grnd_flux,
                                   *LongUnderIn, pressure, *rainfall, *snowfall,
                                   vp, vpd, wind[*UnderStory],
@@ -362,7 +361,7 @@ solve_snow(char               overstory,
                 if (snow->surf_temp <= 0) {
                     // snowpack present, compress and age density
                     snow->density = snow_density(snow, *snowfall, old_swq,
-                                                 air_temp, (double)dt);
+                                                 air_temp, dt);
                 }
                 else
                 // no snowpack present, start with new snow density

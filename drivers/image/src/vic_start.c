@@ -60,6 +60,8 @@ vic_start(void)
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }
+    // Check that model parameters are valid
+    validate_parameters();
 
     // read domain info
     get_global_domain(filenames.domain, &global_domain);

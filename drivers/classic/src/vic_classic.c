@@ -105,6 +105,8 @@ main(int   argc,
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }
+    // Check that model parameters are valid
+    validate_parameters();
 
     /** Set up output data structures **/
     out_data = create_output_list();

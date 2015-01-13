@@ -125,11 +125,11 @@ get_parameters(FILE *paramfile)
                 sscanf(cmdstr, "%*s %lf", &param.CANOPY_VPDMINFACTOR);
             }
             // MTCLIM Parameters
-            else if (strcasecmp("MTCLIM_TDAYCOEF", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_TDAYCOEF);
-            }
             else if (strcasecmp("MTCLIM_SOLAR_CONSTANT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SOLAR_CONSTANT);
+            }
+            else if (strcasecmp("MTCLIM_TDAYCOEF", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_TDAYCOEF);
             }
             else if (strcasecmp("MTCLIM_SNOW_TCRIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SNOW_TCRIT);
@@ -561,5 +561,419 @@ get_parameters(FILE *paramfile)
             }
         }
         fgets(cmdstr, MAXSTRING, paramfile);
+    }
+}
+
+/******************************************************************************
+ * @brief    Validate VIC model parameter values
+ *****************************************************************************/
+void
+validate_parameters()
+{
+
+    extern parameters_struct param;
+
+    // Validate Parameters
+    // Lapse Rate
+    if (param.LAPSE_RATE > 0.) {
+        log_err("Invalid value for LAPSE_RATE, must be <= 0.  "
+                "Units are degC/m");
+    }
+    if (param.LAPSE_RATE < -1) {
+        log_err("Invalid value for LAPSE_RATE, must be > -1.  "
+                "Units are degC/m");    }
+    // Precipitation Guage Height
+    if (param.GAUGE_HEIGHT < 0.) {
+        log_err("Invalid value for GAUGE_HEIGHT, must be >= 0.")
+    }
+    if (param.GAUGE_HEIGHT > 100.) {
+        log_err("Invalid value for GAUGE_HEIGHT, must be less than 100 m");
+    }
+    // Default Wind Speed
+    if (param.WIND_SPEED_DEFAULT < 0.) {
+        log_err("Invalid value for WIND_SPEED_DEFAULT, must be >= 0.");
+    }
+    if (param.WIND_SPEED_MIN < 0.) {
+        log_err("Invalid value for WIND_SPEED_MIN, must be >= 0.");
+    }
+    // Huge Resistance Term
+    if (param.HUGE_RESIST < 0.) {
+        log_err("Invalid value for HUGE_RESIST, must be >= 0.");
+    }
+    // Surface Albedo Parameters
+    if (param.ALBEDO_BARE_SOIL < 0.) {
+        log_err("Invalid value for ALBEDO_BARE_SOIL, must be >= 0.");
+    }
+    if (param.ALBEDO_BARE_SOIL > 1.) {
+        log_err("Invalid value for ALBEDO_BARE_SOIL, must be <= 1.");
+    }
+    if (param.ALBEDO_H20_SURF < 0.) {
+        log_err("Invalid value for ALBEDO_H20_SURF, must be >= 0.");
+    }
+    if (param.ALBEDO_H20_SURF > 1) {
+        log_err("Invalid value for ALBEDO_H20_SURF, must be <= 1.");
+    }
+    // Surface Emissivities
+    if (param.EMISS_GRND < 0.) {
+        log_err("Invalid value for EMISS_GRND, must be >= 0.");
+    }
+    if (param.EMISS_GRND > 1.) {
+        log_err("Invalid value for EMISS_GRND, must be <= 1.");
+    }
+    if (param.EMISS_ICE < 0.)  {
+        log_err("Invalid value for EMISS_ICE, must be >= 0.");
+    }
+    if (param.EMISS_ICE > 1.) {
+        log_err("Invalid value for EMISS_ICE, must be <= 1.");
+    }
+    if (param.EMISS_VEG < 0.)  {
+        log_err("Invalid value for EMISS_VEG, must be >= 0.");
+    }
+    if (param.EMISS_VEG > 1.) {
+        log_err("Invalid value for EMISS_VEG, must be <= 1.");
+    }
+    if (param.EMISS_SNOW < 0.)  {
+        log_err("Invalid value for EMISS_SNOW, must be >= 0.");
+    }
+    if (param.EMISS_SNOW > 1.) {
+        log_err("Invalid value for EMISS_SNOW, must be <= 1.");
+    }
+    if (param.EMISS_H2O < 0.)  {
+        log_err("Invalid value for EMISS_H2O, must be >= 0.");
+    }
+    if (param.EMISS_H2O > 1.) {
+        log_err("Invalid value for EMISS_H2O, must be <= 1.");
+    }
+    // Soil Constraints
+    if (param.SOIL_RESID_MOIST < 0.) {
+        log_err("Invalid value for SOIL_RESID_MOIST, must be >= 0.");
+    }
+    if (param.SOIL_SLAB_MOIST_FRACT < 0) {
+        log_err("Invalid value for SOIL_SLAB_MOIST_FRACT, must be >= 0.");
+    }
+    if (param.SOIL_SLAB_MOIST_FRACT > 1.) {
+        log_err("Invalid value for SOIL_SLAB_MOIST_FRACT, must be <= 1.");
+    }
+    // Vegetation Parameters
+    if (param.VEG_LAI_SNOW_MULTIPLIER < 0.) {
+        log_err("Invalid value for VEG_LAI_SNOW_MULTIPLIER, must be >= 0.");
+    }
+    if (param.VEG_MIN_INTERCEPTION_STORAGE < 0.) {
+        log_err("Invalid value for VEG_MIN_INTERCEPTION_STORAGE, must be >= 0.");
+    }
+    if (param.VEG_LAI_WATER_FACTOR < 0.) {
+        log_err("Invalid value for VEG_LAI_WATER_FACTOR, must be >= 0.");
+    }
+    // Canopy Parameters
+    if (param.CANOPY_CLOSURE < 0.) {
+        log_err("Invalid value for CANOPY_CLOSURE, must be >= 0.");
+    }
+    if (param.CANOPY_RSMAX < 0.) {
+        log_err("Invalid value for CANOPY_RSMAX, must be >= 0.");
+    }
+    if (param.CANOPY_VPDMINFACTOR < 0.) {
+        log_err("Invalid value for CANOPY_VPDMINFACTOR, must be >= 0.");
+    }
+    // MTCLIM Parameters
+    if (param.MTCLIM_SOLAR_CONSTANT < 0.) {
+        log_err("Invalid value for MTCLIM_SNOW_TRATE, must be >= 0.");
+    }
+    // MTCLIM_TDAYCOEF - Currently, no constraints
+    // MTCLIM_SNOW_TCRIT - Currently, no constraints
+    // MTCLIM_SNOW_TRATE - Currently, no constraints
+    // MTCLIM_TBASE - Currently, no constraints
+    // MTCLIM_ABASE - Currently, no constraints
+    // MTCLIM_C - Currently, no constraints
+    // MTCLIM_B0 - Currently, no constraints
+    // MTCLIM_B1 - Currently, no constraints
+    // MTCLIM_B2 - Currently, no constraints
+    // MTCLIM_RAIN_SCALAR - Currently, no constraints
+    if (param.MTCLIM_DIF_ALB < 0.) {
+        log_err("Invalid value for MTCLIM_DIF_ALB, must be >= 0.");
+    }
+    if (param.MTCLIM_DIF_ALB > 1) {
+        log_err("Invalid value for MTCLIM_DIF_ALB, must be <= 1.");
+    }
+    if (param.MTCLIM_SC_INT < 0.) {
+        log_err("Invalid value for MTCLIM_SC_INT, must be >= 0.");
+    }
+    // MTCLIM_SC_SLOPE - Currently, no constraints
+    if (param.MTCLIM_SRADDT < 0.) {
+        log_err("Invalid value for MTCLIM_SRADDT, must be >= 0.");
+    }
+    if (param.MTCLIM_SRADDT > SEC_PER_DAY) {
+        log_err("Invalid value for MTCLIM_SRADDT, must be < 86400.");
+    }
+    if (param.MTCLIM_SW_PREC_THRESH < 0.) {
+        log_err("Invalid value for MTCLIM_SRADDT, must be >= 0.");
+    }
+    // Lake Parameters
+    // LAKE_TMELT - Currently, no constraints
+    if (param.LAKE_MAX_SURFACE < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // LAKE_BETA - Currently, no constraints
+    // LAKE_FRACMIN - Currently, no constraints
+    // LAKE_FRACLIM - Currently, no constraints
+    // LAKE_DM - Currently, no constraints
+    if (param.LAKE_SNOWCRIT < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // LAKE_ZWATER - Currently, no constraints
+    // LAKE_ZSNOW - Currently, no constraints
+    if (param.LAKE_RHOSNOW < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // LAKE_CONDI - Currently, no constraints
+    // LAKE_CONDS - Currently, no constraints
+    // LAKE_LAMISW - Currently, no constraints
+    // LAKE_LAMILW - Currently, no constraints
+    // LAKE_LAMSSW - Currently, no constraints
+    // LAKE_LAMSLW - Currently, no constraints
+    // LAKE_LAMWSW - Currently, no constraints
+    // LAKE_LAMWLW - Currently, no constraints
+    // LAKE_A1 - Currently, no constraints
+    // LAKE_A2 - Currently, no constraints
+    // LAKE_QWTAU - Currently, no constraints
+    if (param.LAKE_MAX_ITER < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // Saturation Vapor Pressure Parameters
+    if (param.SVP_A < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SVP_B < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SVP_C < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // Carbon Parameters
+    if (param.CARBON_CATMCURRENT < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.CARBON_SW2PAR < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // Photosynthesis Parameters
+    // PHOTO_OMEGA - Currently, no constraints
+    if (param.PHOTO_LAIMAX < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // PHOTO_LAILIMIT - Currently, no constraints
+    // PHOTO_LAIMIN - Currently, no constraints
+    // PHOTO_EPAR - Currently, no constraints
+    // PHOTO_FCMAX - Currently, no constraints
+    // PHOTO_FCMIN - Currently, no constraints
+    // PHOTO_ZENITHMIN - Currently, no constraints
+    // PHOTO_ZENITHMINPAR - Currently, no constraints
+    // PHOTO_ALBSOIPARMIN - Currently, no constraints
+    // PHOTO_MINMAXETRANS - Currently, no constraints
+    // PHOTO_MINSTOMCOND - Currently, no constraints
+    // PHOTO_FCI1C3 - Currently, no constraints
+    // PHOTO_FCI1C4 - Currently, no constraints
+    // PHOTO_OX - Currently, no constraints
+    // PHOTO_KC - Currently, no constraints
+    // PHOTO_KO - Currently, no constraints
+    // PHOTO_EC - Currently, no constraints
+    // PHOTO_EO - Currently, no constraints
+    // PHOTO_EV - Currently, no constraints
+    // PHOTO_ER - Currently, no constraints
+    // PHOTO_ALC3 - Currently, no constraints
+    // PHOTO_FRDC3 - Currently, no constraints
+    // PHOTO_EK - Currently, no constraints
+    // PHOTO_ALC4 - Currently, no constraints
+    // PHOTO_FRDC4 - Currently, no constraints
+    // PHOTO_THETA - Currently, no constraints
+    // PHOTO_FRLEAF - Currently, no constraints
+    // PHOTO_FRGROWTH - Currently, no constraints
+
+    // Soil Respiration Parameters
+    // SRESP_E0_LT - Currently, no constraints
+    // SRESP_T0_LT - Currently, no constraints
+    // SRESP_WMINFM - Currently, no constraints
+    // SRESP_WMAXFM - Currently, no constraints
+    // SRESP_WOPTFM - Currently, no constraints
+    // SRESP_RHSAT - Currently, no constraints
+    // SRESP_RFACTOR - Currently, no constraints
+    // SRESP_TAULITTER - Currently, no constraints
+    // SRESP_TAUINTER - Currently, no constraints
+    // SRESP_TAUSLOW - Currently, no constraints
+    // SRESP_FAIR - Currently, no constraints
+    // SRESP_FINTER - Currently, no constraints
+
+    // Snow Parameters
+    if (param.SNOW_MAX_SURFACE_SWE < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SNOW_LIQUID_WATER_CAPACITY < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SNOW_NEW_SNOW_DENSITY < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SNOW_DENS_DMLIMIT < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SNOW_DENS_MAX_CHANGE < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    // SNOW_DENS_ETA0 - Currently, no constraints
+    // SNOW_DENS_C1 - Currently, no constraints
+    // SNOW_DENS_C2 - Currently, no constraints
+    // SNOW_DENS_C5 - Currently, no constraints
+    // SNOW_DENS_C6 - Currently, no constraints
+    // SNOW_DENS_F - Currently, no constraints
+    if (param.SNOW_MIN_SWQ_EB_THRES < 0.) {
+        log_err("Invalid value for LAKE_MAX_SURFACE, must be >= 0.");
+    }
+    if (param.SNOW_A1 < 0.) {
+        log_err("Invalid value for SNOW_A1, must be >= 0.");
+    }
+    if (param.SNOW_A2 < 0.) {
+        log_err("Invalid value for SNOW_A2, must be >= 0.");
+    }
+    if (param.SNOW_L1 < 0.) {
+        log_err("Invalid value for SNOW_L1, must be >= 0.");
+    }
+    if (param.SNOW_L2 < 0.) {
+        log_err("Invalid value for SNOW_L2, must be >= 0.");
+    }
+    if (param.SNOW_NEW_SNOW_ALB < 0.) {
+        log_err("Invalid value for SNOW_NEW_SNOW_ALB, must be >= 0.");
+    }
+    if (param.SNOW_NEW_SNOW_ALB > 1.) {
+        log_err("Invalid value for SNOW_NEW_SNOW_ALB, must be <= 1.");
+    }
+    if (param.SNOW_ALB_ACCUM_A < 0.) {
+        log_err("Invalid value for SNOW_ALB_ACCUM_A, must be >= 0.");
+    }
+    if (param.SNOW_ALB_ACCUM_B < 0.) {
+        log_err("Invalid value for SNOW_ALB_ACCUM_B, must be >= 0.");
+    }
+    if (param.SNOW_ALB_THAW_A < 0.) {
+        log_err("Invalid value for SNOW_ALB_THAW_A, must be >= 0.");
+    }
+    if (param.SNOW_ALB_THAW_B < 0.) {
+        log_err("Invalid value for SNOW_ALB_THAW_B, must be >= 0.");
+    }
+    if (param.SNOW_TRACESNOW < 0.) {
+        log_err("Invalid value for SNOW_TRACESNOW, must be >= 0.");
+    }
+    if (param.SNOW_CONDUCT < 0.) {
+        log_err("Invalid value for SNOW_CONDUCT, must be >= 0.");
+    }
+    // SNOW_MAX_SNOW_TEMP - Currently, no constraints
+    if (param.SNOW_MAX_SNOW_TEMP < -10.) {
+        log_warn("SNOW_MAX_SNOW_TEMP is outside its normal bounds.");
+    }
+    if (param.SNOW_MAX_SNOW_TEMP > 10.) {
+        log_warn("SNOW_MAX_SNOW_TEMP is outside its normal bounds.");
+    }
+    if (param.SNOW_MIN_RAIN_TEMP < -10.) {
+        log_warn("SNOW_MIN_RAIN_TEMP is outside its normal bounds.");
+    }
+    if (param.SNOW_MIN_RAIN_TEMP > 10.) {
+        log_warn("SNOW_MIN_RAIN_TEMP is outside its normal bounds.");
+    }
+    if (param.SNOW_MIN_RAIN_TEMP > param.SNOW_MAX_SNOW_TEMP) {
+        log_err("SNOW_MIN_RAIN_TEMP > SNOW_MAX_SNOW_TEMP.");
+    }
+    // Blowing Snow Parameters
+    if (param.BLOWING_KA < 0.) {
+        log_err("Invalid value for BLOWING_KA, must be >= 0.");
+    }
+    if (param.BLOWING_CSALT < 0.) {
+        log_err("Invalid value for BLOWING_CSALT, must be >= 0.");
+    }
+    if (param.BLOWING_UTHRESH < 0.) {
+        log_err("Invalid value for BLOWING_UTHRESH, must be >= 0.");
+    }
+    if (param.BLOWING_KIN_VIS < 0.) {
+        log_err("Invalid value for BLOWING_KIN_VIS, must be >= 0.");
+    }
+    if (param.BLOWING_MAX_ITER < 0) {
+        log_err("Invalid value for BLOWING_MAX_ITER, must be >= 0.");
+    }
+    if (param.BLOWING_K < 0) {
+        log_err("Invalid value for BLOWING_K, must be >= 0.");
+    }
+    if (param.BLOWING_SETTLING < 0.) {
+        log_err("Invalid value for BLOWING_SETTLING, must be >= 0.");
+    }
+    if (param.BLOWING_NUMINCS < 0) {
+        log_err("Invalid value for BLOWING_NUMINCS, must be >= 0.");
+    }
+    // Treeline temperature
+    if (param.TREELINE_TEMPERATURE < -10.) {
+        log_warn("TREELINE_TEMPERATURE is outside its normal bounds.");
+    }
+    if (param.TREELINE_TEMPERATURE > 20.) {
+        log_warn("TREELINE_TEMPERATURE is outside its normal bounds.");
+    }
+
+    // Iteration Bracket Widths
+    if (param.SNOW_DT < 0.) {
+        log_err("Invalid value for SNOW_DT, must be >= 0.");
+    }
+    if (param.SURF_DT < 0.) {
+        log_err("Invalid value for SURF_DT, must be >= 0.");
+    }
+    if (param.SOIL_DT < 0.) {
+        log_err("Invalid value for SOIL_DT, must be >= 0.");
+    }
+    if (param.CANOPY_DT < 0.) {
+        log_err("Invalid value for CANOPY_DT, must be >= 0.");
+    }
+    if (param.CANOPY_VP < 0.) {
+        log_err("Invalid value for CANOPY_VP, must be >= 0.");
+    }
+    // Convergence Tolerances
+    if (param.TOL_GRND < 0.) {
+        log_err("Invalid value for TOL_GRND, must be >= 0.");
+    }
+    if (param.TOL_OVER < 0.) {
+        log_err("Invalid value for TOL_OVER, must be >= 0.");
+    }
+    // Frozen Soil Parameters
+    if (param.FROZEN_MAXITER < 0) {
+        log_err("Invalid value for FROZEN_MAXITER, must be >= 0.");
+    }
+    // Newton-Raphson Solver Parameters
+    if (param.NEWT_RAPH_MAXTRIAL < 0) {
+        log_err("Invalid value for NEWT_RAPH_MAXTRIAL, must be >= 0.");
+    }
+    if (param.NEWT_RAPH_TOLX < 0.) {
+        log_err("Invalid value for NEWT_RAPH_TOLX, must be >= 0.");
+    }
+    if (param.NEWT_RAPH_TOLF < 0.) {
+        log_err("Invalid value for NEWT_RAPH_TOLF, must be >= 0.");
+    }
+    // NEWT_RAPH_R_MAX - Currently, no constraints
+    // NEWT_RAPH_R_MIN - Currently, no constraints
+    if (param.NEWT_RAPH_RELAX1 < 0.) {
+        log_err("Invalid value for NEWT_RAPH_RELAX1, must be >= 0.");
+    }
+    if (param.NEWT_RAPH_RELAX2 < 0.) {
+        log_err("Invalid value for NEWT_RAPH_RELAX2, must be >= 0.");
+    }
+    if (param.NEWT_RAPH_RELAX3 < 0.) {
+        log_err("Invalid value for NEWT_RAPH_RELAX3, must be >= 0.");
+    }
+    if (param.NEWT_RAPH_EPS2 < 0.) {
+        log_err("Invalid value for NEWT_RAPH_EPS2, must be >= 0.");
+    }
+    // Root-Brent parameters
+    if (param.ROOT_BRENT_MAXTRIES < 0) {
+        log_err("Invalid value for ROOT_BRENT_MAXTRIES, must be >= 0.");
+    }
+    if (param.ROOT_BRENT_MAXITER < 0) {
+        log_err("Invalid value for ROOT_BRENT_MAXITER, must be >= 0.");
+    }
+    if (param.ROOT_BRENT_TSTEP < 0) {
+        log_err("Invalid value for ROOT_BRENT_TSTEP, must be >= 0.");
+    }
+    if (param.ROOT_BRENT_T < 0.) {
+        log_err("Invalid value for ROOT_BRENT_T, must be >= 0.");
     }
 }

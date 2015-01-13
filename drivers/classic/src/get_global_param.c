@@ -904,13 +904,13 @@ get_global_param(FILE *gp)
                Define output file contents
             *************************************/
             else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ;     // do nothing
+                ; // do nothing
             }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
-                ;     // do nothing
+                ; // do nothing
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
-                ;     // do nothing
+                ; // do nothing
             }
 
             /***********************************
@@ -918,8 +918,7 @@ get_global_param(FILE *gp)
             ***********************************/
             else {
                 log_warn("Unrecognized option in the global parameter file: "
-                         "%s is unknown - check your spelling",
-                         optstr);
+                         "%s is unknown - check your spelling", optstr);
             }
         }
         fgets(cmdstr, MAXSTRING, gp);
@@ -1169,11 +1168,9 @@ get_global_param(FILE *gp)
             if (param_set.FORCE_FORMAT[i] == MISSING) {
                 log_err("FORCE_FORMAT%d: %d. Need to specify the FORCE_FORMAT "
                         "(ASCII or BINARY) for forcing file %d.", i,
-                        param_set.FORCE_FORMAT[i],
-                        i);
+                        param_set.FORCE_FORMAT[i], i);
             }
-            if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] ==
-                MISSING) {
+            if (param_set.FORCE_INDEX[i][param_set.N_TYPES[i] - 1] == MISSING) {
                 log_err("Did not define enough forcing variables in forcing "
                         "file %d.",
                         i);
@@ -1284,8 +1281,7 @@ get_global_param(FILE *gp)
                         "but no elevation band file has been defined.  Make "
                         "sure that the global file defines the elevation band "
                         "file on the line that begins with \"SNOW_BAND\" "
-                        "(after the number of bands).",
-                        options.SNOW_BAND);
+                        "(after the number of bands).", options.SNOW_BAND);
             }
             if (options.SNOW_BAND > MAX_BANDS) {
                 log_err("Global file wants more snow bands (%zu) than are "
@@ -1320,17 +1316,14 @@ get_global_param(FILE *gp)
                     "defines the output state file on the line that begins "
                     "with \"SAVE_STATE\".");
             }
-            if (global_param.stateyear == 0 || global_param.statemonth ==
-                0 ||
+            if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
                 global_param.stateday == 0) {
                 log_err("Incomplete specification of the date to save state "
                         "for state file (%s).  Specified date (yyyy-mm-dd): "
                         "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
                         "STATEDAY are set correctly in your global parameter "
-                        "file.", filenames.statefile,
-                        global_param.stateyear,
-                        global_param.statemonth,
-                        global_param.stateday);
+                        "file.", filenames.statefile, global_param.stateyear,
+                        global_param.statemonth, global_param.stateday);
             }
             // Check for month, day in range
             make_lastday(global_param.stateyear, global_param.calendar,
@@ -1343,16 +1336,13 @@ get_global_param(FILE *gp)
                         "state file (%s).  Specified date (yyyy-mm-dd): "
                         "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
                         "STATEDAY are set correctly in your global parameter "
-                        "file.", filenames.statefile,
-                        global_param.stateyear,
-                        global_param.statemonth,
-                        global_param.stateday);
+                        "file.", filenames.statefile, global_param.stateyear,
+                        global_param.statemonth, global_param.stateday);
             }
         }
         // Set the statename here to be able to compare with INIT_STATE name
         if (options.SAVE_STATE) {
-            sprintf(filenames.statefile, "%s_%04i%02i%02i",
-                    filenames.statefile,
+            sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
                     global_param.stateyear, global_param.statemonth,
                     global_param.stateday);
         }
@@ -1361,8 +1351,7 @@ get_global_param(FILE *gp)
             log_err("The save state file (%s) has the same name as the "
                     "initialize state file (%s).  The initialize state file "
                     "will be destroyed when the save state file is opened.",
-                    filenames.statefile,
-                    filenames.init_state);
+                    filenames.statefile, filenames.init_state);
         }
 
         // Validate soil parameter/simulation mode combinations
@@ -1391,8 +1380,7 @@ get_global_param(FILE *gp)
              options.FROZEN_SOIL) && options.Nlayer < 3) {
             log_err("You must define at least 3 soil moisture layers to run "
                     "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                    "Currently Nlayers is set to %zu.",
-                    options.Nlayer);
+                    "Currently Nlayers is set to %zu.", options.Nlayer);
         }
         if ((!options.FULL_ENERGY &&
              !options.FROZEN_SOIL) && options.Nlayer < 1) {
@@ -1455,5 +1443,5 @@ get_global_param(FILE *gp)
            Output major options to stderr
         *********************************/
         display_current_settings(DISP_VERSION);
-    }     // !OUTPUT_FORCE
+    } // !OUTPUT_FORCE
 }

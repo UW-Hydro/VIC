@@ -41,10 +41,8 @@ VICPATH = ../../vic_run
 SHELL = /bin/bash
 
 # Set CC = your compiler here
-ifeq (true, ${TRAVIS})
-CC = $(CC)
-else
-CC = gcc
+ifndef CC
+CC=gcc
 endif
 
 # set include

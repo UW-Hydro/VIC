@@ -49,9 +49,9 @@ get_global_param(FILE *gp)
     size_t                     file_num;
     int                        field;
     int                        i;
-    unsigned                   tmpstartdate;
-    unsigned                   tmpenddate;
-    unsigned short             lastday[MONTHS_PER_YEAR];
+    unsigned int               tmpstartdate;
+    unsigned int               tmpenddate;
+    unsigned short int         lastday[MONTHS_PER_YEAR];
 
     file_num = 0;
 
@@ -100,7 +100,7 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %u", &global_param.startsec);
             }
             else if (strcasecmp("NRECS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %u", &global_param.nrecs);
+                sscanf(cmdstr, "%*s %zu", &global_param.nrecs);
             }
             else if (strcasecmp("ENDYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.endyear);
@@ -913,6 +913,17 @@ get_global_param(FILE *gp)
                 ; // do nothing
             }
 
+            /*************************************
+               Fail when depreciated options are used.
+            *************************************/
+            else if (strcasecmp("TIME_STEP", optstr) == 0) {
+                log_err("TIME_STEP has been replaced with SNOW_STEPS_PER_DAY, "
+                        "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("SNOW_STEP", optstr) == 0) {
+                log_err("SNOW_STEP has been replaced with MODEL_STEPS_PER_DAY, "
+                        "update your global parameter file accordingly");
+            }
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/
@@ -1148,7 +1159,7 @@ get_global_param(FILE *gp)
         }
     }
     else if (global_param.nrecs < 1) {
-        log_err("The specified duration of simulation (%d) < 1 time step. "
+        log_err("The specified duration of simulation (%zu) < 1 time step. "
                 "Make sure that the global file defines a positive integer "
                 "for NRECS.", global_param.nrecs);
     }

@@ -47,7 +47,7 @@ write_header(out_data_file_struct *out_data_files,
     unsigned short       Nbytes1;
     unsigned short       Nbytes2;
     char                 tmp_ALMA_OUTPUT;
-    char                 Nvars;
+    size_t               Nvars;
     char                 tmp_len;
     char                *tmp_str;
     char                 tmp_type;
@@ -98,22 +98,22 @@ write_header(out_data_file_struct *out_data_files,
             // ***** Compute the number of bytes in part 1 *****
 
             // 1 instance of Nbytes1
-            Nbytes1 = sizeof(unsigned short);
+            Nbytes1 = sizeof(unsigned short int);
 
             // nrecs
-            Nbytes1 += sizeof(int);
+            Nbytes1 += sizeof(size_t);
 
             // dt
-            Nbytes1 += sizeof(int);
+            Nbytes1 += sizeof(double);
 
             // start date (year, month, day, sec)
-            Nbytes1 += 4 * sizeof(int);
+            Nbytes1 += sizeof(int) + 2 * sizeof(unsigned short int) + sizeof(unsigned int);
 
             // ALMA_OUTPUT
-            Nbytes1 += sizeof(char);
+            Nbytes1 += sizeof(bool);
 
             // Nvars
-            Nbytes1 += sizeof(char);
+            Nbytes1 += sizeof(size_t);
 
             // ***** Compute the number of bytes in part 2 *****
 
@@ -182,22 +182,22 @@ write_header(out_data_file_struct *out_data_files,
                    out_data_files[file_idx].fh);
 
             // nrecs
-            fwrite(&(global.nrecs), sizeof(int), 1,
+            fwrite(&(global.nrecs), sizeof(size_t), 1,
                    out_data_files[file_idx].fh);
 
             // dt
-            fwrite(&(global.out_dt), sizeof(int), 1,
+            fwrite(&(global.out_dt), sizeof(double), 1,
                    out_data_files[file_idx].fh);
 
             // start date (year, month, day, sec)
             fwrite(&(dmy->year), sizeof(int), 1, out_data_files[file_idx].fh);
-            fwrite(&(dmy->month), sizeof(int), 1, out_data_files[file_idx].fh);
-            fwrite(&(dmy->day), sizeof(int), 1, out_data_files[file_idx].fh);
-            fwrite(&(dmy->dayseconds), sizeof(int), 1,
+            fwrite(&(dmy->month), sizeof(unsigned short int), 1, out_data_files[file_idx].fh);
+            fwrite(&(dmy->day), sizeof(unsigned short int), 1, out_data_files[file_idx].fh);
+            fwrite(&(dmy->dayseconds), sizeof(unsigned int), 1,
                    out_data_files[file_idx].fh);
 
             // ALMA_OUTPUT
-            fwrite(&tmp_ALMA_OUTPUT, sizeof(char), 1,
+            fwrite(&tmp_ALMA_OUTPUT, sizeof(bool), 1,
                    out_data_files[file_idx].fh);
 
             // Nvars
@@ -210,7 +210,7 @@ write_header(out_data_file_struct *out_data_files,
                     Nvars += 3;
                 }
             }
-            fwrite(&Nvars, sizeof(char), 1, out_data_files[file_idx].fh);
+            fwrite(&Nvars, sizeof(size_t), 1, out_data_files[file_idx].fh);
 
             // Nbytes2
             fwrite(&Nbytes2, sizeof(unsigned short), 1,
@@ -332,14 +332,14 @@ write_header(out_data_file_struct *out_data_files,
                     Nvars += 3;
                 }
             }
-            fprintf(out_data_files[file_idx].fh, "# NRECS: %d\n", global.nrecs);
+            fprintf(out_data_files[file_idx].fh, "# NRECS: %zu\n", global.nrecs);
             fprintf(out_data_files[file_idx].fh, "# DT: %f\n", global.out_dt);
             fprintf(out_data_files[file_idx].fh,
-                    "# STARTDATE: %04u-%02u-%02u %05u:00:00\n",
+                    "# STARTDATE: %04d-%02d-%02d-%05d\n",
                     dmy->year, dmy->month, dmy->day, dmy->dayseconds);
             fprintf(out_data_files[file_idx].fh, "# ALMA_OUTPUT: %d\n",
                     tmp_ALMA_OUTPUT);
-            fprintf(out_data_files[file_idx].fh, "# NVARS: %d\n", Nvars);
+            fprintf(out_data_files[file_idx].fh, "# NVARS: %zu\n", Nvars);
 
             // Header part 2: Variables
             fprintf(out_data_files[file_idx].fh, "# ");

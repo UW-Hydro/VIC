@@ -61,6 +61,8 @@ typedef struct {
     unsigned N_TYPES[2];
 } param_set_struct;
 
+double all_30_day_from_dmy(dmy_struct *dmy);
+double all_leap_from_dmy(dmy_struct *dmy);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 int check_date(unsigned short calendar, dmy_struct *dmy);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
@@ -69,8 +71,13 @@ void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short calendar, unsigned short time_units);
+void dmy_all_30_day(double julian, dmy_struct *dmy);
+void dmy_all_leap(double julian, dmy_struct *dmy);
+void dmy_julian_day(double julian, unsigned short calendar, dmy_struct *dmy);
+void dmy_no_leap_day(double julian, dmy_struct *dmy);
 char*get_current_datetime(void);
 void display_current_settings(int);
+double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 void free_vegcon(veg_con_struct **veg_con);
@@ -91,6 +98,8 @@ void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      size_t veg_num);
 void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
+double julian_day_from_dmy(dmy_struct *dmy, unsigned short calendar);
+bool leap_year(unsigned short year, unsigned short calendar);
 all_vars_struct make_all_vars(size_t nveg);
 cell_data_struct **make_cell_data(size_t veg_type_num);
 dmy_struct *make_dmy(global_param_struct *global);
@@ -99,6 +108,7 @@ void make_lastday(unsigned short calendar, unsigned short year,
                   unsigned short lastday[]);
 snow_data_struct **make_snow_data(size_t nveg);
 veg_var_struct **make_veg_var(size_t veg_type_num);
+double no_leap_day_from_dmy(dmy_struct *dmy);
 void num2date(double origin, double time_value, double tzoffset,
               unsigned short calendar, unsigned short time_units,
               dmy_struct *date);

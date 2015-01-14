@@ -92,7 +92,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "STARTDAY\t\t%d\n", global_param.startday);
     fprintf(LOG_DEST, "STARTSEC\t\t%u\n", global_param.startsec);
     if (global_param.nrecs > 0) {
-        fprintf(LOG_DEST, "NRECS\t\t%d\n", global_param.nrecs);
+        fprintf(LOG_DEST, "NRECS\t\t%zu\n", global_param.nrecs);
     }
     else {
         fprintf(LOG_DEST, "ENDYEAR\t\t\t%d\n", global_param.endyear);

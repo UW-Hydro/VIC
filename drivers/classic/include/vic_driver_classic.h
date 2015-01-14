@@ -77,7 +77,7 @@ void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
-void set_max_min_sec(double *, int, int, int *, int *);
+void set_max_min_sec(double *, size_t, size_t, int *, int *);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);

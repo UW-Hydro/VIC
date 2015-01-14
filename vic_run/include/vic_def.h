@@ -749,7 +749,7 @@ typedef struct {
     unsigned forceskip[2];   /**< number of model time steps to skip at
                                       the start of the forcing file */
     unsigned short forceyear[2];   /**< year forcing files start */
-    unsigned nrecs;                /**< Number of time steps simulated */
+    size_t nrecs;                /**< Number of time steps simulated */
     unsigned short skipyear;       /**< Number of years to skip before writing
                                       output data */
     unsigned short startday;       /**< Starting day of the simulation */
@@ -1165,7 +1165,7 @@ typedef struct {
     unsigned short day;         /**< current day */
     unsigned short day_in_year; /**< julian day in year */
     unsigned short month;       /**< current month */
-    unsigned short year;        /**< current year */
+    int year;                   /**< current year */
     unsigned dayseconds;        /**< seconds since midnight */
 } dmy_struct;                   /**< array of length nrec created */
 

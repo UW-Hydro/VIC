@@ -38,84 +38,84 @@ int
 data_alloc(const control_struct *ctrl,
            data_struct          *data)
 {
-    int    ok = 1;
+    bool   ok = true;
     size_t ndays;
 
     ndays = ctrl->ndays;
 
     if (ok && !(data->yday = (int*) malloc(ndays * sizeof(int)))) {
         log_err("Error allocating for yearday array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->tmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tmax array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->tmin = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tmin array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->prcp = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for prcp array");
-        ok = 0;
+        ok = false;
     }
     if (ok && ctrl->indewpt &&
         !(data->tdew = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for input humidity array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tmax array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tmin = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tmin array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tday = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tday array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_prcp = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site prcp array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_hum = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site VPD array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_srad = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site radiation array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_dayl = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site daylength array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_swe = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site snowpack array");
-        ok = 0;
+        ok = false;
     }
     /* start vic_change */
     if (ok && !(data->s_fdir = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for direct fraction array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tskc = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site cloudiness array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_ppratio = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tfmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_ttmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     /* end vic_change */
     return (!ok);
@@ -129,7 +129,7 @@ calc_tair(const control_struct   *ctrl,
           const parameter_struct *p,
           data_struct            *data)
 {
-    int                      ok = 1;
+    bool                     ok = true;
     size_t                   i, ndays;
     double                   dz;
     double                   tmean, tmax, tmin;
@@ -167,7 +167,7 @@ calc_prcp(const control_struct   *ctrl,
           const parameter_struct *p,
           data_struct            *data)
 {
-    int    ok = 1;
+    bool   ok = true;
     size_t i, ndays;
     double ratio;
 
@@ -207,7 +207,7 @@ int
 snowpack(const control_struct *ctrl,
          data_struct          *data)
 {
-    int                      ok = 1;
+    bool                     ok = true;
     size_t                   i, ndays, count;
     int                      start_yday, prev_yday;
     double                   snowpack, newsnow, snowmelt, sum;
@@ -292,7 +292,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     extern option_struct     options;
     extern parameters_struct param;
 
-    int                      ok = 1;
+    bool                     ok = true;
     size_t                   i, j, ndays;
     int                      start_yday, end_yday, isloop;
     int                      ami, yday;
@@ -352,51 +352,51 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     /* allocate space for DTR and smoothed DTR arrays */
     if (!(dtr = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for DTR array");
-        ok = 0;
+        ok = false;
     }
     if (!(sm_dtr = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for smoothed DTR array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for effective annual precip array */
     if (!(parray = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for effective annual precip array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for the prcp totaling array */
     if (!(window = (double*) malloc((ndays + 90) * sizeof(double)))) {
         log_err("Error allocating for prcp totaling array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for t_fmax */
     if (!(t_fmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for p_tt_max array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for Tdew array */
     if (!(tdew = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for Tdew array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pet array */
     if (!(pet = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pet array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pva array */
     if (!(pva = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pva array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for tdew_save array */
     if (!(tdew_save = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tdew_save array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pva_save array */
     if (!(pva_save = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pva_save array");
-        ok = 0;
+        ok = false;
     }
 
     /* calculate diurnal temperature range for transmittance calculations */
@@ -413,13 +413,13 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     if (ndays >= 30) { /* use 30-day antecedent smoothing window */
         if (pulled_boxcar(dtr, sm_dtr, ndays, 30, 0)) {
             log_err("Error in boxcar smoothing, calc_srad_humidity()");
-            ok = 0;
+            ok = false;
         }
     }
     else { /* smoothing window width = ndays */
         if (pulled_boxcar(dtr, sm_dtr, ndays, ndays, 0)) {
             log_err("Error in boxcar smoothing, calc_srad_humidity()");
-            ok = 0;
+            ok = false;
         }
     }
 
@@ -1055,7 +1055,7 @@ int
 data_free(const control_struct *ctrl,
           data_struct          *data)
 {
-    int ok = 1;
+    bool ok = true;
 
     free(data->yday);
     free(data->tmax);
@@ -1185,19 +1185,19 @@ pulled_boxcar(double *input,
               int     w,
               int     w_flag)
 {
-    int     ok = 1;
+    bool    ok = true;
     int     i, j;
     double *wt;
     double  total, sum_wt;
 
     if (w > n) {
         log_err("Boxcar longer than array...Resize boxcar and try again");
-        ok = 0;
+        ok = false;
     }
 
     if (ok && !(wt = (double*) malloc(w * sizeof(double)))) {
         log_err("Allocation error in boxcar()");
-        ok = 0;
+        ok = false;
     }
 
     if (ok) {

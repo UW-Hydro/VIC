@@ -113,7 +113,7 @@ SubDailyT(size_t  stepsperday,
     size_t  nsteps;
 
     nsteps = stepsperday * ndays;
-    Dt = SEC_PER_DAY / stepsperday;
+    Dt = (double) (SEC_PER_DAY) / (double) stepsperday;
 
     n = ndays * 2 + 2;
     x = (double *) calloc(n, sizeof(double));
@@ -179,19 +179,19 @@ SubDailyT(size_t  stepsperday,
  *****************************************************************************/
 void
 set_max_min_sec(double *subdailyrad,
-                int     ndays,
-                int     stepsize,
+                size_t  ndays,
+                size_t  stepsperday,
                 int    *tmaxsec,
                 int    *tminsec)
 {
+    double stepsize;
     size_t step;
     int    risesec;
     int    setsec;
     int    sec;
-    int    i;
-    size_t stepsperday;
+    size_t i;
 
-    stepsperday = SEC_PER_DAY / stepsize;
+    stepsize = (double) (SEC_PER_DAY) / (double) stepsperday;
 
     for (i = 0; i < ndays; i++) {
         risesec = MISSING;
@@ -208,8 +208,8 @@ set_max_min_sec(double *subdailyrad,
         for (step = step + 1, sec = 12 * SEC_PER_HOUR;
              sec < SEC_PER_DAY;
              step++, sec += stepsize) {
-            if (subdailyrad[i * stepsperday + sec] <= 0 &&
-                subdailyrad[i * stepsperday + sec - 1] > 0) {
+            if (subdailyrad[i * stepsperday + step] <= 0 &&
+                subdailyrad[i * stepsperday + step - 1] > 0) {
                 setsec = sec;
             }
         }
@@ -218,7 +218,12 @@ set_max_min_sec(double *subdailyrad,
         }
         if (risesec >= 0 && setsec >= 0) {
             tmaxsec[i] = 0.67 * (setsec - risesec) + risesec;
-            tminsec[i] = risesec - 1;
+            if (risesec > stepsize) {
+                tminsec[i] = risesec - stepsize;
+            }
+            else {
+                tminsec[i] = 0.;
+            }
         }
         else {
             /* arbitrarily set the min and max times to 2am and 2pm */

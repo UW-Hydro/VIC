@@ -88,7 +88,7 @@ mtclim_wrapper(int         have_dewpt,
         log_err("Memory allocation error in mtclim_init() ...");
     }
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
-        tiny_radfract[i] = (double *) calloc(CONST_CDAY, sizeof(double));
+        tiny_radfract[i] = (double *) calloc((CONST_CDAY), sizeof(double));
         if (tiny_radfract[i] == NULL) {
             log_err("Memory allocation error in mtclim_init() ...");
         }
@@ -169,8 +169,8 @@ mtclim_init(int               have_dewpt,
     size_t                     atmos_steps_per_day;
 
     atmos_steps_per_day = global_param.model_steps_per_day;
-    if (atmos_steps_per_day < HOURS_PER_DAY) {
-        atmos_steps_per_day = HOURS_PER_DAY;
+    if (atmos_steps_per_day < (HOURS_PER_DAY)) {
+        atmos_steps_per_day = (HOURS_PER_DAY);
     }
 
     /* initialize the control structure */
@@ -240,7 +240,7 @@ mtclim_init(int               have_dewpt,
             log_err("have_dewpt not yet implemented ...");
         }
     }
-    tinystepspday = (size_t)(CONST_CDAY / param.MTCLIM_SRADDT);
+    tinystepspday = (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT);
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
         for (j = 0; j < tinystepspday; j++) {
             tiny_radfract[i][j] = 0;
@@ -273,12 +273,12 @@ mtclim_to_vic(double          sec_offset,
     size_t                     atmos_steps_per_day;
 
     atmos_steps_per_day = global_param.model_steps_per_day;
-    if (atmos_steps_per_day < HOURS_PER_DAY) {
-        atmos_steps_per_day = HOURS_PER_DAY;
+    if (atmos_steps_per_day < (HOURS_PER_DAY)) {
+        atmos_steps_per_day = (HOURS_PER_DAY);
     }
 
     tinystepspstep =
-        (size_t)(CONST_CDAY / param.MTCLIM_SRADDT) / atmos_steps_per_day;
+        (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
 
     tiny_offset = (int)((double)tinystepspstep * sec_offset);
     for (i = 0; i < ctrl->ndays; i++) {
@@ -287,7 +287,7 @@ mtclim_to_vic(double          sec_offset,
         }
         else {
             tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] /
-                      SEC_PER_DAY;
+                      (double) (SEC_PER_DAY);
         }
         for (j = 0; j < atmos_steps_per_day; j++) {
             subdailyrad[i * atmos_steps_per_day + j] = 0;
@@ -300,8 +300,7 @@ mtclim_to_vic(double          sec_offset,
                     (int)(atmos_steps_per_day * tinystepspstep - 1)) {
                     tinystep -= atmos_steps_per_day * tinystepspstep;
                 }
-                subdailyrad[i * atmos_steps_per_day +
-                            j] +=
+                subdailyrad[i * atmos_steps_per_day + j] +=
                     tiny_radfract[dmy[i * atmos_steps_per_day +
                                       j].day_in_year - 1][tinystep];
             }

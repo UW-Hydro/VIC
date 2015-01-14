@@ -192,12 +192,12 @@ calc_surf_energy_bal(double             Le,
         while (soil_con->Zsum_node[i] < soil_con->depth[0]) {
             i++;
         }
+        // i should be greater than 0, else code would have aborted in initialize_model_state()
         T1_old = energy->T[i - 1] +
                  (energy->T[i] - energy->T[i - 1]) *
                  (soil_con->depth[0] -
-                  soil_con->Zsum_node[i -
-                                      1]) /
-                 (soil_con->Zsum_node[i] - soil_con->Zsum_node[i - 1]);                                                     // i should be greater than 0, else code would have aborted in initialize_model_state()
+                  soil_con->Zsum_node[i - 1]) /
+                 (soil_con->Zsum_node[i] - soil_con->Zsum_node[i - 1]);
     }
     D1 = soil_con->depth[0];                // top layer thickness
     D2 = soil_con->depth[0];                // Distance below layer boundary to consider (= top layer thickness)

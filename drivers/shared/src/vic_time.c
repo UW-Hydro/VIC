@@ -3,7 +3,8 @@
  *
  * VIC time and calendar module
  *
- * Ported from https://github.com/Unidata/netcdf4-python/blob/master/netcdftime/netcdftime.py
+ * Ported from Unidata and Jeff Whitaker's netcdftime.py module:
+ * https://github.com/Unidata/netcdf4-python/blob/master/netcdftime/netcdftime.py
  *
  * @section LICENSE
  *
@@ -32,28 +33,16 @@
 #include <vic_run.h>
 #include <vic_driver_shared.h>
 
-// FUNCTION PROTOTYPES
-double _FractionalDayFromDate(dmy_struct *date);
-double _JulianDayFromDate(dmy_struct *date, unsigned short calendar);
-double _NoLeapDayFromDate(dmy_struct *date);
-double _AllLeapFromDate(dmy_struct *date);
-double _360DayFromDate(dmy_struct *date);
-void _DMYJulianDay(double julian, unsigned short calendar, dmy_struct *dmy);
-void _DMYNoLeapDay(double julian, dmy_struct *dmy);
-void _DMYAllLeap(double julian, dmy_struct *dmy);
-void _DMY360Day(double julian, dmy_struct *dmy);
-bool _leap_year(unsigned short year, unsigned short calendar);
-
 /******************************************************************************
  * @brief   Get fractional day of month from dmy structure.
  * @return  Fractional Day.
  *****************************************************************************/
 double
-_FractionalDayFromDate(dmy_struct *date)
+fractional_day_from_dmy(dmy_struct *dmy)
 {
     double day;
 
-    day = (double)date->day + (double)date->dayseconds / (double)SEC_PER_DAY;
+    day = (double) dmy->day + (double) dmy->dayseconds / (double) (SEC_PER_DAY);
 
     return day;
 }
@@ -77,18 +66,18 @@ _FractionalDayFromDate(dmy_struct *date)
  *          based on redate.py by David Finlayson.
  *****************************************************************************/
 double
-_JulianDayFromDate(dmy_struct    *date,
+julian_day_from_dmy(dmy_struct   *dmy,
                    unsigned short calendar)
 {
     double jd, day;
     int    year, month;
     int    A, B;
 
-    year = date->year;
-    month = date->month;
+    year = dmy->year;
+    month = dmy->month;
 
     // Convert time to fractions of a day
-    day = _FractionalDayFromDate(date);
+    day = fractional_day_from_dmy(dmy);
 
     // Start Meeus algorithm (variables are in his notation)
     if (month < 3) {
@@ -143,16 +132,16 @@ _JulianDayFromDate(dmy_struct    *date,
  * @return  Fractional Julian Day.
  *****************************************************************************/
 double
-_NoLeapDayFromDate(dmy_struct *date)
+no_leap_day_from_dmy(dmy_struct *dmy)
 {
     double         jd, day;
     unsigned short year, month;
 
-    year = date->year;
-    month = date->month;
+    year = dmy->year;
+    month = dmy->month;
 
     // Convert time to fractions of a day
-    day = _FractionalDayFromDate(date);
+    day = fractional_day_from_dmy(dmy);
 
     // Start Meeus algorithm (variables are in his notation)
     if (month < 3) {
@@ -160,8 +149,8 @@ _NoLeapDayFromDate(dmy_struct *date)
         year -= 1;
     }
 
-    jd = (double)(unsigned short)(DAYS_PER_YEAR * (year + 4716)) +
-         (double)(unsigned short)(30.6001 * (month + 1)) +
+    jd = (double)((unsigned short)(DAYS_PER_YEAR * (year + 4716))) +
+         (double)((unsigned short)(30.6001 * (month + 1))) +
          day - 1524.5;
 
     return jd;
@@ -173,16 +162,16 @@ _NoLeapDayFromDate(dmy_struct *date)
  * @return  Fractional Julian Day.
  *****************************************************************************/
 double
-_AllLeapFromDate(dmy_struct *date)
+all_leap_from_dmy(dmy_struct *dmy)
 {
     double         jd, day;
     unsigned short year, month;
 
-    year = date->year;
-    month = date->month;
+    year = dmy->year;
+    month = dmy->month;
 
     // Convert time to fractions of a day
-    day = _FractionalDayFromDate(date);
+    day = fractional_day_from_dmy(dmy);
 
     // Start Meeus algorithm (variables are in his notation)
     if (month < 3) {
@@ -203,19 +192,19 @@ _AllLeapFromDate(dmy_struct *date)
  * @return  Fractional Julian Day.
  *****************************************************************************/
 double
-_360DayFromDate(dmy_struct *date)
+all_30_day_from_dmy(dmy_struct *dmy)
 {
     double         jd, day;
     unsigned short year, month;
 
-    year = date->year;
-    month = date->month;
+    year = dmy->year;
+    month = dmy->month;
 
     // Convert time to fractions of a day
-    day = _FractionalDayFromDate(date);
+    day = fractional_day_from_dmy(dmy);
 
-    jd = (double)(unsigned short)(360. * (year + 4716)) +
-         (double)(unsigned short)(30. * (month - 1)) +
+    jd = (double)((unsigned short)(360. * (year + 4716))) +
+         (double)((unsigned short)(30. * (month - 1))) +
          day;
 
     return jd;
@@ -241,9 +230,9 @@ _360DayFromDate(dmy_struct *date)
  *          based on redate.py by David Finlayson.
  *****************************************************************************/
 void
-_DMYJulianDay(double         julian,
-              unsigned short calendar,
-              dmy_struct    *dmy)
+dmy_julian_day(double         julian,
+               unsigned short calendar,
+               dmy_struct    *dmy)
 {
     double day, F, eps;
     double hour, minute, second;
@@ -251,7 +240,7 @@ _DMYJulianDay(double         julian,
     int    A, B, C, D, E;
     int    nday, dayofyr;
     int    year, month;
-    bool   leap;
+    bool   is_leap;
 
     if (julian < 0) {
         log_err("Julian Day must be positive");
@@ -311,26 +300,9 @@ _DMYJulianDay(double         julian,
     }
 
     // a leap year?
-    leap = _leap_year(year, calendar);
-    // if (year % 4 == 0) {
-    // leap = 1;
-    // }
-    // else {
-    // leap = 0;
-    // }
-    // if ((calendar == CALENDAR_PROLEPTIC_GREGORIAN) &&
-    // (year % 100 == 0) && (year % 400 != 0)) {
-    // leap = 0;
-    // }
-    // else if ((calendar == CALENDAR_STANDARD ||
-    // calendar == CALENDAR_GREGORIAN) &&
-    // (year % 100 == 0) &&
-    // (year % 400 != 0) &&
-    // (julian < 2299160.5)) {
-    // leap = 0;
-    // }
+    is_leap = leap_year(year, calendar);
 
-    if (leap && (month > 2)) {
+    if (is_leap && (month > 2)) {
         dayofyr += 1;
     }
 
@@ -376,8 +348,8 @@ _DMYJulianDay(double         julian,
  * @return  dmy structure.
  *****************************************************************************/
 void
-_DMYNoLeapDay(double      julian,
-              dmy_struct *dmy)
+dmy_no_leap_day(double      julian,
+                dmy_struct *dmy)
 {
     double         F;
     double         day, dfrac;
@@ -440,8 +412,8 @@ _DMYNoLeapDay(double      julian,
  * @note    based on redate.py by David Finlayson.
  *****************************************************************************/
 void
-_DMYAllLeap(double      julian,
-            dmy_struct *dmy)
+dmy_all_leap(double      julian,
+             dmy_struct *dmy)
 {
     double         F, day, days, seconds;
     double         dfrac, I;
@@ -504,8 +476,8 @@ _DMYAllLeap(double      julian,
  * @return  dmy structure.
  *****************************************************************************/
 void
-_DMY360Day(double      julian,
-           dmy_struct *dmy)
+dmy_all_30_day(double      julian,
+               dmy_struct *dmy)
 {
     double         F, Z, dfrac, day, days, seconds;
     unsigned short dayofyr, month;
@@ -545,7 +517,7 @@ _DMY360Day(double      julian,
  *****************************************************************************/
 double
 date2num(double         origin,
-         dmy_struct    *date,
+         dmy_struct    *dmy,
          double         tzoffset,
          unsigned short calendar,
          unsigned short time_units)
@@ -556,24 +528,24 @@ date2num(double         origin,
         calendar == CALENDAR_STANDARD ||
         calendar == CALENDAR_GREGORIAN ||
         calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        jdelta = _JulianDayFromDate(date, calendar) - origin;
+        jdelta = julian_day_from_dmy(dmy, calendar) - origin;
     }
     else if (calendar == CALENDAR_NOLEAP || calendar == CALENDAR_365_DAY) {
-        if ((date->month == 2) && (date->day == 29)) {
+        if ((dmy->month == 2) && (dmy->day == 29)) {
             log_err("there is no leap day in the noleap calendar");
         }
-        jdelta = _NoLeapDayFromDate(date) - origin;
+        jdelta = no_leap_day_from_dmy(dmy) - origin;
     }
     else if ((calendar == CALENDAR_ALL_LEAP) ||
              (calendar == CALENDAR_366_DAY)) {
-        jdelta = _AllLeapFromDate(date) - origin;
+        jdelta = all_leap_from_dmy(dmy) - origin;
     }
     else if (calendar == CALENDAR_360_DAY) {
-        if (date->day > 30) {
+        if (dmy->day > 30) {
             log_err("there are only 30 days in every month with the 360_day "
                     "calendar");
         }
-        jdelta = _360DayFromDate(date) - origin;
+        jdelta = all_30_day_from_dmy(dmy) - origin;
     }
     else {
         log_err("Unknown Calendar Flag: %hu", calendar);
@@ -610,7 +582,7 @@ num2date(double         origin,
          double         tzoffset,
          unsigned short calendar,
          unsigned short time_units,
-         dmy_struct    *date)
+         dmy_struct    *dmy)
 {
     double jd, jdelta;
 
@@ -636,16 +608,16 @@ num2date(double         origin,
         calendar == CALENDAR_STANDARD ||
         calendar == CALENDAR_GREGORIAN ||
         calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        _DMYJulianDay(jd, calendar, date);
+        dmy_julian_day(jd, calendar, dmy);
     }
     else if (calendar == CALENDAR_NOLEAP || calendar == CALENDAR_365_DAY) {
-        _DMYNoLeapDay(jd, date);
+        dmy_no_leap_day(jd, dmy);
     }
     else if (calendar == CALENDAR_ALL_LEAP || calendar == CALENDAR_366_DAY) {
-        _DMYAllLeap(jd, date);
+        dmy_all_leap(jd, dmy);
     }
     else if (calendar == CALENDAR_360_DAY) {
-        _DMY360Day(jd, date);
+        dmy_all_30_day(jd, dmy);
     }
     else {
         log_err("Unknown Calendar Flag: %hu", calendar);
@@ -682,7 +654,7 @@ make_lastday(unsigned short calendar,
         calendar == CALENDAR_STANDARD ||
         calendar == CALENDAR_GREGORIAN ||
         calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        if (_leap_year(year, calendar)) {
+        if (leap_year(year, calendar)) {
             lastday[1] = 29;
         }
     }
@@ -698,8 +670,8 @@ make_lastday(unsigned short calendar,
  * @return  Return pointer to last day of month array
  *****************************************************************************/
 bool
-_leap_year(unsigned short year,
-           unsigned short calendar)
+leap_year(unsigned short year,
+          unsigned short calendar)
 {
     bool leap = false;
 
@@ -740,6 +712,10 @@ initialize_time()
     dmy.dayseconds = 0;
 
     // Set origin using by using date2num with numeric origin of 0.
+    // This calculates the julian day (in units = global_param.time_units)
+    // for 0001-01-01 for the given calendar
+    // This is later used as the reference (origin for advancing numeric dates).
+    // See make_dmy.c for more details on how global_param.time_origin_num is used.
     global_param.time_origin_num = date2num(0., &dmy, 0., global_param.calendar,
                                             global_param.time_units);
     return;
@@ -747,7 +723,7 @@ initialize_time()
 
 /******************************************************************************
  * @brief Validate dmy structure
- * @return 0 if ok, else retun > 0
+ * @return 0 if ok, else return > 0
  *****************************************************************************/
 
 int

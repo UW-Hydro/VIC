@@ -711,7 +711,7 @@ initialize_time()
     dmy.day_in_year = 1;
     dmy.dayseconds = 0;
 
-    // Set origin using by using date2num with numeric origin of 0.
+    // Set origin using date2num with numeric origin of 0.
     // This calculates the julian day (in units = global_param.time_units)
     // for 0001-01-01 for the given calendar
     // This is later used as the reference (origin for advancing numeric dates).
@@ -766,5 +766,27 @@ valid_date(unsigned short calendar,
     }
     else {
         return 0;
+    }
+}
+
+void
+dt_seconds_to_time_units(unsigned short int time_units,
+                         double             dt_seconds,
+                         double            *dt_time_units)
+{
+    if (time_units == TIME_UNITS_SECONDS) {
+        *dt_time_units = dt_seconds;
+    }
+    else if (time_units == TIME_UNITS_MINUTES) {
+        *dt_time_units = dt_seconds / SEC_PER_MIN;
+    }
+    else if (time_units == TIME_UNITS_HOURS) {
+        *dt_time_units = dt_seconds / SEC_PER_HOUR;
+    }
+    else if (time_units == TIME_UNITS_DAYS) {
+        *dt_time_units = dt_seconds / SEC_PER_DAY;
+    }
+    else {
+        log_err("Unknown Time Units Flag: %hu", time_units);
     }
 }

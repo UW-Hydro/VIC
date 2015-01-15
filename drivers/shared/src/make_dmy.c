@@ -40,9 +40,9 @@ make_dmy(global_param_struct *global)
     dmy_struct  start_dmy, end_dmy;
     size_t      i;
     unsigned    offset;
-    double      tempsec, dt_days, start_num, end_num, numdate;
+    double      dt_time_units, start_num, end_num, numdate;
 
-    dt_days = 1. / (double)global->model_steps_per_day;
+    dt_seconds_to_time_units(global->time_units, global->dt, &dt_time_units);
 
     start_dmy.dayseconds = global->startsec;
     start_dmy.year = global->startyear;
@@ -50,7 +50,7 @@ make_dmy(global_param_struct *global)
     start_dmy.month = global->startmonth;
 
     start_num = date2num(global->time_origin_num, &start_dmy, 0.,
-                         global->calendar, TIME_UNITS_DAYS);
+                         global->calendar, global->time_units);
 
     /** Check if user defined end date instead of number of records **/
     if (global->nrecs == 0) {
@@ -67,7 +67,7 @@ make_dmy(global_param_struct *global)
         end_dmy.dayseconds = SEC_PER_DAY - global->dt;
 
         end_num = date2num(global->time_origin_num, &end_dmy, 0.,
-                           global->calendar, TIME_UNITS_DAYS);
+                           global->calendar, global->time_units);
         global->nrecs =
             (unsigned)((end_num - start_num) * global->model_steps_per_day) + 1;
     }
@@ -76,7 +76,7 @@ make_dmy(global_param_struct *global)
         if ((((unsigned)global->dt * (global->nrecs - offset)) % SEC_PER_DAY) !=
             0) {
             log_err("Nrecs must be defined such that the model ends after "
-                    "completing a full day.  Currently Nrecs is set to %i.",
+                    "completing a full day.  Currently Nrecs is set to %zu.",
                     global->nrecs);
         }
     }
@@ -87,9 +87,9 @@ make_dmy(global_param_struct *global)
     /** Create Date Structure for each Modele Time Step **/
     for (i = 0, numdate = start_num;
          i < global->nrecs;
-         i++, numdate += dt_days) {
+         i++, numdate += dt_time_units) {
         num2date(global->time_origin_num, numdate, 0., global->calendar,
-                 TIME_UNITS_DAYS, &temp[i]);
+                 global->time_units, &temp[i]);
     }
 
     return temp;

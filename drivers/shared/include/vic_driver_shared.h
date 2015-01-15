@@ -58,7 +58,7 @@ typedef struct {
                                         DAILY_BINARY format */
     int FORCE_FORMAT[2];            /**< ASCII or BINARY */
     int FORCE_INDEX[2][N_FORCING_TYPES];
-    unsigned N_TYPES[2];
+    size_t N_TYPES[2];
 } param_set_struct;
 
 double all_30_day_from_dmy(dmy_struct *dmy);
@@ -75,6 +75,8 @@ void dmy_all_30_day(double julian, dmy_struct *dmy);
 void dmy_all_leap(double julian, dmy_struct *dmy);
 void dmy_julian_day(double julian, unsigned short calendar, dmy_struct *dmy);
 void dmy_no_leap_day(double julian, dmy_struct *dmy);
+void dt_seconds_to_time_units(unsigned short int time_units, double dt_seconds,
+                              double *dt_time_units);
 char*get_current_datetime(void);
 void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);

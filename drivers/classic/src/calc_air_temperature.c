@@ -94,9 +94,9 @@ hermint(double  xbar,
 void
 SubDailyT(size_t  stepsperday,
           size_t  ndays,
-          int    *TmaxSec,
+          double *TmaxSec,
           double *Tmax,
-          int    *TminSec,
+          double *TminSec,
           double *Tmin,
           double *Tair)
 {
@@ -108,7 +108,7 @@ SubDailyT(size_t  stepsperday,
     double  sec;
     double  Dt;
     size_t  i;
-    int     j;
+    size_t  j;
     size_t  n;
     size_t  nsteps;
 
@@ -181,14 +181,14 @@ void
 set_max_min_sec(double *subdailyrad,
                 size_t  ndays,
                 size_t  stepsperday,
-                int    *tmaxsec,
-                int    *tminsec)
+                double *tmaxsec,
+                double *tminsec)
 {
     double stepsize;
     size_t step;
-    int    risesec;
-    int    setsec;
-    int    sec;
+    double risesec;
+    double setsec;
+    double sec;
     size_t i;
 
     stepsize = (double) (SEC_PER_DAY) / (double) stepsperday;
@@ -199,7 +199,7 @@ set_max_min_sec(double *subdailyrad,
         for (step = 0, sec = 0;
              sec < 12 * SEC_PER_HOUR;
              step++, sec += stepsize) {
-            if (subdailyrad[i * SEC_PER_DAY + step] > 0 &&
+            if (subdailyrad[i * stepsperday + step] > 0 &&
                 (i * stepsperday + step == 0 ||
                  subdailyrad[i * stepsperday + step - 1] <= 0)) {
                 risesec = sec;

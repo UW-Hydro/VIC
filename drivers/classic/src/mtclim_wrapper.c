@@ -48,7 +48,7 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation,
                  control_struct *ctrl, parameter_struct *p,
                  data_struct *mtclim_data);
 
-void mtclim_to_vic(double sec_offset, dmy_struct *dmy, double **tiny_radfract,
+void mtclim_to_vic(double sec_offset_solar, dmy_struct *dmy, double **tiny_radfract,
                    control_struct *ctrl, data_struct *mtclim_data, double *tskc,
                    double *vp, double *subdailyrad, double *fdir);
 
@@ -58,7 +58,7 @@ void mtclim_to_vic(double sec_offset, dmy_struct *dmy, double **tiny_radfract,
 void
 mtclim_wrapper(int         have_dewpt,
                int         have_shortwave,
-               double      sec_offset,
+               double      sec_offset_solar,
                double      elevation,
                double      slope,
                double      aspect,
@@ -123,7 +123,7 @@ mtclim_wrapper(int         have_dewpt,
     }
 
     /* translate the mtclim structures back to the VIC data structures */
-    mtclim_to_vic(sec_offset, dmy, tiny_radfract, &ctrl, &mtclim_data, tskc,
+    mtclim_to_vic(sec_offset_solar, dmy, tiny_radfract, &ctrl, &mtclim_data, tskc,
                   vp, subdailyrad, fdir);
 
     /* clean up */
@@ -168,10 +168,7 @@ mtclim_init(int               have_dewpt,
     size_t                     tinystepspday;
     size_t                     atmos_steps_per_day;
 
-    atmos_steps_per_day = global_param.model_steps_per_day;
-    if (atmos_steps_per_day < (HOURS_PER_DAY)) {
-        atmos_steps_per_day = (HOURS_PER_DAY);
-    }
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
 
     /* initialize the control structure */
 
@@ -252,7 +249,7 @@ mtclim_init(int               have_dewpt,
  * @brief    Store MTCLIM variables in VIC arrays.
  *****************************************************************************/
 void
-mtclim_to_vic(double          sec_offset,
+mtclim_to_vic(double          sec_offset_solar,
               dmy_struct     *dmy,
               double        **tiny_radfract,
               control_struct *ctrl,
@@ -272,15 +269,12 @@ mtclim_to_vic(double          sec_offset,
     double                     tmp_rad;
     size_t                     atmos_steps_per_day;
 
-    atmos_steps_per_day = global_param.model_steps_per_day;
-    if (atmos_steps_per_day < (HOURS_PER_DAY)) {
-        atmos_steps_per_day = (HOURS_PER_DAY);
-    }
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
 
     tinystepspstep =
         (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
 
-    tiny_offset = (int)((double)tinystepspstep * sec_offset);
+    tiny_offset = (int)((double)tinystepspstep * sec_offset_solar);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
             tmp_rad = mtclim_data->s_srad[i] * atmos_steps_per_day;

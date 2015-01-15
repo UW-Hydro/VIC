@@ -733,10 +733,13 @@ typedef struct {
     double dt;                     /**< Time step in seconds */
     double snow_dt;                /**< Snow model time step in seconds */
     double runoff_dt;              /**< Runoff time step in seconds */
+    double atmos_dt;               /**< Atmos time step in seconds */
     double out_dt;                 /**< Output time step in seconds */
     size_t model_steps_per_day;    /**< Number of model timesteps per day */
     size_t snow_steps_per_day;     /**< Number of snow timesteps per day */
     size_t runoff_steps_per_day;   /**< Number of runoff timesteps per day */
+    size_t atmos_steps_per_day;    /**< Number of atmos timesteps per day */
+    size_t output_steps_per_day;   /**< Number of output timesteps per day */
     unsigned short endday;         /**< Last day of model simulation */
     unsigned short endmonth;       /**< Last month of model simulation */
     unsigned short endyear;        /**< Last year of model simulation */

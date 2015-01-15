@@ -87,6 +87,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("RUNOFF_STEPS_PER_DAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &global_param.runoff_steps_per_day);
             }
+            else if (strcasecmp("ATMOS_STEPS_PER_DAY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &global_param.atmos_steps_per_day);
+            }
             else if (strcasecmp("STARTYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.startyear);
             }
@@ -590,13 +593,10 @@ get_global_param(FILE *gp)
                 }
             }
             else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %u", &param_set.N_TYPES[file_num]);
+                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
             }
             else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
                 get_force_type(cmdstr, file_num, &field);
-            }
-            else if (strcasecmp("FORCE_DT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf ", &param_set.FORCE_DT[file_num]);
             }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu",
@@ -830,8 +830,8 @@ get_global_param(FILE *gp)
             else if (strcasecmp("RESULT_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.result_dir);
             }
-            else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global_param.out_dt);
+            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &global_param.output_steps_per_day);
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
@@ -917,11 +917,19 @@ get_global_param(FILE *gp)
                Fail when depreciated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                log_err("TIME_STEP has been replaced with SNOW_STEPS_PER_DAY, "
+                log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
             else if (strcasecmp("SNOW_STEP", optstr) == 0) {
-                log_err("SNOW_STEP has been replaced with MODEL_STEPS_PER_DAY, "
+                log_err("SNOW_STEP has been replaced with SNOW_STEPS_PER_DAY, "
+                        "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("OUT_DT", optstr) == 0) {
+                log_err("OUT_DT has been replaced with OUTPUT_STEPS_PER_DAY, "
+                        "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("FORCE_DT", optstr) == 0) {
+                log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
             /***********************************
@@ -1021,7 +1029,7 @@ get_global_param(FILE *gp)
 
     // Validate runoff time step
     if (global_param.runoff_steps_per_day == 0) {
-        log_err("Snow model time steps per day has not been defined.  Make "
+        log_err("Runoff time steps per day has not been defined.  Make "
                 "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
     }
     else if (global_param.runoff_steps_per_day <
@@ -1041,7 +1049,7 @@ get_global_param(FILE *gp)
     }
     else if (global_param.runoff_steps_per_day >
              MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of snow steps per day (%zu) > the "
+        log_err("The specified number of runoff steps per day (%zu) > the "
                 "the maximum number of subdaily steps per day (%d).  Make "
                 "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
                 "most (%d).", global_param.runoff_steps_per_day,
@@ -1050,7 +1058,7 @@ get_global_param(FILE *gp)
     }
     else if (global_param.runoff_steps_per_day %
              global_param.model_steps_per_day != 0) {
-        log_err("The specified number of snow model timesteps (%zu) must be "
+        log_err("The specified number of runoff timesteps (%zu) must be "
                 "evenly divisible by the number of model timesteps per day "
                 "(%zu)", global_param.runoff_steps_per_day,
                 global_param.model_steps_per_day);
@@ -1060,15 +1068,88 @@ get_global_param(FILE *gp)
                                  (double)global_param.runoff_steps_per_day;
     }
 
-    // Validate the output step
-    if (global_param.out_dt == 0) {
-        global_param.out_dt = global_param.dt;
+    // Validate atmos time step
+    if (global_param.atmos_steps_per_day == 0) {
+        // For classic driver default to hourly atmos timestep
+        global_param.atmos_steps_per_day = HOURS_PER_DAY;
     }
-    else if ((global_param.out_dt < global_param.dt) ||
-             (global_param.out_dt > SEC_PER_DAY)) {
-        log_err("Invalid output step specified. Output step must be an "
-                "multiple of the model time step; >= model time step "
-                "and <= 24");
+    if (global_param.atmos_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of atmos steps per day (%zu) < "
+                "the minimum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines ATMOS_STEPS_PER_DAY of at "
+                "least (%d).", global_param.atmos_steps_per_day,
+                MIN_SUBDAILY_STEPS_PER_DAY,
+                MIN_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (global_param.atmos_steps_per_day > HOURS_PER_DAY &&
+             global_param.atmos_steps_per_day % HOURS_PER_DAY != 0) {
+        log_err("The specified number of atmos steps per day (%zu) is > "
+                "24 and is not evenly divided by 24.",
+                global_param.atmos_steps_per_day);
+    }
+    else if (global_param.atmos_steps_per_day > MAX_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of atmos timesteps per day (%zu) > the "
+                "the maximum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines ATMOS_STEPS_PER_DAY of at "
+                "most (%d).", global_param.atmos_steps_per_day,
+                MAX_SUBDAILY_STEPS_PER_DAY,
+                MAX_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (global_param.atmos_steps_per_day %
+             global_param.model_steps_per_day != 0) {
+        log_err("The specified number of atmos timesteps (%zu) must be "
+                "evenly divisible by the number of model timesteps per day "
+                "(%zu)", global_param.atmos_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else if (global_param.atmos_steps_per_day %
+             global_param.snow_steps_per_day != 0) {
+        log_err("The specified number of atmos timesteps (%zu) must be evenly "
+                "divisible by the number of snow model timesteps per day (%zu)",
+                global_param.atmos_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else {
+        global_param.atmos_dt = SEC_PER_DAY /
+                                 (double) global_param.atmos_steps_per_day;
+    }
+
+    // Validate the output step
+    if (global_param.output_steps_per_day == 0) {
+        global_param.output_steps_per_day = global_param.model_steps_per_day;
+    }
+    if (global_param.output_steps_per_day >
+        global_param.model_steps_per_day) {
+        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
+                "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
+                global_param.output_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else if (global_param.model_steps_per_day %
+             global_param.output_steps_per_day != 0) {
+        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
+                "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
+                "OUTPUT_STEPS_PER_DAY.",
+                global_param.output_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else if (global_param.output_steps_per_day != 1 &&
+             global_param.output_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of output steps per day (%zu) > 1 and < "
+                "the minimum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines OUTPUT_STEPS_PER_DAY of at "
+                "least (%d).", global_param.model_steps_per_day,
+                MIN_SUBDAILY_STEPS_PER_DAY,
+                MIN_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (global_param.output_steps_per_day >
+             MAX_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of model steps per day (%zu) > the "
+                "the maximum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines MODEL_STEPS_PER_DAY of at "
+                "most (%d).", global_param.model_steps_per_day,
+                MAX_SUBDAILY_STEPS_PER_DAY,
+                MAX_SUBDAILY_STEPS_PER_DAY);
     }
 
     // set NR and NF
@@ -1098,7 +1179,7 @@ get_global_param(FILE *gp)
         log_err("Simulation start day has not been defined.  Make sure that "
                 "the global file defines STARTDAY.");
     }
-    if (global_param.dt == SEC_PER_DAY) {
+    if (global_param.model_steps_per_day == 1) {
         global_param.startsec = 0;
     }
     else if (global_param.startsec > SEC_PER_DAY) {
@@ -1451,7 +1532,7 @@ get_global_param(FILE *gp)
         }
 
         /*********************************
-           Output major options to stderr
+           Output major options
         *********************************/
         display_current_settings(DISP_VERSION);
     } // !OUTPUT_FORCE

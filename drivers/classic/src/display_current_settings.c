@@ -85,8 +85,10 @@ display_current_settings(int mode)
         fprintf(LOG_DEST, "EQUAL_AREA\t\tFALSE\n");
     }
     fprintf(LOG_DEST, "RESOLUTION\t\t%f\n", global_param.resolution);
-    fprintf(LOG_DEST, "TIME_STEP\t\t%f\n", global_param.dt);
-    fprintf(LOG_DEST, "SNOW_STEP\t\t%f\n", global_param.snow_dt);
+    fprintf(LOG_DEST, "MODEL_DT\t\t%f\n", global_param.dt);
+    fprintf(LOG_DEST, "SNOW_DT\t\t%f\n", global_param.snow_dt);
+    fprintf(LOG_DEST, "RUNOFF_DT\t\t%f\n", global_param.runoff_dt);
+    fprintf(LOG_DEST, "ATMOS_DT\t\t%f\n", global_param.atmos_dt);
     fprintf(LOG_DEST, "STARTYEAR\t\t%d\n", global_param.startyear);
     fprintf(LOG_DEST, "STARTMONTH\t\t%d\n", global_param.startmonth);
     fprintf(LOG_DEST, "STARTDAY\t\t%d\n", global_param.startday);
@@ -302,7 +304,7 @@ display_current_settings(int mode)
                     global_param.forceday[file_num]);
             fprintf(LOG_DEST, "FORCESEC\t\t%u\n",
                     global_param.forcesec[file_num]);
-            fprintf(LOG_DEST, "N_TYPES\t\t\t%d\n", param_set.N_TYPES[file_num]);
+            fprintf(LOG_DEST, "N_TYPES\t\t\t%zu\n", param_set.N_TYPES[file_num]);
             fprintf(LOG_DEST, "FORCE_DT\t\t%f\n", param_set.FORCE_DT[file_num]);
             if (param_set.FORCE_ENDIAN[file_num] == LITTLE) {
                 fprintf(LOG_DEST, "FORCE_ENDIAN\t\tLITTLE\n");

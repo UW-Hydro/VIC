@@ -43,9 +43,12 @@ initialize_global()
     global_param.dt = MISSING;
     global_param.snow_dt = MISSING;
     global_param.runoff_dt = MISSING;
+    global_param.atmos_dt = MISSING;
     global_param.model_steps_per_day = 0;
     global_param.snow_steps_per_day = 0;
     global_param.runoff_steps_per_day = 0;
+    global_param.atmos_steps_per_day = 0;
+    global_param.output_steps_per_day = 0;
     global_param.nrecs = 0;
     global_param.startyear = 0;
     global_param.startmonth = 0;

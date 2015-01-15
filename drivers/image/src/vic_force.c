@@ -177,7 +177,7 @@ vic_force(void)
             // temperature in CONST_TKFRZ
             atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
-            atmos[i].prec[j] *= (double) (options.SNOW_STEP * SEC_PER_HOUR);
+            atmos[i].prec[j] *= global_param.snow_dt;
             // pressure in kPa
             atmos[i].pressure[j] /= PA_PER_KPA;
             // vapor pressure in kPa (we read specific humidity in kg/kg)

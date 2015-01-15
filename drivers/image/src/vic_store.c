@@ -949,9 +949,9 @@ initialize_state_file(nc_file_struct *nc)
     int                     status;
     int                     old_fill_mode;
 
-    sprintf(nc->fname, "%s.%04d%02d%02d_%02d.nc",
+    sprintf(nc->fname, "%s.%04d%02d%02d_%05u.nc",
             filenames.statefile, dmy[current].year, dmy[current].month,
-            dmy[current].day, dmy[current].hour);
+            dmy[current].day, dmy[current].dayseconds);
 
     nc->c_fillvalue = NC_FILL_CHAR;
     nc->i_fillvalue = NC_FILL_INT;

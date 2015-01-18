@@ -143,7 +143,7 @@ print_license()
             "  under certain conditions; see LICENSE.txt for details.\n\n");
 
     fprintf(stdout,
-            "  Report Bugs and Issues to :  https://github.com/UW-Hydro/VIC/issues\n");
+            "  Report Bugs and Issues to : https://github.com/UW-Hydro/VIC/issues\n");
     fprintf(stdout,
             "  VIC Users Email Listserve : vic_users@u.washington.edu \n\n");
 }

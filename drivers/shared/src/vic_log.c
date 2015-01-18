@@ -29,80 +29,82 @@
  *****************************************************************************/
 
 #include <time.h>
-
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_shared.h>
 
 /******************************************************************************
+ * @brief    Finalize logging - called after all logging is completed
+ *****************************************************************************/
+void
+finalize_logging(void)
+{
+    extern FILE *LOG_DEST;
+
+    if (!(LOG_DEST == stdout || LOG_DEST == stderr)) {
+        fclose(LOG_DEST);
+        LOG_DEST = stderr;
+    }
+}
+
+/******************************************************************************
  * @brief    Get string of current date and time.  Format YYMMDD-SSSSS.
  *****************************************************************************/
-char*
-get_current_datetime()
+void
+get_current_datetime(char *cdt)
 {
-    const int size = 20;
-    char     *cdt = (char*)malloc(sizeof(char) * size);
     char      ymd[8];
+    struct tm timeinfo;
     unsigned  seconds_since_midnight;
+    time_t    curr_date_time;
 
-    if (cdt == NULL) {
-        return NULL;
+    curr_date_time = time(NULL);
+    if (curr_date_time == -1) {
+        return;
     }
 
-    memset(cdt, 0, size);
+    localtime_r(&curr_date_time, &timeinfo);
 
-    time_t currDateTime;
-    currDateTime = time(NULL);
+    seconds_since_midnight = (unsigned) curr_date_time % CONST_CDAY;
 
-    if (currDateTime == -1) {
-        return NULL;
-    }
-
-    struct tm *timeinfo = localtime(&currDateTime);
-
-    seconds_since_midnight = (unsigned)currDateTime % 86400;
-
-    if (strftime(ymd, 7, "%y%m%d", timeinfo) == 0) {
-        return NULL;
+    if (strftime(ymd, 7, "%y%m%d", &timeinfo) == 0) {
+        return;
     }
 
     sprintf(cdt, "%s-%05d", ymd, seconds_since_midnight);
-
-    return cdt;
 }
 
 /******************************************************************************
  * @brief    Make logfile name string.
  *****************************************************************************/
-char*
-get_logname(const char *path)
+void
+get_logname(const char *path,
+            int         id,
+            char       *filename)
 {
-    char *timestamp = get_current_datetime();
-    char *prefix = "vic.log.";
+    char  timestamp[MAXSTRING];
     char *ext = ".txt";
-    int   size = (strlen(path) + strlen(prefix) + strlen(ext) +
-                  strlen(timestamp) + 1);
-    char *filename = (char*)malloc(sizeof(char) * size);
+    char *prefix = "vic.log.";
 
-    if (filename == NULL) {
-        return NULL;
+    memset(timestamp, 0, MAXSTRING);
+    get_current_datetime(timestamp);
+
+    memset(filename, 0, MAXSTRING);
+    if (id != MISSING) {
+        snprintf(filename, MAXSTRING - 1, "%s%s%s.%06d%s", path, prefix,
+                 timestamp, id, ext);
     }
-
-    memset(filename, 0, size);
-    strcpy(filename, path);
-    strcpy(filename + strlen(path), prefix);
-    strcpy(filename + strlen(path) + strlen(prefix), timestamp);
-    strcpy(filename + strlen(path) + strlen(prefix) + strlen(timestamp),
-           ext);
-
-    return filename;
+    else {
+        snprintf(filename, MAXSTRING - 1, "%s%s%s%s", path, prefix,
+                 timestamp, ext);
+    }
 }
 
 /******************************************************************************
  * @brief    Set global log destination
  *****************************************************************************/
 void
-initialize_log()
+initialize_log(void)
 {
     extern FILE *LOG_DEST;
 
@@ -113,17 +115,16 @@ initialize_log()
  * @brief    Set global log destination
  *****************************************************************************/
 void
-setup_logging()
+setup_logging(int id)
 {
     extern filenames_struct filenames;
     extern filep_struct     filep;
     extern FILE            *LOG_DEST;
-
-    char                   *logfilename;
+    char                    logfilename[MAXSTRING];
 
     if (strcmp(filenames.log_path, "MISSING") != 0) {
         // Create logfile name
-        logfilename = get_logname(filenames.log_path);
+        get_logname(filenames.log_path, id, logfilename);
 
         // Open Logfile
         filep.logfile = open_file(logfilename, "w");

@@ -209,7 +209,7 @@ full:
 	make model
 
 clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${VICPATH}/src/*~ vic_classic
+	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*~ ${VICPATH}/src/*~ vic_classic
 
 model: $(OBJS)
 	$(CC) -o vic_classic$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)

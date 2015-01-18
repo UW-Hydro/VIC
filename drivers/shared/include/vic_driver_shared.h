@@ -69,6 +69,7 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
+char*get_current_datetime(void);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short calendar, unsigned short time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
@@ -77,14 +78,12 @@ void dmy_julian_day(double julian, unsigned short calendar, dmy_struct *dmy);
 void dmy_no_leap_day(double julian, dmy_struct *dmy);
 void dt_seconds_to_time_units(unsigned short int time_units, double dt_seconds,
                               double *dt_time_units);
-char*get_current_datetime(void);
 void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
-char*get_logname(const char *pathtofile);
 void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
                         unsigned short *, unsigned short *, unsigned short);
 void get_parameters(FILE *paramfile);
@@ -92,7 +91,6 @@ void initialize_forcing_files(void);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
-void initialize_log(void);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
@@ -143,7 +141,6 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
-void setup_logging(void);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short calendar, dmy_struct *dmy);
 #endif

@@ -63,6 +63,9 @@ int
 main(int    argc,
      char **argv)
 {
+    // Initialize Log Destination
+    initialize_log();
+
     // process command line arguments
     cmd_proc(argc, argv, filenames.global);
 

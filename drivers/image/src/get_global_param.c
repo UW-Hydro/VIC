@@ -497,14 +497,12 @@ get_global_param(FILE *gp)
                     options.RC_MODE = RC_JARVIS;
                 }
             }
-
             /*************************************
                Define log directory
             *************************************/
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
-
             /*************************************
                Define state files
             *************************************/
@@ -540,7 +538,6 @@ get_global_param(FILE *gp)
                     options.BINARY_STATE_FILE = true;
                 }
             }
-
             /*************************************
                Define forcing files
             *************************************/
@@ -614,7 +611,6 @@ get_global_param(FILE *gp)
                     options.ALMA_INPUT = true;
                 }
             }
-
             /*************************************
                Define parameter files
             *************************************/
@@ -763,7 +759,6 @@ get_global_param(FILE *gp)
                     options.LAKE_PROFILE = true;
                 }
             }
-
             /*************************************
                Define output files
             *************************************/
@@ -830,7 +825,6 @@ get_global_param(FILE *gp)
                     options.PRT_SNOW_BAND = false;
                 }
             }
-
             /*************************************
                Define output file contents
             *************************************/
@@ -1024,7 +1018,7 @@ get_global_param(FILE *gp)
         global_param.atmos_steps_per_day = global_param.model_steps_per_day;
     }
     global_param.atmos_dt = SEC_PER_DAY /
-                                 (double) global_param.atmos_steps_per_day;
+                            (double) global_param.atmos_steps_per_day;
 
     // Validate the output step
     if (global_param.output_steps_per_day == 0) {
@@ -1094,9 +1088,10 @@ get_global_param(FILE *gp)
         global_param.startsec = 0;
     }
     else if (global_param.startsec > SEC_PER_DAY) {
-        log_err("The specified simulation start hour (%hu) > 86400  Make sure "
+        log_err("The specified simulation start second (%hu) > 86400  Make sure "
                 "that the global file defines a positive integer "
-                "for STARTSEC.", global_param.startsec);
+                "for STARTSEC.",
+                global_param.startsec);
     }
 
     // Validate simulation end date and/or number of timesteps

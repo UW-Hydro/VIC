@@ -373,7 +373,7 @@ initialize_model_state(all_vars_struct *all_vars,
                                     "Either set IMPLICIT to TRUE in your "
                                     "global parameter file (this is the "
                                     "recommended action), or decrease time "
-                                    "step length to <= %f hours, or decrease "
+                                    "step length to <= %f seconds, or decrease "
                                     "the number of soil thermal nodes.",
                                     global_param.dt,
                                     soil_con->dz_node[1],

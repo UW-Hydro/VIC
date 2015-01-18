@@ -72,7 +72,9 @@ make_dmy(global_param_struct *global)
             (unsigned)((end_num - start_num) * global->model_steps_per_day) + 1;
     }
     else {
-        offset = (unsigned int) ((double) (SEC_PER_DAY - start_dmy.dayseconds) / global->dt);
+        offset =
+            (unsigned int) ((double) (SEC_PER_DAY -
+                                      start_dmy.dayseconds) / global->dt);
         if ((((unsigned)global->dt * (global->nrecs - offset)) % SEC_PER_DAY) !=
             0) {
             log_err("Nrecs must be defined such that the model ends after "

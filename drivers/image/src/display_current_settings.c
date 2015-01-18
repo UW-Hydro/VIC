@@ -304,7 +304,8 @@ display_current_settings(int mode)
                     global_param.forceday[file_num]);
             fprintf(LOG_DEST, "FORCESEC\t\t%d\n",
                     global_param.forcesec[file_num]);
-            fprintf(LOG_DEST, "N_TYPES\t\t\t%zu\n", param_set.N_TYPES[file_num]);
+            fprintf(LOG_DEST, "N_TYPES\t\t\t%zu\n",
+                    param_set.N_TYPES[file_num]);
             fprintf(LOG_DEST, "FORCE_DT\t\t%f\n", param_set.FORCE_DT[file_num]);
             if (param_set.FORCE_ENDIAN[file_num] == LITTLE) {
                 fprintf(LOG_DEST, "FORCE_ENDIAN\t\tLITTLE\n");

@@ -48,9 +48,10 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation,
                  control_struct *ctrl, parameter_struct *p,
                  data_struct *mtclim_data);
 
-void mtclim_to_vic(double sec_offset_solar, dmy_struct *dmy, double **tiny_radfract,
-                   control_struct *ctrl, data_struct *mtclim_data, double *tskc,
-                   double *vp, double *subdailyrad, double *fdir);
+void mtclim_to_vic(double sec_offset_solar, dmy_struct *dmy,
+                   double **tiny_radfract, control_struct *ctrl,
+                   data_struct *mtclim_data, double *tskc, double *vp,
+                   double *subdailyrad, double *fdir);
 
 /******************************************************************************
  * @brief    interface between VIC and MTCLIM.
@@ -123,7 +124,8 @@ mtclim_wrapper(int         have_dewpt,
     }
 
     /* translate the mtclim structures back to the VIC data structures */
-    mtclim_to_vic(sec_offset_solar, dmy, tiny_radfract, &ctrl, &mtclim_data, tskc,
+    mtclim_to_vic(sec_offset_solar, dmy, tiny_radfract, &ctrl, &mtclim_data,
+                  tskc,
                   vp, subdailyrad, fdir);
 
     /* clean up */

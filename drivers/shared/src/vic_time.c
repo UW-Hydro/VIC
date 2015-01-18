@@ -66,8 +66,8 @@ fractional_day_from_dmy(dmy_struct *dmy)
  *          based on redate.py by David Finlayson.
  *****************************************************************************/
 double
-julian_day_from_dmy(dmy_struct   *dmy,
-                   unsigned short calendar)
+julian_day_from_dmy(dmy_struct    *dmy,
+                    unsigned short calendar)
 {
     double jd, day;
     int    year, month;

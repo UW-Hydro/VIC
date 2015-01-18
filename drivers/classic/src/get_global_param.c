@@ -932,6 +932,7 @@ get_global_param(FILE *gp)
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/
@@ -1111,7 +1112,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.atmos_dt = SEC_PER_DAY /
-                                 (double) global_param.atmos_steps_per_day;
+                                (double) global_param.atmos_steps_per_day;
     }
 
     // Validate the output step

@@ -200,7 +200,6 @@ read_atmos_data(FILE               *infile,
             rec++;
         }
     }
-
     /**************************
        Read ASCII Forcing Data
     **************************/
@@ -251,6 +250,7 @@ read_atmos_data(FILE               *infile,
                 "(%zu * %lf = %lf).  Check forcing file time step, and global "
                 "file", file_num + 1, rec, param_set.FORCE_DT[file_num],
                 rec * param_set.FORCE_DT[file_num], global_param.nrecs,
-                global_param.dt, global_param.nrecs * global_param.dt);
+                global_param.dt,
+                global_param.nrecs * global_param.dt);
     }
 }

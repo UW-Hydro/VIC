@@ -301,7 +301,7 @@ print_global_param(global_param_struct *gp)
         fprintf(LOG_DEST, "\tforceskip[%zd]      : %u\n", i, gp->forceskip[i]);
         fprintf(LOG_DEST, "\tforceyear[%zd]      : %hu\n", i, gp->forceyear[i]);
     }
-    fprintf(LOG_DEST, "\tnrecs               : %u\n", gp->nrecs);
+    fprintf(LOG_DEST, "\tnrecs               : %zu\n", gp->nrecs);
     fprintf(LOG_DEST, "\tskipyear            : %hu\n", gp->skipyear);
     fprintf(LOG_DEST, "\tstartday            : %hu\n", gp->startday);
     fprintf(LOG_DEST, "\tstartsec            : %u\n", gp->startsec);
@@ -589,7 +589,7 @@ print_param_set(param_set_struct *param_set)
         fprintf(LOG_DEST, "\t\t%zd: %d %d\n", i, param_set->FORCE_INDEX[0][i],
                 param_set->FORCE_INDEX[1][i]);
     }
-    fprintf(LOG_DEST, "\tN_TYPES     : %d %d\n", param_set->N_TYPES[0],
+    fprintf(LOG_DEST, "\tN_TYPES     : %zu %zu\n", param_set->N_TYPES[0],
             param_set->N_TYPES[1]);
 }
 

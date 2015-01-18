@@ -49,7 +49,8 @@ void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 double hermint(double, int, double *, double *, double *, double *, double *);
 void hermite(size_t, double *, double *, double *, double *, double *);
-void SubDailyT(size_t, size_t, double *, double *, double *, double *, double *);
+void SubDailyT(size_t, size_t, double *, double *, double *, double *,
+               double *);
 void init_output_list(out_data_struct *, int, char *, int, double);
 void initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
                       veg_lib_struct *, veg_con_struct *, veg_hist_struct **,

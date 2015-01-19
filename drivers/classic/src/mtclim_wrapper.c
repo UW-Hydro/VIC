@@ -269,14 +269,16 @@ mtclim_to_vic(double          sec_offset_solar,
     int                        tinystep;
     int                        tiny_offset;
     double                     tmp_rad;
+    double                     atmos_dt;
     size_t                     atmos_steps_per_day;
 
     atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
 
     tinystepspstep =
         (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
 
-    tiny_offset = (int)((double)tinystepspstep * sec_offset_solar);
+    tiny_offset = (int)((double)tinystepspstep * sec_offset_solar / atmos_dt);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
             tmp_rad = mtclim_data->s_srad[i] * atmos_steps_per_day;
@@ -302,9 +304,7 @@ mtclim_to_vic(double          sec_offset_solar,
             }
             subdailyrad[i * atmos_steps_per_day + j] *= tmp_rad;
         }
-    }
 
-    for (i = 0; i < ctrl->ndays; i++) {
         fdir[i] = mtclim_data->s_fdir[i];
         tskc[i] = mtclim_data->s_tskc[i];
         vp[i] = mtclim_data->s_hum[i];

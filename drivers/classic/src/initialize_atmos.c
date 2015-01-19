@@ -1067,15 +1067,13 @@ initialize_atmos(atmos_data_struct    *atmos,
        (if sub-daily air_temp will be estimated) and/or at which daily vapor
        pressure will occur (if daily vapor pressure is estimated)
     **************************************************************************/
-    set_max_min_sec(subdailyrad, Ndays_local, atmos_steps_per_day, tmaxsec,
-                    tminsec);
+    set_max_min_sec(subdailyrad, Ndays_local, tmaxsec, tminsec);
 
     if (!param_set.TYPE[AIR_TEMP].SUPPLIED) {
         /**********************************************************************
            Calculate the subdaily and daily temperature based on tmax and tmin
         **********************************************************************/
-        SubDailyT(atmos_steps_per_day, Ndays_local, tmaxsec, tmax, tminsec,
-                  tmin, tair);
+        SubDailyT(Ndays_local, tmaxsec, tmax, tminsec, tmin, tair);
         for (rec = 0; rec < global_param.nrecs; rec++) {
             sum = 0;
             for (i = 0; i < NF; i++) {

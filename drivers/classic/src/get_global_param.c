@@ -598,6 +598,10 @@ get_global_param(FILE *gp)
             else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
                 get_force_type(cmdstr, file_num, &field);
             }
+            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu",
+                       &param_set.force_steps_per_day[file_num]);
+            }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu",
                        &global_param.forceyear[file_num]);
@@ -1152,6 +1156,10 @@ get_global_param(FILE *gp)
                 MAX_SUBDAILY_STEPS_PER_DAY,
                 MAX_SUBDAILY_STEPS_PER_DAY);
     }
+    else {
+        global_param.out_dt = SEC_PER_DAY /
+                              (double) global_param.output_steps_per_day;
+    }
 
     // set NR and NF
     NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
@@ -1268,10 +1276,15 @@ get_global_param(FILE *gp)
                         "file %d.",
                         i);
             }
-            if (param_set.FORCE_DT[i] == 0) {
-                log_err("Must define time steps (FORCE_DT <dt>) in control "
-                        "file for focing file %zu.",
-                        file_num);
+            if (param_set.force_steps_per_day[i] == 0) {
+                log_err("Forcing file %d time steps per day has not been "
+                        "defined.  Make sure that the global file defines "
+                        "FORCE_STEPS_PER_DAY.", i);
+            }
+            else {
+                param_set.FORCE_DT[i] = SEC_PER_DAY /
+                                        (double) param_set.force_steps_per_day[i
+                                        ];
             }
         }
     }

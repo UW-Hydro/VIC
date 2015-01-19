@@ -92,28 +92,32 @@ hermint(double  xbar,
  * @brief    calculate subdaily temperature.
  *****************************************************************************/
 void
-SubDailyT(size_t  stepsperday,
-          size_t  ndays,
+SubDailyT(size_t  ndays,
           double *TmaxSec,
           double *Tmax,
           double *TminSec,
           double *Tmin,
           double *Tair)
 {
-    double *x;
-    double *Tyc1;
-    double *yc2;
-    double *yc3;
-    double *yc4;
-    double  sec;
-    double  Dt;
-    size_t  i;
-    size_t  j;
-    size_t  n;
-    size_t  nsteps;
+    extern global_param_struct global_param;
 
-    nsteps = stepsperday * ndays;
-    Dt = (double) (SEC_PER_DAY) / (double) stepsperday;
+    double                     atmos_dt;
+    size_t                     atmos_steps_per_day;
+    double                    *x;
+    double                    *Tyc1;
+    double                    *yc2;
+    double                    *yc3;
+    double                    *yc4;
+    double                     sec;
+    size_t                     i;
+    size_t                     j;
+    size_t                     n;
+    size_t                     nsteps;
+
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
+
+    nsteps = atmos_steps_per_day * ndays;
 
     n = ndays * 2 + 2;
     x = (double *) calloc(n, sizeof(double));
@@ -159,7 +163,7 @@ SubDailyT(size_t  stepsperday,
     hermite(n, x, Tyc1, yc2, yc3, yc4);
 
     /* interpolate the temperatures */
-    for (i = 0, sec = 0; i < nsteps; i++, sec += Dt) {
+    for (i = 0, sec = 0; i < nsteps; i++, sec += atmos_dt) {
         Tair[i] = hermint(sec, n, x, Tyc1, yc2, yc3, yc4);
     }
 
@@ -180,36 +184,39 @@ SubDailyT(size_t  stepsperday,
 void
 set_max_min_sec(double *subdailyrad,
                 size_t  ndays,
-                size_t  stepsperday,
                 double *tmaxsec,
                 double *tminsec)
 {
-    double stepsize;
-    size_t step;
-    double risesec;
-    double setsec;
-    double sec;
-    size_t i;
+    extern global_param_struct global_param;
 
-    stepsize = (double) (SEC_PER_DAY) / (double) stepsperday;
+    double                     atmos_dt;
+    size_t                     atmos_steps_per_day;
+    size_t                     step;
+    double                     risesec;
+    double                     setsec;
+    double                     sec;
+    size_t                     i;
+
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
 
     for (i = 0; i < ndays; i++) {
         risesec = MISSING;
         setsec = MISSING;
         for (step = 0, sec = 0;
              sec < 12 * SEC_PER_HOUR;
-             step++, sec += stepsize) {
-            if (subdailyrad[i * stepsperday + step] > 0 &&
-                (i * stepsperday + step == 0 ||
-                 subdailyrad[i * stepsperday + step - 1] <= 0)) {
+             step++, sec += atmos_dt) {
+            if (subdailyrad[i * atmos_steps_per_day + step] > 0 &&
+                (i * atmos_steps_per_day + step == 0 ||
+                 subdailyrad[i * atmos_steps_per_day + step - 1] <= 0)) {
                 risesec = sec;
             }
         }
-        for (step = step + 1, sec = 12 * SEC_PER_HOUR;
+        for (step = step + 1, sec = 12 * SEC_PER_HOUR + atmos_dt;
              sec < SEC_PER_DAY;
-             step++, sec += stepsize) {
-            if (subdailyrad[i * stepsperday + step] <= 0 &&
-                subdailyrad[i * stepsperday + step - 1] > 0) {
+             step++, sec += atmos_dt) {
+            if (subdailyrad[i * atmos_steps_per_day + step] <= 0 &&
+                subdailyrad[i * atmos_steps_per_day + step - 1] > 0) {
                 setsec = sec;
             }
         }
@@ -218,8 +225,8 @@ set_max_min_sec(double *subdailyrad,
         }
         if (risesec >= 0 && setsec >= 0) {
             tmaxsec[i] = 0.67 * (setsec - risesec) + risesec;
-            if (risesec > stepsize) {
-                tminsec[i] = risesec - stepsize;
+            if (risesec > atmos_dt) {
+                tminsec[i] = risesec - atmos_dt;
             }
             else {
                 tminsec[i] = 0.;

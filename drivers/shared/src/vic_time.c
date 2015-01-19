@@ -88,8 +88,8 @@ julian_day_from_dmy(dmy_struct    *dmy,
     A = year / 100;
 
     jd = DAYS_PER_YEAR * year +
-         (double)(int)(0.25 * (double)year + 2000.) +
-         (double)(int)(30.6001 * (double)(month + 1)) +
+         floor(0.25 * (double) year + 2000.) +
+         floor(30.6001 * (double) (month + 1)) +
          day + 1718994.5;
 
     // optionally adjust the jd for the switch from
@@ -149,9 +149,8 @@ no_leap_day_from_dmy(dmy_struct *dmy)
         year -= 1;
     }
 
-    jd = (double)((unsigned short)(DAYS_PER_YEAR * (year + 4716))) +
-         (double)((unsigned short)(30.6001 * (month + 1))) +
-         day - 1524.5;
+    jd = floor(DAYS_PER_YEAR * (year + 4716)) +
+         floor(30.6001 * (double) (month + 1)) + day - 1524.5;
 
     return jd;
 }
@@ -179,9 +178,8 @@ all_leap_from_dmy(dmy_struct *dmy)
         year -= 1;
     }
 
-    jd = (double)(unsigned short)(DAYS_PER_LYEAR * (year + 4716)) +
-         (double)(unsigned short)(30.6001 * (month + 1)) +
-         day - 1524.5;
+    jd = floor(DAYS_PER_LYEAR * (year + 4716)) +
+         floor(30.6001 * (double) (month + 1)) + day - 1524.5;
 
     return jd;
 }
@@ -203,9 +201,7 @@ all_30_day_from_dmy(dmy_struct *dmy)
     // Convert time to fractions of a day
     day = fractional_day_from_dmy(dmy);
 
-    jd = (double)((unsigned short)(360. * (year + 4716))) +
-         (double)((unsigned short)(30. * (month - 1))) +
-         day;
+    jd = floor(360. * (year + 4716)) + floor(30. * (month - 1)) + day;
 
     return jd;
 }
@@ -235,7 +231,7 @@ dmy_julian_day(double         julian,
                dmy_struct    *dmy)
 {
     double day, F, eps;
-    double hour, minute, second;
+    int    second;
     int    Z, alpha;
     int    A, B, C, D, E;
     int    nday, dayofyr;
@@ -252,8 +248,8 @@ dmy_julian_day(double         julian,
     Z = (int)round(julian + 0.00005);
     F = (double)(julian + 0.5 - Z);
     if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) {
-        alpha = (int)(((Z - 1867216.0) - 0.25) / 36524.25);
-        A = Z + 1 + alpha - (int)(0.25 * alpha);
+        alpha = (int) ((((double) Z - 1867216.0) - 0.25) / 36524.25);
+        A = Z + 1 + alpha - (int) (0.25 * (double) alpha);
         // check if dates before oct 5th 1582 are in the array
         if (julian < 2299160.5) {
             A = Z;
@@ -272,12 +268,13 @@ dmy_julian_day(double         julian,
     }
 
     B = A + 1524;
-    C = (int)(6680. + ((B - 2439870.) - 122.1) / DAYS_PER_JYEAR);
-    D = (int)(DAYS_PER_YEAR * C + (int)(0.25 * C));
-    E = (int)((B - D) / 30.6001);
+    C = (int) (6680. +
+               (((double) B - 2439870.) - 122.1) / (double) DAYS_PER_JYEAR);
+    D = (int) (DAYS_PER_YEAR * C + (int)(0.25 * (double) C));
+    E = (int) (((double) (B - D)) / 30.6001);
 
     // Convert to date
-    day = B - D - (int)(30.6001 * E) + F;
+    day = B - D - (int) (30.6001 * (double) E) + F;
     if (day < 1) {
         day = 1;
     }
@@ -306,29 +303,12 @@ dmy_julian_day(double         julian,
         dayofyr += 1;
     }
 
-    eps = 1e-12 * abs(Z);
+    eps = 1e-12 * (double) abs(Z);
     if (eps < 1e-12) {
         eps = 1e-12;
     }
 
-    hour = F * HOURS_PER_DAY + eps;
-    if (hour < 0) {
-        hour = 0;
-    }
-    if (hour > 23) {
-        hour = 23;
-    }
-    F -= hour / HOURS_PER_DAY;
-
-    minute = F * MIN_PER_DAY + eps;
-    if (minute < 0) {
-        minute = 0;
-    }
-    if (minute > 59) {
-        minute = 59;
-    }
-
-    second = (F - minute / MIN_PER_DAY) * CONST_CDAY;
+    second = (int) round((double) F * (double) (SEC_PER_DAY) + eps);
     if (second < 0) {
         second = 0;
     }
@@ -337,7 +317,7 @@ dmy_julian_day(double         julian,
     dmy->day_in_year = dayofyr;
     dmy->month = month;
     dmy->year = year;
-    dmy->dayseconds = hour * SEC_PER_HOUR + minute * SEC_PER_MIN + second;
+    dmy->dayseconds = second;
 
     return;
 }
@@ -394,7 +374,7 @@ dmy_no_leap_day(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = dfrac * CONST_CDAY;
+    seconds = round(dfrac * (SEC_PER_DAY));
 
     dmy->year = year;
     dmy->month = month;
@@ -459,7 +439,7 @@ dmy_all_leap(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = dfrac * CONST_CDAY;
+    seconds = round(dfrac * (SEC_PER_DAY));
 
     dmy->year = year;
     dmy->month = month;
@@ -495,7 +475,7 @@ dmy_all_30_day(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = dfrac * CONST_CDAY;
+    seconds = round(dfrac * (SEC_PER_DAY));
 
     dmy->year = year;
     dmy->month = month;
@@ -554,10 +534,10 @@ date2num(double         origin,
 
     // convert to desired units, add time zone offset.
     if (time_units == TIME_UNITS_SECONDS) {
-        jdelta = jdelta * CONST_CDAY + tzoffset * SEC_PER_HOUR;
+        jdelta = jdelta * (SEC_PER_DAY) + tzoffset * (SEC_PER_HOUR);
     }
     else if (time_units == TIME_UNITS_MINUTES) {
-        jdelta = jdelta * MIN_PER_DAY + tzoffset * MIN_PER_HOUR;
+        jdelta = jdelta * (MIN_PER_DAY) + tzoffset * MIN_PER_HOUR;
     }
     else if (time_units == TIME_UNITS_HOURS) {
         jdelta = jdelta * HOURS_PER_DAY + tzoffset;
@@ -587,10 +567,10 @@ num2date(double         origin,
     double jd, jdelta;
 
     if (time_units == TIME_UNITS_SECONDS) {
-        jdelta = time_value / CONST_CDAY - tzoffset / HOURS_PER_DAY;
+        jdelta = time_value / (SEC_PER_DAY) -tzoffset / HOURS_PER_DAY;
     }
     else if (time_units == TIME_UNITS_MINUTES) {
-        jdelta = time_value / MIN_PER_DAY - tzoffset / HOURS_PER_DAY;
+        jdelta = time_value / (MIN_PER_DAY) -tzoffset / HOURS_PER_DAY;
     }
     else if (time_units == TIME_UNITS_HOURS) {
         jdelta = time_value / HOURS_PER_DAY - tzoffset / HOURS_PER_DAY;
@@ -743,7 +723,7 @@ valid_date(unsigned short calendar,
         days_in_year += lastday[i];
     }
 
-    if (dmy->dayseconds > SEC_PER_DAY) {
+    if (dmy->dayseconds > (SEC_PER_DAY)) {
         return 1;
     }
     else if (dmy->month > MONTHS_PER_YEAR) {
@@ -778,13 +758,13 @@ dt_seconds_to_time_units(unsigned short int time_units,
         *dt_time_units = dt_seconds;
     }
     else if (time_units == TIME_UNITS_MINUTES) {
-        *dt_time_units = dt_seconds / SEC_PER_MIN;
+        *dt_time_units = dt_seconds / (SEC_PER_MIN);
     }
     else if (time_units == TIME_UNITS_HOURS) {
-        *dt_time_units = dt_seconds / SEC_PER_HOUR;
+        *dt_time_units = dt_seconds / (SEC_PER_HOUR);
     }
     else if (time_units == TIME_UNITS_DAYS) {
-        *dt_time_units = dt_seconds / SEC_PER_DAY;
+        *dt_time_units = dt_seconds / (SEC_PER_DAY);
     }
     else {
         log_err("Unknown Time Units Flag: %hu", time_units);

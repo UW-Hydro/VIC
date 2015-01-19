@@ -69,7 +69,7 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
-char*get_current_datetime(void);
+void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short calendar, unsigned short time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);

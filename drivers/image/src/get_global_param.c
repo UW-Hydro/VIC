@@ -584,6 +584,10 @@ get_global_param(FILE *gp)
             else if (strcasecmp("N_TYPES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
             }
+            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu",
+                       &param_set.force_steps_per_day[file_num]);
+            }
             else if (strcasecmp("FORCEYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.forceyear[file_num]);
             }
@@ -1056,6 +1060,10 @@ get_global_param(FILE *gp)
                 MAX_SUBDAILY_STEPS_PER_DAY,
                 MAX_SUBDAILY_STEPS_PER_DAY);
     }
+    else {
+        global_param.out_dt = SEC_PER_DAY /
+                              (double) global_param.output_steps_per_day;
+    }
 
     // set NR and NF
     NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
@@ -1160,6 +1168,15 @@ get_global_param(FILE *gp)
         global_param.forcesec[1] = global_param.forcesec[0];
         global_param.forceskip[1] = 0;
         global_param.forceoffset[1] = global_param.forceskip[1];
+    }
+    if (param_set.force_steps_per_day[1] == 0) {
+        log_err("Forcing file time steps per day has not been "
+                "defined.  Make sure that the global file defines "
+                "FORCE_STEPS_PER_DAY.");
+    }
+    else {
+        param_set.FORCE_DT[1] = SEC_PER_DAY /
+                                (double) param_set.force_steps_per_day[1];
     }
 
     // Validate result directory
@@ -1315,65 +1332,65 @@ get_global_param(FILE *gp)
                 filenames.statefile, filenames.init_state);
     }
 
-        // Validate soil parameter/simulation mode combinations
-        if (options.QUICK_FLUX) {
-            if (options.Nnode != 3) {
-                log_warn("To run the model QUICK_FLUX=TRUE, you must "
-                         "define exactly 3 soil thermal nodes.  Currently "
-                         "Nnodes is set to %zu.  Setting Nnodes to 3.",
-                         options.Nnode);
-                options.Nnode = 3;
-            }
-            if (options.IMPLICIT || options.EXP_TRANS) {
-                log_err("To run the model with QUICK_FLUX=TRUE, you cannot "
-                        "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
-            }
+    // Validate soil parameter/simulation mode combinations
+    if (options.QUICK_FLUX) {
+        if (options.Nnode != 3) {
+            log_warn("To run the model QUICK_FLUX=TRUE, you must "
+                     "define exactly 3 soil thermal nodes.  Currently "
+                     "Nnodes is set to %zu.  Setting Nnodes to 3.",
+                     options.Nnode);
+            options.Nnode = 3;
         }
-        else {
-            if (!options.FULL_ENERGY && !options.FROZEN_SOIL) {
-                log_err("To run the model in water balance mode (both "
-                        "FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set "
-                        "QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your "
-                        "global parameter file).");
-            }
+        if (options.IMPLICIT || options.EXP_TRANS) {
+            log_err("To run the model with QUICK_FLUX=TRUE, you cannot "
+                    "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
         }
-        if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
-            if (options.NOFLUX) {
-                log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
-                        "and QUICK_FLUX=FALSE");
-            }
-            if (options.EXP_TRANS) {
-                log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
-                        "and QUICK_FLUX=FALSE");
-            }
+    }
+    else {
+        if (!options.FULL_ENERGY && !options.FROZEN_SOIL) {
+            log_err("To run the model in water balance mode (both "
+                    "FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set "
+                    "QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your "
+                    "global parameter file).");
         }
-        if ((options.FULL_ENERGY ||
-             options.FROZEN_SOIL) && options.Nlayer < 3) {
-            log_err("You must define at least 3 soil moisture layers to run "
-                    "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                    "Currently Nlayers is set to  %zu.", options.Nlayer);
+    }
+    if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
+        if (options.NOFLUX) {
+            log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
+                    "and QUICK_FLUX=FALSE");
         }
-        if ((!options.FULL_ENERGY &&
-             !options.FROZEN_SOIL) && options.Nlayer < 1) {
-            log_err("You must define at least 1 soil moisture layer to run "
-                    "the model.  Currently Nlayers is set to  %zu.",
-                    options.Nlayer);
+        if (options.EXP_TRANS) {
+            log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
+                    "and QUICK_FLUX=FALSE");
         }
-        if (options.Nlayer > MAX_LAYERS) {
-            log_err("Global file wants more soil moisture layers (%zu) than "
-                    "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
-                    "recompile.", options.Nlayer, MAX_LAYERS);
-        }
-        if (options.Nnode > MAX_NODES) {
-            log_err("Global file wants more soil thermal nodes (%zu) than "
-                    "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
-                    "recompile.", options.Nnode, MAX_NODES);
-        }
-        if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
-            log_err("CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set "
-                    "FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set "
-                    "CLOSE_ENERGY to FALSE.");
-        }
+    }
+    if ((options.FULL_ENERGY ||
+         options.FROZEN_SOIL) && options.Nlayer < 3) {
+        log_err("You must define at least 3 soil moisture layers to run "
+                "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
+                "Currently Nlayers is set to  %zu.", options.Nlayer);
+    }
+    if ((!options.FULL_ENERGY &&
+         !options.FROZEN_SOIL) && options.Nlayer < 1) {
+        log_err("You must define at least 1 soil moisture layer to run "
+                "the model.  Currently Nlayers is set to  %zu.",
+                options.Nlayer);
+    }
+    if (options.Nlayer > MAX_LAYERS) {
+        log_err("Global file wants more soil moisture layers (%zu) than "
+                "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
+                "recompile.", options.Nlayer, MAX_LAYERS);
+    }
+    if (options.Nnode > MAX_NODES) {
+        log_err("Global file wants more soil thermal nodes (%zu) than "
+                "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
+                "recompile.", options.Nnode, MAX_NODES);
+    }
+    if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
+        log_err("CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set "
+                "FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set "
+                "CLOSE_ENERGY to FALSE.");
+    }
 
     // Validate treeline option
     if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {

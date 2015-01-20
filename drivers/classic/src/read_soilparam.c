@@ -42,7 +42,6 @@ read_soilparam(FILE *soilparam,
     extern veg_lib_struct     *veg_lib;
     extern parameters_struct   param;
 
-    char                       ErrStr[MAXSTRING];
     char                       line[MAXSTRING];
     char                       tmpline[MAXSTRING];
     const char                 delimiters[] = " \t";
@@ -84,8 +83,7 @@ read_soilparam(FILE *soilparam,
         }
 
         if (fgets(line, MAXSTRING, soilparam) == NULL) {
-            sprintf(ErrStr, "ERROR: Unexpected EOF while reading soil file\n");
-            nrerror(ErrStr);
+            log_err("Unexpected EOF while reading soil file");
         }
     }
     else {
@@ -97,9 +95,7 @@ read_soilparam(FILE *soilparam,
         strcpy(tmpline, line);
         ttrim(tmpline);
         if ((token = strtok(tmpline, delimiters)) == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for CELL NUMBER in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for CELL NUMBER in soil file");
         }
         sscanf(token, "%d", &temp.gridcel);
         token = strtok(NULL, delimiters);
@@ -107,9 +103,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for CELL LATITUDE in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for CELL LATITUDE in soil file");
         }
         sscanf(token, "%lf", &temp.lat);
         token = strtok(NULL, delimiters);
@@ -117,9 +111,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for CELL LONGITUDE in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for CELL LONGITUDE in soil file");
         }
         sscanf(token, "%lf", &temp.lng);
 
@@ -129,16 +121,12 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for INFILTRATION in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for INFILTRATION in soil file");
         }
         sscanf(token, "%lf", &temp.b_infilt);
         if (temp.b_infilt <= 0) {
-            sprintf(ErrStr,
-                    "ERROR: b_infilt (%f) in soil file is <= 0; b_infilt must "
-                    "be positive\n", temp.b_infilt);
-            nrerror(ErrStr);
+            log_err("b_infilt (%f) in soil file is <= 0; b_infilt must "
+                    "be positive", temp.b_infilt);
         }
 
         /* read fraction of baseflow rate */
@@ -147,10 +135,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for FRACTION OF BASEFLOW RATE "
-                    "in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for FRACTION OF BASEFLOW RATE "
+                    "in soil file");
         }
         sscanf(token, "%lf", &temp.Ds);
 
@@ -160,10 +146,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for MAXIMUM BASEFLOW RATE in "
-                    "soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for MAXIMUM BASEFLOW RATE in "
+                    "soil file");
         }
         sscanf(token, "%lf", &temp.Dsmax);
 
@@ -173,10 +157,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for FRACTION OF BOTTOM SOIL "
-                    "LAYER MOISTURE in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for FRACTION OF BOTTOM SOIL LAYER "
+                    "MOISTURE in soil file");
         }
         sscanf(token, "%lf", &temp.Ws);
 
@@ -186,9 +168,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for EXPONENTIAL in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for EXPONENTIAL in soil file");
         }
         sscanf(token, "%lf", &temp.c);
 
@@ -199,18 +179,14 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for EXPT for layer %zu in "
-                        "soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for EXPT for layer %zu in "
+                        "soil file", layer);
             }
             sscanf(token, "%lf", &temp.expt[layer]);
             if (!options.OUTPUT_FORCE) {
                 if (temp.expt[layer] < 3.0) {
-                    fprintf(stderr,
-                            "ERROR: Exponent in layer %zu is %f < 3.0; This "
-                            "must be > 3.0\n", layer, temp.expt[layer]);
-                    exit(0);
+                    log_err("Exponent in layer %zu is %f < 3.0; This must be "
+                            "> 3.0", layer, temp.expt[layer]);
                 }
             }
         }
@@ -222,10 +198,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for SATURATED HYDRAULIC "
-                        "CONDUCTIVITY for layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for SATURATED HYDRAULIC "
+                        "CONDUCTIVITY for layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.Ksat[layer]);
         }
@@ -237,10 +211,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for PHI_S for layer %zu in "
-                        "soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for PHI_S for layer %zu in "
+                        "soil file", layer);
             }
             sscanf(token, "%lf", &temp.phi_s[layer]);
         }
@@ -252,18 +224,14 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for INITIAL MOISTURE for "
-                        "layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for INITIAL MOISTURE for "
+                        "layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.init_moist[layer]);
             if (!options.OUTPUT_FORCE) {
                 if (temp.init_moist[layer] < 0.) {
-                    sprintf(ErrStr,
-                            "ERROR: Initial moisture for layer %zu cannot be "
+                    log_err("Initial moisture for layer %zu cannot be "
                             "negative (%f)", layer, temp.init_moist[layer]);
-                    nrerror(ErrStr);
                 }
             }
         }
@@ -274,10 +242,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for CELL MEAN ELEVATION in soil "
-                    "file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for CELL MEAN ELEVATION in soil "
+                    "file");
         }
         sscanf(token, "%lf", &temp.elevation);
 
@@ -288,10 +254,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for LAYER THICKNESS for "
-                        "layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for LAYER THICKNESS for "
+                        "layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.depth[layer]);
         }
@@ -310,20 +274,16 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for AVERAGE SOIL TEMPERATURE in "
-                    "soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for AVERAGE SOIL TEMPERATURE in "
+                    "soil file");
         }
         sscanf(token, "%lf", &temp.avg_temp);
         if (!options.OUTPUT_FORCE) {
             if (options.FULL_ENERGY &&
                 (temp.avg_temp > 100. || temp.avg_temp < -50)) {
-                fprintf(stderr,
-                        "Need valid average soil temperature in degrees C to run");
-                fprintf(stderr, " Full Energy model, %f is not acceptable.\n",
+                log_err("Need valid average soil temperature in degrees C to "
+                        "run.  Full Energy model, %f is not acceptable.",
                         temp.avg_temp);
-                exit(0);
             }
         }
 
@@ -333,10 +293,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for SOIL DAMPING DEPTH in soil "
-                    "file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for SOIL DAMPING DEPTH in soil "
+                    "file");
         }
         sscanf(token, "%lf", &temp.dp);
 
@@ -347,20 +305,16 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for BUBBLING PRESSURE for "
-                        "layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for BUBBLING PRESSURE for "
+                        "layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.bubble[layer]);
             if (!options.OUTPUT_FORCE) {
                 if ((options.FULL_ENERGY ||
                      options.FROZEN_SOIL) && temp.bubble[layer] < 0) {
-                    fprintf(stderr,
-                            "ERROR: Bubbling pressure in layer %zu is %f < 0; "
+                    log_err("Bubbling pressure in layer %zu is %f < 0; "
                             "This must be positive for FULL_ENERGY = true or "
-                            "FROZEN_SOIL = true\n", layer, temp.bubble[layer]);
-                    exit(0);
+                            "FROZEN_SOIL = true", layer, temp.bubble[layer]);
                 }
             }
         }
@@ -372,21 +326,16 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for QUARTZ CONTENT for "
-                        "layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for QUARTZ CONTENT for "
+                        "layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.quartz[layer]);
             if (!options.OUTPUT_FORCE) {
                 if (options.FULL_ENERGY &&
                     (temp.quartz[layer] > 1. || temp.quartz[layer] < 0)) {
-                    fprintf(stderr,
-                            "Need valid quartz content as a fraction to run");
-                    fprintf(stderr,
-                            " Full Energy model, %f is not acceptable.\n",
+                    log_err("Need valid quartz content as a fraction to run "
+                            "Full Energy model, %f is not acceptable.",
                             temp.quartz[layer]);
-                    exit(0);
                 }
             }
         }
@@ -398,18 +347,14 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for mineral BULK DENSITY "
-                        "for layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for mineral BULK DENSITY "
+                        "for layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.bulk_dens_min[layer]);
             if (!options.OUTPUT_FORCE) {
                 if (temp.bulk_dens_min[layer] <= 0) {
-                    sprintf(ErrStr,
-                            "ERROR: layer %zu mineral bulk density (%f) must "
+                    log_err("layer %zu mineral bulk density (%f) must "
                             "be > 0", layer, temp.bulk_dens_min[layer]);
-                    nrerror(ErrStr);
                 }
             }
         }
@@ -421,26 +366,20 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for mineral SOIL DENSITY "
-                        "for layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for mineral SOIL DENSITY "
+                        "for layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.soil_dens_min[layer]);
             if (!options.OUTPUT_FORCE) {
                 if (temp.soil_dens_min[layer] <= 0) {
-                    sprintf(ErrStr,
-                            "ERROR: layer %zu mineral soil density (%f) must "
+                    log_err("layer %zu mineral soil density (%f) must "
                             "be > 0", layer, temp.soil_dens_min[layer]);
-                    nrerror(ErrStr);
                 }
                 if (temp.bulk_dens_min[layer] >= temp.soil_dens_min[layer]) {
-                    sprintf(ErrStr,
-                            "ERROR: layer %zu mineral bulk density (%f) must "
+                    log_err("layer %zu mineral bulk density (%f) must "
                             "be less than mineral soil density (%f)", layer,
                             temp.bulk_dens_min[layer],
                             temp.soil_dens_min[layer]);
-                    nrerror(ErrStr);
                 }
             }
         }
@@ -453,20 +392,16 @@ read_soilparam(FILE *soilparam,
                     token = strtok(NULL, delimiters);
                 }
                 if (token == NULL) {
-                    sprintf(ErrStr,
-                            "ERROR: Can't find values for ORGANIC CONTENT for "
-                            "layer %zu in soil file\n", layer);
-                    nrerror(ErrStr);
+                    log_err("Can't find values for ORGANIC CONTENT for "
+                            "layer %zu in soil file", layer);
                 }
                 sscanf(token, "%lf", &temp.organic[layer]);
                 if (!options.OUTPUT_FORCE) {
                     if (temp.organic[layer] > 1. || temp.organic[layer] < 0) {
-                        sprintf(ErrStr,
-                                "ERROR: Need valid volumetric organic soil "
+                        log_err("Need valid volumetric organic soil "
                                 "fraction when options.ORGANIC_FRACT is set "
-                                "to true.\n  %f is not acceptable.\n",
+                                "to true.  %f is not acceptable.",
                                 temp.organic[layer]);
-                        nrerror(ErrStr);
                     }
                 }
             }
@@ -478,20 +413,17 @@ read_soilparam(FILE *soilparam,
                     token = strtok(NULL, delimiters);
                 }
                 if (token == NULL) {
-                    sprintf(ErrStr,
-                            "ERROR: Can't find values for organic BULK "
-                            "DENSITY for layer %zu in soil file\n", layer);
-                    nrerror(ErrStr);
+                    log_err("Can't find values for organic BULK "
+                            "DENSITY for layer %zu in soil file", layer);
                 }
                 sscanf(token, "%lf", &temp.bulk_dens_org[layer]);
                 if (!options.OUTPUT_FORCE) {
                     if (temp.bulk_dens_org[layer] <= 0 && temp.organic[layer] >
                         0) {
-                        fprintf(stderr,
-                                "WARNING: layer %zu organic bulk density (%f) "
-                                "must be > 0; setting to mineral bulk density "
-                                "(%f)\n", layer, temp.bulk_dens_org[layer],
-                                temp.bulk_dens_min[layer]);
+                        log_warn("layer %zu organic bulk density (%f) must "
+                                 "be > 0; setting to mineral bulk density "
+                                 "(%f)", layer, temp.bulk_dens_org[layer],
+                                 temp.bulk_dens_min[layer]);
                         temp.bulk_dens_org[layer] = temp.bulk_dens_min[layer];
                     }
                 }
@@ -504,31 +436,25 @@ read_soilparam(FILE *soilparam,
                     token = strtok(NULL, delimiters);
                 }
                 if (token == NULL) {
-                    sprintf(ErrStr,
-                            "ERROR: Can't find values for organic SOIL "
-                            "DENSITY for layer %zu in soil file\n",
-                            layer);
-                    nrerror(ErrStr);
+                    log_err("Can't find values for organic SOIL DENSITY for "
+                            "layer %zu in soil file", layer);
                 }
                 sscanf(token, "%lf", &temp.soil_dens_org[layer]);
                 if (!options.OUTPUT_FORCE) {
                     if (temp.soil_dens_org[layer] <= 0 && temp.organic[layer] >
                         0) {
-                        fprintf(stderr,
-                                "WARNING: layer %zu organic soil density (%f) "
-                                "must be > 0; setting to mineral soil density "
-                                "(%f)\n", layer, temp.soil_dens_org[layer],
-                                temp.soil_dens_min[layer]);
+                        log_warn("layer %zu organic soil density (%f) must be "
+                                 "> 0; setting to mineral soil density (%f)",
+                                 layer, temp.soil_dens_org[layer],
+                                 temp.soil_dens_min[layer]);
                         temp.soil_dens_org[layer] = temp.soil_dens_min[layer];
                     }
                     if (temp.organic[layer] > 0 && temp.bulk_dens_org[layer] >=
                         temp.soil_dens_org[layer]) {
-                        sprintf(ErrStr,
-                                "ERROR: layer %zu organic bulk density (%f) "
+                        log_err("layer %zu organic bulk density (%f) "
                                 "must be less than organic soil density (%f)",
                                 layer, temp.bulk_dens_org[layer],
                                 temp.soil_dens_org[layer]);
-                        nrerror(ErrStr);
                     }
                 }
             }
@@ -547,9 +473,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for GMT OFFSET in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for GMT OFFSET in soil file");
         }
         sscanf(token, "%lf", &off_gmt);
 
@@ -560,10 +484,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for CRITICAL POINT for "
-                        "layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for CRITICAL POINT for layer %zu "
+                        "in soil file", layer);
             }
             sscanf(token, "%lf", &(Wcr_FRACT[layer]));
         }
@@ -575,11 +497,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for WILTING POINT for layer "
-                        "%zu in soil file\n",
-                        layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for WILTING POINT for layer %zu "
+                        "in soil file", layer);
             }
             sscanf(token, "%lf", &(Wpwp_FRACT[layer]));
         }
@@ -590,9 +509,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for SOIL ROUGHNESS in soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for SOIL ROUGHNESS in soil file");
         }
         sscanf(token, "%lf", &temp.rough);
         if (!options.OUTPUT_FORCE) {
@@ -612,10 +529,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for SNOW ROUGHNESS in soil "
-                    "file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for SNOW ROUGHNESS in soil file");
         }
         sscanf(token, "%lf", &temp.snow_rough);
 
@@ -625,10 +539,7 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for ANNUAL PRECIPITATION in "
-                    "soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for ANNUAL PRECIPITATION in soil file");
         }
         sscanf(token, "%lf", &temp.annual_prec);
 
@@ -639,10 +550,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for RESIDUAL MOISTURE "
-                        "CONTENT for layer %zu in soil file\n", layer);
-                nrerror(ErrStr);
+                log_err("Can't find values for RESIDUAL MOISTURE CONTENT for "
+                        "layer %zu in soil file", layer);
             }
             sscanf(token, "%lf", &temp.resid_moist[layer]);
         }
@@ -653,10 +562,8 @@ read_soilparam(FILE *soilparam,
             token = strtok(NULL, delimiters);
         }
         if (token == NULL) {
-            sprintf(ErrStr,
-                    "ERROR: Can't find values for FROZEN SOIL ACTIVE FLAG in "
-                    "soil file\n");
-            nrerror(ErrStr);
+            log_err("Can't find values for FROZEN SOIL ACTIVE FLAG in "
+                    "soil file");
         }
         sscanf(token, "%d", &tempint);
         temp.FS_ACTIVE = (char)tempint;
@@ -668,10 +575,7 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for SPATIAL SNOW in soil "
-                        "file\n");
-                nrerror(ErrStr);
+                log_err("Can't find values for SPATIAL SNOW in soil file");
             }
             sscanf(token, "%lf", &tempdbl);
             temp.max_snow_distrib_slope = tempdbl;
@@ -687,10 +591,7 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for SPATIAL FROST in soil "
-                        "file\n");
-                nrerror(ErrStr);
+                log_err("Can't find values for SPATIAL FROST in soil file");
             }
             sscanf(token, "%lf", &tempdbl);
             temp.frost_slope = tempdbl;
@@ -707,10 +608,8 @@ read_soilparam(FILE *soilparam,
                 token = strtok(NULL, delimiters);
             }
             if (token == NULL) {
-                sprintf(ErrStr,
-                        "ERROR: Can't find values for average July Tair in "
-                        "soil file\n");
-                nrerror(ErrStr);
+                log_err("Can't find values for average July Tair in "
+                        "soil file");
             }
             sscanf(token, "%lf", &tempdbl);
             temp.avgJulyAirTemp = tempdbl;
@@ -747,19 +646,15 @@ read_soilparam(FILE *soilparam,
             **********************************************/
             for (layer = 0; layer < options.Nlayer; layer++) {
                 if (temp.depth[layer] < MINSOILDEPTH) {
-                    sprintf(ErrStr,
-                            "ERROR: Model will not function with layer %zu "
-                            "depth %f < %f m.\n", layer, temp.depth[layer],
+                    log_err("Model will not function with layer %zu "
+                            "depth %f < %f m.", layer, temp.depth[layer],
                             MINSOILDEPTH);
-                    nrerror(ErrStr);
                 }
             }
             if (temp.depth[0] > temp.depth[1]) {
-                sprintf(ErrStr,
-                        "ERROR: Model will not function with layer %d depth"
-                        "(%f m) > layer %d depth (%f m).\n", 0, temp.depth[0],
+                log_err("Model will not function with layer %d depth"
+                        "(%f m) > layer %d depth (%f m).", 0, temp.depth[0],
                         1, temp.depth[1]);
-                nrerror(ErrStr);
             }
 
             /**********************************************
@@ -781,25 +676,21 @@ read_soilparam(FILE *soilparam,
                 temp.Wcr[layer] = Wcr_FRACT[layer] * temp.max_moist[layer];
                 temp.Wpwp[layer] = Wpwp_FRACT[layer] * temp.max_moist[layer];
                 if (temp.Wpwp[layer] > temp.Wcr[layer]) {
-                    sprintf(ErrStr,
-                            "Calculated wilting point moisture (%f mm) is "
+                    log_err("Calculated wilting point moisture (%f mm) is "
                             "greater than calculated critical point moisture "
                             "(%f mm) for layer %zu.\n\tIn the soil parameter "
-                            "file, Wpwp_FRACT MUST be <= Wcr_FRACT.\n",
+                            "file, Wpwp_FRACT MUST be <= Wcr_FRACT.",
                             temp.Wpwp[layer], temp.Wcr[layer], layer);
-                    nrerror(ErrStr);
                 }
                 if (temp.Wpwp[layer] < temp.resid_moist[layer] *
                     temp.depth[layer] * MM_PER_M) {
-                    sprintf(ErrStr,
-                            "Calculated wilting point moisture (%f mm) is "
+                    log_err("Calculated wilting point moisture (%f mm) is "
                             "less than calculated residual moisture (%f mm) "
                             "for layer %zu.\n\tIn the soil parameter file, "
                             "Wpwp_FRACT MUST be >= resid_moist / (1.0 - "
-                            "bulk_density/soil_density).\n",
+                            "bulk_density/soil_density).",
                             temp.Wpwp[layer], temp.resid_moist[layer] *
                             temp.depth[layer] * MM_PER_M, layer);
-                    nrerror(ErrStr);
                 }
             }
 
@@ -808,18 +699,15 @@ read_soilparam(FILE *soilparam,
             **********************************************/
             if (options.SPATIAL_SNOW) {
                 if (temp.max_snow_distrib_slope < 0.0) {
-                    sprintf(ErrStr,
-                            "max_snow_distrib_slope (%f) must be positive.\n",
+                    log_err("max_snow_distrib_slope (%f) must be positive.",
                             temp.max_snow_distrib_slope);
-                    nrerror(ErrStr);
                 }
             }
 
             if (options.SPATIAL_FROST) {
                 if (temp.frost_slope < 0.0) {
-                    sprintf(ErrStr, "frost_slope (%f) must be positive.\n",
+                    log_err("frost_slope (%f) must be positive.",
                             temp.frost_slope);
-                    nrerror(ErrStr);
                 }
             }
 
@@ -880,7 +768,7 @@ read_soilparam(FILE *soilparam,
 
             if (temp.Tfactor == NULL || temp.Pfactor == NULL ||
                 temp.AreaFract == NULL) {
-                nrerror("Memory allocation failure in read_snowband");
+                log_err("Memory allocation failure in read_snowband");
             }
 
             /** Set default values for factors to use unmodified forcing data **/

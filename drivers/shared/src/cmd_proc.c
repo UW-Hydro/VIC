@@ -48,7 +48,7 @@ cmd_proc(int    argc,
     int  optchar;
 
     if (argc == 1) {
-        usage(argv[0]);
+        print_usage(argv[0]);
         exit(1);
     }
 
@@ -73,7 +73,7 @@ cmd_proc(int    argc,
             break;
         default:
             /** Print Usage if Invalid Command Line Arguments **/
-            usage(argv[0]);
+            print_usage(argv[0]);
             exit(1);
             break;
         }
@@ -82,7 +82,7 @@ cmd_proc(int    argc,
     if (!GLOBAL_SET) {
         fprintf(stderr,
                 "ERROR: Must set global control file using the '-g' flag\n");
-        usage(argv[0]);
+        print_usage(argv[0]);
         exit(1);
     }
 }
@@ -91,21 +91,59 @@ cmd_proc(int    argc,
  * @brief    This routine prints out usage details.
  *****************************************************************************/
 void
-usage(char *executable)
+print_usage(char *executable)
 {
-    fprintf(stderr,
+    fprintf(stdout,
             "Usage: %s [-v | -o | -g <global_parameter_file>]\n", executable);
-    fprintf(stderr, "  v: display version information\n");
-    fprintf(stderr,
+    fprintf(stdout, "  v: display version information\n");
+    fprintf(stdout,
             "  o: display compile-time options settings"
             " (set in vicNl_def.h)\n");
-    fprintf(stderr,
+    fprintf(stdout,
             "  g: read model parameters from <global_parameter_file>.\n");
-    fprintf(stderr,
+    fprintf(stdout,
             "       <global_parameter_file> is a file that contains all"
             " needed model\n");
-    fprintf(stderr,
+    fprintf(stdout,
             "       parameters as well as model option flags, and the names"
             " and\n");
-    fprintf(stderr, "       locations of all other files.\n");
+    fprintf(stdout, "       locations of all other files.\n");
+}
+
+/******************************************************************************
+ * @brief    This routine prints out the model Version
+ *****************************************************************************/
+void
+print_version(char *driver)
+{
+    fprintf(stdout, "  VIC Version : %s\n", SHORT_VERSION);
+    fprintf(stdout, "  VIC Driver  : %s\n", driver);
+
+    print_license();
+}
+
+/******************************************************************************
+ * @brief    This routine prints out license information
+ *****************************************************************************/
+void
+print_license()
+{
+    fprintf(stdout,
+            "\n  Variable Infiltration Capacity (VIC) macroscale hydrologic\n");
+    fprintf(stdout,
+            "  model version %s, Copyright (C) 2014 Land Surface\n",
+            SHORT_VERSION);
+    fprintf(stdout,
+            "  HydrologyGroup, Dept. of Civil and Environmental Engineering,\n");
+    fprintf(stdout,
+            "  University of Washington.  VIC comes with ABSOLUTELY NO\n");
+    fprintf(stdout,
+            "  WARRANTY. This is free software, you may redistribute it\n");
+    fprintf(stdout,
+            "  under certain conditions; see LICENSE.txt for details.\n\n");
+
+    fprintf(stdout,
+            "  Report Bugs and Issues to : https://github.com/UW-Hydro/VIC/issues\n");
+    fprintf(stdout,
+            "  VIC Users Email Listserve : vic_users@u.washington.edu \n\n");
 }

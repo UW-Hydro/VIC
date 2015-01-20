@@ -45,81 +45,81 @@ data_alloc(const control_struct *ctrl,
 
     if (ok && ctrl->inyear &&
         !(data->year = (int*) malloc(ndays * sizeof(int)))) {
-        printf("Error allocating for year array\n");
+        log_err("Error allocating for year array");
         ok = 0;
     }
     if (ok && !(data->yday = (int*) malloc(ndays * sizeof(int)))) {
-        printf("Error allocating for yearday array\n");
+        log_err("Error allocating for yearday array");
         ok = 0;
     }
     if (ok && !(data->tmax = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for tmax array\n");
+        log_err("Error allocating for tmax array");
         ok = 0;
     }
     if (ok && !(data->tmin = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for tmin array\n");
+        log_err("Error allocating for tmin array");
         ok = 0;
     }
     if (ok && !(data->prcp = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for prcp array\n");
+        log_err("Error allocating for prcp array");
         ok = 0;
     }
     if (ok && ctrl->indewpt &&
         !(data->tdew = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for input humidity array\n");
+        log_err("Error allocating for input humidity array");
         ok = 0;
     }
     if (ok && !(data->s_tmax = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site Tmax array\n");
+        log_err("Error allocating for site Tmax array");
         ok = 0;
     }
     if (ok && !(data->s_tmin = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site Tmin array\n");
+        log_err("Error allocating for site Tmin array");
         ok = 0;
     }
     if (ok && !(data->s_tday = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site Tday array\n");
+        log_err("Error allocating for site Tday array");
         ok = 0;
     }
     if (ok && !(data->s_prcp = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site prcp array\n");
+        log_err("Error allocating for site prcp array");
         ok = 0;
     }
     if (ok && !(data->s_hum = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site VPD array\n");
+        log_err("Error allocating for site VPD array");
         ok = 0;
     }
     if (ok && !(data->s_srad = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site radiation array\n");
+        log_err("Error allocating for site radiation array");
         ok = 0;
     }
     if (ok && !(data->s_dayl = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site daylength array\n");
+        log_err("Error allocating for site daylength array");
         ok = 0;
     }
     if (ok && !(data->s_swe = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site snowpack array\n");
+        log_err("Error allocating for site snowpack array");
         ok = 0;
     }
     /* start vic_change */
     if (ok && !(data->s_fdir = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for direct fraction array\n");
+        log_err("Error allocating for direct fraction array");
         ok = 0;
     }
     if (ok && !(data->s_tskc = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site cloudiness array\n");
+        log_err("Error allocating for site cloudiness array");
         ok = 0;
     }
     if (ok && !(data->s_ppratio = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site pet/prcp ratio array\n");
+        log_err("Error allocating for site pet/prcp ratio array");
         ok = 0;
     }
     if (ok && !(data->s_tfmax = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site pet/prcp ratio array\n");
+        log_err("Error allocating for site pet/prcp ratio array");
         ok = 0;
     }
     if (ok && !(data->s_ttmax = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for site pet/prcp ratio array\n");
+        log_err("Error allocating for site pet/prcp ratio array");
         ok = 0;
     }
     /* end vic_change */
@@ -187,8 +187,8 @@ calc_prcp(const control_struct   *ctrl,
         ratio = 1.;
     }
     else if (p->base_isoh == 0) {
-        nrerror(
-            "Error in calc_prcp(): base_isoh == 0 and site_isoh/base_isoh == NaN.");
+        log_err("Error in calc_prcp(): base_isoh == 0 and site_isoh/base_isoh "
+                "== NaN.");
     }
     else {
         ratio = p->site_isoh / p->base_isoh;
@@ -356,51 +356,51 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     /* local array memory allocation */
     /* allocate space for DTR and smoothed DTR arrays */
     if (!(dtr = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for DTR array\n");
+        log_err("Error allocating for DTR array");
         ok = 0;
     }
     if (!(sm_dtr = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for smoothed DTR array\n");
+        log_err("Error allocating for smoothed DTR array");
         ok = 0;
     }
     /* allocate space for effective annual precip array */
     if (!(parray = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for effective annual precip array\n");
+        log_err("Error allocating for effective annual precip array");
         ok = 0;
     }
     /* allocate space for the prcp totaling array */
     if (!(window = (double*) malloc((ndays + 90) * sizeof(double)))) {
-        printf("Error allocating for prcp totaling array\n");
+        log_err("Error allocating for prcp totaling array");
         ok = 0;
     }
     /* allocate space for t_fmax */
     if (!(t_fmax = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for p_tt_max array\n");
+        log_err("Error allocating for p_tt_max array");
         ok = 0;
     }
     /* allocate space for Tdew array */
     if (!(tdew = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for Tdew array\n");
+        log_err("Error allocating for Tdew array");
         ok = 0;
     }
     /* allocate space for pet array */
     if (!(pet = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for pet array\n");
+        log_err("Error allocating for pet array");
         ok = 0;
     }
     /* allocate space for pva array */
     if (!(pva = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for pva array\n");
+        log_err("Error allocating for pva array");
         ok = 0;
     }
     /* allocate space for tdew_save array */
     if (!(tdew_save = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for tdew_save array\n");
+        log_err("Error allocating for tdew_save array");
         ok = 0;
     }
     /* allocate space for pva_save array */
     if (!(pva_save = (double*) malloc(ndays * sizeof(double)))) {
-        printf("Error allocating for pva_save array\n");
+        log_err("Error allocating for pva_save array");
         ok = 0;
     }
 
@@ -417,13 +417,13 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     /* smooth dtr array: After Bristow and Campbell, 1984 */
     if (ndays >= 30) { /* use 30-day antecedent smoothing window */
         if (pulled_boxcar(dtr, sm_dtr, ndays, 30, 0)) {
-            printf("Error in boxcar smoothing, calc_srad_humidity()\n");
+            log_err("Error in boxcar smoothing, calc_srad_humidity()");
             ok = 0;
         }
     }
     else { /* smoothing window width = ndays */
         if (pulled_boxcar(dtr, sm_dtr, ndays, ndays, 0)) {
-            printf("Error in boxcar smoothing, calc_srad_humidity()\n");
+            log_err("Error in boxcar smoothing, calc_srad_humidity()");
             ok = 0;
         }
     }
@@ -1198,13 +1198,12 @@ pulled_boxcar(double *input,
     double  total, sum_wt;
 
     if (w > n) {
-        printf("Boxcar longer than array...\n");
-        printf("Resize boxcar and try again\n");
+        log_err("Boxcar longer than array...Resize boxcar and try again");
         ok = 0;
     }
 
     if (ok && !(wt = (double*) malloc(w * sizeof(double)))) {
-        printf("Allocation error in boxcar()\n");
+        log_err("Allocation error in boxcar()");
         ok = 0;
     }
 

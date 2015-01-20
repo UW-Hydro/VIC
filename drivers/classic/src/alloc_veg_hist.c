@@ -40,29 +40,29 @@ alloc_veg_hist(int                nrecs,
 
     (*veg_hist) = (veg_hist_struct **) calloc(nrecs, sizeof(veg_hist_struct *));
     if ((*veg_hist) == NULL) {
-        nrerror("Memory allocation error in alloc_veg_hist().");
+        log_err("Memory allocation error in alloc_veg_hist().");
     }
 
     for (i = 0; i < nrecs; i++) {
         (*veg_hist)[i] = (veg_hist_struct *) calloc(nveg,
                                                     sizeof(veg_hist_struct));
         if ((*veg_hist)[i] == NULL) {
-            nrerror("Memory allocation error in alloc_veg_hist().");
+            log_err("Memory allocation error in alloc_veg_hist().");
         }
         for (j = 0; j < nveg; j++) {
             (*veg_hist)[i][j].albedo =
                 (double *) calloc(NR + 1, sizeof(double));
             if ((*veg_hist)[i][j].albedo == NULL) {
-                nrerror("Memory allocation error in alloc_veg_hist().");
+                log_err("Memory allocation error in alloc_veg_hist().");
             }
             (*veg_hist)[i][j].LAI = (double *) calloc(NR + 1, sizeof(double));
             if ((*veg_hist)[i][j].LAI == NULL) {
-                nrerror("Memory allocation error in alloc_veg_hist().");
+                log_err("Memory allocation error in alloc_veg_hist().");
             }
             (*veg_hist)[i][j].vegcover = (double *) calloc(NR + 1,
                                                            sizeof(double));
             if ((*veg_hist)[i][j].vegcover == NULL) {
-                nrerror("Memory allocation error in alloc_veg_hist().");
+                log_err("Memory allocation error in alloc_veg_hist().");
             }
         }
     }

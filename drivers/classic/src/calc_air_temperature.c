@@ -125,7 +125,7 @@ HourlyT(int     Dt,
     yc4 = (double *) calloc(n, sizeof(double));
     if (x == NULL || Tyc1 == NULL || yc2 == NULL || yc3 == NULL || yc4 ==
         NULL) {
-        nrerror("Memory allocation failure in HourlyT()");
+        log_err("Memory allocation failure in HourlyT()");
     }
 
     /* First fill the x vector with the times for Tmin and Tmax, and fill the

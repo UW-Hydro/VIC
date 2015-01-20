@@ -51,7 +51,6 @@ make_dmy(global_param_struct *global)
     unsigned short          endmonth, endday, endyear, skiprec, i, offset;
     unsigned short          tmpmonth, tmpday, tmpyear, tmphr, tmpjday;
     char                    DONE;
-    char                    ErrStr[MAXSTRING];
 
     hr = global->starthour;
     year = global->startyear;
@@ -62,7 +61,7 @@ make_dmy(global_param_struct *global)
     if (global->nrecs == 0) {
         if ((global->endyear == 0) || (global->endmonth == 0) ||
             (global->endday == 0)) {
-            nrerror("The model global file MUST define EITHER the number of "
+            log_err("The model global file MUST define EITHER the number of "
                     "records to simulate (NRECS), or the year (ENDYEAR), "
                     "month (ENDMONTH), and day (ENDDAY) of the last full "
                     "simulation day");
@@ -120,15 +119,14 @@ make_dmy(global_param_struct *global)
             }
         }
         if (((global->dt * (global->nrecs - offset)) % HOURS_PER_DAY) != 0) {
-            sprintf(ErrStr,
-                    "Nrecs must be defined such that the model ends after "
+            log_err("Nrecs must be defined such that the model ends after "
                     "completing a full day.  Currently Nrecs is set to %i, "
                     "while %i and %i are allowable values.", global->nrecs,
                     ((global->dt * (global->nrecs - offset)) / HOURS_PER_DAY) * HOURS_PER_DAY,
                     ((global->dt *
                       (global->nrecs -
-             offset)) / HOURS_PER_DAY) * HOURS_PER_DAY + HOURS_PER_DAY);
-            nrerror(ErrStr);
+                       offset)) /
+                     HOURS_PER_DAY) * HOURS_PER_DAY + HOURS_PER_DAY);
         }
     }
 

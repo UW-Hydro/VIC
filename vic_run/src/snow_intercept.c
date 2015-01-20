@@ -746,89 +746,92 @@ error_print_canopy_energy_bal(double  Tfoliage,
     ErrorString = (char *) va_arg(ap, char *);
 
     /** Print variable info */
-    fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr,
-            "ERROR: snow_intercept failed to converge to a solution in root_brent.  Variable values will be dumped to the screen, check for invalid values.\n");
+    fprintf(LOG_DEST, "%s", ErrorString);
+    fprintf(LOG_DEST, "ERROR: snow_intercept failed to converge to a solution "
+            "in root_brent.  Variable values will be dumped to the "
+            "screen, check for invalid values.\n");
 
     /* General Model Parameters */
-    printf("band = %i\n", band);
-    printf("month = %i\n", month);
-    printf("rec = %i\n", rec);
+    fprintf(LOG_DEST, "band = %i\n", band);
+    fprintf(LOG_DEST, "month = %i\n", month);
+    fprintf(LOG_DEST, "rec = %i\n", rec);
 
-    printf("delta_t = %f\n", delta_t);
-    printf("elevation = %f\n", elevation);
+    fprintf(LOG_DEST, "delta_t = %f\n", delta_t);
+    fprintf(LOG_DEST, "elevation = %f\n", elevation);
 
-    printf("*Wmax = %f\n", *Wmax);
-    printf("*Wcr = %f\n", *Wcr);
-    printf("*Wpwp = %f\n", *Wpwp);
-    printf("*depth = %f\n", *depth);
-    printf("frost_fract = %f\n", *frost_fract);
+    fprintf(LOG_DEST, "*Wmax = %f\n", *Wmax);
+    fprintf(LOG_DEST, "*Wcr = %f\n", *Wcr);
+    fprintf(LOG_DEST, "*Wpwp = %f\n", *Wpwp);
+    fprintf(LOG_DEST, "*depth = %f\n", *depth);
+    fprintf(LOG_DEST, "frost_fract = %f\n", *frost_fract);
 
     /* Atmopheric Condition and Forcings */
-    printf("AirDens = %f\n", AirDens);
-    printf("EactAir = %f\n", EactAir);
-    printf("Press = %f\n", Press);
-    printf("Le = %f\n", Le);
-    printf("Ra = [%f, %f]\n", Ra[1], Ra[UnderStory]);
-    printf("Ra_used = %f\n", *Ra_used);
-    printf("Tcanopy = %f\n", Tcanopy);
-    printf("Vpd = %f\n", Vpd);
-    printf("shortwave = %f\n", shortwave);
-    printf("Catm = %f\n", Catm);
-    printf("dryFrac = %f\n", *dryFrac);
+    fprintf(LOG_DEST, "AirDens = %f\n", AirDens);
+    fprintf(LOG_DEST, "EactAir = %f\n", EactAir);
+    fprintf(LOG_DEST, "Press = %f\n", Press);
+    fprintf(LOG_DEST, "Le = %f\n", Le);
+    fprintf(LOG_DEST, "Ra = [%f, %f]\n", Ra[1], Ra[UnderStory]);
+    fprintf(LOG_DEST, "Ra_used = %f\n", *Ra_used);
+    fprintf(LOG_DEST, "Tcanopy = %f\n", Tcanopy);
+    fprintf(LOG_DEST, "Vpd = %f\n", Vpd);
+    fprintf(LOG_DEST, "shortwave = %f\n", shortwave);
+    fprintf(LOG_DEST, "Catm = %f\n", Catm);
+    fprintf(LOG_DEST, "dryFrac = %f\n", *dryFrac);
 
-    printf("Evap = %f\n", *Evap);
-    printf("Rainfall = %f\n", Rainfall);
-    printf("Wind = [%f, %f]\n", Wind[1], Wind[UnderStory]);
+    fprintf(LOG_DEST, "Evap = %f\n", *Evap);
+    fprintf(LOG_DEST, "Rainfall = %f\n", Rainfall);
+    fprintf(LOG_DEST, "Wind = [%f, %f]\n", Wind[1], Wind[UnderStory]);
 
     /* Vegetation Terms */
-    printf("UnderStory = %i\n", UnderStory);
-    printf("iveg = %i\n", iveg);
-    printf("veg_class = %i\n", veg_class);
+    fprintf(LOG_DEST, "UnderStory = %i\n", UnderStory);
+    fprintf(LOG_DEST, "iveg = %i\n", iveg);
+    fprintf(LOG_DEST, "veg_class = %i\n", veg_class);
 
-    printf("displacement = [%f, %f]\n", displacement[1],
-           displacement[UnderStory]);
-    printf("ref_height = [%f, %f]\n", ref_height[1], ref_height[UnderStory]);
-    printf("roughness = [%f, %f]\n", roughness[1], roughness[UnderStory]);
+    fprintf(LOG_DEST, "displacement = [%f, %f]\n", displacement[1],
+            displacement[UnderStory]);
+    fprintf(LOG_DEST, "ref_height = [%f, %f]\n",
+            ref_height[1], ref_height[UnderStory]);
+    fprintf(LOG_DEST, "roughness = [%f, %f]\n",
+            roughness[1], roughness[UnderStory]);
 
-    printf("root = %f\n", *root);
+    fprintf(LOG_DEST, "root = %f\n", *root);
 
     if (options.CARBON) {
-        printf("CanopLayerBnd =");
+        fprintf(LOG_DEST, "CanopLayerBnd =");
         for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-            printf(" %f", CanopLayerBnd[cidx]);
+            fprintf(LOG_DEST, " %f", CanopLayerBnd[cidx]);
         }
-        printf("\n");
+        fprintf(LOG_DEST, "\n");
     }
 
     /* Water Flux Terms */
-    printf("IntRain = %f\n", IntRain);
-    printf("IntSnow = %f\n", IntSnow);
+    fprintf(LOG_DEST, "IntRain = %f\n", IntRain);
+    fprintf(LOG_DEST, "IntSnow = %f\n", IntSnow);
 
-    printf("Wdew = %f\n", *Wdew);
+    fprintf(LOG_DEST, "Wdew = %f\n", *Wdew);
 
     write_layer(layer, iveg, frost_fract);
     write_vegvar(&(veg_var[0]), iveg);
 
-    fprintf(stderr, "Tfoliage = %f\n", Tfoliage);
+    fprintf(LOG_DEST, "Tfoliage = %f\n", Tfoliage);
 
     /* Energy Flux Terms */
-    fprintf(stderr, "LongOverIn = %f\n", LongOverIn);
-    fprintf(stderr, "LongUnderOut = %f\n", LongUnderOut);
-    fprintf(stderr, "NetShortOver = %f\n", NetShortOver);
+    fprintf(LOG_DEST, "LongOverIn = %f\n", LongOverIn);
+    fprintf(LOG_DEST, "LongUnderOut = %f\n", LongUnderOut);
+    fprintf(LOG_DEST, "NetShortOver = %f\n", NetShortOver);
 
-    fprintf(stderr, "*AdvectedEnergy = %f\n", *AdvectedEnergy);
-    fprintf(stderr, "*LatentHeat = %f\n", *LatentHeat);
-    fprintf(stderr, "*LatentHeatSub = %f\n", *LatentHeatSub);
-    fprintf(stderr, "*LongOverOut = %f\n", *LongOverOut);
-    fprintf(stderr, "*NetLongOver = %f\n", *NetLongOver);
-    fprintf(stderr, "*NetRadiation = %f\n", *NetRadiation);
-    fprintf(stderr, "*RefreezeEnergy = %f\n", *RefreezeEnergy);
-    fprintf(stderr, "*SensibleHeat = %f\n", *SensibleHeat);
-    fprintf(stderr, "*VaporMassFlux = %f\n", *VaporMassFlux);
+    fprintf(LOG_DEST, "*AdvectedEnergy = %f\n", *AdvectedEnergy);
+    fprintf(LOG_DEST, "*LatentHeat = %f\n", *LatentHeat);
+    fprintf(LOG_DEST, "*LatentHeatSub = %f\n", *LatentHeatSub);
+    fprintf(LOG_DEST, "*LongOverOut = %f\n", *LongOverOut);
+    fprintf(LOG_DEST, "*NetLongOver = %f\n", *NetLongOver);
+    fprintf(LOG_DEST, "*NetRadiation = %f\n", *NetRadiation);
+    fprintf(LOG_DEST, "*RefreezeEnergy = %f\n", *RefreezeEnergy);
+    fprintf(LOG_DEST, "*SensibleHeat = %f\n", *SensibleHeat);
+    fprintf(LOG_DEST, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
     /* call error handling routine */
-    fprintf(stderr, "**********\n**********\n"
+    fprintf(LOG_DEST, "**********\n**********\n"
             "Finished dumping snow_intercept "
             "variables.\nTry increasing SNOW_DT to get model to "
             "complete cell.\nThen check output for instabilities."

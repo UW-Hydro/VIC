@@ -27,7 +27,6 @@
 #ifndef VIC_DRIVER_CLASSIC_H
 #define VIC_DRIVER_CLASSIC_H
 
-#include <stdio.h>
 #include <vic_driver_shared.h>
 
 #define VIC_DRIVER "Classic"

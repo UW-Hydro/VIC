@@ -79,7 +79,8 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_image.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
-	${VICPATH}/include/vic_physical_constants.h
+	${VICPATH}/include/vic_physical_constants.h \
+	${VICPATH}/include/vic_log.h
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -116,7 +117,7 @@ OBJS = \
 	${SHAREDPATH}/src/free_vegcon.o \
 	${SHAREDPATH}/src/get_dist.o \
 	${SHAREDPATH}/src/get_parameters.o \
-	${SHAREDPATH}/src/initialize_filenames.o \
+	${SHAREDPATH}/src/initialize_files.o \
 	${SHAREDPATH}/src/initialize_global.o \
 	${SHAREDPATH}/src/initialize_options.o \
 	${SHAREDPATH}/src/initialize_parameters.o \
@@ -132,6 +133,7 @@ OBJS = \
 	${SHAREDPATH}/src/open_file.o \
 	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/soil_moisture_from_water_table.o \
+	${SHAREDPATH}/src/vic_log.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \
@@ -167,7 +169,6 @@ OBJS = \
 	${VICPATH}/src/massrelease.o \
 	${VICPATH}/src/modify_Ksat.o \
 	${VICPATH}/src/newt_raph_func_fast.o \
-	${VICPATH}/src/nrerror.o \
 	${VICPATH}/src/penman.o \
 	${VICPATH}/src/photosynth.o \
 	${VICPATH}/src/physics.o \
@@ -208,7 +209,7 @@ full:
 	make model
 
 clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${VICPATH}/src/*~ vic_image
+	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ vic_image
 
 model: $(OBJS)
 	$(CC) -o vic_image$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)

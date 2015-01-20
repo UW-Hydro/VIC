@@ -39,6 +39,9 @@ vic_start(void)
     extern domain_struct    global_domain;
     extern option_struct    options;
 
+    // Initialize Log Destination
+    initialize_log();
+
     // Initialize global structures
     initialize_options();
     initialize_global();
@@ -49,12 +52,14 @@ vic_start(void)
     filep.globalparam = open_file(filenames.global, "r");
     get_global_param(filep.globalparam);
 
+    // Set Log Destination
+    setup_logging(MISSING);
+
     // set model constants
     if (!strcasecmp(filenames.constants, "MISSING")) {
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }
-    ;
 
     // read domain info
     get_global_domain(filenames.domain, &global_domain);
@@ -68,7 +73,7 @@ vic_start(void)
     if (options.SNOW_BAND > 1) {
         if (options.SNOW_BAND !=
             get_nc_dimension(filenames.snowband, "snow_band")) {
-            nrerror("Number of snow bands in global file does not "
+            log_err("Number of snow bands in global file does not "
                     "match parameter file");
         }
     }

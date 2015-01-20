@@ -139,9 +139,8 @@ put_data(all_vars_struct   *all_vars,
             TreeAdjustFactor[band] = 1.;
         }
         if (TreeAdjustFactor[band] != 1 && rec == 0) {
-            fprintf(stderr,
-                    "WARNING: Tree adjust factor for band %zu is equal to %f.\n",
-                    band, TreeAdjustFactor[band]);
+            log_warn("Tree adjust factor for band %zu is equal to %f.",
+                     band, TreeAdjustFactor[band]);
         }
     }
 
@@ -644,15 +643,15 @@ put_data(all_vars_struct   *all_vars,
        Report T Fallback Occurrences
     ********************/
     if (rec == (int)global_param.nrecs - 1) {
-        fprintf(stderr, "Total number of fallbacks in Tfoliage: %d\n",
+        fprintf(LOG_DEST, "Total number of fallbacks in Tfoliage: %d\n",
                 Tfoliage_fbcount_total);
-        fprintf(stderr, "Total number of fallbacks in Tcanopy: %d\n",
+        fprintf(LOG_DEST, "Total number of fallbacks in Tcanopy: %d\n",
                 Tcanopy_fbcount_total);
-        fprintf(stderr, "Total number of fallbacks in Tsnowsurf: %d\n",
+        fprintf(LOG_DEST, "Total number of fallbacks in Tsnowsurf: %d\n",
                 Tsnowsurf_fbcount_total);
-        fprintf(stderr, "Total number of fallbacks in Tsurf: %d\n",
+        fprintf(LOG_DEST, "Total number of fallbacks in Tsurf: %d\n",
                 Tsurf_fbcount_total);
-        fprintf(stderr, "Total number of fallbacks in soil T profile: %d\n",
+        fprintf(LOG_DEST, "Total number of fallbacks in soil T profile: %d\n",
                 Tsoil_fbcount_total);
     }
 

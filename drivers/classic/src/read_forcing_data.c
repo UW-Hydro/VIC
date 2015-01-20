@@ -42,7 +42,6 @@ read_forcing_data(FILE              **infile,
     extern param_set_struct param_set;
     extern size_t           NF;
 
-    char                    errorstr[MAXSTRING];
     size_t                  i, j;
     double                **forcing_data;
 
@@ -73,10 +72,8 @@ read_forcing_data(FILE              **infile,
                         forcing_data, (*veg_hist_data));
     }
     else {
-        sprintf(errorstr,
-                "ERROR: File time step must be defined for at least the first "
+        log_err("File time step must be defined for at least the first "
                 "forcing file (FILE_DT).\n");
-        nrerror(errorstr);
     }
 
     /** Read Second Forcing Data File **/

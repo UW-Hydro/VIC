@@ -246,7 +246,12 @@ vic_run(int                  rec,
             prepare_full_energy(iveg, all_vars, soil_con, moist0, ice0);
 
             /** Compute Bare (free of snow) Albedo **/
-            bare_albedo = veg_var[iveg][0].albedo;
+            if (iveg != Nveg) {
+                bare_albedo = veg_var[iveg][0].albedo;
+            }
+            else {
+                bare_albedo = param.ALBEDO_BARE_SOIL;
+            }
 
             /*************************************
                Compute the aerodynamic resistance

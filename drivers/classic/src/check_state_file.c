@@ -44,7 +44,6 @@ check_state_file(char  *init_state_name,
     extern option_struct options;
 
     FILE                *init_state;
-    char                 ErrStr[MAXSTRING];
     size_t               tmp_Nlayer;
     size_t               tmp_Nnodes;
     unsigned short       startday, startmonth, startyear;
@@ -79,18 +78,14 @@ check_state_file(char  *init_state_name,
         fscanf(init_state, "%zu %zu\n", &tmp_Nlayer, &tmp_Nnodes);
     }
     if (tmp_Nlayer != Nlayer) {
-        sprintf(ErrStr,
-                "The number of soil moisture layers in the model state file "
+        log_err("The number of soil moisture layers in the model state file "
                 "(%zu) does not equal that defined in the global control file "
                 "(%zu).  Check your input files.", tmp_Nlayer, Nlayer);
-        nrerror(ErrStr);
     }
     if (tmp_Nnodes != Nnodes) {
-        sprintf(ErrStr,
-                "The number of soil thermal nodes in the model state file "
+        log_err("The number of soil thermal nodes in the model state file "
                 "(%zu) does not equal that defined in the global control file "
                 "(%zu).  Check your input files.", tmp_Nnodes, Nnodes);
-        nrerror(ErrStr);
     }
 
     return(init_state);

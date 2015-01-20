@@ -114,9 +114,7 @@ CalcAerodynamic(bool    OverStory,          /* overstory flag */
         Zt = Trunk * Height;
 
         if (Zt < (Z0_Lower + d_Lower)) {
-            fprintf(stderr, "ERROR: CalcAerodynamic - Trunk space height "
-                    "below \"center\" of lower boundary");
-            return(ERROR);
+            log_err("Trunk space height below \"center\" of lower boundary");
         }
 
         /* Resistance for overstory */
@@ -178,8 +176,8 @@ CalcAerodynamic(bool    OverStory,          /* overstory flag */
                     log((ref_height[0] -
                          d_Upper) / Z0_Upper) / (n * K2 * (Zw - d_Upper)) *
                     (exp(n * (1 - Zt / Height)) - 1);
-            fprintf(stderr, "WARNING:  Top of overstory is less than 2 meters "
-                    "above the lower boundary\n");
+            log_warn("Top of overstory is less than 2 meters above the lower "
+                     "boundary");
         }
 
         /** Set aerodynamic resistance terms for canopy */

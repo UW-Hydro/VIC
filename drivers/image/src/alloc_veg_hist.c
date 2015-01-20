@@ -36,15 +36,15 @@ alloc_veg_hist(veg_hist_struct *veg_hist)
 {
     veg_hist->albedo = (double *) calloc(NR + 1, sizeof(double));
     if (veg_hist->albedo == NULL) {
-        nrerror("Memory allocation error in alloc_veg_hist().");
+        log_err("Memory allocation error in alloc_veg_hist().");
     }
     veg_hist->LAI = (double *) calloc(NR + 1, sizeof(double));
     if (veg_hist->LAI == NULL) {
-        nrerror("Memory allocation error in alloc_veg_hist().");
+        log_err("Memory allocation error in alloc_veg_hist().");
     }
     veg_hist->vegcover = (double *) calloc(NR + 1, sizeof(double));
     if (veg_hist->vegcover == NULL) {
-        nrerror("Memory allocation error in alloc_veg_hist().");
+        log_err("Memory allocation error in alloc_veg_hist().");
     }
 }
 

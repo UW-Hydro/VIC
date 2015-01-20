@@ -76,7 +76,7 @@ calc_rc(double rs,
         vpdfactor = 1 - vpd / param.CANOPY_CLOSURE;
         vpdfactor =
             (vpdfactor <
-         param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
+             param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
 
         /* calculate canopy resistance in s/m */
         rc = rs / (lai * gsm_inv * Tfactor * vpdfactor) * DAYfactor;
@@ -161,7 +161,7 @@ calc_rc_ps(char    Ctype,
     vpdfactor = 1 - vpd / param.CANOPY_CLOSURE;
     vpdfactor =
         (vpdfactor <
-     param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
+         param.CANOPY_VPDMINFACTOR) ? param.CANOPY_VPDMINFACTOR : vpdfactor;
 
     /* calculate canopy resistance in presence of soil moisture stress */
     *rc = rc0 / (gsm_inv * vpdfactor);
@@ -172,7 +172,7 @@ calc_rc_ps(char    Ctype,
         rsLayer[cidx] *= rcRatio;
         rsLayer[cidx] =
             (rsLayer[cidx] >
-         param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : rsLayer[cidx];
+             param.CANOPY_RSMAX) ? param.CANOPY_RSMAX : rsLayer[cidx];
     }
 }
 

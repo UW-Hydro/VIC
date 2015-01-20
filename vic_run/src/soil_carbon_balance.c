@@ -169,10 +169,11 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     cell->CLitter += veg_var->Litterfall - cell->RhLitter;
     cell->CInter +=
         (1 -
-     param.SRESP_FAIR) * cell->RhLitter * param.SRESP_FINTER - cell->RhInter;
+         param.SRESP_FAIR) * cell->RhLitter * param.SRESP_FINTER -
+        cell->RhInter;
     cell->CSlow +=
         (1 -
-     param.SRESP_FAIR) * cell->RhLitter *
+         param.SRESP_FAIR) * cell->RhLitter *
         (1 - param.SRESP_FINTER) - cell->RhSlow;
 
     // Free temporary dynamic arrays

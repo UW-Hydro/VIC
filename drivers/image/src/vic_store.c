@@ -28,8 +28,6 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-#define ERR(e) {fprintf(stderr, "\nError(vic_store): %s\n", nc_strerror(e)); }
-
 /******************************************************************************
  * @brief    Save model state.
  *****************************************************************************/
@@ -73,29 +71,29 @@ vic_store(void)
     // allocate memory for variables to be stored
     cvar = (char *) malloc(grid_size * sizeof(char));
     if (cvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
     ivar = (int *) malloc(grid_size * sizeof(int));
     if (ivar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
     dvar = (double *) malloc(grid_size * sizeof(double));
     if (dvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
     fvar = (float *) malloc(grid_size * sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
     idx = (size_t *) malloc(global_domain.ncells_global *
                             sizeof(size_t));
     if (idx == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
     for (i = 0; i < global_domain.ncells_global; i++) {
         idx[i] = get_global_idx(&global_domain, i);
@@ -921,14 +919,14 @@ vic_store(void)
     }
 
     if (options.LAKES) {
-        nrerror("LAKES option not yet implemented in vic_store()");
+        log_err("LAKES option not yet implemented in vic_store()");
     }
 
     // close the netcdf file if it is still open
     if (nc_state_file.open == true) {
         status = nc_close(nc_state_file.nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
 
@@ -972,73 +970,65 @@ initialize_state_file(nc_file_struct *nc)
     // open the netcdf file
     status = nc_create(nc->fname, NC_NETCDF4 | NC_CLASSIC_MODEL, &(nc->nc_id));
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
     nc->open = true;
 
     // set the NC_FILL attribute
     status = nc_set_fill(nc->nc_id, NC_FILL, &old_fill_mode);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // define netcdf dimensions
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
                         &(nc->band_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim snow_band\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim frost_area\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim nlayer\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "ni", nc->ni_size, &(nc->ni_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim ni\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "nj", nc->nj_size, &(nc->nj_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim nj\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "node", nc->node_size, &(nc->node_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim node\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim root_zone\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim veg_class\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     // leave define mode
     status = nc_enddef(nc->nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 }

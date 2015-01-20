@@ -501,14 +501,14 @@ calc_soil_thermal_fluxes(int       Nnodes,
             }
         }
         else {
-            fprintf(stderr,
+            fprintf(LOG_DEST,
                     "ERROR: Temperature Profile Unable to Converge!!!\n");
-            fprintf(stderr, "Dumping Profile Temperatures (last, new).\n");
+            fprintf(LOG_DEST, "Dumping Profile Temperatures (last, new).\n");
             for (j = 0; j < Nnodes; j++) {
-                fprintf(stderr, "%f\t%f\n", T0[j], T[j]);
+                fprintf(LOG_DEST, "%f\t%f\n", T0[j], T[j]);
             }
-            fprintf(stderr,
-                    "ERROR: Cannot solve temperature profile:\n\tToo Many Iterations in solve_T_profile\n");
+            log_err("Cannot solve temperature profile:\n"
+                    "\tToo Many Iterations in solve_T_profile");
             return (ERROR);
         }
     }
@@ -573,28 +573,28 @@ error_print_solve_T_profile(double  T,
     E = (double) va_arg(ap, double);
     ErrorString = (char *) va_arg(ap, char *);
 
-    fprintf(stderr, "%s", ErrorString);
-    fprintf(stderr, "ERROR: solve_T_profile failed to converge to a solution "
+    fprintf(LOG_DEST, "%s", ErrorString);
+    fprintf(LOG_DEST, "ERROR: solve_T_profile failed to converge to a solution "
             "in root_brent.  Variable values will be dumped to the "
             "screen, check for invalid values.\n");
 
-    fprintf(stderr, "T\t%f\n", T);
-    fprintf(stderr, "TL\t%f\n", TL);
-    fprintf(stderr, "TU\t%f\n", TU);
-    fprintf(stderr, "T0\t%f\n", T0);
-    fprintf(stderr, "moist\t%f\n", moist);
-    fprintf(stderr, "max_moist\t%f\n", max_moist);
-    fprintf(stderr, "bubble\t%f\n", bubble);
-    fprintf(stderr, "expt\t%f\n", expt);
-    fprintf(stderr, "ice0\t%f\n", ice0);
-    fprintf(stderr, "gamma\t%f\n", gamma);
-    fprintf(stderr, "A\t%f\n", A);
-    fprintf(stderr, "B\t%f\n", B);
-    fprintf(stderr, "C\t%f\n", C);
-    fprintf(stderr, "D\t%f\n", D);
-    fprintf(stderr, "E\t%f\n", E);
+    fprintf(LOG_DEST, "T\t%f\n", T);
+    fprintf(LOG_DEST, "TL\t%f\n", TL);
+    fprintf(LOG_DEST, "TU\t%f\n", TU);
+    fprintf(LOG_DEST, "T0\t%f\n", T0);
+    fprintf(LOG_DEST, "moist\t%f\n", moist);
+    fprintf(LOG_DEST, "max_moist\t%f\n", max_moist);
+    fprintf(LOG_DEST, "bubble\t%f\n", bubble);
+    fprintf(LOG_DEST, "expt\t%f\n", expt);
+    fprintf(LOG_DEST, "ice0\t%f\n", ice0);
+    fprintf(LOG_DEST, "gamma\t%f\n", gamma);
+    fprintf(LOG_DEST, "A\t%f\n", A);
+    fprintf(LOG_DEST, "B\t%f\n", B);
+    fprintf(LOG_DEST, "C\t%f\n", C);
+    fprintf(LOG_DEST, "D\t%f\n", D);
+    fprintf(LOG_DEST, "E\t%f\n", E);
 
-    fprintf(stderr, "Finished dumping values for solve_T_profile.\n"
+    fprintf(LOG_DEST, "Finished dumping values for solve_T_profile.\n"
             "Try increasing SOIL_DT to get model to complete cell.\n"
             "Then check output for instabilities.\n");
 

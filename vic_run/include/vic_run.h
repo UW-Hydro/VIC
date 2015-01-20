@@ -205,7 +205,6 @@ double modify_Ksat(double);
 double new_snow_density(double);
 int newt_raph(void (*vecfunc)(double *, double *, int, int,
                               ...), double *, int);
-void nrerror(char *);
 double penman(double, double, double, double, double, double, double);
 void photosynth(char, double, double, double, double, double, double, double,
                 double, double, char *, double *, double *, double *, double *,
@@ -318,7 +317,6 @@ void tridiag(double *, double *, double *, double *, unsigned);
 int vic_run(int, atmos_data_struct *, all_vars_struct *, dmy_struct *,
             global_param_struct *, lake_con_struct *, soil_con_struct *,
             veg_con_struct *, veg_lib_struct *, veg_hist_struct *veg_hist);
-void vicerror(char *);
 double volumetric_heat_capacity(double, double, double, double);
 int water_balance(lake_var_struct *, lake_con_struct, int, all_vars_struct *,
                   int, int, int, double, soil_con_struct, veg_con_struct);

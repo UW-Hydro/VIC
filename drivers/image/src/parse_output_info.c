@@ -59,10 +59,9 @@ parse_output_info(FILE             *gp,
                     }
                 }
                 if (!found) {
-                    fprintf(stderr, "Error: parse_output_info: \"%s\" was "
-                            "not found in the list of supported output "
-                            "variable names.  Please use "
-                            "the exact name listed in vic_def.h.\n",
+                    log_err("\"%s\" was not found in the list of supported "
+                            "output variable names.  Please use "
+                            "the exact name listed in vic_def.h.",
                             varname);
                 }
                 outvarnum++;

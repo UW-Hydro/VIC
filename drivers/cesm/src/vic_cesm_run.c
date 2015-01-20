@@ -57,12 +57,4 @@ vic_cesm_run(bool save_state)
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  current);
     }
-
-    // if output:
-        vic_write();
-
-    // if save:
-    if (save_state) {
-        vic_store();
-    }
 }

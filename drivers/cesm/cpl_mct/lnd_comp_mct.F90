@@ -6,6 +6,7 @@ module lnd_comp_mct
   use esmf
   use seq_cdata_mod
   use seq_infodata_mod
+  use vic_cesm_interface
 
 !
 ! !PUBLIC TYPES:
@@ -51,23 +52,10 @@ CONTAINS
 !-------------------------------------------------------------------------------
 
    call seq_infodata_PutData(cdata%infodata, &
-        lnd_present=.false., lnd_prognostic=.false., &
+        lnd_present=.true., lnd_prognostic=.true., &
         sno_present=.false., sno_prognostic=.false.)
 
-    ! read global parameters
-    !vic_start()
-
-    ! allocate memory
-    !vic_alloc()
-
-    ! initialize model parameters from parameter files
-    !vic_init()
-
-    ! restore model state, either using a cold start or from a restart file
-    !vic_restore()
-
-    ! initialize output structures
-    !vic_init_output()
+   call vic_cesm_init(args_to_vic)
 
 end subroutine lnd_init_mct
 
@@ -100,14 +88,7 @@ subroutine lnd_run_mct( EClock, cdata, x2d, d2x, cdata_s, x2s, s2x)
 !EOP
 !-------------------------------------------------------------------------------
 
-    ! read forcing data
-    !vic_force()
-
-    ! run vic over the domain
-    ! save state
-    ! write output
-    ! return coupled fields
-    !vic_cesm_run()
+    vic_cesm_run(args_to_vic)
 
 end subroutine lnd_run_mct
 
@@ -141,7 +122,7 @@ subroutine lnd_final_mct( EClock, cdata, x2d, d2x, cdata_s, x2s, s2x)
 !-------------------------------------------------------------------------------
 
     ! clean up
-    !vic_finalize()
+    vic_cesm_final(args_to_vic)
 
  end subroutine lnd_final_mct
 

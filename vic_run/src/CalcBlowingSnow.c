@@ -77,7 +77,7 @@ CalcBlowingSnow(double   Dt,
     /* Calculate some general variables, that don't depend on wind speed. */
 
     /* Age in hours */
-    Age = LastSnow * (Dt);
+    Age = LastSnow * Dt / SEC_PER_HOUR;
 
     /* Saturation density of water vapor, Liston A-8 */
     es = svp(Tair);

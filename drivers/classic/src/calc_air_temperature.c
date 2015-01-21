@@ -33,14 +33,14 @@
  * @brief    calculate the coefficients for the Hermite polynomials
  *****************************************************************************/
 void
-hermite(int     n,
+hermite(size_t  n,
         double *x,
         double *yc1,
         double *yc2,
         double *yc3,
         double *yc4)
 {
-    int    i;
+    size_t i;
     double dx;
     double divdf1;
     double divdf3;
@@ -88,34 +88,36 @@ hermint(double  xbar,
     return result;
 }
 
-/****************************************************************************/
-/*				    HourlyT                                 */
-/****************************************************************************/
-
 /******************************************************************************
- * @brief    calculate hourly temperature.
+ * @brief    calculate subdaily temperature.
  *****************************************************************************/
 void
-HourlyT(int     Dt,
-        int     ndays,
-        int    *TmaxHour,
-        double *Tmax,
-        int    *TminHour,
-        double *Tmin,
-        double *Tair)
+SubDailyT(size_t  ndays,
+          double *TmaxSec,
+          double *Tmax,
+          double *TminSec,
+          double *Tmin,
+          double *Tair)
 {
-    double *x;
-    double *Tyc1;
-    double *yc2;
-    double *yc3;
-    double *yc4;
-    int     i;
-    int     j;
-    int     n;
-    int     hour;
-    int     nsteps;
+    extern global_param_struct global_param;
 
-    nsteps = HOURS_PER_DAY / Dt * ndays;
+    double                     atmos_dt;
+    size_t                     atmos_steps_per_day;
+    double                    *x;
+    double                    *Tyc1;
+    double                    *yc2;
+    double                    *yc3;
+    double                    *yc4;
+    double                     sec;
+    size_t                     i;
+    size_t                     j;
+    size_t                     n;
+    size_t                     nsteps;
+
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
+
+    nsteps = atmos_steps_per_day * ndays;
 
     n = ndays * 2 + 2;
     x = (double *) calloc(n, sizeof(double));
@@ -125,30 +127,30 @@ HourlyT(int     Dt,
     yc4 = (double *) calloc(n, sizeof(double));
     if (x == NULL || Tyc1 == NULL || yc2 == NULL || yc3 == NULL || yc4 ==
         NULL) {
-        log_err("Memory allocation failure in HourlyT()");
+        log_err("Memory allocation failure in SubDailyT()");
     }
 
     /* First fill the x vector with the times for Tmin and Tmax, and fill the
        Tyc1 with the corresponding temperature and humidity values */
-    for (i = 0, j = 1, hour = 0; i < ndays; i++, hour += HOURS_PER_DAY) {
-        if (TminHour[i] < TmaxHour[i]) {
-            x[j] = TminHour[i] + hour;
+    for (i = 0, j = 1, sec = 0; i < ndays; i++, sec += SEC_PER_DAY) {
+        if (TminSec[i] < TmaxSec[i]) {
+            x[j] = TminSec[i] + sec;
             Tyc1[j++] = Tmin[i];
-            x[j] = TmaxHour[i] + hour;
+            x[j] = TmaxSec[i] + sec;
             Tyc1[j++] = Tmax[i];
         }
         else {
-            x[j] = TmaxHour[i] + hour;
+            x[j] = TmaxSec[i] + sec;
             Tyc1[j++] = Tmax[i];
-            x[j] = TminHour[i] + hour;
+            x[j] = TminSec[i] + sec;
             Tyc1[j++] = Tmin[i];
         }
     }
 
     /* To "tie" down the first and last values, repeat those */
-    x[0] = x[2] - HOURS_PER_DAY;
+    x[0] = x[2] - SEC_PER_DAY;
     Tyc1[0] = Tyc1[2];
-    x[n - 1] = x[n - 3] + HOURS_PER_DAY;
+    x[n - 1] = x[n - 3] + SEC_PER_DAY;
     Tyc1[n - 1] = Tyc1[n - 3];
 
     /* we want to preserve maxima and minima, so we require that the first
@@ -161,8 +163,8 @@ HourlyT(int     Dt,
     hermite(n, x, Tyc1, yc2, yc3, yc4);
 
     /* interpolate the temperatures */
-    for (i = 0, hour = 0; i < nsteps; i++, hour += Dt) {
-        Tair[i] = hermint(hour, n, x, Tyc1, yc2, yc3, yc4);
+    for (i = 0, sec = 0; i < nsteps; i++, sec += atmos_dt) {
+        Tair[i] = hermint(sec, n, x, Tyc1, yc2, yc3, yc4);
     }
 
     free(x);
@@ -176,48 +178,64 @@ HourlyT(int     Dt,
 
 /******************************************************************************
  * @brief    This function estimates the times of minimum and maximum
- *           temperature for each day of the simulation, based on the hourly
+ *           temperature for each day of the simulation, based on the diurnal
  *           cycle of incoming solar radiation.
  *****************************************************************************/
 void
-set_max_min_hour(double *hourlyrad,
-                 int     ndays,
-                 int    *tmaxhour,
-                 int    *tminhour)
+set_max_min_sec(double *subdailyrad,
+                size_t  ndays,
+                double *tmaxsec,
+                double *tminsec)
 {
-    int risehour;
-    int sethour;
-    int hour;
-    int i;
+    extern global_param_struct global_param;
+
+    double                     atmos_dt;
+    size_t                     atmos_steps_per_day;
+    size_t                     step;
+    double                     risesec;
+    double                     setsec;
+    double                     sec;
+    size_t                     i;
+
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
 
     for (i = 0; i < ndays; i++) {
-        risehour = MISSING;
-        sethour = MISSING;
-        for (hour = 0; hour < 12; hour++) {
-            if (hourlyrad[i * HOURS_PER_DAY + hour] > 0 &&
-                (i * HOURS_PER_DAY + hour == 0 ||
-                 hourlyrad[i * HOURS_PER_DAY + hour - 1] <= 0)) {
-                risehour = hour;
+        risesec = MISSING;
+        setsec = MISSING;
+        for (step = 0, sec = 0;
+             sec < 12 * SEC_PER_HOUR;
+             step++, sec += atmos_dt) {
+            if (subdailyrad[i * atmos_steps_per_day + step] > 0 &&
+                (i * atmos_steps_per_day + step == 0 ||
+                 subdailyrad[i * atmos_steps_per_day + step - 1] <= 0)) {
+                risesec = sec;
             }
         }
-        for (hour = 12; hour < HOURS_PER_DAY; hour++) {
-            if (hourlyrad[i * HOURS_PER_DAY + hour] <= 0 &&
-                hourlyrad[i * HOURS_PER_DAY + hour - 1] >
-                0) {
-                sethour = hour;
+        for (step = step + 1, sec = 12 * SEC_PER_HOUR + atmos_dt;
+             sec < SEC_PER_DAY;
+             step++, sec += atmos_dt) {
+            if (subdailyrad[i * atmos_steps_per_day + step] <= 0 &&
+                subdailyrad[i * atmos_steps_per_day + step - 1] > 0) {
+                setsec = sec;
             }
         }
-        if (i == ndays - 1 && sethour == MISSING) {
-            sethour = 23;
+        if (i == ndays - 1 && setsec == MISSING) {
+            setsec = 23 * SEC_PER_HOUR;
         }
-        if (risehour >= 0 && sethour >= 0) {
-            tmaxhour[i] = 0.67 * (sethour - risehour) + risehour;
-            tminhour[i] = risehour - 1;
+        if (risesec >= 0 && setsec >= 0) {
+            tmaxsec[i] = 0.67 * (setsec - risesec) + risesec;
+            if (risesec > atmos_dt) {
+                tminsec[i] = risesec - atmos_dt;
+            }
+            else {
+                tminsec[i] = 0.;
+            }
         }
         else {
             /* arbitrarily set the min and max times to 2am and 2pm */
-            tminhour[i] = 2;
-            tmaxhour[i] = 14;
+            tminsec[i] = 2 * SEC_PER_HOUR;
+            tmaxsec[i] = 14 * SEC_PER_HOUR;
         }
     }
 }

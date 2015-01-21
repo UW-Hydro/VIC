@@ -28,12 +28,17 @@
 #define VIC_PHYSICAL_CONSTANTS
 
 /***** Time Conversions *****/
+#define DAYS_PER_360DAY_YEAR 360  /**< days in 360day year */
 #define DAYS_PER_YEAR 365  /**< days in nonleap year */
 #define DAYS_PER_LYEAR 366  /**< days in leap year */
+#define DAYS_PER_JYEAR 365.25  /** days in Julian year */
 #define HOURS_PER_DAY 24  /**< hours per day */
 #define MONTHS_PER_YEAR 12  /**< months per year */
-#define SEC_PER_HOUR 3600  /**< seconds per hour */
-#define SEC_PER_DAY SEC_PER_HOUR * HOURS_PER_DAY  /**< hours per day */
+#define MIN_PER_HOUR 60  /**< minutes per hour */
+#define MIN_PER_DAY (MIN_PER_HOUR * HOURS_PER_DAY)  /**< hours per day */
+#define SEC_PER_MIN 60  /**< seconds per minutes */
+#define SEC_PER_HOUR (SEC_PER_MIN * MIN_PER_HOUR)  /**< seconds per hour */
+#define SEC_PER_DAY (SEC_PER_HOUR * HOURS_PER_DAY)  /**< hours per day */
 
 /***** Unit Conversions *****/
 #define JOULES_PER_CAL 4.1868  /**< Joules per calorie */
@@ -58,7 +63,7 @@
 #define CONST_DDAYS_PER_YEAR 365.2425  /**< decimal days in year */
 
 /***** Oribital Constants *****/
-#define CONST_OMEGA 2.0 * CONST_PI / CONST_SDAY
+#define CONST_OMEGA (2.0 * CONST_PI / CONST_SDAY)
 #define CONST_SECPERRAD 13750.9871  /**< seconds per radian of hour angle */
 #define CONST_RADPERDAY 0.017214  /**< radians of Earth orbit per julian day */
 #define CONST_RADPERDEG 0.01745329  /**< radians per degree */
@@ -79,18 +84,18 @@
 #define CONST_MWAIR 28.97  /**< molecular weight of air ~ kg/kmole */
 #define CONST_MWC 12.01  /**< molecular weight of carbon ~ kg/kmole */
 /**< gas constants */
-#define CONST_RGAS CONST_AVOGAD * CONST_BOLTZ /**< Universal gas constant ~ J/K/kmole */
-#define CONST_RDAIR CONST_RGAS / CONST_MWDAIR  /**< Dry air gas constant ~ J/K/kg */
-#define CONST_RWV CONST_RGAS / CONST_MWWV  /**< Water vapor gas constant ~ J/K/kg */
-#define CONST_EPS CONST_MWWV / CONST_MWAIR  /**< Ratio of molecular weights */
+#define CONST_RGAS (CONST_AVOGAD * CONST_BOLTZ) /**< Universal gas constant ~ J/K/kmole */
+#define CONST_RDAIR (CONST_RGAS / CONST_MWDAIR)  /**< Dry air gas constant ~ J/K/kg */
+#define CONST_RWV (CONST_RGAS / CONST_MWWV)  /**< Water vapor gas constant ~ J/K/kg */
+#define CONST_EPS (CONST_MWWV / CONST_MWAIR)  /**< Ratio of molecular weights */
 /**< temperatures */
 #define CONST_TKTRIP 273.16  /**< triple point of fresh water ~ K */
 #define CONST_TKFRZ 273.15  /**< freezing T of fresh water ~ K */
 /**< standard temperature and pressure */
 #define CONST_PSTD 101325.0  /**< (Pa) standard pressure at 0.0 m elevation */
-#define CONST_TSTD CONST_TKFRZ + 15.0  /**< (K) standard temp at 0.0 m elevation */
+#define CONST_TSTD (CONST_TKFRZ + 15.0)  /**< (K) standard temp at 0.0 m elevation */
 /**< densities */
-#define CONST_RHODAIR CONST_PSTD / (CONST_RDAIR * CONST_TKFRZ)  /**< density of dry air at STP ~ kg/m^3 */
+#define CONST_RHODAIR (CONST_PSTD / (CONST_RDAIR * CONST_TKFRZ))  /**< density of dry air at STP ~ kg/m^3 */
 #define CONST_RHOFW 1.000e3  /**< density of fresh water ~ kg/m^3 */
 #define CONST_RHOICE 0.917e3  /**< density of ice   ~ kg/m^3 */
 /**< specific heats */
@@ -103,7 +108,7 @@
 /**< latent heats */
 #define CONST_LATICE 3.337e5  /**< latent heat of fusion ~ J/kg */
 #define CONST_LATVAP 2.501e6  /**< latent heat of evaporation ~ J/kg */
-#define CONST_LATSUB CONST_LATICE + CONST_LATVAP  /**< latent heat of sublimation ~ J/kg */
+#define CONST_LATSUB (CONST_LATICE + CONST_LATVAP)  /**< latent heat of sublimation ~ J/kg */
 
 /**< special values */
 #define CONST_SPVAL 1.0e30

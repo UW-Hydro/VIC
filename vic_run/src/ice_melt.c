@@ -38,7 +38,7 @@ ice_melt(double            z2,
          double            Le,
          snow_data_struct *snow,
          lake_var_struct  *lake,
-         int               delta_t,
+         double            delta_t,
          double            displacement,
          double            Z0,
          double            surf_atten,
@@ -201,7 +201,7 @@ ice_melt(double            z2,
 
     if (options.BLOWING && snow->swq > 0.) {
         Ls = calc_latent_heat_of_sublimation(snow->surf_temp);
-        snow->blowing_flux = CalcBlowingSnow((double) delta_t, air_temp,
+        snow->blowing_flux = CalcBlowingSnow(delta_t, air_temp,
                                              snow->last_snow, snow->surf_water,
                                              wind, Ls, density,
                                              vp, Z0,
@@ -213,7 +213,7 @@ ice_melt(double            z2,
                     "CalcBlowingSnow.  Exiting module.");
         }
 
-        snow->blowing_flux *= delta_t * SEC_PER_HOUR / CONST_RHOFW;
+        snow->blowing_flux *= delta_t / CONST_RHOFW;
     }
     else {
         snow->blowing_flux = 0.0;
@@ -226,7 +226,7 @@ ice_melt(double            z2,
 
     /* Calculate the surface energy balance for snow_temp = 0.0 */
 
-    Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
+    Qnet = CalcIcePackEnergyBalance((double)0.0, delta_t, aero_resist,
                                     aero_resist_used, z2, Z0, wind, net_short,
                                     longwave, density, Le, air_temp,
                                     pressure * PA_PER_KPA, vpd * PA_PER_KPA,
@@ -249,11 +249,11 @@ ice_melt(double            z2,
         if (RefreezeEnergy >= 0.0) {                 /* Surface is freezing. */
             RefrozenWater = RefreezeEnergy /
                             (CONST_LATICE *
-                             CONST_RHOFW) * delta_t * SEC_PER_HOUR;
+                             CONST_RHOFW) * delta_t;
             if (RefrozenWater > snow->surf_water) {
                 RefrozenWater = snow->surf_water;
                 RefreezeEnergy = RefrozenWater * CONST_LATICE * CONST_RHOFW /
-                                 (delta_t * SEC_PER_HOUR);
+                                 (delta_t);
             }
             melt_energy += RefreezeEnergy;
             SurfaceSwq += RefrozenWater;
@@ -268,7 +268,7 @@ ice_melt(double            z2,
         else {
             /* Calculate snow melt if refreeze energy is negative */
             SnowMelt = fabs(RefreezeEnergy) /
-                       (CONST_LATICE * CONST_RHOFW) * delta_t * SEC_PER_HOUR;
+                       (CONST_LATICE * CONST_RHOFW) * delta_t;
             melt_energy += RefreezeEnergy;
         }
 
@@ -351,10 +351,9 @@ ice_melt(double            z2,
         if (SurfaceSwq > param.SNOW_MIN_SWQ_EB_THRES) {
             snow->surf_temp =
                 root_brent((double)(snow->surf_temp - param.SNOW_DT),
-                           (double)(snow->surf_temp +
-                                    param.SNOW_DT),
+                           (double)(snow->surf_temp + param.SNOW_DT),
                            ErrorString,
-                           IceEnergyBalance, (double)delta_t,
+                           IceEnergyBalance, delta_t,
                            aero_resist, aero_resist_used, z2, Z0,
                            wind, net_short, longwave, density,
                            Le, air_temp, pressure * PA_PER_KPA,
@@ -374,7 +373,7 @@ ice_melt(double            z2,
                     snow->surf_temp_fbcount++;
                 }
                 else {
-                    ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t,
+                    ErrorIcePackEnergyBalance(snow->surf_temp, delta_t,
                                               aero_resist,
                                               aero_resist_used, z2,
                                               displacement, Z0, wind, net_short,
@@ -403,7 +402,7 @@ ice_melt(double            z2,
             snow->surf_temp = 999;
         }
         if (snow->surf_temp > -998 && snow->surf_temp < 999) {
-            Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t,
+            Qnet = CalcIcePackEnergyBalance(snow->surf_temp, delta_t,
                                             aero_resist, aero_resist_used, z2,
                                             Z0, wind, net_short, longwave,
                                             density, Le, air_temp,
@@ -432,7 +431,7 @@ ice_melt(double            z2,
             SnowIce += snow->surf_water;
             Ice += snow->surf_water;
             melt_energy += snow->surf_water * CONST_LATICE * CONST_RHOFW /
-                           (delta_t * SEC_PER_HOUR);
+                           (delta_t);
             RefrozenWater = snow->surf_water;
             snow->surf_water = 0.0;
 
@@ -659,7 +658,7 @@ double
 ErrorPrintIcePackEnergyBalance(double  TSurf,
                                va_list ap)
 {
-    double  Dt;                  /* Model time step (hours) */
+    double  Dt;                  /* Model time step (seconds) */
     double  Ra;                  /* Aerodynamic resistance (s/m) */
     double *Ra_used;             /* Aerodynamic resistance (s/m) after stability correction */
     double  Z;                   /* Reference height (m) */

@@ -117,6 +117,8 @@ vic_start(void)
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
+    // Check that model parameters are valid
+    validate_parameters();
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
                        0, MPI_COMM_WORLD);

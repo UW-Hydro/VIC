@@ -41,7 +41,10 @@ VICPATH = ../../vic_run
 SHELL = /bin/bash
 
 # Set CC = your compiler here
-CC = gcc
+ifndef CC
+CC=gcc
+endif
+
 # set include
 INCLUDES = -I ${DRIVERPATH}/include -I $(SHAREDPATH)/include -I ${VICPATH}/include
 
@@ -133,6 +136,7 @@ OBJS = \
 	${SHAREDPATH}/src/open_file.o \
 	${SHAREDPATH}/src/print_library_shared.o \
 	${SHAREDPATH}/src/vic_log.o \
+	${SHAREDPATH}/src/vic_time.o \
 	${VICPATH}/src/CalcAerodynamic.o \
 	${VICPATH}/src/CalcBlowingSnow.o \
 	${VICPATH}/src/IceEnergyBalance.o \

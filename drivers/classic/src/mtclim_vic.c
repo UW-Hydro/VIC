@@ -38,89 +38,84 @@ int
 data_alloc(const control_struct *ctrl,
            data_struct          *data)
 {
-    int ok = 1;
-    int ndays;
+    bool   ok = true;
+    size_t ndays;
 
     ndays = ctrl->ndays;
 
-    if (ok && ctrl->inyear &&
-        !(data->year = (int*) malloc(ndays * sizeof(int)))) {
-        log_err("Error allocating for year array");
-        ok = 0;
-    }
     if (ok && !(data->yday = (int*) malloc(ndays * sizeof(int)))) {
         log_err("Error allocating for yearday array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->tmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tmax array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->tmin = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tmin array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->prcp = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for prcp array");
-        ok = 0;
+        ok = false;
     }
     if (ok && ctrl->indewpt &&
         !(data->tdew = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for input humidity array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tmax array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tmin = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tmin array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tday = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site Tday array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_prcp = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site prcp array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_hum = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site VPD array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_srad = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site radiation array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_dayl = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site daylength array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_swe = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site snowpack array");
-        ok = 0;
+        ok = false;
     }
     /* start vic_change */
     if (ok && !(data->s_fdir = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for direct fraction array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tskc = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site cloudiness array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_ppratio = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_tfmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     if (ok && !(data->s_ttmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for site pet/prcp ratio array");
-        ok = 0;
+        ok = false;
     }
     /* end vic_change */
     return (!ok);
@@ -134,8 +129,8 @@ calc_tair(const control_struct   *ctrl,
           const parameter_struct *p,
           data_struct            *data)
 {
-    int                      ok = 1;
-    int                      i, ndays;
+    bool                     ok = true;
+    size_t                   i, ndays;
     double                   dz;
     double                   tmean, tmax, tmin;
 
@@ -172,8 +167,8 @@ calc_prcp(const control_struct   *ctrl,
           const parameter_struct *p,
           data_struct            *data)
 {
-    int    ok = 1;
-    int    i, ndays;
+    bool   ok = true;
+    size_t i, ndays;
     double ratio;
 
     ndays = ctrl->ndays;
@@ -212,8 +207,8 @@ int
 snowpack(const control_struct *ctrl,
          data_struct          *data)
 {
-    int                      ok = 1;
-    int                      i, ndays, count;
+    bool                     ok = true;
+    size_t                   i, ndays, count;
     int                      start_yday, prev_yday;
     double                   snowpack, newsnow, snowmelt, sum;
 
@@ -244,7 +239,7 @@ snowpack(const control_struct *ctrl,
        first day of data */
     start_yday = data->yday[0];
     if (start_yday == 1) {
-        prev_yday = DAYS_PER_YEAR;
+        prev_yday = (int) ctrl->days_per_year;
     }
     else {
         prev_yday = start_yday - 1;
@@ -297,14 +292,15 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     extern option_struct     options;
     extern parameters_struct param;
 
-    int                      ok = 1;
-    int                      i, j, ndays;
+    bool                     ok = true;
+    bool                     include_leap_day;
+    size_t                   i, j, ndays, days_per_year;
     int                      start_yday, end_yday, isloop;
     int                      ami, yday;
-    double                   ttmax0[DAYS_PER_LYEAR];
-    double                   flat_potrad[DAYS_PER_LYEAR];
-    double                   slope_potrad[DAYS_PER_LYEAR];
-    double                   daylength[DAYS_PER_LYEAR];
+    double                  *ttmax0;
+    double                  *flat_potrad;
+    double                  *slope_potrad;
+    double                  *daylength;
     double                  *dtr, *sm_dtr;
     double                  *parray, *window, *t_fmax, *tdew;
     double                  *pet;
@@ -339,7 +335,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
     /* start vic_change */
     int                      tinystep;
-    int                      tinystepspday;
+    size_t                   tinystepspday;
     /* end vic_change */
 
     int                      iter;
@@ -353,55 +349,84 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     /* number of simulation days */
     ndays = ctrl->ndays;
 
+    if (ctrl->days_per_year + DBL_EPSILON > DAYS_PER_YEAR) {
+        days_per_year = (size_t) DAYS_PER_LYEAR;
+        include_leap_day = true;
+    }
+    else {
+        days_per_year = (size_t) ctrl->days_per_year;
+        include_leap_day = false;
+    }
+
     /* local array memory allocation */
     /* allocate space for DTR and smoothed DTR arrays */
     if (!(dtr = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for DTR array");
-        ok = 0;
+        ok = false;
     }
     if (!(sm_dtr = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for smoothed DTR array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for effective annual precip array */
     if (!(parray = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for effective annual precip array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for the prcp totaling array */
     if (!(window = (double*) malloc((ndays + 90) * sizeof(double)))) {
         log_err("Error allocating for prcp totaling array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for t_fmax */
     if (!(t_fmax = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for p_tt_max array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for Tdew array */
     if (!(tdew = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for Tdew array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pet array */
     if (!(pet = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pet array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pva array */
     if (!(pva = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pva array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for tdew_save array */
     if (!(tdew_save = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for tdew_save array");
-        ok = 0;
+        ok = false;
     }
     /* allocate space for pva_save array */
     if (!(pva_save = (double*) malloc(ndays * sizeof(double)))) {
         log_err("Error allocating for pva_save array");
-        ok = 0;
+        ok = false;
+    }
+    /* allocate space for ttmax0 array */
+    if (!(ttmax0 = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for ttmax0 array");
+        ok = false;
+    }
+    /* allocate space for flat_potrad array */
+    if (!(flat_potrad = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for flat_potrad array");
+        ok = false;
+    }
+    /* allocate space for slope_potrad array */
+    if (!(slope_potrad = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for slope_potrad array");
+        ok = false;
+    }
+    /* allocate space for daylength array */
+    if (!(daylength = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for daylength array");
+        ok = false;
     }
 
     /* calculate diurnal temperature range for transmittance calculations */
@@ -418,13 +443,13 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     if (ndays >= 30) { /* use 30-day antecedent smoothing window */
         if (pulled_boxcar(dtr, sm_dtr, ndays, 30, 0)) {
             log_err("Error in boxcar smoothing, calc_srad_humidity()");
-            ok = 0;
+            ok = false;
         }
     }
     else { /* smoothing window width = ndays */
         if (pulled_boxcar(dtr, sm_dtr, ndays, ndays, 0)) {
             log_err("Error in boxcar smoothing, calc_srad_humidity()");
-            ok = 0;
+            ok = false;
         }
     }
 
@@ -433,7 +458,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_prcp += data->s_prcp[i];
     }
-    ann_prcp = (sum_prcp / (double)ndays) * CONST_DDAYS_PER_YEAR;
+    ann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
     if (ann_prcp == 0.0) {
         ann_prcp = 1.0;
     }
@@ -449,7 +474,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         for (i = 0; i < ndays; i++) {
             sum_prcp += data->s_prcp[i];
         }
-        effann_prcp = (sum_prcp / (double)ndays) * CONST_DDAYS_PER_YEAR;
+        effann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
 
         /* if the effective annual precip for this period
            is less than 8 cm, set the effective annual precip to 8 cm
@@ -475,8 +500,8 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         }
         else {
             isloop =
-                (end_yday == DAYS_PER_YEAR || end_yday ==
-                 DAYS_PER_LYEAR) ? 1 : 0;
+                (end_yday == (int) ctrl->days_per_year || end_yday ==
+                 (int) ctrl->days_per_year + 1) ? 1 : 0;
         }
 
         /* fill the first 90 days of window */
@@ -500,7 +525,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             for (j = 0; j < 90; j++) {
                 sum_prcp += window[i + j];
             }
-            sum_prcp = (sum_prcp / 90.0) * CONST_DDAYS_PER_YEAR;
+            sum_prcp = (sum_prcp / 90.0) * ctrl->days_per_year;
 
             /* if the effective annual precip for this 90-day period
                is less than 8 cm, set the effective annual precip to 8 cm
@@ -554,11 +579,11 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     dt = param.MTCLIM_SRADDT;              /* set timestep */
     dh = dt / CONST_SECPERRAD;      /* calculate hour-angle step */
     /* start vic_change */
-    tinystepspday = CONST_CDAY / param.MTCLIM_SRADDT;
+    tinystepspday = (size_t)(CONST_CDAY / param.MTCLIM_SRADDT);
     /* end vic_change */
 
     /* begin loop through yeardays */
-    for (i = 0; i < DAYS_PER_YEAR; i++) {
+    for (i = 0; i < (size_t) ctrl->days_per_year; i++) {
         /* calculate cos and sin of declination */
         decl = CONST_MINDECL *
                cos(((double)i + CONST_DAYSOFF) * CONST_RADPERDAY);
@@ -592,7 +617,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
         /* solar constant as a function of yearday (W/m^2) */
         sc = param.MTCLIM_SOLAR_CONSTANT + 45.5 *
-             sin((2.0 * CONST_PI * (double)i / CONST_DDAYS_PER_YEAR) + 1.7);
+             sin((2.0 * CONST_PI * (double)i / ctrl->days_per_year) + 1.7);
 
         /* extraterrestrial radiation perpendicular to beam, total over
            the timestep (J) */
@@ -671,7 +696,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             if (tinystep < 0) {
                 tinystep = 0;
             }
-            if (tinystep > tinystepspday - 1) {
+            if (tinystep > (int)tinystepspday - 1) {
                 tinystep = tinystepspday - 1;
             }
             if (dir_flat_topa > 0) {
@@ -703,19 +728,21 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             flat_potrad[i] = 0.0;
             slope_potrad[i] = 0.0;
         }
-    } /* end of i=365 days loop */
+    } /* end of i=days_year_days loop */
 
-    /* force yearday 366 = yearday 365 */
-    ttmax0[DAYS_PER_YEAR] = ttmax0[DAYS_PER_YEAR - 1];
-    flat_potrad[DAYS_PER_YEAR] = flat_potrad[DAYS_PER_YEAR - 1];
-    slope_potrad[DAYS_PER_YEAR] = slope_potrad[DAYS_PER_YEAR - 1];
-    daylength[DAYS_PER_YEAR] = daylength[DAYS_PER_YEAR - 1];
+    /* if leap day should be included, force yearday 366 = yearday 365 */
+    if (include_leap_day) {
+        ttmax0[DAYS_PER_YEAR] = ttmax0[DAYS_PER_YEAR - 1];
+        flat_potrad[DAYS_PER_YEAR] = flat_potrad[DAYS_PER_YEAR - 1];
+        slope_potrad[DAYS_PER_YEAR] = slope_potrad[DAYS_PER_YEAR - 1];
+        daylength[DAYS_PER_YEAR] = daylength[DAYS_PER_YEAR - 1];
 
-    /* start vic_change */
-    for (j = 0; j < tinystepspday; j++) {
-        tiny_radfract[DAYS_PER_YEAR][j] = tiny_radfract[DAYS_PER_YEAR - 1][j];
+        /* start vic_change */
+        for (j = 0; j < tinystepspday; j++) {
+            tiny_radfract[DAYS_PER_YEAR][j] = tiny_radfract[DAYS_PER_YEAR - 1][j];
+        }
+        /* end vic_change */
     }
-    /* end vic_change */
 
     /* STEP (4)  calculate the sky proportion for diffuse radiation */
 
@@ -807,7 +834,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_pet += pet[i];
     }
-    ann_pet = (sum_pet / (double)ndays) * CONST_DDAYS_PER_YEAR;
+    ann_pet = (sum_pet / (double)ndays) * ctrl->days_per_year;
 
     /* Reset humidity terms if no iteration desired */
     if (ctrl->indewpt || ctrl->invp ||
@@ -1036,7 +1063,7 @@ compute_srad_humidity_onetime(int                   ndays,
 
         /* calculate ratio (PET/effann_prcp) and correct the dewpoint */
         ratio = pet[i] / parray[i];
-        data->s_ppratio[i] = ratio * CONST_DDAYS_PER_YEAR;
+        data->s_ppratio[i] = ratio * ctrl->days_per_year;
         ratio2 = ratio * ratio;
         ratio3 = ratio2 * ratio;
         tdewk = tmink *
@@ -1060,10 +1087,8 @@ int
 data_free(const control_struct *ctrl,
           data_struct          *data)
 {
-    int ok = 1;
-    if (ctrl->inyear) {
-        free(data->year);
-    }
+    bool ok = true;
+
     free(data->yday);
     free(data->tmax);
     free(data->tmin);
@@ -1192,19 +1217,19 @@ pulled_boxcar(double *input,
               int     w,
               int     w_flag)
 {
-    int     ok = 1;
+    bool    ok = true;
     int     i, j;
     double *wt;
     double  total, sum_wt;
 
     if (w > n) {
         log_err("Boxcar longer than array...Resize boxcar and try again");
-        ok = 0;
+        ok = false;
     }
 
     if (ok && !(wt = (double*) malloc(w * sizeof(double)))) {
         log_err("Allocation error in boxcar()");
-        ok = 0;
+        ok = false;
     }
 
     if (ok) {

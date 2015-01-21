@@ -32,10 +32,11 @@
  * @brief    This subroutine computes the cosine of the solar zenith angle.
  *****************************************************************************/
 double
-compute_coszen(double     lat,
-               double     lng,
-               double     time_zone_lng,
-               dmy_struct dmy)
+compute_coszen(double         lat,
+               double         lng,
+               double         time_zone_lng,
+               unsigned short day_in_year,
+               unsigned       second)
 {
     double coslat;
     double sinlat;
@@ -48,13 +49,16 @@ compute_coszen(double     lat,
     double hour_offset;
     double cosh;
     double coszen;
+    double hour;
+
+    hour = second / SEC_PER_HOUR;
 
     /* calculate cos and sin of latitude */
     coslat = cos(lat * CONST_PI / 180);
     sinlat = sin(lat * CONST_PI / 180);
 
     /* calculate cos and sin of declination */
-    decl = CONST_MINDECL * cos(((double)dmy.day_in_year + CONST_DAYSOFF) *
+    decl = CONST_MINDECL * cos(((double)day_in_year + CONST_DAYSOFF) *
                                CONST_RADPERDAY);
     cosdecl = cos(decl);
     sindecl = sin(decl);
@@ -72,7 +76,7 @@ compute_coszen(double     lat,
 
     /* calculate cos of hour angle */
     hour_offset = (time_zone_lng - lng) * HOURS_PER_DAY / 360;
-    cosh = cos(((double)dmy.hour + hour_offset - 12) * CONST_PI / 12);
+    cosh = cos((hour + hour_offset - 12) * CONST_PI / 12);
 
     /* calculate cosine of solar zenith angle */
     coszen = cosegeom * cosh + sinegeom;

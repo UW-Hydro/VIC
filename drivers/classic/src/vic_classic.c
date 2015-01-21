@@ -105,6 +105,8 @@ main(int   argc,
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }
+    // Check that model parameters are valid
+    validate_parameters();
 
     /** Set up output data structures **/
     out_data = create_output_list();
@@ -125,6 +127,7 @@ main(int   argc,
     cellnum = -1;
 
     /** Make Date Data Structure **/
+    initialize_time();
     dmy = make_dmy(&global_param);
 
     /** allocate memory for the atmos_data_struct **/

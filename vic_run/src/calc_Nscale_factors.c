@@ -35,30 +35,25 @@
  * @brief    Calculate nitrogen scaling factors for all canopy layers.
  *****************************************************************************/
 void
-calc_Nscale_factors(char       NscaleFlag,
-                    double    *CanopLayerBnd,
-                    double     LAItotal,
-                    double     lat,
-                    double     lng,
-                    double     time_zone_lng,
-                    dmy_struct dmy,
-                    double    *NscaleFactor)
+calc_Nscale_factors(char           NscaleFlag,
+                    double        *CanopLayerBnd,
+                    double         LAItotal,
+                    double         lat,
+                    double         lng,
+                    double         time_zone_lng,
+                    unsigned short day_in_year,
+                    double        *NscaleFactor)
 {
     extern option_struct     options;
     extern parameters_struct param;
 
-    dmy_struct               dmy_tmp;
     double                   coszen_noon;
     double                   k12;
     size_t                   cidx; // canopy layer index
 
     /* Compute solar zenith angle at local noon */
-    dmy_tmp.year = dmy.year;
-    dmy_tmp.month = dmy.month;
-    dmy_tmp.day = dmy.day;
-    dmy_tmp.day_in_year = dmy.day_in_year;
-    dmy_tmp.hour = 12;
-    coszen_noon = compute_coszen(lat, lng, time_zone_lng, dmy_tmp);
+    coszen_noon = compute_coszen(lat, lng, time_zone_lng, day_in_year,
+                                 SEC_PER_DAY / 2);
     if (coszen_noon < param.PHOTO_ZENITHMINPAR) {
         coszen_noon = param.PHOTO_ZENITHMINPAR;
     }

@@ -71,7 +71,7 @@ write_output(out_data_struct      *out_data,
     int                        out_dt_sec;
     int                        v;
 
-    out_dt_sec = global_param.out_dt * SEC_PER_HOUR;
+    out_dt_sec = global_param.out_dt;
 
     /***********************************************
        Change of units for ALMA-compliant output

@@ -48,8 +48,8 @@ void free_veglib(veg_lib_struct **);
 void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 double hermint(double, int, double *, double *, double *, double *, double *);
-void hermite(int, double *, double *, double *, double *, double *);
-void HourlyT(int, int, int *, double *, int *, double *, double *);
+void hermite(size_t, double *, double *, double *, double *, double *);
+void SubDailyT(size_t, double *, double *, double *, double *, double *);
 void init_output_list(out_data_struct *, int, char *, int, double);
 void initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
                       veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
@@ -77,11 +77,12 @@ void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
-void set_max_min_hour(double *, int, int *, int *);
+void set_max_min_sec(double *, size_t, double *, double *);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
-void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *, int);
+void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
+                double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,
                         out_data_struct *);
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *,

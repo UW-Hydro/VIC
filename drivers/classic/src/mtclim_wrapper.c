@@ -195,6 +195,30 @@ mtclim_init(int               have_dewpt,
     }
     ctrl->outhum = 1;           /* output vapor pressure */
 
+    // Set days per year parameter based on calendar.  Note this isn't a
+    // perfect solution since for the standard calendars, we aren't tracking
+    // which years are leap years.
+    if (global_param.calendar == CALENDAR_STANDARD ||
+        global_param.calendar == CALENDAR_GREGORIAN ||
+        global_param.calendar == CALENDAR_PROLEPTIC_GREGORIAN ||
+        global_param.calendar == CALENDAR_JULIAN) {
+        ctrl->days_per_year = DAYS_PER_JYEAR;
+    }
+    else if (global_param.calendar == CALENDAR_NOLEAP ||
+             global_param.calendar == CALENDAR_365_DAY) {
+        ctrl->days_per_year = DAYS_PER_YEAR;
+    }
+    else if (global_param.calendar == CALENDAR_ALL_LEAP ||
+             global_param.calendar == CALENDAR_366_DAY) {
+        ctrl->days_per_year = DAYS_PER_LYEAR;
+    }
+    else if (global_param.calendar == CALENDAR_360_DAY) {
+        ctrl->days_per_year = 360;
+    }
+    else {
+        log_err("Unknown Calendar Flag: %hu", global_param.calendar);
+    }
+
     /* initialize the parameter structure.  Meteorological variables are only
        calculated for the mean grid cell elevation.  The temperatures are lapsed
        outside of the mtclim code.  Therefore p->base_elev and p->site_elev are

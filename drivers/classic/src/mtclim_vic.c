@@ -239,7 +239,7 @@ snowpack(const control_struct *ctrl,
        first day of data */
     start_yday = data->yday[0];
     if (start_yday == 1) {
-        prev_yday = DAYS_PER_YEAR;
+        prev_yday = (int) ctrl->days_per_year;
     }
     else {
         prev_yday = start_yday - 1;
@@ -293,13 +293,14 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     extern parameters_struct param;
 
     bool                     ok = true;
-    size_t                   i, j, ndays;
+    bool                     include_leap_day;
+    size_t                   i, j, ndays, days_per_year;
     int                      start_yday, end_yday, isloop;
     int                      ami, yday;
-    double                   ttmax0[DAYS_PER_LYEAR];
-    double                   flat_potrad[DAYS_PER_LYEAR];
-    double                   slope_potrad[DAYS_PER_LYEAR];
-    double                   daylength[DAYS_PER_LYEAR];
+    double                  *ttmax0;
+    double                  *flat_potrad;
+    double                  *slope_potrad;
+    double                  *daylength;
     double                  *dtr, *sm_dtr;
     double                  *parray, *window, *t_fmax, *tdew;
     double                  *pet;
@@ -347,6 +348,15 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
     /* number of simulation days */
     ndays = ctrl->ndays;
+
+    if (ctrl->days_per_year + DBL_EPSILON > DAYS_PER_YEAR) {
+        days_per_year = (size_t) DAYS_PER_LYEAR;
+        include_leap_day = true;
+    }
+    else {
+        days_per_year = (size_t) ctrl->days_per_year;
+        include_leap_day = false;
+    }
 
     /* local array memory allocation */
     /* allocate space for DTR and smoothed DTR arrays */
@@ -398,6 +408,26 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         log_err("Error allocating for pva_save array");
         ok = false;
     }
+    /* allocate space for ttmax0 array */
+    if (!(ttmax0 = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for ttmax0 array");
+        ok = false;
+    }
+    /* allocate space for flat_potrad array */
+    if (!(flat_potrad = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for flat_potrad array");
+        ok = false;
+    }
+    /* allocate space for slope_potrad array */
+    if (!(slope_potrad = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for slope_potrad array");
+        ok = false;
+    }
+    /* allocate space for daylength array */
+    if (!(daylength = (double*) malloc(days_per_year * sizeof(double)))) {
+        log_err("Error allocating for daylength array");
+        ok = false;
+    }
 
     /* calculate diurnal temperature range for transmittance calculations */
     for (i = 0; i < ndays; i++) {
@@ -428,7 +458,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_prcp += data->s_prcp[i];
     }
-    ann_prcp = (sum_prcp / (double)ndays) * CONST_DDAYS_PER_YEAR;
+    ann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
     if (ann_prcp == 0.0) {
         ann_prcp = 1.0;
     }
@@ -444,7 +474,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         for (i = 0; i < ndays; i++) {
             sum_prcp += data->s_prcp[i];
         }
-        effann_prcp = (sum_prcp / (double)ndays) * CONST_DDAYS_PER_YEAR;
+        effann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
 
         /* if the effective annual precip for this period
            is less than 8 cm, set the effective annual precip to 8 cm
@@ -470,8 +500,8 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         }
         else {
             isloop =
-                (end_yday == DAYS_PER_YEAR || end_yday ==
-                 DAYS_PER_LYEAR) ? 1 : 0;
+                (end_yday == (int) ctrl->days_per_year || end_yday ==
+                 (int) ctrl->days_per_year + 1) ? 1 : 0;
         }
 
         /* fill the first 90 days of window */
@@ -495,7 +525,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             for (j = 0; j < 90; j++) {
                 sum_prcp += window[i + j];
             }
-            sum_prcp = (sum_prcp / 90.0) * CONST_DDAYS_PER_YEAR;
+            sum_prcp = (sum_prcp / 90.0) * ctrl->days_per_year;
 
             /* if the effective annual precip for this 90-day period
                is less than 8 cm, set the effective annual precip to 8 cm
@@ -553,7 +583,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     /* end vic_change */
 
     /* begin loop through yeardays */
-    for (i = 0; i < DAYS_PER_YEAR; i++) {
+    for (i = 0; i < (size_t) ctrl->days_per_year; i++) {
         /* calculate cos and sin of declination */
         decl = CONST_MINDECL *
                cos(((double)i + CONST_DAYSOFF) * CONST_RADPERDAY);
@@ -587,7 +617,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
         /* solar constant as a function of yearday (W/m^2) */
         sc = param.MTCLIM_SOLAR_CONSTANT + 45.5 *
-             sin((2.0 * CONST_PI * (double)i / CONST_DDAYS_PER_YEAR) + 1.7);
+             sin((2.0 * CONST_PI * (double)i / ctrl->days_per_year) + 1.7);
 
         /* extraterrestrial radiation perpendicular to beam, total over
            the timestep (J) */
@@ -698,19 +728,21 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             flat_potrad[i] = 0.0;
             slope_potrad[i] = 0.0;
         }
-    } /* end of i=365 days loop */
+    } /* end of i=days_year_days loop */
 
-    /* force yearday 366 = yearday 365 */
-    ttmax0[DAYS_PER_YEAR] = ttmax0[DAYS_PER_YEAR - 1];
-    flat_potrad[DAYS_PER_YEAR] = flat_potrad[DAYS_PER_YEAR - 1];
-    slope_potrad[DAYS_PER_YEAR] = slope_potrad[DAYS_PER_YEAR - 1];
-    daylength[DAYS_PER_YEAR] = daylength[DAYS_PER_YEAR - 1];
+    /* if leap day should be included, force yearday 366 = yearday 365 */
+    if (include_leap_day) {
+        ttmax0[DAYS_PER_YEAR] = ttmax0[DAYS_PER_YEAR - 1];
+        flat_potrad[DAYS_PER_YEAR] = flat_potrad[DAYS_PER_YEAR - 1];
+        slope_potrad[DAYS_PER_YEAR] = slope_potrad[DAYS_PER_YEAR - 1];
+        daylength[DAYS_PER_YEAR] = daylength[DAYS_PER_YEAR - 1];
 
-    /* start vic_change */
-    for (j = 0; j < tinystepspday; j++) {
-        tiny_radfract[DAYS_PER_YEAR][j] = tiny_radfract[DAYS_PER_YEAR - 1][j];
+        /* start vic_change */
+        for (j = 0; j < tinystepspday; j++) {
+            tiny_radfract[DAYS_PER_YEAR][j] = tiny_radfract[DAYS_PER_YEAR - 1][j];
+        }
+        /* end vic_change */
     }
-    /* end vic_change */
 
     /* STEP (4)  calculate the sky proportion for diffuse radiation */
 
@@ -802,7 +834,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_pet += pet[i];
     }
-    ann_pet = (sum_pet / (double)ndays) * CONST_DDAYS_PER_YEAR;
+    ann_pet = (sum_pet / (double)ndays) * ctrl->days_per_year;
 
     /* Reset humidity terms if no iteration desired */
     if (ctrl->indewpt || ctrl->invp ||
@@ -1031,7 +1063,7 @@ compute_srad_humidity_onetime(int                   ndays,
 
         /* calculate ratio (PET/effann_prcp) and correct the dewpoint */
         ratio = pet[i] / parray[i];
-        data->s_ppratio[i] = ratio * CONST_DDAYS_PER_YEAR;
+        data->s_ppratio[i] = ratio * ctrl->days_per_year;
         ratio2 = ratio * ratio;
         ratio3 = ratio2 * ratio;
         tdewk = tmink *

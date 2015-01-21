@@ -37,6 +37,7 @@ typedef struct
     int indewpt;         /**< input dewpoint temperature flag (0=NO, 1=YES) */
     int invp;            /**< input vapor pressure flag (0=NO, 1=YES) */
     int outhum;          /**< output humidity flag            (0=VPD, 1=VP) */
+    double days_per_year;  /**< Days per year*/
 } control_struct;
 
 /******************************************************************************

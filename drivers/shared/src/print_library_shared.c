@@ -83,7 +83,7 @@ print_dmy(dmy_struct *dmy)
     fprintf(LOG_DEST, "\tday_in_year: %hu\n", dmy->day_in_year);
     fprintf(LOG_DEST, "\tseconds    : %u\n", dmy->dayseconds);
     fprintf(LOG_DEST, "\tmonth      : %hu\n", dmy->month);
-    fprintf(LOG_DEST, "\tyear       : %hu\n", dmy->year);
+    fprintf(LOG_DEST, "\tyear       : %u\n", dmy->year);
 }
 
 /******************************************************************************

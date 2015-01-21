@@ -1096,7 +1096,7 @@ get_global_param(FILE *gp)
         global_param.startsec = 0;
     }
     else if (global_param.startsec > SEC_PER_DAY) {
-        log_err("The specified simulation start second (%hu) > 86400  Make sure "
+        log_err("The specified simulation start second (%u) > 86400  Make sure "
                 "that the global file defines a positive integer "
                 "for STARTSEC.",
                 global_param.startsec);

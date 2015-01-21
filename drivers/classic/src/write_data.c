@@ -203,13 +203,13 @@ write_data(out_data_file_struct *out_data_files,
                 if (dt < SEC_PER_DAY) {
                     // Write year, month, day, and sec
                     fprintf(out_data_files[file_idx].fh,
-                            "%04hu\t%02hu\t%02hu\t%05u\t",
+                            "%04u\t%02hu\t%02hu\t%05u\t",
                             dmy->year, dmy->month, dmy->day, dmy->dayseconds);
                 }
                 else {
                     // Only write year, month, and day
                     fprintf(out_data_files[file_idx].fh,
-                            "%04hu\t%02hu\t%02hu\t",
+                            "%04u\t%02hu\t%02hu\t",
                             dmy->year, dmy->month, dmy->day);
                 }
             }

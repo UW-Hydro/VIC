@@ -245,7 +245,7 @@ read_atmos_data(FILE               *infile,
 
     if (rec * param_set.FORCE_DT[file_num] <
         global_param.nrecs * global_param.dt) {
-        log_err("Not enough records in forcing file %i (%hu * %lf = %lf) to run "
+        log_err("Not enough records in forcing file %i (%u * %lf = %lf) to run "
                 "the number of records defined in the global file "
                 "(%zu * %lf = %lf).  Check forcing file time step, and global "
                 "file", file_num + 1, rec, param_set.FORCE_DT[file_num],

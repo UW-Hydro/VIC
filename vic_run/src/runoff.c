@@ -39,48 +39,51 @@ runoff(cell_data_struct  *cell,
        soil_con_struct   *soil_con,
        double             ppt,
        double            *frost_fract,
-       int                dt,
+       double             dt,
        int                Nnodes)
 {
-    extern option_struct options;
-    size_t               lindex;
-    int                  last_index;
-    int                  time_step;
-    int                  tmplayer;
-    size_t               frost_area;
-    int                  fidx;
-    int                  ErrorFlag;
-    double               A, frac;
-    double               tmp_runoff;
-    double               inflow;
-    double               resid_moist[MAX_LAYERS]; // residual moisture (mm)
-    double               org_moist[MAX_LAYERS]; // total soil moisture (liquid and frozen) at beginning of this function (mm)
-    double               avail_liq[MAX_LAYERS][MAX_FROST_AREAS]; // liquid soil moisture available for evap/drainage (mm)
-    double               liq[MAX_LAYERS];     // current liquid soil moisture (mm)
-    double               ice[MAX_LAYERS];     // current frozen soil moisture (mm)
-    double               moist[MAX_LAYERS];   // current total soil moisture (liquid and frozen) (mm)
-    double               max_moist[MAX_LAYERS]; // maximum storable moisture (liquid and frozen) (mm)
-    double               Ksat[MAX_LAYERS];
-    double               Q12[MAX_LAYERS - 1];
-    double               Dsmax;
-    double               tmp_inflow;
-    double               tmp_moist;
-    double               tmp_moist_for_runoff[MAX_LAYERS];
-    double               tmp_liq;
-    double               dt_inflow;
-    double               dt_runoff;
-    double               runoff[MAX_FROST_AREAS];
-    double               tmp_dt_runoff[MAX_FROST_AREAS];
-    double               baseflow[MAX_FROST_AREAS];
-    double               dt_baseflow;
-    double               rel_moist;
-    double               evap[MAX_LAYERS][MAX_FROST_AREAS];
-    double               sum_liq;
-    double               evap_fraction;
-    double               evap_sum;
-    double               tmp_fract;
-    layer_data_struct   *layer;
-    layer_data_struct    tmp_layer;
+    extern option_struct       options;
+    extern global_param_struct global_param;
+
+    size_t                     lindex;
+    size_t                     time_step;
+    int                        last_index;
+    int                        tmplayer;
+    size_t                     frost_area;
+    int                        fidx;
+    int                        ErrorFlag;
+    double                     A, frac;
+    double                     tmp_runoff;
+    double                     inflow;
+    double                     resid_moist[MAX_LAYERS]; // residual moisture (mm)
+    double                     org_moist[MAX_LAYERS]; // total soil moisture (liquid and frozen) at beginning of this function (mm)
+    double                     avail_liq[MAX_LAYERS][MAX_FROST_AREAS]; // liquid soil moisture available for evap/drainage (mm)
+    double                     liq[MAX_LAYERS]; // current liquid soil moisture (mm)
+    double                     ice[MAX_LAYERS]; // current frozen soil moisture (mm)
+    double                     moist[MAX_LAYERS]; // current total soil moisture (liquid and frozen) (mm)
+    double                     max_moist[MAX_LAYERS]; // maximum storable moisture (liquid and frozen) (mm)
+    double                     Ksat[MAX_LAYERS];
+    double                     Q12[MAX_LAYERS - 1];
+    double                     Dsmax;
+    double                     tmp_inflow;
+    double                     tmp_moist;
+    double                     tmp_moist_for_runoff[MAX_LAYERS];
+    double                     tmp_liq;
+    double                     dt_inflow;
+    double                     dt_runoff;
+    double                     runoff[MAX_FROST_AREAS];
+    double                     tmp_dt_runoff[MAX_FROST_AREAS];
+    double                     baseflow[MAX_FROST_AREAS];
+    double                     dt_baseflow;
+    double                     rel_moist;
+    double                     evap[MAX_LAYERS][MAX_FROST_AREAS];
+    double                     sum_liq;
+    double                     evap_fraction;
+    double                     evap_sum;
+    double                     tmp_fract;
+    layer_data_struct         *layer;
+    layer_data_struct          tmp_layer;
+    unsigned short             runoff_steps_per_dt;
 
     /** Set Residual Moisture **/
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
@@ -100,7 +103,7 @@ runoff(cell_data_struct  *cell,
     }
 
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        evap[lindex][0] = layer[lindex].evap / (double)dt;
+        evap[lindex][0] = layer[lindex].evap / dt;
         org_moist[lindex] = layer[lindex].moist;
         layer[lindex].moist = 0;
         if (evap[lindex][0] > 0) { // if there is positive evaporation
@@ -162,7 +165,8 @@ runoff(cell_data_struct  *cell,
            Initialize Variables
         **************************************************/
         for (lindex = 0; lindex < options.Nlayer; lindex++) {
-            Ksat[lindex] = soil_con->Ksat[lindex] / HOURS_PER_DAY;
+            Ksat[lindex] = soil_con->Ksat[lindex] /
+                           global_param.runoff_steps_per_day;
 
             /** Set Layer Liquid Moisture Content **/
             liq[lindex] = org_moist[lindex] - layer[lindex].ice[frost_area];
@@ -186,15 +190,20 @@ runoff(cell_data_struct  *cell,
 
         // save dt_runoff based on initial runoff estimate,
         // since we will modify total runoff below for the case of completely saturated soil
-        tmp_dt_runoff[frost_area] = runoff[frost_area] / (double) dt;
+        tmp_dt_runoff[frost_area] = runoff[frost_area] / dt;
 
         /**************************************************
-           Compute Flow Between Soil Layers (using an hourly time step)
+           Compute Flow Between Soil Layers ()
         **************************************************/
 
-        dt_inflow = inflow / (double) dt;
+        runoff_steps_per_dt = global_param.runoff_steps_per_day /
+                              global_param.model_steps_per_day;
 
-        for (time_step = 0; time_step < dt; time_step++) {
+        dt_inflow = inflow / (double)runoff_steps_per_dt;
+
+        Dsmax = soil_con->Dsmax / global_param.runoff_steps_per_day;
+
+        for (time_step = 0; time_step < runoff_steps_per_dt; time_step++) {
             inflow = dt_inflow;
 
             /*************************************
@@ -242,14 +251,13 @@ runoff(cell_data_struct  *cell,
 
                 /** Update soil layer moisture content **/
                 liq[lindex] = liq[lindex] +
-                              (inflow -
-                               dt_runoff) -
+                              (inflow - dt_runoff) -
                               (Q12[lindex] + evap[lindex][frost_area]);
 
                 /** Verify that soil layer moisture is less than maximum **/
                 if ((liq[lindex] + ice[lindex]) > max_moist[lindex]) {
-                    tmp_inflow =
-                        (liq[lindex] + ice[lindex]) - max_moist[lindex];
+                    tmp_inflow = (liq[lindex] + ice[lindex]) -
+                                 max_moist[lindex];
                     liq[lindex] = max_moist[lindex] - ice[lindex];
 
                     if (lindex == 0) {
@@ -311,7 +319,6 @@ runoff(cell_data_struct  *cell,
                 soil layer moisture from previous time step) **/
 
             lindex = options.Nlayer - 1;
-            Dsmax = soil_con->Dsmax / HOURS_PER_DAY;
 
             /** Compute relative moisture **/
             rel_moist =
@@ -381,7 +388,7 @@ runoff(cell_data_struct  *cell,
             }
 
             baseflow[frost_area] += dt_baseflow;
-        } /* end of hourly time step loop */
+        } /* end of sub-dt time step loop */
 
         /** If negative baseflow, reduce evap accordingly **/
         if (baseflow[frost_area] < 0) {

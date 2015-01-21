@@ -58,6 +58,10 @@
 #define MINSOILDEPTH    0.001  /**< Minimum layer depth with which model can work (m) */
 #define MIN_VEGCOVER    0.0001 /**< Minimum allowable vegcover fraction */
 
+/***** Define minimum and maximum values for model timesteps *****/
+#define MIN_SUBDAILY_STEPS_PER_DAY  4
+#define MAX_SUBDAILY_STEPS_PER_DAY  1440
+
 /***** Potential Evap types *****/
 #define N_PET_TYPES 0
 #define N_PET_TYPES_NON_NAT 0
@@ -498,6 +502,33 @@ enum
     DISP_ALL
 };
 
+/******************************************************************************
+ * @brief   Codes for calendar option.
+ *****************************************************************************/
+enum calendars
+{
+    CALENDAR_STANDARD,
+    CALENDAR_GREGORIAN,
+    CALENDAR_PROLEPTIC_GREGORIAN,
+    CALENDAR_NOLEAP,
+    CALENDAR_365_DAY,
+    CALENDAR_360_DAY,
+    CALENDAR_JULIAN,
+    CALENDAR_ALL_LEAP,
+    CALENDAR_366_DAY
+};
+
+/******************************************************************************
+ * @brief   Codes for time units option.
+ *****************************************************************************/
+enum time_units
+{
+    TIME_UNITS_SECONDS,
+    TIME_UNITS_MINUTES,
+    TIME_UNITS_HOURS,
+    TIME_UNITS_DAYS
+};
+
 /***** Data Structures *****/
 
 /******************************************************************************
@@ -631,7 +662,6 @@ typedef struct {
     unsigned short SNOW_DENSITY;   /**< DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
     size_t SNOW_BAND;    /**< Number of elevation bands over which to solve the
                             snow model */
-    unsigned SNOW_STEP;  /**< Time step in hours to use when solving the snow model */
     bool SPATIAL_FROST;   /**< TRUE = use a uniform distribution to simulate the
                              spatial distribution of soil frost; FALSE = assume
                              that the entire grid cell is frozen uniformly. */
@@ -700,26 +730,34 @@ typedef struct {
     double measure_h;              /**< height of measurements (m) */
     double wind_h;                 /**< height of wind measurements (m) */
     double resolution;             /**< Model resolution (degrees) */
-    unsigned dt;             /**< Time step in hours (24/dt must be an
-                                      integer) */
-    unsigned out_dt;          /**< Output time step in hours (24/out_dt must
-                                      be an integer) */
-    unsigned short endday;          /**< Last day of model simulation */
-    unsigned short endmonth;        /**< Last month of model simulation */
-    unsigned short endyear;         /**< Last year of model simulation */
+    double dt;                     /**< Time step in seconds */
+    double snow_dt;                /**< Snow model time step in seconds */
+    double runoff_dt;              /**< Runoff time step in seconds */
+    double atmos_dt;               /**< Atmos time step in seconds */
+    double out_dt;                 /**< Output time step in seconds */
+    size_t model_steps_per_day;    /**< Number of model timesteps per day */
+    size_t snow_steps_per_day;     /**< Number of snow timesteps per day */
+    size_t runoff_steps_per_day;   /**< Number of runoff timesteps per day */
+    size_t atmos_steps_per_day;    /**< Number of atmos timesteps per day */
+    size_t output_steps_per_day;   /**< Number of output timesteps per day */
+    unsigned short endday;         /**< Last day of model simulation */
+    unsigned short endmonth;       /**< Last month of model simulation */
+    unsigned short endyear;        /**< Last year of model simulation */
     unsigned short forceday[2];    /**< day forcing files starts */
-    unsigned short forcehour[2];   /**< hour forcing files starts */
+    unsigned forcesec[2];          /**< seconds since midnight when forcing
+                                      files starts */
     unsigned short forcemonth[2];  /**< month forcing files starts */
     unsigned short forceoffset[2]; /**< counter to keep track of offset in reading
                                       forcing files; updated after every read */
-    unsigned short forceskip[2];   /**< number of model time steps to skip at
+    unsigned forceskip[2];   /**< number of model time steps to skip at
                                       the start of the forcing file */
     unsigned short forceyear[2];   /**< year forcing files start */
-    unsigned nrecs;                /**< Number of time steps simulated */
+    size_t nrecs;                /**< Number of time steps simulated */
     unsigned short skipyear;       /**< Number of years to skip before writing
                                       output data */
     unsigned short startday;       /**< Starting day of the simulation */
-    unsigned short starthour;      /**< Starting hour of the simulation */
+    unsigned startsec;             /**< Seconds since midnight when simulation
+                                      will start */
     unsigned short startmonth;     /**< Starting month of the simulation */
     unsigned short startyear;      /**< Starting year of the simulation */
     unsigned short stateday;       /**< Day of the simulation at which to save
@@ -728,6 +766,9 @@ typedef struct {
                                       model state */
     unsigned short stateyear;      /**< Year of the simulation at which to save
                                       model state */
+    unsigned short calendar;       /**< Date/time calendar */
+    unsigned short time_units;     /**< Units for numeric times */
+    double time_origin_num;        /**< Numeric date origin */
 } global_param_struct;
 
 /******************************************************************************
@@ -1126,9 +1167,9 @@ typedef struct {
 typedef struct {
     unsigned short day;         /**< current day */
     unsigned short day_in_year; /**< julian day in year */
-    unsigned short hour;        /**< beginning of current hour */
     unsigned short month;       /**< current month */
-    unsigned short year;        /**< current year */
+    int year;                   /**< current year */
+    unsigned dayseconds;        /**< seconds since midnight */
 } dmy_struct;                   /**< array of length nrec created */
 
 /******************************************************************************

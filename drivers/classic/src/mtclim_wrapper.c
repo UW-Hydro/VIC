@@ -42,15 +42,16 @@
 /******************************************************************************/
 void mtclim_init(int have_dewpt, int have_shortwave, double elevation,
                  double slope, double aspect, double ehoriz, double whoriz,
-                 double annual_prcp, double lat, int Ndays, dmy_struct *dmy,
+                 double annual_prcp, double lat, size_t Ndays, dmy_struct *dmy,
                  double *prec, double *tmax, double *tmin, double *vp,
-                 double *hourlyrad, double **tiny_radfract,
+                 double *subdailyrad, double **tiny_radfract,
                  control_struct *ctrl, parameter_struct *p,
                  data_struct *mtclim_data);
 
-void mtclim_to_vic(double hour_offset, dmy_struct *dmy, double **tiny_radfract,
-                   control_struct *ctrl, data_struct *mtclim_data, double *tskc,
-                   double *vp, double *hourlyrad, double *fdir);
+void mtclim_to_vic(double sec_offset_solar, dmy_struct *dmy,
+                   double **tiny_radfract, control_struct *ctrl,
+                   data_struct *mtclim_data, double *tskc, double *vp,
+                   double *subdailyrad, double *fdir);
 
 /******************************************************************************
  * @brief    interface between VIC and MTCLIM.
@@ -58,7 +59,7 @@ void mtclim_to_vic(double hour_offset, dmy_struct *dmy, double **tiny_radfract,
 void
 mtclim_wrapper(int         have_dewpt,
                int         have_shortwave,
-               double      hour_offset,
+               double      sec_offset_solar,
                double      elevation,
                double      slope,
                double      aspect,
@@ -73,7 +74,7 @@ mtclim_wrapper(int         have_dewpt,
                double     *tmin,
                double     *tskc,
                double     *vp,
-               double     *hourlyrad,
+               double     *subdailyrad,
                double     *fdir)
 {
     control_struct   ctrl;
@@ -88,7 +89,7 @@ mtclim_wrapper(int         have_dewpt,
         log_err("Memory allocation error in mtclim_init() ...");
     }
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
-        tiny_radfract[i] = (double *) calloc(CONST_CDAY, sizeof(double));
+        tiny_radfract[i] = (double *) calloc((CONST_CDAY), sizeof(double));
         if (tiny_radfract[i] == NULL) {
             log_err("Memory allocation error in mtclim_init() ...");
         }
@@ -98,7 +99,7 @@ mtclim_wrapper(int         have_dewpt,
     mtclim_init(have_dewpt, have_shortwave, elevation, slope, aspect, ehoriz,
                 whoriz,
                 annual_prcp, lat, Ndays, dmy, prec,
-                tmax, tmin, vp, hourlyrad, tiny_radfract, &ctrl, &p,
+                tmax, tmin, vp, subdailyrad, tiny_radfract, &ctrl, &p,
                 &mtclim_data);
 
     /* calculate daily air temperatures */
@@ -123,8 +124,9 @@ mtclim_wrapper(int         have_dewpt,
     }
 
     /* translate the mtclim structures back to the VIC data structures */
-    mtclim_to_vic(hour_offset, dmy, tiny_radfract, &ctrl, &mtclim_data, tskc,
-                  vp, hourlyrad, fdir);
+    mtclim_to_vic(sec_offset_solar, dmy, tiny_radfract, &ctrl, &mtclim_data,
+                  tskc,
+                  vp, subdailyrad, fdir);
 
     /* clean up */
     if (data_free(&ctrl, &mtclim_data)) {
@@ -149,22 +151,26 @@ mtclim_init(int               have_dewpt,
             double            whoriz,
             double            annual_prcp,
             double            lat,
-            int               Ndays,
+            size_t            Ndays,
             dmy_struct       *dmy,
             double           *prec,
             double           *tmax,
             double           *tmin,
             double           *vp,
-            double           *hourlyrad,
+            double           *subdailyrad,
             double          **tiny_radfract,
             control_struct   *ctrl,
             parameter_struct *p,
             data_struct      *mtclim_data)
 {
-    int                      i, j;
-    int                      tinystepspday;
+    extern parameters_struct   param;
+    extern global_param_struct global_param;
 
-    extern parameters_struct param;
+    size_t                     i, j;
+    size_t                     tinystepspday;
+    size_t                     atmos_steps_per_day;
+
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
 
     /* initialize the control structure */
 
@@ -188,7 +194,30 @@ mtclim_init(int               have_dewpt,
         ctrl->insw = 0;
     }
     ctrl->outhum = 1;           /* output vapor pressure */
-    ctrl->inyear = 0;
+
+    // Set days per year parameter based on calendar.  Note this isn't a
+    // perfect solution since for the standard calendars, we aren't tracking
+    // which years are leap years.
+    if (global_param.calendar == CALENDAR_STANDARD ||
+        global_param.calendar == CALENDAR_GREGORIAN ||
+        global_param.calendar == CALENDAR_PROLEPTIC_GREGORIAN ||
+        global_param.calendar == CALENDAR_JULIAN) {
+        ctrl->days_per_year = DAYS_PER_JYEAR;
+    }
+    else if (global_param.calendar == CALENDAR_NOLEAP ||
+             global_param.calendar == CALENDAR_365_DAY) {
+        ctrl->days_per_year = DAYS_PER_YEAR;
+    }
+    else if (global_param.calendar == CALENDAR_ALL_LEAP ||
+             global_param.calendar == CALENDAR_366_DAY) {
+        ctrl->days_per_year = DAYS_PER_LYEAR;
+    }
+    else if (global_param.calendar == CALENDAR_360_DAY) {
+        ctrl->days_per_year = DAYS_PER_360DAY_YEAR;
+    }
+    else {
+        log_err("Unknown Calendar Flag: %hu", global_param.calendar);
+    }
 
     /* initialize the parameter structure.  Meteorological variables are only
        calculated for the mean grid cell elevation.  The temperatures are lapsed
@@ -214,15 +243,16 @@ mtclim_init(int               have_dewpt,
 
     /* initialize the data arrays with the vic input data */
     for (i = 0; i < ctrl->ndays; i++) {
-        mtclim_data->yday[i] = dmy[i * HOURS_PER_DAY].day_in_year;
+        mtclim_data->yday[i] = dmy[i * atmos_steps_per_day].day_in_year;
         mtclim_data->tmax[i] = tmax[i];
         mtclim_data->tmin[i] = tmin[i];
         if (ctrl->insw) {
             mtclim_data->s_srad[i] = 0;
-            for (j = 0; j < HOURS_PER_DAY; j++) {
-                mtclim_data->s_srad[i] += hourlyrad[i * HOURS_PER_DAY + j];
+            for (j = 0; j < atmos_steps_per_day; j++) {
+                mtclim_data->s_srad[i] +=
+                    subdailyrad[i * atmos_steps_per_day + j];
             }
-            mtclim_data->s_srad[i] /= HOURS_PER_DAY;
+            mtclim_data->s_srad[i] /= atmos_steps_per_day;
         }
         if (ctrl->invp) {
             mtclim_data->s_hum[i] = vp[i];
@@ -233,7 +263,7 @@ mtclim_init(int               have_dewpt,
             log_err("have_dewpt not yet implemented ...");
         }
     }
-    tinystepspday = CONST_CDAY / param.MTCLIM_SRADDT;
+    tinystepspday = (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT);
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
         for (j = 0; j < tinystepspday; j++) {
             tiny_radfract[i][j] = 0;
@@ -245,55 +275,60 @@ mtclim_init(int               have_dewpt,
  * @brief    Store MTCLIM variables in VIC arrays.
  *****************************************************************************/
 void
-mtclim_to_vic(double          hour_offset,
+mtclim_to_vic(double          sec_offset_solar,
               dmy_struct     *dmy,
               double        **tiny_radfract,
               control_struct *ctrl,
               data_struct    *mtclim_data,
               double         *tskc,
               double         *vp,
-              double         *hourlyrad,
+              double         *subdailyrad,
               double         *fdir)
 {
-    int                      i, j, k;
-    int                      tinystepsphour;
-    int                      tinystep;
-    int                      tiny_offset;
-    double                   tmp_rad;
+    extern parameters_struct   param;
+    extern global_param_struct global_param;
 
-    extern parameters_struct param;
+    size_t                     i, j, k;
+    size_t                     tinystepspstep;
+    int                        tinystep;
+    int                        tiny_offset;
+    double                     tmp_rad;
+    double                     atmos_dt;
+    size_t                     atmos_steps_per_day;
 
-    tinystepsphour = SEC_PER_HOUR / param.MTCLIM_SRADDT;
+    atmos_steps_per_day = global_param.atmos_steps_per_day;
+    atmos_dt = global_param.atmos_dt;
 
-    tiny_offset = (int)((double)tinystepsphour * hour_offset);
+    tinystepspstep =
+        (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
+
+    tiny_offset = (int)((double)tinystepspstep * sec_offset_solar / atmos_dt);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
-            tmp_rad = mtclim_data->s_srad[i] * HOURS_PER_DAY;
+            tmp_rad = mtclim_data->s_srad[i] * atmos_steps_per_day;
         }
         else {
             tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] /
-                      SEC_PER_HOUR;
+                      (double) (SEC_PER_DAY);
         }
-        for (j = 0; j < HOURS_PER_DAY; j++) {
-            hourlyrad[i * HOURS_PER_DAY + j] = 0;
-            for (k = 0; k < tinystepsphour; k++) {
-                tinystep = j * tinystepsphour + k - tiny_offset;
+        for (j = 0; j < atmos_steps_per_day; j++) {
+            subdailyrad[i * atmos_steps_per_day + j] = 0;
+            for (k = 0; k < tinystepspstep; k++) {
+                tinystep = j * tinystepspstep + k - tiny_offset;
                 if (tinystep < 0) {
-                    tinystep += HOURS_PER_DAY * tinystepsphour;
+                    tinystep += atmos_steps_per_day * tinystepspstep;
                 }
-                if (tinystep > HOURS_PER_DAY * tinystepsphour - 1) {
-                    tinystep -= HOURS_PER_DAY * tinystepsphour;
+                if (tinystep >
+                    (int)(atmos_steps_per_day * tinystepspstep - 1)) {
+                    tinystep -= atmos_steps_per_day * tinystepspstep;
                 }
-                hourlyrad[i * HOURS_PER_DAY +
-                          j] +=
-                    tiny_radfract[dmy[i * HOURS_PER_DAY +
+                subdailyrad[i * atmos_steps_per_day + j] +=
+                    tiny_radfract[dmy[i * atmos_steps_per_day +
                                       j].day_in_year - 1][tinystep];
             }
-            hourlyrad[i * HOURS_PER_DAY + j] *= tmp_rad;
+            subdailyrad[i * atmos_steps_per_day + j] *= tmp_rad;
         }
-    }
 
-    for (i = 0; i < ctrl->ndays; i++) {
         fdir[i] = mtclim_data->s_fdir[i];
         tskc[i] = mtclim_data->s_tskc[i];
         vp[i] = mtclim_data->s_hum[i];

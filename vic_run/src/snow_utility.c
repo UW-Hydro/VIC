@@ -138,7 +138,7 @@ snow_density(snow_data_struct *snow,
 
         /* Calculate compaction rate and new snow density */
         CR = -ddz1 - ddz2;
-        density = density * (1 + CR * dt * SEC_PER_HOUR);
+        density = density * (1. + CR * dt);
     }
     else if (options.SNOW_DENSITY == DENS_BRAS) {
         depth = snow->depth;
@@ -179,7 +179,7 @@ snow_density(snow_data_struct *snow,
             viscosity = param.SNOW_DENS_ETA0 * exp(
                 -param.SNOW_DENS_C5 *
                 (Tavg - CONST_TKFRZ) + param.SNOW_DENS_C6 * density);
-            delta_depth = overburden / viscosity * depth * dt * SEC_PER_HOUR;
+            delta_depth = overburden / viscosity * depth * dt;
             if (delta_depth > param.SNOW_DENS_MAX_CHANGE * depth) {
                 delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
             }
@@ -248,14 +248,14 @@ snow_albedo(double new_snow,
         if (cold_content < 0.0 && !MELTING) {
             albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_ACCUM_A,
                                                    pow((double)last_snow * dt /
-                                                       HOURS_PER_DAY,
+                                                       SEC_PER_DAY,
                                                        param.SNOW_ALB_ACCUM_B));
         }
         /* Melt Season */
         else {
             albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_THAW_A,
                                                    pow((double)last_snow * dt /
-                                                       HOURS_PER_DAY,
+                                                       SEC_PER_DAY,
                                                        param.SNOW_ALB_THAW_B));
         }
     }

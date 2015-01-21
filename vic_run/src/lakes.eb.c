@@ -43,7 +43,7 @@ solve_lake(double           snowfall,
            double           air_density,
            lake_var_struct *lake,
            soil_con_struct  soil_con,
-           int              dt,
+           double           dt,
            double           wind_h,
            dmy_struct       dmy,
            double           fracprv)
@@ -188,7 +188,7 @@ solve_lake(double           snowfall,
         alblake(Tcutoff, tair, &lake->SAlbedo, &tempalbs, &albi, &albw,
                 snowfall, lake_snow->coldcontent, dt, &lake_snow->last_snow,
                 lake_snow->swq, &lake_snow->MELTING, dmy.day_in_year,
-                (double)soil_con.lat);
+                soil_con.lat);
 
         /* --------------------------------------------------------------------
          * Calculate the incoming solar radiaton for both the ice fraction
@@ -343,7 +343,7 @@ solve_lake(double           snowfall,
                                             &temphi, water_cp,
                                             mixdepth, lake->hice,
                                             lake_snow->swq * CONST_RHOFW / param.LAKE_RHOSNOW,
-                                            (double)dt, &energy_out_bottom_ice);
+                                            dt, &energy_out_bottom_ice);
                 if (ErrorFlag == ERROR) {
                     return (ERROR);
                 }
@@ -393,7 +393,7 @@ solve_lake(double           snowfall,
                     (lake->hice * CONST_RHOICE +
                      (snowfall /
                       MM_PER_M) *
-                     CONST_RHOFW) * CONST_LATICE / (dt * SEC_PER_HOUR);
+                     CONST_RHOFW) * CONST_LATICE / dt;
                 lake->areai = 0.0;
                 lake->hice = 0.0;
                 lake->ice_water_eq = 0.0;
@@ -483,7 +483,7 @@ solve_lake(double           snowfall,
 
         /* Lake data structure terms */
         lake->evapw *=
-            ((1. - fracprv) * dt * SEC_PER_HOUR) / MM_PER_M * lake->sarea;            // in m3
+            ((1. - fracprv) * dt) / MM_PER_M * lake->sarea;            // in m3
         lake->vapor_flux = lake->snow.vapor_flux * lake->sarea; // in m3
         lake->swe = lake_snow->swq * lake->sarea; // in m3
         lake->snowmlt *= fracprv / MM_PER_M * lake->sarea; // in m3
@@ -624,20 +624,20 @@ latsens(double  Tsurf,
  * @brief    Calculate the albedo of snow, ice and water of the lake.
  *****************************************************************************/
 void
-alblake(double    Tcutoff,
-        double    Tair,
-        double   *snowalbedo,
-        double   *albs,
-        double   *albi,
-        double   *albw,
-        double    newsnow,
-        double    coldcontent,
-        int       dt,
-        unsigned *last_snow,
-        double    swq,
-        bool     *MELTING,
-        int       day_in_year,
-        double    latitude)
+alblake(double         Tcutoff,
+        double         Tair,
+        double        *snowalbedo,
+        double        *albs,
+        double        *albi,
+        double        *albw,
+        double         newsnow,
+        double         coldcontent,
+        double         dt,
+        unsigned      *last_snow,
+        double         swq,
+        bool          *MELTING,
+        unsigned short day_in_year,
+        double         latitude)
 {
     extern parameters_struct param;
 
@@ -945,7 +945,7 @@ iceform(double *qfusion,
         double  fracprv,
         double *areaadd,
         int     numnod,
-        int     dt,
+        double  dt,
         double  dz,
         double  surfdz,
         double *cp,
@@ -1006,7 +1006,7 @@ iceform(double *qfusion,
     *new_ice_water_eq = sum / (CONST_RHOFW * CONST_LATICE);
 
     if (lvolume > *new_ice_water_eq) {
-        *qfusion = (sum / (dt * SEC_PER_HOUR * surface[0] * (1.0 - fracprv))); /*W/m2*/
+        *qfusion = (sum / (dt * surface[0] * (1.0 - fracprv))); /*W/m2*/
 
         di = sum / (CONST_LATICE * CONST_RHOICE);    /* m^3 of ice formed */
     }
@@ -1018,7 +1018,7 @@ iceform(double *qfusion,
         // NEED TO CHANGE ICE TEMPERATURE TO ACCOUNT FOR EXTRA qfusion
         *qfusion =
             (*new_ice_water_eq * CONST_RHOFW /
-             CONST_RHOICE) / (dt * SEC_PER_HOUR * surface[0] * (1.0 - fracprv));                    /*W/m2*/
+             CONST_RHOICE) / (dt * surface[0] * (1.0 - fracprv));                    /*W/m2*/
     }
     else {
         *new_ice_water_eq = 0.0;
@@ -1116,7 +1116,7 @@ icerad(double  sw,
 int
 lakeice(double  sw_ice,
         double  fracice,
-        int     dt,
+        double  dt,
         double  snowflux,
         double  qw,
         double *energy_ice_melt_bot,
@@ -1151,7 +1151,7 @@ lakeice(double  sw_ice,
 
     dibot =
         (*energy_ice_melt_bot /
-         (CONST_RHOICE * CONST_LATICE)) * dt * SEC_PER_HOUR;
+         (CONST_RHOICE * CONST_LATICE)) * dt;
 
     /* --------------------------------------------------------------------
      * Calculate the water equivalent of the ice volume (in cubic meters).
@@ -1304,7 +1304,7 @@ temp_area(double  sw_visible,
           double *Tnew,
           double *water_density,
           double *de,
-          int     dt,
+          double  dt,
           double *surface,
           int     numnod,
           double  dz,
@@ -1385,8 +1385,7 @@ temp_area(double  sw_visible,
 
     if (numnod == 1) {
         Tnew[0] = T[0] +
-                  (T1 * dt *
-                   SEC_PER_HOUR) / ((1.e3 + water_density[0]) * cp[0] * z[0]);
+                  (T1 * dt) / ((1.e3 + water_density[0]) * cp[0] * z[0]);
     }
     else {
         /* --------------------------------------------------------------------
@@ -1394,11 +1393,10 @@ temp_area(double  sw_visible,
          * -------------------------------------------------------------------- */
 
         d[0] = T[0] +
-               (T1 * dt *
-                SEC_PER_HOUR) /
+               (T1 * dt) /
                ((1.e3 +
                  water_density[0]) * cp[0] *
-                z[0]) + cnextra * dt * SEC_PER_HOUR;
+                z[0]) + cnextra * dt;
 
         *energy_out_bottom =
             (surface_1 -
@@ -1452,9 +1450,8 @@ temp_area(double  sw_visible,
 
             energymixed += (term1 + term2);
             d[k] = T[k] +
-                   (T1 * dt *
-                    SEC_PER_HOUR) / ((1.e3 + water_density[k]) * cp[k] * z[k]) +
-                   cnextra * dt * SEC_PER_HOUR;
+                   (T1 * dt) / ((1.e3 + water_density[k]) * cp[k] * z[k]) +
+                   cnextra * dt;
 
             *energy_out_bottom +=
                 (surface_1 -
@@ -1504,9 +1501,8 @@ temp_area(double  sw_visible,
         energymixed += cnextra;
 
         d[k] = T[k] +
-               (T1 * dt *
-                SEC_PER_HOUR) / ((1.e3 + water_density[k]) * cp[k] * z[k]) +
-               cnextra * dt * SEC_PER_HOUR;
+               (T1 * dt) / ((1.e3 + water_density[k]) * cp[k] * z[k]) +
+               cnextra * dt;
 
         /**********************************************************************
         * Calculate arrays for tridiagonal matrix.
@@ -1521,7 +1517,7 @@ temp_area(double  sw_visible,
         surface_avg = (surface[0] + surface[1]) / 2.;
 
         b[0] = -0.5 * (de[0] / zhalf[0]) *
-               (dt * SEC_PER_HOUR / z[0]) * surface_2 / surface_avg;
+               (dt / z[0]) * surface_2 / surface_avg;
         a[0] = 1. - b[0];
 
         /* --------------------------------------------------------------------
@@ -1534,9 +1530,9 @@ temp_area(double  sw_visible,
             surface_avg = (surface[k] + surface[k + 1]) / 2.;
 
             b[k] = -0.5 * (de[k] / zhalf[k]) *
-                   (dt * SEC_PER_HOUR / z[k]) * surface_2 / surface_avg;
+                   (dt / z[k]) * surface_2 / surface_avg;
             c[k] = -0.5 * (de[k - 1] / zhalf[k - 1]) *
-                   (dt * SEC_PER_HOUR / z[k]) * surface_1 / surface_avg;
+                   (dt / z[k]) * surface_1 / surface_avg;
             a[k] = 1. - b[k] - c[k];
         }
 
@@ -1547,7 +1543,7 @@ temp_area(double  sw_visible,
         surface_1 = surface[numnod - 1];
         surface_avg = surface[numnod - 1];
         c[numnod - 1] = -0.5 * (de[numnod - 1] / zhalf[numnod - 1]) *
-                        (dt * SEC_PER_HOUR /
+                        (dt /
                          z[numnod - 1]) * surface_1 / surface_avg;
         a[numnod - 1] = 1. - c[numnod - 1];
 
@@ -1818,7 +1814,7 @@ energycalc(double *finaltemp,
 int
 water_balance(lake_var_struct *lake,
               lake_con_struct  lake_con,
-              int              dt,
+              double           dt,
               all_vars_struct *all_vars,
               int              rec,
               int              iveg,
@@ -1827,33 +1823,34 @@ water_balance(lake_var_struct *lake,
               soil_con_struct  soil_con,
               veg_con_struct   veg_con)
 {
-    extern option_struct     options;
-    extern parameters_struct param;
+    extern option_struct       options;
+    extern parameters_struct   param;
+    extern global_param_struct global_param;
 
-    int                      isave_n;
-    double                   inflow_volume;
-    double                   surfacearea, ldepth;
-    double                   i;
-    double                   index;
-    size_t                   j, k, frost_area;
-    double                   Tnew[MAX_LAKE_NODES];
-    double                   circum;
-    double                   baseflow_out_mm;
-    double                   newfraction, Recharge;
-    double                   abovegrnd_storage;
-    int                      ErrorFlag;
-    cell_data_struct       **cell;
-    veg_var_struct         **veg_var;
-    snow_data_struct       **snow;
-    energy_bal_struct      **energy;
-    size_t                   lindex;
-    double                   frac;
-    double                   Dsmax, resid_moist, liq, rel_moist;
-    double                  *frost_fract;
-    double                   volume_save;
-    double                  *delta_moist;
-    double                  *moist;
-    double                   max_newfraction;
+    int                        isave_n;
+    double                     inflow_volume;
+    double                     surfacearea, ldepth;
+    double                     i;
+    double                     index;
+    size_t                     j, k, frost_area;
+    double                     Tnew[MAX_LAKE_NODES];
+    double                     circum;
+    double                     baseflow_out_mm;
+    double                     newfraction, Recharge;
+    double                     abovegrnd_storage;
+    int                        ErrorFlag;
+    cell_data_struct         **cell;
+    veg_var_struct           **veg_var;
+    snow_data_struct         **snow;
+    energy_bal_struct        **energy;
+    size_t                     lindex;
+    double                     frac;
+    double                     Dsmax, resid_moist, liq, rel_moist;
+    double                    *frost_fract;
+    double                     volume_save;
+    double                    *delta_moist;
+    double                    *moist;
+    double                     max_newfraction;
 
     cell = all_vars->cell;
     veg_var = all_vars->veg_var;
@@ -2021,7 +2018,7 @@ water_balance(lake_var_struct *lake,
     *    wetland.  Outgoing runoff and baseflow are in m3.
     **********************************************************************/
 
-    Dsmax = soil_con.Dsmax / HOURS_PER_DAY;
+    Dsmax = soil_con.Dsmax / global_param.model_steps_per_day;
     lindex = options.Nlayer - 1;
     liq = 0;
     for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
@@ -2083,8 +2080,7 @@ water_balance(lake_var_struct *lake,
     }
     else {
         circum = 2*CONST_PI*pow(surfacearea / CONST_PI, 0.5);
-        lake->runoff_out = lake_con.wfrac * circum * SEC_PER_HOUR *
-                           ((double)dt) *
+        lake->runoff_out = lake_con.wfrac * circum * dt *
                            1.6 * pow(ldepth - lake_con.mindepth, 1.5);
         if ((lake->volume - lake->ice_water_eq) >= lake->runoff_out) {
             /*liquid water is available */

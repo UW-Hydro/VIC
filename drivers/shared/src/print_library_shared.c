@@ -79,11 +79,11 @@ void
 print_dmy(dmy_struct *dmy)
 {
     fprintf(LOG_DEST, "dmy:\n");
-    fprintf(LOG_DEST, "\tday        : %d\n", dmy->day);
-    fprintf(LOG_DEST, "\tday_in_year: %d\n", dmy->day_in_year);
-    fprintf(LOG_DEST, "\thour       : %d\n", dmy->hour);
-    fprintf(LOG_DEST, "\tmonth      : %d\n", dmy->month);
-    fprintf(LOG_DEST, "\tyear       : %d\n", dmy->year);
+    fprintf(LOG_DEST, "\tday        : %hu\n", dmy->day);
+    fprintf(LOG_DEST, "\tday_in_year: %hu\n", dmy->day_in_year);
+    fprintf(LOG_DEST, "\tseconds    : %u\n", dmy->dayseconds);
+    fprintf(LOG_DEST, "\tmonth      : %hu\n", dmy->month);
+    fprintf(LOG_DEST, "\tyear       : %u\n", dmy->year);
 }
 
 /******************************************************************************
@@ -277,31 +277,39 @@ print_global_param(global_param_struct *gp)
     size_t i;
 
     fprintf(LOG_DEST, "global_param:\n");
-    fprintf(LOG_DEST, "\tmeasure_h    : %.4lf\n", gp->measure_h);
-    fprintf(LOG_DEST, "\twind_h       : %.4lf\n", gp->wind_h);
-    fprintf(LOG_DEST, "\tresolution   : %.4f\n", gp->resolution);
-    fprintf(LOG_DEST, "\tdt           : %d\n", gp->dt);
-    fprintf(LOG_DEST, "\tout_dt       : %d\n", gp->out_dt);
-    fprintf(LOG_DEST, "\tendday       : %d\n", gp->endday);
-    fprintf(LOG_DEST, "\tendmonth     : %d\n", gp->endmonth);
-    fprintf(LOG_DEST, "\tendyear      : %d\n", gp->endyear);
+    fprintf(LOG_DEST, "\tmeasure_h           : %.4lf\n", gp->measure_h);
+    fprintf(LOG_DEST, "\twind_h              : %.4lf\n", gp->wind_h);
+    fprintf(LOG_DEST, "\tresolution          : %.4f\n", gp->resolution);
+    fprintf(LOG_DEST, "\tdt                  : %.4f\n", gp->dt);
+    fprintf(LOG_DEST, "\tsnow_dt             : %.4f\n", gp->snow_dt);
+    fprintf(LOG_DEST, "\trunoff_dt           : %.4f\n", gp->runoff_dt);
+    fprintf(LOG_DEST, "\tout_dt              : %.4f\n", gp->out_dt);
+    fprintf(LOG_DEST, "\tmodel_steps_per_day : %zu\n", gp->model_steps_per_day);
+    fprintf(LOG_DEST, "\tsnow_steps_per_day  : %zu\n", gp->snow_steps_per_day);
+    fprintf(LOG_DEST, "\trunoff_steps_per_day: %zu\n",
+            gp->runoff_steps_per_day);
+    fprintf(LOG_DEST, "\tendday              : %hu\n", gp->endday);
+    fprintf(LOG_DEST, "\tendmonth            : %hu\n", gp->endmonth);
+    fprintf(LOG_DEST, "\tendyear             : %hu\n", gp->endyear);
     for (i = 0; i < 2; i++) {
-        fprintf(LOG_DEST, "\tforceday[%zd]   : %d\n", i, gp->forceday[i]);
-        fprintf(LOG_DEST, "\tforcehour[%zd]  : %d\n", i, gp->forcehour[i]);
-        fprintf(LOG_DEST, "\tforcemonth[%zd] : %d\n", i, gp->forcemonth[i]);
-        fprintf(LOG_DEST, "\tforceoffset[%zd]: %d\n", i, gp->forceoffset[i]);
-        fprintf(LOG_DEST, "\tforceskip[%zd]  : %d\n", i, gp->forceskip[i]);
-        fprintf(LOG_DEST, "\tforceyear[%zd]  : %d\n", i, gp->forceyear[i]);
+        fprintf(LOG_DEST, "\tforceday[%zd]       : %hu\n", i, gp->forceday[i]);
+        fprintf(LOG_DEST, "\tforcesec[%zd]       : %u\n", i, gp->forcesec[i]);
+        fprintf(LOG_DEST, "\tforcemonth[%zd]     : %hu\n", i,
+                gp->forcemonth[i]);
+        fprintf(LOG_DEST, "\tforceoffset[%zd]    : %hu\n", i,
+                gp->forceoffset[i]);
+        fprintf(LOG_DEST, "\tforceskip[%zd]      : %u\n", i, gp->forceskip[i]);
+        fprintf(LOG_DEST, "\tforceyear[%zd]      : %hu\n", i, gp->forceyear[i]);
     }
-    fprintf(LOG_DEST, "\tnrecs        : %d\n", gp->nrecs);
-    fprintf(LOG_DEST, "\tskipyear     : %d\n", gp->skipyear);
-    fprintf(LOG_DEST, "\tstartday     : %d\n", gp->startday);
-    fprintf(LOG_DEST, "\tstarthour    : %d\n", gp->starthour);
-    fprintf(LOG_DEST, "\tstartmonth   : %d\n", gp->startmonth);
-    fprintf(LOG_DEST, "\tstartyear    : %d\n", gp->startyear);
-    fprintf(LOG_DEST, "\tstateday     : %d\n", gp->stateday);
-    fprintf(LOG_DEST, "\tstatemonth   : %d\n", gp->statemonth);
-    fprintf(LOG_DEST, "\tstateyear    : %d\n", gp->stateyear);
+    fprintf(LOG_DEST, "\tnrecs               : %zu\n", gp->nrecs);
+    fprintf(LOG_DEST, "\tskipyear            : %hu\n", gp->skipyear);
+    fprintf(LOG_DEST, "\tstartday            : %hu\n", gp->startday);
+    fprintf(LOG_DEST, "\tstartsec            : %u\n", gp->startsec);
+    fprintf(LOG_DEST, "\tstartmonth          : %hu\n", gp->startmonth);
+    fprintf(LOG_DEST, "\tstartyear           : %hu\n", gp->startyear);
+    fprintf(LOG_DEST, "\tstateday            : %hu\n", gp->stateday);
+    fprintf(LOG_DEST, "\tstatemonth          : %hu\n", gp->statemonth);
+    fprintf(LOG_DEST, "\tstateyear           : %hu\n", gp->stateyear);
 }
 
 /******************************************************************************
@@ -490,7 +498,6 @@ print_option(option_struct *option)
             option->SHARE_LAYER_MOIST);
     fprintf(LOG_DEST, "\tSNOW_DENSITY         : %d\n", option->SNOW_DENSITY);
     fprintf(LOG_DEST, "\tSNOW_BAND            : %zu\n", option->SNOW_BAND);
-    fprintf(LOG_DEST, "\tSNOW_STEP            : %d\n", option->SNOW_STEP);
     fprintf(LOG_DEST, "\tSPATIAL_FROST        : %d\n", option->SPATIAL_FROST);
     fprintf(LOG_DEST, "\tSPATIAL_SNOW         : %d\n", option->SPATIAL_SNOW);
     fprintf(LOG_DEST, "\tTFALLBACK            : %d\n", option->TFALLBACK);
@@ -571,7 +578,7 @@ print_param_set(param_set_struct *param_set)
     for (i = 0; i < N_FORCING_TYPES; i++) {
         print_force_type(&(param_set->TYPE[i]));
     }
-    fprintf(LOG_DEST, "\tFORCE_DT    : %d %d\n", param_set->FORCE_DT[0],
+    fprintf(LOG_DEST, "\tFORCE_DT    : %.4f %.4f\n", param_set->FORCE_DT[0],
             param_set->FORCE_DT[1]);
     fprintf(LOG_DEST, "\tFORCE_ENDIAN: %d %d\n", param_set->FORCE_ENDIAN[0],
             param_set->FORCE_ENDIAN[1]);
@@ -582,7 +589,7 @@ print_param_set(param_set_struct *param_set)
         fprintf(LOG_DEST, "\t\t%zd: %d %d\n", i, param_set->FORCE_INDEX[0][i],
                 param_set->FORCE_INDEX[1][i]);
     }
-    fprintf(LOG_DEST, "\tN_TYPES     : %d %d\n", param_set->N_TYPES[0],
+    fprintf(LOG_DEST, "\tN_TYPES     : %zu %zu\n", param_set->N_TYPES[0],
             param_set->N_TYPES[1]);
 }
 

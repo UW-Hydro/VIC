@@ -35,7 +35,7 @@ void
 write_data(out_data_file_struct *out_data_files,
            out_data_struct      *out_data,
            dmy_struct           *dmy,
-           int                   dt)
+           double                dt)
 {
     extern option_struct options;
     size_t               file_idx;
@@ -71,14 +71,14 @@ write_data(out_data_file_struct *out_data_files,
         tmp_iptr[0] = dmy->year;
         tmp_iptr[1] = dmy->month;
         tmp_iptr[2] = dmy->day;
-        tmp_iptr[3] = dmy->hour;
+        tmp_iptr[3] = dmy->dayseconds;
 
         // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (dt < HOURS_PER_DAY) {
-                    // Write year, month, day, and hour
+                if (dt < SEC_PER_DAY) {
+                    // Write year, month, day, and sec
                     fwrite(tmp_iptr, sizeof(int), 4,
                            out_data_files[file_idx].fh);
                 }
@@ -200,15 +200,16 @@ write_data(out_data_file_struct *out_data_files,
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             if (!options.OUTPUT_FORCE) {
                 // Write the date
-                if (dt < HOURS_PER_DAY) {
-                    // Write year, month, day, and hour
+                if (dt < SEC_PER_DAY) {
+                    // Write year, month, day, and sec
                     fprintf(out_data_files[file_idx].fh,
-                            "%04i\t%02i\t%02i\t%02i\t",
-                            dmy->year, dmy->month, dmy->day, dmy->hour);
+                            "%04u\t%02hu\t%02hu\t%05u\t",
+                            dmy->year, dmy->month, dmy->day, dmy->dayseconds);
                 }
                 else {
                     // Only write year, month, and day
-                    fprintf(out_data_files[file_idx].fh, "%04i\t%02i\t%02i\t",
+                    fprintf(out_data_files[file_idx].fh,
+                            "%04u\t%02hu\t%02hu\t",
                             dmy->year, dmy->month, dmy->day);
                 }
             }

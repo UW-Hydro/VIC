@@ -46,7 +46,8 @@ initialize_forcing_files()
         param_set.TYPE[j].multiplier = 1;
     }
     for (i = 0; i < 2; i++) {
-        param_set.FORCE_DT[i] = 0;
+        param_set.FORCE_DT[i] = MISSING;
+        param_set.force_steps_per_day[i] = 0;
         param_set.N_TYPES[i] = 0;
         param_set.FORCE_FORMAT[i] = MISSING;
         for (j = 0; j < N_FORCING_TYPES; j++) {

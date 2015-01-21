@@ -32,12 +32,12 @@
  *****************************************************************************/
 typedef struct
 {
-    int ndays;           /**< number of days of data in input file */
+    size_t ndays;        /**< number of days of data in input file */
     int insw;            /**< input shortwave radiation flag (0=NO, 1=YES) */
     int indewpt;         /**< input dewpoint temperature flag (0=NO, 1=YES) */
     int invp;            /**< input vapor pressure flag (0=NO, 1=YES) */
     int outhum;          /**< output humidity flag            (0=VPD, 1=VP) */
-    int inyear;          /**< input year flag                 (0=NO, 1=YES) */
+    double days_per_year;  /**< Days per year*/
 } control_struct;
 
 /******************************************************************************
@@ -63,7 +63,6 @@ typedef struct
  *****************************************************************************/
 typedef struct
 {
-    int *year;           /**< array of year values */
     int *yday;           /**< array of yearday values */
     double *tmax;        /**< array of base maximum temperature values */
     double *tmin;        /**< array of base minimum temperature values */

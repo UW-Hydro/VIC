@@ -78,7 +78,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 23;
+    nitems = 34;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
@@ -115,13 +115,45 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(global_param_struct, resolution);
     mpi_types[i++] = MPI_DOUBLE;
 
-    // unsigned dt;
+    // double dt;
     offsets[i] = offsetof(global_param_struct, dt);
-    mpi_types[i++] = MPI_UNSIGNED;
+    mpi_types[i++] = MPI_DOUBLE;
 
-    // unsigned out_dt;
+    // double snow_dt;
+    offsets[i] = offsetof(global_param_struct, snow_dt);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double runoff_dt;
+    offsets[i] = offsetof(global_param_struct, runoff_dt);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double atmos_dt;
+    offsets[i] = offsetof(global_param_struct, atmos_dt);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double out_dt;
     offsets[i] = offsetof(global_param_struct, out_dt);
-    mpi_types[i++] = MPI_UNSIGNED;
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // size_t model_steps_per_day;
+    offsets[i] = offsetof(global_param_struct, model_steps_per_day);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t snow_steps_per_day;
+    offsets[i] = offsetof(global_param_struct, snow_steps_per_day);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t runoff_steps_per_day;
+    offsets[i] = offsetof(global_param_struct, runoff_steps_per_day);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t atmos_steps_per_day;
+    offsets[i] = offsetof(global_param_struct, atmos_steps_per_day);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t output_steps_per_day;
+    offsets[i] = offsetof(global_param_struct, output_steps_per_day);
+    mpi_types[i++] = MPI_AINT;
 
     // unsigned short endday;
     offsets[i] = offsetof(global_param_struct, endday);
@@ -140,10 +172,10 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     blocklengths[i] = 2;
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short forcehour[2];
-    offsets[i] = offsetof(global_param_struct, forcehour);
+    // unsigned forcesec[2];
+    offsets[i] = offsetof(global_param_struct, forcesec);
     blocklengths[i] = 2;
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+    mpi_types[i++] = MPI_UNSIGNED;
 
     // unsigned short forcemonth[2];
     offsets[i] = offsetof(global_param_struct, forcemonth);
@@ -177,9 +209,9 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(global_param_struct, startday);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short starthour;
-    offsets[i] = offsetof(global_param_struct, starthour);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+    // unsigned short startsec;
+    offsets[i] = offsetof(global_param_struct, startsec);
+    mpi_types[i++] = MPI_UNSIGNED;
 
     // unsigned short startmonth;
     offsets[i] = offsetof(global_param_struct, startmonth);
@@ -200,6 +232,18 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     // unsigned short stateyear;
     offsets[i] = offsetof(global_param_struct, stateyear);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // unsigned short calendar;
+    offsets[i] = offsetof(global_param_struct, calendar);
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // unsigned short time_units;
+    offsets[i] = offsetof(global_param_struct, time_units);
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // double time_origin_num;
+    offsets[i] = offsetof(global_param_struct, time_origin_num);
+    mpi_types[i++] = MPI_DOUBLE;
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
@@ -342,7 +386,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
-    nitems = 69;
+    nitems = 68;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
@@ -521,10 +565,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     // size_t SNOW_BAND;
     offsets[i] = offsetof(option_struct, SNOW_BAND);
     mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
-
-    // unsigned SNOW_STEP;
-    offsets[i] = offsetof(option_struct, SNOW_STEP);
-    mpi_types[i++] = MPI_UNSIGNED;
 
     // bool SPATIAL_FROST;
     offsets[i] = offsetof(option_struct, SPATIAL_FROST);

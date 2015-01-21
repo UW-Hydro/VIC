@@ -143,4 +143,5 @@ void print_version(char *);
 void print_usage(char *);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short calendar, dmy_struct *dmy);
+void validate_parameters(void);
 #endif

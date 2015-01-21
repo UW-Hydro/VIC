@@ -41,7 +41,10 @@ VICPATH = ../../vic_run
 SHELL = /bin/bash
 
 # Set CC = your compiler here
-CC = gcc
+ifndef CC
+CC=gcc
+endif
+
 # set include
 INCLUDES = -I ${DRIVERPATH}/include -I $(SHAREDPATH)/include -I ${VICPATH}/include
 

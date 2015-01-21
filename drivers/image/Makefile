@@ -50,7 +50,9 @@ endif
 SHELL = /bin/bash
 
 # Set CC = your compiler here
-CC = gcc
+ifndef CC
+CC=gcc
+endif
 
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include

@@ -201,7 +201,8 @@ all_30_day_from_dmy(dmy_struct *dmy)
     // Convert time to fractions of a day
     day = fractional_day_from_dmy(dmy);
 
-    jd = floor(360. * (year + 4716)) + floor(30. * (month - 1)) + day;
+    jd = floor((double) DAYS_PER_360DAY_YEAR * (year + 4716)) +
+         floor(30. * (month - 1)) + day;
 
     return jd;
 }
@@ -468,8 +469,8 @@ dmy_all_30_day(double      julian,
     }
 
     F = modf(julian, &Z);
-    year = (int)((Z - 0.5) / 360.) - 4716;
-    dayofyr = Z - (year + 4716) * 360;
+    year = (int)((Z - 0.5) / (double) DAYS_PER_360DAY_YEAR) - 4716;
+    dayofyr = Z - (year + 4716) * DAYS_PER_360DAY_YEAR;
     month = (int)((dayofyr - 0.5) / 30) + 1;
     day = dayofyr - (month - 1) * 30 + F;
 

@@ -28,6 +28,7 @@
 #define VIC_PHYSICAL_CONSTANTS
 
 /***** Time Conversions *****/
+#define DAYS_PER_360DAY_YEAR 360  /**< days in 360day year */
 #define DAYS_PER_YEAR 365  /**< days in nonleap year */
 #define DAYS_PER_LYEAR 366  /**< days in leap year */
 #define DAYS_PER_JYEAR 365.25  /** days in Julian year */

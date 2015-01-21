@@ -213,7 +213,7 @@ mtclim_init(int               have_dewpt,
         ctrl->days_per_year = DAYS_PER_LYEAR;
     }
     else if (global_param.calendar == CALENDAR_360_DAY) {
-        ctrl->days_per_year = 360;
+        ctrl->days_per_year = DAYS_PER_360DAY_YEAR;
     }
     else {
         log_err("Unknown Calendar Flag: %hu", global_param.calendar);

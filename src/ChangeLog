@@ -26,7 +26,7 @@ Usage:
 
 
 -------------------------------------------------------------------------------
-***** Description of changes between VIC 4.2.1 and VIC 4.2.2 *****
+***** Description of changes between VIC 4.2.a and VIC 4.2.b *****
 -------------------------------------------------------------------------------
 
 Bug Fixes:
@@ -49,7 +49,7 @@ Fixed memory error in initialize atmos when OUTPUT_FORCE = TRUE.
 
 
 -------------------------------------------------------------------------------
-***** Description of changes between VIC 4.2.0 and VIC 4.2.1 *****
+***** Description of changes between VIC 4.2 and VIC 4.2.a *****
 -------------------------------------------------------------------------------
 
 Bug Fixes:

@@ -255,10 +255,11 @@ void initialize_atmos(atmos_data_struct        *atmos,
 //    nrerror("Input meteorological forcing files must contain either WIND (wind speed) or both WIND_N (north component of wind speed) and WIND_E (east component of wind speed); check input files\n");
 
   /* Assign N_ELEM for veg-dependent forcings */
-  param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
-  param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
-  param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
-
+  if (!options.OUTPUT_FORCE) {
+    param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
+    param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
+    param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
+  }
   /* compute number of simulation days */
   tmp_starthour = 0;
   tmp_endhour = 24 - global_param.dt;
@@ -1421,172 +1422,174 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
-  /****************************************************
-    Albedo
-  ****************************************************/
+  if (!options.OUTPUT_FORCE) {
 
-  /* First, assign default climatology */
-  for (rec = 0; rec < global_param.nrecs; rec++) {
-    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-      for (j = 0; j < NF; j++) {
-        veg_hist[rec][v].albedo[j] = veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month-1];
-      }
-    }
-  }
+    /****************************************************
+      Albedo
+    ****************************************************/
 
-  if(param_set.TYPE[ALBEDO].SUPPLIED) {
-    if(param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED-1] == 24) {
-      /* daily albedo provided */
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for (j = 0; j < NF; j++) {
-            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            if (global_param.starthour - hour_offset_int < 0) hour += 24;
-            idx = (int)((float)hour/24.0);
-            if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH)
-	      veg_hist[rec][v].albedo[j] = local_veg_hist_data[ALBEDO][v][idx]; // assume constant over the day
-            sum += veg_hist[rec][v].albedo[j];
-          }
-          if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
+    /* First, assign default climatology */
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+        for (j = 0; j < NF; j++) {
+          veg_hist[rec][v].albedo[j] = veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month-1];
         }
       }
     }
-    else {
-      /* sub-daily albedo provided */
-      for(rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for(i = 0; i < NF; i++) {
-            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            veg_hist[rec][v].albedo[i] = 0;
-            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
-              idx = hour;
-              if (idx < 0) idx += 24;
+
+    if(param_set.TYPE[ALBEDO].SUPPLIED) {
+      if(param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED-1] == 24) {
+        /* daily albedo provided */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for (j = 0; j < NF; j++) {
+              hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              if (global_param.starthour - hour_offset_int < 0) hour += 24;
+              idx = (int)((float)hour/24.0);
               if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH)
-	        veg_hist[rec][v].albedo[i] = local_veg_hist_data[ALBEDO][v][idx];
-              hour++;
+  	      veg_hist[rec][v].albedo[j] = local_veg_hist_data[ALBEDO][v][idx]; // assume constant over the day
+              sum += veg_hist[rec][v].albedo[j];
             }
-	    sum += veg_hist[rec][v].albedo[i];
+            if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
           }
-          if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
         }
       }
-    }
-  }
-
-  /****************************************************
-    Leaf Area Index (LAI)
-  ****************************************************/
-
-  /* First, assign default climatology */
-  for (rec = 0; rec < global_param.nrecs; rec++) {
-    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-      for (j = 0; j < NF; j++) {
-        veg_hist[rec][v].LAI[j] = veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month-1];
-      }
-    }
-  }
-
-  if(param_set.TYPE[LAI_IN].SUPPLIED) {
-    if(param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED-1] == 24) {
-      /* daily LAI provided */
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for (j = 0; j < NF; j++) {
-            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            if (global_param.starthour - hour_offset_int < 0) hour += 24;
-            idx = (int)((float)hour/24.0);
-            if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
-	      veg_hist[rec][v].LAI[j] = local_veg_hist_data[LAI_IN][v][idx]; // assume constant over the day
-            sum += veg_hist[rec][v].LAI[j];
-          }
-          if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
-        }
-      }
-    }
-    else {
-      /* sub-daily LAI provided */
-      for(rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for(i = 0; i < NF; i++) {
-            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            veg_hist[rec][v].LAI[i] = 0;
-            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
-              idx = hour;
-              if (idx < 0) idx += 24;
-              if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
-	        veg_hist[rec][v].LAI[i] = local_veg_hist_data[LAI_IN][v][idx];
-              hour++;
-            }
-	    sum += veg_hist[rec][v].LAI[i];
-          }
-          if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
-        }
-      }
-    }
-  }
-
-  /****************************************************
-    Fractional Vegetation Cover
-  ****************************************************/
-
-  /* First, assign default climatology */
-  for (rec = 0; rec < global_param.nrecs; rec++) {
-    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-      for (j = 0; j < NF; j++) {
-        veg_hist[rec][v].vegcover[j] = veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month-1];
-      }
-    }
-  }
-
-  if(param_set.TYPE[VEGCOVER].SUPPLIED) {
-    if(param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED-1] == 24) {
-      /* daily vegcover provided */
-      for (rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for (j = 0; j < NF; j++) {
-            hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            if (global_param.starthour - hour_offset_int < 0) hour += 24;
-            idx = (int)((float)hour/24.0);
-            if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
-	      veg_hist[rec][v].vegcover[j] = local_veg_hist_data[VEGCOVER][v][idx]; // assume constant over the day
-              if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
-            }
-            sum += veg_hist[rec][v].vegcover[j];
-          }
-          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
-        }
-      }
-    }
-    else {
-      /* sub-daily vegcover provided */
-      for(rec = 0; rec < global_param.nrecs; rec++) {
-        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
-          sum = 0;
-          for(i = 0; i < NF; i++) {
-            hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
-            veg_hist[rec][v].vegcover[i] = 0;
-            while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
-              idx = hour;
-              if (idx < 0) idx += 24;
-              if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
-	        veg_hist[rec][v].vegcover[i] = local_veg_hist_data[VEGCOVER][v][idx];
-                if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+      else {
+        /* sub-daily albedo provided */
+        for(rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for(i = 0; i < NF; i++) {
+              hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              veg_hist[rec][v].albedo[i] = 0;
+              while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+                idx = hour;
+                if (idx < 0) idx += 24;
+                if (local_veg_hist_data[ALBEDO][v][idx] != NODATA_VH)
+  	        veg_hist[rec][v].albedo[i] = local_veg_hist_data[ALBEDO][v][idx];
+                hour++;
               }
-              hour++;
+  	    sum += veg_hist[rec][v].albedo[i];
             }
-	    sum += veg_hist[rec][v].vegcover[i];
+            if(NF>1) veg_hist[rec][v].albedo[NR] = sum / (float)NF;
           }
-          if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+        }
+      }
+    }
+
+    /****************************************************
+      Leaf Area Index (LAI)
+    ****************************************************/
+
+    /* First, assign default climatology */
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+        for (j = 0; j < NF; j++) {
+          veg_hist[rec][v].LAI[j] = veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month-1];
+        }
+      }
+    }
+
+    if(param_set.TYPE[LAI_IN].SUPPLIED) {
+      if(param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED-1] == 24) {
+        /* daily LAI provided */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for (j = 0; j < NF; j++) {
+              hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              if (global_param.starthour - hour_offset_int < 0) hour += 24;
+              idx = (int)((float)hour/24.0);
+              if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
+  	      veg_hist[rec][v].LAI[j] = local_veg_hist_data[LAI_IN][v][idx]; // assume constant over the day
+              sum += veg_hist[rec][v].LAI[j];
+            }
+            if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+          }
+        }
+      }
+      else {
+        /* sub-daily LAI provided */
+        for(rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for(i = 0; i < NF; i++) {
+              hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              veg_hist[rec][v].LAI[i] = 0;
+              while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+                idx = hour;
+                if (idx < 0) idx += 24;
+                if (local_veg_hist_data[LAI_IN][v][idx] != NODATA_VH)
+  	        veg_hist[rec][v].LAI[i] = local_veg_hist_data[LAI_IN][v][idx];
+                hour++;
+              }
+  	    sum += veg_hist[rec][v].LAI[i];
+            }
+            if(NF>1) veg_hist[rec][v].LAI[NR] = sum / (float)NF;
+          }
+        }
+      }
+    }
+
+    /****************************************************
+      Fractional Vegetation Cover
+    ****************************************************/
+
+    /* First, assign default climatology */
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+        for (j = 0; j < NF; j++) {
+          veg_hist[rec][v].vegcover[j] = veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month-1];
+        }
+      }
+    }
+
+    if(param_set.TYPE[VEGCOVER].SUPPLIED) {
+      if(param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED-1] == 24) {
+        /* daily vegcover provided */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for (j = 0; j < NF; j++) {
+              hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              if (global_param.starthour - hour_offset_int < 0) hour += 24;
+              idx = (int)((float)hour/24.0);
+              if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+  	      veg_hist[rec][v].vegcover[j] = local_veg_hist_data[VEGCOVER][v][idx]; // assume constant over the day
+                if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
+              }
+              sum += veg_hist[rec][v].vegcover[j];
+            }
+            if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+          }
+        }
+      }
+      else {
+        /* sub-daily vegcover provided */
+        for(rec = 0; rec < global_param.nrecs; rec++) {
+          for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+            sum = 0;
+            for(i = 0; i < NF; i++) {
+              hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              veg_hist[rec][v].vegcover[i] = 0;
+              while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+                idx = hour;
+                if (idx < 0) idx += 24;
+                if (local_veg_hist_data[VEGCOVER][v][idx] != NODATA_VH) {
+  	        veg_hist[rec][v].vegcover[i] = local_veg_hist_data[VEGCOVER][v][idx];
+                  if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+                }
+                hour++;
+              }
+  	    sum += veg_hist[rec][v].vegcover[i];
+            }
+            if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
+          }
         }
       }
     }
   }
-
   /*************************************************
     Cosine of Solar Zenith Angle
   *************************************************/

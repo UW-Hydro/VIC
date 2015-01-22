@@ -66,8 +66,8 @@ fractional_day_from_dmy(dmy_struct *dmy)
  *          based on redate.py by David Finlayson.
  *****************************************************************************/
 double
-julian_day_from_dmy(dmy_struct    *dmy,
-                    unsigned short calendar)
+julian_day_from_dmy(dmy_struct        *dmy,
+                    unsigned short int calendar)
 {
     double jd, day;
     int    year, month;
@@ -98,7 +98,7 @@ julian_day_from_dmy(dmy_struct    *dmy,
     if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) {
         if (jd >= 2299170.5) {
             // 1582 October 15 (Gregorian Calendar)
-            B = 2 - A + (int)(A / 4);
+            B = 2 - A + (int) (A / 4);
         }
         else if (jd < 2299160.5) {
             // 1582 October 5 (Julian Calendar)
@@ -110,7 +110,7 @@ julian_day_from_dmy(dmy_struct    *dmy,
         }
     }
     else if (calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        B = 2 - A + (int)(A / 4);
+        B = 2 - A + (int) (A / 4);
     }
     else if (calendar == CALENDAR_JULIAN) {
         B = 0;
@@ -134,8 +134,8 @@ julian_day_from_dmy(dmy_struct    *dmy,
 double
 no_leap_day_from_dmy(dmy_struct *dmy)
 {
-    double         jd, day;
-    unsigned short year, month;
+    double             jd, day;
+    unsigned short int year, month;
 
     year = dmy->year;
     month = dmy->month;
@@ -163,8 +163,8 @@ no_leap_day_from_dmy(dmy_struct *dmy)
 double
 all_leap_from_dmy(dmy_struct *dmy)
 {
-    double         jd, day;
-    unsigned short year, month;
+    double             jd, day;
+    unsigned short int year, month;
 
     year = dmy->year;
     month = dmy->month;
@@ -192,8 +192,8 @@ all_leap_from_dmy(dmy_struct *dmy)
 double
 all_30_day_from_dmy(dmy_struct *dmy)
 {
-    double         jd, day;
-    unsigned short year, month;
+    double             jd, day;
+    unsigned short int year, month;
 
     year = dmy->year;
     month = dmy->month;
@@ -227,9 +227,9 @@ all_30_day_from_dmy(dmy_struct *dmy)
  *          based on redate.py by David Finlayson.
  *****************************************************************************/
 void
-dmy_julian_day(double         julian,
-               unsigned short calendar,
-               dmy_struct    *dmy)
+dmy_julian_day(double             julian,
+               unsigned short int calendar,
+               dmy_struct        *dmy)
 {
     double day, F, eps;
     int    second;
@@ -246,8 +246,8 @@ dmy_julian_day(double         julian,
     // get the day (Z) and the fraction of the day (F)
     // add 0.000005 which is 452 ms in case of jd being after
     // second 23:59:59 of a day we want to round to the next day
-    Z = (int)round(julian + 0.00005);
-    F = (double)(julian + 0.5 - Z);
+    Z = (int) round(julian + 0.00005);
+    F = (double) (julian + 0.5 - Z);
     if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) {
         alpha = (int) ((((double) Z - 1867216.0) - 0.25) / 36524.25);
         A = Z + 1 + alpha - (int) (0.25 * (double) alpha);
@@ -257,8 +257,8 @@ dmy_julian_day(double         julian,
         }
     }
     else if (calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        alpha = (int)(((Z - 1867216.0) - 0.25) / 36524.25);
-        A = Z + 1 + alpha - (int)(0.25 * alpha);
+        alpha = (int) (((Z - 1867216.0) - 0.25) / 36524.25);
+        A = Z + 1 + alpha - (int) (0.25 * alpha);
     }
     else if (calendar == CALENDAR_JULIAN) {
         A = Z;
@@ -271,7 +271,7 @@ dmy_julian_day(double         julian,
     B = A + 1524;
     C = (int) (6680. +
                (((double) B - 2439870.) - 122.1) / (double) DAYS_PER_JYEAR);
-    D = (int) (DAYS_PER_YEAR * C + (int)(0.25 * (double) C));
+    D = (int) (DAYS_PER_YEAR * C + (int) (0.25 * (double) C));
     E = (int) (((double) (B - D)) / 30.6001);
 
     // Convert to date
@@ -332,25 +332,25 @@ void
 dmy_no_leap_day(double      julian,
                 dmy_struct *dmy)
 {
-    double         F;
-    double         day, dfrac;
-    unsigned       A, B, C, D, E, year;
-    double         I, days, seconds;
-    unsigned short month, nday, dayofyr;
+    double             F;
+    double             day, dfrac;
+    unsigned int       A, B, C, D, E, year;
+    double             I, days, seconds;
+    unsigned short int month, nday, dayofyr;
 
     if (julian < 0) {
         log_err("Julian Day must be positive");
     }
 
     F = modf(julian + 0.5, &I);
-    A = (unsigned)I;
+    A = (unsigned int) I;
     B = A + 1524;
-    C = (unsigned)((B - 122.1) / DAYS_PER_YEAR);
-    D = (unsigned)(DAYS_PER_YEAR * C);
-    E = (unsigned)((B - D) / 30.6001);
+    C = (unsigned int) ((B - 122.1) / DAYS_PER_YEAR);
+    D = (unsigned int) (DAYS_PER_YEAR * C);
+    E = (unsigned int) ((B - D) / 30.6001);
 
     // Convert to date
-    day = B - D - (unsigned)(30.6001 * E) + (unsigned)F;
+    day = B - D - (unsigned int) (30.6001 * E) + (unsigned int) F;
     nday = B - D - 123;
     if (nday <= 305) {
         dayofyr = nday + 60;
@@ -379,7 +379,7 @@ dmy_no_leap_day(double      julian,
 
     dmy->year = year;
     dmy->month = month;
-    dmy->day = (unsigned short)days;
+    dmy->day = (unsigned short int) days;
     dmy->day_in_year = dayofyr;
     dmy->dayseconds = seconds;
 
@@ -396,24 +396,24 @@ void
 dmy_all_leap(double      julian,
              dmy_struct *dmy)
 {
-    double         F, day, days, seconds;
-    double         dfrac, I;
-    unsigned       A, B, C, D, E, year, nday;
-    unsigned short dayofyr, month;
+    double             F, day, days, seconds;
+    double             dfrac, I;
+    unsigned int       A, B, C, D, E, year, nday;
+    unsigned short int dayofyr, month;
 
     if (julian < 0) {
         log_err("Julian Day must be positive");
     }
 
     F = modf(julian + 0.5, &I);
-    A = (unsigned)I;
+    A = (unsigned int)I;
     B = A + 1524;
-    C = (unsigned)((B - 122.1) / DAYS_PER_LYEAR);
-    D = (unsigned)(DAYS_PER_LYEAR * C);
-    E = (unsigned)((B - D) / 30.6001);
+    C = (unsigned int)((B - 122.1) / DAYS_PER_LYEAR);
+    D = (unsigned int)(DAYS_PER_LYEAR * C);
+    E = (unsigned int)((B - D) / 30.6001);
 
     // Convert to date
-    day = B - D - (unsigned)(30.6001 * E) + (unsigned)F;
+    day = B - D - (unsigned int) (30.6001 * E) + (unsigned int) F;
     nday = B - D - 123;
     if (nday <= 305) {
         dayofyr = nday + 60;
@@ -444,7 +444,7 @@ dmy_all_leap(double      julian,
 
     dmy->year = year;
     dmy->month = month;
-    dmy->day = (unsigned short)days;
+    dmy->day = (unsigned short int) days;
     dmy->day_in_year = dayofyr;
     dmy->dayseconds = seconds;
 
@@ -460,18 +460,18 @@ void
 dmy_all_30_day(double      julian,
                dmy_struct *dmy)
 {
-    double         F, Z, dfrac, day, days, seconds;
-    unsigned short dayofyr, month;
-    unsigned       year;
+    double             F, Z, dfrac, day, days, seconds;
+    unsigned short int dayofyr, month;
+    unsigned int       year;
 
     if (julian < 0) {
         log_err("Julian Day must be positive");
     }
 
     F = modf(julian, &Z);
-    year = (int)((Z - 0.5) / (double) DAYS_PER_360DAY_YEAR) - 4716;
+    year = (int) ((Z - 0.5) / (double) DAYS_PER_360DAY_YEAR) - 4716;
     dayofyr = Z - (year + 4716) * DAYS_PER_360DAY_YEAR;
-    month = (int)((dayofyr - 0.5) / 30) + 1;
+    month = (int) ((dayofyr - 0.5) / 30) + 1;
     day = dayofyr - (month - 1) * 30 + F;
 
     // Convert fractions of a day to time
@@ -480,7 +480,7 @@ dmy_all_30_day(double      julian,
 
     dmy->year = year;
     dmy->month = month;
-    dmy->day = (unsigned short)days;
+    dmy->day = (unsigned short int) days;
     dmy->day_in_year = dayofyr;
     dmy->dayseconds = seconds;
 
@@ -497,11 +497,11 @@ dmy_all_30_day(double      julian,
  *          1582-10-5 and 1582-10-15.
  *****************************************************************************/
 double
-date2num(double         origin,
-         dmy_struct    *dmy,
-         double         tzoffset,
-         unsigned short calendar,
-         unsigned short time_units)
+date2num(double             origin,
+         dmy_struct        *dmy,
+         double             tzoffset,
+         unsigned short int calendar,
+         unsigned short int time_units)
 {
     double jdelta;
 
@@ -558,12 +558,12 @@ date2num(double         origin,
             using "calendar".
  *****************************************************************************/
 void
-num2date(double         origin,
-         double         time_value,
-         double         tzoffset,
-         unsigned short calendar,
-         unsigned short time_units,
-         dmy_struct    *dmy)
+num2date(double             origin,
+         double             time_value,
+         double             tzoffset,
+         unsigned short int calendar,
+         unsigned short int time_units,
+         dmy_struct        *dmy)
 {
     double jd, jdelta;
 
@@ -612,12 +612,12 @@ num2date(double         origin,
  * @return  Return pointer to last day of month array
  *****************************************************************************/
 void
-make_lastday(unsigned short calendar,
-             unsigned short year,
-             unsigned short lastday[])
+make_lastday(unsigned short int calendar,
+             unsigned short int year,
+             unsigned short int lastday[])
 {
-    size_t         i;
-    unsigned short temp[MONTHS_PER_YEAR] = {
+    size_t             i;
+    unsigned short int temp[MONTHS_PER_YEAR] = {
         31, 28, 31, 30, 31, 30,
         31, 31, 30, 31, 30, 31
     };
@@ -651,8 +651,8 @@ make_lastday(unsigned short calendar,
  * @return  Return pointer to last day of month array
  *****************************************************************************/
 bool
-leap_year(unsigned short year,
-          unsigned short calendar)
+leap_year(unsigned short int year,
+          unsigned short int calendar)
 {
     bool leap = false;
 
@@ -706,14 +706,13 @@ initialize_time()
  * @brief Validate dmy structure
  * @return 0 if ok, else return > 0
  *****************************************************************************/
-
 int
-valid_date(unsigned short calendar,
-           dmy_struct    *dmy)
+valid_date(unsigned short int calendar,
+           dmy_struct        *dmy)
 {
-    unsigned short lastday[MONTHS_PER_YEAR];
-    unsigned short days_in_year;
-    size_t         i;
+    unsigned short int lastday[MONTHS_PER_YEAR];
+    unsigned short int days_in_year;
+    size_t             i;
 
     // Get array of last days of month
     make_lastday(calendar, dmy->year, lastday);
@@ -750,6 +749,10 @@ valid_date(unsigned short calendar,
     }
 }
 
+/******************************************************************************
+ * @brief Convert time value from seconds to other units.
+ * @return 0 if ok, else return > 0
+ *****************************************************************************/
 void
 dt_seconds_to_time_units(unsigned short int time_units,
                          double             dt_seconds,

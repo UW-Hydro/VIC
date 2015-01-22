@@ -160,7 +160,7 @@ initialize_model_state(all_vars_struct *all_vars,
                         for (index = 3; index < Nnodes - 1; index++) {
                             if (FIRST_VEG) {
                                 soil_con->dz_node[index] = tmpdp /
-                                                           (((double)Nnodes -
+                                                           (((double) Nnodes -
                                                              tmpadj));
                             }
                             Zsum += (soil_con->dz_node[index] +
@@ -180,8 +180,8 @@ initialize_model_state(all_vars_struct *all_vars,
                             Zsum += (soil_con->dz_node[Nnodes - 2] +
                                      soil_con->dz_node[Nnodes - 1]) / 2.;
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
-                            if ((int)(Zsum * MM_PER_M + 0.5) !=
-                                (int)(dp * MM_PER_M + 0.5)) {
+                            if ((int) (Zsum * MM_PER_M + 0.5) !=
+                                (int) (dp * MM_PER_M + 0.5)) {
                                 log_err("Sum of thermal node thicknesses (%f) "
                                         "in initialize_model_state do not "
                                         "equal dp (%f), check initialization "
@@ -193,7 +193,7 @@ initialize_model_state(all_vars_struct *all_vars,
                            // calculate exponential function parameter */
                         if (FIRST_VEG) {
                             // to force Zsum=dp at bottom node
-                            Bexp = logf(dp + 1.) / (double)(Nnodes - 1);
+                            Bexp = logf(dp + 1.) / (double) (Nnodes - 1);
                             // validate Nnodes by requiring that there be at
                             // least 3 nodes in the top 50cm
                             if (Nnodes < 5 * logf(dp + 1.) + 1) {
@@ -211,8 +211,8 @@ initialize_model_state(all_vars_struct *all_vars,
                                         "parameter file.  Or set EXP_TRANS to "
                                         "FALSE in the global parameter file.",
                                         Nnodes, dp,
-                                        (int)(5 * logf(
-                                                  dp + 1.)) + 2,
+                                        (int) (5 * logf(
+                                                   dp + 1.)) + 2,
                                         exp(0.2 * (Nnodes - 1)) + 1);
                             }
                             for (index = 0; index <= Nnodes - 1; index++) {

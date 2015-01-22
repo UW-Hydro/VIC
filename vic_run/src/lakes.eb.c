@@ -336,7 +336,7 @@ solve_lake(double           snowfall,
             if (lake->activenod > 0) {
                 ErrorFlag = water_under_ice(freezeflag, sw_ice, wind, Ti,
                                             water_density,
-                                            (double)soil_con.lat,
+                                            soil_con.lat,
                                             lake->activenod, lake->dz,
                                             lake->surfdz,
                                             Tcutoff, &qw, lake->surface,
@@ -863,7 +863,7 @@ eddy(int     freezeflag,
         * value of the Prandtl number (Hostetler and Bartlein eq. 6 and 7).
         **********************************************************************/
 
-        ks = 6.6 * pow(sin((double)fabs(lat) * CONST_PI / 180.), 0.5) * pow(
+        ks = 6.6 * pow(sin((double) fabs(lat) * CONST_PI / 180.), 0.5) * pow(
             wind,
             -1.84);
         ws = 0.0012 * wind;
@@ -888,7 +888,7 @@ eddy(int     freezeflag,
 
             dpdz = (water_density[k + 1] - water_density[k]) / zhalf[k];
             N2 = (dpdz / (1.e3 + water_density[k])) * 9.8;
-            z = surfdz + ((double)k) * dz;
+            z = surfdz + ((double) k) * dz;
 
             /* --------------------------------------------------------------------
              * Calculate the second term in the calculation of the Richardson
@@ -1859,8 +1859,8 @@ water_balance(lake_var_struct *lake,
 
     frost_fract = soil_con.frost_fract;
 
-    delta_moist = (double*)calloc(options.Nlayer, sizeof(double));
-    moist = (double*)calloc(options.Nlayer, sizeof(double));
+    delta_moist = (double*) calloc(options.Nlayer, sizeof(double));
+    moist = (double*) calloc(options.Nlayer, sizeof(double));
 
     /**********************************************************************
     * 1. Preliminary stuff
@@ -2154,7 +2154,7 @@ water_balance(lake_var_struct *lake,
             lake->activenod = MAX_LAKE_NODES;
         }
         lake->dz =
-            (lake->ldepth - lake->surfdz) / ((double)(lake->activenod - 1));
+            (lake->ldepth - lake->surfdz) / ((double) (lake->activenod - 1));
     }
     else if (lake->ldepth > DBL_EPSILON) {
         lake->surfdz = lake->ldepth;
@@ -2211,7 +2211,7 @@ water_balance(lake_var_struct *lake,
             Tnew[k] = 0.0;
             for (i = 0; i < isave_n; i++) {
                 index += (1. / lake->activenod);
-                Tnew[k] += lake->temp[(int)floor(index)];
+                Tnew[k] += lake->temp[(int) floor(index)];
             }
         }
         for (k = 0; k < lake->activenod; k++) {
@@ -2336,8 +2336,8 @@ water_balance(lake_var_struct *lake,
         advect_carbon_storage(lakefrac, newfraction, lake, &(cell[iveg][band]));
     }
 
-    free((char*)delta_moist);
-    free((char*)moist);
+    free((char*) delta_moist);
+    free((char*) moist);
 
     return(0);
 }
@@ -2383,7 +2383,7 @@ advect_soil_veg_storage(double            lakefrac,
                 new_moist[lidx] = soil_con->max_moist[lidx];
             }
         }
-        for (ilidx = (int)options.Nlayer - 1; ilidx >= 0; ilidx--) {
+        for (ilidx = (int) options.Nlayer - 1; ilidx >= 0; ilidx--) {
             new_moist[ilidx] += delta_moist[ilidx]; // mm over (1-lakefrac)
             delta_moist[ilidx] = 0;
             if (new_moist[ilidx] > soil_con->max_moist[ilidx]) {

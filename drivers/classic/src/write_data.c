@@ -51,19 +51,19 @@ write_data(out_data_file_struct *out_data_files,
 
     if (options.BINARY_OUTPUT) { // BINARY
         // Initialize pointers
-        tmp_cptr = (char *)calloc(
+        tmp_cptr = (char *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(char));
-        tmp_siptr = (short int *)calloc(
+        tmp_siptr = (short int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(short int));
-        tmp_usiptr = (unsigned short int *)calloc(
+        tmp_usiptr = (unsigned short int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(unsigned short int));
-        tmp_iptr = (int *)calloc(
+        tmp_iptr = (int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(int));
-        tmp_fptr = (float *)calloc(
+        tmp_fptr = (float *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(float));
-        tmp_dptr = (double *)calloc(
+        tmp_dptr = (double *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(double));
 
@@ -186,12 +186,12 @@ write_data(out_data_file_struct *out_data_files,
         }
 
         // Free the arrays
-        free((char *)tmp_cptr);
-        free((char *)tmp_siptr);
-        free((char *)tmp_usiptr);
-        free((char *)tmp_iptr);
-        free((char *)tmp_fptr);
-        free((char *)tmp_dptr);
+        free((char *) tmp_cptr);
+        free((char *) tmp_siptr);
+        free((char *) tmp_usiptr);
+        free((char *) tmp_iptr);
+        free((char *) tmp_fptr);
+        free((char *) tmp_dptr);
     }
     else { // ASCII
            // Loop over output files

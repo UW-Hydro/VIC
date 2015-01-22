@@ -226,7 +226,7 @@ ice_melt(double            z2,
 
     /* Calculate the surface energy balance for snow_temp = 0.0 */
 
-    Qnet = CalcIcePackEnergyBalance((double)0.0, delta_t, aero_resist,
+    Qnet = CalcIcePackEnergyBalance((double) 0.0, delta_t, aero_resist,
                                     aero_resist_used, z2, Z0, wind, net_short,
                                     longwave, density, Le, air_temp,
                                     pressure * PA_PER_KPA, vpd * PA_PER_KPA,
@@ -350,8 +350,8 @@ ice_melt(double            z2,
         /* Calculate surface layer temperature using "Brent method" */
         if (SurfaceSwq > param.SNOW_MIN_SWQ_EB_THRES) {
             snow->surf_temp =
-                root_brent((double)(snow->surf_temp - param.SNOW_DT),
-                           (double)(snow->surf_temp + param.SNOW_DT),
+                root_brent((double) (snow->surf_temp - param.SNOW_DT),
+                           (double) (snow->surf_temp + param.SNOW_DT),
                            ErrorString,
                            IceEnergyBalance, delta_t,
                            aero_resist, aero_resist_used, z2, Z0,

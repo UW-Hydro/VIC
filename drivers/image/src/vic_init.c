@@ -172,7 +172,7 @@ vic_init(void)
         get_nc_field_double(filenames.veglib, "RGL",
                             d3start, d3count, dvar);
         for (i = 0; i < global_domain.ncells_global; i++) {
-            veg_lib[i][j].RGL = (double)dvar[idx[i]];
+            veg_lib[i][j].RGL = (double) dvar[idx[i]];
         }
     }
 
@@ -739,7 +739,7 @@ vic_init(void)
             for (j = 0; j < options.SNOW_BAND; j++) {
                 if (soil_con[i].Pfactor[j] < 0.) {
                     sprint_location(locstr, &(global_domain.locations[i]));
-                    log_err("Snow band precipitation fraction (%lf) "
+                    log_err("Snow band precipitation fraction (%f) "
                             "must be between 0 and 1.\n%s",
                             soil_con[i].Pfactor[j], locstr);
                 }
@@ -748,7 +748,7 @@ vic_init(void)
                     // TBD: Check to make sure whether this check is actually
                     // needed
                     sprint_location(locstr, &(global_domain.locations[i]));
-                    log_err("Snow band precipitation fraction (%lf) "
+                    log_err("Snow band precipitation fraction (%f) "
                             "should be 0 when the area fraction is "
                             "0. (band = %zd).\n%s",
                             soil_con[i].AreaFract[j], j, locstr);
@@ -891,7 +891,7 @@ vic_init(void)
                 if (sum <= 0) {
                     sprint_location(locstr, &(global_domain.locations[i]));
                     log_err("Root zone depths must sum to a value greater "
-                            "than 0 (sum = %.2lf) - Type: %zd.\n%s", sum, j,
+                            "than 0 (sum = %.2f) - Type: %zd.\n%s", sum, j,
                             locstr);
                 }
                 sum = 0;

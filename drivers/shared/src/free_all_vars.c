@@ -46,27 +46,27 @@ free_all_vars(all_vars_struct *all_vars,
     Nitems = Nveg + 1;
 
     for (j = 0; j < Nitems; j++) {
-        free((char *)all_vars[0].cell[j]);
+        free((char *) all_vars[0].cell[j]);
     }
-    free((char *)all_vars[0].cell);
+    free((char *) all_vars[0].cell);
     for (j = 0; j < Nitems; j++) {
         if (options.CARBON) {
             for (k = 0; k < options.SNOW_BAND; k++) {
-                free((char *)all_vars[0].veg_var[j][k].NscaleFactor);
-                free((char *)all_vars[0].veg_var[j][k].aPARLayer);
-                free((char *)all_vars[0].veg_var[j][k].CiLayer);
-                free((char *)all_vars[0].veg_var[j][k].rsLayer);
+                free((char *) all_vars[0].veg_var[j][k].NscaleFactor);
+                free((char *) all_vars[0].veg_var[j][k].aPARLayer);
+                free((char *) all_vars[0].veg_var[j][k].CiLayer);
+                free((char *) all_vars[0].veg_var[j][k].rsLayer);
             }
         }
         free((char *)(*all_vars).veg_var[j]);
     }
     free((char *)(*all_vars).veg_var);
     for (j = 0; j < Nitems; j++) {
-        free((char *)all_vars[0].energy[j]);
+        free((char *) all_vars[0].energy[j]);
     }
-    free((char *)all_vars[0].energy);
+    free((char *) all_vars[0].energy);
     for (i = 0; i < Nitems; i++) {
-        free((char *)all_vars[0].snow[i]);
+        free((char *) all_vars[0].snow[i]);
     }
-    free((char *)all_vars[0].snow);
+    free((char *) all_vars[0].snow);
 }

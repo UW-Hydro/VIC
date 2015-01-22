@@ -570,21 +570,21 @@ get_parameters(FILE *paramfile)
 void
 validate_parameters()
 {
-
     extern parameters_struct param;
 
     // Validate Parameters
     // Lapse Rate
-    if (!(param.LAPSE_RATE  >= -1 && param.LAPSE_RATE <= 0)) {
+    if (!(param.LAPSE_RATE >= -1 && param.LAPSE_RATE <= 0)) {
         log_err("LAPSE_RATE must be defined on the interval [-1,0] (C/m)")
     }
     // Precipitation Guage Height
-    if (!(param.GAUGE_HEIGHT  >= 0 && param.GAUGE_HEIGHT <= 100)) {
+    if (!(param.GAUGE_HEIGHT >= 0 && param.GAUGE_HEIGHT <= 100)) {
         log_err("GAUGE_HEIGHT must be defined on the interval [0,100] (m)")
     }
     // Default Wind Speed
     if (!param.WIND_SPEED_DEFAULT > 0.) {
-        log_err("WIND_SPEED_DEFAULT must be defined on the interval [0, inf) (m/s)");
+        log_err(
+            "WIND_SPEED_DEFAULT must be defined on the interval [0, inf) (m/s)");
     }
     if (!(param.WIND_SPEED_MIN >= 0.)) {
         log_err("WIND_SPEED_MIN must be defined on the interval [0, inf) (m/s)");
@@ -594,44 +594,49 @@ validate_parameters()
         log_err("HUGE_RESIST must be defined on the interval [0, inf) (s/m)");
     }
     // Surface Albedo Parameters
-    if (!(param.ALBEDO_BARE_SOIL  >= 0 && param.ALBEDO_BARE_SOIL <= 1)) {
+    if (!(param.ALBEDO_BARE_SOIL >= 0 && param.ALBEDO_BARE_SOIL <= 1)) {
         log_err("ALBEDO_BARE_SOIL must be defined on the interval [0,1] (-)")
     }
-    if (!(param.ALBEDO_H20_SURF  >= 0 && param.ALBEDO_H20_SURF <= 1)) {
+    if (!(param.ALBEDO_H20_SURF >= 0 && param.ALBEDO_H20_SURF <= 1)) {
         log_err("ALBEDO_H20_SURF must be defined on the interval [0,1] (-)")
     }
     // Surface Emissivities
-    if (!(param.EMISS_GRND  >= 0 && param.EMISS_GRND <= 1)) {
+    if (!(param.EMISS_GRND >= 0 && param.EMISS_GRND <= 1)) {
         log_err("EMISS_GRND must be defined on the interval [0,1] (-)")
     }
-    if (!(param.EMISS_ICE  >= 0 && param.EMISS_ICE <= 1)) {
+    if (!(param.EMISS_ICE >= 0 && param.EMISS_ICE <= 1)) {
         log_err("EMISS_ICE must be defined on the interval [0,1] (-)")
     }
-    if (!(param.EMISS_VEG  >= 0 && param.EMISS_VEG <= 1)) {
+    if (!(param.EMISS_VEG >= 0 && param.EMISS_VEG <= 1)) {
         log_err("EMISS_VEG must be defined on the interval [0,1] (-)")
     }
-    if (!(param.EMISS_SNOW  >= 0 && param.EMISS_SNOW <= 1)) {
+    if (!(param.EMISS_SNOW >= 0 && param.EMISS_SNOW <= 1)) {
         log_err("EMISS_SNOW must be defined on the interval [0,1] (-)")
     }
-    if (!(param.EMISS_H2O  >= 0 && param.EMISS_H2O <= 1)) {
+    if (!(param.EMISS_H2O >= 0 && param.EMISS_H2O <= 1)) {
         log_err("EMISS_H2O must be defined on the interval [0,1] (-)")
     }
     // Soil Constraints
     if (!(param.SOIL_RESID_MOIST >= 0.)) {
         log_err("SOIL_RESID_MOIST must be defined on the interval [0, inf)");
     }
-    if (!(param.SOIL_SLAB_MOIST_FRACT  >= 0 && param.SOIL_SLAB_MOIST_FRACT <= 1)) {
-        log_err("SOIL_SLAB_MOIST_FRACT must be defined on the interval [0,1] (-)")
+    if (!(param.SOIL_SLAB_MOIST_FRACT >= 0 && param.SOIL_SLAB_MOIST_FRACT <=
+          1)) {
+        log_err(
+            "SOIL_SLAB_MOIST_FRACT must be defined on the interval [0,1] (-)")
     }
     // Vegetation Parameters
     if (!(param.VEG_LAI_SNOW_MULTIPLIER >= 0.)) {
-        log_err("VEG_LAI_SNOW_MULTIPLIER must be defined on the interval [0, inf) (-)");
+        log_err(
+            "VEG_LAI_SNOW_MULTIPLIER must be defined on the interval [0, inf) (-)");
     }
     if (!(param.VEG_MIN_INTERCEPTION_STORAGE >= 0.)) {
-        log_err("VEG_MIN_INTERCEPTION_STORAGE must be defined on the interval [0, inf) (m)");
+        log_err(
+            "VEG_MIN_INTERCEPTION_STORAGE must be defined on the interval [0, inf) (m)");
     }
     if (!(param.VEG_LAI_WATER_FACTOR >= 0.)) {
-        log_err("VEG_LAI_WATER_FACTOR must be defined on the interval [0, inf) (-)");
+        log_err(
+            "VEG_LAI_WATER_FACTOR must be defined on the interval [0, inf) (-)");
     }
     // Canopy Parameters
     if (!(param.CANOPY_CLOSURE >= 0.)) {
@@ -641,11 +646,13 @@ validate_parameters()
         log_err("CANOPY_RSMAX must be defined on the interval [0, inf) (s/m)");
     }
     if (!(param.CANOPY_VPDMINFACTOR >= 0.)) {
-        log_err("CANOPY_VPDMINFACTOR must be defined on the interval [0, inf) (-)");
+        log_err(
+            "CANOPY_VPDMINFACTOR must be defined on the interval [0, inf) (-)");
     }
     // MTCLIM Parameters
     if (!(param.MTCLIM_SOLAR_CONSTANT >= 0.)) {
-        log_err("MTCLIM_SNOW_TRATE must be defined on the interval [0, inf) (W/m2)");
+        log_err(
+            "MTCLIM_SNOW_TRATE must be defined on the interval [0, inf) (W/m2)");
     }
     // MTCLIM_TDAYCOEF - Currently, no constraints
     // MTCLIM_SNOW_TCRIT - Currently, no constraints
@@ -657,18 +664,20 @@ validate_parameters()
     // MTCLIM_B1 - Currently, no constraints
     // MTCLIM_B2 - Currently, no constraints
     // MTCLIM_RAIN_SCALAR - Currently, no constraints
-    if (!(param.MTCLIM_DIF_ALB  >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
+    if (!(param.MTCLIM_DIF_ALB >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
         log_err("MTCLIM_DIF_ALB must be defined on the interval [0,1] (-)")
     }
-    if (!(param.MTCLIM_DIF_ALB  >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
+    if (!(param.MTCLIM_DIF_ALB >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
         log_err("MTCLIM_DIF_ALB must be defined on the interval [0,1] (-)")
     }
     if (!(param.MTCLIM_SC_INT >= 0.)) {
-        log_err("MTCLIM_SC_INT must be defined on the interval [0, inf) (MJ/m2/day)");
+        log_err(
+            "MTCLIM_SC_INT must be defined on the interval [0, inf) (MJ/m2/day)");
     }
     // MTCLIM_SC_SLOPE - Currently, no constraints
     if (!(param.MTCLIM_SRADDT >= 0 && param.MTCLIM_SRADDT <= SEC_PER_DAY)) {
-        log_err("MTCLIM_SRADDT must be defined on the interval [0, 86400) (seconds)");
+        log_err(
+            "MTCLIM_SRADDT must be defined on the interval [0, 86400) (seconds)");
     }
     if (!(param.MTCLIM_SW_PREC_THRESH >= 0.)) {
         log_err("MTCLIM_SRADDT must be defined on the interval [0, inf) (mm)");
@@ -702,7 +711,8 @@ validate_parameters()
     // LAKE_A2 - Currently, no constraints
     // LAKE_QWTAU - Currently, no constraints
     if (!(param.LAKE_MAX_ITER >= 0.)) {
-        log_err("LAKE_MAX_ITER must be defined on the interval [0, inf) (iterations)");
+        log_err(
+            "LAKE_MAX_ITER must be defined on the interval [0, inf) (iterations)");
     }
     // Saturation Vapor Pressure Parameters
     if (!(param.SVP_A >= 0.)) {
@@ -716,7 +726,8 @@ validate_parameters()
     }
     // Carbon Parameters
     if (!(param.CARBON_CATMCURRENT >= 0.)) {
-        log_err("CARBON_CATMCURRENT must be defined on the interval [0, inf) (ppm)");
+        log_err(
+            "CARBON_CATMCURRENT must be defined on the interval [0, inf) (ppm)");
     }
     if (!(param.CARBON_SW2PAR >= 0.)) {
         log_err("CARBON_SW2PAR must be defined on the interval [0, inf) (W/m2)");
@@ -734,29 +745,33 @@ validate_parameters()
         log_err("PHOTO_LAIMIN must be defined on the interval [0, inf) (-)");
     }
     if (!(param.PHOTO_EPAR >= 0.)) {
-        log_err("PHOTO_EPAR must be defined on the interval [0, inf) (mol/MJ PAR)");
+        log_err(
+            "PHOTO_EPAR must be defined on the interval [0, inf) (mol/MJ PAR)");
     }
-    if (!(param.PHOTO_FCMAX  >= 0 && param.PHOTO_FCMAX <= 1)) {
+    if (!(param.PHOTO_FCMAX >= 0 && param.PHOTO_FCMAX <= 1)) {
         log_err("PHOTO_FCMAX must be defined on the interval [0,1] (-)")
     }
-    if (!(param.PHOTO_FCMIN  >= 0 && param.PHOTO_FCMIN <= 1)) {
+    if (!(param.PHOTO_FCMIN >= 0 && param.PHOTO_FCMIN <= 1)) {
         log_err("PHOTO_FCMIN must be defined on the interval [0,1] (-)")
     }
     // PHOTO_ZENITHMIN - Currently, no constraints
     // PHOTO_ZENITHMINPAR - Currently, no constraints
-    if (!(param.PHOTO_ALBSOIPARMIN  >= 0 && param.PHOTO_ALBSOIPARMIN <= 1)) {
+    if (!(param.PHOTO_ALBSOIPARMIN >= 0 && param.PHOTO_ALBSOIPARMIN <= 1)) {
         log_err("PHOTO_ALBSOIPARMIN must be defined on the interval [0,1] (-)")
     }
     if (!(param.PHOTO_MINMAXETRANS >= 0.)) {
-        log_err("PHOTO_MINMAXETRANS must be defined on the interval [0, inf) (mol/(m^2 s))");
+        log_err(
+            "PHOTO_MINMAXETRANS must be defined on the interval [0, inf) (mol/(m^2 s))");
     }
     if (!(param.PHOTO_MINSTOMCOND >= 0.)) {
-        log_err("PHOTO_MINSTOMCOND must be defined on the interval [0, inf) (mol H2O/m2s)");
+        log_err(
+            "PHOTO_MINSTOMCOND must be defined on the interval [0, inf) (mol H2O/m2s)");
     }
     // PHOTO_FCI1C3 - Currently, no constraints
     // PHOTO_FCI1C4 - Currently, no constraints
     if (!(param.PHOTO_OX >= 0.)) {
-        log_err("PHOTO_OX must be defined on the interval [0, inf) (mol H2O/m2s)");
+        log_err(
+            "PHOTO_OX must be defined on the interval [0, inf) (mol H2O/m2s)");
     }
     // PHOTO_KC - Currently, no constraints
     // PHOTO_KO - Currently, no constraints
@@ -775,18 +790,20 @@ validate_parameters()
 
     // Soil Respiration Parameters
     if (!(param.SRESP_E0_LT >= 0.)) {
-        log_err("SRESP_E0_LT must be defined on the interval [0, inf) (mol H2O/m2s)");
+        log_err(
+            "SRESP_E0_LT must be defined on the interval [0, inf) (mol H2O/m2s)");
     }
     if (!(param.SRESP_T0_LT >= 0.)) {
-        log_err("SRESP_T0_LT must be defined on the interval [0, inf) (mol H2O/m2s)");
+        log_err(
+            "SRESP_T0_LT must be defined on the interval [0, inf) (mol H2O/m2s)");
     }
-    if (!(param.SRESP_WMINFM  >= 0 && param.SRESP_WMINFM <= 1)) {
+    if (!(param.SRESP_WMINFM >= 0 && param.SRESP_WMINFM <= 1)) {
         log_err("SRESP_WMINFM must be defined on the interval [0,1] (-)")
     }
-    if (!(param.SRESP_WMAXFM  >= 0 && param.SRESP_WMAXFM <= 1)) {
+    if (!(param.SRESP_WMAXFM >= 0 && param.SRESP_WMAXFM <= 1)) {
         log_err("SRESP_WMAXFM must be defined on the interval [0,1] (-)")
     }
-    if (!(param.SRESP_WOPTFM  >= 0 && param.SRESP_WOPTFM <= 1)) {
+    if (!(param.SRESP_WOPTFM >= 0 && param.SRESP_WOPTFM <= 1)) {
         log_err("SRESP_WOPTFM must be defined on the interval [0,1] (-)")
     }
     // SRESP_RHSAT - Currently, no constraints
@@ -800,27 +817,32 @@ validate_parameters()
     if (!(param.SRESP_TAUSLOW >= 0.)) {
         log_err("SRESP_TAUSLOW must be defined on the interval [0, inf) (y)");
     }
-    if (!(param.SRESP_FAIR  >= 0 && param.SRESP_FAIR <= 1)) {
+    if (!(param.SRESP_FAIR >= 0 && param.SRESP_FAIR <= 1)) {
         log_err("SRESP_FAIR must be defined on the interval [0,1] (-)")
     }
-    if (!(param.SRESP_FINTER  >= 0 && param.SRESP_FINTER <= 1)) {
+    if (!(param.SRESP_FINTER >= 0 && param.SRESP_FINTER <= 1)) {
         log_err("SRESP_FINTER must be defined on the interval [0,1] (-)")
     }
 
     // Snow Parameters
     if (!(param.SNOW_MAX_SURFACE_SWE >= 0.)) {
-        log_err("SNOW_MAX_SURFACE_SWE must be defined on the interval [0, inf) (m)");
+        log_err(
+            "SNOW_MAX_SURFACE_SWE must be defined on the interval [0, inf) (m)");
     }
-    if (!(param.SNOW_LIQUID_WATER_CAPACITY  >= 0 && param.SNOW_LIQUID_WATER_CAPACITY <= 1)) {
-        log_err("SNOW_LIQUID_WATER_CAPACITY must be defined on the interval [0,1] (-)")
+    if (!(param.SNOW_LIQUID_WATER_CAPACITY >= 0 &&
+          param.SNOW_LIQUID_WATER_CAPACITY <= 1)) {
+        log_err(
+            "SNOW_LIQUID_WATER_CAPACITY must be defined on the interval [0,1] (-)")
     }
     if (!(param.SNOW_NEW_SNOW_DENSITY >= 0.)) {
-        log_err("SNOW_NEW_SNOW_DENSITY must be defined on the interval [0, inf) (kg/m^3)");
+        log_err(
+            "SNOW_NEW_SNOW_DENSITY must be defined on the interval [0, inf) (kg/m^3)");
     }
     if (!(param.SNOW_DENS_DMLIMIT >= 0.)) {
-        log_err("SNOW_DENS_DMLIMIT must be defined on the interval [0, inf) (kg/m^3)");
+        log_err(
+            "SNOW_DENS_DMLIMIT must be defined on the interval [0, inf) (kg/m^3)");
     }
-    if (!(param.SNOW_DENS_MAX_CHANGE  >= 0 && param.SNOW_DENS_MAX_CHANGE <= 1)) {
+    if (!(param.SNOW_DENS_MAX_CHANGE >= 0 && param.SNOW_DENS_MAX_CHANGE <= 1)) {
         log_err("SNOW_DENS_MAX_CHANGE must be defined on the interval [0,1] (-)")
     }
     // SNOW_DENS_ETA0 - Currently, no constraints
@@ -830,7 +852,8 @@ validate_parameters()
     // SNOW_DENS_C6 - Currently, no constraints
     // SNOW_DENS_F - Currently, no constraints
     if (!(param.SNOW_MIN_SWQ_EB_THRES >= 0.)) {
-        log_err("SNOW_MIN_SWQ_EB_THRES must be defined on the interval [0, inf) (m)");
+        log_err(
+            "SNOW_MIN_SWQ_EB_THRES must be defined on the interval [0, inf) (m)");
     }
     if (!(param.SNOW_A1 >= 0.)) {
         log_err("SNOW_A1 must be defined on the interval [0, inf)");
@@ -844,7 +867,7 @@ validate_parameters()
     if (!(param.SNOW_L2 >= 0.)) {
         log_err("SNOW_L2 must be defined on the interval [0, inf) (1/m)");
     }
-    if (!(param.SNOW_NEW_SNOW_ALB  >= 0 && param.SNOW_NEW_SNOW_ALB <= 1)) {
+    if (!(param.SNOW_NEW_SNOW_ALB >= 0 && param.SNOW_NEW_SNOW_ALB <= 1)) {
         log_err("SNOW_NEW_SNOW_ALB must be defined on the interval [0,1] (-)");
     }
     if (!(param.SNOW_ALB_ACCUM_A >= 0.)) {
@@ -865,11 +888,13 @@ validate_parameters()
     if (!(param.SNOW_CONDUCT >= 0.)) {
         log_err("SNOW_CONDUCT must be defined on the interval [0, inf) (W/mK)");
     }
-    if (!(param.SNOW_MAX_SNOW_TEMP  >= -10 && param.SNOW_MAX_SNOW_TEMP <= 10)) {
-        log_err("SNOW_MAX_SNOW_TEMP must be defined on the interval [-10,10] (C)");
+    if (!(param.SNOW_MAX_SNOW_TEMP >= -10 && param.SNOW_MAX_SNOW_TEMP <= 10)) {
+        log_err(
+            "SNOW_MAX_SNOW_TEMP must be defined on the interval [-10,10] (C)");
     }
-    if (!(param.SNOW_MIN_RAIN_TEMP  >= -10 && param.SNOW_MIN_RAIN_TEMP <= 10)) {
-        log_err("SNOW_MIN_RAIN_TEMP must be defined on the interval [-10,10] (C)");
+    if (!(param.SNOW_MIN_RAIN_TEMP >= -10 && param.SNOW_MIN_RAIN_TEMP <= 10)) {
+        log_err(
+            "SNOW_MIN_RAIN_TEMP must be defined on the interval [-10,10] (C)");
     }
     if (!(param.SNOW_MIN_RAIN_TEMP < param.SNOW_MAX_SNOW_TEMP)) {
         log_err("SNOW_MIN_RAIN_TEMP > SNOW_MAX_SNOW_TEMP.");
@@ -882,26 +907,33 @@ validate_parameters()
         log_err("BLOWING_CSALT must be defined on the interval [0, inf) (m/s)");
     }
     if (!(param.BLOWING_UTHRESH >= 0.)) {
-        log_err("BLOWING_UTHRESH must be defined on the interval [0, inf)  (m/s)");
+        log_err(
+            "BLOWING_UTHRESH must be defined on the interval [0, inf)  (m/s)");
     }
     if (!(param.BLOWING_KIN_VIS >= 0.)) {
-        log_err("BLOWING_KIN_VIS must be defined on the interval [0, inf)  (m2/s)");
+        log_err(
+            "BLOWING_KIN_VIS must be defined on the interval [0, inf)  (m2/s)");
     }
     if (!(param.BLOWING_MAX_ITER >= 1)) {
-        log_err("BLOWING_MAX_ITER must be defined on the interval [1, inf) (iterations");
+        log_err(
+            "BLOWING_MAX_ITER must be defined on the interval [1, inf) (iterations");
     }
     if (!(param.BLOWING_K >= 0)) {
         log_err("BLOWING_K must be defined on the interval [0, inf)");
     }
     if (!(param.BLOWING_SETTLING >= 0.)) {
-        log_err("BLOWING_SETTLING must be defined on the interval [0, inf) (m/s)");
+        log_err(
+            "BLOWING_SETTLING must be defined on the interval [0, inf) (m/s)");
     }
     if (param.BLOWING_NUMINCS < 0) {
-        log_err("BLOWING_NUMINCS must be defined on the interval [0, inf) (intervals)");
+        log_err(
+            "BLOWING_NUMINCS must be defined on the interval [0, inf) (intervals)");
     }
     // Treeline temperature
-    if (!(param.TREELINE_TEMPERATURE  >= -10 && param.TREELINE_TEMPERATURE <= 20)) {
-        log_warn("TREELINE_TEMPERATURE must be defined on the interval [-10,20] (C)");
+    if (!(param.TREELINE_TEMPERATURE >= -10 && param.TREELINE_TEMPERATURE <=
+          20)) {
+        log_warn(
+            "TREELINE_TEMPERATURE must be defined on the interval [-10,20] (C)");
     }
 
     // Iteration Bracket Widths
@@ -929,11 +961,13 @@ validate_parameters()
     }
     // Frozen Soil Parameters
     if (!(param.FROZEN_MAXITER >= 0)) {
-        log_err("FROZEN_MAXITER must be defined on the interval [0, inf) (iterations");
+        log_err(
+            "FROZEN_MAXITER must be defined on the interval [0, inf) (iterations");
     }
     // Newton-Raphson Solver Parameters
     if (!(param.NEWT_RAPH_MAXTRIAL >= 0)) {
-        log_err("NEWT_RAPH_MAXTRIAL must be defined on the interval [0, inf) (trials)");
+        log_err(
+            "NEWT_RAPH_MAXTRIAL must be defined on the interval [0, inf) (trials)");
     }
     if (!(param.NEWT_RAPH_TOLX >= 0.)) {
         log_err("NEWT_RAPH_TOLX must be defined on the interval [0, inf)");

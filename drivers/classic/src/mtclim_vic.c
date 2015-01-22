@@ -256,7 +256,7 @@ snowpack(const control_struct *ctrl,
     /* Proceed with correction if there are valid days to reinitialize
        the snowpack estiamtes. Otherwise use the first-pass estimate. */
     if (count) {
-        snowpack = sum / (double)count;
+        snowpack = sum / (double) count;
         for (i = 0; i < ndays; i++) {
             newsnow = 0.0;
             snowmelt = 0.0;
@@ -458,7 +458,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_prcp += data->s_prcp[i];
     }
-    ann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
+    ann_prcp = (sum_prcp / (double) ndays) * ctrl->days_per_year;
     if (ann_prcp == 0.0) {
         ann_prcp = 1.0;
     }
@@ -474,7 +474,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
         for (i = 0; i < ndays; i++) {
             sum_prcp += data->s_prcp[i];
         }
-        effann_prcp = (sum_prcp / (double)ndays) * ctrl->days_per_year;
+        effann_prcp = (sum_prcp / (double) ndays) * ctrl->days_per_year;
 
         /* if the effective annual precip for this period
            is less than 8 cm, set the effective annual precip to 8 cm
@@ -559,11 +559,11 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     lat = p->site_lat;
     /* check for (+/-) 90 degrees latitude, throws off daylength calc */
     lat *= RAD_PER_DEG;
-    if (lat > 1.5707) {
-        lat = 1.5707;
+    if (lat > (CONST_PI / 2.0)) {
+        lat = (CONST_PI / 2.0);
     }
-    if (lat < -1.5707) {
-        lat = -1.5707;
+    if (lat < -(CONST_PI / 2.0)) {
+        lat = -(CONST_PI / 2.0);
     }
     coslat = cos(lat);
     sinlat = sin(lat);
@@ -572,21 +572,21 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     cosasp = cos(p->site_asp * RAD_PER_DEG);
     sinasp = sin(p->site_asp * RAD_PER_DEG);
     /* cosine of zenith angle for east and west horizons */
-    coszeh = cos(1.570796 - (p->site_ehoriz * RAD_PER_DEG));
-    coszwh = cos(1.570796 - (p->site_whoriz * RAD_PER_DEG));
+    coszeh = cos((CONST_PI / 2.0) - (p->site_ehoriz * RAD_PER_DEG));
+    coszwh = cos((CONST_PI / 2.0) - (p->site_whoriz * RAD_PER_DEG));
 
     /* sub-daily time and angular increment information */
     dt = param.MTCLIM_SRADDT;              /* set timestep */
     dh = dt / CONST_SECPERRAD;      /* calculate hour-angle step */
     /* start vic_change */
-    tinystepspday = (size_t)(CONST_CDAY / param.MTCLIM_SRADDT);
+    tinystepspday = (size_t) (CONST_CDAY / param.MTCLIM_SRADDT);
     /* end vic_change */
 
     /* begin loop through yeardays */
     for (i = 0; i < (size_t) ctrl->days_per_year; i++) {
         /* calculate cos and sin of declination */
         decl = CONST_MINDECL *
-               cos(((double)i + CONST_DAYSOFF) * CONST_RADPERDAY);
+               cos(((double) i + CONST_DAYSOFF) * CONST_RADPERDAY);
         cosdecl = cos(decl);
         sindecl = sin(decl);
 
@@ -617,7 +617,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
         /* solar constant as a function of yearday (W/m^2) */
         sc = param.MTCLIM_SOLAR_CONSTANT + 45.5 *
-             sin((2.0 * CONST_PI * (double)i / ctrl->days_per_year) + 1.7);
+             sin((2.0 * CONST_PI * (double) i / ctrl->days_per_year) + 1.7);
 
         /* extraterrestrial radiation perpendicular to beam, total over
            the timestep (J) */
@@ -653,7 +653,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
                 /* determine optical air mass */
                 am = 1.0 / (cza + 0.0000001);
                 if (am > 2.9) {
-                    ami = (int)(acos(cza) / RAD_PER_DEG) - 69;
+                    ami = (int) (acos(cza) / RAD_PER_DEG) - 69;
                     if (ami < 0) {
                         ami = 0;
                     }
@@ -696,7 +696,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
             if (tinystep < 0) {
                 tinystep = 0;
             }
-            if (tinystep > (int)tinystepspday - 1) {
+            if (tinystep > (int) tinystepspday - 1) {
                 tinystep = tinystepspday - 1;
             }
             if (dir_flat_topa > 0) {
@@ -739,7 +739,8 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
 
         /* start vic_change */
         for (j = 0; j < tinystepspday; j++) {
-            tiny_radfract[DAYS_PER_YEAR][j] = tiny_radfract[DAYS_PER_YEAR - 1][j];
+            tiny_radfract[DAYS_PER_YEAR][j] =
+                tiny_radfract[DAYS_PER_YEAR - 1][j];
         }
         /* end vic_change */
     }
@@ -834,7 +835,7 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     for (i = 0; i < ndays; i++) {
         sum_pet += pet[i];
     }
-    ann_pet = (sum_pet / (double)ndays) * ctrl->days_per_year;
+    ann_pet = (sum_pet / (double) ndays) * ctrl->days_per_year;
 
     /* Reset humidity terms if no iteration desired */
     if (ctrl->indewpt || ctrl->invp ||
@@ -914,6 +915,10 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     free(pva);
     free(tdew_save);
     free(pva_save);
+    free(ttmax0);
+    free(flat_potrad);
+    free(slope_potrad);
+    free(daylength);
 
     return (!ok);
 }
@@ -1238,7 +1243,7 @@ pulled_boxcar(double *input,
         sum_wt = 0.0;
         if (w_flag) {
             for (i = 0; i < w; i++) {
-                wt[i] = (double)(i + 1);
+                wt[i] = (double) (i + 1);
                 sum_wt += wt[i];
             }
         }

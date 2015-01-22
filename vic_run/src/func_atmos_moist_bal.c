@@ -54,7 +54,7 @@ func_atmos_moist_bal(double  VPcanopy,
     gamma = (double)  va_arg(ap, double);
     vp = (double)  va_arg(ap, double);
 
-    LatentHeat = (double *)va_arg(ap, double *);
+    LatentHeat = (double *) va_arg(ap, double *);
 
     // compute sensible heat flux between canopy and atmosphere
     (*LatentHeat) = Lv * calc_sensible_heat(atmos_density, vp, VPcanopy,

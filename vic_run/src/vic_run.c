@@ -104,9 +104,9 @@ vic_run(int                  rec,
     vic_run_veg_lib = veg_lib;
 
     /* Allocate aero_resist array */
-    aero_resist = (double**)calloc(N_PET_TYPES + 1, sizeof(double*));
+    aero_resist = (double**) calloc(N_PET_TYPES + 1, sizeof(double*));
     for (p = 0; p < N_PET_TYPES + 1; p++) {
-        aero_resist[p] = (double*)calloc(3, sizeof(double));
+        aero_resist[p] = (double*) calloc(3, sizeof(double));
     }
 
     /* set local pointers */
@@ -431,9 +431,9 @@ vic_run(int                  rec,
     }
 
     for (p = 0; p < N_PET_TYPES + 1; p++) {
-        free((char *)aero_resist[p]);
+        free((char *) aero_resist[p]);
     }
-    free((char *)aero_resist);
+    free((char *) aero_resist);
 
     /****************************
        Run Lake Model
@@ -497,7 +497,7 @@ vic_run(int                  rec,
         rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR],
                                  param.SNOW_MAX_SNOW_TEMP,
                                  param.SNOW_MIN_RAIN_TEMP);
-        if ((int)rainonly == ERROR) {
+        if ((int) rainonly == ERROR) {
             return(ERROR);
         }
 

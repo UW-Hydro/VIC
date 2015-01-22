@@ -35,25 +35,25 @@ void
 print_atmos_data(atmos_data_struct *atmos)
 {
     fprintf(LOG_DEST, "atmos_data  :\n");
-    fprintf(LOG_DEST, "\tair_temp  : %.4lf\n", atmos->air_temp[0]);
-    fprintf(LOG_DEST, "\tCatm      : %.4lf\n", atmos->Catm[0]);
-    fprintf(LOG_DEST, "\tchannel_in: %.4lf\n", atmos->channel_in[0]);
-    fprintf(LOG_DEST, "\tcoszen    : %.4lf\n", atmos->coszen[0]);
-    fprintf(LOG_DEST, "\tdensity   : %.4lf\n", atmos->density[0]);
-    fprintf(LOG_DEST, "\tfdir      : %.4lf\n", atmos->fdir[0]);
-    fprintf(LOG_DEST, "\tlongwave  : %.4lf\n", atmos->longwave[0]);
-    fprintf(LOG_DEST, "\tout_prec  : %.4lf\n", atmos->out_prec);
-    fprintf(LOG_DEST, "\tout_rain  : %.4lf\n", atmos->out_rain);
-    fprintf(LOG_DEST, "\tout_snow  : %.4lf\n", atmos->out_snow);
-    fprintf(LOG_DEST, "\tpar       : %.4lf\n", atmos->par[0]);
-    fprintf(LOG_DEST, "\tprec      : %.4lf\n", atmos->prec[0]);
-    fprintf(LOG_DEST, "\tpressure  : %.4lf\n", atmos->pressure[0]);
-    fprintf(LOG_DEST, "\tshortwave : %.4lf\n", atmos->shortwave[0]);
+    fprintf(LOG_DEST, "\tair_temp  : %.4f\n", atmos->air_temp[0]);
+    fprintf(LOG_DEST, "\tCatm      : %.4f\n", atmos->Catm[0]);
+    fprintf(LOG_DEST, "\tchannel_in: %.4f\n", atmos->channel_in[0]);
+    fprintf(LOG_DEST, "\tcoszen    : %.4f\n", atmos->coszen[0]);
+    fprintf(LOG_DEST, "\tdensity   : %.4f\n", atmos->density[0]);
+    fprintf(LOG_DEST, "\tfdir      : %.4f\n", atmos->fdir[0]);
+    fprintf(LOG_DEST, "\tlongwave  : %.4f\n", atmos->longwave[0]);
+    fprintf(LOG_DEST, "\tout_prec  : %.4f\n", atmos->out_prec);
+    fprintf(LOG_DEST, "\tout_rain  : %.4f\n", atmos->out_rain);
+    fprintf(LOG_DEST, "\tout_snow  : %.4f\n", atmos->out_snow);
+    fprintf(LOG_DEST, "\tpar       : %.4f\n", atmos->par[0]);
+    fprintf(LOG_DEST, "\tprec      : %.4f\n", atmos->prec[0]);
+    fprintf(LOG_DEST, "\tpressure  : %.4f\n", atmos->pressure[0]);
+    fprintf(LOG_DEST, "\tshortwave : %.4f\n", atmos->shortwave[0]);
     fprintf(LOG_DEST, "\tsnowflag  : %d\n", atmos->snowflag[0]);
-    fprintf(LOG_DEST, "\ttskc      : %.4lf\n", atmos->tskc[0]);
-    fprintf(LOG_DEST, "\tvp        : %.4lf\n", atmos->vp[0]);
-    fprintf(LOG_DEST, "\tvpd       : %.4lf\n", atmos->vpd[0]);
-    fprintf(LOG_DEST, "\twind      : %.4lf\n", atmos->wind[0]);
+    fprintf(LOG_DEST, "\ttskc      : %.4f\n", atmos->tskc[0]);
+    fprintf(LOG_DEST, "\tvp        : %.4f\n", atmos->vp[0]);
+    fprintf(LOG_DEST, "\tvpd       : %.4f\n", atmos->vpd[0]);
+    fprintf(LOG_DEST, "\twind      : %.4f\n", atmos->wind[0]);
 }
 
 /******************************************************************************
@@ -85,10 +85,10 @@ void
 print_location(location_struct *loc)
 {
     fprintf(LOG_DEST, "location:\n");
-    fprintf(LOG_DEST, "\tlatitude       : %.4lf\n", loc->latitude);
-    fprintf(LOG_DEST, "\tlongitude      : %.4lf\n", loc->longitude);
-    fprintf(LOG_DEST, "\tarea           : %.4lf\n", loc->area);
-    fprintf(LOG_DEST, "\tfrac           : %.4lf\n", loc->frac);
+    fprintf(LOG_DEST, "\tlatitude       : %.4f\n", loc->latitude);
+    fprintf(LOG_DEST, "\tlongitude      : %.4f\n", loc->longitude);
+    fprintf(LOG_DEST, "\tarea           : %.4f\n", loc->area);
+    fprintf(LOG_DEST, "\tfrac           : %.4f\n", loc->frac);
     fprintf(LOG_DEST, "\tglobal_cell_idx: %zd\n", loc->global_cell_idx);
     fprintf(LOG_DEST, "\tglobal_x_idx   : %zd\n", loc->global_x_idx);
     fprintf(LOG_DEST, "\tglobal_y_idx   : %zd\n", loc->global_y_idx);
@@ -106,10 +106,10 @@ sprint_location(char            *str,
 {
     sprintf(str,
             "location:\n"
-            "\tlatitude       : %.4lf\n"
-            "\tlongitude      : %.4lf\n"
-            "\tarea           : %.4lf\n"
-            "\tfrac           : %.4lf\n"
+            "\tlatitude       : %.4f\n"
+            "\tlongitude      : %.4f\n"
+            "\tarea           : %.4f\n"
+            "\tfrac           : %.4f\n"
             "\tglobal_cell_idx: %zd\n"
             "\tglobal_x_idx   : %zd\n"
             "\tglobal_y_idx   : %zd\n"
@@ -131,7 +131,7 @@ print_nc_file(nc_file_struct *nc)
     fprintf(LOG_DEST, "\tfname          : %s\n", nc->fname);
     fprintf(LOG_DEST, "\tc_fillvalue    : %d\n", nc->c_fillvalue);
     fprintf(LOG_DEST, "\ti_fillvalue    : %d\n", nc->i_fillvalue);
-    fprintf(LOG_DEST, "\td_fillvalue    : %.4lf\n", nc->d_fillvalue);
+    fprintf(LOG_DEST, "\td_fillvalue    : %.4f\n", nc->d_fillvalue);
     fprintf(LOG_DEST, "\tf_fillvalue    : %.4f\n", nc->f_fillvalue);
     fprintf(LOG_DEST, "\tnc_id          : %d\n", nc->nc_id);
     fprintf(LOG_DEST, "\tband_dimid     : %d\n", nc->band_dimid);
@@ -197,7 +197,7 @@ print_veg_con_map(veg_con_map_struct *veg_con_map)
     fprintf(LOG_DEST, "\tnv_types : %zd\n", veg_con_map->nv_types);
     fprintf(LOG_DEST, "\tnv_active: %zd\n", veg_con_map->nv_active);
     for (i = 0; i < veg_con_map->nv_types; i++) {
-        fprintf(LOG_DEST, "\t%zd      : %d (vidx) %lf (Cv)\n", i,
+        fprintf(LOG_DEST, "\t%zd      : %d (vidx) %f (Cv)\n", i,
                 veg_con_map->vidx[i],
                 veg_con_map->Cv[i]);
     }

@@ -74,9 +74,9 @@ soil_carbon_balance(soil_con_struct   *soil_con,
         Nnodes--;
     }
     dZ = (double*)calloc(Nnodes, sizeof(double));
-    dZCum = (double*)calloc(Nnodes, sizeof(double));
-    T = (double*)calloc(Nnodes, sizeof(double));
-    w = (double*)calloc(Nnodes, sizeof(double));
+    dZCum = (double*) calloc(Nnodes, sizeof(double));
+    T = (double*) calloc(Nnodes, sizeof(double));
+    w = (double*) calloc(Nnodes, sizeof(double));
 
     // Assign node thicknesses and temperatures for subset
     dZTot = 0;
@@ -177,8 +177,8 @@ soil_carbon_balance(soil_con_struct   *soil_con,
         (1 - param.SRESP_FINTER) - cell->RhSlow;
 
     // Free temporary dynamic arrays
-    free((char *)dZ);
-    free((char *)dZCum);
-    free((char *)T);
-    free((char *)w);
+    free((char *) dZ);
+    free((char *) dZCum);
+    free((char *) T);
+    free((char *) w);
 }

@@ -122,7 +122,7 @@ read_vegparam(FILE  *vegparam,
             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                 /* apportion LAI equally among layers */
                 temp[i].CanopLayerBnd[cidx] =
-                    (double)((cidx + 1)) / (double)(options.Ncanopy);
+                    (double) ((cidx + 1)) / (double) (options.Ncanopy);
             }
         }
 
@@ -386,7 +386,7 @@ read_vegparam(FILE  *vegparam,
         if (options.AboveTreelineVeg < 0) {
             // Above treeline snowband should be treated as bare soil
             for (j = 0; j < (size_t)vegetat_type_num; j++) {
-                temp[j].Cv -= (0.001 / (double)vegetat_type_num);
+                temp[j].Cv -= (0.001 / (double) vegetat_type_num);
             }
             temp[0].Cv_sum -= 0.001;
         }
@@ -396,7 +396,7 @@ read_vegparam(FILE  *vegparam,
             // check that veg type exists in library and does not have overstory
             if (vegetat_type_num > 0) {
                 for (j = 0; j < (size_t)vegetat_type_num; j++) {
-                    temp[j].Cv -= (0.001 / (double)vegetat_type_num);
+                    temp[j].Cv -= (0.001 / (double) vegetat_type_num);
                     temp[j].vegetat_type_num++;
                 }
 

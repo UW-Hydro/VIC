@@ -210,7 +210,7 @@ initialize_model_state(all_vars_struct     *all_vars,
 
             // Override possible bad values of soil moisture under lake coming from state file
             // (ideally we wouldn't store these in the state file in the first place)
-            if (options.LAKES && (int)veg == lake_con.lake_idx) {
+            if (options.LAKES && (int) veg == lake_con.lake_idx) {
                 for (lidx = 0; lidx < options.Nlayer; lidx++) {
                     lake_var->soil.layer[lidx].moist =
                         soil_con->max_moist[lidx];
@@ -358,7 +358,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                         for (index = 3; index < Nnodes - 1; index++) {
                             if (FIRST_VEG) {
                                 soil_con->dz_node[index] = tmpdp /
-                                                           (((double)Nnodes -
+                                                           (((double) Nnodes -
                                                              tmpadj));
                             }
                             Zsum += (soil_con->dz_node[index] +
@@ -378,8 +378,8 @@ initialize_model_state(all_vars_struct     *all_vars,
                             Zsum += (soil_con->dz_node[Nnodes - 2] +
                                      soil_con->dz_node[Nnodes - 1]) / 2.;
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
-                            if ((int)(Zsum * MM_PER_M + 0.5) !=
-                                (int)(dp * MM_PER_M + 0.5)) {
+                            if ((int) (Zsum * MM_PER_M + 0.5) !=
+                                (int) (dp * MM_PER_M + 0.5)) {
                                 log_err("Sum of thermal node thicknesses (%f) "
                                         "do not equal dp (%f), check "
                                         "initialization procedure", Zsum, dp);
@@ -389,7 +389,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                     else { /* exponential grid transformation, EXP_TRANS = TRUE*/
                            /*calculate exponential function parameter */
                         if (FIRST_VEG) {
-                            Bexp = logf(dp + 1.) / (double)(Nnodes - 1); // to force Zsum=dp at bottom node
+                            Bexp = logf(dp + 1.) / (double) (Nnodes - 1); // to force Zsum=dp at bottom node
 
                             /* validate Nnodes by requiring that there be at
                                least 3 nodes in the top 50cm */
@@ -407,7 +407,7 @@ initialize_model_state(all_vars_struct     *all_vars,
                                         "to %f in the soil parameter file.  "
                                         "Or set EXP_TRANS to FALSE in the "
                                         "global parameter file.", Nnodes, dp,
-                                        (int)(5 * logf(dp + 1.)) + 2,
+                                        (int) (5 * logf(dp + 1.)) + 2,
                                         exp(0.2 * (Nnodes - 1)) + 1);
                             }
                             for (index = 0; index <= Nnodes - 1; index++) {

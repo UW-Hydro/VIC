@@ -57,7 +57,7 @@ compute_treeline(atmos_data_struct *atmos,
     double                     AnnualSum;
     int                        MonthCnt;
     int                        AnnualCnt;
-    unsigned                   rec;
+    unsigned int               rec;
     size_t                     band;
     size_t                     i;
 
@@ -83,7 +83,7 @@ compute_treeline(atmos_data_struct *atmos,
                 }
                 if (MonthCnt > 0) {
                     // Sum monthly average July temperature
-                    AnnualSum += MonthSum / (double)MonthCnt;
+                    AnnualSum += MonthSum / (double) MonthCnt;
                     AnnualCnt++;
                 }
             }
@@ -92,7 +92,7 @@ compute_treeline(atmos_data_struct *atmos,
 
         // Compute average annual July air temperature
         if (AnnualCnt > 0) {
-            AnnualSum /= (double)AnnualCnt;
+            AnnualSum /= (double) AnnualCnt;
         }
     }
 

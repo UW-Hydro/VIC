@@ -172,7 +172,7 @@ vic_init(void)
         get_nc_field_double(filenames.veglib, "RGL",
                             d3start, d3count, dvar);
         for (i = 0; i < global_domain.ncells_global; i++) {
-            veg_lib[i][j].RGL = (double)dvar[idx[i]];
+            veg_lib[i][j].RGL = (double) dvar[idx[i]];
         }
     }
 

@@ -94,8 +94,8 @@ canopy_evap(layer_data_struct *layer,
         tmp_Wdew = veg_var->Wdmax;
     }
 
-    rc = calc_rc((double)0.0, net_short, vic_run_veg_lib[veg_class].RGL,
-                 air_temp, vpd, veg_var->LAI, (double)1.0, false);
+    rc = calc_rc((double) 0.0, net_short, vic_run_veg_lib[veg_class].RGL,
+                 air_temp, vpd, veg_var->LAI, (double) 1.0, false);
     if (veg_var->LAI > 0) {
         canopyevap = pow((tmp_Wdew / veg_var->Wdmax), (2.0 / 3.0)) *
                      penman(air_temp, elevation, rad, vpd, ra, rc,
@@ -335,7 +335,7 @@ transpiration(layer_data_struct *layer,
         spare_evap = 0.0;
         for (i = 0; i < options.Nlayer; i++) {
             if (avail_moist[i] >= Wcr[i]) {
-                layerevap[i] = evap * (double)root[i];
+                layerevap[i] = evap * (double) root[i];
             }
             else {
                 if (avail_moist[i] >= Wpwp[i]) {
@@ -346,9 +346,9 @@ transpiration(layer_data_struct *layer,
                     gsm_inv = 0.0;
                 }
 
-                layerevap[i] = evap * gsm_inv * (double)root[i];
+                layerevap[i] = evap * gsm_inv * (double) root[i];
                 root_sum -= root[i];
-                spare_evap = evap * (double)root[i] * (1.0 - gsm_inv);
+                spare_evap = evap * (double) root[i] * (1.0 - gsm_inv);
             }
         }
 
@@ -356,7 +356,7 @@ transpiration(layer_data_struct *layer,
         if (spare_evap > 0.0) {
             for (i = 0; i < options.Nlayer; i++) {
                 if (avail_moist[i] >= Wcr[i]) {
-                    layerevap[i] += (double)root[i] * spare_evap / root_sum;
+                    layerevap[i] += (double) root[i] * spare_evap / root_sum;
                 }
             }
         }
@@ -432,7 +432,7 @@ transpiration(layer_data_struct *layer,
                                       veg_var->rc,
                                       vic_run_veg_lib[veg_class].rarc) *
                                delta_t / CONST_CDAY * dryFrac *
-                               (double)root[i];
+                               (double) root[i];
 
                 if (veg_var->rc > 0) {
                     gc += 1 / (veg_var->rc);
@@ -489,7 +489,7 @@ transpiration(layer_data_struct *layer,
         }
 
         if (options.CARBON) {
-            free((char *)gsLayer);
+            free((char *) gsLayer);
         }
     }
 

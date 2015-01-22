@@ -576,30 +576,30 @@ typedef struct {
     // simulation modes
     short AboveTreelineVeg;  /**< Default veg type to use above treeline;
                                 Negative number indicates bare soil. */
-    unsigned short AERO_RESIST_CANSNOW;  /**< "AR_406" = multiply aerodynamic resistance
-                                            by 10 for latent heat but not
-                                            for sensible heat (as in
-                                            VIC 4.0.6); do NOT apply stability
-                                            correction; use surface aero_resist
-                                            for ET when no snow in canopy.
-                                            "AR_406_LS" = multiply aerodynamic resistance
-                                            by 10 for BOTH latent heat AND
-                                            sensible heat; do NOT apply
-                                            stability correction;
-                                            use surface aero_resist
-                                            for ET when no snow in canopy.
-                                            "AR_406_FULL" = multiply aerodynamic resistance
-                                            by 10 for BOTH latent heat AND
-                                            sensible heat; do NOT apply
-                                            stability correction;
-                                            always use canopy aero_resist
-                                            for ET.
-                                            "AR_410" = do not multiply aerodynamic
-                                            resistance by 10 in snow-filled
-                                            canopy (as in VIC 4.1.0);
-                                            DO apply stability correction;
-                                            always use canopy aero_resist
-                                            for ET. */
+    unsigned short int AERO_RESIST_CANSNOW;  /**< "AR_406" = multiply aerodynamic resistance
+                                                by 10 for latent heat but not
+                                                for sensible heat (as in
+                                                VIC 4.0.6); do NOT apply stability
+                                                correction; use surface aero_resist
+                                                for ET when no snow in canopy.
+                                                "AR_406_LS" = multiply aerodynamic resistance
+                                                by 10 for BOTH latent heat AND
+                                                sensible heat; do NOT apply
+                                                stability correction;
+                                                use surface aero_resist
+                                                for ET when no snow in canopy.
+                                                "AR_406_FULL" = multiply aerodynamic resistance
+                                                by 10 for BOTH latent heat AND
+                                                sensible heat; do NOT apply
+                                                stability correction;
+                                                always use canopy aero_resist
+                                                for ET.
+                                                "AR_410" = do not multiply aerodynamic
+                                                resistance by 10 in snow-filled
+                                                canopy (as in VIC 4.1.0);
+                                                DO apply stability correction;
+                                                always use canopy aero_resist
+                                                for ET. */
     bool BLOWING;        /**< TRUE = calculate sublimation from blowing snow */
     bool BLOWING_VAR_THRESHOLD;
     bool BLOWING_CALC_PROB;
@@ -625,17 +625,17 @@ typedef struct {
                             distribution for soil heat flux calculations*/
     bool FROZEN_SOIL;    /**< TRUE = Use frozen soils code */
     bool FULL_ENERGY;    /**< TRUE = Use full energy code */
-    unsigned short GRND_FLUX_TYPE; /**< "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
-                                        from VIC 4.0.6 and earlier
-                                      "GF_410"  = use formulas from VIC 4.1.0 */
+    unsigned short int GRND_FLUX_TYPE; /**< "GF_406"  = use (flawed) formulas for ground flux, deltaH, and fusion
+                                          from VIC 4.0.6 and earlier
+                                          "GF_410"  = use formulas from VIC 4.1.0 */
     bool IMPLICIT;       /**< TRUE = Use implicit solution when computing
                             soil thermal fluxes */
     bool JULY_TAVG_SUPPLIED; /**< If TRUE and COMPUTE_TREELINE is also true,
                                 then average July air temperature will be read
                                 from soil file and used in calculating treeline */
     bool LAKES;          /**< TRUE = use lake energy code */
-    unsigned short LW_CLOUD;       /**< Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
-    unsigned short LW_TYPE;        /**< Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
+    unsigned short int LW_CLOUD;  /**< Longwave cloud formulation; "LW_CLOUD_x" = code for LW cloud formulation - see LW_CLOUD codes above */
+    unsigned short int LW_TYPE;   /**< Longwave clear sky algorithm; "LW_x" = code for LW algorithm - see LW codes above */
     bool MTCLIM_SWE_CORR; /**< TRUE = correct MTCLIM's downward shortwave radiation estimate in presence of snow */
     size_t Ncanopy;      /**< Number of canopy layers in the model. */
     size_t Nfrost;       /**< Number of frost subareas in model */
@@ -649,8 +649,8 @@ typedef struct {
                             input forcing, compute it by lapsing sea-level
                             pressure by grid cell average elevation;
                             FALSE = air pressure set to constant 95.5 kPa */
-    unsigned short RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
-                                      RC_PHOTO = compute canopy resistance based on photosynthetic activity */
+    unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
+                                          RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */
     bool QUICK_FLUX;     /**< TRUE = Use Liang et al., 1999 formulation for
                             ground heat flux, if FALSE use explicit finite
@@ -659,7 +659,7 @@ typedef struct {
                             iteration, but explicit finite difference
                             method for final step. */
     bool SHARE_LAYER_MOIST; /**< TRUE = transpiration in moisture-limited layers can draw from other layers (default) */
-    unsigned short SNOW_DENSITY;   /**< DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
+    unsigned short int SNOW_DENSITY;   /**< DENS_BRAS: Use algorithm of Bras, 1990; DENS_SNTHRM: Use algorithm of SNTHRM89 adapted for 1-layer pack */
     size_t SNOW_BAND;    /**< Number of elevation bands over which to solve the
                             snow model */
     bool SPATIAL_FROST;   /**< TRUE = use a uniform distribution to simulate the
@@ -687,18 +687,18 @@ typedef struct {
     // input options
     bool ALMA_INPUT;     /**< TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
     bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
-    unsigned short GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
+    unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */
     bool VEGLIB_VEGCOVER; /**< TRUE = veg library file contains monthly vegcover values */
     bool VEGPARAM_ALB;   /**< TRUE = veg param file contains monthly albedo values */
     bool VEGPARAM_LAI;   /**< TRUE = veg param file contains monthly LAI values */
     bool VEGPARAM_VEGCOVER; /**< TRUE = veg param file contains monthly vegcover values */
-    unsigned short ALB_SRC;        /**< FROM_VEGLIB = use albedo values from veg library file
-                                      FROM_VEGPARAM = use albedo values from the veg param file */
-    unsigned short LAI_SRC;        /**< FROM_VEGLIB = use LAI values from veg library file
-                                      FROM_VEGPARAM = use LAI values from the veg param file */
-    unsigned short VEGCOVER_SRC;   /**< FROM_VEGLIB = use vegcover values from veg library file
-                                      FROM_VEGPARAM = use vegcover values from the veg param file */
+    unsigned short int ALB_SRC;        /**< FROM_VEGLIB = use albedo values from veg library file
+                                          FROM_VEGPARAM = use albedo values from the veg param file */
+    unsigned short int LAI_SRC;        /**< FROM_VEGLIB = use LAI values from veg library file
+                                          FROM_VEGPARAM = use LAI values from the veg param file */
+    unsigned short int VEGCOVER_SRC;   /**< FROM_VEGLIB = use vegcover values from veg library file
+                                          FROM_VEGPARAM = use vegcover values from the veg param file */
     bool LAKE_PROFILE;   /**< TRUE = user-specified lake/area profile */
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
@@ -740,34 +740,34 @@ typedef struct {
     size_t runoff_steps_per_day;   /**< Number of runoff timesteps per day */
     size_t atmos_steps_per_day;    /**< Number of atmos timesteps per day */
     size_t output_steps_per_day;   /**< Number of output timesteps per day */
-    unsigned short endday;         /**< Last day of model simulation */
-    unsigned short endmonth;       /**< Last month of model simulation */
-    unsigned short endyear;        /**< Last year of model simulation */
-    unsigned short forceday[2];    /**< day forcing files starts */
+    unsigned short int endday;     /**< Last day of model simulation */
+    unsigned short int endmonth;   /**< Last month of model simulation */
+    unsigned short int endyear;    /**< Last year of model simulation */
+    unsigned short int forceday[2];  /**< day forcing files starts */
     unsigned forcesec[2];          /**< seconds since midnight when forcing
                                       files starts */
-    unsigned short forcemonth[2];  /**< month forcing files starts */
-    unsigned short forceoffset[2]; /**< counter to keep track of offset in reading
-                                      forcing files; updated after every read */
-    unsigned forceskip[2];   /**< number of model time steps to skip at
+    unsigned short int forcemonth[2];  /**< month forcing files starts */
+    unsigned short int forceoffset[2];  /**< counter to keep track of offset in reading
+                                           forcing files; updated after every read */
+    unsigned int forceskip[2];   /**< number of model time steps to skip at
                                       the start of the forcing file */
-    unsigned short forceyear[2];   /**< year forcing files start */
+    unsigned short int forceyear[2];  /**< year forcing files start */
     size_t nrecs;                /**< Number of time steps simulated */
-    unsigned short skipyear;       /**< Number of years to skip before writing
+    unsigned short int skipyear;  /**< Number of years to skip before writing
                                       output data */
-    unsigned short startday;       /**< Starting day of the simulation */
-    unsigned startsec;             /**< Seconds since midnight when simulation
-                                      will start */
-    unsigned short startmonth;     /**< Starting month of the simulation */
-    unsigned short startyear;      /**< Starting year of the simulation */
-    unsigned short stateday;       /**< Day of the simulation at which to save
+    unsigned short int startday;  /**< Starting day of the simulation */
+    unsigned int startsec;          /**< Seconds since midnight when simulation
+                                       will start */
+    unsigned short int startmonth;  /**< Starting month of the simulation */
+    unsigned short int startyear;  /**< Starting year of the simulation */
+    unsigned short int stateday;   /**< Day of the simulation at which to save
                                       model state */
-    unsigned short statemonth;     /**< Month of the simulation at which to save
+    unsigned short int statemonth;  /**< Month of the simulation at which to save
+                                       model state */
+    unsigned short int stateyear;  /**< Year of the simulation at which to save
                                       model state */
-    unsigned short stateyear;      /**< Year of the simulation at which to save
-                                      model state */
-    unsigned short calendar;       /**< Date/time calendar */
-    unsigned short time_units;     /**< Units for numeric times */
+    unsigned short int calendar;  /**< Date/time calendar */
+    unsigned short int time_units;  /**< Units for numeric times */
     double time_origin_num;        /**< Numeric date origin */
 } global_param_struct;
 
@@ -1047,7 +1047,7 @@ typedef struct {
     double lng;                       /**< grid cell central longitude */
     double cell_area;                 /**< Area of grid cell (m^2) */
     double time_zone_lng;             /**< central meridian of the time zone */
-    unsigned gridcel;                 /**< grid cell number */
+    unsigned int gridcel;             /**< grid cell number */
     double zwtvmoist_zwt[MAX_LAYERS + 2][MAX_ZWTVMOIST]; /**< zwt values in the zwt-v-moist curve for each layer */
     double zwtvmoist_moist[MAX_LAYERS + 2][MAX_ZWTVMOIST]; /**< moist values in the zwt-v-moist curve for each layer */
     double slope;
@@ -1102,7 +1102,7 @@ typedef struct {
     double RGL;            /**< Value of solar radiation below which there
                               will be no transpiration (ranges from
                               ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
-    unsigned short veg_class; /**< vegetation class reference number */
+    unsigned short int veg_class; /**< vegetation class reference number */
     char Ctype;              /**< Photosynthetic pathway; can be C3 or C4 */
     double MaxCarboxRate;  /**< maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
     double MaxETransport;  /**< maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
@@ -1165,12 +1165,12 @@ typedef struct {
  *          current time step.
  *****************************************************************************/
 typedef struct {
-    unsigned short day;         /**< current day */
-    unsigned short day_in_year; /**< julian day in year */
-    unsigned short month;       /**< current month */
-    int year;                   /**< current year */
-    unsigned dayseconds;        /**< seconds since midnight */
-} dmy_struct;                   /**< array of length nrec created */
+    unsigned short int day;         /**< current day */
+    unsigned short int day_in_year; /**< julian day in year */
+    unsigned short int month;       /**< current month */
+    int year;                       /**< current year */
+    unsigned int dayseconds;        /**< seconds since midnight */
+} dmy_struct;                       /**< array of length nrec created */
 
 /******************************************************************************
  * @brief   This structure stores all soil variables for each layer in the
@@ -1247,18 +1247,18 @@ typedef struct {
     size_t Nthaw;                /**< number of simulated thawing fronts */
     double T[MAX_NODES];         /**< thermal node temperatures (C) */
     bool T_fbflag[MAX_NODES];      /**< flag indicating if previous step's temperature was used */
-    unsigned T_fbcount[MAX_NODES]; /**< running total number of times that previous step's temperature was used */
+    unsigned int T_fbcount[MAX_NODES]; /**< running total number of times that previous step's temperature was used */
     int T1_index;                   /**< soil node at the bottom of the top layer */
     double Tcanopy;              /**< temperature of the canopy air */
     bool Tcanopy_fbflag;           /**< flag indicating if previous step's temperature was used */
-    unsigned Tcanopy_fbcount;    /**< running total number of times that previous step's temperature was used */
+    unsigned int Tcanopy_fbcount;    /**< running total number of times that previous step's temperature was used */
     double tdepth[MAX_FRONTS];   /**< all simulated thawing front depths */
     double Tfoliage;             /**< temperature of the overstory vegetation */
     bool Tfoliage_fbflag;            /**< flag indicating if previous step's temperature was used */
-    unsigned Tfoliage_fbcount;   /**< running total number of times that previous step's temperature was used */
+    unsigned int Tfoliage_fbcount;   /**< running total number of times that previous step's temperature was used */
     double Tsurf;                /**< temperature of the understory */
     bool Tsurf_fbflag;           /**< flag indicating if previous step's temperature was used */
-    unsigned Tsurf_fbcount;      /**< running total number of times that previous step's temperature was used */
+    unsigned int Tsurf_fbcount;      /**< running total number of times that previous step's temperature was used */
     double unfrozen;             /**< frozen layer water content that is unfrozen */
     // Fluxes
     double advected_sensible;    /**< net sensible heat flux advected to snowpack (Wm-2) */
@@ -1345,7 +1345,7 @@ typedef struct {
     double coverage;        /**< fraction of snow band that is covered with snow */
     double density;         /**< snow density (kg/m^3) */
     double depth;           /**< snow depth (m) */
-    unsigned last_snow;     /**< time steps since last snowfall */
+    unsigned int last_snow;     /**< time steps since last snowfall */
     double max_snow_depth;  /**< last maximum snow depth - used to determine coverage
                                fraction during current melt period (m) */
     bool MELTING;           /**< flag indicating that snowpack melted
@@ -1360,7 +1360,7 @@ typedef struct {
     double store_swq;       /**< stores newly accumulated snow over an
                                established snowpack melt distribution (m) */
     double surf_temp;       /**< depth averaged temperature of the snow pack surface layer (C) */
-    unsigned surf_temp_fbcount; /**< running total number of times that previous step's temperature was used */
+    unsigned int surf_temp_fbcount; /**< running total number of times that previous step's temperature was used */
     bool surf_temp_fbflag;    /**< flag indicating if previous step's temperature was used */
     double surf_water;      /**< liquid water content of the surface layer (m) */
     double swq;             /**< snow water equivalent of the entire pack (m) */
@@ -1407,7 +1407,7 @@ typedef struct {
  *****************************************************************************/
 typedef struct {
     // Current lake dimensions and liquid water state variables
-    unsigned short activenod;     /**< Number of nodes whose corresponding layers currently contain water */
+    unsigned short int activenod;     /**< Number of nodes whose corresponding layers currently contain water */
     double dz;                    /**< Vertical thickness of all horizontal water layers below the surface layer (m) */
     double surfdz;                /**< Vertical thickness of surface (top) water layer (m) */
     double ldepth;                /**< Current depth of liquid water in lake (distance from surface to deepest point) (m) */
@@ -1486,20 +1486,20 @@ typedef struct {
     bool write;              /**< FALSE = don't write; TRUE = write */
     char format[10];         /**< format, when written to an ascii file;
                                 should match the desired fprintf format specifier, e.g. %.4f */
-    unsigned short type;     /**< type, when written to a binary file;
-                                OUT_TYPE_USunsigned short  = unsigned short int
-                                OUT_TYPE_SINT   = short int
-                                OUT_TYPE_FLOAT  = single precision floating point
-                                OUT_TYPE_DOUBLE = double precision floating point */
+    unsigned short int type;  /**< type, when written to a binary file;
+                                 OUT_TYPE_USunsigned short  = unsigned short int
+                                 OUT_TYPE_SINT   = short int
+                                 OUT_TYPE_FLOAT  = single precision floating point
+                                 OUT_TYPE_DOUBLE = double precision floating point */
     double mult;             /**< multiplier, when written to a binary file */
-    unsigned short aggtype;  /**< type of aggregation to use;
-                                AGG_TYPE_AVG    = take average value over agg interval
-                                AGG_TYPE_BEG    = take value at beginning of agg interval
-                                AGG_TYPE_END    = take value at end of agg interval
-                                AGG_TYPE_MAX    = take maximum value over agg interval
-                                AGG_TYPE_MIN    = take minimum value over agg interval
-                                AGG_TYPE_SUM    = take sum over agg interval */
-    unsigned nelem;          /**< number of data values */
+    unsigned short int aggtype;  /**< type of aggregation to use;
+                                    AGG_TYPE_AVG    = take average value over agg interval
+                                    AGG_TYPE_BEG    = take value at beginning of agg interval
+                                    AGG_TYPE_END    = take value at end of agg interval
+                                    AGG_TYPE_MAX    = take maximum value over agg interval
+                                    AGG_TYPE_MIN    = take minimum value over agg interval
+                                    AGG_TYPE_SUM    = take sum over agg interval */
+    unsigned int nelem;          /**< number of data values */
     double *data;            /**< array of data values */
     double *aggdata;         /**< array of aggregated data values */
 } out_data_struct;
@@ -1512,10 +1512,10 @@ typedef struct {
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                /**< filehandle */
     size_t nvars;            /**< number of variables to store in the file */
-    unsigned *varid;         /**< id numbers of the variables to store in the file
-                                (a variable's id number is its index in the out_data array).
-                                The order of the id numbers in the varid array
-                                is the order in which the variables will be written. */
+    unsigned int *varid;         /**< id numbers of the variables to store in the file
+                                    (a variable's id number is its index in the out_data array).
+                                    The order of the id numbers in the varid array
+                                    is the order in which the variables will be written. */
 } out_data_file_struct;
 
 /******************************************************************************

@@ -53,10 +53,10 @@ finalize_logging(void)
 void
 get_current_datetime(char *cdt)
 {
-    char      ymd[8];
-    struct tm timeinfo;
-    unsigned  seconds_since_midnight;
-    time_t    curr_date_time;
+    char         ymd[8];
+    struct tm    timeinfo;
+    unsigned int seconds_since_midnight;
+    time_t       curr_date_time;
 
     curr_date_time = time(NULL);
     if (curr_date_time == -1) {
@@ -65,7 +65,7 @@ get_current_datetime(char *cdt)
 
     localtime_r(&curr_date_time, &timeinfo);
 
-    seconds_since_midnight = (unsigned) curr_date_time % CONST_CDAY;
+    seconds_since_midnight = (unsigned int) curr_date_time % CONST_CDAY;
 
     if (strftime(ymd, 7, "%y%m%d", &timeinfo) == 0) {
         return;

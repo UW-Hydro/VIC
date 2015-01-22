@@ -115,7 +115,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                     Lsum += Lstep;
                 }
                 else if (layer == options.Nlayer && zone < options.ROOT_ZONES) {
-                    Zstep = (double)veg_con[veg].zone_depth[zone];
+                    Zstep = (double) veg_con[veg].zone_depth[zone];
                     Lstep = Zsum + Zstep - Lsum;
                     if (zone < options.ROOT_ZONES - 1) {
                         for (i = zone + 1; i < options.ROOT_ZONES; i++) {

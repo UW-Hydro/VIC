@@ -263,8 +263,7 @@ read_soilparam(FILE *soilparam,
             /* round soil layer thicknesses to nearest mm */
             for (layer = 0; layer < options.Nlayer; layer++) {
                 temp.depth[layer] =
-                    (double)(int)(temp.depth[layer] * MM_PER_M +
-                                  0.5) / MM_PER_M;
+                    round(temp.depth[layer] * MM_PER_M + 0.5) / MM_PER_M;
             }
         }
 
@@ -720,7 +719,8 @@ read_soilparam(FILE *soilparam,
                 layer = options.Nlayer - 1;
                 temp.Dsmax = temp.Dsmax *
                              pow(
-                    (double)(1. / (temp.max_moist[layer] - temp.Ws)), -temp.c) +
+                    (double) (1. / (temp.max_moist[layer] - temp.Ws)),
+                    -temp.c) +
                              temp.Ds * temp.max_moist[layer];
                 temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
                 temp.Ws = temp.Ws / temp.max_moist[layer];
@@ -760,11 +760,11 @@ read_soilparam(FILE *soilparam,
                Allocate and Initialize Snow Band Parameters
             *************************************************/
             Nbands = options.SNOW_BAND;
-            temp.AreaFract = (double *)calloc(Nbands, sizeof(double));
-            temp.BandElev = (double *)calloc(Nbands, sizeof(double));
-            temp.Tfactor = (double *)calloc(Nbands, sizeof(double));
-            temp.Pfactor = (double *)calloc(Nbands, sizeof(double));
-            temp.AboveTreeLine = (bool *)calloc(Nbands, sizeof(bool));
+            temp.AreaFract = (double *) calloc(Nbands, sizeof(double));
+            temp.BandElev = (double *) calloc(Nbands, sizeof(double));
+            temp.Tfactor = (double *) calloc(Nbands, sizeof(double));
+            temp.Pfactor = (double *) calloc(Nbands, sizeof(double));
+            temp.AboveTreeLine = (bool *) calloc(Nbands, sizeof(bool));
 
             if (temp.Tfactor == NULL || temp.Pfactor == NULL ||
                 temp.AreaFract == NULL) {

@@ -42,10 +42,10 @@ write_header(out_data_file_struct *out_data_files,
     size_t               var_idx;
     unsigned             elem_idx;
     size_t               i;
-    unsigned short       Identifier;
-    unsigned short       Nbytes;
-    unsigned short       Nbytes1;
-    unsigned short       Nbytes2;
+    unsigned short int   Identifier;
+    unsigned short int   Nbytes;
+    unsigned short int   Nbytes1;
+    unsigned short int   Nbytes2;
     char                 tmp_ALMA_OUTPUT;
     size_t               Nvars;
     char                 tmp_len;

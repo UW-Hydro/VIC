@@ -73,7 +73,7 @@ canopy_assimilation(char    Ctype,
 
     /* use hypsometric equation to calculate p_z, assume that virtual
        temperature is equal air_temp */
-    pz = CONST_PSTD * exp(-(double)elevation / h);
+    pz = CONST_PSTD * exp(-(double) elevation / h);
 
     CiLayer = (double*)calloc(options.Ncanopy, sizeof(double));
 
@@ -190,5 +190,5 @@ canopy_assimilation(char    Ctype,
     *Raut = *Rmaint + *Rgrowth;
     *NPP = *GPP - *Raut;
 
-    free((char*)CiLayer);
+    free((char*) CiLayer);
 }

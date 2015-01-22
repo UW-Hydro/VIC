@@ -199,7 +199,7 @@ runoff(cell_data_struct  *cell,
         runoff_steps_per_dt = global_param.runoff_steps_per_day /
                               global_param.model_steps_per_day;
 
-        dt_inflow = inflow / (double)runoff_steps_per_dt;
+        dt_inflow = inflow / (double) runoff_steps_per_dt;
 
         Dsmax = soil_con->Dsmax / global_param.runoff_steps_per_day;
 

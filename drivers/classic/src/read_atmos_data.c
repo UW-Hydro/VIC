@@ -41,16 +41,16 @@ read_atmos_data(FILE               *infile,
 {
     extern param_set_struct param_set;
 
-    unsigned                rec;
-    unsigned                skip_recs;
-    unsigned                i, j;
+    unsigned int            rec;
+    unsigned int            skip_recs;
+    unsigned int            i, j;
     int                     endian;
-    unsigned                Nfields;
+    unsigned int            Nfields;
     int                    *field_index;
-    unsigned short          ustmp;
+    unsigned short int      ustmp;
     signed short            stmp;
     char                    str[MAXSTRING + 1];
-    unsigned short          Identifier[4];
+    unsigned short int      Identifier[4];
     int                     Nbytes;
 
     Nfields = param_set.N_TYPES[file_num];
@@ -60,13 +60,14 @@ read_atmos_data(FILE               *infile,
 
     /* if ascii then the following refers to the number of lines to skip,
        if binary the following needs multiplying by the number of input fields */
-    skip_recs = (unsigned)((global_param.dt * forceskip)) /
+    skip_recs = (unsigned int) ((global_param.dt * forceskip)) /
                 param_set.FORCE_DT[file_num];
     if ((((global_param.dt < SEC_PER_DAY &&
-           (unsigned)(param_set.FORCE_DT[file_num] * forceskip) %
-           (unsigned)global_param.dt) > 0)) ||
+           (unsigned int) (param_set.FORCE_DT[file_num] * forceskip) %
+           (unsigned int) global_param.dt) > 0)) ||
         (global_param.dt == SEC_PER_DAY &&
-         ((unsigned)global_param.dt % (unsigned)param_set.FORCE_DT[file_num] >
+         ((unsigned int) global_param.dt %
+          (unsigned int) param_set.FORCE_DT[file_num] >
           0))) {
         log_err("Currently unable to handle a model starting date that does "
                 "not correspond to a line in the forcing file.");
@@ -112,7 +113,7 @@ read_atmos_data(FILE               *infile,
             log_err("No data in the forcing file.  Model stopping...");
         }
         for (i = 0; i < 4; i++) {
-            fread(&ustmp, sizeof(unsigned short), 1, infile);
+            fread(&ustmp, sizeof(unsigned short int), 1, infile);
             if (endian != param_set.FORCE_ENDIAN[file_num]) {
                 ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
             }
@@ -123,18 +124,18 @@ read_atmos_data(FILE               *infile,
             Nbytes = 0;
         }
         else {
-            fread(&ustmp, sizeof(unsigned short), 1, infile);
+            fread(&ustmp, sizeof(unsigned short int), 1, infile);
             if (endian != param_set.FORCE_ENDIAN[file_num]) {
                 ustmp = ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
             }
-            Nbytes = (int)ustmp;
+            Nbytes = (int) ustmp;
         }
         fseek(infile, Nbytes, SEEK_SET);
 
 
         /** if forcing file starts before the model simulation,
             skip over its starting records **/
-        fseek(infile, skip_recs * Nfields * sizeof(short), SEEK_CUR);
+        fseek(infile, skip_recs * Nfields * sizeof(short int), SEEK_CUR);
         if (feof(infile)) {
             log_err("No data for the specified time period in the forcing "
                     "file.  Model stopping...");
@@ -154,7 +155,7 @@ read_atmos_data(FILE               *infile,
                             stmp = ((stmp & 0xFF) << 8) | ((stmp >> 8) & 0xFF);
                         }
                         forcing_data[field_index[i]][rec] =
-                            (double)stmp /
+                            (double) stmp /
                             param_set.TYPE[field_index[i]].multiplier;
                     }
                     else {
@@ -164,7 +165,7 @@ read_atmos_data(FILE               *infile,
                                 ((ustmp & 0xFF) << 8) | ((ustmp >> 8) & 0xFF);
                         }
                         forcing_data[field_index[i]][rec] =
-                            (double)ustmp /
+                            (double) ustmp /
                             param_set.TYPE[field_index[i]].multiplier;
                     }
                 }
@@ -178,7 +179,7 @@ read_atmos_data(FILE               *infile,
                                     ((stmp & 0xFF) << 8) | ((stmp >> 8) & 0xFF);
                             }
                             veg_hist_data[field_index[i]][j][rec] =
-                                (double)stmp /
+                                (double) stmp /
                                 param_set.TYPE[field_index[i]].multiplier;
                         }
                         else {
@@ -190,7 +191,7 @@ read_atmos_data(FILE               *infile,
                                       0xFF) << 8) | ((ustmp >> 8) & 0xFF);
                             }
                             veg_hist_data[field_index[i]][j][rec] =
-                                (double)ustmp /
+                                (double) ustmp /
                                 param_set.TYPE[field_index[i]].multiplier;
                         }
                     }

@@ -104,7 +104,7 @@ calc_energy_balance_error(int    rec,
             max_error = error;
             if (rec > 0) {
                 fprintf(LOG_DEST, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
-                        rec, error, cum_error / (double)rec);
+                        rec, error, cum_error / (double) rec);
             }
             else {
                 fprintf(LOG_DEST, "Maximum Energy Error:\t%i\t%.4f\t%.4f\n",
@@ -114,7 +114,7 @@ calc_energy_balance_error(int    rec,
         if (rec == Nrecs - 1) {
             fprintf(LOG_DEST,
                     "Total Cumulative Energy Error for Grid Cell = %.4f\n",
-                    cum_error / (double)rec);
+                    cum_error / (double) rec);
         }
     }
 

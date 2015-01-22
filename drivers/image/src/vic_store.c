@@ -215,8 +215,8 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].layer[j].moist;
+                        dvar[idx[i]] =
+                            (double) all_vars[i].cell[v][m].layer[j].moist;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -257,9 +257,8 @@ vic_store(void)
                     for (i = 0; i < global_domain.ncells_global; i++) {
                         v = veg_con_map[i].vidx[k];
                         if (v >= 0) {
-                            dvar[idx[i]] = (double)
-                                           all_vars[i].cell[v][m].layer[j].ice[p
-                                           ];
+                            dvar[idx[i]] =
+                                (double) all_vars[i].cell[v][m].layer[j].ice[p];
                         }
                         else {
                             dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -295,8 +294,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].veg_var[v][m].Wdew;
+                    dvar[idx[i]] = (double) all_vars[i].veg_var[v][m].Wdew;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -331,8 +329,8 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPP;
+                        dvar[idx[i]] =
+                            (double) all_vars[i].veg_var[v][m].AnnualNPP;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -366,8 +364,8 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPPPrev;
+                        dvar[idx[i]] =
+                            (double) all_vars[i].veg_var[v][m].AnnualNPPPrev;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -401,8 +399,7 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CLitter;
+                        dvar[idx[i]] = (double) all_vars[i].cell[v][m].CLitter;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -436,8 +433,7 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CInter;
+                        dvar[idx[i]] = (double) all_vars[i].cell[v][m].CInter;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -471,8 +467,7 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CSlow;
+                        dvar[idx[i]] = (double) all_vars[i].cell[v][m].CSlow;
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -577,8 +572,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].coverage;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].coverage;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -612,8 +606,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].swq;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].swq;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -647,8 +640,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].surf_temp;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].surf_temp;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -682,8 +674,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].surf_water;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].surf_water;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -717,8 +708,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].pack_temp;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].pack_temp;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -752,8 +742,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].pack_water;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].pack_water;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -787,8 +776,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].density;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].density;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -822,8 +810,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].coldcontent;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].coldcontent;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -857,8 +844,7 @@ vic_store(void)
             for (i = 0; i < global_domain.ncells_global; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].snow_canopy;
+                    dvar[idx[i]] = (double) all_vars[i].snow[v][m].snow_canopy;
                 }
                 else {
                     dvar[idx[i]] = nc_state_file.d_fillvalue;
@@ -895,8 +881,7 @@ vic_store(void)
                 for (i = 0; i < global_domain.ncells_global; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].energy[v][m].T[j];
+                        dvar[idx[i]] = (double) all_vars[i].energy[v][m].T[j];
                     }
                     else {
                         dvar[idx[i]] = nc_state_file.d_fillvalue;

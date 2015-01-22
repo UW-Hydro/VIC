@@ -316,11 +316,11 @@ main(int   argc,
                               &veg_hist);
                 free_all_vars(&all_vars, veg_con[0].vegetat_type_num);
                 free_vegcon(&veg_con);
-                free((char *)soil_con.AreaFract);
-                free((char *)soil_con.BandElev);
-                free((char *)soil_con.Tfactor);
-                free((char *)soil_con.Pfactor);
-                free((char *)soil_con.AboveTreeLine);
+                free((char *) soil_con.AreaFract);
+                free((char *) soil_con.BandElev);
+                free((char *) soil_con.Tfactor);
+                free((char *) soil_con.Pfactor);
+                free((char *) soil_con.AboveTreeLine);
             } /* !OUTPUT_FORCE */
         } /* End Run Model Condition */
     }   /* End Grid Loop */

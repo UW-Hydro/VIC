@@ -103,7 +103,7 @@ put_data(all_vars_struct   *all_vars,
     frost_slope = soil_con->frost_slope;
     dt_sec = global_param.dt;
     out_dt_sec = global_param.out_dt;
-    out_step_ratio = (unsigned)(out_dt_sec / dt_sec);
+    out_step_ratio = (unsigned) (out_dt_sec / dt_sec);
     if (rec >= 0) {
         step_count++;
     }
@@ -642,7 +642,7 @@ put_data(all_vars_struct   *all_vars,
     /********************
        Report T Fallback Occurrences
     ********************/
-    if (rec == (int)global_param.nrecs - 1) {
+    if (rec == (int) global_param.nrecs - 1) {
         fprintf(LOG_DEST, "Total number of fallbacks in Tfoliage: %d\n",
                 Tfoliage_fbcount_total);
         fprintf(LOG_DEST, "Total number of fallbacks in Tcanopy: %d\n",
@@ -672,7 +672,7 @@ put_data(all_vars_struct   *all_vars,
         else if (out_data[v].aggtype == AGG_TYPE_AVG) {
             for (i = 0; i < out_data[v].nelem; i++) {
                 out_data[v].aggdata[i] += out_data[v].data[i] /
-                                          (double)out_step_ratio;
+                                          (double) out_step_ratio;
             }
         }
     }

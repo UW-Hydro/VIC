@@ -204,7 +204,7 @@ penman(double tair,
 
     /* use hypsometric equation to calculate p_z, assume that virtual
        temperature is equal air_temp */
-    pz = CONST_PSTD * exp(-(double)elevation / h);
+    pz = CONST_PSTD * exp(-elevation / h);
 
     /* calculate latent heat of vaporization. Eq. 4.2.1 in Handbook of
        Hydrology, assume Ts is Tair */

@@ -118,7 +118,7 @@ CalcBlowingSnow(double   Dt,
 
     Total = 0.0;
     *TotalTransport = 0.0;
-    area = 1. / (double)param.BLOWING_NUMINCS;
+    area = 1. / (double) param.BLOWING_NUMINCS;
 
     if (snowdepth > 0.0) {
         if (options.BLOWING_SPATIAL_WIND && sigma_w != 0.) {
@@ -134,7 +134,7 @@ CalcBlowingSnow(double   Dt,
                     upper = Uo + sigma_w * log(2. * (p + 1) * area);
                 }
                 else if (p < (param.BLOWING_NUMINCS - 1) && p >=
-                         (double)param.BLOWING_NUMINCS / 2) {
+                         (double) param.BLOWING_NUMINCS / 2) {
                     lower = Uo - sigma_w * log(2. - 2. * (p * area));
                     upper = Uo - sigma_w * log(2. - 2. * ((p + 1.) * area));
                 }
@@ -214,13 +214,10 @@ CalcBlowingSnow(double   Dt,
                     Transport = 0.0;
                 }
 
-                Total +=
-                    (1. /
-                     (double)param.BLOWING_NUMINCS) * SubFlux * prob_occurence;
-                *TotalTransport +=
-                    (1. /
-                     (double)param.BLOWING_NUMINCS) * Transport *
-                    prob_occurence;
+                Total += (1. / (double) param.BLOWING_NUMINCS) * SubFlux *
+                         prob_occurence;
+                *TotalTransport += (1. / (double) param.BLOWING_NUMINCS) *
+                                   Transport * prob_occurence;
             }
         }
         else {

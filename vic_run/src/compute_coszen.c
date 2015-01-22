@@ -58,7 +58,7 @@ compute_coszen(double         lat,
     sinlat = sin(lat * CONST_PI / 180);
 
     /* calculate cos and sin of declination */
-    decl = CONST_MINDECL * cos(((double)day_in_year + CONST_DAYSOFF) *
+    decl = CONST_MINDECL * cos(((double) day_in_year + CONST_DAYSOFF) *
                                CONST_RADPERDAY);
     cosdecl = cos(decl);
     sindecl = sin(decl);

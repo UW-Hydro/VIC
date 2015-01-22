@@ -43,7 +43,7 @@ read_lakeparam(FILE           *lakeparam,
     extern parameters_struct param;
 
     size_t                   i;
-    unsigned                 lakecel;
+    unsigned int             lakecel;
     double                   tempdz;
     double                   radius, x;
     char                     tmpstr[MAXSTRING + 1];
@@ -140,7 +140,7 @@ read_lakeparam(FILE           *lakeparam,
 
         fscanf(lakeparam, "%lf %lf", &temp.z[0], &temp.Cl[0]);
         temp.maxdepth = temp.z[0];
-        tempdz = (temp.maxdepth) / ((double)temp.numnod);
+        tempdz = (temp.maxdepth) / ((double) temp.numnod);
         if (temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0) {
             log_err("Lake area fraction (%f) for cell (%d) specified in the "
                     "lake parameter file must be a fraction between 0 and 1.",

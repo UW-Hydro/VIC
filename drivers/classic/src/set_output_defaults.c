@@ -38,19 +38,20 @@ set_output_defaults(out_data_struct *out_data)
 {
     extern option_struct  options;
     out_data_file_struct *out_data_files;
-    unsigned              filenum;
-    unsigned              varnum;
+    unsigned int          filenum;
+    unsigned int          varnum;
 
     if (options.OUTPUT_FORCE) {
         // Output files
         options.Noutfiles = 1;
-        out_data_files = (out_data_file_struct *)calloc(options.Noutfiles,
-                                                        sizeof(
-                                                            out_data_file_struct));
+        out_data_files = (out_data_file_struct *) calloc(options.Noutfiles,
+                                                         sizeof(
+                                                             out_data_file_struct));
         strcpy(out_data_files[0].prefix, "full_data");
         out_data_files[0].nvars = 8;
         out_data_files[0].varid =
-            (unsigned *)calloc(out_data_files[0].nvars, sizeof(unsigned));
+            (unsigned int *) calloc(out_data_files[0].nvars,
+                                    sizeof(unsigned int));
 
         // Variables in first file
         filenum = 0;
@@ -84,9 +85,9 @@ set_output_defaults(out_data_struct *out_data)
         if (options.LAKES) {
             options.Noutfiles++;
         }
-        out_data_files = (out_data_file_struct *)calloc(options.Noutfiles,
-                                                        sizeof(
-                                                            out_data_file_struct));
+        out_data_files = (out_data_file_struct *) calloc(options.Noutfiles,
+                                                         sizeof(
+                                                             out_data_file_struct));
         filenum = 0;
         strcpy(out_data_files[filenum].prefix, "fluxes");
         if (options.FULL_ENERGY || options.FROZEN_SOIL) {
@@ -127,8 +128,8 @@ set_output_defaults(out_data_struct *out_data)
             out_data_files[filenum].nvars = 8;
         }
         for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-            out_data_files[filenum].varid = (unsigned *)calloc(
-                out_data_files[filenum].nvars, sizeof(unsigned));
+            out_data_files[filenum].varid = (unsigned int *) calloc(
+                out_data_files[filenum].nvars, sizeof(unsigned int));
         }
 
         // Variables in first file

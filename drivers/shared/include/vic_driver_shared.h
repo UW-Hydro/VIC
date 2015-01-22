@@ -54,8 +54,8 @@ typedef struct {
     force_type_struct TYPE[N_FORCING_TYPES];
     double FORCE_DT[2];    /**< forcing file time step */
     size_t force_steps_per_day[2];    /**< forcing file timesteps per day */
-    unsigned short FORCE_ENDIAN[2];  /**< endian-ness of input file, used for
-                                        DAILY_BINARY format */
+    unsigned short int FORCE_ENDIAN[2];  /**< endian-ness of input file, used for
+                                            DAILY_BINARY format */
     int FORCE_FORMAT[2];            /**< ASCII or BINARY */
     int FORCE_INDEX[2][N_FORCING_TYPES];
     size_t N_TYPES[2];
@@ -64,17 +64,18 @@ typedef struct {
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
-int check_date(unsigned short calendar, dmy_struct *dmy);
+int check_date(unsigned short int calendar, dmy_struct *dmy);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
-                unsigned short calendar, unsigned short time_units);
+                unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
 void dmy_all_leap(double julian, dmy_struct *dmy);
-void dmy_julian_day(double julian, unsigned short calendar, dmy_struct *dmy);
+void dmy_julian_day(double julian, unsigned short int calendar,
+                    dmy_struct *dmy);
 void dmy_no_leap_day(double julian, dmy_struct *dmy);
 void dt_seconds_to_time_units(unsigned short int time_units, double dt_seconds,
                               double *dt_time_units);
@@ -84,8 +85,9 @@ void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
-void get_next_time_step(unsigned short *, unsigned short *, unsigned short *,
-                        unsigned short *, unsigned short *, unsigned short);
+void get_next_time_step(unsigned short int *, unsigned short int *,
+                        unsigned short int *, unsigned short int *,
+                        unsigned short int *, unsigned short int);
 void get_parameters(FILE *paramfile);
 void initialize_forcing_files(void);
 void initialize_filenames(void);
@@ -98,19 +100,19 @@ void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
                      size_t veg_num);
 void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
-double julian_day_from_dmy(dmy_struct *dmy, unsigned short calendar);
-bool leap_year(unsigned short year, unsigned short calendar);
+double julian_day_from_dmy(dmy_struct *dmy, unsigned short int calendar);
+bool leap_year(unsigned short int year, unsigned short int calendar);
 all_vars_struct make_all_vars(size_t nveg);
 cell_data_struct **make_cell_data(size_t veg_type_num);
 dmy_struct *make_dmy(global_param_struct *global);
 energy_bal_struct **make_energy_bal(size_t nveg);
-void make_lastday(unsigned short calendar, unsigned short year,
-                  unsigned short lastday[]);
+void make_lastday(unsigned short int calendar, unsigned short int year,
+                  unsigned short int lastday[]);
 snow_data_struct **make_snow_data(size_t nveg);
 veg_var_struct **make_veg_var(size_t veg_type_num);
 double no_leap_day_from_dmy(dmy_struct *dmy);
 void num2date(double origin, double time_value, double tzoffset,
-              unsigned short calendar, unsigned short time_units,
+              unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
@@ -142,6 +144,6 @@ void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
-int valid_date(unsigned short calendar, dmy_struct *dmy);
+int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 #endif

@@ -144,7 +144,7 @@ solve_T_profile(double   *T,
 
     if (FIRST_SOLN[0]) {
         if (EXP_TRANS) {
-            Bexp = logf(Dp + 1.) / (double)(Nnodes - 1);
+            Bexp = logf(Dp + 1.) / (double) (Nnodes - 1);
         }
 
         FIRST_SOLN[0] = false;

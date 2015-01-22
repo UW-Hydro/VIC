@@ -497,12 +497,14 @@ get_global_param(FILE *gp)
                     options.RC_MODE = RC_JARVIS;
                 }
             }
+
             /*************************************
                Define log directory
             *************************************/
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+
             /*************************************
                Define state files
             *************************************/
@@ -538,6 +540,7 @@ get_global_param(FILE *gp)
                     options.BINARY_STATE_FILE = true;
                 }
             }
+
             /*************************************
                Define forcing files
             *************************************/
@@ -615,6 +618,7 @@ get_global_param(FILE *gp)
                     options.ALMA_INPUT = true;
                 }
             }
+
             /*************************************
                Define parameter files
             *************************************/
@@ -763,6 +767,7 @@ get_global_param(FILE *gp)
                     options.LAKE_PROFILE = true;
                 }
             }
+
             /*************************************
                Define output files
             *************************************/
@@ -829,6 +834,7 @@ get_global_param(FILE *gp)
                     options.PRT_SNOW_BAND = false;
                 }
             }
+
             /*************************************
                Define output file contents
             *************************************/
@@ -850,6 +856,7 @@ get_global_param(FILE *gp)
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
             }
+
             /*************************************
                Fail when depreciated options are used.
             *************************************/
@@ -869,6 +876,7 @@ get_global_param(FILE *gp)
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
+
             /*************************************
                Fail when classic driver specific options are used
             *************************************/
@@ -880,6 +888,7 @@ get_global_param(FILE *gp)
                 log_err("OUTPUT_FORCE is not a valid option for this driver.  "
                         "Update your global parameter file accordingly.");
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/
@@ -927,7 +936,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.dt = SEC_PER_DAY /
-                          (double)global_param.model_steps_per_day;
+                          (double) global_param.model_steps_per_day;
     }
 
     // Validate snow model time step
@@ -972,7 +981,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.snow_dt = SEC_PER_DAY /
-                               (double)global_param.snow_steps_per_day;
+                               (double) global_param.snow_steps_per_day;
     }
 
     // Validate runoff time step
@@ -1013,7 +1022,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.runoff_dt = SEC_PER_DAY /
-                                 (double)global_param.runoff_steps_per_day;
+                                 (double) global_param.runoff_steps_per_day;
     }
 
     // Validate atmos time step

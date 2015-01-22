@@ -263,7 +263,7 @@ mtclim_init(int               have_dewpt,
             log_err("have_dewpt not yet implemented ...");
         }
     }
-    tinystepspday = (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT);
+    tinystepspday = (size_t) ((CONST_CDAY) / param.MTCLIM_SRADDT);
     for (i = 0; i < DAYS_PER_LYEAR; i++) {
         for (j = 0; j < tinystepspday; j++) {
             tiny_radfract[i][j] = 0;
@@ -300,9 +300,9 @@ mtclim_to_vic(double          sec_offset_solar,
     atmos_dt = global_param.atmos_dt;
 
     tinystepspstep =
-        (size_t)((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
+        (size_t) ((CONST_CDAY) / param.MTCLIM_SRADDT) / atmos_steps_per_day;
 
-    tiny_offset = (int)((double)tinystepspstep * sec_offset_solar / atmos_dt);
+    tiny_offset = (int) ((double) tinystepspstep * sec_offset_solar / atmos_dt);
     for (i = 0; i < ctrl->ndays; i++) {
         if (ctrl->insw) {
             tmp_rad = mtclim_data->s_srad[i] * atmos_steps_per_day;
@@ -319,7 +319,7 @@ mtclim_to_vic(double          sec_offset_solar,
                     tinystep += atmos_steps_per_day * tinystepspstep;
                 }
                 if (tinystep >
-                    (int)(atmos_steps_per_day * tinystepspstep - 1)) {
+                    (int) (atmos_steps_per_day * tinystepspstep - 1)) {
                     tinystep -= atmos_steps_per_day * tinystepspstep;
                 }
                 subdailyrad[i * atmos_steps_per_day + j] +=

@@ -984,7 +984,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.dt = SEC_PER_DAY /
-                          (double)global_param.model_steps_per_day;
+                          (double) global_param.model_steps_per_day;
     }
 
     // Validate snow model time step
@@ -1029,7 +1029,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.snow_dt = SEC_PER_DAY /
-                               (double)global_param.snow_steps_per_day;
+                               (double) global_param.snow_steps_per_day;
     }
 
     // Validate runoff time step
@@ -1070,7 +1070,7 @@ get_global_param(FILE *gp)
     }
     else {
         global_param.runoff_dt = SEC_PER_DAY /
-                                 (double)global_param.runoff_steps_per_day;
+                                 (double) global_param.runoff_steps_per_day;
     }
 
     // Validate atmos time step

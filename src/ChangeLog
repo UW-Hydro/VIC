@@ -26,7 +26,30 @@ Usage:
 
 
 -------------------------------------------------------------------------------
-***** Description of changes between VIC 4.2.0 and VIC 4.2.1 *****
+***** Description of changes between VIC 4.2.a and VIC 4.2.b *****
+-------------------------------------------------------------------------------
+
+Bug Fixes:
+----------
+
+Fixed memory error in initialize atmos when OUTPUT_FORCE = TRUE.
+
+	Files Affected:
+
+	initialize_atmos.
+	Makefile
+
+	Description:
+
+	Previously, access to unitialized elements of the veg_con and veg_hist
+	structure was attempted when OUTPUT_FORCE = TRUE, causing a memory error
+	and the model to crash.  This fix sets these elements inside a
+	`if (!options.OUTPUT_FORCE)` block allowing the OUTPUT_FORCE option to
+	work as expected.
+
+
+-------------------------------------------------------------------------------
+***** Description of changes between VIC 4.2 and VIC 4.2.a *****
 -------------------------------------------------------------------------------
 
 Bug Fixes:

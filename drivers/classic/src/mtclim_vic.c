@@ -559,11 +559,11 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     lat = p->site_lat;
     /* check for (+/-) 90 degrees latitude, throws off daylength calc */
     lat *= RAD_PER_DEG;
-    if (lat > 1.5707) {
-        lat = 1.5707;
+    if (lat > (CONST_PI / 2.0)) {
+        lat = (CONST_PI / 2.0);
     }
-    if (lat < -1.5707) {
-        lat = -1.5707;
+    if (lat < -(CONST_PI / 2.0)) {
+        lat = -(CONST_PI / 2.0);
     }
     coslat = cos(lat);
     sinlat = sin(lat);
@@ -572,8 +572,8 @@ calc_srad_humidity_iterative(const control_struct   *ctrl,
     cosasp = cos(p->site_asp * RAD_PER_DEG);
     sinasp = sin(p->site_asp * RAD_PER_DEG);
     /* cosine of zenith angle for east and west horizons */
-    coszeh = cos(1.570796 - (p->site_ehoriz * RAD_PER_DEG));
-    coszwh = cos(1.570796 - (p->site_whoriz * RAD_PER_DEG));
+    coszeh = cos((CONST_PI / 2.0) - (p->site_ehoriz * RAD_PER_DEG));
+    coszwh = cos((CONST_PI / 2.0) - (p->site_whoriz * RAD_PER_DEG));
 
     /* sub-daily time and angular increment information */
     dt = param.MTCLIM_SRADDT;              /* set timestep */

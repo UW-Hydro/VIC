@@ -670,7 +670,7 @@ maximum_unfrozen_water(double T,
     if (T < 0.) {
         unfrozen = max_moist *
                    pow((-CONST_LATICE *
-                        T) / 273.16 / (CONST_G * bubble / CM_PER_M),
+                        T) / (CONST_TKTRIP) / (CONST_G * bubble / (CM_PER_M)),
                        -(2.0 / (expt - 3.0)));
         if (unfrozen > max_moist) {
             unfrozen = max_moist;

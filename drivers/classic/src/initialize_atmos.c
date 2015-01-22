@@ -2159,6 +2159,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     else {
         // If OUTPUT_FORCE is TRUE then the full
         // forcing data array is dumped into a new set of files.
-        write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+        write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data,
+                           dmy);
     }
 }

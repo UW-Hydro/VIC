@@ -36,7 +36,8 @@ void
 write_forcing_file(atmos_data_struct    *atmos,
                    int                   nrecs,
                    out_data_file_struct *out_data_files,
-                   out_data_struct      *out_data)
+                   out_data_struct      *out_data,
+                   dmy_struct           *dmy)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -45,11 +46,9 @@ write_forcing_file(atmos_data_struct    *atmos,
     int                        rec, v;
     unsigned                   i;
     size_t                     j;
-    dmy_struct                *dummy_dmy;
     double                     dt_sec;
 
     dt_sec = global_param.dt;
-    dummy_dmy = NULL;
 
     for (rec = 0; rec < nrecs; rec++) {
         for (j = 0; j < NF; j++) {
@@ -116,7 +115,7 @@ write_forcing_file(atmos_data_struct    *atmos,
                     }
                 }
             }
-            write_data(out_data_files, out_data, dummy_dmy, global_param.dt);
+            write_data(out_data_files, out_data, &dmy[rec], global_param.dt);
         }
     }
 }

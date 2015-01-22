@@ -136,15 +136,6 @@ all:
 	make depend
 	make model
 
-disagg:
-	sed -i.bak 's/OUTPUT_FORCE FALSE/OUTPUT_FORCE TRUE/' user_def.h
-	make clean
-	make depend
-	make vicDisagg
-	sed -i.bak 's/OUTPUT_FORCE TRUE/OUTPUT_FORCE FALSE/' user_def.h
-	make clean
-	make depend
-
 default:
 	make depend
 	make model
@@ -154,7 +145,6 @@ full:
 	make depend
 	make tags
 	make model
-	make disagg
 
 clean::
 	/bin/rm -f *.o core log *~

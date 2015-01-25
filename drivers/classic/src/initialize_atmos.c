@@ -165,14 +165,14 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
 
     if (!(param_set.TYPE[TMAX].SUPPLIED &&
-          param_set.FORCE_DT[param_set.TYPE[TMAX].SUPPLIED - 1] ==
-          (SEC_PER_DAY) &&
+          param_set.force_steps_per_day[param_set.TYPE[TMAX].SUPPLIED - 1] ==
+          1 &&
           param_set.TYPE[TMIN].SUPPLIED &&
-          param_set.FORCE_DT[param_set.TYPE[TMIN].SUPPLIED - 1] ==
-          SEC_PER_DAY) &&
+          param_set.force_steps_per_day[param_set.TYPE[TMIN].SUPPLIED - 1] ==
+          1) &&
         !(param_set.TYPE[AIR_TEMP].SUPPLIED &&
-          param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED - 1] <
-          SEC_PER_DAY)) {
+          param_set.force_steps_per_day[param_set.TYPE[AIR_TEMP].SUPPLIED - 1] >
+          1)) {
         log_err("Input meteorological forcing files must contain either: a. "
                 "Daily TMAX and TMIN (maximum and minimum air temperature) or "
                 "b. sub-daily AIR_TEMP (air temperature); check input files.");
@@ -391,8 +391,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
         }
         if (param_set.TYPE[type].SUPPLIED) {
-            if (param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED - 1] ==
-                SEC_PER_DAY) {
+            if (param_set.force_steps_per_day[param_set.TYPE[type].SUPPLIED -
+                                              1] == 1) {
                 /* Daily forcings in non-local time will straddle local day
                    boundaries and need to be padded with an extra day at
                    start or end */
@@ -479,8 +479,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     *************************************************/
 
     if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[CHANNEL_IN].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[CHANNEL_IN].SUPPLIED -
+                                          1] == 1) {
             /* daily channel_in provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -545,8 +545,7 @@ initialize_atmos(atmos_data_struct    *atmos,
        Precipitation
     *************************************************/
 
-    if (param_set.FORCE_DT[param_set.TYPE[PREC].SUPPLIED - 1] ==
-        SEC_PER_DAY) {
+    if (param_set.force_steps_per_day[param_set.TYPE[PREC].SUPPLIED - 1] == 1) {
         /* daily precipitation provided */
         for (rec = 0; rec < global_param.nrecs; rec++) {
             sum = 0;
@@ -604,8 +603,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     *************************************************/
 
     if (param_set.TYPE[WIND].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[WIND].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[WIND].SUPPLIED - 1] ==
+            1) {
             /* daily wind provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -622,7 +621,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 if (NF > 1) {
                     atmos[rec].wind[NR] = sum / (double) NF;
                 }
-                if (global_param.dt == SEC_PER_DAY) {
+                if (global_param.model_steps_per_day == 1) {
                     if (atmos[rec].wind[j] < param.WIND_SPEED_MIN) {
                         atmos[rec].wind[j] = param.WIND_SPEED_MIN;
                     }
@@ -679,8 +678,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     ************************************************/
 
     if (param_set.TYPE[TMAX].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[TMAX].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[TMAX].SUPPLIED - 1] ==
+            1) {
             /* daily tmax provided */
             for (day = 0; day < Ndays_local; day++) {
                 tmax[day] = local_forcing_data[TMAX][day];
@@ -699,8 +698,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     ************************************************/
 
     if (param_set.TYPE[TMIN].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[TMIN].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[TMIN].SUPPLIED - 1] ==
+            1) {
             /* daily tmin provided */
             for (day = 0; day < Ndays_local; day++) {
                 tmin[day] = local_forcing_data[TMIN][day];
@@ -782,11 +781,11 @@ initialize_atmos(atmos_data_struct    *atmos,
         if (param_set.TYPE[QAIR].SUPPLIED &&
             param_set.TYPE[PRESSURE].SUPPLIED) {
             /* specific humidity and atm. pressure supplied */
-            if (param_set.FORCE_DT[param_set.TYPE[QAIR].SUPPLIED - 1] ==
-                SEC_PER_DAY) {
+            if (param_set.force_steps_per_day[param_set.TYPE[QAIR].SUPPLIED -
+                                              1] == 1) {
                 for (day = 0; day < Ndays_local; day++) {
-                    if (param_set.FORCE_DT[param_set.TYPE[PRESSURE].SUPPLIED -
-                                           1] < SEC_PER_DAY) {
+                    if (param_set.force_steps_per_day[param_set.TYPE[PRESSURE].
+                                                      SUPPLIED - 1] > 1) {
                         tmp = 0;
                         for (step = 0; step < atmos_steps_per_day; step++) {
                             tmp +=
@@ -810,9 +809,9 @@ initialize_atmos(atmos_data_struct    *atmos,
                 for (day = 0; day < Ndays_local; day++) {
                     daily_vp[day] = 0;
                     for (step = 0; step < atmos_steps_per_day; step++) {
-                        if (param_set.FORCE_DT[param_set.TYPE[PRESSURE].SUPPLIED
-                                               -
-                                               1] == SEC_PER_DAY) {
+                        if (param_set.force_steps_per_day[param_set.TYPE[
+                                                              PRESSURE].SUPPLIED
+                                                          - 1] == 1) {
                             tmp = local_forcing_data[PRESSURE][day];
                         }
                         else {
@@ -836,7 +835,6 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
             param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
         }
-
         /*************************************************
            If provided, translate relative humidity and air temperature
            into vapor pressure
@@ -847,11 +845,11 @@ initialize_atmos(atmos_data_struct    *atmos,
         else if (param_set.TYPE[REL_HUMID].SUPPLIED &&
                  param_set.TYPE[AIR_TEMP].SUPPLIED) {
             /* relative humidity and air temperature supplied */
-            if (param_set.FORCE_DT[param_set.TYPE[REL_HUMID].SUPPLIED - 1] ==
-                SEC_PER_DAY) {
+            if (param_set.force_steps_per_day[param_set.TYPE[REL_HUMID].SUPPLIED
+                                              - 1] == 1) {
                 for (day = 0; day < Ndays_local; day++) {
-                    if (param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED -
-                                           1] < SEC_PER_DAY) {
+                    if (param_set.force_steps_per_day[param_set.TYPE[AIR_TEMP].
+                                                      SUPPLIED - 1] > 1) {
                         tmp = 0;
                         for (step = 0; step < atmos_steps_per_day; step++) {
                             tmp +=
@@ -875,9 +873,9 @@ initialize_atmos(atmos_data_struct    *atmos,
                 for (day = 0; day < Ndays_local; day++) {
                     daily_vp[day] = 0;
                     for (step = 0; step < atmos_steps_per_day; step++) {
-                        if (param_set.FORCE_DT[param_set.TYPE[AIR_TEMP].SUPPLIED
-                                               -
-                                               1] == SEC_PER_DAY) {
+                        if (param_set.force_steps_per_day[param_set.TYPE[
+                                                              AIR_TEMP].SUPPLIED
+                                                          - 1] == 1) {
                             tmp = svp(local_forcing_data[AIR_TEMP][day]);
                         }
                         else {
@@ -912,8 +910,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     if (param_set.TYPE[VP].SUPPLIED) {
         have_dewpt = 2; // flag for MTCLIM
 
-        if (param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[VP].SUPPLIED - 1] ==
+            1) {
             /* daily vp provided */
             for (day = 0; day < Ndays_local; day++) {
                 daily_vp[day] = local_forcing_data[VP][day];
@@ -981,8 +979,9 @@ initialize_atmos(atmos_data_struct    *atmos,
         have_shortwave = 1; // flag for MTCLIM
         for (day = 0; day < Ndays_local; day++) {
             for (step = 0; step < atmos_steps_per_day; step++) {
-                if (param_set.FORCE_DT[param_set.TYPE[SHORTWAVE].SUPPLIED -
-                                       1] == SEC_PER_DAY) {
+                if (param_set.force_steps_per_day[param_set.TYPE[SHORTWAVE].
+                                                  SUPPLIED -
+                                                  1] == 1) {
                     subdailyrad[day * atmos_steps_per_day +
                                 step] = local_forcing_data[SHORTWAVE][day];
                 }
@@ -1027,8 +1026,8 @@ initialize_atmos(atmos_data_struct    *atmos,
 
     // Ignore MTCLIM estimates if sub-daily SW was supplied
     if (param_set.TYPE[SHORTWAVE].SUPPLIED &&
-        param_set.FORCE_DT[param_set.TYPE[SHORTWAVE].SUPPLIED - 1] <
-        SEC_PER_DAY) {
+        param_set.force_steps_per_day[param_set.TYPE[SHORTWAVE].SUPPLIED - 1] >
+        1) {
         for (day = 0; day < Ndays_local; day++) {
             for (step = 0; step < atmos_steps_per_day; step++) {
                 subdailyrad[day * atmos_steps_per_day + step] =
@@ -1107,8 +1106,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     *************************************************/
 
     if (param_set.TYPE[DENSITY].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[DENSITY].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[DENSITY].SUPPLIED -
+                                          1] == 1) {
             /* daily density provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -1227,8 +1226,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
     else {
         /* observed atmospheric pressure supplied */
-        if (param_set.FORCE_DT[param_set.TYPE[PRESSURE].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[PRESSURE].SUPPLIED -
+                                          1] == 1) {
             /* daily pressure provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -1313,8 +1312,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         /* handle cases of daily QAIR or RH supplied without pressure or temperature */
 
         if (param_set.TYPE[QAIR].SUPPLIED &&
-            param_set.FORCE_DT[param_set.TYPE[QAIR].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+            param_set.force_steps_per_day[param_set.TYPE[QAIR].SUPPLIED - 1] ==
+            1) {
             /**************************************************************************
                If we arrive here, it means we couldn't use Qair earlier because
                atmospheric pressure wasn't available at that time.  Now it is
@@ -1336,8 +1335,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
         } // end if QAIR supplied
         else if (param_set.TYPE[REL_HUMID].SUPPLIED &&
-                 param_set.FORCE_DT[param_set.TYPE[REL_HUMID].SUPPLIED - 1] ==
-                 SEC_PER_DAY) {
+                 param_set.force_steps_per_day[param_set.TYPE[REL_HUMID].
+                                               SUPPLIED - 1] == 1) {
             /**************************************************************************
                If we arrive here, it means we couldn't use RH earlier because
                air temperature wasn't available at that time.  Now it is
@@ -1360,7 +1359,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     } // end if VP not supplied
 
     if (!param_set.TYPE[VP].SUPPLIED ||
-        param_set.FORCE_DT[param_set.TYPE[VP].SUPPLIED - 1] == SEC_PER_DAY) {
+        param_set.force_steps_per_day[param_set.TYPE[VP].SUPPLIED - 1] == 1) {
         /**************************************************
            Either no observations of VP, QAIR, or REL_HUMID were supplied,
            in which case we will use MTCLIM's estimates of daily vapor pressure,
@@ -1468,8 +1467,8 @@ initialize_atmos(atmos_data_struct    *atmos,
            overwrite the sub-daily VP from MTCLIM here.
         **************************************************/
         if (param_set.TYPE[QAIR].SUPPLIED &&
-            param_set.FORCE_DT[param_set.TYPE[QAIR].SUPPLIED - 1] <
-            SEC_PER_DAY) {
+            param_set.force_steps_per_day[param_set.TYPE[QAIR].SUPPLIED - 1] >
+            1) {
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
                 for (i = 0; i < NF; i++) {
@@ -1494,8 +1493,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
         }
         else if (param_set.TYPE[REL_HUMID].SUPPLIED &&
-                 param_set.FORCE_DT[param_set.TYPE[REL_HUMID].SUPPLIED - 1] <
-                 SEC_PER_DAY) {
+                 param_set.force_steps_per_day[param_set.TYPE[REL_HUMID].
+                                               SUPPLIED - 1] > 1) {
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
                 for (i = 0; i < NF; i++) {
@@ -1592,8 +1591,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
     }
     else {
-        if (param_set.FORCE_DT[param_set.TYPE[LONGWAVE].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[LONGWAVE].SUPPLIED -
+                                          1] == 1) {
             /* daily incoming longwave radiation provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -1653,8 +1652,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
 
     if (param_set.TYPE[ALBEDO].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[ALBEDO].SUPPLIED -
+                                          1] == 1) {
             /* daily albedo provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
@@ -1730,8 +1729,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
 
     if (param_set.TYPE[LAI_IN].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[LAI_IN].SUPPLIED -
+                                          1] == 1) {
             /* daily LAI provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
@@ -1808,8 +1807,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
 
     if (param_set.TYPE[VEGCOVER].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[VEGCOVER].SUPPLIED -
+                                          1] == 1) {
             /* daily vegcover provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
@@ -1947,8 +1946,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
     }
     else {
-        if (param_set.FORCE_DT[param_set.TYPE[PAR].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[PAR].SUPPLIED - 1] ==
+            1) {
             /* daily par provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;
@@ -2022,8 +2021,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
     }
     else {
-        if (param_set.FORCE_DT[param_set.TYPE[CATM].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
+        if (param_set.force_steps_per_day[param_set.TYPE[CATM].SUPPLIED - 1] ==
+            1) {
             /* daily atmospheric carbon dioxide concentration provided */
             for (rec = 0; rec < global_param.nrecs; rec++) {
                 sum = 0;

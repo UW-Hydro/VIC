@@ -67,8 +67,7 @@ void mtclim_wrapper(int, int, double, double, double, double, double, double,
 FILE *open_state_file(global_param_struct *, filenames_struct, int, int);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
-void read_atmos_data(FILE *, global_param_struct, int, int, double **,
-                     double ***);
+void read_atmos_data(FILE *, global_param_struct, int, double **, double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
 void read_initial_model_state(FILE *, all_vars_struct *, int, int, int,
                               soil_con_struct *);

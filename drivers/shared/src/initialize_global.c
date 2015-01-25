@@ -65,7 +65,6 @@ initialize_global()
         global_param.forcemonth[i] = 1;
         global_param.forceday[i] = 1;
         global_param.forcesec[i] = 0;
-        global_param.forceskip[i] = 0;
         global_param.forceoffset[i] = 0;
     }
     global_param.skipyear = 0;

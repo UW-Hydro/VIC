@@ -178,6 +178,7 @@ read_atmos_data(FILE               *infile,
             rec++;
         }
     }
+
     /**************************
        Read ASCII Forcing Data
     **************************/

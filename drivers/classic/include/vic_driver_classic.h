@@ -83,7 +83,7 @@ int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
                 double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,
-                        out_data_struct *);
+                        out_data_struct *, dmy_struct *);
 void write_header(out_data_file_struct *, out_data_struct *, dmy_struct *,
                   global_param_struct);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,

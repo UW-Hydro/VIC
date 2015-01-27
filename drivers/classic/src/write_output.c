@@ -68,7 +68,7 @@ write_output(out_data_struct      *out_data,
 
     unsigned                   i;
     size_t                     index;
-    int                        out_dt_sec;
+    double                     out_dt_sec;
     int                        v;
 
     out_dt_sec = global_param.out_dt;

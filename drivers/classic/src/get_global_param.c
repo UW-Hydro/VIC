@@ -1033,46 +1033,47 @@ get_global_param(FILE *gp)
     }
 
     // Validate runoff time step
-    if (global_param.runoff_steps_per_day == 0) {
-        log_err("Runoff time steps per day has not been defined.  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
+    if (!options.OUTPUT_FORCE) {
+        if (global_param.runoff_steps_per_day == 0) {
+            log_err("Runoff time steps per day has not been defined.  Make "
+                    "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
+        }
+        else if (global_param.runoff_steps_per_day <
+                 MIN_SUBDAILY_STEPS_PER_DAY) {
+            log_err("The specified number of runoff steps per day (%zu) < "
+                    "the minimum number of subdaily steps per day (%d).  Make "
+                    "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
+                    "least (%d).", global_param.runoff_steps_per_day,
+                    MIN_SUBDAILY_STEPS_PER_DAY,
+                    MIN_SUBDAILY_STEPS_PER_DAY);
+        }
+        else if (global_param.runoff_steps_per_day > HOURS_PER_DAY &&
+                 global_param.runoff_steps_per_day % HOURS_PER_DAY != 0) {
+            log_err("The specified number of runoff steps per day (%zu) is > "
+                    "24 and is not evenly divided by 24.",
+                    global_param.runoff_steps_per_day);
+        }
+        else if (global_param.runoff_steps_per_day >
+                 MAX_SUBDAILY_STEPS_PER_DAY) {
+            log_err("The specified number of runoff steps per day (%zu) > the "
+                    "the maximum number of subdaily steps per day (%d).  Make "
+                    "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
+                    "most (%d).", global_param.runoff_steps_per_day,
+                    MAX_SUBDAILY_STEPS_PER_DAY,
+                    MAX_SUBDAILY_STEPS_PER_DAY);
+        }
+        else if (global_param.runoff_steps_per_day %
+                 global_param.model_steps_per_day != 0) {
+            log_err("The specified number of runoff timesteps (%zu) must be "
+                    "evenly divisible by the number of model timesteps per day "
+                    "(%zu)", global_param.runoff_steps_per_day,
+                    global_param.model_steps_per_day);
+        }
+        else {
+            global_param.runoff_dt = SEC_PER_DAY /
+                                     (double) global_param.runoff_steps_per_day;
+        }
     }
-    else if (global_param.runoff_steps_per_day <
-             MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of runoff steps per day (%zu) < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                "least (%d).", global_param.runoff_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.runoff_steps_per_day > HOURS_PER_DAY &&
-             global_param.runoff_steps_per_day % HOURS_PER_DAY != 0) {
-        log_err("The specified number of runoff steps per day (%zu) is > "
-                "24 and is not evenly divided by 24.",
-                global_param.runoff_steps_per_day);
-    }
-    else if (global_param.runoff_steps_per_day >
-             MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of runoff steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                "most (%d).", global_param.runoff_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.runoff_steps_per_day %
-             global_param.model_steps_per_day != 0) {
-        log_err("The specified number of runoff timesteps (%zu) must be "
-                "evenly divisible by the number of model timesteps per day "
-                "(%zu)", global_param.runoff_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else {
-        global_param.runoff_dt = SEC_PER_DAY /
-                                 (double) global_param.runoff_steps_per_day;
-    }
-
     // Validate atmos time step
     if (global_param.atmos_steps_per_day == 0) {
         // For classic driver default to hourly atmos timestep

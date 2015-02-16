@@ -54,6 +54,11 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 #MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
 #MIN_RAIN_TEMP	-0.5	# minimum temperature (C) at which rain can fall
+#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
+                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
+                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
+                        # in the soil paramter file containing the snow distibution slope parameter
+                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # Turbulent Flux Parameters
@@ -92,18 +97,18 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #			# default = LW_CLOUD_DEARDORFF
 
 #######################################################################
+# Carbon Cycle Parameters
+#######################################################################
+#CARBON 		FALSE		# TRUE = simulate carbon cycle; FALSE = do not simulate carbon cycle.  Default = FALSE.
+#VEGLIB_PHOTO	FALSE		# TRUE = photosynthesis parameters are included in the veg library file.  Default = FALSE.
+#RC_MODE	RC_JARVIS	# RC_JARVIS = canopy resistance computed by applying resistance factors to the veg class's minimum resistance, listed in the veg library
+                        	# RC_PHOTO = canopy resistance computed by applying resistance factors to the minimum resistance required by current photosynthetic demand.  Default = RC_JARVIS.
+
+#######################################################################
 # Miscellaneous Simulation Parameters
 # Generally these default values do not need to be overridden
 #######################################################################
 #CONTINUEONERROR	TRUE	# TRUE = if simulation aborts on one grid cell, continue to next grid cell
-#LOG_MATRIC	FALSE	# TRUE = use the linear interpolation of the logarithm of the matric potential
-                        # from the two surrounding layers to estimate the soil moisture drainage from each
-                        # layer (Boone and Wetzel, 1996).
-#SPATIAL_SNOW	FALSE	# TRUE = use a uniform distribution to simulate the partial coverage of the
-                        # surface by a thin snowpack.  Coverage is assumed to be uniform after snowfall
-                        # until the pack begins to melt.  If TRUE, VIC will expect an additional column
-                        # in the soil paramter file containing the snow distibution slope parameter
-                        # (= 2 * snow depth below which coverage < 1).
 
 #######################################################################
 # State Files and Parameters
@@ -159,6 +164,7 @@ ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
+#VEGLIB_VEGCOVER	FALSE	# TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
 #VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 #VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
 #VEGPARAM_VEGCOVER 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information

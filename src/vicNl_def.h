@@ -439,7 +439,7 @@ extern char ref_veg_ref_crop[];
 #define CANOPY_VP    25.0	/* Used to bracket canopy vapor pressures 
                                    while computing moisture balance (Pa) */
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
-#define SLAB_MOIST_FRACT 1.0    /* Ratio of the moisture in the soil/rock below the bottom soil layer to bottom soil layer moisture */
+#define SLAB_MOIST_FRACT 1.0    /* Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
 
 /***** Glacier Constraints *****/
 #define BAHR_C 0.033            /* V-A Scaling Coeficient */
@@ -672,9 +672,9 @@ extern char ref_veg_ref_crop[];
 #define OUT_LITTERFALL     161  /* flux of carbon from living biomass into soil [g C/m2d] */
 #define OUT_RHET           162  /* soil respiration (heterotrophic respiration) [g C/m2d] */
 #define OUT_NEE            163  /* net ecosystem exchange (=NPP-RHET) [g C/m2d] */
-#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2d] */
-#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2d] */
-#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2d] */
+#define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2] */
+#define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2] */
+#define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2] */
 // Glacier terms
 #define OUT_IWE            167
 #define OUT_IWE_BAND       168
@@ -688,7 +688,6 @@ extern char ref_veg_ref_crop[];
 #define OUT_BN_BAND        176
 #define OUT_SNOW_DENSITY   177
 #define OUT_SNOW_DENS_BAND 178
-
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
 #define OUT_TYPE_CHAR    1 /* char */

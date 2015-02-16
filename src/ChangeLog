@@ -25,6 +25,65 @@ Usage:
 
 
 
+-------------------------------------------------------------------------------
+***** Description of changes between VIC 4.2.a and VIC 4.2.b *****
+-------------------------------------------------------------------------------
+
+Bug Fixes:
+----------
+
+Fixed memory error in initialize atmos when OUTPUT_FORCE = TRUE.
+
+	Files Affected:
+
+	initialize_atmos.
+	Makefile
+
+	Description:
+
+	Previously, access to unitialized elements of the veg_con and veg_hist
+	structure was attempted when OUTPUT_FORCE = TRUE, causing a memory error
+	and the model to crash.  This fix sets these elements inside a
+	`if (!options.OUTPUT_FORCE)` block allowing the OUTPUT_FORCE option to
+	work as expected.
+
+
+-------------------------------------------------------------------------------
+***** Description of changes between VIC 4.2 and VIC 4.2.a *****
+-------------------------------------------------------------------------------
+
+Bug Fixes:
+----------
+
+Fixed unitialized bare soil albedo.
+
+	Files Affected:
+
+	full_energy.c
+
+	Description:
+
+	Previously, bare_albedo was unset for the bare soil case (`iveg!=Nveg`).
+	This fix sets the bare_albedo to the global variable value of
+	`BARE_SOIL_ALBEDO`.
+
+
+
+Cleanup of frozen soil option constraints.
+
+	Files Affected:
+
+	calc_surf_energy_bal.c
+	get_global_param.c
+
+	Description:
+
+	Removed hardcoded, behind the scenes checks for the `EXP_TRANS` and
+	`NO_FLUX` global parameter values for case of `QUICK_SOLVE=TRUE` in
+	`calc_surf_energy_bal`.
+
+
+
 --------------------------------------------------------------------------------
 ***** Description of changes between VIC 4.1.2 and VIC 4.2 *****
 --------------------------------------------------------------------------------

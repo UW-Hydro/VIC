@@ -181,13 +181,11 @@ calc_surf_energy_bal(double             Le,
     extern veg_lib_struct *veg_lib;
     extern option_struct   options;
 
-    int                    FIRST_SOLN[2];
-    int                    NOFLUX;
-    int                    EXP_TRANS;
-    int                    VEG;
-    int                    i;
-    int                    nidx;
-    int                    tmpNnodes;
+  int      FIRST_SOLN[2];
+  int      VEG;
+  int      i;
+  int      nidx;
+  int      tmpNnodes;
 
     double                 Cs1;
     double                 Cs2;
@@ -361,34 +359,20 @@ calc_surf_energy_bal(double             Le,
             T_upper = 0.5 * (energy->T[0] + Tair) + SURF_DT;
         }
 
-        if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
-            // Set iterative Nnodes using the depth of the thaw layer
-            tmpNnodes = 0;
-            for (nidx = Nnodes - 5; nidx >= 0; nidx--) {
-                if (T_node[nidx] >= 0 && T_node[nidx + 1] < 0) {
-                    tmpNnodes = nidx + 1;
-                }
-            }
-            if (tmpNnodes == 0) {
-                if (T_node[0] <= 0 && T_node[1] >= 0) {
-                    tmpNnodes = Nnodes;
-                }
-                else {
-                    tmpNnodes = 3;
-                }
-            }
-            else {
-                tmpNnodes += 4;
-            }
-            NOFLUX = FALSE;
-
-            EXP_TRANS = FALSE; // Why would we do this???
-        }
-        else {
-            tmpNnodes = Nnodes;
-            NOFLUX = options.NOFLUX;
-            EXP_TRANS = options.EXP_TRANS;
-        }
+    if ( options.QUICK_SOLVE && !options.QUICK_FLUX ) {
+      // Set iterative Nnodes using the depth of the thaw layer
+      tmpNnodes = 0;
+      for ( nidx = Nnodes-5; nidx >= 0; nidx-- ) 
+	if ( T_node[nidx] >= 0 && T_node[nidx+1] < 0 ) tmpNnodes = nidx+1;
+      if ( tmpNnodes == 0 ) { 
+	if ( T_node[0] <= 0 && T_node[1] >= 0 ) tmpNnodes = Nnodes;
+	else tmpNnodes = 3;
+      }
+      else tmpNnodes += 4;
+    }
+    else { 
+      tmpNnodes = Nnodes;
+    }
 
         Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
                            rec, nrecs, dmy->month, VEG, veg_class, iveg,
@@ -418,7 +402,7 @@ calc_surf_energy_bal(double             Le,
                            gamma,
                            ice_node, kappa_node, max_moist_node, moist_node,
                            soil_con, layer, veg_var,
-                           INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow,
+                           INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow,
                            FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1,
                            &energy->deltaH, &energy->fusion, &energy->grnd_flux,
                            &energy->latent, &energy->latent_sub,
@@ -488,7 +472,7 @@ calc_surf_energy_bal(double             Le,
                                                    layer, veg_var,
                                                    INCLUDE_SNOW,
                                                    soil_con->FS_ACTIVE,
-                                                   NOFLUX, EXP_TRANS,
+                                                   options.NOFLUX, options.EXP_TRANS,
                                                    snow->snow, FIRST_SOLN,
                                                    &NetLongBare,
                                                    &TmpNetLongSnow, &T1,
@@ -510,7 +494,6 @@ calc_surf_energy_bal(double             Le,
 
         if (Ts_old * Tsurf < 0 && options.QUICK_SOLVE) {
             tmpNnodes = Nnodes;
-            NOFLUX = options.NOFLUX;
             FIRST_SOLN[0] = TRUE;
 
             Tsurf = root_brent(T_lower, T_upper, ErrorString,
@@ -544,7 +527,7 @@ calc_surf_energy_bal(double             Le,
                                gamma,
                                ice_node, kappa_node, max_moist_node, moist_node,
                                soil_con, layer, veg_var,
-                               INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow,
+                               INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow,
                                FIRST_SOLN, &NetLongBare, &TmpNetLongSnow, &T1,
                                &energy->deltaH, &energy->fusion,
                                &energy->grnd_flux,
@@ -605,7 +588,7 @@ calc_surf_energy_bal(double             Le,
                                                        max_moist_node, moist_node,
                                                        soil_con->frost_fract,
                                                        layer, veg_var, INCLUDE_SNOW,
-                                                       soil_con->FS_ACTIVE, NOFLUX, EXP_TRANS,
+                                                       soil_con->FS_ACTIVE, options.NOFLUX, options.EXP_TRANS,
                                                        snow->snow, FIRST_SOLN, &NetLongBare,
                                                        &TmpNetLongSnow, &T1,
                                                        &energy->deltaH, &energy->fusion,
@@ -623,8 +606,6 @@ calc_surf_energy_bal(double             Le,
     else {
         /** Frozen soil model run with no surface energy balance **/
         Tsurf = Tair;
-        NOFLUX = options.NOFLUX;
-        EXP_TRANS = options.EXP_TRANS;
     }
 
     if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
@@ -664,7 +645,7 @@ calc_surf_energy_bal(double             Le,
                                   ice_node, kappa_node, max_moist_node,
                                   moist_node,
                                   soil_con, layer, veg_var,
-                                  INCLUDE_SNOW, NOFLUX, EXP_TRANS, snow->snow,
+                                  INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS, snow->snow,
                                   FIRST_SOLN, &NetLongBare, &TmpNetLongSnow,
                                   &T1,
                                   &energy->deltaH, &energy->fusion,

@@ -1,0 +1,18 @@
+site_name: VIC
+site_description: Variable Infiltration Capacity Model
+site_author: UW Hydro | Computational Hydrology
+repo_url: https://github.com/UW-Hydro/VIC
+
+
+theme: Flatly
+
+pages:
+- ['index.md', 'Home']
+- ['about/ModelOverview.md', 'About', 'VIC Model Overview']
+- ['user-guide/HowtorunVIC.md', 'User Guide', 'How to run VIC']
+- ['user-guide/Drivers.md', 'User Guide', 'VIC Drivers']
+- ['downloads/Datasets.md', 'Downloads', 'Datasets']
+- ['downloads/Code.md', 'Downloads', 'Code']
+- ['model-development/Contribuing.md', 'Model Development', 'Model Development']
+
+copyright: Copyright &copy; 2015, <a href="www.hydro.washington.edu/">University of Washington Computational Hydrology Group</a>.

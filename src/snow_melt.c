@@ -191,6 +191,7 @@ snow_melt(double            Le,
     double               melt_energy = 0.;
     double               delswe;
     double               deliwe;
+    double               temp;
     char                 ErrorString[MAXSTRING];
 
     SnowFall = snowfall / (double)MMPERMETER; /* convet to m */
@@ -213,15 +214,25 @@ snow_melt(double            Le,
     }
     PackSwq = Ice - SurfaceSwq;
 
-    PackDepth = snow->depth + snow->icedepth;
-    PackDensity =
-        (snow->density * snow->depth + ice_density *
-         snow->icedepth) / PackDepth;
+    if (snow->icedepth > 0.) {
+        PackDepth = snow->depth + snow->icedepth;
+        PackDensity = (snow->density * snow->depth + ice_density *
+                       snow->icedepth) / PackDepth;
+    }
+    else {
+        PackDepth = snow->depth;
+        PackDensity = snow->density;
+    }
 
     /* Calculate cold contents */
     SurfaceCC = calc_cold_content(SurfaceSwq, snow->surf_temp);
-    PackCC = calc_cold_content((PackSwq - snow->iwq), snow->pack_temp);
-    if (air_temp > 0.0) {
+    temp = PackSwq - snow->iwq;
+    if (temp < 0.) {
+        PackCC = 0.;
+    }
+    else {
+        PackCC = calc_cold_content(temp, snow->pack_temp);
+    }if (air_temp > 0.0) {
         SnowFallCC = 0.0;
     }
     else {
@@ -541,23 +552,34 @@ snow_melt(double            Le,
     Ice = PackSwq + SurfaceSwq;
 
     // Update glacier properties and remove glacier ice from pack
-    if (Ice >= InitialIwq) {
-        // No melting so iwe didn't change
-        snow->iwq = InitialIwq;
-        Ice -= InitialIwq;
-        snow->glmelt = 0.0;
-    }
-    else if (Ice - InitialIwq < 0.0) {
-        // Complete melting of snow and some glacier
-        snow->iwq = Ice;
-        Ice = 0.0;
-        snow->glmelt = InitialIwq;
-    }
-    else {
-        // Total melting of pack
-        snow->iwq = 0.0;
-        snow->glmelt = InitialIwq;
-    }
+    if (InitialIwq > 0.) {
+        if (Ice >= InitialIwq) {
+            // No melting of the glacier ice so iwq didn't change
+            snow->iwq = InitialIwq;
+            Ice -= InitialIwq;
+            snow->glmelt = 0.0;
+        }
+        else if (Ice - InitialIwq < 0.) {
+            // Complete melting of snow and some glacier
+            snow->iwq = Ice;  // What's left is glacier
+            Ice = 0.0;  // No ice to be apportioned later
+            snow->glmelt = InitialIwq - Ice;  // Lost ice
+        }
+        else {
+            // Total melting of pack
+            snow->iwq = 0.0;
+            snow->glmelt = InitialIwq;
+            Ice = 0.0;
+        }
+        // Handle case where the vapor flux deposits directly onto the glacier.
+        // If we began without snow and there was no snowfall, all the mass
+        // will remain part of the glacier.
+        if ((InitialSwq == 0) && (SnowFall == 0)) {
+            snow->iwq += Ice;
+            Ice = 0.;
+        }
+    }  // After removing the glacier ice from the "Ice" pack, the rest should
+       // be just like the standard VIC snow_melt() function
 
     if (Ice > MAX_SURFACE_SWE) {
         SurfaceCC = calc_cold_content(SurfaceSwq, snow->surf_temp);
@@ -584,8 +606,18 @@ snow_melt(double            Le,
         snow->pack_temp = 0.0;
     }
 
-    snow->swq = Ice + snow->pack_water + snow->surf_water;
-    snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
+    if (Ice > 0.) {
+        // Reconstitute the swq variable
+        snow->swq = Ice + snow->pack_water + snow->surf_water;
+    }
+    else {
+        // Ice was totally depleted so remove any remaining liquid water
+        snow->swq = 0.;
+        melt[0] += snow->pack_water + snow->surf_water;
+        snow->pack_water = 0.;
+        snow->surf_water = 0.;
+    }
+        snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
 
     if (snow->swq <= 0.0) {
         snow->swq = 0.0;
@@ -593,8 +625,9 @@ snow_melt(double            Le,
         snow->pack_temp = 0.0;
     }
 
+    /* Snow solution is unstable as independent layer */
     if (snow->surf_temp == 999) {
-        snow->swq += snow->iwq;
+        snow->swq += snow->iwq;  // Include ice in snowpack for now
         snow->iwq = 0.0;
         snow->depth = PackDepth;
         snow->icedepth = 0.0;
@@ -615,11 +648,11 @@ snow_melt(double            Le,
     snow->bn = delswe + deliwe; // glacier mass balance
 
     melt[0] *= MMPERMETER;               /* converts back to mm */
-    
+
     // add glacier outflow to melt and glmelt
     melt[0] += snow->gl_overflow;
     snow->glmelt += snow->gl_overflow;
-    
+
     // store final values
     snow->mass_error = MassBalanceError;
     snow->surf_coldcontent = SurfaceCC;

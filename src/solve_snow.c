@@ -157,7 +157,7 @@ solve_snow(char               overstory,
     double               shortwave;
     double               vp;
     double               vpd;
-
+  
     month = dmy[rec].month;
     hour = dmy[rec].hour;
     day_in_year = dmy[rec].day_in_year;
@@ -406,7 +406,8 @@ solve_snow(char               overstory,
             energy->AlbedoUnder = *AlbedoUnder;
 
             /** Compute Snow Parameters **/
-            if (snow->swq > 0. || snow->iwq > 0.) {
+            if (snow->swq > 0.) {
+
                 /** Calculate Snow Density **/
                 if (snow->surf_temp <= 0. && (old_swq > 0. || *snowfall > 0.)) {
                     // snowpack present, compress and age density
@@ -415,14 +416,14 @@ solve_snow(char               overstory,
                 }
                 else {
                     // no snowpack present, start with new snow density
-                    if (snow->last_snow == 0) {
+                    if (snow->last_snow == 0 || snow->density <= 0.) {
                         snow->density = new_snow_density(air_temp);
                     }
                 }
 
                 // Snow to ice conversion
                 if (options.GLACIER && (soil_con->glcel == 1) && (
-                    snow->swq > MAX_SURFACE_SWE)) {
+                    snow->swq > 1.)) {
                     snow_to_ice(&snow->swq, &snow->iwq, &snow->density,
                                 &snow->pack_temp);
                 }
@@ -443,7 +444,6 @@ solve_snow(char               overstory,
                 else if (snow->MELTING && *snowfall > TraceSnow) {
                     snow->MELTING = FALSE;
                 }
-
 
                 /** Check for Thin Snowpack which only Partially Covers Grid Cell
                    exists only if not snowing and snowpack has started to melt **/

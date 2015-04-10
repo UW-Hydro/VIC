@@ -324,7 +324,7 @@ calc_snow_depth(double swq,
         depth = (double)h20_density * swq / density;
     }
     else {
-        depth = 0.0;
+        depth = 0.;
     }
 
     return(depth);
@@ -343,8 +343,12 @@ calc_cold_content(double wq,
 **********************************************************************/
 
     double cc;
-
-    cc = (double)CH_ICE * wq * temp;
+    if (wq > 0.) {
+      cc = (double) CH_ICE * wq * temp;
+    }
+    else {
+      cc = 0;
+    }
 
     return(cc);
 }
@@ -388,12 +392,11 @@ snow_to_ice(double *swq,
     double maxdens;
     double slopedens;
     
-    packswq = *swq - MAX_SURFACE_SWE;
-    packcc = calc_cold_content(packswq, *packtemp);
-    packdepth = calc_snow_depth(packswq, *density);
-    
     maxdens = 2. * (*density) - (double)NEW_SNOW_DENSITY;
     if (maxdens > SNOWICE_THRESH) {
+        packswq = *swq - MAX_SURFACE_SWE;
+        packcc = calc_cold_content(packswq, *packtemp);
+        packdepth = calc_snow_depth(packswq, *density);
         slopedens = (maxdens - (double)NEW_SNOW_DENSITY) / (packdepth);
         snowdepth = (packdepth) -
                     (((*density) - (double)NEW_SNOW_DENSITY) / slopedens);

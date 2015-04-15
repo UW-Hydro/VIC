@@ -416,14 +416,14 @@ solve_snow(char               overstory,
                 }
                 else {
                     // no snowpack present, start with new snow density
-                    if (snow->last_snow == 0 || snow->density <= 0.) {
+                    if (snow->last_snow == 0) {
                         snow->density = new_snow_density(air_temp);
                     }
                 }
 
                 // Snow to ice conversion
                 if (options.GLACIER && (soil_con->glcel == 1) && (
-                    snow->swq > 1.)) {
+                    snow->swq > SNOWICE_DEPTH)) {
                     snow_to_ice(&snow->swq, &snow->iwq, &snow->density,
                                 &snow->pack_temp);
                 }
@@ -546,6 +546,10 @@ solve_snow(char               overstory,
                 snow->snow_distrib_slope = 0.;
                 snow->store_snow = TRUE;
                 snow->MELTING = FALSE;
+
+                if (snow->iwq > 0) {
+                    snow->density = ice_density;
+                }
             }
 
             *snowfall = 0.; /* all falling snow has been added to the pack */

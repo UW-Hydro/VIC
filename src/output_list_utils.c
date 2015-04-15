@@ -265,6 +265,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_GLQOUT_BAND].varname,"OUT_GLQOUT_BAND");
   strcpy(out_data[OUT_GLQIN_BAND].varname,"OUT_GLQIN_BAND");
   strcpy(out_data[OUT_GL_MELT_BAND].varname,"OUT_GL_MELT_BAND");
+  strcpy(out_data[OUT_GL_OVER_BAND].varname,"OUT_GL_OVER_BAND");
 
   // Set number of elements - default is 1
   for (v=0; v<N_OUTVAR_TYPES; v++) {
@@ -310,6 +311,7 @@ out_data_struct *create_output_list() {
   out_data[OUT_GLQOUT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_GLQIN_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_GL_MELT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_GL_OVER_BAND].nelem = options.SNOW_BAND;
 
   // Set aggregation method - default is to average over the interval
   for (v=0; v<N_OUTVAR_TYPES; v++) {

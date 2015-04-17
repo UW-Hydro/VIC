@@ -157,7 +157,7 @@ solve_snow(char               overstory,
     double               shortwave;
     double               vp;
     double               vpd;
-  
+
     month = dmy[rec].month;
     hour = dmy[rec].hour;
     day_in_year = dmy[rec].day_in_year;
@@ -301,14 +301,16 @@ solve_snow(char               overstory,
             /* Rescale veg terms back to whole tile (as opposed to just over plants) */
             veg_var->throughfall =
                 (1 -
-             veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
+                 veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
                 veg_var->throughfall;
             *rainfall =
                 (1 -
-             veg_var->vegcover) * (*out_rain) + veg_var->vegcover * (*rainfall);
+                 veg_var->vegcover) * (*out_rain) + veg_var->vegcover *
+                (*rainfall);
             *snowfall =
                 (1 -
-             veg_var->vegcover) * (*out_snow) + veg_var->vegcover * (*snowfall);
+                 veg_var->vegcover) * (*out_snow) + veg_var->vegcover *
+                (*snowfall);
             snow->canopy_vapor_flux *= veg_var->vegcover;
             snow->snow_canopy *= veg_var->vegcover;
             veg_var->Wdew *= veg_var->vegcover;
@@ -365,7 +367,8 @@ solve_snow(char               overstory,
                 (*AlbedoUnder) =
                     (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
             }
-            else if (snow->swq <= 0.0 && snow->iwq > 0.0) {
+            else if ((snow->swq == 0.0) && (snow->iwq > 0.0) &&
+                     (store_snowfall == 0.)) {
                 snow->albedo = BARE_ICE_ALBEDO;
                 (*AlbedoUnder) = snow->albedo;
             }
@@ -407,7 +410,6 @@ solve_snow(char               overstory,
 
             /** Compute Snow Parameters **/
             if (snow->swq > 0.) {
-
                 /** Calculate Snow Density **/
                 if (snow->surf_temp <= 0. && (old_swq > 0. || *snowfall > 0.)) {
                     // snowpack present, compress and age density
@@ -423,7 +425,7 @@ solve_snow(char               overstory,
 
                 // Snow to ice conversion
                 if (options.GLACIER && (soil_con->glcel == 1) && (
-                    snow->swq > SNOWICE_DEPTH)) {
+                        snow->swq > SNOWICE_DEPTH)) {
                     snow_to_ice(&snow->swq, &snow->iwq, &snow->density,
                                 &snow->pack_temp);
                 }
@@ -435,9 +437,9 @@ solve_snow(char               overstory,
                 /** Record if snowpack is melting this time step **/
                 if (snow->surf_coldcontent >= 0. && (
                         (soil_con->lat >= 0. && (day_in_year > 60 && // ~ March 1
-                                                day_in_year < 273)) || // ~ October 1
+                                                 day_in_year < 273)) || // ~ October 1
                         (soil_con->lat < 0. && (day_in_year < 60 || // ~ March 1
-                                               day_in_year > 273)) // ~ October 1
+                                                day_in_year > 273)) // ~ October 1
                         )) {
                     snow->MELTING = TRUE;
                 }
@@ -459,7 +461,7 @@ solve_snow(char               overstory,
                                                         &snow->store_coverage);
                 }
                 else {
-                    if (snow->swq > 0.) {
+                    if ((snow->swq > 0.) || (snow->iwq > 0.)) {
                         snow->coverage = 1.;
                     }
                     else {
@@ -528,7 +530,8 @@ solve_snow(char               overstory,
             energy->latent_sub *= (snow->coverage + *delta_coverage);
             energy->sensible *= (snow->coverage + *delta_coverage);
 
-            if (snow->swq == 0.) {
+            if ((snow->swq == 0.) && (snow->iwq == 0.)) {
+
                 /** Reset Snow Pack Variables after Complete Melt **/
 
                 /*** NOTE *coverage should not be zero the time step the

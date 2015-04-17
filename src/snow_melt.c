@@ -103,7 +103,8 @@ snow_melt(double            latent,
         pack_glacier_we = 0.;
     }
 
-    if (snow->icedepth > 0.) {
+    if (snow->iwq > 0.) {
+        snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
         surface_pack_glacier_depth = snow->depth + snow->icedepth;
         surface_pack_glacier_density = (snow->density * snow->depth +
                                         ice_density *
@@ -169,7 +170,7 @@ snow_melt(double            latent,
         snow->pack_temp = 0.0;
     }
 
-    /* Adjust ice and snow->surf_water */
+    /* Adjust surface_pack_glacier_we and snow->surf_water */
     surface_pack_glacier_we += snowfall_m;
     snow->surf_water += rainfall_m;
 
@@ -519,10 +520,10 @@ snow_melt(double            latent,
         snow->pack_water = 0.;
         snow->surf_water = 0.;
     }
+
     snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
 
-    if (snow->swq <= 0.0) {
-        snow->swq = 0.0;
+    if (snow->swq == 0.) {
         snow->surf_temp = 0.0;
         snow->pack_temp = 0.0;
     }
@@ -549,11 +550,11 @@ snow_melt(double            latent,
     snow->iwqold = snow->iwq;
     snow->bn = delswe + deliwe; // glacier mass balance
 
-    melt[0] *= MMPERMETER;               /* converts back to mm */
-
     // add glacier outflow to melt and glmelt
     melt[0] += snow->gl_overflow;
     snow->glmelt += snow->gl_overflow;
+
+    melt[0] *= MMPERMETER;               /* converts back to mm */
 
     // store final values
     snow->mass_error = mass_balance_error;

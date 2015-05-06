@@ -54,7 +54,7 @@ snow_melt(double            latent,
     double               initial_glacier_we; /* Initial ice water equivalent (m) */
     double               mass_balance_error; /* Mass balance error (m) */
     double               max_liquid_water; /* Maximum liquid water content of pack (m) */
-    double               surface_pack_cc; /* Cold content of snow pack (J) */
+    double               pack_cc; /* Cold content of snow pack (J) */
     double               pack_glacier_we; /* Snow pack snow water equivalent (m) */
     double               surface_pack_glacier_depth; /* Snow pack depth (m) */
     double               surface_pack_glacier_density; /* Snow pack density (kg/m3) */
@@ -80,6 +80,7 @@ snow_melt(double            latent,
     double               deliwe;
     double               tmp;
     char                 errorstring[MAXSTRING];
+    int                  glacier_present;
 
     snowfall_m = snowfall / (double) MMPERMETER; /* convet to m */
     rainfall_m = rainfall / (double) MMPERMETER; /* convet to m */
@@ -90,8 +91,14 @@ snow_melt(double            latent,
     (*old_tsurf) = snow->surf_temp;
 
     /* Initialize snowpack variables */
-    surface_pack_glacier_we = snow->swq + snow->iwq - snow->pack_water -
-                              snow->surf_water;
+    if (snow->iwq > SMALL){
+      glacier_present = TRUE;
+      surface_pack_glacier_we = snow->swq + snow->iwq - snow->pack_water - snow->surf_water;
+    }
+    else {
+      glacier_present = FALSE;
+      surface_pack_glacier_we = snow->swq - snow->pack_water - snow->surf_water;
+    }
 
     /* Reconstruct snow pack */
     if (surface_pack_glacier_we > MAX_SURFACE_SWE) {
@@ -103,7 +110,7 @@ snow_melt(double            latent,
         pack_glacier_we = 0.;
     }
 
-    if (snow->iwq > 0.) {
+    if (glacier_present) {
         snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
         surface_pack_glacier_depth = snow->depth + snow->icedepth;
         surface_pack_glacier_density = (snow->density * snow->depth +
@@ -118,13 +125,18 @@ snow_melt(double            latent,
 
     /* Calculate cold contents */
     surface_cc = calc_cold_content(surface_we, snow->surf_temp);
-    tmp = pack_glacier_we - snow->iwq;
-
-    if (tmp < 0.) {
-        surface_pack_cc = 0.;
+    if (glacier_present) {
+        tmp = pack_glacier_we - snow->iwq;
     }
     else {
-        surface_pack_cc = calc_cold_content(tmp, snow->pack_temp);
+      tmp = pack_glacier_we;
+    }
+
+    if (tmp < 0.) {
+        pack_cc = 0.;
+    }
+    else {
+        pack_cc = calc_cold_content(tmp, snow->pack_temp);
     }
 
     if (air_temp > 0.0) {
@@ -151,7 +163,7 @@ snow_melt(double            latent,
         surface_we = MAX_SURFACE_SWE;
         surface_cc += snowfall_cc - delta_pack_glacier_cc;
         pack_glacier_we += delta_pack_glacier_we;
-        surface_pack_cc += delta_pack_glacier_cc;
+        pack_cc += delta_pack_glacier_cc;
     }
     else {
         surface_we += snowfall_m;
@@ -164,7 +176,7 @@ snow_melt(double            latent,
         snow->surf_temp = 0.0;
     }
     if (pack_glacier_we > 0.0) {
-        snow->pack_temp = calc_temp_from_cc(pack_glacier_we, surface_pack_cc);
+        snow->pack_temp = calc_temp_from_cc(pack_glacier_we, pack_cc);
     }
     else {
         snow->pack_temp = 0.0;
@@ -402,8 +414,8 @@ snow_melt(double            latent,
     /* Refreeze liquid water in the pack.
        variable 'refreeze_energy' is the heat released to the snow pack
        if all liquid water were refrozen.
-       if refreeze_energy < surface_pack_cc then all water IS refrozen
-       surface_pack_cc always <=0.0
+       if refreeze_energy < pack_cc then all water IS refrozen
+       pack_cc always <=0.0
 
        WORK IN PROGRESS: This energy is NOT added to MeltEnergy, since this does
        not involve energy transported to the pixel.  Instead heat from the snow
@@ -413,14 +425,14 @@ snow_melt(double            latent,
     pack_glacier_refreeze_energy = snow->pack_water * Lf * RHO_W;
 
     /* calculate energy released to freeze*/
-    if (surface_pack_cc < -pack_glacier_refreeze_energy) { /* cold content not fully depleted*/
+    if (pack_cc < -pack_glacier_refreeze_energy) { /* cold content not fully depleted*/
         pack_glacier_we += snow->pack_water;  /* refreeze all water and update*/
         surface_pack_glacier_we += snow->pack_water;
         snow->pack_water = 0.0;
         if (pack_glacier_we > 0.0) {
-            surface_pack_cc += pack_glacier_refreeze_energy;
+            pack_cc += pack_glacier_refreeze_energy;
             snow->pack_temp =
-                calc_temp_from_cc(pack_glacier_we, surface_pack_cc);
+                calc_temp_from_cc(pack_glacier_we, pack_cc);
             if (snow->pack_temp > 0.) {
                 snow->pack_temp = 0.;
             }
@@ -431,12 +443,12 @@ snow_melt(double            latent,
     }
     else {
         /* cold content has been either exactly satisfied or exceeded. If
-           surface_pack_cc = refreeze then pack is ripe and all pack water is
-           refrozen, else if energy released in refreezing exceeds surface_pack_cc
-           then exactly the right amount of water is refrozen to satify surface_pack_cc.
+           pack_cc = refreeze then pack is ripe and all pack water is
+           refrozen, else if energy released in refreezing exceeds pack_cc
+           then exactly the right amount of water is refrozen to satify pack_cc.
            The refrozen water is added to pack_glacier_we and surface_pack_glacier_we */
         snow->pack_temp = 0.0;
-        delta_pack_glacier_we = -surface_pack_cc / (Lf * RHO_W);
+        delta_pack_glacier_we = -pack_cc / (Lf * RHO_W);
         snow->pack_water -= delta_pack_glacier_we;
         pack_glacier_we += delta_pack_glacier_we;
         surface_pack_glacier_we += delta_pack_glacier_we;
@@ -456,7 +468,7 @@ snow_melt(double            latent,
     surface_pack_glacier_we = pack_glacier_we + surface_we;
 
     // Update glacier properties and remove glacier ice from pack
-    if (initial_glacier_we > 0.) {
+    if (glacier_present) {
         if (surface_pack_glacier_we >= initial_glacier_we) {
             // No melting of the glacier ice so iwq didn't change
             snow->iwq = initial_glacier_we;
@@ -482,9 +494,9 @@ snow_melt(double            latent,
 
     if (surface_pack_glacier_we > MAX_SURFACE_SWE) {
         surface_cc = calc_cold_content(surface_we, snow->surf_temp);
-        surface_pack_cc = calc_cold_content(pack_glacier_we, snow->pack_temp);
+        pack_cc = calc_cold_content(pack_glacier_we, snow->pack_temp);
         if (surface_we > MAX_SURFACE_SWE) {
-            surface_pack_cc += surface_cc *
+            pack_cc += surface_cc *
                                (surface_we - MAX_SURFACE_SWE) / surface_we;
             surface_cc -= surface_cc *
                           (surface_we - MAX_SURFACE_SWE) / surface_we;
@@ -492,19 +504,19 @@ snow_melt(double            latent,
             surface_we -= surface_we - MAX_SURFACE_SWE;
         }
         else if (surface_we < MAX_SURFACE_SWE) {
-            surface_pack_cc -= surface_pack_cc *
+            pack_cc -= pack_cc *
                                (MAX_SURFACE_SWE - surface_we) / pack_glacier_we;
-            surface_cc += surface_pack_cc *
+            surface_cc += pack_cc *
                           (MAX_SURFACE_SWE - surface_we) / pack_glacier_we;
             pack_glacier_we -= MAX_SURFACE_SWE - surface_we;
             surface_we += MAX_SURFACE_SWE - surface_we;
         }
-        snow->pack_temp = calc_temp_from_cc(pack_glacier_we, surface_pack_cc);
+        snow->pack_temp = calc_temp_from_cc(pack_glacier_we, pack_cc);
         snow->surf_temp = calc_temp_from_cc(surface_we, surface_cc);
     }
     else {
         pack_glacier_we = 0.0;
-        surface_pack_cc = 0.0;
+        pack_cc = 0.0;
         snow->pack_temp = 0.0;
     }
 
@@ -521,7 +533,9 @@ snow_melt(double            latent,
         snow->surf_water = 0.;
     }
 
-    snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
+    if (glacier_present) {
+      snow->icedepth = calc_snow_depth(snow->iwq, ice_density);
+    }
 
     if (snow->swq == 0.) {
         snow->surf_temp = 0.0;
@@ -530,7 +544,9 @@ snow_melt(double            latent,
 
     /* Snow solution is unstable as independent layer */
     if (snow->surf_temp == 999) {
-        snow->swq += snow->iwq;  // Include ice in snowpack for now
+        if (glacier_present) {
+            snow->swq += snow->iwq;  // Include ice in snowpack for now
+        }
         snow->iwq = 0.0;
         snow->depth = surface_pack_glacier_depth;
         snow->icedepth = 0.0;
@@ -559,7 +575,7 @@ snow_melt(double            latent,
     // store final values
     snow->mass_error = mass_balance_error;
     snow->surf_coldcontent = surface_cc;
-    snow->pack_coldcontent = surface_pack_cc;
+    snow->pack_coldcontent = pack_cc;
     snow->vapor_flux *= -1.;
     *save_advection = advection;
     *save_deltaCC = delta_cc;

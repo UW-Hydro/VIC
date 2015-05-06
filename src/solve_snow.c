@@ -209,7 +209,7 @@ solve_snow(char               overstory,
     (*ShortUnderIn) = shortwave;
     (*LongUnderIn) = longwave;
 
-    if (snow->swq > 0. || snow->iwq > 0. || *snowfall > 0. ||
+    if (snow->swq > 0. || snow->iwq > SMALL || *snowfall > 0. ||
         (snow->snow_canopy > 0. && overstory)) {
         /*****************************
            Snow is Present or Falling
@@ -328,7 +328,7 @@ solve_snow(char               overstory,
             energy->LongOverIn = 0.;
         }
 
-        if (snow->swq > 0.0 || *snowfall > 0.0 || snow->iwq > 0.0) {
+        if (snow->swq > 0.0 || *snowfall > 0.0 || snow->iwq > SMALL) {
             /******************************
                Snow Pack Present on Ground
             ******************************/
@@ -367,7 +367,7 @@ solve_snow(char               overstory,
                 (*AlbedoUnder) =
                     (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
             }
-            else if ((snow->swq == 0.0) && (snow->iwq > 0.0) &&
+            else if ((snow->swq == 0.0) && (snow->iwq > SMALL) &&
                      (store_snowfall == 0.)) {
                 snow->albedo = BARE_ICE_ALBEDO;
                 (*AlbedoUnder) = snow->albedo;
@@ -461,7 +461,7 @@ solve_snow(char               overstory,
                                                         &snow->store_coverage);
                 }
                 else {
-                    if ((snow->swq > 0.) || (snow->iwq > 0.)) {
+                    if ((snow->swq > 0.) || (snow->iwq > SMALL)) {
                         snow->coverage = 1.;
                     }
                     else {
@@ -530,7 +530,7 @@ solve_snow(char               overstory,
             energy->latent_sub *= (snow->coverage + *delta_coverage);
             energy->sensible *= (snow->coverage + *delta_coverage);
 
-            if ((snow->swq == 0.) && (snow->iwq == 0.)) {
+            if ((snow->swq == 0.) && (snow->iwq <= SMALL)) {
 
                 /** Reset Snow Pack Variables after Complete Melt **/
 
@@ -550,7 +550,7 @@ solve_snow(char               overstory,
                 snow->store_snow = TRUE;
                 snow->MELTING = FALSE;
 
-                if (snow->iwq > 0) {
+                if (snow->iwq > SMALL) {
                     snow->density = ice_density;
                 }
             }

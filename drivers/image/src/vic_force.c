@@ -233,12 +233,12 @@ vic_force(void)
                     veg_hist[i][vidx].vegcover[j] =
                         veg_lib[i][v].vegcover[dmy[current].month - 1];
                 }
+                // not the correct way to calculate average albedo, but leave
+                // for now
+                veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo, NF);
+                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].vegcover[NR] = average(veg_hist[i][vidx].vegcover, NF);
             }
-            // not the correct way to calculate average albedo, but leave
-            // for now
-            veg_hist[i][v].albedo[NR] = average(veg_hist[i][v].albedo, NF);
-            veg_hist[i][v].LAI[NR] = average(veg_hist[i][v].LAI, NF);
-            veg_hist[i][v].vegcover[NR] = average(veg_hist[i][v].vegcover, NF);
         }
     }
 

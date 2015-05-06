@@ -56,7 +56,7 @@ vic_start(void)
     setup_logging(MISSING);
 
     // set model constants
-    if (!strcasecmp(filenames.constants, "MISSING")) {
+    if (strcasecmp(filenames.constants, "MISSING") != 0) {
         filep.constants = open_file(filenames.constants, "r");
         get_parameters(filep.constants);
     }

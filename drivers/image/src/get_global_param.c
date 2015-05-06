@@ -1178,14 +1178,21 @@ get_global_param(FILE *gp)
         global_param.forceskip[1] = 0;
         global_param.forceoffset[1] = global_param.forceskip[1];
     }
-    if (param_set.force_steps_per_day[1] == 0) {
+    if (param_set.force_steps_per_day[0] == 0) {
         log_err("Forcing file time steps per day has not been "
                 "defined.  Make sure that the global file defines "
                 "FORCE_STEPS_PER_DAY.");
     }
     else {
+        param_set.FORCE_DT[0] = SEC_PER_DAY /
+                                (double) param_set.force_steps_per_day[0];
+    }
+    if (param_set.force_steps_per_day[1] > 0) {
         param_set.FORCE_DT[1] = SEC_PER_DAY /
                                 (double) param_set.force_steps_per_day[1];
+    }
+    else {
+        param_set.FORCE_DT[1] = param_set.FORCE_DT[0];
     }
 
     // Validate result directory

@@ -46,7 +46,7 @@ check_state_file(char  *init_state_name,
     FILE                *init_state;
     size_t               tmp_Nlayer;
     size_t               tmp_Nnodes;
-    unsigned short       startday, startmonth, startyear;
+    unsigned short int   startday, startmonth, startyear;
 
     /* open state file */
     if (options.BINARY_STATE_FILE) {

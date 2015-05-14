@@ -28,9 +28,6 @@
 #include <vic_run.h>
 #include <vic_driver_image.h>
 
-#define ERR(e) {fprintf(stderr, "\nError(vic_finalize): %s\n", nc_strerror(e)); \
-}
-
 /******************************************************************************
  * @brief    Finalize VIC run by freeing memory and closing open files.
  *****************************************************************************/
@@ -70,7 +67,7 @@ vic_finalize(void)
         if (nc_hist_file.open == true) {
             status = nc_close(nc_hist_file.nc_id);
             if (status != NC_NOERR) {
-                ERR(status);
+                log_ncerr(status);
             }
         }
     }

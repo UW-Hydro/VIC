@@ -36,11 +36,11 @@
 dmy_struct *
 make_dmy(global_param_struct *global)
 {
-    dmy_struct *temp;
-    dmy_struct  start_dmy, end_dmy;
-    size_t      i;
-    unsigned    offset;
-    double      dt_time_units, start_num, end_num, numdate;
+    dmy_struct  *temp;
+    dmy_struct   start_dmy, end_dmy;
+    size_t       i;
+    unsigned int offset;
+    double       dt_time_units, start_num, end_num, numdate;
 
     dt_seconds_to_time_units(global->time_units, global->dt, &dt_time_units);
 
@@ -69,13 +69,15 @@ make_dmy(global_param_struct *global)
         end_num = date2num(global->time_origin_num, &end_dmy, 0.,
                            global->calendar, global->time_units);
         global->nrecs =
-            (unsigned)((end_num - start_num) * global->model_steps_per_day) + 1;
+            (unsigned int) ((end_num -
+                             start_num) * global->model_steps_per_day) + 1;
     }
     else {
         offset =
             (unsigned int) ((double) (SEC_PER_DAY -
                                       start_dmy.dayseconds) / global->dt);
-        if ((((unsigned)global->dt * (global->nrecs - offset)) % SEC_PER_DAY) !=
+        if ((((unsigned int)global->dt *
+              (global->nrecs - offset)) % SEC_PER_DAY) !=
             0) {
             log_err("Nrecs must be defined such that the model ends after "
                     "completing a full day.  Currently Nrecs is set to %zu.",

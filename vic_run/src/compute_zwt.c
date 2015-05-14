@@ -114,7 +114,7 @@ wrap_compute_zwt(soil_con_struct  *soil_con,
     if (idx < 0) {
         cell->zwt = 0;
     }
-    else if (idx < (short)(options.Nlayer - 1)) {
+    else if (idx < (short) (options.Nlayer - 1)) {
         if (cell->layer[idx].zwt != 999) {
             cell->zwt = cell->layer[idx].zwt;
         }

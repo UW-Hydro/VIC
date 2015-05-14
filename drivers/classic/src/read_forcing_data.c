@@ -46,21 +46,21 @@ read_forcing_data(FILE              **infile,
     double                **forcing_data;
 
     /** Allocate data arrays for input forcing data **/
-    forcing_data = (double **)calloc(N_FORCING_TYPES, sizeof(double*));
-    (*veg_hist_data) = (double ***)calloc(N_FORCING_TYPES, sizeof(double**));
+    forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
+    (*veg_hist_data) = (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
             if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
-                forcing_data[i] = (double *)calloc((global_param.nrecs * NF),
-                                                   sizeof(double));
+                forcing_data[i] = (double *) calloc((global_param.nrecs * NF),
+                                                    sizeof(double));
             }
             else {
-                (*veg_hist_data)[i] = (double **)calloc(
+                (*veg_hist_data)[i] = (double **) calloc(
                     param_set.TYPE[i].N_ELEM, sizeof(double*));
                 for (j = 0; j < param_set.TYPE[i].N_ELEM; j++) {
                     (*veg_hist_data)[i][j] =
-                        (double *)calloc((global_param.nrecs * NF),
-                                         sizeof(double));
+                        (double *) calloc((global_param.nrecs * NF),
+                                          sizeof(double));
                 }
             }
         }

@@ -157,8 +157,10 @@ vic_store(void)
             dvar[i] = (double) soil_con[i].dz_node[j];
         }
         gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
-                            &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
-                            dimids, ndims, "dz_node", d3start, d3count, dvar);
+                                   &(nc_state_file.nc_id),
+                                   nc_state_file.d_fillvalue,
+                                   dimids, ndims, "dz_node", d3start, d3count,
+                                   dvar);
         for (i = 0; i < local_domain.ncells; i++) {
             dvar[i] = nc_state_file.d_fillvalue;
         }
@@ -179,8 +181,10 @@ vic_store(void)
             dvar[i] = (double) soil_con[i].Zsum_node[j];
         }
         gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
-                            &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
-                            dimids, ndims, "Zsum_node", d3start, d3count, dvar);
+                                   &(nc_state_file.nc_id),
+                                   nc_state_file.d_fillvalue,
+                                   dimids, ndims, "Zsum_node", d3start, d3count,
+                                   dvar);
         for (i = 0; i < local_domain.ncells; i++) {
             dvar[i] = nc_state_file.d_fillvalue;
         }
@@ -206,18 +210,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].cell[v][m].layer[j].moist;
+                                  all_vars[i].cell[v][m].layer[j].moist;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Soil_moisture",
-                                    d5start, d5count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Soil_moisture",
+                                           d5start, d5count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -248,19 +252,18 @@ vic_store(void)
                         v = veg_con_map[i].vidx[k];
                         if (v >= 0) {
                             dvar[i] = (double)
-                                           all_vars[i].cell[v][m].layer[j].ice[p
-                                           ];
+                                      all_vars[i].cell[v][m].layer[j].ice[p];
                         }
                         else {
                             dvar[i] = nc_state_file.d_fillvalue;
                         }
                     }
                     gather_put_nc_field_double(nc_state_file.fname,
-                                        &(nc_state_file.open),
-                                        &(nc_state_file.nc_id),
-                                        nc_state_file.d_fillvalue,
-                                        dimids, ndims, "Ice_content",
-                                        d6start, d6count, dvar);
+                                               &(nc_state_file.open),
+                                               &(nc_state_file.nc_id),
+                                               nc_state_file.d_fillvalue,
+                                               dimids, ndims, "Ice_content",
+                                               d6start, d6count, dvar);
                     for (i = 0; i < local_domain.ncells; i++) {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
@@ -286,18 +289,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].veg_var[v][m].Wdew;
+                              all_vars[i].veg_var[v][m].Wdew;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Wdew",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Wdew",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -322,18 +325,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPP;
+                                  all_vars[i].veg_var[v][m].AnnualNPP;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "AnnualNPP",
-                                    d4start, d4count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "AnnualNPP",
+                                           d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -357,18 +360,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPPPrev;
+                                  all_vars[i].veg_var[v][m].AnnualNPPPrev;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "AnnualNPPPrev",
-                                    d4start, d4count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "AnnualNPPPrev",
+                                           d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -392,18 +395,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].cell[v][m].CLitter;
+                                  all_vars[i].cell[v][m].CLitter;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "CLitter",
-                                    d4start, d4count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "CLitter",
+                                           d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -427,18 +430,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].cell[v][m].CInter;
+                                  all_vars[i].cell[v][m].CInter;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Cinter",
-                                    d4start, d4count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Cinter",
+                                           d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -462,18 +465,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].cell[v][m].CSlow;
+                                  all_vars[i].cell[v][m].CSlow;
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "CSlow",
-                                    d4start, d4count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "CSlow",
+                                           d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
@@ -498,18 +501,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     ivar[i] = (int)
-                                   all_vars[i].snow[v][m].last_snow;
+                              all_vars[i].snow[v][m].last_snow;
                 }
                 else {
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
             gather_put_nc_field_int(nc_state_file.fname,
-                             &(nc_state_file.open),
-                             &(nc_state_file.nc_id),
-                             nc_state_file.i_fillvalue,
-                             dimids, ndims, "Last_snow",
-                             d4start, d4count, ivar);
+                                    &(nc_state_file.open),
+                                    &(nc_state_file.nc_id),
+                                    nc_state_file.i_fillvalue,
+                                    dimids, ndims, "Last_snow",
+                                    d4start, d4count, ivar);
             for (i = 0; i < local_domain.ncells; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -533,18 +536,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     ivar[i] = (int)
-                                   all_vars[i].snow[v][m].MELTING;
+                              all_vars[i].snow[v][m].MELTING;
                 }
                 else {
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
             gather_put_nc_field_int(nc_state_file.fname,
-                             &(nc_state_file.open),
-                             &(nc_state_file.nc_id),
-                             nc_state_file.i_fillvalue,
-                             dimids, ndims, "Melt_state",
-                             d4start, d4count, ivar);
+                                    &(nc_state_file.open),
+                                    &(nc_state_file.nc_id),
+                                    nc_state_file.i_fillvalue,
+                                    dimids, ndims, "Melt_state",
+                                    d4start, d4count, ivar);
             for (i = 0; i < local_domain.ncells; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -568,18 +571,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].coverage;
+                              all_vars[i].snow[v][m].coverage;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_coverage",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_coverage",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -603,18 +606,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].swq;
+                              all_vars[i].snow[v][m].swq;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_water_equivalent",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_water_equivalent",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -638,18 +641,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].surf_temp;
+                              all_vars[i].snow[v][m].surf_temp;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_surf_temp",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_surf_temp",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -673,18 +676,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].surf_water;
+                              all_vars[i].snow[v][m].surf_water;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_surf_water",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_surf_water",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -708,18 +711,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].pack_temp;
+                              all_vars[i].snow[v][m].pack_temp;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_pack_temp",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_pack_temp",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -743,18 +746,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].pack_water;
+                              all_vars[i].snow[v][m].pack_water;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_pack_water",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_pack_water",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -778,18 +781,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].density;
+                              all_vars[i].snow[v][m].density;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_density",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_density",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -813,18 +816,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].coldcontent;
+                              all_vars[i].snow[v][m].coldcontent;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_cold_content",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_cold_content",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -848,18 +851,18 @@ vic_store(void)
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
-                                   all_vars[i].snow[v][m].snow_canopy;
+                              all_vars[i].snow[v][m].snow_canopy;
                 }
                 else {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
             gather_put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_canopy",
-                                d4start, d4count, dvar);
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_canopy",
+                                       d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -886,18 +889,18 @@ vic_store(void)
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
-                                       all_vars[i].energy[v][m].T[j];
+                                  all_vars[i].energy[v][m].T[j];
                     }
                     else {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
                 gather_put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Node_temperature",
-                                    d5start, d5count, dvar);
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Node_temperature",
+                                           d5start, d5count, dvar);
                 for (i = 0; i < local_domain.ncells; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }

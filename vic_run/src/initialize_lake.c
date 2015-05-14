@@ -90,7 +90,8 @@ initialize_lake(lake_var_struct  *lake,
                 lake->activenod = MAX_LAKE_NODES;
             }
             lake->dz =
-                (lake->ldepth - lake->surfdz) / ((double)(lake->activenod - 1));
+                (lake->ldepth -
+                 lake->surfdz) / ((double) (lake->activenod - 1));
         }
         else if (lake->ldepth > 0.0) {
             lake->surfdz = lake->ldepth;

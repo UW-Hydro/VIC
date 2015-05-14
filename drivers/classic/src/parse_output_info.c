@@ -41,7 +41,7 @@ parse_output_info(FILE                  *gp,
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
-    short                outfilenum;
+    short int            outfilenum;
     char                 varname[20];
     int                  outvarnum;
     char                 format[10];
@@ -67,7 +67,7 @@ parse_output_info(FILE                  *gp,
                 sscanf(cmdstr, "%*s %d", &tmp_noutfiles);
                 free_out_data_files(out_data_files);
                 options.Noutfiles = tmp_noutfiles;
-                *out_data_files = (out_data_file_struct *)calloc(
+                *out_data_files = (out_data_file_struct *) calloc(
                     options.Noutfiles, sizeof(out_data_file_struct));
                 outfilenum = -1;
                 init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
@@ -80,7 +80,7 @@ parse_output_info(FILE                  *gp,
                     log_err("in global param file: \"N_OUTFILES\" must be "
                             "specified before you can specify \"OUTFILE\".");
                 }
-                if (outfilenum >= (short)options.Noutfiles) {
+                if (outfilenum >= (short int)options.Noutfiles) {
                     log_err("number of output files specified in N_OUTFILES "
                             "(%zu) is less than actual number of output files "
                             "defined in the global param file.",
@@ -90,8 +90,8 @@ parse_output_info(FILE                  *gp,
                        (*out_data_files)[outfilenum].prefix,
                        &((*out_data_files)[outfilenum].nvars));
                 (*out_data_files)[outfilenum].varid =
-                    (unsigned *)calloc((*out_data_files)[outfilenum].nvars,
-                                       sizeof(unsigned));
+                    (unsigned int *) calloc((*out_data_files)[outfilenum].nvars,
+                                            sizeof(unsigned int));
                 outvarnum = 0;
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -129,7 +129,7 @@ parse_output_info(FILE                  *gp,
                         mult = 0; // 0 means use default multiplier
                     }
                     else {
-                        mult = (double)atof(multstr);
+                        mult = (double) atof(multstr);
                     }
                 }
                 if (set_output_var((*out_data_files), true, outfilenum,

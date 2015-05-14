@@ -188,11 +188,11 @@ compute_soil_resp(int     Nnodes,
         *RhSlowTot += RhSlow[i];
     }
 
-    free((char *)TK);
-    free((char *)fTSoil);
-    free((char *)fMSoil);
-    free((char *)CInterNode);
-    free((char *)CSlowNode);
-    free((char *)RhInter);
-    free((char *)RhSlow);
+    free((char *) TK);
+    free((char *) fTSoil);
+    free((char *) fMSoil);
+    free((char *) CInterNode);
+    free((char *) CSlowNode);
+    free((char *) RhInter);
+    free((char *) RhSlow);
 }

@@ -183,12 +183,12 @@ vic_alloc(void)
 
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].zone_depth = calloc(options.ROOT_ZONES,
-                                              sizeof(float));
+                                              sizeof(double));
             if (veg_con[i][j].zone_depth == NULL) {
                 log_err("Memory allocation error in vic_alloc().");
             }
             veg_con[i][j].zone_fract = calloc(options.ROOT_ZONES,
-                                              sizeof(float));
+                                              sizeof(double));
             if (veg_con[i][j].zone_fract == NULL) {
                 log_err("Memory allocation error in vic_alloc().");
             }

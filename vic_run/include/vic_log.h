@@ -67,7 +67,7 @@ void setup_logging(int id);
                                           exit(1); }
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
-#define clean_ncerrno(e) (errno == 0 ? "None" : nc_strerror(e))
+#define clean_ncerrno(e) (nc_strerror(e))
 
 #ifdef NO_LINENOS
 // versions that don't feature line numbers

@@ -57,7 +57,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     size_t                     v;
     size_t                     step;
     size_t                     band;
-    unsigned short             day;
+    unsigned short int         day;
     double                     sec;
     size_t                     rec;
     int                        idx;
@@ -102,7 +102,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     double                     delta_t_plus;
     int                        have_dewpt;
     int                        have_shortwave;
-    unsigned                   tmp_endsec;
+    unsigned int               tmp_endsec;
     size_t                     tmp_nrecs;
     size_t                     Ndays_local;
     dmy_struct                *dmy_local;
@@ -179,10 +179,11 @@ initialize_atmos(atmos_data_struct    *atmos,
     }
 
     /* Assign N_ELEM for veg-dependent forcings */
-    param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
-    param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
-    param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
-
+    if (!options.OUTPUT_FORCE) {
+        param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
+        param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
+        param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
+    }
     /* compute number of simulation days */
     tmp_endsec = ((double) (SEC_PER_DAY) -global_param.dt);
     tmp_nrecs = global_param.nrecs + (global_param.startsec +
@@ -304,8 +305,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     if (param_set.TYPE[RAINF].SUPPLIED && param_set.TYPE[SNOWF].SUPPLIED) {
         /* rainfall and snowfall supplied */
         if (forcing_data[PREC] == NULL) {
-            forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),
-                                                  sizeof(double));
+            forcing_data[PREC] = (double *) calloc((global_param.nrecs * NF),
+                                                   sizeof(double));
         }
         for (i = 0; i < (global_param.nrecs * NF); i++) {
             forcing_data[PREC][i] = forcing_data[RAINF][i] +
@@ -319,8 +320,8 @@ initialize_atmos(atmos_data_struct    *atmos,
              param_set.TYPE[LSSNOWF].SUPPLIED) {
         /* convective and large-scale rainfall and snowfall supplied */
         if (forcing_data[PREC] == NULL) {
-            forcing_data[PREC] = (double *)calloc((global_param.nrecs * NF),
-                                                  sizeof(double));
+            forcing_data[PREC] = (double *) calloc((global_param.nrecs * NF),
+                                                   sizeof(double));
         }
         for (i = 0; i < (global_param.nrecs * NF); i++) {
             forcing_data[PREC][i] = forcing_data[CRAINF][i] +
@@ -339,8 +340,8 @@ initialize_atmos(atmos_data_struct    *atmos,
     if (param_set.TYPE[WIND_E].SUPPLIED && param_set.TYPE[WIND_N].SUPPLIED) {
         /* specific wind_e and wind_n supplied */
         if (forcing_data[WIND] == NULL) {
-            forcing_data[WIND] = (double *)calloc((global_param.nrecs * NF),
-                                                  sizeof(double));
+            forcing_data[WIND] = (double *) calloc((global_param.nrecs * NF),
+                                                   sizeof(double));
         }
         for (i = 0; i < (global_param.nrecs * NF); i++) {
             forcing_data[WIND][i] = sqrt(forcing_data[WIND_E][i] *
@@ -371,8 +372,8 @@ initialize_atmos(atmos_data_struct    *atmos,
         // Allocate enough space for subdaily data
         if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
             if ((local_forcing_data[type] =
-                     (double *)calloc(Ndays_local * atmos_steps_per_day,
-                                      sizeof(double))) == NULL) {
+                     (double *) calloc(Ndays_local * atmos_steps_per_day,
+                                       sizeof(double))) == NULL) {
                 log_err("Memory allocation failure in initialize_atmos()");
             }
         }
@@ -384,8 +385,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
             for (v = 0; v < param_set.TYPE[type].N_ELEM; v++) {
                 if ((local_veg_hist_data[type][v] =
-                         (double *)calloc(Ndays_local * atmos_steps_per_day,
-                                          sizeof(double))) == NULL) {
+                         (double *) calloc(Ndays_local * atmos_steps_per_day,
+                                           sizeof(double))) == NULL) {
                     log_err("Memory allocation failure in initialize_atmos()");
                 }
             }
@@ -404,8 +405,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (k < 0) {
                         k = 0; // W. Hemisphere, in GMT time; pad extra day in front
                     }
-                    if (k >= (int)Ndays) {
-                        k = (int)Ndays - 1; // E. Hemisphere, in GMT time; pad extra day at end
+                    if (k >= (int) Ndays) {
+                        k = (int) Ndays - 1; // E. Hemisphere, in GMT time; pad extra day at end
                     }
                     if (type != ALBEDO && type != LAI_IN && type != VEGCOVER) {
                         local_forcing_data[type][uidx] = forcing_data[type][k];
@@ -437,7 +438,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     if (k < 0) {
                         k += fstepspday;
                     }
-                    if (k >= (int)(Ndays * fstepspday)) {
+                    if (k >= (int) (Ndays * fstepspday)) {
                         k -= fstepspday;
                     }
                     if (type == PREC ||
@@ -493,7 +494,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     uidx = (size_t) (sec / atmos_dt);
                     atmos[rec].channel_in[j] =
                         local_forcing_data[CHANNEL_IN][uidx] /
-                        (double)(NF * atmos_steps_per_day);  // divide evenly over the day
+                        (double) (NF * atmos_steps_per_day);  // divide evenly over the day
                     atmos[rec].channel_in[j] *= MM_PER_M / cell_area; // convert to mm over grid cell
                     sum += atmos[rec].channel_in[j];
                 }
@@ -558,7 +559,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 }
                 uidx = (size_t) (sec / atmos_dt);
                 atmos[rec].prec[j] = local_forcing_data[PREC][uidx] /
-                                     (double)(NF * atmos_steps_per_day);  // divide evenly over the day
+                                     (double) (NF * atmos_steps_per_day);  // divide evenly over the day
                 sum += atmos[rec].prec[j];
             }
             if (NF > 1) {
@@ -620,7 +621,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].wind[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].wind[NR] = sum / (double)NF;
+                    atmos[rec].wind[NR] = sum / (double) NF;
                 }
                 if (global_param.dt == SEC_PER_DAY) {
                     if (atmos[rec].wind[j] < param.WIND_SPEED_MIN) {
@@ -655,7 +656,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].wind[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].wind[NR] = sum / (double)NF;
+                    atmos[rec].wind[NR] = sum / (double) NF;
                 }
             }
         }
@@ -737,7 +738,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].air_temp[i];
             }
             if (NF > 1) {
-                atmos[rec].air_temp[NR] = sum / (double)NF;
+                atmos[rec].air_temp[NR] = sum / (double) NF;
             }
         }
     }
@@ -930,7 +931,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (double)NF;
+                    atmos[rec].vp[NR] = sum / (double) NF;
                 }
             }
         }
@@ -962,7 +963,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (double)NF;
+                    atmos[rec].vp[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1054,7 +1055,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             sum += atmos[rec].shortwave[i];
         }
         if (NF > 1) {
-            atmos[rec].shortwave[NR] = sum / (double)NF;
+            atmos[rec].shortwave[NR] = sum / (double) NF;
         }
     }
 
@@ -1091,7 +1092,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].air_temp[i];
             }
             if (NF > 1) {
-                atmos[rec].air_temp[NR] = sum / (double)NF;
+                atmos[rec].air_temp[NR] = sum / (double) NF;
             }
         }
     }
@@ -1122,7 +1123,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].density[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].density[NR] = sum / (double)NF;
+                    atmos[rec].density[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1146,7 +1147,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].density[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].density[NR] = sum / (double)NF;
+                    atmos[rec].density[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1242,7 +1243,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].pressure[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].pressure[NR] = sum / (double)NF;
+                    atmos[rec].pressure[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1266,7 +1267,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].pressure[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].pressure[NR] = sum / (double)NF;
+                    atmos[rec].pressure[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1457,7 +1458,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].vp[i];
             }
             if (NF > 1) {
-                atmos[rec].vp[NR] = sum / (double)NF;
+                atmos[rec].vp[NR] = sum / (double) NF;
             }
         }
 
@@ -1488,7 +1489,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (double)NF;
+                    atmos[rec].vp[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1515,7 +1516,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].vp[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].vp[NR] = sum / (double)NF;
+                    atmos[rec].vp[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1539,10 +1540,10 @@ initialize_atmos(atmos_data_struct    *atmos,
         }
         if (param_set.TYPE[VP].SUPPLIED || options.VP_INTERP) { // ensure that vp[NR] and vpd[NR] are accurate averages of vp[i] and vpd[i]
             if (NF > 1) {
-                atmos[rec].vpd[NR] = sum / (double)NF;
+                atmos[rec].vpd[NR] = sum / (double) NF;
             }
             if (NF > 1) {
-                atmos[rec].vp[NR] = sum2 / (double)NF;
+                atmos[rec].vp[NR] = sum2 / (double) NF;
             }
         }
         else { // do not recompute vp[NR]; vpd[NR] is computed relative to vp[NR] and air_temp[NR]
@@ -1568,7 +1569,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             sum += atmos[rec].tskc[j];
         }
         if (NF > 1) {
-            atmos[rec].tskc[NR] = sum / (double)NF;
+            atmos[rec].tskc[NR] = sum / (double) NF;
         }
     }
 
@@ -1586,7 +1587,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].longwave[i];
             }
             if (NF > 1) {
-                atmos[rec].longwave[NR] = sum / (double)NF;
+                atmos[rec].longwave[NR] = sum / (double) NF;
             }
         }
     }
@@ -1607,7 +1608,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].longwave[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].longwave[NR] = sum / (double)NF;
+                    atmos[rec].longwave[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1631,247 +1632,264 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].longwave[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].longwave[NR] = sum / (double)NF;
+                    atmos[rec].longwave[NR] = sum / (double) NF;
                 }
             }
         }
     }
 
-    /****************************************************
-       Albedo
-    ****************************************************/
+    if (!options.OUTPUT_FORCE) {
+        /****************************************************
+           Albedo
+        ****************************************************/
 
-    /* First, assign default climatology */
-    for (rec = 0; rec < global_param.nrecs; rec++) {
-        for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-            for (j = 0; j < NF; j++) {
-                veg_hist[rec][v].albedo[j] =
-                    veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month - 1];
-            }
-        }
-    }
-
-    if (param_set.TYPE[ALBEDO].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
-            /* daily albedo provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (j = 0; j < NF; j++) {
-                        sec = rec * global_param.dt + j *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        if ((double) global_param.startsec - sec_offset_gmt <
-                            0) {
-                            sec += SEC_PER_DAY;
-                        }
-                        uidx = (size_t) (sec / atmos_dt);
-                        if (local_veg_hist_data[ALBEDO][v][uidx] != NODATA_VH) {
-                            veg_hist[rec][v].albedo[j] =
-                                local_veg_hist_data[ALBEDO][v][uidx];            // assume constant over the day
-                        }
-                        sum += veg_hist[rec][v].albedo[j];
-                    }
-                    if (NF > 1) {
-                        veg_hist[rec][v].albedo[NR] = sum / (double)NF;
-                    }
+        /* First, assign default climatology */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+            for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                for (j = 0; j < NF; j++) {
+                    veg_hist[rec][v].albedo[j] =
+                        veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month -
+                                                             1];
                 }
             }
         }
-        else {
-            /* sub-daily albedo provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (i = 0; i < NF; i++) {
-                        sec = rec * global_param.dt + i *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        veg_hist[rec][v].albedo[i] = 0;
-                        while (sec < rec * global_param.dt +
-                               (i + 1) * global_param.snow_dt +
-                               (double) global_param.startsec -
-                               sec_offset_gmt) {
-                            if (sec < 0) {
+
+        if (param_set.TYPE[ALBEDO].SUPPLIED) {
+            if (param_set.FORCE_DT[param_set.TYPE[ALBEDO].SUPPLIED - 1] ==
+                SEC_PER_DAY) {
+                /* daily albedo provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (j = 0; j < NF; j++) {
+                            sec = rec * global_param.dt + j *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
+                                0) {
                                 sec += SEC_PER_DAY;
                             }
                             uidx = (size_t) (sec / atmos_dt);
                             if (local_veg_hist_data[ALBEDO][v][uidx] !=
                                 NODATA_VH) {
-                                veg_hist[rec][v].albedo[i] =
-                                    local_veg_hist_data[ALBEDO][v][uidx];
+                                veg_hist[rec][v].albedo[j] =
+                                    local_veg_hist_data[ALBEDO][v][uidx];            // assume constant over the day
                             }
-                            sec += atmos_dt;
+                            sum += veg_hist[rec][v].albedo[j];
                         }
-                        sum += veg_hist[rec][v].albedo[i];
+                        if (NF > 1) {
+                            veg_hist[rec][v].albedo[NR] = sum / (double) NF;
+                        }
                     }
-                    if (NF > 1) {
-                        veg_hist[rec][v].albedo[NR] = sum / (double)NF;
+                }
+            }
+            else {
+                /* sub-daily albedo provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (i = 0; i < NF; i++) {
+                            sec = rec * global_param.dt + i *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            veg_hist[rec][v].albedo[i] = 0;
+                            while (sec < rec * global_param.dt +
+                                   (i + 1) * global_param.snow_dt +
+                                   (double) global_param.startsec -
+                                   sec_offset_gmt) {
+                                if (sec < 0) {
+                                    sec += SEC_PER_DAY;
+                                }
+                                uidx = (size_t) (sec / atmos_dt);
+                                if (local_veg_hist_data[ALBEDO][v][uidx] !=
+                                    NODATA_VH) {
+                                    veg_hist[rec][v].albedo[i] =
+                                        local_veg_hist_data[ALBEDO][v][uidx];
+                                }
+                                sec += atmos_dt;
+                            }
+                            sum += veg_hist[rec][v].albedo[i];
+                        }
+                        if (NF > 1) {
+                            veg_hist[rec][v].albedo[NR] = sum / (double) NF;
+                        }
                     }
                 }
             }
         }
-    }
 
-    /****************************************************
-       Leaf Area Index (LAI)
-    ****************************************************/
+        /****************************************************
+           Leaf Area Index (LAI)
+        ****************************************************/
 
-    /* First, assign default climatology */
-    for (rec = 0; rec < global_param.nrecs; rec++) {
-        for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-            for (j = 0; j < NF; j++) {
-                veg_hist[rec][v].LAI[j] =
-                    veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month - 1];
-            }
-        }
-    }
-
-    if (param_set.TYPE[LAI_IN].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
-            /* daily LAI provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (j = 0; j < NF; j++) {
-                        sec = rec * global_param.dt + j *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        if ((double) global_param.startsec - sec_offset_gmt <
-                            0) {
-                            sec += SEC_PER_DAY;
-                        }
-                        uidx = (size_t) (sec / atmos_dt);
-                        if (local_veg_hist_data[LAI_IN][v][uidx] != NODATA_VH) {
-                            veg_hist[rec][v].LAI[j] =
-                                local_veg_hist_data[LAI_IN][v][uidx];         // assume constant over the day
-                        }
-                        sum += veg_hist[rec][v].LAI[j];
-                    }
-                    if (NF > 1) {
-                        veg_hist[rec][v].LAI[NR] = sum / (double)NF;
-                    }
+        /* First, assign default climatology */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+            for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                for (j = 0; j < NF; j++) {
+                    veg_hist[rec][v].LAI[j] =
+                        veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month - 1];
                 }
             }
         }
-        else {
-            /* sub-daily LAI provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (i = 0; i < NF; i++) {
-                        sec = rec * global_param.dt + i *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        veg_hist[rec][v].LAI[i] = 0;
-                        while (sec < rec * global_param.dt +
-                               (i +
-                                1) * global_param.snow_dt +
-                               (double) global_param.startsec -
-                               sec_offset_gmt) {
-                            if (sec < 0) {
+
+        if (param_set.TYPE[LAI_IN].SUPPLIED) {
+            if (param_set.FORCE_DT[param_set.TYPE[LAI_IN].SUPPLIED - 1] ==
+                SEC_PER_DAY) {
+                /* daily LAI provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (j = 0; j < NF; j++) {
+                            sec = rec * global_param.dt + j *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
+                                0) {
                                 sec += SEC_PER_DAY;
                             }
                             uidx = (size_t) (sec / atmos_dt);
                             if (local_veg_hist_data[LAI_IN][v][uidx] !=
                                 NODATA_VH) {
-                                veg_hist[rec][v].LAI[i] =
-                                    local_veg_hist_data[LAI_IN][v][uidx];
+                                veg_hist[rec][v].LAI[j] =
+                                    local_veg_hist_data[LAI_IN][v][uidx];         // assume constant over the day
                             }
-                            sec += atmos_dt;
+                            sum += veg_hist[rec][v].LAI[j];
                         }
-                        sum += veg_hist[rec][v].LAI[i];
+                        if (NF > 1) {
+                            veg_hist[rec][v].LAI[NR] = sum / (double) NF;
+                        }
                     }
-                    if (NF > 1) {
-                        veg_hist[rec][v].LAI[NR] = sum / (double)NF;
+                }
+            }
+            else {
+                /* sub-daily LAI provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (i = 0; i < NF; i++) {
+                            sec = rec * global_param.dt + i *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            veg_hist[rec][v].LAI[i] = 0;
+                            while (sec < rec * global_param.dt +
+                                   (i +
+                                    1) * global_param.snow_dt +
+                                   (double) global_param.startsec -
+                                   sec_offset_gmt) {
+                                if (sec < 0) {
+                                    sec += SEC_PER_DAY;
+                                }
+                                uidx = (size_t) (sec / atmos_dt);
+                                if (local_veg_hist_data[LAI_IN][v][uidx] !=
+                                    NODATA_VH) {
+                                    veg_hist[rec][v].LAI[i] =
+                                        local_veg_hist_data[LAI_IN][v][uidx];
+                                }
+                                sec += atmos_dt;
+                            }
+                            sum += veg_hist[rec][v].LAI[i];
+                        }
+                        if (NF > 1) {
+                            veg_hist[rec][v].LAI[NR] = sum / (double) NF;
+                        }
                     }
                 }
             }
         }
-    }
 
-    /****************************************************
-       Fractional Vegetation Cover
-    ****************************************************/
+        /****************************************************
+           Fractional Vegetation Cover
+        ****************************************************/
 
-    /* First, assign default climatology */
-    for (rec = 0; rec < global_param.nrecs; rec++) {
-        for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-            for (j = 0; j < NF; j++) {
-                veg_hist[rec][v].vegcover[j] =
-                    veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month - 1];
-            }
-        }
-    }
-
-    if (param_set.TYPE[VEGCOVER].SUPPLIED) {
-        if (param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED - 1] ==
-            SEC_PER_DAY) {
-            /* daily vegcover provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (j = 0; j < NF; j++) {
-                        sec = rec * global_param.dt + j *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        if ((double) global_param.startsec - sec_offset_gmt <
-                            0) {
-                            sec += SEC_PER_DAY;
-                        }
-                        uidx = (size_t) (sec / atmos_dt);
-                        if (local_veg_hist_data[VEGCOVER][v][uidx] !=
-                            NODATA_VH) {
-                            veg_hist[rec][v].vegcover[j] =
-                                local_veg_hist_data[VEGCOVER][v][uidx];              // assume constant over the day
-                            if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) {
-                                veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
-                            }
-                        }
-                        sum += veg_hist[rec][v].vegcover[j];
-                    }
-                    if (NF > 1) {
-                        veg_hist[rec][v].vegcover[NR] = sum / (double)NF;
-                    }
+        /* First, assign default climatology */
+        for (rec = 0; rec < global_param.nrecs; rec++) {
+            for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                for (j = 0; j < NF; j++) {
+                    veg_hist[rec][v].vegcover[j] =
+                        veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month -
+                                                               1];
                 }
             }
         }
-        else {
-            /* sub-daily vegcover provided */
-            for (rec = 0; rec < global_param.nrecs; rec++) {
-                for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
-                    sum = 0;
-                    for (i = 0; i < NF; i++) {
-                        sec = rec * global_param.dt + i *
-                              global_param.snow_dt +
-                              (double) global_param.startsec - sec_offset_gmt;
-                        veg_hist[rec][v].vegcover[i] = 0;
-                        while (sec < rec * global_param.dt +
-                               (i +
-                                1) * global_param.snow_dt +
-                               (double) global_param.startsec -
-                               sec_offset_gmt) {
-                            if (sec < 0) {
+
+        if (param_set.TYPE[VEGCOVER].SUPPLIED) {
+            if (param_set.FORCE_DT[param_set.TYPE[VEGCOVER].SUPPLIED - 1] ==
+                SEC_PER_DAY) {
+                /* daily vegcover provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (j = 0; j < NF; j++) {
+                            sec = rec * global_param.dt + j *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
+                                0) {
                                 sec += SEC_PER_DAY;
                             }
                             uidx = (size_t) (sec / atmos_dt);
                             if (local_veg_hist_data[VEGCOVER][v][uidx] !=
                                 NODATA_VH) {
-                                veg_hist[rec][v].vegcover[i] =
-                                    local_veg_hist_data[VEGCOVER][v][uidx];
-                                if (veg_hist[rec][v].vegcover[i] <
+                                veg_hist[rec][v].vegcover[j] =
+                                    local_veg_hist_data[VEGCOVER][v][uidx];              // assume constant over the day
+                                if (veg_hist[rec][v].vegcover[j] <
                                     MIN_VEGCOVER) {
-                                    veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+                                    veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
                                 }
                             }
-                            sec += atmos_dt;
+                            sum += veg_hist[rec][v].vegcover[j];
                         }
-                        sum += veg_hist[rec][v].vegcover[i];
+                        if (NF > 1) {
+                            veg_hist[rec][v].vegcover[NR] = sum / (double) NF;
+                        }
                     }
-                    if (NF > 1) {
-                        veg_hist[rec][v].vegcover[NR] = sum / (double)NF;
+                }
+            }
+            else {
+                /* sub-daily vegcover provided */
+                for (rec = 0; rec < global_param.nrecs; rec++) {
+                    for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+                        sum = 0;
+                        for (i = 0; i < NF; i++) {
+                            sec = rec * global_param.dt + i *
+                                  global_param.snow_dt +
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            veg_hist[rec][v].vegcover[i] = 0;
+                            while (sec < rec * global_param.dt +
+                                   (i +
+                                    1) * global_param.snow_dt +
+                                   (double) global_param.startsec -
+                                   sec_offset_gmt) {
+                                if (sec < 0) {
+                                    sec += SEC_PER_DAY;
+                                }
+                                uidx = (size_t) (sec / atmos_dt);
+                                if (local_veg_hist_data[VEGCOVER][v][uidx] !=
+                                    NODATA_VH) {
+                                    veg_hist[rec][v].vegcover[i] =
+                                        local_veg_hist_data[VEGCOVER][v][uidx];
+                                    if (veg_hist[rec][v].vegcover[i] <
+                                        MIN_VEGCOVER) {
+                                        veg_hist[rec][v].vegcover[i] =
+                                            MIN_VEGCOVER;
+                                    }
+                                }
+                                sec += atmos_dt;
+                            }
+                            sum += veg_hist[rec][v].vegcover[i];
+                        }
+                        if (NF > 1) {
+                            veg_hist[rec][v].vegcover[NR] = sum / (double) NF;
+                        }
                     }
                 }
             }
@@ -1923,7 +1941,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             sum += atmos[rec].fdir[j];
         }
         if (NF > 1) {
-            atmos[rec].fdir[NR] = sum / (double)NF;
+            atmos[rec].fdir[NR] = sum / (double) NF;
         }
     }
 
@@ -1941,7 +1959,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].par[i];
             }
             if (NF > 1) {
-                atmos[rec].par[NR] = sum / (double)NF;
+                atmos[rec].par[NR] = sum / (double) NF;
             }
         }
     }
@@ -1974,7 +1992,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].par[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].par[NR] = sum / (double)NF;
+                    atmos[rec].par[NR] = sum / (double) NF;
                 }
             }
         }
@@ -1997,7 +2015,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].par[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].par[NR] = sum / (double)NF;
+                    atmos[rec].par[NR] = sum / (double) NF;
                 }
             }
         }
@@ -2016,7 +2034,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                 sum += atmos[rec].Catm[i];
             }
             if (NF > 1) {
-                atmos[rec].Catm[NR] = sum / (double)NF;
+                atmos[rec].Catm[NR] = sum / (double) NF;
             }
         }
     }
@@ -2039,7 +2057,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].Catm[j];
                 }
                 if (NF > 1) {
-                    atmos[rec].Catm[NR] = sum / (double)NF;
+                    atmos[rec].Catm[NR] = sum / (double) NF;
                 }
             }
         }
@@ -2064,7 +2082,7 @@ initialize_atmos(atmos_data_struct    *atmos,
                     sum += atmos[rec].Catm[i];
                 }
                 if (NF > 1) {
-                    atmos[rec].Catm[NR] = sum / (double)NF;
+                    atmos[rec].Catm[NR] = sum / (double) NF;
                 }
             }
         }
@@ -2157,6 +2175,7 @@ initialize_atmos(atmos_data_struct    *atmos,
     else {
         // If OUTPUT_FORCE is TRUE then the full
         // forcing data array is dumped into a new set of files.
-        write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data);
+        write_forcing_file(atmos, global_param.nrecs, out_data_files, out_data,
+                           dmy);
     }
 }

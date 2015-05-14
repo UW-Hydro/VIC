@@ -51,19 +51,19 @@ write_data(out_data_file_struct *out_data_files,
 
     if (options.BINARY_OUTPUT) { // BINARY
         // Initialize pointers
-        tmp_cptr = (char *)calloc(
+        tmp_cptr = (char *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(char));
-        tmp_siptr = (short int *)calloc(
+        tmp_siptr = (short int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(short int));
-        tmp_usiptr = (unsigned short int *)calloc(
+        tmp_usiptr = (unsigned short int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(unsigned short int));
-        tmp_iptr = (int *)calloc(
+        tmp_iptr = (int *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(int));
-        tmp_fptr = (float *)calloc(
+        tmp_fptr = (float *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(float));
-        tmp_dptr = (double *)calloc(
+        tmp_dptr = (double *) calloc(
             N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
             sizeof(double));
 
@@ -75,18 +75,16 @@ write_data(out_data_file_struct *out_data_files,
 
         // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
-            if (!options.OUTPUT_FORCE) {
-                // Write the date
-                if (dt < SEC_PER_DAY) {
-                    // Write year, month, day, and sec
-                    fwrite(tmp_iptr, sizeof(int), 4,
-                           out_data_files[file_idx].fh);
-                }
-                else {
-                    // Only write year, month, and day
-                    fwrite(tmp_iptr, sizeof(int), 3,
-                           out_data_files[file_idx].fh);
-                }
+            // Write the date
+            if (dt < SEC_PER_DAY) {
+                // Write year, month, day, and sec
+                fwrite(tmp_iptr, sizeof(int), 4,
+                       out_data_files[file_idx].fh);
+            }
+            else {
+                // Only write year, month, and day
+                fwrite(tmp_iptr, sizeof(int), 3,
+                       out_data_files[file_idx].fh);
             }
 
             // Loop over this output file's data variables
@@ -188,30 +186,28 @@ write_data(out_data_file_struct *out_data_files,
         }
 
         // Free the arrays
-        free((char *)tmp_cptr);
-        free((char *)tmp_siptr);
-        free((char *)tmp_usiptr);
-        free((char *)tmp_iptr);
-        free((char *)tmp_fptr);
-        free((char *)tmp_dptr);
+        free((char *) tmp_cptr);
+        free((char *) tmp_siptr);
+        free((char *) tmp_usiptr);
+        free((char *) tmp_iptr);
+        free((char *) tmp_fptr);
+        free((char *) tmp_dptr);
     }
     else { // ASCII
            // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
-            if (!options.OUTPUT_FORCE) {
-                // Write the date
-                if (dt < SEC_PER_DAY) {
-                    // Write year, month, day, and sec
-                    fprintf(out_data_files[file_idx].fh,
-                            "%04u\t%02hu\t%02hu\t%05u\t",
-                            dmy->year, dmy->month, dmy->day, dmy->dayseconds);
-                }
-                else {
-                    // Only write year, month, and day
-                    fprintf(out_data_files[file_idx].fh,
-                            "%04u\t%02hu\t%02hu\t",
-                            dmy->year, dmy->month, dmy->day);
-                }
+            // Write the date
+            if (dt < SEC_PER_DAY) {
+                // Write year, month, day, and sec
+                fprintf(out_data_files[file_idx].fh,
+                        "%04u\t%02hu\t%02hu\t%05u\t",
+                        dmy->year, dmy->month, dmy->day, dmy->dayseconds);
+            }
+            else {
+                // Only write year, month, and day
+                fprintf(out_data_files[file_idx].fh,
+                        "%04u\t%02hu\t%02hu\t",
+                        dmy->year, dmy->month, dmy->day);
             }
 
             // Loop over this output file's data variables

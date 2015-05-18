@@ -172,7 +172,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     blocklengths[i] = 2;
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned forcesec[2];
+    // unsigned int forcesec[2];
     offsets[i] = offsetof(global_param_struct, forcesec);
     blocklengths[i] = 2;
     mpi_types[i++] = MPI_UNSIGNED;
@@ -187,57 +187,57 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     blocklengths[i] = 2;
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short forceskip[2];
+    // unsigned int forceskip[2];
     offsets[i] = offsetof(global_param_struct, forceskip);
     blocklengths[i] = 2;
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+    mpi_types[i++] = MPI_UNSIGNED;
 
-    // unsigned short forceyear[2];
+    // unsigned short int forceyear[2];
     offsets[i] = offsetof(global_param_struct, forceyear);
     blocklengths[i] = 2;
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned nrecs;
+    // size_t nrecs;
     offsets[i] = offsetof(global_param_struct, nrecs);
-    mpi_types[i++] = MPI_UNSIGNED;
+    mpi_types[i++] = MPI_AINT;
 
-    // unsigned short skipyear;
+    // unsigned short int skipyear;
     offsets[i] = offsetof(global_param_struct, skipyear);
-    mpi_types[i++] = MPI_DOUBLE;
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short startday;
+    // unsigned short int startday;
     offsets[i] = offsetof(global_param_struct, startday);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short startsec;
+    // unsigned int startsec;
     offsets[i] = offsetof(global_param_struct, startsec);
     mpi_types[i++] = MPI_UNSIGNED;
 
-    // unsigned short startmonth;
+    // unsigned short int startmonth;
     offsets[i] = offsetof(global_param_struct, startmonth);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short startyear;
+    // unsigned short int startyear;
     offsets[i] = offsetof(global_param_struct, startyear);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short stateday;
+    // unsigned short int stateday;
     offsets[i] = offsetof(global_param_struct, stateday);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short statemonth;
+    // unsigned short int statemonth;
     offsets[i] = offsetof(global_param_struct, statemonth);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short stateyear;
+    // unsigned short int stateyear;
     offsets[i] = offsetof(global_param_struct, stateyear);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short calendar;
+    // unsigned short int calendar;
     offsets[i] = offsetof(global_param_struct, calendar);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short time_units;
+    // unsigned short int time_units;
     offsets[i] = offsetof(global_param_struct, time_units);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 

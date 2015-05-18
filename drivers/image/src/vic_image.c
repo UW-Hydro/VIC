@@ -121,10 +121,10 @@ main(int    argc,
         // if output:
         vic_write();
 
-        // if save:
-        if (current == global_param.nrecs - 1) {
-            vic_store();
-        }
+        // if save: TBD needs to be fixed - not working in MPI
+        // if (current == global_param.nrecs - 1) {
+        //    vic_store();
+        // }
     }
 
     // clean up

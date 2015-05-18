@@ -43,6 +43,7 @@ global_param_struct global_param;
 lake_con_struct     lake_con;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_location_struct_type;
+MPI_Datatype        mpi_nc_file_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;

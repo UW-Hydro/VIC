@@ -35,6 +35,7 @@ initialize_mpi(void)
 {
     extern MPI_Datatype mpi_global_struct_type;
     extern MPI_Datatype mpi_location_struct_type;
+    extern MPI_Datatype mpi_nc_file_struct_type;
     extern MPI_Datatype mpi_option_struct_type;
     extern MPI_Datatype mpi_param_struct_type;
     extern int          mpi_rank;
@@ -55,6 +56,7 @@ initialize_mpi(void)
     // initialize MPI data structures
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
+    create_MPI_nc_file_struct_type(&mpi_nc_file_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 }
@@ -366,6 +368,182 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
     free(offsets);
     free(mpi_types);
 }
+
+/******************************************************************************
+ * @brief   Create an MPI_Datatype that represents the nc_file_struct
+ * @details This allows MPI operations in which the entire nc_file_struct can
+ *          be treated as an MPI_Datatype. NOTE: This function needs to be kept
+ *          in-sync with the nc_file_struct data type in vic_driver_image.h.
+ *
+ * @param mpi_type MPI_Datatype that can be used in MPI operations
+ *****************************************************************************/
+void
+create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
+{
+    int           nitems; // number of elements in struct
+    int           status;
+    int          *blocklengths;
+    size_t        i;
+    MPI_Aint     *offsets;
+    MPI_Datatype *mpi_types;
+
+    // nitems has to equal the number of elements in nc_file_struct
+    nitems = 27;
+    blocklengths = (int *) malloc(nitems * sizeof(int));
+    if (blocklengths == NULL) {
+        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
+    }
+
+    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    if (offsets == NULL) {
+        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
+    }
+
+    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    if (mpi_types == NULL) {
+        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
+    }
+
+    // only the first element in nc_file_struct is an array
+    i = 0;
+    blocklengths[i] = MAXSTRING + 1;
+    for (i = 1; i < (size_t) nitems; i++) {
+        blocklengths[i] = 1;
+    }
+
+    // reset i
+    i = 0;
+
+    // char fname[MAXSTRING + 1];
+    offsets[i] = offsetof(nc_file_struct, fname);
+    mpi_types[i++] = MPI_CHAR;
+
+    // char c_fillvalue;
+    offsets[i] = offsetof(nc_file_struct, c_fillvalue);
+    mpi_types[i++] = MPI_CHAR;
+
+    // int i_fillvalue;
+    offsets[i] = offsetof(nc_file_struct, i_fillvalue);
+    mpi_types[i++] = MPI_INT;
+
+    // double d_fillvalue;
+    offsets[i] = offsetof(nc_file_struct, d_fillvalue);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // float f_fillvalue;
+    offsets[i] = offsetof(nc_file_struct, f_fillvalue);
+    mpi_types[i++] = MPI_FLOAT;
+
+    // int nc_id;
+    offsets[i] = offsetof(nc_file_struct, nc_id);
+    mpi_types[i++] = MPI_INT;
+
+    // int band_dimid;
+    offsets[i] = offsetof(nc_file_struct, band_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int front_dimid;
+    offsets[i] = offsetof(nc_file_struct, front_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int frost_dimid;
+    offsets[i] = offsetof(nc_file_struct, frost_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int layer_dimid;
+    offsets[i] = offsetof(nc_file_struct, layer_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int ni_dimid;
+    offsets[i] = offsetof(nc_file_struct, ni_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int nj_dimid;
+    offsets[i] = offsetof(nc_file_struct, nj_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int node_dimid;
+    offsets[i] = offsetof(nc_file_struct, node_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int root_zone_dimid;
+    offsets[i] = offsetof(nc_file_struct, root_zone_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int time_dimid;
+    offsets[i] = offsetof(nc_file_struct, time_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // int veg_dimid;
+    offsets[i] = offsetof(nc_file_struct, veg_dimid);
+    mpi_types[i++] = MPI_INT;
+
+    // size_t band_size;
+    offsets[i] = offsetof(nc_file_struct, band_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t front_size;
+    offsets[i] = offsetof(nc_file_struct, front_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t frost_size;
+    offsets[i] = offsetof(nc_file_struct, frost_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t layer_size;
+    offsets[i] = offsetof(nc_file_struct, layer_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t ni_size;
+    offsets[i] = offsetof(nc_file_struct, ni_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t nj_size;
+    offsets[i] = offsetof(nc_file_struct, nj_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t node_size;
+    offsets[i] = offsetof(nc_file_struct, node_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t root_zone_size;
+    offsets[i] = offsetof(nc_file_struct, root_zone_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t time_size;
+    offsets[i] = offsetof(nc_file_struct, time_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t veg_size;
+    offsets[i] = offsetof(nc_file_struct, veg_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // bool open;
+    offsets[i] = offsetof(nc_file_struct, open);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // make sure that the we have the right number of elements
+    if (i != (size_t) nitems) {
+        log_err("Miscount in create_MPI_nc_file_struct_type(): "
+                "%zd not equal to %d\n", i, nitems);
+    }
+
+    status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
+                                    mpi_type);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in create_MPI_nc_file_struct_type(): %d\n", status);
+    }
+    status = MPI_Type_commit(mpi_type);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in create_MPI_nc_file_struct_type(): %d\n", status);
+    }
+
+    // cleanup
+    free(blocklengths);
+    free(offsets);
+    free(mpi_types);
+}
+
 
 /******************************************************************************
  * @brief   Create an MPI_Datatype that represents the option_struct
@@ -1885,28 +2063,61 @@ get_scatter_nc_field_int(char   *nc_name,
 #include <vic_driver_shared.h>
 #include <assert.h>
 
-filenames_struct filenames;
-filep_struct     filep;
+//size_t              NF, NR;
+//size_t              current;
+size_t             *filter_active_cells = NULL;
+size_t             *mpi_map_mapping_array = NULL;
+//all_vars_struct    *all_vars = NULL;
+//atmos_data_struct  *atmos = NULL;
+//dmy_struct         *dmy = NULL;
+filenames_struct    filenames;
+filep_struct        filep;
+domain_struct       global_domain;
+domain_struct       local_domain;
+//global_param_struct global_param;
+//lake_con_struct     lake_con;
+MPI_Datatype        mpi_global_struct_type;
+MPI_Datatype        mpi_location_struct_type;
+MPI_Datatype        mpi_nc_file_struct_type;
+MPI_Datatype        mpi_option_struct_type;
+MPI_Datatype        mpi_param_struct_type;
+int                *mpi_map_local_array_sizes = NULL;
+int                *mpi_map_global_array_offsets = NULL;
+int                 mpi_rank;
+int                 mpi_size;
+//nc_file_struct      nc_hist_file;
+//nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+//option_struct       options;
+//parameters_struct   param;
+//out_data_struct   **out_data;
+//save_data_struct   *save_data;
+//param_set_struct    param_set;
+//soil_con_struct    *soil_con = NULL;
+//veg_con_map_struct *veg_con_map = NULL;
+//veg_con_struct    **veg_con = NULL;
+//veg_hist_struct   **veg_hist = NULL;
+//veg_lib_struct    **veg_lib = NULL;
 FILE            *LOG_DEST;
 
 /******************************************************************************
  * @brief   Test routine for VIC MPI support functions
  * @details Note: need to define VIC_MPI_SUPPORT_TEST to compile.
- *          For example (from drivers/shared/src):
- *          mpicc-mpich-mp -Wall -Wextra -o vic_mpi_support vic_log.c
- *          open_file.c vic_mpi_support.c -I ../include/
- *          -I ../../../vic_run/include/ -DVIC_MPI_SUPPORT_TEST
+ *          For example (from drivers/image/src):
+ *          mpicc-mpich-mp -Wall -Wextra -o vic_mpi_support vic_mpi_support.c
+ *          get_nc_field.c put_nc_field.c ../../shared/src/vic_log.c
+ *          ../../shared/src/open_file.c -I ../include/ -I ../../shared/include
+ *          -I ../../../vic_run/include/ -I/opt/local/include
+ *          -L/opt/local/lib -lnetcdf -lmpi -DVIC_MPI_SUPPORT_TEST
  *****************************************************************************/
 int
 main(int    argc,
      char **argv)
 {
-    int                 rank, size;
+
     int                 status;
-    MPI_Datatype        mpi_option_struct_type;
-    MPI_Datatype        mpi_global_struct_type;
-    MPI_Datatype        mpi_param_struct_type;
     global_param_struct global;
+    location_struct     location;
+    nc_file_struct      ncfile;
     option_struct       option;
     parameters_struct   param;
 
@@ -1918,22 +2129,39 @@ main(int    argc,
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
-    status = MPI_Comm_size(MPI_COMM_WORLD, &size);
+    status = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
-    status = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    status = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     create_MPI_global_struct_type(&mpi_global_struct_type);
+    create_MPI_location_struct_type(&mpi_location_struct_type);
+    create_MPI_nc_file_struct_type(&mpi_nc_file_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 
-    if (rank == 0) {
+    if (mpi_rank == 0) {
+        // populate the test structure on the master
+        // make sure to test the last element of the structure, because any
+        // problem with alignment would show there
         global.forceskip[0] = 4321;
         global.forceskip[1] = 8765;
+        // last element of global
+        global.time_origin_num = -12345.6789;
+
+        location.latitude = 47.620607;
+        location.longitude = -122.349281;
+        // last element of location
+        location.local_idx = 12345678;
+
+        sprintf(ncfile.fname, "Space Needle, Seattle, WA");
+        // last element of ncfile
+        ncfile.open = true;
+
         option.CARBON = false;
         option.CLOSE_ENERGY = true;
         option.COMPUTE_TREELINE = true;
@@ -1941,13 +2169,30 @@ main(int    argc,
         option.Nfrost = 1234;
         option.Nlakenode = 5678;
         option.PRT_HEADER = false;
+        // last element of option
         option.PRT_SNOW_BAND = true;
+
         param.ROOT_BRENT_MAXTRIES = 6543;
         param.ROOT_BRENT_MAXITER = 1010;
         param.TOL_GRND = 0.001;
+        // last element of param
+        param.ROOT_BRENT_T = -98765432.;
     }
 
+    // broadcast to the slaves
     status = MPI_Bcast(&global, 1, mpi_global_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in main(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&location, 1, mpi_location_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in main(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&ncfile, 1, mpi_nc_file_struct_type,
                        0, MPI_COMM_WORLD);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
@@ -1965,36 +2210,53 @@ main(int    argc,
         log_err("MPI error in main(): %d\n", status);
     }
 
-    printf("%d: global.forceskip == %d\n", rank, global.forceskip[0]);
+    // assert the values on all processes are the same as the original 
+    // assignment
+    printf("%d: global.forceskip == %d\n", mpi_rank, global.forceskip[0]);
     assert(global.forceskip[0] == 4321);
-    printf("%d: global.forceskip == %d\n", rank, global.forceskip[1]);
+    printf("%d: global.forceskip == %d\n", mpi_rank, global.forceskip[1]);
     assert(global.forceskip[1] == 8765);
-    printf("%d: option.CARBON == %d\n", rank, option.CARBON);
+    printf("%d: global.time_origin_num == %f\n", mpi_rank, 
+           global.time_origin_num);
+    assert(global.time_origin_num == -12345.6789);
+    printf("%d: location.latitude == %f\n", mpi_rank, location.latitude);
+    assert(location.latitude == 47.620607);
+    printf("%d: location.longitude == %f\n", mpi_rank, location.longitude);
+    assert(location.longitude == -122.349281);
+    printf("%d: location.local_idx == %zd\n", mpi_rank, location.local_idx);
+    assert(location.local_idx == 12345678);
+    printf("%d: ncfile.fname == %s\n", mpi_rank, ncfile.fname);
+    assert(strcmp(ncfile.fname, "Space Needle, Seattle, WA") == 0);
+    printf("%d: ncfile.open == %d\n", mpi_rank, ncfile.open);
+    assert(ncfile.open == true);
+    printf("%d: option.CARBON == %d\n", mpi_rank, option.CARBON);
     assert(option.CARBON == false);
-    printf("%d: option.CLOSE_ENERGY == %d\n", rank, option.CLOSE_ENERGY);
+    printf("%d: option.CLOSE_ENERGY == %d\n", mpi_rank, option.CLOSE_ENERGY);
     assert(option.CLOSE_ENERGY == true);
-    printf("%d: option.COMPUTE_TREELINE == %d\n", rank,
+    printf("%d: option.COMPUTE_TREELINE == %d\n", mpi_rank,
            option.COMPUTE_TREELINE);
     assert(option.COMPUTE_TREELINE == true);
-    printf("%d: option.CONTINUEONERROR == %d\n", rank, option.CONTINUEONERROR);
+    printf("%d: option.CONTINUEONERROR == %d\n", mpi_rank,
+           option.CONTINUEONERROR);
     assert(option.CONTINUEONERROR == true);
-    printf("%d: option.Nfrost == %zd\n", rank, option.Nfrost);
+    printf("%d: option.Nfrost == %zd\n", mpi_rank, option.Nfrost);
     assert(option.Nfrost == 1234);
-    printf("%d: option.Nlakenode == %zd\n", rank, option.Nlakenode);
+    printf("%d: option.Nlakenode == %zd\n", mpi_rank, option.Nlakenode);
     assert(option.Nlakenode == 5678);
-    printf("%d: option.PRT_HEADER == %d\n", rank, option.PRT_HEADER);
+    printf("%d: option.PRT_HEADER == %d\n", mpi_rank, option.PRT_HEADER);
     assert(option.PRT_HEADER == false);
-    printf("%d: option.PRT_SNOW_BAND == %d\n", rank, option.PRT_SNOW_BAND);
+    printf("%d: option.PRT_SNOW_BAND == %d\n", mpi_rank, option.PRT_SNOW_BAND);
     assert(option.PRT_SNOW_BAND == true);
     printf("%d: param.ROOT_BRENT_MAXTRIES == %d\n",
-           rank, param.ROOT_BRENT_MAXTRIES);
+           mpi_rank, param.ROOT_BRENT_MAXTRIES);
     assert(param.ROOT_BRENT_MAXTRIES == 6543);
     printf("%d: param.ROOT_BRENT_MAXITER == %d\n",
-           rank, param.ROOT_BRENT_MAXITER);
+           mpi_rank, param.ROOT_BRENT_MAXITER);
     assert(param.ROOT_BRENT_MAXITER == 1010);
-    printf("%d: param.TOL_GRND == %lf\n", rank, param.TOL_GRND);
+    printf("%d: param.TOL_GRND == %f\n", mpi_rank, param.TOL_GRND);
     assert(param.TOL_GRND == 0.001);
-
+    printf("%d: param.ROOT_BRENT_T == %f\n", mpi_rank, param.ROOT_BRENT_T);
+    assert(param.ROOT_BRENT_T == -98765432.);
 
     status = MPI_Finalize();
     if (status != MPI_SUCCESS) {

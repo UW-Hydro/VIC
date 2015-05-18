@@ -73,7 +73,7 @@ vic_start(void)
 
     if (mpi_rank == 0) {
         // set model constants
-        if (!strcasecmp(filenames.constants, "MISSING")) {
+        if (strcasecmp(filenames.constants, "MISSING")) {
             filep.constants = open_file(filenames.constants, "r");
             get_parameters(filep.constants);
         }
@@ -109,17 +109,23 @@ vic_start(void)
                         "match parameter file");
             }
         }
-        // set model constants
-        if (strcasecmp(filenames.constants, "MISSING") != 0) {
-            filep.constants = open_file(filenames.constants, "r");
-            get_parameters(filep.constants);
-        }
 
         // Check that model parameters are valid
         validate_parameters();
     }
 
-    // broadcast global, option, param structures
+    // broadcast global, option, param structures as well as global valies
+    // such as NF and NR
+    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_start(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_start(): %d\n", status);
+    }
+
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
                        0, MPI_COMM_WORLD);
     if (status != MPI_SUCCESS) {

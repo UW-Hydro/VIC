@@ -66,20 +66,20 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
-                global_domain->ncells_global++;
+            if (run[i] == 1) {
+                global_domain->ncells++;
             }
         }
     }
 
     // if MASTER_PROC
     global_domain->locations = (location_struct *)
-                               malloc(global_domain->ncells_global *
+                               malloc(global_domain->ncells *
                                       sizeof(location_struct));
     if (global_domain->locations == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }
-    for (i = 0; i < global_domain->ncells_global; i++) {
+    for (i = 0; i < global_domain->ncells; i++) {
         initialize_location(&(global_domain->locations[i]));
     }
 
@@ -92,30 +92,29 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
-                global_domain->locations[j].global_cell_idx = j;
-                global_domain->locations[j].global_x_idx = x;
-                global_domain->locations[j].global_y_idx = y;
+            if (run[i] == 1) {
+                global_domain->locations[j].io_idx = i;
+                global_domain->locations[j].global_idx = j;
                 j++;
             }
         }
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain->ncells_global *
+    idx = (size_t *) malloc(global_domain->ncells *
                             sizeof(size_t));
     if (idx == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
-    for (i = 0; i < global_domain->ncells_global; i++) {
-        idx[i] = get_global_idx(global_domain, i);
+    for (i = 0; i < global_domain->ncells; i++) {
+        idx[i] = global_domain->locations[i].io_idx;
     }
 
     // get longitude -
     // TBD: read var id from file
     get_nc_field_double(nc_name, "xc",
                         d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_global; i++) {
+    for (i = 0; i < global_domain->ncells; i++) {
         // rescale to [-180., 180]. Note that the if statement is not strictly
         // needed, but it prevents -180 from turning into 180 and vice versa
         if (var[idx[i]] < -180.f || var[idx[i]] > 180.f) {
@@ -128,7 +127,7 @@ get_global_domain(char          *nc_name,
     // TBD: read var id from file
     get_nc_field_double(nc_name, "yc",
                         d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_global; i++) {
+    for (i = 0; i < global_domain->ncells; i++) {
         global_domain->locations[i].latitude = (double) var[idx[i]];
     }
 
@@ -136,7 +135,7 @@ get_global_domain(char          *nc_name,
     // TBD: read var id from file
     get_nc_field_double(nc_name, "area",
                         d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_global; i++) {
+    for (i = 0; i < global_domain->ncells; i++) {
         global_domain->locations[i].area = (double) var[idx[i]];
     }
 
@@ -144,7 +143,7 @@ get_global_domain(char          *nc_name,
     // TBD: read var id from file
     get_nc_field_double(nc_name, "frac",
                         d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_global; i++) {
+    for (i = 0; i < global_domain->ncells; i++) {
         global_domain->locations[i].frac = (double) var[idx[i]];
     }
 
@@ -155,7 +154,7 @@ get_global_domain(char          *nc_name,
 
     // print_domain(global_domain, true);
 
-    return global_domain->ncells_global;
+    return global_domain->ncells;
 }
 
 /******************************************************************************
@@ -164,10 +163,9 @@ get_global_domain(char          *nc_name,
 void
 initialize_domain(domain_struct *domain)
 {
-    domain->ncells_global = 0;
+    domain->ncells = 0;
     domain->n_nx = 0;
     domain->n_ny = 0;
-    domain->ncells_local = 0;
     domain->locations = NULL;
 }
 
@@ -181,27 +179,40 @@ initialize_location(location_struct *location)
     location->longitude = 0;
     location->area = 0;
     location->frac = 0;
-    location->global_cell_idx = 0;
-    location->global_x_idx = 0;
-    location->global_y_idx = 0;
-    location->local_cell_idx = 0;
-    location->local_x_idx = 0;
-    location->local_y_idx = 0;
+    location->nveg = 0;
+    location->global_idx = 0;
+    location->io_idx = 0;
+    location->local_idx = 0;
 }
 
 /******************************************************************************
- * @brief    Get global index,
+ * @brief    Read the number of vegetation type per grid cell from file
  *****************************************************************************/
-size_t
-get_global_idx(domain_struct *domain,
-               size_t         i)
+void
+add_nveg_to_global_domain(char          *nc_name,
+                          domain_struct *global_domain)
 {
-    size_t idx = -1;
+    size_t  d2count[2];
+    size_t  d2start[2];
+    size_t  i;
+    double *dvar = NULL;
 
-    if (i < domain->ncells_global) {
-        idx = domain->locations[i].global_y_idx * domain->n_nx +
-              domain->locations[i].global_x_idx;
+    dvar = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
+                             sizeof(double));
+    if (dvar == NULL) {
+        log_err("Memory allocation error in add_nveg_to_global_domain().");
     }
 
-    return idx;
+    d2start[0] = 0;
+    d2start[1] = 0;
+    d2count[0] = global_domain->n_ny;
+    d2count[1] = global_domain->n_nx;
+    get_nc_field_double(nc_name, "Nveg", d2start, d2count, dvar);
+
+    for (i = 0; i < global_domain->ncells; i++) {
+        global_domain->locations[i].nveg =
+            (size_t) dvar[global_domain->locations[i].io_idx];
+    }
+
+    free(dvar);
 }

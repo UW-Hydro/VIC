@@ -38,7 +38,7 @@ vic_image_run(void)
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
-    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern lake_con_struct     lake_con;
     extern out_data_struct   **out_data;
@@ -50,7 +50,7 @@ vic_image_run(void)
 
     size_t                     i;
 
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         vic_run(current, &(atmos[i]), &(all_vars[i]), dmy, &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i], veg_hist[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],

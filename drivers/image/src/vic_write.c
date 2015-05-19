@@ -29,70 +29,39 @@
 #include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    Write output to netcdf file.
+ * @brief    Write output to netcdf file. Currently everything is cast to
+ *           double
  *****************************************************************************/
 void
 vic_write(void)
 {
     extern out_data_struct **out_data;
     extern domain_struct     global_domain;
+    extern domain_struct     local_domain;
     extern nc_file_struct    nc_hist_file;
     extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
     extern size_t            current;
-
     int                      dimids[MAXDIMS];
     size_t                   i;
     size_t                   j;
     size_t                   k;
     size_t                   grid_size;
     size_t                   ndims;
-    char                    *cvar = NULL;
-    int                     *ivar = NULL;
     double                  *dvar = NULL;
-    float                   *fvar = NULL;
-    size_t                  *idx = NULL;
     size_t                   dcount[MAXDIMS];
     size_t                   dstart[MAXDIMS];
 
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    cvar = (char *) malloc(grid_size * sizeof(char));
-    if (cvar == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
-
-    ivar = (int *) malloc(grid_size * sizeof(int));
-    if (ivar == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
-
-    dvar = (double *) malloc(grid_size * sizeof(double));
+    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_write().");
     }
 
-    fvar = (float *) malloc(grid_size * sizeof(float));
-    if (fvar == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
-
-    // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
-                            sizeof(size_t));
-    if (idx == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        idx[i] = get_global_idx(&global_domain, i);
-    }
-
     // set missing values
-    for (i = 0; i < grid_size; i++) {
-        cvar[i] = nc_hist_file.c_fillvalue;
-        ivar[i] = nc_hist_file.i_fillvalue;
+    for (i = 0; i < local_domain.ncells; i++) {
         dvar[i] = nc_hist_file.d_fillvalue;
-        fvar[i] = nc_hist_file.f_fillvalue;
     }
 
     // initialize dimids to invalid values - helps debugging
@@ -122,16 +91,16 @@ vic_write(void)
         for (j = 0; j < out_data[0][k].nelem; j++) {
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = (double) out_data[i][k].aggdata[j];
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = (double) out_data[i][k].aggdata[j];
             }
-            put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-                                &(nc_hist_file.nc_id),
-                                nc_hist_file.d_fillvalue,
-                                dimids, ndims, nc_vars[k].nc_var_name,
-                                dstart, dcount, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_hist_file.d_fillvalue;
+            gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                                       &(nc_hist_file.nc_id),
+                                       nc_hist_file.d_fillvalue,
+                                       dimids, ndims, nc_vars[k].nc_var_name,
+                                       dstart, dcount, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_hist_file.d_fillvalue;
             }
         }
 
@@ -146,16 +115,12 @@ vic_write(void)
     // reset the agg data
     for (k = 0; k < N_OUTVAR_TYPES; k++) {
         for (j = 0; j < out_data[0][k].nelem; j++) {
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 out_data[i][k].aggdata[j] = 0;
             }
         }
     }
 
     // free memory
-    free(idx);
-    free(cvar);
-    free(ivar);
     free(dvar);
-    free(fvar);
 }

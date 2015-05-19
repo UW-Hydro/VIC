@@ -744,7 +744,7 @@ typedef struct {
     unsigned short int endmonth;   /**< Last month of model simulation */
     unsigned short int endyear;    /**< Last year of model simulation */
     unsigned short int forceday[2];  /**< day forcing files starts */
-    unsigned forcesec[2];          /**< seconds since midnight when forcing
+    unsigned int forcesec[2];          /**< seconds since midnight when forcing
                                       files starts */
     unsigned short int forcemonth[2];  /**< month forcing files starts */
     unsigned short int forceoffset[2];  /**< counter to keep track of offset in reading

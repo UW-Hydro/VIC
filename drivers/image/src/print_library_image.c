@@ -66,13 +66,12 @@ print_domain(domain_struct *domain,
     size_t i;
 
     fprintf(LOG_DEST, "domain:\n");
-    fprintf(LOG_DEST, "\tncells_global: %zd\n", domain->ncells_global);
-    fprintf(LOG_DEST, "\tn_nx         : %zd\n", domain->n_nx);
-    fprintf(LOG_DEST, "\tn_ny         : %zd\n", domain->n_ny);
-    fprintf(LOG_DEST, "\tncells_local : %zd\n", domain->ncells_local);
-    fprintf(LOG_DEST, "\tlocations    : %p\n", domain->locations);
+    fprintf(LOG_DEST, "\tncells   : %zd\n", domain->ncells);
+    fprintf(LOG_DEST, "\tn_nx     : %zd\n", domain->n_nx);
+    fprintf(LOG_DEST, "\tn_ny     : %zd\n", domain->n_ny);
+    fprintf(LOG_DEST, "\tlocations: %p\n", domain->locations);
     if (print_loc) {
-        for (i = 0; i < domain->ncells_global; i++) {
+        for (i = 0; i < domain->ncells; i++) {
             print_location(&(domain->locations[i]));
         }
     }
@@ -89,12 +88,10 @@ print_location(location_struct *loc)
     fprintf(LOG_DEST, "\tlongitude      : %.4f\n", loc->longitude);
     fprintf(LOG_DEST, "\tarea           : %.4f\n", loc->area);
     fprintf(LOG_DEST, "\tfrac           : %.4f\n", loc->frac);
-    fprintf(LOG_DEST, "\tglobal_cell_idx: %zd\n", loc->global_cell_idx);
-    fprintf(LOG_DEST, "\tglobal_x_idx   : %zd\n", loc->global_x_idx);
-    fprintf(LOG_DEST, "\tglobal_y_idx   : %zd\n", loc->global_y_idx);
-    fprintf(LOG_DEST, "\tlocal_cell_idx : %zd\n", loc->local_cell_idx);
-    fprintf(LOG_DEST, "\tlocal_x_idx    : %zd\n", loc->local_x_idx);
-    fprintf(LOG_DEST, "\tlocal_y_idx    : %zd\n", loc->local_y_idx);
+    fprintf(LOG_DEST, "\tnveg           : %zd\n", loc->nveg);
+    fprintf(LOG_DEST, "\tglobal_idx     : %zd\n", loc->global_idx);
+    fprintf(LOG_DEST, "\tio_idx         : %zd\n", loc->io_idx);
+    fprintf(LOG_DEST, "\tlocal_idx      : %zd\n", loc->local_idx);
 }
 
 /******************************************************************************
@@ -110,15 +107,12 @@ sprint_location(char            *str,
             "\tlongitude      : %.4f\n"
             "\tarea           : %.4f\n"
             "\tfrac           : %.4f\n"
-            "\tglobal_cell_idx: %zd\n"
-            "\tglobal_x_idx   : %zd\n"
-            "\tglobal_y_idx   : %zd\n"
-            "\tlocal_cell_idx : %zd\n"
-            "\tlocal_x_idx    : %zd\n"
-            "\tlocal_y_idx    : %zd\n",
+            "\nveg            : %zd\n"
+            "\tglobal_idx     : %zd\n"
+            "\tio_idx         : %zd\n"
+            "\tlocal_idx      : %zd\n",
             loc->latitude, loc->longitude, loc->area, loc->frac,
-            loc->global_cell_idx, loc->global_x_idx, loc->global_y_idx,
-            loc->local_cell_idx, loc->local_x_idx, loc->local_y_idx);
+            loc->nveg, loc->global_idx, loc->io_idx, loc->local_idx);
 }
 
 /******************************************************************************

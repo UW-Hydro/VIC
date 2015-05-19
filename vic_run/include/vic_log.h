@@ -76,7 +76,7 @@ void setup_logging(int id);
 #define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] errno: %s \n", \
                              clean_ncerrno(e)); exit(1);
 #define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] errno: %s: " M "\n", \
-                                 clean_errno(), ## __VA_ARGS__)
+                                 clean_errno(), ## __VA_ARGS__); errno = 0
 #define log_info(M, ...) fprintf(LOG_DEST, "[INFO] " M "\n", ## __VA_ARGS__)
 #else
 #define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s: " M "\n", \
@@ -86,7 +86,7 @@ void setup_logging(int id);
                              __LINE__, clean_ncerrno(e)); exit(1);
 #define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] %s:%d: errno: %s: " M "\n", \
                                  __FILE__, __LINE__, \
-                                 clean_errno(), ## __VA_ARGS__)
+                                 clean_errno(), ## __VA_ARGS__); errno = 0
 #define log_info(M, ...) fprintf(LOG_DEST, "[INFO] %s:%d: " M "\n", __FILE__, \
                                  __LINE__, ## __VA_ARGS__)
 #endif

@@ -837,7 +837,6 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
             param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
         }
-
         /*************************************************
            If provided, translate relative humidity and air temperature
            into vapor pressure
@@ -1649,7 +1648,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[rec][v].albedo[j] =
-                        veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month - 1];
+                        veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month -
+                                                             1];
                 }
             }
         }
@@ -1664,13 +1664,16 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (j = 0; j < NF; j++) {
                             sec = rec * global_param.dt + j *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
-                            if ((double) global_param.startsec - sec_offset_gmt <
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
                                 0) {
                                 sec += SEC_PER_DAY;
                             }
                             uidx = (size_t) (sec / atmos_dt);
-                            if (local_veg_hist_data[ALBEDO][v][uidx] != NODATA_VH) {
+                            if (local_veg_hist_data[ALBEDO][v][uidx] !=
+                                NODATA_VH) {
                                 veg_hist[rec][v].albedo[j] =
                                     local_veg_hist_data[ALBEDO][v][uidx];            // assume constant over the day
                             }
@@ -1690,7 +1693,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (i = 0; i < NF; i++) {
                             sec = rec * global_param.dt + i *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
                             veg_hist[rec][v].albedo[i] = 0;
                             while (sec < rec * global_param.dt +
                                    (i + 1) * global_param.snow_dt +
@@ -1741,13 +1745,16 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (j = 0; j < NF; j++) {
                             sec = rec * global_param.dt + j *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
-                            if ((double) global_param.startsec - sec_offset_gmt <
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
                                 0) {
                                 sec += SEC_PER_DAY;
                             }
                             uidx = (size_t) (sec / atmos_dt);
-                            if (local_veg_hist_data[LAI_IN][v][uidx] != NODATA_VH) {
+                            if (local_veg_hist_data[LAI_IN][v][uidx] !=
+                                NODATA_VH) {
                                 veg_hist[rec][v].LAI[j] =
                                     local_veg_hist_data[LAI_IN][v][uidx];         // assume constant over the day
                             }
@@ -1767,7 +1774,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (i = 0; i < NF; i++) {
                             sec = rec * global_param.dt + i *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
                             veg_hist[rec][v].LAI[i] = 0;
                             while (sec < rec * global_param.dt +
                                    (i +
@@ -1804,7 +1812,8 @@ initialize_atmos(atmos_data_struct    *atmos,
             for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[rec][v].vegcover[j] =
-                        veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month - 1];
+                        veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month -
+                                                               1];
                 }
             }
         }
@@ -1819,8 +1828,10 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (j = 0; j < NF; j++) {
                             sec = rec * global_param.dt + j *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
-                            if ((double) global_param.startsec - sec_offset_gmt <
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
+                            if ((double) global_param.startsec -
+                                sec_offset_gmt <
                                 0) {
                                 sec += SEC_PER_DAY;
                             }
@@ -1829,7 +1840,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                                 NODATA_VH) {
                                 veg_hist[rec][v].vegcover[j] =
                                     local_veg_hist_data[VEGCOVER][v][uidx];              // assume constant over the day
-                                if (veg_hist[rec][v].vegcover[j] < MIN_VEGCOVER) {
+                                if (veg_hist[rec][v].vegcover[j] <
+                                    MIN_VEGCOVER) {
                                     veg_hist[rec][v].vegcover[j] = MIN_VEGCOVER;
                                 }
                             }
@@ -1849,7 +1861,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                         for (i = 0; i < NF; i++) {
                             sec = rec * global_param.dt + i *
                                   global_param.snow_dt +
-                                  (double) global_param.startsec - sec_offset_gmt;
+                                  (double) global_param.startsec -
+                                  sec_offset_gmt;
                             veg_hist[rec][v].vegcover[i] = 0;
                             while (sec < rec * global_param.dt +
                                    (i +
@@ -1866,7 +1879,8 @@ initialize_atmos(atmos_data_struct    *atmos,
                                         local_veg_hist_data[VEGCOVER][v][uidx];
                                     if (veg_hist[rec][v].vegcover[i] <
                                         MIN_VEGCOVER) {
-                                        veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
+                                        veg_hist[rec][v].vegcover[i] =
+                                            MIN_VEGCOVER;
                                     }
                                 }
                                 sec += atmos_dt;
@@ -1881,6 +1895,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
         }
     }
+
     /*************************************************
        Cosine of Solar Zenith Angle
     *************************************************/

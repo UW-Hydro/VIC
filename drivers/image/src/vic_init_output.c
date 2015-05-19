@@ -37,9 +37,11 @@ vic_init_output(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern filep_struct        filep;
     extern global_param_struct global_param;
+    extern MPI_Datatype        mpi_nc_file_struct_type;
+    extern int                 mpi_rank;
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
     extern lake_con_struct     lake_con;
@@ -49,23 +51,45 @@ vic_init_output(void)
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
 
+    int                        status;
     size_t                     i;
 
     // initialize the output data structures
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  -global_param.nrecs);
     }
 
-    // determine which variables will be written to the history file
-    parse_output_info(filep.globalparam, out_data);
+    if (mpi_rank == 0) {
+        // determine which variables will be written to the history file
+        parse_output_info(filep.globalparam, out_data);
 
-    // open the netcdf history file
-    initialize_history_file(&nc_hist_file);
-
+        // open the netcdf history file
+        initialize_history_file(&nc_hist_file);
+    }
+    
+    // broadcast which variables to write.
+    for (i = 0; i < N_OUTVAR_TYPES; i++) {
+        status = MPI_Bcast(&out_data[0][i].write, 1, MPI_C_BOOL,
+                           0, MPI_COMM_WORLD);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error in vic_init_output(): %d\n", status);
+        }
+    }
+    
+    // broadcast history file info. Only the master process will write to it, 
+    // but the slave processes need some of the information to initialize as
+    // well (particularly which variables to write and dimension sizes)
+    status = MPI_Bcast(&nc_hist_file, 1, mpi_nc_file_struct_type,
+                       0, MPI_COMM_WORLD);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_init_output(): %d\n", status);
+    }
+  
     // initialize netcdf info for output variables
     vic_nc_info(&nc_hist_file, out_data, nc_vars);
+
 }
 
 /******************************************************************************

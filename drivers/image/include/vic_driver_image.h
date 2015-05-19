@@ -27,6 +27,7 @@
 #ifndef VIC_DRIVER_IMAGE_H
 #define VIC_DRIVER_IMAGE_H
 
+#include <vic_mpi.h>
 #include <netcdf.h>
 #include <vic_driver_shared.h>
 
@@ -46,12 +47,10 @@ typedef struct {
     double longitude; /**< longitude of grid cell center */
     double area; /**< area of grid cell */
     double frac; /**< fraction of grid cell that is active */
-    size_t global_cell_idx; /**< index of grid cell in global list of grid cells */
-    size_t global_x_idx; /**< index of x-dimension in global domain */
-    size_t global_y_idx; /**< index of y-dimension in global domain */
-    size_t local_cell_idx; /**< index of grid cell in local list of grid cells */
-    size_t local_x_idx; /**< index of x-dimension in local domain */
-    size_t local_y_idx; /**< index of y-dimension in local domain */
+    size_t nveg; /**< number of vegetation type according to parameter file */
+    size_t global_idx; /**< index of grid cell in global list of grid cells */
+    size_t io_idx; /**< index of cell in 1-D I/O arrays */
+    size_t local_idx; /**< index of grid cell in local list of grid cells */
 } location_struct;
 
 
@@ -60,10 +59,9 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells_global; /**< number of active grid cell on global domain */
+    size_t ncells; /**< number of active grid cells on domain */
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
-    size_t ncells_local; /**< number of active grid cell on local domain */
     location_struct *locations; /**< locations structs for local domain */
 } domain_struct;
 
@@ -130,6 +128,7 @@ typedef struct {
     double *Cv;     /**< array of fractional coverage for nc_types */
 } veg_con_map_struct;
 
+void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
@@ -139,7 +138,6 @@ void free_atmos(atmos_data_struct *atmos);
 void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
-size_t get_global_idx(domain_struct *domain, size_t i);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,

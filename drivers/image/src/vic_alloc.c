@@ -36,8 +36,7 @@ vic_alloc(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern domain_struct       global_domain;
-    extern filenames_struct    filenames;
+    extern domain_struct       local_domain;
     extern option_struct       options;
     extern out_data_struct   **out_data;
     extern save_data_struct   *save_data;
@@ -46,38 +45,12 @@ vic_alloc(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
-
-    double                    *dvar = NULL;
-
     size_t                     i;
     size_t                     j;
-    size_t                     idx;
-    size_t                     d2count[2];
-    size_t                     d2start[2];
-
-    // TBD: handle decomposed domain
-
-    // allocate memory for number of veg types to be read
-    // this is to maintain consistency with the VIC data structures, so that
-    // the call to vic_run() is not affected
-    dvar = (double *) malloc(global_domain.n_ny * global_domain.n_nx *
-                             sizeof(double));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_init().");
-    }
-    // read the number of vegetation types for each grid cell. This result is
-    // not stored at this time, but will be read again in vic_init(). Clunky,
-    // but so it is
-    // overstory
-    d2start[0] = 0;
-    d2start[1] = 0;
-    d2count[0] = global_domain.n_ny;
-    d2count[1] = global_domain.n_nx;
-    get_nc_field_double(filenames.veglib, "Nveg", d2start, d2count, dvar);
 
     // allocate memory for atmos structure
     atmos = (atmos_data_struct *)
-            malloc((size_t) global_domain.ncells_global *
+            malloc((size_t) local_domain.ncells *
                    sizeof(atmos_data_struct));
     if (atmos == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -85,7 +58,7 @@ vic_alloc(void)
 
     // allocate memory for veg_hist structure
     veg_hist = (veg_hist_struct **)
-               malloc((size_t) global_domain.ncells_global *
+               malloc((size_t) local_domain.ncells *
                       sizeof(veg_hist_struct *));
     if (veg_hist == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -93,7 +66,7 @@ vic_alloc(void)
 
     // allocate memory for soil structure
     soil_con = (soil_con_struct *)
-               malloc((size_t) global_domain.ncells_global *
+               malloc((size_t) local_domain.ncells *
                       sizeof(soil_con_struct));
     if (soil_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -101,7 +74,7 @@ vic_alloc(void)
 
     // allocate memory for vegetation mapping structure
     veg_con_map = (veg_con_map_struct *)
-                  malloc((size_t) global_domain.ncells_global *
+                  malloc((size_t) local_domain.ncells *
                          sizeof(veg_con_map_struct));
     if (veg_con_map == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -109,7 +82,7 @@ vic_alloc(void)
 
     // allocate memory for vegetation structure
     veg_con = (veg_con_struct **)
-              malloc((size_t) global_domain.ncells_global *
+              malloc((size_t) local_domain.ncells *
                      sizeof(veg_con_struct *));
     if (veg_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -117,7 +90,7 @@ vic_alloc(void)
 
     // allocate memory for vegetation structure
     veg_lib = (veg_lib_struct **)
-              malloc((size_t) global_domain.ncells_global *
+              malloc((size_t) local_domain.ncells *
                      sizeof(veg_lib_struct *));
     if (veg_lib == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -125,7 +98,7 @@ vic_alloc(void)
 
     // all_vars allocation
     all_vars = (all_vars_struct *)
-               malloc((size_t) global_domain.ncells_global *
+               malloc((size_t) local_domain.ncells *
                       sizeof(all_vars_struct));
     if (all_vars == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -133,7 +106,7 @@ vic_alloc(void)
 
     // out_data allocation
     out_data = (out_data_struct **)
-               malloc((size_t) global_domain.ncells_global *
+               malloc((size_t) local_domain.ncells *
                       sizeof(out_data_struct *));
     if (out_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
@@ -141,14 +114,14 @@ vic_alloc(void)
 
     // save_data allocation
     save_data = (save_data_struct *)
-                malloc((size_t) global_domain.ncells_global *
+                malloc((size_t) local_domain.ncells *
                        sizeof(save_data_struct));
     if (save_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for individual grid cells
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         // atmos allocation - allocate enough memory for NR+1 steps
         alloc_atmos(&(atmos[i]));
 
@@ -196,8 +169,7 @@ vic_alloc(void)
             log_err("Memory allocation error in vic_alloc().");
         }
 
-        idx = get_global_idx(&global_domain, i);
-        veg_con_map[i].nv_active = (size_t) dvar[idx] + 1;
+        veg_con_map[i].nv_active = (size_t) local_domain.locations[i].nveg + 1;
         if (options.AboveTreelineVeg >= 0) {
             veg_con_map[i].nv_active += 1;
         }
@@ -250,7 +222,4 @@ vic_alloc(void)
             alloc_veg_hist(&(veg_hist[i][j]));
         }
     }
-
-    // cleanup
-    free(dvar);
 }

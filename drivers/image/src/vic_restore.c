@@ -35,7 +35,7 @@ void
 vic_restore(void)
 {
     extern all_vars_struct    *all_vars;
-    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
@@ -57,7 +57,7 @@ vic_restore(void)
     }
 
     // run through the remaining VIC initialization routines
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         // TBD: do something sensible for surf_temp
         surf_temp = 0.;
         nveg = veg_con[i][0].vegetat_type_num;

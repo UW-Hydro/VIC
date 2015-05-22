@@ -23,3 +23,5 @@ vic_image
 
 .DS_Store
 TAGS
+
+*egg-info*

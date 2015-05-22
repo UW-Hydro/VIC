@@ -98,11 +98,15 @@ if write_version:
 
 sources = []
 sources.extend(glob.glob(os.path.join(vic_root_path, 'vic_run/src/*c')))
-sources.extend(glob.glob(os.path.join(vic_root_path, 'drivers/shared/src/*c')))
+sources.extend(glob.glob(os.path.join(vic_root_path, 'drivers/python/src/*c')))
 
 includes = []
 includes.append(os.path.join(vic_root_path, 'vic_run/include'))
-includes.append(os.path.join(vic_root_path, 'drivers/shared/include'))
+
+ext_modules = [Extension('vic_run',
+                         sources=sources,
+                         include_dirs=includes,
+                         extra_compile_args=['-std=c99'])]
 
 # -------------------------------------------------------------------- #
 # Run Setup
@@ -116,9 +120,5 @@ setup(name='vic',
       test_suite='pytest.collector',
       packages=['vic'],
       py_modules=['vic'],
-      ext_modules=[Extension(
-          'vic_run',
-          sources=sources,
-          include_dirs=includes,
-          extra_compile_args=['-std=c99'])])
+      ext_modules=ext_modules)
 # -------------------------------------------------------------------- #

@@ -98,10 +98,13 @@ if write_version:
 
 sources = []
 sources.extend(glob.glob(os.path.join(vic_root_path, 'vic_run/src/*c')))
+sources.extend(glob.glob(os.path.join(vic_root_path, 'drivers/shared/src/*c')))
 sources.extend(glob.glob(os.path.join(vic_root_path, 'drivers/python/src/*c')))
 
 includes = []
 includes.append(os.path.join(vic_root_path, 'vic_run/include'))
+includes.append(os.path.join(vic_root_path, 'drivers/shared/include'))
+includes.append(os.path.join(vic_root_path, 'drivers/python/include'))
 
 ext_modules = [Extension('vic_run',
                          sources=sources,

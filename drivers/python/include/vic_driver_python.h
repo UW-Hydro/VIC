@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Top level wrapper for globals used in vic_run but defined at the global
- * level.
+ * Header file for vic_driver_image routines
  *
  * @section LICENSE
  *
@@ -25,21 +24,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
+#ifndef VIC_DRIVER_PYTHON_H
+#define VIC_DRIVER_PYTHON_H
+
 #include <vic_driver_shared.h>
 
-// global variables
-int                 flag;
-size_t              NR; /* array index for atmos struct that indicates
-                           the model step avarage or sum */
-size_t              NF; /* array index loop counter limit for atmos
-                           struct that indicates the SNOW_STEP values */
+#define VIC_DRIVER "Python"
 
-global_param_struct global_param;
-option_struct       options;
-parameters_struct   param;
-filenames_struct    filenames;
-filep_struct        filep;
-param_set_struct    param_set;
-
+#endif

@@ -106,7 +106,7 @@ includes.append(os.path.join(vic_root_path, 'vic_run/include'))
 includes.append(os.path.join(vic_root_path, 'drivers/shared/include'))
 includes.append(os.path.join(vic_root_path, 'drivers/python/include'))
 
-ext_modules = [Extension('vic_run',
+ext_modules = [Extension('vic_core',
                          sources=sources,
                          include_dirs=includes,
                          extra_compile_args=['-std=c99'])]

@@ -1,7 +1,7 @@
 '''Wrapper for vic_def.h
 
 Generated with:
-/Users/jhamman/anaconda/envs/vic_testpy27/bin/ctypesgen.py ../../vic_run/include/vic_def.h ../../vic_run/include/vic_log.h ../../vic_run/include/vic_physical_constants.h ../../vic_run/include/vic_run.h ../shared/include/vic_driver_shared.h ../shared/include/vic_version.h include/vic_driver_python.h -o vic/vic_run_lib.py -l vic_run.so
+/Users/jhamman/anaconda/envs/vic_testpy27/bin/ctypesgen.py ../../vic_run/include/vic_def.h ../../vic_run/include/vic_log.h ../../vic_run/include/vic_physical_constants.h ../../vic_run/include/vic_run.h ../shared/include/vic_driver_shared.h ../shared/include/vic_version.h include/vic_driver_python.h -o vic/_vic_run_lib.py -l vic_core.so
 
 Do not modify this file.
 '''
@@ -715,7 +715,7 @@ add_library_search_dirs([])
 
 # Begin libraries
 
-_libs["vic_run.so"] = load_library("vic_run.so")
+_libs["vic_core.so"] = load_library("vic_core.so")
 
 # 1 libraries
 # End libraries
@@ -803,8 +803,8 @@ struct___sFILE._fields_ = [
 FILE = struct___sFILE  # /usr/include/stdio.h: 153
 
 # /usr/include/string.h: 81
-if hasattr(_libs['vic_run.so'], 'strerror'):
-    strerror = _libs['vic_run.so'].strerror
+if hasattr(_libs['vic_core.so'], 'strerror'):
+    strerror = _libs['vic_core.so'].strerror
     strerror.argtypes = [c_int]
     if sizeof(c_int) == sizeof(c_void_p):
         strerror.restype = ReturnString
@@ -813,44 +813,44 @@ if hasattr(_libs['vic_run.so'], 'strerror'):
         strerror.errcheck = ReturnString
 
 # /usr/include/sys/errno.h: 80
-if hasattr(_libs['vic_run.so'], '__error'):
-    __error = _libs['vic_run.so'].__error
+if hasattr(_libs['vic_core.so'], '__error'):
+    __error = _libs['vic_core.so'].__error
     __error.argtypes = []
     __error.restype = POINTER(c_int)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 48
 try:
-    LOG_DEST = (POINTER(FILE)).in_dll(_libs['vic_run.so'], 'LOG_DEST')
+    LOG_DEST = (POINTER(FILE)).in_dll(_libs['vic_core.so'], 'LOG_DEST')
 except:
     pass
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 57
-if hasattr(_libs['vic_run.so'], 'finalize_logging'):
-    finalize_logging = _libs['vic_run.so'].finalize_logging
+if hasattr(_libs['vic_core.so'], 'finalize_logging'):
+    finalize_logging = _libs['vic_core.so'].finalize_logging
     finalize_logging.argtypes = []
     finalize_logging.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 58
-if hasattr(_libs['vic_run.so'], 'get_current_datetime'):
-    get_current_datetime = _libs['vic_run.so'].get_current_datetime
+if hasattr(_libs['vic_core.so'], 'get_current_datetime'):
+    get_current_datetime = _libs['vic_core.so'].get_current_datetime
     get_current_datetime.argtypes = [String]
     get_current_datetime.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 59
-if hasattr(_libs['vic_run.so'], 'get_logname'):
-    get_logname = _libs['vic_run.so'].get_logname
+if hasattr(_libs['vic_core.so'], 'get_logname'):
+    get_logname = _libs['vic_core.so'].get_logname
     get_logname.argtypes = [String, c_int, String]
     get_logname.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 60
-if hasattr(_libs['vic_run.so'], 'initialize_log'):
-    initialize_log = _libs['vic_run.so'].initialize_log
+if hasattr(_libs['vic_core.so'], 'initialize_log'):
+    initialize_log = _libs['vic_core.so'].initialize_log
     initialize_log.argtypes = []
     initialize_log.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h: 61
-if hasattr(_libs['vic_run.so'], 'setup_logging'):
-    setup_logging = _libs['vic_run.so'].setup_logging
+if hasattr(_libs['vic_core.so'], 'setup_logging'):
+    setup_logging = _libs['vic_core.so'].setup_logging
     setup_logging.argtypes = [c_int]
     setup_logging.restype = None
 
@@ -858,7 +858,7 @@ if hasattr(_libs['vic_run.so'], 'setup_logging'):
 try:
     ref_veg_over = (
         POINTER(c_bool)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_over')
 except:
     pass
@@ -867,7 +867,7 @@ except:
 try:
     ref_veg_rarc = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_rarc')
 except:
     pass
@@ -876,7 +876,7 @@ except:
 try:
     ref_veg_rmin = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_rmin')
 except:
     pass
@@ -885,7 +885,7 @@ except:
 try:
     ref_veg_lai = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_lai')
 except:
     pass
@@ -894,7 +894,7 @@ except:
 try:
     ref_veg_albedo = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_albedo')
 except:
     pass
@@ -903,7 +903,7 @@ except:
 try:
     ref_veg_vegcover = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_vegcover')
 except:
     pass
@@ -912,7 +912,7 @@ except:
 try:
     ref_veg_rough = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_rough')
 except:
     pass
@@ -921,7 +921,7 @@ except:
 try:
     ref_veg_displ = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_displ')
 except:
     pass
@@ -930,7 +930,7 @@ except:
 try:
     ref_veg_wind_h = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_wind_h')
 except:
     pass
@@ -939,7 +939,7 @@ except:
 try:
     ref_veg_RGL = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_RGL')
 except:
     pass
@@ -948,7 +948,7 @@ except:
 try:
     ref_veg_rad_atten = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_rad_atten')
 except:
     pass
@@ -957,7 +957,7 @@ except:
 try:
     ref_veg_wind_atten = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_wind_atten')
 except:
     pass
@@ -966,7 +966,7 @@ except:
 try:
     ref_veg_trunk_ratio = (
         POINTER(c_double)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_trunk_ratio')
 except:
     pass
@@ -975,20 +975,20 @@ except:
 try:
     ref_veg_ref_crop = (
         POINTER(c_bool)).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'ref_veg_ref_crop')
 except:
     pass
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h: 105
 try:
-    NR = (c_size_t).in_dll(_libs['vic_run.so'], 'NR')
+    NR = (c_size_t).in_dll(_libs['vic_core.so'], 'NR')
 except:
     pass
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h: 107
 try:
-    NF = (c_size_t).in_dll(_libs['vic_run.so'], 'NF')
+    NF = (c_size_t).in_dll(_libs['vic_core.so'], 'NF')
 except:
     pass
 
@@ -3465,8 +3465,8 @@ struct_anon_49._fields_ = [
 Error_struct = struct_anon_49
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 30
-if hasattr(_libs['vic_run.so'], 'advect_carbon_storage'):
-    advect_carbon_storage = _libs['vic_run.so'].advect_carbon_storage
+if hasattr(_libs['vic_core.so'], 'advect_carbon_storage'):
+    advect_carbon_storage = _libs['vic_core.so'].advect_carbon_storage
     advect_carbon_storage.argtypes = [
         c_double,
         c_double,
@@ -3475,8 +3475,8 @@ if hasattr(_libs['vic_run.so'], 'advect_carbon_storage'):
     advect_carbon_storage.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 32
-if hasattr(_libs['vic_run.so'], 'advect_snow_storage'):
-    advect_snow_storage = _libs['vic_run.so'].advect_snow_storage
+if hasattr(_libs['vic_core.so'], 'advect_snow_storage'):
+    advect_snow_storage = _libs['vic_core.so'].advect_snow_storage
     advect_snow_storage.argtypes = [
         c_double,
         c_double,
@@ -3485,8 +3485,8 @@ if hasattr(_libs['vic_run.so'], 'advect_snow_storage'):
     advect_snow_storage.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 33
-if hasattr(_libs['vic_run.so'], 'advect_soil_veg_storage'):
-    advect_soil_veg_storage = _libs['vic_run.so'].advect_soil_veg_storage
+if hasattr(_libs['vic_core.so'], 'advect_soil_veg_storage'):
+    advect_soil_veg_storage = _libs['vic_core.so'].advect_soil_veg_storage
     advect_soil_veg_storage.argtypes = [
         c_double,
         c_double,
@@ -3500,8 +3500,8 @@ if hasattr(_libs['vic_run.so'], 'advect_soil_veg_storage'):
     advect_soil_veg_storage.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 37
-if hasattr(_libs['vic_run.so'], 'advected_sensible_heat'):
-    advected_sensible_heat = _libs['vic_run.so'].advected_sensible_heat
+if hasattr(_libs['vic_core.so'], 'advected_sensible_heat'):
+    advected_sensible_heat = _libs['vic_core.so'].advected_sensible_heat
     advected_sensible_heat.argtypes = [
         c_double,
         c_double,
@@ -3511,8 +3511,8 @@ if hasattr(_libs['vic_run.so'], 'advected_sensible_heat'):
     advected_sensible_heat.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 38
-if hasattr(_libs['vic_run.so'], 'alblake'):
-    alblake = _libs['vic_run.so'].alblake
+if hasattr(_libs['vic_core.so'], 'alblake'):
+    alblake = _libs['vic_core.so'].alblake
     alblake.argtypes = [
         c_double,
         c_double,
@@ -3531,8 +3531,8 @@ if hasattr(_libs['vic_run.so'], 'alblake'):
     alblake.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 41
-if hasattr(_libs['vic_run.so'], 'arno_evap'):
-    arno_evap = _libs['vic_run.so'].arno_evap
+if hasattr(_libs['vic_core.so'], 'arno_evap'):
+    arno_evap = _libs['vic_core.so'].arno_evap
     arno_evap.argtypes = [
         POINTER(layer_data_struct),
         c_double,
@@ -3549,8 +3549,8 @@ if hasattr(_libs['vic_run.so'], 'arno_evap'):
     arno_evap.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 43
-if hasattr(_libs['vic_run.so'], 'calc_atmos_energy_bal'):
-    calc_atmos_energy_bal = _libs['vic_run.so'].calc_atmos_energy_bal
+if hasattr(_libs['vic_core.so'], 'calc_atmos_energy_bal'):
+    calc_atmos_energy_bal = _libs['vic_core.so'].calc_atmos_energy_bal
     calc_atmos_energy_bal.argtypes = [
         c_double,
         c_double,
@@ -3576,14 +3576,14 @@ if hasattr(_libs['vic_run.so'], 'calc_atmos_energy_bal'):
     calc_atmos_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 47
-if hasattr(_libs['vic_run.so'], 'calc_density'):
-    calc_density = _libs['vic_run.so'].calc_density
+if hasattr(_libs['vic_core.so'], 'calc_density'):
+    calc_density = _libs['vic_core.so'].calc_density
     calc_density.argtypes = [c_double]
     calc_density.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 48
-if hasattr(_libs['vic_run.so'], 'calc_energy_balance_error'):
-    calc_energy_balance_error = _libs['vic_run.so'].calc_energy_balance_error
+if hasattr(_libs['vic_core.so'], 'calc_energy_balance_error'):
+    calc_energy_balance_error = _libs['vic_core.so'].calc_energy_balance_error
     calc_energy_balance_error.argtypes = [
         c_int,
         c_double,
@@ -3594,23 +3594,23 @@ if hasattr(_libs['vic_run.so'], 'calc_energy_balance_error'):
     calc_energy_balance_error.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 49
-if hasattr(_libs['vic_run.so'], 'calc_latent_heat_of_sublimation'):
+if hasattr(_libs['vic_core.so'], 'calc_latent_heat_of_sublimation'):
     calc_latent_heat_of_sublimation = _libs[
-        'vic_run.so'].calc_latent_heat_of_sublimation
+        'vic_core.so'].calc_latent_heat_of_sublimation
     calc_latent_heat_of_sublimation.argtypes = [c_double]
     calc_latent_heat_of_sublimation.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 50
-if hasattr(_libs['vic_run.so'], 'calc_latent_heat_of_vaporization'):
+if hasattr(_libs['vic_core.so'], 'calc_latent_heat_of_vaporization'):
     calc_latent_heat_of_vaporization = _libs[
-        'vic_run.so'].calc_latent_heat_of_vaporization
+        'vic_core.so'].calc_latent_heat_of_vaporization
     calc_latent_heat_of_vaporization.argtypes = [c_double]
     calc_latent_heat_of_vaporization.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 51
-if hasattr(_libs['vic_run.so'], 'calc_layer_average_thermal_props'):
+if hasattr(_libs['vic_core.so'], 'calc_layer_average_thermal_props'):
     calc_layer_average_thermal_props = _libs[
-        'vic_run.so'].calc_layer_average_thermal_props
+        'vic_core.so'].calc_layer_average_thermal_props
     calc_layer_average_thermal_props.argtypes = [
         POINTER(energy_bal_struct),
         POINTER(layer_data_struct),
@@ -3620,26 +3620,26 @@ if hasattr(_libs['vic_run.so'], 'calc_layer_average_thermal_props'):
     calc_layer_average_thermal_props.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 53
-if hasattr(_libs['vic_run.so'], 'calc_outgoing_longwave'):
-    calc_outgoing_longwave = _libs['vic_run.so'].calc_outgoing_longwave
+if hasattr(_libs['vic_core.so'], 'calc_outgoing_longwave'):
+    calc_outgoing_longwave = _libs['vic_core.so'].calc_outgoing_longwave
     calc_outgoing_longwave.argtypes = [c_double, c_double]
     calc_outgoing_longwave.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 54
-if hasattr(_libs['vic_run.so'], 'calc_scale_height'):
-    calc_scale_height = _libs['vic_run.so'].calc_scale_height
+if hasattr(_libs['vic_core.so'], 'calc_scale_height'):
+    calc_scale_height = _libs['vic_core.so'].calc_scale_height
     calc_scale_height.argtypes = [c_double, c_double]
     calc_scale_height.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 55
-if hasattr(_libs['vic_run.so'], 'calc_sensible_heat'):
-    calc_sensible_heat = _libs['vic_run.so'].calc_sensible_heat
+if hasattr(_libs['vic_core.so'], 'calc_sensible_heat'):
+    calc_sensible_heat = _libs['vic_core.so'].calc_sensible_heat
     calc_sensible_heat.argtypes = [c_double, c_double, c_double, c_double]
     calc_sensible_heat.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 57
-if hasattr(_libs['vic_run.so'], 'calc_Nscale_factors'):
-    calc_Nscale_factors = _libs['vic_run.so'].calc_Nscale_factors
+if hasattr(_libs['vic_core.so'], 'calc_Nscale_factors'):
+    calc_Nscale_factors = _libs['vic_core.so'].calc_Nscale_factors
     calc_Nscale_factors.argtypes = [
         c_char,
         POINTER(c_double),
@@ -3652,14 +3652,14 @@ if hasattr(_libs['vic_run.so'], 'calc_Nscale_factors'):
     calc_Nscale_factors.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 59
-if hasattr(_libs['vic_run.so'], 'calc_rainonly'):
-    calc_rainonly = _libs['vic_run.so'].calc_rainonly
+if hasattr(_libs['vic_core.so'], 'calc_rainonly'):
+    calc_rainonly = _libs['vic_core.so'].calc_rainonly
     calc_rainonly.argtypes = [c_double, c_double, c_double, c_double]
     calc_rainonly.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 60
-if hasattr(_libs['vic_run.so'], 'calc_rc'):
-    calc_rc = _libs['vic_run.so'].calc_rc
+if hasattr(_libs['vic_core.so'], 'calc_rc'):
+    calc_rc = _libs['vic_core.so'].calc_rc
     calc_rc.argtypes = [
         c_double,
         c_double,
@@ -3672,8 +3672,8 @@ if hasattr(_libs['vic_run.so'], 'calc_rc'):
     calc_rc.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 61
-if hasattr(_libs['vic_run.so'], 'calc_rc_ps'):
-    calc_rc_ps = _libs['vic_run.so'].calc_rc_ps
+if hasattr(_libs['vic_core.so'], 'calc_rc_ps'):
+    calc_rc_ps = _libs['vic_core.so'].calc_rc_ps
     calc_rc_ps.argtypes = [
         c_char,
         c_double,
@@ -3694,8 +3694,8 @@ if hasattr(_libs['vic_run.so'], 'calc_rc_ps'):
     calc_rc_ps.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 64
-if hasattr(_libs['vic_run.so'], 'calc_snow_coverage'):
-    calc_snow_coverage = _libs['vic_run.so'].calc_snow_coverage
+if hasattr(_libs['vic_core.so'], 'calc_snow_coverage'):
+    calc_snow_coverage = _libs['vic_core.so'].calc_snow_coverage
     calc_snow_coverage.argtypes = [
         POINTER(c_bool),
         c_double,
@@ -3713,8 +3713,8 @@ if hasattr(_libs['vic_run.so'], 'calc_snow_coverage'):
     calc_snow_coverage.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 67
-if hasattr(_libs['vic_run.so'], 'calc_soil_thermal_fluxes'):
-    calc_soil_thermal_fluxes = _libs['vic_run.so'].calc_soil_thermal_fluxes
+if hasattr(_libs['vic_core.so'], 'calc_soil_thermal_fluxes'):
+    calc_soil_thermal_fluxes = _libs['vic_core.so'].calc_soil_thermal_fluxes
     calc_soil_thermal_fluxes.argtypes = [
         c_int,
         POINTER(c_double),
@@ -3738,8 +3738,8 @@ if hasattr(_libs['vic_run.so'], 'calc_soil_thermal_fluxes'):
     calc_soil_thermal_fluxes.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 71
-if hasattr(_libs['vic_run.so'], 'calc_surf_energy_bal'):
-    calc_surf_energy_bal = _libs['vic_run.so'].calc_surf_energy_bal
+if hasattr(_libs['vic_core.so'], 'calc_surf_energy_bal'):
+    calc_surf_energy_bal = _libs['vic_core.so'].calc_surf_energy_bal
     calc_surf_energy_bal.argtypes = [
         c_double,
         c_double,
@@ -3797,32 +3797,32 @@ if hasattr(_libs['vic_run.so'], 'calc_surf_energy_bal'):
     calc_surf_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 83
-if hasattr(_libs['vic_run.so'], 'calc_veg_displacement'):
-    calc_veg_displacement = _libs['vic_run.so'].calc_veg_displacement
+if hasattr(_libs['vic_core.so'], 'calc_veg_displacement'):
+    calc_veg_displacement = _libs['vic_core.so'].calc_veg_displacement
     calc_veg_displacement.argtypes = [c_double]
     calc_veg_displacement.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 84
-if hasattr(_libs['vic_run.so'], 'calc_veg_height'):
-    calc_veg_height = _libs['vic_run.so'].calc_veg_height
+if hasattr(_libs['vic_core.so'], 'calc_veg_height'):
+    calc_veg_height = _libs['vic_core.so'].calc_veg_height
     calc_veg_height.argtypes = [c_double]
     calc_veg_height.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 85
-if hasattr(_libs['vic_run.so'], 'calc_veg_roughness'):
-    calc_veg_roughness = _libs['vic_run.so'].calc_veg_roughness
+if hasattr(_libs['vic_core.so'], 'calc_veg_roughness'):
+    calc_veg_roughness = _libs['vic_core.so'].calc_veg_roughness
     calc_veg_roughness.argtypes = [c_double]
     calc_veg_roughness.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 86
-if hasattr(_libs['vic_run.so'], 'calc_water_balance_error'):
-    calc_water_balance_error = _libs['vic_run.so'].calc_water_balance_error
+if hasattr(_libs['vic_core.so'], 'calc_water_balance_error'):
+    calc_water_balance_error = _libs['vic_core.so'].calc_water_balance_error
     calc_water_balance_error.argtypes = [c_int, c_double, c_double, c_double]
     calc_water_balance_error.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 87
-if hasattr(_libs['vic_run.so'], 'CalcAerodynamic'):
-    CalcAerodynamic = _libs['vic_run.so'].CalcAerodynamic
+if hasattr(_libs['vic_core.so'], 'CalcAerodynamic'):
+    CalcAerodynamic = _libs['vic_core.so'].CalcAerodynamic
     CalcAerodynamic.argtypes = [
         c_bool,
         c_double,
@@ -3838,8 +3838,8 @@ if hasattr(_libs['vic_run.so'], 'CalcAerodynamic'):
     CalcAerodynamic.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 89
-if hasattr(_libs['vic_run.so'], 'CalcBlowingSnow'):
-    CalcBlowingSnow = _libs['vic_run.so'].CalcBlowingSnow
+if hasattr(_libs['vic_core.so'], 'CalcBlowingSnow'):
+    CalcBlowingSnow = _libs['vic_core.so'].CalcBlowingSnow
     CalcBlowingSnow.argtypes = [
         c_double,
         c_double,
@@ -3864,22 +3864,22 @@ if hasattr(_libs['vic_run.so'], 'CalcBlowingSnow'):
     CalcBlowingSnow.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 92
-if hasattr(_libs['vic_run.so'], 'CalcIcePackEnergyBalance'):
-    _func = _libs['vic_run.so'].CalcIcePackEnergyBalance
+if hasattr(_libs['vic_core.so'], 'CalcIcePackEnergyBalance'):
+    _func = _libs['vic_core.so'].CalcIcePackEnergyBalance
     _restype = c_double
     _argtypes = [c_double]
     CalcIcePackEnergyBalance = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 93
-if hasattr(_libs['vic_run.so'], 'CalcSnowPackEnergyBalance'):
-    _func = _libs['vic_run.so'].CalcSnowPackEnergyBalance
+if hasattr(_libs['vic_core.so'], 'CalcSnowPackEnergyBalance'):
+    _func = _libs['vic_core.so'].CalcSnowPackEnergyBalance
     _restype = c_double
     _argtypes = [c_double]
     CalcSnowPackEnergyBalance = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 94
-if hasattr(_libs['vic_run.so'], 'CalcSubFlux'):
-    CalcSubFlux = _libs['vic_run.so'].CalcSubFlux
+if hasattr(_libs['vic_core.so'], 'CalcSubFlux'):
+    CalcSubFlux = _libs['vic_core.so'].CalcSubFlux
     CalcSubFlux.argtypes = [
         c_double,
         c_double,
@@ -3897,8 +3897,8 @@ if hasattr(_libs['vic_run.so'], 'CalcSubFlux'):
     CalcSubFlux.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 98
-if hasattr(_libs['vic_run.so'], 'canopy_assimilation'):
-    canopy_assimilation = _libs['vic_run.so'].canopy_assimilation
+if hasattr(_libs['vic_core.so'], 'canopy_assimilation'):
+    canopy_assimilation = _libs['vic_core.so'].canopy_assimilation
     canopy_assimilation.argtypes = [
         c_char,
         c_double,
@@ -3926,8 +3926,8 @@ if hasattr(_libs['vic_run.so'], 'canopy_assimilation'):
     canopy_assimilation.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 102
-if hasattr(_libs['vic_run.so'], 'canopy_evap'):
-    canopy_evap = _libs['vic_run.so'].canopy_evap
+if hasattr(_libs['vic_core.so'], 'canopy_evap'):
+    canopy_evap = _libs['vic_core.so'].canopy_evap
     canopy_evap.argtypes = [
         POINTER(layer_data_struct),
         POINTER(veg_var_struct),
@@ -3954,8 +3954,8 @@ if hasattr(_libs['vic_run.so'], 'canopy_evap'):
     canopy_evap.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 106
-if hasattr(_libs['vic_run.so'], 'colavg'):
-    colavg = _libs['vic_run.so'].colavg
+if hasattr(_libs['vic_core.so'], 'colavg'):
+    colavg = _libs['vic_core.so'].colavg
     colavg.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -3968,8 +3968,8 @@ if hasattr(_libs['vic_run.so'], 'colavg'):
     colavg.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 108
-if hasattr(_libs['vic_run.so'], 'collect_eb_terms'):
-    collect_eb_terms = _libs['vic_run.so'].collect_eb_terms
+if hasattr(_libs['vic_core.so'], 'collect_eb_terms'):
+    collect_eb_terms = _libs['vic_core.so'].collect_eb_terms
     collect_eb_terms.argtypes = [
         energy_bal_struct,
         snow_data_struct,
@@ -3993,8 +3993,8 @@ if hasattr(_libs['vic_run.so'], 'collect_eb_terms'):
     collect_eb_terms.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 112
-if hasattr(_libs['vic_run.so'], 'collect_wb_terms'):
-    collect_wb_terms = _libs['vic_run.so'].collect_wb_terms
+if hasattr(_libs['vic_core.so'], 'collect_wb_terms'):
+    collect_wb_terms = _libs['vic_core.so'].collect_wb_terms
     collect_wb_terms.argtypes = [
         cell_data_struct,
         veg_var_struct,
@@ -4011,14 +4011,14 @@ if hasattr(_libs['vic_run.so'], 'collect_wb_terms'):
     collect_wb_terms.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 115
-if hasattr(_libs['vic_run.so'], 'compute_coszen'):
-    compute_coszen = _libs['vic_run.so'].compute_coszen
+if hasattr(_libs['vic_core.so'], 'compute_coszen'):
+    compute_coszen = _libs['vic_core.so'].compute_coszen
     compute_coszen.argtypes = [c_double, c_double, c_double, c_uint, c_uint]
     compute_coszen.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 116
-if hasattr(_libs['vic_run.so'], 'compute_pot_evap'):
-    compute_pot_evap = _libs['vic_run.so'].compute_pot_evap
+if hasattr(_libs['vic_core.so'], 'compute_pot_evap'):
+    compute_pot_evap = _libs['vic_core.so'].compute_pot_evap
     compute_pot_evap.argtypes = [
         c_uint,
         POINTER(dmy_struct),
@@ -4035,8 +4035,8 @@ if hasattr(_libs['vic_run.so'], 'compute_pot_evap'):
     compute_pot_evap.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 118
-if hasattr(_libs['vic_run.so'], 'compute_runoff_and_asat'):
-    compute_runoff_and_asat = _libs['vic_run.so'].compute_runoff_and_asat
+if hasattr(_libs['vic_core.so'], 'compute_runoff_and_asat'):
+    compute_runoff_and_asat = _libs['vic_core.so'].compute_runoff_and_asat
     compute_runoff_and_asat.argtypes = [
         POINTER(soil_con_struct),
         POINTER(c_double),
@@ -4046,8 +4046,8 @@ if hasattr(_libs['vic_run.so'], 'compute_runoff_and_asat'):
     compute_runoff_and_asat.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 120
-if hasattr(_libs['vic_run.so'], 'compute_soil_resp'):
-    compute_soil_resp = _libs['vic_run.so'].compute_soil_resp
+if hasattr(_libs['vic_core.so'], 'compute_soil_resp'):
+    compute_soil_resp = _libs['vic_core.so'].compute_soil_resp
     compute_soil_resp.argtypes = [
         c_int,
         POINTER(c_double),
@@ -4064,9 +4064,9 @@ if hasattr(_libs['vic_run.so'], 'compute_soil_resp'):
     compute_soil_resp.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 122
-if hasattr(_libs['vic_run.so'], 'compute_soil_layer_thermal_properties'):
+if hasattr(_libs['vic_core.so'], 'compute_soil_layer_thermal_properties'):
     compute_soil_layer_thermal_properties = _libs[
-        'vic_run.so'].compute_soil_layer_thermal_properties
+        'vic_core.so'].compute_soil_layer_thermal_properties
     compute_soil_layer_thermal_properties.argtypes = [
         POINTER(layer_data_struct),
         POINTER(c_double),
@@ -4081,14 +4081,14 @@ if hasattr(_libs['vic_run.so'], 'compute_soil_layer_thermal_properties'):
     compute_soil_layer_thermal_properties.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 126
-if hasattr(_libs['vic_run.so'], 'compute_zwt'):
-    compute_zwt = _libs['vic_run.so'].compute_zwt
+if hasattr(_libs['vic_core.so'], 'compute_zwt'):
+    compute_zwt = _libs['vic_core.so'].compute_zwt
     compute_zwt.argtypes = [POINTER(soil_con_struct), c_int, c_double]
     compute_zwt.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 127
-if hasattr(_libs['vic_run.so'], 'correct_precip'):
-    correct_precip = _libs['vic_run.so'].correct_precip
+if hasattr(_libs['vic_core.so'], 'correct_precip'):
+    correct_precip = _libs['vic_core.so'].correct_precip
     correct_precip.argtypes = [
         POINTER(c_double),
         c_double,
@@ -4098,15 +4098,15 @@ if hasattr(_libs['vic_run.so'], 'correct_precip'):
     correct_precip.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 128
-if hasattr(_libs['vic_run.so'], 'darkinhib'):
-    darkinhib = _libs['vic_run.so'].darkinhib
+if hasattr(_libs['vic_core.so'], 'darkinhib'):
+    darkinhib = _libs['vic_core.so'].darkinhib
     darkinhib.argtypes = [c_double]
     darkinhib.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 129
-if hasattr(_libs['vic_run.so'], 'distribute_node_moisture_properties'):
+if hasattr(_libs['vic_core.so'], 'distribute_node_moisture_properties'):
     distribute_node_moisture_properties = _libs[
-        'vic_run.so'].distribute_node_moisture_properties
+        'vic_core.so'].distribute_node_moisture_properties
     distribute_node_moisture_properties.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4131,8 +4131,8 @@ if hasattr(_libs['vic_run.so'], 'distribute_node_moisture_properties'):
     distribute_node_moisture_properties.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 134
-if hasattr(_libs['vic_run.so'], 'eddy'):
-    eddy = _libs['vic_run.so'].eddy
+if hasattr(_libs['vic_core.so'], 'eddy'):
+    eddy = _libs['vic_core.so'].eddy
     eddy.argtypes = [
         c_int,
         c_double,
@@ -4145,8 +4145,8 @@ if hasattr(_libs['vic_run.so'], 'eddy'):
     eddy.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 135
-if hasattr(_libs['vic_run.so'], 'energycalc'):
-    energycalc = _libs['vic_run.so'].energycalc
+if hasattr(_libs['vic_core.so'], 'energycalc'):
+    energycalc = _libs['vic_core.so'].energycalc
     energycalc.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4159,8 +4159,8 @@ if hasattr(_libs['vic_run.so'], 'energycalc'):
     energycalc.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 137
-if hasattr(_libs['vic_run.so'], 'error_calc_atmos_energy_bal'):
-    _func = _libs['vic_run.so'].error_calc_atmos_energy_bal
+if hasattr(_libs['vic_core.so'], 'error_calc_atmos_energy_bal'):
+    _func = _libs['vic_core.so'].error_calc_atmos_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     error_calc_atmos_energy_bal = _variadic_function(
@@ -4169,15 +4169,15 @@ if hasattr(_libs['vic_run.so'], 'error_calc_atmos_energy_bal'):
         _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 138
-if hasattr(_libs['vic_run.so'], 'error_calc_atmos_moist_bal'):
-    _func = _libs['vic_run.so'].error_calc_atmos_moist_bal
+if hasattr(_libs['vic_core.so'], 'error_calc_atmos_moist_bal'):
+    _func = _libs['vic_core.so'].error_calc_atmos_moist_bal
     _restype = c_double
     _argtypes = [c_double]
     error_calc_atmos_moist_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 139
-if hasattr(_libs['vic_run.so'], 'error_calc_canopy_energy_bal'):
-    _func = _libs['vic_run.so'].error_calc_canopy_energy_bal
+if hasattr(_libs['vic_core.so'], 'error_calc_canopy_energy_bal'):
+    _func = _libs['vic_core.so'].error_calc_canopy_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     error_calc_canopy_energy_bal = _variadic_function(
@@ -4186,85 +4186,86 @@ if hasattr(_libs['vic_run.so'], 'error_calc_canopy_energy_bal'):
         _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 140
-if hasattr(_libs['vic_run.so'], 'error_calc_surf_energy_bal'):
-    _func = _libs['vic_run.so'].error_calc_surf_energy_bal
+if hasattr(_libs['vic_core.so'], 'error_calc_surf_energy_bal'):
+    _func = _libs['vic_core.so'].error_calc_surf_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     error_calc_surf_energy_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 141
-if hasattr(_libs['vic_run.so'], 'error_print_atmos_energy_bal'):
+if hasattr(_libs['vic_core.so'], 'error_print_atmos_energy_bal'):
     error_print_atmos_energy_bal = _libs[
-        'vic_run.so'].error_print_atmos_energy_bal
+        'vic_core.so'].error_print_atmos_energy_bal
     error_print_atmos_energy_bal.argtypes = [c_double, c_void_p]
     error_print_atmos_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 142
-if hasattr(_libs['vic_run.so'], 'error_print_atmos_moist_bal'):
+if hasattr(_libs['vic_core.so'], 'error_print_atmos_moist_bal'):
     error_print_atmos_moist_bal = _libs[
-        'vic_run.so'].error_print_atmos_moist_bal
+        'vic_core.so'].error_print_atmos_moist_bal
     error_print_atmos_moist_bal.argtypes = [c_double, c_void_p]
     error_print_atmos_moist_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 143
-if hasattr(_libs['vic_run.so'], 'error_print_canopy_energy_bal'):
+if hasattr(_libs['vic_core.so'], 'error_print_canopy_energy_bal'):
     error_print_canopy_energy_bal = _libs[
-        'vic_run.so'].error_print_canopy_energy_bal
+        'vic_core.so'].error_print_canopy_energy_bal
     error_print_canopy_energy_bal.argtypes = [c_double, c_void_p]
     error_print_canopy_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 144
-if hasattr(_libs['vic_run.so'], 'error_print_solve_T_profile'):
+if hasattr(_libs['vic_core.so'], 'error_print_solve_T_profile'):
     error_print_solve_T_profile = _libs[
-        'vic_run.so'].error_print_solve_T_profile
+        'vic_core.so'].error_print_solve_T_profile
     error_print_solve_T_profile.argtypes = [c_double, c_void_p]
     error_print_solve_T_profile.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 145
-if hasattr(_libs['vic_run.so'], 'error_print_surf_energy_bal'):
+if hasattr(_libs['vic_core.so'], 'error_print_surf_energy_bal'):
     error_print_surf_energy_bal = _libs[
-        'vic_run.so'].error_print_surf_energy_bal
+        'vic_core.so'].error_print_surf_energy_bal
     error_print_surf_energy_bal.argtypes = [c_double, c_void_p]
     error_print_surf_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 146
-if hasattr(_libs['vic_run.so'], 'error_solve_T_profile'):
-    _func = _libs['vic_run.so'].error_solve_T_profile
+if hasattr(_libs['vic_core.so'], 'error_solve_T_profile'):
+    _func = _libs['vic_core.so'].error_solve_T_profile
     _restype = c_double
     _argtypes = [c_double]
     error_solve_T_profile = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 147
-if hasattr(_libs['vic_run.so'], 'ErrorIcePackEnergyBalance'):
-    _func = _libs['vic_run.so'].ErrorIcePackEnergyBalance
+if hasattr(_libs['vic_core.so'], 'ErrorIcePackEnergyBalance'):
+    _func = _libs['vic_core.so'].ErrorIcePackEnergyBalance
     _restype = c_double
     _argtypes = [c_double]
     ErrorIcePackEnergyBalance = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 148
-if hasattr(_libs['vic_run.so'], 'ErrorPrintIcePackEnergyBalance'):
+if hasattr(_libs['vic_core.so'], 'ErrorPrintIcePackEnergyBalance'):
     ErrorPrintIcePackEnergyBalance = _libs[
-        'vic_run.so'].ErrorPrintIcePackEnergyBalance
+        'vic_core.so'].ErrorPrintIcePackEnergyBalance
     ErrorPrintIcePackEnergyBalance.argtypes = [c_double, c_void_p]
     ErrorPrintIcePackEnergyBalance.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 149
-if hasattr(_libs['vic_run.so'], 'ErrorPrintSnowPackEnergyBalance'):
+if hasattr(_libs['vic_core.so'], 'ErrorPrintSnowPackEnergyBalance'):
     ErrorPrintSnowPackEnergyBalance = _libs[
-        'vic_run.so'].ErrorPrintSnowPackEnergyBalance
+        'vic_core.so'].ErrorPrintSnowPackEnergyBalance
     ErrorPrintSnowPackEnergyBalance.argtypes = [c_double, c_void_p]
     ErrorPrintSnowPackEnergyBalance.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 150
-if hasattr(_libs['vic_run.so'], 'ErrorSnowPackEnergyBalance'):
-    _func = _libs['vic_run.so'].ErrorSnowPackEnergyBalance
+if hasattr(_libs['vic_core.so'], 'ErrorSnowPackEnergyBalance'):
+    _func = _libs['vic_core.so'].ErrorSnowPackEnergyBalance
     _restype = c_int
     _argtypes = [c_double]
     ErrorSnowPackEnergyBalance = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 151
-if hasattr(_libs['vic_run.so'], 'estimate_layer_ice_content'):
-    estimate_layer_ice_content = _libs['vic_run.so'].estimate_layer_ice_content
+if hasattr(_libs['vic_core.so'], 'estimate_layer_ice_content'):
+    estimate_layer_ice_content = _libs[
+        'vic_core.so'].estimate_layer_ice_content
     estimate_layer_ice_content.argtypes = [
         POINTER(layer_data_struct),
         POINTER(c_double),
@@ -4281,9 +4282,9 @@ if hasattr(_libs['vic_run.so'], 'estimate_layer_ice_content'):
     estimate_layer_ice_content.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 154
-if hasattr(_libs['vic_run.so'], 'estimate_layer_ice_content_quick_flux'):
+if hasattr(_libs['vic_core.so'], 'estimate_layer_ice_content_quick_flux'):
     estimate_layer_ice_content_quick_flux = _libs[
-        'vic_run.so'].estimate_layer_ice_content_quick_flux
+        'vic_core.so'].estimate_layer_ice_content_quick_flux
     estimate_layer_ice_content_quick_flux.argtypes = [
         POINTER(layer_data_struct),
         POINTER(c_double),
@@ -4300,8 +4301,8 @@ if hasattr(_libs['vic_run.so'], 'estimate_layer_ice_content_quick_flux'):
     estimate_layer_ice_content_quick_flux.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 158
-if hasattr(_libs['vic_run.so'], 'estimate_T1'):
-    estimate_T1 = _libs['vic_run.so'].estimate_T1
+if hasattr(_libs['vic_core.so'], 'estimate_T1'):
+    estimate_T1 = _libs['vic_core.so'].estimate_T1
     estimate_T1.argtypes = [
         c_double,
         c_double,
@@ -4316,14 +4317,14 @@ if hasattr(_libs['vic_run.so'], 'estimate_T1'):
     estimate_T1.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 160
-if hasattr(_libs['vic_run.so'], 'exp_interp'):
-    exp_interp = _libs['vic_run.so'].exp_interp
+if hasattr(_libs['vic_core.so'], 'exp_interp'):
+    exp_interp = _libs['vic_core.so'].exp_interp
     exp_interp.argtypes = [c_double, c_double, c_double, c_double, c_double]
     exp_interp.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 161
-if hasattr(_libs['vic_run.so'], 'faparl'):
-    faparl = _libs['vic_run.so'].faparl
+if hasattr(_libs['vic_core.so'], 'faparl'):
+    faparl = _libs['vic_core.so'].faparl
     faparl.argtypes = [
         POINTER(c_double),
         c_double,
@@ -4335,15 +4336,15 @@ if hasattr(_libs['vic_run.so'], 'faparl'):
     faparl.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 162
-if hasattr(_libs['vic_run.so'], 'fda_heat_eqn'):
-    _func = _libs['vic_run.so'].fda_heat_eqn
+if hasattr(_libs['vic_core.so'], 'fda_heat_eqn'):
+    _func = _libs['vic_core.so'].fda_heat_eqn
     _restype = None
     _argtypes = [POINTER(c_double), POINTER(c_double), c_int, c_int]
     fda_heat_eqn = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 163
-if hasattr(_libs['vic_run.so'], 'fdjac3'):
-    fdjac3 = _libs['vic_run.so'].fdjac3
+if hasattr(_libs['vic_core.so'], 'fdjac3'):
+    fdjac3 = _libs['vic_core.so'].fdjac3
     fdjac3.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4360,8 +4361,8 @@ if hasattr(_libs['vic_run.so'], 'fdjac3'):
     fdjac3.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 165
-if hasattr(_libs['vic_run.so'], 'find_0_degree_fronts'):
-    find_0_degree_fronts = _libs['vic_run.so'].find_0_degree_fronts
+if hasattr(_libs['vic_core.so'], 'find_0_degree_fronts'):
+    find_0_degree_fronts = _libs['vic_core.so'].find_0_degree_fronts
     find_0_degree_fronts.argtypes = [
         POINTER(energy_bal_struct),
         POINTER(c_double),
@@ -4383,26 +4384,26 @@ for _lib in _libs.itervalues():
     break
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 168
-if hasattr(_libs['vic_run.so'], 'func_atmos_energy_bal'):
-    func_atmos_energy_bal = _libs['vic_run.so'].func_atmos_energy_bal
+if hasattr(_libs['vic_core.so'], 'func_atmos_energy_bal'):
+    func_atmos_energy_bal = _libs['vic_core.so'].func_atmos_energy_bal
     func_atmos_energy_bal.argtypes = [c_double, c_void_p]
     func_atmos_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 169
-if hasattr(_libs['vic_run.so'], 'func_atmos_moist_bal'):
-    func_atmos_moist_bal = _libs['vic_run.so'].func_atmos_moist_bal
+if hasattr(_libs['vic_core.so'], 'func_atmos_moist_bal'):
+    func_atmos_moist_bal = _libs['vic_core.so'].func_atmos_moist_bal
     func_atmos_moist_bal.argtypes = [c_double, c_void_p]
     func_atmos_moist_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 170
-if hasattr(_libs['vic_run.so'], 'func_canopy_energy_bal'):
-    func_canopy_energy_bal = _libs['vic_run.so'].func_canopy_energy_bal
+if hasattr(_libs['vic_core.so'], 'func_canopy_energy_bal'):
+    func_canopy_energy_bal = _libs['vic_core.so'].func_canopy_energy_bal
     func_canopy_energy_bal.argtypes = [c_double, c_void_p]
     func_canopy_energy_bal.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 171
-if hasattr(_libs['vic_run.so'], 'func_surf_energy_bal'):
-    func_surf_energy_bal = _libs['vic_run.so'].func_surf_energy_bal
+if hasattr(_libs['vic_core.so'], 'func_surf_energy_bal'):
+    func_surf_energy_bal = _libs['vic_core.so'].func_surf_energy_bal
     func_surf_energy_bal.argtypes = [c_double, c_void_p]
     func_surf_energy_bal.restype = c_double
 
@@ -4423,32 +4424,32 @@ try:
                 c_double,
                 c_double,
                 c_double))).in_dll(
-        _libs['vic_run.so'],
+        _libs['vic_core.so'],
         'funcd')
 except:
     pass
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 176
-if hasattr(_libs['vic_run.so'], 'get_depth'):
-    get_depth = _libs['vic_run.so'].get_depth
+if hasattr(_libs['vic_core.so'], 'get_depth'):
+    get_depth = _libs['vic_core.so'].get_depth
     get_depth.argtypes = [lake_con_struct, c_double, POINTER(c_double)]
     get_depth.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 177
-if hasattr(_libs['vic_run.so'], 'get_prob'):
-    get_prob = _libs['vic_run.so'].get_prob
+if hasattr(_libs['vic_core.so'], 'get_prob'):
+    get_prob = _libs['vic_core.so'].get_prob
     get_prob.argtypes = [c_double, c_double, c_double, c_double]
     get_prob.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 178
-if hasattr(_libs['vic_run.so'], 'get_sarea'):
-    get_sarea = _libs['vic_run.so'].get_sarea
+if hasattr(_libs['vic_core.so'], 'get_sarea'):
+    get_sarea = _libs['vic_core.so'].get_sarea
     get_sarea.argtypes = [lake_con_struct, c_double, POINTER(c_double)]
     get_sarea.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 179
-if hasattr(_libs['vic_run.so'], 'get_shear'):
-    get_shear = _libs['vic_run.so'].get_shear
+if hasattr(_libs['vic_core.so'], 'get_shear'):
+    get_shear = _libs['vic_core.so'].get_shear
     get_shear.argtypes = [
         c_double,
         POINTER(c_double),
@@ -4458,26 +4459,26 @@ if hasattr(_libs['vic_run.so'], 'get_shear'):
     get_shear.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 180
-if hasattr(_libs['vic_run.so'], 'get_thresh'):
-    get_thresh = _libs['vic_run.so'].get_thresh
+if hasattr(_libs['vic_core.so'], 'get_thresh'):
+    get_thresh = _libs['vic_core.so'].get_thresh
     get_thresh.argtypes = [c_double, c_double, c_double]
     get_thresh.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 181
-if hasattr(_libs['vic_run.so'], 'get_volume'):
-    get_volume = _libs['vic_run.so'].get_volume
+if hasattr(_libs['vic_core.so'], 'get_volume'):
+    get_volume = _libs['vic_core.so'].get_volume
     get_volume.argtypes = [lake_con_struct, c_double, POINTER(c_double)]
     get_volume.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 182
-if hasattr(_libs['vic_run.so'], 'hiTinhib'):
-    hiTinhib = _libs['vic_run.so'].hiTinhib
+if hasattr(_libs['vic_core.so'], 'hiTinhib'):
+    hiTinhib = _libs['vic_core.so'].hiTinhib
     hiTinhib.argtypes = [c_double]
     hiTinhib.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 183
-if hasattr(_libs['vic_run.so'], 'initialize_lake'):
-    initialize_lake = _libs['vic_run.so'].initialize_lake
+if hasattr(_libs['vic_core.so'], 'initialize_lake'):
+    initialize_lake = _libs['vic_core.so'].initialize_lake
     initialize_lake.argtypes = [
         POINTER(lake_var_struct),
         lake_con_struct,
@@ -4488,8 +4489,8 @@ if hasattr(_libs['vic_run.so'], 'initialize_lake'):
     initialize_lake.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 185
-if hasattr(_libs['vic_run.so'], 'ice_melt'):
-    ice_melt = _libs['vic_run.so'].ice_melt
+if hasattr(_libs['vic_core.so'], 'ice_melt'):
+    ice_melt = _libs['vic_core.so'].ice_melt
     ice_melt.argtypes = [
         c_double,
         c_double,
@@ -4524,14 +4525,14 @@ if hasattr(_libs['vic_run.so'], 'ice_melt'):
     ice_melt.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 190
-if hasattr(_libs['vic_run.so'], 'IceEnergyBalance'):
-    IceEnergyBalance = _libs['vic_run.so'].IceEnergyBalance
+if hasattr(_libs['vic_core.so'], 'IceEnergyBalance'):
+    IceEnergyBalance = _libs['vic_core.so'].IceEnergyBalance
     IceEnergyBalance.argtypes = [c_double, c_void_p]
     IceEnergyBalance.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 191
-if hasattr(_libs['vic_run.so'], 'iceform'):
-    iceform = _libs['vic_run.so'].iceform
+if hasattr(_libs['vic_core.so'], 'iceform'):
+    iceform = _libs['vic_core.so'].iceform
     iceform.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4550,8 +4551,8 @@ if hasattr(_libs['vic_run.so'], 'iceform'):
     iceform.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 193
-if hasattr(_libs['vic_run.so'], 'icerad'):
-    icerad = _libs['vic_run.so'].icerad
+if hasattr(_libs['vic_core.so'], 'icerad'):
+    icerad = _libs['vic_core.so'].icerad
     icerad.argtypes = [
         c_double,
         c_double,
@@ -4562,8 +4563,8 @@ if hasattr(_libs['vic_run.so'], 'icerad'):
     icerad.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 194
-if hasattr(_libs['vic_run.so'], 'lakeice'):
-    lakeice = _libs['vic_run.so'].lakeice
+if hasattr(_libs['vic_core.so'], 'lakeice'):
+    lakeice = _libs['vic_core.so'].lakeice
     lakeice.argtypes = [
         c_double,
         c_double,
@@ -4579,8 +4580,8 @@ if hasattr(_libs['vic_run.so'], 'lakeice'):
     lakeice.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 196
-if hasattr(_libs['vic_run.so'], 'latent_heat_from_snow'):
-    latent_heat_from_snow = _libs['vic_run.so'].latent_heat_from_snow
+if hasattr(_libs['vic_core.so'], 'latent_heat_from_snow'):
+    latent_heat_from_snow = _libs['vic_core.so'].latent_heat_from_snow
     latent_heat_from_snow.argtypes = [
         c_double,
         c_double,
@@ -4597,8 +4598,8 @@ if hasattr(_libs['vic_run.so'], 'latent_heat_from_snow'):
     latent_heat_from_snow.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 199
-if hasattr(_libs['vic_run.so'], 'latsens'):
-    latsens = _libs['vic_run.so'].latsens
+if hasattr(_libs['vic_core.so'], 'latsens'):
+    latsens = _libs['vic_core.so'].latsens
     latsens.argtypes = [
         c_double,
         c_double,
@@ -4614,20 +4615,20 @@ if hasattr(_libs['vic_run.so'], 'latsens'):
     latsens.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 201
-if hasattr(_libs['vic_run.so'], 'linear_interp'):
-    linear_interp = _libs['vic_run.so'].linear_interp
+if hasattr(_libs['vic_core.so'], 'linear_interp'):
+    linear_interp = _libs['vic_core.so'].linear_interp
     linear_interp.argtypes = [c_double, c_double, c_double, c_double, c_double]
     linear_interp.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 202
-if hasattr(_libs['vic_run.so'], 'lkdrag'):
-    lkdrag = _libs['vic_run.so'].lkdrag
+if hasattr(_libs['vic_core.so'], 'lkdrag'):
+    lkdrag = _libs['vic_core.so'].lkdrag
     lkdrag.argtypes = [c_double, c_double, c_double, c_double, c_double]
     lkdrag.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 203
-if hasattr(_libs['vic_run.so'], 'MassRelease'):
-    MassRelease = _libs['vic_run.so'].MassRelease
+if hasattr(_libs['vic_core.so'], 'MassRelease'):
+    MassRelease = _libs['vic_core.so'].MassRelease
     MassRelease.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4636,26 +4637,26 @@ if hasattr(_libs['vic_run.so'], 'MassRelease'):
     MassRelease.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 204
-if hasattr(_libs['vic_run.so'], 'maximum_unfrozen_water'):
-    maximum_unfrozen_water = _libs['vic_run.so'].maximum_unfrozen_water
+if hasattr(_libs['vic_core.so'], 'maximum_unfrozen_water'):
+    maximum_unfrozen_water = _libs['vic_core.so'].maximum_unfrozen_water
     maximum_unfrozen_water.argtypes = [c_double, c_double, c_double, c_double]
     maximum_unfrozen_water.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 205
-if hasattr(_libs['vic_run.so'], 'modify_Ksat'):
-    modify_Ksat = _libs['vic_run.so'].modify_Ksat
+if hasattr(_libs['vic_core.so'], 'modify_Ksat'):
+    modify_Ksat = _libs['vic_core.so'].modify_Ksat
     modify_Ksat.argtypes = [c_double]
     modify_Ksat.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 206
-if hasattr(_libs['vic_run.so'], 'new_snow_density'):
-    new_snow_density = _libs['vic_run.so'].new_snow_density
+if hasattr(_libs['vic_core.so'], 'new_snow_density'):
+    new_snow_density = _libs['vic_core.so'].new_snow_density
     new_snow_density.argtypes = [c_double]
     new_snow_density.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 207
-if hasattr(_libs['vic_run.so'], 'newt_raph'):
-    newt_raph = _libs['vic_run.so'].newt_raph
+if hasattr(_libs['vic_core.so'], 'newt_raph'):
+    newt_raph = _libs['vic_core.so'].newt_raph
     newt_raph.argtypes = [
         CFUNCTYPE(
             UNCHECKED(None),
@@ -4668,8 +4669,8 @@ if hasattr(_libs['vic_run.so'], 'newt_raph'):
     newt_raph.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 209
-if hasattr(_libs['vic_run.so'], 'penman'):
-    penman = _libs['vic_run.so'].penman
+if hasattr(_libs['vic_core.so'], 'penman'):
+    penman = _libs['vic_core.so'].penman
     penman.argtypes = [
         c_double,
         c_double,
@@ -4681,8 +4682,8 @@ if hasattr(_libs['vic_run.so'], 'penman'):
     penman.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 210
-if hasattr(_libs['vic_run.so'], 'photosynth'):
-    photosynth = _libs['vic_run.so'].photosynth
+if hasattr(_libs['vic_core.so'], 'photosynth'):
+    photosynth = _libs['vic_core.so'].photosynth
     photosynth.argtypes = [
         c_char,
         c_double,
@@ -4703,8 +4704,8 @@ if hasattr(_libs['vic_run.so'], 'photosynth'):
     photosynth.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 213
-if hasattr(_libs['vic_run.so'], 'polint'):
-    polint = _libs['vic_run.so'].polint
+if hasattr(_libs['vic_core.so'], 'polint'):
+    polint = _libs['vic_core.so'].polint
     polint.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4715,8 +4716,8 @@ if hasattr(_libs['vic_run.so'], 'polint'):
     polint.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 214
-if hasattr(_libs['vic_run.so'], 'prepare_full_energy'):
-    prepare_full_energy = _libs['vic_run.so'].prepare_full_energy
+if hasattr(_libs['vic_core.so'], 'prepare_full_energy'):
+    prepare_full_energy = _libs['vic_core.so'].prepare_full_energy
     prepare_full_energy.argtypes = [
         c_int,
         POINTER(all_vars_struct),
@@ -4726,8 +4727,8 @@ if hasattr(_libs['vic_run.so'], 'prepare_full_energy'):
     prepare_full_energy.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 216
-if hasattr(_libs['vic_run.so'], 'put_data'):
-    put_data = _libs['vic_run.so'].put_data
+if hasattr(_libs['vic_core.so'], 'put_data'):
+    put_data = _libs['vic_core.so'].put_data
     put_data.argtypes = [
         POINTER(all_vars_struct),
         POINTER(atmos_data_struct),
@@ -4741,8 +4742,8 @@ if hasattr(_libs['vic_run.so'], 'put_data'):
     put_data.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 219
-if hasattr(_libs['vic_run.so'], 'qromb'):
-    qromb = _libs['vic_run.so'].qromb
+if hasattr(_libs['vic_core.so'], 'qromb'):
+    qromb = _libs['vic_core.so'].qromb
     qromb.argtypes = [
         CFUNCTYPE(
             UNCHECKED(c_double),
@@ -4762,8 +4763,9 @@ if hasattr(_libs['vic_run.so'], 'qromb'):
     qromb.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 222
-if hasattr(_libs['vic_run.so'], 'rescale_snow_energy_fluxes'):
-    rescale_snow_energy_fluxes = _libs['vic_run.so'].rescale_snow_energy_fluxes
+if hasattr(_libs['vic_core.so'], 'rescale_snow_energy_fluxes'):
+    rescale_snow_energy_fluxes = _libs[
+        'vic_core.so'].rescale_snow_energy_fluxes
     rescale_snow_energy_fluxes.argtypes = [
         c_double,
         c_double,
@@ -4772,8 +4774,8 @@ if hasattr(_libs['vic_run.so'], 'rescale_snow_energy_fluxes'):
     rescale_snow_energy_fluxes.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 224
-if hasattr(_libs['vic_run.so'], 'rescale_snow_storage'):
-    rescale_snow_storage = _libs['vic_run.so'].rescale_snow_storage
+if hasattr(_libs['vic_core.so'], 'rescale_snow_storage'):
+    rescale_snow_storage = _libs['vic_core.so'].rescale_snow_storage
     rescale_snow_storage.argtypes = [
         c_double,
         c_double,
@@ -4781,8 +4783,8 @@ if hasattr(_libs['vic_run.so'], 'rescale_snow_storage'):
     rescale_snow_storage.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 225
-if hasattr(_libs['vic_run.so'], 'rescale_soil_veg_fluxes'):
-    rescale_soil_veg_fluxes = _libs['vic_run.so'].rescale_soil_veg_fluxes
+if hasattr(_libs['vic_core.so'], 'rescale_soil_veg_fluxes'):
+    rescale_soil_veg_fluxes = _libs['vic_core.so'].rescale_soil_veg_fluxes
     rescale_soil_veg_fluxes.argtypes = [
         c_double,
         c_double,
@@ -4791,14 +4793,14 @@ if hasattr(_libs['vic_run.so'], 'rescale_soil_veg_fluxes'):
     rescale_soil_veg_fluxes.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 227
-if hasattr(_libs['vic_run.so'], 'rhoinit'):
-    rhoinit = _libs['vic_run.so'].rhoinit
+if hasattr(_libs['vic_core.so'], 'rhoinit'):
+    rhoinit = _libs['vic_core.so'].rhoinit
     rhoinit.argtypes = [POINTER(c_double), c_double]
     rhoinit.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 228
-if hasattr(_libs['vic_run.so'], 'root_brent'):
-    _func = _libs['vic_run.so'].root_brent
+if hasattr(_libs['vic_core.so'], 'root_brent'):
+    _func = _libs['vic_core.so'].root_brent
     _restype = c_double
     _argtypes = [
         c_double,
@@ -4811,14 +4813,14 @@ if hasattr(_libs['vic_run.so'], 'root_brent'):
     root_brent = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 230
-if hasattr(_libs['vic_run.so'], 'rtnewt'):
-    rtnewt = _libs['vic_run.so'].rtnewt
+if hasattr(_libs['vic_core.so'], 'rtnewt'):
+    rtnewt = _libs['vic_core.so'].rtnewt
     rtnewt.argtypes = [c_double, c_double, c_double, c_double, c_double]
     rtnewt.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 231
-if hasattr(_libs['vic_run.so'], 'runoff'):
-    runoff = _libs['vic_run.so'].runoff
+if hasattr(_libs['vic_core.so'], 'runoff'):
+    runoff = _libs['vic_core.so'].runoff
     runoff.argtypes = [
         POINTER(cell_data_struct),
         POINTER(energy_bal_struct),
@@ -4830,8 +4832,8 @@ if hasattr(_libs['vic_run.so'], 'runoff'):
     runoff.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 233
-if hasattr(_libs['vic_run.so'], 'set_node_parameters'):
-    set_node_parameters = _libs['vic_run.so'].set_node_parameters
+if hasattr(_libs['vic_core.so'], 'set_node_parameters'):
+    set_node_parameters = _libs['vic_core.so'].set_node_parameters
     set_node_parameters.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -4849,8 +4851,8 @@ if hasattr(_libs['vic_run.so'], 'set_node_parameters'):
     set_node_parameters.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 236
-if hasattr(_libs['vic_run.so'], 'shear_stress'):
-    shear_stress = _libs['vic_run.so'].shear_stress
+if hasattr(_libs['vic_core.so'], 'shear_stress'):
+    shear_stress = _libs['vic_core.so'].shear_stress
     shear_stress.argtypes = [
         c_double,
         c_double,
@@ -4860,8 +4862,8 @@ if hasattr(_libs['vic_run.so'], 'shear_stress'):
     shear_stress.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 238
-if hasattr(_libs['vic_run.so'], 'snow_albedo'):
-    snow_albedo = _libs['vic_run.so'].snow_albedo
+if hasattr(_libs['vic_core.so'], 'snow_albedo'):
+    snow_albedo = _libs['vic_core.so'].snow_albedo
     snow_albedo.argtypes = [
         c_double,
         c_double,
@@ -4873,8 +4875,8 @@ if hasattr(_libs['vic_run.so'], 'snow_albedo'):
     snow_albedo.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 239
-if hasattr(_libs['vic_run.so'], 'snow_density'):
-    snow_density = _libs['vic_run.so'].snow_density
+if hasattr(_libs['vic_core.so'], 'snow_density'):
+    snow_density = _libs['vic_core.so'].snow_density
     snow_density.argtypes = [
         POINTER(snow_data_struct),
         c_double,
@@ -4884,8 +4886,8 @@ if hasattr(_libs['vic_run.so'], 'snow_density'):
     snow_density.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 240
-if hasattr(_libs['vic_run.so'], 'snow_intercept'):
-    snow_intercept = _libs['vic_run.so'].snow_intercept
+if hasattr(_libs['vic_core.so'], 'snow_intercept'):
+    snow_intercept = _libs['vic_core.so'].snow_intercept
     snow_intercept.argtypes = [
         c_double,
         c_double,
@@ -4938,8 +4940,8 @@ if hasattr(_libs['vic_run.so'], 'snow_intercept'):
     snow_intercept.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 249
-if hasattr(_libs['vic_run.so'], 'snow_melt'):
-    snow_melt = _libs['vic_run.so'].snow_melt
+if hasattr(_libs['vic_core.so'], 'snow_melt'):
+    snow_melt = _libs['vic_core.so'].snow_melt
     snow_melt.argtypes = [
         c_double,
         c_double,
@@ -4981,14 +4983,14 @@ if hasattr(_libs['vic_run.so'], 'snow_melt'):
     snow_melt.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 255
-if hasattr(_libs['vic_run.so'], 'SnowPackEnergyBalance'):
-    SnowPackEnergyBalance = _libs['vic_run.so'].SnowPackEnergyBalance
+if hasattr(_libs['vic_core.so'], 'SnowPackEnergyBalance'):
+    SnowPackEnergyBalance = _libs['vic_core.so'].SnowPackEnergyBalance
     SnowPackEnergyBalance.argtypes = [c_double, c_void_p]
     SnowPackEnergyBalance.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 256
-if hasattr(_libs['vic_run.so'], 'soil_carbon_balance'):
-    soil_carbon_balance = _libs['vic_run.so'].soil_carbon_balance
+if hasattr(_libs['vic_core.so'], 'soil_carbon_balance'):
+    soil_carbon_balance = _libs['vic_core.so'].soil_carbon_balance
     soil_carbon_balance.argtypes = [
         POINTER(soil_con_struct),
         POINTER(energy_bal_struct),
@@ -4997,8 +4999,8 @@ if hasattr(_libs['vic_run.so'], 'soil_carbon_balance'):
     soil_carbon_balance.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 258
-if hasattr(_libs['vic_run.so'], 'soil_conductivity'):
-    soil_conductivity = _libs['vic_run.so'].soil_conductivity
+if hasattr(_libs['vic_core.so'], 'soil_conductivity'):
+    soil_conductivity = _libs['vic_core.so'].soil_conductivity
     soil_conductivity.argtypes = [
         c_double,
         c_double,
@@ -5011,35 +5013,35 @@ if hasattr(_libs['vic_run.so'], 'soil_conductivity'):
     soil_conductivity.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 260
-if hasattr(_libs['vic_run.so'], 'soil_thermal_eqn'):
-    soil_thermal_eqn = _libs['vic_run.so'].soil_thermal_eqn
+if hasattr(_libs['vic_core.so'], 'soil_thermal_eqn'):
+    soil_thermal_eqn = _libs['vic_core.so'].soil_thermal_eqn
     soil_thermal_eqn.argtypes = [c_double, c_void_p]
     soil_thermal_eqn.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 261
-if hasattr(_libs['vic_run.so'], 'solve_atmos_energy_bal'):
-    _func = _libs['vic_run.so'].solve_atmos_energy_bal
+if hasattr(_libs['vic_core.so'], 'solve_atmos_energy_bal'):
+    _func = _libs['vic_core.so'].solve_atmos_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     solve_atmos_energy_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 262
-if hasattr(_libs['vic_run.so'], 'solve_atmos_moist_bal'):
-    _func = _libs['vic_run.so'].solve_atmos_moist_bal
+if hasattr(_libs['vic_core.so'], 'solve_atmos_moist_bal'):
+    _func = _libs['vic_core.so'].solve_atmos_moist_bal
     _restype = c_double
     _argtypes = [c_double]
     solve_atmos_moist_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 263
-if hasattr(_libs['vic_run.so'], 'solve_canopy_energy_bal'):
-    _func = _libs['vic_run.so'].solve_canopy_energy_bal
+if hasattr(_libs['vic_core.so'], 'solve_canopy_energy_bal'):
+    _func = _libs['vic_core.so'].solve_canopy_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     solve_canopy_energy_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 264
-if hasattr(_libs['vic_run.so'], 'solve_lake'):
-    solve_lake = _libs['vic_run.so'].solve_lake
+if hasattr(_libs['vic_core.so'], 'solve_lake'):
+    solve_lake = _libs['vic_core.so'].solve_lake
     solve_lake.argtypes = [
         c_double,
         c_double,
@@ -5060,8 +5062,8 @@ if hasattr(_libs['vic_run.so'], 'solve_lake'):
     solve_lake.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 267
-if hasattr(_libs['vic_run.so'], 'solve_snow'):
-    solve_snow = _libs['vic_run.so'].solve_snow
+if hasattr(_libs['vic_core.so'], 'solve_snow'):
+    solve_snow = _libs['vic_core.so'].solve_snow
     solve_snow.argtypes = [
         c_char,
         c_double,
@@ -5122,15 +5124,15 @@ if hasattr(_libs['vic_run.so'], 'solve_snow'):
     solve_snow.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 277
-if hasattr(_libs['vic_run.so'], 'solve_surf_energy_bal'):
-    _func = _libs['vic_run.so'].solve_surf_energy_bal
+if hasattr(_libs['vic_core.so'], 'solve_surf_energy_bal'):
+    _func = _libs['vic_core.so'].solve_surf_energy_bal
     _restype = c_double
     _argtypes = [c_double]
     solve_surf_energy_bal = _variadic_function(_func, _restype, _argtypes)
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 278
-if hasattr(_libs['vic_run.so'], 'solve_T_profile'):
-    solve_T_profile = _libs['vic_run.so'].solve_T_profile
+if hasattr(_libs['vic_core.so'], 'solve_T_profile'):
+    solve_T_profile = _libs['vic_core.so'].solve_T_profile
     solve_T_profile.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -5157,8 +5159,8 @@ if hasattr(_libs['vic_run.so'], 'solve_T_profile'):
     solve_T_profile.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 282
-if hasattr(_libs['vic_run.so'], 'solve_T_profile_implicit'):
-    solve_T_profile_implicit = _libs['vic_run.so'].solve_T_profile_implicit
+if hasattr(_libs['vic_core.so'], 'solve_T_profile_implicit'):
+    solve_T_profile_implicit = _libs['vic_core.so'].solve_T_profile_implicit
     solve_T_profile_implicit.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -5191,14 +5193,14 @@ if hasattr(_libs['vic_run.so'], 'solve_T_profile_implicit'):
     solve_T_profile_implicit.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 288
-if hasattr(_libs['vic_run.so'], 'specheat'):
-    specheat = _libs['vic_run.so'].specheat
+if hasattr(_libs['vic_core.so'], 'specheat'):
+    specheat = _libs['vic_core.so'].specheat
     specheat.argtypes = [c_double]
     specheat.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 289
-if hasattr(_libs['vic_run.so'], 'StabilityCorrection'):
-    StabilityCorrection = _libs['vic_run.so'].StabilityCorrection
+if hasattr(_libs['vic_core.so'], 'StabilityCorrection'):
+    StabilityCorrection = _libs['vic_core.so'].StabilityCorrection
     StabilityCorrection.argtypes = [
         c_double,
         c_double,
@@ -5209,8 +5211,8 @@ if hasattr(_libs['vic_run.so'], 'StabilityCorrection'):
     StabilityCorrection.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 290
-if hasattr(_libs['vic_run.so'], 'sub_with_height'):
-    sub_with_height = _libs['vic_run.so'].sub_with_height
+if hasattr(_libs['vic_core.so'], 'sub_with_height'):
+    sub_with_height = _libs['vic_core.so'].sub_with_height
     sub_with_height.argtypes = [
         c_double,
         c_double,
@@ -5226,8 +5228,8 @@ if hasattr(_libs['vic_run.so'], 'sub_with_height'):
     sub_with_height.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 293
-if hasattr(_libs['vic_run.so'], 'surface_fluxes'):
-    surface_fluxes = _libs['vic_run.so'].surface_fluxes
+if hasattr(_libs['vic_core.so'], 'surface_fluxes'):
+    surface_fluxes = _libs['vic_core.so'].surface_fluxes
     surface_fluxes.argtypes = [
         c_bool,
         c_double,
@@ -5270,20 +5272,20 @@ if hasattr(_libs['vic_run.so'], 'surface_fluxes'):
     surface_fluxes.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 301
-if hasattr(_libs['vic_run.so'], 'svp'):
-    svp = _libs['vic_run.so'].svp
+if hasattr(_libs['vic_core.so'], 'svp'):
+    svp = _libs['vic_core.so'].svp
     svp.argtypes = [c_double]
     svp.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 302
-if hasattr(_libs['vic_run.so'], 'svp_slope'):
-    svp_slope = _libs['vic_run.so'].svp_slope
+if hasattr(_libs['vic_core.so'], 'svp_slope'):
+    svp_slope = _libs['vic_core.so'].svp_slope
     svp_slope.argtypes = [c_double]
     svp_slope.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 303
-if hasattr(_libs['vic_run.so'], 'temp_area'):
-    temp_area = _libs['vic_run.so'].temp_area
+if hasattr(_libs['vic_core.so'], 'temp_area'):
+    temp_area = _libs['vic_core.so'].temp_area
     temp_area.argtypes = [
         c_double,
         c_double,
@@ -5303,8 +5305,8 @@ if hasattr(_libs['vic_run.so'], 'temp_area'):
     temp_area.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 306
-if hasattr(_libs['vic_run.so'], 'tracer_mixer'):
-    tracer_mixer = _libs['vic_run.so'].tracer_mixer
+if hasattr(_libs['vic_core.so'], 'tracer_mixer'):
+    tracer_mixer = _libs['vic_core.so'].tracer_mixer
     tracer_mixer.argtypes = [
         POINTER(c_double),
         POINTER(c_int),
@@ -5316,8 +5318,8 @@ if hasattr(_libs['vic_run.so'], 'tracer_mixer'):
     tracer_mixer.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 307
-if hasattr(_libs['vic_run.so'], 'transpiration'):
-    transpiration = _libs['vic_run.so'].transpiration
+if hasattr(_libs['vic_core.so'], 'transpiration'):
+    transpiration = _libs['vic_core.so'].transpiration
     transpiration.argtypes = [
         POINTER(layer_data_struct),
         POINTER(veg_var_struct),
@@ -5342,8 +5344,8 @@ if hasattr(_libs['vic_run.so'], 'transpiration'):
     transpiration.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 311
-if hasattr(_libs['vic_run.so'], 'transport_with_height'):
-    transport_with_height = _libs['vic_run.so'].transport_with_height
+if hasattr(_libs['vic_core.so'], 'transport_with_height'):
+    transport_with_height = _libs['vic_core.so'].transport_with_height
     transport_with_height.argtypes = [
         c_double,
         c_double,
@@ -5359,8 +5361,8 @@ if hasattr(_libs['vic_run.so'], 'transport_with_height'):
     transport_with_height.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 314
-if hasattr(_libs['vic_run.so'], 'trapzd'):
-    trapzd = _libs['vic_run.so'].trapzd
+if hasattr(_libs['vic_core.so'], 'trapzd'):
+    trapzd = _libs['vic_core.so'].trapzd
     trapzd.argtypes = [
         CFUNCTYPE(
             UNCHECKED(c_double),
@@ -5381,8 +5383,8 @@ if hasattr(_libs['vic_run.so'], 'trapzd'):
     trapzd.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 317
-if hasattr(_libs['vic_run.so'], 'tridia'):
-    tridia = _libs['vic_run.so'].tridia
+if hasattr(_libs['vic_core.so'], 'tridia'):
+    tridia = _libs['vic_core.so'].tridia
     tridia.argtypes = [
         c_int,
         POINTER(c_double),
@@ -5393,8 +5395,8 @@ if hasattr(_libs['vic_run.so'], 'tridia'):
     tridia.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 318
-if hasattr(_libs['vic_run.so'], 'tridiag'):
-    tridiag = _libs['vic_run.so'].tridiag
+if hasattr(_libs['vic_core.so'], 'tridiag'):
+    tridiag = _libs['vic_core.so'].tridiag
     tridiag.argtypes = [
         POINTER(c_double),
         POINTER(c_double),
@@ -5404,8 +5406,8 @@ if hasattr(_libs['vic_run.so'], 'tridiag'):
     tridiag.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 319
-if hasattr(_libs['vic_run.so'], 'vic_run'):
-    vic_run = _libs['vic_run.so'].vic_run
+if hasattr(_libs['vic_core.so'], 'vic_run'):
+    vic_run = _libs['vic_core.so'].vic_run
     vic_run.argtypes = [
         c_int,
         POINTER(atmos_data_struct),
@@ -5420,8 +5422,8 @@ if hasattr(_libs['vic_run.so'], 'vic_run'):
     vic_run.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 322
-if hasattr(_libs['vic_run.so'], 'volumetric_heat_capacity'):
-    volumetric_heat_capacity = _libs['vic_run.so'].volumetric_heat_capacity
+if hasattr(_libs['vic_core.so'], 'volumetric_heat_capacity'):
+    volumetric_heat_capacity = _libs['vic_core.so'].volumetric_heat_capacity
     volumetric_heat_capacity.argtypes = [
         c_double,
         c_double,
@@ -5430,8 +5432,8 @@ if hasattr(_libs['vic_run.so'], 'volumetric_heat_capacity'):
     volumetric_heat_capacity.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 323
-if hasattr(_libs['vic_run.so'], 'water_balance'):
-    water_balance = _libs['vic_run.so'].water_balance
+if hasattr(_libs['vic_core.so'], 'water_balance'):
+    water_balance = _libs['vic_core.so'].water_balance
     water_balance.argtypes = [
         POINTER(lake_var_struct),
         lake_con_struct,
@@ -5446,8 +5448,8 @@ if hasattr(_libs['vic_run.so'], 'water_balance'):
     water_balance.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 325
-if hasattr(_libs['vic_run.so'], 'water_energy_balance'):
-    water_energy_balance = _libs['vic_run.so'].water_energy_balance
+if hasattr(_libs['vic_core.so'], 'water_energy_balance'):
+    water_energy_balance = _libs['vic_core.so'].water_energy_balance
     water_energy_balance.argtypes = [
         c_int,
         POINTER(c_double),
@@ -5482,8 +5484,8 @@ if hasattr(_libs['vic_run.so'], 'water_energy_balance'):
     water_energy_balance.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 331
-if hasattr(_libs['vic_run.so'], 'water_under_ice'):
-    water_under_ice = _libs['vic_run.so'].water_under_ice
+if hasattr(_libs['vic_core.so'], 'water_under_ice'):
+    water_under_ice = _libs['vic_core.so'].water_under_ice
     water_under_ice.argtypes = [
         c_int,
         c_double,
@@ -5507,16 +5509,16 @@ if hasattr(_libs['vic_run.so'], 'water_under_ice'):
     water_under_ice.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 334
-if hasattr(_libs['vic_run.so'], 'wrap_compute_zwt'):
-    wrap_compute_zwt = _libs['vic_run.so'].wrap_compute_zwt
+if hasattr(_libs['vic_core.so'], 'wrap_compute_zwt'):
+    wrap_compute_zwt = _libs['vic_core.so'].wrap_compute_zwt
     wrap_compute_zwt.argtypes = [
         POINTER(soil_con_struct),
         POINTER(cell_data_struct)]
     wrap_compute_zwt.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 335
-if hasattr(_libs['vic_run.so'], 'write_layer'):
-    write_layer = _libs['vic_run.so'].write_layer
+if hasattr(_libs['vic_core.so'], 'write_layer'):
+    write_layer = _libs['vic_core.so'].write_layer
     write_layer.argtypes = [
         POINTER(layer_data_struct),
         c_int,
@@ -5524,14 +5526,14 @@ if hasattr(_libs['vic_run.so'], 'write_layer'):
     write_layer.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 336
-if hasattr(_libs['vic_run.so'], 'write_vegvar'):
-    write_vegvar = _libs['vic_run.so'].write_vegvar
+if hasattr(_libs['vic_core.so'], 'write_vegvar'):
+    write_vegvar = _libs['vic_core.so'].write_vegvar
     write_vegvar.argtypes = [POINTER(veg_var_struct), c_int]
     write_vegvar.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h: 337
-if hasattr(_libs['vic_run.so'], 'zero_output_list'):
-    zero_output_list = _libs['vic_run.so'].zero_output_list
+if hasattr(_libs['vic_core.so'], 'zero_output_list'):
+    zero_output_list = _libs['vic_core.so'].zero_output_list
     zero_output_list.argtypes = [POINTER(out_data_struct)]
     zero_output_list.restype = None
 
@@ -5586,20 +5588,20 @@ struct_anon_51._fields_ = [
 param_set_struct = struct_anon_51
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 64
-if hasattr(_libs['vic_run.so'], 'all_30_day_from_dmy'):
-    all_30_day_from_dmy = _libs['vic_run.so'].all_30_day_from_dmy
+if hasattr(_libs['vic_core.so'], 'all_30_day_from_dmy'):
+    all_30_day_from_dmy = _libs['vic_core.so'].all_30_day_from_dmy
     all_30_day_from_dmy.argtypes = [POINTER(dmy_struct)]
     all_30_day_from_dmy.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 65
-if hasattr(_libs['vic_run.so'], 'all_leap_from_dmy'):
-    all_leap_from_dmy = _libs['vic_run.so'].all_leap_from_dmy
+if hasattr(_libs['vic_core.so'], 'all_leap_from_dmy'):
+    all_leap_from_dmy = _libs['vic_core.so'].all_leap_from_dmy
     all_leap_from_dmy.argtypes = [POINTER(dmy_struct)]
     all_leap_from_dmy.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 66
-if hasattr(_libs['vic_run.so'], 'calc_root_fractions'):
-    calc_root_fractions = _libs['vic_run.so'].calc_root_fractions
+if hasattr(_libs['vic_core.so'], 'calc_root_fractions'):
+    calc_root_fractions = _libs['vic_core.so'].calc_root_fractions
     calc_root_fractions.argtypes = [
         POINTER(veg_con_struct),
         POINTER(soil_con_struct)]
@@ -5615,8 +5617,8 @@ for _lib in _libs.itervalues():
     break
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 68
-if hasattr(_libs['vic_run.so'], 'compute_treeline'):
-    compute_treeline = _libs['vic_run.so'].compute_treeline
+if hasattr(_libs['vic_core.so'], 'compute_treeline'):
+    compute_treeline = _libs['vic_core.so'].compute_treeline
     compute_treeline.argtypes = [
         POINTER(atmos_data_struct),
         POINTER(dmy_struct),
@@ -5626,26 +5628,26 @@ if hasattr(_libs['vic_run.so'], 'compute_treeline'):
     compute_treeline.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 70
-if hasattr(_libs['vic_run.so'], 'cmd_proc'):
-    cmd_proc = _libs['vic_run.so'].cmd_proc
+if hasattr(_libs['vic_core.so'], 'cmd_proc'):
+    cmd_proc = _libs['vic_core.so'].cmd_proc
     cmd_proc.argtypes = [c_int, POINTER(POINTER(c_char)), String]
     cmd_proc.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 71
-if hasattr(_libs['vic_run.so'], 'compress_files'):
-    compress_files = _libs['vic_run.so'].compress_files
+if hasattr(_libs['vic_core.so'], 'compress_files'):
+    compress_files = _libs['vic_core.so'].compress_files
     compress_files.argtypes = [POINTER(c_char)]
     compress_files.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 72
-if hasattr(_libs['vic_run.so'], 'get_current_datetime'):
-    get_current_datetime = _libs['vic_run.so'].get_current_datetime
+if hasattr(_libs['vic_core.so'], 'get_current_datetime'):
+    get_current_datetime = _libs['vic_core.so'].get_current_datetime
     get_current_datetime.argtypes = [String]
     get_current_datetime.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 73
-if hasattr(_libs['vic_run.so'], 'date2num'):
-    date2num = _libs['vic_run.so'].date2num
+if hasattr(_libs['vic_core.so'], 'date2num'):
+    date2num = _libs['vic_core.so'].date2num
     date2num.argtypes = [
         c_double,
         POINTER(dmy_struct),
@@ -5655,68 +5657,68 @@ if hasattr(_libs['vic_run.so'], 'date2num'):
     date2num.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 75
-if hasattr(_libs['vic_run.so'], 'dmy_all_30_day'):
-    dmy_all_30_day = _libs['vic_run.so'].dmy_all_30_day
+if hasattr(_libs['vic_core.so'], 'dmy_all_30_day'):
+    dmy_all_30_day = _libs['vic_core.so'].dmy_all_30_day
     dmy_all_30_day.argtypes = [c_double, POINTER(dmy_struct)]
     dmy_all_30_day.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 76
-if hasattr(_libs['vic_run.so'], 'dmy_all_leap'):
-    dmy_all_leap = _libs['vic_run.so'].dmy_all_leap
+if hasattr(_libs['vic_core.so'], 'dmy_all_leap'):
+    dmy_all_leap = _libs['vic_core.so'].dmy_all_leap
     dmy_all_leap.argtypes = [c_double, POINTER(dmy_struct)]
     dmy_all_leap.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 77
-if hasattr(_libs['vic_run.so'], 'dmy_julian_day'):
-    dmy_julian_day = _libs['vic_run.so'].dmy_julian_day
+if hasattr(_libs['vic_core.so'], 'dmy_julian_day'):
+    dmy_julian_day = _libs['vic_core.so'].dmy_julian_day
     dmy_julian_day.argtypes = [c_double, c_uint, POINTER(dmy_struct)]
     dmy_julian_day.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 79
-if hasattr(_libs['vic_run.so'], 'dmy_no_leap_day'):
-    dmy_no_leap_day = _libs['vic_run.so'].dmy_no_leap_day
+if hasattr(_libs['vic_core.so'], 'dmy_no_leap_day'):
+    dmy_no_leap_day = _libs['vic_core.so'].dmy_no_leap_day
     dmy_no_leap_day.argtypes = [c_double, POINTER(dmy_struct)]
     dmy_no_leap_day.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 80
-if hasattr(_libs['vic_run.so'], 'dt_seconds_to_time_units'):
-    dt_seconds_to_time_units = _libs['vic_run.so'].dt_seconds_to_time_units
+if hasattr(_libs['vic_core.so'], 'dt_seconds_to_time_units'):
+    dt_seconds_to_time_units = _libs['vic_core.so'].dt_seconds_to_time_units
     dt_seconds_to_time_units.argtypes = [c_uint, c_double, POINTER(c_double)]
     dt_seconds_to_time_units.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 82
-if hasattr(_libs['vic_run.so'], 'display_current_settings'):
-    display_current_settings = _libs['vic_run.so'].display_current_settings
+if hasattr(_libs['vic_core.so'], 'display_current_settings'):
+    display_current_settings = _libs['vic_core.so'].display_current_settings
     display_current_settings.argtypes = [c_int]
     display_current_settings.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 83
-if hasattr(_libs['vic_run.so'], 'fractional_day_from_dmy'):
-    fractional_day_from_dmy = _libs['vic_run.so'].fractional_day_from_dmy
+if hasattr(_libs['vic_core.so'], 'fractional_day_from_dmy'):
+    fractional_day_from_dmy = _libs['vic_core.so'].fractional_day_from_dmy
     fractional_day_from_dmy.argtypes = [POINTER(dmy_struct)]
     fractional_day_from_dmy.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 84
-if hasattr(_libs['vic_run.so'], 'free_all_vars'):
-    free_all_vars = _libs['vic_run.so'].free_all_vars
+if hasattr(_libs['vic_core.so'], 'free_all_vars'):
+    free_all_vars = _libs['vic_core.so'].free_all_vars
     free_all_vars.argtypes = [POINTER(all_vars_struct), c_int]
     free_all_vars.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 85
-if hasattr(_libs['vic_run.so'], 'free_dmy'):
-    free_dmy = _libs['vic_run.so'].free_dmy
+if hasattr(_libs['vic_core.so'], 'free_dmy'):
+    free_dmy = _libs['vic_core.so'].free_dmy
     free_dmy.argtypes = [POINTER(POINTER(dmy_struct))]
     free_dmy.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 86
-if hasattr(_libs['vic_run.so'], 'free_vegcon'):
-    free_vegcon = _libs['vic_run.so'].free_vegcon
+if hasattr(_libs['vic_core.so'], 'free_vegcon'):
+    free_vegcon = _libs['vic_core.so'].free_vegcon
     free_vegcon.argtypes = [POINTER(POINTER(veg_con_struct))]
     free_vegcon.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 87
-if hasattr(_libs['vic_run.so'], 'get_dist'):
-    get_dist = _libs['vic_run.so'].get_dist
+if hasattr(_libs['vic_core.so'], 'get_dist'):
+    get_dist = _libs['vic_core.so'].get_dist
     get_dist.argtypes = [c_double, c_double, c_double, c_double]
     get_dist.restype = c_double
 
@@ -5736,8 +5738,8 @@ for _lib in _libs.itervalues():
     break
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 91
-if hasattr(_libs['vic_run.so'], 'get_parameters'):
-    get_parameters = _libs['vic_run.so'].get_parameters
+if hasattr(_libs['vic_core.so'], 'get_parameters'):
+    get_parameters = _libs['vic_core.so'].get_parameters
     get_parameters.argtypes = [POINTER(FILE)]
     get_parameters.restype = None
 
@@ -5751,44 +5753,44 @@ for _lib in _libs.itervalues():
     break
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 93
-if hasattr(_libs['vic_run.so'], 'initialize_filenames'):
-    initialize_filenames = _libs['vic_run.so'].initialize_filenames
+if hasattr(_libs['vic_core.so'], 'initialize_filenames'):
+    initialize_filenames = _libs['vic_core.so'].initialize_filenames
     initialize_filenames.argtypes = []
     initialize_filenames.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 94
-if hasattr(_libs['vic_run.so'], 'initialize_fileps'):
-    initialize_fileps = _libs['vic_run.so'].initialize_fileps
+if hasattr(_libs['vic_core.so'], 'initialize_fileps'):
+    initialize_fileps = _libs['vic_core.so'].initialize_fileps
     initialize_fileps.argtypes = []
     initialize_fileps.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 95
-if hasattr(_libs['vic_run.so'], 'initialize_global'):
-    initialize_global = _libs['vic_run.so'].initialize_global
+if hasattr(_libs['vic_core.so'], 'initialize_global'):
+    initialize_global = _libs['vic_core.so'].initialize_global
     initialize_global.argtypes = []
     initialize_global.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 96
-if hasattr(_libs['vic_run.so'], 'initialize_options'):
-    initialize_options = _libs['vic_run.so'].initialize_options
+if hasattr(_libs['vic_core.so'], 'initialize_options'):
+    initialize_options = _libs['vic_core.so'].initialize_options
     initialize_options.argtypes = []
     initialize_options.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 97
-if hasattr(_libs['vic_run.so'], 'initialize_parameters'):
-    initialize_parameters = _libs['vic_run.so'].initialize_parameters
+if hasattr(_libs['vic_core.so'], 'initialize_parameters'):
+    initialize_parameters = _libs['vic_core.so'].initialize_parameters
     initialize_parameters.argtypes = []
     initialize_parameters.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 98
-if hasattr(_libs['vic_run.so'], 'initialize_snow'):
-    initialize_snow = _libs['vic_run.so'].initialize_snow
+if hasattr(_libs['vic_core.so'], 'initialize_snow'):
+    initialize_snow = _libs['vic_core.so'].initialize_snow
     initialize_snow.argtypes = [POINTER(POINTER(snow_data_struct)), c_size_t]
     initialize_snow.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 99
-if hasattr(_libs['vic_run.so'], 'initialize_soil'):
-    initialize_soil = _libs['vic_run.so'].initialize_soil
+if hasattr(_libs['vic_core.so'], 'initialize_soil'):
+    initialize_soil = _libs['vic_core.so'].initialize_soil
     initialize_soil.argtypes = [
         POINTER(
             POINTER(cell_data_struct)),
@@ -5797,80 +5799,80 @@ if hasattr(_libs['vic_run.so'], 'initialize_soil'):
     initialize_soil.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 101
-if hasattr(_libs['vic_run.so'], 'initialize_time'):
-    initialize_time = _libs['vic_run.so'].initialize_time
+if hasattr(_libs['vic_core.so'], 'initialize_time'):
+    initialize_time = _libs['vic_core.so'].initialize_time
     initialize_time.argtypes = []
     initialize_time.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 102
-if hasattr(_libs['vic_run.so'], 'initialize_veg'):
-    initialize_veg = _libs['vic_run.so'].initialize_veg
+if hasattr(_libs['vic_core.so'], 'initialize_veg'):
+    initialize_veg = _libs['vic_core.so'].initialize_veg
     initialize_veg.argtypes = [POINTER(POINTER(veg_var_struct)), c_size_t]
     initialize_veg.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 103
-if hasattr(_libs['vic_run.so'], 'julian_day_from_dmy'):
-    julian_day_from_dmy = _libs['vic_run.so'].julian_day_from_dmy
+if hasattr(_libs['vic_core.so'], 'julian_day_from_dmy'):
+    julian_day_from_dmy = _libs['vic_core.so'].julian_day_from_dmy
     julian_day_from_dmy.argtypes = [POINTER(dmy_struct), c_uint]
     julian_day_from_dmy.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 104
-if hasattr(_libs['vic_run.so'], 'leap_year'):
-    leap_year = _libs['vic_run.so'].leap_year
+if hasattr(_libs['vic_core.so'], 'leap_year'):
+    leap_year = _libs['vic_core.so'].leap_year
     leap_year.argtypes = [c_uint, c_uint]
     leap_year.restype = c_bool
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 105
-if hasattr(_libs['vic_run.so'], 'make_all_vars'):
-    make_all_vars = _libs['vic_run.so'].make_all_vars
+if hasattr(_libs['vic_core.so'], 'make_all_vars'):
+    make_all_vars = _libs['vic_core.so'].make_all_vars
     make_all_vars.argtypes = [c_size_t]
     make_all_vars.restype = all_vars_struct
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 106
-if hasattr(_libs['vic_run.so'], 'make_cell_data'):
-    make_cell_data = _libs['vic_run.so'].make_cell_data
+if hasattr(_libs['vic_core.so'], 'make_cell_data'):
+    make_cell_data = _libs['vic_core.so'].make_cell_data
     make_cell_data.argtypes = [c_size_t]
     make_cell_data.restype = POINTER(POINTER(cell_data_struct))
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 107
-if hasattr(_libs['vic_run.so'], 'make_dmy'):
-    make_dmy = _libs['vic_run.so'].make_dmy
+if hasattr(_libs['vic_core.so'], 'make_dmy'):
+    make_dmy = _libs['vic_core.so'].make_dmy
     make_dmy.argtypes = [POINTER(global_param_struct)]
     make_dmy.restype = POINTER(dmy_struct)
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 108
-if hasattr(_libs['vic_run.so'], 'make_energy_bal'):
-    make_energy_bal = _libs['vic_run.so'].make_energy_bal
+if hasattr(_libs['vic_core.so'], 'make_energy_bal'):
+    make_energy_bal = _libs['vic_core.so'].make_energy_bal
     make_energy_bal.argtypes = [c_size_t]
     make_energy_bal.restype = POINTER(POINTER(energy_bal_struct))
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 109
-if hasattr(_libs['vic_run.so'], 'make_lastday'):
-    make_lastday = _libs['vic_run.so'].make_lastday
+if hasattr(_libs['vic_core.so'], 'make_lastday'):
+    make_lastday = _libs['vic_core.so'].make_lastday
     make_lastday.argtypes = [c_uint, c_uint, POINTER(c_uint)]
     make_lastday.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 111
-if hasattr(_libs['vic_run.so'], 'make_snow_data'):
-    make_snow_data = _libs['vic_run.so'].make_snow_data
+if hasattr(_libs['vic_core.so'], 'make_snow_data'):
+    make_snow_data = _libs['vic_core.so'].make_snow_data
     make_snow_data.argtypes = [c_size_t]
     make_snow_data.restype = POINTER(POINTER(snow_data_struct))
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 112
-if hasattr(_libs['vic_run.so'], 'make_veg_var'):
-    make_veg_var = _libs['vic_run.so'].make_veg_var
+if hasattr(_libs['vic_core.so'], 'make_veg_var'):
+    make_veg_var = _libs['vic_core.so'].make_veg_var
     make_veg_var.argtypes = [c_size_t]
     make_veg_var.restype = POINTER(POINTER(veg_var_struct))
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 113
-if hasattr(_libs['vic_run.so'], 'no_leap_day_from_dmy'):
-    no_leap_day_from_dmy = _libs['vic_run.so'].no_leap_day_from_dmy
+if hasattr(_libs['vic_core.so'], 'no_leap_day_from_dmy'):
+    no_leap_day_from_dmy = _libs['vic_core.so'].no_leap_day_from_dmy
     no_leap_day_from_dmy.argtypes = [POINTER(dmy_struct)]
     no_leap_day_from_dmy.restype = c_double
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 114
-if hasattr(_libs['vic_run.so'], 'num2date'):
-    num2date = _libs['vic_run.so'].num2date
+if hasattr(_libs['vic_core.so'], 'num2date'):
+    num2date = _libs['vic_core.so'].num2date
     num2date.argtypes = [
         c_double,
         c_double,
@@ -5881,14 +5883,14 @@ if hasattr(_libs['vic_run.so'], 'num2date'):
     num2date.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 117
-if hasattr(_libs['vic_run.so'], 'open_file'):
-    open_file = _libs['vic_run.so'].open_file
+if hasattr(_libs['vic_core.so'], 'open_file'):
+    open_file = _libs['vic_core.so'].open_file
     open_file.argtypes = [POINTER(c_char), POINTER(c_char)]
     open_file.restype = POINTER(FILE)
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 118
-if hasattr(_libs['vic_run.so'], 'print_cell_data'):
-    print_cell_data = _libs['vic_run.so'].print_cell_data
+if hasattr(_libs['vic_core.so'], 'print_cell_data'):
+    print_cell_data = _libs['vic_core.so'].print_cell_data
     print_cell_data.argtypes = [
         POINTER(cell_data_struct),
         c_size_t,
@@ -5897,14 +5899,14 @@ if hasattr(_libs['vic_run.so'], 'print_cell_data'):
     print_cell_data.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 120
-if hasattr(_libs['vic_run.so'], 'print_dmy'):
-    print_dmy = _libs['vic_run.so'].print_dmy
+if hasattr(_libs['vic_core.so'], 'print_dmy'):
+    print_dmy = _libs['vic_core.so'].print_dmy
     print_dmy.argtypes = [POINTER(dmy_struct)]
     print_dmy.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 121
-if hasattr(_libs['vic_run.so'], 'print_energy_bal'):
-    print_energy_bal = _libs['vic_run.so'].print_energy_bal
+if hasattr(_libs['vic_core.so'], 'print_energy_bal'):
+    print_energy_bal = _libs['vic_core.so'].print_energy_bal
     print_energy_bal.argtypes = [
         POINTER(energy_bal_struct),
         c_size_t,
@@ -5912,38 +5914,38 @@ if hasattr(_libs['vic_run.so'], 'print_energy_bal'):
     print_energy_bal.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 122
-if hasattr(_libs['vic_run.so'], 'print_filenames'):
-    print_filenames = _libs['vic_run.so'].print_filenames
+if hasattr(_libs['vic_core.so'], 'print_filenames'):
+    print_filenames = _libs['vic_core.so'].print_filenames
     print_filenames.argtypes = [POINTER(filenames_struct)]
     print_filenames.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 123
-if hasattr(_libs['vic_run.so'], 'print_filep'):
-    print_filep = _libs['vic_run.so'].print_filep
+if hasattr(_libs['vic_core.so'], 'print_filep'):
+    print_filep = _libs['vic_core.so'].print_filep
     print_filep.argtypes = [POINTER(filep_struct)]
     print_filep.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 124
-if hasattr(_libs['vic_run.so'], 'print_force_type'):
-    print_force_type = _libs['vic_run.so'].print_force_type
+if hasattr(_libs['vic_core.so'], 'print_force_type'):
+    print_force_type = _libs['vic_core.so'].print_force_type
     print_force_type.argtypes = [POINTER(force_type_struct)]
     print_force_type.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 125
-if hasattr(_libs['vic_run.so'], 'print_global_param'):
-    print_global_param = _libs['vic_run.so'].print_global_param
+if hasattr(_libs['vic_core.so'], 'print_global_param'):
+    print_global_param = _libs['vic_core.so'].print_global_param
     print_global_param.argtypes = [POINTER(global_param_struct)]
     print_global_param.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 126
-if hasattr(_libs['vic_run.so'], 'print_lake_con'):
-    print_lake_con = _libs['vic_run.so'].print_lake_con
+if hasattr(_libs['vic_core.so'], 'print_lake_con'):
+    print_lake_con = _libs['vic_core.so'].print_lake_con
     print_lake_con.argtypes = [POINTER(lake_con_struct), c_size_t]
     print_lake_con.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 127
-if hasattr(_libs['vic_run.so'], 'print_lake_var'):
-    print_lake_var = _libs['vic_run.so'].print_lake_var
+if hasattr(_libs['vic_core.so'], 'print_lake_var'):
+    print_lake_var = _libs['vic_core.so'].print_lake_var
     print_lake_var.argtypes = [
         POINTER(lake_var_struct),
         c_size_t,
@@ -5955,62 +5957,62 @@ if hasattr(_libs['vic_run.so'], 'print_lake_var'):
     print_lake_var.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 129
-if hasattr(_libs['vic_run.so'], 'print_layer_data'):
-    print_layer_data = _libs['vic_run.so'].print_layer_data
+if hasattr(_libs['vic_core.so'], 'print_layer_data'):
+    print_layer_data = _libs['vic_core.so'].print_layer_data
     print_layer_data.argtypes = [POINTER(layer_data_struct), c_size_t]
     print_layer_data.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 130
-if hasattr(_libs['vic_run.so'], 'print_license'):
-    print_license = _libs['vic_run.so'].print_license
+if hasattr(_libs['vic_core.so'], 'print_license'):
+    print_license = _libs['vic_core.so'].print_license
     print_license.argtypes = []
     print_license.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 131
-if hasattr(_libs['vic_run.so'], 'print_option'):
-    print_option = _libs['vic_run.so'].print_option
+if hasattr(_libs['vic_core.so'], 'print_option'):
+    print_option = _libs['vic_core.so'].print_option
     print_option.argtypes = [POINTER(option_struct)]
     print_option.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 132
-if hasattr(_libs['vic_run.so'], 'print_out_data'):
-    print_out_data = _libs['vic_run.so'].print_out_data
+if hasattr(_libs['vic_core.so'], 'print_out_data'):
+    print_out_data = _libs['vic_core.so'].print_out_data
     print_out_data.argtypes = [POINTER(out_data_struct), c_size_t]
     print_out_data.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 133
-if hasattr(_libs['vic_run.so'], 'print_out_data_file'):
-    print_out_data_file = _libs['vic_run.so'].print_out_data_file
+if hasattr(_libs['vic_core.so'], 'print_out_data_file'):
+    print_out_data_file = _libs['vic_core.so'].print_out_data_file
     print_out_data_file.argtypes = [POINTER(out_data_file_struct)]
     print_out_data_file.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 134
-if hasattr(_libs['vic_run.so'], 'print_param_set'):
-    print_param_set = _libs['vic_run.so'].print_param_set
+if hasattr(_libs['vic_core.so'], 'print_param_set'):
+    print_param_set = _libs['vic_core.so'].print_param_set
     print_param_set.argtypes = [POINTER(param_set_struct)]
     print_param_set.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 135
-if hasattr(_libs['vic_run.so'], 'print_parameters'):
-    print_parameters = _libs['vic_run.so'].print_parameters
+if hasattr(_libs['vic_core.so'], 'print_parameters'):
+    print_parameters = _libs['vic_core.so'].print_parameters
     print_parameters.argtypes = [POINTER(parameters_struct)]
     print_parameters.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 136
-if hasattr(_libs['vic_run.so'], 'print_save_data'):
-    print_save_data = _libs['vic_run.so'].print_save_data
+if hasattr(_libs['vic_core.so'], 'print_save_data'):
+    print_save_data = _libs['vic_core.so'].print_save_data
     print_save_data.argtypes = [POINTER(save_data_struct)]
     print_save_data.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 137
-if hasattr(_libs['vic_run.so'], 'print_snow_data'):
-    print_snow_data = _libs['vic_run.so'].print_snow_data
+if hasattr(_libs['vic_core.so'], 'print_snow_data'):
+    print_snow_data = _libs['vic_core.so'].print_snow_data
     print_snow_data.argtypes = [POINTER(snow_data_struct)]
     print_snow_data.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 138
-if hasattr(_libs['vic_run.so'], 'print_soil_con'):
-    print_soil_con = _libs['vic_run.so'].print_soil_con
+if hasattr(_libs['vic_core.so'], 'print_soil_con'):
+    print_soil_con = _libs['vic_core.so'].print_soil_con
     print_soil_con.argtypes = [
         POINTER(soil_con_struct),
         c_size_t,
@@ -6021,8 +6023,8 @@ if hasattr(_libs['vic_run.so'], 'print_soil_con'):
     print_soil_con.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 140
-if hasattr(_libs['vic_run.so'], 'print_veg_con'):
-    print_veg_con = _libs['vic_run.so'].print_veg_con
+if hasattr(_libs['vic_core.so'], 'print_veg_con'):
+    print_veg_con = _libs['vic_core.so'].print_veg_con
     print_veg_con.argtypes = [
         POINTER(veg_con_struct),
         c_size_t,
@@ -6033,47 +6035,47 @@ if hasattr(_libs['vic_run.so'], 'print_veg_con'):
     print_veg_con.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 142
-if hasattr(_libs['vic_run.so'], 'print_veg_lib'):
-    print_veg_lib = _libs['vic_run.so'].print_veg_lib
+if hasattr(_libs['vic_core.so'], 'print_veg_lib'):
+    print_veg_lib = _libs['vic_core.so'].print_veg_lib
     print_veg_lib.argtypes = [POINTER(veg_lib_struct), c_char]
     print_veg_lib.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 143
-if hasattr(_libs['vic_run.so'], 'print_veg_var'):
-    print_veg_var = _libs['vic_run.so'].print_veg_var
+if hasattr(_libs['vic_core.so'], 'print_veg_var'):
+    print_veg_var = _libs['vic_core.so'].print_veg_var
     print_veg_var.argtypes = [POINTER(veg_var_struct), c_size_t]
     print_veg_var.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 144
-if hasattr(_libs['vic_run.so'], 'print_version'):
-    print_version = _libs['vic_run.so'].print_version
+if hasattr(_libs['vic_core.so'], 'print_version'):
+    print_version = _libs['vic_core.so'].print_version
     print_version.argtypes = [String]
     print_version.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 145
-if hasattr(_libs['vic_run.so'], 'print_usage'):
-    print_usage = _libs['vic_run.so'].print_usage
+if hasattr(_libs['vic_core.so'], 'print_usage'):
+    print_usage = _libs['vic_core.so'].print_usage
     print_usage.argtypes = [String]
     print_usage.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 146
-if hasattr(_libs['vic_run.so'], 'soil_moisture_from_water_table'):
+if hasattr(_libs['vic_core.so'], 'soil_moisture_from_water_table'):
     soil_moisture_from_water_table = _libs[
-        'vic_run.so'].soil_moisture_from_water_table
+        'vic_core.so'].soil_moisture_from_water_table
     soil_moisture_from_water_table.argtypes = [
         POINTER(soil_con_struct),
         c_size_t]
     soil_moisture_from_water_table.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 147
-if hasattr(_libs['vic_run.so'], 'valid_date'):
-    valid_date = _libs['vic_run.so'].valid_date
+if hasattr(_libs['vic_core.so'], 'valid_date'):
+    valid_date = _libs['vic_core.so'].valid_date
     valid_date.argtypes = [c_uint, POINTER(dmy_struct)]
     valid_date.restype = c_int
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 148
-if hasattr(_libs['vic_run.so'], 'validate_parameters'):
-    validate_parameters = _libs['vic_run.so'].validate_parameters
+if hasattr(_libs['vic_core.so'], 'validate_parameters'):
+    validate_parameters = _libs['vic_core.so'].validate_parameters
     validate_parameters.argtypes = []
     validate_parameters.restype = None
 

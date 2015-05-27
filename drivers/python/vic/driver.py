@@ -24,7 +24,7 @@
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-import .vic
+from . import vic
 
 
 def vic_init():

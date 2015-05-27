@@ -13,7 +13,7 @@ import shutil
 if sys.version_info[0] > 2:
     raise ValueError('ctypes bindings currently unavailable for Python 3')
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -232,7 +232,6 @@ setup(name='vic',
       author_email='jhamman1@uw.edu',
       tests_require=['pytest'],
       url='https://github.com/UW-Hydro/VIC',
-      packages=['vic'],
-      py_modules=['vic.vic', 'vic.driver'],
+      packages=find_packages(),
       ext_modules=[ext_module])
 # -------------------------------------------------------------------- #

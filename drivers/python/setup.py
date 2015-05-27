@@ -22,7 +22,6 @@ try:
     import ctypesgencore as ctypesgen
 except ImportError:
     ctypesgen = False
-    raise
 try:
     import autopep8
 except:

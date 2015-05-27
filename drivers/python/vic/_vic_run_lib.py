@@ -1,7 +1,7 @@
 '''Wrapper for vic_def.h
 
 Generated with:
-/Users/jhamman/anaconda/envs/vic_testpy27/bin/ctypesgen.py ../../vic_run/include/vic_def.h ../../vic_run/include/vic_log.h ../../vic_run/include/vic_physical_constants.h ../../vic_run/include/vic_run.h ../shared/include/vic_driver_shared.h ../shared/include/vic_version.h include/vic_driver_python.h -o vic/_vic_run_lib.py -l vic_core.so
+/Users/jhamman/anaconda/envs/vic_testpy27/bin/ctypesgen.py /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_log.h /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_physical_constants.h /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_run.h /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_version.h /Users/jhamman/Dropbox/src/VIC/drivers/python/include/vic_driver_python.h -o vic/_vic_run_lib.py -l vic_core.so
 
 Do not modify this file.
 '''
@@ -433,7 +433,6 @@ import os.path
 import re
 import sys
 import glob
-import platform
 import ctypes
 import ctypes.util
 
@@ -478,8 +477,8 @@ class LibraryLoader(object):
         """Return a list of paths where the library might be found."""
         if os.path.isabs(libname):
             yield libname
+
         else:
-            # FIXME / TODO return '.' and os.path.dirname(__file__)
             for path in self.getplatformpaths(libname):
                 yield path
 
@@ -534,7 +533,6 @@ class DarwinLibraryLoader(LibraryLoader):
 
         dirs.extend(self.other_dirs)
         dirs.append(".")
-        dirs.append(os.path.dirname(__file__))
 
         if hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
             dirs.append(os.path.join(
@@ -570,7 +568,6 @@ class PosixLibraryLoader(LibraryLoader):
                 directories.extend(os.environ[name].split(os.pathsep))
         directories.extend(self.other_dirs)
         directories.append(".")
-        directories.append(os.path.dirname(__file__))
 
         try:
             directories.extend([dir.strip()
@@ -578,23 +575,7 @@ class PosixLibraryLoader(LibraryLoader):
         except IOError:
             pass
 
-        unix_lib_dirs_list = ['/lib', '/usr/lib', '/lib64', '/usr/lib64']
-        if sys.platform.startswith('linux'):
-            # Try and support multiarch work in Ubuntu
-            # https://wiki.ubuntu.com/MultiarchSpec
-            bitage = platform.architecture()[0]
-            if bitage.startswith('32'):
-                # Assume Intel/AMD x86 compat
-                unix_lib_dirs_list += ['/lib/i386-linux-gnu',
-                                       '/usr/lib/i386-linux-gnu']
-            elif bitage.startswith('64'):
-                # Assume Intel/AMD x86 compat
-                unix_lib_dirs_list += ['/lib/x86_64-linux-gnu',
-                                       '/usr/lib/x86_64-linux-gnu']
-            else:
-                # guess...
-                unix_lib_dirs_list += glob.glob('/lib/*linux-gnu')
-        directories.extend(unix_lib_dirs_list)
+        directories.extend(['/lib', '/usr/lib', '/lib64', '/usr/lib64'])
 
         cache = {}
         lib_re = re.compile(r'lib(.*)\.s[ol]')
@@ -715,7 +696,11 @@ add_library_search_dirs([])
 
 # Begin libraries
 
-_libs["vic_core.so"] = load_library("vic_core.so")
+_libs["vic_core.so"] = load_library(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir,
+        "vic_core.so"))
 
 # 1 libraries
 # End libraries
@@ -857,7 +842,7 @@ if hasattr(_libs['vic_core.so'], 'setup_logging'):
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h: 77
 try:
     ref_veg_over = (
-        POINTER(c_bool)).in_dll(
+        POINTER(c_uint8)).in_dll(
         _libs['vic_core.so'],
         'ref_veg_over')
 except:
@@ -974,7 +959,7 @@ except:
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h: 90
 try:
     ref_veg_ref_crop = (
-        POINTER(c_bool)).in_dll(
+        POINTER(c_uint8)).in_dll(
         _libs['vic_core.so'],
         'ref_veg_ref_crop')
 except:
@@ -1999,72 +1984,72 @@ struct_anon_29.__slots__ = [
 struct_anon_29._fields_ = [
     ('AboveTreelineVeg', c_short),
     ('AERO_RESIST_CANSNOW', c_uint),
-    ('BLOWING', c_bool),
-    ('BLOWING_VAR_THRESHOLD', c_bool),
-    ('BLOWING_CALC_PROB', c_bool),
-    ('BLOWING_SIMPLE', c_bool),
-    ('BLOWING_FETCH', c_bool),
-    ('BLOWING_SPATIAL_WIND', c_bool),
-    ('CARBON', c_bool),
-    ('CLOSE_ENERGY', c_bool),
-    ('COMPUTE_TREELINE', c_bool),
-    ('CONTINUEONERROR', c_bool),
-    ('CORRPREC', c_bool),
-    ('EQUAL_AREA', c_bool),
-    ('EXP_TRANS', c_bool),
-    ('FROZEN_SOIL', c_bool),
-    ('FULL_ENERGY', c_bool),
+    ('BLOWING', c_uint8),
+    ('BLOWING_VAR_THRESHOLD', c_uint8),
+    ('BLOWING_CALC_PROB', c_uint8),
+    ('BLOWING_SIMPLE', c_uint8),
+    ('BLOWING_FETCH', c_uint8),
+    ('BLOWING_SPATIAL_WIND', c_uint8),
+    ('CARBON', c_uint8),
+    ('CLOSE_ENERGY', c_uint8),
+    ('COMPUTE_TREELINE', c_uint8),
+    ('CONTINUEONERROR', c_uint8),
+    ('CORRPREC', c_uint8),
+    ('EQUAL_AREA', c_uint8),
+    ('EXP_TRANS', c_uint8),
+    ('FROZEN_SOIL', c_uint8),
+    ('FULL_ENERGY', c_uint8),
     ('GRND_FLUX_TYPE', c_uint),
-    ('IMPLICIT', c_bool),
-    ('JULY_TAVG_SUPPLIED', c_bool),
-    ('LAKES', c_bool),
+    ('IMPLICIT', c_uint8),
+    ('JULY_TAVG_SUPPLIED', c_uint8),
+    ('LAKES', c_uint8),
     ('LW_CLOUD', c_uint),
     ('LW_TYPE', c_uint),
-    ('MTCLIM_SWE_CORR', c_bool),
+    ('MTCLIM_SWE_CORR', c_uint8),
     ('Ncanopy', c_size_t),
     ('Nfrost', c_size_t),
     ('Nlakenode', c_size_t),
     ('Nlayer', c_size_t),
     ('Nnode', c_size_t),
-    ('NOFLUX', c_bool),
+    ('NOFLUX', c_uint8),
     ('NVEGTYPES', c_size_t),
-    ('PLAPSE', c_bool),
+    ('PLAPSE', c_uint8),
     ('RC_MODE', c_uint),
     ('ROOT_ZONES', c_size_t),
-    ('QUICK_FLUX', c_bool),
-    ('QUICK_SOLVE', c_bool),
-    ('SHARE_LAYER_MOIST', c_bool),
+    ('QUICK_FLUX', c_uint8),
+    ('QUICK_SOLVE', c_uint8),
+    ('SHARE_LAYER_MOIST', c_uint8),
     ('SNOW_DENSITY', c_uint),
     ('SNOW_BAND', c_size_t),
-    ('SPATIAL_FROST', c_bool),
-    ('SPATIAL_SNOW', c_bool),
-    ('TFALLBACK', c_bool),
-    ('VP_INTERP', c_bool),
+    ('SPATIAL_FROST', c_uint8),
+    ('SPATIAL_SNOW', c_uint8),
+    ('TFALLBACK', c_uint8),
+    ('VP_INTERP', c_uint8),
     ('VP_ITER', c_ushort),
-    ('ALMA_INPUT', c_bool),
-    ('BASEFLOW', c_bool),
+    ('ALMA_INPUT', c_uint8),
+    ('BASEFLOW', c_uint8),
     ('GRID_DECIMAL', c_uint),
-    ('VEGLIB_PHOTO', c_bool),
-    ('VEGLIB_VEGCOVER', c_bool),
-    ('VEGPARAM_ALB', c_bool),
-    ('VEGPARAM_LAI', c_bool),
-    ('VEGPARAM_VEGCOVER', c_bool),
+    ('VEGLIB_PHOTO', c_uint8),
+    ('VEGLIB_VEGCOVER', c_uint8),
+    ('VEGPARAM_ALB', c_uint8),
+    ('VEGPARAM_LAI', c_uint8),
+    ('VEGPARAM_VEGCOVER', c_uint8),
     ('ALB_SRC', c_uint),
     ('LAI_SRC', c_uint),
     ('VEGCOVER_SRC', c_uint),
-    ('LAKE_PROFILE', c_bool),
-    ('ORGANIC_FRACT', c_bool),
-    ('BINARY_STATE_FILE', c_bool),
-    ('INIT_STATE', c_bool),
-    ('SAVE_STATE', c_bool),
-    ('ALMA_OUTPUT', c_bool),
-    ('BINARY_OUTPUT', c_bool),
-    ('COMPRESS', c_bool),
-    ('MOISTFRACT', c_bool),
+    ('LAKE_PROFILE', c_uint8),
+    ('ORGANIC_FRACT', c_uint8),
+    ('BINARY_STATE_FILE', c_uint8),
+    ('INIT_STATE', c_uint8),
+    ('SAVE_STATE', c_uint8),
+    ('ALMA_OUTPUT', c_uint8),
+    ('BINARY_OUTPUT', c_uint8),
+    ('COMPRESS', c_uint8),
+    ('MOISTFRACT', c_uint8),
     ('Noutfiles', c_size_t),
-    ('OUTPUT_FORCE', c_bool),
-    ('PRT_HEADER', c_bool),
-    ('PRT_SNOW_BAND', c_bool),
+    ('OUTPUT_FORCE', c_uint8),
+    ('PRT_HEADER', c_uint8),
+    ('PRT_SNOW_BAND', c_uint8),
 ]
 
 # /Users/jhamman/Dropbox/src/VIC/vic_run/include/vic_def.h: 724
@@ -2554,7 +2539,7 @@ struct_anon_32.__slots__ = [
     'whoriz',
 ]
 struct_anon_32._fields_ = [
-    ('FS_ACTIVE', c_bool),
+    ('FS_ACTIVE', c_uint8),
     ('Ds', c_double),
     ('Dsmax', c_double),
     ('Ksat', c_double * 3),
@@ -2602,7 +2587,7 @@ struct_anon_32._fields_ = [
     ('AreaFract', POINTER(c_double)),
     ('Pfactor', POINTER(c_double)),
     ('Tfactor', POINTER(c_double)),
-    ('AboveTreeLine', POINTER(c_bool)),
+    ('AboveTreeLine', POINTER(c_uint8)),
     ('elevation', c_double),
     ('lat', c_double),
     ('lng', c_double),
@@ -2692,7 +2677,7 @@ struct_anon_34.__slots__ = [
     'NPPfactor_sat',
 ]
 struct_anon_34._fields_ = [
-    ('overstory', c_bool),
+    ('overstory', c_uint8),
     ('LAI', c_double * 12),
     ('vegcover', c_double * 12),
     ('Wdmax', c_double * 12),
@@ -2714,7 +2699,7 @@ struct_anon_34._fields_ = [
     ('MaxETransport', c_double),
     ('CO2Specificity', c_double),
     ('LightUseEff', c_double),
-    ('NscaleFlag', c_bool),
+    ('NscaleFlag', c_uint8),
     ('Wnpp_inhib', c_double),
     ('NPPfactor_sat', c_double),
 ]
@@ -2784,7 +2769,7 @@ struct_anon_36._fields_ = [
     ('prec', POINTER(c_double)),
     ('pressure', POINTER(c_double)),
     ('shortwave', POINTER(c_double)),
-    ('snowflag', POINTER(c_bool)),
+    ('snowflag', POINTER(c_uint8)),
     ('tskc', POINTER(c_double)),
     ('vp', POINTER(c_double)),
     ('vpd', POINTER(c_double)),
@@ -2983,7 +2968,7 @@ struct_anon_40._fields_ = [
     ('Cs', c_double * 2),
     ('Cs_node', c_double * 50),
     ('fdepth', c_double * 3),
-    ('frozen', c_bool),
+    ('frozen', c_uint8),
     ('ice', c_double * 50),
     ('kappa', c_double * 2),
     ('kappa_node', c_double * 50),
@@ -2991,18 +2976,18 @@ struct_anon_40._fields_ = [
     ('Nfrost', c_size_t),
     ('Nthaw', c_size_t),
     ('T', c_double * 50),
-    ('T_fbflag', c_bool * 50),
+    ('T_fbflag', c_uint8 * 50),
     ('T_fbcount', c_uint * 50),
     ('T1_index', c_int),
     ('Tcanopy', c_double),
-    ('Tcanopy_fbflag', c_bool),
+    ('Tcanopy_fbflag', c_uint8),
     ('Tcanopy_fbcount', c_uint),
     ('tdepth', c_double * 3),
     ('Tfoliage', c_double),
-    ('Tfoliage_fbflag', c_bool),
+    ('Tfoliage_fbflag', c_uint8),
     ('Tfoliage_fbcount', c_uint),
     ('Tsurf', c_double),
-    ('Tsurf_fbflag', c_bool),
+    ('Tsurf_fbflag', c_uint8),
     ('Tsurf_fbcount', c_uint),
     ('unfrozen', c_double),
     ('advected_sensible', c_double),
@@ -3160,17 +3145,17 @@ struct_anon_42._fields_ = [
     ('depth', c_double),
     ('last_snow', c_uint),
     ('max_snow_depth', c_double),
-    ('MELTING', c_bool),
+    ('MELTING', c_uint8),
     ('pack_temp', c_double),
     ('pack_water', c_double),
-    ('snow', c_bool),
+    ('snow', c_uint8),
     ('snow_canopy', c_double),
     ('store_coverage', c_double),
-    ('store_snow', c_bool),
+    ('store_snow', c_uint8),
     ('store_swq', c_double),
     ('surf_temp', c_double),
     ('surf_temp_fbcount', c_uint),
-    ('surf_temp_fbflag', c_bool),
+    ('surf_temp_fbflag', c_uint8),
     ('surf_water', c_double),
     ('swq', c_double),
     ('snow_distrib_slope', c_double),
@@ -3391,7 +3376,7 @@ struct_anon_47.__slots__ = [
 ]
 struct_anon_47._fields_ = [
     ('varname', c_char * 20),
-    ('write', c_bool),
+    ('write', c_uint8),
     ('format', c_char * 10),
     ('type', c_uint),
     ('mult', c_double),
@@ -3525,7 +3510,7 @@ if hasattr(_libs['vic_core.so'], 'alblake'):
         c_double,
         POINTER(c_uint),
         c_double,
-        POINTER(c_bool),
+        POINTER(c_uint8),
         c_uint,
         c_double]
     alblake.restype = None
@@ -3571,7 +3556,7 @@ if hasattr(_libs['vic_core.so'], 'calc_atmos_energy_bal'):
         POINTER(c_double),
         POINTER(c_double),
         POINTER(c_double),
-        POINTER(c_bool),
+        POINTER(c_uint8),
         POINTER(c_uint)]
     calc_atmos_energy_bal.restype = c_double
 
@@ -3697,7 +3682,7 @@ if hasattr(_libs['vic_core.so'], 'calc_rc_ps'):
 if hasattr(_libs['vic_core.so'], 'calc_snow_coverage'):
     calc_snow_coverage = _libs['vic_core.so'].calc_snow_coverage
     calc_snow_coverage.argtypes = [
-        POINTER(c_bool),
+        POINTER(c_uint8),
         c_double,
         c_double,
         c_double,
@@ -3824,7 +3809,7 @@ if hasattr(_libs['vic_core.so'], 'calc_water_balance_error'):
 if hasattr(_libs['vic_core.so'], 'CalcAerodynamic'):
     CalcAerodynamic = _libs['vic_core.so'].CalcAerodynamic
     CalcAerodynamic.argtypes = [
-        c_bool,
+        c_uint8,
         c_double,
         c_double,
         c_double,
@@ -3931,7 +3916,7 @@ if hasattr(_libs['vic_core.so'], 'canopy_evap'):
     canopy_evap.argtypes = [
         POINTER(layer_data_struct),
         POINTER(veg_var_struct),
-        c_bool,
+        c_uint8,
         c_uint,
         POINTER(c_double),
         c_double,
@@ -4915,7 +4900,7 @@ if hasattr(_libs['vic_core.so'], 'snow_intercept'):
         POINTER(c_double),
         POINTER(c_double),
         POINTER(c_double),
-        POINTER(c_bool),
+        POINTER(c_uint8),
         POINTER(c_uint),
         POINTER(c_double),
         POINTER(c_double),
@@ -5231,7 +5216,7 @@ if hasattr(_libs['vic_core.so'], 'sub_with_height'):
 if hasattr(_libs['vic_core.so'], 'surface_fluxes'):
     surface_fluxes = _libs['vic_core.so'].surface_fluxes
     surface_fluxes.argtypes = [
-        c_bool,
+        c_uint8,
         c_double,
         c_double,
         c_double,
@@ -5551,8 +5536,8 @@ struct_anon_50.__slots__ = [
 ]
 struct_anon_50._fields_ = [
     ('N_ELEM', c_size_t),
-    ('SIGNED', c_bool),
-    ('SUPPLIED', c_bool),
+    ('SIGNED', c_uint8),
+    ('SUPPLIED', c_uint8),
     ('multiplier', c_double),
 ]
 
@@ -5624,7 +5609,7 @@ if hasattr(_libs['vic_core.so'], 'compute_treeline'):
         POINTER(dmy_struct),
         c_double,
         POINTER(c_double),
-        POINTER(c_bool)]
+        POINTER(c_uint8)]
     compute_treeline.restype = None
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 70
@@ -5820,7 +5805,7 @@ if hasattr(_libs['vic_core.so'], 'julian_day_from_dmy'):
 if hasattr(_libs['vic_core.so'], 'leap_year'):
     leap_year = _libs['vic_core.so'].leap_year
     leap_year.argtypes = [c_uint, c_uint]
-    leap_year.restype = c_bool
+    leap_year.restype = c_uint8
 
 # /Users/jhamman/Dropbox/src/VIC/drivers/shared/include/vic_driver_shared.h: 105
 if hasattr(_libs['vic_core.so'], 'make_all_vars'):

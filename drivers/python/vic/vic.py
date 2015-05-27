@@ -29,21 +29,22 @@
 """
 
 import ctypes
+from ._vic_run_lib_names import vic_core
 from ._vic_run_lib import *
 from ._vic_run_lib import _libs
 
 # Map global scalars
-flag = ctypes.c_int.in_dll(_libs['vic_core.so'], 'flag')
-NR = ctypes.c_size_t.in_dll(_libs['vic_core.so'], 'NR')
-NF = ctypes.c_size_t.in_dll(_libs['vic_core.so'], 'NF')
+flag = ctypes.c_int.in_dll(_libs[vic_core], 'flag')
+NR = ctypes.c_size_t.in_dll(_libs[vic_core], 'NR')
+NF = ctypes.c_size_t.in_dll(_libs[vic_core], 'NF')
 
 # Map global structures
-global_param = global_param_struct.in_dll(_libs['vic_core.so'], 'global_param')
-options = option_struct.in_dll(_libs['vic_core.so'], 'options')
-param = parameters_struct.in_dll(_libs['vic_core.so'], 'param')
-filenames = filenames_struct.in_dll(_libs['vic_core.so'], 'filenames')
-filep = filep_struct.in_dll(_libs['vic_core.so'], 'filep')
-param_set = param_set_struct.in_dll(_libs['vic_core.so'], 'param_set')
+global_param = global_param_struct.in_dll(_libs[vic_core], 'global_param')
+options = option_struct.in_dll(_libs[vic_core], 'options')
+param = parameters_struct.in_dll(_libs[vic_core], 'param')
+filenames = filenames_struct.in_dll(_libs[vic_core], 'filenames')
+filep = filep_struct.in_dll(_libs[vic_core], 'filep')
+param_set = param_set_struct.in_dll(_libs[vic_core], 'param_set')
 
 # Initialize global structures
 initialize_log()

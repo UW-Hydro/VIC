@@ -80,7 +80,7 @@ parse_output_info(FILE                  *gp,
                     log_err("in global param file: \"N_OUTFILES\" must be "
                             "specified before you can specify \"OUTFILE\".");
                 }
-                if (outfilenum >= (short int)options.Noutfiles) {
+                if (outfilenum >= (short int) options.Noutfiles) {
                     log_err("number of output files specified in N_OUTFILES "
                             "(%zu) is less than actual number of output files "
                             "defined in the global param file.",

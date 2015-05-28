@@ -298,7 +298,6 @@ print_global_param(global_param_struct *gp)
                 gp->forcemonth[i]);
         fprintf(LOG_DEST, "\tforceoffset[%zd]    : %hu\n", i,
                 gp->forceoffset[i]);
-        fprintf(LOG_DEST, "\tforceskip[%zd]      : %u\n", i, gp->forceskip[i]);
         fprintf(LOG_DEST, "\tforceyear[%zd]      : %hu\n", i, gp->forceyear[i]);
     }
     fprintf(LOG_DEST, "\tnrecs               : %zu\n", gp->nrecs);

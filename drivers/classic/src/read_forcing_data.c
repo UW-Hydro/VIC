@@ -67,18 +67,18 @@ read_forcing_data(FILE              **infile,
     }
 
     /** Read First Forcing Data File **/
-    if (param_set.FORCE_DT[0] > 0) {
-        read_atmos_data(infile[0], global_param, 0, global_param.forceskip[0],
+    if (param_set.force_steps_per_day[0] > 0) {
+        read_atmos_data(infile[0], global_param, 0,
                         forcing_data, (*veg_hist_data));
     }
     else {
-        log_err("File time step must be defined for at least the first "
-                "forcing file (FILE_DT).");
+        log_err("Forcing timesteps per day must be defined for at least the "
+                "first forcing file (FORCE_STEPS_PER_DAY).");
     }
 
     /** Read Second Forcing Data File **/
-    if (param_set.FORCE_DT[1] > 0) {
-        read_atmos_data(infile[1], global_param, 1, global_param.forceskip[1],
+    if (param_set.force_steps_per_day[1] > 0) {
+        read_atmos_data(infile[1], global_param, 1,
                         forcing_data, (*veg_hist_data));
     }
 

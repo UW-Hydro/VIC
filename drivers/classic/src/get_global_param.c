@@ -1294,8 +1294,7 @@ get_global_param(FILE *gp)
         global_param.forcemonth[1] = global_param.forcemonth[0];
         global_param.forceday[1] = global_param.forceday[0];
         global_param.forcesec[1] = global_param.forcesec[0];
-        global_param.forceskip[1] = 0;
-        global_param.forceoffset[1] = global_param.forceskip[1];
+        global_param.forceoffset[1] = 0;
     }
 
     // Validate result directory

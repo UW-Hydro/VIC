@@ -35,7 +35,7 @@
  * @brief    Calculate nitrogen scaling factors for all canopy layers.
  *****************************************************************************/
 void
-calc_Nscale_factors(char           NscaleFlag,
+calc_Nscale_factors(bool           NscaleFlag,
                     double        *CanopLayerBnd,
                     double         LAItotal,
                     double         lat,

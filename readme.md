@@ -1,5 +1,10 @@
 # Variable Infiltration Capacity (VIC) Model
-[![Build Status](https://travis-ci.org/UW-Hydro/VIC.svg)](https://travis-ci.org/UW-Hydro/VIC)
+
+[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC) [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+***Note:*** *The Gitter chat room space is a place for discussions about VIC model development.  For questions about how to run VIC, please email the [VIC users group (vic_users at u.washington.edu)](mailto: vic_users@u.washington.edu).  To report bugs or propose new features in VIC, use the [VIC Github Issues Page](https://github.com/UW-Hydro/VIC/issues)*.
+
+------
 
 This repository serves as the public source code repository of the **Variable Infiltration Capacity Model**, better known as **VIC**. The [official VIC website](http://www.hydro.washington.edu/Lettenmaier/Models/VIC/index.shtml) it still maintained at the [University of Washington Land Surface Hydrology Group](http://www.hydro.washington.edu) headed by [Dennis P. Lettenmaier](http://www.ce.washington.edu/people/faculty/faculty.php?id=25).
 

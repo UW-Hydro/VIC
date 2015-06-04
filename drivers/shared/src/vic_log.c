@@ -67,7 +67,7 @@ get_current_datetime(char *cdt)
 
     seconds_since_midnight = (unsigned int) curr_date_time % CONST_CDAY;
 
-    if (strftime(ymd, 7, "%Y%m%d", &timeinfo) == 0) {
+    if (strftime(ymd, 7, "%y%m%d", &timeinfo) == 0) {
         return;
     }
 

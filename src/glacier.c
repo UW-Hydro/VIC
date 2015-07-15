@@ -91,6 +91,7 @@ gl_volume_area(snow_data_struct **snow,
                                (ice_area_temp - ice_area_old) * exp(stepsize / BAHR_T);
 
                 // Make sure the area isn't too big
+                overflow_vol = 0.;
                 if (ice_area_new > tile_area) {
                     ice_area_new = tile_area;
                     if (options.GLACIER_OVERFLOW) {

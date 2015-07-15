@@ -446,6 +446,7 @@ extern char ref_veg_ref_crop[];
 #define BAHR_LAMBDA 1.375       /* V-A Scaling Exponent */
 #define BAHR_T 788940000.0      /* Time Scaling Constant ~25yrs (secs) */
 #define SNOWICE_THRESH 700.    /* kg/m3 */ 
+#define SNOWICE_DEPTH 1.    /* kg/m3 */ 
 
 /***** Define Boolean Values *****/
 #ifndef FALSE
@@ -678,11 +679,11 @@ extern char ref_veg_ref_crop[];
 // Glacier terms
 #define OUT_IWE            167
 #define OUT_IWE_BAND       168
-#define OUT_DELIWE         169 
+#define OUT_DELIWE         169
 #define OUT_GLACIER_MELT   170  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_GLACIER_OVER   171  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */
-#define OUT_GL_MELT_BAND   172  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */ 
-#define OUT_GL_OVER_BAND   173  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */ 
+#define OUT_GL_MELT_BAND   172  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_OVER_BAND   173  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */
 #define OUT_GLQOUT_BAND    174
 #define OUT_GLQIN_BAND     175
 #define OUT_BN_BAND        176
